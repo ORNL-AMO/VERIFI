@@ -3,10 +3,8 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountOverviewService } from './account-overview.service';
 import { Subscription } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { AllSources, EnergySources, IdbAccount, IdbFacility, MeterSource, WaterSources } from 'src/app/models/idb';
+import { IdbAccount, IdbFacility } from 'src/app/models/idb';
 import { Router } from '@angular/router';
-import { AccountSummaryClass } from 'src/app/calculations/dashboard-calculations/accountSummaryClass';
-import { AccountOverviewData } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
 
 @Component({
   selector: 'app-account-overview',
@@ -21,6 +19,7 @@ export class AccountOverviewComponent implements OnInit {
   account: IdbAccount;
 
   dateRangeSub: Subscription;
+  dateRange: { startDate: Date, endDate: Date };
   constructor(private accountDbService: AccountdbService, private accountOverviewService: AccountOverviewService,
     private facilityDbService: FacilitydbService, private router: Router) { }
 
@@ -28,19 +27,20 @@ export class AccountOverviewComponent implements OnInit {
     this.accountSub = this.accountDbService.selectedAccount.subscribe(val => {
       this.account = val;
       this.accountOverviewService.setCalanderizedMeters();
-      // if (this.accountOverviewService.calanderizedMeters.length != 0) {
-      //   this.noUtilityData = false;
-      //   this.calculateFacilitiesSummary();
-      // } else {
-      //   this.noUtilityData = true;
-      // }
+      if (this.accountOverviewService.calanderizedMeters.length != 0) {
+        this.noUtilityData = false;
+        if (this.dateRange) {
+          this.calculateFacilitiesSummary();
+        }
+      } else {
+        this.noUtilityData = true;
+      }
     });
 
     this.dateRangeSub = this.accountOverviewService.dateRange.subscribe(dateRange => {
-      if (dateRange) {
-        // let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
-        // let test = new AccountOverviewData(this.accountOverviewService.calanderizedMeters, facilities, this.account, dateRange);
-        this.calculateFacilitiesSummary(dateRange);
+      this.dateRange = dateRange;
+      if (this.dateRange) {
+        this.calculateFacilitiesSummary();
       }
     });
   }
@@ -53,7 +53,7 @@ export class AccountOverviewComponent implements OnInit {
     }
   }
 
-  calculateFacilitiesSummary(dateRange: { startDate: Date, endDate: Date }) {
+  calculateFacilitiesSummary() {
     let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     if (typeof Worker !== 'undefined') {
       this.worker = new Worker(new URL('src/app/web-workers/account-overview.worker', import.meta.url));
@@ -72,21 +72,13 @@ export class AccountOverviewComponent implements OnInit {
         calanderizedMeters: this.accountOverviewService.calanderizedMeters,
         facilities: facilities,
         type: 'overview',
-        dateRange: dateRange
+        dateRange: this.dateRange
       });
 
 
     } else {
       // Web Workers are not supported in this environment.
-      // let energySources: Array<MeterSource> = EnergySources;
-      // let energySummaryClass: AccountSummaryClass = new AccountSummaryClass(this.accountOverviewService.calanderizedMeters, facilities, energySources, this.account);
-      //      this.accountOverviewService.energyYearMonthData.next(energySummaryClass.yearMonthData);
-      // let waterSources: Array<MeterSource> = WaterSources;
-      // let waterSummaryClass: AccountSummaryClass = new AccountSummaryClass(this.accountOverviewService.calanderizedMeters, facilities, waterSources, this.account);
-      // this.accountOverviewService.waterYearMonthData.next(waterSummaryClass.yearMonthData);
-      // let allSources: Array<MeterSource> = AllSources;
-      // let allSummaryClass: AccountSummaryClass = new AccountSummaryClass(this.accountOverviewService.calanderizedMeters, facilities, allSources, this.account);
-      // this.accountOverviewService.costsYearMonthData.next(allSummaryClass.yearMonthData);
+
     }
   }
 

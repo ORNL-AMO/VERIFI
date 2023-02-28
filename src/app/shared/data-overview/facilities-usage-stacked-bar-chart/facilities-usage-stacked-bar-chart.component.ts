@@ -54,12 +54,12 @@ export class FacilitiesUsageStackedBarChartComponent {
   }
 
   ngOnChanges(changes: SimpleChanges) {
+
     if (!changes.dataType && ((changes.calanderizedMeters && !changes.calanderizedMeters.isFirstChange()) || (changes.dateRange && !changes.dateRange.isFirstChange()))) {
       this.setBarChartData();
       this.drawChart();
     }
   }
-
   ngOnDestroy() {
     if (this.dataType == 'emissions') {
       this.emissionsDisplaySub.unsubscribe();

@@ -18,7 +18,6 @@ export class WaterOverviewComponent implements OnInit {
   calculating: boolean;
   selectedAccountSub: Subscription;
   waterUnit: string;
-  calanderizedMeters: Array<CalanderizedMeter>;
   
   accountOverviewDataSub: Subscription;
   accountOverviewData: AccountOverviewData;
@@ -30,7 +29,6 @@ export class WaterOverviewComponent implements OnInit {
     private accountDbService: AccountdbService) { }
 
   ngOnInit(): void {
-    this.calanderizedMeters = this.accountOverviewService.calanderizedMeters;
     this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(val => {
       if (val) {
         this.waterUnit = val.volumeLiquidUnit;

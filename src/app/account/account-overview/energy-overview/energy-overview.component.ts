@@ -16,18 +16,16 @@ export class EnergyOverviewComponent implements OnInit {
   calculating: boolean;
   energyUnit: string;
   selectedAccountSub: Subscription;
-  calanderizedMeters: Array<CalanderizedMeter>;
 
   accountOverviewDataSub: Subscription;
   accountOverviewData: AccountOverviewData;
   utilityUseAndCostSub: Subscription;
   utilityUseAndCost: UtilityUseAndCost;
   dateRangeSub: Subscription;
-  dateRange: {startDate: Date, endDate: Date};
+  dateRange: { startDate: Date, endDate: Date };
   constructor(private accountOverviewService: AccountOverviewService, private accountDbService: AccountdbService) { }
 
   ngOnInit(): void {
-    this.calanderizedMeters = this.accountOverviewService.calanderizedMeters;
     this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(val => {
       if (val) {
         this.energyUnit = val.energyUnit;

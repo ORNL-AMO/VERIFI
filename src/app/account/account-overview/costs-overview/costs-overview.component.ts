@@ -1,8 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { AccountOverviewService } from '../account-overview.service';
 import { Subscription } from 'rxjs';
-import { YearMonthData } from 'src/app/models/dashboard';
-import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { AccountOverviewData, UtilityUseAndCost } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
 
 @Component({
@@ -18,8 +16,6 @@ export class CostsOverviewComponent implements OnInit {
   //TODO: Need to add warning back in!
   displayWarning: boolean;
 
-  calanderizedMeters: Array<CalanderizedMeter>;
-
   accountOverviewDataSub: Subscription;
   accountOverviewData: AccountOverviewData;
   utilityUseAndCostSub: Subscription;
@@ -29,7 +25,6 @@ export class CostsOverviewComponent implements OnInit {
   constructor(private accountOverviewService: AccountOverviewService) { }
 
   ngOnInit(): void {
-    this.calanderizedMeters = this.accountOverviewService.calanderizedMeters;
     this.calculatingSub = this.accountOverviewService.calculatingAccountOverviewData.subscribe(val => {
       this.calculating = val;
     })

@@ -23,9 +23,9 @@ export class AccountOverviewData {
     facilitiesWater: Array<AccountOverviewFacility>;
     totalWaterConsumption: number;
     totalWaterCost: number;
-
+    calanderizedMeters: Array<CalanderizedMeter>;
     constructor(calanderizedMeters: Array<CalanderizedMeter>, facilities: Array<IdbFacility>, account: IdbAccount, dateRange: { startDate: Date, endDate: Date }) {
-
+        this.calanderizedMeters = calanderizedMeters;
         //energy
         this.setEnergyYearMonthData(calanderizedMeters);
         this.setEnergyFacilities(calanderizedMeters, facilities, dateRange);
