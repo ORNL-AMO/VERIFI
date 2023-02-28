@@ -19,6 +19,7 @@ export class AccountReportSetupComponent {
   reportYears: Array<number>;
   baselineYears: Array<number>;
   months: Array<Month> = Months;
+  //TODO: Report years validation. Start < End
   constructor(private accountReportDbService: AccountReportDbService,
     private accountReportsService: AccountReportsService,
     private dbChangesService: DbChangesService,
@@ -43,6 +44,8 @@ export class AccountReportSetupComponent {
   }
 
   setYearOptions() {
+    //TODO: baseline years less than report year selection
+    //TODO: report years greater than baseline year selection
     this.reportYears = this.utilityMeterDataDbService.getYearOptions(true);
     this.baselineYears = this.utilityMeterDataDbService.getYearOptions(true);
   }
@@ -65,4 +68,5 @@ export class AccountReportSetupComponent {
     }
     await this.save();
   }
+
 }
