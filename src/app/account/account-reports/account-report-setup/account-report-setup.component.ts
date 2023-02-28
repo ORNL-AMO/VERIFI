@@ -1,11 +1,12 @@
 import { Component } from '@angular/core';
-import { FormGroup } from '@angular/forms';
+import { FormGroup, Validators } from '@angular/forms';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { AccountReportsService } from '../account-reports.service';
 import { IdbAccount, IdbAccountReport } from 'src/app/models/idb';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
+import { Month, Months } from 'src/app/shared/form-data/months';
 @Component({
   selector: 'app-account-report-setup',
   templateUrl: './account-report-setup.component.html',
@@ -17,6 +18,7 @@ export class AccountReportSetupComponent {
   account: IdbAccount;
   reportYears: Array<number>;
   baselineYears: Array<number>;
+  months: Array<Month> = Months;
   constructor(private accountReportDbService: AccountReportDbService,
     private accountReportsService: AccountReportsService,
     private dbChangesService: DbChangesService,
@@ -43,5 +45,24 @@ export class AccountReportSetupComponent {
   setYearOptions() {
     this.reportYears = this.utilityMeterDataDbService.getYearOptions(true);
     this.baselineYears = this.utilityMeterDataDbService.getYearOptions(true);
+  }
+
+  async changeReportType() {
+    if (this.setupForm.controls.reportType.value == 'betterPlants') {
+      this.setupForm.controls.baselineYear.setValidators([Validators.required]);
+      this.setupForm.controls.reportYear.setValidators([Validators.required]);
+      this.setupForm.controls.startYear.setValidators([]);
+      this.setupForm.controls.startMonth.setValidators([]);
+      this.setupForm.controls.endYear.setValidators([]);
+      this.setupForm.controls.endMonth.setValidators([]);
+    } else if (this.setupForm.controls.reportType.value == 'dataOverview') {
+      this.setupForm.controls.baselineYear.setValidators([]);
+      this.setupForm.controls.reportYear.setValidators([]);
+      this.setupForm.controls.startYear.setValidators([Validators.required]);
+      this.setupForm.controls.startMonth.setValidators([Validators.required]);
+      this.setupForm.controls.endYear.setValidators([Validators.required]);
+      this.setupForm.controls.endMonth.setValidators([Validators.required]);
+    }
+    await this.save();
   }
 }

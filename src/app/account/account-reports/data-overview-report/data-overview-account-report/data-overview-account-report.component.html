@@ -9,10 +9,13 @@
     <div class="row justify-content-center print-break-before">
         <div class="report-page" [ngClass]="{'col-11': !print, 'col-12': print}">
             <h4>Account Energy Consumption</h4>
-            <app-account-section-report [dataType]="'energyUse'"
-                [accountFacilitiesSummary]="accountData.accountFacilitiesEnergySummary"
-                [utilityUsageSummaryData]="accountData.energyUtilityUsageSummaryData"
-                [yearMonthData]="accountData.energyYearMonthData"
+            <app-account-section-report [dataType]="'energyUse'" [dateRange]="accountData.dateRange"
+                [previousYear]="accountData.utilityUseAndCost.previousYear"
+                [accountOverviewFacilities]="accountData.accountOverviewData.facilitiesEnergy"
+                [sourcesUseAndCost]="accountData.utilityUseAndCost.energyUseAndCost"
+                [useAndCostTotal]="accountData.utilityUseAndCost.energyTotal"
+                [accountOverviewData]="accountData.accountOverviewData"
+                [yearMonthData]="accountData.accountOverviewData.energyYearMonthData"
                 [calanderizedMeters]="accountData.calanderizedMeters"></app-account-section-report>
         </div>
     </div>
@@ -23,35 +26,30 @@
     <div class="row justify-content-center">
         <div class="report-page" [ngClass]="{'col-11': !print, 'col-12': print}">
             <h4>Account Water Consumption</h4>
-            <app-account-section-report [dataType]="'water'"
-                [accountFacilitiesSummary]="accountData.accountFacilitiesWaterSummary"
-                [utilityUsageSummaryData]="accountData.waterUtilityUsageSummaryData"
-                [yearMonthData]="accountData.waterYearMonthData"
+            <app-account-section-report [dataType]="'water'" [dateRange]="accountData.dateRange"
+                [previousYear]="accountData.utilityUseAndCost.previousYear"
+                [accountOverviewFacilities]="accountData.accountOverviewData.facilitiesWater"
+                [sourcesUseAndCost]="accountData.utilityUseAndCost.waterUseAndCost"
+                [useAndCostTotal]="accountData.utilityUseAndCost.waterTotal"
+                [accountOverviewData]="accountData.accountOverviewData"
+                [yearMonthData]="accountData.accountOverviewData.waterYearMonthData"
                 [calanderizedMeters]="accountData.calanderizedMeters"></app-account-section-report>
         </div>
     </div>
 </ng-container>
-<!-- <div class="row justify-content-center">
-<div class="col-12">
-    <hr>
-</div>
-<div class="col-12">
-    <h1>Account Water Consumption</h1>
-</div>
-<div class="col-12">
-    <app-account-water-report></app-account-water-report>
-</div>
-</div> -->
 <!--account costs-->
 <ng-container class="print-break-before" *ngIf="overviewReport.includeCostsSection">
     <hr>
     <div class="row justify-content-center">
         <div class="report-page" [ngClass]="{'col-11': !print, 'col-12': print}">
             <h4>Account Costs</h4>
-            <app-account-section-report [dataType]="'cost'"
-                [accountFacilitiesSummary]="accountData.accountFacilitiesCostsSummary"
-                [utilityUsageSummaryData]="accountData.costsUtilityUsageSummaryData"
-                [yearMonthData]="accountData.costsYearMonthData"
+            <app-account-section-report [dataType]="'cost'" [dateRange]="accountData.dateRange"
+                [previousYear]="accountData.utilityUseAndCost.previousYear"
+                [accountOverviewFacilities]="accountData.accountOverviewData.facilitiesCost"
+                [sourcesUseAndCost]="accountData.utilityUseAndCost.allSourcesUseAndCost"
+                [useAndCostTotal]="accountData.utilityUseAndCost.allSourcesTotal"
+                [accountOverviewData]="accountData.accountOverviewData"
+                [yearMonthData]="accountData.accountOverviewData.allSourcesYearMonthData"
                 [calanderizedMeters]="accountData.calanderizedMeters"></app-account-section-report>
         </div>
     </div>
@@ -62,10 +60,13 @@
     <div class="row justify-content-center">
         <div class="report-page" [ngClass]="{'col-11': !print, 'col-12': print}">
             <h4>Account Emissions</h4>
-            <app-account-section-report [dataType]="'emissions'"
-                [accountFacilitiesSummary]="accountData.accountFacilitiesEnergySummary"
-                [utilityUsageSummaryData]="accountData.energyUtilityUsageSummaryData"
-                [yearMonthData]="accountData.energyYearMonthData"
+            <app-account-section-report [dataType]="'emissions'" [dateRange]="accountData.dateRange"
+                [previousYear]="accountData.utilityUseAndCost.previousYear"
+                [accountOverviewFacilities]="accountData.accountOverviewData.facilitiesEnergy"
+                [sourcesUseAndCost]="accountData.utilityUseAndCost.energyUseAndCost"
+                [useAndCostTotal]="accountData.utilityUseAndCost.energyTotal"
+                [accountOverviewData]="accountData.accountOverviewData"
+                [yearMonthData]="accountData.accountOverviewData.energyYearMonthData"
                 [calanderizedMeters]="accountData.calanderizedMeters"></app-account-section-report>
         </div>
     </div>

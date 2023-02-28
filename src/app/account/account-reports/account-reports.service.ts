@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { IdbAccountReport } from 'src/app/models/idb';
 import { BetterPlantsReportSetup, DataOverviewReportSetup } from 'src/app/models/overview-report';
 import { BehaviorSubject } from 'rxjs';
@@ -15,11 +15,24 @@ export class AccountReportsService {
   }
 
   getSetupFormFromReport(report: IdbAccountReport): FormGroup {
+    let yearValidators: Array<ValidatorFn> = [];
+    let dateValidators: Array<ValidatorFn> = [];
+    if (report.reportType == 'betterPlants') {
+      yearValidators = [Validators.required];
+    } else if (report.reportType == 'dataOverview') {
+      dateValidators = [Validators.required];
+    }
+
+
     let form: FormGroup = this.formBuilder.group({
       reportName: [report.name, Validators.required],
       reportType: [report.reportType, Validators.required],
-      reportYear: [report.reportYear, Validators.required],
-      baselineYear: [report.baselineYear, Validators.required]
+      reportYear: [report.reportYear, yearValidators],
+      baselineYear: [report.baselineYear, yearValidators],
+      startMonth: [report.startMonth, dateValidators],
+      startYear: [report.startYear, dateValidators],
+      endMonth: [report.endMonth, dateValidators],
+      endYear: [report.endYear, dateValidators]
     });
     return form;
   }
@@ -29,6 +42,10 @@ export class AccountReportsService {
     report.reportType = form.controls.reportType.value;
     report.reportYear = form.controls.reportYear.value;
     report.baselineYear = form.controls.baselineYear.value;
+    report.startMonth = form.controls.startMonth.value;
+    report.startYear = form.controls.startYear.value;
+    report.endMonth = form.controls.endMonth.value;
+    report.endYear = form.controls.endYear.value;
     return report;
   }
 

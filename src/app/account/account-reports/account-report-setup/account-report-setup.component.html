@@ -16,18 +16,18 @@
                         <div class="col-7">
                             <div class="form-check">
                                 <input type="radio" class="form-check-input" name="reportType" [value]="'betterPlants'"
-                                    id="betterPlants" (change)="save()" formControlName="reportType">
+                                    id="betterPlants" (change)="changeReportType()" formControlName="reportType">
                                 <label class="form-check-label" for="betterPlants">Better Plants Report</label>
                             </div>
                             <div class="form-check">
                                 <input type="radio" class="form-check-input" name="reportType" [value]="'dataOverview'"
-                                    id="dataOverview" formControlName="reportType" (change)="save()">
+                                    id="dataOverview" formControlName="reportType" (change)="changeReportType()">
                                 <label class="form-check-label" for="dataOverview">Data Overview Report</label>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-6">
+                <div class="col-6" *ngIf="setupForm.controls.reportType.value == 'betterPlants'">
                     <div class="row form-group">
                         <label class="col-5 col-form-label semibold" for="baselineYear">Baseline Year</label>
 
@@ -50,6 +50,53 @@
                                 <option *ngFor="let year of reportYears" [ngValue]="year">{{year | yearDisplay:
                                     account.fiscalYear}}</option>
                             </select>
+                        </div>
+                        <!-- <div class="alert alert-danger" *ngIf="!reportOptions.targetYear">
+                                Target Year Required
+                            </div> -->
+                    </div>
+                </div>
+                <div class="col-6" *ngIf="setupForm.controls.reportType.value == 'dataOverview'">
+
+                    <div class="row form-group">
+                        <label class="col-5 col-form-label semibold" for="startDate">Start Date</label>
+
+                        <div class="col-7">
+                            <div>
+                                <select name="startMonth" formControlName="startMonth" class="form-select"
+                                    (change)="save()">
+                                    <option class="pe-2" *ngFor="let month of months" [ngValue]="month.monthNumValue">
+                                        {{month.abbreviation}}</option>
+                                </select>
+                            </div>
+                            <div class="pe-1">
+                                <select name="startYear" formControlName="startYear" class="form-select"
+                                    (change)="save()">
+                                    <option class="pe-2" *ngFor="let year of baselineYears" [ngValue]="year">{{year}}
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                        <!-- <div class="alert alert-danger" *ngIf="!reportOptions.baselineYear">
+                                    Baseline Year Required
+                                </div> -->
+                    </div>
+                    <div class="row form-group">
+                        <label class="col-5 col-form-label semibold" for="reportName">End Date</label>
+                        <div class="col-7">
+                            <div>
+                                <select name="endMonth" formControlName="endMonth" class="form-select"
+                                    (change)="save()">
+                                    <option class="pe-2" *ngFor="let month of months" [ngValue]="month.monthNumValue">
+                                        {{month.abbreviation}}</option>
+                                </select>
+                            </div>
+                            <div class="pe-1">
+                                <select name="endYear" formControlName="endYear" class="form-select" (change)="save()">
+                                    <option class="pe-2" *ngFor="let year of reportYears" [ngValue]="year">{{year}}
+                                    </option>
+                                </select>
+                            </div>
                         </div>
                         <!-- <div class="alert alert-danger" *ngIf="!reportOptions.targetYear">
                                 Target Year Required

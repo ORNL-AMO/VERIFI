@@ -5,7 +5,7 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
-import { AccountFacilitiesSummary, FacilityMeterSummaryData, UtilityUsageSummaryData, YearMonthData } from 'src/app/models/dashboard';
+import { FacilityMeterSummaryData, UtilityUsageSummaryData, YearMonthData } from 'src/app/models/dashboard';
 import { AllSources, EnergySources, IdbAccount, IdbAccountReport, IdbFacility, IdbUtilityMeter, IdbUtilityMeterGroup, MeterSource, WaterSources } from 'src/app/models/idb';
 import { DataOverviewReportSetup } from 'src/app/models/overview-report';
 import { FacilityBarChartData } from 'src/app/models/visualization';
@@ -13,7 +13,7 @@ import { CalanderizationService } from 'src/app/shared/helper-services/calanderi
 import { AccountReportsService } from '../account-reports.service';
 import { Subscription } from 'rxjs';
 import { FacilitySummaryClass } from 'src/app/calculations/dashboard-calculations/facilitySummaryClass';
-import { AccountSummaryClass } from 'src/app/calculations/dashboard-calculations/accountSummaryClass';
+import { AccountOverviewData, UtilityUseAndCost } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
 
 @Component({
   selector: 'app-data-overview-report',
@@ -65,7 +65,7 @@ export class DataOverviewReportComponent {
       }
     });
     if (this.overviewReport.includeAccountReport) {
-      this.calculateAccountSummary();
+      this.calculateAccountSummary(selectedReport);
     } else {
       this.calculatingAccounts = false;
     }
@@ -115,13 +115,11 @@ export class DataOverviewReportComponent {
           dataOverviewFacility.costsMonthlySourceData = data.monthlySourceData;
           dataOverviewFacility.costsUtilityUsageSummaryData = data.utilityUsageSummaryData;
           dataOverviewFacility.costsYearMonthData = data.yearMonthData;
-          // this.calculating = false;
           this.facilitiesWorker.terminate();
           this.facilitiesData.push(dataOverviewFacility);
           if (facilityIndex != this.includedFacilities.length - 1) {
             this.calculateFacilitiesSummary(facilityIndex + 1, accountFacilities, accountMeterGroups);
           } else {
-            // this.accountReportsService.calculatingFacilities.next(false);
             this.calculatingFacilities = false;
           }
         }
@@ -178,13 +176,12 @@ export class DataOverviewReportComponent {
       if (facilityIndex != this.includedFacilities.length - 1) {
         this.calculateFacilitiesSummary(facilityIndex + 1, accountFacilities, accountMeterGroups);
       } else {
-        // this.accountReportsService.calculatingFacilities.next(false);
         this.calculatingFacilities = false;
       }
     }
   }
 
-  calculateAccountSummary() {
+  calculateAccountSummary(selectedReport: IdbAccountReport) {
     let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     let includedFacilities: Array<IdbFacility> = facilities.filter(facility => {
       return this.includedFacilities.includes(facility.guid);
@@ -194,71 +191,34 @@ export class DataOverviewReportComponent {
     let includedMeters: Array<IdbUtilityMeter> = meters.filter(meter => {
       return this.includedFacilities.includes(meter.facilityId);
     });
-    this.accountData = this.initDataOverviewAccount(this.account);
+
+    let startDate: Date = new Date(selectedReport.startYear, selectedReport.startMonth, 1);
+    let endDate: Date = new Date(selectedReport.endYear, selectedReport.endMonth, 1);
+
+
+    this.accountData = this.initDataOverviewAccount(this.account, startDate, endDate);
     this.accountData.calanderizedMeters = this.calanderizationService.getCalanderizedMeterData(includedMeters, true, true, { energyIsSource: this.overviewReport.energyIsSource });
+
     if (typeof Worker !== 'undefined') {
       this.accountWorker = new Worker(new URL('src/app/web-workers/account-overview.worker', import.meta.url));
       this.accountWorker.onmessage = ({ data }) => {
-        if (data.type == 'energy') {
-          this.accountData.accountFacilitiesEnergySummary = data.accountFacilitiesSummary;
-          this.accountData.energyUtilityUsageSummaryData = data.utilityUsageSummaryData;
-          this.accountData.energyYearMonthData = data.yearMonthData;
-        } else if (data.type == 'water') {
-          this.accountData.accountFacilitiesWaterSummary = data.accountFacilitiesSummary;
-          this.accountData.waterUtilityUsageSummaryData = data.utilityUsageSummaryData;
-          this.accountData.waterYearMonthData = data.yearMonthData;
-        } else if (data.type == 'all') {
-          this.accountData.accountFacilitiesCostsSummary = data.accountFacilitiesSummary;
-          this.accountData.costsUtilityUsageSummaryData = data.utilityUsageSummaryData;
-          this.accountData.costsYearMonthData = data.yearMonthData;
-          this.calculatingAccounts = false;
-          this.accountWorker.terminate();
-        }
+        this.accountData.accountOverviewData = data.accountOverviewData;
+        this.accountData.utilityUseAndCost = data.utilityUseAndCost;
+        console.log(this.accountData);
+        this.calculatingAccounts = false;
+        this.accountWorker.terminate();
       };
 
-      let energySources: Array<MeterSource> = EnergySources;
       this.accountWorker.postMessage({
         calanderizedMeters: this.accountData.calanderizedMeters,
         facilities: includedFacilities,
-        sources: energySources,
-        type: 'energy',
-        account: this.account
-      });
-
-      let waterSources: Array<MeterSource> = WaterSources;
-      this.accountWorker.postMessage({
-        calanderizedMeters: this.accountData.calanderizedMeters,
-        facilities: includedFacilities,
-        sources: waterSources,
-        type: 'water',
-        account: this.account
-      });
-
-      let allSources: Array<MeterSource> = AllSources;
-      this.accountWorker.postMessage({
-        calanderizedMeters: this.accountData.calanderizedMeters,
-        facilities: includedFacilities,
-        sources: allSources,
-        type: 'all',
-        account: this.account
+        type: 'overview',
+        dateRange: this.accountData.dateRange
       });
     } else {
       // Web Workers are not supported in this environment.
-      let energySources: Array<MeterSource> = EnergySources;
-      let energySummaryClass: AccountSummaryClass = new AccountSummaryClass(this.accountData.calanderizedMeters, facilities, energySources, this.account);
-      this.accountData.accountFacilitiesEnergySummary = energySummaryClass.facilitiesSummary;
-      this.accountData.energyUtilityUsageSummaryData = energySummaryClass.utilityUsageSummaryData;
-      this.accountData.energyYearMonthData = energySummaryClass.yearMonthData;
-      let waterSources: Array<MeterSource> = WaterSources;
-      let waterSummaryClass: AccountSummaryClass = new AccountSummaryClass(this.accountData.calanderizedMeters, facilities, waterSources, this.account);
-      this.accountData.accountFacilitiesWaterSummary = waterSummaryClass.facilitiesSummary;
-      this.accountData.waterUtilityUsageSummaryData = waterSummaryClass.utilityUsageSummaryData;
-      this.accountData.waterYearMonthData = waterSummaryClass.yearMonthData;
-      let allSources: Array<MeterSource> = AllSources;
-      let allSummaryClass: AccountSummaryClass = new AccountSummaryClass(this.accountData.calanderizedMeters, facilities, allSources, this.account);
-      this.accountData.accountFacilitiesCostsSummary = allSummaryClass.facilitiesSummary;
-      this.accountData.costsUtilityUsageSummaryData = allSummaryClass.utilityUsageSummaryData;
-      this.accountData.costsYearMonthData = allSummaryClass.yearMonthData;
+      this.accountData.accountOverviewData = new AccountOverviewData(this.accountData.calanderizedMeters, facilities, this.account, this.accountData.dateRange);
+      this.accountData.utilityUseAndCost = new UtilityUseAndCost(this.accountData.calanderizedMeters, this.accountData.dateRange);
       this.calculatingAccounts = false;
     }
   }
@@ -286,22 +246,16 @@ export class DataOverviewReportComponent {
     }
   }
 
-  initDataOverviewAccount(account: IdbAccount): DataOverviewAccount {
+  initDataOverviewAccount(account: IdbAccount, startDate: Date, endDate: Date): DataOverviewAccount {
     return {
       account: account,
       calanderizedMeters: undefined,
-
-      accountFacilitiesEnergySummary: undefined,
-      energyUtilityUsageSummaryData: undefined,
-      energyYearMonthData: undefined,
-
-      accountFacilitiesCostsSummary: undefined,
-      costsUtilityUsageSummaryData: undefined,
-      costsYearMonthData: undefined,
-
-      accountFacilitiesWaterSummary: undefined,
-      waterUtilityUsageSummaryData: undefined,
-      waterYearMonthData: undefined,
+      dateRange: {
+        startDate: startDate,
+        endDate: endDate
+      },
+      accountOverviewData: undefined,
+      utilityUseAndCost: undefined
     }
   }
 
@@ -340,17 +294,10 @@ export interface DataOverviewFacility {
 export interface DataOverviewAccount {
   account: IdbAccount;
   calanderizedMeters: Array<CalanderizedMeter>;
-
-
-  accountFacilitiesEnergySummary: AccountFacilitiesSummary;
-  energyUtilityUsageSummaryData: UtilityUsageSummaryData;
-  energyYearMonthData: Array<YearMonthData>;
-
-  accountFacilitiesCostsSummary: AccountFacilitiesSummary;
-  costsUtilityUsageSummaryData: UtilityUsageSummaryData;
-  costsYearMonthData: Array<YearMonthData>;
-
-  accountFacilitiesWaterSummary: AccountFacilitiesSummary;
-  waterUtilityUsageSummaryData: UtilityUsageSummaryData;
-  waterYearMonthData: Array<YearMonthData>;
+  dateRange: {
+    startDate: Date,
+    endDate: Date
+  };
+  accountOverviewData: AccountOverviewData;
+  utilityUseAndCost: UtilityUseAndCost;
 }

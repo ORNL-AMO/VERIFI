@@ -78,6 +78,10 @@ export class AccountReportDbService {
       reportType: undefined,
       reportYear: undefined,
       baselineYear: undefined,
+      startYear: undefined,
+      startMonth: undefined,
+      endYear: undefined,
+      endMonth: undefined,
       betterPlantsReportSetup: {
         analysisItemId: undefined,
         includeFacilityNames: true,

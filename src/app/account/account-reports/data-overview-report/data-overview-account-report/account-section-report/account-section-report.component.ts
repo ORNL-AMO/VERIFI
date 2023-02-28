@@ -1,8 +1,9 @@
 import { Component, Input } from '@angular/core';
+import { AccountOverviewData, AccountOverviewFacility, IUseAndCost, UseAndCost } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
-import { AccountFacilitiesSummary, UtilityUsageSummaryData, YearMonthData } from 'src/app/models/dashboard';
+import { YearMonthData } from 'src/app/models/dashboard';
 import { IdbAccount, IdbAccountReport } from 'src/app/models/idb';
 import { DataOverviewReportSetup } from 'src/app/models/overview-report';
 
@@ -15,13 +16,28 @@ export class AccountSectionReportComponent {
   @Input()
   dataType: 'energyUse' | 'emissions' | 'cost' | 'water';
   @Input()
-  accountFacilitiesSummary: AccountFacilitiesSummary;
+  dateRange: {
+    startDate: Date,
+    endDate: Date
+  };
   @Input()
-  utilityUsageSummaryData: UtilityUsageSummaryData;
+  previousYear: Date;
   @Input()
-  yearMonthData: Array<YearMonthData>;
+  accountOverviewFacilities: Array<AccountOverviewFacility>;
+  @Input()
+  sourcesUseAndCost: Array<UseAndCost>;
+  @Input()
+  useAndCostTotal: {
+      end: IUseAndCost;
+      average: IUseAndCost;
+      previousYear: IUseAndCost;
+  };
   @Input()
   calanderizedMeters: Array<CalanderizedMeter>;
+  @Input()
+  accountOverviewData: AccountOverviewData;
+  @Input()
+  yearMonthData: Array<YearMonthData>;
 
   sectionOptions: DataOverviewReportSetup;
   waterUnit: string;
