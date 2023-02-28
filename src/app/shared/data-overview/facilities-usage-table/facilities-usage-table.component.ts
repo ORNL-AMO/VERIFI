@@ -23,7 +23,7 @@ export class FacilitiesUsageTableComponent {
   accountOverviewFacilities: Array<AccountOverviewFacility>;
   @Input()
   accountOverviewData: AccountOverviewData;
-  
+
 
 
 
@@ -32,19 +32,44 @@ export class FacilitiesUsageTableComponent {
 
   emissionsDisplay: "market" | "location";
   emissionsDisplaySub: Subscription;
+
+  orderByField: 'totalUsage' | 'totalMarketEmissions' | 'totalLocationEmissions' | 'totalCost';
+
+
   constructor(private router: Router, private accountOverviewService: AccountOverviewService) { }
 
   ngOnInit(): void {
-    this.emissionsDisplaySub = this.accountOverviewService.emissionsDisplay.subscribe(val => {
-      this.emissionsDisplay = val;
-    });
+    if (this.dataType == 'emissions') {
+      this.emissionsDisplaySub = this.accountOverviewService.emissionsDisplay.subscribe(val => {
+        this.emissionsDisplay = val;
+        this.setOrderBy();
+      });
+    } else {
+      this.setOrderBy();
+    }
   }
 
   ngOnDestroy() {
-    this.emissionsDisplaySub.unsubscribe();
+    if (this.emissionsDisplaySub) {
+      this.emissionsDisplaySub.unsubscribe();
+    }
   }
 
   selectFacility(facility: IdbFacility) {
     this.router.navigateByUrl('facility/' + facility.id);
+  }
+
+  setOrderBy() {
+    if (this.dataType == 'cost') {
+      this.orderByField = 'totalCost';
+    } else if (this.dataType == 'emissions') {
+      if (this.emissionsDisplay == 'location') {
+        this.orderByField = 'totalLocationEmissions';
+      } else {
+        this.orderByField = 'totalMarketEmissions';
+      }
+    } else {
+      this.orderByField = 'totalUsage';
+    }
   }
 }

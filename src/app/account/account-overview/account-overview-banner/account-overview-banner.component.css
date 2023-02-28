@@ -36,5 +36,9 @@
 
 
 select.form-select{
-  height: min-content !important;
+  /* height: min-content !important; */
+  font-size: 10.5px;
+  color: #2c386b;
+  background-color: #fff;
+  border-color: #2c386b;
 }

@@ -148,6 +148,4 @@ export class AccountOverviewBannerComponent implements OnInit {
       startDate: minDate
     });
   }
-
-
 }

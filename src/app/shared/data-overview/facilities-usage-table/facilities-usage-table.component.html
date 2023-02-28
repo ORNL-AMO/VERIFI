@@ -21,7 +21,7 @@
         </thead>
         <tbody class="table-group-divider"
             *ngIf="accountOverviewFacilities">
-            <tr *ngFor="let summary of accountOverviewFacilities | orderBy: 'energyUsage'">
+            <tr *ngFor="let summary of accountOverviewFacilities | orderBy: orderByField">
                 <td>
                     <span class="badge"
                         [ngStyle]="{background: summary.facility.color, color: summary.facility.color }">
@@ -45,7 +45,7 @@
                     {{summary.totalMarketEmissions / 1000 | customNumber}}
                 </td>
                 <td *ngIf="dataType == 'emissions' && emissionsDisplay == 'location'">
-                    {{summary.totalMarketEmissions / 1000 | customNumber}}
+                    {{summary.totalLocationEmissions / 1000 | customNumber}}
                 </td>
             </tr>
         </tbody>
