@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
+import { FacilityOverviewData } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';
+import { UtilityUseAndCost } from 'src/app/calculations/dashboard-calculations/useAndCostClass';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { FacilityMeterSummaryData, UtilityUsageSummaryData, YearMonthData } from 'src/app/models/dashboard';
@@ -14,72 +16,47 @@ import { FacilityOverviewService } from '../facility-overview.service';
 })
 export class FacilityCostOverviewComponent implements OnInit {
 
-  lastMonthsDate: Date;
-  yearPriorDate: Date;
-  accountFacilitiesSummarySub: Subscription;
   calculatingSub: Subscription;
   calculating: boolean;
   displayWarning: boolean;
   facilityId: string;
   selectedFacilitySub: Subscription;
-  utilityUsageSummaryData: UtilityUsageSummaryData;
-  utilityUsageSummaryDataSub: Subscription;
-  yearMonthData: Array<YearMonthData>;
-  yearMonthDataSub: Subscription;
-  monthlySourceData: Array<{
-    source: MeterSource,
-    data: Array<FacilityBarChartData>
-  }>;
-  monthlySourceDataSub: Subscription;
-  calanderizedMeters: Array<CalanderizedMeter>;
-  metersSummary: FacilityMeterSummaryData;
-  metersSummarySub: Subscription;
+
+  dateRange: { startDate: Date, endDate: Date };
+  dateRangeSub: Subscription;
+  utilityUseAndCost: UtilityUseAndCost;
+  utilityUseAndCostSub: Subscription;
+  facilityOverviewData: FacilityOverviewData;
+  facilityOverviewDataSub: Subscription;
   constructor(private facilityOverviewService: FacilityOverviewService, private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
-    this.calanderizedMeters = this.facilityOverviewService.calanderizedMeters;
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
       this.facilityId = val.guid;
     })
 
-    this.calculatingSub = this.facilityOverviewService.calculatingCosts.subscribe(val => {
+    this.calculatingSub = this.facilityOverviewService.calculatingFacilityOverviewData.subscribe(val => {
       this.calculating = val;
     })
 
-    this.accountFacilitiesSummarySub = this.facilityOverviewService.costsMeterSummaryData.subscribe(summaryData => {
-      if (summaryData && summaryData.allMetersLastBill) {
-        this.displayWarning = summaryData.totalEnergyCost == 0;
-        this.lastMonthsDate = new Date(summaryData.allMetersLastBill.year, summaryData.allMetersLastBill.monthNumValue);
-        this.yearPriorDate = new Date(summaryData.allMetersLastBill.year - 1, summaryData.allMetersLastBill.monthNumValue + 1);
-      } else {
-        this.lastMonthsDate = undefined;
-        this.yearPriorDate = undefined;
-      }
+    this.dateRangeSub = this.facilityOverviewService.dateRange.subscribe(val => {
+      this.dateRange = val;
     });
 
-    this.utilityUsageSummaryDataSub = this.facilityOverviewService.costsUtilityUsageSummaryData.subscribe(utilityUsageSummaryData => {
-      this.utilityUsageSummaryData = utilityUsageSummaryData;
+    this.utilityUseAndCostSub = this.facilityOverviewService.utilityUseAndCost.subscribe(val => {
+      this.utilityUseAndCost = val;
     });
 
-    this.yearMonthDataSub = this.facilityOverviewService.costsYearMonthData.subscribe(yearMonthData => {
-      this.yearMonthData = yearMonthData;
-    });
-    this.monthlySourceDataSub = this.facilityOverviewService.costsMonthlySourceData.subscribe(monthlySourceData => {
-      this.monthlySourceData = monthlySourceData;
-    });
-    this.metersSummarySub = this.facilityOverviewService.costsMeterSummaryData.subscribe(metersSummary => {
-      this.metersSummary = metersSummary;
-    });
+    this.facilityOverviewDataSub = this.facilityOverviewService.facilityOverviewData.subscribe(val => {
+      this.facilityOverviewData = val;
+    })
   }
 
   ngOnDestroy() {
-    this.accountFacilitiesSummarySub.unsubscribe();
     this.calculatingSub.unsubscribe();
     this.selectedFacilitySub.unsubscribe();
-    this.utilityUsageSummaryDataSub.unsubscribe();
-    this.yearMonthDataSub.unsubscribe();
-    this.monthlySourceDataSub.unsubscribe();
-    this.metersSummarySub.unsubscribe();
+    this.dateRangeSub.unsubscribe();
+    this.utilityUseAndCostSub.unsubscribe();
+    this.facilityOverviewDataSub.unsubscribe();
   }
-
 }

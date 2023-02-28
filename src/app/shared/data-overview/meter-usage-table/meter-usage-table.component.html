@@ -8,8 +8,7 @@
                 <th *ngIf="dataType =='energyUse'">Utility Usage <br>(<span
                         [innerHTML]="energyUnit | settingsLabel"></span>)
                 </th>
-                <th *ngIf="dataType =='water'">Consumption <br>(<span
-                        [innerHTML]="waterUnit | settingsLabel"></span>)
+                <th *ngIf="dataType =='water'">Consumption <br>(<span [innerHTML]="waterUnit | settingsLabel"></span>)
                 </th>
                 <th *ngIf="dataType != 'emissions'">Utility Cost</th>
                 <th *ngIf="dataType == 'emissions' && emissionsDisplay == 'market'">
@@ -21,30 +20,30 @@
             </tr>
         </thead>
         <tbody class="table-group-divider">
-            <tr *ngFor="let summary of metersSummary.meterSummaries | orderBy: orderByValue">
+            <tr *ngFor="let overviewMeter of facilityOverviewMeters | orderBy: orderByValue">
                 <td>
-                    {{summary.meter.name}}
+                    {{overviewMeter.meter.name}}
                 </td>
                 <td>
-                    {{summary.meter.source}}
+                    {{overviewMeter.meter.source}}
                 </td>
                 <td>
-                    {{summary.groupName}}
+                    {{overviewMeter.meter.groupId}}
                 </td>
                 <td *ngIf="dataType =='energyUse'">
-                    {{summary.energyUsage | customNumber}}
+                    {{overviewMeter.totalUsage | customNumber}}
                 </td>
                 <td *ngIf="dataType =='water'">
-                    {{summary.consumption | customNumber}}
+                    {{overviewMeter.totalUsage | customNumber}}
                 </td>
                 <td *ngIf="dataType != 'emissions'">
-                    {{summary.energyCost | customNumber:true }}
+                    {{overviewMeter.totalCost | customNumber:true }}
                 </td>
                 <td *ngIf="dataType =='emissions' && emissionsDisplay == 'market'">
-                    {{summary.marketEmissions |customNumber }}
+                    {{overviewMeter.totalMarketEmissions |customNumber }}
                 </td>
                 <td *ngIf="dataType =='emissions' && emissionsDisplay == 'location'">
-                    {{summary.locationEmissions |customNumber }}
+                    {{overviewMeter.totalLocationEmissions |customNumber }}
                 </td>
             </tr>
         </tbody>
@@ -58,19 +57,25 @@
                 <th>
                 </th>
                 <th *ngIf="dataType =='energyUse'">
-                    {{metersSummary.totalEnergyUse | customNumber}}
+                    {{facilityOverviewData.totalEnergyUsage | customNumber}}
+                </th>
+                <th *ngIf="dataType == 'energyUse'">
+                    {{facilityOverviewData.totalEnergyCost | customNumber:true }}
                 </th>
                 <th *ngIf="dataType =='water'">
-                    {{metersSummary.totalConsumption | customNumber}}
+                    {{facilityOverviewData.totalWaterConsumption | customNumber}}
                 </th>
-                <th *ngIf="dataType != 'emissions'">
-                    {{metersSummary.totalEnergyCost | customNumber:true }}
+                <th *ngIf="dataType == 'water'">
+                    {{facilityOverviewData.totalWaterCost | customNumber:true }}
+                </th>
+                <th *ngIf="dataType == 'cost'">
+                    {{facilityOverviewData.totalFacilityCost | customNumber:true }}
                 </th>
                 <th *ngIf="dataType =='emissions' && emissionsDisplay == 'market'">
-                    {{metersSummary.totalMarketEmissions | customNumber }}
+                    {{facilityOverviewData.totalMarketEmissions | customNumber }}
                 </th>
                 <th *ngIf="dataType =='emissions' && emissionsDisplay == 'location'">
-                    {{metersSummary.totalLocationEmissions | customNumber }}
+                    {{facilityOverviewData.totalLocationEmissions | customNumber }}
                 </th>
             </tr>
         </tfoot>

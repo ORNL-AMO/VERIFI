@@ -1,9 +1,8 @@
 import { Component, Input } from '@angular/core';
 import { FacilityMeterSummaryData } from 'src/app/models/dashboard';
 import { Subscription } from 'rxjs';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { FacilityOverviewService } from 'src/app/facility/facility-overview/facility-overview.service';
-import { IdbFacility } from 'src/app/models/idb';
+import { FacilityOverviewData, FacilityOverviewMeter } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';
 
 @Component({
   selector: 'app-meter-usage-table',
@@ -14,13 +13,15 @@ export class MeterUsageTableComponent {
   @Input()
   dataType: 'energyUse' | 'emissions' | 'cost' | 'water';
   @Input()
-  facilityId: string;
-  @Input()
   metersSummary: FacilityMeterSummaryData;
   @Input()
   waterUnit: string;
   @Input()
   energyUnit: string;
+  @Input()
+  facilityOverviewMeters: Array<FacilityOverviewMeter>;
+  @Input()
+  facilityOverviewData: FacilityOverviewData
 
   emissionsDisplay: 'market' | 'location';
   emissionsDisplaySub: Subscription;

@@ -19,8 +19,7 @@
                 </th>
             </tr>
         </thead>
-        <tbody class="table-group-divider"
-            *ngIf="accountOverviewFacilities">
+        <tbody class="table-group-divider" *ngIf="accountOverviewFacilities">
             <tr *ngFor="let summary of accountOverviewFacilities | orderBy: orderByField">
                 <td>
                     <span class="badge"
@@ -63,8 +62,14 @@
                 <th *ngIf="dataType == 'cost'">
                     {{accountOverviewData.numberOfMeters}}
                 </th>
-                <th *ngIf="dataType != 'emissions'">
+                <th *ngIf="dataType == 'energyUse'">
                     {{accountOverviewData.totalEnergyCost | customNumber:true }}
+                </th>
+                <th *ngIf="dataType == 'water'">
+                    {{accountOverviewData.totalWaterCost | customNumber:true }}
+                </th>
+                <th *ngIf="dataType == 'cost'">
+                    {{accountOverviewData.totalAccountCost | customNumber:true}}
                 </th>
                 <th *ngIf="dataType == 'emissions' && emissionsDisplay == 'market'">
                     {{accountOverviewData.totalMarketEmissions / 1000 | customNumber}}

@@ -4,7 +4,7 @@
             [calanderizedMeters]="calanderizedMeters"></app-meters-overview-stacked-line-chart>
     </div>
     <div class="col-6" *ngIf="sectionOptions.includeMeterUsageTable">
-        <app-meter-usage-table [dataType]="dataType" [facilityId]="facility.guid" [metersSummary]="metersSummary"
+        <app-meter-usage-table [dataType]="dataType" [metersSummary]="metersSummary"
             [waterUnit]="waterUnit" [energyUnit]="energyUnit"></app-meter-usage-table>
     </div>
     <div class="col-6" *ngIf="sectionOptions.includeMeterUsageTable">

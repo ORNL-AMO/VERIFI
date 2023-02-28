@@ -10,20 +10,22 @@
                     <div class="row">
                         <div class="col-12">
                             <app-meters-overview-stacked-line-chart [dataType]="'energyUse'" [facilityId]="facilityId"
-                                [calanderizedMeters]="calanderizedMeters"
+                                [calanderizedMeters]="facilityOverviewData.calanderizedMeters"
                                 [dateRange]="dateRange"></app-meters-overview-stacked-line-chart>
                             <hr>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-6">
-                            <app-meter-usage-table [dataType]="'energyUse'" [facilityId]="facilityId"
-                                [metersSummary]="metersSummary" [energyUnit]="energyUnit"></app-meter-usage-table>
+                            <app-meter-usage-table [dataType]="'energyUse'"
+                                [facilityOverviewData]="facilityOverviewData"
+                                [facilityOverviewMeters]="facilityOverviewData.energyMeters"
+                                [energyUnit]="energyUnit"></app-meter-usage-table>
                         </div>
-                        <div class="col-6">
+                        <!-- <div class="col-6">
                             <app-meter-usage-donut [dataType]="'energyUse'" [facilityId]="facilityId"
                                 [metersSummary]="metersSummary"></app-meter-usage-donut>
-                        </div>
+                        </div> -->
                     </div>
                 </div>
             </div>
@@ -37,9 +39,11 @@
                     <h4 class="mb-0">Utility Use and Cost</h4>
                 </div>
                 <div class="card-body">
-                    <!-- <app-utility-consumption-table [dataType]="'energyUse'" [facilityId]="facilityId"
-                        [utilityUsageSummaryData]="utilityUsageSummaryData"
-                        [energyUnit]="energyUnit"></app-utility-consumption-table> -->
+                    <app-utility-consumption-table [dataType]="'energyUse'"
+                        [sourcesUseAndCost]="utilityUseAndCost.energyUseAndCost"
+                        [useAndCostTotal]="utilityUseAndCost.energyTotal"
+                        [previousYear]="utilityUseAndCost.previousYear" [dateRange]="dateRange"
+                        [energyUnit]="energyUnit"></app-utility-consumption-table>
                 </div>
             </div>
         </div>
@@ -66,9 +70,8 @@
                     <h4 class="mb-0">Monthly Utility Usage</h4>
                 </div>
                 <div class="card-body">
-                    <!-- <app-facility-energy-monthly-chart></app-facility-energy-monthly-chart> -->
-                    <!-- <app-monthly-utility-usage-line-chart [dataType]="'energyUse'" [facilityId]="facilityId"
-                        [yearMonthData]="yearMonthData"></app-monthly-utility-usage-line-chart> -->
+                    <app-monthly-utility-usage-line-chart [dataType]="'energyUse'" [facilityId]="facilityId"
+                        [yearMonthData]="facilityOverviewData.energyYearMonthData"></app-monthly-utility-usage-line-chart>
                 </div>
             </div>
         </div>

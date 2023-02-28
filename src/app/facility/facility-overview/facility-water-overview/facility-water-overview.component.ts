@@ -1,10 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
+import { FacilityOverviewData } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';
+import { UtilityUseAndCost } from 'src/app/calculations/dashboard-calculations/useAndCostClass';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { CalanderizedMeter } from 'src/app/models/calanderization';
-import { FacilityMeterSummaryData, UtilityUsageSummaryData, YearMonthData } from 'src/app/models/dashboard';
-import { MeterSource } from 'src/app/models/idb';
-import { FacilityBarChartData } from 'src/app/models/visualization';
 import { FacilityOverviewService } from '../facility-overview.service';
 
 @Component({
@@ -14,72 +12,50 @@ import { FacilityOverviewService } from '../facility-overview.service';
 })
 export class FacilityWaterOverviewComponent implements OnInit {
 
-  lastMonthsDate: Date;
-  yearPriorDate: Date;
-  accountFacilitiesSummarySub: Subscription;
   calculatingSub: Subscription;
   calculating: boolean;
   facilityId: string;
   selectedFacilitySub: Subscription;
   waterUnit: string;
-  utilityUsageSummaryData: UtilityUsageSummaryData;
-  utilityUsageSummaryDataSub: Subscription;
-  yearMonthData: Array<YearMonthData>;
-  yearMonthDataSub: Subscription;
-  monthlySourceData: Array<{
-    source: MeterSource,
-    data: Array<FacilityBarChartData>
-  }>;
-  monthlySourceDataSub: Subscription;
-  calanderizedMeters: Array<CalanderizedMeter>;
-  metersSummary: FacilityMeterSummaryData;
-  metersSummarySub: Subscription;
+
+  
+  dateRange: { startDate: Date, endDate: Date };
+  dateRangeSub: Subscription;
+  utilityUseAndCost: UtilityUseAndCost;
+  utilityUseAndCostSub: Subscription;
+  facilityOverviewData: FacilityOverviewData;
+  facilityOverviewDataSub: Subscription;
   constructor(private facilityOverviewService: FacilityOverviewService, private facilityDbService: FacilitydbService) { }
 
 
   ngOnInit(): void {
-    this.calanderizedMeters = this.facilityOverviewService.calanderizedMeters;
-
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
       this.facilityId = val.guid;
       this.waterUnit = val.volumeLiquidUnit;
     })
-    this.calculatingSub = this.facilityOverviewService.calculatingWater.subscribe(val => {
+    this.calculatingSub = this.facilityOverviewService.calculatingFacilityOverviewData.subscribe(val => {
       this.calculating = val;
     })
 
-    this.accountFacilitiesSummarySub = this.facilityOverviewService.waterMeterSummaryData.subscribe(summaryData => {
-      if (summaryData && summaryData.allMetersLastBill) {
-        this.lastMonthsDate = new Date(summaryData.allMetersLastBill.year, summaryData.allMetersLastBill.monthNumValue);
-        this.yearPriorDate = new Date(summaryData.allMetersLastBill.year - 1, summaryData.allMetersLastBill.monthNumValue + 1);
-      } else {
-        this.lastMonthsDate = undefined;
-        this.yearPriorDate = undefined;
-      }
-    });
-    this.utilityUsageSummaryDataSub = this.facilityOverviewService.waterUtilityUsageSummaryData.subscribe(utilityUsageSummaryData => {
-      this.utilityUsageSummaryData = utilityUsageSummaryData;
+    this.dateRangeSub = this.facilityOverviewService.dateRange.subscribe(val => {
+      this.dateRange = val;
     });
 
-    this.yearMonthDataSub = this.facilityOverviewService.waterYearMonthData.subscribe(yearMonthData => {
-      this.yearMonthData = yearMonthData;
+    this.utilityUseAndCostSub = this.facilityOverviewService.utilityUseAndCost.subscribe(val => {
+      this.utilityUseAndCost = val;
     });
-    this.monthlySourceDataSub = this.facilityOverviewService.waterMonthlySourceData.subscribe(monthlySourceData => {
-      this.monthlySourceData = monthlySourceData;
-    });
-    this.metersSummarySub = this.facilityOverviewService.waterMeterSummaryData.subscribe(metersSummary => {
-      this.metersSummary = metersSummary;
-    });
+
+    this.facilityOverviewDataSub = this.facilityOverviewService.facilityOverviewData.subscribe(val => {
+      this.facilityOverviewData = val;
+    })
   }
 
   ngOnDestroy() {
-    this.accountFacilitiesSummarySub.unsubscribe();
     this.calculatingSub.unsubscribe();
     this.selectedFacilitySub.unsubscribe();
-    this.utilityUsageSummaryDataSub.unsubscribe();
-    this.yearMonthDataSub.unsubscribe();
-    this.monthlySourceDataSub.unsubscribe();
-    this.metersSummarySub.unsubscribe();
+    this.dateRangeSub.unsubscribe();
+    this.utilityUseAndCostSub.unsubscribe();
+    this.facilityOverviewDataSub.unsubscribe();
   }
 
 
