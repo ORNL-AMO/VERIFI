@@ -1,7 +1,7 @@
 
 
 
-export class FacilityOverviewClass {
+export class FacilityOverviewData {
     
     constructor(){
 

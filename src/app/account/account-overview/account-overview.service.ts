@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { AccountOverviewData, AccountOverviewFacility, UtilityUseAndCost } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
+import { AccountOverviewData } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
+import { UtilityUseAndCost } from 'src/app/calculations/dashboard-calculations/useAndCostClass';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
-import { AccountFacilitiesSummary, UtilityUsageSummaryData, YearMonthData } from 'src/app/models/dashboard';
 import { IdbUtilityMeter } from 'src/app/models/idb';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 

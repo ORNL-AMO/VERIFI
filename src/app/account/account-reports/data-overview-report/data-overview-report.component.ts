@@ -13,7 +13,8 @@ import { CalanderizationService } from 'src/app/shared/helper-services/calanderi
 import { AccountReportsService } from '../account-reports.service';
 import { Subscription } from 'rxjs';
 import { FacilitySummaryClass } from 'src/app/calculations/dashboard-calculations/facilitySummaryClass';
-import { AccountOverviewData, UtilityUseAndCost } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
+import { AccountOverviewData } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
+import { UtilityUseAndCost } from 'src/app/calculations/dashboard-calculations/useAndCostClass';
 
 @Component({
   selector: 'app-data-overview-report',

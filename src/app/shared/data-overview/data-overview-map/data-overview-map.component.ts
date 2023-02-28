@@ -3,7 +3,6 @@ import { PlotlyService } from 'angular-plotly.js';
 import { Subscription } from 'rxjs';
 import { AccountOverviewService } from 'src/app/account/account-overview/account-overview.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { AccountFacilitiesSummary } from 'src/app/models/dashboard';
 import { IdbAccount, IdbFacility } from 'src/app/models/idb';
 import { EGridService } from '../../helper-services/e-grid.service';
 import * as _ from 'lodash';
@@ -17,8 +16,6 @@ import { AccountOverviewFacility } from 'src/app/calculations/dashboard-calculat
 export class DataOverviewMapComponent {
   @Input()
   dataType: 'energyUse' | 'emissions' | 'cost' | 'water';
-  @Input()
-  accountFacilitiesSummary: AccountFacilitiesSummary;
   @Input()
   accountOverviewFacilities: Array<AccountOverviewFacility>;
 

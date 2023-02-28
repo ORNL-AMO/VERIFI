@@ -42,6 +42,13 @@ export class FacilityOverviewService {
   }>>;
   waterUtilityUsageSummaryData: BehaviorSubject<UtilityUsageSummaryData>;
   waterYearMonthData: BehaviorSubject<Array<YearMonthData>>;
+
+
+  dateRange: BehaviorSubject<{
+    startDate: Date,
+    endDate: Date
+  }>;
+
   constructor(private utilityMeterDbService: UtilityMeterdbService, private calanderizationService: CalanderizationService) {
     this.emissionsDisplay = new BehaviorSubject<"market" | "location">("market");
     this.calculatingEnergy = new BehaviorSubject<boolean>(undefined);
@@ -59,6 +66,8 @@ export class FacilityOverviewService {
     this.waterMonthlySourceData = new BehaviorSubject(undefined);
     this.waterUtilityUsageSummaryData = new BehaviorSubject(undefined);
     this.waterYearMonthData = new BehaviorSubject(undefined);
+
+    this.dateRange = new BehaviorSubject(undefined);
   }
 
   setCalanderizedMeters() {

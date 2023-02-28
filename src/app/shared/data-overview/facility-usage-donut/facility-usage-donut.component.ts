@@ -3,7 +3,6 @@ import { PlotlyService } from 'angular-plotly.js';
 import { Subscription } from 'rxjs';
 import { AccountOverviewService } from 'src/app/account/account-overview/account-overview.service';
 import { AccountOverviewFacility } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
-import { AccountFacilitiesSummary } from 'src/app/models/dashboard';
 
 @Component({
   selector: 'app-facility-usage-donut',
@@ -13,8 +12,6 @@ import { AccountFacilitiesSummary } from 'src/app/models/dashboard';
 export class FacilityUsageDonutComponent {
   @Input()
   dataType: 'energyUse' | 'emissions' | 'cost' | 'water';
-  @Input()
-  accountFacilitiesSummary: AccountFacilitiesSummary;
   @Input()
   energyUnit: string;
   @Input()

@@ -7,7 +7,7 @@ import { UtilityColors } from '../../utilityColors';
 import * as _ from 'lodash';
 import { Subscription } from 'rxjs';
 import { FacilityBarChartData } from 'src/app/models/visualization';
-import { CalanderizedMeter } from 'src/app/models/calanderization';
+import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
 
 @Component({
   selector: 'app-meters-overview-stacked-line-chart',
@@ -20,7 +20,9 @@ export class MetersOverviewStackedLineChartComponent {
   @Input()
   facilityId: string;
   @Input()
-  calanderizedMeters: Array<CalanderizedMeter>
+  calanderizedMeters: Array<CalanderizedMeter>;
+  @Input()
+  dateRange: { startDate: Date, endDate: Date };
 
   @ViewChild('stackedAreaChart', { static: false }) stackedAreaChart: ElementRef;
 
@@ -55,7 +57,7 @@ export class MetersOverviewStackedLineChartComponent {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if (!changes.dataType && (changes.monthlySourceData && !changes.monthlySourceData.isFirstChange())) {
+    if (!changes.dataType && ((changes.calanderizedMeters && !changes.calanderizedMeters.isFirstChange()) || (changes.dateRange && !changes.dateRange.isFirstChange()))) {
       this.drawChart();
     }
   }
@@ -64,16 +66,20 @@ export class MetersOverviewStackedLineChartComponent {
     if (this.stackedAreaChart && this.calanderizedMeters && this.calanderizedMeters.length != 0) {
       let traceData = new Array();
       this.calanderizedMeters = _.orderBy(this.calanderizedMeters, (cMeter) => { return cMeter.meter.source });
-      let dataPointSize: number = 0;
+      // let dataPointSize: number = 0;
       let includedSources: Array<MeterSource> = this.getIncludedSources();
       this.calanderizedMeters.forEach(cMeter => {
         if (includedSources.includes(cMeter.meter.source)) {
           let x: Array<string> = new Array();
           let y: Array<number> = new Array();
-          if (dataPointSize < cMeter.monthlyData.length - 1) {
-            dataPointSize = cMeter.monthlyData.length - 1;
-          }
-          cMeter.monthlyData.forEach(dataItem => {
+          // if (dataPointSize < cMeter.monthlyData.length - 1) {
+          //   dataPointSize = cMeter.monthlyData.length - 1;
+          // }
+          let monthlyDataInRange: Array<MonthlyData> = cMeter.monthlyData.filter(dataItem => {
+            let dataItemDate: Date = new Date(dataItem.date);
+            return (dataItemDate >= this.dateRange.startDate) && (dataItemDate <= this.dateRange.endDate);
+          });
+          monthlyDataInRange.forEach(dataItem => {
             x.push(dataItem.month + ', ' + dataItem.year);
             if (this.dataType == 'energyUse') {
               y.push(dataItem.energyUse);
@@ -93,7 +99,7 @@ export class MetersOverviewStackedLineChartComponent {
             x: x,
             y: y,
             name: cMeter.meter.name,
-            text: cMeter.monthlyData.map(item => { return cMeter.meter.name }),
+            text: monthlyDataInRange.map(item => { return cMeter.meter.name }),
             stackgroup: 'one',
             marker: {
               color: UtilityColors[cMeter.meter.source].color,
@@ -104,10 +110,10 @@ export class MetersOverviewStackedLineChartComponent {
         }
       })
 
-      let xrange;
-      if (dataPointSize >= 11) {
-        xrange = [dataPointSize - 11, dataPointSize];
-      };
+      // let xrange;
+      // if (dataPointSize >= 11) {
+      //   xrange = [dataPointSize - 11, dataPointSize];
+      // };
 
       var layout = {
         barmode: 'group',
@@ -118,8 +124,8 @@ export class MetersOverviewStackedLineChartComponent {
           },
         },
         xaxis: {
-          autotick: false,
-          range: xrange
+          // autotick: false,
+          // range: xrange
         },
         yaxis: {
           title: {
@@ -127,9 +133,9 @@ export class MetersOverviewStackedLineChartComponent {
           },
           hoverformat: ",.2f"
         },
-        legend: {
-          orientation: 'h'
-        }
+        // legend: {
+        //   orientation: 'h'
+        // }
       };
 
       let config = {

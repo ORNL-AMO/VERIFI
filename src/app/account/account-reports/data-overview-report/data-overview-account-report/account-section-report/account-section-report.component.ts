@@ -1,5 +1,6 @@
 import { Component, Input } from '@angular/core';
-import { AccountOverviewData, AccountOverviewFacility, IUseAndCost, UseAndCost } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
+import { AccountOverviewData, AccountOverviewFacility } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
+import { IUseAndCost, UseAndCost } from 'src/app/calculations/dashboard-calculations/useAndCostClass';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { CalanderizedMeter } from 'src/app/models/calanderization';

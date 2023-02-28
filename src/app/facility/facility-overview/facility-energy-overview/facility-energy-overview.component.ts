@@ -37,6 +37,9 @@ export class FacilityEnergyOverviewComponent implements OnInit {
   calanderizedMeters: Array<CalanderizedMeter>;
   metersSummary: FacilityMeterSummaryData;
   metersSummarySub: Subscription;
+
+  dateRange: {startDate: Date, endDate: Date};
+  dateRangeSub: Subscription;
   constructor(private facilityOverviewService: FacilityOverviewService, private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
@@ -75,6 +78,9 @@ export class FacilityEnergyOverviewComponent implements OnInit {
       this.metersSummary = metersSummary;
     });
 
+    this.dateRangeSub = this.facilityOverviewService.dateRange.subscribe(val => {
+      this.dateRange = val;
+    });
   }
 
   ngOnDestroy() {
@@ -85,6 +91,7 @@ export class FacilityEnergyOverviewComponent implements OnInit {
     this.yearMonthDataSub.unsubscribe();
     this.monthlySourceDataSub.unsubscribe();
     this.metersSummarySub.unsubscribe();
+    this.dateRangeSub.unsubscribe();
   }
 
 }

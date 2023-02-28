@@ -1,12 +1,15 @@
 import { Component, OnInit } from '@angular/core';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { Subscription } from 'rxjs';
-import { IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
+import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { NavigationEnd, Router } from '@angular/router';
 import { FacilityOverviewService } from '../facility-overview.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
+import { Month, Months } from 'src/app/shared/form-data/months';
+import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
+import * as _ from 'lodash';
 
 @Component({
   selector: 'app-facility-overview-banner',
@@ -24,11 +27,22 @@ export class FacilityOverviewBannerComponent implements OnInit {
   selectedFacility: IdbFacility;
   selectedFacilitySub: Subscription;
   showWater: boolean;
+
+  minMonth: number;
+  minYear: number;
+  maxMonth: number;
+  maxYear: number;
+  months: Array<Month> = Months;
+  years: Array<number>;
+
+  dateRangeSub: Subscription;
+
   constructor(private sharedDataService: SharedDataService, private facilityDbService: FacilitydbService,
     private router: Router,
     private facilityOverviewService: FacilityOverviewService,
     private dbChangesService: DbChangesService,
-    private utilityMeterDbService: UtilityMeterdbService) { }
+    private utilityMeterDbService: UtilityMeterdbService,
+    private utilityMeterDataDbService: UtilityMeterDatadbService) { }
 
   ngOnInit(): void {
     this.modalOpenSub = this.sharedDataService.modalOpen.subscribe(val => {
@@ -37,6 +51,7 @@ export class FacilityOverviewBannerComponent implements OnInit {
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
       this.selectedFacility = val;
       this.setShowWater();
+      this.setYears();
     });
 
     this.emissionsDisplaySub = this.facilityOverviewService.emissionsDisplay.subscribe(val => {
@@ -49,6 +64,17 @@ export class FacilityOverviewBannerComponent implements OnInit {
       }
     });
     this.setUrlString(this.router.url);
+
+    this.dateRangeSub = this.facilityOverviewService.dateRange.subscribe(dateRange => {
+      if (dateRange) {
+        this.minMonth = dateRange.startDate.getMonth();
+        this.minYear = dateRange.startDate.getFullYear();
+        this.maxMonth = dateRange.endDate.getMonth();
+        this.maxYear = dateRange.endDate.getFullYear();
+      } else {
+        this.setDateRange();
+      }
+    });
   }
 
   ngOnDestroy() {
@@ -87,7 +113,40 @@ export class FacilityOverviewBannerComponent implements OnInit {
     this.showWater = waterMeter != undefined;
   }
 
-  createReport(){
+  createReport() {
     this.sharedDataService.openCreateReportModal.next(true);
+  }
+
+  setDate() {
+    let startDate: Date = new Date(this.minYear, this.minMonth, 1);
+    let endDate: Date = new Date(this.maxYear, this.maxMonth, 1);
+    this.facilityOverviewService.dateRange.next({
+      startDate: startDate,
+      endDate: endDate
+    });
+  }
+
+  setYears() {
+    let utilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
+    let years: Array<number> = utilityMeterData.map(meterData => {
+      let date: Date = new Date(meterData.readDate);
+      return date.getFullYear();
+    });
+    this.years = _.uniq(years);
+  }
+
+  setDateRange() {
+    let utilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
+    let dates: Array<Date> = utilityMeterData.map(meterData => {
+      let date: Date = new Date(meterData.readDate);
+      return date;
+    });
+    let maxDate: Date = _.max(dates);
+    let minDate: Date = new Date(maxDate.getUTCFullYear() - 1, maxDate.getMonth(), 1);
+    maxDate.setMonth(maxDate.getMonth() - 1)
+    this.facilityOverviewService.dateRange.next({
+      endDate: maxDate,
+      startDate: minDate
+    });
   }
 }

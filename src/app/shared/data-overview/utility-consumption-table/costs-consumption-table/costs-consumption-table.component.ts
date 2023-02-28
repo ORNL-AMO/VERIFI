@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { IUseAndCost, UseAndCost } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
+import { IUseAndCost, UseAndCost } from 'src/app/calculations/dashboard-calculations/useAndCostClass';
 
 @Component({
   selector: 'app-costs-consumption-table',
