@@ -2,7 +2,6 @@ import { Component, Input } from '@angular/core';
 import { AnnualSourceData, FacilityOverviewData, FacilityOverviewMeter } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';
 import { IUseAndCost, UseAndCost } from 'src/app/calculations/dashboard-calculations/useAndCostClass';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { YearMonthData } from 'src/app/models/dashboard';
 import { IdbAccountReport, IdbFacility } from 'src/app/models/idb';
@@ -44,15 +43,12 @@ export class FacilitySectionReportComponent {
   sectionOptions: DataOverviewReportSetup;
   waterUnit: string;
   energyUnit: string;
-  constructor(private accountReportDbService: AccountReportDbService,
-    private facilityDbService: FacilitydbService) {
+  constructor(private accountReportDbService: AccountReportDbService) {
   }
 
   ngOnInit() {
     let selectedReport: IdbAccountReport = this.accountReportDbService.selectedReport.getValue();
     this.sectionOptions = selectedReport.dataOverviewReportSetup;
-    // let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
-    // let facility: IdbFacility = accountFacilities.find(facility => { return facility.guid == this.facilityId })
     this.waterUnit = this.facility.volumeLiquidUnit;
     this.energyUnit = this.facility.energyUnit;
   }

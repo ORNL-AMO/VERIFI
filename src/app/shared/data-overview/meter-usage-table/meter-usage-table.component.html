@@ -28,7 +28,7 @@
                     {{overviewMeter.meter.source}}
                 </td>
                 <td>
-                    {{overviewMeter.meter.groupId}}
+                    {{overviewMeter.meter.groupId | groupName}}
                 </td>
                 <td *ngIf="dataType =='energyUse'">
                     {{overviewMeter.totalUsage | customNumber}}

@@ -5,7 +5,8 @@
     </div>
     <div class="col-6" *ngIf="sectionOptions.includeMeterUsageTable">
         <app-meter-usage-table [dataType]="dataType" [facilityOverviewData]="facilityOverviewData"
-            [facilityOverviewMeters]="facilityOverviewMeters"></app-meter-usage-table>
+            [facilityOverviewMeters]="facilityOverviewMeters" [waterUnit]="waterUnit"
+            [energyUnit]="energyUnit"></app-meter-usage-table>
     </div>
     <div class="col-6" *ngIf="sectionOptions.includeMeterUsageTable">
         <app-meter-usage-donut [dataType]="dataType" [facilityId]="facility.guid"
@@ -27,12 +28,12 @@
 <div class="row" *ngIf="sectionOptions.includeAnnualBarChart">
     <div class="col-12">
         <app-utilities-usage-chart [dataType]="dataType" [facilityId]="facility.guid"
-        [annualSourceData]="annualSourceData"></app-utilities-usage-chart>
+            [annualSourceData]="annualSourceData"></app-utilities-usage-chart>
     </div>
 </div>
 <div class="row" *ngIf="sectionOptions.includeMonthlyLineChartForFacility">
     <div class="col-12">
-        <app-monthly-utility-usage-line-chart [dataType]="dataType"[facilityId]="facility.guid"
-        [yearMonthData]="yearMonthData"></app-monthly-utility-usage-line-chart>
+        <app-monthly-utility-usage-line-chart [dataType]="dataType" [facilityId]="facility.guid"
+            [yearMonthData]="yearMonthData"></app-monthly-utility-usage-line-chart>
     </div>
 </div>
