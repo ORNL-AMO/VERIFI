@@ -1,43 +1,6 @@
 import { AnnualAnalysisSummary } from "./analysis";
 import { IdbFacility, MeterSource } from "./idb";
 
-export interface BarChartDataTrace {
-  x: Array<string | number>,
-  y: Array<number>,
-  width?: Array<number>
-  name: string,
-  type: string,
-  marker: {
-    color: string
-  }
-}
-
-
-export interface ReportUtilitySummary {
-  utilitySummaries: Array<UtilitySummary>,
-  totals: UtilitySummary,
-  targetYearStart: Date,
-  targetYearEnd: Date,
-  baselineYearStart: Date,
-  baselineYearEnd: Date
-}
-
-export interface UtilitySummary {
-  source: MeterSource,
-  consumptionTargetYear: number,
-  costTargetYear: number,
-  marketEmissionsTargetYear: number,
-  locationEmissionsTargetYear: number,
-  consumptionBaselineYear: number,
-  costBaselineYear: number,
-  marketEmissionsBaselineYear: number,
-  locationEmissionsBaselineYear: number,
-  consumptionChange: number,
-  costChange: number,
-  marketEmissionsChange: number,
-  locationEmissionsChange: number
-}
-
 
 export interface ReportOptions {
   title: string,
@@ -148,18 +111,4 @@ export interface DataOverviewReportSetup {
   includeUtilityTableForFacility: boolean,
   includeAnnualBarChart: boolean,
   includeMonthlyLineChartForFacility: boolean
-  // accountEnergySection: DataOverviewReportAccountSection,
-  // accountEmissionsSection: DataOverviewReportAccountSection,
-  // accountCostsSection: DataOverviewReportAccountSection,
-  // accountWaterSection: DataOverviewReportAccountSection
 }
-
-// export interface DataOverviewReportAccountSection {
-//   includeSection: boolean,
-//   includeMap: boolean,
-//   includeFacilityTable: boolean,
-//   includeFacilityDonut: boolean,
-//   includeUtilityTable: boolean,
-//   includeStackedBarChart: boolean,
-//   includeMonthlyLineChart: boolean
-// }

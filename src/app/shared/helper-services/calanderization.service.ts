@@ -3,7 +3,7 @@ import { IdbAccount, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 's
 import * as _ from 'lodash';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
-import { CalanderizedMeter, MonthlyData, LastYearData, CalanderizationFilters, CalanderizationOptions } from 'src/app/models/calanderization';
+import { CalanderizedMeter, MonthlyData, CalanderizationFilters, CalanderizationOptions } from 'src/app/models/calanderization';
 import { BehaviorSubject } from 'rxjs';
 import { ConvertUnitsService } from '../convert-units/convert-units.service';
 import { ReportOptions } from 'src/app/models/overview-report';
@@ -400,105 +400,6 @@ export class CalanderizationService {
     return Math.floor((utc2 - utc1) / _MS_PER_DAY);
   }
 
-  getPastYearData(meters: Array<IdbUtilityMeter>, inAccount: boolean, yearEndBill: MonthlyData, calanderizedMeterData?: Array<CalanderizedMeter>, reportOptions?: ReportOptions): Array<LastYearData> {
-    if (yearEndBill) {
-      //calanderize meters
-      if (!calanderizedMeterData) {
-        calanderizedMeterData = this.getCalanderizedMeterData(meters, inAccount, undefined, reportOptions);
-      }
-      //array of year/month combos needed
-      let yearMonths: Array<{ year: number, month: number }> = new Array();
-      let startDate: Date = new Date(yearEndBill.year - 1, yearEndBill.monthNumValue + 1);
-      let endDate: Date = new Date(yearEndBill.date);
-      while (startDate <= endDate) {
-        yearMonths.push({ year: startDate.getUTCFullYear(), month: startDate.getUTCMonth() });
-        startDate.setUTCMonth(startDate.getUTCMonth() + 1);
-      }
-      //create array of just the meter data
-      let combindedCalanderizedMeterData: Array<MonthlyData> = calanderizedMeterData.flatMap(meterData => {
-        return meterData.monthlyData;
-      });
-      let resultData: Array<LastYearData> = new Array();
-      resultData = yearMonths.map(yearMonth => {
-        let totalEnergyUse: number = _.sumBy(combindedCalanderizedMeterData, (meterData: MonthlyData) => {
-          if (meterData.monthNumValue == yearMonth.month && meterData.year == yearMonth.year) {
-            return meterData.energyUse;
-          } else {
-            return 0;
-          }
-        });
-        let totalEnergyConsumption: number = _.sumBy(combindedCalanderizedMeterData, (meterData: MonthlyData) => {
-          if (meterData.monthNumValue == yearMonth.month && meterData.year == yearMonth.year) {
-            return meterData.energyConsumption;
-          } else {
-            return 0;
-          }
-        });
-        let totalEnergyCost: number = _.sumBy(combindedCalanderizedMeterData, (meterData: MonthlyData) => {
-          if (meterData.monthNumValue == yearMonth.month && meterData.year == yearMonth.year) {
-            return meterData.energyCost;
-          } else {
-            return 0;
-          }
-        });
-        let totalLocationEmissions: number = _.sumBy(combindedCalanderizedMeterData, (meterData: MonthlyData) => {
-          if (meterData.monthNumValue == yearMonth.month && meterData.year == yearMonth.year) {
-            return meterData.locationEmissions;
-          } else {
-            return 0;
-          }
-        });
-        let totalMarketEmissions: number = _.sumBy(combindedCalanderizedMeterData, (meterData: MonthlyData) => {
-          if (meterData.monthNumValue == yearMonth.month && meterData.year == yearMonth.year) {
-            return meterData.marketEmissions;
-          } else {
-            return 0;
-          }
-        });
-        let RECs: number = _.sumBy(combindedCalanderizedMeterData, (meterData: MonthlyData) => {
-          if (meterData.monthNumValue == yearMonth.month && meterData.year == yearMonth.year) {
-            return meterData.RECs;
-          } else {
-            return 0;
-          }
-        });
-        let excessRECsEmissions: number = _.sumBy(combindedCalanderizedMeterData, (meterData: MonthlyData) => {
-          if (meterData.monthNumValue == yearMonth.month && meterData.year == yearMonth.year) {
-            return meterData.excessRECsEmissions;
-          } else {
-            return 0;
-          }
-        });
-        let excessRECs: number = _.sumBy(combindedCalanderizedMeterData, (meterData: MonthlyData) => {
-          if (meterData.monthNumValue == yearMonth.month && meterData.year == yearMonth.year) {
-            return meterData.excessRECs;
-          } else {
-            return 0;
-          }
-        });
-        return {
-          time: yearMonth.month + ', ' + yearMonth.year,
-          energyUse: totalEnergyUse,
-          energyCost: totalEnergyCost,
-          energyConsumption: totalEnergyConsumption,
-          year: yearMonth.year,
-          month: yearMonth.month,
-          date: new Date(yearMonth.year, yearMonth.month),
-          marketEmissions: totalMarketEmissions,
-          locationEmissions: totalLocationEmissions,
-          RECs: RECs,
-          excessRECs: excessRECs,
-          excessRECsEmissions: excessRECsEmissions
-        }
-
-      });
-      return resultData;
-    } else {
-      return [];
-    }
-  }
-
-
   getLastBillEntry(facilityMeters: Array<IdbUtilityMeter>, inAccount: boolean, reportOptions?: ReportOptions): MonthlyData {
     let calanderizedMeterData: Array<CalanderizedMeter> = this.getCalanderizedMeterData(facilityMeters, inAccount, false, reportOptions);
     let lastBill: MonthlyData = this.getLastBillEntryFromCalanderizedMeterData(calanderizedMeterData);
@@ -532,45 +433,6 @@ export class CalanderizationService {
     });
     return firstBill;
   }
-  getYearPriorBillEntry(facilityMeters: Array<IdbUtilityMeter>, inAccount: boolean, lastBill: MonthlyData): Array<MonthlyData> {
-    let calanderizedMeterData: Array<CalanderizedMeter> = this.getCalanderizedMeterData(facilityMeters, inAccount, false);
-    let yearPriorBill: Array<MonthlyData> = this.getYearPriorBillEntryFromCalanderizedMeterData(calanderizedMeterData, lastBill);
-    if (yearPriorBill) {
-      return yearPriorBill;
-    } else {
-      return [{
-        month: undefined,
-        monthNumValue: undefined,
-        year: undefined,
-        fiscalYear: undefined,
-        energyConsumption: 0,
-        energyUse: 0,
-        energyCost: 0,
-        date: undefined,
-        marketEmissions: 0,
-        locationEmissions: 0,
-        RECs: 0,
-        excessRECs: 0,
-        excessRECsEmissions: 0
-      }]
-    }
-  }
-
-  getYearPriorBillEntryFromCalanderizedMeterData(calanderizedMeterData: Array<CalanderizedMeter>, lastBill: MonthlyData): Array<MonthlyData> {
-    let monthlyData: Array<MonthlyData> = calanderizedMeterData.flatMap(data => {
-      return data.monthlyData;
-    });
-    if (lastBill) {
-      let yearPrior: number = lastBill.year - 1;
-      let yearPriorBill: Array<MonthlyData> = monthlyData.filter(dataItem => {
-        return (dataItem.year == yearPrior) && (dataItem.monthNumValue == lastBill.monthNumValue);
-      });
-      return yearPriorBill;
-    } else {
-      return undefined;
-    }
-  }
-
 
   getCalendarizationSummary(meter: IdbUtilityMeter, meterData: Array<IdbUtilityMeterData>): Array<CalendarizationSummaryItem> {
     if (meter.meterReadingDataApplication == 'fullMonth' || !meter.meterReadingDataApplication) {

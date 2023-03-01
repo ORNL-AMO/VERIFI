@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { FacilityOverviewData } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';
+import { UtilityUseAndCost } from 'src/app/calculations/dashboard-calculations/useAndCostClass';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbFacility } from 'src/app/models/idb';
 import { FacilityOverviewService } from './facility-overview.service';
@@ -73,7 +75,15 @@ export class FacilityOverviewComponent implements OnInit {
       });
     } else {
       // Web Workers are not supported in this environment.
-      
+      if (this.facilityOverviewService.utilityUseAndCost.getValue() == undefined) {
+        this.facilityOverviewService.calculatingFacilityOverviewData.next(true);
+      }
+      let facilityOverviewData: FacilityOverviewData = new FacilityOverviewData(this.facilityOverviewService.calanderizedMeters, this.dateRange, this.facility);
+      let utilityUseAndCost: UtilityUseAndCost = new UtilityUseAndCost(this.facilityOverviewService.calanderizedMeters, this.dateRange);
+      this.facilityOverviewService.facilityOverviewData.next(facilityOverviewData);
+      this.facilityOverviewService.utilityUseAndCost.next(utilityUseAndCost);
+      this.facilityOverviewService.calculatingFacilityOverviewData.next(false);
+
     }
   }
 

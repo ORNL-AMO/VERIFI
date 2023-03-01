@@ -22,7 +22,6 @@ export class DataOverviewMapComponent {
 
   @ViewChild('utilityUsageMap', { static: false }) utilityUsageMap: ElementRef;
 
-  accountFacilitiesSummarySub: Subscription;
   mapData: Array<{
     lng: string,
     lat: string,

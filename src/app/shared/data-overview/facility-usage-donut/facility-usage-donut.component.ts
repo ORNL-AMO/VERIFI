@@ -38,7 +38,6 @@ export class FacilityUsageDonutComponent {
   }
 
   ngOnDestroy() {
-    // this.accountFacilitiesSummarySub.unsubscribe();
     if (this.emissionsDisplaySub) {
       this.emissionsDisplaySub.unsubscribe();
     }

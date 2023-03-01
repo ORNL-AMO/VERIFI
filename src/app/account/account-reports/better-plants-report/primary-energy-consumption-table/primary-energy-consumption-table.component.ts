@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { IdbAccount, IdbAccountReport } from 'src/app/models/idb';
-import { BetterPlantsSummary, ReportOptions } from 'src/app/models/overview-report';
+import { BetterPlantsSummary } from 'src/app/models/overview-report';
 import * as _ from 'lodash';
 
 @Component({

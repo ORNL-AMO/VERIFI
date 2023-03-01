@@ -23,7 +23,6 @@ export class FacilitiesUsageTableComponent {
   accountOverviewData: AccountOverviewData;
 
   selectedAccountSub: Subscription;
-  accountFacilitiesSummarySub: Subscription;
 
   emissionsDisplay: "market" | "location";
   emissionsDisplaySub: Subscription;

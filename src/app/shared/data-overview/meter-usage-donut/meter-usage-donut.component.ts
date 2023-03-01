@@ -1,5 +1,4 @@
 import { Component, ElementRef, ViewChild, Input, SimpleChanges } from '@angular/core';
-import { FacilityMeterSummaryData } from 'src/app/models/dashboard';
 import { UtilityColors } from '../../utilityColors';
 import * as _ from 'lodash';
 import { Subscription } from 'rxjs';

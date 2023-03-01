@@ -1,5 +1,4 @@
 import { Component, Input } from '@angular/core';
-import { FacilityMeterSummaryData } from 'src/app/models/dashboard';
 import { Subscription } from 'rxjs';
 import { FacilityOverviewService } from 'src/app/facility/facility-overview/facility-overview.service';
 import { FacilityOverviewData, FacilityOverviewMeter } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';

@@ -1,13 +1,12 @@
 import { Component, Input } from '@angular/core';
 import { AnnualSourceData, FacilityOverviewData, FacilityOverviewMeter } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';
-import { IUseAndCost, UseAndCost, UtilityUseAndCost } from 'src/app/calculations/dashboard-calculations/useAndCostClass';
+import { IUseAndCost, UseAndCost } from 'src/app/calculations/dashboard-calculations/useAndCostClass';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
-import { FacilityMeterSummaryData, UtilityUsageSummaryData, YearMonthData } from 'src/app/models/dashboard';
-import { IdbAccountReport, IdbFacility, MeterSource } from 'src/app/models/idb';
+import { YearMonthData } from 'src/app/models/dashboard';
+import { IdbAccountReport, IdbFacility } from 'src/app/models/idb';
 import { DataOverviewReportSetup } from 'src/app/models/overview-report';
-import { FacilityBarChartData } from 'src/app/models/visualization';
 
 @Component({
   selector: 'app-facility-section-report',

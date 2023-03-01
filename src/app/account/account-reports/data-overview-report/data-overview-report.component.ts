@@ -86,10 +86,10 @@ export class DataOverviewReportComponent {
     this.printSub.unsubscribe();
   }
 
+  //recursively function to calculate all facilities one at a time
   calculateFacilitiesSummary(facilityIndex: number, accountFacilities: Array<IdbFacility>, accountMeterGroups: Array<IdbUtilityMeterGroup>, startDate: Date, endDate: Date) {
     let facilityId: string = this.includedFacilities[facilityIndex];
     let facility: IdbFacility = accountFacilities.find(facility => { return facility.guid == facilityId });
-    // let facilityGroups: Array<IdbUtilityMeterGroup> = accountMeterGroups.filter(group => { return group.facilityId == facilityId });
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == facilityId });
     let dataOverviewFacility: DataOverviewFacility = this.initDataOverviewFacility(facility, startDate, endDate);
@@ -120,32 +120,14 @@ export class DataOverviewReportComponent {
 
     } else {
       // Web Workers are not supported in this environment.
-      // let energySources: Array<MeterSource> = EnergySources;
-      // let facilitySummaryClass: FacilitySummaryClass = new FacilitySummaryClass(dataOverviewFacility.calanderizedMeters, facilityGroups, energySources, facility);
-      // dataOverviewFacility.energyMeterSummaryData = facilitySummaryClass.meterSummaryData;
-      // dataOverviewFacility.energyMonthlySourceData = facilitySummaryClass.monthlySourceData;
-      // dataOverviewFacility.energyUtilityUsageSummaryData = facilitySummaryClass.utilityUsageSummaryData;
-      // dataOverviewFacility.energyYearMonthData = facilitySummaryClass.yearMonthData;
-
-      // let waterSources: Array<MeterSource> = WaterSources;
-      // let waterSummaryClass: FacilitySummaryClass = new FacilitySummaryClass(dataOverviewFacility.calanderizedMeters, facilityGroups, waterSources, facility);
-      // dataOverviewFacility.waterMeterSummaryData = waterSummaryClass.meterSummaryData;
-      // dataOverviewFacility.waterMonthlySourceData = waterSummaryClass.monthlySourceData;
-      // dataOverviewFacility.waterUtilityUsageSummaryData = waterSummaryClass.utilityUsageSummaryData;
-      // dataOverviewFacility.waterYearMonthData = waterSummaryClass.yearMonthData;
-
-      // let allSources: Array<MeterSource> = AllSources;
-      // let allSourcesSummaryClass: FacilitySummaryClass = new FacilitySummaryClass(dataOverviewFacility.calanderizedMeters, facilityGroups, allSources, facility);
-      // dataOverviewFacility.costsMeterSummaryData = allSourcesSummaryClass.meterSummaryData;
-      // dataOverviewFacility.costsMonthlySourceData = allSourcesSummaryClass.monthlySourceData;
-      // dataOverviewFacility.costsUtilityUsageSummaryData = allSourcesSummaryClass.utilityUsageSummaryData;
-      // dataOverviewFacility.costsYearMonthData = allSourcesSummaryClass.yearMonthData;
-      // this.facilitiesData.push(dataOverviewFacility);
-      // if (facilityIndex != this.includedFacilities.length - 1) {
-      //   this.calculateFacilitiesSummary(facilityIndex + 1, accountFacilities, accountMeterGroups);
-      // } else {
-      //   this.calculatingFacilities = false;
-      // }
+      dataOverviewFacility.facilityOverviewData = new FacilityOverviewData(dataOverviewFacility.calanderizedMeters, dataOverviewFacility.dateRange, facility);
+      dataOverviewFacility.utilityUseAndCost = new UtilityUseAndCost(dataOverviewFacility.calanderizedMeters, dataOverviewFacility.dateRange);
+      this.facilitiesData.push(dataOverviewFacility);
+      if (facilityIndex != this.includedFacilities.length - 1) {
+        this.calculateFacilitiesSummary(facilityIndex + 1, accountFacilities, accountMeterGroups, startDate, endDate);
+      } else {
+        this.calculatingFacilities = false;
+      }
     }
   }
 

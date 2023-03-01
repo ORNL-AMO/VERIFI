@@ -3,10 +3,6 @@ import { Subscription } from 'rxjs';
 import { FacilityOverviewData } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';
 import { UtilityUseAndCost } from 'src/app/calculations/dashboard-calculations/useAndCostClass';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { CalanderizedMeter } from 'src/app/models/calanderization';
-import { FacilityMeterSummaryData, UtilityUsageSummaryData, YearMonthData } from 'src/app/models/dashboard';
-import { MeterSource } from 'src/app/models/idb';
-import { FacilityBarChartData } from 'src/app/models/visualization';
 import { FacilityOverviewService } from '../facility-overview.service';
 
 @Component({

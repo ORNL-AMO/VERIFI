@@ -1,6 +1,5 @@
 import { Component, Input } from '@angular/core';
 import { IUseAndCost, UseAndCost } from 'src/app/calculations/dashboard-calculations/useAndCostClass';
-import { UtilityUsageSummaryData } from 'src/app/models/dashboard';
 
 @Component({
   selector: 'app-utility-consumption-table',
@@ -12,8 +11,6 @@ export class UtilityConsumptionTableComponent {
   dataType: 'energyUse' | 'emissions' | 'cost' | 'water';
   @Input()
   facilityId: string;
-  @Input()
-  utilityUsageSummaryData: UtilityUsageSummaryData;
   @Input()
   energyUnit: string;
   @Input()
