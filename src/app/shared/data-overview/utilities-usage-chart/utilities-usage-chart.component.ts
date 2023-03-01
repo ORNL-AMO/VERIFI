@@ -2,11 +2,11 @@ import { Component, ElementRef, ViewChild, Input, SimpleChanges } from '@angular
 import { PlotlyService } from 'angular-plotly.js';
 import { Subscription } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { IdbFacility, MeterSource } from 'src/app/models/idb';
-import { FacilityBarChartData } from 'src/app/models/visualization';
+import { EnergySources, IdbFacility, WaterSources } from 'src/app/models/idb';
 import * as _ from 'lodash';
 import { UtilityColors } from 'src/app/shared/utilityColors';
 import { FacilityOverviewService } from 'src/app/facility/facility-overview/facility-overview.service';
+import { AnnualSourceData } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';
 
 @Component({
   selector: 'app-utilities-usage-chart',
@@ -19,10 +19,7 @@ export class UtilitiesUsageChartComponent {
   @Input()
   facilityId: string;
   @Input()
-  monthlySourceData: Array<{
-    source: MeterSource,
-    data: Array<FacilityBarChartData>
-  }>;
+  annualSourceData: Array<AnnualSourceData>;
 
   @ViewChild('utilityBarChart', { static: false }) utilityBarChart: ElementRef;
 
@@ -58,13 +55,13 @@ export class UtilitiesUsageChartComponent {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if (!changes.dataType && !changes.monthlySourceData.isFirstChange()) {
+    if (!changes.dataType && !changes.annualSourceData.isFirstChange()) {
       this.drawChart();
     }
   }
 
   drawChart() {
-    if (this.utilityBarChart && this.monthlySourceData && this.monthlySourceData.length != 0) {
+    if (this.utilityBarChart && this.annualSourceData && this.annualSourceData.length != 0) {
       let traceData = new Array();
 
 
@@ -74,41 +71,37 @@ export class UtilitiesUsageChartComponent {
       }
       let tickprefix: string = "";
 
-      this.monthlySourceData.forEach(dataItem => {
-        let years: Array<number> = dataItem.data.map(d => { return d.fiscalYear });
-        years = _.uniq(years)
-        let yValues: Array<number> = new Array();
-        years.forEach(year => {
-          let dataValue: number = 0;
-          dataItem.data.forEach(d => {
-            if (d.fiscalYear == year) {
-              if (this.dataType == 'cost') {
-                dataValue += d.energyCost;
-              } else if (this.dataType == 'emissions') {
-                if (this.emissionsDisplay == 'market') {
-                  dataValue += d.marketEmissions;
-                } else {
-                  dataValue += d.locationEmissions;
-                }
-              } else if (this.dataType == 'energyUse') {
-                dataValue += d.energyUse;
-              } else if (this.dataType == 'water') {
-                dataValue += d.consumption;
-              }
+      this.annualSourceData.forEach(sourceData => {
+        let includeData: boolean = this.checkIncludeData(sourceData);
+        if (includeData) {
+          let years: Array<number> = sourceData.annualSourceDataItems.map(d => { return d.fiscalYear });
+          years = _.uniq(years)
+          let yValues: Array<number> = new Array();
+          if (this.dataType == 'cost') {
+            yValues = sourceData.annualSourceDataItems.map(data => { return data.totalCost });
+          } else if (this.dataType == 'emissions') {
+            if (this.emissionsDisplay == 'market') {
+              yValues = sourceData.annualSourceDataItems.map(data => { return data.totalMarketEmissions });
+            } else {
+              yValues = sourceData.annualSourceDataItems.map(data => { return data.totalLocationEmissions });
             }
-          });
-          yValues.push(dataValue);
-        });
-        let trace = {
-          x: years,
-          y: yValues,
-          name: dataItem.source,
-          type: 'bar',
-          marker: {
-            color: UtilityColors[dataItem.source].color,
+          } else if (this.dataType == 'energyUse') {
+            yValues = sourceData.annualSourceDataItems.map(data => { return data.totalEnergyUsage });
+          } else if (this.dataType == 'water') {
+            yValues = sourceData.annualSourceDataItems.map(data => { return data.totalConsumption });
           }
+
+          let trace = {
+            x: years,
+            y: yValues,
+            name: sourceData.source,
+            type: 'bar',
+            marker: {
+              color: UtilityColors[sourceData.source].color,
+            }
+          }
+          traceData.push(trace);
         }
-        traceData.push(trace);
       })
 
       let xAxisTitle: string = 'Year';
@@ -152,6 +145,16 @@ export class UtilitiesUsageChartComponent {
       return "Utility Usage (" + this.selectedFacility.volumeLiquidUnit + ")";
     } else if (this.dataType == 'cost') {
       return "Utility Costs";
+    }
+  }
+
+  checkIncludeData(sourceData: AnnualSourceData): boolean {
+    if (this.dataType == 'cost') {
+      return true;
+    } else if (this.dataType == 'energyUse' || this.dataType == 'emissions') {
+      return EnergySources.includes(sourceData.source);
+    } else if (this.dataType == 'water') {
+      return WaterSources.includes(sourceData.source);
     }
   }
 }

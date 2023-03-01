@@ -15,7 +15,7 @@ addEventListener('message', ({ data }) => {
     //     type: data.type
     // }
 
-    let facilityOverviewData: FacilityOverviewData = new FacilityOverviewData(data.calanderizedMeters, data.dateRange);
+    let facilityOverviewData: FacilityOverviewData = new FacilityOverviewData(data.calanderizedMeters, data.dateRange, data.facility);
     let utilityUseAndCost: UtilityUseAndCost = new UtilityUseAndCost(data.calanderizedMeters, data.dateRange);
     let results = {
         facilityOverviewData: facilityOverviewData,

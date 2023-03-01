@@ -1,15 +1,18 @@
 import { CalanderizedMeter, MonthlyData } from "src/app/models/calanderization";
 import { YearMonthData } from "src/app/models/dashboard";
-import { EnergySources, IdbUtilityMeter, WaterSources } from "src/app/models/idb";
-import { getYearlyUsageNumbers } from "../shared-calculations/calanderizationFunctions";
+import { AllSources, EnergySources, IdbAccount, IdbFacility, IdbUtilityMeter, MeterSource, WaterSources } from "src/app/models/idb";
+import { getFiscalYear, getYearlyUsageNumbers } from "../shared-calculations/calanderizationFunctions";
 import * as _ from 'lodash';
 
 export class FacilityOverviewData {
 
+
+    annualSourceData: Array<AnnualSourceData>;
+
     energyYearMonthData: Array<YearMonthData>;
     waterYearMonthData: Array<YearMonthData>;
     allSourcesYearMonthData: Array<YearMonthData>;
-    
+
     energyMeters: Array<FacilityOverviewMeter>;
     totalEnergyUsage: number;
     totalEnergyCost: number;
@@ -23,7 +26,7 @@ export class FacilityOverviewData {
     totalWaterConsumption: number;
     totalWaterCost: number;
     calanderizedMeters: Array<CalanderizedMeter>;
-    constructor(calanderizedMeters: Array<CalanderizedMeter>, dateRange: { startDate: Date, endDate: Date }) {
+    constructor(calanderizedMeters: Array<CalanderizedMeter>, dateRange: { startDate: Date, endDate: Date }, facility: IdbFacility) {
         this.calanderizedMeters = calanderizedMeters;
         //energy
         this.setEnergyYearMonthData(calanderizedMeters);
@@ -44,6 +47,8 @@ export class FacilityOverviewData {
             this.setTotalWaterCost();
             this.setWaterYearMonthData(calanderizedMeters);
         }
+
+        this.setAnnualSourceData(calanderizedMeters, facility);
     }
 
     setEnergyYearMonthData(calanderizedMeters: Array<CalanderizedMeter>) {
@@ -120,7 +125,7 @@ export class FacilityOverviewData {
         });
         this.waterMeters = new Array();
         sourceMeters.forEach(cMeter => {
-            let facilityOverview: FacilityOverviewMeter = new FacilityOverviewMeter(cMeter,dateRange, 'water');
+            let facilityOverview: FacilityOverviewMeter = new FacilityOverviewMeter(cMeter, dateRange, 'water');
             this.waterMeters.push(facilityOverview);
         });
     }
@@ -134,6 +139,16 @@ export class FacilityOverviewData {
         if (isNaN(this.totalWaterCost)) {
             this.totalWaterCost = 0;
         }
+    }
+
+
+    //Annual source data
+    setAnnualSourceData(calanderizedMeters: Array<CalanderizedMeter>, facility: IdbFacility) {
+        this.annualSourceData = new Array();
+        AllSources.forEach(source => {
+            let sourceData: AnnualSourceData = new AnnualSourceData(calanderizedMeters, source, facility);
+            this.annualSourceData.push(sourceData);
+        });
     }
 
 }
@@ -189,4 +204,69 @@ export class FacilityOverviewMeter {
     }
 
 
+}
+
+
+export class AnnualSourceData {
+
+    source: MeterSource;
+    annualSourceDataItems: Array<AnnualSourceDataItem>;
+    constructor(calanderizedMeters: Array<CalanderizedMeter>, source: MeterSource, facilityOrAccount: IdbFacility | IdbAccount) {
+        this.source = source;
+        let sourceMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => {
+            return cMeter.meter.source == source;
+        });
+        let monthlyData: Array<MonthlyData> = sourceMeters.flatMap(scMeter => {
+            return scMeter.monthlyData;
+        });
+        let years: Array<number> = monthlyData.flatMap(mData => {
+            return getFiscalYear(mData.date, facilityOrAccount);
+        });
+        years = _.uniq(years);
+        this.annualSourceDataItems = new Array();
+        years.forEach(year => {
+            let dataItem: AnnualSourceDataItem = new AnnualSourceDataItem(monthlyData, year, facilityOrAccount)
+            this.annualSourceDataItems.push(dataItem);
+        });
+
+    }
+}
+
+
+export class AnnualSourceDataItem {
+
+    fiscalYear: number;
+    totalEnergyUsage: number;
+    totalConsumption: number;
+    totalCost: number;
+    totalMarketEmissions: number;
+    totalLocationEmissions: number;
+
+    constructor(monthlyData: Array<MonthlyData>, fiscalYear: number, facilityOrAccount: IdbFacility | IdbAccount) {
+        this.fiscalYear = fiscalYear;
+        let fiscalYearMonthlyData: Array<MonthlyData> = monthlyData.filter(mData => {
+            return getFiscalYear(mData.date, facilityOrAccount) == fiscalYear;
+        });
+        this.setTotalEnergyUsage(fiscalYearMonthlyData);
+        this.setTotalConsumption(fiscalYearMonthlyData);
+        this.setCost(fiscalYearMonthlyData);
+        this.setTotalMarketEmissions(fiscalYearMonthlyData);
+        this.setTotalLocationEmissions(fiscalYearMonthlyData);
+    }
+
+    setTotalEnergyUsage(fiscalYearMonthlyData: Array<MonthlyData>) {
+        this.totalEnergyUsage = _.sumBy(fiscalYearMonthlyData, 'energyUse');
+    }
+    setTotalConsumption(fiscalYearMonthlyData: Array<MonthlyData>) {
+        this.totalConsumption = _.sumBy(fiscalYearMonthlyData, 'energyConsumption');
+    }
+    setCost(fiscalYearMonthlyData: Array<MonthlyData>) {
+        this.totalCost = _.sumBy(fiscalYearMonthlyData, 'energyCost');
+    }
+    setTotalMarketEmissions(fiscalYearMonthlyData: Array<MonthlyData>) {
+        this.totalMarketEmissions = _.sumBy(fiscalYearMonthlyData, 'marketEmissions');
+    }
+    setTotalLocationEmissions(fiscalYearMonthlyData: Array<MonthlyData>) {
+        this.totalLocationEmissions = _.sumBy(fiscalYearMonthlyData, 'locationEmissions');
+    }
 }

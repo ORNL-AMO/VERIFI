@@ -29,7 +29,7 @@
                         </div>
                         <div class="col-6">
                             <app-meter-usage-donut [dataType]="'cost'" [facilityId]="facilityId"
-                            [facilityOverviewMeters]="facilityOverviewData.costMeters"></app-meter-usage-donut>
+                                [facilityOverviewMeters]="facilityOverviewData.costMeters"></app-meter-usage-donut>
                         </div>
                     </div>
                 </div>
@@ -61,8 +61,8 @@
                     <h4 class="mb-0">Annual Utility Costs</h4>
                 </div>
                 <div class="card-body">
-                    <!-- <app-utilities-usage-chart [dataType]="'cost'" [facilityId]="facilityId"
-                        [monthlySourceData]="monthlySourceData"></app-utilities-usage-chart> -->
+                    <app-utilities-usage-chart [dataType]="'cost'" [facilityId]="facilityId"
+                        [annualSourceData]="facilityOverviewData.annualSourceData"></app-utilities-usage-chart>
                 </div>
             </div>
         </div>

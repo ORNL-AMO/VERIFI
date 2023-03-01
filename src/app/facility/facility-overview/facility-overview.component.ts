@@ -68,7 +68,8 @@ export class FacilityOverviewComponent implements OnInit {
       this.worker.postMessage({
         calanderizedMeters: this.facilityOverviewService.calanderizedMeters,
         type: 'overview',
-        dateRange: this.dateRange
+        dateRange: this.dateRange,
+        facility: this.facility
       });
     } else {
       // Web Workers are not supported in this environment.
