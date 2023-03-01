@@ -7,6 +7,7 @@ import { PlotlyService } from 'angular-plotly.js';
 import { FacilityOverviewService } from 'src/app/facility/facility-overview/facility-overview.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbFacility } from 'src/app/models/idb';
+import { FacilityOverviewMeter } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';
 
 @Component({
   selector: 'app-meter-usage-donut',
@@ -19,7 +20,7 @@ export class MeterUsageDonutComponent {
   @Input()
   facilityId: string;
   @Input()
-  metersSummary: FacilityMeterSummaryData;
+  facilityOverviewMeters: Array<FacilityOverviewMeter>;
 
   @ViewChild('energyUseDonut', { static: false }) energyUseDonut: ElementRef;
   selectedFacility: IdbFacility;
@@ -55,21 +56,20 @@ export class MeterUsageDonutComponent {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if (!changes.dataType && !changes.metersSummary.isFirstChange()) {
+    if (!changes.dataType && !changes.facilityOverviewMeters.isFirstChange()) {
       this.drawChart();
     }
   }
 
   drawChart() {
-    if (this.energyUseDonut && this.metersSummary) {
-
-      this.metersSummary.meterSummaries = _.orderBy(this.metersSummary.meterSummaries, (summary) => { return summary.meter.source });
+    if (this.energyUseDonut && this.facilityOverviewMeters) {
+      this.facilityOverviewMeters = _.orderBy(this.facilityOverviewMeters, (meterOverview) => { return meterOverview.meter.source });
 
       var data = [{
         values: this.getValues(),
-        labels: this.metersSummary.meterSummaries.map(summary => { return summary.meter.name }),
+        labels: this.facilityOverviewMeters.map(meterOverview => { return meterOverview.meter.name }),
         marker: {
-          colors: this.metersSummary.meterSummaries.map(summary => { return UtilityColors[summary.meter.source].color }),
+          colors: this.facilityOverviewMeters.map(meterOverview => { return UtilityColors[meterOverview.meter.source].color }),
           line: {
             color: '#fff',
             width: 5
@@ -111,18 +111,16 @@ export class MeterUsageDonutComponent {
   }
 
   getValues(): Array<number> {
-    if (this.dataType == 'energyUse') {
-      return this.metersSummary.meterSummaries.map(summary => { return summary.energyUsage });
+    if (this.dataType == 'energyUse' || this.dataType == 'water') {
+      return this.facilityOverviewMeters.map(meterOverview => { return meterOverview.totalUsage });
     } else if (this.dataType == 'cost') {
-      return this.metersSummary.meterSummaries.map(summary => { return summary.energyCost });
+      return this.facilityOverviewMeters.map(meterOverview => { return meterOverview.totalCost });
     } else if (this.dataType == 'emissions') {
       if (this.emissionsDisplay == 'location') {
-        return this.metersSummary.meterSummaries.map(summary => { return summary.locationEmissions });
+        return this.facilityOverviewMeters.map(meterOverview => { return meterOverview.totalLocationEmissions });
       } else {
-        return this.metersSummary.meterSummaries.map(summary => { return summary.marketEmissions });
+        return this.facilityOverviewMeters.map(meterOverview => { return meterOverview.totalMarketEmissions });
       }
-    } else if (this.dataType == 'water') {
-      return this.metersSummary.meterSummaries.map(summary => { return summary.consumption });
     }
   }
 }

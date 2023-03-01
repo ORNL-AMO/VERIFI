@@ -13,8 +13,6 @@ export class MeterUsageTableComponent {
   @Input()
   dataType: 'energyUse' | 'emissions' | 'cost' | 'water';
   @Input()
-  metersSummary: FacilityMeterSummaryData;
-  @Input()
   waterUnit: string;
   @Input()
   energyUnit: string;
