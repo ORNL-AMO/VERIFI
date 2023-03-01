@@ -12,6 +12,7 @@ import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
+import { FacilityOverviewService } from 'src/app/facility/facility-overview/facility-overview.service';
 
 @Component({
   selector: 'app-create-report-modal',
@@ -34,7 +35,8 @@ export class CreateReportModalComponent {
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private accountAnalysisDbService: AccountAnalysisDbService,
     private facilityDbService: FacilitydbService,
-    private utilityMeterDbService: UtilityMeterdbService) {
+    private utilityMeterDbService: UtilityMeterdbService,
+    private facilityOverviewService: FacilityOverviewService) {
 
   }
 
@@ -82,27 +84,29 @@ export class CreateReportModalComponent {
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     if (this.router.url.includes('account/overview')) {
       newReport.reportType = 'dataOverview';
-      let yearOptions: Array<number> = this.utilityMeterDataDbService.getYearOptions(true);
-      newReport.baselineYear = yearOptions[0];
-      newReport.reportYear = yearOptions[yearOptions.length - 1];
+      let dateRange: { startDate: Date, endDate: Date } = this.accountOverviewService.dateRange.getValue();
+      newReport.startMonth = dateRange.startDate.getMonth();
+      newReport.startYear = dateRange.startDate.getFullYear();
+      newReport.endMonth = dateRange.endDate.getMonth();
+      newReport.endYear = dateRange.endDate.getFullYear();
       if (this.router.url.includes('energy')) {
-        newReport.name = 'Energy Report';
+        newReport.name = account.name + ' Energy Report';
         newReport.dataOverviewReportSetup.includeCostsSection = false;
         newReport.dataOverviewReportSetup.includeEmissionsSection = false;
         newReport.dataOverviewReportSetup.includeWaterSection = false;
       } else if (this.router.url.includes('costs')) {
-        newReport.name = 'Costs Report';
+        newReport.name = account.name + ' Costs Report';
         newReport.dataOverviewReportSetup.includeEnergySection = false;
         newReport.dataOverviewReportSetup.includeEmissionsSection = false;
         newReport.dataOverviewReportSetup.includeWaterSection = false;
       } else if (this.router.url.includes('emissions')) {
-        newReport.name = 'Emissions Report';
+        newReport.name = account.name + ' Emissions Report';
         newReport.dataOverviewReportSetup.includeEnergySection = false;
         newReport.dataOverviewReportSetup.includeCostsSection = false;
         newReport.dataOverviewReportSetup.includeWaterSection = false;
         newReport.dataOverviewReportSetup.emissionsDisplay = this.accountOverviewService.emissionsDisplay.getValue();
       } else if (this.router.url.includes('water')) {
-        newReport.name = 'Water Report';
+        newReport.name = account.name + ' Water Report';
         newReport.dataOverviewReportSetup.includeEnergySection = false;
         newReport.dataOverviewReportSetup.includeCostsSection = false;
         newReport.dataOverviewReportSetup.includeEmissionsSection = false;
@@ -110,9 +114,12 @@ export class CreateReportModalComponent {
     } else if (this.router.url.includes('facility') && this.router.url.includes('/overview')) {
       let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
       newReport.reportType = 'dataOverview';
-      let yearOptions: Array<number> = this.utilityMeterDataDbService.getYearOptions(false);
-      newReport.baselineYear = yearOptions[0];
-      newReport.reportYear = yearOptions[yearOptions.length - 1];
+      let dateRange: { startDate: Date, endDate: Date } = this.facilityOverviewService.dateRange.getValue();
+      newReport.startMonth = dateRange.startDate.getMonth();
+      newReport.startYear = dateRange.startDate.getFullYear();
+      newReport.endMonth = dateRange.endDate.getMonth();
+      newReport.endYear = dateRange.endDate.getFullYear();
+
       newReport.dataOverviewReportSetup.includeAccountReport = false;
       newReport.dataOverviewReportSetup.includedFacilities.forEach(facility => {
         if (facility.facilityId == selectedFacility.guid) {
@@ -122,23 +129,23 @@ export class CreateReportModalComponent {
         }
       });
       if (this.router.url.includes('energy')) {
-        newReport.name = 'Energy Report';
+        newReport.name = selectedFacility.name + ' Energy Report';
         newReport.dataOverviewReportSetup.includeCostsSection = false;
         newReport.dataOverviewReportSetup.includeEmissionsSection = false;
         newReport.dataOverviewReportSetup.includeWaterSection = false;
       } else if (this.router.url.includes('costs')) {
-        newReport.name = 'Costs Report';
+        newReport.name = selectedFacility.name + ' Costs Report';
         newReport.dataOverviewReportSetup.includeEnergySection = false;
         newReport.dataOverviewReportSetup.includeEmissionsSection = false;
         newReport.dataOverviewReportSetup.includeWaterSection = false;
       } else if (this.router.url.includes('emissions')) {
-        newReport.name = 'Emissions Report';
+        newReport.name = selectedFacility.name + ' Emissions Report';
         newReport.dataOverviewReportSetup.includeEnergySection = false;
         newReport.dataOverviewReportSetup.includeCostsSection = false;
         newReport.dataOverviewReportSetup.includeWaterSection = false;
-        newReport.dataOverviewReportSetup.emissionsDisplay = this.accountOverviewService.emissionsDisplay.getValue();
+        newReport.dataOverviewReportSetup.emissionsDisplay = this.facilityOverviewService.emissionsDisplay.getValue();
       } else if (this.router.url.includes('water')) {
-        newReport.name = 'Water Report';
+        newReport.name = selectedFacility.name + ' Water Report';
         newReport.dataOverviewReportSetup.includeEnergySection = false;
         newReport.dataOverviewReportSetup.includeCostsSection = false;
         newReport.dataOverviewReportSetup.includeEmissionsSection = false;
