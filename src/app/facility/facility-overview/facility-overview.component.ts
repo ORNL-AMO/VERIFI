@@ -52,6 +52,9 @@ export class FacilityOverviewComponent implements OnInit {
     if (this.worker) {
       this.worker.terminate();
     }
+    this.facilityOverviewService.facilityOverviewData.next(undefined);
+    this.facilityOverviewService.utilityUseAndCost.next(undefined);
+    this.facilityOverviewService.dateRange.next(undefined);
   }
 
   calculateFacilitiesSummary() {

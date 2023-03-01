@@ -51,6 +51,9 @@ export class AccountOverviewComponent implements OnInit {
     if (this.worker) {
       this.worker.terminate();
     }
+    this.accountOverviewService.accountOverviewData.next(undefined);
+    this.accountOverviewService.dateRange.next(undefined);
+    this.accountOverviewService.utilityUseAndCost.next(undefined);
   }
 
   calculateFacilitiesSummary() {
