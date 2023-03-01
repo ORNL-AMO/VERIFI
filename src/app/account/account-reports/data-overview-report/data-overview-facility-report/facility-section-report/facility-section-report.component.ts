@@ -1,4 +1,6 @@
 import { Component, Input } from '@angular/core';
+import { AnnualSourceData, FacilityOverviewData, FacilityOverviewMeter } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';
+import { IUseAndCost, UseAndCost, UtilityUseAndCost } from 'src/app/calculations/dashboard-calculations/useAndCostClass';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
@@ -20,16 +22,25 @@ export class FacilitySectionReportComponent {
   @Input()
   calanderizedMeters: Array<CalanderizedMeter>;
   @Input()
-  metersSummary: FacilityMeterSummaryData;
-  @Input()
-  monthlySourceData: Array<{
-    source: MeterSource,
-    data: Array<FacilityBarChartData>
-  }>;
-  @Input()
-  utilityUsageSummaryData: UtilityUsageSummaryData;
-  @Input()
   yearMonthData: Array<YearMonthData>;
+  @Input()
+  annualSourceData: Array<AnnualSourceData>;
+  @Input()
+  facilityOverviewMeters: Array<FacilityOverviewMeter>;
+  @Input()
+  facilityOverviewData: FacilityOverviewData;
+  @Input()
+  sourcesUseAndCost: Array<UseAndCost>;
+  @Input()
+  useAndCostTotal: {
+      end: IUseAndCost;
+      average: IUseAndCost;
+      previousYear: IUseAndCost;
+  };
+  @Input()
+  dateRange: {startDate: Date, endDate: Date};
+  @Input()
+  previousYear: Date;
 
   sectionOptions: DataOverviewReportSetup;
   waterUnit: string;

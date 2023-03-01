@@ -1,15 +1,15 @@
-<!-- <div class="row">
+<div class="row">
     <div class="col-12" *ngIf="sectionOptions.includeMeterUsageStackedLineChart">
         <app-meters-overview-stacked-line-chart [dataType]="dataType" [facilityId]="facility.guid"
-            [calanderizedMeters]="calanderizedMeters"></app-meters-overview-stacked-line-chart>
+            [calanderizedMeters]="calanderizedMeters" [dateRange]="dateRange"></app-meters-overview-stacked-line-chart>
     </div>
     <div class="col-6" *ngIf="sectionOptions.includeMeterUsageTable">
-        <app-meter-usage-table [dataType]="dataType" [metersSummary]="metersSummary"
-            [waterUnit]="waterUnit" [energyUnit]="energyUnit"></app-meter-usage-table>
+        <app-meter-usage-table [dataType]="dataType" [facilityOverviewData]="facilityOverviewData"
+            [facilityOverviewMeters]="facilityOverviewMeters"></app-meter-usage-table>
     </div>
     <div class="col-6" *ngIf="sectionOptions.includeMeterUsageTable">
         <app-meter-usage-donut [dataType]="dataType" [facilityId]="facility.guid"
-            [metersSummary]="metersSummary"></app-meter-usage-donut>
+            [facilityOverviewMeters]="facilityOverviewMeters"></app-meter-usage-donut>
     </div>
 </div>
 <div class="row">
@@ -19,19 +19,20 @@
 </div>
 <div class="row" *ngIf="sectionOptions.includeUtilityTableForFacility">
     <div class="col-12">
-        <app-utility-consumption-table [dataType]="dataType" [utilityUsageSummaryData]="utilityUsageSummaryData"
+        <app-utility-consumption-table [dataType]="dataType" [sourcesUseAndCost]="sourcesUseAndCost"
+            [useAndCostTotal]="useAndCostTotal" [previousYear]="previousYear" [dateRange]="dateRange"
             [waterUnit]="waterUnit" [energyUnit]="energyUnit"></app-utility-consumption-table>
     </div>
 </div>
 <div class="row" *ngIf="sectionOptions.includeAnnualBarChart">
     <div class="col-12">
         <app-utilities-usage-chart [dataType]="dataType" [facilityId]="facility.guid"
-            [monthlySourceData]="monthlySourceData"></app-utilities-usage-chart>
+        [annualSourceData]="annualSourceData"></app-utilities-usage-chart>
     </div>
 </div>
 <div class="row" *ngIf="sectionOptions.includeMonthlyLineChartForFacility">
     <div class="col-12">
-        <app-monthly-utility-usage-line-chart [dataType]="dataType"
-            [yearMonthData]="yearMonthData"></app-monthly-utility-usage-line-chart>
+        <app-monthly-utility-usage-line-chart [dataType]="dataType"[facilityId]="facility.guid"
+        [yearMonthData]="yearMonthData"></app-monthly-utility-usage-line-chart>
     </div>
-</div> -->
+</div>

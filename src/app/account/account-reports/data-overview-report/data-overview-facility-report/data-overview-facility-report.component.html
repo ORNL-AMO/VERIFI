@@ -12,11 +12,15 @@
         <div class="col-11 report-page">
             <h4>{{dataOverviewFacility.facility.guid | facilityName}} Energy Consumption</h4>
             <app-facility-section-report [dataType]="'energyUse'" [facility]="dataOverviewFacility.facility"
-                [monthlySourceData]="dataOverviewFacility.energyMonthlySourceData"
                 [calanderizedMeters]="dataOverviewFacility.calanderizedMeters"
-                [metersSummary]="dataOverviewFacility.energyMeterSummaryData"
-                [utilityUsageSummaryData]="dataOverviewFacility.energyUtilityUsageSummaryData"
-                [yearMonthData]="dataOverviewFacility.energyYearMonthData"></app-facility-section-report>
+                [yearMonthData]="dataOverviewFacility.facilityOverviewData.energyYearMonthData"
+                [annualSourceData]="dataOverviewFacility.facilityOverviewData.annualSourceData"
+                [facilityOverviewMeters]="dataOverviewFacility.facilityOverviewData.energyMeters"
+                [facilityOverviewData]="dataOverviewFacility.facilityOverviewData"
+                [sourcesUseAndCost]="dataOverviewFacility.utilityUseAndCost.energyUseAndCost"
+                [useAndCostTotal]="dataOverviewFacility.utilityUseAndCost.energyTotal"
+                [dateRange]="dataOverviewFacility.dateRange"
+                [previousYear]="dataOverviewFacility.utilityUseAndCost.previousYear"></app-facility-section-report>
         </div>
     </div>
 </ng-container>
@@ -27,11 +31,15 @@
         <div class="col-11 report-page">
             <h4>{{dataOverviewFacility.facility.guid | facilityName}} Water</h4>
             <app-facility-section-report [dataType]="'water'" [facility]="dataOverviewFacility.facility"
-                [monthlySourceData]="dataOverviewFacility.waterMonthlySourceData"
                 [calanderizedMeters]="dataOverviewFacility.calanderizedMeters"
-                [metersSummary]="dataOverviewFacility.waterMeterSummaryData"
-                [utilityUsageSummaryData]="dataOverviewFacility.waterUtilityUsageSummaryData"
-                [yearMonthData]="dataOverviewFacility.waterYearMonthData"></app-facility-section-report>
+                [yearMonthData]="dataOverviewFacility.facilityOverviewData.waterYearMonthData"
+                [annualSourceData]="dataOverviewFacility.facilityOverviewData.annualSourceData"
+                [facilityOverviewMeters]="dataOverviewFacility.facilityOverviewData.waterMeters"
+                [facilityOverviewData]="dataOverviewFacility.facilityOverviewData"
+                [sourcesUseAndCost]="dataOverviewFacility.utilityUseAndCost.waterUseAndCost"
+                [useAndCostTotal]="dataOverviewFacility.utilityUseAndCost.waterTotal"
+                [dateRange]="dataOverviewFacility.dateRange"
+                [previousYear]="dataOverviewFacility.utilityUseAndCost.previousYear"></app-facility-section-report>
         </div>
     </div>
 </ng-container>
@@ -42,11 +50,15 @@
         <div class="col-11 report-page">
             <h4>{{dataOverviewFacility.facility.guid | facilityName}} Costs</h4>
             <app-facility-section-report [dataType]="'cost'" [facility]="dataOverviewFacility.facility"
-                [monthlySourceData]="dataOverviewFacility.costsMonthlySourceData"
                 [calanderizedMeters]="dataOverviewFacility.calanderizedMeters"
-                [metersSummary]="dataOverviewFacility.costsMeterSummaryData"
-                [utilityUsageSummaryData]="dataOverviewFacility.costsUtilityUsageSummaryData"
-                [yearMonthData]="dataOverviewFacility.costsYearMonthData"></app-facility-section-report>
+                [yearMonthData]="dataOverviewFacility.facilityOverviewData.allSourcesYearMonthData"
+                [annualSourceData]="dataOverviewFacility.facilityOverviewData.annualSourceData"
+                [facilityOverviewMeters]="dataOverviewFacility.facilityOverviewData.costMeters"
+                [facilityOverviewData]="dataOverviewFacility.facilityOverviewData"
+                [sourcesUseAndCost]="dataOverviewFacility.utilityUseAndCost.allSourcesUseAndCost"
+                [useAndCostTotal]="dataOverviewFacility.utilityUseAndCost.allSourcesTotal"
+                [dateRange]="dataOverviewFacility.dateRange"
+                [previousYear]="dataOverviewFacility.utilityUseAndCost.previousYear"></app-facility-section-report>
         </div>
     </div>
 </ng-container>
@@ -57,11 +69,15 @@
         <div class="col-11 report-page">
             <h4>{{dataOverviewFacility.facility.guid | facilityName}} Emissions</h4>
             <app-facility-section-report [dataType]="'emissions'" [facility]="dataOverviewFacility.facility"
-                [monthlySourceData]="dataOverviewFacility.energyMonthlySourceData"
                 [calanderizedMeters]="dataOverviewFacility.calanderizedMeters"
-                [metersSummary]="dataOverviewFacility.energyMeterSummaryData"
-                [utilityUsageSummaryData]="dataOverviewFacility.energyUtilityUsageSummaryData"
-                [yearMonthData]="dataOverviewFacility.energyYearMonthData"></app-facility-section-report>
+                [yearMonthData]="dataOverviewFacility.facilityOverviewData.energyYearMonthData"
+                [annualSourceData]="dataOverviewFacility.facilityOverviewData.annualSourceData"
+                [facilityOverviewMeters]="dataOverviewFacility.facilityOverviewData.energyMeters"
+                [facilityOverviewData]="dataOverviewFacility.facilityOverviewData"
+                [sourcesUseAndCost]="dataOverviewFacility.utilityUseAndCost.energyUseAndCost"
+                [useAndCostTotal]="dataOverviewFacility.utilityUseAndCost.energyTotal"
+                [dateRange]="dataOverviewFacility.dateRange"
+                [previousYear]="dataOverviewFacility.utilityUseAndCost.previousYear"></app-facility-section-report>
         </div>
     </div>
 </ng-container>
