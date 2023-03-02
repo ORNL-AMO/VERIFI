@@ -14,3 +14,18 @@ thead th{
 .text-right{
     text-align: right;
 }
+
+@media print{
+    .print-full{
+        width: 100% !important;
+        text-align: center !important;
+    }
+
+    td, th{
+        width: fit-content;
+    }
+
+    table.table{
+        width: 740px !important;
+    }
+}

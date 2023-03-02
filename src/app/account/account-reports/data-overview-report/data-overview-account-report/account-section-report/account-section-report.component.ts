@@ -1,4 +1,5 @@
 import { Component, Input } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { AccountOverviewData, AccountOverviewFacility } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
 import { IUseAndCost, UseAndCost } from 'src/app/calculations/dashboard-calculations/useAndCostClass';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
@@ -7,6 +8,7 @@ import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { YearMonthData } from 'src/app/models/dashboard';
 import { IdbAccount, IdbAccountReport } from 'src/app/models/idb';
 import { DataOverviewReportSetup } from 'src/app/models/overview-report';
+import { AccountReportsService } from '../../../account-reports.service';
 
 @Component({
   selector: 'app-account-section-report',
@@ -43,8 +45,11 @@ export class AccountSectionReportComponent {
   sectionOptions: DataOverviewReportSetup;
   waterUnit: string;
   energyUnit: string;
+  printSub: Subscription;
+  print: boolean;
   constructor(private accountReportDbService: AccountReportDbService,
-    private accountDbService: AccountdbService) {
+    private accountDbService: AccountdbService,
+    private accountReportsService: AccountReportsService) {
   }
 
   ngOnInit() {
@@ -53,6 +58,14 @@ export class AccountSectionReportComponent {
     this.energyUnit = account.energyUnit;
     let selectedReport: IdbAccountReport = this.accountReportDbService.selectedReport.getValue();
     this.sectionOptions = selectedReport.dataOverviewReportSetup;
+
+    this.printSub = this.accountReportsService.print.subscribe(print => {
+      this.print = print;
+    });
+  }
+
+  ngOnDestroy(){
+    this.printSub.unsubscribe();
   }
 
 }

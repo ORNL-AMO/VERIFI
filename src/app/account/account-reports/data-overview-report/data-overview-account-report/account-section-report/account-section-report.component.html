@@ -1,38 +1,38 @@
-<div class="row">
+<div class="row justify-content-center">
     <div class="col-12" *ngIf="sectionOptions.includeMap">
         <app-data-overview-map [dataType]="dataType"
             [accountOverviewFacilities]="accountOverviewFacilities"></app-data-overview-map>
     </div>
-    <div class="col-6" *ngIf="sectionOptions.includeFacilityTable">
+    <div class="print-break-before" *ngIf="sectionOptions.includeFacilityTable" [ngClass]="{'col-10': print, 'col-6': !print}">
         <app-facilities-usage-table [dataType]="dataType" [accountOverviewFacilities]="accountOverviewFacilities"
             [accountOverviewData]="accountOverviewData" [waterUnit]="waterUnit"
             [energyUnit]="energyUnit"></app-facilities-usage-table>
     </div>
-    <div class="col-6" *ngIf="sectionOptions.includeFacilityDonut">
+    <div *ngIf="sectionOptions.includeFacilityDonut" [ngClass]="{'col-10': print, 'col-6': !print}">
         <app-facility-usage-donut [dataType]="dataType " [accountOverviewFacilities]="accountOverviewFacilities"
             [waterUnit]="waterUnit" [energyUnit]="energyUnit"></app-facility-usage-donut>
     </div>
 </div>
-<div class="row">
+<div class="row hide-print">
     <div class="col-12">
         <hr>
     </div>
 </div>
-<div class="row" *ngIf="sectionOptions.includeUtilityTable">
+<div class="row print-break-avoid" *ngIf="sectionOptions.includeUtilityTable">
     <div class="col-12">
         <app-utility-consumption-table [dataType]="dataType" [sourcesUseAndCost]="sourcesUseAndCost"
             [useAndCostTotal]="useAndCostTotal" [previousYear]="previousYear" [waterUnit]="waterUnit"
             [energyUnit]="energyUnit" [dateRange]="dateRange"></app-utility-consumption-table>
     </div>
 </div>
-<div class="row" *ngIf="sectionOptions.includeStackedBarChart">
+<div class="row print-break-avoid" *ngIf="sectionOptions.includeStackedBarChart">
     <div class="col-12">
         <app-facilities-usage-stacked-bar-chart [dataType]="dataType" [calanderizedMeters]="calanderizedMeters"
             [waterUnit]="waterUnit" [energyUnit]="energyUnit" [reportOptions]="sectionOptions"
             [dateRange]="dateRange"></app-facilities-usage-stacked-bar-chart>
     </div>
 </div>
-<div class="row" *ngIf="sectionOptions.includeMonthlyLineChart">
+<div class="row print-break-avoid" *ngIf="sectionOptions.includeMonthlyLineChart">
     <div class="col-12">
         <app-monthly-utility-usage-line-chart [dataType]="dataType"
             [yearMonthData]="yearMonthData"></app-monthly-utility-usage-line-chart>

@@ -27,6 +27,10 @@ hr.page-spacer{
         padding: 0px;
     }
 
+    .report-container{
+        margin-bottom: 0px;
+    }
+
     .report-item{
         margin-top: 40px;
     }

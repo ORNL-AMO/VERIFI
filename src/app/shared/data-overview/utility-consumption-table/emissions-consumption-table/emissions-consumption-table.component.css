@@ -1,17 +1,32 @@
-
-thead th{
+thead th {
     text-align: center;
 }
 
-.badge .fa{
+.badge .fa {
     color: white;
     font-size: smaller;
 }
 
-.badge{
+.badge {
     font-weight: normal;
 }
 
-.text-right{
+.text-right {
     text-align: right;
+}
+
+
+@media print{
+    .print-full{
+        width: 100% !important;
+        text-align: center !important;
+    }
+
+    td, th{
+        width: fit-content;
+    }
+
+    table.table{
+        width: 740px !important;
+    }
 }

@@ -3,3 +3,13 @@
     background-color: white;
     border: solid 1px lightgray;
 }
+
+@media print {
+    .report-page{
+        border: none;
+    }
+
+    hr{
+        display: none;
+    }
+}

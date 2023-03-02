@@ -3,15 +3,18 @@
         <tr class="table-mh">
             <th class="w-25"></th>
             <th class="w-25">
-                Latest Month <span class="small" *ngIf="dateRange.endDate">
+                Latest Month 
+                <br><span class="small" *ngIf="dateRange.endDate">
                     ({{dateRange.endDate | date: 'MMM, y'}})</span>
             </th>
             <th class="w-25">
                 Previous Year
+                <br>
                 <span class="small" *ngIf="previousYear">({{previousYear | date: 'MMM, y'}})</span>
             </th>
             <th class="w-25">
                 Monthly Average
+                <br>
                 <span class="small" *ngIf="dateRange.startDate">
                     ({{dateRange.startDate | date: 'MMM, y'}} -
                     {{dateRange.endDate | date: 'MMM, y'}})</span>
@@ -55,7 +58,7 @@
             <!--Year prior-->
             <td *ngIf="emissionsDisplay == 'market'">
                 <div class="d-flex w-100">
-                    <div class="w-50 text-right pe-1">
+                    <div class="w-50 text-right pe-1 print-full">
                         <span *ngIf="useAndCost.previousYear.marketEmissions">
                             {{useAndCost.previousYear.marketEmissions | customNumber}}
                         </span>
@@ -63,7 +66,7 @@
                             &mdash;
                         </span>
                     </div>
-                    <div class="w-50 ps-1">
+                    <div class="w-50 ps-1 hide-print">
                         <span *ngIf="useAndCost.previousYear.marketEmissionsChange" class="small ps-2 badge"
                             [ngClass]="{'bg-danger': useAndCost.previousYear.marketEmissionsChange < 0, 'bg-success': useAndCost.previousYear.marketEmissionsChange > 0}">
                             <span class="fa fa-chevron-down"
@@ -77,7 +80,7 @@
             </td>
             <td *ngIf="emissionsDisplay == 'location'">
                 <div class="d-flex w-100">
-                    <div class="w-50 text-right pe-1">
+                    <div class="w-50 text-right pe-1 print-full">
                         <span *ngIf="useAndCost.previousYear.locationEmissions">
                             {{useAndCost.previousYear.locationEmissions | customNumber}}
                         </span>
@@ -85,7 +88,7 @@
                             &mdash;
                         </span>
                     </div>
-                    <div class="w-50 ps-1">
+                    <div class="w-50 ps-1 hide-print">
                         <span *ngIf="useAndCost.previousYear.locationEmissionsChange" class="small ps-2 badge"
                             [ngClass]="{'bg-danger': useAndCost.previousYear.locationEmissionsChange < 0, 'bg-success': useAndCost.previousYear.locationEmissionsChange > 0}">
                             <span class="fa fa-chevron-down"
@@ -101,7 +104,7 @@
             <!--Average-->
             <td *ngIf="emissionsDisplay == 'market'">
                 <div class="d-flex w-100">
-                    <div class="w-50 text-right pe-1">
+                    <div class="w-50 text-right pe-1 print-full">
                         <span *ngIf="useAndCost.average.marketEmissions">
                             {{useAndCost.average.marketEmissions | customNumber}}
                         </span>
@@ -109,7 +112,7 @@
                             &mdash;
                         </span>
                     </div>
-                    <div class="w-50 ps-1">
+                    <div class="w-50 ps-1 hide-print">
                         <span *ngIf="useAndCost.average.marketEmissionsChange" class="small ps-2 badge"
                             [ngClass]="{'bg-danger': useAndCost.average.marketEmissionsChange < 0, 'bg-success': useAndCost.average.marketEmissionsChange > 0}">
                             <span class="fa fa-chevron-down"
@@ -122,7 +125,7 @@
             </td>
             <td *ngIf="emissionsDisplay == 'location'">
                 <div class="d-flex w-100">
-                    <div class="w-50 text-right pe-1">
+                    <div class="w-50 text-right pe-1 print-full">
                         <span *ngIf="useAndCost.average.locationEmissions">
                             {{useAndCost.average.locationEmissions | customNumber}}
                         </span>
@@ -130,7 +133,7 @@
                             &mdash;
                         </span>
                     </div>
-                    <div class="w-50 ps-1">
+                    <div class="w-50 ps-1 hide-print">
                         <span *ngIf="useAndCost.average.locationEmissionsChange" class="small ps-2 badge"
                             [ngClass]="{'bg-danger': useAndCost.average.locationEmissionsChange < 0, 'bg-success': useAndCost.average.locationEmissionsChange > 0}">
                             <span class="fa fa-chevron-down"
@@ -171,7 +174,7 @@
             <!--year prior-->
             <th *ngIf="emissionsDisplay == 'market'">
                 <div class="d-flex w-100">
-                    <div class="w-50 text-right pe-1">
+                    <div class="w-50 text-right pe-1 print-full">
                         <span *ngIf="useAndCostTotal.previousYear.marketEmissions">
                             {{useAndCostTotal.previousYear.marketEmissions | customNumber}}
                         </span>
@@ -179,7 +182,7 @@
                             &mdash;
                         </span>
                     </div>
-                    <div class="w-50 ps-1">
+                    <div class="w-50 ps-1 hide-print">
                         <span *ngIf="useAndCostTotal.previousYear.marketEmissionsChange" class="small ps-2 badge"
                             [ngClass]="{'bg-danger': useAndCostTotal.previousYear.marketEmissionsChange < 0, 'bg-success': useAndCostTotal.previousYear.marketEmissionsChange > 0}">
                             <span class="fa fa-chevron-down"
@@ -193,7 +196,7 @@
             </th>
             <th *ngIf="emissionsDisplay == 'location'">
                 <div class="d-flex w-100">
-                    <div class="w-50 text-right pe-1">
+                    <div class="w-50 text-right pe-1 print-full">
                         <span *ngIf="useAndCostTotal.previousYear.locationEmissions">
                             {{useAndCostTotal.previousYear.locationEmissions | customNumber}}
                         </span>
@@ -201,7 +204,7 @@
                             &mdash;
                         </span>
                     </div>
-                    <div class="w-50 ps-1">
+                    <div class="w-50 ps-1 hide-print">
                         <span *ngIf="useAndCostTotal.previousYear.locationEmissionsChange" class="small ps-2 badge"
                             [ngClass]="{'bg-danger': useAndCostTotal.previousYear.locationEmissionsChange < 0, 'bg-success': useAndCostTotal.previousYear.locationEmissionsChange > 0}">
                             <span class="fa fa-chevron-down"
@@ -217,7 +220,7 @@
             <!--average-->
             <th *ngIf="emissionsDisplay == 'market'">
                 <div class="d-flex w-100">
-                    <div class="w-50 text-right pe-1">
+                    <div class="w-50 text-right pe-1 print-full">
                         <span *ngIf="useAndCostTotal.average.marketEmissions">
                             {{useAndCostTotal.average.marketEmissions | customNumber}}
                         </span>
@@ -225,7 +228,7 @@
                             &mdash;
                         </span>
                     </div>
-                    <div class="w-50 ps-1">
+                    <div class="w-50 ps-1 hide-print">
                         <span *ngIf="useAndCostTotal.average.marketEmissionsChange" class="small ps-2 badge"
                             [ngClass]="{'bg-danger': useAndCostTotal.average.marketEmissionsChange < 0, 'bg-success': useAndCostTotal.average.marketEmissionsChange > 0}">
                             <span class="fa fa-chevron-down"
@@ -239,7 +242,7 @@
             </th>
             <th *ngIf="emissionsDisplay == 'location'">
                 <div class="d-flex w-100">
-                    <div class="w-50 text-right pe-1">
+                    <div class="w-50 text-right pe-1 print-full">
                         <span *ngIf="useAndCostTotal.average.locationEmissions">
                             {{useAndCostTotal.average.locationEmissions | customNumber}}
                         </span>
@@ -247,7 +250,7 @@
                             &mdash;
                         </span>
                     </div>
-                    <div class="w-50 ps-1">
+                    <div class="w-50 ps-1 hide-print">
                         <span *ngIf="useAndCostTotal.average.locationEmissionsChange" class="small ps-2 badge"
                             [ngClass]="{'bg-danger': useAndCostTotal.average.locationEmissionsChange < 0, 'bg-success': useAndCostTotal.average.locationEmissionsChange > 0}">
                             <span class="fa fa-chevron-down"

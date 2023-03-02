@@ -1,37 +1,37 @@
-<div class="row">
+<div class="row justify-content-center">
     <div class="col-12" *ngIf="sectionOptions.includeMeterUsageStackedLineChart">
         <app-meters-overview-stacked-line-chart [dataType]="dataType" [facilityId]="facility.guid"
             [calanderizedMeters]="calanderizedMeters" [dateRange]="dateRange"></app-meters-overview-stacked-line-chart>
     </div>
-    <div class="col-6" *ngIf="sectionOptions.includeMeterUsageTable">
+    <div class="print-break-before" *ngIf="sectionOptions.includeMeterUsageTable" [ngClass]="{'col-10': print, 'col-6': !print}">
         <app-meter-usage-table [dataType]="dataType" [facilityOverviewData]="facilityOverviewData"
             [facilityOverviewMeters]="facilityOverviewMeters" [waterUnit]="waterUnit"
             [energyUnit]="energyUnit"></app-meter-usage-table>
     </div>
-    <div class="col-6" *ngIf="sectionOptions.includeMeterUsageTable">
+    <div *ngIf="sectionOptions.includeMeterUsageTable" [ngClass]="{'col-10': print, 'col-6': !print}">
         <app-meter-usage-donut [dataType]="dataType" [facilityId]="facility.guid"
             [facilityOverviewMeters]="facilityOverviewMeters"></app-meter-usage-donut>
     </div>
 </div>
-<div class="row">
+<div class="row hide-print">
     <div class="col-12">
         <hr>
     </div>
 </div>
-<div class="row" *ngIf="sectionOptions.includeUtilityTableForFacility">
+<div class="row print-break-avoid" *ngIf="sectionOptions.includeUtilityTableForFacility">
     <div class="col-12">
         <app-utility-consumption-table [dataType]="dataType" [sourcesUseAndCost]="sourcesUseAndCost"
             [useAndCostTotal]="useAndCostTotal" [previousYear]="previousYear" [dateRange]="dateRange"
             [waterUnit]="waterUnit" [energyUnit]="energyUnit"></app-utility-consumption-table>
     </div>
 </div>
-<div class="row" *ngIf="sectionOptions.includeAnnualBarChart">
+<div class="row print-break-avoid" *ngIf="sectionOptions.includeAnnualBarChart">
     <div class="col-12">
         <app-utilities-usage-chart [dataType]="dataType" [facilityId]="facility.guid"
             [annualSourceData]="annualSourceData"></app-utilities-usage-chart>
     </div>
 </div>
-<div class="row" *ngIf="sectionOptions.includeMonthlyLineChartForFacility">
+<div class="row print-break-avoid" *ngIf="sectionOptions.includeMonthlyLineChartForFacility">
     <div class="col-12">
         <app-monthly-utility-usage-line-chart [dataType]="dataType" [facilityId]="facility.guid"
             [yearMonthData]="yearMonthData"></app-monthly-utility-usage-line-chart>

@@ -1,5 +1,6 @@
 import { Component, Input } from '@angular/core';
-import { IdbFacility } from 'src/app/models/idb';
+import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
+import { IdbAccountReport, IdbFacility } from 'src/app/models/idb';
 import { getNAICS } from 'src/app/shared/form-data/naics-data';
 
 @Component({
@@ -12,12 +13,19 @@ export class FacilityTitlePageComponent {
   facility: IdbFacility;
 
   naics: string;
-  constructor() {
+  dateRange: {startDate: Date, endDate: Date};
+  currentDate: Date = new Date();
+  constructor(private accountReportDbService: AccountReportDbService) {
 
   }
 
   ngOnInit() {
-    this.naics = getNAICS(this.facility);
+    this.naics = getNAICS(this.facility);   
+     let report: IdbAccountReport = this.accountReportDbService.selectedReport.getValue();
+    this.dateRange = {
+      startDate: new Date(report.startYear, report.startMonth, 1),
+      endDate: new Date(report.endYear, report.endMonth, 1)
+    };
   }
 
 }
