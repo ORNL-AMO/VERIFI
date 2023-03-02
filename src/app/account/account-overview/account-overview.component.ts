@@ -52,7 +52,6 @@ export class AccountOverviewComponent implements OnInit {
       this.worker.terminate();
     }
     this.accountOverviewService.accountOverviewData.next(undefined);
-    this.accountOverviewService.dateRange.next(undefined);
     this.accountOverviewService.utilityUseAndCost.next(undefined);
   }
 

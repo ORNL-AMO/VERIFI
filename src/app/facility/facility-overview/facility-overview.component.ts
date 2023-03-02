@@ -54,10 +54,10 @@ export class FacilityOverviewComponent implements OnInit {
     }
     this.facilityOverviewService.facilityOverviewData.next(undefined);
     this.facilityOverviewService.utilityUseAndCost.next(undefined);
-    this.facilityOverviewService.dateRange.next(undefined);
   }
 
   calculateFacilitiesSummary() {
+    console.log('calc');
     if (typeof Worker !== 'undefined') {
       this.worker = new Worker(new URL('src/app/web-workers/facility-overview.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {

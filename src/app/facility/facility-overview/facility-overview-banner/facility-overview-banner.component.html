@@ -29,7 +29,7 @@
         </ul>
 
         <div class="d-flex">
-            <div>
+            <div class="pe-1">
                 <select name="minMonth" [(ngModel)]="minMonth" class="form-select" (change)="setDate()">
                     <option class="pe-2" *ngFor="let month of months" [ngValue]="month.monthNumValue">
                         {{month.abbreviation}}</option>
@@ -43,7 +43,7 @@
             <div class="ps-1 pe-1">
                 <span class="fa fa-arrow-right"></span>
             </div>
-            <div>
+            <div class="pe-1">
                 <select name="maxMonth" [(ngModel)]="maxMonth" class="form-select" (change)="setDate()">
                     <option class="pe-2" *ngFor="let month of months" [ngValue]="month.monthNumValue">
                         {{month.abbreviation}}</option>

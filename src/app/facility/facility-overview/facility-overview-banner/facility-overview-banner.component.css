@@ -29,7 +29,7 @@
 }
 
 .fa-arrow-right{
-  padding-top: 10px;
+  padding-top: 6px;
   padding-right: .25rem;
   padding-left: .25rem;
   color: black !important;
@@ -42,4 +42,6 @@ select.form-select{
   color: #2c386b;
   background-color: #fff;
   border-color: #2c386b;
+  padding: .3rem 2.25rem .2rem .75rem;
+  border-radius: 0.25rem;
 }
