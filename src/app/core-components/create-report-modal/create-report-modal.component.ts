@@ -26,6 +26,7 @@ export class CreateReportModalComponent {
   accountReport: IdbAccountReport;
   isOverviewReport: boolean;
   showWater: boolean;
+  inAccount: boolean;
   constructor(private sharedDataService: SharedDataService, private router: Router,
     private accountReportDbService: AccountReportDbService,
     private dbChangesService: DbChangesService,
@@ -89,6 +90,7 @@ export class CreateReportModalComponent {
       newReport.startYear = dateRange.startDate.getFullYear();
       newReport.endMonth = dateRange.endDate.getMonth();
       newReport.endYear = dateRange.endDate.getFullYear();
+      newReport.dataOverviewReportSetup.includeFacilityReports = false;
       if (this.router.url.includes('energy')) {
         newReport.name = account.name + ' Energy Report';
         newReport.dataOverviewReportSetup.includeCostsSection = false;
@@ -163,6 +165,7 @@ export class CreateReportModalComponent {
 
   setIsOverviewReport() {
     this.isOverviewReport = this.router.url.includes('overview');
+    this.inAccount = this.router.url.includes('account');
   }
 
   setShowWater() {

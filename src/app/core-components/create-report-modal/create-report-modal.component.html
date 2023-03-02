@@ -32,6 +32,11 @@
                         [(ngModel)]="accountReport.dataOverviewReportSetup.includeWaterSection">
                     <label class="form-check-label" for="includeWaterSection">Water</label>
                 </div>
+                <div class="form-check" *ngIf="inAccount">
+                    <input type="checkbox" class="form-check-input" name="includeFacilityReports" id="includeFacilityReports"
+                        [(ngModel)]="accountReport.dataOverviewReportSetup.includeFacilityReports">
+                    <label class="form-check-label" for="includeFacilityReports">Individual Facility Reports</label>
+                </div>
             </div>
         </form>
     </div>
