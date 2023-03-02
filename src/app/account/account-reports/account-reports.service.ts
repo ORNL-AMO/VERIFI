@@ -101,28 +101,17 @@ export class AccountReportsService {
     return dataOverviewReportSetup;
   }
 
-
-  // getSectionFormFromReport(overviewReportAccountSection: DataOverviewReportAccountSection): FormGroup {
-  //   let form: FormGroup = this.formBuilder.group({
-  //     includeSection: [overviewReportAccountSection.includeSection, Validators.required],
-  //     includeMap: [overviewReportAccountSection.includeMap, Validators.required],
-  //     includeFacilityTable: [overviewReportAccountSection.includeFacilityTable, Validators.required],
-  //     includeFacilityDonut: [overviewReportAccountSection.includeFacilityDonut, Validators.required],
-  //     includeUtilityTable: [overviewReportAccountSection.includeUtilityTable, Validators.required],
-  //     includeStackedBarChart: [overviewReportAccountSection.includeStackedBarChart, Validators.required],
-  //     includeMonthlyLineChart: [overviewReportAccountSection.includeMonthlyLineChart, Validators.required],
-  //   });
-  //   return form;
-  // }
-
-  // updateReportSectionFromForm(overviewReportAccountSection: DataOverviewReportAccountSection, form: FormGroup): DataOverviewReportAccountSection {
-  //   overviewReportAccountSection.includeSection = form.controls.includeSection.value;
-  //   overviewReportAccountSection.includeMap = form.controls.includeMap.value
-  //   overviewReportAccountSection.includeFacilityTable = form.controls.includeFacilityTable.value
-  //   overviewReportAccountSection.includeFacilityDonut = form.controls.includeFacilityDonut.value
-  //   overviewReportAccountSection.includeUtilityTable = form.controls.includeUtilityTable.value
-  //   overviewReportAccountSection.includeStackedBarChart = form.controls.includeStackedBarChart.value
-  //   overviewReportAccountSection.includeMonthlyLineChart = form.controls.includeMonthlyLineChart.value
-  //   return overviewReportAccountSection;
-  // }
+  isReportValid(report: IdbAccountReport): boolean {
+    let setupForm: FormGroup = this.getSetupFormFromReport(report);
+    if (setupForm.invalid) {
+      return false;
+    }
+    if (report.reportType == 'betterPlants') {
+      let bpForm: FormGroup = this.getBetterPlantsFormFromReport(report.betterPlantsReportSetup);
+      return bpForm.valid;
+    } else if (report.reportType == 'dataOverview') {
+      let dataForm: FormGroup = this.getDataOverviewFormFromReport(report.dataOverviewReportSetup);
+      return dataForm.valid;
+    }
+  }
 }

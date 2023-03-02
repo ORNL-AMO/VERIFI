@@ -54,18 +54,25 @@ export class AccountReportSetupComponent {
     if (this.setupForm.controls.reportType.value == 'betterPlants') {
       this.setupForm.controls.baselineYear.setValidators([Validators.required]);
       this.setupForm.controls.reportYear.setValidators([Validators.required]);
-      this.setupForm.controls.startYear.setValidators([]);
-      this.setupForm.controls.startMonth.setValidators([]);
-      this.setupForm.controls.endYear.setValidators([]);
-      this.setupForm.controls.endMonth.setValidators([]);
+      this.setupForm.controls.startYear.clearValidators();
+      this.setupForm.controls.startMonth.clearValidators();
+      this.setupForm.controls.endYear.clearValidators();
+      this.setupForm.controls.endMonth.clearValidators();
     } else if (this.setupForm.controls.reportType.value == 'dataOverview') {
-      this.setupForm.controls.baselineYear.setValidators([]);
-      this.setupForm.controls.reportYear.setValidators([]);
+      this.setupForm.controls.baselineYear.clearValidators();
+      this.setupForm.controls.reportYear.clearValidators();
       this.setupForm.controls.startYear.setValidators([Validators.required]);
       this.setupForm.controls.startMonth.setValidators([Validators.required]);
       this.setupForm.controls.endYear.setValidators([Validators.required]);
       this.setupForm.controls.endMonth.setValidators([Validators.required]);
     }
+    this.setupForm.controls.baselineYear.updateValueAndValidity();
+    this.setupForm.controls.reportYear.updateValueAndValidity();
+    this.setupForm.controls.startYear.updateValueAndValidity();
+    this.setupForm.controls.startMonth.updateValueAndValidity();
+    this.setupForm.controls.endYear.updateValueAndValidity();
+    this.setupForm.controls.endMonth.updateValueAndValidity();
+    this.setupForm.updateValueAndValidity();
     await this.save();
   }
 

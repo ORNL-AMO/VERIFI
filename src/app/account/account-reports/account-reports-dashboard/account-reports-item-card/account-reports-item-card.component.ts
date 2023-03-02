@@ -5,6 +5,7 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { IdbAccount, IdbAccountReport } from 'src/app/models/idb';
+import { AccountReportsService } from '../../account-reports.service';
 
 @Component({
   selector: 'app-account-reports-item-card',
@@ -17,15 +18,18 @@ export class AccountReportsItemCardComponent {
 
 
   displayDeleteModal: boolean;
+  isValid: boolean;
   constructor(private accountReportDbService: AccountReportDbService,
     private router: Router,
     private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
-    private toastNotificationService: ToastNotificationsService) {
+    private toastNotificationService: ToastNotificationsService,
+    private accountReportsService: AccountReportsService) {
 
   }
 
   ngOnInit() {
+    this.isValid = this.accountReportsService.isReportValid(this.report);
 
   }
 
@@ -56,11 +60,15 @@ export class AccountReportsItemCardComponent {
     this.displayDeleteModal = false;
   }
 
-  async confirmDelete(){
+  async confirmDelete() {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.accountReportDbService.deleteWithObservable(this.report.id).toPromise();
     await this.dbChangesService.setAccountReports(selectedAccount);
     this.displayDeleteModal = false;
     this.toastNotificationService.showToast('Report Deleted', undefined, undefined, false, "alert-success");
+  }
+
+  getDate(month: number, year: number): Date {
+    return new Date(year, month, 1);
   }
 }
