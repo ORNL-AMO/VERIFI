@@ -5,11 +5,12 @@ import { PredictordbService } from '../../indexedDB/predictors-db.service';
 import { UtilityMeterdbService } from '../../indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from '../../indexedDB/utilityMeterData-db.service';
 import { UtilityMeterGroupdbService } from '../../indexedDB/utilityMeterGroup-db.service';
-import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility, IdbOverviewReportOptions, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from '../../models/idb';
+import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport, IdbAnalysisItem, IdbFacility, IdbOverviewReportOptions, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from '../../models/idb';
 import { LoadingService } from '../../core-components/loading/loading.service';
 import { OverviewReportOptionsDbService } from '../../indexedDB/overview-report-options-db.service';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
+import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { JStatRegressionModel } from 'src/app/models/analysis';
 
 @Injectable({
@@ -21,7 +22,7 @@ export class BackupDataService {
     private utilityMeterDbService: UtilityMeterdbService, private utilityMeterDataDbService: UtilityMeterDatadbService,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService, private loadingService: LoadingService,
     private overviewReportOptionsDbService: OverviewReportOptionsDbService, private accountAnalysisDbService: AccountAnalysisDbService,
-    private analysisDbService: AnalysisDbService) { }
+    private analysisDbService: AnalysisDbService, private accountReportsDbService: AccountReportDbService) { }
 
 
   backupAccount() {
@@ -30,8 +31,8 @@ export class BackupDataService {
       facilities: this.facilityDbService.accountFacilities.getValue(),
       meters: this.utilityMeterDbService.accountMeters.getValue(),
       meterData: this.utilityMeterDataDbService.accountMeterData.getValue(),
+      accountReports: this.accountReportsDbService.accountReports.getValue(),
       groups: this.trimGroups(this.utilityMeterGroupDbService.accountMeterGroups.getValue()),
-      reports: this.overviewReportOptionsDbService.accountOverviewReportOptions.getValue(),
       accountAnalysisItems: this.accountAnalysisDbService.accountAnalysisItems.getValue(),
       facilityAnalysisItems: this.analysisDbService.accountAnalysisItems.getValue(),
       predictorData: this.predictorsDbService.accountPredictorEntries.getValue(),
@@ -70,7 +71,7 @@ export class BackupDataService {
       meters: facilityMeters,
       meterData: facilityMeterData,
       groups: facilityGroups,
-      reports: undefined,
+      accountReports: undefined,
       accountAnalysisItems: undefined,
       facilityAnalysisItems: facilityAnalysisItems,
       predictorData: facilityPredictorData,
@@ -246,18 +247,57 @@ export class BackupDataService {
     }
 
     this.loadingService.setLoadingMessage('Adding Account Reports...');
-    for (let i = 0; i < backupFile.reports.length; i++) {
-      let reportOptions: IdbOverviewReportOptions = backupFile.reports[i];
-      reportOptions.guid = this.getGUID();
-      delete reportOptions.id;
-      reportOptions.accountId = accountGUIDs.newId;
-      reportOptions.reportOptions.facilities.forEach(facility => {
+    for (let i = 0; i < backupFile.accountReports?.length; i++) {
+      let accountReport: IdbAccountReport = backupFile.accountReports[i];
+      accountReport.guid = this.getGUID();
+      delete accountReport.id;
+      accountReport.accountId = accountGUIDs.newId;
+      accountReport.dataOverviewReportSetup.includedFacilities.forEach(facility => {
         facility.facilityId = this.getNewId(facility.facilityId, facilityGUIDs);
       });
       //TODO: Update with better plants
-      reportOptions.reportOptions.analysisItemId = this.getNewId(reportOptions.reportOptions.analysisItemId, accountAnalysisGUIDs);
-      await this.overviewReportOptionsDbService.addWithObservable(reportOptions).toPromise();
+      if (accountReport.reportType == 'betterPlants') {
+        accountReport.betterPlantsReportSetup.analysisItemId = this.getNewId(accountReport.betterPlantsReportSetup.analysisItemId, accountAnalysisGUIDs);
+      } else {
+        accountReport.betterPlantsReportSetup = {
+          analysisItemId: undefined,
+          includeFacilityNames: undefined,
+          baselineAdjustmentNotes: undefined,
+          modificationNotes: undefined,
+        }
+      }
+      await this.accountReportsDbService.addWithObservable(accountReport).toPromise();
     }
+
+
+    for (let i = 0; i < backupFile.reports?.length; i++) {
+      let overviewReport: IdbOverviewReportOptions = backupFile.reports[i];
+      if (overviewReport.type == 'report' && overviewReport.reportOptionsType == 'betterPlants') {
+        let newReport: IdbAccountReport = this.accountReportsDbService.getNewAccountReport(newAccount);
+        newReport.name = overviewReport.name;
+        newReport.baselineYear = overviewReport.baselineYear;
+        newReport.reportYear = overviewReport.targetYear;
+        newReport.reportType = 'betterPlants';
+        newReport.betterPlantsReportSetup.analysisItemId = this.getNewId(overviewReport.reportOptions.analysisItemId, accountAnalysisGUIDs);
+        newReport.betterPlantsReportSetup.baselineAdjustmentNotes = overviewReport.reportOptions.baselineAdjustmentNotes;
+        newReport.betterPlantsReportSetup.includeFacilityNames = overviewReport.reportOptions.includeFacilityNames;
+        newReport.betterPlantsReportSetup.modificationNotes = overviewReport.reportOptions.modificationNotes;
+        await this.accountReportsDbService.addWithObservable(newReport).toPromise();
+      }
+    }
+
+    // for (let i = 0; i < backupFile.reports.length; i++) {
+    //   let reportOptions: IdbOverviewReportOptions = backupFile.reports[i];
+    //   reportOptions.guid = this.getGUID();
+    //   delete reportOptions.id;
+    //   reportOptions.accountId = accountGUIDs.newId;
+    //   reportOptions.reportOptions.facilities.forEach(facility => {
+    //     facility.facilityId = this.getNewId(facility.facilityId, facilityGUIDs);
+    //   });
+    //   //TODO: Update with better plants
+    //   reportOptions.reportOptions.analysisItemId = this.getNewId(reportOptions.reportOptions.analysisItemId, accountAnalysisGUIDs);
+    //   await this.overviewReportOptionsDbService.addWithObservable(reportOptions).toPromise();
+    // }
     return newAccount;
   }
 
@@ -369,14 +409,14 @@ export class BackupDataService {
     }
 
     this.loadingService.setLoadingMessage('Updating Account Reports...');
-    let overviewReports: Array<IdbOverviewReportOptions> = this.overviewReportOptionsDbService.accountOverviewReportOptions.getValue();
-    for (let reportIndex = 0; reportIndex < overviewReports.length; reportIndex++) {
-      overviewReports[reportIndex].reportOptions.facilities.push({
+    let accountReports: Array<IdbAccountReport> = this.accountReportsDbService.accountReports.getValue();
+    for (let reportIndex = 0; reportIndex < accountReports.length; reportIndex++) {
+      accountReports[reportIndex].dataOverviewReportSetup.includedFacilities.push({
         facilityId: newFacilityGUID,
-        selected: false
+        included: false
       });
       //TODO: update better plants reports items..
-      await this.overviewReportOptionsDbService.updateWithObservable(overviewReports[reportIndex]).toPromise();
+      await this.accountReportsDbService.updateWithObservable(accountReports[reportIndex]).toPromise();
     }
 
     return newFacility;
@@ -411,11 +451,18 @@ export class BackupDataService {
       await this.utilityMeterGroupDbService.deleteWithObservable(accountMeterGroups[i].id).toPromise();
     }
 
-    //delete reports
-    let reports: Array<IdbOverviewReportOptions> = this.overviewReportOptionsDbService.accountOverviewReportOptions.getValue();
-    for (let i = 0; i < reports.length; i++) {
-      await this.overviewReportOptionsDbService.deleteWithObservable(reports[i].id).toPromise();
+    //delete overview reports
+    //todo remove in future (overview reports no longer used)
+    let overviewReportOptions: Array<IdbOverviewReportOptions> = await this.overviewReportOptionsDbService.getAllByIndexRange('accountId', account.guid).toPromise();
+    for (let i = 0; i < overviewReportOptions.length; i++) {
+      await this.overviewReportOptionsDbService.deleteWithObservable(overviewReportOptions[i].id).toPromise();
     }
+    //delete account reports
+    let accountReports: Array<IdbAccountReport> = this.accountReportsDbService.accountReports.getValue();
+    for (let i = 0; i < accountReports.length; i++) {
+      await this.accountReportsDbService.deleteWithObservable(accountReports[i].id).toPromise();
+    }
+
     //delete account analysis
     let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
     for (let i = 0; i < accountAnalysisItems.length; i++) {
@@ -464,10 +511,10 @@ export class BackupDataService {
     }
 
     //update reports
-    let reports: Array<IdbOverviewReportOptions> = this.overviewReportOptionsDbService.accountOverviewReportOptions.getValue();
+    let reports: Array<IdbAccountReport> = this.accountReportsDbService.accountReports.getValue();
     for (let i = 0; i < reports.length; i++) {
-      reports[i].reportOptions.facilities = reports[i].reportOptions.facilities.filter(option => { return option.facilityId != facility.guid });
-      await this.overviewReportOptionsDbService.updateWithObservable(reports[i]).toPromise();
+      reports[i].dataOverviewReportSetup.includedFacilities = reports[i].dataOverviewReportSetup.includedFacilities.filter(option => { return option.facilityId != facility.guid });
+      await this.accountReportsDbService.updateWithObservable(reports[i]).toPromise();
     }
     //update account analysis
     let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
@@ -543,7 +590,8 @@ export interface BackupFile {
   meters: Array<IdbUtilityMeter>,
   meterData: Array<IdbUtilityMeterData>,
   groups: Array<IdbUtilityMeterGroup>,
-  reports: Array<IdbOverviewReportOptions>,
+  accountReports: Array<IdbAccountReport>,
+  reports?: Array<IdbOverviewReportOptions>,
   accountAnalysisItems: Array<IdbAccountAnalysisItem>,
   facilityAnalysisItems: Array<IdbAnalysisItem>,
   predictorData: Array<IdbPredictorEntry>,

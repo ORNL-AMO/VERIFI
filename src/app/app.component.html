@@ -8,6 +8,7 @@
       <div class="content w-100" role="main" *ngIf="dataInitialized">
         <router-outlet></router-outlet>
         <app-import-backup-modal class="hide-print"></app-import-backup-modal>
+        <app-create-report-modal class="hide-print"></app-create-report-modal>
         <app-toast-notifications class="hide-print"></app-toast-notifications>
       </div>
       <app-help-panel *ngIf="dataInitialized"></app-help-panel>

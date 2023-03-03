@@ -6,7 +6,6 @@ import { FacilitydbService } from './facility-db.service';
 import { AccountdbService } from './account-db.service';
 import { ConvertMeterDataService } from '../shared/helper-services/convert-meter-data.service';
 import * as _ from 'lodash';
-import { ReportOptions } from '../models/overview-report';
 import { CalanderizationOptions } from '../models/calanderization';
 
 @Injectable({

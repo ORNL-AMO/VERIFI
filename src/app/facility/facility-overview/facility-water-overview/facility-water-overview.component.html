@@ -3,25 +3,27 @@
         <div class="col">
             <div class="card">
                 <div class="card-header bg-white">
-                    <h4 class="mb-0">Facility Meter Water Consumption<span class="pull-right"
-                            *ngIf="yearPriorDate">({{yearPriorDate |
-                            date: 'MMM, y'}} -
-                            {{lastMonthsDate | date: 'MMM, y'}})</span></h4>
+                    <h4 class="mb-0">Facility Meter Water Consumption</h4>
 
                 </div>
                 <div class="card-body">
                     <div class="row">
                         <div class="col-12">
-                            <app-water-meters-usage-chart></app-water-meters-usage-chart>
+                            <app-meters-overview-stacked-line-chart [dataType]="'water'" [facilityId]="facilityId"
+                                [calanderizedMeters]="facilityOverviewData.calanderizedMeters"
+                                [dateRange]="dateRange"></app-meters-overview-stacked-line-chart>
                             <hr>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-6">
-                            <app-water-meters-overview-table></app-water-meters-overview-table>
+                            <app-meter-usage-table [dataType]="'water'" [facilityOverviewData]="facilityOverviewData"
+                                [facilityOverviewMeters]="facilityOverviewData.waterMeters"
+                                [waterUnit]="waterUnit"></app-meter-usage-table>
                         </div>
                         <div class="col-6">
-                            <app-water-meters-overview-chart></app-water-meters-overview-chart>
+                            <app-meter-usage-donut [dataType]="'water'" [facilityId]="facilityId"
+                                [facilityOverviewMeters]="facilityOverviewData.waterMeters"></app-meter-usage-donut>
                         </div>
                     </div>
                 </div>
@@ -36,7 +38,10 @@
                     <h4 class="mb-0">Water Use and Cost</h4>
                 </div>
                 <div class="card-body">
-                    <app-water-utilities-usage-table></app-water-utilities-usage-table>
+                    <app-utility-consumption-table [dataType]="'water'"
+                        [sourcesUseAndCost]="utilityUseAndCost.waterUseAndCost"
+                        [useAndCostTotal]="utilityUseAndCost.waterTotal" [previousYear]="utilityUseAndCost.previousYear"
+                        [dateRange]="dateRange" [waterUnit]="waterUnit"></app-utility-consumption-table>
                 </div>
             </div>
         </div>
@@ -49,7 +54,8 @@
                     <h4 class="mb-0">Annual Water Consumption</h4>
                 </div>
                 <div class="card-body">
-                    <app-water-utilities-usage-chart></app-water-utilities-usage-chart>
+                    <app-utilities-usage-chart [dataType]="'water'" [facilityId]="facilityId"
+                        [annualSourceData]="facilityOverviewData.annualSourceData"></app-utilities-usage-chart>
                 </div>
             </div>
         </div>
@@ -62,7 +68,8 @@
                     <h4 class="mb-0">Monthly Water Consumption</h4>
                 </div>
                 <div class="card-body">
-                    <app-facility-water-monthly-chart></app-facility-water-monthly-chart>
+                    <app-monthly-utility-usage-line-chart [dataType]="'water'" [facilityId]="facilityId"
+                        [yearMonthData]="facilityOverviewData.waterYearMonthData"></app-monthly-utility-usage-line-chart>
                 </div>
             </div>
         </div>

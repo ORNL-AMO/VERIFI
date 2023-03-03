@@ -12,10 +12,6 @@ import { AboutComponent } from './static-content/about/about.component';
 import { AcknowledgmentsComponent } from './static-content/acknowledgments/acknowledgments.component';
 import { FeedbackComponent } from './static-content/feedback/feedback.component';
 import { HelpComponent } from './static-content/help/help.component';
-import { OverviewReportComponent } from './account/overview-report/overview-report.component';
-import { OverviewReportDashboardComponent } from './account/overview-report/overview-report-dashboard/overview-report-dashboard.component';
-import { OverviewReportMenuComponent } from './account/overview-report/overview-report-menu/overview-report-menu.component';
-import { BasicReportComponent } from './account/overview-report/basic-report/basic-report.component';
 import { UtilityDataComponent } from './facility/utility-data/utility-data.component';
 import { AnalysisComponent } from './facility/analysis/analysis.component';
 import { AnalysisDashboardComponent } from './facility/analysis/analysis-dashboard/analysis-dashboard.component';
@@ -46,8 +42,6 @@ import { SelectFacilityAnalysisItemsComponent } from './account/account-analysis
 import { AccountAnalysisResultsComponent } from './account/account-analysis/account-analysis-results/account-analysis-results.component';
 import { MonthlyAccountAnalysisComponent } from './account/account-analysis/account-analysis-results/monthly-account-analysis/monthly-account-analysis.component';
 import { AnnualAccountAnalysisComponent } from './account/account-analysis/account-analysis-results/annual-account-analysis/annual-account-analysis.component';
-import { BetterPlantsReportMenuComponent } from './account/overview-report/better-plants-report-menu/better-plants-report-menu.component';
-import { BetterPlantsReportComponent } from './account/overview-report/better-plants-report/better-plants-report.component';
 import { EditMeterComponent } from './facility/utility-data/energy-consumption/energy-source/edit-meter/edit-meter.component';
 import { UtilityMetersTableComponent } from './facility/utility-data/energy-consumption/energy-source/utility-meters-table/utility-meters-table.component';
 import { UtilityMeterDataTableComponent } from './facility/utility-data/energy-consumption/utility-meter-data/utility-meter-data-table/utility-meter-data-table.component';
@@ -89,6 +83,11 @@ import { FacilityEmissionsOverviewComponent } from './facility/facility-overview
 import { FacilityWaterOverviewComponent } from './facility/facility-overview/facility-water-overview/facility-water-overview.component';
 import { FacilityOverviewComponent } from './facility/facility-overview/facility-overview.component';
 import { AccountAnalysisListComponent } from './facility/analysis/account-analysis-list/account-analysis-list.component';
+import { AccountReportsDashboardComponent } from './account/account-reports/account-reports-dashboard/account-reports-dashboard.component';
+import { AccountReportsComponent } from './account/account-reports/account-reports.component';
+import { AccountReportSetupComponent } from './account/account-reports/account-report-setup/account-report-setup.component';
+import { BetterPlantsReportComponent } from './account/account-reports/better-plants-report/better-plants-report.component';
+import { DataOverviewReportComponent } from './account/account-reports/data-overview-report/data-overview-report.component';
 
 const routes: Routes = [
   {
@@ -128,14 +127,13 @@ const routes: Routes = [
       },
       {
         path: 'reports',
-        component: OverviewReportComponent,
+        component: AccountReportsComponent,
         children: [
           { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
-          { path: 'dashboard', component: OverviewReportDashboardComponent },
-          { path: 'menu', component: OverviewReportMenuComponent },
-          { path: 'basic-report', component: BasicReportComponent },
-          { path: 'better-plants-menu', component: BetterPlantsReportMenuComponent },
-          { path: 'better-plants-report', component: BetterPlantsReportComponent }
+          { path: 'dashboard', component: AccountReportsDashboardComponent },
+          { path: 'setup', component: AccountReportSetupComponent },
+          { path: 'better-plants-report', component: BetterPlantsReportComponent },
+          { path: 'data-overview-report', component: DataOverviewReportComponent }
         ]
       },
       {

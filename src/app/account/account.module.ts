@@ -7,11 +7,11 @@ import { AccountSettingsComponent } from './account-settings/account-settings.co
 import { FormsModule } from '@angular/forms';
 import { HelperPipesModule } from '../shared/helper-pipes/helper-pipes.module';
 import { SettingsFormsModule } from '../shared/settings-forms/settings-forms.module';
-import { OverviewReportModule } from './overview-report/overview-report.module';
 import { AccountAnalysisModule } from './account-analysis/account-analysis.module';
 import { AccountHomeModule } from './account-home/account-home.module';
 import { CustomDatabaseModule } from './custom-database/custom-database.module';
 import { AccountOverviewModule } from './account-overview/account-overview.module';
+import { AccountReportsModule } from './account-reports/account-reports.module';
 
 
 @NgModule({
@@ -26,11 +26,11 @@ import { AccountOverviewModule } from './account-overview/account-overview.modul
     FormsModule,
     HelperPipesModule,
     SettingsFormsModule,
-    OverviewReportModule,
     AccountAnalysisModule,
     AccountHomeModule,
     CustomDatabaseModule,
-    AccountOverviewModule
+    AccountOverviewModule,
+    AccountReportsModule
   ]
 })
 export class AccountModule { }

@@ -1,0 +1,267 @@
+<table class="table utility-data table-sm table-bordered table-hover">
+    <thead>
+        <tr class="table-mh">
+            <th class="w-25"></th>
+            <th class="w-25">
+                Latest Month 
+                <br><span class="small" *ngIf="dateRange.endDate">
+                    ({{dateRange.endDate | date: 'MMM, y'}})</span>
+            </th>
+            <th class="w-25">
+                Previous Year
+                <br>
+                <span class="small" *ngIf="previousYear">({{previousYear | date: 'MMM, y'}})</span>
+            </th>
+            <th class="w-25">
+                Monthly Average
+                <br>
+                <span class="small" *ngIf="dateRange.startDate">
+                    ({{dateRange.startDate | date: 'MMM, y'}} -
+                    {{dateRange.endDate | date: 'MMM, y'}})</span>
+            </th>
+        </tr>
+        <tr>
+            <th></th>
+            <th>
+                (<span>kg CO<sub>2</sub>e</span>)
+            </th>
+            <th>
+                (<span>kg CO<sub>2</sub>e</span>)
+            </th>
+            <th>
+                (<span>kg CO<sub>2</sub>e</span>)
+            </th>
+        </tr>
+    </thead>
+    <tbody class="table-group-divider">
+        <tr *ngFor="let useAndCost of sourcesUseAndCost">
+            <td>
+                {{useAndCost.source}}
+            </td>
+            <!--Last Month-->
+            <td class="text-center" *ngIf="emissionsDisplay == 'market'">
+                <span *ngIf="useAndCost.end.marketEmissions">
+                    {{useAndCost.end.marketEmissions | customNumber}}
+                </span>
+                <span *ngIf="!useAndCost.end.marketEmissions">
+                    &mdash;
+                </span>
+            </td>
+            <td class="text-center" *ngIf="emissionsDisplay == 'location'">
+                <span *ngIf="useAndCost.end.locationEmissions">
+                    {{useAndCost.end.locationEmissions | customNumber}}
+                </span>
+                <span *ngIf="!useAndCost.end.locationEmissions">
+                    &mdash;
+                </span>
+            </td>
+            <!--Year prior-->
+            <td *ngIf="emissionsDisplay == 'market'">
+                <div class="d-flex w-100">
+                    <div class="w-50 text-right pe-1 print-full">
+                        <span *ngIf="useAndCost.previousYear.marketEmissions">
+                            {{useAndCost.previousYear.marketEmissions | customNumber}}
+                        </span>
+                        <span *ngIf="!useAndCost.previousYear.marketEmissions">
+                            &mdash;
+                        </span>
+                    </div>
+                    <div class="w-50 ps-1 hide-print">
+                        <span *ngIf="useAndCost.previousYear.marketEmissionsChange" class="small ps-2 badge"
+                            [ngClass]="{'bg-danger': useAndCost.previousYear.marketEmissionsChange < 0, 'bg-success': useAndCost.previousYear.marketEmissionsChange > 0}">
+                            <span class="fa fa-chevron-down"
+                                *ngIf="useAndCost.previousYear.marketEmissionsChange > 0"></span>
+                            <span class="fa fa-chevron-up"
+                                *ngIf="useAndCost.previousYear.marketEmissionsChange < 0"></span>
+                            {{useAndCost.previousYear.marketEmissionsChange | customNumber}}
+                        </span>
+                    </div>
+                </div>
+            </td>
+            <td *ngIf="emissionsDisplay == 'location'">
+                <div class="d-flex w-100">
+                    <div class="w-50 text-right pe-1 print-full">
+                        <span *ngIf="useAndCost.previousYear.locationEmissions">
+                            {{useAndCost.previousYear.locationEmissions | customNumber}}
+                        </span>
+                        <span *ngIf="!useAndCost.previousYear.locationEmissions">
+                            &mdash;
+                        </span>
+                    </div>
+                    <div class="w-50 ps-1 hide-print">
+                        <span *ngIf="useAndCost.previousYear.locationEmissionsChange" class="small ps-2 badge"
+                            [ngClass]="{'bg-danger': useAndCost.previousYear.locationEmissionsChange < 0, 'bg-success': useAndCost.previousYear.locationEmissionsChange > 0}">
+                            <span class="fa fa-chevron-down"
+                                *ngIf="useAndCost.previousYear.locationEmissionsChange > 0"></span>
+                            <span class="fa fa-chevron-up"
+                                *ngIf="useAndCost.previousYear.locationEmissionsChange < 0"></span>
+                            {{useAndCost.previousYear.locationEmissionsChange | customNumber}}
+                        </span>
+                    </div>
+                </div>
+            </td>
+
+            <!--Average-->
+            <td *ngIf="emissionsDisplay == 'market'">
+                <div class="d-flex w-100">
+                    <div class="w-50 text-right pe-1 print-full">
+                        <span *ngIf="useAndCost.average.marketEmissions">
+                            {{useAndCost.average.marketEmissions | customNumber}}
+                        </span>
+                        <span *ngIf="!useAndCost.average.marketEmissions">
+                            &mdash;
+                        </span>
+                    </div>
+                    <div class="w-50 ps-1 hide-print">
+                        <span *ngIf="useAndCost.average.marketEmissionsChange" class="small ps-2 badge"
+                            [ngClass]="{'bg-danger': useAndCost.average.marketEmissionsChange < 0, 'bg-success': useAndCost.average.marketEmissionsChange > 0}">
+                            <span class="fa fa-chevron-down"
+                                *ngIf="useAndCost.average.marketEmissionsChange > 0"></span>
+                            <span class="fa fa-chevron-up" *ngIf="useAndCost.average.marketEmissionsChange < 0"></span>
+                            {{useAndCost.average.marketEmissionsChange | customNumber}}
+                        </span>
+                    </div>
+                </div>
+            </td>
+            <td *ngIf="emissionsDisplay == 'location'">
+                <div class="d-flex w-100">
+                    <div class="w-50 text-right pe-1 print-full">
+                        <span *ngIf="useAndCost.average.locationEmissions">
+                            {{useAndCost.average.locationEmissions | customNumber}}
+                        </span>
+                        <span *ngIf="!useAndCost.average.locationEmissions">
+                            &mdash;
+                        </span>
+                    </div>
+                    <div class="w-50 ps-1 hide-print">
+                        <span *ngIf="useAndCost.average.locationEmissionsChange" class="small ps-2 badge"
+                            [ngClass]="{'bg-danger': useAndCost.average.locationEmissionsChange < 0, 'bg-success': useAndCost.average.locationEmissionsChange > 0}">
+                            <span class="fa fa-chevron-down"
+                                *ngIf="useAndCost.average.locationEmissionsChange > 0"></span>
+                            <span class="fa fa-chevron-up"
+                                *ngIf="useAndCost.average.locationEmissionsChange < 0"></span>
+                            {{useAndCost.average.locationEmissionsChange | customNumber}}
+                        </span>
+                    </div>
+                </div>
+            </td>
+
+        </tr>
+    </tbody>
+    <tfoot>
+        <tr>
+            <th>
+                Total
+            </th>
+            <!--previous month-->
+            <th class="text-center" *ngIf="emissionsDisplay == 'market'">
+                <span *ngIf="useAndCostTotal.end.marketEmissions">
+                    {{useAndCostTotal.end.marketEmissions | customNumber}}
+                </span>
+                <span *ngIf="!useAndCostTotal.end.marketEmissions">
+                    &mdash;
+                </span>
+            </th>
+            <th class="text-center" *ngIf="emissionsDisplay == 'location'">
+                <span *ngIf="useAndCostTotal.end.locationEmissions">
+                    {{useAndCostTotal.end.locationEmissions | customNumber}}
+                </span>
+                <span *ngIf="!useAndCostTotal.end.locationEmissions">
+                    &mdash;
+                </span>
+            </th>
+
+            <!--year prior-->
+            <th *ngIf="emissionsDisplay == 'market'">
+                <div class="d-flex w-100">
+                    <div class="w-50 text-right pe-1 print-full">
+                        <span *ngIf="useAndCostTotal.previousYear.marketEmissions">
+                            {{useAndCostTotal.previousYear.marketEmissions | customNumber}}
+                        </span>
+                        <span *ngIf="!useAndCostTotal.previousYear.marketEmissions">
+                            &mdash;
+                        </span>
+                    </div>
+                    <div class="w-50 ps-1 hide-print">
+                        <span *ngIf="useAndCostTotal.previousYear.marketEmissionsChange" class="small ps-2 badge"
+                            [ngClass]="{'bg-danger': useAndCostTotal.previousYear.marketEmissionsChange < 0, 'bg-success': useAndCostTotal.previousYear.marketEmissionsChange > 0}">
+                            <span class="fa fa-chevron-down"
+                                *ngIf="useAndCostTotal.previousYear.marketEmissionsChange > 0"></span>
+                            <span class="fa fa-chevron-up"
+                                *ngIf="useAndCostTotal.previousYear.marketEmissionsChange < 0"></span>
+                            {{useAndCostTotal.previousYear.marketEmissionsChange | customNumber}}
+                        </span>
+                    </div>
+                </div>
+            </th>
+            <th *ngIf="emissionsDisplay == 'location'">
+                <div class="d-flex w-100">
+                    <div class="w-50 text-right pe-1 print-full">
+                        <span *ngIf="useAndCostTotal.previousYear.locationEmissions">
+                            {{useAndCostTotal.previousYear.locationEmissions | customNumber}}
+                        </span>
+                        <span *ngIf="!useAndCostTotal.previousYear.locationEmissions">
+                            &mdash;
+                        </span>
+                    </div>
+                    <div class="w-50 ps-1 hide-print">
+                        <span *ngIf="useAndCostTotal.previousYear.locationEmissionsChange" class="small ps-2 badge"
+                            [ngClass]="{'bg-danger': useAndCostTotal.previousYear.locationEmissionsChange < 0, 'bg-success': useAndCostTotal.previousYear.locationEmissionsChange > 0}">
+                            <span class="fa fa-chevron-down"
+                                *ngIf="useAndCostTotal.previousYear.locationEmissionsChange > 0"></span>
+                            <span class="fa fa-chevron-up"
+                                *ngIf="useAndCostTotal.previousYear.locationEmissionsChange < 0"></span>
+                            {{useAndCostTotal.previousYear.locationEmissionsChange | customNumber}}
+                        </span>
+                    </div>
+                </div>
+            </th>
+
+            <!--average-->
+            <th *ngIf="emissionsDisplay == 'market'">
+                <div class="d-flex w-100">
+                    <div class="w-50 text-right pe-1 print-full">
+                        <span *ngIf="useAndCostTotal.average.marketEmissions">
+                            {{useAndCostTotal.average.marketEmissions | customNumber}}
+                        </span>
+                        <span *ngIf="!useAndCostTotal.average.marketEmissions">
+                            &mdash;
+                        </span>
+                    </div>
+                    <div class="w-50 ps-1 hide-print">
+                        <span *ngIf="useAndCostTotal.average.marketEmissionsChange" class="small ps-2 badge"
+                            [ngClass]="{'bg-danger': useAndCostTotal.average.marketEmissionsChange < 0, 'bg-success': useAndCostTotal.average.marketEmissionsChange > 0}">
+                            <span class="fa fa-chevron-down"
+                                *ngIf="useAndCostTotal.average.marketEmissionsChange > 0"></span>
+                            <span class="fa fa-chevron-up"
+                                *ngIf="useAndCostTotal.average.marketEmissionsChange < 0"></span>
+                            {{useAndCostTotal.average.marketEmissionsChange | customNumber}}
+                        </span>
+                    </div>
+                </div>
+            </th>
+            <th *ngIf="emissionsDisplay == 'location'">
+                <div class="d-flex w-100">
+                    <div class="w-50 text-right pe-1 print-full">
+                        <span *ngIf="useAndCostTotal.average.locationEmissions">
+                            {{useAndCostTotal.average.locationEmissions | customNumber}}
+                        </span>
+                        <span *ngIf="!useAndCostTotal.average.locationEmissions">
+                            &mdash;
+                        </span>
+                    </div>
+                    <div class="w-50 ps-1 hide-print">
+                        <span *ngIf="useAndCostTotal.average.locationEmissionsChange" class="small ps-2 badge"
+                            [ngClass]="{'bg-danger': useAndCostTotal.average.locationEmissionsChange < 0, 'bg-success': useAndCostTotal.average.locationEmissionsChange > 0}">
+                            <span class="fa fa-chevron-down"
+                                *ngIf="useAndCostTotal.average.locationEmissionsChange > 0"></span>
+                            <span class="fa fa-chevron-up"
+                                *ngIf="useAndCostTotal.average.locationEmissionsChange < 0"></span>
+                            {{useAndCostTotal.average.locationEmissionsChange | customNumber}}
+                        </span>
+                    </div>
+                </div>
+            </th>
+        </tr>
+    </tfoot>
+</table>

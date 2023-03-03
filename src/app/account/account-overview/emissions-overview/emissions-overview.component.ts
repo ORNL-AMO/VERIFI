@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { AccountOverviewService } from '../account-overview.service';
 import { Subscription } from 'rxjs';
+import { AccountOverviewData } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
+import { UtilityUseAndCost } from 'src/app/calculations/dashboard-calculations/useAndCostClass';
 
 @Component({
   selector: 'app-emissions-overview',
@@ -9,35 +11,40 @@ import { Subscription } from 'rxjs';
 })
 export class EmissionsOverviewComponent implements OnInit {
 
-  lastMonthsDate: Date;
-  yearPriorDate: Date;
-  accountFacilitiesSummarySub: Subscription;
   calculatingSub: Subscription;
   calculating: boolean;
+  accountOverviewDataSub: Subscription;
+  accountOverviewData: AccountOverviewData;
+  utilityUseAndCostSub: Subscription;
+  utilityUseAndCost: UtilityUseAndCost;
+  dateRangeSub: Subscription;
+  dateRange: {startDate: Date, endDate: Date};
   constructor(private accountOverviewService: AccountOverviewService) { }
 
   ngOnInit(): void {
-
-
-    this.calculatingSub = this.accountOverviewService.calculatingEnergy.subscribe(val => {
+    this.calculatingSub = this.accountOverviewService.calculatingAccountOverviewData.subscribe(val => {
       this.calculating = val;
     })
 
-
-    this.accountFacilitiesSummarySub = this.accountOverviewService.accountFacilitiesEnergySummary.subscribe(accountFacilitiesSummary => {
-      if (accountFacilitiesSummary.allMetersLastBill) {
-        this.lastMonthsDate = new Date(accountFacilitiesSummary.allMetersLastBill.year, accountFacilitiesSummary.allMetersLastBill.monthNumValue);
-        this.yearPriorDate = new Date(accountFacilitiesSummary.allMetersLastBill.year - 1, accountFacilitiesSummary.allMetersLastBill.monthNumValue + 1);
-      } else {
-        this.lastMonthsDate = undefined;
-        this.yearPriorDate = undefined;
-      }
+    this.dateRangeSub = this.accountOverviewService.dateRange.subscribe(dateRange => {
+      this.dateRange = dateRange;
     });
+
+    this.accountOverviewDataSub = this.accountOverviewService.accountOverviewData.subscribe(val => {
+      this.accountOverviewData = val;
+    });
+
+    this.utilityUseAndCostSub = this.accountOverviewService.utilityUseAndCost.subscribe(val => {
+      this.utilityUseAndCost = val;
+    });
+
   }
 
-  ngOnDestroy(){
-    this.accountFacilitiesSummarySub.unsubscribe();
+  ngOnDestroy() {
     this.calculatingSub.unsubscribe();
+    this.accountOverviewDataSub.unsubscribe();
+    this.utilityUseAndCostSub.unsubscribe();
+    this.dateRangeSub.unsubscribe();
   }
 
 

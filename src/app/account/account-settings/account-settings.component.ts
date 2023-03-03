@@ -13,9 +13,10 @@ import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
-import { IdbAccount, IdbAccountAnalysisItem, IdbFacility, IdbOverviewReportOptions } from 'src/app/models/idb';
+import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport, IdbFacility, IdbOverviewReportOptions } from 'src/app/models/idb';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
+import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 
 @Component({
   selector: 'app-account-settings',
@@ -55,7 +56,7 @@ export class AccountSettingsComponent implements OnInit {
     private loadingService: LoadingService,
     private backupDataService: BackupDataService,
     private analysisDbService: AnalysisDbService,
-    private overviewReportOptionsDbService: OverviewReportOptionsDbService,
+    private accountReportDbService: AccountReportDbService,
     private importBackupModalService: ImportBackupModalService,
     private toastNotificationService: ToastNotificationsService,
     private accountAnalysisDbService: AccountAnalysisDbService,
@@ -90,13 +91,13 @@ export class AccountSettingsComponent implements OnInit {
     let idbFacility: IdbFacility = this.facilityDbService.getNewIdbFacility(selectedAccount);
     let newFacility: IdbFacility = await this.facilityDbService.addWithObservable(idbFacility).toPromise();
     this.loadingService.setLoadingMessage('Updating Reports...');
-    let overviewReportOptions: Array<IdbOverviewReportOptions> = this.overviewReportOptionsDbService.accountOverviewReportOptions.getValue();
-    for (let index = 0; index < overviewReportOptions.length; index++) {
-      overviewReportOptions[index].reportOptions.facilities.push({
+    let accountReports: Array<IdbAccountReport> = this.accountReportDbService.accountReports.getValue();
+    for (let index = 0; index < accountReports.length; index++) {
+      accountReports[index].dataOverviewReportSetup.includedFacilities.push({
         facilityId: newFacility.guid,
-        selected: false
+        included: false
       });
-      await this.overviewReportOptionsDbService.updateWithObservable(overviewReportOptions[index]).toPromise();
+      await this.accountReportDbService.updateWithObservable(accountReports[index]).toPromise();
     }
     this.loadingService.setLoadingMessage('Updating Analysis Items...');
     let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
@@ -135,7 +136,7 @@ export class AccountSettingsComponent implements OnInit {
     this.loadingService.setLoadingMessage("Deleting Account Facilities...");
     await this.facilityDbService.deleteAllSelectedAccountFacilities();
     this.loadingService.setLoadingMessage("Deleting Reports...")
-    await this.overviewReportOptionsDbService.deleteAccountReports();
+    await this.accountReportDbService.deleteAccountReports();
     this.loadingService.setLoadingMessage("Deleting Analysis Items...")
     await this.analysisDbService.deleteAccountAnalysisItems();
     await this.accountAnalysisDbService.deleteAccountAnalysisItems();

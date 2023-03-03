@@ -10,7 +10,17 @@
         </ul>
     </div>
     <div class="content-padding">
-        <h4>Account Analysis</h4>
+        <h4>
+            <div class="d-flex justify-content-between">
+                <div class="mt-auto h4-title">
+                    Account Analysis
+                </div>
+
+                <div>
+                    <button class="btn action-btn" (click)="createNewReport()">+Create BP Report</button>
+                </div>
+            </div>
+        </h4>
         <router-outlet></router-outlet>
     </div>
 </div>
