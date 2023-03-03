@@ -47,14 +47,7 @@ export class BetterPlantsReportComponent implements OnInit {
     });
     this.selectedReport = this.accountReportDbService.selectedReport.getValue();
     if (!this.selectedReport) {
-      // let selectedOptions: IdbOverviewReportOptions = this.overviewReportOptionsDbService.selectedOverviewReportOptions.getValue()
-      // if (selectedOptions) {
-      //   this.reportOptions = selectedOptions.reportOptions;
-      // } else {
-      //   this.router.navigateByUrl('/overview-report/report-dashboard');
-      // }
-      // this.router.navigateByUrl('/overview-report/report-dashboard');
-    } else {
+      this.router.navigateByUrl('/account/reports/dashboard');
     }
     this.account = this.accountDbService.selectedAccount.getValue();
     this.setBetterPlantsSummary();
@@ -78,7 +71,7 @@ export class BetterPlantsReportComponent implements OnInit {
     selectedAnalysisItem.energyUnit = 'MMBtu';
     let includedFacilityIds: Array<string> = new Array();
     selectedAnalysisItem.facilityAnalysisItems.forEach(item => {
-      if (item.analysisItemId) {
+      if (item.analysisItemId && item.analysisItemId != 'skip') {
         includedFacilityIds.push(item.facilityId);
       }
     });
