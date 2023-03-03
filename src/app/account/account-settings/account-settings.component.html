@@ -29,7 +29,20 @@
 
     <hr>
 
-    <h4>Portfolio</h4>
+    <h4>
+        <div class="d-flex w-100 justify-content-between">
+            <div class="h4 mb-0 mt-2">
+                Portfolio
+            </div>
+            <div>
+                <button class="btn action-btn me-2" (click)="addNewFacility()"><i class="fa fa-plus"></i> Add New
+                    Facility</button>
+                <button class="btn action-btn" (click)="openApplySettingsModal()">Apply Settings To Facilities</button>
+            </div>
+        </div>
+
+
+    </h4>
 
     <div class="table-responsive">
         <table class="table table-sm utility-data table-hover table-bordered">
@@ -74,7 +87,7 @@
             </tbody>
         </table>
     </div>
-    <div class="row">
+    <!-- <div class="row">
         <div class="col">
             <button class="btn btn-link" (click)="addNewFacility()"><i class="fa fa-plus"></i> Add New Facility</button>
         </div>
@@ -83,7 +96,7 @@
                 <button class="btn btn-outline" (click)="openApplySettingsModal()">Apply Settings To Facilities</button>
             </div>
         </div>
-    </div>
+    </div> -->
     <hr>
 
     <div class="row">
