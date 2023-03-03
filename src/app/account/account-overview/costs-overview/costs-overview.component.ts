@@ -3,6 +3,7 @@ import { AccountOverviewService } from '../account-overview.service';
 import { Subscription } from 'rxjs';
 import { AccountOverviewData } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
 import { UtilityUseAndCost } from 'src/app/calculations/dashboard-calculations/useAndCostClass';
+import { YearMonthData } from 'src/app/models/dashboard';
 
 @Component({
   selector: 'app-costs-overview',
@@ -14,7 +15,6 @@ export class CostsOverviewComponent implements OnInit {
 
   calculatingSub: Subscription;
   calculating: boolean;
-  //TODO: Need to add warning back in!
   displayWarning: boolean;
 
   accountOverviewDataSub: Subscription;
@@ -36,6 +36,12 @@ export class CostsOverviewComponent implements OnInit {
 
     this.accountOverviewDataSub = this.accountOverviewService.accountOverviewData.subscribe(val => {
       this.accountOverviewData = val;
+      if (this.accountOverviewData) {
+        let test: YearMonthData = this.accountOverviewData.allSourcesYearMonthData.find(data => {
+          return data.energyCost != 0 && isNaN(data.energyCost) == false;
+        });
+        this.displayWarning = test == undefined;
+      }
     });
 
     this.utilityUseAndCostSub = this.accountOverviewService.utilityUseAndCost.subscribe(val => {

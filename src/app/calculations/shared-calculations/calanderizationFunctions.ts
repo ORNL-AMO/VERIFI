@@ -64,7 +64,7 @@ export function getYearlyUsageNumbers(calanderizedMeters: Array<CalanderizedMete
                 consumption: consumption
             })
         })
-    })
+    });
     return yearMonthData;
 }
 

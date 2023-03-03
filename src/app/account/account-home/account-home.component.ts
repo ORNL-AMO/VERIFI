@@ -104,7 +104,6 @@ export class AccountHomeComponent implements OnInit {
       let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.accountPredictorEntries.getValue();
       if (typeof Worker !== 'undefined') {
         this.facilityWorker = new Worker(new URL('src/app/web-workers/annual-facility-analysis.worker', import.meta.url));
-        console.log('new worker');
         this.facilityWorker.onmessage = ({ data }) => {
           this.facilityWorker.terminate();
           let facilitySummary: {

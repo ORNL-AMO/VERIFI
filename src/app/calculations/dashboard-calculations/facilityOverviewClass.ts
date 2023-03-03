@@ -66,8 +66,8 @@ export class FacilityOverviewData {
         let sourceMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => {
             return WaterSources.includes(cMeter.meter.source);
         });
-        this.energyYearMonthData = getYearlyUsageNumbers(sourceMeters);
-
+        this.waterYearMonthData = getYearlyUsageNumbers(sourceMeters);
+        console.log(this.waterYearMonthData);
     }
 
     //energy

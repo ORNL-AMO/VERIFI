@@ -3,6 +3,7 @@ import { Subscription } from 'rxjs';
 import { FacilityOverviewData } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';
 import { UtilityUseAndCost } from 'src/app/calculations/dashboard-calculations/useAndCostClass';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
+import { YearMonthData } from 'src/app/models/dashboard';
 import { FacilityOverviewService } from '../facility-overview.service';
 
 @Component({
@@ -45,6 +46,12 @@ export class FacilityCostOverviewComponent implements OnInit {
 
     this.facilityOverviewDataSub = this.facilityOverviewService.facilityOverviewData.subscribe(val => {
       this.facilityOverviewData = val;
+      if (this.facilityOverviewData) {
+        let test: YearMonthData = this.facilityOverviewData.allSourcesYearMonthData.find(data => {
+          return data.energyCost != 0 && isNaN(data.energyCost) == false;
+        });
+        this.displayWarning = test == undefined;
+      }
     })
   }
 

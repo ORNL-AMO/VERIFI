@@ -57,7 +57,6 @@ export class FacilityOverviewComponent implements OnInit {
   }
 
   calculateFacilitiesSummary() {
-    console.log('calc');
     if (typeof Worker !== 'undefined') {
       this.worker = new Worker(new URL('src/app/web-workers/facility-overview.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {
@@ -86,7 +85,6 @@ export class FacilityOverviewComponent implements OnInit {
       this.facilityOverviewService.facilityOverviewData.next(facilityOverviewData);
       this.facilityOverviewService.utilityUseAndCost.next(utilityUseAndCost);
       this.facilityOverviewService.calculatingFacilityOverviewData.next(false);
-
     }
   }
 
