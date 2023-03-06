@@ -30,34 +30,26 @@ export class MonthlyAnalysisSummarySavingsGraphComponent {
 
   drawChart() {
     if (this.monthlyAnalysisSavingsGraph) {
-      // let postiveData: Array<MonthlyAnalysisSummaryData> = this.monthlyAnalysisSummaryData.filter(data => {
-      //   return data.savings >= 0;
-      // })
       var trace1 = {
         type: "scatter",
         mode: "none",
         name: 'Savings',
         x: this.monthlyAnalysisSummaryData.map(results => { return results.date }),
         y: this.monthlyAnalysisSummaryData.map(results => {
-          if (results.savings >= 0) {
-            return results.savings
+          if (results.percentSavingsComparedToBaseline >= 0) {
+            return results.percentSavingsComparedToBaseline
           } else {
             return undefined;
           }
         }),
-        // line: { color: '#27AE60' },
+        line: { color: '#27AE60', width: 4 },
         fill:'tozero',
-        fillcolor:'#27AE60',
+        fillcolor:'#1B5E20',
         marker: {
           // size: 8
         },
-        stackgroup: 'one',
+        stackgroup: 'one'
       }
-
-
-      // let negativeData: Array<MonthlyAnalysisSummaryData> = this.monthlyAnalysisSummaryData.filter(data => {
-      //   return data.savings < 0;
-      // })
 
       var trace2 = {
         type: "scatter",
@@ -65,15 +57,15 @@ export class MonthlyAnalysisSummarySavingsGraphComponent {
         name: 'Losses',
         x: this.monthlyAnalysisSummaryData.map(results => { return results.date }),
         y: this.monthlyAnalysisSummaryData.map(results => {
-          if (results.savings < 0) {
-            return results.savings
+          if (results.percentSavingsComparedToBaseline < 0) {
+            return results.percentSavingsComparedToBaseline
           } else {
             return undefined;
           }
         }),
-        // line: { color: '#E74C3C' },
+        line: { color: '#E74C3C', width: 4 },
         fill: 'tozero',
-        fillcolor: '#E74C3C',
+        fillcolor: '#B71C1C',
         marker: {
           // size: 8
         },
@@ -82,47 +74,7 @@ export class MonthlyAnalysisSummarySavingsGraphComponent {
 
       var data = [trace2, trace1];
 
-      let traces = new Array();
-      let isPositive: boolean = this.monthlyAnalysisSummaryData[0].savings >= 0;
-      let currentTraceData: Array<MonthlyAnalysisSummaryData> = new Array();
-      let index: number = 1;
-      this.monthlyAnalysisSummaryData.forEach((dataItem) => {
-        if (isPositive && dataItem.savings >= 0) {
-          //still positive
-          currentTraceData.push(dataItem);
-        } else if (!isPositive && dataItem.savings < 0) {
-          //still negative
-          currentTraceData.push(dataItem);
-        } else {
-          let color: string;
-          if (isPositive) {
-            color = '#27AE60';
-          } else {
-            color = '#E74C3C';
-          }
 
-          traces.push({
-            type: "scatter",
-            mode: "lines+markers",
-            name: 'Savings',
-            x: currentTraceData.map(results => { return results.date }),
-            y: currentTraceData.map(results => { return results.savings }),
-            line: { color: color, width: 4 },
-            marker: {
-              size: 8
-            },
-            legendgroup: 'legend1',
-            stackgroup: 'group' + index,
-          });
-          currentTraceData = new Array();
-          isPositive = dataItem.savings >= 0;
-          currentTraceData.push(dataItem);
-          index++;
-        }
-      });
-
-
-      console.log(traces);
       var layout = {
         legend: {
           orientation: "h"
@@ -132,12 +84,14 @@ export class MonthlyAnalysisSummarySavingsGraphComponent {
         },
         yaxis: {
           title: {
-            text: this.analysisItem.energyUnit,
+            text: 'Percent Savings',
             font: {
               size: 16
             },
             // standoff: 18
           },
+          ticksuffix: '%',
+          hoverformat: ",.1f",
           automargin: true,
         },
         margin: { r: 0, t: 50 }
