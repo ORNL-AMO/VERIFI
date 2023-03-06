@@ -30,6 +30,9 @@
     <app-monthly-analysis-summary-graph *ngIf="dataDisplay == 'graph'" [analysisItem]="analysisItem"
         [monthlyAnalysisSummaryData]="monthlyAnalysisSummary.monthlyAnalysisSummaryData" [facilityOrAccount]="facility">
     </app-monthly-analysis-summary-graph>
+    <app-monthly-analysis-summary-savings-graph *ngIf="dataDisplay == 'graph'" [analysisItem]="analysisItem"
+        [monthlyAnalysisSummaryData]="monthlyAnalysisSummary.monthlyAnalysisSummaryData" [facilityOrAccount]="facility">
+    </app-monthly-analysis-summary-savings-graph>
 </div>
 
 <app-calculating-spinner *ngIf="calculating" [message]="'Calculating Monthly Results...'"></app-calculating-spinner>
