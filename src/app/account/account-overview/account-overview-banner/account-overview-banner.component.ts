@@ -132,6 +132,7 @@ export class AccountOverviewBannerComponent implements OnInit {
       return date.getFullYear();
     });
     this.years = _.uniq(years);
+    this.years = _.orderBy(years);
   }
 
   setDateRange() {

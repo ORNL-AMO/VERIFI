@@ -171,7 +171,7 @@ export class ExportToExcelTemplateService {
     return 'No';
   }
 
-  getCalendarization(val: "backward" | "fullMonth"): 'Yes' | 'No' {
+  getCalendarization(val: "backward" | "fullMonth" | 'fullYear'): 'Yes' | 'No' {
     if (val == 'backward') {
       return 'Yes';
     }
