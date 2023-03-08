@@ -17,8 +17,10 @@ export class CorrelationMenuComponent implements OnInit {
   meterDataOptionSub: Subscription;
   meterDataOption: 'meters' | 'groups';
 
-  meterGroupOptions: Array<{meterGroup: IdbUtilityMeterGroup, selected: boolean}>;
+  meterGroupOptions: Array<{ meterGroup: IdbUtilityMeterGroup, selected: boolean }>;
   meterGroupOptionsSub: Subscription;
+  menuOpen: boolean;
+  menuOpenSub: Subscription;
   constructor(private visualizationStateService: VisualizationStateService) { }
 
   ngOnInit(): void {
@@ -37,6 +39,14 @@ export class CorrelationMenuComponent implements OnInit {
     this.meterGroupOptionsSub = this.visualizationStateService.meterGroupOptions.subscribe(val => {
       this.meterGroupOptions = val;
     });
+
+    this.menuOpenSub = this.visualizationStateService.menuOpen.subscribe(val => {
+      this.menuOpen = val;
+      setTimeout(() => {
+        //used to trigger responsive graph resizing
+        window.dispatchEvent(new Event("resize"));
+      }, 100)
+    })
   }
 
   ngOnDestroy() {
@@ -44,6 +54,7 @@ export class CorrelationMenuComponent implements OnInit {
     this.predictorOptionsSub.unsubscribe();
     this.meterDataOptionSub.unsubscribe();
     this.meterGroupOptionsSub.unsubscribe();
+    this.menuOpenSub.unsubscribe();
   }
 
   toggleMeterOption(index: number) {
@@ -56,7 +67,7 @@ export class CorrelationMenuComponent implements OnInit {
     this.visualizationStateService.predictorOptions.next(this.predictorOptions);
   }
 
-  toggleMeterGroupOption(index: number){
+  toggleMeterGroupOption(index: number) {
     this.meterGroupOptions[index].selected = !this.meterGroupOptions[index].selected;
     this.visualizationStateService.meterGroupOptions.next(this.meterGroupOptions);
   }
@@ -64,5 +75,4 @@ export class CorrelationMenuComponent implements OnInit {
   saveDataOption() {
     this.visualizationStateService.meterDataOption.next(this.meterDataOption);
   }
-
 }

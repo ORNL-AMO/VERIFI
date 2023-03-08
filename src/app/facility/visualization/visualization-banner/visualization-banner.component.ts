@@ -30,6 +30,8 @@ export class VisualizationBannerComponent implements OnInit {
   selectedFacilitySub: Subscription;
   modalOpen: boolean;
   modalOpenSub: Subscription;
+  menuOpen: boolean;
+  menuOpenSub: Subscription;
   constructor(private visualizationStateService: VisualizationStateService,
     private facilityDbService: FacilitydbService, private meterGroupingService: MeterGroupingService,
     private sharedDataService: SharedDataService, private dbChangesService: DbChangesService) { }
@@ -51,7 +53,13 @@ export class VisualizationBannerComponent implements OnInit {
 
     this.modalOpenSub = this.sharedDataService.modalOpen.subscribe(val => {
       this.modalOpen = val;
+    });
+
+    this.menuOpenSub = this.visualizationStateService.menuOpen.subscribe(val => {
+      this.menuOpen = val;
     })
+
+
   }
 
   ngOnDestroy() {
@@ -60,6 +68,7 @@ export class VisualizationBannerComponent implements OnInit {
     this.modalOpenSub.unsubscribe();
     this.visualizationStateService.dateRange.next({ minDate: undefined, maxDate: undefined });
     this.meterGroupingService.dateRange.next({ minDate: undefined, maxDate: undefined });
+    this.menuOpenSub.unsubscribe();
   }
 
   setView(str: "splom" | "heatmap" | "timeseries") {
@@ -100,5 +109,9 @@ export class VisualizationBannerComponent implements OnInit {
       this.selectedFacility.energyIsSource = energyIsSource;
       await this.dbChangesService.updateFacilities(this.selectedFacility);
     }
+  }
+
+  toggleMenu(){
+    this.visualizationStateService.menuOpen.next(!this.menuOpen);
   }
 }

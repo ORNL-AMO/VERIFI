@@ -4,6 +4,9 @@ import { Subscription } from 'rxjs';
 import { PlotDataItem, RegressionTableDataItem } from 'src/app/models/visualization';
 import * as _ from 'lodash';
 import { VisualizationStateService } from '../visualization-state.service';
+import { Router } from '@angular/router';
+import { IdbFacility } from 'src/app/models/idb';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 
 @Component({
   selector: 'app-correlation-plot',
@@ -21,7 +24,9 @@ export class CorrelationPlotComponent implements OnInit {
   ];
   plotDataSub: Subscription;
   regressionTableDataSub: Subscription;
-  constructor(private plotlyService: PlotlyService, private cd: ChangeDetectorRef, private visualizationStateService: VisualizationStateService) { }
+  showMenu: boolean = false;
+  constructor(private plotlyService: PlotlyService, private cd: ChangeDetectorRef, private visualizationStateService: VisualizationStateService,
+    private router: Router, private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
     this.plotDataSub = this.visualizationStateService.plotData.subscribe(plotData => {
@@ -36,17 +41,17 @@ export class CorrelationPlotComponent implements OnInit {
   }
 
   ngOnDestroy() {
-    this.plotDataSub.unsubscribe();
-    this.regressionTableDataSub.unsubscribe();
+    // this.plotDataSub.unsubscribe();
+    // this.regressionTableDataSub.unsubscribe();
   }
 
-  ngAfterViewInit() {
-    this.drawChart();
-  }
+  // ngAfterViewInit() {
+  //   this.drawChart();
+  // }
 
-  ngOnChanges() {
-    this.drawChart();
-  }
+  // ngOnChanges() {
+  //   this.drawChart();
+  // }
 
   drawChart(): void {
     if (this.matrixPlot && this.plotData && this.regressionTableData && this.regressionTableData.length != 0) {
@@ -84,8 +89,8 @@ export class CorrelationPlotComponent implements OnInit {
     }]
 
     let layout = {
-      title: 'Data Correlation',
-      height: 700,
+      // title: 'Data Correlation',
+      height: 600,
       plot_bgcolor: 'rgba(240,240,240, 0.95)',
       xaxis: axis,
       yaxis: axis,
@@ -175,5 +180,10 @@ export class CorrelationPlotComponent implements OnInit {
 
   getSigFigs(val: number): string {
     return (val).toLocaleString(undefined, { maximumSignificantDigits: 5 });
+  }
+
+  toggleOptions() {
+    let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue()
+    this.router.navigateByUrl('/facility/' + facility.id + '/visualization/correlation/options')
   }
 }

@@ -1,3 +1,26 @@
-.border-left{
-    border-left-width: 5px !important;
+.visualization-menu{
+    width: 0px;
+    transition: .2s width;
+    height: 100%;
+    background-color: white;
+}
+
+.visualization-menu.open{
+    width: 260px;
+    height: 100%;
+    overflow-y: auto;
+}
+@media (max-width: 1500px) {
+    .visualization-menu.open{
+        width: 200px;
+    }
+}
+ 
+.banner-border{
+    border-bottom: solid #2c386b;
+  }
+
+.utility.banner{
+   background-color: white;
+    padding-bottom: 0px;
 }

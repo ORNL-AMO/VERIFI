@@ -88,6 +88,11 @@ import { AccountReportsComponent } from './account/account-reports/account-repor
 import { AccountReportSetupComponent } from './account/account-reports/account-report-setup/account-report-setup.component';
 import { BetterPlantsReportComponent } from './account/account-reports/better-plants-report/better-plants-report.component';
 import { DataOverviewReportComponent } from './account/account-reports/data-overview-report/data-overview-report.component';
+import { CorrelationPlotComponent } from './facility/visualization/correlation-plot/correlation-plot.component';
+import { CorrelationHeatmapComponent } from './facility/visualization/correlation-heatmap/correlation-heatmap.component';
+import { TimeSeriesComponent } from './facility/visualization/time-series/time-series.component';
+import { CorrelationPlotGraphComponent } from './facility/visualization/correlation-plot/correlation-plot-graph/correlation-plot-graph.component';
+import { CorrelationPlotMenuComponent } from './facility/visualization/correlation-plot/correlation-plot-menu/correlation-plot-menu.component';
 
 const routes: Routes = [
   {
@@ -270,7 +275,30 @@ const routes: Routes = [
           { path: '', pathMatch: 'full', redirectTo: 'energy-consumption' }
         ]
       },
-      { path: 'visualization', component: VisualizationComponent },
+      {
+        path: 'visualization',
+        component: VisualizationComponent,
+        children: [
+          { path: '', pathMatch: 'full', redirectTo: 'correlation' },
+          { 
+            path: 'correlation', 
+            component: CorrelationPlotComponent,
+            children: [
+              { path: '', pathMatch: 'full', redirectTo: 'graph' },
+              {
+                path: 'graph',
+                component: CorrelationPlotGraphComponent
+              },
+              {
+                path: 'options',
+                component: CorrelationPlotMenuComponent
+              }
+            ]
+          },
+          { path: 'variance', component: CorrelationHeatmapComponent },
+          { path: 'time-series', component: TimeSeriesComponent }
+        ]
+      },
       {
         path: 'analysis',
         component: AnalysisComponent,

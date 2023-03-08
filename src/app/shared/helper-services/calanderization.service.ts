@@ -12,6 +12,7 @@ import { EnergyUseCalculationsService } from './energy-use-calculations.service'
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { getFiscalYear } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
+import { getIsEnergyMeter, getIsEnergyUnit } from '../sharedHelperFuntions';
 
 @Injectable({
   providedIn: 'root'
@@ -69,7 +70,7 @@ export class CalanderizationService {
         meter: meter,
         monthlyData: calanderizedMeter,
         showConsumption: showConsumption,
-        showEnergyUse: this.energyUnitsHelperService.isEnergyMeter(meter.source),
+        showEnergyUse: getIsEnergyMeter(meter.source),
         energyUnit: calanderizedenergyUnit,
         showEmissions: showEmissions
       });
@@ -174,12 +175,12 @@ export class CalanderizationService {
             let volumeForMonth: number = volumePerDay * daysInMonth;
             totals.totalCost = energyCostPerDay * daysInMonth;
             //energy use
-            let isEnergyMeter: boolean = this.energyUnitsHelperService.isEnergyMeter(meter.source);
+            let isEnergyMeter: boolean = getIsEnergyMeter(meter.source);
             if (isEnergyMeter) {
               totals.totalEnergyUse = energyUseForMonth;
             }
             //energy consumption (data input not as energy)
-            let isEnergyUnit: boolean = this.energyUnitsHelperService.isEnergyUnit(meter.startingUnit);
+            let isEnergyUnit: boolean = getIsEnergyUnit(meter.startingUnit);
             if (!isEnergyUnit) {
               totals.totalConsumption = volumeForMonth;
             } else {
@@ -277,12 +278,12 @@ export class CalanderizationService {
     let costForNext: number = (nextReading.totalCost / daysFromNext) * daysTillNext;
     let volumeForNext: number = volumePerDayNext * daysTillNext;
     //energy use
-    let isEnergyMeter: boolean = this.energyUnitsHelperService.isEnergyMeter(meter.source);
+    let isEnergyMeter: boolean = getIsEnergyMeter(meter.source);
     if (isEnergyMeter) {
       totalEnergyUse = energyUseForCurrent + energyUseForNext;
     }
     //energy consumption (data input not as energy)
-    let isEnergyUnit: boolean = this.energyUnitsHelperService.isEnergyUnit(meter.startingUnit);
+    let isEnergyUnit: boolean = getIsEnergyUnit(meter.startingUnit);
     if (!isEnergyUnit) {
       totalConsumption = volumeForCurrent + volumeForNext;
     } else {
@@ -335,12 +336,12 @@ export class CalanderizationService {
           let totalMonthEnergyConsumption: number = 0;
           let totalMonthCost: number = Number(reading.totalCost);
           //energy use
-          let isEnergyMeter: boolean = this.energyUnitsHelperService.isEnergyMeter(meter.source);
+          let isEnergyMeter: boolean = getIsEnergyMeter(meter.source);
           if (isEnergyMeter) {
             totalMonthEnergyUse = Number(reading.totalEnergyUse);
           }
           //energy consumption (data input not as energy)
-          let isEnergyUnit: boolean = this.energyUnitsHelperService.isEnergyUnit(meter.startingUnit);
+          let isEnergyUnit: boolean = getIsEnergyUnit(meter.startingUnit);
           if (!isEnergyUnit) {
             totalMonthEnergyConsumption = Number(reading.totalVolume);
           } else {
@@ -639,12 +640,12 @@ export class CalanderizationService {
           let totalMonthEnergyUse: number = 0;
 
           //energy use
-          let isEnergyMeter: boolean = this.energyUnitsHelperService.isEnergyMeter(meter.source);
+          let isEnergyMeter: boolean = getIsEnergyMeter(meter.source);
           if (isEnergyMeter) {
             totalMonthEnergyUse = reading.totalEnergyUse;
           }
           //energy consumption (data input not as energy)
-          let isEnergyUnit: boolean = this.energyUnitsHelperService.isEnergyUnit(meter.startingUnit);
+          let isEnergyUnit: boolean = getIsEnergyUnit(meter.startingUnit);
           if (!isEnergyUnit) {
             totalMonthEnergyConsumption = reading.totalVolume;
           } else {
