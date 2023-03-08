@@ -1,31 +1,7 @@
 <div class="d-flex flex-column h-100" *ngIf="utilityMeterData.length != 0">
     <app-visualization-banner></app-visualization-banner>
-    <!-- <div class="d-flex h-100"> -->
-    <!-- <div class="flex-grow-1 p-3"> -->
     <router-outlet></router-outlet>
-    <!-- </div> -->
-    <!-- <app-correlation-menu></app-correlation-menu>
-    </div> -->
 </div>
-<!-- 
-<div class="d-flex h-100" *ngIf="utilityMeterData.length != 0">
-    <div class="d-flex flex-column h-100 flex-grow-1">
-        <app-visualization-banner></app-visualization-banner>
-        <router-outlet></router-outlet>
-    </div>
-    <app-correlation-menu></app-correlation-menu>
-</div> -->
-
-
-
-<!-- <div class="wrapper main-content p-0" *ngIf="utilityMeterData.length != 0">
-    <div class="d-flex">
-        <div class="flex-grow-1">
-            <router-outlet></router-outlet>
-        </div>
-        <app-correlation-menu></app-correlation-menu>
-    </div>
-</div> -->
 
 <div class="p-5" *ngIf="utilityMeterData.length == 0">
     <div class="alert alert-danger text-center">

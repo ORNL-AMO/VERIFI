@@ -1,5 +1,19 @@
-<div class="d-flex flex-column h-100 w-100">
-    <div class="p-1">
-        <div #heatMapPlot id="heatMapPlot"></div>
-    </div>
+<div class="plot-content">
+    <h4>
+        <div class="d-flex w-100 justify-content-between">
+            <div class="h4 mb-0 mt-2">
+                R<sup>2</sup> Variance
+            </div>
+            <div>
+                <button class="btn action-btn" routerLink="options" [routerLinkActive]="['hide']"><i
+                        class="fa fa-cogs"></i> Set Plot
+                    Options</button>
+                <button class="btn action-btn" routerLink="graph" [routerLinkActive]="['hide']"><i
+                        class="fa fa-save"></i> Save Plot
+                    Options</button>
+            </div>
+        </div>
+    </h4>
+
+    <router-outlet></router-outlet>
 </div>

@@ -125,6 +125,9 @@ export class VisualizationStateService {
     let yAxisMeterOptions: Array<AxisOption> = new Array();
     let yAxisGroupOptions: Array<AxisOption> = new Array();
     let yAxisPredictorOptions: Array<AxisOption> = new Array();
+    let r2MeterOptions: Array<AxisOption> = new Array();
+    let r2GroupOptions: Array<AxisOption> = new Array();
+    let r2PredictorOptions: Array<AxisOption> = new Array();
     let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
     meters.forEach((meter, index) => {
       xAxisMeterOptions.push({
@@ -134,6 +137,12 @@ export class VisualizationStateService {
         selected: false
       });
       yAxisMeterOptions.push({
+        itemId: meter.guid,
+        label: meter.name,
+        type: 'meter',
+        selected: true
+      });
+      r2MeterOptions.push({
         itemId: meter.guid,
         label: meter.name,
         type: 'meter',
@@ -155,6 +164,12 @@ export class VisualizationStateService {
         type: 'meterGroup',
         selected: true
       });
+      r2GroupOptions.push({
+        itemId: meterGroup.guid,
+        label: meterGroup.name,
+        type: 'meterGroup',
+        selected: true
+      });
     });
     let predictors: Array<PredictorData> = this.predictorDbService.facilityPredictors.getValue();
     predictors.forEach((predictor, index) => {
@@ -170,6 +185,12 @@ export class VisualizationStateService {
         type: 'predictor',
         selected: false
       });
+      r2PredictorOptions.push({
+        itemId: predictor.id,
+        label: predictor.name,
+        type: 'predictor',
+        selected: false
+      });
     });
     this.correlationPlotOptions.next({
       xAxisMeterOptions: xAxisMeterOptions,
@@ -178,7 +199,10 @@ export class VisualizationStateService {
       yAxisMeterOptions: yAxisMeterOptions,
       yAxisGroupOptions: yAxisGroupOptions,
       yAxisPredictorOptions: yAxisPredictorOptions,
-      asMeters: true
+      asMeters: true,
+      r2MeterOptions: r2MeterOptions,
+      r2GroupOptions: r2GroupOptions,
+      r2PredictorOptions: r2PredictorOptions
     })
   }
 }
@@ -192,6 +216,9 @@ export interface CorrelationPlotOptions {
   yAxisGroupOptions: Array<AxisOption>;
   yAxisPredictorOptions: Array<AxisOption>;
   asMeters: boolean;
+  r2MeterOptions: Array<AxisOption>,
+  r2GroupOptions: Array<AxisOption>,
+  r2PredictorOptions: Array<AxisOption>
 }
 
 export interface AxisOption {

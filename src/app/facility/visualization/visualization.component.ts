@@ -16,9 +16,6 @@ import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
 })
 export class VisualizationComponent implements OnInit {
 
-
-  selectedChart: "splom" | "heatmap" | "timeseries";
-  selectedChartSub: Subscription;
   facilityPredictorsSub: Subscription;
   meterOptionsSub: Subscription;
   predictorsOptionsSub: Subscription;
@@ -80,7 +77,6 @@ export class VisualizationComponent implements OnInit {
 
   ngOnDestroy() {
     this.selectedFacilitySub.unsubscribe();
-    this.selectedChartSub.unsubscribe();
     this.facilityPredictorsSub.unsubscribe();
     this.meterOptionsSub.unsubscribe();
     this.predictorsOptionsSub.unsubscribe();

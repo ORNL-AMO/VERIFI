@@ -1,8 +1,9 @@
 import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { Month, Months } from 'src/app/shared/form-data/months';
-import { CorrelationPlotOptions, VisualizationStateService } from '../../visualization-state.service';
+import { CorrelationPlotOptions, VisualizationStateService } from '../visualization-state.service';
 
 @Component({
   selector: 'app-correlation-plot-menu',
@@ -22,11 +23,14 @@ export class CorrelationPlotMenuComponent {
   correlationPlotOptions: CorrelationPlotOptions;
 
   correlationPlotOptionsSub: Subscription;
+  plotType: 'timeseries' | 'variance' | 'correlation';
   constructor(private visualizationStateService: VisualizationStateService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService) {
+    private utilityMeterDataDbService: UtilityMeterDatadbService,
+    private router: Router) {
   }
 
   ngOnInit() {
+    this.setPlotType();
     this.correlationPlotOptionsSub = this.visualizationStateService.correlationPlotOptions.subscribe(correlationPlotOptions => {
       this.setDateRange();
       this.years = this.utilityMeterDataDbService.getYearOptions(false);
@@ -34,7 +38,7 @@ export class CorrelationPlotMenuComponent {
     });
   }
 
-  ngOnDestroy(){
+  ngOnDestroy() {
     this.correlationPlotOptionsSub.unsubscribe();
   }
 
@@ -56,7 +60,16 @@ export class CorrelationPlotMenuComponent {
       this.endMonth = dateRange.maxDate.getMonth();
       this.endYear = dateRange.maxDate.getFullYear();
     }
+  }
 
+  setPlotType() {
+    if (this.router.url.includes('variance')) {
+      this.plotType = 'variance';
+    } else if (this.router.url.includes('timeseries')) {
+      this.plotType = 'timeseries';
+    } else if (this.router.url.includes('correlation')) {
+      this.plotType = 'correlation';
+    }
   }
 }
 
