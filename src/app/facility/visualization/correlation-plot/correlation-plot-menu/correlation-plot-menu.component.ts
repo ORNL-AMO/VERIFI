@@ -1,9 +1,6 @@
 import { Component } from '@angular/core';
-import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
+import { Subscription } from 'rxjs';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
-import { IdbUtilityMeter, IdbUtilityMeterGroup, PredictorData } from 'src/app/models/idb';
 import { Month, Months } from 'src/app/shared/form-data/months';
 import { CorrelationPlotOptions, VisualizationStateService } from '../../visualization-state.service';
 
@@ -23,14 +20,22 @@ export class CorrelationPlotMenuComponent {
   endYear: number;
 
   correlationPlotOptions: CorrelationPlotOptions;
+
+  correlationPlotOptionsSub: Subscription;
   constructor(private visualizationStateService: VisualizationStateService,
     private utilityMeterDataDbService: UtilityMeterDatadbService) {
   }
 
   ngOnInit() {
-    this.setDateRange();
-    this.years = this.utilityMeterDataDbService.getYearOptions(false);
-    this.correlationPlotOptions = this.visualizationStateService.correlationPlotOptions.getValue();
+    this.correlationPlotOptionsSub = this.visualizationStateService.correlationPlotOptions.subscribe(correlationPlotOptions => {
+      this.setDateRange();
+      this.years = this.utilityMeterDataDbService.getYearOptions(false);
+      this.correlationPlotOptions = correlationPlotOptions;
+    });
+  }
+
+  ngOnDestroy(){
+    this.correlationPlotOptionsSub.unsubscribe();
   }
 
   saveDateRange() {

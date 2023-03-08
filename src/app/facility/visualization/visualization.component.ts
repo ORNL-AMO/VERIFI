@@ -47,11 +47,6 @@ export class VisualizationComponent implements OnInit {
       this.visualizationStateService.setData();
     });
 
-
-    this.selectedChartSub = this.visualizationStateService.selectedChart.subscribe(val => {
-      this.selectedChart = val;
-    });
-
     this.facilityPredictorsSub = this.predictorDbService.facilityPredictors.subscribe(predictors => {
       if (predictors) {
         this.visualizationStateService.setPredictorOptions(predictors);

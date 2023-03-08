@@ -15,7 +15,6 @@ import { MeterGroupingService } from '../utility-data/meter-grouping/meter-group
 })
 export class VisualizationStateService {
 
-  selectedChart: BehaviorSubject<"splom" | "heatmap" | "timeseries">;
   meterOptions: BehaviorSubject<Array<{ meter: IdbUtilityMeter, selected: boolean }>>;
   predictorOptions: BehaviorSubject<Array<{ predictor: PredictorData, selected: boolean }>>;
   meterGroupOptions: BehaviorSubject<Array<{ meterGroup: IdbUtilityMeterGroup, selected: boolean }>>
@@ -33,7 +32,6 @@ export class VisualizationStateService {
   constructor(private visualizationService: VisualizationService, private predictorDbService: PredictordbService,
     private meterGroupingService: MeterGroupingService, private utilityMeterDbService: UtilityMeterdbService,
     private calanderizationService: CalanderizationService, private utilityMeterGroupDbService: UtilityMeterGroupdbService) {
-    this.selectedChart = new BehaviorSubject<"splom" | "heatmap" | "timeseries">("splom");
     this.meterOptions = new BehaviorSubject<Array<{ meter: IdbUtilityMeter, selected: boolean }>>([]);
     this.predictorOptions = new BehaviorSubject<Array<{ predictor: PredictorData, selected: boolean }>>([]);
     this.regressionTableData = new BehaviorSubject<Array<RegressionTableDataItem>>([]);
