@@ -192,4 +192,9 @@ export class AnalysisFooterComponent implements OnInit {
     }
   }
 
+  returnToDashboard(){
+    let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    this.router.navigateByUrl('/facility/' + facility.id + '/analysis/analysis-dashboard');
+  }
+
 }

@@ -64,4 +64,8 @@ export class AccountAnalysisListComponent implements OnInit {
   goBackToAccount() {
     this.selectAnalysisItem(this.analysisService.accountAnalysisItem);
   }
+
+  goToAccountAnalysisDashboard(){
+    this.router.navigateByUrl('/account/analysis')
+  }
 }
