@@ -5,6 +5,9 @@
         </div>
         <div>
             <button *ngIf="showContinue" class="btn" (click)="continue()">Continue<span class="fa fa-chevron-right ps-1"></span></button>
+            <button *ngIf="!showContinue" class="btn" (click)="returnToDashboard()">
+                <i class="fa fa-list"></i> All Account Analysis
+            </button>
         </div>
     </div>
 </div>
