@@ -85,7 +85,6 @@ export class CalanderizationService {
     } else if (meter.meterReadingDataApplication == 'backward') {
       return this.calanderizeMeterDataBackwards(meter, meterData, energyIsSource, calanderizedEnergyUnit, monthDisplayShort, inAccount);
     } else if (meter.meterReadingDataApplication == 'fullYear') {
-      console.log('full year!');
       return this.calanderizeFullYear(meter, meterData, energyIsSource, calanderizedEnergyUnit, monthDisplayShort, inAccount);
     }
   }
@@ -779,7 +778,6 @@ export class CalanderizationService {
         });
       });
     });
-    console.log(calanderizeData)
     return calanderizeData;
   }
 }

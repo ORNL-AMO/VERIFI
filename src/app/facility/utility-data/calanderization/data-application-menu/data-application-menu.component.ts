@@ -50,14 +50,16 @@ export class DataApplicationMenuComponent implements OnInit {
   }
 
   calanderizeMeter() {
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    this.monthlyData = this.calanderizationService.calanderizeMeterData(this.meter, this.utilityMeterData, selectedFacility.energyIsSource, selectedFacility.energyUnit, false, false);
-    if (this.meter.meterReadingDataApplication == 'backward') {
-      this.monthlyData = this.monthlyData.splice(0, 2);
-    } else {
-      this.monthlyData = this.monthlyData.splice(0, 4);
+    if (this.utilityMeterData.length > 2) {
+      let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+      this.monthlyData = this.calanderizationService.calanderizeMeterData(this.meter, this.utilityMeterData, selectedFacility.energyIsSource, selectedFacility.energyUnit, false, false);
+      if (this.meter.meterReadingDataApplication == 'backward') {
+        this.monthlyData = this.monthlyData.splice(0, 2);
+      } else {
+        this.monthlyData = this.monthlyData.splice(0, 4);
+      }
+      this.calanderizationSummary = this.calanderizationService.getCalendarizationSummary(this.meter, this.utilityMeterData);
     }
-    this.calanderizationSummary = this.calanderizationService.getCalendarizationSummary(this.meter, this.utilityMeterData);
   }
 
   checkSameDate(firstDate: Date, secondDate: Date): boolean {
@@ -158,7 +160,7 @@ export class DataApplicationMenuComponent implements OnInit {
           }
         }
       }
-    } 
+    }
     return 'lightgray'
   }
 

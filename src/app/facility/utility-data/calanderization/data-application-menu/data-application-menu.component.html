@@ -1,4 +1,4 @@
-<div class="row no-gutters justify-content-center" *ngIf="utilityMeterData.length > 2">
+<div class="row m-0 justify-content-center">
     <div class="col-md-12 col-lg-8">
         <div class="d-flex pb-2">
             <div class="ps-0 w-50 calanderization-label" for="dataApplication">Calendarization Method</div>
@@ -11,16 +11,16 @@
             </select>
         </div>
 
-        <p class="alert alert-secondary p-1">
+        <div class="alert alert-secondary p-1">
             Calendarization is the process of allocating data to a consistent and appropriate use period. This is done
             for reporting purposes so that there can be a fair comparison of utility data for each year and resource.
             The standard way to calendarize utility data is to divide consumption for each utility by the number of days
             on the bill. Usage is then allocated to each month based on this daily use ratio and the number of billing
             days in each month.
-        </p>
+        </div>
         <hr>
     </div>
-    <ng-container *ngIf="meter.meterReadingDataApplication != 'fullYear'">
+    <ng-container *ngIf="meter.meterReadingDataApplication != 'fullYear' && utilityMeterData.length > 2">
         <div class="col-12 table-col">
 
             <div class="table-responsive"
@@ -94,9 +94,15 @@
             </p>
         </div>
     </ng-container>
+    <div class="col-12"
+        *ngIf="(meter.meterReadingDataApplication == 'backward' || meter.meterReadingDataApplication == 'fullMonth') && utilityMeterData.length < 3">
+        <div class="alert alert-info">
+            Three meter readings are needed to calendarize meter data.
+        </div>
+    </div>
+    <div class="col-12" *ngIf="meter.meterReadingDataApplication == 'fullYear'">
+        <div class="alert alert-info">
+            Meter readings will be summed up per year and distributed evenly across 12 months.
+        </div>
+    </div>
 </div>
-
-
-<p class="alert alert-info" *ngIf="utilityMeterData.length < 3">
-    Three meter readings are needed to calendarize meter data.
-</p>
