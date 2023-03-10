@@ -164,7 +164,7 @@ export class MonthlyAnalysisSummaryDataClass {
         this.baselineAdjustmentForOther = 0;
         if (this.group.hasBaselineAdjustement && this.fiscalYear != baselineYear) {
             let yearAdjustment: { year: number, amount: number } = this.group.baselineAdjustments.find(bAdjustement => { return bAdjustement.year == this.date.getUTCFullYear(); })
-            if (yearAdjustment.amount) {
+            if (yearAdjustment && yearAdjustment.amount) {
                 this.baselineAdjustmentForOther = (this.energyUse / this.annualEnergyUse) * yearAdjustment.amount;
             }
         }
