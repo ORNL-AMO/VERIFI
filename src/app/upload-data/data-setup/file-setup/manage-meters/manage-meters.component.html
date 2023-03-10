@@ -117,6 +117,7 @@
                         [(ngModel)]="meter.meterReadingDataApplication" (change)="setHasNoCalanderizationSelection()">
                         <option [ngValue]="'backward'">Calanderize</option>
                         <option [ngValue]="'fullMonth'">Do Not Calanderize</option>
+                        <option [ngValue]="'fullYear'">Evenly Distribute Data Annually</option>
                         <option [ngValue]="undefined">Unselected</option>
                     </select>
                 </td>
