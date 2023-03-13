@@ -1,22 +1,22 @@
-<div class="card toast" [@updateToast]="showUpdateAvailable"
+<div class="card card-toast" [@updateToast]="showUpdateAvailable"
     [ngClass]="{'warning': !updateError, 'error': updateError}">
-    <div class="header">
+    <div class="card-header">
         <i class="fa fa-exclamation-circle item-left me-2"></i>
 
-        <p class="item-left toast-title" *ngIf="!updateError">A new version of VERIFI is available!</p>
-        <p class="item-left toast-title" *ngIf="updateError">Ooops! Something went wrong!</p>
-        <button class="close item-right" (click)="closeUpdateAvailable()">&times;</button>
+        <ng-container *ngIf="!updateError">A new version of VERIFI is available!</ng-container>
+        <ng-container *ngIf="updateError">Ooops! Something went wrong!</ng-container>
+        <button type="button" class="btn-close" aria-label="Close" (click)="closeUpdateAvailable()"></button>
     </div>
-    <div class="body" *ngIf="updateInfo && !downloading">
-        <p class="mb-0">{{updateInfo.releaseName}} is now available! Click the download link below to download the
+    <div class="card-body" *ngIf="updateInfo && !downloading">
+        <p class="card-text">{{updateInfo.releaseName}} is now available! Click the download link below to download the
             updated version of the application.</p>
     </div>
-    <div class="body" *ngIf="updateError">
-        <p class="mb-0">Something went wrong, please contact ORNL to inform them that there was an error downloading the
+    <div class="card-body" *ngIf="updateError">
+        <p class="card-text">Something went wrong, please contact ORNL to inform them that there was an error
+            downloading the
             update so they can fix the issue as quickly as possible.</p>
     </div>
-    <div class="footer text-end" *ngIf="!downloading">
-        <hr>
+    <div class="card-footer text-end" *ngIf="!downloading">
         <a class="click-link" (click)="update()">Download Update</a>
     </div>
 </div>
