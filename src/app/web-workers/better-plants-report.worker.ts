@@ -5,7 +5,8 @@ import { BetterPlantsReportClass } from "../calculations/better-plants-calculati
 
 addEventListener('message', ({ data }) => {
     let betterPlantsReportClass: BetterPlantsReportClass = new BetterPlantsReportClass(
-        data.reportOptions,
+        data.baselineYear,
+        data.reportYear,
         data.selectedAnalysisItem,
         data.calanderizedMeters,
         data.accountPredictorEntries,

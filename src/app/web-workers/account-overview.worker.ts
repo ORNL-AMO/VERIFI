@@ -1,13 +1,14 @@
 /// <reference lib="webworker" />
 
-import { AccountSummaryClass } from "../calculations/dashboard-calculations/accountSummaryClass";
+import { AccountOverviewData } from "../calculations/dashboard-calculations/accountOverviewClass";
+import { UtilityUseAndCost } from "../calculations/dashboard-calculations/useAndCostClass";
 
 addEventListener('message', ({ data }) => {
-    let accountFacilitiesSummaryClass: AccountSummaryClass = new AccountSummaryClass(data.calanderizedMeters, data.facilities, data.sources, data.account);
+    let accountOverviewData: AccountOverviewData = new AccountOverviewData(data.calanderizedMeters, data.facilities, data.account, data.dateRange);
+    let utilityUseAndCost: UtilityUseAndCost = new UtilityUseAndCost(data.calanderizedMeters, data.dateRange);
     let results = {
-        accountFacilitiesSummary: accountFacilitiesSummaryClass.facilitiesSummary,
-        utilityUsageSummaryData: accountFacilitiesSummaryClass.utilityUsageSummaryData,
-        yearMonthData: accountFacilitiesSummaryClass.yearMonthData,
+        accountOverviewData: accountOverviewData,
+        utilityUseAndCost: utilityUseAndCost,
         type: data.type
     }
     postMessage(results);

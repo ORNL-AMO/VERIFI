@@ -1,14 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { OverviewReportOptionsDbService } from 'src/app/indexedDB/overview-report-options-db.service';
-import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
-import { IdbAccount, IdbAccountAnalysisItem, IdbOverviewReportOptions, IdbUtilityMeterData } from 'src/app/models/idb';
+import { MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
+import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport, IdbUtilityMeterData } from 'src/app/models/idb';
 import { AccountHomeService } from '../account-home.service';
 import * as _ from 'lodash';
 import { Router } from '@angular/router';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { ExportToExcelTemplateService } from 'src/app/shared/helper-services/export-to-excel-template.service';
+import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 
 @Component({
   selector: 'app-account-home-summary',
@@ -39,7 +39,7 @@ export class AccountHomeSummaryComponent implements OnInit {
   calculatingSub: Subscription;
   calculating: boolean;
   constructor(private accountDbService: AccountdbService, private accountHomeService: AccountHomeService,
-    private overviewReportOptionsDbService: OverviewReportOptionsDbService, private router: Router,
+    private accountReportDbService: AccountReportDbService, private router: Router,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private exportToExcelTemplateService: ExportToExcelTemplateService) { }
 
@@ -76,11 +76,11 @@ export class AccountHomeSummaryComponent implements OnInit {
     })
 
 
-    this.overviewReportOptionsSub = this.overviewReportOptionsDbService.accountOverviewReportOptions.subscribe(accountOverviewReportOptions => {
-      let betterPlantsReports: Array<IdbOverviewReportOptions> = accountOverviewReportOptions.filter(options => { return options.type == 'report' && options.reportOptionsType == "betterPlants" });
-      let latestReport: IdbOverviewReportOptions = _.maxBy(betterPlantsReports, 'targetYear');
+    this.overviewReportOptionsSub = this.accountReportDbService.accountReports.subscribe(accountReports => {
+      let betterPlantsReports: Array<IdbAccountReport> = accountReports.filter(options => { return options.reportType == 'betterPlants' });
+      let latestReport: IdbAccountReport = _.maxBy(betterPlantsReports, 'reportYear');
       if (latestReport) {
-        this.betterPlantsReportYear = latestReport.targetYear;
+        this.betterPlantsReportYear = latestReport.reportYear;
       } else {
         this.betterPlantsReportYear = undefined;
       }

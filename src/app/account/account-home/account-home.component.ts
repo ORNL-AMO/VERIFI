@@ -97,7 +97,16 @@ export class AccountHomeComponent implements OnInit {
     let facility: IdbFacility = this.accountFacilities[facilityIndex];
     let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
     let facilityAnalysisItems: Array<IdbAnalysisItem> = accountAnalysisItems.filter(item => { return item.facilityId == facility.guid });
-    let latestAnalysisItem: IdbAnalysisItem = _.maxBy(facilityAnalysisItems, 'reportYear');
+    let selectedAnalysisItems: Array<IdbAnalysisItem> = facilityAnalysisItems.filter(item => {
+      return item.selectedYearAnalysis == true
+    });
+    let latestAnalysisItem: IdbAnalysisItem;
+    if (selectedAnalysisItems.length != 0) {
+      latestAnalysisItem = _.maxBy(selectedAnalysisItems, 'reportYear');
+    } else {
+      latestAnalysisItem = _.maxBy(facilityAnalysisItems, 'reportYear');
+
+    }
 
     if (latestAnalysisItem) {
       let calanderizedMeters: Array<CalanderizedMeter> = this.accountHomeService.calanderizedMeters;
@@ -157,6 +166,10 @@ export class AccountHomeComponent implements OnInit {
         if (facilityIndex != this.accountFacilities.length - 1) {
           this.setFacilityAnalysisSummary(facilityIndex + 1);
         }
+      }
+    } else {
+      if (facilityIndex != this.accountFacilities.length - 1) {
+        this.setFacilityAnalysisSummary(facilityIndex + 1);
       }
     }
   }

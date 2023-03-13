@@ -5,9 +5,9 @@ import { ToastNotificationsService } from 'src/app/core-components/toast-notific
 import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { OverviewReportOptionsDbService } from 'src/app/indexedDB/overview-report-options-db.service';
-import { IdbAccount, IdbAccountAnalysisItem, IdbOverviewReportOptions } from 'src/app/models/idb';
+import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport } from 'src/app/models/idb';
 
 @Component({
   selector: 'app-account-analysis-item-card',
@@ -25,7 +25,7 @@ export class AccountAnalysisItemCardComponent implements OnInit {
     private analysisService: AnalysisService, private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService, private toastNotificationService: ToastNotificationsService,
     private accountAnalysisDbService: AccountAnalysisDbService,
-    private overviewReportOptionsDbService: OverviewReportOptionsDbService) { }
+    private accountReportDbService: AccountReportDbService) { }
 
   ngOnInit(): void {
     this.showDetailSub = this.analysisService.showDetail.subscribe(val => {
@@ -54,15 +54,13 @@ export class AccountAnalysisItemCardComponent implements OnInit {
   async confirmDelete() {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.accountAnalysisDbService.deleteWithObservable(this.analysisItem.id).toPromise();
-    let overviewReportOptions: Array<IdbOverviewReportOptions> = this.overviewReportOptionsDbService.accountOverviewReportOptions.getValue();
+    let accountReports: Array<IdbAccountReport> = this.accountReportDbService.accountReports.getValue();
     let updateReportOptions: boolean = false;
-    for (let i = 0; i < overviewReportOptions.length; i++) {
-      if (overviewReportOptions[i].reportOptionsType == 'betterPlants') {
-        if (overviewReportOptions[i].reportOptions.analysisItemId == this.analysisItem.guid) {
-          overviewReportOptions[i].reportOptions.analysisItemId = undefined;
-          await this.overviewReportOptionsDbService.updateWithObservable(overviewReportOptions[i]).toPromise();
-          updateReportOptions = true;
-        }
+    for (let i = 0; i < accountReports.length; i++) {
+      if (accountReports[i].betterPlantsReportSetup.analysisItemId == this.analysisItem.guid) {
+        accountReports[i].betterPlantsReportSetup.analysisItemId = undefined;
+        await this.accountReportDbService.updateWithObservable(accountReports[i]).toPromise();
+        updateReportOptions = true;
       }
     }
     await this.dbChangesService.setAccountAnalysisItems(selectedAccount);
@@ -70,7 +68,7 @@ export class AccountAnalysisItemCardComponent implements OnInit {
       await this.dbChangesService.setAccountOverviewReportOptions(selectedAccount);
     }
     this.displayDeleteModal = false;
-    this.toastNotificationService.showToast('Analysis Item Deleted', undefined, undefined, false, "bg-success");
+    this.toastNotificationService.showToast('Analysis Item Deleted', undefined, undefined, false, "alert-success");
   }
 
   async setUseItem() {
@@ -102,7 +100,7 @@ export class AccountAnalysisItemCardComponent implements OnInit {
     let addedItem: IdbAccountAnalysisItem = await this.accountAnalysisDbService.addWithObservable(newItem).toPromise();
     await this.dbChangesService.setAccountAnalysisItems(selectedAccount);
     this.accountAnalysisDbService.selectedAnalysisItem.next(addedItem);
-    this.toastNotificationService.showToast('Analysis Item Copy Created', undefined, undefined, false, "bg-success");
+    this.toastNotificationService.showToast('Analysis Item Copy Created', undefined, undefined, false, "alert-success");
     this.router.navigateByUrl('account/analysis/setup');
   }
 }

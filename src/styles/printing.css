@@ -34,12 +34,14 @@
         page-break-after: always !important;
     }
 
-    .table-mh th, .table-mh th span{
+    .table-mh th, .table-mh th span, table.table.table-sm thead tr.table-mh th span{
         background-color: white;
         color: black;
     }
 
-    table.table.table-sm tr th, table.table.table-sm tbody tr, .table th, .table td {
+    table.table.table-sm tr th, table.table.table-sm tbody tr,
+     .table th, .table td,  table.table.table-sm thead tr.table-mh th
+      {
         border-top: solid 1px black !important;
         border-bottom: solid 1px black !important;
         border-left: solid 1px black !important;
@@ -51,5 +53,9 @@
     table.table{
         border-collapse: inherit !important;
         border: none;
+    }
+
+    .overflow-hidden{
+        overflow: visible !important;
     }
 }

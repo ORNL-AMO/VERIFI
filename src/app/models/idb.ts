@@ -1,7 +1,7 @@
 import { JStatRegressionModel } from './analysis';
 import { CalanderizedMeter, MonthlyData } from './calanderization';
 import { ElectricityDataFilters, GeneralUtilityDataFilters } from './meterDataFilter';
-import { ReportOptions } from './overview-report';
+import { BetterPlantsReportSetup, DataOverviewReportSetup, ReportOptions } from './overview-report';
 import { SustainabilityQuestions } from './sustainabilityQuestions';
 
 export interface IdbAccount {
@@ -133,7 +133,7 @@ export interface IdbUtilityMeter {
     fuel?: string
     visible?: boolean
     importWizardName?: string
-    meterReadingDataApplication?: "backward" | "fullMonth",
+    meterReadingDataApplication?: "backward" | "fullMonth" | 'fullYear',
     unitsDifferent?: boolean,
     ignoreDuplicateMonths?: boolean,
     ignoreMissingMonths?: boolean,
@@ -178,7 +178,7 @@ export interface IdbUtilityMeterData {
 
     //electricity
     totalRealDemand?: number,
-    totalBilledDemand? :number,
+    totalBilledDemand?: number,
     nonEnergyCharge?: number,
     block1Consumption?: number,
     block1ConsumptionCharge?: number,
@@ -249,6 +249,27 @@ export interface IdbOverviewReportOptions {
     reportOptionsType?: 'betterPlants' | 'data'
 }
 
+
+export interface IdbAccountReport {
+    id?: number,
+    guid: string,
+    accountId: string,
+    overviewReportId?: string,
+    baselineYear: number,
+    reportYear: number,
+    startMonth: number,
+    startYear: number,
+    endMonth: number,
+    endYear: number,
+    date: Date,
+    name: string,
+    reportType: ReportType,
+    betterPlantsReportSetup: BetterPlantsReportSetup,
+    dataOverviewReportSetup: DataOverviewReportSetup
+}
+
+
+
 export interface IdbAnalysisItem {
     id?: number,
     guid: string,
@@ -264,7 +285,7 @@ export interface IdbAnalysisItem {
     selectedYearAnalysis?: boolean
 }
 
-export interface AnalysisSetupErrors{
+export interface AnalysisSetupErrors {
     hasError: boolean,
     missingName: boolean,
     noGroups: boolean,
@@ -350,3 +371,9 @@ export interface IdbCustomEmissionsItem {
 export type AnalysisType = 'absoluteEnergyConsumption' | 'energyIntensity' | 'modifiedEnergyIntensity' | 'regression';
 export type MeterSource = "Electricity" | "Natural Gas" | "Other Fuels" | "Other Energy" | "Water" | "Waste Water" | "Other Utility";
 export type MeterPhase = "Solid" | "Liquid" | "Gas";
+export type ReportType = "betterPlants" | 'dataOverview';
+
+
+export const EnergySources: Array<MeterSource> = ["Electricity", "Natural Gas", "Other Fuels", "Other Energy"];
+export const AllSources: Array<MeterSource> = ["Electricity", "Natural Gas", "Other Fuels", "Other Energy", "Water", "Waste Water", "Other Utility"];
+export const WaterSources: Array<MeterSource> = ["Water", "Waste Water"];

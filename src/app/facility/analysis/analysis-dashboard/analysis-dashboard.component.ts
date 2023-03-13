@@ -71,7 +71,7 @@ export class AnalysisDashboardComponent implements OnInit {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.setAnalysisItems(selectedAccount, this.selectedFacility);
     this.analysisDbService.selectedAnalysisItem.next(addedItem);
-    this.toastNotificationService.showToast('New Analysis Created', undefined, undefined, false, "bg-success");
+    this.toastNotificationService.showToast('New Analysis Created', undefined, undefined, false, "alert-success");
     this.router.navigateByUrl('facility/' + this.selectedFacility.id + '/analysis/run-analysis');
   }
 

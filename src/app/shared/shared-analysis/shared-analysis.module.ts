@@ -8,6 +8,7 @@ import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { HelperPipesModule } from '../helper-pipes/helper-pipes.module';
 import { AnnualAnalysisSummaryGraphComponent } from './annual-analysis-summary-graph/annual-analysis-summary-graph.component';
 import { MonthlyAnalysisSummaryGraphComponent } from './monthly-analysis-summary-graph/monthly-analysis-summary-graph.component';
+import { MonthlyAnalysisSummarySavingsGraphComponent } from './monthly-analysis-summary-savings-graph/monthly-analysis-summary-savings-graph.component';
 
 
 @NgModule({
@@ -16,7 +17,8 @@ import { MonthlyAnalysisSummaryGraphComponent } from './monthly-analysis-summary
     AnnualAnalysisSummaryTableComponent,
     MonthlyAnalysisSummaryTableComponent,
     AnnualAnalysisSummaryGraphComponent,
-    MonthlyAnalysisSummaryGraphComponent
+    MonthlyAnalysisSummaryGraphComponent,
+    MonthlyAnalysisSummarySavingsGraphComponent
   ],
   imports: [
     CommonModule,
@@ -29,7 +31,8 @@ import { MonthlyAnalysisSummaryGraphComponent } from './monthly-analysis-summary
     AnnualAnalysisSummaryTableComponent,
     MonthlyAnalysisSummaryTableComponent,
     AnnualAnalysisSummaryGraphComponent,
-    MonthlyAnalysisSummaryGraphComponent
+    MonthlyAnalysisSummaryGraphComponent,
+    MonthlyAnalysisSummarySavingsGraphComponent
   ]
 })
 export class SharedAnalysisModule { }

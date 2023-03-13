@@ -1,0 +1,20 @@
+<div class="report" [ngClass]="{'print': print}"
+    *ngIf="overviewReport && !calculatingAccounts && !calculatingFacilities">
+    <app-data-overview-account-report *ngIf="overviewReport.includeAccountReport" [overviewReport]="overviewReport"
+        [accountData]="accountData"></app-data-overview-account-report>
+
+    <ng-container *ngIf="overviewReport.includeFacilityReports">
+        <app-data-overview-facility-report *ngFor="let dataOverviewFacility of facilitiesData"
+            [dataOverviewFacility]="dataOverviewFacility"
+            [overviewReport]="overviewReport"></app-data-overview-facility-report>
+    </ng-container>
+</div>
+
+<div class="w-100 justify-content-center" *ngIf="calculatingFacilities || calculatingAccounts">
+    <div class="pt-5">
+        <app-calculating-spinner [message]="'Generating Data Overview Report...'"></app-calculating-spinner>
+    </div>
+</div>
+
+<app-print-report-button
+    *ngIf="overviewReport && !calculatingAccounts && !calculatingFacilities"></app-print-report-button>

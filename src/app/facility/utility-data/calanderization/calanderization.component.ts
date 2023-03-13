@@ -225,7 +225,7 @@ export class CalanderizationComponent implements OnInit {
     this.cancelSetDataApplication();
   }
 
-  async setCalanderizeData(calanderize: 'fullMonth' | 'backward') {
+  async setCalanderizeData(calanderize: 'fullMonth' | 'backward' | 'fullYear') {
     this.dataApplicationMeter = this.selectedMeter;
     this.dataApplicationMeter.meterReadingDataApplication = calanderize;
     await this.setDataApplication();

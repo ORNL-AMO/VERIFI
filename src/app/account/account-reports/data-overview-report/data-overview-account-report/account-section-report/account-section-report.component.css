@@ -1,0 +1,10 @@
+
+@media print {
+    .report-page{
+        border: none;
+    }
+
+    hr{
+        display: none;
+    }
+}

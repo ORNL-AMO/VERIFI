@@ -2,7 +2,7 @@ import { DBConfig } from "ngx-indexed-db";
 
 export const dbConfig: DBConfig = {
   name: 'verifi',
-  version: 11,
+  version: 12,
   objectStoresMeta: [{
     store: 'accounts',
     storeConfig: { keyPath: 'id', autoIncrement: true },
@@ -146,5 +146,13 @@ export const dbConfig: DBConfig = {
     storeSchema: [
       { name: 'accountId', keypath: 'accountId', options: { unique: false } },
     ]
-  }]
+  },
+  {
+    store: 'accountReports',
+    storeConfig: { keyPath: 'id', autoIncrement: true },
+    storeSchema: [
+      { name: 'accountId', keypath: 'accountId', options: { unique: false } },
+    ]
+  },
+]
 };

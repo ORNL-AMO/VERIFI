@@ -1,0 +1,83 @@
+<div class="table-responsive">
+    <table class="table utility-data table-sm table-bordered table-hover">
+        <thead>
+            <tr>
+                <th>Meter</th>
+                <th>Utility</th>
+                <th>Group</th>
+                <th *ngIf="dataType =='energyUse'">Utility Usage <br>(<span
+                        [innerHTML]="energyUnit | settingsLabel"></span>)
+                </th>
+                <th *ngIf="dataType =='water'">Consumption <br>(<span [innerHTML]="waterUnit | settingsLabel"></span>)
+                </th>
+                <th *ngIf="dataType != 'emissions'">Utility Cost</th>
+                <th *ngIf="dataType == 'emissions' && emissionsDisplay == 'market'">
+                    Market-Based <br>Emissions (kg CO<sub>2</sub>e)
+                </th>
+                <th *ngIf="dataType == 'emissions' && emissionsDisplay == 'location'">
+                    Location-Based <br>Emissions (kg CO<sub>2</sub>e)
+                </th>
+            </tr>
+        </thead>
+        <tbody class="table-group-divider">
+            <tr *ngFor="let overviewMeter of facilityOverviewMeters | orderBy: orderByValue">
+                <td>
+                    {{overviewMeter.meter.name}}
+                </td>
+                <td>
+                    {{overviewMeter.meter.source}}
+                </td>
+                <td>
+                    {{overviewMeter.meter.groupId | groupName}}
+                </td>
+                <td *ngIf="dataType =='energyUse'">
+                    {{overviewMeter.totalUsage | customNumber}}
+                </td>
+                <td *ngIf="dataType =='water'">
+                    {{overviewMeter.totalUsage | customNumber}}
+                </td>
+                <td *ngIf="dataType != 'emissions'">
+                    {{overviewMeter.totalCost | customNumber:true }}
+                </td>
+                <td *ngIf="dataType =='emissions' && emissionsDisplay == 'market'">
+                    {{overviewMeter.totalMarketEmissions |customNumber }}
+                </td>
+                <td *ngIf="dataType =='emissions' && emissionsDisplay == 'location'">
+                    {{overviewMeter.totalLocationEmissions |customNumber }}
+                </td>
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr>
+                <th>
+                    Total
+                </th>
+                <th>
+                </th>
+                <th>
+                </th>
+                <th *ngIf="dataType =='energyUse'">
+                    {{facilityOverviewData.totalEnergyUsage | customNumber}}
+                </th>
+                <th *ngIf="dataType == 'energyUse'">
+                    {{facilityOverviewData.totalEnergyCost | customNumber:true }}
+                </th>
+                <th *ngIf="dataType =='water'">
+                    {{facilityOverviewData.totalWaterConsumption | customNumber}}
+                </th>
+                <th *ngIf="dataType == 'water'">
+                    {{facilityOverviewData.totalWaterCost | customNumber:true }}
+                </th>
+                <th *ngIf="dataType == 'cost'">
+                    {{facilityOverviewData.totalFacilityCost | customNumber:true }}
+                </th>
+                <th *ngIf="dataType =='emissions' && emissionsDisplay == 'market'">
+                    {{facilityOverviewData.totalMarketEmissions | customNumber }}
+                </th>
+                <th *ngIf="dataType =='emissions' && emissionsDisplay == 'location'">
+                    {{facilityOverviewData.totalLocationEmissions | customNumber }}
+                </th>
+            </tr>
+        </tfoot>
+    </table>
+</div>

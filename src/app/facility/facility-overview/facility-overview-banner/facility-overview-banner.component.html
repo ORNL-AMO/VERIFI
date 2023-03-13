@@ -28,7 +28,35 @@
             </li>
         </ul>
 
-        <div class="d-flex" *ngIf="urlDisplay != 'other'">
+        <div class="d-flex">
+            <div class="pe-1">
+                <select name="minMonth" [(ngModel)]="minMonth" class="form-select" (change)="setDate()">
+                    <option class="pe-2" *ngFor="let month of months" [ngValue]="month.monthNumValue">
+                        {{month.abbreviation}}</option>
+                </select>
+            </div>
+            <div class="pe-1">
+                <select name="minYear" [(ngModel)]="minYear" class="form-select" (change)="setDate()">
+                    <option class="pe-2" *ngFor="let year of years" [ngValue]="year">{{year}}</option>
+                </select>
+            </div>
+            <div class="ps-1 pe-1">
+                <span class="fa fa-arrow-right"></span>
+            </div>
+            <div class="pe-1">
+                <select name="maxMonth" [(ngModel)]="maxMonth" class="form-select" (change)="setDate()">
+                    <option class="pe-2" *ngFor="let month of months" [ngValue]="month.monthNumValue">
+                        {{month.abbreviation}}</option>
+                </select>
+            </div>
+            <div class="pe-1">
+                <select name="maxYear" [(ngModel)]="maxYear" class="form-select" (change)="setDate()">
+                    <option class="pe-2" *ngFor="let year of years" [ngValue]="year">{{year}}</option>
+                </select>
+            </div>
+            <div class="pe-1">
+                <button class="btn action-btn btn-sm" (click)="createReport()"><span class="fa fa-file"></span> Create Report</button>
+            </div>
             <div class="pe-1" *ngIf="urlDisplay == 'energy'">
                 <div class="btn-group">
                     <button class="btn btn-sm m-0 toggle-btn" (click)="setEnergyIsSource(true)"

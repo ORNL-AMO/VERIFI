@@ -1,6 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { AccountOverviewService } from '../account-overview.service';
 import { Subscription } from 'rxjs';
+import { AccountOverviewData } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
+import { UtilityUseAndCost } from 'src/app/calculations/dashboard-calculations/useAndCostClass';
+import { YearMonthData } from 'src/app/models/dashboard';
 
 @Component({
   selector: 'app-costs-overview',
@@ -9,34 +12,48 @@ import { Subscription } from 'rxjs';
 })
 export class CostsOverviewComponent implements OnInit {
 
-  lastMonthsDate: Date;
-  yearPriorDate: Date;
-  accountFacilitiesSummarySub: Subscription;
+
   calculatingSub: Subscription;
   calculating: boolean;
   displayWarning: boolean;
+
+  accountOverviewDataSub: Subscription;
+  accountOverviewData: AccountOverviewData;
+  utilityUseAndCostSub: Subscription;
+  utilityUseAndCost: UtilityUseAndCost;
+  dateRangeSub: Subscription;
+  dateRange: { startDate: Date, endDate: Date };
   constructor(private accountOverviewService: AccountOverviewService) { }
 
   ngOnInit(): void {
-    this.calculatingSub = this.accountOverviewService.calculatingCosts.subscribe(val => {
+    this.calculatingSub = this.accountOverviewService.calculatingAccountOverviewData.subscribe(val => {
       this.calculating = val;
     })
 
-    this.accountFacilitiesSummarySub = this.accountOverviewService.accountFacilitiesCostsSummary.subscribe(accountFacilitiesSummary => {
-      if (accountFacilitiesSummary.allMetersLastBill) {
-        this.displayWarning = accountFacilitiesSummary.totalEnergyCost == 0;
-        this.lastMonthsDate = new Date(accountFacilitiesSummary.allMetersLastBill.year, accountFacilitiesSummary.allMetersLastBill.monthNumValue);
-        this.yearPriorDate = new Date(accountFacilitiesSummary.allMetersLastBill.year - 1, accountFacilitiesSummary.allMetersLastBill.monthNumValue + 1);
-      } else {
-        this.lastMonthsDate = undefined;
-        this.yearPriorDate = undefined;
+    this.dateRangeSub = this.accountOverviewService.dateRange.subscribe(dateRange => {
+      this.dateRange = dateRange;
+    });
+
+    this.accountOverviewDataSub = this.accountOverviewService.accountOverviewData.subscribe(val => {
+      this.accountOverviewData = val;
+      if (this.accountOverviewData) {
+        let test: YearMonthData = this.accountOverviewData.allSourcesYearMonthData.find(data => {
+          return data.energyCost != 0 && isNaN(data.energyCost) == false;
+        });
+        this.displayWarning = test == undefined;
       }
+    });
+
+    this.utilityUseAndCostSub = this.accountOverviewService.utilityUseAndCost.subscribe(val => {
+      this.utilityUseAndCost = val;
     });
   }
 
-  ngOnDestroy(){
-    this.accountFacilitiesSummarySub.unsubscribe();
+  ngOnDestroy() {
     this.calculatingSub.unsubscribe();
+    this.accountOverviewDataSub.unsubscribe();
+    this.utilityUseAndCostSub.unsubscribe();
+    this.dateRangeSub.unsubscribe();
   }
 
 }

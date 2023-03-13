@@ -1,0 +1,20 @@
+<div class="table-responsive">
+    <!--energy use-->
+    <app-energy-consumption-table *ngIf="dataType == 'energyUse'" [dateRange]="dateRange" [facilityId]="facilityId"
+        [energyUnit]="energyUnit" [sourcesUseAndCost]="sourcesUseAndCost" [useAndCostTotal]="useAndCostTotal"
+        [previousYear]="previousYear"></app-energy-consumption-table>
+    <!--emissions-->
+    <app-emissions-consumption-table *ngIf="dataType == 'emissions'" [dateRange]="dateRange" [facilityId]="facilityId"
+        [sourcesUseAndCost]="sourcesUseAndCost" [useAndCostTotal]="useAndCostTotal"
+        [previousYear]="previousYear"></app-emissions-consumption-table>
+
+    <!--costs-->
+    <app-costs-consumption-table *ngIf="dataType == 'cost'" [dateRange]="dateRange" [facilityId]="facilityId"
+        [sourcesUseAndCost]="sourcesUseAndCost" [useAndCostTotal]="useAndCostTotal"
+        [previousYear]="previousYear"></app-costs-consumption-table>
+
+    <!--water-->
+    <app-water-consumption-table *ngIf="dataType == 'water'" [dateRange]="dateRange" [facilityId]="facilityId"
+        [sourcesUseAndCost]="sourcesUseAndCost" [useAndCostTotal]="useAndCostTotal" [previousYear]="previousYear"
+        [waterUnit]="waterUnit"></app-water-consumption-table>
+</div>

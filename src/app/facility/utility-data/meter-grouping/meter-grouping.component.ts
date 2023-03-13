@@ -196,7 +196,7 @@ export class MeterGroupingComponent implements OnInit {
     await this.dbChangesService.setAnalysisItems(selectedAccount, this.selectedFacility);
     this.closeDeleteGroup();
     this.loadingService.setLoadingStatus(false);
-    this.toastNoticationService.showToast("Meter Group Deleted!", undefined, undefined, false, "bg-success");
+    this.toastNoticationService.showToast("Meter Group Deleted!", undefined, undefined, false, "alert-success");
 
     this.setGroupTypes();
   }

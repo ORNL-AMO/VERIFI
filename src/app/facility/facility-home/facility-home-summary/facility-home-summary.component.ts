@@ -11,8 +11,8 @@ import { Router } from '@angular/router';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityColors } from 'src/app/shared/utilityColors';
-import { OverviewReportService } from 'src/app/account/overview-report/overview-report.service';
 import { ExportToExcelTemplateService } from 'src/app/shared/helper-services/export-to-excel-template.service';
+import { getNAICS } from 'src/app/shared/form-data/naics-data';
 
 @Component({
   selector: 'app-facility-home-summary',
@@ -58,7 +58,6 @@ export class FacilityHomeSummaryComponent implements OnInit {
     private facilityDbService: FacilitydbService, private facilityHomeService: FacilityHomeService,
     private router: Router, private predictorDbService: PredictordbService,
     private utilityMeterDbService: UtilityMeterdbService,
-    private overviewReportService: OverviewReportService,
     private exportToExcelTemplateService: ExportToExcelTemplateService) { }
 
   ngOnInit(): void {
@@ -164,7 +163,7 @@ export class FacilityHomeSummaryComponent implements OnInit {
   }
 
   setNAICS() {
-    this.naics = this.overviewReportService.getNAICS(this.facility);
+    this.naics = getNAICS(this.facility);
   }
 
   exportData() {

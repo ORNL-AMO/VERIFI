@@ -26,21 +26,6 @@ export interface MonthlyData {
     excessRECsEmissions: number
 }
 
-
-export interface LastYearData {
-    time: string,
-    energyUse: number,
-    energyCost: number,
-    energyConsumption: number,
-    locationEmissions: number, 
-    marketEmissions: number, 
-    RECs: number,
-    excessRECs: number, 
-    excessRECsEmissions: number,   
-    date: Date
-}
-
-
 export interface CalanderizationFilters {
     showAllSources: boolean;
     selectedSources: Array<{

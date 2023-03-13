@@ -1,5 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
+import { FacilityOverviewData } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';
+import { UtilityUseAndCost } from 'src/app/calculations/dashboard-calculations/useAndCostClass';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
+import { YearMonthData } from 'src/app/models/dashboard';
 import { FacilityOverviewService } from '../facility-overview.service';
 
 @Component({
@@ -9,34 +13,53 @@ import { FacilityOverviewService } from '../facility-overview.service';
 })
 export class FacilityCostOverviewComponent implements OnInit {
 
-  lastMonthsDate: Date;
-  yearPriorDate: Date;
-  accountFacilitiesSummarySub: Subscription;
   calculatingSub: Subscription;
   calculating: boolean;
   displayWarning: boolean;
-  constructor(private facilityOverviewService: FacilityOverviewService) { }
+  facilityId: string;
+  selectedFacilitySub: Subscription;
+
+  dateRange: { startDate: Date, endDate: Date };
+  dateRangeSub: Subscription;
+  utilityUseAndCost: UtilityUseAndCost;
+  utilityUseAndCostSub: Subscription;
+  facilityOverviewData: FacilityOverviewData;
+  facilityOverviewDataSub: Subscription;
+  constructor(private facilityOverviewService: FacilityOverviewService, private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
-    this.calculatingSub = this.facilityOverviewService.calculatingCosts.subscribe(val => {
+    this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
+      this.facilityId = val.guid;
+    })
+
+    this.calculatingSub = this.facilityOverviewService.calculatingFacilityOverviewData.subscribe(val => {
       this.calculating = val;
     })
 
-    this.accountFacilitiesSummarySub = this.facilityOverviewService.costsMeterSummaryData.subscribe(summaryData => {
-      if (summaryData && summaryData.allMetersLastBill) {
-        this.displayWarning = summaryData.totalEnergyCost == 0;
-        this.lastMonthsDate = new Date(summaryData.allMetersLastBill.year, summaryData.allMetersLastBill.monthNumValue);
-        this.yearPriorDate = new Date(summaryData.allMetersLastBill.year - 1, summaryData.allMetersLastBill.monthNumValue + 1);
-      } else {
-        this.lastMonthsDate = undefined;
-        this.yearPriorDate = undefined;
-      }
+    this.dateRangeSub = this.facilityOverviewService.dateRange.subscribe(val => {
+      this.dateRange = val;
     });
+
+    this.utilityUseAndCostSub = this.facilityOverviewService.utilityUseAndCost.subscribe(val => {
+      this.utilityUseAndCost = val;
+    });
+
+    this.facilityOverviewDataSub = this.facilityOverviewService.facilityOverviewData.subscribe(val => {
+      this.facilityOverviewData = val;
+      if (this.facilityOverviewData) {
+        let test: YearMonthData = this.facilityOverviewData.allSourcesYearMonthData.find(data => {
+          return data.energyCost != 0 && isNaN(data.energyCost) == false;
+        });
+        this.displayWarning = test == undefined;
+      }
+    })
   }
 
   ngOnDestroy() {
-    this.accountFacilitiesSummarySub.unsubscribe();
     this.calculatingSub.unsubscribe();
+    this.selectedFacilitySub.unsubscribe();
+    this.dateRangeSub.unsubscribe();
+    this.utilityUseAndCostSub.unsubscribe();
+    this.facilityOverviewDataSub.unsubscribe();
   }
-
 }

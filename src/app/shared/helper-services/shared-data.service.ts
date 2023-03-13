@@ -10,6 +10,7 @@ export class SharedDataService {
   modalOpen: BehaviorSubject<boolean>;
   sidebarOpen: BehaviorSubject<boolean>;
   itemsPerPage: BehaviorSubject<number>;
+  openCreateReportModal: BehaviorSubject<boolean>;
   constructor(private localStorageService: LocalStorageService) {
     this.modalOpen = new BehaviorSubject<boolean>(false);
     this.sidebarOpen = new BehaviorSubject<boolean>(true);
@@ -25,6 +26,8 @@ export class SharedDataService {
         this.localStorageService.store("itemsPerPage", itemsPerPage);
       }
     });
+
+    this.openCreateReportModal = new BehaviorSubject<boolean>(false);
   }
 
   getInitialItemsPerPage(): number {
