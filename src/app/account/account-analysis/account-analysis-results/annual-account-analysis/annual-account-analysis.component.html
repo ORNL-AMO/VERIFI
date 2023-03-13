@@ -1,5 +1,9 @@
 <div class="d-flex justify-content-between mb-2">
-    <app-analysis-summary-table-filter [tableContext]="'annualAccount'"></app-analysis-summary-table-filter>
+    <div class="p-0">
+        <app-analysis-summary-table-filter [tableContext]="'annualAccount'"
+            *ngIf="dataDisplay == 'table'"></app-analysis-summary-table-filter>
+    </div>
+
 
     <div class="btn-group">
         <button class="btn toggle-btn" [ngClass]="{'active': dataDisplay == 'table'}" (click)="setDataDisplay('table')">
