@@ -46,7 +46,7 @@ export class ManageMetersComponent implements OnInit {
     groupOptions: Array<IdbUtilityMeterGroup>
   }>;
   allMetersValid: boolean;
-  calanderizeAllOnToggle: boolean = false;
+  calanderizeAllOnToggle: 'fullYear' | 'backward' | 'fullMonth' = 'fullMonth';
   hasNoCalanderizationSelection: boolean = false;
   constructor(private activatedRoute: ActivatedRoute, private uploadDataService: UploadDataService,
     private editMeterFormService: EditMeterFormService, private router: Router,
@@ -215,14 +215,23 @@ export class ManageMetersComponent implements OnInit {
   }
 
   toggleCalanderizeAll() {
-    this.calanderizeAllOnToggle = !this.calanderizeAllOnToggle;
+    // this.calanderizeAllOnToggle = !this.calanderizeAllOnToggle;
     this.fileReference.meters.forEach(meter => {
-      if (this.calanderizeAllOnToggle) {
+      if (this.calanderizeAllOnToggle == 'fullMonth') {
         meter.meterReadingDataApplication = 'backward';
-      } else {
+      } else if (this.calanderizeAllOnToggle == 'backward') {
+        meter.meterReadingDataApplication = 'fullYear';
+      } else if (this.calanderizeAllOnToggle == 'fullYear') {
         meter.meterReadingDataApplication = 'fullMonth';
       }
     });
+    if (this.calanderizeAllOnToggle == 'fullMonth') {
+      this.calanderizeAllOnToggle = 'backward';
+    } else if (this.calanderizeAllOnToggle == 'backward') {
+      this.calanderizeAllOnToggle = 'fullYear';
+    } else if (this.calanderizeAllOnToggle == 'fullYear') {
+      this.calanderizeAllOnToggle = 'fullMonth';
+    }
     this.setHasNoCalanderizationSelection();
   }
 

@@ -1,4 +1,4 @@
-<div class="row no-gutters justify-content-center" *ngIf="utilityMeterData.length > 2">
+<div class="row m-0 justify-content-center">
     <div class="col-md-12 col-lg-8">
         <div class="d-flex pb-2">
             <div class="ps-0 w-50 calanderization-label" for="dataApplication">Calendarization Method</div>
@@ -6,94 +6,102 @@
                 [(ngModel)]="meter.meterReadingDataApplication" (change)="calanderizeMeter()">
                 <option [ngValue]="'fullMonth'">Do <b>Not</b> Calanderize Meter Data</option>
                 <option [ngValue]="'backward'">Calendarize Meter Data</option>
-                <!-- <option [ngValue]="'forward'">Use current month name for entry</option> -->
+                <option [ngValue]="'fullYear'">Evenly Distribute Data Annually</option>
             </select>
         </div>
 
-        <p class="alert alert-secondary p-1">
+        <div class="alert alert-secondary p-1">
             Calendarization is the process of allocating data to a consistent and appropriate use period. This is done
             for reporting purposes so that there can be a fair comparison of utility data for each year and resource.
             The standard way to calendarize utility data is to divide consumption for each utility by the number of days
             on the bill. Usage is then allocated to each month based on this daily use ratio and the number of billing
             days in each month.
-        </p>
+        </div>
         <hr>
     </div>
+    <ng-container *ngIf="meter.meterReadingDataApplication != 'fullYear' && utilityMeterData.length > 2">
+        <div class="col-12 table-col">
 
-    <div class="col-12 table-col">
+            <div class="table-responsive"
+                *ngFor="let calanderizationSummaryItem of calanderizationSummary; let index = index;">
+                <table class="table table-sm table-hover">
+                    <thead>
+                        <tr>
+                            <th>
+                                Meter Reading Date
+                            </th>
+                            <th>
+                                Days In Bill
+                            </th>
+                            <th>
+                                Energy Use Per Day
+                            </th>
+                            <th>
+                                Days Applied For Month
+                            </th>
+                            <th>
+                                Total Energy From Bill
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let monthReadingSummary of calanderizationSummaryItem.monthReadingSummaries">
+                            <td>
+                                {{monthReadingSummary.readDate | date}}
+                            </td>
+                            <td>
+                                {{monthReadingSummary.daysInBill}}
+                            </td>
+                            <td>
+                                {{monthReadingSummary.energyUsePerDay | customNumber}}
+                            </td>
+                            <td>
+                                {{monthReadingSummary.daysApplied | customNumber}}
+                            </td>
+                            <td>
+                                {{monthReadingSummary.totalEnergyFromBill | customNumber}}
+                            </td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr class="table-mh">
+                            <th colspan="4">
+                                Calanderized Month: {{calanderizationSummaryItem.calanderizedMonth | date:'MMMM, y'}}
+                            </th>
+                            <th colspan="1">
+                                Total Energy Use: {{calanderizationSummaryItem.totalEnergyUse | customNumber}}
+                            </th>
+                        </tr>
+                    </tfoot>
+                </table>
+                <hr>
+            </div>
+        </div>
+        <div class="col-12 text-center">
+            <ngb-datepicker [dayTemplate]="customDay" [navigation]="'none'" [outsideDays]="'hidden'"
+                [startDate]="startDate" [displayMonths]="displayMonths" [firstDayOfWeek]="7"></ngb-datepicker>
 
-        <div class="table-responsive" *ngFor="let calanderizationSummaryItem of calanderizationSummary; let index = index;">
-            <table class="table table-sm table-hover">
-                <thead>
-                    <tr>
-                        <th>
-                            Meter Reading Date
-                        </th>
-                        <th>
-                            Days In Bill
-                        </th>
-                        <th>
-                            Energy Use Per Day
-                        </th>
-                        <th>
-                            Days Applied For Month
-                        </th>
-                        <th>
-                            Total Energy From Bill
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr *ngFor="let monthReadingSummary of calanderizationSummaryItem.monthReadingSummaries">
-                        <td>
-                            {{monthReadingSummary.readDate | date}}
-                        </td>
-                        <td>
-                            {{monthReadingSummary.daysInBill}}
-                        </td>
-                        <td>
-                            {{monthReadingSummary.energyUsePerDay | customNumber}}
-                        </td>
-                        <td>
-                            {{monthReadingSummary.daysApplied | customNumber}}
-                        </td>
-                        <td>
-                            {{monthReadingSummary.totalEnergyFromBill | customNumber}}
-                        </td>
-                    </tr>
-                </tbody>
-                <tfoot>
-                    <tr class="table-mh">
-                        <th colspan="4">
-                            Calanderized Month: {{calanderizationSummaryItem.calanderizedMonth | date:'MMMM, y'}}
-                        </th>
-                        <th colspan="1">
-                            Total Energy Use: {{calanderizationSummaryItem.totalEnergyUse | customNumber}}
-                        </th>
-                    </tr>
-                </tfoot>
-            </table>
-            <hr>
+            <ng-template #customDay let-date="date">
+                <div class="custom-day" [style.background-color]="getBackground(date)" [style.border]="getBorder(date)">
+                    {{ date.day }}
+                </div>
+            </ng-template>
+            <p class="alert alert-info p-1">
+                The darker circles represent the meter reading date and the corresponding lighter colors represent
+                the days in which the per day average from that bill will be applied will.<br>
+                It takes three meter readings to calendarize a month when "Apply to Full Read Month" is not selected.
+            </p>
+        </div>
+    </ng-container>
+    <div class="col-12"
+        *ngIf="(meter.meterReadingDataApplication == 'backward' || meter.meterReadingDataApplication == 'fullMonth') && utilityMeterData.length < 3">
+        <div class="alert alert-info">
+            Three meter readings are needed to calendarize meter data.
         </div>
     </div>
-    <div class="col-12 text-center">
-        <ngb-datepicker [dayTemplate]="customDay" [navigation]="'none'" [outsideDays]="'hidden'" [startDate]="startDate"
-            [displayMonths]="displayMonths" [firstDayOfWeek]="7"></ngb-datepicker>
-
-        <ng-template #customDay let-date="date">
-            <div class="custom-day" [style.background-color]="getBackground(date)" [style.border]="getBorder(date)">
-                {{ date.day }}
-            </div>
-        </ng-template>
-        <p class="alert alert-info p-1">
-            The darker circles represent the meter reading date and the corresponding lighter colors represent
-            the days in which the per day average from that bill will be applied will.<br>
-            It takes three meter readings to calendarize a month when "Apply to Full Read Month" is not selected.
-        </p>
+    <div class="col-12" *ngIf="meter.meterReadingDataApplication == 'fullYear'">
+        <div class="alert alert-info">
+            Meter readings will be summed up per year and distributed evenly across 12 months.
+        </div>
     </div>
 </div>
-
-
-<p class="alert alert-info" *ngIf="utilityMeterData.length < 3">
-    Three meter readings are needed to calendarize meter data.
-</p>

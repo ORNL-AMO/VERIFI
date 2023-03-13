@@ -151,7 +151,7 @@ export class MonthlyAnalysisSummaryDataClass {
     }
 
     setAnnualEnergyUse(annualMeterDataUsage: Array<{ year: number, usage: number }>) {
-        let findYearUsage: { year: number, usage: number } = annualMeterDataUsage.find(annualUsage => { return annualUsage.year == this.date.getUTCFullYear() });
+        let findYearUsage: { year: number, usage: number } = annualMeterDataUsage.find(annualUsage => { return annualUsage.year == this.fiscalYear });
         if (findYearUsage) {
             this.annualEnergyUse = findYearUsage.usage;
         } else {
@@ -163,8 +163,8 @@ export class MonthlyAnalysisSummaryDataClass {
     setBaselineAdjustmentForOther(baselineYear: number) {
         this.baselineAdjustmentForOther = 0;
         if (this.group.hasBaselineAdjustement && this.fiscalYear != baselineYear) {
-            let yearAdjustment: { year: number, amount: number } = this.group.baselineAdjustments.find(bAdjustement => { return bAdjustement.year == this.date.getUTCFullYear(); })
-            if (yearAdjustment.amount) {
+            let yearAdjustment: { year: number, amount: number } = this.group.baselineAdjustments.find(bAdjustement => { return bAdjustement.year == this.fiscalYear; })
+            if (yearAdjustment && yearAdjustment.amount) {
                 this.baselineAdjustmentForOther = (this.energyUse / this.annualEnergyUse) * yearAdjustment.amount;
             }
         }

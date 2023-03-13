@@ -13,6 +13,7 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { getFiscalYear } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
 import { getIsEnergyMeter, getIsEnergyUnit } from '../sharedHelperFuntions';
+import { Months } from '../form-data/months';
 
 @Injectable({
   providedIn: 'root'
@@ -84,6 +85,8 @@ export class CalanderizationService {
       return this.calanderizeMeterDataFullMonth(meter, meterData, energyIsSource, calanderizedEnergyUnit, monthDisplayShort, inAccount);
     } else if (meter.meterReadingDataApplication == 'backward') {
       return this.calanderizeMeterDataBackwards(meter, meterData, energyIsSource, calanderizedEnergyUnit, monthDisplayShort, inAccount);
+    } else if (meter.meterReadingDataApplication == 'fullYear') {
+      return this.calanderizeFullYear(meter, meterData, energyIsSource, calanderizedEnergyUnit, monthDisplayShort, inAccount);
     }
   }
 
@@ -728,6 +731,55 @@ export class CalanderizationService {
     } else {
       return { RECs: 0, locationEmissions: 0, marketEmissions: 0, excessRECs: 0, excessRECsEmissions: 0 };
     }
+  }
+
+  calanderizeFullYear(meter: IdbUtilityMeter, meterData: Array<IdbUtilityMeterData>, energyIsSource: boolean, calanderizedEnergyUnit: string, monthDisplayShort: boolean, inAccount: boolean): Array<MonthlyData> {
+    let calanderizeData: Array<MonthlyData> = new Array();
+    let orderedMeterData: Array<IdbUtilityMeterData> = _.orderBy(meterData, (data) => { return new Date(data.readDate) });
+    let years: Array<number> = orderedMeterData.map(mData => { return new Date(mData.readDate).getFullYear() })
+    years = _.uniq(years);
+    years.forEach(year => {
+      let currentYearData: Array<IdbUtilityMeterData> = orderedMeterData.filter(mData => {
+        return new Date(mData.readDate).getFullYear() == year
+      });
+
+      let monthlyEnergyUse: number = _.sumBy(currentYearData, 'totalEnergyUse') / 12;
+      let monthlyCost: number = _.sumBy(currentYearData, 'totalCost') / 12;
+      let monthlyConsumption: number = _.sumBy(currentYearData, 'totalEnergyUse') / 12;
+      Months.forEach(month => {
+        let emissionsValues: EmissionsResults = this.getEmissions(meter, monthlyEnergyUse, calanderizedEnergyUnit, year, energyIsSource)
+
+        let accountOrFacility: IdbAccount | IdbFacility;
+        if (inAccount) {
+          accountOrFacility = this.accountDbService.selectedAccount.getValue();
+        } else {
+          let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+          accountOrFacility = accountFacilities.find(facility => { return facility.guid == meter.facilityId });
+        }
+        let monthStr: string;
+        if (monthDisplayShort) {
+          monthStr = new Date(year, month.monthNumValue).toLocaleString('default', { month: 'short' });
+        } else {
+          monthStr = new Date(year, month.monthNumValue).toLocaleString('default', { month: 'long' });
+        }
+        calanderizeData.push({
+          month: monthStr,
+          monthNumValue: month.monthNumValue,
+          year: year,
+          fiscalYear: getFiscalYear(new Date(year, month.monthNumValue), accountOrFacility),
+          energyConsumption: monthlyConsumption,
+          energyUse: monthlyEnergyUse,
+          energyCost: monthlyCost,
+          date: new Date(year, month.monthNumValue),
+          marketEmissions: emissionsValues.marketEmissions,
+          locationEmissions: emissionsValues.locationEmissions,
+          RECs: emissionsValues.RECs,
+          excessRECs: emissionsValues.excessRECs,
+          excessRECsEmissions: emissionsValues.excessRECsEmissions
+        });
+      });
+    });
+    return calanderizeData;
   }
 }
 

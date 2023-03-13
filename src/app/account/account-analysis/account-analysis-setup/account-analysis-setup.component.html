@@ -70,7 +70,8 @@
                     <div class="d-flex flex-column" *ngIf="analysisItem.hasBaselineAdjustement">
                         <div class="row form-group" *ngFor="let baselineAdjustment of analysisItem.baselineAdjustments">
                             <div class="col-5">
-                                <label>{{baselineAdjustment.year}}</label>
+                                <label>{{baselineAdjustment.year| yearDisplay:
+                                    account.fiscalYear}}</label>
                             </div>
                             <div class="col-7">
                                 <div class="input-group">

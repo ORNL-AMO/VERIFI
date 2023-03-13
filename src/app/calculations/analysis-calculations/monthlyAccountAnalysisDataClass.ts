@@ -23,7 +23,7 @@ export class MonthlyAccountAnalysisDataClass {
         baselineYear: number,
         account: IdbAccount,
         analysisItem: IdbAccountAnalysisItem,
-        annualUsageValues: Array<{year: number, usage: number}>) {
+        annualUsageValues: Array<{ year: number, usage: number }>) {
         this.date = monthDate;
         this.setFiscalYear(account);
         this.setCurrentMonthData(allFacilityAnalysisData);
@@ -54,12 +54,12 @@ export class MonthlyAccountAnalysisDataClass {
         this.modeledEnergy = _.sumBy(this.currentMonthData, 'modeledEnergy');
     }
 
-    setBaselineAdjustmentForOther(accountAnalysisItem: IdbAccountAnalysisItem, baselineYear: number, annualUsageValues: Array<{year: number, usage: number}>) {
+    setBaselineAdjustmentForOther(accountAnalysisItem: IdbAccountAnalysisItem, baselineYear: number, annualUsageValues: Array<{ year: number, usage: number }>) {
         this.baselineAdjustmentForOther = _.sumBy(this.currentMonthData, 'baselineAdjustmentForOther');
         if (accountAnalysisItem.hasBaselineAdjustement && this.fiscalYear != baselineYear) {
-            let annualEnergyUse: number = annualUsageValues.find(usageVal => {return usageVal.year == this.fiscalYear})?.usage;
-            let yearAdjustment: { year: number, amount: number } = accountAnalysisItem.baselineAdjustments.find(bAdjustement => { return bAdjustement.year == this.date.getUTCFullYear(); })
-            if (yearAdjustment.amount) {
+            let annualEnergyUse: number = annualUsageValues.find(usageVal => { return usageVal.year == this.fiscalYear })?.usage;
+            let yearAdjustment: { year: number, amount: number } = accountAnalysisItem.baselineAdjustments.find(bAdjustement => { return bAdjustement.year == this.fiscalYear; })
+            if (yearAdjustment && yearAdjustment.amount) {
                 let accountBaselineAdjustementForOther: number = (this.energyUse / annualEnergyUse) * yearAdjustment.amount;
                 this.baselineAdjustmentForOther = this.baselineAdjustmentForOther + accountBaselineAdjustementForOther;
             }

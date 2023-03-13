@@ -12,23 +12,26 @@
         <ng-container *ngIf="hasMeterData">
             <div class="p-2 text-center" *ngIf="!selectedMeter.meterReadingDataApplication">
                 <p>
-                    No Calanderization Method Selected. Select the method you would like to use to calanderize your
+                    No calanderization method selected. Select the method you would like to use to calanderize your
                     meter
-                    data. The modal will give a more detailed look at how calanderization is done!
+                    data. The modal will give a more detailed look at how calanderization is done.
                 </p>
                 <div class="row justify-content-center pb-2">
                     <div class="col">
-                        <button class="btn btn-primary me-3" (click)="setCalanderizeData('backward')">
+                        <button class="btn btn-primary" (click)="setCalanderizeData('backward')">
                             Calanderize Meter
                         </button>
-                        <button class="btn btn-primary me-3" (click)="setCalanderizeData('fullMonth')">
+                        <button class="btn btn-primary ms-3 me-3" (click)="setCalanderizeData('fullMonth')">
                             Do Not Calanderize
+                        </button>
+                        <button class="btn btn-primary" (click)="setCalanderizeData('fullYear')">
+                            Annual Meter Data
                         </button>
                     </div>
                 </div>
                 <div class="row justify-content-center">
                     <div class="col">
-                        <button class="btn btn-primary me-3" (click)="showDataApplicationModal()">
+                        <button class="btn action-btn" (click)="showDataApplicationModal()">
                             View Calanderization Modal
                         </button>
                     </div>

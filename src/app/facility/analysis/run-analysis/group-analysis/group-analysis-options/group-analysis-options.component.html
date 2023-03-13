@@ -178,7 +178,7 @@
                         *ngFor="let baselineAdjustment of group.baselineAdjustments; let index = index;">
                         <div class="row">
                             <div class="col-6">
-                                <label for="{{'baselineAdjustment_'+index}}">{{baselineAdjustment.year}}</label>
+                                <label for="{{'baselineAdjustment_'+index}}">{{baselineAdjustment.year | yearDisplay: facility.fiscalYear}}</label>
                             </div>
                             <div class="col-6">
                                 <div class="input-group">

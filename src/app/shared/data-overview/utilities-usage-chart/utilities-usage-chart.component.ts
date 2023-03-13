@@ -55,7 +55,7 @@ export class UtilitiesUsageChartComponent {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if (!changes.dataType && !changes.annualSourceData.isFirstChange()) {
+    if (!changes.dataType && (changes.annualSourceData && !changes.annualSourceData.isFirstChange())) {
       this.drawChart();
     }
   }

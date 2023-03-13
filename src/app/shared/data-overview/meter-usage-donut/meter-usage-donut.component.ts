@@ -55,7 +55,7 @@ export class MeterUsageDonutComponent {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if (!changes.dataType && !changes.facilityOverviewMeters.isFirstChange()) {
+    if (!changes.dataType && (changes.facilityOverviewMeters && !changes.facilityOverviewMeters.isFirstChange())) {
       this.drawChart();
     }
   }
