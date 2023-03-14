@@ -189,7 +189,7 @@ export class VisualizationStateService {
         itemId: predictor.id,
         label: predictor.name,
         type: 'predictor',
-        selected: false
+        selected: true
       });
     });
     this.correlationPlotOptions.next({
