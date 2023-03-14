@@ -49,7 +49,7 @@ export class TimeSeriesComponent implements OnInit {
     let traceData = new Array();
     this.plotData.forEach(dataItem => {
       let yaxis: string = 'y';
-      if(dataItem.isMeter == false){
+      if (dataItem.isMeter == false) {
         yaxis = 'y2';
       }
       traceData.push({
@@ -58,7 +58,7 @@ export class TimeSeriesComponent implements OnInit {
         name: dataItem.label,
         type: 'scatter',
         yaxis: yaxis,
-        line: {width: 5}
+        line: { width: 5 }
       });
     });
     var layout = {
@@ -73,7 +73,8 @@ export class TimeSeriesComponent implements OnInit {
         },
       },
       xaxis: {
-        hoverformat: "%b, %y"
+        hoverformat: "%b, %y",
+        automargin: true
       },
       yaxis: {
         title: {
@@ -99,9 +100,12 @@ export class TimeSeriesComponent implements OnInit {
         overlaying: 'y',
         tickmode: 'sync'
       },
-      margin: { r: 0, t: 50 }
+      // margin: { r: 0, t: 50 }
     };
-    var config = { responsive: true };
+    var config = {
+      displaylogo: false,
+      responsive: true
+    };
     this.plotlyService.newPlot(this.timeSeries.nativeElement, traceData, layout, config);
   }
 }

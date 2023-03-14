@@ -1,6 +1,6 @@
 <div class="plot-content">
     <h4>
-        Visualization Plot Options
+        Visualization Options
     </h4>
 
     <form>
@@ -64,90 +64,87 @@
             <div class="col-12">
                 <h5>Data Correlation Options</h5>
             </div>
-            <div class="col-6">
-                <div class="row">
-                    <div class="col-12">
-                        <label class="semibold">Plotted on Y-Axis</label>
-                    </div>
-                    <div class="col-6">
-                        <div *ngIf="correlationPlotOptions.asMeters">
-                            <label>Meters</label>
-                            <div class="form-check ms-2"
-                                *ngFor="let xAxisOption of correlationPlotOptions.yAxisMeterOptions">
-                                <input class="form-check-input" type="checkbox" name="{{xAxisOption.label+'y'}}"
-                                    id="{{xAxisOption.label+'y'}}" [(ngModel)]="xAxisOption.selected"
-                                    (change)="savePlotOptions()">
-                                <label class="form-check-label"
-                                    for="{{xAxisOption.label+'y'}}">{{xAxisOption.label}}</label>
-                            </div>
-                        </div>
-                        <div *ngIf="!correlationPlotOptions.asMeters">
-                            <label>Groups</label>
-                            <div class="form-check ms-2"
-                                *ngFor="let xAxisOption of correlationPlotOptions.yAxisGroupOptions">
-                                <input class="form-check-input" type="checkbox" name="{{xAxisOption.label+'y'}}"
-                                    id="{{xAxisOption.label+'y'}}" [(ngModel)]="xAxisOption.selected"
-                                    (change)="savePlotOptions()">
-                                <label class="form-check-label"
-                                    for="{{xAxisOption.label+'y'}}">{{xAxisOption.label}}</label>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <label>Predictors</label>
-                        <div class="form-check ms-2"
-                            *ngFor="let xAxisOption of correlationPlotOptions.yAxisPredictorOptions">
-                            <input class="form-check-input" type="checkbox" name="{{xAxisOption.label+'y'}}"
-                                id="{{xAxisOption.label+'y'}}" [(ngModel)]="xAxisOption.selected"
-                                (change)="savePlotOptions()">
-                            <label class="form-check-label"
-                                for="{{xAxisOption.label+'y'}}">{{xAxisOption.label}}</label>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-6">
-                <div class="row">
-                    <div class="col-12">
-                        <label class="semibold">Plotted on X-Axis</label>
-                    </div>
-                    <div class="col-6">
-                        <div *ngIf="correlationPlotOptions.asMeters">
-                            <label>Meters</label>
-                            <div class="form-check ms-2"
-                                *ngFor="let xAxisOption of correlationPlotOptions.xAxisMeterOptions">
-                                <input class="form-check-input" type="checkbox" name="{{xAxisOption.label}}"
-                                    id="{{xAxisOption.label}}" [(ngModel)]="xAxisOption.selected"
-                                    (change)="savePlotOptions()">
-                                <label class="form-check-label"
-                                    for="{{xAxisOption.label}}">{{xAxisOption.label}}</label>
-                            </div>
-                        </div>
-                        <div *ngIf="!correlationPlotOptions.asMeters">
-                            <label>Groups</label>
-                            <div class="form-check ms-2"
-                                *ngFor="let xAxisOption of correlationPlotOptions.xAxisGroupOptions">
-                                <input class="form-check-input" type="checkbox" name="{{xAxisOption.label}}"
-                                    id="{{xAxisOption.label}}" [(ngModel)]="xAxisOption.selected"
-                                    (change)="savePlotOptions()">
-                                <label class="form-check-label"
-                                    for="{{xAxisOption.label}}">{{xAxisOption.label}}</label>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <label>Predictors</label>
-                        <div class="form-check ms-2"
-                            *ngFor="let xAxisOption of correlationPlotOptions.xAxisPredictorOptions">
-                            <input class="form-check-input" type="checkbox" name="{{xAxisOption.label}}"
-                                id="{{xAxisOption.label}}" [(ngModel)]="xAxisOption.selected"
-                                (change)="savePlotOptions()">
-                            <label class="form-check-label" for="{{xAxisOption.label}}">{{xAxisOption.label}}</label>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
+            <div class="col-12">
+                <div class="d-flex">
+                    <div class="d-flex flex-column">
+                        <label class="semibold">Plotted on Y-Axis</label>
+                        <div class="d-flex">
+                            <div class="p-2" *ngIf="correlationPlotOptions.asMeters">
+                                <label>Meters</label>
+                                <div class="form-check ms-2"
+                                    *ngFor="let xAxisOption of correlationPlotOptions.yAxisMeterOptions">
+                                    <input class="form-check-input" type="checkbox" name="{{xAxisOption.label+'y'}}"
+                                        id="{{xAxisOption.label+'y'}}" [(ngModel)]="xAxisOption.selected"
+                                        (change)="savePlotOptions()">
+                                    <label class="form-check-label"
+                                        for="{{xAxisOption.label+'y'}}">{{xAxisOption.label}}</label>
+                                </div>
+                            </div>
+                            <div class="p-2" *ngIf="!correlationPlotOptions.asMeters">
+                                <label>Groups</label>
+                                <div class="form-check ms-2"
+                                    *ngFor="let xAxisOption of correlationPlotOptions.yAxisGroupOptions">
+                                    <input class="form-check-input" type="checkbox" name="{{xAxisOption.label+'y'}}"
+                                        id="{{xAxisOption.label+'y'}}" [(ngModel)]="xAxisOption.selected"
+                                        (change)="savePlotOptions()">
+                                    <label class="form-check-label"
+                                        for="{{xAxisOption.label+'y'}}">{{xAxisOption.label}}</label>
+                                </div>
+                            </div>
+                            <div class="p-2">
+                                <label>Predictors</label>
+                                <div class="form-check ms-2"
+                                    *ngFor="let xAxisOption of correlationPlotOptions.yAxisPredictorOptions">
+                                    <input class="form-check-input" type="checkbox" name="{{xAxisOption.label+'y'}}"
+                                        id="{{xAxisOption.label+'y'}}" [(ngModel)]="xAxisOption.selected"
+                                        (change)="savePlotOptions()">
+                                    <label class="form-check-label"
+                                        for="{{xAxisOption.label+'y'}}">{{xAxisOption.label}}</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex flex-column">
+                        <label class="semibold">Plotted on X-Axis</label>
+                        <div class="d-flex">
+                            <div class="p-2" *ngIf="correlationPlotOptions.asMeters">
+                                <label>Meters</label>
+                                <div class="form-check ms-2"
+                                    *ngFor="let xAxisOption of correlationPlotOptions.xAxisMeterOptions">
+                                    <input class="form-check-input" type="checkbox" name="{{xAxisOption.label}}"
+                                        id="{{xAxisOption.label}}" [(ngModel)]="xAxisOption.selected"
+                                        (change)="savePlotOptions()">
+                                    <label class="form-check-label"
+                                        for="{{xAxisOption.label}}">{{xAxisOption.label}}</label>
+                                </div>
+                            </div>
+                            <div class="p-2" *ngIf="!correlationPlotOptions.asMeters">
+                                <label>Groups</label>
+                                <div class="form-check ms-2"
+                                    *ngFor="let xAxisOption of correlationPlotOptions.xAxisGroupOptions">
+                                    <input class="form-check-input" type="checkbox" name="{{xAxisOption.label}}"
+                                        id="{{xAxisOption.label}}" [(ngModel)]="xAxisOption.selected"
+                                        (change)="savePlotOptions()">
+                                    <label class="form-check-label"
+                                        for="{{xAxisOption.label}}">{{xAxisOption.label}}</label>
+                                </div>
+                            </div>
+                            <div class="p-2">
+                                <label>Predictors</label>
+                                <div class="form-check ms-2"
+                                    *ngFor="let xAxisOption of correlationPlotOptions.xAxisPredictorOptions">
+                                    <input class="form-check-input" type="checkbox" name="{{xAxisOption.label}}"
+                                        id="{{xAxisOption.label}}" [(ngModel)]="xAxisOption.selected"
+                                        (change)="savePlotOptions()">
+                                    <label class="form-check-label"
+                                        for="{{xAxisOption.label}}">{{xAxisOption.label}}</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
         <div class="m-2 p-2 alert alert-info">
             Correlation plots will be generated for all x/y variable combinations that are selected.

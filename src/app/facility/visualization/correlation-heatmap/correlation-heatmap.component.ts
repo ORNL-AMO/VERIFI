@@ -15,7 +15,7 @@ import { AxisOption, CorrelationPlotOptions, VisualizationStateService } from '.
   templateUrl: './correlation-heatmap.component.html',
   styleUrls: ['./correlation-heatmap.component.css']
 })
-export class CorrelationHeatmapComponent{
+export class CorrelationHeatmapComponent {
   @ViewChild('heatMapPlot', { static: false }) heatMapPlot: ElementRef;
 
 
@@ -65,6 +65,8 @@ export class CorrelationHeatmapComponent{
             let r2 = this.getR2(yItem.values, xItem.values);
             if (r2) {
               valuesArr.push(this.getSigFigs(r2));
+            } else {
+              valuesArr.push(null);
             }
           }
           zValues.push(valuesArr);
@@ -261,7 +263,7 @@ export class CorrelationHeatmapComponent{
       let model: JStatRegressionModel = jStat.models.ols(endog, exog);
       return model.R2;
     } catch (err) {
-
+      return undefined;
     }
   }
 }
