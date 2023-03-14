@@ -198,5 +198,57 @@
                 </div>
             </div>
         </div>
+        <!--Time Series-->
+        <div class="row">
+            <div class="col-12">
+                <hr>
+            </div>
+            <div class="col-12">
+                <h5>Time Series</h5>
+            </div>
+            <div class="col-12">
+                <label class="semibold">Included Variables</label>
+            </div>
+            <div class="col-12">
+                <div class="d-flex">
+                    <div class="p-2" *ngIf="correlationPlotOptions.asMeters">
+                        <label>Meters</label>
+                        <div class="form-check ms-2"
+                            *ngFor="let timeSeriesMeterOption of correlationPlotOptions.timeSeriesMeterOptions">
+                            <input class="form-check-input" type="checkbox"
+                                name="{{timeSeriesMeterOption.label+'TimeSeriesMeter'}}"
+                                id="{{timeSeriesMeterOption.label+'TimeSeriesMeter'}}"
+                                [(ngModel)]="timeSeriesMeterOption.selected" (change)="savePlotOptions()">
+                            <label class="form-check-label"
+                                for="{{timeSeriesMeterOption.label+'TimeSeriesMeter'}}">{{timeSeriesMeterOption.label}}</label>
+                        </div>
+                    </div>
+                    <div class="p-2" *ngIf="!correlationPlotOptions.asMeters">
+                        <label>Groups</label>
+                        <div class="form-check ms-2"
+                            *ngFor="let timeSeriesGroupOption of correlationPlotOptions.timeSeriesGroupOptions">
+                            <input class="form-check-input" type="checkbox"
+                                name="{{timeSeriesGroupOption.label+'TimeSeriesGroup'}}"
+                                id="{{timeSeriesGroupOption.label+'TimeSeriesGroup'}}"
+                                [(ngModel)]="timeSeriesGroupOption.selected" (change)="savePlotOptions()">
+                            <label class="form-check-label"
+                                for="{{timeSeriesGroupOption.label+'TimeSeriesGroup'}}">{{timeSeriesGroupOption.label}}</label>
+                        </div>
+                    </div>
+                    <div class="p-2">
+                        <label>Predictors</label>
+                        <div class="form-check ms-2"
+                            *ngFor="let timeSeriesPredictor of correlationPlotOptions.timeSeriesPredictorOptions">
+                            <input class="form-check-input" type="checkbox"
+                                name="{{timeSeriesPredictor.label+'TimeSeriesPredictor'}}"
+                                id="{{timeSeriesPredictor.label+'TimeSeriesPredictor'}}"
+                                [(ngModel)]="timeSeriesPredictor.selected" (change)="savePlotOptions()">
+                            <label class="form-check-label"
+                                for="{{timeSeriesPredictor.label+'TimeSeriesPredictor'}}">{{timeSeriesPredictor.label}}</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </form>
 </div>
