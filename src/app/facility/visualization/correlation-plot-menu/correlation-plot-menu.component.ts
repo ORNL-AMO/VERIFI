@@ -25,12 +25,10 @@ export class CorrelationPlotMenuComponent {
   correlationPlotOptionsSub: Subscription;
   plotType: 'timeseries' | 'variance' | 'correlation';
   constructor(private visualizationStateService: VisualizationStateService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private router: Router) {
+    private utilityMeterDataDbService: UtilityMeterDatadbService) {
   }
 
   ngOnInit() {
-    this.setPlotType();
     this.correlationPlotOptionsSub = this.visualizationStateService.correlationPlotOptions.subscribe(correlationPlotOptions => {
       this.setDateRange();
       this.years = this.utilityMeterDataDbService.getYearOptions(false);
@@ -59,16 +57,6 @@ export class CorrelationPlotMenuComponent {
       this.startYear = dateRange.minDate.getFullYear();
       this.endMonth = dateRange.maxDate.getMonth();
       this.endYear = dateRange.maxDate.getFullYear();
-    }
-  }
-
-  setPlotType() {
-    if (this.router.url.includes('variance')) {
-      this.plotType = 'variance';
-    } else if (this.router.url.includes('timeseries')) {
-      this.plotType = 'timeseries';
-    } else if (this.router.url.includes('correlation')) {
-      this.plotType = 'correlation';
     }
   }
 }

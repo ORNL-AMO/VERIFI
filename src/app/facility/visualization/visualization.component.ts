@@ -1,7 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { VisualizationStateService } from './visualization-state.service';
 import * as _ from 'lodash';
 import { IdbFacility, IdbUtilityMeterData } from 'src/app/models/idb';
@@ -16,21 +14,14 @@ import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
 })
 export class VisualizationComponent implements OnInit {
 
-  facilityPredictorsSub: Subscription;
-  meterOptionsSub: Subscription;
-  predictorsOptionsSub: Subscription;
-  meterGroupOptionsSub: Subscription;
-  meterDataOptionSub: Subscription;
-  plotDataSub: Subscription;
-  meterGroupSub: Subscription;
-  numberOfOptionsSelected: number;
+  
   utilityMeterDataSub: Subscription;
   utilityMeterData: Array<IdbUtilityMeterData>;
 
 
   selectedFacilitySub: Subscription;
   selectedFacility: IdbFacility;
-  constructor(private visualizationStateService: VisualizationStateService, private predictorDbService: PredictordbService,
+  constructor(private visualizationStateService: VisualizationStateService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private facilityDbService: FacilitydbService) { }
 
@@ -38,36 +29,7 @@ export class VisualizationComponent implements OnInit {
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
       this.visualizationStateService.setCalanderizedMeters();
       this.initializeDate();
-      this.visualizationStateService.initiliazeCorrelationPlotOptions();
-      this.visualizationStateService.setMeterOptions();
-      this.visualizationStateService.setMeterGroupOptions();
-      this.visualizationStateService.setData();
-    });
-
-    this.facilityPredictorsSub = this.predictorDbService.facilityPredictors.subscribe(predictors => {
-      if (predictors) {
-        this.visualizationStateService.setPredictorOptions(predictors);
-      }
-    });
-
-    this.meterOptionsSub = this.visualizationStateService.meterOptions.subscribe(() => {
-      this.visualizationStateService.setData();
-    });
-
-    this.predictorsOptionsSub = this.visualizationStateService.predictorOptions.subscribe(() => {
-      this.visualizationStateService.setData();
-    });
-
-    this.meterDataOptionSub = this.visualizationStateService.meterDataOption.subscribe(val => {
-      this.visualizationStateService.setData();
-    });
-
-    this.meterGroupOptionsSub = this.visualizationStateService.meterGroupOptions.subscribe(val => {
-      this.visualizationStateService.setData();
-    })
-
-    this.plotDataSub = this.visualizationStateService.plotData.subscribe(plotData => {
-      this.numberOfOptionsSelected = plotData.length;
+      this.visualizationStateService.initilizeCorrelationPlotOptions();
     });
 
     this.utilityMeterDataSub = this.utilityMeterDataDbService.facilityMeterData.subscribe(val => {
@@ -77,12 +39,6 @@ export class VisualizationComponent implements OnInit {
 
   ngOnDestroy() {
     this.selectedFacilitySub.unsubscribe();
-    this.facilityPredictorsSub.unsubscribe();
-    this.meterOptionsSub.unsubscribe();
-    this.predictorsOptionsSub.unsubscribe();
-    this.plotDataSub.unsubscribe();
-    this.meterGroupOptionsSub.unsubscribe();
-    this.meterDataOptionSub.unsubscribe();
     this.utilityMeterDataSub.unsubscribe();
   }
 
