@@ -91,9 +91,7 @@ import { DataOverviewReportComponent } from './account/account-reports/data-over
 import { CorrelationPlotComponent } from './facility/visualization/correlation-plot/correlation-plot.component';
 import { CorrelationHeatmapComponent } from './facility/visualization/correlation-heatmap/correlation-heatmap.component';
 import { TimeSeriesComponent } from './facility/visualization/time-series/time-series.component';
-import { CorrelationPlotGraphComponent } from './facility/visualization/correlation-plot/correlation-plot-graph/correlation-plot-graph.component';
 import { CorrelationPlotMenuComponent } from './facility/visualization/correlation-plot-menu/correlation-plot-menu.component';
-import { CorrelationHeatmapGraphComponent } from './facility/visualization/correlation-heatmap/correlation-heatmap-graph/correlation-heatmap-graph.component';
 
 const routes: Routes = [
   {
@@ -280,35 +278,19 @@ const routes: Routes = [
         path: 'visualization',
         component: VisualizationComponent,
         children: [
-          { path: '', pathMatch: 'full', redirectTo: 'correlation' },
-          { 
-            path: 'correlation', 
-            component: CorrelationPlotComponent,
-            children: [
-              { path: '', pathMatch: 'full', redirectTo: 'graph' },
-              {
-                path: 'graph',
-                component: CorrelationPlotGraphComponent
-              },
-              {
-                path: 'options',
-                component: CorrelationPlotMenuComponent
-              }
-            ]
+          { path: '', pathMatch: 'full', redirectTo: 'options' },
+          {
+            path: 'options',
+            component: CorrelationPlotMenuComponent
           },
-          { path: 'variance', 
-          component: CorrelationHeatmapComponent,
-          children: [
-            { path: '', pathMatch: 'full', redirectTo: 'graph' },
-            {
-              path: 'graph',
-              component: CorrelationHeatmapGraphComponent
-            },
-            {
-              path: 'options',
-              component: CorrelationPlotMenuComponent
-            }
-          ] },
+          {
+            path: 'correlation',
+            component: CorrelationPlotComponent
+          },
+          {
+            path: 'variance',
+            component: CorrelationHeatmapComponent
+          },
           { path: 'time-series', component: TimeSeriesComponent }
         ]
       },

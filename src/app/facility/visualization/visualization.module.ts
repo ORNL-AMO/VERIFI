@@ -8,9 +8,7 @@ import { FormsModule } from '@angular/forms';
 import { VisualizationBannerComponent } from './visualization-banner/visualization-banner.component';
 import { RouterModule } from '@angular/router';
 import { CorrelationPlotMenuComponent } from './correlation-plot-menu/correlation-plot-menu.component';
-import { CorrelationPlotGraphComponent } from './correlation-plot/correlation-plot-graph/correlation-plot-graph.component';
-import { CorrelationPlotGraphItemComponent } from './correlation-plot/correlation-plot-graph/correlation-plot-graph-item/correlation-plot-graph-item.component';
-import { CorrelationHeatmapGraphComponent } from './correlation-heatmap/correlation-heatmap-graph/correlation-heatmap-graph.component';
+import { CorrelationPlotGraphItemComponent } from './correlation-plot/correlation-plot-graph-item/correlation-plot-graph-item.component';
 
 
 
@@ -22,9 +20,7 @@ import { CorrelationHeatmapGraphComponent } from './correlation-heatmap/correlat
     VisualizationComponent,
     VisualizationBannerComponent,
     CorrelationPlotMenuComponent,
-    CorrelationPlotGraphComponent,
     CorrelationPlotGraphItemComponent,
-    CorrelationHeatmapGraphComponent
   ],
   imports: [
     CommonModule,

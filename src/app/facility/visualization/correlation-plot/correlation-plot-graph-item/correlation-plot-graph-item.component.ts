@@ -3,7 +3,7 @@ import { PlotlyService } from 'angular-plotly.js';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
 import { IdbPredictorEntry, IdbUtilityMeterGroup, PredictorData } from 'src/app/models/idb';
-import { AxisOption, VisualizationStateService } from '../../../visualization-state.service';
+import { AxisOption, VisualizationStateService } from '../../visualization-state.service';
 import * as jStat from 'jstat';
 import { JStatRegressionModel } from 'src/app/models/analysis';
 import * as _ from 'lodash';

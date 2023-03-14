@@ -1,8 +1,0 @@
-<div class="row justify-content-center" *ngFor="let combination of axisCombinations">
-    <div class="col-4" *ngFor="let xOption of combination.xOptions">
-        <app-correlation-plot-graph-item [axisCombo]="{x: xOption, y: combination.y}"></app-correlation-plot-graph-item>
-    </div>
-    <div class="col-12">
-        <hr>
-    </div>
-</div>

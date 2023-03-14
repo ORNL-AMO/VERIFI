@@ -1,61 +1,69 @@
-<form>
-    <div class="row">
-        <div class="col-6">
-            <div class="row form-group mb-2">
-                <label class="col-3 col-form-label semibold" for="startDate">Start Date</label>
+<div class="plot-content">
+    <h4>
+        Visualization Plot Options
+    </h4>
 
-                <div class="col-3">
-                    <select name="startMonth" [(ngModel)]="startMonth" class="form-select" (change)="saveDateRange()">
-                        <option class="pe-2" *ngFor="let month of months" [ngValue]="month.monthNumValue">
-                            {{month.abbreviation}}</option>
-                    </select>
-                </div>
-                <div class="col-3">
-                    <select name="startYear" [(ngModel)]="startYear" class="form-select" (change)="saveDateRange()">
-                        <option class="pe-2" *ngFor="let year of years" [ngValue]="year">{{year}}
-                        </option>
-                    </select>
-                </div>
-            </div>
-            <div class="row form-group">
-                <label class="col-3 col-form-label semibold" for="endMonth">End Date</label>
-                <div class="col-3">
-                    <select name="endMonth" [(ngModel)]="endMonth" class="form-select" (change)="saveDateRange()">
-                        <option class="pe-2" *ngFor="let month of months" [ngValue]="month.monthNumValue">
-                            {{month.abbreviation}}</option>
-                    </select>
-                </div>
-                <div class="col-3">
-                    <select name="endYear" [(ngModel)]="endYear" class="form-select" (change)="saveDateRange()">
-                        <option class="pe-2" *ngFor="let year of years" [ngValue]="year">{{year}}
-                        </option>
-                    </select>
-                </div>
-            </div>
-        </div>
-        <div class="col-6 justify-content-center">
-            <label class="semibold">Meters or Groups? </label>
-            <div class="form-check ms-2">
-                <input type="radio" class="form-check-input" name="asMeters" [value]="true" id="asMeters"
-                    (change)="savePlotOptions()" [(ngModel)]="correlationPlotOptions.asMeters">
-                <label class="form-check-label" for="asMeters">Meters</label>
-            </div>
-            <div class="form-check ms-2">
-                <input type="radio" class="form-check-input" name="notAsMeters" [value]="false" id="notAsMeters"
-                    [(ngModel)]="correlationPlotOptions.asMeters" (change)="savePlotOptions()">
-                <label class="form-check-label" for="notAsMeters">Groups</label>
-            </div>
-
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-12">
-            <hr>
-        </div>
-    </div>
-    <!--Correlation options-->
-    <ng-container *ngIf="plotType == 'correlation'">
+    <form>
         <div class="row">
+            <div class="col-6">
+                <div class="row form-group mb-2">
+                    <label class="col-3 col-form-label semibold" for="startDate">Start Date</label>
+
+                    <div class="col-3">
+                        <select name="startMonth" [(ngModel)]="startMonth" class="form-select"
+                            (change)="saveDateRange()">
+                            <option class="pe-2" *ngFor="let month of months" [ngValue]="month.monthNumValue">
+                                {{month.abbreviation}}</option>
+                        </select>
+                    </div>
+                    <div class="col-3">
+                        <select name="startYear" [(ngModel)]="startYear" class="form-select" (change)="saveDateRange()">
+                            <option class="pe-2" *ngFor="let year of years" [ngValue]="year">{{year}}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row form-group">
+                    <label class="col-3 col-form-label semibold" for="endMonth">End Date</label>
+                    <div class="col-3">
+                        <select name="endMonth" [(ngModel)]="endMonth" class="form-select" (change)="saveDateRange()">
+                            <option class="pe-2" *ngFor="let month of months" [ngValue]="month.monthNumValue">
+                                {{month.abbreviation}}</option>
+                        </select>
+                    </div>
+                    <div class="col-3">
+                        <select name="endYear" [(ngModel)]="endYear" class="form-select" (change)="saveDateRange()">
+                            <option class="pe-2" *ngFor="let year of years" [ngValue]="year">{{year}}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 justify-content-center">
+                <label class="semibold">Meters or Groups? </label>
+                <div class="form-check ms-2">
+                    <input type="radio" class="form-check-input" name="asMeters" [value]="true" id="asMeters"
+                        (change)="savePlotOptions()" [(ngModel)]="correlationPlotOptions.asMeters">
+                    <label class="form-check-label" for="asMeters">Meters</label>
+                </div>
+                <div class="form-check ms-2">
+                    <input type="radio" class="form-check-input" name="notAsMeters" [value]="false" id="notAsMeters"
+                        [(ngModel)]="correlationPlotOptions.asMeters" (change)="savePlotOptions()">
+                    <label class="form-check-label" for="notAsMeters">Groups</label>
+                </div>
+
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <hr>
+            </div>
+        </div>
+        <!--Correlation options-->
+        <div class="row">
+            <div class="col-12">
+                <h5>Data Correlation Options</h5>
+            </div>
             <div class="col-6">
                 <div class="row">
                     <div class="col-12">
@@ -144,10 +152,14 @@
         <div class="m-2 p-2 alert alert-info">
             Correlation plots will be generated for all x/y variable combinations that are selected.
         </div>
-    </ng-container>
-    <!--VARIANCE OPTIONS-->
-    <ng-container *ngIf="plotType == 'variance'">
+        <!--VARIANCE OPTIONS-->
         <div class="row">
+            <div class="col-12">
+                <hr>
+            </div>
+            <div class="col-12">
+                <h5>R<sup>2</sup> Correlation Options</h5>
+            </div>
             <div class="col-12">
                 <label class="semibold">Included Variables</label>
             </div>
@@ -189,5 +201,5 @@
                 </div>
             </div>
         </div>
-    </ng-container>
-</form>
+    </form>
+</div>
