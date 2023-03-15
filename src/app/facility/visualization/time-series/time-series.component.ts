@@ -40,11 +40,12 @@ export class TimeSeriesComponent implements OnInit {
   drawTimeSeries() {
     if (this.timeSeries) {
       let traceData = new Array();
-      let hasEnergyData: boolean = false;
+      let y1Labels: Array<string> = new Array();
+      let y2Labels: Array<string> = new Array();
       if (this.correlationPlotOptions.asMeters) {
-        this.correlationPlotOptions.timeSeriesMeterOptions.forEach(axisOption => {
+        this.correlationPlotOptions.timeSeriesMeterYAxis1Options.forEach(axisOption => {
           if (axisOption.selected) {
-            hasEnergyData = true;
+            y1Labels.push(axisOption.label);
             let values: Array<number> = this.getValues(axisOption);
             traceData.push({
               x: this.dates,
@@ -56,10 +57,24 @@ export class TimeSeriesComponent implements OnInit {
             });
           }
         })
-      } else {
-        this.correlationPlotOptions.timeSeriesGroupOptions.forEach(axisOption => {
+        this.correlationPlotOptions.timeSeriesMeterYAxis2Options.forEach(axisOption => {
           if (axisOption.selected) {
-            hasEnergyData = true;
+            y2Labels.push(axisOption.label);
+            let values: Array<number> = this.getValues(axisOption);
+            traceData.push({
+              x: this.dates,
+              y: values,
+              name: axisOption.label,
+              type: 'scatter',
+              yaxis: 'y2',
+              line: { width: 5 }
+            });
+          }
+        })
+      } else {
+        this.correlationPlotOptions.timeSeriesGroupYAxis1Options.forEach(axisOption => {
+          if (axisOption.selected) {
+            y1Labels.push(axisOption.label);
             let values: Array<number> = this.getValues(axisOption);
             traceData.push({
               x: this.dates,
@@ -71,30 +86,51 @@ export class TimeSeriesComponent implements OnInit {
             });
           }
         });
-      }
-      let yaxis: string = 'y';
-      if(hasEnergyData){
-        yaxis = 'y2'
+        this.correlationPlotOptions.timeSeriesGroupYAxis2Options.forEach(axisOption => {
+          if (axisOption.selected) {
+            y2Labels.push(axisOption.label);
+            let values: Array<number> = this.getValues(axisOption);
+            traceData.push({
+              x: this.dates,
+              y: values,
+              name: axisOption.label,
+              type: 'scatter',
+              yaxis: 'y2',
+              line: { width: 5 }
+            });
+          }
+        });
       }
 
-      this.correlationPlotOptions.timeSeriesPredictorOptions.forEach(axisOption => {
+      this.correlationPlotOptions.timeSeriesPredictorYAxis1Options.forEach(axisOption => {
         if (axisOption.selected) {
+          y1Labels.push(axisOption.label);
           let values: Array<number> = this.getValues(axisOption);
           traceData.push({
             x: this.dates,
             y: values,
             name: axisOption.label,
             type: 'scatter',
-            yaxis: yaxis,
+            yaxis: 'y',
             line: { width: 5 }
           });
         }
       });
 
-      let yAxisTitle: string = 'Energy Consumption';
-      if(!hasEnergyData){
-        yAxisTitle = 'Predictor Usage';
-      }
+      this.correlationPlotOptions.timeSeriesPredictorYAxis2Options.forEach(axisOption => {
+        if (axisOption.selected) {
+          y2Labels.push(axisOption.label);
+          let values: Array<number> = this.getValues(axisOption);
+          traceData.push({
+            x: this.dates,
+            y: values,
+            name: axisOption.label,
+            type: 'scatter',
+            yaxis: 'y2',
+            line: { width: 5 }
+          });
+        }
+      });
 
 
       var layout = {
@@ -114,7 +150,7 @@ export class TimeSeriesComponent implements OnInit {
         },
         yaxis: {
           title: {
-            text: yAxisTitle,
+            text: this.getAxisTitle(y1Labels),
             font: {
               size: 16
             },
@@ -125,7 +161,7 @@ export class TimeSeriesComponent implements OnInit {
         },
         yaxis2: {
           title: {
-            text: 'Predictor Usage',
+            text: this.getAxisTitle(y2Labels),
             font: {
               size: 16
             },
@@ -224,5 +260,17 @@ export class TimeSeriesComponent implements OnInit {
       });
     }
     return values;
+  }
+
+  getAxisTitle(labels: Array<string>): string {
+    let title: string = '';
+    labels.forEach((label, index) => {
+      if (index == 0) {
+        title = label;
+      } else {
+        title = title + ', ' + label;
+      }
+    });
+    return title;
   }
 }
