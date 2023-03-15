@@ -1,7 +1,10 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
+import { IdbFacility } from 'src/app/models/idb';
 import { Month, Months } from 'src/app/shared/form-data/months';
 import { CorrelationPlotOptions, VisualizationStateService } from '../visualization-state.service';
 
@@ -24,11 +27,18 @@ export class CorrelationPlotMenuComponent {
 
   correlationPlotOptionsSub: Subscription;
   plotType: 'timeseries' | 'variance' | 'correlation';
+  facility: IdbFacility;
+  facilitySub: Subscription;
   constructor(private visualizationStateService: VisualizationStateService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService) {
+    private utilityMeterDataDbService: UtilityMeterDatadbService,
+    private facilityDbService: FacilitydbService,
+    private dbChangesService: DbChangesService) {
   }
 
   ngOnInit() {
+    this.facilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
+      this.facility = val;
+    });
     this.correlationPlotOptionsSub = this.visualizationStateService.correlationPlotOptions.subscribe(correlationPlotOptions => {
       this.setDateRange();
       this.years = this.utilityMeterDataDbService.getYearOptions(false);
@@ -38,6 +48,7 @@ export class CorrelationPlotMenuComponent {
 
   ngOnDestroy() {
     this.correlationPlotOptionsSub.unsubscribe();
+    this.facilitySub.unsubscribe();
   }
 
   saveDateRange() {
@@ -58,6 +69,10 @@ export class CorrelationPlotMenuComponent {
       this.endMonth = dateRange.maxDate.getMonth();
       this.endYear = dateRange.maxDate.getFullYear();
     }
+  }
+
+  async saveSiteOrSource() {
+    await this.dbChangesService.updateFacilities(this.facility);
   }
 }
 

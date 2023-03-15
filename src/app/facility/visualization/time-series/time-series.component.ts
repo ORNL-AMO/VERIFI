@@ -53,7 +53,7 @@ export class TimeSeriesComponent implements OnInit {
               name: axisOption.label,
               type: 'scatter',
               yaxis: 'y',
-              line: { width: 5 }
+              line: { width: 3 },
             });
           }
         })
@@ -67,7 +67,7 @@ export class TimeSeriesComponent implements OnInit {
               name: axisOption.label,
               type: 'scatter',
               yaxis: 'y2',
-              line: { width: 5 }
+              line: { width: 3, dash: 'dashdot' }
             });
           }
         })
@@ -82,7 +82,7 @@ export class TimeSeriesComponent implements OnInit {
               name: axisOption.label,
               type: 'scatter',
               yaxis: 'y',
-              line: { width: 5 }
+              line: { width: 3 }
             });
           }
         });
@@ -96,7 +96,7 @@ export class TimeSeriesComponent implements OnInit {
               name: axisOption.label,
               type: 'scatter',
               yaxis: 'y2',
-              line: { width: 5 }
+              line: { width: 3, dash: 'dashdot' }
             });
           }
         });
@@ -112,7 +112,7 @@ export class TimeSeriesComponent implements OnInit {
             name: axisOption.label,
             type: 'scatter',
             yaxis: 'y',
-            line: { width: 5 }
+            line: { width: 3 }
           });
         }
       });
@@ -127,7 +127,7 @@ export class TimeSeriesComponent implements OnInit {
             name: axisOption.label,
             type: 'scatter',
             yaxis: 'y2',
-            line: { width: 5 }
+            line: { width: 3, dash: 'dashdot' }
           });
         }
       });
@@ -146,7 +146,8 @@ export class TimeSeriesComponent implements OnInit {
         },
         xaxis: {
           hoverformat: "%b, %y",
-          automargin: true
+          automargin: true,
+          showspikes: true
         },
         yaxis: {
           title: {
@@ -157,7 +158,8 @@ export class TimeSeriesComponent implements OnInit {
             standoff: 18
           },
           automargin: true,
-          tickmode: 'sync'
+          tickmode: 'sync',
+          showspikes: true
         },
         yaxis2: {
           title: {
@@ -170,7 +172,9 @@ export class TimeSeriesComponent implements OnInit {
           automargin: true,
           side: 'right',
           overlaying: 'y',
-          tickmode: 'sync'
+          tickmode: 'sync',
+          showspikes: true
+
         },
         // margin: { r: 0, t: 50 }
       };

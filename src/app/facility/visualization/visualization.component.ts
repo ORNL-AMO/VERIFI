@@ -14,7 +14,7 @@ import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
 })
 export class VisualizationComponent implements OnInit {
 
-  
+
   utilityMeterDataSub: Subscription;
   utilityMeterData: Array<IdbUtilityMeterData>;
 
@@ -27,9 +27,19 @@ export class VisualizationComponent implements OnInit {
 
   ngOnInit(): void {
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
-      this.visualizationStateService.setCalanderizedMeters();
-      this.initializeDate();
-      this.visualizationStateService.initilizeCorrelationPlotOptions();
+      if (!this.selectedFacility) {
+        this.selectedFacility = val;
+        this.visualizationStateService.setCalanderizedMeters();
+        this.initializeDate();
+        this.visualizationStateService.initilizeCorrelationPlotOptions();
+      } else {
+        this.visualizationStateService.setCalanderizedMeters();
+      }
+      if (this.selectedFacility.guid != val.guid) {
+        this.selectedFacility = val;
+        this.initializeDate();
+        this.visualizationStateService.initilizeCorrelationPlotOptions();
+      }
     });
 
     this.utilityMeterDataSub = this.utilityMeterDataDbService.facilityMeterData.subscribe(val => {
@@ -43,7 +53,7 @@ export class VisualizationComponent implements OnInit {
   }
 
 
-  initializeDate(){
+  initializeDate() {
     let calanderizedMeters: Array<CalanderizedMeter> = this.visualizationStateService.calanderizedMeters;
     let monthlyData: Array<MonthlyData> = calanderizedMeters.flatMap(cMeter => {
       return cMeter.monthlyData;

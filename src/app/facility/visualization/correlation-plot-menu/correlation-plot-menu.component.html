@@ -39,7 +39,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-6 justify-content-center">
+            <div class="col-3 justify-content-center">
                 <label class="semibold">Meters or Groups? </label>
                 <div class="form-check ms-2">
                     <input type="radio" class="form-check-input" name="asMeters" [value]="true" id="asMeters"
@@ -53,6 +53,22 @@
                 </div>
 
             </div>
+            <div class="col-3 justify-content-center">
+                <label class="semibold">Energy displayed as site or source? </label>
+                <div class="form-check ms-2">
+                    <input type="radio" class="form-check-input" name="energyIsSource"
+                        [(ngModel)]="facility.energyIsSource" [value]="true" (change)="saveSiteOrSource()"
+                        id="sourceEnergy">
+                    <label class="form-check-label" for="sourceEnergy">Source Energy</label>
+                </div>
+                <div class="form-check ms-2">
+                    <input type="radio" class="form-check-input" name="energyIsSource"
+                        [(ngModel)]="facility.energyIsSource" [value]="false" (change)="saveSiteOrSource()"
+                        id="siteEnergy">
+                    <label class="form-check-label" for="siteEnergy">Site Energy</label>
+                </div>
+
+            </div>
         </div>
         <div class="row">
             <div class="col-12">
@@ -63,6 +79,9 @@
         <div class="d-flex flex-wrap">
             <div class="d-flex flex-column">
                 <h5>Data Correlation Options</h5>
+                <p class="help-text">
+                    Correlation plots will be generated for all x/y variable combinations that are selected.
+                </p>
                 <div class="d-flex">
                     <div class="d-flex flex-column">
                         <label class="semibold">Plotted on Y-Axis</label>
@@ -141,10 +160,10 @@
                         </div>
                     </div>
                 </div>
+                <!-- <div class="m-2 p-2 alert alert-info">
+                    Correlation plots will be generated for all x/y variable combinations that are selected.
+                </div> -->
             </div>
-        </div>
-        <div class="m-2 p-2 alert alert-info">
-            Correlation plots will be generated for all x/y variable combinations that are selected.
         </div>
         <!--VARIANCE OPTIONS-->
         <div class="row">
@@ -153,6 +172,7 @@
             </div>
             <div class="col-12">
                 <h5>R<sup>2</sup> Variance Options</h5>
+                <p>Select the utility and predictor combinations to include in an R<sup>2</sup> variance heatmap.</p>
             </div>
             <div class="col-12">
                 <label class="semibold">Included Variables</label>
@@ -201,7 +221,8 @@
                 <hr>
             </div>
             <div class="col-12">
-                <h5>Time Series</h5>
+                <h5>Time Series Options</h5>
+                <p>Select which axis you would like to represent utilities and predictors plotted over time.</p>
             </div>
             <div class="col-12">
                 <div class="d-flex">

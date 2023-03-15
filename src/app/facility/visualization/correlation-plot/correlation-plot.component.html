@@ -4,7 +4,7 @@
     </h4>
 
     <div class="row justify-content-center" *ngFor="let combination of axisCombinations">
-        <div class="col-4" *ngFor="let xOption of combination.xOptions">
+        <div class="col-lg-6 col-md-12" *ngFor="let xOption of combination.xOptions">
             <app-correlation-plot-graph-item [axisCombo]="{x: xOption, y: combination.y}"></app-correlation-plot-graph-item>
         </div>
         <div class="col-12">
