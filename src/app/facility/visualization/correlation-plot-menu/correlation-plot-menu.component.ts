@@ -74,6 +74,64 @@ export class CorrelationPlotMenuComponent {
   async saveSiteOrSource() {
     await this.dbChangesService.updateFacilities(this.facility);
   }
+
+  setTimeSeriesLeftAxis() {
+    this.correlationPlotOptions.timeSeriesGroupYAxis1Options.forEach(option => {
+      if (option.selected) {
+        let sameOption: AxisOption = this.correlationPlotOptions.timeSeriesGroupYAxis2Options.find(option2 => {
+          return option2.itemId == option.itemId;
+        });
+        sameOption.selected = false;
+      }
+    })
+    this.correlationPlotOptions.timeSeriesMeterYAxis1Options.forEach(option => {
+      if (option.selected) {
+        let sameOption: AxisOption = this.correlationPlotOptions.timeSeriesMeterYAxis2Options.find(option2 => {
+          return option2.itemId == option.itemId;
+        });
+        sameOption.selected = false;
+      }
+    })
+    this.correlationPlotOptions.timeSeriesPredictorYAxis1Options.forEach(option => {
+      if (option.selected) {
+        let sameOption: AxisOption = this.correlationPlotOptions.timeSeriesPredictorYAxis2Options.find(option2 => {
+          return option2.itemId == option.itemId;
+        });
+        sameOption.selected = false;
+      }
+    })
+
+    this.savePlotOptions();
+  }
+
+  setTimeSeriesRightAxis() {
+    this.correlationPlotOptions.timeSeriesGroupYAxis2Options.forEach(option => {
+      if (option.selected) {
+        let sameOption: AxisOption = this.correlationPlotOptions.timeSeriesGroupYAxis1Options.find(option2 => {
+          return option2.itemId == option.itemId;
+        });
+        sameOption.selected = false;
+      }
+    })
+    this.correlationPlotOptions.timeSeriesMeterYAxis2Options.forEach(option => {
+      if (option.selected) {
+        let sameOption: AxisOption = this.correlationPlotOptions.timeSeriesMeterYAxis1Options.find(option2 => {
+          return option2.itemId == option.itemId;
+        });
+        sameOption.selected = false;
+      }
+    })
+    this.correlationPlotOptions.timeSeriesPredictorYAxis2Options.forEach(option => {
+      if (option.selected) {
+        let sameOption: AxisOption = this.correlationPlotOptions.timeSeriesPredictorYAxis1Options.find(option2 => {
+          return option2.itemId == option.itemId;
+        });
+        sameOption.selected = false;
+      }
+    })
+
+    this.savePlotOptions();
+  }
 }
 
 export interface AxisOption {
