@@ -243,11 +243,13 @@ export class VisualizationStateService {
   getDates(): Array<Date> {
     let dateRange: { minDate: Date, maxDate: Date } = this.dateRange.getValue();
     let dates: Array<Date> = new Array();
-    let startDate: Date = new Date(dateRange.minDate);
-    let endDate: Date = new Date(dateRange.maxDate);
-    while (startDate < endDate) {
-      dates.push(new Date(startDate.getFullYear(), startDate.getMonth(), 1));
-      startDate.setMonth(startDate.getMonth() + 1);
+    if (dateRange) {
+      let startDate: Date = new Date(dateRange.minDate);
+      let endDate: Date = new Date(dateRange.maxDate);
+      while (startDate < endDate) {
+        dates.push(new Date(startDate.getFullYear(), startDate.getMonth(), 1));
+        startDate.setMonth(startDate.getMonth() + 1);
+      }
     }
     return dates;
   }

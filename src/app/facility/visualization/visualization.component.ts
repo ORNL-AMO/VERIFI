@@ -55,19 +55,27 @@ export class VisualizationComponent implements OnInit {
 
   initializeDate() {
     let calanderizedMeters: Array<CalanderizedMeter> = this.visualizationStateService.calanderizedMeters;
-    let monthlyData: Array<MonthlyData> = calanderizedMeters.flatMap(cMeter => {
-      return cMeter.monthlyData;
-    })
-    let dates: Array<Date> = monthlyData.map(mData => {
-      let date: Date = new Date(mData.date);
-      return date;
-    });
-    let maxDate: Date = _.max(dates);
-    let minDate: Date = _.min(dates);
-    maxDate.setMonth(maxDate.getMonth() - 1)
-    this.visualizationStateService.dateRange.next({
-      maxDate: maxDate,
-      minDate: minDate
-    });
+    if (calanderizedMeters.length > 0) {
+      let monthlyData: Array<MonthlyData> = calanderizedMeters.flatMap(cMeter => {
+        return cMeter.monthlyData;
+      })
+      if (monthlyData.length > 0) {
+        let dates: Array<Date> = monthlyData.map(mData => {
+          let date: Date = new Date(mData.date);
+          return date;
+        });
+        let maxDate: Date = _.max(dates);
+        let minDate: Date = _.min(dates);
+        maxDate.setMonth(maxDate.getMonth() - 1)
+        this.visualizationStateService.dateRange.next({
+          maxDate: maxDate,
+          minDate: minDate
+        });
+      } else {
+        this.visualizationStateService.dateRange.next(undefined);
+      }
+    } else {
+      this.visualizationStateService.dateRange.next(undefined);
+    }
   }
 }
