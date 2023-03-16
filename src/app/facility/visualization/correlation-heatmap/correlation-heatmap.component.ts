@@ -1,10 +1,5 @@
 import { Component, ElementRef, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
-import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
-import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
-import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
-import { IdbPredictorEntry, IdbUtilityMeterGroup, PredictorData } from 'src/app/models/idb';
-import { getIsEnergyMeter } from 'src/app/shared/sharedHelperFuntions';
 import * as _ from 'lodash';
 import * as jStat from 'jstat';
 import { JStatRegressionModel } from 'src/app/models/analysis';
@@ -18,15 +13,11 @@ import { AxisOption, CorrelationPlotOptions, VisualizationStateService } from '.
 export class CorrelationHeatmapComponent {
   @ViewChild('heatMapPlot', { static: false }) heatMapPlot: ElementRef;
 
-
-  dates: Array<Date>;
   correlationPlotOptions: CorrelationPlotOptions;
-  constructor(private visualizationStateService: VisualizationStateService, private plotlyService: PlotlyService,
-    private predictorDbService: PredictordbService, private utilityMeterGroupDbService: UtilityMeterGroupdbService) { }
+  constructor(private visualizationStateService: VisualizationStateService, private plotlyService: PlotlyService) { }
 
   ngOnInit(): void {
     this.correlationPlotOptions = this.visualizationStateService.correlationPlotOptions.getValue();
-    this.setDates();
   }
 
   ngOnDestroy() {
@@ -37,7 +28,7 @@ export class CorrelationHeatmapComponent {
   }
 
   drawHeatMap() {
-    if (this.dates && this.heatMapPlot) {
+    if (this.heatMapPlot) {
       let axisData: Array<{
         option: AxisOption,
         values: Array<number>
@@ -93,7 +84,6 @@ export class CorrelationHeatmapComponent {
         }];
 
         var layout = {
-          height: 700,
           title: 'R&#178; Variance',
           annotations: [],
           yaxis: {
@@ -114,7 +104,7 @@ export class CorrelationHeatmapComponent {
               text: zValues[j][i],
               font: {
                 size: 12,
-                color: 'white',
+                color: this.getFont(zValues[j][i]),
               },
               showarrow: false,
             };
@@ -130,10 +120,19 @@ export class CorrelationHeatmapComponent {
     }
   }
 
+  getFont(value: number): string {
+    if (value && isNaN(value) == false) {
+      if (value > .5 || value < .2) {
+        return "white";
+      } else {
+        return "black";
+      }
+    }
+    return "white";
+  }
 
   getSigFigs(val: number): number {
     return Number((val).toLocaleString(undefined, { maximumSignificantDigits: 3 }));
-    // return Number((Math.round(val * 100) / 100).toFixed(4))
   }
 
 
@@ -146,12 +145,13 @@ export class CorrelationHeatmapComponent {
       values: Array<number>
     }> = new Array();
 
+    let dates: Array<Date> = this.visualizationStateService.getDates();
 
     this.correlationPlotOptions.r2PredictorOptions.forEach(option => {
       if (option.selected) {
         allAxisOptions.push({
           option: option,
-          values: this.getValues(option)
+          values: this.visualizationStateService.getValues(option, dates)
         });
       }
     });
@@ -160,7 +160,7 @@ export class CorrelationHeatmapComponent {
         if (meterOption.selected) {
           allAxisOptions.push({
             option: meterOption,
-            values: this.getValues(meterOption)
+            values: this.visualizationStateService.getValues(meterOption, dates)
           });
         }
       })
@@ -169,91 +169,12 @@ export class CorrelationHeatmapComponent {
         if (groupOption.selected) {
           allAxisOptions.push({
             option: groupOption,
-            values: this.getValues(groupOption)
+            values: this.visualizationStateService.getValues(groupOption, dates)
           });
         }
       });
     };
     return allAxisOptions;
-  }
-
-  setDates() {
-    let dateRange: { minDate: Date, maxDate: Date } = this.visualizationStateService.dateRange.getValue();
-    this.dates = new Array();
-    let startDate: Date = new Date(dateRange.minDate);
-    let endDate: Date = new Date(dateRange.maxDate);
-    while (startDate < endDate) {
-      this.dates.push(new Date(startDate.getFullYear(), startDate.getMonth(), 1));
-      startDate.setMonth(startDate.getMonth() + 1);
-    }
-  }
-
-  getValues(axisOption: AxisOption): Array<number> {
-    let values: Array<number> = new Array();
-    let calanderizedMeters: Array<CalanderizedMeter> = this.visualizationStateService.calanderizedMeters;
-    if (axisOption.type == 'meter') {
-      let calanderizedMeter: CalanderizedMeter = calanderizedMeters.find(cMeter => { return cMeter.meter.guid == axisOption.itemId });
-      this.dates.forEach(date => {
-        let monthlyData: MonthlyData = calanderizedMeter.monthlyData.find(mData => {
-          return mData.date.getMonth() == date.getMonth() && mData.date.getFullYear() == date.getFullYear();
-        });
-        if (monthlyData) {
-          if (getIsEnergyMeter(calanderizedMeter.meter.source)) {
-            values.push(monthlyData.energyUse);
-          } else {
-            values.push(monthlyData.energyConsumption);
-          }
-        } else {
-          values.push(0);
-        }
-      })
-    } else if (axisOption.type == 'meterGroup') {
-      let facilityGroups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.facilityMeterGroups.getValue();
-      let group: IdbUtilityMeterGroup = facilityGroups.find(group => { return group.guid == axisOption.itemId });
-      let groupMeters: Array<CalanderizedMeter> = this.visualizationStateService.calanderizedMeters.filter(cMeter => {
-        return cMeter.meter.groupId == axisOption.itemId;
-      })
-      let groupMonthlyData: Array<MonthlyData> = groupMeters.flatMap(cMeter => {
-        return cMeter.monthlyData;
-      });
-      this.dates.forEach(date => {
-        let monthlyData: Array<MonthlyData> = groupMonthlyData.filter(mData => {
-          return mData.date.getMonth() == date.getMonth() && mData.date.getFullYear() == date.getFullYear();
-        })
-        if (monthlyData) {
-          if (group.groupType == 'Energy') {
-            let value: number = _.sumBy(monthlyData, 'energyUse')
-            values.push(value);
-          } else {
-            let value: number = _.sumBy(monthlyData, 'energyConsumption')
-            values.push(value);
-          }
-        } else {
-          values.push(0);
-        }
-
-      });
-    } else if (axisOption.type == 'predictor') {
-      let facilityPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.facilityPredictorEntries.getValue();
-      this.dates.forEach(date => {
-        let monthPredictorEntry: IdbPredictorEntry = facilityPredictorEntries.find(entry => {
-          return entry.date.getMonth() == date.getMonth() && entry.date.getFullYear() == date.getFullYear();
-        });
-        if (monthPredictorEntry) {
-          let predictor: PredictorData = monthPredictorEntry.predictors.find(predictor => {
-            return predictor.id == axisOption.itemId;
-          });
-          if (predictor) {
-            values.push(predictor.amount);
-          } else {
-            values.push(0);
-          }
-        } else {
-          values.push(0);
-        }
-      });
-    }
-    return values;
   }
 
   getR2(xValues: Array<number>, yValue: Array<number>) {

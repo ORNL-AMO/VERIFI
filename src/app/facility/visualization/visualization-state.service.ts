@@ -3,9 +3,11 @@ import { BehaviorSubject } from 'rxjs';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
-import { CalanderizedMeter } from 'src/app/models/calanderization';
-import { IdbUtilityMeter, IdbUtilityMeterGroup, PredictorData } from 'src/app/models/idb';
+import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
+import { IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterGroup, PredictorData } from 'src/app/models/idb';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
+import { getIsEnergyMeter } from 'src/app/shared/sharedHelperFuntions';
+import * as _ from 'lodash';
 
 @Injectable({
   providedIn: 'root'
@@ -168,6 +170,86 @@ export class VisualizationStateService {
       timeSeriesPredictorYAxis1Options: timeSeriesPredictorYAxis1Options,
       timeSeriesPredictorYAxis2Options: timeSeriesPredictorYAxis2Options
     });
+  }
+
+
+  getValues(axisOption: AxisOption, dates: Array<Date>): Array<number> {
+    let values: Array<number> = new Array();
+    if (axisOption.type == 'meter') {
+      let calanderizedMeter: CalanderizedMeter = this.calanderizedMeters.find(cMeter => { return cMeter.meter.guid == axisOption.itemId });
+      dates.forEach(date => {
+        let monthlyData: MonthlyData = calanderizedMeter.monthlyData.find(mData => {
+          return mData.date.getMonth() == date.getMonth() && mData.date.getFullYear() == date.getFullYear();
+        });
+        if (monthlyData) {
+          if (getIsEnergyMeter(calanderizedMeter.meter.source)) {
+            values.push(monthlyData.energyUse);
+          } else {
+            values.push(monthlyData.energyConsumption);
+          }
+        } else {
+          values.push(0);
+        }
+      })
+    } else if (axisOption.type == 'meterGroup') {
+      let facilityGroups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.facilityMeterGroups.getValue();
+      let group: IdbUtilityMeterGroup = facilityGroups.find(group => { return group.guid == axisOption.itemId });
+      let groupMeters: Array<CalanderizedMeter> = this.calanderizedMeters.filter(cMeter => {
+        return cMeter.meter.groupId == axisOption.itemId;
+      })
+      let groupMonthlyData: Array<MonthlyData> = groupMeters.flatMap(cMeter => {
+        return cMeter.monthlyData;
+      });
+      dates.forEach(date => {
+        let monthlyData: Array<MonthlyData> = groupMonthlyData.filter(mData => {
+          return mData.date.getMonth() == date.getMonth() && mData.date.getFullYear() == date.getFullYear();
+        })
+        if (monthlyData) {
+          if (group.groupType == 'Energy') {
+            let value: number = _.sumBy(monthlyData, 'energyUse')
+            values.push(value);
+          } else {
+            let value: number = _.sumBy(monthlyData, 'energyConsumption')
+            values.push(value);
+          }
+        } else {
+          values.push(0);
+        }
+
+      });
+    } else if (axisOption.type == 'predictor') {
+      let facilityPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.facilityPredictorEntries.getValue();
+      dates.forEach(date => {
+        let monthPredictorEntry: IdbPredictorEntry = facilityPredictorEntries.find(entry => {
+          return entry.date.getMonth() == date.getMonth() && entry.date.getFullYear() == date.getFullYear();
+        });
+        if (monthPredictorEntry) {
+          let predictor: PredictorData = monthPredictorEntry.predictors.find(predictor => {
+            return predictor.id == axisOption.itemId;
+          });
+          if (predictor) {
+            values.push(predictor.amount);
+          } else {
+            values.push(0);
+          }
+        } else {
+          values.push(0);
+        }
+      });
+    }
+    return values;
+  }
+
+  getDates(): Array<Date> {
+    let dateRange: { minDate: Date, maxDate: Date } = this.dateRange.getValue();
+    let dates: Array<Date> = new Array();
+    let startDate: Date = new Date(dateRange.minDate);
+    let endDate: Date = new Date(dateRange.maxDate);
+    while (startDate < endDate) {
+      dates.push(new Date(startDate.getFullYear(), startDate.getMonth(), 1));
+      startDate.setMonth(startDate.getMonth() + 1);
+    }
+    return dates;
   }
 }
 
