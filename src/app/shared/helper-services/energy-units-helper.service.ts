@@ -5,6 +5,7 @@ import { IdbAccount, IdbFacility, IdbUtilityMeter, MeterPhase, MeterSource } fro
 import { FuelTypeOption, GasOptions, LiquidOptions, OtherEnergyOptions, SolidOptions, SourceOptions } from 'src/app/facility/utility-data/energy-consumption/energy-source/edit-meter-form/editMeterOptions';
 import { ChilledWaterUnitOptions, EnergyUnitOptions, MassUnitOptions, UnitOption, VolumeGasOptions, VolumeLiquidOptions } from '../unitOptions';
 import { EnergyUseCalculationsService } from './energy-use-calculations.service';
+import { getIsEnergyMeter, getIsEnergyUnit } from '../sharedHelperFuntions';
 
 @Injectable({
   providedIn: 'root'
@@ -17,7 +18,7 @@ export class EnergyUnitsHelperService {
   getMeterConsumptionUnitInAccount(meter: IdbUtilityMeter): string {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     if (selectedAccount) {
-      let isEnergyMeter: boolean = this.isEnergyMeter(meter.source);
+      let isEnergyMeter: boolean = getIsEnergyMeter(meter.source);
       //use meter unit 
       if (isEnergyMeter) {
         return selectedAccount.energyUnit;
@@ -33,7 +34,7 @@ export class EnergyUnitsHelperService {
     let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     let selectedFacility: IdbFacility = accountFacilities.find(facility => {return meter.facilityId == facility.guid});
     if (selectedFacility) {
-      let isEnergyMeter: boolean = this.isEnergyMeter(meter.source);
+      let isEnergyMeter: boolean = getIsEnergyMeter(meter.source);
       //use meter unit 
       if (isEnergyMeter) {
         return selectedFacility.energyUnit;
@@ -114,19 +115,19 @@ export class EnergyUnitsHelperService {
   }
 
 
-  isEnergyUnit(unit: string): boolean {
-    let findEnergyUnit: UnitOption = EnergyUnitOptions.find(unitOption => { return unitOption.value == unit });
-    return findEnergyUnit != undefined;
-  }
+  // isEnergyUnit(unit: string): boolean {
+  //   let findEnergyUnit: UnitOption = EnergyUnitOptions.find(unitOption => { return unitOption.value == unit });
+  //   return findEnergyUnit != undefined;
+  // }
 
 
-  isEnergyMeter(source: MeterSource): boolean {
-    if (source == 'Electricity' || source == 'Natural Gas' || source == 'Other Fuels' || source == 'Other Energy') {
-      return true;
-    } else {
-      return false;
-    }
-  }
+  // isEnergyMeter(source: MeterSource): boolean {
+  //   if (source == 'Electricity' || source == 'Natural Gas' || source == 'Other Fuels' || source == 'Other Energy') {
+  //     return true;
+  //   } else {
+  //     return false;
+  //   }
+  // }
 
   getStartingUnitOptions(source: MeterSource, phase: MeterPhase, fuel: string): Array<UnitOption> {
     if (source == 'Electricity' || !source) {
@@ -160,7 +161,7 @@ export class EnergyUnitsHelperService {
   }
 
   getStartingUnitOptionsExistingData(source: MeterSource, phase: MeterPhase, fuel: string, startingUnit: string): Array<UnitOption> {
-    let isEnergyUnit: boolean = this.isEnergyUnit(startingUnit);
+    let isEnergyUnit: boolean = getIsEnergyUnit(startingUnit);
     if (isEnergyUnit) {
       return EnergyUnitOptions;
     } else if (source == 'Natural Gas') {
@@ -265,9 +266,9 @@ export class EnergyUnitsHelperService {
     let hasDifferentCollectionUnits: boolean = false;
     let hasDifferentEnergyUnits: boolean = false;
     let hasDifferentEmissions: boolean = false;
-    let isEnergyMeter: boolean = this.isEnergyMeter(source);
+    let isEnergyMeter: boolean = getIsEnergyMeter(source);
     if (isEnergyMeter) {
-      let isEnergyUnit: boolean = this.isEnergyUnit(startingUnit);
+      let isEnergyUnit: boolean = getIsEnergyUnit(startingUnit);
       let meterEnergyUnit: string = energyUnit;
       if (isEnergyUnit) {
         meterEnergyUnit = startingUnit;

@@ -4,6 +4,7 @@ import { IdbFacility } from 'src/app/models/idb';
 import { ConvertUnitsService } from 'src/app/shared/convert-units/convert-units.service';
 import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
 import { EnergyUseCalculationsService } from 'src/app/shared/helper-services/energy-use-calculations.service';
+import { getIsEnergyMeter } from 'src/app/shared/sharedHelperFuntions';
 import { EnergyUnitOptions, UnitOption } from 'src/app/shared/unitOptions';
 import { EditMeterFormService } from './edit-meter-form.service';
 import { AgreementType, AgreementTypes, FuelTypeOption, OtherEnergyOptions, ScopeOption, ScopeOptions, SourceOptions } from './editMeterOptions';
@@ -285,7 +286,7 @@ export class EditMeterFormComponent implements OnInit {
   }
 
   setUnitBooleans() {
-    this.isEnergyMeter = this.energyUnitsHelperService.isEnergyMeter(this.meterForm.controls.source.value);
+    this.isEnergyMeter = getIsEnergyMeter(this.meterForm.controls.source.value);
     let selectedUnit: UnitOption = EnergyUnitOptions.find(option => { return option.value == this.meterForm.controls.startingUnit.value });
     if (selectedUnit) {
       this.meterForm.controls.energyUnit.patchValue(selectedUnit.value);

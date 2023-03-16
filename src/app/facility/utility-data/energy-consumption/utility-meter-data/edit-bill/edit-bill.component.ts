@@ -9,7 +9,7 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbAccount, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
-import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
+import { getIsEnergyMeter, getIsEnergyUnit } from 'src/app/shared/sharedHelperFuntions';
 import { UtilityMeterDataService } from '../utility-meter-data.service';
 
 @Component({
@@ -32,7 +32,7 @@ export class EditBillComponent implements OnInit {
     private utilityMeterDbService: UtilityMeterdbService, private loadingService: LoadingService,
     private dbChangesService: DbChangesService, private facilityDbService: FacilitydbService, private accountDbService: AccountdbService,
     private utilityMeterDataService: UtilityMeterDataService, private toastNotificationService: ToastNotificationsService,
-    private energyUnitsHelperService: EnergyUnitsHelperService, private router: Router) { }
+    private router: Router) { }
 
   ngOnInit(): void {
     this.activatedRoute.parent.params.subscribe(parentParams => {
@@ -58,14 +58,14 @@ export class EditBillComponent implements OnInit {
 
 
   cancel(onSave?: boolean) {
-    if(!this.meterDataForm.dirty || onSave){
+    if (!this.meterDataForm.dirty || onSave) {
       this.confirmCancel();
-    }else{
+    } else {
       this.showConfirmCancel = true;
     }
   }
 
-  confirmCancel(){
+  confirmCancel() {
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     this.router.navigateByUrl('/facility/' + selectedFacility.id + '/utility/energy-consumption/utility-meter/' + this.editMeter.id + '/data-table');
   }
@@ -121,8 +121,8 @@ export class EditBillComponent implements OnInit {
     if (this.editMeter.source == 'Electricity') {
       this.meterDataForm = this.utilityMeterDataService.getElectricityMeterDataForm(this.editMeterData);
     } else {
-      this.displayVolumeInput = (this.energyUnitsHelperService.isEnergyUnit(this.editMeter.startingUnit) == false);
-      this.displayEnergyUse = this.energyUnitsHelperService.isEnergyMeter(this.editMeter.source);
+      this.displayVolumeInput = (getIsEnergyUnit(this.editMeter.startingUnit) == false);
+      this.displayEnergyUse = getIsEnergyMeter(this.editMeter.source);
       this.meterDataForm = this.utilityMeterDataService.getGeneralMeterDataForm(this.editMeterData, this.displayVolumeInput, this.displayEnergyUse);
       if (this.displayVolumeInput) {
         this.meterDataForm.controls.totalEnergyUse.disable();
@@ -134,7 +134,7 @@ export class EditBillComponent implements OnInit {
     })
   }
 
-  toggleFilterMenu(){
+  toggleFilterMenu() {
     this.showFilterDropdown = !this.showFilterDropdown;
   }
 }
