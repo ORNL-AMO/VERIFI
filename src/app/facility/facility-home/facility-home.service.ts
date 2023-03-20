@@ -19,7 +19,7 @@ export class FacilityHomeService {
   latestAnalysisItem: IdbAnalysisItem;
   annualAnalysisSummary: BehaviorSubject<Array<AnnualAnalysisSummary>>;
   monthlyFacilityAnalysisData: BehaviorSubject<Array<MonthlyAnalysisSummaryData>>;
-  calculating: BehaviorSubject<boolean>;
+  calculating: BehaviorSubject<boolean | 'error'>;
   constructor(private analysisDbService: AnalysisDbService, private utilityMeterDbService: UtilityMeterdbService,
     private calendarizationService: CalanderizationService,
     private convertMeterDataService: ConvertMeterDataService) {

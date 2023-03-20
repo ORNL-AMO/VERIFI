@@ -24,6 +24,7 @@ export class AccountHomeService {
     facilityId: string,
     annualAnalysisSummary: Array<AnnualAnalysisSummary>,
     monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
+    error: boolean
   }>>;
   constructor(private accountAnalysisDbService: AccountAnalysisDbService, private utilityMeterDbService: UtilityMeterdbService,
     private accountDbService: AccountdbService, private calendarizationService: CalanderizationService, private convertMeterDataService: ConvertMeterDataService) {

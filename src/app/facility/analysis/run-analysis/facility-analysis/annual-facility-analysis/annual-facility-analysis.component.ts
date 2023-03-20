@@ -16,7 +16,7 @@ export class AnnualFacilityAnalysisComponent implements OnInit {
   dataDisplay: 'table' | 'graph';
   analysisItem: IdbAnalysisItem;
   facility: IdbFacility;
-  calculating: boolean;
+  calculating: boolean | 'error';
   annualAnalysisSummary: Array<AnnualAnalysisSummary>;
   calculatingSub: Subscription;
   annualAnalysisSummarySub: Subscription;

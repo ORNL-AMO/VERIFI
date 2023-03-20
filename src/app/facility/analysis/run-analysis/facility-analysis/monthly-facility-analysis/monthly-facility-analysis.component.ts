@@ -20,7 +20,7 @@ export class MonthlyFacilityAnalysisComponent implements OnInit {
   facility: IdbFacility;
   itemsPerPage: number;
   itemsPerPageSub: Subscription;
-  calculating: boolean;
+  calculating: boolean | 'error';
   calculatingSub: Subscription;
   monthlyFacilityAnalysisDataSub: Subscription;
   constructor(private analysisService: AnalysisService,

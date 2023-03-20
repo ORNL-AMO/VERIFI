@@ -25,7 +25,7 @@ export class MonthlyAnalysisSummaryComponent implements OnInit {
   itemsPerPage: number;
   itemsPerPageSub: Subscription;
   worker: Worker;
-  calculating: boolean;
+  calculating: boolean | 'error';
   constructor(private analysisService: AnalysisService, private analysisDbService: AnalysisDbService,
     private facilityDbService: FacilitydbService,
     private predictorDbService: PredictordbService,
@@ -46,8 +46,14 @@ export class MonthlyAnalysisSummaryComponent implements OnInit {
     if (typeof Worker !== 'undefined') {
       this.worker = new Worker(new URL('src/app/web-workers/monthly-group-analysis.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {
-        this.monthlyAnalysisSummary = data;
-        this.calculating = false;
+        if(!data.error){
+          this.monthlyAnalysisSummary = data;
+          this.calculating = false;
+        }else{
+          this.monthlyAnalysisSummary = undefined;
+          this.calculating = 'error';
+        }
+        
         this.worker.terminate();
       };
       this.calculating = true;
