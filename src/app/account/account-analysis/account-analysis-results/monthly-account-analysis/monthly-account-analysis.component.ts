@@ -21,7 +21,7 @@ export class MonthlyAccountAnalysisComponent implements OnInit {
   account: IdbAccount;
   itemsPerPage: number;
   itemsPerPageSub: Subscription;
-  calculating: boolean;
+  calculating: boolean | 'error';
 
   calculatingSub: Subscription;
   monthlyAccountAnalysisDataSub: Subscription;

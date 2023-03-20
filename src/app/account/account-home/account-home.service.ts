@@ -19,7 +19,7 @@ export class AccountHomeService {
   latestAnalysisItem: IdbAccountAnalysisItem;
   annualAnalysisSummary: BehaviorSubject<Array<AnnualAnalysisSummary>>;
   monthlyAccountAnalysisData: BehaviorSubject<Array<MonthlyAnalysisSummaryData>>;
-  calculating: BehaviorSubject<boolean>;
+  calculating: BehaviorSubject<boolean | 'error'>;
   facilityAnalysisSummaries: BehaviorSubject<Array<{
     facilityId: string,
     annualAnalysisSummary: Array<AnnualAnalysisSummary>,
