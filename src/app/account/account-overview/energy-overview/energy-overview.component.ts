@@ -12,7 +12,7 @@ import { UtilityUseAndCost } from 'src/app/calculations/dashboard-calculations/u
 export class EnergyOverviewComponent implements OnInit {
 
   calculatingSub: Subscription;
-  calculating: boolean;
+  calculating: boolean | 'error';
   energyUnit: string;
   selectedAccountSub: Subscription;
 
@@ -30,7 +30,7 @@ export class EnergyOverviewComponent implements OnInit {
         this.energyUnit = val.energyUnit;
       }
     });
-    this.calculatingSub = this.accountOverviewService.calculatingAccountOverviewData.subscribe(val => {
+    this.calculatingSub = this.accountOverviewService.calculating.subscribe(val => {
       this.calculating = val;
     });
 

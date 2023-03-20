@@ -60,15 +60,21 @@ export class AccountOverviewComponent implements OnInit {
     if (typeof Worker !== 'undefined') {
       this.worker = new Worker(new URL('src/app/web-workers/account-overview.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {
-        this.accountOverviewService.accountOverviewData.next(data.accountOverviewData);
-        this.accountOverviewService.utilityUseAndCost.next(data.utilityUseAndCost);
-        this.accountOverviewService.calculatingAccountOverviewData.next(false);
+        if (!data.error) {
+          this.accountOverviewService.accountOverviewData.next(data.accountOverviewData);
+          this.accountOverviewService.utilityUseAndCost.next(data.utilityUseAndCost);
+          this.accountOverviewService.calculating.next(false);
+        } else {
+          this.accountOverviewService.accountOverviewData.next(undefined);
+          this.accountOverviewService.utilityUseAndCost.next(undefined);
+          this.accountOverviewService.calculating.next('error');
+        }
         this.worker.terminate();
       };
 
       //only show calculating spinner if no data calculated yet
       if (this.accountOverviewService.accountOverviewData.getValue() == undefined) {
-        this.accountOverviewService.calculatingAccountOverviewData.next(true);
+        this.accountOverviewService.calculating.next(true);
       }
       this.worker.postMessage({
         calanderizedMeters: this.accountOverviewService.calanderizedMeters,

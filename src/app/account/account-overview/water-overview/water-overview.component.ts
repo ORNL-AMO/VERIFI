@@ -14,7 +14,7 @@ import { UtilityUseAndCost } from 'src/app/calculations/dashboard-calculations/u
 export class WaterOverviewComponent implements OnInit {
 
   calculatingSub: Subscription;
-  calculating: boolean;
+  calculating: boolean | 'error';
   selectedAccountSub: Subscription;
   waterUnit: string;
   
@@ -33,7 +33,7 @@ export class WaterOverviewComponent implements OnInit {
         this.waterUnit = val.volumeLiquidUnit;
       }
     });
-    this.calculatingSub = this.accountOverviewService.calculatingAccountOverviewData.subscribe(val => {
+    this.calculatingSub = this.accountOverviewService.calculating.subscribe(val => {
       this.calculating = val;
     })
 

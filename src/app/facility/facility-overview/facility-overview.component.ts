@@ -60,14 +60,20 @@ export class FacilityOverviewComponent implements OnInit {
     if (typeof Worker !== 'undefined') {
       this.worker = new Worker(new URL('src/app/web-workers/facility-overview.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {
-        this.facilityOverviewService.facilityOverviewData.next(data.facilityOverviewData);
-        this.facilityOverviewService.utilityUseAndCost.next(data.utilityUseAndCost);
-        this.facilityOverviewService.calculatingFacilityOverviewData.next(false);
+        if (!data.error) {
+          this.facilityOverviewService.facilityOverviewData.next(data.facilityOverviewData);
+          this.facilityOverviewService.utilityUseAndCost.next(data.utilityUseAndCost);
+          this.facilityOverviewService.calculating.next(false);
+        } else {
+          this.facilityOverviewService.facilityOverviewData.next(undefined);
+          this.facilityOverviewService.utilityUseAndCost.next(undefined);
+          this.facilityOverviewService.calculating.next("error");
+        }
         this.worker.terminate();
 
       };
       if (this.facilityOverviewService.utilityUseAndCost.getValue() == undefined) {
-        this.facilityOverviewService.calculatingFacilityOverviewData.next(true);
+        this.facilityOverviewService.calculating.next(true);
       }
       this.worker.postMessage({
         calanderizedMeters: this.facilityOverviewService.calanderizedMeters,
@@ -78,13 +84,13 @@ export class FacilityOverviewComponent implements OnInit {
     } else {
       // Web Workers are not supported in this environment.
       if (this.facilityOverviewService.utilityUseAndCost.getValue() == undefined) {
-        this.facilityOverviewService.calculatingFacilityOverviewData.next(true);
+        this.facilityOverviewService.calculating.next(true);
       }
       let facilityOverviewData: FacilityOverviewData = new FacilityOverviewData(this.facilityOverviewService.calanderizedMeters, this.dateRange, this.facility);
       let utilityUseAndCost: UtilityUseAndCost = new UtilityUseAndCost(this.facilityOverviewService.calanderizedMeters, this.dateRange);
       this.facilityOverviewService.facilityOverviewData.next(facilityOverviewData);
       this.facilityOverviewService.utilityUseAndCost.next(utilityUseAndCost);
-      this.facilityOverviewService.calculatingFacilityOverviewData.next(false);
+      this.facilityOverviewService.calculating.next(false);
     }
   }
 

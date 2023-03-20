@@ -33,9 +33,15 @@ export class FacilityAnalysisComponent implements OnInit {
       this.worker = new Worker(new URL('src/app/web-workers/annual-facility-analysis.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {
         this.worker.terminate();
-        this.analysisService.annualAnalysisSummary.next(data.annualAnalysisSummaries);
-        this.analysisService.monthlyAccountAnalysisData.next(data.monthlyAnalysisSummaryData);
-        this.analysisService.calculating.next(false);
+        if (!data.error) {
+          this.analysisService.annualAnalysisSummary.next(data.annualAnalysisSummaries);
+          this.analysisService.monthlyAccountAnalysisData.next(data.monthlyAnalysisSummaryData);
+          this.analysisService.calculating.next(false);
+        } else {
+          this.analysisService.annualAnalysisSummary.next(undefined);
+          this.analysisService.monthlyAccountAnalysisData.next(undefined);
+          this.analysisService.calculating.next('error');
+        }
       };
       this.analysisService.calculating.next(true)
       this.worker.postMessage({

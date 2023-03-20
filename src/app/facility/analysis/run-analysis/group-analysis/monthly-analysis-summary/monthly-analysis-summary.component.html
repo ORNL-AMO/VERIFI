@@ -24,7 +24,7 @@
     </div>
 </div>
 
-<div class="w-100 x-scroll" *ngIf="!calculating">
+<div class="w-100 x-scroll" *ngIf="calculating == false">
     <app-monthly-analysis-summary-table *ngIf="dataDisplay == 'table'" [analysisItem]="analysisItem"
         [monthlyAnalysisSummaryData]="monthlyAnalysisSummary.monthlyAnalysisSummaryData" [itemsPerPage]="itemsPerPage"
         [facilityOrAccount]="facility" [predictorVariables]="monthlyAnalysisSummary.predictorVariables" [group]="group">
@@ -37,4 +37,5 @@
     </app-monthly-analysis-summary-savings-graph>
 </div>
 
-<app-calculating-spinner *ngIf="calculating" [message]="'Calculating Monthly Results...'"></app-calculating-spinner>
+<app-calculating-spinner *ngIf="calculating != false" [message]="'Calculating Monthly Results...'"
+    [error]="calculating == 'error'"></app-calculating-spinner>

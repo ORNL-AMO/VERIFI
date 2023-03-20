@@ -19,7 +19,7 @@ export class AnnualAccountAnalysisComponent implements OnInit {
   account: IdbAccount;
   annualAnalysisSummary: Array<AnnualAnalysisSummary>;
   worker: Worker;
-  calculating: boolean;
+  calculating: boolean | 'error';
   calculatingSub: Subscription;
   annualAnalysisSummarySub: Subscription;
   constructor(private analysisService: AnalysisService,

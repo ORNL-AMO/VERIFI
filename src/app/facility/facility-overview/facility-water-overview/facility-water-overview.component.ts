@@ -13,7 +13,7 @@ import { FacilityOverviewService } from '../facility-overview.service';
 export class FacilityWaterOverviewComponent implements OnInit {
 
   calculatingSub: Subscription;
-  calculating: boolean;
+  calculating: boolean | 'error';
   facilityId: string;
   selectedFacilitySub: Subscription;
   waterUnit: string;
@@ -33,7 +33,7 @@ export class FacilityWaterOverviewComponent implements OnInit {
       this.facilityId = val.guid;
       this.waterUnit = val.volumeLiquidUnit;
     })
-    this.calculatingSub = this.facilityOverviewService.calculatingFacilityOverviewData.subscribe(val => {
+    this.calculatingSub = this.facilityOverviewService.calculating.subscribe(val => {
       this.calculating = val;
     })
 

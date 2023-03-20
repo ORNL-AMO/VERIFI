@@ -29,7 +29,7 @@ export class FacilityCardComponent implements OnInit {
   latestPredictorEntry: IdbPredictorEntry;
   noMeterData: boolean;
   naics: string;
-  calculating: boolean = true;
+  calculating: boolean | 'error' = true;
   // annualAnalysisSummary: Array<AnnualAnalysisSummary>;
   monthlyFacilityAnalysisData: Array<MonthlyAnalysisSummaryData>;
 
@@ -73,12 +73,17 @@ export class FacilityCardComponent implements OnInit {
           facilityId: string,
           annualAnalysisSummary: Array<AnnualAnalysisSummary>,
           monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
+          error: boolean
         } = summaries.find(summary => { return summary.facilityId == this.facility.guid });
         if (facilitySummary) {
           // this.annualAnalysisSummary = facilitySummary.annualAnalysisSummary;
-          this.monthlyFacilityAnalysisData = facilitySummary.monthlyAnalysisSummaryData;
-          this.setProgressPercentages();
-          this.calculating = false;
+          if(!facilitySummary.error){
+            this.monthlyFacilityAnalysisData = facilitySummary.monthlyAnalysisSummaryData;
+            this.setProgressPercentages();
+            this.calculating = false;
+          }else{
+            this.calculating = 'error';
+          }
         }
       })
     }

@@ -37,7 +37,7 @@ export class AccountHomeSummaryComponent implements OnInit {
   monthlyDataSub: Subscription;
   latestAnalysisItem: IdbAccountAnalysisItem;
   calculatingSub: Subscription;
-  calculating: boolean;
+  calculating: boolean | 'error';
   constructor(private accountDbService: AccountdbService, private accountHomeService: AccountHomeService,
     private accountReportDbService: AccountReportDbService, private router: Router,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
@@ -70,7 +70,7 @@ export class AccountHomeSummaryComponent implements OnInit {
 
     this.calculatingSub = this.accountHomeService.calculating.subscribe(val => {
       this.calculating = val;
-      if(!this.calculating){
+      if(this.calculating == false){
         this.monthlyFacilityAnalysisData = this.accountHomeService.monthlyAccountAnalysisData.getValue();
       }
     })
