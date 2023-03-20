@@ -5,12 +5,23 @@ import { UtilityUseAndCost } from "../calculations/dashboard-calculations/useAnd
 
 
 addEventListener('message', ({ data }) => {
-    let facilityOverviewData: FacilityOverviewData = new FacilityOverviewData(data.calanderizedMeters, data.dateRange, data.facility);
-    let utilityUseAndCost: UtilityUseAndCost = new UtilityUseAndCost(data.calanderizedMeters, data.dateRange);
-    let results = {
-        facilityOverviewData: facilityOverviewData,
-        utilityUseAndCost: utilityUseAndCost,
-        type: data.type
+    try {
+        let facilityOverviewData: FacilityOverviewData = new FacilityOverviewData(data.calanderizedMeters, data.dateRange, data.facility);
+        let utilityUseAndCost: UtilityUseAndCost = new UtilityUseAndCost(data.calanderizedMeters, data.dateRange);
+        let results = {
+            facilityOverviewData: facilityOverviewData,
+            utilityUseAndCost: utilityUseAndCost,
+            type: data.type,
+            error: false
+        }
+        postMessage(results);
+    } catch (err) {
+        let results = {
+            facilityOverviewData: undefined,
+            utilityUseAndCost: undefined,
+            type: data.type,
+            error: true
+        }
+        postMessage(results);
     }
-    postMessage(results);
 });

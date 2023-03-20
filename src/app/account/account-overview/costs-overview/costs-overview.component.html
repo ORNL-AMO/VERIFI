@@ -1,4 +1,4 @@
-<ng-container *ngIf="!calculating">
+<ng-container *ngIf="calculating == false">
     <div class="row" *ngIf="displayWarning">
         <div class="col">
             <div class="alert alert-warning text-center">
@@ -85,4 +85,5 @@
 </ng-container>
 
 
-<app-calculating-spinner *ngIf="calculating" [message]="'Calculating Data Overview...'"></app-calculating-spinner>
+<app-calculating-spinner *ngIf="calculating != false" [message]="'Calculating Data Overview...'"
+    [error]="calculating == 'error'"></app-calculating-spinner>

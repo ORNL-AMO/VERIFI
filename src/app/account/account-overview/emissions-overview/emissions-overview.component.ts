@@ -12,7 +12,7 @@ import { UtilityUseAndCost } from 'src/app/calculations/dashboard-calculations/u
 export class EmissionsOverviewComponent implements OnInit {
 
   calculatingSub: Subscription;
-  calculating: boolean;
+  calculating: boolean | 'error';
   accountOverviewDataSub: Subscription;
   accountOverviewData: AccountOverviewData;
   utilityUseAndCostSub: Subscription;
@@ -22,7 +22,7 @@ export class EmissionsOverviewComponent implements OnInit {
   constructor(private accountOverviewService: AccountOverviewService) { }
 
   ngOnInit(): void {
-    this.calculatingSub = this.accountOverviewService.calculatingAccountOverviewData.subscribe(val => {
+    this.calculatingSub = this.accountOverviewService.calculating.subscribe(val => {
       this.calculating = val;
     })
 
