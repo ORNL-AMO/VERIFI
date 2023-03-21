@@ -47,7 +47,7 @@ export class MonthlyAnalysisSummaryComponent implements OnInit {
       this.worker = new Worker(new URL('src/app/web-workers/monthly-group-analysis.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {
         if(!data.error){
-          this.monthlyAnalysisSummary = data;
+          this.monthlyAnalysisSummary = data.monthlyAnalysisSummary;
           this.calculating = false;
         }else{
           this.monthlyAnalysisSummary = undefined;
