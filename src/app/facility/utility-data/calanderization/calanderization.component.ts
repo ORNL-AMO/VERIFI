@@ -219,9 +219,9 @@ export class CalanderizationComponent implements OnInit {
 
   async setDataApplication() {
     await this.utilityMeterDbService.updateWithObservable(this.dataApplicationMeter).toPromise();
+    this.selectedMeter = this.dataApplicationMeter;
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.setMeters(selectedAccount, this.selectedFacility)
-    this.selectedMeter = this.dataApplicationMeter;
     this.cancelSetDataApplication();
   }
 
