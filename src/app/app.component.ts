@@ -57,11 +57,7 @@ export class AppComponent {
   }
 
   ngOnInit() {
-    try {
-      this.initializeData();
-    } catch (err) {
-      console.log(err);
-    }
+    this.initializeData();
   }
 
   async initializeData() {
