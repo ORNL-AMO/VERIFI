@@ -7,13 +7,14 @@
             </h3>
         </div>
         <div class="help-content">
+            <app-account-help *ngIf="helpURL == 'account'"></app-account-help>
+            <app-facility-help *ngIf="helpURL == 'facility'"></app-facility-help>
             <app-help-page *ngIf="helpURL == 'help'"></app-help-page>
-
             <app-upload-data-help *ngIf="helpURL == 'upload'"></app-upload-data-help>
             <app-setup-wizard-help *ngIf="helpURL == 'setup-wizard'"></app-setup-wizard-help>
 
 
-            <app-energy-consumption-help *ngIf="helpURL == 'energy-consumption'"></app-energy-consumption-help>
+            <!-- <app-energy-consumption-help *ngIf="helpURL == 'energy-consumption'"></app-energy-consumption-help>
             <app-account-overview-help *ngIf="helpURL == 'account-summary'"></app-account-overview-help>
             <app-facility-overview-help *ngIf="helpURL == 'facility-summary'"></app-facility-overview-help>
             <app-calanderization-help *ngIf="helpURL == 'monthly-meter-data'"></app-calanderization-help>
@@ -32,7 +33,7 @@
             <app-annual-group-analysis-help *ngIf="helpURL == 'annual-energy-intensity'"></app-annual-group-analysis-help>
             <app-facility-analysis-help *ngIf="helpURL == 'facility-analysis'"></app-facility-analysis-help>
             <app-monthly-group-analysis-help *ngIf="helpURL == 'monthly-energy-intensity'"></app-monthly-group-analysis-help>
-            <app-group-analysis-setup-help *ngIf="helpURL == 'group-analysis-options'"></app-group-analysis-setup-help>
+            <app-group-analysis-setup-help *ngIf="helpURL == 'group-analysis-options'"></app-group-analysis-setup-help> -->
         </div>
     </div>
 </div>
