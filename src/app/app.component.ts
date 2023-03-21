@@ -29,6 +29,7 @@ export class AppComponent {
 
   dataInitialized: boolean = false;
   loadingMessage: string = "Loading Accounts...";
+  startupError: string;
   constructor(
     private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService,
@@ -56,45 +57,54 @@ export class AppComponent {
   }
 
   ngOnInit() {
-    this.initializeData();
+    try {
+      this.initializeData();
+    } catch (err) {
+      console.log(err);
+    }
   }
 
   async initializeData() {
-    let accounts: Array<IdbAccount> = await this.accountDbService.getAll().toPromise();
-    this.accountDbService.allAccounts.next(accounts);
-    let localStorageAccountId: number = this.accountDbService.getInitialAccount();
-    let account: IdbAccount;
-    if (localStorageAccountId) {
-      account = accounts.find(account => { return account.id == localStorageAccountId });
-    } else if (accounts.length != 0) {
-      account = accounts[0];
-    }
-
-    await this.eGridService.parseZipCodeLongLat();
-    if (account) {
-      await this.initializeFacilities(account);
-      // await this.initializeReports(account);
-      await this.initializeAccountReports(account);
-      await this.initializePredictors(account);
-      await this.initializeMeters(account);
-      await this.initializeMeterData(account);
-      await this.initilizeMeterGroups(account);
-      await this.initializeAccountAnalysisItems(account);
-      await this.initializeFacilityAnalysisItems(account);
-      await this.initializeCustomEmissions(account);
-      let updatedAccount: { account: IdbAccount, isChanged: boolean } = this.updateDbEntryService.updateAccount(account);
-      if (updatedAccount.isChanged) {
-        await this.accountDbService.updateWithObservable(updatedAccount.account).toPromise();
-        this.accountDbService.selectedAccount.next(updatedAccount.account);
-      } else {
-        this.accountDbService.selectedAccount.next(account);
+    try {
+      let accounts: Array<IdbAccount> = await this.accountDbService.getAll().toPromise();
+      this.accountDbService.allAccounts.next(accounts);
+      let localStorageAccountId: number = this.accountDbService.getInitialAccount();
+      let account: IdbAccount;
+      if (localStorageAccountId) {
+        account = accounts.find(account => { return account.id == localStorageAccountId });
+      } else if (accounts.length != 0) {
+        account = accounts[0];
       }
-      this.dataInitialized = true;
-    } else {
-      await this.eGridService.parseEGridData();
 
-      this.dataInitialized = true;
-      this.router.navigateByUrl('setup-wizard');
+      await this.eGridService.parseZipCodeLongLat();
+      if (account) {
+        await this.initializeFacilities(account);
+        // await this.initializeReports(account);
+        await this.initializeAccountReports(account);
+        await this.initializePredictors(account);
+        await this.initializeMeters(account);
+        await this.initializeMeterData(account);
+        await this.initilizeMeterGroups(account);
+        await this.initializeAccountAnalysisItems(account);
+        await this.initializeFacilityAnalysisItems(account);
+        await this.initializeCustomEmissions(account);
+        let updatedAccount: { account: IdbAccount, isChanged: boolean } = this.updateDbEntryService.updateAccount(account);
+        if (updatedAccount.isChanged) {
+          await this.accountDbService.updateWithObservable(updatedAccount.account).toPromise();
+          this.accountDbService.selectedAccount.next(updatedAccount.account);
+        } else {
+          this.accountDbService.selectedAccount.next(account);
+        }
+        this.dataInitialized = true;
+      } else {
+        await this.eGridService.parseEGridData();
+
+        this.dataInitialized = true;
+        this.router.navigateByUrl('setup-wizard');
+      }
+    } catch (err) {
+      console.log(err);
+      this.startupError = err;
     }
   }
 
