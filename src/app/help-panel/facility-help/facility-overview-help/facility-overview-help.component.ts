@@ -34,6 +34,7 @@ export class FacilityOverviewHelpComponent {
 
   ngOnDestroy() {
     this.selectedFacilitySub.unsubscribe();
+    this.routerSub.unsubscribe();
   }
 
 
