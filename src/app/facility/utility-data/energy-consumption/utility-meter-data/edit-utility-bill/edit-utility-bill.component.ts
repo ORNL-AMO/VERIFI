@@ -37,6 +37,7 @@ export class EditUtilityBillComponent implements OnInit {
 
   ngOnInit(): void {
     this.showEmissions = this.editMeterFormService.checkShowEmissionsOutputRate(this.editMeter.source);
+    this.setTotalEmissions();
   }
 
   ngOnChanges() {

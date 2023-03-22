@@ -11,6 +11,10 @@ import { EnergyConsumptionHelpComponent } from './facility-utility-help/energy-c
 import { MeterGroupingHelpComponent } from './facility-utility-help/meter-grouping-help/meter-grouping-help.component';
 import { PredictorsDataHelpComponent } from './facility-utility-help/predictors-data-help/predictors-data-help.component';
 import { CalendarizationHelpComponent } from './facility-utility-help/calendarization-help/calendarization-help.component';
+import { MetersHelpComponent } from './facility-utility-help/energy-consumption-help/meters-help/meters-help.component';
+import { UtilityMeterHelpComponent } from './facility-utility-help/energy-consumption-help/utility-meter-help/utility-meter-help.component';
+import { EditMeterHelpComponent } from './facility-utility-help/energy-consumption-help/edit-meter-help/edit-meter-help.component';
+import { EditBillHelpComponent } from './facility-utility-help/energy-consumption-help/edit-bill-help/edit-bill-help.component';
 
 
 
@@ -26,7 +30,11 @@ import { CalendarizationHelpComponent } from './facility-utility-help/calendariz
     EnergyConsumptionHelpComponent,
     MeterGroupingHelpComponent,
     PredictorsDataHelpComponent,
-    CalendarizationHelpComponent
+    CalendarizationHelpComponent,
+    MetersHelpComponent,
+    UtilityMeterHelpComponent,
+    EditMeterHelpComponent,
+    EditBillHelpComponent
   ],
   imports: [
     CommonModule

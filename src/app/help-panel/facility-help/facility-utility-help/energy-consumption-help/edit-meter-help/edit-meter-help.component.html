@@ -1,0 +1,34 @@
+<ng-container *ngIf="isEdit">
+    <h4>Edit Meter Help</h4>
+    <p>
+        Use this screen to edit the properties of an existing meter.
+    </p>
+</ng-container>
+<ng-container *ngIf="!isEdit">
+    <h4>Add Meter Help</h4>
+    <p>
+        Use this screen to fill out the properties of the new meter.
+    </p>
+</ng-container>
+<hr>
+<p>
+    Hover over the "<span class="fa fa-circle-question"></span>" icons for details about the corresponding input fields.
+</p>
+<hr>
+<ng-container *ngIf="!isEdit">
+    <p>
+        Once all the details of the meter are correct, click the "Add Meter" button to submit the new meter.
+    </p>
+    <hr>
+    <p>
+        Once the meter has been added it will show up as a new tab. Meter bills can then be added under that tab.
+    </p>
+    <hr>
+</ng-container>
+<ng-container *ngIf="isEdit">
+    <p>
+        Once all the details of the meter are correct, click the "Save Changes" button to submit the changes to the
+        meter.
+    </p>
+    <hr>
+</ng-container>

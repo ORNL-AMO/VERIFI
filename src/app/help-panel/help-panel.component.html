@@ -2,9 +2,9 @@
     <div *ngIf="helpPanelOpen">
         <div class="banner d-flex w-100 justify-content-between">
             <h3>Help</h3>
-            <h3>
+            <div>
                 <a (click)="closePanel()"><span class="fa fa-close"></span></a>
-            </h3>
+            </div>
         </div>
         <div class="help-content">
             <app-account-help *ngIf="helpURL == 'account'"></app-account-help>
