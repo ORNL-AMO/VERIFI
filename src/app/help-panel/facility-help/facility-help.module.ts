@@ -15,6 +15,7 @@ import { MetersHelpComponent } from './facility-utility-help/energy-consumption-
 import { UtilityMeterHelpComponent } from './facility-utility-help/energy-consumption-help/utility-meter-help/utility-meter-help.component';
 import { EditMeterHelpComponent } from './facility-utility-help/energy-consumption-help/edit-meter-help/edit-meter-help.component';
 import { EditBillHelpComponent } from './facility-utility-help/energy-consumption-help/edit-bill-help/edit-bill-help.component';
+import { FacilityAnalysisDashboardHelpComponent } from './facility-analysis-help/facility-analysis-dashboard-help/facility-analysis-dashboard-help.component';
 
 
 
@@ -34,7 +35,8 @@ import { EditBillHelpComponent } from './facility-utility-help/energy-consumptio
     MetersHelpComponent,
     UtilityMeterHelpComponent,
     EditMeterHelpComponent,
-    EditBillHelpComponent
+    EditBillHelpComponent,
+    FacilityAnalysisDashboardHelpComponent
   ],
   imports: [
     CommonModule
