@@ -51,11 +51,13 @@ export class HelpPanelComponent implements OnInit {
       'upload',
       'setup-wizard',
       'help',
+      'facility',
       'account',
-      'facility'
     ]
+    let urlSplit: Array<string> = url.split('/');
+    let firstUrl: string = urlSplit[1];
     this.helpURL = componentOptions.find(option => {
-      return url.includes(option);
+      return firstUrl == option;
     });
   }
 

@@ -19,7 +19,7 @@ import { FacilityAnalysisDashboardHelpComponent } from './facility-analysis-help
 import { FacilityAnalysisSetupHelpComponent } from './facility-analysis-help/facility-analysis-setup-help/facility-analysis-setup-help.component';
 import { GroupAnalysisHelpComponent } from './facility-analysis-help/group-analysis-help/group-analysis-help.component';
 import { FacilityAnalysisResultsHelpComponent } from './facility-analysis-help/facility-analysis-results-help/facility-analysis-results-help.component';
-import { AccountAnalysisHelpComponent } from './facility-analysis-help/account-analysis-help/account-analysis-help.component';
+import { AccountAnalysisInFacilityHelpComponent } from './facility-analysis-help/account-analysis-in-facility-help/account-analysis-in-facility-help.component';
 
 
 
@@ -44,7 +44,7 @@ import { AccountAnalysisHelpComponent } from './facility-analysis-help/account-a
     FacilityAnalysisSetupHelpComponent,
     GroupAnalysisHelpComponent,
     FacilityAnalysisResultsHelpComponent,
-    AccountAnalysisHelpComponent
+    AccountAnalysisInFacilityHelpComponent
   ],
   imports: [
     CommonModule
