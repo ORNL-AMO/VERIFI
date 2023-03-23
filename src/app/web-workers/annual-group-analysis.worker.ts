@@ -8,7 +8,7 @@ addEventListener('message', ({ data }) => {
         let annualAnalysisSummaryClass: AnnualGroupAnalysisSummaryClass = new AnnualGroupAnalysisSummaryClass(data.selectedGroup, data.analysisItem, data.facility, data.calanderizedMeters, data.accountPredictorEntries);
         let annualAnalysisSummaries: Array<AnnualAnalysisSummary> = annualAnalysisSummaryClass.getAnnualAnalysisSummaries();
         postMessage({
-            error: true,
+            error: false,
             annualAnalysisSummaries: annualAnalysisSummaries
         });
     } catch (err) {

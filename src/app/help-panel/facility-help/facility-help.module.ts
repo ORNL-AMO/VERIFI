@@ -16,6 +16,10 @@ import { UtilityMeterHelpComponent } from './facility-utility-help/energy-consum
 import { EditMeterHelpComponent } from './facility-utility-help/energy-consumption-help/edit-meter-help/edit-meter-help.component';
 import { EditBillHelpComponent } from './facility-utility-help/energy-consumption-help/edit-bill-help/edit-bill-help.component';
 import { FacilityAnalysisDashboardHelpComponent } from './facility-analysis-help/facility-analysis-dashboard-help/facility-analysis-dashboard-help.component';
+import { FacilityAnalysisSetupHelpComponent } from './facility-analysis-help/facility-analysis-setup-help/facility-analysis-setup-help.component';
+import { GroupAnalysisHelpComponent } from './facility-analysis-help/group-analysis-help/group-analysis-help.component';
+import { FacilityAnalysisResultsHelpComponent } from './facility-analysis-help/facility-analysis-results-help/facility-analysis-results-help.component';
+import { AccountAnalysisHelpComponent } from './facility-analysis-help/account-analysis-help/account-analysis-help.component';
 
 
 
@@ -36,7 +40,11 @@ import { FacilityAnalysisDashboardHelpComponent } from './facility-analysis-help
     UtilityMeterHelpComponent,
     EditMeterHelpComponent,
     EditBillHelpComponent,
-    FacilityAnalysisDashboardHelpComponent
+    FacilityAnalysisDashboardHelpComponent,
+    FacilityAnalysisSetupHelpComponent,
+    GroupAnalysisHelpComponent,
+    FacilityAnalysisResultsHelpComponent,
+    AccountAnalysisHelpComponent
   ],
   imports: [
     CommonModule
