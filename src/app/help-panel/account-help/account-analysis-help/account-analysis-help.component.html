@@ -1,2 +1,4 @@
-<p>account-analysis-help works!</p>
-this shouldn't be showing up here...
+<app-account-analysis-dashboard-help *ngIf="helpURL == 'dashboard'"></app-account-analysis-dashboard-help>
+<app-account-analysis-results-help *ngIf="helpURL == 'results'"></app-account-analysis-results-help>
+<app-account-analysis-select-items-help *ngIf="helpURL == 'select-items'"></app-account-analysis-select-items-help>
+<app-account-analysis-setup-help *ngIf="helpURL == 'setup'"></app-account-analysis-setup-help>
