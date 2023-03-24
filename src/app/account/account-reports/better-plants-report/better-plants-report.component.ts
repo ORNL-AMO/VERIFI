@@ -28,7 +28,7 @@ export class BetterPlantsReportComponent implements OnInit {
   print: boolean;
   account: IdbAccount;
   betterPlantsSummary: BetterPlantsSummary;
-  calculating: boolean;
+  calculating: boolean | 'error';
   worker: Worker;
   constructor(private accountReportDbService: AccountReportDbService,
     private accountReportsService: AccountReportsService,
@@ -84,8 +84,12 @@ export class BetterPlantsReportComponent implements OnInit {
     if (typeof Worker !== 'undefined') {
       this.worker = new Worker(new URL('src/app/web-workers/better-plants-report.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {
-        this.betterPlantsSummary = data;
-        this.calculating = false;
+        if (!data.error) {
+          this.betterPlantsSummary = data.betterPlantsSummary;
+          this.calculating = false;
+        } else {
+          this.calculating = 'error';
+        }
         this.worker.terminate();
       };
       this.calculating = true;

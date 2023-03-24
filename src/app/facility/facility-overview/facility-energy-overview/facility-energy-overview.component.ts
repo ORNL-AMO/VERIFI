@@ -14,7 +14,7 @@ export class FacilityEnergyOverviewComponent implements OnInit {
 
 
   calculatingSub: Subscription;
-  calculating: boolean;
+  calculating: boolean | 'error';
   facilityId: string;
   selectedFacilitySub: Subscription;
   energyUnit: string;
@@ -33,7 +33,7 @@ export class FacilityEnergyOverviewComponent implements OnInit {
       this.energyUnit = val.energyUnit;
     });
 
-    this.calculatingSub = this.facilityOverviewService.calculatingFacilityOverviewData.subscribe(val => {
+    this.calculatingSub = this.facilityOverviewService.calculating.subscribe(val => {
       this.calculating = val;
     })
 

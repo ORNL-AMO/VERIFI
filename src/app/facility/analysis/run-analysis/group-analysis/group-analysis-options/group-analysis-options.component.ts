@@ -23,6 +23,7 @@ export class GroupAnalysisOptionsComponent implements OnInit {
   showUnitsWarning: boolean;
   yearOptions: Array<number>;
   analysisItem: IdbAnalysisItem;
+  facility: IdbFacility;
   constructor(private analysisService: AnalysisService, private analysisDbService: AnalysisDbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private accountDbService: AccountdbService, private facilityDbService: FacilitydbService,
@@ -31,6 +32,7 @@ export class GroupAnalysisOptionsComponent implements OnInit {
     private router: Router) { }
 
   ngOnInit(): void {
+    this.facility = this.facilityDbService.selectedFacility.getValue();
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
     this.yearOptions = this.utilityMeterDataDbService.getYearOptions();
     this.selectedGroupSub = this.analysisService.selectedGroup.subscribe(group => {
@@ -50,8 +52,7 @@ export class GroupAnalysisOptionsComponent implements OnInit {
     analysisItem.groups[groupIndex] = this.group;
     await this.analysisDbService.updateWithObservable(analysisItem).toPromise();
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    await this.dbChangesService.setAnalysisItems(selectedAccount, selectedFacility);
+    await this.dbChangesService.setAnalysisItems(selectedAccount, this.facility);
     this.analysisDbService.selectedAnalysisItem.next(analysisItem);
     this.analysisService.selectedGroup.next(this.group);
   }

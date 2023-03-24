@@ -1,4 +1,4 @@
-<div class="w-100">
+<div class="w-100" *ngIf="!error">
     <div class="loading-screen">
 
         <!-- <div class="main-content"> -->
@@ -12,4 +12,8 @@
         <!-- </div> -->
 
     </div>
+</div>
+
+<div class="alert alert-danger" *ngIf="error">
+    An error occured during calculations.
 </div>

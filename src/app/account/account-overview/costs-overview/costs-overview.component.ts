@@ -14,7 +14,7 @@ export class CostsOverviewComponent implements OnInit {
 
 
   calculatingSub: Subscription;
-  calculating: boolean;
+  calculating: boolean | 'error';
   displayWarning: boolean;
 
   accountOverviewDataSub: Subscription;
@@ -26,7 +26,7 @@ export class CostsOverviewComponent implements OnInit {
   constructor(private accountOverviewService: AccountOverviewService) { }
 
   ngOnInit(): void {
-    this.calculatingSub = this.accountOverviewService.calculatingAccountOverviewData.subscribe(val => {
+    this.calculatingSub = this.accountOverviewService.calculating.subscribe(val => {
       this.calculating = val;
     })
 

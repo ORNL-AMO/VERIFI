@@ -25,7 +25,7 @@ export class RegressionModelInspectionComponent implements OnInit {
   @ViewChild('monthlyAnalysisGraph', { static: false }) monthlyAnalysisGraph: ElementRef;
 
   worker: Worker;
-  calculating: boolean;
+  calculating: boolean | 'error';
   inspectedMonthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>;
   selectedMonthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>;
   selectedFacility: IdbFacility;
@@ -67,9 +67,14 @@ export class RegressionModelInspectionComponent implements OnInit {
     if (typeof Worker !== 'undefined') {
       this.worker = new Worker(new URL('src/app/web-workers/monthly-group-analysis.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {
-        this.inspectedMonthlyAnalysisSummaryData = data.monthlyAnalysisSummaryData;
-        this.calculating = false;
-        this.drawChart();
+        if (!data.error) {
+          this.inspectedMonthlyAnalysisSummaryData = data.monthlyAnalysisSummary.monthlyAnalysisSummaryData;
+          this.calculating = false;
+          this.drawChart();
+        } else {
+          this.inspectedMonthlyAnalysisSummaryData = undefined;
+          this.calculating = 'error';
+        }
         this.worker.terminate();
       };
       this.calculating = true;
@@ -92,9 +97,14 @@ export class RegressionModelInspectionComponent implements OnInit {
     if (typeof Worker !== 'undefined') {
       this.worker = new Worker(new URL('src/app/web-workers/monthly-group-analysis.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {
-        this.selectedMonthlyAnalysisSummaryData = data.monthlyAnalysisSummaryData;
-        this.calculating = false;
-        this.drawChart();
+        if (!data.error) {
+          this.selectedMonthlyAnalysisSummaryData = data.monthlyAnalysisSummary.monthlyAnalysisSummaryData;
+          this.calculating = false;
+          this.drawChart();
+        } else {
+          this.selectedMonthlyAnalysisSummaryData = undefined;
+          this.calculating = 'error';
+        }
         this.worker.terminate();
       };
       this.calculating = true;
@@ -122,47 +132,50 @@ export class RegressionModelInspectionComponent implements OnInit {
         name = 'Potential Modeled Energy';
       }
 
-      var trace1 = {
-        type: "scatter",
-        mode: "lines+markers",
-        name: name,
-        x: this.inspectedMonthlyAnalysisSummaryData.map(results => { return results.date }),
-        y: this.inspectedMonthlyAnalysisSummaryData.map(results => { return results.modeledEnergy }),
-        line: { color: '#BB8FCE', width: 4 },
-        marker: {
-          size: 8
+      var data = [];
+      if (this.inspectedMonthlyAnalysisSummaryData) {
+        var trace1 = {
+          type: "scatter",
+          mode: "lines+markers",
+          name: name,
+          x: this.inspectedMonthlyAnalysisSummaryData.map(results => { return results.date }),
+          y: this.inspectedMonthlyAnalysisSummaryData.map(results => { return results.modeledEnergy }),
+          line: { color: '#BB8FCE', width: 4 },
+          marker: {
+            size: 8
+          }
         }
-      }
-      let potentialModelYearData: Array<MonthlyAnalysisSummaryData> = this.inspectedMonthlyAnalysisSummaryData.filter(data => {
-        return data.fiscalYear == this.model.modelYear;
-      });
-      var trace2 = {
-        type: "scatter",
-        mode: "markers",
-        name: 'Potential Model Year',
-        x: potentialModelYearData.map(results => { return results.date }),
-        y: potentialModelYearData.map(results => { return results.modeledEnergy }),
-        line: { color: '#8E44AD', width: 4 },
-        marker: {
-          size: 16,
-          symbol: 'star'
+        let potentialModelYearData: Array<MonthlyAnalysisSummaryData> = this.inspectedMonthlyAnalysisSummaryData.filter(data => {
+          return data.fiscalYear == this.model.modelYear;
+        });
+        var trace2 = {
+          type: "scatter",
+          mode: "markers",
+          name: 'Potential Model Year',
+          x: potentialModelYearData.map(results => { return results.date }),
+          y: potentialModelYearData.map(results => { return results.modeledEnergy }),
+          line: { color: '#8E44AD', width: 4 },
+          marker: {
+            size: 16,
+            symbol: 'star'
+          }
         }
+
+        var trace3 = {
+          type: "scatter",
+          mode: "markers",
+          name: 'Actual Energy',
+          x: this.inspectedMonthlyAnalysisSummaryData.map(results => { return results.date }),
+          y: this.inspectedMonthlyAnalysisSummaryData.map(results => { return results.energyUse }),
+          line: { color: '#515A5A', width: 4 },
+          marker: {
+            size: 10,
+            symbol: 'square'
+          }
+        }
+        data = [trace3, trace1, trace2]
       }
 
-      var trace3 = {
-        type: "scatter",
-        mode: "markers",
-        name: 'Actual Energy',
-        x: this.inspectedMonthlyAnalysisSummaryData.map(results => { return results.date }),
-        y: this.inspectedMonthlyAnalysisSummaryData.map(results => { return results.energyUse }),
-        line: { color: '#515A5A', width: 4 },
-        marker: {
-          size: 10,
-          symbol: 'square'
-        }
-      }
-
-      var data = [trace3, trace1, trace2];
 
       if (this.compareSelectedModel) {
         var trace4 = {
@@ -193,8 +206,6 @@ export class RegressionModelInspectionComponent implements OnInit {
           }
         }
         data.push(trace5);
-
-
       }
 
 

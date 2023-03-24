@@ -33,9 +33,9 @@
                 <div class="form-group row">
                     <label class="col-5 col-form-label" for="energyUnit">Energy Unit</label>
                     <div class="col-7">
-                        <select class="form-control" name="energyUnit" id="energyUnit"
+                        <select class="form-select" name="energyUnit" id="energyUnit"
                             [(ngModel)]="analysisItem.energyUnit" (change)="saveItem()">
-                            <option class="form-control" *ngFor="let energyUnitOption of energyUnitOptions"
+                            <option *ngFor="let energyUnitOption of energyUnitOptions"
                                 [ngValue]="energyUnitOption.value">
                                 <span [innerHTML]="energyUnitOption.display"></span>
                             </option>

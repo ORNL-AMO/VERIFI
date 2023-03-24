@@ -1,0 +1,30 @@
+<ng-container *ngIf="isEdit">
+    <h4>Edit Bill</h4>
+    <p>
+        Use this page to edit an existing meter reading.
+    </p>
+    <hr>
+    <p>
+        Once reading data has been filled out click "Save" to submit changes and go back to the table.
+    </p>
+</ng-container>
+<ng-container *ngIf="!isEdit">
+    <h4>New Bill</h4>
+    <p>
+        Use this page add a new meter reading.
+    </p>
+    <hr>
+    <p>
+        Once reading data has been filled out click "Save + Quit" to submit and go back to the table. Otherwise click "Save + Add Another" to add
+        another reading. The month will be incremented forward one month.
+    </p>
+</ng-container>
+<hr>
+<p>
+    Hover over the "<span class="fa fa-circle-question"></span>" icons for details about the corresponding input fields.
+</p>
+<hr>
+<p>
+    Use the "Choose Columns" dropdown to add or remove details to be tracked with electricity meters in this facility.
+</p>
+<hr>

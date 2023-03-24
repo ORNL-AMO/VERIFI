@@ -98,8 +98,12 @@ export class DataOverviewReportComponent {
     if (typeof Worker !== 'undefined') {
       this.facilitiesWorker = new Worker(new URL('src/app/web-workers/facility-overview.worker', import.meta.url));
       this.facilitiesWorker.onmessage = ({ data }) => {
-        dataOverviewFacility.facilityOverviewData = data.facilityOverviewData;
-        dataOverviewFacility.utilityUseAndCost = data.utilityUseAndCost;
+        if (!data.error) {
+          dataOverviewFacility.facilityOverviewData = data.facilityOverviewData;
+          dataOverviewFacility.utilityUseAndCost = data.utilityUseAndCost;
+        } else {
+          dataOverviewFacility.calculationError = true;
+        }
         this.facilitiesWorker.terminate();
         this.facilitiesData.push(dataOverviewFacility);
         if (facilityIndex != this.includedFacilities.length - 1) {
@@ -152,8 +156,14 @@ export class DataOverviewReportComponent {
     if (typeof Worker !== 'undefined') {
       this.accountWorker = new Worker(new URL('src/app/web-workers/account-overview.worker', import.meta.url));
       this.accountWorker.onmessage = ({ data }) => {
-        this.accountData.accountOverviewData = data.accountOverviewData;
-        this.accountData.utilityUseAndCost = data.utilityUseAndCost;
+        if (!data.error) {
+          this.accountData.accountOverviewData = data.accountOverviewData;
+          this.accountData.utilityUseAndCost = data.utilityUseAndCost;
+        } else {
+          this.accountData.accountOverviewData = undefined;
+          this.accountData.utilityUseAndCost = undefined;
+          this.accountData.calculationError = true;
+        }
         this.calculatingAccounts = false;
         this.accountWorker.terminate();
       };
@@ -183,7 +193,8 @@ export class DataOverviewReportComponent {
         endDate: endDate
       },
       facilityOverviewData: undefined,
-      utilityUseAndCost: undefined
+      utilityUseAndCost: undefined,
+      calculationError: false
     }
   }
 
@@ -196,7 +207,8 @@ export class DataOverviewReportComponent {
         endDate: endDate
       },
       accountOverviewData: undefined,
-      utilityUseAndCost: undefined
+      utilityUseAndCost: undefined,
+      calculationError: false
     }
   }
 
@@ -212,6 +224,7 @@ export interface DataOverviewFacility {
   };
   facilityOverviewData: FacilityOverviewData;
   utilityUseAndCost: UtilityUseAndCost;
+  calculationError: boolean
 }
 
 export interface DataOverviewAccount {
@@ -223,4 +236,5 @@ export interface DataOverviewAccount {
   };
   accountOverviewData: AccountOverviewData;
   utilityUseAndCost: UtilityUseAndCost;
+  calculationError: boolean;
 }

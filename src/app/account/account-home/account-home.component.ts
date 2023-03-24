@@ -68,9 +68,15 @@ export class AccountHomeComponent implements OnInit {
       this.accountWorker = new Worker(new URL('src/app/web-workers/annual-account-analysis.worker', import.meta.url));
       this.accountWorker.onmessage = ({ data }) => {
         this.accountWorker.terminate();
-        this.accountHomeService.annualAnalysisSummary.next(data.annualAnalysisSummaries);
-        this.accountHomeService.monthlyAccountAnalysisData.next(data.monthlyAnalysisSummaryData);
-        this.accountHomeService.calculating.next(false);
+        if (!data.error) {
+          this.accountHomeService.annualAnalysisSummary.next(data.annualAnalysisSummaries);
+          this.accountHomeService.monthlyAccountAnalysisData.next(data.monthlyAnalysisSummaryData);
+          this.accountHomeService.calculating.next(false);
+        } else {
+          this.accountHomeService.annualAnalysisSummary.next(undefined);
+          this.accountHomeService.monthlyAccountAnalysisData.next(undefined);
+          this.accountHomeService.calculating.next('error');
+        }
       };
       this.accountHomeService.calculating.next(true);
       this.accountWorker.postMessage({
@@ -119,15 +125,18 @@ export class AccountHomeComponent implements OnInit {
             facilityId: string,
             annualAnalysisSummary: Array<AnnualAnalysisSummary>,
             monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
+            error: boolean
           } = {
             facilityId: facility.guid,
             annualAnalysisSummary: data.annualAnalysisSummaries,
-            monthlyAnalysisSummaryData: data.monthlyAnalysisSummaryData
+            monthlyAnalysisSummaryData: data.monthlyAnalysisSummaryData,
+            error: data.error
           }
           let allSummaries: Array<{
             facilityId: string,
             annualAnalysisSummary: Array<AnnualAnalysisSummary>,
             monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
+            error: boolean
           }> = this.accountHomeService.facilityAnalysisSummaries.getValue();
           allSummaries.push(facilitySummary);
           this.accountHomeService.facilityAnalysisSummaries.next(allSummaries);
@@ -151,15 +160,18 @@ export class AccountHomeComponent implements OnInit {
           facilityId: string,
           annualAnalysisSummary: Array<AnnualAnalysisSummary>,
           monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
+          error: boolean
         } = {
           facilityId: facility.guid,
           annualAnalysisSummary: annualAnalysisSummaries,
-          monthlyAnalysisSummaryData: monthlyAnalysisSummaryData
+          monthlyAnalysisSummaryData: monthlyAnalysisSummaryData,
+          error: false
         }
         let allSummaries: Array<{
           facilityId: string,
           annualAnalysisSummary: Array<AnnualAnalysisSummary>,
           monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
+          error: boolean
         }> = this.accountHomeService.facilityAnalysisSummaries.getValue();
         allSummaries.push(facilitySummary);
         this.accountHomeService.facilityAnalysisSummaries.next(allSummaries);

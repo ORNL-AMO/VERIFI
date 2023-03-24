@@ -1,14 +1,14 @@
 import { Injectable } from '@angular/core';
 import { FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { IdbUtilityMeter, MeterSource } from 'src/app/models/idb';
-import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
+import { getIsEnergyUnit } from 'src/app/shared/sharedHelperFuntions';
 
 @Injectable({
   providedIn: 'root'
 })
 export class EditMeterFormService {
 
-  constructor(private formBuilder: FormBuilder, private energyUnitsHelperService: EnergyUnitsHelperService) { }
+  constructor(private formBuilder: FormBuilder) { }
 
   getFormFromMeter(meter: IdbUtilityMeter): FormGroup {
     let fuelValidators: Array<ValidatorFn> = this.getFuelValidation(meter.source);
@@ -133,7 +133,7 @@ export class EditMeterFormService {
 
   checkShowHeatCapacity(source: MeterSource, startingUnit: string): boolean {
     if (source != 'Waste Water' && source != 'Water' && source != 'Other Utility' && startingUnit) {
-      return (this.energyUnitsHelperService.isEnergyUnit(startingUnit) == false);
+      return (getIsEnergyUnit(startingUnit) == false);
     } else {
       return false;
     }

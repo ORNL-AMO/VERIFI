@@ -48,7 +48,7 @@ export class FacilityHomeSummaryComponent implements OnInit {
 
   selectedFacilitySub: Subscription;
 
-  calculating: boolean;
+  calculating: boolean | 'error';
   calculatingSub: Subscription;
 
   monthlyFacilityAnalysisData: Array<MonthlyAnalysisSummaryData>;

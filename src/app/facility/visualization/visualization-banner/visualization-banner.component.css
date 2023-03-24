@@ -1,23 +1,33 @@
-select.form-select{
-    height: min-content !important;
-    /* margin-top: 10px; */
-}
-
-.btn{
-    margin-top: 0px;
-    margin-bottom: 0px;
-}
-
-.fa-arrow-right{
-    padding-top: 10px;
-    padding-right: .25rem;
-    padding-left: .25rem;
-}
-
-.banner-border{
+ 
+  .banner-border{
     border-bottom: solid #2c386b;
   }
 
-  .breadcrumbs select{
-      background-color: white;
-  }
+
+  li.disabled:hover .navigation-warning{
+    display: block;
+}
+
+.utility.banner{
+   background-color: white;
+    padding-bottom: 0px;
+}
+
+.nav-tabs .nav-link.active{
+    color: #ff6000;
+    background-color: white;
+}
+
+.nav-tabs .nav-link:not(.active){
+    background-color: #2c386b;
+    color: white;
+    border: solid 1px white;
+}
+
+.nav-tabs .nav-link.active, .nav-tabs .nav-link.active i.fa, .nav-tabs .nav-link.active sup{
+    color: #ff6000;
+}
+
+.nav-tabs .nav-link:not(.active) sup{
+    color: white;
+}

@@ -15,6 +15,7 @@ import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-
 import { IdbAccount, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from 'src/app/models/idb';
 import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
+import { getIsEnergyMeter, getIsEnergyUnit } from 'src/app/shared/sharedHelperFuntions';
 import { FileReference, UploadDataService } from 'src/app/upload-data/upload-data.service';
 
 @Component({
@@ -98,8 +99,8 @@ export class ConfirmAndSubmitComponent implements OnInit {
       if (meter.source == 'Electricity') {
         form = this.utilityMeterDataService.getElectricityMeterDataForm(meterData);
       } else {
-        let displayVolumeInput: boolean = (this.energyUnitsHelperService.isEnergyUnit(meter.startingUnit) == false);
-        let displayEnergyUse: boolean = this.energyUnitsHelperService.isEnergyMeter(meter.source);
+        let displayVolumeInput: boolean = (getIsEnergyUnit(meter.startingUnit) == false);
+        let displayEnergyUse: boolean = getIsEnergyMeter(meter.source);
         form = this.utilityMeterDataService.getGeneralMeterDataForm(meterData, displayVolumeInput, displayEnergyUse);
       }
 

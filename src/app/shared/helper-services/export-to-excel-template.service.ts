@@ -10,7 +10,7 @@ import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db
 import { IdbAccount, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import * as _ from 'lodash';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
-import { EnergyUnitsHelperService } from './energy-units-helper.service';
+import { getIsEnergyUnit } from '../sharedHelperFuntions';
 
 @Injectable({
   providedIn: 'root'
@@ -22,8 +22,7 @@ export class ExportToExcelTemplateService {
     private predictorDbService: PredictordbService,
     private facilityDbService: FacilitydbService,
     private accountDbService: AccountdbService,
-    private loadingService: LoadingService,
-    private energyUnitsHelperService: EnergyUnitsHelperService) { }
+    private loadingService: LoadingService) { }
 
 
   exportFacilityData(facilityId?: string) {
@@ -294,7 +293,7 @@ export class ExportToExcelTemplateService {
       meterData.forEach(dataReading => {
         worksheet.getCell('A' + index).value = meter.meterNumber;
         worksheet.getCell('B' + index).value = this.getFormatedDate(dataReading.readDate);
-        if (this.energyUnitsHelperService.isEnergyUnit(meter.startingUnit)) {
+        if (getIsEnergyUnit(meter.startingUnit)) {
           worksheet.getCell('C' + index).value = dataReading.totalEnergyUse;
         } else {
           worksheet.getCell('C' + index).value = dataReading.totalVolume;

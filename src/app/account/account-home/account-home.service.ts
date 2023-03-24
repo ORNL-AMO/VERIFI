@@ -19,11 +19,12 @@ export class AccountHomeService {
   latestAnalysisItem: IdbAccountAnalysisItem;
   annualAnalysisSummary: BehaviorSubject<Array<AnnualAnalysisSummary>>;
   monthlyAccountAnalysisData: BehaviorSubject<Array<MonthlyAnalysisSummaryData>>;
-  calculating: BehaviorSubject<boolean>;
+  calculating: BehaviorSubject<boolean | 'error'>;
   facilityAnalysisSummaries: BehaviorSubject<Array<{
     facilityId: string,
     annualAnalysisSummary: Array<AnnualAnalysisSummary>,
     monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
+    error: boolean
   }>>;
   constructor(private accountAnalysisDbService: AccountAnalysisDbService, private utilityMeterDbService: UtilityMeterdbService,
     private accountDbService: AccountdbService, private calendarizationService: CalanderizationService, private convertMeterDataService: ConvertMeterDataService) {

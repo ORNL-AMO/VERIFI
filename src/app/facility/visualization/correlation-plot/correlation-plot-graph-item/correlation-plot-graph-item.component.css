@@ -1,0 +1,7 @@
+label{
+    font-size: 20px;
+}
+
+.card.no-border{
+    border: none;
+}

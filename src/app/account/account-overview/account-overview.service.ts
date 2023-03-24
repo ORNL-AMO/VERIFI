@@ -22,7 +22,7 @@ export class AccountOverviewService {
 
   accountOverviewData: BehaviorSubject<AccountOverviewData>;
   utilityUseAndCost: BehaviorSubject<UtilityUseAndCost>;
-  calculatingAccountOverviewData: BehaviorSubject<boolean>;
+  calculating: BehaviorSubject<boolean | 'error'>;
   constructor(private calanderizationService: CalanderizationService, private utilityMeterDbService: UtilityMeterdbService) {
     this.emissionsDisplay = new BehaviorSubject<"market" | "location">("market");
 
@@ -33,7 +33,7 @@ export class AccountOverviewService {
 
     this.accountOverviewData = new BehaviorSubject<AccountOverviewData>(undefined);
     this.utilityUseAndCost = new BehaviorSubject<UtilityUseAndCost>(undefined);
-    this.calculatingAccountOverviewData = new BehaviorSubject<boolean>(undefined)
+    this.calculating = new BehaviorSubject<boolean>(undefined)
   }
 
   setCalanderizedMeters() {

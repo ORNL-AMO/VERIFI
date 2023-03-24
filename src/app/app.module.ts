@@ -25,6 +25,7 @@ import { NgbToastModule, NgbTypeaheadModule } from '@ng-bootstrap/ng-bootstrap';
 import { FacilityListPipe } from './core-components/sidebar/facility-list.pipe';
 import { UploadDataModule } from './upload-data/upload-data.module';
 import { CreateReportModalComponent } from './core-components/create-report-modal/create-report-modal.component';
+import { StartupErrorComponent } from './core-components/startup-error/startup-error.component';
 
 @NgModule({
   declarations: [
@@ -38,7 +39,8 @@ import { CreateReportModalComponent } from './core-components/create-report-moda
     ImportBackupModalComponent,
     SearchBarComponent,
     FacilityListPipe,
-    CreateReportModalComponent
+    CreateReportModalComponent,
+    StartupErrorComponent
   ],
   imports: [
     BrowserModule,

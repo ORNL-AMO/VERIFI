@@ -36,8 +36,8 @@ export class MonthlyAnalysisSummarySavingsGraphComponent {
         name: 'Savings',
         x: this.monthlyAnalysisSummaryData.map(results => { return results.date }),
         y: this.monthlyAnalysisSummaryData.map(results => {
-          if (results.percentSavingsComparedToBaseline >= 0) {
-            return results.percentSavingsComparedToBaseline
+          if (results.rolling12MonthImprovement >= 0) {
+            return results.rolling12MonthImprovement
           } else {
             return undefined;
           }
@@ -57,8 +57,8 @@ export class MonthlyAnalysisSummarySavingsGraphComponent {
         name: 'Losses',
         x: this.monthlyAnalysisSummaryData.map(results => { return results.date }),
         y: this.monthlyAnalysisSummaryData.map(results => {
-          if (results.percentSavingsComparedToBaseline < 0) {
-            return results.percentSavingsComparedToBaseline
+          if (results.rolling12MonthImprovement < 0) {
+            return results.rolling12MonthImprovement
           } else {
             return undefined;
           }

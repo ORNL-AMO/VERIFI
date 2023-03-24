@@ -22,14 +22,14 @@ export class FacilityOverviewService {
   
   facilityOverviewData: BehaviorSubject<FacilityOverviewData>;
   utilityUseAndCost: BehaviorSubject<UtilityUseAndCost>;
-  calculatingFacilityOverviewData: BehaviorSubject<boolean>;
+  calculating: BehaviorSubject<boolean | 'error'>;
 
   constructor(private utilityMeterDbService: UtilityMeterdbService, private calanderizationService: CalanderizationService) {
     this.emissionsDisplay = new BehaviorSubject<"market" | "location">("market");
     this.dateRange = new BehaviorSubject(undefined);
     this.utilityUseAndCost = new BehaviorSubject(undefined);
     this.facilityOverviewData = new BehaviorSubject(undefined);
-    this.calculatingFacilityOverviewData = new BehaviorSubject(undefined);
+    this.calculating = new BehaviorSubject(undefined);
   }
 
   setCalanderizedMeters() {

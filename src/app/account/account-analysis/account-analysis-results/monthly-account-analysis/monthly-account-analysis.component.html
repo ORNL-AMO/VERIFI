@@ -1,16 +1,21 @@
 <div class="d-flex justify-content-between mb-2">
-    <app-analysis-summary-table-filter [tableContext]="'monthAccount'"></app-analysis-summary-table-filter>
+    <div class="p-0">
+        <app-analysis-summary-table-filter [tableContext]="'monthAccount'"
+            *ngIf="dataDisplay == 'table'"></app-analysis-summary-table-filter>
+    </div>
 
     <div class="d-flex">
         <!--Items Per Page-->
         <app-table-items-dropdown *ngIf="dataDisplay == 'table'"></app-table-items-dropdown>
         <div class="btn-group ps-2">
-            <button class="btn toggle-btn" [ngClass]="{'active': dataDisplay == 'table'}" (click)="setDataDisplay('table')">
+            <button class="btn toggle-btn" [ngClass]="{'active': dataDisplay == 'table'}"
+                (click)="setDataDisplay('table')">
                 <span class="fa fa-chevron-right"></span>
                 Table
                 <span class="fa fa-chevron-left"></span>
             </button>
-            <button class="btn toggle-btn" [ngClass]="{'active': dataDisplay == 'graph'}" (click)="setDataDisplay('graph')">
+            <button class="btn toggle-btn" [ngClass]="{'active': dataDisplay == 'graph'}"
+                (click)="setDataDisplay('graph')">
                 <span class="fa fa-chevron-right"></span>
                 Graph
                 <span class="fa fa-chevron-left"></span>
@@ -18,7 +23,7 @@
         </div>
     </div>
 </div>
-<div class="w-100 x-scroll" *ngIf="!calculating">
+<div class="w-100 x-scroll" *ngIf="calculating == false">
     <app-monthly-analysis-summary-graph *ngIf="dataDisplay == 'graph'"
         [monthlyAnalysisSummaryData]="monthlyAccountAnalysisData" [analysisItem]="accountAnalysisItem"
         [facilityOrAccount]="account">
@@ -32,4 +37,5 @@
     </app-monthly-analysis-summary-savings-graph>
 </div>
 
-<app-calculating-spinner *ngIf="calculating" [message]="'Calculating Monthly Results...'"></app-calculating-spinner>
+<app-calculating-spinner *ngIf="calculating != false" [message]="'Calculating Monthly Results...'"
+    [error]="calculating == 'error'"></app-calculating-spinner>

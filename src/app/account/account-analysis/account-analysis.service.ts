@@ -16,7 +16,7 @@ export class AccountAnalysisService {
 
   selectedFacility: BehaviorSubject<IdbFacility>;
   calanderizedMeters: Array<CalanderizedMeter>
-  calculating: BehaviorSubject<boolean>;
+  calculating: BehaviorSubject<boolean | 'error'>;
   annualAnalysisSummary: BehaviorSubject<Array<AnnualAnalysisSummary>>;
   monthlyAccountAnalysisData: BehaviorSubject<Array<MonthlyAnalysisSummaryData>>;
   constructor(private accountAnalysisDbService: AccountAnalysisDbService, private utilityMeterDbService: UtilityMeterdbService,

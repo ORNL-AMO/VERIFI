@@ -44,9 +44,15 @@ export class AccountAnalysisResultsComponent implements OnInit {
       this.worker = new Worker(new URL('src/app/web-workers/annual-account-analysis.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {
         this.worker.terminate();
-        this.accountAnalysisService.annualAnalysisSummary.next(data.annualAnalysisSummaries);
-        this.accountAnalysisService.monthlyAccountAnalysisData.next(data.monthlyAnalysisSummaryData);
-        this.accountAnalysisService.calculating.next(false);
+        if (!data.error) {
+          this.accountAnalysisService.annualAnalysisSummary.next(data.annualAnalysisSummaries);
+          this.accountAnalysisService.monthlyAccountAnalysisData.next(data.monthlyAnalysisSummaryData);
+          this.accountAnalysisService.calculating.next(false);
+        } else {
+          this.accountAnalysisService.annualAnalysisSummary.next(undefined);
+          this.accountAnalysisService.monthlyAccountAnalysisData.next(undefined);
+          this.accountAnalysisService.calculating.next('error');
+        }
       };
       this.accountAnalysisService.calculating.next(true);
       this.worker.postMessage({

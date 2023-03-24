@@ -4,6 +4,7 @@ import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility, IdbUt
 import { EditMeterFormService } from 'src/app/facility/utility-data/energy-consumption/energy-source/edit-meter-form/edit-meter-form.service';
 import { ConvertUnitsService } from '../convert-units/convert-units.service';
 import { EnergyUnitsHelperService } from './energy-units-helper.service';
+import { getIsEnergyMeter } from '../sharedHelperFuntions';
 
 @Injectable({
   providedIn: 'root'
@@ -14,7 +15,7 @@ export class ConvertMeterDataService {
     private editMeterFormService: EditMeterFormService) { }
 
   convertMeterDataToFacility(meter: IdbUtilityMeter, meterData: Array<IdbUtilityMeterData>, facility: IdbFacility): Array<IdbUtilityMeterData> {
-    let isEnergyMeter: boolean = this.energyUnitsHelperService.isEnergyMeter(meter.source);
+    let isEnergyMeter: boolean = getIsEnergyMeter(meter.source);
     if (isEnergyMeter) {
       for (let index: number = 0; index < meterData.length; index++) {
         meterData[index].totalEnergyUse = this.convertUnitsService.value(meterData[index].totalEnergyUse).from(meter.energyUnit).to(facility.energyUnit);
@@ -29,7 +30,7 @@ export class ConvertMeterDataService {
   }
 
   convertMeterDataToAccount(meter: IdbUtilityMeter, meterData: Array<IdbUtilityMeterData>, account: IdbAccount): Array<IdbUtilityMeterData> {
-    let isEnergyMeter: boolean = this.energyUnitsHelperService.isEnergyMeter(meter.source);
+    let isEnergyMeter: boolean = getIsEnergyMeter(meter.source);
     if (isEnergyMeter) {
       for (let index: number = 0; index < meterData.length; index++) {
         meterData[index].totalEnergyUse = this.convertUnitsService.value(meterData[index].totalEnergyUse).from(meter.energyUnit).to(account.energyUnit);
@@ -55,7 +56,7 @@ export class ConvertMeterDataService {
 
 
   convertMeterDataToAnalysis(analysisItem: IdbAnalysisItem | IdbAccountAnalysisItem, meterData: Array<MonthlyData>, accountOrFacility: IdbFacility | IdbAccount, meter: IdbUtilityMeter): Array<MonthlyData> {
-    let isEnergyMeter: boolean = this.energyUnitsHelperService.isEnergyMeter(meter.source);
+    let isEnergyMeter: boolean = getIsEnergyMeter(meter.source);
     if (isEnergyMeter) {
       if(accountOrFacility.energyUnit != analysisItem.energyUnit){
         for (let index: number = 0; index < meterData.length; index++) {

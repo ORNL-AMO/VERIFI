@@ -1,6 +1,6 @@
 <!-- <div class="row justify-content-center me-0 ms-0" *ngIf="selectedReport && !calculating">
     <div class="col-11"> -->
-<div class="report" [ngClass]="{'print': print}" *ngIf="selectedReport && !calculating">
+<div class="report" [ngClass]="{'print': print}" *ngIf="selectedReport && calculating == false">
     <img src="assets/images/better-plants-report-banner.jpg" class="w-100">
     <div class="row justify-content-center pt-3">
         <div class="col-12">
@@ -76,11 +76,12 @@
     <img src="assets/images/better-plants-report-footer.jpg" class="w-100 pt-4">
 </div>
 
-<div class="w-100 justify-content-center" *ngIf="calculating">
-    <div class="pt-5">
-        <app-calculating-spinner [message]="'Generating Better Plants Report...'"></app-calculating-spinner>
+<div class="w-100 justify-content-center" *ngIf="calculating != false">
+    <div class="p-5">
+        <app-calculating-spinner [error]="calculating == 'error'"
+            [message]="'Generating Better Plants Report...'"></app-calculating-spinner>
     </div>
 </div>
 
 
-<app-print-report-button *ngIf="!calculating"></app-print-report-button>
+<app-print-report-button *ngIf="calculating == false"></app-print-report-button>
