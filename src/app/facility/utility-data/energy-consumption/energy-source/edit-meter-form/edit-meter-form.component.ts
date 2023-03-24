@@ -277,10 +277,8 @@ export class EditMeterFormComponent implements OnInit {
 
 
   enableChangeUnits() {
-    if (this.meterForm.controls.source.value != 'Electricity') {
-      this.meterForm.controls.startingUnit.enable();
-      this.meterForm.controls.energyUnit.enable();
-    }
+    this.meterForm.controls.startingUnit.enable();
+    this.meterForm.controls.energyUnit.enable();
     this.meterForm.controls.heatCapacity.enable();
     this.changingUnits = true;
   }
@@ -350,33 +348,33 @@ export class EditMeterFormComponent implements OnInit {
     }
   }
 
-  setDisplayEmissionsValues(){
-    if(this.meterForm.controls.source.value == 'Electricity'){
-      if(this.meterForm.controls.agreementType.value == 1){
+  setDisplayEmissionsValues() {
+    if (this.meterForm.controls.source.value == 'Electricity') {
+      if (this.meterForm.controls.agreementType.value == 1) {
         //grid
         this.displayRetainRecs = false;
-        this.displayIncludeEnergy = false;        
-      }else if(this.meterForm.controls.agreementType.value == 2){
+        this.displayIncludeEnergy = false;
+      } else if (this.meterForm.controls.agreementType.value == 2) {
         //self-generated
         this.displayIncludeEnergy = true;
         this.displayRetainRecs = true;
-      } else if(this.meterForm.controls.agreementType.value == 3){
+      } else if (this.meterForm.controls.agreementType.value == 3) {
         //PPPA
         this.displayIncludeEnergy = true;
         this.displayRetainRecs = true;
-      } else if(this.meterForm.controls.agreementType.value == 4){
+      } else if (this.meterForm.controls.agreementType.value == 4) {
         //VPPA
         this.displayIncludeEnergy = false;
         this.displayRetainRecs = true;
-      } else if(this.meterForm.controls.agreementType.value == 5){
+      } else if (this.meterForm.controls.agreementType.value == 5) {
         //Utility Green Product
         this.displayIncludeEnergy = false;
         this.displayRetainRecs = false;
-      }else if(this.meterForm.controls.agreementType.value == 6){
+      } else if (this.meterForm.controls.agreementType.value == 6) {
         //RECS
         this.displayIncludeEnergy = false;
         this.displayRetainRecs = true;
-      } 
+      }
     }
   }
 

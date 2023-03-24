@@ -4,7 +4,7 @@
         </app-utility-meter-data-filter>
     </div>
     <div class="saveCancel item-right">
-        <button *ngIf="!showConfirmCancel" class="btn nav-btn" (click)="cancel()">Cancel</button>
+        <button *ngIf="!showConfirmCancel" class="btn btn-secondary" (click)="cancel()">Cancel</button>
         <button *ngIf="showConfirmCancel" class="btn btn-secondary" (click)="confirmCancel()">Are you sure?
             Changes
             will be lost.</button>

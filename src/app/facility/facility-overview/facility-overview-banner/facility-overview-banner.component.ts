@@ -133,7 +133,7 @@ export class FacilityOverviewBannerComponent implements OnInit {
       return date.getFullYear();
     });
     this.years = _.uniq(years);
-    this.years = _.orderBy(years);
+    this.years = _.orderBy(this.years);
   }
 
   setDateRange() {

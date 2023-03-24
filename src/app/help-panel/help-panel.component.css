@@ -18,14 +18,6 @@
 
 
 
-h3 a{
-    font-size: 1.75rem;
-  }
-
-  h3 a .fa-close{
-    color: white;
-  }
-
   .help-content{
       padding: 1rem;
   }
@@ -34,4 +26,5 @@ h3 a{
       padding-right: 1rem;
       padding-left: 1rem;
       background-color: #2C3E50;
+      padding-bottom: 7px;
   }
