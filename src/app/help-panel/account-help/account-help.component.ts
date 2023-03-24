@@ -30,9 +30,9 @@ export class AccountHelpComponent implements OnInit {
   setHelpURL(url: string) {
     let componentOptions: Array<string> = [
       'home',
+      'reports',
       'overview',
       'settings',
-      'reports',
       'analysis',
       'custom-data'
     ]

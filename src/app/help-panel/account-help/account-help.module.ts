@@ -7,6 +7,10 @@ import { AccountSettingsHelpComponent } from './account-settings-help/account-se
 import { AccountReportsHelpComponent } from './account-reports-help/account-reports-help.component';
 import { AccountAnalysisHelpComponent } from './account-analysis-help/account-analysis-help.component';
 import { AccountCustomDataHelpComponent } from './account-custom-data-help/account-custom-data-help.component';
+import { ReportsDashboardHelpComponent } from './account-reports-help/reports-dashboard-help/reports-dashboard-help.component';
+import { ReportSetupHelpComponent } from './account-reports-help/report-setup-help/report-setup-help.component';
+import { DataOverviewReportHelpComponent } from './account-reports-help/data-overview-report-help/data-overview-report-help.component';
+import { BetterPlantsReportHelpComponent } from './account-reports-help/better-plants-report-help/better-plants-report-help.component';
 
 
 
@@ -18,7 +22,11 @@ import { AccountCustomDataHelpComponent } from './account-custom-data-help/accou
     AccountSettingsHelpComponent,
     AccountReportsHelpComponent,
     AccountAnalysisHelpComponent,
-    AccountCustomDataHelpComponent
+    AccountCustomDataHelpComponent,
+    ReportsDashboardHelpComponent,
+    ReportSetupHelpComponent,
+    DataOverviewReportHelpComponent,
+    BetterPlantsReportHelpComponent
   ],
   imports: [
     CommonModule
