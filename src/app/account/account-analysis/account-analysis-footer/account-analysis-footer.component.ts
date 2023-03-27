@@ -105,8 +105,7 @@ export class AccountAnalysisFooterComponent implements OnInit {
     }
   }
 
-
-  returnToDashboard(){
+  returnToDashboard() {
     this.router.navigateByUrl('/account/analysis/dashboard');
   }
 }
