@@ -1,6 +1,8 @@
 <div class="d-flex flex-column h-100" *ngIf="utilityMeterData.length != 0">
     <app-visualization-banner></app-visualization-banner>
-    <router-outlet></router-outlet>
+    <div class="visualization-content">
+        <router-outlet></router-outlet>
+    </div>
 </div>
 
 <div class="p-5" *ngIf="utilityMeterData.length == 0">
