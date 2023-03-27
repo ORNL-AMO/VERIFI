@@ -79,12 +79,12 @@
                     </div>
                     <div class="col-3">
                         <div class="box h-100">
-                            <input type="file" #importFile id="importFile" (input)="setImportFile($event.target)"
-                                accept=".xlsx">
+                            <input class="form-control" [ngClass]="{'drag-in': dragOver}" type="file" #importFile
+                                id="importFile" (dragenter)="setDragEnter()" (dragleave)="setDragOut()"
+                                (input)="setImportFile($event.target)" accept=".xlsx">
                             <div class="alert alert-danger" *ngIf="fileUploadError">
                                 {{fileUploadError}}
                             </div>
-                            <br>
                             <p>Upload Template Data</p>
                         </div>
                     </div>
