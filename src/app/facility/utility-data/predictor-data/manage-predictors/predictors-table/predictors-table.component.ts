@@ -5,12 +5,13 @@ import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { IdbFacility, PredictorData } from 'src/app/models/idb';
 import { Subscription } from 'rxjs';
 
+
 @Component({
-  selector: 'app-manage-predictors',
-  templateUrl: './manage-predictors.component.html',
-  styleUrls: ['./manage-predictors.component.css']
+  selector: 'app-predictors-table',
+  templateUrl: './predictors-table.component.html',
+  styleUrls: ['./predictors-table.component.css']
 })
-export class ManagePredictorsComponent {
+export class PredictorsTableComponent {
 
   facilityPredictorsSub: Subscription;
   facilityPredictors: Array<PredictorData>;

@@ -11,6 +11,10 @@ import { ManagePredictorsComponent } from './manage-predictors/manage-predictors
 import { RouterModule } from '@angular/router';
 import { PredictorEntriesComponent } from './predictor-entries/predictor-entries.component';
 import { PredictorTabsComponent } from './predictor-tabs/predictor-tabs.component';
+import { EditPredictorComponent } from './manage-predictors/edit-predictor/edit-predictor.component';
+import { EditPredictorEntryComponent } from './edit-predictor-entry/edit-predictor-entry.component';
+import { PredictorsTableComponent } from './manage-predictors/predictors-table/predictors-table.component';
+import { LabelWithTooltipModule } from 'src/app/shared/label-with-tooltip/label-with-tooltip.module';
 
 
 
@@ -21,7 +25,10 @@ import { PredictorTabsComponent } from './predictor-tabs/predictor-tabs.componen
     PredictorDataComponent,
     ManagePredictorsComponent,
     PredictorEntriesComponent,
-    PredictorTabsComponent
+    PredictorTabsComponent,
+    EditPredictorComponent,
+    EditPredictorEntryComponent,
+    PredictorsTableComponent
   ],
   imports: [
     CommonModule,
@@ -30,7 +37,8 @@ import { PredictorTabsComponent } from './predictor-tabs/predictor-tabs.componen
     NgbPaginationModule,
     HelperPipesModule,
     TableItemsDropdownModule,
-    RouterModule
+    RouterModule,
+    LabelWithTooltipModule
   ]
 })
 export class PredictorDataModule { }

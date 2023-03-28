@@ -94,6 +94,8 @@ import { TimeSeriesComponent } from './facility/visualization/time-series/time-s
 import { CorrelationPlotMenuComponent } from './facility/visualization/correlation-plot-menu/correlation-plot-menu.component';
 import { ManagePredictorsComponent } from './facility/utility-data/predictor-data/manage-predictors/manage-predictors.component';
 import { PredictorEntriesComponent } from './facility/utility-data/predictor-data/predictor-entries/predictor-entries.component';
+import { EditPredictorComponent } from './facility/utility-data/predictor-data/manage-predictors/edit-predictor/edit-predictor.component';
+import { PredictorsTableComponent } from './facility/utility-data/predictor-data/manage-predictors/predictors-table/predictors-table.component';
 
 const routes: Routes = [
   {
@@ -276,7 +278,24 @@ const routes: Routes = [
             component: PredictorDataComponent,
             children: [
               { path: '', pathMatch: 'full', redirectTo: 'manage' },
-              { path: 'manage', component: ManagePredictorsComponent },
+              {
+                path: 'manage',
+                component: ManagePredictorsComponent,
+                children: [
+                  {
+                    path: '',
+                    pathMatch: 'full',
+                    redirectTo: 'predictor-table'
+                  },
+                  {
+                    path: 'predictor-table',
+                    component: PredictorsTableComponent
+                  },
+
+                  { path: 'edit-predictor/:id', component: EditPredictorComponent },
+                  { path: 'add-predictor', component: EditPredictorComponent },
+                ]
+              },
               { path: 'entries', component: PredictorEntriesComponent }
             ]
           },

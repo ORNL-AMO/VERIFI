@@ -1,0 +1,59 @@
+<div class="row">
+    <div class="col-12">
+        <div class="saveCancel item-right">
+            <button class="btn btn-secondary" (click)="cancel()">Cancel</button>
+            <button class="btn btn-primary" (click)="saveChanges()">
+                <span *ngIf="addOrEdit == 'add'">Add Predictor</span>
+                <span *ngIf="addOrEdit == 'edit'">Save Changes</span>
+            </button>
+        </div>
+    </div>
+</div>
+<form [formGroup]="predictorForm">
+    <p class="bold">Predictor Information</p>
+    <div class="row">
+        <div class="col-lg-6 col-md-12 col-sm-12">
+            <app-label-with-tooltip [label]="'Name'" [field]="'predictorName'" [labelId]="'predictorName'"
+                [isRequired]="true">
+            </app-label-with-tooltip>
+            <div class="mb-3">
+                <input id="predictorName" class="form-control" type="text" formControlName="name"
+                    onfocus="this.select();" minlength="0" maxlength="100">
+            </div>
+            <div class="alert alert-danger" *ngIf="predictorForm.get('name').hasError('required')">Predictor name is
+                required</div>
+        </div>
+        <div class="col-lg-6 col-md-12 col-sm-12">
+            <!-- <app-label-with-tooltip [label]="'Is Production?'" [field]="'isProductionPredictor'"
+                [labelId]="'isProductionPredictor'" [isRequired]="false"> 
+            </app-label-with-tooltip>-->
+            <label for="isProductionPredictor">Is Production?</label>
+            <div class="mb-3">
+                <select id="isProductionPredictor" class="form-select" formControlName="production">
+                    <option [value]="true">Yes</option>
+                    <option [value]="false">No</option>
+                </select>
+            </div>
+        </div>
+        <div class="col-lg-6 col-md-12 col-sm-12">
+            <!-- <app-label-with-tooltip [label]="'Unit'" [field]="'predictorUnit'" [labelId]="'predictorUnit'"
+                [isRequired]="false">
+            </app-label-with-tooltip> -->
+            <label for="predictorUnit">Unit</label>
+            <div class="mb-3">
+                <input id="predictorUnit" class="form-control" type="text" formControlName="unit"
+                    onfocus="this.select();" minlength="0" maxlength="100">
+            </div>
+        </div>
+        <div class="col-lg-6 col-md-12 col-sm-12">
+            <!-- <app-label-with-tooltip [label]="'Unit'" [field]="'predictorUnit'" [labelId]="'predictorUnit'"
+                [isRequired]="false">
+            </app-label-with-tooltip> -->
+            <label for="description">Description</label>
+            <div class="mb-3">
+                <textarea id="description" class="form-control" type="text" formControlName="description"
+                    onfocus="this.select();"></textarea>
+            </div>
+        </div>
+    </div>
+</form>
