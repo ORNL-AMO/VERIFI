@@ -96,6 +96,8 @@ import { ManagePredictorsComponent } from './facility/utility-data/predictor-dat
 import { PredictorEntriesComponent } from './facility/utility-data/predictor-data/predictor-entries/predictor-entries.component';
 import { EditPredictorComponent } from './facility/utility-data/predictor-data/manage-predictors/edit-predictor/edit-predictor.component';
 import { PredictorsTableComponent } from './facility/utility-data/predictor-data/manage-predictors/predictors-table/predictors-table.component';
+import { PredictorEntriesTableComponent } from './facility/utility-data/predictor-data/predictor-entries/predictor-entries-table/predictor-entries-table.component';
+import { EditPredictorEntryComponent } from './facility/utility-data/predictor-data/predictor-entries/edit-predictor-entry/edit-predictor-entry.component';
 
 const routes: Routes = [
   {
@@ -296,7 +298,24 @@ const routes: Routes = [
                   { path: 'add-predictor', component: EditPredictorComponent },
                 ]
               },
-              { path: 'entries', component: PredictorEntriesComponent }
+              {
+                path: 'entries',
+                component: PredictorEntriesComponent,
+                children: [
+                  {
+                    path: '',
+                    pathMatch: 'full',
+                    redirectTo: 'predictor-entries-table'
+                  },
+                  {
+                    path: 'predictor-entries-table',
+                    component: PredictorEntriesTableComponent
+                  },
+
+                  { path: 'edit-entry/:id', component: EditPredictorEntryComponent },
+                  { path: 'add-entry', component: EditPredictorEntryComponent },
+                ]
+              }
             ]
           },
           // { path: 'upload-data', component: UploadDataComponent },

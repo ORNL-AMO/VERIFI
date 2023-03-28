@@ -12,9 +12,10 @@ import { RouterModule } from '@angular/router';
 import { PredictorEntriesComponent } from './predictor-entries/predictor-entries.component';
 import { PredictorTabsComponent } from './predictor-tabs/predictor-tabs.component';
 import { EditPredictorComponent } from './manage-predictors/edit-predictor/edit-predictor.component';
-import { EditPredictorEntryComponent } from './edit-predictor-entry/edit-predictor-entry.component';
+import { EditPredictorEntryComponent } from './predictor-entries/edit-predictor-entry/edit-predictor-entry.component';
 import { PredictorsTableComponent } from './manage-predictors/predictors-table/predictors-table.component';
 import { LabelWithTooltipModule } from 'src/app/shared/label-with-tooltip/label-with-tooltip.module';
+import { PredictorEntriesTableComponent } from './predictor-entries/predictor-entries-table/predictor-entries-table.component';
 
 
 
@@ -28,7 +29,8 @@ import { LabelWithTooltipModule } from 'src/app/shared/label-with-tooltip/label-
     PredictorTabsComponent,
     EditPredictorComponent,
     EditPredictorEntryComponent,
-    PredictorsTableComponent
+    PredictorsTableComponent,
+    PredictorEntriesTableComponent
   ],
   imports: [
     CommonModule,
