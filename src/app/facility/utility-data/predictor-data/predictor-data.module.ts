@@ -7,6 +7,10 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { HelperPipesModule } from 'src/app/shared/helper-pipes/helper-pipes.module';
 import { TableItemsDropdownModule } from 'src/app/shared/table-items-dropdown/table-items-dropdown.module';
+import { ManagePredictorsComponent } from './manage-predictors/manage-predictors.component';
+import { RouterModule } from '@angular/router';
+import { PredictorEntriesComponent } from './predictor-entries/predictor-entries.component';
+import { PredictorTabsComponent } from './predictor-tabs/predictor-tabs.component';
 
 
 
@@ -14,7 +18,10 @@ import { TableItemsDropdownModule } from 'src/app/shared/table-items-dropdown/ta
   declarations: [
     EditPredictorEntryRowComponent,
     EditPredictorsComponent,
-    PredictorDataComponent
+    PredictorDataComponent,
+    ManagePredictorsComponent,
+    PredictorEntriesComponent,
+    PredictorTabsComponent
   ],
   imports: [
     CommonModule,
@@ -22,7 +29,8 @@ import { TableItemsDropdownModule } from 'src/app/shared/table-items-dropdown/ta
     ReactiveFormsModule,
     NgbPaginationModule,
     HelperPipesModule,
-    TableItemsDropdownModule
+    TableItemsDropdownModule,
+    RouterModule
   ]
 })
 export class PredictorDataModule { }

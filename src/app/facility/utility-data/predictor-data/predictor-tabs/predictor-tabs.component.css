@@ -1,0 +1,33 @@
+
+.nav-tabs{
+    background-color: #f1f1f1;
+}
+
+
+.nav-tabs .nav-link:not(.active){
+    background-color: #2c386b;
+    color: white;
+    border: solid 1px white;
+}
+
+
+a:not([href]){
+    color: white !important;
+}
+
+.nav-tabs a:not([href]).nav-link.active{
+    color: #ff6000 !important;
+    background-color: white;
+}
+
+.nav-link{
+    font-weight: 600;
+}
+.nav-tabs .nav-link.active, .nav-tabs .nav-link.active i.fa{
+    color: #ff6000;
+}
+
+
+.nav-tabs .nav-link i.fa{
+    color: white;
+}

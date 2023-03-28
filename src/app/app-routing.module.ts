@@ -92,6 +92,8 @@ import { CorrelationPlotComponent } from './facility/visualization/correlation-p
 import { CorrelationHeatmapComponent } from './facility/visualization/correlation-heatmap/correlation-heatmap.component';
 import { TimeSeriesComponent } from './facility/visualization/time-series/time-series.component';
 import { CorrelationPlotMenuComponent } from './facility/visualization/correlation-plot-menu/correlation-plot-menu.component';
+import { ManagePredictorsComponent } from './facility/utility-data/predictor-data/manage-predictors/manage-predictors.component';
+import { PredictorEntriesComponent } from './facility/utility-data/predictor-data/predictor-entries/predictor-entries.component';
 
 const routes: Routes = [
   {
@@ -269,7 +271,15 @@ const routes: Routes = [
           },
           { path: 'monthly-meter-data', component: CalanderizationComponent },
           { path: 'meter-groups', component: MeterGroupingComponent },
-          { path: 'predictors', component: PredictorDataComponent },
+          {
+            path: 'predictors',
+            component: PredictorDataComponent,
+            children: [
+              { path: '', pathMatch: 'full', redirectTo: 'manage' },
+              { path: 'manage', component: ManagePredictorsComponent },
+              { path: 'entries', component: PredictorEntriesComponent }
+            ]
+          },
           // { path: 'upload-data', component: UploadDataComponent },
           { path: '', pathMatch: 'full', redirectTo: 'energy-consumption' }
         ]
