@@ -93,6 +93,7 @@ export class PredictordbService {
             unit: undefined,
             description: undefined,
             id: Math.random().toString(36).substr(2, 9),
+            predictorType: 'Standard'
         }
     }
 

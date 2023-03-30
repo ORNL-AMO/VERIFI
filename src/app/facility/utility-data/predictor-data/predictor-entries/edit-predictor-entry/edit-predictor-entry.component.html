@@ -9,3 +9,35 @@
         </div>
     </div>
 </div>
+
+<form>
+    <p class="bold">Predictor Entry Data</p>
+    <div class="row">
+        <div class="col-4">
+            <label for="predictorDate">Date</label>
+        </div>
+        <div class="col">
+            <div class="input-group">
+                <input id="predictorDate" class="form-control" type="month"
+                    [ngModel]="predictorEntry.date | date:'yyyy-MM'" (ngModelChange)="setDate($event)" name="date">
+            </div>
+        </div>
+    </div>
+    <br>
+
+    <div *ngFor="let predictor of predictorEntry.predictors">
+        <div class="row">
+            <div class="col-4">
+                <label [for]="'predictor-' + predictor.id">{{predictor.name}}</label>
+            </div>
+            <div class="col">
+                <div class="input-group mb-2">
+                    <input [id]="'predictor-' + predictor.id" class="form-control" type="number"
+                        [(ngModel)]="predictor.amount" name="{{'predictorAmount'+predictor.id}}"
+                        onfocus="this.select();">
+                    <span class="input-group-text" *ngIf="predictor.unit">{{predictor.unit}}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

@@ -4,6 +4,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { IdbFacility, PredictorData } from 'src/app/models/idb';
+import { ConvertUnitsService } from 'src/app/shared/convert-units/convert-units.service';
+import { UnitConversionTypes } from './unitConversionTypes';
 
 @Component({
   selector: 'app-edit-predictor',
@@ -16,9 +18,15 @@ export class EditPredictorComponent {
   addOrEdit: 'add' | 'edit';
   predictorData: PredictorData;
   predictorForm: FormGroup;
+  showReferencePredictors: boolean;
+  referencePredictors: Array<PredictorData>;
+  unitConversionTypes: Array<{ measure: string, display: string }> = UnitConversionTypes;
+  unitOptions: Array<string> = [];
+  referencePredictorName: string;
   constructor(private activatedRoute: ActivatedRoute, private predictorDbService: PredictordbService,
     private router: Router, private facilityDbService: FacilitydbService,
-    private formBuilder: FormBuilder) {
+    private formBuilder: FormBuilder,
+    private convertUnitsService: ConvertUnitsService) {
   }
 
   ngOnInit() {
@@ -31,27 +39,38 @@ export class EditPredictorComponent {
         this.addOrEdit = 'add';
         this.setPredictorDataNew();
       }
+      this.setReferencePredictors()
     });
   }
 
   setPredictorDataEdit(predictorId: string) {
     let facilityPredictors: Array<PredictorData> = this.predictorDbService.facilityPredictors.getValue();
     this.predictorData = facilityPredictors.find(predictor => { return predictor.id == predictorId });
+    this.setPredictorForm();
+  }
+
+  setPredictorDataNew() {
+    let facilityPredictors: Array<PredictorData> = this.predictorDbService.facilityPredictors.getValue();
+    this.predictorData = this.predictorDbService.getNewPredictor(facilityPredictors);
+    this.setPredictorForm();
+  }
+
+  setPredictorForm() {
     this.predictorForm = this.formBuilder.group({
       'name': [this.predictorData.name, [Validators.required]],
       'unit': [this.predictorData.unit],
       'description': [this.predictorData.description],
-      'production': [this.predictorData.production || false]
+      'production': [this.predictorData.production || false],
+      'predictorType': [this.predictorData.predictorType],
+      'referencePredictorId': [this.predictorData.referencePredictorId],
+      'convertFrom': [this.predictorData.convertFrom],
+      'convertTo': [this.predictorData.convertTo],
+      'conversionType': [this.predictorData.conversionType],
+      'mathAction': [],
+      'mathAmount': []
     });
-  }
-
-  setPredictorDataNew() {
-    this.predictorForm = this.formBuilder.group({
-      'name': ['New Predictor', [Validators.required]],
-      'unit': [],
-      'description': [],
-      'production': [false]
-    });
+    this.setShowReferencePredictors()
+    this.setUnitOptions();
   }
 
   cancel() {
@@ -61,5 +80,30 @@ export class EditPredictorComponent {
 
   saveChanges() {
 
+  }
+
+  setShowReferencePredictors() {
+    this.showReferencePredictors = this.predictorForm.controls.predictorType.value == 'Conversion' || this.predictorForm.controls.predictorType.value == 'Math';
+  }
+
+  setReferencePredictors() {
+    let facilityPredictors: Array<PredictorData> = this.predictorDbService.facilityPredictors.getValue();
+    this.referencePredictors = facilityPredictors.filter(predictor => { return predictor.id != this.predictorData.id });
+  }
+
+  setUnitOptions() {
+    if (this.predictorForm.controls.conversionType.value) {
+      this.unitOptions = this.convertUnitsService.possibilities(this.predictorForm.controls.conversionType.value);
+    } else {
+      this.unitOptions = [];
+    }
+  }
+
+  setReferencePredictorName() {
+    let facilityPredictors: Array<PredictorData> = this.predictorDbService.facilityPredictors.getValue();
+    let referencePredictor: PredictorData = facilityPredictors.find(predictor => { return predictor.id == this.predictorForm.controls.referencePredictorId.value });
+    if (referencePredictor) {
+      this.referencePredictorName = referencePredictor.name;
+    }
   }
 }

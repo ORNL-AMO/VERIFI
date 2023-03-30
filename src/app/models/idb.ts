@@ -231,8 +231,15 @@ export interface PredictorData {
     importWizardName?: string,
     production?: boolean,
     productionInAnalysis?: boolean,
-    regressionCoefficient?: number
+    regressionCoefficient?: number,
+    predictorType: PredictorType,
+    referencePredictorId?: string,
+    conversionType?: string,
+    convertFrom?: string,
+    convertTo?: string
 }
+
+export type PredictorType = 'Standard' | 'Conversion' | 'Math' | 'Weather'
 
 
 export interface IdbOverviewReportOptions {
