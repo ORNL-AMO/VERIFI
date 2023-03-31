@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { Routes, RouterModule } from '@angular/router';
+import { Routes, RouterModule, ExtraOptions } from '@angular/router';
 import { EnergyConsumptionComponent } from './facility/utility-data/energy-consumption/energy-consumption.component';
 import { EnergySourceComponent } from './facility/utility-data/energy-consumption/energy-source/energy-source.component';
 import { UtilityMeterDataComponent } from './facility/utility-data/energy-consumption/utility-meter-data/utility-meter-data.component';
@@ -408,8 +408,14 @@ const routes: Routes = [
   { path: "**", component: PageNotFoundComponent },
 ];
 
+const routerOptions: ExtraOptions = {
+  anchorScrolling: 'enabled',
+  scrollPositionRestoration: 'enabled',
+  useHash: true
+}
+
 @NgModule({
-  imports: [RouterModule.forRoot(routes)],
+  imports: [RouterModule.forRoot(routes, routerOptions)],
   exports: [RouterModule]
 })
 export class AppRoutingModule { }
