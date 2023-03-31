@@ -1,0 +1,196 @@
+import { Route } from "@angular/router";
+import { AccountAnalysisListComponent } from "src/app/facility/analysis/account-analysis-list/account-analysis-list.component";
+import { AnalysisDashboardComponent } from "src/app/facility/analysis/analysis-dashboard/analysis-dashboard.component";
+import { AnalysisComponent } from "src/app/facility/analysis/analysis.component";
+import { AnalysisSetupComponent } from "src/app/facility/analysis/run-analysis/analysis-setup/analysis-setup.component";
+import { AnnualFacilityAnalysisComponent } from "src/app/facility/analysis/run-analysis/facility-analysis/annual-facility-analysis/annual-facility-analysis.component";
+import { FacilityAnalysisComponent } from "src/app/facility/analysis/run-analysis/facility-analysis/facility-analysis.component";
+import { MonthlyFacilityAnalysisComponent } from "src/app/facility/analysis/run-analysis/facility-analysis/monthly-facility-analysis/monthly-facility-analysis.component";
+import { AnnualAnalysisSummaryComponent } from "src/app/facility/analysis/run-analysis/group-analysis/annual-analysis-summary/annual-analysis-summary.component";
+import { GroupAnalysisOptionsComponent } from "src/app/facility/analysis/run-analysis/group-analysis/group-analysis-options/group-analysis-options.component";
+import { GroupAnalysisComponent } from "src/app/facility/analysis/run-analysis/group-analysis/group-analysis.component";
+import { MonthlyAnalysisSummaryComponent } from "src/app/facility/analysis/run-analysis/group-analysis/monthly-analysis-summary/monthly-analysis-summary.component";
+import { RegressionModelSelectionComponent } from "src/app/facility/analysis/run-analysis/group-analysis/regression-model-selection/regression-model-selection.component";
+import { RunAnalysisComponent } from "src/app/facility/analysis/run-analysis/run-analysis.component";
+import { FacilityHomeComponent } from "src/app/facility/facility-home/facility-home.component";
+import { FacilityCostOverviewComponent } from "src/app/facility/facility-overview/facility-cost-overview/facility-cost-overview.component";
+import { FacilityEmissionsOverviewComponent } from "src/app/facility/facility-overview/facility-emissions-overview/facility-emissions-overview.component";
+import { FacilityEnergyOverviewComponent } from "src/app/facility/facility-overview/facility-energy-overview/facility-energy-overview.component";
+import { FacilityOverviewComponent } from "src/app/facility/facility-overview/facility-overview.component";
+import { FacilityWaterOverviewComponent } from "src/app/facility/facility-overview/facility-water-overview/facility-water-overview.component";
+import { FacilitySettingsComponent } from "src/app/facility/facility-settings/facility-settings.component";
+import { FacilityComponent } from "src/app/facility/facility.component";
+import { CalanderizationComponent } from "src/app/facility/utility-data/calanderization/calanderization.component";
+import { EnergyConsumptionComponent } from "src/app/facility/utility-data/energy-consumption/energy-consumption.component";
+import { EditMeterComponent } from "src/app/facility/utility-data/energy-consumption/energy-source/edit-meter/edit-meter.component";
+import { EnergySourceComponent } from "src/app/facility/utility-data/energy-consumption/energy-source/energy-source.component";
+import { UtilityMetersTableComponent } from "src/app/facility/utility-data/energy-consumption/energy-source/utility-meters-table/utility-meters-table.component";
+import { EditBillComponent } from "src/app/facility/utility-data/energy-consumption/utility-meter-data/edit-bill/edit-bill.component";
+import { UtilityMeterDataTableComponent } from "src/app/facility/utility-data/energy-consumption/utility-meter-data/utility-meter-data-table/utility-meter-data-table.component";
+import { UtilityMeterDataComponent } from "src/app/facility/utility-data/energy-consumption/utility-meter-data/utility-meter-data.component";
+import { MeterGroupingComponent } from "src/app/facility/utility-data/meter-grouping/meter-grouping.component";
+import { PredictorDataComponent } from "src/app/facility/utility-data/predictor-data/predictor-data.component";
+import { UtilityDataComponent } from "src/app/facility/utility-data/utility-data.component";
+import { CorrelationHeatmapComponent } from "src/app/facility/visualization/correlation-heatmap/correlation-heatmap.component";
+import { CorrelationPlotMenuComponent } from "src/app/facility/visualization/correlation-plot-menu/correlation-plot-menu.component";
+import { CorrelationPlotComponent } from "src/app/facility/visualization/correlation-plot/correlation-plot.component";
+import { TimeSeriesComponent } from "src/app/facility/visualization/time-series/time-series.component";
+import { VisualizationComponent } from "src/app/facility/visualization/visualization.component";
+
+export const FacilityRoutes: Route = {
+    path: 'facility/:id',
+    component: FacilityComponent,
+    children: [
+        {
+            path: '',
+            pathMatch: 'full',
+            redirectTo: 'home'
+        },
+        {
+            path: 'home',
+            component: FacilityHomeComponent
+        },
+        {
+            path: 'overview',
+            component: FacilityOverviewComponent,
+            children: [
+                { path: '', pathMatch: 'full', redirectTo: 'energy' },
+                { path: 'energy', component: FacilityEnergyOverviewComponent },
+                { path: 'costs', component: FacilityCostOverviewComponent },
+                { path: 'emissions', component: FacilityEmissionsOverviewComponent },
+                { path: 'water', component: FacilityWaterOverviewComponent },
+            ]
+        },
+        {
+            path: 'settings',
+            component: FacilitySettingsComponent
+        },
+        {
+            path: 'utility',
+            component: UtilityDataComponent,
+            children: [
+                {
+                    path: 'energy-consumption', component: EnergyConsumptionComponent,
+                    children: [
+                        {
+                            path: '',
+                            pathMatch: 'full',
+                            redirectTo: 'energy-source'
+                        },
+                        {
+                            path: 'energy-source',
+                            component: EnergySourceComponent,
+                            children: [
+                                {
+                                    path: '',
+                                    pathMatch: 'full',
+                                    redirectTo: 'meters'
+                                },
+                                {
+                                    path: 'meters',
+                                    component: UtilityMetersTableComponent
+                                },
+                                {
+                                    path: 'edit-meter/:id',
+                                    component: EditMeterComponent
+                                },
+                                {
+                                    path: 'new-meter',
+                                    component: EditMeterComponent
+                                }
+                            ]
+                        },
+                        {
+                            path: 'utility-meter/:id',
+                            component: UtilityMeterDataComponent,
+                            children: [
+                                {
+                                    path: '',
+                                    pathMatch: 'full',
+                                    redirectTo: 'data-table'
+                                },
+                                {
+                                    path: 'data-table',
+                                    component: UtilityMeterDataTableComponent
+                                },
+                                {
+                                    path: 'edit-bill/:id',
+                                    component: EditBillComponent
+                                },
+                                {
+                                    path: 'new-bill',
+                                    component: EditBillComponent
+                                }
+                            ]
+                        },
+                    ],
+                },
+                { path: 'monthly-meter-data', component: CalanderizationComponent },
+                { path: 'meter-groups', component: MeterGroupingComponent },
+                { path: 'predictors', component: PredictorDataComponent },
+                // { path: 'upload-data', component: UploadDataComponent },
+                { path: '', pathMatch: 'full', redirectTo: 'energy-consumption' }
+            ]
+        },
+        {
+            path: 'visualization',
+            component: VisualizationComponent,
+            children: [
+                { path: '', pathMatch: 'full', redirectTo: 'options' },
+                {
+                    path: 'options',
+                    component: CorrelationPlotMenuComponent
+                },
+                {
+                    path: 'correlation',
+                    component: CorrelationPlotComponent
+                },
+                {
+                    path: 'variance',
+                    component: CorrelationHeatmapComponent
+                },
+                { path: 'time-series', component: TimeSeriesComponent }
+            ]
+        },
+        {
+            path: 'analysis',
+            component: AnalysisComponent,
+            children: [
+                { path: '', pathMatch: 'full', redirectTo: 'analysis-dashboard' },
+                { path: 'analysis-dashboard', component: AnalysisDashboardComponent },
+                {
+                    path: 'run-analysis',
+                    component: RunAnalysisComponent,
+                    children: [
+                        { path: '', pathMatch: 'full', redirectTo: 'analysis-setup' },
+                        { path: 'analysis-setup', component: AnalysisSetupComponent },
+                        {
+                            path: 'group-analysis/:id',
+                            component: GroupAnalysisComponent,
+                            children: [
+                                { path: '', pathMatch: 'full', redirectTo: 'options' },
+                                { path: 'options', component: GroupAnalysisOptionsComponent },
+                                { path: 'model-selection', component: RegressionModelSelectionComponent },
+                                { path: 'annual-analysis', component: AnnualAnalysisSummaryComponent },
+                                { path: 'monthly-analysis', component: MonthlyAnalysisSummaryComponent }
+                            ]
+                        },
+                        {
+                            path: 'facility-analysis',
+                            component: FacilityAnalysisComponent,
+                            children: [
+                                { path: '', pathMatch: 'full', redirectTo: 'annual-analysis' },
+                                { path: 'annual-analysis', component: AnnualFacilityAnalysisComponent },
+                                { path: 'monthly-analysis', component: MonthlyFacilityAnalysisComponent }
+                            ]
+                        },
+                        {
+                            path: 'account-analysis',
+                            component: AccountAnalysisListComponent
+                        }
+                    ]
+                }
+            ]
+        },
+    ]
+};
