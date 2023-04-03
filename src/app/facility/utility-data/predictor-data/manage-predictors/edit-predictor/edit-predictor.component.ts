@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { IdbFacility, PredictorData } from 'src/app/models/idb';
+import { NoaaService } from 'src/app/noaa.service';
 import { ConvertUnitsService } from 'src/app/shared/convert-units/convert-units.service';
 import { UnitConversionTypes } from './unitConversionTypes';
 
@@ -26,10 +27,13 @@ export class EditPredictorComponent {
   constructor(private activatedRoute: ActivatedRoute, private predictorDbService: PredictordbService,
     private router: Router, private facilityDbService: FacilitydbService,
     private formBuilder: FormBuilder,
-    private convertUnitsService: ConvertUnitsService) {
+    private convertUnitsService: ConvertUnitsService,
+    private noaaService: NoaaService) {
   }
 
   ngOnInit() {
+    this.noaaService.get();
+
     this.activatedRoute.params.subscribe(params => {
       let predictorId: string = params['id'];
       if (predictorId) {
