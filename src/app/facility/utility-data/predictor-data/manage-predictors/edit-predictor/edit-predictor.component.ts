@@ -32,7 +32,7 @@ export class EditPredictorComponent {
   }
 
   ngOnInit() {
-    this.noaaService.get();
+    // this.noaaService.get();
 
     this.activatedRoute.params.subscribe(params => {
       let predictorId: string = params['id'];
@@ -71,7 +71,9 @@ export class EditPredictorComponent {
       'convertTo': [this.predictorData.convertTo],
       'conversionType': [this.predictorData.conversionType],
       'mathAction': [],
-      'mathAmount': []
+      'mathAmount': [],
+      'weatherDataType': [this.predictorData.weatherDataType],
+      'degreeDayThreshold': [this.predictorData.degreeDayThreshold],
     });
     this.setShowReferencePredictors()
     this.setUnitOptions();

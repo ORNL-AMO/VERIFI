@@ -93,7 +93,15 @@ export class PredictordbService {
             unit: undefined,
             description: undefined,
             id: Math.random().toString(36).substr(2, 9),
-            predictorType: 'Standard'
+            predictorType: 'Standard',
+            referencePredictorId: undefined,
+            convertFrom: undefined,
+            convertTo: undefined,
+            conversionType: undefined,
+            // mathAction: undefined,
+            // mathAmount: undefined,
+            weatherDataType: 'HDD',
+            degreeDayThreshold: undefined,
         }
     }
 

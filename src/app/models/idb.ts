@@ -236,11 +236,13 @@ export interface PredictorData {
     referencePredictorId?: string,
     conversionType?: string,
     convertFrom?: string,
-    convertTo?: string
+    convertTo?: string,
+    weatherDataType?: WeatherDataType,
+    degreeDayThreshold?: number
 }
 
 export type PredictorType = 'Standard' | 'Conversion' | 'Math' | 'Weather'
-
+export type WeatherDataType = 'HDD' | 'CDD'
 
 export interface IdbOverviewReportOptions {
     id?: number,

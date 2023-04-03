@@ -76,6 +76,39 @@
                 </select>
             </div>
         </div>
+        <!--weather-->
+        <ng-container *ngIf="predictorForm.controls.predictorType.value == 'Weather'">
+            <div class="col-lg-6 col-md-12 col-sm-12">
+                <label class="semibold" for="weatherDataType">Weather Predictor Type</label>
+                <div class="mb-3">
+                    <select id="weatherDataType" class="form-select" formControlName="weatherDataType">
+                        <option [value]="'HDD'">HDD</option>
+                        <option [value]="'CDD'">CDD</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-lg-6 col-md-12 col-sm-12">
+                <label *ngIf="predictorForm.controls.weatherDataType.value == 'HDD'" class="semibold"
+                    for="degreeDayThreshold">Heating To Temperature</label>
+                <label *ngIf="predictorForm.controls.weatherDataType.value == 'CDD'" class="semibold"
+                    for="degreeDayThreshold">Cooling To Temperature</label>
+
+                <div class="mb-3 input-group">
+                    <input id="degreeDayThreshold" class="form-control" type="number"
+                        formControlName="degreeDayThreshold" onfocus="this.select();">
+                    <!--TODO: Temperature units-->
+                    <span class="input-group-text">
+                        &#8457;
+                    </span>
+                </div>
+            </div>
+        </ng-container>
+
+
+
+
+
+        <!--Math/Conversion-->
         <div class="col-lg-6 col-md-12 col-sm-12" *ngIf="showReferencePredictors">
             <label class="semibold" for="referencePredictorId">Reference Predictor</label>
             <div class="mb-3">
@@ -86,71 +119,76 @@
                 </select>
             </div>
         </div>
-        <div class="col-lg-6 col-md-12 col-sm-12" *ngIf="predictorForm.controls.predictorType.value == 'Conversion'">
-            <label class="semibold" for="conversionType">Conversion Type</label>
-            <div class="mb-3">
-                <select id="conversionType" class="form-select" formControlName="conversionType"
-                    (change)="setUnitOptions()">
-                    <option *ngFor="let conversionType of unitConversionTypes" [value]="conversionType.measure">
-                        {{conversionType.display}}
-                    </option>
-                </select>
+        <ng-container *ngIf="predictorForm.controls.predictorType.value == 'Conversion'">
+            <div class="col-lg-6 col-md-12 col-sm-12">
+                <label class="semibold" for="conversionType">Conversion Type</label>
+                <div class="mb-3">
+                    <select id="conversionType" class="form-select" formControlName="conversionType"
+                        (change)="setUnitOptions()">
+                        <option *ngFor="let conversionType of unitConversionTypes" [value]="conversionType.measure">
+                            {{conversionType.display}}
+                        </option>
+                    </select>
+                </div>
             </div>
-        </div>
-        <div class="col-lg-6 col-md-12 col-sm-12" *ngIf="predictorForm.controls.predictorType.value == 'Conversion'">
-            <label class="semibold" for="convertFrom">Convert From</label>
-            <div class="mb-3">
-                <select id="convertFrom" class="form-select" formControlName="convertFrom">
-                    <option *ngFor="let unitOption of unitOptions" [value]="unitOption">
-                        <span [innerHTML]="unitOption | settingsLabel"></span>
-                    </option>
-                </select>
+            <div class="col-lg-6 col-md-12 col-sm-12">
+                <label class="semibold" for="convertFrom">Convert From</label>
+                <div class="mb-3">
+                    <select id="convertFrom" class="form-select" formControlName="convertFrom">
+                        <option *ngFor="let unitOption of unitOptions" [value]="unitOption">
+                            <span [innerHTML]="unitOption | settingsLabel"></span>
+                        </option>
+                    </select>
+                </div>
             </div>
-        </div>
-        <div class="col-lg-6 col-md-12 col-sm-12" *ngIf="predictorForm.controls.predictorType.value == 'Conversion'">
-            <label class="semibold" for="convertTo">Convert To</label>
-            <div class="mb-3">
-                <select id="convertTo" class="form-select" formControlName="convertTo">
-                    <option *ngFor="let unitOption of unitOptions" [value]="unitOption">
-                        <span [innerHTML]="unitOption | settingsLabel"></span>
-                    </option>
-                </select>
+            <div class="col-lg-6 col-md-12 col-sm-12">
+                <label class="semibold" for="convertTo">Convert To</label>
+                <div class="mb-3">
+                    <select id="convertTo" class="form-select" formControlName="convertTo">
+                        <option *ngFor="let unitOption of unitOptions" [value]="unitOption">
+                            <span [innerHTML]="unitOption | settingsLabel"></span>
+                        </option>
+                    </select>
+                </div>
             </div>
-        </div>
-        <div class="col-lg-6 col-md-12 col-sm-12" *ngIf="predictorForm.controls.predictorType.value == 'Math'">
-            <label class="semibold" for="mathAction">Math Action</label>
-            <div class="mb-3">
-                <select id="mathAction" class="form-select" formControlName="mathAction">
-                    <option [value]="'add'">Add (&plus;)</option>
-                    <option [value]="'subtract'">Subtract (&minus;)</option>
-                    <option [value]="'multiply'">Multiply (&times;)</option>
-                    <option [value]="'divide'">Divide (&divide;)</option>
-                </select>
+        </ng-container>
+        <ng-container *ngIf="predictorForm.controls.predictorType.value == 'Math'">
+            <div class="col-lg-6 col-md-12 col-sm-12">
+                <label class="semibold" for="mathAction">Math Action</label>
+                <div class="mb-3">
+                    <select id="mathAction" class="form-select" formControlName="mathAction">
+                        <option [value]="'add'">Add (&plus;)</option>
+                        <option [value]="'subtract'">Subtract (&minus;)</option>
+                        <option [value]="'multiply'">Multiply (&times;)</option>
+                        <option [value]="'divide'">Divide (&divide;)</option>
+                    </select>
+                </div>
             </div>
-        </div>
-        <div class="col-lg-6 col-md-12 col-sm-12" *ngIf="predictorForm.controls.predictorType.value == 'Math'">
-            <label class="semibold" for="mathAmount">Action Amount</label>
-            <div class="mb-3 input-group">
-                <span class="input-group-text" *ngIf="predictorForm.controls.mathAction.value == 'add'">&plus;</span>
-                <span class="input-group-text"
-                    *ngIf="predictorForm.controls.mathAction.value == 'subtract'">&minus;</span>
-                <span class="input-group-text"
-                    *ngIf="predictorForm.controls.mathAction.value == 'multiply'">&times;</span>
-                <span class="input-group-text"
-                    *ngIf="predictorForm.controls.mathAction.value == 'divide'">&divide;</span>
-                <input type="number" id="mathAmount" class="form-control" formControlName="mathAmount">
+            <div class="col-lg-6 col-md-12 col-sm-12">
+                <label class="semibold" for="mathAmount">Action Amount</label>
+                <div class="mb-3 input-group">
+                    <span class="input-group-text"
+                        *ngIf="predictorForm.controls.mathAction.value == 'add'">&plus;</span>
+                    <span class="input-group-text"
+                        *ngIf="predictorForm.controls.mathAction.value == 'subtract'">&minus;</span>
+                    <span class="input-group-text"
+                        *ngIf="predictorForm.controls.mathAction.value == 'multiply'">&times;</span>
+                    <span class="input-group-text"
+                        *ngIf="predictorForm.controls.mathAction.value == 'divide'">&divide;</span>
+                    <input type="number" id="mathAmount" class="form-control" formControlName="mathAmount">
+                </div>
             </div>
-        </div>
-        <div class="col-lg-6 col-md-12 col-sm-12" *ngIf="predictorForm.controls.predictorType.value == 'Math'">
-            <label class="semibold" for="mathAmount">Result</label>
-            <div class="mb-3">
-                {{predictorForm.controls.name.value}} &equals; {{referencePredictorName}}
-                <span *ngIf="predictorForm.controls.mathAction.value == 'add'">&plus;</span>
-                <span *ngIf="predictorForm.controls.mathAction.value == 'subtract'">&minus;</span>
-                <span *ngIf="predictorForm.controls.mathAction.value == 'multiply'">&times;</span>
-                <span *ngIf="predictorForm.controls.mathAction.value == 'divide'">&divide;</span>
-                {{predictorForm.controls.mathAmount.value}}
+            <div class="col-lg-6 col-md-12 col-sm-12">
+                <label class="semibold" for="mathAmount">Result</label>
+                <div class="mb-3">
+                    {{predictorForm.controls.name.value}} &equals; {{referencePredictorName}}
+                    <span *ngIf="predictorForm.controls.mathAction.value == 'add'">&plus;</span>
+                    <span *ngIf="predictorForm.controls.mathAction.value == 'subtract'">&minus;</span>
+                    <span *ngIf="predictorForm.controls.mathAction.value == 'multiply'">&times;</span>
+                    <span *ngIf="predictorForm.controls.mathAction.value == 'divide'">&divide;</span>
+                    {{predictorForm.controls.mathAmount.value}}
+                </div>
             </div>
-        </div>
+        </ng-container>
     </div>
 </form>
