@@ -6,6 +6,7 @@ import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { IdbFacility, PredictorData } from 'src/app/models/idb';
 import { NoaaService } from 'src/app/noaa.service';
 import { ConvertUnitsService } from 'src/app/shared/convert-units/convert-units.service';
+import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
 import { UnitConversionTypes } from './unitConversionTypes';
 
 @Component({
@@ -28,11 +29,14 @@ export class EditPredictorComponent {
     private router: Router, private facilityDbService: FacilitydbService,
     private formBuilder: FormBuilder,
     private convertUnitsService: ConvertUnitsService,
-    private noaaService: NoaaService) {
+    private noaaService: NoaaService,
+    private degreeDaysService: DegreeDaysService) {
   }
 
   ngOnInit() {
     // this.noaaService.get();
+    let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    this.degreeDaysService.getHeatingDegreeDays(facility.zip, 0, 2022);
 
     this.activatedRoute.params.subscribe(params => {
       let predictorId: string = params['id'];
