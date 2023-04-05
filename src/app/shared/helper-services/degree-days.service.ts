@@ -1,28 +1,62 @@
 import { Injectable } from '@angular/core';
 import { EGridService } from './e-grid.service';
 import * as _ from 'lodash';
+import { ConvertUnitsService } from '../convert-units/convert-units.service';
 @Injectable({
   providedIn: 'root'
 })
 export class DegreeDaysService {
 
-  constructor(private eGridService: EGridService) { }
+  constructor(private eGridService: EGridService, private convertUnitsService: ConvertUnitsService) { }
 
   async getHeatingDegreeDays(zipCode: string, month: number, year: number): Promise<number> {
     console.log('get');
-    let stationsWithinFortyMiles: Array<{ weatherStation: WeatherStation, distance: number }> = await this.getClosestStation(zipCode, year);
+    let stationsWithinFortyMiles: Array<{ weatherStation: WeatherStation, distance: number }> = await this.getClosestStation(zipCode, year, month);
     stationsWithinFortyMiles = _.orderBy(stationsWithinFortyMiles, (station: { weatherStation: WeatherStation, distance: number }) => { return station.distance }, 'asc');
-    console.log(stationsWithinFortyMiles);
+    // console.log(stationsWithinFortyMiles);
     let stationDataResponse: { station: WeatherStation, response: Response } = await this.getClosestStationData(stationsWithinFortyMiles, year);
-    console.log(stationDataResponse.station.name);
+    // console.log(stationDataResponse.station.name);
     let localClimatologicalDataYear: Array<LocalClimatologicalData> = await this.getStationYearLCD(stationDataResponse.station, stationDataResponse.response);
-    console.log('Hours per year: ' + localClimatologicalDataYear.length)
+    // console.log('Hours per year: ' + localClimatologicalDataYear.length)
     let localClimatologicalDataMonth: Array<LocalClimatologicalData> = localClimatologicalDataYear.filter(lcd => {
       return lcd.DATE.getMonth() == month;
     });
-    console.log(localClimatologicalDataMonth);
+    // console.log(localClimatologicalDataMonth);
+    let startDate: Date = new Date(year, month, 1);
+    let endDate: Date = new Date(year, month + 1, 1);
+    while (startDate < endDate) {
+      debugger
+      let degreeDays: number = this.calculateHeatingDegreeDaysForDate(startDate, localClimatologicalDataMonth, 65);
+      console.log(startDate + ': ' + degreeDays);
+      startDate.setDate(startDate.getDate() + 1);
+    }
     console.log('DONE');
     return
+  }
+
+
+  calculateHeatingDegreeDaysForDate(day: Date, localClimatologicalDataMonth: Array<LocalClimatologicalData>, baseTemperature: number): number {
+    let localClimatologicalDataDay: Array<LocalClimatologicalData> = localClimatologicalDataMonth.filter(lcd => {
+      return lcd.DATE.getDate() == day.getDate();
+    });
+
+    let minutesPerDay: number = 1440;
+    let degreeDays: number = 0;
+    for (let i = 0; i < localClimatologicalDataDay.length; i++) {
+      if (localClimatologicalDataDay[i].HourlyWetBulbTemperature < baseTemperature) {
+        let previousDate: Date;
+        if (i == 0) {
+          previousDate = new Date(day.getFullYear(), day.getMonth(), day.getDate(), 0, 0);
+        } else {
+          previousDate = new Date(localClimatologicalDataDay[i - 1].DATE)
+        }
+        let minutesBetween: number = this.getMinutesBetweenDates(previousDate, localClimatologicalDataDay[i].DATE);
+        let portionOfDay: number = (minutesBetween / minutesPerDay);
+        let degreeDifference: number = baseTemperature - localClimatologicalDataDay[i].HourlyWetBulbTemperature;
+        degreeDays += (degreeDifference * portionOfDay);
+      }
+    }
+    return degreeDays;
   }
 
   getCoolingDegreeDays(): number {
@@ -31,7 +65,7 @@ export class DegreeDaysService {
   }
 
   //find weather station closest to zip code
-  async getClosestStation(zipCode: string, year: number): Promise<Array<{ weatherStation: WeatherStation, distance: number }>> {
+  async getClosestStation(zipCode: string, year: number, month: number): Promise<Array<{ weatherStation: WeatherStation, distance: number }>> {
     let stationLatLong: { ZIP: string, LAT: string, LNG: string } = this.eGridService.zipLatLong.find(zipLL => { return zipLL.ZIP == zipCode });
     let fetchStations = await fetch("https://www1.ncdc.noaa.gov/pub/data/noaa/isd-history.csv");
     let stationsResults = await fetchStations.text();
@@ -50,30 +84,49 @@ export class DegreeDaysService {
     // 9: "BEGIN"
     // 10: "END"
     let closestStations: Array<{ weatherStation: WeatherStation, distance: number }> = new Array();
+    let neededDate: Date = new Date(year, month, 1);
     for (let i = 1; i < lines.length; i++) {
       let currentLine: Array<string> = lines[i].split(",");
       let lat: string = currentLine[6];
       let lon: string = currentLine[7];
       let distance = this.haversine(Number(stationLatLong.LAT), Number(stationLatLong.LNG), Number(lat), Number(lon));
-      let USAF: string = currentLine[0];
-      let WBAN: string = currentLine[1];
-      let ID: string = USAF + WBAN;
-      let station: WeatherStation = {
-        name: currentLine[2],
-        country: currentLine[3],
-        state: currentLine[4],
-        lat: lat,
-        lon: lon,
-        begin: currentLine[9],
-        end: currentLine[10],
-        USAF: USAF,
-        WBAN: WBAN,
-        ID: ID
+      //add stations within 40 miles
+      if (distance <= 40) {
+        //API start/end date format YYYYMMDD
+        let begin: string = currentLine[9];
+        let beginYear: number = parseFloat(begin.slice(0, 4));
+        let beginMonth: number = parseFloat(begin.slice(4, 6));
+        let beginDay: number = parseFloat(begin.slice(6, 8));
+        //Month 0 indexed
+        let startDate: Date = new Date(beginYear, beginMonth - 1, beginDay);
+        // let endDate: Date;
+        let end: string = currentLine[10];
+        let endYear: number = parseFloat(end.slice(0, 4));
+        let endMonth: number = parseFloat(end.slice(4, 6));
+        let endDay: number = parseFloat(end.slice(6, 8));
+        //Month 0 indexed
+        let endDate: Date = new Date(endYear, endMonth - 1, endDay);
+        if (startDate <= neededDate && endDate >= neededDate) {
+          let USAF: string = currentLine[0];
+          let WBAN: string = currentLine[1];
+          let ID: string = USAF + WBAN;
+          let station: WeatherStation = {
+            name: currentLine[2],
+            country: currentLine[3],
+            state: currentLine[4],
+            lat: lat,
+            lon: lon,
+            begin: currentLine[9],
+            end: currentLine[10],
+            USAF: USAF,
+            WBAN: WBAN,
+            ID: ID
+          }
+          closestStations.push({ weatherStation: station, distance: distance });
+        }
       }
-      closestStations.push({ weatherStation: station, distance: distance });
     }
-    //filter stations within 40 miles
-    return closestStations.filter(station => { return station.distance <= 40 });
+    return closestStations;
   }
 
   async getClosestStationData(stationsWithinFortyMiles: Array<{ weatherStation: WeatherStation, distance: number }>, year: number): Promise<{ station: WeatherStation, response: Response }> {
@@ -268,6 +321,12 @@ export class DegreeDaysService {
       Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
+  }
+
+  getMinutesBetweenDates(firstDate: Date, secondDate: Date) {
+    let diffMilliseconds = Math.abs(firstDate.getTime() - secondDate.getTime());
+    let diffMinutes = this.convertUnitsService.value(diffMilliseconds).from('ms').to('min');
+    return diffMinutes;
   }
 }
 
