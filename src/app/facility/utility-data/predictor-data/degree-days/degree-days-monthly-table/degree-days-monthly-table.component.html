@@ -10,7 +10,7 @@
         <tbody class="table-group-divider">
             <tr *ngFor="let degreeDay of yearSummaryData">
                 <td>
-                    {{degreeDay.date | date}}
+                    {{degreeDay.date | date:'MMM. y'}}
                 </td>
                 <td>
                     {{degreeDay.amount | number}}

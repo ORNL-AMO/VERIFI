@@ -124,6 +124,59 @@ export class DegreeDaysService {
     };
   }
 
+  async calculateHeatingDegreeHoursForDate(day: Date, baseTemperature: number, station: WeatherStation): Promise<Array<{ time: Date, degreeDays: number, dryBulbTemp: number, percentOfDay: number, degreeDifference: number }>> {
+    console.log('calculateHeatingDegreeHoursForDate');
+    if (!this.stationDataResponse || this.stationDataResponse.station.ID != station.ID || this.stationDataResponse.year != day.getFullYear()) {
+      let response: Response = await this.getStationDataResponse(station, day.getFullYear());
+      let dataResults: string = await response.text();
+      this.stationDataResponse = {
+        response: response,
+        station: station,
+        year: day.getFullYear(),
+        dataResults: dataResults
+      }
+      this.yearHourlyData = this.getStationYearLCDFromResults(station, dataResults);
+    }
+    let localClimatologicalDataDay: Array<LocalClimatologicalData> = this.yearHourlyData.filter(lcd => {
+      return lcd.DATE.getDate() == day.getDate() && lcd.DATE.getMonth() == day.getMonth();
+    });
+
+    let results: Array<{ time: Date, degreeDays: number, dryBulbTemp: number, percentOfDay: number, degreeDifference: number }> = new Array();
+    let minutesPerDay: number = 1440;
+    for (let i = 0; i < localClimatologicalDataDay.length; i++) {
+      if (localClimatologicalDataDay[i].HourlyDryBulbTemperature < baseTemperature) {
+        let previousDate: Date;
+        if (i == 0) {
+          previousDate = new Date(day.getFullYear(), day.getMonth(), day.getDate(), 0, 0);
+        } else {
+          previousDate = new Date(localClimatologicalDataDay[i - 1].DATE)
+        }
+        let minutesBetween: number = this.getMinutesBetweenDates(previousDate, localClimatologicalDataDay[i].DATE);
+        let portionOfDay: number = (minutesBetween / minutesPerDay);
+        let degreeDifference: number = baseTemperature - localClimatologicalDataDay[i].HourlyDryBulbTemperature;
+        results.push({
+          time: localClimatologicalDataDay[i].DATE,
+          degreeDifference: degreeDifference,
+          degreeDays: (degreeDifference * portionOfDay),
+          percentOfDay: portionOfDay,
+          dryBulbTemp: localClimatologicalDataDay[i].HourlyDryBulbTemperature
+        })
+      } else {
+        results.push({
+          time: localClimatologicalDataDay[i].DATE,
+          degreeDifference: 0,
+          degreeDays: 0,
+          percentOfDay: 0,
+          dryBulbTemp: localClimatologicalDataDay[i].HourlyDryBulbTemperature
+        })
+
+      }
+    }
+    return results;
+  }
+
+
+
   getCoolingDegreeDays(): number {
 
     return

@@ -33,8 +33,6 @@ export class DegreeDaysMonthlyGraphComponent {
         }
       ];
 
-
-
       var layout = {
         title: {
           text: 'Monthly Degree Days <br>(' + this.selectedYear + ')',

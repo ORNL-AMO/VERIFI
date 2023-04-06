@@ -92,3 +92,15 @@
         </div>
     </div>
 </ng-container>
+
+<ng-container *ngIf="viewDataAs == 'hourly' && hourlySummaryData">
+    <div class="row">
+        <div class="col-6">
+            <app-degree-days-hourly-graph [hourlySummaryData]="hourlySummaryData"
+                [selectedDay]="selectedDay"></app-degree-days-hourly-graph>
+        </div>
+        <div class="col-6">
+            <app-degree-days-hourly-table [hourlySummaryData]="hourlySummaryData"></app-degree-days-hourly-table>
+        </div>
+    </div>
+</ng-container>

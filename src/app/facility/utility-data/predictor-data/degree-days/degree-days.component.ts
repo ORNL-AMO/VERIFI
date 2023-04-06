@@ -25,7 +25,7 @@ export class DegreeDaysComponent {
   selectedMonth: Date;
   selectedDay: Date;
   years: Array<number>;
-
+  hourlySummaryData: Array<{ time: Date, degreeDays: number, dryBulbTemp: number, percentOfDay: number, degreeDifference: number }>;
   constructor(private facilityDbService: FacilitydbService, private degreeDaysService: DegreeDaysService) {
 
   }
@@ -55,18 +55,21 @@ export class DegreeDaysComponent {
     }
 
     if (this.years.includes(this.selectedYear) == false) {
-      this.selectedYear = this.years[this.years.length - 1];
+      this.selectedYear = this.years[this.years.length - 2];
     }
 
     if (!this.selectedMonth || this.selectedMonth < this.selectedStation.begin || this.selectedMonth > this.selectedStation.end) {
       this.selectedMonth = new Date(this.selectedStation.end);
-      this.selectedMonth.setMonth(this.selectedMonth.getMonth()-1)
+      this.selectedMonth.setMonth(this.selectedMonth.getMonth() - 1)
+      this.selectedMonth.setFullYear(this.selectedYear)
     }
 
     if (!this.selectedDay || this.selectedDay < this.selectedStation.begin || this.selectedDay > this.selectedStation.end) {
       this.selectedDay = new Date(this.selectedStation.end);
-      this.selectedDay.setMonth(this.selectedDay.getMonth()-1)
+      this.selectedDay.setMonth(this.selectedDay.getMonth() - 1)
+      this.selectedDay.setFullYear(this.selectedYear)
     }
+    this.clearDegreeDays();
   }
 
   setSelectedMonth(eventData: string) {
@@ -89,6 +92,7 @@ export class DegreeDaysComponent {
   clearDegreeDays() {
     this.degreeDays = undefined;
     this.yearSummaryData = undefined;
+    this.hourlySummaryData = undefined;
   }
 
   async setDegreeDays() {
@@ -99,6 +103,8 @@ export class DegreeDaysComponent {
       this.setYearSummaryData();
     } else if (this.viewDataAs == 'daily' && isNaN(this.baseTemperature) == false) {
       this.degreeDays = await this.degreeDaysService.getDailyDataFromMonth(this.selectedMonth.getMonth(), this.selectedMonth.getFullYear(), this.baseTemperature, this.selectedStation);
+    } else if (this.viewDataAs == 'hourly' && isNaN(this.baseTemperature) == false) {
+      this.hourlySummaryData = await this.degreeDaysService.calculateHeatingDegreeHoursForDate(this.selectedDay, this.baseTemperature, this.selectedStation);
     }
   }
 
