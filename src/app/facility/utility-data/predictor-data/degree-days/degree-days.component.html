@@ -26,7 +26,7 @@
         </div>
         <div class="col-lg-4 col-md-12 col-sm-12">
             <label class="semibold" for="viewDataAs">View As</label>
-            <select class="form-select" [(ngModel)]="viewDataAs" name="viewDataAs" (change)="setSelectedStation()">
+            <select class="form-select" [(ngModel)]="viewDataAs" name="viewDataAs" (change)="clearDegreeDays()">
                 <option [ngValue]="'monthly'">Monthly</option>
                 <option [ngValue]="'daily'">Daily</option>
                 <option [ngValue]="'hourly'">Hourly</option>
@@ -35,7 +35,7 @@
 
         <div class="col-lg-4 col-md-12 col-sm-12" *ngIf="viewDataAs == 'monthly'">
             <label class="semibold" for="startDate">Select Year</label>
-            <select class="form-select" [(ngModel)]="selectedYear" name="selectedYear" (change)="setSelectedStation()">
+            <select class="form-select" [(ngModel)]="selectedYear" name="selectedYear" (change)="clearDegreeDays()">
                 <option *ngFor="let year of years" [ngValue]="year">{{year}}</option>
             </select>
         </div>
@@ -43,13 +43,13 @@
         <div class="col-lg-4 col-md-12 col-sm-12" *ngIf="viewDataAs == 'daily'">
             <label class="semibold" for="startDate">Select Month</label>
             <input id="selectedMonth" class="form-control" type="month" [ngModel]="selectedMonth | date:'yyyy-MM'"
-                (ngModelChange)="setSelectedMonth($event)" name="selectedMonth">
+                (ngModelChange)="setSelectedMonth($event)" name="selectedMonth" (input)="clearDegreeDays()">
         </div>
 
         <div class="col-lg-4 col-md-12 col-sm-12" *ngIf="viewDataAs == 'hourly'">
             <label class="semibold" for="selectedDay">Select Day</label>
             <input id="selectedDay" class="form-control" type="date" [ngModel]="selectedDay | date:'yyyy-MM-dd'"
-                name="selectedDay" (ngModelChange)="setSelectedDay($event)">
+                name="selectedDay" (ngModelChange)="setSelectedDay($event)" (input)="clearDegreeDays()">
         </div>
 
         <div class="col-lg-4 col-md-12 col-sm-12">
@@ -72,10 +72,23 @@
 <ng-container *ngIf="viewDataAs == 'monthly' && yearSummaryData">
     <div class="row">
         <div class="col-6">
-            <app-degree-days-monthly-graph [yearSummaryData]="yearSummaryData" [selectedYear]="selectedYear"></app-degree-days-monthly-graph>
+            <app-degree-days-monthly-graph [yearSummaryData]="yearSummaryData"
+                [selectedYear]="selectedYear"></app-degree-days-monthly-graph>
         </div>
         <div class="col-6">
             <app-degree-days-monthly-table [yearSummaryData]="yearSummaryData"></app-degree-days-monthly-table>
+        </div>
+    </div>
+</ng-container>
+
+<ng-container *ngIf="viewDataAs == 'daily' && degreeDays">
+    <div class="row">
+        <div class="col-6">
+            <app-degree-days-daily-graph [degreeDays]="degreeDays"
+                [selectedMonth]="selectedMonth"></app-degree-days-daily-graph>
+        </div>
+        <div class="col-6">
+            <app-degree-days-daily-table [degreeDays]="degreeDays"></app-degree-days-daily-table>
         </div>
     </div>
 </ng-container>

@@ -38,8 +38,8 @@ export class DegreeDaysService {
   }
 
 
-  async getHeatingDegreeDaysGivenStation(month: number, year: number, baseTemperature: number, station: WeatherStation): Promise<Array<DegreeDay>> {
-    console.log('get 2');
+  async getDailyDataFromMonth(month: number, year: number, baseTemperature: number, station: WeatherStation): Promise<Array<DegreeDay>> {
+    console.log('getMonthlyDataFromYear');
     if (!this.stationDataResponse || this.stationDataResponse.station.ID != station.ID || this.stationDataResponse.year != year) {
       let response: Response = await this.getStationDataResponse(station, year);
       let dataResults: string = await response.text();

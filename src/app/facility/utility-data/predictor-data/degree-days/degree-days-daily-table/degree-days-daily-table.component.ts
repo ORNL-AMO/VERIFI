@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
+import { DegreeDay } from 'src/app/models/degreeDays';
 
 @Component({
   selector: 'app-degree-days-daily-table',
@@ -6,5 +7,7 @@ import { Component } from '@angular/core';
   styleUrls: ['./degree-days-daily-table.component.css']
 })
 export class DegreeDaysDailyTableComponent {
+  @Input()
+  degreeDays: Array<DegreeDay>;
 
 }

@@ -60,11 +60,12 @@ export class DegreeDaysComponent {
 
     if (!this.selectedMonth || this.selectedMonth < this.selectedStation.begin || this.selectedMonth > this.selectedStation.end) {
       this.selectedMonth = new Date(this.selectedStation.end);
+      this.selectedMonth.setMonth(this.selectedMonth.getMonth()-1)
     }
 
     if (!this.selectedDay || this.selectedDay < this.selectedStation.begin || this.selectedDay > this.selectedStation.end) {
       this.selectedDay = new Date(this.selectedStation.end);
-      console.log(this.selectedDay);
+      this.selectedDay.setMonth(this.selectedDay.getMonth()-1)
     }
   }
 
@@ -86,16 +87,18 @@ export class DegreeDaysComponent {
 
 
   clearDegreeDays() {
-    this.degreeDays = [];
+    this.degreeDays = undefined;
     this.yearSummaryData = undefined;
   }
 
   async setDegreeDays() {
-    this.degreeDays = new Array();
+    // this.degreeDays = new Array();
 
     if (this.viewDataAs == 'monthly' && isNaN(this.baseTemperature) == false) {
       this.degreeDays = await this.degreeDaysService.getMonthlyDataFromYear(this.selectedYear, this.baseTemperature, this.selectedStation);
       this.setYearSummaryData();
+    } else if (this.viewDataAs == 'daily' && isNaN(this.baseTemperature) == false) {
+      this.degreeDays = await this.degreeDaysService.getDailyDataFromMonth(this.selectedMonth.getMonth(), this.selectedMonth.getFullYear(), this.baseTemperature, this.selectedStation);
     }
   }
 

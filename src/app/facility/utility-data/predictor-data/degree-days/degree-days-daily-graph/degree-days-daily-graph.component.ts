@@ -1,4 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, Input, ViewChild, ElementRef } from '@angular/core';
+import { PlotlyService } from 'angular-plotly.js';
+import { DegreeDay } from 'src/app/models/degreeDays';
+import { Months } from 'src/app/shared/form-data/months';
 
 @Component({
   selector: 'app-degree-days-daily-graph',
@@ -6,5 +9,54 @@ import { Component } from '@angular/core';
   styleUrls: ['./degree-days-daily-graph.component.css']
 })
 export class DegreeDaysDailyGraphComponent {
+  @Input()
+  degreeDays: Array<DegreeDay>;
+  @Input()
+  selectedMonth: Date;
+
+
+  @ViewChild('degreeDaysChart', { static: false }) degreeDaysChart: ElementRef;
+  constructor(private plotlyService: PlotlyService) {
+
+  }
+
+  ngAfterViewInit() {
+    this.drawChart();
+  }
+
+  drawChart() {
+    if (this.degreeDaysChart) {
+      let traceData = [
+        {
+          x: this.degreeDays.map(data => { return data.date }),
+          y: this.degreeDays.map(data => { return data.numberOfDays }),
+          type: 'bar'
+        }
+      ];
+
+      var layout = {
+        title: {
+          text: 'Daily Degree Days <br>(' + Months[this.selectedMonth.getMonth()].name + ', ' + this.selectedMonth.getFullYear() + ')',
+          font: {
+            size: 18
+          },
+        },
+        xaxis: {
+          automargin: true,
+        },
+        yaxis: {
+          automargin: true,
+        },
+        // margin: { "t": 0, "b": 0, "l": 0, "r": 0 },
+      };
+
+      let config = {
+        modeBarButtonsToRemove: ['autoScale2d', 'lasso2d', 'pan2d', 'select2d', 'toggleSpikelines', 'hoverClosestCartesian', 'hoverCompareCartesian'],
+        displaylogo: false,
+        responsive: true,
+      };
+      this.plotlyService.newPlot(this.degreeDaysChart.nativeElement, traceData, layout, config);
+    }
+  }
 
 }
