@@ -1,0 +1,81 @@
+<h4>
+    Weather Data <span class="small">(Zip: {{facility.zip}})</span>
+</h4>
+<p>
+    This page provides a detailed look of the weather data available for use by VERIFI. The weather data is pulled from
+    <a href="https://www.ncei.noaa.gov/" target="_blank">The National Centers for Environmental Information</a>. The zip
+    code you
+    entered in the settings tab will be used to locate the closest weather stations with available data. If quality data
+    is found VERIFI can autmatically calculate heating and cooling degree days. The calculated degree days can be used
+    as predictor data for analysis.
+</p>
+
+<h5>Weather Stations <span>(within 40 miles)</span></h5>
+<app-weather-station-table [stations]="stations"></app-weather-station-table>
+<hr>
+<h5>Degree Days</h5>
+<form>
+    <div class="row">
+        <div class="col-lg-4 col-md-12 col-sm-12">
+            <label class="semibold" for="selectedStation">Select Station</label>
+            <select class="form-select" [(ngModel)]="selectedStation" name="selectedStation"
+                (change)="setSelectedStation()">
+                <option *ngFor="let station of stations" [ngValue]="station">{{station.name}} ({{station.lat}},
+                    {{station.lon}})</option>
+            </select>
+        </div>
+        <div class="col-lg-4 col-md-12 col-sm-12">
+            <label class="semibold" for="viewDataAs">View As</label>
+            <select class="form-select" [(ngModel)]="viewDataAs" name="viewDataAs" (change)="setSelectedStation()">
+                <option [ngValue]="'monthly'">Monthly</option>
+                <option [ngValue]="'daily'">Daily</option>
+                <option [ngValue]="'hourly'">Hourly</option>
+            </select>
+        </div>
+
+        <div class="col-lg-4 col-md-12 col-sm-12" *ngIf="viewDataAs == 'monthly'">
+            <label class="semibold" for="startDate">Select Year</label>
+            <select class="form-select" [(ngModel)]="selectedYear" name="selectedYear" (change)="setSelectedStation()">
+                <option *ngFor="let year of years" [ngValue]="year">{{year}}</option>
+            </select>
+        </div>
+
+        <div class="col-lg-4 col-md-12 col-sm-12" *ngIf="viewDataAs == 'daily'">
+            <label class="semibold" for="startDate">Select Month</label>
+            <input id="selectedMonth" class="form-control" type="month" [ngModel]="selectedMonth | date:'yyyy-MM'"
+                (ngModelChange)="setSelectedMonth($event)" name="selectedMonth">
+        </div>
+
+        <div class="col-lg-4 col-md-12 col-sm-12" *ngIf="viewDataAs == 'hourly'">
+            <label class="semibold" for="selectedDay">Select Day</label>
+            <input id="selectedDay" class="form-control" type="date" [ngModel]="selectedDay | date:'yyyy-MM-dd'"
+                name="selectedDay" (ngModelChange)="setSelectedDay($event)">
+        </div>
+
+        <div class="col-lg-4 col-md-12 col-sm-12">
+            <label class="semibold" for="baseTemperature">Base Temperature</label>
+            <div class="mb-3 input-group">
+                <input id="baseTemperature" class="form-control" type="number" [(ngModel)]="baseTemperature"
+                    onfocus="this.select();" name="baseTemperature" (input)="clearDegreeDays()">
+                <!--TODO: Temperature units-->
+                <span class="input-group-text">
+                    &#8451;
+                </span>
+            </div>
+        </div>
+        <div class="col-lg-4 col-md-12 col-sm-12 justify-content-center align-items-center">
+            <button class="btn action-btn" (click)="setDegreeDays()">View Degree Days</button>
+        </div>
+    </div>
+</form>
+<!-- <app-degree-days-graph [selectedStation]="selectedStation" [degreeDays]="degreeDays"></app-degree-days-graph> -->
+<ng-container *ngIf="viewDataAs == 'monthly' && yearSummaryData">
+    <div class="row">
+        <div class="col-6">
+            <app-degree-days-monthly-graph [yearSummaryData]="yearSummaryData" [selectedYear]="selectedYear"></app-degree-days-monthly-graph>
+        </div>
+        <div class="col-6">
+            <app-degree-days-monthly-table [yearSummaryData]="yearSummaryData"></app-degree-days-monthly-table>
+        </div>
+    </div>
+</ng-container>

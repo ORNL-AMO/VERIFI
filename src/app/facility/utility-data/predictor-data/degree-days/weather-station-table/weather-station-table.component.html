@@ -1,0 +1,30 @@
+<table class="table utility-data table-sm table-bordered table-hover">
+    <thead>
+        <tr>
+            <th>Station Name</th>
+            <th>State</th>
+            <th>Distance Away</th>
+            <th>Data Start</th>
+            <th>Data End</th>
+        </tr>
+    </thead>
+    <tbody class="table-group-divider">
+        <tr *ngFor="let station of stations">
+            <td>
+                {{station.name}} ({{station.lat}}, {{station.lon}})
+            </td>
+            <td>
+                {{station.state}}
+            </td>
+            <td>
+                {{station.distanceFrom | number}} miles
+            </td>
+            <td>
+                {{station.begin | date }}
+            </td>
+            <td>
+                {{station.end | date }}
+            </td>
+        </tr>
+    </tbody>
+</table>

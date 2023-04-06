@@ -2,17 +2,20 @@ import { Injectable } from '@angular/core';
 import { EGridService } from './e-grid.service';
 import * as _ from 'lodash';
 import { ConvertUnitsService } from '../convert-units/convert-units.service';
+import { DegreeDay, LocalClimatologicalData, WeatherStation } from 'src/app/models/degreeDays';
 @Injectable({
   providedIn: 'root'
 })
 export class DegreeDaysService {
 
+  stationDataResponse: { station: WeatherStation, response: Response, year: number, dataResults: string };
+  yearHourlyData: Array<LocalClimatologicalData>;
   constructor(private eGridService: EGridService, private convertUnitsService: ConvertUnitsService) { }
 
-  async getHeatingDegreeDays(zipCode: string, month: number, year: number): Promise<number> {
+  async getHeatingDegreeDays(zipCode: string, month: number, year: number, baseTemperature: number): Promise<Array<DegreeDay>> {
     console.log('get');
-    let stationsWithinFortyMiles: Array<{ weatherStation: WeatherStation, distance: number }> = await this.getClosestStation(zipCode, year, month);
-    stationsWithinFortyMiles = _.orderBy(stationsWithinFortyMiles, (station: { weatherStation: WeatherStation, distance: number }) => { return station.distance }, 'asc');
+    let stationsWithinFortyMiles: Array<WeatherStation> = await this.getClosestStation(zipCode, 40, { year: year, month: month });
+    // stationsWithinFortyMiles = ;
     // console.log(stationsWithinFortyMiles);
     let stationDataResponse: { station: WeatherStation, response: Response } = await this.getClosestStationData(stationsWithinFortyMiles, year);
     // console.log(stationDataResponse.station.name);
@@ -24,18 +27,75 @@ export class DegreeDaysService {
     // console.log(localClimatologicalDataMonth);
     let startDate: Date = new Date(year, month, 1);
     let endDate: Date = new Date(year, month + 1, 1);
+    let degreeDays: Array<DegreeDay> = new Array();
     while (startDate < endDate) {
-      debugger
-      let degreeDays: number = this.calculateHeatingDegreeDaysForDate(startDate, localClimatologicalDataMonth, 65);
-      console.log(startDate + ': ' + degreeDays);
+      let degreeDay: DegreeDay = this.calculateHeatingDegreeDaysForDate(startDate, localClimatologicalDataMonth, baseTemperature);
+      degreeDays.push(degreeDay);
       startDate.setDate(startDate.getDate() + 1);
     }
     console.log('DONE');
-    return
+    return degreeDays;
   }
 
 
-  calculateHeatingDegreeDaysForDate(day: Date, localClimatologicalDataMonth: Array<LocalClimatologicalData>, baseTemperature: number): number {
+  async getHeatingDegreeDaysGivenStation(month: number, year: number, baseTemperature: number, station: WeatherStation): Promise<Array<DegreeDay>> {
+    console.log('get 2');
+    if (!this.stationDataResponse || this.stationDataResponse.station.ID != station.ID || this.stationDataResponse.year != year) {
+      let response: Response = await this.getStationDataResponse(station, year);
+      let dataResults: string = await response.text();
+      this.stationDataResponse = {
+        response: response,
+        station: station,
+        year: year,
+        dataResults: dataResults
+      }
+      this.yearHourlyData = this.getStationYearLCDFromResults(station, dataResults);
+    }
+    let localClimatologicalDataMonth: Array<LocalClimatologicalData> = this.yearHourlyData.filter(lcd => {
+      return lcd.DATE.getMonth() == month;
+    });
+    let startDate: Date = new Date(year, month, 1);
+    let endDate: Date = new Date(year, month + 1, 1);
+    let degreeDays: Array<DegreeDay> = new Array();
+    while (startDate < endDate) {
+      let degreeDay: DegreeDay = this.calculateHeatingDegreeDaysForDate(startDate, localClimatologicalDataMonth, baseTemperature);
+      degreeDays.push(degreeDay);
+      startDate.setDate(startDate.getDate() + 1);
+    }
+    console.log('DONE');
+    return degreeDays;
+  }
+
+  async getMonthlyDataFromYear(year: number, baseTemperature: number, station: WeatherStation): Promise<Array<DegreeDay>> {
+    console.log('getMonthlyDataFromYear');
+    if (!this.stationDataResponse || this.stationDataResponse.station.ID != station.ID || this.stationDataResponse.year != year) {
+      let response: Response = await this.getStationDataResponse(station, year);
+      let dataResults: string = await response.text();
+      this.stationDataResponse = {
+        response: response,
+        station: station,
+        year: year,
+        dataResults: dataResults
+      }
+      this.yearHourlyData = this.getStationYearLCDFromResults(station, dataResults);
+    }
+
+    let startDate: Date = new Date(year, 0, 1);
+    let endDate: Date = new Date(year + 1, 0, 1);
+    let degreeDays: Array<DegreeDay> = new Array();
+    while (startDate < endDate) {
+      let localClimatologicalDataMonth: Array<LocalClimatologicalData> = this.yearHourlyData.filter(lcd => {
+        return lcd.DATE.getMonth() == startDate.getMonth();
+      });
+      let degreeDay: DegreeDay = this.calculateHeatingDegreeDaysForDate(startDate, localClimatologicalDataMonth, baseTemperature);
+      degreeDays.push(degreeDay);
+      startDate.setDate(startDate.getDate() + 1);
+    }
+    console.log('DONE');
+    return degreeDays;
+  }
+
+  calculateHeatingDegreeDaysForDate(day: Date, localClimatologicalDataMonth: Array<LocalClimatologicalData>, baseTemperature: number): DegreeDay {
     let localClimatologicalDataDay: Array<LocalClimatologicalData> = localClimatologicalDataMonth.filter(lcd => {
       return lcd.DATE.getDate() == day.getDate();
     });
@@ -43,7 +103,7 @@ export class DegreeDaysService {
     let minutesPerDay: number = 1440;
     let degreeDays: number = 0;
     for (let i = 0; i < localClimatologicalDataDay.length; i++) {
-      if (localClimatologicalDataDay[i].HourlyWetBulbTemperature < baseTemperature) {
+      if (localClimatologicalDataDay[i].HourlyDryBulbTemperature < baseTemperature) {
         let previousDate: Date;
         if (i == 0) {
           previousDate = new Date(day.getFullYear(), day.getMonth(), day.getDate(), 0, 0);
@@ -52,11 +112,16 @@ export class DegreeDaysService {
         }
         let minutesBetween: number = this.getMinutesBetweenDates(previousDate, localClimatologicalDataDay[i].DATE);
         let portionOfDay: number = (minutesBetween / minutesPerDay);
-        let degreeDifference: number = baseTemperature - localClimatologicalDataDay[i].HourlyWetBulbTemperature;
+        let degreeDifference: number = baseTemperature - localClimatologicalDataDay[i].HourlyDryBulbTemperature;
         degreeDays += (degreeDifference * portionOfDay);
       }
     }
-    return degreeDays;
+    return {
+      numberOfDays: degreeDays,
+      date: new Date(day),
+      stationId: localClimatologicalDataDay[0].STATION,
+      stationName: localClimatologicalDataDay[0].NAME
+    };
   }
 
   getCoolingDegreeDays(): number {
@@ -65,7 +130,7 @@ export class DegreeDaysService {
   }
 
   //find weather station closest to zip code
-  async getClosestStation(zipCode: string, year: number, month: number): Promise<Array<{ weatherStation: WeatherStation, distance: number }>> {
+  async getClosestStation(zipCode: string, furthestDistance: number, neededMonth?: { year: number, month: number }): Promise<Array<WeatherStation>> {
     let stationLatLong: { ZIP: string, LAT: string, LNG: string } = this.eGridService.zipLatLong.find(zipLL => { return zipLL.ZIP == zipCode });
     let fetchStations = await fetch("https://www1.ncdc.noaa.gov/pub/data/noaa/isd-history.csv");
     let stationsResults = await fetchStations.text();
@@ -83,15 +148,18 @@ export class DegreeDaysService {
     // 8: "ELEV(M)"
     // 9: "BEGIN"
     // 10: "END"
-    let closestStations: Array<{ weatherStation: WeatherStation, distance: number }> = new Array();
-    let neededDate: Date = new Date(year, month, 1);
+    let closestStations: Array<WeatherStation> = new Array();
+    let neededDate: Date;
+    if (neededMonth) {
+      neededDate = new Date(neededMonth.year, neededMonth.month, 1)
+    }
     for (let i = 1; i < lines.length; i++) {
       let currentLine: Array<string> = lines[i].split(",");
       let lat: string = currentLine[6];
       let lon: string = currentLine[7];
       let distance = this.haversine(Number(stationLatLong.LAT), Number(stationLatLong.LNG), Number(lat), Number(lon));
-      //add stations within 40 miles
-      if (distance <= 40) {
+      //add stations within furthestDistance miles
+      if (distance <= furthestDistance) {
         //API start/end date format YYYYMMDD
         let begin: string = currentLine[9];
         let beginYear: number = parseFloat(begin.slice(0, 4));
@@ -106,7 +174,15 @@ export class DegreeDaysService {
         let endDay: number = parseFloat(end.slice(6, 8));
         //Month 0 indexed
         let endDate: Date = new Date(endYear, endMonth - 1, endDay);
-        if (startDate <= neededDate && endDate >= neededDate) {
+        let includeStation: boolean = true;
+        if (neededDate) {
+          if (startDate >= neededDate || endDate <= neededDate) {
+            includeStation = false;
+          }
+        } else if (endDate < new Date(2013, 0, 1)) {
+          includeStation = false;
+        }
+        if (includeStation) {
           let USAF: string = currentLine[0];
           let WBAN: string = currentLine[1];
           let ID: string = USAF + WBAN;
@@ -116,28 +192,34 @@ export class DegreeDaysService {
             state: currentLine[4],
             lat: lat,
             lon: lon,
-            begin: currentLine[9],
-            end: currentLine[10],
+            begin: startDate,
+            end: endDate,
             USAF: USAF,
             WBAN: WBAN,
-            ID: ID
+            ID: ID,
+            distanceFrom: distance
           }
-          closestStations.push({ weatherStation: station, distance: distance });
+          closestStations.push(station);
         }
+
       }
     }
-    return closestStations;
+    return _.orderBy(closestStations, (station: WeatherStation) => { return station.distanceFrom }, 'asc');
   }
 
-  async getClosestStationData(stationsWithinFortyMiles: Array<{ weatherStation: WeatherStation, distance: number }>, year: number): Promise<{ station: WeatherStation, response: Response }> {
+  async getClosestStationData(stationsWithinFortyMiles: Array<WeatherStation>, year: number): Promise<{ station: WeatherStation, response: Response }> {
     let response: Response;
     for (let i = 0; i < stationsWithinFortyMiles.length; i++) {
-      response = await fetch("https://www.ncei.noaa.gov/data/local-climatological-data/access/" + year + "/" + stationsWithinFortyMiles[i].weatherStation.ID + ".csv");
+      response = await this.getStationDataResponse(stationsWithinFortyMiles[i], year);
       if (response.ok) {
-        return { station: stationsWithinFortyMiles[i].weatherStation, response: response };
+        return { station: stationsWithinFortyMiles[i], response: response };
       }
     }
     return null;
+  }
+
+  async getStationDataResponse(weatherStation: WeatherStation, year: number): Promise<Response> {
+    return await fetch("https://www.ncei.noaa.gov/data/local-climatological-data/access/" + year + "/" + weatherStation.ID + ".csv");
   }
 
 
@@ -306,6 +388,45 @@ export class DegreeDaysService {
     return localData;
   }
 
+  getStationYearLCDFromResults(weatherStation: WeatherStation, dataResults: string): Array<LocalClimatologicalData> {
+    dataResults = dataResults.replace(/['"]+/g, "");
+    let dataLines = dataResults.split("\n");
+    let localData: Array<LocalClimatologicalData> = new Array();
+
+    for (let i = 1; i < dataLines.length; i++) {
+      let currentLine = dataLines[i].split(",");
+      let hourData: LocalClimatologicalData = {
+        STATION: weatherStation.name,
+        DATE: new Date(currentLine[1]),
+        LATITUDE: currentLine[2],
+        LONGITUDE: currentLine[3],
+        ELEVATION: currentLine[4],
+        NAME: currentLine[5],
+        REPORT_TYPE: currentLine[6],
+        SOURCE: currentLine[7],
+        HourlyAltimeterSetting: parseFloat(currentLine[8]),
+        HourlyDewPointTemperature: parseFloat(currentLine[9]),
+        HourlyDryBulbTemperature: parseFloat(currentLine[10]),
+        HourlyPrecipitation: parseFloat(currentLine[11]),
+        HourlyPresentWeatherType: currentLine[12],
+        HourlyPressureChange: parseFloat(currentLine[13]),
+        HourlyPressureTendency: parseFloat(currentLine[14]),
+        HourlyRelativeHumidity: parseFloat(currentLine[15]),
+        HourlySkyConditions: parseFloat(currentLine[16]),
+        HourlySeaLevelPressure: parseFloat(currentLine[17]),
+        HourlyStationPressure: parseFloat(currentLine[18]),
+        HourlyVisibility: parseFloat(currentLine[19]),
+        HourlyWetBulbTemperature: parseFloat(currentLine[20]),
+        HourlyWindDirection: parseFloat(currentLine[21]),
+        HourlyWindGustSpeed: parseFloat(currentLine[22]),
+        HourlyWindSpeed: parseFloat(currentLine[23])
+      }
+      localData.push(hourData);
+    }
+    return localData;
+  }
+
+
 
   /// Haversine formula to calculate approximate distances between coordinate pairs
   ///Taken from ONRL-Weather
@@ -328,45 +449,4 @@ export class DegreeDaysService {
     let diffMinutes = this.convertUnitsService.value(diffMilliseconds).from('ms').to('min');
     return diffMinutes;
   }
-}
-
-
-export interface WeatherStation {
-  name: string,
-  country: string,
-  state: string,
-  lat: string,
-  lon: string,
-  begin: string,
-  end: string,
-  USAF: string,
-  WBAN: string,
-  ID: string
-}
-
-export interface LocalClimatologicalData {
-  STATION: string,
-  DATE: Date,
-  LATITUDE: string,
-  LONGITUDE: string,
-  ELEVATION: string,
-  NAME: string,
-  REPORT_TYPE: string,
-  SOURCE: string,
-  HourlyAltimeterSetting: number,
-  HourlyDewPointTemperature: number,
-  HourlyDryBulbTemperature: number,
-  HourlyPrecipitation: number,
-  HourlyPresentWeatherType: string,
-  HourlyPressureChange: number,
-  HourlyPressureTendency: number,
-  HourlyRelativeHumidity: number,
-  HourlySkyConditions: number,
-  HourlySeaLevelPressure: number,
-  HourlyStationPressure: number,
-  HourlyVisibility: number,
-  HourlyWetBulbTemperature: number,
-  HourlyWindDirection: number,
-  HourlyWindGustSpeed: number,
-  HourlyWindSpeed: number
 }

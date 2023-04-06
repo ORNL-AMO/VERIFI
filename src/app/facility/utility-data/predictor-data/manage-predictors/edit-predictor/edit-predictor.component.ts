@@ -35,8 +35,8 @@ export class EditPredictorComponent {
 
   ngOnInit() {
     // this.noaaService.get();
-    let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    this.degreeDaysService.getHeatingDegreeDays(facility.zip, 0, 2022);
+    // let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    // this.degreeDaysService.getHeatingDegreeDays(facility.zip, 0, 2022);
 
     this.activatedRoute.params.subscribe(params => {
       let predictorId: string = params['id'];
