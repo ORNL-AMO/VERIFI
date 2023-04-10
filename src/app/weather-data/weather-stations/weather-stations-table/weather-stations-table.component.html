@@ -14,7 +14,7 @@
     <tbody class="table-group-divider">
         <tr *ngFor="let station of stations| slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage">
             <td>
-                {{station.name}} ({{station.lat}}, {{station.lon}})
+                <a class="click-link" (click)="selectStation(station)">{{station.name}} ({{station.lat}}, {{station.lon}})</a>
             </td>
             <td>
                 {{station.state}}

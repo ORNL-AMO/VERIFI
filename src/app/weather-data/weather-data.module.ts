@@ -8,6 +8,9 @@ import { WeatherStationsMapComponent } from './weather-stations/weather-stations
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { TableItemsDropdownModule } from 'src/app/shared/table-items-dropdown/table-items-dropdown.module';
 import { RouterModule } from '@angular/router';
+import { AnnualStationDataComponent } from './annual-station-data/annual-station-data.component';
+import { AnnualStationTableComponent } from './annual-station-data/annual-station-table/annual-station-table.component';
+import { AnnualStationGraphComponent } from './annual-station-data/annual-station-graph/annual-station-graph.component';
 
 
 
@@ -16,7 +19,10 @@ import { RouterModule } from '@angular/router';
     WeatherDataComponent,
     WeatherStationsComponent,
     WeatherStationsTableComponent,
-    WeatherStationsMapComponent
+    WeatherStationsMapComponent,
+    AnnualStationDataComponent,
+    AnnualStationTableComponent,
+    AnnualStationGraphComponent
   ],
   imports: [
     CommonModule,

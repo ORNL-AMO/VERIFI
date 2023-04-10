@@ -505,4 +505,64 @@ export class DegreeDaysService {
     let diffMinutes = this.convertUnitsService.value(diffMilliseconds).from('ms').to('min');
     return diffMinutes;
   }
+
+
+  async getStationById(stationID: string): Promise<WeatherStation> {
+    let fetchStations = await fetch("https://www1.ncdc.noaa.gov/pub/data/noaa/isd-history.csv");
+    let stationsResults = await fetchStations.text();
+    stationsResults = stationsResults.replace(/['"]+/g, "");
+    let lines = stationsResults.split("\n");
+    //HEADERS
+    // 0: "USAF"
+    // 1: "WBAN"
+    // 2: "STATION NAME"
+    // 3: "CTRY"
+    // 4: "STATE"
+    // 5: "ICAO"
+    // 6: "LAT"
+    // 7: "LON"
+    // 8: "ELEV(M)"
+    // 9: "BEGIN"
+    // 10: "END"
+    for (let i = 1; i < lines.length; i++) {
+      let currentLine: Array<string> = lines[i].split(",");
+      let USAF: string = currentLine[0];
+      let WBAN: string = currentLine[1];
+      let ID: string = USAF + WBAN;
+      if (ID == stationID) {
+        let lat: string = currentLine[6];
+        let lon: string = currentLine[7];
+
+        //API start/end date format YYYYMMDD
+        let begin: string = currentLine[9];
+        let beginYear: number = parseFloat(begin.slice(0, 4));
+        let beginMonth: number = parseFloat(begin.slice(4, 6));
+        let beginDay: number = parseFloat(begin.slice(6, 8));
+        //Month 0 indexed
+        let startDate: Date = new Date(beginYear, beginMonth - 1, beginDay);
+        // let endDate: Date;
+        let end: string = currentLine[10];
+        let endYear: number = parseFloat(end.slice(0, 4));
+        let endMonth: number = parseFloat(end.slice(4, 6));
+        let endDay: number = parseFloat(end.slice(6, 8));
+        //Month 0 indexed
+        let endDate: Date = new Date(endYear, endMonth - 1, endDay);
+
+        return {
+          name: currentLine[2],
+          country: currentLine[3],
+          state: currentLine[4],
+          lat: lat,
+          lon: lon,
+          begin: startDate,
+          end: endDate,
+          USAF: USAF,
+          WBAN: WBAN,
+          ID: ID,
+          distanceFrom: undefined
+        }
+      }
+    }
+    return;
+  }
 }

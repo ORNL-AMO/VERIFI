@@ -101,6 +101,7 @@ import { EditPredictorEntryComponent } from './facility/utility-data/predictor-d
 import { DegreeDaysComponent } from './facility/utility-data/predictor-data/degree-days/degree-days.component';
 import { WeatherDataComponent } from './weather-data/weather-data.component';
 import { WeatherStationsComponent } from './weather-data/weather-stations/weather-stations.component';
+import { AnnualStationDataComponent } from './weather-data/annual-station-data/annual-station-data.component';
 
 const routes: Routes = [
   {
@@ -462,6 +463,7 @@ const routes: Routes = [
     children: [
       { path: '', pathMatch: 'full', redirectTo: 'stations' },
       { path: 'stations', component: WeatherStationsComponent },
+      { path: 'annual-station/:id', component: AnnualStationDataComponent }
     ]
   },
   //wildcard/page not found needs to be last route
