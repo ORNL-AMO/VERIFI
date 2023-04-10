@@ -27,6 +27,7 @@ import { UploadDataModule } from './upload-data/upload-data.module';
 import { CreateReportModalComponent } from './core-components/create-report-modal/create-report-modal.component';
 import { StartupErrorComponent } from './core-components/startup-error/startup-error.component';
 import { HttpClientModule } from '@angular/common/http';
+import { WeatherDataModule } from './weather-data/weather-data.module';
 
 @NgModule({
   declarations: [
@@ -59,7 +60,8 @@ import { HttpClientModule } from '@angular/common/http';
     HelperPipesModule,
     NgbTypeaheadModule,
     UploadDataModule,
-    HttpClientModule
+    HttpClientModule,
+    WeatherDataModule
   ],
   providers: [],
   bootstrap: [AppComponent]

@@ -1,0 +1,26 @@
+<h5>
+    Weather Stations
+</h5>
+<p>
+    Explore weather stations. Set the zip code and the radius distance from that location to include weather stations.
+</p>
+<form>
+    <div class="row">
+        <div class="col-lg-4 col-md-12 col-sm-12">
+            <label class="semibold" for="zipCode">Zip Code</label>
+            <input type="text" class="form-control" name="zipCode" id="zipCode" [(ngModel)]="zipCode"
+                (input)="setStations()">
+        </div>
+        <div class="col-lg-4 col-md-12 col-sm-12">
+            <label class="semibold" for="furthestDistance">Furthest Distance</label>
+            <div class="input-group">
+                <input type="number" class="form-control" name="furthestDistance" id="furthestDistance"
+                    [(ngModel)]="furthestDistance" (input)="setStations()">
+                <span class="input-group-text">miles</span>
+            </div>
+        </div>
+    </div>
+</form>
+<hr>
+<app-weather-stations-table [stations]="stations"></app-weather-stations-table>
+<app-weather-stations-map [stations]="stations" [zipCode]="zipCode" [furthestDistance]="furthestDistance"></app-weather-stations-map>
