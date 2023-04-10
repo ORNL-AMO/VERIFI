@@ -1,4 +1,4 @@
-<ng-container *ngIf="yearSummaryData">
+<ng-container *ngIf="degreeDays">
     <table class="table utility-data table-sm table-bordered table-hover">
         <thead>
             <tr>
@@ -8,14 +8,12 @@
             </tr>
         </thead>
         <tbody class="table-group-divider">
-            <tr *ngFor="let degreeDay of yearSummaryData">
+            <tr *ngFor="let degreeDay of degreeDays">
                 <td>
-                    <a class="click-link" (click)="gotToMonthSummary(degreeDay.date)">
-                        {{degreeDay.date | date:'MMM. y'}}
-                    </a>
+                    {{degreeDay.date | date}}
                 </td>
                 <td>
-                    {{degreeDay.amount | number}}
+                    {{degreeDay.numberOfDays | number}}
                 </td>
                 <!-- <td>
                     {{degreeDay.stationName}}

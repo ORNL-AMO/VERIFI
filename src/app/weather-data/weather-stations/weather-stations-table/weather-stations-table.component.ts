@@ -3,6 +3,7 @@ import { WeatherStation } from 'src/app/models/degreeDays';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
+import { WeatherDataService } from '../../weather-data.service';
 
 @Component({
   selector: 'app-weather-stations-table',
@@ -16,7 +17,8 @@ export class WeatherStationsTableComponent {
   currentPageNumber: number = 1;
   itemsPerPage: number = 6;
   itemsPerPageSub: Subscription;
-  constructor(private sharedDataService: SharedDataService, private router: Router) {
+  constructor(private sharedDataService: SharedDataService, private router: Router,
+    private weatherDataService: WeatherDataService) {
 
   }
 
@@ -31,7 +33,8 @@ export class WeatherStationsTableComponent {
   }
 
   selectStation(station: WeatherStation) {
-    this.router.navigateByUrl('weather-data/annual-station/' + station.ID);
+    this.weatherDataService.selectedStation = station;
+    this.router.navigateByUrl('weather-data/annual-station');
   }
 
 }

@@ -11,6 +11,9 @@ import { RouterModule } from '@angular/router';
 import { AnnualStationDataComponent } from './annual-station-data/annual-station-data.component';
 import { AnnualStationTableComponent } from './annual-station-data/annual-station-table/annual-station-table.component';
 import { AnnualStationGraphComponent } from './annual-station-data/annual-station-graph/annual-station-graph.component';
+import { MonthlyStationDataComponent } from './monthly-station-data/monthly-station-data.component';
+import { MonthlyStationGraphComponent } from './monthly-station-data/monthly-station-graph/monthly-station-graph.component';
+import { MonthlyStationTableComponent } from './monthly-station-data/monthly-station-table/monthly-station-table.component';
 
 
 
@@ -22,7 +25,10 @@ import { AnnualStationGraphComponent } from './annual-station-data/annual-statio
     WeatherStationsMapComponent,
     AnnualStationDataComponent,
     AnnualStationTableComponent,
-    AnnualStationGraphComponent
+    AnnualStationGraphComponent,
+    MonthlyStationDataComponent,
+    MonthlyStationGraphComponent,
+    MonthlyStationTableComponent
   ],
   imports: [
     CommonModule,
