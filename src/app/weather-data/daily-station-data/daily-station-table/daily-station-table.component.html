@@ -1,0 +1,31 @@
+<table class="table utility-data table-sm table-bordered table-hover">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>% of Day</th>
+            <th>Dry Bulb Temp</th>
+            <th>Degree Difference</th>
+            <th>Degree Days</th>
+            <!-- <th>Station Name</th> -->
+        </tr>
+    </thead>
+    <tbody class="table-group-divider">
+        <tr *ngFor="let summaryData of hourlySummaryData">
+            <td>
+                {{summaryData.time | date:'short'}}
+            </td>
+            <td>
+                {{summaryData.percentOfDay | number}}
+            </td>
+            <td>
+                {{summaryData.dryBulbTemp | number}}
+            </td>
+            <td>
+                {{summaryData.degreeDifference | number}}
+            </td>
+            <td>
+                {{summaryData.degreeDays | number}}
+            </td>
+        </tr>
+    </tbody>
+</table>

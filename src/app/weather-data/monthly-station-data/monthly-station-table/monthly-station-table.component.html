@@ -1,29 +1,18 @@
-<ng-container *ngIf="degreeDays">
-    <table class="table utility-data table-sm table-bordered table-hover">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Degree Days</th>
-                <!-- <th>Station Name</th> -->
-            </tr>
-        </thead>
-        <tbody class="table-group-divider">
-            <tr *ngFor="let degreeDay of degreeDays">
-                <td>
-                    {{degreeDay.date | date}}
-                </td>
-                <td>
-                    {{degreeDay.numberOfDays | number}}
-                </td>
-                <!-- <td>
-                    {{degreeDay.stationName}}
-                </td> -->
-            </tr>
-        </tbody>
-    </table>
-    <!-- <div class="d-flex w-100 justify-content-end">
-        <ngb-pagination [collectionSize]="yearSummaryData.length" [(page)]="currentPageNumber" [pageSize]="itemsPerPage"
-            [maxSize]="5" [rotate]="true" aria-label="Pagination">
-        </ngb-pagination>
-    </div> -->
-</ng-container>
+<table class="table utility-data table-sm table-bordered table-hover">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Degree Days</th>
+        </tr>
+    </thead>
+    <tbody class="table-group-divider">
+        <tr *ngFor="let degreeDay of degreeDays">
+            <td>
+                <a (click)="goToDailySummary(degreeDay.date)">{{degreeDay.date | date}}</a>
+            </td>
+            <td>
+                {{degreeDay.numberOfDays | number}}
+            </td>
+        </tr>
+    </tbody>
+</table>

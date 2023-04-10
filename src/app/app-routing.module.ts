@@ -103,6 +103,7 @@ import { WeatherDataComponent } from './weather-data/weather-data.component';
 import { WeatherStationsComponent } from './weather-data/weather-stations/weather-stations.component';
 import { AnnualStationDataComponent } from './weather-data/annual-station-data/annual-station-data.component';
 import { MonthlyStationDataComponent } from './weather-data/monthly-station-data/monthly-station-data.component';
+import { DailyStationDataComponent } from './weather-data/daily-station-data/daily-station-data.component';
 
 const routes: Routes = [
   {
@@ -465,7 +466,8 @@ const routes: Routes = [
       { path: '', pathMatch: 'full', redirectTo: 'stations' },
       { path: 'stations', component: WeatherStationsComponent },
       { path: 'annual-station', component: AnnualStationDataComponent },
-      { path: 'monthly-station', component: MonthlyStationDataComponent }
+      { path: 'monthly-station', component: MonthlyStationDataComponent },
+      { path: 'daily-station', component: DailyStationDataComponent }
     ]
   },
   //wildcard/page not found needs to be last route

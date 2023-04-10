@@ -14,6 +14,9 @@ import { AnnualStationGraphComponent } from './annual-station-data/annual-statio
 import { MonthlyStationDataComponent } from './monthly-station-data/monthly-station-data.component';
 import { MonthlyStationGraphComponent } from './monthly-station-data/monthly-station-graph/monthly-station-graph.component';
 import { MonthlyStationTableComponent } from './monthly-station-data/monthly-station-table/monthly-station-table.component';
+import { DailyStationDataComponent } from './daily-station-data/daily-station-data.component';
+import { DailyStationGraphComponent } from './daily-station-data/daily-station-graph/daily-station-graph.component';
+import { DailyStationTableComponent } from './daily-station-data/daily-station-table/daily-station-table.component';
 
 
 
@@ -28,7 +31,10 @@ import { MonthlyStationTableComponent } from './monthly-station-data/monthly-sta
     AnnualStationGraphComponent,
     MonthlyStationDataComponent,
     MonthlyStationGraphComponent,
-    MonthlyStationTableComponent
+    MonthlyStationTableComponent,
+    DailyStationDataComponent,
+    DailyStationGraphComponent,
+    DailyStationTableComponent
   ],
   imports: [
     CommonModule,

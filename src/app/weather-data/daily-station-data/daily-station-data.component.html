@@ -1,0 +1,62 @@
+<ng-container *ngIf="weatherStation">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a class="click-link" (click)="goToStations()">Weather Stations</a></li>
+            <li class="breadcrumb-item"><a class="click-link" (click)="goToAnnualData()">{{weatherStation.name}}
+                    ({{weatherStation.lat}},
+                    {{weatherStation.lon}})</a></li>
+            <li class="breadcrumb-item"><a class="click-link" (click)="goToMonthData()">
+                    {{selectedMonth | date:'MMM. y'}}</a>
+            </li>
+            <li class="breadcrumb-item active">
+                {{selectedDate| date}}
+            </li>
+        </ol>
+    </nav>
+    <p>
+        Explore weather stations. Set the zip code and the radius distance from that location to include weather
+        stations.
+    </p>
+    <form>
+        <div class="row">
+            <div class="col-lg-4 col-md-12 col-sm-12">
+
+                <label class="semibold" for="selectedDate">Select Day</label>
+                <input id="selectedDate" class="form-control" type="date" [ngModel]="selectedDate | date:'yyyy-MM-dd'"
+                    name="selectedDate" (ngModelChange)="setSelectedDate($event)" (input)="setDegreeDays()">
+            </div>
+            <div class="col-lg-4 col-md-12 col-sm-12">
+                <label class="semibold" for="heatingTemp">Heating Base Temperature</label>
+                <div class="mb-3 input-group">
+                    <input id="heatingTemp" class="form-control" type="number" [(ngModel)]="heatingTemp"
+                        onfocus="this.select();" name="heatingTemp" (input)="setDegreeDays()">
+                    <!--TODO: Temperature units-->
+                    <span class="input-group-text">
+                        &#8457;
+                    </span>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-12 col-sm-12">
+                <label class="semibold" for="coolingTemp">Cooling Base Temperature</label>
+                <div class="mb-3 input-group">
+                    <input id="heatingTemp" class="form-control" type="coolingTemp" [(ngModel)]="coolingTemp"
+                        onfocus="this.select();" name="coolingTemp" (input)="setDegreeDays()">
+                    <!--TODO: Temperature units-->
+                    <span class="input-group-text">
+                        &#8457;
+                    </span>
+                </div>
+            </div>
+        </div>
+    </form>
+    <hr>
+    <div class="row" *ngIf="hourlySummaryData && hourlySummaryData.length != 0">
+        <div class="col-lg-6 col-md-12 col-sm-12">
+            <app-daily-station-graph [hourlySummaryData]="hourlySummaryData"
+                [selectedDate]="selectedDate"></app-daily-station-graph>
+        </div>
+        <div class="col-lg-6 col-md-12 col-sm-12">
+            <app-daily-station-table [hourlySummaryData]="hourlySummaryData"></app-daily-station-table>
+        </div>
+    </div>
+</ng-container>

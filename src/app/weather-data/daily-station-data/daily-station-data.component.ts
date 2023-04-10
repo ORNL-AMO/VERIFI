@@ -5,17 +5,18 @@ import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.se
 import { WeatherDataService } from 'src/app/weather-data/weather-data.service';
 
 @Component({
-  selector: 'app-monthly-station-data',
-  templateUrl: './monthly-station-data.component.html',
-  styleUrls: ['./monthly-station-data.component.css']
+  selector: 'app-daily-station-data',
+  templateUrl: './daily-station-data.component.html',
+  styleUrls: ['./daily-station-data.component.css']
 })
-export class MonthlyStationDataComponent {
+export class DailyStationDataComponent {
 
   weatherStation: WeatherStation;
+  selectedDate: Date;
   selectedMonth: Date;
-  degreeDays: Array<DegreeDay>;
   heatingTemp: number;
   coolingTemp: number;
+  hourlySummaryData: Array<{ time: Date, degreeDays: number, dryBulbTemp: number, percentOfDay: number, degreeDifference: number }>;
   constructor(private router: Router, private degreeDaysService: DegreeDaysService,
     private weatherDataService: WeatherDataService) {
 
@@ -24,24 +25,26 @@ export class MonthlyStationDataComponent {
   ngOnInit() {
     this.weatherStation = this.weatherDataService.selectedStation;
     this.selectedMonth = this.weatherDataService.selectedMonth;
-    if (!this.weatherStation || !this.selectedMonth) {
+    this.selectedDate = this.weatherDataService.selectedDate;
+    if (!this.weatherStation || !this.selectedDate) {
       this.router.navigateByUrl('weather-data/stations');
-    }else{
+    } else {
       this.heatingTemp = this.weatherDataService.heatingTemp;
       this.coolingTemp = this.weatherDataService.coolingTemp;
-      this.setDegreeDays();
+      this.setDegreeDays()
     }
   }
 
   async setDegreeDays() {
-    this.degreeDays = await this.degreeDaysService.getDailyDataFromMonth(this.selectedMonth.getMonth(), this.selectedMonth.getFullYear(), this.heatingTemp, this.weatherStation);
+    console.log(this.selectedDate);
+    this.hourlySummaryData = await this.degreeDaysService.calculateHeatingDegreeHoursForDate(this.selectedDate, this.heatingTemp, this.weatherStation);
   }
 
-  setSelectedMonth(eventData: string) {
-    //eventData format = yyyy-mm = 2022-06
+  setSelectedDate(eventData: string) {
+    //eventData format = yyyy-mm-dd = 2022-06
     let yearMonth: Array<string> = eventData.split('-');
     //-1 on month
-    this.selectedMonth = new Date(Number(yearMonth[0]), Number(yearMonth[1]) - 1, 1);
+    this.selectedDate = new Date(Number(yearMonth[0]), Number(yearMonth[1]) - 1, Number(yearMonth[2]));
   }
 
   goToStations() {
@@ -50,5 +53,9 @@ export class MonthlyStationDataComponent {
 
   goToAnnualData() {
     this.router.navigateByUrl('weather-data/annual-station');
+  }
+
+  goToMonthData() {
+    this.router.navigateByUrl('weather-data/monthly-station');
   }
 }
