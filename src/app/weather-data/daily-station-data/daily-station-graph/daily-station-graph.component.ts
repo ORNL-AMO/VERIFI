@@ -1,5 +1,6 @@
 import { Component, Input, ViewChild, ElementRef, SimpleChanges } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
+import { DetailDegreeDay } from 'src/app/models/degreeDays';
 import { Months } from 'src/app/shared/form-data/months';
 
 @Component({
@@ -9,7 +10,7 @@ import { Months } from 'src/app/shared/form-data/months';
 })
 export class DailyStationGraphComponent {
   @Input()
-  hourlySummaryData: Array<{ time: Date, degreeDays: number, dryBulbTemp: number, percentOfDay: number, degreeDifference: number }>;
+  hourlySummaryData: Array<DetailDegreeDay>;
   @Input()
   selectedDate: Date;
 
@@ -35,8 +36,16 @@ export class DailyStationGraphComponent {
       let traceData = [
         {
           x: this.hourlySummaryData.map(data => { return data.time }),
-          y: this.hourlySummaryData.map(data => { return data.degreeDays }),
-          type: 'bar'
+          y: this.hourlySummaryData.map(data => { return data.heatingDegreeDay }),
+          type: 'bar',
+          name: 'Heating Degree Days'
+        },
+        
+        {
+          x: this.hourlySummaryData.map(data => { return data.time }),
+          y: this.hourlySummaryData.map(data => { return data.coolingDegreeDay }),
+          type: 'bar',
+          name: 'Cooling Degree Days'
         }
       ];
 
@@ -53,7 +62,9 @@ export class DailyStationGraphComponent {
         yaxis: {
           automargin: true,
         },
+        barmode: 'group'
         // margin: { "t": 0, "b": 0, "l": 0, "r": 0 },
+        
       };
 
       let config = {

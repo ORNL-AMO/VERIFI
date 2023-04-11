@@ -9,7 +9,7 @@ import { Months } from 'src/app/shared/form-data/months';
 })
 export class AnnualStationGraphComponent {
   @Input()
-  yearSummaryData: Array<{ date: Date, amount: number }>;
+  yearSummaryData: Array<{ date: Date, heatingDegreeDays: number, coolingDegreeDays: number  }>;
   @Input()
   selectedYear: number;
 
@@ -34,12 +34,20 @@ export class AnnualStationGraphComponent {
       let traceData = [
         {
           x: this.yearSummaryData.map(data => { return Months[data.date.getMonth()].name }),
-          y: this.yearSummaryData.map(data => { return data.amount }),
-          type: 'bar'
-        }
+          y: this.yearSummaryData.map(data => { return data.heatingDegreeDays }),
+          type: 'bar',
+          name: 'Heating Degree Days'
+        },
+        {
+          x: this.yearSummaryData.map(data => { return Months[data.date.getMonth()].name }),
+          y: this.yearSummaryData.map(data => { return data.coolingDegreeDays }),
+          type: 'bar',
+          name: 'Cooling Degree Days'
+        },
       ];
 
       var layout = {
+        barmode: 'group',
         title: {
           text: 'Monthly Degree Days <br>(' + this.selectedYear + ')',
           font: {

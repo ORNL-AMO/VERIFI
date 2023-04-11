@@ -4,9 +4,10 @@
             <th>Date</th>
             <th>% of Day</th>
             <th>Dry Bulb Temp</th>
-            <th>Degree Difference</th>
-            <th>Degree Days</th>
-            <!-- <th>Station Name</th> -->
+            <th>Heating Degree Difference</th>
+            <th>Heating Degree Days</th>
+            <th>Cooling Degree Difference</th>
+            <th>Cooling Degree Days</th>
         </tr>
     </thead>
     <tbody class="table-group-divider">
@@ -21,10 +22,16 @@
                 {{summaryData.dryBulbTemp | number}}
             </td>
             <td>
-                {{summaryData.degreeDifference | number}}
+                {{summaryData.heatingDegreeDifference | number}}
             </td>
             <td>
-                {{summaryData.degreeDays | number}}
+                {{summaryData.heatingDegreeDay | number}}
+            </td>
+            <td>
+                {{summaryData.coolingDegreeDifference | number}}
+            </td>
+            <td>
+                {{summaryData.coolingDegreeDay | number}}
             </td>
         </tr>
     </tbody>

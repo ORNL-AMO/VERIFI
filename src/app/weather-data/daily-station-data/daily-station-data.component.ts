@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { DegreeDay, WeatherStation } from 'src/app/models/degreeDays';
+import { DegreeDay, DetailDegreeDay, WeatherStation } from 'src/app/models/degreeDays';
 import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
 import { WeatherDataService } from 'src/app/weather-data/weather-data.service';
 
@@ -16,7 +16,7 @@ export class DailyStationDataComponent {
   selectedMonth: Date;
   heatingTemp: number;
   coolingTemp: number;
-  hourlySummaryData: Array<{ time: Date, degreeDays: number, dryBulbTemp: number, percentOfDay: number, degreeDifference: number }>;
+  hourlySummaryData: Array<DetailDegreeDay>;
   constructor(private router: Router, private degreeDaysService: DegreeDaysService,
     private weatherDataService: WeatherDataService) {
 
@@ -37,7 +37,7 @@ export class DailyStationDataComponent {
 
   async setDegreeDays() {
     console.log(this.selectedDate);
-    this.hourlySummaryData = await this.degreeDaysService.calculateHeatingDegreeHoursForDate(this.selectedDate, this.heatingTemp, this.weatherStation);
+    this.hourlySummaryData = await this.degreeDaysService.calculateHeatingDegreeHoursForDate(this.selectedDate, this.heatingTemp, this.coolingTemp, this.weatherStation);
   }
 
   setSelectedDate(eventData: string) {

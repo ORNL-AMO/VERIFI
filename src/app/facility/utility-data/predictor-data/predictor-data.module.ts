@@ -17,13 +17,6 @@ import { PredictorsTableComponent } from './manage-predictors/predictors-table/p
 import { LabelWithTooltipModule } from 'src/app/shared/label-with-tooltip/label-with-tooltip.module';
 import { PredictorEntriesTableComponent } from './predictor-entries/predictor-entries-table/predictor-entries-table.component';
 import { DegreeDaysComponent } from './degree-days/degree-days.component';
-import { WeatherStationTableComponent } from './degree-days/weather-station-table/weather-station-table.component';
-import { DegreeDaysMonthlyGraphComponent } from './degree-days/degree-days-monthly-graph/degree-days-monthly-graph.component';
-import { DegreeDaysMonthlyTableComponent } from './degree-days/degree-days-monthly-table/degree-days-monthly-table.component';
-import { DegreeDaysDailyTableComponent } from './degree-days/degree-days-daily-table/degree-days-daily-table.component';
-import { DegreeDaysDailyGraphComponent } from './degree-days/degree-days-daily-graph/degree-days-daily-graph.component';
-import { DegreeDaysHourlyGraphComponent } from './degree-days/degree-days-hourly-graph/degree-days-hourly-graph.component';
-import { DegreeDaysHourlyTableComponent } from './degree-days/degree-days-hourly-table/degree-days-hourly-table.component';
 
 
 
@@ -39,14 +32,7 @@ import { DegreeDaysHourlyTableComponent } from './degree-days/degree-days-hourly
     EditPredictorEntryComponent,
     PredictorsTableComponent,
     PredictorEntriesTableComponent,
-    DegreeDaysComponent,
-    WeatherStationTableComponent,
-    DegreeDaysMonthlyGraphComponent,
-    DegreeDaysMonthlyTableComponent,
-    DegreeDaysDailyTableComponent,
-    DegreeDaysDailyGraphComponent,
-    DegreeDaysHourlyGraphComponent,
-    DegreeDaysHourlyTableComponent
+    DegreeDaysComponent
   ],
   imports: [
     CommonModule,

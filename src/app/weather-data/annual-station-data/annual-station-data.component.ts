@@ -18,7 +18,7 @@ export class AnnualStationDataComponent {
   heatingTemp: number;
   coolingTemp: number;
   degreeDays: Array<DegreeDay>;
-  yearSummaryData: Array<{ date: Date, amount: number }>;
+  yearSummaryData: Array<{ date: Date, heatingDegreeDays: number, coolingDegreeDays: number }>;
   constructor(private router: Router, private degreeDaysService: DegreeDaysService,
     private weatherDataService: WeatherDataService) {
 
@@ -56,7 +56,7 @@ export class AnnualStationDataComponent {
 
   async setDegreeDays() {
     if (this.selectedYear && this.heatingTemp) {
-      this.degreeDays = await this.degreeDaysService.getMonthlyDataFromYear(this.selectedYear, this.heatingTemp, this.weatherStation);
+      this.degreeDays = await this.degreeDaysService.getMonthlyDataFromYear(this.selectedYear, this.heatingTemp, this.coolingTemp, this.weatherStation);
       this.setYearSummaryData();
     } else {
       this.degreeDays = undefined;
@@ -73,10 +73,12 @@ export class AnnualStationDataComponent {
         let monthData: Array<DegreeDay> = this.degreeDays.filter(day => {
           return day.date.getMonth() == startDate.getMonth();
         });
-        let totalAmount: number = _.sumBy(monthData, 'numberOfDays');
+        let totalHeatingDegreeDays: number = _.sumBy(monthData, 'heatingDegreeDays');
+        let totalCoolingDegreeDays: number = _.sumBy(monthData, 'coolingDegreeDays');
         this.yearSummaryData.push({
           date: new Date(startDate),
-          amount: totalAmount
+          heatingDegreeDays: totalHeatingDegreeDays,
+          coolingDegreeDays: totalCoolingDegreeDays
         });
         startDate.setMonth(startDate.getMonth() + 1);
       }

@@ -98,14 +98,14 @@ export class DegreeDaysComponent {
   async setDegreeDays() {
     // this.degreeDays = new Array();
 
-    if (this.viewDataAs == 'monthly' && isNaN(this.baseTemperature) == false) {
-      this.degreeDays = await this.degreeDaysService.getMonthlyDataFromYear(this.selectedYear, this.baseTemperature, this.selectedStation);
-      this.setYearSummaryData();
-    } else if (this.viewDataAs == 'daily' && isNaN(this.baseTemperature) == false) {
-      this.degreeDays = await this.degreeDaysService.getDailyDataFromMonth(this.selectedMonth.getMonth(), this.selectedMonth.getFullYear(), this.baseTemperature, this.selectedStation);
-    } else if (this.viewDataAs == 'hourly' && isNaN(this.baseTemperature) == false) {
-      this.hourlySummaryData = await this.degreeDaysService.calculateHeatingDegreeHoursForDate(this.selectedDay, this.baseTemperature, this.selectedStation);
-    }
+    // if (this.viewDataAs == 'monthly' && isNaN(this.baseTemperature) == false) {
+    //   this.degreeDays = await this.degreeDaysService.getMonthlyDataFromYear(this.selectedYear, this.baseTemperature, this.selectedStation);
+    //   this.setYearSummaryData();
+    // } else if (this.viewDataAs == 'daily' && isNaN(this.baseTemperature) == false) {
+    //   this.degreeDays = await this.degreeDaysService.getDailyDataFromMonth(this.selectedMonth.getMonth(), this.selectedMonth.getFullYear(), this.baseTemperature, this.selectedStation);
+    // } else if (this.viewDataAs == 'hourly' && isNaN(this.baseTemperature) == false) {
+    //   this.hourlySummaryData = await this.degreeDaysService.calculateHeatingDegreeHoursForDate(this.selectedDay, this.baseTemperature, this.selectedStation);
+    // }
   }
 
   setYearSummaryData() {

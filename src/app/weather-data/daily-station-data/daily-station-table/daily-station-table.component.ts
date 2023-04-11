@@ -1,4 +1,5 @@
 import { Component, Input } from '@angular/core';
+import { DetailDegreeDay } from 'src/app/models/degreeDays';
 
 @Component({
   selector: 'app-daily-station-table',
@@ -7,5 +8,5 @@ import { Component, Input } from '@angular/core';
 })
 export class DailyStationTableComponent {
   @Input()
-  hourlySummaryData: Array<{ time: Date, degreeDays: number, dryBulbTemp: number, percentOfDay: number, degreeDifference: number }>;
+  hourlySummaryData: Array<DetailDegreeDay>;
 }

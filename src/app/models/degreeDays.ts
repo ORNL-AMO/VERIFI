@@ -41,8 +41,19 @@ export interface LocalClimatologicalData {
 }
 
 export interface DegreeDay {
-    numberOfDays: number,
+    heatingDegreeDays: number,
+    coolingDegreeDays: number,
     date: Date,
     stationId: string,
     stationName: string
+}
+
+export interface DetailDegreeDay {
+    time: Date,
+    heatingDegreeDay: number,
+    coolingDegreeDay: number,
+    dryBulbTemp: number,
+    percentOfDay: number,
+    heatingDegreeDifference: number,
+    coolingDegreeDifference: number
 }

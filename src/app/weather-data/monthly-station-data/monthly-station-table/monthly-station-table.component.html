@@ -2,7 +2,8 @@
     <thead>
         <tr>
             <th>Date</th>
-            <th>Degree Days</th>
+            <th>Heating Degree Days</th>
+            <th>Cooling Degree Days</th>
         </tr>
     </thead>
     <tbody class="table-group-divider">
@@ -11,7 +12,10 @@
                 <a (click)="goToDailySummary(degreeDay.date)">{{degreeDay.date | date}}</a>
             </td>
             <td>
-                {{degreeDay.numberOfDays | number}}
+                {{degreeDay.heatingDegreeDays | number}}
+            </td>
+            <td>
+                {{degreeDay.coolingDegreeDays | number}}
             </td>
         </tr>
     </tbody>

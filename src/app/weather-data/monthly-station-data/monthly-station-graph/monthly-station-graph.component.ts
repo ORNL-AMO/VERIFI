@@ -35,12 +35,21 @@ export class MonthlyStationGraphComponent {
       let traceData = [
         {
           x: this.degreeDays.map(data => { return data.date }),
-          y: this.degreeDays.map(data => { return data.numberOfDays }),
-          type: 'bar'
+          y: this.degreeDays.map(data => { return data.heatingDegreeDays }),
+          type: 'bar',
+          name: 'Heating Degree Days'
+        },
+        
+        {
+          x: this.degreeDays.map(data => { return data.date }),
+          y: this.degreeDays.map(data => { return data.coolingDegreeDays }),
+          type: 'bar',
+          name: 'Cooling Degree Days'
         }
       ];
 
       var layout = {
+        barmode: 'group',
         title: {
           text: 'Daily Degree Days <br>(' + Months[this.selectedMonth.getMonth()].name + ', ' + this.selectedMonth.getFullYear() + ')',
           font: {

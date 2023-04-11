@@ -11,7 +11,7 @@
 </p>
 
 <h5>Weather Stations <span>(within 40 miles)</span></h5>
-<app-weather-station-table [stations]="stations"></app-weather-station-table>
+<!-- <app-weather-station-table [stations]="stations"></app-weather-station-table> -->
 <hr>
 <h5>Degree Days</h5>
 <form>
@@ -68,39 +68,3 @@
         </div>
     </div>
 </form>
-<!-- <app-degree-days-graph [selectedStation]="selectedStation" [degreeDays]="degreeDays"></app-degree-days-graph> -->
-<ng-container *ngIf="viewDataAs == 'monthly' && yearSummaryData">
-    <div class="row">
-        <div class="col-6">
-            <app-degree-days-monthly-graph [yearSummaryData]="yearSummaryData"
-                [selectedYear]="selectedYear"></app-degree-days-monthly-graph>
-        </div>
-        <div class="col-6">
-            <app-degree-days-monthly-table [yearSummaryData]="yearSummaryData"></app-degree-days-monthly-table>
-        </div>
-    </div>
-</ng-container>
-
-<ng-container *ngIf="viewDataAs == 'daily' && degreeDays">
-    <div class="row">
-        <div class="col-6">
-            <app-degree-days-daily-graph [degreeDays]="degreeDays"
-                [selectedMonth]="selectedMonth"></app-degree-days-daily-graph>
-        </div>
-        <div class="col-6">
-            <app-degree-days-daily-table [degreeDays]="degreeDays"></app-degree-days-daily-table>
-        </div>
-    </div>
-</ng-container>
-
-<ng-container *ngIf="viewDataAs == 'hourly' && hourlySummaryData">
-    <div class="row">
-        <div class="col-6">
-            <app-degree-days-hourly-graph [hourlySummaryData]="hourlySummaryData"
-                [selectedDay]="selectedDay"></app-degree-days-hourly-graph>
-        </div>
-        <div class="col-6">
-            <app-degree-days-hourly-table [hourlySummaryData]="hourlySummaryData"></app-degree-days-hourly-table>
-        </div>
-    </div>
-</ng-container>

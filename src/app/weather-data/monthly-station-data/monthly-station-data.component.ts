@@ -26,7 +26,7 @@ export class MonthlyStationDataComponent {
     this.selectedMonth = this.weatherDataService.selectedMonth;
     if (!this.weatherStation || !this.selectedMonth) {
       this.router.navigateByUrl('weather-data/stations');
-    }else{
+    } else {
       this.heatingTemp = this.weatherDataService.heatingTemp;
       this.coolingTemp = this.weatherDataService.coolingTemp;
       this.setDegreeDays();
@@ -34,7 +34,7 @@ export class MonthlyStationDataComponent {
   }
 
   async setDegreeDays() {
-    this.degreeDays = await this.degreeDaysService.getDailyDataFromMonth(this.selectedMonth.getMonth(), this.selectedMonth.getFullYear(), this.heatingTemp, this.weatherStation);
+    this.degreeDays = await this.degreeDaysService.getDailyDataFromMonth(this.selectedMonth.getMonth(), this.selectedMonth.getFullYear(), this.heatingTemp, this.coolingTemp, this.weatherStation);
   }
 
   setSelectedMonth(eventData: string) {

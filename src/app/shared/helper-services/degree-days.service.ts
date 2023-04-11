@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { EGridService } from './e-grid.service';
 import * as _ from 'lodash';
 import { ConvertUnitsService } from '../convert-units/convert-units.service';
-import { DegreeDay, LocalClimatologicalData, WeatherStation } from 'src/app/models/degreeDays';
+import { DegreeDay, DetailDegreeDay, LocalClimatologicalData, WeatherStation } from 'src/app/models/degreeDays';
 @Injectable({
   providedIn: 'root'
 })
@@ -12,7 +12,7 @@ export class DegreeDaysService {
   yearHourlyData: Array<LocalClimatologicalData>;
   constructor(private eGridService: EGridService, private convertUnitsService: ConvertUnitsService) { }
 
-  async getHeatingDegreeDays(zipCode: string, month: number, year: number, baseTemperature: number): Promise<Array<DegreeDay>> {
+  async getHeatingDegreeDays(zipCode: string, month: number, year: number, baseHeatingTemperature: number, baseCoolingTemperature: number): Promise<Array<DegreeDay>> {
     console.log('get');
     let stationsWithinFortyMiles: Array<WeatherStation> = await this.getClosestStation(zipCode, 40, { year: year, month: month });
     // stationsWithinFortyMiles = ;
@@ -29,7 +29,7 @@ export class DegreeDaysService {
     let endDate: Date = new Date(year, month + 1, 1);
     let degreeDays: Array<DegreeDay> = new Array();
     while (startDate < endDate) {
-      let degreeDay: DegreeDay = this.calculateHeatingDegreeDaysForDate(startDate, localClimatologicalDataMonth, baseTemperature);
+      let degreeDay: DegreeDay = this.calculateHeatingDegreeDaysForDate(startDate, localClimatologicalDataMonth, baseHeatingTemperature, baseCoolingTemperature);
       degreeDays.push(degreeDay);
       startDate.setDate(startDate.getDate() + 1);
     }
@@ -38,7 +38,7 @@ export class DegreeDaysService {
   }
 
 
-  async getDailyDataFromMonth(month: number, year: number, baseTemperature: number, station: WeatherStation): Promise<Array<DegreeDay>> {
+  async getDailyDataFromMonth(month: number, year: number, baseHeatingTemperature: number, baseCoolingTemperature: number, station: WeatherStation): Promise<Array<DegreeDay>> {
     console.log('getMonthlyDataFromYear');
     if (!this.stationDataResponse || this.stationDataResponse.station.ID != station.ID || this.stationDataResponse.year != year) {
       let response: Response = await this.getStationDataResponse(station, year);
@@ -58,7 +58,7 @@ export class DegreeDaysService {
     let endDate: Date = new Date(year, month + 1, 1);
     let degreeDays: Array<DegreeDay> = new Array();
     while (startDate < endDate) {
-      let degreeDay: DegreeDay = this.calculateHeatingDegreeDaysForDate(startDate, localClimatologicalDataMonth, baseTemperature);
+      let degreeDay: DegreeDay = this.calculateHeatingDegreeDaysForDate(startDate, localClimatologicalDataMonth, baseHeatingTemperature, baseCoolingTemperature);
       degreeDays.push(degreeDay);
       startDate.setDate(startDate.getDate() + 1);
     }
@@ -66,7 +66,7 @@ export class DegreeDaysService {
     return degreeDays;
   }
 
-  async getMonthlyDataFromYear(year: number, baseTemperature: number, station: WeatherStation): Promise<Array<DegreeDay>> {
+  async getMonthlyDataFromYear(year: number, baseHeatingTemperature: number, baseCoolingTemperature: number, station: WeatherStation): Promise<Array<DegreeDay>> {
     console.log('getMonthlyDataFromYear');
     if (!this.stationDataResponse || this.stationDataResponse.station.ID != station.ID || this.stationDataResponse.year != year) {
       let response: Response = await this.getStationDataResponse(station, year);
@@ -87,7 +87,7 @@ export class DegreeDaysService {
       let localClimatologicalDataMonth: Array<LocalClimatologicalData> = this.yearHourlyData.filter(lcd => {
         return lcd.DATE.getMonth() == startDate.getMonth();
       });
-      let degreeDay: DegreeDay = this.calculateHeatingDegreeDaysForDate(startDate, localClimatologicalDataMonth, baseTemperature);
+      let degreeDay: DegreeDay = this.calculateHeatingDegreeDaysForDate(startDate, localClimatologicalDataMonth, baseHeatingTemperature, baseCoolingTemperature);
       degreeDays.push(degreeDay);
       startDate.setDate(startDate.getDate() + 1);
     }
@@ -95,15 +95,16 @@ export class DegreeDaysService {
     return degreeDays;
   }
 
-  calculateHeatingDegreeDaysForDate(day: Date, localClimatologicalDataMonth: Array<LocalClimatologicalData>, baseTemperature: number): DegreeDay {
+  calculateHeatingDegreeDaysForDate(day: Date, localClimatologicalDataMonth: Array<LocalClimatologicalData>, baseHeatingTemperature: number, baseCoolingTemperature: number): DegreeDay {
     let localClimatologicalDataDay: Array<LocalClimatologicalData> = localClimatologicalDataMonth.filter(lcd => {
       return lcd.DATE.getDate() == day.getDate();
     });
 
     let minutesPerDay: number = 1440;
-    let degreeDays: number = 0;
+    let coolingDegreeDays: number = 0;
+    let heatingDegreeDays: number = 0;
     for (let i = 0; i < localClimatologicalDataDay.length; i++) {
-      if (localClimatologicalDataDay[i].HourlyDryBulbTemperature < baseTemperature) {
+      if (localClimatologicalDataDay[i].HourlyDryBulbTemperature < baseHeatingTemperature) {
         let previousDate: Date;
         if (i == 0) {
           previousDate = new Date(day.getFullYear(), day.getMonth(), day.getDate(), 0, 0);
@@ -112,19 +113,33 @@ export class DegreeDaysService {
         }
         let minutesBetween: number = this.getMinutesBetweenDates(previousDate, localClimatologicalDataDay[i].DATE);
         let portionOfDay: number = (minutesBetween / minutesPerDay);
-        let degreeDifference: number = baseTemperature - localClimatologicalDataDay[i].HourlyDryBulbTemperature;
-        degreeDays += (degreeDifference * portionOfDay);
+        let degreeDifference: number = baseHeatingTemperature - localClimatologicalDataDay[i].HourlyDryBulbTemperature;
+        heatingDegreeDays += (degreeDifference * portionOfDay);
+      }
+
+      if (localClimatologicalDataDay[i].HourlyDryBulbTemperature > baseCoolingTemperature) {
+        let previousDate: Date;
+        if (i == 0) {
+          previousDate = new Date(day.getFullYear(), day.getMonth(), day.getDate(), 0, 0);
+        } else {
+          previousDate = new Date(localClimatologicalDataDay[i - 1].DATE)
+        }
+        let minutesBetween: number = this.getMinutesBetweenDates(previousDate, localClimatologicalDataDay[i].DATE);
+        let portionOfDay: number = (minutesBetween / minutesPerDay);
+        let degreeDifference: number = localClimatologicalDataDay[i].HourlyDryBulbTemperature - baseCoolingTemperature;
+        coolingDegreeDays += (degreeDifference * portionOfDay);
       }
     }
     return {
-      numberOfDays: degreeDays,
+      heatingDegreeDays: heatingDegreeDays,
+      coolingDegreeDays: coolingDegreeDays,
       date: new Date(day),
       stationId: localClimatologicalDataDay[0].STATION,
       stationName: localClimatologicalDataDay[0].NAME
     };
   }
 
-  async calculateHeatingDegreeHoursForDate(day: Date, baseTemperature: number, station: WeatherStation): Promise<Array<{ time: Date, degreeDays: number, dryBulbTemp: number, percentOfDay: number, degreeDifference: number }>> {
+  async calculateHeatingDegreeHoursForDate(day: Date, baseHeatingTemperature: number, baseCoolingTemperature: number, station: WeatherStation): Promise<Array<DetailDegreeDay>> {
     console.log('calculateHeatingDegreeHoursForDate');
     if (!this.stationDataResponse || this.stationDataResponse.station.ID != station.ID || this.stationDataResponse.year != day.getFullYear()) {
       let response: Response = await this.getStationDataResponse(station, day.getFullYear());
@@ -141,10 +156,10 @@ export class DegreeDaysService {
       return lcd.DATE.getDate() == day.getDate() && lcd.DATE.getMonth() == day.getMonth();
     });
 
-    let results: Array<{ time: Date, degreeDays: number, dryBulbTemp: number, percentOfDay: number, degreeDifference: number }> = new Array();
+    let results: Array<DetailDegreeDay> = new Array();
     let minutesPerDay: number = 1440;
     for (let i = 0; i < localClimatologicalDataDay.length; i++) {
-      if (localClimatologicalDataDay[i].HourlyDryBulbTemperature < baseTemperature) {
+      if (localClimatologicalDataDay[i].HourlyDryBulbTemperature < baseHeatingTemperature || localClimatologicalDataDay[i].HourlyDryBulbTemperature > baseCoolingTemperature) {
         let previousDate: Date;
         if (i == 0) {
           previousDate = new Date(day.getFullYear(), day.getMonth(), day.getDate(), 0, 0);
@@ -153,19 +168,35 @@ export class DegreeDaysService {
         }
         let minutesBetween: number = this.getMinutesBetweenDates(previousDate, localClimatologicalDataDay[i].DATE);
         let portionOfDay: number = (minutesBetween / minutesPerDay);
-        let degreeDifference: number = baseTemperature - localClimatologicalDataDay[i].HourlyDryBulbTemperature;
+        let heatingDegreeDay: number = 0;
+        let heatingDegreeDifference: number = 0;
+        let coolingDegreeDay: number = 0;
+        let coolingDegreeDifference: number = 0;
+        if (localClimatologicalDataDay[i].HourlyDryBulbTemperature < baseHeatingTemperature) {
+          heatingDegreeDifference = baseHeatingTemperature - localClimatologicalDataDay[i].HourlyDryBulbTemperature;
+          heatingDegreeDay = heatingDegreeDifference * portionOfDay;
+        }
+        if (localClimatologicalDataDay[i].HourlyDryBulbTemperature > baseCoolingTemperature) {
+          coolingDegreeDifference = localClimatologicalDataDay[i].HourlyDryBulbTemperature - baseCoolingTemperature;
+          coolingDegreeDay = coolingDegreeDifference * portionOfDay;
+        }
+
         results.push({
           time: localClimatologicalDataDay[i].DATE,
-          degreeDifference: degreeDifference,
-          degreeDays: (degreeDifference * portionOfDay),
+          heatingDegreeDay: heatingDegreeDay,
+          heatingDegreeDifference: heatingDegreeDifference,
+          coolingDegreeDay: coolingDegreeDay,
+          coolingDegreeDifference: coolingDegreeDifference,
           percentOfDay: portionOfDay,
           dryBulbTemp: localClimatologicalDataDay[i].HourlyDryBulbTemperature
         })
       } else {
         results.push({
           time: localClimatologicalDataDay[i].DATE,
-          degreeDifference: 0,
-          degreeDays: 0,
+          heatingDegreeDay: 0,
+          heatingDegreeDifference: 0,
+          coolingDegreeDay: 0,
+          coolingDegreeDifference: 0,
           percentOfDay: 0,
           dryBulbTemp: localClimatologicalDataDay[i].HourlyDryBulbTemperature
         })
