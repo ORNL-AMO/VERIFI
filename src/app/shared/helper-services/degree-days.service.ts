@@ -158,16 +158,18 @@ export class DegreeDaysService {
 
     let results: Array<DetailDegreeDay> = new Array();
     let minutesPerDay: number = 1440;
+    console.log(localClimatologicalDataDay);
     for (let i = 0; i < localClimatologicalDataDay.length; i++) {
+      let previousDate: Date;
+      if (i == 0) {
+        previousDate = new Date(day.getFullYear(), day.getMonth(), day.getDate(), 0, 0);
+      } else {
+        previousDate = new Date(localClimatologicalDataDay[i - 1].DATE)
+      }
+      let minutesBetween: number = this.getMinutesBetweenDates(previousDate, localClimatologicalDataDay[i].DATE);
+      let portionOfDay: number = (minutesBetween / minutesPerDay);
       if (localClimatologicalDataDay[i].HourlyDryBulbTemperature < baseHeatingTemperature || localClimatologicalDataDay[i].HourlyDryBulbTemperature > baseCoolingTemperature) {
-        let previousDate: Date;
-        if (i == 0) {
-          previousDate = new Date(day.getFullYear(), day.getMonth(), day.getDate(), 0, 0);
-        } else {
-          previousDate = new Date(localClimatologicalDataDay[i - 1].DATE)
-        }
-        let minutesBetween: number = this.getMinutesBetweenDates(previousDate, localClimatologicalDataDay[i].DATE);
-        let portionOfDay: number = (minutesBetween / minutesPerDay);
+
         let heatingDegreeDay: number = 0;
         let heatingDegreeDifference: number = 0;
         let coolingDegreeDay: number = 0;
@@ -197,7 +199,7 @@ export class DegreeDaysService {
           heatingDegreeDifference: 0,
           coolingDegreeDay: 0,
           coolingDegreeDifference: 0,
-          percentOfDay: 0,
+          percentOfDay: portionOfDay,
           dryBulbTemp: localClimatologicalDataDay[i].HourlyDryBulbTemperature
         })
 

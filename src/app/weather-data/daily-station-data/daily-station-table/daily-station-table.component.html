@@ -4,10 +4,10 @@
             <th>Date</th>
             <th>% of Day</th>
             <th>Dry Bulb Temp</th>
-            <th>Heating Degree Difference</th>
-            <th>Heating Degree Days</th>
-            <th>Cooling Degree Difference</th>
-            <th>Cooling Degree Days</th>
+            <th>Heating Degree<br> Difference</th>
+            <th>Heating Degree<br> Days</th>
+            <th>Cooling Degree<br> Difference</th>
+            <th>Cooling Degree<br> Days</th>
         </tr>
     </thead>
     <tbody class="table-group-divider">
@@ -16,7 +16,7 @@
                 {{summaryData.time | date:'short'}}
             </td>
             <td>
-                {{summaryData.percentOfDay | number}}
+                {{summaryData.percentOfDay * 100 | number}}
             </td>
             <td>
                 {{summaryData.dryBulbTemp | number}}

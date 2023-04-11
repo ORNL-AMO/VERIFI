@@ -36,7 +36,6 @@ export class DailyStationDataComponent {
   }
 
   async setDegreeDays() {
-    console.log(this.selectedDate);
     this.hourlySummaryData = await this.degreeDaysService.calculateHeatingDegreeHoursForDate(this.selectedDate, this.heatingTemp, this.coolingTemp, this.weatherStation);
   }
 
@@ -57,5 +56,15 @@ export class DailyStationDataComponent {
 
   goToMonthData() {
     this.router.navigateByUrl('weather-data/monthly-station');
+  }
+
+  async setHeatingBaseTemp(){
+    this.weatherDataService.heatingTemp = this.heatingTemp;
+    await this.setDegreeDays();
+  }
+
+  async setCoolingBaseTemp(){
+    this.weatherDataService.coolingTemp = this.coolingTemp;
+    await this.setDegreeDays();
   }
 }

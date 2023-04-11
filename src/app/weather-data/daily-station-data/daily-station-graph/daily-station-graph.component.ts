@@ -13,6 +13,10 @@ export class DailyStationGraphComponent {
   hourlySummaryData: Array<DetailDegreeDay>;
   @Input()
   selectedDate: Date;
+  @Input()
+  heatingTemp: number;
+  @Input()
+  coolingTemp: number;
 
 
   @ViewChild('degreeDaysChart', { static: false }) degreeDaysChart: ElementRef;
@@ -38,18 +42,47 @@ export class DailyStationGraphComponent {
           x: this.hourlySummaryData.map(data => { return data.time }),
           y: this.hourlySummaryData.map(data => { return data.heatingDegreeDay }),
           type: 'bar',
-          name: 'Heating Degree Days'
+          name: 'Heating Degree Days',
+          yaxis: 'y'
         },
-        
+
         {
           x: this.hourlySummaryData.map(data => { return data.time }),
           y: this.hourlySummaryData.map(data => { return data.coolingDegreeDay }),
           type: 'bar',
-          name: 'Cooling Degree Days'
+          name: 'Cooling Degree Days',
+          yaxis: 'y'
+        },
+        {
+          x: this.hourlySummaryData.map(data => { return data.time }),
+          y: this.hourlySummaryData.map(data => { return data.dryBulbTemp }),
+          type: 'scatter',
+          name: 'Dry Bulb Temp Readings',
+          yaxis: 'y2',
+          mode: 'lines+markers'
+        },
+        {
+          x: this.hourlySummaryData.map(data => { return data.time }),
+          y: this.hourlySummaryData.map(data => { return this.heatingTemp }),
+          type: 'scatter',
+          name: 'Heating Base Temp',
+          yaxis: 'y2',
+          // mode: 'lines+markers'
+        },
+        {
+          x: this.hourlySummaryData.map(data => { return data.time }),
+          y: this.hourlySummaryData.map(data => { return this.coolingTemp }),
+          type: 'scatter',
+          name: 'Cooling Base Temp',
+          yaxis: 'y2',
+          // mode: 'lines+markers'
         }
       ];
 
       var layout = {
+        legend: {
+          orientation: "h"
+        },
         title: {
           text: 'Degree Days <br>(' + Months[this.selectedDate.getMonth()].name + ' ' + this.selectedDate.getDate() + ', ' + this.selectedDate.getFullYear() + ')',
           font: {
@@ -61,10 +94,24 @@ export class DailyStationGraphComponent {
         },
         yaxis: {
           automargin: true,
+          title: {
+            text: 'Heating Degree Days'
+          },
+        },
+        yaxis2: {
+          title: {
+            text: 'Dry Bulb Temp'
+          },
+          automargin: true,
+          overlaying: 'y',
+          side: 'right',
+          // dtick: yAxis2Dtick,
+          rangemode: 'tozero',
+          tickmode: 'sync'
         },
         barmode: 'group'
         // margin: { "t": 0, "b": 0, "l": 0, "r": 0 },
-        
+
       };
 
       let config = {

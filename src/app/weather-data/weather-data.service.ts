@@ -20,9 +20,9 @@ export class WeatherDataService {
     state: "TN"
   };
   selectedYear: number = 2022;
-  selectedMonth: Date = new Date(2022, 0, 1);
-  selectedDate: Date;
-  heatingTemp: number = 65;
-  coolingTemp: number = 65;
+  selectedMonth: Date = new Date(2022, 6, 8);
+  selectedDate: Date = new Date(2022, 6, 8);
+  heatingTemp: number = 60;
+  coolingTemp: number = 70;
   constructor() { }
 }

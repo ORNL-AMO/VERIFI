@@ -26,7 +26,7 @@
                 <label class="semibold" for="heatingTemp">Heating Base Temperature</label>
                 <div class="mb-3 input-group">
                     <input id="heatingTemp" class="form-control" type="number" [(ngModel)]="heatingTemp"
-                        onfocus="this.select();" name="heatingTemp" (input)="setDegreeDays()">
+                        onfocus="this.select();" name="heatingTemp" (input)="setHeatingBaseTemp()">
                     <!--TODO: Temperature units-->
                     <span class="input-group-text">
                         &#8457;
@@ -37,7 +37,7 @@
                 <label class="semibold" for="coolingTemp">Cooling Base Temperature</label>
                 <div class="mb-3 input-group">
                     <input id="heatingTemp" class="form-control" type="coolingTemp" [(ngModel)]="coolingTemp"
-                        onfocus="this.select();" name="coolingTemp" (input)="setDegreeDays()">
+                        onfocus="this.select();" name="coolingTemp" (input)="setCoolingBaseTemp()">
                     <!--TODO: Temperature units-->
                     <span class="input-group-text">
                         &#8457;
