@@ -37,18 +37,27 @@ export class MonthlyStationGraphComponent {
           x: this.degreeDays.map(data => { return data.date }),
           y: this.degreeDays.map(data => { return data.heatingDegreeDays }),
           type: 'bar',
-          name: 'Heating Degree Days'
+          name: 'Heating Degree Days',
+          marker: {
+            color: '#C0392B'
+          }
         },
         
         {
           x: this.degreeDays.map(data => { return data.date }),
           y: this.degreeDays.map(data => { return data.coolingDegreeDays }),
           type: 'bar',
-          name: 'Cooling Degree Days'
+          name: 'Cooling Degree Days',
+          marker: {
+            color: '#2980B9'
+          }
         }
       ];
 
       var layout = {
+        legend: {
+          orientation: "h"
+        },
         barmode: 'group',
         title: {
           text: 'Daily Degree Days <br>(' + Months[this.selectedMonth.getMonth()].name + ', ' + this.selectedMonth.getFullYear() + ')',

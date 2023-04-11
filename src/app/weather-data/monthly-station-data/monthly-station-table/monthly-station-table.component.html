@@ -19,4 +19,17 @@
             </td>
         </tr>
     </tbody>
+    <tfoot>
+        <tr>
+            <th>
+                Total
+            </th>
+            <th>
+                {{degreeDays | total: 'heatingDegreeDays' | number}}
+            </th>
+            <th>
+                {{degreeDays | total: 'coolingDegreeDays' | number}}
+            </th>
+        </tr>
+    </tfoot>
 </table>

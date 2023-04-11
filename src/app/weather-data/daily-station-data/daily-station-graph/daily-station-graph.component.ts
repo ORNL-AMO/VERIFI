@@ -43,7 +43,10 @@ export class DailyStationGraphComponent {
           y: this.hourlySummaryData.map(data => { return data.heatingDegreeDay }),
           type: 'bar',
           name: 'Heating Degree Days',
-          yaxis: 'y'
+          yaxis: 'y',
+          marker: {
+            color: '#C0392B'
+          }
         },
 
         {
@@ -51,7 +54,10 @@ export class DailyStationGraphComponent {
           y: this.hourlySummaryData.map(data => { return data.coolingDegreeDay }),
           type: 'bar',
           name: 'Cooling Degree Days',
-          yaxis: 'y'
+          yaxis: 'y',
+          marker: {
+            color: '#2980B9'
+          }
         },
         {
           x: this.hourlySummaryData.map(data => { return data.time }),

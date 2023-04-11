@@ -21,4 +21,17 @@
             </td>
         </tr>
     </tbody>
+    <tfoot>
+        <tr>
+            <th>
+                Total
+            </th>
+            <th>
+                {{yearSummaryData | total: 'heatingDegreeDays' | number}}
+            </th>
+            <th>
+                {{yearSummaryData | total: 'coolingDegreeDays' | number}}
+            </th>
+        </tr>
+    </tfoot>
 </table>

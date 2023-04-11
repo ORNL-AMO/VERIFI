@@ -35,4 +35,29 @@
             </td>
         </tr>
     </tbody>
+    <tfoot>
+        <tr>
+            <th>
+                Total
+            </th>
+            <th>
+
+            </th>
+            <th>
+
+            </th>
+            <th>
+
+            </th>
+            <th>
+                {{hourlySummaryData | total: 'heatingDegreeDay' | number}}
+            </th>
+            <th>
+
+            </th>
+            <th>
+                {{hourlySummaryData | total: 'coolingDegreeDay' | number}}
+            </th>
+        </tr>
+    </tfoot>
 </table>

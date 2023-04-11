@@ -19,6 +19,7 @@ export class AnnualStationDataComponent {
   coolingTemp: number;
   degreeDays: Array<DegreeDay>;
   yearSummaryData: Array<{ date: Date, heatingDegreeDays: number, coolingDegreeDays: number }>;
+  calculating: boolean;
   constructor(private router: Router, private degreeDaysService: DegreeDaysService,
     private weatherDataService: WeatherDataService) {
 
@@ -55,6 +56,7 @@ export class AnnualStationDataComponent {
   }
 
   async setDegreeDays() {
+    this.calculating = true;
     if (this.selectedYear && this.heatingTemp) {
       this.degreeDays = await this.degreeDaysService.getMonthlyDataFromYear(this.selectedYear, this.heatingTemp, this.coolingTemp, this.weatherStation);
       this.setYearSummaryData();
@@ -62,6 +64,7 @@ export class AnnualStationDataComponent {
       this.degreeDays = undefined;
       this.yearSummaryData = undefined;
     }
+    this.calculating = false;
   }
 
   setYearSummaryData() {

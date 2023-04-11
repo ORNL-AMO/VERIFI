@@ -35,7 +35,7 @@
             <div class="col-lg-4 col-md-12 col-sm-12">
                 <label class="semibold" for="coolingTemp">Cooling Base Temperature</label>
                 <div class="mb-3 input-group">
-                    <input id="heatingTemp" class="form-control" type="coolingTemp" [(ngModel)]="coolingTemp"
+                    <input id="heatingTemp" class="form-control" type="number" [(ngModel)]="coolingTemp"
                         onfocus="this.select();" name="coolingTemp" (input)="setCoolingBaseTemp()">
                     <!--TODO: Temperature units-->
                     <span class="input-group-text">
@@ -46,6 +46,11 @@
         </div>
     </form>
     <hr>
+    <div class="row" *ngIf="calculating">
+        <div class="col-12 text-center pb-4">
+            <app-calculating-spinner [message]="'Calculating...'"></app-calculating-spinner>
+        </div>
+    </div>
     <div class="row" *ngIf="yearSummaryData && yearSummaryData.length != 0">
         <div class="col-lg-6 col-md-12 col-sm-12">
             <app-annual-station-graph [yearSummaryData]="yearSummaryData"

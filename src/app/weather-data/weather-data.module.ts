@@ -17,6 +17,8 @@ import { MonthlyStationTableComponent } from './monthly-station-data/monthly-sta
 import { DailyStationDataComponent } from './daily-station-data/daily-station-data.component';
 import { DailyStationGraphComponent } from './daily-station-data/daily-station-graph/daily-station-graph.component';
 import { DailyStationTableComponent } from './daily-station-data/daily-station-table/daily-station-table.component';
+import { HelperPipesModule } from '../shared/helper-pipes/helper-pipes.module';
+import { CalculatingSpinnerModule } from '../shared/calculating-spinner/calculating-spinner.module';
 
 
 
@@ -41,7 +43,9 @@ import { DailyStationTableComponent } from './daily-station-data/daily-station-t
     FormsModule,
     NgbPaginationModule,
     TableItemsDropdownModule,
-    RouterModule
+    RouterModule,
+    HelperPipesModule,
+    CalculatingSpinnerModule
   ]
 })
 export class WeatherDataModule { }

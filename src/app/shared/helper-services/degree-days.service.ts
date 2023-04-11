@@ -13,18 +13,12 @@ export class DegreeDaysService {
   constructor(private eGridService: EGridService, private convertUnitsService: ConvertUnitsService) { }
 
   async getHeatingDegreeDays(zipCode: string, month: number, year: number, baseHeatingTemperature: number, baseCoolingTemperature: number): Promise<Array<DegreeDay>> {
-    console.log('get');
     let stationsWithinFortyMiles: Array<WeatherStation> = await this.getClosestStation(zipCode, 40, { year: year, month: month });
-    // stationsWithinFortyMiles = ;
-    // console.log(stationsWithinFortyMiles);
     let stationDataResponse: { station: WeatherStation, response: Response } = await this.getClosestStationData(stationsWithinFortyMiles, year);
-    // console.log(stationDataResponse.station.name);
     let localClimatologicalDataYear: Array<LocalClimatologicalData> = await this.getStationYearLCD(stationDataResponse.station, stationDataResponse.response);
-    // console.log('Hours per year: ' + localClimatologicalDataYear.length)
     let localClimatologicalDataMonth: Array<LocalClimatologicalData> = localClimatologicalDataYear.filter(lcd => {
       return lcd.DATE.getMonth() == month;
     });
-    // console.log(localClimatologicalDataMonth);
     let startDate: Date = new Date(year, month, 1);
     let endDate: Date = new Date(year, month + 1, 1);
     let degreeDays: Array<DegreeDay> = new Array();
@@ -33,13 +27,11 @@ export class DegreeDaysService {
       degreeDays.push(degreeDay);
       startDate.setDate(startDate.getDate() + 1);
     }
-    console.log('DONE');
     return degreeDays;
   }
 
 
   async getDailyDataFromMonth(month: number, year: number, baseHeatingTemperature: number, baseCoolingTemperature: number, station: WeatherStation): Promise<Array<DegreeDay>> {
-    console.log('getMonthlyDataFromYear');
     if (!this.stationDataResponse || this.stationDataResponse.station.ID != station.ID || this.stationDataResponse.year != year) {
       let response: Response = await this.getStationDataResponse(station, year);
       let dataResults: string = await response.text();
@@ -62,12 +54,10 @@ export class DegreeDaysService {
       degreeDays.push(degreeDay);
       startDate.setDate(startDate.getDate() + 1);
     }
-    console.log('DONE');
     return degreeDays;
   }
 
   async getMonthlyDataFromYear(year: number, baseHeatingTemperature: number, baseCoolingTemperature: number, station: WeatherStation): Promise<Array<DegreeDay>> {
-    console.log('getMonthlyDataFromYear');
     if (!this.stationDataResponse || this.stationDataResponse.station.ID != station.ID || this.stationDataResponse.year != year) {
       let response: Response = await this.getStationDataResponse(station, year);
       let dataResults: string = await response.text();
@@ -91,13 +81,12 @@ export class DegreeDaysService {
       degreeDays.push(degreeDay);
       startDate.setDate(startDate.getDate() + 1);
     }
-    console.log('DONE');
     return degreeDays;
   }
 
   calculateHeatingDegreeDaysForDate(day: Date, localClimatologicalDataMonth: Array<LocalClimatologicalData>, baseHeatingTemperature: number, baseCoolingTemperature: number): DegreeDay {
     let localClimatologicalDataDay: Array<LocalClimatologicalData> = localClimatologicalDataMonth.filter(lcd => {
-      return lcd.DATE.getDate() == day.getDate();
+      return lcd.DATE.getDate() == day.getDate() && isNaN(lcd.HourlyDryBulbTemperature) == false;
     });
 
     let minutesPerDay: number = 1440;
@@ -140,7 +129,6 @@ export class DegreeDaysService {
   }
 
   async calculateHeatingDegreeHoursForDate(day: Date, baseHeatingTemperature: number, baseCoolingTemperature: number, station: WeatherStation): Promise<Array<DetailDegreeDay>> {
-    console.log('calculateHeatingDegreeHoursForDate');
     if (!this.stationDataResponse || this.stationDataResponse.station.ID != station.ID || this.stationDataResponse.year != day.getFullYear()) {
       let response: Response = await this.getStationDataResponse(station, day.getFullYear());
       let dataResults: string = await response.text();
@@ -153,12 +141,11 @@ export class DegreeDaysService {
       this.yearHourlyData = this.getStationYearLCDFromResults(station, dataResults);
     }
     let localClimatologicalDataDay: Array<LocalClimatologicalData> = this.yearHourlyData.filter(lcd => {
-      return lcd.DATE.getDate() == day.getDate() && lcd.DATE.getMonth() == day.getMonth();
+      return lcd.DATE.getDate() == day.getDate() && lcd.DATE.getMonth() == day.getMonth() && isNaN(lcd.HourlyDryBulbTemperature) == false;
     });
 
     let results: Array<DetailDegreeDay> = new Array();
     let minutesPerDay: number = 1440;
-    console.log(localClimatologicalDataDay);
     for (let i = 0; i < localClimatologicalDataDay.length; i++) {
       let previousDate: Date;
       if (i == 0) {
