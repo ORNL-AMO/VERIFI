@@ -17,6 +17,7 @@ import { PredictorsTableComponent } from './manage-predictors/predictors-table/p
 import { LabelWithTooltipModule } from 'src/app/shared/label-with-tooltip/label-with-tooltip.module';
 import { PredictorEntriesTableComponent } from './predictor-entries/predictor-entries-table/predictor-entries-table.component';
 import { DegreeDaysComponent } from './degree-days/degree-days.component';
+import { WeatherStationsTableComponent } from './degree-days/weather-stations-table/weather-stations-table.component';
 
 
 
@@ -32,7 +33,8 @@ import { DegreeDaysComponent } from './degree-days/degree-days.component';
     EditPredictorEntryComponent,
     PredictorsTableComponent,
     PredictorEntriesTableComponent,
-    DegreeDaysComponent
+    DegreeDaysComponent,
+    WeatherStationsTableComponent
   ],
   imports: [
     CommonModule,

@@ -86,6 +86,9 @@ export interface IdbFacility {
     contactPhone: string,
     modifiedDate?: Date,
     facilityOrder?: number
+    includeDegreeDays?: boolean,
+    heatingBaseTemperature?: number,
+    coolingBaseTemperature?: number
 }
 
 export interface IdbUtilityMeterGroup {

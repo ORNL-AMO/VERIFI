@@ -48,7 +48,7 @@
     <hr>
     <div class="row" *ngIf="calculating">
         <div class="col-12 text-center pb-4">
-            <app-calculating-spinner [message]="'Calculating...'"></app-calculating-spinner>
+            <app-calculating-spinner [message]="'Calculating ' + selectedYear+ '...'"></app-calculating-spinner>
         </div>
     </div>
     <div class="row" *ngIf="yearSummaryData && yearSummaryData.length != 0">

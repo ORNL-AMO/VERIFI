@@ -467,6 +467,7 @@ export class DegreeDaysService {
       }
       localData.push(hourData);
     }
+    console.log(localData);
     return localData;
   }
 
@@ -505,6 +506,7 @@ export class DegreeDaysService {
       }
       localData.push(hourData);
     }
+    console.log(localData);
     return localData;
   }
 

@@ -1,0 +1,41 @@
+<div class="d-flex w-100 justify-content-end pb-2">
+    <app-table-items-dropdown></app-table-items-dropdown>
+</div>
+<table class="table utility-data table-sm table-bordered table-hover">
+    <thead>
+        <tr>
+            <th>Station Name</th>
+            <th>State</th>
+            <th>Distance Away</th>
+            <th>Data Start</th>
+            <th>Data End</th>
+        </tr>
+    </thead>
+    <tbody class="table-group-divider">
+        <tr
+            *ngFor="let station of stations| slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage">
+            <td>
+                <a class="click-link" (click)="goToStation(station)">{{station.name}} ({{station.lat}}, {{station.lon}})</a>
+            </td>
+            <td>
+                {{station.state}}
+            </td>
+            <td>
+                {{station.distanceFrom | number}} miles
+            </td>
+            <td>
+                {{station.begin | date }}
+            </td>
+            <td>
+                {{station.end | date }}
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+
+<div class="d-flex w-100 justify-content-end">
+    <ngb-pagination [collectionSize]="stations.length" [(page)]="currentPageNumber" [pageSize]="itemsPerPage"
+        [maxSize]="5" [rotate]="true" aria-label="Pagination">
+    </ngb-pagination>
+</div>
