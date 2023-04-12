@@ -119,12 +119,18 @@ export class DegreeDaysService {
         coolingDegreeDays += (degreeDifference * portionOfDay);
       }
     }
+    let stationId: string;
+    let stationName: string;
+    if (localClimatologicalDataDay[0]) {
+      stationId = localClimatologicalDataDay[0].STATION;
+      stationName = localClimatologicalDataDay[0].NAME;
+    }
     return {
       heatingDegreeDays: heatingDegreeDays,
       coolingDegreeDays: coolingDegreeDays,
       date: new Date(day),
-      stationId: localClimatologicalDataDay[0].STATION,
-      stationName: localClimatologicalDataDay[0].NAME
+      stationId: stationId,
+      stationName: stationId
     };
   }
 

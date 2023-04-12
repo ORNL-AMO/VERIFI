@@ -24,5 +24,6 @@ export class WeatherDataService {
   selectedDate: Date = new Date(2022, 6, 8);
   heatingTemp: number = 60;
   coolingTemp: number = 70;
+  zipCode: string;
   constructor() { }
 }

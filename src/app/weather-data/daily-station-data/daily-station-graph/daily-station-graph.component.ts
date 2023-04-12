@@ -45,7 +45,7 @@ export class DailyStationGraphComponent {
           name: 'Heating Degree Days',
           yaxis: 'y',
           marker: {
-            color: '#C0392B'
+            color: '#C0392B',
           }
         },
 
@@ -73,7 +73,6 @@ export class DailyStationGraphComponent {
           type: 'scatter',
           name: 'Heating Base Temp',
           yaxis: 'y2',
-          // mode: 'lines+markers'
         },
         {
           x: this.hourlySummaryData.map(data => { return data.time }),
@@ -81,7 +80,6 @@ export class DailyStationGraphComponent {
           type: 'scatter',
           name: 'Cooling Base Temp',
           yaxis: 'y2',
-          // mode: 'lines+markers'
         }
       ];
 

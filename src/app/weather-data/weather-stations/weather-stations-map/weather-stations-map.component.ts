@@ -64,7 +64,13 @@ export class WeatherStationsMapComponent {
         text: this.mapData.map(item => { return item.name }),
         marker: {
           text: this.mapData.map(item => { return item.name }),
-          // size: this.mapData.map(item => { return (item.amount / cmax) * 25 + 10 }),
+          size: this.mapData.map(item => {
+            if (item.isZip) {
+              return 15;
+            } else {
+              return 10;
+            }
+          }),
           color: this.mapData.map(item => {
             if (item.isZip) {
               return 'red';
@@ -88,9 +94,6 @@ export class WeatherStationsMapComponent {
         'geo': {
           scope: 'usa',
           resolution: 110,
-          // projection: {
-          //   type: 'albers usa'
-          // },
           showland: true,
           // landcolor: 'rgb(20, 90, 50)',
           subunitwidth: 1,
@@ -101,9 +104,9 @@ export class WeatherStationsMapComponent {
             lat: zipCodeItem.lat,
             lon: zipCodeItem.lng
           },
-          projection: {
-            scale: this.getScale()
-          }
+          // projection: {
+          //   scale: this.getScale()
+          // }
         },
         showlegend: false,
         margin: { "t": 0, "b": 50, "l": 0, "r": 50 },
@@ -112,7 +115,7 @@ export class WeatherStationsMapComponent {
       let config = {
         displaylogo: false,
         responsive: true,
-        scrollZoom: false
+        // scrollZoom: false
       }
 
       this.plotlyService.newPlot(this.weatherStationMap.nativeElement, data, layout, config);
@@ -144,7 +147,7 @@ export class WeatherStationsMapComponent {
       return 25;
     } else if (this.furthestDistance >= 10 && this.furthestDistance < 150) {
       return 10;
-    } else if(this.furthestDistance >= 150 && this.furthestDistance < 500 ){
+    } else if (this.furthestDistance >= 150 && this.furthestDistance < 500) {
       return 5;
     } else {
       return 1;
