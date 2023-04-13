@@ -28,16 +28,26 @@
     <div *ngFor="let predictor of predictorEntry.predictors">
         <div class="row">
             <div class="col-4">
-                <label [for]="'predictor-' + predictor.id">{{predictor.name}}</label>
+                <label [for]="'predictor-' + predictor.id">
+                    <span class="fa fa-temperature-half" *ngIf="predictor.predictorType == 'Weather'"></span>
+                    {{predictor.name}}</label>
             </div>
             <div class="col">
                 <div class="input-group mb-2">
                     <input [id]="'predictor-' + predictor.id" class="form-control" type="number"
                         [(ngModel)]="predictor.amount" name="{{'predictorAmount'+predictor.id}}"
-                        onfocus="this.select();">
+                        onfocus="this.select();" [disabled]="predictor.predictorType == 'Weather'">
                     <span class="input-group-text" *ngIf="predictor.unit">{{predictor.unit}}</span>
                 </div>
             </div>
         </div>
     </div>
 </form>
+
+<div *ngIf="hasWeatherData" class="alert alert-info text-center">
+    Degree day predictors are denoted with a <span class="fa fa-temperature-half"></span> icon and are automatically
+    calculated.
+</div>
+
+<app-calculating-spinner *ngIf="calculatingDegreeDays"
+    [message]="'Calculating Degree Days...'"></app-calculating-spinner>

@@ -18,6 +18,7 @@ import { LabelWithTooltipModule } from 'src/app/shared/label-with-tooltip/label-
 import { PredictorEntriesTableComponent } from './predictor-entries/predictor-entries-table/predictor-entries-table.component';
 import { DegreeDaysComponent } from './degree-days/degree-days.component';
 import { WeatherStationsTableComponent } from './degree-days/weather-stations-table/weather-stations-table.component';
+import { CalculatingSpinnerModule } from 'src/app/shared/calculating-spinner/calculating-spinner.module';
 
 
 
@@ -44,7 +45,8 @@ import { WeatherStationsTableComponent } from './degree-days/weather-stations-ta
     HelperPipesModule,
     TableItemsDropdownModule,
     RouterModule,
-    LabelWithTooltipModule
+    LabelWithTooltipModule,
+    CalculatingSpinnerModule
   ]
 })
 export class PredictorDataModule { }

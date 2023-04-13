@@ -9,6 +9,9 @@ import { IdbFacility, IdbPredictorEntry, PredictorData } from 'src/app/models/id
 import { CopyTableService } from 'src/app/shared/helper-services/copy-table.service';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import * as _ from 'lodash';
+import { WeatherDataService } from 'src/app/weather-data/weather-data.service';
+import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
+import { WeatherStation } from 'src/app/models/degreeDays';
 
 @Component({
   selector: 'app-predictor-entries-table',
@@ -37,10 +40,12 @@ export class PredictorEntriesTableComponent {
   orderDataField: string = 'date';
   orderByDirection: string = 'desc';
   hasData: boolean;
+  hasWeatherData: boolean;
   copyingTable: boolean = false;
   constructor(private predictorsDbService: PredictordbService, private router: Router, private loadingService: LoadingService,
     private facilityDbService: FacilitydbService, private toastNotificationsService: ToastNotificationsService,
-    private sharedDataService: SharedDataService, private copyTableService: CopyTableService) { }
+    private sharedDataService: SharedDataService, private copyTableService: CopyTableService,
+    private weatherDataService: WeatherDataService, private degreeDaysService: DegreeDaysService) { }
 
   ngOnInit(): void {
     this.facilityPredictorsSub = this.predictorsDbService.facilityPredictors.subscribe(predictors => {
@@ -67,6 +72,12 @@ export class PredictorEntriesTableComponent {
 
   setHasData() {
     this.hasData = (this.facilityPredictors && this.facilityPredictors.length != 0) || (this.facilityPredictorEntries && this.facilityPredictorEntries.length != 0);
+    if(this.hasData){
+      let findPredictor: PredictorData = this.facilityPredictors.find(predictor => {return predictor.predictorType == 'Weather'});
+      this.hasWeatherData = findPredictor != undefined;
+    }else{
+      this.hasWeatherData = false;
+    }
   }
 
 
@@ -190,5 +201,19 @@ export class PredictorEntriesTableComponent {
       this.copyTableService.copyTable(this.predictorTable);
       this.copyingTable = false;
     }, 200)
+  }
+
+  async viewWeatherData(predictorEntry: IdbPredictorEntry) {
+    let predictorData: PredictorData = predictorEntry.predictors.find(pData => { return pData.predictorType == 'Weather' });
+    let weatherStation: WeatherStation = await this.degreeDaysService.getStationById(predictorData.weatherStationId);
+    this.weatherDataService.selectedStation = weatherStation;
+    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    this.weatherDataService.coolingTemp = selectedFacility.coolingBaseTemperature;
+    this.weatherDataService.heatingTemp = selectedFacility.heatingBaseTemperature;
+    let predictorDate: Date = new Date(predictorEntry.date);
+    this.weatherDataService.selectedDate = predictorDate;
+    this.weatherDataService.selectedMonth = predictorDate;
+    this.weatherDataService.selectedYear = predictorDate.getFullYear();
+    this.router.navigateByUrl('weather-data/daily-station');
   }
 }

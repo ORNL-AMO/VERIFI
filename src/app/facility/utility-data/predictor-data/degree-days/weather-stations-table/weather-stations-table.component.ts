@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { WeatherStation } from 'src/app/models/degreeDays';
 import { IdbFacility } from 'src/app/models/idb';
@@ -14,6 +14,11 @@ import { Router } from '@angular/router';
   styleUrls: ['./weather-stations-table.component.css']
 })
 export class WeatherStationsTableComponent {
+  @Input()
+  coolingBaseTemperature: number;
+  @Input()
+  heatingBaseTemperature: number;
+
 
   stations: Array<WeatherStation> = [];
 
@@ -49,8 +54,8 @@ export class WeatherStationsTableComponent {
     let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     this.weatherDataService.zipCode = facility.zip;
     this.weatherDataService.selectedStation = station;
-    this.weatherDataService.coolingTemp = facility.coolingBaseTemperature;
-    this.weatherDataService.heatingTemp = facility.heatingBaseTemperature;
+    this.weatherDataService.coolingTemp = this.coolingBaseTemperature;
+    this.weatherDataService.heatingTemp = this.heatingBaseTemperature;
     this.weatherDataService.selectedYear = station.end.getFullYear() - 1;
     this.router.navigateByUrl('weather-data/annual-station');
   }

@@ -53,7 +53,8 @@ export class EditPredictorComponent {
 
   setPredictorDataEdit(predictorId: string) {
     let facilityPredictors: Array<PredictorData> = this.predictorDbService.facilityPredictors.getValue();
-    this.predictorData = facilityPredictors.find(predictor => { return predictor.id == predictorId });
+    let predictorData: PredictorData = facilityPredictors.find(predictor => { return predictor.id == predictorId });
+    this.predictorData = JSON.parse(JSON.stringify(predictorData));
     this.setPredictorForm();
   }
 
@@ -76,8 +77,7 @@ export class EditPredictorComponent {
       'conversionType': [this.predictorData.conversionType],
       'mathAction': [],
       'mathAmount': [],
-      'weatherDataType': [this.predictorData.weatherDataType],
-      'degreeDayThreshold': [this.predictorData.degreeDayThreshold],
+      'weatherDataType': [this.predictorData.weatherDataType]
     });
     this.setShowReferencePredictors()
     this.setUnitOptions();

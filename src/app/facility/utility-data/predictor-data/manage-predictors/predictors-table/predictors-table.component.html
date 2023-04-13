@@ -28,7 +28,9 @@
         <tbody class="table-group-divider">
             <tr *ngFor="let predictor of facilityPredictors">
                 <td>
-                    <a (click)="selectEditPredictor(predictor)">{{predictor.name}}</a>
+                    <a (click)="selectEditPredictor(predictor)">
+                        <span *ngIf="predictor.predictorType == 'Weather'" class="fa fa-temperature-half"></span>
+                        {{predictor.name}}</a>
                 </td>
                 <td>
                     {{predictor.unit}}
@@ -45,9 +47,30 @@
                         <button class="btn btn-sm btn-outline" (click)="selectDelete(predictor)" title="Delete">
                             <i class="fa fa-trash"></i>
                         </button>
+
+                        <button *ngIf="predictor.predictorType == 'Weather'" class="btn btn-sm btn-outline"
+                            (click)="viewWeatherData(predictor)" title="View Weather Data">
+                            <i class="fa fa-temperature-half"></i>
+                        </button>
                     </div>
                 </td>
             </tr>
         </tbody>
     </table>
+</div>
+
+<div [ngClass]="{'windowOverlay': predictorToDelete}"></div>
+<div class="popup" [class.open]="predictorToDelete">
+    <div class="popup-header">
+        Delete {{predictorToDelete?.name}}?
+        <button class="item-right" (click)="cancelDelete()">x</button>
+    </div>
+    <div class="popup-body">
+        <p>WARNING:
+            Are you sure you want to delete "{{predictorToDelete?.name}}"? This cannot be undone.</p>
+    </div>
+    <div class="saveCancel popup-footer text-end">
+        <button class="btn btn-secondary" (click)="cancelDelete()">Cancel</button>
+        <button class="btn btn-danger" (click)="confirmDelete()">Confirm Delete</button>
+    </div>
 </div>

@@ -14,6 +14,7 @@ export interface WeatherStation {
 }
 
 export interface LocalClimatologicalData {
+    stationId: string,
     STATION: string,
     DATE: Date,
     LATITUDE: string,

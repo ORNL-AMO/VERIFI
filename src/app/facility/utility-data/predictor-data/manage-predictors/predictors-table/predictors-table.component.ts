@@ -4,6 +4,7 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { IdbFacility, PredictorData } from 'src/app/models/idb';
 import { Subscription } from 'rxjs';
+import { LoadingService } from 'src/app/core-components/loading/loading.service';
 
 
 @Component({
@@ -17,15 +18,15 @@ export class PredictorsTableComponent {
   facilityPredictors: Array<PredictorData>;
   selectedFacilitySub: Subscription;
   selectedFacility: IdbFacility;
-
+  predictorToDelete: PredictorData;
   constructor(private predictorDbService: PredictordbService, private router: Router,
-    private facilitydbService: FacilitydbService) {
+    private facilitydbService: FacilitydbService, private loadingService: LoadingService) {
 
   }
 
   ngOnInit() {
     this.facilityPredictorsSub = this.predictorDbService.facilityPredictors.subscribe(val => {
-      this.facilityPredictors = val;
+      this.facilityPredictors = JSON.parse(JSON.stringify(val));
     });
     this.selectedFacilitySub = this.facilitydbService.selectedFacility.subscribe(facility => {
       this.selectedFacility = facility;
@@ -38,8 +39,25 @@ export class PredictorsTableComponent {
   }
 
   selectDelete(predictor: PredictorData) {
+    this.predictorToDelete = predictor;
+  }
+
+
+  async confirmDelete() {
+    let deleteIndex: number = this.facilityPredictors.findIndex(facilityPredictor => { return facilityPredictor.id == this.predictorToDelete.id });
+    this.facilityPredictors.splice(deleteIndex, 1);
+    this.predictorToDelete = undefined;
+    this.loadingService.setLoadingMessage('Deleting Predictor Data...');
+    this.loadingService.setLoadingStatus(true);
+    await this.predictorDbService.updateFacilityPredictorEntries(this.facilityPredictors);
+    this.loadingService.setLoadingStatus(false);
 
   }
+
+  cancelDelete() {
+    this.predictorToDelete = undefined;
+  }
+
 
   selectEditPredictor(predictor: PredictorData) {
     this.router.navigateByUrl('facility/' + this.selectedFacility.id + '/utility/predictors/manage/edit-predictor/' + predictor.id);
@@ -52,4 +70,10 @@ export class PredictorsTableComponent {
   uploadData() {
     this.router.navigateByUrl('/upload');
   }
+
+
+  async viewWeatherData(predictor: PredictorData) {
+
+  }
+
 }

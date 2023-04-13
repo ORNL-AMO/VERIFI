@@ -241,7 +241,7 @@ export interface PredictorData {
     convertFrom?: string,
     convertTo?: string,
     weatherDataType?: WeatherDataType,
-    degreeDayThreshold?: number
+    weatherStationId?: string
 }
 
 export type PredictorType = 'Standard' | 'Conversion' | 'Math' | 'Weather'

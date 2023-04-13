@@ -82,24 +82,9 @@
                 <label class="semibold" for="weatherDataType">Weather Predictor Type</label>
                 <div class="mb-3">
                     <select id="weatherDataType" class="form-select" formControlName="weatherDataType">
-                        <option [value]="'HDD'">HDD</option>
-                        <option [value]="'CDD'">CDD</option>
+                        <option [value]="'HDD'">Heating Degree Days</option>
+                        <option [value]="'CDD'">Cooling Degree Days</option>
                     </select>
-                </div>
-            </div>
-            <div class="col-lg-6 col-md-12 col-sm-12">
-                <label *ngIf="predictorForm.controls.weatherDataType.value == 'HDD'" class="semibold"
-                    for="degreeDayThreshold">Heating To Temperature</label>
-                <label *ngIf="predictorForm.controls.weatherDataType.value == 'CDD'" class="semibold"
-                    for="degreeDayThreshold">Cooling To Temperature</label>
-
-                <div class="mb-3 input-group">
-                    <input id="degreeDayThreshold" class="form-control" type="number"
-                        formControlName="degreeDayThreshold" onfocus="this.select();">
-                    <!--TODO: Temperature units-->
-                    <span class="input-group-text">
-                        &#8457;
-                    </span>
                 </div>
             </div>
         </ng-container>

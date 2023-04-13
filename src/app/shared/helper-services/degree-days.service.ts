@@ -14,9 +14,9 @@ export class DegreeDaysService {
 
   async getHeatingDegreeDays(zipCode: string, month: number, year: number, baseHeatingTemperature: number, baseCoolingTemperature: number): Promise<Array<DegreeDay>> {
     let stationsWithinFortyMiles: Array<WeatherStation> = await this.getClosestStation(zipCode, 40, { year: year, month: month });
-    let stationDataResponse: { station: WeatherStation, response: Response } = await this.getClosestStationData(stationsWithinFortyMiles, year);
-    let localClimatologicalDataYear: Array<LocalClimatologicalData> = await this.getStationYearLCD(stationDataResponse.station, stationDataResponse.response);
-    let localClimatologicalDataMonth: Array<LocalClimatologicalData> = localClimatologicalDataYear.filter(lcd => {
+    let stationDataResponse: { station: WeatherStation, response: Response, localClimatologicalDataYear: Array<LocalClimatologicalData> } = await this.getClosestStationData(stationsWithinFortyMiles, year);
+    // let localClimatologicalDataYear: Array<LocalClimatologicalData> = await this.getStationYearLCD(stationDataResponse.station, stationDataResponse.response);
+    let localClimatologicalDataMonth: Array<LocalClimatologicalData> = stationDataResponse.localClimatologicalDataYear.filter(lcd => {
       return lcd.DATE.getMonth() == month;
     });
     let startDate: Date = new Date(year, month, 1);
@@ -122,15 +122,15 @@ export class DegreeDaysService {
     let stationId: string;
     let stationName: string;
     if (localClimatologicalDataDay[0]) {
-      stationId = localClimatologicalDataDay[0].STATION;
-      stationName = localClimatologicalDataDay[0].NAME;
+      stationId = localClimatologicalDataDay[0].stationId;
+      stationName = localClimatologicalDataDay[0].STATION;
     }
     return {
       heatingDegreeDays: heatingDegreeDays,
       coolingDegreeDays: coolingDegreeDays,
       date: new Date(day),
       stationId: stationId,
-      stationName: stationId
+      stationName: stationName
     };
   }
 
@@ -289,12 +289,16 @@ export class DegreeDaysService {
     return [];
   }
 
-  async getClosestStationData(stationsWithinFortyMiles: Array<WeatherStation>, year: number): Promise<{ station: WeatherStation, response: Response }> {
+  async getClosestStationData(stationsWithinFortyMiles: Array<WeatherStation>, year: number): Promise<{ station: WeatherStation, response: Response, localClimatologicalDataYear: Array<LocalClimatologicalData> }> {
     let response: Response;
     for (let i = 0; i < stationsWithinFortyMiles.length; i++) {
       response = await this.getStationDataResponse(stationsWithinFortyMiles[i], year);
       if (response.ok) {
-        return { station: stationsWithinFortyMiles[i], response: response };
+        let localClimatologicalDataYear: Array<LocalClimatologicalData> = await this.getStationYearLCD(stationsWithinFortyMiles[i], response);
+        let checkData: LocalClimatologicalData = localClimatologicalDataYear.find(data => { return isNaN(data.HourlyDryBulbTemperature) == false });
+        if (checkData != undefined) {
+          return { station: stationsWithinFortyMiles[i], response: response, localClimatologicalDataYear };
+        }
       }
     }
     return null;
@@ -440,6 +444,7 @@ export class DegreeDaysService {
     for (let i = 1; i < dataLines.length; i++) {
       let currentLine = dataLines[i].split(",");
       let hourData: LocalClimatologicalData = {
+        stationId: weatherStation.ID,
         STATION: weatherStation.name,
         DATE: new Date(currentLine[1]),
         LATITUDE: currentLine[2],
@@ -467,7 +472,6 @@ export class DegreeDaysService {
       }
       localData.push(hourData);
     }
-    console.log(localData);
     return localData;
   }
 
@@ -479,6 +483,7 @@ export class DegreeDaysService {
     for (let i = 1; i < dataLines.length; i++) {
       let currentLine = dataLines[i].split(",");
       let hourData: LocalClimatologicalData = {
+        stationId: weatherStation.ID,
         STATION: weatherStation.name,
         DATE: new Date(currentLine[1]),
         LATITUDE: currentLine[2],

@@ -1,4 +1,3 @@
-
 <div class="d-flex w-100 justify-content-end mb-2">
     <!-- <div>
         <button class="btn action-btn" (click)="editPredictors()">Add/Edit Predictors</button>
@@ -37,6 +36,7 @@
             <th class="header" *ngFor="let predictor of facilityPredictors; let predictorIndex = index;"
                 (click)="setOrderDataField(predictor.name)" [ngClass]="{'active': orderDataField == predictor.name}">
                 <span *ngIf="predictor.production" class="fa fa-check-circle-o"></span>
+                <span *ngIf="predictor.predictorType == 'Weather'" class="fa fa-temperature-half"></span>
                 {{predictor.name}}
                 <br *ngIf="predictor.unit">
                 <span class="small block" *ngIf="predictor.unit">({{predictor.unit}})</span>
@@ -54,7 +54,9 @@
                     [(ngModel)]="predictorEntry.checked">
             </td>
             <td>{{predictorEntry.date | date:'MMM, yyyy'}}</td>
-            <td *ngFor="let predictor of predictorEntry.predictors">{{predictor.amount | customNumber}}</td>
+            <td *ngFor="let predictor of predictorEntry.predictors">
+                {{predictor.amount | customNumber}}
+            </td>
             <td class="actions" *ngIf="!copyingTable">
                 <div class="btn-group">
                     <button class="btn btn-sm btn-outline" (click)="setEditPredictorEntry(predictorEntry)" title="Edit">
@@ -63,6 +65,10 @@
                     <button class="btn btn-sm btn-outline" (click)="setDeletePredictorEntry(predictorEntry)"
                         title="Delete">
                         <i class="fa fa-trash"></i>
+                    </button>
+                    <button *ngIf="hasWeatherData" class="btn btn-sm btn-outline"
+                        (click)="viewWeatherData(predictorEntry)" title="View Weather Data">
+                        <i class="fa fa-temperature-half"></i>
                     </button>
                 </div>
             </td>

@@ -1,10 +1,12 @@
 import { Component } from '@angular/core';
-import { FormBuilder } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
-import { IdbFacility, IdbPredictorEntry } from 'src/app/models/idb';
-
+import { IdbAccount, IdbFacility, IdbPredictorEntry } from 'src/app/models/idb';
+import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
+import * as _ from 'lodash';
 @Component({
   selector: 'app-edit-predictor-entry',
   templateUrl: './edit-predictor-entry.component.html',
@@ -14,11 +16,12 @@ export class EditPredictorEntryComponent {
 
   addOrEdit: 'add' | 'edit';
   predictorEntry: IdbPredictorEntry;
-  // predictorData: PredictorData;
-  // predictorForm: FormGroup;
+  hasWeatherData: boolean;
+  calculatingDegreeDays: boolean;
   constructor(private activatedRoute: ActivatedRoute, private predictorDbService: PredictordbService,
     private router: Router, private facilityDbService: FacilitydbService,
-    private formBuilder: FormBuilder) {
+    private accountDbService: AccountdbService, private dbChangesService: DbChangesService,
+    private degreeDaysService: DegreeDaysService) {
   }
 
   ngOnInit() {
@@ -31,6 +34,8 @@ export class EditPredictorEntryComponent {
         this.addOrEdit = 'add';
         this.setNewPredictorEntry();
       }
+      this.setHasWeatherData();
+      this.setDegreeDayValues();
     });
   }
 
@@ -41,13 +46,22 @@ export class EditPredictorEntryComponent {
     this.router.navigateByUrl('facility/' + selectedFacility.id + '/utility/predictors/entries/predictor-entries-table')
   }
 
-  saveChanges() {
+  async saveChanges() {
+    if (this.addOrEdit == "edit") {
+      await this.predictorDbService.updateWithObservable(this.predictorEntry).toPromise();
+    } else {
+      await this.predictorDbService.addWithObservable(this.predictorEntry).toPromise();
+    }
+    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    await this.dbChangesService.setPredictors(selectedAccount, selectedFacility);
 
   }
 
   setPredictorEntryEdit(predictorId: string) {
     let facilityPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.facilityPredictorEntries.getValue();
-    this.predictorEntry = facilityPredictorEntries.find(entry => { return entry.guid == predictorId });
+    let predictorEntry: IdbPredictorEntry = facilityPredictorEntries.find(entry => { return entry.guid == predictorId });
+    this.predictorEntry = JSON.parse(JSON.stringify(predictorEntry));
   }
 
   setNewPredictorEntry() {
@@ -59,5 +73,28 @@ export class EditPredictorEntryComponent {
     let yearMonth: Array<string> = eventData.split('-');
     //-1 on month
     this.predictorEntry.date = new Date(Number(yearMonth[0]), Number(yearMonth[1]) - 1, 1);
+    this.setDegreeDayValues();
+  }
+
+  setHasWeatherData() {
+    this.hasWeatherData = this.predictorEntry.predictors.find(predictor => {
+      return predictor.predictorType == 'Weather';
+    }) != undefined;
+  }
+
+  setDegreeDayValues() {
+    this.calculatingDegreeDays = true;
+    let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    this.degreeDaysService.getHeatingDegreeDays(facility.zip, this.predictorEntry.date.getMonth(), this.predictorEntry.date.getFullYear(), facility.heatingBaseTemperature, facility.coolingBaseTemperature).then(degreeDays => {
+      let cddIndex: number = this.predictorEntry.predictors.findIndex(predictor => { return predictor.predictorType == 'Weather' && predictor.weatherDataType == 'CDD' });
+      let hddIndex: number = this.predictorEntry.predictors.findIndex(predictor => { return predictor.predictorType == 'Weather' && predictor.weatherDataType == 'HDD' });
+      let totalCDD: number = _.sumBy(degreeDays, 'coolingDegreeDays');
+      this.predictorEntry.predictors[cddIndex].amount = totalCDD;
+      this.predictorEntry.predictors[cddIndex].weatherStationId = degreeDays[0]?.stationId;
+      let totalHDD: number = _.sumBy(degreeDays, 'heatingDegreeDays');
+      this.predictorEntry.predictors[hddIndex].amount = totalHDD;
+      this.predictorEntry.predictors[hddIndex].weatherStationId = degreeDays[0]?.stationId;
+      this.calculatingDegreeDays = false;
+    });
   }
 }

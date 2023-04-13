@@ -1,10 +1,13 @@
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { IdbAccount, IdbFacility, IdbPredictorEntry, PredictorData } from '../models/idb';
+import { IdbFacility, IdbPredictorEntry, PredictorData } from '../models/idb';
 import { FacilitydbService } from './facility-db.service';
 import * as _ from 'lodash';
-import { AccountdbService } from './account-db.service';
+import { DegreeDaysService } from '../shared/helper-services/degree-days.service';
+import { DegreeDay } from '../models/degreeDays';
+import { LoadingService } from '../core-components/loading/loading.service';
+import { Months } from '../shared/form-data/months';
 
 @Injectable({
     providedIn: 'root'
@@ -14,7 +17,8 @@ export class PredictordbService {
     accountPredictorEntries: BehaviorSubject<Array<IdbPredictorEntry>>;
     facilityPredictorEntries: BehaviorSubject<Array<IdbPredictorEntry>>;
     facilityPredictors: BehaviorSubject<Array<PredictorData>>;
-    constructor(private dbService: NgxIndexedDBService, private facilityDbService: FacilitydbService, private accountDbService: AccountdbService) {
+    constructor(private dbService: NgxIndexedDBService, private facilityDbService: FacilitydbService, private degreeDaysService: DegreeDaysService,
+        private loadingService: LoadingService) {
         this.facilityPredictorEntries = new BehaviorSubject<Array<IdbPredictorEntry>>(new Array());
         this.facilityPredictors = new BehaviorSubject<Array<PredictorData>>(new Array());
         this.accountPredictorEntries = new BehaviorSubject<Array<IdbPredictorEntry>>(new Array());
@@ -100,8 +104,7 @@ export class PredictordbService {
             conversionType: undefined,
             // mathAction: undefined,
             // mathAmount: undefined,
-            weatherDataType: 'HDD',
-            degreeDayThreshold: undefined,
+            weatherDataType: 'HDD'
         }
     }
 
@@ -185,6 +188,40 @@ export class PredictordbService {
         });
         return entryPredictors;
     }
+
+
+    async setDegreeDays(facility: IdbFacility) {
+        let facilityPredictorEntries: Array<IdbPredictorEntry> = this.facilityPredictorEntries.getValue();
+        for (let index = 0; index < facilityPredictorEntries.length; index++) {
+            let predictorEntry: IdbPredictorEntry = facilityPredictorEntries[index];
+            for (let predictorIndex = 0; predictorIndex < predictorEntry.predictors.length; predictorIndex++) {
+                let predictorData: PredictorData = predictorEntry.predictors[predictorIndex];
+                if (predictorData.predictorType == 'Weather') {
+                    //get degree days
+                    let dataDate: Date = new Date(predictorEntry.date)
+                    this.loadingService.setLoadingMessage('Calculating Degree Days ' + Months[dataDate.getMonth()].name + ', ' + dataDate.getFullYear() + '...')
+                    let degreeDays: Array<DegreeDay> = await this.degreeDaysService.getHeatingDegreeDays(facility.zip, dataDate.getMonth(), dataDate.getFullYear(), facility.heatingBaseTemperature, facility.coolingBaseTemperature);
+                    if (predictorData.weatherDataType == 'CDD') {
+                        let totalCDD: number = _.sumBy(degreeDays, 'coolingDegreeDays');
+                        predictorData.amount = totalCDD;
+                        predictorData.weatherStationId = degreeDays[0]?.stationId;
+                    }
+                    if (predictorData.weatherDataType == 'HDD') {
+                        let totalHDD: number = _.sumBy(degreeDays, 'heatingDegreeDays');
+                        predictorData.amount = totalHDD;
+                        predictorData.weatherStationId = degreeDays[0]?.stationId;
+                    }
+                }
+            }
+            await this.updateWithObservable(facilityPredictorEntries[index]).toPromise();
+        }
+        let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+        let accountPredictorEntries: Array<IdbPredictorEntry> = await this.getAllByIndexRange('accountId', selectedFacility.accountId).toPromise()
+        this.accountPredictorEntries.next(accountPredictorEntries);
+        let updatedFacilityPredictorEntries: Array<IdbPredictorEntry> = accountPredictorEntries.filter(predictor => { return predictor.facilityId == selectedFacility.guid });
+        this.facilityPredictorEntries.next(updatedFacilityPredictorEntries);
+    }
+
 
 
     updateWithObservable(values: IdbPredictorEntry): Observable<any> {
