@@ -3,6 +3,8 @@ import { EGridService } from './e-grid.service';
 import * as _ from 'lodash';
 import { ConvertUnitsService } from '../convert-units/convert-units.service';
 import { DegreeDay, DetailDegreeDay, LocalClimatologicalData, WeatherStation } from 'src/app/models/degreeDays';
+import * as Papa from 'papaparse';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -313,162 +315,36 @@ export class DegreeDaysService {
   async getStationYearLCD(weatherStation: WeatherStation, response: Response): Promise<Array<LocalClimatologicalData>> {
     // let fetchData = await fetch("https://www.ncei.noaa.gov/data/local-climatological-data/access/" + year + "/" + weatherStation.ID + ".csv");
     let dataResults = await response.text();
-    dataResults = dataResults.replace(/['"]+/g, "");
-    let dataLines = dataResults.split("\n");
-    //TODO: Parse data
-    // 0: "STATION"
-    // 1: "DATE"
-    // 2: "LATITUDE"
-    // 3: "LONGITUDE"
-    // 4: "ELEVATION"
-    // 5: "NAME"
-    // 6: "REPORT_TYPE"
-    // 7: "SOURCE"
-    // 8: "HourlyAltimeterSetting"
-    // 9: "HourlyDewPointTemperature"
-    // 10: "HourlyDryBulbTemperature"
-    // 11: "HourlyPrecipitation"
-    // 12: "HourlyPresentWeatherType"
-    // 13: "HourlyPressureChange"
-    // 14: "HourlyPressureTendency"
-    // 15: "HourlyRelativeHumidity"
-    // 16: "HourlySkyConditions"
-    // 17: "HourlySeaLevelPressure"
-    // 18: "HourlyStationPressure"
-    // 19: "HourlyVisibility"
-    // 20: "HourlyWetBulbTemperature"
-    // 21: "HourlyWindDirection"
-    // 22: "HourlyWindGustSpeed"
-    // 23: "HourlyWindSpeed"
-    // 24: "Sunrise"
-    // 25: "Sunset"
-    // 26: "DailyAverageDewPointTemperature"
-    // 27: "DailyAverageDryBulbTemperature"
-    // 28: "DailyAverageRelativeHumidity"
-    // 29: "DailyAverageSeaLevelPressure"
-    // 30: "DailyAverageStationPressure"
-    // 31: "DailyAverageWetBulbTemperature"
-    // 32: "DailyAverageWindSpeed"
-    // 33: "DailyCoolingDegreeDays"
-    // 34: "DailyDepartureFromNormalAverageTemperature"
-    // 35: "DailyHeatingDegreeDays"
-    // 36: "DailyMaximumDryBulbTemperature"
-    // 37: "DailyMinimumDryBulbTemperature"
-    // 38: "DailyPeakWindDirection"
-    // 39: "DailyPeakWindSpeed"
-    // 40: "DailyPrecipitation"
-    // 41: "DailySnowDepth"
-    // 42: "DailySnowfall"
-    // 43: "DailySustainedWindDirection"
-    // 44: "DailySustainedWindSpeed"
-    // 45: "DailyWeather"
-    // 46: "MonthlyAverageRH"
-    // 47: "MonthlyDaysWithGT001Precip"
-    // 48: "MonthlyDaysWithGT010Precip"
-    // 49: "MonthlyDaysWithGT32Temp"
-    // 50: "MonthlyDaysWithGT90Temp"
-    // 51: "MonthlyDaysWithLT0Temp"
-    // 52: "MonthlyDaysWithLT32Temp"
-    // 53: "MonthlyDepartureFromNormalAverageTemperature"
-    // 54: "MonthlyDepartureFromNormalCoolingDegreeDays"
-    // 55: "MonthlyDepartureFromNormalHeatingDegreeDays"
-    // 56: "MonthlyDepartureFromNormalMaximumTemperature"
-    // 57: "MonthlyDepartureFromNormalMinimumTemperature"
-    // 58: "MonthlyDepartureFromNormalPrecipitation"
-    // 59: "MonthlyDewpointTemperature"
-    // 60: "MonthlyGreatestPrecip"
-    // 61: "MonthlyGreatestPrecipDate"
-    // 62: "MonthlyGreatestSnowDepth"
-    // 63: "MonthlyGreatestSnowDepthDate"
-    // 64: "MonthlyGreatestSnowfall"
-    // 65: "MonthlyGreatestSnowfallDate"
-    // 66: "MonthlyMaxSeaLevelPressureValue"
-    // 67: "MonthlyMaxSeaLevelPressureValueDate"
-    // 68: "MonthlyMaxSeaLevelPressureValueTime"
-    // 69: "MonthlyMaximumTemperature"
-    // 70: "MonthlyMeanTemperature"
-    // 71: "MonthlyMinSeaLevelPressureValue"
-    // 72: "MonthlyMinSeaLevelPressureValueDate"
-    // 73: "MonthlyMinSeaLevelPressureValueTime"
-    // 74: "MonthlyMinimumTemperature"
-    // 75: "MonthlySeaLevelPressure"
-    // 76: "MonthlyStationPressure"
-    // 77: "MonthlyTotalLiquidPrecipitation"
-    // 78: "MonthlyTotalSnowfall"
-    // 79: "MonthlyWetBulb"
-    // 80: "AWND"
-    // 81: "CDSD"
-    // 82: "CLDD"
-    // 83: "DSNW"
-    // 84: "HDSD"
-    // 85: "HTDD"
-    // 86: "NormalsCoolingDegreeDay"
-    // 87: "NormalsHeatingDegreeDay"
-    // 88: "ShortDurationEndDate005"
-    // 89: "ShortDurationEndDate010"
-    // 90: "ShortDurationEndDate015"
-    // 91: "ShortDurationEndDate020"
-    // 92: "ShortDurationEndDate030"
-    // 93: "ShortDurationEndDate045"
-    // 94: "ShortDurationEndDate060"
-    // 95: "ShortDurationEndDate080"
-    // 96: "ShortDurationEndDate100"
-    // 97: "ShortDurationEndDate120"
-    // 98: "ShortDurationEndDate150"
-    // 99: "ShortDurationEndDate180"
-    // 100: "ShortDurationPrecipitationValue005"
-    // 101: "ShortDurationPrecipitationValue010"
-    // 102: "ShortDurationPrecipitationValue015"
-    // 103: "ShortDurationPrecipitationValue020"
-    // 104: "ShortDurationPrecipitationValue030"
-    // 105: "ShortDurationPrecipitationValue045"
-    // 106: "ShortDurationPrecipitationValue060"
-    // 107: "ShortDurationPrecipitationValue080"
-    // 108: "ShortDurationPrecipitationValue100"
-    // 109: "ShortDurationPrecipitationValue120"
-    // 110: "ShortDurationPrecipitationValue150"
-    // 111: "ShortDurationPrecipitationValue180"
-    // 112: "REM"
-    // 113: "BackupDirection"
-    // 114: "BackupDistance"
-    // 115: "BackupDistanceUnit"
-    // 116: "BackupElements"
-    // 117: "BackupElevation"
-    // 118: "BackupEquipment"
-    // 119: "BackupLatitude"
-    // 120: "BackupLongitude"
-    // 121: "BackupName"
-    // 122: "WindEquipmentChangeDate"
+    let parsedData: Array<any> = Papa.parse(dataResults, { header: true }).data;
     let localData: Array<LocalClimatologicalData> = new Array();
-
-    for (let i = 1; i < dataLines.length; i++) {
-      let currentLine = dataLines[i].split(",");
+    for (let i = 1; i < parsedData.length; i++) {
+      let currentLine = parsedData[i];
       let hourData: LocalClimatologicalData = {
         stationId: weatherStation.ID,
         STATION: weatherStation.name,
-        DATE: new Date(currentLine[1]),
-        LATITUDE: currentLine[2],
-        LONGITUDE: currentLine[3],
-        ELEVATION: currentLine[4],
-        NAME: currentLine[5],
-        REPORT_TYPE: currentLine[6],
-        SOURCE: currentLine[7],
-        HourlyAltimeterSetting: parseFloat(currentLine[8]),
-        HourlyDewPointTemperature: parseFloat(currentLine[9]),
-        HourlyDryBulbTemperature: parseFloat(currentLine[10]),
-        HourlyPrecipitation: parseFloat(currentLine[11]),
-        HourlyPresentWeatherType: currentLine[12],
-        HourlyPressureChange: parseFloat(currentLine[13]),
-        HourlyPressureTendency: parseFloat(currentLine[14]),
-        HourlyRelativeHumidity: parseFloat(currentLine[15]),
-        HourlySkyConditions: parseFloat(currentLine[16]),
-        HourlySeaLevelPressure: parseFloat(currentLine[17]),
-        HourlyStationPressure: parseFloat(currentLine[18]),
-        HourlyVisibility: parseFloat(currentLine[19]),
-        HourlyWetBulbTemperature: parseFloat(currentLine[20]),
-        HourlyWindDirection: parseFloat(currentLine[21]),
-        HourlyWindGustSpeed: parseFloat(currentLine[22]),
-        HourlyWindSpeed: parseFloat(currentLine[23])
+        DATE: new Date(currentLine['DATE']),
+        LATITUDE: currentLine['LATITUDE'],
+        LONGITUDE: currentLine['LONGITUDE'],
+        ELEVATION: currentLine['ELEVATION'],
+        NAME: currentLine['NAME'],
+        REPORT_TYPE: currentLine['REPORT_TYPE'],
+        SOURCE: currentLine['SOURCE'],
+        HourlyAltimeterSetting: parseFloat(currentLine['HourlyAltimeterSetting']),
+        HourlyDewPointTemperature: parseFloat(currentLine['HourlyDewPointTemperature']),
+        HourlyDryBulbTemperature: parseFloat(currentLine['HourlyDryBulbTemperature']),
+        HourlyPrecipitation: parseFloat(currentLine['HourlyPrecipitation']),
+        HourlyPresentWeatherType: currentLine['HourlyPresentWeatherType'],
+        HourlyPressureChange: parseFloat(currentLine['HourlyPressureChange']),
+        HourlyPressureTendency: parseFloat(currentLine['HourlyPressureTendency']),
+        HourlyRelativeHumidity: parseFloat(currentLine['HourlyRelativeHumidity']),
+        HourlySkyConditions: parseFloat(currentLine['HourlySkyConditions']),
+        HourlySeaLevelPressure: parseFloat(currentLine['HourlySeaLevelPressure']),
+        HourlyStationPressure: parseFloat(currentLine['HourlyStationPressure']),
+        HourlyVisibility: parseFloat(currentLine['HourlyVisibility']),
+        HourlyWetBulbTemperature: parseFloat(currentLine['HourlyWetBulbTemperature']),
+        HourlyWindDirection: parseFloat(currentLine['HourlyWindDirection']),
+        HourlyWindGustSpeed: parseFloat(currentLine['HourlyWindGustSpeed']),
+        HourlyWindSpeed: parseFloat(currentLine['HourlyWindSpeed'])
       }
       localData.push(hourData);
     }
@@ -476,42 +352,40 @@ export class DegreeDaysService {
   }
 
   getStationYearLCDFromResults(weatherStation: WeatherStation, dataResults: string): Array<LocalClimatologicalData> {
-    dataResults = dataResults.replace(/['"]+/g, "");
-    let dataLines = dataResults.split("\n");
+    let parsedData: Array<any> = Papa.parse(dataResults, { header: true }).data;
     let localData: Array<LocalClimatologicalData> = new Array();
-
-    for (let i = 1; i < dataLines.length; i++) {
-      let currentLine = dataLines[i].split(",");
+    for (let i = 1; i < parsedData.length; i++) {
+      let currentLine = parsedData[i];
       let hourData: LocalClimatologicalData = {
         stationId: weatherStation.ID,
         STATION: weatherStation.name,
-        DATE: new Date(currentLine[1]),
-        LATITUDE: currentLine[2],
-        LONGITUDE: currentLine[3],
-        ELEVATION: currentLine[4],
-        NAME: currentLine[5],
-        REPORT_TYPE: currentLine[6],
-        SOURCE: currentLine[7],
-        HourlyAltimeterSetting: parseFloat(currentLine[8]),
-        HourlyDewPointTemperature: parseFloat(currentLine[9]),
-        HourlyDryBulbTemperature: parseFloat(currentLine[10]),
-        HourlyPrecipitation: parseFloat(currentLine[11]),
-        HourlyPresentWeatherType: currentLine[12],
-        HourlyPressureChange: parseFloat(currentLine[13]),
-        HourlyPressureTendency: parseFloat(currentLine[14]),
-        HourlyRelativeHumidity: parseFloat(currentLine[15]),
-        HourlySkyConditions: parseFloat(currentLine[16]),
-        HourlySeaLevelPressure: parseFloat(currentLine[17]),
-        HourlyStationPressure: parseFloat(currentLine[18]),
-        HourlyVisibility: parseFloat(currentLine[19]),
-        HourlyWetBulbTemperature: parseFloat(currentLine[20]),
-        HourlyWindDirection: parseFloat(currentLine[21]),
-        HourlyWindGustSpeed: parseFloat(currentLine[22]),
-        HourlyWindSpeed: parseFloat(currentLine[23])
+        DATE: new Date(currentLine['DATE']),
+        LATITUDE: currentLine['LATITUDE'],
+        LONGITUDE: currentLine['LONGITUDE'],
+        ELEVATION: currentLine['ELEVATION'],
+        NAME: currentLine['NAME'],
+        REPORT_TYPE: currentLine['REPORT_TYPE'],
+        SOURCE: currentLine['SOURCE'],
+        HourlyAltimeterSetting: parseFloat(currentLine['HourlyAltimeterSetting']),
+        HourlyDewPointTemperature: parseFloat(currentLine['HourlyDewPointTemperature']),
+        HourlyDryBulbTemperature: parseFloat(currentLine['HourlyDryBulbTemperature']),
+        HourlyPrecipitation: parseFloat(currentLine['HourlyPrecipitation']),
+        HourlyPresentWeatherType: currentLine['HourlyPresentWeatherType'],
+        HourlyPressureChange: parseFloat(currentLine['HourlyPressureChange']),
+        HourlyPressureTendency: parseFloat(currentLine['HourlyPressureTendency']),
+        HourlyRelativeHumidity: parseFloat(currentLine['HourlyRelativeHumidity']),
+        HourlySkyConditions: parseFloat(currentLine['HourlySkyConditions']),
+        HourlySeaLevelPressure: parseFloat(currentLine['HourlySeaLevelPressure']),
+        HourlyStationPressure: parseFloat(currentLine['HourlyStationPressure']),
+        HourlyVisibility: parseFloat(currentLine['HourlyVisibility']),
+        HourlyWetBulbTemperature: parseFloat(currentLine['HourlyWetBulbTemperature']),
+        HourlyWindDirection: parseFloat(currentLine['HourlyWindDirection']),
+        HourlyWindGustSpeed: parseFloat(currentLine['HourlyWindGustSpeed']),
+        HourlyWindSpeed: parseFloat(currentLine['HourlyWindSpeed'])
       }
       localData.push(hourData);
     }
-    console.log(localData);
+    // console.log(localData);
     return localData;
   }
 

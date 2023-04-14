@@ -15,7 +15,7 @@
             <div class="col-lg-4 col-md-12 col-sm-12">
                 <label class="semibold" for="selectedYear">Select Year</label>
                 <select id="selectedYear" [(ngModel)]="selectedYear" class="form-select" name="selectedYear"
-                    (change)="setDegreeDays()">
+                    (change)="changeYear()">
                     <option *ngFor="let year of years" [ngValue]="year">
                         {{year}}
                     </option>

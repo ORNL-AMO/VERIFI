@@ -17,6 +17,8 @@ export class WeatherStationsTableComponent {
   currentPageNumber: number = 1;
   itemsPerPage: number = 6;
   itemsPerPageSub: Subscription;
+  orderDataField: string = 'distanceFrom';
+  orderByDirection: string = 'asc';
   constructor(private sharedDataService: SharedDataService, private router: Router,
     private weatherDataService: WeatherDataService) {
 
@@ -37,4 +39,15 @@ export class WeatherStationsTableComponent {
     this.router.navigateByUrl('weather-data/annual-station');
   }
 
+  setOrderDataField(str: string) {
+    if (str == this.orderDataField) {
+      if (this.orderByDirection == 'desc') {
+        this.orderByDirection = 'asc';
+      } else {
+        this.orderByDirection = 'desc';
+      }
+    } else {
+      this.orderDataField = str;
+    }
+  }
 }

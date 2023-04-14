@@ -91,14 +91,19 @@ export class AnnualStationDataComponent {
   goToStations() {
     this.router.navigateByUrl('weather-data/stations');
   }
-  
-  async setHeatingBaseTemp(){
+
+  async setHeatingBaseTemp() {
     this.weatherDataService.heatingTemp = this.heatingTemp;
     await this.setDegreeDays();
   }
 
-  async setCoolingBaseTemp(){
+  async setCoolingBaseTemp() {
     this.weatherDataService.coolingTemp = this.coolingTemp;
+    await this.setDegreeDays();
+  }
+
+  async changeYear() {
+    this.weatherDataService.selectedYear = this.selectedYear;
     await this.setDegreeDays();
   }
 }

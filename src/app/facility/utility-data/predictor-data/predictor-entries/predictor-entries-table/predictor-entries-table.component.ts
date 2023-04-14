@@ -214,6 +214,6 @@ export class PredictorEntriesTableComponent {
     this.weatherDataService.selectedDate = predictorDate;
     this.weatherDataService.selectedMonth = predictorDate;
     this.weatherDataService.selectedYear = predictorDate.getFullYear();
-    this.router.navigateByUrl('weather-data/daily-station');
+    this.router.navigateByUrl('weather-data/monthly-station');
   }
 }

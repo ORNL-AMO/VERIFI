@@ -2,19 +2,22 @@
     <app-table-items-dropdown></app-table-items-dropdown>
 </div>
 <table class="table utility-data table-sm table-bordered table-hover">
-    <thead>
+    <thead class="sortable">
         <tr>
-            <th>Station Name</th>
-            <th>State</th>
-            <th>Distance Away</th>
-            <th>Data Start</th>
-            <th>Data End</th>
+            <th (click)="setOrderDataField('name')" [ngClass]="{'active': orderDataField == 'name'}">Station Name</th>
+            <th (click)="setOrderDataField('state')" [ngClass]="{'active': orderDataField == 'state'}">State</th>
+            <th (click)="setOrderDataField('distanceFrom')" [ngClass]="{'active': orderDataField == 'distanceFrom'}">
+                Distance Away</th>
+            <th (click)="setOrderDataField('begin')" [ngClass]="{'active': orderDataField == 'begin'}">Data Start</th>
+            <th (click)="setOrderDataField('end')" [ngClass]="{'active': orderDataField == 'end'}">Data End</th>
         </tr>
     </thead>
     <tbody class="table-group-divider">
-        <tr *ngFor="let station of stations| slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage">
+        <tr
+            *ngFor="let station of stations| orderBy: orderDataField: orderByDirection| slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage">
             <td>
-                <a class="click-link" (click)="selectStation(station)">{{station.name}} ({{station.lat}}, {{station.lon}})</a>
+                <a class="click-link" (click)="selectStation(station)">{{station.name}} ({{station.lat}},
+                    {{station.lon}})</a>
             </td>
             <td>
                 {{station.state}}

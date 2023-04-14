@@ -37,7 +37,6 @@ export class DailyStationDataComponent {
 
   async setDegreeDays() {
     this.hourlySummaryData = await this.degreeDaysService.calculateHeatingDegreeHoursForDate(this.selectedDate, this.heatingTemp, this.coolingTemp, this.weatherStation);
-    console.log(this.hourlySummaryData);
   }
 
   setSelectedDate(eventData: string) {

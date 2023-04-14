@@ -53,7 +53,8 @@
               "lodash",
               "xlsx",
               "exceljs",
-              "jstat"
+              "jstat",
+              "papaparse"
             ],
             "webWorkerTsConfig": "tsconfig.worker.json"
           },
