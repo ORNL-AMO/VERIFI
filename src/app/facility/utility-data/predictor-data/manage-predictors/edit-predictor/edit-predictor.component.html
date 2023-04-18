@@ -1,5 +1,8 @@
 <div class="row">
     <div class="col-12">
+        <!-- <div class="d-flex small text-center alert alert-warning" *ngIf="predictorForm.controls.predictorType.value == 'Weather'">
+            Degree days will be calculated upon saving. Existing predictors may be changed.
+        </div> -->
         <div class="saveCancel item-right">
             <button class="btn btn-secondary" (click)="cancel()">Cancel</button>
             <button class="btn btn-primary" (click)="saveChanges()" [disabled]="predictorForm.invalid">
@@ -81,7 +84,8 @@
             <div class="col-lg-6 col-md-12 col-sm-12">
                 <label class="semibold" for="weatherDataType">Weather Predictor Type</label>
                 <div class="mb-3">
-                    <select id="weatherDataType" class="form-select" formControlName="weatherDataType">
+                    <select id="weatherDataType" class="form-select" formControlName="weatherDataType"
+                        (change)="setValidators()">
                         <option [value]="'HDD'">Heating Degree Days</option>
                         <option [value]="'CDD'">Cooling Degree Days</option>
                     </select>

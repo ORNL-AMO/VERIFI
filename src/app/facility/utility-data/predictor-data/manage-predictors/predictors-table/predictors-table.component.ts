@@ -19,6 +19,11 @@ export class PredictorsTableComponent {
   selectedFacilitySub: Subscription;
   selectedFacility: IdbFacility;
   predictorToDelete: PredictorData;
+
+  standardPredictors: Array<PredictorData>;
+  degreeDayPredictors: Array<PredictorData>;
+
+
   constructor(private predictorDbService: PredictordbService, private router: Router,
     private facilitydbService: FacilitydbService, private loadingService: LoadingService) {
 
@@ -26,7 +31,15 @@ export class PredictorsTableComponent {
 
   ngOnInit() {
     this.facilityPredictorsSub = this.predictorDbService.facilityPredictors.subscribe(val => {
-      this.facilityPredictors = JSON.parse(JSON.stringify(val));
+      this.standardPredictors = new Array();
+      this.degreeDayPredictors = new Array();
+      val.forEach(predictor => {
+        if (predictor.predictorType == 'Standard' || predictor.predictorType == undefined) {
+          this.standardPredictors.push(predictor);
+        } else if (predictor.predictorType == 'Weather') {
+          this.degreeDayPredictors.push(predictor);
+        }
+      })
     });
     this.selectedFacilitySub = this.facilitydbService.selectedFacility.subscribe(facility => {
       this.selectedFacility = facility;

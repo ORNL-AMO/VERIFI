@@ -38,8 +38,20 @@
                 <span *ngIf="predictor.production" class="fa fa-check-circle-o"></span>
                 <span *ngIf="predictor.predictorType == 'Weather'" class="fa fa-temperature-half"></span>
                 {{predictor.name}}
-                <br *ngIf="predictor.unit">
-                <span class="small block" *ngIf="predictor.unit">({{predictor.unit}})</span>
+                <ng-container *ngIf="predictor.unit">
+                    <br>
+                    <span class="small block">({{predictor.unit}})</span>
+                </ng-container>
+                <ng-container *ngIf="predictor.predictorType == 'Weather'">
+                    <br>
+                    <span class="small block">({{predictor.weatherDataType}}, 
+                        <ng-container *ngIf="predictor.weatherDataType == 'HDD'">
+                            {{predictor.heatingBaseTemperature}} &#8457;
+                        </ng-container>
+                        <ng-container *ngIf="predictor.weatherDataType == 'CDD'">
+                            {{predictor.coolingBaseTemperature}} &#8457;
+                        </ng-container>)</span>
+                </ng-container>
             </th>
             <td class="actions" *ngIf="!copyingTable">
 

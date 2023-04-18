@@ -239,6 +239,7 @@ export interface PredictorData {
     convertTo?: string,
     weatherDataType?: WeatherDataType,
     weatherStationId?: string,
+    weatherStationName?: string,
     heatingBaseTemperature?: number,
     coolingBaseTemperature?: number
 }

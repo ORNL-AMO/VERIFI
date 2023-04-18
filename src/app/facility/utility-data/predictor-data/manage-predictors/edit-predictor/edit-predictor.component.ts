@@ -157,11 +157,11 @@ export class EditPredictorComponent {
       let editPredictorIndex: number = facilityPredictorsCopy.findIndex(predictorCopy => { return predictorCopy.id == this.predictorData.id });
       facilityPredictorsCopy[editPredictorIndex] = this.predictorData;
     }
-    if(this.predictorData.predictorType == 'Weather'){
-      await this.predictorDbService.setDegreeDays(this.facility);
+    if (this.predictorData.predictorType == 'Weather') {
+      await this.predictorDbService.updatePredictorDegreeDays(this.facility, this.predictorData);
     }
     this.loadingService.setLoadingStatus(false);
-
+    this.cancel();
   }
 
   setShowReferencePredictors() {

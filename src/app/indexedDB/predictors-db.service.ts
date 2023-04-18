@@ -205,11 +205,13 @@ export class PredictordbService {
                         let totalCDD: number = _.sumBy(degreeDays, 'coolingDegreeDays');
                         predictorData.amount = totalCDD;
                         predictorData.weatherStationId = degreeDays[0]?.stationId;
+                        predictorData.weatherStationName = degreeDays[0]?.stationName;
                     }
                     if (predictorData.weatherDataType == 'HDD') {
                         let totalHDD: number = _.sumBy(degreeDays, 'heatingDegreeDays');
                         predictorData.amount = totalHDD;
                         predictorData.weatherStationId = degreeDays[0]?.stationId;
+                        predictorData.weatherStationName = degreeDays[0]?.stationName;
                     }
                 }
             }
@@ -220,6 +222,7 @@ export class PredictordbService {
         this.accountPredictorEntries.next(accountPredictorEntries);
         let updatedFacilityPredictorEntries: Array<IdbPredictorEntry> = accountPredictorEntries.filter(predictor => { return predictor.facilityId == facility.guid });
         this.facilityPredictorEntries.next(updatedFacilityPredictorEntries);
+        this.facilityPredictors.next(updatedFacilityPredictorEntries[0].predictors);
     }
 
 
@@ -238,11 +241,13 @@ export class PredictordbService {
                     let totalCDD: number = _.sumBy(degreeDays, 'coolingDegreeDays');
                     predictorData.amount = totalCDD;
                     predictorData.weatherStationId = degreeDays[0]?.stationId;
+                    predictorData.weatherStationName = degreeDays[0]?.stationName;
                 }
                 if (predictorData.weatherDataType == 'HDD') {
                     let totalHDD: number = _.sumBy(degreeDays, 'heatingDegreeDays');
                     predictorData.amount = totalHDD;
                     predictorData.weatherStationId = degreeDays[0]?.stationId;
+                    predictorData.weatherStationName = degreeDays[0]?.stationName;
                 }
             }
             await this.updateWithObservable(facilityPredictorEntries[index]).toPromise();
@@ -252,6 +257,7 @@ export class PredictordbService {
         this.accountPredictorEntries.next(accountPredictorEntries);
         let updatedFacilityPredictorEntries: Array<IdbPredictorEntry> = accountPredictorEntries.filter(predictor => { return predictor.facilityId == facility.guid });
         this.facilityPredictorEntries.next(updatedFacilityPredictorEntries);
+        this.facilityPredictors.next(updatedFacilityPredictorEntries[0].predictors);
     }
 
 
