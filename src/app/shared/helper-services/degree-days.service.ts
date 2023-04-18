@@ -33,6 +33,34 @@ export class DegreeDaysService {
   }
 
 
+  async getPredictorValueForMonth(month: number, year: number, baseHeatingTemperature: number, baseCoolingTemperature: number, stationId: string): Promise<Array<DegreeDay>> {
+    if (!this.stationDataResponse || this.stationDataResponse.station.ID != stationId || this.stationDataResponse.year != year) {
+      let station: WeatherStation = await this.getStationById(stationId);
+      let response: Response = await this.getStationDataResponse(station, year);
+      let dataResults: string = await response.text();
+      this.stationDataResponse = {
+        response: response,
+        station: station,
+        year: year,
+        dataResults: dataResults
+      }
+      this.yearHourlyData = this.getStationYearLCDFromResults(station, dataResults);
+    }
+    let localClimatologicalDataMonth: Array<LocalClimatologicalData> = this.yearHourlyData.filter(lcd => {
+      return lcd.DATE.getMonth() == month;
+    });
+    let startDate: Date = new Date(year, month, 1);
+    let endDate: Date = new Date(year, month + 1, 1);
+    let degreeDays: Array<DegreeDay> = new Array();
+    while (startDate < endDate) {
+      let degreeDay: DegreeDay = this.calculateHeatingDegreeDaysForDate(startDate, localClimatologicalDataMonth, baseHeatingTemperature, baseCoolingTemperature);
+      degreeDays.push(degreeDay);
+      startDate.setDate(startDate.getDate() + 1);
+    }
+    return degreeDays;
+  }
+
+
   async getDailyDataFromMonth(month: number, year: number, baseHeatingTemperature: number, baseCoolingTemperature: number, station: WeatherStation): Promise<Array<DegreeDay>> {
     if (!this.stationDataResponse || this.stationDataResponse.station.ID != station.ID || this.stationDataResponse.year != year) {
       let response: Response = await this.getStationDataResponse(station, year);
@@ -309,7 +337,6 @@ export class DegreeDaysService {
   async getStationDataResponse(weatherStation: WeatherStation, year: number): Promise<Response> {
     return await fetch("https://www.ncei.noaa.gov/data/local-climatological-data/access/" + year + "/" + weatherStation.ID + ".csv");
   }
-
 
   //fetch Local Climatological Data for given station and year
   async getStationYearLCD(weatherStation: WeatherStation, response: Response): Promise<Array<LocalClimatologicalData>> {

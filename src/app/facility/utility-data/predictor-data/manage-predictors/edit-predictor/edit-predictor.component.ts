@@ -9,6 +9,7 @@ import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.se
 import { UnitConversionTypes } from './unitConversionTypes';
 import { WeatherStation } from 'src/app/models/degreeDays';
 import { WeatherDataService } from 'src/app/weather-data/weather-data.service';
+import { LoadingService } from 'src/app/core-components/loading/loading.service';
 
 @Component({
   selector: 'app-edit-predictor',
@@ -33,14 +34,12 @@ export class EditPredictorComponent {
     private formBuilder: FormBuilder,
     private convertUnitsService: ConvertUnitsService,
     private weatherDataService: WeatherDataService,
-    private degreeDaysService: DegreeDaysService) {
+    private degreeDaysService: DegreeDaysService,
+    private loadingService: LoadingService) {
   }
 
   ngOnInit() {
-    // this.noaaService.get();
     this.facility = this.facilityDbService.selectedFacility.getValue();
-    // this.degreeDaysService.getHeatingDegreeDays(facility.zip, 0, 2022);
-
     this.activatedRoute.params.subscribe(params => {
       let predictorId: string = params['id'];
       if (predictorId) {
@@ -68,7 +67,7 @@ export class EditPredictorComponent {
     this.setPredictorForm();
   }
 
-  changePredictorType(){
+  changePredictorType() {
     this.setValidators();
     this.setShowReferencePredictors();
   }
@@ -97,6 +96,7 @@ export class EditPredictorComponent {
   }
 
 
+
   setValidators() {
     if (this.predictorForm.controls.predictorType.value == 'Standard') {
       this.predictorForm.controls.heatingBaseTemperature.setValidators([]);
@@ -120,13 +120,47 @@ export class EditPredictorComponent {
     this.predictorForm.controls.weatherDataType.updateValueAndValidity();
   }
 
-
   cancel() {
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     this.router.navigateByUrl('facility/' + selectedFacility.id + '/utility/predictors/manage/predictor-table')
   }
 
-  saveChanges() {
+  setPredictorDataFromForm() {
+    this.predictorData.name = this.predictorForm.controls.name.value;
+    this.predictorData.unit = this.predictorForm.controls.unit.value;
+    this.predictorData.description = this.predictorForm.controls.description.value;
+    this.predictorData.production = this.predictorForm.controls.production.value;
+    this.predictorData.predictorType = this.predictorForm.controls.predictorType.value;
+    this.predictorData.referencePredictorId = this.predictorForm.controls.referencePredictorId.value;
+    this.predictorData.convertFrom = this.predictorForm.controls.convertFrom.value;
+    this.predictorData.convertTo = this.predictorForm.controls.convertTo.value;
+    this.predictorData.conversionType = this.predictorForm.controls.conversionType.value;
+    // this.predictorData.mathAction = this.predictorForm.controls.name.value;
+    // this.predictorData.mathAmount = this.predictorForm.controls.name.value;
+    this.predictorData.weatherDataType = this.predictorForm.controls.weatherDataType.value;
+    this.predictorData.heatingBaseTemperature = this.predictorForm.controls.heatingBaseTemperature.value;
+    this.predictorData.coolingBaseTemperature = this.predictorForm.controls.coolingBaseTemperature.value;
+    this.predictorData.weatherStationId = this.predictorForm.controls.weatherStationId.value;
+
+  }
+
+  async saveChanges() {
+    this.loadingService.setLoadingMessage('Updating Predictors...');
+    this.loadingService.setLoadingStatus(true);
+    this.setPredictorDataFromForm();
+    let facilityPredictors: Array<PredictorData> = this.predictorDbService.facilityPredictors.getValue();
+    let facilityPredictorsCopy: Array<PredictorData> = JSON.parse(JSON.stringify(facilityPredictors));
+    if (this.addOrEdit == 'add') {
+      facilityPredictorsCopy.push(this.predictorData);
+      await this.predictorDbService.updateFacilityPredictorEntries(facilityPredictorsCopy);
+    } else {
+      let editPredictorIndex: number = facilityPredictorsCopy.findIndex(predictorCopy => { return predictorCopy.id == this.predictorData.id });
+      facilityPredictorsCopy[editPredictorIndex] = this.predictorData;
+    }
+    if(this.predictorData.predictorType == 'Weather'){
+      await this.predictorDbService.setDegreeDays(this.facility);
+    }
+    this.loadingService.setLoadingStatus(false);
 
   }
 

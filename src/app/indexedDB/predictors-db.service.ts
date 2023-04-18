@@ -200,7 +200,7 @@ export class PredictordbService {
                     //get degree days
                     let dataDate: Date = new Date(predictorEntry.date)
                     this.loadingService.setLoadingMessage('Calculating Degree Days ' + Months[dataDate.getMonth()].name + ', ' + dataDate.getFullYear() + '...')
-                    let degreeDays: Array<DegreeDay> = await this.degreeDaysService.getHeatingDegreeDays(facility.zip, dataDate.getMonth(), dataDate.getFullYear(), predictorData.heatingBaseTemperature, predictorData.coolingBaseTemperature);
+                    let degreeDays: Array<DegreeDay> = await this.degreeDaysService.getPredictorValueForMonth(dataDate.getMonth(), dataDate.getFullYear(), predictorData.heatingBaseTemperature, predictorData.coolingBaseTemperature, predictorData.weatherStationId);
                     if (predictorData.weatherDataType == 'CDD') {
                         let totalCDD: number = _.sumBy(degreeDays, 'coolingDegreeDays');
                         predictorData.amount = totalCDD;
@@ -222,6 +222,37 @@ export class PredictordbService {
         this.facilityPredictorEntries.next(updatedFacilityPredictorEntries);
     }
 
+
+    async updatePredictorDegreeDays(facility: IdbFacility, facilityPredictor: PredictorData) {
+        let facilityPredictorEntries: Array<IdbPredictorEntry> = this.facilityPredictorEntries.getValue();
+        for (let index = 0; index < facilityPredictorEntries.length; index++) {
+            let predictorEntry: IdbPredictorEntry = facilityPredictorEntries[index];
+            let predictorIndex: number = predictorEntry.predictors.findIndex(predictor => { return predictor.id == facilityPredictor.id });
+            let predictorData: PredictorData = predictorEntry.predictors[predictorIndex];
+            if (predictorData.predictorType == 'Weather') {
+                //get degree days
+                let dataDate: Date = new Date(predictorEntry.date)
+                this.loadingService.setLoadingMessage('Calculating Degree Days ' + Months[dataDate.getMonth()].name + ', ' + dataDate.getFullYear() + '...')
+                let degreeDays: Array<DegreeDay> = await this.degreeDaysService.getPredictorValueForMonth(dataDate.getMonth(), dataDate.getFullYear(), predictorData.heatingBaseTemperature, predictorData.coolingBaseTemperature, predictorData.weatherStationId);
+                if (predictorData.weatherDataType == 'CDD') {
+                    let totalCDD: number = _.sumBy(degreeDays, 'coolingDegreeDays');
+                    predictorData.amount = totalCDD;
+                    predictorData.weatherStationId = degreeDays[0]?.stationId;
+                }
+                if (predictorData.weatherDataType == 'HDD') {
+                    let totalHDD: number = _.sumBy(degreeDays, 'heatingDegreeDays');
+                    predictorData.amount = totalHDD;
+                    predictorData.weatherStationId = degreeDays[0]?.stationId;
+                }
+            }
+            await this.updateWithObservable(facilityPredictorEntries[index]).toPromise();
+        }
+        // let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+        let accountPredictorEntries: Array<IdbPredictorEntry> = await this.getAllByIndexRange('accountId', facility.accountId).toPromise()
+        this.accountPredictorEntries.next(accountPredictorEntries);
+        let updatedFacilityPredictorEntries: Array<IdbPredictorEntry> = accountPredictorEntries.filter(predictor => { return predictor.facilityId == facility.guid });
+        this.facilityPredictorEntries.next(updatedFacilityPredictorEntries);
+    }
 
 
     updateWithObservable(values: IdbPredictorEntry): Observable<any> {
