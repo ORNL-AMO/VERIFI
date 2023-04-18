@@ -15,9 +15,10 @@ export class DegreeDaysComponent {
   facility: IdbFacility;
   showSave: boolean;
 
-  includeDegreeDays: boolean;
+  // includeDegreeDays: boolean;
   coolingBaseTemperature: number;
   heatingBaseTemperature: number;
+  selectedWeatherStationId: string;
   constructor(private facilityDbService: FacilitydbService, private dbChangesService: DbChangesService,
     private predictorDbService: PredictordbService, private loadingService: LoadingService) {
 
@@ -25,17 +26,17 @@ export class DegreeDaysComponent {
 
   ngOnInit() {
     this.facility = this.facilityDbService.selectedFacility.getValue();
-    this.includeDegreeDays = this.facility.includeDegreeDays || false;
-    this.coolingBaseTemperature = this.facility.coolingBaseTemperature;
-    this.heatingBaseTemperature = this.facility.heatingBaseTemperature;
+    // this.includeDegreeDays = this.facility.includeDegreeDays || false;
+    // this.coolingBaseTemperature = this.facility.coolingBaseTemperature;
+    // this.heatingBaseTemperature = this.facility.heatingBaseTemperature;
   }
 
   async saveFacility() {
     this.loadingService.setLoadingMessage('Updating Predictors...');
     this.loadingService.setLoadingStatus(true);
-    this.facility.includeDegreeDays = this.includeDegreeDays;
-    this.facility.coolingBaseTemperature = this.coolingBaseTemperature;
-    this.facility.heatingBaseTemperature = this.heatingBaseTemperature;
+    // this.facility.includeDegreeDays = this.includeDegreeDays;
+    // this.facility.coolingBaseTemperature = this.coolingBaseTemperature;
+    // this.facility.heatingBaseTemperature = this.heatingBaseTemperature;
     await this.dbChangesService.updateFacilities(this.facility);
 
     //update hdd/cdd predictors

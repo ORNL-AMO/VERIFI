@@ -200,7 +200,7 @@ export class PredictordbService {
                     //get degree days
                     let dataDate: Date = new Date(predictorEntry.date)
                     this.loadingService.setLoadingMessage('Calculating Degree Days ' + Months[dataDate.getMonth()].name + ', ' + dataDate.getFullYear() + '...')
-                    let degreeDays: Array<DegreeDay> = await this.degreeDaysService.getHeatingDegreeDays(facility.zip, dataDate.getMonth(), dataDate.getFullYear(), facility.heatingBaseTemperature, facility.coolingBaseTemperature);
+                    let degreeDays: Array<DegreeDay> = await this.degreeDaysService.getHeatingDegreeDays(facility.zip, dataDate.getMonth(), dataDate.getFullYear(), predictorData.heatingBaseTemperature, predictorData.coolingBaseTemperature);
                     if (predictorData.weatherDataType == 'CDD') {
                         let totalCDD: number = _.sumBy(degreeDays, 'coolingDegreeDays');
                         predictorData.amount = totalCDD;
@@ -215,10 +215,10 @@ export class PredictordbService {
             }
             await this.updateWithObservable(facilityPredictorEntries[index]).toPromise();
         }
-        let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-        let accountPredictorEntries: Array<IdbPredictorEntry> = await this.getAllByIndexRange('accountId', selectedFacility.accountId).toPromise()
+        // let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+        let accountPredictorEntries: Array<IdbPredictorEntry> = await this.getAllByIndexRange('accountId', facility.accountId).toPromise()
         this.accountPredictorEntries.next(accountPredictorEntries);
-        let updatedFacilityPredictorEntries: Array<IdbPredictorEntry> = accountPredictorEntries.filter(predictor => { return predictor.facilityId == selectedFacility.guid });
+        let updatedFacilityPredictorEntries: Array<IdbPredictorEntry> = accountPredictorEntries.filter(predictor => { return predictor.facilityId == facility.guid });
         this.facilityPredictorEntries.next(updatedFacilityPredictorEntries);
     }
 

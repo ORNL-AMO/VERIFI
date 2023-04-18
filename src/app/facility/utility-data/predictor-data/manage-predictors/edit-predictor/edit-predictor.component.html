@@ -2,7 +2,7 @@
     <div class="col-12">
         <div class="saveCancel item-right">
             <button class="btn btn-secondary" (click)="cancel()">Cancel</button>
-            <button class="btn btn-primary" (click)="saveChanges()">
+            <button class="btn btn-primary" (click)="saveChanges()" [disabled]="predictorForm.invalid">
                 <span *ngIf="addOrEdit == 'add'">Add Predictor</span>
                 <span *ngIf="addOrEdit == 'edit'">Save Changes</span>
             </button>
@@ -61,17 +61,17 @@
         <div class="col-12">
             <hr>
         </div>
-        <div class="col-lg-12 col-md-12 col-sm-12">
+        <div class="col-lg-6 col-md-12 col-sm-12">
             <!-- <app-label-with-tooltip [label]="'Is Production?'" [field]="'isProductionPredictor'"
                 [labelId]="'isProductionPredictor'" [isRequired]="false"> 
             </app-label-with-tooltip>-->
             <label class="semibold" for="predictorType">Predictor Type</label>
             <div class="mb-3">
                 <select id="predictorType" class="form-select" formControlName="predictorType"
-                    (change)="setShowReferencePredictors()">
+                    (change)="changePredictorType()">
                     <option [value]="'Standard'">Standard</option>
-                    <option [value]="'Conversion'">Conversion</option>
-                    <option [value]="'Math'">Math</option>
+                    <!-- <option [value]="'Conversion'">Conversion</option>
+                    <option [value]="'Math'">Math</option> -->
                     <option [value]="'Weather'">Weather</option>
                 </select>
             </div>
@@ -87,11 +87,55 @@
                     </select>
                 </div>
             </div>
+            <div class="col-lg-6 col-md-12 col-sm-12">
+                <label class="semibold" for="weatherStationId">Weather Station <span>(within 50 miles of
+                        {{facility.zip}})</span></label>
+                <div class="mb-3">
+                    <select id="weatherStationId" class="form-select" formControlName="weatherStationId">
+                        <option *ngFor="let station of stations" [ngValue]="station.ID">{{station.name}}
+                            ({{station.distanceFrom | number}} miles)</option>
+                    </select>
+                </div>
+                <div class="alert alert-danger" *ngIf="predictorForm.get('weatherStationId').hasError('required')">
+                    Weather station is
+                    required</div>
+            </div>
+            <div class="col-lg-6 col-md-12 col-sm-12" *ngIf="predictorForm.controls.weatherDataType.value == 'HDD'">
+                <label class="semibold" for="heatingBaseTemperature">Heating Base Temperature</label>
+                <div class="mb-3 input-group">
+                    <input id="heatingBaseTemperature" class="form-control" type="number"
+                        formControlName="heatingBaseTemperature" onfocus="this.select();" name="heatingBaseTemperature">
+                    <span class="input-group-text">
+                        &#8457;
+                    </span>
+                </div>
+                <div class="alert alert-danger"
+                    *ngIf="predictorForm.get('heatingBaseTemperature').hasError('required')">Heating base temperature is
+                    required</div>
+            </div>
+            <div class="col-lg-6 col-md-12 col-sm-12" *ngIf="predictorForm.controls.weatherDataType.value == 'CDD'">
+                <label class="semibold" for="coolingBaseTemperature">Cooling Base Temperature</label>
+                <div class="mb-3 input-group">
+                    <input id="coolingBaseTemperature" class="form-control" type="number"
+                        formControlName="coolingBaseTemperature" onfocus="this.select();" name="coolingBaseTemperature">
+                    <!--TODO: Temperature units-->
+                    <span class="input-group-text">
+                        &#8457;
+                    </span>
+                </div>
+                <div class="alert alert-danger"
+                    *ngIf="predictorForm.get('coolingBaseTemperature').hasError('required')">Cooling base temperature is
+                    required</div>
+            </div>
+            <div class="col-12">
+                <div class="alert alert-info">
+                    Heating and cooling degree days will be calculated using the dry bulb
+                    temperature readings from the selected weather station. Weather station data quality varies, you may
+                    need to try multiple weather stations before getting accurate degree days. Explore station data and
+                    calculation results in VERIFI's <a (click)="goToWeatherData()">Weather Data</a> page.
+                </div>
+            </div>
         </ng-container>
-
-
-
-
 
         <!--Math/Conversion-->
         <div class="col-lg-6 col-md-12 col-sm-12" *ngIf="showReferencePredictors">

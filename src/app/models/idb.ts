@@ -86,9 +86,6 @@ export interface IdbFacility {
     contactPhone: string,
     modifiedDate?: Date,
     facilityOrder?: number
-    includeDegreeDays?: boolean,
-    heatingBaseTemperature?: number,
-    coolingBaseTemperature?: number
 }
 
 export interface IdbUtilityMeterGroup {
@@ -241,7 +238,9 @@ export interface PredictorData {
     convertFrom?: string,
     convertTo?: string,
     weatherDataType?: WeatherDataType,
-    weatherStationId?: string
+    weatherStationId?: string,
+    heatingBaseTemperature?: number,
+    coolingBaseTemperature?: number
 }
 
 export type PredictorType = 'Standard' | 'Conversion' | 'Math' | 'Weather'

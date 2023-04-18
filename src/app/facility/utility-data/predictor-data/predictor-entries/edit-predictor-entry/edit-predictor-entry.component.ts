@@ -85,9 +85,9 @@ export class EditPredictorEntryComponent {
   setDegreeDayValues() {
     this.calculatingDegreeDays = true;
     let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    this.degreeDaysService.getHeatingDegreeDays(facility.zip, this.predictorEntry.date.getMonth(), this.predictorEntry.date.getFullYear(), facility.heatingBaseTemperature, facility.coolingBaseTemperature).then(degreeDays => {
-      let cddIndex: number = this.predictorEntry.predictors.findIndex(predictor => { return predictor.predictorType == 'Weather' && predictor.weatherDataType == 'CDD' });
-      let hddIndex: number = this.predictorEntry.predictors.findIndex(predictor => { return predictor.predictorType == 'Weather' && predictor.weatherDataType == 'HDD' });
+    let cddIndex: number = this.predictorEntry.predictors.findIndex(predictor => { return predictor.predictorType == 'Weather' && predictor.weatherDataType == 'CDD' });
+    let hddIndex: number = this.predictorEntry.predictors.findIndex(predictor => { return predictor.predictorType == 'Weather' && predictor.weatherDataType == 'HDD' });
+    this.degreeDaysService.getHeatingDegreeDays(facility.zip, this.predictorEntry.date.getMonth(), this.predictorEntry.date.getFullYear(), this.predictorEntry.predictors[hddIndex].heatingBaseTemperature, this.predictorEntry.predictors[cddIndex].coolingBaseTemperature).then(degreeDays => {
       let totalCDD: number = _.sumBy(degreeDays, 'coolingDegreeDays');
       this.predictorEntry.predictors[cddIndex].amount = totalCDD;
       this.predictorEntry.predictors[cddIndex].weatherStationId = degreeDays[0]?.stationId;

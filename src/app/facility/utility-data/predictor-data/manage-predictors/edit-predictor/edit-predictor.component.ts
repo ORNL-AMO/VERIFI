@@ -4,10 +4,11 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { IdbFacility, PredictorData } from 'src/app/models/idb';
-import { NoaaService } from 'src/app/noaa.service';
 import { ConvertUnitsService } from 'src/app/shared/convert-units/convert-units.service';
 import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
 import { UnitConversionTypes } from './unitConversionTypes';
+import { WeatherStation } from 'src/app/models/degreeDays';
+import { WeatherDataService } from 'src/app/weather-data/weather-data.service';
 
 @Component({
   selector: 'app-edit-predictor',
@@ -25,17 +26,19 @@ export class EditPredictorComponent {
   unitConversionTypes: Array<{ measure: string, display: string }> = UnitConversionTypes;
   unitOptions: Array<string> = [];
   referencePredictorName: string;
+  stations: Array<WeatherStation> = [];
+  facility: IdbFacility;
   constructor(private activatedRoute: ActivatedRoute, private predictorDbService: PredictordbService,
     private router: Router, private facilityDbService: FacilitydbService,
     private formBuilder: FormBuilder,
     private convertUnitsService: ConvertUnitsService,
-    private noaaService: NoaaService,
+    private weatherDataService: WeatherDataService,
     private degreeDaysService: DegreeDaysService) {
   }
 
   ngOnInit() {
     // this.noaaService.get();
-    // let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    this.facility = this.facilityDbService.selectedFacility.getValue();
     // this.degreeDaysService.getHeatingDegreeDays(facility.zip, 0, 2022);
 
     this.activatedRoute.params.subscribe(params => {
@@ -47,7 +50,8 @@ export class EditPredictorComponent {
         this.addOrEdit = 'add';
         this.setPredictorDataNew();
       }
-      this.setReferencePredictors()
+      this.setReferencePredictors();
+      this.setStations();
     });
   }
 
@@ -64,6 +68,11 @@ export class EditPredictorComponent {
     this.setPredictorForm();
   }
 
+  changePredictorType(){
+    this.setValidators();
+    this.setShowReferencePredictors();
+  }
+
   setPredictorForm() {
     this.predictorForm = this.formBuilder.group({
       'name': [this.predictorData.name, [Validators.required]],
@@ -77,11 +86,40 @@ export class EditPredictorComponent {
       'conversionType': [this.predictorData.conversionType],
       'mathAction': [],
       'mathAmount': [],
-      'weatherDataType': [this.predictorData.weatherDataType]
+      'weatherDataType': [this.predictorData.weatherDataType],
+      'heatingBaseTemperature': [this.predictorData.heatingBaseTemperature],
+      'coolingBaseTemperature': [this.predictorData.coolingBaseTemperature],
+      'weatherStationId': [this.predictorData.weatherStationId]
     });
     this.setShowReferencePredictors()
     this.setUnitOptions();
+    this.setValidators();
   }
+
+
+  setValidators() {
+    if (this.predictorForm.controls.predictorType.value == 'Standard') {
+      this.predictorForm.controls.heatingBaseTemperature.setValidators([]);
+      this.predictorForm.controls.coolingBaseTemperature.setValidators([]);
+      this.predictorForm.controls.weatherStationId.setValidators([]);
+      this.predictorForm.controls.weatherDataType.setValidators([]);
+    } else if (this.predictorForm.controls.predictorType.value == 'Weather') {
+      this.predictorForm.controls.weatherStationId.setValidators([Validators.required]);
+      this.predictorForm.controls.weatherDataType.setValidators([Validators.required]);
+      if (this.predictorForm.controls.weatherDataType.value == 'HDD') {
+        this.predictorForm.controls.heatingBaseTemperature.setValidators([Validators.required]);
+        this.predictorForm.controls.coolingBaseTemperature.setValidators([]);
+      } else if (this.predictorForm.controls.weatherDataType.value == 'CDD') {
+        this.predictorForm.controls.heatingBaseTemperature.setValidators([]);
+        this.predictorForm.controls.coolingBaseTemperature.setValidators([Validators.required]);
+      }
+    }
+    this.predictorForm.controls.heatingBaseTemperature.updateValueAndValidity();
+    this.predictorForm.controls.coolingBaseTemperature.updateValueAndValidity();
+    this.predictorForm.controls.weatherStationId.updateValueAndValidity();
+    this.predictorForm.controls.weatherDataType.updateValueAndValidity();
+  }
+
 
   cancel() {
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
@@ -115,5 +153,18 @@ export class EditPredictorComponent {
     if (referencePredictor) {
       this.referencePredictorName = referencePredictor.name;
     }
+  }
+
+  setStations() {
+    let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    this.degreeDaysService.getClosestStation(facility.zip, 50).then(stations => {
+      this.stations = stations;
+    });
+  }
+
+  goToWeatherData() {
+    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    this.weatherDataService.zipCode = selectedFacility.zip;
+    this.router.navigateByUrl('/weather-data');
   }
 }

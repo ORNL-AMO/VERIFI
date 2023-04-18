@@ -10,15 +10,15 @@
 <hr>
 <form>
     <div class="row">
-        <div class="col-lg-4 col-md-12 col-sm-12">
+        <!-- <div class="col-lg-4 col-md-12 col-sm-12">
             <label class="semibold" for="includeDegreeDays">Include Degree Day Predictors</label>
             <select class="form-select" id="includeDegreeDays" name="includeDegreeDays" [(ngModel)]="includeDegreeDays"
                 (change)="setShowSave()">
                 <option [ngValue]="true">Yes</option>
                 <option [ngValue]="false">No</option>
             </select>
-        </div>
-        <ng-container *ngIf="facility.includeDegreeDays">
+        </div> -->
+        <!-- <ng-container *ngIf="facility.includeDegreeDays"> -->
             <div class="col-lg-4 col-md-12 col-sm-12">
                 <label class="semibold" for="heatingBaseTemperature">Heating Base Temperature</label>
                 <div class="mb-3 input-group">
@@ -48,10 +48,10 @@
                         Days</button>
                 </div>
             </div>
-        </ng-container>
+        <!-- </ng-container> -->
     </div>
 </form>
-<ng-container *ngIf="includeDegreeDays">
+<!-- <ng-container *ngIf="includeDegreeDays"> -->
     <hr>
     <h5>Weather Stations <span>(within 50 miles of {{facility.zip}})</span></h5>
     <p>Listed below are the weather stations with data that are within 50 miles of the zip code entered on the facility
@@ -65,4 +65,4 @@
     <app-weather-stations-table [coolingBaseTemperature]="coolingBaseTemperature"
         [heatingBaseTemperature]="heatingBaseTemperature"></app-weather-stations-table>
     <hr>
-</ng-container>
+<!-- </ng-container> -->

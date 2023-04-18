@@ -205,11 +205,12 @@ export class PredictorEntriesTableComponent {
 
   async viewWeatherData(predictorEntry: IdbPredictorEntry) {
     let predictorData: PredictorData = predictorEntry.predictors.find(pData => { return pData.predictorType == 'Weather' });
+    //TODO: handle multiple weather data entries
     let weatherStation: WeatherStation = await this.degreeDaysService.getStationById(predictorData.weatherStationId);
     this.weatherDataService.selectedStation = weatherStation;
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    this.weatherDataService.coolingTemp = selectedFacility.coolingBaseTemperature;
-    this.weatherDataService.heatingTemp = selectedFacility.heatingBaseTemperature;
+    // let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    this.weatherDataService.coolingTemp = predictorData.coolingBaseTemperature;
+    this.weatherDataService.heatingTemp = predictorData.heatingBaseTemperature;
     let predictorDate: Date = new Date(predictorEntry.date);
     this.weatherDataService.selectedDate = predictorDate;
     this.weatherDataService.selectedMonth = predictorDate;
