@@ -16,8 +16,6 @@ import { EditPredictorEntryComponent } from './predictor-entries/edit-predictor-
 import { PredictorsTableComponent } from './manage-predictors/predictors-table/predictors-table.component';
 import { LabelWithTooltipModule } from 'src/app/shared/label-with-tooltip/label-with-tooltip.module';
 import { PredictorEntriesTableComponent } from './predictor-entries/predictor-entries-table/predictor-entries-table.component';
-import { DegreeDaysComponent } from './degree-days/degree-days.component';
-import { WeatherStationsTableComponent } from './degree-days/weather-stations-table/weather-stations-table.component';
 import { CalculatingSpinnerModule } from 'src/app/shared/calculating-spinner/calculating-spinner.module';
 
 
@@ -33,9 +31,7 @@ import { CalculatingSpinnerModule } from 'src/app/shared/calculating-spinner/cal
     EditPredictorComponent,
     EditPredictorEntryComponent,
     PredictorsTableComponent,
-    PredictorEntriesTableComponent,
-    DegreeDaysComponent,
-    WeatherStationsTableComponent
+    PredictorEntriesTableComponent
   ],
   imports: [
     CommonModule,

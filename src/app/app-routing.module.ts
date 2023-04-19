@@ -98,7 +98,6 @@ import { EditPredictorComponent } from './facility/utility-data/predictor-data/m
 import { PredictorsTableComponent } from './facility/utility-data/predictor-data/manage-predictors/predictors-table/predictors-table.component';
 import { PredictorEntriesTableComponent } from './facility/utility-data/predictor-data/predictor-entries/predictor-entries-table/predictor-entries-table.component';
 import { EditPredictorEntryComponent } from './facility/utility-data/predictor-data/predictor-entries/edit-predictor-entry/edit-predictor-entry.component';
-import { DegreeDaysComponent } from './facility/utility-data/predictor-data/degree-days/degree-days.component';
 import { WeatherDataComponent } from './weather-data/weather-data.component';
 import { WeatherStationsComponent } from './weather-data/weather-stations/weather-stations.component';
 import { AnnualStationDataComponent } from './weather-data/annual-station-data/annual-station-data.component';
@@ -321,8 +320,7 @@ const routes: Routes = [
                   { path: 'edit-entry/:id', component: EditPredictorEntryComponent },
                   { path: 'add-entry', component: EditPredictorEntryComponent },
                 ]
-              },
-              { path: 'degree-days', component: DegreeDaysComponent }
+              }
             ]
           },
           // { path: 'upload-data', component: UploadDataComponent },
