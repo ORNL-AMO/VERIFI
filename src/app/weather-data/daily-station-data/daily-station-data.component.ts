@@ -67,4 +67,8 @@ export class DailyStationDataComponent {
     this.weatherDataService.coolingTemp = this.coolingTemp;
     await this.setDegreeDays();
   }
+  
+  showApplyToFacility() {
+    this.weatherDataService.applyToFacility.next(true);
+  }
 }

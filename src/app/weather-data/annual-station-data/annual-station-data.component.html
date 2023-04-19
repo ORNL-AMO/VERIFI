@@ -12,7 +12,7 @@
     </p>
     <form>
         <div class="row">
-            <div class="col-lg-4 col-md-12 col-sm-12">
+            <div class="col-lg-3 col-md-12 col-sm-12">
                 <label class="semibold" for="selectedYear">Select Year</label>
                 <select id="selectedYear" [(ngModel)]="selectedYear" class="form-select" name="selectedYear"
                     (change)="changeYear()">
@@ -21,7 +21,7 @@
                     </option>
                 </select>
             </div>
-            <div class="col-lg-4 col-md-12 col-sm-12">
+            <div class="col-lg-3 col-md-12 col-sm-12">
                 <label class="semibold" for="heatingTemp">Heating Base Temperature</label>
                 <div class="mb-3 input-group">
                     <input id="heatingTemp" class="form-control" type="number" [(ngModel)]="heatingTemp"
@@ -32,7 +32,7 @@
                     </span>
                 </div>
             </div>
-            <div class="col-lg-4 col-md-12 col-sm-12">
+            <div class="col-lg-3 col-md-12 col-sm-12">
                 <label class="semibold" for="coolingTemp">Cooling Base Temperature</label>
                 <div class="mb-3 input-group">
                     <input id="heatingTemp" class="form-control" type="number" [(ngModel)]="coolingTemp"
@@ -41,6 +41,11 @@
                     <span class="input-group-text">
                         &#8457;
                     </span>
+                </div>
+            </div>
+            <div class="col">
+                <div class="btn-margin">
+                    <button class="btn action-btn" (click)="showApplyToFacility()">Create Facility Degree Days</button>
                 </div>
             </div>
         </div>

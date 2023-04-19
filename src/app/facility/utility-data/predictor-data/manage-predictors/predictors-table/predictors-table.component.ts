@@ -31,6 +31,7 @@ export class PredictorsTableComponent {
 
   ngOnInit() {
     this.facilityPredictorsSub = this.predictorDbService.facilityPredictors.subscribe(val => {
+      this.facilityPredictors = val;
       this.standardPredictors = new Array();
       this.degreeDayPredictors = new Array();
       val.forEach(predictor => {

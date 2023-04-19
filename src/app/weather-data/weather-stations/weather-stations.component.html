@@ -10,8 +10,19 @@
     <div class="row">
         <div class="col-lg-4 col-md-12 col-sm-12">
             <label class="semibold" for="zipCode">Zip Code</label>
-            <input type="text" class="form-control" name="zipCode" id="zipCode" [(ngModel)]="zipCode"
-                (input)="setStations()">
+            <ng-container *ngIf="!useFacility">
+                <input type="text" class="form-control" name="zipCode" id="zipCode" [(ngModel)]="zipCode"
+                    (input)="setStations()">
+                <a class="small float-end" (click)="toggleUseZip()" *ngIf="facilities.length > 0">Use Facility Zip</a>
+
+            </ng-container>
+
+            <ng-container *ngIf="useFacility">
+                <select class="form-select" name="zipCode" id="zipCode" [(ngModel)]="zipCode" (change)="changeFacility()">
+                    <option *ngFor="let facility of facilities" [ngValue]="facility.zip">{{facility.name}}</option>
+                </select>
+                <a class="small float-end" (click)="toggleUseZip()">Manually Set Zip</a>
+            </ng-container>
         </div>
         <div class="col-lg-4 col-md-12 col-sm-12">
             <label class="semibold" for="furthestDistance">Furthest Distance</label>
@@ -25,4 +36,5 @@
 </form>
 <hr>
 <app-weather-stations-table [stations]="stations"></app-weather-stations-table>
-<app-weather-stations-map [stations]="stations" [zipCode]="zipCode" [furthestDistance]="furthestDistance"></app-weather-stations-map>
+<app-weather-stations-map [stations]="stations" [zipCode]="zipCode"
+    [furthestDistance]="furthestDistance"></app-weather-stations-map>

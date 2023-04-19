@@ -25,7 +25,6 @@ export class WeatherStationsMapComponent {
     name: string,
     isZip: boolean
   }>;
-
   constructor(private plotlyService: PlotlyService,
     private eGridService: EGridService) { }
 
@@ -39,9 +38,9 @@ export class WeatherStationsMapComponent {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if ((changes.stations && !changes.stations.isFirstChange()) || (changes.zipCode && !changes.zipCode.isFirstChange())) {
-      this.setMapData();
-      this.drawChart();
+    if ((changes.stations && !changes.stations.isFirstChange())) {
+        this.setMapData();
+        this.drawChart();
     }
   }
 

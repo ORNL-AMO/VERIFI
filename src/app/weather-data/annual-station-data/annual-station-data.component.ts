@@ -106,4 +106,8 @@ export class AnnualStationDataComponent {
     this.weatherDataService.selectedYear = this.selectedYear;
     await this.setDegreeDays();
   }
+
+  showApplyToFacility() {
+    this.weatherDataService.applyToFacility.next(true);
+  }
 }
