@@ -125,7 +125,7 @@ export class EditPredictorComponent {
     this.router.navigateByUrl('facility/' + selectedFacility.id + '/utility/predictors/manage/predictor-table')
   }
 
-  setPredictorDataFromForm() {
+  setPredictorDataFromForm(): boolean {
     this.predictorData.name = this.predictorForm.controls.name.value;
     this.predictorData.unit = this.predictorForm.controls.unit.value;
     this.predictorData.description = this.predictorForm.controls.description.value;
@@ -137,17 +137,32 @@ export class EditPredictorComponent {
     this.predictorData.conversionType = this.predictorForm.controls.conversionType.value;
     // this.predictorData.mathAction = this.predictorForm.controls.name.value;
     // this.predictorData.mathAmount = this.predictorForm.controls.name.value;
-    this.predictorData.weatherDataType = this.predictorForm.controls.weatherDataType.value;
-    this.predictorData.heatingBaseTemperature = this.predictorForm.controls.heatingBaseTemperature.value;
-    this.predictorData.coolingBaseTemperature = this.predictorForm.controls.coolingBaseTemperature.value;
-    this.predictorData.weatherStationId = this.predictorForm.controls.weatherStationId.value;
 
+    let weatherDataChange: boolean = false;
+    if (this.predictorData.weatherDataType != this.predictorForm.controls.weatherDataType.value) {
+      weatherDataChange = true;
+      this.predictorData.weatherDataType = this.predictorForm.controls.weatherDataType.value;
+    }
+    if (this.predictorData.heatingBaseTemperature != this.predictorForm.controls.heatingBaseTemperature.value) {
+      weatherDataChange = true;
+      this.predictorData.heatingBaseTemperature = this.predictorForm.controls.heatingBaseTemperature.value;
+    }
+    if (this.predictorData.coolingBaseTemperature != this.predictorForm.controls.coolingBaseTemperature.value) {
+      weatherDataChange = true;
+      this.predictorData.coolingBaseTemperature = this.predictorForm.controls.coolingBaseTemperature.value;
+    }
+    if (this.predictorData.weatherStationId != this.predictorForm.controls.weatherStationId.value) {
+      weatherDataChange = true;
+      this.predictorData.weatherStationId = this.predictorForm.controls.weatherStationId.value;
+    }
+    return weatherDataChange;
   }
 
   async saveChanges() {
     this.loadingService.setLoadingMessage('Updating Predictors...');
     this.loadingService.setLoadingStatus(true);
-    this.setPredictorDataFromForm();
+    let needsWeatherDataUpdate: boolean = this.setPredictorDataFromForm();
+    console.log(this.predictorData);
     let facilityPredictors: Array<PredictorData> = this.predictorDbService.facilityPredictors.getValue();
     let facilityPredictorsCopy: Array<PredictorData> = JSON.parse(JSON.stringify(facilityPredictors));
     if (this.addOrEdit == 'add') {
@@ -156,8 +171,9 @@ export class EditPredictorComponent {
     } else {
       let editPredictorIndex: number = facilityPredictorsCopy.findIndex(predictorCopy => { return predictorCopy.id == this.predictorData.id });
       facilityPredictorsCopy[editPredictorIndex] = this.predictorData;
+      await this.predictorDbService.updateFacilityPredictorEntries(facilityPredictorsCopy);
     }
-    if (this.predictorData.predictorType == 'Weather') {
+    if (this.predictorData.predictorType == 'Weather' && needsWeatherDataUpdate) {
       await this.predictorDbService.updatePredictorDegreeDays(this.facility, this.predictorData);
     }
     this.loadingService.setLoadingStatus(false);

@@ -14,23 +14,23 @@ export class DegreeDaysService {
   yearHourlyData: Array<LocalClimatologicalData>;
   constructor(private eGridService: EGridService, private convertUnitsService: ConvertUnitsService) { }
 
-  async getHeatingDegreeDays(zipCode: string, month: number, year: number, baseHeatingTemperature: number, baseCoolingTemperature: number): Promise<Array<DegreeDay>> {
-    let stationsWithinFortyMiles: Array<WeatherStation> = await this.getClosestStation(zipCode, 40, { year: year, month: month });
-    let stationDataResponse: { station: WeatherStation, response: Response, localClimatologicalDataYear: Array<LocalClimatologicalData> } = await this.getClosestStationData(stationsWithinFortyMiles, year);
-    // let localClimatologicalDataYear: Array<LocalClimatologicalData> = await this.getStationYearLCD(stationDataResponse.station, stationDataResponse.response);
-    let localClimatologicalDataMonth: Array<LocalClimatologicalData> = stationDataResponse.localClimatologicalDataYear.filter(lcd => {
-      return lcd.DATE.getMonth() == month;
-    });
-    let startDate: Date = new Date(year, month, 1);
-    let endDate: Date = new Date(year, month + 1, 1);
-    let degreeDays: Array<DegreeDay> = new Array();
-    while (startDate < endDate) {
-      let degreeDay: DegreeDay = this.calculateHeatingDegreeDaysForDate(startDate, localClimatologicalDataMonth, baseHeatingTemperature, baseCoolingTemperature);
-      degreeDays.push(degreeDay);
-      startDate.setDate(startDate.getDate() + 1);
-    }
-    return degreeDays;
-  }
+  // async getHeatingDegreeDays(zipCode: string, month: number, year: number, baseHeatingTemperature: number, baseCoolingTemperature: number): Promise<Array<DegreeDay>> {
+  //   let stationsWithinFortyMiles: Array<WeatherStation> = await this.getClosestStation(zipCode, 40, { year: year, month: month });
+  //   let stationDataResponse: { station: WeatherStation, response: Response, localClimatologicalDataYear: Array<LocalClimatologicalData> } = await this.getClosestStationData(stationsWithinFortyMiles, year);
+  //   // let localClimatologicalDataYear: Array<LocalClimatologicalData> = await this.getStationYearLCD(stationDataResponse.station, stationDataResponse.response);
+  //   let localClimatologicalDataMonth: Array<LocalClimatologicalData> = stationDataResponse.localClimatologicalDataYear.filter(lcd => {
+  //     return lcd.DATE.getMonth() == month;
+  //   });
+  //   let startDate: Date = new Date(year, month, 1);
+  //   let endDate: Date = new Date(year, month + 1, 1);
+  //   let degreeDays: Array<DegreeDay> = new Array();
+  //   while (startDate < endDate) {
+  //     let degreeDay: DegreeDay = this.calculateHeatingDegreeDaysForDate(startDate, localClimatologicalDataMonth, baseHeatingTemperature, baseCoolingTemperature);
+  //     degreeDays.push(degreeDay);
+  //     startDate.setDate(startDate.getDate() + 1);
+  //   }
+  //   return degreeDays;
+  // }
 
 
   async getPredictorValueForMonth(month: number, year: number, baseHeatingTemperature: number, baseCoolingTemperature: number, stationId: string): Promise<Array<DegreeDay>> {

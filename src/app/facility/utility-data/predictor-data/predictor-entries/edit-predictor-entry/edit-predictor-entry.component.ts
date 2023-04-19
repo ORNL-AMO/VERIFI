@@ -4,9 +4,10 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
-import { IdbAccount, IdbFacility, IdbPredictorEntry } from 'src/app/models/idb';
+import { IdbAccount, IdbFacility, IdbPredictorEntry, PredictorData } from 'src/app/models/idb';
 import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
 import * as _ from 'lodash';
+import { DegreeDay } from 'src/app/models/degreeDays';
 @Component({
   selector: 'app-edit-predictor-entry',
   templateUrl: './edit-predictor-entry.component.html',
@@ -62,6 +63,7 @@ export class EditPredictorEntryComponent {
     let facilityPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.facilityPredictorEntries.getValue();
     let predictorEntry: IdbPredictorEntry = facilityPredictorEntries.find(entry => { return entry.guid == predictorId });
     this.predictorEntry = JSON.parse(JSON.stringify(predictorEntry));
+    console.log(this.predictorEntry);
   }
 
   setNewPredictorEntry() {
@@ -82,19 +84,60 @@ export class EditPredictorEntryComponent {
     }) != undefined;
   }
 
-  setDegreeDayValues() {
+  async setDegreeDayValues() {
     this.calculatingDegreeDays = true;
     let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    let cddIndex: number = this.predictorEntry.predictors.findIndex(predictor => { return predictor.predictorType == 'Weather' && predictor.weatherDataType == 'CDD' });
-    let hddIndex: number = this.predictorEntry.predictors.findIndex(predictor => { return predictor.predictorType == 'Weather' && predictor.weatherDataType == 'HDD' });
-    this.degreeDaysService.getHeatingDegreeDays(facility.zip, this.predictorEntry.date.getMonth(), this.predictorEntry.date.getFullYear(), this.predictorEntry.predictors[hddIndex].heatingBaseTemperature, this.predictorEntry.predictors[cddIndex].coolingBaseTemperature).then(degreeDays => {
-      let totalCDD: number = _.sumBy(degreeDays, 'coolingDegreeDays');
-      this.predictorEntry.predictors[cddIndex].amount = totalCDD;
-      this.predictorEntry.predictors[cddIndex].weatherStationId = degreeDays[0]?.stationId;
-      let totalHDD: number = _.sumBy(degreeDays, 'heatingDegreeDays');
-      this.predictorEntry.predictors[hddIndex].amount = totalHDD;
-      this.predictorEntry.predictors[hddIndex].weatherStationId = degreeDays[0]?.stationId;
-      this.calculatingDegreeDays = false;
-    });
+    let degreeDayPredictors: Array<PredictorData> = this.predictorEntry.predictors.filter(predictor => { return predictor.predictorType == 'Weather' });
+    let updatedPredictorIds: Array<string> = [];
+    for (let i = 0; i < degreeDayPredictors.length; i++) {
+      let predictor: PredictorData = degreeDayPredictors[i];
+      if (!updatedPredictorIds.includes(predictor.id)) {
+        let degreeDayPair: PredictorData = degreeDayPredictors.find(predictorPair => {
+          return predictorPair.weatherStationId == predictor.weatherStationId && predictorPair.weatherDataType != predictor.weatherDataType && !updatedPredictorIds.includes(predictorPair.id);
+        });
+        let coolingBaseTemperature: number = 0;
+        let heatingBaseTemperature: number = 0;
+        let cddPredictor: PredictorData;
+        let hddPredictor: PredictorData;
+        let stationId: string = predictor.weatherStationId;
+        if (predictor.weatherDataType == 'CDD') {
+          cddPredictor = predictor;
+          coolingBaseTemperature = predictor.coolingBaseTemperature;
+        } else {
+          hddPredictor = predictor;
+          heatingBaseTemperature = predictor.heatingBaseTemperature;
+        }
+        if (degreeDayPair) {
+          if (degreeDayPair.weatherDataType == 'CDD') {
+            cddPredictor = degreeDayPair;
+            coolingBaseTemperature = degreeDayPair.coolingBaseTemperature;
+          } else {
+            hddPredictor = degreeDayPair;
+            heatingBaseTemperature = degreeDayPair.heatingBaseTemperature;
+          }
+        }
+        let entryDate: Date = new Date(this.predictorEntry.date);
+        console.log('calculate');
+        let degreeDays: Array<DegreeDay> = await this.degreeDaysService.getPredictorValueForMonth(entryDate.getMonth(), entryDate.getFullYear(), heatingBaseTemperature, coolingBaseTemperature, stationId)
+        if (cddPredictor) {
+          let totalCDD: number = _.sumBy(degreeDays, 'coolingDegreeDays');
+          let cddIndex: number = this.predictorEntry.predictors.findIndex(predictor => { return predictor.id == cddPredictor.id });
+          this.predictorEntry.predictors[cddIndex].amount = totalCDD;
+          this.predictorEntry.predictors[cddIndex].weatherStationId = degreeDays[0]?.stationId;
+          this.predictorEntry.predictors[cddIndex].weatherStationName = degreeDays[0]?.stationName;
+          updatedPredictorIds.push(cddPredictor.id);
+        }
+
+        if (hddPredictor) {
+          let hddIndex: number = this.predictorEntry.predictors.findIndex(predictor => { return predictor.id == hddPredictor.id });
+          let totalHDD: number = _.sumBy(degreeDays, 'heatingDegreeDays');
+          this.predictorEntry.predictors[hddIndex].amount = totalHDD;
+          this.predictorEntry.predictors[hddIndex].weatherStationId = degreeDays[0]?.stationId;
+          this.predictorEntry.predictors[hddIndex].weatherStationName = degreeDays[0]?.stationName;
+          updatedPredictorIds.push(hddPredictor.id);
+        }
+      }
+    }
+    this.calculatingDegreeDays = false;
   }
 }

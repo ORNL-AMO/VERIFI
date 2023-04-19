@@ -30,7 +30,18 @@
             <div class="col-4">
                 <label [for]="'predictor-' + predictor.id">
                     <span class="fa fa-temperature-half" *ngIf="predictor.predictorType == 'Weather'"></span>
-                    {{predictor.name}}</label>
+                    {{predictor.name}}
+                    <ng-container *ngIf="predictor.predictorType == 'Weather'">
+                        <br>
+                        <span class="small block">({{predictor.weatherDataType}},
+                            <ng-container *ngIf="predictor.weatherDataType == 'HDD'">
+                                {{predictor.heatingBaseTemperature}} &#8457;
+                            </ng-container>
+                            <ng-container *ngIf="predictor.weatherDataType == 'CDD'">
+                                {{predictor.coolingBaseTemperature}} &#8457;
+                            </ng-container>)</span>
+                    </ng-container>
+                </label>
             </div>
             <div class="col">
                 <div class="input-group mb-2">

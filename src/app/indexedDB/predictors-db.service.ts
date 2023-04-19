@@ -174,9 +174,9 @@ export class PredictordbService {
     async updateFacilityPredictorEntriesInAccount(updatedPredictors: Array<PredictorData>, facility: IdbFacility) {
         let accountPredictorEntries: Array<IdbPredictorEntry> = this.accountPredictorEntries.getValue();
         let facilityPredictorEntries: Array<IdbPredictorEntry> = accountPredictorEntries.filter(predictorEntry => { return predictorEntry.facilityId == facility.guid });
-      
+
         let faclilityPredictors: Array<PredictorData> = [];
-        if(facilityPredictorEntries.length > 0){
+        if (facilityPredictorEntries.length > 0) {
             faclilityPredictors = facilityPredictorEntries[0].predictors;
         }
         let facilityPredictorIds: Array<string> = faclilityPredictors.map(predictor => { return predictor.id });
@@ -216,6 +216,16 @@ export class PredictordbService {
             predictor.unit = updatedPredictor.unit;
             predictor.production = updatedPredictor.production;
             predictor.productionInAnalysis = updatedPredictor.production;
+            predictor.predictorType = updatedPredictor.predictorType;
+            predictor.referencePredictorId = updatedPredictor.referencePredictorId;
+            predictor.conversionType = updatedPredictor.conversionType;
+            predictor.convertFrom = updatedPredictor.convertFrom;
+            predictor.convertTo = updatedPredictor.convertTo;
+            predictor.weatherDataType = updatedPredictor.weatherDataType;
+            predictor.weatherStationId = updatedPredictor.weatherStationId;
+            predictor.weatherStationName = updatedPredictor.weatherStationName;
+            predictor.heatingBaseTemperature = updatedPredictor.heatingBaseTemperature;
+            predictor.coolingBaseTemperature = updatedPredictor.coolingBaseTemperature;
             return predictor;
         });
         return entryPredictors;
