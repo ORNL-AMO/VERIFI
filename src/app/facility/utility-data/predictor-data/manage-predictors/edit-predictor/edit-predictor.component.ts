@@ -121,8 +121,7 @@ export class EditPredictorComponent {
   }
 
   cancel() {
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    this.router.navigateByUrl('facility/' + selectedFacility.id + '/utility/predictors/manage/predictor-table')
+    this.router.navigateByUrl('facility/' + this.facility.id + '/utility/predictors/manage/predictor-table')
   }
 
   setPredictorDataFromForm(): boolean {
@@ -162,7 +161,6 @@ export class EditPredictorComponent {
     this.loadingService.setLoadingMessage('Updating Predictors...');
     this.loadingService.setLoadingStatus(true);
     let needsWeatherDataUpdate: boolean = this.setPredictorDataFromForm();
-    console.log(this.predictorData);
     let facilityPredictors: Array<PredictorData> = this.predictorDbService.facilityPredictors.getValue();
     let facilityPredictorsCopy: Array<PredictorData> = JSON.parse(JSON.stringify(facilityPredictors));
     if (this.addOrEdit == 'add') {
@@ -206,15 +204,29 @@ export class EditPredictorComponent {
   }
 
   setStations() {
-    let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    this.degreeDaysService.getClosestStation(facility.zip, 50).then(stations => {
+    this.degreeDaysService.getClosestStation(this.facility.zip, 50).then(stations => {
       this.stations = stations;
     });
   }
 
   goToWeatherData() {
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    this.weatherDataService.zipCode = selectedFacility.zip;
-    this.router.navigateByUrl('/weather-data');
+    this.weatherDataService.zipCode = this.facility.zip;
+    let weatherStation: WeatherStation = this.stations.find(station => {
+      return station.ID == this.predictorForm.controls.weatherStationId.value
+    });
+    this.weatherDataService.selectedStation = weatherStation;
+    if (this.predictorForm.controls.weatherDataType.value == 'CDD') {
+      this.weatherDataService.coolingTemp = this.predictorForm.controls.coolingBaseTemperature.value;
+    } else {
+      this.weatherDataService.heatingTemp = this.predictorForm.controls.heatingBaseTemperature.value;
+    }
+    let endDate: Date = new Date(weatherStation.end);
+    endDate.setFullYear(endDate.getFullYear() - 1);
+    this.weatherDataService.selectedYear = endDate.getFullYear();
+    this.weatherDataService.selectedDate = endDate;
+    this.weatherDataService.selectedMonth = endDate;
+    this.weatherDataService.selectedFacility = this.facility;
+    this.weatherDataService.zipCode = this.facility.zip;
+    this.router.navigateByUrl('/weather-data/annual-station');
   }
 }

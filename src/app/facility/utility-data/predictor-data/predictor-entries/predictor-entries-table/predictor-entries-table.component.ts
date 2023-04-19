@@ -204,17 +204,29 @@ export class PredictorEntriesTableComponent {
   }
 
   async viewWeatherData(predictorEntry: IdbPredictorEntry) {
-    let predictorData: PredictorData = predictorEntry.predictors.find(pData => { return pData.predictorType == 'Weather' });
-    //TODO: handle multiple weather data entries
-    let weatherStation: WeatherStation = await this.degreeDaysService.getStationById(predictorData.weatherStationId);
+    let predictor: PredictorData = predictorEntry.predictors.find(pData => { return pData.predictorType == 'Weather' });
+    let weatherStation: WeatherStation = await this.degreeDaysService.getStationById(predictor.weatherStationId);
     this.weatherDataService.selectedStation = weatherStation;
-    // let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    this.weatherDataService.coolingTemp = predictorData.coolingBaseTemperature;
-    this.weatherDataService.heatingTemp = predictorData.heatingBaseTemperature;
-    let predictorDate: Date = new Date(predictorEntry.date);
-    this.weatherDataService.selectedDate = predictorDate;
-    this.weatherDataService.selectedMonth = predictorDate;
-    this.weatherDataService.selectedYear = predictorDate.getFullYear();
+    if (predictor.weatherDataType == 'CDD') {
+      this.weatherDataService.coolingTemp = predictor.coolingBaseTemperature;
+      let predictorPair: PredictorData = predictorEntry.predictors.find(predictorPair => { return predictorPair.weatherStationId == predictor.weatherStationId && predictorPair.weatherDataType == 'HDD' });
+      if (predictorPair) {
+        this.weatherDataService.heatingTemp = predictorPair.heatingBaseTemperature;
+      }
+    } else {
+      this.weatherDataService.heatingTemp = predictor.heatingBaseTemperature;
+      let predictorPair: PredictorData = predictorEntry.predictors.find(predictorPair => { return predictorPair.weatherStationId == predictor.weatherStationId && predictorPair.weatherDataType == 'CDD' });
+      if (predictorPair) {
+        this.weatherDataService.coolingTemp = predictorPair.coolingBaseTemperature;
+      }
+    }
+    let entryDate: Date = new Date(predictorEntry.date);
+    this.weatherDataService.selectedYear = entryDate.getFullYear();
+    this.weatherDataService.selectedDate = entryDate;
+    this.weatherDataService.selectedMonth = entryDate;
+    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    this.weatherDataService.selectedFacility = selectedFacility;
+    this.weatherDataService.zipCode = selectedFacility.zip;
     this.router.navigateByUrl('weather-data/monthly-station');
   }
 }

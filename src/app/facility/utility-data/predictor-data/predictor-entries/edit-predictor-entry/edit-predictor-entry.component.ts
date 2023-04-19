@@ -63,7 +63,6 @@ export class EditPredictorEntryComponent {
     let facilityPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.facilityPredictorEntries.getValue();
     let predictorEntry: IdbPredictorEntry = facilityPredictorEntries.find(entry => { return entry.guid == predictorId });
     this.predictorEntry = JSON.parse(JSON.stringify(predictorEntry));
-    console.log(this.predictorEntry);
   }
 
   setNewPredictorEntry() {
@@ -86,7 +85,6 @@ export class EditPredictorEntryComponent {
 
   async setDegreeDayValues() {
     this.calculatingDegreeDays = true;
-    let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     let degreeDayPredictors: Array<PredictorData> = this.predictorEntry.predictors.filter(predictor => { return predictor.predictorType == 'Weather' });
     let updatedPredictorIds: Array<string> = [];
     for (let i = 0; i < degreeDayPredictors.length; i++) {
@@ -117,7 +115,6 @@ export class EditPredictorEntryComponent {
           }
         }
         let entryDate: Date = new Date(this.predictorEntry.date);
-        console.log('calculate');
         let degreeDays: Array<DegreeDay> = await this.degreeDaysService.getPredictorValueForMonth(entryDate.getMonth(), entryDate.getFullYear(), heatingBaseTemperature, coolingBaseTemperature, stationId)
         if (cddPredictor) {
           let totalCDD: number = _.sumBy(degreeDays, 'coolingDegreeDays');

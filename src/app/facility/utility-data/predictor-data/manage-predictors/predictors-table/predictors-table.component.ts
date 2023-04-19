@@ -5,6 +5,9 @@ import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { IdbFacility, PredictorData } from 'src/app/models/idb';
 import { Subscription } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
+import { WeatherDataService } from 'src/app/weather-data/weather-data.service';
+import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
+import { WeatherStation } from 'src/app/models/degreeDays';
 
 
 @Component({
@@ -25,7 +28,8 @@ export class PredictorsTableComponent {
 
 
   constructor(private predictorDbService: PredictordbService, private router: Router,
-    private facilitydbService: FacilitydbService, private loadingService: LoadingService) {
+    private facilitydbService: FacilitydbService, private loadingService: LoadingService,
+    private weatherDataService: WeatherDataService, private degreeDaysService: DegreeDaysService) {
 
   }
 
@@ -87,6 +91,29 @@ export class PredictorsTableComponent {
 
 
   async viewWeatherData(predictor: PredictorData) {
+    let weatherStation: WeatherStation = await this.degreeDaysService.getStationById(predictor.weatherStationId);
+    this.weatherDataService.selectedStation = weatherStation;
+    if (predictor.weatherDataType == 'CDD') {
+      this.weatherDataService.coolingTemp = predictor.coolingBaseTemperature;
+      let predictorPair: PredictorData = this.degreeDayPredictors.find(predictorPair => { return predictorPair.weatherStationId == predictor.weatherStationId && predictorPair.weatherDataType == 'HDD' });
+      if (predictorPair) {
+        this.weatherDataService.heatingTemp = predictorPair.heatingBaseTemperature;
+      }
+    } else {
+      this.weatherDataService.heatingTemp = predictor.heatingBaseTemperature;
+      let predictorPair: PredictorData = this.degreeDayPredictors.find(predictorPair => { return predictorPair.weatherStationId == predictor.weatherStationId && predictorPair.weatherDataType == 'CDD' });
+      if (predictorPair) {
+        this.weatherDataService.coolingTemp = predictorPair.coolingBaseTemperature;
+      }
+    }
+    let endDate: Date = new Date(weatherStation.end);
+    endDate.setFullYear(endDate.getFullYear() - 1);
+    this.weatherDataService.selectedYear = endDate.getFullYear();
+    this.weatherDataService.selectedDate = endDate;
+    this.weatherDataService.selectedMonth = endDate;
+    this.weatherDataService.selectedFacility = this.selectedFacility;
+    this.weatherDataService.zipCode = this.selectedFacility.zip;
+    this.router.navigateByUrl('weather-data/annual-station')
 
   }
 
