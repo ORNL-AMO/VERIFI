@@ -14,37 +14,27 @@ export class DegreeDaysService {
   yearHourlyData: Array<LocalClimatologicalData>;
   constructor(private eGridService: EGridService, private convertUnitsService: ConvertUnitsService) { }
 
-  // async getHeatingDegreeDays(zipCode: string, month: number, year: number, baseHeatingTemperature: number, baseCoolingTemperature: number): Promise<Array<DegreeDay>> {
-  //   let stationsWithinFortyMiles: Array<WeatherStation> = await this.getClosestStation(zipCode, 40, { year: year, month: month });
-  //   let stationDataResponse: { station: WeatherStation, response: Response, localClimatologicalDataYear: Array<LocalClimatologicalData> } = await this.getClosestStationData(stationsWithinFortyMiles, year);
-  //   // let localClimatologicalDataYear: Array<LocalClimatologicalData> = await this.getStationYearLCD(stationDataResponse.station, stationDataResponse.response);
-  //   let localClimatologicalDataMonth: Array<LocalClimatologicalData> = stationDataResponse.localClimatologicalDataYear.filter(lcd => {
-  //     return lcd.DATE.getMonth() == month;
-  //   });
-  //   let startDate: Date = new Date(year, month, 1);
-  //   let endDate: Date = new Date(year, month + 1, 1);
-  //   let degreeDays: Array<DegreeDay> = new Array();
-  //   while (startDate < endDate) {
-  //     let degreeDay: DegreeDay = this.calculateHeatingDegreeDaysForDate(startDate, localClimatologicalDataMonth, baseHeatingTemperature, baseCoolingTemperature);
-  //     degreeDays.push(degreeDay);
-  //     startDate.setDate(startDate.getDate() + 1);
-  //   }
-  //   return degreeDays;
-  // }
-
-
   async getPredictorValueForMonth(month: number, year: number, baseHeatingTemperature: number, baseCoolingTemperature: number, stationId: string): Promise<Array<DegreeDay>> {
     if (!this.stationDataResponse || this.stationDataResponse.station.ID != stationId || this.stationDataResponse.year != year) {
       let station: WeatherStation = await this.getStationById(stationId);
-      let response: Response = await this.getStationDataResponse(station, year);
-      let dataResults: string = await response.text();
-      this.stationDataResponse = {
-        response: response,
-        station: station,
-        year: year,
-        dataResults: dataResults
+      if (station) {
+        let neededDate: Date = new Date(year, month, 1);
+        if (neededDate >= station.begin && neededDate <= station.end) {
+          let response: Response = await this.getStationDataResponse(station, year);
+          let dataResults: string = await response.text();
+          this.stationDataResponse = {
+            response: response,
+            station: station,
+            year: year,
+            dataResults: dataResults
+          }
+          this.yearHourlyData = this.getStationYearLCDFromResults(station, dataResults);
+        } else {
+          return [];
+        }
+      } else {
+        return [];
       }
-      this.yearHourlyData = this.getStationYearLCDFromResults(station, dataResults);
     }
     let localClimatologicalDataMonth: Array<LocalClimatologicalData> = this.yearHourlyData.filter(lcd => {
       return lcd.DATE.getMonth() == month;
@@ -231,13 +221,6 @@ export class DegreeDaysService {
     return results;
   }
 
-
-
-  getCoolingDegreeDays(): number {
-
-    return
-  }
-
   //find weather station closest to zip code
   async getClosestStation(zipCode: string, furthestDistance: number, neededMonth?: { year: number, month: number }): Promise<Array<WeatherStation>> {
     let stationLatLong: { ZIP: string, LAT: string, LNG: string } = this.eGridService.zipLatLong.find(zipLL => { return zipLL.ZIP == zipCode });
@@ -319,63 +302,8 @@ export class DegreeDaysService {
     return [];
   }
 
-  async getClosestStationData(stationsWithinFortyMiles: Array<WeatherStation>, year: number): Promise<{ station: WeatherStation, response: Response, localClimatologicalDataYear: Array<LocalClimatologicalData> }> {
-    let response: Response;
-    for (let i = 0; i < stationsWithinFortyMiles.length; i++) {
-      response = await this.getStationDataResponse(stationsWithinFortyMiles[i], year);
-      if (response.ok) {
-        let localClimatologicalDataYear: Array<LocalClimatologicalData> = await this.getStationYearLCD(stationsWithinFortyMiles[i], response);
-        let checkData: LocalClimatologicalData = localClimatologicalDataYear.find(data => { return isNaN(data.HourlyDryBulbTemperature) == false });
-        if (checkData != undefined) {
-          return { station: stationsWithinFortyMiles[i], response: response, localClimatologicalDataYear };
-        }
-      }
-    }
-    return null;
-  }
-
   async getStationDataResponse(weatherStation: WeatherStation, year: number): Promise<Response> {
     return await fetch("https://www.ncei.noaa.gov/data/local-climatological-data/access/" + year + "/" + weatherStation.ID + ".csv");
-  }
-
-  //fetch Local Climatological Data for given station and year
-  async getStationYearLCD(weatherStation: WeatherStation, response: Response): Promise<Array<LocalClimatologicalData>> {
-    // let fetchData = await fetch("https://www.ncei.noaa.gov/data/local-climatological-data/access/" + year + "/" + weatherStation.ID + ".csv");
-    let dataResults = await response.text();
-    let parsedData: Array<any> = Papa.parse(dataResults, { header: true }).data;
-    let localData: Array<LocalClimatologicalData> = new Array();
-    for (let i = 1; i < parsedData.length; i++) {
-      let currentLine = parsedData[i];
-      let hourData: LocalClimatologicalData = {
-        stationId: weatherStation.ID,
-        STATION: weatherStation.name,
-        DATE: new Date(currentLine['DATE']),
-        LATITUDE: currentLine['LATITUDE'],
-        LONGITUDE: currentLine['LONGITUDE'],
-        ELEVATION: currentLine['ELEVATION'],
-        NAME: currentLine['NAME'],
-        REPORT_TYPE: currentLine['REPORT_TYPE'],
-        SOURCE: currentLine['SOURCE'],
-        HourlyAltimeterSetting: parseFloat(currentLine['HourlyAltimeterSetting']),
-        HourlyDewPointTemperature: parseFloat(currentLine['HourlyDewPointTemperature']),
-        HourlyDryBulbTemperature: parseFloat(currentLine['HourlyDryBulbTemperature']),
-        HourlyPrecipitation: parseFloat(currentLine['HourlyPrecipitation']),
-        HourlyPresentWeatherType: currentLine['HourlyPresentWeatherType'],
-        HourlyPressureChange: parseFloat(currentLine['HourlyPressureChange']),
-        HourlyPressureTendency: parseFloat(currentLine['HourlyPressureTendency']),
-        HourlyRelativeHumidity: parseFloat(currentLine['HourlyRelativeHumidity']),
-        HourlySkyConditions: parseFloat(currentLine['HourlySkyConditions']),
-        HourlySeaLevelPressure: parseFloat(currentLine['HourlySeaLevelPressure']),
-        HourlyStationPressure: parseFloat(currentLine['HourlyStationPressure']),
-        HourlyVisibility: parseFloat(currentLine['HourlyVisibility']),
-        HourlyWetBulbTemperature: parseFloat(currentLine['HourlyWetBulbTemperature']),
-        HourlyWindDirection: parseFloat(currentLine['HourlyWindDirection']),
-        HourlyWindGustSpeed: parseFloat(currentLine['HourlyWindGustSpeed']),
-        HourlyWindSpeed: parseFloat(currentLine['HourlyWindSpeed'])
-      }
-      localData.push(hourData);
-    }
-    return localData;
   }
 
   getStationYearLCDFromResults(weatherStation: WeatherStation, dataResults: string): Array<LocalClimatologicalData> {
