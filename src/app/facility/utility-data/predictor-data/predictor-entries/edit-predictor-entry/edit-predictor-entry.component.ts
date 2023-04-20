@@ -56,7 +56,7 @@ export class EditPredictorEntryComponent {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     await this.dbChangesService.setPredictors(selectedAccount, selectedFacility);
-
+    this.cancel();
   }
 
   setPredictorEntryEdit(predictorId: string) {

@@ -8,6 +8,7 @@ import { FacilitydbService } from '../indexedDB/facility-db.service';
 import { PredictordbService } from '../indexedDB/predictors-db.service';
 import { LoadingService } from '../core-components/loading/loading.service';
 import { Router } from '@angular/router';
+import { AnalysisDbService } from '../indexedDB/analysis-db.service';
 
 @Component({
   selector: 'app-weather-data',
@@ -26,7 +27,8 @@ export class WeatherDataComponent {
     private facilityDbService: FacilitydbService,
     private predictorDbService: PredictordbService,
     private loadingService: LoadingService,
-    private router: Router) {
+    private router: Router,
+    private analysisDbService: AnalysisDbService) {
 
   }
 
@@ -89,6 +91,8 @@ export class WeatherDataComponent {
 
     await this.predictorDbService.updateFacilityPredictorEntriesInAccount(facilityPredictorsCopy, this.selectedFacility);
     await this.predictorDbService.createPredictorHeatingCoolingDegreeDays(this.selectedFacility, hddPredictor, cddPredictor);
+    this.loadingService.setLoadingMessage('Updating Analysis Items...');
+    await this.analysisDbService.updateAnalysisPredictors(facilityPredictorsCopy, this.selectedFacility.guid);
     this.loadingService.setLoadingStatus(false);
     this.router.navigateByUrl('facility/' + this.selectedFacility.id + '/utility/predictors/manage/predictor-table')
     // this.cancel();

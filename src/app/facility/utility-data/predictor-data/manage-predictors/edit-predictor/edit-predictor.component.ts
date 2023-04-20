@@ -10,6 +10,7 @@ import { UnitConversionTypes } from './unitConversionTypes';
 import { WeatherStation } from 'src/app/models/degreeDays';
 import { WeatherDataService } from 'src/app/weather-data/weather-data.service';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
+import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 
 @Component({
   selector: 'app-edit-predictor',
@@ -35,7 +36,8 @@ export class EditPredictorComponent {
     private convertUnitsService: ConvertUnitsService,
     private weatherDataService: WeatherDataService,
     private degreeDaysService: DegreeDaysService,
-    private loadingService: LoadingService) {
+    private loadingService: LoadingService,
+    private analysisDbService: AnalysisDbService) {
   }
 
   ngOnInit() {
@@ -174,6 +176,7 @@ export class EditPredictorComponent {
     if (this.predictorData.predictorType == 'Weather' && needsWeatherDataUpdate) {
       await this.predictorDbService.updatePredictorDegreeDays(this.facility, this.predictorData);
     }
+    await this.analysisDbService.updateAnalysisPredictors(facilityPredictorsCopy, this.facility.guid);
     this.loadingService.setLoadingStatus(false);
     this.cancel();
   }
