@@ -26,7 +26,6 @@ import { FacilityListPipe } from './core-components/sidebar/facility-list.pipe';
 import { UploadDataModule } from './upload-data/upload-data.module';
 import { CreateReportModalComponent } from './core-components/create-report-modal/create-report-modal.component';
 import { StartupErrorComponent } from './core-components/startup-error/startup-error.component';
-import { HttpClientModule } from '@angular/common/http';
 import { WeatherDataModule } from './weather-data/weather-data.module';
 
 @NgModule({
@@ -60,7 +59,6 @@ import { WeatherDataModule } from './weather-data/weather-data.module';
     HelperPipesModule,
     NgbTypeaheadModule,
     UploadDataModule,
-    HttpClientModule,
     WeatherDataModule
   ],
   providers: [],
