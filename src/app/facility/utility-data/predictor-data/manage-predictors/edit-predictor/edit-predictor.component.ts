@@ -223,11 +223,13 @@ export class EditPredictorComponent {
     } else {
       this.weatherDataService.heatingTemp = this.predictorForm.controls.heatingBaseTemperature.value;
     }
-    let endDate: Date = new Date(weatherStation.end);
-    endDate.setFullYear(endDate.getFullYear() - 1);
-    this.weatherDataService.selectedYear = endDate.getFullYear();
-    this.weatherDataService.selectedDate = endDate;
-    this.weatherDataService.selectedMonth = endDate;
+    if (weatherStation) {
+      let endDate: Date = new Date(weatherStation.end);
+      endDate.setFullYear(endDate.getFullYear() - 1);
+      this.weatherDataService.selectedYear = endDate.getFullYear();
+      this.weatherDataService.selectedDate = endDate;
+      this.weatherDataService.selectedMonth = endDate;
+    }
     this.weatherDataService.selectedFacility = this.facility;
     this.weatherDataService.zipCode = this.facility.zip;
     this.router.navigateByUrl('/weather-data/annual-station');
