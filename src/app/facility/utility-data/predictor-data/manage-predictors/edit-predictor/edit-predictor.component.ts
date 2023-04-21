@@ -11,6 +11,7 @@ import { WeatherStation } from 'src/app/models/degreeDays';
 import { WeatherDataService } from 'src/app/weather-data/weather-data.service';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
+import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 
 @Component({
   selector: 'app-edit-predictor',
@@ -37,7 +38,8 @@ export class EditPredictorComponent {
     private weatherDataService: WeatherDataService,
     private degreeDaysService: DegreeDaysService,
     private loadingService: LoadingService,
-    private analysisDbService: AnalysisDbService) {
+    private analysisDbService: AnalysisDbService,
+    private toastNotificationService: ToastNotificationsService) {
   }
 
   ngOnInit() {
@@ -178,6 +180,7 @@ export class EditPredictorComponent {
     }
     await this.analysisDbService.updateAnalysisPredictors(facilityPredictorsCopy, this.facility.guid);
     this.loadingService.setLoadingStatus(false);
+    this.toastNotificationService.showToast('Predictor Entries Updated!', undefined, undefined, false, 'alert-success');
     this.cancel();
   }
 
@@ -223,15 +226,18 @@ export class EditPredictorComponent {
     } else {
       this.weatherDataService.heatingTemp = this.predictorForm.controls.heatingBaseTemperature.value;
     }
+
+    this.weatherDataService.selectedFacility = this.facility;
+    this.weatherDataService.zipCode = this.facility.zip;
     if (weatherStation) {
       let endDate: Date = new Date(weatherStation.end);
       endDate.setFullYear(endDate.getFullYear() - 1);
       this.weatherDataService.selectedYear = endDate.getFullYear();
       this.weatherDataService.selectedDate = endDate;
       this.weatherDataService.selectedMonth = endDate;
+      this.router.navigateByUrl('/weather-data/annual-station');
+    } else {
+      this.router.navigateByUrl('/weather-data');
     }
-    this.weatherDataService.selectedFacility = this.facility;
-    this.weatherDataService.zipCode = this.facility.zip;
-    this.router.navigateByUrl('/weather-data/annual-station');
   }
 }

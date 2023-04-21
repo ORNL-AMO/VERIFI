@@ -28,23 +28,27 @@
                 <label class="semibold" for="heatingTemp">Heating Base Temperature</label>
                 <div class="mb-3 input-group">
                     <input id="heatingTemp" class="form-control" type="number" [(ngModel)]="heatingTemp"
-                        onfocus="this.select();" name="heatingTemp" (input)="setHeatingBaseTemp()">
+                        onfocus="this.select();" name="heatingTemp" (input)="setHeatingBaseTemp()" required>
                     <!--TODO: Temperature units-->
                     <span class="input-group-text">
                         &#8457;
                     </span>
                 </div>
+                <div class="alert-danger alert" *ngIf="heatingTemp == undefined">
+                    Value Required</div>
             </div>
             <div class="col-lg-3 col-md-12 col-sm-12">
                 <label class="semibold" for="coolingTemp">Cooling Base Temperature</label>
                 <div class="mb-3 input-group">
                     <input id="heatingTemp" class="form-control" type="number" [(ngModel)]="coolingTemp"
-                        onfocus="this.select();" name="coolingTemp" (input)="setCoolingBaseTemp()">
+                        onfocus="this.select();" name="coolingTemp" (input)="setCoolingBaseTemp()" required>
                     <!--TODO: Temperature units-->
                     <span class="input-group-text">
                         &#8457;
                     </span>
                 </div>
+                <div class="alert-danger alert" *ngIf="coolingTemp == undefined">
+                    Value Required</div>
             </div>
             <div class="col">
                 <div class="btn-margin">

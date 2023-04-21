@@ -9,6 +9,7 @@ import { PredictordbService } from '../indexedDB/predictors-db.service';
 import { LoadingService } from '../core-components/loading/loading.service';
 import { Router } from '@angular/router';
 import { AnalysisDbService } from '../indexedDB/analysis-db.service';
+import { ToastNotificationsService } from '../core-components/toast-notifications/toast-notifications.service';
 
 @Component({
   selector: 'app-weather-data',
@@ -28,7 +29,8 @@ export class WeatherDataComponent {
     private predictorDbService: PredictordbService,
     private loadingService: LoadingService,
     private router: Router,
-    private analysisDbService: AnalysisDbService) {
+    private analysisDbService: AnalysisDbService,
+    private toastNotificationService: ToastNotificationsService) {
 
   }
 
@@ -94,6 +96,7 @@ export class WeatherDataComponent {
     this.loadingService.setLoadingMessage('Updating Analysis Items...');
     await this.analysisDbService.updateAnalysisPredictors(facilityPredictorsCopy, this.selectedFacility.guid);
     this.loadingService.setLoadingStatus(false);
+    this.toastNotificationService.showToast('Degree Day Predictors Created', undefined, undefined, false, 'alert-success', false);
     this.router.navigateByUrl('facility/' + this.selectedFacility.id + '/utility/predictors/manage/predictor-table')
     // this.cancel();
     //todo: success toast and navigate to facility

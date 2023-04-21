@@ -44,7 +44,7 @@
                 </ng-container>
                 <ng-container *ngIf="predictor.predictorType == 'Weather'">
                     <br>
-                    <span class="small block">({{predictor.weatherDataType}}, 
+                    <span class="small block">({{predictor.weatherDataType}},
                         <ng-container *ngIf="predictor.weatherDataType == 'HDD'">
                             {{predictor.heatingBaseTemperature}} &#8457;
                         </ng-container>
@@ -96,4 +96,38 @@
     <ngb-pagination [collectionSize]="facilityPredictorEntries.length" [(page)]="currentPageNumber"
         [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true" aria-label="Pagination">
     </ngb-pagination>
+</div>
+
+
+
+<div [ngClass]="{'windowOverlay': predictorEntryToDelete || showBulkDelete}"></div>
+<div class="popup" [class.open]="predictorEntryToDelete">
+    <div class="popup-header">
+        Delete {{predictorEntryToDelete?.date | date:'MMM, yyyy'}}?
+        <button class="item-right" (click)="cancelDeletePredictorEntry()">x</button>
+    </div>
+    <div class="popup-body">
+        <p>WARNING:
+            Are you sure you want to delete the predictor entry for {{predictorEntryToDelete?.date | date:'MMM, yyyy'}}?
+            This cannot be undone.</p>
+    </div>
+    <div class="saveCancel popup-footer text-end">
+        <button class="btn btn-secondary" (click)="cancelDeletePredictorEntry()">Cancel</button>
+        <button class="btn btn-danger" (click)="confirmDeletePredictorEntry()">Confirm Delete</button>
+    </div>
+</div>
+<div class="popup" [class.open]="showBulkDelete">
+    <div class="popup-header">
+        Bulk Delete Predictors?
+        <button class="item-right" (click)="cancelBulkDelete()">x</button>
+    </div>
+    <div class="popup-body">
+        <p>WARNING:
+            Are you sure you want to delete the selected predictor entries?
+            This cannot be undone.</p>
+    </div>
+    <div class="saveCancel popup-footer text-end">
+        <button class="btn btn-secondary" (click)="cancelBulkDelete()">Cancel</button>
+        <button class="btn btn-danger" (click)="bulkDelete()">Confirm Delete</button>
+    </div>
 </div>

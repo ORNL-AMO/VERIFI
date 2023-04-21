@@ -2,7 +2,7 @@
     <div class="col-12">
         <div class="saveCancel item-right">
             <button class="btn btn-secondary" (click)="cancel()">Cancel</button>
-            <button class="btn btn-primary" (click)="saveChanges()">
+            <button [disabled]="calculatingDegreeDays" class="btn btn-primary" (click)="saveChanges()">
                 <span *ngIf="addOrEdit == 'add'">Add Predictor Entry</span>
                 <span *ngIf="addOrEdit == 'edit'">Save Changes</span>
             </button>

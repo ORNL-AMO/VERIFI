@@ -1,8 +1,10 @@
 <div class="row">
     <div class="col-12">
-        <!-- <div class="d-flex small text-center alert alert-warning" *ngIf="predictorForm.controls.predictorType.value == 'Weather'">
-            Degree days will be calculated upon saving. Existing predictors may be changed.
-        </div> -->
+        <div class="d-flex small text-center alert alert-warning"
+            *ngIf="predictorForm.controls.predictorType.value == 'Weather' && addOrEdit == 'edit'">
+            Changing weather data properties will cause degree days to re-calculate. Existing predictor entries may be
+            altered.
+        </div>
         <div class="saveCancel item-right">
             <button class="btn btn-secondary" (click)="cancel()">Cancel</button>
             <button class="btn btn-primary" (click)="saveChanges()" [disabled]="predictorForm.invalid">

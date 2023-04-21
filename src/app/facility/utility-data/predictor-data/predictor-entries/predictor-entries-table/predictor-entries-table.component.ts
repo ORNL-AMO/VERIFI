@@ -72,10 +72,10 @@ export class PredictorEntriesTableComponent {
 
   setHasData() {
     this.hasData = (this.facilityPredictors && this.facilityPredictors.length != 0) || (this.facilityPredictorEntries && this.facilityPredictorEntries.length != 0);
-    if(this.hasData){
-      let findPredictor: PredictorData = this.facilityPredictors.find(predictor => {return predictor.predictorType == 'Weather'});
+    if (this.hasData) {
+      let findPredictor: PredictorData = this.facilityPredictors.find(predictor => { return predictor.predictorType == 'Weather' });
       this.hasWeatherData = findPredictor != undefined;
-    }else{
+    } else {
       this.hasWeatherData = false;
     }
   }
@@ -91,6 +91,8 @@ export class PredictorEntriesTableComponent {
   }
 
   async confirmDeletePredictorEntry() {
+    this.loadingService.setLoadingMessage('Deleting Predictor Entry...');
+    this.loadingService.setLoadingStatus(true);
     await this.predictorsDbService.deleteIndexWithObservable(this.predictorEntryToDelete.id).toPromise();
     this.cancelDeletePredictorEntry();
     await this.finishDelete();

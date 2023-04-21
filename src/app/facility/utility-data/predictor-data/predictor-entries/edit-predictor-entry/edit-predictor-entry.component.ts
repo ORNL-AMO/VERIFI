@@ -8,6 +8,8 @@ import { IdbAccount, IdbFacility, IdbPredictorEntry, PredictorData } from 'src/a
 import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
 import * as _ from 'lodash';
 import { DegreeDay } from 'src/app/models/degreeDays';
+import { LoadingService } from 'src/app/core-components/loading/loading.service';
+import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 @Component({
   selector: 'app-edit-predictor-entry',
   templateUrl: './edit-predictor-entry.component.html',
@@ -22,7 +24,9 @@ export class EditPredictorEntryComponent {
   constructor(private activatedRoute: ActivatedRoute, private predictorDbService: PredictordbService,
     private router: Router, private facilityDbService: FacilitydbService,
     private accountDbService: AccountdbService, private dbChangesService: DbChangesService,
-    private degreeDaysService: DegreeDaysService) {
+    private degreeDaysService: DegreeDaysService,
+    private loadingService: LoadingService,
+    private toastNotificationService: ToastNotificationsService) {
   }
 
   ngOnInit() {
@@ -48,6 +52,8 @@ export class EditPredictorEntryComponent {
   }
 
   async saveChanges() {
+    this.loadingService.setLoadingMessage('Savings Predictor Entry...');
+    this.loadingService.setLoadingStatus(true);
     if (this.addOrEdit == "edit") {
       await this.predictorDbService.updateWithObservable(this.predictorEntry).toPromise();
     } else {
@@ -56,6 +62,8 @@ export class EditPredictorEntryComponent {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     await this.dbChangesService.setPredictors(selectedAccount, selectedFacility);
+    this.loadingService.setLoadingStatus(false);
+    this.toastNotificationService.showToast('Predictors Updated!', undefined, undefined, false, 'alert-success');
     this.cancel();
   }
 

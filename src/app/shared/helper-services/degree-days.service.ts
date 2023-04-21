@@ -262,9 +262,12 @@ export class DegreeDaysService {
   getStationYearLCDFromResults(weatherStation: WeatherStation, dataResults: string): Array<LocalClimatologicalData> {
     let parsedData: Array<any> = Papa.parse(dataResults, { header: true }).data;
     let localData: Array<LocalClimatologicalData> = new Array();
+    // let reportTypes = [];
     for (let i = 1; i < parsedData.length; i++) {
       let currentLine = parsedData[i];
-      if (currentLine['REPORT_TYPE'] == 'FM-15') {
+      let dryBulbTemp: number = parseFloat(currentLine['HourlyDewPointTemperature']);
+      // reportTypes.push(currentLine['REPORT_TYPE']);
+      if (currentLine['REPORT_TYPE'] == 'FM-15' && isNaN(dryBulbTemp) == false) {
         let hourData: LocalClimatologicalData = {
           stationId: weatherStation.ID,
           STATION: weatherStation.name,
@@ -295,6 +298,8 @@ export class DegreeDaysService {
         localData.push(hourData);
       }
     }
+    // reportTypes = _.uniq(reportTypes);
+    // console.log(reportTypes);
     return localData;
   }
 

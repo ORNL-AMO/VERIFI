@@ -41,7 +41,6 @@ export class AnnualStationDataComponent {
   async setStation(id: string) {
     this.weatherStation = await this.degreeDaysService.getStationById(id);
     if (this.weatherStation) {
-      console.log(this.weatherStation);
       this.setYears();
     }
   }
