@@ -1,5 +1,12 @@
-<div class="wrapper main-content">
-    <h4>Predictors</h4>
+<div class="wrapper main-content p-0">
+    <app-predictor-tabs></app-predictor-tabs>
+    <div class="content-padding">
+        <router-outlet></router-outlet>
+    </div>
+
+
+
+    <!-- <h4>Predictors</h4>
 
     <div *ngIf="!hasData" class="text-center mt-5">
         <h5>No predictors found for this facility.</h5>
@@ -21,12 +28,12 @@
             </div>
 
             <div class="d-flex">
-                <!--Bulk Delete-->
+                <!--Bulk Delete--
                 <div class="pe-2 bulk-delete" [class.show]="hasCheckedItems">
                     <button class="btn btn-danger" (click)='openBulkDelete()' [disabled]="!hasCheckedItems">Bulk
                         Delete</button>
                 </div>
-                <!--Items Per Page-->
+                <!--Items Per Page--
                 <app-table-items-dropdown></app-table-items-dropdown>
                 <div class="ps-2">
                     <button class="btn nav-btn" (click)="uploadData()"><i class="fa fa-upload"></i> Import
@@ -95,9 +102,9 @@
                 [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true" aria-label="Pagination">
             </ngb-pagination>
         </div>
-    </ng-container>
+    </ng-container> -->
 </div>
-
+<!-- 
 <div class="window" [class.open]="predictorEntryToEdit">
     <div class="windowContent">
         <app-edit-predictor-entry-row *ngIf="predictorEntryToEdit" (emitClose)="cancelEditPredictorEntry()"
@@ -130,7 +137,7 @@
 </div>
 
 
-<!--bulk delete-->
+<!--bulk delete--
 <div class="popup" [class.open]="showBulkDelete">
     <div class="popup-header" *ngIf="showBulkDelete">Delete Predictor Entries
         <button class="item-right" (click)="cancelBulkDelete()">x</button>
@@ -143,4 +150,4 @@
         <button class="btn btn-secondary" (click)="cancelBulkDelete()">Cancel</button>
         <button class="btn btn-danger" (click)="bulkDelete()">Delete</button>
     </div>
-</div>
+</div> -->

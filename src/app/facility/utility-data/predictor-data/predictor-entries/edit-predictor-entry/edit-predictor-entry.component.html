@@ -1,0 +1,64 @@
+<div class="row">
+    <div class="col-12">
+        <div class="saveCancel item-right">
+            <button class="btn btn-secondary" (click)="cancel()">Cancel</button>
+            <button [disabled]="calculatingDegreeDays" class="btn btn-primary" (click)="saveChanges()">
+                <span *ngIf="addOrEdit == 'add'">Add Predictor Entry</span>
+                <span *ngIf="addOrEdit == 'edit'">Save Changes</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<form>
+    <p class="bold">Predictor Entry Data</p>
+    <div class="row">
+        <div class="col-4">
+            <label for="predictorDate">Date</label>
+        </div>
+        <div class="col">
+            <div class="input-group">
+                <input id="predictorDate" class="form-control" type="month"
+                    [ngModel]="predictorEntry.date | date:'yyyy-MM'" (ngModelChange)="setDate($event)" name="date">
+            </div>
+        </div>
+    </div>
+    <br>
+
+    <div *ngFor="let predictor of predictorEntry.predictors">
+        <div class="row">
+            <div class="col-4">
+                <label [for]="'predictor-' + predictor.id">
+                    <span class="fa fa-temperature-half" *ngIf="predictor.predictorType == 'Weather'"></span>
+                    {{predictor.name}}
+                    <ng-container *ngIf="predictor.predictorType == 'Weather'">
+                        <br>
+                        <span class="small block">({{predictor.weatherDataType}},
+                            <ng-container *ngIf="predictor.weatherDataType == 'HDD'">
+                                {{predictor.heatingBaseTemperature}} &#8457;
+                            </ng-container>
+                            <ng-container *ngIf="predictor.weatherDataType == 'CDD'">
+                                {{predictor.coolingBaseTemperature}} &#8457;
+                            </ng-container>)</span>
+                    </ng-container>
+                </label>
+            </div>
+            <div class="col">
+                <div class="input-group mb-2">
+                    <input [id]="'predictor-' + predictor.id" class="form-control" type="number"
+                        [(ngModel)]="predictor.amount" name="{{'predictorAmount'+predictor.id}}"
+                        onfocus="this.select();" [disabled]="predictor.predictorType == 'Weather'">
+                    <span class="input-group-text" *ngIf="predictor.unit">{{predictor.unit}}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<div *ngIf="hasWeatherData" class="alert alert-info text-center">
+    Degree day predictors are denoted with a <span class="fa fa-temperature-half"></span> icon and are automatically
+    calculated.
+</div>
+
+<app-calculating-spinner *ngIf="calculatingDegreeDays"
+    [message]="'Calculating Degree Days...'"></app-calculating-spinner>

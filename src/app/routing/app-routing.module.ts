@@ -9,6 +9,7 @@ import { AccountRoutes } from './account.routes';
 import { FacilityRoutes } from './facility.routes';
 import { SetupWizardRoutes } from './setup-wizard.routes';
 import { UploadRoutes } from './upload.routes';
+import { WeatherDataRoutes } from './weather-data.routes';
 
 const routes: Routes = [
   {
@@ -24,6 +25,7 @@ const routes: Routes = [
   { path: 'feedback', component: FeedbackComponent },
   { path: 'help', component: HelpComponent },
   UploadRoutes,
+  WeatherDataRoutes,
   //wildcard/page not found needs to be last route
   { path: "**", component: PageNotFoundComponent },
 ];

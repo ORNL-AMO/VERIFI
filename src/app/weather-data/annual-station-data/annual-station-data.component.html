@@ -1,0 +1,72 @@
+<ng-container *ngIf="weatherStation">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a class="click-link" (click)="goToStations()">Weather Stations</a></li>
+            <li class="breadcrumb-item active">{{weatherStation.name}} ({{weatherStation.lat}},
+                {{weatherStation.lon}})</li>
+        </ol>
+    </nav>
+    <p>
+        Explore weather stations. Set the zip code and the radius distance from that location to include weather
+        stations.
+    </p>
+    <form>
+        <div class="row">
+            <div class="col-lg-3 col-md-12 col-sm-12">
+                <label class="semibold" for="selectedYear">Select Year</label>
+                <select id="selectedYear" [(ngModel)]="selectedYear" class="form-select" name="selectedYear"
+                    (change)="changeYear()">
+                    <option *ngFor="let year of years" [ngValue]="year">
+                        {{year}}
+                    </option>
+                </select>
+            </div>
+            <div class="col-lg-3 col-md-12 col-sm-12">
+                <label class="semibold" for="heatingTemp">Heating Base Temperature</label>
+                <div class="mb-3 input-group">
+                    <input id="heatingTemp" class="form-control" type="number" [(ngModel)]="heatingTemp"
+                        onfocus="this.select();" name="heatingTemp" (input)="setHeatingBaseTemp()" required>
+                    <!--TODO: Temperature units-->
+                    <span class="input-group-text">
+                        &#8457;
+                    </span>
+                </div>
+                <div class="alert-danger alert" *ngIf="heatingTemp == undefined">
+                    Value Required</div>
+            </div>
+            <div class="col-lg-3 col-md-12 col-sm-12">
+                <label class="semibold" for="coolingTemp">Cooling Base Temperature</label>
+                <div class="mb-3 input-group">
+                    <input id="heatingTemp" class="form-control" type="number" [(ngModel)]="coolingTemp"
+                        onfocus="this.select();" name="coolingTemp" (input)="setCoolingBaseTemp()" required>
+                    <!--TODO: Temperature units-->
+                    <span class="input-group-text">
+                        &#8457;
+                    </span>
+                </div>
+                <div class="alert-danger alert" *ngIf="coolingTemp == undefined">
+                    Value Required</div>
+            </div>
+            <div class="col">
+                <div class="btn-margin">
+                    <button class="btn action-btn" (click)="showApplyToFacility()">Create Facility Degree Days</button>
+                </div>
+            </div>
+        </div>
+    </form>
+    <hr>
+    <div class="row" *ngIf="calculating">
+        <div class="col-12 text-center pb-4">
+            <app-calculating-spinner [message]="'Calculating ' + selectedYear+ '...'"></app-calculating-spinner>
+        </div>
+    </div>
+    <div class="row" *ngIf="yearSummaryData && yearSummaryData.length != 0">
+        <div class="col-lg-6 col-md-12 col-sm-12">
+            <app-annual-station-graph [yearSummaryData]="yearSummaryData"
+                [selectedYear]="selectedYear"></app-annual-station-graph>
+        </div>
+        <div class="col-lg-6 col-md-12 col-sm-12">
+            <app-annual-station-table [yearSummaryData]="yearSummaryData"></app-annual-station-table>
+        </div>
+    </div>
+</ng-container>

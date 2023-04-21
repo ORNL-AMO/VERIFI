@@ -231,9 +231,21 @@ export interface PredictorData {
     importWizardName?: string,
     production?: boolean,
     productionInAnalysis?: boolean,
-    regressionCoefficient?: number
+    regressionCoefficient?: number,
+    predictorType: PredictorType,
+    referencePredictorId?: string,
+    conversionType?: string,
+    convertFrom?: string,
+    convertTo?: string,
+    weatherDataType?: WeatherDataType,
+    weatherStationId?: string,
+    weatherStationName?: string,
+    heatingBaseTemperature?: number,
+    coolingBaseTemperature?: number
 }
 
+export type PredictorType = 'Standard' | 'Conversion' | 'Math' | 'Weather'
+export type WeatherDataType = 'HDD' | 'CDD'
 
 export interface IdbOverviewReportOptions {
     id?: number,

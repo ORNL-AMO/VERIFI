@@ -36,6 +36,12 @@ import { CorrelationPlotMenuComponent } from "src/app/facility/visualization/cor
 import { CorrelationPlotComponent } from "src/app/facility/visualization/correlation-plot/correlation-plot.component";
 import { TimeSeriesComponent } from "src/app/facility/visualization/time-series/time-series.component";
 import { VisualizationComponent } from "src/app/facility/visualization/visualization.component";
+import { ManagePredictorsComponent } from "../facility/utility-data/predictor-data/manage-predictors/manage-predictors.component";
+import { PredictorsTableComponent } from "../facility/utility-data/predictor-data/manage-predictors/predictors-table/predictors-table.component";
+import { EditPredictorComponent } from "../facility/utility-data/predictor-data/manage-predictors/edit-predictor/edit-predictor.component";
+import { PredictorEntriesComponent } from "../facility/utility-data/predictor-data/predictor-entries/predictor-entries.component";
+import { PredictorEntriesTableComponent } from "../facility/utility-data/predictor-data/predictor-entries/predictor-entries-table/predictor-entries-table.component";
+import { EditPredictorEntryComponent } from "../facility/utility-data/predictor-data/predictor-entries/edit-predictor-entry/edit-predictor-entry.component";
 
 export const FacilityRoutes: Route = {
     path: 'facility/:id',
@@ -127,7 +133,49 @@ export const FacilityRoutes: Route = {
                 },
                 { path: 'monthly-meter-data', component: CalanderizationComponent },
                 { path: 'meter-groups', component: MeterGroupingComponent },
-                { path: 'predictors', component: PredictorDataComponent },
+                {
+                    path: 'predictors',
+                    component: PredictorDataComponent,
+                    children: [
+                        { path: '', pathMatch: 'full', redirectTo: 'manage' },
+                        {
+                            path: 'manage',
+                            component: ManagePredictorsComponent,
+                            children: [
+                                {
+                                    path: '',
+                                    pathMatch: 'full',
+                                    redirectTo: 'predictor-table'
+                                },
+                                {
+                                    path: 'predictor-table',
+                                    component: PredictorsTableComponent
+                                },
+
+                                { path: 'edit-predictor/:id', component: EditPredictorComponent },
+                                { path: 'add-predictor', component: EditPredictorComponent },
+                            ]
+                        },
+                        {
+                            path: 'entries',
+                            component: PredictorEntriesComponent,
+                            children: [
+                                {
+                                    path: '',
+                                    pathMatch: 'full',
+                                    redirectTo: 'predictor-entries-table'
+                                },
+                                {
+                                    path: 'predictor-entries-table',
+                                    component: PredictorEntriesTableComponent
+                                },
+
+                                { path: 'edit-entry/:id', component: EditPredictorEntryComponent },
+                                { path: 'add-entry', component: EditPredictorEntryComponent },
+                            ]
+                        }
+                    ]
+                },
                 // { path: 'upload-data', component: UploadDataComponent },
                 { path: '', pathMatch: 'full', redirectTo: 'energy-consumption' }
             ]

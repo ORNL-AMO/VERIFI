@@ -194,7 +194,7 @@ export class ConvertUnitsService {
         if (system === '_anchors')
           return false;
 
-          _.each(units, function (unit, testAbbr) {
+        _.each(units, function (unit, testAbbr) {
           if (testAbbr === abbr) {
             found = {
               abbr: abbr
@@ -231,7 +231,7 @@ export class ConvertUnitsService {
     throw new Error('Unsupported unit ' + what + ', use one of: ' + validUnits.join(', '));
   }
 
-  possibilities(measure) {
+  possibilities(measure): Array<string> {
     var possibilities = [];
     if (!this.origin && !measure) {
       _.each(_.keys(this._measures), function (measure) {
@@ -255,7 +255,7 @@ export class ConvertUnitsService {
     return possibilities;
   }
 
-  roundVal(val: number, digits: number) {
+  roundVal(val: number, digits: number): number {
     return Number((Math.round(val * 100) / 100).toFixed(digits));
   }
 

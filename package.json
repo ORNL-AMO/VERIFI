@@ -113,6 +113,7 @@
     "karma-jasmine": "~2.0.1",
     "karma-jasmine-html-reporter": "^1.7.0",
     "lodash": "^4.17.21",
+    "papaparse": "^5.4.1",
     "protractor": "^7.0.0",
     "ts-node": "9.1.1",
     "tslint": "6.1.3",
