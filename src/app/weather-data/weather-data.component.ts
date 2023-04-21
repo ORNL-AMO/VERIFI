@@ -98,8 +98,6 @@ export class WeatherDataComponent {
     // this.cancel();
     //todo: success toast and navigate to facility
   }
-
-
 }
 
 

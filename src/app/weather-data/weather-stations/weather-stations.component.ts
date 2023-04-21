@@ -48,9 +48,11 @@ export class WeatherStationsComponent {
 
   setStations() {
     this.weatherDataService.zipCode = this.zipCode;
-    this.degreeDaysService.getClosestStation(this.zipCode, this.furthestDistance).then(stations => {
-      this.stations = stations;
-    });
+    if(this.furthestDistance <= 500){
+      this.degreeDaysService.getClosestStation(this.zipCode, this.furthestDistance).then(stations => {
+        this.stations = stations;
+      });
+    }
   }
 
   toggleUseZip() {

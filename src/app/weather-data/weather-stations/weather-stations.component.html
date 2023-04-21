@@ -18,7 +18,8 @@
             </ng-container>
 
             <ng-container *ngIf="useFacility">
-                <select class="form-select" name="zipCode" id="zipCode" [(ngModel)]="zipCode" (change)="changeFacility()">
+                <select class="form-select" name="zipCode" id="zipCode" [(ngModel)]="zipCode"
+                    (change)="changeFacility()">
                     <option *ngFor="let facility of facilities" [ngValue]="facility.zip">{{facility.name}}</option>
                 </select>
                 <a class="small float-end" (click)="toggleUseZip()">Manually Set Zip</a>
@@ -26,11 +27,13 @@
         </div>
         <div class="col-lg-4 col-md-12 col-sm-12">
             <label class="semibold" for="furthestDistance">Furthest Distance</label>
-            <div class="input-group">
+            <div class="input-group mb-3">
                 <input type="number" class="form-control" name="furthestDistance" id="furthestDistance"
-                    [(ngModel)]="furthestDistance" (input)="setStations()">
+                    [(ngModel)]="furthestDistance" (input)="setStations()" max="501">
                 <span class="input-group-text">miles</span>
             </div>
+            <div class="alert-danger alert" *ngIf="furthestDistance > 500">
+                For performance reasons we cannot map further then 500 miles.</div>
         </div>
     </div>
 </form>
