@@ -43,6 +43,12 @@ export class GeneralUtilityDataTableComponent implements OnInit {
   showEmissions: boolean;
   filterSub: Subscription;
   generalUtilityDataFilters: GeneralUtilityDataFilters;
+
+  numDetailedCharges: number;
+  numGeneralInformation: number;
+  numEmissions: number;
+  showEmissionsSection: boolean;
+  showDetailedCharges: boolean;
   constructor(public utilityMeterDataService: UtilityMeterDataService, private energyUnitsHelperService: EnergyUnitsHelperService,
     private copyTableService: CopyTableService,
     private calanderizationService: CalanderizationService, private editMeterFormService: EditMeterFormService) { }
@@ -57,6 +63,9 @@ export class GeneralUtilityDataTableComponent implements OnInit {
 
     this.filterSub = this.utilityMeterDataService.tableGeneralUtilityFilters.subscribe(val => {
       this.generalUtilityDataFilters = val;
+      this.showEmissionsSection = (this.generalUtilityDataFilters.totalMarketEmissions || this.generalUtilityDataFilters.totalLocationEmissions);
+      this.showDetailedCharges = (this.generalUtilityDataFilters.commodityCharge || this.generalUtilityDataFilters.deliveryCharge || this.generalUtilityDataFilters.otherCharge);
+      this.setNumColumns();
     })
   }
 
@@ -76,7 +85,7 @@ export class GeneralUtilityDataTableComponent implements OnInit {
   }
 
   setData() {
-    this.showVolumeColumn = (this.selectedMeterData.find(dataItem => { return dataItem.totalVolume != undefined && dataItem.totalVolume != 0}) != undefined);
+    this.showVolumeColumn = (this.selectedMeterData.find(dataItem => { return dataItem.totalVolume != undefined && dataItem.totalVolume != 0 }) != undefined);
     this.volumeUnit = this.selectedMeter.startingUnit;
     this.showEnergyColumn = getIsEnergyMeter(this.selectedMeter.source);
     this.showEmissions = this.editMeterFormService.checkShowEmissionsOutputRate(this.selectedMeter.source);
@@ -169,5 +178,32 @@ export class GeneralUtilityDataTableComponent implements OnInit {
       dataItem.excessRECs = emissionsValues.excessRECs;
       dataItem.excessRECsEmissions = emissionsValues.excessRECsEmissions;
     })
+  }
+
+  setNumColumns() {
+    this.numDetailedCharges = 0;
+    this.numGeneralInformation = 2;
+    this.numEmissions = 0;
+    if (this.generalUtilityDataFilters.totalLocationEmissions) {
+      this.numEmissions++;
+    }
+    if (this.generalUtilityDataFilters.totalMarketEmissions) {
+      this.numEmissions++;
+    }
+    if (this.generalUtilityDataFilters.totalVolume && this.showVolumeColumn) {
+      this.numGeneralInformation++;
+    }
+    if (this.generalUtilityDataFilters.totalCost) {
+      this.numGeneralInformation++;
+    }
+    if (this.generalUtilityDataFilters.commodityCharge) {
+      this.numDetailedCharges++;
+    }
+    if (this.generalUtilityDataFilters.deliveryCharge) {
+      this.numDetailedCharges++;
+    }
+    if (this.generalUtilityDataFilters.otherCharge) {
+      this.numDetailedCharges++;
+    }
   }
 }
