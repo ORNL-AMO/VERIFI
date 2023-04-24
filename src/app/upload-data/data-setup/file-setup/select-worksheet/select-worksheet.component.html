@@ -13,10 +13,14 @@
             [labelId]="'worksheetName'"></app-label-with-tooltip>
         <select class="form-select" name="worksheetName" [(ngModel)]="fileReference.selectedWorksheetName"
             (change)="setSelectedWorksheetName()" id="worksheetName">
-            <option *ngFor="let name of fileReference.workbook?.SheetNames" [ngValue]="name">
+            <option *ngFor="let name of worksheetNames" [ngValue]="name">
                 {{name}}
             </option>
         </select>
+        <ng-container *ngIf="hasHiddenTabs">
+            <a class="click-link small pull-right" *ngIf="!showHiddenTabs" (click)="setShowHidden(true)">Show Hidden Tabs</a>
+            <a class="click-link small pull-right" *ngIf="showHiddenTabs" (click)="setShowHidden(false)">Don't Show Hidden Tabs</a>
+        </ng-container>
     </div>
     <div class="col-6">
         <app-label-with-tooltip [field]="'selectImportFacility'" [label]="'Select Import Facility'" [isBold]="true"
