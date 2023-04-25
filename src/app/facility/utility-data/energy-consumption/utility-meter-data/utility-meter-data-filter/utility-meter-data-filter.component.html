@@ -128,7 +128,7 @@
         <!--non electricity filters-->
         <div class="row" *ngIf="source != 'Electricity'">
             <div class="col">
-                <div class="form-check">
+                <div class="form-check" *ngIf="displayVolumeInput">
                     <input class="form-check-input" type="checkbox" name="totalVolume" id="totalVolume"
                         [(ngModel)]="generalUtilityDataFilters.totalVolume" (change)="save()">
                     <label for="totalVolume" class="form-check-label">Total Volume</label>
