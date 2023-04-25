@@ -53,6 +53,7 @@ export class HelpPanelComponent implements OnInit {
       'help',
       'facility',
       'account',
+      'weather-data'
     ]
     let urlSplit: Array<string> = url.split('/');
     let firstUrl: string = urlSplit[1];
