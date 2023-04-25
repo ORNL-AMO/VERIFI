@@ -13,7 +13,8 @@
 </div>
 <div *ngIf="meterData.length != 0">
     <div class="d-flex w-100 justify-content-between mb-2">
-        <app-utility-meter-data-filter [source]="selectedMeter.source" [filterType]="'table'">
+        <app-utility-meter-data-filter [source]="selectedMeter.source" [filterType]="'table'"
+            [startingUnit]="selectedMeter.startingUnit">
         </app-utility-meter-data-filter>
 
         <div class="d-flex">
