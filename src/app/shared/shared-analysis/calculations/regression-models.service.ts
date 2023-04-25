@@ -191,20 +191,6 @@ export class RegressionModelsService {
     }
   }
 
-  checkModelValid(model: JStatRegressionModel): boolean {
-    let isValid: boolean = true;
-    if (model.f.pvalue > .1) {
-      isValid = false;
-    } else if (model.t.p.find(val => { return val > .2 })) {
-      isValid = false;
-    } else if (!model.t.p.find(val => { return val < .1 })) {
-      isValid = false;
-    } else if (model.R2 < .5) {
-      isValid = false;
-    }
-    return isValid;
-  }
-
   setModelVaildAndNotes(model: JStatRegressionModel, facilityPredictorData: Array<IdbPredictorEntry>, reportYear: number, facility: IdbFacility): JStatRegressionModel {
     let modelNotes: Array<string> = new Array();
     model['isValid'] = true;
@@ -231,7 +217,14 @@ export class RegressionModelsService {
       }
     })
 
-    if (!model.t.p.find(val => { return val < .1 })) {
+    //need one p value less than .1
+    let hasLessThan: boolean = false;
+    model.t.p.forEach((val, index) => {
+      if (val < .1 && index != 0) {
+        hasLessThan = true;
+      }
+    });
+    if (!hasLessThan) {
       model['isValid'] = false;
       modelNotes.push('No variable p-Value < 0.1')
     }
