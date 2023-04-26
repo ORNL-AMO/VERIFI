@@ -14,7 +14,7 @@ export class PredictorsDataHelpComponent implements OnInit {
   selectedFacility: IdbFacility;
   selectedFacilitySub: Subscription;
   routerSub: Subscription;
-  helpURL: 'manage' | 'entries'
+  helpURL: 'manage' | 'entries' | 'predictor-form' | 'predictor-entry-form';
   constructor(private facilityDbService: FacilitydbService,
     private router: Router) { }
 
@@ -38,9 +38,17 @@ export class PredictorsDataHelpComponent implements OnInit {
 
   setHelpURL(url: string) {
     if (url.includes('manage')) {
-      this.helpURL = 'manage';
+      if(url.includes('predictor-table')){
+        this.helpURL = 'manage';
+      }else if(url.includes('add-predictor') || url.includes('edit-predictor')){
+        this.helpURL = 'predictor-form';
+      }
     } else if (url.includes('entries')) {
-      this.helpURL = 'entries';
+      if(url.includes('predictor-entries-table')){
+        this.helpURL = 'entries';
+      }else if(url.includes('add-entry') || url.includes('edit-entry')){
+        this.helpURL = 'predictor-entry-form';
+      }
     }
   }
 
