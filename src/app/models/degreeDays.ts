@@ -56,5 +56,6 @@ export interface DetailDegreeDay {
     dryBulbTemp: number,
     percentOfDay: number,
     heatingDegreeDifference: number,
-    coolingDegreeDifference: number
+    coolingDegreeDifference: number,
+    lagDryBulbTemp: number
 }

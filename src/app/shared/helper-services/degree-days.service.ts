@@ -116,14 +116,18 @@ export class DegreeDaysService {
     for (let i = 0; i < localClimatologicalDataDay.length; i++) {
       if (localClimatologicalDataDay[i].HourlyDryBulbTemperature < baseHeatingTemperature) {
         let previousDate: Date;
+        let previousDryBulbTemp: number;
         if (i == 0) {
           previousDate = new Date(day.getFullYear(), day.getMonth(), day.getDate(), 0, 0);
+          previousDryBulbTemp = localClimatologicalDataDay[i].HourlyDryBulbTemperature;
         } else {
           previousDate = new Date(localClimatologicalDataDay[i - 1].DATE)
+          previousDryBulbTemp = localClimatologicalDataDay[i - 1].HourlyDryBulbTemperature;
         }
+        let averageDryBulbTemp: number = (localClimatologicalDataDay[i].HourlyDryBulbTemperature + previousDryBulbTemp) / 2;
         let minutesBetween: number = this.getMinutesBetweenDates(previousDate, localClimatologicalDataDay[i].DATE);
         let portionOfDay: number = (minutesBetween / minutesPerDay);
-        let degreeDifference: number = baseHeatingTemperature - localClimatologicalDataDay[i].HourlyDryBulbTemperature;
+        let degreeDifference: number = baseHeatingTemperature - averageDryBulbTemp;
         heatingDegreeDays += (degreeDifference * portionOfDay);
       }
 
@@ -166,25 +170,29 @@ export class DegreeDaysService {
       let minutesPerDay: number = 1440;
       for (let i = 0; i < localClimatologicalDataDay.length; i++) {
         let previousDate: Date;
+        let previousDryBulbTemp: number;
         if (i == 0) {
           previousDate = new Date(day.getFullYear(), day.getMonth(), day.getDate(), 0, 0);
+          previousDryBulbTemp = localClimatologicalDataDay[i].HourlyDryBulbTemperature;
         } else {
           previousDate = new Date(localClimatologicalDataDay[i - 1].DATE)
+          previousDryBulbTemp = localClimatologicalDataDay[i - 1].HourlyDryBulbTemperature;
         }
         let minutesBetween: number = this.getMinutesBetweenDates(previousDate, localClimatologicalDataDay[i].DATE);
+        let averageDryBulbTemp: number = (localClimatologicalDataDay[i].HourlyDryBulbTemperature + previousDryBulbTemp) / 2
         let portionOfDay: number = (minutesBetween / minutesPerDay);
-        if (localClimatologicalDataDay[i].HourlyDryBulbTemperature < baseHeatingTemperature || localClimatologicalDataDay[i].HourlyDryBulbTemperature > baseCoolingTemperature) {
+        if (averageDryBulbTemp < baseHeatingTemperature || averageDryBulbTemp > baseCoolingTemperature) {
 
           let heatingDegreeDay: number = 0;
           let heatingDegreeDifference: number = 0;
           let coolingDegreeDay: number = 0;
           let coolingDegreeDifference: number = 0;
-          if (localClimatologicalDataDay[i].HourlyDryBulbTemperature < baseHeatingTemperature) {
-            heatingDegreeDifference = baseHeatingTemperature - localClimatologicalDataDay[i].HourlyDryBulbTemperature;
+          if (averageDryBulbTemp < baseHeatingTemperature) {
+            heatingDegreeDifference = baseHeatingTemperature - averageDryBulbTemp;
             heatingDegreeDay = heatingDegreeDifference * portionOfDay;
           }
-          if (localClimatologicalDataDay[i].HourlyDryBulbTemperature > baseCoolingTemperature) {
-            coolingDegreeDifference = localClimatologicalDataDay[i].HourlyDryBulbTemperature - baseCoolingTemperature;
+          if (averageDryBulbTemp > baseCoolingTemperature) {
+            coolingDegreeDifference = averageDryBulbTemp - baseCoolingTemperature;
             coolingDegreeDay = coolingDegreeDifference * portionOfDay;
           }
 
@@ -195,7 +203,8 @@ export class DegreeDaysService {
             coolingDegreeDay: coolingDegreeDay,
             coolingDegreeDifference: coolingDegreeDifference,
             percentOfDay: portionOfDay,
-            dryBulbTemp: localClimatologicalDataDay[i].HourlyDryBulbTemperature
+            dryBulbTemp: localClimatologicalDataDay[i].HourlyDryBulbTemperature,
+            lagDryBulbTemp: averageDryBulbTemp
           })
         } else {
           results.push({
@@ -205,7 +214,8 @@ export class DegreeDaysService {
             coolingDegreeDay: 0,
             coolingDegreeDifference: 0,
             percentOfDay: portionOfDay,
-            dryBulbTemp: localClimatologicalDataDay[i].HourlyDryBulbTemperature
+            dryBulbTemp: localClimatologicalDataDay[i].HourlyDryBulbTemperature,
+            lagDryBulbTemp: averageDryBulbTemp
           })
 
         }
