@@ -17,9 +17,10 @@ export class MonthlyFacilityAnalysisClass {
     facilityPredictorEntries: Array<IdbPredictorEntry>;
     baselineYear: number;
     constructor(analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, accountPredictorEntries: Array<IdbPredictorEntry>, calculateAllMonthlyData: boolean) {
-        this.setStartAndEndDate(facility, analysisItem, calculateAllMonthlyData, calanderizedMeters);
-        this.setGroupSummaries(analysisItem, facility, calanderizedMeters, accountPredictorEntries, calculateAllMonthlyData);
+        let calanderizedFacilityMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => { return cMeter.meter.facilityId == facility.guid })
         this.setFacilityPredictorEntries(accountPredictorEntries, facility);
+        this.setStartAndEndDate(facility, analysisItem, calculateAllMonthlyData, calanderizedFacilityMeters);
+        this.setGroupSummaries(analysisItem, facility, calanderizedFacilityMeters, calculateAllMonthlyData);
         this.setBaselineYear(facility);
         this.setFacilityMonthSummaries(facility);
     }
@@ -29,7 +30,12 @@ export class MonthlyFacilityAnalysisClass {
         this.startDate = monthlyStartAndEndDate.baselineDate;
         if (calculateAllMonthlyData) {
             let lastBill: MonthlyData = getLastBillEntryFromCalanderizedMeterData(calanderizedMeters);
-            this.endDate = new Date(lastBill.date);
+            let lastPredictorEntry: IdbPredictorEntry = _.maxBy(this.facilityPredictorEntries, 'date');
+            if (lastBill.date > lastPredictorEntry.date) {
+                this.endDate = new Date(lastPredictorEntry.date);
+            } else {
+                this.endDate = new Date(lastBill.date);
+            }
             this.endDate.setMonth(this.endDate.getMonth() + 1);
             this.endDate.setDate(1);
         } else {
@@ -37,10 +43,10 @@ export class MonthlyFacilityAnalysisClass {
         }
     }
 
-    setGroupSummaries(analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, accountPredictorEntries: Array<IdbPredictorEntry>, calculateAllMonthlyData: boolean) {
+    setGroupSummaries(analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, calculateAllMonthlyData: boolean) {
         let groupMonthlySummariesClasses: Array<MonthlyAnalysisSummaryClass> = new Array();
         analysisItem.groups.forEach(group => {
-            let monthlySummary: MonthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(group, analysisItem, facility, calanderizedMeters, accountPredictorEntries, calculateAllMonthlyData);
+            let monthlySummary: MonthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(group, analysisItem, facility, calanderizedMeters, this.facilityPredictorEntries, calculateAllMonthlyData);
             groupMonthlySummariesClasses.push(monthlySummary);
         });
         this.allFacilityAnalysisData = groupMonthlySummariesClasses.flatMap(summary => { return summary.monthlyAnalysisSummaryData });
