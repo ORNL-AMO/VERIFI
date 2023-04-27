@@ -23,10 +23,11 @@ export class MonthlyGroupAnalysisClass {
     this.analysisItem = analysisItem;
     this.facility = facility;
 
-    this.setStartAndEndDate(calanderizedMeters, calculateAllMonthlyData);
-    this.setPredictorVariables();
+    let calanderizedFacilityMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => { return cMeter.meter.facilityId == facility.guid })
     this.setFacilityPredictorData(accountPredictorEntries);
-    this.setGroupMeters(calanderizedMeters);
+    this.setStartAndEndDate(calanderizedFacilityMeters, calculateAllMonthlyData);
+    this.setPredictorVariables();
+    this.setGroupMeters(calanderizedFacilityMeters);
     this.setGroupMonthlyData();
     this.setBaselineYear();
     this.setAnnualMeterDataUsage();
@@ -38,7 +39,12 @@ export class MonthlyGroupAnalysisClass {
     this.baselineDate = monthlyStartAndEndDate.baselineDate;
     if (calculateAllMonthlyData) {
       let lastBill: MonthlyData = getLastBillEntryFromCalanderizedMeterData(calanderizedMeters);
-      this.endDate = new Date(lastBill.date);
+      let lastPredictorEntry: IdbPredictorEntry = _.maxBy(this.facilityPredictorData, 'date');
+      if (lastBill.date > lastPredictorEntry.date) {
+        this.endDate = new Date(lastPredictorEntry.date);
+      } else {
+        this.endDate = new Date(lastBill.date);
+      }
       this.endDate.setMonth(this.endDate.getMonth() + 1);
       this.endDate.setDate(1);
     } else {
