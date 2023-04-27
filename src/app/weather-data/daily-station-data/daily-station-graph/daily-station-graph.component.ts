@@ -65,7 +65,21 @@ export class DailyStationGraphComponent {
           type: 'scatter',
           name: 'Dry Bulb Temp Readings',
           yaxis: 'y2',
-          mode: 'lines+markers'
+          mode: 'lines+markers',
+          marker: {
+            color: '#58D68D'
+          }
+        },
+        {
+          x: this.hourlySummaryData.map(data => { return data.time }),
+          y: this.hourlySummaryData.map(data => { return data.lagDryBulbTemp }),
+          type: 'scatter',
+          name: 'Lag Dry Bulb Temp',
+          yaxis: 'y2',
+          mode: 'lines+markers',
+          marker: {
+            color: '#273746'
+          }
         },
         {
           x: this.hourlySummaryData.map(data => { return data.time }),

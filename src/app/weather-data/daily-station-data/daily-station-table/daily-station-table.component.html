@@ -3,7 +3,8 @@
         <tr>
             <th>Date</th>
             <th>% of Day</th>
-            <th>Dry Bulb Temp</th>
+            <th>Dry<br> Bulb Temp</th>
+            <th>Lag Dry<br> Bulb Temp</th>
             <th>Heating Degree<br> Difference</th>
             <th>Heating Degree<br> Days</th>
             <th>Cooling Degree<br> Difference</th>
@@ -20,6 +21,9 @@
             </td>
             <td>
                 {{summaryData.dryBulbTemp | number}}
+            </td>
+            <td>
+                {{summaryData.lagDryBulbTemp | number}}
             </td>
             <td>
                 {{summaryData.heatingDegreeDifference | number}}
@@ -39,6 +43,9 @@
         <tr>
             <th>
                 Total
+            </th>
+            <th>
+
             </th>
             <th>
 
