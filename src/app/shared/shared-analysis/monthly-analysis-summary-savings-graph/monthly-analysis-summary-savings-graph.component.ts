@@ -30,8 +30,9 @@ export class MonthlyAnalysisSummarySavingsGraphComponent {
 
   drawChart() {
     if (this.monthlyAnalysisSavingsGraph) {
+
       var trace1 = {
-        type: "scatter",
+        type: "bar",
         mode: "none",
         name: 'Savings',
         x: this.monthlyAnalysisSummaryData.map(results => { return results.date }),
@@ -39,20 +40,16 @@ export class MonthlyAnalysisSummarySavingsGraphComponent {
           if (results.rolling12MonthImprovement >= 0) {
             return results.rolling12MonthImprovement
           } else {
-            return undefined;
+            return 0;
           }
         }),
-        line: { color: '#27AE60', width: 4 },
-        fill:'tozero',
-        fillcolor:'#1B5E20',
         marker: {
-          // size: 8
+          color: '#58D68D'
         },
-        stackgroup: 'one'
       }
 
       var trace2 = {
-        type: "scatter",
+        type: "bar",
         mode: "none",
         name: 'Losses',
         x: this.monthlyAnalysisSummaryData.map(results => { return results.date }),
@@ -63,19 +60,60 @@ export class MonthlyAnalysisSummarySavingsGraphComponent {
             return undefined;
           }
         }),
-        line: { color: '#E74C3C', width: 4 },
-        fill: 'tozero',
-        fillcolor: '#B71C1C',
         marker: {
-          // size: 8
+          color: '#EC7063',
         },
-        stackgroup: 'two'
       }
+
+      //traces for filled area line chart
+      // var trace1 = {
+      //   type: "scatter",
+      //   mode: "none",
+      //   name: 'Savings',
+      //   x: this.monthlyAnalysisSummaryData.map(results => { return results.date }),
+      //   y: this.monthlyAnalysisSummaryData.map(results => {
+      //     if (results.rolling12MonthImprovement >= 0) {
+      //       return results.rolling12MonthImprovement
+      //     } else {
+      //       return 0;
+      //     }
+      //   }),
+      //   line: { color: '#27AE60', width: 4 },
+      //   fill: 'tozeroy',
+      //   fillcolor: '#58D68D',
+      //   marker: {
+      //     // size: 8
+      //   },
+      //   stackgroup: 'one'
+      // }
+
+      // var trace2 = {
+      //   type: "scatter",
+      //   mode: "none",
+      //   name: 'Losses',
+      //   x: this.monthlyAnalysisSummaryData.map(results => { return results.date }),
+      //   y: this.monthlyAnalysisSummaryData.map(results => {
+      //     if (results.rolling12MonthImprovement < 0) {
+      //       return results.rolling12MonthImprovement
+      //     } else {
+      //       return undefined;
+      //     }
+      //   }),
+      //   line: { color: '#E74C3C', width: 4 },
+      //   fill: 'tozeroy',
+      //   fillcolor: '#EC7063',
+      //   marker: {
+      //     // size: 8
+      //   },
+      //   stackgroup: 'two'
+      // }
+
 
       var data = [trace2, trace1];
 
 
       var layout = {
+        barmode: 'stack',
         legend: {
           orientation: "h"
         },
@@ -96,9 +134,11 @@ export class MonthlyAnalysisSummarySavingsGraphComponent {
         },
         margin: { r: 0, t: 50 }
       };
-      var config = { responsive: true };
+      var config = { 
+        displaylogo: false,
+        responsive: true 
+      };
       this.plotlyService.newPlot(this.monthlyAnalysisSavingsGraph.nativeElement, data, layout, config);
     }
   }
-
 }
