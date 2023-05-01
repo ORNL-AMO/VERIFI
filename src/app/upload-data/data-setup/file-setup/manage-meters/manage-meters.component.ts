@@ -176,6 +176,12 @@ export class ManageMetersComponent implements OnInit {
         facilityMeterGroups.push(otherFuelGroup);
       }
 
+      let otherEnergyGroup: IdbUtilityMeterGroup = facilityMeterGroups.find(group => { return group.name == 'Other Energy' });
+      if (!otherEnergyGroup) {
+        otherEnergyGroup = this.utilityMeterGroupDbService.getNewIdbUtilityMeterGroup("Energy", "Other Energy", importFacility.guid, importFacility.accountId);
+        facilityMeterGroups.push(otherEnergyGroup);
+      }
+
       let waterGroup: IdbUtilityMeterGroup = facilityMeterGroups.find(group => { return group.name == 'Water' });
       if (!waterGroup) {
         waterGroup = this.utilityMeterGroupDbService.getNewIdbUtilityMeterGroup("Water", "Water", importFacility.guid, importFacility.accountId);
