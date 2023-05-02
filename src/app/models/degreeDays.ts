@@ -46,7 +46,8 @@ export interface DegreeDay {
     coolingDegreeDays: number,
     date: Date,
     stationId: string,
-    stationName: string
+    stationName: string,
+    hasErrors: boolean
 }
 
 export interface DetailDegreeDay {

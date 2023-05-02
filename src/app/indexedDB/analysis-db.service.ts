@@ -222,9 +222,6 @@ export class AnalysisDbService {
         predictor.name = checkExists.name;
         predictor.unit = checkExists.unit;
         predictor.production = checkExists.production;
-        if (predictor.productionInAnalysis && !checkExists.production) {
-          predictor.productionInAnalysis = false;
-        }
       }
     });
     //remove necessary predictors

@@ -67,4 +67,11 @@
             <app-daily-station-table [hourlySummaryData]="hourlySummaryData"></app-daily-station-table>
         </div>
     </div>
+    <div class="row" *ngIf="hourlySummaryData && hourlySummaryData.length == 0">
+        <div class="col-12">
+            <div class="alert alert-danger">
+                No data found for the selected date. The selected weather station may have gaps in their reporting.
+            </div>
+        </div>
+    </div>
 </ng-container>

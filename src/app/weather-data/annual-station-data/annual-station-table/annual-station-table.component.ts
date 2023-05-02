@@ -9,7 +9,7 @@ import { WeatherDataService } from '../../weather-data.service';
 })
 export class AnnualStationTableComponent {
   @Input()
-  yearSummaryData: Array<{ date: Date, heatingDegreeDays: number, coolingDegreeDays: number  }>;
+  yearSummaryData: Array<{ date: Date, heatingDegreeDays: number, coolingDegreeDays: number, hasErrors: boolean  }>;
   
   currentPageNumber: number = 1;
   itemsPerPage: number = 10;
