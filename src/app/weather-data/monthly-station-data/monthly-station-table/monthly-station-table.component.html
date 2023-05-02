@@ -9,6 +9,7 @@
     <tbody class="table-group-divider">
         <tr *ngFor="let degreeDay of degreeDays">
             <td>
+                <span *ngIf="degreeDay.hasErrors" class="fa fa-exclamation-circle"></span>
                 <a (click)="goToDailySummary(degreeDay.date)">{{degreeDay.date | date}}</a>
             </td>
             <td>

@@ -110,9 +110,28 @@ export class DegreeDaysService {
       return lcd.DATE.getDate() == day.getDate() && isNaN(lcd.HourlyDryBulbTemperature) == false;
     });
 
+    // let lcdYear: Array<LocalClimatologicalData> = this.yearHourlyData.filter(lcd => {
+    //   return isNaN(lcd.HourlyDryBulbTemperature) == false;
+    // });
+
+
+    // let startIndex: number = this.yearHourlyData.findIndex(value => {
+    //   return value.DATE.getDate() == day.getDate() && value.DATE.getMonth() == day.getMonth()
+    // });
+    // let nextDay: Date = new Date(day);
+    // nextDay.setDate(nextDay.getDate() + 1);
+    // let endIndex: number;
+    // if (nextDay.getFullYear() == day.getFullYear()) {
+    //   endIndex = this.yearHourlyData.findIndex(value => {
+    //     return value.DATE.getDate() == nextDay.getDate() && value.DATE.getMonth() == nextDay.getMonth()
+    //   });
+    // } else {
+    //   endIndex = this.yearHourlyData.length;
+    // }
     let minutesPerDay: number = 1440;
     let coolingDegreeDays: number = 0;
     let heatingDegreeDays: number = 0;
+    let hasErrors: boolean = localClimatologicalDataDay.length == 0;
     for (let i = 0; i < localClimatologicalDataDay.length; i++) {
       if (localClimatologicalDataDay[i].HourlyDryBulbTemperature < baseHeatingTemperature) {
         let previousDate: Date;
@@ -144,18 +163,20 @@ export class DegreeDaysService {
         coolingDegreeDays += (degreeDifference * portionOfDay);
       }
     }
+
     let stationId: string;
     let stationName: string;
-    if (localClimatologicalDataDay[0]) {
-      stationId = localClimatologicalDataDay[0].stationId;
-      stationName = localClimatologicalDataDay[0].STATION;
+    if (this.yearHourlyData[0]) {
+      stationId = this.yearHourlyData[0].stationId;
+      stationName = this.yearHourlyData[0].STATION;
     }
     return {
       heatingDegreeDays: heatingDegreeDays,
       coolingDegreeDays: coolingDegreeDays,
       date: new Date(day),
       stationId: stationId,
-      stationName: stationName
+      stationName: stationName,
+      hasErrors: hasErrors
     };
   }
 
@@ -165,6 +186,21 @@ export class DegreeDaysService {
       let localClimatologicalDataDay: Array<LocalClimatologicalData> = this.yearHourlyData.filter(lcd => {
         return lcd.DATE.getDate() == day.getDate() && lcd.DATE.getMonth() == day.getMonth() && isNaN(lcd.HourlyDryBulbTemperature) == false;
       });
+
+
+      // let lcdYear: Array<LocalClimatologicalData> = this.yearHourlyData.filter(lcd => {
+      //   return isNaN(lcd.HourlyDryBulbTemperature) == false;
+      // });
+
+
+      // let startIndex: number = this.yearHourlyData.findIndex(value => {
+      //   return value.DATE.getDate() == day.getDate() && value.DATE.getMonth() == day.getMonth()
+      // });
+      // let nextDay: Date = new Date(day);
+      // nextDay.setDate(nextDay.getDate() + 1);
+      // let endIndex: number = this.yearHourlyData.findIndex(value => {
+      //   return value.DATE.getDate() == nextDay.getDate() && value.DATE.getMonth() == nextDay.getMonth()
+      // });
 
       let results: Array<DetailDegreeDay> = new Array();
       let minutesPerDay: number = 1440;
@@ -178,6 +214,8 @@ export class DegreeDaysService {
           previousDate = new Date(localClimatologicalDataDay[i - 1].DATE)
           previousDryBulbTemp = localClimatologicalDataDay[i - 1].HourlyDryBulbTemperature;
         }
+
+
         let minutesBetween: number = this.getMinutesBetweenDates(previousDate, localClimatologicalDataDay[i].DATE);
         let averageDryBulbTemp: number = (localClimatologicalDataDay[i].HourlyDryBulbTemperature + previousDryBulbTemp) / 2
         let portionOfDay: number = (minutesBetween / minutesPerDay);
@@ -203,7 +241,7 @@ export class DegreeDaysService {
             coolingDegreeDay: coolingDegreeDay,
             coolingDegreeDifference: coolingDegreeDifference,
             percentOfDay: portionOfDay,
-            dryBulbTemp: localClimatologicalDataDay[i].HourlyDryBulbTemperature,
+            dryBulbTemp: this.yearHourlyData[i].HourlyDryBulbTemperature,
             lagDryBulbTemp: averageDryBulbTemp
           })
         } else {
@@ -214,7 +252,7 @@ export class DegreeDaysService {
             coolingDegreeDay: 0,
             coolingDegreeDifference: 0,
             percentOfDay: portionOfDay,
-            dryBulbTemp: localClimatologicalDataDay[i].HourlyDryBulbTemperature,
+            dryBulbTemp: this.yearHourlyData[i].HourlyDryBulbTemperature,
             lagDryBulbTemp: averageDryBulbTemp
           })
 
@@ -278,6 +316,7 @@ export class DegreeDaysService {
       let dryBulbTemp: number = parseFloat(currentLine['HourlyDewPointTemperature']);
       // reportTypes.push(currentLine['REPORT_TYPE']);
       if (currentLine['REPORT_TYPE'] == 'FM-15' && isNaN(dryBulbTemp) == false) {
+        // if (isNaN(dryBulbTemp) == false) {
         let hourData: LocalClimatologicalData = {
           stationId: weatherStation.ID,
           STATION: weatherStation.name,

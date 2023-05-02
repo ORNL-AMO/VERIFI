@@ -9,6 +9,7 @@
     <tbody class="table-group-divider">
         <tr *ngFor="let degreeDay of yearSummaryData">
             <td>
+                <span *ngIf="degreeDay.hasErrors" class="fa fa-exclamation-circle"></span>
                 <a class="click-link" (click)="gotToMonthSummary(degreeDay.date)">
                     {{degreeDay.date | date:'MMM. y'}}
                 </a>
