@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { DegreeDay, WeatherStation } from 'src/app/models/degreeDays';
+import { Router } from '@angular/router';
+import { DetailDegreeDay, WeatherStation } from 'src/app/models/degreeDays';
 import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
 import * as _ from 'lodash';
 import { WeatherDataService } from '../weather-data.service';
@@ -17,7 +17,7 @@ export class AnnualStationDataComponent {
   selectedYear: number;
   heatingTemp: number;
   coolingTemp: number;
-  degreeDays: Array<DegreeDay>;
+  detailedDegreeDays: Array<DetailDegreeDay>;
   yearSummaryData: Array<{ date: Date, heatingDegreeDays: number, coolingDegreeDays: number, hasErrors: boolean }>;
   calculating: boolean;
   constructor(private router: Router, private degreeDaysService: DegreeDaysService,
@@ -49,34 +49,34 @@ export class AnnualStationDataComponent {
   async setDegreeDays() {
     this.calculating = true;
     if (this.selectedYear && this.heatingTemp) {
-      this.degreeDays = await this.degreeDaysService.getMonthlyDataFromYear(this.selectedYear, this.heatingTemp, this.coolingTemp, this.weatherStation);
+      this.detailedDegreeDays = await this.degreeDaysService.getMonthlyDataFromYear(this.selectedYear, this.heatingTemp, this.coolingTemp, this.weatherStation);
       this.setYearSummaryData();
     } else {
-      this.degreeDays = undefined;
+      this.detailedDegreeDays = undefined;
       this.yearSummaryData = undefined;
     }
     this.calculating = false;
   }
 
   setYearSummaryData() {
-    if (this.degreeDays) {
+    if (this.detailedDegreeDays) {
       this.yearSummaryData = new Array();
       let startDate: Date = new Date(this.selectedYear, 0, 1);
       let endDate: Date = new Date(this.selectedYear + 1, 0, 1);
       while (startDate < endDate) {
-        let monthData: Array<DegreeDay> = this.degreeDays.filter(day => {
-          return day.date.getMonth() == startDate.getMonth();
+        let monthData: Array<DetailDegreeDay> = this.detailedDegreeDays.filter(day => {
+          return day.time.getMonth() == startDate.getMonth();
         });
-        let totalHeatingDegreeDays: number = _.sumBy(monthData, 'heatingDegreeDays');
-        let totalCoolingDegreeDays: number = _.sumBy(monthData, 'coolingDegreeDays');
-        let hasErrors: DegreeDay = monthData.find(degreeDay => {
-          return degreeDay.hasErrors == true
-        })
+        let totalHeatingDegreeDays: number = _.sumBy(monthData, 'heatingDegreeDay');
+        let totalCoolingDegreeDays: number = _.sumBy(monthData, 'coolingDegreeDay');
+        // let hasErrors: DetailDegreeDay = monthData.find(degreeDay => {
+        //   return degreeDay.hasErrors == true
+        // })
         this.yearSummaryData.push({
           date: new Date(startDate),
           heatingDegreeDays: totalHeatingDegreeDays,
           coolingDegreeDays: totalCoolingDegreeDays,
-          hasErrors: hasErrors != undefined
+          hasErrors: false
         });
         startDate.setMonth(startDate.getMonth() + 1);
       }

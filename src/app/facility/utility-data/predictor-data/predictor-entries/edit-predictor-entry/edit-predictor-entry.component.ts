@@ -7,7 +7,7 @@ import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { IdbAccount, IdbFacility, IdbPredictorEntry, PredictorData } from 'src/app/models/idb';
 import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
 import * as _ from 'lodash';
-import { DegreeDay } from 'src/app/models/degreeDays';
+import { DetailDegreeDay } from 'src/app/models/degreeDays';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 @Component({
@@ -123,9 +123,9 @@ export class EditPredictorEntryComponent {
           }
         }
         let entryDate: Date = new Date(this.predictorEntry.date);
-        let degreeDays: Array<DegreeDay> = await this.degreeDaysService.getPredictorValueForMonth(entryDate.getMonth(), entryDate.getFullYear(), heatingBaseTemperature, coolingBaseTemperature, stationId)
+        let degreeDays: Array<DetailDegreeDay> = await this.degreeDaysService.getDailyDataFromMonth(entryDate.getMonth(), entryDate.getFullYear(), heatingBaseTemperature, coolingBaseTemperature, stationId)
         if (cddPredictor) {
-          let totalCDD: number = _.sumBy(degreeDays, 'coolingDegreeDays');
+          let totalCDD: number = _.sumBy(degreeDays, 'coolingDegreeDay');
           let cddIndex: number = this.predictorEntry.predictors.findIndex(predictor => { return predictor.id == cddPredictor.id });
           this.predictorEntry.predictors[cddIndex].amount = totalCDD;
           this.predictorEntry.predictors[cddIndex].weatherStationId = degreeDays[0]?.stationId;
@@ -135,7 +135,7 @@ export class EditPredictorEntryComponent {
 
         if (hddPredictor) {
           let hddIndex: number = this.predictorEntry.predictors.findIndex(predictor => { return predictor.id == hddPredictor.id });
-          let totalHDD: number = _.sumBy(degreeDays, 'heatingDegreeDays');
+          let totalHDD: number = _.sumBy(degreeDays, 'heatingDegreeDay');
           this.predictorEntry.predictors[hddIndex].amount = totalHDD;
           this.predictorEntry.predictors[hddIndex].weatherStationId = degreeDays[0]?.stationId;
           this.predictorEntry.predictors[hddIndex].weatherStationName = degreeDays[0]?.stationName;
