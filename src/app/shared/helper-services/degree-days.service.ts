@@ -57,6 +57,7 @@ export class DegreeDaysService {
 
   async getMonthlyDataFromYear(year: number, baseHeatingTemperature: number, baseCoolingTemperature: number, station: WeatherStation): Promise<Array<DegreeDay>> {
     await this.setYearHourlyData(0, year, station.ID);
+    console.log(this.yearHourlyData);
     if (this.yearHourlyData) {
       let startDate: Date = new Date(year, 0, 1);
       let endDate: Date = new Date(year + 1, 0, 1);
@@ -241,7 +242,7 @@ export class DegreeDaysService {
             coolingDegreeDay: coolingDegreeDay,
             coolingDegreeDifference: coolingDegreeDifference,
             percentOfDay: portionOfDay,
-            dryBulbTemp: this.yearHourlyData[i].HourlyDryBulbTemperature,
+            dryBulbTemp: localClimatologicalDataDay[i].HourlyDryBulbTemperature,
             lagDryBulbTemp: averageDryBulbTemp
           })
         } else {
@@ -252,7 +253,7 @@ export class DegreeDaysService {
             coolingDegreeDay: 0,
             coolingDegreeDifference: 0,
             percentOfDay: portionOfDay,
-            dryBulbTemp: this.yearHourlyData[i].HourlyDryBulbTemperature,
+            dryBulbTemp: localClimatologicalDataDay[i].HourlyDryBulbTemperature,
             lagDryBulbTemp: averageDryBulbTemp
           })
 
@@ -309,14 +310,15 @@ export class DegreeDaysService {
 
   getStationYearLCDFromResults(weatherStation: WeatherStation, dataResults: string): Array<LocalClimatologicalData> {
     let parsedData: Array<any> = Papa.parse(dataResults, { header: true }).data;
+    console.log(parsedData);
     let localData: Array<LocalClimatologicalData> = new Array();
     // let reportTypes = [];
     for (let i = 1; i < parsedData.length; i++) {
       let currentLine = parsedData[i];
       let dryBulbTemp: number = parseFloat(currentLine['HourlyDewPointTemperature']);
       // reportTypes.push(currentLine['REPORT_TYPE']);
-      if (currentLine['REPORT_TYPE'] == 'FM-15' && isNaN(dryBulbTemp) == false) {
-        // if (isNaN(dryBulbTemp) == false) {
+      // if (currentLine['REPORT_TYPE'] == 'FM-15' && isNaN(dryBulbTemp) == false) {
+        if (isNaN(dryBulbTemp) == false) {
         let hourData: LocalClimatologicalData = {
           stationId: weatherStation.ID,
           STATION: weatherStation.name,
