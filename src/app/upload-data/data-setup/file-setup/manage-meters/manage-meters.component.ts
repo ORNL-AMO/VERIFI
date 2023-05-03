@@ -48,6 +48,7 @@ export class ManageMetersComponent implements OnInit {
   allMetersValid: boolean;
   calanderizeAllOnToggle: 'fullYear' | 'backward' | 'fullMonth' = 'fullMonth';
   hasNoCalanderizationSelection: boolean = false;
+  skipAll: boolean = false;
   constructor(private activatedRoute: ActivatedRoute, private uploadDataService: UploadDataService,
     private editMeterFormService: EditMeterFormService, private router: Router,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService) { }
@@ -276,5 +277,12 @@ export class ManageMetersComponent implements OnInit {
       }
     });
     this.hasNoCalanderizationSelection = missingCalanderization;
+  }
+
+  setSkipAll() {
+    this.fileReference.meters.forEach(meter => {
+      meter.skipImport = this.skipAll;
+    });
+    this.setValidMeters();
   }
 }
