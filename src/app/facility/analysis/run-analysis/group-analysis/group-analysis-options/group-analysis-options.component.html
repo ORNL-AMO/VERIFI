@@ -39,6 +39,11 @@
                                 id="regression" [(ngModel)]="group.analysisType" (change)="setAnalysisType()">
                             <label class="form-check-label" for="regression">Regression</label>
                         </div>
+                        <div class="form-check">
+                            <input type="radio" class="form-check-input" name="analysisType" [value]="'skip'" id="skip"
+                                [(ngModel)]="group.analysisType" (change)="setAnalysisType()">
+                            <label class="form-check-label" for="skip">Skip Group</label>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -151,7 +156,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-6 col-sm-12">
+            <div class="col-md-6 col-sm-12" *ngIf="group.analysisType != 'skip'">
                 <label class="bold">
                     <span
                         *ngIf="group.analysisType == 'regression' || group.analysisType == 'absoluteEnergyConsumption'">2.</span>
@@ -178,7 +183,8 @@
                         *ngFor="let baselineAdjustment of group.baselineAdjustments; let index = index;">
                         <div class="row">
                             <div class="col-6">
-                                <label for="{{'baselineAdjustment_'+index}}">{{baselineAdjustment.year | yearDisplay: facility.fiscalYear}}</label>
+                                <label for="{{'baselineAdjustment_'+index}}">{{baselineAdjustment.year | yearDisplay:
+                                    facility.fiscalYear}}</label>
                             </div>
                             <div class="col-6">
                                 <div class="input-group">
