@@ -46,8 +46,10 @@ export class MonthlyFacilityAnalysisClass {
     setGroupSummaries(analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, calculateAllMonthlyData: boolean) {
         let groupMonthlySummariesClasses: Array<MonthlyAnalysisSummaryClass> = new Array();
         analysisItem.groups.forEach(group => {
-            let monthlySummary: MonthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(group, analysisItem, facility, calanderizedMeters, this.facilityPredictorEntries, calculateAllMonthlyData);
-            groupMonthlySummariesClasses.push(monthlySummary);
+            if (group.analysisType != 'skip') {
+                let monthlySummary: MonthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(group, analysisItem, facility, calanderizedMeters, this.facilityPredictorEntries, calculateAllMonthlyData);
+                groupMonthlySummariesClasses.push(monthlySummary);
+            }
         });
         this.allFacilityAnalysisData = groupMonthlySummariesClasses.flatMap(summary => { return summary.monthlyAnalysisSummaryData });
     }
