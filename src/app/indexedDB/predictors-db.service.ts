@@ -279,18 +279,21 @@ export class PredictordbService {
                 let dataDate: Date = new Date(predictorEntry.date)
                 this.loadingService.setLoadingMessage('Calculating Degree Days ' + Months[dataDate.getMonth()].name + ', ' + dataDate.getFullYear() + '...')
                 let degreeDays: Array<DetailDegreeDay> = await this.degreeDaysService.getDailyDataFromMonth(dataDate.getMonth(), dataDate.getFullYear(), predictorData.heatingBaseTemperature, predictorData.coolingBaseTemperature, predictorData.weatherStationId);
+                let hasErrors: DetailDegreeDay = degreeDays.find(degreeDay => {
+                    return degreeDay.gapInData == true
+                })
+
                 if (predictorData.weatherDataType == 'CDD') {
                     let totalCDD: number = _.sumBy(degreeDays, 'coolingDegreeDay');
                     predictorData.amount = totalCDD;
-                    predictorData.weatherStationId = degreeDays[0]?.stationId;
-                    predictorData.weatherStationName = degreeDays[0]?.stationName;
                 }
                 if (predictorData.weatherDataType == 'HDD') {
                     let totalHDD: number = _.sumBy(degreeDays, 'heatingDegreeDay');
                     predictorData.amount = totalHDD;
-                    predictorData.weatherStationId = degreeDays[0]?.stationId;
-                    predictorData.weatherStationName = degreeDays[0]?.stationName;
                 }
+                predictorData.weatherStationId = degreeDays[0]?.stationId;
+                predictorData.weatherStationName = degreeDays[0]?.stationName;
+                predictorData.weatherDataWarning = hasErrors != undefined;
             }
             await this.updateWithObservable(facilityPredictorEntries[index]).toPromise();
         }
@@ -317,14 +320,19 @@ export class PredictordbService {
             let dataDate: Date = new Date(predictorEntry.date)
             this.loadingService.setLoadingMessage('Calculating Degree Days ' + Months[dataDate.getMonth()].name + ', ' + dataDate.getFullYear() + '...')
             let degreeDays: Array<DetailDegreeDay> = await this.degreeDaysService.getDailyDataFromMonth(dataDate.getMonth(), dataDate.getFullYear(), heatingPredictorData.heatingBaseTemperature, coolingPredictorData.coolingBaseTemperature, heatingPredictorData.weatherStationId);
+            let hasErrors: DetailDegreeDay = degreeDays.find(degreeDay => {
+                return degreeDay.gapInData == true
+            });
             let totalCDD: number = _.sumBy(degreeDays, 'coolingDegreeDay');
             coolingPredictorData.amount = totalCDD;
             coolingPredictorData.weatherStationId = degreeDays[0]?.stationId;
             coolingPredictorData.weatherStationName = degreeDays[0]?.stationName;
+            coolingPredictorData.weatherDataWarning = hasErrors != undefined;
             let totalHDD: number = _.sumBy(degreeDays, 'heatingDegreeDay');
             heatingPredictorData.amount = totalHDD;
             heatingPredictorData.weatherStationId = degreeDays[0]?.stationId;
             heatingPredictorData.weatherStationName = degreeDays[0]?.stationName;
+            heatingPredictorData.weatherDataWarning = hasErrors != undefined;
             await this.updateWithObservable(facilityPredictorEntries[index]).toPromise();
         }
         // let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();

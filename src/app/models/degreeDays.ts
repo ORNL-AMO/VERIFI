@@ -61,4 +61,5 @@ export interface DetailDegreeDay {
     lagDryBulbTemp: number,
     stationId: string,
     stationName: string,
+    gapInData: boolean
 }

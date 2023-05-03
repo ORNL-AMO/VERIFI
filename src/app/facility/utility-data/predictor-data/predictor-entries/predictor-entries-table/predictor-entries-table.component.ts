@@ -42,6 +42,7 @@ export class PredictorEntriesTableComponent {
   hasData: boolean;
   hasWeatherData: boolean;
   copyingTable: boolean = false;
+  hasWeatherDataWarnings: boolean = false;
   constructor(private predictorsDbService: PredictordbService, private router: Router, private loadingService: LoadingService,
     private facilityDbService: FacilitydbService, private toastNotificationsService: ToastNotificationsService,
     private sharedDataService: SharedDataService, private copyTableService: CopyTableService,
@@ -57,6 +58,9 @@ export class PredictorEntriesTableComponent {
       this.facilityPredictorEntries = entries;
       this.setHasChecked();
       this.setHasData();
+      if (this.hasWeatherData) {
+        this.setHasWeatherDataWarning();
+      }
     });
 
     this.itemsPerPageSub = this.sharedDataService.itemsPerPage.subscribe(val => {
@@ -230,5 +234,19 @@ export class PredictorEntriesTableComponent {
     this.weatherDataService.selectedFacility = selectedFacility;
     this.weatherDataService.zipCode = selectedFacility.zip;
     this.router.navigateByUrl('weather-data/monthly-station');
+  }
+
+  setHasWeatherDataWarning() {
+    let allPredictorData: Array<PredictorData> = this.facilityPredictorEntries.flatMap(entry => { return entry.predictors });
+    let findError: PredictorData = allPredictorData.find(data => {
+      return data.predictorType == 'Weather' && data.weatherDataWarning;
+    });
+    this.hasWeatherDataWarnings = findError != undefined;
+  }
+  
+  goToWeatherData() {
+    let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    this.weatherDataService.selectedFacility = facility;
+    this.router.navigateByUrl('/weather-data');
   }
 }

@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
-import { IdbFacility, PredictorData } from 'src/app/models/idb';
+import { IdbFacility, IdbPredictorEntry, PredictorData } from 'src/app/models/idb';
 import { Subscription } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { WeatherDataService } from 'src/app/weather-data/weather-data.service';
@@ -26,7 +26,7 @@ export class PredictorsTableComponent {
   standardPredictors: Array<PredictorData>;
   degreeDayPredictors: Array<PredictorData>;
 
-
+  hasWeatherDataWarning: boolean;
   constructor(private predictorDbService: PredictordbService, private router: Router,
     private facilitydbService: FacilitydbService, private loadingService: LoadingService,
     private weatherDataService: WeatherDataService, private degreeDaysService: DegreeDaysService) {
@@ -38,13 +38,19 @@ export class PredictorsTableComponent {
       this.facilityPredictors = val;
       this.standardPredictors = new Array();
       this.degreeDayPredictors = new Array();
+      let hasWeatherDataWarning: boolean = false;
       val.forEach(predictor => {
         if (predictor.predictorType == 'Standard' || predictor.predictorType == undefined) {
           this.standardPredictors.push(predictor);
         } else if (predictor.predictorType == 'Weather') {
+          predictor.weatherDataWarning = this.checkWeatherPredictor(predictor);
+          if(!hasWeatherDataWarning && predictor.weatherDataWarning){
+            hasWeatherDataWarning = true;
+          }
           this.degreeDayPredictors.push(predictor);
         }
       })
+      this.hasWeatherDataWarning = hasWeatherDataWarning;
     });
     this.selectedFacilitySub = this.facilitydbService.selectedFacility.subscribe(facility => {
       this.selectedFacility = facility;
@@ -114,7 +120,21 @@ export class PredictorsTableComponent {
     this.weatherDataService.selectedFacility = this.selectedFacility;
     this.weatherDataService.zipCode = this.selectedFacility.zip;
     this.router.navigateByUrl('weather-data/annual-station')
+  }
 
+  checkWeatherPredictor(predictor: PredictorData): boolean {
+    let facilityPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.facilityPredictorEntries.getValue();
+    let allPredictorData: Array<PredictorData> = facilityPredictorEntries.flatMap(entry => { return entry.predictors });
+    let findError: PredictorData = allPredictorData.find(data => {
+      return data.id == predictor.id && data.weatherDataWarning;
+    });
+    return findError != undefined;
+  }
+
+  goToWeatherData() {
+    let facility: IdbFacility = this.facilitydbService.selectedFacility.getValue();
+    this.weatherDataService.selectedFacility = facility;
+    this.router.navigateByUrl('/weather-data');
   }
 
 }

@@ -96,10 +96,10 @@ export class DegreeDaysService {
         previousDryBulbTemp = localClimatologicalDataMonth[i - 1].HourlyDryBulbTemperature;
       }
 
-
+      let gapInData: boolean = false
       let minutesBetween: number = this.getMinutesBetweenDates(previousDate, localClimatologicalDataMonth[i].DATE);
-      if(minutesBetween > 1000){
-        console.log(localClimatologicalDataMonth[i].DATE);
+      if(minutesBetween > 720){
+        gapInData = true;
       }
       let averageDryBulbTemp: number = (localClimatologicalDataMonth[i].HourlyDryBulbTemperature + previousDryBulbTemp) / 2
       let portionOfDay: number = (minutesBetween / minutesPerDay);
@@ -128,7 +128,8 @@ export class DegreeDaysService {
           dryBulbTemp: localClimatologicalDataMonth[i].HourlyDryBulbTemperature,
           lagDryBulbTemp: averageDryBulbTemp,
           stationId: stationId,
-          stationName: stationName
+          stationName: stationName,
+          gapInData: gapInData
         })
       } else {
         results.push({
@@ -141,7 +142,8 @@ export class DegreeDaysService {
           dryBulbTemp: localClimatologicalDataMonth[i].HourlyDryBulbTemperature,
           lagDryBulbTemp: averageDryBulbTemp,
           stationId: stationId,
-          stationName: stationName
+          stationName: stationName,
+          gapInData: gapInData
         })
       }
     }

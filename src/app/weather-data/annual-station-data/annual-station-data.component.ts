@@ -20,6 +20,7 @@ export class AnnualStationDataComponent {
   detailedDegreeDays: Array<DetailDegreeDay>;
   yearSummaryData: Array<{ date: Date, heatingDegreeDays: number, coolingDegreeDays: number, hasErrors: boolean }>;
   calculating: boolean;
+  hasGapsInData: boolean;
   constructor(private router: Router, private degreeDaysService: DegreeDaysService,
     private weatherDataService: WeatherDataService) {
 
@@ -59,6 +60,7 @@ export class AnnualStationDataComponent {
   }
 
   setYearSummaryData() {
+    let hasGapsInData: boolean = false;
     if (this.detailedDegreeDays) {
       this.yearSummaryData = new Array();
       let startDate: Date = new Date(this.selectedYear, 0, 1);
@@ -69,18 +71,22 @@ export class AnnualStationDataComponent {
         });
         let totalHeatingDegreeDays: number = _.sumBy(monthData, 'heatingDegreeDay');
         let totalCoolingDegreeDays: number = _.sumBy(monthData, 'coolingDegreeDay');
-        // let hasErrors: DetailDegreeDay = monthData.find(degreeDay => {
-        //   return degreeDay.hasErrors == true
-        // })
+        let hasErrors: DetailDegreeDay = monthData.find(degreeDay => {
+          return degreeDay.gapInData == true
+        });
+        if(!hasGapsInData){
+          hasGapsInData = hasErrors != undefined;
+        }
         this.yearSummaryData.push({
           date: new Date(startDate),
           heatingDegreeDays: totalHeatingDegreeDays,
           coolingDegreeDays: totalCoolingDegreeDays,
-          hasErrors: false
+          hasErrors: hasErrors != undefined
         });
         startDate.setMonth(startDate.getMonth() + 1);
       }
     }
+    this.hasGapsInData = hasGapsInData;
   }
 
   goToStations() {

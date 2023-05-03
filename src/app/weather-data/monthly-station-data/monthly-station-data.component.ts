@@ -16,6 +16,8 @@ export class MonthlyStationDataComponent {
   heatingTemp: number;
   coolingTemp: number;
   detailedDegreeDays: Array<DetailDegreeDay>;
+  hasGapsInData: boolean;
+  gapsInDataDate: Date;
   constructor(private router: Router, private degreeDaysService: DegreeDaysService,
     private weatherDataService: WeatherDataService) {
 
@@ -35,6 +37,16 @@ export class MonthlyStationDataComponent {
 
   async setDegreeDays() {
     this.detailedDegreeDays = await this.degreeDaysService.getDailyDataFromMonth(this.selectedMonth.getMonth(), this.selectedMonth.getFullYear(), this.heatingTemp, this.coolingTemp, this.weatherStation.ID);
+    let errorIndex: number = this.detailedDegreeDays.findIndex(degreeDay => {
+      return degreeDay.gapInData == true;
+    })
+    if(errorIndex != -1){
+      this.hasGapsInData = true;
+      this.gapsInDataDate = new Date(this.detailedDegreeDays[errorIndex].time);
+    }else{
+      this.hasGapsInData = undefined;
+      this.gapsInDataDate = undefined;
+    }
   }
 
   setSelectedMonth(eventData: string) {

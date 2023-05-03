@@ -45,6 +45,10 @@
             </div>
             <div class="col">
                 <div class="input-group mb-2">
+                    <span class="input-group-text"
+                        *ngIf="predictor.predictorType == 'Weather' && predictor.weatherDataWarning">
+                        <span class="fa fa-exclamation-circle"></span>
+                    </span>
                     <input [id]="'predictor-' + predictor.id" class="form-control" type="number"
                         [(ngModel)]="predictor.amount" name="{{'predictorAmount'+predictor.id}}"
                         onfocus="this.select();" [disabled]="predictor.predictorType == 'Weather'">
@@ -55,6 +59,12 @@
     </div>
 </form>
 
+<div *ngIf="hasWeatherDataWarning" class="alert alert-warning text-center">
+    <span class="fa fa-exclamation-circle"></span> Indicates this value is calculated off of weather data with gaps of
+    twelve hours or more. The resulting value may not be accurate. It may be best to choose a different weather station
+    to pull data from, use the <a (click)="goToWeatherData()">Weather Data</a> page to explore other stations in the
+    area of this facility.
+</div>
 <div *ngIf="hasWeatherData" class="alert alert-info text-center">
     Degree day predictors are denoted with a <span class="fa fa-temperature-half"></span> icon and are automatically
     calculated.
