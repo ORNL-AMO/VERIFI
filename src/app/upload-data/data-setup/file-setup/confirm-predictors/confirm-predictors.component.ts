@@ -37,6 +37,7 @@ export class ConfirmPredictorsComponent implements OnInit {
   paramsSub: Subscription;
   predictorDataSummaries: Array<PredictorDataSummary>;
   predictorsExist: boolean;
+  skipAll: boolean = false;
   constructor(private activatedRoute: ActivatedRoute, private uploadDataService: UploadDataService,
     private router: Router) { }
 
@@ -110,8 +111,12 @@ export class ConfirmPredictorsComponent implements OnInit {
     } else {
       this.router.navigateByUrl('/upload/data-setup/file-setup/' + this.fileReference.id + '/set-facility-predictors');
     }
+  }
 
-
+  setSkipAll() {
+    this.predictorDataSummaries.forEach(summary => {
+      summary.skipExisting = this.skipAll;
+    });
   }
 }
 
