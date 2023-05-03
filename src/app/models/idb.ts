@@ -241,7 +241,8 @@ export interface PredictorData {
     weatherStationId?: string,
     weatherStationName?: string,
     heatingBaseTemperature?: number,
-    coolingBaseTemperature?: number
+    coolingBaseTemperature?: number,
+    weatherDataWarning?: boolean
 }
 
 export type PredictorType = 'Standard' | 'Conversion' | 'Math' | 'Weather'

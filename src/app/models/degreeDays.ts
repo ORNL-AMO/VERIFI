@@ -41,14 +41,14 @@ export interface LocalClimatologicalData {
     HourlyWindSpeed: number
 }
 
-export interface DegreeDay {
-    heatingDegreeDays: number,
-    coolingDegreeDays: number,
-    date: Date,
-    stationId: string,
-    stationName: string,
-    hasErrors: boolean
-}
+// export interface DegreeDay {
+//     heatingDegreeDays: number,
+//     coolingDegreeDays: number,
+//     date: Date,
+//     stationId: string,
+//     stationName: string,
+//     hasErrors: boolean
+// }
 
 export interface DetailDegreeDay {
     time: Date,
@@ -58,5 +58,8 @@ export interface DetailDegreeDay {
     percentOfDay: number,
     heatingDegreeDifference: number,
     coolingDegreeDifference: number,
-    lagDryBulbTemp: number
+    lagDryBulbTemp: number,
+    stationId: string,
+    stationName: string,
+    gapInData: boolean
 }

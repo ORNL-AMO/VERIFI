@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { DegreeDay, WeatherStation } from 'src/app/models/degreeDays';
+import { DetailDegreeDay, WeatherStation } from 'src/app/models/degreeDays';
 import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
 import { WeatherDataService } from 'src/app/weather-data/weather-data.service';
 
@@ -13,9 +13,11 @@ export class MonthlyStationDataComponent {
 
   weatherStation: WeatherStation;
   selectedMonth: Date;
-  degreeDays: Array<DegreeDay>;
   heatingTemp: number;
   coolingTemp: number;
+  detailedDegreeDays: Array<DetailDegreeDay>;
+  hasGapsInData: boolean;
+  gapsInDataDate: Date;
   constructor(private router: Router, private degreeDaysService: DegreeDaysService,
     private weatherDataService: WeatherDataService) {
 
@@ -34,7 +36,17 @@ export class MonthlyStationDataComponent {
   }
 
   async setDegreeDays() {
-    this.degreeDays = await this.degreeDaysService.getDailyDataFromMonth(this.selectedMonth.getMonth(), this.selectedMonth.getFullYear(), this.heatingTemp, this.coolingTemp, this.weatherStation);
+    this.detailedDegreeDays = await this.degreeDaysService.getDailyDataFromMonth(this.selectedMonth.getMonth(), this.selectedMonth.getFullYear(), this.heatingTemp, this.coolingTemp, this.weatherStation.ID);
+    let errorIndex: number = this.detailedDegreeDays.findIndex(degreeDay => {
+      return degreeDay.gapInData == true;
+    })
+    if(errorIndex != -1){
+      this.hasGapsInData = true;
+      this.gapsInDataDate = new Date(this.detailedDegreeDays[errorIndex].time);
+    }else{
+      this.hasGapsInData = undefined;
+      this.gapsInDataDate = undefined;
+    }
   }
 
   setSelectedMonth(eventData: string) {
@@ -51,17 +63,17 @@ export class MonthlyStationDataComponent {
   goToAnnualData() {
     this.router.navigateByUrl('weather-data/annual-station');
   }
-  
-  async setHeatingBaseTemp(){
+
+  async setHeatingBaseTemp() {
     this.weatherDataService.heatingTemp = this.heatingTemp;
     await this.setDegreeDays();
   }
 
-  async setCoolingBaseTemp(){
+  async setCoolingBaseTemp() {
     this.weatherDataService.coolingTemp = this.coolingTemp;
     await this.setDegreeDays();
   }
-  
+
   showApplyToFacility() {
     this.weatherDataService.applyToFacility.next(true);
   }

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { EGridService } from './e-grid.service';
 import * as _ from 'lodash';
 import { ConvertUnitsService } from '../convert-units/convert-units.service';
-import { DegreeDay, DetailDegreeDay, LocalClimatologicalData, WeatherStation } from 'src/app/models/degreeDays';
+import { DetailDegreeDay, LocalClimatologicalData, WeatherStation } from 'src/app/models/degreeDays';
 import * as Papa from 'papaparse';
 
 @Injectable({
@@ -14,63 +14,29 @@ export class DegreeDaysService {
   yearHourlyData: Array<LocalClimatologicalData>;
   constructor(private eGridService: EGridService, private convertUnitsService: ConvertUnitsService) { }
 
-  async getPredictorValueForMonth(month: number, year: number, baseHeatingTemperature: number, baseCoolingTemperature: number, stationId: string): Promise<Array<DegreeDay>> {
+  async getDailyDataFromMonth(month: number, year: number, baseHeatingTemperature: number, baseCoolingTemperature: number, stationId: string): Promise<Array<DetailDegreeDay>> {
     await this.setYearHourlyData(month, year, stationId);
     if (this.yearHourlyData) {
-      let localClimatologicalDataMonth: Array<LocalClimatologicalData> = this.yearHourlyData.filter(lcd => {
-        return lcd.DATE.getMonth() == month;
-      });
-      let startDate: Date = new Date(year, month, 1);
-      let endDate: Date = new Date(year, month + 1, 1);
-      let degreeDays: Array<DegreeDay> = new Array();
-      while (startDate < endDate) {
-        let degreeDay: DegreeDay = this.calculateHeatingDegreeDaysForDate(startDate, localClimatologicalDataMonth, baseHeatingTemperature, baseCoolingTemperature);
-        degreeDays.push(degreeDay);
-        startDate.setDate(startDate.getDate() + 1);
-      }
-      return degreeDays;
+      return this.getDetailedDataForMonth(month, baseHeatingTemperature, baseCoolingTemperature);
     } else {
       return [];
     }
   }
 
-
-  async getDailyDataFromMonth(month: number, year: number, baseHeatingTemperature: number, baseCoolingTemperature: number, station: WeatherStation): Promise<Array<DegreeDay>> {
-    await this.setYearHourlyData(month, year, station.ID);
-    if (this.yearHourlyData) {
-      let localClimatologicalDataMonth: Array<LocalClimatologicalData> = this.yearHourlyData.filter(lcd => {
-        return lcd.DATE.getMonth() == month;
-      });
-      let startDate: Date = new Date(year, month, 1);
-      let endDate: Date = new Date(year, month + 1, 1);
-      let degreeDays: Array<DegreeDay> = new Array();
-      while (startDate < endDate) {
-        let degreeDay: DegreeDay = this.calculateHeatingDegreeDaysForDate(startDate, localClimatologicalDataMonth, baseHeatingTemperature, baseCoolingTemperature);
-        degreeDays.push(degreeDay);
-        startDate.setDate(startDate.getDate() + 1);
-      }
-      return degreeDays;
-    } else {
-      return [];
-    }
-  }
-
-  async getMonthlyDataFromYear(year: number, baseHeatingTemperature: number, baseCoolingTemperature: number, station: WeatherStation): Promise<Array<DegreeDay>> {
+  async getMonthlyDataFromYear(year: number, baseHeatingTemperature: number, baseCoolingTemperature: number, station: WeatherStation): Promise<Array<DetailDegreeDay>> {
     await this.setYearHourlyData(0, year, station.ID);
-    console.log(this.yearHourlyData);
     if (this.yearHourlyData) {
       let startDate: Date = new Date(year, 0, 1);
       let endDate: Date = new Date(year + 1, 0, 1);
-      let degreeDays: Array<DegreeDay> = new Array();
+      let detailedDegreeDays: Array<DetailDegreeDay> = new Array();
       while (startDate < endDate) {
-        let localClimatologicalDataMonth: Array<LocalClimatologicalData> = this.yearHourlyData.filter(lcd => {
-          return lcd.DATE.getMonth() == startDate.getMonth();
+        let monthDetailedDegreeDay: Array<DetailDegreeDay> = this.getDetailedDataForMonth(startDate.getMonth(), baseHeatingTemperature, baseCoolingTemperature);
+        monthDetailedDegreeDay.forEach(detailDegreeDay => {
+          detailedDegreeDays.push(detailDegreeDay);
         });
-        let degreeDay: DegreeDay = this.calculateHeatingDegreeDaysForDate(startDate, localClimatologicalDataMonth, baseHeatingTemperature, baseCoolingTemperature);
-        degreeDays.push(degreeDay);
-        startDate.setDate(startDate.getDate() + 1);
+        startDate.setMonth(startDate.getMonth() + 1);
       }
-      return degreeDays;
+      return detailedDegreeDays;
     } else {
       return [];
     }
@@ -106,163 +72,82 @@ export class DegreeDaysService {
   }
 
 
-  calculateHeatingDegreeDaysForDate(day: Date, localClimatologicalDataMonth: Array<LocalClimatologicalData>, baseHeatingTemperature: number, baseCoolingTemperature: number): DegreeDay {
-    let localClimatologicalDataDay: Array<LocalClimatologicalData> = localClimatologicalDataMonth.filter(lcd => {
-      return lcd.DATE.getDate() == day.getDate() && isNaN(lcd.HourlyDryBulbTemperature) == false;
+  getDetailedDataForMonth(month: number, baseHeatingTemperature: number, baseCoolingTemperature: number): Array<DetailDegreeDay> {
+    let results: Array<DetailDegreeDay> = new Array();
+    let localClimatologicalDataMonth: Array<LocalClimatologicalData> = this.yearHourlyData.filter(lcd => {
+      return lcd.DATE.getMonth() == month;
     });
-
-    // let lcdYear: Array<LocalClimatologicalData> = this.yearHourlyData.filter(lcd => {
-    //   return isNaN(lcd.HourlyDryBulbTemperature) == false;
-    // });
-
-
-    // let startIndex: number = this.yearHourlyData.findIndex(value => {
-    //   return value.DATE.getDate() == day.getDate() && value.DATE.getMonth() == day.getMonth()
-    // });
-    // let nextDay: Date = new Date(day);
-    // nextDay.setDate(nextDay.getDate() + 1);
-    // let endIndex: number;
-    // if (nextDay.getFullYear() == day.getFullYear()) {
-    //   endIndex = this.yearHourlyData.findIndex(value => {
-    //     return value.DATE.getDate() == nextDay.getDate() && value.DATE.getMonth() == nextDay.getMonth()
-    //   });
-    // } else {
-    //   endIndex = this.yearHourlyData.length;
-    // }
     let minutesPerDay: number = 1440;
-    let coolingDegreeDays: number = 0;
-    let heatingDegreeDays: number = 0;
-    let hasErrors: boolean = localClimatologicalDataDay.length == 0;
-    for (let i = 0; i < localClimatologicalDataDay.length; i++) {
-      if (localClimatologicalDataDay[i].HourlyDryBulbTemperature < baseHeatingTemperature) {
-        let previousDate: Date;
-        let previousDryBulbTemp: number;
-        if (i == 0) {
-          previousDate = new Date(day.getFullYear(), day.getMonth(), day.getDate(), 0, 0);
-          previousDryBulbTemp = localClimatologicalDataDay[i].HourlyDryBulbTemperature;
-        } else {
-          previousDate = new Date(localClimatologicalDataDay[i - 1].DATE)
-          previousDryBulbTemp = localClimatologicalDataDay[i - 1].HourlyDryBulbTemperature;
-        }
-        let averageDryBulbTemp: number = (localClimatologicalDataDay[i].HourlyDryBulbTemperature + previousDryBulbTemp) / 2;
-        let minutesBetween: number = this.getMinutesBetweenDates(previousDate, localClimatologicalDataDay[i].DATE);
-        let portionOfDay: number = (minutesBetween / minutesPerDay);
-        let degreeDifference: number = baseHeatingTemperature - averageDryBulbTemp;
-        heatingDegreeDays += (degreeDifference * portionOfDay);
-      }
-
-      if (localClimatologicalDataDay[i].HourlyDryBulbTemperature > baseCoolingTemperature) {
-        let previousDate: Date;
-        if (i == 0) {
-          previousDate = new Date(day.getFullYear(), day.getMonth(), day.getDate(), 0, 0);
-        } else {
-          previousDate = new Date(localClimatologicalDataDay[i - 1].DATE)
-        }
-        let minutesBetween: number = this.getMinutesBetweenDates(previousDate, localClimatologicalDataDay[i].DATE);
-        let portionOfDay: number = (minutesBetween / minutesPerDay);
-        let degreeDifference: number = localClimatologicalDataDay[i].HourlyDryBulbTemperature - baseCoolingTemperature;
-        coolingDegreeDays += (degreeDifference * portionOfDay);
-      }
-    }
-
     let stationId: string;
     let stationName: string;
     if (this.yearHourlyData[0]) {
       stationId = this.yearHourlyData[0].stationId;
       stationName = this.yearHourlyData[0].STATION;
     }
-    return {
-      heatingDegreeDays: heatingDegreeDays,
-      coolingDegreeDays: coolingDegreeDays,
-      date: new Date(day),
-      stationId: stationId,
-      stationName: stationName,
-      hasErrors: hasErrors
-    };
-  }
-
-  async calculateHeatingDegreeHoursForDate(day: Date, baseHeatingTemperature: number, baseCoolingTemperature: number, station: WeatherStation): Promise<Array<DetailDegreeDay>> {
-    await this.setYearHourlyData(day.getMonth(), day.getFullYear(), station.ID);
-    if (this.yearHourlyData) {
-      let localClimatologicalDataDay: Array<LocalClimatologicalData> = this.yearHourlyData.filter(lcd => {
-        return lcd.DATE.getDate() == day.getDate() && lcd.DATE.getMonth() == day.getMonth() && isNaN(lcd.HourlyDryBulbTemperature) == false;
-      });
-
-
-      // let lcdYear: Array<LocalClimatologicalData> = this.yearHourlyData.filter(lcd => {
-      //   return isNaN(lcd.HourlyDryBulbTemperature) == false;
-      // });
-
-
-      // let startIndex: number = this.yearHourlyData.findIndex(value => {
-      //   return value.DATE.getDate() == day.getDate() && value.DATE.getMonth() == day.getMonth()
-      // });
-      // let nextDay: Date = new Date(day);
-      // nextDay.setDate(nextDay.getDate() + 1);
-      // let endIndex: number = this.yearHourlyData.findIndex(value => {
-      //   return value.DATE.getDate() == nextDay.getDate() && value.DATE.getMonth() == nextDay.getMonth()
-      // });
-
-      let results: Array<DetailDegreeDay> = new Array();
-      let minutesPerDay: number = 1440;
-      for (let i = 0; i < localClimatologicalDataDay.length; i++) {
-        let previousDate: Date;
-        let previousDryBulbTemp: number;
-        if (i == 0) {
-          previousDate = new Date(day.getFullYear(), day.getMonth(), day.getDate(), 0, 0);
-          previousDryBulbTemp = localClimatologicalDataDay[i].HourlyDryBulbTemperature;
-        } else {
-          previousDate = new Date(localClimatologicalDataDay[i - 1].DATE)
-          previousDryBulbTemp = localClimatologicalDataDay[i - 1].HourlyDryBulbTemperature;
-        }
-
-
-        let minutesBetween: number = this.getMinutesBetweenDates(previousDate, localClimatologicalDataDay[i].DATE);
-        let averageDryBulbTemp: number = (localClimatologicalDataDay[i].HourlyDryBulbTemperature + previousDryBulbTemp) / 2
-        let portionOfDay: number = (minutesBetween / minutesPerDay);
-        if (averageDryBulbTemp < baseHeatingTemperature || averageDryBulbTemp > baseCoolingTemperature) {
-
-          let heatingDegreeDay: number = 0;
-          let heatingDegreeDifference: number = 0;
-          let coolingDegreeDay: number = 0;
-          let coolingDegreeDifference: number = 0;
-          if (averageDryBulbTemp < baseHeatingTemperature) {
-            heatingDegreeDifference = baseHeatingTemperature - averageDryBulbTemp;
-            heatingDegreeDay = heatingDegreeDifference * portionOfDay;
-          }
-          if (averageDryBulbTemp > baseCoolingTemperature) {
-            coolingDegreeDifference = averageDryBulbTemp - baseCoolingTemperature;
-            coolingDegreeDay = coolingDegreeDifference * portionOfDay;
-          }
-
-          results.push({
-            time: localClimatologicalDataDay[i].DATE,
-            heatingDegreeDay: heatingDegreeDay,
-            heatingDegreeDifference: heatingDegreeDifference,
-            coolingDegreeDay: coolingDegreeDay,
-            coolingDegreeDifference: coolingDegreeDifference,
-            percentOfDay: portionOfDay,
-            dryBulbTemp: localClimatologicalDataDay[i].HourlyDryBulbTemperature,
-            lagDryBulbTemp: averageDryBulbTemp
-          })
-        } else {
-          results.push({
-            time: localClimatologicalDataDay[i].DATE,
-            heatingDegreeDay: 0,
-            heatingDegreeDifference: 0,
-            coolingDegreeDay: 0,
-            coolingDegreeDifference: 0,
-            percentOfDay: portionOfDay,
-            dryBulbTemp: localClimatologicalDataDay[i].HourlyDryBulbTemperature,
-            lagDryBulbTemp: averageDryBulbTemp
-          })
-
-        }
+    for (let i = 0; i < localClimatologicalDataMonth.length; i++) {
+      let previousDate: Date;
+      let previousDryBulbTemp: number;
+      if (i == 0) {
+        let startDate: Date = new Date(localClimatologicalDataMonth[i].DATE);
+        previousDate = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate(), 0, 0);
+        previousDryBulbTemp = localClimatologicalDataMonth[i].HourlyDryBulbTemperature;
+      } else {
+        previousDate = new Date(localClimatologicalDataMonth[i - 1].DATE)
+        previousDryBulbTemp = localClimatologicalDataMonth[i - 1].HourlyDryBulbTemperature;
       }
-      return results;
-    } else {
-      return [];
+
+      let gapInData: boolean = false
+      let minutesBetween: number = this.getMinutesBetweenDates(previousDate, localClimatologicalDataMonth[i].DATE);
+      if(minutesBetween > 720){
+        gapInData = true;
+      }
+      let averageDryBulbTemp: number = (localClimatologicalDataMonth[i].HourlyDryBulbTemperature + previousDryBulbTemp) / 2
+      let portionOfDay: number = (minutesBetween / minutesPerDay);
+      if (averageDryBulbTemp < baseHeatingTemperature || averageDryBulbTemp > baseCoolingTemperature) {
+
+        let heatingDegreeDay: number = 0;
+        let heatingDegreeDifference: number = 0;
+        let coolingDegreeDay: number = 0;
+        let coolingDegreeDifference: number = 0;
+        if (averageDryBulbTemp < baseHeatingTemperature) {
+          heatingDegreeDifference = baseHeatingTemperature - averageDryBulbTemp;
+          heatingDegreeDay = heatingDegreeDifference * portionOfDay;
+        }
+        if (averageDryBulbTemp > baseCoolingTemperature) {
+          coolingDegreeDifference = averageDryBulbTemp - baseCoolingTemperature;
+          coolingDegreeDay = coolingDegreeDifference * portionOfDay;
+        }
+        
+        results.push({
+          time: localClimatologicalDataMonth[i].DATE,
+          heatingDegreeDay: heatingDegreeDay,
+          heatingDegreeDifference: heatingDegreeDifference,
+          coolingDegreeDay: coolingDegreeDay,
+          coolingDegreeDifference: coolingDegreeDifference,
+          percentOfDay: portionOfDay,
+          dryBulbTemp: localClimatologicalDataMonth[i].HourlyDryBulbTemperature,
+          lagDryBulbTemp: averageDryBulbTemp,
+          stationId: stationId,
+          stationName: stationName,
+          gapInData: gapInData
+        })
+      } else {
+        results.push({
+          time: localClimatologicalDataMonth[i].DATE,
+          heatingDegreeDay: 0,
+          heatingDegreeDifference: 0,
+          coolingDegreeDay: 0,
+          coolingDegreeDifference: 0,
+          percentOfDay: portionOfDay,
+          dryBulbTemp: localClimatologicalDataMonth[i].HourlyDryBulbTemperature,
+          lagDryBulbTemp: averageDryBulbTemp,
+          stationId: stationId,
+          stationName: stationName,
+          gapInData: gapInData
+        })
+      }
     }
+    return results;
   }
 
   //find weather station closest to zip code
@@ -310,15 +195,14 @@ export class DegreeDaysService {
 
   getStationYearLCDFromResults(weatherStation: WeatherStation, dataResults: string): Array<LocalClimatologicalData> {
     let parsedData: Array<any> = Papa.parse(dataResults, { header: true }).data;
-    console.log(parsedData);
     let localData: Array<LocalClimatologicalData> = new Array();
     // let reportTypes = [];
     for (let i = 1; i < parsedData.length; i++) {
       let currentLine = parsedData[i];
       let dryBulbTemp: number = parseFloat(currentLine['HourlyDewPointTemperature']);
       // reportTypes.push(currentLine['REPORT_TYPE']);
-      // if (currentLine['REPORT_TYPE'] == 'FM-15' && isNaN(dryBulbTemp) == false) {
-        if (isNaN(dryBulbTemp) == false) {
+      if (currentLine['REPORT_TYPE'] == 'FM-15' && isNaN(dryBulbTemp) == false) {
+        // if (isNaN(dryBulbTemp) == false) {
         let hourData: LocalClimatologicalData = {
           stationId: weatherStation.ID,
           STATION: weatherStation.name,
@@ -357,7 +241,7 @@ export class DegreeDaysService {
 
 
   /// Haversine formula to calculate approximate distances between coordinate pairs
-  ///Taken from ONRL-Weather
+  ///Taken from ORNL-Weather
   haversine(lat1: number, lon1: number, lat2: number, lon2: number): number {
     const R = 3958.8; // average radius of Earth in miles
     const φ1 = (lat1 * Math.PI) / 180; // φ, λ in radians

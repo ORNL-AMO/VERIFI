@@ -60,6 +60,15 @@
             <app-calculating-spinner [message]="'Calculating ' + selectedYear+ '...'"></app-calculating-spinner>
         </div>
     </div>
+    <div class="row" *ngIf="hasGapsInData">
+        <div class="col-12">
+            <div class="alert alert-warning text-center">
+                One or more months have gaps of more then twelve hours in their data. Click the month with an <span
+                    class="fa fa-exclamation-circle"></span> for more details.
+            </div>
+        </div>
+
+    </div>
     <div class="row" *ngIf="yearSummaryData && yearSummaryData.length != 0">
         <div class="col-lg-6 col-md-12 col-sm-12">
             <app-annual-station-graph [yearSummaryData]="yearSummaryData"

@@ -7,9 +7,10 @@ import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { IdbAccount, IdbFacility, IdbPredictorEntry, PredictorData } from 'src/app/models/idb';
 import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
 import * as _ from 'lodash';
-import { DegreeDay } from 'src/app/models/degreeDays';
+import { DetailDegreeDay } from 'src/app/models/degreeDays';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
+import { WeatherDataService } from 'src/app/weather-data/weather-data.service';
 @Component({
   selector: 'app-edit-predictor-entry',
   templateUrl: './edit-predictor-entry.component.html',
@@ -21,12 +22,14 @@ export class EditPredictorEntryComponent {
   predictorEntry: IdbPredictorEntry;
   hasWeatherData: boolean;
   calculatingDegreeDays: boolean;
+  hasWeatherDataWarning: boolean;
   constructor(private activatedRoute: ActivatedRoute, private predictorDbService: PredictordbService,
     private router: Router, private facilityDbService: FacilitydbService,
     private accountDbService: AccountdbService, private dbChangesService: DbChangesService,
     private degreeDaysService: DegreeDaysService,
     private loadingService: LoadingService,
-    private toastNotificationService: ToastNotificationsService) {
+    private toastNotificationService: ToastNotificationsService,
+    private weatherDataService: WeatherDataService) {
   }
 
   ngOnInit() {
@@ -95,6 +98,7 @@ export class EditPredictorEntryComponent {
     this.calculatingDegreeDays = true;
     let degreeDayPredictors: Array<PredictorData> = this.predictorEntry.predictors.filter(predictor => { return predictor.predictorType == 'Weather' });
     let updatedPredictorIds: Array<string> = [];
+    let hasWeatherDataWarning: boolean = false;
     for (let i = 0; i < degreeDayPredictors.length; i++) {
       let predictor: PredictorData = degreeDayPredictors[i];
       if (!updatedPredictorIds.includes(predictor.id)) {
@@ -123,26 +127,43 @@ export class EditPredictorEntryComponent {
           }
         }
         let entryDate: Date = new Date(this.predictorEntry.date);
-        let degreeDays: Array<DegreeDay> = await this.degreeDaysService.getPredictorValueForMonth(entryDate.getMonth(), entryDate.getFullYear(), heatingBaseTemperature, coolingBaseTemperature, stationId)
+        let degreeDays: Array<DetailDegreeDay> = await this.degreeDaysService.getDailyDataFromMonth(entryDate.getMonth(), entryDate.getFullYear(), heatingBaseTemperature, coolingBaseTemperature, stationId)
+
+        let hasErrors: DetailDegreeDay = degreeDays.find(degreeDay => {
+          return degreeDay.gapInData == true
+        });
+        if (!hasWeatherDataWarning && hasErrors != undefined) {
+          hasWeatherDataWarning = true;
+        }
+
         if (cddPredictor) {
-          let totalCDD: number = _.sumBy(degreeDays, 'coolingDegreeDays');
+          let totalCDD: number = _.sumBy(degreeDays, 'coolingDegreeDay');
           let cddIndex: number = this.predictorEntry.predictors.findIndex(predictor => { return predictor.id == cddPredictor.id });
           this.predictorEntry.predictors[cddIndex].amount = totalCDD;
           this.predictorEntry.predictors[cddIndex].weatherStationId = degreeDays[0]?.stationId;
           this.predictorEntry.predictors[cddIndex].weatherStationName = degreeDays[0]?.stationName;
+          this.predictorEntry.predictors[cddIndex].weatherDataWarning = hasErrors != undefined;
           updatedPredictorIds.push(cddPredictor.id);
         }
 
         if (hddPredictor) {
           let hddIndex: number = this.predictorEntry.predictors.findIndex(predictor => { return predictor.id == hddPredictor.id });
-          let totalHDD: number = _.sumBy(degreeDays, 'heatingDegreeDays');
+          let totalHDD: number = _.sumBy(degreeDays, 'heatingDegreeDay');
           this.predictorEntry.predictors[hddIndex].amount = totalHDD;
           this.predictorEntry.predictors[hddIndex].weatherStationId = degreeDays[0]?.stationId;
           this.predictorEntry.predictors[hddIndex].weatherStationName = degreeDays[0]?.stationName;
+          this.predictorEntry.predictors[hddIndex].weatherDataWarning = hasErrors != undefined;
           updatedPredictorIds.push(hddPredictor.id);
         }
       }
     }
     this.calculatingDegreeDays = false;
+    this.hasWeatherDataWarning = hasWeatherDataWarning;
+  }
+
+  goToWeatherData() {
+    let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    this.weatherDataService.selectedFacility = facility;
+    this.router.navigateByUrl('/weather-data');
   }
 }

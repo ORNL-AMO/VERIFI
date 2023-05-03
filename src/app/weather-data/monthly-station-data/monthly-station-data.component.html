@@ -55,13 +55,19 @@
         </div>
     </form>
     <hr>
-    <div class="row" *ngIf="degreeDays && degreeDays.length != 0">
+    <div class="row" *ngIf="hasGapsInData">
+        <div class="alert alert-warning text-center">
+            A gap of more then twelve hours was found prior to the reading at {{gapsInDataDate | date:'long'}}. The
+            degree day calculations for this month may not be completely accurate.
+        </div>
+    </div>
+    <div class="row" *ngIf="detailedDegreeDays && detailedDegreeDays.length != 0">
         <div class="col-lg-12 col-md-12 col-sm-12">
-            <app-monthly-station-graph [degreeDays]="degreeDays"
-                [selectedMonth]="selectedMonth"></app-monthly-station-graph>
+            <app-monthly-station-graph [detailedDegreeDays]="detailedDegreeDays" [selectedMonth]="selectedMonth"
+                [heatingTemp]="heatingTemp" [coolingTemp]="coolingTemp"></app-monthly-station-graph>
         </div>
         <div class="col-lg-12 col-md-12 col-sm-12">
-            <app-monthly-station-table [degreeDays]="degreeDays"></app-monthly-station-table>
+            <app-monthly-station-table [detailedDegreeDays]="detailedDegreeDays"></app-monthly-station-table>
         </div>
     </div>
 </ng-container>
