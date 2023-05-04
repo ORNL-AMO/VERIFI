@@ -57,6 +57,7 @@ export class AccountOverviewComponent implements OnInit {
     }
     this.accountOverviewService.accountOverviewData.next(undefined);
     this.accountOverviewService.utilityUseAndCost.next(undefined);
+    this.accountOverviewService.dateRange.next(undefined);
   }
 
   calculateFacilitiesSummary() {
