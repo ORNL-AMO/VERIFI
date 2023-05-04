@@ -110,6 +110,7 @@ export class AccountOverviewComponent implements OnInit {
       let latestData: MonthlyData = _.maxBy(monthlyData, 'date');
       let maxDate: Date = new Date(latestData.year, latestData.monthNumValue);
       let minDate: Date = new Date(maxDate.getUTCFullYear() - 1, maxDate.getMonth(), 1);
+      minDate.setMonth(minDate.getMonth() + 1);
       this.accountOverviewService.dateRange.next({
         endDate: maxDate,
         startDate: minDate
