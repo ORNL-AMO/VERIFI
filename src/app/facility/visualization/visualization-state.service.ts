@@ -246,6 +246,7 @@ export class VisualizationStateService {
     if (dateRange) {
       let startDate: Date = new Date(dateRange.minDate);
       let endDate: Date = new Date(dateRange.maxDate);
+      endDate.setMonth(endDate.getMonth() + 1);
       while (startDate < endDate) {
         dates.push(new Date(startDate.getFullYear(), startDate.getMonth(), 1));
         startDate.setMonth(startDate.getMonth() + 1);
