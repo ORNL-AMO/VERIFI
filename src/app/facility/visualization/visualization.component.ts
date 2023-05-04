@@ -66,7 +66,6 @@ export class VisualizationComponent implements OnInit {
         });
         let maxDate: Date = _.max(dates);
         let minDate: Date = _.min(dates);
-        maxDate.setMonth(maxDate.getMonth() - 1)
         this.visualizationStateService.dateRange.next({
           maxDate: maxDate,
           minDate: minDate

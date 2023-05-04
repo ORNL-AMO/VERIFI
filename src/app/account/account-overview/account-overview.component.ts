@@ -5,6 +5,8 @@ import { Subscription } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbAccount, IdbFacility } from 'src/app/models/idb';
 import { Router } from '@angular/router';
+import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
+import * as _ from 'lodash';
 
 @Component({
   selector: 'app-account-overview',
@@ -41,6 +43,8 @@ export class AccountOverviewComponent implements OnInit {
       this.dateRange = dateRange;
       if (this.dateRange) {
         this.calculateFacilitiesSummary();
+      } else {
+        this.setDateRange();
       }
     });
   }
@@ -95,6 +99,20 @@ export class AccountOverviewComponent implements OnInit {
     let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     if (facilities.length > 0) {
       this.router.navigateByUrl('facility/' + facilities[0].id + '/utility');
+    }
+  }
+
+  setDateRange() {
+    let calanderizedMeters: Array<CalanderizedMeter> = this.accountOverviewService.calanderizedMeters;
+    if (calanderizedMeters && calanderizedMeters.length > 0) {
+      let monthlyData: Array<MonthlyData> = calanderizedMeters.flatMap(val => { return val.monthlyData });
+      let latestData: MonthlyData = _.maxBy(monthlyData, 'date');
+      let maxDate: Date = new Date(latestData.year, latestData.monthNumValue);
+      let minDate: Date = new Date(maxDate.getUTCFullYear() - 1, maxDate.getMonth(), 1);
+      this.accountOverviewService.dateRange.next({
+        endDate: maxDate,
+        startDate: minDate
+      });
     }
   }
 }
