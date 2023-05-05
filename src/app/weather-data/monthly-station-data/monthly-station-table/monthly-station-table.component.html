@@ -12,9 +12,10 @@
         </tr>
     </thead>
     <tbody class="table-group-divider">
-        <tr
-            *ngFor="let summaryData of detailedDegreeDays| slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage">
+        <tr *ngFor="let summaryData of detailedDegreeDays| slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage"
+            [ngClass]="{'alert alert-danger': summaryData.gapInData}">
             <td>
+                <span class="fa fa-exclamation-circle" *ngIf="summaryData.gapInData"></span>
                 {{summaryData.time | date:'short'}}
             </td>
             <td>

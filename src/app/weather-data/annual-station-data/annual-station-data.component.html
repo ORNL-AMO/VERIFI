@@ -12,6 +12,13 @@
     </p>
     <form>
         <div class="row">
+            <div class="col-1 btn-col">
+                <div class="btn-margin">
+                    <button class="btn nav-btn" (click)="goToStations()">
+                        <span class="fa fa-chevron-left"></span>
+                    </button>
+                </div>
+            </div>
             <div class="col-lg-3 col-md-12 col-sm-12">
                 <label class="semibold" for="selectedYear">Select Year</label>
                 <select id="selectedYear" [(ngModel)]="selectedYear" class="form-select" name="selectedYear"
