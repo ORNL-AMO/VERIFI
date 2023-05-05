@@ -67,7 +67,6 @@ export class AnalysisService {
         baselineAdjustment: true,
         totalSavingsPercentImprovement: true,
         annualSavingsPercentImprovement: true,
-        adjustmentToBaseline: true,
         cummulativeSavings: true,
         newSavings: true,
         predictors: [],

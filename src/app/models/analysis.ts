@@ -116,7 +116,6 @@ export interface AnalysisTableColumns {
   baselineAdjustment: boolean,
   totalSavingsPercentImprovement: boolean,
   annualSavingsPercentImprovement: boolean,
-  adjustmentToBaseline: boolean,
   cummulativeSavings: boolean,
   newSavings: boolean,
   predictors: Array<{

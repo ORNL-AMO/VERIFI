@@ -50,7 +50,6 @@ export class AnalysisSummaryTableFilterComponent implements OnInit {
       this.analysisTableColumns.baselineAdjustmentForNormalization = false;
       this.analysisTableColumns.baselineAdjustmentForOther = false;
       this.analysisTableColumns.baselineAdjustment = false;
-      this.analysisTableColumns.adjustmentToBaseline = false;
     } else {
       this.analysisTableColumns.actualEnergy = true;
       this.analysisTableColumns.modeledEnergy = true;
@@ -59,7 +58,6 @@ export class AnalysisSummaryTableFilterComponent implements OnInit {
       this.analysisTableColumns.baselineAdjustmentForNormalization = true;
       this.analysisTableColumns.baselineAdjustmentForOther = true;
       this.analysisTableColumns.baselineAdjustment = true;
-      this.analysisTableColumns.adjustmentToBaseline = true;
     }
     this.save();
   }
@@ -122,7 +120,6 @@ export class AnalysisSummaryTableFilterComponent implements OnInit {
       this.analysisTableColumns.savings ||
       this.analysisTableColumns.totalSavingsPercentImprovement ||
       this.analysisTableColumns.annualSavingsPercentImprovement ||
-      this.analysisTableColumns.adjustmentToBaseline ||
       this.analysisTableColumns.cummulativeSavings ||
       this.analysisTableColumns.newSavings
     );
@@ -207,7 +204,6 @@ export class AnalysisSummaryTableFilterComponent implements OnInit {
     this.analysisTableColumns.baselineAdjustment = true;
     this.analysisTableColumns.totalSavingsPercentImprovement = true;
     this.analysisTableColumns.annualSavingsPercentImprovement = true;
-    this.analysisTableColumns.adjustmentToBaseline = true;
     this.analysisTableColumns.cummulativeSavings = true;
     this.analysisTableColumns.newSavings = true;
     this.analysisTableColumns.predictors.forEach(predictor => {
