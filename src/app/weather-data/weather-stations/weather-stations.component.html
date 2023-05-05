@@ -13,16 +13,17 @@
             <ng-container *ngIf="!useFacility">
                 <input type="text" class="form-control" name="zipCode" id="zipCode" [(ngModel)]="zipCode"
                     (input)="setStations()">
-                <a class="small float-end" (click)="toggleUseZip()" *ngIf="facilities.length > 0">Use Facility Zip</a>
+                <a class="float-end" (click)="toggleUseZip()" *ngIf="facilities.length > 0">Choose Facility Zip Code</a>
 
             </ng-container>
 
             <ng-container *ngIf="useFacility">
-                <select class="form-select" name="zipCode" id="zipCode" [(ngModel)]="zipCode"
+                <select class="form-select" name="zipCode" id="zipCode" [(ngModel)]="selectedFacilityId"
                     (change)="changeFacility()">
-                    <option *ngFor="let facility of facilities" [ngValue]="facility.zip">{{facility.name}}</option>
+                    <option *ngFor="let facility of facilities" [ngValue]="facility.guid">{{facility.name}}
+                        ({{facility.zip}})</option>
                 </select>
-                <a class="small float-end" (click)="toggleUseZip()">Manually Set Zip</a>
+                <a class="float-end" (click)="toggleUseZip()">Manually Set Zip</a>
             </ng-container>
         </div>
         <div class="col-lg-4 col-md-12 col-sm-12">

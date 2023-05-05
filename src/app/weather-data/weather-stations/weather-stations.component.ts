@@ -21,6 +21,7 @@ export class WeatherStationsComponent {
 
   facilities: Array<IdbFacility>;
   facilitySub: Subscription;
+  selectedFacilityId: string;
   constructor(private accountDbService: AccountdbService, private degreeDaysService: DegreeDaysService,
     private weatherDataService: WeatherDataService,
     private facilityDbService: FacilitydbService) {
@@ -39,6 +40,7 @@ export class WeatherStationsComponent {
       this.zipCode = this.weatherDataService.zipCode;
     }
     this.setStations();
+    this.selectedFacilityId = this.weatherDataService.selectedFacility?.guid;
   }
 
   ngOnDestroy() {
@@ -48,7 +50,7 @@ export class WeatherStationsComponent {
 
   setStations() {
     this.weatherDataService.zipCode = this.zipCode;
-    if(this.furthestDistance <= 500){
+    if (this.furthestDistance <= 500) {
       this.degreeDaysService.getClosestStation(this.zipCode, this.furthestDistance).then(stations => {
         this.stations = stations;
       });
@@ -58,11 +60,13 @@ export class WeatherStationsComponent {
   toggleUseZip() {
     this.useFacility = !this.useFacility;
     if (this.useFacility && this.facilities.length > 0) {
-      this.zipCode = this.facilities[0].zip;
+      this.selectedFacilityId = this.facilities[0].guid;
+      this.changeFacility();
+      this.setStations();
     } else {
       this.weatherDataService.selectedFacility = undefined;
+      this.setStations();
     }
-    this.setStations();
   }
 
   checkSelectedFacility() {
@@ -76,8 +80,8 @@ export class WeatherStationsComponent {
   }
 
   changeFacility() {
-    let facilityExists: IdbFacility = this.facilities.find(facility => { return facility.zip == this.zipCode });
-    this.weatherDataService.selectedFacility = facilityExists;
+    this.weatherDataService.selectedFacility = this.facilities.find(facility => { return facility.guid == this.selectedFacilityId });
+    this.zipCode = this.weatherDataService.selectedFacility?.zip;
     this.setStations();
   }
 }
