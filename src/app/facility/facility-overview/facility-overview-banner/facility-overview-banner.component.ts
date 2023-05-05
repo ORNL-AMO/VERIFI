@@ -71,9 +71,7 @@ export class FacilityOverviewBannerComponent implements OnInit {
         this.minYear = dateRange.startDate.getFullYear();
         this.maxMonth = dateRange.endDate.getMonth();
         this.maxYear = dateRange.endDate.getFullYear();
-      } else {
-        this.setDateRange();
-      }
+      } 
     });
   }
 
@@ -134,20 +132,5 @@ export class FacilityOverviewBannerComponent implements OnInit {
     });
     this.years = _.uniq(years);
     this.years = _.orderBy(this.years);
-  }
-
-  setDateRange() {
-    let utilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
-    let dates: Array<Date> = utilityMeterData.map(meterData => {
-      let date: Date = new Date(meterData.readDate);
-      return date;
-    });
-    let maxDate: Date = _.max(dates);
-    let minDate: Date = new Date(maxDate.getUTCFullYear() - 1, maxDate.getMonth(), 1);
-    maxDate.setMonth(maxDate.getMonth() - 1)
-    this.facilityOverviewService.dateRange.next({
-      endDate: maxDate,
-      startDate: minDate
-    });
   }
 }

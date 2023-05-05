@@ -91,3 +91,13 @@
   .fa-file-circle-check{
     color: green !important;
   }
+
+
+  
+input[type="file"] {
+  border: solid grey;
+}
+
+input[type="file"].drag-in {
+  border: solid black;
+}

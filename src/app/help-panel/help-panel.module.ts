@@ -6,6 +6,7 @@ import { UploadDataHelpModule } from './upload-data-help/upload-data-help.module
 import { SetupWizardHelpModule } from './setup-wizard-help/setup-wizard-help.module';
 import { AccountHelpModule } from './account-help/account-help.module';
 import { FacilityHelpModule } from './facility-help/facility-help.module';
+import { WeatherDataHelpModule } from './weather-data-help/weather-data-help.module';
 
 @NgModule({
   declarations: [
@@ -17,7 +18,8 @@ import { FacilityHelpModule } from './facility-help/facility-help.module';
     UploadDataHelpModule,
     SetupWizardHelpModule,
     AccountHelpModule,
-    FacilityHelpModule
+    FacilityHelpModule,
+    WeatherDataHelpModule
   ],
   exports: [
     HelpPanelComponent

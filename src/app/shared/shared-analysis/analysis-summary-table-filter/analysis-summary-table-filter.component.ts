@@ -95,12 +95,12 @@ export class AnalysisSummaryTableFilterComponent implements OnInit {
 
 
   setEnergyColumns() {
-    this.analysisTableColumns.energy = (this.analysisTableColumns.actualEnergy 
-      || this.analysisTableColumns.modeledEnergy 
-      || this.analysisTableColumns.adjustedForNormalization 
-      || this.analysisTableColumns.adjusted 
-      || this.analysisTableColumns.baselineAdjustmentForNormalization 
-      || this.analysisTableColumns.baselineAdjustmentForOther 
+    this.analysisTableColumns.energy = (this.analysisTableColumns.actualEnergy
+      || this.analysisTableColumns.modeledEnergy
+      || this.analysisTableColumns.adjustedForNormalization
+      || this.analysisTableColumns.adjusted
+      || this.analysisTableColumns.baselineAdjustmentForNormalization
+      || this.analysisTableColumns.baselineAdjustmentForOther
       || this.analysisTableColumns.baselineAdjustment);
   }
 
@@ -184,6 +184,39 @@ export class AnalysisSummaryTableFilterComponent implements OnInit {
     this.analysisTableColumns.predictors.forEach(predictor => {
       predictor.display = this.analysisTableColumns.productionVariables;
     });
+    this.save();
+  }
+
+  setDefault() {
+    this.analysisTableColumns.incrementalImprovement = false;
+    this.analysisTableColumns.SEnPI = false;
+    this.analysisTableColumns.savings = false;
+    this.analysisTableColumns.percentSavingsComparedToBaseline = false;
+    this.analysisTableColumns.yearToDateSavings = false;
+    this.analysisTableColumns.yearToDatePercentSavings = false;
+    this.analysisTableColumns.rollingSavings = false;
+    this.analysisTableColumns.rolling12MonthImprovement = false;
+    this.analysisTableColumns.productionVariables = true;
+    this.analysisTableColumns.energy = true;
+    this.analysisTableColumns.actualEnergy = true;
+    this.analysisTableColumns.modeledEnergy = true;
+    this.analysisTableColumns.adjustedForNormalization = true;
+    this.analysisTableColumns.adjusted = true;
+    this.analysisTableColumns.baselineAdjustmentForNormalization = true;
+    this.analysisTableColumns.baselineAdjustmentForOther = true;
+    this.analysisTableColumns.baselineAdjustment = true;
+    this.analysisTableColumns.totalSavingsPercentImprovement = true;
+    this.analysisTableColumns.annualSavingsPercentImprovement = true;
+    this.analysisTableColumns.adjustmentToBaseline = true;
+    this.analysisTableColumns.cummulativeSavings = true;
+    this.analysisTableColumns.newSavings = true;
+    this.analysisTableColumns.predictors.forEach(predictor => {
+      if (predictor.usedInAnalysis) {
+        predictor.display = true;
+      } else {
+        predictor.display = false;
+      }
+    })
     this.save();
   }
 }

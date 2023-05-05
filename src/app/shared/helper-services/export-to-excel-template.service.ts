@@ -43,8 +43,9 @@ export class ExportToExcelTemplateService {
           let datePipe = new DatePipe('en-us');
           let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
           let accountName: string = account.name;
-
-          a.download = accountName.replaceAll(' ', '-') + "-" + datePipe.transform(date, 'MM-dd-yyyy');
+          accountName = accountName.replaceAll(' ', '-');
+          accountName = accountName.replaceAll('.', '_');
+          a.download = accountName + "-" + datePipe.transform(date, 'MM-dd-yyyy');
           document.body.appendChild(a);
           a.click();
           window.URL.revokeObjectURL(url);

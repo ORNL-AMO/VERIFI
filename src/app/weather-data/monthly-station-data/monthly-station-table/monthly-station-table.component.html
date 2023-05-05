@@ -1,0 +1,58 @@
+<div class="d-flex w-100 justify-content-end pb-2">
+    <app-table-items-dropdown></app-table-items-dropdown>
+</div>
+<table class="table utility-data table-sm table-bordered table-hover">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>% of Day</th>
+            <th>Dry<br> Bulb Temp</th>
+            <th>Heating Degree<br> Days</th>
+            <th>Cooling Degree<br> Days</th>
+        </tr>
+    </thead>
+    <tbody class="table-group-divider">
+        <tr
+            *ngFor="let summaryData of detailedDegreeDays| slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage">
+            <td>
+                {{summaryData.time | date:'short'}}
+            </td>
+            <td>
+                {{summaryData.percentOfDay * 100 | number}}
+            </td>
+            <td>
+                {{summaryData.dryBulbTemp | number}}
+            </td>
+            <td>
+                {{summaryData.heatingDegreeDay | number}}
+            </td>
+            <td>
+                {{summaryData.coolingDegreeDay | number}}
+            </td>
+        </tr>
+    </tbody>
+    <tfoot>
+        <tr>
+            <th>
+                Total
+            </th>
+            <th>
+
+            </th>
+            <th>
+            <th>
+                {{detailedDegreeDays | total: 'heatingDegreeDay' | number}}
+            </th>
+            <th>
+                {{detailedDegreeDays | total: 'coolingDegreeDay' | number}}
+            </th>
+        </tr>
+    </tfoot>
+</table>
+
+
+<div class="d-flex w-100 justify-content-end">
+    <ngb-pagination [collectionSize]="detailedDegreeDays.length" [(page)]="currentPageNumber" [pageSize]="itemsPerPage"
+        [maxSize]="5" [rotate]="true" aria-label="Pagination">
+    </ngb-pagination>
+</div>

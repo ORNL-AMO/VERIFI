@@ -1,0 +1,38 @@
+<table class="table utility-data table-sm table-bordered table-hover">
+    <thead>
+        <tr>
+            <th>Month</th>
+            <th>Heating Degree Days</th>
+            <th>Cooling Degree Days</th>
+        </tr>
+    </thead>
+    <tbody class="table-group-divider">
+        <tr *ngFor="let degreeDay of yearSummaryData">
+            <td>
+                <span *ngIf="degreeDay.hasErrors" class="fa fa-exclamation-circle"></span>
+                <a class="click-link" (click)="gotToMonthSummary(degreeDay.date)">
+                    {{degreeDay.date | date:'MMM. y'}}
+                </a>
+            </td>
+            <td>
+                {{degreeDay.heatingDegreeDays | number}}
+            </td>
+            <td>
+                {{degreeDay.coolingDegreeDays | number}}
+            </td>
+        </tr>
+    </tbody>
+    <tfoot>
+        <tr>
+            <th>
+                Total
+            </th>
+            <th>
+                {{yearSummaryData | total: 'heatingDegreeDays' | number}}
+            </th>
+            <th>
+                {{yearSummaryData | total: 'coolingDegreeDays' | number}}
+            </th>
+        </tr>
+    </tfoot>
+</table>

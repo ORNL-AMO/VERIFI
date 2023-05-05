@@ -1,0 +1,73 @@
+<ng-container *ngIf="weatherStation">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a class="click-link" (click)="goToStations()">Weather Stations</a></li>
+            <li class="breadcrumb-item"><a class="click-link" (click)="goToAnnualData()">{{weatherStation.name}}
+                    ({{weatherStation.lat}},
+                    {{weatherStation.lon}})</a></li>
+            <li class="breadcrumb-item active">
+                {{selectedMonth | date:'MMM. y'}}
+            </li>
+        </ol>
+    </nav>
+    <p>
+        Explore weather stations. Set the zip code and the radius distance from that location to include weather
+        stations.
+    </p>
+    <form>
+        <div class="row">
+            <div class="col-lg-3 col-md-12 col-sm-12">
+                <label class="semibold" for="startDate">Select Month</label>
+                <input id="selectedMonth" class="form-control" type="month" [ngModel]="selectedMonth | date:'yyyy-MM'"
+                    (ngModelChange)="setSelectedMonth($event)" name="selectedMonth" (input)="setDegreeDays()">
+            </div>
+            <div class="col-lg-3 col-md-12 col-sm-12">
+                <label class="semibold" for="heatingTemp">Heating Base Temperature</label>
+                <div class="mb-3 input-group">
+                    <input id="heatingTemp" class="form-control" type="number" [(ngModel)]="heatingTemp"
+                        onfocus="this.select();" name="heatingTemp" (input)="setHeatingBaseTemp()" required>
+                    <!--TODO: Temperature units-->
+                    <span class="input-group-text">
+                        &#8457;
+                    </span>
+                </div>
+                <div class="alert-danger alert" *ngIf="heatingTemp == undefined">
+                    Value Required</div>
+            </div>
+            <div class="col-lg-3 col-md-12 col-sm-12">
+                <label class="semibold" for="coolingTemp">Cooling Base Temperature</label>
+                <div class="mb-3 input-group">
+                    <input id="heatingTemp" class="form-control" type="number" [(ngModel)]="coolingTemp"
+                        onfocus="this.select();" name="coolingTemp" (input)="setCoolingBaseTemp()" required>
+                    <!--TODO: Temperature units-->
+                    <span class="input-group-text">
+                        &#8457;
+                    </span>
+                </div>
+                <div class="alert-danger alert" *ngIf="coolingTemp == undefined">
+                    Value Required</div>
+            </div>
+            <div class="col">
+                <div class="btn-margin">
+                    <button class="btn action-btn" (click)="showApplyToFacility()">Create Facility Degree Days</button>
+                </div>
+            </div>
+        </div>
+    </form>
+    <hr>
+    <div class="row" *ngIf="hasGapsInData">
+        <div class="alert alert-warning text-center">
+            A gap of more then twelve hours was found prior to the reading at {{gapsInDataDate | date:'long'}}. The
+            degree day calculations for this month may not be completely accurate.
+        </div>
+    </div>
+    <div class="row" *ngIf="detailedDegreeDays && detailedDegreeDays.length != 0">
+        <div class="col-lg-12 col-md-12 col-sm-12">
+            <app-monthly-station-graph [detailedDegreeDays]="detailedDegreeDays" [selectedMonth]="selectedMonth"
+                [heatingTemp]="heatingTemp" [coolingTemp]="coolingTemp"></app-monthly-station-graph>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12">
+            <app-monthly-station-table [detailedDegreeDays]="detailedDegreeDays"></app-monthly-station-table>
+        </div>
+    </div>
+</ng-container>

@@ -48,6 +48,7 @@ export class ManageMetersComponent implements OnInit {
   allMetersValid: boolean;
   calanderizeAllOnToggle: 'fullYear' | 'backward' | 'fullMonth' = 'fullMonth';
   hasNoCalanderizationSelection: boolean = false;
+  skipAll: boolean = false;
   constructor(private activatedRoute: ActivatedRoute, private uploadDataService: UploadDataService,
     private editMeterFormService: EditMeterFormService, private router: Router,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService) { }
@@ -176,11 +177,25 @@ export class ManageMetersComponent implements OnInit {
         facilityMeterGroups.push(otherFuelGroup);
       }
 
+      let otherEnergyGroup: IdbUtilityMeterGroup = facilityMeterGroups.find(group => { return group.name == 'Other Energy' });
+      if (!otherEnergyGroup) {
+        otherEnergyGroup = this.utilityMeterGroupDbService.getNewIdbUtilityMeterGroup("Energy", "Other Energy", importFacility.guid, importFacility.accountId);
+        facilityMeterGroups.push(otherEnergyGroup);
+      }
+
       let waterGroup: IdbUtilityMeterGroup = facilityMeterGroups.find(group => { return group.name == 'Water' });
       if (!waterGroup) {
         waterGroup = this.utilityMeterGroupDbService.getNewIdbUtilityMeterGroup("Water", "Water", importFacility.guid, importFacility.accountId);
         facilityMeterGroups.push(waterGroup);
       }
+
+
+      let wasteWaterGroup: IdbUtilityMeterGroup = facilityMeterGroups.find(group => { return group.name == 'Waste Water' });
+      if (!wasteWaterGroup) {
+        wasteWaterGroup = this.utilityMeterGroupDbService.getNewIdbUtilityMeterGroup("Water", "Waste Water", importFacility.guid, importFacility.accountId);
+        facilityMeterGroups.push(wasteWaterGroup);
+      }
+
       let otherGroup: IdbUtilityMeterGroup = facilityMeterGroups.find(group => { return group.name == 'Other' });
       if (!otherGroup) {
         otherGroup = this.utilityMeterGroupDbService.getNewIdbUtilityMeterGroup("Other", "Other (non-energy)", importFacility.guid, importFacility.accountId);
@@ -246,7 +261,7 @@ export class ManageMetersComponent implements OnInit {
           meter.groupId = findGroup.guid;
         } else {
           findGroup = groupOptions.find(group => {
-            return group.name == 'Other';
+            return group.name == 'Other (non-energy)';
           });
           meter.groupId = findGroup.guid;
         }
@@ -262,5 +277,12 @@ export class ManageMetersComponent implements OnInit {
       }
     });
     this.hasNoCalanderizationSelection = missingCalanderization;
+  }
+
+  setSkipAll() {
+    this.fileReference.meters.forEach(meter => {
+      meter.skipImport = this.skipAll;
+    });
+    this.setValidMeters();
   }
 }

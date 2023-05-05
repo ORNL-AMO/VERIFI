@@ -67,7 +67,6 @@ export class FacilityOverviewData {
             return WaterSources.includes(cMeter.meter.source);
         });
         this.waterYearMonthData = getYearlyUsageNumbers(sourceMeters);
-        console.log(this.waterYearMonthData);
     }
 
     //energy

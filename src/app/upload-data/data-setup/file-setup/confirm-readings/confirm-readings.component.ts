@@ -40,6 +40,7 @@ export class ConfirmReadingsComponent implements OnInit {
   paramsSub: Subscription;
   meterDataSummaries: Array<MeterDataSummary>;
   metersIncluded: boolean;
+  skipAll: boolean = false;
   constructor(private activatedRoute: ActivatedRoute, private uploadDataService: UploadDataService,
     private utilityMeterDataService: UtilityMeterDataService,
     private router: Router) { }
@@ -78,7 +79,7 @@ export class ConfirmReadingsComponent implements OnInit {
 
   getFacilityName(facilityId: string): string {
     let facility: IdbFacility = this.fileReference.importFacilities.find(facility => { return facility.guid == facilityId });
-    if(facility){
+    if (facility) {
       return facility.name;
     }
     return;
@@ -158,6 +159,11 @@ export class ConfirmReadingsComponent implements OnInit {
     this.router.navigateByUrl('/upload/data-setup/file-setup/' + this.fileReference.id + '/manage-meters');
   }
 
+  setSkipAll() {
+    this.meterDataSummaries.forEach(summary => {
+      summary.skipExisting = this.skipAll;
+    });
+  }
 }
 
 

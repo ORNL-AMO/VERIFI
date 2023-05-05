@@ -1,12 +1,12 @@
 import { MonthlyAnalysisSummaryData } from "src/app/models/analysis";
-import { CalanderizedMeter, MonthlyData } from "src/app/models/calanderization";
+import { CalanderizedMeter } from "src/app/models/calanderization";
 import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility, IdbPredictorEntry } from "src/app/models/idb";
 import { MonthlyAccountAnalysisDataClass } from "./monthlyAccountAnalysisDataClass";
 import { MonthlyAnalysisSummaryDataClass } from "./monthlyAnalysisSummaryDataClass";
 import { MonthlyFacilityAnalysisClass } from "./monthlyFacilityAnalysisClass";
 import * as _ from 'lodash';
 import { checkAnalysisValue, getMonthlyStartAndEndDate } from "../shared-calculations/calculationsHelpers";
-import { getFiscalYear, getLastBillEntryFromCalanderizedMeterData } from "../shared-calculations/calanderizationFunctions";
+import { getFiscalYear } from "../shared-calculations/calanderizationFunctions";
 
 export class MonthlyAccountAnalysisClass {
 
@@ -17,7 +17,7 @@ export class MonthlyAccountAnalysisClass {
     endDate: Date;
     facilityPredictorEntries: Array<IdbPredictorEntry>;
     baselineYear: number;
-    annualUsageValues: Array<{year: number, usage: number}>
+    annualUsageValues: Array<{ year: number, usage: number }>
     constructor(
         accountAnalysisItem: IdbAccountAnalysisItem,
         account: IdbAccount,
@@ -27,21 +27,20 @@ export class MonthlyAccountAnalysisClass {
         allAccountAnalysisItems: Array<IdbAnalysisItem>,
         calculateAllMonthlyData: boolean
     ) {
-        this.setStartAndEndDate(account, accountAnalysisItem, calanderizedMeters, calculateAllMonthlyData);
-        this.setBaselineYear(account);
         this.setMonthlyFacilityAnlysisClasses(accountAnalysisItem, calanderizedMeters, accountFacilities, accountPredictorEntries, allAccountAnalysisItems, calculateAllMonthlyData);
+        this.setStartAndEndDate(account, accountAnalysisItem, calculateAllMonthlyData);
+        this.setBaselineYear(account);
         this.setAnnualUsageValues();
         this.setAccountMonthSummaries(account, accountAnalysisItem);
     }
 
-    setStartAndEndDate(account: IdbAccount, analysisItem: IdbAccountAnalysisItem, calanderizedMeters: Array<CalanderizedMeter>, calculateAllMonthlyData: boolean) {
+    setStartAndEndDate(account: IdbAccount, analysisItem: IdbAccountAnalysisItem, calculateAllMonthlyData: boolean) {
         let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = getMonthlyStartAndEndDate(account, analysisItem);
         this.startDate = monthlyStartAndEndDate.baselineDate;
         if (calculateAllMonthlyData) {
-            let lastBill: MonthlyData = getLastBillEntryFromCalanderizedMeterData(calanderizedMeters);
-            this.endDate = new Date(lastBill.date);
-            this.endDate.setMonth(this.endDate.getMonth() + 1);
-            this.endDate.setDate(1);
+            let endDates: Array<Date> = this.monthlyFacilityAnalysisClasses.map(monthFacilityAnalysisClass => { return monthFacilityAnalysisClass.endDate });
+            let minEndDate: Date = _.min(endDates);
+            this.endDate = new Date(minEndDate);
         } else {
             this.endDate = monthlyStartAndEndDate.endDate;
         }
@@ -77,12 +76,12 @@ export class MonthlyAccountAnalysisClass {
         this.allAccountAnalysisData = this.monthlyFacilityAnalysisClasses.flatMap(analysisClass => { return analysisClass.allFacilityAnalysisData });
     }
 
-    setAnnualUsageValues(){
+    setAnnualUsageValues() {
         this.annualUsageValues = new Array();
         for (let year = this.baselineYear + 1; year <= this.endDate.getUTCFullYear(); year++) {
-          let yearMeterData: Array<MonthlyAnalysisSummaryDataClass> = this.allAccountAnalysisData.filter(data => { return data.fiscalYear == year });
-          let totalUsage: number = _.sumBy(yearMeterData, 'energyUse');
-          this.annualUsageValues.push({ year: year, usage: totalUsage });
+            let yearMeterData: Array<MonthlyAnalysisSummaryDataClass> = this.allAccountAnalysisData.filter(data => { return data.fiscalYear == year });
+            let totalUsage: number = _.sumBy(yearMeterData, 'energyUse');
+            this.annualUsageValues.push({ year: year, usage: totalUsage });
         }
     }
 
@@ -106,7 +105,7 @@ export class MonthlyAccountAnalysisClass {
             monthDate = new Date(monthDate.getUTCFullYear(), nextMonth, 1);
         }
     }
-    
+
     getMonthlyAnalysisSummaryData(): Array<MonthlyAnalysisSummaryData> {
         return this.accountMonthSummaries.map(summaryDataItem => {
             return {

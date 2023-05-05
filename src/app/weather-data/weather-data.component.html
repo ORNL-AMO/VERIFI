@@ -1,0 +1,49 @@
+<div class="upload-banner banner d-flex justify-content-between w-100">
+    <div class="banner-title">
+        <h3><span class="fa fa-temperature-half"></span> Weather Data</h3>
+    </div>
+    <div class="help-toggle">
+        <a (click)="toggleHelpPanel()"><span class="fa fa-circle-question"></span></a>
+    </div>
+</div>
+
+<div class="wrapper main-content">
+    <h4>
+        Weather Data Used by VERIFI
+    </h4>
+    <p>
+        This page provides a detailed look of the weather data available for use by VERIFI. The weather data is pulled
+        from <a href="https://www.ncei.noaa.gov/" target="_blank">The National Centers for Environmental
+            Information</a>. If quality
+        data is found VERIFI can automatically calculate heating and cooling degree days. The calculated degree days can
+        be used as predictor data for analysis.
+    </p>
+    <p>
+        For much more information on all things degree days, visit <a href="https://www.degreedays.net/"
+            target="_blank">https://www.degreedays.net/</a>
+    </p>
+    <hr>
+    <router-outlet></router-outlet>
+</div>
+
+<div [ngClass]="{'windowOverlay': applyToFacility}"></div>
+<div class="popup" [class.open]="applyToFacility">
+    <div class="popup-header">Create Degree Day Predictors
+        <button class="item-right" (click)="cancelApplyToFacility()">x</button>
+    </div>
+    <div class="popup-body">
+        <p>Select the facility to create new heating and cooling degree day predictors using the selected weather
+            station and
+            temperature thresholds.</p>
+        <form>
+            <select class="form-select" name="selectedFacility" [(ngModel)]="selectedFacility">
+                <option *ngFor="let facility of facilities" [ngValue]="facility">{{facility.name}}</option>
+            </select>
+        </form>
+    </div>
+    <div class="saveCancel popup-footer text-end">
+        <button class="btn btn-secondary" (click)="cancelApplyToFacility()">Cancel</button>
+        <button class="btn action-btn" (click)="confirmCreate()" [disabled]="!selectedFacility">Create
+            Predictors</button>
+    </div>
+</div>

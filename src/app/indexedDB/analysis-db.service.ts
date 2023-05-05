@@ -198,8 +198,9 @@ export class AnalysisDbService {
   }
 
 
-  async updateAnalysisPredictors(predictorEntries: Array<PredictorData>) {
-    let facilityAnalysisItems: Array<IdbAnalysisItem> = this.facilityAnalysisItems.getValue();
+  async updateAnalysisPredictors(predictorEntries: Array<PredictorData>, facilityId: string) {
+    let accountAnalysisItems: Array<IdbAnalysisItem> = this.accountAnalysisItems.getValue();
+    let facilityAnalysisItems: Array<IdbAnalysisItem> = accountAnalysisItems.filter(item => {return item.facilityId == facilityId});
     for (let index = 0; index < facilityAnalysisItems.length; index++) {
       let analysisItem: IdbAnalysisItem = facilityAnalysisItems[index];
       analysisItem.groups.forEach(group => {
@@ -221,9 +222,6 @@ export class AnalysisDbService {
         predictor.name = checkExists.name;
         predictor.unit = checkExists.unit;
         predictor.production = checkExists.production;
-        if (predictor.productionInAnalysis && !checkExists.production) {
-          predictor.productionInAnalysis = false;
-        }
       }
     });
     //remove necessary predictors

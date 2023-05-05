@@ -33,6 +33,7 @@ export class SetupFacilitiesComponent implements OnInit {
   hasTemplate: boolean;
   unitsClass: 'bg-danger' | 'bg-success' | 'bg-warning';
   reportingClass: 'bg-danger' | 'bg-success' | 'bg-warning';
+  dragOver: boolean = false;
   constructor(private setupWizardService: SetupWizardService, private sharedDataService: SharedDataService,
     private router: Router, private settingsFormService: SettingsFormsService,
     private uploadDataService: UploadDataService,
@@ -161,4 +162,14 @@ export class SetupFacilitiesComponent implements OnInit {
   resetOption(){
     this.setupWizardService.facilityTemplateWorkbook.next(undefined);
   }
+
+  
+  setDragEnter(){
+    this.dragOver = true;
+  }
+
+  setDragOut(){
+    this.dragOver = false;
+  }
+
 }

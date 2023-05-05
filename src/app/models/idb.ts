@@ -231,9 +231,22 @@ export interface PredictorData {
     importWizardName?: string,
     production?: boolean,
     productionInAnalysis?: boolean,
-    regressionCoefficient?: number
+    regressionCoefficient?: number,
+    predictorType: PredictorType,
+    referencePredictorId?: string,
+    conversionType?: string,
+    convertFrom?: string,
+    convertTo?: string,
+    weatherDataType?: WeatherDataType,
+    weatherStationId?: string,
+    weatherStationName?: string,
+    heatingBaseTemperature?: number,
+    coolingBaseTemperature?: number,
+    weatherDataWarning?: boolean
 }
 
+export type PredictorType = 'Standard' | 'Conversion' | 'Math' | 'Weather'
+export type WeatherDataType = 'HDD' | 'CDD'
 
 export interface IdbOverviewReportOptions {
     id?: number,
@@ -368,7 +381,7 @@ export interface IdbCustomEmissionsItem {
 
 
 
-export type AnalysisType = 'absoluteEnergyConsumption' | 'energyIntensity' | 'modifiedEnergyIntensity' | 'regression';
+export type AnalysisType = 'absoluteEnergyConsumption' | 'energyIntensity' | 'modifiedEnergyIntensity' | 'regression' | 'skip';
 export type MeterSource = "Electricity" | "Natural Gas" | "Other Fuels" | "Other Energy" | "Water" | "Waste Water" | "Other Utility";
 export type MeterPhase = "Solid" | "Liquid" | "Gas";
 export type ReportType = "betterPlants" | 'dataOverview';

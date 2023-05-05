@@ -400,8 +400,7 @@ export class CalanderizationService {
     // Discard the time and time-zone information.
     const utc1 = Date.UTC(firstDate.getFullYear(), firstDate.getMonth(), firstDate.getDate());
     const utc2 = Date.UTC(secondDate.getFullYear(), secondDate.getMonth(), secondDate.getDate());
-
-    return Math.floor((utc2 - utc1) / _MS_PER_DAY);
+    return Math.round((utc2 - utc1) / _MS_PER_DAY);
   }
 
   getLastBillEntry(facilityMeters: Array<IdbUtilityMeter>, inAccount: boolean, reportOptions?: ReportOptions): MonthlyData {

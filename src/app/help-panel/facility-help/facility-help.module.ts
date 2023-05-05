@@ -20,6 +20,10 @@ import { FacilityAnalysisSetupHelpComponent } from './facility-analysis-help/fac
 import { GroupAnalysisHelpComponent } from './facility-analysis-help/group-analysis-help/group-analysis-help.component';
 import { FacilityAnalysisResultsHelpComponent } from './facility-analysis-help/facility-analysis-results-help/facility-analysis-results-help.component';
 import { AccountAnalysisInFacilityHelpComponent } from './facility-analysis-help/account-analysis-in-facility-help/account-analysis-in-facility-help.component';
+import { ManagePredictorsHelpComponent } from './facility-utility-help/predictors-data-help/manage-predictors-help/manage-predictors-help.component';
+import { PredictorEntriesHelpComponent } from './facility-utility-help/predictors-data-help/predictor-entries-help/predictor-entries-help.component';
+import { PredictorFormHelpComponent } from './facility-utility-help/predictors-data-help/predictor-form-help/predictor-form-help.component';
+import { PredictorEntryFormHelpComponent } from './facility-utility-help/predictors-data-help/predictor-entry-form-help/predictor-entry-form-help.component';
 
 
 
@@ -44,7 +48,11 @@ import { AccountAnalysisInFacilityHelpComponent } from './facility-analysis-help
     FacilityAnalysisSetupHelpComponent,
     GroupAnalysisHelpComponent,
     FacilityAnalysisResultsHelpComponent,
-    AccountAnalysisInFacilityHelpComponent
+    AccountAnalysisInFacilityHelpComponent,
+    ManagePredictorsHelpComponent,
+    PredictorEntriesHelpComponent,
+    PredictorFormHelpComponent,
+    PredictorEntryFormHelpComponent
   ],
   imports: [
     CommonModule
