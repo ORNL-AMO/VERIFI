@@ -14,6 +14,7 @@ import { UtilityMeterDatadbService } from './indexedDB/utilityMeterData-db.servi
 import { UtilityMeterGroupdbService } from './indexedDB/utilityMeterGroup-db.service';
 import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport, IdbAnalysisItem, IdbCustomEmissionsItem, IdbFacility, IdbOverviewReportOptions, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from './models/idb';
 import { EGridService } from './shared/helper-services/e-grid.service';
+import { firstValueFrom } from 'rxjs';
 
 // declare ga as a function to access the JS code in TS
 declare let gtag: Function;
@@ -62,7 +63,7 @@ export class AppComponent {
 
   async initializeData() {
     try {
-      let accounts: Array<IdbAccount> = await this.accountDbService.getAll().toPromise();
+      let accounts: Array<IdbAccount> = await firstValueFrom(this.accountDbService.getAll());
       this.accountDbService.allAccounts.next(accounts);
       let localStorageAccountId: number = this.accountDbService.getInitialAccount();
       let account: IdbAccount;
@@ -86,7 +87,7 @@ export class AppComponent {
         await this.initializeCustomEmissions(account);
         let updatedAccount: { account: IdbAccount, isChanged: boolean } = this.updateDbEntryService.updateAccount(account);
         if (updatedAccount.isChanged) {
-          await this.accountDbService.updateWithObservable(updatedAccount.account).toPromise();
+          await firstValueFrom(this.accountDbService.updateWithObservable(updatedAccount.account));
           this.accountDbService.selectedAccount.next(updatedAccount.account);
         } else {
           this.accountDbService.selectedAccount.next(account);
@@ -107,7 +108,7 @@ export class AppComponent {
   async initializeFacilities(account: IdbAccount) {
     this.loadingMessage = "Loading Facilities..";
     //set account facilities
-    let accountFacilites: Array<IdbFacility> = await this.facilityDbService.getAllByIndexRange('accountId', account.guid).toPromise();
+    let accountFacilites: Array<IdbFacility> = await firstValueFrom(this.facilityDbService.getAllByIndexRange('accountId', account.guid));
     this.facilityDbService.accountFacilities.next(accountFacilites);
     let localStorageFacilityId: number = this.facilityDbService.getInitialFacility();
     if (localStorageFacilityId) {
@@ -119,7 +120,7 @@ export class AppComponent {
   async initializeAccountAnalysisItems(account: IdbAccount) {
     //set account analysis
     this.loadingMessage = "Loading Analysis Items..";
-    let accountAnalysisItems: Array<IdbAccountAnalysisItem> = await this.accountAnalysisDbService.getAllByIndexRange('accountId', account.guid).toPromise();
+    let accountAnalysisItems: Array<IdbAccountAnalysisItem> = await firstValueFrom(this.accountAnalysisDbService.getAllByIndexRange('accountId', account.guid));
     this.accountAnalysisDbService.accountAnalysisItems.next(accountAnalysisItems);
     let localStorageAccountAnalysisId: number = this.accountAnalysisDbService.getInitialAnalysisItem();
     if (localStorageAccountAnalysisId) {
@@ -130,12 +131,12 @@ export class AppComponent {
 
   async initializeFacilityAnalysisItems(account: IdbAccount) {
     //set analysis
-    let analysisItems: Array<IdbAnalysisItem> = await this.analysisDbService.getAllByIndexRange('accountId', account.guid).toPromise();
+    let analysisItems: Array<IdbAnalysisItem> = await firstValueFrom(this.analysisDbService.getAllByIndexRange('accountId', account.guid));
     for (let i = 0; i < analysisItems.length; i++) {
       let updateAnalysis: { analysisItem: IdbAnalysisItem, isChanged: boolean } = this.updateDbEntryService.updateAnalysis(analysisItems[i]);
       if (updateAnalysis.isChanged) {
         analysisItems[i] = updateAnalysis.analysisItem;
-        await this.analysisDbService.updateWithObservable(analysisItems[i]).toPromise();
+        await firstValueFrom(this.analysisDbService.updateWithObservable(analysisItems[i]));
       };
     }
     this.analysisDbService.accountAnalysisItems.next(analysisItems);
@@ -146,24 +147,9 @@ export class AppComponent {
     }
   }
 
-  // async initializeReports(account: IdbAccount) {
-  //   //set overview reports
-  //   this.loadingMessage = "Loading Reports..";
-  //   let overviewReportOptions: Array<IdbOverviewReportOptions> = await this.overviewReportOptionsDbService.getAllByIndexRange('accountId', account.guid).toPromise();
-  //   let templates: Array<IdbOverviewReportOptions> = overviewReportOptions.filter(option => { return option.type == 'template' });
-  //   let nonTemplates: Array<IdbOverviewReportOptions> = overviewReportOptions.filter(option => { return option.type != 'template' });
-  //   this.overviewReportOptionsDbService.accountOverviewReportOptions.next(nonTemplates);
-  //   this.overviewReportOptionsDbService.overviewReportOptionsTemplates.next(templates);
-  //   let overviewReportId: number = this.overviewReportOptionsDbService.getInitialReport();
-  //   if (overviewReportId) {
-  //     let reportOptions: IdbOverviewReportOptions = overviewReportOptions.find(item => { return item.id == overviewReportId });
-  //     this.overviewReportOptionsDbService.selectedOverviewReportOptions.next(reportOptions);
-  //   }
-  // }
-
   async initializeAccountReports(account: IdbAccount) {
     this.loadingMessage = "Loading Reports 2.0...."
-    let overviewReportOptions: Array<IdbOverviewReportOptions> = await this.overviewReportOptionsDbService.getAllByIndexRange('accountId', account.guid).toPromise();
+    let overviewReportOptions: Array<IdbOverviewReportOptions> = await firstValueFrom(this.overviewReportOptionsDbService.getAllByIndexRange('accountId', account.guid));
     for (let i = 0; i < overviewReportOptions.length; i++) {
       let overviewReport: IdbOverviewReportOptions = overviewReportOptions[i];
       if (overviewReport.type == 'report' && overviewReport.reportOptionsType == 'betterPlants') {
@@ -176,11 +162,11 @@ export class AppComponent {
         newReport.betterPlantsReportSetup.baselineAdjustmentNotes = overviewReport.reportOptions.baselineAdjustmentNotes;
         newReport.betterPlantsReportSetup.includeFacilityNames = overviewReport.reportOptions.includeFacilityNames;
         newReport.betterPlantsReportSetup.modificationNotes = overviewReport.reportOptions.modificationNotes;
-        await this.accountReportDbService.addWithObservable(newReport).toPromise();
+        await firstValueFrom(this.accountReportDbService.addWithObservable(newReport));
       }
-      await this.overviewReportOptionsDbService.deleteWithObservable(overviewReport.id).toPromise();
+      await firstValueFrom(this.overviewReportOptionsDbService.deleteWithObservable(overviewReport.id));
     }
-    let accountReports: Array<IdbAccountReport> = await this.accountReportDbService.getAllByIndexRange('accountId', account.guid).toPromise();
+    let accountReports: Array<IdbAccountReport> = await firstValueFrom(this.accountReportDbService.getAllByIndexRange('accountId', account.guid));
     this.accountReportDbService.accountReports.next(accountReports);
     let accountReportId: number = this.accountReportDbService.getInitialReport();
     if (accountReportId) {
@@ -194,38 +180,38 @@ export class AppComponent {
   async initializePredictors(account: IdbAccount) {
     //set predictors
     this.loadingMessage = "Loading Predictors..";
-    let predictors: Array<IdbPredictorEntry> = await this.predictorsDbService.getAllByIndexRange('accountId', account.guid).toPromise();
+    let predictors: Array<IdbPredictorEntry> = await firstValueFrom(this.predictorsDbService.getAllByIndexRange('accountId', account.guid));
     this.predictorsDbService.accountPredictorEntries.next(predictors);
   }
 
   async initializeMeters(account: IdbAccount) {
     //set meters
     this.loadingMessage = "Loading Meters..";
-    let meters: Array<IdbUtilityMeter> = await this.utilityMeterDbService.getAllByIndexRange('accountId', account.guid).toPromise();
+    let meters: Array<IdbUtilityMeter> = await firstValueFrom(this.utilityMeterDbService.getAllByIndexRange('accountId', account.guid));
     this.utilityMeterDbService.accountMeters.next(meters);
   }
 
   async initializeMeterData(account: IdbAccount) {
     //set meter data
     this.loadingMessage = "Loading Meter Data..";
-    let meterData: Array<IdbUtilityMeterData> = await this.utilityMeterDataDbService.getAllByIndexRange('accountId', account.guid).toPromise();
+    let meterData: Array<IdbUtilityMeterData> = await firstValueFrom(this.utilityMeterDataDbService.getAllByIndexRange('accountId', account.guid));
     this.utilityMeterDataDbService.accountMeterData.next(meterData)
   }
 
   async initilizeMeterGroups(account: IdbAccount) {
     //set meter groups
     this.loadingMessage = "Loading Groups..";
-    let meterGroups: Array<IdbUtilityMeterGroup> = await this.utilityMeterGroupDbService.getAllByIndexRange('accountId', account.guid).toPromise();
+    let meterGroups: Array<IdbUtilityMeterGroup> = await firstValueFrom(this.utilityMeterGroupDbService.getAllByIndexRange('accountId', account.guid));
     this.utilityMeterGroupDbService.accountMeterGroups.next(meterGroups);
   }
 
 
   async initializeCustomEmissions(account: IdbAccount) {
     this.loadingMessage = 'Loading Emissions Rates...';
-    let customEmissionsItems: Array<IdbCustomEmissionsItem> = await this.customEmissionsDbService.getAllByIndexRange('accountId', account.guid).toPromise();
+    let customEmissionsItems: Array<IdbCustomEmissionsItem> = await firstValueFrom(this.customEmissionsDbService.getAllByIndexRange('accountId', account.guid));
     if (customEmissionsItems.length == 0) {
       let uSAverageItem: IdbCustomEmissionsItem = this.customEmissionsDbService.getUSAverage(account);
-      uSAverageItem = await this.customEmissionsDbService.addWithObservable(uSAverageItem).toPromise();
+      uSAverageItem = await firstValueFrom(this.customEmissionsDbService.addWithObservable(uSAverageItem));
       customEmissionsItems.push(uSAverageItem);
     }
     await this.eGridService.parseEGridData();

@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Subscription, firstValueFrom } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { UtilityMeterDataService } from 'src/app/facility/utility-data/energy-consumption/utility-meter-data/utility-meter-data.service';
@@ -66,9 +66,9 @@ export class ConfirmAndSubmitComponent implements OnInit {
     for (let i = 0; i < this.fileReference.importFacilities.length; i++) {
       let facility: IdbFacility = this.fileReference.importFacilities[i];
       if (facility.id) {
-        await this.facilityDbService.updateWithObservable(facility).toPromise();
+        await firstValueFrom(this.facilityDbService.updateWithObservable(facility));
       } else {
-        await this.facilityDbService.addWithObservable(facility).toPromise();
+        await firstValueFrom(this.facilityDbService.addWithObservable(facility));
       }
     }
 
@@ -77,17 +77,17 @@ export class ConfirmAndSubmitComponent implements OnInit {
       let meter: IdbUtilityMeter = this.fileReference.meters[i];
       if (meter.id) {
         if (!meter.skipImport) {
-          await this.utilityMeterDbService.updateWithObservable(meter).toPromise();
+          await firstValueFrom(this.utilityMeterDbService.updateWithObservable(meter));
         }
       } else {
-        await this.utilityMeterDbService.addWithObservable(meter).toPromise();
+        await firstValueFrom(this.utilityMeterDbService.addWithObservable(meter));
       }
     }
 
     this.loadingService.setLoadingMessage('Creating Meter Groups..');
     for (let i = 0; i < this.fileReference.newMeterGroups.length; i++) {
       let meterGroup: IdbUtilityMeterGroup = this.fileReference.newMeterGroups[i];
-      await this.utilityMeterGroupDbService.addWithObservable(meterGroup).toPromise();
+      await firstValueFrom(this.utilityMeterGroupDbService.addWithObservable(meterGroup));
     }
 
     this.loadingService.setLoadingMessage('Uploading Meter Data...');
@@ -113,10 +113,10 @@ export class ConfirmAndSubmitComponent implements OnInit {
             }
           }
           if (!skipMeterData) {
-            await this.utilityMeterDataDbService.updateWithObservable(meterData).toPromise();
+            await firstValueFrom(this.utilityMeterDataDbService.updateWithObservable(meterData));
           }
         } else {
-          await this.utilityMeterDataDbService.addWithObservable(meterData).toPromise();
+          await firstValueFrom(this.utilityMeterDataDbService.addWithObservable(meterData));
         }
       }
     }
@@ -133,10 +133,10 @@ export class ConfirmAndSubmitComponent implements OnInit {
           }
         }
         if (!skipPredictorData) {
-          await this.predictorDbService.updateWithObservable(predictorEntry).toPromise();
+          await firstValueFrom(this.predictorDbService.updateWithObservable(predictorEntry));
         }
       } else {
-        await this.predictorDbService.addWithObservable(predictorEntry).toPromise();
+        await firstValueFrom(this.predictorDbService.addWithObservable(predictorEntry));
       }
     }
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();

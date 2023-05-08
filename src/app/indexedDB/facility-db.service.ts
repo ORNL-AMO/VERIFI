@@ -1,7 +1,7 @@
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { Injectable } from '@angular/core';
 import { IdbAccount, IdbFacility } from '../models/idb';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
 import { LocalStorageService } from 'ngx-webstorage';
 import { AccountdbService } from './account-db.service';
 
@@ -73,7 +73,7 @@ export class FacilitydbService {
 
     async deleteFacilitiesAsync(accountFacilities: Array<IdbFacility>) {
         for (let i = 0; i < accountFacilities.length; i++) {
-            await this.deleteWithObservable(accountFacilities[i].id).toPromise();
+            await firstValueFrom(this.deleteWithObservable(accountFacilities[i].id));
         }
     }
 

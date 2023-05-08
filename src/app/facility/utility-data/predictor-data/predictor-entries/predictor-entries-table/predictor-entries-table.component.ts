@@ -1,6 +1,6 @@
 import { Component, ElementRef, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Subscription, firstValueFrom } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
@@ -97,7 +97,7 @@ export class PredictorEntriesTableComponent {
   async confirmDeletePredictorEntry() {
     this.loadingService.setLoadingMessage('Deleting Predictor Entry...');
     this.loadingService.setLoadingStatus(true);
-    await this.predictorsDbService.deleteIndexWithObservable(this.predictorEntryToDelete.id).toPromise();
+    await firstValueFrom(this.predictorsDbService.deleteIndexWithObservable(this.predictorEntryToDelete.id));
     this.cancelDeletePredictorEntry();
     await this.finishDelete();
   }
@@ -169,7 +169,7 @@ export class PredictorEntriesTableComponent {
       }
     })
     for (let index = 0; index < checkedItems.length; index++) {
-      await this.predictorsDbService.deleteIndexWithObservable(checkedItems[index].id).toPromise();
+      await firstValueFrom(this.predictorsDbService.deleteIndexWithObservable(checkedItems[index].id));
     }
 
     this.allChecked = false;
@@ -179,7 +179,7 @@ export class PredictorEntriesTableComponent {
 
   async finishDelete() {
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    let accountPredictors: Array<IdbPredictorEntry> = await this.predictorsDbService.getAllByIndexRange("accountId", selectedFacility.accountId).toPromise();
+    let accountPredictors: Array<IdbPredictorEntry> = await firstValueFrom(this.predictorsDbService.getAllByIndexRange("accountId", selectedFacility.accountId));
     this.predictorsDbService.accountPredictorEntries.next(accountPredictors);
     let facilityPredictors: Array<IdbPredictorEntry> = accountPredictors.filter(predictor => { return predictor.facilityId == selectedFacility.guid });
     this.predictorsDbService.facilityPredictorEntries.next(facilityPredictors);

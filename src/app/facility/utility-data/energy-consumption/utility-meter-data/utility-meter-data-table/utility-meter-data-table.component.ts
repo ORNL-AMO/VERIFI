@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Subscription, firstValueFrom } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
@@ -87,8 +87,9 @@ export class UtilityMeterDataTableComponent implements OnInit {
         meterDataItemsToDelete.push(dataItem);
       }
     });
+    //TODO: bulk delete indexed db call
     for (let index = 0; index < meterDataItemsToDelete.length; index++) {
-      await this.utilityMeterDataDbService.deleteWithObservable(meterDataItemsToDelete[index].id).toPromise();
+      await firstValueFrom(this.utilityMeterDataDbService.deleteWithObservable(meterDataItemsToDelete[index].id));
     }
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
@@ -113,10 +114,13 @@ export class UtilityMeterDataTableComponent implements OnInit {
     this.loadingService.setLoadingMessage("Deleting Meter Data...");
     this.loadingService.setLoadingStatus(true);
     this.showIndividualDelete = false;
-    await this.utilityMeterDataDbService.deleteWithObservable(this.meterDataToDelete.id).toPromise();
+    await firstValueFrom(this.utilityMeterDataDbService.deleteWithObservable(this.meterDataToDelete.id));
+    this.loadingService.setLoadingMessage("Meter Data Deleted...");
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    this.loadingService.setLoadingMessage("Setting Meter Data...");
     await this.dbChangesService.setMeterData(selectedAccount, selectedFacility);
+    this.loadingService.setLoadingMessage("Meter Data Set...");
     this.loadingService.setLoadingStatus(false);
     this.toastNoticationService.showToast("Meter Data Deleted!", undefined, undefined, false, "alert-success");
     this.cancelDelete();

@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
-import { Subscription } from 'rxjs';
+import { Subscription, firstValueFrom } from 'rxjs';
 import { Router } from '@angular/router';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
@@ -72,7 +72,7 @@ export class CreateReportModalComponent {
     } else if (this.router.url.includes('account/analysis')) {
       navigateToStr = 'account/reports/better-plants-report';
     }
-    let addedReport: IdbAccountReport = await this.accountReportDbService.addWithObservable(this.accountReport).toPromise();
+    let addedReport: IdbAccountReport = await firstValueFrom(this.accountReportDbService.addWithObservable(this.accountReport));
     await this.dbChangesService.setAccountReports(account);
     this.accountReportDbService.selectedReport.next(addedReport);
     this.toastNotificationService.showToast('Report Created', undefined, undefined, false, "alert-success");

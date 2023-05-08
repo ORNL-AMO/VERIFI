@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Subscription, firstValueFrom } from 'rxjs';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
@@ -53,7 +53,7 @@ export class BetterPlantsSetupComponent {
     this.isFormChange = true;
     let selectedReport: IdbAccountReport = this.accountReportDbService.selectedReport.getValue()
     selectedReport.betterPlantsReportSetup = this.accountReportsService.updateBetterPlantsReportFromForm(selectedReport.betterPlantsReportSetup, this.betterPlantsReportForm);
-    await this.accountReportDbService.updateWithObservable(selectedReport).toPromise();
+    await firstValueFrom(this.accountReportDbService.updateWithObservable(selectedReport));
     await this.dbChangesService.setAccountReports(this.account);
     this.accountReportDbService.selectedReport.next(selectedReport);
   }

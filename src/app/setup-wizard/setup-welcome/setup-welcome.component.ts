@@ -6,6 +6,7 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { IdbAccount } from 'src/app/models/idb';
 import { BackupDataService, BackupFile } from 'src/app/shared/helper-services/backup-data.service';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-setup-welcome',
@@ -39,7 +40,7 @@ export class SetupWelcomeComponent implements OnInit {
           let newAccount: IdbAccount = await this.backupDataService.importAccountBackupFile(tmpBackupFile);
           await this.dbChangesService.updateAccount(newAccount);
           await this.dbChangesService.selectAccount(newAccount);
-          let allAccounts: Array<IdbAccount> = await this.accountDbService.getAll().toPromise();
+          let allAccounts: Array<IdbAccount> = await firstValueFrom(this.accountDbService.getAll());
           this.accountDbService.allAccounts.next(allAccounts);
           await this.dbChangesService.selectAccount(newAccount);
           this.loadingService.setLoadingStatus(false);

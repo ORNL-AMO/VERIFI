@@ -9,6 +9,7 @@ import { AccountAnalysisService } from '../account-analysis.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-account-analysis-setup',
@@ -41,7 +42,7 @@ export class AccountAnalysisSetupComponent implements OnInit {
   }
 
   async saveItem() {
-    await this.accountAnalysisDbService.updateWithObservable(this.analysisItem).toPromise();
+    await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(this.analysisItem));
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.setAccountAnalysisItems(account);
     this.accountAnalysisDbService.selectedAnalysisItem.next(this.analysisItem);

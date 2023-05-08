@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { LocalStorageService } from 'ngx-webstorage';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
 import { IdbAccount, IdbAccountAnalysisItem, IdbFacility } from '../models/idb';
 import { AccountdbService } from './account-db.service';
 import { FacilitydbService } from './facility-db.service';
@@ -113,7 +113,7 @@ export class AccountAnalysisDbService {
         item.analysisItemId = analysisItemId;
       }
     });
-    await this.updateWithObservable(analysiItem).toPromise();
+    await firstValueFrom(this.updateWithObservable(analysiItem));
     this.selectedAnalysisItem.next(analysiItem);
   }
 }

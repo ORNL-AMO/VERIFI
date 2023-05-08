@@ -1,7 +1,7 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormGroup, NumberValueAccessor } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Subscription, firstValueFrom } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
@@ -109,22 +109,22 @@ export class UtilityMetersTableComponent implements OnInit {
     this.loadingService.setLoadingMessage('Deleteing Meters and Data...')
     this.loadingService.setLoadingStatus(true);
     //delete meter
-    await this.utilityMeterdbService.deleteIndexWithObservable(deleteMeterId).toPromise();
+    await firstValueFrom(this.utilityMeterdbService.deleteIndexWithObservable(deleteMeterId));
 
 
     //delete meter data
-    let meterData: Array<IdbUtilityMeterData> = await this.utilityMeterDatadbService.getAllByIndexRange('meterId', deleteMeterGuid).toPromise();
+    let meterData: Array<IdbUtilityMeterData> = await firstValueFrom(this.utilityMeterDatadbService.getAllByIndexRange('meterId', deleteMeterGuid));
     for (let index = 0; index < meterData.length; index++) {
-      await this.utilityMeterDatadbService.deleteWithObservable(meterData[index].id).toPromise();
+      await firstValueFrom(this.utilityMeterDatadbService.deleteWithObservable(meterData[index].id));
     }
     let selectedFacility: IdbFacility = this.facilitydbService.selectedFacility.getValue();
     //set meters
-    let accountMeters: Array<IdbUtilityMeter> = await this.utilityMeterdbService.getAllByIndexRange("accountId", selectedFacility.accountId).toPromise();
+    let accountMeters: Array<IdbUtilityMeter> = await firstValueFrom(this.utilityMeterdbService.getAllByIndexRange("accountId", selectedFacility.accountId));
     this.utilityMeterdbService.accountMeters.next(accountMeters);
     let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == selectedFacility.guid });
     this.utilityMeterdbService.facilityMeters.next(facilityMeters);
     //set meter data
-    let accountMeterData: Array<IdbUtilityMeterData> = await this.utilityMeterDatadbService.getAllByIndexRange("accountId", selectedFacility.accountId).toPromise();
+    let accountMeterData: Array<IdbUtilityMeterData> = await firstValueFrom(this.utilityMeterDatadbService.getAllByIndexRange("accountId", selectedFacility.accountId));
     this.utilityMeterDatadbService.accountMeterData.next(accountMeterData);
     let facilityMeterData: Array<IdbUtilityMeterData> = accountMeterData.filter(meterData => { return meterData.facilityId == selectedFacility.guid });
     this.utilityMeterDatadbService.facilityMeterData.next(facilityMeterData);
@@ -160,7 +160,7 @@ export class UtilityMetersTableComponent implements OnInit {
     delete copyMeter.id;
     copyMeter.guid = Math.random().toString(36).substr(2, 9);
     copyMeter.name = copyMeter.name + ' (copy)';
-    copyMeter = await this.utilityMeterdbService.addWithObservable(copyMeter).toPromise();
+    copyMeter = await firstValueFrom(this.utilityMeterdbService.addWithObservable(copyMeter));
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let facility: IdbFacility = this.facilitydbService.selectedFacility.getValue();
     await this.dbChangesService.setMeters(account, facility);

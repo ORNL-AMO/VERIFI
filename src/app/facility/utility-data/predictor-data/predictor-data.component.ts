@@ -1,6 +1,6 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Subscription, firstValueFrom } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { IdbFacility, IdbPredictorEntry, PredictorData } from 'src/app/models/idb';
@@ -85,7 +85,7 @@ export class PredictorDataComponent implements OnInit {
   }
 
   async confirmDeletePredictorEntry() {
-    await this.predictorsDbService.deleteIndexWithObservable(this.predictorEntryToDelete.id).toPromise();
+    await firstValueFrom(this.predictorsDbService.deleteIndexWithObservable(this.predictorEntryToDelete.id));
     this.cancelDeletePredictorEntry();
     await this.finishDelete();
   }
@@ -178,7 +178,7 @@ export class PredictorDataComponent implements OnInit {
       }
     })
     for (let index = 0; index < checkedItems.length; index++) {
-      await this.predictorsDbService.deleteIndexWithObservable(checkedItems[index].id).toPromise();
+      await firstValueFrom(this.predictorsDbService.deleteIndexWithObservable(checkedItems[index].id));
     }
 
     this.allChecked = false;
@@ -188,7 +188,7 @@ export class PredictorDataComponent implements OnInit {
 
   async finishDelete() {
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    let accountPredictors: Array<IdbPredictorEntry> = await this.predictorsDbService.getAllByIndexRange("accountId", selectedFacility.accountId).toPromise();
+    let accountPredictors: Array<IdbPredictorEntry> = await firstValueFrom(this.predictorsDbService.getAllByIndexRange("accountId", selectedFacility.accountId));
     this.predictorsDbService.accountPredictorEntries.next(accountPredictors);
     let facilityPredictors: Array<IdbPredictorEntry> = accountPredictors.filter(predictor => { return predictor.facilityId == selectedFacility.guid });
     this.predictorsDbService.facilityPredictorEntries.next(facilityPredictors);

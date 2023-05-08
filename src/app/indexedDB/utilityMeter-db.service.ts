@@ -1,7 +1,7 @@
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { Injectable } from '@angular/core';
-import { IdbAccount, IdbFacility, IdbUtilityMeter, MeterSource } from '../models/idb';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { IdbUtilityMeter, MeterSource } from '../models/idb';
+import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
 import { FacilitydbService } from './facility-db.service';
 import { AccountdbService } from './account-db.service';
 
@@ -65,7 +65,7 @@ export class UtilityMeterdbService {
 
     async deleteMeterEntriesAsync(meterEntries: Array<IdbUtilityMeter>) {
         for (let i = 0; i < meterEntries.length; i++) {
-            await this.deleteIndexWithObservable(meterEntries[i].id).toPromise();
+            await firstValueFrom(this.deleteIndexWithObservable(meterEntries[i].id));
         }
     }
 

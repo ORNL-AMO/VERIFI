@@ -71,7 +71,7 @@ export class OverviewReportOptionsDbService {
   //   for (let i = 0; i < accountReports.length; i++) {
   //     let report: IdbOverviewReportOptions = accountReports[i];
   //     report.reportOptions.facilities = report.reportOptions.facilities.filter(facility => { return facility.facilityId != facilityId });
-  //     await this.updateWithObservable(report).toPromise();
+  //     await firstValueFrom(this.updateWithObservable(report));
   //   }
   // }
 
@@ -82,7 +82,7 @@ export class OverviewReportOptionsDbService {
 
   // async deleteReportsAsync(reports: Array<IdbOverviewReportOptions>) {
   //   for (let i = 0; i < reports.length; i++) {
-  //     await this.deleteWithObservable(reports[i].id).toPromise();
+  //     await firstValueFrom(this.deleteWithObservable(reports[i].id));
   //   }
   // }
 

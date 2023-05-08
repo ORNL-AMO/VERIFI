@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { firstValueFrom } from 'rxjs';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
@@ -48,8 +49,8 @@ export class EditMeterGroupFormComponent implements OnInit {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     if (this.editOrAdd == 'add') {
-      let groupToAdd: IdbUtilityMeterGroup = await this.utilityMeterGroupDbService.addWithObservable(this.groupToEdit).toPromise();
-      allGroups = await this.utilityMeterGroupDbService.getAllByIndexRange('accountId', this.groupToEdit.accountId).toPromise();
+      let groupToAdd: IdbUtilityMeterGroup = await firstValueFrom(this.utilityMeterGroupDbService.addWithObservable(this.groupToEdit));
+      allGroups = await firstValueFrom(this.utilityMeterGroupDbService.getAllByIndexRange('accountId', this.groupToEdit.accountId));
       await this.dbChangesService.setMeterGroups(selectedAccount, selectedFacility)
       if(groupToAdd.groupType == 'Energy'){
         await this.analysisDbService.addGroup(groupToAdd.guid);
@@ -57,8 +58,8 @@ export class EditMeterGroupFormComponent implements OnInit {
       await this.dbChangesService.setAnalysisItems(selectedAccount, selectedFacility);
       this.toastNotificationService.showToast("Meter Group Added!", undefined, undefined, false, "alert-success");
     } else {
-      await this.utilityMeterGroupDbService.updateWithObservable(this.groupToEdit).toPromise();
-      allGroups = await this.utilityMeterGroupDbService.getAllByIndexRange('accountId', this.groupToEdit.accountId).toPromise();
+      await firstValueFrom(this.utilityMeterGroupDbService.updateWithObservable(this.groupToEdit));
+      allGroups = await firstValueFrom(this.utilityMeterGroupDbService.getAllByIndexRange('accountId', this.groupToEdit.accountId));
       await this.dbChangesService.setMeterGroups(selectedAccount, selectedFacility)
       this.toastNotificationService.showToast("Meter Group Updated!", undefined, undefined, false, "alert-success");
     }

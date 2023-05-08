@@ -11,6 +11,7 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { getIsEnergyMeter, getIsEnergyUnit } from 'src/app/shared/sharedHelperFuntions';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-edit-meter',
@@ -69,10 +70,10 @@ export class EditMeterComponent implements OnInit {
     }
     let meterToSave: IdbUtilityMeter = this.editMeterFormService.updateMeterFromForm(this.editMeter, this.meterForm);
     if (this.addOrEdit == 'edit') {
-      await this.utilityMeterDbService.updateWithObservable(meterToSave).toPromise();
+      await firstValueFrom(this.utilityMeterDbService.updateWithObservable(meterToSave));
     } else if (this.addOrEdit == 'add') {
       delete meterToSave.id;
-      meterToSave = await this.utilityMeterDbService.addWithObservable(meterToSave).toPromise();
+      meterToSave = await firstValueFrom(this.utilityMeterDbService.addWithObservable(meterToSave));
     }
     await this.utilityMeterDbService.updateWithObservable(meterToSave);
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
@@ -98,9 +99,9 @@ export class EditMeterComponent implements OnInit {
       let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataForFacility(this.editMeter, false);
       for (let i = 0; i < meterData.length; i++) {
         meterData[i].totalEnergyUse = meterData[i].totalVolume * this.meterForm.controls.heatCapacity.value;
-        await this.utilityMeterDataDbService.updateWithObservable(meterData[i]).toPromise();
+        await firstValueFrom(this.utilityMeterDataDbService.updateWithObservable(meterData[i]));
       }
-      let accountMeterData: Array<IdbUtilityMeterData> = await this.utilityMeterDataDbService.getAllByIndexRange("accountId", this.selectedFacility.accountId).toPromise();
+      let accountMeterData: Array<IdbUtilityMeterData> = await firstValueFrom(this.utilityMeterDataDbService.getAllByIndexRange("accountId", this.selectedFacility.accountId));
       this.utilityMeterDataDbService.accountMeterData.next(accountMeterData);
       let facilityMeterData: Array<IdbUtilityMeterData> = accountMeterData.filter(meterData => { return meterData.facilityId == this.selectedFacility.guid });
       this.utilityMeterDataDbService.facilityMeterData.next(facilityMeterData);

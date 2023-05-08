@@ -6,7 +6,7 @@ import { UtilityMeterdbService } from "../../indexedDB/utilityMeter-db.service";
 import { UtilityMeterGroupdbService } from "../../indexedDB/utilityMeterGroup-db.service";
 import { UtilityMeterDatadbService } from "../../indexedDB/utilityMeterData-db.service";
 import { IdbAccount } from 'src/app/models/idb';
-import { Subscription } from 'rxjs';
+import { Subscription, firstValueFrom } from 'rxjs';
 import * as _ from 'lodash';
 import { ImportBackupModalService } from '../import-backup-modal/import-backup-modal.service';
 import { environment } from 'src/environments/environment';
@@ -108,7 +108,7 @@ export class HeaderComponent implements OnInit {
     this.backupDataService.backupAccount();
     let selectedAccount: IdbAccount = this.accountdbService.selectedAccount.getValue();
     selectedAccount.lastBackup = new Date();
-    await this.accountdbService.updateWithObservable(selectedAccount).toPromise();
+    await firstValueFrom(this.accountdbService.updateWithObservable(selectedAccount));
     this.accountdbService.selectedAccount.next(selectedAccount);
   }
 

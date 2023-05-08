@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { LocalStorageService } from 'ngx-webstorage';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
 import { IdbAccount, IdbAccountReport, IdbFacility } from '../models/idb';
 import { AccountdbService } from './account-db.service';
 import { FacilitydbService } from './facility-db.service';
@@ -124,7 +124,7 @@ export class AccountReportDbService {
     for (let i = 0; i < accountReports.length; i++) {
       let report: IdbAccountReport = accountReports[i];
       report.dataOverviewReportSetup.includedFacilities = report.dataOverviewReportSetup.includedFacilities.filter(facility => { return facility.facilityId != facilityId });
-      await this.updateWithObservable(report).toPromise();
+      await firstValueFrom(this.updateWithObservable(report));
     }
   }
 

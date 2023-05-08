@@ -1,7 +1,7 @@
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { Injectable } from '@angular/core';
 import { IdbUtilityMeterGroup } from '../models/idb';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
 
 @Injectable({
     providedIn: 'root'
@@ -66,7 +66,7 @@ export class UtilityMeterGroupdbService {
 
     async deleteMeterGroupAsync(meterGroups: Array<IdbUtilityMeterGroup>) {
         for (let i = 0; i < meterGroups.length; i++) {
-            await this.deleteWithObservable(meterGroups[i].id).toPromise();
+            await firstValueFrom(this.deleteWithObservable(meterGroups[i].id));
         }
     }
 

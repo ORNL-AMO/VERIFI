@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { Subscription, firstValueFrom } from 'rxjs';
 import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
@@ -74,7 +74,7 @@ export class RegressionModelMenuComponent implements OnInit {
     this.group.groupErrors = this.analysisValidationService.getGroupErrors(this.group);
 
     analysisItem.groups[groupIndex] = this.group;
-    await this.analysisDbService.updateWithObservable(analysisItem).toPromise();
+    await firstValueFrom(this.analysisDbService.updateWithObservable(analysisItem));
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     this.dbChangesService.setAnalysisItems(selectedAccount, this.selectedFacility);
     this.analysisDbService.selectedAnalysisItem.next(analysisItem);

@@ -1,6 +1,6 @@
-import { Component, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
-import { Subscription } from 'rxjs';
+import { Subscription, firstValueFrom } from 'rxjs';
 import { Countries, Country } from 'src/app/shared/form-data/countries';
 import { FirstNaicsList, NAICS, SecondNaicsList, ThirdNaicsList } from 'src/app/shared/form-data/naics-data';
 import { State, States } from 'src/app/shared/form-data/states';
@@ -110,8 +110,8 @@ export class GeneralInformationFormComponent implements OnInit {
     if (!this.inAccount) {
       if (!this.inWizard) {
         this.selectedFacility = this.settingsFormsService.updateFacilityFromGeneralInformationForm(this.form, this.selectedFacility);
-        let updatedFacility: IdbFacility = await this.facilityDbService.updateWithObservable(this.selectedFacility).toPromise();
-        let allFacilities: Array<IdbFacility> = await this.facilityDbService.getAll().toPromise();
+        let updatedFacility: IdbFacility = await firstValueFrom(this.facilityDbService.updateWithObservable(this.selectedFacility));
+        let allFacilities: Array<IdbFacility> = await firstValueFrom(this.facilityDbService.getAll());
         this.facilityDbService.selectedFacility.next(updatedFacility);
         let accountFacilities: Array<IdbFacility> = allFacilities.filter(facility => { return facility.accountId == this.selectedFacility.accountId });
         this.facilityDbService.accountFacilities.next(accountFacilities);
@@ -123,8 +123,8 @@ export class GeneralInformationFormComponent implements OnInit {
     if (this.inAccount) {
       if (!this.inWizard) {
         this.selectedAccount = this.settingsFormsService.updateAccountFromGeneralInformationForm(this.form, this.selectedAccount);
-        let updatedAccount: IdbAccount = await this.accountDbService.updateWithObservable(this.selectedAccount).toPromise();
-        let allAccounts: Array<IdbAccount> = await this.accountDbService.getAll().toPromise();
+        let updatedAccount: IdbAccount = await firstValueFrom(this.accountDbService.updateWithObservable(this.selectedAccount));
+        let allAccounts: Array<IdbAccount> = await firstValueFrom(this.accountDbService.getAll());
         this.accountDbService.selectedAccount.next(updatedAccount);
         this.accountDbService.allAccounts.next(allAccounts);
       } else {

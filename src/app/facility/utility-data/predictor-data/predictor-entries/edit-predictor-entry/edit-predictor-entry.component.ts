@@ -11,6 +11,7 @@ import { DetailDegreeDay } from 'src/app/models/degreeDays';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { WeatherDataService } from 'src/app/weather-data/weather-data.service';
+import { firstValueFrom } from 'rxjs';
 @Component({
   selector: 'app-edit-predictor-entry',
   templateUrl: './edit-predictor-entry.component.html',
@@ -58,9 +59,9 @@ export class EditPredictorEntryComponent {
     this.loadingService.setLoadingMessage('Savings Predictor Entry...');
     this.loadingService.setLoadingStatus(true);
     if (this.addOrEdit == "edit") {
-      await this.predictorDbService.updateWithObservable(this.predictorEntry).toPromise();
+      await firstValueFrom(this.predictorDbService.updateWithObservable(this.predictorEntry));
     } else {
-      await this.predictorDbService.addWithObservable(this.predictorEntry).toPromise();
+      await firstValueFrom(this.predictorDbService.addWithObservable(this.predictorEntry));
     }
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
