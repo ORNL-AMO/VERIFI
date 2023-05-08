@@ -41,10 +41,10 @@ export class FacilitydbService {
         return this.dbService.getByIndex('facilities', indexName, indexValue);
     }
 
-    getAllByIndexRange(indexName: string, indexValue: number | string): Observable<Array<IdbFacility>> {
-        let idbKeyRange: IDBKeyRange = IDBKeyRange.only(indexValue);
-        return this.dbService.getAllByIndex('facilities', indexName, idbKeyRange);
-    }
+    // getAllByIndexRange(indexName: string, indexValue: number | string): Observable<Array<IdbFacility>> {
+    //     let idbKeyRange: IDBKeyRange = IDBKeyRange.only(indexValue);
+    //     return this.dbService.getAllByIndex('facilities', indexName, idbKeyRange);
+    // }
 
     count() {
         return this.dbService.count('facilities');

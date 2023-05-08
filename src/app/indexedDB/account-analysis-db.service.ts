@@ -45,10 +45,10 @@ export class AccountAnalysisDbService {
     return this.dbService.getByIndex('accountAnalysisItems', indexName, indexValue);
   }
 
-  getAllByIndexRange(indexName: string, indexValue: number | string): Observable<Array<IdbAccountAnalysisItem>> {
-    let idbKeyRange: IDBKeyRange = IDBKeyRange.only(indexValue);
-    return this.dbService.getAllByIndex('accountAnalysisItems', indexName, idbKeyRange);
-  }
+  // getAllByIndexRange(indexName: string, indexValue: number | string): Observable<Array<IdbAccountAnalysisItem>> {
+  //   let idbKeyRange: IDBKeyRange = IDBKeyRange.only(indexValue);
+  //   return this.dbService.getAllByIndex('accountAnalysisItems', indexName, idbKeyRange);
+  // }
 
   count() {
     return this.dbService.count('accountAnalysisItems');

@@ -29,10 +29,10 @@ export class CustomEmissionsDbService {
     return this.dbService.getByIndex('customEmissionsItems', indexName, indexValue);
   }
 
-  getAllByIndexRange(indexName: string, indexValue: number | string): Observable<Array<IdbCustomEmissionsItem>> {
-    let idbKeyRange: IDBKeyRange = IDBKeyRange.only(indexValue);
-    return this.dbService.getAllByIndex('customEmissionsItems', indexName, idbKeyRange);
-  }
+  // getAllByIndexRange(indexName: string, indexValue: number | string): Observable<Array<IdbCustomEmissionsItem>> {
+  //   let idbKeyRange: IDBKeyRange = IDBKeyRange.only(indexValue);
+  //   return this.dbService.getAllByIndex('customEmissionsItems', indexName, idbKeyRange);
+  // }
 
   count() {
     return this.dbService.count('accountAnalysisItems');

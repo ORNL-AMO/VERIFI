@@ -179,7 +179,8 @@ export class PredictorEntriesTableComponent {
 
   async finishDelete() {
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    let accountPredictors: Array<IdbPredictorEntry> = await firstValueFrom(this.predictorsDbService.getAllByIndexRange("accountId", selectedFacility.accountId));
+    let allPredictors: Array<IdbPredictorEntry> = await firstValueFrom(this.predictorsDbService.getAll());
+    let accountPredictors: Array<IdbPredictorEntry> = allPredictors.filter(predictor => { return predictor.accountId == selectedFacility.accountId });
     this.predictorsDbService.accountPredictorEntries.next(accountPredictors);
     let facilityPredictors: Array<IdbPredictorEntry> = accountPredictors.filter(predictor => { return predictor.facilityId == selectedFacility.guid });
     this.predictorsDbService.facilityPredictorEntries.next(facilityPredictors);

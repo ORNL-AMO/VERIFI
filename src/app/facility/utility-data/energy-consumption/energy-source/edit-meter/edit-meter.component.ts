@@ -101,7 +101,8 @@ export class EditMeterComponent implements OnInit {
         meterData[i].totalEnergyUse = meterData[i].totalVolume * this.meterForm.controls.heatCapacity.value;
         await firstValueFrom(this.utilityMeterDataDbService.updateWithObservable(meterData[i]));
       }
-      let accountMeterData: Array<IdbUtilityMeterData> = await firstValueFrom(this.utilityMeterDataDbService.getAllByIndexRange("accountId", this.selectedFacility.accountId));
+      let allMeterData: Array<IdbUtilityMeterData> = await firstValueFrom(this.utilityMeterDataDbService.getAll());
+      let accountMeterData: Array<IdbUtilityMeterData> = allMeterData.filter(data => { return data.accountId = this.selectedFacility.accountId});
       this.utilityMeterDataDbService.accountMeterData.next(accountMeterData);
       let facilityMeterData: Array<IdbUtilityMeterData> = accountMeterData.filter(meterData => { return meterData.facilityId == this.selectedFacility.guid });
       this.utilityMeterDataDbService.facilityMeterData.next(facilityMeterData);

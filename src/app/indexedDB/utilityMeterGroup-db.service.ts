@@ -15,11 +15,6 @@ export class UtilityMeterGroupdbService {
         this.accountMeterGroups = new BehaviorSubject<Array<IdbUtilityMeterGroup>>(new Array());
     }
 
-
-    getAllByFacilityWithObservable(facilityId: string): Observable<Array<IdbUtilityMeterGroup>> {
-        return this.getAllByIndexRange('facilityId', facilityId);
-    }
-
     getAll(): Observable<Array<IdbUtilityMeterGroup>> {
         return this.dbService.getAll('utilityMeterGroups');
     }
@@ -32,10 +27,10 @@ export class UtilityMeterGroupdbService {
         return this.dbService.getByIndex('utilityMeterGroups', indexName, indexValue);
     }
 
-    getAllByIndexRange(indexName: string, indexValue: number | string): Observable<Array<IdbUtilityMeterGroup>> {
-        let idbKeyRange: IDBKeyRange = IDBKeyRange.only(indexValue);
-        return this.dbService.getAllByIndex('utilityMeterGroups', indexName, idbKeyRange);
-    }
+    // getAllByIndexRange(indexName: string, indexValue: number | string): Observable<Array<IdbUtilityMeterGroup>> {
+    //     let idbKeyRange: IDBKeyRange = IDBKeyRange.only(indexValue);
+    //     return this.dbService.getAllByIndex('utilityMeterGroups', indexName, idbKeyRange);
+    // }
 
     count() {
         return this.dbService.count('utilityMeterGroups');

@@ -48,7 +48,8 @@ export class DbChangesService {
       await this.updateAccount(account)
     }
     //set account facilities
-    let accountFacilites: Array<IdbFacility> = await firstValueFrom(this.facilityDbService.getAllByIndexRange('accountId', account.guid));
+    let allFacilities: Array<IdbFacility> = await firstValueFrom(this.facilityDbService.getAll());
+    let accountFacilites: Array<IdbFacility> = allFacilities.filter(facility => { return facility.accountId == account.guid });
     for (let i = 0; i < accountFacilites.length; i++) {
       let facility: IdbFacility = accountFacilites[i];
       let updatedFacility: { facility: IdbFacility, isChanged: boolean } = this.updateDbEntryService.updateFacility(facility);
@@ -98,12 +99,14 @@ export class DbChangesService {
   }
 
   async setAccountAnalysisItems(account: IdbAccount) {
-    let accountAnalysisItems: Array<IdbAccountAnalysisItem> = await firstValueFrom(this.accountAnalysisDbService.getAllByIndexRange('accountId', account.guid));
+    let allAnalysisItesm: Array<IdbAccountAnalysisItem> = await firstValueFrom(this.accountAnalysisDbService.getAll())
+    let accountAnalysisItems: Array<IdbAccountAnalysisItem> = allAnalysisItesm.filter(item => { return item.accountId == account.guid });
     this.accountAnalysisDbService.accountAnalysisItems.next(accountAnalysisItems);
   }
 
   async setAnalysisItems(account: IdbAccount, facility?: IdbFacility) {
-    let analysisItems: Array<IdbAnalysisItem> = await firstValueFrom(this.analysisDbService.getAllByIndexRange('accountId', account.guid));
+    let allAnalysisItesm: Array<IdbAnalysisItem> = await firstValueFrom(this.analysisDbService.getAll())
+    let analysisItems: Array<IdbAnalysisItem> = allAnalysisItesm.filter(item => { return item.accountId == account.guid });
     for (let i = 0; i < analysisItems.length; i++) {
       let updateAnalysis: { analysisItem: IdbAnalysisItem, isChanged: boolean } = this.updateDbEntryService.updateAnalysis(analysisItems[i]);
       if (updateAnalysis.isChanged) {
@@ -135,7 +138,9 @@ export class DbChangesService {
 
 
   async setAccountOverviewReportOptions(account: IdbAccount) {
-    let overviewReportOptions: Array<IdbOverviewReportOptions> = await firstValueFrom(this.overviewReportOptionsDbService.getAllByIndexRange('accountId', account.guid));
+    let allOverviewReportOptions: Array<IdbOverviewReportOptions> = await firstValueFrom(this.overviewReportOptionsDbService.getAll());
+    let overviewReportOptions: Array<IdbOverviewReportOptions> = allOverviewReportOptions.filter(option => { return option.accountId == account.guid });
+
     // let templates: Array<IdbOverviewReportOptions> = overviewReportOptions.filter(option => { return option.type == 'template' });
     // let nonTemplates: Array<IdbOverviewReportOptions> = overviewReportOptions.filter(option => { return option.type != 'template' });
     // this.overviewReportOptionsDbService.accountOverviewReportOptions.next(nonTemplates);
@@ -159,14 +164,16 @@ export class DbChangesService {
   }
 
   async setAccountReports(account: IdbAccount) {
-    let accountReports: Array<IdbAccountReport> = await firstValueFrom(this.accountReportDbService.getAllByIndexRange('accountId', account.guid));
+    let allReports: Array<IdbAccountReport> = await firstValueFrom(this.accountReportDbService.getAll())
+    let accountReports: Array<IdbAccountReport> = allReports.filter(report => { return report.accountId == account.guid });
     this.accountReportDbService.accountReports.next(accountReports);
   }
 
 
 
   async setPredictors(account: IdbAccount, facility?: IdbFacility) {
-    let predictors: Array<IdbPredictorEntry> = await firstValueFrom(this.predictorsDbService.getAllByIndexRange('accountId', account.guid));
+    let allPredictors: Array<IdbPredictorEntry> = await firstValueFrom(this.predictorsDbService.getAll());
+    let predictors: Array<IdbPredictorEntry> = allPredictors.filter(predictor => { return predictor.accountId == account.guid });
     this.predictorsDbService.accountPredictorEntries.next(predictors);
     if (facility) {
       this.setFacilityPredictors(facility);
@@ -185,8 +192,9 @@ export class DbChangesService {
   }
 
   async setMeters(account: IdbAccount, facility?: IdbFacility) {
-    let meters: Array<IdbUtilityMeter> = await firstValueFrom(this.utilityMeterDbService.getAllByIndexRange('accountId', account.guid));
-    this.utilityMeterDbService.accountMeters.next(meters);
+    let allMeters: Array<IdbUtilityMeter> = await firstValueFrom(this.utilityMeterDbService.getAll())
+    let accountMeters: Array<IdbUtilityMeter> = allMeters.filter(meter => { return meter.accountId == account.guid });
+    this.utilityMeterDbService.accountMeters.next(accountMeters);
     if (facility) {
       this.setFacilityMeters(facility);
     }
@@ -199,11 +207,8 @@ export class DbChangesService {
   }
 
   async setMeterData(account: IdbAccount, facility?: IdbFacility) {
-    console.log('set')
-    // let accountMeterData: Array<IdbUtilityMeterData> = await firstValueFrom(this.utilityMeterDataDbService.getAllByIndexRange('accountId', account.guid));
-    let accountMeterData: Array<IdbUtilityMeterData> = await firstValueFrom(this.utilityMeterDataDbService.getAll());
-    accountMeterData = accountMeterData.filter(data => { return data.accountId = account.guid });
-    console.log('get complete')
+    let allMeterData: Array<IdbUtilityMeterData> = await firstValueFrom(this.utilityMeterDataDbService.getAll());
+    let accountMeterData: Array<IdbUtilityMeterData> = allMeterData.filter(data => { return data.accountId = account.guid });
     this.utilityMeterDataDbService.accountMeterData.next(accountMeterData);
     if (facility) {
       this.setFacilityMeterData(facility);
@@ -217,8 +222,9 @@ export class DbChangesService {
   }
 
   async setMeterGroups(account: IdbAccount, facility?: IdbFacility) {
-    let meterGroups: Array<IdbUtilityMeterGroup> = await firstValueFrom(this.utilityMeterGroupDbService.getAllByIndexRange('accountId', account.guid));
-    this.utilityMeterGroupDbService.accountMeterGroups.next(meterGroups);
+    let allMeterGroups: Array<IdbUtilityMeterGroup> = await firstValueFrom(this.utilityMeterGroupDbService.getAll());
+    let accountMeterGroups: Array<IdbUtilityMeterGroup> = allMeterGroups.filter(meterGroup => { return meterGroup.accountId == account.guid });
+    this.utilityMeterGroupDbService.accountMeterGroups.next(accountMeterGroups);
     if (facility) {
       this.setFacilityMeterGroups(facility);
     }
@@ -232,7 +238,8 @@ export class DbChangesService {
 
 
   async setCustomEmissions(account: IdbAccount) {
-    let customEmissionsItems: Array<IdbCustomEmissionsItem> = await firstValueFrom(this.customEmissionsDbService.getAllByIndexRange('accountId', account.guid));
+    let allCustomEmissionsItems: Array<IdbCustomEmissionsItem> = await firstValueFrom(this.customEmissionsDbService.getAll());
+    let customEmissionsItems: Array<IdbCustomEmissionsItem> = allCustomEmissionsItems.filter(item => { return item.accountId == account.guid });
     if (customEmissionsItems.length == 0) {
       let uSAverageItem: IdbCustomEmissionsItem = this.customEmissionsDbService.getUSAverage(account);
       uSAverageItem = await firstValueFrom(this.customEmissionsDbService.addWithObservable(uSAverageItem));

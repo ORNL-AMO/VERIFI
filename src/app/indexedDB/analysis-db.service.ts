@@ -42,7 +42,8 @@ export class AnalysisDbService {
   async initializeAnalysisItems() {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     if (selectedAccount) {
-      let accounAnalysisItems: Array<IdbAnalysisItem> = await firstValueFrom(this.getAllByIndexRange('accountId', selectedAccount.guid));
+      let allAnalysisItesm: Array<IdbAnalysisItem> = await firstValueFrom(this.getAll())
+      let accounAnalysisItems: Array<IdbAnalysisItem> = allAnalysisItesm.filter(item => { return item.accountId == selectedAccount.guid });
       this.accountAnalysisItems.next(accounAnalysisItems);
       let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
       if (selectedFacility) {
@@ -85,10 +86,10 @@ export class AnalysisDbService {
     return this.dbService.getByIndex('analysisItems', indexName, indexValue);
   }
 
-  getAllByIndexRange(indexName: string, indexValue: number | string): Observable<Array<IdbAnalysisItem>> {
-    let idbKeyRange: IDBKeyRange = IDBKeyRange.only(indexValue);
-    return this.dbService.getAllByIndex('analysisItems', indexName, idbKeyRange);
-  }
+  // getAllByIndexRange(indexName: string, indexValue: number | string): Observable<Array<IdbAnalysisItem>> {
+  //   let idbKeyRange: IDBKeyRange = IDBKeyRange.only(indexValue);
+  //   return this.dbService.getAllByIndex('analysisItems', indexName, idbKeyRange);
+  // }
 
   count() {
     return this.dbService.count('analysisItems');

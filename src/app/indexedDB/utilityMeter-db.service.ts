@@ -29,10 +29,10 @@ export class UtilityMeterdbService {
         return this.dbService.getByIndex('utilityMeter', indexName, indexValue);
     }
 
-    getAllByIndexRange(indexName: string, indexValue: number | string): Observable<Array<IdbUtilityMeter>> {
-        let idbKeyRange: IDBKeyRange = IDBKeyRange.only(indexValue);
-        return this.dbService.getAllByIndex('utilityMeter', indexName, idbKeyRange);
-    }
+    // getAllByIndexRange(indexName: string, indexValue: number | string): Observable<Array<IdbUtilityMeter>> {
+    //     let idbKeyRange: IDBKeyRange = IDBKeyRange.only(indexValue);
+    //     return this.dbService.getAllByIndex('utilityMeter', indexName, idbKeyRange);
+    // }
 
     count() {
         return this.dbService.count('utilityMeter');

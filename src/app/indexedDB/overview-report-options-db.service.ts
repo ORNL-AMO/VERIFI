@@ -33,9 +33,9 @@ export class OverviewReportOptionsDbService {
   //   return overviewReportOptionsId;
   // }
 
-  // getAll(): Observable<Array<IdbOverviewReportOptions>> {
-  //   return this.dbService.getAll('overviewReportOptions');
-  // }
+  getAll(): Observable<Array<IdbOverviewReportOptions>> {
+    return this.dbService.getAll('overviewReportOptions');
+  }
 
   // getById(id: number): Observable<IdbOverviewReportOptions> {
   //   return this.dbService.getByKey('overviewReportOptions', id);
@@ -45,10 +45,10 @@ export class OverviewReportOptionsDbService {
   //   return this.dbService.getByIndex('overviewReportOptions', indexName, indexValue);
   // }
 
-  getAllByIndexRange(indexName: string, indexValue: number | string): Observable<Array<IdbOverviewReportOptions>> {
-    let idbKeyRange: IDBKeyRange = IDBKeyRange.only(indexValue);
-    return this.dbService.getAllByIndex('overviewReportOptions', indexName, idbKeyRange);
-  }
+  // getAllByIndexRange(indexName: string, indexValue: number | string): Observable<Array<IdbOverviewReportOptions>> {
+  //   let idbKeyRange: IDBKeyRange = IDBKeyRange.only(indexValue);
+  //   return this.dbService.getAllByIndex('overviewReportOptions', indexName, idbKeyRange);
+  // }
 
   // count() {
   //   return this.dbService.count('overviewReportOptions');

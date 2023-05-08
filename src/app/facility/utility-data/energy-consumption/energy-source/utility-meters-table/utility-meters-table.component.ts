@@ -113,18 +113,23 @@ export class UtilityMetersTableComponent implements OnInit {
 
 
     //delete meter data
-    let meterData: Array<IdbUtilityMeterData> = await firstValueFrom(this.utilityMeterDatadbService.getAllByIndexRange('meterId', deleteMeterGuid));
+
+    let allMeterData: Array<IdbUtilityMeterData> = await firstValueFrom(this.utilityMeterDatadbService.getAll());
+    let meterData: Array<IdbUtilityMeterData> = allMeterData.filter(meterData => { return meterData.meterId == deleteMeterGuid });
     for (let index = 0; index < meterData.length; index++) {
       await firstValueFrom(this.utilityMeterDatadbService.deleteWithObservable(meterData[index].id));
     }
     let selectedFacility: IdbFacility = this.facilitydbService.selectedFacility.getValue();
     //set meters
-    let accountMeters: Array<IdbUtilityMeter> = await firstValueFrom(this.utilityMeterdbService.getAllByIndexRange("accountId", selectedFacility.accountId));
+    let allMeters: Array<IdbUtilityMeter> = await firstValueFrom(this.utilityMeterdbService.getAll())
+    let accountMeters: Array<IdbUtilityMeter> = allMeters.filter(meter => { return meter.accountId == selectedFacility.accountId });
     this.utilityMeterdbService.accountMeters.next(accountMeters);
     let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == selectedFacility.guid });
     this.utilityMeterdbService.facilityMeters.next(facilityMeters);
     //set meter data
-    let accountMeterData: Array<IdbUtilityMeterData> = await firstValueFrom(this.utilityMeterDatadbService.getAllByIndexRange("accountId", selectedFacility.accountId));
+
+    allMeterData = await firstValueFrom(this.utilityMeterDatadbService.getAll());
+    let accountMeterData: Array<IdbUtilityMeterData> = allMeterData.filter(meterData => { return meterData.accountId == selectedFacility.accountId });
     this.utilityMeterDatadbService.accountMeterData.next(accountMeterData);
     let facilityMeterData: Array<IdbUtilityMeterData> = accountMeterData.filter(meterData => { return meterData.facilityId == selectedFacility.guid });
     this.utilityMeterDatadbService.facilityMeterData.next(facilityMeterData);

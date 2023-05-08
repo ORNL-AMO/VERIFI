@@ -159,8 +159,9 @@ export class EmissionsDataFormComponent implements OnInit {
       }
       successMessage = 'Custom Emissions Updated!'
     }
-
-    let customEmissionsItems: Array<IdbCustomEmissionsItem> = await firstValueFrom(this.customEmissionsDbService.getAllByIndexRange('accountId', this.editCustomEmissions.accountId));
+    
+    let allCustomEmissionsItems: Array<IdbCustomEmissionsItem> = await firstValueFrom(this.customEmissionsDbService.getAll());
+    let customEmissionsItems: Array<IdbCustomEmissionsItem> = allCustomEmissionsItems.filter(item => { return item.accountId == this.editCustomEmissions.accountId });
     this.customEmissionsDbService.accountEmissionsItems.next(customEmissionsItems);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast(successMessage, undefined, undefined, false, 'alert-success');

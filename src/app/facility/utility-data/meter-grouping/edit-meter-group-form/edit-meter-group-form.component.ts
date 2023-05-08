@@ -45,12 +45,10 @@ export class EditMeterGroupFormComponent implements OnInit {
   async save() {
     this.groupToEdit.name = this.groupForm.controls.name.value;
     this.groupToEdit.description = this.groupForm.controls.description.value;
-    let allGroups: Array<IdbUtilityMeterGroup>;
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     if (this.editOrAdd == 'add') {
       let groupToAdd: IdbUtilityMeterGroup = await firstValueFrom(this.utilityMeterGroupDbService.addWithObservable(this.groupToEdit));
-      allGroups = await firstValueFrom(this.utilityMeterGroupDbService.getAllByIndexRange('accountId', this.groupToEdit.accountId));
       await this.dbChangesService.setMeterGroups(selectedAccount, selectedFacility)
       if(groupToAdd.groupType == 'Energy'){
         await this.analysisDbService.addGroup(groupToAdd.guid);
@@ -59,7 +57,6 @@ export class EditMeterGroupFormComponent implements OnInit {
       this.toastNotificationService.showToast("Meter Group Added!", undefined, undefined, false, "alert-success");
     } else {
       await firstValueFrom(this.utilityMeterGroupDbService.updateWithObservable(this.groupToEdit));
-      allGroups = await firstValueFrom(this.utilityMeterGroupDbService.getAllByIndexRange('accountId', this.groupToEdit.accountId));
       await this.dbChangesService.setMeterGroups(selectedAccount, selectedFacility)
       this.toastNotificationService.showToast("Meter Group Updated!", undefined, undefined, false, "alert-success");
     }

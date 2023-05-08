@@ -43,10 +43,10 @@ export class AccountReportDbService {
     return this.dbService.getByIndex('accountReports', indexName, indexValue);
   }
 
-  getAllByIndexRange(indexName: string, indexValue: number | string): Observable<Array<IdbAccountReport>> {
-    let idbKeyRange: IDBKeyRange = IDBKeyRange.only(indexValue);
-    return this.dbService.getAllByIndex('accountReports', indexName, idbKeyRange);
-  }
+  // getAllByIndexRange(indexName: string, indexValue: number | string): Observable<Array<IdbAccountReport>> {
+  //   let idbKeyRange: IDBKeyRange = IDBKeyRange.only(indexValue);
+  //   return this.dbService.getAllByIndex('accountReports', indexName, idbKeyRange);
+  // }
 
   count() {
     return this.dbService.count('accountReports');
