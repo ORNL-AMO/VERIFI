@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Subscription, firstValueFrom } from 'rxjs';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
@@ -125,7 +125,7 @@ export class AnalysisItemCardComponent implements OnInit {
     newItem.name = newItem.name + " (Copy)";
     newItem.guid = Math.random().toString(36).substr(2, 9);
     newItem.selectedYearAnalysis = false;
-    let addedItem: IdbAnalysisItem = await this.analysisDbService.addWithObservable(newItem).toPromise();
+    let addedItem: IdbAnalysisItem = await firstValueFrom(this.analysisDbService.addWithObservable(newItem));
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.setAnalysisItems(selectedAccount, selectedFacility);
     this.analysisDbService.selectedAnalysisItem.next(addedItem);
@@ -138,7 +138,7 @@ export class AnalysisItemCardComponent implements OnInit {
   }
 
   async confirmDelete(){
-    await this.analysisDbService.deleteWithObservable(this.analysisItem.id).toPromise();
+    await firstValueFrom(this.analysisDbService.deleteWithObservable(this.analysisItem.id));
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     //update account analysis items
     let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
@@ -151,7 +151,7 @@ export class AnalysisItemCardComponent implements OnInit {
         }
       });
       if (updated) {
-        await this.accountAnalysisDbService.updateWithObservable(accountAnalysisItems[index]).toPromise();
+        await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(accountAnalysisItems[index]));
       }
     }
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
@@ -175,10 +175,10 @@ export class AnalysisItemCardComponent implements OnInit {
         } else {
           facilityAnalysisItems[i].selectedYearAnalysis = true;
         }
-        await this.analysisDbService.updateWithObservable(facilityAnalysisItems[i]).toPromise();
+        await firstValueFrom(this.analysisDbService.updateWithObservable(facilityAnalysisItems[i]));
       } else if (facilityAnalysisItems[i].reportYear == this.analysisItem.reportYear && facilityAnalysisItems[i].selectedYearAnalysis) {
         facilityAnalysisItems[i].selectedYearAnalysis = false;
-        await this.analysisDbService.updateWithObservable(facilityAnalysisItems[i]).toPromise();
+        await firstValueFrom(this.analysisDbService.updateWithObservable(facilityAnalysisItems[i]));
       }
     }
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();

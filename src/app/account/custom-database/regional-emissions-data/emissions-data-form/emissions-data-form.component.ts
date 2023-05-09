@@ -9,6 +9,7 @@ import { LoadingService } from 'src/app/core-components/loading/loading.service'
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-emissions-data-form',
@@ -129,18 +130,18 @@ export class EmissionsDataFormComponent implements OnInit {
     if (this.isAdd) {
       this.loadingService.setLoadingMessage('Adding Subgregion...');
       this.loadingService.setLoadingStatus(true);
-      this.editCustomEmissions = await this.customEmissionsDbService.addWithObservable(this.editCustomEmissions).toPromise();
+      this.editCustomEmissions = await firstValueFrom(this.customEmissionsDbService.addWithObservable(this.editCustomEmissions));
       successMessage = 'Custom Emissions Added!';
     } else {
       this.loadingService.setLoadingMessage('Editing Subgregion...');
       this.loadingService.setLoadingStatus(true);
-      await this.customEmissionsDbService.updateWithObservable(this.editCustomEmissions).toPromise();
+      await firstValueFrom(this.customEmissionsDbService.updateWithObservable(this.editCustomEmissions));
       let hasUpdatedValues: boolean = false;
       //update account and facilities previously referencing this subregion
       let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
       if (account.eGridSubregion == this.previousSubregion) {
         account.eGridSubregion = this.editCustomEmissions.subregion;
-        await this.accountDbService.updateWithObservable(account).toPromise();
+        await firstValueFrom(this.accountDbService.updateWithObservable(account));
         this.accountDbService.selectedAccount.next(account);
         hasUpdatedValues = true;
       }
@@ -149,7 +150,7 @@ export class EmissionsDataFormComponent implements OnInit {
         let facility: IdbFacility = accountFacilites[i];
         if (facility.eGridSubregion == this.previousSubregion) {
           facility.eGridSubregion = this.editCustomEmissions.subregion;
-          await this.facilityDbService.updateWithObservable(facility).toPromise();
+          await firstValueFrom(this.facilityDbService.updateWithObservable(facility));
           hasUpdatedValues = true;
         }
       }
@@ -158,8 +159,8 @@ export class EmissionsDataFormComponent implements OnInit {
       }
       successMessage = 'Custom Emissions Updated!'
     }
-
-    let customEmissionsItems: Array<IdbCustomEmissionsItem> = await this.customEmissionsDbService.getAllByIndexRange('accountId', this.editCustomEmissions.accountId).toPromise();
+    
+    let customEmissionsItems: Array<IdbCustomEmissionsItem> = await this.customEmissionsDbService.getAllAccountCustomEmissions(this.editCustomEmissions.accountId);
     this.customEmissionsDbService.accountEmissionsItems.next(customEmissionsItems);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast(successMessage, undefined, undefined, false, 'alert-success');

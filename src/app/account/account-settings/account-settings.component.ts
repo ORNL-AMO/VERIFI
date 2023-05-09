@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Subscription, firstValueFrom } from 'rxjs';
 import { BackupDataService } from 'src/app/shared/helper-services/backup-data.service';
 import { ImportBackupModalService } from 'src/app/core-components/import-backup-modal/import-backup-modal.service';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
@@ -89,7 +89,7 @@ export class AccountSettingsComponent implements OnInit {
     this.loadingService.setLoadingMessage('Creating Facility...');
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let idbFacility: IdbFacility = this.facilityDbService.getNewIdbFacility(selectedAccount);
-    let newFacility: IdbFacility = await this.facilityDbService.addWithObservable(idbFacility).toPromise();
+    let newFacility: IdbFacility = await firstValueFrom(this.facilityDbService.addWithObservable(idbFacility));
     this.loadingService.setLoadingMessage('Updating Reports...');
     let accountReports: Array<IdbAccountReport> = this.accountReportDbService.accountReports.getValue();
     for (let index = 0; index < accountReports.length; index++) {
@@ -97,7 +97,7 @@ export class AccountSettingsComponent implements OnInit {
         facilityId: newFacility.guid,
         included: false
       });
-      await this.accountReportDbService.updateWithObservable(accountReports[index]).toPromise();
+      await firstValueFrom(this.accountReportDbService.updateWithObservable(accountReports[index]));
     }
     this.loadingService.setLoadingMessage('Updating Analysis Items...');
     let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
@@ -106,7 +106,7 @@ export class AccountSettingsComponent implements OnInit {
         facilityId: newFacility.guid,
         analysisItemId: undefined
       });
-      await this.accountAnalysisDbService.updateWithObservable(accountAnalysisItems[index]).toPromise();
+      await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(accountAnalysisItems[index]));
     }
 
     await this.dbChangesService.selectAccount(this.selectedAccount);
@@ -141,10 +141,10 @@ export class AccountSettingsComponent implements OnInit {
     await this.analysisDbService.deleteAccountAnalysisItems();
     await this.accountAnalysisDbService.deleteAccountAnalysisItems();
     this.loadingService.setLoadingMessage("Deleting Account...");
-    await this.accountDbService.deleteAccountWithObservable(this.selectedAccount.id).toPromise();
+    await firstValueFrom(this.accountDbService.deleteAccountWithObservable(this.selectedAccount.id));
 
     // Then navigate to another account
-    let accounts: Array<IdbAccount> = await this.accountDbService.getAll().toPromise();
+    let accounts: Array<IdbAccount> = await firstValueFrom(this.accountDbService.getAll());
     this.accountDbService.allAccounts.next(accounts);
     if (accounts.length != 0) {
       await this.dbChangesService.selectAccount(accounts[0]);

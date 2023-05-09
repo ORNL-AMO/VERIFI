@@ -11,6 +11,7 @@ import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db
 import { IdbAccount, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { getIsEnergyMeter, getIsEnergyUnit } from 'src/app/shared/sharedHelperFuntions';
 import { UtilityMeterDataService } from '../utility-meter-data.service';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-edit-bill',
@@ -80,10 +81,10 @@ export class EditBillComponent implements OnInit {
       meterDataToSave = this.utilityMeterDataService.updateGeneralMeterDataFromForm(this.editMeterData, this.meterDataForm);
     }
     if (this.addOrEdit == 'edit') {
-      await this.utilityMeterDataDbService.updateWithObservable(meterDataToSave).toPromise();
+      await firstValueFrom(this.utilityMeterDataDbService.updateWithObservable(meterDataToSave));
     } else {
       delete meterDataToSave.id;
-      meterDataToSave = await this.utilityMeterDataDbService.addWithObservable(meterDataToSave).toPromise();
+      meterDataToSave = await firstValueFrom(this.utilityMeterDataDbService.addWithObservable(meterDataToSave));
     }
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
@@ -104,7 +105,7 @@ export class EditBillComponent implements OnInit {
     }
 
     delete meterDataToSave.id;
-    meterDataToSave = await this.utilityMeterDataDbService.addWithObservable(meterDataToSave).toPromise();
+    meterDataToSave = await firstValueFrom(this.utilityMeterDataDbService.addWithObservable(meterDataToSave));
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.setMeterData(selectedAccount, selectedFacility);

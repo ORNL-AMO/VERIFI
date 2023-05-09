@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
-import { Subscription } from 'rxjs';
+import { Subscription, firstValueFrom } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { NavigationEnd, Router } from '@angular/router';
@@ -93,8 +93,8 @@ export class AccountOverviewBannerComponent implements OnInit {
   async setAccountEnergyIsSource(energyIsSource: boolean) {
     if (this.selectedAccount.energyIsSource != energyIsSource) {
       this.selectedAccount.energyIsSource = energyIsSource;
-      let updatedAccount: IdbAccount = await this.accountDbService.updateWithObservable(this.selectedAccount).toPromise();
-      let allAccounts: Array<IdbAccount> = await this.accountDbService.getAll().toPromise();
+      let updatedAccount: IdbAccount = await firstValueFrom(this.accountDbService.updateWithObservable(this.selectedAccount));
+      let allAccounts: Array<IdbAccount> = await firstValueFrom(this.accountDbService.getAll());
       this.accountDbService.allAccounts.next(allAccounts);
       this.accountDbService.selectedAccount.next(this.selectedAccount);
     }

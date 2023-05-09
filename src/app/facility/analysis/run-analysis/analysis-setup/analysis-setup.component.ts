@@ -11,6 +11,7 @@ import { AnalysisValidationService } from '../../analysis-validation.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
+import { firstValueFrom } from 'rxjs';
 @Component({
   selector: 'app-analysis-setup',
   templateUrl: './analysis-setup.component.html',
@@ -41,7 +42,7 @@ export class AnalysisSetupComponent implements OnInit {
 
   async saveItem() {
     this.analysisItem.setupErrors = this.analysisValidationService.getAnalysisItemErrors(this.analysisItem);
-    await this.analysisDbService.updateWithObservable(this.analysisItem).toPromise();
+    await firstValueFrom(this.analysisDbService.updateWithObservable(this.analysisItem));
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     await this.dbChangesService.setAnalysisItems(selectedAccount, selectedFacility);

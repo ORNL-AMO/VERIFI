@@ -12,6 +12,7 @@ import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { JStatRegressionModel } from 'src/app/models/analysis';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -111,8 +112,7 @@ export class BackupDataService {
     }
     delete backupFile.account.id;
     backupFile.account.guid = accountGUIDs.newId;
-    let newAccount: IdbAccount = await this.accountDbService.addWithObservable(backupFile.account).toPromise();
-
+    let newAccount: IdbAccount = await firstValueFrom(this.accountDbService.addWithObservable(backupFile.account));
     this.loadingService.setLoadingMessage('Adding Facilities...');
     let facilityGUIDs: Array<{ oldId: string, newId: string }> = new Array();
     for (let i = 0; i < backupFile.facilities.length; i++) {
@@ -125,7 +125,7 @@ export class BackupDataService {
       facility.guid = newGUID;
       delete facility.id;
       facility.accountId = accountGUIDs.newId;
-      await this.facilityDbService.addWithObservable(facility).toPromise();
+      await firstValueFrom(this.facilityDbService.addWithObservable(facility));
     }
 
     this.loadingService.setLoadingMessage('Adding Meter Groups...');
@@ -141,7 +141,7 @@ export class BackupDataService {
       group.accountId = accountGUIDs.newId;
       group.facilityId = this.getNewId(group.facilityId, facilityGUIDs);
       group.guid = newGUID;
-      await this.utilityMeterGroupDbService.addWithObservable(group).toPromise();
+      await firstValueFrom(this.utilityMeterGroupDbService.addWithObservable(group));
     }
 
     this.loadingService.setLoadingMessage('Adding Meters...');
@@ -158,7 +158,7 @@ export class BackupDataService {
       meter.facilityId = this.getNewId(meter.facilityId, facilityGUIDs);
       meter.guid = newGUID;
       meter.groupId = this.getNewId(meter.groupId, meterGroupGUIDs);
-      await this.utilityMeterDbService.addWithObservable(meter).toPromise();
+      await firstValueFrom(this.utilityMeterDbService.addWithObservable(meter));
     }
 
     this.loadingService.setLoadingMessage('Adding Meter Data...');
@@ -176,7 +176,7 @@ export class BackupDataService {
       meterData.facilityId = this.getNewId(meterData.facilityId, facilityGUIDs);
       meterData.meterId = this.getNewId(meterData.meterId, meterGUIDs);
       meterData.readDate = this.getImportDate(meterData.readDate);
-      await this.utilityMeterDataDbService.addWithObservable(meterData).toPromise();
+      await firstValueFrom(this.utilityMeterDataDbService.addWithObservable(meterData));
     }
 
 
@@ -194,7 +194,7 @@ export class BackupDataService {
       predictorEntry.accountId = accountGUIDs.newId;
       predictorEntry.facilityId = this.getNewId(predictorEntry.facilityId, facilityGUIDs);
       predictorEntry.date = this.getImportDate(predictorEntry.date);
-      await this.predictorsDbService.addWithObservable(predictorEntry).toPromise();
+      await firstValueFrom(this.predictorsDbService.addWithObservable(predictorEntry));
     }
 
     this.loadingService.setLoadingMessage('Adding Facility Analysis Items...');
@@ -221,7 +221,7 @@ export class BackupDataService {
         //   variable.id = this.getNewId(variable.id, predictorDataGUIDs);
         // });
       });
-      await this.analysisDbService.addWithObservable(facilityAnalysisItem).toPromise();
+      await firstValueFrom(this.analysisDbService.addWithObservable(facilityAnalysisItem));
     }
 
 
@@ -243,7 +243,7 @@ export class BackupDataService {
           item.analysisItemId = this.getNewId(item.analysisItemId, facilityAnalysisGUIDs);
         }
       });
-      await this.accountAnalysisDbService.addWithObservable(accountAnalysisItem).toPromise();
+      await firstValueFrom(this.accountAnalysisDbService.addWithObservable(accountAnalysisItem));
     }
 
     this.loadingService.setLoadingMessage('Adding Account Reports...');
@@ -266,7 +266,7 @@ export class BackupDataService {
           modificationNotes: undefined,
         }
       }
-      await this.accountReportsDbService.addWithObservable(accountReport).toPromise();
+      await firstValueFrom(this.accountReportsDbService.addWithObservable(accountReport));
     }
 
 
@@ -282,7 +282,7 @@ export class BackupDataService {
         newReport.betterPlantsReportSetup.baselineAdjustmentNotes = overviewReport.reportOptions.baselineAdjustmentNotes;
         newReport.betterPlantsReportSetup.includeFacilityNames = overviewReport.reportOptions.includeFacilityNames;
         newReport.betterPlantsReportSetup.modificationNotes = overviewReport.reportOptions.modificationNotes;
-        await this.accountReportsDbService.addWithObservable(newReport).toPromise();
+        await firstValueFrom(this.accountReportsDbService.addWithObservable(newReport));
       }
     }
 
@@ -296,7 +296,7 @@ export class BackupDataService {
     //   });
     //   //TODO: Update with better plants
     //   reportOptions.reportOptions.analysisItemId = this.getNewId(reportOptions.reportOptions.analysisItemId, accountAnalysisGUIDs);
-    //   await this.overviewReportOptionsDbService.addWithObservable(reportOptions).toPromise();
+    //   await this.overviewReportOptionsDbService.addWithObservable(reportOptions));
     // }
     return newAccount;
   }
@@ -307,7 +307,7 @@ export class BackupDataService {
     backupFile.facility.accountId = accountGUID;
     let newFacilityGUID: string = this.getGUID();
     backupFile.facility.guid = newFacilityGUID;
-    let newFacility: IdbFacility = await this.facilityDbService.addWithObservable(backupFile.facility).toPromise();
+    let newFacility: IdbFacility = await firstValueFrom(this.facilityDbService.addWithObservable(backupFile.facility));
 
     this.loadingService.setLoadingMessage('Adding Meter Groups...');
     let meterGroupGUIDs: Array<{ oldId: string, newId: string }> = new Array();
@@ -322,7 +322,7 @@ export class BackupDataService {
       group.accountId = accountGUID;
       group.facilityId = newFacilityGUID;
       group.guid = newGUID;
-      await this.utilityMeterGroupDbService.addWithObservable(group).toPromise();
+      await firstValueFrom(this.utilityMeterGroupDbService.addWithObservable(group));
     }
 
     this.loadingService.setLoadingMessage('Adding Meters...');
@@ -339,7 +339,7 @@ export class BackupDataService {
       meter.facilityId = newFacilityGUID;
       meter.guid = newGUID;
       meter.groupId = this.getNewId(meter.groupId, meterGroupGUIDs);
-      await this.utilityMeterDbService.addWithObservable(meter).toPromise();
+      await firstValueFrom(this.utilityMeterDbService.addWithObservable(meter));
     }
 
     this.loadingService.setLoadingMessage('Adding Meter Data...');
@@ -357,7 +357,7 @@ export class BackupDataService {
       meterData.facilityId = newFacilityGUID;
       meterData.meterId = this.getNewId(meterData.meterId, meterGUIDs);
       meterData.readDate = this.getImportDate(meterData.readDate);
-      await this.utilityMeterDataDbService.addWithObservable(meterData).toPromise();
+      await firstValueFrom(this.utilityMeterDataDbService.addWithObservable(meterData));
     }
 
     this.loadingService.setLoadingMessage('Adding Facility Analysis Items...');
@@ -376,7 +376,7 @@ export class BackupDataService {
       facilityAnalysisItem.groups.forEach(group => {
         group.idbGroupId = this.getNewId(group.idbGroupId, meterGroupGUIDs);
       });
-      await this.analysisDbService.addWithObservable(facilityAnalysisItem).toPromise();
+      await firstValueFrom(this.analysisDbService.addWithObservable(facilityAnalysisItem));
     }
 
 
@@ -394,7 +394,7 @@ export class BackupDataService {
       predictorEntry.accountId = accountGUID;
       predictorEntry.facilityId = newFacilityGUID;
       predictorEntry.date = this.getImportDate(predictorEntry.date);
-      await this.predictorsDbService.addWithObservable(predictorEntry).toPromise();
+      await firstValueFrom(this.predictorsDbService.addWithObservable(predictorEntry));
     }
 
 
@@ -405,7 +405,7 @@ export class BackupDataService {
         facilityId: newFacilityGUID,
         analysisItemId: undefined
       });
-      await this.accountAnalysisDbService.updateWithObservable(accountAnalysisItems[i]).toPromise();
+      await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(accountAnalysisItems[i]));
     }
 
     this.loadingService.setLoadingMessage('Updating Account Reports...');
@@ -416,7 +416,7 @@ export class BackupDataService {
         included: false
       });
       //TODO: update better plants reports items..
-      await this.accountReportsDbService.updateWithObservable(accountReports[reportIndex]).toPromise();
+      await firstValueFrom(this.accountReportsDbService.updateWithObservable(accountReports[reportIndex]));
     }
 
     return newFacility;
@@ -425,102 +425,102 @@ export class BackupDataService {
 
   async deleteAccountData(account: IdbAccount) {
     //delete account
-    await this.accountDbService.deleteAccountWithObservable(account.id).toPromise();
+    await firstValueFrom(this.accountDbService.deleteAccountWithObservable(account.id));
     let accountFacilites: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     for (let i = 0; i < accountFacilites.length; i++) {
-      await this.facilityDbService.deleteWithObservable(accountFacilites[i].id).toPromise();
+      await firstValueFrom(this.facilityDbService.deleteWithObservable(accountFacilites[i].id));
     }
     //delete meters
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     for (let i = 0; i < accountMeters.length; i++) {
-      await this.utilityMeterDbService.deleteIndexWithObservable(accountMeters[i].id).toPromise();
+      await firstValueFrom(this.utilityMeterDbService.deleteIndexWithObservable(accountMeters[i].id));
     }
     //delete meter data
     let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
     for (let i = 0; i < accountMeterData.length; i++) {
-      await this.utilityMeterDataDbService.deleteWithObservable(accountMeterData[i].id).toPromise();
+      await firstValueFrom(this.utilityMeterDataDbService.deleteWithObservable(accountMeterData[i].id));
     }
     //delete predictors
     let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorsDbService.accountPredictorEntries.getValue();
     for (let i = 0; i < accountPredictorEntries.length; i++) {
-      await this.predictorsDbService.deleteIndexWithObservable(accountPredictorEntries[i].id).toPromise();
+      await firstValueFrom(this.predictorsDbService.deleteIndexWithObservable(accountPredictorEntries[i].id));
     }
     //delete meter groups
     let accountMeterGroups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.accountMeterGroups.getValue();
     for (let i = 0; i < accountMeterGroups.length; i++) {
-      await this.utilityMeterGroupDbService.deleteWithObservable(accountMeterGroups[i].id).toPromise();
+      await firstValueFrom(this.utilityMeterGroupDbService.deleteWithObservable(accountMeterGroups[i].id));
     }
 
     //delete overview reports
     //todo remove in future (overview reports no longer used)
-    let overviewReportOptions: Array<IdbOverviewReportOptions> = await this.overviewReportOptionsDbService.getAllByIndexRange('accountId', account.guid).toPromise();
+    let overviewReportOptions: Array<IdbOverviewReportOptions> = await this.overviewReportOptionsDbService.getAllAccountReports(account.guid);
     for (let i = 0; i < overviewReportOptions.length; i++) {
-      await this.overviewReportOptionsDbService.deleteWithObservable(overviewReportOptions[i].id).toPromise();
+      await firstValueFrom(this.overviewReportOptionsDbService.deleteWithObservable(overviewReportOptions[i].id));
     }
     //delete account reports
     let accountReports: Array<IdbAccountReport> = this.accountReportsDbService.accountReports.getValue();
     for (let i = 0; i < accountReports.length; i++) {
-      await this.accountReportsDbService.deleteWithObservable(accountReports[i].id).toPromise();
+      await firstValueFrom(this.accountReportsDbService.deleteWithObservable(accountReports[i].id));
     }
 
     //delete account analysis
     let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
     for (let i = 0; i < accountAnalysisItems.length; i++) {
-      await this.accountAnalysisDbService.deleteWithObservable(accountAnalysisItems[i].id).toPromise();
+      await firstValueFrom(this.accountAnalysisDbService.deleteWithObservable(accountAnalysisItems[i].id));
     }
     //delete facility analysis
     let facilityAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
     for (let i = 0; i < facilityAnalysisItems.length; i++) {
-      await this.analysisDbService.deleteWithObservable(facilityAnalysisItems[i].id).toPromise();
+      await firstValueFrom(this.analysisDbService.deleteWithObservable(facilityAnalysisItems[i].id));
     }
 
   }
 
   async deleteFacilityData(facility: IdbFacility) {
-    await this.facilityDbService.deleteWithObservable(facility.id).toPromise();
+    await firstValueFrom(this.facilityDbService.deleteWithObservable(facility.id));
     //delete meters
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == facility.guid });
     for (let i = 0; i < facilityMeters.length; i++) {
-      await this.utilityMeterDbService.deleteIndexWithObservable(facilityMeters[i].id).toPromise();
+      await firstValueFrom(this.utilityMeterDbService.deleteIndexWithObservable(facilityMeters[i].id));
     }
     //delete meter data
     let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
     let facilityMeterData: Array<IdbUtilityMeterData> = accountMeterData.filter(meterData => { return meterData.facilityId == facility.guid });
     for (let i = 0; i < facilityMeterData.length; i++) {
-      await this.utilityMeterDataDbService.deleteWithObservable(facilityMeterData[i].id).toPromise();
+      await firstValueFrom(this.utilityMeterDataDbService.deleteWithObservable(facilityMeterData[i].id));
     }
     //delete predictors
     let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorsDbService.accountPredictorEntries.getValue();
     let facilityPredictorEntries: Array<IdbPredictorEntry> = accountPredictorEntries.filter(predictor => { return predictor.facilityId == facility.guid });
     for (let i = 0; i < facilityPredictorEntries.length; i++) {
-      await this.predictorsDbService.deleteIndexWithObservable(facilityPredictorEntries[i].id).toPromise();
+      await firstValueFrom(this.predictorsDbService.deleteIndexWithObservable(facilityPredictorEntries[i].id));
     }
     //delete meter groups
     let accountMeterGroups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.accountMeterGroups.getValue();
     let facilityMeterGroups: Array<IdbUtilityMeterGroup> = accountMeterGroups.filter(group => { return group.facilityId == facility.guid });
     for (let i = 0; i < facilityMeterGroups.length; i++) {
-      await this.utilityMeterGroupDbService.deleteWithObservable(facilityMeterGroups[i].id).toPromise();
+      await firstValueFrom(this.utilityMeterGroupDbService.deleteWithObservable(facilityMeterGroups[i].id));
     }
 
     //delete facility analysis
     let accountFacilityAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
     let facilityAnalysisItems: Array<IdbAnalysisItem> = accountFacilityAnalysisItems.filter(item => { return item.facilityId == facility.guid });
     for (let i = 0; i < facilityAnalysisItems.length; i++) {
-      await this.analysisDbService.deleteWithObservable(facilityAnalysisItems[i].id).toPromise();
+      await firstValueFrom(this.analysisDbService.deleteWithObservable(facilityAnalysisItems[i].id));
     }
 
     //update reports
     let reports: Array<IdbAccountReport> = this.accountReportsDbService.accountReports.getValue();
     for (let i = 0; i < reports.length; i++) {
       reports[i].dataOverviewReportSetup.includedFacilities = reports[i].dataOverviewReportSetup.includedFacilities.filter(option => { return option.facilityId != facility.guid });
-      await this.accountReportsDbService.updateWithObservable(reports[i]).toPromise();
+      await firstValueFrom(this.accountReportsDbService.updateWithObservable(reports[i]));
     }
     //update account analysis
     let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
     for (let i = 0; i < accountAnalysisItems.length; i++) {
       accountAnalysisItems[i].facilityAnalysisItems = accountAnalysisItems[i].facilityAnalysisItems.filter(option => { return option.facilityId != facility.guid });
-      await this.accountAnalysisDbService.updateWithObservable(accountAnalysisItems[i]).toPromise();
+      await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(accountAnalysisItems[i]));
     }
   }
 

@@ -7,6 +7,7 @@ import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { Month, Months } from 'src/app/shared/form-data/months';
+import { firstValueFrom } from 'rxjs';
 @Component({
   selector: 'app-account-report-setup',
   templateUrl: './account-report-setup.component.html',
@@ -38,7 +39,7 @@ export class AccountReportSetupComponent {
   async save() {
     let selectedReport: IdbAccountReport = this.accountReportDbService.selectedReport.getValue()
     selectedReport = this.accountReportsService.updateReportFromSetupForm(selectedReport, this.setupForm);
-    await this.accountReportDbService.updateWithObservable(selectedReport).toPromise();
+    await firstValueFrom(this.accountReportDbService.updateWithObservable(selectedReport));
     await this.dbChangesService.setAccountReports(this.account);
     this.accountReportDbService.selectedReport.next(selectedReport);
   }

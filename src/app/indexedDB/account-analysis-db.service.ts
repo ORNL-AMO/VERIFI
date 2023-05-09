@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { LocalStorageService } from 'ngx-webstorage';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
 import { IdbAccount, IdbAccountAnalysisItem, IdbFacility } from '../models/idb';
 import { AccountdbService } from './account-db.service';
 import { FacilitydbService } from './facility-db.service';
@@ -37,17 +37,18 @@ export class AccountAnalysisDbService {
     return this.dbService.getAll('accountAnalysisItems');
   }
 
+  async getAllAccountAnalysisItems(accountId: string): Promise<Array<IdbAccountAnalysisItem>>{
+    let allAnalysisItesm: Array<IdbAccountAnalysisItem> = await firstValueFrom(this.getAll())
+    let accountAnalysisItems: Array<IdbAccountAnalysisItem> = allAnalysisItesm.filter(item => { return item.accountId == accountId });
+    return accountAnalysisItems;
+  }
+
   getById(id: number): Observable<IdbAccountAnalysisItem> {
     return this.dbService.getByKey('accountAnalysisItems', id);
   }
 
   getByIndex(indexName: string, indexValue: number): Observable<IdbAccountAnalysisItem> {
     return this.dbService.getByIndex('accountAnalysisItems', indexName, indexValue);
-  }
-
-  getAllByIndexRange(indexName: string, indexValue: number | string): Observable<Array<IdbAccountAnalysisItem>> {
-    let idbKeyRange: IDBKeyRange = IDBKeyRange.only(indexValue);
-    return this.dbService.getAllByIndex('accountAnalysisItems', indexName, idbKeyRange);
   }
 
   count() {
@@ -113,7 +114,7 @@ export class AccountAnalysisDbService {
         item.analysisItemId = analysisItemId;
       }
     });
-    await this.updateWithObservable(analysiItem).toPromise();
+    await firstValueFrom(this.updateWithObservable(analysiItem));
     this.selectedAnalysisItem.next(analysiItem);
   }
 }

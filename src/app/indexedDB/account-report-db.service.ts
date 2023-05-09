@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { LocalStorageService } from 'ngx-webstorage';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
 import { IdbAccount, IdbAccountReport, IdbFacility } from '../models/idb';
 import { AccountdbService } from './account-db.service';
 import { FacilitydbService } from './facility-db.service';
@@ -35,17 +35,19 @@ export class AccountReportDbService {
     return this.dbService.getAll('accountReports');
   }
 
+  async getAllAccountReports(accountId: string): Promise<Array<IdbAccountReport>> {
+    let allReports: Array<IdbAccountReport> = await firstValueFrom(this.getAll())
+    let accountReports: Array<IdbAccountReport> = allReports.filter(report => { return report.accountId == accountId });
+    return accountReports;
+
+  }
+
   getById(id: number): Observable<IdbAccountReport> {
     return this.dbService.getByKey('accountReports', id);
   }
 
   getByIndex(indexName: string, indexValue: number): Observable<IdbAccountReport> {
     return this.dbService.getByIndex('accountReports', indexName, indexValue);
-  }
-
-  getAllByIndexRange(indexName: string, indexValue: number | string): Observable<Array<IdbAccountReport>> {
-    let idbKeyRange: IDBKeyRange = IDBKeyRange.only(indexValue);
-    return this.dbService.getAllByIndex('accountReports', indexName, idbKeyRange);
   }
 
   count() {
@@ -124,7 +126,7 @@ export class AccountReportDbService {
     for (let i = 0; i < accountReports.length; i++) {
       let report: IdbAccountReport = accountReports[i];
       report.dataOverviewReportSetup.includedFacilities = report.dataOverviewReportSetup.includedFacilities.filter(facility => { return facility.facilityId != facilityId });
-      await this.updateWithObservable(report).toPromise();
+      await firstValueFrom(this.updateWithObservable(report));
     }
   }
 

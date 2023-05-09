@@ -10,6 +10,7 @@ import { LoadingService } from 'src/app/core-components/loading/loading.service'
 import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
 import { AnalysisValidationService } from 'src/app/facility/analysis/analysis-validation.service';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
+import { firstValueFrom } from 'rxjs';
 @Component({
   selector: 'app-select-item-table',
   templateUrl: './select-item-table.component.html',
@@ -101,7 +102,7 @@ export class SelectItemTableComponent implements OnInit {
     newIdbItem.reportYear = this.selectedAnalysisItem.reportYear;
     newIdbItem = this.analysisService.setBaselineAdjustments(this.facility, newIdbItem);
     newIdbItem.setupErrors = this.analysisValidationService.getAnalysisItemErrors(newIdbItem);
-    newIdbItem = await this.analysisDbService.addWithObservable(newIdbItem).toPromise();
+    newIdbItem = await firstValueFrom(this.analysisDbService.addWithObservable(newIdbItem));
     this.selectedFacilityItemId = newIdbItem.guid;
     await this.save();
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();

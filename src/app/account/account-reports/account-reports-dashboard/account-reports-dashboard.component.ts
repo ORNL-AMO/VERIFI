@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Subscription, firstValueFrom } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { IdbAccount, IdbAccountReport } from 'src/app/models/idb';
@@ -40,7 +40,7 @@ export class AccountReportsDashboardComponent {
 
   async createNewReport() {
     let newReport: IdbAccountReport = this.accountReportDbService.getNewAccountReport();
-    let addedReport: IdbAccountReport = await this.accountReportDbService.addWithObservable(newReport).toPromise();
+    let addedReport: IdbAccountReport = await firstValueFrom(this.accountReportDbService.addWithObservable(newReport));
     await this.dbChangesService.setAccountReports(this.selectedAccount);
     this.accountReportDbService.selectedReport.next(addedReport);
     this.toastNotificationService.showToast('Report Created', undefined, undefined, false, "alert-success");
