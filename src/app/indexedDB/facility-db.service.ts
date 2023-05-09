@@ -33,6 +33,13 @@ export class FacilitydbService {
         return this.dbService.getAll('facilities');
     }
 
+    async getAllAccountFacilities(accountId: string): Promise<Array<IdbFacility>> {
+        let allFacilities: Array<IdbFacility> = await firstValueFrom(this.getAll());
+        let accountFacilites: Array<IdbFacility> = allFacilities.filter(facility => { return facility.accountId == accountId });
+        return accountFacilites;
+    }
+
+
     getById(facilityId: number): Observable<IdbFacility> {
         return this.dbService.getByKey('facilities', facilityId);
     }
@@ -85,7 +92,7 @@ export class FacilitydbService {
             guid: Math.random().toString(36).substr(2, 9),
             name: 'New Facility',
             country: 'US',
-            color: '#'+(Math.random() * 0xFFFFFF << 0).toString(16).padStart(6, '0'),
+            color: '#' + (Math.random() * 0xFFFFFF << 0).toString(16).padStart(6, '0'),
             city: account.city,
             state: account.state,
             zip: account.zip,
@@ -126,7 +133,7 @@ export class FacilitydbService {
         return '';
     }
 
-    getAccountFacilitiesCopy(): Array<IdbFacility>{
+    getAccountFacilitiesCopy(): Array<IdbFacility> {
         let accountFacilites: Array<IdbFacility> = this.accountFacilities.getValue();
         let accountFacilitesCopy: Array<IdbFacility> = JSON.parse(JSON.stringify(accountFacilites));
         return accountFacilitesCopy;

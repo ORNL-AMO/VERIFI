@@ -37,6 +37,13 @@ export class AccountAnalysisDbService {
     return this.dbService.getAll('accountAnalysisItems');
   }
 
+  async getAllAccountAnalysisItems(accountId: string): Promise<Array<IdbAccountAnalysisItem>>{
+    let allAnalysisItesm: Array<IdbAccountAnalysisItem> = await firstValueFrom(this.getAll())
+    let accountAnalysisItems: Array<IdbAccountAnalysisItem> = allAnalysisItesm.filter(item => { return item.accountId == accountId });
+    return accountAnalysisItems;
+  }
+
+
   getById(id: number): Observable<IdbAccountAnalysisItem> {
     return this.dbService.getByKey('accountAnalysisItems', id);
   }

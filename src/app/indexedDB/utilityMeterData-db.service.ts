@@ -25,6 +25,12 @@ export class UtilityMeterDatadbService {
         return this.dbService.getAll('utilityMeterData');
     }
 
+    async getAllAccountMeterData(accountId: string): Promise<Array<IdbUtilityMeterData>> {
+        let allMeterData: Array<IdbUtilityMeterData> = await firstValueFrom(this.getAll());
+        let accountMeterData: Array<IdbUtilityMeterData> = allMeterData.filter(data => { return data.accountId = accountId });
+        return accountMeterData;
+    }
+
     getById(meterDataId: number): Observable<IdbUtilityMeterData> {
         return this.dbService.getByKey('utilityMeterData', meterDataId);
     }
@@ -54,7 +60,7 @@ export class UtilityMeterDatadbService {
 
     deleteWithObservable(meterDataId: number): Observable<any> {
         return this.dbService.deleteByKey('utilityMeterData', meterDataId);
-    }  
+    }
 
     async deleteAllFacilityMeterData(facilityId: string) {
         let accountMeterDataEntries: Array<IdbUtilityMeterData> = this.accountMeterData.getValue();
@@ -197,23 +203,23 @@ export class UtilityMeterDatadbService {
     getYearOptions(inAccount?: boolean): Array<number> {
         let meterData: Array<IdbUtilityMeterData>
         if (!inAccount) {
-          meterData = this.facilityMeterData.getValue();
+            meterData = this.facilityMeterData.getValue();
         } else {
-          meterData = this.accountMeterData.getValue();
+            meterData = this.accountMeterData.getValue();
         }
         if (meterData.length != 0) {
-          let orderedMeterData: Array<IdbUtilityMeterData> = _.orderBy(meterData, (data) => { return new Date(data.readDate) });
-          let firstBill: IdbUtilityMeterData = orderedMeterData[0];
-          let lastBill: IdbUtilityMeterData = orderedMeterData[orderedMeterData.length - 1];
-          let yearStart: number = new Date(firstBill.readDate).getUTCFullYear();
-          let yearEnd: number = new Date(lastBill.readDate).getUTCFullYear();
-          let yearOptions: Array<number> = new Array();
-          for (let i = yearStart; i <= yearEnd; i++) {
-            yearOptions.push(i);
-          }
-          return yearOptions;
+            let orderedMeterData: Array<IdbUtilityMeterData> = _.orderBy(meterData, (data) => { return new Date(data.readDate) });
+            let firstBill: IdbUtilityMeterData = orderedMeterData[0];
+            let lastBill: IdbUtilityMeterData = orderedMeterData[orderedMeterData.length - 1];
+            let yearStart: number = new Date(firstBill.readDate).getUTCFullYear();
+            let yearEnd: number = new Date(lastBill.readDate).getUTCFullYear();
+            let yearOptions: Array<number> = new Array();
+            for (let i = yearStart; i <= yearEnd; i++) {
+                yearOptions.push(i);
+            }
+            return yearOptions;
         } else {
-          return
+            return
         }
-      }
+    }
 }

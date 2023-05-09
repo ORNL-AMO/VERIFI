@@ -2,8 +2,6 @@ import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { Injectable } from '@angular/core';
 import { IdbUtilityMeter, MeterSource } from '../models/idb';
 import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
-import { FacilitydbService } from './facility-db.service';
-import { AccountdbService } from './account-db.service';
 
 @Injectable({
     providedIn: 'root'
@@ -12,13 +10,19 @@ export class UtilityMeterdbService {
 
     facilityMeters: BehaviorSubject<Array<IdbUtilityMeter>>;
     accountMeters: BehaviorSubject<Array<IdbUtilityMeter>>;
-    constructor(private dbService: NgxIndexedDBService, private facilityDbService: FacilitydbService, private accountdbService: AccountdbService) {
+    constructor(private dbService: NgxIndexedDBService) {
         this.facilityMeters = new BehaviorSubject<Array<IdbUtilityMeter>>(new Array());
         this.accountMeters = new BehaviorSubject<Array<IdbUtilityMeter>>(new Array());
     }
 
     getAll(): Observable<Array<IdbUtilityMeter>> {
         return this.dbService.getAll('utilityMeter');
+    }
+
+    async getAllAccountMeters(accountId: string): Promise<Array<IdbUtilityMeter>> {
+        let allMeters: Array<IdbUtilityMeter> = await firstValueFrom(this.getAll())
+        let accountMeters: Array<IdbUtilityMeter> = allMeters.filter(meter => { return meter.accountId == accountId });
+        return accountMeters;
     }
 
     getById(meterId: number): Observable<IdbUtilityMeter> {

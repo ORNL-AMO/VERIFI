@@ -121,15 +121,13 @@ export class UtilityMetersTableComponent implements OnInit {
     }
     let selectedFacility: IdbFacility = this.facilitydbService.selectedFacility.getValue();
     //set meters
-    let allMeters: Array<IdbUtilityMeter> = await firstValueFrom(this.utilityMeterdbService.getAll())
-    let accountMeters: Array<IdbUtilityMeter> = allMeters.filter(meter => { return meter.accountId == selectedFacility.accountId });
+    let accountMeters: Array<IdbUtilityMeter> = await this.utilityMeterdbService.getAllAccountMeters(selectedFacility.accountId);
     this.utilityMeterdbService.accountMeters.next(accountMeters);
     let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == selectedFacility.guid });
     this.utilityMeterdbService.facilityMeters.next(facilityMeters);
     //set meter data
 
-    allMeterData = await firstValueFrom(this.utilityMeterDatadbService.getAll());
-    let accountMeterData: Array<IdbUtilityMeterData> = allMeterData.filter(meterData => { return meterData.accountId == selectedFacility.accountId });
+    let accountMeterData: Array<IdbUtilityMeterData> = await this.utilityMeterDatadbService.getAllAccountMeterData(selectedFacility.accountId);
     this.utilityMeterDatadbService.accountMeterData.next(accountMeterData);
     let facilityMeterData: Array<IdbUtilityMeterData> = accountMeterData.filter(meterData => { return meterData.facilityId == selectedFacility.guid });
     this.utilityMeterDatadbService.facilityMeterData.next(facilityMeterData);

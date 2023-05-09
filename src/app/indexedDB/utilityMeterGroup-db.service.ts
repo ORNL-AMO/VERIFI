@@ -19,6 +19,12 @@ export class UtilityMeterGroupdbService {
         return this.dbService.getAll('utilityMeterGroups');
     }
 
+    async getAllAccountMeterGroups(accountId: string): Promise<Array<IdbUtilityMeterGroup>> {
+        let allMeterGroups: Array<IdbUtilityMeterGroup> = await firstValueFrom(this.getAll());
+        let accountMeterGroups: Array<IdbUtilityMeterGroup> = allMeterGroups.filter(meterGroup => { return meterGroup.accountId == accountId });
+        return accountMeterGroups;
+    }
+
     getById(groupId: number): Observable<IdbUtilityMeterGroup> {
         return this.dbService.getByKey('utilityMeterGroups', groupId);
     }

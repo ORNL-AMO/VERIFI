@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { LocalStorageService } from 'ngx-webstorage';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { firstValueFrom, Observable } from 'rxjs';
 import { IdbOverviewReportOptions } from '../models/idb';
 
 @Injectable({
@@ -15,7 +15,7 @@ export class OverviewReportOptionsDbService {
   // accountOverviewReportOptions: BehaviorSubject<Array<IdbOverviewReportOptions>>;
   // selectedOverviewReportOptions: BehaviorSubject<IdbOverviewReportOptions>;
   // overviewReportOptionsTemplates: BehaviorSubject<Array<IdbOverviewReportOptions>>;
-  constructor(private dbService: NgxIndexedDBService, private localStorageService: LocalStorageService) {
+  constructor(private dbService: NgxIndexedDBService) {
     // this.accountOverviewReportOptions = new BehaviorSubject<Array<IdbOverviewReportOptions>>(new Array());
     // this.overviewReportOptionsTemplates = new BehaviorSubject<Array<IdbOverviewReportOptions>>(new Array());
     // this.selectedOverviewReportOptions = new BehaviorSubject<IdbOverviewReportOptions>(undefined);
@@ -35,6 +35,13 @@ export class OverviewReportOptionsDbService {
 
   getAll(): Observable<Array<IdbOverviewReportOptions>> {
     return this.dbService.getAll('overviewReportOptions');
+  }
+
+  async getAllAccountReports(accountId: string): Promise<Array<IdbOverviewReportOptions>>{
+    let allOverviewReportOptions: Array<IdbOverviewReportOptions> = await firstValueFrom(this.getAll());
+    let overviewReportOptions: Array<IdbOverviewReportOptions> = allOverviewReportOptions.filter(option => { return option.accountId == accountId });
+    return overviewReportOptions;
+
   }
 
   // getById(id: number): Observable<IdbOverviewReportOptions> {

@@ -454,8 +454,7 @@ export class BackupDataService {
 
     //delete overview reports
     //todo remove in future (overview reports no longer used)
-    let allOverviewReportOptions: Array<IdbOverviewReportOptions> = await firstValueFrom(this.overviewReportOptionsDbService.getAll());
-    let overviewReportOptions: Array<IdbOverviewReportOptions> = allOverviewReportOptions.filter(option => { return option.accountId == account.guid });
+    let overviewReportOptions: Array<IdbOverviewReportOptions> = await this.overviewReportOptionsDbService.getAllAccountReports(account.guid);
     for (let i = 0; i < overviewReportOptions.length; i++) {
       await firstValueFrom(this.overviewReportOptionsDbService.deleteWithObservable(overviewReportOptions[i].id));
     }

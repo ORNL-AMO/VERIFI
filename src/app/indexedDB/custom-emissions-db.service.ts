@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
 import { IdbAccount, IdbCustomEmissionsItem } from '../models/idb';
-import { AccountdbService } from './account-db.service';
 
 @Injectable({
   providedIn: 'root'
@@ -10,15 +9,19 @@ import { AccountdbService } from './account-db.service';
 export class CustomEmissionsDbService {
 
   accountEmissionsItems: BehaviorSubject<Array<IdbCustomEmissionsItem>>;
-  constructor(private dbService: NgxIndexedDBService, private accountDbService: AccountdbService) { 
+  constructor(private dbService: NgxIndexedDBService) { 
     this.accountEmissionsItems = new BehaviorSubject<Array<IdbCustomEmissionsItem>>([]);
   }
 
-
-
-
   getAll(): Observable<Array<IdbCustomEmissionsItem>> {
     return this.dbService.getAll('customEmissionsItems');
+  }
+
+  async getAllAccountCustomEmissions(accountId: string): Promise<Array<IdbCustomEmissionsItem>> {
+    let allCustomEmissionsItems: Array<IdbCustomEmissionsItem> = await firstValueFrom(this.getAll());
+    let customEmissionsItems: Array<IdbCustomEmissionsItem> = allCustomEmissionsItems.filter(item => { return item.accountId == accountId });
+    return customEmissionsItems;
+
   }
 
   getById(id: number): Observable<IdbCustomEmissionsItem> {

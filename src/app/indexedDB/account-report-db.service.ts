@@ -35,6 +35,13 @@ export class AccountReportDbService {
     return this.dbService.getAll('accountReports');
   }
 
+  async getAllAccountReports(accountId: string): Promise<Array<IdbAccountReport>> {
+    let allReports: Array<IdbAccountReport> = await firstValueFrom(this.getAll())
+    let accountReports: Array<IdbAccountReport> = allReports.filter(report => { return report.accountId == accountId });
+    return accountReports;
+
+  }
+
   getById(id: number): Observable<IdbAccountReport> {
     return this.dbService.getByKey('accountReports', id);
   }

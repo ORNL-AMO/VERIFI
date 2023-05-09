@@ -26,11 +26,6 @@ export class PredictorEntriesTableComponent {
   facilityPredictorEntries: Array<IdbPredictorEntry>;
   facilityPredictorEntriesSub: Subscription;
   predictorEntryToDelete: IdbPredictorEntry;
-  // addOrEdit: "add" | "edit";
-
-  // showPredictorMenu: boolean = false;
-  // showEditPredictors: boolean = false;
-  // predictorEntryToEdit: IdbPredictorEntry;
   itemsPerPage: number;
   itemsPerPageSub: Subscription;
   currentPageNumber: number = 1;
