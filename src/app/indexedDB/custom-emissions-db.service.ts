@@ -32,11 +32,6 @@ export class CustomEmissionsDbService {
     return this.dbService.getByIndex('customEmissionsItems', indexName, indexValue);
   }
 
-  // getAllByIndexRange(indexName: string, indexValue: number | string): Observable<Array<IdbCustomEmissionsItem>> {
-  //   let idbKeyRange: IDBKeyRange = IDBKeyRange.only(indexValue);
-  //   return this.dbService.getAllByIndex('customEmissionsItems', indexName, idbKeyRange);
-  // }
-
   count() {
     return this.dbService.count('accountAnalysisItems');
   }
@@ -55,7 +50,6 @@ export class CustomEmissionsDbService {
   }
 
   getNewAccountEmissionsItem(selectedAccount: IdbAccount): IdbCustomEmissionsItem {
-    // let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     return {
       accountId: selectedAccount.guid,
       guid: Math.random().toString(36).substr(2, 9),

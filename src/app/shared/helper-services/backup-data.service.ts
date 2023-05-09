@@ -113,7 +113,6 @@ export class BackupDataService {
     delete backupFile.account.id;
     backupFile.account.guid = accountGUIDs.newId;
     let newAccount: IdbAccount = await firstValueFrom(this.accountDbService.addWithObservable(backupFile.account));
-
     this.loadingService.setLoadingMessage('Adding Facilities...');
     let facilityGUIDs: Array<{ oldId: string, newId: string }> = new Array();
     for (let i = 0; i < backupFile.facilities.length; i++) {

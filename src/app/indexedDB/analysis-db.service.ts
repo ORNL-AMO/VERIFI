@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { LocalStorageService } from 'ngx-webstorage';
 import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
-import { AnalysisGroup, IdbAccount, IdbAnalysisItem, IdbFacility, IdbPredictorEntry, IdbUtilityMeterGroup, PredictorData } from '../models/idb';
+import { AnalysisGroup, IdbAccount, IdbAnalysisItem, IdbFacility, IdbUtilityMeterGroup, PredictorData } from '../models/idb';
 import { AccountdbService } from './account-db.service';
 import { FacilitydbService } from './facility-db.service';
 import { PredictordbService } from './predictors-db.service';
@@ -77,11 +77,6 @@ export class AnalysisDbService {
     return this.dbService.getByIndex('analysisItems', indexName, indexValue);
   }
 
-  // getAllByIndexRange(indexName: string, indexValue: number | string): Observable<Array<IdbAnalysisItem>> {
-  //   let idbKeyRange: IDBKeyRange = IDBKeyRange.only(indexValue);
-  //   return this.dbService.getAllByIndex('analysisItems', indexName, idbKeyRange);
-  // }
-
   count() {
     return this.dbService.count('analysisItems');
   }
@@ -108,10 +103,6 @@ export class AnalysisDbService {
     facilityMeterGroups.forEach(group => {
       if (group.groupType == 'Energy') {
         let predictorVariables: Array<PredictorData> = JSON.parse(JSON.stringify(predictors));
-        // predictorVariables.forEach(variable => {
-        //   variable.productionInAnalysis = true;
-        // });
-
         let analysisGroup: AnalysisGroup = {
           idbGroupId: group.guid,
           analysisType: 'regression',

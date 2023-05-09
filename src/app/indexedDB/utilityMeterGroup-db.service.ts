@@ -33,11 +33,6 @@ export class UtilityMeterGroupdbService {
         return this.dbService.getByIndex('utilityMeterGroups', indexName, indexValue);
     }
 
-    // getAllByIndexRange(indexName: string, indexValue: number | string): Observable<Array<IdbUtilityMeterGroup>> {
-    //     let idbKeyRange: IDBKeyRange = IDBKeyRange.only(indexValue);
-    //     return this.dbService.getAllByIndex('utilityMeterGroups', indexName, idbKeyRange);
-    // }
-
     count() {
         return this.dbService.count('utilityMeterGroups');
     }

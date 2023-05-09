@@ -42,11 +42,6 @@ export class PredictordbService {
         return this.dbService.getByIndex('predictors', indexName, indexValue);
     }
 
-    // getAllByIndexRange(indexName: string, indexValue: number | string): Observable<Array<IdbPredictorEntry>> {
-    //     let idbKeyRange: IDBKeyRange = IDBKeyRange.only(indexValue);
-    //     return this.dbService.getAllByIndex('predictors', indexName, idbKeyRange);
-    // }
-
     count() {
         return this.dbService.count('predictors');
     }

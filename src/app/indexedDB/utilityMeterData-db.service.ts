@@ -27,7 +27,7 @@ export class UtilityMeterDatadbService {
 
     async getAllAccountMeterData(accountId: string): Promise<Array<IdbUtilityMeterData>> {
         let allMeterData: Array<IdbUtilityMeterData> = await firstValueFrom(this.getAll());
-        let accountMeterData: Array<IdbUtilityMeterData> = allMeterData.filter(data => { return data.accountId = accountId });
+        let accountMeterData: Array<IdbUtilityMeterData> = allMeterData.filter(data => { return data.accountId == accountId });
         return accountMeterData;
     }
 
@@ -38,11 +38,6 @@ export class UtilityMeterDatadbService {
     getByIndex(indexName: string, indexValue: number): Observable<IdbUtilityMeterData> {
         return this.dbService.getByIndex('utilityMeterData', indexName, indexValue);
     }
-
-    // getAllByIndexRange(indexName: string, indexValue: number | string): Observable<Array<IdbUtilityMeterData>> {
-    //     let idbKeyRange: IDBKeyRange = IDBKeyRange.only(indexValue);
-    //     return this.dbService.getAllByIndex('utilityMeterData', indexName, idbKeyRange);
-    // }
 
     count() {
         return this.dbService.count('utilityMeterData');
@@ -75,6 +70,7 @@ export class UtilityMeterDatadbService {
 
     async deleteMeterDataEntriesAsync(meterDataEntries: Array<IdbUtilityMeterData>) {
         for (let i = 0; i < meterDataEntries.length; i++) {
+            meterDataEntries[i]
             await firstValueFrom(this.deleteWithObservable(meterDataEntries[i].id));
         }
     }

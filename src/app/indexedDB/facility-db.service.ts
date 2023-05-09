@@ -12,7 +12,6 @@ export class FacilitydbService {
 
     accountFacilities: BehaviorSubject<Array<IdbFacility>>;
     selectedFacility: BehaviorSubject<IdbFacility>;
-
     constructor(private dbService: NgxIndexedDBService, private localStorageService: LocalStorageService, private accountDbService: AccountdbService) {
         this.accountFacilities = new BehaviorSubject<Array<IdbFacility>>(new Array());
         this.selectedFacility = new BehaviorSubject<IdbFacility>(undefined);
@@ -39,7 +38,6 @@ export class FacilitydbService {
         return accountFacilites;
     }
 
-
     getById(facilityId: number): Observable<IdbFacility> {
         return this.dbService.getByKey('facilities', facilityId);
     }
@@ -48,15 +46,9 @@ export class FacilitydbService {
         return this.dbService.getByIndex('facilities', indexName, indexValue);
     }
 
-    // getAllByIndexRange(indexName: string, indexValue: number | string): Observable<Array<IdbFacility>> {
-    //     let idbKeyRange: IDBKeyRange = IDBKeyRange.only(indexValue);
-    //     return this.dbService.getAllByIndex('facilities', indexName, idbKeyRange);
-    // }
-
     count() {
         return this.dbService.count('facilities');
     }
-
 
     addWithObservable(facility: IdbFacility): Observable<IdbFacility> {
         facility.modifiedDate = new Date();
