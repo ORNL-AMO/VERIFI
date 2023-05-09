@@ -54,7 +54,7 @@ export class UtilityMeterDatadbService {
     }
 
     deleteWithObservable(meterDataId: number): Observable<any> {
-        return this.dbService.deleteByKey('utilityMeterData', meterDataId);
+        return this.dbService.delete('utilityMeterData', meterDataId);
     }
 
     async deleteAllFacilityMeterData(facilityId: string) {
@@ -70,7 +70,6 @@ export class UtilityMeterDatadbService {
 
     async deleteMeterDataEntriesAsync(meterDataEntries: Array<IdbUtilityMeterData>) {
         for (let i = 0; i < meterDataEntries.length; i++) {
-            meterDataEntries[i]
             await firstValueFrom(this.deleteWithObservable(meterDataEntries[i].id));
         }
     }
@@ -159,6 +158,7 @@ export class UtilityMeterDatadbService {
         let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
         let facility: IdbFacility = facilities.find(facility => { return facility.guid == meter.facilityId });
         let meterData: Array<IdbUtilityMeterData> = this.getMeterDataFromMeterId(meter.guid);
+        //TODO: check copy method for performance hit.
         let meterDataCopy: Array<IdbUtilityMeterData> = JSON.parse(JSON.stringify(meterData));
         if (!calanderizationOptions) {
             if (facility && facility.energyIsSource && !isMeterReadings) {
