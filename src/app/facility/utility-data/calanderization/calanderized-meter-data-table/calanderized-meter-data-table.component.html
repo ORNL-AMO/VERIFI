@@ -18,16 +18,21 @@
                 Total Energy<br> (<span [innerHTML]="calanderizedMeter.energyUnit | settingsLabel"></span>)
             </th>
             <th (click)="setOrderDataField('marketEmissions')"
-                [ngClass]="{'active': orderDataField == 'marketEmissions'}">Total <br>Market-Based<br>Emissions (kg
+                [ngClass]="{'active': orderDataField == 'marketEmissions'}" *ngIf="calanderizedMeter.showEmissions">
+                Total <br>Market-Based<br>Emissions (kg
                 CO<sub>2</sub>e)</th>
             <th (click)="setOrderDataField('locationEmissions')"
-                [ngClass]="{'active': orderDataField == 'locationEmissions'}">Total <br>Location-Based<br>Emissions (kg
+                [ngClass]="{'active': orderDataField == 'locationEmissions'}" *ngIf="calanderizedMeter.showEmissions">
+                Total <br>Location-Based<br>Emissions (kg
                 CO<sub>2</sub>e)</th>
-            <th (click)="setOrderDataField('RECs')" [ngClass]="{'active': orderDataField == 'RECs'}">RECs<br> (MWh)</th>
-            <th (click)="setOrderDataField('excessRECs')" [ngClass]="{'active': orderDataField == 'excessRECs'}">Excess
+            <th (click)="setOrderDataField('RECs')" [ngClass]="{'active': orderDataField == 'RECs'}"
+                *ngIf="calanderizedMeter.showEmissions">RECs<br> (MWh)</th>
+            <th (click)="setOrderDataField('excessRECs')" [ngClass]="{'active': orderDataField == 'excessRECs'}"
+                *ngIf="calanderizedMeter.showEmissions">Excess
                 RECs<br> (MWh)</th>
             <th (click)="setOrderDataField('excessRECsEmissions')"
-                [ngClass]="{'active': orderDataField == 'excessRECsEmissions'}">Excess
+                [ngClass]="{'active': orderDataField == 'excessRECsEmissions'}" *ngIf="calanderizedMeter.showEmissions">
+                Excess
                 RECs <br>Emissions<br> (kg CO<sub>2</sub>e)</th>
             <th (click)="setOrderDataField('energyCost')" [ngClass]="{'active': orderDataField == 'energyCost'}">Total
                 Cost</th>
