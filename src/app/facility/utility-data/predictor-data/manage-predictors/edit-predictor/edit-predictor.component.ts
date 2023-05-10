@@ -223,8 +223,10 @@ export class EditPredictorComponent {
     this.weatherDataService.selectedStation = weatherStation;
     if (this.predictorForm.controls.weatherDataType.value == 'CDD') {
       this.weatherDataService.coolingTemp = this.predictorForm.controls.coolingBaseTemperature.value;
+      this.weatherDataService.weatherDataSelection = 'CDD';
     } else {
       this.weatherDataService.heatingTemp = this.predictorForm.controls.heatingBaseTemperature.value;
+      this.weatherDataService.weatherDataSelection = 'HDD';
     }
 
     this.weatherDataService.selectedFacility = this.facility;

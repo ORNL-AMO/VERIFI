@@ -106,9 +106,7 @@ export class WeatherDataComponent {
     await this.analysisDbService.updateAnalysisPredictors(facilityPredictorsCopy, this.selectedFacility.guid);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('Degree Day Predictors Created', undefined, undefined, false, 'alert-success', false);
-    this.router.navigateByUrl('facility/' + this.selectedFacility.id + '/utility/predictors/manage/predictor-table')
-    // this.cancel();
-    //todo: success toast and navigate to facility
+    this.router.navigateByUrl('facility/' + this.selectedFacility.id + '/utility/predictors/manage/predictor-table');
   }
 }
 
