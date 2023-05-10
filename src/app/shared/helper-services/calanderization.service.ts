@@ -63,7 +63,7 @@ export class CalanderizationService {
       if (meter.source != 'Electricity') {
         showConsumption = calanderizedMeter.find(meterData => { return meterData.energyConsumption != meterData.energyUse }) != undefined;
       }
-      let consumptionUnit: string = meter.startingUnit;
+      let consumptionUnit: string = this.energyUnitsHelperService.getFacilityUnitFromMeter(meter);
       let showEmissions: boolean = (meter.source == "Electricity" || meter.source == "Natural Gas" || meter.source == "Other Fuels");
 
       calanderizedMeterData.push({

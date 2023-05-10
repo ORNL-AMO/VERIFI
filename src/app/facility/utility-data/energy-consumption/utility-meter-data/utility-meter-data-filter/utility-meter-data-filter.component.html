@@ -138,13 +138,13 @@
                         [(ngModel)]="generalUtilityDataFilters.totalCost" (change)="save()">
                     <label for="totalCost" class="form-check-label">Total Cost</label>
                 </div>
-                <div class="form-check">
+                <div class="form-check" *ngIf="showEmissions">
                     <input class="form-check-input" type="checkbox" name="totalMarketEmissions"
                         id="totalMarketEmissions" [(ngModel)]="generalUtilityDataFilters.totalMarketEmissions"
                         (change)="save()">
                     <label for="totalMarketEmissions" class="form-check-label">Market Emissions</label>
                 </div>
-                <div class="form-check">
+                <div class="form-check" *ngIf="showEmissions">
                     <input class="form-check-input" type="checkbox" name="totalLocationEmissions"
                         id="totalLocationEmissions" [(ngModel)]="generalUtilityDataFilters.totalLocationEmissions"
                         (change)="save()">

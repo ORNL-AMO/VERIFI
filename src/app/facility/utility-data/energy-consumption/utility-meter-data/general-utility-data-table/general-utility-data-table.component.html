@@ -5,7 +5,7 @@
             <th [attr.colspan]="numGeneralInformation">
                 General Information
             </th>
-            <th *ngIf="showEmissionsSection" [attr.colspan]="numEmissions">
+            <th *ngIf="showEmissionsSection && showEmissions" [attr.colspan]="numEmissions">
                 Emissions
             </th>
             <th *ngIf="showDetailedCharges" [attr.colspan]="numDetailedCharges">
