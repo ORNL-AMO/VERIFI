@@ -32,9 +32,12 @@
         <button class="item-right" (click)="cancelApplyToFacility()">x</button>
     </div>
     <div class="popup-body">
-        <p>Select the facility to create new heating and cooling degree day predictors using the selected weather
-            station and
-            temperature thresholds.</p>
+        <p *ngIf="weatherDataSelection == 'HDD'">Select the facility to create new heating degree day predictors using
+            the selected weather station and temperature threshold.</p>
+        <p *ngIf="weatherDataSelection == 'CDD'">Select the facility to create new cooling degree day predictors using
+            the selected weather station and temperature threshold.</p>
+        <p *ngIf="weatherDataSelection == 'degreeDays'">Select the facility to create new heating and cooling degree day
+            predictors using the selected weather station and temperature thresholds.</p>
         <form>
             <select class="form-select" name="selectedFacility" [(ngModel)]="selectedFacility">
                 <option *ngFor="let facility of facilities" [ngValue]="facility">{{facility.name}}</option>

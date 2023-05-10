@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { WeatherStation } from '../models/degreeDays';
+import { WeatherDataSelection, WeatherStation } from '../models/degreeDays';
 import { BehaviorSubject } from 'rxjs';
 import { IdbFacility } from '../models/idb';
 
@@ -30,8 +30,8 @@ export class WeatherDataService {
 
   applyToFacility: BehaviorSubject<boolean>;
   selectedFacility: IdbFacility;
-
-  constructor() { 
+  weatherDataSelection: WeatherDataSelection = 'degreeDays';
+  constructor() {
     this.applyToFacility = new BehaviorSubject<boolean>(false);
   }
 }

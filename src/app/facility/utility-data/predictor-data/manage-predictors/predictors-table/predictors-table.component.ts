@@ -104,12 +104,18 @@ export class PredictorsTableComponent {
       let predictorPair: PredictorData = this.degreeDayPredictors.find(predictorPair => { return predictorPair.weatherStationId == predictor.weatherStationId && predictorPair.weatherDataType == 'HDD' });
       if (predictorPair) {
         this.weatherDataService.heatingTemp = predictorPair.heatingBaseTemperature;
+        this.weatherDataService.weatherDataSelection = 'degreeDays';
+      }else{
+        this.weatherDataService.weatherDataSelection = 'CDD';
       }
     } else {
       this.weatherDataService.heatingTemp = predictor.heatingBaseTemperature;
       let predictorPair: PredictorData = this.degreeDayPredictors.find(predictorPair => { return predictorPair.weatherStationId == predictor.weatherStationId && predictorPair.weatherDataType == 'CDD' });
       if (predictorPair) {
         this.weatherDataService.coolingTemp = predictorPair.coolingBaseTemperature;
+        this.weatherDataService.weatherDataSelection = 'degreeDays';
+      }else{
+        this.weatherDataService.weatherDataSelection = 'HDD';
       }
     }
     let endDate: Date = new Date(weatherStation.end);

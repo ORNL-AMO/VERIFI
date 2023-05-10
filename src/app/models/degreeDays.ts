@@ -63,3 +63,25 @@ export interface DetailDegreeDay {
     stationName: string,
     gapInData: boolean
 }
+
+export type WeatherDataSelection = 'degreeDays' | 'CDD' | 'HDD';
+
+export interface WeatherDataSelectionOption {
+    selection: WeatherDataSelection,
+    label: string
+}
+
+export const WeatherDataSelectionOptions: Array<WeatherDataSelectionOption> = [
+    {
+        selection: 'degreeDays',
+        label: 'Both Degree Days'
+    },
+    {
+        selection: 'CDD',
+        label: 'Cooling Degree Days'
+    },
+    {
+        selection: 'HDD',
+        label: 'Heating Degree Days'
+    }
+]

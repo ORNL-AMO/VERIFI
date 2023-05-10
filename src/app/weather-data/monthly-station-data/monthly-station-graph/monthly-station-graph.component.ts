@@ -1,6 +1,6 @@
 import { Component, Input, ViewChild, ElementRef, SimpleChanges } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
-import { DetailDegreeDay } from 'src/app/models/degreeDays';
+import { DetailDegreeDay, WeatherDataSelection } from 'src/app/models/degreeDays';
 import { Months } from 'src/app/shared/form-data/months';
 
 @Component({
@@ -17,6 +17,8 @@ export class MonthlyStationGraphComponent {
   heatingTemp: number;
   @Input()
   coolingTemp: number;
+  @Input()
+  weatherDataSelection: WeatherDataSelection;
 
 
   @ViewChild('degreeDaysChart', { static: false }) degreeDaysChart: ElementRef;
@@ -29,15 +31,16 @@ export class MonthlyStationGraphComponent {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if (changes.degreeDays && !changes.degreeDays.isFirstChange()) {
+    if ((changes.degreeDays && !changes.degreeDays.isFirstChange()) || (changes.weatherDataSelection && !changes.weatherDataSelection.isFirstChange())) {
       this.drawChart();
     }
   }
 
   drawChart() {
     if (this.degreeDaysChart) {
-      let traceData = [
-        {
+      let traceData = [];
+      if (this.weatherDataSelection == 'degreeDays' || this.weatherDataSelection == 'HDD') {
+        traceData.push({
           x: this.detailedDegreeDays.map(data => { return data.time }),
           y: this.detailedDegreeDays.map(data => { return data.heatingDegreeDay }),
           type: 'bar',
@@ -46,41 +49,8 @@ export class MonthlyStationGraphComponent {
           marker: {
             color: '#C0392B'
           }
-        },
-        
-        {
-          x: this.detailedDegreeDays.map(data => { return data.time }),
-          y: this.detailedDegreeDays.map(data => { return data.coolingDegreeDay }),
-          type: 'bar',
-          name: 'Cooling Degree Days',
-          yaxis: 'y',
-          marker: {
-            color: '#2980B9'
-          }
-        },
-        {
-          x: this.detailedDegreeDays.map(data => { return data.time }),
-          y: this.detailedDegreeDays.map(data => { return data.dryBulbTemp }),
-          type: 'scatter',
-          name: 'Dry Bulb Temp Readings',
-          yaxis: 'y2',
-          mode: 'lines+markers',
-          marker: {
-            color: '#273746'
-          }
-        },
-        // {
-        //   x: this.detailedDegreeDays.map(data => { return data.time }),
-        //   y: this.detailedDegreeDays.map(data => { return data.lagDryBulbTemp }),
-        //   type: 'scatter',
-        //   name: 'Lag Dry Bulb Temp',
-        //   yaxis: 'y2',
-        //   mode: 'lines+markers',
-        //   marker: {
-        //     color: '#273746'
-        //   }
-        // },
-        {
+        });
+        traceData.push({
           x: this.detailedDegreeDays.map(data => { return data.time }),
           y: this.detailedDegreeDays.map(data => { return this.heatingTemp }),
           type: 'scatter',
@@ -89,15 +59,39 @@ export class MonthlyStationGraphComponent {
           marker: {
             color: '#F39C12'
           }
-        },
-        {
+        })
+      }
+      if (this.weatherDataSelection == 'degreeDays' || this.weatherDataSelection == 'CDD') {
+        traceData.push({
+          x: this.detailedDegreeDays.map(data => { return data.time }),
+          y: this.detailedDegreeDays.map(data => { return data.coolingDegreeDay }),
+          type: 'bar',
+          name: 'Cooling Degree Days',
+          yaxis: 'y',
+          marker: {
+            color: '#2980B9'
+          }
+        });
+        traceData.push({
           x: this.detailedDegreeDays.map(data => { return data.time }),
           y: this.detailedDegreeDays.map(data => { return this.coolingTemp }),
           type: 'scatter',
           name: 'Cooling Base Temp',
           yaxis: 'y2',
+        })
+      }
+
+      traceData.push({
+        x: this.detailedDegreeDays.map(data => { return data.time }),
+        y: this.detailedDegreeDays.map(data => { return data.dryBulbTemp }),
+        type: 'scatter',
+        name: 'Dry Bulb Temp Readings',
+        yaxis: 'y2',
+        mode: 'lines+markers',
+        marker: {
+          color: '#273746'
         }
-      ];
+      });
 
       var layout = {
         legend: {
