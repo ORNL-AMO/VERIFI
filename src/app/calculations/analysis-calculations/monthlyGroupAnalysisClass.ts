@@ -87,7 +87,7 @@ export class MonthlyGroupAnalysisClass {
     this.annualMeterDataUsage = new Array();
     for (let year = this.baselineYear + 1; year <= this.endDate.getUTCFullYear(); year++) {
       let yearMeterData: Array<MonthlyData> = this.groupMonthlyData.filter(data => { return data.year == year });
-      let totalUsage: number = _.sumBy(yearMeterData, 'energyUse');
+      let totalUsage: number = _.sumBy(yearMeterData, 'energyConsumption');
       this.annualMeterDataUsage.push({ year: year, usage: totalUsage });
     }
   }
@@ -96,7 +96,7 @@ export class MonthlyGroupAnalysisClass {
     if (this.selectedGroup.analysisType == 'energyIntensity' || this.selectedGroup.analysisType == 'modifiedEnergyIntensity') {
       let baselineYearPredictorData: Array<IdbPredictorEntry> = filterYearPredictorData(this.facilityPredictorData, this.baselineYear, this.facility);
       let baselineMeterData: Array<MonthlyData> = filterYearMeterData(this.groupMonthlyData, this.baselineYear, this.facility);
-      let totalBaselineYearEnergy: number = _.sumBy(baselineMeterData, 'energyUse');
+      let totalBaselineYearEnergy: number = _.sumBy(baselineMeterData, 'energyConsumption');
       let totalPredictorUsage: number = getPredictorUsage(this.predictorVariables, baselineYearPredictorData);
       this.baselineYearEnergyIntensity = totalBaselineYearEnergy / totalPredictorUsage;
     } else {
@@ -108,7 +108,7 @@ export class MonthlyGroupAnalysisClass {
     if (selectedGroup.analysisType == 'energyIntensity' || selectedGroup.analysisType == 'modifiedEnergyIntensity') {
       let baselineYearPredictorData: Array<IdbPredictorEntry> = filterYearPredictorData(facilityPredictorData, baselineYear, facility);
       let baselineMeterData: Array<MonthlyData> = filterYearMeterData(allMeterData, baselineYear, facility);
-      let totalBaselineYearEnergy: number = _.sumBy(baselineMeterData, 'energyUse');
+      let totalBaselineYearEnergy: number = _.sumBy(baselineMeterData, 'energyConsumption');
       let totalPredictorUsage: number = getPredictorUsage(predictorVariables, baselineYearPredictorData);
       return totalBaselineYearEnergy / totalPredictorUsage;
     } else {

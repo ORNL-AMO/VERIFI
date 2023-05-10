@@ -141,8 +141,8 @@ export class RegressionModelsService {
         let dataDate: Date = new Date(data.date);
         return dataDate.getUTCMonth() == startDate.getUTCMonth() && dataDate.getUTCFullYear() == startDate.getUTCFullYear();
       });
-      let energyUse: number = _.sumBy(monthData, 'energyUse');
-      endog.push(energyUse);
+      let energyConsumption: number = _.sumBy(monthData, 'energyConsumption');
+      endog.push(energyConsumption);
       let monthPredictorData: Array<IdbPredictorEntry> = facilityPredictorData.filter(pData => {
         let dataDate: Date = new Date(pData.date);
         return dataDate.getUTCMonth() == startDate.getUTCMonth() && dataDate.getUTCFullYear() == startDate.getUTCFullYear();

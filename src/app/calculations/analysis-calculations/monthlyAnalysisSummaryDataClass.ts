@@ -66,7 +66,7 @@ export class MonthlyAnalysisSummaryDataClass {
     }
 
     setEnergyUse() {
-        this.energyUse = _.sumBy(this.monthMeterData, 'energyUse');
+        this.energyUse = _.sumBy(this.monthMeterData, 'energyConsumption');
     }
 
     setBaselineActualEnergyUse(baselineYear: number, previousMonthsSummaryData: Array<MonthlyAnalysisSummaryDataClass>) {
