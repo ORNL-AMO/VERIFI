@@ -7,8 +7,10 @@
             <th>Date</th>
             <th>% of Day</th>
             <th>Dry<br> Bulb Temp</th>
-            <th>Heating Degree<br> Days</th>
-            <th>Cooling Degree<br> Days</th>
+            <th *ngIf="weatherDataSelection == 'degreeDays' || weatherDataSelection == 'HDD'">Heating Degree<br> Days
+            </th>
+            <th *ngIf="weatherDataSelection == 'degreeDays' || weatherDataSelection == 'CDD'">Cooling Degree<br> Days
+            </th>
         </tr>
     </thead>
     <tbody class="table-group-divider">
@@ -24,10 +26,10 @@
             <td>
                 {{summaryData.dryBulbTemp | number}}
             </td>
-            <td>
+            <td *ngIf="weatherDataSelection == 'degreeDays' || weatherDataSelection == 'HDD'">
                 {{summaryData.heatingDegreeDay | number}}
             </td>
-            <td>
+            <td *ngIf="weatherDataSelection == 'degreeDays' || weatherDataSelection == 'CDD'">
                 {{summaryData.coolingDegreeDay | number}}
             </td>
         </tr>
@@ -41,10 +43,10 @@
 
             </th>
             <th>
-            <th>
+            <th *ngIf="weatherDataSelection == 'degreeDays' || weatherDataSelection == 'HDD'">
                 {{detailedDegreeDays | total: 'heatingDegreeDay' | number}}
             </th>
-            <th>
+            <th *ngIf="weatherDataSelection == 'degreeDays' || weatherDataSelection == 'CDD'">
                 {{detailedDegreeDays | total: 'coolingDegreeDay' | number}}
             </th>
         </tr>

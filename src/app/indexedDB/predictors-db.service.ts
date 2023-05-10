@@ -290,38 +290,53 @@ export class PredictordbService {
 
 
 
-    async createPredictorHeatingCoolingDegreeDays(facility: IdbFacility, heatingPredictor: PredictorData, coolingPredictor: PredictorData) {
+    async createPredictorHeatingCoolingDegreeDays(facility: IdbFacility, heatingPredictor?: PredictorData, coolingPredictor?: PredictorData) {
         let accountPredictorEntries: Array<IdbPredictorEntry> = this.accountPredictorEntries.getValue();
         let facilityPredictorEntries: Array<IdbPredictorEntry> = accountPredictorEntries.filter(predictorEntry => { return predictorEntry.facilityId == facility.guid });
         for (let index = 0; index < facilityPredictorEntries.length; index++) {
-            let predictorEntry: IdbPredictorEntry = facilityPredictorEntries[index];
-            let heatingPredictorIndex: number = predictorEntry.predictors.findIndex(predictor => { return predictor.id == heatingPredictor.id });
-            let heatingPredictorData: PredictorData = predictorEntry.predictors[heatingPredictorIndex];
-            let coolingPredictorIndex: number = predictorEntry.predictors.findIndex(predictor => { return predictor.id == coolingPredictor.id });
-            let coolingPredictorData: PredictorData = predictorEntry.predictors[coolingPredictorIndex];
             //get degree days
+            let weatherStationId: string;
+            let heatingBaseTemperature: number = 0;
+            if (heatingPredictor) {
+                weatherStationId = heatingPredictor.weatherStationId;
+                heatingBaseTemperature = heatingPredictor.heatingBaseTemperature;
+            }
+            let coolingBaseTemperature: number = 0;
+            if (coolingPredictor) {
+                weatherStationId = coolingPredictor.weatherStationId;
+                coolingBaseTemperature = coolingPredictor.coolingBaseTemperature;
+            }
+            let predictorEntry: IdbPredictorEntry = facilityPredictorEntries[index];
             let dataDate: Date = new Date(predictorEntry.date)
             this.loadingService.setLoadingMessage('Calculating Degree Days ' + Months[dataDate.getMonth()].name + ', ' + dataDate.getFullYear() + '...')
-            let degreeDays: Array<DetailDegreeDay> = await this.degreeDaysService.getDailyDataFromMonth(dataDate.getMonth(), dataDate.getFullYear(), heatingPredictorData.heatingBaseTemperature, coolingPredictorData.coolingBaseTemperature, heatingPredictorData.weatherStationId);
+            let degreeDays: Array<DetailDegreeDay> = await this.degreeDaysService.getDailyDataFromMonth(dataDate.getMonth(), dataDate.getFullYear(), heatingBaseTemperature, coolingBaseTemperature, weatherStationId);
             let hasErrors: DetailDegreeDay = degreeDays.find(degreeDay => {
                 return degreeDay.gapInData == true
             });
-            let totalCDD: number = _.sumBy(degreeDays, 'coolingDegreeDay');
-            coolingPredictorData.amount = totalCDD;
-            coolingPredictorData.weatherStationId = degreeDays[0]?.stationId;
-            coolingPredictorData.weatherStationName = degreeDays[0]?.stationName;
-            coolingPredictorData.weatherDataWarning = hasErrors != undefined;
-            let totalHDD: number = _.sumBy(degreeDays, 'heatingDegreeDay');
-            heatingPredictorData.amount = totalHDD;
-            heatingPredictorData.weatherStationId = degreeDays[0]?.stationId;
-            heatingPredictorData.weatherStationName = degreeDays[0]?.stationName;
-            heatingPredictorData.weatherDataWarning = hasErrors != undefined;
+            if (heatingPredictor) {
+                let heatingPredictorIndex: number = predictorEntry.predictors.findIndex(predictor => { return predictor.id == heatingPredictor.id });
+                let heatingPredictorData: PredictorData = predictorEntry.predictors[heatingPredictorIndex];
+                let totalHDD: number = _.sumBy(degreeDays, 'heatingDegreeDay');
+                heatingPredictorData.amount = totalHDD;
+                heatingPredictorData.weatherStationId = degreeDays[0]?.stationId;
+                heatingPredictorData.weatherStationName = degreeDays[0]?.stationName;
+                heatingPredictorData.weatherDataWarning = hasErrors != undefined;
+            }
+            if (coolingPredictor) {
+                let coolingPredictorIndex: number = predictorEntry.predictors.findIndex(predictor => { return predictor.id == coolingPredictor.id });
+                let coolingPredictorData: PredictorData = predictorEntry.predictors[coolingPredictorIndex];
+                let totalCDD: number = _.sumBy(degreeDays, 'coolingDegreeDay');
+                coolingPredictorData.amount = totalCDD;
+                coolingPredictorData.weatherStationId = degreeDays[0]?.stationId;
+                coolingPredictorData.weatherStationName = degreeDays[0]?.stationName;
+                coolingPredictorData.weatherDataWarning = hasErrors != undefined;
+            }
             await firstValueFrom(this.updateWithObservable(facilityPredictorEntries[index]));
         }
         await this.finishPredictorChanges(facility);
     }
 
-    async finishPredictorChanges(facility: IdbFacility){
+    async finishPredictorChanges(facility: IdbFacility) {
         let accountPredictorEntries: Array<IdbPredictorEntry> = await this.getAllAccountPredictors(facility.accountId);
         this.accountPredictorEntries.next(accountPredictorEntries);
         let updatedFacilityPredictorEntries: Array<IdbPredictorEntry> = accountPredictorEntries.filter(predictor => { return predictor.facilityId == facility.guid });

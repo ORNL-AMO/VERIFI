@@ -23,12 +23,22 @@
                     </button>
                 </div>
             </div>
-            <div class="col-lg-3 col-md-12 col-sm-12">
+            <div class="col-lg-2 col-md-12 col-sm-12">
                 <label class="semibold" for="startDate">Select Month</label>
                 <input id="selectedMonth" class="form-control" type="month" [ngModel]="selectedMonth | date:'yyyy-MM'"
                     (ngModelChange)="setSelectedMonth($event)" name="selectedMonth" (input)="setDegreeDays()">
             </div>
-            <div class="col-lg-3 col-md-12 col-sm-12">
+            <div class="col-lg-2 col-md-12 col-sm-12">
+                <label class="semibold" for="weatherDataSelection">Select Data</label>
+                <select id="weatherDataSelection" [(ngModel)]="weatherDataSelection" class="form-select"
+                    name="weatherDataSelection" (change)="setWeatherDataOption()">
+                    <option *ngFor="let option of weatherDataSelectionOptions" [ngValue]="option.selection">
+                        {{option.label}}
+                    </option>
+                </select>
+            </div>
+            <div class="col-lg-2 col-md-12 col-sm-12"
+                *ngIf="weatherDataSelection == 'degreeDays' || weatherDataSelection == 'HDD'">
                 <label class="semibold" for="heatingTemp">Heating Base Temperature</label>
                 <div class="mb-3 input-group">
                     <input id="heatingTemp" class="form-control" type="number" [(ngModel)]="heatingTemp"
@@ -41,7 +51,8 @@
                 <div class="alert-danger alert" *ngIf="heatingTemp == undefined">
                     Value Required</div>
             </div>
-            <div class="col-lg-3 col-md-12 col-sm-12">
+            <div class="col-lg-2 col-md-12 col-sm-12"
+                *ngIf="weatherDataSelection == 'degreeDays' || weatherDataSelection == 'CDD'">
                 <label class="semibold" for="coolingTemp">Cooling Base Temperature</label>
                 <div class="mb-3 input-group">
                     <input id="heatingTemp" class="form-control" type="number" [(ngModel)]="coolingTemp"
@@ -71,10 +82,12 @@
     <div class="row" *ngIf="detailedDegreeDays && detailedDegreeDays.length != 0">
         <div class="col-lg-12 col-md-12 col-sm-12">
             <app-monthly-station-graph [detailedDegreeDays]="detailedDegreeDays" [selectedMonth]="selectedMonth"
-                [heatingTemp]="heatingTemp" [coolingTemp]="coolingTemp"></app-monthly-station-graph>
+                [heatingTemp]="heatingTemp" [coolingTemp]="coolingTemp"
+                [weatherDataSelection]="weatherDataSelection"></app-monthly-station-graph>
         </div>
         <div class="col-lg-12 col-md-12 col-sm-12">
-            <app-monthly-station-table [detailedDegreeDays]="detailedDegreeDays"></app-monthly-station-table>
+            <app-monthly-station-table [detailedDegreeDays]="detailedDegreeDays"
+                [weatherDataSelection]="weatherDataSelection"></app-monthly-station-table>
         </div>
     </div>
 </ng-container>
