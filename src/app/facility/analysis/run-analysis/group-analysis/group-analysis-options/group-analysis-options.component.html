@@ -26,14 +26,14 @@
                             <label class="form-check-label" for="energyIntensity">Energy Intensity</label>
 
                         </div>
-                        <div class="form-check">
+                        <!--TODO: Remove option-->
+                        <!-- <div class="form-check">
                             <input type="radio" class="form-check-input" name="analysisType"
                                 [value]="'modifiedEnergyIntensity'" id="modifiedEnergyIntensity"
                                 [(ngModel)]="group.analysisType" (change)="setAnalysisType()">
                             <label class="form-check-label" for="modifiedEnergyIntensity">Modified Energy
                                 Intensity</label>
-
-                        </div>
+                        </div> -->
                         <div class="form-check">
                             <input type="radio" class="form-check-input" name="analysisType" [value]="'regression'"
                                 id="regression" [(ngModel)]="group.analysisType" (change)="setAnalysisType()">

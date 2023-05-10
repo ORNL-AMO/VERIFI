@@ -69,6 +69,10 @@ export class UpdateDbEntryService {
         });
       }
     });
+    if (!analysisItem.analysisCategory) {
+      analysisItem.analysisCategory = 'energy';
+      isChanged = true;
+    }
     return { analysisItem: analysisItem, isChanged: isChanged };
   }
 

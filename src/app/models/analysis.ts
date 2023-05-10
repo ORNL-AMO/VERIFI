@@ -70,7 +70,7 @@ export interface MonthlyAnalysisSummaryData {
   yearToDateSavings: number,
   yearToDatePercentSavings: number,
   rollingSavings: number,
-  rolling12MonthImprovement: number,  
+  rolling12MonthImprovement: number,
   // groupsSummaryData?: Array<MonthlyAnalysisSummaryData>,
 }
 
@@ -192,13 +192,13 @@ export interface AnalysisGroup {
   specifiedMonthlyPercentBaseload: boolean,
   averagePercentBaseload?: number,
   monthlyPercentBaseload: Array<{
-      monthNum: number,
-      percent: number
+    monthNum: number,
+    percent: number
   }>,
   hasBaselineAdjustement: boolean,
   baselineAdjustments: Array<{
-      year: number,
-      amount: number
+    year: number,
+    amount: number
   }>,
   userDefinedModel: boolean,
   models?: Array<JStatRegressionModel>,
@@ -223,3 +223,4 @@ export interface GroupErrors {
 
 
 export type AnalysisType = 'absoluteEnergyConsumption' | 'energyIntensity' | 'modifiedEnergyIntensity' | 'regression' | 'skip';
+export type AnalysisCategory = 'energy' | 'water';

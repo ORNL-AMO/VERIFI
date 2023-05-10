@@ -10,6 +10,7 @@ import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import * as _ from 'lodash';
 import { AnalysisService } from '../analysis.service';
+import { AnalysisCategory } from 'src/app/models/analysis';
 
 @Component({
   selector: 'app-analysis-dashboard',
@@ -33,6 +34,8 @@ export class AnalysisDashboardComponent implements OnInit {
   }>;
   showDetail: boolean;
   showDetailSub: Subscription;
+  newAnalysisCategory: AnalysisCategory = 'energy';
+  displayNewAnalysis: boolean = false;
   constructor(private router: Router, private analysisDbService: AnalysisDbService, private toastNotificationService: ToastNotificationsService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private facilityDbService: FacilitydbService,
@@ -66,7 +69,7 @@ export class AnalysisDashboardComponent implements OnInit {
   }
 
   async createAnalysis() {
-    let newItem: IdbAnalysisItem = this.analysisDbService.getNewAnalysisItem();
+    let newItem: IdbAnalysisItem = this.analysisDbService.getNewAnalysisItem(this.newAnalysisCategory);
     let addedItem: IdbAnalysisItem = await firstValueFrom(this.analysisDbService.addWithObservable(newItem));
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.setAnalysisItems(selectedAccount, this.selectedFacility);
@@ -98,5 +101,13 @@ export class AnalysisDashboardComponent implements OnInit {
 
   saveShowDetails() {
     this.analysisService.showDetail.next(this.showDetail);
+  }
+
+  openCreateAnalysis() {
+    this.displayNewAnalysis = true;
+  }
+
+  cancelCreate() {
+    this.displayNewAnalysis = false;
   }
 }

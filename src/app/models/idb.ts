@@ -1,5 +1,5 @@
-import { AnalysisGroup, AnalysisSetupErrors, JStatRegressionModel } from './analysis';
-import { CalanderizedMeter, MonthlyData } from './calanderization';
+import { AnalysisCategory, AnalysisGroup, AnalysisSetupErrors } from './analysis';
+import { MonthlyData } from './calanderization';
 import { ElectricityDataFilters, GeneralUtilityDataFilters } from './meterDataFilter';
 import { BetterPlantsReportSetup, DataOverviewReportSetup, ReportOptions } from './overview-report';
 import { SustainabilityQuestions } from './sustainabilityQuestions';
@@ -290,6 +290,7 @@ export interface IdbAnalysisItem {
     facilityId: string,
     date: Date,
     name: string,
+    analysisCategory: AnalysisCategory,
     energyIsSource: boolean,
     reportYear: number,
     energyUnit: string,

@@ -9,7 +9,8 @@ import { PredictordbService } from './predictors-db.service';
 import { UtilityMeterGroupdbService } from './utilityMeterGroup-db.service';
 import * as _ from 'lodash';
 import { AnalysisValidationService } from '../facility/analysis/analysis-validation.service';
-import { AnalysisGroup } from '../models/analysis';
+import { AnalysisCategory, AnalysisGroup } from '../models/analysis';
+import { MeterGroupType } from '../models/calanderization';
 
 @Injectable({
   providedIn: 'root'
@@ -95,14 +96,20 @@ export class AnalysisDbService {
     return this.dbService.update('analysisItems', values);
   }
 
-  getNewAnalysisItem(): IdbAnalysisItem {
+  getNewAnalysisItem(analysisCategory: AnalysisCategory): IdbAnalysisItem {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     let facilityMeterGroups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.facilityMeterGroups.getValue();
     let itemGroups: Array<AnalysisGroup> = new Array();
     let predictors: Array<PredictorData> = this.predictorDbService.facilityPredictors.getValue();
     facilityMeterGroups.forEach(group => {
-      if (group.groupType == 'Energy') {
+      let groupTypeNeeded: 'Energy' | 'Water';
+      if (analysisCategory == 'energy') {
+        groupTypeNeeded = 'Energy';
+      } else if (analysisCategory == 'water') {
+        groupTypeNeeded = 'Water';
+      }
+      if (group.groupType == groupTypeNeeded) {
         let predictorVariables: Array<PredictorData> = JSON.parse(JSON.stringify(predictors));
         let analysisGroup: AnalysisGroup = {
           idbGroupId: group.guid,
@@ -138,7 +145,8 @@ export class AnalysisDbService {
       energyIsSource: selectedFacility.energyIsSource,
       energyUnit: selectedFacility.energyUnit,
       groups: itemGroups,
-      setupErrors: undefined
+      setupErrors: undefined,
+      analysisCategory: 'energy'
     };
     analysisItem.setupErrors = this.analysisValidationService.getAnalysisItemErrors(analysisItem);
     return analysisItem;
