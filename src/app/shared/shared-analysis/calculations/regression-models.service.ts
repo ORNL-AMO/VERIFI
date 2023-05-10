@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import * as jStat from 'jstat';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
-import { JStatRegressionModel, SEPValidation } from 'src/app/models/analysis';
+import { AnalysisGroup, JStatRegressionModel, SEPValidation } from 'src/app/models/analysis';
 import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
-import { AnalysisGroup, IdbAnalysisItem, IdbFacility, IdbPredictorEntry, PredictorData } from 'src/app/models/idb';
+import { IdbAnalysisItem, IdbFacility, IdbPredictorEntry, PredictorData } from 'src/app/models/idb';
 import * as _ from 'lodash';
 import { getFiscalYear } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
 import { getMonthlyStartAndEndDate } from 'src/app/calculations/shared-calculations/calculationsHelpers';

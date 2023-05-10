@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { JStatRegressionModel } from 'src/app/models/analysis';
-import { AnalysisGroup, AnalysisSetupErrors, GroupErrors, IdbAnalysisItem, IdbFacility, IdbUtilityMeter, PredictorData } from 'src/app/models/idb';
+import { AnalysisSetupErrors, JStatRegressionModel, AnalysisGroup, GroupErrors } from 'src/app/models/analysis';
+import { IdbAnalysisItem, IdbFacility, IdbUtilityMeter, PredictorData } from 'src/app/models/idb';
 
 @Injectable({
   providedIn: 'root'

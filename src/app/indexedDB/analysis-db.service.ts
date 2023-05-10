@@ -2,13 +2,14 @@ import { Injectable } from '@angular/core';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { LocalStorageService } from 'ngx-webstorage';
 import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
-import { AnalysisGroup, IdbAccount, IdbAnalysisItem, IdbFacility, IdbUtilityMeterGroup, PredictorData } from '../models/idb';
+import { IdbAccount, IdbAnalysisItem, IdbFacility, IdbUtilityMeterGroup, PredictorData } from '../models/idb';
 import { AccountdbService } from './account-db.service';
 import { FacilitydbService } from './facility-db.service';
 import { PredictordbService } from './predictors-db.service';
 import { UtilityMeterGroupdbService } from './utilityMeterGroup-db.service';
 import * as _ from 'lodash';
 import { AnalysisValidationService } from '../facility/analysis/analysis-validation.service';
+import { AnalysisGroup } from '../models/analysis';
 
 @Injectable({
   providedIn: 'root'

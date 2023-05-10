@@ -1,9 +1,10 @@
 import { MonthlyData } from "src/app/models/calanderization";
-import { AnalysisGroup, AnalysisType, IdbFacility, IdbPredictorEntry, PredictorData } from "src/app/models/idb";
+import { IdbFacility, IdbPredictorEntry, PredictorData } from "src/app/models/idb";
 import { MonthlyGroupAnalysisClass } from "./monthlyGroupAnalysisClass";
 import * as _ from 'lodash';
 import { MonthlyAnalysisCalculatedValues } from "./monthlyAnalysisCalculatedValuesClass";
 import { getFiscalYear } from "../shared-calculations/calanderizationFunctions";
+import { AnalysisGroup, AnalysisType } from "src/app/models/analysis";
 
 export class MonthlyAnalysisSummaryDataClass {
     //results

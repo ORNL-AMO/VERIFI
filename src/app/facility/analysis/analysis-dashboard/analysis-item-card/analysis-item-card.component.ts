@@ -7,8 +7,8 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { JStatRegressionModel } from 'src/app/models/analysis';
-import { AnalysisGroup, IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility, PredictorData } from 'src/app/models/idb';
+import { AnalysisGroup, JStatRegressionModel } from 'src/app/models/analysis';
+import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility, PredictorData } from 'src/app/models/idb';
 import { AnalysisService } from '../../analysis.service';
 
 @Component({

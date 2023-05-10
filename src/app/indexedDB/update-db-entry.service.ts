@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { AnalysisValidationService } from '../facility/analysis/analysis-validation.service';
-import { AnalysisSetupErrors, GroupErrors, IdbAccount, IdbAnalysisItem, IdbFacility } from '../models/idb';
+import { IdbAccount, IdbAnalysisItem, IdbFacility } from '../models/idb';
+import { AnalysisSetupErrors, GroupErrors } from '../models/analysis';
 
 @Injectable({
   providedIn: 'root'

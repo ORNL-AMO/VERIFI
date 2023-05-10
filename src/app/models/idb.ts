@@ -1,4 +1,4 @@
-import { JStatRegressionModel } from './analysis';
+import { AnalysisGroup, AnalysisSetupErrors, JStatRegressionModel } from './analysis';
 import { CalanderizedMeter, MonthlyData } from './calanderization';
 import { ElectricityDataFilters, GeneralUtilityDataFilters } from './meterDataFilter';
 import { BetterPlantsReportSetup, DataOverviewReportSetup, ReportOptions } from './overview-report';
@@ -298,54 +298,6 @@ export interface IdbAnalysisItem {
     selectedYearAnalysis?: boolean
 }
 
-export interface AnalysisSetupErrors {
-    hasError: boolean,
-    missingName: boolean,
-    noGroups: boolean,
-    missingReportYear: boolean,
-    reportYearBeforeBaselineYear: boolean,
-    groupsHaveErrors: boolean
-}
-
-export interface AnalysisGroup {
-    idbGroupId: string,
-    analysisType: AnalysisType,
-    predictorVariables: Array<PredictorData>,
-    productionUnits: string,
-    regressionModelYear: number,
-    regressionConstant: number,
-    groupErrors: GroupErrors,
-    specifiedMonthlyPercentBaseload: boolean,
-    averagePercentBaseload?: number,
-    monthlyPercentBaseload: Array<{
-        monthNum: number,
-        percent: number
-    }>,
-    hasBaselineAdjustement: boolean,
-    baselineAdjustments: Array<{
-        year: number,
-        amount: number
-    }>,
-    userDefinedModel: boolean,
-    models?: Array<JStatRegressionModel>,
-    selectedModelId?: string,
-    dateModelsGenerated?: Date,
-    regressionModelNotes?: string
-}
-
-export interface GroupErrors {
-    hasErrors: boolean,
-    missingProductionVariables: boolean,
-    missingRegressionConstant: boolean,
-    missingRegressionModelYear: boolean,
-    missingRegressionModelSelection: boolean,
-    missingRegressionPredictorCoef: boolean,
-    noProductionVariables: boolean,
-    invalidAverageBaseload: boolean,
-    invalidMonthlyBaseload: boolean,
-    missingGroupMeters: boolean,
-    hasInvalidRegressionModel: boolean
-}
 
 export interface IdbAccountAnalysisItem {
     id?: number,
@@ -381,7 +333,6 @@ export interface IdbCustomEmissionsItem {
 
 
 
-export type AnalysisType = 'absoluteEnergyConsumption' | 'energyIntensity' | 'modifiedEnergyIntensity' | 'regression' | 'skip';
 export type MeterSource = "Electricity" | "Natural Gas" | "Other Fuels" | "Other Energy" | "Water" | "Waste Water" | "Other Utility";
 export type MeterPhase = "Solid" | "Liquid" | "Gas";
 export type ReportType = "betterPlants" | 'dataOverview';

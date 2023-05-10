@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { AnalysisGroup, IdbAccount, IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
+import { IdbAccount, IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 import * as _ from 'lodash';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
@@ -10,6 +10,7 @@ import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { AnalysisValidationService } from '../../../analysis-validation.service';
 import { Router } from '@angular/router';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
+import { AnalysisGroup } from 'src/app/models/analysis';
 
 @Component({
   selector: 'app-group-analysis-options',
