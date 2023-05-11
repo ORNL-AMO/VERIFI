@@ -24,7 +24,7 @@
     </div>
 </div>
 
-<div class="w-100 x-scroll" *ngIf="calculating == false">
+<div class="w-100" *ngIf="calculating == false">
     <app-monthly-analysis-summary-table *ngIf="dataDisplay == 'table'" [analysisItem]="analysisItem"
         [monthlyAnalysisSummaryData]="monthlyAnalysisSummary.monthlyAnalysisSummaryData" [itemsPerPage]="itemsPerPage"
         [facilityOrAccount]="facility" [predictorVariables]="monthlyAnalysisSummary.predictorVariables" [group]="group">

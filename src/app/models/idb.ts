@@ -294,6 +294,7 @@ export interface IdbAnalysisItem {
     energyIsSource: boolean,
     reportYear: number,
     energyUnit: string,
+    waterUnit: string,
     setupErrors: AnalysisSetupErrors,
     groups: Array<AnalysisGroup>,
     selectedYearAnalysis?: boolean
@@ -318,7 +319,9 @@ export interface IdbAccountAnalysisItem {
         year: number,
         amount: number
     }>,
-    selectedYearAnalysis?: boolean
+    selectedYearAnalysis?: boolean,
+    analysisCategory: AnalysisCategory,
+    waterUnit: string
 }
 
 

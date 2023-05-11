@@ -15,33 +15,51 @@
                         </div>
                     </div>
                 </div>
-                <div class="form-group row">
-                    <label class="col-5 col-form-label">Energy displayed as site or source? </label>
-                    <div class="col-7">
-                        <div class="form-check">
-                            <input type="radio" class="form-check-input" name="energyIsSource" [value]="true"
-                                id="sourceEnergy" [(ngModel)]="analysisItem.energyIsSource" (change)="setSiteSource()">
-                            <label class="form-check-label" for="sourceEnergy">Source Energy</label>
-                        </div>
-                        <div class="form-check">
-                            <input type="radio" class="form-check-input" name="energyIsSource" [value]="false"
-                                id="siteEnergy" [(ngModel)]="analysisItem.energyIsSource" (change)="setSiteSource()">
-                            <label class="form-check-label" for="siteEnergy">Site Energy</label>
+                <ng-container *ngIf="analysisItem.analysisCategory == 'energy'">
+                    <div class="form-group row">
+                        <label class="col-5 col-form-label">Energy displayed as site or source? </label>
+                        <div class="col-7">
+                            <div class="form-check">
+                                <input type="radio" class="form-check-input" name="energyIsSource" [value]="true"
+                                    id="sourceEnergy" [(ngModel)]="analysisItem.energyIsSource"
+                                    (change)="setSiteSource()">
+                                <label class="form-check-label" for="sourceEnergy">Source Energy</label>
+                            </div>
+                            <div class="form-check">
+                                <input type="radio" class="form-check-input" name="energyIsSource" [value]="false"
+                                    id="siteEnergy" [(ngModel)]="analysisItem.energyIsSource"
+                                    (change)="setSiteSource()">
+                                <label class="form-check-label" for="siteEnergy">Site Energy</label>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="form-group row">
-                    <label class="col-5 col-form-label" for="energyUnit">Energy Unit</label>
-                    <div class="col-7">
-                        <select class="form-select" name="energyUnit" id="energyUnit"
-                            [(ngModel)]="analysisItem.energyUnit" (change)="saveItem()">
-                            <option *ngFor="let energyUnitOption of energyUnitOptions"
-                                [ngValue]="energyUnitOption.value">
-                                <span [innerHTML]="energyUnitOption.display"></span>
-                            </option>
-                        </select>
+                    <div class="form-group row">
+                        <label class="col-5 col-form-label" for="energyUnit">Energy Unit</label>
+                        <div class="col-7">
+                            <select class="form-select" name="energyUnit" id="energyUnit"
+                                [(ngModel)]="analysisItem.energyUnit" (change)="saveItem()">
+                                <option *ngFor="let energyUnitOption of energyUnitOptions"
+                                    [ngValue]="energyUnitOption.value">
+                                    <span [innerHTML]="energyUnitOption.display"></span>
+                                </option>
+                            </select>
+                        </div>
                     </div>
-                </div>
+                </ng-container>
+                <ng-container *ngIf="analysisItem.analysisCategory == 'water'">
+                    <div class="form-group row">
+                        <label class="col-5 col-form-label" for="waterUnit">Water Unit</label>
+                        <div class="col-7">
+                            <select class="form-select" name="waterUnit" id="waterUnit"
+                                [(ngModel)]="analysisItem.waterUnit" (change)="saveItem()">
+                                <option *ngFor="let waterUnitOption of waterUnitOptions"
+                                    [ngValue]="waterUnitOption.value">
+                                    <span [innerHTML]="waterUnitOption.display"></span>
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                </ng-container>
                 <div class="form-group row">
                     <label for="reportYear" class="col-5 col-form-label">
                         Report Year

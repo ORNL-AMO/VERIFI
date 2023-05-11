@@ -29,15 +29,26 @@ export class AnnualAnalysisSummaryGraphComponent implements OnInit {
 
   drawAnnualEnergyIntensityGraph() {
     if (this.annualEnergyIntensityAnalysisGraph) {
-      let traceData = new Array();
 
-      let summariesCopy: Array<AnnualAnalysisSummary> = JSON.parse(JSON.stringify(this.annualAnalysisSummary));
+
+      let trace1Name: string = 'Actual Energy Use';
+      let trace2Name: string = 'Calculated Energy Use';
+      let yAxisTitle: string = 'Energy Use (' + this.analysisItem.energyUnit + ')';
+      if (this.analysisItem.analysisCategory == 'water') {
+        trace1Name = 'Actual Water Consumption';
+        trace2Name = 'Calculated Water Consumption';
+        yAxisTitle = 'Consumption  (' + this.analysisItem.waterUnit + ')';
+      }
+
+
+
+      let traceData = new Array();
       let barTrace = {
-        x: summariesCopy.map(summary => { return summary.year }),
-        y: summariesCopy.map(summary => { return summary.energyUse }),
+        x: this.annualAnalysisSummary.map(summary => { return summary.year }),
+        y: this.annualAnalysisSummary.map(summary => { return summary.energyUse }),
         // width: summariesCopy.map(summary => { return .75 }),
         // texttemplate: '%{value:.5f}',
-        name: "Actual Energy Use",
+        name: trace1Name,
         type: 'bar',
         marker: {
           color: '#7F7F7F'
@@ -46,11 +57,11 @@ export class AnnualAnalysisSummaryGraphComponent implements OnInit {
       traceData.push(barTrace);
 
       barTrace = {
-        x: summariesCopy.map(summary => { return summary.year }),
-        y: summariesCopy.map(summary => { return summary.adjusted }),
+        x: this.annualAnalysisSummary.map(summary => { return summary.year }),
+        y: this.annualAnalysisSummary.map(summary => { return summary.adjusted }),
         // width: summariesCopy.map(summary => { return .75 }),
         // texttemplate: '%{value:.5f}',
-        name: "Calculated Energy Use",
+        name: trace2Name,
         type: 'bar',
         marker: {
           color: '#7D3C98'
@@ -64,7 +75,7 @@ export class AnnualAnalysisSummaryGraphComponent implements OnInit {
           tickmode: 'linear'
         },
         yaxis: {
-          title: 'Energy Use (' + this.analysisItem.energyUnit + ')',
+          title: yAxisTitle,
           hoverformat: ",.2f",
         },
         legend: {
@@ -94,14 +105,21 @@ export class AnnualAnalysisSummaryGraphComponent implements OnInit {
     if (this.percentImprovementAnalysisGraph) {
       let traceData = new Array();
 
-      let summariesCopy: Array<AnnualAnalysisSummary> = JSON.parse(JSON.stringify(this.annualAnalysisSummary));
+
+
+      let trace1Name: string = 'Annual Energy Improvement (%)';
+      let trace2Name: string = 'Total Energy Improvement (%)';
+      if (this.analysisItem.analysisCategory == 'water') {
+        trace1Name = 'Annual Consumption Improvement (%)';
+        trace2Name = 'Total Consumption Improvement (%)';
+      }
 
       let lineTrace = {
-        x: summariesCopy.map(summary => { return summary.year }),
-        y: summariesCopy.map((summary, index) => {
+        x: this.annualAnalysisSummary.map(summary => { return summary.year }),
+        y: this.annualAnalysisSummary.map((summary, index) => {
           return summary.annualSavingsPercentImprovement
         }),
-        name: "Annual Energy Improvement (%)",
+        name: trace1Name,
         type: 'lines+markers',
         texttemplate: '%{value:.5f}',
         marker: {
@@ -111,11 +129,11 @@ export class AnnualAnalysisSummaryGraphComponent implements OnInit {
       traceData.push(lineTrace);
 
       let lineTrace2 = {
-        x: summariesCopy.map(summary => { return summary.year }),
-        y: summariesCopy.map((summary, index) => {
+        x: this.annualAnalysisSummary.map(summary => { return summary.year }),
+        y: this.annualAnalysisSummary.map((summary, index) => {
           return summary.totalSavingsPercentImprovement
         }),
-        name: "Total Energy Improvement (%)",
+        name: trace2Name,
         type: 'lines+markers',
         marker: {
           size: 16

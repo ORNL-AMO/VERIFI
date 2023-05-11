@@ -37,7 +37,7 @@ export class AccountAnalysisDbService {
     return this.dbService.getAll('accountAnalysisItems');
   }
 
-  async getAllAccountAnalysisItems(accountId: string): Promise<Array<IdbAccountAnalysisItem>>{
+  async getAllAccountAnalysisItems(accountId: string): Promise<Array<IdbAccountAnalysisItem>> {
     let allAnalysisItesm: Array<IdbAccountAnalysisItem> = await firstValueFrom(this.getAll())
     let accountAnalysisItems: Array<IdbAccountAnalysisItem> = allAnalysisItesm.filter(item => { return item.accountId == accountId });
     return accountAnalysisItems;
@@ -69,6 +69,7 @@ export class AccountAnalysisDbService {
   }
 
   getNewAccountAnalysisItem(): IdbAccountAnalysisItem {
+    //TODO: Analysis category
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     let facilityAnalysisItems: Array<{
@@ -92,7 +93,9 @@ export class AccountAnalysisDbService {
       facilityAnalysisItems: facilityAnalysisItems,
       energyIsSource: selectedAccount.energyIsSource,
       hasBaselineAdjustement: false,
-      baselineAdjustments: []
+      baselineAdjustments: [],
+      waterUnit: selectedAccount.volumeLiquidUnit,
+      analysisCategory: 'energy'
     }
   }
 
@@ -108,7 +111,7 @@ export class AccountAnalysisDbService {
     }
   }
 
- async updateFacilityItemSelection(analysiItem: IdbAccountAnalysisItem, analysisItemId: string, facilityId: string) {
+  async updateFacilityItemSelection(analysiItem: IdbAccountAnalysisItem, analysisItemId: string, facilityId: string) {
     analysiItem.facilityAnalysisItems.forEach(item => {
       if (item.facilityId == facilityId) {
         item.analysisItemId = analysisItemId;

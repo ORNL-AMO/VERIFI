@@ -12,6 +12,7 @@ import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { firstValueFrom } from 'rxjs';
+import { VolumeLiquidOptions } from 'src/app/shared/unitOptions';
 @Component({
   selector: 'app-analysis-setup',
   templateUrl: './analysis-setup.component.html',
@@ -20,10 +21,10 @@ import { firstValueFrom } from 'rxjs';
 export class AnalysisSetupComponent implements OnInit {
 
   energyUnitOptions: Array<UnitOption> = EnergyUnitOptions;
+  waterUnitOptions: Array<UnitOption> = VolumeLiquidOptions;
   months: Array<Month> = Months;
 
   facility: IdbFacility;
-  energyUnit: string;
   analysisItem: IdbAnalysisItem;
   yearOptions: Array<number>;
   constructor(private facilityDbService: FacilitydbService, private analysisDbService: AnalysisDbService,
@@ -36,7 +37,6 @@ export class AnalysisSetupComponent implements OnInit {
   ngOnInit(): void {
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
     this.facility = this.facilityDbService.selectedFacility.getValue();
-    this.energyUnit = this.facility.energyUnit;
     this.yearOptions = this.utilityMeterDataDbService.getYearOptions();
   }
 

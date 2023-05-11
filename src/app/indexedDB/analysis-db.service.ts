@@ -144,9 +144,10 @@ export class AnalysisDbService {
       reportYear: undefined,
       energyIsSource: selectedFacility.energyIsSource,
       energyUnit: selectedFacility.energyUnit,
+      waterUnit: selectedFacility.volumeLiquidUnit,
       groups: itemGroups,
       setupErrors: undefined,
-      analysisCategory: 'energy'
+      analysisCategory: analysisCategory
     };
     analysisItem.setupErrors = this.analysisValidationService.getAnalysisItemErrors(analysisItem);
     return analysisItem;

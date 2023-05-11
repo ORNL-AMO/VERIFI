@@ -98,7 +98,6 @@ export class RegressionModelMenuComponent implements OnInit {
   generateModels(autoSelect?: boolean) {
     let analysisItem: IdbAnalysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
     let calanderizedMeters: Array<CalanderizedMeter> = this.analysisService.calanderizedMeters;
-    console.log(calanderizedMeters);
     this.group.models = this.regressionsModelsService.getModels(this.group, calanderizedMeters, this.selectedFacility, analysisItem);
     if (this.group.models) {
       this.modelingError = false;
