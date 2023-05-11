@@ -71,6 +71,20 @@ export class SelectFacilityAnalysisItemsComponent implements OnInit {
 
   setFacilityAnlaysisItems() {
     let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
+    if (this.selectedAnalysisItem.analysisCategory == 'energy') {
+      this.facilityAnalysisItems = accountAnalysisItems.filter(item => {
+        return (item.analysisCategory == this.selectedAnalysisItem.analysisCategory
+          && item.facilityId == this.selectedFacility.guid
+          && item.reportYear == this.selectedAnalysisItem.reportYear
+          && item.energyIsSource == this.selectedAnalysisItem.energyIsSource);
+      });
+    } else if (this.selectedAnalysisItem.analysisCategory == 'water') {
+      this.facilityAnalysisItems = accountAnalysisItems.filter(item => {
+        return (item.analysisCategory == this.selectedAnalysisItem.analysisCategory
+          && item.facilityId == this.selectedFacility.guid
+          && item.reportYear == this.selectedAnalysisItem.reportYear);
+      });
+    }
     this.facilityAnalysisItems = accountAnalysisItems.filter(item => {
       return item.facilityId == this.selectedFacility.guid && item.reportYear == this.selectedAnalysisItem.reportYear && item.energyIsSource == this.selectedAnalysisItem.energyIsSource
     });

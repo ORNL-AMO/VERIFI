@@ -37,7 +37,6 @@ export class ConvertMeterDataService {
       }
     } else {
       let accountUnit: string = this.energyUnitsHelperService.getAccountUnitFromMeter(meter);
-      console.log(accountUnit);
       for (let index: number = 0; index < meterData.length; index++) {
         meterData[index].totalVolume = this.convertUnitsService.value(meterData[index].totalVolume).from(meter.startingUnit).to(accountUnit);
       }

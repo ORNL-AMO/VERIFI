@@ -9,7 +9,7 @@
                     </div>
 
                     <div>
-                        <button class="btn action-btn m-0" (click)="createAnalysis()">+Add New Analysis</button>
+                        <button class="btn action-btn m-0" (click)="openCreateAnalysis()">+Add New Analysis</button>
                     </div>
                 </div>
             </h4>
@@ -69,5 +69,39 @@
         The baseline year for your reduction goal is
         {{selectedAccount.sustainabilityQuestions.energyReductionBaselineYear}} and your data starts {{yearOptions[0]}}.
         Fix your facility settings or add data.
+    </div>
+</div>
+
+
+
+<div [ngClass]="{'windowOverlay': displayNewAnalysis}"></div>
+<div class="popup" [class.open]="displayNewAnalysis">
+    <div class="popup-header">Create New Analysis
+        <button class="item-right" (click)="cancelCreate()">x</button>
+    </div>
+    <div class="popup-body">
+        <form>
+            <div class="form-group">
+                <label class="bold">Select Analysis Category </label>
+                <div class="sub-column">
+                    <div class="form-check">
+                        <input type="radio" class="form-check-input" name="newAnalysisCategory" [value]="'energy'"
+                            id="energy" [(ngModel)]="newAnalysisCategory">
+                        <label class="form-check-label" for="energy">Energy Analysis</label>
+                    </div>
+                    <div class="form-check">
+                        <input type="radio" class="form-check-input" name="newAnalysisCategory" [value]="'water'"
+                            id="water" [(ngModel)]="newAnalysisCategory">
+                        <label class="form-check-label" for="water">Water Analysis</label>
+
+                    </div>
+                </div>
+            </div>
+        </form>
+        <hr>
+    </div>
+    <div class="saveCancel popup-footer text-end">
+        <button class="btn btn-secondary" (click)="cancelCreate()">Cancel</button>
+        <button class="btn action-btn" (click)="createAnalysis()">Create Analysis</button>
     </div>
 </div>

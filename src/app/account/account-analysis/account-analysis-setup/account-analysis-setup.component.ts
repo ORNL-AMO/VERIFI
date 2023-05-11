@@ -4,7 +4,7 @@ import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem } from 'src/app/models/idb';
 import { Month, Months } from 'src/app/shared/form-data/months';
-import { EnergyUnitOptions, UnitOption } from 'src/app/shared/unitOptions';
+import { EnergyUnitOptions, UnitOption, VolumeLiquidOptions } from 'src/app/shared/unitOptions';
 import { AccountAnalysisService } from '../account-analysis.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
@@ -19,6 +19,7 @@ import { firstValueFrom } from 'rxjs';
 export class AccountAnalysisSetupComponent implements OnInit {
 
   energyUnitOptions: Array<UnitOption> = EnergyUnitOptions;
+  waterUnitOptions: Array<UnitOption> = VolumeLiquidOptions;
   months: Array<Month> = Months;
 
   account: IdbAccount;

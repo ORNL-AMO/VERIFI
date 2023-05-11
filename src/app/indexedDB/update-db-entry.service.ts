@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { AnalysisValidationService } from '../facility/analysis/analysis-validation.service';
-import { IdbAccount, IdbAnalysisItem, IdbFacility } from '../models/idb';
+import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility } from '../models/idb';
 import { AnalysisSetupErrors, GroupErrors } from '../models/analysis';
 
 @Injectable({
@@ -76,5 +76,13 @@ export class UpdateDbEntryService {
     return { analysisItem: analysisItem, isChanged: isChanged };
   }
 
+  updateAccountAnalysis(accountAnalysisItem: IdbAccountAnalysisItem): { accountAnalysisItem: IdbAccountAnalysisItem, isChanged: boolean } {
+    let isChanged: boolean = false;
+    if (!accountAnalysisItem.analysisCategory) {
+      accountAnalysisItem.analysisCategory = 'energy';
+      isChanged = true;
+    }
+    return { accountAnalysisItem: accountAnalysisItem, isChanged: isChanged };
+  }
 
 }

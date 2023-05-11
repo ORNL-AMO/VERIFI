@@ -121,6 +121,13 @@ export class AppComponent {
     //set account analysis
     this.loadingMessage = "Loading Analysis Items..";
     let accountAnalysisItems: Array<IdbAccountAnalysisItem> = await this.accountAnalysisDbService.getAllAccountAnalysisItems(account.guid);
+    for (let i = 0; i < accountAnalysisItems.length; i++) {
+      let updateAnalysis: { accountAnalysisItem: IdbAccountAnalysisItem, isChanged: boolean } = this.updateDbEntryService.updateAccountAnalysis(accountAnalysisItems[i]);
+      if (updateAnalysis.isChanged) {
+        accountAnalysisItems[i] = updateAnalysis.accountAnalysisItem;
+        await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(accountAnalysisItems[i]));
+      };
+    }
     this.accountAnalysisDbService.accountAnalysisItems.next(accountAnalysisItems);
     let localStorageAccountAnalysisId: number = this.accountAnalysisDbService.getInitialAnalysisItem();
     if (localStorageAccountAnalysisId) {

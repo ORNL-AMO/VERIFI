@@ -9,6 +9,7 @@ import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db
 import { IdbAccount, IdbAccountAnalysisItem } from 'src/app/models/idb';
 import * as _ from 'lodash';
 import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
+import { AnalysisCategory } from 'src/app/models/analysis';
 
 @Component({
   selector: 'app-account-analysis-dashboard',
@@ -29,6 +30,8 @@ export class AccountAnalysisDashboardComponent implements OnInit {
   }>;
   showDetail: boolean;
   showDetailSub: Subscription;
+  newAnalysisCategory: AnalysisCategory = 'energy';
+  displayNewAnalysis: boolean = false;
   constructor(private router: Router, private accountAnalysisDbService: AccountAnalysisDbService, private toastNotificationService: ToastNotificationsService,
     private accountDbService: AccountdbService, private utilityMeterDataDbService: UtilityMeterDatadbService,
     private dbChangesService: DbChangesService, private analysisService: AnalysisService) { }
@@ -55,7 +58,7 @@ export class AccountAnalysisDashboardComponent implements OnInit {
   }
 
   async createAnalysis() {
-    let newItem: IdbAccountAnalysisItem = this.accountAnalysisDbService.getNewAccountAnalysisItem();
+    let newItem: IdbAccountAnalysisItem = this.accountAnalysisDbService.getNewAccountAnalysisItem(this.newAnalysisCategory);
     let addedItem: IdbAccountAnalysisItem = await firstValueFrom(this.accountAnalysisDbService.addWithObservable(newItem));
     await this.dbChangesService.setAccountAnalysisItems(this.selectedAccount);
     this.accountAnalysisDbService.selectedAnalysisItem.next(addedItem);
@@ -81,5 +84,13 @@ export class AccountAnalysisDashboardComponent implements OnInit {
 
   saveShowDetails() {
     this.analysisService.showDetail.next(this.showDetail);
+  }
+  
+  openCreateAnalysis() {
+    this.displayNewAnalysis = true;
+  }
+
+  cancelCreate() {
+    this.displayNewAnalysis = false;
   }
 }

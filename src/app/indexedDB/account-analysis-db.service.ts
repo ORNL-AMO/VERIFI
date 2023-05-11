@@ -5,6 +5,7 @@ import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
 import { IdbAccount, IdbAccountAnalysisItem, IdbFacility } from '../models/idb';
 import { AccountdbService } from './account-db.service';
 import { FacilitydbService } from './facility-db.service';
+import { AnalysisCategory } from '../models/analysis';
 
 @Injectable({
   providedIn: 'root'
@@ -68,7 +69,7 @@ export class AccountAnalysisDbService {
     return this.dbService.update('accountAnalysisItems', values);
   }
 
-  getNewAccountAnalysisItem(): IdbAccountAnalysisItem {
+  getNewAccountAnalysisItem(analysisCategory: AnalysisCategory): IdbAccountAnalysisItem {
     //TODO: Analysis category
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
@@ -95,7 +96,7 @@ export class AccountAnalysisDbService {
       hasBaselineAdjustement: false,
       baselineAdjustments: [],
       waterUnit: selectedAccount.volumeLiquidUnit,
-      analysisCategory: 'energy'
+      analysisCategory: analysisCategory
     }
   }
 
