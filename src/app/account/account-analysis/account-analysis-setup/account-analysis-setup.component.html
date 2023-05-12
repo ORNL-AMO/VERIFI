@@ -95,8 +95,10 @@
                                     <input class="form-control" type="number" name="baselineAdjustment"
                                         id="baselineAdjustment" [(ngModel)]="baselineAdjustment.amount"
                                         (change)="saveItem()" min="0">
-                                    <span class="input-group-text"
+                                    <span *ngIf="analysisItem.analysisCategory == 'energy'" class="input-group-text"
                                         [innerHTML]="analysisItem.energyUnit | settingsLabel:'/yr'"></span>
+                                    <span *ngIf="analysisItem.analysisCategory == 'water'" class="input-group-text"
+                                        [innerHTML]="analysisItem.waterUnit | settingsLabel:'/yr'"></span>
                                 </div>
                             </div>
                         </div>

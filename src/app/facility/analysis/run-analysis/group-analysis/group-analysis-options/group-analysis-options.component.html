@@ -17,13 +17,12 @@
                             <input type="radio" class="form-check-input" name="analysisType"
                                 [value]="'absoluteEnergyConsumption'" id="absoluteEnergyConsumption"
                                 [(ngModel)]="group.analysisType" (change)="setAnalysisType()">
-                            <label class="form-check-label" for="absoluteEnergyConsumption">Absolute Energy
-                                Consumption</label>
+                            <label class="form-check-label" for="absoluteEnergyConsumption">Absolute</label>
                         </div>
                         <div class="form-check">
                             <input type="radio" class="form-check-input" name="analysisType" [value]="'energyIntensity'"
                                 id="energyIntensity" [(ngModel)]="group.analysisType" (change)="setAnalysisType()">
-                            <label class="form-check-label" for="energyIntensity">Energy Intensity</label>
+                            <label class="form-check-label" for="energyIntensity">Classic Intensity</label>
 
                         </div>
                         <!--TODO: Remove option-->
@@ -192,8 +191,10 @@
                                     <input class="form-control" type="number" name="{{'baselineAdjustment_'+index}}"
                                         id="{{'baselineAdjustment_'+index}}" [(ngModel)]="baselineAdjustment.amount"
                                         (input)="saveItem()" min="0">
-                                    <span class="input-group-text"
+                                    <span *ngIf="analysisItem.analysisCategory == 'energy'" class="input-group-text"
                                         [innerHTML]="analysisItem.energyUnit | settingsLabel:'/yr'"></span>
+                                    <span *ngIf="analysisItem.analysisCategory == 'water'" class="input-group-text"
+                                        [innerHTML]="analysisItem.waterUnit | settingsLabel:'/yr'"></span>
                                 </div>
 
                             </div>

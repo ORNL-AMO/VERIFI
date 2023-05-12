@@ -4,7 +4,7 @@ import { MonthlyGroupAnalysisClass } from "./monthlyGroupAnalysisClass";
 import * as _ from 'lodash';
 import { MonthlyAnalysisCalculatedValues } from "./monthlyAnalysisCalculatedValuesClass";
 import { getFiscalYear } from "../shared-calculations/calanderizationFunctions";
-import { AnalysisGroup, AnalysisType } from "src/app/models/analysis";
+import { AnalysisCategory, AnalysisGroup, AnalysisType } from "src/app/models/analysis";
 
 export class MonthlyAnalysisSummaryDataClass {
     //results
@@ -38,7 +38,7 @@ export class MonthlyAnalysisSummaryDataClass {
         this.setMonthPredictorData(monthlyGroupAnalysisClass.facilityPredictorData);
         this.setMonthMeterData(monthlyGroupAnalysisClass.groupMonthlyData);
         this.setMonthIndex(previousMonthsSummaryData);
-        this.setEnergyUse();
+        this.setEnergyUse(monthlyGroupAnalysisClass.analysisItem.analysisCategory);
         this.setPredictorAndProductionUsage(monthlyGroupAnalysisClass.predictorVariables);
         this.setBaselineActualEnergyUse(monthlyGroupAnalysisClass.baselineYear, previousMonthsSummaryData);
         this.setModeledEnergy(monthlyGroupAnalysisClass.selectedGroup.analysisType, monthlyGroupAnalysisClass.predictorVariables, monthlyGroupAnalysisClass.baselineYearEnergyIntensity);
@@ -65,8 +65,12 @@ export class MonthlyAnalysisSummaryDataClass {
         });
     }
 
-    setEnergyUse() {
-        this.energyUse = _.sumBy(this.monthMeterData, 'energyConsumption');
+    setEnergyUse(analysisCategory: AnalysisCategory) {
+        if (analysisCategory == 'energy') {
+            this.energyUse = _.sumBy(this.monthMeterData, 'energyUse');
+        } else if (analysisCategory == 'water') {
+            this.energyUse = _.sumBy(this.monthMeterData, 'energyConsumption');
+        }
     }
 
     setBaselineActualEnergyUse(baselineYear: number, previousMonthsSummaryData: Array<MonthlyAnalysisSummaryDataClass>) {

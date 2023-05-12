@@ -62,7 +62,6 @@ export class ConvertMeterDataService {
         if (accountOrFacility.energyUnit != analysisItem.energyUnit) {
           for (let index: number = 0; index < meterData.length; index++) {
             meterData[index].energyUse = this.convertUnitsService.value(meterData[index].energyUse).from(accountOrFacility.energyUnit).to(analysisItem.energyUnit);
-            meterData[index].energyConsumption = this.convertUnitsService.value(meterData[index].energyConsumption).from(accountOrFacility.energyUnit).to(analysisItem.energyUnit);
           }
         }
       }
