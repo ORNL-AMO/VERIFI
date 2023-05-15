@@ -85,9 +85,6 @@ export class SelectFacilityAnalysisItemsComponent implements OnInit {
           && item.reportYear == this.selectedAnalysisItem.reportYear);
       });
     }
-    this.facilityAnalysisItems = accountAnalysisItems.filter(item => {
-      return item.facilityId == this.selectedFacility.guid && item.reportYear == this.selectedAnalysisItem.reportYear && item.energyIsSource == this.selectedAnalysisItem.energyIsSource
-    });
   }
 
   getClassAndValid(facility: IdbFacility): { cssClass: 'fa fa-square-minus' | 'fa fa-square-check' | 'fa fa-square', isInvalid: boolean } {

@@ -96,10 +96,12 @@ export class AnalysisDbService {
     return this.dbService.update('analysisItems', values);
   }
 
-  getNewAnalysisItem(analysisCategory: AnalysisCategory): IdbAnalysisItem {
+  getNewAnalysisItem(analysisCategory: AnalysisCategory, facilityId: string): IdbAnalysisItem {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    let facilityMeterGroups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.facilityMeterGroups.getValue();
+    let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    let selectedFacility: IdbFacility = facilities.find(filter => { return filter.guid == facilityId });
+    let accountMeterGroups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.accountMeterGroups.getValue();
+    let facilityMeterGroups: Array<IdbUtilityMeterGroup> = accountMeterGroups.filter(group => { return group.facilityId == facilityId });
     let itemGroups: Array<AnalysisGroup> = new Array();
     let predictors: Array<PredictorData> = this.predictorDbService.facilityPredictors.getValue();
     facilityMeterGroups.forEach(group => {

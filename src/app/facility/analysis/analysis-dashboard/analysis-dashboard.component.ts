@@ -69,7 +69,7 @@ export class AnalysisDashboardComponent implements OnInit {
   }
 
   async createAnalysis() {
-    let newItem: IdbAnalysisItem = this.analysisDbService.getNewAnalysisItem(this.newAnalysisCategory);
+    let newItem: IdbAnalysisItem = this.analysisDbService.getNewAnalysisItem(this.newAnalysisCategory, this.selectedFacility.guid);
     let addedItem: IdbAnalysisItem = await firstValueFrom(this.analysisDbService.addWithObservable(newItem));
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.setAnalysisItems(selectedAccount, this.selectedFacility);
