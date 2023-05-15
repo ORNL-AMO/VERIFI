@@ -148,8 +148,13 @@
         <button class="item-right" (click)="cancelDelete()">x</button>
     </div>
     <div class="popup-body">
-        <p>WARNING:
+        <p *ngIf="predictorUsedGroupIds.length == 0">WARNING:
             Are you sure you want to delete "{{predictorToDelete?.name}}"? This cannot be undone.</p>
+        <p class="alert alert-danger" *ngIf="predictorUsedGroupIds.length != 0">
+            WARNING: This predictor is used in an analysis for this facility. Deleting this predictor will alter this
+            analysis.
+            Are you sure you want to delete "{{predictorToDelete?.name}}"? This cannot be undone.
+        </p>
     </div>
     <div class="saveCancel popup-footer text-end">
         <button class="btn btn-secondary" (click)="cancelDelete()">Cancel</button>

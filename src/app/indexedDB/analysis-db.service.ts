@@ -172,20 +172,28 @@ export class AnalysisDbService {
   }
 
 
-  async updateAnalysisPredictors(predictorEntries: Array<PredictorData>, facilityId: string) {
+  async updateAnalysisPredictors(predictorEntries: Array<PredictorData>, facilityId: string, predictorUsedGroupIds?: Array<string>) {
     let accountAnalysisItems: Array<IdbAnalysisItem> = this.accountAnalysisItems.getValue();
     let facilityAnalysisItems: Array<IdbAnalysisItem> = accountAnalysisItems.filter(item => { return item.facilityId == facilityId });
     for (let index = 0; index < facilityAnalysisItems.length; index++) {
       let analysisItem: IdbAnalysisItem = facilityAnalysisItems[index];
       analysisItem.groups.forEach(group => {
-        group.predictorVariables = this.updatePredictorVariables(predictorEntries, group.predictorVariables);
+        let groupUpdates: { predictors: Array<PredictorData>, deletedPredictor: boolean } = this.updatePredictorVariables(predictorEntries, group.predictorVariables);
+        group.predictorVariables = groupUpdates.predictors;
+        if (groupUpdates.deletedPredictor && group.analysisType == 'regression' && predictorUsedGroupIds.includes(group.idbGroupId)) {
+          group.models = undefined;
+          group.selectedModelId = undefined;
+          group.regressionModelYear = undefined;
+          group.regressionConstant = undefined;
+          group.dateModelsGenerated = undefined;
+        }
         group.groupErrors = this.analysisValidationService.getGroupErrors(group);
       });
       await firstValueFrom(this.updateWithObservable(analysisItem));
     };
   }
 
-  updatePredictorVariables(predictorEntries: Array<PredictorData>, analysisPredictors: Array<PredictorData>): Array<PredictorData> {
+  updatePredictorVariables(predictorEntries: Array<PredictorData>, analysisPredictors: Array<PredictorData>): { predictors: Array<PredictorData>, deletedPredictor: boolean } {
     let predictorIdsToRemove: Array<string> = new Array();
     //update existing, check need remove
     analysisPredictors.forEach(predictor => {
@@ -207,7 +215,7 @@ export class AnalysisDbService {
         analysisPredictors.push(entry);
       }
     });
-    return analysisPredictors;
+    return { predictors: analysisPredictors, deletedPredictor: predictorIdsToRemove.length != 0 };
   }
 
 
