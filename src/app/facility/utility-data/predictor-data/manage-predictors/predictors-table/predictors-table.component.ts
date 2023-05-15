@@ -2,12 +2,14 @@ import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
-import { IdbFacility, IdbPredictorEntry, PredictorData } from 'src/app/models/idb';
+import { AnalysisGroup, IdbAnalysisItem, IdbFacility, IdbPredictorEntry, PredictorData } from 'src/app/models/idb';
 import { Subscription } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { WeatherDataService } from 'src/app/weather-data/weather-data.service';
 import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
 import { WeatherStation } from 'src/app/models/degreeDays';
+import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
+import { JStatRegressionModel } from 'src/app/models/analysis';
 
 
 @Component({
@@ -27,9 +29,11 @@ export class PredictorsTableComponent {
   degreeDayPredictors: Array<PredictorData>;
 
   hasWeatherDataWarning: boolean;
+  predictorUsedGroupIds: Array<string> = [];
   constructor(private predictorDbService: PredictordbService, private router: Router,
     private facilitydbService: FacilitydbService, private loadingService: LoadingService,
-    private weatherDataService: WeatherDataService, private degreeDaysService: DegreeDaysService) {
+    private weatherDataService: WeatherDataService, private degreeDaysService: DegreeDaysService,
+    private analysisDbService: AnalysisDbService) {
 
   }
 
@@ -44,7 +48,7 @@ export class PredictorsTableComponent {
           this.standardPredictors.push(predictor);
         } else if (predictor.predictorType == 'Weather') {
           predictor.weatherDataWarning = this.checkWeatherPredictor(predictor);
-          if(!hasWeatherDataWarning && predictor.weatherDataWarning){
+          if (!hasWeatherDataWarning && predictor.weatherDataWarning) {
             hasWeatherDataWarning = true;
           }
           this.degreeDayPredictors.push(predictor);
@@ -64,6 +68,31 @@ export class PredictorsTableComponent {
 
   selectDelete(predictor: PredictorData) {
     this.predictorToDelete = predictor;
+    let facilityAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.facilityAnalysisItems.getValue();
+    let allFacilityGroups: Array<AnalysisGroup> = facilityAnalysisItems.flatMap(item => { return item.groups });
+    this.predictorUsedGroupIds = new Array();
+    for (let i = 0; i < allFacilityGroups.length; i++) {
+      let predictorVariables: Array<PredictorData> = [];
+      let group: AnalysisGroup = allFacilityGroups[i];
+      if (group.analysisType == 'regression') {
+        if (group.selectedModelId) {
+          let selectedModel: JStatRegressionModel = group.models.find(model => { return model.modelId == group.selectedModelId });
+          predictorVariables = selectedModel.predictorVariables;
+        } else {
+          predictorVariables = group.predictorVariables.filter(variable => {
+            return (variable.productionInAnalysis == true);
+          });
+        }
+      } else if (group.analysisType != 'absoluteEnergyConsumption') {
+        predictorVariables = group.predictorVariables.filter(variable => {
+          return (variable.productionInAnalysis == true);
+        });
+      }
+      let isUsed: PredictorData = predictorVariables.find(predictorUsed => { return predictorUsed.id == predictor.id });
+      if(isUsed){
+        this.predictorUsedGroupIds.push(group.idbGroupId)
+      }
+    };
   }
 
 
@@ -73,6 +102,7 @@ export class PredictorsTableComponent {
     this.predictorToDelete = undefined;
     this.loadingService.setLoadingMessage('Deleting Predictor Data...');
     this.loadingService.setLoadingStatus(true);
+    await this.analysisDbService.updateAnalysisPredictors(this.facilityPredictors, this.selectedFacility.guid, this.predictorUsedGroupIds);
     await this.predictorDbService.updateFacilityPredictorEntries(this.facilityPredictors);
     this.loadingService.setLoadingStatus(false);
 
@@ -105,7 +135,7 @@ export class PredictorsTableComponent {
       if (predictorPair) {
         this.weatherDataService.heatingTemp = predictorPair.heatingBaseTemperature;
         this.weatherDataService.weatherDataSelection = 'degreeDays';
-      }else{
+      } else {
         this.weatherDataService.weatherDataSelection = 'CDD';
       }
     } else {
@@ -114,7 +144,7 @@ export class PredictorsTableComponent {
       if (predictorPair) {
         this.weatherDataService.coolingTemp = predictorPair.coolingBaseTemperature;
         this.weatherDataService.weatherDataSelection = 'degreeDays';
-      }else{
+      } else {
         this.weatherDataService.weatherDataSelection = 'HDD';
       }
     }
