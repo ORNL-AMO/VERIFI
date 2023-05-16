@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { IdbAccount, IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
+import { IdbAccount, IdbAnalysisItem, IdbFacility, IdbUtilityMeterGroup } from 'src/app/models/idb';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
@@ -11,6 +11,7 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import * as _ from 'lodash';
 import { AnalysisService } from '../analysis.service';
 import { AnalysisCategory } from 'src/app/models/analysis';
+import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 
 @Component({
   selector: 'app-analysis-dashboard',
@@ -36,12 +37,15 @@ export class AnalysisDashboardComponent implements OnInit {
   showDetailSub: Subscription;
   newAnalysisCategory: AnalysisCategory = 'energy';
   displayNewAnalysis: boolean = false;
+  hasWater: boolean;
+  hasEnergy: boolean;
   constructor(private router: Router, private analysisDbService: AnalysisDbService, private toastNotificationService: ToastNotificationsService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private facilityDbService: FacilitydbService,
     private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
-    private analysisService: AnalysisService) { }
+    private analysisService: AnalysisService,
+    private utilityMeterGroupDbService: UtilityMeterGroupdbService) { }
 
   ngOnInit(): void {
     this.facilityAnalysisItemsSub = this.analysisDbService.facilityAnalysisItems.subscribe(items => {
@@ -103,8 +107,28 @@ export class AnalysisDashboardComponent implements OnInit {
     this.analysisService.showDetail.next(this.showDetail);
   }
 
-  openCreateAnalysis() {
-    this.displayNewAnalysis = true;
+  async openCreateAnalysis() {
+    let groups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.facilityMeterGroups.getValue();
+    this.hasWater = false;
+    this.hasEnergy = false;
+    groups.forEach(group => {
+      if (group.groupType == 'Energy' && !this.hasEnergy) {
+        this.hasEnergy = true;
+      }
+      if (group.groupType == 'Water' && !this.hasWater) {
+        this.hasWater = true;
+      }
+    });
+    if (this.newAnalysisCategory == 'energy' && !this.hasEnergy) {
+      this.newAnalysisCategory = 'water';
+    } else if (this.newAnalysisCategory == 'water' && !this.hasWater) {
+      this.newAnalysisCategory = 'energy';
+    }
+    if (this.hasEnergy && this.hasWater) {
+      this.displayNewAnalysis = true;
+    } else {
+      await this.createAnalysis();
+    }
   }
 
   cancelCreate() {

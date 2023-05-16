@@ -6,10 +6,11 @@ import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { IdbAccount, IdbAccountAnalysisItem } from 'src/app/models/idb';
+import { IdbAccount, IdbAccountAnalysisItem, IdbUtilityMeterGroup } from 'src/app/models/idb';
 import * as _ from 'lodash';
 import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
 import { AnalysisCategory } from 'src/app/models/analysis';
+import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 
 @Component({
   selector: 'app-account-analysis-dashboard',
@@ -32,9 +33,12 @@ export class AccountAnalysisDashboardComponent implements OnInit {
   showDetailSub: Subscription;
   newAnalysisCategory: AnalysisCategory = 'energy';
   displayNewAnalysis: boolean = false;
+  hasWater: boolean;
+  hasEnergy: boolean;
   constructor(private router: Router, private accountAnalysisDbService: AccountAnalysisDbService, private toastNotificationService: ToastNotificationsService,
     private accountDbService: AccountdbService, private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private dbChangesService: DbChangesService, private analysisService: AnalysisService) { }
+    private dbChangesService: DbChangesService, private analysisService: AnalysisService,
+    private utilityMeterGroupDbService: UtilityMeterGroupdbService) { }
 
   ngOnInit(): void {
     this.selectedAccount = this.accountDbService.selectedAccount.getValue();
@@ -86,8 +90,28 @@ export class AccountAnalysisDashboardComponent implements OnInit {
     this.analysisService.showDetail.next(this.showDetail);
   }
   
-  openCreateAnalysis() {
-    this.displayNewAnalysis = true;
+  async openCreateAnalysis() {
+    let groups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.accountMeterGroups.getValue();
+    this.hasWater = false;
+    this.hasEnergy = false;
+    groups.forEach(group => {
+      if (group.groupType == 'Energy' && !this.hasEnergy) {
+        this.hasEnergy = true;
+      }
+      if (group.groupType == 'Water' && !this.hasWater) {
+        this.hasWater = true;
+      }
+    });
+    if (this.newAnalysisCategory == 'energy' && !this.hasEnergy) {
+      this.newAnalysisCategory = 'water';
+    } else if (this.newAnalysisCategory == 'water' && !this.hasWater) {
+      this.newAnalysisCategory = 'energy';
+    }
+    if (this.hasEnergy && this.hasWater) {
+      this.displayNewAnalysis = true;
+    } else {
+      await this.createAnalysis();
+    }
   }
 
   cancelCreate() {
