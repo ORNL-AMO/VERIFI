@@ -59,7 +59,7 @@ export class AccountAnalysisBannerComponent implements OnInit {
   setValidation() {
     if (this.accountAnalysisItem) {
       //TODO: Check that report year is within data entry range
-      this.setupValid = this.accountAnalysisItem.energyUnit != undefined && this.accountAnalysisItem.reportYear != undefined;
+      this.setupValid = this.accountAnalysisItem.energyUnit != undefined && this.accountAnalysisItem.reportYear != undefined && this.accountAnalysisItem.baselineYear != undefined;
       let facilitySelectionValid: boolean = false;
       this.accountAnalysisItem.facilityAnalysisItems.forEach(item => {
         if (item.analysisItemId != undefined) {

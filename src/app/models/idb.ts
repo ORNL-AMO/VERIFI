@@ -295,7 +295,8 @@ export interface IdbAnalysisItem {
     energyUnit: string,
     setupErrors: AnalysisSetupErrors,
     groups: Array<AnalysisGroup>,
-    selectedYearAnalysis?: boolean
+    selectedYearAnalysis?: boolean,
+    baselineYear: number
 }
 
 export interface AnalysisSetupErrors {
@@ -303,6 +304,7 @@ export interface AnalysisSetupErrors {
     missingName: boolean,
     noGroups: boolean,
     missingReportYear: boolean,
+    missingBaselineYear: boolean,
     reportYearBeforeBaselineYear: boolean,
     groupsHaveErrors: boolean
 }
@@ -365,7 +367,8 @@ export interface IdbAccountAnalysisItem {
         year: number,
         amount: number
     }>,
-    selectedYearAnalysis?: boolean
+    selectedYearAnalysis?: boolean,
+    baselineYear: number
 }
 
 

@@ -100,7 +100,7 @@ export class SelectItemTableComponent implements OnInit {
     let newIdbItem: IdbAnalysisItem = this.analysisDbService.getNewAnalysisItem();
     newIdbItem.energyIsSource = this.selectedAnalysisItem.energyIsSource;
     newIdbItem.reportYear = this.selectedAnalysisItem.reportYear;
-    newIdbItem = this.analysisService.setBaselineAdjustments(this.facility, newIdbItem);
+    newIdbItem = this.analysisService.setBaselineAdjustments(newIdbItem);
     newIdbItem.setupErrors = this.analysisValidationService.getAnalysisItemErrors(newIdbItem);
     newIdbItem = await firstValueFrom(this.analysisDbService.addWithObservable(newIdbItem));
     this.selectedFacilityItemId = newIdbItem.guid;

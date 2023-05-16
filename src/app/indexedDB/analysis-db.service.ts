@@ -137,7 +137,8 @@ export class AnalysisDbService {
       energyIsSource: selectedFacility.energyIsSource,
       energyUnit: selectedFacility.energyUnit,
       groups: itemGroups,
-      setupErrors: undefined
+      setupErrors: undefined,
+      baselineYear: selectedFacility.sustainabilityQuestions.energyReductionBaselineYear
     };
     analysisItem.setupErrors = this.analysisValidationService.getAnalysisItemErrors(analysisItem);
     return analysisItem;
