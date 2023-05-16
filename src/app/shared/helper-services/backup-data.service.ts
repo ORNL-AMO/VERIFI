@@ -255,7 +255,6 @@ export class BackupDataService {
       accountReport.dataOverviewReportSetup.includedFacilities.forEach(facility => {
         facility.facilityId = this.getNewId(facility.facilityId, facilityGUIDs);
       });
-      //TODO: Update with better plants
       if (accountReport.reportType == 'betterPlants') {
         accountReport.betterPlantsReportSetup.analysisItemId = this.getNewId(accountReport.betterPlantsReportSetup.analysisItemId, accountAnalysisGUIDs);
       } else {
@@ -285,19 +284,6 @@ export class BackupDataService {
         await firstValueFrom(this.accountReportsDbService.addWithObservable(newReport));
       }
     }
-
-    // for (let i = 0; i < backupFile.reports.length; i++) {
-    //   let reportOptions: IdbOverviewReportOptions = backupFile.reports[i];
-    //   reportOptions.guid = this.getGUID();
-    //   delete reportOptions.id;
-    //   reportOptions.accountId = accountGUIDs.newId;
-    //   reportOptions.reportOptions.facilities.forEach(facility => {
-    //     facility.facilityId = this.getNewId(facility.facilityId, facilityGUIDs);
-    //   });
-    //   //TODO: Update with better plants
-    //   reportOptions.reportOptions.analysisItemId = this.getNewId(reportOptions.reportOptions.analysisItemId, accountAnalysisGUIDs);
-    //   await this.overviewReportOptionsDbService.addWithObservable(reportOptions));
-    // }
     return newAccount;
   }
 
@@ -415,7 +401,6 @@ export class BackupDataService {
         facilityId: newFacilityGUID,
         included: false
       });
-      //TODO: update better plants reports items..
       await firstValueFrom(this.accountReportsDbService.updateWithObservable(accountReports[reportIndex]));
     }
 
@@ -452,7 +437,7 @@ export class BackupDataService {
     }
 
     //delete overview reports
-    //todo remove in future (overview reports no longer used)
+    //todo remove in future (overview reports no longer used) (issue-1195)
     let overviewReportOptions: Array<IdbOverviewReportOptions> = await this.overviewReportOptionsDbService.getAllAccountReports(account.guid);
     for (let i = 0; i < overviewReportOptions.length; i++) {
       await firstValueFrom(this.overviewReportOptionsDbService.deleteWithObservable(overviewReportOptions[i].id));

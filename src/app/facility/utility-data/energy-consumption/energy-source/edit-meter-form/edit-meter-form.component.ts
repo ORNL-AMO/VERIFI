@@ -186,7 +186,6 @@ export class EditMeterFormComponent implements OnInit {
     }
   }
 
-  //TODO: Set heat capacity and source for electricity and natural gas (no energy options used);
   setHeatCapacity() {
     if (this.displayHeatCapacity) {
       let selectedEnergyOption: FuelTypeOption = this.fuelTypeOptions.find(option => { return option.value == this.meterForm.controls.fuel.value });

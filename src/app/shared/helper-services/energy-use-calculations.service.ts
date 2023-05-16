@@ -25,7 +25,6 @@ export class EnergyUseCalculationsService {
         //copy for conversions
         let selectedFuelTypeOptionsCpy: FuelTypeOption = JSON.parse(JSON.stringify(selectedFuelTypeOption))
         if (selectedFuelTypeOptionsCpy.value && selectedFuelTypeOptionsCpy.startingUnit) {
-          //TODO: Round value to some decimal place
           selectedFuelTypeOptionsCpy.heatCapacityValue = this.convertHeatCapacity(selectedFuelTypeOptionsCpy, startingUnit, meterEnergyUnit)
         }
         heatCapacity = selectedFuelTypeOptionsCpy.heatCapacityValue;

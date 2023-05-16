@@ -190,14 +190,6 @@ export class AccountSettingsComponent implements OnInit {
     this.importBackupModalService.showModal.next(true);
   }
 
-
-  //TODO: Add button
-  async deleteDatabase() {
-    this.loadingService.setLoadingStatus(true);
-    this.loadingService.setLoadingMessage('Resetting Database, if this takes too long restart application..');
-    this.accountDbService.deleteDatabase();
-  }
-
   setOrderOptions() {
     let orderOptions: Array<number> = new Array();
     let index: number = 1;

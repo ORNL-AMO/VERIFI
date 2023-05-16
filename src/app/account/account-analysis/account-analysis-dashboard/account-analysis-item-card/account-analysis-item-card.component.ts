@@ -41,7 +41,7 @@ export class AccountAnalysisItemCardComponent implements OnInit {
 
   selectAnalysisItem() {
     this.accountAnalysisDbService.selectedAnalysisItem.next(this.analysisItem);
-    //todo: route to results if item setup
+    //todo: route to results if item setup (issue-1193)
     this.router.navigateByUrl('account/analysis/setup');
   }
 
