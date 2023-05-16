@@ -124,7 +124,6 @@ export class IdentifyColumnsComponent implements OnInit {
       unusedColumns.push({ value: header, index: index, id: Math.random().toString(36).substr(2, 9) });
     });
 
-    //todo: enhance check for "Date"
     let dateColumnIndex: number = unusedColumns.findIndex((column) => { return column.value == 'Date' });
     if (dateColumnIndex > -1) {
       let dateColumn: ColumnItem = unusedColumns[dateColumnIndex];

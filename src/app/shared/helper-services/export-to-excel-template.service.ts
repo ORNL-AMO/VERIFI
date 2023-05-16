@@ -238,7 +238,6 @@ export class ExportToExcelTemplateService {
         //format date!!!!!!
         worksheet.getCell('B' + index).value = this.getFormatedDate(dataReading.readDate);
         worksheet.getCell('C' + index).value = dataReading.totalEnergyUse;
-        //TODO: update '0' when new fields added and names changed
         worksheet.getCell('D' + index).value = dataReading.totalRealDemand;
         worksheet.getCell('E' + index).value = dataReading.totalBilledDemand;
         worksheet.getCell('F' + index).value = dataReading.totalCost;

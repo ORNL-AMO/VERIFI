@@ -158,7 +158,6 @@ export class UtilityMeterDatadbService {
         let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
         let facility: IdbFacility = facilities.find(facility => { return facility.guid == meter.facilityId });
         let meterData: Array<IdbUtilityMeterData> = this.getMeterDataFromMeterId(meter.guid);
-        //TODO: check copy method for performance hit.
         let meterDataCopy: Array<IdbUtilityMeterData> = JSON.parse(JSON.stringify(meterData));
         if (!calanderizationOptions) {
             if (facility && facility.energyIsSource && !isMeterReadings) {

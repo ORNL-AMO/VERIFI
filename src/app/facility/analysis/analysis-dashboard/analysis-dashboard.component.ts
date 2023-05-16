@@ -77,8 +77,11 @@ export class AnalysisDashboardComponent implements OnInit {
 
   selectAnalysisItem(item: IdbAnalysisItem) {
     this.analysisDbService.selectedAnalysisItem.next(item);
-    //todo: route to results if item setup
-    this.router.navigateByUrl('facility/' + this.selectedFacility.id + '/analysis/run-analysis');
+    if(item.setupErrors.hasError){
+      this.router.navigateByUrl('facility/' + this.selectedFacility.id + '/analysis/run-analysis');
+    }else{
+      this.router.navigateByUrl('facility/' + this.selectedFacility.id + '/analysis/run-analysis/facility-analysis');
+    }
   }
 
   setAnalysisItemsList(facilityAnalysisItems: Array<IdbAnalysisItem>) {
