@@ -72,7 +72,10 @@ export class SelectFacilityAnalysisItemsComponent implements OnInit {
   setFacilityAnlaysisItems() {
     let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
     this.facilityAnalysisItems = accountAnalysisItems.filter(item => {
-      return item.facilityId == this.selectedFacility.guid && item.reportYear == this.selectedAnalysisItem.reportYear && item.energyIsSource == this.selectedAnalysisItem.energyIsSource
+      return (item.facilityId == this.selectedFacility.guid
+        && item.reportYear == this.selectedAnalysisItem.reportYear
+        && item.energyIsSource == this.selectedAnalysisItem.energyIsSource
+        && item.baselineYear == this.selectedAnalysisItem.baselineYear);
     });
   }
 

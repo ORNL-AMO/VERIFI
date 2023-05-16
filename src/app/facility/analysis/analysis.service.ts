@@ -96,11 +96,11 @@ export class AnalysisService {
     });
   }
 
-  setBaselineAdjustments(facility: IdbFacility, analysisItem: IdbAnalysisItem): IdbAnalysisItem {
-    if (facility.sustainabilityQuestions.energyReductionBaselineYear < analysisItem.reportYear) {
+  setBaselineAdjustments(analysisItem: IdbAnalysisItem): IdbAnalysisItem {
+    if (analysisItem.baselineYear < analysisItem.reportYear) {
       analysisItem.groups.forEach(group => {
         let yearAdjustments: Array<{ year: number, amount: number }> = new Array();
-        for (let year: number = facility.sustainabilityQuestions.energyReductionBaselineYear + 1; year <= analysisItem.reportYear; year++) {
+        for (let year: number = analysisItem.baselineYear + 1; year <= analysisItem.reportYear; year++) {
           yearAdjustments.push({
             year: year,
             amount: 0

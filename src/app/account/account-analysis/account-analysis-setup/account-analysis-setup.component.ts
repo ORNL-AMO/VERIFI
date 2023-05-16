@@ -25,6 +25,7 @@ export class AccountAnalysisSetupComponent implements OnInit {
   energyUnit: string;
   analysisItem: IdbAccountAnalysisItem;
   yearOptions: Array<number>;
+  baselineYearWarning: string;
   constructor(private accountDbService: AccountdbService, private accountAnalysisDbService: AccountAnalysisDbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private router: Router, private accountAnalysisService: AccountAnalysisService,
@@ -39,6 +40,7 @@ export class AccountAnalysisSetupComponent implements OnInit {
     this.account = this.accountDbService.selectedAccount.getValue();
     this.energyUnit = this.account.energyUnit;
     this.yearOptions = this.utilityMeterDataDbService.getYearOptions(true);
+    this.setBaselineYearWarning();
   }
 
   async saveItem() {
@@ -46,12 +48,13 @@ export class AccountAnalysisSetupComponent implements OnInit {
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.setAccountAnalysisItems(account);
     this.accountAnalysisDbService.selectedAnalysisItem.next(this.analysisItem);
+    this.setBaselineYearWarning();
   }
 
   async changeReportYear() {
-    if (this.account.sustainabilityQuestions.energyReductionBaselineYear < this.analysisItem.reportYear) {
+    if (this.analysisItem.baselineYear < this.analysisItem.reportYear) {
       let yearAdjustments: Array<{ year: number, amount: number }> = new Array();
-      for (let year: number = this.account.sustainabilityQuestions.energyReductionBaselineYear + 1; year <= this.analysisItem.reportYear; year++) {
+      for (let year: number = this.analysisItem.baselineYear + 1; year <= this.analysisItem.reportYear; year++) {
         yearAdjustments.push({
           year: year,
           amount: 0
@@ -66,7 +69,10 @@ export class AccountAnalysisSetupComponent implements OnInit {
     let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
     this.analysisItem.facilityAnalysisItems.forEach(item => {
       let facilityItem: IdbAnalysisItem = accountAnalysisItems.find(accountItem => {
-        return accountItem.reportYear == this.analysisItem.reportYear && accountItem.facilityId == item.facilityId && accountItem.selectedYearAnalysis;
+        return (accountItem.reportYear == this.analysisItem.reportYear
+          && accountItem.facilityId == item.facilityId
+          && accountItem.selectedYearAnalysis
+          && accountItem.baselineYear == this.analysisItem.baselineYear);
       });
       if (facilityItem) {
         item.analysisItemId = facilityItem.guid;
@@ -82,4 +88,11 @@ export class AccountAnalysisSetupComponent implements OnInit {
     this.accountAnalysisService.setCalanderizedMeters();
   }
 
+  setBaselineYearWarning() {
+    if (this.analysisItem.baselineYear && this.account.sustainabilityQuestions.energyReductionBaselineYear != this.analysisItem.baselineYear) {
+      this.baselineYearWarning = "This baseline year does not match your corporate baseline year. This analysis cannot be included in reports or figures relating to the corporate energy goal."
+    } else {
+      this.baselineYearWarning = undefined;
+    }
+  }
 }

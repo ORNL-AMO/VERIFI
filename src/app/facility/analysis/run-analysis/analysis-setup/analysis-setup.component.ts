@@ -26,6 +26,7 @@ export class AnalysisSetupComponent implements OnInit {
   energyUnit: string;
   analysisItem: IdbAnalysisItem;
   yearOptions: Array<number>;
+  baselineYearWarning: string;
   constructor(private facilityDbService: FacilitydbService, private analysisDbService: AnalysisDbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private analysisService: AnalysisService, private router: Router,
@@ -38,6 +39,7 @@ export class AnalysisSetupComponent implements OnInit {
     this.facility = this.facilityDbService.selectedFacility.getValue();
     this.energyUnit = this.facility.energyUnit;
     this.yearOptions = this.utilityMeterDataDbService.getYearOptions();
+    this.setBaselineYearWarning();
   }
 
   async saveItem() {
@@ -50,7 +52,8 @@ export class AnalysisSetupComponent implements OnInit {
   }
 
   changeReportYear() {
-    this.analysisItem = this.analysisService.setBaselineAdjustments(this.facility, this.analysisItem);
+    this.analysisItem = this.analysisService.setBaselineAdjustments(this.analysisItem);
+    this.setBaselineYearWarning();
     this.saveItem();
   }
 
@@ -62,4 +65,14 @@ export class AnalysisSetupComponent implements OnInit {
   continue() {
     this.router.navigateByUrl('/facility/' + this.facility.id + '/analysis/run-analysis/group-analysis/' + this.analysisItem.groups[0].idbGroupId + '/options');
   }
+
+  setBaselineYearWarning() {
+    if (this.analysisItem.baselineYear && this.facility.sustainabilityQuestions.energyReductionBaselineYear != this.analysisItem.baselineYear) {
+      this.baselineYearWarning = "This baseline year does not match your facility baseline year. This analysis cannot be included in reports or figures relating to the facility energy goal."
+    }else{
+      this.baselineYearWarning = undefined;
+    }
+  }
+
+
 }

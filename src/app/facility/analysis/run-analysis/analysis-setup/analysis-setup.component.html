@@ -42,6 +42,25 @@
                         </select>
                     </div>
                 </div>
+
+                <hr>
+            </div>
+            <div class="col-6">
+                <div class="form-group row">
+                    <label class="col-5 col-form-label">
+                        Baseline Year
+                    </label>
+                    <div class="col-7">
+                        <select required class="form-select" id="baselineYear" name="baselineYear"
+                            [(ngModel)]="analysisItem.baselineYear" (change)="changeReportYear()">
+                            <option *ngFor="let year of yearOptions" [ngValue]="year">
+                                {{year| yearDisplay: facility.fiscalYear}}</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="alert alert-warning text-center p-1" *ngIf="baselineYearWarning">
+                    {{baselineYearWarning}}
+                </div>
                 <div class="form-group row">
                     <label for="reportYear" class="col-5 col-form-label">
                         Report Year
@@ -55,23 +74,7 @@
                         </select>
                     </div>
                 </div>
-                <hr>
-            </div>
-            <div class="col-6">
                 <div class="form-group row">
-                    <label class="col-5 col-form-label">
-                        Baseline Year
-                    </label>
-                    <div class="col-7">
-                        <select class="form-select" id="baselineYear" name="baselineYear" disabled
-                            [(ngModel)]="facility.sustainabilityQuestions.energyReductionBaselineYear">
-                            <option [ngValue]="facility.sustainabilityQuestions.energyReductionBaselineYear">
-                                {{facility.sustainabilityQuestions.energyReductionBaselineYear| yearDisplay:
-                                facility.fiscalYear}}</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="form-group d-flex">
                     <label class="col-5 col-form-label">
                         Reporting Year
                     </label>
