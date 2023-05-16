@@ -65,9 +65,6 @@ export class AccountAnalysisItemCardComponent implements OnInit {
       }
     }
     await this.dbChangesService.setAccountAnalysisItems(this.selectedAccount);
-    if (updateReportOptions) {
-      await this.dbChangesService.setAccountOverviewReportOptions(this.selectedAccount);
-    }
     this.displayDeleteModal = false;
     this.toastNotificationService.showToast('Analysis Item Deleted', undefined, undefined, false, "alert-success");
   }

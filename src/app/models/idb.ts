@@ -1,7 +1,7 @@
 import { JStatRegressionModel } from './analysis';
-import { CalanderizedMeter, MonthlyData } from './calanderization';
+import { MonthlyData } from './calanderization';
 import { ElectricityDataFilters, GeneralUtilityDataFilters } from './meterDataFilter';
-import { BetterPlantsReportSetup, DataOverviewReportSetup, ReportOptions } from './overview-report';
+import { BetterPlantsReportSetup, DataOverviewReportSetup } from './overview-report';
 import { SustainabilityQuestions } from './sustainabilityQuestions';
 
 export interface IdbAccount {
@@ -247,21 +247,6 @@ export interface PredictorData {
 
 export type PredictorType = 'Standard' | 'Conversion' | 'Math' | 'Weather'
 export type WeatherDataType = 'HDD' | 'CDD'
-
-export interface IdbOverviewReportOptions {
-    id?: number,
-    guid: string,
-    accountId: string,
-    reportOptions: ReportOptions,
-    date: Date,
-    type: 'report' | 'template',
-    name: string,
-    baselineYear?: number,
-    targetYear?: number,
-    title?: string,
-    reportOptionsType?: 'betterPlants' | 'data'
-}
-
 
 export interface IdbAccountReport {
     id?: number,
