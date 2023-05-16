@@ -31,7 +31,7 @@ export class AccountHomeSummaryComponent implements OnInit {
   betterPlantsReportYear: number;
   accountAnalysisYear: number;
 
-  overviewReportOptionsSub: Subscription;
+  accountReportsSub: Subscription;
   disableButtons: boolean;
   monthlyFacilityAnalysisData: Array<MonthlyAnalysisSummaryData>;
   monthlyDataSub: Subscription;
@@ -76,7 +76,7 @@ export class AccountHomeSummaryComponent implements OnInit {
     })
 
 
-    this.overviewReportOptionsSub = this.accountReportDbService.accountReports.subscribe(accountReports => {
+    this.accountReportsSub = this.accountReportDbService.accountReports.subscribe(accountReports => {
       let betterPlantsReports: Array<IdbAccountReport> = accountReports.filter(options => { return options.reportType == 'betterPlants' });
       let latestReport: IdbAccountReport = _.maxBy(betterPlantsReports, 'reportYear');
       if (latestReport) {
@@ -91,7 +91,7 @@ export class AccountHomeSummaryComponent implements OnInit {
   ngOnDestroy() {
     this.accountSub.unsubscribe();
     this.latestSummarySub.unsubscribe();
-    this.overviewReportOptionsSub.unsubscribe();
+    this.accountReportsSub.unsubscribe();
   }
 
   setGoalYears() {
