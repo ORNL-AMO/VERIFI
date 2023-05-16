@@ -1,48 +1,36 @@
 import { Injectable } from '@angular/core';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { AnalysisSetupErrors, JStatRegressionModel, AnalysisGroup, GroupErrors } from 'src/app/models/analysis';
-import { IdbAnalysisItem, IdbFacility, IdbUtilityMeter, PredictorData } from 'src/app/models/idb';
+import { IdbAnalysisItem, IdbUtilityMeter, PredictorData } from 'src/app/models/idb';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AnalysisValidationService {
 
-  constructor(private utilityMeterDbService: UtilityMeterdbService, private facilityDbService: FacilitydbService) { }
+  constructor(private utilityMeterDbService: UtilityMeterdbService) { }
 
   getAnalysisItemErrors(analysisItem: IdbAnalysisItem): AnalysisSetupErrors {
     let missingName: boolean = (analysisItem.name == undefined || analysisItem.name == '');
     let noGroups: boolean = analysisItem.groups.length == 0;
     let missingReportYear: boolean = this.checkValueValid(analysisItem.reportYear) == false;
-    let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
-    let analysisFacility: IdbFacility = accountFacilities.find(facility => { return facility.guid == analysisItem.facilityId });
-    if (analysisFacility) {
-      let reportYearBeforeBaselineYear: boolean = analysisFacility.sustainabilityQuestions.energyReductionBaselineYear > analysisItem.reportYear;
-      let hasError: boolean = (missingName || noGroups || missingReportYear || reportYearBeforeBaselineYear);
-      let groupsHaveErrors: boolean = false;
-      analysisItem.groups.forEach(group => {
-        if (group.groupErrors && group.groupErrors.hasErrors) {
-          groupsHaveErrors = true;
-        }
-      })
-      return {
-        hasError: hasError,
-        missingName: missingName,
-        noGroups: noGroups,
-        missingReportYear: missingReportYear,
-        reportYearBeforeBaselineYear: reportYearBeforeBaselineYear,
-        groupsHaveErrors: groupsHaveErrors
+    let missingBaselineYear: boolean = this.checkValueValid(analysisItem.baselineYear) == false;
+    let reportYearBeforeBaselineYear: boolean = analysisItem.baselineYear > analysisItem.reportYear;
+    let hasError: boolean = (missingName || noGroups || missingReportYear || reportYearBeforeBaselineYear);
+    let groupsHaveErrors: boolean = false;
+    analysisItem.groups.forEach(group => {
+      if (group.groupErrors && group.groupErrors.hasErrors) {
+        groupsHaveErrors = true;
       }
-    } else {
-      return {
-        hasError: true,
-        missingName: true,
-        noGroups: true,
-        missingReportYear: true,
-        reportYearBeforeBaselineYear: true,
-        groupsHaveErrors: true
-      }
+    })
+    return {
+      hasError: hasError,
+      missingName: missingName,
+      noGroups: noGroups,
+      missingReportYear: missingReportYear,
+      reportYearBeforeBaselineYear: reportYearBeforeBaselineYear,
+      groupsHaveErrors: groupsHaveErrors,
+      missingBaselineYear: missingBaselineYear
     }
   }
 

@@ -28,13 +28,10 @@ export class FacilityHomeSummaryComponent implements OnInit {
   percentTowardsGoal: number = 0;
   goalYear: number;
   baselineYear: number;
-  // facilityAnalysisYear: number;
-
 
   facility: IdbFacility
   facilitySub: Subscription;
   lastBill: IdbUtilityMeterData;
-  meterDataUpToDate: boolean;
   hasCurrentYearAnalysis: IdbAnalysisItem;
   lastYear: number;
 
@@ -77,10 +74,8 @@ export class FacilityHomeSummaryComponent implements OnInit {
       this.latestAnalysisSummary = _.maxBy(val, 'date');
       if (this.latestAnalysisSummary) {
         this.latestAnalysisDate = new Date(this.latestAnalysisSummary.date);
-        // this.facilityAnalysisYear = this.latestAnalysisSummary.year;
         this.setProgressPercentages();
       } else {
-        // this.facilityAnalysisYear = undefined;
         this.latestAnalysisDate = undefined;
         this.percentSavings = 0;
         this.percentTowardsGoal = 0;
@@ -93,22 +88,6 @@ export class FacilityHomeSummaryComponent implements OnInit {
     this.latestSummarySub.unsubscribe();
     this.selectedFacilitySub.unsubscribe();
     this.calculatingSub.unsubscribe();
-    // this.monthlyFacilityAnalysisDataSub.unsubscribe();
-  }
-
-  checkMeterDataUpToDate() {
-    if (this.lastBill) {
-      let lastBillDate: Date = new Date(this.lastBill.readDate);
-      let todaysDate: Date = new Date();
-      //todo enhance check
-      if (lastBillDate.getUTCFullYear() == todaysDate.getUTCFullYear() && lastBillDate.getUTCMonth() >= todaysDate.getUTCMonth() - 1) {
-        this.meterDataUpToDate = true;
-      } else {
-        this.meterDataUpToDate = false;
-      }
-    } else {
-      this.meterDataUpToDate = false;
-    }
   }
 
   setGoalYears() {
@@ -138,7 +117,6 @@ export class FacilityHomeSummaryComponent implements OnInit {
   setFacilityStatus() {
     let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
     this.lastBill = _.maxBy(facilityMeterData, (data: IdbUtilityMeterData) => { return new Date(data.readDate) });
-    // this.checkMeterDataUpToDate();
     let facilityAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.facilityAnalysisItems.getValue();
     this.latestAnalysisItem = _.maxBy(facilityAnalysisItems, 'reportYear');
     this.setSources();

@@ -149,7 +149,8 @@ export class AnalysisDbService {
       waterUnit: selectedFacility.volumeLiquidUnit,
       groups: itemGroups,
       setupErrors: undefined,
-      analysisCategory: analysisCategory
+      analysisCategory: analysisCategory,
+      baselineYear: selectedFacility.sustainabilityQuestions.energyReductionBaselineYear
     };
     analysisItem.setupErrors = this.analysisValidationService.getAnalysisItemErrors(analysisItem);
     return analysisItem;

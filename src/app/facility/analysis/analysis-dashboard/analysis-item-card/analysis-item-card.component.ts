@@ -31,12 +31,14 @@ export class AnalysisItemCardComponent implements OnInit {
   showDetailSub: Subscription;
   showDetail: boolean;
   displayDeleteModal: boolean = false;
+  selectedFacility: IdbFacility;
   constructor(private analysisDbService: AnalysisDbService, private router: Router, private facilityDbService: FacilitydbService,
     private analysisService: AnalysisService, private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService, private toastNotificationService: ToastNotificationsService,
     private accountAnalysisDbService: AccountAnalysisDbService) { }
 
   ngOnInit(): void {
+    this.selectedFacility = this.facilityDbService.selectedFacility.getValue();
     this.initializeGroups();
     this.showDetailSub = this.analysisService.showDetail.subscribe(val => {
       this.showDetail = val;
@@ -81,9 +83,11 @@ export class AnalysisItemCardComponent implements OnInit {
 
   selectAnalysisItem() {
     this.analysisDbService.selectedAnalysisItem.next(this.analysisItem);
-    //todo: route to results if item setup
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    this.router.navigateByUrl('facility/' + selectedFacility.id + '/analysis/run-analysis');
+    if(this.analysisItem.setupErrors.hasError){
+      this.router.navigateByUrl('facility/' + this.selectedFacility.id + '/analysis/run-analysis');
+    }else{
+      this.router.navigateByUrl('facility/' + this.selectedFacility.id + '/analysis/run-analysis/facility-analysis');
+    }
   }
 
 
@@ -119,7 +123,6 @@ export class AnalysisItemCardComponent implements OnInit {
   }
 
   async createCopy() {
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     let newItem: IdbAnalysisItem = JSON.parse(JSON.stringify(this.analysisItem));
     delete newItem.id;
     newItem.name = newItem.name + " (Copy)";
@@ -127,25 +130,24 @@ export class AnalysisItemCardComponent implements OnInit {
     newItem.selectedYearAnalysis = false;
     let addedItem: IdbAnalysisItem = await firstValueFrom(this.analysisDbService.addWithObservable(newItem));
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    await this.dbChangesService.setAnalysisItems(selectedAccount, selectedFacility);
+    await this.dbChangesService.setAnalysisItems(selectedAccount, this.selectedFacility);
     this.analysisDbService.selectedAnalysisItem.next(addedItem);
     this.toastNotificationService.showToast('Analysis Copy Created', undefined, undefined, false, "alert-success");
-    this.router.navigateByUrl('facility/' + selectedFacility.id + '/analysis/run-analysis');
+    this.router.navigateByUrl('facility/' + this.selectedFacility.id + '/analysis/run-analysis');
   }
 
   deleteItem() {
     this.displayDeleteModal = true;
   }
 
-  async confirmDelete(){
+  async confirmDelete() {
     await firstValueFrom(this.analysisDbService.deleteWithObservable(this.analysisItem.id));
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     //update account analysis items
     let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
     for (let index = 0; index < accountAnalysisItems.length; index++) {
       let updated: boolean = false;
       accountAnalysisItems[index].facilityAnalysisItems.forEach(item => {
-        if (item.facilityId == selectedFacility.guid && item.analysisItemId == this.analysisItem.guid) {
+        if (item.facilityId == this.selectedFacility.guid && item.analysisItemId == this.analysisItem.guid) {
           item.analysisItemId = undefined;
           updated = true;
         }
@@ -156,12 +158,12 @@ export class AnalysisItemCardComponent implements OnInit {
     }
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.setAccountAnalysisItems(selectedAccount)
-    await this.dbChangesService.setAnalysisItems(selectedAccount, selectedFacility);
+    await this.dbChangesService.setAnalysisItems(selectedAccount, this.selectedFacility);
     this.displayDeleteModal = false;
     this.toastNotificationService.showToast('Analysis Item Deleted', undefined, undefined, false, "alert-success");
   }
 
-  cancelDelete(){
+  cancelDelete() {
     this.displayDeleteModal = false;
   }
 
@@ -182,8 +184,6 @@ export class AnalysisItemCardComponent implements OnInit {
       }
     }
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    await this.dbChangesService.setAnalysisItems(selectedAccount, selectedFacility);
-    // this.toastNotificationService.showToast("Analysis Item Selected for " + this.analysisItem.reportYear, undefined, undefined, false, "success");
+    await this.dbChangesService.setAnalysisItems(selectedAccount, this.selectedFacility);
   }
 }

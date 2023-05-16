@@ -130,4 +130,13 @@ export class FacilitydbService {
         let accountFacilitesCopy: Array<IdbFacility> = JSON.parse(JSON.stringify(accountFacilites));
         return accountFacilitesCopy;
     }
+
+    getFacilityById(id: string): IdbFacility {
+        let accountFacilites: Array<IdbFacility> = this.accountFacilities.getValue();
+        let selectedFacility: IdbFacility = accountFacilites.find(facility => { return facility.guid == id });
+        if (selectedFacility) {
+            return selectedFacility;
+        }
+        return;
+    }
 }

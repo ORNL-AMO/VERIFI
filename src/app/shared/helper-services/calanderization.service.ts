@@ -6,7 +6,6 @@ import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-
 import { CalanderizedMeter, MonthlyData, CalanderizationFilters, CalanderizationOptions } from 'src/app/models/calanderization';
 import { BehaviorSubject } from 'rxjs';
 import { ConvertUnitsService } from '../convert-units/convert-units.service';
-import { ReportOptions } from 'src/app/models/overview-report';
 import { EGridService } from './e-grid.service';
 import { EnergyUseCalculationsService } from './energy-use-calculations.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
@@ -403,8 +402,8 @@ export class CalanderizationService {
     return Math.round((utc2 - utc1) / _MS_PER_DAY);
   }
 
-  getLastBillEntry(facilityMeters: Array<IdbUtilityMeter>, inAccount: boolean, reportOptions?: ReportOptions): MonthlyData {
-    let calanderizedMeterData: Array<CalanderizedMeter> = this.getCalanderizedMeterData(facilityMeters, inAccount, false, reportOptions);
+  getLastBillEntry(facilityMeters: Array<IdbUtilityMeter>, inAccount: boolean): MonthlyData {
+    let calanderizedMeterData: Array<CalanderizedMeter> = this.getCalanderizedMeterData(facilityMeters, inAccount, false);
     let lastBill: MonthlyData = this.getLastBillEntryFromCalanderizedMeterData(calanderizedMeterData);
     return lastBill;
   }

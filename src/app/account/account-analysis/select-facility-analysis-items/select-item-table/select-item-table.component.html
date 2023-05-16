@@ -75,10 +75,10 @@
             </tr>
             <tr *ngIf="facilityAnalysisItems.length == 0">
                 <td colspan="7" class="text-center">
-                    No <span *ngIf="selectedAnalysisItem.energyIsSource">source energy</span>
-                    <span *ngIf="!selectedAnalysisItem.energyIsSource">site energy</span> analysis items found for this
+                    No <b *ngIf="selectedAnalysisItem.energyIsSource">source energy</b>
+                    <b *ngIf="!selectedAnalysisItem.energyIsSource">site energy</b> analysis items found for this
                     facility that match
-                    the selected report year.<br>
+                    the <b>selected baseline and report years.</b><br>
                     Click the "+Add Facility Analysis" button to conduct a facility level analysis that will be added to
                     the account analysis in progress.
                 </td>

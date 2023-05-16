@@ -6,13 +6,12 @@ import { AccountReportDbService } from './indexedDB/account-report-db.service';
 import { AnalysisDbService } from './indexedDB/analysis-db.service';
 import { CustomEmissionsDbService } from './indexedDB/custom-emissions-db.service';
 import { FacilitydbService } from './indexedDB/facility-db.service';
-import { OverviewReportOptionsDbService } from './indexedDB/overview-report-options-db.service';
 import { PredictordbService } from './indexedDB/predictors-db.service';
 import { UpdateDbEntryService } from './indexedDB/update-db-entry.service';
 import { UtilityMeterdbService } from './indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from './indexedDB/utilityMeterData-db.service';
 import { UtilityMeterGroupdbService } from './indexedDB/utilityMeterGroup-db.service';
-import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport, IdbAnalysisItem, IdbCustomEmissionsItem, IdbFacility, IdbOverviewReportOptions, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from './models/idb';
+import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport, IdbAnalysisItem, IdbCustomEmissionsItem, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from './models/idb';
 import { EGridService } from './shared/helper-services/e-grid.service';
 import { firstValueFrom } from 'rxjs';
 
@@ -40,7 +39,6 @@ export class AppComponent {
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
     public router: Router,
     private eGridService: EGridService,
-    private overviewReportOptionsDbService: OverviewReportOptionsDbService,
     private analysisDbService: AnalysisDbService,
     private accountAnalysisDbService: AccountAnalysisDbService,
     private updateDbEntryService: UpdateDbEntryService,
@@ -122,7 +120,7 @@ export class AppComponent {
     this.loadingMessage = "Loading Analysis Items..";
     let accountAnalysisItems: Array<IdbAccountAnalysisItem> = await this.accountAnalysisDbService.getAllAccountAnalysisItems(account.guid);
     for (let i = 0; i < accountAnalysisItems.length; i++) {
-      let updateAnalysis: { accountAnalysisItem: IdbAccountAnalysisItem, isChanged: boolean } = this.updateDbEntryService.updateAccountAnalysis(accountAnalysisItems[i]);
+      let updateAnalysis: { accountAnalysisItem: IdbAccountAnalysisItem, isChanged: boolean } = this.updateDbEntryService.updateAccountAnalysis(accountAnalysisItems[i], account);
       if (updateAnalysis.isChanged) {
         accountAnalysisItems[i] = updateAnalysis.accountAnalysisItem;
         await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(accountAnalysisItems[i]));
@@ -155,24 +153,7 @@ export class AppComponent {
   }
 
   async initializeAccountReports(account: IdbAccount) {
-    this.loadingMessage = "Loading Reports 2.0...."
-    let overviewReportOptions: Array<IdbOverviewReportOptions> = await this.overviewReportOptionsDbService.getAllAccountReports(account.guid);
-    for (let i = 0; i < overviewReportOptions.length; i++) {
-      let overviewReport: IdbOverviewReportOptions = overviewReportOptions[i];
-      if (overviewReport.type == 'report' && overviewReport.reportOptionsType == 'betterPlants') {
-        let newReport: IdbAccountReport = this.accountReportDbService.getNewAccountReport(account);
-        newReport.name = overviewReport.name;
-        newReport.baselineYear = overviewReport.baselineYear;
-        newReport.reportYear = overviewReport.targetYear;
-        newReport.reportType = 'betterPlants';
-        newReport.betterPlantsReportSetup.analysisItemId = overviewReport.reportOptions.analysisItemId;
-        newReport.betterPlantsReportSetup.baselineAdjustmentNotes = overviewReport.reportOptions.baselineAdjustmentNotes;
-        newReport.betterPlantsReportSetup.includeFacilityNames = overviewReport.reportOptions.includeFacilityNames;
-        newReport.betterPlantsReportSetup.modificationNotes = overviewReport.reportOptions.modificationNotes;
-        await firstValueFrom(this.accountReportDbService.addWithObservable(newReport));
-      }
-      await firstValueFrom(this.overviewReportOptionsDbService.deleteWithObservable(overviewReport.id));
-    }
+    this.loadingMessage = "Loading Reports..."
     let accountReports: Array<IdbAccountReport> = await this.accountReportDbService.getAllAccountReports(account.guid);
     this.accountReportDbService.accountReports.next(accountReports);
     let accountReportId: number = this.accountReportDbService.getInitialReport();

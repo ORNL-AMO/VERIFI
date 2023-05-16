@@ -1,14 +1,13 @@
 import { Injectable } from '@angular/core';
 import { LoadingService } from '../core-components/loading/loading.service';
 import { ToastNotificationsService } from '../core-components/toast-notifications/toast-notifications.service';
-import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport, IdbAnalysisItem, IdbCustomEmissionsItem, IdbFacility, IdbOverviewReportOptions, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from '../models/idb';
+import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport, IdbAnalysisItem, IdbCustomEmissionsItem, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from '../models/idb';
 import { AccountAnalysisDbService } from './account-analysis-db.service';
 import { AccountdbService } from './account-db.service';
 import { AccountReportDbService } from './account-report-db.service';
 import { AnalysisDbService } from './analysis-db.service';
 import { CustomEmissionsDbService } from './custom-emissions-db.service';
 import { FacilitydbService } from './facility-db.service';
-import { OverviewReportOptionsDbService } from './overview-report-options-db.service';
 import { PredictordbService } from './predictors-db.service';
 import { UpdateDbEntryService } from './update-db-entry.service';
 import { UtilityMeterdbService } from './utilityMeter-db.service';
@@ -23,7 +22,6 @@ export class DbChangesService {
 
   constructor(private accountDbService: AccountdbService, private facilityDbService: FacilitydbService,
     private accountAnalysisDbService: AccountAnalysisDbService, private analysisDbService: AnalysisDbService,
-    private overviewReportOptionsDbService: OverviewReportOptionsDbService,
     private predictorsDbService: PredictordbService, private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
@@ -58,8 +56,6 @@ export class DbChangesService {
       }
     }
     this.facilityDbService.accountFacilities.next(accountFacilites);
-    //set overview reports
-    await this.setAccountOverviewReportOptions(account);
     //set reports
     await this.setAccountReports(account);
     //set predictors
@@ -100,7 +96,7 @@ export class DbChangesService {
   async setAccountAnalysisItems(account: IdbAccount) {
     let accountAnalysisItems: Array<IdbAccountAnalysisItem> = await this.accountAnalysisDbService.getAllAccountAnalysisItems(account.guid);
     for (let i = 0; i < accountAnalysisItems.length; i++) {
-      let updateAnalysis: { accountAnalysisItem: IdbAccountAnalysisItem, isChanged: boolean } = this.updateDbEntryService.updateAccountAnalysis(accountAnalysisItems[i]);
+      let updateAnalysis: { accountAnalysisItem: IdbAccountAnalysisItem, isChanged: boolean } = this.updateDbEntryService.updateAccountAnalysis(accountAnalysisItems[i], account);
       if (updateAnalysis.isChanged) {
         accountAnalysisItems[i] = updateAnalysis.accountAnalysisItem;
         await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(accountAnalysisItems[i]));
@@ -136,27 +132,6 @@ export class DbChangesService {
     this.facilityDbService.accountFacilities.next(accountFacilites);
     if (!onSelect) {
       this.facilityDbService.selectedFacility.next(updatedFacility);
-    }
-  }
-
-
-  async setAccountOverviewReportOptions(account: IdbAccount) {
-    let overviewReportOptions: Array<IdbOverviewReportOptions> = await this.overviewReportOptionsDbService.getAllAccountReports(account.guid);
-    for (let i = 0; i < overviewReportOptions.length; i++) {
-      let overviewReport: IdbOverviewReportOptions = overviewReportOptions[i];
-      if (overviewReport.type == 'report' && overviewReport.reportOptionsType == 'betterPlants') {
-        let newReport: IdbAccountReport = this.accountReportDbService.getNewAccountReport(account);
-        newReport.name = overviewReport.name;
-        newReport.baselineYear = overviewReport.baselineYear;
-        newReport.reportYear = overviewReport.targetYear;
-        newReport.reportType = 'betterPlants';
-        newReport.betterPlantsReportSetup.analysisItemId = overviewReport.reportOptions.analysisItemId;
-        newReport.betterPlantsReportSetup.baselineAdjustmentNotes = overviewReport.reportOptions.baselineAdjustmentNotes;
-        newReport.betterPlantsReportSetup.includeFacilityNames = overviewReport.reportOptions.includeFacilityNames;
-        newReport.betterPlantsReportSetup.modificationNotes = overviewReport.reportOptions.modificationNotes;
-        await firstValueFrom(this.accountReportDbService.addWithObservable(newReport));
-      }
-      await firstValueFrom(this.overviewReportOptionsDbService.deleteWithObservable(overviewReport.id));
     }
   }
 

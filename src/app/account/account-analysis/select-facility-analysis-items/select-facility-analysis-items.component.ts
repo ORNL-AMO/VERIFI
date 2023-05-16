@@ -76,13 +76,15 @@ export class SelectFacilityAnalysisItemsComponent implements OnInit {
         return (item.analysisCategory == this.selectedAnalysisItem.analysisCategory
           && item.facilityId == this.selectedFacility.guid
           && item.reportYear == this.selectedAnalysisItem.reportYear
-          && item.energyIsSource == this.selectedAnalysisItem.energyIsSource);
+          && item.energyIsSource == this.selectedAnalysisItem.energyIsSource
+          && item.baselineYear == this.selectedAnalysisItem.baselineYear);
       });
     } else if (this.selectedAnalysisItem.analysisCategory == 'water') {
       this.facilityAnalysisItems = accountAnalysisItems.filter(item => {
         return (item.analysisCategory == this.selectedAnalysisItem.analysisCategory
           && item.facilityId == this.selectedFacility.guid
-          && item.reportYear == this.selectedAnalysisItem.reportYear);
+          && item.reportYear == this.selectedAnalysisItem.reportYear
+          && item.baselineYear == this.selectedAnalysisItem.baselineYear);
       });
     }
   }

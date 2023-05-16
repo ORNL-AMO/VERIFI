@@ -1,7 +1,7 @@
 import { AnalysisCategory, AnalysisGroup, AnalysisSetupErrors } from './analysis';
 import { MonthlyData } from './calanderization';
 import { ElectricityDataFilters, GeneralUtilityDataFilters } from './meterDataFilter';
-import { BetterPlantsReportSetup, DataOverviewReportSetup, ReportOptions } from './overview-report';
+import { BetterPlantsReportSetup, DataOverviewReportSetup } from './overview-report';
 import { SustainabilityQuestions } from './sustainabilityQuestions';
 
 export interface IdbAccount {
@@ -248,21 +248,6 @@ export interface PredictorData {
 export type PredictorType = 'Standard' | 'Conversion' | 'Math' | 'Weather'
 export type WeatherDataType = 'HDD' | 'CDD'
 
-export interface IdbOverviewReportOptions {
-    id?: number,
-    guid: string,
-    accountId: string,
-    reportOptions: ReportOptions,
-    date: Date,
-    type: 'report' | 'template',
-    name: string,
-    baselineYear?: number,
-    targetYear?: number,
-    title?: string,
-    reportOptionsType?: 'betterPlants' | 'data'
-}
-
-
 export interface IdbAccountReport {
     id?: number,
     guid: string,
@@ -297,7 +282,8 @@ export interface IdbAnalysisItem {
     waterUnit: string,
     setupErrors: AnalysisSetupErrors,
     groups: Array<AnalysisGroup>,
-    selectedYearAnalysis?: boolean
+    selectedYearAnalysis?: boolean,
+    baselineYear: number
 }
 
 
@@ -321,7 +307,8 @@ export interface IdbAccountAnalysisItem {
     }>,
     selectedYearAnalysis?: boolean,
     analysisCategory: AnalysisCategory,
-    waterUnit: string
+    waterUnit: string,
+    baselineYear: number
 }
 
 

@@ -87,7 +87,6 @@ export class UtilityMeterDataTableComponent implements OnInit {
         meterDataItemsToDelete.push(dataItem);
       }
     });
-    //TODO: bulk delete indexed db call
     for (let index = 0; index < meterDataItemsToDelete.length; index++) {
       await firstValueFrom(this.utilityMeterDataDbService.deleteWithObservable(meterDataItemsToDelete[index].id));
     }

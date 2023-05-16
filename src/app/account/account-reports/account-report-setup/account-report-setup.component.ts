@@ -20,7 +20,7 @@ export class AccountReportSetupComponent {
   reportYears: Array<number>;
   baselineYears: Array<number>;
   months: Array<Month> = Months;
-  //TODO: Report years validation. Start < End
+  //TODO: Report years validation. Start < End (issue-1194)
   constructor(private accountReportDbService: AccountReportDbService,
     private accountReportsService: AccountReportsService,
     private dbChangesService: DbChangesService,

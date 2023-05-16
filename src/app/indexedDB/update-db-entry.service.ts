@@ -2,13 +2,14 @@ import { Injectable } from '@angular/core';
 import { AnalysisValidationService } from '../facility/analysis/analysis-validation.service';
 import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility } from '../models/idb';
 import { AnalysisSetupErrors, GroupErrors } from '../models/analysis';
+import { FacilitydbService } from './facility-db.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UpdateDbEntryService {
 
-  constructor(private analysisValidationService: AnalysisValidationService) { }
+  constructor(private analysisValidationService: AnalysisValidationService, private facilityDbService: FacilitydbService) { }
 
   updateAccount(account: IdbAccount): { account: IdbAccount, isChanged: boolean } {
     let isChanged: boolean = false;
@@ -55,6 +56,12 @@ export class UpdateDbEntryService {
       });
     }
 
+    if (!analysisItem.baselineYear) {
+      let facility: IdbFacility = this.facilityDbService.getFacilityById(analysisItem.facilityId);
+      analysisItem.baselineYear = facility.sustainabilityQuestions.energyReductionBaselineYear;
+      isChanged = true;
+    }
+
     analysisItem.groups.forEach(group => {
       if (!group.groupErrors) {
         group.groupErrors = this.analysisValidationService.getGroupErrors(group);
@@ -76,13 +83,18 @@ export class UpdateDbEntryService {
     return { analysisItem: analysisItem, isChanged: isChanged };
   }
 
-  updateAccountAnalysis(accountAnalysisItem: IdbAccountAnalysisItem): { accountAnalysisItem: IdbAccountAnalysisItem, isChanged: boolean } {
+  updateAccountAnalysis(accountAnalysisItem: IdbAccountAnalysisItem, account: IdbAccount): { accountAnalysisItem: IdbAccountAnalysisItem, isChanged: boolean } {
     let isChanged: boolean = false;
     if (!accountAnalysisItem.analysisCategory) {
       accountAnalysisItem.analysisCategory = 'energy';
       isChanged = true;
     }
+    if (!accountAnalysisItem.baselineYear) {
+      accountAnalysisItem.baselineYear = account.sustainabilityQuestions.energyReductionBaselineYear;
+      isChanged = true;
+    }
     return { accountAnalysisItem: accountAnalysisItem, isChanged: isChanged };
   }
+
 
 }

@@ -90,6 +90,7 @@ export class AccountAnalysisDbService {
       name: 'Account Analysis',
       // energyIsSource: selectedAccount.energyIsSource,
       reportYear: selectedAccount.sustainabilityQuestions.energyReductionTargetYear,
+      baselineYear: selectedAccount.sustainabilityQuestions.energyReductionBaselineYear,
       energyUnit: selectedAccount.energyUnit,
       facilityAnalysisItems: facilityAnalysisItems,
       energyIsSource: selectedAccount.energyIsSource,
