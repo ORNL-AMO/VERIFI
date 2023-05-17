@@ -28,7 +28,6 @@ export class SelectItemTableComponent implements OnInit {
   itemToEdit: IdbAnalysisItem;
   facilities: Array<IdbFacility>
   showCreateItem: boolean;
-  selectedItemHasErrors: boolean;
   selectedFacilityItem: IdbAnalysisItem;
   constructor(private accountAnalysisDbService: AccountAnalysisDbService, private router: Router,
     private analysisDbService: AnalysisDbService, private facilityDbService: FacilitydbService,

@@ -80,8 +80,8 @@ export class AppComponent {
         await this.initializeMeters(account);
         await this.initializeMeterData(account);
         await this.initilizeMeterGroups(account);
-        await this.initializeAccountAnalysisItems(account);
         await this.initializeFacilityAnalysisItems(account);
+        await this.initializeAccountAnalysisItems(account);
         await this.initializeCustomEmissions(account);
         let updatedAccount: { account: IdbAccount, isChanged: boolean } = this.updateDbEntryService.updateAccount(account);
         if (updatedAccount.isChanged) {
@@ -119,8 +119,9 @@ export class AppComponent {
     //set account analysis
     this.loadingMessage = "Loading Analysis Items..";
     let accountAnalysisItems: Array<IdbAccountAnalysisItem> = await this.accountAnalysisDbService.getAllAccountAnalysisItems(account.guid);
+    let facilityAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
     for (let i = 0; i < accountAnalysisItems.length; i++) {
-      let updateAnalysis: { analysisItem: IdbAccountAnalysisItem, isChanged: boolean } = this.updateDbEntryService.updateAccountAnalysis(accountAnalysisItems[i], account);
+      let updateAnalysis: { analysisItem: IdbAccountAnalysisItem, isChanged: boolean } = this.updateDbEntryService.updateAccountAnalysis(accountAnalysisItems[i], account, facilityAnalysisItems);
       if (updateAnalysis.isChanged) {
         accountAnalysisItems[i] = updateAnalysis.analysisItem;
         await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(accountAnalysisItems[i]));

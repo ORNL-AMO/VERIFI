@@ -2,7 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
-import { IdbAccountAnalysisItem } from 'src/app/models/idb';
+import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
+import { AccountAnalysisSetupErrors } from 'src/app/models/accountAnalysis';
+import { IdbAccountAnalysisItem, IdbAnalysisItem } from 'src/app/models/idb';
+import { AnalysisValidationService } from 'src/app/shared/helper-services/analysis-validation.service';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 
 @Component({
@@ -18,14 +21,12 @@ export class AccountAnalysisBannerComponent implements OnInit {
 
   accountAnalysisItem: IdbAccountAnalysisItem;
   accountAnalysisItemSub: Subscription;
-  setupValid: boolean;
-  facilitySelectionValid: boolean;
   routerSub: Subscription;
   constructor(private router: Router,
     private sharedDataService: SharedDataService, private accountAnalysisDbService: AccountAnalysisDbService) { }
 
   ngOnInit(): void {
-  this.routerSub =  this.router.events.subscribe(event => {
+    this.routerSub = this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
         this.setInDashboard(event.url);
       }
@@ -37,7 +38,6 @@ export class AccountAnalysisBannerComponent implements OnInit {
 
     this.accountAnalysisItemSub = this.accountAnalysisDbService.selectedAnalysisItem.subscribe(val => {
       this.accountAnalysisItem = val;
-      this.setValidation();
     })
 
   }
@@ -54,19 +54,5 @@ export class AccountAnalysisBannerComponent implements OnInit {
 
   goToDashboard() {
     this.router.navigateByUrl('/analysis/dashboard')
-  }
-
-  setValidation() {
-    if (this.accountAnalysisItem) {
-      //TODO: Check that report year is within data entry range (issue 1193)
-      this.setupValid = this.accountAnalysisItem.energyUnit != undefined && this.accountAnalysisItem.reportYear != undefined && this.accountAnalysisItem.baselineYear != undefined;
-      let facilitySelectionValid: boolean = false;
-      this.accountAnalysisItem.facilityAnalysisItems.forEach(item => {
-        if (item.analysisItemId != undefined) {
-          facilitySelectionValid = true;
-        }
-      });
-      this.facilitySelectionValid = facilitySelectionValid;
-    }
   }
 }

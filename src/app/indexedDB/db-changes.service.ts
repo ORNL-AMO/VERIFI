@@ -107,6 +107,7 @@ export class DbChangesService {
         await firstValueFrom(this.analysisDbService.updateWithObservable(analysisItems[i]));
       };
     }
+    console.log('SETT')
     this.analysisDbService.accountAnalysisItems.next(analysisItems);
     if (facility) {
       this.setFacilityAnalysisItems(facility);

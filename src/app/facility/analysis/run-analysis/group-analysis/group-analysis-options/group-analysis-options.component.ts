@@ -50,6 +50,7 @@ export class GroupAnalysisOptionsComponent implements OnInit {
     let groupIndex: number = analysisItem.groups.findIndex(group => { return group.idbGroupId == this.group.idbGroupId });
     this.group.groupErrors = this.analysisValidationService.getGroupErrors(this.group);
     analysisItem.groups[groupIndex] = this.group;
+    analysisItem.setupErrors = this.analysisValidationService.getAnalysisItemErrors(analysisItem);
     await firstValueFrom(this.analysisDbService.updateWithObservable(analysisItem));
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.setAnalysisItems(selectedAccount, this.facility);
@@ -76,7 +77,6 @@ export class GroupAnalysisOptionsComponent implements OnInit {
       });
     }
     this.changeModelType();
-    this.saveItem();
   }
 
   changeModelType() {

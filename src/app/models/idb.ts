@@ -1,3 +1,4 @@
+import { AccountAnalysisSetupErrors } from './accountAnalysis';
 import { JStatRegressionModel } from './analysis';
 import { MonthlyData } from './calanderization';
 import { ElectricityDataFilters, GeneralUtilityDataFilters } from './meterDataFilter';
@@ -353,7 +354,8 @@ export interface IdbAccountAnalysisItem {
         amount: number
     }>,
     selectedYearAnalysis?: boolean,
-    baselineYear: number
+    baselineYear: number,
+    setupErrors: AccountAnalysisSetupErrors
 }
 
 

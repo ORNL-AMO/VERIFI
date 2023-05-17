@@ -6,6 +6,9 @@
                     [ngClass]="{'fa-circle-check':analysisItem.selectedYearAnalysis, 'fa-circle':!analysisItem.selectedYearAnalysis}"
                     (click)="setUseItem()"></span>
                 <a class="item-name click-link" (click)="selectAnalysisItem()">
+                    
+                    <span class="ms-2 fa fa-exclamation-circle"
+                        *ngIf="analysisItem.setupErrors.hasError || analysisItem.setupErrors.facilitiesSelectionsInvalid"></span>
                     {{analysisItem.name}}
                 </a>
             </div>

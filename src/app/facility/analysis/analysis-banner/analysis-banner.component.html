@@ -8,7 +8,7 @@
                     <i class="fa fa-gears"></i>
                     Analysis Setup</a>
             </li>
-            <li class="nav-item" *ngFor="let group of groups" [ngClass]="{'disabled': !analysisSetupValid || analysisItem.setupErrors.hasError}">
+            <li class="nav-item" *ngFor="let group of groups" [ngClass]="{'disabled': analysisItem.setupErrors.hasError}">
                 <a class="nav-link" routerLink="run-analysis/group-analysis/{{group.idbGroupId}}"
                     [routerLinkActive]="['active']">
                     <span class="fa fa-exclamation-circle" *ngIf="group.groupErrors?.hasErrors"></span>
@@ -17,7 +17,7 @@
                     {{group.idbGroupId | groupName}}
                 </a>
             </li>
-            <li class="nav-item" [ngClass]="{'disabled': !analysisSetupValid || groupHasError || analysisItem.setupErrors.hasError}">
+            <li class="nav-item" [ngClass]="{'disabled': analysisItem.setupErrors.groupsHaveErrors || analysisItem.setupErrors.hasError}">
                 <a class="nav-link" routerLink="run-analysis/facility-analysis" [routerLinkActive]="['active']">
                     <i class="fa fa-magnifying-glass-chart"></i>Facility
                     Summary</a>

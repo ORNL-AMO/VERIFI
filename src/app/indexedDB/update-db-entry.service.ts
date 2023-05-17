@@ -78,10 +78,15 @@ export class UpdateDbEntryService {
     return { analysisItem: analysisItem, isChanged: isChanged };
   }
 
-  updateAccountAnalysis(analysisItem: IdbAccountAnalysisItem, account: IdbAccount): { analysisItem: IdbAccountAnalysisItem, isChanged: boolean } {
+  updateAccountAnalysis(analysisItem: IdbAccountAnalysisItem, account: IdbAccount, facilityAnalysisItems: Array<IdbAnalysisItem>): { analysisItem: IdbAccountAnalysisItem, isChanged: boolean } {
     let isChanged: boolean = false;
     if (!analysisItem.baselineYear) {
       analysisItem.baselineYear = account.sustainabilityQuestions.energyReductionBaselineYear;
+      isChanged = true;
+    }
+
+    if (!analysisItem.setupErrors) {
+      analysisItem.setupErrors = this.analysisValidationService.getAccountAnalysisSetupErrors(analysisItem, facilityAnalysisItems);
       isChanged = true;
     }
     return { analysisItem: analysisItem, isChanged: isChanged };
