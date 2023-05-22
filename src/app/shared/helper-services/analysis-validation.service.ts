@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
+import { AccountAnalysisSetupErrors } from 'src/app/models/accountAnalysis';
 import { JStatRegressionModel } from 'src/app/models/analysis';
-import { AnalysisGroup, AnalysisSetupErrors, GroupErrors, IdbAnalysisItem, IdbUtilityMeter, PredictorData } from 'src/app/models/idb';
+import { AnalysisGroup, AnalysisSetupErrors, GroupErrors, IdbAccountAnalysisItem, IdbAnalysisItem, IdbUtilityMeter, PredictorData } from 'src/app/models/idb';
 
 @Injectable({
   providedIn: 'root'
@@ -120,5 +121,65 @@ export class AnalysisValidationService {
   }
 
 
+  getAccountAnalysisSetupErrors(analysisItem: IdbAccountAnalysisItem, allAnalysisItems: Array<IdbAnalysisItem>): AccountAnalysisSetupErrors {
+    let missingName: boolean = (analysisItem.name == undefined || analysisItem.name == '');
+    let missingReportYear: boolean = this.checkValueValid(analysisItem.reportYear) == false;
+    let missingBaselineYear: boolean = this.checkValueValid(analysisItem.baselineYear) == false;
+    let reportYearBeforeBaselineYear: boolean = analysisItem.baselineYear >= analysisItem.reportYear;
+    let hasError: boolean = (missingName || missingReportYear || missingBaselineYear || reportYearBeforeBaselineYear);
+    let facilitiesSelectionsErrors: Array<boolean> = [];
+    analysisItem.facilityAnalysisItems.forEach(item => {
+      if (item.analysisItemId != undefined && item.analysisItemId != 'skip') {
+        let analysisItem: IdbAnalysisItem = allAnalysisItems.find(analysisItem => { return analysisItem.guid == item.analysisItemId });
+        if (analysisItem.setupErrors.hasError || analysisItem.setupErrors.groupsHaveErrors) {
+          facilitiesSelectionsErrors.push(true)
+        } else {
+          facilitiesSelectionsErrors.push(false);
+        }
+      } else {
+        if (item.analysisItemId == 'skip') {
+          facilitiesSelectionsErrors.push(false);
+        } else {
+          facilitiesSelectionsErrors.push(true);
+        }
+      }
+    });
+    let facilitiesSelectionsInvalid: boolean = facilitiesSelectionsErrors.includes(true);
+    return {
+      hasError: hasError,
+      missingName: missingName,
+      missingReportYear: missingReportYear,
+      missingBaselineYear: missingBaselineYear,
+      reportYearBeforeBaselineYear: reportYearBeforeBaselineYear,
+      facilitiesSelectionsInvalid: facilitiesSelectionsInvalid
+    }
+  }
+
+  updateFacilitySelectionErrors(analysisItem: IdbAccountAnalysisItem, allAnalysisItems: Array<IdbAnalysisItem>): { analysisItem: IdbAccountAnalysisItem, isChanged: boolean } {
+    let facilitiesSelectionsErrors: Array<boolean> = [];
+    analysisItem.facilityAnalysisItems.forEach(item => {
+      if (item.analysisItemId != undefined && item.analysisItemId != 'skip') {
+        let analysisItem: IdbAnalysisItem = allAnalysisItems.find(analysisItem => { return analysisItem.guid == item.analysisItemId });
+        if (analysisItem.setupErrors.hasError || analysisItem.setupErrors.groupsHaveErrors) {
+          facilitiesSelectionsErrors.push(true)
+        } else {
+          facilitiesSelectionsErrors.push(false);
+        }
+      } else {
+        if (item.analysisItemId == 'skip') {
+          facilitiesSelectionsErrors.push(false);
+        } else {
+          facilitiesSelectionsErrors.push(true);
+        }
+      }
+    });
+    let facilitiesSelectionsInvalid: boolean = facilitiesSelectionsErrors.includes(true);
+    let isChanged: boolean = false;
+    if (facilitiesSelectionsInvalid != analysisItem.setupErrors.facilitiesSelectionsInvalid) {
+      analysisItem.setupErrors.facilitiesSelectionsInvalid = facilitiesSelectionsInvalid;
+      isChanged = true;
+    }
+    return { analysisItem: analysisItem, isChanged: isChanged };
+  }
 
 }

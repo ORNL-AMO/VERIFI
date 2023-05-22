@@ -8,9 +8,9 @@ import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
-import { AnalysisValidationService } from 'src/app/facility/analysis/analysis-validation.service';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { firstValueFrom } from 'rxjs';
+import { AnalysisValidationService } from 'src/app/shared/helper-services/analysis-validation.service';
 @Component({
   selector: 'app-select-item-table',
   templateUrl: './select-item-table.component.html',
@@ -28,7 +28,6 @@ export class SelectItemTableComponent implements OnInit {
   itemToEdit: IdbAnalysisItem;
   facilities: Array<IdbFacility>
   showCreateItem: boolean;
-  selectedItemHasErrors: boolean;
   selectedFacilityItem: IdbAnalysisItem;
   constructor(private accountAnalysisDbService: AccountAnalysisDbService, private router: Router,
     private analysisDbService: AnalysisDbService, private facilityDbService: FacilitydbService,

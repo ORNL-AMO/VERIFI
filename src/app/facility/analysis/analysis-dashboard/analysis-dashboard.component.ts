@@ -75,15 +75,6 @@ export class AnalysisDashboardComponent implements OnInit {
     this.router.navigateByUrl('facility/' + this.selectedFacility.id + '/analysis/run-analysis');
   }
 
-  selectAnalysisItem(item: IdbAnalysisItem) {
-    this.analysisDbService.selectedAnalysisItem.next(item);
-    if(item.setupErrors.hasError){
-      this.router.navigateByUrl('facility/' + this.selectedFacility.id + '/analysis/run-analysis');
-    }else{
-      this.router.navigateByUrl('facility/' + this.selectedFacility.id + '/analysis/run-analysis/facility-analysis');
-    }
-  }
-
   setAnalysisItemsList(facilityAnalysisItems: Array<IdbAnalysisItem>) {
     this.analysisItemsList = new Array();
     let years: Array<number> = facilityAnalysisItems.map(item => { return item.reportYear });

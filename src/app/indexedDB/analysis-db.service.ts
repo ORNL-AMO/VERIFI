@@ -8,7 +8,7 @@ import { FacilitydbService } from './facility-db.service';
 import { PredictordbService } from './predictors-db.service';
 import { UtilityMeterGroupdbService } from './utilityMeterGroup-db.service';
 import * as _ from 'lodash';
-import { AnalysisValidationService } from '../facility/analysis/analysis-validation.service';
+import { AnalysisValidationService } from '../shared/helper-services/analysis-validation.service';
 
 @Injectable({
   providedIn: 'root'
@@ -168,6 +168,7 @@ export class AnalysisDbService {
     let facilityAnalysisItems: Array<IdbAnalysisItem> = accountAnalysisItems.filter(item => { return item.facilityId == facilityId });
     for (let index = 0; index < facilityAnalysisItems.length; index++) {
       let analysisItem: IdbAnalysisItem = facilityAnalysisItems[index];
+      let hasGroupErrors: boolean = false;
       analysisItem.groups.forEach(group => {
         let groupUpdates: { predictors: Array<PredictorData>, deletedPredictor: boolean } = this.updatePredictorVariables(predictorEntries, group.predictorVariables);
         group.predictorVariables = groupUpdates.predictors;
@@ -179,7 +180,11 @@ export class AnalysisDbService {
           group.dateModelsGenerated = undefined;
         }
         group.groupErrors = this.analysisValidationService.getGroupErrors(group);
+        if (group.groupErrors.hasErrors) {
+          hasGroupErrors = true;
+        }
       });
+      analysisItem.setupErrors.groupsHaveErrors = hasGroupErrors;
       await firstValueFrom(this.updateWithObservable(analysisItem));
     };
   }

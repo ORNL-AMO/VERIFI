@@ -10,6 +10,7 @@ import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { firstValueFrom } from 'rxjs';
+import { AnalysisValidationService } from 'src/app/shared/helper-services/analysis-validation.service';
 
 @Component({
   selector: 'app-account-analysis-setup',
@@ -30,7 +31,8 @@ export class AccountAnalysisSetupComponent implements OnInit {
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private router: Router, private accountAnalysisService: AccountAnalysisService,
     private dbChangesService: DbChangesService,
-    private analysisDbService: AnalysisDbService) { }
+    private analysisDbService: AnalysisDbService,
+    private analysisValidationService: AnalysisValidationService) { }
 
   ngOnInit(): void {
     this.analysisItem = this.accountAnalysisDbService.selectedAnalysisItem.getValue();
@@ -44,6 +46,8 @@ export class AccountAnalysisSetupComponent implements OnInit {
   }
 
   async saveItem() {
+    let analysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
+    this.analysisItem.setupErrors = this.analysisValidationService.getAccountAnalysisSetupErrors(this.analysisItem, analysisItems);
     await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(this.analysisItem));
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.setAccountAnalysisItems(account);

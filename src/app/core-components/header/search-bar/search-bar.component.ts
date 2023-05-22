@@ -125,11 +125,14 @@ export class SearchBarComponent implements OnInit {
       this.router.navigateByUrl('facility/' + item.facilityId + '/utility/energy-consumption/utility-meter/' + item.meterId);
     } else if (item.type == 'accountAnalysis') {
       this.accountAnalysisDbService.selectedAnalysisItem.next(item.accountAnalysisItem);
-      //todo: route to results if item setup (issue-1193)
-      this.router.navigateByUrl('account/analysis/setup');
+      if (item.accountAnalysisItem.setupErrors.hasError || item.accountAnalysisItem.setupErrors.facilitiesSelectionsInvalid) {
+        this.router.navigateByUrl('account/analysis/setup');
+      } else {
+        this.router.navigateByUrl('account/analysis/results');
+      }
     } else if (item.type == 'facilityAnalysis') {
       this.analysisDbService.selectedAnalysisItem.next(item.facilityAnalysisItem);
-      if (item.facilityAnalysisItem.setupErrors.hasError) {
+      if (item.facilityAnalysisItem.setupErrors.hasError || item.facilityAnalysisItem.setupErrors.groupsHaveErrors) {
         this.router.navigateByUrl('facility/' + item.facilityId + '/analysis/run-analysis');
       } else {
         this.router.navigateByUrl('facility/' + item.facilityId + '/analysis/run-analysis/facility-analysis');

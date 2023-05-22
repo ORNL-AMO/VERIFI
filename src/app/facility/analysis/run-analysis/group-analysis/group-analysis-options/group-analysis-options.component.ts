@@ -7,9 +7,9 @@ import * as _ from 'lodash';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { AnalysisValidationService } from '../../../analysis-validation.service';
 import { Router } from '@angular/router';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
+import { AnalysisValidationService } from 'src/app/shared/helper-services/analysis-validation.service';
 
 @Component({
   selector: 'app-group-analysis-options',
@@ -50,6 +50,7 @@ export class GroupAnalysisOptionsComponent implements OnInit {
     let groupIndex: number = analysisItem.groups.findIndex(group => { return group.idbGroupId == this.group.idbGroupId });
     this.group.groupErrors = this.analysisValidationService.getGroupErrors(this.group);
     analysisItem.groups[groupIndex] = this.group;
+    analysisItem.setupErrors = this.analysisValidationService.getAnalysisItemErrors(analysisItem);
     await firstValueFrom(this.analysisDbService.updateWithObservable(analysisItem));
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.setAnalysisItems(selectedAccount, this.facility);
@@ -76,7 +77,6 @@ export class GroupAnalysisOptionsComponent implements OnInit {
       });
     }
     this.changeModelType();
-    this.saveItem();
   }
 
   changeModelType() {

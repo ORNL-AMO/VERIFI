@@ -17,8 +17,6 @@ export class AnalysisBannerComponent implements OnInit {
   inRunAnalysis: boolean;
   analysisItem: IdbAnalysisItem;
   analysisItemSub: Subscription;
-  analysisSetupValid: boolean;
-  groupHasError: boolean;
   groups: Array<AnalysisGroup>;
   modalOpen: boolean;
   modalOpenSub: Subscription;
@@ -29,7 +27,6 @@ export class AnalysisBannerComponent implements OnInit {
   ngOnInit(): void {
     this.analysisItemSub = this.analysisDbService.selectedAnalysisItem.subscribe(item => {
       this.analysisItem = item;
-      this.checkAnalysisSetupValid();
     })
     this.routerSub = this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
@@ -64,20 +61,5 @@ export class AnalysisBannerComponent implements OnInit {
 
   goToDashboard() {
     this.router.navigateByUrl('/analysis/analysis-dashboard')
-  }
-
-  checkAnalysisSetupValid() {
-    if (this.analysisItem) {
-      this.analysisSetupValid = this.analysisItem.reportYear != undefined;
-      let groupHasError: boolean = false;
-      this.analysisItem.groups.forEach(group => {
-        if (group.groupErrors.hasErrors) {
-          groupHasError = true;
-        }
-      });
-      this.groupHasError = groupHasError;
-    } else {
-      this.analysisSetupValid = false;
-    }
   }
 }
