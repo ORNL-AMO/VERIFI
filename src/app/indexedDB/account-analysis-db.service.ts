@@ -132,4 +132,21 @@ export class AccountAnalysisDbService {
     await firstValueFrom(this.updateWithObservable(analysiItem));
     this.selectedAnalysisItem.next(analysiItem);
   }
+
+  async updateAccountValidation(allAnalysisItems: Array<IdbAnalysisItem>) {
+    let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisItems.getValue();
+    let hasChanges: boolean = false;
+    for (let i = 0; i < accountAnalysisItems.length; i++) {
+      let item: IdbAccountAnalysisItem = accountAnalysisItems[i];
+      let results: { analysisItem: IdbAccountAnalysisItem, isChanged: boolean } = this.analysisValidationService.updateFacilitySelectionErrors(item, allAnalysisItems);
+      if (results.isChanged) {
+        accountAnalysisItems[i] = results.analysisItem;
+        await firstValueFrom(this.updateWithObservable(accountAnalysisItems[i]));
+        hasChanges = true;
+      }
+    }
+    if (hasChanges) {
+      this.accountAnalysisItems.next(accountAnalysisItems);
+    }
+  }
 }

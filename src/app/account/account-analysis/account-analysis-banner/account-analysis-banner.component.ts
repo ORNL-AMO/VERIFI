@@ -2,10 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { AccountAnalysisSetupErrors } from 'src/app/models/accountAnalysis';
-import { IdbAccountAnalysisItem, IdbAnalysisItem } from 'src/app/models/idb';
-import { AnalysisValidationService } from 'src/app/shared/helper-services/analysis-validation.service';
+import { IdbAccountAnalysisItem } from 'src/app/models/idb';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 
 @Component({

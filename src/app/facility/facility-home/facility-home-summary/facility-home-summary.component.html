@@ -182,6 +182,10 @@
                     <app-calculating-spinner *ngIf="calculating != false" [message]="'Calculating Monthly Results...'"
                         [error]="calculating == 'error'">
                     </app-calculating-spinner>
+                    <div class="alert alert-danger"
+                        *ngIf="latestAnalysisItem.setupErrors.hasError || latestAnalysisItem.setupErrors.groupsHaveErrors">
+                        Errors found in selected analysis.
+                    </div>
                 </ng-container>
 
             </div>
