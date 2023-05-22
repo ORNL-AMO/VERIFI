@@ -90,6 +90,11 @@ export class UpdateDbEntryService {
       isChanged = true;
     }
 
+    if (!analysisItem.baselineYear) {
+      analysisItem.baselineYear = account.sustainabilityQuestions.energyReductionBaselineYear;
+      isChanged = true;
+    }
+    
     if (!analysisItem.setupErrors) {
       analysisItem.setupErrors = this.analysisValidationService.getAccountAnalysisSetupErrors(analysisItem, facilityAnalysisItems);
       isChanged = true;
