@@ -95,13 +95,15 @@ export class DbChangesService {
 
   async setAccountAnalysisItems(account: IdbAccount) {
     let accountAnalysisItems: Array<IdbAccountAnalysisItem> = await this.accountAnalysisDbService.getAllAccountAnalysisItems(account.guid);
+    let facilityAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
     for (let i = 0; i < accountAnalysisItems.length; i++) {
-      let updateAnalysis: { accountAnalysisItem: IdbAccountAnalysisItem, isChanged: boolean } = this.updateDbEntryService.updateAccountAnalysis(accountAnalysisItems[i], account);
+      let updateAnalysis: { analysisItem: IdbAccountAnalysisItem, isChanged: boolean } = this.updateDbEntryService.updateAccountAnalysis(accountAnalysisItems[i], account, facilityAnalysisItems);
       if (updateAnalysis.isChanged) {
-        accountAnalysisItems[i] = updateAnalysis.accountAnalysisItem;
+        accountAnalysisItems[i] = updateAnalysis.analysisItem;
         await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(accountAnalysisItems[i]));
       };
     }
+   
     this.accountAnalysisDbService.accountAnalysisItems.next(accountAnalysisItems);
   }
 

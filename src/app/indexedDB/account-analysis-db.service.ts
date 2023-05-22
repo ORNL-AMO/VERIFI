@@ -2,10 +2,12 @@ import { Injectable } from '@angular/core';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { LocalStorageService } from 'ngx-webstorage';
 import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
-import { IdbAccount, IdbAccountAnalysisItem, IdbFacility } from '../models/idb';
+import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility } from '../models/idb';
 import { AccountdbService } from './account-db.service';
 import { FacilitydbService } from './facility-db.service';
 import { AnalysisCategory } from '../models/analysis';
+import { AnalysisDbService } from './analysis-db.service';
+import { AnalysisValidationService } from '../shared/helper-services/analysis-validation.service';
 
 @Injectable({
   providedIn: 'root'
@@ -17,7 +19,9 @@ export class AccountAnalysisDbService {
 
   constructor(private dbService: NgxIndexedDBService, private localStorageService: LocalStorageService,
     private accountDbService: AccountdbService,
-    private facilityDbService: FacilitydbService) {
+    private facilityDbService: FacilitydbService,
+    private analysisDbService: AnalysisDbService,
+    private analysisValidationService: AnalysisValidationService) {
     this.accountAnalysisItems = new BehaviorSubject<Array<IdbAccountAnalysisItem>>([]);
     this.selectedAnalysisItem = new BehaviorSubject<IdbAccountAnalysisItem>(undefined);
 
@@ -89,7 +93,7 @@ export class AccountAnalysisDbService {
       date: new Date(),
       name: 'Account Analysis',
       // energyIsSource: selectedAccount.energyIsSource,
-      reportYear: selectedAccount.sustainabilityQuestions.energyReductionTargetYear,
+      reportYear: undefined,
       baselineYear: selectedAccount.sustainabilityQuestions.energyReductionBaselineYear,
       energyUnit: selectedAccount.energyUnit,
       facilityAnalysisItems: facilityAnalysisItems,
@@ -97,7 +101,15 @@ export class AccountAnalysisDbService {
       hasBaselineAdjustement: false,
       baselineAdjustments: [],
       waterUnit: selectedAccount.volumeLiquidUnit,
-      analysisCategory: analysisCategory
+      analysisCategory: analysisCategory,
+      setupErrors: {
+        hasError: true,
+        missingName: false,
+        missingReportYear: true,
+        missingBaselineYear: false,
+        reportYearBeforeBaselineYear: false,
+        facilitiesSelectionsInvalid: true
+      }
     }
   }
 
@@ -119,7 +131,26 @@ export class AccountAnalysisDbService {
         item.analysisItemId = analysisItemId;
       }
     });
+    let analysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
+    analysiItem.setupErrors = this.analysisValidationService.getAccountAnalysisSetupErrors(analysiItem, analysisItems);
     await firstValueFrom(this.updateWithObservable(analysiItem));
     this.selectedAnalysisItem.next(analysiItem);
+  }
+
+  async updateAccountValidation(allAnalysisItems: Array<IdbAnalysisItem>) {
+    let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisItems.getValue();
+    let hasChanges: boolean = false;
+    for (let i = 0; i < accountAnalysisItems.length; i++) {
+      let item: IdbAccountAnalysisItem = accountAnalysisItems[i];
+      let results: { analysisItem: IdbAccountAnalysisItem, isChanged: boolean } = this.analysisValidationService.updateFacilitySelectionErrors(item, allAnalysisItems);
+      if (results.isChanged) {
+        accountAnalysisItems[i] = results.analysisItem;
+        await firstValueFrom(this.updateWithObservable(accountAnalysisItems[i]));
+        hasChanges = true;
+      }
+    }
+    if (hasChanges) {
+      this.accountAnalysisItems.next(accountAnalysisItems);
+    }
   }
 }

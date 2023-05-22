@@ -7,12 +7,12 @@ import { EnergyUnitOptions, UnitOption } from 'src/app/shared/unitOptions';
 import * as _ from 'lodash';
 import { AnalysisService } from '../../analysis.service';
 import { Router } from '@angular/router';
-import { AnalysisValidationService } from '../../analysis-validation.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { firstValueFrom } from 'rxjs';
 import { VolumeLiquidOptions } from 'src/app/shared/unitOptions';
+import { AnalysisValidationService } from 'src/app/shared/helper-services/analysis-validation.service';
 @Component({
   selector: 'app-analysis-setup',
   templateUrl: './analysis-setup.component.html',

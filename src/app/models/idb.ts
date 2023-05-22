@@ -1,3 +1,4 @@
+import { AccountAnalysisSetupErrors } from './accountAnalysis';
 import { AnalysisCategory, AnalysisGroup, AnalysisSetupErrors } from './analysis';
 import { MonthlyData } from './calanderization';
 import { ElectricityDataFilters, GeneralUtilityDataFilters } from './meterDataFilter';
@@ -309,6 +310,7 @@ export interface IdbAccountAnalysisItem {
     analysisCategory: AnalysisCategory,
     waterUnit: string,
     baselineYear: number
+    setupErrors: AccountAnalysisSetupErrors
 }
 
 

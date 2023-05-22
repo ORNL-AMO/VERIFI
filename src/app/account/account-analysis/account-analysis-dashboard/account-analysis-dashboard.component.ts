@@ -50,7 +50,7 @@ export class AccountAnalysisDashboardComponent implements OnInit {
     if (this.yearOptions) {
       this.baselineYearError = this.yearOptions[0] > this.selectedAccount.sustainabilityQuestions.energyReductionBaselineYear
     }
-   
+
     this.showDetailSub = this.analysisService.showDetail.subscribe(showDetail => {
       this.showDetail = showDetail;
     })
@@ -69,21 +69,26 @@ export class AccountAnalysisDashboardComponent implements OnInit {
     this.toastNotificationService.showToast('Analysis Item Created', undefined, undefined, false, "alert-success");
     this.router.navigateByUrl('account/analysis/setup');
   }
-  
 
-  setAnalysisItemsList(accountAnalysisItems: Array<IdbAccountAnalysisItem>) {
+
+  async setAnalysisItemsList(accountAnalysisItems: Array<IdbAccountAnalysisItem>) {
     this.analysisItemsList = new Array();
     let years: Array<number> = accountAnalysisItems.map(item => { return item.reportYear });
     years = _.uniq(years);
     years = _.orderBy(years, (year) => { return year }, 'desc');
-    years.forEach(year => {
+    for (let i = 0; i < years.length; i++) {
+      let year: number = years[i];
       let yearAnalysisItems: Array<IdbAccountAnalysisItem> = accountAnalysisItems.filter(item => { return item.reportYear == year });
+      for (let x = 0; x < yearAnalysisItems.length; x++) {
+        let accountAnalysisItem: IdbAccountAnalysisItem = yearAnalysisItems[i];
+        
+      }
       this.analysisItemsList.push({
         year: year,
         analysisItems: yearAnalysisItems,
         hasSelectedItem: yearAnalysisItems.findIndex((item: IdbAccountAnalysisItem) => { return item.selectedYearAnalysis == true }) != -1
       });
-    })
+    }
   }
 
   saveShowDetails() {

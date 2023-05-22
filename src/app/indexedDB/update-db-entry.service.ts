@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
-import { AnalysisValidationService } from '../facility/analysis/analysis-validation.service';
 import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility } from '../models/idb';
 import { AnalysisSetupErrors, GroupErrors } from '../models/analysis';
 import { FacilitydbService } from './facility-db.service';
+import { AnalysisValidationService } from '../shared/helper-services/analysis-validation.service';
 
 @Injectable({
   providedIn: 'root'
@@ -83,17 +83,18 @@ export class UpdateDbEntryService {
     return { analysisItem: analysisItem, isChanged: isChanged };
   }
 
-  updateAccountAnalysis(accountAnalysisItem: IdbAccountAnalysisItem, account: IdbAccount): { accountAnalysisItem: IdbAccountAnalysisItem, isChanged: boolean } {
+  updateAccountAnalysis(analysisItem: IdbAccountAnalysisItem, account: IdbAccount, facilityAnalysisItems: Array<IdbAnalysisItem>): { analysisItem: IdbAccountAnalysisItem, isChanged: boolean } {
     let isChanged: boolean = false;
-    if (!accountAnalysisItem.analysisCategory) {
-      accountAnalysisItem.analysisCategory = 'energy';
+    if (!analysisItem.analysisCategory) {
+      analysisItem.analysisCategory = 'energy';
       isChanged = true;
     }
-    if (!accountAnalysisItem.baselineYear) {
-      accountAnalysisItem.baselineYear = account.sustainabilityQuestions.energyReductionBaselineYear;
+
+    if (!analysisItem.setupErrors) {
+      analysisItem.setupErrors = this.analysisValidationService.getAccountAnalysisSetupErrors(analysisItem, facilityAnalysisItems);
       isChanged = true;
     }
-    return { accountAnalysisItem: accountAnalysisItem, isChanged: isChanged };
+    return { analysisItem: analysisItem, isChanged: isChanged };
   }
 
 

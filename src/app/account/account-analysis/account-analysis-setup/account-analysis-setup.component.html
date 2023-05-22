@@ -98,7 +98,8 @@
                         </label>
                         <div class="col-7">
                             <select required class="form-select" id="baselineYear" name="baselineYear"
-                                [(ngModel)]="analysisItem.baselineYear" (change)="changeReportYear()">
+                                [(ngModel)]="analysisItem.baselineYear" (change)="changeReportYear()"
+                                [ngClass]="{'ng-invalid': analysisItem.setupErrors.reportYearBeforeBaselineYear}">
                                 <option *ngFor="let year of yearOptions" [ngValue]="year">
                                     {{year| yearDisplay: account.fiscalYear}}</option>
                             </select>
@@ -114,12 +115,17 @@
                         </label>
                         <div class="col-7">
                             <select required class="form-select" name="reportYear" id="reportYear"
-                                [(ngModel)]="analysisItem.reportYear" (change)="changeReportYear()">
+                                [(ngModel)]="analysisItem.reportYear" (change)="changeReportYear()"
+                                [ngClass]="{'ng-invalid': analysisItem.setupErrors.reportYearBeforeBaselineYear}">
                                 <option *ngFor="let year of yearOptions" [ngValue]="year">{{year| yearDisplay:
                                     account.fiscalYear}}
                                 </option>
                             </select>
                         </div>
+                    </div>
+                    <div class="alert alert-danger text-center p-1"
+                        *ngIf="analysisItem.setupErrors.reportYearBeforeBaselineYear">
+                        Baseline year must be prior to report year.
                     </div>
                     <div class="form-group row">
                         <label class="col-5 col-form-label">

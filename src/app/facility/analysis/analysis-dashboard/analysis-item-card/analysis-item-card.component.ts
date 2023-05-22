@@ -83,7 +83,7 @@ export class AnalysisItemCardComponent implements OnInit {
 
   selectAnalysisItem() {
     this.analysisDbService.selectedAnalysisItem.next(this.analysisItem);
-    if(this.analysisItem.setupErrors.hasError){
+    if(this.analysisItem.setupErrors.hasError || this.analysisItem.setupErrors.groupsHaveErrors){
       this.router.navigateByUrl('facility/' + this.selectedFacility.id + '/analysis/run-analysis');
     }else{
       this.router.navigateByUrl('facility/' + this.selectedFacility.id + '/analysis/run-analysis/facility-analysis');

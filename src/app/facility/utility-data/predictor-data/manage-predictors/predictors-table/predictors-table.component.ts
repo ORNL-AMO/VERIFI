@@ -10,6 +10,7 @@ import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.se
 import { WeatherStation } from 'src/app/models/degreeDays';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { AnalysisGroup, JStatRegressionModel } from 'src/app/models/analysis';
+import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 
 
 @Component({
@@ -33,7 +34,8 @@ export class PredictorsTableComponent {
   constructor(private predictorDbService: PredictordbService, private router: Router,
     private facilitydbService: FacilitydbService, private loadingService: LoadingService,
     private weatherDataService: WeatherDataService, private degreeDaysService: DegreeDaysService,
-    private analysisDbService: AnalysisDbService) {
+    private analysisDbService: AnalysisDbService,
+    private accountAnalysisDbService: AccountAnalysisDbService) {
 
   }
 
@@ -103,6 +105,8 @@ export class PredictorsTableComponent {
     this.loadingService.setLoadingMessage('Deleting Predictor Data...');
     this.loadingService.setLoadingStatus(true);
     await this.analysisDbService.updateAnalysisPredictors(this.facilityPredictors, this.selectedFacility.guid, this.predictorUsedGroupIds);
+    let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
+    await this.accountAnalysisDbService.updateAccountValidation(accountAnalysisItems);
     await this.predictorDbService.updateFacilityPredictorEntries(this.facilityPredictors);
     this.loadingService.setLoadingStatus(false);
 
