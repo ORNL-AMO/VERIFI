@@ -8,7 +8,7 @@ import { getIsEnergyMeter } from 'src/app/shared/sharedHelperFuntions';
 import { EnergyUnitOptions, UnitOption } from 'src/app/shared/unitOptions';
 import { EditMeterFormService } from './edit-meter-form.service';
 import { AgreementType, AgreementTypes, FuelTypeOption, OtherEnergyOptions, ScopeOption, ScopeOptions, SourceOptions } from './editMeterOptions';
-import { MeterSource } from 'src/app/models/constantsAndTypes';
+import { MeterSource, WaterDischargeType, WaterDischargeTypes, WaterIntakeType, WaterIntakeTypes } from 'src/app/models/constantsAndTypes';
 
 @Component({
   selector: 'app-edit-meter-form',
@@ -48,7 +48,10 @@ export class EditMeterFormComponent implements OnInit {
 
   displayRetainRecs: boolean;
   displayIncludeEnergy: boolean;
-
+  waterIntakeTypes: Array<WaterIntakeType> = WaterIntakeTypes;
+  waterDischargeTypes: Array<WaterDischargeType> = WaterDischargeTypes;
+  displayWaterIntakeTypes: boolean;
+  displayWaterDischargeTypes: boolean;
   constructor(
     private energyUnitsHelperService: EnergyUnitsHelperService, private energyUseCalculationsService: EnergyUseCalculationsService,
     private editMeterFormService: EditMeterFormService, private cd: ChangeDetectorRef, private convertUnitsService: ConvertUnitsService) { }
@@ -80,11 +83,13 @@ export class EditMeterFormComponent implements OnInit {
     this.checkDisplayFuel();
     this.checkDisplayPhase();
     this.checkDisplaySource();
+    this.checkDisplayWaterTypes();
     this.setScopeOptions();
     this.setStartingUnitOptions();
     this.setStartingUnit();
     this.updatePhaseAndFuelValidation();
     this.updateHeatCapacityValidation();
+    this.updateWaterValidation();
     this.checkShowHeatCapacity();
     this.checkShowSiteToSource();
     this.setUnitBooleans();
@@ -160,6 +165,19 @@ export class EditMeterFormComponent implements OnInit {
     }
   }
 
+  checkDisplayWaterTypes() {
+    if (this.meterForm.controls.source.value == 'Water Intake') {
+      this.displayWaterDischargeTypes = false;
+      this.displayWaterIntakeTypes = true;
+    } else if (this.meterForm.controls.source.value == 'Water Discharge') {
+      this.displayWaterDischargeTypes = true;
+      this.displayWaterIntakeTypes = false;
+    } else {
+      this.displayWaterDischargeTypes = false;
+      this.displayWaterIntakeTypes = false;
+    }
+  }
+
   updatePhaseAndFuelValidation() {
     let fuelValidators: Array<ValidatorFn> = this.editMeterFormService.getFuelValidation(this.meterForm.controls.source.value);
     this.meterForm.controls.fuel.setValidators(fuelValidators);
@@ -177,6 +195,15 @@ export class EditMeterFormComponent implements OnInit {
     let siteToSourceValidation: Array<ValidatorFn> = this.editMeterFormService.getSiteToSourceValidation(this.meterForm.controls.source.value, this.meterForm.controls.startingUnit.value, this.meterForm.controls.includeInEnergy.value);
     this.meterForm.controls.siteToSource.setValidators(siteToSourceValidation);
     this.meterForm.controls.siteToSource.updateValueAndValidity();
+  }
+
+  updateWaterValidation() {
+    let waterIntakeValidation: Array<ValidatorFn> = this.editMeterFormService.getWaterIntakeValidation(this.meterForm.controls.source.value);
+    this.meterForm.controls.waterIntakeType.setValidators(waterIntakeValidation);
+    this.meterForm.controls.waterIntakeType.updateValueAndValidity();
+    let waterDischargeValidation: Array<ValidatorFn> = this.editMeterFormService.getWaterDischargeValidation(this.meterForm.controls.source.value);
+    this.meterForm.controls.waterDischargeType.setValidators(waterDischargeValidation);
+    this.meterForm.controls.waterDischargeType.updateValueAndValidity();
   }
 
   setFuelTypeOptions(onChange: boolean) {

@@ -1,7 +1,7 @@
 import { AccountAnalysisSetupErrors } from './accountAnalysis';
 import { AnalysisCategory, AnalysisGroup, AnalysisSetupErrors } from './analysis';
 import { MonthlyData } from './calanderization';
-import { MeterPhase, MeterSource, ReportType, WaterDischargeTypes, WaterIntakeTypes } from './constantsAndTypes';
+import { MeterPhase, MeterSource, ReportType, WaterDischargeType, WaterIntakeType } from './constantsAndTypes';
 import { ElectricityDataFilters, GeneralUtilityDataFilters } from './meterDataFilter';
 import { BetterPlantsReportSetup, DataOverviewReportSetup } from './overview-report';
 import { SustainabilityQuestions } from './sustainabilityQuestions';
@@ -151,8 +151,8 @@ export interface IdbUtilityMeter {
     locationGHGMultiplier: number,
     isValid?: boolean,
     skipImport?: boolean,
-    waterIntakeType?: WaterIntakeTypes,
-    waterDischargeType?: WaterDischargeTypes
+    waterIntakeType?: WaterIntakeType,
+    waterDischargeType?: WaterDischargeType
 }
 
 export interface IdbUtilityMeterData {

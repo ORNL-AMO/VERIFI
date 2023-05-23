@@ -16,6 +16,8 @@ export class EditMeterFormService {
     let phaseValidators: Array<ValidatorFn> = this.getPhaseValidation(meter.source);
     let heatCapacityValidators: Array<ValidatorFn> = this.getHeatCapacitValidation(meter.source, meter.startingUnit);
     let siteToSourceValidators: Array<ValidatorFn> = this.getSiteToSourceValidation(meter.source, meter.startingUnit, meter.includeInEnergy);
+    let waterIntakeValidation: Array<ValidatorFn> = this.getWaterIntakeValidation(meter.source);
+    let waterDischargeValidation: Array<ValidatorFn> = this.getWaterDischargeValidation(meter.source);
     let form: FormGroup = this.formBuilder.group({
       meterNumber: [meter.meterNumber],
       accountNumber: [meter.accountNumber],
@@ -36,7 +38,9 @@ export class EditMeterFormService {
       includeInEnergy: [meter.includeInEnergy],
       retainRECs: [meter.retainRECs],
       directConnection: [meter.directConnection],
-      greenPurchaseFraction: [meter.greenPurchaseFraction * 100, [Validators.min(0), Validators.max(100)]]
+      greenPurchaseFraction: [meter.greenPurchaseFraction * 100, [Validators.min(0), Validators.max(100)]],
+      waterIntakeType: [meter.waterIntakeType, waterIntakeValidation],
+      waterDischargeType: [meter.waterDischargeType, waterDischargeValidation]
     });
     // if(form.controls.source.value == 'Electricity'){
     //   form.controls.startingUnit.disable();
@@ -66,7 +70,8 @@ export class EditMeterFormService {
     meter.retainRECs = form.controls.retainRECs.value;
     meter.directConnection = form.controls.directConnection.value;
     meter.greenPurchaseFraction = form.controls.greenPurchaseFraction.value / 100;
-
+    meter.waterDischargeType = form.controls.waterDischargeType.value;
+    meter.waterIntakeType = form.controls.waterIntakeType.value;
     //set multipliers
     meter = this.setMultipliers(meter);
     return meter;
@@ -130,6 +135,20 @@ export class EditMeterFormService {
     } else {
       return [];
     }
+  }
+
+  getWaterIntakeValidation(source: MeterSource): Array<ValidatorFn>{
+    if (source == 'Water Intake') {
+      return [Validators.required]
+    }
+    return [];
+  }
+
+  getWaterDischargeValidation(source: MeterSource): Array<ValidatorFn>{
+    if (source == 'Water Discharge') {
+      return [Validators.required]
+    }
+    return [];
   }
 
   checkShowHeatCapacity(source: MeterSource, startingUnit: string): boolean {
