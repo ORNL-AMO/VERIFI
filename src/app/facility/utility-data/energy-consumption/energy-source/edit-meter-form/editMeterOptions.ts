@@ -1,4 +1,5 @@
-import { MeterSource } from "src/app/models/idb"
+import { MeterSource } from "src/app/models/constantsAndTypes"
+
 
 export interface FuelTypeOption {
     startingUnit: string,
@@ -14,8 +15,8 @@ export const SourceOptions: Array<MeterSource> = [
     "Natural Gas",
     "Other Fuels",
     "Other Energy",
-    "Water",
-    "Waste Water",
+    "Water Intake",
+    "Water Discharge",
     "Other Utility"
 ]
 

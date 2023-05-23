@@ -44,7 +44,7 @@ export class MeterGroupingService {
       meterGroupTypes = this.addEnergyMetersWithoutGroups(energyMeters, 'Energy', meterGroupTypes);
     }
     //Water/WasteWater
-    let waterMeters: Array<CalanderizedMeter> = metersWithoutGroups.filter(cMeter => { return cMeter.meter.source == 'Water' || cMeter.meter.source == 'Waste Water' });
+    let waterMeters: Array<CalanderizedMeter> = metersWithoutGroups.filter(cMeter => { return cMeter.meter.source == 'Water Intake' || cMeter.meter.source == 'Water Discharge' });
     if (waterMeters.length != 0) {
       meterGroupTypes = this.addEnergyMetersWithoutGroups(waterMeters, 'Water', meterGroupTypes);
     }

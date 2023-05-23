@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility } from '../models/idb';
+import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility, IdbUtilityMeter } from '../models/idb';
 import { AnalysisSetupErrors, GroupErrors } from '../models/analysis';
 import { FacilitydbService } from './facility-db.service';
 import { AnalysisValidationService } from '../shared/helper-services/analysis-validation.service';
@@ -94,12 +94,27 @@ export class UpdateDbEntryService {
       analysisItem.baselineYear = account.sustainabilityQuestions.energyReductionBaselineYear;
       isChanged = true;
     }
-    
+
     if (!analysisItem.setupErrors) {
       analysisItem.setupErrors = this.analysisValidationService.getAccountAnalysisSetupErrors(analysisItem, facilityAnalysisItems);
       isChanged = true;
     }
     return { analysisItem: analysisItem, isChanged: isChanged };
+  }
+
+  updateUtilityMeter(utilityMeter: IdbUtilityMeter): { utilityMeter: IdbUtilityMeter, isChanged: boolean } {
+    let isChanged: boolean = false;
+    let source: string = utilityMeter.source;
+    if (source == 'Water') {
+      isChanged = true;
+      utilityMeter.source = 'Water Intake';
+      utilityMeter.waterIntakeType = 'Municipal (Potable)';
+    } else if (source == 'Waste Water') {
+      isChanged = true;
+      utilityMeter.source = 'Water Discharge';
+      utilityMeter.waterDischargeType = 'Municipal Sewer';
+    }
+    return { utilityMeter: utilityMeter, isChanged: isChanged };
   }
 
 

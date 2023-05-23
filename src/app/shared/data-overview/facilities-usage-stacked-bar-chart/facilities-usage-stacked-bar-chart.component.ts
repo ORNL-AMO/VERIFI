@@ -393,11 +393,11 @@ export class FacilitiesUsageStackedBarChartComponent {
                 otherEnergy.energyUse = (otherEnergy.energyUse + Number(dataItem.energyUse));
                 otherEnergy.energyCost = (otherEnergy.energyCost + Number(dataItem.energyCost));
               }
-              else if (cMeter.meter.source == 'Water') {
+              else if (cMeter.meter.source == 'Water Intake') {
                 water.energyUse = (water.energyUse + Number(dataItem.energyConsumption));
                 water.energyCost = (water.energyCost + Number(dataItem.energyCost));
               }
-              else if (cMeter.meter.source == 'Waste Water') {
+              else if (cMeter.meter.source == 'Water Discharge') {
                 wasteWater.energyUse = (wasteWater.energyUse + Number(dataItem.energyConsumption));
                 wasteWater.energyCost = (wasteWater.energyCost + Number(dataItem.energyCost));
               }

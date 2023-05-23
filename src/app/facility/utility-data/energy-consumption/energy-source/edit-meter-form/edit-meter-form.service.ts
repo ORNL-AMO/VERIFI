@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
-import { IdbUtilityMeter, MeterSource } from 'src/app/models/idb';
+import { MeterSource } from 'src/app/models/constantsAndTypes';
+import { IdbUtilityMeter } from 'src/app/models/idb';
 import { getIsEnergyUnit } from 'src/app/shared/sharedHelperFuntions';
 
 @Injectable({
@@ -132,7 +133,7 @@ export class EditMeterFormService {
   }
 
   checkShowHeatCapacity(source: MeterSource, startingUnit: string): boolean {
-    if (source != 'Waste Water' && source != 'Water' && source != 'Other Utility' && startingUnit) {
+    if (source != 'Water Intake' && source != 'Water Discharge' && source != 'Other Utility' && startingUnit) {
       return (getIsEnergyUnit(startingUnit) == false);
     } else {
       return false;

@@ -8,6 +8,7 @@ import { getIsEnergyMeter } from 'src/app/shared/sharedHelperFuntions';
 import { EnergyUnitOptions, UnitOption } from 'src/app/shared/unitOptions';
 import { EditMeterFormService } from './edit-meter-form.service';
 import { AgreementType, AgreementTypes, FuelTypeOption, OtherEnergyOptions, ScopeOption, ScopeOptions, SourceOptions } from './editMeterOptions';
+import { MeterSource } from 'src/app/models/constantsAndTypes';
 
 @Component({
   selector: 'app-edit-meter-form',
@@ -221,11 +222,12 @@ export class EditMeterFormComponent implements OnInit {
 
   setStartingUnit() {
     let facilityUnit: string;
-    if (this.meterForm.controls.source.value == 'Electricity') {
+    let selectedMeterSource: MeterSource = this.meterForm.controls.source.value;
+    if (selectedMeterSource == 'Electricity') {
       facilityUnit = this.facility.electricityUnit;
-    } else if (this.meterForm.controls.source.value == 'Natural Gas') {
+    } else if (selectedMeterSource == 'Natural Gas') {
       facilityUnit = this.facility.volumeGasUnit;
-    } else if (this.meterForm.controls.source.value == 'Other Fuels') {
+    } else if (selectedMeterSource == 'Other Fuels') {
       if (this.meterForm.controls.phase.value == 'Gas') {
         facilityUnit = this.facility.volumeGasUnit;
       } else if (this.meterForm.controls.phase.value == 'Liquid') {
@@ -233,7 +235,7 @@ export class EditMeterFormComponent implements OnInit {
       } else if (this.meterForm.controls.phase.value == 'Solid') {
         facilityUnit = this.facility.massUnit;
       }
-    } else if (this.meterForm.controls.source.value == 'Other Energy') {
+    } else if (selectedMeterSource == 'Other Energy') {
       let selectedEnergyOption: FuelTypeOption = OtherEnergyOptions.find(option => { return option.value == this.meterForm.controls.fuel.value });
       if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Steam') {
         facilityUnit = this.facility.massUnit;
@@ -242,9 +244,9 @@ export class EditMeterFormComponent implements OnInit {
       } else if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Hot Water') {
         facilityUnit = this.facility.energyUnit;
       }
-    } else if (this.meterForm.controls.source.value == 'Water' || this.meterForm.controls.source.value == 'Waste Water') {
+    } else if (selectedMeterSource == 'Water Intake' || selectedMeterSource == 'Water Discharge') {
       facilityUnit = this.facility.volumeLiquidUnit;
-    } else if (this.meterForm.controls.source.value == 'Other Utility') {
+    } else if (selectedMeterSource == 'Other Utility') {
       facilityUnit = this.facility.energyUnit;
     }
     this.meterForm.controls.startingUnit.patchValue(facilityUnit);
@@ -294,7 +296,8 @@ export class EditMeterFormComponent implements OnInit {
   }
 
   checkDisplaySource() {
-    if (this.meterForm.controls.source.value == 'Water' || this.meterForm.controls.source.value == 'Waste Water' || this.meterForm.controls.source.value == 'Other Utility') {
+    let selectedMeterSource: MeterSource = this.meterForm.controls.source.value;
+    if (selectedMeterSource == 'Water Intake' || selectedMeterSource == 'Water Discharge' || selectedMeterSource == 'Other Utility') {
       this.displayScope = false;
     } else {
       this.displayScope = true;
@@ -335,13 +338,14 @@ export class EditMeterFormComponent implements OnInit {
   }
 
   setScopeOptions() {
-    if (this.meterForm.controls.source.value == 'Electricity') {
+    let selectedMeterSource: MeterSource = this.meterForm.controls.source.value;
+    if (selectedMeterSource == 'Electricity') {
       //purchased electricity
       this.scopeOptions = [ScopeOptions[2]]
-    } else if (this.meterForm.controls.source.value == 'Other Energy') {
+    } else if (selectedMeterSource == 'Other Energy') {
       //all options
       this.scopeOptions = ScopeOptions;
-    } else if (this.meterForm.controls.source.value == 'Natural Gas' || this.meterForm.controls.source.value == 'Other Fuels') {
+    } else if (selectedMeterSource == 'Natural Gas' || selectedMeterSource == 'Other Fuels') {
       //Scope 1
       this.scopeOptions = ScopeOptions.filter(option => { return option.scope == 'Scope 1' });
     }

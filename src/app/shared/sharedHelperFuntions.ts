@@ -1,4 +1,4 @@
-import { MeterSource } from "../models/idb";
+import { MeterSource } from "../models/constantsAndTypes";
 import { EnergyUnitOptions, UnitOption } from "./unitOptions";
 
 export function getGUID(): string {

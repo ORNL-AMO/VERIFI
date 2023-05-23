@@ -2,11 +2,12 @@ import { Component, ElementRef, ViewChild, Input, SimpleChanges } from '@angular
 import { PlotlyService } from 'angular-plotly.js';
 import { Subscription } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { EnergySources, IdbFacility, WaterSources } from 'src/app/models/idb';
+import { IdbFacility } from 'src/app/models/idb';
 import * as _ from 'lodash';
 import { UtilityColors } from 'src/app/shared/utilityColors';
 import { FacilityOverviewService } from 'src/app/facility/facility-overview/facility-overview.service';
 import { AnnualSourceData } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';
+import { EnergySources, WaterSources } from 'src/app/models/constantsAndTypes';
 
 @Component({
   selector: 'app-utilities-usage-chart',
