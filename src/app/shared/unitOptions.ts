@@ -70,6 +70,11 @@ export const VolumeLiquidOptions: Array<UnitOption> = [
         unitsOfMeasure: 'Imperial'
     },
     {
+        display: 'Million Gallons (Mgal)',
+        value: 'Mgal',
+        unitsOfMeasure: 'Imperial'
+    },
+    {
         display: 'Cubic Meters (m&#x00B3;)',
         value: 'm3',
         unitsOfMeasure: 'Metric'
