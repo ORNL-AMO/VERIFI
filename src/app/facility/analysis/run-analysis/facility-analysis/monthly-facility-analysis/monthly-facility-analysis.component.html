@@ -1,5 +1,5 @@
 <div class="d-flex justify-content-between mb-2">
-    <app-analysis-summary-table-filter [tableContext]="'monthFacility'"></app-analysis-summary-table-filter>
+    <app-analysis-summary-table-filter [tableContext]="'monthFacility'" [analysisItem]="analysisItem"></app-analysis-summary-table-filter>
     <div class="d-flex">
         <app-table-items-dropdown *ngIf="dataDisplay == 'table'"></app-table-items-dropdown>
         <div class="btn-group ps-2">
