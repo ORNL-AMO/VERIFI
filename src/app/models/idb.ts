@@ -1,7 +1,8 @@
+import { AccountAnalysisSetupErrors } from './accountAnalysis';
 import { JStatRegressionModel } from './analysis';
-import { CalanderizedMeter, MonthlyData } from './calanderization';
+import { MonthlyData } from './calanderization';
 import { ElectricityDataFilters, GeneralUtilityDataFilters } from './meterDataFilter';
-import { ReportOptions } from './overview-report';
+import { BetterPlantsReportSetup, DataOverviewReportSetup } from './overview-report';
 import { SustainabilityQuestions } from './sustainabilityQuestions';
 
 export interface IdbAccount {
@@ -133,7 +134,7 @@ export interface IdbUtilityMeter {
     fuel?: string
     visible?: boolean
     importWizardName?: string
-    meterReadingDataApplication?: "backward" | "fullMonth",
+    meterReadingDataApplication?: "backward" | "fullMonth" | 'fullYear',
     unitsDifferent?: boolean,
     ignoreDuplicateMonths?: boolean,
     ignoreMissingMonths?: boolean,
@@ -178,7 +179,7 @@ export interface IdbUtilityMeterData {
 
     //electricity
     totalRealDemand?: number,
-    totalBilledDemand? :number,
+    totalBilledDemand?: number,
     nonEnergyCharge?: number,
     block1Consumption?: number,
     block1ConsumptionCharge?: number,
@@ -231,23 +232,42 @@ export interface PredictorData {
     importWizardName?: string,
     production?: boolean,
     productionInAnalysis?: boolean,
-    regressionCoefficient?: number
+    regressionCoefficient?: number,
+    predictorType: PredictorType,
+    referencePredictorId?: string,
+    conversionType?: string,
+    convertFrom?: string,
+    convertTo?: string,
+    weatherDataType?: WeatherDataType,
+    weatherStationId?: string,
+    weatherStationName?: string,
+    heatingBaseTemperature?: number,
+    coolingBaseTemperature?: number,
+    weatherDataWarning?: boolean
 }
 
+export type PredictorType = 'Standard' | 'Conversion' | 'Math' | 'Weather'
+export type WeatherDataType = 'HDD' | 'CDD'
 
-export interface IdbOverviewReportOptions {
+export interface IdbAccountReport {
     id?: number,
     guid: string,
     accountId: string,
-    reportOptions: ReportOptions,
+    overviewReportId?: string,
+    baselineYear: number,
+    reportYear: number,
+    startMonth: number,
+    startYear: number,
+    endMonth: number,
+    endYear: number,
     date: Date,
-    type: 'report' | 'template',
     name: string,
-    baselineYear?: number,
-    targetYear?: number,
-    title?: string,
-    reportOptionsType?: 'betterPlants' | 'data'
+    reportType: ReportType,
+    betterPlantsReportSetup: BetterPlantsReportSetup,
+    dataOverviewReportSetup: DataOverviewReportSetup
 }
+
+
 
 export interface IdbAnalysisItem {
     id?: number,
@@ -261,14 +281,16 @@ export interface IdbAnalysisItem {
     energyUnit: string,
     setupErrors: AnalysisSetupErrors,
     groups: Array<AnalysisGroup>,
-    selectedYearAnalysis?: boolean
+    selectedYearAnalysis?: boolean,
+    baselineYear: number
 }
 
-export interface AnalysisSetupErrors{
+export interface AnalysisSetupErrors {
     hasError: boolean,
     missingName: boolean,
     noGroups: boolean,
     missingReportYear: boolean,
+    missingBaselineYear: boolean,
     reportYearBeforeBaselineYear: boolean,
     groupsHaveErrors: boolean
 }
@@ -282,7 +304,7 @@ export interface AnalysisGroup {
     regressionConstant: number,
     groupErrors: GroupErrors,
     specifiedMonthlyPercentBaseload: boolean,
-    averagePercentBaseload: number,
+    averagePercentBaseload?: number,
     monthlyPercentBaseload: Array<{
         monthNum: number,
         percent: number
@@ -331,7 +353,9 @@ export interface IdbAccountAnalysisItem {
         year: number,
         amount: number
     }>,
-    selectedYearAnalysis?: boolean
+    selectedYearAnalysis?: boolean,
+    baselineYear: number,
+    setupErrors: AccountAnalysisSetupErrors
 }
 
 
@@ -347,6 +371,12 @@ export interface IdbCustomEmissionsItem {
 
 
 
-export type AnalysisType = 'absoluteEnergyConsumption' | 'energyIntensity' | 'modifiedEnergyIntensity' | 'regression';
+export type AnalysisType = 'absoluteEnergyConsumption' | 'energyIntensity' | 'modifiedEnergyIntensity' | 'regression' | 'skip';
 export type MeterSource = "Electricity" | "Natural Gas" | "Other Fuels" | "Other Energy" | "Water" | "Waste Water" | "Other Utility";
 export type MeterPhase = "Solid" | "Liquid" | "Gas";
+export type ReportType = "betterPlants" | 'dataOverview';
+
+
+export const EnergySources: Array<MeterSource> = ["Electricity", "Natural Gas", "Other Fuels", "Other Energy"];
+export const AllSources: Array<MeterSource> = ["Electricity", "Natural Gas", "Other Fuels", "Other Energy", "Water", "Waste Water", "Other Utility"];
+export const WaterSources: Array<MeterSource> = ["Water", "Waste Water"];

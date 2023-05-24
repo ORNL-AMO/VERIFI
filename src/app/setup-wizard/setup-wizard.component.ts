@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Subscription, firstValueFrom } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
@@ -56,18 +56,18 @@ export class SetupWizardComponent implements OnInit {
     this.loadingService.setLoadingMessage("Creating Account...");
     this.loadingService.setLoadingStatus(true);
     let account: IdbAccount = this.setupWizardService.account.getValue();
-    account = await this.accountdbService.addWithObservable(account).toPromise();
+    account = await firstValueFrom(this.accountdbService.addWithObservable(account));
 
     let workbook: XLSX.WorkBook = this.setupWizardService.facilityTemplateWorkbook.getValue();
     if (workbook) {
       this.loadingService.setLoadingMessage("Parsing Template Data...")
-      let allAccounts: Array<IdbAccount> = await this.accountdbService.getAll().toPromise();
+      let allAccounts: Array<IdbAccount> = await firstValueFrom(this.accountdbService.getAll());
       this.accountdbService.allAccounts.next(allAccounts);
       await this.dbChangesService.selectAccount(account);
       let fileReference: FileReference = this.uploadDataService.getFileReference(undefined, workbook);
       this.uploadDataService.fileReferences = [fileReference];
       this.loadingService.setLoadingStatus(false);
-      this.toastNotificationService.showToast("Account Created!", "Use the upload data wizard to finish uploading facility data!", 10000, false, "bg-success", true);
+      this.toastNotificationService.showToast("Account Created!", "Use the upload data wizard to finish uploading facility data!", 10000, false, "alert-success", true);
       this.router.navigateByUrl('upload/data-setup/file-setup/' + fileReference.id + '/template-facilities');
 
     } else {
@@ -77,17 +77,17 @@ export class SetupWizardComponent implements OnInit {
       for (let i = 0; i < facilities.length; i++) {
         let facility: IdbFacility = facilities[i];
         facility.accountId = account.guid;
-        facility = await this.facilityDbService.addWithObservable(facility).toPromise();
+        facility = await firstValueFrom(this.facilityDbService.addWithObservable(facility));
         if (i == 0) {
           newFacility = facility;
         }
       }
       this.loadingService.setLoadingMessage("Finishing up...");
-      let allAccounts: Array<IdbAccount> = await this.accountdbService.getAll().toPromise();
+      let allAccounts: Array<IdbAccount> = await firstValueFrom(this.accountdbService.getAll());
       this.accountdbService.allAccounts.next(allAccounts);
       await this.dbChangesService.selectAccount(account);
       this.loadingService.setLoadingStatus(false);
-      this.toastNotificationService.showToast("Account and Facilities Created!", "You can now add utility data to your facilities for analysis!", 10000, false, "bg-success", true);
+      this.toastNotificationService.showToast("Account and Facilities Created!", "You can now add utility data to your facilities for analysis!", 10000, false, "alert-success", true);
       this.router.navigateByUrl('facility/' + newFacility.id + '/utility');
     }
 

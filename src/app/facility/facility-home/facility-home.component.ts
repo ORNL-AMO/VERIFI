@@ -59,9 +59,15 @@ export class FacilityHomeComponent implements OnInit {
     if (typeof Worker !== 'undefined') {
       this.annualAnalysisWorker = new Worker(new URL('src/app/web-workers/annual-facility-analysis.worker', import.meta.url));
       this.annualAnalysisWorker.onmessage = ({ data }) => {
-        this.facilityHomeService.annualAnalysisSummary.next(data.annualAnalysisSummaries);
-        this.facilityHomeService.monthlyFacilityAnalysisData.next(data.monthlyAnalysisSummaryData);
-        this.facilityHomeService.calculating.next(false);
+        if (!data.error) {
+          this.facilityHomeService.annualAnalysisSummary.next(data.annualAnalysisSummaries);
+          this.facilityHomeService.monthlyFacilityAnalysisData.next(data.monthlyAnalysisSummaryData);
+          this.facilityHomeService.calculating.next(false);
+        } else {
+          this.facilityHomeService.annualAnalysisSummary.next(undefined);
+          this.facilityHomeService.monthlyFacilityAnalysisData.next(undefined);
+          this.facilityHomeService.calculating.next('error');
+        }
         this.annualAnalysisWorker.terminate();
       };
       this.facilityHomeService.calculating.next(true);

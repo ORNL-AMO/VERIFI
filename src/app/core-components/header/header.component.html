@@ -3,17 +3,23 @@
     <span class="badge bg-secondary">v{{version}}</span>
 
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="ps-2" *ngIf="updateAvailable">
+            <button class="btn action-btn" (click)="toggleUpdateModal()">
+                <span class="fa fa-info-circle"></span>
+                Update Available!
+            </button>
+        </div>
         <div class="ps-2" *ngIf="dataInitialized && activeAccount">
             <app-search-bar></app-search-bar>
         </div>
 
         <div class="dropdown ms-auto" *ngIf="dataInitialized">
-            <button *ngIf="activeAccount" class="btn action-btn dropdown-toggle"
-                data-bs-toggle="dropdown" aria-expanded="false"><span class="fa fa-building"></span>
+            <button *ngIf="activeAccount" class="btn action-btn dropdown-toggle" data-bs-toggle="dropdown"
+                aria-expanded="false"><span class="fa fa-building"></span>
                 {{activeAccount.name}}
             </button>
-            <button *ngIf="!activeAccount" class="btn action-btn dropdown-toggle italic"
-                data-bs-toggle="dropdown" aria-expanded="false">Account Required
+            <button *ngIf="!activeAccount" class="btn action-btn dropdown-toggle italic" data-bs-toggle="dropdown"
+                aria-expanded="false">Account Required
             </button>
             <ul class="dropdown-menu">
                 <li>
@@ -26,7 +32,7 @@
                 </li>
                 <li><a class="dropdown-item" (click)="addNewAccount()"><i class="fa fa-plus"></i> Add New
                         Account</a></li>
-                <li><a class="dropdown-item" (click)="addNewAccount()"><i class="fa fa-upload"></i> Import Backup</a>
+                <li><a class="dropdown-item" (click)="openBackupModal()"><i class="fa fa-upload"></i> Import Backup</a>
                 </li>
             </ul>
         </div>
@@ -37,7 +43,7 @@
         <div class="ps-2" *ngIf="dataInitialized && activeAccount">Last Backup: (<span
                 *ngIf="lastBackupDate">{{lastBackupDate | date:'medium'}}</span><span
                 *ngIf="!lastBackupDate">&mdash;</span>)</div>
-        <!--TODO: Remove For Production-->
+        <!--Doesnt Show In Production-->
         <div class="ps-2" *ngIf="!isProduction">
             <button *ngIf="!resetDatabase" class="btn btn-danger" (click)="toggleResetDatabase()">Reset
                 Database
@@ -49,3 +55,17 @@
 
     </div>
 </nav>
+
+
+<div [ngClass]="{'windowOverlay': showUpdateModal}"></div>
+<div class="popup" [ngClass]="{'open': showUpdateModal}">
+    <div class="popup-header">Download Latest Version of VERIFI
+        <button class="item-right" (click)="toggleUpdateModal()">x</button>
+    </div>
+    <div class="popup-footer text-end pt-2">
+        <button class="btn btn-secondary" (click)="toggleUpdateModal()">Cancel</button>
+        <button class="btn btn-primary" (click)="update()">
+            Download Update
+        </button>
+    </div>
+</div>

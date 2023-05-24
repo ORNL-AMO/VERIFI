@@ -21,7 +21,7 @@ export class AnalysisService {
   analysisTableColumns: BehaviorSubject<AnalysisTableColumns>;
   calanderizedMeters: Array<CalanderizedMeter>;
   showInvalidModels: BehaviorSubject<boolean>;
-  calculating: BehaviorSubject<boolean>;
+  calculating: BehaviorSubject<boolean | 'error'>;
   annualAnalysisSummary: BehaviorSubject<Array<AnnualAnalysisSummary>>;
   monthlyAccountAnalysisData: BehaviorSubject<Array<MonthlyAnalysisSummaryData>>;
   accountAnalysisItem: IdbAccountAnalysisItem;
@@ -40,7 +40,7 @@ export class AnalysisService {
     this.annualAnalysisSummary = new BehaviorSubject([]);
     this.monthlyAccountAnalysisData = new BehaviorSubject([]);
     let showDetail: boolean = this.localStorageService.retrieve("showDetail");
-    if(showDetail == undefined){
+    if (showDetail == undefined) {
       showDetail = true;
     }
     this.showDetail = new BehaviorSubject<boolean>(showDetail);
@@ -67,7 +67,6 @@ export class AnalysisService {
         baselineAdjustment: true,
         totalSavingsPercentImprovement: true,
         annualSavingsPercentImprovement: true,
-        adjustmentToBaseline: true,
         cummulativeSavings: true,
         newSavings: true,
         predictors: [],
@@ -97,16 +96,16 @@ export class AnalysisService {
     });
   }
 
-  setBaselineAdjustments(facility: IdbFacility, analysisItem: IdbAnalysisItem): IdbAnalysisItem {
-    if (facility.sustainabilityQuestions.energyReductionBaselineYear < analysisItem.reportYear) {
-      let yearAdjustments: Array<{ year: number, amount: number }> = new Array();
-      for (let year: number = facility.sustainabilityQuestions.energyReductionBaselineYear + 1; year <= analysisItem.reportYear; year++) {
-        yearAdjustments.push({
-          year: year,
-          amount: 0
-        })
-      }
+  setBaselineAdjustments(analysisItem: IdbAnalysisItem): IdbAnalysisItem {
+    if (analysisItem.baselineYear < analysisItem.reportYear) {
       analysisItem.groups.forEach(group => {
+        let yearAdjustments: Array<{ year: number, amount: number }> = new Array();
+        for (let year: number = analysisItem.baselineYear + 1; year <= analysisItem.reportYear; year++) {
+          yearAdjustments.push({
+            year: year,
+            amount: 0
+          })
+        }
         group.baselineAdjustments = yearAdjustments;
       });
     }

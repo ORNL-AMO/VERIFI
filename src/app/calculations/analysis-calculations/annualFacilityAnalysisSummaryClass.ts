@@ -14,7 +14,7 @@ export class AnnualFacilityAnalysisSummaryClass {
     reportYear: number;
     constructor(analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, accountPredictorEntries: Array<IdbPredictorEntry>, calculateAllMonthlyData: boolean) {
         this.setMonthlyAnalysisSummaryData(analysisItem, facility, calanderizedMeters, accountPredictorEntries, calculateAllMonthlyData);
-        this.setBaselineYear(facility);
+        this.setBaselineYear(analysisItem);
         this.setReportYear(analysisItem);
         this.setAnnualAnalysisSummaryDataClasses(accountPredictorEntries, facility);
     }
@@ -24,8 +24,8 @@ export class AnnualFacilityAnalysisSummaryClass {
         this.monthlyAnalysisSummaryData = monthlyAnalysisSummaryClass.getMonthlyAnalysisSummaryData();
     }
 
-    setBaselineYear(facilityOrAccount: IdbFacility | IdbAccount) {
-        this.baselineYear = facilityOrAccount.sustainabilityQuestions.energyReductionBaselineYear;
+    setBaselineYear(analysisItem: IdbAnalysisItem) {
+        this.baselineYear = analysisItem.baselineYear;
     }
 
     setReportYear(analysisItem: IdbAnalysisItem) {

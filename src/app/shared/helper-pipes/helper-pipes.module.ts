@@ -14,6 +14,7 @@ import { ScopeLabelPipe } from './scope-label.pipe';
 import { AgreementTypeLabelPipe } from './agreement-type-label.pipe';
 import { YearDisplayPipe } from './year-display.pipe';
 import { AnalysisTypeLabelPipe } from './analysis-type-label.pipe';
+import { TotalPipe } from './total.pipe';
 
 @NgModule({
   declarations: [
@@ -30,7 +31,8 @@ import { AnalysisTypeLabelPipe } from './analysis-type-label.pipe';
     ScopeLabelPipe,
     AgreementTypeLabelPipe,
     YearDisplayPipe,
-    AnalysisTypeLabelPipe
+    AnalysisTypeLabelPipe,
+    TotalPipe
   ],
   imports: [
     CommonModule
@@ -49,7 +51,8 @@ import { AnalysisTypeLabelPipe } from './analysis-type-label.pipe';
     ScopeLabelPipe,
     AgreementTypeLabelPipe,
     YearDisplayPipe,
-    AnalysisTypeLabelPipe
+    AnalysisTypeLabelPipe,
+    TotalPipe
   ]
 })
 export class HelperPipesModule { }

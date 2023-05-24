@@ -1,14 +1,14 @@
 import { Injectable } from '@angular/core';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { LocalStorageService } from 'ngx-webstorage';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { AnalysisGroup, IdbAccount, IdbAnalysisItem, IdbFacility, IdbPredictorEntry, IdbUtilityMeterGroup, PredictorData } from '../models/idb';
+import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
+import { AnalysisGroup, IdbAccount, IdbAnalysisItem, IdbFacility, IdbUtilityMeterGroup, PredictorData } from '../models/idb';
 import { AccountdbService } from './account-db.service';
 import { FacilitydbService } from './facility-db.service';
 import { PredictordbService } from './predictors-db.service';
 import { UtilityMeterGroupdbService } from './utilityMeterGroup-db.service';
 import * as _ from 'lodash';
-import { AnalysisValidationService } from '../facility/analysis/analysis-validation.service';
+import { AnalysisValidationService } from '../shared/helper-services/analysis-validation.service';
 
 @Injectable({
   providedIn: 'root'
@@ -42,7 +42,8 @@ export class AnalysisDbService {
   async initializeAnalysisItems() {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     if (selectedAccount) {
-      let accounAnalysisItems: Array<IdbAnalysisItem> = await this.getAllByIndexRange('accountId', selectedAccount.guid).toPromise();
+      let allAnalysisItesm: Array<IdbAnalysisItem> = await firstValueFrom(this.getAll())
+      let accounAnalysisItems: Array<IdbAnalysisItem> = allAnalysisItesm.filter(item => { return item.accountId == selectedAccount.guid });
       this.accountAnalysisItems.next(accounAnalysisItems);
       let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
       if (selectedFacility) {
@@ -57,24 +58,15 @@ export class AnalysisDbService {
     }
   }
 
-  // setAccountAnalysisItems() {
-  //   let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-  //   if (selectedAccount) {
-  //     this.getAllByIndexRange('accountId', selectedAccount.guid).subscribe((analysisItems: Array<IdbAnalysisItem>) => {
-  //       this.accountAnalysisItems.next(analysisItems);
-  //       let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-  //       if (selectedFacility) {
-  //         let facilityAnalysisItems: Array<IdbAnalysisItem> = analysisItems.filter(item => { return item.facilityId == selectedFacility.guid });
-  //         this.facilityAnalysisItems.next(facilityAnalysisItems);
-  //       }else{
-  //         this.facilityAnalysisItems.next([]);
-  //       }
-  //     });
-  //   }
-  // }
 
   getAll(): Observable<Array<IdbAnalysisItem>> {
     return this.dbService.getAll('analysisItems');
+  }
+
+  async getAllAccountAnalysisItems(accountId: string): Promise<Array<IdbAnalysisItem>> {
+    let allAnalysisItesm: Array<IdbAnalysisItem> = await firstValueFrom(this.getAll())
+    let analysisItems: Array<IdbAnalysisItem> = allAnalysisItesm.filter(item => { return item.accountId == accountId });
+    return analysisItems;
   }
 
   getById(id: number): Observable<IdbAnalysisItem> {
@@ -85,20 +77,9 @@ export class AnalysisDbService {
     return this.dbService.getByIndex('analysisItems', indexName, indexValue);
   }
 
-  getAllByIndexRange(indexName: string, indexValue: number | string): Observable<Array<IdbAnalysisItem>> {
-    let idbKeyRange: IDBKeyRange = IDBKeyRange.only(indexValue);
-    return this.dbService.getAllByIndex('analysisItems', indexName, idbKeyRange);
-  }
-
   count() {
     return this.dbService.count('analysisItems');
   }
-
-  // add(analysisItems: IdbAnalysisItem): void {
-  //   this.dbService.add('analysisItems', analysisItems).subscribe(() => {
-  //     this.setAccountAnalysisItems();
-  //   });
-  // }
 
   addWithObservable(analysisItem: IdbAnalysisItem): Observable<IdbAnalysisItem> {
     return this.dbService.add('analysisItems', analysisItem);
@@ -108,23 +89,10 @@ export class AnalysisDbService {
     return this.dbService.delete('analysisItems', id);
   }
 
-  // update(values: IdbAnalysisItem): void {
-  //   values.date = new Date();
-  //   this.dbService.update('analysisItems', values).subscribe(() => {
-  //     this.setAccountAnalysisItems();
-  //   });
-  // }
-
   updateWithObservable(values: IdbAnalysisItem): Observable<IdbAnalysisItem> {
     values.date = new Date();
     return this.dbService.update('analysisItems', values);
   }
-
-  // deleteById(analysisItemId: number): void {
-  //   this.dbService.delete('analysisItems', analysisItemId).subscribe(() => {
-  //     this.setAccountAnalysisItems();
-  //   });
-  // }
 
   getNewAnalysisItem(): IdbAnalysisItem {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
@@ -135,10 +103,6 @@ export class AnalysisDbService {
     facilityMeterGroups.forEach(group => {
       if (group.groupType == 'Energy') {
         let predictorVariables: Array<PredictorData> = JSON.parse(JSON.stringify(predictors));
-        // predictorVariables.forEach(variable => {
-        //   variable.productionInAnalysis = true;
-        // });
-
         let analysisGroup: AnalysisGroup = {
           idbGroupId: group.guid,
           analysisType: 'regression',
@@ -173,7 +137,8 @@ export class AnalysisDbService {
       energyIsSource: selectedFacility.energyIsSource,
       energyUnit: selectedFacility.energyUnit,
       groups: itemGroups,
-      setupErrors: undefined
+      setupErrors: undefined,
+      baselineYear: selectedFacility.sustainabilityQuestions.energyReductionBaselineYear
     };
     analysisItem.setupErrors = this.analysisValidationService.getAnalysisItemErrors(analysisItem);
     return analysisItem;
@@ -198,19 +163,33 @@ export class AnalysisDbService {
   }
 
 
-  async updateAnalysisPredictors(predictorEntries: Array<PredictorData>) {
-    let facilityAnalysisItems: Array<IdbAnalysisItem> = this.facilityAnalysisItems.getValue();
+  async updateAnalysisPredictors(predictorEntries: Array<PredictorData>, facilityId: string, predictorUsedGroupIds?: Array<string>) {
+    let accountAnalysisItems: Array<IdbAnalysisItem> = this.accountAnalysisItems.getValue();
+    let facilityAnalysisItems: Array<IdbAnalysisItem> = accountAnalysisItems.filter(item => { return item.facilityId == facilityId });
     for (let index = 0; index < facilityAnalysisItems.length; index++) {
       let analysisItem: IdbAnalysisItem = facilityAnalysisItems[index];
+      let hasGroupErrors: boolean = false;
       analysisItem.groups.forEach(group => {
-        group.predictorVariables = this.updatePredictorVariables(predictorEntries, group.predictorVariables);
+        let groupUpdates: { predictors: Array<PredictorData>, deletedPredictor: boolean } = this.updatePredictorVariables(predictorEntries, group.predictorVariables);
+        group.predictorVariables = groupUpdates.predictors;
+        if (groupUpdates.deletedPredictor && group.analysisType == 'regression' && predictorUsedGroupIds.includes(group.idbGroupId)) {
+          group.models = undefined;
+          group.selectedModelId = undefined;
+          group.regressionModelYear = undefined;
+          group.regressionConstant = undefined;
+          group.dateModelsGenerated = undefined;
+        }
         group.groupErrors = this.analysisValidationService.getGroupErrors(group);
+        if (group.groupErrors.hasErrors) {
+          hasGroupErrors = true;
+        }
       });
-      await this.updateWithObservable(analysisItem).toPromise();
+      analysisItem.setupErrors.groupsHaveErrors = hasGroupErrors;
+      await firstValueFrom(this.updateWithObservable(analysisItem));
     };
   }
 
-  updatePredictorVariables(predictorEntries: Array<PredictorData>, analysisPredictors: Array<PredictorData>): Array<PredictorData> {
+  updatePredictorVariables(predictorEntries: Array<PredictorData>, analysisPredictors: Array<PredictorData>): { predictors: Array<PredictorData>, deletedPredictor: boolean } {
     let predictorIdsToRemove: Array<string> = new Array();
     //update existing, check need remove
     analysisPredictors.forEach(predictor => {
@@ -221,9 +200,6 @@ export class AnalysisDbService {
         predictor.name = checkExists.name;
         predictor.unit = checkExists.unit;
         predictor.production = checkExists.production;
-        if (predictor.productionInAnalysis && !checkExists.production) {
-          predictor.productionInAnalysis = false;
-        }
       }
     });
     //remove necessary predictors
@@ -235,7 +211,7 @@ export class AnalysisDbService {
         analysisPredictors.push(entry);
       }
     });
-    return analysisPredictors;
+    return { predictors: analysisPredictors, deletedPredictor: predictorIdsToRemove.length != 0 };
   }
 
 
@@ -244,7 +220,7 @@ export class AnalysisDbService {
     for (let index = 0; index < facilityAnalysisItems.length; index++) {
       let item: IdbAnalysisItem = facilityAnalysisItems[index];
       item.groups = item.groups.filter(group => { return group.idbGroupId != groupId });
-      await this.updateWithObservable(item).toPromise();
+      await firstValueFrom(this.updateWithObservable(item));
     }
   }
 
@@ -274,7 +250,7 @@ export class AnalysisDbService {
       }
       analysisGroup.groupErrors = this.analysisValidationService.getGroupErrors(analysisGroup);
       item.groups.push(analysisGroup);
-      await this.updateWithObservable(item).toPromise();
+      await firstValueFrom(this.updateWithObservable(item));
     };
   }
 
@@ -292,7 +268,7 @@ export class AnalysisDbService {
 
   async deleteAnalysisItems(analysisItems: Array<IdbAnalysisItem>) {
     for (let i = 0; i < analysisItems.length; i++) {
-      await this.deleteWithObservable(analysisItems[i].id).toPromise();
+      await firstValueFrom(this.deleteWithObservable(analysisItems[i].id));
     }
   }
 

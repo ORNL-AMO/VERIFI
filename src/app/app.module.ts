@@ -2,7 +2,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations'
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { AppRoutingModule } from './app-routing.module';
+import { AppRoutingModule } from './routing/app-routing.module';
 import { AppComponent } from './app.component';
 import { HeaderComponent } from './core-components/header/header.component';
 import { SidebarComponent } from './core-components/sidebar/sidebar.component';
@@ -24,6 +24,9 @@ import { SearchBarComponent } from './core-components/header/search-bar/search-b
 import { NgbTypeaheadModule } from '@ng-bootstrap/ng-bootstrap';
 import { FacilityListPipe } from './core-components/sidebar/facility-list.pipe';
 import { UploadDataModule } from './upload-data/upload-data.module';
+import { CreateReportModalComponent } from './core-components/create-report-modal/create-report-modal.component';
+import { StartupErrorComponent } from './core-components/startup-error/startup-error.component';
+import { WeatherDataModule } from './weather-data/weather-data.module';
 
 @NgModule({
   declarations: [
@@ -36,7 +39,9 @@ import { UploadDataModule } from './upload-data/upload-data.module';
     ElectronUpdateComponent,
     ImportBackupModalComponent,
     SearchBarComponent,
-    FacilityListPipe
+    FacilityListPipe,
+    CreateReportModalComponent,
+    StartupErrorComponent
   ],
   imports: [
     BrowserModule,
@@ -53,7 +58,8 @@ import { UploadDataModule } from './upload-data/upload-data.module';
     SetupWizardModule,
     HelperPipesModule,
     NgbTypeaheadModule,
-    UploadDataModule
+    UploadDataModule,
+    WeatherDataModule
   ],
   providers: [],
   bootstrap: [AppComponent]

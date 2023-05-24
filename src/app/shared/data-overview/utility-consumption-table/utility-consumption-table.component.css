@@ -1,0 +1,16 @@
+tr > td {
+    width: 10%;
+} 
+
+thead th{
+    text-align: center;
+}
+
+.badge .fa{
+    color: white;
+    font-size: smaller;
+}
+
+.badge{
+    font-weight: normal;
+}

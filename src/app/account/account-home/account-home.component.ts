@@ -68,9 +68,15 @@ export class AccountHomeComponent implements OnInit {
       this.accountWorker = new Worker(new URL('src/app/web-workers/annual-account-analysis.worker', import.meta.url));
       this.accountWorker.onmessage = ({ data }) => {
         this.accountWorker.terminate();
-        this.accountHomeService.annualAnalysisSummary.next(data.annualAnalysisSummaries);
-        this.accountHomeService.monthlyAccountAnalysisData.next(data.monthlyAnalysisSummaryData);
-        this.accountHomeService.calculating.next(false);
+        if (!data.error) {
+          this.accountHomeService.annualAnalysisSummary.next(data.annualAnalysisSummaries);
+          this.accountHomeService.monthlyAccountAnalysisData.next(data.monthlyAnalysisSummaryData);
+          this.accountHomeService.calculating.next(false);
+        } else {
+          this.accountHomeService.annualAnalysisSummary.next(undefined);
+          this.accountHomeService.monthlyAccountAnalysisData.next(undefined);
+          this.accountHomeService.calculating.next('error');
+        }
       };
       this.accountHomeService.calculating.next(true);
       this.accountWorker.postMessage({
@@ -97,7 +103,16 @@ export class AccountHomeComponent implements OnInit {
     let facility: IdbFacility = this.accountFacilities[facilityIndex];
     let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
     let facilityAnalysisItems: Array<IdbAnalysisItem> = accountAnalysisItems.filter(item => { return item.facilityId == facility.guid });
-    let latestAnalysisItem: IdbAnalysisItem = _.maxBy(facilityAnalysisItems, 'reportYear');
+    let selectedAnalysisItems: Array<IdbAnalysisItem> = facilityAnalysisItems.filter(item => {
+      return item.selectedYearAnalysis == true
+    });
+    let latestAnalysisItem: IdbAnalysisItem;
+    if (selectedAnalysisItems.length != 0) {
+      latestAnalysisItem = _.maxBy(selectedAnalysisItems, 'reportYear');
+    } else {
+      latestAnalysisItem = _.maxBy(facilityAnalysisItems, 'reportYear');
+
+    }
 
     if (latestAnalysisItem) {
       let calanderizedMeters: Array<CalanderizedMeter> = this.accountHomeService.calanderizedMeters;
@@ -110,15 +125,18 @@ export class AccountHomeComponent implements OnInit {
             facilityId: string,
             annualAnalysisSummary: Array<AnnualAnalysisSummary>,
             monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
+            error: boolean
           } = {
             facilityId: facility.guid,
             annualAnalysisSummary: data.annualAnalysisSummaries,
-            monthlyAnalysisSummaryData: data.monthlyAnalysisSummaryData
+            monthlyAnalysisSummaryData: data.monthlyAnalysisSummaryData,
+            error: data.error
           }
           let allSummaries: Array<{
             facilityId: string,
             annualAnalysisSummary: Array<AnnualAnalysisSummary>,
             monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
+            error: boolean
           }> = this.accountHomeService.facilityAnalysisSummaries.getValue();
           allSummaries.push(facilitySummary);
           this.accountHomeService.facilityAnalysisSummaries.next(allSummaries);
@@ -142,21 +160,28 @@ export class AccountHomeComponent implements OnInit {
           facilityId: string,
           annualAnalysisSummary: Array<AnnualAnalysisSummary>,
           monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
+          error: boolean
         } = {
           facilityId: facility.guid,
           annualAnalysisSummary: annualAnalysisSummaries,
-          monthlyAnalysisSummaryData: monthlyAnalysisSummaryData
+          monthlyAnalysisSummaryData: monthlyAnalysisSummaryData,
+          error: false
         }
         let allSummaries: Array<{
           facilityId: string,
           annualAnalysisSummary: Array<AnnualAnalysisSummary>,
           monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
+          error: boolean
         }> = this.accountHomeService.facilityAnalysisSummaries.getValue();
         allSummaries.push(facilitySummary);
         this.accountHomeService.facilityAnalysisSummaries.next(allSummaries);
         if (facilityIndex != this.accountFacilities.length - 1) {
           this.setFacilityAnalysisSummary(facilityIndex + 1);
         }
+      }
+    } else {
+      if (facilityIndex != this.accountFacilities.length - 1) {
+        this.setFacilityAnalysisSummary(facilityIndex + 1);
       }
     }
   }

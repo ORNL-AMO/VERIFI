@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { Subscription, firstValueFrom } from 'rxjs';
 import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { AnalysisGroup, IdbAccount, IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
@@ -7,9 +7,9 @@ import * as _ from 'lodash';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { AnalysisValidationService } from '../../../analysis-validation.service';
 import { Router } from '@angular/router';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
+import { AnalysisValidationService } from 'src/app/shared/helper-services/analysis-validation.service';
 
 @Component({
   selector: 'app-group-analysis-options',
@@ -23,14 +23,16 @@ export class GroupAnalysisOptionsComponent implements OnInit {
   showUnitsWarning: boolean;
   yearOptions: Array<number>;
   analysisItem: IdbAnalysisItem;
+  facility: IdbFacility;
   constructor(private analysisService: AnalysisService, private analysisDbService: AnalysisDbService,
-     private utilityMeterDataDbService: UtilityMeterDatadbService,
+    private utilityMeterDataDbService: UtilityMeterDatadbService,
     private accountDbService: AccountdbService, private facilityDbService: FacilitydbService,
     private dbChangesService: DbChangesService,
     private analysisValidationService: AnalysisValidationService,
     private router: Router) { }
 
   ngOnInit(): void {
+    this.facility = this.facilityDbService.selectedFacility.getValue();
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
     this.yearOptions = this.utilityMeterDataDbService.getYearOptions();
     this.selectedGroupSub = this.analysisService.selectedGroup.subscribe(group => {
@@ -47,12 +49,11 @@ export class GroupAnalysisOptionsComponent implements OnInit {
     let analysisItem: IdbAnalysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
     let groupIndex: number = analysisItem.groups.findIndex(group => { return group.idbGroupId == this.group.idbGroupId });
     this.group.groupErrors = this.analysisValidationService.getGroupErrors(this.group);
-
     analysisItem.groups[groupIndex] = this.group;
-    await this.analysisDbService.updateWithObservable(analysisItem).toPromise();
+    analysisItem.setupErrors = this.analysisValidationService.getAnalysisItemErrors(analysisItem);
+    await firstValueFrom(this.analysisDbService.updateWithObservable(analysisItem));
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    this.dbChangesService.setAnalysisItems(selectedAccount, selectedFacility);
+    await this.dbChangesService.setAnalysisItems(selectedAccount, this.facility);
     this.analysisDbService.selectedAnalysisItem.next(analysisItem);
     this.analysisService.selectedGroup.next(this.group);
   }
@@ -76,7 +77,6 @@ export class GroupAnalysisOptionsComponent implements OnInit {
       });
     }
     this.changeModelType();
-    this.saveItem();
   }
 
   changeModelType() {
@@ -91,7 +91,7 @@ export class GroupAnalysisOptionsComponent implements OnInit {
     this.router.navigateByUrl('facility/' + facility.id + '/utility/predictors');
   }
 
-  goToMeterGroups(){
+  goToMeterGroups() {
     let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     this.router.navigateByUrl('facility/' + facility.id + '/utility/meter-groups');
   }

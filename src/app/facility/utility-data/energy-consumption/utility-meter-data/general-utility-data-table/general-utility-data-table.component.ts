@@ -8,6 +8,7 @@ import { CalanderizationService, EmissionsResults } from 'src/app/shared/helper-
 import { EditMeterFormService } from '../../energy-source/edit-meter-form/edit-meter-form.service';
 import { Subscription } from 'rxjs';
 import { GeneralUtilityDataFilters } from 'src/app/models/meterDataFilter';
+import { getIsEnergyMeter } from 'src/app/shared/sharedHelperFuntions';
 
 @Component({
   selector: 'app-general-utility-data-table',
@@ -42,7 +43,13 @@ export class GeneralUtilityDataTableComponent implements OnInit {
   showEmissions: boolean;
   filterSub: Subscription;
   generalUtilityDataFilters: GeneralUtilityDataFilters;
-  constructor(public utilityMeterDataService: UtilityMeterDataService, private energyUnitsHelperService: EnergyUnitsHelperService,
+
+  numDetailedCharges: number;
+  numGeneralInformation: number;
+  numEmissions: number;
+  showEmissionsSection: boolean;
+  showDetailedCharges: boolean;
+  constructor(public utilityMeterDataService: UtilityMeterDataService,
     private copyTableService: CopyTableService,
     private calanderizationService: CalanderizationService, private editMeterFormService: EditMeterFormService) { }
 
@@ -56,6 +63,7 @@ export class GeneralUtilityDataTableComponent implements OnInit {
 
     this.filterSub = this.utilityMeterDataService.tableGeneralUtilityFilters.subscribe(val => {
       this.generalUtilityDataFilters = val;
+      this.setNumColumns();
     })
   }
 
@@ -69,21 +77,24 @@ export class GeneralUtilityDataTableComponent implements OnInit {
       this.checkAll();
     }
 
-    if (changes.selectedMeterData && !changes.selectedMeterData.firstChange) {
+    if ((changes.selectedMeterData && !changes.selectedMeterData.firstChange) || (changes.selectedMeter && !changes.selectedMeter.firstChange)) {
       this.setData();
     }
   }
 
   setData() {
-    this.showVolumeColumn = (this.selectedMeterData.find(dataItem => { return dataItem.totalVolume != undefined && dataItem.totalVolume != 0}) != undefined);
+    this.showVolumeColumn = (this.selectedMeterData.find(dataItem => { return dataItem.totalVolume != undefined && dataItem.totalVolume != 0 }) != undefined);
     this.volumeUnit = this.selectedMeter.startingUnit;
-    this.showEnergyColumn = this.energyUnitsHelperService.isEnergyMeter(this.selectedMeter.source);
+    this.showEnergyColumn = getIsEnergyMeter(this.selectedMeter.source);
     this.showEmissions = this.editMeterFormService.checkShowEmissionsOutputRate(this.selectedMeter.source);
     if (this.showEmissions) {
       this.setEmissions();
     }
     if (this.showEnergyColumn) {
       this.energyUnit = this.selectedMeter.energyUnit;
+    }
+    if (this.generalUtilityDataFilters) {
+      this.setNumColumns()
     }
   }
 
@@ -168,5 +179,39 @@ export class GeneralUtilityDataTableComponent implements OnInit {
       dataItem.excessRECs = emissionsValues.excessRECs;
       dataItem.excessRECsEmissions = emissionsValues.excessRECsEmissions;
     })
+  }
+
+  setNumColumns() {
+    this.numDetailedCharges = 0;
+    this.numGeneralInformation = 2;
+    this.numEmissions = 0;
+    this.showEmissionsSection = (this.generalUtilityDataFilters.totalMarketEmissions || this.generalUtilityDataFilters.totalLocationEmissions) && this.showEmissions;
+    this.showDetailedCharges = (this.generalUtilityDataFilters.commodityCharge || this.generalUtilityDataFilters.deliveryCharge || this.generalUtilityDataFilters.otherCharge);
+    if (this.showEmissions) {
+      if (this.generalUtilityDataFilters.totalLocationEmissions) {
+        this.numEmissions++;
+      }
+      if (this.generalUtilityDataFilters.totalMarketEmissions) {
+        this.numEmissions++;
+      }
+    }
+    if (this.generalUtilityDataFilters.totalVolume && this.showVolumeColumn) {
+      this.numGeneralInformation++;
+    }
+    if (!this.showEnergyColumn) {
+      this.numGeneralInformation--;
+    }
+    if (this.generalUtilityDataFilters.totalCost) {
+      this.numGeneralInformation++;
+    }
+    if (this.generalUtilityDataFilters.commodityCharge) {
+      this.numDetailedCharges++;
+    }
+    if (this.generalUtilityDataFilters.deliveryCharge) {
+      this.numDetailedCharges++;
+    }
+    if (this.generalUtilityDataFilters.otherCharge) {
+      this.numDetailedCharges++;
+    }
   }
 }

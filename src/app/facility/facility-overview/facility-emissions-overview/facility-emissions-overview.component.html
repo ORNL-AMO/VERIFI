@@ -1,27 +1,30 @@
-<ng-container *ngIf="!calculating">
+<ng-container *ngIf="calculating == false">
     <div class="row">
         <div class="col">
             <div class="card">
                 <div class="card-header bg-white">
-                    <h4 class="mb-0">Facility Meter Emissions<span class="pull-right"
-                            *ngIf="yearPriorDate">({{yearPriorDate |
-                            date: 'MMM, y'}} -
-                            {{lastMonthsDate | date: 'MMM, y'}})</span></h4>
+                    <h4 class="mb-0">Facility Meter Emissions</h4>
 
                 </div>
                 <div class="card-body">
                     <div class="row">
                         <div class="col-12">
-                            <app-emissions-meters-usage-chart></app-emissions-meters-usage-chart>
+                            <app-meters-overview-stacked-line-chart [dataType]="'emissions'" [facilityId]="facilityId"
+                                [calanderizedMeters]="facilityOverviewData.calanderizedMeters"
+                                [dateRange]="dateRange"></app-meters-overview-stacked-line-chart>
                             <hr>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-6">
-                            <app-emissions-meters-overview-table></app-emissions-meters-overview-table>
+                            <app-meter-usage-table [dataType]="'emissions'"
+                                [facilityOverviewData]="facilityOverviewData"
+                                [facilityOverviewMeters]="facilityOverviewData.energyMeters"></app-meter-usage-table>
+
                         </div>
                         <div class="col-6">
-                            <app-emissions-meters-overview-chart></app-emissions-meters-overview-chart>
+                            <app-meter-usage-donut [dataType]="'emissions'" [facilityId]="facilityId"
+                                [facilityOverviewMeters]="facilityOverviewData.energyMeters"></app-meter-usage-donut>
                         </div>
                     </div>
                 </div>
@@ -36,7 +39,11 @@
                     <h4 class="mb-0">Utility Emissions</h4>
                 </div>
                 <div class="card-body">
-                    <app-emissions-utilities-table></app-emissions-utilities-table>
+                    <app-utility-consumption-table [dataType]="'emissions'"
+                        [sourcesUseAndCost]="utilityUseAndCost.energyUseAndCost"
+                        [useAndCostTotal]="utilityUseAndCost.energyTotal"
+                        [previousYear]="utilityUseAndCost.previousYear"
+                        [dateRange]="dateRange"></app-utility-consumption-table>
                 </div>
             </div>
         </div>
@@ -49,7 +56,8 @@
                     <h4 class="mb-0">Annual Utility Emissions</h4>
                 </div>
                 <div class="card-body">
-                    <app-emissions-utilities-chart></app-emissions-utilities-chart>
+                    <app-utilities-usage-chart [dataType]="'emissions'" [facilityId]="facilityId"
+                        [annualSourceData]="facilityOverviewData.annualSourceData"></app-utilities-usage-chart>
                 </div>
             </div>
         </div>
@@ -62,7 +70,8 @@
                     <h4 class="mb-0">Monthly Emissions</h4>
                 </div>
                 <div class="card-body">
-                    <app-facility-emissions-monthly-chart></app-facility-emissions-monthly-chart>
+                    <app-monthly-utility-usage-line-chart [dataType]="'emissions'" [facilityId]="facilityId"
+                        [yearMonthData]="facilityOverviewData.energyYearMonthData"></app-monthly-utility-usage-line-chart>
                 </div>
             </div>
         </div>
@@ -70,4 +79,6 @@
 </ng-container>
 
 
-<app-calculating-spinner *ngIf="calculating" [message]="'Calculating Data Overview...'"></app-calculating-spinner>
+
+<app-calculating-spinner *ngIf="calculating != false" [message]="'Calculating Data Overview...'"
+    [error]="calculating == 'error'"></app-calculating-spinner>

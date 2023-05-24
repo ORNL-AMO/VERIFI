@@ -55,14 +55,6 @@
                         [(ngModel)]="analysisTableColumns.baselineAdjustment" (change)="save()" id="baselineAdjustment">
                     <label class="form-check-label" for="baselineAdjustment">Baseline Adjustment</label>
                 </div>
-
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" name="adjustmentToBaseline"
-                        [(ngModel)]="analysisTableColumns.adjustmentToBaseline" (change)="save()" id="adjustmentToBaseline">
-                    <label class="form-check-label" for="adjustmentToBaseline">Adjustment to
-                        Baseline</label>
-                </div>
-
             </div>
             <div class="col" *ngIf="tableContext != 'monthAccount' && tableContext != 'annualAccount'">
                 <div class="form-check">
@@ -165,6 +157,11 @@
                     <input class="form-check-input" type="checkbox" name="newSavings"
                         [(ngModel)]="analysisTableColumns.newSavings" (change)="save()" id="newSavings">
                     <label class="form-check-label" for="newSavings">New Savings</label>
+                </div>
+            </div>
+            <div class="col-12 pt-2">
+                <div class="d-flex justify-content-end">
+                    <a class="small click-link" (click)="setDefault()">Use Default</a>
                 </div>
             </div>
         </div>

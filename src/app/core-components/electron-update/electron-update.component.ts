@@ -11,7 +11,7 @@ import { SharedDataService } from 'src/app/shared/helper-services/shared-data.se
   styleUrls: ['./electron-update.component.css'],
   animations: [
     trigger('updateToast', [
-      state('show', style({ top: '40px' })),
+      state('show', style({ top: '20px' })),
       state('hide', style({ top: '-200px' })),
       transition('hide => show', animate('.5s ease')),
       transition('show => hide', animate('.5s ease'))

@@ -85,8 +85,8 @@ export class ElectronService {
     let title: string = "VERIFI Web";
     let body: string = `You are running VERIFI in a web browser. All application data is saved within this browser (The DOE does not have access to your data). 
       It is encouraged that you download backup files of your data frequently. Backups can be uploaded to restore lost or corrupted data. <br> <hr>
-      You can download data backups using the "Backup Account" button in the lower left hand corner of your screen or the account and facility settings pages.`
-    this.toastNotificationService.showToast(title, body, 50000, true, "bg-info");
+      You can download data backups using the "Backup Account" button in the upper right hand corner of your screen or the account and facility settings pages.`
+    this.toastNotificationService.showToast(title, body, 50000, true, "alert-info");
     let disableNotificationSub: Subscription = this.toastNotificationService.disableNotification.subscribe(val => {
       if (val != undefined) {
         if (val == true) {

@@ -175,12 +175,17 @@
             </div>
             <div class="col-8">
                 <ng-container *ngIf="latestAnalysisItem">
-                    <app-monthly-analysis-summary-graph *ngIf="!calculating && monthlyFacilityAnalysisData"
+                    <app-monthly-analysis-summary-graph *ngIf="calculating == false && monthlyFacilityAnalysisData"
                         [monthlyAnalysisSummaryData]="monthlyFacilityAnalysisData" [analysisItem]="latestAnalysisItem"
                         [facilityOrAccount]="facility">
                     </app-monthly-analysis-summary-graph>
-                    <app-calculating-spinner *ngIf="calculating" [message]="'Calculating Monthly Results...'">
+                    <app-calculating-spinner *ngIf="calculating != false" [message]="'Calculating Monthly Results...'"
+                        [error]="calculating == 'error'">
                     </app-calculating-spinner>
+                    <div class="alert alert-danger"
+                        *ngIf="latestAnalysisItem.setupErrors.hasError || latestAnalysisItem.setupErrors.groupsHaveErrors">
+                        Errors found in selected analysis.
+                    </div>
                 </ng-container>
 
             </div>

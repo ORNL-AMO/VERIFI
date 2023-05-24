@@ -1,11 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
-import { Subscription } from 'rxjs';
+import { Subscription, firstValueFrom } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { IdbAccount, IdbUtilityMeter } from 'src/app/models/idb';
+import { IdbAccount, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { NavigationEnd, Router } from '@angular/router';
 import { AccountOverviewService } from '../account-overview.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
+import { Month, Months } from 'src/app/shared/form-data/months';
+import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
+import * as _ from 'lodash';
 
 @Component({
   selector: 'app-account-overview-banner',
@@ -23,10 +26,20 @@ export class AccountOverviewBannerComponent implements OnInit {
   emissionsDisplay: 'market' | 'location';
   emissionsDisplaySub: Subscription;
   showWater: boolean;
+
+  minMonth: number;
+  minYear: number;
+  maxMonth: number;
+  maxYear: number;
+  months: Array<Month> = Months;
+  years: Array<number>;
+
+  dateRangeSub: Subscription;
   constructor(private sharedDataService: SharedDataService, private accountDbService: AccountdbService,
     private router: Router,
     private accountOverviewService: AccountOverviewService,
-    private utilityMeterDbService: UtilityMeterdbService) { }
+    private utilityMeterDbService: UtilityMeterdbService,
+    private utilityMeterDataDbService: UtilityMeterDatadbService) { }
 
   ngOnInit(): void {
     this.modalOpenSub = this.sharedDataService.modalOpen.subscribe(val => {
@@ -35,6 +48,7 @@ export class AccountOverviewBannerComponent implements OnInit {
     this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(val => {
       this.selectedAccount = val;
       this.setShowWater();
+      this.setYears();
     });
 
     this.emissionsDisplaySub = this.accountOverviewService.emissionsDisplay.subscribe(val => {
@@ -47,6 +61,15 @@ export class AccountOverviewBannerComponent implements OnInit {
       }
     });
     this.setUrlString(this.router.url);
+
+    this.dateRangeSub = this.accountOverviewService.dateRange.subscribe(dateRange => {
+      if (dateRange) {
+        this.minMonth = dateRange.startDate.getMonth();
+        this.minYear = dateRange.startDate.getFullYear();
+        this.maxMonth = dateRange.endDate.getMonth();
+        this.maxYear = dateRange.endDate.getFullYear();
+      }
+    });
   }
 
   ngOnDestroy() {
@@ -54,6 +77,7 @@ export class AccountOverviewBannerComponent implements OnInit {
     this.selectedAccountSub.unsubscribe();
     this.routerSub.unsubscribe();
     this.emissionsDisplaySub.unsubscribe();
+    this.dateRangeSub.unsubscribe();
   }
 
   setUrlString(url: string) {
@@ -66,17 +90,15 @@ export class AccountOverviewBannerComponent implements OnInit {
     }
   }
 
-
   async setAccountEnergyIsSource(energyIsSource: boolean) {
     if (this.selectedAccount.energyIsSource != energyIsSource) {
       this.selectedAccount.energyIsSource = energyIsSource;
-      let updatedAccount: IdbAccount = await this.accountDbService.updateWithObservable(this.selectedAccount).toPromise();
-      let allAccounts: Array<IdbAccount> = await this.accountDbService.getAll().toPromise();
+      let updatedAccount: IdbAccount = await firstValueFrom(this.accountDbService.updateWithObservable(this.selectedAccount));
+      let allAccounts: Array<IdbAccount> = await firstValueFrom(this.accountDbService.getAll());
       this.accountDbService.allAccounts.next(allAccounts);
       this.accountDbService.selectedAccount.next(this.selectedAccount);
     }
   }
-
 
   setEmissions(display: 'market' | 'location') {
     this.accountOverviewService.emissionsDisplay.next(display);
@@ -86,5 +108,28 @@ export class AccountOverviewBannerComponent implements OnInit {
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     let waterMeter: IdbUtilityMeter = accountMeters.find(meter => { return meter.source == 'Water' || meter.source == 'Waste Water' });
     this.showWater = waterMeter != undefined;
+  }
+
+  createReport() {
+    this.sharedDataService.openCreateReportModal.next(true);
+  }
+
+  setDate() {
+    let startDate: Date = new Date(this.minYear, this.minMonth, 1);
+    let endDate: Date = new Date(this.maxYear, this.maxMonth, 1);
+    this.accountOverviewService.dateRange.next({
+      startDate: startDate,
+      endDate: endDate
+    });
+  }
+
+  setYears() {
+    let utilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
+    let years: Array<number> = utilityMeterData.map(meterData => {
+      let date: Date = new Date(meterData.readDate);
+      return date.getFullYear();
+    });
+    this.years = _.uniq(years);
+    this.years = _.orderBy(this.years);
   }
 }

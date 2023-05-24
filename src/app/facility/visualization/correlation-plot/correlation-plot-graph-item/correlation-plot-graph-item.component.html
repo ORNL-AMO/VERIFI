@@ -1,0 +1,18 @@
+<div class="card no-border">
+    <div class="card-body">
+        <div class="text-center">
+            <label class="bold">{{axisCombo.y.label}} vs {{axisCombo.x.label}}</label>
+            <ng-container *ngIf="regressionTableDataItem">
+                <br>Best Fit:
+                <br> {{bestFit}}
+                <br>R&#178;: {{regressionTableDataItem.r2Value | number:'0.3-3'}}
+                <br>P-value: {{regressionTableDataItem.pValue| number:'0.2-2'}}
+            </ng-container>
+            <ng-container *ngIf="!regressionTableDataItem">
+                <br>Best fit line not found.
+                <br><br><br><br>
+            </ng-container>
+        </div>
+        <div #matrixPlot id="matrixPlot"></div>
+    </div>
+</div>

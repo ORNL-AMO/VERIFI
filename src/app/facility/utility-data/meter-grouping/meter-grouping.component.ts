@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { Subscription, firstValueFrom } from 'rxjs';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { IdbAccount, IdbFacility, IdbUtilityMeter, IdbUtilityMeterGroup } from 'src/app/models/idb';
 import * as _ from 'lodash';
@@ -171,7 +171,7 @@ export class MeterGroupingComponent implements OnInit {
     let draggedMeter: IdbUtilityMeter = this.facilityMeters.find(meter => { return meter.id == event.item.data.id });
     let group: IdbUtilityMeterGroup = this.facilityMeterGroups.find(group => { return group.id == Number(event.container.id) })
     draggedMeter.groupId = group.guid;
-    await this.utilityMeterDbService.updateWithObservable(draggedMeter).toPromise();
+    await firstValueFrom(this.utilityMeterDbService.updateWithObservable(draggedMeter));
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.setMeters(selectedAccount, this.selectedFacility);
     await this.dbChangesService.setAnalysisItems(selectedAccount, this.selectedFacility);
@@ -189,14 +189,14 @@ export class MeterGroupingComponent implements OnInit {
     this.loadingService.setLoadingMessage("Deleting Meter Group...");
     this.loadingService.setLoadingStatus(true);
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    await this.utilityMeterGroupDbService.deleteWithObservable(this.groupToDelete.id).toPromise();
+    await firstValueFrom(this.utilityMeterGroupDbService.deleteWithObservable(this.groupToDelete.id));
     await this.dbChangesService.setMeterGroups(selectedAccount, this.selectedFacility);
     //update analysis items
     await this.analysisDbService.deleteGroup(this.groupToDelete.guid);
     await this.dbChangesService.setAnalysisItems(selectedAccount, this.selectedFacility);
     this.closeDeleteGroup();
     this.loadingService.setLoadingStatus(false);
-    this.toastNoticationService.showToast("Meter Group Deleted!", undefined, undefined, false, "bg-success");
+    this.toastNoticationService.showToast("Meter Group Deleted!", undefined, undefined, false, "alert-success");
 
     this.setGroupTypes();
   }
@@ -204,7 +204,7 @@ export class MeterGroupingComponent implements OnInit {
   async setToggleView(meterGroup) {
     meterGroup.visible = !meterGroup.visible
     if (meterGroup.name != "Ungrouped") {
-      await this.utilityMeterGroupDbService.updateWithObservable(meterGroup).toPromise();
+      await firstValueFrom(this.utilityMeterGroupDbService.updateWithObservable(meterGroup));
       let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
       await this.dbChangesService.setMeterGroups(selectedAccount, this.selectedFacility);
     }

@@ -4,6 +4,8 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { AdditionalChargesFilters, DetailedChargesFilters, ElectricityDataFilters, EmissionsFilters, GeneralInformationFilters, GeneralUtilityDataFilters } from 'src/app/models/meterDataFilter';
 import { IdbFacility, MeterSource } from 'src/app/models/idb';
 import { UtilityMeterDataService } from '../utility-meter-data.service';
+import { getIsEnergyUnit } from 'src/app/shared/sharedHelperFuntions';
+import { EditMeterFormService } from '../../energy-source/edit-meter-form/edit-meter-form.service';
 
 @Component({
   selector: 'app-utility-meter-data-filter',
@@ -15,19 +17,23 @@ export class UtilityMeterDataFilterComponent implements OnInit {
   filterType: string;
   @Input()
   source: MeterSource;
+  @Input()
+  startingUnit: string;
 
   detailedChargesFilters: DetailedChargesFilters;
   additionalChargesFilters: AdditionalChargesFilters;
   generalInformationFilters: GeneralInformationFilters;
   emissionsFilters: EmissionsFilters;
   generalUtilityDataFilters: GeneralUtilityDataFilters;
+  displayVolumeInput: boolean;
+  showEmissions: boolean;
   constructor(private utilityMeterDataService: UtilityMeterDataService, private facilityDbService: FacilitydbService,
-    private dbChangesService: DbChangesService) { }
+    private dbChangesService: DbChangesService, private editMeterFormService: EditMeterFormService) { }
 
   ngOnInit(): void {
   }
 
-  ngOnChanges(){
+  ngOnChanges() {
     if (this.source == 'Electricity') {
       let electricityDataFilters: ElectricityDataFilters;
       if (this.filterType == 'table') {
@@ -42,6 +48,8 @@ export class UtilityMeterDataFilterComponent implements OnInit {
     } else {
       this.generalUtilityDataFilters = this.utilityMeterDataService.tableGeneralUtilityFilters.getValue();
     }
+    this.showEmissions = this.editMeterFormService.checkShowEmissionsOutputRate(this.source);
+    this.displayVolumeInput = (getIsEnergyUnit(this.startingUnit) == false);
   }
 
   async save() {

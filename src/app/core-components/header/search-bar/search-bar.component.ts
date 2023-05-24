@@ -2,13 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, OperatorFunction } from 'rxjs';
 import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
-import { OverviewReportService } from 'src/app/account/overview-report/overview-report.service';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
+import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { OverviewReportOptionsDbService } from 'src/app/indexedDB/overview-report-options-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility, IdbOverviewReportOptions, IdbUtilityMeter } from 'src/app/models/idb';
+import { IdbAccountAnalysisItem, IdbAccountReport, IdbAnalysisItem, IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
 
 @Component({
   selector: 'app-search-bar',
@@ -26,8 +25,7 @@ export class SearchBarComponent implements OnInit {
   constructor(private facilityDbService: FacilitydbService, private router: Router,
     private utilityMeterDbService: UtilityMeterdbService,
     private analysisDbService: AnalysisDbService, private accountAnalysisDbService: AccountAnalysisDbService,
-    private overviewReportOptionsDbService: OverviewReportOptionsDbService,
-    private overviewReportService: OverviewReportService) { }
+    private accountReportsDbService: AccountReportDbService) { }
 
   ngOnInit(): void {
   }
@@ -37,7 +35,7 @@ export class SearchBarComponent implements OnInit {
     let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
     let analysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
-    let reportOptions: Array<IdbOverviewReportOptions> = this.overviewReportOptionsDbService.accountOverviewReportOptions.getValue();
+    let accountReports: Array<IdbAccountReport> = this.accountReportsDbService.accountReports.getValue();
     this.dropdownOptions = new Array();
     facilityItems.forEach(item => {
       this.dropdownOptions.push({
@@ -46,7 +44,7 @@ export class SearchBarComponent implements OnInit {
         facilityId: item.id,
         facilityGuid: item.guid,
         meterId: undefined,
-        idbReportOptions: undefined,
+        idbAccountReport: undefined,
         facilityAnalysisItem: undefined,
         accountAnalysisItem: undefined,
         facilityColor: item.color
@@ -60,7 +58,7 @@ export class SearchBarComponent implements OnInit {
         facilityId: facility.id,
         facilityGuid: item.facilityId,
         meterId: item.id,
-        idbReportOptions: undefined,
+        idbAccountReport: undefined,
         facilityAnalysisItem: undefined,
         accountAnalysisItem: undefined,
         facilityColor: facility.color
@@ -73,7 +71,7 @@ export class SearchBarComponent implements OnInit {
         facilityId: undefined,
         facilityGuid: undefined,
         meterId: undefined,
-        idbReportOptions: undefined,
+        idbAccountReport: undefined,
         facilityAnalysisItem: undefined,
         accountAnalysisItem: item,
         facilityColor: undefined
@@ -87,20 +85,20 @@ export class SearchBarComponent implements OnInit {
         facilityId: facility.id,
         facilityGuid: item.facilityId,
         meterId: undefined,
-        idbReportOptions: undefined,
+        idbAccountReport: undefined,
         facilityAnalysisItem: item,
         accountAnalysisItem: undefined,
         facilityColor: facility.color
       })
     })
-    reportOptions.forEach(reportOptions => {
+    accountReports.forEach(reportOptions => {
       this.dropdownOptions.push({
         name: reportOptions.name,
         type: 'report',
         facilityId: undefined,
         facilityGuid: undefined,
         meterId: undefined,
-        idbReportOptions: reportOptions,
+        idbAccountReport: reportOptions,
         facilityAnalysisItem: undefined,
         accountAnalysisItem: undefined,
         facilityColor: undefined
@@ -127,19 +125,21 @@ export class SearchBarComponent implements OnInit {
       this.router.navigateByUrl('facility/' + item.facilityId + '/utility/energy-consumption/utility-meter/' + item.meterId);
     } else if (item.type == 'accountAnalysis') {
       this.accountAnalysisDbService.selectedAnalysisItem.next(item.accountAnalysisItem);
-      //todo: route to results if item setup
-      this.router.navigateByUrl('account/analysis/setup');
+      if (item.accountAnalysisItem.setupErrors.hasError || item.accountAnalysisItem.setupErrors.facilitiesSelectionsInvalid) {
+        this.router.navigateByUrl('account/analysis/setup');
+      } else {
+        this.router.navigateByUrl('account/analysis/results');
+      }
     } else if (item.type == 'facilityAnalysis') {
       this.analysisDbService.selectedAnalysisItem.next(item.facilityAnalysisItem);
-      this.router.navigateByUrl('facility/' + item.facilityId + '/analysis/run-analysis');
-    } else if (item.type == 'report') {
-      this.overviewReportOptionsDbService.selectedOverviewReportOptions.next(item.idbReportOptions);
-      this.overviewReportService.reportOptions.next(item.idbReportOptions.reportOptions);
-      if (item.idbReportOptions.reportOptions.reportType == 'data') {
-        this.router.navigateByUrl('/account/reports/basic-report');
-      } else if (item.idbReportOptions.reportOptions.reportType == 'betterPlants') {
-        this.router.navigateByUrl('/account/reports/better-plants-report');
+      if (item.facilityAnalysisItem.setupErrors.hasError || item.facilityAnalysisItem.setupErrors.groupsHaveErrors) {
+        this.router.navigateByUrl('facility/' + item.facilityId + '/analysis/run-analysis');
+      } else {
+        this.router.navigateByUrl('facility/' + item.facilityId + '/analysis/run-analysis/facility-analysis');
       }
+    } else if (item.type == 'report') {
+      this.accountReportsDbService.selectedReport.next(item.idbAccountReport);
+      this.router.navigateByUrl('account/reports/setup');
     }
   }
 
@@ -163,7 +163,7 @@ export interface DropdownOption {
   facilityGuid: string,
   // accountId: number,
   meterId: number,
-  idbReportOptions: IdbOverviewReportOptions,
+  idbAccountReport: IdbAccountReport,
   facilityAnalysisItem: IdbAnalysisItem,
   accountAnalysisItem: IdbAccountAnalysisItem,
   facilityColor: string

@@ -4,9 +4,9 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { UtilityMeterDataService } from 'src/app/facility/utility-data/energy-consumption/utility-meter-data/utility-meter-data.service';
 import { IdbFacility, IdbUtilityMeterData } from 'src/app/models/idb';
-import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
 import { FileReference, UploadDataService } from 'src/app/upload-data/upload-data.service';
 import * as _ from 'lodash';
+import { getIsEnergyMeter, getIsEnergyUnit } from 'src/app/shared/sharedHelperFuntions';
 
 @Component({
   selector: 'app-confirm-readings',
@@ -40,8 +40,9 @@ export class ConfirmReadingsComponent implements OnInit {
   paramsSub: Subscription;
   meterDataSummaries: Array<MeterDataSummary>;
   metersIncluded: boolean;
+  skipAll: boolean = false;
   constructor(private activatedRoute: ActivatedRoute, private uploadDataService: UploadDataService,
-    private utilityMeterDataService: UtilityMeterDataService, private energyUnitsHelperService: EnergyUnitsHelperService,
+    private utilityMeterDataService: UtilityMeterDataService,
     private router: Router) { }
 
   ngOnInit(): void {
@@ -78,7 +79,7 @@ export class ConfirmReadingsComponent implements OnInit {
 
   getFacilityName(facilityId: string): string {
     let facility: IdbFacility = this.fileReference.importFacilities.find(facility => { return facility.guid == facilityId });
-    if(facility){
+    if (facility) {
       return facility.name;
     }
     return;
@@ -97,8 +98,8 @@ export class ConfirmReadingsComponent implements OnInit {
           if (meter.source == 'Electricity') {
             form = this.utilityMeterDataService.getElectricityMeterDataForm(reading);
           } else {
-            let displayVolumeInput: boolean = (this.energyUnitsHelperService.isEnergyUnit(meter.startingUnit) == false);
-            let displayEnergyUse: boolean = this.energyUnitsHelperService.isEnergyMeter(meter.source);
+            let displayVolumeInput: boolean = (getIsEnergyUnit(meter.startingUnit) == false);
+            let displayEnergyUse: boolean = getIsEnergyMeter(meter.source);
             form = this.utilityMeterDataService.getGeneralMeterDataForm(reading, displayVolumeInput, displayEnergyUse);
           }
           if (form.invalid) {
@@ -158,6 +159,11 @@ export class ConfirmReadingsComponent implements OnInit {
     this.router.navigateByUrl('/upload/data-setup/file-setup/' + this.fileReference.id + '/manage-meters');
   }
 
+  setSkipAll() {
+    this.meterDataSummaries.forEach(summary => {
+      summary.skipExisting = this.skipAll;
+    });
+  }
 }
 
 

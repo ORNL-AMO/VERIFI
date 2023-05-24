@@ -8,6 +8,7 @@ import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility, IdbPredictorEntry } from 'src/app/models/idb';
+import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { AccountAnalysisService } from '../account-analysis.service';
 
 @Component({
@@ -25,7 +26,8 @@ export class AccountAnalysisResultsComponent implements OnInit {
     private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService,
     private predictorDbService: PredictordbService,
-    private analysisDbService: AnalysisDbService) { }
+    private analysisDbService: AnalysisDbService,
+    private sharedDataService: SharedDataService) { }
 
   ngOnInit(): void {
     if (!this.accountAnalysisService.calanderizedMeters) {
@@ -42,9 +44,15 @@ export class AccountAnalysisResultsComponent implements OnInit {
       this.worker = new Worker(new URL('src/app/web-workers/annual-account-analysis.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {
         this.worker.terminate();
-        this.accountAnalysisService.annualAnalysisSummary.next(data.annualAnalysisSummaries);
-        this.accountAnalysisService.monthlyAccountAnalysisData.next(data.monthlyAnalysisSummaryData);
-        this.accountAnalysisService.calculating.next(false);
+        if (!data.error) {
+          this.accountAnalysisService.annualAnalysisSummary.next(data.annualAnalysisSummaries);
+          this.accountAnalysisService.monthlyAccountAnalysisData.next(data.monthlyAnalysisSummaryData);
+          this.accountAnalysisService.calculating.next(false);
+        } else {
+          this.accountAnalysisService.annualAnalysisSummary.next(undefined);
+          this.accountAnalysisService.monthlyAccountAnalysisData.next(undefined);
+          this.accountAnalysisService.calculating.next('error');
+        }
       };
       this.accountAnalysisService.calculating.next(true);
       this.worker.postMessage({
@@ -70,5 +78,9 @@ export class AccountAnalysisResultsComponent implements OnInit {
     if (this.worker) {
       this.worker.terminate();
     }
+  }
+
+  createNewReport() {
+    this.sharedDataService.openCreateReportModal.next(true);
   }
 }

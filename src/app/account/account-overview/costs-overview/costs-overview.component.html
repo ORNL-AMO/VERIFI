@@ -1,4 +1,4 @@
-<ng-container *ngIf="!calculating">
+<ng-container *ngIf="calculating == false">
     <div class="row" *ngIf="displayWarning">
         <div class="col">
             <div class="alert alert-warning text-center">
@@ -10,25 +10,26 @@
         <div class="col">
             <div class="card">
                 <div class="card-header bg-white">
-                    <h4 class="mb-0">Facility Utility Costs<span class="pull-right"
-                            *ngIf="yearPriorDate">({{yearPriorDate |
-                            date: 'MMM, y'}} -
-                            {{lastMonthsDate | date: 'MMM, y'}})</span></h4>
+                    <h4 class="mb-0">Facility Utility Costs</h4>
 
                 </div>
                 <div class="card-body">
                     <div class="row">
                         <div class="col-12">
-                            <app-facility-costs-map></app-facility-costs-map>
+                            <app-data-overview-map [dataType]="'cost'"
+                                [accountOverviewFacilities]="accountOverviewData.facilitiesCost"></app-data-overview-map>
                             <hr>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-6">
-                            <app-facility-cost-table></app-facility-cost-table>
+                            <app-facilities-usage-table [dataType]="'cost'"
+                                [accountOverviewFacilities]="accountOverviewData.facilitiesCost"
+                                [accountOverviewData]="accountOverviewData"></app-facilities-usage-table>
                         </div>
                         <div class="col-6">
-                            <app-facility-cost-chart></app-facility-cost-chart>
+                            <app-facility-usage-donut [dataType]="'cost'"
+                                [accountOverviewFacilities]="accountOverviewData.facilitiesCost"></app-facility-usage-donut>
                         </div>
                     </div>
                 </div>
@@ -43,7 +44,11 @@
                     <h4 class="mb-0">Utility Costs</h4>
                 </div>
                 <div class="card-body">
-                    <app-utility-cost-table></app-utility-cost-table>
+                    <app-utility-consumption-table [dataType]="'cost'"
+                        [sourcesUseAndCost]="utilityUseAndCost.allSourcesUseAndCost"
+                        [useAndCostTotal]="utilityUseAndCost.allSourcesTotal"
+                        [previousYear]="utilityUseAndCost.previousYear"
+                        [dateRange]="dateRange"></app-utility-consumption-table>
                 </div>
             </div>
         </div>
@@ -53,10 +58,12 @@
         <div class="col">
             <div class="card">
                 <div class="card-header bg-white">
-                    <h4 class="mb-0">Utility Costs (All-time)</h4>
+                    <h4 class="mb-0">Utility Costs</h4>
                 </div>
                 <div class="card-body">
-                    <app-utility-cost-chart></app-utility-cost-chart>
+                    <app-facilities-usage-stacked-bar-chart [dataType]="'cost'"
+                        [calanderizedMeters]="accountOverviewData.calanderizedMeters"
+                        [dateRange]="dateRange"></app-facilities-usage-stacked-bar-chart>
                 </div>
             </div>
         </div>
@@ -69,7 +76,8 @@
                     <h4 class="mb-0">Monthly Costs</h4>
                 </div>
                 <div class="card-body">
-                    <app-monthly-costs-chart></app-monthly-costs-chart>
+                    <app-monthly-utility-usage-line-chart [dataType]="'cost'"
+                        [yearMonthData]="accountOverviewData.allSourcesYearMonthData"></app-monthly-utility-usage-line-chart>
                 </div>
             </div>
         </div>
@@ -77,4 +85,5 @@
 </ng-container>
 
 
-<app-calculating-spinner *ngIf="calculating" [message]="'Calculating Data Overview...'"></app-calculating-spinner>
+<app-calculating-spinner *ngIf="calculating != false" [message]="'Calculating Data Overview...'"
+    [error]="calculating == 'error'"></app-calculating-spinner>

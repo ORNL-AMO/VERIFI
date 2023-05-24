@@ -73,6 +73,8 @@
     <hr *ngIf="facilityList.length > 4 && open">
     <a class="nav-link" routerLink="/upload" [routerLinkActive]="['active']"><i class="fa fa-upload"></i> <span
             [hidden]="!open" class="ps-2 nav-label">Upload Data</span> </a>
+    <a class="nav-link" routerLink="/weather-data" [routerLinkActive]="['active']"><i class="fa fa-temperature-half"></i> <span
+            [hidden]="!open" class="ps-2 nav-label">Weather Data</span> </a>
     <a class="nav-link" routerLink="/help" [routerLinkActive]="['active']"
         [routerLinkActiveOptions]="{ exact: true }"><i class="fa fa-question"></i> <span [hidden]="!open"
             class="ps-2 nav-label">Help</span> </a>

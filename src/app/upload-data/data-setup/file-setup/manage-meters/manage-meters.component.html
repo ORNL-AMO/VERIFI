@@ -75,7 +75,15 @@
                     New / Existing
                 </th>
                 <th>
-                    Skip Import
+                    <div class="w-100 d-flex">
+                        <div class="pe-1">
+                            <input type="checkbox" class="form-check-input" [(ngModel)]="skipAll"
+                                (change)="setSkipAll()">
+                        </div>
+                        <div>
+                            Skip Import
+                        </div>
+                    </div>
                 </th>
             </tr>
         </thead>
@@ -117,6 +125,7 @@
                         [(ngModel)]="meter.meterReadingDataApplication" (change)="setHasNoCalanderizationSelection()">
                         <option [ngValue]="'backward'">Calanderize</option>
                         <option [ngValue]="'fullMonth'">Do Not Calanderize</option>
+                        <option [ngValue]="'fullYear'">Evenly Distribute Data Annually</option>
                         <option [ngValue]="undefined">Unselected</option>
                     </select>
                 </td>
@@ -129,7 +138,7 @@
                     </span>
                 </td>
                 <td>
-                    <div class="form-check">
+                    <div class="d-flex w-100 h-100 justify-content-center align-items-center">
                         <input type="checkbox" class="form-check-input" [(ngModel)]="meter.skipImport"
                             (change)="setValidMeters()">
                     </div>

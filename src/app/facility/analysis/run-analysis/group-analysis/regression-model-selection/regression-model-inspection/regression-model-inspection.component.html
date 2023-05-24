@@ -370,5 +370,5 @@
 
 </div>
 <hr>
-<app-calculating-spinner *ngIf="calculating" [message]="'Calculating Model Details...'"></app-calculating-spinner>
+<app-calculating-spinner *ngIf="calculating != false" [message]="'Calculating Model Details...'" [error]="calculating == 'error'"></app-calculating-spinner>
 <div #monthlyAnalysisGraph id="monthlyAnalysisGraph"></div>

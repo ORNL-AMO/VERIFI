@@ -1,6 +1,6 @@
 import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
-import { MonthlyAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
+import { MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 
 @Component({
@@ -75,7 +75,10 @@ export class MonthlyAnalysisSummaryGraphComponent implements OnInit {
         },
         margin: { r: 0, t: 50 }
       };
-      var config = { responsive: true };
+      var config = {
+        displaylogo: false,
+        responsive: true
+      };
       this.plotlyService.newPlot(this.monthlyAnalysisGraph.nativeElement, data, layout, config);
     }
   }

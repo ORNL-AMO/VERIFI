@@ -1,0 +1,112 @@
+<div class="wrapper main-content p-0">
+    <div class="content-padding">
+        <h4>Report Setup</h4>
+        <form [formGroup]="setupForm">
+            <div class="row">
+                <div class="col-6">
+                    <div class="row form-group">
+                        <label class="col-5 col-form-label semibold" for="reportName">Name</label>
+                        <div class="col-7">
+                            <input class="form-control" type="text" id="reportName" name="reportName"
+                                formControlName="reportName" (input)="save()">
+                        </div>
+                    </div>
+                    <div class="row form-group">
+                        <label class="col-5 col-form-label semibold">Report Type</label>
+                        <div class="col-7">
+                            <div class="form-check">
+                                <input type="radio" class="form-check-input" name="reportType" [value]="'betterPlants'"
+                                    id="betterPlants" (change)="changeReportType()" formControlName="reportType">
+                                <label class="form-check-label" for="betterPlants">Better Plants Report</label>
+                            </div>
+                            <div class="form-check">
+                                <input type="radio" class="form-check-input" name="reportType" [value]="'dataOverview'"
+                                    id="dataOverview" formControlName="reportType" (change)="changeReportType()">
+                                <label class="form-check-label" for="dataOverview">Data Overview Report</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6" *ngIf="setupForm.controls.reportType.value == 'betterPlants'">
+                    <div class="row form-group">
+                        <label class="col-5 col-form-label semibold" for="baselineYear">Baseline Year</label>
+
+                        <div class="col-7">
+                            <select id="baselineYear" name="baselineYear" formControlName="baselineYear"
+                                class="form-select" required (change)="save()">
+                                <option *ngFor="let year of baselineYears" [ngValue]="year">{{year | yearDisplay:
+                                    account.fiscalYear}}</option>
+                            </select>
+                        </div>
+                        <!-- <div class="alert alert-danger" *ngIf="!reportOptions.baselineYear">
+                                    Baseline Year Required
+                                </div> -->
+                    </div>
+                    <div class="row form-group">
+                        <label class="col-5 col-form-label semibold" for="reportName">Report Year</label>
+                        <div class="col-7">
+                            <select id="reportYear" name="reportYear" formControlName="reportYear" class="form-select"
+                                required (change)="save()">
+                                <option *ngFor="let year of reportYears" [ngValue]="year">{{year | yearDisplay:
+                                    account.fiscalYear}}</option>
+                            </select>
+                        </div>
+                        <!-- <div class="alert alert-danger" *ngIf="!reportOptions.targetYear">
+                                Target Year Required
+                            </div> -->
+                    </div>
+                </div>
+                <div class="col-6" *ngIf="setupForm.controls.reportType.value == 'dataOverview'">
+
+                    <div class="row form-group">
+                        <label class="col-5 col-form-label semibold" for="startDate">Start Date</label>
+
+                        <div class="col-3">
+                            <select name="startMonth" formControlName="startMonth" class="form-select"
+                                (change)="save()">
+                                <option class="pe-2" *ngFor="let month of months" [ngValue]="month.monthNumValue">
+                                    {{month.abbreviation}}</option>
+                            </select>
+                        </div>
+                        <div class="col-3">
+                            <select name="startYear" formControlName="startYear" class="form-select" (change)="save()">
+                                <option class="pe-2" *ngFor="let year of baselineYears" [ngValue]="year">{{year}}
+                                </option>
+                            </select>
+                        </div>
+                        <!-- <div class="alert alert-danger" *ngIf="!reportOptions.baselineYear">
+                                    Baseline Year Required
+                                </div> -->
+                    </div>
+                    <div class="row form-group">
+                        <label class="col-5 col-form-label semibold" for="endMonth">End Date</label>
+                        <div class="col-3">
+                            <select name="endMonth" formControlName="endMonth" class="form-select" (change)="save()">
+                                <option class="pe-2" *ngFor="let month of months" [ngValue]="month.monthNumValue">
+                                    {{month.abbreviation}}</option>
+                            </select>
+                        </div>
+                        <div class="col-3">
+                            <select name="endYear" formControlName="endYear" class="form-select" (change)="save()">
+                                <option class="pe-2" *ngFor="let year of reportYears" [ngValue]="year">{{year}}
+                                </option>
+                            </select>
+                        </div>
+                        <!-- <div class="alert alert-danger" *ngIf="!reportOptions.targetYear">
+                                Target Year Required
+                            </div> -->
+                    </div>
+                </div>
+                <div class="col-12">
+                    <hr>
+                </div>
+            </div>
+        </form>
+        <ng-container *ngIf="setupForm.valid">
+            <app-better-plants-setup
+                *ngIf="setupForm.controls.reportType.value == 'betterPlants'"></app-better-plants-setup>
+            <app-data-overview-setup
+                *ngIf="setupForm.controls.reportType.value == 'dataOverview'"></app-data-overview-setup>
+        </ng-container>
+    </div>
+</div>

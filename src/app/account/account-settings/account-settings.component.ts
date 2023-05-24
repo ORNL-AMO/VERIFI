@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Subscription, firstValueFrom } from 'rxjs';
 import { BackupDataService } from 'src/app/shared/helper-services/backup-data.service';
 import { ImportBackupModalService } from 'src/app/core-components/import-backup-modal/import-backup-modal.service';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
@@ -8,14 +8,14 @@ import { ToastNotificationsService } from 'src/app/core-components/toast-notific
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { OverviewReportOptionsDbService } from 'src/app/indexedDB/overview-report-options-db.service';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
-import { IdbAccount, IdbAccountAnalysisItem, IdbFacility, IdbOverviewReportOptions } from 'src/app/models/idb';
+import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport, IdbFacility } from 'src/app/models/idb';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
+import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 
 @Component({
   selector: 'app-account-settings',
@@ -55,7 +55,7 @@ export class AccountSettingsComponent implements OnInit {
     private loadingService: LoadingService,
     private backupDataService: BackupDataService,
     private analysisDbService: AnalysisDbService,
-    private overviewReportOptionsDbService: OverviewReportOptionsDbService,
+    private accountReportDbService: AccountReportDbService,
     private importBackupModalService: ImportBackupModalService,
     private toastNotificationService: ToastNotificationsService,
     private accountAnalysisDbService: AccountAnalysisDbService,
@@ -88,15 +88,15 @@ export class AccountSettingsComponent implements OnInit {
     this.loadingService.setLoadingMessage('Creating Facility...');
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let idbFacility: IdbFacility = this.facilityDbService.getNewIdbFacility(selectedAccount);
-    let newFacility: IdbFacility = await this.facilityDbService.addWithObservable(idbFacility).toPromise();
+    let newFacility: IdbFacility = await firstValueFrom(this.facilityDbService.addWithObservable(idbFacility));
     this.loadingService.setLoadingMessage('Updating Reports...');
-    let overviewReportOptions: Array<IdbOverviewReportOptions> = this.overviewReportOptionsDbService.accountOverviewReportOptions.getValue();
-    for (let index = 0; index < overviewReportOptions.length; index++) {
-      overviewReportOptions[index].reportOptions.facilities.push({
+    let accountReports: Array<IdbAccountReport> = this.accountReportDbService.accountReports.getValue();
+    for (let index = 0; index < accountReports.length; index++) {
+      accountReports[index].dataOverviewReportSetup.includedFacilities.push({
         facilityId: newFacility.guid,
-        selected: false
+        included: false
       });
-      await this.overviewReportOptionsDbService.updateWithObservable(overviewReportOptions[index]).toPromise();
+      await firstValueFrom(this.accountReportDbService.updateWithObservable(accountReports[index]));
     }
     this.loadingService.setLoadingMessage('Updating Analysis Items...');
     let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
@@ -105,12 +105,12 @@ export class AccountSettingsComponent implements OnInit {
         facilityId: newFacility.guid,
         analysisItemId: undefined
       });
-      await this.accountAnalysisDbService.updateWithObservable(accountAnalysisItems[index]).toPromise();
+      await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(accountAnalysisItems[index]));
     }
 
     await this.dbChangesService.selectAccount(this.selectedAccount);
     this.loadingService.setLoadingStatus(false);
-    this.toastNotificationService.showToast('New Facility Added!', undefined, undefined, false, 'bg-success');
+    this.toastNotificationService.showToast('New Facility Added!', undefined, undefined, false, 'alert-success');
   }
 
 
@@ -135,15 +135,15 @@ export class AccountSettingsComponent implements OnInit {
     this.loadingService.setLoadingMessage("Deleting Account Facilities...");
     await this.facilityDbService.deleteAllSelectedAccountFacilities();
     this.loadingService.setLoadingMessage("Deleting Reports...")
-    await this.overviewReportOptionsDbService.deleteAccountReports();
+    await this.accountReportDbService.deleteAccountReports();
     this.loadingService.setLoadingMessage("Deleting Analysis Items...")
     await this.analysisDbService.deleteAccountAnalysisItems();
     await this.accountAnalysisDbService.deleteAccountAnalysisItems();
     this.loadingService.setLoadingMessage("Deleting Account...");
-    await this.accountDbService.deleteAccountWithObservable(this.selectedAccount.id).toPromise();
+    await firstValueFrom(this.accountDbService.deleteAccountWithObservable(this.selectedAccount.id));
 
     // Then navigate to another account
-    let accounts: Array<IdbAccount> = await this.accountDbService.getAll().toPromise();
+    let accounts: Array<IdbAccount> = await firstValueFrom(this.accountDbService.getAll());
     this.accountDbService.allAccounts.next(accounts);
     if (accounts.length != 0) {
       await this.dbChangesService.selectAccount(accounts[0]);
@@ -153,7 +153,7 @@ export class AccountSettingsComponent implements OnInit {
       this.router.navigateByUrl('/setup-wizard');
     }
     this.loadingService.setLoadingStatus(false);
-    this.toastNotificationService.showToast('Account Deleted!', undefined, undefined, false, 'bg-success');
+    this.toastNotificationService.showToast('Account Deleted!', undefined, undefined, false, 'alert-success');
   }
 
   setDeleteFacilityEntry(facility: IdbFacility) {
@@ -187,14 +187,6 @@ export class AccountSettingsComponent implements OnInit {
   openImportBackup() {
     this.importBackupModalService.inFacility = false;
     this.importBackupModalService.showModal.next(true);
-  }
-
-
-  //TODO: Add button
-  async deleteDatabase() {
-    this.loadingService.setLoadingStatus(true);
-    this.loadingService.setLoadingMessage('Resetting Database, if this takes too long restart application..');
-    this.accountDbService.deleteDatabase();
   }
 
   setOrderOptions() {
@@ -250,7 +242,7 @@ export class AccountSettingsComponent implements OnInit {
       await this.dbChangesService.updateFacilities(facility, false);
     }
     this.loadingService.setLoadingStatus(false);
-    this.toastNotificationService.showToast('Facility Settings Updated!', undefined, undefined, false, "bg-success");
+    this.toastNotificationService.showToast('Facility Settings Updated!', undefined, undefined, false, "alert-success");
   }
 
 

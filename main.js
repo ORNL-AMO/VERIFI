@@ -12,6 +12,8 @@ app.allowRendererProcessReuse = false
 // Logger for autoUpdater
 autoUpdater.logger = log;
 autoUpdater.logger.transports.file.level = 'info';
+//needed for forcing update check in develop
+// autoUpdater.forceDevUpdateConfig = true;
 log.info('App starting...');
 
 let win = null;
@@ -130,7 +132,7 @@ app.on('ready', function () {
         if ('file://' === url.substr(0, 'file://'.length)) {
             return;
         }
-        
+
         e.preventDefault();
         shell.openExternal(url);
     });

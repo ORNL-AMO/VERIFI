@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Subscription, firstValueFrom } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { UtilityMeterDataService } from 'src/app/facility/utility-data/energy-consumption/utility-meter-data/utility-meter-data.service';
@@ -15,6 +15,7 @@ import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-
 import { IdbAccount, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from 'src/app/models/idb';
 import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
+import { getIsEnergyMeter, getIsEnergyUnit } from 'src/app/shared/sharedHelperFuntions';
 import { FileReference, UploadDataService } from 'src/app/upload-data/upload-data.service';
 
 @Component({
@@ -65,9 +66,9 @@ export class ConfirmAndSubmitComponent implements OnInit {
     for (let i = 0; i < this.fileReference.importFacilities.length; i++) {
       let facility: IdbFacility = this.fileReference.importFacilities[i];
       if (facility.id) {
-        await this.facilityDbService.updateWithObservable(facility).toPromise();
+        await firstValueFrom(this.facilityDbService.updateWithObservable(facility));
       } else {
-        await this.facilityDbService.addWithObservable(facility).toPromise();
+        await firstValueFrom(this.facilityDbService.addWithObservable(facility));
       }
     }
 
@@ -76,17 +77,17 @@ export class ConfirmAndSubmitComponent implements OnInit {
       let meter: IdbUtilityMeter = this.fileReference.meters[i];
       if (meter.id) {
         if (!meter.skipImport) {
-          await this.utilityMeterDbService.updateWithObservable(meter).toPromise();
+          await firstValueFrom(this.utilityMeterDbService.updateWithObservable(meter));
         }
       } else {
-        await this.utilityMeterDbService.addWithObservable(meter).toPromise();
+        await firstValueFrom(this.utilityMeterDbService.addWithObservable(meter));
       }
     }
 
     this.loadingService.setLoadingMessage('Creating Meter Groups..');
     for (let i = 0; i < this.fileReference.newMeterGroups.length; i++) {
       let meterGroup: IdbUtilityMeterGroup = this.fileReference.newMeterGroups[i];
-      await this.utilityMeterGroupDbService.addWithObservable(meterGroup).toPromise();
+      await firstValueFrom(this.utilityMeterGroupDbService.addWithObservable(meterGroup));
     }
 
     this.loadingService.setLoadingMessage('Uploading Meter Data...');
@@ -98,8 +99,8 @@ export class ConfirmAndSubmitComponent implements OnInit {
       if (meter.source == 'Electricity') {
         form = this.utilityMeterDataService.getElectricityMeterDataForm(meterData);
       } else {
-        let displayVolumeInput: boolean = (this.energyUnitsHelperService.isEnergyUnit(meter.startingUnit) == false);
-        let displayEnergyUse: boolean = this.energyUnitsHelperService.isEnergyMeter(meter.source);
+        let displayVolumeInput: boolean = (getIsEnergyUnit(meter.startingUnit) == false);
+        let displayEnergyUse: boolean = getIsEnergyMeter(meter.source);
         form = this.utilityMeterDataService.getGeneralMeterDataForm(meterData, displayVolumeInput, displayEnergyUse);
       }
 
@@ -112,16 +113,15 @@ export class ConfirmAndSubmitComponent implements OnInit {
             }
           }
           if (!skipMeterData) {
-            await this.utilityMeterDataDbService.updateWithObservable(meterData).toPromise();
+            await firstValueFrom(this.utilityMeterDataDbService.updateWithObservable(meterData));
           }
         } else {
-          await this.utilityMeterDataDbService.addWithObservable(meterData).toPromise();
+          await firstValueFrom(this.utilityMeterDataDbService.addWithObservable(meterData));
         }
       }
     }
 
     this.loadingService.setLoadingMessage('Uploading Predictors..');
-    //TODO: make sure old predictor entries have new predictor data.
     for (let i = 0; i < this.fileReference.predictorEntries.length; i++) {
       let predictorEntry: IdbPredictorEntry = this.fileReference.predictorEntries[i];
       if (predictorEntry.id) {
@@ -132,10 +132,10 @@ export class ConfirmAndSubmitComponent implements OnInit {
           }
         }
         if (!skipPredictorData) {
-          await this.predictorDbService.updateWithObservable(predictorEntry).toPromise();
+          await firstValueFrom(this.predictorDbService.updateWithObservable(predictorEntry));
         }
       } else {
-        await this.predictorDbService.addWithObservable(predictorEntry).toPromise();
+        await firstValueFrom(this.predictorDbService.addWithObservable(predictorEntry));
       }
     }
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
@@ -146,7 +146,7 @@ export class ConfirmAndSubmitComponent implements OnInit {
     this.uploadDataService.fileReferences[fileReferenceIndex] = this.fileReference;
     this.hasNextFile = fileReferenceIndex < (this.uploadDataService.fileReferences.length - 1);
     this.loadingService.setLoadingStatus(false);
-    this.toastNotificationService.showToast(this.fileReference.name + ' Data Submitted', undefined, undefined, false, "bg-success");
+    this.toastNotificationService.showToast(this.fileReference.name + ' Data Submitted', undefined, undefined, false, "alert-success");
     this.sharedDataService.modalOpen.next(false);
   }
 

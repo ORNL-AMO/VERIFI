@@ -1,10 +1,12 @@
 import { Injectable } from '@angular/core';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { LocalStorageService } from 'ngx-webstorage';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { IdbAccount, IdbAccountAnalysisItem, IdbFacility } from '../models/idb';
+import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
+import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility } from '../models/idb';
 import { AccountdbService } from './account-db.service';
 import { FacilitydbService } from './facility-db.service';
+import { AnalysisDbService } from './analysis-db.service';
+import { AnalysisValidationService } from '../shared/helper-services/analysis-validation.service';
 
 @Injectable({
   providedIn: 'root'
@@ -16,7 +18,9 @@ export class AccountAnalysisDbService {
 
   constructor(private dbService: NgxIndexedDBService, private localStorageService: LocalStorageService,
     private accountDbService: AccountdbService,
-    private facilityDbService: FacilitydbService) {
+    private facilityDbService: FacilitydbService,
+    private analysisDbService: AnalysisDbService,
+    private analysisValidationService: AnalysisValidationService) {
     this.accountAnalysisItems = new BehaviorSubject<Array<IdbAccountAnalysisItem>>([]);
     this.selectedAnalysisItem = new BehaviorSubject<IdbAccountAnalysisItem>(undefined);
 
@@ -37,17 +41,18 @@ export class AccountAnalysisDbService {
     return this.dbService.getAll('accountAnalysisItems');
   }
 
+  async getAllAccountAnalysisItems(accountId: string): Promise<Array<IdbAccountAnalysisItem>> {
+    let allAnalysisItesm: Array<IdbAccountAnalysisItem> = await firstValueFrom(this.getAll())
+    let accountAnalysisItems: Array<IdbAccountAnalysisItem> = allAnalysisItesm.filter(item => { return item.accountId == accountId });
+    return accountAnalysisItems;
+  }
+
   getById(id: number): Observable<IdbAccountAnalysisItem> {
     return this.dbService.getByKey('accountAnalysisItems', id);
   }
 
   getByIndex(indexName: string, indexValue: number): Observable<IdbAccountAnalysisItem> {
     return this.dbService.getByIndex('accountAnalysisItems', indexName, indexValue);
-  }
-
-  getAllByIndexRange(indexName: string, indexValue: number | string): Observable<Array<IdbAccountAnalysisItem>> {
-    let idbKeyRange: IDBKeyRange = IDBKeyRange.only(indexValue);
-    return this.dbService.getAllByIndex('accountAnalysisItems', indexName, idbKeyRange);
   }
 
   count() {
@@ -86,12 +91,21 @@ export class AccountAnalysisDbService {
       date: new Date(),
       name: 'Account Analysis',
       // energyIsSource: selectedAccount.energyIsSource,
-      reportYear: selectedAccount.sustainabilityQuestions.energyReductionTargetYear,
+      reportYear: undefined,
+      baselineYear: selectedAccount.sustainabilityQuestions.energyReductionBaselineYear,
       energyUnit: selectedAccount.energyUnit,
       facilityAnalysisItems: facilityAnalysisItems,
       energyIsSource: selectedAccount.energyIsSource,
       hasBaselineAdjustement: false,
-      baselineAdjustments: []
+      baselineAdjustments: [],
+      setupErrors: {
+        hasError: true,
+        missingName: false,
+        missingReportYear: true,
+        missingBaselineYear: false,
+        reportYearBeforeBaselineYear: false,
+        facilitiesSelectionsInvalid: true
+      }
     }
   }
 
@@ -107,13 +121,32 @@ export class AccountAnalysisDbService {
     }
   }
 
- async updateFacilityItemSelection(analysiItem: IdbAccountAnalysisItem, analysisItemId: string, facilityId: string) {
+  async updateFacilityItemSelection(analysiItem: IdbAccountAnalysisItem, analysisItemId: string, facilityId: string) {
     analysiItem.facilityAnalysisItems.forEach(item => {
       if (item.facilityId == facilityId) {
         item.analysisItemId = analysisItemId;
       }
     });
-    await this.updateWithObservable(analysiItem).toPromise();
+    let analysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
+    analysiItem.setupErrors = this.analysisValidationService.getAccountAnalysisSetupErrors(analysiItem, analysisItems);
+    await firstValueFrom(this.updateWithObservable(analysiItem));
     this.selectedAnalysisItem.next(analysiItem);
+  }
+
+  async updateAccountValidation(allAnalysisItems: Array<IdbAnalysisItem>) {
+    let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisItems.getValue();
+    let hasChanges: boolean = false;
+    for (let i = 0; i < accountAnalysisItems.length; i++) {
+      let item: IdbAccountAnalysisItem = accountAnalysisItems[i];
+      let results: { analysisItem: IdbAccountAnalysisItem, isChanged: boolean } = this.analysisValidationService.updateFacilitySelectionErrors(item, allAnalysisItems);
+      if (results.isChanged) {
+        accountAnalysisItems[i] = results.analysisItem;
+        await firstValueFrom(this.updateWithObservable(accountAnalysisItems[i]));
+        hasChanges = true;
+      }
+    }
+    if (hasChanges) {
+      this.accountAnalysisItems.next(accountAnalysisItems);
+    }
   }
 }

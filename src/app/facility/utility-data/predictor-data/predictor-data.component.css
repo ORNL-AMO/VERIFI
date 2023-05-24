@@ -7,3 +7,9 @@
 .copying-table .actions .fa, .copying-table input, .copying-table br{
     display: none;
 }
+.content-padding{
+    padding: 20px 30px;
+    height: calc(100vh - 290px);
+    overflow-y: auto;
+
+}

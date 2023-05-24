@@ -29,7 +29,20 @@
 
     <hr>
 
-    <h4>Portfolio</h4>
+    <h4>
+        <div class="d-flex w-100 justify-content-between">
+            <div class="h4 mb-0 mt-2">
+                Portfolio
+            </div>
+            <div>
+                <button class="btn action-btn me-2" (click)="addNewFacility()"><i class="fa fa-plus"></i> Add New
+                    Facility</button>
+                <button class="btn action-btn" (click)="openApplySettingsModal()">Apply Settings To Facilities</button>
+            </div>
+        </div>
+
+
+    </h4>
 
     <div class="table-responsive">
         <table class="table table-sm utility-data table-hover table-bordered">
@@ -40,7 +53,6 @@
                     <th>NAICS</th>
                     <th>State</th>
                     <th>Country</th>
-                    <!-- <th>Facility Size</th> -->
                     <th>Units</th>
                     <th class="actions">Actions</th>
                 </tr>
@@ -57,7 +69,6 @@
                     <td>{{facility.naics3}}</td>
                     <td>{{facility.state}}</td>
                     <td>{{facility.country}}</td>
-                    <!-- <td>{{facility.size}}</td> -->
                     <td>{{facility.unitsOfMeasure}}</td>
                     <td class="actions">
                         <div class="btn-group">
@@ -73,16 +84,6 @@
                 </tr>
             </tbody>
         </table>
-    </div>
-    <div class="row">
-        <div class="col">
-            <button class="btn btn-link" (click)="addNewFacility()"><i class="fa fa-plus"></i> Add New Facility</button>
-        </div>
-        <div class="col justify-content-end d-flex">
-            <div>
-                <button class="btn btn-outline" (click)="openApplySettingsModal()">Apply Settings To Facilities</button>
-            </div>
-        </div>
     </div>
     <hr>
 
@@ -124,7 +125,7 @@
         <p>WARNING: By deleting this account, you are also deleting all of the data associated with it.
             Are you sure you want to preform this action?</p>
     </div>
-    <div class="popup-footer text-end pb-2">
+    <div class="popup-footer text-end">
         <button class="btn btn-secondary" (click)="cancelAccountDelete()">Cancel</button>
         <button class="btn btn-danger" (click)="confirmAccountDelete()">Confirm Delete</button>
     </div>
@@ -138,7 +139,7 @@
         <p>WARNING: By deleting this facility, you are also deleting all of the data associated with it.
             Are you sure you want to preform this action?</p>
     </div>
-    <div class="popup-footer text-end pb-2">
+    <div class="popup-footer text-end">
         <button class="btn btn-secondary" (click)="cancelFacilityDelete()">Cancel</button>
         <button class="btn btn-danger" (click)="confirmFacilityDelete()">Confirm Delete</button>
     </div>
@@ -178,7 +179,7 @@
             </label>
         </div>
     </div>
-    <div class="popup-footer text-end pb-2">
+    <div class="popup-footer text-end">
         <button class="btn btn-secondary" (click)="closeApplySettingsModel()">Cancel</button>
         <button class="btn btn-outline" (click)="applySettingsToFacility()">Apply Settings</button>
     </div>

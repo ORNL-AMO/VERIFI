@@ -1,5 +1,20 @@
 <table class="table utility-data table-sm table-bordered table-hover" #meterTable [ngClass]="{'copying-table': copyingTable}">
     <thead class="sortable">
+        <tr class="table-mh">
+            <th></th>
+            <th [attr.colspan]="numGeneralInformation">
+                General Information
+            </th>
+            <th *ngIf="showEmissionsSection && showEmissions" [attr.colspan]="numEmissions">
+                Emissions
+            </th>
+            <th *ngIf="showDetailedCharges" [attr.colspan]="numDetailedCharges">
+                Detailed Charges
+            </th>
+            <th>
+
+            </th>
+        </tr>
         <tr>
             <th *ngIf="!copyingTable" class="input">
                 <input #masterCheckbox type="checkbox" (change)="checkAll()" [(ngModel)]="allChecked">

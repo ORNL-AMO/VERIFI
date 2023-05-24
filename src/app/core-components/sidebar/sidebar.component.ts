@@ -71,7 +71,10 @@ export class SidebarComponent implements OnInit {
 
   toggleSidebar() {
     this.open = !this.open;
-    window.dispatchEvent(new Event("resize"));
+    setTimeout(() => {
+      //used to trigger responsive graph resizing
+      window.dispatchEvent(new Event("resize"));
+    }, 100)
     this.localStorageService.store('sidebarOpen', this.open);
     this.sharedDataService.sidebarOpen.next(this.open);
   }

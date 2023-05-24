@@ -4,11 +4,20 @@ import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from "../models/ana
 import { AnnualAccountAnalysisSummaryClass } from "../calculations/analysis-calculations/annualAccountAnalysisSummaryClass";
 
 addEventListener('message', ({ data }) => {
-    let annualAnalysisSummaryClass: AnnualAccountAnalysisSummaryClass = new AnnualAccountAnalysisSummaryClass(data.accountAnalysisItem, data.account, data.calanderizedMeters, data.accountFacilities, data.accountPredictorEntries, data.allAccountAnalysisItems, data.calculateAllMonthlyData);
-    let annualAnalysisSummaries: Array<AnnualAnalysisSummary> = annualAnalysisSummaryClass.getAnnualAnalysisSummaries();
-    let monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData> = annualAnalysisSummaryClass.monthlyAnalysisSummaryData;
-    postMessage({
-        annualAnalysisSummaries: annualAnalysisSummaries,
-        monthlyAnalysisSummaryData: monthlyAnalysisSummaryData
-    });
+    try {
+        let annualAnalysisSummaryClass: AnnualAccountAnalysisSummaryClass = new AnnualAccountAnalysisSummaryClass(data.accountAnalysisItem, data.account, data.calanderizedMeters, data.accountFacilities, data.accountPredictorEntries, data.allAccountAnalysisItems, data.calculateAllMonthlyData);
+        let annualAnalysisSummaries: Array<AnnualAnalysisSummary> = annualAnalysisSummaryClass.getAnnualAnalysisSummaries();
+        let monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData> = annualAnalysisSummaryClass.monthlyAnalysisSummaryData;
+        postMessage({
+            annualAnalysisSummaries: annualAnalysisSummaries,
+            monthlyAnalysisSummaryData: monthlyAnalysisSummaryData,
+            error: false
+        });
+    } catch (err) {
+        postMessage({
+            annualAnalysisSummaries: undefined,
+            monthlyAnalysisSummaryData: undefined,
+            error: true
+        });
+    }
 });

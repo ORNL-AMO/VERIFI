@@ -38,7 +38,6 @@
               "src/styles/htmlElements.css",
               "src/styles/typography.css",
               "src/styles/buttons.css",
-              "src/styles/toast.css",
               "src/styles/banners.css",
               "node_modules/@fortawesome/fontawesome-free/css/all.css",
               "node_modules/bootstrap/dist/css/bootstrap.min.css",
@@ -54,7 +53,8 @@
               "lodash",
               "xlsx",
               "exceljs",
-              "jstat"
+              "jstat",
+              "papaparse"
             ],
             "webWorkerTsConfig": "tsconfig.worker.json"
           },
@@ -143,7 +143,6 @@
               "src/styles/htmlElements.css",
               "src/styles/typography.css",
               "src/styles/buttons.css",
-              "src/styles/toast.css",
               "src/styles/banners.css",
               "node_modules/bootstrap/dist/css/bootstrap.min.css",
               "src/styles/printing.css"

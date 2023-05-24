@@ -5,8 +5,8 @@ import { LoadingService } from 'src/app/core-components/loading/loading.service'
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { IdbAccount } from 'src/app/models/idb';
-import { ExampleAccount } from 'src/app/shared/example-data/Better_Plants_Example';
-import { BackupDataService } from 'src/app/shared/helper-services/backup-data.service';
+import { BackupDataService, BackupFile } from 'src/app/shared/helper-services/backup-data.service';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-setup-welcome',
@@ -15,6 +15,7 @@ import { BackupDataService } from 'src/app/shared/helper-services/backup-data.se
 })
 export class SetupWelcomeComponent implements OnInit {
 
+  backupFile: any;
   constructor(private loadingService: LoadingService, private accountDbService: AccountdbService,
     private backupDataService: BackupDataService,
     private importBackupModalService: ImportBackupModalService, private router: Router,
@@ -23,16 +24,34 @@ export class SetupWelcomeComponent implements OnInit {
   ngOnInit(): void {
   }
 
-  async loadTestData() {
+  loadTestData() {
     this.loadingService.setLoadingMessage('Loading Example Data..');
     this.loadingService.setLoadingStatus(true);
-    let newAccount: IdbAccount = await this.backupDataService.importAccountBackupFile(ExampleAccount);
-    this.loadingService.setLoadingMessage("Finishing up...");
-    let allAccounts: Array<IdbAccount> = await this.accountDbService.getAll().toPromise();
-    this.accountDbService.allAccounts.next(allAccounts);
-    await this.dbChangesService.selectAccount(newAccount);
-    this.loadingService.setLoadingStatus(false);
-    this.router.navigateByUrl('/account');
+    var request = new XMLHttpRequest();
+    request.open('GET', 'assets/example-data/ExampleAccount.json', true);
+    request.responseType = 'blob';
+    request.onload = () => {
+      var reader = new FileReader();
+      reader.readAsText(request.response);
+      reader.onloadend = async (e) => {
+        try {
+          let test = JSON.parse(JSON.stringify(reader.result));
+          let tmpBackupFile: BackupFile = JSON.parse(test);
+          let newAccount: IdbAccount = await this.backupDataService.importAccountBackupFile(tmpBackupFile);
+          await this.dbChangesService.updateAccount(newAccount);
+          await this.dbChangesService.selectAccount(newAccount);
+          let allAccounts: Array<IdbAccount> = await firstValueFrom(this.accountDbService.getAll());
+          this.accountDbService.allAccounts.next(allAccounts);
+          await this.dbChangesService.selectAccount(newAccount);
+          this.loadingService.setLoadingStatus(false);
+          this.router.navigateByUrl('/account');
+        } catch (err) {
+          console.log(err);
+          this.loadingService.setLoadingMessage('Something has gone horribly wrong with the example data..');
+        }
+      };
+    };
+    request.send();
   }
 
   openImportBackup() {
@@ -40,8 +59,8 @@ export class SetupWelcomeComponent implements OnInit {
     this.importBackupModalService.showModal.next(true);
   }
 
-  goToAccountSetup(){
-    this.router.navigateByUrl('setup-wizard/account-setup');   
+  goToAccountSetup() {
+    this.router.navigateByUrl('setup-wizard/account-setup');
 
   }
 }

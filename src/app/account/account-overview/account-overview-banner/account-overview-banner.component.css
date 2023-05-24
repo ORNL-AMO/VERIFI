@@ -26,3 +26,28 @@
 .nav-tabs .nav-link.active, .nav-tabs .nav-link.active i.fa{
     color: #ff6000;
 }
+
+.fa-arrow-right{
+  padding-top: 6px;
+  padding-right: .25rem;
+  padding-left: .25rem;
+  color: black !important;
+}
+
+
+select.form-select{
+  /* height: min-content !important; */
+  font-size: 12.5px;
+  color: #2c386b;
+  background-color: #fff;
+  border-color: #2c386b;
+  padding: .3rem 2.25rem .2rem .75rem;
+  border-radius: 0.25rem;
+}
+
+
+@media (max-width: 1500px) {
+  select.form-select{
+      font-size: 10.5px;
+  }
+}

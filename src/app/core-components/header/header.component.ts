@@ -6,14 +6,14 @@ import { UtilityMeterdbService } from "../../indexedDB/utilityMeter-db.service";
 import { UtilityMeterGroupdbService } from "../../indexedDB/utilityMeterGroup-db.service";
 import { UtilityMeterDatadbService } from "../../indexedDB/utilityMeterData-db.service";
 import { IdbAccount } from 'src/app/models/idb';
-import { Subscription } from 'rxjs';
+import { Subscription, firstValueFrom } from 'rxjs';
 import * as _ from 'lodash';
 import { ImportBackupModalService } from '../import-backup-modal/import-backup-modal.service';
-import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { environment } from 'src/environments/environment';
 import { BackupDataService } from 'src/app/shared/helper-services/backup-data.service';
 import { LoadingService } from '../loading/loading.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
+import { ElectronService } from 'src/app/electron/electron.service';
 
 @Component({
   selector: 'app-header',
@@ -34,6 +34,10 @@ export class HeaderComponent implements OnInit {
   showSearch: boolean = false;
   lastBackupDate: Date;
   resetDatabase: boolean = false;
+
+  updateAvailableSub: Subscription;
+  updateAvailable: boolean;
+  showUpdateModal: boolean = false;
   constructor(
     private router: Router,
     public accountdbService: AccountdbService,
@@ -42,10 +46,10 @@ export class HeaderComponent implements OnInit {
     public utilityMeterGroupdbService: UtilityMeterGroupdbService,
     public utilityMeterDatadbService: UtilityMeterDatadbService,
     private importBackupModalService: ImportBackupModalService,
-    private sharedDataService: SharedDataService,
     private backupDataService: BackupDataService,
     private loadingService: LoadingService,
-    private dbChangesService: DbChangesService
+    private dbChangesService: DbChangesService,
+    private electronService: ElectronService
   ) {
   }
 
@@ -63,11 +67,20 @@ export class HeaderComponent implements OnInit {
         this.lastBackupDate = undefined;
       }
     });
+
+    if (this.electronService.isElectron) {
+      this.updateAvailableSub = this.electronService.updateAvailable.subscribe(val => {
+        this.updateAvailable = val;
+      });
+    }
   }
 
   ngOnDestroy() {
     this.allAccountsSub.unsubscribe();
     this.selectedAccountSub.unsubscribe();
+    if (this.updateAvailableSub) {
+      this.updateAvailableSub.unsubscribe();
+    }
   }
 
   addNewAccount() {
@@ -95,7 +108,7 @@ export class HeaderComponent implements OnInit {
     this.backupDataService.backupAccount();
     let selectedAccount: IdbAccount = this.accountdbService.selectedAccount.getValue();
     selectedAccount.lastBackup = new Date();
-    await this.accountdbService.updateWithObservable(selectedAccount).toPromise();
+    await firstValueFrom(this.accountdbService.updateWithObservable(selectedAccount));
     this.accountdbService.selectedAccount.next(selectedAccount);
   }
 
@@ -105,7 +118,23 @@ export class HeaderComponent implements OnInit {
     this.accountdbService.deleteDatabase();
   }
 
-  toggleResetDatabase(){
+  toggleResetDatabase() {
     this.resetDatabase = !this.resetDatabase;
+  }
+
+  openBackupModal() {
+    this.importBackupModalService.inFacility = this.router.url.includes('facility');
+    this.importBackupModalService.showModal.next(true);
+  }
+
+  update() {
+    this.showUpdateModal = false;
+    this.loadingService.setLoadingMessage('Downloading update. Application will close when download is completed. This may take a moment.');
+    this.loadingService.setLoadingStatus(true);
+    this.electronService.sendUpdateSignal();
+  }
+
+  toggleUpdateModal() {
+    this.showUpdateModal = !this.showUpdateModal;
   }
 }

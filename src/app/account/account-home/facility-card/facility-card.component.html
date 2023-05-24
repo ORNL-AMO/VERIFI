@@ -125,12 +125,17 @@
         </div>
         <div class="col-8">
             <ng-container *ngIf="latestAnalysisItem">
-                <app-monthly-analysis-summary-graph *ngIf="!calculating && monthlyFacilityAnalysisData"
+                <app-monthly-analysis-summary-graph *ngIf="calculating == false && monthlyFacilityAnalysisData"
                     [monthlyAnalysisSummaryData]="monthlyFacilityAnalysisData" [analysisItem]="latestAnalysisItem"
                     [facilityOrAccount]="facility">
                 </app-monthly-analysis-summary-graph>
-                <app-calculating-spinner *ngIf="calculating" [message]="'Calculating Monthly Results...'">
+                <app-calculating-spinner *ngIf="calculating != false" [message]="'Calculating Monthly Results...'"
+                    [error]="calculating == 'error'">
                 </app-calculating-spinner>
+                <div class="alert alert-danger"
+                    *ngIf="latestAnalysisItem.setupErrors.hasError || latestAnalysisItem.setupErrors.groupsHaveErrors">
+                    Errors found in selected analysis.
+                </div>
             </ng-container>
         </div>
     </div>
@@ -162,14 +167,12 @@
                     </button>
                 </div>
                 <div class="ps-1 pe-1" *ngIf="!noMeterData">
-                    <button title="Facility Analysis" class="btn nav-btn btn-sm"
-                        (click)="navigateTo('analysis')">
+                    <button title="Facility Analysis" class="btn nav-btn btn-sm" (click)="navigateTo('analysis')">
                         <i class="fa fa-microscope"></i>
                     </button>
                 </div>
                 <div class="ps-1 pe-1" *ngIf="!noMeterData">
-                    <button title="Facility Settings" class="btn nav-btn btn-sm"
-                        (click)="navigateTo('settings')">
+                    <button title="Facility Settings" class="btn nav-btn btn-sm" (click)="navigateTo('settings')">
                         <i class="fa fa-cog"></i>
                     </button>
                 </div>

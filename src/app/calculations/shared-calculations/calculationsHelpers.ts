@@ -6,14 +6,14 @@ export function getMonthlyStartAndEndDate(facilityOrAccount: IdbFacility | IdbAc
     let baselineDate: Date;
     let endDate: Date;
     if (facilityOrAccount.fiscalYear == 'calendarYear') {
-        baselineDate = new Date(facilityOrAccount.sustainabilityQuestions.energyReductionBaselineYear, 0, 1);
+        baselineDate = new Date(analysisItem.baselineYear, 0, 1);
         endDate = new Date(analysisItem.reportYear + 1, 0, 1);
     } else {
         if (facilityOrAccount.fiscalYearCalendarEnd) {
-            baselineDate = new Date(facilityOrAccount.sustainabilityQuestions.energyReductionBaselineYear - 1, facilityOrAccount.fiscalYearMonth);
+            baselineDate = new Date(analysisItem.baselineYear - 1, facilityOrAccount.fiscalYearMonth);
             endDate = new Date(analysisItem.reportYear, facilityOrAccount.fiscalYearMonth);
         } else {
-            baselineDate = new Date(facilityOrAccount.sustainabilityQuestions.energyReductionBaselineYear, facilityOrAccount.fiscalYearMonth);
+            baselineDate = new Date(analysisItem.baselineYear, facilityOrAccount.fiscalYearMonth);
             endDate = new Date(analysisItem.reportYear + 1, facilityOrAccount.fiscalYearMonth);
         }
     }

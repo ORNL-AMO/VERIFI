@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Subscription, firstValueFrom } from 'rxjs';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { IdbAccount, IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
@@ -67,17 +67,11 @@ export class AnalysisDashboardComponent implements OnInit {
 
   async createAnalysis() {
     let newItem: IdbAnalysisItem = this.analysisDbService.getNewAnalysisItem();
-    let addedItem: IdbAnalysisItem = await this.analysisDbService.addWithObservable(newItem).toPromise();
+    let addedItem: IdbAnalysisItem = await firstValueFrom(this.analysisDbService.addWithObservable(newItem));
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.setAnalysisItems(selectedAccount, this.selectedFacility);
     this.analysisDbService.selectedAnalysisItem.next(addedItem);
-    this.toastNotificationService.showToast('New Analysis Created', undefined, undefined, false, "bg-success");
-    this.router.navigateByUrl('facility/' + this.selectedFacility.id + '/analysis/run-analysis');
-  }
-
-  selectAnalysisItem(item: IdbAnalysisItem) {
-    this.analysisDbService.selectedAnalysisItem.next(item);
-    //todo: route to results if item setup
+    this.toastNotificationService.showToast('New Analysis Created', undefined, undefined, false, "alert-success");
     this.router.navigateByUrl('facility/' + this.selectedFacility.id + '/analysis/run-analysis');
   }
 

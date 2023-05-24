@@ -1,17 +1,18 @@
 <div class="d-flex justify-content-between mb-2">
 
-    <app-analysis-summary-table-filter [tableContext]="'annualGroup'" [group]="group">
-    </app-analysis-summary-table-filter>
+    <div class="p-0">
+        <app-analysis-summary-table-filter [tableContext]="'annualGroup'" [group]="group"
+            *ngIf="dataDisplay == 'table'">
+        </app-analysis-summary-table-filter>
+    </div>
 
     <div class="btn-group">
-        <button class="btn toggle-btn" [ngClass]="{'active': dataDisplay == 'table'}"
-            (click)="setDataDisplay('table')">
+        <button class="btn toggle-btn" [ngClass]="{'active': dataDisplay == 'table'}" (click)="setDataDisplay('table')">
             <span class="fa fa-chevron-right"></span>
             Table
             <span class="fa fa-chevron-left"></span>
         </button>
-        <button class="btn toggle-btn" [ngClass]="{'active': dataDisplay == 'graph'}"
-            (click)="setDataDisplay('graph')">
+        <button class="btn toggle-btn" [ngClass]="{'active': dataDisplay == 'graph'}" (click)="setDataDisplay('graph')">
             <span class="fa fa-chevron-right"></span>
             Graph
             <span class="fa fa-chevron-left"></span>
@@ -20,7 +21,7 @@
 </div>
 
 
-<div class="w-100 x-scroll" *ngIf="!calculating">
+<div class="w-100 x-scroll" *ngIf="calculating == false">
     <app-annual-analysis-summary-table *ngIf="dataDisplay == 'table'" [annualAnalysisSummary]="annualAnalysisSummary"
         [analysisItem]="analysisItem" [accountOrFacility]="facility">
     </app-annual-analysis-summary-table>
@@ -29,4 +30,5 @@
     </app-annual-analysis-summary-graph>
 </div>
 
-<app-calculating-spinner *ngIf="calculating" [message]="'Calculating Annual Results...'"></app-calculating-spinner>
+<app-calculating-spinner *ngIf="calculating != false" [message]="'Calculating Annual Results...'"
+    [error]="calculating == 'error'"></app-calculating-spinner>

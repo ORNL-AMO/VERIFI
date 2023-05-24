@@ -3,7 +3,8 @@
         <div class="row">
             <div class="col">
                 <h1 class="card-title"><span class="fa fa-building"></span> {{account.name}}</h1>
-                <p class="card-text mg-0" *ngIf="account.address">{{account.address}}, {{account.city}}, {{account.state}}
+                <p class="card-text mg-0" *ngIf="account.address">{{account.address}}, {{account.city}},
+                    {{account.state}}
                     {{account.zip}}
                     {{account.country}}
                 </p>
@@ -90,13 +91,6 @@
                             Export Account <br> Utility Data
                         </button>
                     </div>
-                    <!--TODO: Add functionality-->
-                    <!--<div class="pe-2">
-                        <button class="btn btn-outline m-0">
-                            <span class="fa fa-plus"></span><br>
-                            Add New <br> Facility
-                        </button>
-                    </div> -->
                 </div>
             </div>
         </div>
@@ -113,7 +107,8 @@
                         <a class="nav-link" routerLink="/account/analysis">
                             <span class="fa fa-chevron-right pe-2"></span>
                             <span>Latest Plant Analysis:
-                                <span *ngIf="accountAnalysisYear">{{accountAnalysisYear | yearDisplay:account.fiscalYear}}</span>
+                                <span *ngIf="accountAnalysisYear">{{accountAnalysisYear |
+                                    yearDisplay:account.fiscalYear}}</span>
                                 <span *ngIf="!accountAnalysisYear">&mdash;</span></span>
                         </a>
                     </li>
@@ -121,7 +116,8 @@
                         <a class="nav-link" routerLink="/account/reports">
                             <span class="fa fa-chevron-right pe-2"></span>
                             <span>Latest Better Plants Report:
-                                <span *ngIf="betterPlantsReportYear">{{betterPlantsReportYear | yearDisplay:account.fiscalYear}}</span>
+                                <span *ngIf="betterPlantsReportYear">{{betterPlantsReportYear |
+                                    yearDisplay:account.fiscalYear}}</span>
                                 <span *ngIf="!betterPlantsReportYear">&mdash;</span>
                             </span>
                         </a>
@@ -130,12 +126,17 @@
             </div>
             <div class="col-8">
                 <ng-container *ngIf="latestAnalysisItem">
-                    <app-monthly-analysis-summary-graph *ngIf="!calculating && monthlyFacilityAnalysisData"
+                    <app-monthly-analysis-summary-graph *ngIf="calculating == false && monthlyFacilityAnalysisData"
                         [monthlyAnalysisSummaryData]="monthlyFacilityAnalysisData" [analysisItem]="latestAnalysisItem"
                         [facilityOrAccount]="account">
                     </app-monthly-analysis-summary-graph>
-                    <app-calculating-spinner *ngIf="calculating" [message]="'Calculating Monthly Results...'">
+                    <app-calculating-spinner *ngIf="calculating != false" [message]="'Calculating Monthly Results...'"
+                        [error]="calculating == 'error'">
                     </app-calculating-spinner>
+                    <div class="alert alert-danger"
+                        *ngIf="latestAnalysisItem.setupErrors.hasError || latestAnalysisItem.setupErrors.facilitiesSelectionsInvalid">
+                        Errors found in selected analysis.
+                    </div>
                 </ng-container>
             </div>
         </div>

@@ -1,0 +1,87 @@
+<hr>
+<div class="row justify-content-center print-break-before pt-3">
+    <div class="col-12 report-page">
+        <app-facility-title-page [facility]="dataOverviewFacility.facility"></app-facility-title-page>
+    </div>
+</div>
+<ng-container *ngIf="!dataOverviewFacility.calculationError">
+    <ng-container *ngIf="overviewReport.includeEnergySection">
+        <hr>
+        <!--account energy consumption-->
+        <div class="row justify-content-center print-break-before">
+            <div class="report-page" [ngClass]="{'col-11': !print, 'col-12': print}">
+                <h4>{{dataOverviewFacility.facility.guid | facilityName}} Energy Consumption</h4>
+                <app-facility-section-report [dataType]="'energyUse'" [facility]="dataOverviewFacility.facility"
+                    [calanderizedMeters]="dataOverviewFacility.calanderizedMeters"
+                    [yearMonthData]="dataOverviewFacility.facilityOverviewData.energyYearMonthData"
+                    [annualSourceData]="dataOverviewFacility.facilityOverviewData.annualSourceData"
+                    [facilityOverviewMeters]="dataOverviewFacility.facilityOverviewData.energyMeters"
+                    [facilityOverviewData]="dataOverviewFacility.facilityOverviewData"
+                    [sourcesUseAndCost]="dataOverviewFacility.utilityUseAndCost.energyUseAndCost"
+                    [useAndCostTotal]="dataOverviewFacility.utilityUseAndCost.energyTotal"
+                    [dateRange]="dataOverviewFacility.dateRange"
+                    [previousYear]="dataOverviewFacility.utilityUseAndCost.previousYear"></app-facility-section-report>
+            </div>
+        </div>
+    </ng-container>
+    <!--account water consumption-->
+    <ng-container *ngIf="overviewReport.includeWaterSection">
+        <hr>
+        <div class="row justify-content-center print-break-before">
+            <div class="report-page" [ngClass]="{'col-11': !print, 'col-12': print}">
+                <h4>{{dataOverviewFacility.facility.guid | facilityName}} Water</h4>
+                <app-facility-section-report [dataType]="'water'" [facility]="dataOverviewFacility.facility"
+                    [calanderizedMeters]="dataOverviewFacility.calanderizedMeters"
+                    [yearMonthData]="dataOverviewFacility.facilityOverviewData.waterYearMonthData"
+                    [annualSourceData]="dataOverviewFacility.facilityOverviewData.annualSourceData"
+                    [facilityOverviewMeters]="dataOverviewFacility.facilityOverviewData.waterMeters"
+                    [facilityOverviewData]="dataOverviewFacility.facilityOverviewData"
+                    [sourcesUseAndCost]="dataOverviewFacility.utilityUseAndCost.waterUseAndCost"
+                    [useAndCostTotal]="dataOverviewFacility.utilityUseAndCost.waterTotal"
+                    [dateRange]="dataOverviewFacility.dateRange"
+                    [previousYear]="dataOverviewFacility.utilityUseAndCost.previousYear"></app-facility-section-report>
+            </div>
+        </div>
+    </ng-container>
+    <!--account costs-->
+    <ng-container *ngIf="overviewReport.includeCostsSection">
+        <hr>
+        <div class="row justify-content-center print-break-before">
+            <div class="report-page" [ngClass]="{'col-11': !print, 'col-12': print}">
+                <h4>{{dataOverviewFacility.facility.guid | facilityName}} Costs</h4>
+                <app-facility-section-report [dataType]="'cost'" [facility]="dataOverviewFacility.facility"
+                    [calanderizedMeters]="dataOverviewFacility.calanderizedMeters"
+                    [yearMonthData]="dataOverviewFacility.facilityOverviewData.allSourcesYearMonthData"
+                    [annualSourceData]="dataOverviewFacility.facilityOverviewData.annualSourceData"
+                    [facilityOverviewMeters]="dataOverviewFacility.facilityOverviewData.costMeters"
+                    [facilityOverviewData]="dataOverviewFacility.facilityOverviewData"
+                    [sourcesUseAndCost]="dataOverviewFacility.utilityUseAndCost.allSourcesUseAndCost"
+                    [useAndCostTotal]="dataOverviewFacility.utilityUseAndCost.allSourcesTotal"
+                    [dateRange]="dataOverviewFacility.dateRange"
+                    [previousYear]="dataOverviewFacility.utilityUseAndCost.previousYear"></app-facility-section-report>
+            </div>
+        </div>
+    </ng-container>
+    <ng-container *ngIf="overviewReport.includeEmissionsSection">
+        <hr>
+        <!--account emissions-->
+        <div class="row justify-content-center print-break-before">
+            <div class="report-page" [ngClass]="{'col-11': !print, 'col-12': print}">
+                <h4>{{dataOverviewFacility.facility.guid | facilityName}} Emissions</h4>
+                <app-facility-section-report [dataType]="'emissions'" [facility]="dataOverviewFacility.facility"
+                    [calanderizedMeters]="dataOverviewFacility.calanderizedMeters"
+                    [yearMonthData]="dataOverviewFacility.facilityOverviewData.energyYearMonthData"
+                    [annualSourceData]="dataOverviewFacility.facilityOverviewData.annualSourceData"
+                    [facilityOverviewMeters]="dataOverviewFacility.facilityOverviewData.energyMeters"
+                    [facilityOverviewData]="dataOverviewFacility.facilityOverviewData"
+                    [sourcesUseAndCost]="dataOverviewFacility.utilityUseAndCost.energyUseAndCost"
+                    [useAndCostTotal]="dataOverviewFacility.utilityUseAndCost.energyTotal"
+                    [dateRange]="dataOverviewFacility.dateRange"
+                    [previousYear]="dataOverviewFacility.utilityUseAndCost.previousYear"></app-facility-section-report>
+            </div>
+        </div>
+    </ng-container>
+</ng-container>
+<div class="alert alert-danger" *ngIf="dataOverviewFacility.calculationError">
+    Error calculating overview data for this facility.
+</div>

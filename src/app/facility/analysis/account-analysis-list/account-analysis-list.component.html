@@ -4,13 +4,15 @@
     <div *ngIf="canReturnToAccount" class="alert text-center">
         You navigated to this facility analysis from an account analysis. Would you like to return to the account
         analysis you came from?<br>
-        <button class="btn btn-secondary" (click)="goBackToAccount()">Return to Account Analysis</button>
+        <button class="btn nav-btn" (click)="goBackToAccount()">Return to Account Analysis</button>
     </div>
 
     <hr *ngIf="canReturnToAccount">
 
     <div *ngIf="accountAnalysisItems.length == 0" class="text-center mt-5">
         <h5>This facility analysis is not a part of any account analysis.</h5>
+        <button class="btn nav-btn" (click)="goToAccountAnalysisDashboard()">Go To Account Analysis</button>
+
     </div>
 
     <div *ngIf="accountAnalysisItems.length != 0" class="alert alert-info text-center">
@@ -18,9 +20,10 @@
     </div>
 
     <div *ngIf="accountAnalysisItems.length > 0">
-        <div class="controls mb-2">
-
-            <app-table-items-dropdown></app-table-items-dropdown>
+        <div class="d-flex justify-content-end">
+            <div class="p-0">
+                <app-table-items-dropdown></app-table-items-dropdown>
+            </div>
         </div>
 
         <div class="table-responsive">
@@ -48,8 +51,8 @@
         </div>
 
         <div class="d-flex w-100 justify-content-end">
-            <ngb-pagination [collectionSize]="accountAnalysisItems.length" [(page)]="currentPageNumber" [pageSize]="itemsPerPage"
-                [maxSize]="5" [rotate]="true" aria-label="Pagination">
+            <ngb-pagination [collectionSize]="accountAnalysisItems.length" [(page)]="currentPageNumber"
+                [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true" aria-label="Pagination">
             </ngb-pagination>
         </div>
     </div>

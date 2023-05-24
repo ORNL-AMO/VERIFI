@@ -1,0 +1,17 @@
+.plot-content{
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-bottom: 10px;
+    margin-left: 40px;
+    margin-right: 40px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    background-color: white;
+}
+
+
+.axis-group{
+    padding-left: 1.5rem;
+    border-left: 1px solid lightgrey;
+    margin-left: 1.5rem
+}

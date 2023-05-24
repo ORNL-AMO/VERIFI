@@ -18,6 +18,7 @@ import { Countries, Country } from '../shared/form-data/countries';
 import { EGridService, SubRegionData } from '../shared/helper-services/e-grid.service';
 import * as _ from 'lodash';
 import { State, States } from '../shared/form-data/states';
+import { getIsEnergyMeter, getIsEnergyUnit } from '../shared/sharedHelperFuntions';
 
 @Injectable({
   providedIn: 'root'
@@ -179,7 +180,7 @@ export class UploadDataService {
           meter.fuel = this.getFuelEnum(meterData['Fuel'], meter.source, meter.phase);
           meter.startingUnit = this.checkImportStartingUnit(meterData['Collection Unit'], meter.source, meter.phase, meter.fuel);
           meter.heatCapacity = meterData['Heat Capacity'];
-          let isEnergyUnit: boolean = this.energyUnitsHelperService.isEnergyUnit(meter.startingUnit);
+          let isEnergyUnit: boolean = getIsEnergyUnit(meter.startingUnit);
           if (isEnergyUnit) {
             meter.energyUnit = meter.startingUnit;
           }
@@ -261,7 +262,7 @@ export class UploadDataService {
       let facilityPredictorEntries: Array<IdbPredictorEntry> = accountPredictorEntries.filter(entry => { return entry.facilityId == facility.guid });
       let existingFacilityPredictorData: Array<PredictorData> = new Array();
       if (facilityPredictorEntries.length != 0) {
-        existingFacilityPredictorData = facilityPredictorEntries[0].predictors;
+        existingFacilityPredictorData = facilityPredictorEntries[0].predictors.map(predictor => { return predictor });
       }
       if (facilityPredictorData.length != 0) {
         Object.keys(facilityPredictorData[0]).forEach((key) => {
@@ -282,6 +283,9 @@ export class UploadDataService {
                 }
                 newPredictor.name = key;
                 existingFacilityPredictorData.push(newPredictor);
+                facilityPredictorEntries.forEach(predictorEntry => {
+                  predictorEntry.predictors.push(newPredictor);
+                });
               }
             }
           }
@@ -294,7 +298,11 @@ export class UploadDataService {
         });
         if (!facilityPredictorEntry) {
           facilityPredictorEntry = this.predictorDbService.getNewIdbPredictorEntry(facility.guid, selectedAccount.guid, dataItemDate);
-          facilityPredictorEntry.predictors = JSON.parse(JSON.stringify(existingFacilityPredictorData));
+          if (facilityPredictorEntries.length != 0) {
+            facilityPredictorEntry.predictors = JSON.parse(JSON.stringify(facilityPredictorEntries[0].predictors));
+          } else {
+            facilityPredictorEntry.predictors = JSON.parse(JSON.stringify(existingFacilityPredictorData));
+          }
         }
         Object.keys(dataItem).forEach((key) => {
           if (key != 'Facility Name' && key != 'Date') {
@@ -305,7 +313,7 @@ export class UploadDataService {
           }
         });
         if (facilityPredictorEntry.predictors.length != 0) {
-          predictorEntries.push(facilityPredictorEntry);
+          predictorEntries.push(JSON.parse(JSON.stringify(facilityPredictorEntry)));
         }
       });
     })
@@ -452,8 +460,8 @@ export class UploadDataService {
         let totalVolume: number = 0;
         let energyUse: number = 0;
         let totalConsumption: number = this.checkImportCellNumber(dataPoint['Total Consumption']);
-        let displayVolumeInput: boolean = (this.energyUnitsHelperService.isEnergyUnit(meter.startingUnit) == false);
-        let displayEnergyUse: boolean = this.energyUnitsHelperService.isEnergyMeter(meter.source);
+        let displayVolumeInput: boolean = (getIsEnergyUnit(meter.startingUnit) == false);
+        let displayEnergyUse: boolean = getIsEnergyMeter(meter.source);
         if (!displayVolumeInput) {
           energyUse = totalConsumption;
         } else {
@@ -606,7 +614,7 @@ export class UploadDataService {
         //use fuel option
         newMeter.startingUnit = fuelType.fuelTypeOption.startingUnit;
       }
-      let isEnergyUnit: boolean = this.energyUnitsHelperService.isEnergyUnit(startingUnit);
+      let isEnergyUnit: boolean = getIsEnergyUnit(startingUnit);
       if (isEnergyUnit) {
         newMeter.energyUnit = startingUnit;
       } else {
@@ -617,7 +625,7 @@ export class UploadDataService {
       newMeter.startingUnit = this.energyUnitsHelperService.parseStartingUnit(groupItem.value);
       if (newMeter.source == 'Electricity') {
         newMeter.scope = 3
-        if (newMeter.startingUnit == undefined || this.energyUnitsHelperService.isEnergyUnit(newMeter.startingUnit) == false) {
+        if (newMeter.startingUnit == undefined || getIsEnergyUnit(newMeter.startingUnit) == false) {
           newMeter.startingUnit = 'kWh';
           newMeter.energyUnit = 'kWh';
         }
@@ -627,7 +635,7 @@ export class UploadDataService {
         newMeter.scope = 4;
       }
       if (newMeter.startingUnit && newMeter.source) {
-        let isEnergyUnit: boolean = this.energyUnitsHelperService.isEnergyUnit(newMeter.startingUnit);
+        let isEnergyUnit: boolean = getIsEnergyUnit(newMeter.startingUnit);
         if (isEnergyUnit) {
           newMeter.energyUnit = newMeter.startingUnit;
         } else {
@@ -678,8 +686,8 @@ export class UploadDataService {
           let totalVolume: number = 0;
           let energyUse: number = 0;
           let totalConsumption: number = dataRow[meter.importWizardName];
-          let displayVolumeInput: boolean = (this.energyUnitsHelperService.isEnergyUnit(meter.startingUnit) == false);
-          let displayEnergyUse: boolean = this.energyUnitsHelperService.isEnergyMeter(meter.source);
+          let displayVolumeInput: boolean = (getIsEnergyUnit(meter.startingUnit) == false);
+          let displayEnergyUse: boolean = getIsEnergyMeter(meter.source);
           if (!displayVolumeInput) {
             energyUse = totalConsumption;
           } else {

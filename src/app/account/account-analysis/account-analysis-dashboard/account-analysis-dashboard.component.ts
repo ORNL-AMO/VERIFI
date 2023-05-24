@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Subscription, firstValueFrom } from 'rxjs';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
@@ -43,7 +43,7 @@ export class AccountAnalysisDashboardComponent implements OnInit {
     if (this.yearOptions) {
       this.baselineYearError = this.yearOptions[0] > this.selectedAccount.sustainabilityQuestions.energyReductionBaselineYear
     }
-   
+
     this.showDetailSub = this.analysisService.showDetail.subscribe(showDetail => {
       this.showDetail = showDetail;
     })
@@ -56,27 +56,32 @@ export class AccountAnalysisDashboardComponent implements OnInit {
 
   async createAnalysis() {
     let newItem: IdbAccountAnalysisItem = this.accountAnalysisDbService.getNewAccountAnalysisItem();
-    let addedItem: IdbAccountAnalysisItem = await this.accountAnalysisDbService.addWithObservable(newItem).toPromise();
+    let addedItem: IdbAccountAnalysisItem = await firstValueFrom(this.accountAnalysisDbService.addWithObservable(newItem));
     await this.dbChangesService.setAccountAnalysisItems(this.selectedAccount);
     this.accountAnalysisDbService.selectedAnalysisItem.next(addedItem);
-    this.toastNotificationService.showToast('Analysis Item Created', undefined, undefined, false, "bg-success");
+    this.toastNotificationService.showToast('Analysis Item Created', undefined, undefined, false, "alert-success");
     this.router.navigateByUrl('account/analysis/setup');
   }
-  
 
-  setAnalysisItemsList(accountAnalysisItems: Array<IdbAccountAnalysisItem>) {
+
+  async setAnalysisItemsList(accountAnalysisItems: Array<IdbAccountAnalysisItem>) {
     this.analysisItemsList = new Array();
     let years: Array<number> = accountAnalysisItems.map(item => { return item.reportYear });
     years = _.uniq(years);
     years = _.orderBy(years, (year) => { return year }, 'desc');
-    years.forEach(year => {
+    for (let i = 0; i < years.length; i++) {
+      let year: number = years[i];
       let yearAnalysisItems: Array<IdbAccountAnalysisItem> = accountAnalysisItems.filter(item => { return item.reportYear == year });
+      for (let x = 0; x < yearAnalysisItems.length; x++) {
+        let accountAnalysisItem: IdbAccountAnalysisItem = yearAnalysisItems[i];
+        
+      }
       this.analysisItemsList.push({
         year: year,
         analysisItems: yearAnalysisItems,
         hasSelectedItem: yearAnalysisItems.findIndex((item: IdbAccountAnalysisItem) => { return item.selectedYearAnalysis == true }) != -1
       });
-    })
+    }
   }
 
   saveShowDetails() {

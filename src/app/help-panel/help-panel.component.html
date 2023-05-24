@@ -2,37 +2,17 @@
     <div *ngIf="helpPanelOpen">
         <div class="banner d-flex w-100 justify-content-between">
             <h3>Help</h3>
-            <h3>
+            <div>
                 <a (click)="closePanel()"><span class="fa fa-close"></span></a>
-            </h3>
+            </div>
         </div>
         <div class="help-content">
+            <app-account-help *ngIf="helpURL == 'account'"></app-account-help>
+            <app-facility-help *ngIf="helpURL == 'facility'"></app-facility-help>
             <app-help-page *ngIf="helpURL == 'help'"></app-help-page>
-
             <app-upload-data-help *ngIf="helpURL == 'upload'"></app-upload-data-help>
             <app-setup-wizard-help *ngIf="helpURL == 'setup-wizard'"></app-setup-wizard-help>
-
-
-            <app-energy-consumption-help *ngIf="helpURL == 'energy-consumption'"></app-energy-consumption-help>
-            <app-account-overview-help *ngIf="helpURL == 'account-summary'"></app-account-overview-help>
-            <app-facility-overview-help *ngIf="helpURL == 'facility-summary'"></app-facility-overview-help>
-            <app-calanderization-help *ngIf="helpURL == 'monthly-meter-data'"></app-calanderization-help>
-            <app-meter-grouping-help *ngIf="helpURL == 'meter-groups'"></app-meter-grouping-help>
-            <app-predictors-data-help *ngIf="helpURL == 'predictors'"></app-predictors-data-help>
-            <app-visualization-help *ngIf="helpURL == 'visualization'"></app-visualization-help>
-            <app-account-help *ngIf="helpURL == 'account-management'"></app-account-help>
-            <app-facility-help *ngIf="helpURL == 'facility-management'"></app-facility-help>
-            <app-overview-report-dashboard-help *ngIf="helpURL == 'report-dashboard'"></app-overview-report-dashboard-help>
-            <app-basic-report-help *ngIf="helpURL == 'basic-report'"></app-basic-report-help>
-            <app-overview-report-menu-help *ngIf="helpURL == 'report-menu'"></app-overview-report-menu-help>
-            <app-account-analysis-dashboard-help *ngIf="helpURL == 'account-analysis-dashboard'"></app-account-analysis-dashboard-help>
-            <app-account-analysis-setup-help *ngIf="helpURL == 'account-analysis-setup'"></app-account-analysis-setup-help>
-            <app-analysis-dashboard-help *ngIf="helpURL == 'analysis-dashboard'"></app-analysis-dashboard-help>
-            <app-analysis-setup-help *ngIf="helpURL == 'analysis-setup'"></app-analysis-setup-help>
-            <app-annual-group-analysis-help *ngIf="helpURL == 'annual-energy-intensity'"></app-annual-group-analysis-help>
-            <app-facility-analysis-help *ngIf="helpURL == 'facility-analysis'"></app-facility-analysis-help>
-            <app-monthly-group-analysis-help *ngIf="helpURL == 'monthly-energy-intensity'"></app-monthly-group-analysis-help>
-            <app-group-analysis-setup-help *ngIf="helpURL == 'group-analysis-options'"></app-group-analysis-setup-help>
+            <app-weather-data-help *ngIf="helpURL == 'weather-data'"></app-weather-data-help>
         </div>
     </div>
 </div>

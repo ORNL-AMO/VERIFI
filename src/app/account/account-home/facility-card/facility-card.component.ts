@@ -6,12 +6,11 @@ import * as _ from 'lodash';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityColors } from 'src/app/shared/utilityColors';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
-import { OverviewReportService } from '../../overview-report/overview-report.service';
 import { AccountHomeService } from '../account-home.service';
-import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
+import { getNAICS } from 'src/app/shared/form-data/naics-data';
 @Component({
   selector: 'app-facility-card',
   templateUrl: './facility-card.component.html',
@@ -23,15 +22,13 @@ export class FacilityCardComponent implements OnInit {
 
 
   lastBill: IdbUtilityMeterData;
-  meterDataUpToDate: boolean;
   latestAnalysisItem: IdbAnalysisItem;
   sources: Array<MeterSource>;
   facilityPredictors: Array<PredictorData>;
   latestPredictorEntry: IdbPredictorEntry;
   noMeterData: boolean;
   naics: string;
-  calculating: boolean = true;
-  // annualAnalysisSummary: Array<AnnualAnalysisSummary>;
+  calculating: boolean | 'error' = true;
   monthlyFacilityAnalysisData: Array<MonthlyAnalysisSummaryData>;
 
   latestAnalysisDate: Date;
@@ -45,7 +42,7 @@ export class FacilityCardComponent implements OnInit {
   facilityAnalysisSummariesSub: Subscription;
   constructor(private analysisDbService: AnalysisDbService, private utilityMeterDataDbService: UtilityMeterDatadbService,
     private utilityMeterDbService: UtilityMeterdbService, private predictorDbService: PredictordbService,
-    private overviewReportService: OverviewReportService, private accountHomeService: AccountHomeService,
+    private accountHomeService: AccountHomeService,
     private router: Router) { }
 
   ngOnInit(): void {
@@ -54,7 +51,6 @@ export class FacilityCardComponent implements OnInit {
     this.noMeterData = facilityMeterData.length == 0;
     if (!this.noMeterData) {
       this.lastBill = _.maxBy(facilityMeterData, (data: IdbUtilityMeterData) => { return new Date(data.readDate) });
-      // this.checkMeterDataUpToDate();
       let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
       let facilityAnalysisItems: Array<IdbAnalysisItem> = accountAnalysisItems.filter(item => { return item.facilityId == this.facility.guid });
       this.latestAnalysisItem = _.maxBy(facilityAnalysisItems, 'reportYear');
@@ -74,12 +70,17 @@ export class FacilityCardComponent implements OnInit {
           facilityId: string,
           annualAnalysisSummary: Array<AnnualAnalysisSummary>,
           monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
+          error: boolean
         } = summaries.find(summary => { return summary.facilityId == this.facility.guid });
         if (facilitySummary) {
           // this.annualAnalysisSummary = facilitySummary.annualAnalysisSummary;
-          this.monthlyFacilityAnalysisData = facilitySummary.monthlyAnalysisSummaryData;
-          this.setProgressPercentages();
-          this.calculating = false;
+          if(!facilitySummary.error){
+            this.monthlyFacilityAnalysisData = facilitySummary.monthlyAnalysisSummaryData;
+            this.setProgressPercentages();
+            this.calculating = false;
+          }else{
+            this.calculating = 'error';
+          }
         }
       })
     }
@@ -93,22 +94,6 @@ export class FacilityCardComponent implements OnInit {
     }
   }
 
-  checkMeterDataUpToDate() {
-    if (this.lastBill) {
-      let lastBillDate: Date = new Date(this.lastBill.readDate);
-      let todaysDate: Date = new Date();
-      //todo enhance check
-      if (lastBillDate.getUTCFullYear() == todaysDate.getUTCFullYear() && lastBillDate.getUTCMonth() >= todaysDate.getUTCMonth() - 1) {
-        this.meterDataUpToDate = true;
-      } else {
-        this.meterDataUpToDate = false;
-      }
-    } else {
-      this.meterDataUpToDate = false;
-    }
-  }
-
-
   setSources() {
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == this.facility.guid });
@@ -121,7 +106,7 @@ export class FacilityCardComponent implements OnInit {
   }
 
   setNAICS() {
-    this.naics = this.overviewReportService.getNAICS(this.facility);
+    this.naics = getNAICS(this.facility);
   }
 
   setGoalYears() {
