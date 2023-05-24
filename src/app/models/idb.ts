@@ -1,6 +1,7 @@
 import { AccountAnalysisSetupErrors } from './accountAnalysis';
 import { AnalysisCategory, AnalysisGroup, AnalysisSetupErrors } from './analysis';
 import { MonthlyData } from './calanderization';
+import { MeterPhase, MeterSource, ReportType, WaterDischargeType, WaterIntakeType } from './constantsAndTypes';
 import { ElectricityDataFilters, GeneralUtilityDataFilters } from './meterDataFilter';
 import { BetterPlantsReportSetup, DataOverviewReportSetup } from './overview-report';
 import { SustainabilityQuestions } from './sustainabilityQuestions';
@@ -149,7 +150,9 @@ export interface IdbUtilityMeter {
     marketGHGMultiplier: number,
     locationGHGMultiplier: number,
     isValid?: boolean,
-    skipImport?: boolean
+    skipImport?: boolean,
+    waterIntakeType?: WaterIntakeType,
+    waterDischargeType?: WaterDischargeType
 }
 
 export interface IdbUtilityMeterData {
@@ -325,12 +328,3 @@ export interface IdbCustomEmissionsItem {
 }
 
 
-
-export type MeterSource = "Electricity" | "Natural Gas" | "Other Fuels" | "Other Energy" | "Water" | "Waste Water" | "Other Utility";
-export type MeterPhase = "Solid" | "Liquid" | "Gas";
-export type ReportType = "betterPlants" | 'dataOverview';
-
-
-export const EnergySources: Array<MeterSource> = ["Electricity", "Natural Gas", "Other Fuels", "Other Energy"];
-export const AllSources: Array<MeterSource> = ["Electricity", "Natural Gas", "Other Fuels", "Other Energy", "Water", "Waste Water", "Other Utility"];
-export const WaterSources: Array<MeterSource> = ["Water", "Waste Water"];

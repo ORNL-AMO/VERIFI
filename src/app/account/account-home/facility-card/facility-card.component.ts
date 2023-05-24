@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { IdbAnalysisItem, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, MeterSource, PredictorData } from 'src/app/models/idb';
+import { IdbAnalysisItem, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, PredictorData } from 'src/app/models/idb';
 import * as _ from 'lodash';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityColors } from 'src/app/shared/utilityColors';
@@ -11,6 +11,7 @@ import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/model
 import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
 import { getNAICS } from 'src/app/shared/form-data/naics-data';
+import { MeterSource } from 'src/app/models/constantsAndTypes';
 @Component({
   selector: 'app-facility-card',
   templateUrl: './facility-card.component.html',

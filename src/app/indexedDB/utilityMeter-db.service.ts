@@ -1,7 +1,8 @@
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { Injectable } from '@angular/core';
-import { IdbUtilityMeter, MeterSource } from '../models/idb';
+import { IdbUtilityMeter } from '../models/idb';
 import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
+import { MeterSource } from '../models/constantsAndTypes';
 
 @Injectable({
     providedIn: 'root'

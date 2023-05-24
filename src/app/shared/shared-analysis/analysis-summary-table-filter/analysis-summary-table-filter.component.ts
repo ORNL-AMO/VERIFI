@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { AnalysisGroup, AnalysisTableColumns } from 'src/app/models/analysis';
-import { PredictorData } from 'src/app/models/idb';
+import { IdbAccountAnalysisItem, IdbAnalysisItem, PredictorData } from 'src/app/models/idb';
 import * as _ from 'lodash';
 import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
 
@@ -15,13 +15,19 @@ export class AnalysisSummaryTableFilterComponent implements OnInit {
   tableContext: string;
   @Input()
   group: AnalysisGroup;
+  @Input()
+  analysisItem: IdbAnalysisItem | IdbAccountAnalysisItem;
 
   analysisTableColumns: AnalysisTableColumns;
+  energyColumnLabel: string;
+  actualUseLabel: string;
+  modeledUseLabel: string;
   constructor(private analysisService: AnalysisService, private predictorDbService: PredictordbService) { }
 
   ngOnInit(): void {
     this.analysisTableColumns = this.analysisService.analysisTableColumns.getValue();
     this.setPredictorVariables();
+    this.setLabels();
   }
 
   save() {
@@ -214,5 +220,17 @@ export class AnalysisSummaryTableFilterComponent implements OnInit {
       }
     })
     this.save();
+  }
+
+  setLabels(){
+    if(this.analysisItem.analysisCategory == 'water'){
+      this.actualUseLabel = 'Actual Consumption';
+      this.modeledUseLabel = 'Modeled Consumption';
+      this.energyColumnLabel = 'Consumption Columns';
+    }else if(this.analysisItem.analysisCategory == 'energy'){
+      this.actualUseLabel = 'Actual Energy Use';
+      this.modeledUseLabel = 'Modeled Energy Use';
+      this.energyColumnLabel = 'Energy Columns';
+    }
   }
 }

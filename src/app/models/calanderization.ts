@@ -1,4 +1,5 @@
-import { IdbUtilityMeter, IdbUtilityMeterGroup, MeterSource } from "./idb";
+import { MeterSource } from "./constantsAndTypes";
+import { IdbUtilityMeter, IdbUtilityMeterGroup } from "./idb";
 
 export interface CalanderizedMeter {
     meter: IdbUtilityMeter,

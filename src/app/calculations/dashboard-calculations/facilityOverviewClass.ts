@@ -1,8 +1,9 @@
 import { CalanderizedMeter, MonthlyData } from "src/app/models/calanderization";
 import { YearMonthData } from "src/app/models/dashboard";
-import { AllSources, EnergySources, IdbAccount, IdbFacility, IdbUtilityMeter, MeterSource, WaterSources } from "src/app/models/idb";
+import { IdbAccount, IdbFacility, IdbUtilityMeter } from "src/app/models/idb";
 import { getFiscalYear, getYearlyUsageNumbers } from "../shared-calculations/calanderizationFunctions";
 import * as _ from 'lodash';
+import { AllSources, EnergySources, MeterSource, WaterSources } from "src/app/models/constantsAndTypes";
 
 export class FacilityOverviewData {
 
