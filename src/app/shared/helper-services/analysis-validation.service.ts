@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
+import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { AccountAnalysisSetupErrors } from 'src/app/models/accountAnalysis';
 import { JStatRegressionModel } from 'src/app/models/analysis';
 import { AnalysisGroup, AnalysisSetupErrors, GroupErrors, IdbAccountAnalysisItem, IdbAnalysisItem, IdbUtilityMeter, PredictorData } from 'src/app/models/idb';
@@ -9,7 +10,8 @@ import { AnalysisGroup, AnalysisSetupErrors, GroupErrors, IdbAccountAnalysisItem
 })
 export class AnalysisValidationService {
 
-  constructor(private utilityMeterDbService: UtilityMeterdbService) { }
+  constructor(private utilityMeterDbService: UtilityMeterdbService,
+    private utilityMeterDataDbService: UtilityMeterDatadbService) { }
 
   getAnalysisItemErrors(analysisItem: IdbAnalysisItem): AnalysisSetupErrors {
     let missingName: boolean = (analysisItem.name == undefined || analysisItem.name == '');
@@ -17,7 +19,19 @@ export class AnalysisValidationService {
     let missingReportYear: boolean = this.checkValueValid(analysisItem.reportYear) == false;
     let missingBaselineYear: boolean = this.checkValueValid(analysisItem.baselineYear) == false;
     let reportYearBeforeBaselineYear: boolean = analysisItem.baselineYear > analysisItem.reportYear;
-    let hasError: boolean = (missingName || noGroups || missingReportYear || reportYearBeforeBaselineYear);
+    let yearOptions: Array<number> = this.utilityMeterDataDbService.getYearOptions(analysisItem.facilityId);
+    let baselineYearAfterMeterDataEnd: boolean = false;
+    let baselineYearBeforeMeterDataStart: boolean = false;
+    if (yearOptions && yearOptions.length > 0) {
+      if (yearOptions[0] > analysisItem.baselineYear) {
+        baselineYearBeforeMeterDataStart = true;
+      }
+      if (yearOptions[yearOptions.length - 1] < analysisItem.baselineYear) {
+        baselineYearAfterMeterDataEnd = true;
+      };
+    }
+
+    let hasError: boolean = (missingName || noGroups || missingReportYear || reportYearBeforeBaselineYear || baselineYearAfterMeterDataEnd || baselineYearBeforeMeterDataStart);
     let groupsHaveErrors: boolean = false;
     analysisItem.groups.forEach(group => {
       if (group.groupErrors && group.groupErrors.hasErrors) {
@@ -31,7 +45,9 @@ export class AnalysisValidationService {
       missingReportYear: missingReportYear,
       reportYearBeforeBaselineYear: reportYearBeforeBaselineYear,
       groupsHaveErrors: groupsHaveErrors,
-      missingBaselineYear: missingBaselineYear
+      missingBaselineYear: missingBaselineYear,
+      baselineYearAfterMeterDataEnd: baselineYearAfterMeterDataEnd,
+      baselineYearBeforeMeterDataStart: baselineYearBeforeMeterDataStart
     }
   }
 

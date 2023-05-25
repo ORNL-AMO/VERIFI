@@ -44,7 +44,7 @@ export class RegressionModelMenuComponent implements OnInit {
   ngOnInit(): void {
     this.selectedFacility = this.facilityDbService.selectedFacility.getValue();
     this.showInvalid = this.analysisService.showInvalidModels.getValue();
-    this.yearOptions = this.utilityMeterDataDbService.getYearOptions();
+    this.yearOptions = this.utilityMeterDataDbService.getYearOptions(this.selectedFacility.guid);
     this.selectedGroupSub = this.analysisService.selectedGroup.subscribe(group => {
       if (!this.isFormChange) {
         this.group = JSON.parse(JSON.stringify(group));

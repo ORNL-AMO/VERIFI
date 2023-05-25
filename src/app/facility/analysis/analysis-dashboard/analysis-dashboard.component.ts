@@ -21,9 +21,6 @@ export class AnalysisDashboardComponent implements OnInit {
   facilityAnalysisItems: Array<IdbAnalysisItem>;
   facilityAnalysisItemsSub: Subscription;
 
-  baselineYearErrorMin: boolean;
-  baselineYearErrorMax: boolean;
-  yearOptions: Array<number>;
   selectedFacility: IdbFacility;
   selectedFacilitySub: Subscription;
   analysisItemsList: Array<{
@@ -34,7 +31,6 @@ export class AnalysisDashboardComponent implements OnInit {
   showDetail: boolean;
   showDetailSub: Subscription;
   constructor(private router: Router, private analysisDbService: AnalysisDbService, private toastNotificationService: ToastNotificationsService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
     private facilityDbService: FacilitydbService,
     private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
@@ -47,11 +43,6 @@ export class AnalysisDashboardComponent implements OnInit {
 
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
       this.selectedFacility = val;
-      this.yearOptions = this.utilityMeterDataDbService.getYearOptions();
-      if (this.yearOptions) {
-        this.baselineYearErrorMin = this.yearOptions[0] > this.selectedFacility.sustainabilityQuestions.energyReductionBaselineYear;
-        this.baselineYearErrorMax = this.yearOptions[this.yearOptions.length - 1] < this.selectedFacility.sustainabilityQuestions.energyReductionBaselineYear
-      }
     });
 
     this.showDetailSub = this.analysisService.showDetail.subscribe(showDetail => {
