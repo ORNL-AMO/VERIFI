@@ -97,7 +97,8 @@
                             </button>
                         </div>
 
-                        <div class="btn-group ps-2">
+                        <div class="btn-group ps-2"
+                            *ngIf="selectedMeter.source != 'Water' && selectedMeter.source != 'Waste Water'">
                             <button class="btn toggle-btn" (click)="setFacilityEnergyIsSource(true)"
                                 [ngClass]="{'active': selectedFacility.energyIsSource == true}">
                                 <span class="fa fa-chevron-right"></span>
