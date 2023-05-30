@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
-import { IdbFacility, PredictorData } from 'src/app/models/idb';
+import { IdbFacility, IdbPredictorEntry, PredictorData } from 'src/app/models/idb';
 import { ConvertUnitsService } from 'src/app/shared/convert-units/convert-units.service';
 import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
 import { UnitConversionTypes } from './unitConversionTypes';
@@ -31,6 +31,7 @@ export class EditPredictorComponent {
   referencePredictorName: string;
   stations: Array<WeatherStation> = [];
   facility: IdbFacility;
+  facilityPredictorsEntries: Array<IdbPredictorEntry>;
   constructor(private activatedRoute: ActivatedRoute, private predictorDbService: PredictordbService,
     private router: Router, private facilityDbService: FacilitydbService,
     private formBuilder: FormBuilder,
@@ -44,6 +45,7 @@ export class EditPredictorComponent {
 
   ngOnInit() {
     this.facility = this.facilityDbService.selectedFacility.getValue();
+    this.facilityPredictorsEntries = this.predictorDbService.facilityPredictorEntries.getValue();
     this.activatedRoute.params.subscribe(params => {
       let predictorId: string = params['id'];
       if (predictorId) {
@@ -241,5 +243,21 @@ export class EditPredictorComponent {
     } else {
       this.router.navigateByUrl('/weather-data');
     }
+  }
+
+  addAnotherPredictor() {
+    this.setPredictorDataFromForm();
+    let facilityPredictors: Array<PredictorData> = this.predictorDbService.facilityPredictors.getValue();
+    facilityPredictors.push(this.predictorData);
+    this.predictorDbService.facilityPredictors.next(facilityPredictors);
+    this.setPredictorDataNew();
+  }
+
+  goToPredictorEntry() {
+    this.setPredictorDataFromForm();
+    let facilityPredictors: Array<PredictorData> = this.predictorDbService.facilityPredictors.getValue();
+    facilityPredictors.push(this.predictorData);
+    this.predictorDbService.facilityPredictors.next(facilityPredictors);
+    this.router.navigateByUrl('facility/' + this.facility.id + '/utility/predictors/entries/add-entry');
   }
 }

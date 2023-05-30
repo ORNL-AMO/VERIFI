@@ -153,7 +153,7 @@ export const FacilityRoutes: Route = {
                                 },
 
                                 { path: 'edit-predictor/:id', component: EditPredictorComponent },
-                                { path: 'add-predictor', component: EditPredictorComponent },
+                                { path: 'add-predictor', component: EditPredictorComponent }
                             ]
                         },
                         {
