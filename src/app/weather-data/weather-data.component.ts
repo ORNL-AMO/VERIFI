@@ -85,13 +85,10 @@ export class WeatherDataComponent {
     this.weatherDataService.applyToFacility.next(false);
     this.loadingService.setLoadingMessage('Updating Predictors...');
     this.loadingService.setLoadingStatus(true);
-    // let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.accountPredictorEntries.getValue();
-    // let facilityPredictorEntries: Array<IdbPredictorEntry> = accountPredictorEntries.filter(entry => { return entry.facilityId == this.selectedFacility.guid })
     let facilityPredictors: Array<PredictorData> = [];
     if (this.facilityPredictorEntries.length > 0) {
       facilityPredictors = this.facilityPredictorEntries[0].predictors
     } else {
-      console.log('else adding predictor entries!')
       let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
       let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == this.selectedFacility.guid });
       let calanderizedMeters: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMeterData(facilityMeters, false);
@@ -101,7 +98,6 @@ export class WeatherDataComponent {
       let endDate: Date = new Date(monthlyData[monthlyData.length - 1].date);
       while (startDate <= endDate) {
         let newIdbPredictorEntry: IdbPredictorEntry = this.predictorDbService.getNewIdbPredictorEntry(this.selectedFacility.guid, this.selectedFacility.accountId, new Date(startDate));
-        console.log(newIdbPredictorEntry.date);
         await firstValueFrom(this.predictorDbService.addWithObservable(newIdbPredictorEntry));
         startDate.setMonth(startDate.getMonth() + 1);
       }
