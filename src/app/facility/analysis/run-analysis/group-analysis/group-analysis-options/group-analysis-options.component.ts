@@ -34,7 +34,7 @@ export class GroupAnalysisOptionsComponent implements OnInit {
   ngOnInit(): void {
     this.facility = this.facilityDbService.selectedFacility.getValue();
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
-    this.yearOptions = this.utilityMeterDataDbService.getYearOptions();
+    this.yearOptions = this.utilityMeterDataDbService.getYearOptions(this.facility.guid);
     this.selectedGroupSub = this.analysisService.selectedGroup.subscribe(group => {
       this.group = group;
       this.checkUnitsWarning();

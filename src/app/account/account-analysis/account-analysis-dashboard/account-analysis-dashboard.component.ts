@@ -39,7 +39,7 @@ export class AccountAnalysisDashboardComponent implements OnInit {
       this.setAnalysisItemsList(items);
     });
 
-    this.yearOptions = this.utilityMeterDataDbService.getYearOptions(true);
+    this.yearOptions = this.utilityMeterDataDbService.getYearOptions();
     if (this.yearOptions) {
       this.baselineYearError = this.yearOptions[0] > this.selectedAccount.sustainabilityQuestions.energyReductionBaselineYear
     }

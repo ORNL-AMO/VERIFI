@@ -94,9 +94,10 @@ export class AnalysisDbService {
     return this.dbService.update('analysisItems', values);
   }
 
-  getNewAnalysisItem(): IdbAnalysisItem {
+  getNewAnalysisItem(facilityId: string): IdbAnalysisItem {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    let selectedFacility: IdbFacility = accountFacilities.find(facility => { return facility.guid == facilityId });
     let facilityMeterGroups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.facilityMeterGroups.getValue();
     let itemGroups: Array<AnalysisGroup> = new Array();
     let predictors: Array<PredictorData> = this.predictorDbService.facilityPredictors.getValue();

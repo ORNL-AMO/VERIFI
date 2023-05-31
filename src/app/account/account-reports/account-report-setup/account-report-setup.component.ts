@@ -47,8 +47,8 @@ export class AccountReportSetupComponent {
   setYearOptions() {
     //TODO: baseline years less than report year selection
     //TODO: report years greater than baseline year selection
-    this.reportYears = this.utilityMeterDataDbService.getYearOptions(true);
-    this.baselineYears = this.utilityMeterDataDbService.getYearOptions(true);
+    this.reportYears = this.utilityMeterDataDbService.getYearOptions();
+    this.baselineYears = this.utilityMeterDataDbService.getYearOptions();
   }
 
   async changeReportType() {

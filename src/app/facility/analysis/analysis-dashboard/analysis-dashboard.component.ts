@@ -34,11 +34,11 @@ export class AnalysisDashboardComponent implements OnInit {
   showDetail: boolean;
   showDetailSub: Subscription;
   constructor(private router: Router, private analysisDbService: AnalysisDbService, private toastNotificationService: ToastNotificationsService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
     private facilityDbService: FacilitydbService,
     private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
-    private analysisService: AnalysisService) { }
+    private analysisService: AnalysisService,
+    private utilityMeterDataDbService: UtilityMeterDatadbService) { }
 
   ngOnInit(): void {
     this.facilityAnalysisItemsSub = this.analysisDbService.facilityAnalysisItems.subscribe(items => {
@@ -47,7 +47,7 @@ export class AnalysisDashboardComponent implements OnInit {
 
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
       this.selectedFacility = val;
-      this.yearOptions = this.utilityMeterDataDbService.getYearOptions();
+      this.yearOptions = this.utilityMeterDataDbService.getYearOptions(this.selectedFacility.guid);
       if (this.yearOptions) {
         this.baselineYearErrorMin = this.yearOptions[0] > this.selectedFacility.sustainabilityQuestions.energyReductionBaselineYear;
         this.baselineYearErrorMax = this.yearOptions[this.yearOptions.length - 1] < this.selectedFacility.sustainabilityQuestions.energyReductionBaselineYear
@@ -66,7 +66,7 @@ export class AnalysisDashboardComponent implements OnInit {
   }
 
   async createAnalysis() {
-    let newItem: IdbAnalysisItem = this.analysisDbService.getNewAnalysisItem();
+    let newItem: IdbAnalysisItem = this.analysisDbService.getNewAnalysisItem(this.selectedFacility.guid);
     let addedItem: IdbAnalysisItem = await firstValueFrom(this.analysisDbService.addWithObservable(newItem));
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.setAnalysisItems(selectedAccount, this.selectedFacility);
@@ -92,5 +92,13 @@ export class AnalysisDashboardComponent implements OnInit {
 
   saveShowDetails() {
     this.analysisService.showDetail.next(this.showDetail);
+  }
+
+  goToSettings(){
+    this.router.navigateByUrl('facility/' + this.selectedFacility.id + '/settings');
+  }
+
+  goToUtilityData(){
+    this.router.navigateByUrl('facility/' + this.selectedFacility.id + '/utility');
   }
 }

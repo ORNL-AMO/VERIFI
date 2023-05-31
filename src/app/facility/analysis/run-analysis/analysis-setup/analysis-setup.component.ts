@@ -38,7 +38,7 @@ export class AnalysisSetupComponent implements OnInit {
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
     this.facility = this.facilityDbService.selectedFacility.getValue();
     this.energyUnit = this.facility.energyUnit;
-    this.yearOptions = this.utilityMeterDataDbService.getYearOptions();
+    this.yearOptions = this.utilityMeterDataDbService.getYearOptions(this.facility.guid);
     this.setBaselineYearWarning();
   }
 

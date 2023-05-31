@@ -86,7 +86,8 @@ export interface IdbFacility {
     contactEmail: string,
     contactPhone: string,
     modifiedDate?: Date,
-    facilityOrder?: number
+    facilityOrder?: number,
+    isNewFacility?: boolean
 }
 
 export interface IdbUtilityMeterGroup {
@@ -292,7 +293,9 @@ export interface AnalysisSetupErrors {
     missingReportYear: boolean,
     missingBaselineYear: boolean,
     reportYearBeforeBaselineYear: boolean,
-    groupsHaveErrors: boolean
+    groupsHaveErrors: boolean,
+    baselineYearAfterMeterDataEnd: boolean,
+    baselineYearBeforeMeterDataStart: boolean,
 }
 
 export interface AnalysisGroup {
