@@ -7,10 +7,18 @@
         </div>
         <div class="saveCancel item-right">
             <button class="btn btn-secondary" (click)="cancel()">Cancel</button>
-            <button class="btn btn-primary" (click)="saveChanges()" [disabled]="predictorForm.invalid">
+            <button *ngIf="facilityPredictorsEntries.length != 0" class="btn btn-primary" (click)="saveChanges()" [disabled]="predictorForm.invalid">
                 <span *ngIf="addOrEdit == 'add'">Add Predictor</span>
                 <span *ngIf="addOrEdit == 'edit'">Save Changes</span>
             </button>
+            <ng-container *ngIf="facilityPredictorsEntries.length == 0">
+                <button  class="btn btn-primary me-2" (click)="addAnotherPredictor()" [disabled]="predictorForm.invalid">
+                    Add Another Predictor
+                </button>
+                <button  class="btn btn-primary" (click)="goToPredictorEntry()" [disabled]="predictorForm.invalid">
+                    Add Predictor Entry
+                </button>
+            </ng-container>
         </div>
     </div>
 </div>
