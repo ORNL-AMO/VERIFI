@@ -86,7 +86,8 @@ export interface IdbFacility {
     contactEmail: string,
     contactPhone: string,
     modifiedDate?: Date,
-    facilityOrder?: number
+    facilityOrder?: number,
+    isNewFacility?: boolean
 }
 
 export interface IdbUtilityMeterGroup {

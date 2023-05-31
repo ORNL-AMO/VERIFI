@@ -4,7 +4,7 @@ import { SustainabilityQuestionsFormComponent } from './sustainability-questions
 import { GeneralInformationFormComponent } from './general-information-form/general-information-form.component';
 import { FinancialReportingFormComponent } from './financial-reporting-form/financial-reporting-form.component';
 import { DefaultUnitsFormComponent } from './default-units-form/default-units-form.component';
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HelperPipesModule } from '../helper-pipes/helper-pipes.module';
 import { LabelWithTooltipModule } from '../label-with-tooltip/label-with-tooltip.module';
 import { EGridEmissionsTableComponent } from './default-units-form/e-grid-emissions-table/e-grid-emissions-table.component';
@@ -22,6 +22,7 @@ import { EGridEmissionsTableComponent } from './default-units-form/e-grid-emissi
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    FormsModule,
     HelperPipesModule,
     LabelWithTooltipModule
   ],

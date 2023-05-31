@@ -75,7 +75,7 @@ export class SelectFacilityAnalysisItemsComponent implements OnInit {
       return (item.facilityId == this.selectedFacility.guid
         && item.reportYear == this.selectedAnalysisItem.reportYear
         && item.energyIsSource == this.selectedAnalysisItem.energyIsSource
-        && item.baselineYear == this.selectedAnalysisItem.baselineYear);
+        && (item.baselineYear == this.selectedAnalysisItem.baselineYear || this.selectedFacility.isNewFacility));
     });
   }
 

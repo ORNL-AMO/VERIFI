@@ -96,16 +96,16 @@ export class SelectItemTableComponent implements OnInit {
     this.loadingService.setLoadingStatus(true);
     this.showCreateItem = false;
     this.dbChangesService.selectFacility(this.facility);
-    let newIdbItem: IdbAnalysisItem = this.analysisDbService.getNewAnalysisItem();
+    let newIdbItem: IdbAnalysisItem = this.analysisDbService.getNewAnalysisItem(this.facility.guid);
     newIdbItem.energyIsSource = this.selectedAnalysisItem.energyIsSource;
     newIdbItem.reportYear = this.selectedAnalysisItem.reportYear;
     newIdbItem = this.analysisService.setBaselineAdjustments(newIdbItem);
     newIdbItem.setupErrors = this.analysisValidationService.getAnalysisItemErrors(newIdbItem);
     newIdbItem = await firstValueFrom(this.analysisDbService.addWithObservable(newIdbItem));
     this.selectedFacilityItemId = newIdbItem.guid;
-    await this.save();
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.selectAccount(account);
+    await this.save();
     this.analysisDbService.selectedAnalysisItem.next(newIdbItem);
     this.loadingService.setLoadingStatus(false);
     this.analysisService.accountAnalysisItem = this.selectedAnalysisItem;
