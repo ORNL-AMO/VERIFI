@@ -195,12 +195,13 @@ export class UtilityMeterDatadbService {
         return meterDataCopy;
     }
 
-    getYearOptions(inAccount?: boolean): Array<number> {
-        let meterData: Array<IdbUtilityMeterData>
-        if (!inAccount) {
-            meterData = this.facilityMeterData.getValue();
+    getYearOptions(facilityId?: string): Array<number> {
+        let meterData: Array<IdbUtilityMeterData>;
+        let accountMeterData: Array<IdbUtilityMeterData> = this.accountMeterData.getValue();
+        if (facilityId) {
+            meterData = accountMeterData.filter(meterData => { return meterData.facilityId == facilityId });
         } else {
-            meterData = this.accountMeterData.getValue();
+            meterData = accountMeterData
         }
         if (meterData.length != 0) {
             let orderedMeterData: Array<IdbUtilityMeterData> = _.orderBy(meterData, (data) => { return new Date(data.readDate) });

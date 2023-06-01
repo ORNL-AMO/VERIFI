@@ -5,7 +5,7 @@
             Manage Predictors
         </a>
     </li>
-    <li class="nav-item">
+    <li class="nav-item" [ngClass]="{'disabled': facilityPredictors.length == 0}">
         <a class="nav-link" routerLink="entries" [routerLinkActive]="['active']">
             <i class="fa fa-table"></i>
             Predictor Entries

@@ -64,6 +64,7 @@
     </div>
 </div>
 
+
 <div class="w-100 justify-content-center p-5" *ngIf="baselineYearErrorMax || baselineYearErrorMin">
     <div class="alert alert-danger text-center p-2">
         The baseline year for your reduction goal is
@@ -74,7 +75,8 @@
         <ng-container *ngIf="baselineYearErrorMax">
             and your meter readings end {{yearOptions[yearOptions.length -1]}}.
         </ng-container>
-        Fix your reduction goal year in facility settings or add data.
+        Fix your reduction goal year in <a class="click-link" (click)="goToSettings()">facility settings</a> or <a
+            class="click-link" (click)="goToUtilityData()">add data</a>.
     </div>
 </div>
 

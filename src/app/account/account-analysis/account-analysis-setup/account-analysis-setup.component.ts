@@ -42,7 +42,7 @@ export class AccountAnalysisSetupComponent implements OnInit {
     }
     this.account = this.accountDbService.selectedAccount.getValue();
     this.energyUnit = this.account.energyUnit;
-    this.yearOptions = this.utilityMeterDataDbService.getYearOptions(true);
+    this.yearOptions = this.utilityMeterDataDbService.getYearOptions();
     this.setBaselineYearWarning();
   }
 

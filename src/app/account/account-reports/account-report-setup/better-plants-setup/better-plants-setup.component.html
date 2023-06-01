@@ -18,7 +18,9 @@
                                 Facilities Included
                             </td>
                             <td>
-                                <!-- Report Year -->
+                                Analysis Category
+                            </td>
+                            <td>
                             </td>
                         </tr>
                     </thead>
@@ -39,6 +41,10 @@
                                         {{facilityItem.facilityId | facilityName}}<br>
                                     </span>
                                 </span>
+                            </td>
+                            <td>
+                                <ng-container *ngIf="analysisItem.analysisCategory == 'energy'">Energy</ng-container>
+                                <ng-container *ngIf="analysisItem.analysisCategory == 'water'">Water</ng-container>
                             </td>
                             <td class="text-center">
                                 <a class="click-link" (click)="viewAnalysis(analysisItem)">View Analysis</a>

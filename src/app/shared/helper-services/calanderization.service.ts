@@ -320,7 +320,7 @@ export class CalanderizationService {
   calanderizeMeterDataFullMonth(meter: IdbUtilityMeter, meterData: Array<IdbUtilityMeterData>, energyIsSource: boolean, calanderizedEnergyUnit: string, monthDisplayShort: boolean, inAccount: boolean): Array<MonthlyData> {
     let calanderizeData: Array<MonthlyData> = new Array();
     let orderedMeterData: Array<IdbUtilityMeterData> = _.orderBy(meterData, (data) => { return new Date(data.readDate) });
-    if (orderedMeterData.length > 3) {
+    if (orderedMeterData.length != 0) {
       let startDate: Date = new Date(orderedMeterData[0].readDate);
       let endDate: Date = new Date(orderedMeterData[orderedMeterData.length - 1].readDate);
       endDate.setUTCMonth(endDate.getUTCMonth() + 1);
@@ -620,7 +620,7 @@ export class CalanderizationService {
   calanderizationSummaryFullMonth(meter: IdbUtilityMeter, meterData: Array<IdbUtilityMeterData>): Array<CalendarizationSummaryItem> {
     let calanderizationSummary: Array<CalendarizationSummaryItem> = new Array();
     let orderedMeterData: Array<IdbUtilityMeterData> = _.orderBy(meterData, (data) => { return new Date(data.readDate) });
-    if (orderedMeterData.length > 3) {
+    if (orderedMeterData.length != 0) {
       let startDate: Date = new Date(orderedMeterData[0].readDate);
       startDate.setUTCMonth(startDate.getUTCMonth() + 1);
 
