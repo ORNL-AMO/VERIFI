@@ -1,1 +1,130 @@
-<p>primary-water-consumption-table works!</p>
+<div class="table-responsive">
+    <table class="table table-sm table-hover">
+        <tbody>
+            <tr>
+                <td class="w-50">
+
+                </td>
+                <td class="bold text-center w-25">
+                    Baseline Year
+                    <br>
+                    {{report.baselineYear | yearDisplay: account.fiscalYear}}
+                </td>
+                <td class="bold text-center w-25">
+                    Report Year
+                    <br>
+                    {{report.reportYear | yearDisplay: account.fiscalYear}}
+                </td>
+            </tr>
+            <tr>
+                <td class="bold">
+                    Number of Participating Plants*
+                </td>
+                <td>
+                    {{betterPlantsSummary.baselineYearEnergyResults.numberOfFacilities}}
+                </td>
+                <td>
+                    {{betterPlantsSummary.reportYearEnergyResults.numberOfFacilities}}
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <table class="table table-sm table-hover mt-3">
+        <tbody>
+            <tr>
+                <td class="bold">
+                    Primary Water Consumed (MGal)
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Water Utility (public or private)
+                </td>
+                <td>
+                    {{betterPlantsSummary.baselineYearWaterResults.waterUtilityUse | customNumber}}
+                </td>
+                <td>
+                    {{betterPlantsSummary.reportYearWaterResults.waterUtilityUse | customNumber}}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Surface freshwater, including self-supplied
+                </td>
+                <td>
+                    {{betterPlantsSummary.baselineYearWaterResults.surfaceFreshwaterUse | customNumber}}
+                </td>
+                <td>
+                    {{betterPlantsSummary.reportYearWaterResults.surfaceFreshwaterUse | customNumber}}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Ground freshwater, including self-supplied
+                </td>
+                <td>
+                    {{betterPlantsSummary.baselineYearWaterResults.groundFreshwaterUse | customNumber}}
+                </td>
+                <td>
+                    {{betterPlantsSummary.reportYearWaterResults.groundFreshwaterUse | customNumber}}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Other freshwater
+                </td>
+                <td>
+                    {{betterPlantsSummary.baselineYearWaterResults.otherFreshwaterUse | customNumber}}
+                </td>
+                <td>
+                    {{betterPlantsSummary.reportYearWaterResults.otherFreshwaterUse | customNumber}}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Total saline water intake (e.g., ocean water)
+                </td>
+                <td>
+                    {{betterPlantsSummary.baselineYearWaterResults.salineWaterIntake | customNumber}}
+                </td>
+                <td>
+                    {{betterPlantsSummary.reportYearWaterResults.salineWaterIntake | customNumber}}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Rainwater
+                </td>
+                <td>
+                    {{betterPlantsSummary.baselineYearWaterResults.rainwater | customNumber}}
+                </td>
+                <td>
+                    {{betterPlantsSummary.reportYearWaterResults.rainwater | customNumber}}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Externally supplied recycled (i.e., grey water)
+                </td>
+                <td>
+                    {{betterPlantsSummary.baselineYearWaterResults.externallySuppliedRecycled | customNumber}}
+                </td>
+                <td>
+                    {{betterPlantsSummary.reportYearWaterResults.externallySuppliedRecycled | customNumber}}
+                </td>
+            </tr>
+            <tr>
+                <td class="w-50">
+                    Total water intake
+                </td>
+                <td class="w-25">
+                    {{betterPlantsSummary.baselineYearWaterResults.totalWaterIntake | customNumber}}
+                </td>
+                <td class="w-25">
+                    {{betterPlantsSummary.reportYearWaterResults.totalWaterIntake | customNumber}}
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
