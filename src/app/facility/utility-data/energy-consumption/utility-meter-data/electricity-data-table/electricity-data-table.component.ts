@@ -45,6 +45,7 @@ export class ElectricityDataTableComponent implements OnInit {
   numAdditionalCharges: number;
   numGeneralInformation: number;
   numEmissions: number;
+  showEstimated: boolean;
   constructor(private utilityMeterDataService: UtilityMeterDataService, private copyTableService: CopyTableService,
     private calanderizationService: CalanderizationService) { }
 
@@ -73,6 +74,8 @@ export class ElectricityDataTableComponent implements OnInit {
       this.checkAll();
     } else if (changes.selectedMeter && !changes.selectedMeter.firstChange) {
       this.energyUnit = this.selectedMeter.startingUnit;
+    }else if(changes.selectedMeterData){
+      this.showEstimated = (this.selectedMeterData.find(dataItem => {return dataItem.isEstimated == true})) != undefined;      
     }
     this.setEmissions();
   }

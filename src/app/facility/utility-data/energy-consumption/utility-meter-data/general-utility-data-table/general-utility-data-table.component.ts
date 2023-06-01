@@ -49,6 +49,7 @@ export class GeneralUtilityDataTableComponent implements OnInit {
   numEmissions: number;
   showEmissionsSection: boolean;
   showDetailedCharges: boolean;
+  showEstimated: boolean;
   constructor(public utilityMeterDataService: UtilityMeterDataService,
     private copyTableService: CopyTableService,
     private calanderizationService: CalanderizationService, private editMeterFormService: EditMeterFormService) { }
@@ -87,6 +88,7 @@ export class GeneralUtilityDataTableComponent implements OnInit {
     this.volumeUnit = this.selectedMeter.startingUnit;
     this.showEnergyColumn = getIsEnergyMeter(this.selectedMeter.source);
     this.showEmissions = this.editMeterFormService.checkShowEmissionsOutputRate(this.selectedMeter.source);
+    this.showEstimated = (this.selectedMeterData.find(dataItem => {return dataItem.isEstimated == true})) != undefined;
     if (this.showEmissions) {
       this.setEmissions();
     }
