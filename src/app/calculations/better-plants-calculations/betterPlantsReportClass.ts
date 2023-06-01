@@ -5,6 +5,7 @@ import { BetterPlantsSummary } from "src/app/models/overview-report";
 import { AnnualAccountAnalysisSummaryClass } from "src/app/calculations/analysis-calculations/annualAccountAnalysisSummaryClass";
 import { AnnualFacilityAnalysisSummaryClass } from "src/app/calculations/analysis-calculations/annualFacilityAnalysisSummaryClass";
 import { BetterPlantsEnergySummaryClass } from "./betterPlantsEnergySummaryClass";
+import { BetterPlantsWaterSummaryClass } from "./betterPlantsWaterSummaryClass";
 
 export class BetterPlantsReportClass {
 
@@ -13,9 +14,14 @@ export class BetterPlantsReportClass {
     baselineYearAnalysisSummary: AnnualAnalysisSummary;
     reportYearEnergySummaryClass: BetterPlantsEnergySummaryClass;
     baselineYearEnergySummaryClass: BetterPlantsEnergySummaryClass;
+    reportYearWaterSummaryClass: BetterPlantsWaterSummaryClass;
+    baselineYearWaterSummaryClass: BetterPlantsWaterSummaryClass;
     adjustedBaselinePrimaryEnergy: number;
     totalEnergySavings: number;
-    percentTotalImprovement: number;
+    percentTotalEnergyImprovement: number;
+    totalWaterSavings: number;
+    percentTotalWaterImprovement: number;
+    adjustedBaselinePrimaryWater: number;
     constructor(
         baselineYear: number,
         reportYear: number,
@@ -32,7 +38,13 @@ export class BetterPlantsReportClass {
         this.setBaselineYearEnergySummaryClass(calanderizedMeters, baselineYear);
         this.setAdjustBaselinePrimaryEnergy();
         this.setTotalEnergySavings();
-        this.setPercentTotalImprovement();
+        this.setPercentTotalEnergyImprovement();
+
+        this.setReportYearWaterSummaryClass(calanderizedMeters, reportYear);
+        this.setBaselineYearWaterSummaryClass(calanderizedMeters, baselineYear);
+        this.setAdjustBaselinePrimaryWater();
+        this.setTotalWaterSavings();
+        this.setPercentTotalWaterImprovement();
     }
 
     setFacilityPerformance(
@@ -74,6 +86,7 @@ export class BetterPlantsReportClass {
         this.baselineYearAnalysisSummary = annualAnalysisSummaries.find(summary => { return summary.year == baselineYear });
     }
 
+    //Energy
     setReportYearEnergySummaryClass(calanderizedMeters: Array<CalanderizedMeter>, year: number) {
         this.reportYearEnergySummaryClass = new BetterPlantsEnergySummaryClass(calanderizedMeters, year);
     }
@@ -90,8 +103,29 @@ export class BetterPlantsReportClass {
         this.totalEnergySavings = this.adjustedBaselinePrimaryEnergy - this.reportYearEnergySummaryClass.totalEnergyUse;
     }
 
-    setPercentTotalImprovement() {
-        this.percentTotalImprovement = (this.totalEnergySavings / this.adjustedBaselinePrimaryEnergy) * 100
+    setPercentTotalEnergyImprovement() {
+        this.percentTotalEnergyImprovement = (this.totalEnergySavings / this.adjustedBaselinePrimaryEnergy) * 100
+    }
+
+    //water
+    setReportYearWaterSummaryClass(calanderizedMeters: Array<CalanderizedMeter>, year: number) {
+        this.reportYearWaterSummaryClass = new BetterPlantsWaterSummaryClass(calanderizedMeters, year);
+    }
+
+    setBaselineYearWaterSummaryClass(calanderizedMeters: Array<CalanderizedMeter>, year: number) {
+        this.baselineYearWaterSummaryClass = new BetterPlantsWaterSummaryClass(calanderizedMeters, year);
+    }
+
+    setAdjustBaselinePrimaryWater() {
+        this.adjustedBaselinePrimaryWater = this.reportYearAnalysisSummary.baselineAdjustmentForOther + this.baselineYearWaterSummaryClass.totalWaterIntake + this.reportYearAnalysisSummary.baselineAdjustmentForNormalization;
+    }
+
+    setTotalWaterSavings() {
+        this.totalWaterSavings = this.adjustedBaselinePrimaryWater - this.reportYearWaterSummaryClass.totalWaterIntake;
+    }
+
+    setPercentTotalWaterImprovement() {
+        this.percentTotalWaterImprovement = (this.totalWaterSavings / this.adjustedBaselinePrimaryWater) * 100
     }
 
 
@@ -99,13 +133,18 @@ export class BetterPlantsReportClass {
         return {
             facilityPerformance: this.facilityPerformance,
             percentAnnualImprovement: this.reportYearAnalysisSummary.annualSavingsPercentImprovement,
-            percentTotalImprovement: this.percentTotalImprovement,
+            percentTotalEnergyImprovement: this.percentTotalEnergyImprovement,
+            percentTotalWaterImprovement: this.percentTotalWaterImprovement,
             adjustedBaselinePrimaryEnergy: this.adjustedBaselinePrimaryEnergy,
+            adjustedBaselinePrimaryWater: this.adjustedBaselinePrimaryWater,
             reportYearAnalysisSummary: this.reportYearAnalysisSummary,
             baselineYearAnalysisSummary: this.baselineYearAnalysisSummary,
             totalEnergySavings: this.totalEnergySavings,
-            baselineYearResults: this.baselineYearEnergySummaryClass.getBetterPlantsEnergySummary(),
-            reportYearResults: this.reportYearEnergySummaryClass.getBetterPlantsEnergySummary()
+            totalWaterSavings: this.totalWaterSavings,
+            baselineYearEnergyResults: this.baselineYearEnergySummaryClass.getBetterPlantsEnergySummary(),
+            reportYearEnergyResults: this.reportYearEnergySummaryClass.getBetterPlantsEnergySummary(),
+            baselineYearWaterResults: this.baselineYearWaterSummaryClass.getBetterPlantsWaterSummary(),
+            reportYearWaterResults: this.reportYearWaterSummaryClass.getBetterPlantsWaterSummary()
         }
     }
 }

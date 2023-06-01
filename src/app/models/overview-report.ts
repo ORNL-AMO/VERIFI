@@ -3,12 +3,17 @@ import { IdbFacility } from "./idb";
 
 export interface BetterPlantsSummary {
   percentAnnualImprovement: number,
-  percentTotalImprovement: number,
+  percentTotalEnergyImprovement: number,
+  percentTotalWaterImprovement: number,
   adjustedBaselinePrimaryEnergy: number,
+  adjustedBaselinePrimaryWater: number,
   // baselineAdjustment: number,
   totalEnergySavings: number,
-  baselineYearResults: BetterPlantsEnergySummary,
-  reportYearResults: BetterPlantsEnergySummary,
+  totalWaterSavings: number,
+  baselineYearEnergyResults: BetterPlantsEnergySummary,
+  reportYearEnergyResults: BetterPlantsEnergySummary,
+  baselineYearWaterResults: BetterPlantsWaterSummary,
+  reportYearWaterResults: BetterPlantsWaterSummary,
   reportYearAnalysisSummary: AnnualAnalysisSummary,
   baselineYearAnalysisSummary: AnnualAnalysisSummary,
   facilityPerformance: Array<{
@@ -36,6 +41,18 @@ export interface BetterPlantsEnergySummary {
   totalEnergyUse: number,
   otherEnergyUse: number,
   otherEnergyTypes: Array<string>
+}
+
+export interface BetterPlantsWaterSummary {
+  numberOfFacilities: number;
+  waterUtilityUse: number;
+  surfaceFreshwaterUse: number;
+  groundFreshwaterUse: number;
+  otherFreshwaterUse: number;
+  salineWaterIntake: number;
+  rainwater: number;
+  externallySuppliedRecycled: number;
+  totalWaterIntake: number;
 }
 
 export interface BetterPlantsReportSetup {
