@@ -39,14 +39,23 @@
         <p *ngIf="weatherDataSelection == 'degreeDays'">Select the facility to create new heating and cooling degree day
             predictors using the selected weather station and temperature thresholds.</p>
         <form>
-            <select class="form-select" name="selectedFacility" [(ngModel)]="selectedFacility">
+            <select class="form-select" name="selectedFacility" [(ngModel)]="selectedFacility"
+                (change)="setFacilityData()">
                 <option *ngFor="let facility of facilities" [ngValue]="facility">{{facility.name}}</option>
             </select>
         </form>
+        <div class="alert alert-warning"
+            *ngIf="facilityPredictorEntries?.length == 0 && facilityMeterData?.length != 0">
+            No facility predictor entries found. Entries will be created to match facility meter dates.
+        </div>
+        <div class="alert alert-danger" *ngIf="facilityMeterData?.length == 0">
+            No meter data found for this facility, predictors cannot be created.
+        </div>
     </div>
     <div class="saveCancel popup-footer text-end">
         <button class="btn btn-secondary" (click)="cancelApplyToFacility()">Cancel</button>
-        <button class="btn action-btn" (click)="confirmCreate()" [disabled]="!selectedFacility">Create
+        <button class="btn action-btn" (click)="confirmCreate()"
+            [disabled]="!selectedFacility || facilityMeterData?.length == 0">Create
             Predictors</button>
     </div>
 </div>

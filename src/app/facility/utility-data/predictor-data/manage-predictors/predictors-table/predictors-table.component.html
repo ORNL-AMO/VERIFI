@@ -140,6 +140,19 @@
     </div>
 </ng-container>
 
+<ng-container *ngIf="facilityPredictors.length == 0">
+    <div class="alert alert-warning">
+        No predictor data found for this facility. Click "<span class="fa fa-plus"></span> Add New Predictor" button to
+        create your first predictor or the "<span class="fa fa-upload"></span> Import Data" button to use the upload
+        data wizard to upload data from a .xlsx file.
+    </div>
+</ng-container>
+<ng-container *ngIf="predictorEntries.length == 0 && facilityPredictors.length != 0">
+    <div class="alert alert-warning">
+        No entries found for this facility. A predictor entry is required to save these predictors.
+    </div>
+</ng-container>
+
 
 <div [ngClass]="{'windowOverlay': predictorToDelete}"></div>
 <div class="popup" [class.open]="predictorToDelete">

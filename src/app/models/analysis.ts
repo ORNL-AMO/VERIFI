@@ -179,7 +179,9 @@ export interface AnalysisSetupErrors {
   missingReportYear: boolean,
   reportYearBeforeBaselineYear: boolean,
   groupsHaveErrors: boolean,
-  missingBaselineYear: boolean
+  missingBaselineYear: boolean,
+  baselineYearAfterMeterDataEnd: boolean,
+  baselineYearBeforeMeterDataStart: boolean
 }
 
 export interface AnalysisGroup {

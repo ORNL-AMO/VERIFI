@@ -41,7 +41,7 @@ export class CorrelationPlotMenuComponent {
     });
     this.correlationPlotOptionsSub = this.visualizationStateService.correlationPlotOptions.subscribe(correlationPlotOptions => {
       this.setDateRange();
-      this.years = this.utilityMeterDataDbService.getYearOptions(false);
+      this.years = this.utilityMeterDataDbService.getYearOptions();
       this.correlationPlotOptions = correlationPlotOptions;
     });
   }

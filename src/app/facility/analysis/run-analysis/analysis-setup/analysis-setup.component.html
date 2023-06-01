@@ -78,6 +78,15 @@
                 <div class="alert alert-warning text-center p-1" *ngIf="baselineYearWarning">
                     {{baselineYearWarning}}
                 </div>
+                <div class="alert alert-danger text-center p-1"
+                    *ngIf="analysisItem.setupErrors.baselineYearAfterMeterDataEnd">
+                    Your baseline year ({{analysisItem.baselineYear}}) is after the meter data for this facility ends.
+                </div>
+                <div class="alert alert-danger text-center p-1"
+                    *ngIf="analysisItem.setupErrors.baselineYearBeforeMeterDataStart">
+                    Your baseline year ({{analysisItem.baselineYear}}) is before the meter data for this facility
+                    starts.
+                </div>
                 <div class="form-group row">
                     <label for="reportYear" class="col-5 col-form-label">
                         Report Year
