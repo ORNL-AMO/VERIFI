@@ -3,19 +3,26 @@
 
   <div class="row">
     <div class="col-6">
-      <!--read date-->
-      <label for="readDate">
-        Meter Read Date
-        <span class="required">*</span>
-      </label>
-      <div class="input-group mb-3">
-        <input id="readDate" class="form-control" type="date" formControlName="readDate" (change)="checkDate()"
-          [ngClass]="{'error': invalidDate}">
+      <div class="row">
+        <div class="col-6">
+          <!--read date-->
+          <label for="readDate">Meter Read Date <span class="required">*</span> </label>
+          <div class="input-group mb-3">
+            <input id="readDate" class="form-control" type="date" formControlName="readDate" (change)="checkDate()"
+              [ngClass]="{'error': invalidDate}">
+          </div>
+          <div class="alert alert-danger" *ngIf="meterDataForm.get('readDate').hasError('required')">Meter read date is
+            required</div>
+          <div class="alert alert-danger" *ngIf="invalidDate">Meter already has data entered for selected date</div>
+        </div>
+        <div class="col-6">
+          <label for="isEstimated">Is Estimated Reading?</label>
+          <select class="form-select" name="isEstimated" id="isEstimated" formControlName="isEstimated">
+            <option class="form-control" [ngValue]="true">Yes</option>
+            <option class="form-control" [ngValue]="false">No</option>
+          </select>
+        </div>
       </div>
-      <div class="alert alert-danger" *ngIf="meterDataForm.get('readDate').hasError('required')">Meter read date is
-        required</div>
-      <div class="alert alert-danger" *ngIf="invalidDate">Meter already has data entered for selected date</div>
-
       <!--energy use-->
       <label for="totalEnergyUse">
         Total Energy Use
