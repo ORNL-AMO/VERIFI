@@ -38,6 +38,11 @@ export class UpdateDbEntryService {
       isChanged = true;
     }
 
+    if(!facility.classification){
+      facility.classification = 'Manufacturing';
+      isChanged = true;
+    }
+
     return { facility: facility, isChanged: isChanged };
   }
 

@@ -112,7 +112,8 @@ export class FacilitydbService {
             contactName: undefined,
             contactEmail: undefined,
             contactPhone: undefined,
-            facilityOrder: undefined
+            facilityOrder: undefined,
+            classification: 'Manufacturing'
         }
     }
 

@@ -27,8 +27,9 @@ export class SettingsFormsService {
       contactName: [generalInformation.contactName],
       contactEmail: [generalInformation.contactEmail],
       contactPhone: [generalInformation.contactPhone]
-
     });
+
+
     return form;
   }
 
