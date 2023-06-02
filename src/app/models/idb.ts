@@ -1,7 +1,7 @@
 import { AccountAnalysisSetupErrors } from './accountAnalysis';
 import { AnalysisCategory, AnalysisGroup, AnalysisSetupErrors } from './analysis';
 import { MonthlyData } from './calanderization';
-import { MeterPhase, MeterSource, ReportType, WaterDischargeType, WaterIntakeType } from './constantsAndTypes';
+import { FacilityClassification, MeterPhase, MeterSource, ReportType, WaterDischargeType, WaterIntakeType } from './constantsAndTypes';
 import { ElectricityDataFilters, GeneralUtilityDataFilters } from './meterDataFilter';
 import { BetterPlantsReportSetup, DataOverviewReportSetup } from './overview-report';
 import { SustainabilityQuestions } from './sustainabilityQuestions';
@@ -88,7 +88,8 @@ export interface IdbFacility {
     contactPhone: string,
     modifiedDate?: Date,
     facilityOrder?: number,
-    isNewFacility?: boolean
+    isNewFacility?: boolean,
+    classification?: FacilityClassification
 }
 
 export interface IdbUtilityMeterGroup {

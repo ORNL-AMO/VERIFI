@@ -6,7 +6,8 @@
             <input type="text" class="form-control" formControlName="name" (input)="saveChanges()"
                 onfocus="this.select();" minlength="1" maxlength="42" required>
         </div>
-        <span class="alert alert-danger" *ngIf="form.get('name').hasError('required')">{{formNameLabel}} name is required</span>
+        <span class="alert alert-danger" *ngIf="form.get('name').hasError('required')">{{formNameLabel}} name is
+            required</span>
 
         <div class="mb-3">
             <label for="address">Address</label>
@@ -64,30 +65,37 @@
                     <option [ngValue]=null></option>
                 </select>
             </div>
-
-            <div class="mb-3 col-md-6 col-sm-12" *ngIf="!inAccount">
-                <div class="row">
-                    <div class="col-12">
-                        <label for="facilityArea">Facility Area</label>
-                        <div class="input-group">
-                            <input type="text" class="form-control" formControlName="size" (input)="saveChanges()"
-                                onfocus="this.select();" minlength="1" maxlength="60">
-                            <span class="input-group-text" *ngIf="unitsOfMeasure != 'Metric'">ft<sup>2</sup></span>
-                            <span class="input-group-text" *ngIf="unitsOfMeasure === 'Metric'">m<sup>2</sup></span>
+            <ng-container *ngIf="!inAccount">
+                <div class="mb-3 col-md-6 col-sm-12">
+                    <label for="facilityClassification">Facility Classification</label>
+                    <select class="form-select" formControlName="facilityClassification" (change)="saveChanges()"
+                        id="facilityClassification">
+                        <option *ngFor="let classification of facilityClassifications" [ngValue]="classification">
+                            {{classification}}</option>
+                    </select>
+                </div>
+                <div class="mb-3 col-12">
+                    <div class="row">
+                        <div class="col-md-6 col-sm-12">
+                            <label for="facilityArea">Facility Area</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" formControlName="size" (input)="saveChanges()"
+                                    onfocus="this.select();" minlength="1" maxlength="60">
+                                <span class="input-group-text" *ngIf="unitsOfMeasure != 'Metric'">ft<sup>2</sup></span>
+                                <span class="input-group-text" *ngIf="unitsOfMeasure === 'Metric'">m<sup>2</sup></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-sm-12">
+                            <!-- <label>Facility Color</label> -->
+                            <app-label-with-tooltip [label]="'Facility Color'" [field]="'facilityColor'"
+                                [labelId]="'facilityColor'" [isRequired]="false">
+                            </app-label-with-tooltip>
+                            <input type="color" class="form-control" formControlName="color" (input)="saveChanges()"
+                                [ngStyle]="{'background-color':form.controls.color.value}" id="facilityColor">
                         </div>
                     </div>
                 </div>
-                <div class="row pt-2">
-                    <div class="col-12">
-                        <!-- <label>Facility Color</label> -->
-                        <app-label-with-tooltip [label]="'Facility Color'" [field]="'facilityColor'"
-                            [labelId]="'facilityColor'" [isRequired]="false">
-                        </app-label-with-tooltip>
-                        <input type="color" class="form-control" formControlName="color" (input)="saveChanges()"
-                            [ngStyle]="{'background-color':form.controls.color.value}" id="facilityColor">
-                    </div>
-                </div>
-            </div>
+            </ng-container>
         </div>
 
         <div class="mb-3">
@@ -213,14 +221,15 @@
                     <option *ngFor="let naics of firstNaicsList" [ngValue]="naics.code">{{naics.code}} -
                         {{naics.industryType}}</option>
                 </select>
-                <select class="form-select" formControlName="naics2" (change)="checkNAICS()" *ngIf="form.controls.naics1.value" id="naics2">
+                <select class="form-select" formControlName="naics2" (change)="checkNAICS()"
+                    *ngIf="form.controls.naics1.value" id="naics2">
                     <option *ngFor="let naics of secondNaicsList | naicsList:form.controls.naics1.value"
                         [ngValue]="naics.code">{{naics.code}} -
                         {{naics.industryType}}</option>
                     <option [ngValue]=null></option>
                 </select>
-                <select class="form-select" formControlName="naics3" (change)="saveChanges()" *ngIf="form.controls.naics2.value"
-                    id="naics3">
+                <select class="form-select" formControlName="naics3" (change)="saveChanges()"
+                    *ngIf="form.controls.naics2.value" id="naics3">
                     <option *ngFor="let naics of thirdNaicsList | naicsList:form.controls.naics2.value"
                         [ngValue]="naics.code">{{naics.code}} -
                         {{naics.industryType}}</option>
