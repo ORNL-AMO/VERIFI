@@ -100,11 +100,14 @@ export class CalanderizationService {
       startDate.setUTCDate(1);
       let endDate: Date = new Date(orderedMeterData[orderedMeterData.length - 1].readDate);
       while (startDate.getUTCMonth() != endDate.getUTCMonth() || startDate.getUTCFullYear() != endDate.getUTCFullYear()) {
+
         let month: number = startDate.getUTCMonth();
         let year: number = startDate.getUTCFullYear();
         let previousMonthReading: IdbUtilityMeterData = this.getPreviousMonthsBill(month, year, orderedMeterData);
         let currentMonthsReadings: Array<IdbUtilityMeterData> = this.getCurrentMonthsReadings(month, year, orderedMeterData);
         let nextMonthsReading: IdbUtilityMeterData = this.getNextMonthsBill(month, year, orderedMeterData);
+
+
         let totals: {
           totalConsumption: number,
           totalEnergyUse: number,
@@ -208,6 +211,28 @@ export class CalanderizationService {
           let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
           accountOrFacility = accountFacilities.find(facility => { return facility.guid == meter.facilityId });
         }
+
+
+        let readingType: 'mixed' | 'metered' | 'estimated';
+        let allUsedReadings: Array<IdbUtilityMeterData> = [previousMonthReading];
+        if(nextMonthsReading){
+          allUsedReadings.push(nextMonthsReading);
+          currentMonthsReadings.forEach(reading => {
+            allUsedReadings.push(reading);
+          });
+        }
+
+        let readingsEstimated: Array<boolean> = allUsedReadings.map(reading => {return reading.isEstimated});
+        let uniqEstimated: Array<boolean> = _.uniq(readingsEstimated);
+        if(uniqEstimated.length > 1){
+          readingType = 'mixed';
+        }else if(uniqEstimated[0] == true){
+          readingType = 'estimated';
+        }else {
+          readingType = 'metered';
+        }
+
+
         calanderizeData.push({
           month: monthStr,
           monthNumValue: month,
@@ -221,7 +246,8 @@ export class CalanderizationService {
           locationEmissions: emissionsValues.locationEmissions,
           RECs: emissionsValues.RECs,
           excessRECs: emissionsValues.excessRECs,
-          excessRECsEmissions: emissionsValues.excessRECsEmissions
+          excessRECsEmissions: emissionsValues.excessRECsEmissions,
+          readingType: readingType
         });
         startDate.setUTCMonth(startDate.getUTCMonth() + 1);
       }
@@ -373,6 +399,17 @@ export class CalanderizationService {
           let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
           accountOrFacility = accountFacilities.find(facility => { return facility.guid == meter.facilityId });
         }
+
+        let readingType: 'mixed' | 'metered' | 'estimated';
+        let readingsEstimated: Array<boolean> = currentMonthsReadings.map(reading => {return reading.isEstimated});
+        let uniqEstimated: Array<boolean> = _.uniq(readingsEstimated);
+        if(uniqEstimated.length > 1){
+          readingType = 'mixed';
+        }else if(uniqEstimated[0] == true){
+          readingType = 'estimated';
+        }else {
+          readingType = 'metered';
+        }
         calanderizeData.push({
           month: monthStr,
           monthNumValue: month,
@@ -386,7 +423,8 @@ export class CalanderizationService {
           locationEmissions: emissionsValues.locationEmissions,
           RECs: emissionsValues.RECs,
           excessRECs: emissionsValues.excessRECs,
-          excessRECsEmissions: emissionsValues.excessRECsEmissions
+          excessRECsEmissions: emissionsValues.excessRECsEmissions,
+          readingType: readingType
         });
         startDate.setUTCMonth(startDate.getUTCMonth() + 1);
       }
@@ -744,6 +782,16 @@ export class CalanderizationService {
       let monthlyEnergyUse: number = _.sumBy(currentYearData, 'totalEnergyUse') / 12;
       let monthlyCost: number = _.sumBy(currentYearData, 'totalCost') / 12;
       let monthlyConsumption: number = _.sumBy(currentYearData, 'totalEnergyUse') / 12;
+      let readingType: 'mixed' | 'metered' | 'estimated';
+      let readingsEstimated: Array<boolean> = currentYearData.map(reading => {return reading.isEstimated});
+      let uniqEstimated: Array<boolean> = _.uniq(readingsEstimated);
+      if(uniqEstimated.length > 1){
+        readingType = 'mixed';
+      }else if(uniqEstimated[0] == true){
+        readingType = 'estimated';
+      }else {
+        readingType = 'metered';
+      }
       Months.forEach(month => {
         let emissionsValues: EmissionsResults = this.getEmissions(meter, monthlyEnergyUse, calanderizedEnergyUnit, year, energyIsSource)
 
@@ -773,7 +821,8 @@ export class CalanderizationService {
           locationEmissions: emissionsValues.locationEmissions,
           RECs: emissionsValues.RECs,
           excessRECs: emissionsValues.excessRECs,
-          excessRECsEmissions: emissionsValues.excessRECsEmissions
+          excessRECsEmissions: emissionsValues.excessRECsEmissions,
+          readingType: readingType
         });
       });
     });
