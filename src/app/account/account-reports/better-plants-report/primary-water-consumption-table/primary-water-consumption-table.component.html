@@ -5,12 +5,12 @@
                 <td class="w-50">
 
                 </td>
-                <td class="bold text-center w-25">
+                <td colspan="2" class="bold text-center w-25">
                     Baseline Year
                     <br>
                     {{report.baselineYear | yearDisplay: account.fiscalYear}}
                 </td>
-                <td class="bold text-center w-25">
+                <td colspan="2" class="bold text-center w-25">
                     Report Year
                     <br>
                     {{report.reportYear | yearDisplay: account.fiscalYear}}
@@ -18,13 +18,24 @@
             </tr>
             <tr>
                 <td class="bold">
-                    Number of Participating Plants*
+                    Number of Participating Facilities*
                 </td>
-                <td>
-                    {{betterPlantsSummary.baselineYearEnergyResults.numberOfFacilities}}
+                <td colspan="2">
+                    {{betterPlantsSummary.reportYearWaterResults.numberOfFacilities}}
                 </td>
-                <td>
-                    {{betterPlantsSummary.reportYearEnergyResults.numberOfFacilities}}
+                <td colspan="2">
+                    {{betterPlantsSummary.reportYearWaterResults.numberOfFacilities}}
+                </td>
+            </tr>
+            <tr>
+                <td class="bold">
+                    Number of Participating Manufacturing Facilities*
+                </td>
+                <td colspan="2">
+                    {{betterPlantsSummary.reportYearWaterResults.numberOfManufacturingFacilities}}
+                </td>
+                <td colspan="2">
+                    {{betterPlantsSummary.reportYearWaterResults.numberOfManufacturingFacilities}}
                 </td>
             </tr>
         </tbody>
@@ -34,7 +45,7 @@
         <tbody>
             <tr>
                 <td class="bold">
-                    Primary Water Consumed (MGal)
+                    Primary Water Consumed (kGal)
                 </td>
             </tr>
             <tr>
@@ -45,7 +56,13 @@
                     {{betterPlantsSummary.baselineYearWaterResults.waterUtilityUse | customNumber}}
                 </td>
                 <td>
+                    Metered
+                </td>
+                <td>
                     {{betterPlantsSummary.reportYearWaterResults.waterUtilityUse | customNumber}}
+                </td>
+                <td>
+                    Estimated
                 </td>
             </tr>
             <tr>
@@ -56,7 +73,13 @@
                     {{betterPlantsSummary.baselineYearWaterResults.surfaceFreshwaterUse | customNumber}}
                 </td>
                 <td>
+                    Metered
+                </td>
+                <td>
                     {{betterPlantsSummary.reportYearWaterResults.surfaceFreshwaterUse | customNumber}}
+                </td>
+                <td>
+                    Metered
                 </td>
             </tr>
             <tr>
@@ -67,7 +90,13 @@
                     {{betterPlantsSummary.baselineYearWaterResults.groundFreshwaterUse | customNumber}}
                 </td>
                 <td>
+                    Metered
+                </td>
+                <td>
                     {{betterPlantsSummary.reportYearWaterResults.groundFreshwaterUse | customNumber}}
+                </td>
+                <td>
+                    Metered
                 </td>
             </tr>
             <tr>
@@ -78,7 +107,13 @@
                     {{betterPlantsSummary.baselineYearWaterResults.otherFreshwaterUse | customNumber}}
                 </td>
                 <td>
+                    Metered
+                </td>
+                <td>
                     {{betterPlantsSummary.reportYearWaterResults.otherFreshwaterUse | customNumber}}
+                </td>
+                <td>
+                    Metered
                 </td>
             </tr>
             <tr>
@@ -89,7 +124,13 @@
                     {{betterPlantsSummary.baselineYearWaterResults.salineWaterIntake | customNumber}}
                 </td>
                 <td>
+                    Metered
+                </td>
+                <td>
                     {{betterPlantsSummary.reportYearWaterResults.salineWaterIntake | customNumber}}
+                </td>
+                <td>
+                    Metered
                 </td>
             </tr>
             <tr>
@@ -100,7 +141,13 @@
                     {{betterPlantsSummary.baselineYearWaterResults.rainwater | customNumber}}
                 </td>
                 <td>
+                    Metered
+                </td>
+                <td>
                     {{betterPlantsSummary.reportYearWaterResults.rainwater | customNumber}}
+                </td>
+                <td>
+                    Metered
                 </td>
             </tr>
             <tr>
@@ -111,18 +158,30 @@
                     {{betterPlantsSummary.baselineYearWaterResults.externallySuppliedRecycled | customNumber}}
                 </td>
                 <td>
+                    Metered
+                </td>
+                <td>
                     {{betterPlantsSummary.reportYearWaterResults.externallySuppliedRecycled | customNumber}}
+                </td>
+                <td>
+                    Metered
                 </td>
             </tr>
             <tr>
                 <td class="w-50">
-                    Total water intake
+                    Total Water Intake
                 </td>
-                <td class="w-25">
+                <td class="w-cell">
                     {{betterPlantsSummary.baselineYearWaterResults.totalWaterIntake | customNumber}}
                 </td>
-                <td class="w-25">
+                <td class="w-cell">
+                    
+                </td>
+                <td class="w-cell">
                     {{betterPlantsSummary.reportYearWaterResults.totalWaterIntake | customNumber}}
+                </td>
+                <td class="w-cell">
+                    
                 </td>
             </tr>
         </tbody>

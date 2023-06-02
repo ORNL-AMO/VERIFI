@@ -45,6 +45,7 @@ export interface BetterPlantsEnergySummary {
 
 export interface BetterPlantsWaterSummary {
   numberOfFacilities: number;
+  numberOfManufacturingFacilities: number;
   waterUtilityUse: number;
   surfaceFreshwaterUse: number;
   groundFreshwaterUse: number;

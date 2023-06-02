@@ -40,8 +40,8 @@ export class BetterPlantsReportClass {
         this.setTotalEnergySavings();
         this.setPercentTotalEnergyImprovement();
 
-        this.setReportYearWaterSummaryClass(calanderizedMeters, reportYear);
-        this.setBaselineYearWaterSummaryClass(calanderizedMeters, baselineYear);
+        this.setReportYearWaterSummaryClass(calanderizedMeters, reportYear, facilities);
+        this.setBaselineYearWaterSummaryClass(calanderizedMeters, baselineYear, facilities);
         this.setAdjustBaselinePrimaryWater();
         this.setTotalWaterSavings();
         this.setPercentTotalWaterImprovement();
@@ -108,12 +108,12 @@ export class BetterPlantsReportClass {
     }
 
     //water
-    setReportYearWaterSummaryClass(calanderizedMeters: Array<CalanderizedMeter>, year: number) {
-        this.reportYearWaterSummaryClass = new BetterPlantsWaterSummaryClass(calanderizedMeters, year);
+    setReportYearWaterSummaryClass(calanderizedMeters: Array<CalanderizedMeter>, year: number, facilities: Array<IdbFacility>) {
+        this.reportYearWaterSummaryClass = new BetterPlantsWaterSummaryClass(calanderizedMeters, year, facilities);
     }
 
-    setBaselineYearWaterSummaryClass(calanderizedMeters: Array<CalanderizedMeter>, year: number) {
-        this.baselineYearWaterSummaryClass = new BetterPlantsWaterSummaryClass(calanderizedMeters, year);
+    setBaselineYearWaterSummaryClass(calanderizedMeters: Array<CalanderizedMeter>, year: number, facilities: Array<IdbFacility>) {
+        this.baselineYearWaterSummaryClass = new BetterPlantsWaterSummaryClass(calanderizedMeters, year, facilities);
     }
 
     setAdjustBaselinePrimaryWater() {

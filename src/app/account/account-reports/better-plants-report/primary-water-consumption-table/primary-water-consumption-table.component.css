@@ -7,3 +7,8 @@ td{
     border: solid 1px;
     border-color: inherit;
 }
+
+
+.w-cell{
+    width: 12.5%;
+}
