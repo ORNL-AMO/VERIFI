@@ -14,6 +14,7 @@ import { UtilityMeterGroupdbService } from './indexedDB/utilityMeterGroup-db.ser
 import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport, IdbAnalysisItem, IdbCustomEmissionsItem, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from './models/idb';
 import { EGridService } from './shared/helper-services/e-grid.service';
 import { firstValueFrom } from 'rxjs';
+import { environment } from 'src/environments/environment';
 
 // declare ga as a function to access the JS code in TS
 declare let gtag: Function;
@@ -44,15 +45,17 @@ export class AppComponent {
     private updateDbEntryService: UpdateDbEntryService,
     private customEmissionsDbService: CustomEmissionsDbService,
     private accountReportDbService: AccountReportDbService) {
-    this.router.events.subscribe(event => {
-      if (event instanceof NavigationEnd) {
-        gtag('config', 'G-YG1QD02XSE',
-          {
-            'page_path': event.urlAfterRedirects
-          }
-        );
-      }
-    })
+    if (environment.production) {
+      this.router.events.subscribe(event => {
+        if (event instanceof NavigationEnd) {
+          gtag('config', 'G-YG1QD02XSE',
+            {
+              'page_path': event.urlAfterRedirects
+            }
+          );
+        }
+      })
+    }
   }
 
   ngOnInit() {
