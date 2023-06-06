@@ -3,14 +3,14 @@ import { Router } from '@angular/router';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbAccount, IdbAccountAnalysisItem, IdbUtilityMeterGroup } from 'src/app/models/idb';
 import * as _ from 'lodash';
 import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
-import { AnalysisCategory } from 'src/app/models/analysis';
+import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
+import { AnalysisCategory } from 'src/app/models/analysis';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 
 @Component({
   selector: 'app-account-analysis-dashboard',
@@ -36,9 +36,10 @@ export class AccountAnalysisDashboardComponent implements OnInit {
   hasWater: boolean;
   hasEnergy: boolean;
   constructor(private router: Router, private accountAnalysisDbService: AccountAnalysisDbService, private toastNotificationService: ToastNotificationsService,
-    private accountDbService: AccountdbService, private utilityMeterDataDbService: UtilityMeterDatadbService,
+    private calendarizationService: CalanderizationService,
     private dbChangesService: DbChangesService, private analysisService: AnalysisService,
-    private utilityMeterGroupDbService: UtilityMeterGroupdbService) { }
+    private utilityMeterGroupDbService: UtilityMeterGroupdbService,
+    private accountDbService: AccountdbService) { }
 
   ngOnInit(): void {
     this.selectedAccount = this.accountDbService.selectedAccount.getValue();
@@ -46,7 +47,7 @@ export class AccountAnalysisDashboardComponent implements OnInit {
       this.setAnalysisItemsList(items);
     });
 
-    this.yearOptions = this.utilityMeterDataDbService.getYearOptions();
+    this.yearOptions = this.calendarizationService.getYearOptionsAccount();
     if (this.yearOptions) {
       this.baselineYearError = this.yearOptions[0] > this.selectedAccount.sustainabilityQuestions.energyReductionBaselineYear
     }
@@ -79,10 +80,10 @@ export class AccountAnalysisDashboardComponent implements OnInit {
     for (let i = 0; i < years.length; i++) {
       let year: number = years[i];
       let yearAnalysisItems: Array<IdbAccountAnalysisItem> = accountAnalysisItems.filter(item => { return item.reportYear == year });
-      for (let x = 0; x < yearAnalysisItems.length; x++) {
-        let accountAnalysisItem: IdbAccountAnalysisItem = yearAnalysisItems[i];
-        
-      }
+      // for (let x = 0; x < yearAnalysisItems.length; x++) {
+      //   let accountAnalysisItem: IdbAccountAnalysisItem = yearAnalysisItems[i];
+
+      // }
       this.analysisItemsList.push({
         year: year,
         analysisItems: yearAnalysisItems,
@@ -94,7 +95,7 @@ export class AccountAnalysisDashboardComponent implements OnInit {
   saveShowDetails() {
     this.analysisService.showDetail.next(this.showDetail);
   }
-  
+
   async openCreateAnalysis() {
     let groups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.accountMeterGroups.getValue();
     this.hasWater = false;

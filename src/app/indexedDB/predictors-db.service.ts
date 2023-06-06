@@ -162,7 +162,11 @@ export class PredictordbService {
             for (let newIndex = 0; newIndex < newPredictors.length; newIndex++) {
                 facilityPredictorEntries[index].predictors.push(newPredictors[newIndex]);
             }
-            await firstValueFrom(this.updateWithObservable(facilityPredictorEntries[index]));
+            if (facilityPredictorEntries[index].predictors.length > 0) {
+                await firstValueFrom(this.updateWithObservable(facilityPredictorEntries[index]));
+            } else {
+                await firstValueFrom(this.deleteIndexWithObservable(facilityPredictorEntries[index].id));
+            }
         }
         let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
         await this.finishPredictorChanges(selectedFacility);
@@ -191,7 +195,12 @@ export class PredictordbService {
             for (let newIndex = 0; newIndex < newPredictors.length; newIndex++) {
                 facilityPredictorEntries[index].predictors.push(newPredictors[newIndex]);
             }
-            await firstValueFrom(this.updateWithObservable(facilityPredictorEntries[index]));
+            if (facilityPredictorEntries[index].predictors.length > 0) {
+                await firstValueFrom(this.updateWithObservable(facilityPredictorEntries[index]));
+            } else {
+                console.log('DELETE ENTRY')
+                await firstValueFrom(this.deleteIndexWithObservable(facilityPredictorEntries[index].id));
+            }
         }
         await this.finishPredictorChanges(facility);
     }
@@ -341,7 +350,11 @@ export class PredictordbService {
         this.accountPredictorEntries.next(accountPredictorEntries);
         let updatedFacilityPredictorEntries: Array<IdbPredictorEntry> = accountPredictorEntries.filter(predictor => { return predictor.facilityId == facility.guid });
         this.facilityPredictorEntries.next(updatedFacilityPredictorEntries);
-        this.facilityPredictors.next(updatedFacilityPredictorEntries[0].predictors);
+        if (updatedFacilityPredictorEntries.length > 0) {
+            this.facilityPredictors.next(updatedFacilityPredictorEntries[0].predictors);
+        } else {
+            this.facilityPredictors.next([]);
+        }
     }
 
 

@@ -8,9 +8,9 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { Router } from '@angular/router';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { AnalysisGroup } from 'src/app/models/analysis';
 import { AnalysisValidationService } from 'src/app/shared/helper-services/analysis-validation.service';
+import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 
 @Component({
   selector: 'app-group-analysis-options',
@@ -26,16 +26,16 @@ export class GroupAnalysisOptionsComponent implements OnInit {
   analysisItem: IdbAnalysisItem;
   facility: IdbFacility;
   constructor(private analysisService: AnalysisService, private analysisDbService: AnalysisDbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
     private accountDbService: AccountdbService, private facilityDbService: FacilitydbService,
     private dbChangesService: DbChangesService,
     private analysisValidationService: AnalysisValidationService,
+    private calanderizationService: CalanderizationService,
     private router: Router) { }
 
   ngOnInit(): void {
     this.facility = this.facilityDbService.selectedFacility.getValue();
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
-    this.yearOptions = this.utilityMeterDataDbService.getYearOptions(this.facility.guid);
+    this.yearOptions = this.calanderizationService.getYearOptionsFacility(this.facility.guid);
     this.selectedGroupSub = this.analysisService.selectedGroup.subscribe(group => {
       this.group = group;
       this.checkUnitsWarning();

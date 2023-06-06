@@ -15,6 +15,7 @@ import { RegressionModelsService } from 'src/app/shared/shared-analysis/calculat
 import * as _ from 'lodash';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { AnalysisValidationService } from 'src/app/shared/helper-services/analysis-validation.service';
+import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 @Component({
   selector: 'app-regression-model-menu',
   templateUrl: './regression-model-menu.component.html',
@@ -39,12 +40,13 @@ export class RegressionModelMenuComponent implements OnInit {
     private regressionsModelsService: RegressionModelsService, private predictorDbService: PredictordbService,
     private utilityMeterDbService: UtilityMeterdbService, private utilityMeterDataDbService: UtilityMeterDatadbService,
     private analysisValidationService: AnalysisValidationService,
-    private sharedDataService: SharedDataService) { }
+    private sharedDataService: SharedDataService,
+    private calanderizationService: CalanderizationService) { }
 
   ngOnInit(): void {
     this.selectedFacility = this.facilityDbService.selectedFacility.getValue();
     this.showInvalid = this.analysisService.showInvalidModels.getValue();
-    this.yearOptions = this.utilityMeterDataDbService.getYearOptions(this.selectedFacility.guid);
+    this.yearOptions = this.calanderizationService.getYearOptionsFacility(this.selectedFacility.guid);
     this.selectedGroupSub = this.analysisService.selectedGroup.subscribe(group => {
       if (!this.isFormChange) {
         this.group = JSON.parse(JSON.stringify(group));

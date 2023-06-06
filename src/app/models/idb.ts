@@ -179,7 +179,8 @@ export interface IdbUtilityMeterData {
     totalLocationEmissions?: number,
     RECs?: number,
     excessRECs?: number,
-    excessRECsEmissions?: number
+    excessRECsEmissions?: number,
+    isEstimated?: boolean,
 
 
     //electricity
