@@ -5,10 +5,10 @@ import { ToastNotificationsService } from 'src/app/core-components/toast-notific
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbAccount, IdbAccountAnalysisItem } from 'src/app/models/idb';
 import * as _ from 'lodash';
 import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
+import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 
 @Component({
   selector: 'app-account-analysis-dashboard',
@@ -30,8 +30,9 @@ export class AccountAnalysisDashboardComponent implements OnInit {
   showDetail: boolean;
   showDetailSub: Subscription;
   constructor(private router: Router, private accountAnalysisDbService: AccountAnalysisDbService, private toastNotificationService: ToastNotificationsService,
-    private accountDbService: AccountdbService, private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private dbChangesService: DbChangesService, private analysisService: AnalysisService) { }
+    private accountDbService: AccountdbService,
+    private dbChangesService: DbChangesService, private analysisService: AnalysisService,
+    private calendarizationService: CalanderizationService) { }
 
   ngOnInit(): void {
     this.selectedAccount = this.accountDbService.selectedAccount.getValue();
@@ -39,7 +40,7 @@ export class AccountAnalysisDashboardComponent implements OnInit {
       this.setAnalysisItemsList(items);
     });
 
-    this.yearOptions = this.utilityMeterDataDbService.getYearOptions();
+    this.yearOptions = this.calendarizationService.getYearOptionsAccount();
     if (this.yearOptions) {
       this.baselineYearError = this.yearOptions[0] > this.selectedAccount.sustainabilityQuestions.energyReductionBaselineYear
     }

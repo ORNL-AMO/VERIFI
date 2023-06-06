@@ -7,10 +7,10 @@ import { Month, Months } from 'src/app/shared/form-data/months';
 import { EnergyUnitOptions, UnitOption } from 'src/app/shared/unitOptions';
 import { AccountAnalysisService } from '../account-analysis.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { firstValueFrom } from 'rxjs';
 import { AnalysisValidationService } from 'src/app/shared/helper-services/analysis-validation.service';
+import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 
 @Component({
   selector: 'app-account-analysis-setup',
@@ -28,11 +28,11 @@ export class AccountAnalysisSetupComponent implements OnInit {
   yearOptions: Array<number>;
   baselineYearWarning: string;
   constructor(private accountDbService: AccountdbService, private accountAnalysisDbService: AccountAnalysisDbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
     private router: Router, private accountAnalysisService: AccountAnalysisService,
     private dbChangesService: DbChangesService,
     private analysisDbService: AnalysisDbService,
-    private analysisValidationService: AnalysisValidationService) { }
+    private analysisValidationService: AnalysisValidationService,
+    private calendarizationService: CalanderizationService) { }
 
   ngOnInit(): void {
     this.analysisItem = this.accountAnalysisDbService.selectedAnalysisItem.getValue();
@@ -41,7 +41,7 @@ export class AccountAnalysisSetupComponent implements OnInit {
     }
     this.account = this.accountDbService.selectedAccount.getValue();
     this.energyUnit = this.account.energyUnit;
-    this.yearOptions = this.utilityMeterDataDbService.getYearOptions();
+    this.yearOptions = this.calendarizationService.getYearOptionsAccount();
     this.setBaselineYearWarning();
   }
 

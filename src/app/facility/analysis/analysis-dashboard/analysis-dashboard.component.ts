@@ -5,11 +5,11 @@ import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { IdbAccount, IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import * as _ from 'lodash';
 import { AnalysisService } from '../analysis.service';
+import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 
 @Component({
   selector: 'app-analysis-dashboard',
@@ -38,7 +38,7 @@ export class AnalysisDashboardComponent implements OnInit {
     private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
     private analysisService: AnalysisService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService) { }
+    private calanderizationService: CalanderizationService) { }
 
   ngOnInit(): void {
     this.facilityAnalysisItemsSub = this.analysisDbService.facilityAnalysisItems.subscribe(items => {
@@ -47,7 +47,7 @@ export class AnalysisDashboardComponent implements OnInit {
 
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
       this.selectedFacility = val;
-      this.yearOptions = this.utilityMeterDataDbService.getYearOptions(this.selectedFacility.guid);
+      this.yearOptions = this.calanderizationService.getYearOptionsFacility(this.selectedFacility.guid);
       if (this.yearOptions) {
         this.baselineYearErrorMin = this.yearOptions[0] > this.selectedFacility.sustainabilityQuestions.energyReductionBaselineYear;
         this.baselineYearErrorMax = this.yearOptions[this.yearOptions.length - 1] < this.selectedFacility.sustainabilityQuestions.energyReductionBaselineYear

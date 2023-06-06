@@ -4,6 +4,7 @@ import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db
 import { AccountAnalysisSetupErrors } from 'src/app/models/accountAnalysis';
 import { JStatRegressionModel } from 'src/app/models/analysis';
 import { AnalysisGroup, AnalysisSetupErrors, GroupErrors, IdbAccountAnalysisItem, IdbAnalysisItem, IdbUtilityMeter, PredictorData } from 'src/app/models/idb';
+import { CalanderizationService } from './calanderization.service';
 
 @Injectable({
   providedIn: 'root'
@@ -11,7 +12,7 @@ import { AnalysisGroup, AnalysisSetupErrors, GroupErrors, IdbAccountAnalysisItem
 export class AnalysisValidationService {
 
   constructor(private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService) { }
+    private calanderizationService: CalanderizationService) { }
 
   getAnalysisItemErrors(analysisItem: IdbAnalysisItem): AnalysisSetupErrors {
     let missingName: boolean = (analysisItem.name == undefined || analysisItem.name == '');
@@ -19,7 +20,7 @@ export class AnalysisValidationService {
     let missingReportYear: boolean = this.checkValueValid(analysisItem.reportYear) == false;
     let missingBaselineYear: boolean = this.checkValueValid(analysisItem.baselineYear) == false;
     let reportYearBeforeBaselineYear: boolean = analysisItem.baselineYear > analysisItem.reportYear;
-    let yearOptions: Array<number> = this.utilityMeterDataDbService.getYearOptions(analysisItem.facilityId);
+    let yearOptions: Array<number> = this.calanderizationService.getYearOptionsFacility(analysisItem.facilityId);
     let baselineYearAfterMeterDataEnd: boolean = false;
     let baselineYearBeforeMeterDataStart: boolean = false;
     if (yearOptions && yearOptions.length > 0) {
