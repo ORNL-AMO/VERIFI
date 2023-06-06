@@ -46,14 +46,20 @@ export interface BetterPlantsEnergySummary {
 export interface BetterPlantsWaterSummary {
   numberOfFacilities: number;
   numberOfManufacturingFacilities: number;
-  waterUtilityUse: number;
-  surfaceFreshwaterUse: number;
-  groundFreshwaterUse: number;
-  otherFreshwaterUse: number;
-  salineWaterIntake: number;
-  rainwater: number;
-  externallySuppliedRecycled: number;
+  // waterUtilityUse: number;
+  surfaceFreshwater: WaterSummaryItem;
+  groundFreshwater: WaterSummaryItem;
+  otherFreshwater: WaterSummaryItem;
+  salineWaterIntake: WaterSummaryItem;
+  rainwater: WaterSummaryItem;
+  externallySuppliedRecycled: WaterSummaryItem;
   totalWaterIntake: number;
+  waterUtility: WaterSummaryItem
+}
+
+export interface WaterSummaryItem {
+  use: number,
+  meteredType: 'Metered' | 'Estimated' | 'Mixed' | 'N/A'
 }
 
 export interface BetterPlantsReportSetup {

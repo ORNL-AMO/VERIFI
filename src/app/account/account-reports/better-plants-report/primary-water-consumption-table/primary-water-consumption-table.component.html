@@ -53,16 +53,16 @@
                     Water Utility (public or private)
                 </td>
                 <td>
-                    {{betterPlantsSummary.baselineYearWaterResults.waterUtilityUse | customNumber}}
+                    {{betterPlantsSummary.baselineYearWaterResults.waterUtility.use | customNumber}}
                 </td>
                 <td>
-                    Metered
+                    {{betterPlantsSummary.baselineYearWaterResults.waterUtility.meteredType}}
                 </td>
                 <td>
-                    {{betterPlantsSummary.reportYearWaterResults.waterUtilityUse | customNumber}}
+                    {{betterPlantsSummary.reportYearWaterResults.waterUtility.use | customNumber}}
                 </td>
                 <td>
-                    Estimated
+                    {{betterPlantsSummary.reportYearWaterResults.waterUtility.meteredType}}
                 </td>
             </tr>
             <tr>
@@ -70,16 +70,16 @@
                     Surface freshwater, including self-supplied
                 </td>
                 <td>
-                    {{betterPlantsSummary.baselineYearWaterResults.surfaceFreshwaterUse | customNumber}}
+                    {{betterPlantsSummary.baselineYearWaterResults.surfaceFreshwater.use | customNumber}}
                 </td>
                 <td>
-                    Metered
+                    {{betterPlantsSummary.baselineYearWaterResults.surfaceFreshwater.meteredType}}
                 </td>
                 <td>
-                    {{betterPlantsSummary.reportYearWaterResults.surfaceFreshwaterUse | customNumber}}
+                    {{betterPlantsSummary.reportYearWaterResults.surfaceFreshwater.use | customNumber}}
                 </td>
                 <td>
-                    Metered
+                    {{betterPlantsSummary.reportYearWaterResults.surfaceFreshwater.meteredType}}
                 </td>
             </tr>
             <tr>
@@ -87,16 +87,16 @@
                     Ground freshwater, including self-supplied
                 </td>
                 <td>
-                    {{betterPlantsSummary.baselineYearWaterResults.groundFreshwaterUse | customNumber}}
+                    {{betterPlantsSummary.baselineYearWaterResults.groundFreshwater.use | customNumber}}
                 </td>
                 <td>
-                    Metered
+                    {{betterPlantsSummary.baselineYearWaterResults.groundFreshwater.meteredType}}
                 </td>
                 <td>
-                    {{betterPlantsSummary.reportYearWaterResults.groundFreshwaterUse | customNumber}}
+                    {{betterPlantsSummary.reportYearWaterResults.groundFreshwater.use | customNumber}}
                 </td>
                 <td>
-                    Metered
+                    {{betterPlantsSummary.reportYearWaterResults.groundFreshwater.meteredType}}
                 </td>
             </tr>
             <tr>
@@ -104,16 +104,16 @@
                     Other freshwater
                 </td>
                 <td>
-                    {{betterPlantsSummary.baselineYearWaterResults.otherFreshwaterUse | customNumber}}
+                    {{betterPlantsSummary.baselineYearWaterResults.otherFreshwater.use | customNumber}}
                 </td>
                 <td>
-                    Metered
+                    {{betterPlantsSummary.baselineYearWaterResults.otherFreshwater.meteredType}}
                 </td>
                 <td>
-                    {{betterPlantsSummary.reportYearWaterResults.otherFreshwaterUse | customNumber}}
+                    {{betterPlantsSummary.reportYearWaterResults.otherFreshwater.use | customNumber}}
                 </td>
                 <td>
-                    Metered
+                    {{betterPlantsSummary.reportYearWaterResults.otherFreshwater.meteredType}}
                 </td>
             </tr>
             <tr>
@@ -121,16 +121,16 @@
                     Total saline water intake (e.g., ocean water)
                 </td>
                 <td>
-                    {{betterPlantsSummary.baselineYearWaterResults.salineWaterIntake | customNumber}}
+                    {{betterPlantsSummary.baselineYearWaterResults.salineWaterIntake.use | customNumber}}
                 </td>
                 <td>
-                    Metered
+                    {{betterPlantsSummary.baselineYearWaterResults.salineWaterIntake.meteredType}}
                 </td>
                 <td>
-                    {{betterPlantsSummary.reportYearWaterResults.salineWaterIntake | customNumber}}
+                    {{betterPlantsSummary.reportYearWaterResults.salineWaterIntake.use | customNumber}}
                 </td>
                 <td>
-                    Metered
+                    {{betterPlantsSummary.reportYearWaterResults.salineWaterIntake.meteredType}}
                 </td>
             </tr>
             <tr>
@@ -138,16 +138,16 @@
                     Rainwater
                 </td>
                 <td>
-                    {{betterPlantsSummary.baselineYearWaterResults.rainwater | customNumber}}
+                    {{betterPlantsSummary.baselineYearWaterResults.rainwater.use | customNumber}}
                 </td>
                 <td>
-                    Metered
+                    {{betterPlantsSummary.baselineYearWaterResults.rainwater.meteredType}}
                 </td>
                 <td>
-                    {{betterPlantsSummary.reportYearWaterResults.rainwater | customNumber}}
+                    {{betterPlantsSummary.reportYearWaterResults.rainwater.use | customNumber}}
                 </td>
                 <td>
-                    Metered
+                    {{betterPlantsSummary.reportYearWaterResults.rainwater.meteredType}}
                 </td>
             </tr>
             <tr>
@@ -155,16 +155,16 @@
                     Externally supplied recycled (i.e., grey water)
                 </td>
                 <td>
-                    {{betterPlantsSummary.baselineYearWaterResults.externallySuppliedRecycled | customNumber}}
+                    {{betterPlantsSummary.baselineYearWaterResults.externallySuppliedRecycled.use | customNumber}}
                 </td>
                 <td>
-                    Metered
+                    {{betterPlantsSummary.baselineYearWaterResults.externallySuppliedRecycled.meteredType}}
                 </td>
                 <td>
-                    {{betterPlantsSummary.reportYearWaterResults.externallySuppliedRecycled | customNumber}}
+                    {{betterPlantsSummary.reportYearWaterResults.externallySuppliedRecycled.use | customNumber}}
                 </td>
                 <td>
-                    Metered
+                    {{betterPlantsSummary.reportYearWaterResults.externallySuppliedRecycled.meteredType}}
                 </td>
             </tr>
             <tr>
@@ -175,13 +175,52 @@
                     {{betterPlantsSummary.baselineYearWaterResults.totalWaterIntake | customNumber}}
                 </td>
                 <td class="w-cell">
-                    
+
                 </td>
                 <td class="w-cell">
                     {{betterPlantsSummary.reportYearWaterResults.totalWaterIntake | customNumber}}
                 </td>
                 <td class="w-cell">
-                    
+
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <table class="table table-sm table-hover mt-3">
+        <tbody>
+            <tr>
+                <td class="w-50">
+                    Baseline adjustment due to increase/decrease in the number of facilities reporting relative to
+                    baseline year or other operational changes, (+/- thousand gallons):
+                </td>
+                <td class="w-25">
+                    {{betterPlantsSummary.reportYearAnalysisSummary.baselineAdjustmentForNormalization | customNumber}}
+
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Adjusted baseline for total water intake (thousand gallons)
+                </td>
+                <td>
+                    {{betterPlantsSummary.reportYearAnalysisSummary.adjustedForNormalization | customNumber}}
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    Annual Improvement In Water Intensity for Current Year (%)**
+                </td>
+                <td>
+                    {{betterPlantsSummary.percentAnnualImprovement | number:'1.0-2'}} %
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    Total Improvement In Water Intensity (%)**
+                </td>
+                <td>
+                    {{betterPlantsSummary.percentTotalWaterImprovement | number:'1.0-2'}} %
                 </td>
             </tr>
         </tbody>

@@ -1,25 +1,26 @@
 import { CalanderizedMeter, MonthlyData } from "src/app/models/calanderization";
 import * as _ from 'lodash';
-import { BetterPlantsWaterSummary } from "src/app/models/overview-report";
+import { BetterPlantsWaterSummary, WaterSummaryItem } from "src/app/models/overview-report";
 import { IdbFacility } from "src/app/models/idb";
+import { WaterIntakeType } from "src/app/models/constantsAndTypes";
 
 export class BetterPlantsWaterSummaryClass {
 
     numberOfFacilities: number;
     numberOfManufacturingFacilities: number;
-    waterUtilityUse: number;
-    surfaceFreshwaterUse: number;
-    groundFreshwaterUse: number;
-    otherFreshwaterUse: number;
-    salineWaterIntake: number;
-    rainwater: number;
-    externallySuppliedRecycled: number;
+    waterUtility: WaterSummaryItem;
+    surfaceFreshwater: WaterSummaryItem;
+    groundFreshwater: WaterSummaryItem;
+    otherFreshwater: WaterSummaryItem;
+    salineWaterIntake: WaterSummaryItem;
+    rainwater: WaterSummaryItem;
+    externallySuppliedRecycled: WaterSummaryItem;
     totalWaterIntake: number;
     constructor(calanderizedMeters: Array<CalanderizedMeter>, year: number, facilities: Array<IdbFacility>) {
-        this.setWaterUtilityUse(calanderizedMeters, year);
-        this.setSurfaceFreshwaterUse(calanderizedMeters, year);
-        this.setGroundFreshwaterUse(calanderizedMeters, year);
-        this.setOtherFreshwaterUse(calanderizedMeters, year);
+        this.setWaterUtility(calanderizedMeters, year);
+        this.setSurfaceFreshwater(calanderizedMeters, year);
+        this.setGroundFreshwater(calanderizedMeters, year);
+        this.setOtherFreshwater(calanderizedMeters, year);
         this.setSalineWaterIntake(calanderizedMeters, year);
         this.setRainwater(calanderizedMeters, year);
         this.setExternallySuppliedRecycled(calanderizedMeters, year);
@@ -27,61 +28,71 @@ export class BetterPlantsWaterSummaryClass {
         this.setNumberOfFacilities(calanderizedMeters, year, facilities);
     }
 
-    setWaterUtilityUse(calanderizedMeters: Array<CalanderizedMeter>, year: number) {
-        let filteredMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => {
-            return cMeter.meter.waterIntakeType == 'Municipal (Potable)'
-        });
-        let yearData: Array<MonthlyData> = this.getYearData(filteredMeters, year);
-        this.waterUtilityUse = _.sumBy(yearData, 'energyConsumption');
+    setWaterUtility(calanderizedMeters: Array<CalanderizedMeter>, year: number) {
+        this.waterUtility = this.getUtilityResults(calanderizedMeters, year, 'Municipal (Potable)');
     }
 
-    setSurfaceFreshwaterUse(calanderizedMeters: Array<CalanderizedMeter>, year: number) {
-        let filteredMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => {
-            return cMeter.meter.waterIntakeType == 'Surface Freshwater'
-        });
-        let yearData: Array<MonthlyData> = this.getYearData(filteredMeters, year);
-        this.surfaceFreshwaterUse = _.sumBy(yearData, 'energyConsumption');
+    setSurfaceFreshwater(calanderizedMeters: Array<CalanderizedMeter>, year: number) {
+        this.surfaceFreshwater = this.getUtilityResults(calanderizedMeters, year, 'Surface Freshwater');
+    }
+    setGroundFreshwater(calanderizedMeters: Array<CalanderizedMeter>, year: number) {
+        this.groundFreshwater = this.getUtilityResults(calanderizedMeters, year, 'Ground Freshwater');
     }
 
-    setGroundFreshwaterUse(calanderizedMeters: Array<CalanderizedMeter>, year: number) {
-        let filteredMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => {
-            return cMeter.meter.waterIntakeType == 'Ground Freshwater'
-        });
-        let yearData: Array<MonthlyData> = this.getYearData(filteredMeters, year);
-        this.groundFreshwaterUse = _.sumBy(yearData, 'energyConsumption');
-    }
-
-    setOtherFreshwaterUse(calanderizedMeters: Array<CalanderizedMeter>, year: number) {
-        let filteredMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => {
-            return cMeter.meter.waterIntakeType == 'Other Freshwater'
-        });
-        let yearData: Array<MonthlyData> = this.getYearData(filteredMeters, year);
-        this.otherFreshwaterUse = _.sumBy(yearData, 'energyConsumption');
+    setOtherFreshwater(calanderizedMeters: Array<CalanderizedMeter>, year: number) {
+        this.otherFreshwater = this.getUtilityResults(calanderizedMeters, year, 'Other Freshwater');
     }
 
     setSalineWaterIntake(calanderizedMeters: Array<CalanderizedMeter>, year: number) {
-        let filteredMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => {
-            return cMeter.meter.waterIntakeType == 'Salt Water'
-        });
-        let yearData: Array<MonthlyData> = this.getYearData(filteredMeters, year);
-        this.salineWaterIntake = _.sumBy(yearData, 'energyConsumption');
+        this.salineWaterIntake = this.getUtilityResults(calanderizedMeters, year, 'Salt Water');
     }
 
     setRainwater(calanderizedMeters: Array<CalanderizedMeter>, year: number) {
-        let filteredMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => {
-            return cMeter.meter.waterIntakeType == 'Rainwater'
-        });
-        let yearData: Array<MonthlyData> = this.getYearData(filteredMeters, year);
-        this.rainwater = _.sumBy(yearData, 'energyConsumption');
+        this.rainwater = this.getUtilityResults(calanderizedMeters, year, 'Rainwater');
     }
 
     setExternallySuppliedRecycled(calanderizedMeters: Array<CalanderizedMeter>, year: number) {
-        let filteredMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => {
-            return cMeter.meter.waterIntakeType == 'Externally Recycled Water'
-        });
-        let yearData: Array<MonthlyData> = this.getYearData(filteredMeters, year);
-        this.externallySuppliedRecycled = _.sumBy(yearData, 'energyConsumption');
+        this.externallySuppliedRecycled = this.getUtilityResults(calanderizedMeters, year, 'Externally Recycled Water');
     }
+
+    getUtilityResults(calanderizedMeters: Array<CalanderizedMeter>, year: number, intakeType: WaterIntakeType): WaterSummaryItem {
+        let filteredMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => {
+            return cMeter.meter.waterIntakeType == intakeType
+        });
+        if (filteredMeters.length > 0) {
+            let yearData: Array<MonthlyData> = this.getYearData(filteredMeters, year);
+            let use: number = _.sumBy(yearData, 'energyConsumption');
+            let readingTypes: Array<"mixed" | "metered" | "estimated"> = yearData.map(data => { return data.readingType });
+            let meteredType: 'Metered' | 'Estimated' | 'Mixed';
+            readingTypes = _.uniq(readingTypes);
+            if (readingTypes.length == 1) {
+                if (readingTypes[0] == 'mixed') {
+                    meteredType = 'Mixed';
+                } else if (readingTypes[0] == 'estimated') {
+                    meteredType = 'Estimated';
+                } else if (readingTypes[0] == 'metered') {
+                    meteredType = 'Metered';
+                }
+            } else if (readingTypes.length > 1) {
+                meteredType = 'Mixed';
+            }
+            return {
+                use: use,
+                meteredType: meteredType
+            }
+        }
+        return {
+            use: 0,
+            meteredType: 'N/A'
+        }
+    }
+
+
+
+
+
+
+
 
     getYearData(filteredMeters: Array<CalanderizedMeter>, year: number): Array<MonthlyData> {
         let meterMonthlyData: Array<MonthlyData> = filteredMeters.flatMap(sourceMeter => {
@@ -96,13 +107,13 @@ export class BetterPlantsWaterSummaryClass {
 
     setTotalWater() {
         this.totalWaterIntake = (
-            this.waterUtilityUse +
-            this.surfaceFreshwaterUse +
-            this.groundFreshwaterUse +
-            this.otherFreshwaterUse +
-            this.salineWaterIntake +
-            this.rainwater +
-            this.externallySuppliedRecycled
+            this.waterUtility.use +
+            this.surfaceFreshwater.use +
+            this.groundFreshwater.use +
+            this.otherFreshwater.use +
+            this.salineWaterIntake.use +
+            this.rainwater.use +
+            this.externallySuppliedRecycled.use
         );
     }
 
@@ -134,15 +145,16 @@ export class BetterPlantsWaterSummaryClass {
     getBetterPlantsWaterSummary(): BetterPlantsWaterSummary {
         return {
             numberOfFacilities: this.numberOfFacilities,
-            waterUtilityUse: this.waterUtilityUse,
-            surfaceFreshwaterUse: this.surfaceFreshwaterUse,
-            groundFreshwaterUse: this.groundFreshwaterUse,
-            otherFreshwaterUse: this.otherFreshwaterUse,
+            // waterUtilityUse: this.waterUtilityUse,
+            surfaceFreshwater: this.surfaceFreshwater,
+            groundFreshwater: this.groundFreshwater,
+            otherFreshwater: this.otherFreshwater,
             salineWaterIntake: this.salineWaterIntake,
             rainwater: this.rainwater,
             externallySuppliedRecycled: this.externallySuppliedRecycled,
             totalWaterIntake: this.totalWaterIntake,
-            numberOfManufacturingFacilities: this.numberOfManufacturingFacilities
+            numberOfManufacturingFacilities: this.numberOfManufacturingFacilities,
+            waterUtility: this.waterUtility
         }
     }
 }
