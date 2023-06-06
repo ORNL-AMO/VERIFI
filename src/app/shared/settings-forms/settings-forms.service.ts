@@ -72,6 +72,7 @@ export class SettingsFormsService {
     facility.contactName = form.controls.contactName.value;
     facility.contactEmail = form.controls.contactEmail.value;
     facility.contactPhone = form.controls.contactPhone.value;
+    facility.size = form.controls.size.value;
     return facility;
   }
 

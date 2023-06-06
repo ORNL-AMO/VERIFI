@@ -676,31 +676,33 @@ export class UploadDataService {
       if (!meter.skipImport) {
         fileReference.headerMap.forEach(dataRow => {
           let readDate: Date = new Date(dataRow[dateColumnVal]);
-          let dataItem: IdbUtilityMeterData = accountUtilityData.find(accountDataItem => {
-            return accountDataItem.facilityId == meter.facilityId && this.checkSameDay(new Date(accountDataItem.readDate), readDate) && accountDataItem.meterId == meter.guid;
-          })
-          if (!dataItem) {
-            dataItem = this.utilityMeterDataDbService.getNewIdbUtilityMeterData(meter);
-          }
-          dataItem.readDate = readDate;
-
-          let totalVolume: number = 0;
-          let energyUse: number = 0;
-          let totalConsumption: number = dataRow[meter.importWizardName];
-          let displayVolumeInput: boolean = (getIsEnergyUnit(meter.startingUnit) == false);
-          let displayEnergyUse: boolean = getIsEnergyMeter(meter.source);
-          if (!displayVolumeInput) {
-            energyUse = totalConsumption;
-          } else {
-            totalVolume = totalConsumption;
-            if (displayEnergyUse && totalVolume) {
-              energyUse = totalVolume * meter.heatCapacity;
+          if (!isNaN(readDate.valueOf())) {
+            let dataItem: IdbUtilityMeterData = accountUtilityData.find(accountDataItem => {
+              return accountDataItem.facilityId == meter.facilityId && this.checkSameDay(new Date(accountDataItem.readDate), readDate) && accountDataItem.meterId == meter.guid;
+            })
+            if (!dataItem) {
+              dataItem = this.utilityMeterDataDbService.getNewIdbUtilityMeterData(meter);
             }
+            dataItem.readDate = readDate;
+
+            let totalVolume: number = 0;
+            let energyUse: number = 0;
+            let totalConsumption: number = dataRow[meter.importWizardName];
+            let displayVolumeInput: boolean = (getIsEnergyUnit(meter.startingUnit) == false);
+            let displayEnergyUse: boolean = getIsEnergyMeter(meter.source);
+            if (!displayVolumeInput) {
+              energyUse = totalConsumption;
+            } else {
+              totalVolume = totalConsumption;
+              if (displayEnergyUse && totalVolume) {
+                energyUse = totalVolume * meter.heatCapacity;
+              }
+            }
+            dataItem.totalEnergyUse = energyUse;
+            dataItem.totalImportConsumption = totalConsumption;
+            dataItem.totalVolume = totalVolume;
+            utilityData.push(dataItem);
           }
-          dataItem.totalEnergyUse = energyUse;
-          dataItem.totalImportConsumption = totalConsumption;
-          dataItem.totalVolume = totalVolume;
-          utilityData.push(dataItem);
         });
       }
     });
@@ -723,7 +725,7 @@ export class UploadDataService {
         });
         let existingFacilityPredictorData: Array<PredictorData> = new Array();
         if (facilityPredictorEntries.length != 0) {
-          existingFacilityPredictorData = facilityPredictorEntries[0].predictors;
+          existingFacilityPredictorData = facilityPredictorEntries[0].predictors.map(predictor => { return predictor });
         }
         if (group.groupItems.length != 0) {
           group.groupItems.forEach((predictorItem) => {
@@ -732,26 +734,30 @@ export class UploadDataService {
               let newPredictor: PredictorData = this.predictorDbService.getNewPredictor([]);
               newPredictor.name = predictorItem.value;
               existingFacilityPredictorData.push(newPredictor);
+              facilityPredictorEntries.forEach(predictorEntry => {
+                predictorEntry.predictors.push(newPredictor);
+              });
             }
           });
         }
         fileReference.headerMap.forEach(dataRow => {
           let readDate: Date = new Date(dataRow[dateColumnVal]);
-          let predictorEntry: IdbPredictorEntry = facilityPredictorEntries.find(entry => {
-            return this.checkSameMonth(new Date(entry.date), readDate);
-          });
-          if (!predictorEntry) {
-            predictorEntry = this.predictorDbService.getNewIdbPredictorEntry(group.facilityId, selectedAccount.guid, readDate);
-            predictorEntry.predictors = JSON.parse(JSON.stringify(existingFacilityPredictorData));
-          }
-          group.groupItems.forEach(item => {
-
-            let entryDataIndex: number = predictorEntry.predictors.findIndex(predictor => { return predictor.name == item.value });
-            if (entryDataIndex != -1) {
-              predictorEntry.predictors[entryDataIndex].amount = dataRow[item.value];
+          if (!isNaN(readDate.valueOf())) {
+            let predictorEntry: IdbPredictorEntry = facilityPredictorEntries.find(entry => {
+              return this.checkSameMonth(new Date(entry.date), readDate);
+            });
+            if (!predictorEntry) {
+              predictorEntry = this.predictorDbService.getNewIdbPredictorEntry(group.facilityId, selectedAccount.guid, readDate);
+              predictorEntry.predictors = JSON.parse(JSON.stringify(existingFacilityPredictorData));
             }
-          });
-          predictorData.push(predictorEntry);
+            group.groupItems.forEach(item => {
+              let entryDataIndex: number = predictorEntry.predictors.findIndex(predictor => { return predictor.name == item.value });
+              if (entryDataIndex != -1) {
+                predictorEntry.predictors[entryDataIndex].amount = Number(dataRow[item.value]);
+              }
+            });
+            predictorData.push(JSON.parse(JSON.stringify(predictorEntry)));
+          }
         });
       }
     });
