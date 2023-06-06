@@ -138,23 +138,25 @@ export class EGridService {
 
 
   getEmissionsRate(subregion: string, year: number): { marketRate: number, locationRate: number } {
-    let subregionEmissions: SubregionEmissions = this.co2Emissions.find(emissions => { return emissions.subregion == subregion });
-    if (subregionEmissions) {
-      let marketRate: number = 0;
-      let locationRate: number = 0;
-      if (subregionEmissions.locationEmissionRates.length != 0) {
-        let closestYearRate: { co2Emissions: number, year: number } = _.minBy(subregionEmissions.locationEmissionRates, (emissionRate: { co2Emissions: number, year: number }) => {
-          return Math.abs(emissionRate.year - year);
-        });
-        locationRate = closestYearRate.co2Emissions;
+    if (this.co2Emissions) {
+      let subregionEmissions: SubregionEmissions = this.co2Emissions.find(emissions => { return emissions.subregion == subregion });
+      if (subregionEmissions) {
+        let marketRate: number = 0;
+        let locationRate: number = 0;
+        if (subregionEmissions.locationEmissionRates.length != 0) {
+          let closestYearRate: { co2Emissions: number, year: number } = _.minBy(subregionEmissions.locationEmissionRates, (emissionRate: { co2Emissions: number, year: number }) => {
+            return Math.abs(emissionRate.year - year);
+          });
+          locationRate = closestYearRate.co2Emissions;
+        }
+        if (subregionEmissions.residualEmissionRates.length != 0) {
+          let closestYearRate: { co2Emissions: number, year: number } = _.minBy(subregionEmissions.residualEmissionRates, (emissionRate: { co2Emissions: number, year: number }) => {
+            return Math.abs(emissionRate.year - year);
+          });
+          marketRate = closestYearRate.co2Emissions;
+        }
+        return { marketRate: marketRate, locationRate: locationRate };
       }
-      if (subregionEmissions.residualEmissionRates.length != 0) {
-        let closestYearRate: { co2Emissions: number, year: number } = _.minBy(subregionEmissions.residualEmissionRates, (emissionRate: { co2Emissions: number, year: number }) => {
-          return Math.abs(emissionRate.year - year);
-        });
-        marketRate = closestYearRate.co2Emissions;
-      }
-      return { marketRate: marketRate, locationRate: locationRate };
     }
     return { marketRate: 0, locationRate: 0 };
   }

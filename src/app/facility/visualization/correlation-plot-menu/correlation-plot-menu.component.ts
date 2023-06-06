@@ -1,12 +1,12 @@
 import { Component } from '@angular/core';
-import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbFacility } from 'src/app/models/idb';
 import { Month, Months } from 'src/app/shared/form-data/months';
 import { CorrelationPlotOptions, VisualizationStateService } from '../visualization-state.service';
+import { MonthlyData } from 'src/app/models/calanderization';
+import * as _ from 'lodash';
 
 @Component({
   selector: 'app-correlation-plot-menu',
@@ -30,7 +30,6 @@ export class CorrelationPlotMenuComponent {
   facility: IdbFacility;
   facilitySub: Subscription;
   constructor(private visualizationStateService: VisualizationStateService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
     private facilityDbService: FacilitydbService,
     private dbChangesService: DbChangesService) {
   }
@@ -38,10 +37,10 @@ export class CorrelationPlotMenuComponent {
   ngOnInit() {
     this.facilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
       this.facility = val;
+      this.setYears();
     });
     this.correlationPlotOptionsSub = this.visualizationStateService.correlationPlotOptions.subscribe(correlationPlotOptions => {
       this.setDateRange();
-      this.years = this.utilityMeterDataDbService.getYearOptions();
       this.correlationPlotOptions = correlationPlotOptions;
     });
   }
@@ -131,6 +130,14 @@ export class CorrelationPlotMenuComponent {
     })
 
     this.savePlotOptions();
+  }
+
+
+  setYears() {
+    let combinedMonthlyData: Array<MonthlyData> = this.visualizationStateService.calanderizedMeters.flatMap(cMeter => { return cMeter.monthlyData });
+    let allYears: Array<number> = combinedMonthlyData.flatMap(monthlyData => { return monthlyData.year });
+    allYears = _.uniq(allYears);
+    this.years = allYears;
   }
 }
 

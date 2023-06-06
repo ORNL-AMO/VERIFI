@@ -12,6 +12,7 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { firstValueFrom } from 'rxjs';
 import { AnalysisValidationService } from 'src/app/shared/helper-services/analysis-validation.service';
+import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 @Component({
   selector: 'app-analysis-setup',
   templateUrl: './analysis-setup.component.html',
@@ -32,13 +33,14 @@ export class AnalysisSetupComponent implements OnInit {
     private analysisService: AnalysisService, private router: Router,
     private analysisValidationService: AnalysisValidationService,
     private dbChangesService: DbChangesService,
-    private accountDbService: AccountdbService) { }
+    private accountDbService: AccountdbService,
+    private calanderizationService: CalanderizationService) { }
 
   ngOnInit(): void {
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
     this.facility = this.facilityDbService.selectedFacility.getValue();
     this.energyUnit = this.facility.energyUnit;
-    this.yearOptions = this.utilityMeterDataDbService.getYearOptions(this.facility.guid);
+    this.yearOptions = this.calanderizationService.getYearOptionsFacility(this.facility.guid);
     this.setBaselineYearWarning();
   }
 
@@ -69,7 +71,7 @@ export class AnalysisSetupComponent implements OnInit {
   setBaselineYearWarning() {
     if (this.analysisItem.baselineYear && this.facility.sustainabilityQuestions.energyReductionBaselineYear != this.analysisItem.baselineYear) {
       this.baselineYearWarning = "This baseline year does not match your facility baseline year. This analysis cannot be included in reports or figures relating to the facility energy goal."
-    }else{
+    } else {
       this.baselineYearWarning = undefined;
     }
   }
