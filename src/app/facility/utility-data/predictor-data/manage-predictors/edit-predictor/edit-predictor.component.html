@@ -13,9 +13,6 @@
                 <span *ngIf="addOrEdit == 'edit'">Save Changes</span>
             </button>
             <ng-container *ngIf="facilityPredictorsEntries.length == 0">
-                <!-- <button class="btn btn-primary me-2" (click)="addAnotherPredictor()" [disabled]="predictorForm.invalid">
-                    Add Another Predictor
-                </button> -->
                 <button *ngIf="predictorForm.controls.predictorType.value == 'Standard'" class="btn nav-btn"
                     (click)="goToPredictorEntry()" [disabled]="predictorForm.invalid">
                     Add Predictor Entry Data <span class="fa fa-chevron-right"></span>
@@ -26,11 +23,6 @@
                 </button>
             </ng-container>
         </div>
-        <!-- <div class="d-flex justify-content-end pt-2" *ngIf="facilityPredictorsEntries.length == 0">
-            <div class="alert alert-info">
-                Add additional predictors or go to the predictor entry data form to add your first predictor entry.
-            </div>
-        </div> -->
     </div>
 </div>
 <form [formGroup]="predictorForm">
