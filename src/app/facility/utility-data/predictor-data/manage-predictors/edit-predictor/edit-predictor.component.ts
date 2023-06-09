@@ -14,7 +14,7 @@ import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Observable, of } from 'rxjs';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
@@ -286,5 +286,13 @@ export class EditPredictorComponent {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.setPredictors(selectedAccount, this.facility)
     this.saveChanges();
+  }
+  
+  canDeactivate(): Observable<boolean> {
+    if (this.predictorForm.dirty) {
+      const result = window.confirm('There are unsaved changes! Are you sure you want to leave this page?');
+      return of(result);
+    }
+    return of(true);
   }
 }
