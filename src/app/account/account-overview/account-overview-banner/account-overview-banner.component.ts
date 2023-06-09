@@ -1,14 +1,15 @@
 import { Component, OnInit } from '@angular/core';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
-import { Subscription } from 'rxjs';
+import { Subscription, firstValueFrom } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { IdbAccount, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import { IdbAccount, IdbUtilityMeter } from 'src/app/models/idb';
 import { NavigationEnd, Router } from '@angular/router';
 import { AccountOverviewService } from '../account-overview.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { Month, Months } from 'src/app/shared/form-data/months';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import * as _ from 'lodash';
+import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
+import { MonthlyData } from 'src/app/models/calanderization';
 
 @Component({
   selector: 'app-account-overview-banner',
@@ -38,8 +39,7 @@ export class AccountOverviewBannerComponent implements OnInit {
   constructor(private sharedDataService: SharedDataService, private accountDbService: AccountdbService,
     private router: Router,
     private accountOverviewService: AccountOverviewService,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService) { }
+    private utilityMeterDbService: UtilityMeterdbService) { }
 
   ngOnInit(): void {
     this.modalOpenSub = this.sharedDataService.modalOpen.subscribe(val => {
@@ -93,8 +93,8 @@ export class AccountOverviewBannerComponent implements OnInit {
   async setAccountEnergyIsSource(energyIsSource: boolean) {
     if (this.selectedAccount.energyIsSource != energyIsSource) {
       this.selectedAccount.energyIsSource = energyIsSource;
-      let updatedAccount: IdbAccount = await this.accountDbService.updateWithObservable(this.selectedAccount).toPromise();
-      let allAccounts: Array<IdbAccount> = await this.accountDbService.getAll().toPromise();
+      let updatedAccount: IdbAccount = await firstValueFrom(this.accountDbService.updateWithObservable(this.selectedAccount));
+      let allAccounts: Array<IdbAccount> = await firstValueFrom(this.accountDbService.getAll());
       this.accountDbService.allAccounts.next(allAccounts);
       this.accountDbService.selectedAccount.next(this.selectedAccount);
     }
@@ -123,13 +123,10 @@ export class AccountOverviewBannerComponent implements OnInit {
     });
   }
 
-  setYears() {
-    let utilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
-    let years: Array<number> = utilityMeterData.map(meterData => {
-      let date: Date = new Date(meterData.readDate);
-      return date.getFullYear();
-    });
-    this.years = _.uniq(years);
-    this.years = _.orderBy(this.years);
+  setYears(){
+    let combinedMonthlyData: Array<MonthlyData> = this.accountOverviewService.calanderizedMeters.flatMap(cMeter => {return cMeter.monthlyData});
+    let allYears: Array<number> = combinedMonthlyData.flatMap(monthlyData => {return monthlyData.year});
+    allYears = _.uniq(allYears);
+    this.years = allYears;
   }
 }

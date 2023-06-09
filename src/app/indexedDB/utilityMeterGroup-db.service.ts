@@ -1,7 +1,7 @@
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { Injectable } from '@angular/core';
 import { IdbUtilityMeterGroup } from '../models/idb';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
 
 @Injectable({
     providedIn: 'root'
@@ -15,13 +15,14 @@ export class UtilityMeterGroupdbService {
         this.accountMeterGroups = new BehaviorSubject<Array<IdbUtilityMeterGroup>>(new Array());
     }
 
-
-    getAllByFacilityWithObservable(facilityId: string): Observable<Array<IdbUtilityMeterGroup>> {
-        return this.getAllByIndexRange('facilityId', facilityId);
-    }
-
     getAll(): Observable<Array<IdbUtilityMeterGroup>> {
         return this.dbService.getAll('utilityMeterGroups');
+    }
+
+    async getAllAccountMeterGroups(accountId: string): Promise<Array<IdbUtilityMeterGroup>> {
+        let allMeterGroups: Array<IdbUtilityMeterGroup> = await firstValueFrom(this.getAll());
+        let accountMeterGroups: Array<IdbUtilityMeterGroup> = allMeterGroups.filter(meterGroup => { return meterGroup.accountId == accountId });
+        return accountMeterGroups;
     }
 
     getById(groupId: number): Observable<IdbUtilityMeterGroup> {
@@ -30,11 +31,6 @@ export class UtilityMeterGroupdbService {
 
     getByIndex(indexName: string, indexValue: number): Observable<IdbUtilityMeterGroup> {
         return this.dbService.getByIndex('utilityMeterGroups', indexName, indexValue);
-    }
-
-    getAllByIndexRange(indexName: string, indexValue: number | string): Observable<Array<IdbUtilityMeterGroup>> {
-        let idbKeyRange: IDBKeyRange = IDBKeyRange.only(indexValue);
-        return this.dbService.getAllByIndex('utilityMeterGroups', indexName, idbKeyRange);
     }
 
     count() {
@@ -66,7 +62,7 @@ export class UtilityMeterGroupdbService {
 
     async deleteMeterGroupAsync(meterGroups: Array<IdbUtilityMeterGroup>) {
         for (let i = 0; i < meterGroups.length; i++) {
-            await this.deleteWithObservable(meterGroups[i].id).toPromise();
+            await firstValueFrom(this.deleteWithObservable(meterGroups[i].id));
         }
     }
 

@@ -119,13 +119,6 @@ export const dbConfig: DBConfig = {
     ]
   },
   {
-    store: 'overviewReportOptions',
-    storeConfig: { keyPath: 'id', autoIncrement: true },
-    storeSchema: [
-      { name: 'accountId', keypath: 'accountId', options: { unique: false } },
-    ]
-  },
-  {
     store: 'analysisItems',
     storeConfig: { keyPath: 'id', autoIncrement: true },
     storeSchema: [

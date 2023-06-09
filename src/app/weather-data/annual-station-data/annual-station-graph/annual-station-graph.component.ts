@@ -1,5 +1,6 @@
 import { Component, Input, ViewChild, ElementRef, SimpleChanges } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
+import { WeatherDataSelection } from 'src/app/models/degreeDays';
 import { Months } from 'src/app/shared/form-data/months';
 
 @Component({
@@ -9,9 +10,11 @@ import { Months } from 'src/app/shared/form-data/months';
 })
 export class AnnualStationGraphComponent {
   @Input()
-  yearSummaryData: Array<{ date: Date, heatingDegreeDays: number, coolingDegreeDays: number  }>;
+  yearSummaryData: Array<{ date: Date, heatingDegreeDays: number, coolingDegreeDays: number }>;
   @Input()
   selectedYear: number;
+  @Input()
+  weatherDataSelection: WeatherDataSelection;
 
 
   @ViewChild('degreeDaysChart', { static: false }) degreeDaysChart: ElementRef;
@@ -24,15 +27,16 @@ export class AnnualStationGraphComponent {
   }
 
   ngOnChanges(change: SimpleChanges) {
-    if (change.yearSummaryData && !change.yearSummaryData.isFirstChange()) {
+    if ((change.yearSummaryData && !change.yearSummaryData.isFirstChange()) || (change.weatherDataSelection && !change.weatherDataSelection.isFirstChange())) {
       this.drawChart();
     }
   }
 
   drawChart() {
     if (this.degreeDaysChart) {
-      let traceData = [
-        {
+      let traceData = [];
+      if (this.weatherDataSelection == 'HDD' || this.weatherDataSelection == 'degreeDays') {
+        traceData.push({
           x: this.yearSummaryData.map(data => { return Months[data.date.getMonth()].name }),
           y: this.yearSummaryData.map(data => { return data.heatingDegreeDays }),
           type: 'bar',
@@ -40,8 +44,11 @@ export class AnnualStationGraphComponent {
           marker: {
             color: '#C0392B'
           }
-        },
-        {
+        })
+      }
+
+      if (this.weatherDataSelection == 'CDD' || this.weatherDataSelection == 'degreeDays') {
+        traceData.push({
           x: this.yearSummaryData.map(data => { return Months[data.date.getMonth()].name }),
           y: this.yearSummaryData.map(data => { return data.coolingDegreeDays }),
           type: 'bar',
@@ -49,8 +56,8 @@ export class AnnualStationGraphComponent {
           marker: {
             color: '#2980B9'
           }
-        },
-      ];
+        })
+      }
 
       var layout = {
         legend: {

@@ -1,9 +1,7 @@
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { Injectable } from '@angular/core';
-import { IdbAccount, IdbFacility, IdbUtilityMeter, MeterSource } from '../models/idb';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { FacilitydbService } from './facility-db.service';
-import { AccountdbService } from './account-db.service';
+import { IdbUtilityMeter, MeterSource } from '../models/idb';
+import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
 
 @Injectable({
     providedIn: 'root'
@@ -12,7 +10,7 @@ export class UtilityMeterdbService {
 
     facilityMeters: BehaviorSubject<Array<IdbUtilityMeter>>;
     accountMeters: BehaviorSubject<Array<IdbUtilityMeter>>;
-    constructor(private dbService: NgxIndexedDBService, private facilityDbService: FacilitydbService, private accountdbService: AccountdbService) {
+    constructor(private dbService: NgxIndexedDBService) {
         this.facilityMeters = new BehaviorSubject<Array<IdbUtilityMeter>>(new Array());
         this.accountMeters = new BehaviorSubject<Array<IdbUtilityMeter>>(new Array());
     }
@@ -21,17 +19,18 @@ export class UtilityMeterdbService {
         return this.dbService.getAll('utilityMeter');
     }
 
+    async getAllAccountMeters(accountId: string): Promise<Array<IdbUtilityMeter>> {
+        let allMeters: Array<IdbUtilityMeter> = await firstValueFrom(this.getAll())
+        let accountMeters: Array<IdbUtilityMeter> = allMeters.filter(meter => { return meter.accountId == accountId });
+        return accountMeters;
+    }
+
     getById(meterId: number): Observable<IdbUtilityMeter> {
         return this.dbService.getByKey('utilityMeter', meterId);
     }
 
     getByIndex(indexName: string, indexValue: number): Observable<IdbUtilityMeter> {
         return this.dbService.getByIndex('utilityMeter', indexName, indexValue);
-    }
-
-    getAllByIndexRange(indexName: string, indexValue: number | string): Observable<Array<IdbUtilityMeter>> {
-        let idbKeyRange: IDBKeyRange = IDBKeyRange.only(indexValue);
-        return this.dbService.getAllByIndex('utilityMeter', indexName, idbKeyRange);
     }
 
     count() {
@@ -65,7 +64,7 @@ export class UtilityMeterdbService {
 
     async deleteMeterEntriesAsync(meterEntries: Array<IdbUtilityMeter>) {
         for (let i = 0; i < meterEntries.length; i++) {
-            await this.deleteIndexWithObservable(meterEntries[i].id).toPromise();
+            await firstValueFrom(this.deleteIndexWithObservable(meterEntries[i].id));
         }
     }
 

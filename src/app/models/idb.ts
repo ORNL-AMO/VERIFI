@@ -1,7 +1,8 @@
+import { AccountAnalysisSetupErrors } from './accountAnalysis';
 import { JStatRegressionModel } from './analysis';
-import { CalanderizedMeter, MonthlyData } from './calanderization';
+import { MonthlyData } from './calanderization';
 import { ElectricityDataFilters, GeneralUtilityDataFilters } from './meterDataFilter';
-import { BetterPlantsReportSetup, DataOverviewReportSetup, ReportOptions } from './overview-report';
+import { BetterPlantsReportSetup, DataOverviewReportSetup } from './overview-report';
 import { SustainabilityQuestions } from './sustainabilityQuestions';
 
 export interface IdbAccount {
@@ -85,7 +86,8 @@ export interface IdbFacility {
     contactEmail: string,
     contactPhone: string,
     modifiedDate?: Date,
-    facilityOrder?: number
+    facilityOrder?: number,
+    isNewFacility?: boolean
 }
 
 export interface IdbUtilityMeterGroup {
@@ -173,7 +175,8 @@ export interface IdbUtilityMeterData {
     totalLocationEmissions?: number,
     RECs?: number,
     excessRECs?: number,
-    excessRECsEmissions?: number
+    excessRECsEmissions?: number,
+    isEstimated?: boolean,
 
 
     //electricity
@@ -248,21 +251,6 @@ export interface PredictorData {
 export type PredictorType = 'Standard' | 'Conversion' | 'Math' | 'Weather'
 export type WeatherDataType = 'HDD' | 'CDD'
 
-export interface IdbOverviewReportOptions {
-    id?: number,
-    guid: string,
-    accountId: string,
-    reportOptions: ReportOptions,
-    date: Date,
-    type: 'report' | 'template',
-    name: string,
-    baselineYear?: number,
-    targetYear?: number,
-    title?: string,
-    reportOptionsType?: 'betterPlants' | 'data'
-}
-
-
 export interface IdbAccountReport {
     id?: number,
     guid: string,
@@ -295,7 +283,8 @@ export interface IdbAnalysisItem {
     energyUnit: string,
     setupErrors: AnalysisSetupErrors,
     groups: Array<AnalysisGroup>,
-    selectedYearAnalysis?: boolean
+    selectedYearAnalysis?: boolean,
+    baselineYear: number
 }
 
 export interface AnalysisSetupErrors {
@@ -303,8 +292,11 @@ export interface AnalysisSetupErrors {
     missingName: boolean,
     noGroups: boolean,
     missingReportYear: boolean,
+    missingBaselineYear: boolean,
     reportYearBeforeBaselineYear: boolean,
-    groupsHaveErrors: boolean
+    groupsHaveErrors: boolean,
+    baselineYearAfterMeterDataEnd: boolean,
+    baselineYearBeforeMeterDataStart: boolean,
 }
 
 export interface AnalysisGroup {
@@ -365,7 +357,9 @@ export interface IdbAccountAnalysisItem {
         year: number,
         amount: number
     }>,
-    selectedYearAnalysis?: boolean
+    selectedYearAnalysis?: boolean,
+    baselineYear: number,
+    setupErrors: AccountAnalysisSetupErrors
 }
 
 

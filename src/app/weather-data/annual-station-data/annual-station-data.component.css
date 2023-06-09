@@ -5,3 +5,7 @@
 .btn-margin{
     margin-top: 20px;
 }
+
+.btn-col{
+    width: fit-content;
+}

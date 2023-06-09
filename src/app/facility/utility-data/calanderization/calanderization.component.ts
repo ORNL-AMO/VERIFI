@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { Subscription, firstValueFrom } from 'rxjs';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { CalanderizationFilters, CalanderizationOptions, CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
@@ -218,7 +218,7 @@ export class CalanderizationComponent implements OnInit {
   }
 
   async setDataApplication() {
-    await this.utilityMeterDbService.updateWithObservable(this.dataApplicationMeter).toPromise();
+    await firstValueFrom(this.utilityMeterDbService.updateWithObservable(this.dataApplicationMeter));
     this.selectedMeter = this.dataApplicationMeter;
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.setMeters(selectedAccount, this.selectedFacility)

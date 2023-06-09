@@ -12,7 +12,14 @@
     </p>
     <form>
         <div class="row">
-            <div class="col-lg-3 col-md-12 col-sm-12">
+            <div class="col-1 btn-col">
+                <div class="btn-margin">
+                    <button class="btn nav-btn" (click)="goToStations()">
+                        <span class="fa fa-chevron-left"></span>
+                    </button>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-12 col-sm-12">
                 <label class="semibold" for="selectedYear">Select Year</label>
                 <select id="selectedYear" [(ngModel)]="selectedYear" class="form-select" name="selectedYear"
                     (change)="changeYear()">
@@ -21,12 +28,21 @@
                     </option>
                 </select>
             </div>
-            <div class="col-lg-3 col-md-12 col-sm-12">
+            <div class="col-lg-2 col-md-12 col-sm-12">
+                <label class="semibold" for="weatherDataSelection">Select Data</label>
+                <select id="weatherDataSelection" [(ngModel)]="weatherDataSelection" class="form-select"
+                    name="weatherDataSelection" (change)="setWeatherDataOption()">
+                    <option *ngFor="let option of weatherDataSelectionOptions" [ngValue]="option.selection">
+                        {{option.label}}
+                    </option>
+                </select>
+            </div>
+            <div class="col-lg-2 col-md-12 col-sm-12"
+                *ngIf="weatherDataSelection == 'degreeDays' || weatherDataSelection == 'HDD'">
                 <label class="semibold" for="heatingTemp">Heating Base Temperature</label>
                 <div class="mb-3 input-group">
                     <input id="heatingTemp" class="form-control" type="number" [(ngModel)]="heatingTemp"
                         onfocus="this.select();" name="heatingTemp" (input)="setHeatingBaseTemp()" required>
-                    <!--TODO: Temperature units-->
                     <span class="input-group-text">
                         &#8457;
                     </span>
@@ -34,12 +50,12 @@
                 <div class="alert-danger alert" *ngIf="heatingTemp == undefined">
                     Value Required</div>
             </div>
-            <div class="col-lg-3 col-md-12 col-sm-12">
+            <div class="col-lg-2 col-md-12 col-sm-12"
+                *ngIf="weatherDataSelection == 'degreeDays' || weatherDataSelection == 'CDD'">
                 <label class="semibold" for="coolingTemp">Cooling Base Temperature</label>
                 <div class="mb-3 input-group">
                     <input id="heatingTemp" class="form-control" type="number" [(ngModel)]="coolingTemp"
                         onfocus="this.select();" name="coolingTemp" (input)="setCoolingBaseTemp()" required>
-                    <!--TODO: Temperature units-->
                     <span class="input-group-text">
                         &#8457;
                     </span>
@@ -71,11 +87,12 @@
     </div>
     <div class="row" *ngIf="yearSummaryData && yearSummaryData.length != 0">
         <div class="col-lg-6 col-md-12 col-sm-12">
-            <app-annual-station-graph [yearSummaryData]="yearSummaryData"
-                [selectedYear]="selectedYear"></app-annual-station-graph>
+            <app-annual-station-graph [yearSummaryData]="yearSummaryData" [selectedYear]="selectedYear"
+                [weatherDataSelection]="weatherDataSelection"></app-annual-station-graph>
         </div>
         <div class="col-lg-6 col-md-12 col-sm-12">
-            <app-annual-station-table [yearSummaryData]="yearSummaryData"></app-annual-station-table>
+            <app-annual-station-table [yearSummaryData]="yearSummaryData"
+                [weatherDataSelection]="weatherDataSelection"></app-annual-station-table>
         </div>
     </div>
 </ng-container>

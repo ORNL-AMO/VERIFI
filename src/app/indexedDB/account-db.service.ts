@@ -51,8 +51,6 @@ export class AccountdbService {
         return this.dbService.delete('accounts', accountId);
     }
 
-
-    //TODO: MOVE
     // *WARNING* Can not be undone
     deleteDatabase() {
         try {

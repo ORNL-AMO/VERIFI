@@ -43,7 +43,7 @@
         <div class="ps-2" *ngIf="dataInitialized && activeAccount">Last Backup: (<span
                 *ngIf="lastBackupDate">{{lastBackupDate | date:'medium'}}</span><span
                 *ngIf="!lastBackupDate">&mdash;</span>)</div>
-        <!--TODO: Remove For Production-->
+        <!--Doesnt Show In Production-->
         <div class="ps-2" *ngIf="!isProduction">
             <button *ngIf="!resetDatabase" class="btn btn-danger" (click)="toggleResetDatabase()">Reset
                 Database

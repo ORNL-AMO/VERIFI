@@ -1,44 +1,5 @@
 import { AnnualAnalysisSummary } from "./analysis";
-import { IdbFacility, MeterSource } from "./idb";
-
-
-export interface ReportOptions {
-  title: string,
-  notes: string,
-  includeAccount: boolean,
-  accountInfo: boolean,
-  facilitySummaryTable: boolean,
-  accountUtilityTable: boolean,
-  accountFacilityCharts: boolean,
-  includeFacilities: boolean,
-  facilityMetersTable: boolean,
-  facilityUtilityUsageTable: boolean,
-  facilityInfo: boolean,
-  templateId: number,
-  electricity: boolean,
-  naturalGas: boolean,
-  otherFuels: boolean,
-  otherEnergy: boolean,
-  water: boolean,
-  wasteWater: boolean,
-  otherUtility: boolean,
-  facilities: Array<{
-    facilityId: string,
-    selected: boolean
-  }>,
-  baselineYear: number,
-  targetYear: number,
-  monthBarCharts: boolean,
-  annualBarCharts: boolean,
-  energyIsSource: boolean,
-  meterReadings: boolean,
-  reportType: 'data' | 'betterPlants',
-  analysisItemId: string,
-  baselineAdjustmentNotes: string,
-  modificationNotes: string,
-  includeFacilityNames: boolean
-}
-
+import { IdbFacility } from "./idb";
 
 export interface BetterPlantsSummary {
   percentAnnualImprovement: number,
@@ -55,8 +16,6 @@ export interface BetterPlantsSummary {
     performance: number
   }>
 }
-
-
 
 export interface BetterPlantsEnergySummary {
   numberOfFacilities: number,

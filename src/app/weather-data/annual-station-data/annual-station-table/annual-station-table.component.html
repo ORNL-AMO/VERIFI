@@ -2,8 +2,8 @@
     <thead>
         <tr>
             <th>Month</th>
-            <th>Heating Degree Days</th>
-            <th>Cooling Degree Days</th>
+            <th *ngIf="weatherDataSelection == 'degreeDays' || weatherDataSelection == 'HDD'">Heating Degree Days</th>
+            <th *ngIf="weatherDataSelection == 'degreeDays' || weatherDataSelection == 'CDD'">Cooling Degree Days</th>
         </tr>
     </thead>
     <tbody class="table-group-divider">
@@ -14,10 +14,10 @@
                     {{degreeDay.date | date:'MMM. y'}}
                 </a>
             </td>
-            <td>
+            <td *ngIf="weatherDataSelection == 'degreeDays' || weatherDataSelection == 'HDD'">
                 {{degreeDay.heatingDegreeDays | number}}
             </td>
-            <td>
+            <td *ngIf="weatherDataSelection == 'degreeDays' || weatherDataSelection == 'CDD'">
                 {{degreeDay.coolingDegreeDays | number}}
             </td>
         </tr>
@@ -27,10 +27,10 @@
             <th>
                 Total
             </th>
-            <th>
+            <th *ngIf="weatherDataSelection == 'degreeDays' || weatherDataSelection == 'HDD'">
                 {{yearSummaryData | total: 'heatingDegreeDays' | number}}
             </th>
-            <th>
+            <th *ngIf="weatherDataSelection == 'degreeDays' || weatherDataSelection == 'CDD'">
                 {{yearSummaryData | total: 'coolingDegreeDays' | number}}
             </th>
         </tr>

@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { Subscription, firstValueFrom } from 'rxjs';
 import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
@@ -13,8 +13,9 @@ import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { AnalysisGroup, IdbAccount, IdbAnalysisItem, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { RegressionModelsService } from 'src/app/shared/shared-analysis/calculations/regression-models.service';
 import * as _ from 'lodash';
-import { AnalysisValidationService } from 'src/app/facility/analysis/analysis-validation.service';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
+import { AnalysisValidationService } from 'src/app/shared/helper-services/analysis-validation.service';
+import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 @Component({
   selector: 'app-regression-model-menu',
   templateUrl: './regression-model-menu.component.html',
@@ -39,12 +40,13 @@ export class RegressionModelMenuComponent implements OnInit {
     private regressionsModelsService: RegressionModelsService, private predictorDbService: PredictordbService,
     private utilityMeterDbService: UtilityMeterdbService, private utilityMeterDataDbService: UtilityMeterDatadbService,
     private analysisValidationService: AnalysisValidationService,
-    private sharedDataService: SharedDataService) { }
+    private sharedDataService: SharedDataService,
+    private calanderizationService: CalanderizationService) { }
 
   ngOnInit(): void {
     this.selectedFacility = this.facilityDbService.selectedFacility.getValue();
     this.showInvalid = this.analysisService.showInvalidModels.getValue();
-    this.yearOptions = this.utilityMeterDataDbService.getYearOptions();
+    this.yearOptions = this.calanderizationService.getYearOptionsFacility(this.selectedFacility.guid);
     this.selectedGroupSub = this.analysisService.selectedGroup.subscribe(group => {
       if (!this.isFormChange) {
         this.group = JSON.parse(JSON.stringify(group));
@@ -74,7 +76,7 @@ export class RegressionModelMenuComponent implements OnInit {
     this.group.groupErrors = this.analysisValidationService.getGroupErrors(this.group);
 
     analysisItem.groups[groupIndex] = this.group;
-    await this.analysisDbService.updateWithObservable(analysisItem).toPromise();
+    await firstValueFrom(this.analysisDbService.updateWithObservable(analysisItem));
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     this.dbChangesService.setAnalysisItems(selectedAccount, this.selectedFacility);
     this.analysisDbService.selectedAnalysisItem.next(analysisItem);

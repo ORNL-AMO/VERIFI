@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { FormGroup } from '@angular/forms';
-import { Subscription } from 'rxjs';
+import { Subscription, firstValueFrom } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
@@ -51,7 +51,7 @@ export class DataOverviewSetupComponent {
     let selectedReport: IdbAccountReport = this.accountReportDbService.selectedReport.getValue()
     // selectedReport.dataOverviewReportSetup = this.accountReportsService.updateDataOverviewReportFromForm(selectedReport.dataOverviewReportSetup, this.overviewForm);
     selectedReport.dataOverviewReportSetup = this.reportSetup;
-    await this.accountReportDbService.updateWithObservable(selectedReport).toPromise();
+    await firstValueFrom(this.accountReportDbService.updateWithObservable(selectedReport));
     await this.dbChangesService.setAccountReports(this.account);
     this.accountReportDbService.selectedReport.next(selectedReport);
   }

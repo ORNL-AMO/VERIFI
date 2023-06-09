@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Subscription, firstValueFrom } from 'rxjs';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
@@ -21,6 +21,7 @@ export class AccountAnalysisItemCardComponent implements OnInit {
   showDetailSub: Subscription;
   showDetail: boolean;
   displayDeleteModal: boolean = false;
+  selectedAccount: IdbAccount;
   constructor(private router: Router,
     private analysisService: AnalysisService, private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService, private toastNotificationService: ToastNotificationsService,
@@ -28,6 +29,7 @@ export class AccountAnalysisItemCardComponent implements OnInit {
     private accountReportDbService: AccountReportDbService) { }
 
   ngOnInit(): void {
+    this.selectedAccount = this.accountDbService.selectedAccount.getValue();
     this.showDetailSub = this.analysisService.showDetail.subscribe(val => {
       this.showDetail = val;
     });
@@ -39,8 +41,11 @@ export class AccountAnalysisItemCardComponent implements OnInit {
 
   selectAnalysisItem() {
     this.accountAnalysisDbService.selectedAnalysisItem.next(this.analysisItem);
-    //todo: route to results if item setup
-    this.router.navigateByUrl('account/analysis/setup');
+    if (this.analysisItem.setupErrors.hasError || this.analysisItem.setupErrors.facilitiesSelectionsInvalid) {
+      this.router.navigateByUrl('account/analysis/setup');
+    } else {
+      this.router.navigateByUrl('account/analysis/results');
+    }
   }
 
   deleteItem() {
@@ -52,21 +57,17 @@ export class AccountAnalysisItemCardComponent implements OnInit {
   }
 
   async confirmDelete() {
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    await this.accountAnalysisDbService.deleteWithObservable(this.analysisItem.id).toPromise();
+    await firstValueFrom(this.accountAnalysisDbService.deleteWithObservable(this.analysisItem.id));
     let accountReports: Array<IdbAccountReport> = this.accountReportDbService.accountReports.getValue();
     let updateReportOptions: boolean = false;
     for (let i = 0; i < accountReports.length; i++) {
       if (accountReports[i].betterPlantsReportSetup.analysisItemId == this.analysisItem.guid) {
         accountReports[i].betterPlantsReportSetup.analysisItemId = undefined;
-        await this.accountReportDbService.updateWithObservable(accountReports[i]).toPromise();
+        await firstValueFrom(this.accountReportDbService.updateWithObservable(accountReports[i]));
         updateReportOptions = true;
       }
     }
-    await this.dbChangesService.setAccountAnalysisItems(selectedAccount);
-    if (updateReportOptions) {
-      await this.dbChangesService.setAccountOverviewReportOptions(selectedAccount);
-    }
+    await this.dbChangesService.setAccountAnalysisItems(this.selectedAccount);
     this.displayDeleteModal = false;
     this.toastNotificationService.showToast('Analysis Item Deleted', undefined, undefined, false, "alert-success");
   }
@@ -80,25 +81,22 @@ export class AccountAnalysisItemCardComponent implements OnInit {
         } else {
           accountAnalysisItems[i].selectedYearAnalysis = true;
         }
-        await this.accountAnalysisDbService.updateWithObservable(accountAnalysisItems[i]).toPromise();
+        await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(accountAnalysisItems[i]));
       } else if (accountAnalysisItems[i].reportYear == this.analysisItem.reportYear && accountAnalysisItems[i].selectedYearAnalysis) {
         accountAnalysisItems[i].selectedYearAnalysis = false;
-        await this.accountAnalysisDbService.updateWithObservable(accountAnalysisItems[i]).toPromise();
+        await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(accountAnalysisItems[i]));
       }
     }
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    // let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    await this.dbChangesService.setAccountAnalysisItems(selectedAccount);
+    await this.dbChangesService.setAccountAnalysisItems(this.selectedAccount);
   }
 
   async createCopy() {
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let newItem: IdbAccountAnalysisItem = JSON.parse(JSON.stringify(this.analysisItem));
     delete newItem.id;
     newItem.name = newItem.name + ' (Copy)';
     newItem.guid = Math.random().toString(36).substr(2, 9);
-    let addedItem: IdbAccountAnalysisItem = await this.accountAnalysisDbService.addWithObservable(newItem).toPromise();
-    await this.dbChangesService.setAccountAnalysisItems(selectedAccount);
+    let addedItem: IdbAccountAnalysisItem = await firstValueFrom(this.accountAnalysisDbService.addWithObservable(newItem));
+    await this.dbChangesService.setAccountAnalysisItems(this.selectedAccount);
     this.accountAnalysisDbService.selectedAnalysisItem.next(addedItem);
     this.toastNotificationService.showToast('Analysis Item Copy Created', undefined, undefined, false, "alert-success");
     this.router.navigateByUrl('account/analysis/setup');

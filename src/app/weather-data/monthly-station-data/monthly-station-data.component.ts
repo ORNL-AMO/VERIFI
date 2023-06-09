@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { DetailDegreeDay, WeatherStation } from 'src/app/models/degreeDays';
+import { DetailDegreeDay, WeatherDataSelection, WeatherDataSelectionOption, WeatherDataSelectionOptions, WeatherStation } from 'src/app/models/degreeDays';
 import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
 import { WeatherDataService } from 'src/app/weather-data/weather-data.service';
 
@@ -18,6 +18,8 @@ export class MonthlyStationDataComponent {
   detailedDegreeDays: Array<DetailDegreeDay>;
   hasGapsInData: boolean;
   gapsInDataDate: Date;
+  weatherDataSelection: WeatherDataSelection;
+  weatherDataSelectionOptions: Array<WeatherDataSelectionOption> = WeatherDataSelectionOptions;
   constructor(private router: Router, private degreeDaysService: DegreeDaysService,
     private weatherDataService: WeatherDataService) {
 
@@ -31,6 +33,7 @@ export class MonthlyStationDataComponent {
     } else {
       this.heatingTemp = this.weatherDataService.heatingTemp;
       this.coolingTemp = this.weatherDataService.coolingTemp;
+      this.weatherDataSelection = this.weatherDataService.weatherDataSelection;
       this.setDegreeDays();
     }
   }
@@ -76,5 +79,9 @@ export class MonthlyStationDataComponent {
 
   showApplyToFacility() {
     this.weatherDataService.applyToFacility.next(true);
+  }
+  
+  setWeatherDataOption() {
+    this.weatherDataService.weatherDataSelection = this.weatherDataSelection;
   }
 }

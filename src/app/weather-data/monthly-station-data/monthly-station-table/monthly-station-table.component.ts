@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { DetailDegreeDay } from 'src/app/models/degreeDays';
+import { DetailDegreeDay, WeatherDataSelection } from 'src/app/models/degreeDays';
 import { Subscription } from 'rxjs';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 
@@ -11,6 +11,8 @@ import { SharedDataService } from 'src/app/shared/helper-services/shared-data.se
 export class MonthlyStationTableComponent {
   @Input()
   detailedDegreeDays: Array<DetailDegreeDay>;
+  @Input()
+  weatherDataSelection: WeatherDataSelection;
 
   currentPageNumber: number = 1;
   itemsPerPage: number = 6;

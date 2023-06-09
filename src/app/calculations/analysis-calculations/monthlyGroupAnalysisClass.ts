@@ -40,7 +40,7 @@ export class MonthlyGroupAnalysisClass {
     if (calculateAllMonthlyData) {
       let lastBill: MonthlyData = getLastBillEntryFromCalanderizedMeterData(calanderizedMeters);
       let lastPredictorEntry: IdbPredictorEntry = _.maxBy(this.facilityPredictorData, 'date');
-      if (lastBill.date > lastPredictorEntry.date) {
+      if (lastPredictorEntry && lastBill.date > lastPredictorEntry.date) {
         this.endDate = new Date(lastPredictorEntry.date);
       } else {
         this.endDate = new Date(lastBill.date);

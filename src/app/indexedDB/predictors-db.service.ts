@@ -1,13 +1,14 @@
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { IdbFacility, IdbPredictorEntry, PredictorData } from '../models/idb';
+import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
+import { IdbFacility, IdbPredictorEntry, IdbUtilityMeterData, PredictorData } from '../models/idb';
 import { FacilitydbService } from './facility-db.service';
 import * as _ from 'lodash';
 import { DegreeDaysService } from '../shared/helper-services/degree-days.service';
 import { DetailDegreeDay } from '../models/degreeDays';
 import { LoadingService } from '../core-components/loading/loading.service';
 import { Months } from '../shared/form-data/months';
+import { UtilityMeterDatadbService } from './utilityMeterData-db.service';
 
 @Injectable({
     providedIn: 'root'
@@ -18,7 +19,7 @@ export class PredictordbService {
     facilityPredictorEntries: BehaviorSubject<Array<IdbPredictorEntry>>;
     facilityPredictors: BehaviorSubject<Array<PredictorData>>;
     constructor(private dbService: NgxIndexedDBService, private facilityDbService: FacilitydbService, private degreeDaysService: DegreeDaysService,
-        private loadingService: LoadingService) {
+        private loadingService: LoadingService, private utilityMeterDataDbService: UtilityMeterDatadbService) {
         this.facilityPredictorEntries = new BehaviorSubject<Array<IdbPredictorEntry>>(new Array());
         this.facilityPredictors = new BehaviorSubject<Array<PredictorData>>(new Array());
         this.accountPredictorEntries = new BehaviorSubject<Array<IdbPredictorEntry>>(new Array());
@@ -28,17 +29,18 @@ export class PredictordbService {
         return this.dbService.getAll('predictors');
     }
 
+    async getAllAccountPredictors(accountId: string): Promise<Array<IdbPredictorEntry>> {
+        let allPredictors: Array<IdbPredictorEntry> = await firstValueFrom(this.getAll());
+        let predictors: Array<IdbPredictorEntry> = allPredictors.filter(predictor => { return predictor.accountId == accountId });
+        return predictors;
+    }
+
     getById(predictorId: number): Observable<IdbPredictorEntry> {
         return this.dbService.getByKey('predictors', predictorId);
     }
 
     getByIndex(indexName: string, indexValue: number): Observable<IdbPredictorEntry> {
         return this.dbService.getByIndex('predictors', indexName, indexValue);
-    }
-
-    getAllByIndexRange(indexName: string, indexValue: number | string): Observable<Array<IdbPredictorEntry>> {
-        let idbKeyRange: IDBKeyRange = IDBKeyRange.only(indexValue);
-        return this.dbService.getAllByIndex('predictors', indexName, idbKeyRange);
     }
 
     count() {
@@ -67,7 +69,7 @@ export class PredictordbService {
 
     async deletePredictorsAsync(accountPredictorEntries: Array<IdbPredictorEntry>) {
         for (let i = 0; i < accountPredictorEntries.length; i++) {
-            await this.deleteIndexWithObservable(accountPredictorEntries[i].id).toPromise();
+            await firstValueFrom(this.deleteIndexWithObservable(accountPredictorEntries[i].id));
         }
     }
 
@@ -119,6 +121,11 @@ export class PredictordbService {
             let maxDateEntry: Date = _.max(dates);
             newPredictorDate = new Date(maxDateEntry);
             newPredictorDate.setMonth(newPredictorDate.getMonth() + 1);
+        }else{
+            let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
+            let dates: Array<Date> = facilityMeterData.map(entry => { return new Date(entry.readDate) });
+            let startReadingsDate: Date = _.min(dates);
+            newPredictorDate = new Date(startReadingsDate);
         }
 
         let predictors: Array<PredictorData> = JSON.parse(JSON.stringify(this.facilityPredictors.getValue()))
@@ -139,7 +146,7 @@ export class PredictordbService {
     async importNewPredictorEntries(entries: Array<IdbPredictorEntry>) {
         for (let index = 0; index < entries.length; index++) {
             let entry: IdbPredictorEntry = entries[index];
-            await this.addWithObservable(entry).toPromise();
+            await firstValueFrom(this.addWithObservable(entry));
         }
     }
 
@@ -161,14 +168,14 @@ export class PredictordbService {
             for (let newIndex = 0; newIndex < newPredictors.length; newIndex++) {
                 facilityPredictorEntries[index].predictors.push(newPredictors[newIndex]);
             }
-            await this.updateWithObservable(facilityPredictorEntries[index]).toPromise();
+            if (facilityPredictorEntries[index].predictors.length > 0) {
+                await firstValueFrom(this.updateWithObservable(facilityPredictorEntries[index]));
+            } else {
+                await firstValueFrom(this.deleteIndexWithObservable(facilityPredictorEntries[index].id));
+            }
         }
         let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-        let accountPredictorEntries: Array<IdbPredictorEntry> = await this.getAllByIndexRange('accountId', selectedFacility.accountId).toPromise()
-        this.accountPredictorEntries.next(accountPredictorEntries);
-        let updatedFacilityPredictorEntries: Array<IdbPredictorEntry> = accountPredictorEntries.filter(predictor => { return predictor.facilityId == selectedFacility.guid });
-        this.facilityPredictorEntries.next(updatedFacilityPredictorEntries);
-        this.facilityPredictors.next(updatedPredictors);
+        await this.finishPredictorChanges(selectedFacility);
     }
 
     async updateFacilityPredictorEntriesInAccount(updatedPredictors: Array<PredictorData>, facility: IdbFacility) {
@@ -194,13 +201,14 @@ export class PredictordbService {
             for (let newIndex = 0; newIndex < newPredictors.length; newIndex++) {
                 facilityPredictorEntries[index].predictors.push(newPredictors[newIndex]);
             }
-            await this.updateWithObservable(facilityPredictorEntries[index]).toPromise();
+            if (facilityPredictorEntries[index].predictors.length > 0) {
+                await firstValueFrom(this.updateWithObservable(facilityPredictorEntries[index]));
+            } else {
+                console.log('DELETE ENTRY')
+                await firstValueFrom(this.deleteIndexWithObservable(facilityPredictorEntries[index].id));
+            }
         }
-        accountPredictorEntries = await this.getAllByIndexRange('accountId', facility.accountId).toPromise()
-        this.accountPredictorEntries.next(accountPredictorEntries);
-        let updatedFacilityPredictorEntries: Array<IdbPredictorEntry> = accountPredictorEntries.filter(predictor => { return predictor.facilityId == facility.guid });
-        this.facilityPredictorEntries.next(updatedFacilityPredictorEntries);
-        this.facilityPredictors.next(updatedPredictors);
+        await this.finishPredictorChanges(facility);
     }
 
     updateEntryPredictors(entryPredictors: Array<PredictorData>, updatedPredictors: Array<PredictorData>): Array<PredictorData> {
@@ -257,14 +265,9 @@ export class PredictordbService {
                     }
                 }
             }
-            await this.updateWithObservable(facilityPredictorEntries[index]).toPromise();
+            await firstValueFrom(this.updateWithObservable(facilityPredictorEntries[index]));
         }
-        // let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-        let accountPredictorEntries: Array<IdbPredictorEntry> = await this.getAllByIndexRange('accountId', facility.accountId).toPromise()
-        this.accountPredictorEntries.next(accountPredictorEntries);
-        let updatedFacilityPredictorEntries: Array<IdbPredictorEntry> = accountPredictorEntries.filter(predictor => { return predictor.facilityId == facility.guid });
-        this.facilityPredictorEntries.next(updatedFacilityPredictorEntries);
-        this.facilityPredictors.next(updatedFacilityPredictorEntries[0].predictors);
+        await this.finishPredictorChanges(facility);
     }
 
 
@@ -295,54 +298,70 @@ export class PredictordbService {
                 predictorData.weatherStationName = degreeDays[0]?.stationName;
                 predictorData.weatherDataWarning = hasErrors != undefined;
             }
-            await this.updateWithObservable(facilityPredictorEntries[index]).toPromise();
+            await firstValueFrom(this.updateWithObservable(facilityPredictorEntries[index]));
         }
-        // let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-        let accountPredictorEntries: Array<IdbPredictorEntry> = await this.getAllByIndexRange('accountId', facility.accountId).toPromise()
-        this.accountPredictorEntries.next(accountPredictorEntries);
-        let updatedFacilityPredictorEntries: Array<IdbPredictorEntry> = accountPredictorEntries.filter(predictor => { return predictor.facilityId == facility.guid });
-        this.facilityPredictorEntries.next(updatedFacilityPredictorEntries);
-        this.facilityPredictors.next(updatedFacilityPredictorEntries[0].predictors);
+        await this.finishPredictorChanges(facility);
     }
 
 
 
-    async createPredictorHeatingCoolingDegreeDays(facility: IdbFacility, heatingPredictor: PredictorData, coolingPredictor: PredictorData) {
+    async createPredictorHeatingCoolingDegreeDays(facility: IdbFacility, heatingPredictor?: PredictorData, coolingPredictor?: PredictorData) {
         let accountPredictorEntries: Array<IdbPredictorEntry> = this.accountPredictorEntries.getValue();
         let facilityPredictorEntries: Array<IdbPredictorEntry> = accountPredictorEntries.filter(predictorEntry => { return predictorEntry.facilityId == facility.guid });
         for (let index = 0; index < facilityPredictorEntries.length; index++) {
-            let predictorEntry: IdbPredictorEntry = facilityPredictorEntries[index];
-            let heatingPredictorIndex: number = predictorEntry.predictors.findIndex(predictor => { return predictor.id == heatingPredictor.id });
-            let heatingPredictorData: PredictorData = predictorEntry.predictors[heatingPredictorIndex];
-            let coolingPredictorIndex: number = predictorEntry.predictors.findIndex(predictor => { return predictor.id == coolingPredictor.id });
-            let coolingPredictorData: PredictorData = predictorEntry.predictors[coolingPredictorIndex];
             //get degree days
+            let weatherStationId: string;
+            let heatingBaseTemperature: number = 0;
+            if (heatingPredictor) {
+                weatherStationId = heatingPredictor.weatherStationId;
+                heatingBaseTemperature = heatingPredictor.heatingBaseTemperature;
+            }
+            let coolingBaseTemperature: number = 0;
+            if (coolingPredictor) {
+                weatherStationId = coolingPredictor.weatherStationId;
+                coolingBaseTemperature = coolingPredictor.coolingBaseTemperature;
+            }
+            let predictorEntry: IdbPredictorEntry = facilityPredictorEntries[index];
             let dataDate: Date = new Date(predictorEntry.date)
             this.loadingService.setLoadingMessage('Calculating Degree Days ' + Months[dataDate.getMonth()].name + ', ' + dataDate.getFullYear() + '...')
-            let degreeDays: Array<DetailDegreeDay> = await this.degreeDaysService.getDailyDataFromMonth(dataDate.getMonth(), dataDate.getFullYear(), heatingPredictorData.heatingBaseTemperature, coolingPredictorData.coolingBaseTemperature, heatingPredictorData.weatherStationId);
+            let degreeDays: Array<DetailDegreeDay> = await this.degreeDaysService.getDailyDataFromMonth(dataDate.getMonth(), dataDate.getFullYear(), heatingBaseTemperature, coolingBaseTemperature, weatherStationId);
             let hasErrors: DetailDegreeDay = degreeDays.find(degreeDay => {
                 return degreeDay.gapInData == true
             });
-            let totalCDD: number = _.sumBy(degreeDays, 'coolingDegreeDay');
-            coolingPredictorData.amount = totalCDD;
-            coolingPredictorData.weatherStationId = degreeDays[0]?.stationId;
-            coolingPredictorData.weatherStationName = degreeDays[0]?.stationName;
-            coolingPredictorData.weatherDataWarning = hasErrors != undefined;
-            let totalHDD: number = _.sumBy(degreeDays, 'heatingDegreeDay');
-            heatingPredictorData.amount = totalHDD;
-            heatingPredictorData.weatherStationId = degreeDays[0]?.stationId;
-            heatingPredictorData.weatherStationName = degreeDays[0]?.stationName;
-            heatingPredictorData.weatherDataWarning = hasErrors != undefined;
-            await this.updateWithObservable(facilityPredictorEntries[index]).toPromise();
+            if (heatingPredictor) {
+                let heatingPredictorIndex: number = predictorEntry.predictors.findIndex(predictor => { return predictor.id == heatingPredictor.id });
+                let heatingPredictorData: PredictorData = predictorEntry.predictors[heatingPredictorIndex];
+                let totalHDD: number = _.sumBy(degreeDays, 'heatingDegreeDay');
+                heatingPredictorData.amount = totalHDD;
+                heatingPredictorData.weatherStationId = degreeDays[0]?.stationId;
+                heatingPredictorData.weatherStationName = degreeDays[0]?.stationName;
+                heatingPredictorData.weatherDataWarning = hasErrors != undefined;
+            }
+            if (coolingPredictor) {
+                let coolingPredictorIndex: number = predictorEntry.predictors.findIndex(predictor => { return predictor.id == coolingPredictor.id });
+                let coolingPredictorData: PredictorData = predictorEntry.predictors[coolingPredictorIndex];
+                let totalCDD: number = _.sumBy(degreeDays, 'coolingDegreeDay');
+                coolingPredictorData.amount = totalCDD;
+                coolingPredictorData.weatherStationId = degreeDays[0]?.stationId;
+                coolingPredictorData.weatherStationName = degreeDays[0]?.stationName;
+                coolingPredictorData.weatherDataWarning = hasErrors != undefined;
+            }
+            await firstValueFrom(this.updateWithObservable(facilityPredictorEntries[index]));
         }
-        // let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-        accountPredictorEntries = await this.getAllByIndexRange('accountId', facility.accountId).toPromise()
+        await this.finishPredictorChanges(facility);
+    }
+
+    async finishPredictorChanges(facility: IdbFacility) {
+        let accountPredictorEntries: Array<IdbPredictorEntry> = await this.getAllAccountPredictors(facility.accountId);
         this.accountPredictorEntries.next(accountPredictorEntries);
         let updatedFacilityPredictorEntries: Array<IdbPredictorEntry> = accountPredictorEntries.filter(predictor => { return predictor.facilityId == facility.guid });
         this.facilityPredictorEntries.next(updatedFacilityPredictorEntries);
-        this.facilityPredictors.next(updatedFacilityPredictorEntries[0].predictors);
+        if (updatedFacilityPredictorEntries.length > 0) {
+            this.facilityPredictors.next(updatedFacilityPredictorEntries[0].predictors);
+        } else {
+            this.facilityPredictors.next([]);
+        }
     }
-
 
 
     updateWithObservable(values: IdbPredictorEntry): Observable<any> {

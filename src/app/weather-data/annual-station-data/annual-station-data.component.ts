@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { DetailDegreeDay, WeatherStation } from 'src/app/models/degreeDays';
+import { DetailDegreeDay, WeatherDataSelection, WeatherDataSelectionOption, WeatherDataSelectionOptions, WeatherStation } from 'src/app/models/degreeDays';
 import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
 import * as _ from 'lodash';
 import { WeatherDataService } from '../weather-data.service';
@@ -21,6 +21,8 @@ export class AnnualStationDataComponent {
   yearSummaryData: Array<{ date: Date, heatingDegreeDays: number, coolingDegreeDays: number, hasErrors: boolean }>;
   calculating: boolean;
   hasGapsInData: boolean;
+  weatherDataSelection: WeatherDataSelection;
+  weatherDataSelectionOptions: Array<WeatherDataSelectionOption> = WeatherDataSelectionOptions;
   constructor(private router: Router, private degreeDaysService: DegreeDaysService,
     private weatherDataService: WeatherDataService) {
 
@@ -35,6 +37,7 @@ export class AnnualStationDataComponent {
     this.selectedYear = this.weatherDataService.selectedYear;
     this.heatingTemp = this.weatherDataService.heatingTemp;
     this.coolingTemp = this.weatherDataService.coolingTemp;
+    this.weatherDataSelection = this.weatherDataService.weatherDataSelection;
     this.setDegreeDays();
   }
 
@@ -74,7 +77,7 @@ export class AnnualStationDataComponent {
         let hasErrors: DetailDegreeDay = monthData.find(degreeDay => {
           return degreeDay.gapInData == true
         });
-        if(!hasGapsInData){
+        if (!hasGapsInData) {
           hasGapsInData = hasErrors != undefined;
         }
         this.yearSummaryData.push({
@@ -110,5 +113,9 @@ export class AnnualStationDataComponent {
 
   showApplyToFacility() {
     this.weatherDataService.applyToFacility.next(true);
+  }
+
+  setWeatherDataOption() {
+    this.weatherDataService.weatherDataSelection = this.weatherDataSelection;
   }
 }

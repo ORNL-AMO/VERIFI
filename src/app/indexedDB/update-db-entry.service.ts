@@ -1,13 +1,14 @@
 import { Injectable } from '@angular/core';
-import { AnalysisValidationService } from '../facility/analysis/analysis-validation.service';
-import { AnalysisSetupErrors, GroupErrors, IdbAccount, IdbAnalysisItem, IdbFacility } from '../models/idb';
+import { AnalysisSetupErrors, GroupErrors, IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility } from '../models/idb';
+import { FacilitydbService } from './facility-db.service';
+import { AnalysisValidationService } from '../shared/helper-services/analysis-validation.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UpdateDbEntryService {
 
-  constructor(private analysisValidationService: AnalysisValidationService) { }
+  constructor(private analysisValidationService: AnalysisValidationService, private facilityDbService: FacilitydbService) { }
 
   updateAccount(account: IdbAccount): { account: IdbAccount, isChanged: boolean } {
     let isChanged: boolean = false;
@@ -54,6 +55,12 @@ export class UpdateDbEntryService {
       });
     }
 
+    if (!analysisItem.baselineYear) {
+      let facility: IdbFacility = this.facilityDbService.getFacilityById(analysisItem.facilityId);
+      analysisItem.baselineYear = facility.sustainabilityQuestions.energyReductionBaselineYear;
+      isChanged = true;
+    }
+
     analysisItem.groups.forEach(group => {
       if (!group.groupErrors) {
         group.groupErrors = this.analysisValidationService.getGroupErrors(group);
@@ -68,6 +75,20 @@ export class UpdateDbEntryService {
         });
       }
     });
+    return { analysisItem: analysisItem, isChanged: isChanged };
+  }
+
+  updateAccountAnalysis(analysisItem: IdbAccountAnalysisItem, account: IdbAccount, facilityAnalysisItems: Array<IdbAnalysisItem>): { analysisItem: IdbAccountAnalysisItem, isChanged: boolean } {
+    let isChanged: boolean = false;
+    if (!analysisItem.baselineYear) {
+      analysisItem.baselineYear = account.sustainabilityQuestions.energyReductionBaselineYear;
+      isChanged = true;
+    }
+
+    if (!analysisItem.setupErrors) {
+      analysisItem.setupErrors = this.analysisValidationService.getAccountAnalysisSetupErrors(analysisItem, facilityAnalysisItems);
+      isChanged = true;
+    }
     return { analysisItem: analysisItem, isChanged: isChanged };
   }
 

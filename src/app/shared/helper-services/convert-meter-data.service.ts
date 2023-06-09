@@ -21,7 +21,7 @@ export class ConvertMeterDataService {
         meterData[index].totalEnergyUse = this.convertUnitsService.value(meterData[index].totalEnergyUse).from(meter.energyUnit).to(facility.energyUnit);
       }
     } else {
-      let facilityUnit: string = this.energyUnitsHelperService.getFacilityUnitFromMeter(meter)
+      let facilityUnit: string = this.energyUnitsHelperService.getFacilityUnitFromMeter(meter);
       for (let index: number = 0; index < meterData.length; index++) {
         meterData[index].totalVolume = this.convertUnitsService.value(meterData[index].totalVolume).from(meter.startingUnit).to(facilityUnit);
       }
@@ -36,7 +36,8 @@ export class ConvertMeterDataService {
         meterData[index].totalEnergyUse = this.convertUnitsService.value(meterData[index].totalEnergyUse).from(meter.energyUnit).to(account.energyUnit);
       }
     } else {
-      let accountUnit: string = this.energyUnitsHelperService.getAccountUnitFromMeter(meter)
+      let accountUnit: string = this.energyUnitsHelperService.getAccountUnitFromMeter(meter);
+      console.log(accountUnit);
       for (let index: number = 0; index < meterData.length; index++) {
         meterData[index].totalVolume = this.convertUnitsService.value(meterData[index].totalVolume).from(meter.startingUnit).to(accountUnit);
       }
@@ -58,7 +59,7 @@ export class ConvertMeterDataService {
   convertMeterDataToAnalysis(analysisItem: IdbAnalysisItem | IdbAccountAnalysisItem, meterData: Array<MonthlyData>, accountOrFacility: IdbFacility | IdbAccount, meter: IdbUtilityMeter): Array<MonthlyData> {
     let isEnergyMeter: boolean = getIsEnergyMeter(meter.source);
     if (isEnergyMeter) {
-      if(accountOrFacility.energyUnit != analysisItem.energyUnit){
+      if (accountOrFacility.energyUnit != analysisItem.energyUnit) {
         for (let index: number = 0; index < meterData.length; index++) {
           meterData[index].energyUse = this.convertUnitsService.value(meterData[index].energyUse).from(accountOrFacility.energyUnit).to(analysisItem.energyUnit);
         }

@@ -1,6 +1,6 @@
 import { Component, ElementRef, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Subscription, firstValueFrom } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
@@ -26,11 +26,6 @@ export class PredictorEntriesTableComponent {
   facilityPredictorEntries: Array<IdbPredictorEntry>;
   facilityPredictorEntriesSub: Subscription;
   predictorEntryToDelete: IdbPredictorEntry;
-  // addOrEdit: "add" | "edit";
-
-  // showPredictorMenu: boolean = false;
-  // showEditPredictors: boolean = false;
-  // predictorEntryToEdit: IdbPredictorEntry;
   itemsPerPage: number;
   itemsPerPageSub: Subscription;
   currentPageNumber: number = 1;
@@ -97,7 +92,7 @@ export class PredictorEntriesTableComponent {
   async confirmDeletePredictorEntry() {
     this.loadingService.setLoadingMessage('Deleting Predictor Entry...');
     this.loadingService.setLoadingStatus(true);
-    await this.predictorsDbService.deleteIndexWithObservable(this.predictorEntryToDelete.id).toPromise();
+    await firstValueFrom(this.predictorsDbService.deleteIndexWithObservable(this.predictorEntryToDelete.id));
     this.cancelDeletePredictorEntry();
     await this.finishDelete();
   }
@@ -169,7 +164,7 @@ export class PredictorEntriesTableComponent {
       }
     })
     for (let index = 0; index < checkedItems.length; index++) {
-      await this.predictorsDbService.deleteIndexWithObservable(checkedItems[index].id).toPromise();
+      await firstValueFrom(this.predictorsDbService.deleteIndexWithObservable(checkedItems[index].id));
     }
 
     this.allChecked = false;
@@ -179,7 +174,7 @@ export class PredictorEntriesTableComponent {
 
   async finishDelete() {
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    let accountPredictors: Array<IdbPredictorEntry> = await this.predictorsDbService.getAllByIndexRange("accountId", selectedFacility.accountId).toPromise();
+    let accountPredictors: Array<IdbPredictorEntry> = await this.predictorsDbService.getAllAccountPredictors(selectedFacility.accountId);
     this.predictorsDbService.accountPredictorEntries.next(accountPredictors);
     let facilityPredictors: Array<IdbPredictorEntry> = accountPredictors.filter(predictor => { return predictor.facilityId == selectedFacility.guid });
     this.predictorsDbService.facilityPredictorEntries.next(facilityPredictors);
@@ -218,12 +213,18 @@ export class PredictorEntriesTableComponent {
       let predictorPair: PredictorData = predictorEntry.predictors.find(predictorPair => { return predictorPair.weatherStationId == predictor.weatherStationId && predictorPair.weatherDataType == 'HDD' });
       if (predictorPair) {
         this.weatherDataService.heatingTemp = predictorPair.heatingBaseTemperature;
+        this.weatherDataService.weatherDataSelection = 'degreeDays';
+      } else {
+        this.weatherDataService.weatherDataSelection = 'CDD';
       }
     } else {
       this.weatherDataService.heatingTemp = predictor.heatingBaseTemperature;
       let predictorPair: PredictorData = predictorEntry.predictors.find(predictorPair => { return predictorPair.weatherStationId == predictor.weatherStationId && predictorPair.weatherDataType == 'CDD' });
       if (predictorPair) {
         this.weatherDataService.coolingTemp = predictorPair.coolingBaseTemperature;
+        this.weatherDataService.weatherDataSelection = 'degreeDays';
+      } else {
+        this.weatherDataService.weatherDataSelection = 'HDD';
       }
     }
     let entryDate: Date = new Date(predictorEntry.date);
@@ -243,7 +244,7 @@ export class PredictorEntriesTableComponent {
     });
     this.hasWeatherDataWarnings = findError != undefined;
   }
-  
+
   goToWeatherData() {
     let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     this.weatherDataService.selectedFacility = facility;

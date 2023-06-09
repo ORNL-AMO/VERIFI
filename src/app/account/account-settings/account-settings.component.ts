@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Subscription, firstValueFrom } from 'rxjs';
 import { BackupDataService } from 'src/app/shared/helper-services/backup-data.service';
 import { ImportBackupModalService } from 'src/app/core-components/import-backup-modal/import-backup-modal.service';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
@@ -8,12 +8,11 @@ import { ToastNotificationsService } from 'src/app/core-components/toast-notific
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { OverviewReportOptionsDbService } from 'src/app/indexedDB/overview-report-options-db.service';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
-import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport, IdbFacility, IdbOverviewReportOptions } from 'src/app/models/idb';
+import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport, IdbFacility } from 'src/app/models/idb';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
@@ -89,7 +88,7 @@ export class AccountSettingsComponent implements OnInit {
     this.loadingService.setLoadingMessage('Creating Facility...');
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let idbFacility: IdbFacility = this.facilityDbService.getNewIdbFacility(selectedAccount);
-    let newFacility: IdbFacility = await this.facilityDbService.addWithObservable(idbFacility).toPromise();
+    let newFacility: IdbFacility = await firstValueFrom(this.facilityDbService.addWithObservable(idbFacility));
     this.loadingService.setLoadingMessage('Updating Reports...');
     let accountReports: Array<IdbAccountReport> = this.accountReportDbService.accountReports.getValue();
     for (let index = 0; index < accountReports.length; index++) {
@@ -97,7 +96,7 @@ export class AccountSettingsComponent implements OnInit {
         facilityId: newFacility.guid,
         included: false
       });
-      await this.accountReportDbService.updateWithObservable(accountReports[index]).toPromise();
+      await firstValueFrom(this.accountReportDbService.updateWithObservable(accountReports[index]));
     }
     this.loadingService.setLoadingMessage('Updating Analysis Items...');
     let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
@@ -106,7 +105,7 @@ export class AccountSettingsComponent implements OnInit {
         facilityId: newFacility.guid,
         analysisItemId: undefined
       });
-      await this.accountAnalysisDbService.updateWithObservable(accountAnalysisItems[index]).toPromise();
+      await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(accountAnalysisItems[index]));
     }
 
     await this.dbChangesService.selectAccount(this.selectedAccount);
@@ -141,10 +140,10 @@ export class AccountSettingsComponent implements OnInit {
     await this.analysisDbService.deleteAccountAnalysisItems();
     await this.accountAnalysisDbService.deleteAccountAnalysisItems();
     this.loadingService.setLoadingMessage("Deleting Account...");
-    await this.accountDbService.deleteAccountWithObservable(this.selectedAccount.id).toPromise();
+    await firstValueFrom(this.accountDbService.deleteAccountWithObservable(this.selectedAccount.id));
 
     // Then navigate to another account
-    let accounts: Array<IdbAccount> = await this.accountDbService.getAll().toPromise();
+    let accounts: Array<IdbAccount> = await firstValueFrom(this.accountDbService.getAll());
     this.accountDbService.allAccounts.next(accounts);
     if (accounts.length != 0) {
       await this.dbChangesService.selectAccount(accounts[0]);
@@ -188,14 +187,6 @@ export class AccountSettingsComponent implements OnInit {
   openImportBackup() {
     this.importBackupModalService.inFacility = false;
     this.importBackupModalService.showModal.next(true);
-  }
-
-
-  //TODO: Add button
-  async deleteDatabase() {
-    this.loadingService.setLoadingStatus(true);
-    this.loadingService.setLoadingMessage('Resetting Database, if this takes too long restart application..');
-    this.accountDbService.deleteDatabase();
   }
 
   setOrderOptions() {
