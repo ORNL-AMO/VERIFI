@@ -27,7 +27,6 @@ export class EditBillComponent implements OnInit {
   displayVolumeInput: boolean;
   displayEnergyUse: boolean;
   invalidDate: boolean;
-  // showConfirmCancel: boolean = false;
   showFilterDropdown: boolean = false;
   constructor(private activatedRoute: ActivatedRoute, private utilityMeterDataDbService: UtilityMeterDatadbService,
     private utilityMeterDbService: UtilityMeterdbService, private loadingService: LoadingService,
@@ -57,21 +56,10 @@ export class EditBillComponent implements OnInit {
     })
   }
 
-
   cancel() {
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     this.router.navigateByUrl('/facility/' + selectedFacility.id + '/utility/energy-consumption/utility-meter/' + this.editMeter.id + '/data-table');
-    // if (!this.meterDataForm.dirty || onSave) {
-    //   this.confirmCancel();
-    // } else {
-    //   this.showConfirmCancel = true;
-    // }
   }
-
-  // confirmCancel() {
-  //   let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-  //   this.router.navigateByUrl('/facility/' + selectedFacility.id + '/utility/energy-consumption/utility-meter/' + this.editMeter.id + '/data-table');
-  // }
 
   async saveAndQuit() {
     this.loadingService.setLoadingMessage('Saving Reading...');

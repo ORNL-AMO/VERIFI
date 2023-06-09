@@ -5,9 +5,6 @@
     </div>
     <div class="saveCancel item-right">
         <button class="btn btn-secondary" (click)="cancel()">Cancel</button>
-        <!-- <button *ngIf="showConfirmCancel" class="btn btn-secondary" (click)="confirmCancel()">Are you sure?
-            Changes
-            will be lost.</button> -->
         <button *ngIf="addOrEdit == 'edit'" class="btn btn-primary" (click)="saveAndQuit()"
             [disabled]="meterDataForm.invalid || invalidDate">Save</button>
         <button *ngIf="addOrEdit == 'add'" class="btn btn-primary me-2" (click)="saveAndQuit()"
