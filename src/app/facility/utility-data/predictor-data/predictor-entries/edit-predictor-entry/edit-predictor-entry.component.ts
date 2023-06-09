@@ -11,7 +11,7 @@ import { DetailDegreeDay } from 'src/app/models/degreeDays';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { WeatherDataService } from 'src/app/weather-data/weather-data.service';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Observable, of } from 'rxjs';
 @Component({
   selector: 'app-edit-predictor-entry',
   templateUrl: './edit-predictor-entry.component.html',
@@ -24,6 +24,7 @@ export class EditPredictorEntryComponent {
   hasWeatherData: boolean;
   calculatingDegreeDays: boolean;
   hasWeatherDataWarning: boolean;
+  isSaved: boolean = true;
   constructor(private activatedRoute: ActivatedRoute, private predictorDbService: PredictordbService,
     private router: Router, private facilityDbService: FacilitydbService,
     private accountDbService: AccountdbService, private dbChangesService: DbChangesService,
@@ -66,6 +67,7 @@ export class EditPredictorEntryComponent {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     await this.dbChangesService.setPredictors(selectedAccount, selectedFacility);
+    this.isSaved = true;
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('Predictors Updated!', undefined, undefined, false, 'alert-success');
     this.cancel();
@@ -86,6 +88,7 @@ export class EditPredictorEntryComponent {
     let yearMonth: Array<string> = eventData.split('-');
     //-1 on month
     this.predictorEntry.date = new Date(Number(yearMonth[0]), Number(yearMonth[1]) - 1, 1);
+    this.isSaved = false;
     this.setDegreeDayValues();
   }
 
@@ -166,5 +169,17 @@ export class EditPredictorEntryComponent {
     let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     this.weatherDataService.selectedFacility = facility;
     this.router.navigateByUrl('/weather-data');
+  }
+
+  setChanged() {
+    this.isSaved = false;
+  }
+
+  canDeactivate(): Observable<boolean> {
+    if (!this.isSaved) {
+      const result = window.confirm('There are unsaved changes! Are you sure you want to leave this page?');
+      return of(result);
+    }
+    return of(true);
   }
 }

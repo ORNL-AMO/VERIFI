@@ -11,7 +11,7 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { getIsEnergyMeter, getIsEnergyUnit } from 'src/app/shared/sharedHelperFuntions';
-import { firstValueFrom } from 'rxjs';
+import { Observable, firstValueFrom, of } from 'rxjs';
 
 @Component({
   selector: 'app-edit-meter',
@@ -34,7 +34,6 @@ export class EditMeterComponent implements OnInit {
     private router: Router) { }
 
   ngOnInit(): void {
-
     this.selectedFacility = this.facilityDbService.selectedFacility.getValue();
     let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
     this.activatedRoute.params.subscribe(params => {
@@ -79,6 +78,7 @@ export class EditMeterComponent implements OnInit {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     await this.dbChangesService.setMeters(selectedAccount, selectedFacility);
+    this.meterForm.markAsPristine();
     this.cancel();
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('Meter Saved!', undefined, undefined, false, "alert-success");
@@ -107,5 +107,13 @@ export class EditMeterComponent implements OnInit {
       this.utilityMeterDataDbService.facilityMeterData.next(facilityMeterData);
       this.toastNotificationService.showToast("Meter and Meter Data Updated", undefined, undefined, false, "alert-success");
     }
+  }
+  
+  canDeactivate(): Observable<boolean> {
+    if (this.meterForm.dirty) {
+      const result = window.confirm('There are unsaved changes! Are you sure you want to leave this page?');
+      return of(result);
+    }
+    return of(true);
   }
 }
