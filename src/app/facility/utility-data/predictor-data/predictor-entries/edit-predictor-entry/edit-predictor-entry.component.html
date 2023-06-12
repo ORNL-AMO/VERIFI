@@ -51,7 +51,7 @@
                     </span>
                     <input [id]="'predictor-' + predictor.id" class="form-control" type="number"
                         [(ngModel)]="predictor.amount" name="{{'predictorAmount'+predictor.id}}"
-                        onfocus="this.select();" [disabled]="predictor.predictorType == 'Weather'">
+                        onfocus="this.select();" [disabled]="predictor.predictorType == 'Weather'" (input)="setChanged()">
                     <span class="input-group-text" *ngIf="predictor.unit">{{predictor.unit}}</span>
                 </div>
             </div>
