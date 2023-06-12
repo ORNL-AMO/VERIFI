@@ -88,6 +88,17 @@
                             formControlName="baselineAdjustmentNotes" (input)="save()"></textarea>
                     </div>
                 </div>
+                <div class="row" *ngIf="selectedAnalysisItem.analysisCategory == 'water'">
+                    <div class="col-12">
+                        <hr>
+                        <app-label-with-tooltip [isSemiBold]="true" [label]="methodologyNotesLabel"
+                            [field]="'methodsUndertaken'" [labelId]="'methodologyNotes'">
+                        </app-label-with-tooltip>
+                        <!-- <label for="baselineAdjustmentNotes">{{methodsUndertakenLabel}}</label> -->
+                        <textarea class="form-control" name="methodologyNotes" id="methodologyNotes"
+                            formControlName="methodologyNotes" (input)="save()"></textarea>
+                    </div>
+                </div>
                 <div class="row">
                     <div class="col-12">
                         <hr>

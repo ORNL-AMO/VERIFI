@@ -54,7 +54,8 @@ export class AccountReportsService {
       analysisItemId: [betterPlantsReportSetup.analysisItemId, Validators.required],
       includeFacilityNames: [betterPlantsReportSetup.includeFacilityNames, Validators.required],
       baselineAdjustmentNotes: [betterPlantsReportSetup.baselineAdjustmentNotes],
-      modificationNotes: [betterPlantsReportSetup.modificationNotes]
+      modificationNotes: [betterPlantsReportSetup.modificationNotes],
+      methodologyNotes: [betterPlantsReportSetup.methodologyNotes]
     });
     return form;
   }
@@ -64,6 +65,7 @@ export class AccountReportsService {
     betterPlantsReportSetup.includeFacilityNames = form.controls.includeFacilityNames.value;
     betterPlantsReportSetup.baselineAdjustmentNotes = form.controls.baselineAdjustmentNotes.value;
     betterPlantsReportSetup.modificationNotes = form.controls.modificationNotes.value;
+    betterPlantsReportSetup.methodologyNotes = form.controls.methodologyNotes.value;
     return betterPlantsReportSetup;
   }
 

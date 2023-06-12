@@ -20,7 +20,7 @@ export class BetterPlantsSetupComponent {
   account: IdbAccount;
   methodsUndertakenLabel: string = 'Please describe any methods undertaken to normalize energy intensity data or adjust baseline data to account for economic and other factors that affect energy use:';
   modificationNotesLabel: string = 'Please describe the energy efficient technologies, strategies, and practices employed during the previous year to decrease intensity. Please identify systems impacted and approximate savings from projects. (Ex: Furnace insulation project-12,000 MMBtu/yr savings, compressor controls upgrade-6,000 MMBtu/yr, energy awareness campaign, etc):'
-
+  methodologyNotesLabel: string = 'Please describe the methdology used for calculating water intensity improvements:';
   accountAnalysisItems: Array<IdbAccountAnalysisItem>;
   selectedReportSub: Subscription;
   isFormChange: boolean = false;
@@ -87,7 +87,7 @@ export class BetterPlantsSetupComponent {
   setSelectedAnalysisItem() {
     this.selectedAnalysisItem = this.accountAnalysisItems.find(item => { return item.guid == this.betterPlantsReportForm.controls.analysisItemId.value });
     if (this.selectedAnalysisItem && this.selectedAnalysisItem.analysisCategory == 'water') {
-      this.methodsUndertakenLabel = 'Please describe the methdology used for calculating  water intensity improvements:';
+      this.methodsUndertakenLabel = 'If a baseline adjustment was made, please indicate the reason for making the adjustment';
       this.modificationNotesLabel = 'Please briefly describe major technologies, strategies, and practices employed during the previous year to decrease water intensity. Please identify: systems/processes impacted, approximate water savings from projects, and implementation cost';
     } else {
       this.methodsUndertakenLabel = 'Please describe any methods undertaken to normalize energy intensity data or adjust baseline data to account for economic and other factors that affect energy use:';

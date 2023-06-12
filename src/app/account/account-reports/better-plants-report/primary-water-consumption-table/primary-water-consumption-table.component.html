@@ -207,7 +207,17 @@
                 </td>
                 <td class="w-25">
                     {{betterPlantsSummary.reportYearAnalysisSummary.baselineAdjustmentForNormalization | customNumber}}
+                </td>
+                <td class="no-border">
 
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    If a baseline adjustment was made, please indicate the reason for making the adjustment
+                </td>
+                <td colspan="2">
+                    {{report.betterPlantsReportSetup.baselineAdjustmentNotes}}
                 </td>
             </tr>
             <tr>
@@ -218,8 +228,12 @@
                     {{betterPlantsSummary.reportYearAnalysisSummary.adjustedForNormalization | customNumber}}
                 </td>
             </tr>
+        </tbody>
+    </table>
+    <table class="table table-sm table-hover mt-3">
+        <tbody>
             <tr>
-                <td colspan="2">
+                <td class="w-75">
                     Annual Improvement In Water Intensity for Current Year (%)**
                 </td>
                 <td>
@@ -227,7 +241,7 @@
                 </td>
             </tr>
             <tr>
-                <td colspan="2">
+                <td class="w-75">
                     Total Improvement In Water Intensity (%)**
                 </td>
                 <td>

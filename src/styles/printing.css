@@ -50,6 +50,10 @@
         background-color: white;
     }
 
+    table.table td.no-border{
+        border: none !important;
+    }
+
     table.table{
         border-collapse: inherit !important;
         border: none;

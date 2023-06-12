@@ -12,3 +12,7 @@ td{
 .w-cell{
     width: 12.5%;
 }
+
+.no-border{
+    border: none;
+}
