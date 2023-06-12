@@ -67,6 +67,8 @@ export class BetterPlantsReportComponent implements OnInit {
     this.selectedAnalysisItem = accountAnalysisItems.find(item => { return item.guid == this.selectedReport.betterPlantsReportSetup.analysisItemId });
     if(this.selectedAnalysisItem.analysisCategory == 'energy'){
       this.selectedAnalysisItem.energyUnit = 'MMBtu';
+    }else if(this.selectedAnalysisItem.analysisCategory == 'water'){
+      this.selectedAnalysisItem.waterUnit = 'kgal';
     }
   }
 
