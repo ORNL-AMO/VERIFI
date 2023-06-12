@@ -1,13 +1,14 @@
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
-import { IdbFacility, IdbPredictorEntry, PredictorData } from '../models/idb';
+import { IdbFacility, IdbPredictorEntry, IdbUtilityMeterData, PredictorData } from '../models/idb';
 import { FacilitydbService } from './facility-db.service';
 import * as _ from 'lodash';
 import { DegreeDaysService } from '../shared/helper-services/degree-days.service';
 import { DetailDegreeDay } from '../models/degreeDays';
 import { LoadingService } from '../core-components/loading/loading.service';
 import { Months } from '../shared/form-data/months';
+import { UtilityMeterDatadbService } from './utilityMeterData-db.service';
 
 @Injectable({
     providedIn: 'root'
@@ -18,7 +19,7 @@ export class PredictordbService {
     facilityPredictorEntries: BehaviorSubject<Array<IdbPredictorEntry>>;
     facilityPredictors: BehaviorSubject<Array<PredictorData>>;
     constructor(private dbService: NgxIndexedDBService, private facilityDbService: FacilitydbService, private degreeDaysService: DegreeDaysService,
-        private loadingService: LoadingService) {
+        private loadingService: LoadingService, private utilityMeterDataDbService: UtilityMeterDatadbService) {
         this.facilityPredictorEntries = new BehaviorSubject<Array<IdbPredictorEntry>>(new Array());
         this.facilityPredictors = new BehaviorSubject<Array<PredictorData>>(new Array());
         this.accountPredictorEntries = new BehaviorSubject<Array<IdbPredictorEntry>>(new Array());
@@ -120,6 +121,11 @@ export class PredictordbService {
             let maxDateEntry: Date = _.max(dates);
             newPredictorDate = new Date(maxDateEntry);
             newPredictorDate.setMonth(newPredictorDate.getMonth() + 1);
+        }else{
+            let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
+            let dates: Array<Date> = facilityMeterData.map(entry => { return new Date(entry.readDate) });
+            let startReadingsDate: Date = _.min(dates);
+            newPredictorDate = new Date(startReadingsDate);
         }
 
         let predictors: Array<PredictorData> = JSON.parse(JSON.stringify(this.facilityPredictors.getValue()))

@@ -42,6 +42,7 @@ import { EditPredictorComponent } from "../facility/utility-data/predictor-data/
 import { PredictorEntriesComponent } from "../facility/utility-data/predictor-data/predictor-entries/predictor-entries.component";
 import { PredictorEntriesTableComponent } from "../facility/utility-data/predictor-data/predictor-entries/predictor-entries-table/predictor-entries-table.component";
 import { EditPredictorEntryComponent } from "../facility/utility-data/predictor-data/predictor-entries/edit-predictor-entry/edit-predictor-entry.component";
+import { canDeactivateGuard } from "./can-deactivate.guard";
 
 export const FacilityRoutes: Route = {
     path: 'facility/:id',
@@ -98,11 +99,13 @@ export const FacilityRoutes: Route = {
                                 },
                                 {
                                     path: 'edit-meter/:id',
-                                    component: EditMeterComponent
+                                    component: EditMeterComponent,
+                                    canDeactivate: [canDeactivateGuard]
                                 },
                                 {
                                     path: 'new-meter',
-                                    component: EditMeterComponent
+                                    component: EditMeterComponent,
+                                    canDeactivate: [canDeactivateGuard]
                                 }
                             ]
                         },
@@ -121,11 +124,13 @@ export const FacilityRoutes: Route = {
                                 },
                                 {
                                     path: 'edit-bill/:id',
-                                    component: EditBillComponent
+                                    component: EditBillComponent,
+                                    canDeactivate: [canDeactivateGuard]
                                 },
                                 {
                                     path: 'new-bill',
-                                    component: EditBillComponent
+                                    component: EditBillComponent,
+                                    canDeactivate: [canDeactivateGuard]
                                 }
                             ]
                         },
@@ -152,8 +157,16 @@ export const FacilityRoutes: Route = {
                                     component: PredictorsTableComponent
                                 },
 
-                                { path: 'edit-predictor/:id', component: EditPredictorComponent },
-                                { path: 'add-predictor', component: EditPredictorComponent }
+                                {
+                                    path: 'edit-predictor/:id',
+                                    component: EditPredictorComponent,
+                                    canDeactivate: [canDeactivateGuard]
+                                },
+                                {
+                                    path: 'add-predictor',
+                                    component: EditPredictorComponent,
+                                    canDeactivate: [canDeactivateGuard]
+                                }
                             ]
                         },
                         {
@@ -170,8 +183,16 @@ export const FacilityRoutes: Route = {
                                     component: PredictorEntriesTableComponent
                                 },
 
-                                { path: 'edit-entry/:id', component: EditPredictorEntryComponent },
-                                { path: 'add-entry', component: EditPredictorEntryComponent },
+                                {
+                                    path: 'edit-entry/:id',
+                                    component: EditPredictorEntryComponent,
+                                    canDeactivate: [canDeactivateGuard]
+                                },
+                                {
+                                    path: 'add-entry',
+                                    component: EditPredictorEntryComponent,
+                                    canDeactivate: [canDeactivateGuard]
+                                },
                             ]
                         }
                     ]
