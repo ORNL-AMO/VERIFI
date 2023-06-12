@@ -25,6 +25,7 @@ export class BetterPlantsSetupComponent {
   selectedReportSub: Subscription;
   isFormChange: boolean = false;
   itemToEdit: IdbAccountAnalysisItem;
+  selectedAnalysisItem: IdbAccountAnalysisItem;
   constructor(private accountReportDbService: AccountReportDbService,
     private accountReportsService: AccountReportsService,
     private dbChangesService: DbChangesService,
@@ -51,6 +52,7 @@ export class BetterPlantsSetupComponent {
 
   async save() {
     this.isFormChange = true;
+    this.setSelectedAnalysisItem();
     let selectedReport: IdbAccountReport = this.accountReportDbService.selectedReport.getValue()
     selectedReport.betterPlantsReportSetup = this.accountReportsService.updateBetterPlantsReportFromForm(selectedReport.betterPlantsReportSetup, this.betterPlantsReportForm);
     await firstValueFrom(this.accountReportDbService.updateWithObservable(selectedReport));
@@ -61,24 +63,35 @@ export class BetterPlantsSetupComponent {
   setAnalysisOptions(report: IdbAccountReport) {
     let analysisOptions: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
     this.accountAnalysisItems = analysisOptions.filter(option => { return option.reportYear == report.reportYear && option.energyIsSource });
-    let selectedAnalysisItem: IdbAccountAnalysisItem = this.accountAnalysisItems.find(item => { return item.guid == this.betterPlantsReportForm.controls.analysisItemId.value });
-    if (!selectedAnalysisItem) {
+    this.setSelectedAnalysisItem();
+    if (!this.selectedAnalysisItem) {
       this.betterPlantsReportForm.controls.analysisItemId.patchValue(undefined);
       this.betterPlantsReportForm.controls.analysisItemId.updateValueAndValidity();
       this.save();
     }
   }
 
-  viewAnalysis(analysisItem: IdbAccountAnalysisItem){
+  viewAnalysis(analysisItem: IdbAccountAnalysisItem) {
     this.itemToEdit = analysisItem;
   }
 
-  confirmEditItem(){
+  confirmEditItem() {
     this.accountAnalysisDbService.selectedAnalysisItem.next(this.itemToEdit);
     this.router.navigateByUrl('account/analysis/results/annual-analysis');
   }
 
-  cancelEditItem(){
+  cancelEditItem() {
     this.itemToEdit = undefined;
+  }
+
+  setSelectedAnalysisItem() {
+    this.selectedAnalysisItem = this.accountAnalysisItems.find(item => { return item.guid == this.betterPlantsReportForm.controls.analysisItemId.value });
+    if (this.selectedAnalysisItem && this.selectedAnalysisItem.analysisCategory == 'water') {
+      this.methodsUndertakenLabel = 'Please describe the methdology used for calculating  water intensity improvements:';
+      this.modificationNotesLabel = 'Please briefly describe major technologies, strategies, and practices employed during the previous year to decrease water intensity. Please identify: systems/processes impacted, approximate water savings from projects, and implementation cost';
+    } else {
+      this.methodsUndertakenLabel = 'Please describe any methods undertaken to normalize energy intensity data or adjust baseline data to account for economic and other factors that affect energy use:';
+      this.modificationNotesLabel = 'Please describe the energy efficient technologies, strategies, and practices employed during the previous year to decrease intensity. Please identify systems impacted and approximate savings from projects. (Ex: Furnace insulation project-12,000 MMBtu/yr savings, compressor controls upgrade-6,000 MMBtu/yr, energy awareness campaign, etc):';
+    }
   }
 }

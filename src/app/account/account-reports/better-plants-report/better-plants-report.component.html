@@ -88,6 +88,41 @@
                 </p>
             </div>
         </div>
+        <div class="row justify-content-center print-break-before">
+            <div class="col-10">
+                <hr class="hide-print">
+                <p class="bold">
+                    Please describe the methdology used for calculating water intensity improvements:
+                </p>
+                <p>
+                    <span
+                        *ngIf="selectedReport.betterPlantsReportSetup.baselineAdjustmentNotes">{{selectedReport.betterPlantsReportSetup.baselineAdjustmentNotes}}</span>
+                    <span *ngIf="!selectedReport.betterPlantsReportSetup.baselineAdjustmentNotes">N/A</span>
+                </p>
+            </div>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-10">
+                <p class="bold">
+                    Please briefly describe major technologies, strategies, and practices employed during the previous
+                    year to decrease water intensity. Please identify: systems/processes impacted, approximate water
+                    savings from projects, and implementation cost:
+                </p>
+                <p>
+                    <span
+                        *ngIf="selectedReport.betterPlantsReportSetup.modificationNotes">{{selectedReport.betterPlantsReportSetup.modificationNotes}}</span>
+                    <span *ngIf="!selectedReport.betterPlantsReportSetup.modificationNotes">N/A</span>
+                </p>
+            </div>
+        </div>
+        <div class="row justify-content-center print-break-before">
+            <div class="col-10">
+                <hr class="hide-print">
+                <p class="bold pt-4">
+                    Facility-level Water Performance (Applies to Companies with Multiple Plants)
+                </p>
+            </div>
+        </div>
     </ng-container>
     <!--end water-->
     <div class="row justify-content-center">
