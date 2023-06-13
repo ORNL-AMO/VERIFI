@@ -22,16 +22,15 @@ import { MeterSource } from 'src/app/models/constantsAndTypes';
 })
 export class FacilityHomeSummaryComponent implements OnInit {
 
-  latestAnalysisSummary: MonthlyAnalysisSummaryData;
+  // latestAnalysisSummary: MonthlyAnalysisSummaryData;
   latestSummarySub: Subscription;
-  percentSavings: number = 0;
-  percentGoal: number;
-  percentTowardsGoal: number = 0;
-  goalYear: number;
-  baselineYear: number;
+  // percentSavings: number = 0;
+  // percentGoal: number;
+  // percentTowardsGoal: number = 0;
+  // goalYear: number;
+  // baselineYear: number;
 
   facility: IdbFacility
-  facilitySub: Subscription;
   lastBill: IdbUtilityMeterData;
   hasCurrentYearAnalysis: IdbAnalysisItem;
   lastYear: number;
@@ -51,7 +50,7 @@ export class FacilityHomeSummaryComponent implements OnInit {
 
   monthlyFacilityAnalysisData: Array<MonthlyAnalysisSummaryData>;
   monthlyFacilityAnalysisDataSub: Subscription;
-  latestAnalysisDate: Date; 
+  latestAnalysisDate: Date;
   constructor(private analysisDbService: AnalysisDbService, private utilityMeterDataDbService: UtilityMeterDatadbService,
     private facilityDbService: FacilitydbService, private facilityHomeService: FacilityHomeService,
     private router: Router, private predictorDbService: PredictordbService,
@@ -66,21 +65,21 @@ export class FacilityHomeSummaryComponent implements OnInit {
 
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
       this.facility = this.facilityDbService.selectedFacility.getValue();
-      this.setGoalYears()
+      // this.setGoalYears()
       this.setNAICS();
       this.setFacilityStatus();
     });
     this.latestSummarySub = this.facilityHomeService.monthlyFacilityAnalysisData.subscribe(val => {
       this.monthlyFacilityAnalysisData = val;
-      this.latestAnalysisSummary = _.maxBy(val, 'date');
-      if (this.latestAnalysisSummary) {
-        this.latestAnalysisDate = new Date(this.latestAnalysisSummary.date);
-        this.setProgressPercentages();
-      } else {
-        this.latestAnalysisDate = undefined;
-        this.percentSavings = 0;
-        this.percentTowardsGoal = 0;
-      }
+      // this.latestAnalysisSummary = _.maxBy(val, 'date');
+      // if (this.latestAnalysisSummary) {
+      //   this.latestAnalysisDate = new Date(this.latestAnalysisSummary.date);
+      // this.setProgressPercentages();
+      // } else {
+      //   this.latestAnalysisDate = undefined;
+      // this.percentSavings = 0;
+      // this.percentTowardsGoal = 0;
+      // }
     });
 
   }
@@ -91,21 +90,21 @@ export class FacilityHomeSummaryComponent implements OnInit {
     this.calculatingSub.unsubscribe();
   }
 
-  setGoalYears() {
-    if (this.facility && this.facility.sustainabilityQuestions) {
-      this.percentGoal = this.facility.sustainabilityQuestions.energyReductionPercent;
-      this.goalYear = this.facility.sustainabilityQuestions.energyReductionTargetYear;
-      this.baselineYear = this.facility.sustainabilityQuestions.energyReductionBaselineYear;
-    }
-  }
+  // setGoalYears() {
+  //   if (this.facility && this.facility.sustainabilityQuestions) {
+  //     this.percentGoal = this.facility.sustainabilityQuestions.energyReductionPercent;
+  //     this.goalYear = this.facility.sustainabilityQuestions.energyReductionTargetYear;
+  //     this.baselineYear = this.facility.sustainabilityQuestions.energyReductionBaselineYear;
+  //   }
+  // }
 
-  setProgressPercentages() {
-    this.percentSavings = this.latestAnalysisSummary.rolling12MonthImprovement;
-    this.percentTowardsGoal = (this.percentSavings / this.percentGoal) * 100;
-    if (this.percentTowardsGoal < 0) {
-      this.percentTowardsGoal = 0;
-    }
-  }
+  // setProgressPercentages() {
+  //   this.percentSavings = this.latestAnalysisSummary.rolling12MonthImprovement;
+  //   this.percentTowardsGoal = (this.percentSavings / this.percentGoal) * 100;
+  //   if (this.percentTowardsGoal < 0) {
+  //     this.percentTowardsGoal = 0;
+  //   }
+  // }
 
   navigateTo(urlStr: string) {
     if (urlStr != 'upload') {

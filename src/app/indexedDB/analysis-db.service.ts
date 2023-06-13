@@ -136,6 +136,13 @@ export class AnalysisDbService {
       }
     });
 
+    let baselineYear: number;
+    if (analysisCategory == 'energy') {
+      baselineYear = selectedFacility.sustainabilityQuestions.energyReductionBaselineYear
+    } else if (analysisCategory == 'water') {
+      baselineYear = selectedFacility.sustainabilityQuestions.waterReductionBaselineYear
+    }
+
     let analysisItem: IdbAnalysisItem = {
       facilityId: selectedFacility.guid,
       accountId: selectedAccount.guid,
@@ -149,7 +156,7 @@ export class AnalysisDbService {
       groups: itemGroups,
       setupErrors: undefined,
       analysisCategory: analysisCategory,
-      baselineYear: selectedFacility.sustainabilityQuestions.energyReductionBaselineYear
+      baselineYear: baselineYear
     };
     analysisItem.setupErrors = this.analysisValidationService.getAnalysisItemErrors(analysisItem);
     return analysisItem;
