@@ -1,4 +1,5 @@
 <div class="main-content p-0" *ngIf="!baselineYearError">
+    <app-account-analysis-dashboard-tabs></app-account-analysis-dashboard-tabs>
     <div class="content-padding">
         <div class="card card-body">
             <h4 class="pt-0">
@@ -30,37 +31,7 @@
             </div>
         </div>
         <hr>
-        <ng-container *ngIf="analysisItemsList.length != 0">
-            <div class="d-flex flex-column">
-                <div class="row" *ngFor="let listItem of analysisItemsList; let index = index;">
-                    <div class="col-12 text-center pb-2">
-                        <span class="badge report-year">
-                            {{listItem.year | yearDisplay:selectedAccount.fiscalYear}}
-                        </span>
-                        <ng-container *ngIf="!listItem.hasSelectedItem">
-                            <br>
-                            <div class="mt-2">
-                                <span class="alert alert-danger">
-                                    No item selected!
-                                </span>
-                            </div>
-                        </ng-container>
-                    </div>
-                    <div class="col-6 pt-2" *ngFor="let analysisItem of listItem.analysisItems">
-                        <app-account-analysis-item-card [analysisItem]="analysisItem"></app-account-analysis-item-card>
-                    </div>
-                    <div class="col-12">
-                        <hr>
-                    </div>
-                </div>
-            </div>
-        </ng-container>
-        <ng-container *ngIf="analysisItemsList.length == 0">
-            <div class="card card-body text-center bold">
-                No analysis items found for this account. Click "+Add New Analysis" to start analyzing this
-                account!
-            </div>
-        </ng-container>
+        <router-outlet></router-outlet>
     </div>
 </div>
 

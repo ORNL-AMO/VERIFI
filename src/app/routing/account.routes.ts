@@ -24,6 +24,8 @@ import { CustomDatabaseComponent } from "src/app/account/custom-database/custom-
 import { EmissionsDataDashboardComponent } from "src/app/account/custom-database/regional-emissions-data/emissions-data-dashboard/emissions-data-dashboard.component";
 import { EmissionsDataFormComponent } from "src/app/account/custom-database/regional-emissions-data/emissions-data-form/emissions-data-form.component";
 import { RegionalEmissionsDataComponent } from "src/app/account/custom-database/regional-emissions-data/regional-emissions-data.component";
+import { AccountAnalysisEnergyDashboardComponent } from "../account/account-analysis/account-analysis-dashboard/account-analysis-energy-dashboard/account-analysis-energy-dashboard.component";
+import { AccountAnalysisWaterDashboardComponent } from "../account/account-analysis/account-analysis-dashboard/account-analysis-water-dashboard/account-analysis-water-dashboard.component";
 
 export const AccountRoutes: Route = {
     path: 'account',
@@ -71,7 +73,15 @@ export const AccountRoutes: Route = {
             component: AccountAnalysisComponent,
             children: [
                 { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
-                { path: 'dashboard', component: AccountAnalysisDashboardComponent },
+                {
+                    path: 'dashboard',
+                    component: AccountAnalysisDashboardComponent,
+                    children: [
+                        { path: '', pathMatch: 'full', redirectTo: 'energy' },
+                        { path: 'energy', component: AccountAnalysisEnergyDashboardComponent },
+                        { path: 'water', component: AccountAnalysisWaterDashboardComponent }
+                    ]
+                },
                 { path: 'setup', component: AccountAnalysisSetupComponent },
                 { path: 'select-items', component: SelectFacilityAnalysisItemsComponent },
                 {
