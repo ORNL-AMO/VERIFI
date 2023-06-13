@@ -20,7 +20,6 @@ import { CalanderizationService } from 'src/app/shared/helper-services/calanderi
 })
 export class AnalysisDashboardComponent implements OnInit {
 
-  facilityAnalysisItems: Array<IdbAnalysisItem>;
   facilityAnalysisItemsSub: Subscription;
 
   baselineYearErrorMin: boolean;

@@ -1,4 +1,5 @@
 <div class="main-content p-0" *ngIf="!baselineYearErrorMax && !baselineYearErrorMin">
+    <app-analysis-dashboard-tabs></app-analysis-dashboard-tabs>
     <div class="content-padding">
         <div class="card card-body">
             <h4 class="pt-0">
@@ -30,7 +31,7 @@
             </div>
         </div>
         <hr>
-        <ng-container *ngIf="analysisItemsList.length != 0">
+        <!-- <ng-container *ngIf="analysisItemsList.length != 0">
             <div class="d-flex flex-column">
                 <div class="row" *ngFor="let listItem of analysisItemsList; let index = index;">
                     <div class="col-12 text-center pb-2">
@@ -60,7 +61,8 @@
                 No analysis items found for this facility. Click "+Add New Analysis" to start analyzing this
                 facility!
             </div>
-        </ng-container>
+        </ng-container> -->
+        <router-outlet></router-outlet>
     </div>
 </div>
 

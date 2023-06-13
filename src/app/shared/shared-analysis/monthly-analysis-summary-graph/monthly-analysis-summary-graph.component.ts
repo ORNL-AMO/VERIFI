@@ -34,10 +34,12 @@ export class MonthlyAnalysisSummaryGraphComponent implements OnInit {
       let trace1Name: string = 'Actual Energy Use';
       let trace2Name: string = 'Calculated Energy Use';
       let yAxisTitle: string = this.analysisItem.energyUnit;
+      let traceColor: string = '#7D3C98'
       if (this.analysisItem.analysisCategory == 'water') {
         trace1Name = 'Actual Water Consumption';
         trace2Name = 'Calculated Water Consumption';
         yAxisTitle = this.analysisItem.waterUnit;
+        traceColor = '#3498DB';
       }
 
 
@@ -59,7 +61,7 @@ export class MonthlyAnalysisSummaryGraphComponent implements OnInit {
         name: trace2Name,
         x: this.monthlyAnalysisSummaryData.map(results => { return results.date }),
         y: this.monthlyAnalysisSummaryData.map(results => { return results.adjusted }),
-        line: { color: '#7D3C98', width: 4 },
+        line: { color: traceColor, width: 4 },
         marker: {
           size: 8
         }

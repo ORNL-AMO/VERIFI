@@ -34,10 +34,12 @@ export class AnnualAnalysisSummaryGraphComponent implements OnInit {
       let trace1Name: string = 'Actual Energy Use';
       let trace2Name: string = 'Calculated Energy Use';
       let yAxisTitle: string = 'Energy Use (' + this.analysisItem.energyUnit + ')';
+      let traceColor: string = '#7D3C98'
       if (this.analysisItem.analysisCategory == 'water') {
         trace1Name = 'Actual Water Consumption';
         trace2Name = 'Calculated Water Consumption';
         yAxisTitle = 'Consumption  (' + this.analysisItem.waterUnit + ')';
+        traceColor = '#3498DB';
       }
 
 
@@ -64,7 +66,7 @@ export class AnnualAnalysisSummaryGraphComponent implements OnInit {
         name: trace2Name,
         type: 'bar',
         marker: {
-          color: '#7D3C98'
+          color: traceColor
         }
       }
       traceData.push(barTrace);
