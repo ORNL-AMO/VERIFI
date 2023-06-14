@@ -42,7 +42,7 @@ export class AccountAnalysisSetupComponent implements OnInit {
     }
     this.account = this.accountDbService.selectedAccount.getValue();
     this.energyUnit = this.account.energyUnit;
-    this.yearOptions = this.calendarizationService.getYearOptionsAccount();
+    this.yearOptions = this.calendarizationService.getYearOptionsAccount(this.analysisItem.analysisCategory);
     this.setBaselineYearWarning();
   }
 

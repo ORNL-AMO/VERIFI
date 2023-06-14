@@ -38,7 +38,7 @@ export class AnalysisSetupComponent implements OnInit {
   ngOnInit(): void {
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
     this.facility = this.facilityDbService.selectedFacility.getValue();
-    this.yearOptions = this.calanderizationService.getYearOptionsFacility(this.facility.guid);
+    this.yearOptions = this.calanderizationService.getYearOptionsFacility(this.facility.guid, this.analysisItem.analysisCategory);
     this.setBaselineYearWarning();
   }
 

@@ -41,7 +41,7 @@ export class WaterDashboardComponent {
 
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
       this.selectedFacility = val;
-      this.yearOptions = this.calanderizationService.getYearOptionsFacility(this.selectedFacility.guid);
+      this.yearOptions = this.calanderizationService.getYearOptionsFacility(this.selectedFacility.guid, 'water');
       if (this.yearOptions) {
         this.baselineYearErrorMin = this.yearOptions[0] > this.selectedFacility.sustainabilityQuestions.waterReductionBaselineYear;
         this.baselineYearErrorMax = this.yearOptions[this.yearOptions.length - 1] < this.selectedFacility.sustainabilityQuestions.waterReductionBaselineYear

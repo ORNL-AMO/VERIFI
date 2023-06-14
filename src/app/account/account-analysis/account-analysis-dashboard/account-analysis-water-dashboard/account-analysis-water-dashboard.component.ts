@@ -35,7 +35,7 @@ export class AccountAnalysisWaterDashboardComponent {
       this.setAnalysisItemsList(items);
     });
 
-    this.yearOptions = this.calendarizationService.getYearOptionsAccount();
+    this.yearOptions = this.calendarizationService.getYearOptionsAccount('water');
     if (this.yearOptions) {
       this.baselineYearError = this.yearOptions[0] > this.selectedAccount.sustainabilityQuestions.waterReductionBaselineYear
     }
