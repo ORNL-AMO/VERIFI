@@ -80,10 +80,6 @@ export class AccountAnalysisDashboardComponent implements OnInit {
     for (let i = 0; i < years.length; i++) {
       let year: number = years[i];
       let yearAnalysisItems: Array<IdbAccountAnalysisItem> = accountAnalysisItems.filter(item => { return item.reportYear == year });
-      // for (let x = 0; x < yearAnalysisItems.length; x++) {
-      //   let accountAnalysisItem: IdbAccountAnalysisItem = yearAnalysisItems[i];
-
-      // }
       this.analysisItemsList.push({
         year: year,
         analysisItems: yearAnalysisItems,

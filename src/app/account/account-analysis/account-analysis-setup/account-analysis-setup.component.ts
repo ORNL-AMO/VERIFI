@@ -77,7 +77,8 @@ export class AccountAnalysisSetupComponent implements OnInit {
         return (accountItem.reportYear == this.analysisItem.reportYear
           && accountItem.facilityId == item.facilityId
           && accountItem.selectedYearAnalysis
-          && accountItem.baselineYear == this.analysisItem.baselineYear);
+          && accountItem.baselineYear == this.analysisItem.baselineYear
+          && accountItem.analysisCategory == this.analysisItem.analysisCategory);
       });
       if (facilityItem) {
         item.analysisItemId = facilityItem.guid;
