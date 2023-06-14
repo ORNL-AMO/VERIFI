@@ -24,6 +24,8 @@
             </div>
             <div class="col">
                 <app-facility-energy-reduction-goal></app-facility-energy-reduction-goal>
+                <hr>
+                <app-facility-water-reduction-goal></app-facility-water-reduction-goal>
                 <!-- <div class="row">
                     <div class="col-2 text-center">
                         Baseline
@@ -167,24 +169,38 @@
                     <li class="list-group-item" *ngIf="lastBill">
                         <a class="nav-link" routerLink="/facility/{{facility.id}}/analysis">
                             <span class="fa fa-chevron-right pe-2"></span>
-                            <span *ngIf="latestAnalysisItem">Latest Facility Analysis:
-                                {{latestAnalysisItem.reportYear | yearDisplay:facility.fiscalYear}}</span>
-                            <span *ngIf="!latestAnalysisItem">No Analysis Found For Facility</span>
+                            <span *ngIf="latestEnergyAnalysisItem">Latest Energy Analysis:
+                                {{latestEnergyAnalysisItem.reportYear | yearDisplay:facility.fiscalYear}}</span>
+                            <span *ngIf="!latestEnergyAnalysisItem">No Analysis Found For Facility</span>
                         </a>
                     </li>
                 </ul>
             </div>
             <div class="col-8">
-                <ng-container *ngIf="latestAnalysisItem">
-                    <app-monthly-analysis-summary-graph *ngIf="calculating == false && monthlyFacilityAnalysisData"
-                        [monthlyAnalysisSummaryData]="monthlyFacilityAnalysisData" [analysisItem]="latestAnalysisItem"
-                        [facilityOrAccount]="facility">
+                <ng-container *ngIf="latestEnergyAnalysisItem">
+                    <app-monthly-analysis-summary-graph
+                        *ngIf="calculating == false && monthlyFacilityEnergyAnalysisData"
+                        [monthlyAnalysisSummaryData]="monthlyFacilityEnergyAnalysisData"
+                        [analysisItem]="latestEnergyAnalysisItem" [facilityOrAccount]="facility">
                     </app-monthly-analysis-summary-graph>
                     <app-calculating-spinner *ngIf="calculating != false" [message]="'Calculating Monthly Results...'"
                         [error]="calculating == 'error'">
                     </app-calculating-spinner>
                     <div class="alert alert-danger"
-                        *ngIf="latestAnalysisItem.setupErrors.hasError || latestAnalysisItem.setupErrors.groupsHaveErrors">
+                        *ngIf="latestEnergyAnalysisItem.setupErrors.hasError || latestEnergyAnalysisItem.setupErrors.groupsHaveErrors">
+                        Errors found in selected analysis.
+                    </div>
+                </ng-container>
+                <ng-container *ngIf="latestWaterAnalysisItem">
+                    <app-monthly-analysis-summary-graph *ngIf="calculating == false && monthlyFacilityWaterAnalysisData"
+                        [monthlyAnalysisSummaryData]="monthlyFacilityWaterAnalysisData"
+                        [analysisItem]="latestWaterAnalysisItem" [facilityOrAccount]="facility">
+                    </app-monthly-analysis-summary-graph>
+                    <app-calculating-spinner *ngIf="calculating != false" [message]="'Calculating Monthly Results...'"
+                        [error]="calculating == 'error'">
+                    </app-calculating-spinner>
+                    <div class="alert alert-danger"
+                        *ngIf="latestWaterAnalysisItem.setupErrors.hasError || latestWaterAnalysisItem.setupErrors.groupsHaveErrors">
                         Errors found in selected analysis.
                     </div>
                 </ng-container>

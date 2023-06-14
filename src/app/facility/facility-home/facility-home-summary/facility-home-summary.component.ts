@@ -22,13 +22,6 @@ import { MeterSource } from 'src/app/models/constantsAndTypes';
 })
 export class FacilityHomeSummaryComponent implements OnInit {
 
-  // latestAnalysisSummary: MonthlyAnalysisSummaryData;
-  latestSummarySub: Subscription;
-  // percentSavings: number = 0;
-  // percentGoal: number;
-  // percentTowardsGoal: number = 0;
-  // goalYear: number;
-  // baselineYear: number;
 
   facility: IdbFacility
   lastBill: IdbUtilityMeterData;
@@ -36,7 +29,8 @@ export class FacilityHomeSummaryComponent implements OnInit {
   lastYear: number;
 
 
-  latestAnalysisItem: IdbAnalysisItem;
+  latestEnergyAnalysisItem: IdbAnalysisItem;
+  latestWaterAnalysisItem: IdbAnalysisItem;
   sources: Array<MeterSource>;
   facilityPredictors: Array<PredictorData>;
   latestPredictorEntry: IdbPredictorEntry;
@@ -48,9 +42,10 @@ export class FacilityHomeSummaryComponent implements OnInit {
   calculating: boolean | 'error';
   calculatingSub: Subscription;
 
-  monthlyFacilityAnalysisData: Array<MonthlyAnalysisSummaryData>;
-  monthlyFacilityAnalysisDataSub: Subscription;
-  latestAnalysisDate: Date;
+  monthlyFacilityEnergyAnalysisData: Array<MonthlyAnalysisSummaryData>;
+  monthlyFacilityEnergyAnalysisDataSub: Subscription;
+  monthlyFacilityWaterAnalysisData: Array<MonthlyAnalysisSummaryData>;
+  monthlyFacilityWaterAnalysisDataSub: Subscription;
   constructor(private analysisDbService: AnalysisDbService, private utilityMeterDataDbService: UtilityMeterDatadbService,
     private facilityDbService: FacilitydbService, private facilityHomeService: FacilityHomeService,
     private router: Router, private predictorDbService: PredictordbService,
@@ -65,46 +60,24 @@ export class FacilityHomeSummaryComponent implements OnInit {
 
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
       this.facility = this.facilityDbService.selectedFacility.getValue();
-      // this.setGoalYears()
       this.setNAICS();
       this.setFacilityStatus();
     });
-    this.latestSummarySub = this.facilityHomeService.monthlyFacilityAnalysisData.subscribe(val => {
-      this.monthlyFacilityAnalysisData = val;
-      // this.latestAnalysisSummary = _.maxBy(val, 'date');
-      // if (this.latestAnalysisSummary) {
-      //   this.latestAnalysisDate = new Date(this.latestAnalysisSummary.date);
-      // this.setProgressPercentages();
-      // } else {
-      //   this.latestAnalysisDate = undefined;
-      // this.percentSavings = 0;
-      // this.percentTowardsGoal = 0;
-      // }
+    this.monthlyFacilityEnergyAnalysisDataSub = this.facilityHomeService.monthlyFacilityEnergyAnalysisData.subscribe(val => {
+      this.monthlyFacilityEnergyAnalysisData = val;
+    });
+    this.monthlyFacilityWaterAnalysisDataSub = this.facilityHomeService.monthlyFacilityWaterAnalysisData.subscribe(val => {
+      this.monthlyFacilityWaterAnalysisData = val;
     });
 
   }
 
   ngOnDestroy() {
-    this.latestSummarySub.unsubscribe();
+    this.monthlyFacilityEnergyAnalysisDataSub.unsubscribe();
+    this.monthlyFacilityWaterAnalysisDataSub.unsubscribe();
     this.selectedFacilitySub.unsubscribe();
     this.calculatingSub.unsubscribe();
   }
-
-  // setGoalYears() {
-  //   if (this.facility && this.facility.sustainabilityQuestions) {
-  //     this.percentGoal = this.facility.sustainabilityQuestions.energyReductionPercent;
-  //     this.goalYear = this.facility.sustainabilityQuestions.energyReductionTargetYear;
-  //     this.baselineYear = this.facility.sustainabilityQuestions.energyReductionBaselineYear;
-  //   }
-  // }
-
-  // setProgressPercentages() {
-  //   this.percentSavings = this.latestAnalysisSummary.rolling12MonthImprovement;
-  //   this.percentTowardsGoal = (this.percentSavings / this.percentGoal) * 100;
-  //   if (this.percentTowardsGoal < 0) {
-  //     this.percentTowardsGoal = 0;
-  //   }
-  // }
 
   navigateTo(urlStr: string) {
     if (urlStr != 'upload') {
@@ -117,8 +90,9 @@ export class FacilityHomeSummaryComponent implements OnInit {
   setFacilityStatus() {
     let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
     this.lastBill = _.maxBy(facilityMeterData, (data: IdbUtilityMeterData) => { return new Date(data.readDate) });
-    let facilityAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.facilityAnalysisItems.getValue();
-    this.latestAnalysisItem = _.maxBy(facilityAnalysisItems, 'reportYear');
+    // let facilityAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.facilityAnalysisItems.getValue();
+    this.latestEnergyAnalysisItem = this.facilityHomeService.latestEnergyAnalysisItem;
+    this.latestWaterAnalysisItem = this.facilityHomeService.latestWaterAnalysisItem;
     this.setSources();
     let facilityPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.facilityPredictorEntries.getValue();
     this.latestPredictorEntry = _.maxBy(facilityPredictorEntries, (entry) => { return new Date(entry.date) });

@@ -32,7 +32,7 @@ export class FacilityEnergyReductionGoalComponent {
       this.setGoalYears()
     });
 
-    this.latestSummarySub = this.facilityHomeService.monthlyFacilityAnalysisData.subscribe(val => {
+    this.latestSummarySub = this.facilityHomeService.monthlyFacilityEnergyAnalysisData.subscribe(val => {
       // this.monthlyFacilityAnalysisData = val;
       this.latestAnalysisSummary = _.maxBy(val, 'date');
       if (this.latestAnalysisSummary) {
