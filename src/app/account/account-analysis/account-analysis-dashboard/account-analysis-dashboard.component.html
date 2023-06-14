@@ -1,11 +1,11 @@
-<div class="main-content p-0" *ngIf="!baselineYearError">
-    <app-account-analysis-dashboard-tabs></app-account-analysis-dashboard-tabs>
+<div class="main-content p-0">
+    <app-account-analysis-dashboard-tabs *ngIf="hasWater && hasEnergy"></app-account-analysis-dashboard-tabs>
     <div class="content-padding">
         <div class="card card-body">
             <h4 class="pt-0">
                 <div class="d-flex justify-content-between">
                     <div class="mt-auto">
-                        <i class="fa fa-microscope pe-2"></i>{{selectedAccount.name}}
+                        <i class="fa fa-microscope pe-2"></i>{{selectedAccount.name}} {{analysisType}}
                         Analysis
                     </div>
 
@@ -14,32 +14,14 @@
                     </div>
                 </div>
             </h4>
-            <div class="d-flex justify-content-between" *ngIf="analysisItemsList.length != 0">
+            <div class="d-flex justify-content-between">
                 <div>
                     <span class="fa fa-circle-check"></span> Denotes selected analysis for report year.
                 </div>
-                <!-- <div class="d-flex">
-                    <div class="pe-1">
-                        Show Details
-                    </div>
-                    <label class="switch mb-0" for="showDetail">
-                        <input class="checkbox" type="checkbox" id="showDetail" name="showDetail"
-                            [(ngModel)]="showDetail" (change)="saveShowDetails()">
-                        <span class="slider round"></span>
-                    </label>
-                </div> -->
             </div>
         </div>
         <hr>
         <router-outlet></router-outlet>
-    </div>
-</div>
-
-<div class="w-100 justify-content-center p-5" *ngIf="baselineYearError">
-    <div class="alert alert-danger text-center p-2">
-        The baseline year for your reduction goal is
-        {{selectedAccount.sustainabilityQuestions.energyReductionBaselineYear}} and your data starts {{yearOptions[0]}}.
-        Fix your facility settings or add data.
     </div>
 </div>
 

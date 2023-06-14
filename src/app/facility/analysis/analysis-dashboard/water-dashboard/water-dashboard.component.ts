@@ -6,6 +6,7 @@ import { IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 import { AnalysisService } from '../../analysis.service';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import * as _ from 'lodash';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-water-dashboard',
@@ -30,7 +31,8 @@ export class WaterDashboardComponent {
   constructor(private analysisDbService: AnalysisDbService,
     private facilityDbService: FacilitydbService,
     private analysisService: AnalysisService,
-    private calanderizationService: CalanderizationService) { }
+    private calanderizationService: CalanderizationService,
+    private router: Router) { }
 
   ngOnInit(): void {
     this.facilityAnalysisItemsSub = this.analysisDbService.facilityAnalysisItems.subscribe(items => {
@@ -73,5 +75,13 @@ export class WaterDashboardComponent {
         hasSelectedItem: yearAnalysisItems.findIndex((item: IdbAnalysisItem) => { return item.selectedYearAnalysis == true }) != -1
       });
     })
+  }
+  
+  goToSettings() {
+    this.router.navigateByUrl('facility/' + this.selectedFacility.id + '/settings');
+  }
+
+  goToUtilityData() {
+    this.router.navigateByUrl('facility/' + this.selectedFacility.id + '/utility');
   }
 }
