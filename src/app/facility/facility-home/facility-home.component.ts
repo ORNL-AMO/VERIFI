@@ -89,15 +89,15 @@ export class FacilityHomeComponent implements OnInit {
         if (!data.error) {
           this.facilityHomeService.annualEnergyAnalysisSummary.next(data.annualAnalysisSummaries);
           this.facilityHomeService.monthlyFacilityEnergyAnalysisData.next(data.monthlyAnalysisSummaryData);
-          this.facilityHomeService.calculating.next(false);
+          this.facilityHomeService.calculatingEnergy.next(false);
         } else {
           this.facilityHomeService.annualEnergyAnalysisSummary.next(undefined);
           this.facilityHomeService.monthlyFacilityEnergyAnalysisData.next(undefined);
-          this.facilityHomeService.calculating.next('error');
+          this.facilityHomeService.calculatingEnergy.next('error');
         }
         this.annualEnergyAnalysisWorker.terminate();
       };
-      this.facilityHomeService.calculating.next(true);
+      this.facilityHomeService.calculatingEnergy.next(true);
       this.annualEnergyAnalysisWorker.postMessage({
         analysisItem: this.facilityHomeService.latestEnergyAnalysisItem,
         facility: this.facility,
@@ -129,15 +129,15 @@ export class FacilityHomeComponent implements OnInit {
         if (!data.error) {
           this.facilityHomeService.annualWaterAnalysisSummary.next(data.annualAnalysisSummaries);
           this.facilityHomeService.monthlyFacilityWaterAnalysisData.next(data.monthlyAnalysisSummaryData);
-          this.facilityHomeService.calculating.next(false);
+          this.facilityHomeService.calculatingWater.next(false);
         } else {
           this.facilityHomeService.annualWaterAnalysisSummary.next(undefined);
           this.facilityHomeService.monthlyFacilityWaterAnalysisData.next(undefined);
-          this.facilityHomeService.calculating.next('error');
+          this.facilityHomeService.calculatingWater.next('error');
         }
         this.annualWaterAnalysisWorker.terminate();
       };
-      this.facilityHomeService.calculating.next(true);
+      this.facilityHomeService.calculatingWater.next(true);
       this.annualWaterAnalysisWorker.postMessage({
         analysisItem: this.facilityHomeService.latestWaterAnalysisItem,
         facility: this.facility,

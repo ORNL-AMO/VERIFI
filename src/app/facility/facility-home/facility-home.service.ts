@@ -22,7 +22,8 @@ export class FacilityHomeService {
   latestWaterAnalysisItem: IdbAnalysisItem;
   annualWaterAnalysisSummary: BehaviorSubject<Array<AnnualAnalysisSummary>>;
   monthlyFacilityWaterAnalysisData: BehaviorSubject<Array<MonthlyAnalysisSummaryData>>;
-  calculating: BehaviorSubject<boolean | 'error'>;
+  calculatingEnergy: BehaviorSubject<boolean | 'error'>;
+  calculatingWater: BehaviorSubject<boolean | 'error'>;
   constructor(private analysisDbService: AnalysisDbService, private utilityMeterDbService: UtilityMeterdbService,
     private calendarizationService: CalanderizationService,
     private convertMeterDataService: ConvertMeterDataService) {
@@ -32,8 +33,8 @@ export class FacilityHomeService {
     this.annualWaterAnalysisSummary = new BehaviorSubject<Array<AnnualAnalysisSummary>>(undefined);
     this.monthlyFacilityWaterAnalysisData = new BehaviorSubject<Array<MonthlyAnalysisSummaryData>>(undefined);
 
-    this.calculating = new BehaviorSubject<boolean>(true);
-
+    this.calculatingEnergy = new BehaviorSubject<boolean>(true);
+    this.calculatingWater = new BehaviorSubject<boolean>(true);
   }
 
   setLatestEnergyAnalysisItem(selectedFacility: IdbFacility) {

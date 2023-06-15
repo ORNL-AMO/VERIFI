@@ -1,18 +1,17 @@
 <div class="row">
     <div class="col-2 text-center">
-        Baseline
     </div>
-    <div class="col-8 text-center">
+    <div class="col-8 text-center label-font">
         Water Reduction Goal <ng-container *ngIf="latestAnalysisDate">({{latestAnalysisDate | date:
             'MMM. y'}})
         </ng-container>
     </div>
     <div class="col-2 text-center">
-        Goal
     </div>
 </div>
 <div class="row">
     <div class="col-2 text-center">
+        Baseline<br>
         {{baselineYear | yearDisplay:facility.fiscalYear}}
     </div>
     <div class="col-8">
@@ -28,6 +27,7 @@
         </div>
     </div>
     <div class="col-2 text-center">
+        Goal<br>
         {{goalYear | yearDisplay:facility.fiscalYear}} ({{percentGoal}}%)
     </div>
 </div>
