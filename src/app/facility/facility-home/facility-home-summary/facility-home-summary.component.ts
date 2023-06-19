@@ -27,6 +27,11 @@ export class FacilityHomeSummaryComponent implements OnInit {
   sources: Array<MeterSource>;
   naics: string;
   selectedFacilitySub: Subscription;
+
+  waterAnalysisNeeded: boolean;
+  energyAnalysisNeeded: boolean;
+  meterReadingsNeeded: boolean;
+  predictorsNeeded: boolean;
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService,
     private facilityDbService: FacilitydbService, private facilityHomeService: FacilityHomeService,
     private router: Router,
@@ -56,9 +61,57 @@ export class FacilityHomeSummaryComponent implements OnInit {
   setFacilityStatus() {
     let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
     this.lastBill = _.maxBy(facilityMeterData, (data: IdbUtilityMeterData) => { return new Date(data.readDate) });
+    this.setMeterReadingsNeeded();
     this.latestEnergyAnalysisItem = this.facilityHomeService.latestEnergyAnalysisItem;
+    this.setEnergyAnalysisNeeded();
     this.latestWaterAnalysisItem = this.facilityHomeService.latestWaterAnalysisItem;
+    this.setWaterAnalysisNeeded();
     this.setSources();
+  }
+
+  setMeterReadingsNeeded() {
+    let currentDate: Date = new Date();
+    currentDate.setMonth(currentDate.getMonth() - 1);
+    if (this.lastBill) {
+      let lastBillDate: Date = new Date(this.lastBill.readDate);
+      if (lastBillDate < currentDate) {
+        this.meterReadingsNeeded = true;
+      } else {
+        this.meterReadingsNeeded = false;
+      }
+    } else {
+      this.meterReadingsNeeded = true;
+    }
+  }
+
+  setEnergyAnalysisNeeded() {
+    let currentDate: Date = new Date();
+    if (this.latestEnergyAnalysisItem) {
+      if (this.latestEnergyAnalysisItem.reportYear < currentDate.getFullYear() - 1) {
+        this.energyAnalysisNeeded = true;
+      } else {
+        this.energyAnalysisNeeded = false;
+      }
+    } else if (this.facility.sustainabilityQuestions.energyReductionGoal) {
+      this.energyAnalysisNeeded = true;
+    } else {
+      this.energyAnalysisNeeded = false;
+    }
+  }
+
+  setWaterAnalysisNeeded() {
+    let currentDate: Date = new Date();
+    if (this.latestWaterAnalysisItem) {
+      if (this.latestWaterAnalysisItem.reportYear < currentDate.getFullYear() - 1) {
+        this.waterAnalysisNeeded = true;
+      } else {
+        this.waterAnalysisNeeded = false;
+      }
+    } else if (this.facility.sustainabilityQuestions.waterReductionGoal) {
+      this.waterAnalysisNeeded = true;
+    } else {
+      this.waterAnalysisNeeded = false;
+    }
   }
 
 

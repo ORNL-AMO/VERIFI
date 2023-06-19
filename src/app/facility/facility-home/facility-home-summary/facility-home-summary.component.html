@@ -31,7 +31,8 @@
                             <span class="fa fa-book"></span><br>
                             Manage Utility <br> Data
                             <span
-                                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                                *ngIf="meterReadingsNeeded">
                                 <span class="fa-exclamation white"></span>
                             </span>
                         </button>
@@ -55,7 +56,8 @@
                             <span class="fa fa-microscope"></span><br>
                             Conduct Facility <br> Analysis
                             <span
-                                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                                *ngIf="energyAnalysisNeeded || waterAnalysisNeeded">
                                 <span class="fa-exclamation white"></span>
                             </span>
                         </button>
@@ -80,10 +82,11 @@
                     </div>
 
                 </div>
-                <div class="d-flex justify-content-center">
+                <div class="d-flex justify-content-center"
+                    *ngIf="meterReadingsNeeded || energyAnalysisNeeded || waterAnalysisNeeded">
                     <ul class="list-group list-group-flush">
                         <!--meters-->
-                        <li class="list-group-item">
+                        <li class="list-group-item" *ngIf="meterReadingsNeeded">
                             <a class="nav-link" routerLink="/facility/{{facility.id}}/utility">
                                 <span class="badge rounded-pill bg-danger">
                                     <span class="fa-exclamation white"></span>
@@ -91,24 +94,28 @@
                                 Meter readings needed. Latest entry {{lastBill.readDate | date}}
                             </a>
                         </li>
-                        <li class="list-group-item" *ngIf="latestEnergyAnalysisItem">
+                        <li class="list-group-item" *ngIf="energyAnalysisNeeded">
                             <a class="nav-link"
                                 routerLink="/facility/{{facility.id}}/analysis/analysis-dashboard/energy">
                                 <span class="badge rounded-pill bg-danger">
                                     <span class="fa-exclamation white"></span>
                                 </span>
-                                Energy analysis needed. Latest energy analysis conducted for
-                                {{latestEnergyAnalysisItem.reportYear | yearDisplay:facility.fiscalYear}}
+                                Energy analysis needed. <ng-container *ngIf="latestEnergyAnalysisItem">Latest energy
+                                    analysis conducted for
+                                    {{latestEnergyAnalysisItem.reportYear |
+                                    yearDisplay:facility.fiscalYear}}</ng-container>
                             </a>
                         </li>
-                        <li class="list-group-item" *ngIf="latestWaterAnalysisItem">
+                        <li class="list-group-item" *ngIf="waterAnalysisNeeded">
                             <a class="nav-link"
                                 routerLink="/facility/{{facility.id}}/analysis/analysis-dashboard/water">
                                 <span class="badge rounded-pill bg-danger">
                                     <span class="fa-exclamation white"></span>
                                 </span>
-                                Water analysis needed. Latest water analysis conducted for
-                                {{latestWaterAnalysisItem.reportYear | yearDisplay:facility.fiscalYear}}
+                                Water analysis needed. <ng-container *ngIf="latestWaterAnalysisItem">Latest water
+                                    analysis conducted for
+                                    {{latestWaterAnalysisItem.reportYear |
+                                    yearDisplay:facility.fiscalYear}}</ng-container>
                             </a>
                         </li>
                     </ul>

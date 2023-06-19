@@ -23,7 +23,6 @@ export class FacilityEnergyReductionGoalComponent {
   facility: IdbFacility;
   selectedFacilitySub: Subscription;
   latestAnalysisDate: Date;
-
   constructor(private facilityDbService: FacilitydbService, private facilityHomeService: FacilityHomeService) { }
 
   ngOnInit(): void {
