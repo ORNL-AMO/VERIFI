@@ -1,21 +1,98 @@
 <div class="measur-wrapper main-content">
     <app-facility-home-summary></app-facility-home-summary>
     <hr>
-    <div class="row" *ngIf="facilityMeters.length == 0">
-        <!-- <div class="col-12">
+
+    <!-- <div class="row">
+        <div class="col">
+            <hr>
+        </div>
+    </div> -->
+    <div class="row">
+        <div [ngClass]="{'col-6': latestWaterAnalysisItem, 'col-12': !latestWaterAnalysisItem}"
+            *ngIf="latestEnergyAnalysisItem">
             <div class="card">
-                <div class="card-header">
-                    <h2 class="card-title mb-0">
-                        <a (click)="navigateToMeters()">
-                            Meters
-                        </a>
-                    </h2>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-12">
+                            <app-facility-energy-reduction-goal></app-facility-energy-reduction-goal>
+                            <app-calculating-spinner *ngIf="calculatingEnergy != false"
+                                [message]="'Calculating Energy...'" [error]="calculatingEnergy == 'error'">
+                            </app-calculating-spinner>
+                            <div class="alert alert-danger"
+                                *ngIf="latestEnergyAnalysisItem.setupErrors.hasError || latestEnergyAnalysisItem.setupErrors.groupsHaveErrors">
+                                Errors found in selected analysis.
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <hr>
+                        </div>
+                        <div *ngIf="calculatingEnergy == false && monthlyFacilityEnergyAnalysisData"
+                            [ngClass]="{'col-6': !latestWaterAnalysisItem, 'col-12': latestWaterAnalysisItem}">
+                            <app-monthly-analysis-summary-graph
+                                [monthlyAnalysisSummaryData]="monthlyFacilityEnergyAnalysisData"
+                                [analysisItem]="latestEnergyAnalysisItem" [facilityOrAccount]="facility">
+                            </app-monthly-analysis-summary-graph>
+                        </div>
+                        <div *ngIf="latestWaterAnalysisItem" class="col-12">
+                            <hr>
+                        </div>
+                        <div *ngIf="calculatingEnergy == false && monthlyFacilityEnergyAnalysisData"
+                            [ngClass]="{'col-6': !latestWaterAnalysisItem, 'col-12': latestWaterAnalysisItem}">
+                            <app-monthly-analysis-summary-savings-graph [analysisItem]="latestEnergyAnalysisItem"
+                                [monthlyAnalysisSummaryData]="monthlyFacilityEnergyAnalysisData"
+                                [facilityOrAccount]="facility">
+                            </app-monthly-analysis-summary-savings-graph>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div [ngClass]="{'col-6': latestEnergyAnalysisItem, 'col-12': !latestEnergyAnalysisItem}"
+            *ngIf="latestWaterAnalysisItem">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-12">
+                            <app-facility-water-reduction-goal></app-facility-water-reduction-goal>
+                            <app-calculating-spinner *ngIf="calculatingWater != false"
+                                [message]="'Calculating Water...'" [error]="calculatingWater == 'error'">
+                            </app-calculating-spinner>
+                            <div class="alert alert-danger"
+                                *ngIf="latestWaterAnalysisItem.setupErrors.hasError || latestWaterAnalysisItem.setupErrors.groupsHaveErrors">
+                                Errors found in selected analysis.
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <hr>
+                        </div>
+                        <div *ngIf="calculatingWater == false && monthlyFacilityWaterAnalysisData"
+                            [ngClass]="{'col-6': !latestEnergyAnalysisItem, 'col-12': latestEnergyAnalysisItem}">
+                            <app-monthly-analysis-summary-graph
+                                *ngIf="calculatingWater == false && monthlyFacilityWaterAnalysisData"
+                                [monthlyAnalysisSummaryData]="monthlyFacilityWaterAnalysisData"
+                                [analysisItem]="latestWaterAnalysisItem" [facilityOrAccount]="facility">
+                            </app-monthly-analysis-summary-graph>
+                        </div>
+                        <div *ngIf="latestEnergyAnalysisItem" class="col-12">
+                            <hr>
+                        </div>
+                        <div *ngIf="calculatingWater == false && monthlyFacilityWaterAnalysisData"
+                            [ngClass]="{'col-6': !latestEnergyAnalysisItem, 'col-12': latestEnergyAnalysisItem}">
+                            <app-monthly-analysis-summary-savings-graph [analysisItem]="latestWaterAnalysisItem"
+                                [monthlyAnalysisSummaryData]="monthlyFacilityWaterAnalysisData"
+                                [facilityOrAccount]="facility">
+                            </app-monthly-analysis-summary-savings-graph>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col-4 mt-3" *ngFor="let meter of facilityMeters">
-            <app-meter-card [meter]="meter"></app-meter-card>
-        </div> -->
+    </div>
+
+
+
+    <div class="row" *ngIf="facilityMeters.length == 0">
         <div class="col-4 mt-3">
             <div class="card no-data-card" (click)="navigateToMeters()">
                 <div class="card-body text-center">

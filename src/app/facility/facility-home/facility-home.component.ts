@@ -7,7 +7,7 @@ import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { CalanderizationOptions, CalanderizedMeter } from 'src/app/models/calanderization';
-import { IdbFacility, IdbPredictorEntry, IdbUtilityMeter } from 'src/app/models/idb';
+import { IdbAnalysisItem, IdbFacility, IdbPredictorEntry, IdbUtilityMeter } from 'src/app/models/idb';
 import { FacilityHomeService } from './facility-home.service';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { ConvertMeterDataService } from 'src/app/shared/helper-services/convert-meter-data.service';
@@ -24,6 +24,16 @@ export class FacilityHomeComponent implements OnInit {
   facility: IdbFacility;
   annualEnergyAnalysisWorker: Worker;
   annualWaterAnalysisWorker: Worker;
+  calculatingEnergy: boolean | 'error';
+  calculatingEnergySub: Subscription;
+  calculatingWater: boolean | 'error';
+  calculatingWaterSub: Subscription;
+  monthlyFacilityEnergyAnalysisData: Array<MonthlyAnalysisSummaryData>;
+  monthlyFacilityEnergyAnalysisDataSub: Subscription;
+  monthlyFacilityWaterAnalysisData: Array<MonthlyAnalysisSummaryData>;
+  monthlyFacilityWaterAnalysisDataSub: Subscription;
+  latestEnergyAnalysisItem: IdbAnalysisItem;
+  latestWaterAnalysisItem: IdbAnalysisItem;
   constructor(private facilityDbService: FacilitydbService,
     private facilityHomeService: FacilityHomeService, private utilityMeterDbService: UtilityMeterdbService,
     private router: Router, private predictorDbService: PredictordbService,
@@ -38,19 +48,36 @@ export class FacilityHomeComponent implements OnInit {
       this.facilityHomeService.setLatestWaterAnalysisItem(this.facility);
 
       if (this.facilityHomeService.latestEnergyAnalysisItem) {
+        this.latestEnergyAnalysisItem = this.facilityHomeService.latestEnergyAnalysisItem;
         this.setAnnualEnergyAnalysisSummary();
       } else {
+        this.latestEnergyAnalysisItem = undefined;
         this.facilityHomeService.monthlyFacilityEnergyAnalysisData.next(undefined);
         this.facilityHomeService.annualEnergyAnalysisSummary.next(undefined);
       }
 
       if (this.facilityHomeService.latestWaterAnalysisItem) {
+        this.latestWaterAnalysisItem = this.facilityHomeService.latestWaterAnalysisItem;
         this.setAnnualWaterAnalysisSummary();
       } else {
+        this.latestWaterAnalysisItem = undefined;
         this.facilityHomeService.monthlyFacilityWaterAnalysisData.next(undefined);
         this.facilityHomeService.annualWaterAnalysisSummary.next(undefined);
       }
     })
+
+    this.calculatingEnergySub = this.facilityHomeService.calculatingEnergy.subscribe(val => {
+      this.calculatingEnergy = val;
+    });
+    this.calculatingWaterSub = this.facilityHomeService.calculatingWater.subscribe(val => {
+      this.calculatingWater = val;
+    });
+    this.monthlyFacilityEnergyAnalysisDataSub = this.facilityHomeService.monthlyFacilityEnergyAnalysisData.subscribe(val => {
+      this.monthlyFacilityEnergyAnalysisData = val;
+    });
+    this.monthlyFacilityWaterAnalysisDataSub = this.facilityHomeService.monthlyFacilityWaterAnalysisData.subscribe(val => {
+      this.monthlyFacilityWaterAnalysisData = val;
+    });
   }
 
   ngOnDestroy() {
@@ -65,6 +92,10 @@ export class FacilityHomeComponent implements OnInit {
     this.facilityHomeService.annualEnergyAnalysisSummary.next(undefined);
     this.facilityHomeService.monthlyFacilityWaterAnalysisData.next(undefined);
     this.facilityHomeService.annualWaterAnalysisSummary.next(undefined);
+    this.calculatingEnergySub.unsubscribe();
+    this.calculatingWaterSub.unsubscribe();
+    this.monthlyFacilityEnergyAnalysisDataSub.unsubscribe();
+    this.monthlyFacilityWaterAnalysisDataSub.unsubscribe();
   }
 
 
