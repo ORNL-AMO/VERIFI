@@ -94,12 +94,7 @@ export class HeaderComponent implements OnInit {
     this.router.navigate(['/']);
     this.loadingService.setLoadingStatus(false);
   }
-
-  openImportBackup() {
-    this.importBackupModalService.inFacility = false;
-    this.importBackupModalService.showModal.next(true);
-  }
-
+  
   toggleSearch() {
     this.showSearch = !this.showSearch;
   }
@@ -123,7 +118,7 @@ export class HeaderComponent implements OnInit {
   }
 
   openBackupModal() {
-    this.importBackupModalService.inFacility = this.router.url.includes('facility');
+    this.importBackupModalService.inFacility = false;
     this.importBackupModalService.showModal.next(true);
   }
 

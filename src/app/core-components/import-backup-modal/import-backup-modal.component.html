@@ -1,10 +1,9 @@
-
 <div [ngClass]="{'windowOverlay': showModal}"></div>
 <div class="popup" [ngClass]="{'open': showModal}">
     <div class="popup-header">Import Backup File
         <button class="item-right" (click)="cancelImportBackup()">x</button>
     </div>
-    <div class="popup-body">
+    <div class="popup-body" *ngIf="showModal">
         <p>Select backup .json file you previously exported from VERIFI application.</p>
         <input type="file" #importFile id="importFile" (input)="setImportFile($event.target)" accept=".json">
         <p class="alert alert-danger" *ngIf="backupFileError">

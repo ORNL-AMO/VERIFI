@@ -121,7 +121,8 @@
                         [(ngModel)]="analysisTableColumns.rollingSavings" (change)="save()" id="rollingSavings">
                     <label class="form-check-label" for="rollingSavings">Rolling Savings</label>
                 </div>
-                <div class="form-check" *ngIf="tableContext == 'monthGroup' || tableContext == 'monthFacility'">
+                <div class="form-check"
+                    *ngIf="tableContext == 'monthGroup' || tableContext == 'monthFacility' || tableContext == 'monthAccount'">
                     <input class="form-check-input" type="checkbox" name="rolling12MonthImprovement"
                         [(ngModel)]="analysisTableColumns.rolling12MonthImprovement" (change)="save()"
                         id="rolling12MonthImprovement">
