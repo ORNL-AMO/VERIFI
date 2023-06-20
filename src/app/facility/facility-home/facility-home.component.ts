@@ -110,7 +110,7 @@ export class FacilityHomeComponent implements OnInit {
     let calanderizationOptions: CalanderizationOptions = {
       energyIsSource: this.facilityHomeService.latestEnergyAnalysisItem.energyIsSource
     }
-    let calanderizedMeterData: Array<CalanderizedMeter> = this.calendarizationService.getCalanderizedMeterData(facilityMeters, true, false, calanderizationOptions);
+    let calanderizedMeterData: Array<CalanderizedMeter> = this.calendarizationService.getCalanderizedMeterData(facilityMeters, false, false, calanderizationOptions);
     calanderizedMeterData.forEach(calanderizedMeter => {
       calanderizedMeter.monthlyData = this.convertMeterDataService.convertMeterDataToAnalysis(this.facilityHomeService.latestEnergyAnalysisItem, calanderizedMeter.monthlyData, this.facility, calanderizedMeter.meter);
     });
@@ -150,7 +150,7 @@ export class FacilityHomeComponent implements OnInit {
     let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.accountPredictorEntries.getValue();
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == this.facility.guid });
-    let calanderizedMeterData: Array<CalanderizedMeter> = this.calendarizationService.getCalanderizedMeterData(facilityMeters, true, false, undefined);
+    let calanderizedMeterData: Array<CalanderizedMeter> = this.calendarizationService.getCalanderizedMeterData(facilityMeters, false, false, undefined);
     calanderizedMeterData.forEach(calanderizedMeter => {
       calanderizedMeter.monthlyData = this.convertMeterDataService.convertMeterDataToAnalysis(this.facilityHomeService.latestWaterAnalysisItem, calanderizedMeter.monthlyData, this.facility, calanderizedMeter.meter);
     });

@@ -7,6 +7,8 @@ import { RouterModule } from '@angular/router';
 import { HelperPipesModule } from 'src/app/shared/helper-pipes/helper-pipes.module';
 import { SharedAnalysisModule } from 'src/app/shared/shared-analysis/shared-analysis.module';
 import { CalculatingSpinnerModule } from 'src/app/shared/calculating-spinner/calculating-spinner.module';
+import { AccountWaterReductionGoalComponent } from './account-water-reduction-goal/account-water-reduction-goal.component';
+import { AccountEnergyReductionGoalComponent } from './account-energy-reduction-goal/account-energy-reduction-goal.component';
 
 
 
@@ -15,6 +17,8 @@ import { CalculatingSpinnerModule } from 'src/app/shared/calculating-spinner/cal
     AccountHomeComponent,
     AccountHomeSummaryComponent,
     FacilityCardComponent,
+    AccountWaterReductionGoalComponent,
+    AccountEnergyReductionGoalComponent,
   ],
   imports: [
     CommonModule,

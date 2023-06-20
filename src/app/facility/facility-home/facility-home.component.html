@@ -1,12 +1,6 @@
 <div class="measur-wrapper main-content">
     <app-facility-home-summary></app-facility-home-summary>
     <hr>
-
-    <!-- <div class="row">
-        <div class="col">
-            <hr>
-        </div>
-    </div> -->
     <div class="row">
         <div [ngClass]="{'col-6': latestWaterAnalysisItem, 'col-12': !latestWaterAnalysisItem}"
             *ngIf="latestEnergyAnalysisItem">

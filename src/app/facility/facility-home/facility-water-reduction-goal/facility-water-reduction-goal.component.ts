@@ -27,7 +27,7 @@ export class FacilityWaterReductionGoalComponent {
 
   ngOnInit(): void {
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
-      this.facility = this.facilityDbService.selectedFacility.getValue();
+      this.facility = val;
       this.setGoalYears()
     });
 

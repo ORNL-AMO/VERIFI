@@ -46,8 +46,8 @@ export class AccountHomeSummaryComponent implements OnInit {
   ngOnInit(): void {
     this.accountSub = this.accountDbService.selectedAccount.subscribe(val => {
       this.account = val;
-      this.setGoalYears();
-      this.latestAnalysisItem = this.accountHomeService.latestAnalysisItem;
+      // this.setGoalYears();
+      // this.latestAnalysisItem = this.accountHomeService.latestAnalysisItem;
       if(this.latestAnalysisItem){
         this.accountAnalysisYear = this.latestAnalysisItem.reportYear;
       }else{
@@ -56,24 +56,24 @@ export class AccountHomeSummaryComponent implements OnInit {
       let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
       this.disableButtons = (accountMeterData.length == 0);
     });
-    this.latestSummarySub = this.accountHomeService.monthlyAccountAnalysisData.subscribe(val => {
-      this.latestAnalysisSummary = _.maxBy(val, 'date');
-      if (this.latestAnalysisSummary) {
-        this.latestAnalysisDate = new Date(this.latestAnalysisSummary.date);
-        this.setProgressPercentages();
-      } else {
-        this.latestAnalysisDate = undefined
-        this.percentSavings = 0;
-        this.percentTowardsGoal = 0;
-      }
-    });
+    // this.latestSummarySub = this.accountHomeService.monthlyAccountAnalysisData.subscribe(val => {
+    //   this.latestAnalysisSummary = _.maxBy(val, 'date');
+    //   if (this.latestAnalysisSummary) {
+    //     this.latestAnalysisDate = new Date(this.latestAnalysisSummary.date);
+    //     this.setProgressPercentages();
+    //   } else {
+    //     this.latestAnalysisDate = undefined
+    //     this.percentSavings = 0;
+    //     this.percentTowardsGoal = 0;
+    //   }
+    // });
 
-    this.calculatingSub = this.accountHomeService.calculating.subscribe(val => {
-      this.calculating = val;
-      if(this.calculating == false){
-        this.monthlyFacilityAnalysisData = this.accountHomeService.monthlyAccountAnalysisData.getValue();
-      }
-    })
+    // this.calculatingSub = this.accountHomeService.calculating.subscribe(val => {
+    //   this.calculating = val;
+    //   if(this.calculating == false){
+    //     this.monthlyFacilityAnalysisData = this.accountHomeService.monthlyAccountAnalysisData.getValue();
+    //   }
+    // })
 
 
     this.accountReportsSub = this.accountReportDbService.accountReports.subscribe(accountReports => {
@@ -90,8 +90,8 @@ export class AccountHomeSummaryComponent implements OnInit {
 
   ngOnDestroy() {
     this.accountSub.unsubscribe();
-    this.latestSummarySub.unsubscribe();
-    this.accountReportsSub.unsubscribe();
+    // this.latestSummarySub.unsubscribe();
+    // this.accountReportsSub.unsubscribe();
   }
 
   setGoalYears() {
