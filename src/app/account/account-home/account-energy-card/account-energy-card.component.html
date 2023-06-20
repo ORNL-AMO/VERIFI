@@ -1,0 +1,49 @@
+<div class="card">
+    <div class="card-body">
+        <div class="row">
+            <div class="col-12">
+                <app-account-energy-reduction-goal></app-account-energy-reduction-goal>
+                <app-calculating-spinner *ngIf="calculatingEnergy != false"
+                    [message]="'Calculating Energy...'" [error]="calculatingEnergy == 'error'">
+                </app-calculating-spinner>
+                <div class="alert alert-danger" *ngIf="latestEnergyAnalysisItem.setupErrors.hasError">
+                    Errors found in selected analysis.
+                </div>
+            </div>
+            <div class="col-12">
+                <hr>
+            </div>
+            <div class="col-12" *ngIf="calculatingEnergy == false && monthlyEnergyAnalysisData">
+                <div class="carousel slide carousel-fade">
+                    <div class="carousel-inner">
+                        <div class="carousel-item" [ngClass]="{'active': carouselIndex == 0}">
+                            <app-monthly-analysis-summary-graph
+                                [monthlyAnalysisSummaryData]="monthlyEnergyAnalysisData"
+                                [analysisItem]="latestEnergyAnalysisItem" [facilityOrAccount]="account">
+                            </app-monthly-analysis-summary-graph>
+                        </div>
+                        <div class="carousel-item" [ngClass]="{'active': carouselIndex == 1}">
+                            <app-monthly-analysis-summary-savings-graph
+                                [analysisItem]="latestEnergyAnalysisItem"
+                                [monthlyAnalysisSummaryData]="monthlyEnergyAnalysisData"
+                                [facilityOrAccount]="account">
+                            </app-monthly-analysis-summary-savings-graph>
+                        </div>
+                    </div>
+                    <button class="carousel-control-prev" type="button"
+                        data-bs-target="#carouselExampleIndicators" data-bs-slide="prev" (click)="goBack()">
+                        <!-- <span class="carousel-control-prev-icon" aria-hidden="true"></span> -->
+                        <span class="fa fa-chevron-left"></span>
+                        <span class="visually-hidden">Previous</span>
+                    </button>
+                    <button class="carousel-control-next" type="button"
+                        data-bs-target="#carouselExampleIndicators" data-bs-slide="next" (click)="goNext()">
+                        <!-- <span class="carousel-control-next-icon" aria-hidden="true"></span> -->
+                        <span class="fa fa-chevron-right"></span>
+                        <span class="visually-hidden">Next</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

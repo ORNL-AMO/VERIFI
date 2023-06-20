@@ -2,87 +2,11 @@
     <app-account-home-summary></app-account-home-summary>
     <hr>
     <div class="row">
-        <div [ngClass]="{'col-6': latestWaterAnalysisItem, 'col-12': !latestWaterAnalysisItem}"
-            *ngIf="latestEnergyAnalysisItem">
-            <div class="card">
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-12">
-                            <app-account-energy-reduction-goal></app-account-energy-reduction-goal>
-                            <app-calculating-spinner *ngIf="calculatingEnergy != false"
-                                [message]="'Calculating Energy...'" [error]="calculatingEnergy == 'error'">
-                            </app-calculating-spinner>
-                            <div class="alert alert-danger"
-                                *ngIf="latestEnergyAnalysisItem.setupErrors.hasError">
-                                Errors found in selected analysis.
-                            </div>
-                        </div>
-                        <div class="col-12">
-                            <hr>
-                        </div>
-                        <div *ngIf="calculatingEnergy == false && monthlyEnergyAnalysisData"
-                            [ngClass]="{'col-6': !latestWaterAnalysisItem, 'col-12': latestWaterAnalysisItem}">
-                            <app-monthly-analysis-summary-graph
-                                [monthlyAnalysisSummaryData]="monthlyEnergyAnalysisData"
-                                [analysisItem]="latestEnergyAnalysisItem" [facilityOrAccount]="account">
-                            </app-monthly-analysis-summary-graph>
-                        </div>
-                        <div *ngIf="latestWaterAnalysisItem" class="col-12">
-                            <hr>
-                        </div>
-                        <div *ngIf="calculatingEnergy == false && monthlyEnergyAnalysisData"
-                            [ngClass]="{'col-6': !latestWaterAnalysisItem, 'col-12': latestWaterAnalysisItem}">
-                            <app-monthly-analysis-summary-savings-graph [analysisItem]="latestEnergyAnalysisItem"
-                                [monthlyAnalysisSummaryData]="monthlyEnergyAnalysisData"
-                                [facilityOrAccount]="account">
-                            </app-monthly-analysis-summary-savings-graph>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
+        <div class="col-6" *ngIf="latestEnergyAnalysisItem">
+            <app-account-energy-card></app-account-energy-card>
         </div>
-        <div [ngClass]="{'col-6': latestEnergyAnalysisItem, 'col-12': !latestEnergyAnalysisItem}"
-            *ngIf="latestWaterAnalysisItem">
-            <div class="card">
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-12">
-                            <app-account-water-reduction-goal></app-account-water-reduction-goal>
-                            <app-calculating-spinner *ngIf="calculatingWater != false"
-                                [message]="'Calculating Water...'" [error]="calculatingWater == 'error'">
-                            </app-calculating-spinner>
-                            <div class="alert alert-danger"
-                                *ngIf="latestWaterAnalysisItem.setupErrors.hasError">
-                                Errors found in selected analysis.
-                            </div>
-                        </div>
-                        <div class="col-12">
-                            <hr>
-                        </div>
-                        <div *ngIf="calculatingWater == false && monthlyWaterAnalysisData"
-                            [ngClass]="{'col-6': !latestEnergyAnalysisItem, 'col-12': latestEnergyAnalysisItem}">
-                            <app-monthly-analysis-summary-graph
-                                *ngIf="calculatingWater == false && monthlyWaterAnalysisData"
-                                [monthlyAnalysisSummaryData]="monthlyWaterAnalysisData"
-                                [analysisItem]="latestWaterAnalysisItem" [facilityOrAccount]="account">
-                            </app-monthly-analysis-summary-graph>
-                        </div>
-                        <div *ngIf="latestEnergyAnalysisItem" class="col-12">
-                            <hr>
-                        </div>
-                        <div *ngIf="calculatingWater == false && monthlyWaterAnalysisData"
-                            [ngClass]="{'col-6': !latestEnergyAnalysisItem, 'col-12': latestEnergyAnalysisItem}">
-                            <app-monthly-analysis-summary-savings-graph [analysisItem]="latestWaterAnalysisItem"
-                                [monthlyAnalysisSummaryData]="monthlyWaterAnalysisData"
-                                [facilityOrAccount]="account">
-                            </app-monthly-analysis-summary-savings-graph>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="col-6" *ngIf="latestWaterAnalysisItem">
+            <app-account-water-card></app-account-water-card>
         </div>
     </div>
-
-
 </div>

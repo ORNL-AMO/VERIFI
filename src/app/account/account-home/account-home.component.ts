@@ -38,6 +38,7 @@ export class AccountHomeComponent implements OnInit {
   account: IdbAccount;
   latestEnergyAnalysisItem: IdbAccountAnalysisItem;
   latestWaterAnalysisItem: IdbAccountAnalysisItem;
+  carrouselIndex: number = 0;
   constructor(private facilityDbService: FacilitydbService, private accountDbService: AccountdbService,
     private accountHomeService: AccountHomeService,
     private predictorDbService: PredictordbService,
@@ -280,6 +281,13 @@ export class AccountHomeComponent implements OnInit {
   //   }
   // }
 
+  goNext(){
+    this.carrouselIndex++;
+  }
+
+  goBack(){
+    this.carrouselIndex--;
+  }
 
 
 }
