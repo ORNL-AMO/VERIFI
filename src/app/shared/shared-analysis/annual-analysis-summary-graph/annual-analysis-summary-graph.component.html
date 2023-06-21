@@ -1,7 +1,9 @@
 <div class="p-2">
     <div #annualEnergyIntensityAnalysisGraph id="annualEnergyIntensityAnalysisGraph"></div>
 </div>
-<hr class="w-100">
-<div class="pe-2 ps-2">
-    <div #percentImprovementAnalysisGraph id="percentImprovementAnalysisGraph"></div>
-</div>
+<ng-container *ngIf="includePercentImprovement">
+    <hr class="w-100">
+    <div class="pe-2 ps-2">
+        <div #percentImprovementAnalysisGraph id="percentImprovementAnalysisGraph"></div>
+    </div>
+</ng-container>

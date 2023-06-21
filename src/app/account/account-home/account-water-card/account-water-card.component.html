@@ -13,36 +13,64 @@
             <div class="col-12">
                 <hr>
             </div>
-            <div class="col-12" *ngIf="calculatingWater == false && monthlyWaterAnalysisData">
-                <div class="carousel slide carousel-fade">
-                    <div class="carousel-inner">
-                        <div class="carousel-item" [ngClass]="{'active': carouselIndex == 0}">
-                            <app-monthly-analysis-summary-graph
-                                *ngIf="calculatingWater == false && monthlyWaterAnalysisData"
-                                [monthlyAnalysisSummaryData]="monthlyWaterAnalysisData"
-                                [analysisItem]="latestWaterAnalysisItem" [facilityOrAccount]="account">
-                            </app-monthly-analysis-summary-graph>
-                        </div>
-                        <div class="carousel-item" [ngClass]="{'active': carouselIndex == 1}">
-                            <app-monthly-analysis-summary-savings-graph [analysisItem]="latestWaterAnalysisItem"
-                                [monthlyAnalysisSummaryData]="monthlyWaterAnalysisData" [facilityOrAccount]="account">
-                            </app-monthly-analysis-summary-savings-graph>
+            <ng-container *ngIf="calculatingWater == false && monthlyWaterAnalysisData">
+                <div class="col-12">
+                    <div class="carousel slide carousel-fade">
+                        <div class="carousel-inner">
+                            <div class="carousel-item" [ngClass]="{'active': carouselIndex == 0}">
+                                <app-monthly-analysis-summary-graph
+                                    *ngIf="calculatingWater == false && monthlyWaterAnalysisData"
+                                    [monthlyAnalysisSummaryData]="monthlyWaterAnalysisData"
+                                    [analysisItem]="latestWaterAnalysisItem" [facilityOrAccount]="account">
+                                </app-monthly-analysis-summary-graph>
+                            </div>
+                            <div class="carousel-item" [ngClass]="{'active': carouselIndex == 1}">
+                                <app-monthly-analysis-summary-savings-graph [analysisItem]="latestWaterAnalysisItem"
+                                    [monthlyAnalysisSummaryData]="monthlyWaterAnalysisData"
+                                    [facilityOrAccount]="account">
+                                </app-monthly-analysis-summary-savings-graph>
+                            </div>
+                            <div class="carousel-item" [ngClass]="{'active': carouselIndex == 2}">
+                                <app-annual-analysis-summary-graph [annualAnalysisSummary]="annualWaterAnalysisSummary"
+                                    [analysisItem]="latestWaterAnalysisItem">
+                                </app-annual-analysis-summary-graph>
+                            </div>
+                            <div class="carousel-item" [ngClass]="{'active': carouselIndex == 3}">
+                                <app-account-annual-analysis-table [annualAnalysisSummary]="annualWaterAnalysisSummary"
+                                    [analysisItem]="latestWaterAnalysisItem"
+                                    [accountOrFacility]="account"></app-account-annual-analysis-table>
+                            </div>
                         </div>
                     </div>
-                    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators"
-                        data-bs-slide="prev" (click)="goBack()">
-                        <!-- <span class="carousel-control-prev-icon" aria-hidden="true"></span> -->
-                        <span class="fa fa-chevron-left"></span>
-                        <span class="visually-hidden">Previous</span>
-                    </button>
-                    <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators"
-                        data-bs-slide="next" (click)="goNext()">
-                        <!-- <span class="carousel-control-next-icon" aria-hidden="true"></span> -->
-                        <span class="fa fa-chevron-right"></span>
-                        <span class="visually-hidden">Next</span>
-                    </button>
                 </div>
-            </div>
+                <div class="col-12">
+                    <hr>
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <button class="btn nav-btn" type="button" (click)="goBack()"
+                                [disabled]="carouselIndex == 0">
+                                <span class="fa fa-chevron-left"></span>
+                            </button>
+                        </div>
+                        <div>
+                            <span (click)="goToIndex(0)" class="fa"
+                                [ngClass]="{'fa-circle-dot': carouselIndex == 0, 'fa-circle': carouselIndex != 0}"></span>
+                            <span (click)="goToIndex(1)" class="fa"
+                                [ngClass]="{'fa-circle-dot': carouselIndex == 1, 'fa-circle': carouselIndex != 1}"></span>
+                            <span (click)="goToIndex(2)" class="fa"
+                                [ngClass]="{'fa-circle-dot': carouselIndex == 2, 'fa-circle': carouselIndex != 2}"></span>
+                            <span (click)="goToIndex(3)" class="fa"
+                                [ngClass]="{'fa-circle-dot': carouselIndex == 3, 'fa-circle': carouselIndex != 3}"></span>
+                        </div>
+                        <div>
+                            <button class="btn nav-btn" type="button" (click)="goNext()"
+                                [disabled]="carouselIndex == 3">
+                                <span class="fa fa-chevron-right"></span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </ng-container>
         </div>
     </div>
 </div>

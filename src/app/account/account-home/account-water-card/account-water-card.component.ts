@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { AccountHomeService } from '../account-home.service';
-import { MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
+import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { Subscription } from 'rxjs';
 import { IdbAccount, IdbAccountAnalysisItem } from 'src/app/models/idb';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
@@ -14,6 +14,8 @@ export class AccountWaterCardComponent {
 
   monthlyWaterAnalysisData: Array<MonthlyAnalysisSummaryData>;
   monthlyWaterAnalysisDataSub: Subscription;
+  annualWaterAnalysisSummary: Array<AnnualAnalysisSummary>;
+  annualWaterAnalysisSummarySub: Subscription;
   calculatingWater: boolean | 'error';
   calculatingWaterSub: Subscription;
 
@@ -38,12 +40,17 @@ export class AccountWaterCardComponent {
     this.monthlyWaterAnalysisDataSub = this.accountHomeService.monthlyWaterAnalysisData.subscribe(val => {
       this.monthlyWaterAnalysisData = val;
     });
+
+    this.annualWaterAnalysisSummarySub = this.accountHomeService.annualWaterAnalysisSummary.subscribe(val => {
+      this.annualWaterAnalysisSummary = val;
+    });
   }
 
   ngOnDestroy() {
     this.calculatingWaterSub.unsubscribe();
     this.monthlyWaterAnalysisDataSub.unsubscribe();
     this.selectedAccountSub.unsubscribe();
+    this.annualWaterAnalysisSummarySub.unsubscribe();
   }
 
   goNext() {
@@ -52,5 +59,9 @@ export class AccountWaterCardComponent {
 
   goBack() {
     this.carouselIndex--;
+  }
+
+  goToIndex(index: number){
+    this.carouselIndex = index;
   }
 }

@@ -13,6 +13,8 @@ export class AnnualAnalysisSummaryGraphComponent implements OnInit {
   annualAnalysisSummary: Array<AnnualAnalysisSummary>;
   @Input()
   analysisItem: IdbAnalysisItem | IdbAccountAnalysisItem;
+  @Input()
+  includePercentImprovement: boolean;
 
   @ViewChild('percentImprovementAnalysisGraph', { static: false }) percentImprovementAnalysisGraph: ElementRef;
   @ViewChild('annualEnergyIntensityAnalysisGraph', { static: false }) annualEnergyIntensityAnalysisGraph: ElementRef;
@@ -24,7 +26,9 @@ export class AnnualAnalysisSummaryGraphComponent implements OnInit {
 
   ngAfterViewInit() {
     this.drawAnnualEnergyIntensityGraph();
-    this.drawPercentImprovementGraph();
+    if (this.includePercentImprovement) {
+      this.drawPercentImprovementGraph();
+    }
   }
 
   drawAnnualEnergyIntensityGraph() {

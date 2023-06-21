@@ -93,6 +93,8 @@ export class AnalysisDashboardComponent implements OnInit {
 
   setHasEnergyAndWater() {
     let groups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.facilityMeterGroups.getValue();
+    this.hasEnergy = false;
+    this.hasWater = false;
     let hasWater: boolean = false;
     let hasEnergy: boolean = false;
     groups.forEach(group => {

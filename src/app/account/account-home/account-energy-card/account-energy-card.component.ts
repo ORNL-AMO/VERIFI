@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { AccountHomeService } from '../account-home.service';
-import { MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
+import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { Subscription } from 'rxjs';
 import { IdbAccount, IdbAccountAnalysisItem } from 'src/app/models/idb';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
@@ -16,6 +16,8 @@ export class AccountEnergyCardComponent {
   monthlyEnergyAnalysisDataSub: Subscription;
   calculatingEnergy: boolean | 'error';
   calculatingEnergySub: Subscription;
+  annualEnergyAnalysisSummary: Array<AnnualAnalysisSummary>;
+  annualEnergyAnalysisSummarySub: Subscription;
 
   latestEnergyAnalysisItem: IdbAccountAnalysisItem;
   account: IdbAccount;
@@ -37,12 +39,16 @@ export class AccountEnergyCardComponent {
     this.monthlyEnergyAnalysisDataSub = this.accountHomeService.monthlyEnergyAnalysisData.subscribe(val => {
       this.monthlyEnergyAnalysisData = val;
     });
+    this.annualEnergyAnalysisSummarySub = this.accountHomeService.annualWaterAnalysisSummary.subscribe(val => {
+      this.annualEnergyAnalysisSummary = val;
+    });
   }
 
   ngOnDestroy() {
     this.calculatingEnergySub.unsubscribe();
     this.monthlyEnergyAnalysisDataSub.unsubscribe();
     this.selectedAccountSub.unsubscribe();
+    this.annualEnergyAnalysisSummarySub.unsubscribe();
   }
 
   goNext() {
@@ -51,5 +57,9 @@ export class AccountEnergyCardComponent {
 
   goBack() {
     this.carouselIndex--;
+  }
+
+  goToIndex(index: number){
+    this.carouselIndex = index;
   }
 }
