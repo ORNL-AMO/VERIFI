@@ -3,15 +3,16 @@ import * as _ from 'lodash';
 import { MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { Subscription } from 'rxjs';
 import { IdbFacility } from 'src/app/models/idb';
-import { FacilityHomeService } from '../facility-home.service';
+import { FacilityHomeService } from '../../facility-home.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 
 @Component({
-  selector: 'app-facility-water-reduction-goal',
-  templateUrl: './facility-water-reduction-goal.component.html',
-  styleUrls: ['./facility-water-reduction-goal.component.css']
+  selector: 'app-facility-energy-reduction-goal',
+  templateUrl: './facility-energy-reduction-goal.component.html',
+  styleUrls: ['./facility-energy-reduction-goal.component.css']
 })
-export class FacilityWaterReductionGoalComponent {
+export class FacilityEnergyReductionGoalComponent {
+
   latestAnalysisSummary: MonthlyAnalysisSummaryData;
   latestSummarySub: Subscription;
   percentSavings: number = 0;
@@ -22,7 +23,6 @@ export class FacilityWaterReductionGoalComponent {
   facility: IdbFacility;
   selectedFacilitySub: Subscription;
   latestAnalysisDate: Date;
-
   constructor(private facilityDbService: FacilitydbService, private facilityHomeService: FacilityHomeService) { }
 
   ngOnInit(): void {
@@ -31,7 +31,7 @@ export class FacilityWaterReductionGoalComponent {
       this.setGoalYears()
     });
 
-    this.latestSummarySub = this.facilityHomeService.monthlyFacilityWaterAnalysisData.subscribe(val => {
+    this.latestSummarySub = this.facilityHomeService.monthlyFacilityEnergyAnalysisData.subscribe(val => {
       // this.monthlyFacilityAnalysisData = val;
       this.latestAnalysisSummary = _.maxBy(val, 'date');
       if (this.latestAnalysisSummary) {
@@ -52,9 +52,9 @@ export class FacilityWaterReductionGoalComponent {
 
   setGoalYears() {
     if (this.facility && this.facility.sustainabilityQuestions) {
-      this.percentGoal = this.facility.sustainabilityQuestions.waterReductionPercent;
-      this.goalYear = this.facility.sustainabilityQuestions.waterReductionTargetYear;
-      this.baselineYear = this.facility.sustainabilityQuestions.waterReductionBaselineYear;
+      this.percentGoal = this.facility.sustainabilityQuestions.energyReductionPercent;
+      this.goalYear = this.facility.sustainabilityQuestions.energyReductionTargetYear;
+      this.baselineYear = this.facility.sustainabilityQuestions.energyReductionBaselineYear;
     }
   }
 

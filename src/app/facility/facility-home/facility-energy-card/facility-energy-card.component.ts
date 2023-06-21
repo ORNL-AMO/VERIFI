@@ -1,17 +1,17 @@
 import { Component } from '@angular/core';
-import { AccountHomeService } from '../account-home.service';
+import { FacilityHomeService } from '../facility-home.service';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
+import { IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
+import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { Subscription } from 'rxjs';
-import { IdbAccount, IdbAccountAnalysisItem } from 'src/app/models/idb';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 
 @Component({
-  selector: 'app-account-energy-card',
-  templateUrl: './account-energy-card.component.html',
-  styleUrls: ['./account-energy-card.component.css']
+  selector: 'app-facility-energy-card',
+  templateUrl: './facility-energy-card.component.html',
+  styleUrls: ['./facility-energy-card.component.css']
 })
-export class AccountEnergyCardComponent {
+export class FacilityEnergyCardComponent {
 
   monthlyEnergyAnalysisData: Array<MonthlyAnalysisSummaryData>;
   monthlyEnergyAnalysisDataSub: Subscription;
@@ -20,30 +20,30 @@ export class AccountEnergyCardComponent {
   annualEnergyAnalysisSummary: Array<AnnualAnalysisSummary>;
   annualEnergyAnalysisSummarySub: Subscription;
 
-  latestEnergyAnalysisItem: IdbAccountAnalysisItem;
-  account: IdbAccount;
-  selectedAccountSub: Subscription;
+  latestEnergyAnalysisItem: IdbAnalysisItem;
+  facility: IdbFacility;
+  selectedFacilitySub: Subscription;
   carouselIndex: number = 0;
-  constructor(private accountHomeService: AccountHomeService,
-    private accountDbService: AccountdbService,
+  constructor(private facilityHomeService: FacilityHomeService,
+    private facilityDbService: FacilitydbService,
     private sharedDataService: SharedDataService) {
   }
 
   ngOnInit() {
     this.carouselIndex = this.sharedDataService.energyHomeCarouselIndex.getValue();
 
-    this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(val => {
-      this.latestEnergyAnalysisItem = this.accountHomeService.latestEnergyAnalysisItem;
-      this.account = val;
+    this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
+      this.latestEnergyAnalysisItem = this.facilityHomeService.latestEnergyAnalysisItem;
+      this.facility = val;
     });
-    this.calculatingEnergySub = this.accountHomeService.calculatingEnergy.subscribe(val => {
+    this.calculatingEnergySub = this.facilityHomeService.calculatingEnergy.subscribe(val => {
       this.calculatingEnergy = val;
     });
 
-    this.monthlyEnergyAnalysisDataSub = this.accountHomeService.monthlyEnergyAnalysisData.subscribe(val => {
+    this.monthlyEnergyAnalysisDataSub = this.facilityHomeService.monthlyFacilityEnergyAnalysisData.subscribe(val => {
       this.monthlyEnergyAnalysisData = val;
     });
-    this.annualEnergyAnalysisSummarySub = this.accountHomeService.annualEnergyAnalysisSummary.subscribe(val => {
+    this.annualEnergyAnalysisSummarySub = this.facilityHomeService.annualEnergyAnalysisSummary.subscribe(val => {
       this.annualEnergyAnalysisSummary = val;
     });
   }
@@ -51,7 +51,7 @@ export class AccountEnergyCardComponent {
   ngOnDestroy() {
     this.calculatingEnergySub.unsubscribe();
     this.monthlyEnergyAnalysisDataSub.unsubscribe();
-    this.selectedAccountSub.unsubscribe();
+    this.selectedFacilitySub.unsubscribe();
     this.annualEnergyAnalysisSummarySub.unsubscribe();
   }
 

@@ -2,11 +2,12 @@
     <div class="card-body">
         <div class="row">
             <div class="col-12">
-                <app-account-water-reduction-goal></app-account-water-reduction-goal>
+                <app-facility-water-reduction-goal></app-facility-water-reduction-goal>
                 <app-calculating-spinner *ngIf="calculatingWater != false" [message]="'Calculating Water...'"
                     [error]="calculatingWater == 'error'">
                 </app-calculating-spinner>
-                <div class="alert alert-danger" *ngIf="latestWaterAnalysisItem.setupErrors.hasError">
+                <div class="alert alert-danger"
+                    *ngIf="latestWaterAnalysisItem.setupErrors.hasError || latestWaterAnalysisItem.setupErrors.groupsHaveErrors">
                     Errors found in selected analysis.
                 </div>
             </div>
@@ -21,28 +22,21 @@
                                 <app-monthly-analysis-summary-graph
                                     *ngIf="calculatingWater == false && monthlyWaterAnalysisData"
                                     [monthlyAnalysisSummaryData]="monthlyWaterAnalysisData"
-                                    [analysisItem]="latestWaterAnalysisItem" [facilityOrAccount]="account"
+                                    [analysisItem]="latestWaterAnalysisItem" [facilityOrAccount]="facility"
                                     [inHomeScreen]="true">
                                 </app-monthly-analysis-summary-graph>
                             </div>
                             <div class="carousel-item" [ngClass]="{'active': carouselIndex == 1}">
                                 <app-monthly-analysis-summary-savings-graph [analysisItem]="latestWaterAnalysisItem"
                                     [monthlyAnalysisSummaryData]="monthlyWaterAnalysisData"
-                                    [facilityOrAccount]="account"
-                                    [inHomeScreen]="true">
+                                    [facilityOrAccount]="facility" [inHomeScreen]="true">
                                 </app-monthly-analysis-summary-savings-graph>
                             </div>
                             <div class="carousel-item" [ngClass]="{'active': carouselIndex == 2}">
                                 <app-annual-analysis-summary-graph [annualAnalysisSummary]="annualWaterAnalysisSummary"
-                                    [analysisItem]="latestWaterAnalysisItem"
-                                    [inHomeScreen]="true">
+                                    [analysisItem]="latestWaterAnalysisItem" [inHomeScreen]="true">
                                 </app-annual-analysis-summary-graph>
                             </div>
-                            <!-- <div class="carousel-item" [ngClass]="{'active': carouselIndex == 3}">
-                                <app-account-annual-analysis-table [annualAnalysisSummary]="annualWaterAnalysisSummary"
-                                    [analysisItem]="latestWaterAnalysisItem"
-                                    [accountOrFacility]="account"></app-account-annual-analysis-table>
-                            </div> -->
                         </div>
                     </div>
                 </div>
@@ -62,8 +56,6 @@
                                 [ngClass]="{'fa-circle-dot': carouselIndex == 1, 'fa-circle': carouselIndex != 1}"></span>
                             <span (click)="goToIndex(2)" class="fa"
                                 [ngClass]="{'fa-circle-dot': carouselIndex == 2, 'fa-circle': carouselIndex != 2}"></span>
-                            <!-- <span (click)="goToIndex(3)" class="fa"
-                                [ngClass]="{'fa-circle-dot': carouselIndex == 3, 'fa-circle': carouselIndex != 3}"></span> -->
                         </div>
                         <div>
                             <button class="btn nav-btn" type="button" (click)="goNext()"

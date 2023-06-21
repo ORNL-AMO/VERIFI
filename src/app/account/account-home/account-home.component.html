@@ -2,10 +2,12 @@
     <app-account-home-summary></app-account-home-summary>
     <hr>
     <div class="row">
-        <div class="col-6" *ngIf="latestEnergyAnalysisItem">
+        <div [ngClass]="{'col-6': latestWaterAnalysisItem, 'col-12': !latestWaterAnalysisItem}"
+            *ngIf="latestEnergyAnalysisItem">
             <app-account-energy-card></app-account-energy-card>
         </div>
-        <div class="col-6" *ngIf="latestWaterAnalysisItem">
+        <div [ngClass]="{'col-6': latestEnergyAnalysisItem, 'col-12': !latestEnergyAnalysisItem}"
+            *ngIf="latestWaterAnalysisItem">
             <app-account-water-card></app-account-water-card>
         </div>
     </div>

@@ -6,8 +6,10 @@ import { RouterModule } from '@angular/router';
 import { HelperPipesModule } from 'src/app/shared/helper-pipes/helper-pipes.module';
 import { CalculatingSpinnerModule } from 'src/app/shared/calculating-spinner/calculating-spinner.module';
 import { SharedAnalysisModule } from 'src/app/shared/shared-analysis/shared-analysis.module';
-import { FacilityEnergyReductionGoalComponent } from './facility-energy-reduction-goal/facility-energy-reduction-goal.component';
-import { FacilityWaterReductionGoalComponent } from './facility-water-reduction-goal/facility-water-reduction-goal.component';
+import { FacilityEnergyReductionGoalComponent } from './facility-energy-card/facility-energy-reduction-goal/facility-energy-reduction-goal.component';
+import { FacilityWaterReductionGoalComponent } from './facility-water-card/facility-water-reduction-goal/facility-water-reduction-goal.component';
+import { FacilityEnergyCardComponent } from './facility-energy-card/facility-energy-card.component';
+import { FacilityWaterCardComponent } from './facility-water-card/facility-water-card.component';
 
 
 
@@ -16,7 +18,9 @@ import { FacilityWaterReductionGoalComponent } from './facility-water-reduction-
     FacilityHomeComponent,
     FacilityHomeSummaryComponent,
     FacilityEnergyReductionGoalComponent,
-    FacilityWaterReductionGoalComponent
+    FacilityWaterReductionGoalComponent,
+    FacilityEnergyCardComponent,
+    FacilityWaterCardComponent
   ],
   imports: [
     CommonModule,
