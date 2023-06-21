@@ -14,7 +14,7 @@ export class AnnualAnalysisSummaryGraphComponent implements OnInit {
   @Input()
   analysisItem: IdbAnalysisItem | IdbAccountAnalysisItem;
   @Input()
-  includePercentImprovement: boolean;
+  inHomeScreen: boolean;
 
   @ViewChild('percentImprovementAnalysisGraph', { static: false }) percentImprovementAnalysisGraph: ElementRef;
   @ViewChild('annualEnergyIntensityAnalysisGraph', { static: false }) annualEnergyIntensityAnalysisGraph: ElementRef;
@@ -26,7 +26,7 @@ export class AnnualAnalysisSummaryGraphComponent implements OnInit {
 
   ngAfterViewInit() {
     this.drawAnnualEnergyIntensityGraph();
-    if (this.includePercentImprovement) {
+    if (!this.inHomeScreen) {
       this.drawPercentImprovementGraph();
     }
   }
@@ -75,7 +75,12 @@ export class AnnualAnalysisSummaryGraphComponent implements OnInit {
       }
       traceData.push(barTrace);
 
+      let height: number;
+      if(this.inHomeScreen){
+        height = 350;
+      }
       let layout = {
+        height: height,
         xaxis: {
           title: 'Reporting Fiscal Year',
           tickmode: 'linear'
