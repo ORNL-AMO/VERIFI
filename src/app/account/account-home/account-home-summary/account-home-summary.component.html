@@ -19,16 +19,26 @@
                         </button>
                     </div>
                     <div class="p-1">
-                        <button class="btn btn-outline m-0" (click)="navigateTo('analysis')"
+                        <button class="btn btn-outline m-0 position-relative" (click)="navigateTo('analysis')"
                             [disabled]="disableButtons">
                             <span class="fa fa-microscope"></span><br>
                             Conduct Account <br> Analysis
+                            <span
+                                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                                *ngIf="energyAnalysisNeeded || waterAnalysisNeeded">
+                                <span class="fa-exclamation white"></span>
+                            </span>
                         </button>
                     </div>
                     <div class="p-1">
                         <button class="btn btn-outline m-0" (click)="navigateTo('reports')" [disabled]="disableButtons">
                             <span class="fa fa-folder"></span><br>
                             Generate Account <br> Reports
+                            <!-- <span
+                                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                                *ngIf="energyReportNeeded || waterReportNeeded">
+                                <span class="fa-exclamation white"></span>
+                            </span> -->
                         </button>
                     </div>
                     <div class="p-1">
@@ -50,22 +60,48 @@
                         </button>
                     </div>
                 </div>
-            </div>
+                <div class="d-flex justify-content-center" *ngIf="energyAnalysisNeeded || waterAnalysisNeeded">
+                    <ul class="list-group list-group-flush">
 
+                        <li class="list-group-item" *ngIf="energyAnalysisNeeded">
+                            <a class="nav-link" routerLink="/account/analysis/dashboard/energy">
+                                <span class="badge rounded-pill bg-danger">
+                                    <span class="fa-exclamation white"></span>
+                                </span>
+                                Energy analysis needed. <ng-container *ngIf="latestEnergyAnalysisItem">Latest energy
+                                    analysis conducted for
+                                    {{latestEnergyAnalysisItem.reportYear |
+                                    yearDisplay:account.fiscalYear}}</ng-container>
+                            </a>
+                        </li>
+                        <li class="list-group-item" *ngIf="waterAnalysisNeeded">
+                            <a class="nav-link" routerLink="/account/analysis/dashboard/water">
+                                <span class="badge rounded-pill bg-danger">
+                                    <span class="fa-exclamation white"></span>
+                                </span>
+                                Water analysis needed. <ng-container *ngIf="latestWaterAnalysisItem">Latest water
+                                    analysis conducted for
+                                    {{latestWaterAnalysisItem.reportYear |
+                                    yearDisplay:account.fiscalYear}}</ng-container>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
         </div>
 
+    </div>
 
-        <div class="row" *ngIf="disableButtons">
-            <div class="col-12">
-                <hr>
-                <div class="d-flex justify-content-center">
-                    <div class="alert alert-warning">
-                        No meter data found for this account. Please add meter data to facilities within this account to
-                        begin.
-                    </div>
+
+    <div class="row" *ngIf="disableButtons">
+        <div class="col-12">
+            <hr>
+            <div class="d-flex justify-content-center">
+                <div class="alert alert-warning">
+                    No meter data found for this account. Please add meter data to facilities within this account to
+                    begin.
                 </div>
             </div>
         </div>
     </div>
-
 </div>
