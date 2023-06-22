@@ -14,30 +14,22 @@
             <div class="col-12">
                 <hr>
             </div>
-            <ng-container *ngIf="calculatingEnergy == false && monthlyEnergyAnalysisData && annualEnergyAnalysisSummary">
+            <ng-container
+                *ngIf="calculatingEnergy == false && monthlyEnergyAnalysisData && annualEnergyAnalysisSummary">
                 <div class="col-12">
-                    <div class="carousel slide carousel-fade">
-                        <div class="carousel-inner">
-                            <div class="carousel-item" [ngClass]="{'active': carouselIndex == 0}">
-                                <app-monthly-analysis-summary-graph
-                                    [monthlyAnalysisSummaryData]="monthlyEnergyAnalysisData"
-                                    [analysisItem]="latestEnergyAnalysisItem" [facilityOrAccount]="facility"
-                                    [inHomeScreen]="true">
-                                </app-monthly-analysis-summary-graph>
-                            </div>
-                            <div class="carousel-item" [ngClass]="{'active': carouselIndex == 1}">
-                                <app-monthly-analysis-summary-savings-graph [analysisItem]="latestEnergyAnalysisItem"
-                                    [monthlyAnalysisSummaryData]="monthlyEnergyAnalysisData"
-                                    [facilityOrAccount]="facility" [inHomeScreen]="true">
-                                </app-monthly-analysis-summary-savings-graph>
-                            </div>
-                            <div class="carousel-item" [ngClass]="{'active': carouselIndex == 2}">
-                                <app-annual-analysis-summary-graph [annualAnalysisSummary]="annualEnergyAnalysisSummary"
-                                    [analysisItem]="latestEnergyAnalysisItem" [inHomeScreen]="true">
-                                </app-annual-analysis-summary-graph>
-                            </div>
-                        </div>
-                    </div>
+                    <app-monthly-analysis-summary-graph *ngIf="carouselIndex == 0"
+                        [monthlyAnalysisSummaryData]="monthlyEnergyAnalysisData"
+                        [analysisItem]="latestEnergyAnalysisItem" [facilityOrAccount]="facility" [inHomeScreen]="true">
+                    </app-monthly-analysis-summary-graph>
+                    <app-monthly-analysis-summary-savings-graph *ngIf="carouselIndex == 1"
+                        [analysisItem]="latestEnergyAnalysisItem"
+                        [monthlyAnalysisSummaryData]="monthlyEnergyAnalysisData" [facilityOrAccount]="facility"
+                        [inHomeScreen]="true">
+                    </app-monthly-analysis-summary-savings-graph>
+                    <app-annual-analysis-summary-graph *ngIf="carouselIndex == 2"
+                        [annualAnalysisSummary]="annualEnergyAnalysisSummary" [analysisItem]="latestEnergyAnalysisItem"
+                        [inHomeScreen]="true">
+                    </app-annual-analysis-summary-graph>
                 </div>
                 <div class="col-12">
                     <hr>

@@ -24,14 +24,7 @@ export class FacilityHomeComponent implements OnInit {
   facility: IdbFacility;
   annualEnergyAnalysisWorker: Worker;
   annualWaterAnalysisWorker: Worker;
-  calculatingEnergy: boolean | 'error';
-  calculatingEnergySub: Subscription;
-  calculatingWater: boolean | 'error';
-  calculatingWaterSub: Subscription;
-  monthlyFacilityEnergyAnalysisData: Array<MonthlyAnalysisSummaryData>;
-  monthlyFacilityEnergyAnalysisDataSub: Subscription;
-  monthlyFacilityWaterAnalysisData: Array<MonthlyAnalysisSummaryData>;
-  monthlyFacilityWaterAnalysisDataSub: Subscription;
+
   latestEnergyAnalysisItem: IdbAnalysisItem;
   latestWaterAnalysisItem: IdbAnalysisItem;
   constructor(private facilityDbService: FacilitydbService,
@@ -66,18 +59,6 @@ export class FacilityHomeComponent implements OnInit {
       }
     })
 
-    this.calculatingEnergySub = this.facilityHomeService.calculatingEnergy.subscribe(val => {
-      this.calculatingEnergy = val;
-    });
-    this.calculatingWaterSub = this.facilityHomeService.calculatingWater.subscribe(val => {
-      this.calculatingWater = val;
-    });
-    this.monthlyFacilityEnergyAnalysisDataSub = this.facilityHomeService.monthlyFacilityEnergyAnalysisData.subscribe(val => {
-      this.monthlyFacilityEnergyAnalysisData = val;
-    });
-    this.monthlyFacilityWaterAnalysisDataSub = this.facilityHomeService.monthlyFacilityWaterAnalysisData.subscribe(val => {
-      this.monthlyFacilityWaterAnalysisData = val;
-    });
   }
 
   ngOnDestroy() {
@@ -92,10 +73,6 @@ export class FacilityHomeComponent implements OnInit {
     this.facilityHomeService.annualEnergyAnalysisSummary.next(undefined);
     this.facilityHomeService.monthlyFacilityWaterAnalysisData.next(undefined);
     this.facilityHomeService.annualWaterAnalysisSummary.next(undefined);
-    this.calculatingEnergySub.unsubscribe();
-    this.calculatingWaterSub.unsubscribe();
-    this.monthlyFacilityEnergyAnalysisDataSub.unsubscribe();
-    this.monthlyFacilityWaterAnalysisDataSub.unsubscribe();
   }
 
 
