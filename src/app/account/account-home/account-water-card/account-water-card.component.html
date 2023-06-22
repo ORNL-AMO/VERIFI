@@ -13,7 +13,8 @@
             <div class="col-12">
                 <hr>
             </div>
-            <ng-container *ngIf="calculatingWater == false && monthlyWaterAnalysisData && annualWaterAnalysisSummary">
+            <ng-container
+                *ngIf="calculatingWater == false && calculatingOverview == false && monthlyWaterAnalysisData && annualWaterAnalysisSummary && accountOverviewData">
                 <div class="col-12">
                     <app-monthly-analysis-summary-graph *ngIf=" carouselIndex == 0"
                         [monthlyAnalysisSummaryData]="monthlyWaterAnalysisData" [analysisItem]="latestWaterAnalysisItem"
@@ -27,6 +28,9 @@
                         [annualAnalysisSummary]="annualWaterAnalysisSummary" [analysisItem]="latestWaterAnalysisItem"
                         [inHomeScreen]="true">
                     </app-annual-analysis-summary-graph>
+                    <app-facility-usage-donut *ngIf=" carouselIndex == 3" [dataType]="'water'"
+                        [accountOverviewFacilities]="accountOverviewData.facilitiesWater" [waterUnit]="waterUnit"
+                        [inHomeScreen]="true"></app-facility-usage-donut>
                 </div>
                 <div class="col-12">
                     <hr>
@@ -44,12 +48,12 @@
                                 [ngClass]="{'fa-circle-dot': carouselIndex == 1, 'fa-circle': carouselIndex != 1}"></span>
                             <span (click)="goToIndex(2)" class="fa"
                                 [ngClass]="{'fa-circle-dot': carouselIndex == 2, 'fa-circle': carouselIndex != 2}"></span>
-                            <!-- <span (click)="goToIndex(3)" class="fa"
-                                [ngClass]="{'fa-circle-dot': carouselIndex == 3, 'fa-circle': carouselIndex != 3}"></span> -->
+                            <span (click)="goToIndex(3)" class="fa"
+                                [ngClass]="{'fa-circle-dot': carouselIndex == 3, 'fa-circle': carouselIndex != 3}"></span>
                         </div>
                         <div>
                             <button class="btn nav-btn" type="button" (click)="goNext()"
-                                [disabled]="carouselIndex == 2">
+                                [disabled]="carouselIndex == 3">
                                 <span class="fa fa-chevron-right"></span>
                             </button>
                         </div>

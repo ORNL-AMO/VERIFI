@@ -5,6 +5,7 @@ import { SharedDataService } from 'src/app/shared/helper-services/shared-data.se
 import { IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { Subscription } from 'rxjs';
+import { FacilityOverviewData } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';
 
 @Component({
   selector: 'app-facility-water-card',
@@ -18,11 +19,16 @@ export class FacilityWaterCardComponent {
   annualWaterAnalysisSummarySub: Subscription;
   calculatingWater: boolean | 'error';
   calculatingWaterSub: Subscription;
+  calculatingOverview: boolean | 'error';
+  calculatingOverviewSub: Subscription;
 
   latestWaterAnalysisItem: IdbAnalysisItem;
   facility: IdbFacility;
   selectedFacilitySub: Subscription;
   carouselIndex: number = 0;
+  waterUnit: string;
+  facilityOverviewData: FacilityOverviewData;
+  facilityOverviewDataSub: Subscription;
   constructor(private facilityHomeService: FacilityHomeService,
     private facilityDbService: FacilitydbService,
     private sharedDataService: SharedDataService) {
@@ -33,11 +39,16 @@ export class FacilityWaterCardComponent {
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
       this.latestWaterAnalysisItem = this.facilityHomeService.latestWaterAnalysisItem;
       this.facility = val;
+      this.waterUnit = this.facility.volumeLiquidUnit;
     });
 
     this.calculatingWaterSub = this.facilityHomeService.calculatingWater.subscribe(val => {
       this.calculatingWater = val;
     });
+    this.calculatingOverviewSub = this.facilityHomeService.calculatingOverview.subscribe(val => {
+      this.calculatingOverview = val;
+    });
+
 
     this.monthlyWaterAnalysisDataSub = this.facilityHomeService.monthlyFacilityWaterAnalysisData.subscribe(val => {
       this.monthlyWaterAnalysisData = val;
@@ -46,6 +57,10 @@ export class FacilityWaterCardComponent {
     this.annualWaterAnalysisSummarySub = this.facilityHomeService.annualWaterAnalysisSummary.subscribe(val => {
       this.annualWaterAnalysisSummary = val;
     });
+
+    this.facilityOverviewDataSub = this.facilityHomeService.facilityOverviewData.subscribe(val => {
+      this.facilityOverviewData = val;
+    });
   }
 
   ngOnDestroy() {
@@ -53,6 +68,8 @@ export class FacilityWaterCardComponent {
     this.monthlyWaterAnalysisDataSub.unsubscribe();
     this.selectedFacilitySub.unsubscribe();
     this.annualWaterAnalysisSummarySub.unsubscribe();
+    this.facilityOverviewDataSub.unsubscribe();
+    this.calculatingOverviewSub.unsubscribe();
   }
 
   goNext() {

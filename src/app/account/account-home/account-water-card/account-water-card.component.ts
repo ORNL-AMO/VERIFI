@@ -5,6 +5,7 @@ import { Subscription } from 'rxjs';
 import { IdbAccount, IdbAccountAnalysisItem } from 'src/app/models/idb';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
+import { AccountOverviewData } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
 
 @Component({
   selector: 'app-account-water-card',
@@ -19,11 +20,16 @@ export class AccountWaterCardComponent {
   annualWaterAnalysisSummarySub: Subscription;
   calculatingWater: boolean | 'error';
   calculatingWaterSub: Subscription;
+  calculatingOverview: boolean | 'error';
+  calculatingOverviewSub: Subscription;
 
   latestWaterAnalysisItem: IdbAccountAnalysisItem;
   account: IdbAccount;
   selectedAccountSub: Subscription;
   carouselIndex: number = 0;
+  accountOverviewData: AccountOverviewData;
+  accountOverviewDataSub: Subscription;
+  waterUnit: string;
   constructor(private accountHomeService: AccountHomeService,
     private accountDbService: AccountdbService,
     private sharedDataService: SharedDataService) {
@@ -34,10 +40,19 @@ export class AccountWaterCardComponent {
     this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(val => {
       this.latestWaterAnalysisItem = this.accountHomeService.latestWaterAnalysisItem;
       this.account = val;
+      this.waterUnit = this.account.volumeLiquidUnit;
     });
 
     this.calculatingWaterSub = this.accountHomeService.calculatingWater.subscribe(val => {
       this.calculatingWater = val;
+    });
+
+    this.calculatingOverviewSub = this.accountHomeService.calculatingOverview.subscribe(val => {
+      this.calculatingOverview = val;
+    });
+
+    this.accountOverviewDataSub = this.accountHomeService.accountOverviewData.subscribe(val => {
+      this.accountOverviewData = val;
     });
 
     this.monthlyWaterAnalysisDataSub = this.accountHomeService.monthlyWaterAnalysisData.subscribe(val => {
@@ -54,6 +69,8 @@ export class AccountWaterCardComponent {
     this.monthlyWaterAnalysisDataSub.unsubscribe();
     this.selectedAccountSub.unsubscribe();
     this.annualWaterAnalysisSummarySub.unsubscribe();
+    this.calculatingOverviewSub.unsubscribe();
+    this.accountOverviewDataSub.unsubscribe();
   }
 
   goNext() {

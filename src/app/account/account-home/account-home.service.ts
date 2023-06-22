@@ -1,14 +1,10 @@
 import { Injectable } from '@angular/core';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { CalanderizationOptions, CalanderizedMeter } from 'src/app/models/calanderization';
-import { IdbAccount, IdbAccountAnalysisItem, IdbUtilityMeter } from 'src/app/models/idb';
-import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
-import { ConvertMeterDataService } from 'src/app/shared/helper-services/convert-meter-data.service';
+import { IdbAccountAnalysisItem } from 'src/app/models/idb';
 import * as _ from 'lodash';
 import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { BehaviorSubject } from 'rxjs';
+import { AccountOverviewData } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
 
 @Injectable({
   providedIn: 'root'
@@ -24,21 +20,18 @@ export class AccountHomeService {
   monthlyWaterAnalysisData: BehaviorSubject<Array<MonthlyAnalysisSummaryData>>;
   calculatingEnergy: BehaviorSubject<boolean | 'error'>;
   calculatingWater: BehaviorSubject<boolean | 'error'>;
-  facilityAnalysisSummaries: BehaviorSubject<Array<{
-    facilityId: string,
-    annualAnalysisSummary: Array<AnnualAnalysisSummary>,
-    monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
-    error: boolean
-  }>>;
-  constructor(private accountAnalysisDbService: AccountAnalysisDbService, private utilityMeterDbService: UtilityMeterdbService,
-    private accountDbService: AccountdbService, private calendarizationService: CalanderizationService, private convertMeterDataService: ConvertMeterDataService) {
+  calculatingOverview: BehaviorSubject<boolean | 'error'>;
+  accountOverviewData: BehaviorSubject<AccountOverviewData>;
+
+  constructor(private accountAnalysisDbService: AccountAnalysisDbService) {
     this.annualEnergyAnalysisSummary = new BehaviorSubject<Array<AnnualAnalysisSummary>>(undefined);
     this.monthlyEnergyAnalysisData = new BehaviorSubject<Array<MonthlyAnalysisSummaryData>>(undefined);
     this.annualWaterAnalysisSummary = new BehaviorSubject<Array<AnnualAnalysisSummary>>(undefined);
     this.monthlyWaterAnalysisData = new BehaviorSubject<Array<MonthlyAnalysisSummaryData>>(undefined);
-    this.calculatingEnergy = new BehaviorSubject<boolean>(true);
-    this.calculatingWater = new BehaviorSubject<boolean>(true);
-    this.facilityAnalysisSummaries = new BehaviorSubject([]);
+    this.calculatingEnergy = new BehaviorSubject<boolean | 'error'>(true);
+    this.calculatingWater = new BehaviorSubject<boolean | 'error'>(true);
+    this.calculatingOverview = new BehaviorSubject<boolean | 'error'>(true);
+    this.accountOverviewData = new BehaviorSubject<AccountOverviewData>(undefined);
   }
 
   setLatestEnergyAnalysisItem() {

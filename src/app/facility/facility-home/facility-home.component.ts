@@ -6,12 +6,13 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
-import { CalanderizationOptions, CalanderizedMeter } from 'src/app/models/calanderization';
+import { CalanderizationOptions, CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
 import { IdbAnalysisItem, IdbFacility, IdbPredictorEntry, IdbUtilityMeter } from 'src/app/models/idb';
 import { FacilityHomeService } from './facility-home.service';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { ConvertMeterDataService } from 'src/app/shared/helper-services/convert-meter-data.service';
-
+import { FacilityOverviewData } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';
+import * as _ from 'lodash';
 @Component({
   selector: 'app-facility-home',
   templateUrl: './facility-home.component.html',
@@ -24,6 +25,7 @@ export class FacilityHomeComponent implements OnInit {
   facility: IdbFacility;
   annualEnergyAnalysisWorker: Worker;
   annualWaterAnalysisWorker: Worker;
+  overviewWorker: Worker;
 
   latestEnergyAnalysisItem: IdbAnalysisItem;
   latestWaterAnalysisItem: IdbAnalysisItem;
@@ -57,6 +59,7 @@ export class FacilityHomeComponent implements OnInit {
         this.facilityHomeService.monthlyFacilityWaterAnalysisData.next(undefined);
         this.facilityHomeService.annualWaterAnalysisSummary.next(undefined);
       }
+      this.setFacilityOverview();
     })
 
   }
@@ -68,6 +71,9 @@ export class FacilityHomeComponent implements OnInit {
     }
     if (this.annualWaterAnalysisWorker) {
       this.annualWaterAnalysisWorker.terminate();
+    }
+    if (this.overviewWorker) {
+      this.overviewWorker.terminate();
     }
     this.facilityHomeService.monthlyFacilityEnergyAnalysisData.next(undefined);
     this.facilityHomeService.annualEnergyAnalysisSummary.next(undefined);
@@ -160,6 +166,55 @@ export class FacilityHomeComponent implements OnInit {
       let monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData> = annualAnalysisSummaryClass.monthlyAnalysisSummaryData;
       this.facilityHomeService.annualWaterAnalysisSummary.next(annualAnalysisSummaries);
       this.facilityHomeService.monthlyFacilityWaterAnalysisData.next(monthlyAnalysisSummaryData);
+    }
+  }
+
+  setFacilityOverview() {
+    let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
+    let calanderizedMeters: Array<CalanderizedMeter> = this.calendarizationService.getCalanderizedMeterData(meters, false, true);
+    let dateRange: { endDate: Date, startDate: Date };
+    if (calanderizedMeters && calanderizedMeters.length > 0) {
+      let monthlyData: Array<MonthlyData> = calanderizedMeters.flatMap(val => { return val.monthlyData });
+      let latestData: MonthlyData = _.maxBy(monthlyData, 'date');
+      let startData: MonthlyData = _.minBy(monthlyData, 'date');
+      let maxDate: Date = new Date(latestData.year, latestData.monthNumValue);
+      let minDate: Date = new Date(startData.year, startData.monthNumValue);
+      minDate.setMonth(minDate.getMonth() + 1);
+      dateRange = {
+        endDate: maxDate,
+        startDate: minDate
+      };
+    }
+    if (typeof Worker !== 'undefined') {
+      this.overviewWorker = new Worker(new URL('src/app/web-workers/facility-overview.worker', import.meta.url));
+      this.overviewWorker.onmessage = ({ data }) => {
+        if (!data.error) {
+          this.facilityHomeService.facilityOverviewData.next(data.facilityOverviewData);
+          // this.facilityHomeService.utilityUseAndCost.next(data.utilityUseAndCost);
+          this.facilityHomeService.calculatingOverview.next(false);
+        } else {
+          this.facilityHomeService.facilityOverviewData.next(undefined);
+          // this.facilityHomeService.utilityUseAndCost.next(undefined);
+          this.facilityHomeService.calculatingOverview.next("error");
+        }
+        this.overviewWorker.terminate();
+
+      };
+      this.facilityHomeService.calculatingOverview.next(true)
+      this.overviewWorker.postMessage({
+        calanderizedMeters: calanderizedMeters,
+        type: 'overview',
+        dateRange: dateRange,
+        facility: this.facility
+      });
+    } else {
+      // Web Workers are not supported in this environment.
+
+      let facilityOverviewData: FacilityOverviewData = new FacilityOverviewData(calanderizedMeters, dateRange, this.facility);
+      // let utilityUseAndCost: UtilityUseAndCost = new UtilityUseAndCost(this.facilityOverviewService.calanderizedMeters, this.dateRange);
+      this.facilityHomeService.facilityOverviewData.next(facilityOverviewData);
+      // this.facilityOverviewService.utilityUseAndCost.next(utilityUseAndCost);
+      this.facilityHomeService.calculatingOverview.next(false);
     }
   }
 }

@@ -10,6 +10,7 @@ import { FacilityEnergyReductionGoalComponent } from './facility-energy-card/fac
 import { FacilityWaterReductionGoalComponent } from './facility-water-card/facility-water-reduction-goal/facility-water-reduction-goal.component';
 import { FacilityEnergyCardComponent } from './facility-energy-card/facility-energy-card.component';
 import { FacilityWaterCardComponent } from './facility-water-card/facility-water-card.component';
+import { DataOverviewModule } from 'src/app/shared/data-overview/data-overview.module';
 
 
 
@@ -27,7 +28,8 @@ import { FacilityWaterCardComponent } from './facility-water-card/facility-water
     RouterModule,
     HelperPipesModule,
     CalculatingSpinnerModule,
-    SharedAnalysisModule
+    SharedAnalysisModule,
+    DataOverviewModule
   ]
 })
 export class FacilityHomeModule { }

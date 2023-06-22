@@ -2,7 +2,6 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AccountHomeComponent } from './account-home.component';
 import { AccountHomeSummaryComponent } from './account-home-summary/account-home-summary.component';
-import { FacilityCardComponent } from './facility-card/facility-card.component';
 import { RouterModule } from '@angular/router';
 import { HelperPipesModule } from 'src/app/shared/helper-pipes/helper-pipes.module';
 import { SharedAnalysisModule } from 'src/app/shared/shared-analysis/shared-analysis.module';
@@ -12,6 +11,7 @@ import { AccountEnergyReductionGoalComponent } from './account-energy-card/accou
 import { AccountEnergyCardComponent } from './account-energy-card/account-energy-card.component';
 import { AccountWaterCardComponent } from './account-water-card/account-water-card.component';
 import { AccountAnnualAnalysisTableComponent } from './account-annual-analysis-table/account-annual-analysis-table.component';
+import { DataOverviewModule } from 'src/app/shared/data-overview/data-overview.module';
 
 
 
@@ -19,7 +19,6 @@ import { AccountAnnualAnalysisTableComponent } from './account-annual-analysis-t
   declarations: [
     AccountHomeComponent,
     AccountHomeSummaryComponent,
-    FacilityCardComponent,
     AccountWaterReductionGoalComponent,
     AccountEnergyReductionGoalComponent,
     AccountEnergyCardComponent,
@@ -31,7 +30,8 @@ import { AccountAnnualAnalysisTableComponent } from './account-annual-analysis-t
     RouterModule,
     HelperPipesModule,
     SharedAnalysisModule,
-    CalculatingSpinnerModule
+    CalculatingSpinnerModule,
+    DataOverviewModule
   ]
 })
 export class AccountHomeModule { }
