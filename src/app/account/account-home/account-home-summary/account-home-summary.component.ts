@@ -19,92 +19,27 @@ export class AccountHomeSummaryComponent implements OnInit {
 
   account: IdbAccount;
   accountSub: Subscription;
-  latestAnalysisSummary: MonthlyAnalysisSummaryData;
-  latestSummarySub: Subscription;
-  latestAnalysisDate: Date;
-  percentSavings: number = 0;
-  percentGoal: number;
-  percentTowardsGoal: number = 0;
-  goalYear: number;
-  baselineYear: number;
-
-  betterPlantsReportYear: number;
-  accountAnalysisYear: number;
-
-  accountReportsSub: Subscription;
   disableButtons: boolean;
-  monthlyFacilityAnalysisData: Array<MonthlyAnalysisSummaryData>;
-  monthlyDataSub: Subscription;
-  latestAnalysisItem: IdbAccountAnalysisItem;
-  calculatingSub: Subscription;
-  calculating: boolean | 'error';
+  waterAnalysisNeeded: boolean;
+  energyAnalysisNeeded: boolean;
+  latestEnergyAnalysisItem: IdbAccountAnalysisItem;
+  latestWaterAnalysisItem: IdbAccountAnalysisItem;
   constructor(private accountDbService: AccountdbService, private accountHomeService: AccountHomeService,
-    private accountReportDbService: AccountReportDbService, private router: Router,
+    private router: Router,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private exportToExcelTemplateService: ExportToExcelTemplateService) { }
 
   ngOnInit(): void {
     this.accountSub = this.accountDbService.selectedAccount.subscribe(val => {
       this.account = val;
-      this.setGoalYears();
-      this.latestAnalysisItem = this.accountHomeService.latestAnalysisItem;
-      if(this.latestAnalysisItem){
-        this.accountAnalysisYear = this.latestAnalysisItem.reportYear;
-      }else{
-        this.accountAnalysisYear = undefined;
-      }
+      this.setAccountStatus();
       let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
       this.disableButtons = (accountMeterData.length == 0);
     });
-    this.latestSummarySub = this.accountHomeService.monthlyAccountAnalysisData.subscribe(val => {
-      this.latestAnalysisSummary = _.maxBy(val, 'date');
-      if (this.latestAnalysisSummary) {
-        this.latestAnalysisDate = new Date(this.latestAnalysisSummary.date);
-        this.setProgressPercentages();
-      } else {
-        this.latestAnalysisDate = undefined
-        this.percentSavings = 0;
-        this.percentTowardsGoal = 0;
-      }
-    });
-
-    this.calculatingSub = this.accountHomeService.calculating.subscribe(val => {
-      this.calculating = val;
-      if(this.calculating == false){
-        this.monthlyFacilityAnalysisData = this.accountHomeService.monthlyAccountAnalysisData.getValue();
-      }
-    })
-
-
-    this.accountReportsSub = this.accountReportDbService.accountReports.subscribe(accountReports => {
-      let betterPlantsReports: Array<IdbAccountReport> = accountReports.filter(options => { return options.reportType == 'betterPlants' });
-      let latestReport: IdbAccountReport = _.maxBy(betterPlantsReports, 'reportYear');
-      if (latestReport) {
-        this.betterPlantsReportYear = latestReport.reportYear;
-      } else {
-        this.betterPlantsReportYear = undefined;
-      }
-    });
-
   }
 
   ngOnDestroy() {
     this.accountSub.unsubscribe();
-    this.latestSummarySub.unsubscribe();
-    this.accountReportsSub.unsubscribe();
-  }
-
-  setGoalYears() {
-    if (this.account && this.account.sustainabilityQuestions) {
-      this.percentGoal = this.account.sustainabilityQuestions.energyReductionPercent;
-      this.goalYear = this.account.sustainabilityQuestions.energyReductionTargetYear;
-      this.baselineYear = this.account.sustainabilityQuestions.energyReductionBaselineYear;
-    }
-  }
-
-  setProgressPercentages() {
-    this.percentSavings = this.latestAnalysisSummary.rolling12MonthImprovement;
-    this.percentTowardsGoal = (this.percentSavings / this.percentGoal) * 100;
   }
 
   navigateTo(urlStr: string) {
@@ -120,5 +55,43 @@ export class AccountHomeSummaryComponent implements OnInit {
   }
 
 
- 
+  setAccountStatus() {
+    this.latestEnergyAnalysisItem = this.accountHomeService.latestEnergyAnalysisItem;
+    this.setEnergyAnalysisNeeded();
+    this.latestWaterAnalysisItem = this.accountHomeService.latestWaterAnalysisItem;
+    this.setWaterAnalysisNeeded();
+  }
+
+
+  setEnergyAnalysisNeeded() {
+    let currentDate: Date = new Date();
+    if (this.latestEnergyAnalysisItem) {
+      if (this.latestEnergyAnalysisItem.reportYear < currentDate.getFullYear() - 1) {
+        this.energyAnalysisNeeded = true;
+      } else {
+        this.energyAnalysisNeeded = false;
+      }
+    } else if (this.account.sustainabilityQuestions.energyReductionGoal) {
+      this.energyAnalysisNeeded = true;
+    } else {
+      this.energyAnalysisNeeded = false;
+    }
+  }
+
+  setWaterAnalysisNeeded() {
+    let currentDate: Date = new Date();
+    if (this.latestWaterAnalysisItem) {
+      if (this.latestWaterAnalysisItem.reportYear < currentDate.getFullYear() - 1) {
+        this.waterAnalysisNeeded = true;
+      } else {
+        this.waterAnalysisNeeded = false;
+      }
+    } else if (this.account.sustainabilityQuestions.waterReductionGoal) {
+      this.waterAnalysisNeeded = true;
+    } else {
+      this.waterAnalysisNeeded = false;
+    }
+  }
+
+
 }

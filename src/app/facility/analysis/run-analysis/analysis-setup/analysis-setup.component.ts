@@ -38,7 +38,7 @@ export class AnalysisSetupComponent implements OnInit {
   ngOnInit(): void {
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
     this.facility = this.facilityDbService.selectedFacility.getValue();
-    this.yearOptions = this.calanderizationService.getYearOptionsFacility(this.facility.guid);
+    this.yearOptions = this.calanderizationService.getYearOptionsFacility(this.facility.guid, this.analysisItem.analysisCategory);
     this.setBaselineYearWarning();
   }
 
@@ -67,8 +67,18 @@ export class AnalysisSetupComponent implements OnInit {
   }
 
   setBaselineYearWarning() {
-    if (this.analysisItem.baselineYear && this.facility.sustainabilityQuestions.energyReductionBaselineYear != this.analysisItem.baselineYear) {
-      this.baselineYearWarning = "This baseline year does not match your facility baseline year. This analysis cannot be included in reports or figures relating to the facility energy goal."
+    if (this.analysisItem.analysisCategory == 'water') {
+      if (this.analysisItem.baselineYear && this.facility.sustainabilityQuestions.waterReductionGoal && this.facility.sustainabilityQuestions.waterReductionBaselineYear != this.analysisItem.baselineYear) {
+        this.baselineYearWarning = "This baseline year does not match your facility baseline year. This analysis cannot be included in reports or figures relating to the facility water goal."
+      } else {
+        this.baselineYearWarning = undefined;
+      }
+    } else if (this.analysisItem.analysisCategory == 'energy') {
+      if (this.analysisItem.baselineYear && this.facility.sustainabilityQuestions.energyReductionGoal && this.facility.sustainabilityQuestions.energyReductionBaselineYear != this.analysisItem.baselineYear) {
+        this.baselineYearWarning = "This baseline year does not match your facility baseline year. This analysis cannot be included in reports or figures relating to the facility energy goal."
+      } else {
+        this.baselineYearWarning = undefined;
+      }
     } else {
       this.baselineYearWarning = undefined;
     }

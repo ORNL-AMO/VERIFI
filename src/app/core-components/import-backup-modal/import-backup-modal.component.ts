@@ -40,6 +40,9 @@ export class ImportBackupModalComponent implements OnInit {
     this.showModalSub = this.importBackupModalService.showModal.subscribe(value => {
       this.showModal = value;
       this.inFacility = this.importBackupModalService.inFacility;
+      this.backupFile = undefined;
+      this.backupFileError = undefined;
+      this.backupName = undefined;
       if (this.showModal == true) {
         this.selectedAccount = this.accountDbService.selectedAccount.getValue();
         this.accountFacilities = this.facilityDbService.accountFacilities.getValue();

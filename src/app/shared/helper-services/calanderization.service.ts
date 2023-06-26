@@ -832,23 +832,37 @@ export class CalanderizationService {
   }
 
 
-  getYearOptionsAccount(): Array<number>{
+  getYearOptionsAccount(meterCategory: 'water' | 'energy' | 'all'): Array<number> {
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
-    let calanderizedMeterData: Array<CalanderizedMeter> =  this.getCalanderizedMeterData(accountMeters, true);
-    let combinedMonthlyData: Array<MonthlyData> = calanderizedMeterData.flatMap(cMeter => {return cMeter.monthlyData});
-    let allYears: Array<number> = combinedMonthlyData.flatMap(monthlyData => {return monthlyData.year});
+    let categoryMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return this.isCategoryMeter(meter, meterCategory) });
+    let calanderizedMeterData: Array<CalanderizedMeter> = this.getCalanderizedMeterData(categoryMeters, true);
+    let combinedMonthlyData: Array<MonthlyData> = calanderizedMeterData.flatMap(cMeter => { return cMeter.monthlyData });
+    let allYears: Array<number> = combinedMonthlyData.flatMap(monthlyData => { return monthlyData.year });
     allYears = _.uniq(allYears);
     return allYears;
   }
 
-  getYearOptionsFacility(facilityId: string): Array<number>{
+  getYearOptionsFacility(facilityId: string, meterCategory: 'water' | 'energy' | 'all'): Array<number> {
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
-    let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => {return meter.facilityId == facilityId})
-    let calanderizedMeterData: Array<CalanderizedMeter> =  this.getCalanderizedMeterData(facilityMeters, false);
-    let combinedMonthlyData: Array<MonthlyData> = calanderizedMeterData.flatMap(cMeter => {return cMeter.monthlyData});
-    let allYears: Array<number> = combinedMonthlyData.flatMap(monthlyData => {return monthlyData.year});
+    let facilityCategoryMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == facilityId && this.isCategoryMeter(meter, meterCategory) })
+    let calanderizedMeterData: Array<CalanderizedMeter> = this.getCalanderizedMeterData(facilityCategoryMeters, false);
+    let combinedMonthlyData: Array<MonthlyData> = calanderizedMeterData.flatMap(cMeter => { return cMeter.monthlyData });
+    let allYears: Array<number> = combinedMonthlyData.flatMap(monthlyData => { return monthlyData.year });
     allYears = _.uniq(allYears);
     return allYears;
+  }
+
+  isCategoryMeter(meter: IdbUtilityMeter, meterCategory: 'water' | 'energy' | 'all'): boolean {
+    if (meterCategory == 'water') {
+      if (meter.source == 'Water Intake') {
+        return true;
+      }
+      return false;
+    } else if (meterCategory == 'energy') {
+      return getIsEnergyMeter(meter.source);
+    } else if (meterCategory == 'all') {
+      return true;
+    }
   }
 }
 

@@ -1,0 +1,33 @@
+<div class="row">
+    <div class="col-2 text-center">
+    </div>
+    <div class="col-8 text-center label-font">
+        Water Reduction Goal <ng-container *ngIf="latestAnalysisDate">({{latestAnalysisDate | date:
+            'MMM. y'}})
+        </ng-container>
+    </div>
+    <div class="col-2 text-center">
+    </div>
+</div>
+<div class="row">
+    <div class="col-2 text-center">
+        Baseline<br>
+        {{baselineYear | yearDisplay:facility.fiscalYear}}
+    </div>
+    <div class="col-8">
+        <div class="d-flex flex-column">
+            <div class="progress">
+                <div class="progress-bar" role="progressbar" [style.width.%]="percentTowardsGoal" aria-valuemin="0"
+                    aria-valuemax="percentGoal">
+                </div>
+            </div>
+            <div class="w-100 text-center bold">
+                {{percentSavings | number:'1.0-0'}}%
+            </div>
+        </div>
+    </div>
+    <div class="col-2 text-center">
+        Goal<br>
+        {{goalYear | yearDisplay:facility.fiscalYear}} ({{percentGoal}}%)
+    </div>
+</div>

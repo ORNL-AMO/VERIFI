@@ -43,6 +43,8 @@ import { PredictorEntriesComponent } from "../facility/utility-data/predictor-da
 import { PredictorEntriesTableComponent } from "../facility/utility-data/predictor-data/predictor-entries/predictor-entries-table/predictor-entries-table.component";
 import { EditPredictorEntryComponent } from "../facility/utility-data/predictor-data/predictor-entries/edit-predictor-entry/edit-predictor-entry.component";
 import { canDeactivateGuard } from "./can-deactivate.guard";
+import { EnergyDashboardComponent } from "../facility/analysis/analysis-dashboard/energy-dashboard/energy-dashboard.component";
+import { WaterDashboardComponent } from "../facility/analysis/analysis-dashboard/water-dashboard/water-dashboard.component";
 
 export const FacilityRoutes: Route = {
     path: 'facility/:id',
@@ -226,7 +228,15 @@ export const FacilityRoutes: Route = {
             component: AnalysisComponent,
             children: [
                 { path: '', pathMatch: 'full', redirectTo: 'analysis-dashboard' },
-                { path: 'analysis-dashboard', component: AnalysisDashboardComponent },
+                {
+                    path: 'analysis-dashboard',
+                    component: AnalysisDashboardComponent,
+                    children: [
+                        { path: '', pathMatch: 'full', redirectTo: 'energy' },
+                        { path: 'energy', component: EnergyDashboardComponent },
+                        { path: 'water', component: WaterDashboardComponent },
+                    ]
+                },
                 {
                     path: 'run-analysis',
                     component: RunAnalysisComponent,

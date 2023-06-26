@@ -18,6 +18,8 @@ export class FacilityUsageDonutComponent {
   waterUnit: string;
   @Input()
   accountOverviewFacilities: Array<AccountOverviewFacility>;
+  @Input()
+  inHomeScreen: boolean;
 
   @ViewChild('usageDonut', { static: false }) usageDonut: ElementRef;
 
@@ -74,7 +76,13 @@ export class FacilityUsageDonutComponent {
         automargin: true
       }];
 
+      let height: number;
+      if(this.inHomeScreen){
+        height = 350;
+      }
+
       var layout = {
+        height: height,
         margin: { "t": 50, "b": 50, "l": 50, "r": 50 },
         showlegend: false
       };

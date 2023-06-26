@@ -38,7 +38,7 @@ export class UpdateDbEntryService {
       isChanged = true;
     }
 
-    if(!facility.classification){
+    if (!facility.classification) {
       facility.classification = 'Manufacturing';
       isChanged = true;
     }
@@ -48,6 +48,10 @@ export class UpdateDbEntryService {
 
   updateAnalysis(analysisItem: IdbAnalysisItem): { analysisItem: IdbAnalysisItem, isChanged: boolean } {
     let isChanged: boolean = false;
+    if (!analysisItem.analysisCategory) {
+      analysisItem.analysisCategory = 'energy';
+      isChanged = true;
+    }
     if (!analysisItem.setupErrors) {
       analysisItem.setupErrors = this.analysisValidationService.getAnalysisItemErrors(analysisItem);
       isChanged = true;
@@ -60,10 +64,14 @@ export class UpdateDbEntryService {
         }
       });
     }
-
     if (!analysisItem.baselineYear) {
       let facility: IdbFacility = this.facilityDbService.getFacilityById(analysisItem.facilityId);
-      analysisItem.baselineYear = facility.sustainabilityQuestions.energyReductionBaselineYear;
+      //TODO: make sure facility is found
+      if (facility) {
+        analysisItem.baselineYear = facility.sustainabilityQuestions.energyReductionBaselineYear;
+      } else {
+        analysisItem.baselineYear = 2017;
+      }
       isChanged = true;
     }
 
@@ -81,10 +89,6 @@ export class UpdateDbEntryService {
         });
       }
     });
-    if (!analysisItem.analysisCategory) {
-      analysisItem.analysisCategory = 'energy';
-      isChanged = true;
-    }
     return { analysisItem: analysisItem, isChanged: isChanged };
   }
 

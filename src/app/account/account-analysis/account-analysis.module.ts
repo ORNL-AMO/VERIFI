@@ -18,6 +18,9 @@ import { CalculatingSpinnerModule } from 'src/app/shared/calculating-spinner/cal
 import { AccountAnalysisFooterComponent } from './account-analysis-footer/account-analysis-footer.component';
 import { TableItemsDropdownModule } from 'src/app/shared/table-items-dropdown/table-items-dropdown.module';
 import { AccountAnalysisItemCardComponent } from './account-analysis-dashboard/account-analysis-item-card/account-analysis-item-card.component';
+import { AccountAnalysisWaterDashboardComponent } from './account-analysis-dashboard/account-analysis-water-dashboard/account-analysis-water-dashboard.component';
+import { AccountAnalysisEnergyDashboardComponent } from './account-analysis-dashboard/account-analysis-energy-dashboard/account-analysis-energy-dashboard.component';
+import { AccountAnalysisDashboardTabsComponent } from './account-analysis-dashboard/account-analysis-dashboard-tabs/account-analysis-dashboard-tabs.component';
 
 
 @NgModule({
@@ -32,7 +35,10 @@ import { AccountAnalysisItemCardComponent } from './account-analysis-dashboard/a
     MonthlyAccountAnalysisComponent,
     AnnualAccountAnalysisComponent,
     AccountAnalysisFooterComponent,
-    AccountAnalysisItemCardComponent
+    AccountAnalysisItemCardComponent,
+    AccountAnalysisWaterDashboardComponent,
+    AccountAnalysisEnergyDashboardComponent,
+    AccountAnalysisDashboardTabsComponent
   ],
   imports: [
     CommonModule,
