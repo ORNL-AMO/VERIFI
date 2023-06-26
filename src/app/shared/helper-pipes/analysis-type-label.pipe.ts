@@ -15,7 +15,7 @@ export class AnalysisTypeLabelPipe implements PipeTransform {
       return 'Energy Intensity';
     } else if (analysisType == 'modifiedEnergyIntensity') {
       return 'Modified Energy Intensity';
-    } else if (analysisType == 'skip') {
+    } else if (analysisType == 'skip' || analysisType == 'skipAnalysis') {
       return 'Group Skipped'
     }
     return;

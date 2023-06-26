@@ -33,15 +33,19 @@ export class BetterPlantsReportClass {
         accountAnalysisItems: Array<IdbAnalysisItem>
     ) {
         this.setFacilityPerformance(selectedAnalysisItem, facilities, calanderizedMeters, accountPredictorEntries, accountAnalysisItems);
-        this.setReportAndBaselineYearSummaries(selectedAnalysisItem, account, calanderizedMeters, facilities, accountPredictorEntries, accountAnalysisItems, baselineYear, reportYear);
-        this.setReportYearEnergySummaryClass(calanderizedMeters, reportYear);
-        this.setBaselineYearEnergySummaryClass(calanderizedMeters, baselineYear);
+        let includedCalanderizedMeters: Array<CalanderizedMeter> = this.getIncludedMeters(calanderizedMeters, selectedAnalysisItem, accountAnalysisItems);
+
+
+
+        this.setReportAndBaselineYearSummaries(selectedAnalysisItem, account, includedCalanderizedMeters, facilities, accountPredictorEntries, accountAnalysisItems, baselineYear, reportYear);
+        this.setReportYearEnergySummaryClass(includedCalanderizedMeters, reportYear);
+        this.setBaselineYearEnergySummaryClass(includedCalanderizedMeters, baselineYear);
         this.setAdjustBaselinePrimaryEnergy();
         this.setTotalEnergySavings();
         this.setPercentTotalEnergyImprovement();
 
-        this.setReportYearWaterSummaryClass(calanderizedMeters, reportYear, facilities);
-        this.setBaselineYearWaterSummaryClass(calanderizedMeters, baselineYear, facilities);
+        this.setReportYearWaterSummaryClass(includedCalanderizedMeters, reportYear, facilities);
+        this.setBaselineYearWaterSummaryClass(includedCalanderizedMeters, baselineYear, facilities);
         this.setAdjustBaselinePrimaryWater();
         this.setTotalWaterSavings();
         this.setPercentTotalWaterImprovement();
@@ -58,7 +62,7 @@ export class BetterPlantsReportClass {
         selectedAnalysisItem.facilityAnalysisItems.forEach(item => {
             if (item.analysisItemId != undefined && item.analysisItemId != 'skip') {
                 let facilityAnalysisItem: IdbAnalysisItem = accountAnalysisItems.find(accountItem => { return accountItem.guid == item.analysisItemId });
-                let calanderizedFacilityMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(meter => { return meter.meter.facilityId == item.facilityId });
+                let calanderizedFacilityMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => { return cMeter.meter.facilityId == item.facilityId });
                 let facility: IdbFacility = facilities.find(facility => { return facility.guid == item.facilityId });
                 let facilityAnalysisSummaryClass: AnnualFacilityAnalysisSummaryClass = new AnnualFacilityAnalysisSummaryClass(facilityAnalysisItem, facility, calanderizedFacilityMeters, accountPredictorEntries, false);
                 let annualAnalysisSummary: Array<AnnualAnalysisSummary> = facilityAnalysisSummaryClass.getAnnualAnalysisSummaries();
@@ -146,5 +150,23 @@ export class BetterPlantsReportClass {
             baselineYearWaterResults: this.baselineYearWaterSummaryClass.getBetterPlantsWaterSummary(),
             reportYearWaterResults: this.reportYearWaterSummaryClass.getBetterPlantsWaterSummary()
         }
+    }
+
+    getIncludedMeters(calanderizedMeters: Array<CalanderizedMeter>, selectedAnalysisItem: IdbAccountAnalysisItem, accountAnalysisItems: Array<IdbAnalysisItem>) {
+        let includedCalanderizedMeters: Array<CalanderizedMeter> = new Array()
+        selectedAnalysisItem.facilityAnalysisItems.forEach(item => {
+            if (item.analysisItemId != undefined && item.analysisItemId != 'skip') {
+                let facilityAnalysisItem: IdbAnalysisItem = accountAnalysisItems.find(accountItem => { return accountItem.guid == item.analysisItemId });
+                facilityAnalysisItem.groups.forEach(group => {
+                    if (group.analysisType != 'skip') {
+                        let filteredMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => {
+                            return cMeter.meter.groupId == group.idbGroupId;
+                        });
+                        includedCalanderizedMeters = includedCalanderizedMeters.concat(filteredMeters);
+                    }
+                });
+            }
+        });
+        return includedCalanderizedMeters;
     }
 }

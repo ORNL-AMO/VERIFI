@@ -1,3 +1,7 @@
 .popup{
     top: 15%;
 }
+
+.popup-footer{
+    padding-top: 10px;
+}
