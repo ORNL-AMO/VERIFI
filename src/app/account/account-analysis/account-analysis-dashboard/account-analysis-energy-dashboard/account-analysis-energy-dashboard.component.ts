@@ -36,7 +36,7 @@ export class AccountAnalysisEnergyDashboardComponent {
     });
 
     this.yearOptions = this.calendarizationService.getYearOptionsAccount('energy');
-    if (this.yearOptions) {
+    if (this.yearOptions && this.selectedAccount.sustainabilityQuestions.energyReductionGoal) {
       this.baselineYearError = this.yearOptions[0] > this.selectedAccount.sustainabilityQuestions.energyReductionBaselineYear
     }
 

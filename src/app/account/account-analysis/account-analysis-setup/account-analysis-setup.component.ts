@@ -95,8 +95,18 @@ export class AccountAnalysisSetupComponent implements OnInit {
   }
 
   setBaselineYearWarning() {
-    if (this.analysisItem.baselineYear && this.account.sustainabilityQuestions.energyReductionBaselineYear != this.analysisItem.baselineYear) {
-      this.baselineYearWarning = "This baseline year does not match your corporate baseline year. This analysis cannot be included in reports or figures relating to the corporate energy goal."
+    if (this.analysisItem.analysisCategory == 'water') {
+      if (this.analysisItem.baselineYear && this.account.sustainabilityQuestions.waterReductionGoal && this.account.sustainabilityQuestions.waterReductionBaselineYear != this.analysisItem.baselineYear) {
+        this.baselineYearWarning = "This baseline year does not match your corporate baseline year. This analysis cannot be included in reports or figures relating to the corporate water goal."
+      } else {
+        this.baselineYearWarning = undefined;
+      }
+    } else if (this.analysisItem.analysisCategory == 'energy') {
+      if (this.analysisItem.baselineYear && this.account.sustainabilityQuestions.energyReductionGoal && this.account.sustainabilityQuestions.energyReductionBaselineYear != this.analysisItem.baselineYear) {
+        this.baselineYearWarning = "This baseline year does not match your corporate baseline year. This analysis cannot be included in reports or figures relating to the corporate energy goal."
+      } else {
+        this.baselineYearWarning = undefined;
+      }
     } else {
       this.baselineYearWarning = undefined;
     }
