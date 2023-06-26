@@ -145,7 +145,10 @@
                 <input type="checkbox" name="metersSelected" (change)="toggleChecked()" [(ngModel)]="meterData.checked">
             </td>
             <td class="read-date" [ngClass]="checkError(meterData.readDate)">{{meterData.readDate | date}}</td>
-            <td>{{meterData.totalEnergyUse | customNumber}}</td>
+            <td>
+                <span class="fa fa-asterisk" *ngIf="meterData.isEstimated"></span>
+                {{meterData.totalEnergyUse | customNumber}}
+            </td>
             <td *ngIf="generalInformationFilters.totalCost">{{meterData.totalCost | customNumber:true}}</td>
             <td *ngIf="generalInformationFilters.realDemand">{{meterData.totalRealDemand | customNumber}}</td>
             <td *ngIf="generalInformationFilters.billedDemand">{{meterData.totalBilledDemand | customNumber}}</td>
@@ -193,11 +196,17 @@
 </table>
 
 <div class="d-flex w-100 justify-content-between">
-    <div>
-        <button class="btn action-btn btn-sm" (click)="copyTable()">
-            <span class="fa fa-copy"></span> Copy Table
-        </button>
+    <div class="d-flex">
+        <div>
+            <button class="btn action-btn btn-sm" (click)="copyTable()">
+                <span class="fa fa-copy"></span> Copy Table
+            </button>
+        </div>
+        <div class="ps-2" *ngIf="showEstimated">
+            <span class="fa fa-asterisk"></span> Indicates Estimated Reading
+        </div>
     </div>
+
     <ngb-pagination [collectionSize]="selectedMeterData.length" [(page)]="currentPageNumber" [pageSize]="itemsPerPage"
         [maxSize]="5" [rotate]="true" aria-label="Pagination">
     </ngb-pagination>

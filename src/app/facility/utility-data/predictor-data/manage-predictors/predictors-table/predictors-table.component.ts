@@ -31,6 +31,8 @@ export class PredictorsTableComponent {
 
   hasWeatherDataWarning: boolean;
   predictorUsedGroupIds: Array<string> = [];
+
+  predictorEntries: Array<IdbPredictorEntry>;
   constructor(private predictorDbService: PredictordbService, private router: Router,
     private facilitydbService: FacilitydbService, private loadingService: LoadingService,
     private weatherDataService: WeatherDataService, private degreeDaysService: DegreeDaysService,
@@ -40,6 +42,7 @@ export class PredictorsTableComponent {
   }
 
   ngOnInit() {
+    this.predictorEntries = this.predictorDbService.facilityPredictorEntries.getValue();
     this.facilityPredictorsSub = this.predictorDbService.facilityPredictors.subscribe(val => {
       this.facilityPredictors = val;
       this.standardPredictors = new Array();
@@ -91,7 +94,7 @@ export class PredictorsTableComponent {
         });
       }
       let isUsed: PredictorData = predictorVariables.find(predictorUsed => { return predictorUsed.id == predictor.id });
-      if(isUsed){
+      if (isUsed) {
         this.predictorUsedGroupIds.push(group.idbGroupId)
       }
     };
@@ -102,13 +105,17 @@ export class PredictorsTableComponent {
     let deleteIndex: number = this.facilityPredictors.findIndex(facilityPredictor => { return facilityPredictor.id == this.predictorToDelete.id });
     this.facilityPredictors.splice(deleteIndex, 1);
     this.predictorToDelete = undefined;
-    this.loadingService.setLoadingMessage('Deleting Predictor Data...');
-    this.loadingService.setLoadingStatus(true);
-    await this.analysisDbService.updateAnalysisPredictors(this.facilityPredictors, this.selectedFacility.guid, this.predictorUsedGroupIds);
-    let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
-    await this.accountAnalysisDbService.updateAccountValidation(accountAnalysisItems);
-    await this.predictorDbService.updateFacilityPredictorEntries(this.facilityPredictors);
-    this.loadingService.setLoadingStatus(false);
+    if (this.predictorEntries.length > 0) {
+      this.loadingService.setLoadingMessage('Deleting Predictor Data...');
+      this.loadingService.setLoadingStatus(true);
+      await this.analysisDbService.updateAnalysisPredictors(this.facilityPredictors, this.selectedFacility.guid, this.predictorUsedGroupIds);
+      let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
+      await this.accountAnalysisDbService.updateAccountValidation(accountAnalysisItems);
+      await this.predictorDbService.updateFacilityPredictorEntries(this.facilityPredictors);
+      this.loadingService.setLoadingStatus(false);
+    }else{
+      this.predictorDbService.facilityPredictors.next(this.facilityPredictors);
+    }
 
   }
 

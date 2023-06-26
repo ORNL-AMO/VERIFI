@@ -31,7 +31,7 @@ export class MonthlyFacilityAnalysisClass {
         if (calculateAllMonthlyData) {
             let lastBill: MonthlyData = getLastBillEntryFromCalanderizedMeterData(calanderizedMeters);
             let lastPredictorEntry: IdbPredictorEntry = _.maxBy(this.facilityPredictorEntries, 'date');
-            if (lastBill.date > lastPredictorEntry.date) {
+            if (lastPredictorEntry && lastBill.date > lastPredictorEntry.date) {
                 this.endDate = new Date(lastPredictorEntry.date);
             } else {
                 this.endDate = new Date(lastBill.date);

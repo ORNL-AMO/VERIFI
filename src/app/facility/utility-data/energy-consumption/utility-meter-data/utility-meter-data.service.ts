@@ -16,7 +16,7 @@ export class UtilityMeterDataService {
 
   tableElectricityFilters: BehaviorSubject<ElectricityDataFilters>;
   tableGeneralUtilityFilters: BehaviorSubject<GeneralUtilityDataFilters>;
-  
+
   electricityInputFilters: BehaviorSubject<ElectricityDataFilters>;
 
   constructor(private formBuilder: FormBuilder, private facilityDbService: FacilitydbService,
@@ -37,7 +37,7 @@ export class UtilityMeterDataService {
           this.tableElectricityFilters.next(selectedFacility.tableElectricityFilters);
         }
 
-        if(selectedFacility.tableGeneralUtilityFilters){
+        if (selectedFacility.tableGeneralUtilityFilters) {
           this.tableGeneralUtilityFilters.next(selectedFacility.tableGeneralUtilityFilters)
         }
       }
@@ -115,7 +115,7 @@ export class UtilityMeterDataService {
     }
   }
 
-  getDefaultGeneralFilters(): GeneralUtilityDataFilters{
+  getDefaultGeneralFilters(): GeneralUtilityDataFilters {
     return {
       totalVolume: true,
       totalCost: true,
@@ -161,7 +161,8 @@ export class UtilityMeterDataService {
       localSalesTax: [meterData.localSalesTax, [Validators.min(0)]],
       stateSalesTax: [meterData.stateSalesTax, [Validators.min(0)]],
       latePayment: [meterData.latePayment, [Validators.min(0)]],
-      otherCharge: [meterData.otherCharge, [Validators.min(0)]]
+      otherCharge: [meterData.otherCharge, [Validators.min(0)]],
+      isEstimated: [meterData.isEstimated || false]
     })
   }
 
@@ -195,6 +196,7 @@ export class UtilityMeterDataService {
     meterData.stateSalesTax = form.controls.stateSalesTax.value;
     meterData.latePayment = form.controls.latePayment.value;
     meterData.otherCharge = form.controls.otherCharge.value;
+    meterData.isEstimated = form.controls.isEstimated.value;
     return meterData;
   }
 
@@ -223,6 +225,7 @@ export class UtilityMeterDataService {
       commodityCharge: [meterData.commodityCharge],
       deliveryCharge: [meterData.deliveryCharge],
       otherCharge: [meterData.otherCharge],
+      isEstimated: [meterData.isEstimated || false]
     });
   }
 
@@ -236,6 +239,7 @@ export class UtilityMeterDataService {
     meterData.commodityCharge = form.controls.commodityCharge.value;
     meterData.deliveryCharge = form.controls.deliveryCharge.value;
     meterData.otherCharge = form.controls.otherCharge.value;
+    meterData.isEstimated = form.controls.isEstimated.value;
     return meterData;
   }
 

@@ -86,7 +86,8 @@ export interface IdbFacility {
     contactEmail: string,
     contactPhone: string,
     modifiedDate?: Date,
-    facilityOrder?: number
+    facilityOrder?: number,
+    isNewFacility?: boolean
 }
 
 export interface IdbUtilityMeterGroup {
@@ -174,7 +175,8 @@ export interface IdbUtilityMeterData {
     totalLocationEmissions?: number,
     RECs?: number,
     excessRECs?: number,
-    excessRECsEmissions?: number
+    excessRECsEmissions?: number,
+    isEstimated?: boolean,
 
 
     //electricity
@@ -292,7 +294,9 @@ export interface AnalysisSetupErrors {
     missingReportYear: boolean,
     missingBaselineYear: boolean,
     reportYearBeforeBaselineYear: boolean,
-    groupsHaveErrors: boolean
+    groupsHaveErrors: boolean,
+    baselineYearAfterMeterDataEnd: boolean,
+    baselineYearBeforeMeterDataStart: boolean,
 }
 
 export interface AnalysisGroup {

@@ -1,16 +1,27 @@
 <div class="row">
-    <div class="col-12">
+    <div class="col-12 justify-content-end">
         <div class="d-flex small text-center alert alert-warning"
             *ngIf="predictorForm.controls.predictorType.value == 'Weather' && addOrEdit == 'edit'">
             Changing weather data properties will cause degree days to re-calculate. Existing predictor entries may be
             altered.
         </div>
-        <div class="saveCancel item-right">
-            <button class="btn btn-secondary" (click)="cancel()">Cancel</button>
-            <button class="btn btn-primary" (click)="saveChanges()" [disabled]="predictorForm.invalid">
+        <div class="d-flex justify-content-end">
+            <button class="btn btn-secondary me-2" (click)="cancel()">Cancel</button>
+            <button *ngIf="facilityPredictorsEntries.length != 0" class="btn btn-primary" (click)="saveChanges()"
+                [disabled]="predictorForm.invalid">
                 <span *ngIf="addOrEdit == 'add'">Add Predictor</span>
                 <span *ngIf="addOrEdit == 'edit'">Save Changes</span>
             </button>
+            <ng-container *ngIf="facilityPredictorsEntries.length == 0">
+                <button *ngIf="predictorForm.controls.predictorType.value == 'Standard'" class="btn nav-btn"
+                    (click)="goToPredictorEntry()" [disabled]="predictorForm.invalid">
+                    Add Predictor Entry Data <span class="fa fa-chevron-right"></span>
+                </button>
+                <button *ngIf="predictorForm.controls.predictorType.value == 'Weather'" class="btn nav-btn"
+                    (click)="generateWeatherData()" [disabled]="predictorForm.invalid">
+                    Generate Weather Data <span class="fa fa-chevron-right"></span>
+                </button>
+            </ng-container>
         </div>
     </div>
 </div>
@@ -96,15 +107,21 @@
             <div class="col-lg-6 col-md-12 col-sm-12">
                 <label class="semibold" for="weatherStationId">Weather Station <span>(within 50 miles of
                         {{facility.zip}})</span></label>
-                <div class="mb-3">
-                    <select id="weatherStationId" class="form-select" formControlName="weatherStationId">
-                        <option *ngFor="let station of stations" [ngValue]="station.ID">{{station.name}}
-                            ({{station.distanceFrom | number}} miles)</option>
-                    </select>
+                <ng-container *ngIf="stations.length != 0">
+                    <div class="mb-3">
+                        <select id="weatherStationId" class="form-select" formControlName="weatherStationId">
+                            <option *ngFor="let station of stations" [ngValue]="station.ID">{{station.name}}
+                                ({{station.distanceFrom | number}} miles)</option>
+                        </select>
+                    </div>
+                    <div class="alert alert-danger" *ngIf="predictorForm.get('weatherStationId').hasError('required')">
+                        Weather station is
+                        required</div>
+                </ng-container>
+                <div *ngIf="stations.length == 0" class="alert alert-danger">
+                    No stations found within 50 miles of the facility zip. Use the weather data portion of VERIFI for
+                    more information.
                 </div>
-                <div class="alert alert-danger" *ngIf="predictorForm.get('weatherStationId').hasError('required')">
-                    Weather station is
-                    required</div>
             </div>
             <div class="col-lg-6 col-md-12 col-sm-12" *ngIf="predictorForm.controls.weatherDataType.value == 'HDD'">
                 <label class="semibold" for="heatingBaseTemperature">Heating Base Temperature</label>

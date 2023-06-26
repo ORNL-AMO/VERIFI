@@ -1,8 +1,4 @@
 <div class="d-flex w-100 justify-content-end mb-2">
-    <!-- <div>
-        <button class="btn action-btn" (click)="editPredictors()">Add/Edit Predictors</button>
-    </div> -->
-
     <div class="d-flex">
         <!--Bulk Delete-->
         <div class="pe-2 bulk-delete" [class.show]="hasCheckedItems">
@@ -10,7 +6,7 @@
                 Delete</button>
         </div>
         <!--Items Per Page-->
-        <app-table-items-dropdown></app-table-items-dropdown>
+        <app-table-items-dropdown *ngIf="facilityPredictorEntries.length != 0"></app-table-items-dropdown>
         <div class="ps-2">
             <button class="btn nav-btn" (click)="uploadData()"><i class="fa fa-upload"></i> Import
                 Data</button>
@@ -33,83 +29,94 @@
     to pull data from, use the <a (click)="goToWeatherData()">Weather Data</a> page to explore other stations in the
     area of this facility.
 </div>
-<table class="table utility-data table-sm table-bordered table-hover" #predictorTable
-    [ngClass]="{'copying-table': copyingTable}">
-    <thead class="sortable">
-        <tr>
-            <th class="input" *ngIf="!copyingTable">
-                <input #masterCheckbox type="checkbox" (change)="checkAll()" [(ngModel)]="allChecked">
-            </th>
-            <th (click)="setOrderDataField('date')" [ngClass]="{'active': orderDataField == 'date'}">Date
-            </th>
-            <th class="header" *ngFor="let predictor of facilityPredictors; let predictorIndex = index;"
-                (click)="setOrderDataField(predictor.name)" [ngClass]="{'active': orderDataField == predictor.name}">
-                <span *ngIf="predictor.production" class="fa fa-check-circle-o"></span>
-                <span *ngIf="predictor.predictorType == 'Weather'" class="fa fa-temperature-half"></span>
-                {{predictor.name}}
-                <ng-container *ngIf="predictor.unit">
-                    <br>
-                    <span class="small block">({{predictor.unit}})</span>
-                </ng-container>
-                <ng-container *ngIf="predictor.predictorType == 'Weather'">
-                    <br>
-                    <span class="small block">({{predictor.weatherDataType}},
-                        <ng-container *ngIf="predictor.weatherDataType == 'HDD'">
-                            {{predictor.heatingBaseTemperature}} &#8457;
-                        </ng-container>
-                        <ng-container *ngIf="predictor.weatherDataType == 'CDD'">
-                            {{predictor.coolingBaseTemperature}} &#8457;
-                        </ng-container>)</span>
-                </ng-container>
-            </th>
-            <td class="actions" *ngIf="!copyingTable">
+<ng-container *ngIf="facilityPredictorEntries.length != 0">
+    <table class="table utility-data table-sm table-bordered table-hover" #predictorTable
+        [ngClass]="{'copying-table': copyingTable}">
+        <thead class="sortable">
+            <tr>
+                <th class="input" *ngIf="!copyingTable">
+                    <input #masterCheckbox type="checkbox" (change)="checkAll()" [(ngModel)]="allChecked">
+                </th>
+                <th (click)="setOrderDataField('date')" [ngClass]="{'active': orderDataField == 'date'}">Date
+                </th>
+                <th class="header" *ngFor="let predictor of facilityPredictors; let predictorIndex = index;"
+                    (click)="setOrderDataField(predictor.name)"
+                    [ngClass]="{'active': orderDataField == predictor.name}">
+                    <span *ngIf="predictor.production" class="fa fa-check-circle-o"></span>
+                    <span *ngIf="predictor.predictorType == 'Weather'" class="fa fa-temperature-half"></span>
+                    {{predictor.name}}
+                    <ng-container *ngIf="predictor.unit">
+                        <br>
+                        <span class="small block">({{predictor.unit}})</span>
+                    </ng-container>
+                    <ng-container *ngIf="predictor.predictorType == 'Weather'">
+                        <br>
+                        <span class="small block">({{predictor.weatherDataType}},
+                            <ng-container *ngIf="predictor.weatherDataType == 'HDD'">
+                                {{predictor.heatingBaseTemperature}} &#8457;
+                            </ng-container>
+                            <ng-container *ngIf="predictor.weatherDataType == 'CDD'">
+                                {{predictor.coolingBaseTemperature}} &#8457;
+                            </ng-container>)</span>
+                    </ng-container>
+                </th>
+                <td class="actions" *ngIf="!copyingTable">
 
-            </td>
-        </tr>
-    </thead>
-    <tbody class="table-group-divider">
-        <tr
-            *ngFor="let predictorEntry of facilityPredictorEntries | predictorsOrderBy: orderDataField: orderByDirection | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage">
-            <td class="input" *ngIf="!copyingTable">
-                <input type="checkbox" name="predictorEntry" (change)="setHasChecked()"
-                    [(ngModel)]="predictorEntry.checked">
-            </td>
-            <td>{{predictorEntry.date | date:'MMM, yyyy'}}</td>
-            <td *ngFor="let predictor of predictorEntry.predictors">
-                <span *ngIf="predictor.weatherDataWarning" class="fa  fa-exclamation-circle" data-bs-toggle="tooltip"
-                    data-bs-placement="top" title="Gaps found in weather data for this reading. It may not be accurate."
-                    data-bs-html="true"></span>
-                {{predictor.amount | customNumber}}
-            </td>
-            <td class="actions" *ngIf="!copyingTable">
-                <div class="btn-group">
-                    <button class="btn btn-sm btn-outline" (click)="setEditPredictorEntry(predictorEntry)" title="Edit">
-                        <i class="fa fa-pencil"></i>
-                    </button>
-                    <button class="btn btn-sm btn-outline" (click)="setDeletePredictorEntry(predictorEntry)"
-                        title="Delete">
-                        <i class="fa fa-trash"></i>
-                    </button>
-                    <button *ngIf="hasWeatherData" class="btn btn-sm btn-outline"
-                        (click)="viewWeatherData(predictorEntry)" title="View Weather Data">
-                        <i class="fa fa-temperature-half"></i>
-                    </button>
-                </div>
-            </td>
-        </tr>
-    </tbody>
-</table>
-<div class="d-flex w-100 justify-content-between">
-    <div>
-        <button class="btn action-btn btn-sm" (click)="copyTable()">
-            <span class="fa fa-copy"></span> Copy Table
-        </button>
+                </td>
+            </tr>
+        </thead>
+        <tbody class="table-group-divider">
+            <tr
+                *ngFor="let predictorEntry of facilityPredictorEntries | predictorsOrderBy: orderDataField: orderByDirection | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage">
+                <td class="input" *ngIf="!copyingTable">
+                    <input type="checkbox" name="predictorEntry" (change)="setHasChecked()"
+                        [(ngModel)]="predictorEntry.checked">
+                </td>
+                <td>{{predictorEntry.date | date:'MMM, yyyy'}}</td>
+                <td *ngFor="let predictor of predictorEntry.predictors">
+                    <span *ngIf="predictor.weatherDataWarning" class="fa  fa-exclamation-circle"
+                        data-bs-toggle="tooltip" data-bs-placement="top"
+                        title="Gaps found in weather data for this reading. It may not be accurate."
+                        data-bs-html="true"></span>
+                    {{predictor.amount | customNumber}}
+                </td>
+                <td class="actions" *ngIf="!copyingTable">
+                    <div class="btn-group">
+                        <button class="btn btn-sm btn-outline" (click)="setEditPredictorEntry(predictorEntry)"
+                            title="Edit">
+                            <i class="fa fa-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline" (click)="setDeletePredictorEntry(predictorEntry)"
+                            title="Delete">
+                            <i class="fa fa-trash"></i>
+                        </button>
+                        <button *ngIf="hasWeatherData" class="btn btn-sm btn-outline"
+                            (click)="viewWeatherData(predictorEntry)" title="View Weather Data">
+                            <i class="fa fa-temperature-half"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <div class="d-flex w-100 justify-content-between">
+        <div>
+            <button class="btn action-btn btn-sm" (click)="copyTable()">
+                <span class="fa fa-copy"></span> Copy Table
+            </button>
+        </div>
+        <ngb-pagination [collectionSize]="facilityPredictorEntries.length" [(page)]="currentPageNumber"
+            [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true" aria-label="Pagination">
+        </ngb-pagination>
     </div>
-    <ngb-pagination [collectionSize]="facilityPredictorEntries.length" [(page)]="currentPageNumber"
-        [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true" aria-label="Pagination">
-    </ngb-pagination>
-</div>
-
+</ng-container>
+<ng-container *ngIf="facilityPredictorEntries.length == 0">
+    <div class="alert alert-warning">
+        No predictor data found for this facility. Click "<span class="fa fa-plus"></span> Add Predictor Entry" button
+        to create your first predictor or the "<span class="fa fa-upload"></span> Import Data" button to use the upload
+        data wizard to upload data from a .xlsx file.
+    </div>
+</ng-container>
 
 
 <div [ngClass]="{'windowOverlay': predictorEntryToDelete || showBulkDelete}"></div>
