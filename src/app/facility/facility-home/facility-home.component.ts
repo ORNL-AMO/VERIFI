@@ -79,6 +79,9 @@ export class FacilityHomeComponent implements OnInit {
     this.facilityHomeService.annualEnergyAnalysisSummary.next(undefined);
     this.facilityHomeService.monthlyFacilityWaterAnalysisData.next(undefined);
     this.facilityHomeService.annualWaterAnalysisSummary.next(undefined);
+    this.facilityHomeService.calculatingEnergy.next(true);
+    this.facilityHomeService.calculatingOverview.next(true);
+    this.facilityHomeService.calculatingWater.next(true);
   }
 
 

@@ -14,7 +14,7 @@
                 <hr>
             </div>
             <ng-container
-                *ngIf="calculatingEnergy == false && monthlyEnergyAnalysisData && annualEnergyAnalysisSummary">
+                *ngIf="calculatingEnergy == false && calculatingOverview == false && monthlyEnergyAnalysisData && annualEnergyAnalysisSummary">
                 <div class="col-12">
                     <app-monthly-analysis-summary-graph *ngIf="carouselIndex == 0"
                         [monthlyAnalysisSummaryData]="monthlyEnergyAnalysisData"

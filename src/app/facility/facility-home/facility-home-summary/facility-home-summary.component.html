@@ -91,10 +91,11 @@
                                 <span class="badge rounded-pill bg-danger">
                                     <span class="fa-exclamation white"></span>
                                 </span>
-                                Meter readings needed. Latest entry {{lastBill.readDate | date}}
+                                Meter readings needed. <span *ngIf="lastBill">Latest entry {{lastBill.readDate |
+                                    date}}.</span>
                             </a>
                         </li>
-                        <li class="list-group-item" *ngIf="energyAnalysisNeeded">
+                        <li class="list-group-item" *ngIf="energyAnalysisNeeded && lastBill">
                             <a class="nav-link"
                                 routerLink="/facility/{{facility.id}}/analysis/analysis-dashboard/energy">
                                 <span class="badge rounded-pill bg-danger">
@@ -106,7 +107,7 @@
                                     yearDisplay:facility.fiscalYear}}</ng-container>
                             </a>
                         </li>
-                        <li class="list-group-item" *ngIf="waterAnalysisNeeded">
+                        <li class="list-group-item" *ngIf="waterAnalysisNeeded && lastBill">
                             <a class="nav-link"
                                 routerLink="/facility/{{facility.id}}/analysis/analysis-dashboard/water">
                                 <span class="badge rounded-pill bg-danger">
@@ -120,16 +121,6 @@
                         </li>
                     </ul>
                 </div>
-            </div>
-        </div>
-    </div>
-</div>
-<div class="row" *ngIf="!lastBill">
-    <div class="col-12">
-        <hr>
-        <div class="d-flex justify-content-center">
-            <div class="alert alert-warning">
-                No meter data found for this facility. Please add meter data to this facility to begin.
             </div>
         </div>
     </div>

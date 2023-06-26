@@ -96,6 +96,9 @@ export class AccountHomeComponent implements OnInit {
     this.accountHomeService.monthlyWaterAnalysisData.next(undefined);
     this.accountHomeService.annualWaterAnalysisSummary.next(undefined);
     this.accountHomeService.accountOverviewData.next(undefined);
+    this.accountHomeService.calculatingEnergy.next(true);
+    this.accountHomeService.calculatingOverview.next(true);
+    this.accountHomeService.calculatingWater.next(true);
   }
 
   setAnnualEnergyAnalysisSummary() {
