@@ -1,0 +1,11 @@
+.fa-circle, .fa-circle-dot{
+    font-size: 1.5rem;
+    /* color: gray; */
+    padding-left: .25rem;
+    padding-right: .25rem;
+    padding-top: .15rem;
+}
+
+.fa-circle:hover, .fa-circle-dot:hover{
+    cursor: pointer;
+}

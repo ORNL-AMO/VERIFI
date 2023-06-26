@@ -74,7 +74,6 @@ export class AccountAnalysisDbService {
   }
 
   getNewAccountAnalysisItem(analysisCategory: AnalysisCategory): IdbAccountAnalysisItem {
-    //TODO: Analysis category
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     let facilityAnalysisItems: Array<{
@@ -86,15 +85,18 @@ export class AccountAnalysisDbService {
         facilityId: facility.guid,
         analysisItemId: undefined
       })
-    })
+    });
+    let baselineYear: number = selectedAccount.sustainabilityQuestions.energyReductionBaselineYear;
+    if (analysisCategory == 'water') {
+      baselineYear = selectedAccount.sustainabilityQuestions.waterReductionBaselineYear;
+    }
     return {
       accountId: selectedAccount.guid,
       guid: Math.random().toString(36).substr(2, 9),
       date: new Date(),
       name: 'Account Analysis',
-      // energyIsSource: selectedAccount.energyIsSource,
       reportYear: undefined,
-      baselineYear: selectedAccount.sustainabilityQuestions.energyReductionBaselineYear,
+      baselineYear: baselineYear,
       energyUnit: selectedAccount.energyUnit,
       facilityAnalysisItems: facilityAnalysisItems,
       energyIsSource: selectedAccount.energyIsSource,

@@ -6,28 +6,6 @@
     font-size: 24px
 }
 
-.progress {
-    margin: 7px 0px;
-    /* height: 8px; */
-}
-.progress-bar {
-    background-color: #2c386b;
-}
-.progress-bar-data {
-    position: absolute;
-    right: 50%;
-    top: 35px;
-    font-weight: bold;
-}
-
-.fa-check-circle {
-    color: green;
-}
-
-.fa-circle {
-    color: red;
-}
-
 .icon-row .fa {
     color: rgb(29, 95, 216);
 }
@@ -50,4 +28,8 @@ button:hover span.fa{
 
 .alert-warning{
     width: auto;
+}
+
+.fa-exclamation.white{
+    color: white;
 }
