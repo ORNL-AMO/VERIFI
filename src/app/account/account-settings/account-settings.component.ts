@@ -111,6 +111,7 @@ export class AccountSettingsComponent implements OnInit {
     await this.dbChangesService.selectAccount(this.selectedAccount);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('New Facility Added!', undefined, undefined, false, 'alert-success');
+    this.router.navigateByUrl('/facility/' + newFacility.id + '/settings');
   }
 
 
