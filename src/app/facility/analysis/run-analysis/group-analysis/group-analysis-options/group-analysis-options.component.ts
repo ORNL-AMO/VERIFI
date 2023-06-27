@@ -38,7 +38,6 @@ export class GroupAnalysisOptionsComponent implements OnInit {
     this.yearOptions = this.calanderizationService.getYearOptionsFacility(this.facility.guid, this.analysisItem.analysisCategory);
     this.selectedGroupSub = this.analysisService.selectedGroup.subscribe(group => {
       this.group = group;
-      this.checkUnitsWarning();
     });
   }
 
@@ -57,16 +56,6 @@ export class GroupAnalysisOptionsComponent implements OnInit {
     await this.dbChangesService.setAnalysisItems(selectedAccount, this.facility);
     this.analysisDbService.selectedAnalysisItem.next(analysisItem);
     this.analysisService.selectedGroup.next(this.group);
-  }
-
-  setProductionUnits() {
-    this.group.productionUnits = this.analysisDbService.getUnits(this.group.predictorVariables);
-    this.checkUnitsWarning();
-    this.saveItem();
-  }
-
-  checkUnitsWarning() {
-    this.showUnitsWarning = (this.group.productionUnits == 'units');
   }
 
   setAnalysisType() {

@@ -1,7 +1,7 @@
 import { CalanderizedMeter, MonthlyData } from "src/app/models/calanderization";
 import * as _ from 'lodash';
 import { BetterPlantsWaterSummary, WaterSummaryItem } from "src/app/models/overview-report";
-import { IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility } from "src/app/models/idb";
+import { IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility, PredictorData } from "src/app/models/idb";
 import { WaterIntakeType } from "src/app/models/constantsAndTypes";
 
 export class BetterPlantsWaterSummaryClass {
@@ -32,12 +32,14 @@ export class BetterPlantsWaterSummaryClass {
 
     totalWaterIntake: number;
     totalWaterIntakeIncludeAdditional: number;
+    unitsUsed: Array<string>;
     constructor(calanderizedMeters: Array<CalanderizedMeter>, year: number, facilities: Array<IdbFacility>, selectedAnalysisItem: IdbAccountAnalysisItem, accountAnalysisItems: Array<IdbAnalysisItem>) {
         let splitCalanderizedMeters: {
             analysisCalanderizedMeters: Array<CalanderizedMeter>,
-            additionalCalanderizedMeters: Array<CalanderizedMeter>
+            additionalCalanderizedMeters: Array<CalanderizedMeter>,
+            units: Array<string>
         } = this.splitCalanderizedMeters(calanderizedMeters, selectedAnalysisItem, accountAnalysisItems)
-
+        this.unitsUsed = splitCalanderizedMeters.units;
         this.setWaterUtility(splitCalanderizedMeters.analysisCalanderizedMeters, year);
         this.setAdditionalWaterUtility(splitCalanderizedMeters.additionalCalanderizedMeters, year);
 
@@ -227,21 +229,29 @@ export class BetterPlantsWaterSummaryClass {
             totalWaterIntakeIncludeAdditional: this.totalWaterIntakeIncludeAdditional,
             numberOfManufacturingFacilities: this.numberOfManufacturingFacilities,
             waterUtility: this.waterUtility,
-            additionalWaterUtility: this.additionalWaterUtility
+            additionalWaterUtility: this.additionalWaterUtility,
+            unitsUsed: this.unitsUsed
         }
     }
 
     splitCalanderizedMeters(calanderizedMeters: Array<CalanderizedMeter>, selectedAnalysisItem: IdbAccountAnalysisItem, accountAnalysisItems: Array<IdbAnalysisItem>): {
         analysisCalanderizedMeters: Array<CalanderizedMeter>,
-        additionalCalanderizedMeters: Array<CalanderizedMeter>
+        additionalCalanderizedMeters: Array<CalanderizedMeter>,
+        units: Array<string>
     } {
         let analysisCalanderizedMeters: Array<CalanderizedMeter> = new Array();
         let additionalCalanderizedMeters: Array<CalanderizedMeter> = new Array();
+        let units: Array<string> = new Array();
         selectedAnalysisItem.facilityAnalysisItems.forEach(item => {
             if (item.analysisItemId != undefined && item.analysisItemId != 'skip') {
                 let facilityAnalysisItem: IdbAnalysisItem = accountAnalysisItems.find(accountItem => { return accountItem.guid == item.analysisItemId });
                 facilityAnalysisItem.groups.forEach(group => {
                     if (group.analysisType != 'skip') {
+                        let selectedPredictorData: Array<PredictorData> = group.predictorVariables.filter(variable => {
+                            return variable.productionInAnalysis == true && variable.unit != undefined;
+                        });
+                        let selectedUnits: Array<string> = selectedPredictorData.map(data => { return data.unit });
+                        units = _.uniq(units.concat(selectedUnits));
                         let filteredMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => {
                             return cMeter.meter.groupId == group.idbGroupId;
                         });
@@ -257,7 +267,8 @@ export class BetterPlantsWaterSummaryClass {
 
         return {
             additionalCalanderizedMeters: additionalCalanderizedMeters,
-            analysisCalanderizedMeters: analysisCalanderizedMeters
+            analysisCalanderizedMeters: analysisCalanderizedMeters,
+            units: units
         };
     }
 }

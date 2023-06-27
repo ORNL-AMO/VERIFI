@@ -63,6 +63,7 @@ export interface BetterPlantsWaterSummary {
   waterUtility: WaterSummaryItem;
   additionalWaterUtility: WaterSummaryItem;
   totalWaterIntakeIncludeAdditional: number;
+  unitsUsed: Array<string>;
 }
 
 export interface WaterSummaryItem {

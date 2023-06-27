@@ -178,6 +178,7 @@ export class EditPredictorComponent {
     this.loadingService.setLoadingMessage('Updating Predictors...');
     this.loadingService.setLoadingStatus(true);
     let needsWeatherDataUpdate: boolean = this.setPredictorDataFromForm();
+    this.predictorForm.markAsPristine();
     let facilityPredictors: Array<PredictorData> = this.predictorDbService.facilityPredictors.getValue();
     let facilityPredictorsCopy: Array<PredictorData> = JSON.parse(JSON.stringify(facilityPredictors));
     if (this.addOrEdit == 'add') {

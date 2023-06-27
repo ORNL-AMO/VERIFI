@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { IdbAccount, IdbAccountReport } from 'src/app/models/idb';
 import { BetterPlantsSummary } from 'src/app/models/overview-report';
 
@@ -14,5 +14,4 @@ export class PrimaryWaterConsumptionTableComponent {
   account: IdbAccount;
   @Input()
   betterPlantsSummary: BetterPlantsSummary;
-
 }

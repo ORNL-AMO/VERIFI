@@ -377,6 +377,25 @@
             </tr>
         </tbody>
     </table>
+
+    <table class="table table-sm table-hover mt-3"
+        *ngIf="betterPlantsSummary.reportYearWaterResults.unitsUsed.length != 0">
+        <tbody>
+            <tr>
+                <td class="w-50">
+                    Units for water intensity metric
+                </td>
+                <td>
+                    <span *ngFor="let unit of betterPlantsSummary.reportYearWaterResults.unitsUsed; let index = index;">
+                        {{unit}}
+                        <span *ngIf="index != betterPlantsSummary.reportYearWaterResults.unitsUsed.length-1"
+                            class="pe-1">,</span>
+                    </span>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
     <table class="table table-sm table-hover mt-3">
         <tbody>
             <tr>

@@ -188,7 +188,6 @@ export interface AnalysisGroup {
   idbGroupId: string,
   analysisType: AnalysisType,
   predictorVariables: Array<PredictorData>,
-  productionUnits: string,
   regressionModelYear: number,
   regressionConstant: number,
   groupErrors: GroupErrors,
