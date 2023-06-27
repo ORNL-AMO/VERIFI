@@ -34,9 +34,6 @@ export class BetterPlantsReportClass {
     ) {
         this.setFacilityPerformance(selectedAnalysisItem, facilities, calanderizedMeters, accountPredictorEntries, accountAnalysisItems);
         let includedCalanderizedMeters: Array<CalanderizedMeter> = this.getIncludedMeters(calanderizedMeters, selectedAnalysisItem, accountAnalysisItems);
-
-
-
         this.setReportAndBaselineYearSummaries(selectedAnalysisItem, account, includedCalanderizedMeters, facilities, accountPredictorEntries, accountAnalysisItems, baselineYear, reportYear);
         this.setReportYearEnergySummaryClass(includedCalanderizedMeters, reportYear);
         this.setBaselineYearEnergySummaryClass(includedCalanderizedMeters, baselineYear);
@@ -44,8 +41,8 @@ export class BetterPlantsReportClass {
         this.setTotalEnergySavings();
         this.setPercentTotalEnergyImprovement();
 
-        this.setReportYearWaterSummaryClass(includedCalanderizedMeters, reportYear, facilities);
-        this.setBaselineYearWaterSummaryClass(includedCalanderizedMeters, baselineYear, facilities);
+        this.setReportYearWaterSummaryClass(includedCalanderizedMeters, reportYear, facilities, selectedAnalysisItem, accountAnalysisItems);
+        this.setBaselineYearWaterSummaryClass(includedCalanderizedMeters, baselineYear, facilities, selectedAnalysisItem, accountAnalysisItems);
         this.setAdjustBaselinePrimaryWater();
         this.setTotalWaterSavings();
         this.setPercentTotalWaterImprovement();
@@ -112,12 +109,12 @@ export class BetterPlantsReportClass {
     }
 
     //water
-    setReportYearWaterSummaryClass(calanderizedMeters: Array<CalanderizedMeter>, year: number, facilities: Array<IdbFacility>) {
-        this.reportYearWaterSummaryClass = new BetterPlantsWaterSummaryClass(calanderizedMeters, year, facilities);
+    setReportYearWaterSummaryClass(calanderizedMeters: Array<CalanderizedMeter>, year: number, facilities: Array<IdbFacility>, selectedAnalysisItem: IdbAccountAnalysisItem, accountAnalysisItems: Array<IdbAnalysisItem>) {
+        this.reportYearWaterSummaryClass = new BetterPlantsWaterSummaryClass(calanderizedMeters, year, facilities, selectedAnalysisItem, accountAnalysisItems);
     }
 
-    setBaselineYearWaterSummaryClass(calanderizedMeters: Array<CalanderizedMeter>, year: number, facilities: Array<IdbFacility>) {
-        this.baselineYearWaterSummaryClass = new BetterPlantsWaterSummaryClass(calanderizedMeters, year, facilities);
+    setBaselineYearWaterSummaryClass(calanderizedMeters: Array<CalanderizedMeter>, year: number, facilities: Array<IdbFacility>, selectedAnalysisItem: IdbAccountAnalysisItem, accountAnalysisItems: Array<IdbAnalysisItem>) {
+        this.baselineYearWaterSummaryClass = new BetterPlantsWaterSummaryClass(calanderizedMeters, year, facilities, selectedAnalysisItem, accountAnalysisItems);
     }
 
     setAdjustBaselinePrimaryWater() {

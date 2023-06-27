@@ -48,13 +48,21 @@ export interface BetterPlantsWaterSummary {
   numberOfManufacturingFacilities: number;
   // waterUtilityUse: number;
   surfaceFreshwater: WaterSummaryItem;
+  additionalSurfaceFreshWater: WaterSummaryItem;
   groundFreshwater: WaterSummaryItem;
+  additionalGroundFreshwater: WaterSummaryItem;
   otherFreshwater: WaterSummaryItem;
+  additionalOtherFreshwater: WaterSummaryItem;
   salineWaterIntake: WaterSummaryItem;
+  additionalSalineWaterIntake: WaterSummaryItem;
   rainwater: WaterSummaryItem;
+  additionalRainwater: WaterSummaryItem;
   externallySuppliedRecycled: WaterSummaryItem;
+  additionalExternallySuppliedRecycled: WaterSummaryItem;
   totalWaterIntake: number;
-  waterUtility: WaterSummaryItem
+  waterUtility: WaterSummaryItem;
+  additionalWaterUtility: WaterSummaryItem;
+  totalWaterIntakeIncludeAdditional: number;
 }
 
 export interface WaterSummaryItem {
