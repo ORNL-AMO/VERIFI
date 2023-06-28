@@ -76,7 +76,9 @@ export interface BetterPlantsReportSetup {
   includeFacilityNames: boolean,
   baselineAdjustmentNotes: string,
   modificationNotes: string,
-  methodologyNotes?: string
+  methodologyNotes?: string,
+  baselineYearWaterPilotGoal?: number,
+  reportYearWaterPilotGoal?: number
 }
 
 export interface DataOverviewReportSetup {

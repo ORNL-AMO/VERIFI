@@ -73,7 +73,7 @@
             <tr
                 *ngIf="betterPlantsSummary.baselineYearWaterResults.additionalWaterUtility.use || betterPlantsSummary.reportYearWaterResults.additionalWaterUtility.use">
                 <td>
-                    <span class="fa fa-asterisk"></span> Water Utility (public or private)
+                    <span class="fa fa-plus"></span><span class="fa fa-plus"></span> Water Utility (public or private)
                 </td>
                 <td>
                     {{betterPlantsSummary.baselineYearWaterResults.additionalWaterUtility.use | customNumber}}
@@ -109,7 +109,7 @@
             <tr
                 *ngIf="betterPlantsSummary.baselineYearWaterResults.additionalSurfaceFreshWater.use || betterPlantsSummary.reportYearWaterResults.additionalSurfaceFreshWater.use">
                 <td>
-                    <span class="fa fa-asterisk"></span> Surface freshwater, including self-supplied
+                    <span class="fa fa-plus"></span><span class="fa fa-plus"></span> Surface freshwater, including self-supplied
                 </td>
                 <td>
                     {{betterPlantsSummary.baselineYearWaterResults.additionalSurfaceFreshWater.use | customNumber}}
@@ -145,7 +145,7 @@
             <tr
                 *ngIf="betterPlantsSummary.baselineYearWaterResults.additionalGroundFreshwater.use || betterPlantsSummary.reportYearWaterResults.additionalGroundFreshwater.use">
                 <td>
-                    <span class="fa fa-asterisk"></span> Ground freshwater, including self-supplied
+                    <span class="fa fa-plus"></span><span class="fa fa-plus"></span> Ground freshwater, including self-supplied
                 </td>
                 <td>
                     {{betterPlantsSummary.baselineYearWaterResults.additionalGroundFreshwater.use | customNumber}}
@@ -181,7 +181,7 @@
             <tr
                 *ngIf="betterPlantsSummary.baselineYearWaterResults.additionalOtherFreshwater.use || betterPlantsSummary.reportYearWaterResults.additionalOtherFreshwater.use">
                 <td>
-                    <span class="fa fa-asterisk"></span> Other freshwater
+                    <span class="fa fa-plus"></span><span class="fa fa-plus"></span> Other freshwater
                 </td>
                 <td>
                     {{betterPlantsSummary.baselineYearWaterResults.additionalOtherFreshwater.use | customNumber}}
@@ -217,7 +217,7 @@
             <tr
                 *ngIf="betterPlantsSummary.baselineYearWaterResults.additionalSalineWaterIntake.use || betterPlantsSummary.reportYearWaterResults.additionalSalineWaterIntake.use">
                 <td>
-                    <span class="fa fa-asterisk"></span> Total saline water intake (e.g., ocean water)
+                    <span class="fa fa-plus"></span><span class="fa fa-plus"></span> Total saline water intake (e.g., ocean water)
                 </td>
                 <td>
                     {{betterPlantsSummary.baselineYearWaterResults.additionalSalineWaterIntake.use | customNumber}}
@@ -253,7 +253,7 @@
             <tr
                 *ngIf="betterPlantsSummary.baselineYearWaterResults.additionalRainwater.use || betterPlantsSummary.reportYearWaterResults.additionalRainwater.use">
                 <td>
-                    <span class="fa fa-asterisk"></span> Rainwater
+                    <span class="fa fa-plus"></span><span class="fa fa-plus"></span> Rainwater
                 </td>
                 <td>
                     {{betterPlantsSummary.baselineYearWaterResults.additionalRainwater.use | customNumber}}
@@ -289,7 +289,7 @@
             <tr
                 *ngIf="betterPlantsSummary.baselineYearWaterResults.additionalExternallySuppliedRecycled.use || betterPlantsSummary.reportYearWaterResults.additionalExternallySuppliedRecycled.use">
                 <td>
-                    <span class="fa fa-asterisk"></span> Externally supplied recycled (i.e., grey water)
+                    <span class="fa fa-plus"></span><span class="fa fa-plus"></span> Externally supplied recycled (i.e., grey water)
                 </td>
                 <td>
                     {{betterPlantsSummary.baselineYearWaterResults.additionalExternallySuppliedRecycled.use |
@@ -391,6 +391,24 @@
                         <span *ngIf="index != betterPlantsSummary.reportYearWaterResults.unitsUsed.length-1"
                             class="pe-1">,</span>
                     </span>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <table class="table table-sm table-hover mt-3"
+        *ngIf="report.betterPlantsReportSetup.baselineYearWaterPilotGoal || report.betterPlantsReportSetup.reportYearWaterPilotGoal">
+        <tbody>
+            <tr>
+                <td colspan="2" class="w-50">
+                    For partners using a single water intensity metric across all plants, water intensity or other
+                    metric used for tracking Water Savings Pilot goal (numeric value)
+                </td>
+                <td class="w-25">
+                    {{report.betterPlantsReportSetup.baselineYearWaterPilotGoal | customNumber}}
+                </td>
+                <td class="w-25">
+                    {{report.betterPlantsReportSetup.reportYearWaterPilotGoal | customNumber}}
                 </td>
             </tr>
         </tbody>

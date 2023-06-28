@@ -315,7 +315,7 @@ export interface IdbAccountAnalysisItem {
     selectedYearAnalysis?: boolean,
     analysisCategory: AnalysisCategory,
     waterUnit: string,
-    baselineYear: number
+    baselineYear: number,
     setupErrors: AccountAnalysisSetupErrors
 }
 

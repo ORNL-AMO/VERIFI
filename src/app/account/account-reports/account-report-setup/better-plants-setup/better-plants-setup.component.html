@@ -65,7 +65,7 @@
         <ng-container *ngIf="selectedAnalysisItem">
             <div class="col-12">
                 <div class="form-group row">
-                    <div class="col-12">
+                    <div class="col">
                         <hr>
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" id="includeFacilityNames"
@@ -110,6 +110,27 @@
                             formControlName="modificationNotes" (input)="save()"></textarea>
                     </div>
                 </div>
+                <div class="row" *ngIf="selectedAnalysisItem.analysisCategory == 'water'">
+                    <div class="col-12">
+                        <hr>
+                        <label class="semibold" for="baselineAdjustmentNotes">For partners using a single water
+                            intensity metric across
+                            all plants, water intensity or other metric used for tracking Water Savings Pilot
+                            goal
+                            (numeric value)</label>
+                    </div>
+                    <div class="col-6">
+                        <label>Baseline Year</label>
+                        <input type="number" class="form-control" name="baselineYearWaterPilotGoal"
+                            formControlName="baselineYearWaterPilotGoal" (input)="save()">
+                    </div>
+                    <div class="col-6">
+                        <label>Report Year</label>
+                        <input type="number" class="form-control" name="reportYearWaterPilotGoal"
+                            formControlName="reportYearWaterPilotGoal" (input)="save()">
+                    </div>
+                </div>
+
             </div>
         </ng-container>
     </div>
