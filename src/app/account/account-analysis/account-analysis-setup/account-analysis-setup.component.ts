@@ -50,7 +50,7 @@ export class AccountAnalysisSetupComponent implements OnInit {
     this.analysisItem.setupErrors = this.analysisValidationService.getAccountAnalysisSetupErrors(this.analysisItem, analysisItems);
     await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(this.analysisItem));
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    await this.dbChangesService.setAccountAnalysisItems(account);
+    await this.dbChangesService.setAccountAnalysisItems(account, false);
     this.accountAnalysisDbService.selectedAnalysisItem.next(this.analysisItem);
     this.setBaselineYearWarning();
   }

@@ -69,7 +69,7 @@ export class AnalysisDashboardComponent implements OnInit {
     let newItem: IdbAnalysisItem = this.analysisDbService.getNewAnalysisItem(this.selectedFacility.guid);
     let addedItem: IdbAnalysisItem = await firstValueFrom(this.analysisDbService.addWithObservable(newItem));
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    await this.dbChangesService.setAnalysisItems(selectedAccount, this.selectedFacility);
+    await this.dbChangesService.setAnalysisItems(selectedAccount, false, this.selectedFacility);
     this.analysisDbService.selectedAnalysisItem.next(addedItem);
     this.toastNotificationService.showToast('New Analysis Created', undefined, undefined, false, "alert-success");
     this.router.navigateByUrl('facility/' + this.selectedFacility.id + '/analysis/run-analysis');

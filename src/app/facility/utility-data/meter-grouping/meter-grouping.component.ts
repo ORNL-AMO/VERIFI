@@ -174,7 +174,7 @@ export class MeterGroupingComponent implements OnInit {
     await firstValueFrom(this.utilityMeterDbService.updateWithObservable(draggedMeter));
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.setMeters(selectedAccount, this.selectedFacility);
-    await this.dbChangesService.setAnalysisItems(selectedAccount, this.selectedFacility);
+    await this.dbChangesService.setAnalysisItems(selectedAccount, false, this.selectedFacility);
     this.setCalanderizedMeters();
     this.setGroupTypes();
   }
@@ -193,7 +193,7 @@ export class MeterGroupingComponent implements OnInit {
     await this.dbChangesService.setMeterGroups(selectedAccount, this.selectedFacility);
     //update analysis items
     await this.analysisDbService.deleteGroup(this.groupToDelete.guid);
-    await this.dbChangesService.setAnalysisItems(selectedAccount, this.selectedFacility);
+    await this.dbChangesService.setAnalysisItems(selectedAccount, false, this.selectedFacility);
     this.closeDeleteGroup();
     this.loadingService.setLoadingStatus(false);
     this.toastNoticationService.showToast("Meter Group Deleted!", undefined, undefined, false, "alert-success");

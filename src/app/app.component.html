@@ -3,7 +3,7 @@
     <div #header>
       <app-header class="hide-print" [dataInitialized]="dataInitialized"></app-header>
     </div>
-    <app-startup-error *ngIf="startupError" [startupError]="startupError"></app-startup-error>
+    <app-startup-error *ngIf="startupError" [startupError]="startupError" (emitReset)="initializeData()"></app-startup-error>
     <div class="d-flex overflow-hidden flex-grow-1">
       <app-sidebar class="hide-print" *ngIf="dataInitialized"></app-sidebar>
       <div class="content w-100" role="main" *ngIf="dataInitialized">

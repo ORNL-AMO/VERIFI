@@ -57,30 +57,34 @@ export class UpdateDbEntryService {
 
     if (!analysisItem.baselineYear) {
       let facility: IdbFacility = this.facilityDbService.getFacilityById(analysisItem.facilityId);
-      analysisItem.baselineYear = facility.sustainabilityQuestions.energyReductionBaselineYear;
-      isChanged = true;
+      if (facility && facility.sustainabilityQuestions) {
+        analysisItem.baselineYear = facility.sustainabilityQuestions.energyReductionBaselineYear;
+        isChanged = true;
+      }
     }
 
-    analysisItem.groups.forEach(group => {
-      if (!group.groupErrors) {
-        group.groupErrors = this.analysisValidationService.getGroupErrors(group);
-        isChanged = true;
-      } else {
-        let groupErrors: GroupErrors = this.analysisValidationService.getGroupErrors(group);
-        Object.keys(groupErrors).forEach(key => {
-          if (groupErrors[key] != group.groupErrors[key]) {
-            group.groupErrors[key] = groupErrors[key];
-            isChanged = true;
-          }
-        });
-      }
-    });
+    if (analysisItem.groups) {
+      analysisItem.groups.forEach(group => {
+        if (!group.groupErrors) {
+          group.groupErrors = this.analysisValidationService.getGroupErrors(group);
+          isChanged = true;
+        } else {
+          let groupErrors: GroupErrors = this.analysisValidationService.getGroupErrors(group);
+          Object.keys(groupErrors).forEach(key => {
+            if (groupErrors[key] != group.groupErrors[key]) {
+              group.groupErrors[key] = groupErrors[key];
+              isChanged = true;
+            }
+          });
+        }
+      });
+    }
     return { analysisItem: analysisItem, isChanged: isChanged };
   }
 
   updateAccountAnalysis(analysisItem: IdbAccountAnalysisItem, account: IdbAccount, facilityAnalysisItems: Array<IdbAnalysisItem>): { analysisItem: IdbAccountAnalysisItem, isChanged: boolean } {
     let isChanged: boolean = false;
-    if (!analysisItem.baselineYear) {
+    if (!analysisItem.baselineYear && account) {
       analysisItem.baselineYear = account.sustainabilityQuestions.energyReductionBaselineYear;
       isChanged = true;
     }

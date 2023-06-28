@@ -111,18 +111,21 @@ export class ConvertUnitsService {
         //console.log('You need to set a value (make sure its not undefined) before you call .from');
       }
     }
-    if (this.destination)
-      throw new Error('.from must be called before .to');
+    // if (this.destination)
+    //   throw new Error('.from must be called before .to');
     this.origin = this.getUnit(from);
     if (!this.origin) {
       this.throwUnsupportedUnitError(from);
+      // return this;
     }
     return this;
   }
 
   to(to: any) {
-    if (!this.origin)
-      throw new Error('.to must be called after .from');
+    if (!this.origin) {
+      // throw new Error('.to must be called after .from');
+      return this.val
+    }
 
     this.destination = this.getUnit(to);
 
@@ -130,7 +133,8 @@ export class ConvertUnitsService {
       , transform;
 
     if (!this.destination) {
-      this.throwUnsupportedUnitError(to);
+      // this.throwUnsupportedUnitError(to);
+      return this.val;
     }
 
     // Don't change the value if origin and destination are the same

@@ -52,6 +52,8 @@ export class UtilityMeterDataComponent implements OnInit {
   }
 
   getColor(): string {
-    return UtilityColors[this.selectedMeter.source].color
+    if (UtilityColors[this.selectedMeter.source]) {
+      return UtilityColors[this.selectedMeter.source].color
+    }
   }
 }

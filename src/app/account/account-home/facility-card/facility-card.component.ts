@@ -74,11 +74,11 @@ export class FacilityCardComponent implements OnInit {
         } = summaries.find(summary => { return summary.facilityId == this.facility.guid });
         if (facilitySummary) {
           // this.annualAnalysisSummary = facilitySummary.annualAnalysisSummary;
-          if(!facilitySummary.error){
+          if (!facilitySummary.error) {
             this.monthlyFacilityAnalysisData = facilitySummary.monthlyAnalysisSummaryData;
             this.setProgressPercentages();
             this.calculating = false;
-          }else{
+          } else {
             this.calculating = 'error';
           }
         }
@@ -102,7 +102,9 @@ export class FacilityCardComponent implements OnInit {
   }
 
   getColor(source: MeterSource): string {
-    return UtilityColors[source].color
+    if (UtilityColors[source]) {
+      return UtilityColors[source].color
+    }
   }
 
   setNAICS() {

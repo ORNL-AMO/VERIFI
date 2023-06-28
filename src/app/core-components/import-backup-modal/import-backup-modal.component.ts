@@ -133,7 +133,7 @@ export class ImportBackupModalComponent implements OnInit {
   async importNewAccount(backupFile: BackupFile) {
     let newAccount: IdbAccount = await this.backupDataService.importAccountBackupFile(backupFile);
     await this.dbChangesService.updateAccount(newAccount);
-    await this.dbChangesService.selectAccount(newAccount);
+    await this.dbChangesService.selectAccount(newAccount, false);
   }
 
   async importExistingAccount(backupFile: BackupFile) {
@@ -145,7 +145,7 @@ export class ImportBackupModalComponent implements OnInit {
   async importNewFacility(backupFile: BackupFile) {
     let newFacility: IdbFacility = await this.backupDataService.importFacilityBackupFile(backupFile, this.selectedAccount.guid);
     let currentAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    await this.dbChangesService.selectAccount(currentAccount);
+    await this.dbChangesService.selectAccount(currentAccount, false);
     this.dbChangesService.selectFacility(newFacility);
 
   }

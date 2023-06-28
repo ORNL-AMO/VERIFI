@@ -39,10 +39,10 @@ export class SetupWelcomeComponent implements OnInit {
           let tmpBackupFile: BackupFile = JSON.parse(test);
           let newAccount: IdbAccount = await this.backupDataService.importAccountBackupFile(tmpBackupFile);
           await this.dbChangesService.updateAccount(newAccount);
-          await this.dbChangesService.selectAccount(newAccount);
+          await this.dbChangesService.selectAccount(newAccount,false);
           let allAccounts: Array<IdbAccount> = await firstValueFrom(this.accountDbService.getAll());
           this.accountDbService.allAccounts.next(allAccounts);
-          await this.dbChangesService.selectAccount(newAccount);
+          await this.dbChangesService.selectAccount(newAccount, false);
           this.loadingService.setLoadingStatus(false);
           this.router.navigateByUrl('/account');
         } catch (err) {

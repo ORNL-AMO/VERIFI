@@ -53,7 +53,7 @@ export class GroupAnalysisOptionsComponent implements OnInit {
     analysisItem.setupErrors = this.analysisValidationService.getAnalysisItemErrors(analysisItem);
     await firstValueFrom(this.analysisDbService.updateWithObservable(analysisItem));
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    await this.dbChangesService.setAnalysisItems(selectedAccount, this.facility);
+    await this.dbChangesService.setAnalysisItems(selectedAccount, false, this.facility);
     this.analysisDbService.selectedAnalysisItem.next(analysisItem);
     this.analysisService.selectedGroup.next(this.group);
   }

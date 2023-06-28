@@ -140,7 +140,7 @@ export class ConfirmAndSubmitComponent implements OnInit {
     }
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     this.loadingService.setLoadingMessage('Finishing Up...');
-    await this.dbChangesService.selectAccount(selectedAccount)
+    await this.dbChangesService.selectAccount(selectedAccount, false)
     this.fileReference.dataSubmitted = true;
     let fileReferenceIndex: number = this.uploadDataService.fileReferences.findIndex(ref => { return ref.id == this.fileReference.id });
     this.uploadDataService.fileReferences[fileReferenceIndex] = this.fileReference;
