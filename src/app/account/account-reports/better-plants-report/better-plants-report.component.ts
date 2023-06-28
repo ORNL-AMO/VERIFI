@@ -30,6 +30,7 @@ export class BetterPlantsReportComponent implements OnInit {
   betterPlantsSummary: BetterPlantsSummary;
   calculating: boolean | 'error';
   worker: Worker;
+  selectedAnalysisItem: IdbAccountAnalysisItem;
   constructor(private accountReportDbService: AccountReportDbService,
     private accountReportsService: AccountReportsService,
     private router: Router, private accountDbService: AccountdbService,
@@ -50,6 +51,7 @@ export class BetterPlantsReportComponent implements OnInit {
       this.router.navigateByUrl('/account/reports/dashboard');
     }
     this.account = this.accountDbService.selectedAccount.getValue();
+    this.setAnalysisItem();
     this.setBetterPlantsSummary();
   }
 
@@ -60,17 +62,22 @@ export class BetterPlantsReportComponent implements OnInit {
     }
   }
 
+  setAnalysisItem(){
+    let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
+    this.selectedAnalysisItem = accountAnalysisItems.find(item => { return item.guid == this.selectedReport.betterPlantsReportSetup.analysisItemId });
+    if(this.selectedAnalysisItem.analysisCategory == 'energy'){
+      this.selectedAnalysisItem.energyUnit = 'MMBtu';
+    }else if(this.selectedAnalysisItem.analysisCategory == 'water'){
+      this.selectedAnalysisItem.waterUnit = 'kgal';
+    }
+  }
 
   setBetterPlantsSummary() {
     let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
-
     let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.accountPredictorEntries.getValue();
     let accountFacilityAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
-    let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
-    let selectedAnalysisItem: IdbAccountAnalysisItem = accountAnalysisItems.find(item => { return item.guid == this.selectedReport.betterPlantsReportSetup.analysisItemId });
-    selectedAnalysisItem.energyUnit = 'MMBtu';
     let includedFacilityIds: Array<string> = new Array();
-    selectedAnalysisItem.facilityAnalysisItems.forEach(item => {
+    this.selectedAnalysisItem.facilityAnalysisItems.forEach(item => {
       if (item.analysisItemId && item.analysisItemId != 'skip') {
         includedFacilityIds.push(item.facilityId);
       }
@@ -79,7 +86,7 @@ export class BetterPlantsReportComponent implements OnInit {
     let includedFacilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return includedFacilityIds.includes(meter.facilityId) });
     let calanderizedMeters: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMeterData(includedFacilityMeters, true, true, { energyIsSource: true });
     calanderizedMeters.forEach(calanderizedMeter => {
-      calanderizedMeter.monthlyData = this.convertMeterDataService.convertMeterDataToAnalysis(selectedAnalysisItem, calanderizedMeter.monthlyData, this.account, calanderizedMeter.meter);
+      calanderizedMeter.monthlyData = this.convertMeterDataService.convertMeterDataToAnalysis(this.selectedAnalysisItem, calanderizedMeter.monthlyData, this.account, calanderizedMeter.meter);
     });
     if (typeof Worker !== 'undefined') {
       this.worker = new Worker(new URL('src/app/web-workers/better-plants-report.worker', import.meta.url));
@@ -96,7 +103,7 @@ export class BetterPlantsReportComponent implements OnInit {
       this.worker.postMessage({
         baselineYear: this.selectedReport.baselineYear,
         reportYear: this.selectedReport.reportYear,
-        selectedAnalysisItem: selectedAnalysisItem,
+        selectedAnalysisItem: this.selectedAnalysisItem,
         calanderizedMeters: calanderizedMeters,
         accountPredictorEntries: accountPredictorEntries,
         account: this.account,
@@ -108,7 +115,7 @@ export class BetterPlantsReportComponent implements OnInit {
       let betterPlantsReportClass: BetterPlantsReportClass = new BetterPlantsReportClass(
         this.selectedReport.baselineYear,
         this.selectedReport.reportYear,
-        selectedAnalysisItem,
+        this.selectedAnalysisItem,
         calanderizedMeters,
         accountPredictorEntries,
         this.account,

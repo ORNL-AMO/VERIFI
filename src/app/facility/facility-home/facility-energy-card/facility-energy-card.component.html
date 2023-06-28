@@ -1,0 +1,67 @@
+<div class="card">
+    <div class="card-body">
+        <div class="row">
+            <div class="col-12">
+                <app-facility-energy-reduction-goal></app-facility-energy-reduction-goal>
+                <app-calculating-spinner *ngIf="calculatingEnergy != false" [message]="'Calculating Energy...'"
+                    [error]="calculatingEnergy == 'error'">
+                </app-calculating-spinner>
+                <div class="alert alert-danger"
+                    *ngIf="latestEnergyAnalysisItem.setupErrors.hasError || latestEnergyAnalysisItem.setupErrors.groupsHaveErrors">
+                    Errors found in selected analysis.
+                </div>
+            </div>
+            <div class="col-12">
+                <hr>
+            </div>
+            <ng-container
+                *ngIf="calculatingEnergy == false && calculatingOverview == false && monthlyEnergyAnalysisData && annualEnergyAnalysisSummary && facilityOverviewData">
+                <div class="col-12">
+                    <app-monthly-analysis-summary-graph *ngIf="carouselIndex == 0"
+                        [monthlyAnalysisSummaryData]="monthlyEnergyAnalysisData"
+                        [analysisItem]="latestEnergyAnalysisItem" [facilityOrAccount]="facility" [inHomeScreen]="true">
+                    </app-monthly-analysis-summary-graph>
+                    <app-monthly-analysis-summary-savings-graph *ngIf="carouselIndex == 1"
+                        [analysisItem]="latestEnergyAnalysisItem"
+                        [monthlyAnalysisSummaryData]="monthlyEnergyAnalysisData" [facilityOrAccount]="facility"
+                        [inHomeScreen]="true">
+                    </app-monthly-analysis-summary-savings-graph>
+                    <app-annual-analysis-summary-graph *ngIf="carouselIndex == 2"
+                        [annualAnalysisSummary]="annualEnergyAnalysisSummary" [analysisItem]="latestEnergyAnalysisItem"
+                        [inHomeScreen]="true">
+                    </app-annual-analysis-summary-graph>
+                    <app-meter-usage-donut *ngIf="carouselIndex == 3" [dataType]="'energyUse'"
+                        [facilityId]="facility.guid" [facilityOverviewMeters]="facilityOverviewData.energyMeters"
+                        [inHomeScreen]="true"></app-meter-usage-donut>
+                </div>
+                <div class="col-12">
+                    <hr>
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <button class="btn nav-btn" type="button" (click)="goBack()"
+                                [disabled]="carouselIndex == 0">
+                                <span class="fa fa-chevron-left"></span>
+                            </button>
+                        </div>
+                        <div>
+                            <span (click)="goToIndex(0)" class="fa"
+                                [ngClass]="{'fa-circle-dot': carouselIndex == 0, 'fa-circle': carouselIndex != 0}"></span>
+                            <span (click)="goToIndex(1)" class="fa"
+                                [ngClass]="{'fa-circle-dot': carouselIndex == 1, 'fa-circle': carouselIndex != 1}"></span>
+                            <span (click)="goToIndex(2)" class="fa"
+                                [ngClass]="{'fa-circle-dot': carouselIndex == 2, 'fa-circle': carouselIndex != 2}"></span>
+                            <span (click)="goToIndex(3)" class="fa"
+                                [ngClass]="{'fa-circle-dot': carouselIndex == 3, 'fa-circle': carouselIndex != 3}"></span>
+                        </div>
+                        <div>
+                            <button class="btn nav-btn" type="button" (click)="goNext()"
+                                [disabled]="carouselIndex == 3">
+                                <span class="fa fa-chevron-right"></span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </ng-container>
+        </div>
+    </div>
+</div>

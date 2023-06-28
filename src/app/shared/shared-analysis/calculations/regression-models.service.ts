@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import * as jStat from 'jstat';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
-import { JStatRegressionModel, SEPValidation } from 'src/app/models/analysis';
+import { AnalysisGroup, JStatRegressionModel, SEPValidation } from 'src/app/models/analysis';
 import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
-import { AnalysisGroup, IdbAnalysisItem, IdbFacility, IdbPredictorEntry, PredictorData } from 'src/app/models/idb';
+import { IdbAnalysisItem, IdbFacility, IdbPredictorEntry, PredictorData } from 'src/app/models/idb';
 import * as _ from 'lodash';
 import { getFiscalYear } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
 import { getMonthlyStartAndEndDate } from 'src/app/calculations/shared-calculations/calculationsHelpers';
@@ -141,8 +141,8 @@ export class RegressionModelsService {
         let dataDate: Date = new Date(data.date);
         return dataDate.getUTCMonth() == startDate.getUTCMonth() && dataDate.getUTCFullYear() == startDate.getUTCFullYear();
       });
-      let energyUse: number = _.sumBy(monthData, 'energyUse');
-      endog.push(energyUse);
+      let energyConsumption: number = _.sumBy(monthData, 'energyConsumption');
+      endog.push(energyConsumption);
       let monthPredictorData: Array<IdbPredictorEntry> = facilityPredictorData.filter(pData => {
         let dataDate: Date = new Date(pData.date);
         return dataDate.getUTCMonth() == startDate.getUTCMonth() && dataDate.getUTCFullYear() == startDate.getUTCFullYear();

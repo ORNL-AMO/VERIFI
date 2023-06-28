@@ -171,11 +171,11 @@ export class CreateReportModalComponent {
   setShowWater() {
     if (this.router.url.includes('account')) {
       let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
-      let waterMeter: IdbUtilityMeter = accountMeters.find(meter => { return meter.source == 'Water' || meter.source == 'Waste Water' });
+      let waterMeter: IdbUtilityMeter = accountMeters.find(meter => { return meter.source == 'Water Intake' || meter.source == 'Water Discharge' });
       this.showWater = waterMeter != undefined;
     } else if (this.router.url.includes('facility')) {
       let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
-      let waterMeter: IdbUtilityMeter = facilityMeters.find(meter => { return meter.source == 'Water' || meter.source == 'Waste Water' });
+      let waterMeter: IdbUtilityMeter = facilityMeters.find(meter => { return meter.source == 'Water Intake' || meter.source == 'Water Discharge' });
       this.showWater = waterMeter != undefined;
     }
   }

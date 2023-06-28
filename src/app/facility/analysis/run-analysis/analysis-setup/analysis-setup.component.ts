@@ -9,8 +9,8 @@ import { AnalysisService } from '../../analysis.service';
 import { Router } from '@angular/router';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { firstValueFrom } from 'rxjs';
+import { VolumeLiquidOptions } from 'src/app/shared/unitOptions';
 import { AnalysisValidationService } from 'src/app/shared/helper-services/analysis-validation.service';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 @Component({
@@ -21,15 +21,14 @@ import { CalanderizationService } from 'src/app/shared/helper-services/calanderi
 export class AnalysisSetupComponent implements OnInit {
 
   energyUnitOptions: Array<UnitOption> = EnergyUnitOptions;
+  waterUnitOptions: Array<UnitOption> = VolumeLiquidOptions;
   months: Array<Month> = Months;
 
   facility: IdbFacility;
-  energyUnit: string;
   analysisItem: IdbAnalysisItem;
   yearOptions: Array<number>;
   baselineYearWarning: string;
   constructor(private facilityDbService: FacilitydbService, private analysisDbService: AnalysisDbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
     private analysisService: AnalysisService, private router: Router,
     private analysisValidationService: AnalysisValidationService,
     private dbChangesService: DbChangesService,
@@ -39,8 +38,7 @@ export class AnalysisSetupComponent implements OnInit {
   ngOnInit(): void {
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
     this.facility = this.facilityDbService.selectedFacility.getValue();
-    this.energyUnit = this.facility.energyUnit;
-    this.yearOptions = this.calanderizationService.getYearOptionsFacility(this.facility.guid);
+    this.yearOptions = this.calanderizationService.getYearOptionsFacility(this.facility.guid, this.analysisItem.analysisCategory);
     this.setBaselineYearWarning();
   }
 
@@ -69,8 +67,18 @@ export class AnalysisSetupComponent implements OnInit {
   }
 
   setBaselineYearWarning() {
-    if (this.analysisItem.baselineYear && this.facility.sustainabilityQuestions.energyReductionBaselineYear != this.analysisItem.baselineYear) {
-      this.baselineYearWarning = "This baseline year does not match your facility baseline year. This analysis cannot be included in reports or figures relating to the facility energy goal."
+    if (this.analysisItem.analysisCategory == 'water') {
+      if (this.analysisItem.baselineYear && this.facility.sustainabilityQuestions.waterReductionGoal && this.facility.sustainabilityQuestions.waterReductionBaselineYear != this.analysisItem.baselineYear) {
+        this.baselineYearWarning = "This baseline year does not match your facility baseline year. This analysis cannot be included in reports or figures relating to the facility water goal."
+      } else {
+        this.baselineYearWarning = undefined;
+      }
+    } else if (this.analysisItem.analysisCategory == 'energy') {
+      if (this.analysisItem.baselineYear && this.facility.sustainabilityQuestions.energyReductionGoal && this.facility.sustainabilityQuestions.energyReductionBaselineYear != this.analysisItem.baselineYear) {
+        this.baselineYearWarning = "This baseline year does not match your facility baseline year. This analysis cannot be included in reports or figures relating to the facility energy goal."
+      } else {
+        this.baselineYearWarning = undefined;
+      }
     } else {
       this.baselineYearWarning = undefined;
     }

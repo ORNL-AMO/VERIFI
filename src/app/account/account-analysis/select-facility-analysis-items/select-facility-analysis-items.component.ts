@@ -71,12 +71,22 @@ export class SelectFacilityAnalysisItemsComponent implements OnInit {
 
   setFacilityAnlaysisItems() {
     let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
-    this.facilityAnalysisItems = accountAnalysisItems.filter(item => {
-      return (item.facilityId == this.selectedFacility.guid
-        && item.reportYear == this.selectedAnalysisItem.reportYear
-        && item.energyIsSource == this.selectedAnalysisItem.energyIsSource
-        && (item.baselineYear == this.selectedAnalysisItem.baselineYear || this.selectedFacility.isNewFacility));
-    });
+    if (this.selectedAnalysisItem.analysisCategory == 'energy') {
+      this.facilityAnalysisItems = accountAnalysisItems.filter(item => {
+        return (item.analysisCategory == this.selectedAnalysisItem.analysisCategory
+          && item.facilityId == this.selectedFacility.guid
+          && item.reportYear == this.selectedAnalysisItem.reportYear
+          && item.energyIsSource == this.selectedAnalysisItem.energyIsSource
+          && (item.baselineYear == this.selectedAnalysisItem.baselineYear || this.selectedFacility.isNewFacility));
+      });
+    } else if (this.selectedAnalysisItem.analysisCategory == 'water') {
+      this.facilityAnalysisItems = accountAnalysisItems.filter(item => {
+        return (item.analysisCategory == this.selectedAnalysisItem.analysisCategory
+          && item.facilityId == this.selectedFacility.guid
+          && item.reportYear == this.selectedAnalysisItem.reportYear
+          && (item.baselineYear == this.selectedAnalysisItem.baselineYear || this.selectedFacility.isNewFacility));
+      });
+    }
   }
 
   getClassAndValid(facility: IdbFacility): { cssClass: 'fa fa-square-minus' | 'fa fa-square-check' | 'fa fa-square', isInvalid: boolean } {

@@ -37,7 +37,6 @@ export class ConvertMeterDataService {
       }
     } else {
       let accountUnit: string = this.energyUnitsHelperService.getAccountUnitFromMeter(meter);
-      console.log(accountUnit);
       for (let index: number = 0; index < meterData.length; index++) {
         meterData[index].totalVolume = this.convertUnitsService.value(meterData[index].totalVolume).from(meter.startingUnit).to(accountUnit);
       }
@@ -57,11 +56,19 @@ export class ConvertMeterDataService {
 
 
   convertMeterDataToAnalysis(analysisItem: IdbAnalysisItem | IdbAccountAnalysisItem, meterData: Array<MonthlyData>, accountOrFacility: IdbFacility | IdbAccount, meter: IdbUtilityMeter): Array<MonthlyData> {
-    let isEnergyMeter: boolean = getIsEnergyMeter(meter.source);
-    if (isEnergyMeter) {
-      if (accountOrFacility.energyUnit != analysisItem.energyUnit) {
+    if (analysisItem.analysisCategory == 'energy') {
+      let isEnergyMeter: boolean = getIsEnergyMeter(meter.source);
+      if (isEnergyMeter) {
+        if (accountOrFacility.energyUnit != analysisItem.energyUnit) {
+          for (let index: number = 0; index < meterData.length; index++) {
+            meterData[index].energyUse = this.convertUnitsService.value(meterData[index].energyUse).from(accountOrFacility.energyUnit).to(analysisItem.energyUnit);
+          }
+        }
+      }
+    } else if (analysisItem.analysisCategory == 'water') {
+      if (accountOrFacility.volumeLiquidUnit != analysisItem.waterUnit) {
         for (let index: number = 0; index < meterData.length; index++) {
-          meterData[index].energyUse = this.convertUnitsService.value(meterData[index].energyUse).from(accountOrFacility.energyUnit).to(analysisItem.energyUnit);
+          meterData[index].energyConsumption = this.convertUnitsService.value(meterData[index].energyConsumption).from(accountOrFacility.volumeLiquidUnit).to(analysisItem.waterUnit);
         }
       }
     }

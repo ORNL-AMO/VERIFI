@@ -11,6 +11,8 @@ export class SharedDataService {
   sidebarOpen: BehaviorSubject<boolean>;
   itemsPerPage: BehaviorSubject<number>;
   openCreateReportModal: BehaviorSubject<boolean>;
+  energyHomeCarouselIndex: BehaviorSubject<number>;
+  waterHomeCarouselIndex: BehaviorSubject<number>;
   constructor(private localStorageService: LocalStorageService) {
     this.modalOpen = new BehaviorSubject<boolean>(false);
     this.sidebarOpen = new BehaviorSubject<boolean>(true);
@@ -28,10 +30,48 @@ export class SharedDataService {
     });
 
     this.openCreateReportModal = new BehaviorSubject<boolean>(false);
+
+    let initialEnergyHomeCarouselIndex: number = this.getInitialEnergyHomeCarouselIndex();
+    if (initialEnergyHomeCarouselIndex != undefined) {
+      this.energyHomeCarouselIndex = new BehaviorSubject<number>(initialEnergyHomeCarouselIndex);
+    } else {
+      this.energyHomeCarouselIndex = new BehaviorSubject<number>(0)
+    }
+
+    this.energyHomeCarouselIndex.subscribe(energyHomeCarouselIndex => {
+      if (energyHomeCarouselIndex) {
+        this.localStorageService.store("energyHomeCarouselIndex", energyHomeCarouselIndex);
+      }
+    });
+
+
+    let initialWaterHomeCarouselIndex: number = this.getInitialWaterHomeCarouselIndex();
+    if (initialWaterHomeCarouselIndex != undefined) {
+      this.waterHomeCarouselIndex = new BehaviorSubject<number>(initialWaterHomeCarouselIndex);
+    } else {
+      this.waterHomeCarouselIndex = new BehaviorSubject<number>(0)
+    }
+
+    this.waterHomeCarouselIndex.subscribe(waterHomeCarouselIndex => {
+      if (waterHomeCarouselIndex) {
+        this.localStorageService.store("waterHomeCarouselIndex", waterHomeCarouselIndex);
+      }
+    });
+
   }
 
   getInitialItemsPerPage(): number {
     let itemsPerPage: number = this.localStorageService.retrieve("itemsPerPage");
     return itemsPerPage;
+  }
+
+  getInitialEnergyHomeCarouselIndex(): number {
+    let energyHomeCarouselIndex: number = this.localStorageService.retrieve("energyHomeCarouselIndex");
+    return energyHomeCarouselIndex;
+  }
+
+  getInitialWaterHomeCarouselIndex(): number {
+    let waterHomeCarouselIndex: number = this.localStorageService.retrieve("waterHomeCarouselIndex");
+    return waterHomeCarouselIndex;
   }
 }

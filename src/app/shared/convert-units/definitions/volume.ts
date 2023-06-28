@@ -260,6 +260,13 @@ export const volume = {
                 display: '(imp gal)'
             }
             , to_anchor: 153.722
+        } , Mgal: {
+            name: {
+                singular: 'Million U.S. Gallons',
+                plural: 'Million U.S. Gallons',
+                display: '(Mgal)'
+            }
+            , to_anchor: 128 * 1000000
         }
     },
     _anchors: {

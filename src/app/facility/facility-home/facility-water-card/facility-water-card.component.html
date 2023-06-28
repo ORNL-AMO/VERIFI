@@ -1,0 +1,65 @@
+<div class="card">
+    <div class="card-body">
+        <div class="row">
+            <div class="col-12">
+                <app-facility-water-reduction-goal></app-facility-water-reduction-goal>
+                <app-calculating-spinner *ngIf="calculatingWater != false" [message]="'Calculating Water...'"
+                    [error]="calculatingWater == 'error'">
+                </app-calculating-spinner>
+                <div class="alert alert-danger"
+                    *ngIf="latestWaterAnalysisItem.setupErrors.hasError || latestWaterAnalysisItem.setupErrors.groupsHaveErrors">
+                    Errors found in selected analysis.
+                </div>
+            </div>
+            <div class="col-12">
+                <hr>
+            </div>
+            <ng-container *ngIf="calculatingWater == false && monthlyWaterAnalysisData && annualWaterAnalysisSummary">
+                <div class="col-12">
+                    <app-monthly-analysis-summary-graph *ngIf="carouselIndex == 0"
+                        [monthlyAnalysisSummaryData]="monthlyWaterAnalysisData" [analysisItem]="latestWaterAnalysisItem"
+                        [facilityOrAccount]="facility" [inHomeScreen]="true">
+                    </app-monthly-analysis-summary-graph>
+                    <app-monthly-analysis-summary-savings-graph *ngIf="carouselIndex == 1"
+                        [analysisItem]="latestWaterAnalysisItem" [monthlyAnalysisSummaryData]="monthlyWaterAnalysisData"
+                        [facilityOrAccount]="facility" [inHomeScreen]="true">
+                    </app-monthly-analysis-summary-savings-graph>
+                    <app-annual-analysis-summary-graph *ngIf="carouselIndex == 2"
+                        [annualAnalysisSummary]="annualWaterAnalysisSummary" [analysisItem]="latestWaterAnalysisItem"
+                        [inHomeScreen]="true">
+                    </app-annual-analysis-summary-graph>
+                    <app-meter-usage-donut *ngIf="carouselIndex == 3" [dataType]="'water'" [facilityId]="facility.guid"
+                        [facilityOverviewMeters]="facilityOverviewData.waterMeters"
+                        [inHomeScreen]="true"></app-meter-usage-donut>
+                </div>
+                <div class="col-12">
+                    <hr>
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <button class="btn nav-btn" type="button" (click)="goBack()"
+                                [disabled]="carouselIndex == 0">
+                                <span class="fa fa-chevron-left"></span>
+                            </button>
+                        </div>
+                        <div>
+                            <span (click)="goToIndex(0)" class="fa"
+                                [ngClass]="{'fa-circle-dot': carouselIndex == 0, 'fa-circle': carouselIndex != 0}"></span>
+                            <span (click)="goToIndex(1)" class="fa"
+                                [ngClass]="{'fa-circle-dot': carouselIndex == 1, 'fa-circle': carouselIndex != 1}"></span>
+                            <span (click)="goToIndex(2)" class="fa"
+                                [ngClass]="{'fa-circle-dot': carouselIndex == 2, 'fa-circle': carouselIndex != 2}"></span>
+                            <span (click)="goToIndex(3)" class="fa"
+                                [ngClass]="{'fa-circle-dot': carouselIndex == 3, 'fa-circle': carouselIndex != 3}"></span>
+                        </div>
+                        <div>
+                            <button class="btn nav-btn" type="button" (click)="goNext()"
+                                [disabled]="carouselIndex == 3">
+                                <span class="fa fa-chevron-right"></span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </ng-container>
+        </div>
+    </div>
+</div>

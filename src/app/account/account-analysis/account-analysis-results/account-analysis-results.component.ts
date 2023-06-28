@@ -71,6 +71,7 @@ export class AccountAnalysisResultsComponent implements OnInit {
       let monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData> = annualAnalysisSummaryClass.monthlyAnalysisSummaryData;
       this.accountAnalysisService.annualAnalysisSummary.next(annualAnalysisSummaries);
       this.accountAnalysisService.monthlyAccountAnalysisData.next(monthlyAnalysisSummaryData);
+      this.accountAnalysisService.calculating.next(false);
     }
   }
 

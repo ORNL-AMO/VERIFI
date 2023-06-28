@@ -15,6 +15,8 @@ export class MonthlyAnalysisSummarySavingsGraphComponent {
   analysisItem: IdbAnalysisItem | IdbAccountAnalysisItem;
   @Input()
   facilityOrAccount: IdbFacility | IdbAccount;
+  @Input()
+  inHomeScreen: boolean;
 
   @ViewChild('monthlyAnalysisSavingsGraph', { static: false }) monthlyAnalysisSavingsGraph: ElementRef;
 
@@ -111,8 +113,12 @@ export class MonthlyAnalysisSummarySavingsGraphComponent {
 
       var data = [trace2, trace1];
 
-
+      let height: number;
+      if (this.inHomeScreen) {
+        height = 350;
+      }
       var layout = {
+        height: height,
         barmode: 'stack',
         legend: {
           orientation: "h"
@@ -134,9 +140,9 @@ export class MonthlyAnalysisSummarySavingsGraphComponent {
         },
         margin: { r: 0, t: 50 }
       };
-      var config = { 
+      var config = {
         displaylogo: false,
-        responsive: true 
+        responsive: true
       };
       this.plotlyService.newPlot(this.monthlyAnalysisSavingsGraph.nativeElement, data, layout, config);
     }

@@ -96,7 +96,7 @@ export class SelectItemTableComponent implements OnInit {
     this.loadingService.setLoadingStatus(true);
     this.showCreateItem = false;
     this.dbChangesService.selectFacility(this.facility);
-    let newIdbItem: IdbAnalysisItem = this.analysisDbService.getNewAnalysisItem(this.facility.guid);
+    let newIdbItem: IdbAnalysisItem = this.analysisDbService.getNewAnalysisItem(this.selectedAnalysisItem.analysisCategory, this.facility.guid);
     newIdbItem.energyIsSource = this.selectedAnalysisItem.energyIsSource;
     newIdbItem.reportYear = this.selectedAnalysisItem.reportYear;
     newIdbItem = this.analysisService.setBaselineAdjustments(newIdbItem);
