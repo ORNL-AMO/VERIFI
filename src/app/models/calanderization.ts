@@ -24,7 +24,8 @@ export interface MonthlyData {
     marketEmissions: number,    
     RECs: number,
     excessRECs: number, 
-    excessRECsEmissions: number
+    excessRECsEmissions: number,
+    readingType: 'mixed' | 'metered' | 'estimated'
 }
 
 export interface CalanderizationFilters {

@@ -168,7 +168,8 @@ export class MeterGroupingService {
         locationEmissions: _.sumBy(filteredData, 'locationEmissions'),
         RECs: _.sumBy(filteredData, 'RECs'),
         excessRECs: _.sumBy(filteredData, 'excessRECs'), 
-        excessRECsEmissions: _.sumBy(filteredData, 'excessRECsEmissions')
+        excessRECsEmissions: _.sumBy(filteredData, 'excessRECsEmissions'),
+        readingType: undefined
       })
       startDate = new Date(startDate.getFullYear(), startDate.getMonth() + 1);
     }

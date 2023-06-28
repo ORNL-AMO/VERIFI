@@ -45,14 +45,30 @@ export interface BetterPlantsEnergySummary {
 
 export interface BetterPlantsWaterSummary {
   numberOfFacilities: number;
-  waterUtilityUse: number;
-  surfaceFreshwaterUse: number;
-  groundFreshwaterUse: number;
-  otherFreshwaterUse: number;
-  salineWaterIntake: number;
-  rainwater: number;
-  externallySuppliedRecycled: number;
+  numberOfManufacturingFacilities: number;
+  // waterUtilityUse: number;
+  surfaceFreshwater: WaterSummaryItem;
+  additionalSurfaceFreshWater: WaterSummaryItem;
+  groundFreshwater: WaterSummaryItem;
+  additionalGroundFreshwater: WaterSummaryItem;
+  otherFreshwater: WaterSummaryItem;
+  additionalOtherFreshwater: WaterSummaryItem;
+  salineWaterIntake: WaterSummaryItem;
+  additionalSalineWaterIntake: WaterSummaryItem;
+  rainwater: WaterSummaryItem;
+  additionalRainwater: WaterSummaryItem;
+  externallySuppliedRecycled: WaterSummaryItem;
+  additionalExternallySuppliedRecycled: WaterSummaryItem;
   totalWaterIntake: number;
+  waterUtility: WaterSummaryItem;
+  additionalWaterUtility: WaterSummaryItem;
+  totalWaterIntakeIncludeAdditional: number;
+  unitsUsed: Array<string>;
+}
+
+export interface WaterSummaryItem {
+  use: number,
+  meteredType: 'Metered' | 'Estimated' | 'Mixed' | 'N/A'
 }
 
 export interface BetterPlantsReportSetup {
@@ -60,6 +76,9 @@ export interface BetterPlantsReportSetup {
   includeFacilityNames: boolean,
   baselineAdjustmentNotes: string,
   modificationNotes: string,
+  methodologyNotes?: string,
+  baselineYearWaterPilotGoal?: number,
+  reportYearWaterPilotGoal?: number
 }
 
 export interface DataOverviewReportSetup {

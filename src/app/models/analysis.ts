@@ -188,7 +188,6 @@ export interface AnalysisGroup {
   idbGroupId: string,
   analysisType: AnalysisType,
   predictorVariables: Array<PredictorData>,
-  productionUnits: string,
   regressionModelYear: number,
   regressionConstant: number,
   groupErrors: GroupErrors,
@@ -225,5 +224,5 @@ export interface GroupErrors {
 }
 
 
-export type AnalysisType = 'absoluteEnergyConsumption' | 'energyIntensity' | 'modifiedEnergyIntensity' | 'regression' | 'skip';
+export type AnalysisType = 'absoluteEnergyConsumption' | 'energyIntensity' | 'modifiedEnergyIntensity' | 'regression' | 'skip' | 'skipAnalysis';
 export type AnalysisCategory = 'energy' | 'water';

@@ -38,10 +38,15 @@
                                 id="regression" [(ngModel)]="group.analysisType" (change)="setAnalysisType()">
                             <label class="form-check-label" for="regression">Regression</label>
                         </div>
+                        <div class="form-check" *ngIf="analysisItem.analysisCategory == 'water'">
+                            <input type="radio" class="form-check-input" name="analysisType" [value]="'skipAnalysis'"
+                                id="skipAnalysis" [(ngModel)]="group.analysisType" (change)="setAnalysisType()">
+                            <label class="form-check-label" for="skipAnalysis">Skip Analysis</label>
+                        </div>
                         <div class="form-check">
                             <input type="radio" class="form-check-input" name="analysisType" [value]="'skip'" id="skip"
                                 [(ngModel)]="group.analysisType" (change)="setAnalysisType()">
-                            <label class="form-check-label" for="skip">Skip Group</label>
+                            <label class="form-check-label" for="skip">Exclude from Report</label>
                         </div>
                     </div>
                 </div>
@@ -155,7 +160,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-6 col-sm-12" *ngIf="group.analysisType != 'skip'">
+            <div class="col-md-6 col-sm-12" *ngIf="group.analysisType != 'skip' && group.analysisType != 'skipAnalysis'">
                 <label class="bold">
                     <span
                         *ngIf="group.analysisType == 'regression' || group.analysisType == 'absoluteEnergyConsumption'">2.</span>

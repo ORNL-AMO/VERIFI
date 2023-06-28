@@ -119,7 +119,6 @@ export class AnalysisDbService {
             variable.productionInAnalysis = true;
             return variable
           }),
-          productionUnits: this.getUnits(predictorVariables),
           regressionModelYear: undefined,
           regressionConstant: undefined,
           groupErrors: undefined,
@@ -255,7 +254,6 @@ export class AnalysisDbService {
         idbGroupId: groupId,
         analysisType: 'energyIntensity',
         predictorVariables: predictorVariables,
-        productionUnits: this.getUnits(predictorVariables),
         regressionConstant: undefined,
         regressionModelYear: undefined,
         groupErrors: undefined,

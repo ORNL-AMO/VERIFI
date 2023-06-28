@@ -5,12 +5,12 @@
                 <td class="w-50">
 
                 </td>
-                <td class="bold text-center w-25">
+                <td colspan="2" class="bold text-center w-25">
                     Baseline Year
                     <br>
                     {{report.baselineYear | yearDisplay: account.fiscalYear}}
                 </td>
-                <td class="bold text-center w-25">
+                <td colspan="2" class="bold text-center w-25">
                     Report Year
                     <br>
                     {{report.reportYear | yearDisplay: account.fiscalYear}}
@@ -18,13 +18,24 @@
             </tr>
             <tr>
                 <td class="bold">
-                    Number of Participating Plants*
+                    Number of Participating Facilities*
                 </td>
-                <td>
-                    {{betterPlantsSummary.baselineYearEnergyResults.numberOfFacilities}}
+                <td colspan="2">
+                    {{betterPlantsSummary.reportYearWaterResults.numberOfFacilities}}
                 </td>
-                <td>
-                    {{betterPlantsSummary.reportYearEnergyResults.numberOfFacilities}}
+                <td colspan="2">
+                    {{betterPlantsSummary.reportYearWaterResults.numberOfFacilities}}
+                </td>
+            </tr>
+            <tr>
+                <td class="bold">
+                    Number of Participating Manufacturing Facilities*
+                </td>
+                <td colspan="2">
+                    {{betterPlantsSummary.reportYearWaterResults.numberOfManufacturingFacilities}}
+                </td>
+                <td colspan="2">
+                    {{betterPlantsSummary.reportYearWaterResults.numberOfManufacturingFacilities}}
                 </td>
             </tr>
         </tbody>
@@ -34,95 +45,391 @@
         <tbody>
             <tr>
                 <td class="bold">
-                    Primary Water Consumed (MGal)
+                    Primary Water Consumed (kGal)
                 </td>
+                <td></td>
+                <td>Metered or Estimated?</td>
+                <td></td>
+                <td>Metered or Estimated?</td>
             </tr>
-            <tr>
+            <tr
+                *ngIf="betterPlantsSummary.baselineYearWaterResults.waterUtility.use || betterPlantsSummary.reportYearWaterResults.waterUtility.use">
                 <td>
                     Water Utility (public or private)
                 </td>
                 <td>
-                    {{betterPlantsSummary.baselineYearWaterResults.waterUtilityUse | customNumber}}
+                    {{betterPlantsSummary.baselineYearWaterResults.waterUtility.use | customNumber}}
                 </td>
                 <td>
-                    {{betterPlantsSummary.reportYearWaterResults.waterUtilityUse | customNumber}}
+                    {{betterPlantsSummary.baselineYearWaterResults.waterUtility.meteredType}}
+                </td>
+                <td>
+                    {{betterPlantsSummary.reportYearWaterResults.waterUtility.use | customNumber}}
+                </td>
+                <td>
+                    {{betterPlantsSummary.reportYearWaterResults.waterUtility.meteredType}}
                 </td>
             </tr>
-            <tr>
+            <tr
+                *ngIf="betterPlantsSummary.baselineYearWaterResults.additionalWaterUtility.use || betterPlantsSummary.reportYearWaterResults.additionalWaterUtility.use">
+                <td>
+                    <span class="fa fa-plus"></span><span class="fa fa-plus"></span> Water Utility (public or private)
+                </td>
+                <td>
+                    {{betterPlantsSummary.baselineYearWaterResults.additionalWaterUtility.use | customNumber}}
+                </td>
+                <td>
+                    {{betterPlantsSummary.baselineYearWaterResults.additionalWaterUtility.meteredType}}
+                </td>
+                <td>
+                    {{betterPlantsSummary.reportYearWaterResults.additionalWaterUtility.use | customNumber}}
+                </td>
+                <td>
+                    {{betterPlantsSummary.reportYearWaterResults.additionalWaterUtility.meteredType}}
+                </td>
+            </tr>
+            <tr
+                *ngIf="betterPlantsSummary.baselineYearWaterResults.surfaceFreshwater.use || betterPlantsSummary.reportYearWaterResults.surfaceFreshwater.use">
                 <td>
                     Surface freshwater, including self-supplied
                 </td>
                 <td>
-                    {{betterPlantsSummary.baselineYearWaterResults.surfaceFreshwaterUse | customNumber}}
+                    {{betterPlantsSummary.baselineYearWaterResults.surfaceFreshwater.use | customNumber}}
                 </td>
                 <td>
-                    {{betterPlantsSummary.reportYearWaterResults.surfaceFreshwaterUse | customNumber}}
+                    {{betterPlantsSummary.baselineYearWaterResults.surfaceFreshwater.meteredType}}
+                </td>
+                <td>
+                    {{betterPlantsSummary.reportYearWaterResults.surfaceFreshwater.use | customNumber}}
+                </td>
+                <td>
+                    {{betterPlantsSummary.reportYearWaterResults.surfaceFreshwater.meteredType}}
                 </td>
             </tr>
-            <tr>
+            <tr
+                *ngIf="betterPlantsSummary.baselineYearWaterResults.additionalSurfaceFreshWater.use || betterPlantsSummary.reportYearWaterResults.additionalSurfaceFreshWater.use">
+                <td>
+                    <span class="fa fa-plus"></span><span class="fa fa-plus"></span> Surface freshwater, including self-supplied
+                </td>
+                <td>
+                    {{betterPlantsSummary.baselineYearWaterResults.additionalSurfaceFreshWater.use | customNumber}}
+                </td>
+                <td>
+                    {{betterPlantsSummary.baselineYearWaterResults.additionalSurfaceFreshWater.meteredType}}
+                </td>
+                <td>
+                    {{betterPlantsSummary.reportYearWaterResults.additionalSurfaceFreshWater.use | customNumber}}
+                </td>
+                <td>
+                    {{betterPlantsSummary.reportYearWaterResults.additionalSurfaceFreshWater.meteredType}}
+                </td>
+            </tr>
+            <tr
+                *ngIf="betterPlantsSummary.baselineYearWaterResults.groundFreshwater.use || betterPlantsSummary.reportYearWaterResults.groundFreshwater.use">
                 <td>
                     Ground freshwater, including self-supplied
                 </td>
                 <td>
-                    {{betterPlantsSummary.baselineYearWaterResults.groundFreshwaterUse | customNumber}}
+                    {{betterPlantsSummary.baselineYearWaterResults.groundFreshwater.use | customNumber}}
                 </td>
                 <td>
-                    {{betterPlantsSummary.reportYearWaterResults.groundFreshwaterUse | customNumber}}
+                    {{betterPlantsSummary.baselineYearWaterResults.groundFreshwater.meteredType}}
+                </td>
+                <td>
+                    {{betterPlantsSummary.reportYearWaterResults.groundFreshwater.use | customNumber}}
+                </td>
+                <td>
+                    {{betterPlantsSummary.reportYearWaterResults.groundFreshwater.meteredType}}
                 </td>
             </tr>
-            <tr>
+            <tr
+                *ngIf="betterPlantsSummary.baselineYearWaterResults.additionalGroundFreshwater.use || betterPlantsSummary.reportYearWaterResults.additionalGroundFreshwater.use">
+                <td>
+                    <span class="fa fa-plus"></span><span class="fa fa-plus"></span> Ground freshwater, including self-supplied
+                </td>
+                <td>
+                    {{betterPlantsSummary.baselineYearWaterResults.additionalGroundFreshwater.use | customNumber}}
+                </td>
+                <td>
+                    {{betterPlantsSummary.baselineYearWaterResults.additionalGroundFreshwater.meteredType}}
+                </td>
+                <td>
+                    {{betterPlantsSummary.reportYearWaterResults.additionalGroundFreshwater.use | customNumber}}
+                </td>
+                <td>
+                    {{betterPlantsSummary.reportYearWaterResults.additionalGroundFreshwater.meteredType}}
+                </td>
+            </tr>
+            <tr
+                *ngIf="betterPlantsSummary.baselineYearWaterResults.otherFreshwater.use || betterPlantsSummary.reportYearWaterResults.otherFreshwater.use">
                 <td>
                     Other freshwater
                 </td>
                 <td>
-                    {{betterPlantsSummary.baselineYearWaterResults.otherFreshwaterUse | customNumber}}
+                    {{betterPlantsSummary.baselineYearWaterResults.otherFreshwater.use | customNumber}}
                 </td>
                 <td>
-                    {{betterPlantsSummary.reportYearWaterResults.otherFreshwaterUse | customNumber}}
+                    {{betterPlantsSummary.baselineYearWaterResults.otherFreshwater.meteredType}}
+                </td>
+                <td>
+                    {{betterPlantsSummary.reportYearWaterResults.otherFreshwater.use | customNumber}}
+                </td>
+                <td>
+                    {{betterPlantsSummary.reportYearWaterResults.otherFreshwater.meteredType}}
                 </td>
             </tr>
-            <tr>
+            <tr
+                *ngIf="betterPlantsSummary.baselineYearWaterResults.additionalOtherFreshwater.use || betterPlantsSummary.reportYearWaterResults.additionalOtherFreshwater.use">
+                <td>
+                    <span class="fa fa-plus"></span><span class="fa fa-plus"></span> Other freshwater
+                </td>
+                <td>
+                    {{betterPlantsSummary.baselineYearWaterResults.additionalOtherFreshwater.use | customNumber}}
+                </td>
+                <td>
+                    {{betterPlantsSummary.baselineYearWaterResults.additionalOtherFreshwater.meteredType}}
+                </td>
+                <td>
+                    {{betterPlantsSummary.reportYearWaterResults.additionalOtherFreshwater.use | customNumber}}
+                </td>
+                <td>
+                    {{betterPlantsSummary.reportYearWaterResults.additionalOtherFreshwater.meteredType}}
+                </td>
+            </tr>
+            <tr
+                *ngIf="betterPlantsSummary.baselineYearWaterResults.salineWaterIntake.use || betterPlantsSummary.reportYearWaterResults.salineWaterIntake.use">
                 <td>
                     Total saline water intake (e.g., ocean water)
                 </td>
                 <td>
-                    {{betterPlantsSummary.baselineYearWaterResults.salineWaterIntake | customNumber}}
+                    {{betterPlantsSummary.baselineYearWaterResults.salineWaterIntake.use | customNumber}}
                 </td>
                 <td>
-                    {{betterPlantsSummary.reportYearWaterResults.salineWaterIntake | customNumber}}
+                    {{betterPlantsSummary.baselineYearWaterResults.salineWaterIntake.meteredType}}
+                </td>
+                <td>
+                    {{betterPlantsSummary.reportYearWaterResults.salineWaterIntake.use | customNumber}}
+                </td>
+                <td>
+                    {{betterPlantsSummary.reportYearWaterResults.salineWaterIntake.meteredType}}
                 </td>
             </tr>
-            <tr>
+            <tr
+                *ngIf="betterPlantsSummary.baselineYearWaterResults.additionalSalineWaterIntake.use || betterPlantsSummary.reportYearWaterResults.additionalSalineWaterIntake.use">
+                <td>
+                    <span class="fa fa-plus"></span><span class="fa fa-plus"></span> Total saline water intake (e.g., ocean water)
+                </td>
+                <td>
+                    {{betterPlantsSummary.baselineYearWaterResults.additionalSalineWaterIntake.use | customNumber}}
+                </td>
+                <td>
+                    {{betterPlantsSummary.baselineYearWaterResults.additionalSalineWaterIntake.meteredType}}
+                </td>
+                <td>
+                    {{betterPlantsSummary.reportYearWaterResults.additionalSalineWaterIntake.use | customNumber}}
+                </td>
+                <td>
+                    {{betterPlantsSummary.reportYearWaterResults.additionalSalineWaterIntake.meteredType}}
+                </td>
+            </tr>
+            <tr
+                *ngIf="betterPlantsSummary.baselineYearWaterResults.rainwater.use || betterPlantsSummary.reportYearWaterResults.rainwater.use">
                 <td>
                     Rainwater
                 </td>
                 <td>
-                    {{betterPlantsSummary.baselineYearWaterResults.rainwater | customNumber}}
+                    {{betterPlantsSummary.baselineYearWaterResults.rainwater.use | customNumber}}
                 </td>
                 <td>
-                    {{betterPlantsSummary.reportYearWaterResults.rainwater | customNumber}}
+                    {{betterPlantsSummary.baselineYearWaterResults.rainwater.meteredType}}
+                </td>
+                <td>
+                    {{betterPlantsSummary.reportYearWaterResults.rainwater.use | customNumber}}
+                </td>
+                <td>
+                    {{betterPlantsSummary.reportYearWaterResults.rainwater.meteredType}}
                 </td>
             </tr>
-            <tr>
+            <tr
+                *ngIf="betterPlantsSummary.baselineYearWaterResults.additionalRainwater.use || betterPlantsSummary.reportYearWaterResults.additionalRainwater.use">
+                <td>
+                    <span class="fa fa-plus"></span><span class="fa fa-plus"></span> Rainwater
+                </td>
+                <td>
+                    {{betterPlantsSummary.baselineYearWaterResults.additionalRainwater.use | customNumber}}
+                </td>
+                <td>
+                    {{betterPlantsSummary.baselineYearWaterResults.additionalRainwater.meteredType}}
+                </td>
+                <td>
+                    {{betterPlantsSummary.reportYearWaterResults.additionalRainwater.use | customNumber}}
+                </td>
+                <td>
+                    {{betterPlantsSummary.reportYearWaterResults.additionalRainwater.meteredType}}
+                </td>
+            </tr>
+            <tr
+                *ngIf="betterPlantsSummary.baselineYearWaterResults.externallySuppliedRecycled.use || betterPlantsSummary.reportYearWaterResults.externallySuppliedRecycled.use">
                 <td>
                     Externally supplied recycled (i.e., grey water)
                 </td>
                 <td>
-                    {{betterPlantsSummary.baselineYearWaterResults.externallySuppliedRecycled | customNumber}}
+                    {{betterPlantsSummary.baselineYearWaterResults.externallySuppliedRecycled.use | customNumber}}
                 </td>
                 <td>
-                    {{betterPlantsSummary.reportYearWaterResults.externallySuppliedRecycled | customNumber}}
+                    {{betterPlantsSummary.baselineYearWaterResults.externallySuppliedRecycled.meteredType}}
+                </td>
+                <td>
+                    {{betterPlantsSummary.reportYearWaterResults.externallySuppliedRecycled.use | customNumber}}
+                </td>
+                <td>
+                    {{betterPlantsSummary.reportYearWaterResults.externallySuppliedRecycled.meteredType}}
+                </td>
+            </tr>
+            <tr
+                *ngIf="betterPlantsSummary.baselineYearWaterResults.additionalExternallySuppliedRecycled.use || betterPlantsSummary.reportYearWaterResults.additionalExternallySuppliedRecycled.use">
+                <td>
+                    <span class="fa fa-plus"></span><span class="fa fa-plus"></span> Externally supplied recycled (i.e., grey water)
+                </td>
+                <td>
+                    {{betterPlantsSummary.baselineYearWaterResults.additionalExternallySuppliedRecycled.use |
+                    customNumber}}
+                </td>
+                <td>
+                    {{betterPlantsSummary.baselineYearWaterResults.additionalExternallySuppliedRecycled.meteredType}}
+                </td>
+                <td>
+                    {{betterPlantsSummary.reportYearWaterResults.additionalExternallySuppliedRecycled.use |
+                    customNumber}}
+                </td>
+                <td>
+                    {{betterPlantsSummary.reportYearWaterResults.additionalExternallySuppliedRecycled.meteredType}}
                 </td>
             </tr>
             <tr>
                 <td class="w-50">
-                    Total water intake
+                    Total Water Intake
                 </td>
-                <td class="w-25">
+                <td class="w-cell">
                     {{betterPlantsSummary.baselineYearWaterResults.totalWaterIntake | customNumber}}
                 </td>
-                <td class="w-25">
+                <td class="w-cell">
+
+                </td>
+                <td class="w-cell">
                     {{betterPlantsSummary.reportYearWaterResults.totalWaterIntake | customNumber}}
+                </td>
+                <td class="w-cell">
+
+                </td>
+            </tr>
+            <tr
+                *ngIf="betterPlantsSummary.baselineYearWaterResults.totalWaterIntakeIncludeAdditional !=  betterPlantsSummary.baselineYearWaterResults.totalWaterIntake
+                || betterPlantsSummary.reportYearWaterResults.totalWaterIntakeIncludeAdditional != betterPlantsSummary.reportYearWaterResults.totalWaterIntake">
+                <td class="w-50">
+                    Total Water Intake included in target
+                </td>
+                <td class="w-cell">
+                    {{betterPlantsSummary.baselineYearWaterResults.totalWaterIntakeIncludeAdditional | customNumber}}
+                </td>
+                <td class="w-cell">
+
+                </td>
+                <td class="w-cell">
+                    {{betterPlantsSummary.reportYearWaterResults.totalWaterIntakeIncludeAdditional | customNumber}}
+                </td>
+                <td class="w-cell">
+
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <table class="table table-sm table-hover mt-3">
+        <tbody>
+            <tr>
+                <td class="w-50">
+                    Baseline adjustment due to increase/decrease in the number of facilities reporting relative to
+                    baseline year or other operational changes, (+/- thousand gallons):
+                </td>
+                <td class="w-25">
+                    {{betterPlantsSummary.reportYearAnalysisSummary.baselineAdjustmentForNormalization | customNumber}}
+                </td>
+                <td class="no-border">
+
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    If a baseline adjustment was made, please indicate the reason for making the adjustment
+                </td>
+                <td colspan="2">
+                    {{report.betterPlantsReportSetup.baselineAdjustmentNotes}}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Adjusted baseline for total water intake (thousand gallons)
+                </td>
+                <td>
+                    {{betterPlantsSummary.reportYearAnalysisSummary.adjustedForNormalization | customNumber}}
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <table class="table table-sm table-hover mt-3"
+        *ngIf="betterPlantsSummary.reportYearWaterResults.unitsUsed.length != 0">
+        <tbody>
+            <tr>
+                <td class="w-50">
+                    Units for water intensity metric
+                </td>
+                <td>
+                    <span *ngFor="let unit of betterPlantsSummary.reportYearWaterResults.unitsUsed; let index = index;">
+                        {{unit}}
+                        <span *ngIf="index != betterPlantsSummary.reportYearWaterResults.unitsUsed.length-1"
+                            class="pe-1">,</span>
+                    </span>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <table class="table table-sm table-hover mt-3"
+        *ngIf="report.betterPlantsReportSetup.baselineYearWaterPilotGoal || report.betterPlantsReportSetup.reportYearWaterPilotGoal">
+        <tbody>
+            <tr>
+                <td colspan="2" class="w-50">
+                    For partners using a single water intensity metric across all plants, water intensity or other
+                    metric used for tracking Water Savings Pilot goal (numeric value)
+                </td>
+                <td class="w-25">
+                    {{report.betterPlantsReportSetup.baselineYearWaterPilotGoal | customNumber}}
+                </td>
+                <td class="w-25">
+                    {{report.betterPlantsReportSetup.reportYearWaterPilotGoal | customNumber}}
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <table class="table table-sm table-hover mt-3">
+        <tbody>
+            <tr>
+                <td class="w-75">
+                    Annual Improvement In Water Intensity for Current Year (%)**
+                </td>
+                <td>
+                    {{betterPlantsSummary.percentAnnualImprovement | number:'1.0-2'}} %
+                </td>
+            </tr>
+            <tr>
+                <td class="w-75">
+                    Total Improvement In Water Intensity (%)**
+                </td>
+                <td>
+                    {{betterPlantsSummary.percentTotalWaterImprovement | number:'1.0-2'}} %
                 </td>
             </tr>
         </tbody>
