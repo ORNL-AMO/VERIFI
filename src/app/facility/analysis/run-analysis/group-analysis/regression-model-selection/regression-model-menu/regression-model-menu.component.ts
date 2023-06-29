@@ -79,7 +79,7 @@ export class RegressionModelMenuComponent implements OnInit {
     this.analysisItem.groups[groupIndex] = this.group;
     await firstValueFrom(this.analysisDbService.updateWithObservable(this.analysisItem));
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    this.dbChangesService.setAnalysisItems(selectedAccount, this.selectedFacility);
+    this.dbChangesService.setAnalysisItems(selectedAccount, false, this.selectedFacility);
     this.analysisDbService.selectedAnalysisItem.next(this.analysisItem);
     this.analysisService.selectedGroup.next(this.group);
   }

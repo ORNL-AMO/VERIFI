@@ -130,7 +130,7 @@ export class AnalysisItemCardComponent implements OnInit {
     newItem.selectedYearAnalysis = false;
     let addedItem: IdbAnalysisItem = await firstValueFrom(this.analysisDbService.addWithObservable(newItem));
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    await this.dbChangesService.setAnalysisItems(selectedAccount, this.selectedFacility);
+    await this.dbChangesService.setAnalysisItems(selectedAccount, false, this.selectedFacility);
     this.analysisDbService.selectedAnalysisItem.next(addedItem);
     this.toastNotificationService.showToast('Analysis Copy Created', undefined, undefined, false, "alert-success");
     this.router.navigateByUrl('facility/' + this.selectedFacility.id + '/analysis/run-analysis');
@@ -157,8 +157,8 @@ export class AnalysisItemCardComponent implements OnInit {
       }
     }
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    await this.dbChangesService.setAccountAnalysisItems(selectedAccount)
-    await this.dbChangesService.setAnalysisItems(selectedAccount, this.selectedFacility);
+    await this.dbChangesService.setAccountAnalysisItems(selectedAccount, false)
+    await this.dbChangesService.setAnalysisItems(selectedAccount, false, this.selectedFacility);
     this.displayDeleteModal = false;
     this.toastNotificationService.showToast('Analysis Item Deleted', undefined, undefined, false, "alert-success");
   }
@@ -185,6 +185,6 @@ export class AnalysisItemCardComponent implements OnInit {
       }
     }
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    await this.dbChangesService.setAnalysisItems(selectedAccount, this.selectedFacility);
+    await this.dbChangesService.setAnalysisItems(selectedAccount, false, this.selectedFacility);
   }
 }

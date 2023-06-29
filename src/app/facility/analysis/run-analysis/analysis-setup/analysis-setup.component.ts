@@ -47,7 +47,7 @@ export class AnalysisSetupComponent implements OnInit {
     await firstValueFrom(this.analysisDbService.updateWithObservable(this.analysisItem));
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    await this.dbChangesService.setAnalysisItems(selectedAccount, selectedFacility);
+    await this.dbChangesService.setAnalysisItems(selectedAccount, false, selectedFacility);
     this.analysisDbService.selectedAnalysisItem.next(this.analysisItem);
   }
 

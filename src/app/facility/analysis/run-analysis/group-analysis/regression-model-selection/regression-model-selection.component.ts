@@ -67,7 +67,7 @@ export class RegressionModelSelectionComponent implements OnInit {
     analysisItem.setupErrors = this.analysisValidationService.getAnalysisItemErrors(analysisItem);
     await firstValueFrom(this.analysisDbService.updateWithObservable(analysisItem));
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    this.dbChangesService.setAnalysisItems(selectedAccount, this.selectedFacility);
+    this.dbChangesService.setAnalysisItems(selectedAccount, false, this.selectedFacility);
     this.analysisDbService.selectedAnalysisItem.next(analysisItem);
     this.analysisService.selectedGroup.next(this.selectedGroup)
   }

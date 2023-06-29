@@ -123,7 +123,9 @@ export class FacilityHomeSummaryComponent implements OnInit {
   }
 
   getColor(source: MeterSource): string {
-    return UtilityColors[source].color
+    if (UtilityColors[source]) {
+      return UtilityColors[source].color
+    }
   }
 
   setNAICS() {

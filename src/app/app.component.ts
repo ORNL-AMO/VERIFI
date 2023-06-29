@@ -15,6 +15,7 @@ import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport, IdbAnalysisItem, 
 import { EGridService } from './shared/helper-services/e-grid.service';
 import { firstValueFrom } from 'rxjs';
 import { environment } from 'src/environments/environment';
+import { ToastNotificationsService } from './core-components/toast-notifications/toast-notifications.service';
 
 // declare ga as a function to access the JS code in TS
 declare let gtag: Function;
@@ -30,7 +31,6 @@ export class AppComponent {
 
   dataInitialized: boolean = false;
   loadingMessage: string = "Loading Accounts...";
-  startupError: string;
   constructor(
     private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService,
@@ -44,7 +44,8 @@ export class AppComponent {
     private accountAnalysisDbService: AccountAnalysisDbService,
     private updateDbEntryService: UpdateDbEntryService,
     private customEmissionsDbService: CustomEmissionsDbService,
-    private accountReportDbService: AccountReportDbService) {
+    private accountReportDbService: AccountReportDbService,
+    private toastNotificationService: ToastNotificationsService) {
     if (environment.production) {
       this.router.events.subscribe(event => {
         if (event instanceof NavigationEnd) {
@@ -102,7 +103,10 @@ export class AppComponent {
       }
     } catch (err) {
       console.log(err);
-      this.startupError = err;
+      await this.eGridService.parseEGridData();
+      this.toastNotificationService.showToast('An Error Occured', 'There was an error when trying to initialize the application data.', 15000, false, 'alert-danger');
+      this.router.navigateByUrl('/manage-accounts');
+      this.dataInitialized = true;
     }
   }
 

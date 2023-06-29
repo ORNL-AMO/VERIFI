@@ -61,7 +61,6 @@ export class AnalysisValidationService {
     let invalidMonthlyBaseload: boolean = false;
     let noProductionVariables: boolean = false;
     let groupMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.getGroupMetersByGroupId(group.idbGroupId);
-
     let hasInvalidRegressionModel: boolean = false;
 
     let missingGroupMeters: boolean = groupMeters.length == 0;
@@ -144,22 +143,24 @@ export class AnalysisValidationService {
     let reportYearBeforeBaselineYear: boolean = analysisItem.baselineYear >= analysisItem.reportYear;
     let hasError: boolean = (missingName || missingReportYear || missingBaselineYear || reportYearBeforeBaselineYear);
     let facilitiesSelectionsErrors: Array<boolean> = [];
-    analysisItem.facilityAnalysisItems.forEach(item => {
-      if (item.analysisItemId != undefined && item.analysisItemId != 'skip') {
-        let analysisItem: IdbAnalysisItem = allAnalysisItems.find(analysisItem => { return analysisItem.guid == item.analysisItemId });
-        if (analysisItem.setupErrors.hasError || analysisItem.setupErrors.groupsHaveErrors) {
-          facilitiesSelectionsErrors.push(true)
+    if (analysisItem.facilityAnalysisItems) {
+      analysisItem.facilityAnalysisItems.forEach(item => {
+        if (item.analysisItemId != undefined && item.analysisItemId != 'skip') {
+          let analysisItem: IdbAnalysisItem = allAnalysisItems.find(analysisItem => { return analysisItem.guid == item.analysisItemId });
+          if (analysisItem.setupErrors.hasError || analysisItem.setupErrors.groupsHaveErrors) {
+            facilitiesSelectionsErrors.push(true)
+          } else {
+            facilitiesSelectionsErrors.push(false);
+          }
         } else {
-          facilitiesSelectionsErrors.push(false);
+          if (item.analysisItemId == 'skip') {
+            facilitiesSelectionsErrors.push(false);
+          } else {
+            facilitiesSelectionsErrors.push(true);
+          }
         }
-      } else {
-        if (item.analysisItemId == 'skip') {
-          facilitiesSelectionsErrors.push(false);
-        } else {
-          facilitiesSelectionsErrors.push(true);
-        }
-      }
-    });
+      });
+    }
     let facilitiesSelectionsInvalid: boolean = facilitiesSelectionsErrors.includes(true);
     return {
       hasError: hasError,

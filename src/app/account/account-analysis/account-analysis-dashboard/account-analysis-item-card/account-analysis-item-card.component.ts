@@ -67,7 +67,7 @@ export class AccountAnalysisItemCardComponent implements OnInit {
         updateReportOptions = true;
       }
     }
-    await this.dbChangesService.setAccountAnalysisItems(this.selectedAccount);
+    await this.dbChangesService.setAccountAnalysisItems(this.selectedAccount, false);
     this.displayDeleteModal = false;
     this.toastNotificationService.showToast('Analysis Item Deleted', undefined, undefined, false, "alert-success");
   }
@@ -88,7 +88,7 @@ export class AccountAnalysisItemCardComponent implements OnInit {
         await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(categoryItems[i]));
       }
     }
-    await this.dbChangesService.setAccountAnalysisItems(this.selectedAccount);
+    await this.dbChangesService.setAccountAnalysisItems(this.selectedAccount, false);
   }
 
   async createCopy() {
@@ -97,7 +97,7 @@ export class AccountAnalysisItemCardComponent implements OnInit {
     newItem.name = newItem.name + ' (Copy)';
     newItem.guid = Math.random().toString(36).substr(2, 9);
     let addedItem: IdbAccountAnalysisItem = await firstValueFrom(this.accountAnalysisDbService.addWithObservable(newItem));
-    await this.dbChangesService.setAccountAnalysisItems(this.selectedAccount);
+    await this.dbChangesService.setAccountAnalysisItems(this.selectedAccount, false);
     this.accountAnalysisDbService.selectedAnalysisItem.next(addedItem);
     this.toastNotificationService.showToast('Analysis Item Copy Created', undefined, undefined, false, "alert-success");
     this.router.navigateByUrl('account/analysis/setup');
