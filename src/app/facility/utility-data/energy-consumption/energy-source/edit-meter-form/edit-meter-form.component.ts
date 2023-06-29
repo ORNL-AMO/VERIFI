@@ -276,7 +276,7 @@ export class EditMeterFormComponent implements OnInit {
     } else if (selectedMeterSource == 'Water Intake' || selectedMeterSource == 'Water Discharge') {
       facilityUnit = this.facility.volumeLiquidUnit;
     } else if (selectedMeterSource == 'Other Utility') {
-      facilityUnit = this.facility.energyUnit;
+      facilityUnit = this.facility.massUnit;
     }
     this.meterForm.controls.startingUnit.patchValue(facilityUnit);
     this.meterForm.controls.startingUnit.updateValueAndValidity();
