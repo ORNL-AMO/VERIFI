@@ -25,7 +25,6 @@ import { NgbTypeaheadModule } from '@ng-bootstrap/ng-bootstrap';
 import { FacilityListPipe } from './core-components/sidebar/facility-list.pipe';
 import { UploadDataModule } from './upload-data/upload-data.module';
 import { CreateReportModalComponent } from './core-components/create-report-modal/create-report-modal.component';
-import { StartupErrorComponent } from './core-components/startup-error/startup-error.component';
 import { WeatherDataModule } from './weather-data/weather-data.module';
 import { ManageAccountsComponent } from './core-components/manage-accounts/manage-accounts.component';
 
@@ -42,7 +41,6 @@ import { ManageAccountsComponent } from './core-components/manage-accounts/manag
     SearchBarComponent,
     FacilityListPipe,
     CreateReportModalComponent,
-    StartupErrorComponent,
     ManageAccountsComponent
   ],
   imports: [
