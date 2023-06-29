@@ -3,12 +3,17 @@ import { IdbFacility } from "./idb";
 
 export interface BetterPlantsSummary {
   percentAnnualImprovement: number,
-  percentTotalImprovement: number,
+  percentTotalEnergyImprovement: number,
+  percentTotalWaterImprovement: number,
   adjustedBaselinePrimaryEnergy: number,
+  adjustedBaselinePrimaryWater: number,
   // baselineAdjustment: number,
   totalEnergySavings: number,
-  baselineYearResults: BetterPlantsEnergySummary,
-  reportYearResults: BetterPlantsEnergySummary,
+  totalWaterSavings: number,
+  baselineYearEnergyResults: BetterPlantsEnergySummary,
+  reportYearEnergyResults: BetterPlantsEnergySummary,
+  baselineYearWaterResults: BetterPlantsWaterSummary,
+  reportYearWaterResults: BetterPlantsWaterSummary,
   reportYearAnalysisSummary: AnnualAnalysisSummary,
   baselineYearAnalysisSummary: AnnualAnalysisSummary,
   facilityPerformance: Array<{
@@ -38,11 +43,42 @@ export interface BetterPlantsEnergySummary {
   otherEnergyTypes: Array<string>
 }
 
+export interface BetterPlantsWaterSummary {
+  numberOfFacilities: number;
+  numberOfManufacturingFacilities: number;
+  // waterUtilityUse: number;
+  surfaceFreshwater: WaterSummaryItem;
+  additionalSurfaceFreshWater: WaterSummaryItem;
+  groundFreshwater: WaterSummaryItem;
+  additionalGroundFreshwater: WaterSummaryItem;
+  otherFreshwater: WaterSummaryItem;
+  additionalOtherFreshwater: WaterSummaryItem;
+  salineWaterIntake: WaterSummaryItem;
+  additionalSalineWaterIntake: WaterSummaryItem;
+  rainwater: WaterSummaryItem;
+  additionalRainwater: WaterSummaryItem;
+  externallySuppliedRecycled: WaterSummaryItem;
+  additionalExternallySuppliedRecycled: WaterSummaryItem;
+  totalWaterIntake: number;
+  waterUtility: WaterSummaryItem;
+  additionalWaterUtility: WaterSummaryItem;
+  totalWaterIntakeIncludeAdditional: number;
+  unitsUsed: Array<string>;
+}
+
+export interface WaterSummaryItem {
+  use: number,
+  meteredType: 'Metered' | 'Estimated' | 'Mixed' | 'N/A'
+}
+
 export interface BetterPlantsReportSetup {
   analysisItemId: string,
   includeFacilityNames: boolean,
   baselineAdjustmentNotes: string,
   modificationNotes: string,
+  methodologyNotes?: string,
+  baselineYearWaterPilotGoal?: number,
+  reportYearWaterPilotGoal?: number
 }
 
 export interface DataOverviewReportSetup {

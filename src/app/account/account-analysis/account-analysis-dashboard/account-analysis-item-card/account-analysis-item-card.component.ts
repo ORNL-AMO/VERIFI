@@ -74,17 +74,18 @@ export class AccountAnalysisItemCardComponent implements OnInit {
 
   async setUseItem() {
     let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
-    for (let i = 0; i < accountAnalysisItems.length; i++) {
-      if (accountAnalysisItems[i].guid == this.analysisItem.guid) {
-        if (accountAnalysisItems[i].selectedYearAnalysis) {
-          accountAnalysisItems[i].selectedYearAnalysis = false;
+    let categoryItems: Array<IdbAccountAnalysisItem> = accountAnalysisItems.filter(item => {return item.analysisCategory == this.analysisItem.analysisCategory});
+    for (let i = 0; i < categoryItems.length; i++) {
+      if (categoryItems[i].guid == this.analysisItem.guid) {
+        if (categoryItems[i].selectedYearAnalysis) {
+          categoryItems[i].selectedYearAnalysis = false;
         } else {
-          accountAnalysisItems[i].selectedYearAnalysis = true;
+          categoryItems[i].selectedYearAnalysis = true;
         }
-        await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(accountAnalysisItems[i]));
-      } else if (accountAnalysisItems[i].reportYear == this.analysisItem.reportYear && accountAnalysisItems[i].selectedYearAnalysis) {
-        accountAnalysisItems[i].selectedYearAnalysis = false;
-        await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(accountAnalysisItems[i]));
+        await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(categoryItems[i]));
+      } else if (categoryItems[i].reportYear == this.analysisItem.reportYear && categoryItems[i].selectedYearAnalysis) {
+        categoryItems[i].selectedYearAnalysis = false;
+        await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(categoryItems[i]));
       }
     }
     await this.dbChangesService.setAccountAnalysisItems(this.selectedAccount, false);

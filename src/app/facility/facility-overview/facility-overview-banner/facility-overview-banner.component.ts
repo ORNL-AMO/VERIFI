@@ -107,7 +107,7 @@ export class FacilityOverviewBannerComponent implements OnInit {
 
   setShowWater() {
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
-    let waterMeter: IdbUtilityMeter = accountMeters.find(meter => { return meter.source == 'Water' || meter.source == 'Waste Water' });
+    let waterMeter: IdbUtilityMeter = accountMeters.find(meter => { return meter.source == 'Water Intake' || meter.source == 'Water Discharge' });
     this.showWater = waterMeter != undefined;
   }
 

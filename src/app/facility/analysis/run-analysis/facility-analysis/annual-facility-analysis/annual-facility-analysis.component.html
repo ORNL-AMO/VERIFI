@@ -1,5 +1,5 @@
 <div class="d-flex justify-content-between mb-2">
-    <app-analysis-summary-table-filter [tableContext]="'annualFacility'"></app-analysis-summary-table-filter>
+    <app-analysis-summary-table-filter [tableContext]="'annualFacility'" [analysisItem]="analysisItem"></app-analysis-summary-table-filter>
 
     <div class="btn-group">
         <button class="btn toggle-btn" [ngClass]="{'active': dataDisplay == 'table'}" (click)="setDataDisplay('table')">
@@ -15,7 +15,7 @@
     </div>
 </div>
 
-<div class="w-100 x-scroll" *ngIf="calculating == false">
+<div class="w-100" *ngIf="calculating == false">
     <app-annual-analysis-summary-table *ngIf="dataDisplay == 'table'" [annualAnalysisSummary]="annualAnalysisSummary"
         [analysisItem]="analysisItem" [accountOrFacility]="facility">
     </app-annual-analysis-summary-table>

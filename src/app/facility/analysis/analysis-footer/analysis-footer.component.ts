@@ -5,10 +5,11 @@ import { HelpPanelService } from 'src/app/help-panel/help-panel.service';
 import { NavigationEnd, Router } from '@angular/router';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { AnalysisService } from '../analysis.service';
-import { AnalysisGroup, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
+import { IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { AccountAnalysisService } from 'src/app/account/account-analysis/account-analysis.service';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
+import { AnalysisGroup } from 'src/app/models/analysis';
 
 @Component({
   selector: 'app-analysis-footer',

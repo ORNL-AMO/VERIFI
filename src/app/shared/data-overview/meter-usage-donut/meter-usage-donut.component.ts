@@ -20,6 +20,8 @@ export class MeterUsageDonutComponent {
   facilityId: string;
   @Input()
   facilityOverviewMeters: Array<FacilityOverviewMeter>;
+  @Input()
+  inHomeScreen: boolean;
 
   @ViewChild('energyUseDonut', { static: false }) energyUseDonut: ElementRef;
   selectedFacility: IdbFacility;
@@ -84,7 +86,13 @@ export class MeterUsageDonutComponent {
         sort: false
       }];
 
+      let height: number;
+      if (this.inHomeScreen) {
+        height = 350;
+      }
+
       var layout = {
+        height: height,
         margin: { "t": 50, "b": 50, "l": 50, "r": 50 },
         showlegend: false
       };

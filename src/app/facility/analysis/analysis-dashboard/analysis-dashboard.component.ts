@@ -1,15 +1,15 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { NavigationEnd, Router } from '@angular/router';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { IdbAccount, IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
+import { IdbAccount, IdbAnalysisItem, IdbFacility, IdbUtilityMeterGroup } from 'src/app/models/idb';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import * as _ from 'lodash';
 import { AnalysisService } from '../analysis.service';
-import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
+import { AnalysisCategory } from 'src/app/models/analysis';
+import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 
 @Component({
   selector: 'app-analysis-dashboard',
@@ -18,55 +18,50 @@ import { CalanderizationService } from 'src/app/shared/helper-services/calanderi
 })
 export class AnalysisDashboardComponent implements OnInit {
 
-  facilityAnalysisItems: Array<IdbAnalysisItem>;
-  facilityAnalysisItemsSub: Subscription;
-
-  baselineYearErrorMin: boolean;
-  baselineYearErrorMax: boolean;
-  yearOptions: Array<number>;
   selectedFacility: IdbFacility;
   selectedFacilitySub: Subscription;
-  analysisItemsList: Array<{
-    year: number,
-    analysisItems: Array<IdbAnalysisItem>,
-    hasSelectedItem: boolean
-  }>;
   showDetail: boolean;
   showDetailSub: Subscription;
+  newAnalysisCategory: AnalysisCategory = 'energy';
+  displayNewAnalysis: boolean = false;
+  hasWater: boolean;
+  hasEnergy: boolean;
+  analysisType: 'Water' | 'Energy';
+  routerSub: Subscription;
   constructor(private router: Router, private analysisDbService: AnalysisDbService, private toastNotificationService: ToastNotificationsService,
     private facilityDbService: FacilitydbService,
     private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
     private analysisService: AnalysisService,
-    private calanderizationService: CalanderizationService) { }
+    private utilityMeterGroupDbService: UtilityMeterGroupdbService) { }
 
   ngOnInit(): void {
-    this.facilityAnalysisItemsSub = this.analysisDbService.facilityAnalysisItems.subscribe(items => {
-      this.setAnalysisItemsList(items);
+    this.routerSub = this.router.events.subscribe((event) => {
+      if (event instanceof NavigationEnd) {
+        this.setAnalysisType(event.urlAfterRedirects);
+      }
     });
+    //navigationsEnd isn't fired on init. Call here.
+    this.setAnalysisType(this.router.url);
 
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
       this.selectedFacility = val;
-      this.yearOptions = this.calanderizationService.getYearOptionsFacility(this.selectedFacility.guid);
-      if (this.yearOptions) {
-        this.baselineYearErrorMin = this.yearOptions[0] > this.selectedFacility.sustainabilityQuestions.energyReductionBaselineYear;
-        this.baselineYearErrorMax = this.yearOptions[this.yearOptions.length - 1] < this.selectedFacility.sustainabilityQuestions.energyReductionBaselineYear
-      }
+      this.setHasEnergyAndWater();
     });
 
     this.showDetailSub = this.analysisService.showDetail.subscribe(showDetail => {
       this.showDetail = showDetail;
-    })
+    });
   }
 
   ngOnDestroy() {
-    this.facilityAnalysisItemsSub.unsubscribe();
     this.selectedFacilitySub.unsubscribe();
     this.showDetailSub.unsubscribe();
+    this.routerSub.unsubscribe();
   }
 
   async createAnalysis() {
-    let newItem: IdbAnalysisItem = this.analysisDbService.getNewAnalysisItem(this.selectedFacility.guid);
+    let newItem: IdbAnalysisItem = this.analysisDbService.getNewAnalysisItem(this.newAnalysisCategory, this.selectedFacility.guid);
     let addedItem: IdbAnalysisItem = await firstValueFrom(this.analysisDbService.addWithObservable(newItem));
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.setAnalysisItems(selectedAccount, false, this.selectedFacility);
@@ -75,30 +70,57 @@ export class AnalysisDashboardComponent implements OnInit {
     this.router.navigateByUrl('facility/' + this.selectedFacility.id + '/analysis/run-analysis');
   }
 
-  setAnalysisItemsList(facilityAnalysisItems: Array<IdbAnalysisItem>) {
-    this.analysisItemsList = new Array();
-    let years: Array<number> = facilityAnalysisItems.map(item => { return item.reportYear });
-    years = _.uniq(years);
-    years = _.orderBy(years, (year) => { return year }, 'desc');
-    years.forEach(year => {
-      let yearAnalysisItems: Array<IdbAnalysisItem> = facilityAnalysisItems.filter(item => { return item.reportYear == year });
-      this.analysisItemsList.push({
-        year: year,
-        analysisItems: yearAnalysisItems,
-        hasSelectedItem: yearAnalysisItems.findIndex((item: IdbAnalysisItem) => { return item.selectedYearAnalysis == true }) != -1
-      });
-    })
-  }
-
   saveShowDetails() {
     this.analysisService.showDetail.next(this.showDetail);
   }
 
-  goToSettings(){
-    this.router.navigateByUrl('facility/' + this.selectedFacility.id + '/settings');
+  async openCreateAnalysis() {
+    if (this.newAnalysisCategory == 'energy' && !this.hasEnergy) {
+      this.newAnalysisCategory = 'water';
+    } else if (this.newAnalysisCategory == 'water' && !this.hasWater) {
+      this.newAnalysisCategory = 'energy';
+    }
+    if (this.hasEnergy && this.hasWater) {
+      this.displayNewAnalysis = true;
+    } else {
+      await this.createAnalysis();
+    }
   }
 
-  goToUtilityData(){
-    this.router.navigateByUrl('facility/' + this.selectedFacility.id + '/utility');
+  cancelCreate() {
+    this.displayNewAnalysis = false;
+  }
+
+  setHasEnergyAndWater() {
+    let groups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.facilityMeterGroups.getValue();
+    this.hasEnergy = false;
+    this.hasWater = false;
+    let hasWater: boolean = false;
+    let hasEnergy: boolean = false;
+    groups.forEach(group => {
+      if (group.groupType == 'Energy' && !this.hasEnergy) {
+        hasEnergy = true;
+      }
+      if (group.groupType == 'Water' && !this.hasWater) {
+        hasWater = true;
+      }
+    });
+    this.hasWater = hasWater;
+    this.hasEnergy = hasEnergy;
+    //check nav
+    if (this.analysisType == 'Energy' && !this.hasEnergy) {
+      this.router.navigateByUrl('/facility/' + this.selectedFacility.id + '/analysis/analysis-dashboard/water');
+    }
+    if (this.analysisType == 'Water' && !this.hasWater) {
+      this.router.navigateByUrl('/facility/' + this.selectedFacility.id + '/analysis/analysis-dashboard/energy');
+    }
+  }
+
+  setAnalysisType(url: string) {
+    if (url.includes('water')) {
+      this.analysisType = 'Water';
+    } else if (url.includes('energy')) {
+      this.analysisType = 'Energy';
+    }
   }
 }

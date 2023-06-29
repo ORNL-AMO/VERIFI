@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { FormGroup } from '@angular/forms';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
@@ -7,7 +6,6 @@ import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { IdbAccount, IdbAccountReport, IdbUtilityMeter } from 'src/app/models/idb';
 import { DataOverviewReportSetup } from 'src/app/models/overview-report';
-import { AccountReportsService } from '../../account-reports.service';
 
 @Component({
   selector: 'app-data-overview-setup',
@@ -23,7 +21,6 @@ export class DataOverviewSetupComponent {
   reportSetup: DataOverviewReportSetup;
   showWater: boolean;
   constructor(private accountReportDbService: AccountReportDbService,
-    private accountReportsService: AccountReportsService,
     private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
     private utilityMeterDbService: UtilityMeterdbService) {
@@ -58,7 +55,7 @@ export class DataOverviewSetupComponent {
 
   setShowWater() {
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
-    let waterMeter: IdbUtilityMeter = accountMeters.find(meter => { return meter.source == 'Water' || meter.source == 'Waste Water' });
+    let waterMeter: IdbUtilityMeter = accountMeters.find(meter => { return meter.source == 'Water Intake' || meter.source == 'Water Discharge' });
     this.showWater = waterMeter != undefined;
     if (!this.showWater && this.reportSetup.includeWaterSection) {
       this.reportSetup.includeWaterSection = false;

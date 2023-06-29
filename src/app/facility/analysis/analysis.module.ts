@@ -27,6 +27,9 @@ import { TableItemsDropdownModule } from 'src/app/shared/table-items-dropdown/ta
 import { RegressionModelInspectionComponent } from './run-analysis/group-analysis/regression-model-selection/regression-model-inspection/regression-model-inspection.component';
 import { RegressionNumberPipe } from './run-analysis/group-analysis/regression-model-selection/regression-number.pipe';
 import { AnalysisItemCardComponent } from './analysis-dashboard/analysis-item-card/analysis-item-card.component';
+import { EnergyDashboardComponent } from './analysis-dashboard/energy-dashboard/energy-dashboard.component';
+import { WaterDashboardComponent } from './analysis-dashboard/water-dashboard/water-dashboard.component';
+import { AnalysisDashboardTabsComponent } from './analysis-dashboard/analysis-dashboard-tabs/analysis-dashboard-tabs.component';
 
 
 
@@ -51,7 +54,10 @@ import { AnalysisItemCardComponent } from './analysis-dashboard/analysis-item-ca
     AnalysisFooterComponent,
     RegressionModelInspectionComponent,
     RegressionNumberPipe,
-    AnalysisItemCardComponent
+    AnalysisItemCardComponent,
+    EnergyDashboardComponent,
+    WaterDashboardComponent,
+    AnalysisDashboardTabsComponent
   ],
   imports: [
     CommonModule,

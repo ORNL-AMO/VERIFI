@@ -11,10 +11,10 @@ export const UtilityColors = {
     "Other Energy": {
         "color": "#CC79A7"
     },
-    "Water": {
+    "Water Intake": {
         "color": "#56B4E9"
     },
-    "Waste Water": {
+    "Water Discharge": {
         "color": "#0072B2"
     },
     "Other Utility": {

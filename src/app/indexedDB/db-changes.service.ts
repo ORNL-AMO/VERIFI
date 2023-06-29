@@ -170,6 +170,13 @@ export class DbChangesService {
 
   async setMeters(account: IdbAccount, facility?: IdbFacility) {
     let accountMeters: Array<IdbUtilityMeter> = await this.utilityMeterDbService.getAllAccountMeters(account.guid);
+    for (let i = 0; i < accountMeters.length; i++) {
+      let updateMeter: { utilityMeter: IdbUtilityMeter, isChanged: boolean } = this.updateDbEntryService.updateUtilityMeter(accountMeters[i]);
+      if (updateMeter.isChanged) {
+        accountMeters[i] = updateMeter.utilityMeter;
+        await firstValueFrom(this.utilityMeterDbService.updateWithObservable(accountMeters[i]));
+      };
+    }
     this.utilityMeterDbService.accountMeters.next(accountMeters);
     if (facility) {
       this.setFacilityMeters(facility);

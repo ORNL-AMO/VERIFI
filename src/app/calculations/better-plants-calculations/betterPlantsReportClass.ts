@@ -5,6 +5,7 @@ import { BetterPlantsSummary } from "src/app/models/overview-report";
 import { AnnualAccountAnalysisSummaryClass } from "src/app/calculations/analysis-calculations/annualAccountAnalysisSummaryClass";
 import { AnnualFacilityAnalysisSummaryClass } from "src/app/calculations/analysis-calculations/annualFacilityAnalysisSummaryClass";
 import { BetterPlantsEnergySummaryClass } from "./betterPlantsEnergySummaryClass";
+import { BetterPlantsWaterSummaryClass } from "./betterPlantsWaterSummaryClass";
 
 export class BetterPlantsReportClass {
 
@@ -13,9 +14,14 @@ export class BetterPlantsReportClass {
     baselineYearAnalysisSummary: AnnualAnalysisSummary;
     reportYearEnergySummaryClass: BetterPlantsEnergySummaryClass;
     baselineYearEnergySummaryClass: BetterPlantsEnergySummaryClass;
+    reportYearWaterSummaryClass: BetterPlantsWaterSummaryClass;
+    baselineYearWaterSummaryClass: BetterPlantsWaterSummaryClass;
     adjustedBaselinePrimaryEnergy: number;
     totalEnergySavings: number;
-    percentTotalImprovement: number;
+    percentTotalEnergyImprovement: number;
+    totalWaterSavings: number;
+    percentTotalWaterImprovement: number;
+    adjustedBaselinePrimaryWater: number;
     constructor(
         baselineYear: number,
         reportYear: number,
@@ -27,12 +33,19 @@ export class BetterPlantsReportClass {
         accountAnalysisItems: Array<IdbAnalysisItem>
     ) {
         this.setFacilityPerformance(selectedAnalysisItem, facilities, calanderizedMeters, accountPredictorEntries, accountAnalysisItems);
-        this.setReportAndBaselineYearSummaries(selectedAnalysisItem, account, calanderizedMeters, facilities, accountPredictorEntries, accountAnalysisItems, baselineYear, reportYear);
-        this.setReportYearEnergySummaryClass(calanderizedMeters, reportYear);
-        this.setBaselineYearEnergySummaryClass(calanderizedMeters, baselineYear);
+        let includedCalanderizedMeters: Array<CalanderizedMeter> = this.getIncludedMeters(calanderizedMeters, selectedAnalysisItem, accountAnalysisItems);
+        this.setReportAndBaselineYearSummaries(selectedAnalysisItem, account, includedCalanderizedMeters, facilities, accountPredictorEntries, accountAnalysisItems, baselineYear, reportYear);
+        this.setReportYearEnergySummaryClass(includedCalanderizedMeters, reportYear);
+        this.setBaselineYearEnergySummaryClass(includedCalanderizedMeters, baselineYear);
         this.setAdjustBaselinePrimaryEnergy();
         this.setTotalEnergySavings();
-        this.setPercentTotalImprovement();
+        this.setPercentTotalEnergyImprovement();
+
+        this.setReportYearWaterSummaryClass(includedCalanderizedMeters, reportYear, facilities, selectedAnalysisItem, accountAnalysisItems);
+        this.setBaselineYearWaterSummaryClass(includedCalanderizedMeters, baselineYear, facilities, selectedAnalysisItem, accountAnalysisItems);
+        this.setAdjustBaselinePrimaryWater();
+        this.setTotalWaterSavings();
+        this.setPercentTotalWaterImprovement();
     }
 
     setFacilityPerformance(
@@ -46,7 +59,7 @@ export class BetterPlantsReportClass {
         selectedAnalysisItem.facilityAnalysisItems.forEach(item => {
             if (item.analysisItemId != undefined && item.analysisItemId != 'skip') {
                 let facilityAnalysisItem: IdbAnalysisItem = accountAnalysisItems.find(accountItem => { return accountItem.guid == item.analysisItemId });
-                let calanderizedFacilityMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(meter => { return meter.meter.facilityId == item.facilityId });
+                let calanderizedFacilityMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => { return cMeter.meter.facilityId == item.facilityId });
                 let facility: IdbFacility = facilities.find(facility => { return facility.guid == item.facilityId });
                 let facilityAnalysisSummaryClass: AnnualFacilityAnalysisSummaryClass = new AnnualFacilityAnalysisSummaryClass(facilityAnalysisItem, facility, calanderizedFacilityMeters, accountPredictorEntries, false);
                 let annualAnalysisSummary: Array<AnnualAnalysisSummary> = facilityAnalysisSummaryClass.getAnnualAnalysisSummaries();
@@ -74,6 +87,7 @@ export class BetterPlantsReportClass {
         this.baselineYearAnalysisSummary = annualAnalysisSummaries.find(summary => { return summary.year == baselineYear });
     }
 
+    //Energy
     setReportYearEnergySummaryClass(calanderizedMeters: Array<CalanderizedMeter>, year: number) {
         this.reportYearEnergySummaryClass = new BetterPlantsEnergySummaryClass(calanderizedMeters, year);
     }
@@ -90,8 +104,29 @@ export class BetterPlantsReportClass {
         this.totalEnergySavings = this.adjustedBaselinePrimaryEnergy - this.reportYearEnergySummaryClass.totalEnergyUse;
     }
 
-    setPercentTotalImprovement() {
-        this.percentTotalImprovement = (this.totalEnergySavings / this.adjustedBaselinePrimaryEnergy) * 100
+    setPercentTotalEnergyImprovement() {
+        this.percentTotalEnergyImprovement = (this.totalEnergySavings / this.adjustedBaselinePrimaryEnergy) * 100
+    }
+
+    //water
+    setReportYearWaterSummaryClass(calanderizedMeters: Array<CalanderizedMeter>, year: number, facilities: Array<IdbFacility>, selectedAnalysisItem: IdbAccountAnalysisItem, accountAnalysisItems: Array<IdbAnalysisItem>) {
+        this.reportYearWaterSummaryClass = new BetterPlantsWaterSummaryClass(calanderizedMeters, year, facilities, selectedAnalysisItem, accountAnalysisItems);
+    }
+
+    setBaselineYearWaterSummaryClass(calanderizedMeters: Array<CalanderizedMeter>, year: number, facilities: Array<IdbFacility>, selectedAnalysisItem: IdbAccountAnalysisItem, accountAnalysisItems: Array<IdbAnalysisItem>) {
+        this.baselineYearWaterSummaryClass = new BetterPlantsWaterSummaryClass(calanderizedMeters, year, facilities, selectedAnalysisItem, accountAnalysisItems);
+    }
+
+    setAdjustBaselinePrimaryWater() {
+        this.adjustedBaselinePrimaryWater = this.reportYearAnalysisSummary.baselineAdjustmentForOther + this.baselineYearWaterSummaryClass.totalWaterIntake + this.reportYearAnalysisSummary.baselineAdjustmentForNormalization;
+    }
+
+    setTotalWaterSavings() {
+        this.totalWaterSavings = this.adjustedBaselinePrimaryWater - this.reportYearWaterSummaryClass.totalWaterIntake;
+    }
+
+    setPercentTotalWaterImprovement() {
+        this.percentTotalWaterImprovement = (this.totalWaterSavings / this.adjustedBaselinePrimaryWater) * 100
     }
 
 
@@ -99,13 +134,36 @@ export class BetterPlantsReportClass {
         return {
             facilityPerformance: this.facilityPerformance,
             percentAnnualImprovement: this.reportYearAnalysisSummary.annualSavingsPercentImprovement,
-            percentTotalImprovement: this.percentTotalImprovement,
+            percentTotalEnergyImprovement: this.percentTotalEnergyImprovement,
+            percentTotalWaterImprovement: this.percentTotalWaterImprovement,
             adjustedBaselinePrimaryEnergy: this.adjustedBaselinePrimaryEnergy,
+            adjustedBaselinePrimaryWater: this.adjustedBaselinePrimaryWater,
             reportYearAnalysisSummary: this.reportYearAnalysisSummary,
             baselineYearAnalysisSummary: this.baselineYearAnalysisSummary,
             totalEnergySavings: this.totalEnergySavings,
-            baselineYearResults: this.baselineYearEnergySummaryClass.getBetterPlantsEnergySummary(),
-            reportYearResults: this.reportYearEnergySummaryClass.getBetterPlantsEnergySummary()
+            totalWaterSavings: this.totalWaterSavings,
+            baselineYearEnergyResults: this.baselineYearEnergySummaryClass.getBetterPlantsEnergySummary(),
+            reportYearEnergyResults: this.reportYearEnergySummaryClass.getBetterPlantsEnergySummary(),
+            baselineYearWaterResults: this.baselineYearWaterSummaryClass.getBetterPlantsWaterSummary(),
+            reportYearWaterResults: this.reportYearWaterSummaryClass.getBetterPlantsWaterSummary()
         }
+    }
+
+    getIncludedMeters(calanderizedMeters: Array<CalanderizedMeter>, selectedAnalysisItem: IdbAccountAnalysisItem, accountAnalysisItems: Array<IdbAnalysisItem>) {
+        let includedCalanderizedMeters: Array<CalanderizedMeter> = new Array()
+        selectedAnalysisItem.facilityAnalysisItems.forEach(item => {
+            if (item.analysisItemId != undefined && item.analysisItemId != 'skip') {
+                let facilityAnalysisItem: IdbAnalysisItem = accountAnalysisItems.find(accountItem => { return accountItem.guid == item.analysisItemId });
+                facilityAnalysisItem.groups.forEach(group => {
+                    if (group.analysisType != 'skip') {
+                        let filteredMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => {
+                            return cMeter.meter.groupId == group.idbGroupId;
+                        });
+                        includedCalanderizedMeters = includedCalanderizedMeters.concat(filteredMeters);
+                    }
+                });
+            }
+        });
+        return includedCalanderizedMeters;
     }
 }

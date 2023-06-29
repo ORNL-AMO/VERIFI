@@ -1,8 +1,9 @@
 import { CalanderizedMeter, MonthlyData } from "src/app/models/calanderization";
-import { AnalysisGroup, IdbAnalysisItem, IdbFacility, IdbPredictorEntry, PredictorData } from "src/app/models/idb";
+import { IdbAnalysisItem, IdbFacility, IdbPredictorEntry, PredictorData } from "src/app/models/idb";
 import * as _ from 'lodash';
 import { filterYearMeterData, filterYearPredictorData, getMonthlyStartAndEndDate, getPredictorUsage } from "../shared-calculations/calculationsHelpers";
 import { getFiscalYear, getLastBillEntryFromCalanderizedMeterData } from "../shared-calculations/calanderizationFunctions";
+import { AnalysisGroup } from "src/app/models/analysis";
 
 export class MonthlyGroupAnalysisClass {
 
@@ -86,8 +87,13 @@ export class MonthlyGroupAnalysisClass {
     this.annualMeterDataUsage = new Array();
     for (let year = this.baselineYear + 1; year <= this.endDate.getUTCFullYear(); year++) {
       let yearMeterData: Array<MonthlyData> = this.groupMonthlyData.filter(data => { return data.year == year });
-      let totalUsage: number = _.sumBy(yearMeterData, 'energyUse');
-      this.annualMeterDataUsage.push({ year: year, usage: totalUsage });
+      if (this.analysisItem.analysisCategory == 'energy') {
+        let totalUsage: number = _.sumBy(yearMeterData, 'energyUse');
+        this.annualMeterDataUsage.push({ year: year, usage: totalUsage });
+      } else if (this.analysisItem.analysisCategory == 'water') {
+        let totalUsage: number = _.sumBy(yearMeterData, 'energyConsumption');
+        this.annualMeterDataUsage.push({ year: year, usage: totalUsage });
+      }
     }
   }
 
@@ -95,7 +101,12 @@ export class MonthlyGroupAnalysisClass {
     if (this.selectedGroup.analysisType == 'energyIntensity' || this.selectedGroup.analysisType == 'modifiedEnergyIntensity') {
       let baselineYearPredictorData: Array<IdbPredictorEntry> = filterYearPredictorData(this.facilityPredictorData, this.baselineYear, this.facility);
       let baselineMeterData: Array<MonthlyData> = filterYearMeterData(this.groupMonthlyData, this.baselineYear, this.facility);
-      let totalBaselineYearEnergy: number = _.sumBy(baselineMeterData, 'energyUse');
+      let totalBaselineYearEnergy: number
+      if (this.analysisItem.analysisCategory == 'energy') {
+        totalBaselineYearEnergy = _.sumBy(baselineMeterData, 'energyUse');
+      } else if (this.analysisItem.analysisCategory == 'water') {
+        totalBaselineYearEnergy = _.sumBy(baselineMeterData, 'energyConsumption');
+      }
       let totalPredictorUsage: number = getPredictorUsage(this.predictorVariables, baselineYearPredictorData);
       this.baselineYearEnergyIntensity = totalBaselineYearEnergy / totalPredictorUsage;
     } else {
@@ -107,7 +118,12 @@ export class MonthlyGroupAnalysisClass {
     if (selectedGroup.analysisType == 'energyIntensity' || selectedGroup.analysisType == 'modifiedEnergyIntensity') {
       let baselineYearPredictorData: Array<IdbPredictorEntry> = filterYearPredictorData(facilityPredictorData, baselineYear, facility);
       let baselineMeterData: Array<MonthlyData> = filterYearMeterData(allMeterData, baselineYear, facility);
-      let totalBaselineYearEnergy: number = _.sumBy(baselineMeterData, 'energyUse');
+      let totalBaselineYearEnergy: number;
+      if (this.analysisItem.analysisCategory == 'energy') {
+        totalBaselineYearEnergy = _.sumBy(baselineMeterData, 'energyUse');
+      } else if (this.analysisItem.analysisCategory == 'water') {
+        totalBaselineYearEnergy = _.sumBy(baselineMeterData, 'energyConsumption');
+      }
       let totalPredictorUsage: number = getPredictorUsage(predictorVariables, baselineYearPredictorData);
       return totalBaselineYearEnergy / totalPredictorUsage;
     } else {

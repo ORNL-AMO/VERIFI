@@ -84,7 +84,7 @@
         </div>
         <div class="row sub-column" *ngFor="let predictor of group.predictorVariables">
             <div class="col-4">
-                {{predictor.name}}<span *ngIf="predictor.unit">({{predictor.unit}})</span>
+                {{predictor.name}}<span class="ps-1" *ngIf="predictor.unit">({{predictor.unit}})</span>
             </div>
             <div class="col-4">
                 <label class="switch" for="{{'predictor_'+predictor.id}}">

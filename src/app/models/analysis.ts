@@ -1,4 +1,4 @@
-import { AnalysisGroup, IdbPredictorEntry, PredictorData } from "./idb";
+import { PredictorData } from "./idb";
 
 export interface MonthlyGroupSummary {
   date: Date,
@@ -70,7 +70,7 @@ export interface MonthlyAnalysisSummaryData {
   yearToDateSavings: number,
   yearToDatePercentSavings: number,
   rollingSavings: number,
-  rolling12MonthImprovement: number,  
+  rolling12MonthImprovement: number,
   // groupsSummaryData?: Array<MonthlyAnalysisSummaryData>,
 }
 
@@ -170,3 +170,59 @@ export interface SEPValidation {
   modelMinus3StdDevValid: boolean,
   isValid: boolean
 }
+
+
+export interface AnalysisSetupErrors {
+  hasError: boolean,
+  missingName: boolean,
+  noGroups: boolean,
+  missingReportYear: boolean,
+  reportYearBeforeBaselineYear: boolean,
+  groupsHaveErrors: boolean,
+  missingBaselineYear: boolean,
+  baselineYearAfterMeterDataEnd: boolean,
+  baselineYearBeforeMeterDataStart: boolean
+}
+
+export interface AnalysisGroup {
+  idbGroupId: string,
+  analysisType: AnalysisType,
+  predictorVariables: Array<PredictorData>,
+  regressionModelYear: number,
+  regressionConstant: number,
+  groupErrors: GroupErrors,
+  specifiedMonthlyPercentBaseload: boolean,
+  averagePercentBaseload?: number,
+  monthlyPercentBaseload: Array<{
+    monthNum: number,
+    percent: number
+  }>,
+  hasBaselineAdjustement: boolean,
+  baselineAdjustments: Array<{
+    year: number,
+    amount: number
+  }>,
+  userDefinedModel: boolean,
+  models?: Array<JStatRegressionModel>,
+  selectedModelId?: string,
+  dateModelsGenerated?: Date,
+  regressionModelNotes?: string
+}
+
+export interface GroupErrors {
+  hasErrors: boolean,
+  missingProductionVariables: boolean,
+  missingRegressionConstant: boolean,
+  missingRegressionModelYear: boolean,
+  missingRegressionModelSelection: boolean,
+  missingRegressionPredictorCoef: boolean,
+  noProductionVariables: boolean,
+  invalidAverageBaseload: boolean,
+  invalidMonthlyBaseload: boolean,
+  missingGroupMeters: boolean,
+  hasInvalidRegressionModel: boolean
+}
+
+
+export type AnalysisType = 'absoluteEnergyConsumption' | 'energyIntensity' | 'modifiedEnergyIntensity' | 'regression' | 'skip' | 'skipAnalysis';
+export type AnalysisCategory = 'energy' | 'water';

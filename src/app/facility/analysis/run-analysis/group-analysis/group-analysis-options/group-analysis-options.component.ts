@@ -2,12 +2,13 @@ import { Component, OnInit } from '@angular/core';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { AnalysisGroup, IdbAccount, IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
+import { IdbAccount, IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 import * as _ from 'lodash';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { Router } from '@angular/router';
+import { AnalysisGroup } from 'src/app/models/analysis';
 import { AnalysisValidationService } from 'src/app/shared/helper-services/analysis-validation.service';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 
@@ -34,10 +35,9 @@ export class GroupAnalysisOptionsComponent implements OnInit {
   ngOnInit(): void {
     this.facility = this.facilityDbService.selectedFacility.getValue();
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
-    this.yearOptions = this.calanderizationService.getYearOptionsFacility(this.facility.guid);
+    this.yearOptions = this.calanderizationService.getYearOptionsFacility(this.facility.guid, this.analysisItem.analysisCategory);
     this.selectedGroupSub = this.analysisService.selectedGroup.subscribe(group => {
       this.group = group;
-      this.checkUnitsWarning();
     });
   }
 
@@ -56,16 +56,6 @@ export class GroupAnalysisOptionsComponent implements OnInit {
     await this.dbChangesService.setAnalysisItems(selectedAccount, false, this.facility);
     this.analysisDbService.selectedAnalysisItem.next(analysisItem);
     this.analysisService.selectedGroup.next(this.group);
-  }
-
-  setProductionUnits() {
-    this.group.productionUnits = this.analysisDbService.getUnits(this.group.predictorVariables);
-    this.checkUnitsWarning();
-    this.saveItem();
-  }
-
-  checkUnitsWarning() {
-    this.showUnitsWarning = (this.group.productionUnits == 'units');
   }
 
   setAnalysisType() {

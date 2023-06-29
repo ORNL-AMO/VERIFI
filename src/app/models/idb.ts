@@ -1,6 +1,7 @@
 import { AccountAnalysisSetupErrors } from './accountAnalysis';
-import { JStatRegressionModel } from './analysis';
+import { AnalysisCategory, AnalysisGroup, AnalysisSetupErrors } from './analysis';
 import { MonthlyData } from './calanderization';
+import { FacilityClassification, MeterPhase, MeterSource, ReportType, WaterDischargeType, WaterIntakeType } from './constantsAndTypes';
 import { ElectricityDataFilters, GeneralUtilityDataFilters } from './meterDataFilter';
 import { BetterPlantsReportSetup, DataOverviewReportSetup } from './overview-report';
 import { SustainabilityQuestions } from './sustainabilityQuestions';
@@ -87,7 +88,8 @@ export interface IdbFacility {
     contactPhone: string,
     modifiedDate?: Date,
     facilityOrder?: number,
-    isNewFacility?: boolean
+    isNewFacility?: boolean,
+    classification?: FacilityClassification
 }
 
 export interface IdbUtilityMeterGroup {
@@ -150,7 +152,9 @@ export interface IdbUtilityMeter {
     marketGHGMultiplier: number,
     locationGHGMultiplier: number,
     isValid?: boolean,
-    skipImport?: boolean
+    skipImport?: boolean,
+    waterIntakeType?: WaterIntakeType,
+    waterDischargeType?: WaterDischargeType
 }
 
 export interface IdbUtilityMeterData {
@@ -278,66 +282,17 @@ export interface IdbAnalysisItem {
     facilityId: string,
     date: Date,
     name: string,
+    analysisCategory: AnalysisCategory,
     energyIsSource: boolean,
     reportYear: number,
     energyUnit: string,
+    waterUnit: string,
     setupErrors: AnalysisSetupErrors,
     groups: Array<AnalysisGroup>,
     selectedYearAnalysis?: boolean,
     baselineYear: number
 }
 
-export interface AnalysisSetupErrors {
-    hasError: boolean,
-    missingName: boolean,
-    noGroups: boolean,
-    missingReportYear: boolean,
-    missingBaselineYear: boolean,
-    reportYearBeforeBaselineYear: boolean,
-    groupsHaveErrors: boolean,
-    baselineYearAfterMeterDataEnd: boolean,
-    baselineYearBeforeMeterDataStart: boolean,
-}
-
-export interface AnalysisGroup {
-    idbGroupId: string,
-    analysisType: AnalysisType,
-    predictorVariables: Array<PredictorData>,
-    productionUnits: string,
-    regressionModelYear: number,
-    regressionConstant: number,
-    groupErrors: GroupErrors,
-    specifiedMonthlyPercentBaseload: boolean,
-    averagePercentBaseload?: number,
-    monthlyPercentBaseload: Array<{
-        monthNum: number,
-        percent: number
-    }>,
-    hasBaselineAdjustement: boolean,
-    baselineAdjustments: Array<{
-        year: number,
-        amount: number
-    }>,
-    userDefinedModel: boolean,
-    models?: Array<JStatRegressionModel>,
-    selectedModelId?: string,
-    dateModelsGenerated?: Date,
-    regressionModelNotes?: string
-}
-
-export interface GroupErrors {
-    hasErrors: boolean,
-    missingProductionVariables: boolean,
-    missingRegressionConstant: boolean,
-    missingRegressionModelYear: boolean,
-    missingRegressionModelSelection: boolean,
-    missingRegressionPredictorCoef: boolean,
-    noProductionVariables: boolean,
-    invalidAverageBaseload: boolean,
-    invalidMonthlyBaseload: boolean,
-    missingGroupMeters: boolean,
-    hasInvalidRegressionModel: boolean
-}
 
 export interface IdbAccountAnalysisItem {
     id?: number,
@@ -358,6 +313,8 @@ export interface IdbAccountAnalysisItem {
         amount: number
     }>,
     selectedYearAnalysis?: boolean,
+    analysisCategory: AnalysisCategory,
+    waterUnit: string,
     baselineYear: number,
     setupErrors: AccountAnalysisSetupErrors
 }
@@ -374,13 +331,3 @@ export interface IdbCustomEmissionsItem {
 }
 
 
-
-export type AnalysisType = 'absoluteEnergyConsumption' | 'energyIntensity' | 'modifiedEnergyIntensity' | 'regression' | 'skip';
-export type MeterSource = "Electricity" | "Natural Gas" | "Other Fuels" | "Other Energy" | "Water" | "Waste Water" | "Other Utility";
-export type MeterPhase = "Solid" | "Liquid" | "Gas";
-export type ReportType = "betterPlants" | 'dataOverview';
-
-
-export const EnergySources: Array<MeterSource> = ["Electricity", "Natural Gas", "Other Fuels", "Other Energy"];
-export const AllSources: Array<MeterSource> = ["Electricity", "Natural Gas", "Other Fuels", "Other Energy", "Water", "Waste Water", "Other Utility"];
-export const WaterSources: Array<MeterSource> = ["Water", "Waste Water"];

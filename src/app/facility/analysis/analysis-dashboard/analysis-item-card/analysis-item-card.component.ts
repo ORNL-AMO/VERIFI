@@ -7,8 +7,8 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { JStatRegressionModel } from 'src/app/models/analysis';
-import { AnalysisGroup, IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility, PredictorData } from 'src/app/models/idb';
+import { AnalysisGroup, JStatRegressionModel } from 'src/app/models/analysis';
+import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility, PredictorData } from 'src/app/models/idb';
 import { AnalysisService } from '../../analysis.service';
 
 @Component({
@@ -83,9 +83,9 @@ export class AnalysisItemCardComponent implements OnInit {
 
   selectAnalysisItem() {
     this.analysisDbService.selectedAnalysisItem.next(this.analysisItem);
-    if(this.analysisItem.setupErrors.hasError || this.analysisItem.setupErrors.groupsHaveErrors){
+    if (this.analysisItem.setupErrors.hasError || this.analysisItem.setupErrors.groupsHaveErrors) {
       this.router.navigateByUrl('facility/' + this.selectedFacility.id + '/analysis/run-analysis');
-    }else{
+    } else {
       this.router.navigateByUrl('facility/' + this.selectedFacility.id + '/analysis/run-analysis/facility-analysis');
     }
   }
@@ -170,17 +170,18 @@ export class AnalysisItemCardComponent implements OnInit {
 
   async setUseItem() {
     let facilityAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.facilityAnalysisItems.getValue();
-    for (let i = 0; i < facilityAnalysisItems.length; i++) {
-      if (facilityAnalysisItems[i].guid == this.analysisItem.guid) {
-        if (facilityAnalysisItems[i].selectedYearAnalysis) {
-          facilityAnalysisItems[i].selectedYearAnalysis = false;
+    let categoryAnalysisItems: Array<IdbAnalysisItem> = facilityAnalysisItems.filter(item => { return item.analysisCategory == this.analysisItem.analysisCategory });
+    for (let i = 0; i < categoryAnalysisItems.length; i++) {
+      if (categoryAnalysisItems[i].guid == this.analysisItem.guid) {
+        if (categoryAnalysisItems[i].selectedYearAnalysis) {
+          categoryAnalysisItems[i].selectedYearAnalysis = false;
         } else {
-          facilityAnalysisItems[i].selectedYearAnalysis = true;
+          categoryAnalysisItems[i].selectedYearAnalysis = true;
         }
-        await firstValueFrom(this.analysisDbService.updateWithObservable(facilityAnalysisItems[i]));
-      } else if (facilityAnalysisItems[i].reportYear == this.analysisItem.reportYear && facilityAnalysisItems[i].selectedYearAnalysis) {
-        facilityAnalysisItems[i].selectedYearAnalysis = false;
-        await firstValueFrom(this.analysisDbService.updateWithObservable(facilityAnalysisItems[i]));
+        await firstValueFrom(this.analysisDbService.updateWithObservable(categoryAnalysisItems[i]));
+      } else if (categoryAnalysisItems[i].reportYear == this.analysisItem.reportYear && categoryAnalysisItems[i].selectedYearAnalysis) {
+        categoryAnalysisItems[i].selectedYearAnalysis = false;
+        await firstValueFrom(this.analysisDbService.updateWithObservable(categoryAnalysisItems[i]));
       }
     }
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();

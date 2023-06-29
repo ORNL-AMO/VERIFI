@@ -1,0 +1,18 @@
+
+.progress {
+    margin: 7px 0px;
+    /* height: 8px; */
+}
+.progress-bar {
+    background-color: #7D3C98;
+}
+.progress-bar-data {
+    position: absolute;
+    right: 50%;
+    top: 35px;
+    font-weight: bold;
+}
+
+.label-font{
+    font-size: 18px;
+}

@@ -46,7 +46,7 @@ export class MonthlyFacilityAnalysisClass {
     setGroupSummaries(analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, calculateAllMonthlyData: boolean) {
         let groupMonthlySummariesClasses: Array<MonthlyAnalysisSummaryClass> = new Array();
         analysisItem.groups.forEach(group => {
-            if (group.analysisType != 'skip') {
+            if (group.analysisType != 'skip' && group.analysisType != 'skipAnalysis') {
                 let monthlySummary: MonthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(group, analysisItem, facility, calanderizedMeters, this.facilityPredictorEntries, calculateAllMonthlyData);
                 groupMonthlySummariesClasses.push(monthlySummary);
             }
