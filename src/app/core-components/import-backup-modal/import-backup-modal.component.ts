@@ -8,6 +8,7 @@ import { LoadingService } from '../loading/loading.service';
 import { ImportBackupModalService } from './import-backup-modal.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { Router } from '@angular/router';
+import { ToastNotificationsService } from '../toast-notifications/toast-notifications.service';
 
 @Component({
   selector: 'app-import-backup-modal',
@@ -34,16 +35,17 @@ export class ImportBackupModalComponent implements OnInit {
     private facilityDbService: FacilitydbService,
     private importBackupModalService: ImportBackupModalService,
     private dbChangesService: DbChangesService,
-    private router: Router) { }
+    private router: Router,
+    private toastNotificationService: ToastNotificationsService) { }
 
   ngOnInit(): void {
     this.showModalSub = this.importBackupModalService.showModal.subscribe(value => {
       this.showModal = value;
       this.inFacility = this.importBackupModalService.inFacility;
-      this.backupFile = undefined;
-      this.backupFileError = undefined;
-      this.backupName = undefined;
       if (this.showModal == true) {
+        this.backupFile = undefined;
+        this.backupFileError = undefined;
+        this.backupName = undefined;
         this.selectedAccount = this.accountDbService.selectedAccount.getValue();
         this.accountFacilities = this.facilityDbService.accountFacilities.getValue();
         if (!this.selectedAccount) {
@@ -112,22 +114,28 @@ export class ImportBackupModalComponent implements OnInit {
     this.cancelImportBackup();
     this.loadingService.setLoadingStatus(true);
     this.loadingService.setLoadingMessage("Importing backup file...")
-    let tmpBackupFile: BackupFile = JSON.parse(this.backupFile);
-    if (this.importIsAccount) {
-      if (this.overwriteData) {
-        await this.importExistingAccount(tmpBackupFile);
+    try {
+      let tmpBackupFile: BackupFile = JSON.parse(this.backupFile);
+      if (this.importIsAccount) {
+        if (this.overwriteData) {
+          await this.importExistingAccount(tmpBackupFile);
+        } else {
+          await this.importNewAccount(tmpBackupFile);
+        }
       } else {
-        await this.importNewAccount(tmpBackupFile);
+        if (this.overwriteData) {
+          await this.importExistingFacility(tmpBackupFile);
+        } else {
+          await this.importNewFacility(tmpBackupFile)
+        }
       }
-    } else {
-      if (this.overwriteData) {
-        await this.importExistingFacility(tmpBackupFile);
-      } else {
-        await this.importNewFacility(tmpBackupFile)
-      }
+      this.loadingService.setLoadingStatus(false);
+      this.router.navigateByUrl('account');
+    } catch (err) {
+      console.log(err);
+      this.toastNotificationService.showToast('Error importing backup', 'There was an error importing this data file.', 15000, false, 'alert-danger');
+      this.loadingService.setLoadingStatus(false);
     }
-    this.loadingService.setLoadingStatus(false);
-    this.router.navigateByUrl('account');
   }
 
   async importNewAccount(backupFile: BackupFile) {

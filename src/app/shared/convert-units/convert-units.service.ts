@@ -43,6 +43,7 @@ import { thermalConductivity } from './definitions/thermalConductivity';
 
 
 import * as _ from 'lodash';
+import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 // import * as keys from 'lodash.keys';
 // import * as each from 'lodash.foreach';
 
@@ -85,7 +86,7 @@ export class ConvertUnitsService {
   destination: any;
   val: any;
 
-  constructor() { }
+  constructor(private toastNotificationService: ToastNotificationsService) { }
 
   value(val: any) {
     this.origin = null;
@@ -115,8 +116,9 @@ export class ConvertUnitsService {
     //   throw new Error('.from must be called before .to');
     this.origin = this.getUnit(from);
     if (!this.origin) {
-      this.throwUnsupportedUnitError(from);
-      // return this;
+      // this.throwUnsupportedUnitError(from);
+      this.showErrorNotification('Unsupported unit ' + from + '. Values may not be converted correctly.')
+      return this;
     }
     return this;
   }
@@ -124,6 +126,7 @@ export class ConvertUnitsService {
   to(to: any) {
     if (!this.origin) {
       // throw new Error('.to must be called after .from');
+      // this.showErrorNotification('.to must be called after .from')
       return this.val
     }
 
@@ -134,6 +137,7 @@ export class ConvertUnitsService {
 
     if (!this.destination) {
       // this.throwUnsupportedUnitError(to);
+      this.showErrorNotification('Unsupported unit ' + to + '. Values may not be converted correctly.')
       return this.val;
     }
 
@@ -144,8 +148,11 @@ export class ConvertUnitsService {
 
     // You can't go from liquid to mass, for example
     if (this.destination.measure !== this.origin.measure) {
-      throw new Error('Cannot convert incompatible measures of '
-        + this.destination.measure + ' and ' + this.origin.measure);
+      // throw new Error('Cannot convert incompatible measures of '
+      //   + this.destination.measure + ' and ' + this.origin.measure);
+      this.showErrorNotification('Cannot convert incompatible measures of '
+        + this.destination.measure + ' and ' + this.origin.measure)
+      return this.val;
     }
 
     /**
@@ -221,19 +228,25 @@ export class ConvertUnitsService {
     return found;
   }
 
-  throwUnsupportedUnitError(what: any) {
-    var validUnits = [];
-    _.each(this._measures, function (systems, measure) {
-      _.each(systems, function (units, system) {
-        if (system === '_anchors')
-          return false;
+  // throwUnsupportedUnitError(what: any) {
+  //   var validUnits = [];
+  //   _.each(this._measures, function (systems, measure) {
+  //     _.each(systems, function (units, system) {
+  //       if (system === '_anchors')
+  //         return false;
 
-        validUnits = validUnits.concat(_.keys(units));
-      });
-    });
+  //       validUnits = validUnits.concat(_.keys(units));
+  //     });
+  //   });
 
-    throw new Error('Unsupported unit ' + what + ', use one of: ' + validUnits.join(', '));
+  //   // throw new Error('Unsupported unit ' + what + ', use one of: ' + validUnits.join(', '));
+  //   this.toastNotificationService.showToast('Error in unit conversions', 'Unsupported unit ' + what + '. Values may not be converted correctly.', undefined, false, 'alert-danger');
+  // }
+
+  showErrorNotification(errorMsg: string) {
+    this.toastNotificationService.showToast('Error in unit conversions', errorMsg, 10000, false, 'alert-danger');
   }
+
 
   possibilities(measure): Array<string> {
     var possibilities = [];

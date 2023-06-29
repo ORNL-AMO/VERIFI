@@ -29,7 +29,7 @@ export class ManageAccountsComponent {
 
   showDeleteAccount: boolean = false;
   selectedAccount: IdbAccount;
-
+  resetDatabase: boolean = false;
   constructor(private accountDbService: AccountdbService, private loadingService: LoadingService,
     private dbChangesService: DbChangesService, private router: Router,
     private toastNotificationService: ToastNotificationsService,
@@ -140,4 +140,14 @@ export class ManageAccountsComponent {
     this.toastNotificationService.showToast('Account Deleted!', undefined, undefined, false, 'alert-success');
   }
 
+ 
+  async deleteDatabase() {
+    this.loadingService.setLoadingStatus(true);
+    this.loadingService.setLoadingMessage('Resetting Database, if this takes too long restart application..');
+    this.accountDbService.deleteDatabase();
+  }
+
+  toggleResetDatabase() {
+    this.resetDatabase = !this.resetDatabase;
+  }
 }
