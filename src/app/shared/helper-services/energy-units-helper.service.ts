@@ -169,7 +169,7 @@ export class EnergyUnitsHelperService {
     } else if (source == 'Water Intake' || source == 'Water Discharge') {
       return VolumeLiquidOptions;
     } else if (source == 'Other Utility') {
-      return EnergyUnitOptions.concat(VolumeGasOptions).concat(VolumeLiquidOptions).concat(MassUnitOptions).concat(ChilledWaterUnitOptions);
+      return VolumeGasOptions.concat(VolumeLiquidOptions).concat(MassUnitOptions).concat(ChilledWaterUnitOptions);
     }
     return EnergyUnitOptions;
   }
