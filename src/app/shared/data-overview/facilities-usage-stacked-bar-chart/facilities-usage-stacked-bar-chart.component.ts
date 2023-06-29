@@ -210,7 +210,7 @@ export class FacilitiesUsageStackedBarChartComponent {
         name: 'Water',
         type: 'bar',
         marker: {
-          color: UtilityColors['Water'].color
+          color: UtilityColors['Water Intake'].color
         }
       })
     }
@@ -221,7 +221,7 @@ export class FacilitiesUsageStackedBarChartComponent {
         name: 'Waste Water',
         type: 'bar',
         marker: {
-          color: UtilityColors['Waste Water'].color
+          color: UtilityColors['Water Discharge'].color
         }
       })
     }
