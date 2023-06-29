@@ -227,6 +227,8 @@ export class EditMeterFormComponent implements OnInit {
       let selectedFuelTypeOption: FuelTypeOption = this.fuelTypeOptions.find(option => { return option.value == this.meterForm.controls.fuel.value });
       let siteToSource: number = this.energyUseCalculationsService.getSiteToSource(this.meterForm.controls.source.value, selectedFuelTypeOption, this.meterForm.controls.agreementType.value);
       this.meterForm.controls.siteToSource.patchValue(siteToSource);
+    } else {
+      this.meterForm.controls.siteToSource.patchValue(1);
     }
   }
 

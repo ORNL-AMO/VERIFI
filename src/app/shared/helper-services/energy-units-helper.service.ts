@@ -4,7 +4,6 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbAccount, IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
 import { FuelTypeOption, GasOptions, LiquidOptions, OtherEnergyOptions, SolidOptions, SourceOptions } from 'src/app/facility/utility-data/energy-consumption/energy-source/edit-meter-form/editMeterOptions';
 import { ChilledWaterUnitOptions, EnergyUnitOptions, MassUnitOptions, UnitOption, VolumeGasOptions, VolumeLiquidOptions } from '../unitOptions';
-import { EnergyUseCalculationsService } from './energy-use-calculations.service';
 import { getIsEnergyMeter, getIsEnergyUnit } from '../sharedHelperFuntions';
 import { MeterPhase, MeterSource } from 'src/app/models/constantsAndTypes';
 
@@ -13,13 +12,17 @@ import { MeterPhase, MeterSource } from 'src/app/models/constantsAndTypes';
 })
 export class EnergyUnitsHelperService {
 
-  constructor(private facilityDbService: FacilitydbService, private accountDbService: AccountdbService,
-    private energyUseCalculationsService: EnergyUseCalculationsService) { }
+  constructor(private facilityDbService: FacilitydbService, private accountDbService: AccountdbService,) { }
 
   getMeterConsumptionUnitInAccount(meter: IdbUtilityMeter): string {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     if (selectedAccount) {
-      let isEnergyMeter: boolean = getIsEnergyMeter(meter.source);
+      let isEnergyMeter: boolean;
+      if (meter.source == 'Other Utility') {
+        isEnergyMeter = getIsEnergyUnit(meter.startingUnit);
+      } else {
+        isEnergyMeter = getIsEnergyMeter(meter.source);
+      }
       //use meter unit 
       if (isEnergyMeter) {
         return selectedAccount.energyUnit;
@@ -35,7 +38,12 @@ export class EnergyUnitsHelperService {
     let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     let selectedFacility: IdbFacility = accountFacilities.find(facility => { return meter.facilityId == facility.guid });
     if (selectedFacility) {
-      let isEnergyMeter: boolean = getIsEnergyMeter(meter.source);
+      let isEnergyMeter: boolean;
+      if (meter.source == 'Other Utility') {
+        isEnergyMeter = getIsEnergyUnit(meter.startingUnit);
+      } else {
+        isEnergyMeter = getIsEnergyMeter(meter.source);
+      }
       //use meter unit 
       if (isEnergyMeter) {
         return selectedFacility.energyUnit;
@@ -87,6 +95,8 @@ export class EnergyUnitsHelperService {
       } else if (selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Chilled Water') {
         return selectedFacility.energyUnit;
       }
+    } else if (facilityMeter.source == 'Other Utility') {
+      return facilityMeter.startingUnit;
     }
   }
 
@@ -113,6 +123,8 @@ export class EnergyUnitsHelperService {
       } else if (selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Chilled Water') {
         return selectedAccount.energyUnit;
       }
+    } else if (accountMeter.source == 'Other Utility') {
+      return accountMeter.startingUnit;
     }
   }
 
