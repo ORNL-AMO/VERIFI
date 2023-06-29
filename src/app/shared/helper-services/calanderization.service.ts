@@ -67,12 +67,20 @@ export class CalanderizationService {
       let consumptionUnit: string = this.energyUnitsHelperService.getFacilityUnitFromMeter(meter);
       let showEmissions: boolean = (meter.source == "Electricity" || meter.source == "Natural Gas" || meter.source == "Other Fuels");
 
+      let showEnergyUse: boolean;
+      if(meter.source == 'Other Utility'){
+        showEnergyUse = getIsEnergyUnit(meter.startingUnit);
+      }else{
+        showEnergyUse = getIsEnergyMeter(meter.source);
+      }
+
+
       calanderizedMeterData.push({
         consumptionUnit: consumptionUnit,
         meter: meter,
         monthlyData: calanderizedMeter,
         showConsumption: showConsumption,
-        showEnergyUse: getIsEnergyMeter(meter.source),
+        showEnergyUse: showEnergyUse,
         energyUnit: calanderizedenergyUnit,
         showEmissions: showEmissions
       });
