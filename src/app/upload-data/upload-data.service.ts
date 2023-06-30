@@ -178,7 +178,13 @@ export class UploadDataService {
             meter.groupId = groupData.group.guid;
           }
           meter.phase = this.getPhase(meterData['Phase']);
-          meter.fuel = this.getFuelEnum(meterData['Fuel'], meter.source, meter.phase);
+          if (meter.source == 'Water Discharge') {
+            meter.waterDischargeType = meterData['Fuel'];
+          } else if (meter.source == 'Water Intake') {
+            meter.waterIntakeType = meterData['Fuel'];
+          } else {
+            meter.fuel = this.getFuelEnum(meterData['Fuel'], meter.source, meter.phase);
+          }
           meter.startingUnit = this.checkImportStartingUnit(meterData['Collection Unit'], meter.source, meter.phase, meter.fuel);
           meter.heatCapacity = meterData['Heat Capacity'];
           let isEnergyUnit: boolean = getIsEnergyUnit(meter.startingUnit);
