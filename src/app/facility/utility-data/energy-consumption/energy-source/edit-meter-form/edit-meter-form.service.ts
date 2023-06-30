@@ -169,8 +169,8 @@ export class EditMeterFormService {
     }
   }
 
-  checkShowEmissionsOutputRate(source: MeterSource): boolean {
-    if (source == "Electricity" || source == "Natural Gas" || source == "Other Fuels") {
+  checkShowEmissionsOutputRate(meter: IdbUtilityMeter): boolean {
+    if (meter.source == 'Electricity' || meter.source == 'Natural Gas' || meter.source == 'Other Fuels' || (meter.source == 'Other Energy' && meter.fuel == 'Purchased Compressed Air')) {
       return true;
     } else {
       return false;
