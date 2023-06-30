@@ -1,6 +1,6 @@
 <div class="d-flex w-100 justify-content-between">
     <div>
-        <app-utility-meter-data-filter *ngIf="editMeter.source == 'Electricity'" [source]="'Electricity'">
+        <app-utility-meter-data-filter *ngIf="editMeter.source == 'Electricity'" [meter]="editMeter">
         </app-utility-meter-data-filter>
     </div>
     <div class="saveCancel item-right">

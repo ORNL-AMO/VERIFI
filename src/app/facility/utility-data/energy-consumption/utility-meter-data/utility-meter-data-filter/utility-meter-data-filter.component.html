@@ -6,7 +6,7 @@
     <form class="dropdown-menu p-2">
         <!--ELECTRICITY FILTERS-->
         <p>Choose Table Columns</p>
-        <div class="row" *ngIf="source == 'Electricity'">
+        <div class="row" *ngIf="meter.source == 'Electricity'">
             <div class="col" *ngIf="filterType == 'table'">
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" name="totalCost" id="totalCost"
@@ -126,7 +126,7 @@
             </div>
         </div>
         <!--non electricity filters-->
-        <div class="row" *ngIf="source != 'Electricity'">
+        <div class="row" *ngIf="meter.source != 'Electricity'">
             <div class="col">
                 <div class="form-check" *ngIf="displayVolumeInput">
                     <input class="form-check-input" type="checkbox" name="totalVolume" id="totalVolume"

@@ -68,9 +68,9 @@ export class CalanderizationService {
       let showEmissions: boolean = (meter.source == "Electricity" || meter.source == "Natural Gas" || meter.source == "Other Fuels");
 
       let showEnergyUse: boolean;
-      if(meter.source == 'Other Utility'){
+      if (meter.source == 'Other Utility') {
         showEnergyUse = getIsEnergyUnit(meter.startingUnit);
-      }else{
+      } else {
         showEnergyUse = getIsEnergyMeter(meter.source);
       }
 
@@ -225,20 +225,20 @@ export class CalanderizationService {
 
         let readingType: 'mixed' | 'metered' | 'estimated';
         let allUsedReadings: Array<IdbUtilityMeterData> = [previousMonthReading];
-        if(nextMonthsReading){
+        if (nextMonthsReading) {
           allUsedReadings.push(nextMonthsReading);
           currentMonthsReadings.forEach(reading => {
             allUsedReadings.push(reading);
           });
         }
 
-        let readingsEstimated: Array<boolean> = allUsedReadings.map(reading => {return reading.isEstimated});
+        let readingsEstimated: Array<boolean> = allUsedReadings.map(reading => { return reading.isEstimated });
         let uniqEstimated: Array<boolean> = _.uniq(readingsEstimated);
-        if(uniqEstimated.length > 1){
+        if (uniqEstimated.length > 1) {
           readingType = 'mixed';
-        }else if(uniqEstimated[0] == true){
+        } else if (uniqEstimated[0] == true) {
           readingType = 'estimated';
-        }else {
+        } else {
           readingType = 'metered';
         }
 
@@ -411,13 +411,13 @@ export class CalanderizationService {
         }
 
         let readingType: 'mixed' | 'metered' | 'estimated';
-        let readingsEstimated: Array<boolean> = currentMonthsReadings.map(reading => {return reading.isEstimated});
+        let readingsEstimated: Array<boolean> = currentMonthsReadings.map(reading => { return reading.isEstimated });
         let uniqEstimated: Array<boolean> = _.uniq(readingsEstimated);
-        if(uniqEstimated.length > 1){
+        if (uniqEstimated.length > 1) {
           readingType = 'mixed';
-        }else if(uniqEstimated[0] == true){
+        } else if (uniqEstimated[0] == true) {
           readingType = 'estimated';
-        }else {
+        } else {
           readingType = 'metered';
         }
         calanderizeData.push({
@@ -725,11 +725,12 @@ export class CalanderizationService {
   }
 
   getEmissions(meter: IdbUtilityMeter, energyUse: number, energyUnit: string, year: number, energyIsSource: boolean): EmissionsResults {
-    if (meter.source == 'Electricity' || meter.source == 'Natural Gas' || meter.source == 'Other Fuels') {
+    let isCompressedAir: boolean = (meter.source == 'Other Energy' && meter.fuel == 'Purchased Compressed Air');
+    if (meter.source == 'Electricity' || meter.source == 'Natural Gas' || meter.source == 'Other Fuels' || isCompressedAir) {
       if (energyIsSource && meter.siteToSource != 0) {
         energyUse = energyUse / meter.siteToSource;
       } let convertedEnergyUse: number = energyUse;
-      if (meter.source == 'Electricity') {
+      if (meter.source == 'Electricity' || isCompressedAir) {
         //electricty emissions rates in kWh
         convertedEnergyUse = this.convertUnitsService.value(energyUse).from(energyUnit).to('kWh');
       } else {
@@ -740,7 +741,7 @@ export class CalanderizationService {
       let marketEmissions: number;
 
       let marketEmissionsOutputRate: number;
-      if (meter.source == 'Electricity') {
+      if (meter.source == 'Electricity' || isCompressedAir) {
         let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
         let meterFacility: IdbFacility = accountFacilities.find(facility => { return facility.guid == meter.facilityId });
         let emissionsRates: { marketRate: number, locationRate: number } = this.eGridService.getEmissionsRate(meterFacility.eGridSubregion, year);
@@ -793,13 +794,13 @@ export class CalanderizationService {
       let monthlyCost: number = _.sumBy(currentYearData, 'totalCost') / 12;
       let monthlyConsumption: number = _.sumBy(currentYearData, 'totalEnergyUse') / 12;
       let readingType: 'mixed' | 'metered' | 'estimated';
-      let readingsEstimated: Array<boolean> = currentYearData.map(reading => {return reading.isEstimated});
+      let readingsEstimated: Array<boolean> = currentYearData.map(reading => { return reading.isEstimated });
       let uniqEstimated: Array<boolean> = _.uniq(readingsEstimated);
-      if(uniqEstimated.length > 1){
+      if (uniqEstimated.length > 1) {
         readingType = 'mixed';
-      }else if(uniqEstimated[0] == true){
+      } else if (uniqEstimated[0] == true) {
         readingType = 'estimated';
-      }else {
+      } else {
         readingType = 'metered';
       }
       Months.forEach(month => {

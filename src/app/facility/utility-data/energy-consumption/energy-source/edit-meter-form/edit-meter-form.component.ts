@@ -272,6 +272,8 @@ export class EditMeterFormComponent implements OnInit {
         facilityUnit = this.facility.energyUnit;
       } else if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Hot Water') {
         facilityUnit = this.facility.energyUnit;
+      } else if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Compressed Air') {
+        facilityUnit = this.facility.volumeGasUnit;
       }
     } else if (selectedMeterSource == 'Water Intake' || selectedMeterSource == 'Water Discharge') {
       facilityUnit = this.facility.volumeLiquidUnit;

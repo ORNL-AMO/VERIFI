@@ -91,7 +91,7 @@ export class GeneralUtilityDataTableComponent implements OnInit {
     } else {
       this.showEnergyColumn = getIsEnergyMeter(this.selectedMeter.source);
     }
-    this.showEmissions = this.editMeterFormService.checkShowEmissionsOutputRate(this.selectedMeter.source);
+    this.showEmissions = this.editMeterFormService.checkShowEmissionsOutputRate(this.selectedMeter);
     this.showEstimated = (this.selectedMeterData.find(dataItem => { return dataItem.isEstimated == true })) != undefined;
     if (this.showEmissions) {
       this.setEmissions();

@@ -37,7 +37,7 @@ export class EditUtilityBillComponent implements OnInit {
     private calanderizationService: CalanderizationService, private editMeterFormService: EditMeterFormService) { }
 
   ngOnInit(): void {
-    this.showEmissions = this.editMeterFormService.checkShowEmissionsOutputRate(this.editMeter.source);
+    this.showEmissions = this.editMeterFormService.checkShowEmissionsOutputRate(this.editMeter);
     this.setTotalEmissions();
   }
 

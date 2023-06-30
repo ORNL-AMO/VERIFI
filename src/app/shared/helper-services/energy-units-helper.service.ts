@@ -92,8 +92,10 @@ export class EnergyUnitsHelperService {
       let selectedEnergyOption: FuelTypeOption = JSON.parse(JSON.stringify(OtherEnergyOptions.find(option => { return option.value == facilityMeter.fuel })));
       if (selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Steam') {
         return selectedFacility.massUnit;
-      } else if (selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Chilled Water') {
+      } else if (selectedEnergyOption.otherEnergyType && (selectedEnergyOption.otherEnergyType == 'Chilled Water' || selectedEnergyOption.otherEnergyType == 'Hot Water')) {
         return selectedFacility.energyUnit;
+      } else if (selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Compressed Air') {
+        return selectedFacility.volumeGasUnit;
       }
     } else if (facilityMeter.source == 'Other Utility') {
       return facilityMeter.startingUnit;
@@ -120,8 +122,10 @@ export class EnergyUnitsHelperService {
       let selectedEnergyOption: FuelTypeOption = JSON.parse(JSON.stringify(OtherEnergyOptions.find(option => { return option.value == accountMeter.fuel })));
       if (selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Steam') {
         return selectedAccount.massUnit;
-      } else if (selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Chilled Water') {
+      } else if (selectedEnergyOption.otherEnergyType && (selectedEnergyOption.otherEnergyType == 'Chilled Water' || selectedEnergyOption.otherEnergyType == 'Hot Water')) {
         return selectedAccount.energyUnit;
+      } else if (selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Compressed Air') {
+        return selectedAccount.volumeGasUnit;
       }
     } else if (accountMeter.source == 'Other Utility') {
       return accountMeter.startingUnit;
@@ -162,9 +166,10 @@ export class EnergyUnitsHelperService {
         return MassUnitOptions.concat(EnergyUnitOptions);
       } else if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Chilled Water') {
         return EnergyUnitOptions.concat(ChilledWaterUnitOptions)
-
       } else if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Hot Water') {
         return EnergyUnitOptions;
+      } else if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Compressed Air') {
+        return EnergyUnitOptions.concat(VolumeGasOptions);
       }
     } else if (source == 'Water Intake' || source == 'Water Discharge') {
       return VolumeLiquidOptions;
@@ -192,6 +197,10 @@ export class EnergyUnitsHelperService {
       let selectedEnergyOption: FuelTypeOption = OtherEnergyOptions.find(option => { return option.value == fuel });
       if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Steam') {
         return MassUnitOptions;
+      } else if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Chilled Water') {
+        return ChilledWaterUnitOptions
+      } else if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Compressed Air') {
+        return VolumeGasOptions;
       }
     } else if (source == 'Water Intake' || source == 'Water Discharge') {
       return VolumeLiquidOptions;
