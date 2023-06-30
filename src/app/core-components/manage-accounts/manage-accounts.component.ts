@@ -134,13 +134,13 @@ export class ManageAccountsComponent {
     await this.accountAnalysisDbService.deleteAccountAnalysisItems();
     this.loadingService.setLoadingMessage("Deleting Account...");
     await firstValueFrom(this.accountDbService.deleteAccountWithObservable(this.selectedAccount.id));
-    // Then navigate to another account
     this.accounts = await firstValueFrom(this.accountDbService.getAll());
+    this.accountDbService.allAccounts.next(this.accounts);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('Account Deleted!', undefined, undefined, false, 'alert-success');
   }
 
- 
+
   async deleteDatabase() {
     this.loadingService.setLoadingStatus(true);
     this.loadingService.setLoadingMessage('Resetting Database, if this takes too long restart application..');

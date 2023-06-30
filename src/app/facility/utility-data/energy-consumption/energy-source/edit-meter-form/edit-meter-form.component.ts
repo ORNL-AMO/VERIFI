@@ -65,6 +65,7 @@ export class EditMeterFormComponent implements OnInit {
     this.checkDisplayFuel();
     this.checkDisplayPhase();
     this.checkDisplaySource();
+    this.checkDisplayWaterTypes();
     this.setScopeOptions();
     this.setStartingUnitOptions();
     this.setUnitBooleans();

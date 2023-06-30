@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { FuelTypeOption, GasOptions, LiquidOptions, OtherEnergyOptions, SolidOptions } from 'src/app/facility/utility-data/energy-consumption/energy-source/edit-meter-form/editMeterOptions';
 import { ConvertUnitsService } from '../convert-units/convert-units.service';
-import { MeterPhase, MeterSource } from 'src/app/models/constantsAndTypes';
+import { MeterPhase, MeterSource, WaterSources } from 'src/app/models/constantsAndTypes';
 
 @Injectable({
   providedIn: 'root'
