@@ -848,6 +848,7 @@ export class CalanderizationService {
     let combinedMonthlyData: Array<MonthlyData> = calanderizedMeterData.flatMap(cMeter => { return cMeter.monthlyData });
     let allYears: Array<number> = combinedMonthlyData.flatMap(monthlyData => { return monthlyData.year });
     allYears = _.uniq(allYears);
+    allYears = _.orderBy(allYears, (val) => { return val }, 'asc');
     return allYears;
   }
 
@@ -858,6 +859,7 @@ export class CalanderizationService {
     let combinedMonthlyData: Array<MonthlyData> = calanderizedMeterData.flatMap(cMeter => { return cMeter.monthlyData });
     let allYears: Array<number> = combinedMonthlyData.flatMap(monthlyData => { return monthlyData.year });
     allYears = _.uniq(allYears);
+    allYears = _.orderBy(allYears, (val) => { return val }, 'asc');
     return allYears;
   }
 
