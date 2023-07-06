@@ -136,6 +136,7 @@ export class ManageAccountsComponent {
     await firstValueFrom(this.accountDbService.deleteAccountWithObservable(this.selectedAccount.id));
     this.accounts = await firstValueFrom(this.accountDbService.getAll());
     this.accountDbService.allAccounts.next(this.accounts);
+    this.accountDbService.selectedAccount.next(undefined);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('Account Deleted!', undefined, undefined, false, 'alert-success');
   }
