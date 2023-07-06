@@ -106,7 +106,7 @@ export class UtilityMetersTableComponent implements OnInit {
     let deleteMeterId: number = this.meterToDelete.id;
     let deleteMeterGuid: string = this.meterToDelete.guid;
     this.meterToDelete = undefined;
-    this.loadingService.setLoadingMessage('Deleteing Meters and Data...')
+    this.loadingService.setLoadingMessage('Deleting Meters and Data...')
     this.loadingService.setLoadingStatus(true);
     //delete meter
     await firstValueFrom(this.utilityMeterdbService.deleteIndexWithObservable(deleteMeterId));
