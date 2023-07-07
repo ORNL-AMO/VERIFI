@@ -74,7 +74,7 @@ export class EnergyUnitsHelperService {
   getFacilityUnitFromMeter(facilityMeter: IdbUtilityMeter): string {
     let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     let selectedFacility: IdbFacility = facilities.find(facility => { return facility.guid == facilityMeter.facilityId });
-    if (facilityMeter.source == 'Electricity') {
+    if (facilityMeter.source == 'Electricity' || getIsEnergyUnit(facilityMeter.startingUnit)) {
       return selectedFacility.energyUnit;
     } else if (facilityMeter.source == 'Natural Gas') {
       return selectedFacility.volumeGasUnit;
@@ -104,7 +104,7 @@ export class EnergyUnitsHelperService {
 
   getAccountUnitFromMeter(accountMeter: IdbUtilityMeter): string {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    if (accountMeter.source == 'Electricity') {
+    if (accountMeter.source == 'Electricity' || getIsEnergyUnit(accountMeter.startingUnit)) {
       return selectedAccount.energyUnit;
     } else if (accountMeter.source == 'Natural Gas') {
       return selectedAccount.volumeGasUnit;
