@@ -2,3 +2,7 @@
 .row.form-group{
     margin-bottom:.5rem;
 }
+
+td{
+    vertical-align: middle;
+}

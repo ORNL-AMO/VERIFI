@@ -1,4 +1,5 @@
-import { IdbUtilityMeter, IdbUtilityMeterGroup, MeterSource } from "./idb";
+import { MeterSource } from "./constantsAndTypes";
+import { IdbUtilityMeter, IdbUtilityMeterGroup } from "./idb";
 
 export interface CalanderizedMeter {
     meter: IdbUtilityMeter,
@@ -23,7 +24,8 @@ export interface MonthlyData {
     marketEmissions: number,    
     RECs: number,
     excessRECs: number, 
-    excessRECsEmissions: number
+    excessRECsEmissions: number,
+    readingType: 'mixed' | 'metered' | 'estimated'
 }
 
 export interface CalanderizationFilters {

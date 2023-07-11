@@ -4,13 +4,15 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
-import { CalanderizedMeter } from 'src/app/models/calanderization';
-import { IdbAccount, IdbAnalysisItem, IdbFacility, IdbPredictorEntry } from 'src/app/models/idb';
+import { CalanderizationOptions, CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
+import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility, IdbPredictorEntry, IdbUtilityMeter } from 'src/app/models/idb';
 import { AccountHomeService } from './account-home.service';
 import * as _ from 'lodash';
 import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { AnnualAccountAnalysisSummaryClass } from 'src/app/calculations/analysis-calculations/annualAccountAnalysisSummaryClass';
-import { AnnualFacilityAnalysisSummaryClass } from 'src/app/calculations/analysis-calculations/annualFacilityAnalysisSummaryClass';
+import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
+import { ConvertMeterDataService } from 'src/app/shared/helper-services/convert-meter-data.service';
+import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 
 @Component({
   selector: 'app-account-home',
@@ -21,68 +23,117 @@ export class AccountHomeComponent implements OnInit {
 
   accountFacilities: Array<IdbFacility>;
   selectedAccountSub: Subscription;
-  accountWorker: Worker;
-  facilityWorker: Worker;
+  annualEnergyAnalysisWorker: Worker;
+  annualWaterAnalysisWorker: Worker;
+  accountOverviewWorker: Worker;
+
+  monthlyEnergyAnalysisData: Array<MonthlyAnalysisSummaryData>;
+  monthlyEnergyAnalysisDataSub: Subscription;
+  monthlyWaterAnalysisData: Array<MonthlyAnalysisSummaryData>;
+  monthlyWaterAnalysisDataSub: Subscription;
   account: IdbAccount;
+  latestEnergyAnalysisItem: IdbAccountAnalysisItem;
+  latestWaterAnalysisItem: IdbAccountAnalysisItem;
+  carrouselIndex: number = 0;
   constructor(private facilityDbService: FacilitydbService, private accountDbService: AccountdbService,
     private accountHomeService: AccountHomeService,
     private predictorDbService: PredictordbService,
-    private analysisDbService: AnalysisDbService) { }
+    private analysisDbService: AnalysisDbService,
+    private utilityMeterDbService: UtilityMeterdbService,
+    private calendarizationService: CalanderizationService,
+    private convertMeterDataService: ConvertMeterDataService) { }
 
   ngOnInit(): void {
     this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(val => {
       this.account = val
-      this.accountHomeService.setCalanderizedMeters();
-      this.accountFacilities = this.facilityDbService.accountFacilities.getValue();
-      if (this.accountFacilities.length != 0) {
-        this.setFacilityAnalysisSummary(0);
-      }
-      if (this.accountHomeService.latestAnalysisItem) {
-        this.setAnnualAnalysisSummary();
+      this.accountHomeService.setLatestEnergyAnalysisItem();
+      this.accountHomeService.setLatestWaterAnalysisItem();
+      if (this.accountHomeService.latestEnergyAnalysisItem) {
+        this.latestEnergyAnalysisItem = this.accountHomeService.latestEnergyAnalysisItem;
+        this.setAnnualEnergyAnalysisSummary();
       } else {
-        this.accountHomeService.monthlyAccountAnalysisData.next(undefined);
-        this.accountHomeService.annualAnalysisSummary.next(undefined);
+        this.latestEnergyAnalysisItem = undefined;
+        this.accountHomeService.monthlyEnergyAnalysisData.next(undefined);
+        this.accountHomeService.annualEnergyAnalysisSummary.next(undefined);
       }
-    })
+
+      if (this.accountHomeService.latestWaterAnalysisItem) {
+        this.latestWaterAnalysisItem = this.accountHomeService.latestWaterAnalysisItem;
+        this.setAnnualWaterAnalysisSummary();
+      } else {
+        this.latestWaterAnalysisItem = undefined;
+        this.accountHomeService.monthlyWaterAnalysisData.next(undefined);
+        this.accountHomeService.annualWaterAnalysisSummary.next(undefined);
+      }
+      this.setAccountOverviewData();
+    });
+
+    this.monthlyEnergyAnalysisDataSub = this.accountHomeService.monthlyEnergyAnalysisData.subscribe(val => {
+      this.monthlyEnergyAnalysisData = val;
+    });
+    this.monthlyWaterAnalysisDataSub = this.accountHomeService.monthlyWaterAnalysisData.subscribe(val => {
+      this.monthlyWaterAnalysisData = val;
+    });
   }
 
   ngOnDestroy() {
     this.selectedAccountSub.unsubscribe();
-    if (this.accountWorker) {
-      this.accountWorker.terminate();
+    this.monthlyEnergyAnalysisDataSub.unsubscribe();
+    this.monthlyWaterAnalysisDataSub.unsubscribe();
+
+
+    if (this.annualWaterAnalysisWorker) {
+      this.annualWaterAnalysisWorker.terminate();
     }
-    if (this.facilityWorker) {
-      this.facilityWorker.terminate();
+    if (this.annualEnergyAnalysisWorker) {
+      this.annualEnergyAnalysisWorker.terminate();
     }
-    this.accountHomeService.monthlyAccountAnalysisData.next(undefined);
-    this.accountHomeService.annualAnalysisSummary.next(undefined);
-    this.accountHomeService.facilityAnalysisSummaries.next([])
+    if (this.accountOverviewWorker) {
+      this.accountOverviewWorker.terminate();
+    }
+    this.accountHomeService.monthlyEnergyAnalysisData.next(undefined);
+    this.accountHomeService.annualEnergyAnalysisSummary.next(undefined);
+    this.accountHomeService.monthlyWaterAnalysisData.next(undefined);
+    this.accountHomeService.annualWaterAnalysisSummary.next(undefined);
+    this.accountHomeService.accountOverviewData.next(undefined);
+    this.accountHomeService.calculatingEnergy.next(true);
+    this.accountHomeService.calculatingOverview.next(true);
+    this.accountHomeService.calculatingWater.next(true);
   }
 
-  setAnnualAnalysisSummary() {
-    let calanderizedMeters: Array<CalanderizedMeter> = this.accountHomeService.calanderizedMeters;
+  setAnnualEnergyAnalysisSummary() {
     let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.accountPredictorEntries.getValue();
     let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
+    let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+
+    let calanderizationOptions: CalanderizationOptions = {
+      energyIsSource: this.accountHomeService.latestEnergyAnalysisItem.energyIsSource
+    }
+    let calanderizedMeterData: Array<CalanderizedMeter> = this.calendarizationService.getCalanderizedMeterData(accountMeters, true, false, calanderizationOptions);
+    calanderizedMeterData.forEach(calanderizedMeter => {
+      calanderizedMeter.monthlyData = this.convertMeterDataService.convertMeterDataToAnalysis(this.accountHomeService.latestEnergyAnalysisItem, calanderizedMeter.monthlyData, this.account, calanderizedMeter.meter);
+    });
+
     if (typeof Worker !== 'undefined') {
-      this.accountWorker = new Worker(new URL('src/app/web-workers/annual-account-analysis.worker', import.meta.url));
-      this.accountWorker.onmessage = ({ data }) => {
-        this.accountWorker.terminate();
+      this.annualEnergyAnalysisWorker = new Worker(new URL('src/app/web-workers/annual-account-analysis.worker', import.meta.url));
+      this.annualEnergyAnalysisWorker.onmessage = ({ data }) => {
+        this.annualEnergyAnalysisWorker.terminate();
         if (!data.error) {
-          this.accountHomeService.annualAnalysisSummary.next(data.annualAnalysisSummaries);
-          this.accountHomeService.monthlyAccountAnalysisData.next(data.monthlyAnalysisSummaryData);
-          this.accountHomeService.calculating.next(false);
+          this.accountHomeService.annualEnergyAnalysisSummary.next(data.annualAnalysisSummaries);
+          this.accountHomeService.monthlyEnergyAnalysisData.next(data.monthlyAnalysisSummaryData);
+          this.accountHomeService.calculatingEnergy.next(false);
         } else {
-          this.accountHomeService.annualAnalysisSummary.next(undefined);
-          this.accountHomeService.monthlyAccountAnalysisData.next(undefined);
-          this.accountHomeService.calculating.next('error');
+          this.accountHomeService.annualEnergyAnalysisSummary.next(undefined);
+          this.accountHomeService.monthlyEnergyAnalysisData.next(undefined);
+          this.accountHomeService.calculatingEnergy.next('error');
         }
       };
-      this.accountHomeService.calculating.next(true);
-      this.accountWorker.postMessage({
-        accountAnalysisItem: this.accountHomeService.latestAnalysisItem,
+      this.accountHomeService.calculatingEnergy.next(true);
+      this.annualEnergyAnalysisWorker.postMessage({
+        accountAnalysisItem: this.accountHomeService.latestEnergyAnalysisItem,
         account: this.account,
-        calanderizedMeters: calanderizedMeters,
+        calanderizedMeters: calanderizedMeterData,
         accountFacilities: accountFacilities,
         accountPredictorEntries: accountPredictorEntries,
         allAccountAnalysisItems: accountAnalysisItems,
@@ -90,102 +141,108 @@ export class AccountHomeComponent implements OnInit {
       });
     } else {
       // Web Workers are not supported in this environment.
-      let annualAnalysisSummaryClass: AnnualAccountAnalysisSummaryClass = new AnnualAccountAnalysisSummaryClass(this.accountHomeService.latestAnalysisItem, this.account, calanderizedMeters, accountFacilities, accountPredictorEntries, accountAnalysisItems, true);
+      let annualAnalysisSummaryClass: AnnualAccountAnalysisSummaryClass = new AnnualAccountAnalysisSummaryClass(this.accountHomeService.latestEnergyAnalysisItem, this.account, calanderizedMeterData, accountFacilities, accountPredictorEntries, accountAnalysisItems, true);
       let annualAnalysisSummaries: Array<AnnualAnalysisSummary> = annualAnalysisSummaryClass.getAnnualAnalysisSummaries();
       let monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData> = annualAnalysisSummaryClass.monthlyAnalysisSummaryData;
-      this.accountHomeService.annualAnalysisSummary.next(annualAnalysisSummaries);
-      this.accountHomeService.monthlyAccountAnalysisData.next(monthlyAnalysisSummaryData);
+      this.accountHomeService.annualEnergyAnalysisSummary.next(annualAnalysisSummaries);
+      this.accountHomeService.monthlyEnergyAnalysisData.next(monthlyAnalysisSummaryData);
     }
   }
 
-
-  setFacilityAnalysisSummary(facilityIndex: number) {
-    let facility: IdbFacility = this.accountFacilities[facilityIndex];
+  setAnnualWaterAnalysisSummary() {
+    let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.accountPredictorEntries.getValue();
+    let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
-    let facilityAnalysisItems: Array<IdbAnalysisItem> = accountAnalysisItems.filter(item => { return item.facilityId == facility.guid });
-    let selectedAnalysisItems: Array<IdbAnalysisItem> = facilityAnalysisItems.filter(item => {
-      return item.selectedYearAnalysis == true
+
+    let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+    let calanderizedMeterData: Array<CalanderizedMeter> = this.calendarizationService.getCalanderizedMeterData(accountMeters, true, false);
+    calanderizedMeterData.forEach(calanderizedMeter => {
+      calanderizedMeter.monthlyData = this.convertMeterDataService.convertMeterDataToAnalysis(this.accountHomeService.latestWaterAnalysisItem, calanderizedMeter.monthlyData, this.account, calanderizedMeter.meter);
     });
-    let latestAnalysisItem: IdbAnalysisItem;
-    if (selectedAnalysisItems.length != 0) {
-      latestAnalysisItem = _.maxBy(selectedAnalysisItems, 'reportYear');
-    } else {
-      latestAnalysisItem = _.maxBy(facilityAnalysisItems, 'reportYear');
-
-    }
-
-    if (latestAnalysisItem) {
-      let calanderizedMeters: Array<CalanderizedMeter> = this.accountHomeService.calanderizedMeters;
-      let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.accountPredictorEntries.getValue();
-      if (typeof Worker !== 'undefined') {
-        this.facilityWorker = new Worker(new URL('src/app/web-workers/annual-facility-analysis.worker', import.meta.url));
-        this.facilityWorker.onmessage = ({ data }) => {
-          this.facilityWorker.terminate();
-          let facilitySummary: {
-            facilityId: string,
-            annualAnalysisSummary: Array<AnnualAnalysisSummary>,
-            monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
-            error: boolean
-          } = {
-            facilityId: facility.guid,
-            annualAnalysisSummary: data.annualAnalysisSummaries,
-            monthlyAnalysisSummaryData: data.monthlyAnalysisSummaryData,
-            error: data.error
-          }
-          let allSummaries: Array<{
-            facilityId: string,
-            annualAnalysisSummary: Array<AnnualAnalysisSummary>,
-            monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
-            error: boolean
-          }> = this.accountHomeService.facilityAnalysisSummaries.getValue();
-          allSummaries.push(facilitySummary);
-          this.accountHomeService.facilityAnalysisSummaries.next(allSummaries);
-          if (facilityIndex != this.accountFacilities.length - 1) {
-            this.setFacilityAnalysisSummary(facilityIndex + 1);
-          }
-        };
-        this.facilityWorker.postMessage({
-          analysisItem: latestAnalysisItem,
-          facility: facility,
-          calanderizedMeters: calanderizedMeters,
-          accountPredictorEntries: accountPredictorEntries,
-          calculateAllMonthlyData: true
-        });
-      } else {
-        // Web Workers are not supported in this environment.
-        let annualAnalysisSummaryClass: AnnualFacilityAnalysisSummaryClass = new AnnualFacilityAnalysisSummaryClass(latestAnalysisItem, facility, calanderizedMeters, accountPredictorEntries, true);
-        let annualAnalysisSummaries: Array<AnnualAnalysisSummary> = annualAnalysisSummaryClass.getAnnualAnalysisSummaries();
-        let monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData> = annualAnalysisSummaryClass.monthlyAnalysisSummaryData;
-        let facilitySummary: {
-          facilityId: string,
-          annualAnalysisSummary: Array<AnnualAnalysisSummary>,
-          monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
-          error: boolean
-        } = {
-          facilityId: facility.guid,
-          annualAnalysisSummary: annualAnalysisSummaries,
-          monthlyAnalysisSummaryData: monthlyAnalysisSummaryData,
-          error: false
+    if (typeof Worker !== 'undefined') {
+      this.annualWaterAnalysisWorker = new Worker(new URL('src/app/web-workers/annual-account-analysis.worker', import.meta.url));
+      this.annualWaterAnalysisWorker.onmessage = ({ data }) => {
+        this.annualWaterAnalysisWorker.terminate();
+        if (!data.error) {
+          this.accountHomeService.annualWaterAnalysisSummary.next(data.annualAnalysisSummaries);
+          this.accountHomeService.monthlyWaterAnalysisData.next(data.monthlyAnalysisSummaryData);
+          this.accountHomeService.calculatingWater.next(false);
+        } else {
+          this.accountHomeService.annualWaterAnalysisSummary.next(undefined);
+          this.accountHomeService.monthlyWaterAnalysisData.next(undefined);
+          this.accountHomeService.calculatingWater.next('error');
         }
-        let allSummaries: Array<{
-          facilityId: string,
-          annualAnalysisSummary: Array<AnnualAnalysisSummary>,
-          monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
-          error: boolean
-        }> = this.accountHomeService.facilityAnalysisSummaries.getValue();
-        allSummaries.push(facilitySummary);
-        this.accountHomeService.facilityAnalysisSummaries.next(allSummaries);
-        if (facilityIndex != this.accountFacilities.length - 1) {
-          this.setFacilityAnalysisSummary(facilityIndex + 1);
-        }
-      }
+      };
+      this.accountHomeService.calculatingWater.next(true);
+      this.annualWaterAnalysisWorker.postMessage({
+        accountAnalysisItem: this.accountHomeService.latestWaterAnalysisItem,
+        account: this.account,
+        calanderizedMeters: calanderizedMeterData,
+        accountFacilities: accountFacilities,
+        accountPredictorEntries: accountPredictorEntries,
+        allAccountAnalysisItems: accountAnalysisItems,
+        calculateAllMonthlyData: true
+      });
     } else {
-      if (facilityIndex != this.accountFacilities.length - 1) {
-        this.setFacilityAnalysisSummary(facilityIndex + 1);
-      }
+      // Web Workers are not supported in this environment.
+      let annualAnalysisSummaryClass: AnnualAccountAnalysisSummaryClass = new AnnualAccountAnalysisSummaryClass(this.accountHomeService.latestWaterAnalysisItem, this.account, calanderizedMeterData, accountFacilities, accountPredictorEntries, accountAnalysisItems, true);
+      let annualAnalysisSummaries: Array<AnnualAnalysisSummary> = annualAnalysisSummaryClass.getAnnualAnalysisSummaries();
+      let monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData> = annualAnalysisSummaryClass.monthlyAnalysisSummaryData;
+      this.accountHomeService.annualWaterAnalysisSummary.next(annualAnalysisSummaries);
+      this.accountHomeService.monthlyWaterAnalysisData.next(monthlyAnalysisSummaryData);
     }
   }
 
+  goNext() {
+    this.carrouselIndex++;
+  }
 
+  goBack() {
+    this.carrouselIndex--;
+  }
+
+  setAccountOverviewData() {
+    let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+    let calanderizedMeters: Array<CalanderizedMeter> = this.calendarizationService.getCalanderizedMeterData(meters, true, true);
+    let dateRange: { endDate: Date, startDate: Date };
+    if (calanderizedMeters && calanderizedMeters.length > 0) {
+      let monthlyData: Array<MonthlyData> = calanderizedMeters.flatMap(val => { return val.monthlyData });
+      let latestData: MonthlyData = _.maxBy(monthlyData, 'date');
+      let startData: MonthlyData = _.minBy(monthlyData, 'date');
+      let maxDate: Date = new Date(latestData.year, latestData.monthNumValue);
+      let minDate: Date = new Date(startData.year, startData.monthNumValue);
+      minDate.setMonth(minDate.getMonth() + 1);
+      dateRange = {
+        endDate: maxDate,
+        startDate: minDate
+      };
+    }
+    if (typeof Worker !== 'undefined') {
+      this.accountOverviewWorker = new Worker(new URL('src/app/web-workers/account-overview.worker', import.meta.url));
+      this.accountOverviewWorker.onmessage = ({ data }) => {
+        if (!data.error) {
+          this.accountHomeService.accountOverviewData.next(data.accountOverviewData);
+          // this.accountOverviewService.utilityUseAndCost.next(data.utilityUseAndCost);
+          this.accountHomeService.calculatingOverview.next(false);
+        } else {
+          this.accountHomeService.accountOverviewData.next(undefined);
+          // this.accountOverviewService.utilityUseAndCost.next(undefined);
+          this.accountHomeService.calculatingOverview.next('error');
+        }
+        this.accountOverviewWorker.terminate();
+      };
+
+      this.accountOverviewWorker.postMessage({
+        calanderizedMeters: calanderizedMeters,
+        facilities: facilities,
+        type: 'overview',
+        dateRange: dateRange
+      });
+    } else {
+      // Web Workers are not supported in this environment.
+
+    }
+  }
 
 }

@@ -67,27 +67,28 @@ export class AccountAnalysisItemCardComponent implements OnInit {
         updateReportOptions = true;
       }
     }
-    await this.dbChangesService.setAccountAnalysisItems(this.selectedAccount);
+    await this.dbChangesService.setAccountAnalysisItems(this.selectedAccount, false);
     this.displayDeleteModal = false;
     this.toastNotificationService.showToast('Analysis Item Deleted', undefined, undefined, false, "alert-success");
   }
 
   async setUseItem() {
     let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
-    for (let i = 0; i < accountAnalysisItems.length; i++) {
-      if (accountAnalysisItems[i].guid == this.analysisItem.guid) {
-        if (accountAnalysisItems[i].selectedYearAnalysis) {
-          accountAnalysisItems[i].selectedYearAnalysis = false;
+    let categoryItems: Array<IdbAccountAnalysisItem> = accountAnalysisItems.filter(item => {return item.analysisCategory == this.analysisItem.analysisCategory});
+    for (let i = 0; i < categoryItems.length; i++) {
+      if (categoryItems[i].guid == this.analysisItem.guid) {
+        if (categoryItems[i].selectedYearAnalysis) {
+          categoryItems[i].selectedYearAnalysis = false;
         } else {
-          accountAnalysisItems[i].selectedYearAnalysis = true;
+          categoryItems[i].selectedYearAnalysis = true;
         }
-        await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(accountAnalysisItems[i]));
-      } else if (accountAnalysisItems[i].reportYear == this.analysisItem.reportYear && accountAnalysisItems[i].selectedYearAnalysis) {
-        accountAnalysisItems[i].selectedYearAnalysis = false;
-        await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(accountAnalysisItems[i]));
+        await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(categoryItems[i]));
+      } else if (categoryItems[i].reportYear == this.analysisItem.reportYear && categoryItems[i].selectedYearAnalysis) {
+        categoryItems[i].selectedYearAnalysis = false;
+        await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(categoryItems[i]));
       }
     }
-    await this.dbChangesService.setAccountAnalysisItems(this.selectedAccount);
+    await this.dbChangesService.setAccountAnalysisItems(this.selectedAccount, false);
   }
 
   async createCopy() {
@@ -96,7 +97,7 @@ export class AccountAnalysisItemCardComponent implements OnInit {
     newItem.name = newItem.name + ' (Copy)';
     newItem.guid = Math.random().toString(36).substr(2, 9);
     let addedItem: IdbAccountAnalysisItem = await firstValueFrom(this.accountAnalysisDbService.addWithObservable(newItem));
-    await this.dbChangesService.setAccountAnalysisItems(this.selectedAccount);
+    await this.dbChangesService.setAccountAnalysisItems(this.selectedAccount, false);
     this.accountAnalysisDbService.selectedAnalysisItem.next(addedItem);
     this.toastNotificationService.showToast('Analysis Item Copy Created', undefined, undefined, false, "alert-success");
     this.router.navigateByUrl('account/analysis/setup');

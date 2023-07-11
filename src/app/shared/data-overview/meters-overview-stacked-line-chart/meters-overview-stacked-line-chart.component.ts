@@ -2,12 +2,12 @@ import { Component, ElementRef, ViewChild, Input, SimpleChanges } from '@angular
 import { PlotlyService } from 'angular-plotly.js';
 import { FacilityOverviewService } from 'src/app/facility/facility-overview/facility-overview.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { AllSources, EnergySources, IdbFacility, MeterSource, WaterSources } from 'src/app/models/idb';
+import { IdbFacility } from 'src/app/models/idb';
 import { UtilityColors } from '../../utilityColors';
 import * as _ from 'lodash';
 import { Subscription } from 'rxjs';
-import { FacilityBarChartData } from 'src/app/models/visualization';
 import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
+import { AllSources, EnergySources, MeterSource, WaterSources } from 'src/app/models/constantsAndTypes';
 
 @Component({
   selector: 'app-meters-overview-stacked-line-chart',

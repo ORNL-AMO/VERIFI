@@ -1,9 +1,10 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { IdbUtilityMeter, IdbUtilityMeterData, MeterSource } from 'src/app/models/idb';
+import { IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { CalanderizationService, EmissionsResults } from 'src/app/shared/helper-services/calanderization.service';
 import { EditMeterFormService } from '../../energy-source/edit-meter-form/edit-meter-form.service';
+import { MeterSource } from 'src/app/models/constantsAndTypes';
 
 @Component({
   selector: 'app-edit-utility-bill',
@@ -36,7 +37,7 @@ export class EditUtilityBillComponent implements OnInit {
     private calanderizationService: CalanderizationService, private editMeterFormService: EditMeterFormService) { }
 
   ngOnInit(): void {
-    this.showEmissions = this.editMeterFormService.checkShowEmissionsOutputRate(this.editMeter.source);
+    this.showEmissions = this.editMeterFormService.checkShowEmissionsOutputRate(this.editMeter);
     this.setTotalEmissions();
   }
 

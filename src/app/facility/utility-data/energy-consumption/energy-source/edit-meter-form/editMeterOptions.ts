@@ -1,4 +1,5 @@
-import { MeterSource } from "src/app/models/idb"
+import { MeterSource } from "src/app/models/constantsAndTypes"
+
 
 export interface FuelTypeOption {
     startingUnit: string,
@@ -6,7 +7,7 @@ export interface FuelTypeOption {
     value: string,
     siteToSourceMultiplier: number,
     emissionsOutputRate: number,
-    otherEnergyType?: string
+    otherEnergyType?: 'Hot Water' | 'Steam' | 'Compressed Air' | 'Chilled Water';
 }
 
 export const SourceOptions: Array<MeterSource> = [
@@ -14,8 +15,8 @@ export const SourceOptions: Array<MeterSource> = [
     "Natural Gas",
     "Other Fuels",
     "Other Energy",
-    "Water",
-    "Waste Water",
+    "Water Intake",
+    "Water Discharge",
     "Other Utility"
 ]
 
@@ -356,6 +357,14 @@ export const OtherEnergyOptions: Array<FuelTypeOption> = [
         siteToSourceMultiplier: undefined,
         otherEnergyType: 'Hot Water',
         emissionsOutputRate: 66.3985
+    },
+    {
+        startingUnit: 'SCF',
+        heatCapacityValue: 0.00001093,
+        value: 'Purchased Compressed Air',
+        siteToSourceMultiplier: 3,
+        otherEnergyType: 'Compressed Air',
+        emissionsOutputRate: undefined
     }
 ]
 

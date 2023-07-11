@@ -2,12 +2,13 @@ import { Injectable } from '@angular/core';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { LocalStorageService } from 'ngx-webstorage';
 import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
-import { AnalysisGroup, IdbAccount, IdbAnalysisItem, IdbFacility, IdbUtilityMeterGroup, PredictorData } from '../models/idb';
+import { IdbAccount, IdbAnalysisItem, IdbFacility, IdbUtilityMeterGroup, PredictorData } from '../models/idb';
 import { AccountdbService } from './account-db.service';
 import { FacilitydbService } from './facility-db.service';
 import { PredictordbService } from './predictors-db.service';
 import { UtilityMeterGroupdbService } from './utilityMeterGroup-db.service';
 import * as _ from 'lodash';
+import { AnalysisCategory, AnalysisGroup } from '../models/analysis';
 import { AnalysisValidationService } from '../shared/helper-services/analysis-validation.service';
 
 @Injectable({
@@ -94,15 +95,22 @@ export class AnalysisDbService {
     return this.dbService.update('analysisItems', values);
   }
 
-  getNewAnalysisItem(facilityId: string): IdbAnalysisItem {
+  getNewAnalysisItem(analysisCategory: AnalysisCategory, facilityId: string): IdbAnalysisItem {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
-    let selectedFacility: IdbFacility = accountFacilities.find(facility => { return facility.guid == facilityId });
-    let facilityMeterGroups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.facilityMeterGroups.getValue();
+    let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    let selectedFacility: IdbFacility = facilities.find(filter => { return filter.guid == facilityId });
+    let accountMeterGroups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.accountMeterGroups.getValue();
+    let facilityMeterGroups: Array<IdbUtilityMeterGroup> = accountMeterGroups.filter(group => { return group.facilityId == facilityId });
     let itemGroups: Array<AnalysisGroup> = new Array();
     let predictors: Array<PredictorData> = this.predictorDbService.facilityPredictors.getValue();
     facilityMeterGroups.forEach(group => {
-      if (group.groupType == 'Energy') {
+      let groupTypeNeeded: 'Energy' | 'Water';
+      if (analysisCategory == 'energy') {
+        groupTypeNeeded = 'Energy';
+      } else if (analysisCategory == 'water') {
+        groupTypeNeeded = 'Water';
+      }
+      if (group.groupType == groupTypeNeeded) {
         let predictorVariables: Array<PredictorData> = JSON.parse(JSON.stringify(predictors));
         let analysisGroup: AnalysisGroup = {
           idbGroupId: group.guid,
@@ -111,7 +119,6 @@ export class AnalysisDbService {
             variable.productionInAnalysis = true;
             return variable
           }),
-          productionUnits: this.getUnits(predictorVariables),
           regressionModelYear: undefined,
           regressionConstant: undefined,
           groupErrors: undefined,
@@ -128,6 +135,13 @@ export class AnalysisDbService {
       }
     });
 
+    let baselineYear: number;
+    if (analysisCategory == 'energy') {
+      baselineYear = selectedFacility.sustainabilityQuestions.energyReductionBaselineYear
+    } else if (analysisCategory == 'water') {
+      baselineYear = selectedFacility.sustainabilityQuestions.waterReductionBaselineYear
+    }
+
     let analysisItem: IdbAnalysisItem = {
       facilityId: selectedFacility.guid,
       accountId: selectedAccount.guid,
@@ -137,9 +151,11 @@ export class AnalysisDbService {
       reportYear: undefined,
       energyIsSource: selectedFacility.energyIsSource,
       energyUnit: selectedFacility.energyUnit,
+      waterUnit: selectedFacility.volumeLiquidUnit,
       groups: itemGroups,
       setupErrors: undefined,
-      baselineYear: selectedFacility.sustainabilityQuestions.energyReductionBaselineYear
+      analysisCategory: analysisCategory,
+      baselineYear: baselineYear
     };
     analysisItem.setupErrors = this.analysisValidationService.getAnalysisItemErrors(analysisItem);
     return analysisItem;
@@ -238,7 +254,6 @@ export class AnalysisDbService {
         idbGroupId: groupId,
         analysisType: 'energyIntensity',
         predictorVariables: predictorVariables,
-        productionUnits: this.getUnits(predictorVariables),
         regressionConstant: undefined,
         regressionModelYear: undefined,
         groupErrors: undefined,

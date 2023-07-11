@@ -112,6 +112,10 @@ export class EditBillComponent implements OnInit {
   setMeterDataForm() {
     if (this.editMeter.source == 'Electricity') {
       this.meterDataForm = this.utilityMeterDataService.getElectricityMeterDataForm(this.editMeterData);
+    } else if (this.editMeter.source == 'Other Utility') {
+      this.displayVolumeInput = (getIsEnergyUnit(this.editMeter.startingUnit) == false);
+      this.displayEnergyUse = (getIsEnergyUnit(this.editMeter.startingUnit) == true);
+      this.meterDataForm = this.utilityMeterDataService.getGeneralMeterDataForm(this.editMeterData, this.displayVolumeInput, this.displayEnergyUse);
     } else {
       this.displayVolumeInput = (getIsEnergyUnit(this.editMeter.startingUnit) == false);
       this.displayEnergyUse = getIsEnergyMeter(this.editMeter.source);
@@ -126,7 +130,7 @@ export class EditBillComponent implements OnInit {
     this.showFilterDropdown = !this.showFilterDropdown;
   }
 
-  
+
   canDeactivate(): Observable<boolean> {
     if (this.meterDataForm.dirty) {
       const result = window.confirm('There are unsaved changes! Are you sure you want to leave this page?');

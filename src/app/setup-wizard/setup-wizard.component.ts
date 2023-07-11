@@ -63,7 +63,7 @@ export class SetupWizardComponent implements OnInit {
       this.loadingService.setLoadingMessage("Parsing Template Data...")
       let allAccounts: Array<IdbAccount> = await firstValueFrom(this.accountdbService.getAll());
       this.accountdbService.allAccounts.next(allAccounts);
-      await this.dbChangesService.selectAccount(account);
+      await this.dbChangesService.selectAccount(account, false);
       let fileReference: FileReference = this.uploadDataService.getFileReference(undefined, workbook);
       this.uploadDataService.fileReferences = [fileReference];
       this.loadingService.setLoadingStatus(false);
@@ -85,7 +85,7 @@ export class SetupWizardComponent implements OnInit {
       this.loadingService.setLoadingMessage("Finishing up...");
       let allAccounts: Array<IdbAccount> = await firstValueFrom(this.accountdbService.getAll());
       this.accountdbService.allAccounts.next(allAccounts);
-      await this.dbChangesService.selectAccount(account);
+      await this.dbChangesService.selectAccount(account, false);
       this.loadingService.setLoadingStatus(false);
       this.toastNotificationService.showToast("Account and Facilities Created!", "You can now add utility data to your facilities for analysis!", 10000, false, "alert-success", true);
       this.router.navigateByUrl('facility/' + newFacility.id + '/utility');

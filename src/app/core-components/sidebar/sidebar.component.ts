@@ -89,7 +89,7 @@ export class SidebarComponent implements OnInit {
       } else if (this.router.url.includes('account') && !this.router.url.includes('facility')) {
         if (index == this.hoverIndex) {
           return false;
-        }else{
+        } else {
           return true;
         }
       } else if (this.selectedFacility) {
@@ -113,7 +113,7 @@ export class SidebarComponent implements OnInit {
   }
 
   setShowSidebar() {
-    this.showSidebar = !this.router.url.includes('setup-wizard');
+    this.showSidebar = !this.router.url.includes('setup-wizard') && !this.router.url.includes('manage-accounts');
   }
 
   setFacilityList(accountFacilities: Array<IdbFacility>) {
@@ -155,7 +155,7 @@ export class SidebarComponent implements OnInit {
     this.hoverIndex = index;
   }
 
-  setHoverAccount(bool: boolean){
+  setHoverAccount(bool: boolean) {
     this.hoverAccount = bool;
   }
 }

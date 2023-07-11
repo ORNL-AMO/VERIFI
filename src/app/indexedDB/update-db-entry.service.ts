@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
-import { AnalysisSetupErrors, GroupErrors, IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility } from '../models/idb';
+import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility, IdbUtilityMeter } from '../models/idb';
+import { AnalysisSetupErrors, GroupErrors } from '../models/analysis';
 import { FacilitydbService } from './facility-db.service';
 import { AnalysisValidationService } from '../shared/helper-services/analysis-validation.service';
 
@@ -37,11 +38,20 @@ export class UpdateDbEntryService {
       isChanged = true;
     }
 
+    if (!facility.classification) {
+      facility.classification = 'Manufacturing';
+      isChanged = true;
+    }
+
     return { facility: facility, isChanged: isChanged };
   }
 
   updateAnalysis(analysisItem: IdbAnalysisItem): { analysisItem: IdbAnalysisItem, isChanged: boolean } {
     let isChanged: boolean = false;
+    if (!analysisItem.analysisCategory) {
+      analysisItem.analysisCategory = 'energy';
+      isChanged = true;
+    }
     if (!analysisItem.setupErrors) {
       analysisItem.setupErrors = this.analysisValidationService.getAnalysisItemErrors(analysisItem);
       isChanged = true;
@@ -54,34 +64,56 @@ export class UpdateDbEntryService {
         }
       });
     }
-
     if (!analysisItem.baselineYear) {
       let facility: IdbFacility = this.facilityDbService.getFacilityById(analysisItem.facilityId);
-      analysisItem.baselineYear = facility.sustainabilityQuestions.energyReductionBaselineYear;
+      if (facility && facility.sustainabilityQuestions) {
+        analysisItem.baselineYear = facility.sustainabilityQuestions.energyReductionBaselineYear;
+      } else {
+        analysisItem.baselineYear = 2017;
+      }
       isChanged = true;
     }
 
-    analysisItem.groups.forEach(group => {
-      if (!group.groupErrors) {
-        group.groupErrors = this.analysisValidationService.getGroupErrors(group);
-        isChanged = true;
-      } else {
-        let groupErrors: GroupErrors = this.analysisValidationService.getGroupErrors(group);
-        Object.keys(groupErrors).forEach(key => {
-          if (groupErrors[key] != group.groupErrors[key]) {
-            group.groupErrors[key] = groupErrors[key];
-            isChanged = true;
-          }
-        });
-      }
-    });
+    if (analysisItem.groups) {
+      analysisItem.groups.forEach(group => {
+        if (!group.groupErrors) {
+          group.groupErrors = this.analysisValidationService.getGroupErrors(group);
+          isChanged = true;
+        }
+      });
+    }
+    if (analysisItem.groups) {
+      analysisItem.groups.forEach(group => {
+        if (!group.groupErrors) {
+          group.groupErrors = this.analysisValidationService.getGroupErrors(group);
+          isChanged = true;
+        } else {
+          let groupErrors: GroupErrors = this.analysisValidationService.getGroupErrors(group);
+          Object.keys(groupErrors).forEach(key => {
+            if (groupErrors[key] != group.groupErrors[key]) {
+              group.groupErrors[key] = groupErrors[key];
+              isChanged = true;
+            }
+          });
+        }
+      });
+    }
     return { analysisItem: analysisItem, isChanged: isChanged };
   }
 
   updateAccountAnalysis(analysisItem: IdbAccountAnalysisItem, account: IdbAccount, facilityAnalysisItems: Array<IdbAnalysisItem>): { analysisItem: IdbAccountAnalysisItem, isChanged: boolean } {
     let isChanged: boolean = false;
+    if (!analysisItem.analysisCategory) {
+      analysisItem.analysisCategory = 'energy';
+      isChanged = true;
+    }
+
     if (!analysisItem.baselineYear) {
-      analysisItem.baselineYear = account.sustainabilityQuestions.energyReductionBaselineYear;
+      if(account && account.sustainabilityQuestions){
+        analysisItem.baselineYear = account.sustainabilityQuestions.energyReductionBaselineYear;
+      }else{
+        analysisItem.baselineYear = 2017;
+      }
       isChanged = true;
     }
 
@@ -90,6 +122,21 @@ export class UpdateDbEntryService {
       isChanged = true;
     }
     return { analysisItem: analysisItem, isChanged: isChanged };
+  }
+
+  updateUtilityMeter(utilityMeter: IdbUtilityMeter): { utilityMeter: IdbUtilityMeter, isChanged: boolean } {
+    let isChanged: boolean = false;
+    let source: string = utilityMeter.source;
+    if (source == 'Water') {
+      isChanged = true;
+      utilityMeter.source = 'Water Intake';
+      utilityMeter.waterIntakeType = 'Municipal (Potable)';
+    } else if (source == 'Waste Water') {
+      isChanged = true;
+      utilityMeter.source = 'Water Discharge';
+      utilityMeter.waterDischargeType = 'Municipal Sewer';
+    }
+    return { utilityMeter: utilityMeter, isChanged: isChanged };
   }
 
 

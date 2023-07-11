@@ -1,9 +1,15 @@
-<table class="table utility-data table-sm table-bordered table-hover" #dataTable [ngClass]="{'copying-table': copyingTable}">
+<table class="table utility-data table-sm table-bordered table-hover" #dataTable
+    [ngClass]="{'copying-table': copyingTable}">
     <thead class="sortable">
         <tr class="table-mh">
             <th class="first-column"></th>
             <th *ngIf="analysisTableColumns.energy" class="text-center th-3" [attr.colspan]="numEnergyColumns">
-                Energy (<span [innerHTML]="analysisItem.energyUnit | settingsLabel"></span>)
+                <ng-container *ngIf="analysisItem.analysisCategory == 'energy'">
+                    Energy (<span [innerHTML]="analysisItem.energyUnit | settingsLabel"></span>)
+                </ng-container>
+                <ng-container *ngIf="analysisItem.analysisCategory == 'water'">
+                    Consumption (<span [innerHTML]="analysisItem.waterUnit | settingsLabel"></span>)
+                </ng-container>
             </th>
             <th *ngIf="predictorColumns.length != 0" class="text-center" [attr.colspan]="predictorColumns.length">
                 Production Variables

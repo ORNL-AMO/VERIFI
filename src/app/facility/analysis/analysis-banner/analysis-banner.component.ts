@@ -3,9 +3,9 @@ import { NavigationEnd, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { HelpPanelService } from 'src/app/help-panel/help-panel.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { AnalysisGroup, IdbAccountAnalysisItem, IdbAnalysisItem } from 'src/app/models/idb';
+import { AnalysisGroup } from 'src/app/models/analysis';
+import { IdbAnalysisItem } from 'src/app/models/idb';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
-import { AnalysisService } from '../analysis.service';
 
 @Component({
   selector: 'app-analysis-banner',

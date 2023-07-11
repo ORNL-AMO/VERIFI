@@ -1,0 +1,99 @@
+<table class="table utility-data table-sm table-bordered table-hover">
+    <thead class="sortable">
+        <tr>
+            <th (click)="setOrderDataField('year')" [ngClass]="{'active': orderDataField == 'year'}">
+                Year
+            </th>
+            <th (click)="setOrderDataField('energyUse')" [ngClass]="{'active': orderDataField == 'energyUse'}">
+                Actual
+            </th>
+            <th (click)="setOrderDataField('adjusted')" [ngClass]="{'active': orderDataField == 'adjusted'}">
+                Calculated
+            </th>
+            <th (click)="setOrderDataField('savings')" [ngClass]="{'active': orderDataField == 'savings'}">
+                Savings
+            </th>
+            <th (click)="setOrderDataField('totalSavingsPercentImprovement')"
+                [ngClass]="{'active': orderDataField == 'totalSavingsPercentImprovement'}">
+                Total Savings <br> % Improvement
+            </th>
+            <th (click)="setOrderDataField('newSavings')" [ngClass]="{'active': orderDataField == 'newSavings'}">
+                New <br> Savings
+            </th>
+            <th (click)="setOrderDataField('annualSavingsPercentImprovement')"
+                [ngClass]="{'active': orderDataField == 'annualSavingsPercentImprovement'}">
+                Annual Savings <br> % Improvement
+            </th>
+            <th (click)="setOrderDataField('cummulativeSavings')"
+                [ngClass]="{'active': orderDataField == 'cummulativeSavings'}">
+                Cumulative <br> Savings
+            </th>
+        </tr>
+    </thead>
+    <tbody class="table-group-divider">
+        <tr *ngFor="let summary of annualAnalysisSummary | orderBy: orderDataField: orderByDirection">
+            <td>
+                {{summary.year | yearDisplay: accountOrFacility.fiscalYear}}
+            </td>
+            <td>
+                <span *ngIf="summary.energyUse" [ngClass]="{'red': summary.energyUse < 0}">
+                    {{summary.energyUse | customNumber}}
+                </span>
+                <span *ngIf="!summary.energyUse">
+                    &mdash;
+                </span>
+            </td>
+            <td>
+                <span *ngIf="summary.adjusted" [ngClass]="{'red': summary.adjusted < 0}">
+                    {{summary.adjusted | customNumber}}
+                </span>
+                <span *ngIf="!summary.adjusted">
+                    &mdash;
+                </span>
+            </td>
+
+            <td>
+                <span *ngIf="summary.savings" [ngClass]="{'red': summary.savings < 0}">
+                    {{summary.savings | customNumber}}
+                </span>
+                <span *ngIf="!summary.savings">
+                    &mdash;
+                </span>
+            </td>
+            <td>
+                <span *ngIf="summary.totalSavingsPercentImprovement"
+                    [ngClass]="{'red': summary.totalSavingsPercentImprovement < 0}">
+                    {{summary.totalSavingsPercentImprovement | number:'1.0-2'}} %
+                </span>
+                <span *ngIf="!summary.totalSavingsPercentImprovement">
+                    &mdash;
+                </span>
+            </td>
+            <td>
+                <span *ngIf="summary.newSavings" [ngClass]="{'red': summary.newSavings < 0}">
+                    {{summary.newSavings | customNumber}}
+                </span>
+                <span *ngIf="!summary.newSavings">
+                    &mdash;
+                </span>
+            </td>
+            <td>
+                <span *ngIf="summary.annualSavingsPercentImprovement"
+                    [ngClass]="{'red': summary.annualSavingsPercentImprovement < 0}">
+                    {{summary.annualSavingsPercentImprovement | number:'1.0-2'}} %
+                </span>
+                <span *ngIf="!summary.annualSavingsPercentImprovement">
+                    &mdash;
+                </span>
+            </td>
+            <td>
+                <span *ngIf="summary.cummulativeSavings" [ngClass]="{'red': summary.cummulativeSavings < 0}">
+                    {{summary.cummulativeSavings | customNumber}}
+                </span>
+                <span *ngIf="!summary.cummulativeSavings">
+                    &mdash;
+                </span>
+            </td>
+        </tr>
+    </tbody>
+</table>

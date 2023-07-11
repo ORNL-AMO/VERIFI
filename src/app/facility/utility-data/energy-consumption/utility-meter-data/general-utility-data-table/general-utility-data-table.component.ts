@@ -8,7 +8,7 @@ import { CalanderizationService, EmissionsResults } from 'src/app/shared/helper-
 import { EditMeterFormService } from '../../energy-source/edit-meter-form/edit-meter-form.service';
 import { Subscription } from 'rxjs';
 import { GeneralUtilityDataFilters } from 'src/app/models/meterDataFilter';
-import { getIsEnergyMeter } from 'src/app/shared/sharedHelperFuntions';
+import { getIsEnergyMeter, getIsEnergyUnit } from 'src/app/shared/sharedHelperFuntions';
 
 @Component({
   selector: 'app-general-utility-data-table',
@@ -86,9 +86,13 @@ export class GeneralUtilityDataTableComponent implements OnInit {
   setData() {
     this.showVolumeColumn = (this.selectedMeterData.find(dataItem => { return dataItem.totalVolume != undefined && dataItem.totalVolume != 0 }) != undefined);
     this.volumeUnit = this.selectedMeter.startingUnit;
-    this.showEnergyColumn = getIsEnergyMeter(this.selectedMeter.source);
-    this.showEmissions = this.editMeterFormService.checkShowEmissionsOutputRate(this.selectedMeter.source);
-    this.showEstimated = (this.selectedMeterData.find(dataItem => {return dataItem.isEstimated == true})) != undefined;
+    if (this.selectedMeter.source == 'Other Utility') {
+      this.showEnergyColumn = (getIsEnergyUnit(this.selectedMeter.startingUnit) == true);
+    } else {
+      this.showEnergyColumn = getIsEnergyMeter(this.selectedMeter.source);
+    }
+    this.showEmissions = this.editMeterFormService.checkShowEmissionsOutputRate(this.selectedMeter);
+    this.showEstimated = (this.selectedMeterData.find(dataItem => { return dataItem.isEstimated == true })) != undefined;
     if (this.showEmissions) {
       this.setEmissions();
     }

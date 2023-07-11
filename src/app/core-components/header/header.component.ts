@@ -14,6 +14,7 @@ import { BackupDataService } from 'src/app/shared/helper-services/backup-data.se
 import { LoadingService } from '../loading/loading.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { ElectronService } from 'src/app/electron/electron.service';
+import { ToastNotificationsService } from '../toast-notifications/toast-notifications.service';
 
 @Component({
   selector: 'app-header',
@@ -49,7 +50,8 @@ export class HeaderComponent implements OnInit {
     private backupDataService: BackupDataService,
     private loadingService: LoadingService,
     private dbChangesService: DbChangesService,
-    private electronService: ElectronService
+    private electronService: ElectronService,
+    private toastNotificationService: ToastNotificationsService
   ) {
   }
 
@@ -90,11 +92,17 @@ export class HeaderComponent implements OnInit {
   async switchAccount(account: IdbAccount) {
     this.loadingService.setLoadingMessage("Switching accounts...");
     this.loadingService.setLoadingStatus(true);
-    await this.dbChangesService.selectAccount(account);
-    this.router.navigate(['/']);
-    this.loadingService.setLoadingStatus(false);
+    try {
+      await this.dbChangesService.selectAccount(account, false);
+      this.loadingService.setLoadingStatus(false);
+      this.router.navigate(['/']);
+    } catch (err) {
+      this.toastNotificationService.showToast('An Error Occured', 'There was an error when trying to switch to ' + account.name + '. The action was unable to be completed.', 15000, false, 'alert-danger');
+      this.loadingService.setLoadingStatus(false);
+      this.router.navigate(['/manage-accounts']);
+    }
   }
-  
+
   toggleSearch() {
     this.showSearch = !this.showSearch;
   }
@@ -131,5 +139,9 @@ export class HeaderComponent implements OnInit {
 
   toggleUpdateModal() {
     this.showUpdateModal = !this.showUpdateModal;
+  }
+
+  goToManageAccounts() {
+    this.router.navigate(['/manage-accounts']);
   }
 }

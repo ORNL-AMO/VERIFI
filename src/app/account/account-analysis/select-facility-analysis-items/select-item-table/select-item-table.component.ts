@@ -58,7 +58,7 @@ export class SelectItemTableComponent implements OnInit {
   async save() {
     await this.accountAnalysisDbService.updateFacilityItemSelection(this.selectedAnalysisItem, this.selectedFacilityItemId, this.facility.guid);
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    await this.dbChangesService.setAccountAnalysisItems(account);
+    await this.dbChangesService.setAccountAnalysisItems(account, false);
     this.setSelectedFacilityItem();
   }
 
@@ -96,7 +96,7 @@ export class SelectItemTableComponent implements OnInit {
     this.loadingService.setLoadingStatus(true);
     this.showCreateItem = false;
     this.dbChangesService.selectFacility(this.facility);
-    let newIdbItem: IdbAnalysisItem = this.analysisDbService.getNewAnalysisItem(this.facility.guid);
+    let newIdbItem: IdbAnalysisItem = this.analysisDbService.getNewAnalysisItem(this.selectedAnalysisItem.analysisCategory, this.facility.guid);
     newIdbItem.energyIsSource = this.selectedAnalysisItem.energyIsSource;
     newIdbItem.reportYear = this.selectedAnalysisItem.reportYear;
     newIdbItem = this.analysisService.setBaselineAdjustments(newIdbItem);
@@ -104,7 +104,7 @@ export class SelectItemTableComponent implements OnInit {
     newIdbItem = await firstValueFrom(this.analysisDbService.addWithObservable(newIdbItem));
     this.selectedFacilityItemId = newIdbItem.guid;
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    await this.dbChangesService.selectAccount(account);
+    await this.dbChangesService.selectAccount(account, false);
     await this.save();
     this.analysisDbService.selectedAnalysisItem.next(newIdbItem);
     this.loadingService.setLoadingStatus(false);

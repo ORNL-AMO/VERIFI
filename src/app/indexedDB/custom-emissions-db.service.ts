@@ -9,7 +9,7 @@ import { IdbAccount, IdbCustomEmissionsItem } from '../models/idb';
 export class CustomEmissionsDbService {
 
   accountEmissionsItems: BehaviorSubject<Array<IdbCustomEmissionsItem>>;
-  constructor(private dbService: NgxIndexedDBService) { 
+  constructor(private dbService: NgxIndexedDBService) {
     this.accountEmissionsItems = new BehaviorSubject<Array<IdbCustomEmissionsItem>>([]);
   }
 
@@ -85,10 +85,48 @@ export class CustomEmissionsDbService {
         co2Emissions: 0.455530652
       },
       {
+        year: 2019,
+        co2Emissions: 0.455530652
+      },
+      {
         year: 2020,
         co2Emissions: 0.43222827
+      },
+      {
+        year: 2023,
+        co2Emissions: 0.388753292
       }
     ];
+    uSAverageItem.residualEmissionRates = [
+      {
+        year: 2022,
+        co2Emissions: 0.382795242
+      },
+      {
+        year: 2021,
+        co2Emissions: 0.411992734
+      },
+      {
+        year: 2015,
+        co2Emissions: 0.517937082
+      },
+      {
+        year: 2014,
+        co2Emissions: 0.561726056
+      },
+      {
+        year: 2018,
+        co2Emissions: 0.455530652
+      },
+      {
+        year: 2019,
+        co2Emissions: 0.46307276
+      },
+      {
+        year: 2020,
+        co2Emissions: 0.439195115
+      }
+    ]
     return uSAverageItem;
   }
 

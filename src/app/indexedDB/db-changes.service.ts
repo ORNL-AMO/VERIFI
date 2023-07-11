@@ -39,20 +39,24 @@ export class DbChangesService {
   }
 
 
-  async selectAccount(account: IdbAccount) {
-    let updateAccount: { account: IdbAccount, isChanged: boolean } = this.updateDbEntryService.updateAccount(account);
-    if (updateAccount.isChanged) {
-      account = updateAccount.account;
-      await this.updateAccount(account)
+  async selectAccount(account: IdbAccount, skipUpdates: boolean) {
+    if (!skipUpdates) {
+      let updateAccount: { account: IdbAccount, isChanged: boolean } = this.updateDbEntryService.updateAccount(account);
+      if (updateAccount.isChanged) {
+        account = updateAccount.account;
+        await this.updateAccount(account)
+      }
     }
     //set account facilities
     let accountFacilites: Array<IdbFacility> = await this.facilityDbService.getAllAccountFacilities(account.guid);
-    for (let i = 0; i < accountFacilites.length; i++) {
-      let facility: IdbFacility = accountFacilites[i];
-      let updatedFacility: { facility: IdbFacility, isChanged: boolean } = this.updateDbEntryService.updateFacility(facility);
-      if (updatedFacility.isChanged) {
-        accountFacilites[i] = updatedFacility.facility;
-        await firstValueFrom(this.facilityDbService.updateWithObservable(updatedFacility.facility));
+    if (!skipUpdates) {
+      for (let i = 0; i < accountFacilites.length; i++) {
+        let facility: IdbFacility = accountFacilites[i];
+        let updatedFacility: { facility: IdbFacility, isChanged: boolean } = this.updateDbEntryService.updateFacility(facility);
+        if (updatedFacility.isChanged) {
+          accountFacilites[i] = updatedFacility.facility;
+          await firstValueFrom(this.facilityDbService.updateWithObservable(updatedFacility.facility));
+        }
       }
     }
     this.facilityDbService.accountFacilities.next(accountFacilites);
@@ -69,9 +73,9 @@ export class DbChangesService {
     //set custom emissions
     await this.setCustomEmissions(account);
     //set analysis
-    await this.setAnalysisItems(account);
+    await this.setAnalysisItems(account, skipUpdates);
     //set account analysis
-    await this.setAccountAnalysisItems(account);
+    await this.setAccountAnalysisItems(account, skipUpdates);
 
     this.accountDbService.selectedAccount.next(account);
   }
@@ -93,28 +97,31 @@ export class DbChangesService {
     this.facilityDbService.selectedFacility.next(facility);
   }
 
-  async setAccountAnalysisItems(account: IdbAccount) {
+  async setAccountAnalysisItems(account: IdbAccount, skipUpdates: boolean) {
     let accountAnalysisItems: Array<IdbAccountAnalysisItem> = await this.accountAnalysisDbService.getAllAccountAnalysisItems(account.guid);
-    let facilityAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
-    for (let i = 0; i < accountAnalysisItems.length; i++) {
-      let updateAnalysis: { analysisItem: IdbAccountAnalysisItem, isChanged: boolean } = this.updateDbEntryService.updateAccountAnalysis(accountAnalysisItems[i], account, facilityAnalysisItems);
-      if (updateAnalysis.isChanged) {
-        accountAnalysisItems[i] = updateAnalysis.analysisItem;
-        await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(accountAnalysisItems[i]));
-      };
+    if (!skipUpdates) {
+      let facilityAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
+      for (let i = 0; i < accountAnalysisItems.length; i++) {
+        let updateAnalysis: { analysisItem: IdbAccountAnalysisItem, isChanged: boolean } = this.updateDbEntryService.updateAccountAnalysis(accountAnalysisItems[i], account, facilityAnalysisItems);
+        if (updateAnalysis.isChanged) {
+          accountAnalysisItems[i] = updateAnalysis.analysisItem;
+          await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(accountAnalysisItems[i]));
+        };
+      }
     }
-   
     this.accountAnalysisDbService.accountAnalysisItems.next(accountAnalysisItems);
   }
 
-  async setAnalysisItems(account: IdbAccount, facility?: IdbFacility) {
+  async setAnalysisItems(account: IdbAccount, skipUpdates: boolean, facility?: IdbFacility) {
     let analysisItems: Array<IdbAnalysisItem> = await this.analysisDbService.getAllAccountAnalysisItems(account.guid);
-    for (let i = 0; i < analysisItems.length; i++) {
-      let updateAnalysis: { analysisItem: IdbAnalysisItem, isChanged: boolean } = this.updateDbEntryService.updateAnalysis(analysisItems[i]);
-      if (updateAnalysis.isChanged) {
-        analysisItems[i] = updateAnalysis.analysisItem;
-        await firstValueFrom(this.analysisDbService.updateWithObservable(analysisItems[i]));
-      };
+    if (!skipUpdates) {
+      for (let i = 0; i < analysisItems.length; i++) {
+        let updateAnalysis: { analysisItem: IdbAnalysisItem, isChanged: boolean } = this.updateDbEntryService.updateAnalysis(analysisItems[i]);
+        if (updateAnalysis.isChanged) {
+          analysisItems[i] = updateAnalysis.analysisItem;
+          await firstValueFrom(this.analysisDbService.updateWithObservable(analysisItems[i]));
+        };
+      }
     }
     this.analysisDbService.accountAnalysisItems.next(analysisItems);
     if (facility) {
@@ -163,6 +170,13 @@ export class DbChangesService {
 
   async setMeters(account: IdbAccount, facility?: IdbFacility) {
     let accountMeters: Array<IdbUtilityMeter> = await this.utilityMeterDbService.getAllAccountMeters(account.guid);
+    for (let i = 0; i < accountMeters.length; i++) {
+      let updateMeter: { utilityMeter: IdbUtilityMeter, isChanged: boolean } = this.updateDbEntryService.updateUtilityMeter(accountMeters[i]);
+      if (updateMeter.isChanged) {
+        accountMeters[i] = updateMeter.utilityMeter;
+        await firstValueFrom(this.utilityMeterDbService.updateWithObservable(accountMeters[i]));
+      };
+    }
     this.utilityMeterDbService.accountMeters.next(accountMeters);
     if (facility) {
       this.setFacilityMeters(facility);
@@ -239,7 +253,7 @@ export class DbChangesService {
 
     this.loadingService.setLoadingMessage("Deleting Facility...");
     await this.facilityDbService.deleteFacilitiesAsync([facility]);
-    await this.selectAccount(selectedAccount);
+    await this.selectAccount(selectedAccount, false);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('Facility Deleted!', undefined, undefined, false, 'alert-success');
   }

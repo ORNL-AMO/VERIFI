@@ -67,12 +67,20 @@ export class CalanderizationService {
       let consumptionUnit: string = this.energyUnitsHelperService.getFacilityUnitFromMeter(meter);
       let showEmissions: boolean = (meter.source == "Electricity" || meter.source == "Natural Gas" || meter.source == "Other Fuels");
 
+      let showEnergyUse: boolean;
+      if (meter.source == 'Other Utility') {
+        showEnergyUse = getIsEnergyUnit(meter.startingUnit);
+      } else {
+        showEnergyUse = getIsEnergyMeter(meter.source);
+      }
+
+
       calanderizedMeterData.push({
         consumptionUnit: consumptionUnit,
         meter: meter,
         monthlyData: calanderizedMeter,
         showConsumption: showConsumption,
-        showEnergyUse: getIsEnergyMeter(meter.source),
+        showEnergyUse: showEnergyUse,
         energyUnit: calanderizedenergyUnit,
         showEmissions: showEmissions
       });
@@ -102,11 +110,14 @@ export class CalanderizationService {
       startDate.setUTCDate(1);
       let endDate: Date = new Date(orderedMeterData[orderedMeterData.length - 1].readDate);
       while (startDate.getUTCMonth() != endDate.getUTCMonth() || startDate.getUTCFullYear() != endDate.getUTCFullYear()) {
+
         let month: number = startDate.getUTCMonth();
         let year: number = startDate.getUTCFullYear();
         let previousMonthReading: IdbUtilityMeterData = this.getPreviousMonthsBill(month, year, orderedMeterData);
         let currentMonthsReadings: Array<IdbUtilityMeterData> = this.getCurrentMonthsReadings(month, year, orderedMeterData);
         let nextMonthsReading: IdbUtilityMeterData = this.getNextMonthsBill(month, year, orderedMeterData);
+
+
         let totals: {
           totalConsumption: number,
           totalEnergyUse: number,
@@ -210,6 +221,28 @@ export class CalanderizationService {
           let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
           accountOrFacility = accountFacilities.find(facility => { return facility.guid == meter.facilityId });
         }
+
+
+        let readingType: 'mixed' | 'metered' | 'estimated';
+        let allUsedReadings: Array<IdbUtilityMeterData> = [previousMonthReading];
+        if (nextMonthsReading) {
+          allUsedReadings.push(nextMonthsReading);
+          currentMonthsReadings.forEach(reading => {
+            allUsedReadings.push(reading);
+          });
+        }
+
+        let readingsEstimated: Array<boolean> = allUsedReadings.map(reading => { return reading.isEstimated });
+        let uniqEstimated: Array<boolean> = _.uniq(readingsEstimated);
+        if (uniqEstimated.length > 1) {
+          readingType = 'mixed';
+        } else if (uniqEstimated[0] == true) {
+          readingType = 'estimated';
+        } else {
+          readingType = 'metered';
+        }
+
+
         calanderizeData.push({
           month: monthStr,
           monthNumValue: month,
@@ -223,7 +256,8 @@ export class CalanderizationService {
           locationEmissions: emissionsValues.locationEmissions,
           RECs: emissionsValues.RECs,
           excessRECs: emissionsValues.excessRECs,
-          excessRECsEmissions: emissionsValues.excessRECsEmissions
+          excessRECsEmissions: emissionsValues.excessRECsEmissions,
+          readingType: readingType
         });
         startDate.setUTCMonth(startDate.getUTCMonth() + 1);
       }
@@ -375,6 +409,17 @@ export class CalanderizationService {
           let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
           accountOrFacility = accountFacilities.find(facility => { return facility.guid == meter.facilityId });
         }
+
+        let readingType: 'mixed' | 'metered' | 'estimated';
+        let readingsEstimated: Array<boolean> = currentMonthsReadings.map(reading => { return reading.isEstimated });
+        let uniqEstimated: Array<boolean> = _.uniq(readingsEstimated);
+        if (uniqEstimated.length > 1) {
+          readingType = 'mixed';
+        } else if (uniqEstimated[0] == true) {
+          readingType = 'estimated';
+        } else {
+          readingType = 'metered';
+        }
         calanderizeData.push({
           month: monthStr,
           monthNumValue: month,
@@ -388,7 +433,8 @@ export class CalanderizationService {
           locationEmissions: emissionsValues.locationEmissions,
           RECs: emissionsValues.RECs,
           excessRECs: emissionsValues.excessRECs,
-          excessRECsEmissions: emissionsValues.excessRECsEmissions
+          excessRECsEmissions: emissionsValues.excessRECsEmissions,
+          readingType: readingType
         });
         startDate.setUTCMonth(startDate.getUTCMonth() + 1);
       }
@@ -679,11 +725,12 @@ export class CalanderizationService {
   }
 
   getEmissions(meter: IdbUtilityMeter, energyUse: number, energyUnit: string, year: number, energyIsSource: boolean): EmissionsResults {
-    if (meter.source == 'Electricity' || meter.source == 'Natural Gas' || meter.source == 'Other Fuels') {
+    let isCompressedAir: boolean = (meter.source == 'Other Energy' && meter.fuel == 'Purchased Compressed Air');
+    if (meter.source == 'Electricity' || meter.source == 'Natural Gas' || meter.source == 'Other Fuels' || isCompressedAir) {
       if (energyIsSource && meter.siteToSource != 0) {
         energyUse = energyUse / meter.siteToSource;
       } let convertedEnergyUse: number = energyUse;
-      if (meter.source == 'Electricity') {
+      if (meter.source == 'Electricity' || isCompressedAir) {
         //electricty emissions rates in kWh
         convertedEnergyUse = this.convertUnitsService.value(energyUse).from(energyUnit).to('kWh');
       } else {
@@ -694,7 +741,7 @@ export class CalanderizationService {
       let marketEmissions: number;
 
       let marketEmissionsOutputRate: number;
-      if (meter.source == 'Electricity') {
+      if (meter.source == 'Electricity' || isCompressedAir) {
         let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
         let meterFacility: IdbFacility = accountFacilities.find(facility => { return facility.guid == meter.facilityId });
         let emissionsRates: { marketRate: number, locationRate: number } = this.eGridService.getEmissionsRate(meterFacility.eGridSubregion, year);
@@ -746,6 +793,16 @@ export class CalanderizationService {
       let monthlyEnergyUse: number = _.sumBy(currentYearData, 'totalEnergyUse') / 12;
       let monthlyCost: number = _.sumBy(currentYearData, 'totalCost') / 12;
       let monthlyConsumption: number = _.sumBy(currentYearData, 'totalEnergyUse') / 12;
+      let readingType: 'mixed' | 'metered' | 'estimated';
+      let readingsEstimated: Array<boolean> = currentYearData.map(reading => { return reading.isEstimated });
+      let uniqEstimated: Array<boolean> = _.uniq(readingsEstimated);
+      if (uniqEstimated.length > 1) {
+        readingType = 'mixed';
+      } else if (uniqEstimated[0] == true) {
+        readingType = 'estimated';
+      } else {
+        readingType = 'metered';
+      }
       Months.forEach(month => {
         let emissionsValues: EmissionsResults = this.getEmissions(meter, monthlyEnergyUse, calanderizedEnergyUnit, year, energyIsSource)
 
@@ -775,7 +832,8 @@ export class CalanderizationService {
           locationEmissions: emissionsValues.locationEmissions,
           RECs: emissionsValues.RECs,
           excessRECs: emissionsValues.excessRECs,
-          excessRECsEmissions: emissionsValues.excessRECsEmissions
+          excessRECsEmissions: emissionsValues.excessRECsEmissions,
+          readingType: readingType
         });
       });
     });
@@ -783,23 +841,39 @@ export class CalanderizationService {
   }
 
 
-  getYearOptionsAccount(): Array<number>{
+  getYearOptionsAccount(meterCategory: 'water' | 'energy' | 'all'): Array<number> {
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
-    let calanderizedMeterData: Array<CalanderizedMeter> =  this.getCalanderizedMeterData(accountMeters, true);
-    let combinedMonthlyData: Array<MonthlyData> = calanderizedMeterData.flatMap(cMeter => {return cMeter.monthlyData});
-    let allYears: Array<number> = combinedMonthlyData.flatMap(monthlyData => {return monthlyData.year});
+    let categoryMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return this.isCategoryMeter(meter, meterCategory) });
+    let calanderizedMeterData: Array<CalanderizedMeter> = this.getCalanderizedMeterData(categoryMeters, true);
+    let combinedMonthlyData: Array<MonthlyData> = calanderizedMeterData.flatMap(cMeter => { return cMeter.monthlyData });
+    let allYears: Array<number> = combinedMonthlyData.flatMap(monthlyData => { return monthlyData.year });
     allYears = _.uniq(allYears);
+    allYears = _.orderBy(allYears, (val) => { return val }, 'asc');
     return allYears;
   }
 
-  getYearOptionsFacility(facilityId: string): Array<number>{
+  getYearOptionsFacility(facilityId: string, meterCategory: 'water' | 'energy' | 'all'): Array<number> {
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
-    let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => {return meter.facilityId == facilityId})
-    let calanderizedMeterData: Array<CalanderizedMeter> =  this.getCalanderizedMeterData(facilityMeters, false);
-    let combinedMonthlyData: Array<MonthlyData> = calanderizedMeterData.flatMap(cMeter => {return cMeter.monthlyData});
-    let allYears: Array<number> = combinedMonthlyData.flatMap(monthlyData => {return monthlyData.year});
+    let facilityCategoryMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == facilityId && this.isCategoryMeter(meter, meterCategory) })
+    let calanderizedMeterData: Array<CalanderizedMeter> = this.getCalanderizedMeterData(facilityCategoryMeters, false);
+    let combinedMonthlyData: Array<MonthlyData> = calanderizedMeterData.flatMap(cMeter => { return cMeter.monthlyData });
+    let allYears: Array<number> = combinedMonthlyData.flatMap(monthlyData => { return monthlyData.year });
     allYears = _.uniq(allYears);
+    allYears = _.orderBy(allYears, (val) => { return val }, 'asc');
     return allYears;
+  }
+
+  isCategoryMeter(meter: IdbUtilityMeter, meterCategory: 'water' | 'energy' | 'all'): boolean {
+    if (meterCategory == 'water') {
+      if (meter.source == 'Water Intake') {
+        return true;
+      }
+      return false;
+    } else if (meterCategory == 'energy') {
+      return getIsEnergyMeter(meter.source);
+    } else if (meterCategory == 'all') {
+      return true;
+    }
   }
 }
 

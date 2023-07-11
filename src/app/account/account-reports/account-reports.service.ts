@@ -54,7 +54,10 @@ export class AccountReportsService {
       analysisItemId: [betterPlantsReportSetup.analysisItemId, Validators.required],
       includeFacilityNames: [betterPlantsReportSetup.includeFacilityNames, Validators.required],
       baselineAdjustmentNotes: [betterPlantsReportSetup.baselineAdjustmentNotes],
-      modificationNotes: [betterPlantsReportSetup.modificationNotes]
+      modificationNotes: [betterPlantsReportSetup.modificationNotes],
+      methodologyNotes: [betterPlantsReportSetup.methodologyNotes],
+      baselineYearWaterPilotGoal: [betterPlantsReportSetup.baselineYearWaterPilotGoal],
+      reportYearWaterPilotGoal: [betterPlantsReportSetup.reportYearWaterPilotGoal]
     });
     return form;
   }
@@ -64,6 +67,9 @@ export class AccountReportsService {
     betterPlantsReportSetup.includeFacilityNames = form.controls.includeFacilityNames.value;
     betterPlantsReportSetup.baselineAdjustmentNotes = form.controls.baselineAdjustmentNotes.value;
     betterPlantsReportSetup.modificationNotes = form.controls.modificationNotes.value;
+    betterPlantsReportSetup.methodologyNotes = form.controls.methodologyNotes.value;
+    betterPlantsReportSetup.reportYearWaterPilotGoal = form.controls.reportYearWaterPilotGoal.value;
+    betterPlantsReportSetup.baselineYearWaterPilotGoal = form.controls.baselineYearWaterPilotGoal.value;
     return betterPlantsReportSetup;
   }
 

@@ -8,9 +8,9 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { JStatRegressionModel } from 'src/app/models/analysis';
+import { AnalysisGroup, JStatRegressionModel } from 'src/app/models/analysis';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
-import { AnalysisGroup, IdbAccount, IdbAnalysisItem, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import { IdbAccount, IdbAnalysisItem, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { RegressionModelsService } from 'src/app/shared/shared-analysis/calculations/regression-models.service';
 import * as _ from 'lodash';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
@@ -34,6 +34,7 @@ export class RegressionModelMenuComponent implements OnInit {
   modelingError: boolean = false;
   selectedFacility: IdbFacility;
   isFormChange: boolean;
+  analysisItem: IdbAnalysisItem;
   constructor(private analysisDbService: AnalysisDbService, private analysisService: AnalysisService,
     private dbChangesService: DbChangesService, private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService,
@@ -46,7 +47,8 @@ export class RegressionModelMenuComponent implements OnInit {
   ngOnInit(): void {
     this.selectedFacility = this.facilityDbService.selectedFacility.getValue();
     this.showInvalid = this.analysisService.showInvalidModels.getValue();
-    this.yearOptions = this.calanderizationService.getYearOptionsFacility(this.selectedFacility.guid);
+    this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
+    this.yearOptions = this.calanderizationService.getYearOptionsFacility(this.selectedFacility.guid, this.analysisItem.analysisCategory);
     this.selectedGroupSub = this.analysisService.selectedGroup.subscribe(group => {
       if (!this.isFormChange) {
         this.group = JSON.parse(JSON.stringify(group));
@@ -71,15 +73,14 @@ export class RegressionModelMenuComponent implements OnInit {
 
   async saveItem() {
     this.isFormChange = true;
-    let analysisItem: IdbAnalysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
-    let groupIndex: number = analysisItem.groups.findIndex(group => { return group.idbGroupId == this.group.idbGroupId });
+    let groupIndex: number = this.analysisItem.groups.findIndex(group => { return group.idbGroupId == this.group.idbGroupId });
     this.group.groupErrors = this.analysisValidationService.getGroupErrors(this.group);
 
-    analysisItem.groups[groupIndex] = this.group;
-    await firstValueFrom(this.analysisDbService.updateWithObservable(analysisItem));
+    this.analysisItem.groups[groupIndex] = this.group;
+    await firstValueFrom(this.analysisDbService.updateWithObservable(this.analysisItem));
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    this.dbChangesService.setAnalysisItems(selectedAccount, this.selectedFacility);
-    this.analysisDbService.selectedAnalysisItem.next(analysisItem);
+    this.dbChangesService.setAnalysisItems(selectedAccount, false, this.selectedFacility);
+    this.analysisDbService.selectedAnalysisItem.next(this.analysisItem);
     this.analysisService.selectedGroup.next(this.group);
   }
 
@@ -189,9 +190,8 @@ export class RegressionModelMenuComponent implements OnInit {
   }
 
   cancelTogglePredictor() {
-    let analysisItem: IdbAnalysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
-    let groupIndex: number = analysisItem.groups.findIndex(group => { return group.idbGroupId == this.group.idbGroupId });
-    this.group.predictorVariables = JSON.parse(JSON.stringify(analysisItem.groups[groupIndex].predictorVariables));
+    let groupIndex: number = this.analysisItem.groups.findIndex(group => { return group.idbGroupId == this.group.idbGroupId });
+    this.group.predictorVariables = JSON.parse(JSON.stringify(this.analysisItem.groups[groupIndex].predictorVariables));
     this.showConfirmPredictorChangeModel = false;
   }
 

@@ -4,8 +4,8 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { JStatRegressionModel } from 'src/app/models/analysis';
-import { AnalysisGroup, IdbAccount, IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
+import { AnalysisGroup, JStatRegressionModel } from 'src/app/models/analysis';
+import { IdbAccount, IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 import { AnalysisService } from '../../../analysis.service';
 import { AnalysisValidationService } from 'src/app/shared/helper-services/analysis-validation.service';
 @Component({
@@ -67,7 +67,7 @@ export class RegressionModelSelectionComponent implements OnInit {
     analysisItem.setupErrors = this.analysisValidationService.getAnalysisItemErrors(analysisItem);
     await firstValueFrom(this.analysisDbService.updateWithObservable(analysisItem));
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    this.dbChangesService.setAnalysisItems(selectedAccount, this.selectedFacility);
+    this.dbChangesService.setAnalysisItems(selectedAccount, false, this.selectedFacility);
     this.analysisDbService.selectedAnalysisItem.next(analysisItem);
     this.analysisService.selectedGroup.next(this.selectedGroup)
   }

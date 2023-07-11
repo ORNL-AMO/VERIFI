@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { FormGroup } from '@angular/forms';
+import { FormControl, FormGroup } from '@angular/forms';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { Countries, Country } from 'src/app/shared/form-data/countries';
 import { FirstNaicsList, NAICS, SecondNaicsList, ThirdNaicsList } from 'src/app/shared/form-data/naics-data';
@@ -9,6 +9,7 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbAccount, IdbFacility } from 'src/app/models/idb';
 import { SettingsFormsService } from '../settings-forms.service';
 import { SetupWizardService } from 'src/app/setup-wizard/setup-wizard.service';
+import { FacilityClassification, FacilityClassifications } from 'src/app/models/constantsAndTypes';
 
 @Component({
   selector: 'app-general-information-form',
@@ -36,6 +37,7 @@ export class GeneralInformationFormComponent implements OnInit {
   countries: Array<Country> = Countries;
   states: Array<State> = States;
   isFormChange: boolean = false;
+  facilityClassifications: Array<FacilityClassification> = FacilityClassifications;
   constructor(private accountDbService: AccountdbService, private settingsFormsService: SettingsFormsService, private facilityDbService: FacilitydbService,
     private setupWizardService: SetupWizardService) { }
 
@@ -74,6 +76,7 @@ export class GeneralInformationFormComponent implements OnInit {
           if (facility) {
             if (this.isFormChange == false) {
               this.form = this.settingsFormsService.getGeneralInformationForm(facility);
+              this.form.addControl('facilityClassification', new FormControl(this.selectedFacility.classification));
               this.unitsOfMeasure = this.selectedFacility.unitsOfMeasure;
             } else {
               this.isFormChange = false;
@@ -86,6 +89,7 @@ export class GeneralInformationFormComponent implements OnInit {
           if (facility) {
             if (this.isFormChange == false) {
               this.form = this.settingsFormsService.getGeneralInformationForm(facility);
+              this.form.addControl('facilityClassification', new FormControl(facility.classification));
               this.unitsOfMeasure = this.selectedFacility.unitsOfMeasure;
             } else {
               this.isFormChange = false;

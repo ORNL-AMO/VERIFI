@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { WorkBook } from 'xlsx';
-import { IdbAccount, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup, MeterPhase, MeterSource, PredictorData } from '../models/idb';
+import { IdbAccount, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup, PredictorData } from '../models/idb';
 import * as XLSX from 'xlsx';
 import { AgreementType, AgreementTypes, FuelTypeOption, ScopeOption, ScopeOptions, SourceOptions } from '../facility/utility-data/energy-consumption/energy-source/edit-meter-form/editMeterOptions';
 import { FacilitydbService } from '../indexedDB/facility-db.service';
@@ -19,6 +19,7 @@ import { EGridService, SubRegionData } from '../shared/helper-services/e-grid.se
 import * as _ from 'lodash';
 import { State, States } from '../shared/form-data/states';
 import { getIsEnergyMeter, getIsEnergyUnit } from '../shared/sharedHelperFuntions';
+import { MeterPhase, MeterSource } from '../models/constantsAndTypes';
 
 @Injectable({
   providedIn: 'root'
@@ -177,7 +178,13 @@ export class UploadDataService {
             meter.groupId = groupData.group.guid;
           }
           meter.phase = this.getPhase(meterData['Phase']);
-          meter.fuel = this.getFuelEnum(meterData['Fuel'], meter.source, meter.phase);
+          if (meter.source == 'Water Discharge') {
+            meter.waterDischargeType = meterData['Fuel'];
+          } else if (meter.source == 'Water Intake') {
+            meter.waterIntakeType = meterData['Fuel'];
+          } else {
+            meter.fuel = this.getFuelEnum(meterData['Fuel'], meter.source, meter.phase);
+          }
           meter.startingUnit = this.checkImportStartingUnit(meterData['Collection Unit'], meter.source, meter.phase, meter.fuel);
           meter.heatCapacity = meterData['Heat Capacity'];
           let isEnergyUnit: boolean = getIsEnergyUnit(meter.startingUnit);

@@ -1,6 +1,6 @@
-import { MonthlyAnalysisSummary, MonthlyAnalysisSummaryData } from "src/app/models/analysis";
+import { AnalysisGroup, MonthlyAnalysisSummary, MonthlyAnalysisSummaryData } from "src/app/models/analysis";
 import { CalanderizedMeter } from "src/app/models/calanderization";
-import { AnalysisGroup, IdbAnalysisItem, IdbFacility, IdbPredictorEntry } from "src/app/models/idb";
+import { IdbAnalysisItem, IdbFacility, IdbPredictorEntry } from "src/app/models/idb";
 import { checkAnalysisValue } from "../shared-calculations/calculationsHelpers";
 import { MonthlyAnalysisSummaryDataClass } from "./monthlyAnalysisSummaryDataClass";
 import { MonthlyGroupAnalysisClass } from "./monthlyGroupAnalysisClass";

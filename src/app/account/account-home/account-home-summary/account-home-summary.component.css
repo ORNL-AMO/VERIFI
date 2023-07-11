@@ -51,10 +51,6 @@ button:hover span.fa{
 .alert-warning{
     width: auto;
 }
-
-.progress-bar-data-year{
-    top: 50px;
-    right: 48%;
-    font-weight: bold;
-    position: absolute;
+.fa-exclamation.white{
+    color: white;
 }
