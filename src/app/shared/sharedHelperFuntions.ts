@@ -18,3 +18,13 @@ export function getIsEnergyMeter(source: MeterSource): boolean {
         return false;
     }
 }
+
+export function checkShowSiteToSource(source: MeterSource, includeInEnergy: boolean): boolean {
+    if (!includeInEnergy) {
+        return false;
+    } else if (source == "Electricity" || source == "Natural Gas" || source == 'Other Energy') {
+        return true;
+    } else {
+        return false;
+    }
+}

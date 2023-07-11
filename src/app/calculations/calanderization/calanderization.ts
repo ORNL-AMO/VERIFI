@@ -6,6 +6,8 @@ import { EmissionsResults } from "src/app/shared/helper-services/calanderization
 import { getFiscalYear } from "../shared-calculations/calanderizationFunctions";
 import { Months } from "src/app/shared/form-data/months";
 import { FuelTypeOption, OtherEnergyOptions } from "src/app/facility/utility-data/energy-consumption/energy-source/edit-meter-form/editMeterOptions";
+import { getConsumptionUnit, getCurrentMonthsReadings, getNextMonthsBill, getPreviousMonthsBill, getUnitFromMeter } from "./calanderizationHelpers";
+import { convertMeterData } from "../conversions/convertMeterData";
 
 
 export class Calanderization {
@@ -20,8 +22,9 @@ export class Calanderization {
         let calanderizedMeterData: Array<CalanderizedMeter> = new Array();
         meters.forEach(meter => {
             let energyIsSource: boolean = accountOrFacility.energyIsSource;
-            let calanderizedenergyUnit: string = this.getConsumptionUnit(meter, accountOrFacility);
+            let calanderizedenergyUnit: string = getConsumptionUnit(meter, accountOrFacility);
             let meterData: Array<IdbUtilityMeterData> = allMeterData.filter(meterData => { return meterData.meterId == meter.guid });
+            let convertedMeterData: Array<IdbUtilityMeterData> = convertMeterData(meter, meterData, accountOrFacility);
             // if (inAccount) {
             //     meterData = this.utilityMeterDataDbService.getMeterDataForAccount(meter, true, calanderizationOptions);
             //     calanderizedenergyUnit = this.energyUnitsHelperService.getMeterConsumptionUnitInAccount(meter);
@@ -34,12 +37,12 @@ export class Calanderization {
                 energyIsSource = calanderizationOptions.energyIsSource;
             }
 
-            let calanderizedMeter: Array<MonthlyData> = this.calanderizeMeterData(meter, meterData, energyIsSource, calanderizedenergyUnit, monthDisplayShort, accountOrFacility);
+            let calanderizedMeter: Array<MonthlyData> = this.calanderizeMeterData(meter, convertedMeterData, energyIsSource, calanderizedenergyUnit, monthDisplayShort, accountOrFacility);
             let showConsumption: boolean;
             if (meter.source != 'Electricity') {
-                showConsumption = calanderizedMeter.find(meterData => { return meterData.energyConsumption != meterData.energyUse }) != undefined;
+                showConsumption = calanderizedMeter.find(cMeter => { return cMeter.energyConsumption != cMeter.energyUse }) != undefined;
             }
-            // let consumptionUnit: string = this.energyUnitsHelperService.getFacilityUnitFromMeter(meter);
+            let consumptionUnit: string = getUnitFromMeter(meter, accountOrFacility);
             let showEmissions: boolean = (meter.source == "Electricity" || meter.source == "Natural Gas" || meter.source == "Other Fuels");
 
             let showEnergyUse: boolean;
@@ -51,7 +54,7 @@ export class Calanderization {
 
 
             calanderizedMeterData.push({
-                consumptionUnit: calanderizedenergyUnit,
+                consumptionUnit: consumptionUnit,
                 meter: meter,
                 monthlyData: calanderizedMeter,
                 showConsumption: showConsumption,
@@ -89,9 +92,9 @@ export class Calanderization {
 
                 let month: number = startDate.getUTCMonth();
                 let year: number = startDate.getUTCFullYear();
-                let previousMonthReading: IdbUtilityMeterData = this.getPreviousMonthsBill(month, year, orderedMeterData);
-                let currentMonthsReadings: Array<IdbUtilityMeterData> = this.getCurrentMonthsReadings(month, year, orderedMeterData);
-                let nextMonthsReading: IdbUtilityMeterData = this.getNextMonthsBill(month, year, orderedMeterData);
+                let previousMonthReading: IdbUtilityMeterData = getPreviousMonthsBill(month, year, orderedMeterData);
+                let currentMonthsReadings: Array<IdbUtilityMeterData> = getCurrentMonthsReadings(month, year, orderedMeterData);
+                let nextMonthsReading: IdbUtilityMeterData = getNextMonthsBill(month, year, orderedMeterData);
 
 
                 let totals: {
@@ -336,7 +339,7 @@ export class Calanderization {
             while (startDate.getUTCMonth() != endDate.getUTCMonth() || startDate.getUTCFullYear() != endDate.getUTCFullYear()) {
                 let month: number = startDate.getUTCMonth();
                 let year: number = startDate.getUTCFullYear();
-                let currentMonthsReadings: Array<IdbUtilityMeterData> = this.getCurrentMonthsReadings(month, year, orderedMeterData);
+                let currentMonthsReadings: Array<IdbUtilityMeterData> = getCurrentMonthsReadings(month, year, orderedMeterData);
                 let readingSummaries: Array<{
                     energyUse: number,
                     energyConsumption: number,
@@ -476,90 +479,4 @@ export class Calanderization {
         });
         return calanderizeData;
     }
-
-    getPreviousMonthsBill(month: number, year: number, meterReadings: Array<IdbUtilityMeterData>): IdbUtilityMeterData {
-        //set to the 5th to not conflict
-        let previousMonth: Date = new Date();
-        previousMonth.setUTCFullYear(year, month - 1, 5);
-        let previousMonthReadings: Array<IdbUtilityMeterData> = this.getCurrentMonthsReadings(previousMonth.getUTCMonth(), previousMonth.getUTCFullYear(), meterReadings);
-        if (previousMonthReadings.length == 0) {
-            return this.getPreviousMonthsBill(previousMonth.getUTCMonth(), previousMonth.getUTCFullYear(), meterReadings);
-        } else if (previousMonthReadings.length == 1) {
-            return previousMonthReadings[0]
-        } else {
-            let latestReading: IdbUtilityMeterData = _.maxBy(previousMonthReadings, (reading) => { return new Date(reading.readDate) });
-            return latestReading;
-        }
-    }
-
-    getCurrentMonthsReadings(month: number, year: number, meterReadings: Array<IdbUtilityMeterData>): Array<IdbUtilityMeterData> {
-        let currentMonthReadings: Array<IdbUtilityMeterData> = _.filter(meterReadings, (reading) => {
-            let readingDate: Date = new Date(reading.readDate);
-            return (month == readingDate.getUTCMonth() && year == readingDate.getUTCFullYear());
-        });
-        return _.orderBy(currentMonthReadings, (data) => { return new Date(data.readDate) });
-    }
-
-    getNextMonthsBill(month: number, year: number, meterReadings: Array<IdbUtilityMeterData>): IdbUtilityMeterData {
-        let nextMonth: Date = new Date();
-        nextMonth.setFullYear(year, month + 1, 5);
-        let nextMonthReadings: Array<IdbUtilityMeterData> = this.getCurrentMonthsReadings(nextMonth.getUTCMonth(), nextMonth.getUTCFullYear(), meterReadings);
-        if (nextMonthReadings.length == 0) {
-            return this.getNextMonthsBill(nextMonth.getUTCMonth(), nextMonth.getUTCFullYear(), meterReadings);
-        } else if (nextMonthReadings.length == 1) {
-            return nextMonthReadings[0]
-        } else {
-            let latestReading: IdbUtilityMeterData = _.minBy(nextMonthReadings, (reading) => { return new Date(reading.readDate) });
-            return latestReading;
-        }
-    }
-
-    getConsumptionUnit(meter: IdbUtilityMeter, accountOrFacility: IdbAccount | IdbFacility): string {
-        if (accountOrFacility) {
-            let isEnergyMeter: boolean;
-            if (meter.source == 'Other Utility') {
-                isEnergyMeter = getIsEnergyUnit(meter.startingUnit);
-            } else {
-                isEnergyMeter = getIsEnergyMeter(meter.source);
-            }
-            //use meter unit 
-            if (isEnergyMeter) {
-                return accountOrFacility.energyUnit;
-            } else {
-                return this.getUnitFromMeter(meter, accountOrFacility);
-            }
-        } else {
-            return;
-        }
-    }
-
-    getUnitFromMeter(accountMeter: IdbUtilityMeter, accountOrFacility: IdbAccount | IdbFacility): string {
-        if (accountMeter.source == 'Electricity' || getIsEnergyUnit(accountMeter.startingUnit)) {
-            return accountOrFacility.energyUnit;
-        } else if (accountMeter.source == 'Natural Gas') {
-            return accountOrFacility.volumeGasUnit;
-        } else if (accountMeter.source == 'Other Fuels') {
-            if (accountMeter.phase == 'Gas') {
-                return accountOrFacility.volumeGasUnit;
-            } else if (accountMeter.phase == 'Liquid') {
-                return accountOrFacility.volumeLiquidUnit;
-            } else if (accountMeter.phase == 'Solid') {
-                return accountOrFacility.massUnit;
-            }
-        } else if (accountMeter.source == 'Water Intake' || accountMeter.source == 'Water Discharge') {
-            return accountOrFacility.volumeLiquidUnit;
-        } else if (accountMeter.source == 'Other Energy') {
-            let selectedEnergyOption: FuelTypeOption = JSON.parse(JSON.stringify(OtherEnergyOptions.find(option => { return option.value == accountMeter.fuel })));
-            if (selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Steam') {
-                return accountOrFacility.massUnit;
-            } else if (selectedEnergyOption.otherEnergyType && (selectedEnergyOption.otherEnergyType == 'Chilled Water' || selectedEnergyOption.otherEnergyType == 'Hot Water')) {
-                return accountOrFacility.energyUnit;
-            } else if (selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Compressed Air') {
-                return accountOrFacility.volumeGasUnit;
-            }
-        } else if (accountMeter.source == 'Other Utility') {
-            return accountMeter.startingUnit;
-        }
-    }
-
 }
