@@ -4,7 +4,7 @@ import { getIsEnergyMeter, getIsEnergyUnit } from "src/app/shared/sharedHelperFu
 import * as _ from 'lodash';
 import { getFiscalYear } from "../shared-calculations/calanderizationFunctions";
 import { Months } from "src/app/shared/form-data/months";
-import { getConsumptionUnit, getCurrentMonthsReadings, getNextMonthsBill, getPreviousMonthsBill, getUnitFromMeter } from "./calanderizationHelpers";
+import { daysBetweenDates, getConsumptionUnit, getCurrentMonthsReadings, getNextMonthsBill, getPreviousMonthsBill, getUnitFromMeter } from "./calanderizationHelpers";
 import { convertMeterData } from "../conversions/convertMeterData";
 
 
@@ -146,7 +146,7 @@ export class CalanderizeMetersClass {
                         //find number of days between next month and previous month
                         let previousBillDate: Date = new Date(previousMonthReading.readDate);
                         let nextBillDate: Date = new Date(nextMonthsReading.readDate);
-                        let daysBetween: number = this.daysBetweenDates(previousBillDate, nextBillDate);
+                        let daysBetween: number = daysBetweenDates(previousBillDate, nextBillDate);
                         //find per day energy use
                         let energyUsePerDay: number = nextMonthsReading.totalEnergyUse / daysBetween;
                         let energyCostPerDay: number = nextMonthsReading.totalCost / daysBetween;
@@ -154,7 +154,7 @@ export class CalanderizeMetersClass {
                         //find number of days in current month
                         let currentMonthDate1: Date = new Date(year, month);
                         let currentMonthDate2: Date = new Date(year, month + 1);
-                        let daysInMonth: number = this.daysBetweenDates(currentMonthDate1, currentMonthDate2);
+                        let daysInMonth: number = daysBetweenDates(currentMonthDate1, currentMonthDate2);
                         //multiply per day by number of days in current month
                         let energyUseForMonth: number = energyUsePerDay * daysInMonth;
                         let volumeForMonth: number = volumePerDay * daysInMonth;
@@ -180,7 +180,6 @@ export class CalanderizeMetersClass {
                 } else {
                     monthStr = new Date(year, month).toLocaleString('default', { month: 'long' });
                 }
-                // let emissionsValues: EmissionsResults = this.getEmissions(meter, totals.totalEnergyUse, calanderizedEnergyUnit, year, energyIsSource);
                 if (meter.includeInEnergy == false) {
                     totals.totalEnergyUse = 0;
                 }
@@ -214,11 +213,6 @@ export class CalanderizeMetersClass {
                     energyUse: totals.totalEnergyUse,
                     energyCost: totals.totalCost,
                     date: new Date(year, month),
-                    // marketEmissions: emissionsValues.marketEmissions,
-                    // locationEmissions: emissionsValues.locationEmissions,
-                    // RECs: emissionsValues.RECs,
-                    // excessRECs: emissionsValues.excessRECs,
-                    // excessRECsEmissions: emissionsValues.excessRECsEmissions,
                     marketEmissions: 0,
                     locationEmissions: 0,
                     RECs: 0,
@@ -251,7 +245,7 @@ export class CalanderizeMetersClass {
         let currentDate: Date = new Date(currentReading.readDate);
         let previousReadingDate: Date = new Date(previousReading.readDate)
         //days from previous to current bill reading
-        let daysFromPrevious: number = this.daysBetweenDates(previousReadingDate, currentDate);
+        let daysFromPrevious: number = daysBetweenDates(previousReadingDate, currentDate);
         //find per day energy use
         let energyUsePerDayCurrent: number = currentReading.totalEnergyUse / daysFromPrevious;
         let volumePerDayCurrent: number = currentReading.totalVolume / daysFromPrevious;
@@ -266,7 +260,7 @@ export class CalanderizeMetersClass {
 
         //days from next bill to current bill reading
         let nextMonthsDate: Date = new Date(nextReading.readDate);
-        let daysFromNext: number = this.daysBetweenDates(currentDate, nextMonthsDate);
+        let daysFromNext: number = daysBetweenDates(currentDate, nextMonthsDate);
         //find days per energy use
         let energyUsePerDayNext: number = nextReading.totalEnergyUse / daysFromNext;
         let volumePerDayNext: number = nextReading.totalVolume / daysFromNext;
@@ -278,7 +272,7 @@ export class CalanderizeMetersClass {
             nextMonthsDate.setUTCMonth(currentDate.getUTCMonth() + 1);
             nextMonthsDate.setDate(0);
         }
-        let daysTillNext: number = this.daysBetweenDates(currentDate, nextMonthsDate);
+        let daysTillNext: number = daysBetweenDates(currentDate, nextMonthsDate);
         let energyUseForNext: number = energyUsePerDayNext * daysTillNext;
         let costForNext: number = (nextReading.totalCost / daysFromNext) * daysTillNext;
         let volumeForNext: number = volumePerDayNext * daysTillNext;
@@ -367,7 +361,6 @@ export class CalanderizeMetersClass {
                 } else {
                     monthStr = new Date(year, month).toLocaleString('default', { month: 'long' });
                 }
-                // let emissionsValues: EmissionsResults = this.getEmissions(meter, totalEnergyUse, calanderizedEnergyUnit, year, energyIsSource);
 
                 let readingType: 'mixed' | 'metered' | 'estimated';
                 let readingsEstimated: Array<boolean> = currentMonthsReadings.map(reading => { return reading.isEstimated });
@@ -388,11 +381,6 @@ export class CalanderizeMetersClass {
                     energyUse: totalEnergyUse,
                     energyCost: totalCost,
                     date: new Date(year, month),
-                    // marketEmissions: emissionsValues.marketEmissions,
-                    // locationEmissions: emissionsValues.locationEmissions,
-                    // RECs: emissionsValues.RECs,
-                    // excessRECs: emissionsValues.excessRECs,
-                    // excessRECsEmissions: emissionsValues.excessRECsEmissions,
                     marketEmissions: 0,
                     locationEmissions: 0,
                     RECs: 0,
@@ -406,13 +394,6 @@ export class CalanderizeMetersClass {
         return calanderizeData;
     }
 
-    daysBetweenDates(firstDate: Date, secondDate: Date) {
-        const _MS_PER_DAY = 1000 * 60 * 60 * 24;
-        // Discard the time and time-zone information.
-        const utc1 = Date.UTC(firstDate.getFullYear(), firstDate.getMonth(), firstDate.getDate());
-        const utc2 = Date.UTC(secondDate.getFullYear(), secondDate.getMonth(), secondDate.getDate());
-        return Math.round((utc2 - utc1) / _MS_PER_DAY);
-    }
 
     calanderizeFullYear(meter: IdbUtilityMeter, meterData: Array<IdbUtilityMeterData>, energyIsSource: boolean, calanderizedEnergyUnit: string, monthDisplayShort: boolean, accountOrFacility: IdbAccount | IdbFacility): Array<MonthlyData> {
         let calanderizeData: Array<MonthlyData> = new Array();
@@ -438,7 +419,6 @@ export class CalanderizeMetersClass {
                 readingType = 'metered';
             }
             Months.forEach(month => {
-                // let emissionsValues: EmissionsResults = this.getEmissions(meter, monthlyEnergyUse, calanderizedEnergyUnit, year, energyIsSource)
                 let monthStr: string;
                 if (monthDisplayShort) {
                     monthStr = new Date(year, month.monthNumValue).toLocaleString('default', { month: 'short' });
@@ -454,11 +434,6 @@ export class CalanderizeMetersClass {
                     energyUse: monthlyEnergyUse,
                     energyCost: monthlyCost,
                     date: new Date(year, month.monthNumValue),
-                    // marketEmissions: emissionsValues.marketEmissions,
-                    // locationEmissions: emissionsValues.locationEmissions,
-                    // RECs: emissionsValues.RECs,
-                    // excessRECs: emissionsValues.excessRECs,
-                    // excessRECsEmissions: emissionsValues.excessRECsEmissions,
                     marketEmissions: 0,
                     locationEmissions: 0,
                     RECs: 0,

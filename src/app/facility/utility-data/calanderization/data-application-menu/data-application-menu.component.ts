@@ -4,8 +4,9 @@ import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/model
 import * as _ from 'lodash';
 import { NgbDateStruct } from '@ng-bootstrap/ng-bootstrap';
 import { CalanderizationService, CalendarizationSummaryItem } from 'src/app/shared/helper-services/calanderization.service';
-import { MonthlyData } from 'src/app/models/calanderization';
+import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
+import { CalanderizeMetersClass } from 'src/app/calculations/calanderization/calanderizeMeters';
 
 @Component({
   selector: 'app-data-application-menu',
@@ -52,7 +53,8 @@ export class DataApplicationMenuComponent implements OnInit {
   calanderizeMeter() {
     if (this.utilityMeterData.length > 2) {
       let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-      this.monthlyData = this.calanderizationService.calanderizeMeterData(this.meter, this.utilityMeterData, selectedFacility.energyIsSource, selectedFacility.energyUnit, false, false);
+      let calanderizedData: Array<CalanderizedMeter> = new CalanderizeMetersClass([this.meter], this.utilityMeterData, selectedFacility).calanderizedMeterData
+      this.monthlyData = calanderizedData[0].monthlyData;
       if (this.meter.meterReadingDataApplication == 'backward') {
         this.monthlyData = this.monthlyData.splice(0, 2);
       } else {

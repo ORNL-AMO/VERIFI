@@ -15,7 +15,6 @@ import { ToastNotificationsService } from 'src/app/core-components/toast-notific
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
 import { firstValueFrom, Observable, of } from 'rxjs';
-import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import * as _ from 'lodash';

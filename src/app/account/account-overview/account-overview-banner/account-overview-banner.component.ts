@@ -8,8 +8,6 @@ import { AccountOverviewService } from '../account-overview.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { Month, Months } from 'src/app/shared/form-data/months';
 import * as _ from 'lodash';
-import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
-import { MonthlyData } from 'src/app/models/calanderization';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 
 @Component({

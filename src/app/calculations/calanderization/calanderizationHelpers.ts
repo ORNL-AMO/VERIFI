@@ -88,3 +88,10 @@ export function getUnitFromMeter(accountMeter: IdbUtilityMeter, accountOrFacilit
         return accountMeter.startingUnit;
     }
 }
+export function daysBetweenDates(firstDate: Date, secondDate: Date) {
+    const _MS_PER_DAY = 1000 * 60 * 60 * 24;
+    // Discard the time and time-zone information.
+    const utc1 = Date.UTC(firstDate.getFullYear(), firstDate.getMonth(), firstDate.getDate());
+    const utc2 = Date.UTC(secondDate.getFullYear(), secondDate.getMonth(), secondDate.getDate());
+    return Math.round((utc2 - utc1) / _MS_PER_DAY);
+}

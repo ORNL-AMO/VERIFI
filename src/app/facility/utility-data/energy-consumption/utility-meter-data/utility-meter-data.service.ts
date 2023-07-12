@@ -4,10 +4,8 @@ import { FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms'
 import { BehaviorSubject } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { AdditionalChargesFilters, DetailedChargesFilters, ElectricityDataFilters, EmissionsFilters, GeneralInformationFilters, GeneralUtilityDataFilters } from 'src/app/models/meterDataFilter';
-import { IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import { IdbUtilityMeterData } from 'src/app/models/idb';
 import * as _ from 'lodash';
-import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
-import { MonthlyData } from 'src/app/models/calanderization';
 
 @Injectable({
   providedIn: 'root'
@@ -19,8 +17,7 @@ export class UtilityMeterDataService {
 
   electricityInputFilters: BehaviorSubject<ElectricityDataFilters>;
 
-  constructor(private formBuilder: FormBuilder, private facilityDbService: FacilitydbService,
-    private calanderizationService: CalanderizationService) {
+  constructor(private formBuilder: FormBuilder, private facilityDbService: FacilitydbService) {
     let defaultFilters: ElectricityDataFilters = this.getDefaultFilters();
     this.tableElectricityFilters = new BehaviorSubject<ElectricityDataFilters>(defaultFilters);
     this.electricityInputFilters = new BehaviorSubject<ElectricityDataFilters>(defaultFilters);
@@ -241,40 +238,5 @@ export class UtilityMeterDataService {
     meterData.otherCharge = form.controls.otherCharge.value;
     meterData.isEstimated = form.controls.isEstimated.value;
     return meterData;
-  }
-
-
-  checkForErrors(meterData: Array<IdbUtilityMeterData>, meter: IdbUtilityMeter): { error: Date, warning: Date, missingMonth: Date } {
-    if (meterData && meterData.length != 0) {
-      let orderedData: Array<IdbUtilityMeterData> = _.orderBy(meterData, 'readDate', 'desc');
-      let meterDataDates: Array<Date> = orderedData.map(data => { return data.readDate });
-      for (let index = 0; index < meterDataDates.length - 1; index++) {
-        let date1: Date = new Date(meterDataDates[index]);
-        let date2: Date = new Date(meterDataDates[index + 1]);
-        if (date1.getUTCMonth() == date2.getUTCMonth() && date1.getUTCFullYear() == date2.getUTCFullYear()) {
-          if (date1.getUTCDate() == date2.getUTCDate()) {
-            return { error: date1, warning: undefined, missingMonth: undefined }
-          } else if (!meter.ignoreDuplicateMonths) {
-            return { error: undefined, warning: date1, missingMonth: undefined }
-          }
-        }
-      }
-
-      if (!meter.ignoreMissingMonths) {
-        let meterCopy: IdbUtilityMeter = JSON.parse(JSON.stringify(meter));
-        meterCopy.meterReadingDataApplication = "fullMonth";
-
-        //calanderizationEnergyUnit doesn't matter, used for emissions. Hardcoded 'MMBtu'
-        let calanderizedData: Array<MonthlyData> = this.calanderizationService.calanderizeMeterData(meterCopy, orderedData, false, 'MMBtu', false, false);
-        for (let index = 0; index < calanderizedData.length; index++) {
-          let dataItem: MonthlyData = calanderizedData[index];
-          if (dataItem.energyUse == 0 && dataItem.energyConsumption == 0) {
-            return { error: undefined, warning: undefined, missingMonth: new Date(dataItem.date) };
-          }
-        }
-      }
-    }
-
-    return { error: undefined, warning: undefined, missingMonth: undefined };
   }
 }

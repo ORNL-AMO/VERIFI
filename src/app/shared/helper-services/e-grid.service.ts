@@ -2,12 +2,8 @@ import { Injectable } from '@angular/core';
 import * as XLSX from 'xlsx';
 import * as _ from 'lodash';
 import { CustomEmissionsDbService } from 'src/app/indexedDB/custom-emissions-db.service';
-import { IdbCustomEmissionsItem, IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
-import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
-import { ConvertUnitsService } from '../convert-units/convert-units.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { EnergyUseCalculationsService } from './energy-use-calculations.service';
-import { EmissionsResults, SubRegionData, SubregionEmissions } from 'src/app/models/eGridEmissions';
+import { IdbCustomEmissionsItem } from 'src/app/models/idb';
+import { SubRegionData, SubregionEmissions } from 'src/app/models/eGridEmissions';
 
 @Injectable({
   providedIn: 'root'
@@ -19,8 +15,7 @@ export class EGridService {
   excelCo2Emissions: Array<SubregionEmissions>;
   co2Emissions: Array<SubregionEmissions>;
   zipLatLong: Array<{ ZIP: string, LAT: string, LNG: string }>;
-  constructor(private customEmissionsDbService: CustomEmissionsDbService, private convertUnitsService: ConvertUnitsService,
-    private facilityDbService: FacilitydbService, private energyUseCalculationsService: EnergyUseCalculationsService) {
+  constructor(private customEmissionsDbService: CustomEmissionsDbService) {
     this.customEmissionsDbService.accountEmissionsItems.subscribe(emissions => {
       this.combineExcelAndCustomEmissions();
     });
@@ -142,32 +137,6 @@ export class EGridService {
     return subregionEmissions;
   }
 
-
-  getEmissionsRate(subregion: string, year: number): { marketRate: number, locationRate: number } {
-    if (this.co2Emissions) {
-      let subregionEmissions: SubregionEmissions = this.co2Emissions.find(emissions => { return emissions.subregion == subregion });
-      if (subregionEmissions) {
-        let marketRate: number = 0;
-        let locationRate: number = 0;
-        if (subregionEmissions.locationEmissionRates.length != 0) {
-          let closestYearRate: { co2Emissions: number, year: number } = _.minBy(subregionEmissions.locationEmissionRates, (emissionRate: { co2Emissions: number, year: number }) => {
-            return Math.abs(emissionRate.year - year);
-          });
-          locationRate = closestYearRate.co2Emissions;
-        }
-        if (subregionEmissions.residualEmissionRates.length != 0) {
-          let closestYearRate: { co2Emissions: number, year: number } = _.minBy(subregionEmissions.residualEmissionRates, (emissionRate: { co2Emissions: number, year: number }) => {
-            return Math.abs(emissionRate.year - year);
-          });
-          marketRate = closestYearRate.co2Emissions;
-        }
-        return { marketRate: marketRate, locationRate: locationRate };
-      }
-    }
-    return { marketRate: 0, locationRate: 0 };
-  }
-
-
   async parseZipCodeLongLat() {
     await fetch('assets/eGrid_data/zip-long-lat.xlsx')
       .then(response => response.arrayBuffer())
@@ -189,7 +158,6 @@ export class EGridService {
       });
   }
 
-
   checkZIP(zip: string): string {
     if (zip.length < 5) {
       for (let i = 0; i <= 5 - zip.length; i++) {
@@ -197,61 +165,5 @@ export class EGridService {
       }
     }
     return zip;
-  }
-
-  getEmissions(meter: IdbUtilityMeter, energyUse: number, energyUnit: string, year: number, energyIsSource: boolean): EmissionsResults {
-    let isCompressedAir: boolean = (meter.source == 'Other Energy' && meter.fuel == 'Purchased Compressed Air');
-    if (meter.source == 'Electricity' || meter.source == 'Natural Gas' || meter.source == 'Other Fuels' || isCompressedAir) {
-      if (energyIsSource && meter.siteToSource != 0) {
-        energyUse = energyUse / meter.siteToSource;
-      } let convertedEnergyUse: number = energyUse;
-      if (meter.source == 'Electricity' || isCompressedAir) {
-        //electricty emissions rates in kWh
-        convertedEnergyUse = this.convertUnitsService.value(energyUse).from(energyUnit).to('kWh');
-      } else {
-        //non-electricity emissions rates are in MMBtu
-        convertedEnergyUse = this.convertUnitsService.value(energyUse).from(energyUnit).to('MMBtu');
-      }
-      let locationEmissions: number;
-      let marketEmissions: number;
-
-      let marketEmissionsOutputRate: number;
-      if (meter.source == 'Electricity' || isCompressedAir) {
-        let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
-        let meterFacility: IdbFacility = accountFacilities.find(facility => { return facility.guid == meter.facilityId });
-        let emissionsRates: { marketRate: number, locationRate: number } = this.getEmissionsRate(meterFacility.eGridSubregion, year);
-        marketEmissionsOutputRate = emissionsRates.marketRate;
-
-        if (meter.includeInEnergy) {
-          locationEmissions = convertedEnergyUse * emissionsRates.locationRate * meter.locationGHGMultiplier;
-          marketEmissions = convertedEnergyUse * emissionsRates.marketRate * meter.marketGHGMultiplier;
-        } else {
-          marketEmissions = 0;
-          locationEmissions = 0;
-        }
-      } else {
-        marketEmissionsOutputRate = this.energyUseCalculationsService.getFuelEmissionsOutputRate(meter.source, meter.fuel, meter.phase, energyUnit);
-        locationEmissions = convertedEnergyUse * marketEmissionsOutputRate;
-        marketEmissions = convertedEnergyUse * marketEmissionsOutputRate;
-      }
-      let RECs: number = convertedEnergyUse * meter.recsMultiplier;
-      let excessRECs: number;
-      let emissionsEnergyUse: number = convertedEnergyUse;
-      if (meter.includeInEnergy == false) {
-        emissionsEnergyUse = 0;
-      }
-
-      if (RECs - emissionsEnergyUse <= 0) {
-        excessRECs = 0;
-      } else {
-        excessRECs = RECs;
-      }
-      let excessRECsEmissions: number = excessRECs * marketEmissionsOutputRate;
-      excessRECs = this.convertUnitsService.value(excessRECs).from('kWh').to('MWh');
-      RECs = this.convertUnitsService.value(RECs).from('kWh').to('MWh');
-      return { RECs: RECs, locationEmissions: locationEmissions, marketEmissions: marketEmissions, excessRECs: excessRECs, excessRECsEmissions: excessRECsEmissions };
-    } else {
-      return { RECs: 0, locationEmissions: 0, marketEmissions: 0, excessRECs: 0, excessRECsEmissions: 0 };
-    }
   }
 }

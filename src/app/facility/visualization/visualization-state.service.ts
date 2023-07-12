@@ -5,7 +5,6 @@ import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
 import { IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup, PredictorData } from 'src/app/models/idb';
-import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { getIsEnergyMeter } from 'src/app/shared/sharedHelperFuntions';
 import * as _ from 'lodash';
 import { CalanderizeMetersClass } from 'src/app/calculations/calanderization/calanderizeMeters';

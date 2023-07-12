@@ -3,10 +3,12 @@ import { FormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { AdditionalChargesFilters, DetailedChargesFilters, ElectricityDataFilters } from 'src/app/models/meterDataFilter';
-import { IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { UtilityMeterDataService } from '../utility-meter-data.service';
-import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { EmissionsResults } from 'src/app/models/eGridEmissions';
+import { getEmissions } from 'src/app/calculations/emissions-calculations/emissions';
+import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 
 @Component({
   selector: 'app-edit-electricity-bill',
@@ -31,14 +33,14 @@ export class EditElectricityBillComponent implements OnInit {
   showDetailsColumnTwo: boolean;
   detailedChargesFilter: DetailedChargesFilters;
   additionalChargesFilter: AdditionalChargesFilters;
-  
-  
+
+
   energyUnit: string;
   totalLocationEmissions: number = 0;
   totalMarketEmissions: number = 0;
   RECs: number = 0;
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private utilityMeterDataService: UtilityMeterDataService,
-    private calanderizationService: CalanderizationService) { }
+    private eGridService: EGridService, private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
     this.electricityDataFiltersSub = this.utilityMeterDataService.electricityInputFilters.subscribe(dataFilters => {
@@ -85,13 +87,14 @@ export class EditElectricityBillComponent implements OnInit {
     }
   }
 
-  setTotalEmissions(){
-    if(this.meterDataForm.controls.totalEnergyUse.value){
-      let emissionsValues: EmissionsResults = this.calanderizationService.getEmissions(this.editMeter, this.meterDataForm.controls.totalEnergyUse.value, this.editMeter.energyUnit, new Date(this.meterDataForm.controls.readDate.value).getFullYear(), false);
+  setTotalEmissions() {
+    if (this.meterDataForm.controls.totalEnergyUse.value) {
+      let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+      let emissionsValues: EmissionsResults = getEmissions(this.editMeter, this.meterDataForm.controls.totalEnergyUse.value, this.editMeter.energyUnit, new Date(this.meterDataForm.controls.readDate.value).getFullYear(), false, [facility], this.eGridService.co2Emissions);
       this.totalLocationEmissions = emissionsValues.locationEmissions;
       this.totalMarketEmissions = emissionsValues.marketEmissions;
       this.RECs = emissionsValues.RECs;
-    }else{
+    } else {
       this.totalLocationEmissions = 0;
       this.totalMarketEmissions = 0;
       this.RECs = 0;
