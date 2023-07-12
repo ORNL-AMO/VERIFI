@@ -4,15 +4,15 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
-import { CalanderizationOptions, CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
-import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility, IdbPredictorEntry, IdbUtilityMeter } from 'src/app/models/idb';
+import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
+import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { AccountHomeService } from './account-home.service';
 import * as _ from 'lodash';
 import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { AnnualAccountAnalysisSummaryClass } from 'src/app/calculations/analysis-calculations/annualAccountAnalysisSummaryClass';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
-import { ConvertMeterDataService } from 'src/app/shared/helper-services/convert-meter-data.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
+import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 
 @Component({
   selector: 'app-account-home',
@@ -41,7 +41,7 @@ export class AccountHomeComponent implements OnInit {
     private analysisDbService: AnalysisDbService,
     private utilityMeterDbService: UtilityMeterdbService,
     private calendarizationService: CalanderizationService,
-    private convertMeterDataService: ConvertMeterDataService) { }
+    private utilityMeterDataDbService: UtilityMeterDatadbService) { }
 
   ngOnInit(): void {
     this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(val => {
@@ -106,14 +106,8 @@ export class AccountHomeComponent implements OnInit {
     let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+    let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
 
-    let calanderizationOptions: CalanderizationOptions = {
-      energyIsSource: this.accountHomeService.latestEnergyAnalysisItem.energyIsSource
-    }
-    let calanderizedMeterData: Array<CalanderizedMeter> = this.calendarizationService.getCalanderizedMeterData(accountMeters, true, false, calanderizationOptions);
-    calanderizedMeterData.forEach(calanderizedMeter => {
-      calanderizedMeter.monthlyData = this.convertMeterDataService.convertMeterDataToAnalysis(this.accountHomeService.latestEnergyAnalysisItem, calanderizedMeter.monthlyData, this.account, calanderizedMeter.meter);
-    });
 
     if (typeof Worker !== 'undefined') {
       this.annualEnergyAnalysisWorker = new Worker(new URL('src/app/web-workers/annual-account-analysis.worker', import.meta.url));
@@ -133,15 +127,16 @@ export class AccountHomeComponent implements OnInit {
       this.annualEnergyAnalysisWorker.postMessage({
         accountAnalysisItem: this.accountHomeService.latestEnergyAnalysisItem,
         account: this.account,
-        calanderizedMeters: calanderizedMeterData,
         accountFacilities: accountFacilities,
         accountPredictorEntries: accountPredictorEntries,
         allAccountAnalysisItems: accountAnalysisItems,
-        calculateAllMonthlyData: true
+        calculateAllMonthlyData: true,
+        meters: accountMeters,
+        meterData: accountMeterData
       });
     } else {
       // Web Workers are not supported in this environment.
-      let annualAnalysisSummaryClass: AnnualAccountAnalysisSummaryClass = new AnnualAccountAnalysisSummaryClass(this.accountHomeService.latestEnergyAnalysisItem, this.account, calanderizedMeterData, accountFacilities, accountPredictorEntries, accountAnalysisItems, true);
+      let annualAnalysisSummaryClass: AnnualAccountAnalysisSummaryClass = new AnnualAccountAnalysisSummaryClass(this.accountHomeService.latestEnergyAnalysisItem, this.account, accountFacilities, accountPredictorEntries, accountAnalysisItems, true, accountMeters, accountMeterData);
       let annualAnalysisSummaries: Array<AnnualAnalysisSummary> = annualAnalysisSummaryClass.getAnnualAnalysisSummaries();
       let monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData> = annualAnalysisSummaryClass.monthlyAnalysisSummaryData;
       this.accountHomeService.annualEnergyAnalysisSummary.next(annualAnalysisSummaries);
@@ -155,10 +150,8 @@ export class AccountHomeComponent implements OnInit {
     let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
 
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
-    let calanderizedMeterData: Array<CalanderizedMeter> = this.calendarizationService.getCalanderizedMeterData(accountMeters, true, false);
-    calanderizedMeterData.forEach(calanderizedMeter => {
-      calanderizedMeter.monthlyData = this.convertMeterDataService.convertMeterDataToAnalysis(this.accountHomeService.latestWaterAnalysisItem, calanderizedMeter.monthlyData, this.account, calanderizedMeter.meter);
-    });
+    let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
+
     if (typeof Worker !== 'undefined') {
       this.annualWaterAnalysisWorker = new Worker(new URL('src/app/web-workers/annual-account-analysis.worker', import.meta.url));
       this.annualWaterAnalysisWorker.onmessage = ({ data }) => {
@@ -177,15 +170,16 @@ export class AccountHomeComponent implements OnInit {
       this.annualWaterAnalysisWorker.postMessage({
         accountAnalysisItem: this.accountHomeService.latestWaterAnalysisItem,
         account: this.account,
-        calanderizedMeters: calanderizedMeterData,
         accountFacilities: accountFacilities,
         accountPredictorEntries: accountPredictorEntries,
         allAccountAnalysisItems: accountAnalysisItems,
-        calculateAllMonthlyData: true
+        calculateAllMonthlyData: true,
+        meters: accountMeters,
+        meterData: accountMeterData
       });
     } else {
       // Web Workers are not supported in this environment.
-      let annualAnalysisSummaryClass: AnnualAccountAnalysisSummaryClass = new AnnualAccountAnalysisSummaryClass(this.accountHomeService.latestWaterAnalysisItem, this.account, calanderizedMeterData, accountFacilities, accountPredictorEntries, accountAnalysisItems, true);
+      let annualAnalysisSummaryClass: AnnualAccountAnalysisSummaryClass = new AnnualAccountAnalysisSummaryClass(this.accountHomeService.latestWaterAnalysisItem, this.account, accountFacilities, accountPredictorEntries, accountAnalysisItems, true, accountMeters, accountMeterData);
       let annualAnalysisSummaries: Array<AnnualAnalysisSummary> = annualAnalysisSummaryClass.getAnnualAnalysisSummaries();
       let monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData> = annualAnalysisSummaryClass.monthlyAnalysisSummaryData;
       this.accountHomeService.annualWaterAnalysisSummary.next(annualAnalysisSummaries);

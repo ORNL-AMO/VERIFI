@@ -6,10 +6,11 @@ import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
-import { CalanderizedMeter } from 'src/app/models/calanderization';
-import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility, IdbPredictorEntry } from 'src/app/models/idb';
+import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { AccountAnalysisService } from '../account-analysis.service';
+import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
+import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 
 @Component({
   selector: 'app-account-analysis-results',
@@ -27,19 +28,19 @@ export class AccountAnalysisResultsComponent implements OnInit {
     private facilityDbService: FacilitydbService,
     private predictorDbService: PredictordbService,
     private analysisDbService: AnalysisDbService,
-    private sharedDataService: SharedDataService) { }
+    private sharedDataService: SharedDataService,
+    private utilityMeterDbService: UtilityMeterdbService,
+    private utilityMeterDataDbService: UtilityMeterDatadbService) { }
 
   ngOnInit(): void {
-    if (!this.accountAnalysisService.calanderizedMeters) {
-      this.accountAnalysisService.setCalanderizedMeters();
-    }
     this.accountAnalysisItem = this.accountAnalysisDbService.selectedAnalysisItem.getValue();
     this.account = this.accountDbService.selectedAccount.getValue();
-    let calanderizedMeters: Array<CalanderizedMeter> = this.accountAnalysisService.calanderizedMeters;
     let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
 
     let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.accountPredictorEntries.getValue();
     let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
+    let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+    let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
     if (typeof Worker !== 'undefined') {
       this.worker = new Worker(new URL('src/app/web-workers/annual-account-analysis.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {
@@ -58,15 +59,16 @@ export class AccountAnalysisResultsComponent implements OnInit {
       this.worker.postMessage({
         accountAnalysisItem: this.accountAnalysisItem,
         account: this.account,
-        calanderizedMeters: calanderizedMeters,
         accountFacilities: accountFacilities,
         accountPredictorEntries: accountPredictorEntries,
         allAccountAnalysisItems: accountAnalysisItems,
-        calculateAllMonthlyData: false
+        calculateAllMonthlyData: false,
+        meters: meters,
+        meterData: meterData
       });
     } else {
       // Web Workers are not supported in this environment.
-      let annualAnalysisSummaryClass: AnnualAccountAnalysisSummaryClass = new AnnualAccountAnalysisSummaryClass(this.accountAnalysisItem, this.account, calanderizedMeters, accountFacilities, accountPredictorEntries, accountAnalysisItems, false);
+      let annualAnalysisSummaryClass: AnnualAccountAnalysisSummaryClass = new AnnualAccountAnalysisSummaryClass(this.accountAnalysisItem, this.account, accountFacilities, accountPredictorEntries, accountAnalysisItems, false, meters, meterData);
       let annualAnalysisSummaries: Array<AnnualAnalysisSummary> = annualAnalysisSummaryClass.getAnnualAnalysisSummaries();
       let monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData> = annualAnalysisSummaryClass.monthlyAnalysisSummaryData;
       this.accountAnalysisService.annualAnalysisSummary.next(annualAnalysisSummaries);
