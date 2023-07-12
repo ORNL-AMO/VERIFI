@@ -4,8 +4,9 @@ import { IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { UtilityMeterDataService } from '../utility-meter-data.service';
 import * as _ from 'lodash';
 import { CopyTableService } from 'src/app/shared/helper-services/copy-table.service';
-import { CalanderizationService, EmissionsResults } from 'src/app/shared/helper-services/calanderization.service';
+import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { AdditionalChargesFilters, DetailedChargesFilters, EmissionsFilters, GeneralInformationFilters } from 'src/app/models/meterDataFilter';
+import { EmissionsResults } from 'src/app/models/eGridEmissions';
 
 @Component({
   selector: 'app-electricity-data-table',

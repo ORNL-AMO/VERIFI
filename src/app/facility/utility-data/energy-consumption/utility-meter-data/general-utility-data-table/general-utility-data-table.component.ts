@@ -1,14 +1,14 @@
 import { Component, ElementRef, EventEmitter, Input, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
-import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
 import { UtilityMeterDataService } from '../utility-meter-data.service';
 import * as _ from 'lodash';
 import { CopyTableService } from 'src/app/shared/helper-services/copy-table.service';
-import { CalanderizationService, EmissionsResults } from 'src/app/shared/helper-services/calanderization.service';
+import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { EditMeterFormService } from '../../energy-source/edit-meter-form/edit-meter-form.service';
 import { Subscription } from 'rxjs';
 import { GeneralUtilityDataFilters } from 'src/app/models/meterDataFilter';
 import { getIsEnergyMeter, getIsEnergyUnit } from 'src/app/shared/sharedHelperFuntions';
+import { EmissionsResults } from 'src/app/models/eGridEmissions';
 
 @Component({
   selector: 'app-general-utility-data-table',

@@ -14,6 +14,7 @@ import { getFiscalYear } from 'src/app/calculations/shared-calculations/calander
 import { getIsEnergyMeter, getIsEnergyUnit } from '../sharedHelperFuntions';
 import { Months } from '../form-data/months';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
+import { EmissionsResults } from 'src/app/models/eGridEmissions';
 
 @Injectable({
   providedIn: 'root'
@@ -888,8 +889,4 @@ export interface CalendarizationSummaryItem {
     totalEnergyFromBill: number
   }>
   totalEnergyUse: number
-}
-
-export interface EmissionsResults {
-  RECs: number, locationEmissions: number, marketEmissions: number, excessRECs: number, excessRECsEmissions: number
 }

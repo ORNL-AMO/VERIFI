@@ -14,6 +14,7 @@ import { UtilityUseAndCost } from 'src/app/calculations/dashboard-calculations/u
 import { FacilityOverviewData } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { CalanderizeMetersClass } from 'src/app/calculations/calanderization/calanderizeMeters';
+import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 
 @Component({
   selector: 'app-data-overview-report',
@@ -44,7 +45,8 @@ export class DataOverviewReportComponent {
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
     private utilityMeterDbService: UtilityMeterdbService,
     private accountReportsService: AccountReportsService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService) {
+    private utilityMeterDataDbService: UtilityMeterDatadbService,
+    private eGridService: EGridService) {
 
   }
 
@@ -122,7 +124,8 @@ export class DataOverviewReportComponent {
         energyIsSource: this.overviewReport.energyIsSource,
         meters: facilityMeters,
         meterData: meterData,
-        inOverview: false
+        inOverview: false,
+        co2Emissions: this.eGridService.co2Emissions
       });
 
 
@@ -181,7 +184,8 @@ export class DataOverviewReportComponent {
         meters: includedMeters,
         meterData: meterData,
         account: this.account,
-        energyIsSource: this.overviewReport.energyIsSource
+        energyIsSource: this.overviewReport.energyIsSource,
+        co2Emissions: this.eGridService.co2Emissions
       });
     } else {
       // Web Workers are not supported in this environment.

@@ -1,4 +1,4 @@
-import { MeterSource } from "src/app/models/constantsAndTypes"
+import { MeterPhase, MeterSource } from "src/app/models/constantsAndTypes"
 
 
 export interface FuelTypeOption {
@@ -375,7 +375,7 @@ export const ScopeOptions: Array<ScopeOption> = [
         value: 1,
         scope: 'Scope 1'
     },
-     {
+    {
         optionLabel: 'Mobile',
         value: 2,
         scope: 'Scope 1'
@@ -393,8 +393,8 @@ export const ScopeOptions: Array<ScopeOption> = [
 ]
 
 export interface ScopeOption {
-    optionLabel: string, 
-    value: number, 
+    optionLabel: string,
+    value: number,
     scope: 'Scope 1' | 'Scope 2'
 }
 
@@ -425,6 +425,22 @@ export const AgreementTypes: Array<AgreementType> = [
         value: 6
     }
 ]
+
+export function getFuelTypeOptions(source: MeterSource, phase: MeterPhase): Array<FuelTypeOption> {
+    if (source == 'Other Fuels') {
+        if (phase == 'Solid') {
+            return SolidOptions;
+        } else if (phase == 'Liquid') {
+            return LiquidOptions;
+        } else if (phase == 'Gas') {
+            return GasOptions;
+        }
+    } else if (source == 'Other Energy') {
+        return OtherEnergyOptions;
+    }
+    return [];
+}
+
 
 
 export interface AgreementType {

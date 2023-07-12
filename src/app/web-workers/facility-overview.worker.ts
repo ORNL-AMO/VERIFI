@@ -3,12 +3,17 @@
 import { CalanderizeMetersClass } from "../calculations/calanderization/calanderizeMeters";
 import { FacilityOverviewData } from "../calculations/dashboard-calculations/facilityOverviewClass";
 import { UtilityUseAndCost } from "../calculations/dashboard-calculations/useAndCostClass";
+import { setEmissionsForCalanderizedMeters } from "../calculations/emissions-calculations/emissions";
 import { CalanderizedMeter, MonthlyData } from "../models/calanderization";
 import * as _ from 'lodash';
 
 addEventListener('message', ({ data }) => {
     try {
         let calanderizedMeters: Array<CalanderizedMeter> = new CalanderizeMetersClass(data.meters, data.meterData, data.facility, true, { energyIsSource: data.energyIsSource }).calanderizedMeterData;
+        if (data.co2Emissions) {
+            //set emissions values
+            calanderizedMeters = setEmissionsForCalanderizedMeters(calanderizedMeters, data.energyIsSource, [data.facility], data.co2Emissions);
+        }
         let dateRange: { endDate: Date, startDate: Date };
         if (!data.dateRange) {
             if (calanderizedMeters && calanderizedMeters.length > 0) {

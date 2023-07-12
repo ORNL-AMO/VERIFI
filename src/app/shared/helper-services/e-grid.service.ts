@@ -4,10 +4,10 @@ import * as _ from 'lodash';
 import { CustomEmissionsDbService } from 'src/app/indexedDB/custom-emissions-db.service';
 import { IdbCustomEmissionsItem, IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
 import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
-import { EmissionsResults } from './calanderization.service';
 import { ConvertUnitsService } from '../convert-units/convert-units.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { EnergyUseCalculationsService } from './energy-use-calculations.service';
+import { EmissionsResults, SubRegionData, SubregionEmissions } from 'src/app/models/eGridEmissions';
 
 @Injectable({
   providedIn: 'root'
@@ -199,22 +199,6 @@ export class EGridService {
     return zip;
   }
 
-  setEmissionsForCalanderizedMeters(calanderizedMeterData: Array<CalanderizedMeter>, energyIsSource: boolean): Array<CalanderizedMeter> {
-    for (let i = 0; i < calanderizedMeterData.length; i++) {
-      let cMeter: CalanderizedMeter = calanderizedMeterData[i];
-      for (let x = 0; x < cMeter.monthlyData.length; x++) {
-        let monthlyData: MonthlyData = cMeter.monthlyData[x]
-        let emissions: EmissionsResults = this.getEmissions(cMeter.meter, monthlyData.energyUse, cMeter.energyUnit, monthlyData.year, energyIsSource);
-        cMeter.monthlyData[x].RECs = emissions.RECs;
-        cMeter.monthlyData[x].locationEmissions = emissions.locationEmissions;
-        cMeter.monthlyData[x].marketEmissions = emissions.marketEmissions;
-        cMeter.monthlyData[x].excessRECs = emissions.excessRECs;
-        cMeter.monthlyData[x].excessRECsEmissions = emissions.excessRECsEmissions;
-      }
-    }
-    return calanderizedMeterData;
-  }
-
   getEmissions(meter: IdbUtilityMeter, energyUse: number, energyUnit: string, year: number, energyIsSource: boolean): EmissionsResults {
     let isCompressedAir: boolean = (meter.source == 'Other Energy' && meter.fuel == 'Purchased Compressed Air');
     if (meter.source == 'Electricity' || meter.source == 'Natural Gas' || meter.source == 'Other Fuels' || isCompressedAir) {
@@ -270,18 +254,4 @@ export class EGridService {
       return { RECs: 0, locationEmissions: 0, marketEmissions: 0, excessRECs: 0, excessRECsEmissions: 0 };
     }
   }
-}
-
-export interface SubRegionData {
-  zip: number,
-  state: string,
-  co2Emissions?: number,
-  subregions?: Array<string>
-}
-
-export interface SubregionEmissions {
-  subregion: string,
-  locationEmissionRates: Array<{ co2Emissions: number, year: number }>,
-  residualEmissionRates: Array<{ co2Emissions: number, year: number }>,
-  isCustom?: boolean
 }

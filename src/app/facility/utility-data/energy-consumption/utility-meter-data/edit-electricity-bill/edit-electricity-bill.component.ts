@@ -5,7 +5,8 @@ import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db
 import { AdditionalChargesFilters, DetailedChargesFilters, ElectricityDataFilters } from 'src/app/models/meterDataFilter';
 import { IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { UtilityMeterDataService } from '../utility-meter-data.service';
-import { CalanderizationService, EmissionsResults } from 'src/app/shared/helper-services/calanderization.service';
+import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
+import { EmissionsResults } from 'src/app/models/eGridEmissions';
 
 @Component({
   selector: 'app-edit-electricity-bill',

@@ -2,9 +2,10 @@ import { Component, Input, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
-import { CalanderizationService, EmissionsResults } from 'src/app/shared/helper-services/calanderization.service';
+import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { EditMeterFormService } from '../../energy-source/edit-meter-form/edit-meter-form.service';
 import { MeterSource } from 'src/app/models/constantsAndTypes';
+import { EmissionsResults } from 'src/app/models/eGridEmissions';
 
 @Component({
   selector: 'app-edit-utility-bill',

@@ -5,10 +5,10 @@ import { Subscription } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbAccount, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { Router } from '@angular/router';
-import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
 import * as _ from 'lodash';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
+import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 
 @Component({
   selector: 'app-account-overview',
@@ -26,7 +26,8 @@ export class AccountOverviewComponent implements OnInit {
   dateRange: { startDate: Date, endDate: Date };
   constructor(private accountDbService: AccountdbService, private accountOverviewService: AccountOverviewService,
     private facilityDbService: FacilitydbService, private router: Router, private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService) { }
+    private utilityMeterDataDbService: UtilityMeterDatadbService,
+    private eGridService: EGridService) { }
 
   ngOnInit(): void {
     this.accountSub = this.accountDbService.selectedAccount.subscribe(val => {
@@ -98,7 +99,8 @@ export class AccountOverviewComponent implements OnInit {
         dateRange: this.dateRange,
         account: this.account,
         energyIsSource: this.account.energyIsSource,
-        inOverview: true
+        inOverview: true,
+        co2Emissions: this.eGridService.co2Emissions
       });
 
 
@@ -115,19 +117,4 @@ export class AccountOverviewComponent implements OnInit {
       this.router.navigateByUrl('facility/' + facilities[0].id + '/utility');
     }
   }
-
-  // setDateRange() {
-  //   let calanderizedMeters: Array<CalanderizedMeter> = this.accountOverviewService.calanderizedMeters;
-  //   if (calanderizedMeters && calanderizedMeters.length > 0) {
-  //     let monthlyData: Array<MonthlyData> = calanderizedMeters.flatMap(val => { return val.monthlyData });
-  //     let latestData: MonthlyData = _.maxBy(monthlyData, 'date');
-  //     let maxDate: Date = new Date(latestData.year, latestData.monthNumValue);
-  //     let minDate: Date = new Date(maxDate.getUTCFullYear() - 1, maxDate.getMonth(), 1);
-  //     minDate.setMonth(minDate.getMonth() + 1);
-  //     this.accountOverviewService.dateRange.next({
-  //       endDate: maxDate,
-  //       startDate: minDate
-  //     });
-  //   }
-  // }
 }

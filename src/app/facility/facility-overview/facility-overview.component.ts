@@ -11,6 +11,8 @@ import * as _ from 'lodash';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { CalanderizeMetersClass } from 'src/app/calculations/calanderization/calanderizeMeters';
+import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
+import { setEmissionsForCalanderizedMeters } from 'src/app/calculations/emissions-calculations/emissions';
 
 @Component({
   selector: 'app-facility-overview',
@@ -29,7 +31,8 @@ export class FacilityOverviewComponent implements OnInit {
     private facilityOverviewService: FacilityOverviewService,
     private router: Router,
     private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService) { }
+    private utilityMeterDataDbService: UtilityMeterDatadbService,
+    private eGridService: EGridService) { }
 
   ngOnInit(): void {
     this.facilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
@@ -101,7 +104,8 @@ export class FacilityOverviewComponent implements OnInit {
         inOverview: false,
         energyIsSource: this.facility.energyIsSource,
         meterData: meterData,
-        meters: meters
+        meters: meters,
+        co2Emissions: this.eGridService.co2Emissions
       });
     } else {
       // Web Workers are not supported in this environment.
@@ -109,6 +113,7 @@ export class FacilityOverviewComponent implements OnInit {
         this.facilityOverviewService.calculating.next(true);
       }
       let calanderizedMeters: Array<CalanderizedMeter> = new CalanderizeMetersClass(meters, meterData, this.facility, false).calanderizedMeterData;
+      calanderizedMeters = setEmissionsForCalanderizedMeters(calanderizedMeters, this.facility.energyIsSource, [this.facility], this.eGridService.co2Emissions);
       let facilityOverviewData: FacilityOverviewData = new FacilityOverviewData(calanderizedMeters, this.dateRange, this.facility);
       let utilityUseAndCost: UtilityUseAndCost = new UtilityUseAndCost(calanderizedMeters, this.dateRange);
       this.facilityOverviewService.facilityOverviewData.next(facilityOverviewData);
