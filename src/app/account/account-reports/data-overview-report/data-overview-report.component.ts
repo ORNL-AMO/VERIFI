@@ -7,7 +7,6 @@ import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { IdbAccount, IdbAccountReport, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from 'src/app/models/idb';
 import { DataOverviewReportSetup } from 'src/app/models/overview-report';
-import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { AccountReportsService } from '../account-reports.service';
 import { Subscription } from 'rxjs';
 import { AccountOverviewData } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
@@ -43,7 +42,6 @@ export class DataOverviewReportComponent {
     private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
-    private calanderizationService: CalanderizationService,
     private utilityMeterDbService: UtilityMeterdbService,
     private accountReportsService: AccountReportsService,
     private utilityMeterDataDbService: UtilityMeterDatadbService) {
@@ -95,15 +93,16 @@ export class DataOverviewReportComponent {
     let facility: IdbFacility = accountFacilities.find(facility => { return facility.guid == facilityId });
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == facilityId });
+    let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
     let dataOverviewFacility: DataOverviewFacility = this.initDataOverviewFacility(facility, startDate, endDate);
 
-    dataOverviewFacility.calanderizedMeters = this.calanderizationService.getCalanderizedMeterData(facilityMeters, false, true, { energyIsSource: this.overviewReport.energyIsSource });
     if (typeof Worker !== 'undefined') {
       this.facilitiesWorker = new Worker(new URL('src/app/web-workers/facility-overview.worker', import.meta.url));
       this.facilitiesWorker.onmessage = ({ data }) => {
         if (!data.error) {
           dataOverviewFacility.facilityOverviewData = data.facilityOverviewData;
           dataOverviewFacility.utilityUseAndCost = data.utilityUseAndCost;
+          dataOverviewFacility.calanderizedMeters = data.calanderizedMeters;
         } else {
           dataOverviewFacility.calculationError = true;
         }
@@ -117,16 +116,20 @@ export class DataOverviewReportComponent {
       };
 
       this.facilitiesWorker.postMessage({
-        calanderizedMeters: dataOverviewFacility.calanderizedMeters,
         type: 'overview',
         dateRange: dataOverviewFacility.dateRange,
-        facility: facility
+        facility: facility,
+        energyIsSource: this.overviewReport.energyIsSource,
+        meters: facilityMeters,
+        meterData: meterData,
+        inOverview: false
       });
 
 
 
     } else {
       // Web Workers are not supported in this environment.
+      this.accountData.calanderizedMeters = new CalanderizeMetersClass(facilityMeters, meterData, this.account, false, { energyIsSource: this.overviewReport.energyIsSource }).calanderizedMeterData;
       dataOverviewFacility.facilityOverviewData = new FacilityOverviewData(dataOverviewFacility.calanderizedMeters, dataOverviewFacility.dateRange, facility);
       dataOverviewFacility.utilityUseAndCost = new UtilityUseAndCost(dataOverviewFacility.calanderizedMeters, dataOverviewFacility.dateRange);
       this.facilitiesData.push(dataOverviewFacility);
@@ -183,7 +186,6 @@ export class DataOverviewReportComponent {
       });
     } else {
       // Web Workers are not supported in this environment.
-      //TODO:
       this.accountData.calanderizedMeters = new CalanderizeMetersClass(meters, meterData, this.account, false, { energyIsSource: this.overviewReport.energyIsSource }).calanderizedMeterData;
 
       this.accountData.accountOverviewData = new AccountOverviewData(this.accountData.calanderizedMeters, facilities, this.account, this.accountData.dateRange);

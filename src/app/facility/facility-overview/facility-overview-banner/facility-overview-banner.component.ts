@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { Subscription } from 'rxjs';
-import { IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
+import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { NavigationEnd, Router } from '@angular/router';
 import { FacilityOverviewService } from '../facility-overview.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
@@ -11,6 +11,7 @@ import { Month, Months } from 'src/app/shared/form-data/months';
 import * as _ from 'lodash';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { MonthlyData } from 'src/app/models/calanderization';
+import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 
 @Component({
   selector: 'app-facility-overview-banner',
@@ -42,7 +43,8 @@ export class FacilityOverviewBannerComponent implements OnInit {
     private router: Router,
     private facilityOverviewService: FacilityOverviewService,
     private dbChangesService: DbChangesService,
-    private utilityMeterDbService: UtilityMeterdbService) { }
+    private utilityMeterDbService: UtilityMeterdbService,
+    private utilityMeterDataDbService: UtilityMeterDatadbService) { }
 
   ngOnInit(): void {
     this.modalOpenSub = this.sharedDataService.modalOpen.subscribe(val => {
@@ -71,7 +73,7 @@ export class FacilityOverviewBannerComponent implements OnInit {
         this.minYear = dateRange.startDate.getFullYear();
         this.maxMonth = dateRange.endDate.getMonth();
         this.maxYear = dateRange.endDate.getFullYear();
-      } 
+      }
     });
   }
 
@@ -123,10 +125,10 @@ export class FacilityOverviewBannerComponent implements OnInit {
       endDate: endDate
     });
   }
-  
-  setYears(){
-    let combinedMonthlyData: Array<MonthlyData> = this.facilityOverviewService.calanderizedMeters.flatMap(cMeter => {return cMeter.monthlyData});
-    let allYears: Array<number> = combinedMonthlyData.flatMap(monthlyData => {return monthlyData.year});
+
+  setYears() {
+    let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
+    let allYears: Array<number> = facilityMeterData.flatMap(meterData => { return new Date(meterData.readDate).getFullYear() });
     allYears = _.uniq(allYears);
     this.years = allYears;
   }
