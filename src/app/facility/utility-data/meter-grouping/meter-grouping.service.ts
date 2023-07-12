@@ -69,7 +69,6 @@ export class MeterGroupingService {
     meterGroups.forEach(group => {
       let groupMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => { return cMeter.meter.groupId == group.guid });
       if (groupMeters.length != 0) {
-        // let calanderizedMeterData: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMeterData(groupMeters, false);
         group.combinedMonthlyData = this.combineCalanderizedMeterData(groupMeters);
         group.groupData = groupMeters.map(cMeter => { return cMeter.meter });
         group.totalEnergyUse = _.sumBy(group.combinedMonthlyData, 'energyUse');
@@ -100,7 +99,6 @@ export class MeterGroupingService {
   }
 
   addEnergyMetersWithoutGroups(energyMeters: Array<CalanderizedMeter>, groupType: 'Energy' | 'Water' | 'Other', meterGroupTypes: Array<MeterGroupType>) {
-    // let calanderizedMeterData: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMeterData(energyMeters, false);
     let combinedMonthlyData: Array<MonthlyData> = this.combineCalanderizedMeterData(energyMeters);
     let meterGroup: IdbUtilityMeterGroup = {
       //randon number id for unsaved

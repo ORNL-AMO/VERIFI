@@ -17,6 +17,20 @@ export function getLastBillEntryFromCalanderizedMeterData(calanderizedMeterData:
     return lastBill;
 }
 
+export function getFirstBillEntryFromCalanderizedMeterData(calanderizedMeterData: Array<CalanderizedMeter>, monthlyData?: Array<MonthlyData>): MonthlyData {
+    if (!monthlyData) {
+        monthlyData = calanderizedMeterData.flatMap(data => {
+            return data.monthlyData;
+        });
+    }
+    let firstBill: MonthlyData = _.minBy(monthlyData, (data: MonthlyData) => {
+        let date = new Date(data.date);
+        // date.setFullYear(data.year, data.monthNumValue);
+        return date;
+    });
+    return firstBill;
+}
+
 
 export function getSumValue(val: number): number {
     if (isNaN(val) == false) {

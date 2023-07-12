@@ -12,11 +12,11 @@ import { AnalysisDbService } from '../indexedDB/analysis-db.service';
 import { ToastNotificationsService } from '../core-components/toast-notifications/toast-notifications.service';
 import { WeatherDataSelection } from '../models/degreeDays';
 import { UtilityMeterDatadbService } from '../indexedDB/utilityMeterData-db.service';
-import { CalanderizationService } from '../shared/helper-services/calanderization.service';
 import { UtilityMeterdbService } from '../indexedDB/utilityMeter-db.service';
 import { CalanderizedMeter, MonthlyData } from '../models/calanderization';
 import * as _ from 'lodash';
 import { DbChangesService } from '../indexedDB/db-changes.service';
+import { CalanderizeMetersClass } from '../calculations/calanderization/calanderizeMeters';
 
 @Component({
   selector: 'app-weather-data',
@@ -42,7 +42,6 @@ export class WeatherDataComponent {
     private analysisDbService: AnalysisDbService,
     private toastNotificationService: ToastNotificationsService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private calanderizationService: CalanderizationService,
     private utilityMeterDbService: UtilityMeterdbService,
     private dbChangesService: DbChangesService) {
 
@@ -91,7 +90,8 @@ export class WeatherDataComponent {
     } else {
       let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
       let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == this.selectedFacility.guid });
-      let calanderizedMeters: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMeterData(facilityMeters, false);
+      let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
+      let calanderizedMeters: Array<CalanderizedMeter> = new CalanderizeMetersClass(facilityMeters, meterData, this.selectedFacility, false).calanderizedMeterData;
       let monthlyData: Array<MonthlyData> = calanderizedMeters.flatMap(cMeter => { return cMeter.monthlyData });
       monthlyData = _.orderBy(monthlyData, (dataItem: MonthlyData) => { return dataItem.date });
       let startDate: Date = new Date(monthlyData[0].date);

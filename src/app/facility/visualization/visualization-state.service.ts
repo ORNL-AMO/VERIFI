@@ -4,10 +4,12 @@ import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
-import { IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterGroup, PredictorData } from 'src/app/models/idb';
+import { IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup, PredictorData } from 'src/app/models/idb';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { getIsEnergyMeter } from 'src/app/shared/sharedHelperFuntions';
 import * as _ from 'lodash';
+import { CalanderizeMetersClass } from 'src/app/calculations/calanderization/calanderizeMeters';
+import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 
 @Injectable({
   providedIn: 'root'
@@ -23,16 +25,18 @@ export class VisualizationStateService {
 
   constructor(private predictorDbService: PredictordbService,
     private utilityMeterDbService: UtilityMeterdbService,
-    private calanderizationService: CalanderizationService, private utilityMeterGroupDbService: UtilityMeterGroupdbService) {
+    private utilityMeterDataDbService: UtilityMeterDatadbService, private utilityMeterGroupDbService: UtilityMeterGroupdbService) {
     this.dateRange = new BehaviorSubject<{ minDate: Date, maxDate: Date }>(undefined);
 
     this.menuOpen = new BehaviorSubject<boolean>(true);
     this.correlationPlotOptions = new BehaviorSubject<CorrelationPlotOptions>(undefined);
   }
 
-  setCalanderizedMeters() {
+  setCalanderizedMeters(facility: IdbFacility) {
     let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
-    this.calanderizedMeters = this.calanderizationService.getCalanderizedMeterData(facilityMeters, false, true);
+    let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
+    this.calanderizedMeters = new CalanderizeMetersClass(facilityMeters, meterData, facility, true).calanderizedMeterData;
+
   }
 
   initilizeCorrelationPlotOptions() {

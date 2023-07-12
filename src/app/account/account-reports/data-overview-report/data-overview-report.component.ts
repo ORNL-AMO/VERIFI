@@ -157,7 +157,6 @@ export class DataOverviewReportComponent {
 
 
     this.accountData = this.initDataOverviewAccount(this.account, startDate, endDate);
-    // this.accountData.calanderizedMeters = this.calanderizationService.getCalanderizedMeterData(includedMeters, true, true, { energyIsSource: this.overviewReport.energyIsSource });
 
     if (typeof Worker !== 'undefined') {
       this.accountWorker = new Worker(new URL('src/app/web-workers/account-overview.worker', import.meta.url));

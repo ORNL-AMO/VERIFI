@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
-import { IdbAccount, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, PredictorData } from 'src/app/models/idb';
+import { IdbAccount, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, PredictorData } from 'src/app/models/idb';
 import { ConvertUnitsService } from 'src/app/shared/convert-units/convert-units.service';
 import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
 import { UnitConversionTypes } from './unitConversionTypes';
@@ -19,6 +19,8 @@ import { CalanderizationService } from 'src/app/shared/helper-services/calanderi
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import * as _ from 'lodash';
+import { CalanderizeMetersClass } from 'src/app/calculations/calanderization/calanderizeMeters';
+import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 
 @Component({
   selector: 'app-edit-predictor',
@@ -49,9 +51,9 @@ export class EditPredictorComponent {
     private analysisDbService: AnalysisDbService,
     private toastNotificationService: ToastNotificationsService,
     private utilityMeterDbService: UtilityMeterdbService,
-    private calanderizationService: CalanderizationService,
     private accountDbService: AccountdbService,
-    private dbChangesService: DbChangesService) {
+    private dbChangesService: DbChangesService,
+    private utilityMeterDataDbService: UtilityMeterDatadbService) {
   }
 
   ngOnInit() {
@@ -274,7 +276,8 @@ export class EditPredictorComponent {
     this.loadingService.setLoadingStatus(true);
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == this.facility.guid });
-    let calanderizedMeters: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMeterData(facilityMeters, false);
+    let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
+    let calanderizedMeters: Array<CalanderizedMeter> = new CalanderizeMetersClass(facilityMeters, meterData, this.facility, false).calanderizedMeterData;
     let monthlyData: Array<MonthlyData> = calanderizedMeters.flatMap(cMeter => { return cMeter.monthlyData });
     monthlyData = _.orderBy(monthlyData, (dataItem: MonthlyData) => { return dataItem.date });
     let startDate: Date = new Date(monthlyData[0].date);
@@ -288,7 +291,7 @@ export class EditPredictorComponent {
     await this.dbChangesService.setPredictors(selectedAccount, this.facility)
     this.saveChanges();
   }
-  
+
   canDeactivate(): Observable<boolean> {
     if (this.predictorForm.dirty) {
       const result = window.confirm('There are unsaved changes! Are you sure you want to leave this page?');

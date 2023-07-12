@@ -11,7 +11,6 @@ import { AccountOverviewData } from 'src/app/calculations/dashboard-calculations
 })
 export class AccountHomeService {
 
-  // calanderizedMeters: Array<CalanderizedMeter>;
   latestEnergyAnalysisItem: IdbAccountAnalysisItem;
   latestWaterAnalysisItem: IdbAccountAnalysisItem;
   annualEnergyAnalysisSummary: BehaviorSubject<Array<AnnualAnalysisSummary>>;
@@ -64,32 +63,4 @@ export class AccountHomeService {
       this.latestWaterAnalysisItem = undefined;
     }
   }
-
-
-
-  // setCalanderizedMeters() {
-  //   let analysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
-  //   let selectedAnalysisItems: Array<IdbAccountAnalysisItem> = analysisItems.filter(item => { return item.selectedYearAnalysis == true });
-  //   if (selectedAnalysisItems.length != 0) {
-  //     this.latestAnalysisItem = _.maxBy(selectedAnalysisItems, 'reportYear');
-  //   } else {
-  //     this.latestAnalysisItem = _.maxBy(analysisItems, 'reportYear');
-  //   }
-  //   if (this.latestAnalysisItem) {
-  //     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-  //     let calanderizationOptions: CalanderizationOptions = {
-  //       energyIsSource: this.latestAnalysisItem.energyIsSource
-  //     }
-  //     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
-  //     let calanderizedMeterData: Array<CalanderizedMeter> = this.calendarizationService.getCalanderizedMeterData(accountMeters, true, false, calanderizationOptions);
-
-  //     calanderizedMeterData.forEach(calanderizedMeter => {
-  //       calanderizedMeter.monthlyData = this.convertMeterDataService.convertMeterDataToAnalysis(this.latestAnalysisItem, calanderizedMeter.monthlyData, selectedAccount, calanderizedMeter.meter);
-  //     });
-  //     this.calanderizedMeters = calanderizedMeterData;
-  //   } else {
-  //     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
-  //     this.calanderizedMeters = this.calendarizationService.getCalanderizedMeterData(accountMeters, true, false, undefined);
-  //   }
-  // }
 }
