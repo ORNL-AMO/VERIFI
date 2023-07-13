@@ -1,4 +1,3 @@
-import { MonthlyData } from "src/app/models/calanderization";
 import { IdbAccount, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from "src/app/models/idb";
 import { checkShowSiteToSource, getIsEnergyMeter } from "src/app/shared/sharedHelperFuntions";
 import { getUnitFromMeter } from "../calanderization/calanderizationHelpers";
@@ -14,32 +13,16 @@ export function convertMeterData(meter: IdbUtilityMeter, meterData: Array<IdbUti
                 copyMeterData[index].totalEnergyUse = copyMeterData[index].totalEnergyUse * meter.siteToSource;
             }
             copyMeterData[index].totalEnergyUse = new ConvertValue(copyMeterData[index].totalEnergyUse, meter.energyUnit, accountOrFacility.energyUnit).convertedValue;
-            // this.convertUnitsService.value(meterData[index].totalEnergyUse).from(meter.energyUnit).to(accountOrFacility.energyUnit);
         }
     } else {
         let facilityUnit: string = getUnitFromMeter(meter, accountOrFacility);
         for (let index: number = 0; index < copyMeterData.length; index++) {
             copyMeterData[index].totalVolume = new ConvertValue(copyMeterData[index].totalVolume, meter.startingUnit, facilityUnit).convertedValue;
-            // this.convertUnitsService.value(meterData[index].totalVolume).from(meter.startingUnit).to(facilityUnit);
         }
     }
     return copyMeterData;
 }
 
-// export function convertMeterDataToAccount(meter: IdbUtilityMeter, meterData: Array<IdbUtilityMeterData>, account: IdbAccount): Array<IdbUtilityMeterData> {
-//     let isEnergyMeter: boolean = getIsEnergyMeter(meter.source);
-//     if (isEnergyMeter) {
-//         for (let index: number = 0; index < meterData.length; index++) {
-//             meterData[index].totalEnergyUse = this.convertUnitsService.value(meterData[index].totalEnergyUse).from(meter.energyUnit).to(account.energyUnit);
-//         }
-//     } else {
-//         let accountUnit: string = this.energyUnitsHelperService.getAccountUnitFromMeter(meter);
-//         for (let index: number = 0; index < meterData.length; index++) {
-//             meterData[index].totalVolume = this.convertUnitsService.value(meterData[index].totalVolume).from(meter.startingUnit).to(accountUnit);
-//         }
-//     }
-//     return meterData;
-// }
 
 export function applySiteToSourceMultiplier(meter: IdbUtilityMeter, meterData: Array<IdbUtilityMeterData>): Array<IdbUtilityMeterData> {
     let showSiteToSource: boolean = checkShowSiteToSource(meter.source, meter.includeInEnergy);
@@ -50,27 +33,6 @@ export function applySiteToSourceMultiplier(meter: IdbUtilityMeter, meterData: A
     }
     return meterData;
 }
-
-
-// export function convertMeterDataToAnalysis(analysisItem: IdbAnalysisItem | IdbAccountAnalysisItem, meterData: Array<MonthlyData>, accountOrFacility: IdbFacility | IdbAccount, meter: IdbUtilityMeter): Array<MonthlyData> {
-//     if (analysisItem.analysisCategory == 'energy') {
-//         let isEnergyMeter: boolean = getIsEnergyMeter(meter.source);
-//         if (isEnergyMeter) {
-//             if (accountOrFacility.energyUnit != analysisItem.energyUnit) {
-//                 for (let index: number = 0; index < meterData.length; index++) {
-//                     meterData[index].energyUse = this.convertUnitsService.value(meterData[index].energyUse).from(accountOrFacility.energyUnit).to(analysisItem.energyUnit);
-//                 }
-//             }
-//         }
-//     } else if (analysisItem.analysisCategory == 'water') {
-//         if (accountOrFacility.volumeLiquidUnit != analysisItem.waterUnit) {
-//             for (let index: number = 0; index < meterData.length; index++) {
-//                 meterData[index].energyConsumption = this.convertUnitsService.value(meterData[index].energyConsumption).from(accountOrFacility.volumeLiquidUnit).to(analysisItem.waterUnit);
-//             }
-//         }
-//     }
-//     return meterData;
-// }
 
 export function getMeterDataCopy(meterData: IdbUtilityMeterData): IdbUtilityMeterData {
     return {

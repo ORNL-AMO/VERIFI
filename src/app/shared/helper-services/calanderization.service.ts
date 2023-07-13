@@ -290,7 +290,3 @@ export interface CalendarizationSummaryItem {
   }>
   totalEnergyUse: number
 }
-
-export interface EmissionsResults {
-  RECs: number, locationEmissions: number, marketEmissions: number, excessRECs: number, excessRECsEmissions: number
-}

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { FuelTypeOption, getFuelTypeOptions } from 'src/app/facility/utility-data/energy-consumption/energy-source/edit-meter-form/editMeterOptions';
+import { FuelTypeOption } from 'src/app/facility/utility-data/energy-consumption/energy-source/edit-meter-form/editMeterOptions';
 import { ConvertUnitsService } from '../convert-units/convert-units.service';
-import { MeterPhase, MeterSource } from 'src/app/models/constantsAndTypes';
+import { MeterSource } from 'src/app/models/constantsAndTypes';
 
 @Injectable({
   providedIn: 'root'
@@ -72,23 +72,6 @@ export class EnergyUseCalculationsService {
       return (convertedHeatCapacity / conversionHelper)
     }
     return 0;
-  }
-
-  getFuelEmissionsOutputRate(source: MeterSource, fuel: string, phase: MeterPhase, energyUnit: string): number {
-    //emissions rates in kg/MMBtu
-    let emissionsRate: number;
-    if (source == 'Natural Gas') {
-      // emissionsRate = this.convertEmissions(53.06, energyUnit);
-      emissionsRate = 53.1148;
-    } else if (source == 'Other Fuels') {
-      let fuelTypeOptions: Array<FuelTypeOption> = getFuelTypeOptions(source, phase);
-      let selectedFuel: FuelTypeOption = fuelTypeOptions.find(option => { return option.value == fuel })
-      if (selectedFuel) {
-        emissionsRate = selectedFuel.emissionsOutputRate;
-        // emissionsRate = this.convertEmissions(emissionsRate, energyUnit);
-      }
-    }
-    return emissionsRate;
   }
 
   convertEmissions(emissionsRate: number, energyUnit: string): number {

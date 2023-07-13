@@ -69,7 +69,7 @@ export class UtilityMeterDataTableComponent implements OnInit {
   }
 
   setData() {
-    this.meterData = this.utilityMeterDataDbService.getMeterDataForFacility(this.selectedMeter, false, true);
+    this.meterData = this.utilityMeterDataDbService.getMeterDataFromMeterId(this.selectedMeter.guid);
     this.setHasCheckedItems();
   }
 

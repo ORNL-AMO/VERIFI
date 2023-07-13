@@ -31,7 +31,7 @@ export class DataApplicationMenuComponent implements OnInit {
     private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
-    let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataForFacility(this.meter, false);
+    let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataFromMeterId(this.meter.guid);
     this.utilityMeterData = _.orderBy(meterData, (data) => { return new Date(data.readDate) }, 'asc');
     if (this.utilityMeterData.length > 2) {
       if (!this.meter.meterReadingDataApplication) {

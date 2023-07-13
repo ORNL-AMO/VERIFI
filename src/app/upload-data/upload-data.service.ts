@@ -21,6 +21,7 @@ import { State, States } from '../shared/form-data/states';
 import { getIsEnergyMeter, getIsEnergyUnit } from '../shared/sharedHelperFuntions';
 import { MeterPhase, MeterSource } from '../models/constantsAndTypes';
 import { SubRegionData } from '../models/eGridEmissions';
+import { getMeterDataCopy } from '../calculations/conversions/convertMeterData';
 
 @Injectable({
   providedIn: 'root'
@@ -396,7 +397,9 @@ export class UploadDataService {
     //electricity readings
     let importMeterData: Array<IdbUtilityMeterData> = new Array();
     let electricityData = XLSX.utils.sheet_to_json(workbook.Sheets['Electricity']);
-    let utilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getAccountMeterDataCopy();
+    let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
+    let utilityMeterData: Array<IdbUtilityMeterData> = accountMeterData.map(meterData => {return getMeterDataCopy(meterData)});
+
     electricityData.forEach(dataPoint => {
       let meterNumber: string = dataPoint['Meter Number'];
       let readDate: Date = new Date(dataPoint['Read Date']);
@@ -675,8 +678,8 @@ export class UploadDataService {
   parseExcelMeterData(fileReference: FileReference): Array<IdbUtilityMeterData> {
     let dateColumnGroup: ColumnGroup = fileReference.columnGroups.find(group => { return group.groupLabel == 'Date' });
     let dateColumnVal: string = dateColumnGroup.groupItems[0].value;
-
-    let accountUtilityData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getAccountMeterDataCopy();
+    let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
+    let accountUtilityData: Array<IdbUtilityMeterData> = accountMeterData.map(meterData => {return getMeterDataCopy(meterData)});
 
     let utilityData: Array<IdbUtilityMeterData> = new Array();
     fileReference.meters.forEach(meter => {

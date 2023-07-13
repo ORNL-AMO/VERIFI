@@ -244,7 +244,7 @@ export class CalanderizationComponent implements OnInit {
 
   selectMeter(meter: IdbUtilityMeter) {
     this.selectedMeter = meter;
-    let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataForFacility(this.selectedMeter, false);
+    let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataFromMeterId(this.selectedMeter.guid);
     if (meterData.length != 0) {
       this.hasMeterData = true;
       this.setCalanderizedMeterData();
