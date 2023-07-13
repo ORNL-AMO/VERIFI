@@ -7,8 +7,8 @@ import { setEmissionsForCalanderizedMeters } from "../calculations/emissions-cal
 import { CalanderizedMeter, MonthlyData } from "../models/calanderization";
 import * as _ from 'lodash';
 addEventListener('message', ({ data }) => {
-    try {
-        let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(data.meters, data.meterData, data.account, true, { energyIsSource: data.energyIsSource });
+    try {      
+        let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(data.meters, data.meterData, data.account, true, { energyIsSource: data.energyIsSource, neededUnits: undefined });
         if (data.co2Emissions) {
             //set emissions values
             calanderizedMeters = setEmissionsForCalanderizedMeters(calanderizedMeters, data.energyIsSource, data.facilities, data.co2Emissions);

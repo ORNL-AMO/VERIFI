@@ -14,10 +14,12 @@ export function getCalanderizedMeterData(meters: Array<IdbUtilityMeter>, allMete
         let energyIsSource: boolean = accountOrFacility.energyIsSource;
         let calanderizedenergyUnit: string = getConsumptionUnit(meter, accountOrFacility);
         let meterData: Array<IdbUtilityMeterData> = allMeterData.filter(meterData => { return meterData.meterId == meter.guid });
+        let neededUnits: string;
         if (calanderizationOptions) {
             energyIsSource = calanderizationOptions.energyIsSource;
+            neededUnits = calanderizationOptions.neededUnits;
         }
-        let convertedMeterData: Array<IdbUtilityMeterData> = convertMeterData(meter, meterData, accountOrFacility, energyIsSource);
+        let convertedMeterData: Array<IdbUtilityMeterData> = convertMeterData(meter, meterData, accountOrFacility, energyIsSource, neededUnits);
 
 
         let calanderizedMeter: Array<MonthlyData> = calanderizeMeterData(meter, convertedMeterData, energyIsSource, calanderizedenergyUnit, monthDisplayShort, accountOrFacility);

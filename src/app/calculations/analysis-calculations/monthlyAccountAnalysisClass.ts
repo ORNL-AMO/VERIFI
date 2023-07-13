@@ -64,10 +64,13 @@ export class MonthlyAccountAnalysisClass {
         accountAnalysisItem.facilityAnalysisItems.forEach(item => {
             if (item.analysisItemId != undefined && item.analysisItemId != 'skip') {
                 let analysisItem: IdbAnalysisItem = allAccountAnalysisItems.find(accountItem => { return item.analysisItemId == accountItem.guid });
-                analysisItem.energyUnit = accountAnalysisItem.energyUnit;
                 let facility: IdbFacility = accountFacilities.find(facility => { return facility.guid == item.facilityId });
                 let facilityMeters: Array<IdbUtilityMeter> = meters.filter(meter => { return meter.facilityId == facility.guid });
-                let calanderizedMeterData: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, meterData, facility, false, { energyIsSource: analysisItem.energyIsSource });
+                let neededUnits: string = analysisItem.energyUnit;
+                if (analysisItem.analysisCategory == 'water') {
+                    neededUnits = analysisItem.waterUnit;
+                }
+                let calanderizedMeterData: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, meterData, facility, false, { energyIsSource: analysisItem.energyIsSource, neededUnits: neededUnits });
                 let monthlyFacilityAnalysisClass: MonthlyFacilityAnalysisClass = new MonthlyFacilityAnalysisClass(
                     analysisItem,
                     facility,
@@ -76,6 +79,13 @@ export class MonthlyAccountAnalysisClass {
                     calculateAllMonthlyData
                 );
                 //TODO: Convert Results to account units!!!
+                console.log('Facility: ' + analysisItem.energyUnit)
+                console.log('Account: ' + accountAnalysisItem.energyUnit)
+                if (analysisItem.analysisCategory == 'energy' && (analysisItem.energyUnit != accountAnalysisItem.energyUnit)) {
+                    monthlyFacilityAnalysisClass.convertResults(analysisItem.energyUnit, accountAnalysisItem.energyUnit);
+                } else if (analysisItem.analysisCategory == 'water' && (analysisItem.waterUnit != accountAnalysisItem.waterUnit)) {
+                    monthlyFacilityAnalysisClass.convertResults(analysisItem.waterUnit, accountAnalysisItem.waterUnit);
+                }
                 this.monthlyFacilityAnalysisClasses.push(monthlyFacilityAnalysisClass);
             }
         });

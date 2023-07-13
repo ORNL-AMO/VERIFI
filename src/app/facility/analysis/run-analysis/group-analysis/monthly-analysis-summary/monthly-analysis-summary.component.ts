@@ -73,7 +73,11 @@ export class MonthlyAnalysisSummaryComponent implements OnInit {
       });
     } else {
       // Web Workers are not supported in this environment.
-      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, facilityMeterData, this.facility, false, { energyIsSource: this.analysisItem.energyIsSource });
+      let neededUnits: string = this.analysisItem.energyUnit;
+      if (this.analysisItem.analysisCategory == 'water') {
+        neededUnits = this.analysisItem.waterUnit;
+      }
+      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, facilityMeterData, this.facility, false, { energyIsSource: this.analysisItem.energyIsSource, neededUnits: neededUnits });
       let monthlyAnalysisSummaryClass: MonthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(this.group, this.analysisItem, this.facility, calanderizedMeters, accountPredictorEntries, false);
       this.monthlyAnalysisSummary = monthlyAnalysisSummaryClass.getResults();
     }

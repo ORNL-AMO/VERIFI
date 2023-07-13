@@ -63,7 +63,11 @@ export class AnnualAnalysisSummaryComponent implements OnInit {
       });
     } else {
       // Web Workers are not supported in this environment.
-      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, facilityMeterData, this.facility, false, { energyIsSource: this.analysisItem.energyIsSource });
+      let neededUnits: string = this.analysisItem.energyUnit;
+      if (this.analysisItem.analysisCategory == 'water') {
+        neededUnits = this.analysisItem.waterUnit;
+      }
+      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, facilityMeterData, this.facility, false, { energyIsSource: this.analysisItem.energyIsSource, neededUnits: neededUnits });
       let annualAnalysisSummaryClass: AnnualGroupAnalysisSummaryClass = new AnnualGroupAnalysisSummaryClass(this.group, this.analysisItem, this.facility, calanderizedMeters, accountPredictorEntries);
       this.annualAnalysisSummary = annualAnalysisSummaryClass.getAnnualAnalysisSummaries();
     }

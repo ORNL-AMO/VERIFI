@@ -73,7 +73,7 @@ export class RegressionModelInspectionComponent implements OnInit {
       } else {
         variable.regressionCoefficient = 0;
       }
-    }); 
+    });
     if (typeof Worker !== 'undefined') {
       this.worker = new Worker(new URL('src/app/web-workers/monthly-group-analysis.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {
@@ -97,8 +97,12 @@ export class RegressionModelInspectionComponent implements OnInit {
         accountPredictorEntries: this.accountPredictorEntries
       });
     } else {
-      // Web Workers are not supported in this environment.
-      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(this.facilityMeters, this.facilityMeterData, this.selectedFacility, false, { energyIsSource: this.analysisItem.energyIsSource });
+      // Web Workers are not supported in this environment.  
+      let neededUnits: string = this.analysisItem.energyUnit;
+      if (this.analysisItem.analysisCategory == 'water') {
+        neededUnits = this.analysisItem.waterUnit;
+      }
+      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(this.facilityMeters, this.facilityMeterData, this.selectedFacility, false, { energyIsSource: this.analysisItem.energyIsSource, neededUnits });
       let monthlyAnalysisSummaryClass: MonthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(groupCopy, this.analysisItem, this.selectedFacility, calanderizedMeters, this.accountPredictorEntries, false);
       this.inspectedMonthlyAnalysisSummaryData = monthlyAnalysisSummaryClass.getMonthlyAnalysisSummaryData();
       this.drawChart();
@@ -130,7 +134,11 @@ export class RegressionModelInspectionComponent implements OnInit {
       });
     } else {
       // Web Workers are not supported in this environment.
-      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(this.facilityMeters, this.facilityMeterData, this.selectedFacility, false, { energyIsSource: this.analysisItem.energyIsSource });
+      let neededUnits: string = this.analysisItem.energyUnit;
+      if (this.analysisItem.analysisCategory == 'water') {
+        neededUnits = this.analysisItem.waterUnit;
+      }
+      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(this.facilityMeters, this.facilityMeterData, this.selectedFacility, false, { energyIsSource: this.analysisItem.energyIsSource, neededUnits: neededUnits });
       let monthlyAnalysisSummaryClass: MonthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(this.selectedGroup, this.analysisItem, this.selectedFacility, calanderizedMeters, this.accountPredictorEntries, false);
       this.selectedMonthlyAnalysisSummaryData = monthlyAnalysisSummaryClass.getMonthlyAnalysisSummaryData();
       this.drawChart();

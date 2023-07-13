@@ -3,7 +3,7 @@ import { checkShowSiteToSource, getIsEnergyMeter } from "src/app/shared/sharedHe
 import { getUnitFromMeter } from "../calanderization/calanderizationHelpers";
 import { ConvertValue } from "./convertValue";
 
-export function convertMeterData(meter: IdbUtilityMeter, meterData: Array<IdbUtilityMeterData>, accountOrFacility: IdbFacility | IdbAccount, energyIsSource?: boolean): Array<IdbUtilityMeterData> {
+export function convertMeterData(meter: IdbUtilityMeter, meterData: Array<IdbUtilityMeterData>, accountOrFacility: IdbFacility | IdbAccount, energyIsSource?: boolean, neededUnit?: string): Array<IdbUtilityMeterData> {
     let copyMeterData: Array<IdbUtilityMeterData> = meterData.map(data => { return getMeterDataCopy(data) });
     let isEnergyMeter: boolean = getIsEnergyMeter(meter.source);
     if (isEnergyMeter) {
@@ -12,10 +12,17 @@ export function convertMeterData(meter: IdbUtilityMeter, meterData: Array<IdbUti
             if (showSiteToSource && (accountOrFacility.energyIsSource || energyIsSource)) {
                 copyMeterData[index].totalEnergyUse = copyMeterData[index].totalEnergyUse * meter.siteToSource;
             }
-            copyMeterData[index].totalEnergyUse = new ConvertValue(copyMeterData[index].totalEnergyUse, meter.energyUnit, accountOrFacility.energyUnit).convertedValue;
+            if (!neededUnit) {
+                copyMeterData[index].totalEnergyUse = new ConvertValue(copyMeterData[index].totalEnergyUse, meter.energyUnit, accountOrFacility.energyUnit).convertedValue;
+            } else {
+                copyMeterData[index].totalEnergyUse = new ConvertValue(copyMeterData[index].totalEnergyUse, meter.energyUnit, neededUnit).convertedValue;
+            }
         }
     } else {
-        let facilityUnit: string = getUnitFromMeter(meter, accountOrFacility);
+        let facilityUnit: string = neededUnit;
+        if (!facilityUnit) {
+            facilityUnit = getUnitFromMeter(meter, accountOrFacility);
+        }
         for (let index: number = 0; index < copyMeterData.length; index++) {
             copyMeterData[index].totalVolume = new ConvertValue(copyMeterData[index].totalVolume, meter.startingUnit, facilityUnit).convertedValue;
         }

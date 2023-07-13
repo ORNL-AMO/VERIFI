@@ -3,6 +3,7 @@ import * as _ from 'lodash';
 import { MonthlyAnalysisCalculatedValues } from "./monthlyAnalysisCalculatedValuesClass";
 import { MonthlyAnalysisSummaryDataClass } from "./monthlyAnalysisSummaryDataClass";
 import { getFiscalYear } from "../shared-calculations/calanderizationFunctions";
+import { ConvertValue } from "../conversions/convertValue";
 
 export class MonthlyFacilityAnalysisDataClass {
 
@@ -125,4 +126,16 @@ export class MonthlyFacilityAnalysisDataClass {
         );
     }
 
+    convertResults(startingUnit: string, endingUnit: string) {
+        this.energyUse = new ConvertValue(this.energyUse, startingUnit, endingUnit).convertedValue;
+        this.modeledEnergy = new ConvertValue(this.modeledEnergy, startingUnit, endingUnit).convertedValue;
+        this.monthlyAnalysisCalculatedValues.adjustedForNormalization = new ConvertValue(this.monthlyAnalysisCalculatedValues.adjustedForNormalization, startingUnit, endingUnit).convertedValue;
+        this.monthlyAnalysisCalculatedValues.baselineAdjustmentForNormalization = new ConvertValue(this.monthlyAnalysisCalculatedValues.baselineAdjustmentForNormalization, startingUnit, endingUnit).convertedValue;
+        this.monthlyAnalysisCalculatedValues.adjusted = new ConvertValue(this.monthlyAnalysisCalculatedValues.adjusted, startingUnit, endingUnit).convertedValue;
+        this.baselineAdjustmentForOther = new ConvertValue(this.baselineAdjustmentForOther, startingUnit, endingUnit).convertedValue;
+        this.monthlyAnalysisCalculatedValues.baselineAdjustment = new ConvertValue(this.monthlyAnalysisCalculatedValues.baselineAdjustment, startingUnit, endingUnit).convertedValue;
+        this.monthlyAnalysisCalculatedValues.savings = new ConvertValue(this.monthlyAnalysisCalculatedValues.savings, startingUnit, endingUnit).convertedValue;
+        this.monthlyAnalysisCalculatedValues.yearToDateSavings = new ConvertValue(this.monthlyAnalysisCalculatedValues.yearToDateSavings, startingUnit, endingUnit).convertedValue;
+        this.monthlyAnalysisCalculatedValues.rollingSavings = new ConvertValue(this.monthlyAnalysisCalculatedValues.rollingSavings, startingUnit, endingUnit).convertedValue;
+    }
 }
