@@ -9,7 +9,7 @@ import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { AnnualGroupAnalysisSummaryClass } from 'src/app/calculations/analysis-calculations/annualGroupAnalysisSummaryClass';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { CalanderizeMetersClass } from 'src/app/calculations/calanderization/calanderizeMeters';
+import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
 
 @Component({
   selector: 'app-annual-analysis-summary',
@@ -63,12 +63,10 @@ export class AnnualAnalysisSummaryComponent implements OnInit {
       });
     } else {
       // Web Workers are not supported in this environment.
-      let calanderizedMeters: Array<CalanderizedMeter> = new CalanderizeMetersClass(facilityMeters, facilityMeterData, this.facility, false, { energyIsSource: this.analysisItem.energyIsSource }).calanderizedMeterData;
+      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, facilityMeterData, this.facility, false, { energyIsSource: this.analysisItem.energyIsSource });
       let annualAnalysisSummaryClass: AnnualGroupAnalysisSummaryClass = new AnnualGroupAnalysisSummaryClass(this.group, this.analysisItem, this.facility, calanderizedMeters, accountPredictorEntries);
       this.annualAnalysisSummary = annualAnalysisSummaryClass.getAnnualAnalysisSummaries();
     }
-
-
   }
 
   ngOnDestroy() {

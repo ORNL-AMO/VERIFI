@@ -11,7 +11,7 @@ import { SharedDataService } from 'src/app/shared/helper-services/shared-data.se
 import { MonthlyAnalysisSummaryClass } from 'src/app/calculations/analysis-calculations/monthlyAnalysisSummaryClass';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { CalanderizeMetersClass } from 'src/app/calculations/calanderization/calanderizeMeters';
+import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
 
 @Component({
   selector: 'app-monthly-analysis-summary',
@@ -73,7 +73,7 @@ export class MonthlyAnalysisSummaryComponent implements OnInit {
       });
     } else {
       // Web Workers are not supported in this environment.
-      let calanderizedMeters: Array<CalanderizedMeter> = new CalanderizeMetersClass(facilityMeters, facilityMeterData, this.facility, false, { energyIsSource: this.analysisItem.energyIsSource }).calanderizedMeterData;
+      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, facilityMeterData, this.facility, false, { energyIsSource: this.analysisItem.energyIsSource });
       let monthlyAnalysisSummaryClass: MonthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(this.group, this.analysisItem, this.facility, calanderizedMeters, accountPredictorEntries, false);
       this.monthlyAnalysisSummary = monthlyAnalysisSummaryClass.getResults();
     }

@@ -8,8 +8,8 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { getIsEnergyMeter, getIsEnergyUnit } from '../sharedHelperFuntions';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { CalanderizeMetersClass } from 'src/app/calculations/calanderization/calanderizeMeters';
 import { daysBetweenDates, getCurrentMonthsReadings, getNextMonthsBill, getPreviousMonthsBill } from 'src/app/calculations/calanderization/calanderizationHelpers';
+import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
 
 @Injectable({
   providedIn: 'root'
@@ -242,7 +242,7 @@ export class CalanderizationService {
     let categoryMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return this.isCategoryMeter(meter, meterCategory) });
     let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    let calanderizedMeterData: Array<CalanderizedMeter> = new CalanderizeMetersClass(categoryMeters, meterData, account, false).calanderizedMeterData;
+    let calanderizedMeterData: Array<CalanderizedMeter> = getCalanderizedMeterData(categoryMeters, meterData, account, false);
     let combinedMonthlyData: Array<MonthlyData> = calanderizedMeterData.flatMap(cMeter => { return cMeter.monthlyData });
     let allYears: Array<number> = combinedMonthlyData.flatMap(monthlyData => { return monthlyData.year });
     allYears = _.uniq(allYears);
@@ -256,7 +256,7 @@ export class CalanderizationService {
     let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
     let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     let facility: IdbFacility = facilities.find(facility => { return facility.guid == facilityId });
-    let calanderizedMeterData: Array<CalanderizedMeter> = new CalanderizeMetersClass(facilityCategoryMeters, meterData, facility, false).calanderizedMeterData;
+    let calanderizedMeterData: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityCategoryMeters, meterData, facility, false);
     let combinedMonthlyData: Array<MonthlyData> = calanderizedMeterData.flatMap(cMeter => { return cMeter.monthlyData });
     let allYears: Array<number> = combinedMonthlyData.flatMap(monthlyData => { return monthlyData.year });
     allYears = _.uniq(allYears);

@@ -15,9 +15,9 @@ import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { CalanderizeMetersClass } from 'src/app/calculations/calanderization/calanderizeMeters';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { getFirstBillEntryFromCalanderizedMeterData, getLastBillEntryFromCalanderizedMeterData } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
+import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
 
 @Component({
   selector: 'app-meter-grouping',
@@ -110,7 +110,7 @@ export class MeterGroupingComponent implements OnInit {
 
   setCalanderizedMeters() {
     let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
-    this.calanderizedMeters = new CalanderizeMetersClass(this.facilityMeters, facilityMeterData, this.selectedFacility).calanderizedMeterData;
+    this.calanderizedMeters = getCalanderizedMeterData(this.facilityMeters, facilityMeterData, this.selectedFacility);
   }
 
   initializeDateRange() {

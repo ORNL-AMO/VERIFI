@@ -7,8 +7,8 @@ import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
 import { IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup, PredictorData } from 'src/app/models/idb';
 import { getIsEnergyMeter } from 'src/app/shared/sharedHelperFuntions';
 import * as _ from 'lodash';
-import { CalanderizeMetersClass } from 'src/app/calculations/calanderization/calanderizeMeters';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
+import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
 
 @Injectable({
   providedIn: 'root'
@@ -34,7 +34,7 @@ export class VisualizationStateService {
   setCalanderizedMeters(facility: IdbFacility) {
     let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
     let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
-    this.calanderizedMeters = new CalanderizeMetersClass(facilityMeters, meterData, facility, true).calanderizedMeterData;
+    this.calanderizedMeters = getCalanderizedMeterData(facilityMeters, meterData, facility, true);
 
   }
 

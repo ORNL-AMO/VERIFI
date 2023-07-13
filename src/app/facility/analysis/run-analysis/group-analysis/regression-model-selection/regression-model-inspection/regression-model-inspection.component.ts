@@ -1,7 +1,7 @@
 import { Component, OnInit, Input, ViewChild, ElementRef, Output, EventEmitter } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { MonthlyAnalysisSummaryClass } from 'src/app/calculations/analysis-calculations/monthlyAnalysisSummaryClass';
-import { CalanderizeMetersClass } from 'src/app/calculations/calanderization/calanderizeMeters';
+import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
 import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
@@ -98,7 +98,7 @@ export class RegressionModelInspectionComponent implements OnInit {
       });
     } else {
       // Web Workers are not supported in this environment.
-      let calanderizedMeters: Array<CalanderizedMeter> = new CalanderizeMetersClass(this.facilityMeters, this.facilityMeterData, this.selectedFacility, false, { energyIsSource: this.analysisItem.energyIsSource }).calanderizedMeterData;
+      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(this.facilityMeters, this.facilityMeterData, this.selectedFacility, false, { energyIsSource: this.analysisItem.energyIsSource });
       let monthlyAnalysisSummaryClass: MonthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(groupCopy, this.analysisItem, this.selectedFacility, calanderizedMeters, this.accountPredictorEntries, false);
       this.inspectedMonthlyAnalysisSummaryData = monthlyAnalysisSummaryClass.getMonthlyAnalysisSummaryData();
       this.drawChart();
@@ -130,7 +130,7 @@ export class RegressionModelInspectionComponent implements OnInit {
       });
     } else {
       // Web Workers are not supported in this environment.
-      let calanderizedMeters: Array<CalanderizedMeter> = new CalanderizeMetersClass(this.facilityMeters, this.facilityMeterData, this.selectedFacility, false, { energyIsSource: this.analysisItem.energyIsSource }).calanderizedMeterData;
+      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(this.facilityMeters, this.facilityMeterData, this.selectedFacility, false, { energyIsSource: this.analysisItem.energyIsSource });
       let monthlyAnalysisSummaryClass: MonthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(this.selectedGroup, this.analysisItem, this.selectedFacility, calanderizedMeters, this.accountPredictorEntries, false);
       this.selectedMonthlyAnalysisSummaryData = monthlyAnalysisSummaryClass.getMonthlyAnalysisSummaryData();
       this.drawChart();

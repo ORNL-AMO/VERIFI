@@ -1,6 +1,6 @@
 /// <reference lib="webworker" />
 
-import { CalanderizeMetersClass } from "../calculations/calanderization/calanderizeMeters";
+import { getCalanderizedMeterData } from "../calculations/calanderization/calanderizeMeters";
 import { FacilityOverviewData } from "../calculations/dashboard-calculations/facilityOverviewClass";
 import { UtilityUseAndCost } from "../calculations/dashboard-calculations/useAndCostClass";
 import { setEmissionsForCalanderizedMeters } from "../calculations/emissions-calculations/emissions";
@@ -9,7 +9,7 @@ import * as _ from 'lodash';
 
 addEventListener('message', ({ data }) => {
     try {
-        let calanderizedMeters: Array<CalanderizedMeter> = new CalanderizeMetersClass(data.meters, data.meterData, data.facility, true, { energyIsSource: data.energyIsSource }).calanderizedMeterData;
+        let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(data.meters, data.meterData, data.facility, true, { energyIsSource: data.energyIsSource });
         if (data.co2Emissions) {
             //set emissions values
             calanderizedMeters = setEmissionsForCalanderizedMeters(calanderizedMeters, data.energyIsSource, [data.facility], data.co2Emissions);

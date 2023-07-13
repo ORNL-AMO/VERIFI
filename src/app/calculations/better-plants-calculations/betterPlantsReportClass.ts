@@ -6,7 +6,7 @@ import { AnnualAccountAnalysisSummaryClass } from "src/app/calculations/analysis
 import { AnnualFacilityAnalysisSummaryClass } from "src/app/calculations/analysis-calculations/annualFacilityAnalysisSummaryClass";
 import { BetterPlantsEnergySummaryClass } from "./betterPlantsEnergySummaryClass";
 import { BetterPlantsWaterSummaryClass } from "./betterPlantsWaterSummaryClass";
-import { CalanderizeMetersClass } from "../calanderization/calanderizeMeters";
+import { getCalanderizedMeterData } from "../calanderization/calanderizeMeters";
 
 export class BetterPlantsReportClass {
 
@@ -36,7 +36,7 @@ export class BetterPlantsReportClass {
     ) {
         this.setFacilityPerformance(selectedAnalysisItem, facilities, accountPredictorEntries, accountAnalysisItems, meters, meterData);
         let includedMeters: Array<IdbUtilityMeter> = this.getIncludedMeters(meters, selectedAnalysisItem, accountAnalysisItems);
-        let calanderizedMeters: Array<CalanderizedMeter> = new CalanderizeMetersClass(includedMeters, meterData, account).calanderizedMeterData
+        let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(includedMeters, meterData, account);
         this.setReportAndBaselineYearSummaries(selectedAnalysisItem, account, facilities, accountPredictorEntries, accountAnalysisItems, baselineYear, reportYear, meters, meterData);
         this.setReportYearEnergySummaryClass(calanderizedMeters, reportYear);
         this.setBaselineYearEnergySummaryClass(calanderizedMeters, baselineYear);
@@ -65,7 +65,7 @@ export class BetterPlantsReportClass {
                 let facilityAnalysisItem: IdbAnalysisItem = accountAnalysisItems.find(accountItem => { return accountItem.guid == item.analysisItemId });
                 let facilityMeters: Array<IdbUtilityMeter> = meters.filter(meter => { return meter.facilityId == item.facilityId });
                 let facility: IdbFacility = facilities.find(facility => { return facility.guid == item.facilityId });
-                let calanderizedMeters: Array<CalanderizedMeter> = new CalanderizeMetersClass(facilityMeters, meterData, facility, false, { energyIsSource: facilityAnalysisItem.energyIsSource }).calanderizedMeterData;
+                let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, meterData, facility, false, { energyIsSource: facilityAnalysisItem.energyIsSource });
                 let facilityAnalysisSummaryClass: AnnualFacilityAnalysisSummaryClass = new AnnualFacilityAnalysisSummaryClass(facilityAnalysisItem, facility, calanderizedMeters, accountPredictorEntries, false);
                 let annualAnalysisSummary: Array<AnnualAnalysisSummary> = facilityAnalysisSummaryClass.getAnnualAnalysisSummaries();
                 //TODO: CONVERT RESULTS!!!

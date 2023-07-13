@@ -6,7 +6,8 @@ import { MonthlyFacilityAnalysisClass } from "./monthlyFacilityAnalysisClass";
 import * as _ from 'lodash';
 import { checkAnalysisValue, getMonthlyStartAndEndDate } from "../shared-calculations/calculationsHelpers";
 import { getFiscalYear } from "../shared-calculations/calanderizationFunctions";
-import { CalanderizeMetersClass } from "../calanderization/calanderizeMeters";
+import { CalanderizedMeter } from "src/app/models/calanderization";
+import { getCalanderizedMeterData } from "../calanderization/calanderizeMeters";
 
 export class MonthlyAccountAnalysisClass {
 
@@ -66,11 +67,11 @@ export class MonthlyAccountAnalysisClass {
                 analysisItem.energyUnit = accountAnalysisItem.energyUnit;
                 let facility: IdbFacility = accountFacilities.find(facility => { return facility.guid == item.facilityId });
                 let facilityMeters: Array<IdbUtilityMeter> = meters.filter(meter => { return meter.facilityId == facility.guid });
-                let calanderizeMeterClass: CalanderizeMetersClass = new CalanderizeMetersClass(facilityMeters, meterData, facility, false, { energyIsSource: analysisItem.energyIsSource });
+                let calanderizedMeterData: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, meterData, facility, false, { energyIsSource: analysisItem.energyIsSource });
                 let monthlyFacilityAnalysisClass: MonthlyFacilityAnalysisClass = new MonthlyFacilityAnalysisClass(
                     analysisItem,
                     facility,
-                    calanderizeMeterClass.calanderizedMeterData,
+                    calanderizedMeterData,
                     accountPredictorEntries,
                     calculateAllMonthlyData
                 );

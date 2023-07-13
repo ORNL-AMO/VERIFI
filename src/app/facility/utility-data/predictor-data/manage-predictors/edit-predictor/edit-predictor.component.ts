@@ -18,8 +18,8 @@ import { firstValueFrom, Observable, of } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import * as _ from 'lodash';
-import { CalanderizeMetersClass } from 'src/app/calculations/calanderization/calanderizeMeters';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
+import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
 
 @Component({
   selector: 'app-edit-predictor',
@@ -276,7 +276,7 @@ export class EditPredictorComponent {
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == this.facility.guid });
     let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
-    let calanderizedMeters: Array<CalanderizedMeter> = new CalanderizeMetersClass(facilityMeters, meterData, this.facility, false).calanderizedMeterData;
+    let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, meterData, this.facility, false);
     let monthlyData: Array<MonthlyData> = calanderizedMeters.flatMap(cMeter => { return cMeter.monthlyData });
     monthlyData = _.orderBy(monthlyData, (dataItem: MonthlyData) => { return dataItem.date });
     let startDate: Date = new Date(monthlyData[0].date);

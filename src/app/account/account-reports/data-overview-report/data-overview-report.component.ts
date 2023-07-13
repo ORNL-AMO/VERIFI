@@ -13,8 +13,8 @@ import { AccountOverviewData } from 'src/app/calculations/dashboard-calculations
 import { UtilityUseAndCost } from 'src/app/calculations/dashboard-calculations/useAndCostClass';
 import { FacilityOverviewData } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { CalanderizeMetersClass } from 'src/app/calculations/calanderization/calanderizeMeters';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
+import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
 
 @Component({
   selector: 'app-data-overview-report',
@@ -132,7 +132,7 @@ export class DataOverviewReportComponent {
 
     } else {
       // Web Workers are not supported in this environment.
-      this.accountData.calanderizedMeters = new CalanderizeMetersClass(facilityMeters, meterData, this.account, false, { energyIsSource: this.overviewReport.energyIsSource }).calanderizedMeterData;
+      this.accountData.calanderizedMeters = getCalanderizedMeterData(facilityMeters, meterData, this.account, false, { energyIsSource: this.overviewReport.energyIsSource });
       dataOverviewFacility.facilityOverviewData = new FacilityOverviewData(dataOverviewFacility.calanderizedMeters, dataOverviewFacility.dateRange, facility);
       dataOverviewFacility.utilityUseAndCost = new UtilityUseAndCost(dataOverviewFacility.calanderizedMeters, dataOverviewFacility.dateRange);
       this.facilitiesData.push(dataOverviewFacility);
@@ -189,7 +189,7 @@ export class DataOverviewReportComponent {
       });
     } else {
       // Web Workers are not supported in this environment.
-      this.accountData.calanderizedMeters = new CalanderizeMetersClass(meters, meterData, this.account, false, { energyIsSource: this.overviewReport.energyIsSource }).calanderizedMeterData;
+      this.accountData.calanderizedMeters = getCalanderizedMeterData(meters, meterData, this.account, false, { energyIsSource: this.overviewReport.energyIsSource });
 
       this.accountData.accountOverviewData = new AccountOverviewData(this.accountData.calanderizedMeters, facilities, this.account, this.accountData.dateRange);
       this.accountData.utilityUseAndCost = new UtilityUseAndCost(this.accountData.calanderizedMeters, this.accountData.dateRange);

@@ -11,7 +11,7 @@ import { IdbAnalysisItem, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUt
 import { FacilityHomeService } from './facility-home.service';
 import * as _ from 'lodash';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { CalanderizeMetersClass } from 'src/app/calculations/calanderization/calanderizeMeters';
+import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
 
 @Component({
   selector: 'app-facility-home',
@@ -118,7 +118,7 @@ export class FacilityHomeComponent implements OnInit {
     } else {
 
       // Web Workers are not supported in this environment.
-      let calanderizedMeters: Array<CalanderizedMeter> = new CalanderizeMetersClass(facilityMeters, facilityMeterData, this.facility, false, { energyIsSource: this.facilityHomeService.latestEnergyAnalysisItem.energyIsSource }).calanderizedMeterData;
+      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, facilityMeterData, this.facility, false, { energyIsSource: this.facilityHomeService.latestEnergyAnalysisItem.energyIsSource });
       let annualAnalysisSummaryClass: AnnualFacilityAnalysisSummaryClass = new AnnualFacilityAnalysisSummaryClass(this.facilityHomeService.latestEnergyAnalysisItem, this.facility, calanderizedMeters, accountPredictorEntries, true);
       let annualAnalysisSummaries: Array<AnnualAnalysisSummary> = annualAnalysisSummaryClass.getAnnualAnalysisSummaries();
       let monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData> = annualAnalysisSummaryClass.monthlyAnalysisSummaryData;
@@ -155,7 +155,7 @@ export class FacilityHomeComponent implements OnInit {
       });
     } else {
       // Web Workers are not supported in this environment.
-      let calanderizedMeters: Array<CalanderizedMeter> = new CalanderizeMetersClass(facilityMeters, facilityMeterData, this.facility, false, { energyIsSource: this.facilityHomeService.latestWaterAnalysisItem.energyIsSource }).calanderizedMeterData;
+      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, facilityMeterData, this.facility, false, { energyIsSource: this.facilityHomeService.latestWaterAnalysisItem.energyIsSource });
       let annualAnalysisSummaryClass: AnnualFacilityAnalysisSummaryClass = new AnnualFacilityAnalysisSummaryClass(this.facilityHomeService.latestWaterAnalysisItem, this.facility, calanderizedMeters, accountPredictorEntries, true);
       let annualAnalysisSummaries: Array<AnnualAnalysisSummary> = annualAnalysisSummaryClass.getAnnualAnalysisSummaries();
       let monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData> = annualAnalysisSummaryClass.monthlyAnalysisSummaryData;
