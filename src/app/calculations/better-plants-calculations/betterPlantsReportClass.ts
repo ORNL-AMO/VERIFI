@@ -7,6 +7,7 @@ import { AnnualFacilityAnalysisSummaryClass } from "src/app/calculations/analysi
 import { BetterPlantsEnergySummaryClass } from "./betterPlantsEnergySummaryClass";
 import { BetterPlantsWaterSummaryClass } from "./betterPlantsWaterSummaryClass";
 import { getCalanderizedMeterData } from "../calanderization/calanderizeMeters";
+import { getNeededUnits } from "../shared-calculations/calanderizationFunctions";
 
 export class BetterPlantsReportClass {
 
@@ -36,11 +37,7 @@ export class BetterPlantsReportClass {
     ) {
         this.setFacilityPerformance(selectedAnalysisItem, facilities, accountPredictorEntries, accountAnalysisItems, meters, meterData);
         let includedMeters: Array<IdbUtilityMeter> = this.getIncludedMeters(meters, selectedAnalysisItem, accountAnalysisItems);
-        let neededUnits: string = selectedAnalysisItem.energyUnit;
-        if (selectedAnalysisItem.analysisCategory == 'water') {
-            neededUnits = selectedAnalysisItem.waterUnit;
-        }
-        let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(includedMeters, meterData, account, false, { energyIsSource: selectedAnalysisItem.energyIsSource, neededUnits: neededUnits });
+        let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(includedMeters, meterData, account, false, { energyIsSource: selectedAnalysisItem.energyIsSource, neededUnits: getNeededUnits(selectedAnalysisItem) });
         this.setReportAndBaselineYearSummaries(selectedAnalysisItem, account, facilities, accountPredictorEntries, accountAnalysisItems, baselineYear, reportYear, meters, meterData);
         this.setReportYearEnergySummaryClass(calanderizedMeters, reportYear);
         this.setBaselineYearEnergySummaryClass(calanderizedMeters, baselineYear);
@@ -69,11 +66,7 @@ export class BetterPlantsReportClass {
                 let facilityAnalysisItem: IdbAnalysisItem = accountAnalysisItems.find(accountItem => { return accountItem.guid == item.analysisItemId });
                 let facilityMeters: Array<IdbUtilityMeter> = meters.filter(meter => { return meter.facilityId == item.facilityId });
                 let facility: IdbFacility = facilities.find(facility => { return facility.guid == item.facilityId });
-                let neededUnits: string = facilityAnalysisItem.energyUnit;
-                if (facilityAnalysisItem.analysisCategory == 'water') {
-                    neededUnits = facilityAnalysisItem.waterUnit;
-                }
-                let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, meterData, facility, false, { energyIsSource: facilityAnalysisItem.energyIsSource, neededUnits: neededUnits });
+                let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, meterData, facility, false, { energyIsSource: facilityAnalysisItem.energyIsSource, neededUnits: getNeededUnits(facilityAnalysisItem) });
                 let facilityAnalysisSummaryClass: AnnualFacilityAnalysisSummaryClass = new AnnualFacilityAnalysisSummaryClass(facilityAnalysisItem, facility, calanderizedMeters, accountPredictorEntries, false);
                 let annualAnalysisSummary: Array<AnnualAnalysisSummary> = facilityAnalysisSummaryClass.getAnnualAnalysisSummaries();
                 let reportYearSummary: AnnualAnalysisSummary = annualAnalysisSummary.find(summary => { return summary.year == selectedAnalysisItem.reportYear });

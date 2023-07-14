@@ -10,6 +10,7 @@ import { AnnualGroupAnalysisSummaryClass } from 'src/app/calculations/analysis-c
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
+import { getNeededUnits } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
 
 @Component({
   selector: 'app-annual-analysis-summary',
@@ -63,11 +64,7 @@ export class AnnualAnalysisSummaryComponent implements OnInit {
       });
     } else {
       // Web Workers are not supported in this environment.
-      let neededUnits: string = this.analysisItem.energyUnit;
-      if (this.analysisItem.analysisCategory == 'water') {
-        neededUnits = this.analysisItem.waterUnit;
-      }
-      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, facilityMeterData, this.facility, false, { energyIsSource: this.analysisItem.energyIsSource, neededUnits: neededUnits });
+      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, facilityMeterData, this.facility, false, { energyIsSource: this.analysisItem.energyIsSource, neededUnits: getNeededUnits(this.analysisItem) });
       let annualAnalysisSummaryClass: AnnualGroupAnalysisSummaryClass = new AnnualGroupAnalysisSummaryClass(this.group, this.analysisItem, this.facility, calanderizedMeters, accountPredictorEntries);
       this.annualAnalysisSummary = annualAnalysisSummaryClass.getAnnualAnalysisSummaries();
     }

@@ -4,14 +4,11 @@ import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from "src/app/model
 import { AnnualFacilityAnalysisSummaryClass } from "src/app/calculations/analysis-calculations/annualFacilityAnalysisSummaryClass";
 import { CalanderizedMeter } from "../models/calanderization";
 import { getCalanderizedMeterData } from "../calculations/calanderization/calanderizeMeters";
+import { getNeededUnits } from "../calculations/shared-calculations/calanderizationFunctions";
 
 addEventListener('message', ({ data }) => {
     try {
-        let neededUnits: string = data.analysisItem.energyUnit;
-        if (data.analysisItem.analysisCategory == 'water') {
-            neededUnits = data.analysisItem.waterUnit;
-        }
-        let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(data.meters, data.meterData, data.facility, false, { energyIsSource: data.analysisItem.energyIsSource, neededUnits: neededUnits });
+        let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(data.meters, data.meterData, data.facility, false, { energyIsSource: data.analysisItem.energyIsSource, neededUnits: getNeededUnits(data.analysisItem) });
         let annualAnalysisSummaryClass: AnnualFacilityAnalysisSummaryClass = new AnnualFacilityAnalysisSummaryClass(data.analysisItem, data.facility, calanderizedMeters, data.accountPredictorEntries, data.calculateAllMonthlyData);
         let annualAnalysisSummaries: Array<AnnualAnalysisSummary> = annualAnalysisSummaryClass.getAnnualAnalysisSummaries();
         let monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData> = annualAnalysisSummaryClass.monthlyAnalysisSummaryData;

@@ -10,6 +10,7 @@ import { AnalysisService } from '../../analysis.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
+import { getNeededUnits } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
 
 @Component({
   selector: 'app-facility-analysis',
@@ -60,11 +61,7 @@ export class FacilityAnalysisComponent implements OnInit {
       });
     } else {
       // Web Workers are not supported in this environment.     
-      let neededUnits: string = analysisItem.energyUnit;
-      if (analysisItem.analysisCategory == 'water') {
-        neededUnits = analysisItem.waterUnit;
-      }
-      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, facilityMeterData, facility, false, { energyIsSource: analysisItem.energyIsSource, neededUnits: neededUnits });
+      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, facilityMeterData, facility, false, { energyIsSource: analysisItem.energyIsSource, neededUnits: getNeededUnits(analysisItem) });
       let annualAnalysisSummaryClass: AnnualFacilityAnalysisSummaryClass = new AnnualFacilityAnalysisSummaryClass(analysisItem, facility, calanderizedMeters, accountPredictorEntries, false);
       let annualAnalysisSummaries: Array<AnnualAnalysisSummary> = annualAnalysisSummaryClass.getAnnualAnalysisSummaries();
       let monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData> = annualAnalysisSummaryClass.monthlyAnalysisSummaryData;

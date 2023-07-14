@@ -1,7 +1,7 @@
 import { CalanderizedMeter, MonthlyData } from "src/app/models/calanderization";
 import * as _ from 'lodash';
 import { YearMonthData } from "src/app/models/dashboard";
-import { IdbAccount, IdbFacility } from "src/app/models/idb";
+import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility } from "src/app/models/idb";
 
 export function getLastBillEntryFromCalanderizedMeterData(calanderizedMeterData: Array<CalanderizedMeter>, monthlyData?: Array<MonthlyData>): MonthlyData {
     if (!monthlyData) {
@@ -100,5 +100,13 @@ export function getFiscalYear(date: Date, facilityOrAccount: IdbFacility | IdbAc
                 return date.getUTCFullYear() - 1;
             }
         }
+    }
+}
+
+export function getNeededUnits(analysisItem: IdbAccountAnalysisItem | IdbAnalysisItem): string {
+    if (analysisItem.analysisCategory == 'water') {
+        return analysisItem.waterUnit;
+    } else {
+        return analysisItem.energyUnit;
     }
 }
