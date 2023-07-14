@@ -6,12 +6,13 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
-import { CalanderizedMeter } from 'src/app/models/calanderization';
+import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
 import { IdbAnalysisItem, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { FacilityHomeService } from './facility-home.service';
 import * as _ from 'lodash';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
+import { FacilityOverviewData } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';
 
 @Component({
   selector: 'app-facility-home',
@@ -194,10 +195,27 @@ export class FacilityHomeComponent implements OnInit {
       });
     } else {
       // Web Workers are not supported in this environment.
+      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(meters, meterData, this.facility, true, { energyIsSource: this.facility.energyIsSource, neededUnits: undefined });
+      let dateRange: { endDate: Date, startDate: Date };
+      if (calanderizedMeters && calanderizedMeters.length > 0) {
+        let monthlyData: Array<MonthlyData> = calanderizedMeters.flatMap(val => { return val.monthlyData });
+        let latestData: MonthlyData = _.maxBy(monthlyData, 'date');
+        let maxDate: Date;
+        let minDate: Date;
 
-      // let facilityOverviewData: FacilityOverviewData = new FacilityOverviewData(calanderizedMeters, dateRange, this.facility);
-      // this.facilityHomeService.facilityOverviewData.next(facilityOverviewData);
-      // this.facilityHomeService.calculatingOverview.next(false);
+        let startData: MonthlyData = _.minBy(monthlyData, 'date');
+        maxDate = new Date(latestData.year, latestData.monthNumValue);
+        minDate = new Date(startData.year, startData.monthNumValue);
+
+        minDate.setMonth(minDate.getMonth() + 1);
+        dateRange = {
+          endDate: maxDate,
+          startDate: minDate
+        };
+      }
+      let facilityOverviewData: FacilityOverviewData = new FacilityOverviewData(calanderizedMeters, dateRange, this.facility);
+      this.facilityHomeService.facilityOverviewData.next(facilityOverviewData);
+      this.facilityHomeService.calculatingOverview.next(false);
     }
   }
 }

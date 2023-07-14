@@ -54,7 +54,6 @@ export class RegressionModelInspectionComponent implements OnInit {
     this.isSelectedModel = this.selectedGroup.selectedModelId == this.model.modelId;
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
     this.selectedFacility = this.facilityDbService.selectedFacility.getValue();
-    // this.calanderizedMeters = this.analysisService.calanderizedMeters;
     this.accountPredictorEntries = this.predictorDbService.accountPredictorEntries.getValue();
     this.facilityMeters = this.utilityMeterDbService.facilityMeters.getValue();
     this.facilityMeterData = this.utilityMeterDataDbService.facilityMeterData.getValue();

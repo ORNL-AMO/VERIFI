@@ -8,14 +8,11 @@ import { UtilityUseAndCost } from 'src/app/calculations/dashboard-calculations/u
 })
 export class AccountOverviewService {
 
-  // calanderizedMeters: Array<CalanderizedMeter>;
   emissionsDisplay: BehaviorSubject<"market" | "location">;
-
   dateRange: BehaviorSubject<{
     startDate: Date,
     endDate: Date
   }>;
-
   accountOverviewData: BehaviorSubject<AccountOverviewData>;
   utilityUseAndCost: BehaviorSubject<UtilityUseAndCost>;
   calculating: BehaviorSubject<boolean | 'error'>;
