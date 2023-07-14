@@ -13,6 +13,7 @@ import { BetterPlantsReportClass } from 'src/app/calculations/better-plants-calc
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { AccountReportsService } from '../account-reports.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
+import { ConvertValue } from 'src/app/calculations/conversions/convertValue';
 
 @Component({
   selector: 'app-better-plants-report',
@@ -61,11 +62,31 @@ export class BetterPlantsReportComponent implements OnInit {
 
   setAnalysisItem() {
     let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
-    this.selectedAnalysisItem = accountAnalysisItems.find(item => { return item.guid == this.selectedReport.betterPlantsReportSetup.analysisItemId });
+    let selectedAnalysisItem: IdbAccountAnalysisItem = accountAnalysisItems.find(item => { return item.guid == this.selectedReport.betterPlantsReportSetup.analysisItemId });
+    this.selectedAnalysisItem = JSON.parse(JSON.stringify(selectedAnalysisItem));
     if (this.selectedAnalysisItem.analysisCategory == 'energy') {
+      if (this.selectedAnalysisItem.energyUnit != 'MMBtu') {
+        if (this.selectedAnalysisItem.baselineAdjustments) {
+          this.selectedAnalysisItem.baselineAdjustments.forEach(adjustment => {
+            if (adjustment.amount != 0) {
+              adjustment.amount = new ConvertValue(adjustment.amount, this.selectedAnalysisItem.energyUnit, 'MMBtu').convertedValue;
+            }
+          });
+        }
+        this.selectedAnalysisItem.energyUnit = 'MMBtu';
+      }
       this.selectedAnalysisItem.energyUnit = 'MMBtu';
     } else if (this.selectedAnalysisItem.analysisCategory == 'water') {
-      this.selectedAnalysisItem.waterUnit = 'kgal';
+      if (this.selectedAnalysisItem.waterUnit != 'kgal') {
+        if (this.selectedAnalysisItem.baselineAdjustments) {
+          this.selectedAnalysisItem.baselineAdjustments.forEach(adjustment => {
+            if (adjustment.amount != 0) {
+              adjustment.amount = new ConvertValue(adjustment.amount, this.selectedAnalysisItem.waterUnit, 'kgal').convertedValue;
+            }
+          });
+        }
+        this.selectedAnalysisItem.waterUnit = 'kgal';
+      }
     }
   }
 
@@ -82,7 +103,8 @@ export class BetterPlantsReportComponent implements OnInit {
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     let includedFacilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return includedFacilityIds.includes(meter.facilityId) });
     let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
-    if (typeof Worker !== 'undefined') {
+    let d = false;
+    if (typeof Worker !== 'undefined' && d) {
       this.worker = new Worker(new URL('src/app/web-workers/better-plants-report.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {
         if (!data.error) {
@@ -119,6 +141,7 @@ export class BetterPlantsReportComponent implements OnInit {
         accountMeterData
       );
       this.betterPlantsSummary = betterPlantsReportClass.getBetterPlantsSummary();
+      this.calculating = false;
     }
   }
 }

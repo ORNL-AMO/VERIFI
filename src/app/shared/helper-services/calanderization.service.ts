@@ -10,6 +10,7 @@ import { getIsEnergyMeter, getIsEnergyUnit } from '../sharedHelperFuntions';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { daysBetweenDates, getCurrentMonthsReadings, getNextMonthsBill, getPreviousMonthsBill } from 'src/app/calculations/calanderization/calanderizationHelpers';
 import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
+import { getFiscalYear } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
 
 @Injectable({
   providedIn: 'root'
@@ -240,28 +241,45 @@ export class CalanderizationService {
   getYearOptionsAccount(meterCategory: 'water' | 'energy' | 'all'): Array<number> {
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     let categoryMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return this.isCategoryMeter(meter, meterCategory) });
+    let categoryMeterIds: Array<string> = categoryMeters.map(meter => { return meter.guid });
     let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
+    let categoryMeterData: Array<IdbUtilityMeterData> = meterData.filter(data => { return categoryMeterIds.includes(data.meterId) });
+
+    let firstReading: IdbUtilityMeterData = _.minBy(categoryMeterData, (data) => { return new Date(data.readDate) });
+    let lastReading: IdbUtilityMeterData = _.maxBy(categoryMeterData, (data) => { return new Date(data.readDate) });
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    let calanderizedMeterData: Array<CalanderizedMeter> = getCalanderizedMeterData(categoryMeters, meterData, account, false);
-    let combinedMonthlyData: Array<MonthlyData> = calanderizedMeterData.flatMap(cMeter => { return cMeter.monthlyData });
-    let allYears: Array<number> = combinedMonthlyData.flatMap(monthlyData => { return monthlyData.year });
-    allYears = _.uniq(allYears);
-    allYears = _.orderBy(allYears, (val) => { return val }, 'asc');
-    return allYears;
+    if (firstReading && lastReading) {
+      let start: number = getFiscalYear(firstReading.readDate, account);
+      let end: number = getFiscalYear(lastReading.readDate, account);
+      let years: Array<number> = [];
+      for (let x = start; x <= end; x++) {
+        years.push(x);
+      }
+      return years;
+    }
+    return [];
   }
 
   getYearOptionsFacility(facilityId: string, meterCategory: 'water' | 'energy' | 'all'): Array<number> {
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     let facilityCategoryMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == facilityId && this.isCategoryMeter(meter, meterCategory) })
+    let categoryMeterIds: Array<string> = facilityCategoryMeters.map(meter => { return meter.guid });
     let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
+    let facilityData: Array<IdbUtilityMeterData> = meterData.filter(data => { return (data.facilityId == facilityId && categoryMeterIds.includes(data.meterId)) });
+    let firstReading: IdbUtilityMeterData = _.minBy(facilityData, (data) => { return new Date(data.readDate) });
+    let lastReading: IdbUtilityMeterData = _.maxBy(facilityData, (data) => { return new Date(data.readDate) });
     let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     let facility: IdbFacility = facilities.find(facility => { return facility.guid == facilityId });
-    let calanderizedMeterData: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityCategoryMeters, meterData, facility, false);
-    let combinedMonthlyData: Array<MonthlyData> = calanderizedMeterData.flatMap(cMeter => { return cMeter.monthlyData });
-    let allYears: Array<number> = combinedMonthlyData.flatMap(monthlyData => { return monthlyData.year });
-    allYears = _.uniq(allYears);
-    allYears = _.orderBy(allYears, (val) => { return val }, 'asc');
-    return allYears;
+    if (firstReading && lastReading) {
+      let start: number = getFiscalYear(firstReading.readDate, facility);
+      let end: number = getFiscalYear(lastReading.readDate, facility);
+      let years: Array<number> = [];
+      for (let x = start; x <= end; x++) {
+        years.push(x);
+      }
+      return years;
+    }
+    return [];
   }
 
   isCategoryMeter(meter: IdbUtilityMeter, meterCategory: 'water' | 'energy' | 'all'): boolean {

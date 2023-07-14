@@ -78,9 +78,6 @@ export class MonthlyAccountAnalysisClass {
                     accountPredictorEntries,
                     calculateAllMonthlyData
                 );
-                //TODO: Convert Results to account units!!!
-                console.log('Facility: ' + analysisItem.energyUnit)
-                console.log('Account: ' + accountAnalysisItem.energyUnit)
                 if (analysisItem.analysisCategory == 'energy' && (analysisItem.energyUnit != accountAnalysisItem.energyUnit)) {
                     monthlyFacilityAnalysisClass.convertResults(analysisItem.energyUnit, accountAnalysisItem.energyUnit);
                 } else if (analysisItem.analysisCategory == 'water' && (analysisItem.waterUnit != accountAnalysisItem.waterUnit)) {

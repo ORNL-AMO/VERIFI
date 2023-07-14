@@ -73,7 +73,6 @@ export class FacilityOverviewComponent implements OnInit {
   }
 
   calculateFacilitiesSummary() {
-    console.log('calculated summary')
     let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
     let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
     if (typeof Worker !== 'undefined') {

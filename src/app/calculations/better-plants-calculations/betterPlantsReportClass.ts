@@ -36,7 +36,11 @@ export class BetterPlantsReportClass {
     ) {
         this.setFacilityPerformance(selectedAnalysisItem, facilities, accountPredictorEntries, accountAnalysisItems, meters, meterData);
         let includedMeters: Array<IdbUtilityMeter> = this.getIncludedMeters(meters, selectedAnalysisItem, accountAnalysisItems);
-        let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(includedMeters, meterData, account);
+        let neededUnits: string = selectedAnalysisItem.energyUnit;
+        if (selectedAnalysisItem.analysisCategory == 'water') {
+            neededUnits = selectedAnalysisItem.waterUnit;
+        }
+        let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(includedMeters, meterData, account, false, { energyIsSource: selectedAnalysisItem.energyIsSource, neededUnits: neededUnits });
         this.setReportAndBaselineYearSummaries(selectedAnalysisItem, account, facilities, accountPredictorEntries, accountAnalysisItems, baselineYear, reportYear, meters, meterData);
         this.setReportYearEnergySummaryClass(calanderizedMeters, reportYear);
         this.setBaselineYearEnergySummaryClass(calanderizedMeters, baselineYear);
