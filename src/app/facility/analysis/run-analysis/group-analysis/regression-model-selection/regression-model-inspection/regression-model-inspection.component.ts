@@ -1,13 +1,17 @@
 import { Component, OnInit, Input, ViewChild, ElementRef, Output, EventEmitter } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { MonthlyAnalysisSummaryClass } from 'src/app/calculations/analysis-calculations/monthlyAnalysisSummaryClass';
+import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
+import { getNeededUnits } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
 import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
+import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
+import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { AnalysisGroup, JStatRegressionModel, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
-import { IdbAnalysisItem, IdbFacility, IdbPredictorEntry } from 'src/app/models/idb';
+import { IdbAnalysisItem, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 
 @Component({
   selector: 'app-regression-model-inspection',
@@ -32,24 +36,30 @@ export class RegressionModelInspectionComponent implements OnInit {
   isSelectedModel: boolean;
   compareSelectedModel: boolean = false;
   analysisItem: IdbAnalysisItem;
-  calanderizedMeters: Array<CalanderizedMeter>;
   accountPredictorEntries: Array<IdbPredictorEntry>;
   selectedGroup: AnalysisGroup;
   selectedModel: JStatRegressionModel;
+  facilityMeters: Array<IdbUtilityMeter>;
+  facilityMeterData: Array<IdbUtilityMeterData>;
   constructor(private analysisService: AnalysisService,
     private analysisDbService: AnalysisDbService,
     private facilityDbService: FacilitydbService,
     private predictorDbService: PredictordbService,
-    private plotlyService: PlotlyService) { }
+    private plotlyService: PlotlyService,
+    private utilityMeterDbService: UtilityMeterdbService,
+    private utilityMeterDataDbService: UtilityMeterDatadbService) { }
 
   ngOnInit(): void {
     this.selectedGroup = this.analysisService.selectedGroup.getValue();
     this.isSelectedModel = this.selectedGroup.selectedModelId == this.model.modelId;
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
     this.selectedFacility = this.facilityDbService.selectedFacility.getValue();
-    this.calanderizedMeters = this.analysisService.calanderizedMeters;
     this.accountPredictorEntries = this.predictorDbService.accountPredictorEntries.getValue();
+    this.facilityMeters = this.utilityMeterDbService.facilityMeters.getValue();
+    this.facilityMeterData = this.utilityMeterDataDbService.facilityMeterData.getValue();
+
     this.calculateInspectedModel();
+
   }
 
   calculateInspectedModel() {
@@ -82,12 +92,14 @@ export class RegressionModelInspectionComponent implements OnInit {
         selectedGroup: groupCopy,
         analysisItem: this.analysisItem,
         facility: this.selectedFacility,
-        calanderizedMeters: this.calanderizedMeters,
+        meters: this.facilityMeters,
+        meterData: this.facilityMeterData,
         accountPredictorEntries: this.accountPredictorEntries
       });
     } else {
-      // Web Workers are not supported in this environment.
-      let monthlyAnalysisSummaryClass: MonthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(groupCopy, this.analysisItem, this.selectedFacility, this.calanderizedMeters, this.accountPredictorEntries, false);
+      // Web Workers are not supported in this environment.  
+      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(this.facilityMeters, this.facilityMeterData, this.selectedFacility, false, { energyIsSource: this.analysisItem.energyIsSource, neededUnits: getNeededUnits(this.analysisItem) });
+      let monthlyAnalysisSummaryClass: MonthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(groupCopy, this.analysisItem, this.selectedFacility, calanderizedMeters, this.accountPredictorEntries, false);
       this.inspectedMonthlyAnalysisSummaryData = monthlyAnalysisSummaryClass.getMonthlyAnalysisSummaryData();
       this.drawChart();
     }
@@ -112,12 +124,14 @@ export class RegressionModelInspectionComponent implements OnInit {
         selectedGroup: this.selectedGroup,
         analysisItem: this.analysisItem,
         facility: this.selectedFacility,
-        calanderizedMeters: this.calanderizedMeters,
+        meters: this.facilityMeters,
+        meterData: this.facilityMeterData,
         accountPredictorEntries: this.accountPredictorEntries
       });
     } else {
       // Web Workers are not supported in this environment.
-      let monthlyAnalysisSummaryClass: MonthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(this.selectedGroup, this.analysisItem, this.selectedFacility, this.calanderizedMeters, this.accountPredictorEntries, false);
+      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(this.facilityMeters, this.facilityMeterData, this.selectedFacility, false, { energyIsSource: this.analysisItem.energyIsSource, neededUnits: getNeededUnits(this.analysisItem) });
+      let monthlyAnalysisSummaryClass: MonthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(this.selectedGroup, this.analysisItem, this.selectedFacility, calanderizedMeters, this.accountPredictorEntries, false);
       this.selectedMonthlyAnalysisSummaryData = monthlyAnalysisSummaryClass.getMonthlyAnalysisSummaryData();
       this.drawChart();
     }

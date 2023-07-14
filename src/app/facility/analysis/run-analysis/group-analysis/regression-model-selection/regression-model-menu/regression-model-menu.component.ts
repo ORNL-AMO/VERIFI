@@ -16,6 +16,8 @@ import * as _ from 'lodash';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { AnalysisValidationService } from 'src/app/shared/helper-services/analysis-validation.service';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
+import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
+import { getNeededUnits } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
 @Component({
   selector: 'app-regression-model-menu',
   templateUrl: './regression-model-menu.component.html',
@@ -100,7 +102,10 @@ export class RegressionModelMenuComponent implements OnInit {
 
   generateModels(autoSelect?: boolean) {
     let analysisItem: IdbAnalysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
-    let calanderizedMeters: Array<CalanderizedMeter> = this.analysisService.calanderizedMeters;
+    let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
+    let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
+    let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, facilityMeterData, this.selectedFacility, false, { energyIsSource: this.analysisItem.energyIsSource, neededUnits: getNeededUnits(this.analysisItem) });
+
     this.group.models = this.regressionsModelsService.getModels(this.group, calanderizedMeters, this.selectedFacility, analysisItem);
     if (this.group.models) {
       this.modelingError = false;

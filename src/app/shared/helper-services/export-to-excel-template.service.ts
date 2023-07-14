@@ -231,7 +231,7 @@ export class ExportToExcelTemplateService {
     let electricityMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.source == 'Electricity' });
     let index: number = 2;
     electricityMeters.forEach(meter => {
-      let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataForFacility(meter, false, true);
+      let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataFromMeterId(meter.guid);
       meterData = _.orderBy(meterData, 'readDate');
       meterData.forEach(dataReading => {
         worksheet.getCell('A' + index).value = meter.meterNumber;
@@ -288,7 +288,7 @@ export class ExportToExcelTemplateService {
     let electricityMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => { return meter.source != 'Electricity' });
     let index: number = 2;
     electricityMeters.forEach(meter => {
-      let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataForFacility(meter, false, true);
+      let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataFromMeterId(meter.guid);
       meterData = _.orderBy(meterData, 'readDate');
       meterData.forEach(dataReading => {
         worksheet.getCell('A' + index).value = meter.meterNumber;

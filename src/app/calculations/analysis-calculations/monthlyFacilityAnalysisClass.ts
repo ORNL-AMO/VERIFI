@@ -110,4 +110,13 @@ export class MonthlyFacilityAnalysisClass {
             }
         })
     }
+
+    convertResults(startingUnit: string, endingUnit: string) {
+        for (let i = 0; i < this.facilityMonthSummaries.length; i++) {
+            this.facilityMonthSummaries[i].convertResults(startingUnit, endingUnit);
+        }
+        for (let i = 0; i < this.allFacilityAnalysisData.length; i++) {
+            this.allFacilityAnalysisData[i].convertResults(startingUnit, endingUnit);
+        }
+    }
 }

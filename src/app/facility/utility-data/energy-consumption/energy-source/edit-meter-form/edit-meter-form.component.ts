@@ -7,7 +7,7 @@ import { EnergyUseCalculationsService } from 'src/app/shared/helper-services/ene
 import { getIsEnergyMeter } from 'src/app/shared/sharedHelperFuntions';
 import { EnergyUnitOptions, UnitOption } from 'src/app/shared/unitOptions';
 import { EditMeterFormService } from './edit-meter-form.service';
-import { AgreementType, AgreementTypes, FuelTypeOption, OtherEnergyOptions, ScopeOption, ScopeOptions, SourceOptions } from './editMeterOptions';
+import { AgreementType, AgreementTypes, FuelTypeOption, OtherEnergyOptions, ScopeOption, ScopeOptions, SourceOptions, getFuelTypeOptions } from './editMeterOptions';
 import { MeterSource, WaterDischargeType, WaterDischargeTypes, WaterIntakeType, WaterIntakeTypes } from 'src/app/models/constantsAndTypes';
 
 @Component({
@@ -208,7 +208,7 @@ export class EditMeterFormComponent implements OnInit {
   }
 
   setFuelTypeOptions(onChange: boolean) {
-    this.fuelTypeOptions = this.energyUseCalculationsService.getFuelTypeOptions(this.meterForm.controls.source.value, this.meterForm.controls.phase.value);
+    this.fuelTypeOptions = getFuelTypeOptions(this.meterForm.controls.source.value, this.meterForm.controls.phase.value);
     let selectedEnergyOption: FuelTypeOption = this.fuelTypeOptions.find(option => { return option.value == this.meterForm.controls.fuel.value });
     if (!selectedEnergyOption && this.fuelTypeOptions.length != 0 && !onChange) {
       this.meterForm.controls.fuel.patchValue(this.fuelTypeOptions[0].value);

@@ -1,4 +1,5 @@
 import * as _ from 'lodash';
+import { ConvertValue } from '../conversions/convertValue';
 export class MonthlyAnalysisCalculatedValues {
     //results
     energyUse: number;
@@ -171,5 +172,17 @@ export class MonthlyAnalysisCalculatedValues {
 
     setYearToDatePercentSavings() {
         this.yearToDatePercentSavings = (this.yearToDateSavings / this.yearToDateAdjustedEnergyUse)
+    }
+
+    convertResults(startingUnit: string, endingUnit: string) {
+        this.energyUse = new ConvertValue(this.energyUse, startingUnit, endingUnit).convertedValue;
+        this.modeledEnergy = new ConvertValue(this.modeledEnergy, startingUnit, endingUnit).convertedValue;
+        this.adjustedForNormalization = new ConvertValue(this.adjustedForNormalization, startingUnit, endingUnit).convertedValue;
+        this.baselineAdjustmentForNormalization = new ConvertValue(this.baselineAdjustmentForNormalization, startingUnit, endingUnit).convertedValue;
+        this.adjusted = new ConvertValue(this.adjusted, startingUnit, endingUnit).convertedValue;
+        this.baselineAdjustment = new ConvertValue(this.baselineAdjustment, startingUnit, endingUnit).convertedValue;
+        this.savings = new ConvertValue(this.savings, startingUnit, endingUnit).convertedValue;
+        this.yearToDateSavings = new ConvertValue(this.yearToDateSavings, startingUnit, endingUnit).convertedValue;
+        this.rollingSavings = new ConvertValue(this.rollingSavings, startingUnit, endingUnit).convertedValue;
     }
 }

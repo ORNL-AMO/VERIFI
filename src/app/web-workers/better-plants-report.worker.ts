@@ -9,11 +9,12 @@ addEventListener('message', ({ data }) => {
             data.baselineYear,
             data.reportYear,
             data.selectedAnalysisItem,
-            data.calanderizedMeters,
             data.accountPredictorEntries,
             data.account,
             data.facilities,
-            data.accountAnalysisItems
+            data.accountAnalysisItems,
+            data.meters,
+            data.meterData
         );
         let betterPlantsSummary: BetterPlantsSummary = betterPlantsReportClass.getBetterPlantsSummary();
         postMessage({

@@ -42,7 +42,7 @@ export class EditMeterComponent implements OnInit {
         this.addOrEdit = 'edit';
         this.editMeter = facilityMeters.find(meter => { return meter.guid == meterId });
         this.meterForm = this.editMeterFormService.getFormFromMeter(this.editMeter);
-        let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataForFacility(this.editMeter, false);
+        let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataFromMeterId(this.editMeter.guid);
         if (meterData.length != 0) {
           this.meterDataExists = true;
           this.meterForm.controls.source.disable();
@@ -96,7 +96,7 @@ export class EditMeterComponent implements OnInit {
     if (isEnergyMeter && !isEnergyUnit) {
       this.loadingService.setLoadingMessage('Updating Meter Data...')
       this.loadingService.setLoadingStatus(true);
-      let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataForFacility(this.editMeter, false);
+      let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataFromMeterId(this.editMeter.guid);
       for (let i = 0; i < meterData.length; i++) {
         meterData[i].totalEnergyUse = meterData[i].totalVolume * this.meterForm.controls.heatCapacity.value;
         await firstValueFrom(this.utilityMeterDataDbService.updateWithObservable(meterData[i]));

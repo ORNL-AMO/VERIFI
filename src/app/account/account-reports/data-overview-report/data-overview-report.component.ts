@@ -5,14 +5,16 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
-import { IdbAccount, IdbAccountReport, IdbFacility, IdbUtilityMeter, IdbUtilityMeterGroup } from 'src/app/models/idb';
+import { IdbAccount, IdbAccountReport, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from 'src/app/models/idb';
 import { DataOverviewReportSetup } from 'src/app/models/overview-report';
-import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { AccountReportsService } from '../account-reports.service';
 import { Subscription } from 'rxjs';
 import { AccountOverviewData } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
 import { UtilityUseAndCost } from 'src/app/calculations/dashboard-calculations/useAndCostClass';
 import { FacilityOverviewData } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';
+import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
+import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
+import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
 
 @Component({
   selector: 'app-data-overview-report',
@@ -41,9 +43,10 @@ export class DataOverviewReportComponent {
     private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
-    private calanderizationService: CalanderizationService,
     private utilityMeterDbService: UtilityMeterdbService,
-    private accountReportsService: AccountReportsService) {
+    private accountReportsService: AccountReportsService,
+    private utilityMeterDataDbService: UtilityMeterDatadbService,
+    private eGridService: EGridService) {
 
   }
 
@@ -92,15 +95,16 @@ export class DataOverviewReportComponent {
     let facility: IdbFacility = accountFacilities.find(facility => { return facility.guid == facilityId });
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == facilityId });
+    let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
     let dataOverviewFacility: DataOverviewFacility = this.initDataOverviewFacility(facility, startDate, endDate);
 
-    dataOverviewFacility.calanderizedMeters = this.calanderizationService.getCalanderizedMeterData(facilityMeters, false, true, { energyIsSource: this.overviewReport.energyIsSource });
     if (typeof Worker !== 'undefined') {
       this.facilitiesWorker = new Worker(new URL('src/app/web-workers/facility-overview.worker', import.meta.url));
       this.facilitiesWorker.onmessage = ({ data }) => {
         if (!data.error) {
           dataOverviewFacility.facilityOverviewData = data.facilityOverviewData;
           dataOverviewFacility.utilityUseAndCost = data.utilityUseAndCost;
+          dataOverviewFacility.calanderizedMeters = data.calanderizedMeters;
         } else {
           dataOverviewFacility.calculationError = true;
         }
@@ -114,16 +118,21 @@ export class DataOverviewReportComponent {
       };
 
       this.facilitiesWorker.postMessage({
-        calanderizedMeters: dataOverviewFacility.calanderizedMeters,
         type: 'overview',
         dateRange: dataOverviewFacility.dateRange,
-        facility: facility
+        facility: facility,
+        energyIsSource: this.overviewReport.energyIsSource,
+        meters: facilityMeters,
+        meterData: meterData,
+        inOverview: false,
+        co2Emissions: this.eGridService.co2Emissions
       });
 
 
 
     } else {
       // Web Workers are not supported in this environment.
+      this.accountData.calanderizedMeters = getCalanderizedMeterData(facilityMeters, meterData, this.account, false, { energyIsSource: this.overviewReport.energyIsSource, neededUnits: undefined });
       dataOverviewFacility.facilityOverviewData = new FacilityOverviewData(dataOverviewFacility.calanderizedMeters, dataOverviewFacility.dateRange, facility);
       dataOverviewFacility.utilityUseAndCost = new UtilityUseAndCost(dataOverviewFacility.calanderizedMeters, dataOverviewFacility.dateRange);
       this.facilitiesData.push(dataOverviewFacility);
@@ -145,13 +154,12 @@ export class DataOverviewReportComponent {
     let includedMeters: Array<IdbUtilityMeter> = meters.filter(meter => {
       return this.includedFacilities.includes(meter.facilityId);
     });
-
+    let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
     let startDate: Date = new Date(selectedReport.startYear, selectedReport.startMonth, 1);
     let endDate: Date = new Date(selectedReport.endYear, selectedReport.endMonth, 1);
 
 
     this.accountData = this.initDataOverviewAccount(this.account, startDate, endDate);
-    this.accountData.calanderizedMeters = this.calanderizationService.getCalanderizedMeterData(includedMeters, true, true, { energyIsSource: this.overviewReport.energyIsSource });
 
     if (typeof Worker !== 'undefined') {
       this.accountWorker = new Worker(new URL('src/app/web-workers/account-overview.worker', import.meta.url));
@@ -159,6 +167,7 @@ export class DataOverviewReportComponent {
         if (!data.error) {
           this.accountData.accountOverviewData = data.accountOverviewData;
           this.accountData.utilityUseAndCost = data.utilityUseAndCost;
+          this.accountData.calanderizedMeters = data.calanderizedMeters
         } else {
           this.accountData.accountOverviewData = undefined;
           this.accountData.utilityUseAndCost = undefined;
@@ -169,13 +178,18 @@ export class DataOverviewReportComponent {
       };
 
       this.accountWorker.postMessage({
-        calanderizedMeters: this.accountData.calanderizedMeters,
         facilities: includedFacilities,
         type: 'overview',
-        dateRange: this.accountData.dateRange
+        dateRange: this.accountData.dateRange,
+        meters: includedMeters,
+        meterData: meterData,
+        account: this.account,
+        energyIsSource: this.overviewReport.energyIsSource,
+        co2Emissions: this.eGridService.co2Emissions
       });
     } else {
       // Web Workers are not supported in this environment.
+      this.accountData.calanderizedMeters = getCalanderizedMeterData(meters, meterData, this.account, false, { energyIsSource: this.overviewReport.energyIsSource, neededUnits: undefined });
       this.accountData.accountOverviewData = new AccountOverviewData(this.accountData.calanderizedMeters, facilities, this.account, this.accountData.dateRange);
       this.accountData.utilityUseAndCost = new UtilityUseAndCost(this.accountData.calanderizedMeters, this.accountData.dateRange);
       this.calculatingAccounts = false;
