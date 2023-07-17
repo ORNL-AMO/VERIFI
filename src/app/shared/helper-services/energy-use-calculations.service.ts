@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
+import { ConvertValue } from 'src/app/calculations/conversions/convertValue';
 import { FuelTypeOption } from 'src/app/facility/utility-data/energy-consumption/energy-source/edit-meter-form/editMeterOptions';
-import { ConvertUnitsService } from '../convert-units/convert-units.service';
 import { MeterSource } from 'src/app/models/constantsAndTypes';
 
 @Injectable({
@@ -8,16 +8,16 @@ import { MeterSource } from 'src/app/models/constantsAndTypes';
 })
 export class EnergyUseCalculationsService {
 
-  constructor(private convertUnitsService: ConvertUnitsService) { }
+  constructor() { }
 
   getHeatingCapacity(source: MeterSource, startingUnit: string, meterEnergyUnit: string, selectedFuelTypeOption?: FuelTypeOption): number {
     let heatCapacity: number;
     if (source == 'Electricity') {
-      heatCapacity = this.convertUnitsService.value(.003412).from('kWh').to(startingUnit);
+      heatCapacity = new ConvertValue(.003412, 'kWh', startingUnit).convertedValue;
     }
     else if (source == 'Natural Gas') {
-      let conversionHelper: number = this.convertUnitsService.value(1).from('ft3').to(startingUnit);
-      let convertedHeatCapacity: number = this.convertUnitsService.value(.001029).from('MMBtu').to(meterEnergyUnit);
+      let conversionHelper: number = new ConvertValue(1, 'ft3', startingUnit).convertedValue;
+      let convertedHeatCapacity: number = new ConvertValue(.001029, 'MMBtu', meterEnergyUnit).convertedValue;
       heatCapacity = (convertedHeatCapacity / conversionHelper);
     }
     else if (source == 'Other Fuels' || source == 'Other Energy') {
@@ -67,8 +67,8 @@ export class EnergyUseCalculationsService {
     //fuelTypeOption heat capacity units: MMBtu/option.startingUnit
     //need to convert to: Meter Energy Unit / selected starting unit
     if (fuelTypeOption.heatCapacityValue && startingUnit) {
-      let convertedHeatCapacity: number = this.convertUnitsService.value(fuelTypeOption.heatCapacityValue).from('MMBtu').to(meterEnergyUnit);
-      let conversionHelper: number = this.convertUnitsService.value(1).from(fuelTypeOption.startingUnit).to(startingUnit);
+      let convertedHeatCapacity: number = new ConvertValue(fuelTypeOption.heatCapacityValue, 'MMBtu', meterEnergyUnit).convertedValue;
+      let conversionHelper: number = new ConvertValue(1, fuelTypeOption.startingUnit, startingUnit).convertedValue;
       return (convertedHeatCapacity / conversionHelper)
     }
     return 0;
@@ -76,7 +76,7 @@ export class EnergyUseCalculationsService {
 
   convertEmissions(emissionsRate: number, energyUnit: string): number {
     if (energyUnit != 'MMBtu') {
-      let conversionHelper: number = this.convertUnitsService.value(1).from('MMBtu').to(energyUnit);
+      let conversionHelper: number = new ConvertValue(1, 'MMBtu', energyUnit).convertedValue;
       emissionsRate = emissionsRate / conversionHelper;
       emissionsRate = Number((emissionsRate).toLocaleString(undefined, { maximumSignificantDigits: 5 }));
     }
@@ -85,7 +85,7 @@ export class EnergyUseCalculationsService {
 
   convertElectricityEmissions(emissionsRate: number, energyUnit: string): number {
     if (energyUnit != 'kWh') {
-      let conversionHelper: number = this.convertUnitsService.value(1).from('kWh').to(energyUnit);
+      let conversionHelper: number = new ConvertValue(1, 'kWh', energyUnit).convertedValue;
       emissionsRate = emissionsRate / conversionHelper;
       emissionsRate = Number((emissionsRate).toLocaleString(undefined, { maximumSignificantDigits: 5 }));
     }

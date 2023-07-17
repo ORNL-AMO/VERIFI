@@ -4,7 +4,6 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { IdbAccount, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, PredictorData } from 'src/app/models/idb';
-import { ConvertUnitsService } from 'src/app/shared/convert-units/convert-units.service';
 import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
 import { UnitConversionTypes } from './unitConversionTypes';
 import { WeatherStation } from 'src/app/models/degreeDays';
@@ -43,7 +42,6 @@ export class EditPredictorComponent {
   constructor(private activatedRoute: ActivatedRoute, private predictorDbService: PredictordbService,
     private router: Router, private facilityDbService: FacilitydbService,
     private formBuilder: FormBuilder,
-    private convertUnitsService: ConvertUnitsService,
     private weatherDataService: WeatherDataService,
     private degreeDaysService: DegreeDaysService,
     private loadingService: LoadingService,
@@ -109,7 +107,7 @@ export class EditPredictorComponent {
       'weatherStationId': [this.predictorData.weatherStationId]
     });
     this.setShowReferencePredictors()
-    this.setUnitOptions();
+    // this.setUnitOptions();
     this.setValidators();
   }
 
@@ -212,13 +210,14 @@ export class EditPredictorComponent {
     this.referencePredictors = facilityPredictors.filter(predictor => { return predictor.id != this.predictorData.id });
   }
 
-  setUnitOptions() {
-    if (this.predictorForm.controls.conversionType.value) {
-      this.unitOptions = this.convertUnitsService.possibilities(this.predictorForm.controls.conversionType.value);
-    } else {
-      this.unitOptions = [];
-    }
-  }
+  //conversion method not implemented yet. Unneeded
+  // setUnitOptions() {
+  //   if (this.predictorForm.controls.conversionType.value) {
+  //     this.unitOptions = this.convertUnitsService.possibilities(this.predictorForm.controls.conversionType.value);
+  //   } else {
+  //     this.unitOptions = [];
+  //   }
+  // }
 
   setReferencePredictorName() {
     let facilityPredictors: Array<PredictorData> = this.predictorDbService.facilityPredictors.getValue();

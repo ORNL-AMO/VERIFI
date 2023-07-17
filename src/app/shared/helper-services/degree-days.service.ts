@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { EGridService } from './e-grid.service';
 import * as _ from 'lodash';
-import { ConvertUnitsService } from '../convert-units/convert-units.service';
 import { DetailDegreeDay, LocalClimatologicalData, WeatherStation } from 'src/app/models/degreeDays';
 import * as Papa from 'papaparse';
+import { ConvertValue } from 'src/app/calculations/conversions/convertValue';
 
 @Injectable({
   providedIn: 'root'
@@ -12,7 +12,7 @@ export class DegreeDaysService {
 
   stationDataResponse: { station: WeatherStation, response: Response, year: number, dataResults: string };
   yearHourlyData: Array<LocalClimatologicalData>;
-  constructor(private eGridService: EGridService, private convertUnitsService: ConvertUnitsService) { }
+  constructor(private eGridService: EGridService) { }
 
   async getDailyDataFromMonth(month: number, year: number, baseHeatingTemperature: number, baseCoolingTemperature: number, stationId: string): Promise<Array<DetailDegreeDay>> {
     await this.setYearHourlyData(month, year, stationId);
@@ -256,9 +256,9 @@ export class DegreeDaysService {
     return R * c;
   }
 
-  getMinutesBetweenDates(firstDate: Date, secondDate: Date) {
+  getMinutesBetweenDates(firstDate: Date, secondDate: Date): number {
     let diffMilliseconds = Math.abs(firstDate.getTime() - secondDate.getTime());
-    let diffMinutes = this.convertUnitsService.value(diffMilliseconds).from('ms').to('min');
+    let diffMinutes: number = new ConvertValue(diffMilliseconds, 'ms', 'min').convertedValue;
     return diffMinutes;
   }
 

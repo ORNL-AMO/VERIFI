@@ -170,7 +170,8 @@
                 </select>
             </div>
         </div>
-        <ng-container *ngIf="predictorForm.controls.predictorType.value == 'Conversion'">
+        <!--Conversion method not implemented yet-->
+        <!-- <ng-container *ngIf="predictorForm.controls.predictorType.value == 'Conversion'">
             <div class="col-lg-6 col-md-12 col-sm-12">
                 <label class="semibold" for="conversionType">Conversion Type</label>
                 <div class="mb-3">
@@ -202,7 +203,7 @@
                     </select>
                 </div>
             </div>
-        </ng-container>
+        </ng-container> -->
         <ng-container *ngIf="predictorForm.controls.predictorType.value == 'Math'">
             <div class="col-lg-6 col-md-12 col-sm-12">
                 <label class="semibold" for="mathAction">Math Action</label>
