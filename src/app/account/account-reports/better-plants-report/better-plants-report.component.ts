@@ -103,8 +103,7 @@ export class BetterPlantsReportComponent implements OnInit {
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     let includedFacilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return includedFacilityIds.includes(meter.facilityId) });
     let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
-    let d = false;
-    if (typeof Worker !== 'undefined' && d) {
+    if (typeof Worker !== 'undefined') {
       this.worker = new Worker(new URL('src/app/web-workers/better-plants-report.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {
         if (!data.error) {

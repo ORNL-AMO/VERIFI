@@ -151,8 +151,10 @@ export class FacilityHomeComponent implements OnInit {
       this.annualWaterAnalysisWorker.postMessage({
         analysisItem: this.facilityHomeService.latestWaterAnalysisItem,
         facility: this.facility,
+        meters: facilityMeters,
         accountPredictorEntries: accountPredictorEntries,
-        calculateAllMonthlyData: true
+        calculateAllMonthlyData: true,
+        meterData: facilityMeterData
       });
     } else {
       // Web Workers are not supported in this environment.
