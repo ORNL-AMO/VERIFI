@@ -136,10 +136,13 @@ export class AnalysisDbService {
     });
 
     let baselineYear: number;
+    let name: string;
     if (analysisCategory == 'energy') {
       baselineYear = selectedFacility.sustainabilityQuestions.energyReductionBaselineYear
+      name = 'Energy Analysis';
     } else if (analysisCategory == 'water') {
       baselineYear = selectedFacility.sustainabilityQuestions.waterReductionBaselineYear
+      name = 'Water Analysis';
     }
 
     let analysisItem: IdbAnalysisItem = {
@@ -147,7 +150,7 @@ export class AnalysisDbService {
       accountId: selectedAccount.guid,
       guid: Math.random().toString(36).substr(2, 9),
       date: new Date(),
-      name: 'Analysis Item',
+      name: name,
       reportYear: undefined,
       energyIsSource: selectedFacility.energyIsSource,
       energyUnit: selectedFacility.energyUnit,

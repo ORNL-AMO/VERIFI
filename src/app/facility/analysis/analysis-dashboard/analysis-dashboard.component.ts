@@ -75,6 +75,12 @@ export class AnalysisDashboardComponent implements OnInit {
   }
 
   async openCreateAnalysis() {
+    let inWater: boolean = this.router.url.includes('water');
+    if (inWater) {
+      this.newAnalysisCategory = 'water'
+    } else {
+      this.newAnalysisCategory = 'energy';
+    }
     if (this.newAnalysisCategory == 'energy' && !this.hasEnergy) {
       this.newAnalysisCategory = 'water';
     } else if (this.newAnalysisCategory == 'water' && !this.hasWater) {
