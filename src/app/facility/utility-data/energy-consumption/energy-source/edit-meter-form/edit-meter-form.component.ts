@@ -1,7 +1,6 @@
 import { ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
 import { FormGroup, ValidatorFn } from '@angular/forms';
 import { IdbFacility } from 'src/app/models/idb';
-import { ConvertUnitsService } from 'src/app/shared/convert-units/convert-units.service';
 import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
 import { EnergyUseCalculationsService } from 'src/app/shared/helper-services/energy-use-calculations.service';
 import { getIsEnergyMeter } from 'src/app/shared/sharedHelperFuntions';
@@ -54,7 +53,7 @@ export class EditMeterFormComponent implements OnInit {
   displayWaterDischargeTypes: boolean;
   constructor(
     private energyUnitsHelperService: EnergyUnitsHelperService, private energyUseCalculationsService: EnergyUseCalculationsService,
-    private editMeterFormService: EditMeterFormService, private cd: ChangeDetectorRef, private convertUnitsService: ConvertUnitsService) { }
+    private editMeterFormService: EditMeterFormService, private cd: ChangeDetectorRef) { }
 
   ngOnInit(): void {
   }
@@ -283,15 +282,6 @@ export class EditMeterFormComponent implements OnInit {
     }
     this.meterForm.controls.startingUnit.patchValue(facilityUnit);
     this.meterForm.controls.startingUnit.updateValueAndValidity();
-  }
-
-  convertEmissions(emissionsRate: number): number {
-    if (this.meterForm.controls.energyUnit.value != 'MMBtu') {
-      let conversionHelper: number = this.convertUnitsService.value(1).from('MMBtu').to(this.meterForm.controls.energyUnit.value);
-      emissionsRate = emissionsRate / conversionHelper;
-      emissionsRate = this.convertUnitsService.roundVal(emissionsRate, 4)
-    }
-    return emissionsRate;
   }
 
   checkHasDifferentUnits() {

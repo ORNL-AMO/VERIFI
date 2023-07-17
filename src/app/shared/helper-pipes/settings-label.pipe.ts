@@ -1,16 +1,16 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { ConvertUnitsService } from '../convert-units/convert-units.service';
+import { ConvertValue } from 'src/app/calculations/conversions/convertValue';
 
 @Pipe({
   name: 'settingsLabel'
 })
 export class SettingsLabelPipe implements PipeTransform {
 
-  constructor(private convertUnitsService: ConvertUnitsService) { }
+  constructor() { }
 
   transform(value: string, per?: string): any {
     if (value && value !== 'F' && value !== 'C' && value !== 'K') {
-      let foundUnit = this.convertUnitsService.getUnit(value);
+      let foundUnit = new ConvertValue(undefined, undefined, undefined).getUnit(value);
       if (foundUnit) {
         let dispUnit: string = foundUnit.unit.name.display;
         dispUnit = dispUnit.replace('(', '');

@@ -66,15 +66,17 @@ export class ConvertValue {
     convertedValue: number;
     hasError: boolean;
     constructor(value: number, from: string, to: string) {
-        this.origin = this.getUnit(from);
-        this.destination = this.getUnit(to);
+        if (value != undefined) {
+            this.origin = this.getUnit(from);
+            this.destination = this.getUnit(to);
 
-        if (!this.origin || !this.destination) {
-            this.hasError = true;
-            this.convertedValue = value;
-        } else {
-            this.hasError = false;
-            this.convertedValue = this.convertValue(value);
+            if (!this.origin || !this.destination) {
+                this.hasError = true;
+                this.convertedValue = value;
+            } else {
+                this.hasError = false;
+                this.convertedValue = this.convertValue(value);
+            }
         }
     }
 
