@@ -6,6 +6,13 @@
     </div>
 </div>
 
+<div class="row" *ngIf="hasCorrespondingAccountItems">
+    <div class="col-12 alert alert-info text-center">
+        This analysis is used in one or more account analysis. Click the "Account Analysis" tab to view and navigate
+        to the corresponding analysis items. Making changes to this analysis may effect the results of the account
+        analysis.
+    </div>
+</div>
 <ng-container *ngIf="!group.groupErrors.missingGroupMeters">
     <form>
         <div class="row">
@@ -160,7 +167,8 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-6 col-sm-12" *ngIf="group.analysisType != 'skip' && group.analysisType != 'skipAnalysis'">
+            <div class="col-md-6 col-sm-12"
+                *ngIf="group.analysisType != 'skip' && group.analysisType != 'skipAnalysis'">
                 <label class="bold">
                     <span
                         *ngIf="group.analysisType == 'regression' || group.analysisType == 'absoluteEnergyConsumption'">2.</span>

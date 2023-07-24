@@ -8,6 +8,7 @@ import { AnalysisGroup, JStatRegressionModel } from 'src/app/models/analysis';
 import { IdbAccount, IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 import { AnalysisService } from '../../../analysis.service';
 import { AnalysisValidationService } from 'src/app/shared/helper-services/analysis-validation.service';
+import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 @Component({
   selector: 'app-regression-model-selection',
   templateUrl: './regression-model-selection.component.html',
@@ -23,10 +24,12 @@ export class RegressionModelSelectionComponent implements OnInit {
   selectedGroupSub: Subscription;
   selectedFacility: IdbFacility;
   selectedInspectModel: JStatRegressionModel;
+  hasCorrespondingAccountItems: boolean;
   constructor(private analysisService: AnalysisService,
     private analysisDbService: AnalysisDbService, private facilityDbService: FacilitydbService, private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
-    private analysisValidationService: AnalysisValidationService) { }
+    private analysisValidationService: AnalysisValidationService,
+    private accountAnalysisDbService: AccountAnalysisDbService) { }
 
   ngOnInit(): void {
     this.selectedFacility = this.facilityDbService.selectedFacility.getValue();
@@ -36,10 +39,13 @@ export class RegressionModelSelectionComponent implements OnInit {
 
     this.showInvalidSub = this.analysisService.showInvalidModels.subscribe(val => {
       this.showInvalid = val;
-    })
+    });
+    let analysisItem: IdbAnalysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
+    let accountAnalysisItems = this.accountAnalysisDbService.getCorrespondingAccountAnalysisItems(analysisItem.guid);
+    this.hasCorrespondingAccountItems = accountAnalysisItems.length != 0;
 
   }
-  ngOnDestroy(){
+  ngOnDestroy() {
     this.selectedGroupSub.unsubscribe();
     this.showInvalidSub.unsubscribe();
   }
@@ -50,9 +56,9 @@ export class RegressionModelSelectionComponent implements OnInit {
     this.selectedGroup.regressionModelYear = selectedModel.modelYear;
     this.selectedGroup.predictorVariables.forEach(variable => {
       let coefIndex: number = selectedModel.predictorVariables.findIndex(pVariable => { return pVariable.id == variable.id });
-      if(coefIndex != -1){
+      if (coefIndex != -1) {
         variable.regressionCoefficient = selectedModel.coef[coefIndex + 1];
-      }else{
+      } else {
         variable.regressionCoefficient = 0;
       }
     });
@@ -84,15 +90,15 @@ export class RegressionModelSelectionComponent implements OnInit {
     }
   }
 
-  inspectModel(model: JStatRegressionModel){
+  inspectModel(model: JStatRegressionModel) {
     this.selectedInspectModel = model;
   }
 
-  cancelInspectModel(){
+  cancelInspectModel() {
     this.selectedInspectModel = undefined;
   }
 
-  async selectFromInspection(){
+  async selectFromInspection() {
     this.selectedGroup.selectedModelId = this.selectedInspectModel.modelId;
     await this.selectModel();
     this.cancelInspectModel();

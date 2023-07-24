@@ -1,3 +1,12 @@
+
+<div class="row" *ngIf="hasCorrespondingAccountItems">
+    <div class="col-12 alert alert-info text-center">
+        This analysis is used in one or more account analysis. Click the "Account Analysis" tab to view and navigate
+        to the corresponding analysis items. Making changes to this analysis may effect the results of the account
+        analysis.
+    </div>
+</div>
+
 <ng-container *ngIf="!selectedInspectModel">
     <ng-container *ngIf="selectedGroup.groupErrors?.hasInvalidRegressionModel">
         <div class="alert alert-warning w-100 text-center">

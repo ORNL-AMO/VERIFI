@@ -155,4 +155,17 @@ export class AccountAnalysisDbService {
       this.accountAnalysisItems.next(accountAnalysisItems);
     }
   }
+
+  getCorrespondingAccountAnalysisItems(facilityAnalysisItemId: string): Array<IdbAccountAnalysisItem> {
+    let allAccountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisItems.getValue();
+    let correspondingItems: Array<IdbAccountAnalysisItem> = new Array();
+    allAccountAnalysisItems.forEach(accountItem => {
+      accountItem.facilityAnalysisItems.forEach(facilityItem => {
+        if (facilityItem.analysisItemId == facilityAnalysisItemId) {
+          correspondingItems.push(accountItem);
+        }
+      });
+    });
+    return correspondingItems;
+  }
 }

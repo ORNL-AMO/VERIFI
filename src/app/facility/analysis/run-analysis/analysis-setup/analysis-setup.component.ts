@@ -13,6 +13,7 @@ import { firstValueFrom } from 'rxjs';
 import { VolumeLiquidOptions } from 'src/app/shared/unitOptions';
 import { AnalysisValidationService } from 'src/app/shared/helper-services/analysis-validation.service';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
+import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 @Component({
   selector: 'app-analysis-setup',
   templateUrl: './analysis-setup.component.html',
@@ -28,18 +29,24 @@ export class AnalysisSetupComponent implements OnInit {
   analysisItem: IdbAnalysisItem;
   yearOptions: Array<number>;
   baselineYearWarning: string;
+  disableForm: boolean;
+  hasCorrespondingAccountItems: boolean;
+  hasModelsGenerated: boolean;
+  displayEnableForm: boolean = false;
   constructor(private facilityDbService: FacilitydbService, private analysisDbService: AnalysisDbService,
     private analysisService: AnalysisService, private router: Router,
     private analysisValidationService: AnalysisValidationService,
     private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
-    private calanderizationService: CalanderizationService) { }
+    private calanderizationService: CalanderizationService,
+    private accountAnalysisDbService: AccountAnalysisDbService) { }
 
   ngOnInit(): void {
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
     this.facility = this.facilityDbService.selectedFacility.getValue();
     this.yearOptions = this.calanderizationService.getYearOptionsFacility(this.facility.guid, this.analysisItem.analysisCategory);
     this.setBaselineYearWarning();
+    this.setComponentBools();
   }
 
   async saveItem() {
@@ -83,5 +90,43 @@ export class AnalysisSetupComponent implements OnInit {
     }
   }
 
+  setComponentBools() {
+    let accountAnalysisItems = this.accountAnalysisDbService.getCorrespondingAccountAnalysisItems(this.analysisItem.guid);
+    this.hasCorrespondingAccountItems = accountAnalysisItems.length != 0;
+    let hasModelsGenerated: boolean = false;
+    this.analysisItem.groups.forEach(group => {
+      if (group.analysisType == 'regression') {
+        if (group.models && group.models.length != 0) {
+          hasModelsGenerated = true;
+        }
+      }
+    });
+    this.hasModelsGenerated = hasModelsGenerated;
+    this.disableForm = this.hasModelsGenerated;
+  }
 
+
+  showEnableForm() {
+    this.displayEnableForm = true;
+  }
+
+  cancelEnableForm() {
+    this.displayEnableForm = false;
+  }
+
+  async confirmEnableForm() {
+    this.analysisItem.groups.forEach(group => {
+      group.models = [];
+      group.selectedModelId = undefined;
+      group.regressionConstant = undefined;
+      group.regressionModelYear = undefined;
+      group.regressionConstant = undefined;
+      group.predictorVariables.forEach(variable => {
+        variable.regressionCoefficient = undefined;
+      })
+    });
+    await this.saveItem();
+    this.setComponentBools();
+    this.displayEnableForm = undefined;
+  }
 }

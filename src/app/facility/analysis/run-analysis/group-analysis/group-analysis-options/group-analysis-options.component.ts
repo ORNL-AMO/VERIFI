@@ -11,6 +11,7 @@ import { Router } from '@angular/router';
 import { AnalysisGroup } from 'src/app/models/analysis';
 import { AnalysisValidationService } from 'src/app/shared/helper-services/analysis-validation.service';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
+import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 
 @Component({
   selector: 'app-group-analysis-options',
@@ -25,16 +26,20 @@ export class GroupAnalysisOptionsComponent implements OnInit {
   yearOptions: Array<number>;
   analysisItem: IdbAnalysisItem;
   facility: IdbFacility;
+  hasCorrespondingAccountItems: boolean;
   constructor(private analysisService: AnalysisService, private analysisDbService: AnalysisDbService,
     private accountDbService: AccountdbService, private facilityDbService: FacilitydbService,
     private dbChangesService: DbChangesService,
     private analysisValidationService: AnalysisValidationService,
     private calanderizationService: CalanderizationService,
-    private router: Router) { }
+    private router: Router,
+    private accountAnalysisDbService: AccountAnalysisDbService) { }
 
   ngOnInit(): void {
     this.facility = this.facilityDbService.selectedFacility.getValue();
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
+    let accountAnalysisItems = this.accountAnalysisDbService.getCorrespondingAccountAnalysisItems(this.analysisItem.guid);
+    this.hasCorrespondingAccountItems = accountAnalysisItems.length != 0;
     this.yearOptions = this.calanderizationService.getYearOptionsFacility(this.facility.guid, this.analysisItem.analysisCategory);
     this.selectedGroupSub = this.analysisService.selectedGroup.subscribe(group => {
       this.group = group;
