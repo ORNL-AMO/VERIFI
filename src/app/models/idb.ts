@@ -316,7 +316,8 @@ export interface IdbAccountAnalysisItem {
     analysisCategory: AnalysisCategory,
     waterUnit: string,
     baselineYear: number,
-    setupErrors: AccountAnalysisSetupErrors
+    setupErrors: AccountAnalysisSetupErrors,
+    facilityItemsInitialized?: boolean
 }
 
 

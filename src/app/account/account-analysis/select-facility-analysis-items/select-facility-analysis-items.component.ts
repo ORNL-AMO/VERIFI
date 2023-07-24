@@ -1,11 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Subscription, firstValueFrom } from 'rxjs';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
+import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 import { AccountAnalysisService } from '../account-analysis.service';
+import { AnalysisValidationService } from 'src/app/shared/helper-services/analysis-validation.service';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 
 @Component({
   selector: 'app-select-facility-analysis-items',
@@ -28,11 +31,15 @@ export class SelectFacilityAnalysisItemsComponent implements OnInit {
     private analysisDbService: AnalysisDbService,
     private accountAnalysisDbService: AccountAnalysisDbService,
     private router: Router,
-    private accountAnalysisService: AccountAnalysisService) { }
+    private accountAnalysisService: AccountAnalysisService,
+    private analysisValidationService: AnalysisValidationService,
+    private accountDbService: AccountdbService,
+    private dbChangesService: DbChangesService) { }
 
   ngOnInit(): void {
     this.selectedAnalysisItemSub = this.accountAnalysisDbService.selectedAnalysisItem.subscribe(item => {
       this.selectedAnalysisItem = item;
+      this.initializeSelectedFacilitiesItems();
       this.setFacilitiesList();
     })
 
@@ -125,5 +132,37 @@ export class SelectFacilityAnalysisItemsComponent implements OnInit {
         isInvalid: data.isInvalid
       }
     });
+  }
+
+  async initializeSelectedFacilitiesItems() {
+    if (!this.selectedAnalysisItem.facilityItemsInitialized) {
+      let findItemSelected = this.selectedAnalysisItem.facilityAnalysisItems.find(item => {
+        return item.analysisItemId != undefined;
+      });
+      if (!findItemSelected) {
+        let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
+        this.selectedAnalysisItem.facilityAnalysisItems.forEach(item => {
+          let facilityItem: IdbAnalysisItem = accountAnalysisItems.find(accountItem => {
+            return (accountItem.reportYear == this.selectedAnalysisItem.reportYear
+              && accountItem.facilityId == item.facilityId
+              && accountItem.selectedYearAnalysis
+              && accountItem.baselineYear == this.selectedAnalysisItem.baselineYear
+              && accountItem.analysisCategory == this.selectedAnalysisItem.analysisCategory);
+          });
+          if (facilityItem) {
+            item.analysisItemId = facilityItem.guid;
+          } else {
+            item.analysisItemId = undefined;
+          }
+        });
+        this.selectedAnalysisItem.facilityItemsInitialized = true;
+        let analysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
+        this.selectedAnalysisItem.setupErrors = this.analysisValidationService.getAccountAnalysisSetupErrors(this.selectedAnalysisItem, analysisItems);
+        await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(this.selectedAnalysisItem));
+        let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+        await this.dbChangesService.setAccountAnalysisItems(account, false);
+        this.accountAnalysisDbService.selectedAnalysisItem.next(this.selectedAnalysisItem);
+      }
+    }
   }
 }

@@ -18,13 +18,13 @@
                                 <div class="form-check">
                                     <input type="radio" class="form-check-input" name="energyIsSource" [value]="true"
                                         id="sourceEnergy" [(ngModel)]="analysisItem.energyIsSource"
-                                        (change)="changeSiteSource()">
+                                        (change)="saveItem()" [disabled]="disableForm">
                                     <label class="form-check-label" for="sourceEnergy">Source Energy</label>
                                 </div>
                                 <div class="form-check">
                                     <input type="radio" class="form-check-input" name="energyIsSource" [value]="false"
-                                        id="siteEnergy" [(ngModel)]="analysisItem.energyIsSource"
-                                        (change)="changeSiteSource()">
+                                        id="siteEnergy" [(ngModel)]="analysisItem.energyIsSource" (change)="saveItem()"
+                                        [disabled]="disableForm">
                                     <label class="form-check-label" for="siteEnergy">Site Energy</label>
                                 </div>
                             </div>
@@ -33,7 +33,8 @@
                             <label class="col-5 col-form-label" for="energyUnit">Energy Unit</label>
                             <div class="col-7">
                                 <select class="form-select" name="energyUnit" id="energyUnit"
-                                    [(ngModel)]="analysisItem.energyUnit" (change)="saveItem()">
+                                    [(ngModel)]="analysisItem.energyUnit" (change)="saveItem()"
+                                    [disabled]="disableForm">
                                     <option *ngFor="let energyUnitOption of energyUnitOptions"
                                         [ngValue]="energyUnitOption.value">
                                         <span [innerHTML]="energyUnitOption.display"></span>
@@ -47,7 +48,7 @@
                             <label class="col-5 col-form-label" for="waterUnit">Water Unit</label>
                             <div class="col-7">
                                 <select class="form-select" name="waterUnit" id="waterUnit"
-                                    [(ngModel)]="analysisItem.waterUnit" (change)="saveItem()">
+                                    [(ngModel)]="analysisItem.waterUnit" (change)="saveItem()" [disabled]="disableForm">
                                     <option *ngFor="let waterUnitOption of waterUnitOptions"
                                         [ngValue]="waterUnitOption.value">
                                         <span [innerHTML]="waterUnitOption.display"></span>
@@ -56,12 +57,11 @@
                             </div>
                         </div>
                     </ng-container>
-                    <hr>
                     <div class="form-group row">
                         <label for="hasBaselineAdjustement" class="col-5 col-form-label">
                             Has Baseline Adjustement
                         </label>
-                        <div class="col-7">
+                        <div class="col-7 switch-col">
                             <label class="switch" for="hasBaselineAdjustement">
                                 <input class="checkbox" type="checkbox" id="hasBaselineAdjustement"
                                     name="hasBaselineAdjustement" [(ngModel)]="analysisItem.hasBaselineAdjustement"
@@ -100,7 +100,8 @@
                         <div class="col-7">
                             <select required class="form-select" id="baselineYear" name="baselineYear"
                                 [(ngModel)]="analysisItem.baselineYear" (change)="changeReportYear()"
-                                [ngClass]="{'ng-invalid': analysisItem.setupErrors.reportYearBeforeBaselineYear}">
+                                [ngClass]="{'ng-invalid': analysisItem.setupErrors.reportYearBeforeBaselineYear}"
+                                [disabled]="disableForm">
                                 <option *ngFor="let year of yearOptions" [ngValue]="year">
                                     {{year| yearDisplay: account.fiscalYear}}</option>
                             </select>
@@ -117,7 +118,8 @@
                         <div class="col-7">
                             <select required class="form-select" name="reportYear" id="reportYear"
                                 [(ngModel)]="analysisItem.reportYear" (change)="changeReportYear()"
-                                [ngClass]="{'ng-invalid': analysisItem.setupErrors.reportYearBeforeBaselineYear}">
+                                [ngClass]="{'ng-invalid': analysisItem.setupErrors.reportYearBeforeBaselineYear}"
+                                [disabled]="disableForm">
                                 <option *ngFor="let year of yearOptions" [ngValue]="year">{{year| yearDisplay:
                                     account.fiscalYear}}
                                 </option>
@@ -171,9 +173,49 @@
                     <div class="alert alert-info text-center p-2">
                         Fields set in "<span class="fa fa-gear"></span> Settings" tab.
                     </div>
-                    <hr>
                 </div>
             </div>
         </form>
+        <div class="row">
+            <div class="col">
+                <hr>
+            </div>
+        </div>
+        <div class="row" *ngIf="disableForm">
+            <div class="col-12 alert alert-warning text-center">
+                Facility items selected for this analysis. Changing these settings will clear out the current selections
+                for
+                each corresponding facility. If you'd like to change these settings <a class="click-link"
+                    (click)="showEnableForm()">click here</a>.
+            </div>
+        </div>
+        <div class="row" *ngIf="hasCorrespondingReport">
+            <div class="col-12 alert alert-info text-center">
+                This analysis is used in one or more reports. Changes to this analysis may effect the results of the
+                corresponding reports.
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div [ngClass]="{'windowOverlay': displayEnableForm}"></div>
+<div class="popup" [class.open]="displayEnableForm">
+    <div class="popup-header">Are you sure?
+        <button class="item-right" (click)="cancelEnableForm()">x</button>
+    </div>
+    <div class="popup-body">
+        Are you sure you want to clear the existing facility analysis item selections? This cannot be undone!
+        <hr>
+        <!-- <div class="row"> -->
+        <div class="col-12 alert alert-info text-center" *ngIf="hasCorrespondingReport">
+            This analysis is used in one or more reports. Changes to this analysis may effect the results of the
+            corresponding reports.
+        </div>
+        <!-- </div> -->
+    </div>
+    <div class="saveCancel popup-footer text-end">
+        <button class="btn btn-secondary" (click)="cancelEnableForm()">Cancel</button>
+        <button class="btn action-btn" (click)="confirmEnableForm()">Change Settings</button>
     </div>
 </div>
