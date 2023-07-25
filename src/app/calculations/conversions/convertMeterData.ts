@@ -18,7 +18,9 @@ export function convertMeterData(meter: IdbUtilityMeter, meterData: Array<IdbUti
                 copyMeterData[index].totalEnergyUse = new ConvertValue(copyMeterData[index].totalEnergyUse, meter.energyUnit, neededUnit).convertedValue;
             }
         }
-    } else {
+    }
+    let needConvertVolume: boolean = copyMeterData.find(mData => { return mData.totalVolume != undefined }) != undefined;
+    if (needConvertVolume) {
         let facilityUnit: string = neededUnit;
         if (!facilityUnit) {
             facilityUnit = getUnitFromMeter(meter, accountOrFacility);

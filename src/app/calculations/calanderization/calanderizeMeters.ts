@@ -37,7 +37,6 @@ export function getCalanderizedMeterData(meters: Array<IdbUtilityMeter>, allMete
             showEnergyUse = getIsEnergyMeter(meter.source);
         }
 
-
         calanderizedMeterData.push({
             consumptionUnit: consumptionUnit,
             meter: meter,
