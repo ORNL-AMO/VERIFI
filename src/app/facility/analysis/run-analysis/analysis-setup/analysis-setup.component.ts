@@ -30,7 +30,7 @@ export class AnalysisSetupComponent implements OnInit {
   yearOptions: Array<number>;
   baselineYearWarning: string;
   disableForm: boolean;
-  hasCorrespondingAccountItems: boolean;
+  showInUseMessage: boolean;
   hasModelsGenerated: boolean;
   displayEnableForm: boolean = false;
   constructor(private facilityDbService: FacilitydbService, private analysisDbService: AnalysisDbService,
@@ -92,7 +92,9 @@ export class AnalysisSetupComponent implements OnInit {
 
   setComponentBools() {
     let accountAnalysisItems = this.accountAnalysisDbService.getCorrespondingAccountAnalysisItems(this.analysisItem.guid);
-    this.hasCorrespondingAccountItems = accountAnalysisItems.length != 0;
+    if(accountAnalysisItems.length != 0 && this.analysisService.hideInUseMessage == false){
+      this.showInUseMessage = true;
+    }
     let hasModelsGenerated: boolean = false;
     this.analysisItem.groups.forEach(group => {
       if (group.analysisType == 'regression') {
@@ -105,6 +107,10 @@ export class AnalysisSetupComponent implements OnInit {
     this.disableForm = this.hasModelsGenerated;
   }
 
+  hideInUseMessage(){
+    this.showInUseMessage = false;
+    this.analysisService.hideInUseMessage = true;
+  }
 
   showEnableForm() {
     this.displayEnableForm = true;

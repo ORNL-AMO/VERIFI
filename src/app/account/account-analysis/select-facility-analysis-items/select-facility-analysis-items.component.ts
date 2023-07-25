@@ -9,6 +9,7 @@ import { AccountAnalysisService } from '../account-analysis.service';
 import { AnalysisValidationService } from 'src/app/shared/helper-services/analysis-validation.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
+import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 
 @Component({
   selector: 'app-select-facility-analysis-items',
@@ -27,6 +28,7 @@ export class SelectFacilityAnalysisItemsComponent implements OnInit {
   facilityAnalysisItems: Array<IdbAnalysisItem>;
   selectedFacilitySub: Subscription;
   selectedFacility: IdbFacility;
+  showInUseMessage: boolean;
   constructor(private facilityDbService: FacilitydbService,
     private analysisDbService: AnalysisDbService,
     private accountAnalysisDbService: AccountAnalysisDbService,
@@ -34,11 +36,13 @@ export class SelectFacilityAnalysisItemsComponent implements OnInit {
     private accountAnalysisService: AccountAnalysisService,
     private analysisValidationService: AnalysisValidationService,
     private accountDbService: AccountdbService,
-    private dbChangesService: DbChangesService) { }
+    private dbChangesService: DbChangesService,
+    private accountReportDbService: AccountReportDbService) { }
 
   ngOnInit(): void {
     this.selectedAnalysisItemSub = this.accountAnalysisDbService.selectedAnalysisItem.subscribe(item => {
       this.selectedAnalysisItem = item;
+      this.setShowInUseMessage();
       this.initializeSelectedFacilitiesItems();
       this.setFacilitiesList();
     })
@@ -164,5 +168,18 @@ export class SelectFacilityAnalysisItemsComponent implements OnInit {
         this.accountAnalysisDbService.selectedAnalysisItem.next(this.selectedAnalysisItem);
       }
     }
+  }
+
+
+  setShowInUseMessage() {
+    let hasCorrespondingReport: boolean = this.accountReportDbService.getHasCorrespondingReport(this.selectedAnalysisItem.guid);
+    if (hasCorrespondingReport && this.accountAnalysisService.hideInUseMessage == false) {
+      this.showInUseMessage = true;
+    }
+  }
+
+  hideInUseMessage() {
+    this.showInUseMessage = false;
+    this.accountAnalysisService.hideInUseMessage = true;
   }
 }

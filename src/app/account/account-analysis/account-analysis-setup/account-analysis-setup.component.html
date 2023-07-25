@@ -1,6 +1,13 @@
 <div class="wrapper main-content p-0">
     <div class="content-padding">
         <h4>Analysis Setup</h4>
+        <div class="row" *ngIf="showInUseMessage">
+            <div class="col-12 alert alert-info text-center">
+                <button type="button" class="btn-close" aria-label="Close" (click)="hideInUseMessage()"></button>
+                This analysis is used in one or more reports. Changes to this analysis may effect the results of the
+                corresponding reports.
+            </div>
+        </div>
         <form>
             <div class="row">
                 <div class="col-6">
@@ -189,12 +196,6 @@
                     (click)="showEnableForm()">click here</a>.
             </div>
         </div>
-        <div class="row" *ngIf="hasCorrespondingReport">
-            <div class="col-12 alert alert-info text-center">
-                This analysis is used in one or more reports. Changes to this analysis may effect the results of the
-                corresponding reports.
-            </div>
-        </div>
     </div>
 </div>
 
@@ -207,12 +208,10 @@
     <div class="popup-body">
         Are you sure you want to clear the existing facility analysis item selections? This cannot be undone!
         <hr>
-        <!-- <div class="row"> -->
-        <div class="col-12 alert alert-info text-center" *ngIf="hasCorrespondingReport">
+        <div class="col-12 alert alert-info text-center" *ngIf="showInUseMessage">
             This analysis is used in one or more reports. Changes to this analysis may effect the results of the
             corresponding reports.
         </div>
-        <!-- </div> -->
     </div>
     <div class="saveCancel popup-footer text-end">
         <button class="btn btn-secondary" (click)="cancelEnableForm()">Cancel</button>

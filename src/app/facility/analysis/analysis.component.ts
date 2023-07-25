@@ -48,6 +48,7 @@ export class AnalysisComponent implements OnInit {
     this.utilityMeterGroupsSub.unsubscribe();
     this.analysisService.accountAnalysisItem = undefined;
     this.facilityAnalysisItemsSub.unsubscribe();
+    this.analysisService.hideInUseMessage = false;
   }
 
   goToMeterGroups() {

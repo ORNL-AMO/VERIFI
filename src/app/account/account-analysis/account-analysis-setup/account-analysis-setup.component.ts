@@ -11,6 +11,7 @@ import { firstValueFrom } from 'rxjs';
 import { AnalysisValidationService } from 'src/app/shared/helper-services/analysis-validation.service';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
+import { AccountAnalysisService } from '../account-analysis.service';
 
 @Component({
   selector: 'app-account-analysis-setup',
@@ -29,7 +30,7 @@ export class AccountAnalysisSetupComponent implements OnInit {
   yearOptions: Array<number>;
   baselineYearWarning: string;
   disableForm: boolean;
-  hasCorrespondingReport: boolean;
+  showInUseMessage: boolean;
   displayEnableForm: boolean = false;
   constructor(private accountDbService: AccountdbService, private accountAnalysisDbService: AccountAnalysisDbService,
     private router: Router,
@@ -37,7 +38,8 @@ export class AccountAnalysisSetupComponent implements OnInit {
     private analysisDbService: AnalysisDbService,
     private analysisValidationService: AnalysisValidationService,
     private calendarizationService: CalanderizationService,
-    private accountReportDbService: AccountReportDbService) { }
+    private accountReportDbService: AccountReportDbService,
+    private accountAnalysisService: AccountAnalysisService) { }
 
   ngOnInit(): void {
     this.analysisItem = this.accountAnalysisDbService.selectedAnalysisItem.getValue();
@@ -46,7 +48,7 @@ export class AccountAnalysisSetupComponent implements OnInit {
     }
     this.account = this.accountDbService.selectedAccount.getValue();
     this.setDisableForm();
-    this.setHasCorrespondingReport();
+    this.setShowInUseMessage();
     this.energyUnit = this.account.energyUnit;
     this.yearOptions = this.calendarizationService.getYearOptionsAccount(this.analysisItem.analysisCategory);
     this.setBaselineYearWarning();
@@ -104,13 +106,16 @@ export class AccountAnalysisSetupComponent implements OnInit {
     this.disableForm = hasItemsSelected;
   }
 
-  setHasCorrespondingReport() {
-    let accountReports: Array<IdbAccountReport> = this.accountReportDbService.accountReports.getValue();
-    let hasReport: IdbAccountReport = accountReports.find(report => {
-      return (report.reportType == 'betterPlants' && report.betterPlantsReportSetup.analysisItemId == this.analysisItem.guid);
-    });
-    console.log(hasReport);
-    this.hasCorrespondingReport = (hasReport != undefined);
+  setShowInUseMessage() {
+    let hasCorrespondingReport: boolean = this.accountReportDbService.getHasCorrespondingReport(this.analysisItem.guid);
+    if (hasCorrespondingReport && this.accountAnalysisService.hideInUseMessage == false) {
+      this.showInUseMessage = true;
+    }
+  }
+
+  hideInUseMessage() {
+    this.showInUseMessage = false;
+    this.accountAnalysisService.hideInUseMessage = true;
   }
 
   showEnableForm() {

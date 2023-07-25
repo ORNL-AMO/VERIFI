@@ -6,8 +6,9 @@
     </div>
 </div>
 
-<div class="row" *ngIf="hasCorrespondingAccountItems">
+<div class="row" *ngIf="showInUseMessage">
     <div class="col-12 alert alert-info text-center">
+        <button type="button" class="btn-close" aria-label="Close" (click)="hideInUseMessage()"></button>
         This analysis is used in one or more account analysis. Click the "Account Analysis" tab to view and navigate
         to the corresponding analysis items. Making changes to this analysis may effect the results of the account
         analysis.

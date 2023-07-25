@@ -12,6 +12,7 @@ export class AccountAnalysisService {
   calculating: BehaviorSubject<boolean | 'error'>;
   annualAnalysisSummary: BehaviorSubject<Array<AnnualAnalysisSummary>>;
   monthlyAccountAnalysisData: BehaviorSubject<Array<MonthlyAnalysisSummaryData>>;
+  hideInUseMessage: boolean = false;
   constructor() { 
     this.selectedFacility = new BehaviorSubject<IdbFacility>(undefined);
     this.calculating = new BehaviorSubject<boolean>(true);

@@ -24,7 +24,7 @@ export class RegressionModelSelectionComponent implements OnInit {
   selectedGroupSub: Subscription;
   selectedFacility: IdbFacility;
   selectedInspectModel: JStatRegressionModel;
-  hasCorrespondingAccountItems: boolean;
+  showInUseMessage: boolean;
   constructor(private analysisService: AnalysisService,
     private analysisDbService: AnalysisDbService, private facilityDbService: FacilitydbService, private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
@@ -40,9 +40,7 @@ export class RegressionModelSelectionComponent implements OnInit {
     this.showInvalidSub = this.analysisService.showInvalidModels.subscribe(val => {
       this.showInvalid = val;
     });
-    let analysisItem: IdbAnalysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
-    let accountAnalysisItems = this.accountAnalysisDbService.getCorrespondingAccountAnalysisItems(analysisItem.guid);
-    this.hasCorrespondingAccountItems = accountAnalysisItems.length != 0;
+    this.setShowInUseMessage();
 
   }
   ngOnDestroy() {
@@ -102,5 +100,18 @@ export class RegressionModelSelectionComponent implements OnInit {
     this.selectedGroup.selectedModelId = this.selectedInspectModel.modelId;
     await this.selectModel();
     this.cancelInspectModel();
+  }
+
+  setShowInUseMessage() {
+    let analysisItem: IdbAnalysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
+    let accountAnalysisItems = this.accountAnalysisDbService.getCorrespondingAccountAnalysisItems(analysisItem.guid);
+    if (accountAnalysisItems.length != 0 && this.analysisService.hideInUseMessage == false) {
+      this.showInUseMessage = true;
+    }
+  }
+
+  hideInUseMessage() {
+    this.showInUseMessage = false;
+    this.analysisService.hideInUseMessage = true;
   }
 }

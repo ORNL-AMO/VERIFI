@@ -26,7 +26,7 @@ export class GroupAnalysisOptionsComponent implements OnInit {
   yearOptions: Array<number>;
   analysisItem: IdbAnalysisItem;
   facility: IdbFacility;
-  hasCorrespondingAccountItems: boolean;
+  showInUseMessage: boolean;
   constructor(private analysisService: AnalysisService, private analysisDbService: AnalysisDbService,
     private accountDbService: AccountdbService, private facilityDbService: FacilitydbService,
     private dbChangesService: DbChangesService,
@@ -38,8 +38,7 @@ export class GroupAnalysisOptionsComponent implements OnInit {
   ngOnInit(): void {
     this.facility = this.facilityDbService.selectedFacility.getValue();
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
-    let accountAnalysisItems = this.accountAnalysisDbService.getCorrespondingAccountAnalysisItems(this.analysisItem.guid);
-    this.hasCorrespondingAccountItems = accountAnalysisItems.length != 0;
+    this.setShowInUseMessage();
     this.yearOptions = this.calanderizationService.getYearOptionsFacility(this.facility.guid, this.analysisItem.analysisCategory);
     this.selectedGroupSub = this.analysisService.selectedGroup.subscribe(group => {
       this.group = group;
@@ -90,4 +89,17 @@ export class GroupAnalysisOptionsComponent implements OnInit {
     let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     this.router.navigateByUrl('facility/' + facility.id + '/utility/meter-groups');
   }
+
+  setShowInUseMessage() {
+    let accountAnalysisItems = this.accountAnalysisDbService.getCorrespondingAccountAnalysisItems(this.analysisItem.guid);
+    if (accountAnalysisItems.length != 0 && this.analysisService.hideInUseMessage == false) {
+      this.showInUseMessage = true;
+    }
+  }
+
+  hideInUseMessage() {
+    this.showInUseMessage = false;
+    this.analysisService.hideInUseMessage = true;
+  }
+
 }

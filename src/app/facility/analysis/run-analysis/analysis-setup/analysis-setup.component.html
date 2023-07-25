@@ -1,5 +1,13 @@
 <div class="content-padding">
     <h4>Analysis Setup</h4>
+    <div class="row" *ngIf="showInUseMessage">
+        <div class="col-12 alert alert-info text-center">
+            <button type="button" class="btn-close" aria-label="Close" (click)="hideInUseMessage()"></button>
+            This analysis is used in one or more account analysis. Click the "Account Analysis" tab to view and navigate
+            to the corresponding analysis items. Making changes to this analysis may effect the results of the account
+            analysis.
+        </div>
+    </div>
     <form>
         <div class="row">
             <div class="col-6">
@@ -158,12 +166,6 @@
                 (click)="showEnableForm()">click here</a>.
         </div>
     </div>
-    <div class="row" *ngIf="hasCorrespondingAccountItems">
-        <div class="col-12 alert alert-info text-center">
-            This analysis is used in one or more account analysis. Click the "Account Analysis" tab to view and navigate
-            to the corresponding analysis items.
-        </div>
-    </div>
 </div>
 
 
@@ -176,7 +178,7 @@
         Are you sure you want to clear the existing regression models in this analysis? This cannot be undone!
         <hr>
         <!-- <div class="row"> -->
-        <div class="col-12 alert alert-info text-center" *ngIf="hasCorrespondingAccountItems">
+        <div class="col-12 alert alert-info text-center" *ngIf="showInUseMessage">
             This analysis is used in one or more account analysis. Altering the models in this analysis may effect
             the results of the corresponding account analysis.
         </div>

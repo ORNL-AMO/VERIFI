@@ -3,7 +3,6 @@ import { Subscription } from 'rxjs';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbUtilityMeterData } from 'src/app/models/idb';
 import { AccountAnalysisService } from './account-analysis.service';
-import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 
 @Component({
   selector: 'app-account-analysis',
@@ -14,7 +13,8 @@ export class AccountAnalysisComponent implements OnInit {
 
   utilityMeterDataSub: Subscription;
   utilityMeterData: Array<IdbUtilityMeterData>;
-  constructor(private utilityMeterDataDbService: UtilityMeterDatadbService) { }
+  constructor(private utilityMeterDataDbService: UtilityMeterDatadbService,
+    private accountAnalysisService: AccountAnalysisService) { }
 
   ngOnInit(): void {
     this.utilityMeterDataSub = this.utilityMeterDataDbService.accountMeterData.subscribe(val => {
@@ -24,6 +24,7 @@ export class AccountAnalysisComponent implements OnInit {
 
   ngOnDestroy() {
     this.utilityMeterDataSub.unsubscribe();
+    this.accountAnalysisService.hideInUseMessage = false;
   }
 
 }
