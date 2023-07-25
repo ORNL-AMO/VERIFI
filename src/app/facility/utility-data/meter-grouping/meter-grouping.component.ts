@@ -1,12 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
-import { IdbAccount, IdbFacility, IdbUtilityMeter, IdbUtilityMeterGroup } from 'src/app/models/idb';
+import { IdbAccount, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from 'src/app/models/idb';
 import * as _ from 'lodash';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { CalanderizationService } from '../../../shared/helper-services/calanderization.service';
 import { CalanderizedMeter, MeterGroupType, MonthlyData } from 'src/app/models/calanderization';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
@@ -16,6 +15,9 @@ import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
+import { getFirstBillEntryFromCalanderizedMeterData, getLastBillEntryFromCalanderizedMeterData } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
+import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
 
 @Component({
   selector: 'app-meter-grouping',
@@ -52,10 +54,11 @@ export class MeterGroupingComponent implements OnInit {
   facilityMeterGroups: Array<IdbUtilityMeterGroup>;
   calanderizedMeters: Array<CalanderizedMeter>;
   constructor(private utilityMeterGroupDbService: UtilityMeterGroupdbService,
-    private utilityMeterDbService: UtilityMeterdbService, private facilityDbService: FacilitydbService, private calanderizationService: CalanderizationService,
+    private utilityMeterDbService: UtilityMeterdbService, private facilityDbService: FacilitydbService,
     private loadingService: LoadingService, private toastNoticationService: ToastNotificationsService,
     private meterGroupingService: MeterGroupingService, private analysisDbService: AnalysisDbService, private sharedDataService: SharedDataService,
-    private dbChangesService: DbChangesService, private accountDbService: AccountdbService) { }
+    private dbChangesService: DbChangesService, private accountDbService: AccountdbService,
+    private utilityMeterDataDbService: UtilityMeterDatadbService) { }
 
   ngOnInit(): void {
     this.dataDisplay = this.meterGroupingService.dataDisplay;
@@ -106,12 +109,13 @@ export class MeterGroupingComponent implements OnInit {
   }
 
   setCalanderizedMeters() {
-    this.calanderizedMeters = this.calanderizationService.getCalanderizedMeterData(this.facilityMeters, false);
+    let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
+    this.calanderizedMeters = getCalanderizedMeterData(this.facilityMeters, facilityMeterData, this.selectedFacility);
   }
 
   initializeDateRange() {
-    let startDateData: MonthlyData = this.calanderizationService.getFirstBillEntryFromCalanderizedMeterData(this.calanderizedMeters);
-    let endDateData: MonthlyData = this.calanderizationService.getLastBillEntryFromCalanderizedMeterData(this.calanderizedMeters);
+    let startDateData: MonthlyData = getFirstBillEntryFromCalanderizedMeterData(this.calanderizedMeters);
+    let endDateData: MonthlyData = getLastBillEntryFromCalanderizedMeterData(this.calanderizedMeters);
     let startDate: Date = new Date(startDateData.date);
     let endDate: Date = new Date(endDateData.date);
     this.setYears(startDate, endDate);
@@ -120,8 +124,8 @@ export class MeterGroupingComponent implements OnInit {
 
   setYears(startDate?: Date, endDate?: Date) {
     if (!startDate || !endDate) {
-      let startDateData: MonthlyData = this.calanderizationService.getFirstBillEntryFromCalanderizedMeterData(this.calanderizedMeters);
-      let endDateData: MonthlyData = this.calanderizationService.getLastBillEntryFromCalanderizedMeterData(this.calanderizedMeters);
+      let startDateData: MonthlyData = getFirstBillEntryFromCalanderizedMeterData(this.calanderizedMeters);
+      let endDateData: MonthlyData = getLastBillEntryFromCalanderizedMeterData(this.calanderizedMeters);
       startDate = new Date(startDateData.date);
       endDate = new Date(endDateData.date);
     }

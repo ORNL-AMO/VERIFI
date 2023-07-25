@@ -1,13 +1,12 @@
 import { ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
 import { FormGroup, ValidatorFn } from '@angular/forms';
 import { IdbFacility } from 'src/app/models/idb';
-import { ConvertUnitsService } from 'src/app/shared/convert-units/convert-units.service';
 import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
 import { EnergyUseCalculationsService } from 'src/app/shared/helper-services/energy-use-calculations.service';
 import { getIsEnergyMeter } from 'src/app/shared/sharedHelperFuntions';
 import { EnergyUnitOptions, UnitOption } from 'src/app/shared/unitOptions';
 import { EditMeterFormService } from './edit-meter-form.service';
-import { AgreementType, AgreementTypes, FuelTypeOption, OtherEnergyOptions, ScopeOption, ScopeOptions, SourceOptions } from './editMeterOptions';
+import { AgreementType, AgreementTypes, FuelTypeOption, OtherEnergyOptions, ScopeOption, ScopeOptions, SourceOptions, getFuelTypeOptions } from './editMeterOptions';
 import { MeterSource, WaterDischargeType, WaterDischargeTypes, WaterIntakeType, WaterIntakeTypes } from 'src/app/models/constantsAndTypes';
 
 @Component({
@@ -54,7 +53,7 @@ export class EditMeterFormComponent implements OnInit {
   displayWaterDischargeTypes: boolean;
   constructor(
     private energyUnitsHelperService: EnergyUnitsHelperService, private energyUseCalculationsService: EnergyUseCalculationsService,
-    private editMeterFormService: EditMeterFormService, private cd: ChangeDetectorRef, private convertUnitsService: ConvertUnitsService) { }
+    private editMeterFormService: EditMeterFormService, private cd: ChangeDetectorRef) { }
 
   ngOnInit(): void {
   }
@@ -208,7 +207,7 @@ export class EditMeterFormComponent implements OnInit {
   }
 
   setFuelTypeOptions(onChange: boolean) {
-    this.fuelTypeOptions = this.energyUseCalculationsService.getFuelTypeOptions(this.meterForm.controls.source.value, this.meterForm.controls.phase.value);
+    this.fuelTypeOptions = getFuelTypeOptions(this.meterForm.controls.source.value, this.meterForm.controls.phase.value);
     let selectedEnergyOption: FuelTypeOption = this.fuelTypeOptions.find(option => { return option.value == this.meterForm.controls.fuel.value });
     if (!selectedEnergyOption && this.fuelTypeOptions.length != 0 && !onChange) {
       this.meterForm.controls.fuel.patchValue(this.fuelTypeOptions[0].value);
@@ -283,15 +282,6 @@ export class EditMeterFormComponent implements OnInit {
     }
     this.meterForm.controls.startingUnit.patchValue(facilityUnit);
     this.meterForm.controls.startingUnit.updateValueAndValidity();
-  }
-
-  convertEmissions(emissionsRate: number): number {
-    if (this.meterForm.controls.energyUnit.value != 'MMBtu') {
-      let conversionHelper: number = this.convertUnitsService.value(1).from('MMBtu').to(this.meterForm.controls.energyUnit.value);
-      emissionsRate = emissionsRate / conversionHelper;
-      emissionsRate = this.convertUnitsService.roundVal(emissionsRate, 4)
-    }
-    return emissionsRate;
   }
 
   checkHasDifferentUnits() {

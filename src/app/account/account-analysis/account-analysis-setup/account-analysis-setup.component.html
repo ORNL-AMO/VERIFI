@@ -71,16 +71,17 @@
                         </div>
                     </div>
                     <div class="d-flex flex-column" *ngIf="analysisItem.hasBaselineAdjustement">
-                        <div class="row form-group" *ngFor="let baselineAdjustment of analysisItem.baselineAdjustments">
+                        <div class="row form-group"
+                            *ngFor="let baselineAdjustment of analysisItem.baselineAdjustments; let index = index;">
                             <div class="col-5">
-                                <label>{{baselineAdjustment.year| yearDisplay:
+                                <label for="{{'baselineAdjustment_'+index}}">{{baselineAdjustment.year| yearDisplay:
                                     account.fiscalYear}}</label>
                             </div>
                             <div class="col-7">
                                 <div class="input-group">
                                     <!-- <span class="input-group-text">{{baselineAdjustment.year}}</span> -->
-                                    <input class="form-control" type="number" name="baselineAdjustment"
-                                        id="baselineAdjustment" [(ngModel)]="baselineAdjustment.amount"
+                                    <input class="form-control" type="number" name="{{'baselineAdjustment_'+index}}"
+                                        id="{{'baselineAdjustment_'+index}}" [(ngModel)]="baselineAdjustment.amount"
                                         (change)="saveItem()" min="0">
                                     <span *ngIf="analysisItem.analysisCategory == 'energy'" class="input-group-text"
                                         [innerHTML]="analysisItem.energyUnit | settingsLabel:'/yr'"></span>

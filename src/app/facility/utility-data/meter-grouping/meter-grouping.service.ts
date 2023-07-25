@@ -3,11 +3,10 @@ import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-
 import { CalanderizedMeter, MeterGroupType, MonthlyData } from 'src/app/models/calanderization';
 import { IdbFacility, IdbUtilityMeterGroup } from 'src/app/models/idb';
 import * as _ from 'lodash';
-import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { BehaviorSubject } from 'rxjs';
 import { Month, Months } from 'src/app/shared/form-data/months';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { getFiscalYear } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
+import { getFirstBillEntryFromCalanderizedMeterData, getFiscalYear, getLastBillEntryFromCalanderizedMeterData } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
 @Injectable({
   providedIn: 'root'
 })
@@ -17,7 +16,7 @@ export class MeterGroupingService {
   displayGraphEnergy: "bar" | "scatter" = "bar";
   displayGraphCost: "bar" | "scatter" = "bar";
   dateRange: BehaviorSubject<{ minDate: Date, maxDate: Date }>;
-  constructor(private utilityMeterGroupDbService: UtilityMeterGroupdbService, private calanderizationService: CalanderizationService,
+  constructor(private utilityMeterGroupDbService: UtilityMeterGroupdbService,
     private facilityDbService: FacilitydbService) {
     this.dateRange = new BehaviorSubject<{ minDate: Date, maxDate: Date }>({ minDate: undefined, maxDate: undefined });
   }
@@ -69,7 +68,6 @@ export class MeterGroupingService {
     meterGroups.forEach(group => {
       let groupMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => { return cMeter.meter.groupId == group.guid });
       if (groupMeters.length != 0) {
-        // let calanderizedMeterData: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMeterData(groupMeters, false);
         group.combinedMonthlyData = this.combineCalanderizedMeterData(groupMeters);
         group.groupData = groupMeters.map(cMeter => { return cMeter.meter });
         group.totalEnergyUse = _.sumBy(group.combinedMonthlyData, 'energyUse');
@@ -100,7 +98,6 @@ export class MeterGroupingService {
   }
 
   addEnergyMetersWithoutGroups(energyMeters: Array<CalanderizedMeter>, groupType: 'Energy' | 'Water' | 'Other', meterGroupTypes: Array<MeterGroupType>) {
-    // let calanderizedMeterData: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMeterData(energyMeters, false);
     let combinedMonthlyData: Array<MonthlyData> = this.combineCalanderizedMeterData(energyMeters);
     let meterGroup: IdbUtilityMeterGroup = {
       //randon number id for unsaved
@@ -140,9 +137,9 @@ export class MeterGroupingService {
     let allMonthlyData: Array<MonthlyData> = calanderizedMeterData.flatMap(meterData => { return meterData.monthlyData });
     let dateRange: { minDate: Date, maxDate: Date } = this.dateRange.getValue();
     if (!dateRange.maxDate) {
-      let startDateData: MonthlyData = this.calanderizationService.getFirstBillEntryFromCalanderizedMeterData(calanderizedMeterData);
+      let startDateData: MonthlyData = getFirstBillEntryFromCalanderizedMeterData(calanderizedMeterData);
       dateRange.minDate = new Date(startDateData.date);
-      let endDateData: MonthlyData = this.calanderizationService.getLastBillEntryFromCalanderizedMeterData(calanderizedMeterData);
+      let endDateData: MonthlyData = getLastBillEntryFromCalanderizedMeterData(calanderizedMeterData);
       dateRange.maxDate = new Date(endDateData.date);
     }
     let startDate: Date = new Date(dateRange.minDate);

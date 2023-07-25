@@ -1,10 +1,8 @@
 import { SettingsLabelPipe } from './settings-label.pipe';
-import { ConvertUnitsService } from '../convert-units/convert-units.service';
 
 describe('SettingsLabelPipe', () => {
   it('create an instance', () => {
-    const convertUnitsService = new ConvertUnitsService();
-    const pipe = new SettingsLabelPipe(convertUnitsService);
+    const pipe = new SettingsLabelPipe();
     expect(pipe).toBeTruthy();
   });
 });

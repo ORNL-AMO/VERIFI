@@ -2,14 +2,13 @@ import { Component, OnInit } from '@angular/core';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { IdbAccount, IdbUtilityMeter } from 'src/app/models/idb';
+import { IdbAccount, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { NavigationEnd, Router } from '@angular/router';
 import { AccountOverviewService } from '../account-overview.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { Month, Months } from 'src/app/shared/form-data/months';
 import * as _ from 'lodash';
-import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
-import { MonthlyData } from 'src/app/models/calanderization';
+import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 
 @Component({
   selector: 'app-account-overview-banner',
@@ -39,7 +38,8 @@ export class AccountOverviewBannerComponent implements OnInit {
   constructor(private sharedDataService: SharedDataService, private accountDbService: AccountdbService,
     private router: Router,
     private accountOverviewService: AccountOverviewService,
-    private utilityMeterDbService: UtilityMeterdbService) { }
+    private utilityMeterDbService: UtilityMeterdbService,
+    private utilityMeterDataDbService: UtilityMeterDatadbService) { }
 
   ngOnInit(): void {
     this.modalOpenSub = this.sharedDataService.modalOpen.subscribe(val => {
@@ -123,9 +123,9 @@ export class AccountOverviewBannerComponent implements OnInit {
     });
   }
 
-  setYears(){
-    let combinedMonthlyData: Array<MonthlyData> = this.accountOverviewService.calanderizedMeters.flatMap(cMeter => {return cMeter.monthlyData});
-    let allYears: Array<number> = combinedMonthlyData.flatMap(monthlyData => {return monthlyData.year});
+  setYears() {
+    let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
+    let allYears: Array<number> = accountMeterData.flatMap(meterData => { return new Date(meterData.readDate).getFullYear() });
     allYears = _.uniq(allYears);
     this.years = allYears;
   }

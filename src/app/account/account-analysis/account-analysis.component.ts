@@ -14,8 +14,7 @@ export class AccountAnalysisComponent implements OnInit {
 
   utilityMeterDataSub: Subscription;
   utilityMeterData: Array<IdbUtilityMeterData>;
-  constructor(private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private accountAnalysisService: AccountAnalysisService) { }
+  constructor(private utilityMeterDataDbService: UtilityMeterDatadbService) { }
 
   ngOnInit(): void {
     this.utilityMeterDataSub = this.utilityMeterDataDbService.accountMeterData.subscribe(val => {
@@ -25,7 +24,6 @@ export class AccountAnalysisComponent implements OnInit {
 
   ngOnDestroy() {
     this.utilityMeterDataSub.unsubscribe();
-    this.accountAnalysisService.calanderizedMeters = undefined
   }
 
 }

@@ -59,7 +59,6 @@ export class AnalysisSetupComponent implements OnInit {
 
   async setSiteSource() {
     await this.saveItem();
-    this.analysisService.setCalanderizedMeters();
   }
 
   continue() {

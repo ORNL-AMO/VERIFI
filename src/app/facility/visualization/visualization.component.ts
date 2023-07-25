@@ -29,11 +29,11 @@ export class VisualizationComponent implements OnInit {
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
       if (!this.selectedFacility) {
         this.selectedFacility = val;
-        this.visualizationStateService.setCalanderizedMeters();
+        this.visualizationStateService.setCalanderizedMeters(this.selectedFacility);
         this.initializeDate();
         this.visualizationStateService.initilizeCorrelationPlotOptions();
       } else {
-        this.visualizationStateService.setCalanderizedMeters();
+        this.visualizationStateService.setCalanderizedMeters(this.selectedFacility);
       }
       if (this.selectedFacility.guid != val.guid) {
         this.selectedFacility = val;

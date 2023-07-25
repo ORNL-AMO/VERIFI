@@ -5,7 +5,6 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem } from 'src/app/models/idb';
 import { Month, Months } from 'src/app/shared/form-data/months';
 import { EnergyUnitOptions, UnitOption, VolumeLiquidOptions } from 'src/app/shared/unitOptions';
-import { AccountAnalysisService } from '../account-analysis.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { firstValueFrom } from 'rxjs';
@@ -29,7 +28,7 @@ export class AccountAnalysisSetupComponent implements OnInit {
   yearOptions: Array<number>;
   baselineYearWarning: string;
   constructor(private accountDbService: AccountdbService, private accountAnalysisDbService: AccountAnalysisDbService,
-    private router: Router, private accountAnalysisService: AccountAnalysisService,
+    private router: Router,
     private dbChangesService: DbChangesService,
     private analysisDbService: AnalysisDbService,
     private analysisValidationService: AnalysisValidationService,
@@ -91,7 +90,6 @@ export class AccountAnalysisSetupComponent implements OnInit {
 
   async changeSiteSource() {
     await this.resetFacilityItems();
-    this.accountAnalysisService.setCalanderizedMeters();
   }
 
   setBaselineYearWarning() {

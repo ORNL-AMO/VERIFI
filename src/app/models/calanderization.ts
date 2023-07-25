@@ -58,5 +58,6 @@ export interface CalanderizationFilters {
 
 
   export interface CalanderizationOptions {
-    energyIsSource: boolean
+    energyIsSource: boolean,
+    neededUnits: string
   }

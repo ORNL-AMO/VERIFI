@@ -28,7 +28,7 @@
             </li>
         </ul>
 
-        <div class="d-flex">
+        <div class="d-flex" *ngIf="minMonth != undefined">
             <div class="pe-1">
                 <select name="minMonth" [(ngModel)]="minMonth" class="form-select" (change)="setDate()">
                     <option class="pe-2" *ngFor="let month of months" [ngValue]="month.monthNumValue">
@@ -55,7 +55,8 @@
                 </select>
             </div>
             <div class="pe-1">
-                <button class="btn action-btn btn-sm" (click)="createReport()"><span class="fa fa-file"></span> Create Report</button>
+                <button class="btn action-btn btn-sm" (click)="createReport()"><span class="fa fa-file"></span> Create
+                    Report</button>
             </div>
             <div class="pe-1" *ngIf="urlDisplay == 'energy'">
                 <div class="btn-group">
