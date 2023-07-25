@@ -61,6 +61,14 @@ export class AnalysisSetupComponent implements OnInit {
   changeReportYear() {
     this.analysisItem = this.analysisService.setBaselineAdjustments(this.analysisItem);
     this.setBaselineYearWarning();
+    let allFacilityAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.facilityAnalysisItems.getValue();
+    let selectYearAnalysis: boolean = true;
+    allFacilityAnalysisItems.forEach(item => {
+      if (item.reportYear == this.analysisItem.reportYear && item.selectedYearAnalysis) {
+        selectYearAnalysis = false;
+      }
+    });
+    this.analysisItem.selectedYearAnalysis = selectYearAnalysis;
     this.saveItem();
   }
 
@@ -92,7 +100,7 @@ export class AnalysisSetupComponent implements OnInit {
 
   setComponentBools() {
     let accountAnalysisItems = this.accountAnalysisDbService.getCorrespondingAccountAnalysisItems(this.analysisItem.guid);
-    if(accountAnalysisItems.length != 0 && this.analysisService.hideInUseMessage == false){
+    if (accountAnalysisItems.length != 0 && this.analysisService.hideInUseMessage == false) {
       this.showInUseMessage = true;
     }
     let hasModelsGenerated: boolean = false;
@@ -107,7 +115,7 @@ export class AnalysisSetupComponent implements OnInit {
     this.disableForm = this.hasModelsGenerated;
   }
 
-  hideInUseMessage(){
+  hideInUseMessage() {
     this.showInUseMessage = false;
     this.analysisService.hideInUseMessage = true;
   }

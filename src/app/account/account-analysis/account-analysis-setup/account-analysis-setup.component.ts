@@ -75,6 +75,14 @@ export class AccountAnalysisSetupComponent implements OnInit {
       }
       this.analysisItem.baselineAdjustments = yearAdjustments;
     }
+    let allAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
+    let selectYearAnalysis: boolean = true;
+    allAnalysisItems.forEach(item => {
+      if (item.reportYear == this.analysisItem.reportYear && item.selectedYearAnalysis) {
+        selectYearAnalysis = false;
+      }
+    });
+    this.analysisItem.selectedYearAnalysis = selectYearAnalysis;
     await this.saveItem();
   }
 
