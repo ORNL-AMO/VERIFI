@@ -64,7 +64,7 @@ export class AnalysisValidationService {
     let hasInvalidRegressionModel: boolean = false;
 
     let missingGroupMeters: boolean = groupMeters.length == 0;
-    if (group.analysisType != 'absoluteEnergyConsumption') {
+    if (group.analysisType != 'absoluteEnergyConsumption' && group.analysisType != 'skipAnalysis' && group.analysisType != 'skip') {
       missingProductionVariables = this.checkMissingProductionVariables(group.predictorVariables);
       if (group.analysisType == 'regression') {
         missingRegressionConstant = this.checkValueValid(group.regressionConstant) == false;
