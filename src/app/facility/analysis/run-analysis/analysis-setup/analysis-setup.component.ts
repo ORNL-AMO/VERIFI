@@ -138,6 +138,7 @@ export class AnalysisSetupComponent implements OnInit {
       group.predictorVariables.forEach(variable => {
         variable.regressionCoefficient = undefined;
       })
+      group.groupErrors = this.analysisValidationService.getGroupErrors(group);
     });
     await this.saveItem();
     this.setComponentBools();
