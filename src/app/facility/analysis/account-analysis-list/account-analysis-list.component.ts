@@ -31,22 +31,14 @@ export class AccountAnalysisListComponent implements OnInit {
   ngOnInit(): void {
     this.canReturnToAccount = this.analysisService.accountAnalysisItem != undefined;
     let selectedAnalysisItem: IdbAnalysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
-    let allAccountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
-    this.accountAnalysisItems = new Array();
-    allAccountAnalysisItems.forEach(accountItem => {
-      accountItem.facilityAnalysisItems.forEach(facilityItem => {
-        if (facilityItem.analysisItemId == selectedAnalysisItem.guid) {
-          this.accountAnalysisItems.push(accountItem);
-        }
-      });
-    });
+    this.accountAnalysisItems = this.accountAnalysisDbService.getCorrespondingAccountAnalysisItems(selectedAnalysisItem.guid);
 
     this.itemsPerPageSub = this.sharedDataService.itemsPerPage.subscribe(val => {
       this.itemsPerPage = val;
     });
   }
 
-  ngOnDestroy(){
+  ngOnDestroy() {
     this.itemsPerPageSub.unsubscribe();
   }
 
@@ -65,7 +57,7 @@ export class AccountAnalysisListComponent implements OnInit {
     this.selectAnalysisItem(this.analysisService.accountAnalysisItem);
   }
 
-  goToAccountAnalysisDashboard(){
+  goToAccountAnalysisDashboard() {
     this.router.navigateByUrl('/account/analysis')
   }
 }

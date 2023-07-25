@@ -15,3 +15,7 @@
 .row.form-group{
     margin-bottom:.25rem;
 }
+
+.switch-col{
+    padding-top: calc(.375rem + 1px);
+}

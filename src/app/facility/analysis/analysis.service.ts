@@ -19,6 +19,7 @@ export class AnalysisService {
   monthlyAccountAnalysisData: BehaviorSubject<Array<MonthlyAnalysisSummaryData>>;
   accountAnalysisItem: IdbAccountAnalysisItem;
   showDetail: BehaviorSubject<boolean>;
+  hideInUseMessage: boolean = false;
   constructor(private localStorageService: LocalStorageService) {
     let dataDisplay: "graph" | "table" = this.localStorageService.retrieve("analysisDataDisplay");
     if (!dataDisplay) {
