@@ -1,4 +1,4 @@
-import { MeterSource } from "../models/idb";
+import { MeterSource } from "../models/constantsAndTypes";
 import { EnergyUnitOptions, UnitOption } from "./unitOptions";
 
 export function getGUID(): string {
@@ -13,6 +13,16 @@ export function getIsEnergyUnit(unit: string): boolean {
 
 export function getIsEnergyMeter(source: MeterSource): boolean {
     if (source == 'Electricity' || source == 'Natural Gas' || source == 'Other Fuels' || source == 'Other Energy') {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+export function checkShowSiteToSource(source: MeterSource, includeInEnergy: boolean): boolean {
+    if (!includeInEnergy) {
+        return false;
+    } else if (source == "Electricity" || source == "Natural Gas" || source == 'Other Energy') {
         return true;
     } else {
         return false;

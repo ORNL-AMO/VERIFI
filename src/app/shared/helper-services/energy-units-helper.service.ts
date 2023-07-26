@@ -1,24 +1,28 @@
 import { Injectable } from '@angular/core';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { IdbAccount, IdbFacility, IdbUtilityMeter, MeterPhase, MeterSource } from 'src/app/models/idb';
+import { IdbAccount, IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
 import { FuelTypeOption, GasOptions, LiquidOptions, OtherEnergyOptions, SolidOptions, SourceOptions } from 'src/app/facility/utility-data/energy-consumption/energy-source/edit-meter-form/editMeterOptions';
 import { ChilledWaterUnitOptions, EnergyUnitOptions, MassUnitOptions, UnitOption, VolumeGasOptions, VolumeLiquidOptions } from '../unitOptions';
-import { EnergyUseCalculationsService } from './energy-use-calculations.service';
 import { getIsEnergyMeter, getIsEnergyUnit } from '../sharedHelperFuntions';
+import { MeterPhase, MeterSource } from 'src/app/models/constantsAndTypes';
 
 @Injectable({
   providedIn: 'root'
 })
 export class EnergyUnitsHelperService {
 
-  constructor(private facilityDbService: FacilitydbService, private accountDbService: AccountdbService,
-    private energyUseCalculationsService: EnergyUseCalculationsService) { }
+  constructor(private facilityDbService: FacilitydbService, private accountDbService: AccountdbService,) { }
 
   getMeterConsumptionUnitInAccount(meter: IdbUtilityMeter): string {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     if (selectedAccount) {
-      let isEnergyMeter: boolean = getIsEnergyMeter(meter.source);
+      let isEnergyMeter: boolean;
+      if (meter.source == 'Other Utility') {
+        isEnergyMeter = getIsEnergyUnit(meter.startingUnit);
+      } else {
+        isEnergyMeter = getIsEnergyMeter(meter.source);
+      }
       //use meter unit 
       if (isEnergyMeter) {
         return selectedAccount.energyUnit;
@@ -34,7 +38,12 @@ export class EnergyUnitsHelperService {
     let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     let selectedFacility: IdbFacility = accountFacilities.find(facility => { return meter.facilityId == facility.guid });
     if (selectedFacility) {
-      let isEnergyMeter: boolean = getIsEnergyMeter(meter.source);
+      let isEnergyMeter: boolean;
+      if (meter.source == 'Other Utility') {
+        isEnergyMeter = getIsEnergyUnit(meter.startingUnit);
+      } else {
+        isEnergyMeter = getIsEnergyMeter(meter.source);
+      }
       //use meter unit 
       if (isEnergyMeter) {
         return selectedFacility.energyUnit;
@@ -65,7 +74,7 @@ export class EnergyUnitsHelperService {
   getFacilityUnitFromMeter(facilityMeter: IdbUtilityMeter): string {
     let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     let selectedFacility: IdbFacility = facilities.find(facility => { return facility.guid == facilityMeter.facilityId });
-    if (facilityMeter.source == 'Electricity') {
+    if (facilityMeter.source == 'Electricity' || getIsEnergyUnit(facilityMeter.startingUnit)) {
       return selectedFacility.energyUnit;
     } else if (facilityMeter.source == 'Natural Gas') {
       return selectedFacility.volumeGasUnit;
@@ -77,21 +86,25 @@ export class EnergyUnitsHelperService {
       } else if (facilityMeter.phase == 'Solid') {
         return selectedFacility.massUnit;
       }
-    } else if (facilityMeter.source == 'Water' || facilityMeter.source == 'Waste Water') {
+    } else if (facilityMeter.source == 'Water Intake' || facilityMeter.source == 'Water Discharge') {
       return selectedFacility.volumeLiquidUnit;
     } else if (facilityMeter.source == 'Other Energy') {
       let selectedEnergyOption: FuelTypeOption = JSON.parse(JSON.stringify(OtherEnergyOptions.find(option => { return option.value == facilityMeter.fuel })));
       if (selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Steam') {
         return selectedFacility.massUnit;
-      } else if (selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Chilled Water') {
+      } else if (selectedEnergyOption.otherEnergyType && (selectedEnergyOption.otherEnergyType == 'Chilled Water' || selectedEnergyOption.otherEnergyType == 'Hot Water')) {
         return selectedFacility.energyUnit;
+      } else if (selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Compressed Air') {
+        return selectedFacility.volumeGasUnit;
       }
+    } else if (facilityMeter.source == 'Other Utility') {
+      return facilityMeter.startingUnit;
     }
   }
 
   getAccountUnitFromMeter(accountMeter: IdbUtilityMeter): string {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    if (accountMeter.source == 'Electricity') {
+    if (accountMeter.source == 'Electricity' || getIsEnergyUnit(accountMeter.startingUnit)) {
       return selectedAccount.energyUnit;
     } else if (accountMeter.source == 'Natural Gas') {
       return selectedAccount.volumeGasUnit;
@@ -103,15 +116,19 @@ export class EnergyUnitsHelperService {
       } else if (accountMeter.phase == 'Solid') {
         return selectedAccount.massUnit;
       }
-    } else if (accountMeter.source == 'Water' || accountMeter.source == 'Waste Water') {
+    } else if (accountMeter.source == 'Water Intake' || accountMeter.source == 'Water Discharge') {
       return selectedAccount.volumeLiquidUnit;
     } else if (accountMeter.source == 'Other Energy') {
       let selectedEnergyOption: FuelTypeOption = JSON.parse(JSON.stringify(OtherEnergyOptions.find(option => { return option.value == accountMeter.fuel })));
       if (selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Steam') {
         return selectedAccount.massUnit;
-      } else if (selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Chilled Water') {
+      } else if (selectedEnergyOption.otherEnergyType && (selectedEnergyOption.otherEnergyType == 'Chilled Water' || selectedEnergyOption.otherEnergyType == 'Hot Water')) {
         return selectedAccount.energyUnit;
+      } else if (selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Compressed Air') {
+        return selectedAccount.volumeGasUnit;
       }
+    } else if (accountMeter.source == 'Other Utility') {
+      return accountMeter.startingUnit;
     }
   }
 
@@ -149,14 +166,15 @@ export class EnergyUnitsHelperService {
         return MassUnitOptions.concat(EnergyUnitOptions);
       } else if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Chilled Water') {
         return EnergyUnitOptions.concat(ChilledWaterUnitOptions)
-
       } else if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Hot Water') {
         return EnergyUnitOptions;
+      } else if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Compressed Air') {
+        return EnergyUnitOptions.concat(VolumeGasOptions);
       }
-    } else if (source == 'Water' || source == 'Waste Water') {
+    } else if (source == 'Water Intake' || source == 'Water Discharge') {
       return VolumeLiquidOptions;
     } else if (source == 'Other Utility') {
-      return EnergyUnitOptions.concat(VolumeGasOptions).concat(VolumeLiquidOptions).concat(MassUnitOptions).concat(ChilledWaterUnitOptions);
+      return VolumeGasOptions.concat(VolumeLiquidOptions).concat(MassUnitOptions).concat(ChilledWaterUnitOptions);
     }
     return EnergyUnitOptions;
   }
@@ -179,8 +197,12 @@ export class EnergyUnitsHelperService {
       let selectedEnergyOption: FuelTypeOption = OtherEnergyOptions.find(option => { return option.value == fuel });
       if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Steam') {
         return MassUnitOptions;
+      } else if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Chilled Water') {
+        return ChilledWaterUnitOptions
+      } else if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Compressed Air') {
+        return VolumeGasOptions;
       }
-    } else if (source == 'Water' || source == 'Waste Water') {
+    } else if (source == 'Water Intake' || source == 'Water Discharge') {
       return VolumeLiquidOptions;
     } else if (source == 'Other Utility') {
       return VolumeGasOptions.concat(VolumeLiquidOptions).concat(MassUnitOptions).concat(ChilledWaterUnitOptions);
@@ -301,7 +323,7 @@ export class EnergyUnitsHelperService {
               hasDifferentCollectionUnits = true;
             }
           }
-        } else if ((source == 'Water' || source == 'Waste Water') && (startingUnit != selectedFacility.volumeLiquidUnit)) {
+        } else if ((source == 'Water Intake' || source == 'Water Discharge') && (startingUnit != selectedFacility.volumeLiquidUnit)) {
           // facilityUnit = selectedFacility.volumeLiquidUnit;
           hasDifferentCollectionUnits = true;
         }

@@ -1,13 +1,13 @@
 import { ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
 import { FormGroup, ValidatorFn } from '@angular/forms';
 import { IdbFacility } from 'src/app/models/idb';
-import { ConvertUnitsService } from 'src/app/shared/convert-units/convert-units.service';
 import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
 import { EnergyUseCalculationsService } from 'src/app/shared/helper-services/energy-use-calculations.service';
 import { getIsEnergyMeter } from 'src/app/shared/sharedHelperFuntions';
 import { EnergyUnitOptions, UnitOption } from 'src/app/shared/unitOptions';
 import { EditMeterFormService } from './edit-meter-form.service';
-import { AgreementType, AgreementTypes, FuelTypeOption, OtherEnergyOptions, ScopeOption, ScopeOptions, SourceOptions } from './editMeterOptions';
+import { AgreementType, AgreementTypes, FuelTypeOption, OtherEnergyOptions, ScopeOption, ScopeOptions, SourceOptions, getFuelTypeOptions } from './editMeterOptions';
+import { MeterSource, WaterDischargeType, WaterDischargeTypes, WaterIntakeType, WaterIntakeTypes } from 'src/app/models/constantsAndTypes';
 
 @Component({
   selector: 'app-edit-meter-form',
@@ -47,10 +47,13 @@ export class EditMeterFormComponent implements OnInit {
 
   displayRetainRecs: boolean;
   displayIncludeEnergy: boolean;
-
+  waterIntakeTypes: Array<WaterIntakeType> = WaterIntakeTypes;
+  waterDischargeTypes: Array<WaterDischargeType> = WaterDischargeTypes;
+  displayWaterIntakeTypes: boolean;
+  displayWaterDischargeTypes: boolean;
   constructor(
     private energyUnitsHelperService: EnergyUnitsHelperService, private energyUseCalculationsService: EnergyUseCalculationsService,
-    private editMeterFormService: EditMeterFormService, private cd: ChangeDetectorRef, private convertUnitsService: ConvertUnitsService) { }
+    private editMeterFormService: EditMeterFormService, private cd: ChangeDetectorRef) { }
 
   ngOnInit(): void {
   }
@@ -61,6 +64,7 @@ export class EditMeterFormComponent implements OnInit {
     this.checkDisplayFuel();
     this.checkDisplayPhase();
     this.checkDisplaySource();
+    this.checkDisplayWaterTypes();
     this.setScopeOptions();
     this.setStartingUnitOptions();
     this.setUnitBooleans();
@@ -79,11 +83,13 @@ export class EditMeterFormComponent implements OnInit {
     this.checkDisplayFuel();
     this.checkDisplayPhase();
     this.checkDisplaySource();
+    this.checkDisplayWaterTypes();
     this.setScopeOptions();
     this.setStartingUnitOptions();
     this.setStartingUnit();
     this.updatePhaseAndFuelValidation();
     this.updateHeatCapacityValidation();
+    this.updateWaterValidation();
     this.checkShowHeatCapacity();
     this.checkShowSiteToSource();
     this.setUnitBooleans();
@@ -159,6 +165,19 @@ export class EditMeterFormComponent implements OnInit {
     }
   }
 
+  checkDisplayWaterTypes() {
+    if (this.meterForm.controls.source.value == 'Water Intake') {
+      this.displayWaterDischargeTypes = false;
+      this.displayWaterIntakeTypes = true;
+    } else if (this.meterForm.controls.source.value == 'Water Discharge') {
+      this.displayWaterDischargeTypes = true;
+      this.displayWaterIntakeTypes = false;
+    } else {
+      this.displayWaterDischargeTypes = false;
+      this.displayWaterIntakeTypes = false;
+    }
+  }
+
   updatePhaseAndFuelValidation() {
     let fuelValidators: Array<ValidatorFn> = this.editMeterFormService.getFuelValidation(this.meterForm.controls.source.value);
     this.meterForm.controls.fuel.setValidators(fuelValidators);
@@ -178,8 +197,17 @@ export class EditMeterFormComponent implements OnInit {
     this.meterForm.controls.siteToSource.updateValueAndValidity();
   }
 
+  updateWaterValidation() {
+    let waterIntakeValidation: Array<ValidatorFn> = this.editMeterFormService.getWaterIntakeValidation(this.meterForm.controls.source.value);
+    this.meterForm.controls.waterIntakeType.setValidators(waterIntakeValidation);
+    this.meterForm.controls.waterIntakeType.updateValueAndValidity();
+    let waterDischargeValidation: Array<ValidatorFn> = this.editMeterFormService.getWaterDischargeValidation(this.meterForm.controls.source.value);
+    this.meterForm.controls.waterDischargeType.setValidators(waterDischargeValidation);
+    this.meterForm.controls.waterDischargeType.updateValueAndValidity();
+  }
+
   setFuelTypeOptions(onChange: boolean) {
-    this.fuelTypeOptions = this.energyUseCalculationsService.getFuelTypeOptions(this.meterForm.controls.source.value, this.meterForm.controls.phase.value);
+    this.fuelTypeOptions = getFuelTypeOptions(this.meterForm.controls.source.value, this.meterForm.controls.phase.value);
     let selectedEnergyOption: FuelTypeOption = this.fuelTypeOptions.find(option => { return option.value == this.meterForm.controls.fuel.value });
     if (!selectedEnergyOption && this.fuelTypeOptions.length != 0 && !onChange) {
       this.meterForm.controls.fuel.patchValue(this.fuelTypeOptions[0].value);
@@ -199,6 +227,8 @@ export class EditMeterFormComponent implements OnInit {
       let selectedFuelTypeOption: FuelTypeOption = this.fuelTypeOptions.find(option => { return option.value == this.meterForm.controls.fuel.value });
       let siteToSource: number = this.energyUseCalculationsService.getSiteToSource(this.meterForm.controls.source.value, selectedFuelTypeOption, this.meterForm.controls.agreementType.value);
       this.meterForm.controls.siteToSource.patchValue(siteToSource);
+    } else {
+      this.meterForm.controls.siteToSource.patchValue(1);
     }
   }
 
@@ -221,11 +251,12 @@ export class EditMeterFormComponent implements OnInit {
 
   setStartingUnit() {
     let facilityUnit: string;
-    if (this.meterForm.controls.source.value == 'Electricity') {
+    let selectedMeterSource: MeterSource = this.meterForm.controls.source.value;
+    if (selectedMeterSource == 'Electricity') {
       facilityUnit = this.facility.electricityUnit;
-    } else if (this.meterForm.controls.source.value == 'Natural Gas') {
+    } else if (selectedMeterSource == 'Natural Gas') {
       facilityUnit = this.facility.volumeGasUnit;
-    } else if (this.meterForm.controls.source.value == 'Other Fuels') {
+    } else if (selectedMeterSource == 'Other Fuels') {
       if (this.meterForm.controls.phase.value == 'Gas') {
         facilityUnit = this.facility.volumeGasUnit;
       } else if (this.meterForm.controls.phase.value == 'Liquid') {
@@ -233,7 +264,7 @@ export class EditMeterFormComponent implements OnInit {
       } else if (this.meterForm.controls.phase.value == 'Solid') {
         facilityUnit = this.facility.massUnit;
       }
-    } else if (this.meterForm.controls.source.value == 'Other Energy') {
+    } else if (selectedMeterSource == 'Other Energy') {
       let selectedEnergyOption: FuelTypeOption = OtherEnergyOptions.find(option => { return option.value == this.meterForm.controls.fuel.value });
       if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Steam') {
         facilityUnit = this.facility.massUnit;
@@ -241,23 +272,16 @@ export class EditMeterFormComponent implements OnInit {
         facilityUnit = this.facility.energyUnit;
       } else if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Hot Water') {
         facilityUnit = this.facility.energyUnit;
+      } else if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Compressed Air') {
+        facilityUnit = this.facility.volumeGasUnit;
       }
-    } else if (this.meterForm.controls.source.value == 'Water' || this.meterForm.controls.source.value == 'Waste Water') {
+    } else if (selectedMeterSource == 'Water Intake' || selectedMeterSource == 'Water Discharge') {
       facilityUnit = this.facility.volumeLiquidUnit;
-    } else if (this.meterForm.controls.source.value == 'Other Utility') {
-      facilityUnit = this.facility.energyUnit;
+    } else if (selectedMeterSource == 'Other Utility') {
+      facilityUnit = this.facility.massUnit;
     }
     this.meterForm.controls.startingUnit.patchValue(facilityUnit);
     this.meterForm.controls.startingUnit.updateValueAndValidity();
-  }
-
-  convertEmissions(emissionsRate: number): number {
-    if (this.meterForm.controls.energyUnit.value != 'MMBtu') {
-      let conversionHelper: number = this.convertUnitsService.value(1).from('MMBtu').to(this.meterForm.controls.energyUnit.value);
-      emissionsRate = emissionsRate / conversionHelper;
-      emissionsRate = this.convertUnitsService.roundVal(emissionsRate, 4)
-    }
-    return emissionsRate;
   }
 
   checkHasDifferentUnits() {
@@ -294,7 +318,8 @@ export class EditMeterFormComponent implements OnInit {
   }
 
   checkDisplaySource() {
-    if (this.meterForm.controls.source.value == 'Water' || this.meterForm.controls.source.value == 'Waste Water' || this.meterForm.controls.source.value == 'Other Utility') {
+    let selectedMeterSource: MeterSource = this.meterForm.controls.source.value;
+    if (selectedMeterSource == 'Water Intake' || selectedMeterSource == 'Water Discharge' || selectedMeterSource == 'Other Utility') {
       this.displayScope = false;
     } else {
       this.displayScope = true;
@@ -335,13 +360,14 @@ export class EditMeterFormComponent implements OnInit {
   }
 
   setScopeOptions() {
-    if (this.meterForm.controls.source.value == 'Electricity') {
+    let selectedMeterSource: MeterSource = this.meterForm.controls.source.value;
+    if (selectedMeterSource == 'Electricity') {
       //purchased electricity
       this.scopeOptions = [ScopeOptions[2]]
-    } else if (this.meterForm.controls.source.value == 'Other Energy') {
+    } else if (selectedMeterSource == 'Other Energy') {
       //all options
       this.scopeOptions = ScopeOptions;
-    } else if (this.meterForm.controls.source.value == 'Natural Gas' || this.meterForm.controls.source.value == 'Other Fuels') {
+    } else if (selectedMeterSource == 'Natural Gas' || selectedMeterSource == 'Other Fuels') {
       //Scope 1
       this.scopeOptions = ScopeOptions.filter(option => { return option.scope == 'Scope 1' });
     }
@@ -376,5 +402,4 @@ export class EditMeterFormComponent implements OnInit {
       }
     }
   }
-
 }

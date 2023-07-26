@@ -55,7 +55,8 @@
                             </option>
                         </select>
                     </div>
-                    <div class="alert-danger alert" *ngIf="meterForm.get('startingUnit').hasError('required')">Starting unit is
+                    <div class="alert-danger alert" *ngIf="meterForm.get('startingUnit').hasError('required')">Starting
+                        unit is
                         required</div>
                     <div class="alert alert-warning"
                         *ngIf="hasDifferentCollectionUnits || (hasDifferentEnergyUnits && collectionUnitIsEnergy)">
@@ -73,7 +74,8 @@
                             </option>
                         </select>
                     </div>
-                    <div class="alert-danger alert" *ngIf="meterForm.get('energyUnit').hasError('required')">Energy unit is
+                    <div class="alert-danger alert" *ngIf="meterForm.get('energyUnit').hasError('required')">Energy unit
+                        is
                         required</div>
                     <div class="alert alert-warning" *ngIf="hasDifferentEnergyUnits">
                         Units selected differ from the facility settings.
@@ -87,7 +89,8 @@
                         <input id="siteToSource" class="form-control" type="number" formControlName="siteToSource"
                             onfocus="this.select();" min="0" max="999999999999999">
                     </div>
-                    <div class="alert-danger alert" *ngIf="meterForm.get('siteToSource').hasError('required')">Site to source
+                    <div class="alert-danger alert" *ngIf="meterForm.get('siteToSource').hasError('required')">Site to
+                        source
                         is required</div>
                     <div class="alert-warning alert" *ngIf="meterForm.controls.siteToSource.value === 0">Site to source
                         should be greater than 0</div>
@@ -120,6 +123,38 @@
                     <div class="alert-danger alert" *ngIf="meterForm.get('fuel').hasError('required')">Fuel type is
                         required</div>
                 </div>
+
+
+                <div *ngIf="displayWaterIntakeTypes" class="col-6">
+                    <label for="waterIntakeType">Water Intake Type <span class="required">*</span> </label>
+                    <div class="mb-3">
+                        <select class="form-select" id="waterIntakeType" type="text" formControlName="waterIntakeType">
+                            <option *ngFor="let waterType of waterIntakeTypes" [ngValue]="waterType">
+                                {{waterType}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="alert-danger alert" *ngIf="meterForm.get('waterIntakeType').hasError('required')">Water
+                        Intake type is
+                        required</div>
+                </div>
+
+                <div *ngIf="displayWaterDischargeTypes" class="col-6">
+                    <label for="waterDischargeType">Water Discharge Type <span class="required">*</span> </label>
+                    <div class="mb-3">
+                        <select class="form-select" id="waterDischargeType" type="text"
+                            formControlName="waterDischargeType">
+                            <option *ngFor="let waterType of waterDischargeTypes" [ngValue]="waterType">
+                                {{waterType}}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="alert-danger alert" *ngIf="meterForm.get('waterDischargeType').hasError('required')">Water
+                        Discharge type is
+                        required</div>
+                </div>
+
+
                 <div class="col-6" *ngIf="displayHeatCapacity">
                     <label for="heatCapacity">Heat Capacity <span class="required">*</span> </label>
                     <div class="input-group mb-3">
@@ -130,17 +165,18 @@
                                 [innerHTML]="meterForm.controls.startingUnit.value | settingsLabel"></span>
                         </span>
                     </div>
-                    <div class="alert-danger alert" *ngIf="meterForm.get('heatCapacity').hasError('required')">Heat capacity is
+                    <div class="alert-danger alert" *ngIf="meterForm.get('heatCapacity').hasError('required')">Heat
+                        capacity is
                         required</div>
-                    <div class="alert-danger alert" *ngIf="meterForm.get('heatCapacity').hasError('min')">Value can't be less
+                    <div class="alert-danger alert" *ngIf="meterForm.get('heatCapacity').hasError('min')">Value can't be
+                        less
                         than 0</div>
                     <div class="alert-warning alert" *ngIf="meterForm.controls.heatCapacity.value === 0">Heat capacity
                         should be greater than 0</div>
                 </div>
             </div>
 
-            <p class="alert alert-warning"
-                *ngIf="meterDataExists && !changingUnits"> Data
+            <p class="alert alert-warning" *ngIf="meterDataExists && !changingUnits"> Data
                 found for this
                 meter. Collection units and heating capacity should not be changed after entering meter readings. <a
                     (click)="enableChangeUnits()">Click here to change values if necessary.</a> </p>

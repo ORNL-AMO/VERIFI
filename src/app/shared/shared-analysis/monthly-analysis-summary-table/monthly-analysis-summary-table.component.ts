@@ -2,8 +2,8 @@ import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
-import { AnalysisTableColumns, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
-import { AnalysisGroup, IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility, PredictorData } from 'src/app/models/idb';
+import { AnalysisGroup, AnalysisTableColumns, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
+import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility, PredictorData } from 'src/app/models/idb';
 import { CopyTableService } from '../../helper-services/copy-table.service';
 
 @Component({

@@ -10,6 +10,13 @@
             </div>
         </div>
         <div class="flex-fill pt-2 ps-4 pe-4 pb-4">
+            <div class="p-2" *ngIf="showInUseMessage">
+                <div class="alert alert-info text-center mb-0">
+                    <button type="button" class="btn-close" aria-label="Close" (click)="hideInUseMessage()"></button>
+                    This analysis is used in one or more reports. Changes to this analysis may effect the results of the
+                    corresponding reports.
+                </div>
+            </div>
             <app-select-item-table [facility]="selectedFacility" [selectedAnalysisItem]="selectedAnalysisItem"
                 [facilityAnalysisItems]="facilityAnalysisItems"></app-select-item-table>
         </div>

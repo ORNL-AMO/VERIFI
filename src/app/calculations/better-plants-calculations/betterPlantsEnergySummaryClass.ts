@@ -1,7 +1,7 @@
 import { CalanderizedMeter, MonthlyData } from "src/app/models/calanderization";
 import * as _ from 'lodash';
-import { MeterSource } from "src/app/models/idb";
 import { BetterPlantsEnergySummary } from "src/app/models/overview-report";
+import { MeterSource } from "src/app/models/constantsAndTypes";
 
 export class BetterPlantsEnergySummaryClass {
 

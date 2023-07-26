@@ -53,7 +53,7 @@ export class EditMeterGroupFormComponent implements OnInit {
       if(groupToAdd.groupType == 'Energy'){
         await this.analysisDbService.addGroup(groupToAdd.guid);
       }
-      await this.dbChangesService.setAnalysisItems(selectedAccount, selectedFacility);
+      await this.dbChangesService.setAnalysisItems(selectedAccount, false, selectedFacility);
       this.toastNotificationService.showToast("Meter Group Added!", undefined, undefined, false, "alert-success");
     } else {
       await firstValueFrom(this.utilityMeterGroupDbService.updateWithObservable(this.groupToEdit));

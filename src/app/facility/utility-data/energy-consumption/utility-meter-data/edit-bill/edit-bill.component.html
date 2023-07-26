@@ -1,13 +1,10 @@
 <div class="d-flex w-100 justify-content-between">
     <div>
-        <app-utility-meter-data-filter *ngIf="editMeter.source == 'Electricity'" [source]="'Electricity'">
+        <app-utility-meter-data-filter *ngIf="editMeter.source == 'Electricity'" [meter]="editMeter">
         </app-utility-meter-data-filter>
     </div>
     <div class="saveCancel item-right">
-        <button *ngIf="!showConfirmCancel" class="btn btn-secondary" (click)="cancel()">Cancel</button>
-        <button *ngIf="showConfirmCancel" class="btn btn-secondary" (click)="confirmCancel()">Are you sure?
-            Changes
-            will be lost.</button>
+        <button class="btn btn-secondary" (click)="cancel()">Cancel</button>
         <button *ngIf="addOrEdit == 'edit'" class="btn btn-primary" (click)="saveAndQuit()"
             [disabled]="meterDataForm.invalid || invalidDate">Save</button>
         <button *ngIf="addOrEdit == 'add'" class="btn btn-primary me-2" (click)="saveAndQuit()"

@@ -1,17 +1,22 @@
 /// <reference lib="webworker" />
 
+import { getCalanderizedMeterData } from "../calculations/calanderization/calanderizeMeters";
 import { MonthlyAnalysisSummary } from "../models/analysis";
 import { MonthlyAnalysisSummaryClass } from "src/app/calculations/analysis-calculations/monthlyAnalysisSummaryClass";
+import { CalanderizationOptions, CalanderizedMeter } from "../models/calanderization";
+import { getNeededUnits } from "../calculations/shared-calculations/calanderizationFunctions";
 
 addEventListener('message', ({ data }) => {
-  try{
-    let monthlyAnalysisSummaryClass: MonthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(data.selectedGroup, data.analysisItem, data.facility, data.calanderizedMeters, data.accountPredictorEntries, false);
+  try {
+    let calanderizationOptions: CalanderizationOptions = { energyIsSource: data.analysisItem.energyIsSource, neededUnits: getNeededUnits(data.analysisItem) };
+    let calanderizedMeterData: Array<CalanderizedMeter> = getCalanderizedMeterData(data.meters, data.meterData, data.facility, false, calanderizationOptions);
+    let monthlyAnalysisSummaryClass: MonthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(data.selectedGroup, data.analysisItem, data.facility, calanderizedMeterData, data.accountPredictorEntries, false);
     let monthlyAnalysisSummary: MonthlyAnalysisSummary = monthlyAnalysisSummaryClass.getResults();
     postMessage({
       monthlyAnalysisSummary: monthlyAnalysisSummary,
       error: false
     });
-  }catch(err){
+  } catch (err) {
     postMessage({
       monthlyAnalysisSummary: undefined,
       error: true

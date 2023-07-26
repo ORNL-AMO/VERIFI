@@ -3,6 +3,7 @@ import * as XLSX from 'xlsx';
 import * as _ from 'lodash';
 import { CustomEmissionsDbService } from 'src/app/indexedDB/custom-emissions-db.service';
 import { IdbCustomEmissionsItem } from 'src/app/models/idb';
+import { SubRegionData, SubregionEmissions } from 'src/app/models/eGridEmissions';
 
 @Injectable({
   providedIn: 'root'
@@ -136,32 +137,6 @@ export class EGridService {
     return subregionEmissions;
   }
 
-
-  getEmissionsRate(subregion: string, year: number): { marketRate: number, locationRate: number } {
-    if (this.co2Emissions) {
-      let subregionEmissions: SubregionEmissions = this.co2Emissions.find(emissions => { return emissions.subregion == subregion });
-      if (subregionEmissions) {
-        let marketRate: number = 0;
-        let locationRate: number = 0;
-        if (subregionEmissions.locationEmissionRates.length != 0) {
-          let closestYearRate: { co2Emissions: number, year: number } = _.minBy(subregionEmissions.locationEmissionRates, (emissionRate: { co2Emissions: number, year: number }) => {
-            return Math.abs(emissionRate.year - year);
-          });
-          locationRate = closestYearRate.co2Emissions;
-        }
-        if (subregionEmissions.residualEmissionRates.length != 0) {
-          let closestYearRate: { co2Emissions: number, year: number } = _.minBy(subregionEmissions.residualEmissionRates, (emissionRate: { co2Emissions: number, year: number }) => {
-            return Math.abs(emissionRate.year - year);
-          });
-          marketRate = closestYearRate.co2Emissions;
-        }
-        return { marketRate: marketRate, locationRate: locationRate };
-      }
-    }
-    return { marketRate: 0, locationRate: 0 };
-  }
-
-
   async parseZipCodeLongLat() {
     await fetch('assets/eGrid_data/zip-long-lat.xlsx')
       .then(response => response.arrayBuffer())
@@ -183,7 +158,6 @@ export class EGridService {
       });
   }
 
-
   checkZIP(zip: string): string {
     if (zip.length < 5) {
       for (let i = 0; i <= 5 - zip.length; i++) {
@@ -192,18 +166,4 @@ export class EGridService {
     }
     return zip;
   }
-}
-
-export interface SubRegionData {
-  zip: number,
-  state: string,
-  co2Emissions?: number,
-  subregions?: Array<string>
-}
-
-export interface SubregionEmissions {
-  subregion: string,
-  locationEmissionRates: Array<{ co2Emissions: number, year: number }>,
-  residualEmissionRates: Array<{ co2Emissions: number, year: number }>,
-  isCustom?: boolean
 }

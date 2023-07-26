@@ -3,8 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
-import { IdbAccount, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, PredictorData } from 'src/app/models/idb';
-import { ConvertUnitsService } from 'src/app/shared/convert-units/convert-units.service';
+import { IdbAccount, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, PredictorData } from 'src/app/models/idb';
 import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
 import { UnitConversionTypes } from './unitConversionTypes';
 import { WeatherStation } from 'src/app/models/degreeDays';
@@ -14,11 +13,12 @@ import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
-import { firstValueFrom } from 'rxjs';
-import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
+import { firstValueFrom, Observable, of } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import * as _ from 'lodash';
+import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
+import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
 
 @Component({
   selector: 'app-edit-predictor',
@@ -42,16 +42,15 @@ export class EditPredictorComponent {
   constructor(private activatedRoute: ActivatedRoute, private predictorDbService: PredictordbService,
     private router: Router, private facilityDbService: FacilitydbService,
     private formBuilder: FormBuilder,
-    private convertUnitsService: ConvertUnitsService,
     private weatherDataService: WeatherDataService,
     private degreeDaysService: DegreeDaysService,
     private loadingService: LoadingService,
     private analysisDbService: AnalysisDbService,
     private toastNotificationService: ToastNotificationsService,
     private utilityMeterDbService: UtilityMeterdbService,
-    private calanderizationService: CalanderizationService,
     private accountDbService: AccountdbService,
-    private dbChangesService: DbChangesService) {
+    private dbChangesService: DbChangesService,
+    private utilityMeterDataDbService: UtilityMeterDatadbService) {
   }
 
   ngOnInit() {
@@ -108,7 +107,7 @@ export class EditPredictorComponent {
       'weatherStationId': [this.predictorData.weatherStationId]
     });
     this.setShowReferencePredictors()
-    this.setUnitOptions();
+    // this.setUnitOptions();
     this.setValidators();
   }
 
@@ -178,6 +177,7 @@ export class EditPredictorComponent {
     this.loadingService.setLoadingMessage('Updating Predictors...');
     this.loadingService.setLoadingStatus(true);
     let needsWeatherDataUpdate: boolean = this.setPredictorDataFromForm();
+    this.predictorForm.markAsPristine();
     let facilityPredictors: Array<PredictorData> = this.predictorDbService.facilityPredictors.getValue();
     let facilityPredictorsCopy: Array<PredictorData> = JSON.parse(JSON.stringify(facilityPredictors));
     if (this.addOrEdit == 'add') {
@@ -210,13 +210,14 @@ export class EditPredictorComponent {
     this.referencePredictors = facilityPredictors.filter(predictor => { return predictor.id != this.predictorData.id });
   }
 
-  setUnitOptions() {
-    if (this.predictorForm.controls.conversionType.value) {
-      this.unitOptions = this.convertUnitsService.possibilities(this.predictorForm.controls.conversionType.value);
-    } else {
-      this.unitOptions = [];
-    }
-  }
+  //conversion method not implemented yet. Unneeded
+  // setUnitOptions() {
+  //   if (this.predictorForm.controls.conversionType.value) {
+  //     this.unitOptions = this.convertUnitsService.possibilities(this.predictorForm.controls.conversionType.value);
+  //   } else {
+  //     this.unitOptions = [];
+  //   }
+  // }
 
   setReferencePredictorName() {
     let facilityPredictors: Array<PredictorData> = this.predictorDbService.facilityPredictors.getValue();
@@ -273,7 +274,8 @@ export class EditPredictorComponent {
     this.loadingService.setLoadingStatus(true);
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == this.facility.guid });
-    let calanderizedMeters: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMeterData(facilityMeters, false);
+    let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
+    let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, meterData, this.facility, false);
     let monthlyData: Array<MonthlyData> = calanderizedMeters.flatMap(cMeter => { return cMeter.monthlyData });
     monthlyData = _.orderBy(monthlyData, (dataItem: MonthlyData) => { return dataItem.date });
     let startDate: Date = new Date(monthlyData[0].date);
@@ -286,5 +288,13 @@ export class EditPredictorComponent {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.setPredictors(selectedAccount, this.facility)
     this.saveChanges();
+  }
+
+  canDeactivate(): Observable<boolean> {
+    if (this.predictorForm.dirty) {
+      const result = window.confirm('There are unsaved changes! Are you sure you want to leave this page?');
+      return of(result);
+    }
+    return of(true);
   }
 }

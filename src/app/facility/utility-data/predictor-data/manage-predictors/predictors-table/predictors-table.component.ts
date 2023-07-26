@@ -2,14 +2,14 @@ import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
-import { AnalysisGroup, IdbAnalysisItem, IdbFacility, IdbPredictorEntry, PredictorData } from 'src/app/models/idb';
+import { IdbAnalysisItem, IdbFacility, IdbPredictorEntry, PredictorData } from 'src/app/models/idb';
 import { Subscription } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { WeatherDataService } from 'src/app/weather-data/weather-data.service';
 import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
 import { WeatherStation } from 'src/app/models/degreeDays';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { JStatRegressionModel } from 'src/app/models/analysis';
+import { AnalysisGroup, JStatRegressionModel } from 'src/app/models/analysis';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 
 

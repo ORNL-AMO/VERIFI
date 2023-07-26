@@ -16,7 +16,11 @@ export class MonthlyFacilityAnalysisClass {
     endDate: Date;
     facilityPredictorEntries: Array<IdbPredictorEntry>;
     baselineYear: number;
+    facility: IdbFacility;
+    analysisItem: IdbAnalysisItem;
     constructor(analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, accountPredictorEntries: Array<IdbPredictorEntry>, calculateAllMonthlyData: boolean) {
+        this.facility = facility;
+        this.analysisItem = analysisItem;
         let calanderizedFacilityMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => { return cMeter.meter.facilityId == facility.guid })
         this.setFacilityPredictorEntries(accountPredictorEntries, facility);
         this.setStartAndEndDate(facility, analysisItem, calculateAllMonthlyData, calanderizedFacilityMeters);
@@ -46,7 +50,7 @@ export class MonthlyFacilityAnalysisClass {
     setGroupSummaries(analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, calculateAllMonthlyData: boolean) {
         let groupMonthlySummariesClasses: Array<MonthlyAnalysisSummaryClass> = new Array();
         analysisItem.groups.forEach(group => {
-            if (group.analysisType != 'skip') {
+            if (group.analysisType != 'skip' && group.analysisType != 'skipAnalysis') {
                 let monthlySummary: MonthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(group, analysisItem, facility, calanderizedMeters, this.facilityPredictorEntries, calculateAllMonthlyData);
                 groupMonthlySummariesClasses.push(monthlySummary);
             }
@@ -109,5 +113,14 @@ export class MonthlyFacilityAnalysisClass {
                 rolling12MonthImprovement: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.rolling12MonthImprovement) * 100,
             }
         })
+    }
+
+    convertResults(startingUnit: string, endingUnit: string) {
+        for (let i = 0; i < this.facilityMonthSummaries.length; i++) {
+            this.facilityMonthSummaries[i].convertResults(startingUnit, endingUnit);
+        }
+        for (let i = 0; i < this.allFacilityAnalysisData.length; i++) {
+            this.allFacilityAnalysisData[i].convertResults(startingUnit, endingUnit);
+        }
     }
 }

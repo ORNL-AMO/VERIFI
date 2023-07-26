@@ -1,6 +1,6 @@
 import { CalanderizedMeter, MonthlyData } from "src/app/models/calanderization";
-import { EnergySources, MeterSource } from "src/app/models/idb";
 import * as _ from 'lodash';
+import { EnergySources, MeterSource } from "src/app/models/constantsAndTypes";
 
 export class UtilityUseAndCost {
 
@@ -72,11 +72,11 @@ export class UtilityUseAndCost {
 
     setWaterUseAndCost(calanderizedMeters: Array<CalanderizedMeter>, dateRange: { startDate: Date, endDate: Date }) {
         this.waterUseAndCost = new Array();
-        let water: UseAndCost = new UseAndCost(calanderizedMeters, 'Water', dateRange.startDate, dateRange.endDate, this.previousYear);
+        let water: UseAndCost = new UseAndCost(calanderizedMeters, 'Water Intake', dateRange.startDate, dateRange.endDate, this.previousYear);
         if (water.hasData()) {
             this.waterUseAndCost.push(water);
         }
-        let wasteWater: UseAndCost = new UseAndCost(calanderizedMeters, 'Waste Water', dateRange.startDate, dateRange.endDate, this.previousYear);
+        let wasteWater: UseAndCost = new UseAndCost(calanderizedMeters, 'Water Discharge', dateRange.startDate, dateRange.endDate, this.previousYear);
         if (wasteWater.hasData()) {
             this.waterUseAndCost.push(wasteWater);
         }

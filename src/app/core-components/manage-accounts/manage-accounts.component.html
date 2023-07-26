@@ -1,0 +1,94 @@
+<div class="p-4">
+    <div class="row">
+        <div class="col">
+            <div class="card">
+                <div class="card-body">
+                    <h5>
+                        Account Management
+                    </h5>
+                    <p>
+                        Use this page to manage the accounts existing in your database. If you tried selecting an
+                        account
+                        and were brought to this page, there may have been an error initializing that account. If you
+                        are experiencing errors with your data, please backup or export your data and
+                        contact Kristina Armstrong at <a
+                            href="mailto: armstrongko@ornl.gov">armstrongko@ornl.gov</a>.<br><br>
+
+                        You can reset your database by clicking the "Reset Database" button. This will clear all the data in
+                        your system and allow you to start over fresh.
+                    </p>
+                </div>
+            </div>
+            <hr>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-3 pb-2" *ngFor="let account of accounts; let index = index;">
+            <div class="card">
+                <div class="card-header">
+                    <a class="click-link large" (click)="goToAccount(account, index)">{{account.name}}</a>
+                </div>
+                <div class="card-body justify-content-center">
+                    <div class="p-1">
+                        <button class="btn btn-danger" (click)="deleteAccount(account)">
+                            <span class="fa fa-trash-can"></span> Delete Account
+                        </button>
+                    </div>
+                    <div class="p-1">
+                        <button class="btn action-btn" (click)="backupAccount(account)">
+                            <span class="fa fa-download"></span> Backup Account
+                        </button>
+                    </div>
+                    <div class="p-1">
+                        <button class="btn action-btn" (click)="exportToExcel(account)">
+                            <span class="fa fa-download"></span> Export Account Facilities To Excel
+                        </button>
+                    </div>
+                    <div class="p-1" *ngIf="accountErrors[index]">
+                        <div class="alert alert-danger">
+                            {{accountErrors[index]}}
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    Last Backup: {{account.lastBackup | date}}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col justify-content-center">
+            <hr>
+            <div class="card">
+                <div class="card-body d-flex justify-content-end">
+                    <div>
+                        <button *ngIf="!resetDatabase" class="btn btn-danger" (click)="toggleResetDatabase()">Reset
+                            Database
+                        </button>
+                        <button *ngIf="resetDatabase" class="btn btn-danger" (click)="deleteDatabase()">Are you sure
+                            you want to reset the database?
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div [ngClass]="{'windowOverlay': showDeleteAccount}">
+</div>
+
+<div class="popup" [class.open]="showDeleteAccount">
+    <div class="popup-header">Delete Account: {{selectedAccount?.name}}
+        <button class="item-right" (click)="cancelAccountDelete()">x</button>
+    </div>
+    <div class="popup-body">
+        <p>WARNING: By deleting this account, you are also deleting all of the data associated with it.
+            Are you sure you want to preform this action?</p>
+    </div>
+    <div class="popup-footer text-end">
+        <button class="btn btn-secondary" (click)="cancelAccountDelete()">Cancel</button>
+        <button class="btn btn-danger" (click)="confirmAccountDelete()">Confirm Delete</button>
+    </div>
+</div>

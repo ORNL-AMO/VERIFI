@@ -30,10 +30,10 @@ export class PrimaryEnergyConsumptionTableComponent implements OnInit {
 
 
   setBaselineOtherFuels() {
-    this.otherGasFuels = _.uniq(this.betterPlantsSummary.baselineYearResults.otherGasFuels);
-    this.otherLiquidFuels = _.uniq(this.betterPlantsSummary.baselineYearResults.otherLiquidFuels);
-    this.otherSolidFuels = _.uniq(this.betterPlantsSummary.baselineYearResults.otherSolidFuels);
-    this.otherEnergyFuels = _.uniq(this.betterPlantsSummary.baselineYearResults.otherEnergyTypes);
+    this.otherGasFuels = _.uniq(this.betterPlantsSummary.baselineYearEnergyResults.otherGasFuels);
+    this.otherLiquidFuels = _.uniq(this.betterPlantsSummary.baselineYearEnergyResults.otherLiquidFuels);
+    this.otherSolidFuels = _.uniq(this.betterPlantsSummary.baselineYearEnergyResults.otherSolidFuels);
+    this.otherEnergyFuels = _.uniq(this.betterPlantsSummary.baselineYearEnergyResults.otherEnergyTypes);
   }
 
 }

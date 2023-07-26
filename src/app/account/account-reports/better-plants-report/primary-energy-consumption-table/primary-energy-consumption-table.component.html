@@ -21,10 +21,10 @@
                     Number of Participating Plants*
                 </td>
                 <td>
-                    {{betterPlantsSummary.baselineYearResults.numberOfFacilities}}
+                    {{betterPlantsSummary.baselineYearEnergyResults.numberOfFacilities}}
                 </td>
                 <td>
-                    {{betterPlantsSummary.reportYearResults.numberOfFacilities}}
+                    {{betterPlantsSummary.reportYearEnergyResults.numberOfFacilities}}
                 </td>
             </tr>
         </tbody>
@@ -37,153 +37,153 @@
                 </td>
             </tr>
             <tr
-                *ngIf="betterPlantsSummary.baselineYearResults.electricityUse || betterPlantsSummary.reportYearResults.electricityUse">
+                *ngIf="betterPlantsSummary.baselineYearEnergyResults.electricityUse || betterPlantsSummary.reportYearEnergyResults.electricityUse">
                 <td>
                     Electricity
                 </td>
                 <td>
-                    {{betterPlantsSummary.baselineYearResults.electricityUse | customNumber}}
+                    {{betterPlantsSummary.baselineYearEnergyResults.electricityUse | customNumber}}
                 </td>
                 <td>
-                    {{betterPlantsSummary.reportYearResults.electricityUse | customNumber}}
+                    {{betterPlantsSummary.reportYearEnergyResults.electricityUse | customNumber}}
                 </td>
             </tr>
             <tr
-                *ngIf="betterPlantsSummary.baselineYearResults.naturalGasUse || betterPlantsSummary.reportYearResults.naturalGasUse">
+                *ngIf="betterPlantsSummary.baselineYearEnergyResults.naturalGasUse || betterPlantsSummary.reportYearEnergyResults.naturalGasUse">
                 <td>
                     Natural Gas
                 </td>
                 <td>
-                    {{betterPlantsSummary.baselineYearResults.naturalGasUse | customNumber}}
+                    {{betterPlantsSummary.baselineYearEnergyResults.naturalGasUse | customNumber}}
                 </td>
                 <td>
-                    {{betterPlantsSummary.reportYearResults.naturalGasUse | customNumber}}
+                    {{betterPlantsSummary.reportYearEnergyResults.naturalGasUse | customNumber}}
                 </td>
             </tr>
             <tr
-                *ngIf="betterPlantsSummary.baselineYearResults.distilateFuelUse || betterPlantsSummary.reportYearResults.distilateFuelUse">
+                *ngIf="betterPlantsSummary.baselineYearEnergyResults.distilateFuelUse || betterPlantsSummary.reportYearEnergyResults.distilateFuelUse">
                 <td>
                     Distillate or Light Fuel Oil (#1, 2 & 4)
                 </td>
                 <td>
-                    {{betterPlantsSummary.baselineYearResults.distilateFuelUse | customNumber}}
+                    {{betterPlantsSummary.baselineYearEnergyResults.distilateFuelUse | customNumber}}
                 </td>
                 <td>
-                    {{betterPlantsSummary.reportYearResults.distilateFuelUse | customNumber}}
+                    {{betterPlantsSummary.reportYearEnergyResults.distilateFuelUse | customNumber}}
                 </td>
             </tr>
             <tr
-                *ngIf="betterPlantsSummary.baselineYearResults.residualFuelUse || betterPlantsSummary.reportYearResults.residualFuelUse">
+                *ngIf="betterPlantsSummary.baselineYearEnergyResults.residualFuelUse || betterPlantsSummary.reportYearEnergyResults.residualFuelUse">
                 <td>
                     Residual or Heavy Fuel Oil (#5, 6, Navy Special & Bunker C)
                 </td>
                 <td>
-                    {{betterPlantsSummary.baselineYearResults.residualFuelUse | customNumber}}
+                    {{betterPlantsSummary.baselineYearEnergyResults.residualFuelUse | customNumber}}
                 </td>
                 <td>
-                    {{betterPlantsSummary.reportYearResults.residualFuelUse | customNumber}}
+                    {{betterPlantsSummary.reportYearEnergyResults.residualFuelUse | customNumber}}
                 </td>
             </tr>
             <tr
-                *ngIf="betterPlantsSummary.baselineYearResults.coalUse || betterPlantsSummary.reportYearResults.coalUse">
+                *ngIf="betterPlantsSummary.baselineYearEnergyResults.coalUse || betterPlantsSummary.reportYearEnergyResults.coalUse">
                 <td>
                     Coal
                 </td>
                 <td>
-                    {{betterPlantsSummary.baselineYearResults.coalUse | customNumber}}
+                    {{betterPlantsSummary.baselineYearEnergyResults.coalUse | customNumber}}
                 </td>
                 <td>
-                    {{betterPlantsSummary.reportYearResults.coalUse | customNumber}}
+                    {{betterPlantsSummary.reportYearEnergyResults.coalUse | customNumber}}
                 </td>
             </tr>
             <tr
-                *ngIf="betterPlantsSummary.baselineYearResults.cokeEnergyUse || betterPlantsSummary.reportYearResults.cokeEnergyUse">
+                *ngIf="betterPlantsSummary.baselineYearEnergyResults.cokeEnergyUse || betterPlantsSummary.reportYearEnergyResults.cokeEnergyUse">
                 <td>
                     Coke
                 </td>
                 <td>
-                    {{betterPlantsSummary.baselineYearResults.cokeEnergyUse | customNumber}}
+                    {{betterPlantsSummary.baselineYearEnergyResults.cokeEnergyUse | customNumber}}
                 </td>
                 <td>
-                    {{betterPlantsSummary.reportYearResults.cokeEnergyUse | customNumber}}
+                    {{betterPlantsSummary.reportYearEnergyResults.cokeEnergyUse | customNumber}}
                 </td>
             </tr>
             <tr
-                *ngIf="betterPlantsSummary.baselineYearResults.blastFurnaceEnergyUse || betterPlantsSummary.reportYearResults.blastFurnaceEnergyUse">
+                *ngIf="betterPlantsSummary.baselineYearEnergyResults.blastFurnaceEnergyUse || betterPlantsSummary.reportYearEnergyResults.blastFurnaceEnergyUse">
                 <td>
                     Blast Furnace Gas
                 </td>
                 <td>
-                    {{betterPlantsSummary.baselineYearResults.blastFurnaceEnergyUse | customNumber}}
+                    {{betterPlantsSummary.baselineYearEnergyResults.blastFurnaceEnergyUse | customNumber}}
                 </td>
                 <td>
-                    {{betterPlantsSummary.reportYearResults.blastFurnaceEnergyUse | customNumber}}
+                    {{betterPlantsSummary.reportYearEnergyResults.blastFurnaceEnergyUse | customNumber}}
                 </td>
             </tr>
             <tr
-                *ngIf="betterPlantsSummary.baselineYearResults.woodWasteEnergyUse || betterPlantsSummary.reportYearResults.woodWasteEnergyUse">
+                *ngIf="betterPlantsSummary.baselineYearEnergyResults.woodWasteEnergyUse || betterPlantsSummary.reportYearEnergyResults.woodWasteEnergyUse">
                 <td>
                     Wood Waste
                 </td>
                 <td>
-                    {{betterPlantsSummary.baselineYearResults.woodWasteEnergyUse | customNumber}}
+                    {{betterPlantsSummary.baselineYearEnergyResults.woodWasteEnergyUse | customNumber}}
                 </td>
                 <td>
-                    {{betterPlantsSummary.reportYearResults.woodWasteEnergyUse | customNumber}}
+                    {{betterPlantsSummary.reportYearEnergyResults.woodWasteEnergyUse | customNumber}}
                 </td>
             </tr>
             <tr
-                *ngIf="betterPlantsSummary.baselineYearResults.otherGasUse || betterPlantsSummary.reportYearResults.otherGasUse">
+                *ngIf="betterPlantsSummary.baselineYearEnergyResults.otherGasUse || betterPlantsSummary.reportYearEnergyResults.otherGasUse">
                 <td>
                     Other Gas (<span
-                        *ngFor="let fuel of betterPlantsSummary.baselineYearResults.otherGasFuels">{{fuel}}</span>)
+                        *ngFor="let fuel of betterPlantsSummary.baselineYearEnergyResults.otherGasFuels">{{fuel}}</span>)
                     (<span *ngFor="let fuel of otherGasFuels; let index = index;">{{fuel}}<span class="pe-1"
                             *ngIf="index != otherGasFuels.length - 1">,</span> </span>)
                 </td>
                 <td>
-                    {{betterPlantsSummary.baselineYearResults.otherGasUse | customNumber}}
+                    {{betterPlantsSummary.baselineYearEnergyResults.otherGasUse | customNumber}}
                 </td>
                 <td>
-                    {{betterPlantsSummary.reportYearResults.otherGasUse | customNumber}}
+                    {{betterPlantsSummary.reportYearEnergyResults.otherGasUse | customNumber}}
                 </td>
             </tr>
             <tr
-                *ngIf="betterPlantsSummary.baselineYearResults.otherLiquidUse || betterPlantsSummary.reportYearResults.otherLiquidUse">
+                *ngIf="betterPlantsSummary.baselineYearEnergyResults.otherLiquidUse || betterPlantsSummary.reportYearEnergyResults.otherLiquidUse">
                 <td>
                     Other Liquid (<span *ngFor="let fuel of otherLiquidFuels; let index = index;">{{fuel}}<span
                             class="pe-1" *ngIf="index != otherLiquidFuels.length - 1">,</span> </span>)
                 </td>
                 <td>
-                    {{betterPlantsSummary.baselineYearResults.otherLiquidUse | customNumber}}
+                    {{betterPlantsSummary.baselineYearEnergyResults.otherLiquidUse | customNumber}}
                 </td>
                 <td>
-                    {{betterPlantsSummary.reportYearResults.otherLiquidUse | customNumber}}
+                    {{betterPlantsSummary.reportYearEnergyResults.otherLiquidUse | customNumber}}
                 </td>
             </tr>
             <tr
-                *ngIf="betterPlantsSummary.baselineYearResults.otherSolidUse || betterPlantsSummary.reportYearResults.otherSolidUse">
+                *ngIf="betterPlantsSummary.baselineYearEnergyResults.otherSolidUse || betterPlantsSummary.reportYearEnergyResults.otherSolidUse">
                 <td>
                     Other Solid (<span *ngFor="let fuel of otherSolidFuels; let index = index;">{{fuel}}<span
                             class="pe-1" *ngIf="index != otherSolidFuels.length - 1">,</span> </span>)
                 </td>
                 <td>
-                    {{betterPlantsSummary.baselineYearResults.otherSolidUse | customNumber}}
+                    {{betterPlantsSummary.baselineYearEnergyResults.otherSolidUse | customNumber}}
                 </td>
                 <td>
-                    {{betterPlantsSummary.reportYearResults.otherSolidUse | customNumber}}
+                    {{betterPlantsSummary.reportYearEnergyResults.otherSolidUse | customNumber}}
                 </td>
             </tr>
             <tr
-                *ngIf="betterPlantsSummary.baselineYearResults.otherEnergyUse || betterPlantsSummary.reportYearResults.otherEnergyUse">
+                *ngIf="betterPlantsSummary.baselineYearEnergyResults.otherEnergyUse || betterPlantsSummary.reportYearEnergyResults.otherEnergyUse">
                 <td>
                     Other Energy (<span *ngFor="let fuel of otherEnergyFuels; let index = index;">{{fuel}}<span
-                        class="pe-1" *ngIf="index != otherEnergyFuels.length - 1">,</span> </span>)
+                            class="pe-1" *ngIf="index != otherEnergyFuels.length - 1">,</span> </span>)
                 </td>
                 <td>
-                    {{betterPlantsSummary.baselineYearResults.otherEnergyUse | customNumber}}
+                    {{betterPlantsSummary.baselineYearEnergyResults.otherEnergyUse | customNumber}}
                 </td>
                 <td>
-                    {{betterPlantsSummary.reportYearResults.otherEnergyUse | customNumber}}
+                    {{betterPlantsSummary.reportYearEnergyResults.otherEnergyUse | customNumber}}
                 </td>
             </tr>
             <tr>
@@ -191,10 +191,10 @@
                     Total Primary Energy Consumed, (MMBtu)
                 </td>
                 <td class="w-25">
-                    {{betterPlantsSummary.baselineYearResults.totalEnergyUse | customNumber}}
+                    {{betterPlantsSummary.baselineYearEnergyResults.totalEnergyUse | customNumber}}
                 </td>
                 <td class="w-25">
-                    {{betterPlantsSummary.reportYearResults.totalEnergyUse | customNumber}}
+                    {{betterPlantsSummary.reportYearEnergyResults.totalEnergyUse | customNumber}}
                 </td>
             </tr>
         </tbody>
@@ -261,7 +261,7 @@
                     Total Improvement In Energy Intensity (%)**
                 </td>
                 <td>
-                    {{betterPlantsSummary.percentTotalImprovement | number:'1.0-2'}} %
+                    {{betterPlantsSummary.percentTotalEnergyImprovement | number:'1.0-2'}} %
                 </td>
             </tr>
         </tbody>

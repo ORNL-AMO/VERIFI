@@ -1,4 +1,5 @@
-import { MeterSource } from "src/app/models/idb"
+import { MeterPhase, MeterSource } from "src/app/models/constantsAndTypes"
+
 
 export interface FuelTypeOption {
     startingUnit: string,
@@ -6,7 +7,7 @@ export interface FuelTypeOption {
     value: string,
     siteToSourceMultiplier: number,
     emissionsOutputRate: number,
-    otherEnergyType?: string
+    otherEnergyType?: 'Hot Water' | 'Steam' | 'Compressed Air' | 'Chilled Water';
 }
 
 export const SourceOptions: Array<MeterSource> = [
@@ -14,8 +15,8 @@ export const SourceOptions: Array<MeterSource> = [
     "Natural Gas",
     "Other Fuels",
     "Other Energy",
-    "Water",
-    "Waste Water",
+    "Water Intake",
+    "Water Discharge",
     "Other Utility"
 ]
 
@@ -356,6 +357,14 @@ export const OtherEnergyOptions: Array<FuelTypeOption> = [
         siteToSourceMultiplier: undefined,
         otherEnergyType: 'Hot Water',
         emissionsOutputRate: 66.3985
+    },
+    {
+        startingUnit: 'SCF',
+        heatCapacityValue: 0.00001093,
+        value: 'Purchased Compressed Air',
+        siteToSourceMultiplier: 3,
+        otherEnergyType: 'Compressed Air',
+        emissionsOutputRate: undefined
     }
 ]
 
@@ -366,7 +375,7 @@ export const ScopeOptions: Array<ScopeOption> = [
         value: 1,
         scope: 'Scope 1'
     },
-     {
+    {
         optionLabel: 'Mobile',
         value: 2,
         scope: 'Scope 1'
@@ -384,8 +393,8 @@ export const ScopeOptions: Array<ScopeOption> = [
 ]
 
 export interface ScopeOption {
-    optionLabel: string, 
-    value: number, 
+    optionLabel: string,
+    value: number,
     scope: 'Scope 1' | 'Scope 2'
 }
 
@@ -416,6 +425,22 @@ export const AgreementTypes: Array<AgreementType> = [
         value: 6
     }
 ]
+
+export function getFuelTypeOptions(source: MeterSource, phase: MeterPhase): Array<FuelTypeOption> {
+    if (source == 'Other Fuels') {
+        if (phase == 'Solid') {
+            return SolidOptions;
+        } else if (phase == 'Liquid') {
+            return LiquidOptions;
+        } else if (phase == 'Gas') {
+            return GasOptions;
+        }
+    } else if (source == 'Other Energy') {
+        return OtherEnergyOptions;
+    }
+    return [];
+}
+
 
 
 export interface AgreementType {

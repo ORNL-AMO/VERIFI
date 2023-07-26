@@ -7,14 +7,13 @@ import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { CalanderizedMeter } from 'src/app/models/calanderization';
-import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport, IdbAnalysisItem, IdbFacility, IdbPredictorEntry, IdbUtilityMeter } from 'src/app/models/idb';
+import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport, IdbAnalysisItem, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { BetterPlantsSummary } from 'src/app/models/overview-report';
-import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
-import { ConvertMeterDataService } from 'src/app/shared/helper-services/convert-meter-data.service';
 import { BetterPlantsReportClass } from 'src/app/calculations/better-plants-calculations/betterPlantsReportClass';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { AccountReportsService } from '../account-reports.service';
+import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
+import { ConvertValue } from 'src/app/calculations/conversions/convertValue';
 
 @Component({
   selector: 'app-better-plants-report',
@@ -30,6 +29,7 @@ export class BetterPlantsReportComponent implements OnInit {
   betterPlantsSummary: BetterPlantsSummary;
   calculating: boolean | 'error';
   worker: Worker;
+  selectedAnalysisItem: IdbAccountAnalysisItem;
   constructor(private accountReportDbService: AccountReportDbService,
     private accountReportsService: AccountReportsService,
     private router: Router, private accountDbService: AccountdbService,
@@ -37,9 +37,8 @@ export class BetterPlantsReportComponent implements OnInit {
     private predictorDbService: PredictordbService,
     private analysisDbService: AnalysisDbService,
     private accountAnalysisDbService: AccountAnalysisDbService,
-    private convertMeterDataService: ConvertMeterDataService,
-    private calanderizationService: CalanderizationService,
-    private utilityMeterDbService: UtilityMeterdbService) { }
+    private utilityMeterDbService: UtilityMeterdbService,
+    private utilityMeterDataDbService: UtilityMeterDatadbService) { }
 
   ngOnInit(): void {
     this.printSub = this.accountReportsService.print.subscribe(print => {
@@ -50,6 +49,7 @@ export class BetterPlantsReportComponent implements OnInit {
       this.router.navigateByUrl('/account/reports/dashboard');
     }
     this.account = this.accountDbService.selectedAccount.getValue();
+    this.setAnalysisItem();
     this.setBetterPlantsSummary();
   }
 
@@ -60,27 +60,49 @@ export class BetterPlantsReportComponent implements OnInit {
     }
   }
 
+  setAnalysisItem() {
+    let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
+    let selectedAnalysisItem: IdbAccountAnalysisItem = accountAnalysisItems.find(item => { return item.guid == this.selectedReport.betterPlantsReportSetup.analysisItemId });
+    this.selectedAnalysisItem = JSON.parse(JSON.stringify(selectedAnalysisItem));
+    if (this.selectedAnalysisItem.analysisCategory == 'energy') {
+      if (this.selectedAnalysisItem.energyUnit != 'MMBtu') {
+        if (this.selectedAnalysisItem.baselineAdjustments) {
+          this.selectedAnalysisItem.baselineAdjustments.forEach(adjustment => {
+            if (adjustment.amount != 0) {
+              adjustment.amount = new ConvertValue(adjustment.amount, this.selectedAnalysisItem.energyUnit, 'MMBtu').convertedValue;
+            }
+          });
+        }
+        this.selectedAnalysisItem.energyUnit = 'MMBtu';
+      }
+      this.selectedAnalysisItem.energyUnit = 'MMBtu';
+    } else if (this.selectedAnalysisItem.analysisCategory == 'water') {
+      if (this.selectedAnalysisItem.waterUnit != 'kgal') {
+        if (this.selectedAnalysisItem.baselineAdjustments) {
+          this.selectedAnalysisItem.baselineAdjustments.forEach(adjustment => {
+            if (adjustment.amount != 0) {
+              adjustment.amount = new ConvertValue(adjustment.amount, this.selectedAnalysisItem.waterUnit, 'kgal').convertedValue;
+            }
+          });
+        }
+        this.selectedAnalysisItem.waterUnit = 'kgal';
+      }
+    }
+  }
 
   setBetterPlantsSummary() {
     let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
-
     let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.accountPredictorEntries.getValue();
     let accountFacilityAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
-    let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
-    let selectedAnalysisItem: IdbAccountAnalysisItem = accountAnalysisItems.find(item => { return item.guid == this.selectedReport.betterPlantsReportSetup.analysisItemId });
-    selectedAnalysisItem.energyUnit = 'MMBtu';
     let includedFacilityIds: Array<string> = new Array();
-    selectedAnalysisItem.facilityAnalysisItems.forEach(item => {
+    this.selectedAnalysisItem.facilityAnalysisItems.forEach(item => {
       if (item.analysisItemId && item.analysisItemId != 'skip') {
         includedFacilityIds.push(item.facilityId);
       }
     });
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     let includedFacilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return includedFacilityIds.includes(meter.facilityId) });
-    let calanderizedMeters: Array<CalanderizedMeter> = this.calanderizationService.getCalanderizedMeterData(includedFacilityMeters, true, true, { energyIsSource: true });
-    calanderizedMeters.forEach(calanderizedMeter => {
-      calanderizedMeter.monthlyData = this.convertMeterDataService.convertMeterDataToAnalysis(selectedAnalysisItem, calanderizedMeter.monthlyData, this.account, calanderizedMeter.meter);
-    });
+    let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
     if (typeof Worker !== 'undefined') {
       this.worker = new Worker(new URL('src/app/web-workers/better-plants-report.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {
@@ -96,26 +118,29 @@ export class BetterPlantsReportComponent implements OnInit {
       this.worker.postMessage({
         baselineYear: this.selectedReport.baselineYear,
         reportYear: this.selectedReport.reportYear,
-        selectedAnalysisItem: selectedAnalysisItem,
-        calanderizedMeters: calanderizedMeters,
+        selectedAnalysisItem: this.selectedAnalysisItem,
         accountPredictorEntries: accountPredictorEntries,
         account: this.account,
         facilities: accountFacilities,
-        accountAnalysisItems: accountFacilityAnalysisItems
+        accountAnalysisItems: accountFacilityAnalysisItems,
+        meters: includedFacilityMeters,
+        meterData: accountMeterData
       });
     } else {
       // Web Workers are not supported in this environment.
       let betterPlantsReportClass: BetterPlantsReportClass = new BetterPlantsReportClass(
         this.selectedReport.baselineYear,
         this.selectedReport.reportYear,
-        selectedAnalysisItem,
-        calanderizedMeters,
+        this.selectedAnalysisItem,
         accountPredictorEntries,
         this.account,
         accountFacilities,
-        accountFacilityAnalysisItems
+        accountFacilityAnalysisItems,
+        includedFacilityMeters,
+        accountMeterData
       );
       this.betterPlantsSummary = betterPlantsReportClass.getBetterPlantsSummary();
+      this.calculating = false;
     }
   }
 }

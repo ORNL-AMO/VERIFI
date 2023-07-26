@@ -11,7 +11,7 @@ import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db
 import { IdbAccount, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { getIsEnergyMeter, getIsEnergyUnit } from 'src/app/shared/sharedHelperFuntions';
 import { UtilityMeterDataService } from '../utility-meter-data.service';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Observable, of } from 'rxjs';
 
 @Component({
   selector: 'app-edit-bill',
@@ -27,7 +27,6 @@ export class EditBillComponent implements OnInit {
   displayVolumeInput: boolean;
   displayEnergyUse: boolean;
   invalidDate: boolean;
-  showConfirmCancel: boolean = false;
   showFilterDropdown: boolean = false;
   constructor(private activatedRoute: ActivatedRoute, private utilityMeterDataDbService: UtilityMeterDatadbService,
     private utilityMeterDbService: UtilityMeterdbService, private loadingService: LoadingService,
@@ -57,16 +56,7 @@ export class EditBillComponent implements OnInit {
     })
   }
 
-
-  cancel(onSave?: boolean) {
-    if (!this.meterDataForm.dirty || onSave) {
-      this.confirmCancel();
-    } else {
-      this.showConfirmCancel = true;
-    }
-  }
-
-  confirmCancel() {
+  cancel() {
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     this.router.navigateByUrl('/facility/' + selectedFacility.id + '/utility/energy-consumption/utility-meter/' + this.editMeter.id + '/data-table');
   }
@@ -89,7 +79,8 @@ export class EditBillComponent implements OnInit {
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.setMeterData(selectedAccount, selectedFacility);
-    this.cancel(true);
+    this.meterDataForm.markAsPristine();
+    this.cancel();
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('Reading Saved!', undefined, undefined, false, "alert-success");
   }
@@ -121,6 +112,10 @@ export class EditBillComponent implements OnInit {
   setMeterDataForm() {
     if (this.editMeter.source == 'Electricity') {
       this.meterDataForm = this.utilityMeterDataService.getElectricityMeterDataForm(this.editMeterData);
+    } else if (this.editMeter.source == 'Other Utility') {
+      this.displayVolumeInput = (getIsEnergyUnit(this.editMeter.startingUnit) == false);
+      this.displayEnergyUse = (getIsEnergyUnit(this.editMeter.startingUnit) == true);
+      this.meterDataForm = this.utilityMeterDataService.getGeneralMeterDataForm(this.editMeterData, this.displayVolumeInput, this.displayEnergyUse);
     } else {
       this.displayVolumeInput = (getIsEnergyUnit(this.editMeter.startingUnit) == false);
       this.displayEnergyUse = getIsEnergyMeter(this.editMeter.source);
@@ -129,13 +124,18 @@ export class EditBillComponent implements OnInit {
         this.meterDataForm.controls.totalEnergyUse.disable();
       }
     }
-
-    this.meterDataForm.valueChanges.subscribe(() => {
-      this.showConfirmCancel = false;
-    })
   }
 
   toggleFilterMenu() {
     this.showFilterDropdown = !this.showFilterDropdown;
+  }
+
+
+  canDeactivate(): Observable<boolean> {
+    if (this.meterDataForm.dirty) {
+      const result = window.confirm('There are unsaved changes! Are you sure you want to leave this page?');
+      return of(result);
+    }
+    return of(true);
   }
 }

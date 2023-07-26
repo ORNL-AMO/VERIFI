@@ -108,9 +108,10 @@ export class AccountSettingsComponent implements OnInit {
       await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(accountAnalysisItems[index]));
     }
 
-    await this.dbChangesService.selectAccount(this.selectedAccount);
+    await this.dbChangesService.selectAccount(this.selectedAccount, false);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('New Facility Added!', undefined, undefined, false, 'alert-success');
+    this.router.navigateByUrl('/facility/' + newFacility.id + '/settings');
   }
 
 
@@ -146,7 +147,7 @@ export class AccountSettingsComponent implements OnInit {
     let accounts: Array<IdbAccount> = await firstValueFrom(this.accountDbService.getAll());
     this.accountDbService.allAccounts.next(accounts);
     if (accounts.length != 0) {
-      await this.dbChangesService.selectAccount(accounts[0]);
+      await this.dbChangesService.selectAccount(accounts[0], false);
       this.router.navigate(['/']);
     } else {
       this.accountDbService.selectedAccount.next(undefined);

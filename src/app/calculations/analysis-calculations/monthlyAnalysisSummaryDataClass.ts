@@ -1,9 +1,11 @@
 import { MonthlyData } from "src/app/models/calanderization";
-import { AnalysisGroup, AnalysisType, IdbFacility, IdbPredictorEntry, PredictorData } from "src/app/models/idb";
+import { IdbFacility, IdbPredictorEntry, PredictorData } from "src/app/models/idb";
 import { MonthlyGroupAnalysisClass } from "./monthlyGroupAnalysisClass";
 import * as _ from 'lodash';
 import { MonthlyAnalysisCalculatedValues } from "./monthlyAnalysisCalculatedValuesClass";
 import { getFiscalYear } from "../shared-calculations/calanderizationFunctions";
+import { AnalysisCategory, AnalysisGroup, AnalysisType } from "src/app/models/analysis";
+import { ConvertValue } from "../conversions/convertValue";
 
 export class MonthlyAnalysisSummaryDataClass {
     //results
@@ -37,7 +39,7 @@ export class MonthlyAnalysisSummaryDataClass {
         this.setMonthPredictorData(monthlyGroupAnalysisClass.facilityPredictorData);
         this.setMonthMeterData(monthlyGroupAnalysisClass.groupMonthlyData);
         this.setMonthIndex(previousMonthsSummaryData);
-        this.setEnergyUse();
+        this.setEnergyUse(monthlyGroupAnalysisClass.analysisItem.analysisCategory);
         this.setPredictorAndProductionUsage(monthlyGroupAnalysisClass.predictorVariables);
         this.setBaselineActualEnergyUse(monthlyGroupAnalysisClass.baselineYear, previousMonthsSummaryData);
         this.setModeledEnergy(monthlyGroupAnalysisClass.selectedGroup.analysisType, monthlyGroupAnalysisClass.predictorVariables, monthlyGroupAnalysisClass.baselineYearEnergyIntensity);
@@ -64,8 +66,12 @@ export class MonthlyAnalysisSummaryDataClass {
         });
     }
 
-    setEnergyUse() {
-        this.energyUse = _.sumBy(this.monthMeterData, 'energyUse');
+    setEnergyUse(analysisCategory: AnalysisCategory) {
+        if (analysisCategory == 'energy') {
+            this.energyUse = _.sumBy(this.monthMeterData, 'energyUse');
+        } else if (analysisCategory == 'water') {
+            this.energyUse = _.sumBy(this.monthMeterData, 'energyConsumption');
+        }
     }
 
     setBaselineActualEnergyUse(baselineYear: number, previousMonthsSummaryData: Array<MonthlyAnalysisSummaryDataClass>) {
@@ -181,6 +187,13 @@ export class MonthlyAnalysisSummaryDataClass {
             previousMonthsAnalysisCalculatedValues,
             this.baselineActualEnergyUse
         );
+    }
+
+    convertResults(startingUnit: string, endingUnit: string) {
+        this.energyUse = new ConvertValue(this.energyUse, startingUnit, endingUnit).convertedValue;
+        this.modeledEnergy = new ConvertValue(this.modeledEnergy, startingUnit, endingUnit).convertedValue;
+        this.baselineAdjustmentForOther = new ConvertValue(this.baselineAdjustmentForOther, startingUnit, endingUnit).convertedValue;
+        this.monthlyAnalysisCalculatedValues.convertResults(startingUnit, endingUnit);
     }
 }
 

@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { AnalysisType } from 'src/app/models/idb';
+import { AnalysisType } from 'src/app/models/analysis';
 
 @Pipe({
   name: 'analysisTypeLabel'
@@ -15,7 +15,7 @@ export class AnalysisTypeLabelPipe implements PipeTransform {
       return 'Energy Intensity';
     } else if (analysisType == 'modifiedEnergyIntensity') {
       return 'Modified Energy Intensity';
-    } else if (analysisType == 'skip') {
+    } else if (analysisType == 'skip' || analysisType == 'skipAnalysis') {
       return 'Group Skipped'
     }
     return;

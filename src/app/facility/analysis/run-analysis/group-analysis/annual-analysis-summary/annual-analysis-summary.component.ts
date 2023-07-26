@@ -2,11 +2,15 @@ import { Component, OnInit } from '@angular/core';
 import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { AnnualAnalysisSummary } from 'src/app/models/analysis';
-import { AnalysisGroup, IdbAnalysisItem, IdbFacility, IdbPredictorEntry } from 'src/app/models/idb';
+import { AnalysisGroup, AnnualAnalysisSummary } from 'src/app/models/analysis';
+import { IdbAnalysisItem, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { AnnualGroupAnalysisSummaryClass } from 'src/app/calculations/analysis-calculations/annualGroupAnalysisSummaryClass';
+import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
+import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
+import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
+import { getNeededUnits } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
 
 @Component({
   selector: 'app-annual-analysis-summary',
@@ -23,7 +27,9 @@ export class AnnualAnalysisSummaryComponent implements OnInit {
   worker: Worker;
   calculating: boolean | 'error';
   constructor(private analysisService: AnalysisService, private analysisDbService: AnalysisDbService, private facilityDbService: FacilitydbService,
-    private predictorDbService: PredictordbService) {
+    private predictorDbService: PredictordbService,
+    private utilityMeterDbService: UtilityMeterdbService,
+    private utilityMeterDataDbService: UtilityMeterDatadbService) {
   }
 
   ngOnInit(): void {
@@ -31,7 +37,8 @@ export class AnnualAnalysisSummaryComponent implements OnInit {
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
     this.group = this.analysisService.selectedGroup.getValue();
     this.facility = this.facilityDbService.selectedFacility.getValue();
-    let calanderizedMeters: Array<CalanderizedMeter> = this.analysisService.calanderizedMeters;
+    let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
+    let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
     let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.accountPredictorEntries.getValue();
 
     if (typeof Worker !== 'undefined') {
@@ -51,16 +58,16 @@ export class AnnualAnalysisSummaryComponent implements OnInit {
         selectedGroup: this.group,
         analysisItem: this.analysisItem,
         facility: this.facility,
-        calanderizedMeters: calanderizedMeters,
+        meters: facilityMeters,
+        meterData: facilityMeterData,
         accountPredictorEntries: accountPredictorEntries
       });
     } else {
       // Web Workers are not supported in this environment.
+      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, facilityMeterData, this.facility, false, { energyIsSource: this.analysisItem.energyIsSource, neededUnits: getNeededUnits(this.analysisItem) });
       let annualAnalysisSummaryClass: AnnualGroupAnalysisSummaryClass = new AnnualGroupAnalysisSummaryClass(this.group, this.analysisItem, this.facility, calanderizedMeters, accountPredictorEntries);
       this.annualAnalysisSummary = annualAnalysisSummaryClass.getAnnualAnalysisSummaries();
     }
-
-
   }
 
   ngOnDestroy() {

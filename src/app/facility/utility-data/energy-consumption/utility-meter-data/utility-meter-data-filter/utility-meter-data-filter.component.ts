@@ -2,10 +2,11 @@ import { Component, Input, OnInit } from '@angular/core';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { AdditionalChargesFilters, DetailedChargesFilters, ElectricityDataFilters, EmissionsFilters, GeneralInformationFilters, GeneralUtilityDataFilters } from 'src/app/models/meterDataFilter';
-import { IdbFacility, MeterSource } from 'src/app/models/idb';
+import { IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
 import { UtilityMeterDataService } from '../utility-meter-data.service';
 import { getIsEnergyUnit } from 'src/app/shared/sharedHelperFuntions';
 import { EditMeterFormService } from '../../energy-source/edit-meter-form/edit-meter-form.service';
+import { MeterSource } from 'src/app/models/constantsAndTypes';
 
 @Component({
   selector: 'app-utility-meter-data-filter',
@@ -16,9 +17,7 @@ export class UtilityMeterDataFilterComponent implements OnInit {
   @Input()
   filterType: string;
   @Input()
-  source: MeterSource;
-  @Input()
-  startingUnit: string;
+  meter: IdbUtilityMeter;
 
   detailedChargesFilters: DetailedChargesFilters;
   additionalChargesFilters: AdditionalChargesFilters;
@@ -34,7 +33,7 @@ export class UtilityMeterDataFilterComponent implements OnInit {
   }
 
   ngOnChanges() {
-    if (this.source == 'Electricity') {
+    if (this.meter.source == 'Electricity') {
       let electricityDataFilters: ElectricityDataFilters;
       if (this.filterType == 'table') {
         electricityDataFilters = this.utilityMeterDataService.tableElectricityFilters.getValue();
@@ -48,13 +47,13 @@ export class UtilityMeterDataFilterComponent implements OnInit {
     } else {
       this.generalUtilityDataFilters = this.utilityMeterDataService.tableGeneralUtilityFilters.getValue();
     }
-    this.showEmissions = this.editMeterFormService.checkShowEmissionsOutputRate(this.source);
-    this.displayVolumeInput = (getIsEnergyUnit(this.startingUnit) == false);
+    this.showEmissions = this.editMeterFormService.checkShowEmissionsOutputRate(this.meter);
+    this.displayVolumeInput = (getIsEnergyUnit(this.meter.startingUnit) == false);
   }
 
   async save() {
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    if (this.source == 'Electricity') {
+    if (this.meter.source == 'Electricity') {
       this.checkShowSection();
       let electricityDataFilters: ElectricityDataFilters = {
         detailedCharges: this.detailedChargesFilters,
@@ -77,7 +76,7 @@ export class UtilityMeterDataFilterComponent implements OnInit {
   }
 
   async showAllColumns() {
-    if (this.source == 'Electricity') {
+    if (this.meter.source == 'Electricity') {
       this.detailedChargesFilters = {
         showSection: true,
         block1: true,
@@ -128,7 +127,7 @@ export class UtilityMeterDataFilterComponent implements OnInit {
   }
 
   async hideAllColumns() {
-    if (this.source == 'Electricity') {
+    if (this.meter.source == 'Electricity') {
       this.detailedChargesFilters = {
         showSection: false,
         block1: false,

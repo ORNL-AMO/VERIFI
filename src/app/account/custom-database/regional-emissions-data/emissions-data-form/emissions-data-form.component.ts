@@ -3,13 +3,14 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { CustomEmissionsDbService } from 'src/app/indexedDB/custom-emissions-db.service';
 import { IdbAccount, IdbCustomEmissionsItem, IdbFacility } from 'src/app/models/idb';
-import { EGridService, SubregionEmissions } from 'src/app/shared/helper-services/e-grid.service';
+import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 import * as _ from 'lodash';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { firstValueFrom } from 'rxjs';
+import { SubregionEmissions } from 'src/app/models/eGridEmissions';
 
 @Component({
   selector: 'app-emissions-data-form',
@@ -155,7 +156,7 @@ export class EmissionsDataFormComponent implements OnInit {
         }
       }
       if (hasUpdatedValues) {
-        this.dbChangesService.selectAccount(account);
+        this.dbChangesService.selectAccount(account, false);
       }
       successMessage = 'Custom Emissions Updated!'
     }

@@ -5,6 +5,7 @@ import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
 import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility } from '../models/idb';
 import { AccountdbService } from './account-db.service';
 import { FacilitydbService } from './facility-db.service';
+import { AnalysisCategory } from '../models/analysis';
 import { AnalysisDbService } from './analysis-db.service';
 import { AnalysisValidationService } from '../shared/helper-services/analysis-validation.service';
 
@@ -72,7 +73,7 @@ export class AccountAnalysisDbService {
     return this.dbService.update('accountAnalysisItems', values);
   }
 
-  getNewAccountAnalysisItem(): IdbAccountAnalysisItem {
+  getNewAccountAnalysisItem(analysisCategory: AnalysisCategory): IdbAccountAnalysisItem {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     let facilityAnalysisItems: Array<{
@@ -84,20 +85,25 @@ export class AccountAnalysisDbService {
         facilityId: facility.guid,
         analysisItemId: undefined
       })
-    })
+    });
+    let baselineYear: number = selectedAccount.sustainabilityQuestions.energyReductionBaselineYear;
+    if (analysisCategory == 'water') {
+      baselineYear = selectedAccount.sustainabilityQuestions.waterReductionBaselineYear;
+    }
     return {
       accountId: selectedAccount.guid,
       guid: Math.random().toString(36).substr(2, 9),
       date: new Date(),
       name: 'Account Analysis',
-      // energyIsSource: selectedAccount.energyIsSource,
       reportYear: undefined,
-      baselineYear: selectedAccount.sustainabilityQuestions.energyReductionBaselineYear,
+      baselineYear: baselineYear,
       energyUnit: selectedAccount.energyUnit,
       facilityAnalysisItems: facilityAnalysisItems,
       energyIsSource: selectedAccount.energyIsSource,
       hasBaselineAdjustement: false,
       baselineAdjustments: [],
+      waterUnit: selectedAccount.volumeLiquidUnit,
+      analysisCategory: analysisCategory,
       setupErrors: {
         hasError: true,
         missingName: false,
@@ -148,5 +154,18 @@ export class AccountAnalysisDbService {
     if (hasChanges) {
       this.accountAnalysisItems.next(accountAnalysisItems);
     }
+  }
+
+  getCorrespondingAccountAnalysisItems(facilityAnalysisItemId: string): Array<IdbAccountAnalysisItem> {
+    let allAccountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisItems.getValue();
+    let correspondingItems: Array<IdbAccountAnalysisItem> = new Array();
+    allAccountAnalysisItems.forEach(accountItem => {
+      accountItem.facilityAnalysisItems.forEach(facilityItem => {
+        if (facilityItem.analysisItemId == facilityAnalysisItemId) {
+          correspondingItems.push(accountItem);
+        }
+      });
+    });
+    return correspondingItems;
   }
 }

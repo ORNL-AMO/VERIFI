@@ -34,6 +34,8 @@
                         Account</a></li>
                 <li><a class="dropdown-item" (click)="openBackupModal()"><i class="fa fa-upload"></i> Import Backup</a>
                 </li>
+                <li><a class="dropdown-item" (click)="goToManageAccounts()"><i class="fa fa-gears"></i> Manage Accounts</a>
+                </li>
             </ul>
         </div>
         <div class="ps-2" *ngIf="dataInitialized && activeAccount">

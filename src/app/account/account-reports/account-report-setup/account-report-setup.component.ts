@@ -47,7 +47,8 @@ export class AccountReportSetupComponent {
   setYearOptions() {
     //TODO: baseline years less than report year selection
     //TODO: report years greater than baseline year selection
-    let yearOptions: Array<number> = this.calanderizationService.getYearOptionsAccount();
+    //TODO: get options by water/energy
+    let yearOptions: Array<number> = this.calanderizationService.getYearOptionsAccount('all');
     this.reportYears = yearOptions;
     this.baselineYears = yearOptions;
   }
