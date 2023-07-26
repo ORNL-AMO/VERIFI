@@ -26,6 +26,7 @@ import { EmissionsDataFormComponent } from "src/app/account/custom-database/regi
 import { RegionalEmissionsDataComponent } from "src/app/account/custom-database/regional-emissions-data/regional-emissions-data.component";
 import { AccountAnalysisEnergyDashboardComponent } from "../account/account-analysis/account-analysis-dashboard/account-analysis-energy-dashboard/account-analysis-energy-dashboard.component";
 import { AccountAnalysisWaterDashboardComponent } from "../account/account-analysis/account-analysis-dashboard/account-analysis-water-dashboard/account-analysis-water-dashboard.component";
+import { AccountAnalysisFacilitiesSummaryComponent } from "../account/account-analysis/account-analysis-results/account-analysis-facilities-summary/account-analysis-facilities-summary.component";
 
 export const AccountRoutes: Route = {
     path: 'account',
@@ -90,7 +91,11 @@ export const AccountRoutes: Route = {
                     children: [
                         { path: '', pathMatch: 'full', redirectTo: 'annual-analysis' },
                         { path: 'monthly-analysis', component: MonthlyAccountAnalysisComponent },
-                        { path: 'annual-analysis', component: AnnualAccountAnalysisComponent }
+                        { path: 'annual-analysis', component: AnnualAccountAnalysisComponent },
+                        {
+                            path: 'facilities-summary',
+                            component: AccountAnalysisFacilitiesSummaryComponent
+                        }
                     ]
                 }
             ]

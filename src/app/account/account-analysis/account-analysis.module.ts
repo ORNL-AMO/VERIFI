@@ -21,6 +21,7 @@ import { AccountAnalysisItemCardComponent } from './account-analysis-dashboard/a
 import { AccountAnalysisWaterDashboardComponent } from './account-analysis-dashboard/account-analysis-water-dashboard/account-analysis-water-dashboard.component';
 import { AccountAnalysisEnergyDashboardComponent } from './account-analysis-dashboard/account-analysis-energy-dashboard/account-analysis-energy-dashboard.component';
 import { AccountAnalysisDashboardTabsComponent } from './account-analysis-dashboard/account-analysis-dashboard-tabs/account-analysis-dashboard-tabs.component';
+import { AccountAnalysisFacilitiesSummaryComponent } from './account-analysis-results/account-analysis-facilities-summary/account-analysis-facilities-summary.component';
 
 
 @NgModule({
@@ -38,7 +39,8 @@ import { AccountAnalysisDashboardTabsComponent } from './account-analysis-dashbo
     AccountAnalysisItemCardComponent,
     AccountAnalysisWaterDashboardComponent,
     AccountAnalysisEnergyDashboardComponent,
-    AccountAnalysisDashboardTabsComponent
+    AccountAnalysisDashboardTabsComponent,
+    AccountAnalysisFacilitiesSummaryComponent
   ],
   imports: [
     CommonModule,

@@ -48,10 +48,12 @@ export class AccountAnalysisResultsComponent implements OnInit {
         if (!data.error) {
           this.accountAnalysisService.annualAnalysisSummary.next(data.annualAnalysisSummaries);
           this.accountAnalysisService.monthlyAccountAnalysisData.next(data.monthlyAnalysisSummaryData);
+          this.accountAnalysisService.facilitySummaries.next(data.facilitySummaries);
           this.accountAnalysisService.calculating.next(false);
         } else {
           this.accountAnalysisService.annualAnalysisSummary.next(undefined);
           this.accountAnalysisService.monthlyAccountAnalysisData.next(undefined);
+          this.accountAnalysisService.facilitySummaries.next(undefined);
           this.accountAnalysisService.calculating.next('error');
         }
       };
@@ -73,6 +75,7 @@ export class AccountAnalysisResultsComponent implements OnInit {
       let monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData> = annualAnalysisSummaryClass.monthlyAnalysisSummaryData;
       this.accountAnalysisService.annualAnalysisSummary.next(annualAnalysisSummaries);
       this.accountAnalysisService.monthlyAccountAnalysisData.next(monthlyAnalysisSummaryData);
+      this.accountAnalysisService.facilitySummaries.next(annualAnalysisSummaryClass.facilitySummaries);
       this.accountAnalysisService.calculating.next(false);
     }
   }

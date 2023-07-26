@@ -17,6 +17,8 @@ export class MonthlyAnalysisSummaryGraphComponent implements OnInit {
   facilityOrAccount: IdbFacility | IdbAccount;
   @Input()
   inHomeScreen: boolean;
+  @Input()
+  inFacilitySummary: boolean;
 
   @ViewChild('monthlyAnalysisGraph', { static: false }) monthlyAnalysisGraph: ElementRef;
 
@@ -72,11 +74,22 @@ export class MonthlyAnalysisSummaryGraphComponent implements OnInit {
       var data = [trace2, trace1];
 
       let height: number;
-      if(this.inHomeScreen){
+      if (this.inHomeScreen) {
         height = 350;
       }
 
+      let title: string;
+      if (this.inFacilitySummary) {
+        title = this.facilityOrAccount.name;
+      }
+
       var layout = {
+        title: {
+          text: title,
+          font: {
+            size: 18
+          },
+        },
         height: height,
         legend: {
           orientation: "h"
