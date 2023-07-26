@@ -38,7 +38,7 @@ export class BetterPlantsWaterSummaryClass {
             analysisCalanderizedMeters: Array<CalanderizedMeter>,
             additionalCalanderizedMeters: Array<CalanderizedMeter>,
             units: Array<string>
-        } = this.splitCalanderizedMeters(calanderizedMeters, selectedAnalysisItem, accountAnalysisItems)
+        } = this.splitCalanderizedMeters(calanderizedMeters, selectedAnalysisItem, accountAnalysisItems);
         this.unitsUsed = splitCalanderizedMeters.units;
         this.setWaterUtility(splitCalanderizedMeters.analysisCalanderizedMeters, year);
         this.setAdditionalWaterUtility(splitCalanderizedMeters.additionalCalanderizedMeters, year);
@@ -68,58 +68,58 @@ export class BetterPlantsWaterSummaryClass {
     }
 
     setWaterUtility(calanderizedMeters: Array<CalanderizedMeter>, year: number) {
-        this.waterUtility = this.getUtilityResults(calanderizedMeters, year, 'Municipal (Potable)');
+        this.waterUtility = this.getUtilityResults(calanderizedMeters, year, ['Municipal (Potable)', 'Municipal (Non-potable)']);
     }
 
     setAdditionalWaterUtility(calanderizedMeters: Array<CalanderizedMeter>, year: number) {
-        this.additionalWaterUtility = this.getUtilityResults(calanderizedMeters, year, 'Municipal (Potable)');
+        this.additionalWaterUtility = this.getUtilityResults(calanderizedMeters, year, ['Municipal (Potable)', 'Municipal (Non-potable)']);
     }
 
     setSurfaceFreshwater(calanderizedMeters: Array<CalanderizedMeter>, year: number) {
-        this.surfaceFreshwater = this.getUtilityResults(calanderizedMeters, year, 'Surface Freshwater');
+        this.surfaceFreshwater = this.getUtilityResults(calanderizedMeters, year, ['Surface Freshwater']);
     }
     setAdditionalSurfaceFreshwater(calanderizedMeters: Array<CalanderizedMeter>, year: number) {
-        this.additionalSurfaceFreshWater = this.getUtilityResults(calanderizedMeters, year, 'Surface Freshwater');
+        this.additionalSurfaceFreshWater = this.getUtilityResults(calanderizedMeters, year, ['Surface Freshwater']);
     }
 
     setGroundFreshwater(calanderizedMeters: Array<CalanderizedMeter>, year: number) {
-        this.groundFreshwater = this.getUtilityResults(calanderizedMeters, year, 'Ground Freshwater');
+        this.groundFreshwater = this.getUtilityResults(calanderizedMeters, year, ['Ground Freshwater']);
     }
     setAdditionalGroundFreshwater(calanderizedMeters: Array<CalanderizedMeter>, year: number) {
-        this.additionalGroundFreshwater = this.getUtilityResults(calanderizedMeters, year, 'Ground Freshwater');
+        this.additionalGroundFreshwater = this.getUtilityResults(calanderizedMeters, year, ['Ground Freshwater']);
     }
 
     setOtherFreshwater(calanderizedMeters: Array<CalanderizedMeter>, year: number) {
-        this.otherFreshwater = this.getUtilityResults(calanderizedMeters, year, 'Other Freshwater');
+        this.otherFreshwater = this.getUtilityResults(calanderizedMeters, year, ['Other Freshwater']);
     }
     setAdditionalOtherFreshwater(calanderizedMeters: Array<CalanderizedMeter>, year: number) {
-        this.additionalOtherFreshwater = this.getUtilityResults(calanderizedMeters, year, 'Other Freshwater');
+        this.additionalOtherFreshwater = this.getUtilityResults(calanderizedMeters, year, ['Other Freshwater']);
     }
 
     setSalineWaterIntake(calanderizedMeters: Array<CalanderizedMeter>, year: number) {
-        this.salineWaterIntake = this.getUtilityResults(calanderizedMeters, year, 'Salt Water');
+        this.salineWaterIntake = this.getUtilityResults(calanderizedMeters, year, ['Salt Water']);
     }
     setAdditionalSalineWaterIntake(calanderizedMeters: Array<CalanderizedMeter>, year: number) {
-        this.additionalSalineWaterIntake = this.getUtilityResults(calanderizedMeters, year, 'Salt Water');
+        this.additionalSalineWaterIntake = this.getUtilityResults(calanderizedMeters, year, ['Salt Water']);
     }
 
     setRainwater(calanderizedMeters: Array<CalanderizedMeter>, year: number) {
-        this.rainwater = this.getUtilityResults(calanderizedMeters, year, 'Rainwater');
+        this.rainwater = this.getUtilityResults(calanderizedMeters, year, ['Rainwater']);
     }
     setAdditionalRainwater(calanderizedMeters: Array<CalanderizedMeter>, year: number) {
-        this.additionalRainwater = this.getUtilityResults(calanderizedMeters, year, 'Rainwater');
+        this.additionalRainwater = this.getUtilityResults(calanderizedMeters, year, ['Rainwater']);
     }
 
     setExternallySuppliedRecycled(calanderizedMeters: Array<CalanderizedMeter>, year: number) {
-        this.externallySuppliedRecycled = this.getUtilityResults(calanderizedMeters, year, 'Externally Recycled Water');
+        this.externallySuppliedRecycled = this.getUtilityResults(calanderizedMeters, year, ['Externally Recycled Water']);
     }
     setAdditionalExternallySuppliedRecycled(calanderizedMeters: Array<CalanderizedMeter>, year: number) {
-        this.additionalExternallySuppliedRecycled = this.getUtilityResults(calanderizedMeters, year, 'Externally Recycled Water');
+        this.additionalExternallySuppliedRecycled = this.getUtilityResults(calanderizedMeters, year, ['Externally Recycled Water']);
     }
 
-    getUtilityResults(calanderizedMeters: Array<CalanderizedMeter>, year: number, intakeType: WaterIntakeType): WaterSummaryItem {
+    getUtilityResults(calanderizedMeters: Array<CalanderizedMeter>, year: number, intakeType: Array<WaterIntakeType>): WaterSummaryItem {
         let filteredMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => {
-            return cMeter.meter.waterIntakeType == intakeType
+            return intakeType.includes(cMeter.meter.waterIntakeType)
         });
         if (filteredMeters.length > 0) {
             let yearData: Array<MonthlyData> = this.getYearData(filteredMeters, year);
