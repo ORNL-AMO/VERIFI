@@ -16,7 +16,11 @@ export class MonthlyFacilityAnalysisClass {
     endDate: Date;
     facilityPredictorEntries: Array<IdbPredictorEntry>;
     baselineYear: number;
+    facility: IdbFacility;
+    analysisItem: IdbAnalysisItem;
     constructor(analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, accountPredictorEntries: Array<IdbPredictorEntry>, calculateAllMonthlyData: boolean) {
+        this.facility = facility;
+        this.analysisItem = analysisItem;
         let calanderizedFacilityMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => { return cMeter.meter.facilityId == facility.guid })
         this.setFacilityPredictorEntries(accountPredictorEntries, facility);
         this.setStartAndEndDate(facility, analysisItem, calculateAllMonthlyData, calanderizedFacilityMeters);

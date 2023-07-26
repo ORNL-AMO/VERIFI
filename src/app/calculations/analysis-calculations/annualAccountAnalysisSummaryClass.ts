@@ -9,6 +9,7 @@ export class AnnualAccountAnalysisSummaryClass {
 
     monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>;
     annualAnalysisSummaryDataClasses: Array<AnnualAnalysisSummaryDataClass>;
+    facilitySummaries: Array<{ facility: IdbFacility, analysisItem: IdbAnalysisItem, monthlySummaryData: Array<MonthlyAnalysisSummaryData> }>
     baselineYear: number;
     reportYear: number;
     constructor(
@@ -32,6 +33,7 @@ export class AnnualAccountAnalysisSummaryClass {
         meterData: Array<IdbUtilityMeterData>) {
         let monthlyAnalysisSummaryClass: MonthlyAccountAnalysisClass = new MonthlyAccountAnalysisClass(analysisItem, account, accountFacilities, accountPredictorEntries, allAccountAnalysisItems, calculateAllMonthlyData, meters, meterData);
         this.monthlyAnalysisSummaryData = monthlyAnalysisSummaryClass.getMonthlyAnalysisSummaryData();
+        this.facilitySummaries = monthlyAnalysisSummaryClass.facilitySummaries;
     }
 
     setBaselineYear(analysisItem: IdbAccountAnalysisItem) {

@@ -1,0 +1,15 @@
+<app-calculating-spinner *ngIf="calculating != false" [message]="'Calculating Annual Results...'"
+    [error]="calculating == 'error'"></app-calculating-spinner>
+
+<ng-container *ngIf="calculating == false">
+    <div class="row" *ngFor="let facilitySummary of facilitySummaries">
+        <div class="col-12">
+            <h5>{{facilitySummary.facility.name}}</h5>
+            <app-monthly-analysis-summary-graph [monthlyAnalysisSummaryData]="facilitySummary.monthlySummaryData"
+                [analysisItem]="facilitySummary.analysisItem" [facilityOrAccount]="facilitySummary.facility"
+                [inHomeScreen]="true">
+            </app-monthly-analysis-summary-graph>
+        </div>
+        <hr>
+    </div>
+</ng-container>
