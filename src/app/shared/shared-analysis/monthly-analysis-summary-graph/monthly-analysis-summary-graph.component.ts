@@ -80,7 +80,7 @@ export class MonthlyAnalysisSummaryGraphComponent implements OnInit {
 
       let title: string;
       if (this.inFacilitySummary) {
-        title = this.facilityOrAccount.name;
+        title = this.facilityOrAccount.name + ' (' + this.getPercentValue(this.monthlyAnalysisSummaryData[this.monthlyAnalysisSummaryData.length - 1].rolling12MonthImprovement) + '%)';
       }
 
       var layout = {
@@ -115,5 +115,9 @@ export class MonthlyAnalysisSummaryGraphComponent implements OnInit {
       };
       this.plotlyService.newPlot(this.monthlyAnalysisGraph.nativeElement, data, layout, config);
     }
+  }
+
+  getPercentValue(value: number): string {
+    return (value).toLocaleString(undefined, { maximumFractionDigits: 2, minimumIntegerDigits: 1 })
   }
 }
