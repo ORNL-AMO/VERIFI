@@ -24,6 +24,7 @@ export class BetterPlantsReportClass {
     totalWaterSavings: number;
     percentTotalWaterImprovement: number;
     adjustedBaselinePrimaryWater: number;
+    reportYear: number;
     constructor(
         baselineYear: number,
         reportYear: number,
@@ -35,6 +36,8 @@ export class BetterPlantsReportClass {
         meters: Array<IdbUtilityMeter>,
         meterData: Array<IdbUtilityMeterData>
     ) {
+        this.reportYear = reportYear;
+        selectedAnalysisItem.reportYear = reportYear;
         this.setFacilityPerformance(selectedAnalysisItem, facilities, accountPredictorEntries, accountAnalysisItems, meters, meterData);
         let includedMeters: Array<IdbUtilityMeter> = this.getIncludedMeters(meters, selectedAnalysisItem, accountAnalysisItems);
         let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(includedMeters, meterData, account, false, { energyIsSource: selectedAnalysisItem.energyIsSource, neededUnits: getNeededUnits(selectedAnalysisItem) });
@@ -139,6 +142,7 @@ export class BetterPlantsReportClass {
 
     getBetterPlantsSummary(): BetterPlantsSummary {
         return {
+            reportYear: this.reportYear,
             facilityPerformance: this.facilityPerformance,
             percentAnnualImprovement: this.reportYearAnalysisSummary.annualSavingsPercentImprovement,
             percentTotalEnergyImprovement: this.percentTotalEnergyImprovement,

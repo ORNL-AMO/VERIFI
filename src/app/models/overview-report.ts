@@ -2,6 +2,7 @@ import { AnnualAnalysisSummary } from "./analysis";
 import { IdbFacility } from "./idb";
 
 export interface BetterPlantsSummary {
+  reportYear: number,
   percentAnnualImprovement: number,
   percentTotalEnergyImprovement: number,
   percentTotalWaterImprovement: number,
@@ -74,6 +75,7 @@ export interface WaterSummaryItem {
 export interface BetterPlantsReportSetup {
   analysisItemId: string,
   includeFacilityNames: boolean,
+  includeAllYears?: boolean,
   baselineAdjustmentNotes: string,
   modificationNotes: string,
   methodologyNotes?: string,
