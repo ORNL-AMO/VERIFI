@@ -69,6 +69,7 @@ export class PredictordbService {
 
     async deletePredictorsAsync(accountPredictorEntries: Array<IdbPredictorEntry>) {
         for (let i = 0; i < accountPredictorEntries.length; i++) {
+            this.loadingService.setLoadingMessage('Deleting Predictors (' + i + '/' + accountPredictorEntries.length + ')...' );
             await firstValueFrom(this.deleteIndexWithObservable(accountPredictorEntries[i].id));
         }
     }

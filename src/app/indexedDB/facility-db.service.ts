@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { IdbAccount, IdbFacility } from '../models/idb';
 import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
 import { LocalStorageService } from 'ngx-webstorage';
-import { AccountdbService } from './account-db.service';
+import { LoadingService } from '../core-components/loading/loading.service';
 
 @Injectable({
     providedIn: 'root'
@@ -12,7 +12,7 @@ export class FacilitydbService {
 
     accountFacilities: BehaviorSubject<Array<IdbFacility>>;
     selectedFacility: BehaviorSubject<IdbFacility>;
-    constructor(private dbService: NgxIndexedDBService, private localStorageService: LocalStorageService, private accountDbService: AccountdbService) {
+    constructor(private dbService: NgxIndexedDBService, private localStorageService: LocalStorageService, private loadingService: LoadingService) {
         this.accountFacilities = new BehaviorSubject<Array<IdbFacility>>(new Array());
         this.selectedFacility = new BehaviorSubject<IdbFacility>(undefined);
         //subscribe after initialization
@@ -72,6 +72,7 @@ export class FacilitydbService {
 
     async deleteFacilitiesAsync(accountFacilities: Array<IdbFacility>) {
         for (let i = 0; i < accountFacilities.length; i++) {
+            this.loadingService.setLoadingMessage('Deleting Facilities (' + i + '/' + accountFacilities.length + ')...' );
             await firstValueFrom(this.deleteWithObservable(accountFacilities[i].id));
         }
     }

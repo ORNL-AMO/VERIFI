@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { IdbUtilityMeter } from '../models/idb';
 import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
 import { MeterSource } from '../models/constantsAndTypes';
+import { LoadingService } from '../core-components/loading/loading.service';
 
 @Injectable({
     providedIn: 'root'
@@ -11,7 +12,8 @@ export class UtilityMeterdbService {
 
     facilityMeters: BehaviorSubject<Array<IdbUtilityMeter>>;
     accountMeters: BehaviorSubject<Array<IdbUtilityMeter>>;
-    constructor(private dbService: NgxIndexedDBService) {
+    constructor(private dbService: NgxIndexedDBService,
+        private loadingService: LoadingService) {
         this.facilityMeters = new BehaviorSubject<Array<IdbUtilityMeter>>(new Array());
         this.accountMeters = new BehaviorSubject<Array<IdbUtilityMeter>>(new Array());
     }
@@ -65,6 +67,7 @@ export class UtilityMeterdbService {
 
     async deleteMeterEntriesAsync(meterEntries: Array<IdbUtilityMeter>) {
         for (let i = 0; i < meterEntries.length; i++) {
+            this.loadingService.setLoadingMessage('Deleting Meters (' + i + '/' + meterEntries.length + ')...' );
             await firstValueFrom(this.deleteIndexWithObservable(meterEntries[i].id));
         }
     }

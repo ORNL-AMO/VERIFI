@@ -16,6 +16,7 @@ import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { BackupDataService } from 'src/app/shared/helper-services/backup-data.service';
 import { ExportToExcelTemplateService } from 'src/app/shared/helper-services/export-to-excel-template.service';
+import { CustomEmissionsDbService } from 'src/app/indexedDB/custom-emissions-db.service';
 
 @Component({
   selector: 'app-manage-accounts',
@@ -42,7 +43,8 @@ export class ManageAccountsComponent {
     private analysisDbService: AnalysisDbService,
     private accountAnalysisDbService: AccountAnalysisDbService,
     private backupDataService: BackupDataService,
-    private exportToExcelTemplateService: ExportToExcelTemplateService
+    private exportToExcelTemplateService: ExportToExcelTemplateService,
+    private customEmissionsDbService: CustomEmissionsDbService
   ) {
   }
 
@@ -132,6 +134,8 @@ export class ManageAccountsComponent {
     this.loadingService.setLoadingMessage("Deleting Analysis Items...")
     await this.analysisDbService.deleteAccountAnalysisItems();
     await this.accountAnalysisDbService.deleteAccountAnalysisItems();
+    this.loadingService.setLoadingMessage("Deleting Custom Emissions...")
+    await this.customEmissionsDbService.deleteAccountEmissionsItems();
     this.loadingService.setLoadingMessage("Deleting Account...");
     await firstValueFrom(this.accountDbService.deleteAccountWithObservable(this.selectedAccount.id));
     this.accounts = await firstValueFrom(this.accountDbService.getAll());
@@ -139,6 +143,9 @@ export class ManageAccountsComponent {
     this.accountDbService.selectedAccount.next(undefined);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('Account Deleted!', undefined, undefined, false, 'alert-success');
+    if (this.accounts.length == 0) {
+      this.router.navigateByUrl('/setup-wizard');
+    }
   }
 
 
