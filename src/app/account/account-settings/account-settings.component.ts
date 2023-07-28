@@ -16,6 +16,7 @@ import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport, IdbFacility } fro
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
+import { CustomEmissionsDbService } from 'src/app/indexedDB/custom-emissions-db.service';
 
 @Component({
   selector: 'app-account-settings',
@@ -59,7 +60,8 @@ export class AccountSettingsComponent implements OnInit {
     private importBackupModalService: ImportBackupModalService,
     private toastNotificationService: ToastNotificationsService,
     private accountAnalysisDbService: AccountAnalysisDbService,
-    private dbChangesService: DbChangesService
+    private dbChangesService: DbChangesService,
+    private customEmissionsDbService: CustomEmissionsDbService
   ) { }
 
   ngOnInit() {
@@ -140,6 +142,8 @@ export class AccountSettingsComponent implements OnInit {
     this.loadingService.setLoadingMessage("Deleting Analysis Items...")
     await this.analysisDbService.deleteAccountAnalysisItems();
     await this.accountAnalysisDbService.deleteAccountAnalysisItems();
+    this.loadingService.setLoadingMessage("Deleting Custom Emissions...")
+    await this.customEmissionsDbService.deleteAccountEmissionsItems();
     this.loadingService.setLoadingMessage("Deleting Account...");
     await firstValueFrom(this.accountDbService.deleteAccountWithObservable(this.selectedAccount.id));
 
@@ -147,8 +151,8 @@ export class AccountSettingsComponent implements OnInit {
     let accounts: Array<IdbAccount> = await firstValueFrom(this.accountDbService.getAll());
     this.accountDbService.allAccounts.next(accounts);
     if (accounts.length != 0) {
-      await this.dbChangesService.selectAccount(accounts[0], false);
-      this.router.navigate(['/']);
+      this.accountDbService.selectedAccount.next(undefined);
+      this.router.navigateByUrl('/manage-accounts');
     } else {
       this.accountDbService.selectedAccount.next(undefined);
       this.router.navigateByUrl('/setup-wizard');
