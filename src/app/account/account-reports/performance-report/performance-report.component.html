@@ -1,1 +1,74 @@
-<p>performance-report works!</p>
+<ng-container *ngIf="calculating == false">
+    <div class="report" [ngClass]="{'print': print}">
+        <table class="table table-bordered table-hover">
+            <thead>
+                <tr>
+                    <th>
+                        Facility
+                    </th>
+                    <th>
+                        State
+                    </th>
+                    <ng-container
+                        *ngFor="let data of performanceReport.annualFacilityData[0].annualData; let index = index;">
+                        <th class="border-left-cell">
+                            {{data.year}} Adjusted
+                        </th>
+                        <th>
+                            {{data.year}} Savings
+                        </th>
+                        <th class="border-right-cell">
+                            {{data.year}} Contribution
+                        </th>
+                        <ng-container *ngIf="index == performanceReport.annualFacilityData[0].annualData.length-1">
+                            <th>
+                                Change in Contribution
+                            </th>
+                            <th>
+                                Change in Adj. Baseline
+                            </th>
+                        </ng-container>
+                    </ng-container>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let facilityData of performanceReport.annualFacilityData">
+                    <td>
+                        {{facilityData.facility.name}}
+                    </td>
+                    <td>
+                        {{facilityData.facility.state}}
+                    </td>
+                    <ng-container *ngFor="let data of facilityData.annualData; let index = index;">
+                        <td class="border-left-cell">
+                            {{data.adjusted | customNumber}}
+                        </td>
+                        <td>
+                            {{data.savings | number:'1.0-2'}} %
+                        </td>
+                        <td class="border-right-cell">
+                            {{data.contribution | number:'1.0-2'}} %
+                        </td>
+                        <ng-container *ngIf="index == performanceReport.annualFacilityData[0].annualData.length-1">
+                            <td>
+                                {{data.changeInContribution | number:'1.0-2'}} %
+                            </td>
+                            <td>
+                                {{data.changeInAdjustedBaseline | number:'1.0-2'}} %
+                            </td>
+                        </ng-container>
+                    </ng-container>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</ng-container>
+<div class="w-100 justify-content-center" *ngIf="calculating != false">
+    <div class="p-5">
+        <app-calculating-spinner [error]="calculating == 'error'"
+            [message]="'Generating Performance Report...'"></app-calculating-spinner>
+    </div>
+</div>
+
+
+<app-print-report-button *ngIf="calculating == false"></app-print-report-button>

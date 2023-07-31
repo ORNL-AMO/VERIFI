@@ -8,6 +8,7 @@ import { BetterPlantsEnergySummaryClass } from "./betterPlantsEnergySummaryClass
 import { BetterPlantsWaterSummaryClass } from "./betterPlantsWaterSummaryClass";
 import { getCalanderizedMeterData } from "../calanderization/calanderizeMeters";
 import { getNeededUnits } from "../shared-calculations/calanderizationFunctions";
+import { getIncludedMeters } from "../shared-calculations/calculationsHelpers";
 
 export class BetterPlantsReportClass {
 
@@ -39,7 +40,7 @@ export class BetterPlantsReportClass {
         this.reportYear = reportYear;
         selectedAnalysisItem.reportYear = reportYear;
         this.setFacilityPerformance(selectedAnalysisItem, facilities, accountPredictorEntries, accountAnalysisItems, meters, meterData);
-        let includedMeters: Array<IdbUtilityMeter> = this.getIncludedMeters(meters, selectedAnalysisItem, accountAnalysisItems);
+        let includedMeters: Array<IdbUtilityMeter> = getIncludedMeters(meters, selectedAnalysisItem, accountAnalysisItems);
         let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(includedMeters, meterData, account, false, { energyIsSource: selectedAnalysisItem.energyIsSource, neededUnits: getNeededUnits(selectedAnalysisItem) });
         this.setReportAndBaselineYearSummaries(selectedAnalysisItem, account, facilities, accountPredictorEntries, accountAnalysisItems, baselineYear, reportYear, meters, meterData);
         this.setReportYearEnergySummaryClass(calanderizedMeters, reportYear);
@@ -160,21 +161,5 @@ export class BetterPlantsReportClass {
         }
     }
 
-    getIncludedMeters(meters: Array<IdbUtilityMeter>, selectedAnalysisItem: IdbAccountAnalysisItem, accountAnalysisItems: Array<IdbAnalysisItem>) {
-        let includedMeters: Array<IdbUtilityMeter> = new Array()
-        selectedAnalysisItem.facilityAnalysisItems.forEach(item => {
-            if (item.analysisItemId != undefined && item.analysisItemId != 'skip') {
-                let facilityAnalysisItem: IdbAnalysisItem = accountAnalysisItems.find(accountItem => { return accountItem.guid == item.analysisItemId });
-                facilityAnalysisItem.groups.forEach(group => {
-                    if (group.analysisType != 'skip') {
-                        let filteredMeters: Array<IdbUtilityMeter> = meters.filter(meter => {
-                            return meter.groupId == group.idbGroupId;
-                        });
-                        includedMeters = includedMeters.concat(filteredMeters);
-                    }
-                });
-            }
-        });
-        return includedMeters;
-    }
+
 }
