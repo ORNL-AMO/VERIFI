@@ -1,0 +1,65 @@
+<form [formGroup]="performanceReportForm">
+    <div class="row">
+        <div class="col-12">
+            <app-label-with-tooltip [isSemiBold]="true" [label]="'Select Account Analysis'"
+                [field]="'selectAccountAnalysis'">
+            </app-label-with-tooltip>
+            <div class="table-responsive">
+                <table class="table table-sm table-hover table-bordered">
+                    <thead>
+                        <tr>
+                            <td>
+
+                            </td>
+                            <td>
+                                Analysis Name
+                            </td>
+                            <td>
+                                Analysis Category
+                            </td>
+                            <td>
+                                Facilities Included
+                            </td>
+                            <td>
+                            </td>
+                        </tr>
+                    </thead>
+
+                    <tbody class="table-group-divider">
+                        <tr *ngFor="let analysisItem of accountAnalysisItems">
+                            <td class="text-center">
+                                <input type="radio" class="form-check-input" formControlName="analysisItemId"
+                                    [value]="analysisItem.guid" id="{{analysisItem.guid+'_selectedAccountItemId'}}"
+                                    (change)="save()">
+                            </td>
+                            <td>
+                                {{analysisItem.name}}
+                            </td>
+                            <td>
+                                <ng-container *ngIf="analysisItem.analysisCategory == 'energy'">Energy</ng-container>
+                                <ng-container *ngIf="analysisItem.analysisCategory == 'water'">Water</ng-container>
+                            </td>
+                            <td>
+                                <span
+                                    *ngFor="let facilityItem of analysisItem.facilityAnalysisItems; let index = index;">
+                                    <span *ngIf="facilityItem.analysisItemId && facilityItem.analysisItemId != 'skip'">
+                                        {{facilityItem.facilityId | facilityName}}<span
+                                            *ngIf="index != analysisItem.facilityAnalysisItems.length-1">,</span>
+                                    </span>
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <a class="click-link" (click)="viewAnalysis(analysisItem)">View Analysis</a>
+                            </td>
+                        </tr>
+                        <tr *ngIf="accountAnalysisItems.length == 0">
+                            <td colspan="4" class="alert alert-warning">
+                                No analysis items matching selected report year.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</form>

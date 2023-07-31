@@ -26,6 +26,8 @@ import { DataOverviewAccountReportComponent } from './data-overview-report/data-
 import { DataOverviewFacilityReportComponent } from './data-overview-report/data-overview-facility-report/data-overview-facility-report.component';
 import { PrintReportButtonComponent } from './print-report-button/print-report-button.component';
 import { PrimaryWaterConsumptionTableComponent } from './better-plants-report/primary-water-consumption-table/primary-water-consumption-table.component';
+import { PerformanceReportComponent } from './performance-report/performance-report.component';
+import { PerformanceSetupComponent } from './account-report-setup/performance-setup/performance-setup.component';
 
 
 
@@ -50,7 +52,9 @@ import { PrimaryWaterConsumptionTableComponent } from './better-plants-report/pr
     DataOverviewAccountReportComponent,
     DataOverviewFacilityReportComponent,
     PrintReportButtonComponent,
-    PrimaryWaterConsumptionTableComponent
+    PrimaryWaterConsumptionTableComponent,
+    PerformanceReportComponent,
+    PerformanceSetupComponent
   ],
   imports: [
     CommonModule,

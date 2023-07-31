@@ -54,7 +54,7 @@ export class AccountReportSetupComponent {
   }
 
   async changeReportType() {
-    if (this.setupForm.controls.reportType.value == 'betterPlants') {
+    if (this.setupForm.controls.reportType.value == 'betterPlants' || this.setupForm.controls.reportType.value == 'performance') {
       this.setupForm.controls.baselineYear.setValidators([Validators.required]);
       this.setupForm.controls.reportYear.setValidators([Validators.required]);
       this.setupForm.controls.startYear.clearValidators();

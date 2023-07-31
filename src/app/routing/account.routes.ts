@@ -27,6 +27,7 @@ import { RegionalEmissionsDataComponent } from "src/app/account/custom-database/
 import { AccountAnalysisEnergyDashboardComponent } from "../account/account-analysis/account-analysis-dashboard/account-analysis-energy-dashboard/account-analysis-energy-dashboard.component";
 import { AccountAnalysisWaterDashboardComponent } from "../account/account-analysis/account-analysis-dashboard/account-analysis-water-dashboard/account-analysis-water-dashboard.component";
 import { AccountAnalysisFacilitiesSummaryComponent } from "../account/account-analysis/account-analysis-results/account-analysis-facilities-summary/account-analysis-facilities-summary.component";
+import { PerformanceReportComponent } from "../account/account-reports/performance-report/performance-report.component";
 
 export const AccountRoutes: Route = {
     path: 'account',
@@ -66,7 +67,8 @@ export const AccountRoutes: Route = {
                 { path: 'dashboard', component: AccountReportsDashboardComponent },
                 { path: 'setup', component: AccountReportSetupComponent },
                 { path: 'better-plants-report', component: BetterPlantsReportComponent },
-                { path: 'data-overview-report', component: DataOverviewReportComponent }
+                { path: 'data-overview-report', component: DataOverviewReportComponent },
+                { path: 'performance-report', component: PerformanceReportComponent }
             ]
         },
         {
