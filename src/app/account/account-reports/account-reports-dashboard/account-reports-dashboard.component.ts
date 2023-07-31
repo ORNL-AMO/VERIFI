@@ -51,7 +51,7 @@ export class AccountReportsDashboardComponent {
   setListItems(accountReports: Array<IdbAccountReport>) {
     this.reportItemsList = new Array();
     let years: Array<number> = accountReports.map(item => {
-      if (item.reportType == 'betterPlants') {
+      if (item.reportType == 'betterPlants' || item.reportType == 'performance') {
         return item.reportYear
       } else if (item.reportType == 'dataOverview') {
         return item.endYear
@@ -61,7 +61,7 @@ export class AccountReportsDashboardComponent {
     years = _.orderBy(years, (year) => { return year }, 'desc');
     years.forEach(year => {
       let yearReports: Array<IdbAccountReport> = accountReports.filter(item => {
-        if (item.reportType == 'betterPlants') {
+        if (item.reportType == 'betterPlants' || item.reportType == 'performance') {
           return item.reportYear == year;
         } else if (item.reportType == 'dataOverview') {
           return item.endYear == year;

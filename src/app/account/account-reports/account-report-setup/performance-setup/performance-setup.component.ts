@@ -33,7 +33,6 @@ export class PerformanceSetupComponent {
   }
 
   ngOnInit() {
-    console.log('init');
     this.account = this.accountDbService.selectedAccount.getValue();
     this.selectedReportSub = this.accountReportDbService.selectedReport.subscribe(val => {
       if (!this.isFormChange) {

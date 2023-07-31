@@ -110,7 +110,6 @@ export class PerformanceReportComponent {
         accountFacilityAnalysisItems,
         includedFacilityMeters,
         accountMeterData);
-      console.log(this.performanceReport);
       this.calculating = false;
     }
   }
