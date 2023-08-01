@@ -1,0 +1,93 @@
+<table class="table table-bordered table-hover">
+    <thead>
+        <tr>
+            <th>
+                Facility
+            </th>
+            <th>
+                State
+            </th>
+            <ng-container *ngFor="let data of performanceReport.annualFacilityData[0].annualData; let index = index;">
+                <th class="border-left-cell">
+                    {{data.year}} Adjusted
+                </th>
+                <th>
+                    {{data.year}} Savings
+                </th>
+                <th class="border-right-cell">
+                    {{data.year}} Contribution
+                </th>
+                <ng-container *ngIf="index == performanceReport.annualFacilityData[0].annualData.length-1">
+                    <th>
+                        Change in Contribution
+                    </th>
+                    <th>
+                        Change in Adj. Baseline
+                    </th>
+                </ng-container>
+            </ng-container>
+        </tr>
+    </thead>
+    <tbody>
+        <tr *ngFor="let facilityData of performanceReport.annualFacilityData">
+            <td>
+                {{facilityData.facility.name}}
+            </td>
+            <td>
+                {{facilityData.facility.state}}
+            </td>
+            <ng-container *ngFor="let data of facilityData.annualData; let index = index;">
+                <td class="border-left-cell fill-cell"
+                    [ngStyle]="{'background-size': data.adjusted | tableFill: performanceReport.totals[index].adjusted}">
+                    {{data.adjusted | customNumber}}
+                </td>
+                <td [ngStyle]="{'background-color': data.savings | tableCellShading:savingsGoal:savingsGoal}">
+                    {{data.savings | number:'1.0-2'}} %
+                </td>
+                <td class="border-right-cell"
+                    [ngStyle]="{'background-color': data.contribution | tableCellShading:performanceReport.totals[index].minContribution: performanceReport.totals[index].maxContribution}">
+                    {{data.contribution | number:'1.0-2'}} %
+                </td>
+                <ng-container *ngIf="index == performanceReport.annualFacilityData[0].annualData.length-1">
+                    <td
+                        [ngStyle]="{'background-color': data.changeInContribution | tableCellShading:performanceReport.totals[index].minChangeInContribution: performanceReport.totals[index].maxChangeInContribution}">
+                        {{data.changeInContribution | number:'1.0-2'}} %
+                    </td>
+                    <td
+                        [ngStyle]="{'background-color': data.changeInAdjustedBaseline | tableCellShading:performanceReport.totals[index].minChangeInAdjustedBaseline: performanceReport.totals[index].maxChangeInAdjustedBaseline}">
+                        {{data.changeInAdjustedBaseline | number:'1.0-2'}} %
+                    </td>
+                </ng-container>
+            </ng-container>
+        </tr>
+    </tbody>
+    <tfoot>
+        <tr>
+            <th>
+                Totals
+            </th>
+            <th>
+
+            </th>
+            <ng-container *ngFor="let data of performanceReport.totals; let index = index;">
+                <th class="border-left-cell fill-cell">
+                    {{data.adjusted | customNumber}}
+                </th>
+                <th>
+                    {{data.savings | number:'1.0-2'}} %
+                </th>
+                <th class="border-right-cell">
+
+                </th>
+                <ng-container *ngIf="index == performanceReport.totals.length-1">
+                    <th>
+
+                    </th>
+                    <th>
+                        {{data.changeInAdjustedBaseline | number:'1.0-2'}} %
+                    </th>
+                </ng-container>
+            </ng-container>
+        </tr>
+    </tfoot>
+</table>

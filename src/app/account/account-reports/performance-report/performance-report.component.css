@@ -46,11 +46,3 @@ hr.page-spacer{
     font-style: italic;
     font-size: xx-small;
 }
-
-.border-left-cell{
-    border-left: solid black 4px;
-}
-
-.border-right-cell{
-    border-right: solid black 4px;
-}

@@ -28,6 +28,9 @@ import { PrintReportButtonComponent } from './print-report-button/print-report-b
 import { PrimaryWaterConsumptionTableComponent } from './better-plants-report/primary-water-consumption-table/primary-water-consumption-table.component';
 import { PerformanceReportComponent } from './performance-report/performance-report.component';
 import { PerformanceSetupComponent } from './account-report-setup/performance-setup/performance-setup.component';
+import { PerformanceReportFacilityTableComponent } from './performance-report/performance-report-facility-table/performance-report-facility-table.component';
+import { TableCellShadingPipe } from './performance-report/performance-report-facility-table/table-cell-shading.pipe';
+import { TableFillPipe } from './performance-report/performance-report-facility-table/table-fill.pipe';
 
 
 
@@ -54,7 +57,11 @@ import { PerformanceSetupComponent } from './account-report-setup/performance-se
     PrintReportButtonComponent,
     PrimaryWaterConsumptionTableComponent,
     PerformanceReportComponent,
-    PerformanceSetupComponent
+    PerformanceSetupComponent,
+    FacilityPerformanceTableComponent,
+    PerformanceReportFacilityTableComponent,
+    TableCellShadingPipe,
+    TableFillPipe
   ],
   imports: [
     CommonModule,
