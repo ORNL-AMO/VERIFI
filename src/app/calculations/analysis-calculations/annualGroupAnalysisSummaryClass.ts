@@ -11,8 +11,12 @@ export class AnnualGroupAnalysisSummaryClass {
     annualAnalysisSummaryDataClasses: Array<AnnualAnalysisSummaryDataClass>;
     baselineYear: number;
     reportYear: number;
-    constructor(selectedGroup: AnalysisGroup, analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, accountPredictorEntries: Array<IdbPredictorEntry>) {
-        this.setMonthlyAnalysisSummaryData(selectedGroup, analysisItem, facility, calanderizedMeters, accountPredictorEntries);
+    constructor(selectedGroup: AnalysisGroup, analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, accountPredictorEntries: Array<IdbPredictorEntry>, monthlyAnalysisSummaryData?: Array<MonthlyAnalysisSummaryData>) {
+        if (!this.monthlyAnalysisSummaryData) {
+            this.setMonthlyAnalysisSummaryData(selectedGroup, analysisItem, facility, calanderizedMeters, accountPredictorEntries);
+        }else{
+            this.monthlyAnalysisSummaryData = monthlyAnalysisSummaryData;
+        }
         this.setBaselineYear(analysisItem);
         this.setReportYear(analysisItem);
         this.setAnnualAnalysisSummaryDataClasses(accountPredictorEntries, facility);

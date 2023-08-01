@@ -31,6 +31,7 @@ import { PerformanceSetupComponent } from './account-report-setup/performance-se
 import { PerformanceReportFacilityTableComponent } from './performance-report/performance-report-facility-table/performance-report-facility-table.component';
 import { TableCellShadingPipe } from './performance-report/performance-report-facility-table/table-cell-shading.pipe';
 import { TableFillPipe } from './performance-report/performance-report-facility-table/table-fill.pipe';
+import { PerformanceReportGroupTableComponent } from './performance-report/performance-report-group-table/performance-report-group-table.component';
 
 
 
@@ -61,7 +62,8 @@ import { TableFillPipe } from './performance-report/performance-report-facility-
     FacilityPerformanceTableComponent,
     PerformanceReportFacilityTableComponent,
     TableCellShadingPipe,
-    TableFillPipe
+    TableFillPipe,
+    PerformanceReportGroupTableComponent
   ],
   imports: [
     CommonModule,

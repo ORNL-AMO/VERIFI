@@ -3,22 +3,34 @@ import { getCalanderizedMeterData } from "../calanderization/calanderizeMeters";
 import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData } from "src/app/models/idb";
 import { getNeededUnits } from "../shared-calculations/calanderizationFunctions";
 import { AnnualFacilityAnalysisSummaryClass } from "../analysis-calculations/annualFacilityAnalysisSummaryClass";
-import { AnnualAnalysisSummary } from "src/app/models/analysis";
+import { AnalysisGroup, AnnualAnalysisSummary } from "src/app/models/analysis";
 import * as _ from 'lodash';
+import { AnnualGroupAnalysisSummaryClass } from "../analysis-calculations/annualGroupAnalysisSummaryClass";
+import { MonthlyAnalysisSummaryClass } from "../analysis-calculations/monthlyAnalysisSummaryClass";
 
 export class PerformanceReport {
 
     reportYear: number;
     annualFacilityAnalysisSummaries: Array<{
         facility: IdbFacility,
-        annualAnalysisSummary: Array<AnnualAnalysisSummary>
+        annualAnalysisSummary: Array<AnnualAnalysisSummary>,
+        groupAnnualAnalysisSummary: Array<{
+            group: AnalysisGroup,
+            annualAnalysisSummary: Array<AnnualAnalysisSummary>
+        }>
     }>;
     annualFacilityData: Array<{
         facility: IdbFacility,
         annualData: Array<PerformanceReportAnnualData>,
     }>;
 
-    totals: Array<{
+    annualGroupData: Array<{
+        facility: IdbFacility,
+        group: AnalysisGroup,
+        annualData: Array<PerformanceReportAnnualData>,
+    }>;
+
+    facilityTotals: Array<{
         adjusted: number,
         savings: number,
         maxContribution: number,
@@ -42,7 +54,8 @@ export class PerformanceReport {
         meterData: Array<IdbUtilityMeterData>) {
         this.setAnnualFacilityAnalysisSummaries(selectedAnalysisItem, facilities, accountPredictorEntries, accountAnalysisItems, meters, meterData);
         this.setAnnualFacilityData(baselineYear, reportYear);
-        this.setTotals(baselineYear, reportYear);
+        this.setFacilityTotals(baselineYear, reportYear);
+        this.setAnnualGroupData(baselineYear, reportYear);
     }
 
     setAnnualFacilityAnalysisSummaries(
@@ -61,13 +74,28 @@ export class PerformanceReport {
                 let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, meterData, facility, false, { energyIsSource: facilityAnalysisItem.energyIsSource, neededUnits: getNeededUnits(facilityAnalysisItem) });
                 let facilityAnalysisSummaryClass: AnnualFacilityAnalysisSummaryClass = new AnnualFacilityAnalysisSummaryClass(facilityAnalysisItem, facility, calanderizedMeters, accountPredictorEntries, false);
                 let annualAnalysisSummary: Array<AnnualAnalysisSummary> = facilityAnalysisSummaryClass.getAnnualAnalysisSummaries();
+                let groupAnnualAnalysisSummary: Array<{
+                    group: AnalysisGroup,
+                    annualAnalysisSummary: Array<AnnualAnalysisSummary>
+                }> = new Array();
+                facilityAnalysisItem.groups.forEach(group => {
+                    let groupMonthlySummariesClass: MonthlyAnalysisSummaryClass = facilityAnalysisSummaryClass.groupMonthlySummariesClasses.find(groupClass => {
+                        return groupClass.group.idbGroupId == group.idbGroupId;
+                    });
+                    let groupAnnualAnalysisSummaryClass: AnnualGroupAnalysisSummaryClass = new AnnualGroupAnalysisSummaryClass(group, facilityAnalysisItem, facility, calanderizedMeters, accountPredictorEntries, groupMonthlySummariesClass.getMonthlyAnalysisSummaryData());
+                    groupAnnualAnalysisSummary.push({
+                        group: group,
+                        annualAnalysisSummary: groupAnnualAnalysisSummaryClass.getAnnualAnalysisSummaries()
+                    });
+                });
+
                 this.annualFacilityAnalysisSummaries.push({
                     facility: facility,
-                    annualAnalysisSummary: annualAnalysisSummary
-                })
+                    annualAnalysisSummary: annualAnalysisSummary,
+                    groupAnnualAnalysisSummary: groupAnnualAnalysisSummary
+                });
             }
-        })
-
+        });
     }
 
 
@@ -133,8 +161,8 @@ export class PerformanceReport {
         });
     }
 
-    setTotals(baselineYear: number, reportYear: number) {
-        this.totals = new Array();
+    setFacilityTotals(baselineYear: number, reportYear: number) {
+        this.facilityTotals = new Array();
         let allAnnualSummaries: Array<AnnualAnalysisSummary> = this.annualFacilityAnalysisSummaries.flatMap(facilitySummary => {
             return facilitySummary.annualAnalysisSummary;
         });
@@ -184,7 +212,7 @@ export class PerformanceReport {
                 baselineYearAdjusted = totalAdjusted;
             }
             changeInAdjustedBaseline = (totalAdjusted - baselineYearAdjusted) / baselineYearAdjusted;
-            this.totals.push({
+            this.facilityTotals.push({
                 adjusted: totalAdjusted,
                 savings: totalSavings,
                 year: startYear,
@@ -199,6 +227,72 @@ export class PerformanceReport {
             startYear++;
         }
     }
+
+    setAnnualGroupData(baselineYear: number, reportYear: number) {
+        this.annualGroupData = new Array();
+        let allAnnualSummaries: Array<AnnualAnalysisSummary> = this.annualFacilityAnalysisSummaries.flatMap(facilitySummary => {
+            return facilitySummary.annualAnalysisSummary;
+        });
+
+        this.annualFacilityAnalysisSummaries.forEach(facilitySummary => {
+            facilitySummary.groupAnnualAnalysisSummary.forEach(groupSummary => {
+                let annualData: Array<PerformanceReportAnnualData> = new Array();
+                let startYear: number = baselineYear;
+                let previousYearContribution: number = 0;
+                let baselineYearAdjusted: number = 0;
+                while (startYear <= reportYear) {
+                    let yearSummaryData: Array<AnnualAnalysisSummary> = allAnnualSummaries.filter(summary => {
+                        return summary.year == startYear
+                    });
+                    let totalAdjusted: number = _.sumBy(yearSummaryData, (data: AnnualAnalysisSummary) => {
+                        return data.adjusted;
+                    });
+                    let facilityYearSummary: AnnualAnalysisSummary = groupSummary.annualAnalysisSummary.find(annualSummary => {
+                        return annualSummary.year == startYear;
+                    });
+                    if (facilityYearSummary) {
+                        let changeInAdjustedBaseline: number = 0;
+                        let changeInContribution: number = 0;
+                        let contribution: number = (facilityYearSummary.adjusted * facilityYearSummary.totalSavingsPercentImprovement) / totalAdjusted;
+                        if (startYear == baselineYear) {
+                            baselineYearAdjusted = facilityYearSummary.adjusted;
+                        }
+                        changeInAdjustedBaseline = (facilityYearSummary.adjusted - baselineYearAdjusted) / baselineYearAdjusted;
+                        if (startYear != baselineYear && startYear != (baselineYear + 1)) {
+                            changeInContribution = (contribution - previousYearContribution);
+                        } else if (startYear == (baselineYear + 1)) {
+                            changeInContribution = contribution;
+                        }
+                        annualData.push({
+                            adjusted: facilityYearSummary.adjusted,
+                            savings: facilityYearSummary.totalSavingsPercentImprovement,
+                            year: startYear,
+                            contribution: contribution,
+                            changeInContribution: changeInContribution,
+                            changeInAdjustedBaseline: changeInAdjustedBaseline * 100
+                        });
+                        previousYearContribution = contribution;
+                    } else {
+                        annualData.push({
+                            adjusted: 0,
+                            savings: 0,
+                            year: startYear,
+                            contribution: 0,
+                            changeInContribution: 0,
+                            changeInAdjustedBaseline: 0
+                        });
+                    }
+                    startYear++;
+                }
+                this.annualGroupData.push({
+                    facility: facilitySummary.facility,
+                    group: groupSummary.group,
+                    annualData: annualData,
+                })
+            });
+        });
+    }
+
 }
 
 export interface PerformanceReportAnnualData {

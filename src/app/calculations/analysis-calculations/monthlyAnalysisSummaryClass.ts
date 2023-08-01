@@ -9,7 +9,9 @@ export class MonthlyAnalysisSummaryClass {
 
     monthlyGroupAnalysisClass: MonthlyGroupAnalysisClass;
     monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryDataClass>;
+    group: AnalysisGroup;
     constructor(selectedGroup: AnalysisGroup, analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, accountPredictorEntries: Array<IdbPredictorEntry>, calculateAllMonthlyData: boolean) {
+        this.group = selectedGroup;
         this.monthlyGroupAnalysisClass = new MonthlyGroupAnalysisClass(selectedGroup, analysisItem, facility, calanderizedMeters, accountPredictorEntries, calculateAllMonthlyData);
         this.setMonthlyAnalysisSummaryData();
     }
