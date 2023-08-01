@@ -5,6 +5,7 @@
                 <a class="item-name click-link" (click)="selectReport()">
                     <span class="fa fa-file" *ngIf="report.reportType == 'betterPlants'"></span>
                     <span class="fa fa-chart-simple" *ngIf="report.reportType == 'dataOverview'"></span>
+                    <span class="fa fa-table" *ngIf="report.reportType == 'performance'"></span>
                     {{report.name}}
                     <span class="fa fa-exclamation-circle" *ngIf="!isValid"></span>
                 </a>

@@ -1,5 +1,6 @@
 <ng-container *ngIf="calculating == false">
     <div class="report" [ngClass]="{'print': print}">
+        <h4>Facility Performance</h4>
         <app-performance-report-facility-table [performanceReport]="performanceReport" [account]="account"
             [selectedAnalysisItem]="selectedAnalysisItem"></app-performance-report-facility-table>
     </div>

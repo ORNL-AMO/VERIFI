@@ -1,28 +1,49 @@
-<table class="table table-bordered table-hover">
-    <thead>
+<table class="table utility-data table-sm table-bordered table-hover">
+    <thead class="sortable">
+        <tr class="table-mh">
+            <th colspan="2"></th>
+            <ng-container *ngFor="let data of performanceReport.annualFacilityData[0].annualData; let index = index;">
+                <th class="text-center" colspan="3">
+                    {{data.year}}
+                </th>
+                <ng-container *ngIf="index == performanceReport.annualFacilityData[0].annualData.length-1">
+                    <th colspan="2">
+
+                    </th>
+                </ng-container>
+            </ng-container>
+        </tr>
         <tr>
-            <th>
+            <th (click)="setOrderDataField('facilityName', undefined)"
+                [ngClass]="{'active': orderDataField == 'facilityName'}">
                 Facility
             </th>
-            <th>
+            <th (click)="setOrderDataField('state', undefined)" [ngClass]="{'active': orderDataField == 'state'}"
+                class="text-center">
                 State
             </th>
             <ng-container *ngFor="let data of performanceReport.annualFacilityData[0].annualData; let index = index;">
-                <th class="border-left-cell">
-                    {{data.year}} Adjusted
+                <th (click)="setOrderDataField('adjusted', data.year)"
+                    [ngClass]="{'active': orderDataField == 'adjusted'}" class="text-center">
+                    Adjusted<br>
+                    (<span [innerHTML]="units | settingsLabel"></span>)
                 </th>
-                <th>
-                    {{data.year}} Savings
+                <th (click)="setOrderDataField('savings', data.year)"
+                    [ngClass]="{'active': orderDataField == 'savings'}" class="text-center">
+                    Savings
                 </th>
-                <th class="border-right-cell">
-                    {{data.year}} Contribution
+                <th (click)="setOrderDataField('contribution', data.year)"
+                    [ngClass]="{'active': orderDataField == 'contribution'}" class="text-center">
+                    Contribution
                 </th>
                 <ng-container *ngIf="index == performanceReport.annualFacilityData[0].annualData.length-1">
-                    <th>
-                        Change in Contribution
+                    <th (click)="setOrderDataField('changeInContribution', data.year)"
+                        [ngClass]="{'active': orderDataField == 'changeInContribution'}" class="text-center">
+                        Change in<br> Contribution
                     </th>
-                    <th>
-                        Change in Adj. Baseline
+                    <th (click)="setOrderDataField('changeInAdjustedBaseline', data.year)"
+                        [ngClass]="{'active': orderDataField == 'changeInAdjustedBaseline'}" class="text-center">
+                        Change in<br> Adj. Baseline
                     </th>
                 </ng-container>
             </ng-container>
@@ -33,27 +54,28 @@
             <td>
                 {{facilityData.facility.name}}
             </td>
-            <td>
+            <td class="text-center">
                 {{facilityData.facility.state}}
             </td>
             <ng-container *ngFor="let data of facilityData.annualData; let index = index;">
-                <td class="border-left-cell fill-cell"
+                <td class="text-center fill-cell"
                     [ngStyle]="{'background-size': data.adjusted | tableFill: performanceReport.totals[index].adjusted}">
                     {{data.adjusted | customNumber}}
                 </td>
-                <td [ngStyle]="{'background-color': data.savings | tableCellShading:savingsGoal:savingsGoal}">
+                <td class="text-center"
+                    [ngStyle]="{'background-color': data.savings | tableCellShading:savingsGoal:savingsGoal}">
                     {{data.savings | number:'1.0-2'}} %
                 </td>
-                <td class="border-right-cell"
+                <td class="text-center"
                     [ngStyle]="{'background-color': data.contribution | tableCellShading:performanceReport.totals[index].minContribution: performanceReport.totals[index].maxContribution}">
                     {{data.contribution | number:'1.0-2'}} %
                 </td>
                 <ng-container *ngIf="index == performanceReport.annualFacilityData[0].annualData.length-1">
-                    <td
+                    <td class="text-center"
                         [ngStyle]="{'background-color': data.changeInContribution | tableCellShading:performanceReport.totals[index].minChangeInContribution: performanceReport.totals[index].maxChangeInContribution}">
                         {{data.changeInContribution | number:'1.0-2'}} %
                     </td>
-                    <td
+                    <td class="text-center"
                         [ngStyle]="{'background-color': data.changeInAdjustedBaseline | tableCellShading:performanceReport.totals[index].minChangeInAdjustedBaseline: performanceReport.totals[index].maxChangeInAdjustedBaseline}">
                         {{data.changeInAdjustedBaseline | number:'1.0-2'}} %
                     </td>
@@ -70,20 +92,20 @@
 
             </th>
             <ng-container *ngFor="let data of performanceReport.totals; let index = index;">
-                <th class="border-left-cell fill-cell">
+                <th class="text-center fill-cell">
                     {{data.adjusted | customNumber}}
                 </th>
-                <th>
+                <th class="text-center">
                     {{data.savings | number:'1.0-2'}} %
                 </th>
-                <th class="border-right-cell">
+                <th>
 
                 </th>
                 <ng-container *ngIf="index == performanceReport.totals.length-1">
                     <th>
 
                     </th>
-                    <th>
+                    <th class="text-center">
                         {{data.changeInAdjustedBaseline | number:'1.0-2'}} %
                     </th>
                 </ng-container>
