@@ -4,6 +4,7 @@ import { IdbAccount, IdbAccountAnalysisItem, IdbFacility } from 'src/app/models/
 import * as _ from 'lodash';
 import { AnalysisGroup } from 'src/app/models/analysis';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
+import { PerformanceReportSetup } from 'src/app/models/overview-report';
 
 @Component({
   selector: 'app-performance-report-group-table',
@@ -17,6 +18,8 @@ export class PerformanceReportGroupTableComponent {
   account: IdbAccount;
   @Input()
   selectedAnalysisItem: IdbAccountAnalysisItem;
+  @Input()
+  performanceReportSetup: PerformanceReportSetup;
 
   savingsGoal: number;
   orderDataField: string = 'facilityName';

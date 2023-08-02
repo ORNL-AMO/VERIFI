@@ -113,6 +113,7 @@ export interface DataOverviewReportSetup {
 export interface PerformanceReportSetup {
   analysisItemId: string,
   includeFacilityPerformanceTable: boolean,
-  includeUtilityPerformanceTable: boolean
+  includeUtilityPerformanceTable: boolean,
+  groupPerformanceByYear: boolean
   
 }

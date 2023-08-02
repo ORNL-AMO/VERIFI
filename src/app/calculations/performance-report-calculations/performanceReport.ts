@@ -52,6 +52,7 @@ export class PerformanceReport {
         accountAnalysisItems: Array<IdbAnalysisItem>,
         meters: Array<IdbUtilityMeter>,
         meterData: Array<IdbUtilityMeterData>) {
+        this.reportYear = reportYear;
         this.setAnnualFacilityAnalysisSummaries(selectedAnalysisItem, facilities, accountPredictorEntries, accountAnalysisItems, meters, meterData);
         this.setAnnualFacilityData(baselineYear, reportYear);
         this.setFacilityTotals(baselineYear, reportYear);
@@ -120,13 +121,12 @@ export class PerformanceReport {
                     return annualSummary.year == startYear;
                 });
                 if (facilityYearSummary) {
-                    let changeInAdjustedBaseline: number = 0;
                     let changeInContribution: number = 0;
                     let contribution: number = (facilityYearSummary.adjusted * facilityYearSummary.totalSavingsPercentImprovement) / totalAdjusted;
                     if (startYear == baselineYear) {
                         baselineYearAdjusted = facilityYearSummary.adjusted;
                     }
-                    changeInAdjustedBaseline = (facilityYearSummary.adjusted - baselineYearAdjusted) / baselineYearAdjusted;
+                    let changeInAdjustedBaseline: number =  (facilityYearSummary.adjusted - baselineYearAdjusted) / baselineYearAdjusted;
                     if (startYear != baselineYear && startYear != (baselineYear + 1)) {
                         changeInContribution = (contribution - previousYearContribution);
                     } else if (startYear == (baselineYear + 1)) {

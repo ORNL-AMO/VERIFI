@@ -123,7 +123,8 @@ export class AccountReportDbService {
       performanceReportSetup: {
         analysisItemId: undefined,
         includeFacilityPerformanceTable: true,
-        includeUtilityPerformanceTable: false
+        includeUtilityPerformanceTable: false,
+        groupPerformanceByYear: false
       }
     }
   }
@@ -133,8 +134,8 @@ export class AccountReportDbService {
     for (let i = 0; i < accountReports.length; i++) {
       let report: IdbAccountReport = accountReports[i];
       report.dataOverviewReportSetup.includedFacilities = report.dataOverviewReportSetup.includedFacilities.filter(facility => { return facility.facilityId != facilityId });
-      
-      this.loadingService.setLoadingMessage('Removing Facility From Reports (' + i + '/' + accountReports.length + ')...' );
+
+      this.loadingService.setLoadingMessage('Removing Facility From Reports (' + i + '/' + accountReports.length + ')...');
       await firstValueFrom(this.updateWithObservable(report));
     }
   }
@@ -147,7 +148,7 @@ export class AccountReportDbService {
 
   async deleteReports(accountReports: Array<IdbAccountReport>) {
     for (let i = 0; i < accountReports.length; i++) {
-      this.loadingService.setLoadingMessage('Deleting Reports (' + i + '/' + accountReports.length + ')...' );
+      this.loadingService.setLoadingMessage('Deleting Reports (' + i + '/' + accountReports.length + ')...');
       await this.deleteWithObservable(accountReports[i].id);
     }
   }

@@ -14,7 +14,8 @@
             </div>
             <hr>
             <app-performance-report-facility-table [performanceReport]="performanceReport" [account]="account"
-                [selectedAnalysisItem]="selectedAnalysisItem"></app-performance-report-facility-table>
+                [selectedAnalysisItem]="selectedAnalysisItem"
+                [performanceReportSetup]="selectedReport.performanceReportSetup"></app-performance-report-facility-table>
         </ng-container>
         <ng-container *ngIf="selectedReport.performanceReportSetup.includeUtilityPerformanceTable">
             <h4>Utility Performance</h4>
@@ -30,7 +31,8 @@
             </div>
             <hr>
             <app-performance-report-group-table [performanceReport]="performanceReport" [account]="account"
-                [selectedAnalysisItem]="selectedAnalysisItem"></app-performance-report-group-table>
+                [selectedAnalysisItem]="selectedAnalysisItem"
+                [performanceReportSetup]="selectedReport.performanceReportSetup"></app-performance-report-group-table>
         </ng-container>
     </div>
 </ng-container>

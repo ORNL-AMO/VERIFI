@@ -2,6 +2,7 @@ import { Component, Input } from '@angular/core';
 import { PerformanceReport, PerformanceReportAnnualData } from 'src/app/calculations/performance-report-calculations/performanceReport';
 import { IdbAccount, IdbAccountAnalysisItem, IdbFacility } from 'src/app/models/idb';
 import * as _ from 'lodash';
+import { PerformanceReportSetup } from 'src/app/models/overview-report';
 
 @Component({
   selector: 'app-performance-report-facility-table',
@@ -15,6 +16,8 @@ export class PerformanceReportFacilityTableComponent {
   account: IdbAccount;
   @Input()
   selectedAnalysisItem: IdbAccountAnalysisItem;
+  @Input()
+  performanceReportSetup: PerformanceReportSetup;
 
   savingsGoal: number;
   orderDataField: string = 'facilityName';
@@ -37,8 +40,7 @@ export class PerformanceReportFacilityTableComponent {
   }
 
   setOrderDataField(str: string, year: number) {
-    this.orderByYear = year;
-    if (str == this.orderDataField) {
+    if (str == this.orderDataField && year == this.orderByYear) {
       if (this.orderByDirection == 'desc') {
         this.orderByDirection = 'asc';
       } else {
@@ -46,7 +48,9 @@ export class PerformanceReportFacilityTableComponent {
       }
     } else {
       this.orderDataField = str;
+      this.orderByYear = year;
     }
+    console.log(this.orderByYear);
     this.orderData();
   }
 
