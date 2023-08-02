@@ -112,11 +112,15 @@ export class AccountReportsService {
   getPerformanceFormFromReport(performanceReportSetup: PerformanceReportSetup): FormGroup {
     if (!performanceReportSetup) {
       performanceReportSetup = {
-        analysisItemId: undefined
+        analysisItemId: undefined,
+        includeFacilityPerformanceTable: true,
+        includeUtilityPerformanceTable: false,
       };
     }
     let form: FormGroup = this.formBuilder.group({
-      analysisItemId: [performanceReportSetup.analysisItemId, Validators.required]
+      analysisItemId: [performanceReportSetup.analysisItemId, Validators.required],
+      includeFacilityPerformanceTable: [performanceReportSetup.includeFacilityPerformanceTable],
+      includeUtilityPerformanceTable: [performanceReportSetup.includeUtilityPerformanceTable]
     });
     return form;
   }
@@ -124,10 +128,14 @@ export class AccountReportsService {
   updatePerformanceReportSetupFromForm(performanceReportSetup: PerformanceReportSetup, form: FormGroup): PerformanceReportSetup {
     if (!performanceReportSetup) {
       performanceReportSetup = {
-        analysisItemId: undefined
+        analysisItemId: undefined,
+        includeFacilityPerformanceTable: true,
+        includeUtilityPerformanceTable: false,
       };
     }
     performanceReportSetup.analysisItemId = form.controls.analysisItemId.value;
+    performanceReportSetup.includeFacilityPerformanceTable = form.controls.includeFacilityPerformanceTable.value;
+    performanceReportSetup.includeUtilityPerformanceTable = form.controls.includeUtilityPerformanceTable.value;
     return performanceReportSetup;
   }
 

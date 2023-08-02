@@ -2,7 +2,6 @@ import { Component, Input } from '@angular/core';
 import { PerformanceReport, PerformanceReportAnnualData } from 'src/app/calculations/performance-report-calculations/performanceReport';
 import { IdbAccount, IdbAccountAnalysisItem, IdbFacility } from 'src/app/models/idb';
 import * as _ from 'lodash';
-import { AnnualAnalysisSummary } from 'src/app/models/analysis';
 
 @Component({
   selector: 'app-performance-report-facility-table',

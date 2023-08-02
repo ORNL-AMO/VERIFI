@@ -1,12 +1,37 @@
 <ng-container *ngIf="calculating == false">
     <div class="report" [ngClass]="{'print': print}">
-        <h4>Facility Performance</h4>
-        <app-performance-report-facility-table [performanceReport]="performanceReport" [account]="account"
-            [selectedAnalysisItem]="selectedAnalysisItem"></app-performance-report-facility-table>
-        <hr>
-        <h4>Utility Performance</h4>
-        <app-performance-report-group-table [performanceReport]="performanceReport" [account]="account"
-            [selectedAnalysisItem]="selectedAnalysisItem"></app-performance-report-group-table>
+        <ng-container *ngIf="selectedReport.performanceReportSetup.includeFacilityPerformanceTable">
+            <h4>Facility Performance</h4>
+            <div class="row">
+                <div class="col-6">
+                    <app-facility-performance-chart [performanceReport]="performanceReport"
+                        [chartDataOption]="'savings'"></app-facility-performance-chart>
+                </div>
+                <div class="col-6">
+                    <app-facility-performance-chart [performanceReport]="performanceReport"
+                        [chartDataOption]="'contribution'"></app-facility-performance-chart>
+                </div>
+            </div>
+            <hr>
+            <app-performance-report-facility-table [performanceReport]="performanceReport" [account]="account"
+                [selectedAnalysisItem]="selectedAnalysisItem"></app-performance-report-facility-table>
+        </ng-container>
+        <ng-container *ngIf="selectedReport.performanceReportSetup.includeUtilityPerformanceTable">
+            <h4>Utility Performance</h4>
+            <div class="row">
+                <div class="col-6">
+                    <app-group-performance-chart [performanceReport]="performanceReport"
+                        [chartDataOption]="'savings'"></app-group-performance-chart>
+                </div>
+                <div class="col-6">
+                    <app-group-performance-chart [performanceReport]="performanceReport"
+                        [chartDataOption]="'contribution'"></app-group-performance-chart>
+                </div>
+            </div>
+            <hr>
+            <app-performance-report-group-table [performanceReport]="performanceReport" [account]="account"
+                [selectedAnalysisItem]="selectedAnalysisItem"></app-performance-report-group-table>
+        </ng-container>
     </div>
 </ng-container>
 <div class="w-100 justify-content-center" *ngIf="calculating != false">

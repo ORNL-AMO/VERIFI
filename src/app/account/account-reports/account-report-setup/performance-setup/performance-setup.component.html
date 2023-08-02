@@ -62,6 +62,26 @@
             </div>
         </div>
     </div>
+    <div class="row">
+        <div class="col-12">
+            <hr>
+            <label class="semibold">Report Content Options</label>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="includeFacilityPerformanceTable"
+                    name="includeFacilityPerformanceTable" formControlName="includeFacilityPerformanceTable"
+                    (change)="save()">
+                <label class="form-check-label" for="includeFacilityPerformanceTable">Include facility
+                    performance table</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="includeUtilityPerformanceTable"
+                    name="includeUtilityPerformanceTable" formControlName="includeUtilityPerformanceTable"
+                    (change)="save()">
+                <label class="form-check-label" for="includeUtilityPerformanceTable">Include utility
+                    performance table</label>
+            </div>
+        </div>
+    </div>
 </form>
 
 

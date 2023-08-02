@@ -121,7 +121,9 @@ export class AccountReportDbService {
         includeMonthlyLineChartForFacility: true
       },
       performanceReportSetup: {
-        analysisItemId: undefined
+        analysisItemId: undefined,
+        includeFacilityPerformanceTable: true,
+        includeUtilityPerformanceTable: false
       }
     }
   }
