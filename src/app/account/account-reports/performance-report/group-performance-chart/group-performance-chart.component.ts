@@ -59,6 +59,9 @@ export class GroupPerformanceChartComponent {
 
 
       var layout = {
+        font:{
+          size: 12
+        },
         title: {
           text: title,
           font: {

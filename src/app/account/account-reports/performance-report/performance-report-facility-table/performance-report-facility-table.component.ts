@@ -50,7 +50,6 @@ export class PerformanceReportFacilityTableComponent {
       this.orderDataField = str;
       this.orderByYear = year;
     }
-    console.log(this.orderByYear);
     this.orderData();
   }
 

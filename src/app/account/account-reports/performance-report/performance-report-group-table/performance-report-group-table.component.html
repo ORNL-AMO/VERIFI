@@ -160,6 +160,10 @@
                     class="text-center">
                     State
                 </th>
+                <th (click)="setOrderDataField('groupName', undefined)"
+                    [ngClass]="{'active': orderDataField == 'groupName'}" class="text-center">
+                    Utility
+                </th>
                 <ng-container *ngFor="let data of performanceReport.annualGroupData[0].annualData">
                     <th (click)="setOrderDataField('adjusted', data.year)"
                         [ngClass]="{'active': orderDataField == 'adjusted' && orderByYear == data.year}"
@@ -202,6 +206,9 @@
                 <td class="text-center">
                     {{groupData.facility.state}}
                 </td>
+                <td class="text-center">
+                    {{groupData.group.idbGroupId | groupName}}
+                </td>
                 <ng-container *ngFor="let data of groupData.annualData; let index = index;">
                     <td class="text-center fill-cell"
                         [ngStyle]="{'background-size': data.adjusted | tableFill: performanceReport.facilityTotals[index].adjusted}">
@@ -239,6 +246,7 @@
                 <th>
 
                 </th>
+                <th></th>
                 <ng-container *ngFor="let data of performanceReport.facilityTotals; let index = index;">
                     <th class="text-center fill-cell">
                         {{data.adjusted | customNumber}}

@@ -1,7 +1,7 @@
 import { Component, ElementRef, Input, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { PerformanceReport, PerformanceReportAnnualData } from 'src/app/calculations/performance-report-calculations/performanceReport';
-import { IdbAccountReport } from 'src/app/models/idb';
+
 @Component({
   selector: 'app-facility-performance-chart',
   templateUrl: './facility-performance-chart.component.html',
@@ -12,8 +12,6 @@ export class FacilityPerformanceChartComponent {
   performanceReport: PerformanceReport;
   @Input()
   chartDataOption: 'savings' | 'contribution';
-  @Input()
-  report: IdbAccountReport;
 
   @ViewChild('facilityPerformanceChart', { static: false }) facilityPerformanceChart: ElementRef;
 

@@ -34,6 +34,7 @@ import { TableFillPipe } from './performance-report/performance-report-facility-
 import { PerformanceReportGroupTableComponent } from './performance-report/performance-report-group-table/performance-report-group-table.component';
 import { FacilityPerformanceChartComponent } from './performance-report/facility-performance-chart/facility-performance-chart.component';
 import { GroupPerformanceChartComponent } from './performance-report/group-performance-chart/group-performance-chart.component';
+import { TopFiveTableComponent } from '../account-report/performance-reports/top-five-table/top-five-table.component';
 
 
 
@@ -67,7 +68,8 @@ import { GroupPerformanceChartComponent } from './performance-report/group-perfo
     TableFillPipe,
     PerformanceReportGroupTableComponent,
     FacilityPerformanceChartComponent,
-    GroupPerformanceChartComponent
+    GroupPerformanceChartComponent,
+    TopFiveTableComponent
   ],
   imports: [
     CommonModule,
