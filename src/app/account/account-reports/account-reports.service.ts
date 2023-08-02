@@ -115,14 +115,16 @@ export class AccountReportsService {
         analysisItemId: undefined,
         includeFacilityPerformanceTable: true,
         includeUtilityPerformanceTable: false,
-        groupPerformanceByYear: false
+        groupPerformanceByYear: false,
+        numberOfTopPerformers: 5
       };
     }
     let form: FormGroup = this.formBuilder.group({
       analysisItemId: [performanceReportSetup.analysisItemId, Validators.required],
       includeFacilityPerformanceTable: [performanceReportSetup.includeFacilityPerformanceTable],
       includeUtilityPerformanceTable: [performanceReportSetup.includeUtilityPerformanceTable],
-      groupPerformanceByYear: [performanceReportSetup.groupPerformanceByYear]
+      groupPerformanceByYear: [performanceReportSetup.groupPerformanceByYear],
+      numberOfTopPerformers: [performanceReportSetup.numberOfTopPerformers]
     });
     return form;
   }
@@ -133,13 +135,15 @@ export class AccountReportsService {
         analysisItemId: undefined,
         includeFacilityPerformanceTable: true,
         includeUtilityPerformanceTable: false,
-        groupPerformanceByYear: false
+        groupPerformanceByYear: false,
+        numberOfTopPerformers: 5
       };
     }
     performanceReportSetup.analysisItemId = form.controls.analysisItemId.value;
     performanceReportSetup.includeFacilityPerformanceTable = form.controls.includeFacilityPerformanceTable.value;
     performanceReportSetup.includeUtilityPerformanceTable = form.controls.includeUtilityPerformanceTable.value;
     performanceReportSetup.groupPerformanceByYear = form.controls.groupPerformanceByYear.value;
+    performanceReportSetup.numberOfTopPerformers = form.controls.numberOfTopPerformers.value;
     return performanceReportSetup;
   }
 

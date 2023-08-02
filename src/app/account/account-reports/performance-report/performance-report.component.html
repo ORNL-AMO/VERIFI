@@ -5,24 +5,32 @@
         <h4>Facility Performance</h4>
         <div class="row">
             <div class="col-6">
-                <h5>Top 5 / Low 5 Performing Facilities</h5>
+                <h5>Top {{selectedReport.performanceReportSetup.numberOfTopPerformers}} / Low
+                    {{selectedReport.performanceReportSetup.numberOfTopPerformers}} Performing Facilities</h5>
                 <app-top-five-table [performanceReport]="performanceReport" [chartDataOption]="'savings'"
-                    [dataType]="'facility'"></app-top-five-table>
+                    [dataType]="'facility'"
+                    [performanceReportSetup]="selectedReport.performanceReportSetup"></app-top-five-table>
             </div>
             <div class="col-6">
-                <h5>Top 5 / Low 5 Contributing Facilities</h5>
+                <h5>Top {{selectedReport.performanceReportSetup.numberOfTopPerformers}} / Low
+                    {{selectedReport.performanceReportSetup.numberOfTopPerformers}} Contributing Facilities</h5>
                 <app-top-five-table [performanceReport]="performanceReport" [chartDataOption]="'contribution'"
-                    [dataType]="'facility'"></app-top-five-table>
+                    [dataType]="'facility'"
+                    [performanceReportSetup]="selectedReport.performanceReportSetup"></app-top-five-table>
             </div>
             <div class="col-6">
-                <h5>Top 5 / Low 5 Change In Contribution</h5>
-                <app-top-five-table [performanceReport]="performanceReport" [chartDataOption]="'changeInContribution'"
-                    [dataType]="'facility'"></app-top-five-table>
-            </div>
-            <div class="col-6">
-                <h5>Top 5 / Low 5 Change In Performance</h5>
+                <h5>Top {{selectedReport.performanceReportSetup.numberOfTopPerformers}} / Low
+                    {{selectedReport.performanceReportSetup.numberOfTopPerformers}} Change In Performance</h5>
                 <app-top-five-table [performanceReport]="performanceReport"
-                    [chartDataOption]="'changeInAdjustedBaseline'" [dataType]="'facility'"></app-top-five-table>
+                    [chartDataOption]="'changeInAdjustedBaseline'" [dataType]="'facility'"
+                    [performanceReportSetup]="selectedReport.performanceReportSetup"></app-top-five-table>
+            </div>
+            <div class="col-6">
+                <h5>Top {{selectedReport.performanceReportSetup.numberOfTopPerformers}} / Low
+                    {{selectedReport.performanceReportSetup.numberOfTopPerformers}} Change In Contribution</h5>
+                <app-top-five-table [performanceReport]="performanceReport" [chartDataOption]="'changeInContribution'"
+                    [dataType]="'facility'"
+                    [performanceReportSetup]="selectedReport.performanceReportSetup"></app-top-five-table>
             </div>
         </div>
         <hr>
@@ -50,24 +58,32 @@
         <h4>Utility Performance</h4>
         <div class="row">
             <div class="col-6">
-                <h5>Top 5 / Low 5 Performing Groups</h5>
+                <h5>Top {{selectedReport.performanceReportSetup.numberOfTopPerformers}} / Low
+                    {{selectedReport.performanceReportSetup.numberOfTopPerformers}} Performing Groups</h5>
                 <app-top-five-table [performanceReport]="performanceReport" [chartDataOption]="'savings'"
-                    [dataType]="'group'"></app-top-five-table>
+                    [dataType]="'group'"
+                    [performanceReportSetup]="selectedReport.performanceReportSetup"></app-top-five-table>
             </div>
             <div class="col-6">
-                <h5>Top 5 / Low 5 Contributing Groups</h5>
+                <h5>Top {{selectedReport.performanceReportSetup.numberOfTopPerformers}} / Low
+                    {{selectedReport.performanceReportSetup.numberOfTopPerformers}} Contributing Groups</h5>
                 <app-top-five-table [performanceReport]="performanceReport" [chartDataOption]="'contribution'"
-                    [dataType]="'group'"></app-top-five-table>
+                    [dataType]="'group'"
+                    [performanceReportSetup]="selectedReport.performanceReportSetup"></app-top-five-table>
             </div>
             <div class="col-6">
-                <h5>Top 5 / Low 5 Change In Contribution</h5>
-                <app-top-five-table [performanceReport]="performanceReport" [chartDataOption]="'changeInContribution'"
-                    [dataType]="'group'"></app-top-five-table>
-            </div>
-            <div class="col-6">
-                <h5>Top 5 / Low 5 Change In Performance</h5>
+                <h5>Top {{selectedReport.performanceReportSetup.numberOfTopPerformers}} / Low
+                    {{selectedReport.performanceReportSetup.numberOfTopPerformers}} Change In Performance</h5>
                 <app-top-five-table [performanceReport]="performanceReport"
-                    [chartDataOption]="'changeInAdjustedBaseline'" [dataType]="'group'"></app-top-five-table>
+                    [chartDataOption]="'changeInAdjustedBaseline'" [dataType]="'group'"
+                    [performanceReportSetup]="selectedReport.performanceReportSetup"></app-top-five-table>
+            </div>
+            <div class="col-6">
+                <h5>Top {{selectedReport.performanceReportSetup.numberOfTopPerformers}} / Low
+                    {{selectedReport.performanceReportSetup.numberOfTopPerformers}} Change In Contribution</h5>
+                <app-top-five-table [performanceReport]="performanceReport" [chartDataOption]="'changeInContribution'"
+                    [dataType]="'group'"
+                    [performanceReportSetup]="selectedReport.performanceReportSetup"></app-top-five-table>
             </div>
         </div>
         <hr>

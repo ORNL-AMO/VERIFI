@@ -4,6 +4,7 @@ import { IdbFacility } from 'src/app/models/idb';
 import * as _ from 'lodash';
 import { AnalysisGroup } from 'src/app/models/analysis';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
+import { PerformanceReportSetup } from 'src/app/models/overview-report';
 @Component({
   selector: 'app-top-five-table',
   templateUrl: './top-five-table.component.html',
@@ -16,6 +17,8 @@ export class TopFiveTableComponent {
   chartDataOption: 'savings' | 'contribution' | 'changeInContribution' | 'changeInAdjustedBaseline';
   @Input()
   dataType: 'facility' | 'group';
+  @Input()
+  performanceReportSetup: PerformanceReportSetup;
 
   tableData: Array<{
     order: number,
@@ -69,7 +72,7 @@ export class TopFiveTableComponent {
       return yearSummary[this.chartDataOption];
     }, 'desc');
     this.tableData = new Array();
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < this.performanceReportSetup.numberOfTopPerformers; i++) {
       let topFacilityItem: {
         facility: IdbFacility, annualData: Array<PerformanceReportAnnualData>
       } = annualFacilityData[i];
@@ -114,7 +117,7 @@ export class TopFiveTableComponent {
 
 
     this.tableData = new Array();
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < this.performanceReportSetup.numberOfTopPerformers; i++) {
       let topItem: {
         facility: IdbFacility, annualData: Array<PerformanceReportAnnualData>, group: AnalysisGroup
       } = annualGroupData[i];

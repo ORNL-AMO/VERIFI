@@ -4,18 +4,20 @@
             <th (click)="setOrderDataField('order')" [ngClass]="{'active': orderDataField == 'order'}">
                 Change
             </th>
-            <th (click)="setOrderDataField('highValueName')"
+            <th class="w-25" (click)="setOrderDataField('highValueName')"
                 [ngClass]="{'active': orderDataField == 'highValueName'}">
-                Top 5
+                Top {{performanceReportSetup.numberOfTopPerformers}}
             </th>
-            <th (click)="setOrderDataField('topValue')" [ngClass]="{'active': orderDataField == 'topValue'}">
+            <th class="w-25" (click)="setOrderDataField('topValue')"
+                [ngClass]="{'active': orderDataField == 'topValue'}">
                 {{valueLabel}}
             </th>
-            <th (click)="setOrderDataField('lowValueName')"
+            <th class="w-25" (click)="setOrderDataField('lowValueName')"
                 [ngClass]="{'active': orderDataField == 'lowValueName'}">
-                Low 5
+                Low {{performanceReportSetup.numberOfTopPerformers}}
             </th>
-            <th (click)="setOrderDataField('lowValue')" [ngClass]="{'active': orderDataField == 'lowValue'}">
+            <th class="w-25" (click)="setOrderDataField('lowValue')"
+                [ngClass]="{'active': orderDataField == 'lowValue'}">
                 {{valueLabel}}
             </th>
         </tr>

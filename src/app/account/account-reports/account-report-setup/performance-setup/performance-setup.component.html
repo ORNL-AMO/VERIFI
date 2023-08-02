@@ -85,6 +85,13 @@
                     name="groupPerformanceByYear" formControlName="groupPerformanceByYear" (change)="save()">
                 <label class="form-check-label" for="groupPerformanceByYear">Group performance by year</label>
             </div>
+            <div class="form-group">
+                <label for="numberOfTopPerformers">Number of Top Performers to Highlight</label>
+                <select id="numberOfTopPerformers" name="numberOfTopPerformers" formControlName="numberOfTopPerformers"
+                    class="form-select auto-width" required (change)="save()">
+                    <option *ngFor="let value of numberOfPerformerOptions" [ngValue]="value">{{value}}</option>
+                </select>
+            </div>
         </div>
     </div>
 </form>

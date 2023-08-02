@@ -124,7 +124,8 @@ export class AccountReportDbService {
         analysisItemId: undefined,
         includeFacilityPerformanceTable: true,
         includeUtilityPerformanceTable: false,
-        groupPerformanceByYear: false
+        groupPerformanceByYear: false,
+        numberOfTopPerformers: 5
       }
     }
   }

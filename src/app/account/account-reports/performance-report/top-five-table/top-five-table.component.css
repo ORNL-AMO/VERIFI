@@ -1,3 +1,4 @@
-td{
-    width: 20%;
+
+td, th{
+    text-align: center;
 }
