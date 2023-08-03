@@ -116,7 +116,11 @@ export class AccountReportsService {
         includeFacilityPerformanceTable: true,
         includeUtilityPerformanceTable: false,
         groupPerformanceByYear: false,
-        numberOfTopPerformers: 5
+        numberOfTopPerformers: 5,
+        includeActual: false,
+        includeAdjusted: true,
+        includeContribution: true,
+        includeSavings: true,
       };
     }
     let form: FormGroup = this.formBuilder.group({
@@ -124,7 +128,11 @@ export class AccountReportsService {
       includeFacilityPerformanceTable: [performanceReportSetup.includeFacilityPerformanceTable],
       includeUtilityPerformanceTable: [performanceReportSetup.includeUtilityPerformanceTable],
       groupPerformanceByYear: [performanceReportSetup.groupPerformanceByYear],
-      numberOfTopPerformers: [performanceReportSetup.numberOfTopPerformers]
+      numberOfTopPerformers: [performanceReportSetup.numberOfTopPerformers],
+      includeActual: [performanceReportSetup.includeActual],
+      includeAdjusted: [performanceReportSetup.includeAdjusted],
+      includeContribution: [performanceReportSetup.includeContribution],
+      includeSavings: [performanceReportSetup.includeSavings],
     });
     return form;
   }
@@ -136,7 +144,11 @@ export class AccountReportsService {
         includeFacilityPerformanceTable: true,
         includeUtilityPerformanceTable: false,
         groupPerformanceByYear: false,
-        numberOfTopPerformers: 5
+        numberOfTopPerformers: 5,
+        includeActual: false,
+        includeAdjusted: true,
+        includeContribution: true,
+        includeSavings: true,
       };
     }
     performanceReportSetup.analysisItemId = form.controls.analysisItemId.value;
@@ -144,6 +156,10 @@ export class AccountReportsService {
     performanceReportSetup.includeUtilityPerformanceTable = form.controls.includeUtilityPerformanceTable.value;
     performanceReportSetup.groupPerformanceByYear = form.controls.groupPerformanceByYear.value;
     performanceReportSetup.numberOfTopPerformers = form.controls.numberOfTopPerformers.value;
+    performanceReportSetup.includeActual = form.controls.includeActual.value;
+    performanceReportSetup.includeAdjusted = form.controls.includeAdjusted.value;
+    performanceReportSetup.includeContribution = form.controls.includeContribution.value;
+    performanceReportSetup.includeSavings = form.controls.includeSavings.value;
     return performanceReportSetup;
   }
 

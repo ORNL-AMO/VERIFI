@@ -26,6 +26,7 @@ export class PerformanceReportGroupTableComponent {
   orderByYear: number;
   orderByDirection: 'asc' | 'desc' = 'asc';
   units: string;
+  numberOfData: number = 0;
   constructor(private utilityMeterGroupDbService: UtilityMeterGroupdbService) {
 
   }
@@ -39,6 +40,7 @@ export class PerformanceReportGroupTableComponent {
       this.units = this.selectedAnalysisItem.waterUnit;
     }
     this.orderData();
+    this.setNumberOfData();
   }
 
   setOrderDataField(str: string, year: number) {
@@ -74,6 +76,23 @@ export class PerformanceReportGroupTableComponent {
         let yearSummary: PerformanceReportAnnualData = data.annualData.find(summary => { return summary.year == this.orderByYear })
         return yearSummary[this.orderDataField];
       }, this.orderByDirection);
+    }
+  }
+
+  
+  setNumberOfData() {
+    this.numberOfData = 0;
+    if (this.performanceReportSetup.includeActual) {
+      this.numberOfData++;
+    }
+    if (this.performanceReportSetup.includeAdjusted) {
+      this.numberOfData++;
+    }
+    if (this.performanceReportSetup.includeContribution) {
+      this.numberOfData++;
+    }
+    if (this.performanceReportSetup.includeSavings) {
+      this.numberOfData++;
     }
   }
 

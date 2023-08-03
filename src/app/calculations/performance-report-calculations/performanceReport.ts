@@ -31,6 +31,7 @@ export class PerformanceReport {
     }>;
 
     facilityTotals: Array<{
+        actual: number,
         adjusted: number,
         savings: number,
         maxContribution: number,
@@ -134,6 +135,7 @@ export class PerformanceReport {
                     }
                     annualData.push({
                         adjusted: facilityYearSummary.adjusted,
+                        actual: facilityYearSummary.energyUse,
                         savings: facilityYearSummary.totalSavingsPercentImprovement,
                         year: startYear,
                         contribution: contribution,
@@ -144,6 +146,7 @@ export class PerformanceReport {
                 } else {
                     annualData.push({
                         adjusted: 0,
+                        actual: 0,
                         savings: 0,
                         year: startYear,
                         contribution: 0,
@@ -177,6 +180,10 @@ export class PerformanceReport {
             });
             let totalAdjusted: number = _.sumBy(yearSummaryData, (data: AnnualAnalysisSummary) => {
                 return data.adjusted;
+            });
+
+            let actual: number = _.sumBy(yearSummaryData, (data: AnnualAnalysisSummary) => {
+                return data.energyUse;
             });
 
             let totalSavings: number = _.sumBy(yearSummaryData, (data: AnnualAnalysisSummary) => {
@@ -213,6 +220,7 @@ export class PerformanceReport {
             }
             changeInAdjustedBaseline = (totalAdjusted - baselineYearAdjusted) / baselineYearAdjusted;
             this.facilityTotals.push({
+                actual: actual,
                 adjusted: totalAdjusted,
                 savings: totalSavings,
                 year: startYear,
@@ -265,6 +273,7 @@ export class PerformanceReport {
                         }
                         annualData.push({
                             adjusted: facilityYearSummary.adjusted,
+                            actual: facilityYearSummary.energyUse,
                             savings: facilityYearSummary.totalSavingsPercentImprovement,
                             year: startYear,
                             contribution: contribution,
@@ -275,6 +284,7 @@ export class PerformanceReport {
                     } else {
                         annualData.push({
                             adjusted: 0,
+                            actual: 0,
                             savings: 0,
                             year: startYear,
                             contribution: 0,
@@ -297,6 +307,7 @@ export class PerformanceReport {
 
 export interface PerformanceReportAnnualData {
     adjusted: number,
+    actual: number,
     savings: number,
     contribution: number,
     year: number,

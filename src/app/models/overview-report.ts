@@ -115,6 +115,9 @@ export interface PerformanceReportSetup {
   includeFacilityPerformanceTable: boolean,
   includeUtilityPerformanceTable: boolean,
   groupPerformanceByYear: boolean,
-  numberOfTopPerformers: number
-  
+  numberOfTopPerformers: number,
+  includeActual: boolean,
+  includeAdjusted: boolean,
+  includeContribution: boolean,
+  includeSavings: boolean,  
 }

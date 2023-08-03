@@ -6,6 +6,7 @@ import { IdbAccount, IdbAccountReport, IdbFacility } from '../models/idb';
 import { AccountdbService } from './account-db.service';
 import { FacilitydbService } from './facility-db.service';
 import { LoadingService } from '../core-components/loading/loading.service';
+import { ParseTreeResult } from '@angular/compiler';
 
 @Injectable({
   providedIn: 'root'
@@ -125,7 +126,11 @@ export class AccountReportDbService {
         includeFacilityPerformanceTable: true,
         includeUtilityPerformanceTable: false,
         groupPerformanceByYear: false,
-        numberOfTopPerformers: 5
+        numberOfTopPerformers: 5,
+        includeActual: false,
+        includeAdjusted: true,
+        includeContribution: true,
+        includeSavings: true,  
       }
     }
   }

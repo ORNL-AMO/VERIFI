@@ -4,14 +4,14 @@
         *ngIf="selectedReport.performanceReportSetup.includeFacilityPerformanceTable">
         <h4>Facility Performance</h4>
         <div class="row">
-            <div class="col-6">
+            <div class="col-6" *ngIf="selectedReport.performanceReportSetup.includeSavings">
                 <h5>Top {{selectedReport.performanceReportSetup.numberOfTopPerformers}} / Low
                     {{selectedReport.performanceReportSetup.numberOfTopPerformers}} Performing Facilities</h5>
                 <app-top-five-table [performanceReport]="performanceReport" [chartDataOption]="'savings'"
                     [dataType]="'facility'"
                     [performanceReportSetup]="selectedReport.performanceReportSetup"></app-top-five-table>
             </div>
-            <div class="col-6">
+            <div class="col-6" *ngIf="selectedReport.performanceReportSetup.includeContribution">
                 <h5>Top {{selectedReport.performanceReportSetup.numberOfTopPerformers}} / Low
                     {{selectedReport.performanceReportSetup.numberOfTopPerformers}} Contributing Facilities</h5>
                 <app-top-five-table [performanceReport]="performanceReport" [chartDataOption]="'contribution'"
@@ -34,20 +34,20 @@
             </div>
         </div>
         <hr>
-        <div class="row">
+        <div class="row" *ngIf="selectedReport.performanceReportSetup.includeSavings">
             <div class="col-12">
                 <app-facility-performance-chart [performanceReport]="performanceReport"
                     [chartDataOption]="'savings'"></app-facility-performance-chart>
             </div>
+            <hr>
         </div>
-        <hr>
-        <div class="row">
+        <div class="row" *ngIf="selectedReport.performanceReportSetup.includeContribution">
             <div class="col-12">
                 <app-facility-performance-chart [performanceReport]="performanceReport"
                     [chartDataOption]="'contribution'"></app-facility-performance-chart>
             </div>
+            <hr>
         </div>
-        <hr>
         <app-performance-report-facility-table [performanceReport]="performanceReport" [account]="account"
             [selectedAnalysisItem]="selectedAnalysisItem"
             [performanceReportSetup]="selectedReport.performanceReportSetup"></app-performance-report-facility-table>
@@ -57,14 +57,14 @@
         *ngIf="selectedReport.performanceReportSetup.includeUtilityPerformanceTable">
         <h4>Utility Performance</h4>
         <div class="row">
-            <div class="col-6">
+            <div class="col-6" *ngIf="selectedReport.performanceReportSetup.includeSavings">
                 <h5>Top {{selectedReport.performanceReportSetup.numberOfTopPerformers}} / Low
                     {{selectedReport.performanceReportSetup.numberOfTopPerformers}} Performing Groups</h5>
                 <app-top-five-table [performanceReport]="performanceReport" [chartDataOption]="'savings'"
                     [dataType]="'group'"
                     [performanceReportSetup]="selectedReport.performanceReportSetup"></app-top-five-table>
             </div>
-            <div class="col-6">
+            <div class="col-6" *ngIf="selectedReport.performanceReportSetup.includeContribution">
                 <h5>Top {{selectedReport.performanceReportSetup.numberOfTopPerformers}} / Low
                     {{selectedReport.performanceReportSetup.numberOfTopPerformers}} Contributing Groups</h5>
                 <app-top-five-table [performanceReport]="performanceReport" [chartDataOption]="'contribution'"
@@ -87,20 +87,20 @@
             </div>
         </div>
         <hr>
-        <div class="row">
+        <div class="row" *ngIf="selectedReport.performanceReportSetup.includeSavings">
             <div class="col-12">
                 <app-group-performance-chart [performanceReport]="performanceReport"
                     [chartDataOption]="'savings'"></app-group-performance-chart>
             </div>
+            <hr>
         </div>
-        <hr>
-        <div class="row">
+        <div class="row" *ngIf="selectedReport.performanceReportSetup.includeContribution">
             <div class="col-12">
                 <app-group-performance-chart [performanceReport]="performanceReport"
                     [chartDataOption]="'contribution'"></app-group-performance-chart>
             </div>
+            <hr>
         </div>
-        <hr>
         <app-performance-report-group-table [performanceReport]="performanceReport" [account]="account"
             [selectedAnalysisItem]="selectedAnalysisItem"
             [performanceReportSetup]="selectedReport.performanceReportSetup"></app-performance-report-group-table>

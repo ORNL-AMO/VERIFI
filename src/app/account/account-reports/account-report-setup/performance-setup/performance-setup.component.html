@@ -92,6 +92,30 @@
                     <option *ngFor="let value of numberOfPerformerOptions" [ngValue]="value">{{value}}</option>
                 </select>
             </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="includeActual"
+                    name="includeActual" formControlName="includeActual"
+                    (change)="save()">
+                <label class="form-check-label" for="includeActual">Include actual</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="includeAdjusted"
+                    name="includeAdjusted" formControlName="includeAdjusted"
+                    (change)="save()">
+                <label class="form-check-label" for="includeAdjusted">Include adjusted</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="includeContribution"
+                    name="includeContribution" formControlName="includeContribution"
+                    (change)="save()">
+                <label class="form-check-label" for="includeContribution">Include contribution</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="includeSavings"
+                    name="includeSavings" formControlName="includeSavings"
+                    (change)="save()">
+                <label class="form-check-label" for="includeSavings">Include savings</label>
+            </div>
         </div>
     </div>
 </form>
