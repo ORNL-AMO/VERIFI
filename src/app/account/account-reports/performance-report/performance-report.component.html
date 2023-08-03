@@ -1,4 +1,21 @@
 <ng-container *ngIf="calculating == false">
+    <div class="report performance-report" [ngClass]="{'print': print}">
+        <h4>Utility Performance</h4>
+        <app-performance-report-utility-table [performanceReport]="performanceReport" [account]="account"
+            [selectedAnalysisItem]="selectedAnalysisItem"
+            [performanceReportSetup]="selectedReport.performanceReportSetup"></app-performance-report-utility-table>
+        <hr>
+        <div class="row">
+            <div class="col-6" *ngIf="selectedReport.performanceReportSetup.includeSavings">
+                <app-performance-chart [performanceReport]="performanceReport" [chartDataOption]="'savings'"
+                    [chartDataType]="'utility'"></app-performance-chart>
+            </div>
+            <div class="col-6" *ngIf="selectedReport.performanceReportSetup.includeContribution">
+                <app-performance-chart [performanceReport]="performanceReport" [chartDataOption]="'contribution'"
+                    [chartDataType]="'utility'"></app-performance-chart>
+            </div>
+        </div>
+    </div>
     <!--facility report-->
     <div class="report performance-report" [ngClass]="{'print': print}"
         *ngIf="selectedReport.performanceReportSetup.includeFacilityPerformanceTable">
@@ -36,15 +53,15 @@
         <hr>
         <div class="row" *ngIf="selectedReport.performanceReportSetup.includeSavings">
             <div class="col-12">
-                <app-facility-performance-chart [performanceReport]="performanceReport"
-                    [chartDataOption]="'savings'"></app-facility-performance-chart>
+                <app-performance-chart [performanceReport]="performanceReport" [chartDataOption]="'savings'"
+                    [chartDataType]="'facility'"></app-performance-chart>
             </div>
             <hr>
         </div>
         <div class="row" *ngIf="selectedReport.performanceReportSetup.includeContribution">
             <div class="col-12">
-                <app-facility-performance-chart [performanceReport]="performanceReport"
-                    [chartDataOption]="'contribution'"></app-facility-performance-chart>
+                <app-performance-chart [performanceReport]="performanceReport" [chartDataOption]="'contribution'"
+                    [chartDataType]="'facility'"></app-performance-chart>
             </div>
             <hr>
         </div>
@@ -89,15 +106,15 @@
         <hr>
         <div class="row" *ngIf="selectedReport.performanceReportSetup.includeSavings">
             <div class="col-12">
-                <app-group-performance-chart [performanceReport]="performanceReport"
-                    [chartDataOption]="'savings'"></app-group-performance-chart>
+                <app-performance-chart [performanceReport]="performanceReport" [chartDataOption]="'savings'"
+                    [chartDataType]="'group'"></app-performance-chart>
             </div>
             <hr>
         </div>
         <div class="row" *ngIf="selectedReport.performanceReportSetup.includeContribution">
             <div class="col-12">
-                <app-group-performance-chart [performanceReport]="performanceReport"
-                    [chartDataOption]="'contribution'"></app-group-performance-chart>
+                <app-performance-chart [performanceReport]="performanceReport" [chartDataOption]="'contribution'"
+                    [chartDataType]="'group'"></app-performance-chart>
             </div>
             <hr>
         </div>

@@ -7,6 +7,7 @@ import { AnalysisGroup, AnnualAnalysisSummary } from "src/app/models/analysis";
 import * as _ from 'lodash';
 import { AnnualGroupAnalysisSummaryClass } from "../analysis-calculations/annualGroupAnalysisSummaryClass";
 import { MonthlyAnalysisSummaryClass } from "../analysis-calculations/monthlyAnalysisSummaryClass";
+import { MeterSource } from "src/app/models/constantsAndTypes";
 
 export class PerformanceReport {
 
@@ -16,7 +17,8 @@ export class PerformanceReport {
         annualAnalysisSummary: Array<AnnualAnalysisSummary>,
         groupAnnualAnalysisSummary: Array<{
             group: AnalysisGroup,
-            annualAnalysisSummary: Array<AnnualAnalysisSummary>
+            annualAnalysisSummary: Array<AnnualAnalysisSummary>,
+            utilityClassification: MeterSource | 'Mixed'
         }>
     }>;
     annualFacilityData: Array<{
@@ -27,6 +29,11 @@ export class PerformanceReport {
     annualGroupData: Array<{
         facility: IdbFacility,
         group: AnalysisGroup,
+        annualData: Array<PerformanceReportAnnualData>,
+    }>;
+
+    annualUtilityData: Array<{
+        utilityClassification: MeterSource | 'Mixed',
         annualData: Array<PerformanceReportAnnualData>,
     }>;
 
@@ -58,6 +65,7 @@ export class PerformanceReport {
         this.setAnnualFacilityData(baselineYear, reportYear);
         this.setFacilityTotals(baselineYear, reportYear);
         this.setAnnualGroupData(baselineYear, reportYear);
+        this.setAnnualUtilityData(baselineYear, reportYear);
     }
 
     setAnnualFacilityAnalysisSummaries(
@@ -78,7 +86,8 @@ export class PerformanceReport {
                 let annualAnalysisSummary: Array<AnnualAnalysisSummary> = facilityAnalysisSummaryClass.getAnnualAnalysisSummaries();
                 let groupAnnualAnalysisSummary: Array<{
                     group: AnalysisGroup,
-                    annualAnalysisSummary: Array<AnnualAnalysisSummary>
+                    annualAnalysisSummary: Array<AnnualAnalysisSummary>,
+                    utilityClassification: MeterSource | 'Mixed'
                 }> = new Array();
                 facilityAnalysisItem.groups.forEach(group => {
                     let groupMonthlySummariesClass: MonthlyAnalysisSummaryClass = facilityAnalysisSummaryClass.groupMonthlySummariesClasses.find(groupClass => {
@@ -87,7 +96,8 @@ export class PerformanceReport {
                     let groupAnnualAnalysisSummaryClass: AnnualGroupAnalysisSummaryClass = new AnnualGroupAnalysisSummaryClass(group, facilityAnalysisItem, facility, calanderizedMeters, accountPredictorEntries, groupMonthlySummariesClass.getMonthlyAnalysisSummaryData());
                     groupAnnualAnalysisSummary.push({
                         group: group,
-                        annualAnalysisSummary: groupAnnualAnalysisSummaryClass.getAnnualAnalysisSummaries()
+                        annualAnalysisSummary: groupAnnualAnalysisSummaryClass.getAnnualAnalysisSummaries(),
+                        utilityClassification: groupAnnualAnalysisSummaryClass.utilityClassification
                     });
                 });
 
@@ -127,7 +137,7 @@ export class PerformanceReport {
                     if (startYear == baselineYear) {
                         baselineYearAdjusted = facilityYearSummary.adjusted;
                     }
-                    let changeInAdjustedBaseline: number =  (facilityYearSummary.adjusted - baselineYearAdjusted) / baselineYearAdjusted;
+                    let changeInAdjustedBaseline: number = (facilityYearSummary.adjusted - baselineYearAdjusted) / baselineYearAdjusted;
                     if (startYear != baselineYear && startYear != (baselineYear + 1)) {
                         changeInContribution = (contribution - previousYearContribution);
                     } else if (startYear == (baselineYear + 1)) {
@@ -241,6 +251,155 @@ export class PerformanceReport {
         let allAnnualSummaries: Array<AnnualAnalysisSummary> = this.annualFacilityAnalysisSummaries.flatMap(facilitySummary => {
             return facilitySummary.annualAnalysisSummary;
         });
+
+        this.annualFacilityAnalysisSummaries.forEach(facilitySummary => {
+            facilitySummary.groupAnnualAnalysisSummary.forEach(groupSummary => {
+                let annualData: Array<PerformanceReportAnnualData> = new Array();
+                let startYear: number = baselineYear;
+                let previousYearContribution: number = 0;
+                let baselineYearAdjusted: number = 0;
+                while (startYear <= reportYear) {
+                    let yearSummaryData: Array<AnnualAnalysisSummary> = allAnnualSummaries.filter(summary => {
+                        return summary.year == startYear
+                    });
+                    let totalAdjusted: number = _.sumBy(yearSummaryData, (data: AnnualAnalysisSummary) => {
+                        return data.adjusted;
+                    });
+                    let facilityYearSummary: AnnualAnalysisSummary = groupSummary.annualAnalysisSummary.find(annualSummary => {
+                        return annualSummary.year == startYear;
+                    });
+                    if (facilityYearSummary) {
+                        let changeInAdjustedBaseline: number = 0;
+                        let changeInContribution: number = 0;
+                        let contribution: number = (facilityYearSummary.adjusted * facilityYearSummary.totalSavingsPercentImprovement) / totalAdjusted;
+                        if (startYear == baselineYear) {
+                            baselineYearAdjusted = facilityYearSummary.adjusted;
+                        }
+                        changeInAdjustedBaseline = (facilityYearSummary.adjusted - baselineYearAdjusted) / baselineYearAdjusted;
+                        if (startYear != baselineYear && startYear != (baselineYear + 1)) {
+                            changeInContribution = (contribution - previousYearContribution);
+                        } else if (startYear == (baselineYear + 1)) {
+                            changeInContribution = contribution;
+                        }
+                        annualData.push({
+                            adjusted: facilityYearSummary.adjusted,
+                            actual: facilityYearSummary.energyUse,
+                            savings: facilityYearSummary.totalSavingsPercentImprovement,
+                            year: startYear,
+                            contribution: contribution,
+                            changeInContribution: changeInContribution,
+                            changeInAdjustedBaseline: changeInAdjustedBaseline * 100
+                        });
+                        previousYearContribution = contribution;
+                    } else {
+                        annualData.push({
+                            adjusted: 0,
+                            actual: 0,
+                            savings: 0,
+                            year: startYear,
+                            contribution: 0,
+                            changeInContribution: 0,
+                            changeInAdjustedBaseline: 0
+                        });
+                    }
+                    startYear++;
+                }
+                this.annualGroupData.push({
+                    facility: facilitySummary.facility,
+                    group: groupSummary.group,
+                    annualData: annualData,
+                })
+            });
+        });
+    }
+
+    setAnnualUtilityData(baselineYear: number, reportYear: number) {
+        this.annualUtilityData = new Array();
+        let allAnnualSummaries: Array<AnnualAnalysisSummary> = this.annualFacilityAnalysisSummaries.flatMap(facilitySummary => {
+            return facilitySummary.annualAnalysisSummary;
+        });
+
+        let includedSources: Array<MeterSource | 'Mixed'> = new Array();
+        let allGroupSummaries: Array<{ utilityClassiciation: MeterSource | 'Mixed', annualAnalysisSummary: Array<AnnualAnalysisSummary> }> = new Array();
+        this.annualFacilityAnalysisSummaries.forEach(facilitySummary => {
+            facilitySummary.groupAnnualAnalysisSummary.forEach(groupSummary => {
+                includedSources.push(groupSummary.utilityClassification)
+                allGroupSummaries.push({
+                    utilityClassiciation: groupSummary.utilityClassification,
+                    annualAnalysisSummary: groupSummary.annualAnalysisSummary
+                })
+            })
+        });
+        includedSources = _.uniq(includedSources);
+
+        includedSources.forEach(utilitySource => {
+            let annualData: Array<PerformanceReportAnnualData> = new Array();
+            let startYear: number = baselineYear;
+            let previousYearContribution: number = 0;
+            let baselineYearAdjusted: number = 0;
+            while (startYear <= reportYear) {
+                let yearSummaryData: Array<AnnualAnalysisSummary> = allAnnualSummaries.filter(summary => {
+                    return summary.year == startYear
+                });
+                let totalAdjusted: number = _.sumBy(yearSummaryData, (data: AnnualAnalysisSummary) => {
+                    return data.adjusted;
+                });
+
+                let utilityGroupSummaries = allGroupSummaries.filter(summary => {
+                    return summary.utilityClassiciation == utilitySource
+                })
+
+                let annualAnalysisSummaries: Array<AnnualAnalysisSummary> = utilityGroupSummaries.flatMap(summary => {
+                    return summary.annualAnalysisSummary
+                });
+
+                let startYearAnalysisSummaries: Array<AnnualAnalysisSummary> = annualAnalysisSummaries.filter(summary => {
+                    return summary.year == startYear;
+                })
+
+                let adjusted: number = _.sumBy(startYearAnalysisSummaries, (summary: AnnualAnalysisSummary) => {
+                    return summary.adjusted;
+                });
+
+                let energyUse: number = _.sumBy(startYearAnalysisSummaries, (summary: AnnualAnalysisSummary) => {
+                    return summary.energyUse;
+                });
+
+                let totalSavingsPercentImprovement: number = _.sumBy(startYearAnalysisSummaries, (summary: AnnualAnalysisSummary) => {
+                    return summary.totalSavingsPercentImprovement;
+                });
+
+                let changeInAdjustedBaseline: number = 0;
+                let changeInContribution: number = 0;
+                let contribution: number = (adjusted * totalSavingsPercentImprovement) / totalAdjusted;
+                if (startYear == baselineYear) {
+                    baselineYearAdjusted = adjusted;
+                }
+                changeInAdjustedBaseline = (adjusted - baselineYearAdjusted) / baselineYearAdjusted;
+                if (startYear != baselineYear && startYear != (baselineYear + 1)) {
+                    changeInContribution = (contribution - previousYearContribution);
+                } else if (startYear == (baselineYear + 1)) {
+                    changeInContribution = contribution;
+                }
+                annualData.push({
+                    adjusted: adjusted,
+                    actual: energyUse,
+                    savings: totalSavingsPercentImprovement,
+                    year: startYear,
+                    contribution: contribution,
+                    changeInContribution: changeInContribution,
+                    changeInAdjustedBaseline: changeInAdjustedBaseline * 100
+                });
+                previousYearContribution = contribution;
+
+                startYear++;
+            }
+            this.annualUtilityData.push({
+                utilityClassification: utilitySource,
+                annualData: annualData,
+            })
+        });
+
 
         this.annualFacilityAnalysisSummaries.forEach(facilitySummary => {
             facilitySummary.groupAnnualAnalysisSummary.forEach(groupSummary => {

@@ -5,16 +5,20 @@ import { AnnualAnalysisSummaryDataClass } from "./annualAnalysisSummaryDataClass
 import { MonthlyAnalysisSummaryClass } from "./monthlyAnalysisSummaryClass";
 import { AnnualAnalysisSummary } from 'src/app/models/analysis';
 import { checkAnalysisValue } from "../shared-calculations/calculationsHelpers";
+import { MeterSource } from "src/app/models/constantsAndTypes";
+import * as _ from 'lodash';
+
 export class AnnualGroupAnalysisSummaryClass {
 
     monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>;
     annualAnalysisSummaryDataClasses: Array<AnnualAnalysisSummaryDataClass>;
     baselineYear: number;
     reportYear: number;
+    utilityClassification: MeterSource | 'Mixed';
     constructor(selectedGroup: AnalysisGroup, analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, accountPredictorEntries: Array<IdbPredictorEntry>, monthlyAnalysisSummaryData?: Array<MonthlyAnalysisSummaryData>) {
         if (!this.monthlyAnalysisSummaryData) {
             this.setMonthlyAnalysisSummaryData(selectedGroup, analysisItem, facility, calanderizedMeters, accountPredictorEntries);
-        }else{
+        } else {
             this.monthlyAnalysisSummaryData = monthlyAnalysisSummaryData;
         }
         this.setBaselineYear(analysisItem);
@@ -25,6 +29,7 @@ export class AnnualGroupAnalysisSummaryClass {
     setMonthlyAnalysisSummaryData(selectedGroup: AnalysisGroup, analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, accountPredictorEntries: Array<IdbPredictorEntry>) {
         let monthlyAnalysisSummaryClass: MonthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(selectedGroup, analysisItem, facility, calanderizedMeters, accountPredictorEntries, false);
         this.monthlyAnalysisSummaryData = monthlyAnalysisSummaryClass.getMonthlyAnalysisSummaryData();
+        this.setUtilityClassification(monthlyAnalysisSummaryClass.monthlyGroupAnalysisClass.groupMeters);
     }
 
     setBaselineYear(analysisItem: IdbAnalysisItem) {
@@ -43,6 +48,18 @@ export class AnnualGroupAnalysisSummaryClass {
             let yearAnalysisSummaryDataClass: AnnualAnalysisSummaryDataClass = new AnnualAnalysisSummaryDataClass(this.monthlyAnalysisSummaryData, analysisYear, accountPredictorEntries, facility, this.annualAnalysisSummaryDataClasses);
             this.annualAnalysisSummaryDataClasses.push(yearAnalysisSummaryDataClass);
             analysisYear++;
+        }
+    }
+
+    setUtilityClassification(groupMeters: Array<CalanderizedMeter>) {
+        let sources: Array<MeterSource> = groupMeters.map(cMeter => {
+            return cMeter.meter.source
+        });
+        sources = _.uniq(sources);
+        if (sources.length > 1) {
+            this.utilityClassification = 'Mixed';
+        } else {
+            this.utilityClassification = sources[0];
         }
     }
 
