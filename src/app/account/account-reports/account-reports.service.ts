@@ -115,6 +115,7 @@ export class AccountReportsService {
         analysisItemId: undefined,
         includeFacilityPerformanceTable: true,
         includeUtilityPerformanceTable: false,
+        
         groupPerformanceByYear: false,
         numberOfTopPerformers: 5,
         includeActual: false,

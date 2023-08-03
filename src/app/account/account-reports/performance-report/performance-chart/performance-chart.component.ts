@@ -48,6 +48,20 @@ export class PerformanceChartComponent {
         title = title + 'Utility';
       }
 
+      if (this.chartDataOption == 'savings') {
+        data.push({
+          type: "scatter",
+          mode: "lines+markers",
+          name: 'Corporate',
+          x: this.performanceReport.facilityTotals.map(data => { return data.year }),
+          y: this.performanceReport.facilityTotals.map(data => { return data.savings }),
+          line: { dash: 'dot', color: '#17202A', width: 6},
+          marker: {
+            size: 8
+          }
+        })
+      }
+
       var layout = {
         title: {
           text: title,
@@ -88,7 +102,7 @@ export class PerformanceChartComponent {
     return (value).toLocaleString(undefined, { maximumFractionDigits: 2, minimumIntegerDigits: 1 })
   }
 
-  getYData(annualData: Array<PerformanceReportAnnualData>): Array<number> {
+  getYData(annualData: Array<{ contribution: number, savings: number }>): Array<number> {
     return annualData.map(data => {
       if (this.chartDataOption == 'contribution') {
         return data.contribution;

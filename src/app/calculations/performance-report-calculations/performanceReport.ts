@@ -196,9 +196,7 @@ export class PerformanceReport {
                 return data.energyUse;
             });
 
-            let totalSavings: number = _.sumBy(yearSummaryData, (data: AnnualAnalysisSummary) => {
-                return data.totalSavingsPercentImprovement;
-            });
+            let totalSavings: number = (totalAdjusted - actual) / totalAdjusted;
 
             let yearAnnualData: Array<PerformanceReportAnnualData> = allAnnualData.filter(data => { return data.year == startYear });
 
@@ -232,7 +230,7 @@ export class PerformanceReport {
             this.facilityTotals.push({
                 actual: actual,
                 adjusted: totalAdjusted,
-                savings: totalSavings,
+                savings: totalSavings * 100,
                 year: startYear,
                 maxContribution: maxYearContribution.contribution,
                 minContribution: minYearContribution.contribution,
@@ -365,13 +363,11 @@ export class PerformanceReport {
                     return summary.energyUse;
                 });
 
-                let totalSavingsPercentImprovement: number = _.sumBy(startYearAnalysisSummaries, (summary: AnnualAnalysisSummary) => {
-                    return summary.totalSavingsPercentImprovement;
-                });
+                let totalSavingsPercentImprovement: number =  (adjusted - energyUse) / adjusted;
 
                 let changeInAdjustedBaseline: number = 0;
                 let changeInContribution: number = 0;
-                let contribution: number = (adjusted * totalSavingsPercentImprovement) / totalAdjusted;
+                let contribution: number = (adjusted * (totalSavingsPercentImprovement*100)) / totalAdjusted;
                 if (startYear == baselineYear) {
                     baselineYearAdjusted = adjusted;
                 }
@@ -384,7 +380,7 @@ export class PerformanceReport {
                 annualData.push({
                     adjusted: adjusted,
                     actual: energyUse,
-                    savings: totalSavingsPercentImprovement,
+                    savings: totalSavingsPercentImprovement * 100,
                     year: startYear,
                     contribution: contribution,
                     changeInContribution: changeInContribution,
@@ -398,67 +394,6 @@ export class PerformanceReport {
                 utilityClassification: utilitySource,
                 annualData: annualData,
             })
-        });
-
-
-        this.annualFacilityAnalysisSummaries.forEach(facilitySummary => {
-            facilitySummary.groupAnnualAnalysisSummary.forEach(groupSummary => {
-                let annualData: Array<PerformanceReportAnnualData> = new Array();
-                let startYear: number = baselineYear;
-                let previousYearContribution: number = 0;
-                let baselineYearAdjusted: number = 0;
-                while (startYear <= reportYear) {
-                    let yearSummaryData: Array<AnnualAnalysisSummary> = allAnnualSummaries.filter(summary => {
-                        return summary.year == startYear
-                    });
-                    let totalAdjusted: number = _.sumBy(yearSummaryData, (data: AnnualAnalysisSummary) => {
-                        return data.adjusted;
-                    });
-                    let facilityYearSummary: AnnualAnalysisSummary = groupSummary.annualAnalysisSummary.find(annualSummary => {
-                        return annualSummary.year == startYear;
-                    });
-                    if (facilityYearSummary) {
-                        let changeInAdjustedBaseline: number = 0;
-                        let changeInContribution: number = 0;
-                        let contribution: number = (facilityYearSummary.adjusted * facilityYearSummary.totalSavingsPercentImprovement) / totalAdjusted;
-                        if (startYear == baselineYear) {
-                            baselineYearAdjusted = facilityYearSummary.adjusted;
-                        }
-                        changeInAdjustedBaseline = (facilityYearSummary.adjusted - baselineYearAdjusted) / baselineYearAdjusted;
-                        if (startYear != baselineYear && startYear != (baselineYear + 1)) {
-                            changeInContribution = (contribution - previousYearContribution);
-                        } else if (startYear == (baselineYear + 1)) {
-                            changeInContribution = contribution;
-                        }
-                        annualData.push({
-                            adjusted: facilityYearSummary.adjusted,
-                            actual: facilityYearSummary.energyUse,
-                            savings: facilityYearSummary.totalSavingsPercentImprovement,
-                            year: startYear,
-                            contribution: contribution,
-                            changeInContribution: changeInContribution,
-                            changeInAdjustedBaseline: changeInAdjustedBaseline * 100
-                        });
-                        previousYearContribution = contribution;
-                    } else {
-                        annualData.push({
-                            adjusted: 0,
-                            actual: 0,
-                            savings: 0,
-                            year: startYear,
-                            contribution: 0,
-                            changeInContribution: 0,
-                            changeInAdjustedBaseline: 0
-                        });
-                    }
-                    startYear++;
-                }
-                this.annualGroupData.push({
-                    facility: facilitySummary.facility,
-                    group: groupSummary.group,
-                    annualData: annualData,
-                })
-            });
         });
     }
 
