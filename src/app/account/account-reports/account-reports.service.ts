@@ -113,9 +113,10 @@ export class AccountReportsService {
     if (!performanceReportSetup) {
       performanceReportSetup = {
         analysisItemId: undefined,
-        includeFacilityPerformanceTable: true,
-        includeUtilityPerformanceTable: false,
-        
+        includeFacilityPerformanceDetails: true,
+        includeUtilityPerformanceDetails: true,
+        includeGroupPerformanceDetails: false,
+        includeTopPerformersTable: true,
         groupPerformanceByYear: false,
         numberOfTopPerformers: 5,
         includeActual: false,
@@ -126,14 +127,16 @@ export class AccountReportsService {
     }
     let form: FormGroup = this.formBuilder.group({
       analysisItemId: [performanceReportSetup.analysisItemId, Validators.required],
-      includeFacilityPerformanceTable: [performanceReportSetup.includeFacilityPerformanceTable],
-      includeUtilityPerformanceTable: [performanceReportSetup.includeUtilityPerformanceTable],
+      includeFacilityPerformanceDetails: [performanceReportSetup.includeFacilityPerformanceDetails],
+      includeUtilityPerformanceDetails: [performanceReportSetup.includeUtilityPerformanceDetails],
+      includeGroupPerformanceDetails: [performanceReportSetup.includeGroupPerformanceDetails],
       groupPerformanceByYear: [performanceReportSetup.groupPerformanceByYear],
       numberOfTopPerformers: [performanceReportSetup.numberOfTopPerformers],
       includeActual: [performanceReportSetup.includeActual],
       includeAdjusted: [performanceReportSetup.includeAdjusted],
       includeContribution: [performanceReportSetup.includeContribution],
       includeSavings: [performanceReportSetup.includeSavings],
+      includeTopPerformersTable: [performanceReportSetup.includeTopPerformersTable]
     });
     return form;
   }
@@ -142,9 +145,11 @@ export class AccountReportsService {
     if (!performanceReportSetup) {
       performanceReportSetup = {
         analysisItemId: undefined,
-        includeFacilityPerformanceTable: true,
-        includeUtilityPerformanceTable: false,
+        includeFacilityPerformanceDetails: true,
+        includeUtilityPerformanceDetails: true,
+        includeGroupPerformanceDetails: false,
         groupPerformanceByYear: false,
+        includeTopPerformersTable: true,
         numberOfTopPerformers: 5,
         includeActual: false,
         includeAdjusted: true,
@@ -153,14 +158,16 @@ export class AccountReportsService {
       };
     }
     performanceReportSetup.analysisItemId = form.controls.analysisItemId.value;
-    performanceReportSetup.includeFacilityPerformanceTable = form.controls.includeFacilityPerformanceTable.value;
-    performanceReportSetup.includeUtilityPerformanceTable = form.controls.includeUtilityPerformanceTable.value;
+    performanceReportSetup.includeFacilityPerformanceDetails = form.controls.includeFacilityPerformanceDetails.value;
+    performanceReportSetup.includeUtilityPerformanceDetails = form.controls.includeUtilityPerformanceDetails.value;
+    performanceReportSetup.includeGroupPerformanceDetails = form.controls.includeGroupPerformanceDetails.value;
     performanceReportSetup.groupPerformanceByYear = form.controls.groupPerformanceByYear.value;
     performanceReportSetup.numberOfTopPerformers = form.controls.numberOfTopPerformers.value;
     performanceReportSetup.includeActual = form.controls.includeActual.value;
     performanceReportSetup.includeAdjusted = form.controls.includeAdjusted.value;
     performanceReportSetup.includeContribution = form.controls.includeContribution.value;
     performanceReportSetup.includeSavings = form.controls.includeSavings.value;
+    performanceReportSetup.includeTopPerformersTable = form.controls.includeTopPerformersTable.value;
     return performanceReportSetup;
   }
 

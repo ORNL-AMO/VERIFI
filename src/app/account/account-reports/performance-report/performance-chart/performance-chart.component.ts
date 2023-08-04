@@ -2,8 +2,11 @@ import { Component, ElementRef, Input, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { PerformanceReport, PerformanceReportAnnualData } from 'src/app/calculations/performance-report-calculations/performanceReport';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
-import { IdbAccountReport } from 'src/app/models/idb';
+import { IdbFacility } from 'src/app/models/idb';
+import { PerformanceReportSetup } from 'src/app/models/overview-report';
 import { UtilityColors } from 'src/app/shared/utilityColors';
+import * as _ from 'lodash';
+import { AnalysisGroup } from 'src/app/models/analysis';
 
 @Component({
   selector: 'app-performance-chart',
@@ -17,6 +20,8 @@ export class PerformanceChartComponent {
   chartDataOption: 'savings' | 'contribution';
   @Input()
   chartDataType: 'facility' | 'group' | 'utility';
+  @Input()
+  performanceReportSetup: PerformanceReportSetup;
 
   @ViewChild('performanceChart', { static: false }) performanceChart: ElementRef;
 
@@ -55,7 +60,7 @@ export class PerformanceChartComponent {
           name: 'Corporate',
           x: this.performanceReport.facilityTotals.map(data => { return data.year }),
           y: this.performanceReport.facilityTotals.map(data => { return data.savings }),
-          line: { dash: 'dot', color: '#17202A', width: 6},
+          line: { dash: 'dot', color: '#17202A', width: 6 },
           marker: {
             size: 8
           }
@@ -113,8 +118,32 @@ export class PerformanceChartComponent {
   }
 
   getFacilityTraces() {
+    let topBottomIds: Array<string> = new Array();
+    let annualFacilityData: Array<{
+      facility: IdbFacility,
+      annualData: Array<PerformanceReportAnnualData>
+    }> = this.performanceReport.annualFacilityData.map(data => { return data });
+    annualFacilityData = _.orderBy(annualFacilityData, (data: { facility: IdbFacility, annualData: Array<PerformanceReportAnnualData> }) => {
+      let yearSummary: PerformanceReportAnnualData = data.annualData.find(summary => { return summary.year == this.performanceReport.reportYear })
+      return yearSummary[this.chartDataOption];
+    }, 'desc');
+    for (let i = 0; i < this.performanceReportSetup.numberOfTopPerformers; i++) {
+      let topItem = annualFacilityData[i];
+      if (topItem) {
+        topBottomIds.push(topItem.facility.guid);
+      }
+      let bottomItem = annualFacilityData[annualFacilityData.length - (i + 1)];
+      if (bottomItem) {
+        topBottomIds.push(bottomItem.facility.guid);
+      }
+    }
+
     var data = new Array();
     this.performanceReport.annualFacilityData.forEach(facilityData => {
+      let visible;
+      if (topBottomIds.includes(facilityData.facility.guid) == false) {
+        visible = 'legendonly';
+      }
       var facilityTrace = {
         type: "scatter",
         mode: "lines+markers",
@@ -124,7 +153,8 @@ export class PerformanceChartComponent {
         line: { color: facilityData.facility.color, width: 2 },
         marker: {
           size: 4
-        }
+        },
+        visible: visible
       }
       data.push(facilityTrace);
     });
@@ -132,10 +162,38 @@ export class PerformanceChartComponent {
   }
 
   getGroupTraces() {
+    let topBottomIds: Array<string> = new Array();
+    let annualGroupData: Array<{
+      facility: IdbFacility,
+      group: AnalysisGroup,
+      annualData: Array<PerformanceReportAnnualData>
+    }> = this.performanceReport.annualGroupData.map(data => { return data });
+    annualGroupData = _.orderBy(annualGroupData, (data: { facility: IdbFacility, annualData: Array<PerformanceReportAnnualData> }) => {
+      let yearSummary: PerformanceReportAnnualData = data.annualData.find(summary => { return summary.year == this.performanceReport.reportYear })
+      return yearSummary[this.chartDataOption];
+    }, 'desc');
+    for (let i = 0; i < this.performanceReportSetup.numberOfTopPerformers; i++) {
+      let topItem = annualGroupData[i];
+      if (topItem) {
+        topBottomIds.push(topItem.group.idbGroupId);
+      }
+      let bottomItem = annualGroupData[annualGroupData.length - (i + 1)];
+      if (bottomItem) {
+        topBottomIds.push(bottomItem.group.idbGroupId);
+      }
+    }
+
+
     var data = new Array();
     this.performanceReport.annualGroupData.forEach(groupData => {
+      let visible;
+      if (topBottomIds.includes(groupData.group.idbGroupId) == false) {
+        visible = 'legendonly';
+      }
+
       let name: string = groupData.facility.name + ' (' + this.utilityMeterGroupDbService.getGroupName(groupData.group.idbGroupId) + ')';
       var facilityTrace = {
+        visible: visible,
         type: "scatter",
         mode: "lines+markers",
         name: name,

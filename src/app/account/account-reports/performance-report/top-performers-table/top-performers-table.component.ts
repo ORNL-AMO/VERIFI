@@ -5,12 +5,13 @@ import * as _ from 'lodash';
 import { AnalysisGroup } from 'src/app/models/analysis';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { PerformanceReportSetup } from 'src/app/models/overview-report';
+
 @Component({
-  selector: 'app-top-five-table',
-  templateUrl: './top-five-table.component.html',
-  styleUrls: ['./top-five-table.component.css']
+  selector: 'app-top-performers-table',
+  templateUrl: './top-performers-table.component.html',
+  styleUrls: ['./top-performers-table.component.css']
 })
-export class TopFiveTableComponent {
+export class TopPerformersTableComponent {
   @Input()
   performanceReport: PerformanceReport;
   @Input()

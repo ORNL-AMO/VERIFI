@@ -123,14 +123,16 @@ export class AccountReportDbService {
       },
       performanceReportSetup: {
         analysisItemId: undefined,
-        includeFacilityPerformanceTable: true,
-        includeUtilityPerformanceTable: false,
+        includeFacilityPerformanceDetails: true,
+        includeUtilityPerformanceDetails: true,
+        includeGroupPerformanceDetails: false,
         groupPerformanceByYear: false,
+        includeTopPerformersTable: true,
         numberOfTopPerformers: 5,
         includeActual: false,
         includeAdjusted: true,
         includeContribution: true,
-        includeSavings: true,  
+        includeSavings: true,
       }
     }
   }
