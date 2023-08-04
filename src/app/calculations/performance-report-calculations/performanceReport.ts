@@ -41,6 +41,7 @@ export class PerformanceReport {
         actual: number,
         adjusted: number,
         savings: number,
+        contribution: number,
         maxContribution: number,
         minContribution: number,
         year: number,
@@ -48,7 +49,8 @@ export class PerformanceReport {
         minChangeInContribution: number,
         changeInAdjustedBaseline: number,
         maxChangeInAdjustedBaseline: number,
-        minChangeInAdjustedBaseline: number
+        minChangeInAdjustedBaseline: number,
+        changeInContribution: number
     }>;
     constructor(
         baselineYear: number,
@@ -184,6 +186,7 @@ export class PerformanceReport {
 
         let startYear: number = baselineYear;
         let baselineYearAdjusted: number = 0;
+        let previousYearContribution: number = 0;
         while (startYear <= reportYear) {
             let yearSummaryData: Array<AnnualAnalysisSummary> = allAnnualSummaries.filter(summary => {
                 return summary.year == startYear
@@ -196,9 +199,14 @@ export class PerformanceReport {
                 return data.energyUse;
             });
 
+
             let totalSavings: number = (totalAdjusted - actual) / totalAdjusted;
 
             let yearAnnualData: Array<PerformanceReportAnnualData> = allAnnualData.filter(data => { return data.year == startYear });
+
+            let contribution: number = _.sumBy(yearAnnualData, (data: PerformanceReportAnnualData) => {
+                return data.contribution;
+            });
 
             let maxYearContribution: PerformanceReportAnnualData = _.maxBy(yearAnnualData, (data: PerformanceReportAnnualData) => {
                 return data.contribution;
@@ -230,6 +238,7 @@ export class PerformanceReport {
             this.facilityTotals.push({
                 actual: actual,
                 adjusted: totalAdjusted,
+                contribution: contribution,
                 savings: totalSavings * 100,
                 year: startYear,
                 maxContribution: maxYearContribution.contribution,
@@ -238,8 +247,10 @@ export class PerformanceReport {
                 minChangeInContribution: minYearChangeInContribution.changeInContribution,
                 changeInAdjustedBaseline: changeInAdjustedBaseline * 100,
                 maxChangeInAdjustedBaseline: maxYearChangeInAdjustedBaseline.changeInAdjustedBaseline,
-                minChangeInAdjustedBaseline: minYearChangeInAdjustedBaseline.changeInAdjustedBaseline
+                minChangeInAdjustedBaseline: minYearChangeInAdjustedBaseline.changeInAdjustedBaseline,
+                changeInContribution: (contribution - previousYearContribution)
             });
+            previousYearContribution = contribution;
             startYear++;
         }
     }
@@ -363,11 +374,11 @@ export class PerformanceReport {
                     return summary.energyUse;
                 });
 
-                let totalSavingsPercentImprovement: number =  (adjusted - energyUse) / adjusted;
+                let totalSavingsPercentImprovement: number = (adjusted - energyUse) / adjusted;
 
                 let changeInAdjustedBaseline: number = 0;
                 let changeInContribution: number = 0;
-                let contribution: number = (adjusted * (totalSavingsPercentImprovement*100)) / totalAdjusted;
+                let contribution: number = (adjusted * (totalSavingsPercentImprovement * 100)) / totalAdjusted;
                 if (startYear == baselineYear) {
                     baselineYearAdjusted = adjusted;
                 }

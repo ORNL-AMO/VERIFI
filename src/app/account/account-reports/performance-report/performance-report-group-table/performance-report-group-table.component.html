@@ -330,13 +330,13 @@
 
                 <ng-container *ngIf="performanceReportSetup.includeContribution">
                     <ng-container *ngFor="let data of performanceReport.facilityTotals; let index = index;">
-                        <th>
-
+                        <th class="text-center">
+                            {{data.contribution | number:'1.0-2'}} %
                         </th>
                     </ng-container>
                 </ng-container>
-                <th>
-
+                <th class="text-center">
+                    {{performanceReport.facilityTotals[performanceReport.facilityTotals.length-1].changeInContribution | number:'1.0-2'}} %
                 </th>
                 <th class="text-center">
                     {{performanceReport.facilityTotals[performanceReport.facilityTotals.length-1].changeInAdjustedBaseline
