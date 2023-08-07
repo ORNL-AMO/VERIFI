@@ -10,10 +10,7 @@
                     <span class="fa fa-exclamation-circle" *ngIf="!isValid"></span>
                 </a>
             </div>
-
-            <!-- <span class="badge report-year pull-right">
-            {{analysisItem.reportYear}}
-        </span> -->
+            
             <div class="d-flex">
                 <button title="Copy" class="btn action-btn btn-sm" (click)="createCopy()">
                     <i class="fa fa-copy"></i>
@@ -25,7 +22,8 @@
         </div>
     </div>
     <div class="card-body d-flex flex-column">
-        <div class="d-flex flex-column" *ngIf="report.reportType == 'betterPlants' || report.reportType == 'performance'">
+        <div class="d-flex flex-column"
+            *ngIf="report.reportType == 'betterPlants' || report.reportType == 'performance'">
             <ul class="list-group list-group-flush">
                 <li class="list-group-item">
                     Baseline Year: {{report.baselineYear}}
@@ -38,10 +36,16 @@
         <div class="d-flex flex-column" *ngIf="report.reportType == 'dataOverview'">
             <ul class="list-group list-group-flush">
                 <li class="list-group-item">
-                    Report Start: {{getDate(report.startMonth, report.startYear)| date: 'MMM. y'}}
+                    Report Start:
+                    <ng-container *ngIf="report.startMonth != undefined && report.startYear != undefined">
+                        {{getDate(report.startMonth, report.startYear)| date: 'MMM. y'}}
+                    </ng-container>
                 </li>
                 <li class="list-group-item">
-                    Report End: {{getDate(report.endMonth, report.endYear)| date: 'MMM. y'}}
+                    Report End:
+                    <ng-container *ngIf="report.endMonth != undefined && report.endYear != undefined">
+                        {{getDate(report.endMonth, report.endYear)| date: 'MMM. y'}}
+                    </ng-container>
                 </li>
             </ul>
         </div>

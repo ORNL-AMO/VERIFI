@@ -7,6 +7,7 @@ import { IdbAccount, IdbAccountReport } from 'src/app/models/idb';
 import * as _ from 'lodash';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
+import { ReportType } from 'src/app/models/constantsAndTypes';
 
 @Component({
   selector: 'app-account-reports-dashboard',
@@ -21,6 +22,10 @@ export class AccountReportsDashboardComponent {
   }> = [];
   selectedAccount: IdbAccount;
   accountReportsSub: Subscription;
+  hasEnergy: boolean;
+  hasWater: boolean;
+  newReportType: ReportType = 'dataOverview';
+  displayNewReport: boolean;
   constructor(private router: Router,
     private accountDbService: AccountdbService,
     private accountReportDbService: AccountReportDbService,
@@ -40,6 +45,7 @@ export class AccountReportsDashboardComponent {
 
   async createNewReport() {
     let newReport: IdbAccountReport = this.accountReportDbService.getNewAccountReport();
+    newReport.reportType = this.newReportType;
     let addedReport: IdbAccountReport = await firstValueFrom(this.accountReportDbService.addWithObservable(newReport));
     await this.dbChangesService.setAccountReports(this.selectedAccount);
     this.accountReportDbService.selectedReport.next(addedReport);
@@ -72,5 +78,13 @@ export class AccountReportsDashboardComponent {
         reports: yearReports,
       });
     });
+  }
+
+  openCreateReport() {
+    this.displayNewReport = true;
+  }
+
+  cancelCreate() {
+    this.displayNewReport = false;
   }
 }

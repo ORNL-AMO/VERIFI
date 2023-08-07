@@ -21,6 +21,7 @@ export class AccountReportSetupComponent {
   baselineYears: Array<number>;
   months: Array<Month> = Months;
   //TODO: Report years validation. Start < End (issue-1194)
+  reportType: 'Better Plants' | 'Data Overview' | 'Performance';
   constructor(private accountReportDbService: AccountReportDbService,
     private accountReportsService: AccountReportsService,
     private dbChangesService: DbChangesService,
@@ -32,6 +33,13 @@ export class AccountReportSetupComponent {
   ngOnInit() {
     this.account = this.accountDbService.selectedAccount.getValue();
     let selectedReport: IdbAccountReport = this.accountReportDbService.selectedReport.getValue()
+    if(selectedReport.reportType == 'betterPlants'){
+      this.reportType = 'Better Plants';
+    }else if(selectedReport.reportType == 'dataOverview'){
+      this.reportType = 'Data Overview';
+    }else if(selectedReport.reportType == 'performance'){
+      this.reportType = 'Performance';
+    }
     this.setupForm = this.accountReportsService.getSetupFormFromReport(selectedReport);
     this.setYearOptions();
   }
