@@ -10,7 +10,7 @@ export function setEmissionsForCalanderizedMeters(calanderizedMeterData: Array<C
     for (let i = 0; i < calanderizedMeterData.length; i++) {
         let cMeter: CalanderizedMeter = calanderizedMeterData[i];
         for (let x = 0; x < cMeter.monthlyData.length; x++) {
-            let monthlyData: MonthlyData = cMeter.monthlyData[x]
+            let monthlyData: MonthlyData = cMeter.monthlyData[x];
             let emissions: EmissionsResults = getEmissions(cMeter.meter, monthlyData.energyUse, cMeter.energyUnit, monthlyData.year, energyIsSource, facilities, co2Emissions);
             cMeter.monthlyData[x].RECs = emissions.RECs;
             cMeter.monthlyData[x].locationEmissions = emissions.locationEmissions;

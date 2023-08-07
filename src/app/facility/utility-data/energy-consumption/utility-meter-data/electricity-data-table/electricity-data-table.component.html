@@ -147,7 +147,12 @@
             <td class="read-date" [ngClass]="checkError(meterData.readDate)">{{meterData.readDate | date}}</td>
             <td>
                 <span class="fa fa-asterisk" *ngIf="meterData.isEstimated"></span>
-                {{meterData.totalEnergyUse | customNumber}}
+                <ng-container *ngIf="selectedMeter.includeInEnergy">
+                    {{meterData.totalEnergyUse | customNumber}}
+                </ng-container>
+                <ng-container *ngIf="!selectedMeter.includeInEnergy">
+                    {{0 | customNumber}}
+                </ng-container>
             </td>
             <td *ngIf="generalInformationFilters.totalCost">{{meterData.totalCost | customNumber:true}}</td>
             <td *ngIf="generalInformationFilters.realDemand">{{meterData.totalRealDemand | customNumber}}</td>
