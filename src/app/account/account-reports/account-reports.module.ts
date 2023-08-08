@@ -35,6 +35,10 @@ import { PerformanceChartComponent } from './performance-report/performance-char
 import { TopPerformersTableComponent } from './performance-report/top-performers-table/top-performers-table.component';
 import { TableCellShadingPipe } from './performance-report/table-cell-shading.pipe';
 import { TableFillPipe } from './performance-report/table-fill.pipe';
+import { PerformanceReportDashboardComponent } from './account-reports-dashboard/performance-report-dashboard/performance-report-dashboard.component';
+import { OverviewReportDashboardComponent } from './account-reports-dashboard/overview-report-dashboard/overview-report-dashboard.component';
+import { BetterPlantsReportDashboardComponent } from './account-reports-dashboard/better-plants-report-dashboard/better-plants-report-dashboard.component';
+import { AccountReportsDashboardTabsComponent } from './account-reports-dashboard/account-reports-dashboard-tabs/account-reports-dashboard-tabs.component';
 
 
 
@@ -69,7 +73,11 @@ import { TableFillPipe } from './performance-report/table-fill.pipe';
     PerformanceReportGroupTableComponent,
     PerformanceReportUtilityTableComponent,
     PerformanceChartComponent,
-    TopPerformersTableComponent
+    TopPerformersTableComponent,
+    PerformanceReportDashboardComponent,
+    OverviewReportDashboardComponent,
+    BetterPlantsReportDashboardComponent,
+    AccountReportsDashboardTabsComponent
   ],
   imports: [
     CommonModule,
