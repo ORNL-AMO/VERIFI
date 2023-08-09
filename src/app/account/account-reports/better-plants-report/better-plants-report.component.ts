@@ -26,7 +26,7 @@ export class BetterPlantsReportComponent implements OnInit {
   printSub: Subscription;
   print: boolean;
   account: IdbAccount;
-  betterPlantsSummary: BetterPlantsSummary;
+  betterPlantsSummaries: Array<BetterPlantsSummary>;
   calculating: boolean | 'error';
   worker: Worker;
   selectedAnalysisItem: IdbAccountAnalysisItem;
@@ -107,7 +107,7 @@ export class BetterPlantsReportComponent implements OnInit {
       this.worker = new Worker(new URL('src/app/web-workers/better-plants-report.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {
         if (!data.error) {
-          this.betterPlantsSummary = data.betterPlantsSummary;
+          this.betterPlantsSummaries = data.betterPlantsSummaries;
           this.calculating = false;
         } else {
           this.calculating = 'error';
@@ -124,22 +124,33 @@ export class BetterPlantsReportComponent implements OnInit {
         facilities: accountFacilities,
         accountAnalysisItems: accountFacilityAnalysisItems,
         meters: includedFacilityMeters,
-        meterData: accountMeterData
+        meterData: accountMeterData,
+        includeAllYears: this.selectedReport.betterPlantsReportSetup.includeAllYears
       });
     } else {
       // Web Workers are not supported in this environment.
-      let betterPlantsReportClass: BetterPlantsReportClass = new BetterPlantsReportClass(
-        this.selectedReport.baselineYear,
-        this.selectedReport.reportYear,
-        this.selectedAnalysisItem,
-        accountPredictorEntries,
-        this.account,
-        accountFacilities,
-        accountFacilityAnalysisItems,
-        includedFacilityMeters,
-        accountMeterData
-      );
-      this.betterPlantsSummary = betterPlantsReportClass.getBetterPlantsSummary();
+      this.betterPlantsSummaries = new Array();
+      let reportYear: number = this.selectedReport.reportYear;
+      while (reportYear > this.selectedReport.baselineYear) {
+        let betterPlantsReportClass: BetterPlantsReportClass = new BetterPlantsReportClass(
+          this.selectedReport.baselineYear,
+          reportYear,
+          this.selectedAnalysisItem,
+          accountPredictorEntries,
+          this.account,
+          accountFacilities,
+          accountFacilityAnalysisItems,
+          includedFacilityMeters,
+          accountMeterData
+        );
+        let betterPlantsSummary: BetterPlantsSummary = betterPlantsReportClass.getBetterPlantsSummary();
+        this.betterPlantsSummaries.push(betterPlantsSummary);
+        if(this.selectedReport.betterPlantsReportSetup.includeAllYears){
+          reportYear--;
+        }else{
+          reportYear = this.selectedReport.baselineYear;
+        }
+      }
       this.calculating = false;
     }
   }

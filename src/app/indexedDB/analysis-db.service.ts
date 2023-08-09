@@ -10,6 +10,7 @@ import { UtilityMeterGroupdbService } from './utilityMeterGroup-db.service';
 import * as _ from 'lodash';
 import { AnalysisCategory, AnalysisGroup } from '../models/analysis';
 import { AnalysisValidationService } from '../shared/helper-services/analysis-validation.service';
+import { LoadingService } from '../core-components/loading/loading.service';
 
 @Injectable({
   providedIn: 'root'
@@ -24,7 +25,8 @@ export class AnalysisDbService {
     private facilityDbService: FacilitydbService, private accountDbService: AccountdbService,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
     private predictorDbService: PredictordbService,
-    private analysisValidationService: AnalysisValidationService) {
+    private analysisValidationService: AnalysisValidationService,
+    private loadingService: LoadingService) {
     this.accountAnalysisItems = new BehaviorSubject<Array<IdbAnalysisItem>>([]);
     this.facilityAnalysisItems = new BehaviorSubject<Array<IdbAnalysisItem>>([]);
     this.selectedAnalysisItem = new BehaviorSubject<IdbAnalysisItem>(undefined);
@@ -287,6 +289,7 @@ export class AnalysisDbService {
 
   async deleteAnalysisItems(analysisItems: Array<IdbAnalysisItem>) {
     for (let i = 0; i < analysisItems.length; i++) {
+      this.loadingService.setLoadingMessage('Deleting Facility Analysis Items (' + i + '/' + analysisItems.length + ')...' );
       await firstValueFrom(this.deleteWithObservable(analysisItems[i].id));
     }
   }

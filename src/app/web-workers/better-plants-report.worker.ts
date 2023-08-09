@@ -5,26 +5,36 @@ import { BetterPlantsReportClass } from "../calculations/better-plants-calculati
 
 addEventListener('message', ({ data }) => {
     try {
-        let betterPlantsReportClass: BetterPlantsReportClass = new BetterPlantsReportClass(
-            data.baselineYear,
-            data.reportYear,
-            data.selectedAnalysisItem,
-            data.accountPredictorEntries,
-            data.account,
-            data.facilities,
-            data.accountAnalysisItems,
-            data.meters,
-            data.meterData
-        );
-        let betterPlantsSummary: BetterPlantsSummary = betterPlantsReportClass.getBetterPlantsSummary();
+        let betterPlantsSummaries: Array<BetterPlantsSummary> = new Array();
+        let reportYear: number = data.reportYear;
+        while (reportYear > data.baselineYear) {
+            let betterPlantsReportClass: BetterPlantsReportClass = new BetterPlantsReportClass(
+                data.baselineYear,
+                reportYear,
+                data.selectedAnalysisItem,
+                data.accountPredictorEntries,
+                data.account,
+                data.facilities,
+                data.accountAnalysisItems,
+                data.meters,
+                data.meterData
+            );
+            let betterPlantsSummary: BetterPlantsSummary = betterPlantsReportClass.getBetterPlantsSummary();
+            betterPlantsSummaries.push(betterPlantsSummary);
+            if (data.includeAllYears) {
+                reportYear--;
+            } else {
+                reportYear = data.baselineYear;
+            }
+        }
         postMessage({
-            betterPlantsSummary: betterPlantsSummary,
+            betterPlantsSummaries: betterPlantsSummaries,
             error: false
         });
     } catch (err) {
         console.log(err);
         postMessage({
-            betterPlantsSummary: undefined,
+            betterPlantsSummaries: undefined,
             error: true
         });
     }
