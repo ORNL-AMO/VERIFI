@@ -14,4 +14,31 @@ export class PrimaryWaterConsumptionTableComponent {
   account: IdbAccount;
   @Input()
   betterPlantsSummary: BetterPlantsSummary;
+
+  baselineFiscalYearStart: Date;
+  baselineFiscalYearEnd: Date;
+  reportFiscalYearStart: Date;
+  reportFiscalYearEnd: Date;
+  constructor() { }
+
+  ngOnInit(): void {
+    if (this.account.fiscalYear == 'nonCalendarYear') {
+      this.setFiscalYear();
+    }
+  }
+
+
+  setFiscalYear() {
+    if (this.account.fiscalYearCalendarEnd) {
+      this.baselineFiscalYearStart = new Date(this.report.baselineYear - 1, this.account.fiscalYearMonth);
+      this.baselineFiscalYearEnd = new Date(this.report.baselineYear, this.account.fiscalYearMonth - 1);
+      this.reportFiscalYearStart = new Date(this.report.reportYear - 1, this.account.fiscalYearMonth);
+      this.reportFiscalYearEnd = new Date(this.report.reportYear, this.account.fiscalYearMonth - 1);
+    } else {
+      this.baselineFiscalYearStart = new Date(this.report.baselineYear, this.account.fiscalYearMonth);
+      this.baselineFiscalYearEnd = new Date(this.report.baselineYear + 1, this.account.fiscalYearMonth - 1);
+      this.reportFiscalYearStart = new Date(this.report.reportYear, this.account.fiscalYearMonth);
+      this.reportFiscalYearEnd = new Date(this.report.reportYear + 1, this.account.fiscalYearMonth - 1);
+    }
+  }
 }
