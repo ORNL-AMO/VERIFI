@@ -68,19 +68,21 @@ export function checkAnalysisValue(val: number): number {
     }
 }
 
-export function getIncludedMeters(meters: Array<IdbUtilityMeter>, selectedAnalysisItem: IdbAccountAnalysisItem, accountAnalysisItems: Array<IdbAnalysisItem>): Array<IdbUtilityMeter> {
+export function getIncludedMeters(meters: Array<IdbUtilityMeter>, selectedAnalysisItem: IdbAccountAnalysisItem, accountAnalysisItems: Array<IdbAnalysisItem>, year: number) {
     let includedMeters: Array<IdbUtilityMeter> = new Array()
     selectedAnalysisItem.facilityAnalysisItems.forEach(item => {
         if (item.analysisItemId != undefined && item.analysisItemId != 'skip') {
             let facilityAnalysisItem: IdbAnalysisItem = accountAnalysisItems.find(accountItem => { return accountItem.guid == item.analysisItemId });
-            facilityAnalysisItem.groups.forEach(group => {
-                if (group.analysisType != 'skip') {
-                    let filteredMeters: Array<IdbUtilityMeter> = meters.filter(meter => {
-                        return meter.groupId == group.idbGroupId;
-                    });
-                    includedMeters = includedMeters.concat(filteredMeters);
-                }
-            });
+            if (facilityAnalysisItem.baselineYear <= year && facilityAnalysisItem.reportYear >= year) {
+                facilityAnalysisItem.groups.forEach(group => {
+                    if (group.analysisType != 'skip') {
+                        let filteredMeters: Array<IdbUtilityMeter> = meters.filter(meter => {
+                            return meter.groupId == group.idbGroupId;
+                        });
+                        includedMeters = includedMeters.concat(filteredMeters);
+                    }
+                });
+            }
         }
     });
     return includedMeters;

@@ -66,7 +66,9 @@ export class UtilityMeterDatadbService {
 
     async deleteMeterDataEntriesAsync(meterDataEntries: Array<IdbUtilityMeterData>) {
         for (let i = 0; i < meterDataEntries.length; i++) {
-            this.loadingService.setLoadingMessage('Deleting Meter Data Entries (' + i + '/' + meterDataEntries.length + ')...' );
+            if (i % 25 == 0 || i == 1) {
+                this.loadingService.setLoadingMessage('Deleting Meter Data Entries (' + i + '/' + meterDataEntries.length + ')...');
+            }
             await firstValueFrom(this.deleteWithObservable(meterDataEntries[i].id));
         }
     }
@@ -151,7 +153,7 @@ export class UtilityMeterDatadbService {
         return accountMeterData.filter(meterData => { return meterData.meterId == meterId });
     }
 
-    
+
     // getYearOptions(facilityId?: string): Array<number> {
     //     let meterData: Array<IdbUtilityMeterData>;
     //     let accountMeterData: Array<IdbUtilityMeterData> = this.accountMeterData.getValue();

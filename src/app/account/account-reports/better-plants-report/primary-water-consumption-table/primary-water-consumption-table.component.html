@@ -9,11 +9,19 @@
                     Baseline Year
                     <br>
                     {{report.baselineYear | yearDisplay: account.fiscalYear}}
+                    <ng-container *ngIf="account.fiscalYear">
+                        <br>
+                        ({{baselineFiscalYearStart | date:"MMM. yy"}} - {{baselineFiscalYearEnd | date:'MMM. yy'}})
+                    </ng-container>
                 </td>
                 <td colspan="2" class="bold text-center w-25">
                     Report Year
                     <br>
                     {{betterPlantsSummary.reportYear | yearDisplay: account.fiscalYear}}
+                    <ng-container *ngIf="account.fiscalYear">
+                        <br>
+                        ({{reportFiscalYearStart | date:'MMM. yy'}} - {{reportFiscalYearEnd | date:'MMM. yy'}})
+                    </ng-container>
                 </td>
             </tr>
             <tr>
@@ -109,7 +117,8 @@
             <tr
                 *ngIf="betterPlantsSummary.baselineYearWaterResults.additionalSurfaceFreshWater.use || betterPlantsSummary.reportYearWaterResults.additionalSurfaceFreshWater.use">
                 <td>
-                    <span class="fa fa-plus"></span><span class="fa fa-plus"></span> Surface freshwater, including self-supplied
+                    <span class="fa fa-plus"></span><span class="fa fa-plus"></span> Surface freshwater, including
+                    self-supplied
                 </td>
                 <td>
                     {{betterPlantsSummary.baselineYearWaterResults.additionalSurfaceFreshWater.use | customNumber}}
@@ -145,7 +154,8 @@
             <tr
                 *ngIf="betterPlantsSummary.baselineYearWaterResults.additionalGroundFreshwater.use || betterPlantsSummary.reportYearWaterResults.additionalGroundFreshwater.use">
                 <td>
-                    <span class="fa fa-plus"></span><span class="fa fa-plus"></span> Ground freshwater, including self-supplied
+                    <span class="fa fa-plus"></span><span class="fa fa-plus"></span> Ground freshwater, including
+                    self-supplied
                 </td>
                 <td>
                     {{betterPlantsSummary.baselineYearWaterResults.additionalGroundFreshwater.use | customNumber}}
@@ -217,7 +227,8 @@
             <tr
                 *ngIf="betterPlantsSummary.baselineYearWaterResults.additionalSalineWaterIntake.use || betterPlantsSummary.reportYearWaterResults.additionalSalineWaterIntake.use">
                 <td>
-                    <span class="fa fa-plus"></span><span class="fa fa-plus"></span> Total saline water intake (e.g., ocean water)
+                    <span class="fa fa-plus"></span><span class="fa fa-plus"></span> Total saline water intake (e.g.,
+                    ocean water)
                 </td>
                 <td>
                     {{betterPlantsSummary.baselineYearWaterResults.additionalSalineWaterIntake.use | customNumber}}
@@ -289,7 +300,8 @@
             <tr
                 *ngIf="betterPlantsSummary.baselineYearWaterResults.additionalExternallySuppliedRecycled.use || betterPlantsSummary.reportYearWaterResults.additionalExternallySuppliedRecycled.use">
                 <td>
-                    <span class="fa fa-plus"></span><span class="fa fa-plus"></span> Externally supplied recycled (i.e., grey water)
+                    <span class="fa fa-plus"></span><span class="fa fa-plus"></span> Externally supplied recycled (i.e.,
+                    grey water)
                 </td>
                 <td>
                     {{betterPlantsSummary.baselineYearWaterResults.additionalExternallySuppliedRecycled.use |

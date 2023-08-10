@@ -354,8 +354,15 @@ export class ExportToExcelTemplateService {
         // alphaIndex = 1;
         entry.predictors.forEach(predictor => {
           // let letter: string = alphabet[alphaIndex];
-          let letter = predictorCellMap.find(mapObj => { return mapObj.predictorName == predictor.name }).letter;
-          worksheet.getCell(letter + index).value = predictor.amount;
+          let findItem: { letter: string, predictorName: string } = predictorCellMap.find(mapObj => {
+            return mapObj.predictorName == predictor.name
+          })
+          if (!findItem) {
+            console.log('Missing Predictor Entry: ' + predictor.name)
+          } else {
+            let letter = findItem.letter;
+            worksheet.getCell(letter + index).value = predictor.amount;
+          }
           // alphaIndex++;
         });
         index++;
@@ -371,7 +378,6 @@ export class ExportToExcelTemplateService {
       let facilityPredictors: Array<IdbPredictorEntry> = predictorEntries.filter(entry => { return entry.facilityId == facility.guid });
       if (facilityPredictors.length > 0) {
         let facilityPredictorNames: Array<string> = facilityPredictors[0].predictors.map(predictor => { return predictor.name })
-        // debugger
         predictorNames = _.union(predictorNames, facilityPredictorNames)
       }
     });

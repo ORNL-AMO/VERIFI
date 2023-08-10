@@ -312,6 +312,7 @@ function calanderizeMeterDataFullMonth(meter: IdbUtilityMeter, meterData: Array<
     let orderedMeterData: Array<IdbUtilityMeterData> = _.orderBy(meterData, (data) => { return new Date(data.readDate) });
     if (orderedMeterData.length != 0) {
         let startDate: Date = new Date(orderedMeterData[0].readDate);
+        startDate.setDate(15);
         let endDate: Date = new Date(orderedMeterData[orderedMeterData.length - 1].readDate);
         endDate.setUTCMonth(endDate.getUTCMonth() + 1);
         while (startDate.getUTCMonth() != endDate.getUTCMonth() || startDate.getUTCFullYear() != endDate.getUTCFullYear()) {
