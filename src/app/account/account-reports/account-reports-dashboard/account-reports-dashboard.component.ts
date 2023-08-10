@@ -24,7 +24,7 @@ export class AccountReportsDashboardComponent {
   accountReportsSub: Subscription;
   hasEnergy: boolean;
   hasWater: boolean;
-  newReportType: ReportType = 'dataOverview';
+  newReportType: ReportType = 'betterPlants';
   displayNewReport: boolean;
   constructor(private router: Router,
     private accountDbService: AccountdbService,
@@ -81,6 +81,13 @@ export class AccountReportsDashboardComponent {
   }
 
   openCreateReport() {
+    if (this.router.url.includes('performance')) {
+      this.newReportType = 'performance';
+    } else if (this.router.url.includes('better-plants')) {
+      this.newReportType = 'betterPlants';
+    } else if (this.router.url.includes('overview')) {
+      this.newReportType = 'dataOverview';
+    }
     this.displayNewReport = true;
   }
 
