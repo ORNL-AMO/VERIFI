@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
 import { IdbAccount, IdbCustomEmissionsItem } from '../models/idb';
+import { LoadingService } from '../core-components/loading/loading.service';
 
 @Injectable({
   providedIn: 'root'
@@ -9,7 +10,7 @@ import { IdbAccount, IdbCustomEmissionsItem } from '../models/idb';
 export class CustomEmissionsDbService {
 
   accountEmissionsItems: BehaviorSubject<Array<IdbCustomEmissionsItem>>;
-  constructor(private dbService: NgxIndexedDBService) {
+  constructor(private dbService: NgxIndexedDBService, private loadingService: LoadingService) {
     this.accountEmissionsItems = new BehaviorSubject<Array<IdbCustomEmissionsItem>>([]);
   }
 
@@ -42,6 +43,14 @@ export class CustomEmissionsDbService {
 
   deleteWithObservable(id: number): Observable<any> {
     return this.dbService.delete('customEmissionsItems', id);
+  }
+
+  async deleteAccountEmissionsItems() {
+    let accountEmissionsItems: Array<IdbCustomEmissionsItem> = this.accountEmissionsItems.getValue();
+    for (let i = 0; i < accountEmissionsItems.length; i++) {
+      this.loadingService.setLoadingMessage('Deleting Emissions Items (' + i + '/' + accountEmissionsItems.length + ')...' );
+      await this.deleteWithObservable(accountEmissionsItems[i].id);
+    }
   }
 
   updateWithObservable(values: IdbCustomEmissionsItem): Observable<IdbCustomEmissionsItem> {

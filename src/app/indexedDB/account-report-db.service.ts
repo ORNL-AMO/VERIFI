@@ -5,6 +5,7 @@ import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
 import { IdbAccount, IdbAccountReport, IdbFacility } from '../models/idb';
 import { AccountdbService } from './account-db.service';
 import { FacilitydbService } from './facility-db.service';
+import { LoadingService } from '../core-components/loading/loading.service';
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +16,8 @@ export class AccountReportDbService {
   selectedReport: BehaviorSubject<IdbAccountReport>;
   constructor(private dbService: NgxIndexedDBService, private localStorageService: LocalStorageService,
     private accountDbService: AccountdbService,
-    private facilityDbService: FacilitydbService) {
+    private facilityDbService: FacilitydbService,
+    private loadingService: LoadingService) {
     this.accountReports = new BehaviorSubject<Array<IdbAccountReport>>([]);
     this.selectedReport = new BehaviorSubject<IdbAccountReport>(undefined);
     //subscribe after initialization
@@ -126,6 +128,8 @@ export class AccountReportDbService {
     for (let i = 0; i < accountReports.length; i++) {
       let report: IdbAccountReport = accountReports[i];
       report.dataOverviewReportSetup.includedFacilities = report.dataOverviewReportSetup.includedFacilities.filter(facility => { return facility.facilityId != facilityId });
+      
+      this.loadingService.setLoadingMessage('Removing Facility From Reports (' + i + '/' + accountReports.length + ')...' );
       await firstValueFrom(this.updateWithObservable(report));
     }
   }
@@ -138,8 +142,17 @@ export class AccountReportDbService {
 
   async deleteReports(accountReports: Array<IdbAccountReport>) {
     for (let i = 0; i < accountReports.length; i++) {
+      this.loadingService.setLoadingMessage('Deleting Reports (' + i + '/' + accountReports.length + ')...' );
       await this.deleteWithObservable(accountReports[i].id);
     }
+  }
+
+  getHasCorrespondingReport(analysisId: string): boolean {
+    let accountReports: Array<IdbAccountReport> = this.accountReports.getValue();
+    let hasReport: IdbAccountReport = accountReports.find(report => {
+      return (report.reportType == 'betterPlants' && report.betterPlantsReportSetup.analysisItemId == analysisId);
+    });
+    return (hasReport != undefined);
   }
 
 }

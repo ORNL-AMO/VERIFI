@@ -244,13 +244,13 @@ export class DbChangesService {
     await this.accountReportDbService.updateReportsRemoveFacility(facility.guid);
     this.loadingService.setLoadingMessage("Deleting Analysis Items...")
     await this.analysisDbService.deleteAllFacilityAnalysisItems(facility.guid);
-    this.loadingService.setLoadingMessage('Updating Analysis Items...');
+    this.loadingService.setLoadingMessage('Updating Account Analysis Items...');
     let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
     for (let index = 0; index < accountAnalysisItems.length; index++) {
       accountAnalysisItems[index].facilityAnalysisItems = accountAnalysisItems[index].facilityAnalysisItems.filter(facilityItem => { return facilityItem.facilityId != facility.guid });
+      this.loadingService.setLoadingMessage('Updating Account Analysis Items (' + index + '/' + accountAnalysisItems.length + ')...');
       await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(accountAnalysisItems[index]));
     }
-
     this.loadingService.setLoadingMessage("Deleting Facility...");
     await this.facilityDbService.deleteFacilitiesAsync([facility]);
     await this.selectAccount(selectedAccount, false);

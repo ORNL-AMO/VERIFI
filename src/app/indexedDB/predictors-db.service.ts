@@ -69,6 +69,9 @@ export class PredictordbService {
 
     async deletePredictorsAsync(accountPredictorEntries: Array<IdbPredictorEntry>) {
         for (let i = 0; i < accountPredictorEntries.length; i++) {
+            if (i % 25 == 0 || i == 1) {
+                this.loadingService.setLoadingMessage('Deleting Predictors (' + i + '/' + accountPredictorEntries.length + ')...');
+            }
             await firstValueFrom(this.deleteIndexWithObservable(accountPredictorEntries[i].id));
         }
     }
@@ -121,7 +124,7 @@ export class PredictordbService {
             let maxDateEntry: Date = _.max(dates);
             newPredictorDate = new Date(maxDateEntry);
             newPredictorDate.setMonth(newPredictorDate.getMonth() + 1);
-        }else{
+        } else {
             let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
             let dates: Array<Date> = facilityMeterData.map(entry => { return new Date(entry.readDate) });
             let startReadingsDate: Date = _.min(dates);

@@ -40,13 +40,14 @@ export class RegressionModelsService {
       let allMeterData: Array<MonthlyData> = groupMeters.flatMap(calanderizedMeter => { return calanderizedMeter.monthlyData });
 
       let models: Array<JStatRegressionModel> = new Array();
-      while (baselineYear <= reportYear) {
-        let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = this.getModelMonthlyStartAndEndDate(facility, baselineYear);
+      let startYear: number = getFiscalYear(baselineDate, facility);
+      while (startYear <= reportYear) {
+        let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = this.getModelMonthlyStartAndEndDate(facility, startYear);
         allPredictorVariableCombos.forEach(variableIdCombo => {
-          let regressionData: { endog: Array<number>, exog: Array<Array<number>> } = this.getRegressionData(monthlyStartAndEndDate.baselineDate, monthlyStartAndEndDate.endDate, allMeterData, facilityPredictorData, variableIdCombo);
+          let regressionData: { endog: Array<number>, exog: Array<Array<number>> } = this.getRegressionData(monthlyStartAndEndDate.baselineDate, monthlyStartAndEndDate.endDate, allMeterData, facilityPredictorData, variableIdCombo, analysisItem.analysisCategory);
           try {
             let model: JStatRegressionModel = jStat.models.ols(regressionData.endog, regressionData.exog);
-            model['modelYear'] = baselineYear;
+            model['modelYear'] = startYear;
             let modelPredictorVariables: Array<PredictorData> = new Array();
             variableIdCombo.forEach(variableId => {
               let variable: PredictorData = predictorVariables.find(variable => { return variable.id == variableId });
@@ -114,7 +115,7 @@ export class RegressionModelsService {
                 pvalue: undefined,
                 F_statistic: undefined
               },
-              modelYear: baselineYear,
+              modelYear: startYear,
               predictorVariables: modelPredictorVariables,
               modelId: undefined,
               isValid: false,
@@ -125,7 +126,7 @@ export class RegressionModelsService {
           }
         })
 
-        baselineYear++;
+        startYear++;
       }
       return models;
     } else {
@@ -133,7 +134,7 @@ export class RegressionModelsService {
     }
   }
 
-  getRegressionData(startDate: Date, endDate: Date, allMeterData: Array<MonthlyData>, facilityPredictorData: Array<IdbPredictorEntry>, predictorVariablesIds: Array<string>): { endog: Array<number>, exog: Array<Array<number>> } {
+  getRegressionData(startDate: Date, endDate: Date, allMeterData: Array<MonthlyData>, facilityPredictorData: Array<IdbPredictorEntry>, predictorVariablesIds: Array<string>, analysisCategory: 'energy' | 'water'): { endog: Array<number>, exog: Array<Array<number>> } {
     let endog: Array<number> = new Array();
     let exog: Array<Array<number>> = new Array();
     while (startDate < endDate) {
@@ -141,7 +142,12 @@ export class RegressionModelsService {
         let dataDate: Date = new Date(data.date);
         return dataDate.getUTCMonth() == startDate.getUTCMonth() && dataDate.getUTCFullYear() == startDate.getUTCFullYear();
       });
-      let energyConsumption: number = _.sumBy(monthData, 'energyConsumption');
+      let energyConsumption: number;
+      if (analysisCategory == 'energy') {
+        energyConsumption = _.sumBy(monthData, 'energyUse');
+      } else {
+        energyConsumption = _.sumBy(monthData, 'energyConsumption');
+      }
       endog.push(energyConsumption);
       let monthPredictorData: Array<IdbPredictorEntry> = facilityPredictorData.filter(pData => {
         let dataDate: Date = new Date(pData.date);
@@ -297,6 +303,7 @@ export class RegressionModelsService {
     }
 
 
+
     model.predictorVariables.forEach(variable => {
       let modelMinValid: boolean = true;
       let modelMaxValid: boolean = true;
@@ -319,14 +326,11 @@ export class RegressionModelsService {
         return predictorData.amount;
       });
       let reportAvg: number = _.mean(reportYearUsage);
-
       let baselineYearUsage: Array<number> = baselineYearPredictorData.map(data => {
         let predictorData: PredictorData = data.predictors.find(predictor => { return predictor.id == variable.id });
         return predictorData.amount;
       });
-
       let baselineAvg: number = _.mean(baselineYearUsage);
-
       let reportYearError: boolean = false;
       let baselineYearError: boolean = false;
       if (modelMax < reportAvg || reportAvg < modelMin || modelMax < baselineAvg || baselineAvg < modelMin) {

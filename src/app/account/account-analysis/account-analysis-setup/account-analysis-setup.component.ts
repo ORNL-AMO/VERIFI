@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem } from 'src/app/models/idb';
+import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport, IdbAnalysisItem } from 'src/app/models/idb';
 import { Month, Months } from 'src/app/shared/form-data/months';
 import { EnergyUnitOptions, UnitOption, VolumeLiquidOptions } from 'src/app/shared/unitOptions';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
@@ -10,6 +10,8 @@ import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { firstValueFrom } from 'rxjs';
 import { AnalysisValidationService } from 'src/app/shared/helper-services/analysis-validation.service';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
+import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
+import { AccountAnalysisService } from '../account-analysis.service';
 
 @Component({
   selector: 'app-account-analysis-setup',
@@ -27,12 +29,17 @@ export class AccountAnalysisSetupComponent implements OnInit {
   analysisItem: IdbAccountAnalysisItem;
   yearOptions: Array<number>;
   baselineYearWarning: string;
+  disableForm: boolean;
+  showInUseMessage: boolean;
+  displayEnableForm: boolean = false;
   constructor(private accountDbService: AccountdbService, private accountAnalysisDbService: AccountAnalysisDbService,
     private router: Router,
     private dbChangesService: DbChangesService,
     private analysisDbService: AnalysisDbService,
     private analysisValidationService: AnalysisValidationService,
-    private calendarizationService: CalanderizationService) { }
+    private calendarizationService: CalanderizationService,
+    private accountReportDbService: AccountReportDbService,
+    private accountAnalysisService: AccountAnalysisService) { }
 
   ngOnInit(): void {
     this.analysisItem = this.accountAnalysisDbService.selectedAnalysisItem.getValue();
@@ -40,6 +47,8 @@ export class AccountAnalysisSetupComponent implements OnInit {
       this.router.navigateByUrl('/account/analysis/dashboard')
     }
     this.account = this.accountDbService.selectedAccount.getValue();
+    this.setDisableForm();
+    this.setShowInUseMessage();
     this.energyUnit = this.account.energyUnit;
     this.yearOptions = this.calendarizationService.getYearOptionsAccount(this.analysisItem.analysisCategory);
     this.setBaselineYearWarning();
@@ -66,30 +75,15 @@ export class AccountAnalysisSetupComponent implements OnInit {
       }
       this.analysisItem.baselineAdjustments = yearAdjustments;
     }
-    await this.resetFacilityItems();
-  }
-
-  async resetFacilityItems() {
-    let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
-    this.analysisItem.facilityAnalysisItems.forEach(item => {
-      let facilityItem: IdbAnalysisItem = accountAnalysisItems.find(accountItem => {
-        return (accountItem.reportYear == this.analysisItem.reportYear
-          && accountItem.facilityId == item.facilityId
-          && accountItem.selectedYearAnalysis
-          && accountItem.baselineYear == this.analysisItem.baselineYear
-          && accountItem.analysisCategory == this.analysisItem.analysisCategory);
-      });
-      if (facilityItem) {
-        item.analysisItemId = facilityItem.guid;
-      } else {
-        item.analysisItemId = undefined;
+    let allAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
+    let selectYearAnalysis: boolean = true;
+    allAnalysisItems.forEach(item => {
+      if (item.reportYear == this.analysisItem.reportYear && item.selectedYearAnalysis) {
+        selectYearAnalysis = false;
       }
     });
+    this.analysisItem.selectedYearAnalysis = selectYearAnalysis;
     await this.saveItem();
-  }
-
-  async changeSiteSource() {
-    await this.resetFacilityItems();
   }
 
   setBaselineYearWarning() {
@@ -108,5 +102,45 @@ export class AccountAnalysisSetupComponent implements OnInit {
     } else {
       this.baselineYearWarning = undefined;
     }
+  }
+
+  setDisableForm() {
+    let hasItemsSelected: boolean = false;
+    this.analysisItem.facilityAnalysisItems.forEach(item => {
+      if (item.analysisItemId != undefined) {
+        hasItemsSelected = true;
+      }
+    });
+    this.disableForm = hasItemsSelected;
+  }
+
+  setShowInUseMessage() {
+    let hasCorrespondingReport: boolean = this.accountReportDbService.getHasCorrespondingReport(this.analysisItem.guid);
+    if (hasCorrespondingReport && this.accountAnalysisService.hideInUseMessage == false) {
+      this.showInUseMessage = true;
+    }
+  }
+
+  hideInUseMessage() {
+    this.showInUseMessage = false;
+    this.accountAnalysisService.hideInUseMessage = true;
+  }
+
+  showEnableForm() {
+    this.displayEnableForm = true;
+  }
+
+  cancelEnableForm() {
+    this.displayEnableForm = false;
+  }
+
+  async confirmEnableForm() {
+    this.analysisItem.facilityItemsInitialized = false;
+    this.analysisItem.facilityAnalysisItems.forEach(item => {
+      item.analysisItemId = undefined;
+    });
+    await this.saveItem();
+    this.disableForm = false;
+    this.displayEnableForm = undefined;
   }
 }

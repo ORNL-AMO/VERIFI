@@ -17,6 +17,8 @@ export class MonthlyAnalysisSummaryGraphComponent implements OnInit {
   facilityOrAccount: IdbFacility | IdbAccount;
   @Input()
   inHomeScreen: boolean;
+  @Input()
+  inFacilitySummary: boolean;
 
   @ViewChild('monthlyAnalysisGraph', { static: false }) monthlyAnalysisGraph: ElementRef;
 
@@ -72,11 +74,22 @@ export class MonthlyAnalysisSummaryGraphComponent implements OnInit {
       var data = [trace2, trace1];
 
       let height: number;
-      if(this.inHomeScreen){
+      if (this.inHomeScreen) {
         height = 350;
       }
 
+      let title: string;
+      if (this.inFacilitySummary) {
+        title = this.facilityOrAccount.name + ' (' + this.getPercentValue(this.monthlyAnalysisSummaryData[this.monthlyAnalysisSummaryData.length - 1].rolling12MonthImprovement) + '%)';
+      }
+
       var layout = {
+        title: {
+          text: title,
+          font: {
+            size: 18
+          },
+        },
         height: height,
         legend: {
           orientation: "h"
@@ -102,5 +115,9 @@ export class MonthlyAnalysisSummaryGraphComponent implements OnInit {
       };
       this.plotlyService.newPlot(this.monthlyAnalysisGraph.nativeElement, data, layout, config);
     }
+  }
+
+  getPercentValue(value: number): string {
+    return (value).toLocaleString(undefined, { maximumFractionDigits: 2, minimumIntegerDigits: 1 })
   }
 }

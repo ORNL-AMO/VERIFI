@@ -13,7 +13,8 @@ export class MonthlyAccountAnalysisClass {
 
     allAccountAnalysisData: Array<MonthlyAnalysisSummaryDataClass>;
     accountMonthSummaries: Array<MonthlyAccountAnalysisDataClass>;
-    monthlyFacilityAnalysisClasses: Array<MonthlyFacilityAnalysisClass>
+    monthlyFacilityAnalysisClasses: Array<MonthlyFacilityAnalysisClass>; 
+    facilitySummaries: Array<{ facility: IdbFacility, analysisItem: IdbAnalysisItem, monthlySummaryData: Array<MonthlyAnalysisSummaryData> }>
     startDate: Date;
     endDate: Date;
     facilityPredictorEntries: Array<IdbPredictorEntry>;
@@ -61,6 +62,7 @@ export class MonthlyAccountAnalysisClass {
         meters: Array<IdbUtilityMeter>,
         meterData: Array<IdbUtilityMeterData>) {
         this.monthlyFacilityAnalysisClasses = new Array();
+        this.facilitySummaries = new Array();
         accountAnalysisItem.facilityAnalysisItems.forEach(item => {
             if (item.analysisItemId != undefined && item.analysisItemId != 'skip') {
                 let analysisItem: IdbAnalysisItem = allAccountAnalysisItems.find(accountItem => { return item.analysisItemId == accountItem.guid });
@@ -80,6 +82,11 @@ export class MonthlyAccountAnalysisClass {
                     monthlyFacilityAnalysisClass.convertResults(analysisItem.waterUnit, accountAnalysisItem.waterUnit);
                 }
                 this.monthlyFacilityAnalysisClasses.push(monthlyFacilityAnalysisClass);
+                this.facilitySummaries.push({
+                    facility: facility,
+                    analysisItem: analysisItem,
+                    monthlySummaryData: monthlyFacilityAnalysisClass.getMonthlyAnalysisSummaryData()
+                })
             }
         });
         this.allAccountAnalysisData = this.monthlyFacilityAnalysisClasses.flatMap(analysisClass => { return analysisClass.allFacilityAnalysisData });

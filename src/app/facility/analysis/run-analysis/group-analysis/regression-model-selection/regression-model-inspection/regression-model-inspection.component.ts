@@ -143,6 +143,13 @@ export class RegressionModelInspectionComponent implements OnInit {
     if (this.monthlyAnalysisGraph) {
       let name: string = this.getGraphName();
 
+      let yAxisTitle: string = this.analysisItem.energyUnit;
+      let traceColor: string = '#7D3C98'
+      if (this.analysisItem.analysisCategory == 'water') {
+        yAxisTitle = this.analysisItem.waterUnit;
+        traceColor = '#3498DB';
+      }
+
       var data = [];
       if (this.inspectedMonthlyAnalysisSummaryData) {
         var trace1 = {
@@ -237,7 +244,7 @@ export class RegressionModelInspectionComponent implements OnInit {
         },
         yaxis: {
           title: {
-            text: this.analysisItem.energyUnit,
+            text: yAxisTitle,
             font: {
               size: 16
             },

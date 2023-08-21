@@ -9,11 +9,19 @@
                     Baseline Year
                     <br>
                     {{report.baselineYear | yearDisplay: account.fiscalYear}}
+                    <ng-container *ngIf="account.fiscalYear">
+                        <br>
+                        ({{baselineFiscalYearStart | date:"MMM. yy"}} - {{baselineFiscalYearEnd | date:'MMM. yy'}})
+                    </ng-container>
                 </td>
                 <td class="bold text-center w-25">
                     Report Year
                     <br>
-                    {{report.reportYear | yearDisplay: account.fiscalYear}}
+                    {{betterPlantsSummary.reportYear | yearDisplay: account.fiscalYear}}
+                    <ng-container *ngIf="account.fiscalYear">
+                        <br>
+                        ({{reportFiscalYearStart | date:'MMM. yy'}} - {{reportFiscalYearEnd | date:'MMM. yy'}})
+                    </ng-container>
                 </td>
             </tr>
             <tr>
@@ -69,7 +77,7 @@
                     {{betterPlantsSummary.baselineYearEnergyResults.distilateFuelUse | customNumber}}
                 </td>
                 <td>
-                    {{betterPlantsSummary.baselineYearEnergyResults.distilateFuelUse | customNumber}}
+                    {{betterPlantsSummary.reportYearEnergyResults.distilateFuelUse | customNumber}}
                 </td>
             </tr>
             <tr

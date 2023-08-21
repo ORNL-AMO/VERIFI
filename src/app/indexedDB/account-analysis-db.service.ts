@@ -8,6 +8,7 @@ import { FacilitydbService } from './facility-db.service';
 import { AnalysisCategory } from '../models/analysis';
 import { AnalysisDbService } from './analysis-db.service';
 import { AnalysisValidationService } from '../shared/helper-services/analysis-validation.service';
+import { LoadingService } from '../core-components/loading/loading.service';
 
 @Injectable({
   providedIn: 'root'
@@ -21,7 +22,8 @@ export class AccountAnalysisDbService {
     private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService,
     private analysisDbService: AnalysisDbService,
-    private analysisValidationService: AnalysisValidationService) {
+    private analysisValidationService: AnalysisValidationService,
+    private loadingService: LoadingService) {
     this.accountAnalysisItems = new BehaviorSubject<Array<IdbAccountAnalysisItem>>([]);
     this.selectedAnalysisItem = new BehaviorSubject<IdbAccountAnalysisItem>(undefined);
 
@@ -123,7 +125,8 @@ export class AccountAnalysisDbService {
 
   async deleteAnalysisItems(analysisItems: Array<IdbAccountAnalysisItem>) {
     for (let i = 0; i < analysisItems.length; i++) {
-      await this.deleteWithObservable(analysisItems[i].id);
+      this.loadingService.setLoadingMessage('Deleting Account Analysis Items (' + i + '/' + analysisItems.length + ')...');
+      await firstValueFrom(this.deleteWithObservable(analysisItems[i].id));
     }
   }
 
@@ -154,5 +157,18 @@ export class AccountAnalysisDbService {
     if (hasChanges) {
       this.accountAnalysisItems.next(accountAnalysisItems);
     }
+  }
+
+  getCorrespondingAccountAnalysisItems(facilityAnalysisItemId: string): Array<IdbAccountAnalysisItem> {
+    let allAccountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisItems.getValue();
+    let correspondingItems: Array<IdbAccountAnalysisItem> = new Array();
+    allAccountAnalysisItems.forEach(accountItem => {
+      accountItem.facilityAnalysisItems.forEach(facilityItem => {
+        if (facilityItem.analysisItemId == facilityAnalysisItemId) {
+          correspondingItems.push(accountItem);
+        }
+      });
+    });
+    return correspondingItems;
   }
 }

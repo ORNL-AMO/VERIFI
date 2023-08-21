@@ -57,7 +57,8 @@ export class AccountReportsService {
       modificationNotes: [betterPlantsReportSetup.modificationNotes],
       methodologyNotes: [betterPlantsReportSetup.methodologyNotes],
       baselineYearWaterPilotGoal: [betterPlantsReportSetup.baselineYearWaterPilotGoal],
-      reportYearWaterPilotGoal: [betterPlantsReportSetup.reportYearWaterPilotGoal]
+      reportYearWaterPilotGoal: [betterPlantsReportSetup.reportYearWaterPilotGoal],
+      includeAllYears: [betterPlantsReportSetup.includeAllYears]
     });
     return form;
   }
@@ -70,6 +71,7 @@ export class AccountReportsService {
     betterPlantsReportSetup.methodologyNotes = form.controls.methodologyNotes.value;
     betterPlantsReportSetup.reportYearWaterPilotGoal = form.controls.reportYearWaterPilotGoal.value;
     betterPlantsReportSetup.baselineYearWaterPilotGoal = form.controls.baselineYearWaterPilotGoal.value;
+    betterPlantsReportSetup.includeAllYears = form.controls.includeAllYears.value;
     return betterPlantsReportSetup;
   }
 

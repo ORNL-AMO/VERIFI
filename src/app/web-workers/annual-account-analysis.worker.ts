@@ -2,6 +2,7 @@
 
 import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from "../models/analysis";
 import { AnnualAccountAnalysisSummaryClass } from "../calculations/analysis-calculations/annualAccountAnalysisSummaryClass";
+import { MonthlyFacilityAnalysisClass } from "../calculations/analysis-calculations/monthlyFacilityAnalysisClass";
 
 addEventListener('message', ({ data }) => {
     try {
@@ -11,13 +12,15 @@ addEventListener('message', ({ data }) => {
         postMessage({
             annualAnalysisSummaries: annualAnalysisSummaries,
             monthlyAnalysisSummaryData: monthlyAnalysisSummaryData,
-            error: false
+            error: false,
+            facilitySummaries: annualAnalysisSummaryClass.facilitySummaries
         });
     } catch (err) {
         postMessage({
             annualAnalysisSummaries: undefined,
             monthlyAnalysisSummaryData: undefined,
-            error: true
+            error: true,
+            facilitySummaries: undefined
         });
     }
 });

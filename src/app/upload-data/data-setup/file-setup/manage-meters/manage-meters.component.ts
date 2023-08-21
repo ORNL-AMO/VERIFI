@@ -183,16 +183,16 @@ export class ManageMetersComponent implements OnInit {
         facilityMeterGroups.push(otherEnergyGroup);
       }
 
-      let waterGroup: IdbUtilityMeterGroup = facilityMeterGroups.find(group => { return group.name == 'Water' });
+      let waterGroup: IdbUtilityMeterGroup = facilityMeterGroups.find(group => { return group.name == 'Water Intake' });
       if (!waterGroup) {
-        waterGroup = this.utilityMeterGroupDbService.getNewIdbUtilityMeterGroup("Water", "Water", importFacility.guid, importFacility.accountId);
+        waterGroup = this.utilityMeterGroupDbService.getNewIdbUtilityMeterGroup("Water", "Water Intake", importFacility.guid, importFacility.accountId);
         facilityMeterGroups.push(waterGroup);
       }
 
 
-      let wasteWaterGroup: IdbUtilityMeterGroup = facilityMeterGroups.find(group => { return group.name == 'Waste Water' });
+      let wasteWaterGroup: IdbUtilityMeterGroup = facilityMeterGroups.find(group => { return group.name == 'Water Discharge' });
       if (!wasteWaterGroup) {
-        wasteWaterGroup = this.utilityMeterGroupDbService.getNewIdbUtilityMeterGroup("Water", "Waste Water", importFacility.guid, importFacility.accountId);
+        wasteWaterGroup = this.utilityMeterGroupDbService.getNewIdbUtilityMeterGroup("Water", "Water Discharge", importFacility.guid, importFacility.accountId);
         facilityMeterGroups.push(wasteWaterGroup);
       }
 

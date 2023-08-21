@@ -2,6 +2,7 @@ import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { Injectable } from '@angular/core';
 import { IdbUtilityMeterGroup } from '../models/idb';
 import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
+import { LoadingService } from '../core-components/loading/loading.service';
 
 @Injectable({
     providedIn: 'root'
@@ -10,7 +11,7 @@ export class UtilityMeterGroupdbService {
 
     facilityMeterGroups: BehaviorSubject<Array<IdbUtilityMeterGroup>>;
     accountMeterGroups: BehaviorSubject<Array<IdbUtilityMeterGroup>>;
-    constructor(private dbService: NgxIndexedDBService) {
+    constructor(private dbService: NgxIndexedDBService, private loadingService: LoadingService) {
         this.facilityMeterGroups = new BehaviorSubject<Array<IdbUtilityMeterGroup>>(new Array());
         this.accountMeterGroups = new BehaviorSubject<Array<IdbUtilityMeterGroup>>(new Array());
     }
@@ -62,6 +63,7 @@ export class UtilityMeterGroupdbService {
 
     async deleteMeterGroupAsync(meterGroups: Array<IdbUtilityMeterGroup>) {
         for (let i = 0; i < meterGroups.length; i++) {
+            this.loadingService.setLoadingMessage('Deleting Meter Groups (' + i + '/' + meterGroups.length + ')...' );
             await firstValueFrom(this.deleteWithObservable(meterGroups[i].id));
         }
     }
