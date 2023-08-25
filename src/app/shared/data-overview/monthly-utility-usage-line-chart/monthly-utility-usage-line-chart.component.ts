@@ -172,7 +172,7 @@ export class MonthlyUtilityUsageLineChartComponent {
     } else if (this.dataType == 'cost') {
       return "Utility Costs";
     } else if (this.dataType == 'emissions') {
-      return "Utility Emissions (kg CO<sub>2</sub>e)";
+      return "Utility Emissions (tonne CO<sub>2</sub>e)";
     } else if (this.dataType == 'water') {
       return "Water Usage (" + accountOrFacility.volumeLiquidUnit + ")";
     }
@@ -184,7 +184,7 @@ export class MonthlyUtilityUsageLineChartComponent {
     } else if (this.dataType == 'water') {
       return '%{text} (%{x}): %{y:,.0f} ' + accountOrFacility.volumeLiquidUnit + ' <extra></extra>';
     } else if (this.dataType == 'emissions') {
-      return '%{text} (%{x}): %{y:,.0f} kg CO<sub>2</sub>e <extra></extra>';
+      return '%{text} (%{x}): %{y:,.0f} tonne CO<sub>2</sub>e <extra></extra>';
     } else if (this.dataType == 'cost') {
       return '%{text} (%{x}): %{y:$,.0f} <extra></extra>';
     }

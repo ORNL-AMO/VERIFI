@@ -116,9 +116,9 @@ export class FacilityUsageDonutComponent {
       return this.accountOverviewFacilities.map(summary => { return summary.totalUsage });
     } else if (this.dataType == 'emissions') {
       if (this.emissionsDisplay == 'location') {
-        return this.accountOverviewFacilities.map(summary => { return summary.totalLocationEmissions / 1000 });
+        return this.accountOverviewFacilities.map(summary => { return summary.totalLocationEmissions });
       } else {
-        return this.accountOverviewFacilities.map(summary => { return summary.totalMarketEmissions / 1000 });
+        return this.accountOverviewFacilities.map(summary => { return summary.totalMarketEmissions });
       }
     }
 
