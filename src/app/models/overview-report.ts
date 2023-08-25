@@ -109,3 +109,17 @@ export interface DataOverviewReportSetup {
   includeAnnualBarChart: boolean,
   includeMonthlyLineChartForFacility: boolean
 }
+
+export interface PerformanceReportSetup {
+  analysisItemId: string,
+  includeFacilityPerformanceDetails: boolean,
+  includeUtilityPerformanceDetails: boolean,
+  includeGroupPerformanceDetails: boolean, 
+  groupPerformanceByYear: boolean,
+  numberOfTopPerformers: number,
+  includeActual: boolean,
+  includeAdjusted: boolean,
+  includeContribution: boolean,
+  includeSavings: boolean,
+  includeTopPerformersTable: boolean
+}

@@ -5,11 +5,13 @@ import { AnnualAnalysisSummaryDataClass } from "./annualAnalysisSummaryDataClass
 import { AnnualAnalysisSummary } from 'src/app/models/analysis';
 import { MonthlyFacilityAnalysisClass } from "./monthlyFacilityAnalysisClass";
 import { checkAnalysisValue } from "../shared-calculations/calculationsHelpers";
+import { MonthlyAnalysisSummaryClass } from "./monthlyAnalysisSummaryClass";
 
 export class AnnualFacilityAnalysisSummaryClass {
 
     monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>;
     annualAnalysisSummaryDataClasses: Array<AnnualAnalysisSummaryDataClass>;
+    groupMonthlySummariesClasses: Array<MonthlyAnalysisSummaryClass>
     baselineYear: number;
     reportYear: number;
     constructor(analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, accountPredictorEntries: Array<IdbPredictorEntry>, calculateAllMonthlyData: boolean) {
@@ -22,6 +24,7 @@ export class AnnualFacilityAnalysisSummaryClass {
     setMonthlyAnalysisSummaryData(analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, accountPredictorEntries: Array<IdbPredictorEntry>, calculateAllMonthlyData: boolean) {
         let monthlyAnalysisSummaryClass: MonthlyFacilityAnalysisClass = new MonthlyFacilityAnalysisClass(analysisItem, facility, calanderizedMeters, accountPredictorEntries, calculateAllMonthlyData);
         this.monthlyAnalysisSummaryData = monthlyAnalysisSummaryClass.getMonthlyAnalysisSummaryData();
+        this.groupMonthlySummariesClasses = monthlyAnalysisSummaryClass.groupMonthlySummariesClasses;
     }
 
     setBaselineYear(analysisItem: IdbAnalysisItem) {

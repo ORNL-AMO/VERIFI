@@ -12,6 +12,7 @@ export class MonthlyFacilityAnalysisClass {
 
     allFacilityAnalysisData: Array<MonthlyAnalysisSummaryDataClass>;
     facilityMonthSummaries: Array<MonthlyFacilityAnalysisDataClass>;
+    groupMonthlySummariesClasses: Array<MonthlyAnalysisSummaryClass>;
     startDate: Date;
     endDate: Date;
     facilityPredictorEntries: Array<IdbPredictorEntry>;
@@ -48,14 +49,14 @@ export class MonthlyFacilityAnalysisClass {
     }
 
     setGroupSummaries(analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, calculateAllMonthlyData: boolean) {
-        let groupMonthlySummariesClasses: Array<MonthlyAnalysisSummaryClass> = new Array();
+        this.groupMonthlySummariesClasses = new Array();
         analysisItem.groups.forEach(group => {
             if (group.analysisType != 'skip' && group.analysisType != 'skipAnalysis') {
                 let monthlySummary: MonthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(group, analysisItem, facility, calanderizedMeters, this.facilityPredictorEntries, calculateAllMonthlyData);
-                groupMonthlySummariesClasses.push(monthlySummary);
+                this.groupMonthlySummariesClasses.push(monthlySummary);
             }
         });
-        this.allFacilityAnalysisData = groupMonthlySummariesClasses.flatMap(summary => { return summary.monthlyAnalysisSummaryData });
+        this.allFacilityAnalysisData = this.groupMonthlySummariesClasses.flatMap(summary => { return summary.monthlyAnalysisSummaryData });
     }
 
     setFacilityPredictorEntries(accountPredictorEntries: Array<IdbPredictorEntry>, facility: IdbFacility) {

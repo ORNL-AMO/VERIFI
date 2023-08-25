@@ -3,7 +3,7 @@ import { AnalysisCategory, AnalysisGroup, AnalysisSetupErrors } from './analysis
 import { MonthlyData } from './calanderization';
 import { FacilityClassification, MeterPhase, MeterSource, ReportType, WaterDischargeType, WaterIntakeType } from './constantsAndTypes';
 import { ElectricityDataFilters, GeneralUtilityDataFilters } from './meterDataFilter';
-import { BetterPlantsReportSetup, DataOverviewReportSetup } from './overview-report';
+import { BetterPlantsReportSetup, DataOverviewReportSetup, PerformanceReportSetup } from './overview-report';
 import { SustainabilityQuestions } from './sustainabilityQuestions';
 
 export interface IdbAccount {
@@ -270,7 +270,8 @@ export interface IdbAccountReport {
     name: string,
     reportType: ReportType,
     betterPlantsReportSetup: BetterPlantsReportSetup,
-    dataOverviewReportSetup: DataOverviewReportSetup
+    dataOverviewReportSetup: DataOverviewReportSetup,
+    performanceReportSetup: PerformanceReportSetup
 }
 
 

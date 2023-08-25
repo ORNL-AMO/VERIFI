@@ -1,4 +1,5 @@
 <div class="main-content p-0">
+    <app-account-reports-dashboard-tabs></app-account-reports-dashboard-tabs>
     <div class="content-padding">
         <div class="card card-body">
             <h4 class="pt-0">
@@ -9,42 +10,48 @@
                     </div>
 
                     <div>
-                        <button class="btn action-btn m-0" (click)="createNewReport()">+Add New Report</button>
+                        <button class="btn action-btn m-0" (click)="openCreateReport()">+Add New Report</button>
                     </div>
                 </div>
             </h4>
         </div>
         <hr>
-        <ng-container *ngIf="reportItemsList.length != 0">
-            <div class="d-flex flex-column">
-                <div class="row" *ngFor="let listItem of reportItemsList; let index = index;">
-                    <div class="col-12 text-center pb-2">
-                        <span class="badge report-year">
-                            {{listItem.year | yearDisplay:selectedAccount.fiscalYear}}
-                        </span>
-                    </div>
-                    <div class="col-6 pt-2" *ngFor="let report of listItem.reports">
-                        <!-- <app-account-analysis-item-card [analysisItem]="analysisItem"></app-account-analysis-item-card> -->
-                        <app-account-reports-item-card [report]="report"></app-account-reports-item-card>
-                    </div>
-                    <div class="col-12">
-                        <hr>
-                    </div>
-                </div>
-            </div>
-        </ng-container>
-        <ng-container *ngIf="reportItemsList.length == 0">
-            <div class="card card-body text-center bold">
-                No reports found for this account. Click "+Add New Report" to create your first report!
-            </div>
-        </ng-container>
+        <router-outlet></router-outlet>
     </div>
 </div>
 
-<!-- <div class="w-100 justify-content-center p-5">
-    <div class="alert alert-danger text-center p-2">
-        The baseline year for your reduction goal is
-        {{selectedAccount.sustainabilityQuestions.energyReductionBaselineYear}} and your data starts {{yearOptions[0]}}.
-        Fix your facility settings or add data.
+<div [ngClass]="{'windowOverlay': displayNewReport}"></div>
+<div class="popup" [class.open]="displayNewReport">
+    <div class="popup-header">Create New Report
+        <button class="item-right" (click)="cancelCreate()">x</button>
     </div>
-</div> -->
+    <div class="popup-body">
+        <form>
+            <div class="form-group">
+                <label class="bold">Select Analysis Category </label>
+                <div class="sub-column">
+                    <div class="form-check">
+                        <input type="radio" class="form-check-input" name="reportType" [value]="'betterPlants'"
+                            id="betterPlants" [(ngModel)]="newReportType">
+                        <label class="form-check-label" for="betterPlants">Better Plants Report</label>
+                    </div>
+                    <div class="form-check">
+                        <input type="radio" class="form-check-input" name="reportType" [value]="'performance'"
+                            id="performance" [(ngModel)]="newReportType">
+                        <label class="form-check-label" for="performance">Performance Report</label>
+                    </div>
+                    <div class="form-check">
+                        <input type="radio" class="form-check-input" name="reportType" [value]="'dataOverview'"
+                            id="dataOverview" [(ngModel)]="newReportType">
+                        <label class="form-check-label" for="dataOverview">Data Overview Report</label>
+                    </div>
+                </div>
+            </div>
+        </form>
+        <hr>
+    </div>
+    <div class="saveCancel popup-footer text-end">
+        <button class="btn btn-secondary" (click)="cancelCreate()">Cancel</button>
+        <button class="btn action-btn" (click)="createNewReport()">Create Report</button>
+    </div>
+</div>

@@ -1,0 +1,16 @@
+/* .border-left-cell {
+    border-left: solid black 4px;
+}
+
+.border-right-cell {
+    border-right: solid black 4px;
+} */
+
+td.fill-cell {
+    /* width: 25%; */
+    /* only for demo, not really required */
+    background-image: linear-gradient(to right, rgba(241, 196, 15, 1) 0%, rgba(241, 196, 15, 1) 100%);
+    /* your gradient */
+    background-repeat: no-repeat;
+    /* don't remove */
+}

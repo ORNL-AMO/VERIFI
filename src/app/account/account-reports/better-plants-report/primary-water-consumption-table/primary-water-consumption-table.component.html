@@ -9,7 +9,7 @@
                     Baseline Year
                     <br>
                     {{report.baselineYear | yearDisplay: account.fiscalYear}}
-                    <ng-container *ngIf="account.fiscalYear">
+                    <ng-container *ngIf="account.fiscalYear == 'nonCalendarYear'">
                         <br>
                         ({{baselineFiscalYearStart | date:"MMM. yy"}} - {{baselineFiscalYearEnd | date:'MMM. yy'}})
                     </ng-container>
@@ -18,7 +18,7 @@
                     Report Year
                     <br>
                     {{betterPlantsSummary.reportYear | yearDisplay: account.fiscalYear}}
-                    <ng-container *ngIf="account.fiscalYear">
+                    <ng-container *ngIf="account.fiscalYear == 'nonCalendarYear'">
                         <br>
                         ({{reportFiscalYearStart | date:'MMM. yy'}} - {{reportFiscalYearEnd | date:'MMM. yy'}})
                     </ng-container>

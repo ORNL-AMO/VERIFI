@@ -26,6 +26,19 @@ import { DataOverviewAccountReportComponent } from './data-overview-report/data-
 import { DataOverviewFacilityReportComponent } from './data-overview-report/data-overview-facility-report/data-overview-facility-report.component';
 import { PrintReportButtonComponent } from './print-report-button/print-report-button.component';
 import { PrimaryWaterConsumptionTableComponent } from './better-plants-report/primary-water-consumption-table/primary-water-consumption-table.component';
+import { PerformanceReportComponent } from './performance-report/performance-report.component';
+import { PerformanceSetupComponent } from './account-report-setup/performance-setup/performance-setup.component';
+import { PerformanceReportFacilityTableComponent } from './performance-report/performance-report-facility-table/performance-report-facility-table.component';
+import { PerformanceReportGroupTableComponent } from './performance-report/performance-report-group-table/performance-report-group-table.component';
+import { PerformanceReportUtilityTableComponent } from './performance-report/performance-report-utility-table/performance-report-utility-table.component';
+import { PerformanceChartComponent } from './performance-report/performance-chart/performance-chart.component';
+import { TopPerformersTableComponent } from './performance-report/top-performers-table/top-performers-table.component';
+import { TableCellShadingPipe } from './performance-report/table-cell-shading.pipe';
+import { TableFillPipe } from './performance-report/table-fill.pipe';
+import { PerformanceReportDashboardComponent } from './account-reports-dashboard/performance-report-dashboard/performance-report-dashboard.component';
+import { OverviewReportDashboardComponent } from './account-reports-dashboard/overview-report-dashboard/overview-report-dashboard.component';
+import { BetterPlantsReportDashboardComponent } from './account-reports-dashboard/better-plants-report-dashboard/better-plants-report-dashboard.component';
+import { AccountReportsDashboardTabsComponent } from './account-reports-dashboard/account-reports-dashboard-tabs/account-reports-dashboard-tabs.component';
 
 
 
@@ -50,7 +63,21 @@ import { PrimaryWaterConsumptionTableComponent } from './better-plants-report/pr
     DataOverviewAccountReportComponent,
     DataOverviewFacilityReportComponent,
     PrintReportButtonComponent,
-    PrimaryWaterConsumptionTableComponent
+    PrimaryWaterConsumptionTableComponent,
+    PerformanceReportComponent,
+    PerformanceSetupComponent,
+    FacilityPerformanceTableComponent,
+    PerformanceReportFacilityTableComponent,
+    TableCellShadingPipe,
+    TableFillPipe,
+    PerformanceReportGroupTableComponent,
+    PerformanceReportUtilityTableComponent,
+    PerformanceChartComponent,
+    TopPerformersTableComponent,
+    PerformanceReportDashboardComponent,
+    OverviewReportDashboardComponent,
+    BetterPlantsReportDashboardComponent,
+    AccountReportsDashboardTabsComponent
   ],
   imports: [
     CommonModule,

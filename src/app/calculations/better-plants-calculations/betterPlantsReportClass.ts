@@ -8,6 +8,7 @@ import { BetterPlantsEnergySummaryClass } from "./betterPlantsEnergySummaryClass
 import { BetterPlantsWaterSummaryClass } from "./betterPlantsWaterSummaryClass";
 import { getCalanderizedMeterData } from "../calanderization/calanderizeMeters";
 import { getNeededUnits } from "../shared-calculations/calanderizationFunctions";
+import { getIncludedMeters } from "../shared-calculations/calculationsHelpers";
 
 export class BetterPlantsReportClass {
 
@@ -39,9 +40,9 @@ export class BetterPlantsReportClass {
         this.reportYear = reportYear;
         selectedAnalysisItem.reportYear = reportYear;
         this.setFacilityPerformance(selectedAnalysisItem, facilities, accountPredictorEntries, accountAnalysisItems, meters, meterData);
-        let includedBaselineMeters: Array<IdbUtilityMeter> = this.getIncludedMeters(meters, selectedAnalysisItem, accountAnalysisItems, baselineYear);
+        let includedBaselineMeters: Array<IdbUtilityMeter> = getIncludedMeters(meters, selectedAnalysisItem, accountAnalysisItems, baselineYear);
         let calanderizedBaselineMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(includedBaselineMeters, meterData, account, false, { energyIsSource: selectedAnalysisItem.energyIsSource, neededUnits: getNeededUnits(selectedAnalysisItem) });
-        let includedReportMeters: Array<IdbUtilityMeter> = this.getIncludedMeters(meters, selectedAnalysisItem, accountAnalysisItems, reportYear);
+        let includedReportMeters: Array<IdbUtilityMeter> = getIncludedMeters(meters, selectedAnalysisItem, accountAnalysisItems, reportYear);
         let calanderizedReportMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(includedReportMeters, meterData, account, false, { energyIsSource: selectedAnalysisItem.energyIsSource, neededUnits: getNeededUnits(selectedAnalysisItem) });
 
         this.setReportAndBaselineYearSummaries(selectedAnalysisItem, account, facilities, accountPredictorEntries, accountAnalysisItems, baselineYear, reportYear, meters, meterData);
@@ -164,25 +165,5 @@ export class BetterPlantsReportClass {
             baselineYearWaterResults: this.baselineYearWaterSummaryClass.getBetterPlantsWaterSummary(),
             reportYearWaterResults: this.reportYearWaterSummaryClass.getBetterPlantsWaterSummary()
         }
-    }
-
-    getIncludedMeters(meters: Array<IdbUtilityMeter>, selectedAnalysisItem: IdbAccountAnalysisItem, accountAnalysisItems: Array<IdbAnalysisItem>, year: number) {
-        let includedMeters: Array<IdbUtilityMeter> = new Array()
-        selectedAnalysisItem.facilityAnalysisItems.forEach(item => {
-            if (item.analysisItemId != undefined && item.analysisItemId != 'skip') {
-                let facilityAnalysisItem: IdbAnalysisItem = accountAnalysisItems.find(accountItem => { return accountItem.guid == item.analysisItemId });
-                if (facilityAnalysisItem.baselineYear <= year && facilityAnalysisItem.reportYear >= year) {
-                    facilityAnalysisItem.groups.forEach(group => {
-                        if (group.analysisType != 'skip') {
-                            let filteredMeters: Array<IdbUtilityMeter> = meters.filter(meter => {
-                                return meter.groupId == group.idbGroupId;
-                            });
-                            includedMeters = includedMeters.concat(filteredMeters);
-                        }
-                    });
-                }
-            }
-        });
-        return includedMeters;
     }
 }

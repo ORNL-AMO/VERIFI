@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { IdbAccountReport } from 'src/app/models/idb';
-import { BetterPlantsReportSetup, DataOverviewReportSetup } from 'src/app/models/overview-report';
+import { BetterPlantsReportSetup, DataOverviewReportSetup, PerformanceReportSetup } from 'src/app/models/overview-report';
 import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
@@ -17,7 +17,7 @@ export class AccountReportsService {
   getSetupFormFromReport(report: IdbAccountReport): FormGroup {
     let yearValidators: Array<ValidatorFn> = [];
     let dateValidators: Array<ValidatorFn> = [];
-    if (report.reportType == 'betterPlants') {
+    if (report.reportType == 'betterPlants' || report.reportType == 'performance') {
       yearValidators = [Validators.required];
     } else if (report.reportType == 'dataOverview') {
       dateValidators = [Validators.required];
@@ -109,6 +109,69 @@ export class AccountReportsService {
     return dataOverviewReportSetup;
   }
 
+  getPerformanceFormFromReport(performanceReportSetup: PerformanceReportSetup): FormGroup {
+    if (!performanceReportSetup) {
+      performanceReportSetup = {
+        analysisItemId: undefined,
+        includeFacilityPerformanceDetails: true,
+        includeUtilityPerformanceDetails: true,
+        includeGroupPerformanceDetails: false,
+        includeTopPerformersTable: true,
+        groupPerformanceByYear: false,
+        numberOfTopPerformers: 5,
+        includeActual: false,
+        includeAdjusted: true,
+        includeContribution: true,
+        includeSavings: true,
+      };
+    }
+    let form: FormGroup = this.formBuilder.group({
+      analysisItemId: [performanceReportSetup.analysisItemId, Validators.required],
+      includeFacilityPerformanceDetails: [performanceReportSetup.includeFacilityPerformanceDetails],
+      includeUtilityPerformanceDetails: [performanceReportSetup.includeUtilityPerformanceDetails],
+      includeGroupPerformanceDetails: [performanceReportSetup.includeGroupPerformanceDetails],
+      groupPerformanceByYear: [performanceReportSetup.groupPerformanceByYear],
+      numberOfTopPerformers: [performanceReportSetup.numberOfTopPerformers],
+      includeActual: [performanceReportSetup.includeActual],
+      includeAdjusted: [performanceReportSetup.includeAdjusted],
+      includeContribution: [performanceReportSetup.includeContribution],
+      includeSavings: [performanceReportSetup.includeSavings],
+      includeTopPerformersTable: [performanceReportSetup.includeTopPerformersTable]
+    });
+    return form;
+  }
+
+  updatePerformanceReportSetupFromForm(performanceReportSetup: PerformanceReportSetup, form: FormGroup): PerformanceReportSetup {
+    if (!performanceReportSetup) {
+      performanceReportSetup = {
+        analysisItemId: undefined,
+        includeFacilityPerformanceDetails: true,
+        includeUtilityPerformanceDetails: true,
+        includeGroupPerformanceDetails: false,
+        groupPerformanceByYear: false,
+        includeTopPerformersTable: true,
+        numberOfTopPerformers: 5,
+        includeActual: false,
+        includeAdjusted: true,
+        includeContribution: true,
+        includeSavings: true,
+      };
+    }
+    performanceReportSetup.analysisItemId = form.controls.analysisItemId.value;
+    performanceReportSetup.includeFacilityPerformanceDetails = form.controls.includeFacilityPerformanceDetails.value;
+    performanceReportSetup.includeUtilityPerformanceDetails = form.controls.includeUtilityPerformanceDetails.value;
+    performanceReportSetup.includeGroupPerformanceDetails = form.controls.includeGroupPerformanceDetails.value;
+    performanceReportSetup.groupPerformanceByYear = form.controls.groupPerformanceByYear.value;
+    performanceReportSetup.numberOfTopPerformers = form.controls.numberOfTopPerformers.value;
+    performanceReportSetup.includeActual = form.controls.includeActual.value;
+    performanceReportSetup.includeAdjusted = form.controls.includeAdjusted.value;
+    performanceReportSetup.includeContribution = form.controls.includeContribution.value;
+    performanceReportSetup.includeSavings = form.controls.includeSavings.value;
+    performanceReportSetup.includeTopPerformersTable = form.controls.includeTopPerformersTable.value;
+    return performanceReportSetup;
+  }
+
+
   isReportValid(report: IdbAccountReport): boolean {
     let setupForm: FormGroup = this.getSetupFormFromReport(report);
     if (setupForm.invalid) {
@@ -120,6 +183,9 @@ export class AccountReportsService {
     } else if (report.reportType == 'dataOverview') {
       let dataForm: FormGroup = this.getDataOverviewFormFromReport(report.dataOverviewReportSetup);
       return dataForm.valid;
+    } else if (report.reportType == 'performance') {
+      let performanceForm: FormGroup = this.getPerformanceFormFromReport(report.performanceReportSetup);
+      return performanceForm.valid;
     }
   }
 }
