@@ -151,7 +151,7 @@ export class MetersOverviewStackedLineChartComponent {
     if (this.dataType == 'energyUse') {
       return "Utility Usage (" + this.selectedFacility.energyUnit + ")";
     } else if (this.dataType == 'emissions') {
-      return "Utility Emissions (kg CO<sub>2</sub>e)";
+      return "Utility Emissions (tonne CO<sub>2</sub>e)";
     } else if (this.dataType == 'cost') {
       return "Utility Costs";
     } else if (this.dataType == 'water') {
@@ -163,7 +163,7 @@ export class MetersOverviewStackedLineChartComponent {
     if (this.dataType == 'energyUse') {
       return '%{text} (%{x}): %{y:,.0f} ' + this.selectedFacility.energyUnit + ' <extra></extra>';
     } else if (this.dataType == 'emissions') {
-      return '%{text} (%{x}): %{y:,.0f} kg CO<sub>2</sub>e <extra></extra>';
+      return '%{text} (%{x}): %{y:,.0f} tonne CO<sub>2</sub>e <extra></extra>';
     } else if (this.dataType == 'cost') {
       return '%{text} (%{x}): %{y:$,.0f} <extra></extra>';
     } else if (this.dataType == 'water') {
