@@ -66,5 +66,18 @@ export class AccountReportsBannerComponent {
     this.setupValid = (setupValid && betterPlantsValid && dataOverviewValid && performanceValid);
   }
 
+  goToDashboard() {
+    console.log('go')
+    if (this.selectedReport.reportType == 'betterPlants') {
+      this.router.navigateByUrl('/account/reports/dashboard/better-plants')
+    } else if (this.selectedReport.reportType == 'dataOverview') {
+      this.router.navigateByUrl('/account/reports/dashboard/overview')
+    } else if (this.selectedReport.reportType == 'performance') {
+      this.router.navigateByUrl('/account/reports/dashboard/performance')
+    } else {
+      this.router.navigateByUrl('/account/reports/dashboard')
+    }
+  }
+
 
 }
