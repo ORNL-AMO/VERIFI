@@ -67,7 +67,6 @@ export class AccountReportsBannerComponent {
   }
 
   goToDashboard() {
-    console.log('go')
     if (this.selectedReport.reportType == 'betterPlants') {
       this.router.navigateByUrl('/account/reports/dashboard/better-plants')
     } else if (this.selectedReport.reportType == 'dataOverview') {
