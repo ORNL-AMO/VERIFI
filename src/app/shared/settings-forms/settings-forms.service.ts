@@ -86,7 +86,9 @@ export class SettingsFormsService {
       volumeGasUnit: [units.volumeGasUnit, [Validators.required]],
       energyIsSource: [units.energyIsSource],
       eGridSubregion: [units.eGridSubregion],
-      electricityUnit: [units.electricityUnit]
+      electricityUnit: [units.electricityUnit],
+      resultWaterDischargeUnit: [units.resultWaterDischargeUnit],
+      resultWaterIntakeUnit: [units.resultWaterIntakeUnit]
     });
     return form;
   }
@@ -100,6 +102,8 @@ export class SettingsFormsService {
     account.energyIsSource = form.controls.energyIsSource.value;
     account.eGridSubregion = form.controls.eGridSubregion.value;
     account.electricityUnit = form.controls.electricityUnit.value;
+    account.resultWaterDischargeUnit = form.controls.resultWaterDischargeUnit.value;
+    account.resultWaterIntakeUnit = form.controls.resultWaterIntakeUnit.value;
     return account;
   }
 
@@ -112,6 +116,8 @@ export class SettingsFormsService {
     facility.energyIsSource = form.controls.energyIsSource.value;
     facility.eGridSubregion = form.controls.eGridSubregion.value;
     facility.electricityUnit = form.controls.electricityUnit.value;
+    facility.resultWaterDischargeUnit = form.controls.resultWaterDischargeUnit.value;
+    facility.resultWaterIntakeUnit = form.controls.resultWaterIntakeUnit.value;
     return facility;
   }
 
@@ -235,11 +241,16 @@ export class SettingsFormsService {
       form.controls.volumeLiquidUnit.setValue('ft3');
       form.controls.volumeGasUnit.setValue('SCF');
       form.controls.massUnit.setValue('lb');
+      form.controls.resultWaterDischargeUnit.setValue('ft3');
+      form.controls.resultWaterIntakeUnit.setValue('ft3');
+      
     } else if (form.controls.unitsOfMeasure.value == 'Metric') {
       form.controls.energyUnit.setValue('MMBtu');
       form.controls.volumeLiquidUnit.setValue('m3');
       form.controls.volumeGasUnit.setValue('m3');
       form.controls.massUnit.setValue('kg');
+      form.controls.resultWaterDischargeUnit.setValue('m3');
+      form.controls.resultWaterIntakeUnit.setValue('m3');
     }
     return form;
   }

@@ -114,7 +114,9 @@ export class FacilitydbService {
             contactEmail: undefined,
             contactPhone: undefined,
             facilityOrder: undefined,
-            classification: 'Manufacturing'
+            classification: 'Manufacturing',
+            resultWaterDischargeUnit: account.resultWaterDischargeUnit,
+            resultWaterIntakeUnit: account.resultWaterIntakeUnit
         }
     }
 

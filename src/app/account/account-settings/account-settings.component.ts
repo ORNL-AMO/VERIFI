@@ -235,6 +235,8 @@ export class AccountSettingsComponent implements OnInit {
         facility.volumeGasUnit = accountCopy.volumeGasUnit;
         facility.energyIsSource = accountCopy.energyIsSource;
         facility.electricityUnit = accountCopy.electricityUnit;
+        facility.resultWaterDischargeUnit = accountCopy.resultWaterDischargeUnit;
+        facility.resultWaterIntakeUnit = accountCopy.resultWaterIntakeUnit;
       }
       if (this.applySettingsOptions.financialReporting) {
         facility.fiscalYear = accountCopy.fiscalYear;

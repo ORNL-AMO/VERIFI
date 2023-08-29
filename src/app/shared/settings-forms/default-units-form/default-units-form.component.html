@@ -7,6 +7,9 @@
                 <option [ngValue]="'Metric'">Metric</option>
                 <option [ngValue]="'Custom'">Custom</option>
             </select>
+        </div>
+
+        <div class="mb-3 col">
             <label for="energyUnit">Result Energy Unit</label>
             <select class="form-select" formControlName="energyUnit" (change)="saveChanges()">
                 <option *ngFor="let energyUnitOption of energyUnitOptions" [ngValue]="energyUnitOption.value">
@@ -14,7 +17,28 @@
                 </option>
             </select>
         </div>
+    </div>
+    <div class="row">
         <div class="mb-3 col">
+            <label for="resultWaterIntakeUnit">Result Water Intake Unit</label>
+            <select class="form-select" formControlName="resultWaterIntakeUnit" (change)="saveChanges()">
+                <option *ngFor="let waterUnitOption of volumeLiquidOptions" [ngValue]="waterUnitOption.value">
+                    <span [innerHTML]="waterUnitOption.display"></span>
+                </option>
+            </select>
+        </div>
+
+        <div class="mb-3 col">
+            <label for="resultWaterDischargeUnit">Result Water Discharge Unit</label>
+            <select class="form-select" formControlName="resultWaterDischargeUnit" (change)="saveChanges()">
+                <option *ngFor="let waterUnitOption of volumeLiquidOptions" [ngValue]="waterUnitOption.value">
+                    <span [innerHTML]="waterUnitOption.display"></span>
+                </option>
+            </select>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col mb-3">
             <label>Energy displayed as site or source? </label>
             <div class="form-check">
                 <input type="radio" class="form-check-input" name="energyIsSource" formControlName="energyIsSource"
@@ -82,7 +106,8 @@
     <div class="row" *ngIf="unitsDontMatchAccount">
         <div class="col">
             <p class="alert alert-warning">
-                The Facility units are different then the units that are set for the account. If you would like to use
+                The Facility units are different then the units that are set for the account. If you would like to
+                use
                 the
                 account units for this facility click here: <a (click)="setAccountUnits()">Use Account Units</a>
             </p>
@@ -114,7 +139,8 @@
                 </div>
                 <select class="form-select" *ngIf="zipCodeSubRegionData.length > 1" name="eGridSubregion"
                     id="eGridSubregion" formControlName="eGridSubregion" (change)="setSelectedSubregionEmissions()">
-                    <option *ngFor="let subregion of zipCodeSubRegionData" [ngValue]="subregion">{{subregion}}</option>
+                    <option *ngFor="let subregion of zipCodeSubRegionData" [ngValue]="subregion">{{subregion}}
+                    </option>
                 </select>
                 <span *ngIf="zipCodeSubRegionData.length == 1">
                     {{form.controls.eGridSubregion.value}}
@@ -135,7 +161,8 @@
     <ng-container *ngIf="!inWizard">
         <br>
         <br>
-        Custom emssions rates can be added and managed in the <a class="click-link" (click)="goToCustomData()">Account Custom Data</a>
+        Custom emssions rates can be added and managed in the <a class="click-link" (click)="goToCustomData()">Account
+            Custom Data</a>
         page.
     </ng-container>
 

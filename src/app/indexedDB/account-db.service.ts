@@ -103,6 +103,8 @@ export class AccountdbService {
             volumeLiquidUnit: 'gal',
             volumeGasUnit: 'SCF',
             massUnit: 'lb',
+            resultWaterDischargeUnit: 'gal',
+            resultWaterIntakeUnit: 'gal',
             sustainabilityQuestions: {
                 energyReductionGoal: true,
                 energyReductionPercent: 25,

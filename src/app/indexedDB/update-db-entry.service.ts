@@ -23,6 +23,16 @@ export class UpdateDbEntryService {
       isChanged = true;
     }
 
+    if(!account.resultWaterDischargeUnit){
+      account.resultWaterDischargeUnit = account.volumeLiquidUnit;
+      isChanged = true;
+    }
+
+    if(!account.resultWaterIntakeUnit){
+      account.resultWaterIntakeUnit = account.volumeLiquidUnit;
+      isChanged = true;
+    }
+
     return { account: account, isChanged: isChanged };
   }
 
@@ -42,6 +52,17 @@ export class UpdateDbEntryService {
       facility.classification = 'Manufacturing';
       isChanged = true;
     }
+
+    if(!facility.resultWaterDischargeUnit){
+      facility.resultWaterDischargeUnit = facility.volumeLiquidUnit;
+      isChanged = true;
+    }
+
+    if(!facility.resultWaterIntakeUnit){
+      facility.resultWaterIntakeUnit = facility.volumeLiquidUnit;
+      isChanged = true;
+    }
+
 
     return { facility: facility, isChanged: isChanged };
   }

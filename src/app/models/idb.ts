@@ -41,7 +41,9 @@ export interface IdbAccount {
     color?: string,
     contactName: string,
     contactEmail: string,
-    contactPhone: string
+    contactPhone: string,
+    resultWaterDischargeUnit: string,
+    resultWaterIntakeUnit: string
 }
 
 export interface IdbFacility {
@@ -89,7 +91,9 @@ export interface IdbFacility {
     modifiedDate?: Date,
     facilityOrder?: number,
     isNewFacility?: boolean,
-    classification?: FacilityClassification
+    classification?: FacilityClassification,
+    resultWaterDischargeUnit: string,
+    resultWaterIntakeUnit: string
 }
 
 export interface IdbUtilityMeterGroup {
