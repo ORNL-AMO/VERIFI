@@ -196,7 +196,15 @@ function calanderizeMeterDataBackwards(meter: IdbUtilityMeter, meterData: Array<
                 readingType = 'metered';
             }
 
-
+            if(isNaN(totals.totalConsumption)){
+                totals.totalConsumption = 0;
+            }
+            if(isNaN(totals.totalEnergyUse)){
+                totals.totalEnergyUse = 0;
+            }
+            if(isNaN(totals.totalCost)){
+                totals.totalCost = 0;
+            }
             calanderizeData.push({
                 month: monthStr,
                 monthNumValue: month,
