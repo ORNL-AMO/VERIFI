@@ -2,7 +2,7 @@ import { Component, ElementRef, ViewChild, Input, SimpleChanges } from '@angular
 import { PlotlyService } from 'angular-plotly.js';
 import { FacilityOverviewService } from 'src/app/facility/facility-overview/facility-overview.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { IdbFacility } from 'src/app/models/idb';
+import { IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
 import { UtilityColors } from '../../utilityColors';
 import * as _ from 'lodash';
 import { Subscription } from 'rxjs';
@@ -67,9 +67,8 @@ export class MetersOverviewStackedLineChartComponent {
       let traceData = new Array();
       this.calanderizedMeters = _.orderBy(this.calanderizedMeters, (cMeter) => { return cMeter.meter.source });
       // let dataPointSize: number = 0;
-      let includedSources: Array<MeterSource> = this.getIncludedSources();
       this.calanderizedMeters.forEach(cMeter => {
-        if (includedSources.includes(cMeter.meter.source)) {
+        if (this.checkIncludeMeter(cMeter.meter)) {
           let x: Array<string> = new Array();
           let y: Array<number> = new Array();
           // if (dataPointSize < cMeter.monthlyData.length - 1) {
@@ -179,5 +178,18 @@ export class MetersOverviewStackedLineChartComponent {
     } else if (this.dataType == 'water') {
       return WaterSources;
     }
+  }
+
+
+  checkIncludeMeter(meter: IdbUtilityMeter): boolean {
+    let includedSources: Array<MeterSource> = this.getIncludedSources();
+    if (includedSources.includes(meter.source)) {
+      if (this.dataType == 'energyUse') {
+        return meter.includeInEnergy;
+      } else {
+        return true;
+      }
+    }
+    return false;
   }
 }
