@@ -11,20 +11,32 @@
                         <div class="col-12">
                             <app-meters-overview-stacked-line-chart [dataType]="'emissions'" [facilityId]="facilityId"
                                 [calanderizedMeters]="facilityOverviewData.calanderizedMeters"
-                                [dateRange]="dateRange"></app-meters-overview-stacked-line-chart>
+                                [dateRange]="dateRange" [emissionsDisplay]="'market'"></app-meters-overview-stacked-line-chart>
+                            <hr>
+                            <app-meters-overview-stacked-line-chart [dataType]="'emissions'" [facilityId]="facilityId"
+                                [calanderizedMeters]="facilityOverviewData.calanderizedMeters"
+                                [dateRange]="dateRange" [emissionsDisplay]="'location'"></app-meters-overview-stacked-line-chart>
                             <hr>
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-6">
+                        <div class="col-12">
                             <app-meter-usage-table [dataType]="'emissions'"
                                 [facilityOverviewData]="facilityOverviewData"
                                 [facilityOverviewMeters]="facilityOverviewData.energyMeters"></app-meter-usage-table>
 
                         </div>
+                    </div>
+                    <div class="row">
                         <div class="col-6">
                             <app-meter-usage-donut [dataType]="'emissions'" [facilityId]="facilityId"
-                                [facilityOverviewMeters]="facilityOverviewData.energyMeters"></app-meter-usage-donut>
+                                [facilityOverviewMeters]="facilityOverviewData.energyMeters"
+                                [emissionsDisplay]="'market'"></app-meter-usage-donut>
+                        </div>
+                        <div class="col-6">
+                            <app-meter-usage-donut [dataType]="'emissions'" [facilityId]="facilityId"
+                                [facilityOverviewMeters]="facilityOverviewData.energyMeters"
+                                [emissionsDisplay]="'location'"></app-meter-usage-donut>
                         </div>
                     </div>
                 </div>
@@ -57,7 +69,7 @@
                 </div>
                 <div class="card-body">
                     <app-utilities-usage-chart [dataType]="'emissions'" [facilityId]="facilityId"
-                        [annualSourceData]="facilityOverviewData.annualSourceData"></app-utilities-usage-chart>
+                        [annualSourceData]="facilityOverviewData.annualScopeData"></app-utilities-usage-chart>
                 </div>
             </div>
         </div>

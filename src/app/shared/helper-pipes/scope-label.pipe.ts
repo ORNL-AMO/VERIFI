@@ -9,7 +9,7 @@ export class ScopeLabelPipe implements PipeTransform {
   transform(value: number): string {
     let scope: ScopeOption = ScopeOptions.find(option => { return option.value == value });
     if (scope) {
-      return scope.optionLabel;
+      return scope.scope + ": " + scope.optionLabel;
     } else {
       return '';
     }

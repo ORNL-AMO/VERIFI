@@ -3,6 +3,7 @@
         <thead>
             <tr>
                 <th>Meter</th>
+                <th *ngIf="dataType == 'emissions'">Scope</th>
                 <th>Utility</th>
                 <th>Group</th>
                 <th *ngIf="dataType =='energyUse'">Utility Usage <br>(<span
@@ -11,10 +12,10 @@
                 <th *ngIf="dataType =='water'">Consumption <br>(<span [innerHTML]="waterUnit | settingsLabel"></span>)
                 </th>
                 <th *ngIf="dataType != 'emissions'">Utility Cost</th>
-                <th *ngIf="dataType == 'emissions' && emissionsDisplay == 'market'">
+                <th *ngIf="dataType == 'emissions'">
                     Market-Based <br>Emissions (tonne CO<sub>2</sub>e)
                 </th>
-                <th *ngIf="dataType == 'emissions' && emissionsDisplay == 'location'">
+                <th *ngIf="dataType == 'emissions'">
                     Location-Based <br>Emissions (tonne CO<sub>2</sub>e)
                 </th>
             </tr>
@@ -23,6 +24,9 @@
             <tr *ngFor="let overviewMeter of facilityOverviewMeters | orderBy: orderByValue">
                 <td>
                     {{overviewMeter.meter.name}}
+                </td>
+                <td *ngIf="dataType == 'emissions'">
+                    {{overviewMeter.meter.scope | scopeLabel}}
                 </td>
                 <td>
                     {{overviewMeter.meter.source}}
@@ -39,10 +43,10 @@
                 <td *ngIf="dataType != 'emissions'">
                     {{overviewMeter.totalCost | customNumber:true }}
                 </td>
-                <td *ngIf="dataType =='emissions' && emissionsDisplay == 'market'">
+                <td *ngIf="dataType =='emissions'">
                     {{overviewMeter.totalMarketEmissions |customNumber }}
                 </td>
-                <td *ngIf="dataType =='emissions' && emissionsDisplay == 'location'">
+                <td *ngIf="dataType =='emissions'">
                     {{overviewMeter.totalLocationEmissions |customNumber }}
                 </td>
             </tr>
@@ -51,6 +55,9 @@
             <tr>
                 <th>
                     Total
+                </th>
+                <th *ngIf="dataType == 'emissions'">
+
                 </th>
                 <th>
                 </th>
@@ -71,10 +78,10 @@
                 <th *ngIf="dataType == 'cost'">
                     {{facilityOverviewData.totalFacilityCost | customNumber:true }}
                 </th>
-                <th *ngIf="dataType =='emissions' && emissionsDisplay == 'market'">
+                <th *ngIf="dataType =='emissions'">
                     {{facilityOverviewData.totalMarketEmissions | customNumber }}
                 </th>
-                <th *ngIf="dataType =='emissions' && emissionsDisplay == 'location'">
+                <th *ngIf="dataType =='emissions'">
                     {{facilityOverviewData.totalLocationEmissions | customNumber }}
                 </th>
             </tr>

@@ -8,6 +8,7 @@ import { UtilityColors } from 'src/app/shared/utilityColors';
 import { FacilityOverviewService } from 'src/app/facility/facility-overview/facility-overview.service';
 import { AnnualSourceData } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';
 import { EnergySources, WaterSources } from 'src/app/models/constantsAndTypes';
+import { ScopeOption, ScopeOptions } from 'src/app/facility/utility-data/energy-consumption/energy-source/edit-meter-form/editMeterOptions';
 
 @Component({
   selector: 'app-utilities-usage-chart',
@@ -24,8 +25,8 @@ export class UtilitiesUsageChartComponent {
 
   @ViewChild('utilityBarChart', { static: false }) utilityBarChart: ElementRef;
 
-  emissionsDisplay: 'market' | 'location';
-  emissionsDisplaySub: Subscription;
+  // emissionsDisplay: 'market' | 'location';
+  // emissionsDisplaySub: Subscription;
   selectedFacility: IdbFacility;
   constructor(private plotlyService: PlotlyService, private facilityOverviewService: FacilityOverviewService,
     private facilityDbService: FacilitydbService) { }
@@ -34,21 +35,21 @@ export class UtilitiesUsageChartComponent {
     let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     this.selectedFacility = facilities.find(facility => { return facility.guid == this.facilityId });
 
-    if (this.dataType == 'emissions') {
-      this.emissionsDisplaySub = this.facilityOverviewService.emissionsDisplay.subscribe(val => {
-        this.emissionsDisplay = val;
-        this.drawChart();
-      });
-    } else {
-      this.drawChart();
-    }
+    // if (this.dataType == 'emissions') {
+    //   this.emissionsDisplaySub = this.facilityOverviewService.emissionsDisplay.subscribe(val => {
+    //     this.emissionsDisplay = val;
+    //     this.drawChart();
+    //   });
+    // } else {
+    //   this.drawChart();
+    // }
   }
 
   ngOnDestroy() {
     // this.monthlySourceDataSub.unsubscribe();
-    if (this.emissionsDisplaySub) {
-      this.emissionsDisplaySub.unsubscribe();
-    }
+    // if (this.emissionsDisplaySub) {
+    //   this.emissionsDisplaySub.unsubscribe();
+    // }
   }
 
   ngAfterViewInit() {
@@ -78,30 +79,46 @@ export class UtilitiesUsageChartComponent {
           let years: Array<number> = sourceData.annualSourceDataItems.map(d => { return d.fiscalYear });
           years = _.uniq(years)
           let yValues: Array<number> = new Array();
-          if (this.dataType == 'cost') {
-            yValues = sourceData.annualSourceDataItems.map(data => { return data.totalCost });
-          } else if (this.dataType == 'emissions') {
-            if (this.emissionsDisplay == 'market') {
-              yValues = sourceData.annualSourceDataItems.map(data => { return data.totalMarketEmissions });
-            } else {
-              yValues = sourceData.annualSourceDataItems.map(data => { return data.totalLocationEmissions });
+          if (this.dataType != 'emissions') {
+            if (this.dataType == 'cost') {
+              yValues = sourceData.annualSourceDataItems.map(data => { return data.totalCost });
+            } else if (this.dataType == 'energyUse') {
+              yValues = sourceData.annualSourceDataItems.map(data => { return data.totalEnergyUsage });
+            } else if (this.dataType == 'water') {
+              yValues = sourceData.annualSourceDataItems.map(data => { return data.totalConsumption });
             }
-          } else if (this.dataType == 'energyUse') {
-            yValues = sourceData.annualSourceDataItems.map(data => { return data.totalEnergyUsage });
-          } else if (this.dataType == 'water') {
-            yValues = sourceData.annualSourceDataItems.map(data => { return data.totalConsumption });
-          }
-
-          let trace = {
-            x: years,
-            y: yValues,
-            name: sourceData.source,
-            type: 'bar',
-            marker: {
-              color: UtilityColors[sourceData.source].color,
+            let trace = {
+              x: years,
+              y: yValues,
+              name: this.getName(sourceData),
+              type: 'bar',
+              marker: {
+                color: this.getTraceColor(sourceData),
+              }
             }
+            traceData.push(trace);
+          } else {
+            let marketTrace = {
+              x: years,
+              y: sourceData.annualSourceDataItems.map(data => { return data.totalMarketEmissions }),
+              name: this.getName(sourceData) + ' Market',
+              type: 'bar',
+              marker: {
+                color: this.getTraceColor(sourceData, 'market'),
+              }
+            }
+            traceData.push(marketTrace);
+            let locationTrace = {
+              x: years,
+              y: sourceData.annualSourceDataItems.map(data => { return data.totalLocationEmissions }),
+              name: this.getName(sourceData) + ' Location',
+              type: 'bar',
+              marker: {
+                color: this.getTraceColor(sourceData, 'location'),
+              }
+            }
+            traceData.push(locationTrace);
           }
-          traceData.push(trace);
         }
       })
 
@@ -150,12 +167,49 @@ export class UtilitiesUsageChartComponent {
   }
 
   checkIncludeData(sourceData: AnnualSourceData): boolean {
-    if (this.dataType == 'cost') {
+    if (this.dataType == 'cost' || this.dataType == 'emissions') {
       return true;
-    } else if (this.dataType == 'energyUse' || this.dataType == 'emissions') {
+    } else if (this.dataType == 'energyUse') {
       return EnergySources.includes(sourceData.source);
     } else if (this.dataType == 'water') {
       return WaterSources.includes(sourceData.source);
     }
+  }
+
+
+  getTraceColor(sourceData: AnnualSourceData, emissionsType?: 'market' | 'location'): string {
+    if (this.dataType != 'emissions') {
+      return UtilityColors[sourceData.source].color
+    } else {
+      if (emissionsType == 'market') {
+        if (sourceData.scope == 1 || sourceData.scope == 2) {
+          //Scope 1
+          return '#95A5A6';
+        } else if (sourceData.scope == 3 || sourceData.scope == 4) {
+          //Scope 2
+          return '#273746';
+        }
+      } else {
+        if (sourceData.scope == 1 || sourceData.scope == 2) {
+          //Scope 1
+          return '#873600';
+        } else if (sourceData.scope == 3 || sourceData.scope == 4) {
+          //Scope 2
+          return '#B9770E';
+        }
+      }
+    }
+  }
+
+  getName(sourceData: AnnualSourceData): string {
+    if (this.dataType != 'emissions') {
+      return sourceData.source;
+    } else {
+      let scopeOption: ScopeOption = ScopeOptions.find(option => {
+        return option.value == sourceData.scope;
+      });
+      return scopeOption.scope;
+    }
+
   }
 }

@@ -25,32 +25,32 @@ export class MonthlyUtilityUsageLineChartComponent {
 
   @ViewChild('monthlyUsageChart', { static: false }) monthlyUsageChart: ElementRef;
 
-  emissionsDisplaySub: Subscription;
-  emissionsDisplay: "market" | "location";
+  // emissionsDisplaySub: Subscription;
+  // emissionsDisplay: "market" | "location";
   constructor(private plotlyService: PlotlyService, private accountOverviewService: AccountOverviewService,
     private accountDbService: AccountdbService, private facilityOverviewService: FacilityOverviewService,
     private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
-    if (!this.facilityId) {
-      //ACCOUNT
-      this.emissionsDisplaySub = this.accountOverviewService.emissionsDisplay.subscribe(val => {
-        this.emissionsDisplay = val;
-        this.drawChart();
-      });
-    } else {
-      //FACILITY
-      this.emissionsDisplaySub = this.facilityOverviewService.emissionsDisplay.subscribe(val => {
-        this.emissionsDisplay = val;
-        this.drawChart()
-      });
-    }
+    // if (!this.facilityId) {
+    //   //ACCOUNT
+    //   this.emissionsDisplaySub = this.accountOverviewService.emissionsDisplay.subscribe(val => {
+    //     this.emissionsDisplay = val;
+    //     this.drawChart();
+    //   });
+    // } else {
+    //   //FACILITY
+    //   this.emissionsDisplaySub = this.facilityOverviewService.emissionsDisplay.subscribe(val => {
+    //     this.emissionsDisplay = val;
+    //     this.drawChart()
+    //   });
+    // }
   }
 
   ngOnDestroy() {
-    if (this.emissionsDisplaySub) {
-      this.emissionsDisplaySub.unsubscribe();
-    }
+    // if (this.emissionsDisplaySub) {
+    //   this.emissionsDisplaySub.unsubscribe();
+    // }
   }
 
   ngAfterViewInit() {
@@ -89,12 +89,15 @@ export class MonthlyUtilityUsageLineChartComponent {
         let y: Array<number> = new Array();
         months.forEach(month => {
           x.push(month.abbreviation);
-          let yValue: number = this.getYValue(year, month);
+          let yValue: number = this.getYValue(year, month, 'market');
           y.push(yValue);
         });
         let name: string = year.toString();
         if (accountOrFacility.fiscalYear == 'nonCalendarYear') {
           name = 'FY - ' + year
+        }
+        if(this.dataType == 'emissions'){
+          name = name + ' (Market)'
         }
         let trace = {
           type: 'scatter',
@@ -111,8 +114,45 @@ export class MonthlyUtilityUsageLineChartComponent {
           hovertemplate: this.getHoverTemplate(accountOrFacility),
         }
         traceData.push(trace);
-
       })
+
+      if(this.dataType == 'emissions'){
+        years.forEach(year => {
+          let x: Array<string> = new Array();
+          let y: Array<number> = new Array();
+          months.forEach(month => {
+            x.push(month.abbreviation);
+            let yValue: number = this.getYValue(year, month, 'location');
+            y.push(yValue);
+          });
+          let name: string = year.toString();
+          if (accountOrFacility.fiscalYear == 'nonCalendarYear') {
+            name = 'FY - ' + year
+          }
+          if(this.dataType == 'emissions'){
+            name = name + ' (Location)'
+          }
+          let trace = {
+            type: 'scatter',
+            x: x,
+            y: y,
+            name: name,
+            text: x.map(item => {
+              if (accountOrFacility.fiscalYear == 'nonCalendarYear') {
+                return 'FY - ' + year
+              } else {
+                return year
+              }
+            }),
+            hovertemplate: this.getHoverTemplate(accountOrFacility),
+            line: {
+              dash: 'dot',
+              width: 4
+            }
+          }
+          traceData.push(trace);
+        })
+      }
 
 
       var layout = {
@@ -145,7 +185,7 @@ export class MonthlyUtilityUsageLineChartComponent {
     }
   }
 
-  getYValue(year: number, month: Month): number {
+  getYValue(year: number, month: Month, emissionsDisplay: 'location' | 'market'): number {
     let yearMonthData: YearMonthData = this.yearMonthData.find(ymData => { return ymData.yearMonth.fiscalYear == year && ymData.yearMonth.month === month.abbreviation })
     if (yearMonthData) {
       if (this.dataType == 'energyUse') {
@@ -153,7 +193,7 @@ export class MonthlyUtilityUsageLineChartComponent {
       } else if (this.dataType == 'cost') {
         return yearMonthData.energyCost;
       } else if (this.dataType == 'emissions') {
-        if (this.emissionsDisplay == 'location') {
+        if (emissionsDisplay == 'location') {
           return yearMonthData.locationEmissions;
         } else {
           return yearMonthData.marketEmissions;

@@ -23,12 +23,14 @@ export class MetersOverviewStackedLineChartComponent {
   calanderizedMeters: Array<CalanderizedMeter>;
   @Input()
   dateRange: { startDate: Date, endDate: Date };
+  @Input()
+  emissionsDisplay: 'market' | 'location';
 
   @ViewChild('stackedAreaChart', { static: false }) stackedAreaChart: ElementRef;
 
   selectedFacility: IdbFacility;
-  emissionsDisplay: 'market' | 'location';
-  emissionsDisplaySub: Subscription;
+  // emissionsDisplay: 'market' | 'location';
+  // emissionsDisplaySub: Subscription;
   constructor(private plotlyService: PlotlyService, private facilityOverviewService: FacilityOverviewService,
     private facilityDbService: FacilitydbService) { }
 
@@ -36,21 +38,21 @@ export class MetersOverviewStackedLineChartComponent {
     let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     this.selectedFacility = facilities.find(facility => { return facility.guid == this.facilityId });
 
-    if (this.dataType == 'emissions') {
-      this.emissionsDisplaySub = this.facilityOverviewService.emissionsDisplay.subscribe(val => {
-        this.emissionsDisplay = val;
-        this.drawChart();
-      });
-    } else {
-      this.drawChart();
-    }
+    // if (this.dataType == 'emissions') {
+    //   this.emissionsDisplaySub = this.facilityOverviewService.emissionsDisplay.subscribe(val => {
+    //     this.emissionsDisplay = val;
+    //     this.drawChart();
+    //   });
+    // } else {
+    //   this.drawChart();
+    // }
   }
 
-  ngOnDestroy() {
-    if (this.dataType == 'emissions') {
-      this.emissionsDisplaySub.unsubscribe();
-    }
-  }
+  // ngOnDestroy() {
+  //   if (this.dataType == 'emissions') {
+  //     this.emissionsDisplaySub.unsubscribe();
+  //   }
+  // }
 
   ngAfterViewInit() {
     this.drawChart();
@@ -101,7 +103,7 @@ export class MetersOverviewStackedLineChartComponent {
             text: monthlyDataInRange.map(item => { return cMeter.meter.name }),
             stackgroup: 'one',
             marker: {
-              color: UtilityColors[cMeter.meter.source].color,
+              color: this.getTraceColor(cMeter.meter),
             },
             hovertemplate: this.getHoverTemplate(),
           }
@@ -150,7 +152,11 @@ export class MetersOverviewStackedLineChartComponent {
     if (this.dataType == 'energyUse') {
       return "Utility Usage (" + this.selectedFacility.energyUnit + ")";
     } else if (this.dataType == 'emissions') {
-      return "Utility Emissions (tonne CO<sub>2</sub>e)";
+      if (this.emissionsDisplay == 'location') {
+        return "Location Emissions (tonne CO<sub>2</sub>e)";
+      } else if (this.emissionsDisplay == 'market') {
+        return "Market Emissions (tonne CO<sub>2</sub>e)";
+      }
     } else if (this.dataType == 'cost') {
       return "Utility Costs";
     } else if (this.dataType == 'water') {
@@ -191,5 +197,29 @@ export class MetersOverviewStackedLineChartComponent {
       }
     }
     return false;
+  }
+
+  getTraceColor(meter: IdbUtilityMeter): string {
+    if (this.dataType != 'emissions') {
+      return UtilityColors[meter.source].color
+    } else {
+      if (this.emissionsDisplay == 'market') {
+        if (meter.scope == 1 || meter.scope == 2) {
+          //Scope 1
+          return '#95A5A6';
+        } else if (meter.scope == 3 || meter.scope == 4) {
+          //Scope 2
+          return '#273746';
+        }
+      } else {
+        if (meter.scope == 1 || meter.scope == 2) {
+          //Scope 1
+          return '#873600';
+        } else if (meter.scope == 3 || meter.scope == 4) {
+          //Scope 2
+          return '#B9770E';
+        }
+      }
+    }
   }
 }

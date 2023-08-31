@@ -5,7 +5,7 @@ import { Subscription } from 'rxjs';
 import { PlotlyService } from 'angular-plotly.js';
 import { FacilityOverviewService } from 'src/app/facility/facility-overview/facility-overview.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { IdbFacility } from 'src/app/models/idb';
+import { IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
 import { FacilityOverviewMeter } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';
 
 @Component({
@@ -22,11 +22,13 @@ export class MeterUsageDonutComponent {
   facilityOverviewMeters: Array<FacilityOverviewMeter>;
   @Input()
   inHomeScreen: boolean;
+  @Input()
+  emissionsDisplay: 'market' | 'location';
 
   @ViewChild('energyUseDonut', { static: false }) energyUseDonut: ElementRef;
   selectedFacility: IdbFacility;
-  emissionsDisplay: 'market' | 'location';
-  emissionsDisplaySub: Subscription;
+  // emissionsDisplay: 'market' | 'location';
+  // emissionsDisplaySub: Subscription;
 
   constructor(private plotlyService: PlotlyService, private facilityOverviewService: FacilityOverviewService,
     private facilityDbService: FacilitydbService) { }
@@ -36,21 +38,21 @@ export class MeterUsageDonutComponent {
     this.selectedFacility = facilities.find(facility => { return facility.guid == this.facilityId });
 
 
-    if (this.dataType == 'emissions') {
-      this.emissionsDisplaySub = this.facilityOverviewService.emissionsDisplay.subscribe(val => {
-        this.emissionsDisplay = val;
-        this.drawChart();
-      });
-    } else {
-      this.drawChart();
-    }
+    // if (this.dataType == 'emissions') {
+    //   this.emissionsDisplaySub = this.facilityOverviewService.emissionsDisplay.subscribe(val => {
+    //     this.emissionsDisplay = val;
+    //     this.drawChart();
+    //   });
+    // } else {
+    // this.drawChart();
+    // }
   }
 
-  ngOnDestroy() {
-    if (this.emissionsDisplaySub) {
-      this.emissionsDisplaySub.unsubscribe();
-    }
-  }
+  // ngOnDestroy() {
+  //   if (this.emissionsDisplaySub) {
+  //     this.emissionsDisplaySub.unsubscribe();
+  //   }
+  // }
 
   ngAfterViewInit() {
     this.drawChart();
@@ -70,7 +72,7 @@ export class MeterUsageDonutComponent {
         values: this.getValues(),
         labels: this.facilityOverviewMeters.map(meterOverview => { return meterOverview.meter.name }),
         marker: {
-          colors: this.facilityOverviewMeters.map(meterOverview => { return UtilityColors[meterOverview.meter.source].color }),
+          colors: this.facilityOverviewMeters.map(meterOverview => { return this.getTraceColor(meterOverview.meter) }),
           line: {
             color: '#fff',
             width: 5
@@ -94,7 +96,20 @@ export class MeterUsageDonutComponent {
       var layout = {
         height: height,
         margin: { "t": 50, "b": 50, "l": 50, "r": 50 },
-        showlegend: false
+        showlegend: false,
+        annotations: this.getAnnotations(),
+        xaxis: {
+          showgrid: false,
+          zeroline: false,
+          showline: false,
+          showticklabels: false
+        },
+        yaxis: {
+          showgrid: false,
+          zeroline: false,
+          showline: false,
+          showticklabels: false
+        }
       };
 
       let config = {
@@ -127,6 +142,64 @@ export class MeterUsageDonutComponent {
         return this.facilityOverviewMeters.map(meterOverview => { return meterOverview.totalLocationEmissions });
       } else {
         return this.facilityOverviewMeters.map(meterOverview => { return meterOverview.totalMarketEmissions });
+      }
+    }
+  }
+
+  getTraceColor(meter: IdbUtilityMeter): string {
+    if (this.dataType != 'emissions') {
+      return UtilityColors[meter.source].color
+    } else {
+      if (this.emissionsDisplay == 'market') {
+        if (meter.scope == 1 || meter.scope == 2) {
+          //Scope 1
+          return '#95A5A6';
+        } else if (meter.scope == 3 || meter.scope == 4) {
+          //Scope 2
+          return '#273746';
+        }
+      } else {
+        if (meter.scope == 1 || meter.scope == 2) {
+          //Scope 1
+          return '#873600';
+        } else if (meter.scope == 3 || meter.scope == 4) {
+          //Scope 2
+          return '#B9770E';
+        }
+      }
+    }
+  }
+
+  getAnnotations(): Array<any> {
+    if (this.dataType == 'emissions') {
+      if (this.emissionsDisplay == 'market') {
+        return [
+          {
+            x: 0.0,
+            y: 0.0,
+            xref: 'x',
+            yref: 'y',
+            text: 'Market',
+            showarrow: false,
+            font: {
+              size: 22
+            },
+          }
+        ];
+      } else {
+        return [
+          {
+            x: 0.0,
+            y: 0.0,
+            xref: 'x',
+            yref: 'y',
+            text: 'Location',
+            showarrow: false,
+            font: {
+              size: 22,
+            },
+          }
+        ];
       }
     }
   }

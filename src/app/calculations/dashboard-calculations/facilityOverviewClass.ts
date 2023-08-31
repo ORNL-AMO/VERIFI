@@ -3,13 +3,13 @@ import { YearMonthData } from "src/app/models/dashboard";
 import { IdbAccount, IdbFacility, IdbUtilityMeter } from "src/app/models/idb";
 import { getFiscalYear, getYearlyUsageNumbers } from "../shared-calculations/calanderizationFunctions";
 import * as _ from 'lodash';
-import { AllSources, EnergySources, MeterSource, WaterSources } from "src/app/models/constantsAndTypes";
+import { AllSources, EnergySources, MeterSource, ScopeValues, WaterSources } from "src/app/models/constantsAndTypes";
 
 export class FacilityOverviewData {
 
 
     annualSourceData: Array<AnnualSourceData>;
-
+    annualScopeData: Array<AnnualSourceData>
     energyYearMonthData: Array<YearMonthData>;
     waterYearMonthData: Array<YearMonthData>;
     allSourcesYearMonthData: Array<YearMonthData>;
@@ -50,6 +50,7 @@ export class FacilityOverviewData {
         }
 
         this.setAnnualSourceData(calanderizedMeters, facility);
+        this.setAnnualScopeData(calanderizedMeters, facility);
     }
 
     setEnergyYearMonthData(calanderizedMeters: Array<CalanderizedMeter>) {
@@ -57,8 +58,8 @@ export class FacilityOverviewData {
             return EnergySources.includes(cMeter.meter.source);
         });
         sourceMeters.forEach(cMeter => {
-            if(cMeter.meter.includeInEnergy == false){
-                cMeter.monthlyData.forEach(mData =>{
+            if (cMeter.meter.includeInEnergy == false) {
+                cMeter.monthlyData.forEach(mData => {
                     mData.energyConsumption = 0;
                     mData.energyUse = 0;
                 });
@@ -85,7 +86,7 @@ export class FacilityOverviewData {
         });
         this.energyMeters = new Array();
         sourceMeters.forEach(cMeter => {
-            if(cMeter.meter.includeInEnergy == false){
+            if (cMeter.meter.includeInEnergy == false) {
                 cMeter.monthlyData.forEach(monthlyData => {
                     monthlyData.energyUse = 0;
                     monthlyData.energyConsumption = 0;
@@ -160,8 +161,18 @@ export class FacilityOverviewData {
     setAnnualSourceData(calanderizedMeters: Array<CalanderizedMeter>, facility: IdbFacility) {
         this.annualSourceData = new Array();
         AllSources.forEach(source => {
-            let sourceData: AnnualSourceData = new AnnualSourceData(calanderizedMeters, source, facility);
+            let sourceData: AnnualSourceData = new AnnualSourceData(calanderizedMeters, facility, source, undefined);
             this.annualSourceData.push(sourceData);
+        });
+    }
+
+    //Annual scope data
+    setAnnualScopeData(calanderizedMeters: Array<CalanderizedMeter>, facility: IdbFacility) {
+        this.annualScopeData = new Array();
+        let scopes: Array<ScopeValues> = [1, 2, 3, 4];
+        scopes.forEach(scope => {
+            let scopeData: AnnualSourceData = new AnnualSourceData(calanderizedMeters, facility, undefined, scope);
+            this.annualScopeData.push(scopeData);
         });
     }
 
@@ -224,12 +235,21 @@ export class FacilityOverviewMeter {
 export class AnnualSourceData {
 
     source: MeterSource;
+    scope: ScopeValues
     annualSourceDataItems: Array<AnnualSourceDataItem>;
-    constructor(calanderizedMeters: Array<CalanderizedMeter>, source: MeterSource, facilityOrAccount: IdbFacility | IdbAccount) {
-        this.source = source;
-        let sourceMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => {
-            return cMeter.meter.source == source;
-        });
+    constructor(calanderizedMeters: Array<CalanderizedMeter>, facilityOrAccount: IdbFacility | IdbAccount, source: MeterSource, scope: ScopeValues) {
+        let sourceMeters: Array<CalanderizedMeter>;
+        if (source) {
+            this.source = source;
+            sourceMeters = calanderizedMeters.filter(cMeter => {
+                return cMeter.meter.source == source;
+            });
+        } else if (scope) {
+            this.scope = scope;
+            sourceMeters = calanderizedMeters.filter(cMeter => {
+                return cMeter.meter.scope == scope;
+            });
+        }
         let monthlyData: Array<MonthlyData> = sourceMeters.flatMap(scMeter => {
             return scMeter.monthlyData;
         });
@@ -245,7 +265,6 @@ export class AnnualSourceData {
 
     }
 }
-
 
 export class AnnualSourceDataItem {
 

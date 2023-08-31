@@ -2,36 +2,70 @@
     <thead>
         <tr class="table-mh">
             <th class="w-25"></th>
-            <th class="w-25">
+            <th class="w-25" colspan="2">
                 Latest Month 
                 <br><span class="small" *ngIf="dateRange.endDate">
                     ({{dateRange.endDate | date: 'MMM, y'}})</span>
+                    <!-- <br>
+                    (<span>tonne CO<sub>2</sub>e</span>) -->
             </th>
-            <th class="w-25">
+            <th class="w-25" colspan="2">
                 Previous Year
                 <br>
                 <span class="small" *ngIf="previousYear">({{previousYear | date: 'MMM, y'}})</span>
+                <!-- <br>
+                (<span>tonne CO<sub>2</sub>e</span>) -->
             </th>
-            <th class="w-25">
+            <th class="w-25" colspan="2">
                 Monthly Average
                 <br>
                 <span class="small" *ngIf="dateRange.startDate">
                     ({{dateRange.startDate | date: 'MMM, y'}} -
                     {{dateRange.endDate | date: 'MMM, y'}})</span>
+                    <!-- <br>
+                    (<span>tonne CO<sub>2</sub>e</span>) -->
             </th>
         </tr>
         <tr>
-            <th></th>
+            <th class="text-right">
+            </th>
             <th>
+                Market<br>
                 (<span>tonne CO<sub>2</sub>e</span>)
             </th>
             <th>
+                Location<br>
                 (<span>tonne CO<sub>2</sub>e</span>)
             </th>
             <th>
+                Market<br>
+                (<span>tonne CO<sub>2</sub>e</span>)
+            </th>
+            <th>
+                Location<br>
+                (<span>tonne CO<sub>2</sub>e</span>)
+            </th>
+            <th>
+                Market<br>
+                (<span>tonne CO<sub>2</sub>e</span>)
+            </th>
+            <th>
+                Location<br>
                 (<span>tonne CO<sub>2</sub>e</span>)
             </th>
         </tr>
+        <!-- <tr>
+            <th></th>
+            <th colspan="2">
+                (<span>tonne CO<sub>2</sub>e</span>)
+            </th>
+            <th colspan="2">
+                (<span>tonne CO<sub>2</sub>e</span>)
+            </th>
+            <th colspan="2">
+                (<span>tonne CO<sub>2</sub>e</span>)
+            </th>
+        </tr> -->
     </thead>
     <tbody class="table-group-divider">
         <tr *ngFor="let useAndCost of sourcesUseAndCost">
@@ -39,7 +73,7 @@
                 {{useAndCost.source}}
             </td>
             <!--Last Month-->
-            <td class="text-center" *ngIf="emissionsDisplay == 'market'">
+            <td class="text-center">
                 <span *ngIf="useAndCost.end.marketEmissions">
                     {{useAndCost.end.marketEmissions | customNumber}}
                 </span>
@@ -47,7 +81,7 @@
                     &mdash;
                 </span>
             </td>
-            <td class="text-center" *ngIf="emissionsDisplay == 'location'">
+            <td class="text-center">
                 <span *ngIf="useAndCost.end.locationEmissions">
                     {{useAndCost.end.locationEmissions | customNumber}}
                 </span>
@@ -56,7 +90,7 @@
                 </span>
             </td>
             <!--Year prior-->
-            <td *ngIf="emissionsDisplay == 'market'">
+            <td>
                 <div class="d-flex w-100">
                     <div class="w-50 text-right pe-1 print-full">
                         <span *ngIf="useAndCost.previousYear.marketEmissions">
@@ -78,7 +112,7 @@
                     </div>
                 </div>
             </td>
-            <td *ngIf="emissionsDisplay == 'location'">
+            <td>
                 <div class="d-flex w-100">
                     <div class="w-50 text-right pe-1 print-full">
                         <span *ngIf="useAndCost.previousYear.locationEmissions">
@@ -102,7 +136,7 @@
             </td>
 
             <!--Average-->
-            <td *ngIf="emissionsDisplay == 'market'">
+            <td>
                 <div class="d-flex w-100">
                     <div class="w-50 text-right pe-1 print-full">
                         <span *ngIf="useAndCost.average.marketEmissions">
@@ -123,7 +157,7 @@
                     </div>
                 </div>
             </td>
-            <td *ngIf="emissionsDisplay == 'location'">
+            <td>
                 <div class="d-flex w-100">
                     <div class="w-50 text-right pe-1 print-full">
                         <span *ngIf="useAndCost.average.locationEmissions">
@@ -154,7 +188,7 @@
                 Total
             </th>
             <!--previous month-->
-            <th class="text-center" *ngIf="emissionsDisplay == 'market'">
+            <th class="text-center">
                 <span *ngIf="useAndCostTotal.end.marketEmissions">
                     {{useAndCostTotal.end.marketEmissions | customNumber}}
                 </span>
@@ -162,7 +196,7 @@
                     &mdash;
                 </span>
             </th>
-            <th class="text-center" *ngIf="emissionsDisplay == 'location'">
+            <th class="text-center">
                 <span *ngIf="useAndCostTotal.end.locationEmissions">
                     {{useAndCostTotal.end.locationEmissions | customNumber}}
                 </span>
@@ -172,7 +206,7 @@
             </th>
 
             <!--year prior-->
-            <th *ngIf="emissionsDisplay == 'market'">
+            <th>
                 <div class="d-flex w-100">
                     <div class="w-50 text-right pe-1 print-full">
                         <span *ngIf="useAndCostTotal.previousYear.marketEmissions">
@@ -194,7 +228,7 @@
                     </div>
                 </div>
             </th>
-            <th *ngIf="emissionsDisplay == 'location'">
+            <th>
                 <div class="d-flex w-100">
                     <div class="w-50 text-right pe-1 print-full">
                         <span *ngIf="useAndCostTotal.previousYear.locationEmissions">
@@ -218,7 +252,7 @@
             </th>
 
             <!--average-->
-            <th *ngIf="emissionsDisplay == 'market'">
+            <th>
                 <div class="d-flex w-100">
                     <div class="w-50 text-right pe-1 print-full">
                         <span *ngIf="useAndCostTotal.average.marketEmissions">
@@ -240,7 +274,7 @@
                     </div>
                 </div>
             </th>
-            <th *ngIf="emissionsDisplay == 'location'">
+            <th>
                 <div class="d-flex w-100">
                     <div class="w-50 text-right pe-1 print-full">
                         <span *ngIf="useAndCostTotal.average.locationEmissions">

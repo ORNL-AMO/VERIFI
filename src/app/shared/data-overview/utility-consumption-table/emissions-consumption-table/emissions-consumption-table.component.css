@@ -2,6 +2,10 @@ thead th {
     text-align: center;
 }
 
+thead th.text-right{
+    text-align: right;
+}
+
 .badge .fa {
     color: white;
     font-size: smaller;
