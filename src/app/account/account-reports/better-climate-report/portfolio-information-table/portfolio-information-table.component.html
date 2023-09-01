@@ -1,0 +1,36 @@
+<h4>
+    Section 1: Portfolio Information
+</h4>
+<table class="table table-responsive">
+    <tbody>
+        <tr>
+            <th class="first-column">
+                Year
+            </th>
+            <td *ngFor="let yearDetail of yearDetails">
+                {{yearDetail.year}}
+            </td>
+        </tr>
+        <tr>
+            <th>
+                Square Feet
+            </th>
+            <td *ngFor="let yearDetail of yearDetails">
+                <ng-container *ngIf="yearDetail.totalSquareFeet">
+                    {{yearDetail.totalSquareFeet | number}}
+                </ng-container>
+                <ng-container *ngIf="!yearDetail.totalSquareFeet">
+                    &mdash;
+                </ng-container>
+            </td>
+        </tr>
+        <tr>
+            <th>
+                Number of Facilities
+            </th>
+            <td *ngFor="let yearDetail of yearDetails">
+                {{yearDetail.facilityIds.length}}
+            </td>
+        </tr>
+    </tbody>
+</table>

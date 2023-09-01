@@ -42,6 +42,8 @@ import { AccountReportsDashboardTabsComponent } from './account-reports-dashboar
 import { BetterClimateReportComponent } from './better-climate-report/better-climate-report.component';
 import { BetterClimateSetupComponent } from './account-report-setup/better-climate-setup/better-climate-setup.component';
 import { BetterClimateReportDashboardComponent } from './account-reports-dashboard/better-climate-report-dashboard/better-climate-report-dashboard.component';
+import { PortfolioInformationTableComponent } from './better-climate-report/portfolio-information-table/portfolio-information-table.component';
+import { AbsoluteEmissionsTableComponent } from './better-climate-report/absolute-emissions-table/absolute-emissions-table.component';
 
 
 
@@ -83,7 +85,9 @@ import { BetterClimateReportDashboardComponent } from './account-reports-dashboa
     AccountReportsDashboardTabsComponent,
     BetterClimateReportComponent,
     BetterClimateSetupComponent,
-    BetterClimateReportDashboardComponent
+    BetterClimateReportDashboardComponent,
+    PortfolioInformationTableComponent,
+    AbsoluteEmissionsTableComponent
   ],
   imports: [
     CommonModule,

@@ -5,8 +5,7 @@ import { BetterClimateReport } from "../calculations/carbon-calculations/betterC
 
 addEventListener('message', ({ data }) => {
     try {
-        let betterClimateReport: BetterClimateReport = new BetterClimateReport();
-        console.log('hello')
+        let betterClimateReport: BetterClimateReport = new BetterClimateReport(data.account, data.facilities, data.meters, data.meterData, data.baselineYear, data.reportYear);
         postMessage({
             error: false,
             betterClimateReport: betterClimateReport
