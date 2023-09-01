@@ -1,1 +1,17 @@
-<p>carbon-report works!</p>
+<ng-container *ngIf="selectedReport && calculating == false">
+    <div class="report" [ngClass]="{'print': print}">
+        
+        {{carbonReport.test}}
+    </div>
+</ng-container>
+
+
+
+<div class="w-100 justify-content-center" *ngIf="calculating != false">
+    <div class="p-5">
+        <app-calculating-spinner [error]="calculating == 'error'"
+            [message]="'Generating Carbon Report...'"></app-calculating-spinner>
+    </div>
+</div>
+
+<app-print-report-button *ngIf="calculating == false"></app-print-report-button>
