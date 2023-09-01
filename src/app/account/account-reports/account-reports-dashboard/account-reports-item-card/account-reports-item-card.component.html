@@ -53,12 +53,24 @@
     <div class="card-footer bg-white">
         <div class="d-flex justify-content-between">
             <div class="bold" *ngIf="report.reportType == 'betterPlants'">
+                <ng-container *ngIf="(report.betterPlantsReportSetup.analysisItemId | analysisCategory) == 'Water'">
+                    <span class="fa fa-droplet"></span> Water
+                </ng-container>
+                <ng-container *ngIf="(report.betterPlantsReportSetup.analysisItemId | analysisCategory) == 'Energy'">
+                    <span class="fa fa-plug"></span> Energy
+                </ng-container>
                 Better Plants Report
             </div>
             <div class="bold" *ngIf="report.reportType == 'dataOverview'">
                 Data Report
             </div>
             <div class="bold" *ngIf="report.reportType == 'performance'">
+                <ng-container *ngIf="(report.performanceReportSetup.analysisItemId | analysisCategory) == 'Water'">
+                    <span class="fa fa-droplet"></span> Water
+                </ng-container>
+                <ng-container *ngIf="(report.performanceReportSetup.analysisItemId | analysisCategory) == 'Energy'">
+                    <span class="fa fa-plug"></span> Energy
+                </ng-container>
                 Performance Report
             </div>
             <div class="d-flex">
