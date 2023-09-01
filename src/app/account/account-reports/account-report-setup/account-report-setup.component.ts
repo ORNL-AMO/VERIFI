@@ -21,7 +21,7 @@ export class AccountReportSetupComponent {
   baselineYears: Array<number>;
   months: Array<Month> = Months;
   //TODO: Report years validation. Start < End (issue-1194)
-  reportType: 'Better Plants' | 'Data Overview' | 'Performance' | 'Carbon';
+  reportType: 'Better Plants' | 'Data Overview' | 'Performance' | 'Better Climate Report';
   constructor(private accountReportDbService: AccountReportDbService,
     private accountReportsService: AccountReportsService,
     private dbChangesService: DbChangesService,
@@ -39,8 +39,8 @@ export class AccountReportSetupComponent {
       this.reportType = 'Data Overview';
     }else if(selectedReport.reportType == 'performance'){
       this.reportType = 'Performance';
-    } else if(selectedReport.reportType == 'carbon'){
-      this.reportType = 'Carbon';
+    } else if(selectedReport.reportType == 'betterClimate'){
+      this.reportType = 'Better Climate Report';
     }
     this.setupForm = this.accountReportsService.getSetupFormFromReport(selectedReport);
     this.setYearOptions();

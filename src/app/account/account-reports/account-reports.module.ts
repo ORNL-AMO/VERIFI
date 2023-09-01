@@ -39,9 +39,9 @@ import { PerformanceReportDashboardComponent } from './account-reports-dashboard
 import { OverviewReportDashboardComponent } from './account-reports-dashboard/overview-report-dashboard/overview-report-dashboard.component';
 import { BetterPlantsReportDashboardComponent } from './account-reports-dashboard/better-plants-report-dashboard/better-plants-report-dashboard.component';
 import { AccountReportsDashboardTabsComponent } from './account-reports-dashboard/account-reports-dashboard-tabs/account-reports-dashboard-tabs.component';
-import { CarbonReportDashboardComponent } from './account-reports-dashboard/carbon-report-dashboard/carbon-report-dashboard.component';
-import { CarbonReportComponent } from './carbon-report/carbon-report.component';
-import { CarbonSetupComponent } from './account-report-setup/carbon-setup/carbon-setup.component';
+import { BetterClimateReportComponent } from './better-climate-report/better-climate-report.component';
+import { BetterClimateSetupComponent } from './account-report-setup/better-climate-setup/better-climate-setup.component';
+import { BetterClimateReportDashboardComponent } from './account-reports-dashboard/better-climate-report-dashboard/better-climate-report-dashboard.component';
 
 
 
@@ -81,9 +81,9 @@ import { CarbonSetupComponent } from './account-report-setup/carbon-setup/carbon
     OverviewReportDashboardComponent,
     BetterPlantsReportDashboardComponent,
     AccountReportsDashboardTabsComponent,
-    CarbonReportDashboardComponent,
-    CarbonReportComponent,
-    CarbonSetupComponent
+    BetterClimateReportComponent,
+    BetterClimateSetupComponent,
+    BetterClimateReportDashboardComponent
   ],
   imports: [
     CommonModule,

@@ -8,14 +8,14 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { CarbonReport } from 'src/app/calculations/carbon-calculations/carbonReport';
+import { BetterClimateReport } from 'src/app/calculations/carbon-calculations/betterClimateReport';
 
 @Component({
-  selector: 'app-carbon-report',
-  templateUrl: './carbon-report.component.html',
-  styleUrls: ['./carbon-report.component.css']
+  selector: 'app-better-climate-report',
+  templateUrl: './better-climate-report.component.html',
+  styleUrls: ['./better-climate-report.component.css']
 })
-export class CarbonReportComponent {
+export class BetterClimateReportComponent {
 
   selectedReport: IdbAccountReport;
   printSub: Subscription;
@@ -23,7 +23,7 @@ export class CarbonReportComponent {
   account: IdbAccount;
   calculating: boolean | 'error';
   worker: Worker;
-  carbonReport: CarbonReport;
+  betterClimateReport: BetterClimateReport;
   constructor(private accountReportDbService: AccountReportDbService,
     private accountReportsService: AccountReportsService,
     private router: Router, private accountDbService: AccountdbService,
@@ -57,11 +57,11 @@ export class CarbonReportComponent {
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
     if (typeof Worker !== 'undefined') {
-      this.worker = new Worker(new URL('src/app/web-workers/carbon-report.worker', import.meta.url));
+      this.worker = new Worker(new URL('src/app/web-workers/better-climate-report.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {
         if (!data.error) {
           this.calculating = false;
-          this.carbonReport = data.carbonReport;
+          this.betterClimateReport = data.betterClimateReport;
         } else {
           this.calculating = 'error';
         }

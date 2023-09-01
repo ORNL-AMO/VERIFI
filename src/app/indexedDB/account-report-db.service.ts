@@ -134,7 +134,7 @@ export class AccountReportDbService {
         includeContribution: true,
         includeSavings: true,
       },
-      carbonReportSetup: {
+      betterClimateReportSetup: {
         emissionsDisplay: 'location'
       }
     }

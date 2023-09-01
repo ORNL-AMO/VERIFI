@@ -81,7 +81,8 @@
             <app-data-overview-setup
                 *ngIf="setupForm.controls.reportType.value == 'dataOverview'"></app-data-overview-setup>
             <app-performance-setup *ngIf="setupForm.controls.reportType.value == 'performance'"></app-performance-setup>
-            <app-carbon-setup *ngIf="setupForm.controls.reportType.value == 'carbon'"></app-carbon-setup>
+            <app-better-climate-setup
+                *ngIf="setupForm.controls.reportType.value == 'betterClimate'"></app-better-climate-setup>
         </ng-container>
         <ng-container *ngIf="setupForm.valid == false">
             <div class="alert alert-warning text-center">

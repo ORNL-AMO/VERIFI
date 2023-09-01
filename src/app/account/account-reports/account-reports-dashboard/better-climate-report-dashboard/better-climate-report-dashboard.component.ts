@@ -6,12 +6,12 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 
 @Component({
-  selector: 'app-carbon-report-dashboard',
-  templateUrl: './carbon-report-dashboard.component.html',
-  styleUrls: ['./carbon-report-dashboard.component.css']
+  selector: 'app-better-climate-report-dashboard',
+  templateUrl: './better-climate-report-dashboard.component.html',
+  styleUrls: ['./better-climate-report-dashboard.component.css']
 })
-export class CarbonReportDashboardComponent {
-
+export class BetterClimateReportDashboardComponent {
+  
   reportItemsList: Array<{
     year: number,
     reports: Array<IdbAccountReport>
@@ -35,7 +35,7 @@ export class CarbonReportDashboardComponent {
   setListItems(accountReports: Array<IdbAccountReport>) {
     this.reportItemsList = new Array();
     let bpReports: Array<IdbAccountReport> = accountReports.filter(report => {
-      return report.reportType == 'carbon';
+      return report.reportType == 'betterClimate';
     })
     let years: Array<number> = bpReports.map(item => {
       return item.reportYear

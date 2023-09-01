@@ -1,7 +1,7 @@
 <ng-container *ngIf="selectedReport && calculating == false">
     <div class="report" [ngClass]="{'print': print}">
         
-        {{carbonReport.test}}
+        {{betterClimateReport.test}}
     </div>
 </ng-container>
 
@@ -10,7 +10,7 @@
 <div class="w-100 justify-content-center" *ngIf="calculating != false">
     <div class="p-5">
         <app-calculating-spinner [error]="calculating == 'error'"
-            [message]="'Generating Carbon Report...'"></app-calculating-spinner>
+            [message]="'Generating Better Climate Report...'"></app-calculating-spinner>
     </div>
 </div>
 

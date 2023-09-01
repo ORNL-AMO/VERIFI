@@ -1,15 +1,15 @@
 /// <reference lib="webworker" />
 
-import { CarbonReport } from "../calculations/carbon-calculations/carbonReport";
+import { BetterClimateReport } from "../calculations/carbon-calculations/betterClimateReport";
 
 
 addEventListener('message', ({ data }) => {
     try {
-        let carbonReport: CarbonReport = new CarbonReport();
+        let betterClimateReport: BetterClimateReport = new BetterClimateReport();
         console.log('hello')
         postMessage({
             error: false,
-            carbonReport: carbonReport
+            betterClimateReport: betterClimateReport
         });
     } catch (err) {
         console.log(err);

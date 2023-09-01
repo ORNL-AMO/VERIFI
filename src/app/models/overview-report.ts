@@ -125,6 +125,6 @@ export interface PerformanceReportSetup {
 }
 
 
-export interface CarbonReportSetup {
+export interface BetterClimateReportSetup {
   emissionsDisplay: 'market' | 'location',
 }
