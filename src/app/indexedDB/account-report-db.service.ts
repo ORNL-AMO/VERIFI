@@ -133,6 +133,9 @@ export class AccountReportDbService {
         includeAdjusted: true,
         includeContribution: true,
         includeSavings: true,
+      },
+      carbonReportSetup: {
+        emissionsDisplay: 'location'
       }
     }
   }

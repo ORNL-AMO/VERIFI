@@ -1,0 +1,20 @@
+<form>
+    <div class="row">
+        <div class="col-6">
+            <div class="row form-group">
+                <label class="col-5 col-form-label semibold">Reporting toward a market-based or location-based goal?</label>
+                <div class="col-7">
+                    <div class="form-check">
+                        <input type="radio" class="form-check-input" name="emissionsDisplay" [value]="'market'"
+                            id="marketEmissions" [(ngModel)]="reportSetup.emissionsDisplay" (change)="save()">
+                        <label class="form-check-label" for="marketEmissions">Market-based</label>
+                    </div>
+                    <div class="form-check">
+                        <input type="radio" class="form-check-input" name="emissionsDisplay" [value]="'location'"
+                            id="locationEmissions" [(ngModel)]="reportSetup.emissionsDisplay" (change)="save()">
+                        <label class="form-check-label" for="locationEmissions">Location-based</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>

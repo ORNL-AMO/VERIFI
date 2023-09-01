@@ -31,6 +31,8 @@ import { PerformanceReportComponent } from "../account/account-reports/performan
 import { BetterPlantsReportDashboardComponent } from "../account/account-reports/account-reports-dashboard/better-plants-report-dashboard/better-plants-report-dashboard.component";
 import { OverviewReportDashboardComponent } from "../account/account-reports/account-reports-dashboard/overview-report-dashboard/overview-report-dashboard.component";
 import { PerformanceReportDashboardComponent } from "../account/account-reports/account-reports-dashboard/performance-report-dashboard/performance-report-dashboard.component";
+import { CarbonReportDashboardComponent } from "../account/account-reports/account-reports-dashboard/carbon-report-dashboard/carbon-report-dashboard.component";
+import { CarbonReportComponent } from "../account/account-reports/carbon-report/carbon-report.component";
 
 export const AccountRoutes: Route = {
     path: 'account',
@@ -74,12 +76,14 @@ export const AccountRoutes: Route = {
                         { path: 'better-plants', component: BetterPlantsReportDashboardComponent },
                         { path: 'overview', component: OverviewReportDashboardComponent },
                         { path: 'performance', component: PerformanceReportDashboardComponent },
+                        { path: 'carbon', component: CarbonReportDashboardComponent }
                     ]
                 },
                 { path: 'setup', component: AccountReportSetupComponent },
                 { path: 'better-plants-report', component: BetterPlantsReportComponent },
                 { path: 'data-overview-report', component: DataOverviewReportComponent },
-                { path: 'performance-report', component: PerformanceReportComponent }
+                { path: 'performance-report', component: PerformanceReportComponent },
+                { path: 'carbon-report', component: CarbonReportComponent }
             ]
         },
         {

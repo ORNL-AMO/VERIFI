@@ -123,3 +123,8 @@ export interface PerformanceReportSetup {
   includeSavings: boolean,
   includeTopPerformersTable: boolean
 }
+
+
+export interface CarbonReportSetup {
+  emissionsDisplay: 'market' | 'location',
+}

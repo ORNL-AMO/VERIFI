@@ -39,6 +39,9 @@ import { PerformanceReportDashboardComponent } from './account-reports-dashboard
 import { OverviewReportDashboardComponent } from './account-reports-dashboard/overview-report-dashboard/overview-report-dashboard.component';
 import { BetterPlantsReportDashboardComponent } from './account-reports-dashboard/better-plants-report-dashboard/better-plants-report-dashboard.component';
 import { AccountReportsDashboardTabsComponent } from './account-reports-dashboard/account-reports-dashboard-tabs/account-reports-dashboard-tabs.component';
+import { CarbonReportDashboardComponent } from './account-reports-dashboard/carbon-report-dashboard/carbon-report-dashboard.component';
+import { CarbonReportComponent } from './carbon-report/carbon-report.component';
+import { CarbonSetupComponent } from './account-report-setup/carbon-setup/carbon-setup.component';
 
 
 
@@ -77,7 +80,10 @@ import { AccountReportsDashboardTabsComponent } from './account-reports-dashboar
     PerformanceReportDashboardComponent,
     OverviewReportDashboardComponent,
     BetterPlantsReportDashboardComponent,
-    AccountReportsDashboardTabsComponent
+    AccountReportsDashboardTabsComponent,
+    CarbonReportDashboardComponent,
+    CarbonReportComponent,
+    CarbonSetupComponent
   ],
   imports: [
     CommonModule,
