@@ -6,15 +6,11 @@
                 Latest Month 
                 <br><span class="small" *ngIf="dateRange.endDate">
                     ({{dateRange.endDate | date: 'MMM, y'}})</span>
-                    <!-- <br>
-                    (<span>tonne CO<sub>2</sub>e</span>) -->
             </th>
             <th class="w-25" colspan="2">
                 Previous Year
                 <br>
                 <span class="small" *ngIf="previousYear">({{previousYear | date: 'MMM, y'}})</span>
-                <!-- <br>
-                (<span>tonne CO<sub>2</sub>e</span>) -->
             </th>
             <th class="w-25" colspan="2">
                 Monthly Average
@@ -22,8 +18,6 @@
                 <span class="small" *ngIf="dateRange.startDate">
                     ({{dateRange.startDate | date: 'MMM, y'}} -
                     {{dateRange.endDate | date: 'MMM, y'}})</span>
-                    <!-- <br>
-                    (<span>tonne CO<sub>2</sub>e</span>) -->
             </th>
         </tr>
         <tr>
@@ -54,18 +48,6 @@
                 (<span>tonne CO<sub>2</sub>e</span>)
             </th>
         </tr>
-        <!-- <tr>
-            <th></th>
-            <th colspan="2">
-                (<span>tonne CO<sub>2</sub>e</span>)
-            </th>
-            <th colspan="2">
-                (<span>tonne CO<sub>2</sub>e</span>)
-            </th>
-            <th colspan="2">
-                (<span>tonne CO<sub>2</sub>e</span>)
-            </th>
-        </tr> -->
     </thead>
     <tbody class="table-group-divider">
         <tr *ngFor="let useAndCost of sourcesUseAndCost">

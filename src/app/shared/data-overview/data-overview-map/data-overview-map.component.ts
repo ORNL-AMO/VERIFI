@@ -18,6 +18,8 @@ export class DataOverviewMapComponent {
   dataType: 'energyUse' | 'emissions' | 'cost' | 'water';
   @Input()
   accountOverviewFacilities: Array<AccountOverviewFacility>;
+  @Input()
+  emissionsDisplay: "market" | "location";
 
 
   @ViewChild('utilityUsageMap', { static: false }) utilityUsageMap: ElementRef;
@@ -29,8 +31,8 @@ export class DataOverviewMapComponent {
     facility: IdbFacility
   }>;
 
-  emissionsDisplaySub: Subscription;
-  emissionsDisplay: "market" | "location";
+  // emissionsDisplaySub: Subscription;
+  // emissionsDisplay: "market" | "location";
   constructor(private plotlyService: PlotlyService,
     private eGridService: EGridService, private accountDbService: AccountdbService,
     private accountOverviewService: AccountOverviewService) { }
@@ -38,22 +40,22 @@ export class DataOverviewMapComponent {
   ngOnInit(): void {
     this.setMapData();
 
-    if (this.dataType == 'emissions') {
-      this.emissionsDisplaySub = this.accountOverviewService.emissionsDisplay.subscribe(val => {
-        this.emissionsDisplay = val;
-        if (this.emissionsDisplay) {
-          this.setMapData();
-          this.drawChart();
-        }
-      })
-    }
+    // if (this.dataType == 'emissions') {
+    //   this.emissionsDisplaySub = this.accountOverviewService.emissionsDisplay.subscribe(val => {
+    //     this.emissionsDisplay = val;
+    //     if (this.emissionsDisplay) {
+    //       this.setMapData();
+    //       this.drawChart();
+    //     }
+    //   })
+    // }
   }
 
-  ngOnDestroy() {
-    if (this.dataType == 'emissions') {
-      this.emissionsDisplaySub.unsubscribe();
-    }
-  }
+  // ngOnDestroy() {
+  //   if (this.dataType == 'emissions') {
+  //     this.emissionsDisplaySub.unsubscribe();
+  //   }
+  // }
 
   ngAfterViewInit() {
     this.drawChart();

@@ -55,8 +55,12 @@
                 </div>
                 <div class="card-body">
                     <app-facilities-usage-stacked-bar-chart [dataType]="'emissions'"
-                        [calanderizedMeters]="accountOverviewData.calanderizedMeters"
-                        [dateRange]="dateRange"></app-facilities-usage-stacked-bar-chart>
+                        [calanderizedMeters]="accountOverviewData.calanderizedMeters" [dateRange]="dateRange"
+                        [emissionsDisplay]="'market'"></app-facilities-usage-stacked-bar-chart>
+                    <hr>
+                    <app-facilities-usage-stacked-bar-chart [dataType]="'emissions'"
+                        [calanderizedMeters]="accountOverviewData.calanderizedMeters" [dateRange]="dateRange"
+                        [emissionsDisplay]="'location'"></app-facilities-usage-stacked-bar-chart>
                 </div>
             </div>
         </div>

@@ -9,6 +9,7 @@ import { IdbFacility } from 'src/app/models/idb';
 import { UtilityColors } from '../../utilityColors';
 import * as _ from 'lodash';
 import { DataOverviewReportSetup } from 'src/app/models/overview-report';
+import { ScopeValues } from 'src/app/models/constantsAndTypes';
 
 @Component({
   selector: 'app-facilities-usage-stacked-bar-chart',
@@ -28,25 +29,28 @@ export class FacilitiesUsageStackedBarChartComponent {
   reportOptions: DataOverviewReportSetup;
   @Input()
   dateRange: { startDate: Date, endDate: Date };
+  @Input()
+  emissionsDisplay: "market" | "location";
 
 
   @ViewChild('stackedBarChart', { static: false }) stackedBarChart: ElementRef;
   barChartData: Array<StackedBarChartData>;
-  emissionsDisplay: "market" | "location";
-  emissionsDisplaySub: Subscription;
+  // emissionsDisplay: "market" | "location";
+  // emissionsDisplaySub: Subscription;
   constructor(private accountOverviewService: AccountOverviewService,
     private plotlyService: PlotlyService, private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
-    if (this.dataType == 'emissions') {
-      this.emissionsDisplaySub = this.accountOverviewService.emissionsDisplay.subscribe(val => {
-        this.emissionsDisplay = val;
-        this.setBarChartData();
-        this.drawChart();
-      });
-    } else {
-      this.setBarChartData();
-    }
+    // if (this.dataType == 'emissions') {
+    //   this.emissionsDisplaySub = this.accountOverviewService.emissionsDisplay.subscribe(val => {
+    //     this.emissionsDisplay = val;
+    //     this.setBarChartData();
+    //     this.drawChart();
+    //   });
+    // } else {
+    //   this.setBarChartData();
+    // }
+    this.setBarChartData();
   }
 
   ngAfterViewInit() {
@@ -61,9 +65,9 @@ export class FacilitiesUsageStackedBarChartComponent {
     }
   }
   ngOnDestroy() {
-    if (this.dataType == 'emissions') {
-      this.emissionsDisplaySub.unsubscribe();
-    }
+    // if (this.dataType == 'emissions') {
+    //   this.emissionsDisplaySub.unsubscribe();
+    // }
   }
 
   drawChart() {
@@ -241,72 +245,142 @@ export class FacilitiesUsageStackedBarChartComponent {
 
   getEmissionsData(): Array<any> {
     let data = new Array();
-    if (this.barChartData.findIndex(dataItem => { return dataItem.electricity.marketEmissions != 0 }) != -1) {
+    if (this.barChartData.findIndex(dataItem => { return dataItem.electricity.scope1LocationEmissions != 0 }) != -1) {
       let yValues: Array<number>;
       if (this.emissionsDisplay == 'location') {
-        yValues = this.barChartData.map(dataItem => { return dataItem.electricity.locationEmissions });
+        yValues = this.barChartData.map(dataItem => { return dataItem.electricity.scope1LocationEmissions });
       } else {
-        yValues = this.barChartData.map(dataItem => { return dataItem.electricity.marketEmissions });
+        yValues = this.barChartData.map(dataItem => { return dataItem.electricity.scope1MarketEmissions });
       }
 
       data.push({
         x: this.barChartData.map(dataItem => { return dataItem.facilityName }),
         y: yValues,
-        name: 'Electricity',
+        name: 'Electricity Scope 1',
         type: 'bar',
         marker: {
-          color: UtilityColors.Electricity.color
+          color: this.getEmissionsTraceColor(1)
         }
       });
     }
-    if (this.barChartData.findIndex(dataItem => { return dataItem.naturalGas.marketEmissions != 0 }) != -1) {
+    if (this.barChartData.findIndex(dataItem => { return dataItem.naturalGas.scope1LocationEmissions != 0 }) != -1) {
       let yValues: Array<number>;
       if (this.emissionsDisplay == 'location') {
-        yValues = this.barChartData.map(dataItem => { return dataItem.naturalGas.locationEmissions });
+        yValues = this.barChartData.map(dataItem => { return dataItem.naturalGas.scope1LocationEmissions });
       } else {
-        yValues = this.barChartData.map(dataItem => { return dataItem.naturalGas.marketEmissions });
+        yValues = this.barChartData.map(dataItem => { return dataItem.naturalGas.scope1MarketEmissions });
       }
       data.push({
         x: this.barChartData.map(dataItem => { return dataItem.facilityName }),
         y: yValues,
-        name: 'Natural Gas',
+        name: 'Natural Gas Scope 1',
         type: 'bar',
         marker: {
-          color: UtilityColors['Natural Gas'].color
+          color: this.getEmissionsTraceColor(1)
         }
       })
     }
-    if (this.barChartData.findIndex(dataItem => { return dataItem.otherFuels.marketEmissions != 0 }) != -1) {
+    if (this.barChartData.findIndex(dataItem => { return dataItem.otherFuels.scope1LocationEmissions != 0 }) != -1) {
       let yValues: Array<number>;
       if (this.emissionsDisplay == 'location') {
-        yValues = this.barChartData.map(dataItem => { return dataItem.otherFuels.locationEmissions });
+        yValues = this.barChartData.map(dataItem => { return dataItem.otherFuels.scope1LocationEmissions });
       } else {
-        yValues = this.barChartData.map(dataItem => { return dataItem.otherFuels.marketEmissions });
+        yValues = this.barChartData.map(dataItem => { return dataItem.otherFuels.scope1MarketEmissions });
       }
       data.push({
         x: this.barChartData.map(dataItem => { return dataItem.facilityName }),
         y: yValues,
-        name: 'Other Fuels',
+        name: 'Other Fuels Scope 1',
         type: 'bar',
         marker: {
-          color: UtilityColors['Other Fuels'].color
+          color: this.getEmissionsTraceColor(1)
         }
       })
     }
-    if (this.barChartData.findIndex(dataItem => { return dataItem.otherEnergy.marketEmissions != 0 }) != -1) {
+    if (this.barChartData.findIndex(dataItem => { return dataItem.otherEnergy.scope1LocationEmissions != 0 }) != -1) {
       let yValues: Array<number>;
       if (this.emissionsDisplay == 'location') {
-        yValues = this.barChartData.map(dataItem => { return dataItem.otherEnergy.locationEmissions });
+        yValues = this.barChartData.map(dataItem => { return dataItem.otherEnergy.scope1LocationEmissions });
       } else {
-        yValues = this.barChartData.map(dataItem => { return dataItem.otherEnergy.marketEmissions });
+        yValues = this.barChartData.map(dataItem => { return dataItem.otherEnergy.scope1MarketEmissions });
       }
       data.push({
         x: this.barChartData.map(dataItem => { return dataItem.facilityName }),
         y: yValues,
-        name: 'Other Energy',
+        name: 'Other Energy Scope 1',
         type: 'bar',
         marker: {
-          color: UtilityColors['Other Energy'].color
+          color: this.getEmissionsTraceColor(1)
+        }
+      })
+    }
+    //scope 2
+    if (this.barChartData.findIndex(dataItem => { return dataItem.electricity.scope2LocationEmissions != 0 }) != -1) {
+      let yValues: Array<number>;
+      if (this.emissionsDisplay == 'location') {
+        yValues = this.barChartData.map(dataItem => { return dataItem.electricity.scope2LocationEmissions });
+      } else {
+        yValues = this.barChartData.map(dataItem => { return dataItem.electricity.scope2MarketEmissions });
+      }
+
+      data.push({
+        x: this.barChartData.map(dataItem => { return dataItem.facilityName }),
+        y: yValues,
+        name: 'Electricity Scope 2',
+        type: 'bar',
+        marker: {
+          color: this.getEmissionsTraceColor(2)
+        }
+      });
+    }
+    if (this.barChartData.findIndex(dataItem => { return dataItem.naturalGas.scope2LocationEmissions != 0 }) != -1) {
+      let yValues: Array<number>;
+      if (this.emissionsDisplay == 'location') {
+        yValues = this.barChartData.map(dataItem => { return dataItem.naturalGas.scope2LocationEmissions });
+      } else {
+        yValues = this.barChartData.map(dataItem => { return dataItem.naturalGas.scope2MarketEmissions });
+      }
+      data.push({
+        x: this.barChartData.map(dataItem => { return dataItem.facilityName }),
+        y: yValues,
+        name: 'Natural Gas Scope 2',
+        type: 'bar',
+        marker: {
+          color: this.getEmissionsTraceColor(2)
+        }
+      })
+    }
+    if (this.barChartData.findIndex(dataItem => { return dataItem.otherFuels.scope2LocationEmissions != 0 }) != -1) {
+      let yValues: Array<number>;
+      if (this.emissionsDisplay == 'location') {
+        yValues = this.barChartData.map(dataItem => { return dataItem.otherFuels.scope2LocationEmissions });
+      } else {
+        yValues = this.barChartData.map(dataItem => { return dataItem.otherFuels.scope2MarketEmissions });
+      }
+      data.push({
+        x: this.barChartData.map(dataItem => { return dataItem.facilityName }),
+        y: yValues,
+        name: 'Other Fuels Scope 2',
+        type: 'bar',
+        marker: {
+          color: this.getEmissionsTraceColor(2)
+        }
+      })
+    }
+    if (this.barChartData.findIndex(dataItem => { return dataItem.otherEnergy.scope2LocationEmissions != 0 }) != -1) {
+      let yValues: Array<number>;
+      if (this.emissionsDisplay == 'location') {
+        yValues = this.barChartData.map(dataItem => { return dataItem.otherEnergy.scope2LocationEmissions });
+      } else {
+        yValues = this.barChartData.map(dataItem => { return dataItem.otherEnergy.scope2MarketEmissions });
+      }
+      data.push({
+        x: this.barChartData.map(dataItem => { return dataItem.facilityName }),
+        y: yValues,
+        name: 'Other Energy Scope 2',
+        type: 'bar',
+        marker: {
+          color: this.getEmissionsTraceColor(2)
         }
       })
     }
@@ -357,39 +431,59 @@ export class FacilitiesUsageStackedBarChartComponent {
 
     accountFacilites.forEach(facility => {
       if (!this.reportOptions || includedFacilityIds.includes(facility.guid)) {
-        let electricity: UtilityItem = { energyUse: 0, energyCost: 0, marketEmissions: 0, locationEmissions: 0 };
-        let naturalGas: UtilityItem = { energyUse: 0, energyCost: 0, marketEmissions: 0, locationEmissions: 0 };
-        let otherFuels: UtilityItem = { energyUse: 0, energyCost: 0, marketEmissions: 0, locationEmissions: 0 };
-        let otherEnergy: UtilityItem = { energyUse: 0, energyCost: 0, marketEmissions: 0, locationEmissions: 0 };
-        let water: UtilityItem = { energyUse: 0, energyCost: 0, marketEmissions: 0, locationEmissions: 0 };
-        let wasteWater: UtilityItem = { energyUse: 0, energyCost: 0, marketEmissions: 0, locationEmissions: 0 };
-        let otherUtility: UtilityItem = { energyUse: 0, energyCost: 0, marketEmissions: 0, locationEmissions: 0 };
+        let electricity: UtilityItem = { energyUse: 0, energyCost: 0, scope1LocationEmissions: 0, scope1MarketEmissions: 0, scope2LocationEmissions: 0, scope2MarketEmissions: 0 };
+        let naturalGas: UtilityItem = { energyUse: 0, energyCost: 0, scope1LocationEmissions: 0, scope1MarketEmissions: 0, scope2LocationEmissions: 0, scope2MarketEmissions: 0 };
+        let otherFuels: UtilityItem = { energyUse: 0, energyCost: 0, scope1LocationEmissions: 0, scope1MarketEmissions: 0, scope2LocationEmissions: 0, scope2MarketEmissions: 0 };
+        let otherEnergy: UtilityItem = { energyUse: 0, energyCost: 0, scope1LocationEmissions: 0, scope1MarketEmissions: 0, scope2LocationEmissions: 0, scope2MarketEmissions: 0 };
+        let water: UtilityItem = { energyUse: 0, energyCost: 0, scope1LocationEmissions: 0, scope1MarketEmissions: 0, scope2LocationEmissions: 0, scope2MarketEmissions: 0 };
+        let wasteWater: UtilityItem = { energyUse: 0, energyCost: 0, scope1LocationEmissions: 0, scope1MarketEmissions: 0, scope2LocationEmissions: 0, scope2MarketEmissions: 0 };
+        let otherUtility: UtilityItem = { energyUse: 0, energyCost: 0, scope1LocationEmissions: 0, scope1MarketEmissions: 0, scope2LocationEmissions: 0, scope2MarketEmissions: 0 };
 
         let facilityMeters: Array<CalanderizedMeter> = this.calanderizedMeters.filter(cMeter => { return cMeter.meter.facilityId == facility.guid });
         facilityMeters.forEach(cMeter => {
           cMeter.monthlyData.forEach(dataItem => {
             if (dataItem.date >= this.dateRange.startDate && dataItem.date <= this.dateRange.endDate) {
               if (cMeter.meter.source == 'Electricity') {
-                electricity.marketEmissions = (electricity.marketEmissions + Number(dataItem.marketEmissions));
-                electricity.locationEmissions = (electricity.locationEmissions + Number(dataItem.locationEmissions));
+                if (cMeter.meter.scope == 1 || cMeter.meter.scope == 2) {
+                  electricity.scope1MarketEmissions = (electricity.scope1MarketEmissions + Number(dataItem.marketEmissions));
+                  electricity.scope1LocationEmissions = (electricity.scope1LocationEmissions + Number(dataItem.locationEmissions));
+                } else if (cMeter.meter.scope == 3 || cMeter.meter.scope == 4) {
+                  electricity.scope2MarketEmissions = (electricity.scope2MarketEmissions + Number(dataItem.marketEmissions));
+                  electricity.scope2LocationEmissions = (electricity.scope2LocationEmissions + Number(dataItem.locationEmissions));
+                }
                 electricity.energyUse = (electricity.energyUse + Number(dataItem.energyUse));
                 electricity.energyCost = (electricity.energyCost + Number(dataItem.energyCost));
               }
               else if (cMeter.meter.source == 'Natural Gas') {
-                naturalGas.marketEmissions = (naturalGas.marketEmissions + Number(dataItem.marketEmissions));
-                naturalGas.locationEmissions = (naturalGas.locationEmissions + Number(dataItem.locationEmissions));
+                if (cMeter.meter.scope == 1 || cMeter.meter.scope == 2) {
+                  naturalGas.scope1MarketEmissions = (naturalGas.scope1MarketEmissions + Number(dataItem.marketEmissions));
+                  naturalGas.scope1LocationEmissions = (naturalGas.scope1LocationEmissions + Number(dataItem.locationEmissions));
+                } else if (cMeter.meter.scope == 3 || cMeter.meter.scope == 4) {
+                  naturalGas.scope2MarketEmissions = (naturalGas.scope2MarketEmissions + Number(dataItem.marketEmissions));
+                  naturalGas.scope2LocationEmissions = (naturalGas.scope2LocationEmissions + Number(dataItem.locationEmissions));
+                }
                 naturalGas.energyUse = (naturalGas.energyUse + Number(dataItem.energyUse));
                 naturalGas.energyCost = (naturalGas.energyCost + Number(dataItem.energyCost));
               }
               else if (cMeter.meter.source == 'Other Fuels') {
-                otherFuels.marketEmissions = (otherFuels.marketEmissions + Number(dataItem.marketEmissions));
-                otherFuels.locationEmissions = (otherFuels.locationEmissions + Number(dataItem.locationEmissions));
+                if (cMeter.meter.scope == 1 || cMeter.meter.scope == 2) {
+                  otherFuels.scope1MarketEmissions = (otherFuels.scope1MarketEmissions + Number(dataItem.marketEmissions));
+                  otherFuels.scope1LocationEmissions = (otherFuels.scope1LocationEmissions + Number(dataItem.locationEmissions));
+                } else if (cMeter.meter.scope == 3 || cMeter.meter.scope == 4) {
+                  otherFuels.scope2MarketEmissions = (otherFuels.scope2MarketEmissions + Number(dataItem.marketEmissions));
+                  otherFuels.scope2LocationEmissions = (otherFuels.scope2LocationEmissions + Number(dataItem.locationEmissions));
+                }
                 otherFuels.energyUse = (otherFuels.energyUse + Number(dataItem.energyUse));
                 otherFuels.energyCost = (otherFuels.energyCost + Number(dataItem.energyCost));
               }
               else if (cMeter.meter.source == 'Other Energy') {
-                otherEnergy.marketEmissions = (otherEnergy.marketEmissions + Number(dataItem.marketEmissions));
-                otherEnergy.locationEmissions = (otherEnergy.locationEmissions + Number(dataItem.locationEmissions));
+                if (cMeter.meter.scope == 1 || cMeter.meter.scope == 2) {
+                  otherEnergy.scope1MarketEmissions = (otherEnergy.scope1MarketEmissions + Number(dataItem.marketEmissions));
+                  otherEnergy.scope1LocationEmissions = (otherEnergy.scope1LocationEmissions + Number(dataItem.locationEmissions));
+                } else if (cMeter.meter.scope == 3 || cMeter.meter.scope == 4) {
+                  otherEnergy.scope2MarketEmissions = (otherEnergy.scope2MarketEmissions + Number(dataItem.marketEmissions));
+                  otherEnergy.scope2LocationEmissions = (otherEnergy.scope2LocationEmissions + Number(dataItem.locationEmissions));
+                }
                 otherEnergy.energyUse = (otherEnergy.energyUse + Number(dataItem.energyUse));
                 otherEnergy.energyCost = (otherEnergy.energyCost + Number(dataItem.energyCost));
               }
@@ -428,7 +522,8 @@ export class FacilitiesUsageStackedBarChartComponent {
       }, 'desc');
     } else if (this.dataType == 'emissions') {
       this.barChartData = _.orderBy(this.barChartData, (data) => {
-        return (data.electricity.marketEmissions + data.naturalGas.marketEmissions + data.otherFuels.marketEmissions + data.otherEnergy.marketEmissions);
+        return (data.electricity.scope2LocationEmissions + data.naturalGas.scope2LocationEmissions + data.otherFuels.scope2LocationEmissions + data.otherEnergy.scope2LocationEmissions +
+          data.electricity.scope1LocationEmissions + data.naturalGas.scope1LocationEmissions + data.otherFuels.scope1LocationEmissions + data.otherEnergy.scope1LocationEmissions);
       }, 'desc');
     } else if (this.dataType == 'energyUse') {
       this.barChartData = _.orderBy(this.barChartData, (data) => {
@@ -447,7 +542,11 @@ export class FacilitiesUsageStackedBarChartComponent {
     } else if (this.dataType == 'cost') {
       return "Utility Costs";
     } else if (this.dataType == 'emissions') {
-      return "Emissions (tonne CO<sub>2</sub>)";
+      if(this.emissionsDisplay == 'location'){
+        return "Location Emissions (tonne CO<sub>2</sub>)";
+      }else{
+        return "Market Emissions (tonne CO<sub>2</sub>)";
+      }
     } else if (this.dataType == 'water') {
       return "Water Usage (" + this.waterUnit + ")"
     }
@@ -458,6 +557,26 @@ export class FacilitiesUsageStackedBarChartComponent {
       return "$";
     }
     return;
+  }
+
+  getEmissionsTraceColor(scope: 1 | 2): string {
+    if (this.emissionsDisplay == 'market') {
+      if (scope == 1) {
+        //Scope 1
+        return '#95A5A6';
+      } else if (scope == 2) {
+        //Scope 2
+        return '#273746';
+      }
+    } else {
+      if (scope == 1) {
+        //Scope 1
+        return '#873600';
+      } else if (scope == 2) {
+        //Scope 2
+        return '#B9770E';
+      }
+    }
   }
 
 }

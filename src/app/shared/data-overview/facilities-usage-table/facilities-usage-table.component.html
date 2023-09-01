@@ -1,7 +1,7 @@
 <div class="table-responsive">
     <table class="table utility-data table-sm table-bordered table-hover">
         <thead>
-            <tr [ngClass]="{'emissions': dataType == 'emissions'}">
+            <tr>
                 <th>Facility</th>
                 <th *ngIf="dataType == 'energyUse'">Utility Usage<br> (<span
                         [innerHTML]="energyUnit | settingsLabel"></span>)
@@ -11,10 +11,10 @@
                 </th>
                 <th *ngIf="dataType == 'cost'"># of Meters</th>
                 <th *ngIf="dataType != 'emissions'">Utility Cost </th>
-                <th *ngIf="dataType == 'emissions'">
+                <th class="w-33" *ngIf="dataType == 'emissions'">
                     Market-Based <br>Emissions (tonne CO<sub>2</sub>e)
                 </th>
-                <th *ngIf="dataType == 'emissions'">
+                <th class="w-33" *ngIf="dataType == 'emissions'">
                     Location-Based <br>Emissions (tonne CO<sub>2</sub>e)
                 </th>
             </tr>
