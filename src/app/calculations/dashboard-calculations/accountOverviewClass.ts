@@ -52,6 +52,14 @@ export class AccountOverviewData {
         let sourceMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => {
             return EnergySources.includes(cMeter.meter.source);
         });
+        sourceMeters.forEach(cMeter => {
+            if(cMeter.meter.includeInEnergy == false){
+                cMeter.monthlyData.forEach(monthlyData => {
+                    monthlyData.energyUse = 0;
+                    monthlyData.energyConsumption = 0;
+                });
+            }
+        })
         this.energyYearMonthData = getYearlyUsageNumbers(sourceMeters);
     }
 

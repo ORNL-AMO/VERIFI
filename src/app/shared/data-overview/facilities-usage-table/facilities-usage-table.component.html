@@ -41,10 +41,10 @@
                     {{summary.totalCost | customNumber:true }}
                 </td>
                 <td *ngIf="dataType == 'emissions' && emissionsDisplay == 'market'">
-                    {{summary.totalMarketEmissions / 1000 | customNumber}}
+                    {{summary.totalMarketEmissions | customNumber}}
                 </td>
                 <td *ngIf="dataType == 'emissions' && emissionsDisplay == 'location'">
-                    {{summary.totalLocationEmissions / 1000 | customNumber}}
+                    {{summary.totalLocationEmissions | customNumber}}
                 </td>
             </tr>
         </tbody>
@@ -72,10 +72,10 @@
                     {{accountOverviewData.totalAccountCost | customNumber:true}}
                 </th>
                 <th *ngIf="dataType == 'emissions' && emissionsDisplay == 'market'">
-                    {{accountOverviewData.totalMarketEmissions / 1000 | customNumber}}
+                    {{accountOverviewData.totalMarketEmissions | customNumber}}
                 </th>
                 <th *ngIf="dataType == 'emissions' && emissionsDisplay == 'location'">
-                    {{accountOverviewData.totalLocationEmissions / 1000 | customNumber}}
+                    {{accountOverviewData.totalLocationEmissions | customNumber}}
                 </th>
             </tr>
         </tfoot>

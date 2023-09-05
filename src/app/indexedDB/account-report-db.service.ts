@@ -6,6 +6,7 @@ import { IdbAccount, IdbAccountReport, IdbFacility } from '../models/idb';
 import { AccountdbService } from './account-db.service';
 import { FacilitydbService } from './facility-db.service';
 import { LoadingService } from '../core-components/loading/loading.service';
+import { ParseTreeResult } from '@angular/compiler';
 
 @Injectable({
   providedIn: 'root'
@@ -119,6 +120,19 @@ export class AccountReportDbService {
         includeUtilityTableForFacility: true,
         includeAnnualBarChart: true,
         includeMonthlyLineChartForFacility: true
+      },
+      performanceReportSetup: {
+        analysisItemId: undefined,
+        includeFacilityPerformanceDetails: true,
+        includeUtilityPerformanceDetails: true,
+        includeGroupPerformanceDetails: false,
+        groupPerformanceByYear: false,
+        includeTopPerformersTable: true,
+        numberOfTopPerformers: 5,
+        includeActual: false,
+        includeAdjusted: true,
+        includeContribution: true,
+        includeSavings: true,
       }
     }
   }
@@ -128,8 +142,8 @@ export class AccountReportDbService {
     for (let i = 0; i < accountReports.length; i++) {
       let report: IdbAccountReport = accountReports[i];
       report.dataOverviewReportSetup.includedFacilities = report.dataOverviewReportSetup.includedFacilities.filter(facility => { return facility.facilityId != facilityId });
-      
-      this.loadingService.setLoadingMessage('Removing Facility From Reports (' + i + '/' + accountReports.length + ')...' );
+
+      this.loadingService.setLoadingMessage('Removing Facility From Reports (' + i + '/' + accountReports.length + ')...');
       await firstValueFrom(this.updateWithObservable(report));
     }
   }
@@ -142,7 +156,7 @@ export class AccountReportDbService {
 
   async deleteReports(accountReports: Array<IdbAccountReport>) {
     for (let i = 0; i < accountReports.length; i++) {
-      this.loadingService.setLoadingMessage('Deleting Reports (' + i + '/' + accountReports.length + ')...' );
+      this.loadingService.setLoadingMessage('Deleting Reports (' + i + '/' + accountReports.length + ')...');
       await this.deleteWithObservable(accountReports[i].id);
     }
   }

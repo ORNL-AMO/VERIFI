@@ -56,6 +56,14 @@ export class FacilityOverviewData {
         let sourceMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => {
             return EnergySources.includes(cMeter.meter.source);
         });
+        sourceMeters.forEach(cMeter => {
+            if(cMeter.meter.includeInEnergy == false){
+                cMeter.monthlyData.forEach(mData =>{
+                    mData.energyConsumption = 0;
+                    mData.energyUse = 0;
+                });
+            }
+        });
         this.energyYearMonthData = getYearlyUsageNumbers(sourceMeters);
     }
 
@@ -77,6 +85,12 @@ export class FacilityOverviewData {
         });
         this.energyMeters = new Array();
         sourceMeters.forEach(cMeter => {
+            if(cMeter.meter.includeInEnergy == false){
+                cMeter.monthlyData.forEach(monthlyData => {
+                    monthlyData.energyUse = 0;
+                    monthlyData.energyConsumption = 0;
+                });
+            }
             let facilityOverview: FacilityOverviewMeter = new FacilityOverviewMeter(cMeter, dateRange, 'energy');
             this.energyMeters.push(facilityOverview);
         });

@@ -22,12 +22,19 @@
                     <i class="fa fa-file"></i>
                     Data Overview</a>
             </li>
+            <li class="nav-item" [ngClass]="{'disabled': !setupValid}"
+                *ngIf="selectedReport.reportType == 'performance'">
+                <a class="nav-link" routerLink="/account/reports/performance-report"
+                    [routerLinkActive]="['active']">
+                    <i class="fa fa-file"></i>
+                    Performance Report</a>
+            </li>
         </ul>
     </div>
     <div>
         <ul class="nav nav-tabs">
             <li class="nav-item">
-                <a class="nav-link home-link" routerLink="dashboard" [routerLinkActive]="['active']">
+                <a class="nav-link home-link" (click)="goToDashboard()">
                     <i class="fa fa-list"></i>
                     All Account Reports
                 </a>

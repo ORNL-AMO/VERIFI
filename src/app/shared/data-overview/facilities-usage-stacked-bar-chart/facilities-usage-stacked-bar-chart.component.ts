@@ -447,7 +447,7 @@ export class FacilitiesUsageStackedBarChartComponent {
     } else if (this.dataType == 'cost') {
       return "Utility Costs";
     } else if (this.dataType == 'emissions') {
-      return "Emissions (kg CO<sub>2</sub>)";
+      return "Emissions (tonne CO<sub>2</sub>)";
     } else if (this.dataType == 'water') {
       return "Water Usage (" + this.waterUnit + ")"
     }
