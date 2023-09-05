@@ -44,6 +44,10 @@ import { BetterClimateSetupComponent } from './account-report-setup/better-clima
 import { BetterClimateReportDashboardComponent } from './account-reports-dashboard/better-climate-report-dashboard/better-climate-report-dashboard.component';
 import { PortfolioInformationTableComponent } from './better-climate-report/portfolio-information-table/portfolio-information-table.component';
 import { AbsoluteEmissionsTableComponent } from './better-climate-report/absolute-emissions-table/absolute-emissions-table.component';
+import { EmissionsReductionsTableComponent } from './better-climate-report/emissions-reductions-table/emissions-reductions-table.component';
+import { TotalPortfolioEnergyUseTableComponent } from './better-climate-report/total-portfolio-energy-use-table/total-portfolio-energy-use-table.component';
+import { VehicleEnergyUseTableComponent } from './better-climate-report/vehicle-energy-use-table/vehicle-energy-use-table.component';
+import { GraphCalculationsTableComponent } from './better-climate-report/graph-calculations-table/graph-calculations-table.component';
 
 
 
@@ -87,7 +91,11 @@ import { AbsoluteEmissionsTableComponent } from './better-climate-report/absolut
     BetterClimateSetupComponent,
     BetterClimateReportDashboardComponent,
     PortfolioInformationTableComponent,
-    AbsoluteEmissionsTableComponent
+    AbsoluteEmissionsTableComponent,
+    EmissionsReductionsTableComponent,
+    TotalPortfolioEnergyUseTableComponent,
+    VehicleEnergyUseTableComponent,
+    GraphCalculationsTableComponent
   ],
   imports: [
     CommonModule,
