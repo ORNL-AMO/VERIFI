@@ -2,14 +2,14 @@
     Section 4: Total Energy Use for Portfolio
 </h4>
 
-<table class="table table-responsive">
+<table class="table table-responsive table-bordered">
     <tbody>
         <tr>
             <td class="first-column">
                 Total Electricity Consumption (MWh)
             </td>
             <td *ngFor="let yearDetail of yearDetails">
-
+                {{yearDetail.totalElectricity | number}}
             </td>
         </tr>
         <tr>
@@ -58,13 +58,21 @@
 
             </td>
         </tr>
-        <tr>
+        <tr *ngFor="let fuel of yearDetails[0].fuelTotals; let index = index;">
             <td>
-                Total Electricity Consumption (MWh)
+                {{fuel.fuelType}} (MMBtu)
             </td>
             <td *ngFor="let yearDetail of yearDetails">
-
+                {{yearDetail.fuelTotals[index].total | number}}
             </td>
+        </tr>
+        <tr>
+            <th>
+                Total Energy Use (MMBtu)
+            </th>
+            <th *ngFor="let yearDetail of yearDetails">
+                {{yearDetail.totalEnergyUse | number}}
+            </th>
         </tr>
     </tbody>
 </table>

@@ -186,6 +186,9 @@ export class AccountReportsService {
     } else if (report.reportType == 'performance') {
       let performanceForm: FormGroup = this.getPerformanceFormFromReport(report.performanceReportSetup);
       return performanceForm.valid;
+    }else if(report.reportType == 'betterClimate'){
+      // let betterClimateForm: FormGroup 
+      return true;
     }
   }
 }
