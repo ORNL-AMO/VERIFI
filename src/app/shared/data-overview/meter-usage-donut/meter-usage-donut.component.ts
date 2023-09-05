@@ -111,7 +111,7 @@ export class MeterUsageDonutComponent {
     } else if (this.dataType == 'cost') {
       return '%{label}: %{value:$,.0f} <extra></extra>';
     } else if (this.dataType == 'emissions') {
-      return '%{label}: %{value:,.0f} kg CO<sub>2</sub>e <extra></extra>';
+      return '%{label}: %{value:,.0f} tonne CO<sub>2</sub>e <extra></extra>';
     } else if (this.dataType == 'water') {
       return '%{label}: %{value:,.0f} ' + this.selectedFacility.volumeLiquidUnit + ' <extra></extra>';
     }

@@ -1,6 +1,6 @@
 <div class="wrapper main-content p-0">
     <div class="content-padding">
-        <h4>Report Setup</h4>
+        <h4>{{reportType}} Report Setup</h4>
         <form [formGroup]="setupForm">
             <div class="row">
                 <div class="col-6">
@@ -11,7 +11,7 @@
                                 formControlName="reportName" (input)="save()">
                         </div>
                     </div>
-                    <div class="row form-group">
+                    <!-- <div class="row form-group">
                         <label class="col-5 col-form-label semibold">Report Type</label>
                         <div class="col-7">
                             <div class="form-check">
@@ -24,10 +24,16 @@
                                     id="dataOverview" formControlName="reportType" (change)="changeReportType()">
                                 <label class="form-check-label" for="dataOverview">Data Overview Report</label>
                             </div>
+                            <div class="form-check">
+                                <input type="radio" class="form-check-input" name="reportType" [value]="'performance'"
+                                    id="performance" formControlName="reportType" (change)="changeReportType()">
+                                <label class="form-check-label" for="performance">Performance Report</label>
+                            </div>
                         </div>
-                    </div>
+                    </div> -->
                 </div>
-                <div class="col-6" *ngIf="setupForm.controls.reportType.value == 'betterPlants'">
+                <div class="col-6"
+                    *ngIf="setupForm.controls.reportType.value == 'betterPlants' || setupForm.controls.reportType.value == 'performance'">
                     <div class="row form-group">
                         <label class="col-5 col-form-label semibold" for="baselineYear">Baseline Year</label>
 
@@ -38,9 +44,6 @@
                                     account.fiscalYear}}</option>
                             </select>
                         </div>
-                        <!-- <div class="alert alert-danger" *ngIf="!reportOptions.baselineYear">
-                                    Baseline Year Required
-                                </div> -->
                     </div>
                     <div class="row form-group">
                         <label class="col-5 col-form-label semibold" for="reportName">Report Year</label>
@@ -51,9 +54,6 @@
                                     account.fiscalYear}}</option>
                             </select>
                         </div>
-                        <!-- <div class="alert alert-danger" *ngIf="!reportOptions.targetYear">
-                                Target Year Required
-                            </div> -->
                     </div>
                 </div>
                 <div class="col-6" *ngIf="setupForm.controls.reportType.value == 'dataOverview'">
@@ -74,9 +74,6 @@
                                 </option>
                             </select>
                         </div>
-                        <!-- <div class="alert alert-danger" *ngIf="!reportOptions.baselineYear">
-                                    Baseline Year Required
-                                </div> -->
                     </div>
                     <div class="row form-group">
                         <label class="col-5 col-form-label semibold" for="endMonth">End Date</label>
@@ -92,9 +89,6 @@
                                 </option>
                             </select>
                         </div>
-                        <!-- <div class="alert alert-danger" *ngIf="!reportOptions.targetYear">
-                                Target Year Required
-                            </div> -->
                     </div>
                 </div>
                 <div class="col-12">
@@ -107,6 +101,12 @@
                 *ngIf="setupForm.controls.reportType.value == 'betterPlants'"></app-better-plants-setup>
             <app-data-overview-setup
                 *ngIf="setupForm.controls.reportType.value == 'dataOverview'"></app-data-overview-setup>
+            <app-performance-setup *ngIf="setupForm.controls.reportType.value == 'performance'"></app-performance-setup>
+        </ng-container>
+        <ng-container *ngIf="setupForm.valid == false">
+            <div class="alert alert-warning text-center">
+                Additional report detail options will appear once report dates are selected.
+            </div>
         </ng-container>
     </div>
 </div>

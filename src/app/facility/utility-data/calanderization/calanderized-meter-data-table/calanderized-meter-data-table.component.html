@@ -19,11 +19,11 @@
             </th>
             <th (click)="setOrderDataField('marketEmissions')"
                 [ngClass]="{'active': orderDataField == 'marketEmissions'}" *ngIf="calanderizedMeter.showEmissions">
-                Total <br>Market-Based<br>Emissions (kg
+                Total <br>Market-Based<br>Emissions (tonne
                 CO<sub>2</sub>e)</th>
             <th (click)="setOrderDataField('locationEmissions')"
                 [ngClass]="{'active': orderDataField == 'locationEmissions'}" *ngIf="calanderizedMeter.showEmissions">
-                Total <br>Location-Based<br>Emissions (kg
+                Total <br>Location-Based<br>Emissions (tonne
                 CO<sub>2</sub>e)</th>
             <th (click)="setOrderDataField('RECs')" [ngClass]="{'active': orderDataField == 'RECs'}"
                 *ngIf="calanderizedMeter.showEmissions">RECs<br> (MWh)</th>
@@ -33,7 +33,7 @@
             <th (click)="setOrderDataField('excessRECsEmissions')"
                 [ngClass]="{'active': orderDataField == 'excessRECsEmissions'}" *ngIf="calanderizedMeter.showEmissions">
                 Excess
-                RECs <br>Emissions<br> (kg CO<sub>2</sub>e)</th>
+                RECs <br>Emissions<br> (tonne CO<sub>2</sub>e)</th>
             <th (click)="setOrderDataField('energyCost')" [ngClass]="{'active': orderDataField == 'energyCost'}">Total
                 Cost</th>
         </tr>

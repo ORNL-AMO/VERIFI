@@ -51,7 +51,7 @@ export class AccountAnalysisWaterDashboardComponent {
   }
 
 
-  async setAnalysisItemsList(accountAnalysisItems: Array<IdbAccountAnalysisItem>) {
+  setAnalysisItemsList(accountAnalysisItems: Array<IdbAccountAnalysisItem>) {
     this.analysisItemsList = new Array();
     let energyItems: Array<IdbAccountAnalysisItem> = accountAnalysisItems.filter(item => {return item.analysisCategory == 'water'});
     let years: Array<number> = energyItems.map(item => { return item.reportYear });

@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { NavigationEnd, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { Subscription } from 'rxjs';
 import { AccountReportsService } from '../account-reports.service';
@@ -26,7 +26,7 @@ export class AccountReportsBannerComponent {
     private accountReportDbService: AccountReportDbService) { }
   ngOnInit() {
     this.routerSub = this.router.events.subscribe(event => {
-        this.setInDashboard();
+      this.setInDashboard();
     });
     this.setInDashboard();
     this.modalOpenSub = this.sharedDataService.modalOpen.subscribe(val => {
@@ -55,12 +55,27 @@ export class AccountReportsBannerComponent {
     let setupValid: boolean = this.accountReportsService.getSetupFormFromReport(report).valid;
     let betterPlantsValid: boolean = true;
     let dataOverviewValid: boolean = true;
+    let performanceValid: boolean = true;
     if (report.reportType == 'betterPlants') {
       betterPlantsValid = this.accountReportsService.getBetterPlantsFormFromReport(report.betterPlantsReportSetup).valid;
     } else if (report.reportType == 'dataOverview') {
       dataOverviewValid = this.accountReportsService.getDataOverviewFormFromReport(report.dataOverviewReportSetup).valid;
+    } else if (report.reportType == 'performance') {
+      performanceValid = this.accountReportsService.getPerformanceFormFromReport(report.performanceReportSetup).valid;
     }
-    this.setupValid = (setupValid && betterPlantsValid && dataOverviewValid);
+    this.setupValid = (setupValid && betterPlantsValid && dataOverviewValid && performanceValid);
+  }
+
+  goToDashboard() {
+    if (this.selectedReport.reportType == 'betterPlants') {
+      this.router.navigateByUrl('/account/reports/dashboard/better-plants')
+    } else if (this.selectedReport.reportType == 'dataOverview') {
+      this.router.navigateByUrl('/account/reports/dashboard/overview')
+    } else if (this.selectedReport.reportType == 'performance') {
+      this.router.navigateByUrl('/account/reports/dashboard/performance')
+    } else {
+      this.router.navigateByUrl('/account/reports/dashboard')
+    }
   }
 
 

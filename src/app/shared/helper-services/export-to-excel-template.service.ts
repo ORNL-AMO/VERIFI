@@ -152,7 +152,13 @@ export class ExportToExcelTemplateService {
       worksheet.getCell('H' + index).value = meter.location;
       worksheet.getCell('I' + index).value = meter.group;
       worksheet.getCell('J' + index).value = meter.phase;
-      worksheet.getCell('K' + index).value = meter.fuel;
+      if (meter.source == 'Water Discharge') {
+        worksheet.getCell('K' + index).value = meter.waterDischargeType;
+      } else if (meter.source == 'Water Intake') {
+        worksheet.getCell('K' + index).value = meter.waterIntakeType;
+      } else {
+        worksheet.getCell('K' + index).value = meter.fuel;
+      }
       worksheet.getCell('L' + index).value = meter.startingUnit;
       worksheet.getCell('M' + index).value = meter.heatCapacity;
       worksheet.getCell('N' + index).value = meter.siteToSource;

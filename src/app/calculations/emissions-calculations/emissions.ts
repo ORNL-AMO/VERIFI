@@ -71,6 +71,12 @@ export function getEmissions(meter: IdbUtilityMeter, energyUse: number, energyUn
         let excessRECsEmissions: number = excessRECs * marketEmissionsOutputRate;
         excessRECs = new ConvertValue(excessRECs, 'kWh', 'MWh').convertedValue;
         RECs = new ConvertValue(RECs, 'kWh', 'MWh').convertedValue;
+
+        //emissions calculated in kg CO2e using emissions factors, converted to tonne CO2e
+        locationEmissions = locationEmissions / 1000;
+        marketEmissions = marketEmissions / 1000;
+        excessRECsEmissions = excessRECsEmissions / 1000;
+
         return { RECs: RECs, locationEmissions: locationEmissions, marketEmissions: marketEmissions, excessRECs: excessRECs, excessRECsEmissions: excessRECsEmissions };
     } else {
         return { RECs: 0, locationEmissions: 0, marketEmissions: 0, excessRECs: 0, excessRECsEmissions: 0 };

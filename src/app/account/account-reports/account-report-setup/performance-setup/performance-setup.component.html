@@ -1,0 +1,150 @@
+<form [formGroup]="performanceReportForm">
+    <div class="row">
+        <div class="col-12">
+            <app-label-with-tooltip [isSemiBold]="true" [label]="'Select Account Analysis'"
+                [field]="'selectAccountAnalysis'">
+            </app-label-with-tooltip>
+            <div class="table-responsive">
+                <table class="table table-sm table-hover table-bordered">
+                    <thead>
+                        <tr>
+                            <td>
+
+                            </td>
+                            <td>
+                                Analysis Name
+                            </td>
+                            <td>
+                                Analysis Category
+                            </td>
+                            <td>
+                                Facilities Included
+                            </td>
+                            <td>
+                            </td>
+                        </tr>
+                    </thead>
+
+                    <tbody class="table-group-divider">
+                        <tr *ngFor="let analysisItem of accountAnalysisItems">
+                            <td class="text-center">
+                                <input type="radio" class="form-check-input" formControlName="analysisItemId"
+                                    [value]="analysisItem.guid" id="{{analysisItem.guid+'_selectedAccountItemId'}}"
+                                    (change)="save()">
+                            </td>
+                            <td>
+                                {{analysisItem.name}}
+                            </td>
+                            <td>
+                                <ng-container *ngIf="analysisItem.analysisCategory == 'energy'">Energy</ng-container>
+                                <ng-container *ngIf="analysisItem.analysisCategory == 'water'">Water</ng-container>
+                            </td>
+                            <td>
+                                <span
+                                    *ngFor="let facilityItem of analysisItem.facilityAnalysisItems; let index = index;">
+                                    <span *ngIf="facilityItem.analysisItemId && facilityItem.analysisItemId != 'skip'">
+                                        {{facilityItem.facilityId | facilityName}}<span
+                                            *ngIf="index != analysisItem.facilityAnalysisItems.length-1">,</span>
+                                    </span>
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <a class="click-link" (click)="viewAnalysis(analysisItem)">View Analysis</a>
+                            </td>
+                        </tr>
+                        <tr *ngIf="accountAnalysisItems.length == 0">
+                            <td colspan="4" class="alert alert-warning">
+                                No analysis items matching selected report year.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <hr>
+        <div class="col">
+            <label class="semibold">Section To Include</label>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="includeFacilityPerformanceDetails"
+                    name="includeFacilityPerformanceDetails" formControlName="includeFacilityPerformanceDetails"
+                    (change)="save()">
+                <label class="form-check-label" for="includeFacilityPerformanceDetails">Include facility
+                    performance</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="includeUtilityPerformanceDetails"
+                    name="includeUtilityPerformanceDetails" formControlName="includeUtilityPerformanceDetails"
+                    (change)="save()">
+                <label class="form-check-label" for="includeUtilityPerformanceDetails">Include utility
+                    performance</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="includeGroupPerformanceDetails"
+                    name="includeGroupPerformanceDetails" formControlName="includeGroupPerformanceDetails"
+                    (change)="save()">
+                <label class="form-check-label" for="includeGroupPerformanceDetails">Include group
+                    performance</label>
+            </div>
+        </div>
+        <div class="col">
+            <label class="semibold">Report Content Options</label>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="includeActual" name="includeActual"
+                    formControlName="includeActual" (change)="save()">
+                <label class="form-check-label" for="includeActual">Include actual</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="includeAdjusted" name="includeAdjusted"
+                    formControlName="includeAdjusted" (change)="save()">
+                <label class="form-check-label" for="includeAdjusted">Include adjusted</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="includeContribution" name="includeContribution"
+                    formControlName="includeContribution" (change)="save()">
+                <label class="form-check-label" for="includeContribution">Include contribution</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="includeSavings" name="includeSavings"
+                    formControlName="includeSavings" (change)="save()">
+                <label class="form-check-label" for="includeSavings">Include savings</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="includeTopPerformersTable"
+                    name="includeTopPerformersTable" formControlName="includeTopPerformersTable" (change)="save()">
+                <label class="form-check-label" for="includeTopPerformersTable">Include top performers table</label>
+            </div>
+            <div class="form-group">
+                <label for="numberOfTopPerformers">Number of Top Performers to Highlight</label>
+                <select id="numberOfTopPerformers" name="numberOfTopPerformers" formControlName="numberOfTopPerformers"
+                    class="form-select auto-width" required (change)="save()">
+                    <option *ngFor="let value of numberOfPerformerOptions" [ngValue]="value">{{value}}</option>
+                </select>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="groupPerformanceByYear"
+                    name="groupPerformanceByYear" formControlName="groupPerformanceByYear" (change)="save()">
+                <label class="form-check-label" for="groupPerformanceByYear">Group performance by year</label>
+            </div>
+        </div>
+    </div>
+</form>
+
+
+
+
+<div [ngClass]="{'windowOverlay': itemToEdit}"></div>
+<div class="popup" [class.open]="itemToEdit">
+    <div class="popup-header" *ngIf="itemToEdit">Go To: {{itemToEdit.name}}
+        <button class="item-right" (click)="cancelEditItem()">x</button>
+    </div>
+    <div class="popup-body">
+        <p>WARNING: Are you sure you want to go to this analysis item? Your progress will be saved and you will leave
+            this screen.</p>
+    </div>
+    <div class="saveCancel popup-footer text-end">
+        <button class="btn btn-secondary" (click)="cancelEditItem()">Cancel</button>
+        <button class="btn btn-outline" (click)="confirmEditItem()">Go To Analysis</button>
+    </div>
+</div>
