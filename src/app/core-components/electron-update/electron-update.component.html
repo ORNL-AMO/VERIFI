@@ -1,6 +1,6 @@
 <div class="card card-toast" [@updateToast]="showUpdateAvailable"
     [ngClass]="{'warning': !updateError, 'error': updateError}">
-    <div class="card-header">
+    <div class="card-header bg-dark">
         <i class="fa fa-exclamation-circle item-left me-2"></i>
 
         <ng-container *ngIf="!updateError">A new version of VERIFI is available!</ng-container>
@@ -11,12 +11,16 @@
         <p class="card-text">{{updateInfo.releaseName}} is now available! Click the download link below to download the
             updated version of the application.</p>
     </div>
-    <div class="card-body" *ngIf="updateError">
+    <div class="card-body alert alert-danger" *ngIf="updateError">
         <p class="card-text">Something went wrong, please contact ORNL to inform them that there was an error
             downloading the
-            update so they can fix the issue as quickly as possible.</p>
+            update and they will fix the issue as quickly as possible.</p>
+        <hr>
+        <p class="card-text">
+            Use the <a class="router-link" routerLink="/feedback">Feedback</a> page in the side bar to find information on reporting bugs.
+        </p>
     </div>
-    <div class="card-footer text-end" *ngIf="!downloading">
+    <div class="card-footer text-end bg-dark" *ngIf="!downloading">
         <a class="click-link" (click)="update()">Download Update</a>
     </div>
 </div>

@@ -6,3 +6,5 @@ embedded.provisionprofile
 .env
 
 .angular
+
+.vscode
