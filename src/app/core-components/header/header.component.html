@@ -3,7 +3,7 @@
     <span class="badge bg-secondary">v{{version}}</span>
 
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <div class="ps-2" *ngIf="updateAvailable">
+        <div class="ps-2" *ngIf="updateAvailable && !updateError">
             <button class="btn action-btn" (click)="toggleUpdateModal()">
                 <span class="fa fa-info-circle"></span>
                 Update Available!

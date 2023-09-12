@@ -58,6 +58,8 @@ export class ElectronUpdateComponent implements OnInit {
       this.updateError = val;
       if (this.updateError) {
         this.loadingService.setLoadingStatus(false);
+        this.loadingService.setLoadingMessage(undefined);
+        this.cd.detectChanges();
       }
     })
   }

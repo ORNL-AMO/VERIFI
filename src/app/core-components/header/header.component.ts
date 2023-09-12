@@ -39,6 +39,8 @@ export class HeaderComponent implements OnInit {
   updateAvailableSub: Subscription;
   updateAvailable: boolean;
   showUpdateModal: boolean = false;
+  updateErrorSub: Subscription;
+  updateError: boolean;
   constructor(
     private router: Router,
     public accountdbService: AccountdbService,
@@ -74,6 +76,9 @@ export class HeaderComponent implements OnInit {
       this.updateAvailableSub = this.electronService.updateAvailable.subscribe(val => {
         this.updateAvailable = val;
       });
+      this.updateErrorSub = this.electronService.updateError.subscribe(val => {
+        this.updateError = val;
+      });
     }
   }
 
@@ -82,6 +87,9 @@ export class HeaderComponent implements OnInit {
     this.selectedAccountSub.unsubscribe();
     if (this.updateAvailableSub) {
       this.updateAvailableSub.unsubscribe();
+    }
+    if(this.updateErrorSub){
+      this.updateErrorSub.unsubscribe();
     }
   }
 

@@ -14,8 +14,10 @@
 
 .card-header i.fa{
     font-size: 20px;
+    color: white;
 }
 
-.card.card-toast .card-header{
-    background-color: none;
+.card.card-toast .card-header, .card.card-toast .btn-close{
+    /* background-color: none; */
+    color: white;
 }
