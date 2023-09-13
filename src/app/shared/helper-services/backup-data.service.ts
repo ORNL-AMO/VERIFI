@@ -25,6 +25,12 @@ export class BackupDataService {
 
 
   backupAccount() {
+    let backupFile: BackupFile = this.getAccountBackupFile();
+    let backupName: string = backupFile.account.name.split(' ').join('_') + '_Backup_';
+    this.downloadBackup(backupFile, backupName);
+  }
+
+  getAccountBackupFile(): BackupFile {
     let backupFile: BackupFile = {
       account: this.accountDbService.selectedAccount.getValue(),
       facilities: this.facilityDbService.accountFacilities.getValue(),
@@ -39,10 +45,10 @@ export class BackupDataService {
       backupFileType: "Account",
       origin: "VERIFI"
     };
-
-    let backupName: string = backupFile.account.name.split(' ').join('_') + '_Backup_';
-    this.downloadBackup(backupFile, backupName);
+    return backupFile;
   }
+
+
 
   backupFacility(facility: IdbFacility) {
     let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();

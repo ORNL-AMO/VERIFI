@@ -2,7 +2,7 @@
   "name": "verifi",
   "description": "Application for analyzing utility usage",
   "version": "0.10.5-beta",
-  "main": "main.js",
+  "main": "electron/main.js",
   "author": "Advanced Manufacturing Office",
   "repository": "https://github.com/ORNL-AMO/VERIFI.git",
   "build": {
@@ -104,6 +104,7 @@
     "electron": "24.7.1",
     "electron-builder": "24.3.0",
     "exceljs": "^4.3.0",
+    "fs-jetpack": "^5.1.0",
     "jasmine-core": "4.6.0",
     "jasmine-spec-reporter": "7.0.0",
     "karma": "^6.4.0",

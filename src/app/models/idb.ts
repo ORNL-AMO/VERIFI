@@ -41,7 +41,8 @@ export interface IdbAccount {
     color?: string,
     contactName: string,
     contactEmail: string,
-    contactPhone: string
+    contactPhone: string,
+    dataBackupFilePath?: string
 }
 
 export interface IdbFacility {

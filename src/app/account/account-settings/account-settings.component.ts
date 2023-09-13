@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription, firstValueFrom } from 'rxjs';
-import { BackupDataService } from 'src/app/shared/helper-services/backup-data.service';
+import { BackupDataService, BackupFile } from 'src/app/shared/helper-services/backup-data.service';
 import { ImportBackupModalService } from 'src/app/core-components/import-backup-modal/import-backup-modal.service';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
@@ -17,6 +17,7 @@ import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { CustomEmissionsDbService } from 'src/app/indexedDB/custom-emissions-db.service';
+import { ElectronService } from 'src/app/electron/electron.service';
 
 @Component({
   selector: 'app-account-settings',
@@ -45,6 +46,10 @@ export class AccountSettingsComponent implements OnInit {
       sustainabilityQuestions: true,
       financialReporting: true
     };
+
+  savedFilePath: string;
+  savedFilePathSub: Subscription;
+  updatingFilePath: boolean = false;
   constructor(
     private router: Router,
     private accountDbService: AccountdbService,
@@ -61,7 +66,8 @@ export class AccountSettingsComponent implements OnInit {
     private toastNotificationService: ToastNotificationsService,
     private accountAnalysisDbService: AccountAnalysisDbService,
     private dbChangesService: DbChangesService,
-    private customEmissionsDbService: CustomEmissionsDbService
+    private customEmissionsDbService: CustomEmissionsDbService,
+    private electronService: ElectronService
   ) { }
 
   ngOnInit() {
@@ -72,6 +78,14 @@ export class AccountSettingsComponent implements OnInit {
     this.accountFacilitiesSub = this.facilityDbService.accountFacilities.subscribe(val => {
       this.facilityList = val;
       this.setOrderOptions();
+    });
+
+    this.savedFilePathSub = this.electronService.savedFilePath.subscribe(savedFilePath => {
+      if(this.updatingFilePath){
+        this.selectedAccount.dataBackupFilePath = savedFilePath;
+        this.updatingFilePath = false;
+        this.dbChangesService.updateAccount(this.selectedAccount);
+      }
     });
   }
 
@@ -253,5 +267,12 @@ export class AccountSettingsComponent implements OnInit {
 
   closeApplySettingsModel() {
     this.displayApplyFacilitySettings = false;
+  }
+
+
+  automaticBackup() {
+    this.updatingFilePath = true;
+    let backupFile: BackupFile = this.backupDataService.getAccountBackupFile();
+    this.electronService.sendSaveData(backupFile);
   }
 }

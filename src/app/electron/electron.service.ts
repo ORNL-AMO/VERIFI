@@ -2,6 +2,8 @@ import { Injectable } from '@angular/core';
 import { LocalStorageService } from 'ngx-webstorage';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { ToastNotificationsService } from '../core-components/toast-notifications/toast-notifications.service';
+import { IdbAccount } from '../models/idb';
+import { BackupFile } from '../shared/helper-services/backup-data.service';
 
 @Injectable({
   providedIn: 'root'
@@ -13,8 +15,9 @@ export class ElectronService {
   updateInfo: BehaviorSubject<{ releaseName: string, releaseNotes: string }>;
   updateError: BehaviorSubject<boolean>;
   isElectron: boolean;
+  savedFilePath: BehaviorSubject<string>;
   constructor(private localStorageService: LocalStorageService, private toastNotificationService: ToastNotificationsService) {
-
+    this.savedFilePath = new BehaviorSubject<string>(undefined);
     this.updateAvailable = new BehaviorSubject<boolean>(false);
     this.updateInfo = new BehaviorSubject<{ releaseName: string, releaseNotes: string }>(undefined);
     this.updateError = new BehaviorSubject<boolean>(false);
@@ -54,6 +57,10 @@ export class ElectronService {
       console.log('update-downloaded');
       console.log(data)
     });
+
+    window["electronAPI"].on("file-path", (data) => {
+      this.savedFilePath.next(data);
+    });
   }
 
   //Used to tell electron that app is ready
@@ -77,9 +84,27 @@ export class ElectronService {
     if(!window["electronAPI"]){
       return;
     }
-    console.log('relaunch1');
     window["electronAPI"].send("relaunch");
   }
+
+
+  sendSaveData(backupFile: BackupFile){
+    console.log('sendSaveData=====')
+    if(!window["electronAPI"]){
+      return;
+    }
+    let args: {fileName: string, fileData: any} = {
+      fileName:  undefined,
+      fileData: backupFile
+    }
+    if(backupFile.account.dataBackupFilePath){
+      args.fileName = backupFile.account.dataBackupFilePath;
+    }else{
+      args.fileName = backupFile.account.name + '.json';
+    }
+    window["electronAPI"].send("saveData", args);
+  }
+
 
   showWebDisclaimer() {
     let title: string = "VERIFI Web";

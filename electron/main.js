@@ -1,8 +1,9 @@
-const { app, BrowserWindow, ipcMain, Menu, shell } = require('electron');
+const { app, BrowserWindow, ipcMain, Menu, shell, dialog } = require('electron');
 const path = require('path');
 const url = require('url');
 const log = require('electron-log');
 const { autoUpdater } = require('electron-updater');
+const jetpack = require('fs-jetpack');
 
 function isDev() {
     return process.mainModule.filename.indexOf('app.asar') === -1;
@@ -33,7 +34,7 @@ app.on('ready', function () {
 
     // Specify entry point
     win.loadURL(url.format({
-        pathname: path.join(__dirname, 'dist/verifi/index.html'),
+        pathname: path.join(__dirname, '../dist/verifi/index.html'),
         protocol: 'file',
         slashes: true
     }));
@@ -137,4 +138,24 @@ app.on('activate', () => {
 
 app.on('window-all-closed', function () {
     app.quit();
+});
+
+
+ipcMain.on("saveData", (event, arg) => {
+    log.info('saveData');
+    let saveDialogOptions = {
+        filters: ['.json'],
+        defaultPath: arg.fileName
+    }
+    delete arg.fileData.account.dataBackupFilePath;
+    if(jetpack.exists(saveDialogOptions.defaultPath)){
+        log.info('saved existing')
+        jetpack.writeAsync(saveDialogOptions.defaultPath, arg.fileData);
+    }else{
+        dialog.showSaveDialog(win, saveDialogOptions).then(results => {
+            win.webContents.send('file-path', results.filePath);
+            log.info('save new')
+            jetpack.writeAsync(results.filePath, arg.fileData);
+        });
+    }
 });

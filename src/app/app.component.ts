@@ -16,6 +16,7 @@ import { EGridService } from './shared/helper-services/e-grid.service';
 import { firstValueFrom } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { ToastNotificationsService } from './core-components/toast-notifications/toast-notifications.service';
+import { AutomaticBackupsService } from './electron/automatic-backups.service';
 
 // declare ga as a function to access the JS code in TS
 declare let gtag: Function;
@@ -45,7 +46,8 @@ export class AppComponent {
     private updateDbEntryService: UpdateDbEntryService,
     private customEmissionsDbService: CustomEmissionsDbService,
     private accountReportDbService: AccountReportDbService,
-    private toastNotificationService: ToastNotificationsService) {
+    private toastNotificationService: ToastNotificationsService,
+    private automaticBackupsService: AutomaticBackupsService) {
     if (environment.production) {
       this.router.events.subscribe(event => {
         if (event instanceof NavigationEnd) {
@@ -61,6 +63,7 @@ export class AppComponent {
 
   ngOnInit() {
     this.initializeData();
+    this.automaticBackupsService.subscribeData();
   }
 
   async initializeData() {
