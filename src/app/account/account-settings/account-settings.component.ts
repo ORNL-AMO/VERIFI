@@ -50,6 +50,7 @@ export class AccountSettingsComponent implements OnInit {
   savedFilePath: string;
   savedFilePathSub: Subscription;
   updatingFilePath: boolean = false;
+  isElectron: boolean;
   constructor(
     private router: Router,
     private accountDbService: AccountdbService,
@@ -71,6 +72,7 @@ export class AccountSettingsComponent implements OnInit {
   ) { }
 
   ngOnInit() {
+    this.isElectron = this.electronService.isElectron;
     this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(val => {
       this.selectedAccount = val;
     });
@@ -79,19 +81,23 @@ export class AccountSettingsComponent implements OnInit {
       this.facilityList = val;
       this.setOrderOptions();
     });
-
-    this.savedFilePathSub = this.electronService.savedFilePath.subscribe(savedFilePath => {
-      if(this.updatingFilePath){
-        this.selectedAccount.dataBackupFilePath = savedFilePath;
-        this.updatingFilePath = false;
-        this.dbChangesService.updateAccount(this.selectedAccount);
-      }
-    });
+    if (this.isElectron) {
+      this.savedFilePathSub = this.electronService.savedFilePath.subscribe(savedFilePath => {
+        if (this.updatingFilePath) {
+          this.selectedAccount.dataBackupFilePath = savedFilePath;
+          this.updatingFilePath = false;
+          this.dbChangesService.updateAccount(this.selectedAccount);
+        }
+      });
+    }
   }
 
   ngOnDestroy() {
     this.selectedAccountSub.unsubscribe();
     this.accountFacilitiesSub.unsubscribe();
+    if(this.savedFilePathSub){
+      this.savedFilePathSub.unsubscribe();
+    }
   }
 
   switchFacility(facility: IdbFacility) {

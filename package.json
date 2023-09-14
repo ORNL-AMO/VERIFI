@@ -2,7 +2,7 @@
   "name": "verifi",
   "description": "Application for analyzing utility usage",
   "version": "0.10.5-beta",
-  "main": "electron/main.js",
+  "main": "main.js",
   "author": "Advanced Manufacturing Office",
   "repository": "https://github.com/ORNL-AMO/VERIFI.git",
   "build": {

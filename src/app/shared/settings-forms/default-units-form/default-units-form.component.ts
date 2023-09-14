@@ -179,10 +179,12 @@ export class DefaultUnitsFormComponent implements OnInit {
       }
     }
     let checkExists: string = this.zipCodeSubRegionData.find(val => { return this.form.controls.eGridSubregion.value === val; })
+    let needSave: boolean = false;
     if (!checkExists || checkExists == 'U.S. Average') {
       this.form.controls.eGridSubregion.patchValue(this.zipCodeSubRegionData[0]);
+      needSave = true;
     }
-    this.setSelectedSubregionEmissions();
+    this.setSelectedSubregionEmissions(needSave);
   }
 
   addCustomSubregions() {
@@ -192,9 +194,11 @@ export class DefaultUnitsFormComponent implements OnInit {
     });
   }
 
-  setSelectedSubregionEmissions() {
+  setSelectedSubregionEmissions(needSave: boolean) {
     this.selectedSubregionEmissions = this.eGridService.co2Emissions.find(region => { return this.form.controls.eGridSubregion.value === region.subregion; });
-    this.saveChanges();
+    if(needSave){
+      this.saveChanges();
+    }    
   }
 
   showEmissionsRates() {
