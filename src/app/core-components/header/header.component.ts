@@ -1,4 +1,4 @@
-import { Component, ElementRef, Input, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, Input, OnInit } from '@angular/core';
 import { Router, Event, NavigationStart } from '@angular/router';
 import { AccountdbService } from "../../indexedDB/account-db.service";
 import { FacilitydbService } from "../../indexedDB/facility-db.service";
@@ -33,7 +33,6 @@ export class HeaderComponent implements OnInit {
   allAccountsSub: Subscription;
   selectedAccountSub: Subscription;
   showSearch: boolean = false;
-  lastBackupDate: Date;
   resetDatabase: boolean = false;
 
   updateAvailableSub: Subscription;
@@ -53,7 +52,8 @@ export class HeaderComponent implements OnInit {
     private loadingService: LoadingService,
     private dbChangesService: DbChangesService,
     private electronService: ElectronService,
-    private toastNotificationService: ToastNotificationsService
+    private toastNotificationService: ToastNotificationsService,
+    private cd: ChangeDetectorRef
   ) {
   }
 
@@ -65,11 +65,7 @@ export class HeaderComponent implements OnInit {
     this.selectedAccountSub = this.accountdbService.selectedAccount.subscribe(selectedAccount => {
       this.resetDatabase = false;
       this.activeAccount = selectedAccount;
-      if (selectedAccount) {
-        this.lastBackupDate = selectedAccount.lastBackup;
-      } else {
-        this.lastBackupDate = undefined;
-      }
+      this.cd.detectChanges();
     });
 
     if (this.electronService.isElectron) {

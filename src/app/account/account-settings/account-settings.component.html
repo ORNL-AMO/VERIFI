@@ -89,11 +89,15 @@
 
     <div class="row">
         <div class="col-lg-6" *ngIf="isElectron">
-            <h4>Automatic Account Backup</h4>
+            <h4>
+                <span class="badge bg-success">
+                    <span class="fa fa-file-arrow-down"></span>
+                </span>                
+                Automatic Account Backup</h4>
             <p>Lets see if we can make automatic backups work...</p>
             <button class="btn btn-outline" (click)="automaticBackup()" *ngIf="!selectedAccount.dataBackupFilePath">Select Automatic Backup Location</button>
             <p *ngIf="selectedAccount.dataBackupFilePath">
-                This account is automatically backed up to at {{selectedAccount.dataBackupFilePath}}
+                This account is automatically backed up at <a class="click-link" (click)="automaticBackup()">{{selectedAccount.dataBackupFilePath}}</a>
             </p>
         </div>
         <div class="col-lg-6">

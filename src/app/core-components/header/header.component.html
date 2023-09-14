@@ -34,17 +34,27 @@
                         Account</a></li>
                 <li><a class="dropdown-item" (click)="openBackupModal()"><i class="fa fa-upload"></i> Import Backup</a>
                 </li>
-                <li><a class="dropdown-item" (click)="goToManageAccounts()"><i class="fa fa-gears"></i> Manage Accounts</a>
+                <li><a class="dropdown-item" (click)="goToManageAccounts()"><i class="fa fa-gears"></i> Manage
+                        Accounts</a>
                 </li>
             </ul>
         </div>
-        <div class="ps-2" *ngIf="dataInitialized && activeAccount">
-            <button class="btn action-btn" (click)="backupAccount()">Backup Account
-            </button>
-        </div>
-        <div class="ps-2" *ngIf="dataInitialized && activeAccount">Last Backup: (<span
-                *ngIf="lastBackupDate">{{lastBackupDate | date:'medium'}}</span><span
-                *ngIf="!lastBackupDate">&mdash;</span>)</div>
+        <ng-container *ngIf="dataInitialized && activeAccount">
+            <ng-container *ngIf="!activeAccount.dataBackupFilePath">
+                <div class="ps-2">
+                    <button class="btn action-btn" (click)="backupAccount()">Backup Account
+                    </button>
+                </div>
+                <div class="ps-2">Last Backup: (<span *ngIf="activeAccount.lastBackup">{{activeAccount.lastBackup |
+                        date:'medium'}}</span><span *ngIf="!activeAccount.lastBackup">&mdash;</span>)
+                </div>
+            </ng-container>
+            <div class="ps-2" *ngIf="activeAccount.dataBackupFilePath">
+                <div class="badge bg-success" title="Automatic Account Backups Active">
+                    <span class="fa fa-file-arrow-down"></span>
+                </div>
+            </div>
+        </ng-container>
         <!--Doesnt Show In Production-->
         <div class="ps-2" *ngIf="!isProduction">
             <button *ngIf="!resetDatabase" class="btn btn-danger" (click)="toggleResetDatabase()">Reset

@@ -148,14 +148,42 @@ ipcMain.on("saveData", (event, arg) => {
         defaultPath: arg.fileName
     }
     delete arg.fileData.account.dataBackupFilePath;
-    if(jetpack.exists(saveDialogOptions.defaultPath)){
+    if (jetpack.exists(saveDialogOptions.defaultPath)) {
         log.info('saved existing')
         jetpack.writeAsync(saveDialogOptions.defaultPath, arg.fileData);
-    }else{
-        dialog.showSaveDialog(win, saveDialogOptions).then(results => {
-            win.webContents.send('file-path', results.filePath);
-            log.info('save new')
-            jetpack.writeAsync(results.filePath, arg.fileData);
-        });
+    } else {
+        log.info('saved new')
+        // jetpack.writeAsync(saveDialogOptions.defaultPath, arg.fileData);
+        // dialog.showSaveDialog(win, saveDialogOptions).then(results => {
+        //     win.webContents.send('file-path', results.filePath);
+        //     // log.info('save new')
+        //     // jetpack.writeAsync(results.filePath, arg.fileData);
+        // });
     }
 });
+
+ipcMain.on("openDialog", (event, arg) => {
+    log.info('openDialog');
+    let saveDialogOptions = {
+        filters: [{
+            name: "JSON Files",
+            extensions: ["json"]
+        }],
+        defaultPath: arg.fileName
+    }
+    dialog.showSaveDialog(win, saveDialogOptions).then(results => {
+        win.webContents.send('file-path', results.filePath);
+        log.info('save new')
+        jetpack.writeAsync(results.filePath, arg.fileData);
+    });
+
+});
+
+
+
+
+ipcMain.on("fileExists", (event, arg) => {
+    log.info("check for data");
+    let results = jetpack.exists(arg.fileName);
+    win.webContents.send('file-exists', results);
+})

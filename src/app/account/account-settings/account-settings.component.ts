@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { BackupDataService, BackupFile } from 'src/app/shared/helper-services/backup-data.service';
@@ -68,7 +68,8 @@ export class AccountSettingsComponent implements OnInit {
     private accountAnalysisDbService: AccountAnalysisDbService,
     private dbChangesService: DbChangesService,
     private customEmissionsDbService: CustomEmissionsDbService,
-    private electronService: ElectronService
+    private electronService: ElectronService,
+    private cd: ChangeDetectorRef
   ) { }
 
   ngOnInit() {
@@ -87,6 +88,7 @@ export class AccountSettingsComponent implements OnInit {
           this.selectedAccount.dataBackupFilePath = savedFilePath;
           this.updatingFilePath = false;
           this.dbChangesService.updateAccount(this.selectedAccount);
+          this.cd.detectChanges();
         }
       });
     }
@@ -95,7 +97,7 @@ export class AccountSettingsComponent implements OnInit {
   ngOnDestroy() {
     this.selectedAccountSub.unsubscribe();
     this.accountFacilitiesSub.unsubscribe();
-    if(this.savedFilePathSub){
+    if (this.savedFilePathSub) {
       this.savedFilePathSub.unsubscribe();
     }
   }
@@ -279,6 +281,6 @@ export class AccountSettingsComponent implements OnInit {
   automaticBackup() {
     this.updatingFilePath = true;
     let backupFile: BackupFile = this.backupDataService.getAccountBackupFile();
-    this.electronService.sendSaveData(backupFile);
+    this.electronService.openDialog(backupFile);
   }
 }

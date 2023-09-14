@@ -12,6 +12,8 @@ import { PredictordbService } from '../indexedDB/predictors-db.service';
 import { UtilityMeterdbService } from '../indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from '../indexedDB/utilityMeterData-db.service';
 import { UtilityMeterGroupdbService } from '../indexedDB/utilityMeterGroup-db.service';
+import { ToastNotificationsService } from '../core-components/toast-notifications/toast-notifications.service';
+import { DbChangesService } from '../indexedDB/db-changes.service';
 
 @Injectable({
   providedIn: 'root'
@@ -20,6 +22,7 @@ export class AutomaticBackupsService {
 
   account: IdbAccount;
   backupTimer: any;
+  fileExists: boolean;
   constructor(
     private accountDbService: AccountdbService,
     private electronService: ElectronService,
@@ -32,8 +35,14 @@ export class AutomaticBackupsService {
     private predictorsDbService: PredictordbService,
     private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private utilityMeterGroupDbService: UtilityMeterGroupdbService
-  ) { }
+    private utilityMeterGroupDbService: UtilityMeterGroupdbService,
+    private toastNotificationService: ToastNotificationsService,
+    private dbChangesService: DbChangesService
+  ) {
+    this.electronService.fileExists.subscribe(val => {
+      this.fileExists = val;
+    })
+  }
 
   subscribeData() {
     if (this.electronService.isElectron) {
@@ -43,50 +52,50 @@ export class AutomaticBackupsService {
       });
 
       this.accountAnalysisDbService.accountAnalysisItems.subscribe(val => {
-        if(val){
+        if (val) {
           this.saveBackup();
         }
       });
 
       this.accountReportDbService.accountReports.subscribe(val => {
-        if(val){
+        if (val) {
           this.saveBackup();
         }
       });
 
       this.customEmissionsDbService.accountEmissionsItems.subscribe(val => {
-        if(val){
+        if (val) {
           this.saveBackup();
         }
       });
 
       this.analysisDbService.accountAnalysisItems.subscribe(val => {
-        if(val){
+        if (val) {
           this.saveBackup();
         }
       });
       this.facilityDbService.accountFacilities.subscribe(val => {
-        if(val){
+        if (val) {
           this.saveBackup();
         }
       });
       this.predictorsDbService.accountPredictorEntries.subscribe(val => {
-        if(val){
+        if (val) {
           this.saveBackup();
         }
       });
       this.utilityMeterDbService.accountMeters.subscribe(val => {
-        if(val){
+        if (val) {
           this.saveBackup();
         }
       });
       this.utilityMeterDataDbService.accountMeterData.subscribe(val => {
-        if(val){
+        if (val) {
           this.saveBackup();
         }
       });
       this.utilityMeterGroupDbService.accountMeterGroups.subscribe(val => {
-        if(val){
+        if (val) {
           this.saveBackup();
         }
       })
@@ -95,16 +104,26 @@ export class AutomaticBackupsService {
 
   saveBackup() {
     if (this.account && this.account.dataBackupFilePath) {
-      console.log('save backup!!');
+      console.log('save...');
       if (this.backupTimer) {
         clearTimeout(this.backupTimer)
       }
-      //backup 30 seconds after changes finish...
+      //backup 3 seconds after changes finish...
       this.backupTimer = setTimeout(() => {
-        console.log('send save...')
-        let backupFile: BackupFile = this.backupDataService.getAccountBackupFile();
-        this.electronService.sendSaveData(backupFile)
-      }, 5000);
+        this.electronService.checkFileExists(this.account.dataBackupFilePath);
+        setTimeout(() => {
+          if (this.fileExists) {
+            let backupFile: BackupFile = this.backupDataService.getAccountBackupFile();
+            this.account.lastBackup = new Date();
+            this.electronService.sendSaveData(backupFile)
+          } else {
+            console.log('tried to save but there is no file')
+            this.toastNotificationService.showToast('Missing Backup File', 'The file selected to backup this account no longer exists. Please navigate to the settings page for the account to update the file selection.', 10000, false, 'alert-danger')
+            this.account.dataBackupFilePath = undefined;
+            this.dbChangesService.updateAccount(this.account);
+          }
+        }, 500);
+      }, 3000);
     }
   }
 

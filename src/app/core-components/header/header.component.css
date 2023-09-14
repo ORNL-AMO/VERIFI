@@ -28,3 +28,8 @@ a:not([href]).dropdown-item.active {
 .dropdown-menu{
     z-index: 9999;
 }
+
+.fa.fa-file-arrow-down{
+    font-size: 22px;
+    color: white;
+}

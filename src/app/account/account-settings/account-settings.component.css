@@ -6,3 +6,10 @@ label.checkbox-label input[type="checkbox"]{
     float: none;
     width: auto;
 }
+
+
+
+.fa.fa-file-arrow-down{
+    font-size: 22px;
+    color: white;
+}
