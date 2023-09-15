@@ -98,6 +98,7 @@ export class AppComponent {
           this.accountDbService.selectedAccount.next(account);
         }
         this.dataInitialized = true;
+        this.automaticBackupsService.initializeAccount();
       } else {
         await this.eGridService.parseEGridData();
 

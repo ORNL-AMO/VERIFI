@@ -1,0 +1,62 @@
+<ng-container *ngIf="isElectron">
+    <div [ngClass]="{'windowOverlay': showModal}">
+    </div>
+
+    <div class="popup" [class.open]="showModal">
+        <div class="popup-header">Backup File Found
+        </div>
+        <div class="popup-body" *ngIf="latestBackupFile">
+            <p>
+                A backup file for this facility was found from {{latestBackupFile.timeStamp | date:'medium'}}
+            </p>
+            <ng-container *ngIf="latestBackupFile.dataBackupId != account.dataBackupId">
+                <hr>
+                <label>
+                    The data backup found differs from the latest backup we have corresponding to this account. The
+                    latest
+                    backup we have for this account is {{account.lastBackup | date:'medium'}}. This may happen if the
+                    data
+                    backup is a shared file.
+                    Would you like to update the data in this account with the data found in the backup file?</label>
+                <div class="form-check">
+                    <input type="radio" class="form-check-input" name="overwriteOption" [(ngModel)]="overwriteOption"
+                        [value]="'updateAccount'" id="updateAccount">
+                    <label class="form-check-label" for="updateAccount">Update Account Data</label>
+                </div>
+                <div class="form-check">
+                    <input type="radio" class="form-check-input" name="overwriteOption" [(ngModel)]="overwriteOption"
+                        [value]="'overwiteFile'" id="overwiteFile">
+                    <label class="form-check-label" for="overwiteFile">Overwrite Data File</label>
+                </div>
+            </ng-container>
+            <hr>
+            <label>
+                Would you like to create an archive of this backup file? If selected, a copy of this backup file will be
+                created with a time stamp in the same folder that has been selected for this backup file. </label>
+            <div class="form-check">
+                <input type="radio" class="form-check-input" name="archiveOption" [(ngModel)]="archiveOption"
+                    [value]="'justOnce'" id="justOnce">
+                <label class="form-check-label" for="justOnce">Create Single Archive</label>
+            </div>
+            <div class="form-check">
+                <input type="radio" class="form-check-input" name="archiveOption" [(ngModel)]="archiveOption"
+                    [value]="'always'" id="always">
+                <label class="form-check-label" for="always">Always Archive</label>
+            </div>
+            <div class="form-check">
+                <input type="radio" class="form-check-input" name="archiveOption" [(ngModel)]="archiveOption"
+                    [value]="'skip'" id="skip">
+                <label class="form-check-label" for="skip">Skip Archive This Time</label>
+            </div>
+            <div class="form-check">
+                <input type="radio" class="form-check-input" name="archiveOption" [(ngModel)]="archiveOption"
+                    [value]="'never'" id="never">
+                <label class="form-check-label" for="never">Never Archive</label>
+            </div>
+        </div>
+        <div class="popup-footer text-end">
+            <button class="btn btn-secondary" (click)="hideModal()">Do Nothing</button>
+            <button class="btn btn-success" (click)="confirmActions()">Confirm</button>
+        </div>
+    </div>
+</ng-container>

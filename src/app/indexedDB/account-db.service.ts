@@ -137,7 +137,8 @@ export class AccountdbService {
             energyIsSource: true,
             contactName: undefined,
             contactEmail: undefined,
-            contactPhone: undefined
+            contactPhone: undefined,
+            arhiveOption: 'skip'
         }
     }
 }

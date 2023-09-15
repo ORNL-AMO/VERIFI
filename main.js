@@ -22,15 +22,15 @@ let win = null;
 app.on('ready', function () {
     // Initialize the window to our specified dimensions
     win = new BrowserWindow({
-        width: 1000,
-        height: 600,
+        width: 1300,
+        height: 1500,
         webPreferences: {
             contextIsolation: true,
             nodeIntegration: false,
             preload: path.join(__dirname, 'preload.js')
         },
     });
-    win.maximize();
+    // win.maximize();
 
     // Specify entry point
     win.loadURL(url.format({
@@ -142,23 +142,14 @@ app.on('window-all-closed', function () {
 
 
 ipcMain.on("saveData", (event, arg) => {
-    log.info('saveData');
-    let saveDialogOptions = {
-        filters: ['.json'],
-        defaultPath: arg.fileName
-    }
+    log.info('saveData called');
     delete arg.fileData.account.dataBackupFilePath;
-    if (jetpack.exists(saveDialogOptions.defaultPath)) {
+    if (jetpack.exists(arg.fileName)) {
         log.info('saved existing')
-        jetpack.writeAsync(saveDialogOptions.defaultPath, arg.fileData);
-    } else {
-        log.info('saved new')
-        // jetpack.writeAsync(saveDialogOptions.defaultPath, arg.fileData);
-        // dialog.showSaveDialog(win, saveDialogOptions).then(results => {
-        //     win.webContents.send('file-path', results.filePath);
-        //     // log.info('save new')
-        //     // jetpack.writeAsync(results.filePath, arg.fileData);
-        // });
+        jetpack.writeAsync(arg.fileName, arg.fileData);
+    } else if(arg.isArchive){
+        log.info('createArchiveFile')
+        jetpack.writeAsync(arg.fileName, arg.fileData);
     }
 });
 
@@ -179,11 +170,13 @@ ipcMain.on("openDialog", (event, arg) => {
 
 });
 
-
-
-
 ipcMain.on("fileExists", (event, arg) => {
     log.info("check for data");
     let results = jetpack.exists(arg.fileName);
     win.webContents.send('file-exists', results);
 })
+
+ipcMain.on("getDataFile", (event, arg) => {
+    let dataFile = jetpack.read(arg.fileName, 'json');
+    win.webContents.send('data-file', dataFile);
+});

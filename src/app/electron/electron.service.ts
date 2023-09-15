@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { LocalStorageService } from 'ngx-webstorage';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { ToastNotificationsService } from '../core-components/toast-notifications/toast-notifications.service';
-import { IdbAccount } from '../models/idb';
 import { BackupFile } from '../shared/helper-services/backup-data.service';
 
 @Injectable({
@@ -17,8 +16,10 @@ export class ElectronService {
   isElectron: boolean;
   savedFilePath: BehaviorSubject<string>;
   fileExists: BehaviorSubject<boolean>;
+  accountLatestBackupFile: BehaviorSubject<BackupFile>;
   constructor(private localStorageService: LocalStorageService, private toastNotificationService: ToastNotificationsService) {
     this.savedFilePath = new BehaviorSubject<string>(undefined);
+    this.accountLatestBackupFile = new BehaviorSubject<BackupFile>(undefined);
     this.updateAvailable = new BehaviorSubject<boolean>(false);
     this.updateInfo = new BehaviorSubject<{ releaseName: string, releaseNotes: string }>(undefined);
     this.updateError = new BehaviorSubject<boolean>(false);
@@ -45,16 +46,19 @@ export class ElectronService {
       console.log(data)
       this.updateInfo.next(data);
     });
+
     window["electronAPI"].on("available", (data) => {
       console.log('available');
       console.log(data)
       this.updateAvailable.next(true);
     });
+
     window["electronAPI"].on("error", (data) => {
       console.log('error');
       console.log(data)
       this.updateError.next(true);
     });
+
     window["electronAPI"].on("update-downloaded", (data) => {
       console.log('update-downloaded');
       console.log(data)
@@ -64,11 +68,14 @@ export class ElectronService {
       this.savedFilePath.next(data);
     });
 
-
     window["electronAPI"].on("file-exists", (data) => {
-      console.log('results: ' + data);
       this.fileExists.next(data == 'file');
     });
+
+    window["electronAPI"].on("data-file", (data) => {
+      this.accountLatestBackupFile.next(data);
+    });
+
   }
 
   //Used to tell electron that app is ready
@@ -96,21 +103,23 @@ export class ElectronService {
   }
 
 
-  sendSaveData(backupFile: BackupFile) {
+  sendSaveData(backupFile: BackupFile, isArchive?: boolean) {
     console.log('send save to electron');
     console.log('===');
     if (!window["electronAPI"] || !backupFile) {
       return;
     }
-    let args: { fileName: string, fileData: any } = {
+    let args: { fileName: string, fileData: any, isArchive: boolean } = {
       fileName: undefined,
-      fileData: backupFile
+      fileData: backupFile,
+      isArchive: isArchive
     }
-    if (backupFile.account.dataBackupFilePath) {
+    if (backupFile.account.dataBackupFilePath || isArchive) {
       args.fileName = backupFile.account.dataBackupFilePath;
     } else {
       args.fileName = backupFile.account.name + '.json';
     }
+    console.log(args.fileName);
     window["electronAPI"].send("saveData", args);
   }
 
@@ -140,7 +149,16 @@ export class ElectronService {
       args.fileName = backupFile.account.name + '.json';
     }
     window["electronAPI"].send("openDialog", args);
+  }
 
+  getDataFile(dataBackupFilePath: string){
+    if (!window["electronAPI"]) {
+      return;
+    }
+    let args: { fileName: string } = {
+      fileName: dataBackupFilePath
+    }
+    window["electronAPI"].send("getDataFile", args);
   }
 
 

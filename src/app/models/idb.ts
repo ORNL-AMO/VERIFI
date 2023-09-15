@@ -42,7 +42,9 @@ export interface IdbAccount {
     contactName: string,
     contactEmail: string,
     contactPhone: string,
-    dataBackupFilePath?: string
+    dataBackupFilePath?: string,
+    dataBackupId?: string,
+    arhiveOption: 'always' | 'never' | 'justOnce' | 'skip'
 }
 
 export interface IdbFacility {

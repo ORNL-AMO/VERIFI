@@ -43,7 +43,9 @@ export class BackupDataService {
       predictorData: this.predictorsDbService.accountPredictorEntries.getValue(),
       facility: undefined,
       backupFileType: "Account",
-      origin: "VERIFI"
+      origin: "VERIFI",
+      timeStamp: new Date(),
+      dataBackupId: Math.random().toString(36).substr(2, 9)
     };
     return backupFile;
   }
@@ -81,7 +83,9 @@ export class BackupDataService {
       facilityAnalysisItems: facilityAnalysisItems,
       predictorData: facilityPredictorData,
       backupFileType: "Facility",
-      origin: "VERIFI"
+      origin: "VERIFI",
+      timeStamp: new Date(),
+      dataBackupId: Math.random().toString(36).substr(2, 9)
     }
     let backupName: string = backupFile.facility.name.split(' ').join('_') + '_Backup_';
     this.downloadBackup(backupFile, backupName);
@@ -561,7 +565,9 @@ export interface BackupFile {
   facilityAnalysisItems: Array<IdbAnalysisItem>,
   predictorData: Array<IdbPredictorEntry>,
   origin: "VERIFI",
-  backupFileType: "Account" | "Facility"
+  backupFileType: "Account" | "Facility",
+  timeStamp: Date,
+  dataBackupId: string
 }
 
 

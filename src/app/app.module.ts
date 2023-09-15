@@ -27,6 +27,7 @@ import { UploadDataModule } from './upload-data/upload-data.module';
 import { CreateReportModalComponent } from './core-components/create-report-modal/create-report-modal.component';
 import { WeatherDataModule } from './weather-data/weather-data.module';
 import { ManageAccountsComponent } from './core-components/manage-accounts/manage-accounts.component';
+import { ElectronBackupFileComponent } from './core-components/electron-backup-file/electron-backup-file.component';
 
 @NgModule({
   declarations: [
@@ -41,7 +42,8 @@ import { ManageAccountsComponent } from './core-components/manage-accounts/manag
     SearchBarComponent,
     FacilityListPipe,
     CreateReportModalComponent,
-    ManageAccountsComponent
+    ManageAccountsComponent,
+    ElectronBackupFileComponent
   ],
   imports: [
     BrowserModule,

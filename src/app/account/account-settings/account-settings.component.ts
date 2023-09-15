@@ -283,4 +283,8 @@ export class AccountSettingsComponent implements OnInit {
     let backupFile: BackupFile = this.backupDataService.getAccountBackupFile();
     this.electronService.openDialog(backupFile);
   }
+
+  testFetch(){
+    this.electronService.getDataFile(this.selectedAccount.dataBackupFilePath)
+  }
 }

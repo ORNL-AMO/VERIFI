@@ -23,6 +23,8 @@ export class AutomaticBackupsService {
   account: IdbAccount;
   backupTimer: any;
   fileExists: boolean;
+  initializingAccount: boolean = true;
+
   constructor(
     private accountDbService: AccountdbService,
     private electronService: ElectronService,
@@ -39,9 +41,16 @@ export class AutomaticBackupsService {
     private toastNotificationService: ToastNotificationsService,
     private dbChangesService: DbChangesService
   ) {
-    this.electronService.fileExists.subscribe(val => {
-      this.fileExists = val;
-    })
+    if (this.electronService.isElectron) {
+      this.electronService.fileExists.subscribe(val => {
+        this.fileExists = val;
+        if (this.initializingAccount) {
+          if (this.fileExists) {
+            this.electronService.getDataFile(this.account.dataBackupFilePath);
+          }
+        }
+      });
+    }
   }
 
   subscribeData() {
@@ -98,16 +107,20 @@ export class AutomaticBackupsService {
         if (val) {
           this.saveBackup();
         }
-      })
+      });
+    }
+  }
+
+  clearBackupTimer() {
+    if (this.backupTimer) {
+      clearTimeout(this.backupTimer)
     }
   }
 
   saveBackup() {
-    if (this.account && this.account.dataBackupFilePath) {
+    if (this.account && this.account.dataBackupFilePath && !this.initializingAccount) {
       console.log('save...');
-      if (this.backupTimer) {
-        clearTimeout(this.backupTimer)
-      }
+      this.clearBackupTimer();
       //backup 3 seconds after changes finish...
       this.backupTimer = setTimeout(() => {
         this.electronService.checkFileExists(this.account.dataBackupFilePath);
@@ -115,6 +128,8 @@ export class AutomaticBackupsService {
           if (this.fileExists) {
             let backupFile: BackupFile = this.backupDataService.getAccountBackupFile();
             this.account.lastBackup = new Date();
+            this.account.dataBackupId = backupFile.dataBackupId;
+            this.accountDbService.updateWithObservable(this.account);
             this.electronService.sendSaveData(backupFile)
           } else {
             console.log('tried to save but there is no file')
@@ -125,6 +140,20 @@ export class AutomaticBackupsService {
         }, 500);
       }, 3000);
     }
+  }
+
+  initializeAccount() {
+    if (this.electronService.isElectron) {
+      if (this.account && this.account.dataBackupFilePath) {
+        this.electronService.checkFileExists(this.account.dataBackupFilePath);
+      } else {
+        this.initializingAccount = false;
+      }
+    }
+  }
+
+  checkDataBackupFile(latestBackupFile: BackupFile) {
+
   }
 
 }

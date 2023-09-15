@@ -15,6 +15,7 @@ import { LoadingService } from '../loading/loading.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { ElectronService } from 'src/app/electron/electron.service';
 import { ToastNotificationsService } from '../toast-notifications/toast-notifications.service';
+import { AutomaticBackupsService } from 'src/app/electron/automatic-backups.service';
 
 @Component({
   selector: 'app-header',
@@ -53,7 +54,8 @@ export class HeaderComponent implements OnInit {
     private dbChangesService: DbChangesService,
     private electronService: ElectronService,
     private toastNotificationService: ToastNotificationsService,
-    private cd: ChangeDetectorRef
+    private cd: ChangeDetectorRef,
+    private automaticBackupService: AutomaticBackupsService
   ) {
   }
 
@@ -97,8 +99,10 @@ export class HeaderComponent implements OnInit {
     this.loadingService.setLoadingMessage("Switching accounts...");
     this.loadingService.setLoadingStatus(true);
     try {
+      this.automaticBackupService.initializingAccount = true;
       await this.dbChangesService.selectAccount(account, false);
       this.loadingService.setLoadingStatus(false);
+      this.automaticBackupService.initializeAccount();
       this.router.navigate(['/']);
     } catch (err) {
       this.toastNotificationService.showToast('An Error Occured', 'There was an error when trying to switch to ' + account.name + '. The action was unable to be completed.', 15000, false, 'alert-danger');
