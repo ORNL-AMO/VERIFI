@@ -49,6 +49,8 @@ export class AutomaticBackupsService {
         if (this.initializingAccount) {
           if (this.fileExists) {
             this.electronService.getDataFile(this.account.dataBackupFilePath);
+          }else if(this.account) {
+            this.alertFileDoesNotExist();
           }
         }
       });
@@ -132,9 +134,7 @@ export class AutomaticBackupsService {
             this.electronService.sendSaveData(backupFile)
           } else {
             console.log('tried to save but there is no file')
-            this.toastNotificationService.showToast('Missing Backup File', 'The file selected to backup this account no longer exists. Please navigate to the settings page for the account to update the file selection.', 10000, false, 'alert-danger')
-            this.account.dataBackupFilePath = undefined;
-            this.dbChangesService.updateAccount(this.account);
+            this.alertFileDoesNotExist();
           }
         }, 500);
       }, 3000);
@@ -171,4 +171,10 @@ export class AutomaticBackupsService {
     }
   }
 
+
+  alertFileDoesNotExist(){
+    this.toastNotificationService.showToast('Missing Backup File', 'The file selected to backup this account no longer exists. Please navigate to the settings page for the account to update the file selection.', 10000, false, 'alert-danger')
+    this.account.dataBackupFilePath = undefined;
+    this.dbChangesService.updateAccount(this.account);    
+  }
 }

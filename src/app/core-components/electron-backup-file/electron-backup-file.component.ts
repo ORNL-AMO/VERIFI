@@ -7,6 +7,7 @@ import { ElectronBackupsDbService } from 'src/app/indexedDB/electron-backups-db.
 import { IdbAccount, IdbElectronBackup } from 'src/app/models/idb';
 import { BackupFile } from 'src/app/shared/helper-services/backup-data.service';
 import { ToastNotificationsService } from '../toast-notifications/toast-notifications.service';
+import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 
 @Component({
   selector: 'app-electron-backup-file',
@@ -29,7 +30,8 @@ export class ElectronBackupFileComponent {
     private accountDbService: AccountdbService,
     private automaticBackupsService: AutomaticBackupsService,
     private electronBackupsDbService: ElectronBackupsDbService,
-    private toastNotificationService: ToastNotificationsService) {
+    private toastNotificationService: ToastNotificationsService,
+    private dbChangesService: DbChangesService) {
 
   }
 
@@ -37,23 +39,26 @@ export class ElectronBackupFileComponent {
     this.isElectron = this.electronService.isElectron;
     if (this.electronService.isElectron) {
       this.accountSub = this.accountDbService.selectedAccount.subscribe(val => {
-        this.account = val;
-        if (this.account) {
-          this.electronBackup = this.electronBackupsDbService.accountBackups.find(backup => {
-            return backup.accountId == this.account.guid
-          });
-          this.archiveOption = this.account.archiveOption;
+        //initialize account or account change
+        if (!this.account || (this.account.guid != val.guid)) {
+          this.account = val;
+          if (this.account) {
+            this.electronBackup = this.electronBackupsDbService.accountBackups.find(backup => {
+              return backup.accountId == this.account.guid
+            });
+            this.archiveOption = this.account.archiveOption;
+            this.checkShowModal();
+          }
         }
       });
 
       this.latestBackupFileSub = this.electronService.accountLatestBackupFile.subscribe(val => {
         if (val) {
           this.latestBackupFile = val;
-          if (this.archiveOption == 'skip' || this.archiveOption == 'justOnce') {
-            this.showModal = true;
-          } else if (this.archiveOption == 'always') {
-            //create archive here?
+          if (this.archiveOption == 'always') {
             this.createArchive();
+          } else {
+            this.checkShowModal();
           }
         }
       });
@@ -68,24 +73,33 @@ export class ElectronBackupFileComponent {
     }
   }
 
+  checkShowModal() {
+    if (this.account && this.electronBackup && this.latestBackupFile) {
+      if (this.account.guid == this.electronBackup.accountId && this.latestBackupFile.account.guid == this.electronBackup.accountId) {
+        if (this.latestBackupFile.dataBackupId != this.electronBackup.dataBackupId) {
+          this.showModal = true;
+        }
+        if (this.archiveOption == 'skip' || this.archiveOption == 'justOnce') {
+          this.showModal = true;
+        }
+      }
+    }
+  }
+
   hideModal() {
     this.showModal = false;
     this.automaticBackupsService.initializingAccount = false;
   }
 
   confirmActions() {
-    if (this.archiveOption == 'always') {
-      //update account and always create archive
-
-    } else if (this.archiveOption == 'justOnce') {
-      //create single archive
-      console.log('just once');
+    if (this.archiveOption == 'justOnce' || ((this.account.archiveOption != this.archiveOption) && this.archiveOption == 'always')) {
       this.createArchive();
-    } else if (this.archiveOption == 'never') {
-      //update account and save. never show again
-    } else if (this.archiveOption == 'skip') {
-      //do nothing with archive  
     }
+
+    if (this.account.archiveOption != this.archiveOption) {
+      this.dbChangesService.updateAccount(this.account);
+    }
+
     this.hideModal();
   }
 
