@@ -79,6 +79,7 @@ export class AccountSettingsComponent implements OnInit {
     this.isElectron = this.electronService.isElectron;
     this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(val => {
       this.selectedAccount = val;
+      console.log('option: ' +this.selectedAccount.archiveOption);
     });
 
     this.accountFacilitiesSub = this.facilityDbService.accountFacilities.subscribe(val => {
@@ -287,5 +288,10 @@ export class AccountSettingsComponent implements OnInit {
     this.updatingFilePath = true;
     this.backupFile = this.backupDataService.getAccountBackupFile();
     this.electronService.openDialog(this.backupFile);
+  }
+
+  async saveChanges(){
+    console.log(this.selectedAccount.archiveOption);
+    await this.dbChangesService.updateAccount(this.selectedAccount);
   }
 }

@@ -17,6 +17,7 @@ import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.
 import { BackupDataService } from 'src/app/shared/helper-services/backup-data.service';
 import { ExportToExcelTemplateService } from 'src/app/shared/helper-services/export-to-excel-template.service';
 import { CustomEmissionsDbService } from 'src/app/indexedDB/custom-emissions-db.service';
+import { ElectronBackupsDbService } from 'src/app/indexedDB/electron-backups-db.service';
 
 @Component({
   selector: 'app-manage-accounts',
@@ -44,7 +45,8 @@ export class ManageAccountsComponent {
     private accountAnalysisDbService: AccountAnalysisDbService,
     private backupDataService: BackupDataService,
     private exportToExcelTemplateService: ExportToExcelTemplateService,
-    private customEmissionsDbService: CustomEmissionsDbService
+    private customEmissionsDbService: CustomEmissionsDbService,
+    private electronBackupsDbService: ElectronBackupsDbService
   ) {
   }
 
@@ -136,6 +138,7 @@ export class ManageAccountsComponent {
     await this.accountAnalysisDbService.deleteAccountAnalysisItems();
     this.loadingService.setLoadingMessage("Deleting Custom Emissions...")
     await this.customEmissionsDbService.deleteAccountEmissionsItems();
+    await this.electronBackupsDbService.deleteWithObservable(this.selectedAccount.guid);
     this.loadingService.setLoadingMessage("Deleting Account...");
     await firstValueFrom(this.accountDbService.deleteAccountWithObservable(this.selectedAccount.id));
     this.accounts = await firstValueFrom(this.accountDbService.getAll());

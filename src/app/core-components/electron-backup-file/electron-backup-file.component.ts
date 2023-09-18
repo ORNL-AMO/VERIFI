@@ -6,6 +6,7 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { ElectronBackupsDbService } from 'src/app/indexedDB/electron-backups-db.service';
 import { IdbAccount, IdbElectronBackup } from 'src/app/models/idb';
 import { BackupFile } from 'src/app/shared/helper-services/backup-data.service';
+import { ToastNotificationsService } from '../toast-notifications/toast-notifications.service';
 
 @Component({
   selector: 'app-electron-backup-file',
@@ -27,7 +28,8 @@ export class ElectronBackupFileComponent {
   constructor(private electronService: ElectronService,
     private accountDbService: AccountdbService,
     private automaticBackupsService: AutomaticBackupsService,
-    private electronBackupsDbService: ElectronBackupsDbService) {
+    private electronBackupsDbService: ElectronBackupsDbService,
+    private toastNotificationService: ToastNotificationsService) {
 
   }
 
@@ -40,17 +42,18 @@ export class ElectronBackupFileComponent {
           this.electronBackup = this.electronBackupsDbService.accountBackups.find(backup => {
             return backup.accountId == this.account.guid
           });
-          this.archiveOption = this.account.arhiveOption;
+          this.archiveOption = this.account.archiveOption;
         }
       });
 
       this.latestBackupFileSub = this.electronService.accountLatestBackupFile.subscribe(val => {
         if (val) {
           this.latestBackupFile = val;
-          if(this.archiveOption == 'skip' || this.archiveOption == 'justOnce'){
+          if (this.archiveOption == 'skip' || this.archiveOption == 'justOnce') {
             this.showModal = true;
-          }else if(this.archiveOption == 'always'){
+          } else if (this.archiveOption == 'always') {
             //create archive here?
+            this.createArchive();
           }
         }
       });
@@ -91,8 +94,9 @@ export class ElectronBackupFileComponent {
     let dataBackupFilePath: string = this.account.dataBackupFilePath;
     let sub: string = dataBackupFilePath.substring(0, dataBackupFilePath.length - 5);
     let date: Date = new Date(this.latestBackupFile.timeStamp);
-    let dateStr: string = date.getFullYear() + '_' + (date.getMonth() + 1) + '_' + date.getDate();
+    let dateStr: string = (date.getMonth() + 1) + "-" + date.getDate() + "-" + date.getFullYear();
     this.latestBackupFile.account.dataBackupFilePath = sub + '_' + dateStr + '.json';
     this.electronService.sendSaveData(this.latestBackupFile, true);
+    this.toastNotificationService.showToast('Archive Created', this.latestBackupFile.account.dataBackupFilePath + ' created!', undefined, false, 'alert-success');
   }
 }

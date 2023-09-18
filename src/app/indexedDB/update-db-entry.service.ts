@@ -23,8 +23,8 @@ export class UpdateDbEntryService {
       isChanged = true;
     }
 
-    if(!account.arhiveOption){
-      account.arhiveOption = 'skip';
+    if(!account.archiveOption){
+      account.archiveOption = 'skip';
       isChanged = true;
     }
 

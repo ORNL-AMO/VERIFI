@@ -11,13 +11,14 @@ import { UpdateDbEntryService } from './indexedDB/update-db-entry.service';
 import { UtilityMeterdbService } from './indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from './indexedDB/utilityMeterData-db.service';
 import { UtilityMeterGroupdbService } from './indexedDB/utilityMeterGroup-db.service';
-import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport, IdbAnalysisItem, IdbCustomEmissionsItem, IdbElectronBackup, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from './models/idb';
+import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport, IdbAnalysisItem, IdbCustomEmissionsItem, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from './models/idb';
 import { EGridService } from './shared/helper-services/e-grid.service';
 import { firstValueFrom } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { ToastNotificationsService } from './core-components/toast-notifications/toast-notifications.service';
 import { AutomaticBackupsService } from './electron/automatic-backups.service';
 import { ElectronBackupsDbService } from './indexedDB/electron-backups-db.service';
+import { ElectronService } from './electron/electron.service';
 
 // declare ga as a function to access the JS code in TS
 declare let gtag: Function;
@@ -49,7 +50,8 @@ export class AppComponent {
     private accountReportDbService: AccountReportDbService,
     private toastNotificationService: ToastNotificationsService,
     private automaticBackupsService: AutomaticBackupsService,
-    private electronBackupsDbService: ElectronBackupsDbService) {
+    private electronBackupsDbService: ElectronBackupsDbService,
+    private electronService: ElectronService) {
     if (environment.production) {
       this.router.events.subscribe(event => {
         if (event instanceof NavigationEnd) {
@@ -228,8 +230,10 @@ export class AppComponent {
     this.customEmissionsDbService.accountEmissionsItems.next(customEmissionsItems);
   }
 
-  async initializeElectronBackups(){
-    this.loadingMessage = 'Loading Account Backups...';
-    this.electronBackupsDbService.accountBackups = await firstValueFrom(this.electronBackupsDbService.getAll());
+  async initializeElectronBackups() {
+    if (this.electronService.isElectron) {
+      this.loadingMessage = 'Loading Account Backups...';
+      this.electronBackupsDbService.accountBackups = await firstValueFrom(this.electronBackupsDbService.getAll());
+    }
   }
 }

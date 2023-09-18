@@ -92,13 +92,48 @@
             <h4>
                 <span class="badge bg-success">
                     <span class="fa fa-file-arrow-down"></span>
-                </span>                
-                Automatic Account Backup</h4>
-            <p>Lets see if we can make automatic backups work...</p>
-            <button class="btn btn-outline" (click)="automaticBackup()" *ngIf="!selectedAccount.dataBackupFilePath">Select Automatic Backup Location</button>
-            <p *ngIf="selectedAccount.dataBackupFilePath">
-                This account is automatically backed up at <a class="click-link" (click)="automaticBackup()">{{selectedAccount.dataBackupFilePath}}</a>
-            </p>
+                </span>
+                Automatic Account Backup
+            </h4>
+            <ng-container *ngIf="!selectedAccount.dataBackupFilePath">
+                <p>Save an automatic backup of this account's data saved to your machine or shared drive. The backup can
+                    be used to restore the data if it is lost or if you want to revert back to an older state of the
+                    account.</p>
+                <button class="btn btn-outline" (click)="automaticBackup()">Select Automatic Backup Location</button>
+            </ng-container>
+            <ng-container *ngIf="selectedAccount.dataBackupFilePath">
+                <p>
+                    Automatic backups are enabled for this account. This account is automatically backed up at <a
+                        class="click-link" (click)="automaticBackup()">{{selectedAccount.dataBackupFilePath}}</a>
+                </p>
+                <form>
+                    <label>
+                        Additionally, you can choose to automatically archive the state of the account everytime that
+                        the account is accessed. A popup will show when the account is accessed allowing you to choose
+                        when to archive the account. Otherwise you can select to never create an archive or to create an
+                        archive whenever the account is accessed without the popup window.
+                    </label>
+                    <div class="form-check">
+                        <input type="radio" class="form-check-input" name="archiveOption"
+                            [(ngModel)]="selectedAccount.archiveOption" [value]="'skip'" id="skip"
+                            (change)="saveChanges()">
+                        <label class="form-check-label" for="skip">Ask Me To Archive When Account Is Accessed</label>
+                    </div>
+                    <div class="form-check">
+                        <input type="radio" class="form-check-input" name="archiveOption"
+                            [(ngModel)]="selectedAccount.archiveOption" [value]="'always'" id="always"
+                            (change)="saveChanges()">
+                        <label class="form-check-label" for="always">Always Archive</label>
+                    </div>
+                    <div class="form-check">
+                        <input type="radio" class="form-check-input" name="archiveOption"
+                            [(ngModel)]="selectedAccount.archiveOption" [value]="'never'" id="never"
+                            (change)="saveChanges()">
+                        <label class="form-check-label" for="never">Never Archive</label>
+                    </div>
+                </form>
+            </ng-container>
+
         </div>
         <div class="col-lg-6">
             <h4>Backup Account</h4>

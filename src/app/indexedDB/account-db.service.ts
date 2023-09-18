@@ -138,7 +138,7 @@ export class AccountdbService {
             contactName: undefined,
             contactEmail: undefined,
             contactPhone: undefined,
-            arhiveOption: 'skip'
+            archiveOption: 'skip'
         }
     }
 }
