@@ -5,16 +5,16 @@
     <div class="popup" [class.open]="showModal">
         <div class="popup-header">Backup File Found
         </div>
-        <div class="popup-body" *ngIf="latestBackupFile">
+        <div class="popup-body" *ngIf="latestBackupFile && electronBackup">
             <p>
-                A backup file for this facility was found from {{latestBackupFile.timeStamp | date:'medium'}}
+                A backup file for this account was found from {{latestBackupFile.timeStamp | date:'medium'}}
             </p>
-            <ng-container *ngIf="latestBackupFile.dataBackupId != account.dataBackupId">
+            <ng-container *ngIf="latestBackupFile.dataBackupId != electronBackup.dataBackupId">
                 <hr>
                 <label>
                     The data backup found differs from the latest backup we have corresponding to this account. The
                     latest
-                    backup we have for this account is {{account.lastBackup | date:'medium'}}. This may happen if the
+                    backup we have for this account is {{electronBackup.timeStamp | date:'medium'}}. This may happen if the
                     data
                     backup is a shared file.
                     Would you like to update the data in this account with the data found in the backup file?</label>

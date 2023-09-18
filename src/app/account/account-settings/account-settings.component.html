@@ -99,7 +99,6 @@
             <p *ngIf="selectedAccount.dataBackupFilePath">
                 This account is automatically backed up at <a class="click-link" (click)="automaticBackup()">{{selectedAccount.dataBackupFilePath}}</a>
             </p>
-            <button *ngIf="selectedAccount.dataBackupFilePath" class="btn btn-primary" (click)="testFetch()">Test Fetch</button>
         </div>
         <div class="col-lg-6">
             <h4>Backup Account</h4>

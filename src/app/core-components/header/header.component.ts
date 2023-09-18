@@ -1,5 +1,5 @@
-import { ChangeDetectorRef, Component, ElementRef, Input, OnInit } from '@angular/core';
-import { Router, Event, NavigationStart } from '@angular/router';
+import { ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { AccountdbService } from "../../indexedDB/account-db.service";
 import { FacilitydbService } from "../../indexedDB/facility-db.service";
 import { UtilityMeterdbService } from "../../indexedDB/utilityMeter-db.service";
@@ -100,6 +100,7 @@ export class HeaderComponent implements OnInit {
     this.loadingService.setLoadingStatus(true);
     try {
       this.automaticBackupService.initializingAccount = true;
+      this.electronService.accountLatestBackupFile.next(undefined);
       await this.dbChangesService.selectAccount(account, false);
       this.loadingService.setLoadingStatus(false);
       this.automaticBackupService.initializeAccount();

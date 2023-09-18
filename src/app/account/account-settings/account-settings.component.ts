@@ -18,6 +18,7 @@ import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { CustomEmissionsDbService } from 'src/app/indexedDB/custom-emissions-db.service';
 import { ElectronService } from 'src/app/electron/electron.service';
+import { ElectronBackupsDbService } from 'src/app/indexedDB/electron-backups-db.service';
 
 @Component({
   selector: 'app-account-settings',
@@ -51,6 +52,7 @@ export class AccountSettingsComponent implements OnInit {
   savedFilePathSub: Subscription;
   updatingFilePath: boolean = false;
   isElectron: boolean;
+  backupFile: BackupFile;
   constructor(
     private router: Router,
     private accountDbService: AccountdbService,
@@ -69,7 +71,8 @@ export class AccountSettingsComponent implements OnInit {
     private dbChangesService: DbChangesService,
     private customEmissionsDbService: CustomEmissionsDbService,
     private electronService: ElectronService,
-    private cd: ChangeDetectorRef
+    private cd: ChangeDetectorRef,
+    private electronBackupsDbService: ElectronBackupsDbService
   ) { }
 
   ngOnInit() {
@@ -86,7 +89,9 @@ export class AccountSettingsComponent implements OnInit {
       this.savedFilePathSub = this.electronService.savedFilePath.subscribe(savedFilePath => {
         if (this.updatingFilePath) {
           this.selectedAccount.dataBackupFilePath = savedFilePath;
+          this.selectedAccount.dataBackupId = this.backupFile.dataBackupId;
           this.updatingFilePath = false;
+          this.electronBackupsDbService.addOrUpdateFile(this.backupFile);
           this.dbChangesService.updateAccount(this.selectedAccount);
           this.cd.detectChanges();
         }
@@ -166,9 +171,9 @@ export class AccountSettingsComponent implements OnInit {
     await this.accountAnalysisDbService.deleteAccountAnalysisItems();
     this.loadingService.setLoadingMessage("Deleting Custom Emissions...")
     await this.customEmissionsDbService.deleteAccountEmissionsItems();
+    await this.electronBackupsDbService.deleteWithObservable(this.selectedAccount.guid);
     this.loadingService.setLoadingMessage("Deleting Account...");
     await firstValueFrom(this.accountDbService.deleteAccountWithObservable(this.selectedAccount.id));
-
     // Then navigate to another account
     let accounts: Array<IdbAccount> = await firstValueFrom(this.accountDbService.getAll());
     this.accountDbService.allAccounts.next(accounts);
@@ -280,11 +285,7 @@ export class AccountSettingsComponent implements OnInit {
 
   automaticBackup() {
     this.updatingFilePath = true;
-    let backupFile: BackupFile = this.backupDataService.getAccountBackupFile();
-    this.electronService.openDialog(backupFile);
-  }
-
-  testFetch(){
-    this.electronService.getDataFile(this.selectedAccount.dataBackupFilePath)
+    this.backupFile = this.backupDataService.getAccountBackupFile();
+    this.electronService.openDialog(this.backupFile);
   }
 }

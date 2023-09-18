@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { AccountdbService } from '../indexedDB/account-db.service';
-import { IdbAccount } from '../models/idb';
+import { IdbAccount, IdbElectronBackup } from '../models/idb';
 import { ElectronService } from './electron.service';
 import { BackupDataService, BackupFile } from '../shared/helper-services/backup-data.service';
 import { AccountAnalysisDbService } from '../indexedDB/account-analysis-db.service';
@@ -14,6 +14,8 @@ import { UtilityMeterDatadbService } from '../indexedDB/utilityMeterData-db.serv
 import { UtilityMeterGroupdbService } from '../indexedDB/utilityMeterGroup-db.service';
 import { ToastNotificationsService } from '../core-components/toast-notifications/toast-notifications.service';
 import { DbChangesService } from '../indexedDB/db-changes.service';
+import { ElectronBackupsDbService } from '../indexedDB/electron-backups-db.service';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -24,7 +26,6 @@ export class AutomaticBackupsService {
   backupTimer: any;
   fileExists: boolean;
   initializingAccount: boolean = true;
-
   constructor(
     private accountDbService: AccountdbService,
     private electronService: ElectronService,
@@ -39,7 +40,8 @@ export class AutomaticBackupsService {
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
     private toastNotificationService: ToastNotificationsService,
-    private dbChangesService: DbChangesService
+    private dbChangesService: DbChangesService,
+    private electronBackupsDbService: ElectronBackupsDbService
   ) {
     if (this.electronService.isElectron) {
       this.electronService.fileExists.subscribe(val => {
@@ -119,17 +121,14 @@ export class AutomaticBackupsService {
 
   saveBackup() {
     if (this.account && this.account.dataBackupFilePath && !this.initializingAccount) {
-      console.log('save...');
       this.clearBackupTimer();
-      //backup 3 seconds after changes finish...
+      //backup 3 seconds after changes finish..
       this.backupTimer = setTimeout(() => {
         this.electronService.checkFileExists(this.account.dataBackupFilePath);
         setTimeout(() => {
           if (this.fileExists) {
             let backupFile: BackupFile = this.backupDataService.getAccountBackupFile();
-            this.account.lastBackup = new Date();
-            this.account.dataBackupId = backupFile.dataBackupId;
-            this.accountDbService.updateWithObservable(this.account);
+            this.updateElectronBackup(backupFile.dataBackupId, this.account.guid);
             this.electronService.sendSaveData(backupFile)
           } else {
             console.log('tried to save but there is no file')
@@ -152,8 +151,24 @@ export class AutomaticBackupsService {
     }
   }
 
-  checkDataBackupFile(latestBackupFile: BackupFile) {
-
+  async updateElectronBackup(dataBackupId: string, accountId: string) {
+    let backupIndex: number = this.electronBackupsDbService.accountBackups.findIndex(backup => {
+      return backup.accountId == accountId
+    });
+    if (backupIndex != -1) {
+      this.electronBackupsDbService.accountBackups[backupIndex].dataBackupId = dataBackupId;
+      this.electronBackupsDbService.accountBackups[backupIndex].timeStamp = new Date();
+      await firstValueFrom(this.electronBackupsDbService.updateWithObservable(this.electronBackupsDbService.accountBackups[backupIndex]));
+    } else {
+      let newBackup: IdbElectronBackup = {
+        accountId: accountId,
+        dataBackupId: dataBackupId,
+        guid: Math.random().toString(36).substr(2, 9),
+        timeStamp: new Date()
+      };
+      newBackup = await firstValueFrom(this.electronBackupsDbService.addWithObservable(newBackup));
+      this.electronBackupsDbService.accountBackups.push(newBackup);
+    }
   }
 
 }

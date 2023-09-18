@@ -3,7 +3,8 @@ import { Subscription } from 'rxjs';
 import { AutomaticBackupsService } from 'src/app/electron/automatic-backups.service';
 import { ElectronService } from 'src/app/electron/electron.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { IdbAccount } from 'src/app/models/idb';
+import { ElectronBackupsDbService } from 'src/app/indexedDB/electron-backups-db.service';
+import { IdbAccount, IdbElectronBackup } from 'src/app/models/idb';
 import { BackupFile } from 'src/app/shared/helper-services/backup-data.service';
 
 @Component({
@@ -22,9 +23,11 @@ export class ElectronBackupFileComponent {
   isElectron: boolean;
   archiveOption: 'never' | 'always' | 'justOnce' | 'skip';
   overwriteOption: 'updateAccount' | 'overwriteFile' = 'updateAccount';
+  electronBackup: IdbElectronBackup;
   constructor(private electronService: ElectronService,
     private accountDbService: AccountdbService,
-    private automaticBackupsService: AutomaticBackupsService) {
+    private automaticBackupsService: AutomaticBackupsService,
+    private electronBackupsDbService: ElectronBackupsDbService) {
 
   }
 
@@ -34,6 +37,9 @@ export class ElectronBackupFileComponent {
       this.accountSub = this.accountDbService.selectedAccount.subscribe(val => {
         this.account = val;
         if (this.account) {
+          this.electronBackup = this.electronBackupsDbService.accountBackups.find(backup => {
+            return backup.accountId == this.account.guid
+          });
           this.archiveOption = this.account.arhiveOption;
         }
       });
@@ -41,7 +47,11 @@ export class ElectronBackupFileComponent {
       this.latestBackupFileSub = this.electronService.accountLatestBackupFile.subscribe(val => {
         if (val) {
           this.latestBackupFile = val;
-          this.showModal = true;
+          if(this.archiveOption == 'skip' || this.archiveOption == 'justOnce'){
+            this.showModal = true;
+          }else if(this.archiveOption == 'always'){
+            //create archive here?
+          }
         }
       });
     }

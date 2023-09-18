@@ -336,3 +336,10 @@ export interface IdbCustomEmissionsItem {
 }
 
 
+export interface IdbElectronBackup {
+    id?: number,
+    accountId: string,
+    guid: string,
+    dataBackupId: string,
+    timeStamp: Date
+}

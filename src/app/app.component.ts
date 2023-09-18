@@ -11,12 +11,13 @@ import { UpdateDbEntryService } from './indexedDB/update-db-entry.service';
 import { UtilityMeterdbService } from './indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from './indexedDB/utilityMeterData-db.service';
 import { UtilityMeterGroupdbService } from './indexedDB/utilityMeterGroup-db.service';
-import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport, IdbAnalysisItem, IdbCustomEmissionsItem, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from './models/idb';
+import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport, IdbAnalysisItem, IdbCustomEmissionsItem, IdbElectronBackup, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from './models/idb';
 import { EGridService } from './shared/helper-services/e-grid.service';
 import { firstValueFrom } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { ToastNotificationsService } from './core-components/toast-notifications/toast-notifications.service';
 import { AutomaticBackupsService } from './electron/automatic-backups.service';
+import { ElectronBackupsDbService } from './indexedDB/electron-backups-db.service';
 
 // declare ga as a function to access the JS code in TS
 declare let gtag: Function;
@@ -47,7 +48,8 @@ export class AppComponent {
     private customEmissionsDbService: CustomEmissionsDbService,
     private accountReportDbService: AccountReportDbService,
     private toastNotificationService: ToastNotificationsService,
-    private automaticBackupsService: AutomaticBackupsService) {
+    private automaticBackupsService: AutomaticBackupsService,
+    private electronBackupsDbService: ElectronBackupsDbService) {
     if (environment.production) {
       this.router.events.subscribe(event => {
         if (event instanceof NavigationEnd) {
@@ -90,6 +92,7 @@ export class AppComponent {
         await this.initializeFacilityAnalysisItems(account);
         await this.initializeAccountAnalysisItems(account);
         await this.initializeCustomEmissions(account);
+        await this.initializeElectronBackups();
         let updatedAccount: { account: IdbAccount, isChanged: boolean } = this.updateDbEntryService.updateAccount(account);
         if (updatedAccount.isChanged) {
           await firstValueFrom(this.accountDbService.updateWithObservable(updatedAccount.account));
@@ -101,6 +104,7 @@ export class AppComponent {
         this.automaticBackupsService.initializeAccount();
       } else {
         await this.eGridService.parseEGridData();
+        await this.initializeElectronBackups();
 
         this.dataInitialized = true;
         this.router.navigateByUrl('setup-wizard');
@@ -108,6 +112,7 @@ export class AppComponent {
     } catch (err) {
       console.log(err);
       await this.eGridService.parseEGridData();
+      await this.initializeElectronBackups();
       this.toastNotificationService.showToast('An Error Occured', 'There was an error when trying to initialize the application data.', 15000, false, 'alert-danger');
       this.router.navigateByUrl('/manage-accounts');
       this.dataInitialized = true;
@@ -175,8 +180,6 @@ export class AppComponent {
     }
   }
 
-
-
   async initializePredictors(account: IdbAccount) {
     //set predictors
     this.loadingMessage = "Loading Predictors..";
@@ -223,5 +226,10 @@ export class AppComponent {
     }
     await this.eGridService.parseEGridData();
     this.customEmissionsDbService.accountEmissionsItems.next(customEmissionsItems);
+  }
+
+  async initializeElectronBackups(){
+    this.loadingMessage = 'Loading Account Backups...';
+    this.electronBackupsDbService.accountBackups = await firstValueFrom(this.electronBackupsDbService.getAll());
   }
 }
