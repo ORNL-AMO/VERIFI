@@ -103,10 +103,36 @@
             </ng-container>
             <ng-container *ngIf="selectedAccount.dataBackupFilePath">
                 <p>
-                    Automatic backups are enabled for this account. This account is automatically backed up at <a
-                        class="click-link" (click)="automaticBackup()">{{selectedAccount.dataBackupFilePath}}</a>
+                    Automatic backups are enabled for this account. This account is automatically backed up at: <br>
+                    <a class="click-link" (click)="automaticBackup()">{{selectedAccount.dataBackupFilePath}}</a>
                 </p>
                 <form>
+                    <label class="semibold">
+                        Is this a shared file?
+                    </label>
+                    <div class="form-check">
+                        <input type="radio" class="form-check-input" name="isSharedBackupFile"
+                            [(ngModel)]="selectedAccount.isSharedBackupFile" [value]="true" id="isShared"
+                            (change)="saveChanges()">
+                        <label class="form-check-label" for="isShared">Yes this is a shared file that may be edited
+                            by someone else on a different computer.</label>
+                    </div>
+                    <div class="form-check">
+                        <input type="radio" class="form-check-input" name="isSharedBackupFile"
+                            [(ngModel)]="selectedAccount.isSharedBackupFile" [value]="false" id="isNotShared"
+                            (change)="saveChanges()">
+                        <label class="form-check-label" for="isNotShared">No this computer is the only one that will
+                            modify this file.</label>
+                    </div>
+                    <ng-container *ngIf="selectedAccount.isSharedBackupFile">
+                        <label class="semibold">
+                            Shared File Author
+                        </label>
+                        <input type="text" class="form-control" id="sharedFileAuthor"
+                            [(ngModel)]="selectedAccount.sharedFileAuthor" name="sharedFileAuthor">
+                    </ng-container>
+                    <hr>
+
                     <label>
                         Additionally, you can choose to automatically archive the state of the account everytime that
                         the account is accessed. A popup will show when the account is accessed allowing you to choose

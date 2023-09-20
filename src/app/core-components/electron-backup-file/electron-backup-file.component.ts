@@ -124,6 +124,8 @@ export class ElectronBackupFileComponent {
     }
 
     if (needUpdate) {
+      console.log('need update...')
+      this.account.archiveOption = this.archiveOption;
       await this.dbChangesService.updateAccount(this.account);
     }
 

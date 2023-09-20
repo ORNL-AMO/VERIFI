@@ -44,7 +44,9 @@ export interface IdbAccount {
     contactPhone: string,
     dataBackupFilePath?: string,
     dataBackupId?: string,
-    archiveOption: 'always' | 'never' | 'justOnce' | 'skip'
+    archiveOption: 'always' | 'never' | 'justOnce' | 'skip',
+    isSharedBackupFile?: boolean,
+    sharedFileAuthor?: string
 }
 
 export interface IdbFacility {
