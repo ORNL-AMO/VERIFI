@@ -41,6 +41,9 @@ export class HeaderComponent implements OnInit {
   showUpdateModal: boolean = false;
   updateErrorSub: Subscription;
   updateError: boolean;
+
+  savingBackup: boolean;
+  savingBackupSub: Subscription;
   constructor(
     private router: Router,
     public accountdbService: AccountdbService,
@@ -77,6 +80,10 @@ export class HeaderComponent implements OnInit {
       this.updateErrorSub = this.electronService.updateError.subscribe(val => {
         this.updateError = val;
       });
+      this.savingBackupSub = this.automaticBackupService.saving.subscribe(val => {
+        this.savingBackup = val;
+        this.cd.detectChanges();
+      })
     }
   }
 
@@ -88,6 +95,9 @@ export class HeaderComponent implements OnInit {
     }
     if(this.updateErrorSub){
       this.updateErrorSub.unsubscribe();
+    }
+    if(this.savingBackupSub){
+      this.savingBackupSub.unsubscribe();
     }
   }
 

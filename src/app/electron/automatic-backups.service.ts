@@ -15,7 +15,7 @@ import { UtilityMeterGroupdbService } from '../indexedDB/utilityMeterGroup-db.se
 import { ToastNotificationsService } from '../core-components/toast-notifications/toast-notifications.service';
 import { DbChangesService } from '../indexedDB/db-changes.service';
 import { ElectronBackupsDbService } from '../indexedDB/electron-backups-db.service';
-import { firstValueFrom } from 'rxjs';
+import { BehaviorSubject, firstValueFrom } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -26,6 +26,7 @@ export class AutomaticBackupsService {
   backupTimer: any;
   fileExists: boolean;
   initializingAccount: boolean = true;
+  saving: BehaviorSubject<boolean>;
   constructor(
     private accountDbService: AccountdbService,
     private electronService: ElectronService,
@@ -43,6 +44,7 @@ export class AutomaticBackupsService {
     private dbChangesService: DbChangesService,
     private electronBackupsDbService: ElectronBackupsDbService
   ) {
+    this.saving = new BehaviorSubject<boolean>(false);
     if (this.electronService.isElectron) {
       this.electronService.fileExists.subscribe(val => {
         this.fileExists = val;
@@ -123,6 +125,7 @@ export class AutomaticBackupsService {
 
   saveBackup() {
     if (this.account && this.account.dataBackupFilePath && !this.initializingAccount) {
+      this.saving.next(true);
       this.clearBackupTimer();
       //backup 3 seconds after changes finish..
       this.backupTimer = setTimeout(() => {
@@ -136,6 +139,7 @@ export class AutomaticBackupsService {
             console.log('tried to save but there is no file')
             this.alertFileDoesNotExist();
           }
+          this.saving.next(false);
         }, 500);
       }, 3000);
     }

@@ -6,47 +6,94 @@
         <div class="popup-header">Backup File Found
         </div>
         <div class="popup-body" *ngIf="latestBackupFile && electronBackup">
-            <p>
+            <!-- <p>
                 A backup file for this account was found from {{latestBackupFile.timeStamp | date:'medium'}}
-            </p>
+            </p> -->
             <ng-container *ngIf="differingBackups">
-                <hr>
-                <label>
-                    The data backup found differs from the latest backup we have corresponding to this account. The
-                    latest
-                    backup we have for this account is {{electronBackup.timeStamp | date:'medium'}}. This may happen if
-                    the
-                    data
-                    backup is a shared file.
-                    Would you like to update the data in this account with the data found in the backup file?</label>
-                <div class="form-check">
-                    <input type="radio" class="form-check-input" name="overwriteOption" [(ngModel)]="overwriteOption"
-                        [value]="'updateAccount'" id="updateAccount">
-                    <label class="form-check-label" for="updateAccount">Update Account Data</label>
-                </div>
-                <div class="form-check">
-                    <input type="radio" class="form-check-input" name="overwriteOption" [(ngModel)]="overwriteOption"
-                        [value]="'overwriteFile'" id="overwriteFile">
-                    <label class="form-check-label" for="overwriteFile">Overwrite Data File</label>
-                </div>
-                <div class="alert alert-warning" *ngIf="account.guid != latestBackupFile.account.guid">
-                    The backed up account ID differs from the selected account ID. The name of the current account is
-                    <b>{{account.name}}</b>. The name of the backed up account is
-                    <b>{{latestBackupFile.account.name}}</b>. It is possible you are using a shared file and
-                    this is why the account IDs differ.
-                </div>
+                <!-- <hr> -->
+                <p> The data found in the backup file corresponding to this account differs from the data in the
+                    account.</p>
+
+                <table class="table table-responsive table-bordered">
+                    <thead>
+                        <tr>
+                            <th>
+
+                            </th>
+                            <th>
+                                Current Account
+                            </th>
+                            <th>
+                                Backup Account
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                Account Name
+                            </td>
+                            <td>
+                                {{account.name}}
+                            </td>
+                            <td>
+                                {{latestBackupFile.account.name}}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                Time Stamp
+                            </td>
+                            <td>
+                                {{electronBackup.timeStamp | date:'medium'}}
+                            </td>
+                            <td>
+                                {{latestBackupFile.timeStamp | date:'medium'}}
+                            </td>
+                        </tr>
+                        <tr *ngIf="account.isSharedBackupFile || latestBackupFile.account.isSharedBackupFile">
+                            <td>
+                                Shared File Author
+                            </td>
+                            <td>
+                                {{account.sharedFileAuthor}}
+                            </td>
+                            <td>
+                                {{latestBackupFile.account.sharedFileAuthor}}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                Which would you like to update?
+                            </td>
+                            <td>
+                                <div class="form-check">
+                                    <input type="radio" class="form-check-input" name="overwriteOption"
+                                        [(ngModel)]="overwriteOption" [value]="'updateAccount'" id="updateAccount">
+                                    <label class="form-check-label" for="updateAccount">Update Account from
+                                        Backup</label>
+                                </div>
+                            </td>
+                            <td>
+
+                                <div class="form-check">
+                                    <input type="radio" class="form-check-input" name="overwriteOption"
+                                        [(ngModel)]="overwriteOption" [value]="'overwriteFile'" id="overwriteFile">
+                                    <label class="form-check-label" for="overwriteFile">Update Backup from
+                                        Account</label>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </ng-container>
-            <hr>
-            <ng-container *ngIf="account.archiveOption != 'always' && account.archiveOption != 'never'">
-                <label>
-                    Would you like to create an archive of this backup file? If selected, a copy of this backup file
-                    will be
-                    created with a time stamp in the same folder that has been selected for this backup file. </label>
-                <div class="form-check">
-                    <input type="radio" class="form-check-input" name="archiveOption" [(ngModel)]="archiveOption"
-                        [value]="'justOnce'" id="justOnce">
-                    <label class="form-check-label" for="justOnce">Create Single Archive</label>
-                </div>
+            <!-- <hr> -->
+            <ng-container
+                *ngIf="differingBackups || (account.archiveOption != 'always' && account.archiveOption != 'never')">
+                <label class="semibold">
+                    Would you like to create an archive of the current state of this account? If selected, a copy of
+                    this
+                    account will be saved as a backup file with a time stamp. </label>
                 <div class="form-check">
                     <input type="radio" class="form-check-input" name="archiveOption" [(ngModel)]="archiveOption"
                         [value]="'skip'" id="skip">
@@ -54,8 +101,18 @@
                 </div>
                 <div class="form-check">
                     <input type="radio" class="form-check-input" name="archiveOption" [(ngModel)]="archiveOption"
+                        [value]="'justOnce'" id="justOnce">
+                    <label class="form-check-label" for="justOnce">
+                        <span class="fa fa-file-arrow-down"></span>
+                        Create Single Archive
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input type="radio" class="form-check-input" name="archiveOption" [(ngModel)]="archiveOption"
                         [value]="'always'" id="always">
-                    <label class="form-check-label" for="always">Always Archive</label>
+                    <label class="form-check-label" for="always">
+                        <span class="fa fa-file-arrow-down"></span> Always Archive
+                    </label>
                 </div>
                 <div class="form-check">
                     <input type="radio" class="form-check-input" name="archiveOption" [(ngModel)]="archiveOption"
@@ -67,7 +124,7 @@
         </div>
         <div class="popup-footer text-end">
             <button class="btn btn-secondary" (click)="hideModal()">Do Nothing</button>
-            <button class="btn btn-success" (click)="confirmActions()">Confirm</button>
+            <button class="btn action-btn" (click)="confirmActions()">Confirm</button>
         </div>
     </div>
 </ng-container>

@@ -50,7 +50,7 @@
                 </div>
             </ng-container>
             <div class="ps-2" *ngIf="activeAccount.dataBackupFilePath">
-                <div class="badge bg-success" title="Automatic Account Backups Active">
+                <div class="badge" title="Automatic Account Backups Active" [ngClass]="{'bg-warning': savingBackup, 'bg-success': !savingBackup}">
                     <span class="fa fa-file-arrow-down"></span>
                 </div>
             </div>

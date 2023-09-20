@@ -123,6 +123,7 @@ export class DefaultUnitsFormComponent implements OnInit {
         this.selectedAccount = this.settingsFormsService.updateAccountFromUnitsForm(this.form, this.selectedAccount);
         let updatedAccount: IdbAccount = await firstValueFrom(this.accountDbService.updateWithObservable(this.selectedAccount));
         let allAccounts: Array<IdbAccount> = await firstValueFrom(this.accountDbService.getAll());
+        console.log('update units form')
         this.accountDbService.selectedAccount.next(updatedAccount);
         this.accountDbService.allAccounts.next(allAccounts);
       }
@@ -181,8 +182,10 @@ export class DefaultUnitsFormComponent implements OnInit {
     let checkExists: string = this.zipCodeSubRegionData.find(val => { return this.form.controls.eGridSubregion.value === val; })
     let needSave: boolean = false;
     if (!checkExists || checkExists == 'U.S. Average') {
-      this.form.controls.eGridSubregion.patchValue(this.zipCodeSubRegionData[0]);
-      needSave = true;
+      if (this.form.controls.eGridSubregion.value != this.zipCodeSubRegionData[0]) {
+        this.form.controls.eGridSubregion.patchValue(this.zipCodeSubRegionData[0]);
+        needSave = true;
+      }
     }
     this.setSelectedSubregionEmissions(needSave);
   }
@@ -196,9 +199,9 @@ export class DefaultUnitsFormComponent implements OnInit {
 
   setSelectedSubregionEmissions(needSave: boolean) {
     this.selectedSubregionEmissions = this.eGridService.co2Emissions.find(region => { return this.form.controls.eGridSubregion.value === region.subregion; });
-    if(needSave){
+    if (needSave) {
       this.saveChanges();
-    }    
+    }
   }
 
   showEmissionsRates() {
@@ -211,7 +214,7 @@ export class DefaultUnitsFormComponent implements OnInit {
     this.sharedDataService.modalOpen.next(false);
   }
 
-  goToCustomData(){
+  goToCustomData() {
     this.router.navigateByUrl('/account/custom-data/emissions')
   }
 }

@@ -59,8 +59,8 @@ export class ElectronBackupFileComponent {
       });
 
       this.latestBackupFileSub = this.electronService.accountLatestBackupFile.subscribe(val => {
-        if (val) {
-          this.latestBackupFile = val;
+        this.latestBackupFile = val;
+        if (this.latestBackupFile) {
           if (this.archiveOption == 'always') {
             this.createArchive();
           }
@@ -83,6 +83,8 @@ export class ElectronBackupFileComponent {
       if (this.latestBackupFile.dataBackupId != this.electronBackup.dataBackupId) {
         this.differingBackups = true;
         this.showModal = true;
+      } else {
+        this.differingBackups = false;
       }
       if (this.archiveOption == 'skip' || this.archiveOption == 'justOnce') {
         this.showModal = true;
@@ -91,7 +93,6 @@ export class ElectronBackupFileComponent {
         this.automaticBackupsService.initializingAccount = false;
       }
     }
-
   }
 
   hideModal() {
@@ -114,8 +115,14 @@ export class ElectronBackupFileComponent {
         this.loadingService.setLoadingStatus(true);
         await this.backupDataService.deleteAccountData(this.account);
         let backupPath: string = this.account.dataBackupFilePath;
+        let sharedFileAuthor: string = this.account.sharedFileAuthor;
+        console.log('1: ' + sharedFileAuthor);
+        let isSharedBackupFile: boolean = this.account.isSharedBackupFile;
         this.account = await this.backupDataService.importAccountBackupFile(this.latestBackupFile);
         this.account.dataBackupFilePath = backupPath;
+        this.account.sharedFileAuthor = sharedFileAuthor;
+        this.account.isSharedBackupFile = isSharedBackupFile;
+        console.log('2: ' + this.account.sharedFileAuthor);
         await this.dbChangesService.updateAccount(this.account);
         await this.dbChangesService.selectAccount(this.account, false);
         this.loadingService.setLoadingStatus(false);
@@ -124,7 +131,6 @@ export class ElectronBackupFileComponent {
     }
 
     if (needUpdate) {
-      console.log('need update...')
       this.account.archiveOption = this.archiveOption;
       await this.dbChangesService.updateAccount(this.account);
     }

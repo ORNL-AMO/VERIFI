@@ -138,7 +138,8 @@ export class AccountdbService {
             contactName: undefined,
             contactEmail: undefined,
             contactPhone: undefined,
-            archiveOption: 'skip'
+            archiveOption: 'skip',
+            isSharedBackupFile: false
         }
     }
 }

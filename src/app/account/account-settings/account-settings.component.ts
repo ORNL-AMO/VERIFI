@@ -292,4 +292,12 @@ export class AccountSettingsComponent implements OnInit {
   async saveChanges(){
     await this.dbChangesService.updateAccount(this.selectedAccount);
   }
+
+  async changeIsShared(){
+    //this is bad code but the "sharedFileAuthor" field won't show unless I have the 
+    //detectChanges() call..
+    //#isWhatItIs
+    await this.saveChanges();
+    this.cd.detectChanges();
+  }
 }
