@@ -5,9 +5,10 @@ import { ElectronService } from 'src/app/electron/electron.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { ElectronBackupsDbService } from 'src/app/indexedDB/electron-backups-db.service';
 import { IdbAccount, IdbElectronBackup } from 'src/app/models/idb';
-import { BackupFile } from 'src/app/shared/helper-services/backup-data.service';
+import { BackupDataService, BackupFile } from 'src/app/shared/helper-services/backup-data.service';
 import { ToastNotificationsService } from '../toast-notifications/toast-notifications.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
+import { LoadingService } from '../loading/loading.service';
 
 @Component({
   selector: 'app-electron-backup-file',
@@ -25,13 +26,16 @@ export class ElectronBackupFileComponent {
   isElectron: boolean;
   archiveOption: 'never' | 'always' | 'justOnce' | 'skip';
   overwriteOption: 'updateAccount' | 'overwriteFile' = 'updateAccount';
+  differingBackups: boolean = false;
   electronBackup: IdbElectronBackup;
   constructor(private electronService: ElectronService,
     private accountDbService: AccountdbService,
     private automaticBackupsService: AutomaticBackupsService,
     private electronBackupsDbService: ElectronBackupsDbService,
     private toastNotificationService: ToastNotificationsService,
-    private dbChangesService: DbChangesService) {
+    private dbChangesService: DbChangesService,
+    private backupDataService: BackupDataService,
+    private loadingService: LoadingService) {
 
   }
 
@@ -40,14 +44,16 @@ export class ElectronBackupFileComponent {
     if (this.electronService.isElectron) {
       this.accountSub = this.accountDbService.selectedAccount.subscribe(val => {
         //initialize account or account change
-        if (!this.account || (this.account.guid != val.guid)) {
-          this.account = val;
-          if (this.account) {
-            this.electronBackup = this.electronBackupsDbService.accountBackups.find(backup => {
-              return backup.accountId == this.account.guid
-            });
-            this.archiveOption = this.account.archiveOption;
-            this.checkShowModal();
+        if (val) {
+          if (!this.account || (this.account.guid != val.guid)) {
+            this.account = val;
+            if (this.account) {
+              this.electronBackup = this.electronBackupsDbService.accountBackups.find(backup => {
+                return backup.accountId == this.account.guid
+              });
+              this.archiveOption = this.account.archiveOption;
+              this.checkShowModal();
+            }
           }
         }
       });
@@ -57,9 +63,8 @@ export class ElectronBackupFileComponent {
           this.latestBackupFile = val;
           if (this.archiveOption == 'always') {
             this.createArchive();
-          } else {
-            this.checkShowModal();
           }
+          this.checkShowModal();
         }
       });
     }
@@ -75,15 +80,18 @@ export class ElectronBackupFileComponent {
 
   checkShowModal() {
     if (this.account && this.electronBackup && this.latestBackupFile) {
-      if (this.account.guid == this.electronBackup.accountId && this.latestBackupFile.account.guid == this.electronBackup.accountId) {
-        if (this.latestBackupFile.dataBackupId != this.electronBackup.dataBackupId) {
-          this.showModal = true;
-        }
-        if (this.archiveOption == 'skip' || this.archiveOption == 'justOnce') {
-          this.showModal = true;
-        }
+      if (this.latestBackupFile.dataBackupId != this.electronBackup.dataBackupId) {
+        this.differingBackups = true;
+        this.showModal = true;
+      }
+      if (this.archiveOption == 'skip' || this.archiveOption == 'justOnce') {
+        this.showModal = true;
+      }
+      if (this.showModal == false) {
+        this.automaticBackupsService.initializingAccount = false;
       }
     }
+
   }
 
   hideModal() {
@@ -91,13 +99,32 @@ export class ElectronBackupFileComponent {
     this.automaticBackupsService.initializingAccount = false;
   }
 
-  confirmActions() {
+  async confirmActions() {
     if (this.archiveOption == 'justOnce' || ((this.account.archiveOption != this.archiveOption) && this.archiveOption == 'always')) {
       this.createArchive();
     }
 
-    if (this.account.archiveOption != this.archiveOption) {
-      this.dbChangesService.updateAccount(this.account);
+    let needUpdate: boolean = this.account.archiveOption != this.archiveOption;
+    if (this.differingBackups) {
+      if (this.overwriteOption == 'overwriteFile') {
+        this.automaticBackupsService.overwriteFile();
+      } else if (this.overwriteOption == 'updateAccount') {
+        this.showModal = false;
+        this.loadingService.setLoadingMessage('Overwriting account. This may take a moment.');
+        this.loadingService.setLoadingStatus(true);
+        await this.backupDataService.deleteAccountData(this.account);
+        let backupPath: string = this.account.dataBackupFilePath;
+        this.account = await this.backupDataService.importAccountBackupFile(this.latestBackupFile);
+        this.account.dataBackupFilePath = backupPath;
+        await this.dbChangesService.updateAccount(this.account);
+        await this.dbChangesService.selectAccount(this.account, false);
+        this.loadingService.setLoadingStatus(false);
+        needUpdate = false;
+      }
+    }
+
+    if (needUpdate) {
+      await this.dbChangesService.updateAccount(this.account);
     }
 
     this.hideModal();

@@ -49,7 +49,7 @@ export class AutomaticBackupsService {
         if (this.initializingAccount) {
           if (this.fileExists) {
             this.electronService.getDataFile(this.account.dataBackupFilePath);
-          }else if(this.account) {
+          } else if (this.account) {
             this.alertFileDoesNotExist();
           }
         }
@@ -141,6 +141,19 @@ export class AutomaticBackupsService {
     }
   }
 
+  overwriteFile() {
+    this.electronService.checkFileExists(this.account.dataBackupFilePath);
+    setTimeout(() => {
+      if (this.fileExists) {
+        let backupFile: BackupFile = this.backupDataService.getAccountBackupFile();
+        this.updateElectronBackup(backupFile.dataBackupId, this.account.guid);
+        this.electronService.sendSaveData(backupFile)
+      } else {
+        this.alertFileDoesNotExist();
+      }
+    }, 500);
+  }
+
   initializeAccount() {
     if (this.electronService.isElectron) {
       if (this.account && this.account.dataBackupFilePath) {
@@ -172,9 +185,9 @@ export class AutomaticBackupsService {
   }
 
 
-  alertFileDoesNotExist(){
+  alertFileDoesNotExist() {
     this.toastNotificationService.showToast('Missing Backup File', 'The file selected to backup this account no longer exists. Please navigate to the settings page for the account to update the file selection.', 10000, false, 'alert-danger')
     this.account.dataBackupFilePath = undefined;
-    this.dbChangesService.updateAccount(this.account);    
+    this.dbChangesService.updateAccount(this.account);
   }
 }
