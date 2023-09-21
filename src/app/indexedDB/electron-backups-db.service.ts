@@ -27,7 +27,6 @@ export class ElectronBackupsDbService {
     }
 
     addWithObservable(electronBackup: IdbElectronBackup): Observable<IdbElectronBackup> {
-        console.log('add')
         return this.dbService.add('electronBackups', electronBackup);
     }
 

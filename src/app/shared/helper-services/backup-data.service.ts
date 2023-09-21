@@ -12,6 +12,7 @@ import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { JStatRegressionModel } from 'src/app/models/analysis';
 import { firstValueFrom } from 'rxjs';
+import { ElectronBackupsDbService } from 'src/app/indexedDB/electron-backups-db.service';
 
 @Injectable({
   providedIn: 'root'
@@ -21,7 +22,8 @@ export class BackupDataService {
   constructor(private accountDbService: AccountdbService, private facilityDbService: FacilitydbService, private predictorsDbService: PredictordbService,
     private utilityMeterDbService: UtilityMeterdbService, private utilityMeterDataDbService: UtilityMeterDatadbService,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService, private loadingService: LoadingService, private accountAnalysisDbService: AccountAnalysisDbService,
-    private analysisDbService: AnalysisDbService, private accountReportsDbService: AccountReportDbService) { }
+    private analysisDbService: AnalysisDbService, private accountReportsDbService: AccountReportDbService,
+    private electronBackupsDbService: ElectronBackupsDbService) { }
 
 
   backupAccount() {
@@ -443,6 +445,8 @@ export class BackupDataService {
     for (let i = 0; i < facilityAnalysisItems.length; i++) {
       await firstValueFrom(this.analysisDbService.deleteWithObservable(facilityAnalysisItems[i].id));
     }
+
+    await firstValueFrom(this.electronBackupsDbService.deleteWithObservable(account.guid));
 
   }
 

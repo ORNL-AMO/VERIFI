@@ -114,15 +114,15 @@ export class ElectronBackupFileComponent {
         this.loadingService.setLoadingMessage('Overwriting account. This may take a moment.');
         this.loadingService.setLoadingStatus(true);
         await this.backupDataService.deleteAccountData(this.account);
+
         let backupPath: string = this.account.dataBackupFilePath;
         let sharedFileAuthor: string = this.account.sharedFileAuthor;
-        console.log('1: ' + sharedFileAuthor);
         let isSharedBackupFile: boolean = this.account.isSharedBackupFile;
         this.account = await this.backupDataService.importAccountBackupFile(this.latestBackupFile);
         this.account.dataBackupFilePath = backupPath;
         this.account.sharedFileAuthor = sharedFileAuthor;
         this.account.isSharedBackupFile = isSharedBackupFile;
-        console.log('2: ' + this.account.sharedFileAuthor);
+        
         await this.dbChangesService.updateAccount(this.account);
         await this.dbChangesService.selectAccount(this.account, false);
         this.loadingService.setLoadingStatus(false);
