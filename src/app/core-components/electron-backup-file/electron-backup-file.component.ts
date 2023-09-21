@@ -9,6 +9,7 @@ import { BackupDataService, BackupFile } from 'src/app/shared/helper-services/ba
 import { ToastNotificationsService } from '../toast-notifications/toast-notifications.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { LoadingService } from '../loading/loading.service';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-electron-backup-file',
@@ -122,7 +123,7 @@ export class ElectronBackupFileComponent {
         this.account.dataBackupFilePath = backupPath;
         this.account.sharedFileAuthor = sharedFileAuthor;
         this.account.isSharedBackupFile = isSharedBackupFile;
-        
+
         await this.dbChangesService.updateAccount(this.account);
         await this.dbChangesService.selectAccount(this.account, false);
         this.loadingService.setLoadingStatus(false);
@@ -141,11 +142,16 @@ export class ElectronBackupFileComponent {
 
   createArchive() {
     let dataBackupFilePath: string = this.account.dataBackupFilePath;
+    let archiveBackup: BackupFile = this.backupDataService.getAccountBackupFile();
     let sub: string = dataBackupFilePath.substring(0, dataBackupFilePath.length - 5);
-    let date: Date = new Date(this.latestBackupFile.timeStamp);
-    let dateStr: string = (date.getMonth() + 1) + "-" + date.getDate() + "-" + date.getFullYear();
-    this.latestBackupFile.account.dataBackupFilePath = sub + '_' + dateStr + '.json';
-    this.electronService.sendSaveData(this.latestBackupFile, true);
-    this.toastNotificationService.showToast('Archive Created', this.latestBackupFile.account.dataBackupFilePath + ' created!', undefined, false, 'alert-success');
+    let date: Date = new Date(archiveBackup.timeStamp);
+
+    let datePipe: DatePipe = new DatePipe(navigator.language);
+    let stringFormat: string = 'shortTime';
+    let timeStr = datePipe.transform(archiveBackup.timeStamp, stringFormat);
+    let dateStr: string = (date.getMonth() + 1) + "-" + date.getDate() + "-" + date.getFullYear() + '_' + timeStr;
+    archiveBackup.account.dataBackupFilePath = sub + '_' + dateStr + '.json';
+    this.electronService.sendSaveData(archiveBackup, true);
+    this.toastNotificationService.showToast('Archive Created', archiveBackup.account.dataBackupFilePath + ' created!', undefined, false, 'alert-success');
   }
 }

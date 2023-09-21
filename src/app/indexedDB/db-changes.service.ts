@@ -81,9 +81,11 @@ export class DbChangesService {
   }
 
   selectFacility(facility: IdbFacility) {
-    facility = this.updateDbEntryService.updateFacility(facility).facility;
-    this.updateFacilities(facility, true);
-    console.log('DB Changes Select Facility');
+    let updateFacility: { facility: IdbFacility, isChanged: boolean } = this.updateDbEntryService.updateFacility(facility);
+    if(updateFacility.isChanged){
+      facility = updateFacility.facility;
+      this.updateFacilities(facility, true);
+    }
     //set predictors
     this.setFacilityPredictors(facility);
     //set meters
@@ -138,6 +140,7 @@ export class DbChangesService {
   async updateFacilities(selectedFacility: IdbFacility, onSelect?: boolean) {
     let updatedFacility: IdbFacility = await firstValueFrom(this.facilityDbService.updateWithObservable(selectedFacility));
     let accountFacilites: Array<IdbFacility> = await this.facilityDbService.getAllAccountFacilities(selectedFacility.accountId);
+    console.log('why is this being called..........shit dawg')
     this.facilityDbService.accountFacilities.next(accountFacilites);
     if (!onSelect) {
       this.facilityDbService.selectedFacility.next(updatedFacility);
