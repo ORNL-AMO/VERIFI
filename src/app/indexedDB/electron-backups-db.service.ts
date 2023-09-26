@@ -44,24 +44,26 @@ export class ElectronBackupsDbService {
         return;
     }
 
-    async addOrUpdateFile(backupFile: BackupFile) {
+    async addOrUpdateFile(dataBackupId: string, accountId: string) {
         let accountBackupIndex: number = this.accountBackups.findIndex(backup => {
-            return backup.accountId == backupFile.account.guid
+            return backup.accountId == accountId
         });
+        console.log('add or update...')
         if (accountBackupIndex != -1) {
-            this.accountBackups[accountBackupIndex].dataBackupId = backupFile.dataBackupId;
-            this.accountBackups[accountBackupIndex].timeStamp = backupFile.timeStamp;
+            console.log('update');
+            this.accountBackups[accountBackupIndex].dataBackupId = dataBackupId;
+            this.accountBackups[accountBackupIndex].timeStamp = new Date();
             await firstValueFrom(this.updateWithObservable(this.accountBackups[accountBackupIndex]));
         } else {
+            console.log('addddd....')
             let newBackup: IdbElectronBackup = {
-                accountId: backupFile.account.guid,
-                dataBackupId: backupFile.dataBackupId,
+                accountId: accountId,
+                dataBackupId: dataBackupId,
                 guid: Math.random().toString(36).substr(2, 9),
                 timeStamp: new Date()
             };
             this.accountBackups.push(newBackup);
             await firstValueFrom(this.addWithObservable(newBackup));
-
         }
     }
 }

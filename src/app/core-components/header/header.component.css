@@ -33,3 +33,8 @@ a:not([href]).dropdown-item.active {
     font-size: 22px;
     color: white;
 }
+
+.badge.bg-success:hover .fa.fa-file-arrow-down{
+    cursor: pointer;
+    color: black;
+}

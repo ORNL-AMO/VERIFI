@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AutomaticBackupsService } from 'src/app/electron/automatic-backups.service';
 import { ElectronService } from 'src/app/electron/electron.service';
@@ -29,6 +29,7 @@ export class ElectronBackupFileComponent {
   overwriteOption: 'updateAccount' | 'overwriteFile' = 'updateAccount';
   differingBackups: boolean = false;
   electronBackup: IdbElectronBackup;
+  forceModal: boolean = false;
   constructor(private electronService: ElectronService,
     private accountDbService: AccountdbService,
     private automaticBackupsService: AutomaticBackupsService,
@@ -36,7 +37,8 @@ export class ElectronBackupFileComponent {
     private toastNotificationService: ToastNotificationsService,
     private dbChangesService: DbChangesService,
     private backupDataService: BackupDataService,
-    private loadingService: LoadingService) {
+    private loadingService: LoadingService,
+    private cd: ChangeDetectorRef) {
 
   }
 
@@ -49,6 +51,8 @@ export class ElectronBackupFileComponent {
           if (!this.account || (this.account.guid != val.guid)) {
             this.account = val;
             if (this.account) {
+              console.log(this.account.guid);
+              console.log(this.electronBackupsDbService.accountBackups);
               this.electronBackup = this.electronBackupsDbService.accountBackups.find(backup => {
                 return backup.accountId == this.account.guid
               });
@@ -80,6 +84,8 @@ export class ElectronBackupFileComponent {
   }
 
   checkShowModal() {
+    // console.log(this.electronBackup);
+    // console.log(this.latestBackupFile);
     if (this.account && this.electronBackup && this.latestBackupFile) {
       if (this.latestBackupFile.dataBackupId != this.electronBackup.dataBackupId) {
         this.differingBackups = true;
@@ -93,12 +99,22 @@ export class ElectronBackupFileComponent {
       if (this.showModal == false) {
         this.automaticBackupsService.initializingAccount = false;
       }
+      if (this.automaticBackupsService.forceModal == true) {
+        this.forceModal = true;
+        this.showModal = true;
+      } else {
+        this.forceModal = false;
+      }
+      this.cd.detectChanges();
+    }else if(this.latestBackupFile){
+      this.automaticBackupsService.initializingAccount = false;
     }
   }
 
   hideModal() {
     this.showModal = false;
     this.automaticBackupsService.initializingAccount = false;
+    this.automaticBackupsService.forceModal = false;
   }
 
   async confirmActions() {

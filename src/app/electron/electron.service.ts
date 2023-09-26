@@ -65,6 +65,7 @@ export class ElectronService {
     });
 
     window["electronAPI"].on("file-path", (data) => {
+      console.log('herrr...?')
       this.savedFilePath.next(data);
     });
 

@@ -87,9 +87,17 @@
                     </tbody>
                 </table>
             </ng-container>
+
+            <ng-container *ngIf="!differingBackups">
+                <p class="alert alert-success">
+                    This account is up to date with the latest backup file found. <br>
+                    Backup Timestamp: {{latestBackupFile.timeStamp | date:'medium'}}
+                </p>
+            </ng-container>
+
             <!-- <hr> -->
             <ng-container
-                *ngIf="differingBackups || (account.archiveOption != 'always' && account.archiveOption != 'never')">
+                *ngIf="differingBackups || (account.archiveOption != 'always' && account.archiveOption != 'never') || forceModal">
                 <label class="semibold">
                     Would you like to create an archive of the current state of this account? If selected, a copy of
                     this

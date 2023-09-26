@@ -19,6 +19,7 @@ import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.serv
 import { CustomEmissionsDbService } from 'src/app/indexedDB/custom-emissions-db.service';
 import { ElectronService } from 'src/app/electron/electron.service';
 import { ElectronBackupsDbService } from 'src/app/indexedDB/electron-backups-db.service';
+import { AutomaticBackupsService } from 'src/app/electron/automatic-backups.service';
 
 @Component({
   selector: 'app-account-settings',
@@ -72,7 +73,8 @@ export class AccountSettingsComponent implements OnInit {
     private customEmissionsDbService: CustomEmissionsDbService,
     private electronService: ElectronService,
     private cd: ChangeDetectorRef,
-    private electronBackupsDbService: ElectronBackupsDbService
+    private electronBackupsDbService: ElectronBackupsDbService,
+    private automaticBackupsService: AutomaticBackupsService
   ) { }
 
   ngOnInit() {
@@ -88,12 +90,7 @@ export class AccountSettingsComponent implements OnInit {
     if (this.isElectron) {
       this.savedFilePathSub = this.electronService.savedFilePath.subscribe(savedFilePath => {
         if (this.updatingFilePath) {
-          this.selectedAccount.dataBackupFilePath = savedFilePath;
-          this.selectedAccount.dataBackupId = this.backupFile.dataBackupId;
-          this.updatingFilePath = false;
-          this.electronBackupsDbService.addOrUpdateFile(this.backupFile);
-          this.dbChangesService.updateAccount(this.selectedAccount);
-          this.cd.detectChanges();
+          this.updateFilePath(savedFilePath)
         }
       });
     }
@@ -103,6 +100,7 @@ export class AccountSettingsComponent implements OnInit {
     this.selectedAccountSub.unsubscribe();
     this.accountFacilitiesSub.unsubscribe();
     if (this.savedFilePathSub) {
+      console.log('UNSUBBBB')
       this.savedFilePathSub.unsubscribe();
     }
   }
@@ -288,12 +286,22 @@ export class AccountSettingsComponent implements OnInit {
     this.backupFile = this.backupDataService.getAccountBackupFile();
     this.electronService.openDialog(this.backupFile);
   }
+  async updateFilePath(savedFilePath: string) {
+    // this.automaticBackupsService.initializingAccount = true;
+    this.selectedAccount.dataBackupFilePath = savedFilePath;
+    this.selectedAccount.dataBackupId = this.backupFile.dataBackupId;
+    this.updatingFilePath = false;
+    // await this.electronBackupsDbService.addOrUpdateFile(this.backupFile.dataBackupId, this.backupFile.account.guid);
+    await this.dbChangesService.updateAccount(this.selectedAccount);
+    // this.automaticBackupsService.initializingAccount = false;
+    this.cd.detectChanges();
+  }
 
-  async saveChanges(){
+  async saveChanges() {
     await this.dbChangesService.updateAccount(this.selectedAccount);
   }
 
-  async changeIsShared(){
+  async changeIsShared() {
     //this is bad code but the "sharedFileAuthor" field won't show unless I have the 
     //detectChanges() call..
     //#isWhatItIs

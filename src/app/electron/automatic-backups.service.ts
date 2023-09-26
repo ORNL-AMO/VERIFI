@@ -27,6 +27,7 @@ export class AutomaticBackupsService {
   fileExists: boolean;
   initializingAccount: boolean = true;
   saving: BehaviorSubject<boolean>;
+  forceModal: boolean = false;
   constructor(
     private accountDbService: AccountdbService,
     private electronService: ElectronService,
@@ -62,6 +63,7 @@ export class AutomaticBackupsService {
   subscribeData() {
     if (this.electronService.isElectron) {
       this.accountDbService.selectedAccount.subscribe(val => {
+        console.log('nextttt');
         this.account = val;
         this.saveBackup();
       });
@@ -133,7 +135,7 @@ export class AutomaticBackupsService {
         setTimeout(() => {
           if (this.fileExists) {
             let backupFile: BackupFile = this.backupDataService.getAccountBackupFile();
-            this.updateElectronBackup(backupFile.dataBackupId, this.account.guid);
+            this.electronBackupsDbService.addOrUpdateFile(backupFile.dataBackupId, this.account.guid);
             this.electronService.sendSaveData(backupFile)
           } else {
             console.log('tried to save but there is no file')
@@ -150,7 +152,7 @@ export class AutomaticBackupsService {
     setTimeout(() => {
       if (this.fileExists) {
         let backupFile: BackupFile = this.backupDataService.getAccountBackupFile();
-        this.updateElectronBackup(backupFile.dataBackupId, this.account.guid);
+        this.electronBackupsDbService.addOrUpdateFile(backupFile.dataBackupId, this.account.guid);
         this.electronService.sendSaveData(backupFile)
       } else {
         this.alertFileDoesNotExist();
@@ -167,27 +169,6 @@ export class AutomaticBackupsService {
       }
     }
   }
-
-  async updateElectronBackup(dataBackupId: string, accountId: string) {
-    let backupIndex: number = this.electronBackupsDbService.accountBackups.findIndex(backup => {
-      return backup.accountId == accountId
-    });
-    if (backupIndex != -1) {
-      this.electronBackupsDbService.accountBackups[backupIndex].dataBackupId = dataBackupId;
-      this.electronBackupsDbService.accountBackups[backupIndex].timeStamp = new Date();
-      await firstValueFrom(this.electronBackupsDbService.updateWithObservable(this.electronBackupsDbService.accountBackups[backupIndex]));
-    } else {
-      let newBackup: IdbElectronBackup = {
-        accountId: accountId,
-        dataBackupId: dataBackupId,
-        guid: Math.random().toString(36).substr(2, 9),
-        timeStamp: new Date()
-      };
-      newBackup = await firstValueFrom(this.electronBackupsDbService.addWithObservable(newBackup));
-      this.electronBackupsDbService.accountBackups.push(newBackup);
-    }
-  }
-
 
   alertFileDoesNotExist() {
     this.toastNotificationService.showToast('Missing Backup File', 'The file selected to backup this account no longer exists. Please navigate to the settings page for the account to update the file selection.', 10000, false, 'alert-danger')

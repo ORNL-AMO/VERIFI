@@ -93,10 +93,10 @@ export class HeaderComponent implements OnInit {
     if (this.updateAvailableSub) {
       this.updateAvailableSub.unsubscribe();
     }
-    if(this.updateErrorSub){
+    if (this.updateErrorSub) {
       this.updateErrorSub.unsubscribe();
     }
-    if(this.savingBackupSub){
+    if (this.savingBackupSub) {
       this.savingBackupSub.unsubscribe();
     }
   }
@@ -162,5 +162,10 @@ export class HeaderComponent implements OnInit {
 
   goToManageAccounts() {
     this.router.navigate(['/manage-accounts']);
+  }
+
+  checkLatestFile() {
+    this.automaticBackupService.forceModal = true;
+    this.electronService.getDataFile(this.activeAccount.dataBackupFilePath);
   }
 }
