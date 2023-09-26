@@ -100,7 +100,6 @@ export class AccountSettingsComponent implements OnInit {
     this.selectedAccountSub.unsubscribe();
     this.accountFacilitiesSub.unsubscribe();
     if (this.savedFilePathSub) {
-      console.log('UNSUBBBB')
       this.savedFilePathSub.unsubscribe();
     }
   }
@@ -281,17 +280,20 @@ export class AccountSettingsComponent implements OnInit {
   }
 
 
-  automaticBackup() {
+  async automaticBackup() {
     this.updatingFilePath = true;
     this.backupFile = this.backupDataService.getAccountBackupFile();
+    // await this.electronBackupsDbService.addOrUpdateFile(this.backupFile.dataBackupId, this.backupFile.account.guid);
     this.electronService.openDialog(this.backupFile);
   }
+
   async updateFilePath(savedFilePath: string) {
-    // this.automaticBackupsService.initializingAccount = true;
+    console.log('update file path')
+    this.automaticBackupsService.initializingAccount = false;
+    this.automaticBackupsService.creatingFile = true;
     this.selectedAccount.dataBackupFilePath = savedFilePath;
     this.selectedAccount.dataBackupId = this.backupFile.dataBackupId;
     this.updatingFilePath = false;
-    // await this.electronBackupsDbService.addOrUpdateFile(this.backupFile.dataBackupId, this.backupFile.account.guid);
     await this.dbChangesService.updateAccount(this.selectedAccount);
     // this.automaticBackupsService.initializingAccount = false;
     this.cd.detectChanges();

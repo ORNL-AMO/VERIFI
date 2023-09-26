@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { IdbElectronBackup } from '../models/idb';
 import { Observable, firstValueFrom } from 'rxjs';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
-import { BackupFile } from '../shared/helper-services/backup-data.service';
 
 @Injectable({
     providedIn: 'root'
@@ -35,35 +34,35 @@ export class ElectronBackupsDbService {
     }
 
     deleteWithObservable(accountId: string): Observable<any> {
-        let backup: IdbElectronBackup = this.accountBackups.find(backup => {
-            return backup.accountId == accountId;
+        let accountBackupIndex: number = this.accountBackups.findIndex(backup => {
+            return backup.accountId == accountId
         });
-        if (backup) {
-            return this.dbService.delete('electronBackups', backup.id);
+        if (accountBackupIndex != -1) {
+            this.accountBackups.splice(accountBackupIndex, 1);
+            return this.dbService.delete('electronBackups', this.accountBackups[accountBackupIndex].id);
+        } else {
+            //need to return observable..
+            return this.dbService.count('electronBackups');
         }
-        return;
     }
 
     async addOrUpdateFile(dataBackupId: string, accountId: string) {
         let accountBackupIndex: number = this.accountBackups.findIndex(backup => {
             return backup.accountId == accountId
         });
-        console.log('add or update...')
         if (accountBackupIndex != -1) {
-            console.log('update');
             this.accountBackups[accountBackupIndex].dataBackupId = dataBackupId;
             this.accountBackups[accountBackupIndex].timeStamp = new Date();
             await firstValueFrom(this.updateWithObservable(this.accountBackups[accountBackupIndex]));
         } else {
-            console.log('addddd....')
             let newBackup: IdbElectronBackup = {
                 accountId: accountId,
                 dataBackupId: dataBackupId,
                 guid: Math.random().toString(36).substr(2, 9),
                 timeStamp: new Date()
             };
+            newBackup = await firstValueFrom(this.addWithObservable(newBackup));
             this.accountBackups.push(newBackup);
-            await firstValueFrom(this.addWithObservable(newBackup));
         }
     }
 }

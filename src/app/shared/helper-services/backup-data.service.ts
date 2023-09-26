@@ -445,7 +445,6 @@ export class BackupDataService {
     for (let i = 0; i < facilityAnalysisItems.length; i++) {
       await firstValueFrom(this.analysisDbService.deleteWithObservable(facilityAnalysisItems[i].id));
     }
-
     await firstValueFrom(this.electronBackupsDbService.deleteWithObservable(account.guid));
 
   }

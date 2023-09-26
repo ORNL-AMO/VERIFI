@@ -62,7 +62,7 @@
                                 {{latestBackupFile.account.sharedFileAuthor}}
                             </td>
                         </tr>
-                        <tr>
+                        <!-- <tr>
                             <td>
                                 Which would you like to update?
                             </td>
@@ -83,9 +83,24 @@
                                         Account</label>
                                 </div>
                             </td>
-                        </tr>
+                        </tr> -->
                     </tbody>
                 </table>
+                <label class="semibold"> Which would you like to update?
+                </label>
+                <div class="form-check">
+                    <input type="radio" class="form-check-input" name="overwriteOption" [(ngModel)]="overwriteOption"
+                        [value]="'updateAccount'" id="updateAccount">
+                    <label class="form-check-label" for="updateAccount"><b>Update Account</b> from
+                        Backup</label>
+                </div>
+                <div class="form-check">
+                    <input type="radio" class="form-check-input" name="overwriteOption" [(ngModel)]="overwriteOption"
+                        [value]="'overwriteFile'" id="overwriteFile">
+                    <label class="form-check-label" for="overwriteFile"><b>Update Backup</b> from
+                        Account</label>
+                </div>
+                <hr>
             </ng-container>
 
             <ng-container *ngIf="!differingBackups">

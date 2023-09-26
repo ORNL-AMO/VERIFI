@@ -65,7 +65,7 @@ export class ElectronService {
     });
 
     window["electronAPI"].on("file-path", (data) => {
-      console.log('herrr...?')
+      console.log('electron service file-path...')
       this.savedFilePath.next(data);
     });
 
@@ -104,28 +104,26 @@ export class ElectronService {
   }
 
 
-  sendSaveData(backupFile: BackupFile, isArchive?: boolean) {
-    console.log('send save to electron');
-    console.log('===');
+  sendSaveData(backupFile: BackupFile, isArchive?: boolean, isCreateNewFile?: boolean) {
+    console.log('send save data===>><<<=====')
     if (!window["electronAPI"] || !backupFile) {
       return;
     }
-    let args: { fileName: string, fileData: any, isArchive: boolean } = {
+    let args: { fileName: string, fileData: any, isArchive: boolean, isCreateNewFile: boolean } = {
       fileName: undefined,
       fileData: backupFile,
-      isArchive: isArchive
+      isArchive: isArchive,
+      isCreateNewFile: isCreateNewFile
     }
     if (backupFile.account.dataBackupFilePath || isArchive) {
       args.fileName = backupFile.account.dataBackupFilePath;
     } else {
       args.fileName = backupFile.account.name + '.json';
     }
-    console.log(args.fileName);
     window["electronAPI"].send("saveData", args);
   }
 
   checkFileExists(dataBackupFilePath: string) {
-    console.log('check exists!')
     if (!window["electronAPI"] || !dataBackupFilePath) {
       return;
     }
@@ -136,7 +134,6 @@ export class ElectronService {
   }
 
   openDialog(backupFile: BackupFile) {
-    console.log('open dialog!')
     if (!window["electronAPI"]) {
       return;
     }

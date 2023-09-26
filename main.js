@@ -147,8 +147,11 @@ ipcMain.on("saveData", (event, arg) => {
     if (jetpack.exists(arg.fileName)) {
         log.info('saved existing')
         jetpack.writeAsync(arg.fileName, arg.fileData);
-    } else if(arg.isArchive){
+    } else if (arg.isArchive) {
         log.info('createArchiveFile')
+        jetpack.writeAsync(arg.fileName, arg.fileData);
+    } else if (arg.isCreateNewFile) {
+        log.info('createNewFile')
         jetpack.writeAsync(arg.fileName, arg.fileData);
     }
 });
@@ -164,8 +167,8 @@ ipcMain.on("openDialog", (event, arg) => {
     }
     dialog.showSaveDialog(win, saveDialogOptions).then(results => {
         win.webContents.send('file-path', results.filePath);
-        log.info('save new')
-        jetpack.writeAsync(results.filePath, arg.fileData);
+        // log.info('save new')
+        // jetpack.writeAsync(results.filePath, arg.fileData);
     });
 
 });

@@ -51,8 +51,6 @@ export class ElectronBackupFileComponent {
           if (!this.account || (this.account.guid != val.guid)) {
             this.account = val;
             if (this.account) {
-              console.log(this.account.guid);
-              console.log(this.electronBackupsDbService.accountBackups);
               this.electronBackup = this.electronBackupsDbService.accountBackups.find(backup => {
                 return backup.accountId == this.account.guid
               });
@@ -84,8 +82,6 @@ export class ElectronBackupFileComponent {
   }
 
   checkShowModal() {
-    // console.log(this.electronBackup);
-    // console.log(this.latestBackupFile);
     if (this.account && this.electronBackup && this.latestBackupFile) {
       if (this.latestBackupFile.dataBackupId != this.electronBackup.dataBackupId) {
         this.differingBackups = true;
