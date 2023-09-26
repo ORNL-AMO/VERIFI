@@ -23,5 +23,5 @@ export class LoadingComponent implements OnInit {
     });
   }
 
-  
+
 }
