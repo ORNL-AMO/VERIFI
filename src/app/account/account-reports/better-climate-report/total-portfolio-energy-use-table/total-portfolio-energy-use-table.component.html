@@ -17,7 +17,7 @@
                 Renewable Energy Generated and Used On-site (MWh)
             </td>
             <td *ngFor="let yearDetail of yearDetails">
-
+                {{yearDetail.onSiteGeneratedElectricity | number}}
             </td>
         </tr>
         <tr>
@@ -25,21 +25,21 @@
                 Purchased or Acquired Electricity (MWh)
             </td>
             <td *ngFor="let yearDetail of yearDetails">
-
+                {{yearDetail.purchasedElectricity | number}}
             </td>
         </tr>
         <tr>
             <td class="ps-5">
                 Physical PPAs, Competitive or Utility Products, CCAs, Self-supply (MWh) </td>
             <td *ngFor="let yearDetail of yearDetails">
-
+                {{yearDetail.pppaElectricity | number}}
             </td>
         </tr>
         <tr>
             <td class="ps-5">
                 Financial / Virtual PPAs (MWh) </td>
             <td *ngFor="let yearDetail of yearDetails">
-
+                {{yearDetail.vppaElectricity | number}}
             </td>
         </tr>
         <tr>
@@ -47,7 +47,7 @@
                 Unbundle RECs (MWh)
             </td>
             <td *ngFor="let yearDetail of yearDetails">
-
+                {{yearDetail.RECs | number}}
             </td>
         </tr>
         <tr>
@@ -55,7 +55,7 @@
                 Remaining Grid (MWh)
             </td>
             <td *ngFor="let yearDetail of yearDetails">
-
+                {{yearDetail.gridElectricity | number}}
             </td>
         </tr>
         <tr *ngFor="let fuel of yearDetails[0].fuelTotals; let index = index;">
