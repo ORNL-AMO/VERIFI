@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { BetterClimateYearDetails } from 'src/app/calculations/carbon-calculations/betterClimateReport';
+import { BetterClimateYearDetails } from 'src/app/calculations/carbon-calculations/betterClimateYearsDetails';
 
 @Component({
   selector: 'app-graph-calculations-table',
