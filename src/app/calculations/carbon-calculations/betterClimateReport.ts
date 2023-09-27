@@ -18,15 +18,19 @@ export class BetterClimateReport {
         let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(meters, meterData, account, false, { energyIsSource: false, neededUnits: 'MMBtu' });
         calanderizedMeters = setEmissionsForCalanderizedMeters(calanderizedMeters, false, facilities, co2Emissions);
 
-        
+
         this.setYearDetails(calanderizedMeters, facilities, emissionsDisplay);
     }
 
     setYearDetails(calanderizedMeters: Array<CalanderizedMeter>, facilities: Array<IdbFacility>, emissionsDisplay: 'market' | 'location') {
         this.yearDetails = new Array();
+        let baselineYearTotalEmissions: number;
         for (let year = this.baselineYear; year <= this.reportYear; year++) {
-            let betterClimateYearDetails: BetterClimateYearDetails = new BetterClimateYearDetails(year, calanderizedMeters, facilities, emissionsDisplay);
+            let betterClimateYearDetails: BetterClimateYearDetails = new BetterClimateYearDetails(year, calanderizedMeters, facilities, emissionsDisplay, baselineYearTotalEmissions);
             this.yearDetails.push(betterClimateYearDetails);
+            if (year == this.baselineYear) {
+                baselineYearTotalEmissions = betterClimateYearDetails.totalEmissions;
+            }
         }
     }
 
@@ -58,7 +62,9 @@ export class BetterClimateYearDetails {
 
     totalEmissions: number;
 
-    constructor(year: number, calanderizedMeters: Array<CalanderizedMeter>, facilities: Array<IdbFacility>, emissionsDisplay: 'market' | 'location') {
+    totalEmissionsReduction: number;
+    percentEmissionsReduction: number;
+    constructor(year: number, calanderizedMeters: Array<CalanderizedMeter>, facilities: Array<IdbFacility>, emissionsDisplay: 'market' | 'location', baselineYearTotalEmissions?: number) {
         this.year = year;
         this.setFacilityIds(calanderizedMeters);
         this.setTotalSquareFeet(facilities);
@@ -98,6 +104,9 @@ export class BetterClimateYearDetails {
         this.scope2LocationEmissions = this.getEmissionsTotal(calanderizedMeters, year, [3, 4], false);
 
         this.setTotalEmissions(emissionsDisplay);
+        this.setTotalEmissionsReduction(baselineYearTotalEmissions);
+        this.setPercentEmissionsReduction(baselineYearTotalEmissions);
+
     }
 
     setFacilityIds(calanderizedMeters: Array<CalanderizedMeter>) {
@@ -204,7 +213,7 @@ export class BetterClimateYearDetails {
         return new ConvertValue(sumElectricity, 'MMBtu', 'MWh').convertedValue;
     }
 
-    getEmissionsTotal(calanderizedMeters: Array<CalanderizedMeter>, year: number, includedScope: Array<number>, isMarketEmissions: boolean): number{
+    getEmissionsTotal(calanderizedMeters: Array<CalanderizedMeter>, year: number, includedScope: Array<number>, isMarketEmissions: boolean): number {
         let scope1Meters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => {
             return includedScope.includes(cMeter.meter.scope)
         });
@@ -214,22 +223,38 @@ export class BetterClimateYearDetails {
         monthlyData = monthlyData.filter(mData => {
             return mData.fiscalYear == year;
         });
-        if(isMarketEmissions){
+        if (isMarketEmissions) {
             return _.sumBy(monthlyData, (monthlyData: MonthlyData) => {
                 return monthlyData.marketEmissions;
             });
-        }else{
+        } else {
             return _.sumBy(monthlyData, (monthlyData: MonthlyData) => {
                 return monthlyData.locationEmissions;
             });
         }
     }
 
-    setTotalEmissions(emissionsDisplay: 'market' | 'location'){
-        if(emissionsDisplay == 'location'){
+    setTotalEmissions(emissionsDisplay: 'market' | 'location') {
+        if (emissionsDisplay == 'location') {
             this.totalEmissions = this.totalScope1Emissions + this.scope2LocationEmissions;
-        }else{
+        } else {
             this.totalEmissions = this.totalScope1Emissions + this.scope2MarketEmissions;
+        }
+    }
+
+    setTotalEmissionsReduction(baselineYearTotalEmissions: number) {
+        if (baselineYearTotalEmissions) {
+            this.totalEmissionsReduction = baselineYearTotalEmissions - this.totalEmissions;
+        } else {
+            this.totalEmissionsReduction = 0;
+        }
+    }
+
+    setPercentEmissionsReduction(baselineYearTotalEmissions: number) {
+        if (baselineYearTotalEmissions) {
+            this.percentEmissionsReduction = (this.totalEmissionsReduction / baselineYearTotalEmissions) * 100;
+        } else {
+            this.percentEmissionsReduction = 0;
         }
     }
 }

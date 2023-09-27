@@ -9,7 +9,12 @@
                 GHG Emissions Reductions (tonne CO<sub>2</sub>e)
             </td>
             <td *ngFor="let yearDetail of yearDetails">
-
+                <ng-container *ngIf="yearDetail.totalEmissionsReduction">
+                    {{yearDetail.totalEmissionsReduction | customNumber}}
+                </ng-container>
+                <ng-container *ngIf="!yearDetail.totalEmissionsReduction">
+                    &mdash;
+                </ng-container>
             </td>
         </tr>
         <tr>
@@ -17,7 +22,12 @@
                 GHG Emissions Reductions (%)
             </td>
             <td *ngFor="let yearDetail of yearDetails">
-
+                <ng-container *ngIf="yearDetail.percentEmissionsReduction">
+                    {{yearDetail.percentEmissionsReduction  | number:'1.0-2'}} %
+                </ng-container>
+                <ng-container *ngIf="!yearDetail.percentEmissionsReduction">
+                    &mdash;
+                </ng-container>
             </td>
         </tr>
     </tbody>
