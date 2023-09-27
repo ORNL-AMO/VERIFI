@@ -1,0 +1,74 @@
+<h4>
+    Facility Emissions {{annualFacilitySummary.year}}
+</h4>
+
+<table class="table table-responsive table-bordered">
+    <thead>
+        <tr>
+            <th>
+                Facility Name
+            </th>
+            <th>
+                Gross Floor Area<br>
+                (Sq. Ft)
+            </th>
+            <!-- <th>
+                Latitude
+            </th>
+            <th>
+                Longitude
+            </th> -->
+            <th>
+                Scope 1 Emissions<br>
+                (Metric tons CO<sub>2</sub>e)
+            </th>
+            <th>
+                Scope 2 Market Emissions<br>
+                (Metric tons CO<sub>2</sub>e)
+            </th>
+            <th>
+                Scope 2 Location Emissions<br>
+                (Metric tons CO<sub>2</sub>e)
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr *ngFor="let facilitySummary of annualFacilitySummary.betterClimateFacilities">
+            <td>
+                {{facilitySummary.facility.name}}
+            </td>
+            <td>
+                <ng-container *ngIf="facilitySummary.facility.size">
+                    {{facilitySummary.facility.size | customNumber}}
+                </ng-container>
+                <ng-container *ngIf="!facilitySummary.facility.size">
+                    &mdash;
+                </ng-container>
+            </td>
+            <td>
+                <ng-container *ngIf="facilitySummary.scope1Emissions">
+                    {{facilitySummary.scope1Emissions | customNumber}}
+                </ng-container>
+                <ng-container *ngIf="!facilitySummary.scope1Emissions">
+                    &mdash;
+                </ng-container>
+            </td>
+            <td>
+                <ng-container *ngIf="facilitySummary.scope2MarketEmissions">
+                    {{facilitySummary.scope2MarketEmissions | customNumber}}
+                </ng-container>
+                <ng-container *ngIf="!facilitySummary.scope2MarketEmissions">
+                    &mdash;
+                </ng-container>
+            </td>
+            <td>
+                <ng-container *ngIf="facilitySummary.scope2LocationEmissions">
+                    {{facilitySummary.scope2LocationEmissions | customNumber}}
+                </ng-container>
+                <ng-container *ngIf="!facilitySummary.scope2LocationEmissions">
+                    &mdash;
+                </ng-container>
+            </td>
+        </tr>
+    </tbody>
+</table>

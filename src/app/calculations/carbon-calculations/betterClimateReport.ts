@@ -5,12 +5,17 @@ import * as _ from 'lodash';
 import { setEmissionsForCalanderizedMeters } from "../emissions-calculations/emissions";
 import { SubregionEmissions } from "src/app/models/eGridEmissions";
 import { BetterClimateYearDetails } from "./betterClimateYearsDetails";
+import { BetterClimateFacility } from "./betterClimateFacility";
 
 export class BetterClimateReport {
 
     baselineYear: number;
     reportYear: number;
     portfolioYearDetails: Array<BetterClimateYearDetails>;
+    annualFacilitiesSummaries: Array<{
+        betterClimateFacilities: Array<BetterClimateFacility>,
+        year: number
+    }>;
     constructor(account: IdbAccount, facilities: Array<IdbFacility>, meters: Array<IdbUtilityMeter>, meterData: Array<IdbUtilityMeterData>, baselineYear: number, reportYear: number,
         co2Emissions: Array<SubregionEmissions>, emissionsDisplay: 'market' | 'location', emissionsGoal: number) {
         this.baselineYear = baselineYear;
@@ -20,6 +25,7 @@ export class BetterClimateReport {
 
 
         this.setPortfolioYearDetails(calanderizedMeters, facilities, emissionsDisplay, emissionsGoal);
+        this.setAnnualFacilitiesSummaries(calanderizedMeters, facilities);
     }
 
     setPortfolioYearDetails(calanderizedMeters: Array<CalanderizedMeter>, facilities: Array<IdbFacility>, emissionsDisplay: 'market' | 'location', emissionsGoal: number) {
@@ -34,6 +40,23 @@ export class BetterClimateReport {
                 baselineYearDetails = betterClimateYearDetails;
             }
         }
+    }
+
+    setAnnualFacilitiesSummaries(calanderizedMeters: Array<CalanderizedMeter>, facilities: Array<IdbFacility>) {
+        this.annualFacilitiesSummaries = new Array();
+
+        for (let year = this.baselineYear; year <= this.reportYear; year++) {
+            let betterClimateFacilities: Array<BetterClimateFacility> = new Array();
+            facilities.forEach(facility => {
+                let betterClimateFacility: BetterClimateFacility = new BetterClimateFacility(facility, calanderizedMeters, year);
+                betterClimateFacilities.push(betterClimateFacility);
+            });
+            this.annualFacilitiesSummaries.push({
+                year: year,
+                betterClimateFacilities: betterClimateFacilities
+            });
+        }
+
     }
 
 }

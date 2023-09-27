@@ -48,6 +48,7 @@ import { EmissionsReductionsTableComponent } from './better-climate-report/emiss
 import { TotalPortfolioEnergyUseTableComponent } from './better-climate-report/total-portfolio-energy-use-table/total-portfolio-energy-use-table.component';
 import { VehicleEnergyUseTableComponent } from './better-climate-report/vehicle-energy-use-table/vehicle-energy-use-table.component';
 import { GraphCalculationsTableComponent } from './better-climate-report/graph-calculations-table/graph-calculations-table.component';
+import { AnnualFacilityClimateSummaryTableComponent } from './better-climate-report/annual-facility-climate-summary-table/annual-facility-climate-summary-table.component';
 
 
 
@@ -95,7 +96,8 @@ import { GraphCalculationsTableComponent } from './better-climate-report/graph-c
     EmissionsReductionsTableComponent,
     TotalPortfolioEnergyUseTableComponent,
     VehicleEnergyUseTableComponent,
-    GraphCalculationsTableComponent
+    GraphCalculationsTableComponent,
+    AnnualFacilityClimateSummaryTableComponent
   ],
   imports: [
     CommonModule,

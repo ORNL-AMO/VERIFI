@@ -1,13 +1,26 @@
 <ng-container *ngIf="selectedReport && calculating == false">
     <div class="report" [ngClass]="{'print': print}">
-        <app-portfolio-information-table [yearDetails]="betterClimateReport.portfolioYearDetails" [cellWidth]="cellWidth"></app-portfolio-information-table>
-        <app-absolute-emissions-table [yearDetails]="betterClimateReport.portfolioYearDetails" [cellWidth]="cellWidth"></app-absolute-emissions-table>
-        <app-emissions-reductions-table [yearDetails]="betterClimateReport.portfolioYearDetails" [cellWidth]="cellWidth"></app-emissions-reductions-table>
-        <app-total-portfolio-energy-use-table [yearDetails]="betterClimateReport.portfolioYearDetails" [cellWidth]="cellWidth"></app-total-portfolio-energy-use-table>
+        <app-portfolio-information-table [yearDetails]="betterClimateReport.portfolioYearDetails"
+            [cellWidth]="cellWidth"></app-portfolio-information-table>
+        <app-absolute-emissions-table [yearDetails]="betterClimateReport.portfolioYearDetails"
+            [cellWidth]="cellWidth"></app-absolute-emissions-table>
+        <app-emissions-reductions-table [yearDetails]="betterClimateReport.portfolioYearDetails"
+            [cellWidth]="cellWidth"></app-emissions-reductions-table>
+        <app-total-portfolio-energy-use-table [yearDetails]="betterClimateReport.portfolioYearDetails"
+            [cellWidth]="cellWidth"></app-total-portfolio-energy-use-table>
         <!--TODO: Add vehicle emissions to meters-->
         <!-- <app-vehicle-energy-use-table [yearDetails]="betterClimateReport.portfolioYearDetails" [cellWidth]="cellWidth"></app-vehicle-energy-use-table> -->
-        <app-graph-calculations-table [yearDetails]="betterClimateReport.portfolioYearDetails" [cellWidth]="cellWidth"></app-graph-calculations-table>
+        <app-graph-calculations-table [yearDetails]="betterClimateReport.portfolioYearDetails"
+            [cellWidth]="cellWidth"></app-graph-calculations-table>
     </div>
+    <ng-container *ngFor="let annualFacilitySummary of betterClimateReport.annualFacilitiesSummaries">
+        <!-- <hr> -->
+        <div class="report" [ngClass]="{'print': print}">
+            <app-annual-facility-climate-summary-table
+                [annualFacilitySummary]="annualFacilitySummary"></app-annual-facility-climate-summary-table>
+        </div>
+    </ng-container>
+
 </ng-container>
 
 
