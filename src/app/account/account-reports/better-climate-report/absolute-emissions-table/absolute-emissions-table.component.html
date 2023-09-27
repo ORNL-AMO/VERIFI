@@ -4,10 +4,10 @@
 <table class="table table-responsive table-bordered">
     <tbody>
         <tr>
-            <th class="first-column">
+            <th [ngStyle]="{'width.%': cellWidth}">
                 Scope 1 Emissions
             </th>
-            <td *ngFor="let yearDetail of yearDetails">
+            <td *ngFor="let yearDetail of yearDetails" [ngStyle]="{'width.%': cellWidth}">
                 <ng-container *ngIf="yearDetail.totalScope1Emissions">
                     {{yearDetail.totalScope1Emissions | customNumber}}
                 </ng-container>

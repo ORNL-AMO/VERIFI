@@ -75,6 +75,15 @@ export class BetterClimateYearDetails {
     increaseInOffsiteRenewables: number;
     emissionsReductionChange: number;
     goalForEmissions: number;
+
+    scope1StationaryReductions: number;
+    scope1MobileReductions: number;
+    scope1FugitiveReductions: number;
+    scope2ChangeInEnergyUse: number;
+    scope2OnsiteRenewablesReductions: number;
+    scope2OffsiteRenewablesReductions: number;
+    scope2GreenOfGridReductions: number;
+    totalEmissionsReductions: number;
     constructor(year: number, calanderizedMeters: Array<CalanderizedMeter>, facilities: Array<IdbFacility>, emissionsDisplay: 'market' | 'location', baselineYearDetails: BetterClimateYearDetails, previousYearDetails: BetterClimateYearDetails, emissionsGoal: number) {
         this.year = year;
         this.setFacilityIds(calanderizedMeters);
@@ -124,6 +133,15 @@ export class BetterClimateYearDetails {
         this.setChangeInRenewables(previousYearDetails);
         this.setEmissionsReductionChange(previousYearDetails);
         this.setGoalForEmissions(emissionsGoal);
+
+        this.setScope1StationaryReductions(baselineYearDetails);
+        this.setScope1MobileReductions(baselineYearDetails);
+        this.setScope1FugitiveReductions(baselineYearDetails);
+        this.setScope2ChangeInEnergyUse(baselineYearDetails);
+        this.setScope2OnsiteRenewablesReductions(baselineYearDetails);
+        this.setScope2OffsiteRenewablesReductions(baselineYearDetails);
+        this.setScope2GreenOfTheGridReductions();
+        this.setTotalEmissionsReductions();
     }
 
     setFacilityIds(calanderizedMeters: Array<CalanderizedMeter>) {
@@ -334,5 +352,59 @@ export class BetterClimateYearDetails {
 
     setGoalForEmissions(emissionsGoal: number) {
         this.goalForEmissions = this.totalEmissions * (1 - emissionsGoal);
+    }
+
+    setScope1StationaryReductions(baselineYearDetails: BetterClimateYearDetails) {
+        if (baselineYearDetails) {
+            this.scope1StationaryReductions = baselineYearDetails.stationaryEmissions - this.stationaryEmissions;
+        } else {
+            this.scope1StationaryReductions = 0;
+        }
+    }
+    setScope1MobileReductions(baselineYearDetails: BetterClimateYearDetails) {
+        if (baselineYearDetails) {
+            this.scope1MobileReductions = baselineYearDetails.mobileEmissions - this.mobileEmissions;
+        } else {
+            this.scope1MobileReductions = 0;
+        }
+    }
+    setScope1FugitiveReductions(baselineYearDetails: BetterClimateYearDetails) {
+        if (baselineYearDetails) {
+            this.scope1FugitiveReductions = baselineYearDetails.fugitiveEmissions - this.fugitiveEmissions;
+        } else {
+            this.scope1FugitiveReductions = 0;
+        }
+    }
+
+    setScope2ChangeInEnergyUse(baselineYearDetails: BetterClimateYearDetails) {
+        if (baselineYearDetails) {
+            this.scope2ChangeInEnergyUse = baselineYearDetails.scope2MarketEmissionsFactor * this.scope2EnergyUse / 1000
+        } else {
+            this.scope2ChangeInEnergyUse = 0;
+        }
+    }
+
+    setScope2OnsiteRenewablesReductions(baselineYearDetails: BetterClimateYearDetails) {
+        if (baselineYearDetails) {
+            this.scope2OnsiteRenewablesReductions = baselineYearDetails.scope2LocationEmissions * this.increaseInOnsiteRenewables / 1000
+        } else {
+            this.scope2OnsiteRenewablesReductions = 0;
+        }
+    }
+
+    setScope2OffsiteRenewablesReductions(baselineYearDetails: BetterClimateYearDetails) {
+        if (baselineYearDetails) {
+            this.scope2OffsiteRenewablesReductions = baselineYearDetails.scope2LocationEmissions * this.increaseInOffsiteRenewables / 1000
+        } else {
+            this.scope2OffsiteRenewablesReductions = 0;
+        }
+    }
+
+    setScope2GreenOfTheGridReductions() {
+        this.scope2GreenOfGridReductions = this.scope2ChangeInEnergyUse + this.scope2OnsiteRenewablesReductions + this.scope2OffsiteRenewablesReductions;
+    }
+
+    setTotalEmissionsReductions(){
+        this.totalEmissionsReductions = this.scope1StationaryReductions + this.scope1MobileReductions + this.scope1FugitiveReductions + this.scope2ChangeInEnergyUse + this.scope2OnsiteRenewablesReductions + this.scope2OffsiteRenewablesReductions + this.scope2GreenOfGridReductions;
     }
 }

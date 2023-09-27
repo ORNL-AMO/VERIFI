@@ -25,6 +25,7 @@ export class BetterClimateReportComponent {
   calculating: boolean | 'error';
   worker: Worker;
   betterClimateReport: BetterClimateReport;
+  cellWidth: number;
   constructor(private accountReportDbService: AccountReportDbService,
     private accountReportsService: AccountReportsService,
     private router: Router, private accountDbService: AccountdbService,
@@ -43,6 +44,7 @@ export class BetterClimateReportComponent {
     }
     this.account = this.accountDbService.selectedAccount.getValue();
     this.calculateCarbonReport();
+    this.setCellWidth();
 
   }
 
@@ -85,5 +87,13 @@ export class BetterClimateReportComponent {
       // Web Workers are not supported in this environment
       this.calculating = false;
     }
+  }
+
+  setCellWidth() {
+    let numCells: number = 1;
+    for (let i = this.selectedReport.baselineYear; i <= this.selectedReport.reportYear; i++) {
+      numCells++;
+    }
+    this.cellWidth = (100 / numCells);
   }
 }

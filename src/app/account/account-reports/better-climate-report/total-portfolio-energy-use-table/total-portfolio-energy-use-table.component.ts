@@ -9,5 +9,7 @@ import { BetterClimateYearDetails } from 'src/app/calculations/carbon-calculatio
 export class TotalPortfolioEnergyUseTableComponent {
   @Input()
   yearDetails: Array<BetterClimateYearDetails>;
+  @Input()
+  cellWidth: number;
 
 }

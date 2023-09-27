@@ -5,10 +5,10 @@
 <table class="table table-responsive table-bordered">
     <tbody>
         <tr>
-            <td class="first-column">
+            <td [ngStyle]="{'width.%': cellWidth}">
                 Total Electricity Consumption (MWh)
             </td>
-            <td *ngFor="let yearDetail of yearDetails">
+            <td *ngFor="let yearDetail of yearDetails" [ngStyle]="{'width.%': cellWidth}">
                 <ng-container *ngIf="yearDetail.totalElectricity">
                     {{yearDetail.totalElectricity | customNumber}}
                 </ng-container>

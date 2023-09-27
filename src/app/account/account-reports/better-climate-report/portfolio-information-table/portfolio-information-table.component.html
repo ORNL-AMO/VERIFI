@@ -4,10 +4,10 @@
 <table class="table table-responsive table-bordered">
     <tbody>
         <tr>
-            <th class="first-column">
+            <th [ngStyle]="{'width.%': cellWidth}">
                 Year
             </th>
-            <td *ngFor="let yearDetail of yearDetails">
+            <td *ngFor="let yearDetail of yearDetails" [ngStyle]="{'width.%': cellWidth}">
                 {{yearDetail.year}}
             </td>
         </tr>
