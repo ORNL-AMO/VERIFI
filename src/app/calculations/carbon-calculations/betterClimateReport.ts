@@ -3,23 +3,29 @@ import { IdbAccount, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from "s
 import { getCalanderizedMeterData } from "../calanderization/calanderizeMeters";
 import * as _ from 'lodash';
 import { ConvertValue } from "../conversions/convertValue";
+import { setEmissionsForCalanderizedMeters } from "../emissions-calculations/emissions";
+import { SubregionEmissions } from "src/app/models/eGridEmissions";
 
 export class BetterClimateReport {
 
     baselineYear: number;
     reportYear: number;
     yearDetails: Array<BetterClimateYearDetails>;
-    constructor(account: IdbAccount, facilities: Array<IdbFacility>, meters: Array<IdbUtilityMeter>, meterData: Array<IdbUtilityMeterData>, baselineYear: number, reportYear: number) {
+    constructor(account: IdbAccount, facilities: Array<IdbFacility>, meters: Array<IdbUtilityMeter>, meterData: Array<IdbUtilityMeterData>, baselineYear: number, reportYear: number,
+        co2Emissions: Array<SubregionEmissions>, emissionsDisplay: 'market' | 'location') {
         this.baselineYear = baselineYear;
         this.reportYear = reportYear;
         let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(meters, meterData, account, false, { energyIsSource: false, neededUnits: 'MMBtu' });
-        this.setYearDetails(calanderizedMeters, facilities);
+        calanderizedMeters = setEmissionsForCalanderizedMeters(calanderizedMeters, false, facilities, co2Emissions);
+
+        
+        this.setYearDetails(calanderizedMeters, facilities, emissionsDisplay);
     }
 
-    setYearDetails(calanderizedMeters: Array<CalanderizedMeter>, facilities: Array<IdbFacility>) {
+    setYearDetails(calanderizedMeters: Array<CalanderizedMeter>, facilities: Array<IdbFacility>, emissionsDisplay: 'market' | 'location') {
         this.yearDetails = new Array();
         for (let year = this.baselineYear; year <= this.reportYear; year++) {
-            let betterClimateYearDetails: BetterClimateYearDetails = new BetterClimateYearDetails(year, calanderizedMeters, facilities);
+            let betterClimateYearDetails: BetterClimateYearDetails = new BetterClimateYearDetails(year, calanderizedMeters, facilities, emissionsDisplay);
             this.yearDetails.push(betterClimateYearDetails);
         }
     }
@@ -40,7 +46,19 @@ export class BetterClimateYearDetails {
     vppaElectricity: number;
     RECs: number;
     totalEnergyUse: number;
-    constructor(year: number, calanderizedMeters: Array<CalanderizedMeter>, facilities: Array<IdbFacility>) {
+
+    totalScope1Emissions: number;
+    stationaryEmissions: number;
+    mobileEmissions: number;
+    fugitiveEmissions: number;
+    processEmissions: number;
+
+    scope2MarketEmissions: number;
+    scope2LocationEmissions: number;
+
+    totalEmissions: number;
+
+    constructor(year: number, calanderizedMeters: Array<CalanderizedMeter>, facilities: Array<IdbFacility>, emissionsDisplay: 'market' | 'location') {
         this.year = year;
         this.setFacilityIds(calanderizedMeters);
         this.setTotalSquareFeet(facilities);
@@ -67,6 +85,19 @@ export class BetterClimateYearDetails {
         let fuelTypes: Array<string> = this.getFuelTypes(calanderizedMeters);
         this.setFuelTotals(fuelTypes, calanderizedMeters);
         this.setTotalEnergyUse();
+        //emissions
+        this.totalScope1Emissions = this.getEmissionsTotal(calanderizedMeters, year, [1, 2], false);
+        this.stationaryEmissions = this.getEmissionsTotal(calanderizedMeters, year, [1], false);
+        this.mobileEmissions = this.getEmissionsTotal(calanderizedMeters, year, [2], false);
+        //TODO: fugitive and process coming soon
+        this.fugitiveEmissions = 0;
+        this.processEmissions = 0;
+
+
+        this.scope2MarketEmissions = this.getEmissionsTotal(calanderizedMeters, year, [3, 4], true);
+        this.scope2LocationEmissions = this.getEmissionsTotal(calanderizedMeters, year, [3, 4], false);
+
+        this.setTotalEmissions(emissionsDisplay);
     }
 
     setFacilityIds(calanderizedMeters: Array<CalanderizedMeter>) {
@@ -171,5 +202,34 @@ export class BetterClimateYearDetails {
             return monthlyData.energyConsumption;
         });
         return new ConvertValue(sumElectricity, 'MMBtu', 'MWh').convertedValue;
+    }
+
+    getEmissionsTotal(calanderizedMeters: Array<CalanderizedMeter>, year: number, includedScope: Array<number>, isMarketEmissions: boolean): number{
+        let scope1Meters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => {
+            return includedScope.includes(cMeter.meter.scope)
+        });
+        let monthlyData: Array<MonthlyData> = scope1Meters.flatMap(eMeter => {
+            return eMeter.monthlyData;
+        });
+        monthlyData = monthlyData.filter(mData => {
+            return mData.fiscalYear == year;
+        });
+        if(isMarketEmissions){
+            return _.sumBy(monthlyData, (monthlyData: MonthlyData) => {
+                return monthlyData.marketEmissions;
+            });
+        }else{
+            return _.sumBy(monthlyData, (monthlyData: MonthlyData) => {
+                return monthlyData.locationEmissions;
+            });
+        }
+    }
+
+    setTotalEmissions(emissionsDisplay: 'market' | 'location'){
+        if(emissionsDisplay == 'location'){
+            this.totalEmissions = this.totalScope1Emissions + this.scope2LocationEmissions;
+        }else{
+            this.totalEmissions = this.totalScope1Emissions + this.scope2MarketEmissions;
+        }
     }
 }

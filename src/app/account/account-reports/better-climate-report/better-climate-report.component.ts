@@ -9,6 +9,7 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { BetterClimateReport } from 'src/app/calculations/carbon-calculations/betterClimateReport';
+import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 
 @Component({
   selector: 'app-better-climate-report',
@@ -29,7 +30,8 @@ export class BetterClimateReportComponent {
     private router: Router, private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService,
     private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService) { }
+    private utilityMeterDataDbService: UtilityMeterDatadbService,
+    private eGridService: EGridService) { }
 
   ngOnInit(): void {
     this.printSub = this.accountReportsService.print.subscribe(print => {
@@ -75,6 +77,8 @@ export class BetterClimateReportComponent {
         facilities: accountFacilities,
         meters: accountMeters,
         meterData: accountMeterData,
+        co2Emissions: this.eGridService.co2Emissions,
+        emissionsDisplay: this.selectedReport.betterClimateReportSetup.emissionsDisplay
       });
     } else {
       // Web Workers are not supported in this environment
