@@ -12,24 +12,26 @@ export class BetterClimateReport {
     reportYear: number;
     yearDetails: Array<BetterClimateYearDetails>;
     constructor(account: IdbAccount, facilities: Array<IdbFacility>, meters: Array<IdbUtilityMeter>, meterData: Array<IdbUtilityMeterData>, baselineYear: number, reportYear: number,
-        co2Emissions: Array<SubregionEmissions>, emissionsDisplay: 'market' | 'location') {
+        co2Emissions: Array<SubregionEmissions>, emissionsDisplay: 'market' | 'location', emissionsGoal: number) {
         this.baselineYear = baselineYear;
         this.reportYear = reportYear;
         let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(meters, meterData, account, false, { energyIsSource: false, neededUnits: 'MMBtu' });
         calanderizedMeters = setEmissionsForCalanderizedMeters(calanderizedMeters, false, facilities, co2Emissions);
 
 
-        this.setYearDetails(calanderizedMeters, facilities, emissionsDisplay);
+        this.setYearDetails(calanderizedMeters, facilities, emissionsDisplay, emissionsGoal);
     }
 
-    setYearDetails(calanderizedMeters: Array<CalanderizedMeter>, facilities: Array<IdbFacility>, emissionsDisplay: 'market' | 'location') {
+    setYearDetails(calanderizedMeters: Array<CalanderizedMeter>, facilities: Array<IdbFacility>, emissionsDisplay: 'market' | 'location', emissionsGoal: number) {
         this.yearDetails = new Array();
-        let baselineYearTotalEmissions: number;
+        let baselineYearDetails: BetterClimateYearDetails;
+        let previousYearDetails: BetterClimateYearDetails;
         for (let year = this.baselineYear; year <= this.reportYear; year++) {
-            let betterClimateYearDetails: BetterClimateYearDetails = new BetterClimateYearDetails(year, calanderizedMeters, facilities, emissionsDisplay, baselineYearTotalEmissions);
+            let betterClimateYearDetails: BetterClimateYearDetails = new BetterClimateYearDetails(year, calanderizedMeters, facilities, emissionsDisplay, baselineYearDetails, previousYearDetails, emissionsGoal);
             this.yearDetails.push(betterClimateYearDetails);
+            previousYearDetails = betterClimateYearDetails;
             if (year == this.baselineYear) {
-                baselineYearTotalEmissions = betterClimateYearDetails.totalEmissions;
+                baselineYearDetails = betterClimateYearDetails;
             }
         }
     }
@@ -64,7 +66,16 @@ export class BetterClimateYearDetails {
 
     totalEmissionsReduction: number;
     percentEmissionsReduction: number;
-    constructor(year: number, calanderizedMeters: Array<CalanderizedMeter>, facilities: Array<IdbFacility>, emissionsDisplay: 'market' | 'location', baselineYearTotalEmissions?: number) {
+    annualPercentImprovement: number;
+    scope2EnergyUse: number;
+    scope2MarketEmissionsFactor: number;
+    scope2LocationEmissionsFactor: number;
+    decreaseInScope2EnergyUse: number;
+    increaseInOnsiteRenewables: number;
+    increaseInOffsiteRenewables: number;
+    emissionsReductionChange: number;
+    goalForEmissions: number;
+    constructor(year: number, calanderizedMeters: Array<CalanderizedMeter>, facilities: Array<IdbFacility>, emissionsDisplay: 'market' | 'location', baselineYearDetails: BetterClimateYearDetails, previousYearDetails: BetterClimateYearDetails, emissionsGoal: number) {
         this.year = year;
         this.setFacilityIds(calanderizedMeters);
         this.setTotalSquareFeet(facilities);
@@ -104,9 +115,15 @@ export class BetterClimateYearDetails {
         this.scope2LocationEmissions = this.getEmissionsTotal(calanderizedMeters, year, [3, 4], false);
 
         this.setTotalEmissions(emissionsDisplay);
-        this.setTotalEmissionsReduction(baselineYearTotalEmissions);
-        this.setPercentEmissionsReduction(baselineYearTotalEmissions);
-
+        this.setTotalEmissionsReduction(baselineYearDetails);
+        this.setPercentEmissionsReduction(baselineYearDetails);
+        this.setAnnualPercentImprovement(previousYearDetails);
+        this.setScope2EnergyUse(calanderizedMeters, year);
+        this.setScope2EmissionsFactors();
+        this.setDecreaseInScope2EnergyUse(baselineYearDetails);
+        this.setChangeInRenewables(previousYearDetails);
+        this.setEmissionsReductionChange(previousYearDetails);
+        this.setGoalForEmissions(emissionsGoal);
     }
 
     setFacilityIds(calanderizedMeters: Array<CalanderizedMeter>) {
@@ -242,19 +259,80 @@ export class BetterClimateYearDetails {
         }
     }
 
-    setTotalEmissionsReduction(baselineYearTotalEmissions: number) {
-        if (baselineYearTotalEmissions) {
-            this.totalEmissionsReduction = baselineYearTotalEmissions - this.totalEmissions;
+    setTotalEmissionsReduction(baselineYearDetails: BetterClimateYearDetails) {
+        if (baselineYearDetails) {
+            this.totalEmissionsReduction = baselineYearDetails.totalEmissions - this.totalEmissions;
         } else {
             this.totalEmissionsReduction = 0;
         }
     }
 
-    setPercentEmissionsReduction(baselineYearTotalEmissions: number) {
-        if (baselineYearTotalEmissions) {
-            this.percentEmissionsReduction = (this.totalEmissionsReduction / baselineYearTotalEmissions) * 100;
+    setPercentEmissionsReduction(baselineYearDetails: BetterClimateYearDetails) {
+        if (baselineYearDetails) {
+            this.percentEmissionsReduction = (this.totalEmissionsReduction / baselineYearDetails.totalEmissions) * 100;
         } else {
             this.percentEmissionsReduction = 0;
         }
+    }
+
+    setAnnualPercentImprovement(previousYearDetails: BetterClimateYearDetails) {
+        if (previousYearDetails) {
+            this.annualPercentImprovement = this.percentEmissionsReduction - previousYearDetails.percentEmissionsReduction;
+        } else {
+            this.annualPercentImprovement = 0;
+        }
+    }
+
+    setScope2EnergyUse(calanderizedMeters: Array<CalanderizedMeter>, year: number) {
+        let scope1Meters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => {
+            return cMeter.meter.scope == 3 || cMeter.meter.scope == 4
+        });
+        let monthlyData: Array<MonthlyData> = scope1Meters.flatMap(eMeter => {
+            return eMeter.monthlyData;
+        });
+        monthlyData = monthlyData.filter(mData => {
+            return mData.fiscalYear == year;
+        });
+        this.scope2EnergyUse = _.sumBy(monthlyData, (monthlyData: MonthlyData) => {
+            return monthlyData.energyConsumption;
+        });
+    }
+
+    setScope2EmissionsFactors() {
+        this.scope2LocationEmissionsFactor = (this.scope2EnergyUse / this.scope2LocationEmissions) * 1000;
+        this.scope2MarketEmissionsFactor = (this.scope2EnergyUse / this.scope2MarketEmissions) * 1000;
+    }
+
+    setDecreaseInScope2EnergyUse(baselineYearDetails: BetterClimateYearDetails) {
+        if (baselineYearDetails) {
+            this.decreaseInScope2EnergyUse = baselineYearDetails.scope2EnergyUse - this.scope2EnergyUse;
+        } else {
+            this.decreaseInScope2EnergyUse = 0;
+        }
+    }
+
+    setChangeInRenewables(previousYearDetails: BetterClimateYearDetails) {
+        if (previousYearDetails) {
+            this.increaseInOnsiteRenewables = this.onSiteGeneratedElectricity - previousYearDetails.onSiteGeneratedElectricity;
+
+            let currentYearOffsiteRenewables: number = (this.pppaElectricity + this.vppaElectricity + this.RECs);
+            let previousYearOffsiteRenewables: number = (previousYearDetails.pppaElectricity + previousYearDetails.vppaElectricity + previousYearDetails.RECs);
+            this.increaseInOffsiteRenewables = currentYearOffsiteRenewables - previousYearOffsiteRenewables;
+        } else {
+            this.increaseInOnsiteRenewables = 0;
+            this.increaseInOffsiteRenewables = 0;
+        }
+    }
+
+    setEmissionsReductionChange(previousYearDetails: BetterClimateYearDetails) {
+        if (previousYearDetails) {
+            this.emissionsReductionChange = this.scope2EnergyUse * (previousYearDetails.scope2MarketEmissionsFactor - this.scope2MarketEmissionsFactor) / 1000;
+        } else {
+            this.emissionsReductionChange = this.scope2EnergyUse * (this.scope2MarketEmissionsFactor - this.scope2MarketEmissionsFactor) / 1000;
+        }
+    }
+
+    setGoalForEmissions(emissionsGoal: number) {
+        this.goalForEmissions = this.totalEmissions * (1 - emissionsGoal);
     }
 }

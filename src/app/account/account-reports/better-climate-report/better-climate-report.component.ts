@@ -78,7 +78,8 @@ export class BetterClimateReportComponent {
         meters: accountMeters,
         meterData: accountMeterData,
         co2Emissions: this.eGridService.co2Emissions,
-        emissionsDisplay: this.selectedReport.betterClimateReportSetup.emissionsDisplay
+        emissionsDisplay: this.selectedReport.betterClimateReportSetup.emissionsDisplay,
+        emissionsGoal: this.account.sustainabilityQuestions.greenhouseReductionPercent
       });
     } else {
       // Web Workers are not supported in this environment
