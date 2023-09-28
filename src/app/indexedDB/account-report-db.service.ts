@@ -135,7 +135,8 @@ export class AccountReportDbService {
         includeSavings: true,
       },
       betterClimateReportSetup: {
-        emissionsDisplay: 'location'
+        emissionsDisplay: 'location',
+        initiativeNotes: []
       }
     }
   }

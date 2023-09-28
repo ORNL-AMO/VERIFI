@@ -127,4 +127,8 @@ export interface PerformanceReportSetup {
 
 export interface BetterClimateReportSetup {
   emissionsDisplay: 'market' | 'location',
+  initiativeNotes: Array<{
+    year: number,
+    note: string
+  }>
 }
