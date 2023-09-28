@@ -3,12 +3,22 @@
 </h4>
 
 <table class="table table-responsive table-bordered">
+    <thead>
+        <tr>
+            <th [ngStyle]="{'width.%': cellWidth}">
+
+            </th>
+            <th *ngFor="let yearDetail of yearDetails" [ngStyle]="{'width.%': cellWidth}">
+                {{yearDetail.year}}
+            </th>
+        </tr>
+    </thead>
     <tbody>
         <tr>
-            <td [ngStyle]="{'width.%': cellWidth}">
+            <td>
                 Total Electricity Consumption (MWh)
             </td>
-            <td *ngFor="let yearDetail of yearDetails" [ngStyle]="{'width.%': cellWidth}">
+            <td *ngFor="let yearDetail of yearDetails">
                 <ng-container *ngIf="yearDetail.totalElectricity">
                     {{yearDetail.totalElectricity | customNumber}}
                 </ng-container>

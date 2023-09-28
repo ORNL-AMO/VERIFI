@@ -1,5 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { BetterClimateYearDetails } from 'src/app/calculations/carbon-calculations/betterClimateYearsDetails';
+import { IdbAccount } from 'src/app/models/idb';
 
 @Component({
   selector: 'app-absolute-emissions-table',
@@ -11,5 +12,7 @@ export class AbsoluteEmissionsTableComponent {
   yearDetails: Array<BetterClimateYearDetails>;
   @Input()
   cellWidth: number;
+  @Input()
+  account: IdbAccount;
 
 }

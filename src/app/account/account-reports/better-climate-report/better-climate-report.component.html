@@ -1,7 +1,7 @@
 <ng-container *ngIf="selectedReport && calculating == false">
     <div class="report" [ngClass]="{'print': print}">
         <app-portfolio-information-table [yearDetails]="betterClimateReport.portfolioYearDetails"
-            [cellWidth]="cellWidth"></app-portfolio-information-table>
+            [cellWidth]="cellWidth" [account]="account"></app-portfolio-information-table>
         <app-absolute-emissions-table [yearDetails]="betterClimateReport.portfolioYearDetails"
             [cellWidth]="cellWidth"></app-absolute-emissions-table>
         <app-emissions-reductions-table [yearDetails]="betterClimateReport.portfolioYearDetails"

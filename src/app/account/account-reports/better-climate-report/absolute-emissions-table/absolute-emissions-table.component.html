@@ -2,12 +2,22 @@
     Section 2: Absolute Emissions (Metric tonne CO<sub>2</sub>e)
 </h4>
 <table class="table table-responsive table-bordered">
-    <tbody>
+    <thead>
         <tr>
             <th [ngStyle]="{'width.%': cellWidth}">
+
+            </th>
+            <th *ngFor="let yearDetail of yearDetails" [ngStyle]="{'width.%': cellWidth}">
+                {{yearDetail.year}}
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <th>
                 Scope 1 Emissions
             </th>
-            <td *ngFor="let yearDetail of yearDetails" [ngStyle]="{'width.%': cellWidth}">
+            <td *ngFor="let yearDetail of yearDetails">
                 <ng-container *ngIf="yearDetail.totalScope1Emissions">
                     {{yearDetail.totalScope1Emissions | customNumber}}
                 </ng-container>
