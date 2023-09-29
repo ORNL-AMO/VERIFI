@@ -7,7 +7,7 @@
             <th [ngStyle]="{'width.%': cellWidth}">
                 Year
             </th>
-            <th *ngFor="let yearDetail of yearDetails" [ngStyle]="{'width.%': cellWidth}">
+            <th class="text-center" *ngFor="let yearDetail of yearDetails" [ngStyle]="{'width.%': cellWidth}">
                 {{yearDetail.year | yearDisplay:account.fiscalYear}}
             </th>
         </tr>

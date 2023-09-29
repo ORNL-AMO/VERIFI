@@ -12,10 +12,7 @@ export class BetterClimateReport {
     baselineYear: number;
     reportYear: number;
     portfolioYearDetails: Array<BetterClimateYearDetails>;
-    annualFacilitiesSummaries: Array<{
-        betterClimateFacilities: Array<BetterClimateFacility>,
-        year: number
-    }>;
+    annualFacilitiesSummaries: Array<BetterClimateAnnualFacilitySummary>;
     constructor(account: IdbAccount, facilities: Array<IdbFacility>, meters: Array<IdbUtilityMeter>, meterData: Array<IdbUtilityMeterData>, baselineYear: number, reportYear: number,
         co2Emissions: Array<SubregionEmissions>, emissionsDisplay: 'market' | 'location', emissionsGoal: number) {
         this.baselineYear = baselineYear;
@@ -53,10 +50,22 @@ export class BetterClimateReport {
             });
             this.annualFacilitiesSummaries.push({
                 year: year,
-                betterClimateFacilities: betterClimateFacilities
+                betterClimateFacilities: betterClimateFacilities,
+                totalScope1Emissions: _.sumBy(betterClimateFacilities, 'scope1Emissions'),
+                totalScope2LocationEmissions: _.sumBy(betterClimateFacilities, 'scope2LocationEmissions'),
+                totalScope2MarketEmissions: _.sumBy(betterClimateFacilities, 'scope2MarketEmissions')
             });
         }
 
     }
 
+}
+
+
+export interface BetterClimateAnnualFacilitySummary {
+    betterClimateFacilities: Array<BetterClimateFacility>,
+    year: number,
+    totalScope1Emissions: number,
+    totalScope2LocationEmissions: number,
+    totalScope2MarketEmissions: number
 }

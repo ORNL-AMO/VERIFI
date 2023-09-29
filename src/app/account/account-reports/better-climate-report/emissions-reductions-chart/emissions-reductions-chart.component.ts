@@ -58,12 +58,12 @@ export class EmissionsReductionsChartComponent {
     }
     traceData.push(trace2)
     var layout = {
-      title: {
-        text: 'GHG Emissions Reductions',
-        font: {
-          size: 24
-        },
-      },
+      // title: {
+      //   text: 'GHG Emissions Reductions',
+      //   font: {
+      //     size: 24
+      //   },
+      // },
       legend: {
         orientation: "h"
       },

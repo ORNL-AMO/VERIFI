@@ -33,8 +33,8 @@ import { PerformanceReportGroupTableComponent } from './performance-report/perfo
 import { PerformanceReportUtilityTableComponent } from './performance-report/performance-report-utility-table/performance-report-utility-table.component';
 import { PerformanceChartComponent } from './performance-report/performance-chart/performance-chart.component';
 import { TopPerformersTableComponent } from './performance-report/top-performers-table/top-performers-table.component';
-import { TableCellShadingPipe } from './performance-report/table-cell-shading.pipe';
-import { TableFillPipe } from './performance-report/table-fill.pipe';
+import { TableCellShadingPipe } from './report-pipes/table-cell-shading.pipe';
+import { TableFillPipe } from './report-pipes/table-fill.pipe';
 import { PerformanceReportDashboardComponent } from './account-reports-dashboard/performance-report-dashboard/performance-report-dashboard.component';
 import { OverviewReportDashboardComponent } from './account-reports-dashboard/overview-report-dashboard/overview-report-dashboard.component';
 import { BetterPlantsReportDashboardComponent } from './account-reports-dashboard/better-plants-report-dashboard/better-plants-report-dashboard.component';

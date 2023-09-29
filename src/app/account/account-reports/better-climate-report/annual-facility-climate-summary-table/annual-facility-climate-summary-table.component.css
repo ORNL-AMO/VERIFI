@@ -1,0 +1,5 @@
+
+td.fill-cell {
+    background-image: linear-gradient(to right, rgba(241, 196, 15, 1) 0%, rgba(241, 196, 15, 1) 100%);
+    background-repeat: no-repeat;
+}

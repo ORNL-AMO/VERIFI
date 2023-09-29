@@ -2,13 +2,13 @@
     Facility Emissions {{annualFacilitySummary.year}}
 </h4>
 
-<table class="table table-responsive table-bordered">
-    <thead>
+<table class="table utility-data table-sm table-bordered table-hover">
+    <thead class="sortable">
         <tr>
-            <th>
+            <th (click)="setOrderDataField('facilityName')" [ngClass]="{'active': orderDataField == 'facilityName'}">
                 Facility Name
             </th>
-            <th>
+            <th (click)="setOrderDataField('size')" [ngClass]="{'active': orderDataField == 'size'}">
                 Gross Floor Area<br>
                 (Sq. Ft)
             </th>
@@ -18,22 +18,26 @@
             <th>
                 Longitude
             </th> -->
-            <th>
+            <th (click)="setOrderDataField('scope1Emissions')"
+                [ngClass]="{'active': orderDataField == 'scope1Emissions'}">
                 Scope 1 Emissions<br>
                 (Metric tons CO<sub>2</sub>e)
             </th>
-            <th>
+            <th (click)="setOrderDataField('scope2MarketEmissions')"
+                [ngClass]="{'active': orderDataField == 'scope2MarketEmissions'}">
                 Scope 2 Market Emissions<br>
                 (Metric tons CO<sub>2</sub>e)
             </th>
-            <th>
+            <th (click)="setOrderDataField('scope2LocationEmissions')"
+                [ngClass]="{'active': orderDataField == 'scope2LocationEmissions'}">
                 Scope 2 Location Emissions<br>
                 (Metric tons CO<sub>2</sub>e)
             </th>
         </tr>
     </thead>
     <tbody>
-        <tr *ngFor="let facilitySummary of annualFacilitySummary.betterClimateFacilities">
+        <tr
+            *ngFor="let facilitySummary of annualFacilitySummary.betterClimateFacilities | orderBy: orderDataField: orderByDirection">
             <td>
                 {{facilitySummary.facility.name}}
             </td>
@@ -45,7 +49,8 @@
                     &mdash;
                 </ng-container>
             </td>
-            <td>
+            <td class="fill-cell"
+                [ngStyle]="{'background-size': facilitySummary.scope1Emissions | tableFill: annualFacilitySummary.totalScope1Emissions}">
                 <ng-container *ngIf="facilitySummary.scope1Emissions">
                     {{facilitySummary.scope1Emissions | customNumber}}
                 </ng-container>
@@ -53,7 +58,8 @@
                     &mdash;
                 </ng-container>
             </td>
-            <td>
+            <td class="fill-cell"
+                [ngStyle]="{'background-size': facilitySummary.scope2MarketEmissions | tableFill: annualFacilitySummary.totalScope2MarketEmissions}">
                 <ng-container *ngIf="facilitySummary.scope2MarketEmissions">
                     {{facilitySummary.scope2MarketEmissions | customNumber}}
                 </ng-container>
@@ -61,7 +67,8 @@
                     &mdash;
                 </ng-container>
             </td>
-            <td>
+            <td class="fill-cell"
+                [ngStyle]="{'background-size': facilitySummary.scope2LocationEmissions | tableFill: annualFacilitySummary.totalScope2LocationEmissions}">
                 <ng-container *ngIf="facilitySummary.scope2LocationEmissions">
                     {{facilitySummary.scope2LocationEmissions | customNumber}}
                 </ng-container>
@@ -71,4 +78,38 @@
             </td>
         </tr>
     </tbody>
+    <tfoot>
+        <tr>
+            <th>
+                Totals
+            </th>
+            <th>
+
+            </th>
+            <th>
+                <ng-container *ngIf="annualFacilitySummary.totalScope1Emissions">
+                    {{annualFacilitySummary.totalScope1Emissions | customNumber}}
+                </ng-container>
+                <ng-container *ngIf="!annualFacilitySummary.totalScope1Emissions">
+                    &mdash;
+                </ng-container>
+            </th>
+            <th>
+                <ng-container *ngIf="annualFacilitySummary.totalScope2MarketEmissions">
+                    {{annualFacilitySummary.totalScope2MarketEmissions | customNumber}}
+                </ng-container>
+                <ng-container *ngIf="!annualFacilitySummary.totalScope2MarketEmissions">
+                    &mdash;
+                </ng-container>
+            </th>
+            <th>
+                <ng-container *ngIf="annualFacilitySummary.totalScope2LocationEmissions">
+                    {{annualFacilitySummary.totalScope2LocationEmissions | customNumber}}
+                </ng-container>
+                <ng-container *ngIf="!annualFacilitySummary.totalScope2LocationEmissions">
+                    &mdash;
+                </ng-container>
+            </th>
+        </tr>
+    </tfoot>
 </table>

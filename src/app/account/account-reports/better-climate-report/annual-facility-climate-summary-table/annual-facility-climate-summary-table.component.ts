@@ -1,5 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { BetterClimateFacility } from 'src/app/calculations/carbon-calculations/betterClimateFacility';
+import { BetterClimateAnnualFacilitySummary } from 'src/app/calculations/carbon-calculations/betterClimateReport';
 
 @Component({
   selector: 'app-annual-facility-climate-summary-table',
@@ -8,8 +9,24 @@ import { BetterClimateFacility } from 'src/app/calculations/carbon-calculations/
 })
 export class AnnualFacilityClimateSummaryTableComponent {
   @Input()
-  annualFacilitySummary: {
-    betterClimateFacilities: Array<BetterClimateFacility>,
-    year: number
-  };
+  annualFacilitySummary: BetterClimateAnnualFacilitySummary;
+
+
+  orderDataField: string = 'scope1Emissions';
+  orderByDirection: 'asc' | 'desc' = 'desc';
+  constructor(){
+
+  }
+
+  setOrderDataField(str: string) {
+    if (str == this.orderDataField) {
+      if (this.orderByDirection == 'desc') {
+        this.orderByDirection = 'asc';
+      } else {
+        this.orderByDirection = 'desc';
+      }
+    } else {
+      this.orderDataField = str;
+    }
+  }
 }
