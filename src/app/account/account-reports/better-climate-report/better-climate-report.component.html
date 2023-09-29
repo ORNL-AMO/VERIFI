@@ -4,6 +4,8 @@
             [cellWidth]="cellWidth" [account]="account"></app-portfolio-information-table>
         <app-absolute-emissions-table [yearDetails]="betterClimateReport.portfolioYearDetails"
             [cellWidth]="cellWidth"></app-absolute-emissions-table>
+        <app-absolute-emissions-chart
+            [yearDetails]="betterClimateReport.portfolioYearDetails"></app-absolute-emissions-chart>
         <app-emissions-reductions-table [yearDetails]="betterClimateReport.portfolioYearDetails"
             [cellWidth]="cellWidth"></app-emissions-reductions-table>
         <app-emissions-reductions-chart [yearDetails]="betterClimateReport.portfolioYearDetails">

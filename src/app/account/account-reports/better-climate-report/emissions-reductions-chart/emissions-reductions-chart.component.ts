@@ -1,6 +1,7 @@
 import { Component, ElementRef, Input, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { BetterClimateYearDetails } from 'src/app/calculations/carbon-calculations/betterClimateYearsDetails';
+import { EmissionsColors } from 'src/app/shared/utilityColors';
 
 @Component({
   selector: 'app-emissions-reductions-chart',
@@ -30,7 +31,10 @@ export class EmissionsReductionsChartComponent {
       y: this.yearDetails.map(yearDetail => { return yearDetail.totalEmissionsReduction }),
       name: 'Total Emissions Reduction',
       type: 'bar',
-      yaxis: 'y1'
+      yaxis: 'y1',
+      marker: {
+        color: EmissionsColors["allEmissions"]
+      }
       // text: monthlyDataInRange.map(item => { return cMeter.meter.name }),
       // stackgroup: 'one',
       // marker: {
@@ -47,7 +51,8 @@ export class EmissionsReductionsChartComponent {
       type: 'scatter',
       yaxis: 'y2',
       marker: {
-        size: 16
+        size: 16,
+        color: '#27AE60'
       }
       // text: monthlyDataInRange.map(item => { return cMeter.meter.name }),
       // stackgroup: 'one',
