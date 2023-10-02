@@ -37,6 +37,19 @@
 
 
     <div class="report" [ngClass]="{'print': print}">
+        <h4>
+            Scope 1 Facility Emissions
+        </h4>
+        <div class="row">
+            <div class="col-6">
+                <app-top-emissions-performers-table [betterClimateReport]="betterClimateReport"
+                    [chartDataOption]="'scope1PercentReductions'"></app-top-emissions-performers-table>
+            </div>
+            <div class="col-6">
+                <app-top-emissions-performers-table [betterClimateReport]="betterClimateReport"
+                    [chartDataOption]="'scope1ReductionContribution'"></app-top-emissions-performers-table>
+            </div>
+        </div>
         <app-annual-facility-climate-summary-table
             [annualFacilitiesSummaries]="betterClimateReport.annualFacilitiesSummaries"
             [facilityTotals]="betterClimateReport.facilityTotals" [emissionsType]="'scope1'"
@@ -44,6 +57,19 @@
             [accountDetails]="betterClimateReport.portfolioYearDetails"></app-annual-facility-climate-summary-table>
     </div>
     <div class="report" [ngClass]="{'print': print}">
+        <h4>
+            Scope 2 Market Based Facility Emissions
+        </h4>
+        <div class="row">
+            <div class="col-6">
+                <app-top-emissions-performers-table [betterClimateReport]="betterClimateReport"
+                    [chartDataOption]="'scope2MarketPercentReductions'"></app-top-emissions-performers-table>
+            </div>
+            <div class="col-6">
+                <app-top-emissions-performers-table [betterClimateReport]="betterClimateReport"
+                    [chartDataOption]="'scope2MarketReductionContribution'"></app-top-emissions-performers-table>
+            </div>
+        </div>
         <app-annual-facility-climate-summary-table
             [annualFacilitiesSummaries]="betterClimateReport.annualFacilitiesSummaries"
             [facilityTotals]="betterClimateReport.facilityTotals" [emissionsType]="'scope2Market'"
@@ -51,6 +77,19 @@
             [accountDetails]="betterClimateReport.portfolioYearDetails"></app-annual-facility-climate-summary-table>
     </div>
     <div class="report" [ngClass]="{'print': print}">
+        <h4>
+            Scope 2 Location Based Facility Emissions
+        </h4>
+        <div class="row">
+            <div class="col-6">
+                <app-top-emissions-performers-table [betterClimateReport]="betterClimateReport"
+                    [chartDataOption]="'scope2LocationPercentReductions'"></app-top-emissions-performers-table>
+            </div>
+            <div class="col-6">
+                <app-top-emissions-performers-table [betterClimateReport]="betterClimateReport"
+                    [chartDataOption]="'scope2LocationReductionContribution'"></app-top-emissions-performers-table>
+            </div>
+        </div>
         <app-annual-facility-climate-summary-table
             [annualFacilitiesSummaries]="betterClimateReport.annualFacilitiesSummaries"
             [facilityTotals]="betterClimateReport.facilityTotals" [emissionsType]="'scope2Location'"

@@ -51,6 +51,7 @@ import { GraphCalculationsTableComponent } from './better-climate-report/graph-c
 import { AnnualFacilityClimateSummaryTableComponent } from './better-climate-report/annual-facility-climate-summary-table/annual-facility-climate-summary-table.component';
 import { EmissionsReductionsChartComponent } from './better-climate-report/emissions-reductions-chart/emissions-reductions-chart.component';
 import { AbsoluteEmissionsChartComponent } from './better-climate-report/absolute-emissions-chart/absolute-emissions-chart.component';
+import { TopEmissionsPerformersTableComponent } from './better-climate-report/top-emissions-performers-table/top-emissions-performers-table.component';
 
 
 
@@ -101,7 +102,8 @@ import { AbsoluteEmissionsChartComponent } from './better-climate-report/absolut
     GraphCalculationsTableComponent,
     AnnualFacilityClimateSummaryTableComponent,
     EmissionsReductionsChartComponent,
-    AbsoluteEmissionsChartComponent
+    AbsoluteEmissionsChartComponent,
+    TopEmissionsPerformersTableComponent
   ],
   imports: [
     CommonModule,

@@ -113,7 +113,7 @@
         </tr>
     </tfoot>
 </table> -->
-<h4>
+<!-- <h4>
     <ng-container *ngIf="emissionsType == 'scope1'">
         Scope 1
     </ng-container>
@@ -124,13 +124,13 @@
         Scope 2 Market Based
     </ng-container>
     Facility Emissions
-</h4>
+</h4> -->
 <table class="table utility-data table-sm table-bordered table-hover">
     <thead class="sortable">
         <tr class="table-mh">
             <th colspan="1"></th>
             <th class="text-center" [attr.colspan]="annualFacilitiesSummaries[0].betterClimateYearDetails.length">
-                <ng-container *ngIf="emissionsType == 'scope1'">
+                <!-- <ng-container *ngIf="emissionsType == 'scope1'">
                     Scope 1
                 </ng-container>
                 <ng-container *ngIf="emissionsType == 'scope2Location'">
@@ -138,11 +138,12 @@
                 </ng-container>
                 <ng-container *ngIf="emissionsType == 'scope2Market'">
                     Scope 2 Market Based
-                </ng-container> Emissions<br>
+                </ng-container>  -->
+                Emissions<br>
                 (Metric tons CO<sub>2</sub>e)
             </th>
             <th class="text-center" [attr.colspan]="annualFacilitiesSummaries[0].betterClimateYearDetails.length">
-                <ng-container *ngIf="emissionsType == 'scope1'">
+                <!-- <ng-container *ngIf="emissionsType == 'scope1'">
                     Scope 1
                 </ng-container>
                 <ng-container *ngIf="emissionsType == 'scope2Location'">
@@ -150,7 +151,8 @@
                 </ng-container>
                 <ng-container *ngIf="emissionsType == 'scope2Market'">
                     Scope 2 Market Based
-                </ng-container> Emissions Reductions<br>
+                </ng-container>  -->
+                Emissions Reductions<br>
                 (Metric tons CO<sub>2</sub>e)
             </th>
             <th class="text-center" [attr.colspan]="annualFacilitiesSummaries[0].betterClimateYearDetails.length">

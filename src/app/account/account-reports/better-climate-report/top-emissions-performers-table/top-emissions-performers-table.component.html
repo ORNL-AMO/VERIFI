@@ -1,0 +1,64 @@
+<table class="table utility-data table-sm table-bordered table-hover">
+    <thead class="sortable">
+        <tr>
+            <th (click)="setOrderDataField('order')" [ngClass]="{'active': orderDataField == 'order'}">
+                Change
+            </th>
+            <th class="w-25" (click)="setOrderDataField('highValueName')"
+                [ngClass]="{'active': orderDataField == 'highValueName'}">
+                Top 5
+            </th>
+            <th class="w-25" (click)="setOrderDataField('topValue')"
+                [ngClass]="{'active': orderDataField == 'topValue'}">
+                {{valueLabel}}
+            </th>
+            <th class="w-25" (click)="setOrderDataField('lowValueName')"
+                [ngClass]="{'active': orderDataField == 'lowValueName'}">
+                Low 5
+            </th>
+            <th class="w-25" (click)="setOrderDataField('lowValue')"
+                [ngClass]="{'active': orderDataField == 'lowValue'}">
+                {{valueLabel}}
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr *ngFor="let data of tableData | orderBy: orderDataField: orderByDirection;">
+            <td>
+                {{data.order}}
+            </td>
+            <ng-container *ngIf="data.highValueName">
+                <td>
+                    {{data.highValueName}}
+                </td>
+                <td>
+                    {{data.topValue | number:'1.0-2'}} %
+                </td>
+            </ng-container>
+            <ng-container *ngIf="!data.highValueName">
+                <td>
+                    &mdash;
+                </td>
+                <td>
+                    &mdash;
+                </td>
+            </ng-container>
+            <ng-container *ngIf="data.lowValueName">
+                <td>
+                    {{data.lowValueName}}
+                </td>
+                <td>
+                    {{data.lowValue | number:'1.0-2'}} %
+                </td>
+            </ng-container>
+            <ng-container *ngIf="!data.lowValueName">
+                <td>
+                    &mdash;
+                </td>
+                <td>
+                    &mdash;
+                </td>
+            </ng-container>
+        </tr>
+    </tbody>
+</table>
