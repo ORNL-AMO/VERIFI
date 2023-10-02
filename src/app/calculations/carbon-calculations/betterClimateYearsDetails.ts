@@ -23,12 +23,13 @@ export class BetterClimateYearDetails {
     mobileEmissions: number;
     fugitiveEmissions: number;
     processEmissions: number;
+    scope1PercentReductions: number;
+    scope1ReductionContribution: number;
+
 
     scope2MarketEmissions: number;
     scope2LocationEmissions: number;
-
     totalEmissions: number;
-
     totalEmissionsReduction: number;
     percentEmissionsReduction: number;
     annualPercentImprovement: number;
@@ -44,12 +45,20 @@ export class BetterClimateYearDetails {
     scope1StationaryReductions: number;
     scope1MobileReductions: number;
     scope1FugitiveReductions: number;
+    scope1Reductions: number;
     scope2ChangeInEnergyUse: number;
     scope2OnsiteRenewablesReductions: number;
     scope2OffsiteRenewablesReductions: number;
     scope2GreenOfGridReductions: number;
     totalEmissionsReductions: number;
-    constructor(year: number, calanderizedMeters: Array<CalanderizedMeter>, facilities: Array<IdbFacility>, emissionsDisplay: 'market' | 'location', baselineYearDetails: BetterClimateYearDetails, previousYearDetails: BetterClimateYearDetails, emissionsGoal: number) {
+    constructor(year: number, 
+        calanderizedMeters: Array<CalanderizedMeter>, 
+        facilities: Array<IdbFacility>, 
+        emissionsDisplay: 'market' | 'location', 
+        baselineYearDetails: BetterClimateYearDetails, 
+        previousYearDetails: BetterClimateYearDetails, 
+        emissionsGoal: number,
+        accountDetails: BetterClimateYearDetails) {
         this.year = year;
         this.setFacilityIds(calanderizedMeters);
         this.setTotalSquareFeet(facilities);
@@ -84,7 +93,6 @@ export class BetterClimateYearDetails {
         this.fugitiveEmissions = 0;
         this.processEmissions = 0;
 
-
         this.scope2MarketEmissions = this.getEmissionsTotal(calanderizedMeters, year, [3, 4], true);
         this.scope2LocationEmissions = this.getEmissionsTotal(calanderizedMeters, year, [3, 4], false);
 
@@ -102,11 +110,17 @@ export class BetterClimateYearDetails {
         this.setScope1StationaryReductions(baselineYearDetails);
         this.setScope1MobileReductions(baselineYearDetails);
         this.setScope1FugitiveReductions(baselineYearDetails);
+        this.setScope1Reductions(baselineYearDetails);
+        this.setScope1PercentReductions(baselineYearDetails);
         this.setScope2ChangeInEnergyUse(baselineYearDetails);
         this.setScope2OnsiteRenewablesReductions(baselineYearDetails);
         this.setScope2OffsiteRenewablesReductions(baselineYearDetails);
         this.setScope2GreenOfTheGridReductions();
         this.setTotalEmissionsReductions();
+
+        if(accountDetails){
+            this.setScope1ReductionContribution(accountDetails);
+        }
     }
 
     setFacilityIds(calanderizedMeters: Array<CalanderizedMeter>) {
@@ -333,11 +347,39 @@ export class BetterClimateYearDetails {
             this.scope1MobileReductions = 0;
         }
     }
+
     setScope1FugitiveReductions(baselineYearDetails: BetterClimateYearDetails) {
         if (baselineYearDetails) {
             this.scope1FugitiveReductions = baselineYearDetails.fugitiveEmissions - this.fugitiveEmissions;
         } else {
             this.scope1FugitiveReductions = 0;
+        }
+    }
+
+    setScope1Reductions(baselineYearDetails: BetterClimateYearDetails) {
+        if (baselineYearDetails) {
+            this.scope1Reductions = baselineYearDetails.totalScope1Emissions - this.totalScope1Emissions;
+        } else {
+            this.scope1Reductions = 0;
+        }
+    }
+
+    setScope1PercentReductions(baselineYearDetails: BetterClimateYearDetails) {
+        if (baselineYearDetails) {
+            this.scope1PercentReductions = (this.scope1Reductions / baselineYearDetails.totalScope1Emissions) * 100;
+        } else {
+            this.scope1PercentReductions = 0;
+        }
+    }
+
+    setScope1ReductionContribution(accountDetails: BetterClimateYearDetails) {
+        if (accountDetails) {
+            this.scope1ReductionContribution = (this.scope1Reductions * accountDetails.scope1PercentReductions) / accountDetails.scope1Reductions;
+            if(isNaN(this.scope1ReductionContribution)){
+                this.scope1ReductionContribution = 0;
+            }
+        } else {
+            this.scope1ReductionContribution = 0;
         }
     }
 
