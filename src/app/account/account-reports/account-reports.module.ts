@@ -52,6 +52,7 @@ import { AnnualFacilityClimateSummaryTableComponent } from './better-climate-rep
 import { EmissionsReductionsChartComponent } from './better-climate-report/emissions-reductions-chart/emissions-reductions-chart.component';
 import { AbsoluteEmissionsChartComponent } from './better-climate-report/absolute-emissions-chart/absolute-emissions-chart.component';
 import { TopEmissionsPerformersTableComponent } from './better-climate-report/top-emissions-performers-table/top-emissions-performers-table.component';
+import { TopPerformersChartComponent } from './better-climate-report/top-performers-chart/top-performers-chart.component';
 
 
 @NgModule({
@@ -102,7 +103,8 @@ import { TopEmissionsPerformersTableComponent } from './better-climate-report/to
     AnnualFacilityClimateSummaryTableComponent,
     EmissionsReductionsChartComponent,
     AbsoluteEmissionsChartComponent,
-    TopEmissionsPerformersTableComponent
+    TopEmissionsPerformersTableComponent,
+    TopPerformersChartComponent
   ],
   imports: [
     CommonModule,

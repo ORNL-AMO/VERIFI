@@ -41,13 +41,17 @@
             Scope 1 Facility Emissions
         </h4>
         <div class="row">
-            <div class="col-6">
+            <div class="col-lg-6 col-md-12">
                 <app-top-emissions-performers-table [betterClimateReport]="betterClimateReport"
                     [chartDataOption]="'scope1PercentReductions'"></app-top-emissions-performers-table>
+                <app-top-performers-chart [betterClimateReport]="betterClimateReport"
+                    [chartDataOption]="'scope1PercentReductions'"></app-top-performers-chart>
             </div>
-            <div class="col-6">
+            <div class="col-lg-6 col-md-12">
                 <app-top-emissions-performers-table [betterClimateReport]="betterClimateReport"
                     [chartDataOption]="'scope1ReductionContribution'"></app-top-emissions-performers-table>
+                <app-top-performers-chart [betterClimateReport]="betterClimateReport"
+                    [chartDataOption]="'scope1ReductionContribution'"></app-top-performers-chart>
             </div>
         </div>
         <app-annual-facility-climate-summary-table [emissionsType]="'scope1'"
@@ -58,13 +62,17 @@
             Scope 2 Market Based Facility Emissions
         </h4>
         <div class="row">
-            <div class="col-6">
+            <div class="col-lg-6 col-md-12">
                 <app-top-emissions-performers-table [betterClimateReport]="betterClimateReport"
                     [chartDataOption]="'scope2MarketPercentReductions'"></app-top-emissions-performers-table>
+                <app-top-performers-chart [betterClimateReport]="betterClimateReport"
+                    [chartDataOption]="'scope2MarketPercentReductions'"></app-top-performers-chart>
             </div>
-            <div class="col-6">
+            <div class="col-lg-6 col-md-12">
                 <app-top-emissions-performers-table [betterClimateReport]="betterClimateReport"
                     [chartDataOption]="'scope2MarketReductionContribution'"></app-top-emissions-performers-table>
+                <app-top-performers-chart [betterClimateReport]="betterClimateReport"
+                    [chartDataOption]="'scope2MarketReductionContribution'"></app-top-performers-chart>
             </div>
         </div>
         <app-annual-facility-climate-summary-table [emissionsType]="'scope2Market'"
@@ -75,13 +83,17 @@
             Scope 2 Location Based Facility Emissions
         </h4>
         <div class="row">
-            <div class="col-6">
+            <div class="col-lg-6 col-md-12">
                 <app-top-emissions-performers-table [betterClimateReport]="betterClimateReport"
                     [chartDataOption]="'scope2LocationPercentReductions'"></app-top-emissions-performers-table>
+                <app-top-performers-chart [betterClimateReport]="betterClimateReport"
+                    [chartDataOption]="'scope2LocationPercentReductions'"></app-top-performers-chart>
             </div>
-            <div class="col-6">
+            <div class="col-lg-6 col-md-12">
                 <app-top-emissions-performers-table [betterClimateReport]="betterClimateReport"
                     [chartDataOption]="'scope2LocationReductionContribution'"></app-top-emissions-performers-table>
+                <app-top-performers-chart [betterClimateReport]="betterClimateReport"
+                    [chartDataOption]="'scope2LocationReductionContribution'"></app-top-performers-chart>
             </div>
         </div>
         <app-annual-facility-climate-summary-table [emissionsType]="'scope2Location'"
