@@ -54,25 +54,14 @@ export class EmissionsReductionsChartComponent {
         size: 16,
         color: '#27AE60'
       }
-      // text: monthlyDataInRange.map(item => { return cMeter.meter.name }),
-      // stackgroup: 'one',
-      // marker: {
-      //   color: UtilityColors[cMeter.meter.source].color,
-      // },
-      // hovertemplate: this.getHoverTemplate(),
     }
     traceData.push(trace2)
     var layout = {
-      // title: {
-      //   text: 'GHG Emissions Reductions',
-      //   font: {
-      //     size: 24
-      //   },
-      // },
       legend: {
         orientation: "h"
       },
       xaxis: {
+        dtick: '1'
         // autotick: false,
         // range: xrange
       },

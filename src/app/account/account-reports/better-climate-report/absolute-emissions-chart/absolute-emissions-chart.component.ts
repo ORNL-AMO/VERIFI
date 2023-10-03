@@ -106,7 +106,8 @@ export class AbsoluteEmissionsChartComponent {
         automargin: true,
       },
       xaxis: {
-        automargin: true
+        automargin: true,
+        dtick: '1'
       },
       legend: {
         orientation: "h"

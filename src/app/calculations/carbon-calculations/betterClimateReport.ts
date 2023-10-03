@@ -12,12 +12,13 @@ export class BetterClimateReport {
     reportYear: number;
     portfolioYearDetails: Array<BetterClimateYearDetails>;
     annualFacilitiesSummaries: Array<BetterClimateAnnualFacilitySummary>;
-    facilityTotals: Array<{
-        year: number;
-        scope1Emissions: number;
-        scope2LocationEmissions: number;
-        scope2MarketEmissions: number;
-    }>;
+    facilityMaxMins: Array<BetterClimateFacilityMaxMin>;
+    // facilityTotals: Array<{
+    //     year: number;
+    //     scope1Emissions: number;
+    //     scope2LocationEmissions: number;
+    //     scope2MarketEmissions: number;
+    // }>;
     constructor(account: IdbAccount, facilities: Array<IdbFacility>, meters: Array<IdbUtilityMeter>, meterData: Array<IdbUtilityMeterData>, baselineYear: number, reportYear: number,
         co2Emissions: Array<SubregionEmissions>, emissionsDisplay: 'market' | 'location', emissionsGoal: number) {
         this.baselineYear = baselineYear;
@@ -28,7 +29,8 @@ export class BetterClimateReport {
 
         this.setPortfolioYearDetails(calanderizedMeters, facilities, emissionsDisplay, emissionsGoal);
         this.setAnnualFacilitiesSummaries(calanderizedMeters, facilities, emissionsDisplay);
-        this.setFacilityTotals();
+        // this.setFacilityTotals();
+        this.setFacilityMaxMins();
     }
 
     setPortfolioYearDetails(calanderizedMeters: Array<CalanderizedMeter>, facilities: Array<IdbFacility>, emissionsDisplay: 'market' | 'location', emissionsGoal: number) {
@@ -75,23 +77,62 @@ export class BetterClimateReport {
         })
     }
 
-    setFacilityTotals() {
-        this.facilityTotals = new Array();
-        let allBetterClimateFacilityData: Array<BetterClimateYearDetails> = this.annualFacilitiesSummaries.flatMap(annualFacility => {
-            return annualFacility.betterClimateYearDetails;
-        })
+    // setFacilityTotals() {
+    //     this.facilityTotals = new Array();
+    //     let allBetterClimateFacilityData: Array<BetterClimateYearDetails> = this.annualFacilitiesSummaries.flatMap(annualFacility => {
+    //         return annualFacility.betterClimateYearDetails;
+    //     })
+    //     for (let year = this.baselineYear; year <= this.reportYear; year++) {
+    //         let yearBetterClimateData: Array<BetterClimateYearDetails> = allBetterClimateFacilityData.filter(data => {
+    //             return data.year == year;
+    //         });
+    //         this.facilityTotals.push({
+    //             year: year,
+    //             scope1Emissions: _.sumBy(yearBetterClimateData, 'totalScope1Emissions'),
+    //             scope2LocationEmissions: _.sumBy(yearBetterClimateData, 'scope2LocationEmissions'),
+    //             scope2MarketEmissions: _.sumBy(yearBetterClimateData, 'scope2MarketEmissions')
+    //         })
+    //     }
+
+    // }
+
+    setFacilityMaxMins(){
+        let allFacilityValues: Array<BetterClimateYearDetails> = this.annualFacilitiesSummaries.flatMap(summary => {
+            return summary.betterClimateYearDetails;
+        });
+        this.facilityMaxMins = new Array();
         for (let year = this.baselineYear; year <= this.reportYear; year++) {
-            let yearBetterClimateData: Array<BetterClimateYearDetails> = allBetterClimateFacilityData.filter(data => {
-                return data.year == year;
+            let yearDetails: Array<BetterClimateYearDetails> = allFacilityValues.filter(value => {
+                return value.year == year;
             });
-            this.facilityTotals.push({
+            this.facilityMaxMins.push({
                 year: year,
-                scope1Emissions: _.sumBy(yearBetterClimateData, 'totalScope1Emissions'),
-                scope2LocationEmissions: _.sumBy(yearBetterClimateData, 'scope2LocationEmissions'),
-                scope2MarketEmissions: _.sumBy(yearBetterClimateData, 'scope2MarketEmissions')
+                scope1PercentReductions: {
+                    max: _.maxBy(yearDetails, 'scope1PercentReductions').scope1PercentReductions,
+                    min: _.minBy(yearDetails, 'scope1PercentReductions').scope1PercentReductions
+                },
+                scope1ReductionContribution: {
+                    max: _.maxBy(yearDetails, 'scope1ReductionContribution').scope1ReductionContribution,
+                    min: _.minBy(yearDetails, 'scope1ReductionContribution').scope1ReductionContribution
+                },
+                scope2MarketPercentReductions: {
+                    max: _.maxBy(yearDetails, 'scope2MarketPercentReductions').scope2MarketPercentReductions,
+                    min: _.minBy(yearDetails, 'scope2MarketPercentReductions').scope2MarketPercentReductions
+                },
+                scope2MarketReductionContribution: {
+                    max: _.maxBy(yearDetails, 'scope2MarketReductionContribution').scope2MarketReductionContribution,
+                    min: _.minBy(yearDetails, 'scope2MarketReductionContribution').scope2MarketReductionContribution
+                },
+                scope2LocationPercentReductions: {
+                    max: _.maxBy(yearDetails, 'scope2LocationPercentReductions').scope2LocationPercentReductions,
+                    min: _.minBy(yearDetails, 'scope2LocationPercentReductions').scope2LocationPercentReductions
+                },
+                scope2LocationReductionContribution: {
+                    max: _.maxBy(yearDetails, 'scope2LocationReductionContribution').scope2LocationReductionContribution,
+                    min: _.minBy(yearDetails, 'scope2LocationReductionContribution').scope2LocationReductionContribution
+                },
             })
         }
-
     }
 
 }
@@ -100,4 +141,32 @@ export class BetterClimateReport {
 export interface BetterClimateAnnualFacilitySummary {
     facility: IdbFacility,
     betterClimateYearDetails: Array<BetterClimateYearDetails>
+}
+
+export interface BetterClimateFacilityMaxMin{
+    year: number,
+    scope1PercentReductions: {
+        max: number,
+        min: number
+    },
+    scope1ReductionContribution: {
+        max: number,
+        min: number
+    },
+    scope2MarketPercentReductions: {
+        max: number,
+        min: number
+    },
+    scope2MarketReductionContribution: {
+        max: number,
+        min: number
+    },
+    scope2LocationPercentReductions: {
+        max: number,
+        min: number
+    },
+    scope2LocationReductionContribution: {
+        max: number,
+        min: number
+    },
 }

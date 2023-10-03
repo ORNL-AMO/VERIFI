@@ -54,7 +54,6 @@ import { AbsoluteEmissionsChartComponent } from './better-climate-report/absolut
 import { TopEmissionsPerformersTableComponent } from './better-climate-report/top-emissions-performers-table/top-emissions-performers-table.component';
 
 
-
 @NgModule({
   declarations: [
     AccountReportsComponent,

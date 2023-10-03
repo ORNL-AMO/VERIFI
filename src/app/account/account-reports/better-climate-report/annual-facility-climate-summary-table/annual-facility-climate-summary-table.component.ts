@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { BetterClimateAnnualFacilitySummary, BetterClimateReport } from 'src/app/calculations/carbon-calculations/betterClimateReport';
+import { BetterClimateAnnualFacilitySummary, BetterClimateFacilityMaxMin, BetterClimateReport } from 'src/app/calculations/carbon-calculations/betterClimateReport';
 import * as _ from 'lodash';
 import { BetterClimateYearDetails } from 'src/app/calculations/carbon-calculations/betterClimateYearsDetails';
 @Component({
@@ -8,17 +8,7 @@ import { BetterClimateYearDetails } from 'src/app/calculations/carbon-calculatio
   styleUrls: ['./annual-facility-climate-summary-table.component.css']
 })
 export class AnnualFacilityClimateSummaryTableComponent {
-  @Input()
-  annualFacilitiesSummaries: Array<BetterClimateAnnualFacilitySummary>;
-  @Input()
-  accountDetails: Array<BetterClimateYearDetails>;
-  @Input()
-  facilityTotals: Array<{
-    year: number;
-    scope1Emissions: number;
-    scope2LocationEmissions: number;
-    scope2MarketEmissions: number;
-  }>;
+  
   @Input()
   emissionsType: 'scope1' | 'scope2Market' | 'scope2Location';
   @Input()
@@ -28,10 +18,17 @@ export class AnnualFacilityClimateSummaryTableComponent {
   orderByDirection: 'asc' | 'desc' = 'desc';
   numberOfData: number;
   orderByYear: number;
+
+  annualFacilitiesSummaries: Array<BetterClimateAnnualFacilitySummary>;
+  accountDetails: Array<BetterClimateYearDetails>;
+  facilityMaxMin: Array<BetterClimateFacilityMaxMin>;
   constructor() {
   }
 
   ngOnInit() {
+    this.annualFacilitiesSummaries = this.betterClimateReport.annualFacilitiesSummaries;
+    this.accountDetails = this.betterClimateReport.portfolioYearDetails;
+    this.facilityMaxMin = this.betterClimateReport.facilityMaxMins;
     if (this.emissionsType == 'scope1') {
       this.orderDataField = 'totalScope1Emissions';
     } else if (this.emissionsType == 'scope2Location') {
@@ -39,7 +36,7 @@ export class AnnualFacilityClimateSummaryTableComponent {
     } else if (this.emissionsType == 'scope2Market') {
       this.orderDataField = 'scope2MarketEmissions';
     }
-    this.orderByYear = this.facilityTotals[this.facilityTotals.length - 1].year;
+    this.orderByYear = this.accountDetails[this.accountDetails.length - 1].year;
     this.orderData();
   }
 

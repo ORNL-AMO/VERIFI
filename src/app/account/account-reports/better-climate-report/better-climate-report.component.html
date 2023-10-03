@@ -50,11 +50,8 @@
                     [chartDataOption]="'scope1ReductionContribution'"></app-top-emissions-performers-table>
             </div>
         </div>
-        <app-annual-facility-climate-summary-table
-            [annualFacilitiesSummaries]="betterClimateReport.annualFacilitiesSummaries"
-            [facilityTotals]="betterClimateReport.facilityTotals" [emissionsType]="'scope1'"
-            [betterClimateReport]="betterClimateReport"
-            [accountDetails]="betterClimateReport.portfolioYearDetails"></app-annual-facility-climate-summary-table>
+        <app-annual-facility-climate-summary-table [emissionsType]="'scope1'"
+            [betterClimateReport]="betterClimateReport"></app-annual-facility-climate-summary-table>
     </div>
     <div class="report" [ngClass]="{'print': print}">
         <h4>
@@ -70,11 +67,8 @@
                     [chartDataOption]="'scope2MarketReductionContribution'"></app-top-emissions-performers-table>
             </div>
         </div>
-        <app-annual-facility-climate-summary-table
-            [annualFacilitiesSummaries]="betterClimateReport.annualFacilitiesSummaries"
-            [facilityTotals]="betterClimateReport.facilityTotals" [emissionsType]="'scope2Market'"
-            [betterClimateReport]="betterClimateReport"
-            [accountDetails]="betterClimateReport.portfolioYearDetails"></app-annual-facility-climate-summary-table>
+        <app-annual-facility-climate-summary-table [emissionsType]="'scope2Market'"
+            [betterClimateReport]="betterClimateReport"></app-annual-facility-climate-summary-table>
     </div>
     <div class="report" [ngClass]="{'print': print}">
         <h4>
@@ -90,11 +84,8 @@
                     [chartDataOption]="'scope2LocationReductionContribution'"></app-top-emissions-performers-table>
             </div>
         </div>
-        <app-annual-facility-climate-summary-table
-            [annualFacilitiesSummaries]="betterClimateReport.annualFacilitiesSummaries"
-            [facilityTotals]="betterClimateReport.facilityTotals" [emissionsType]="'scope2Location'"
-            [betterClimateReport]="betterClimateReport"
-            [accountDetails]="betterClimateReport.portfolioYearDetails"></app-annual-facility-climate-summary-table>
+        <app-annual-facility-climate-summary-table [emissionsType]="'scope2Location'"
+            [betterClimateReport]="betterClimateReport"></app-annual-facility-climate-summary-table>
     </div>
 </ng-container>
 
