@@ -6,3 +6,6 @@
     background-color: #efefef;
     cursor: pointer;
 }
+.form-select.auto-width{
+    width: auto;
+}

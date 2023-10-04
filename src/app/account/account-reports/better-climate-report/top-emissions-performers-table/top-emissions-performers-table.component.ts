@@ -1,8 +1,8 @@
 import { Component, Input } from '@angular/core';
 import { BetterClimateAnnualFacilitySummary, BetterClimateReport } from 'src/app/calculations/carbon-calculations/betterClimateReport';
 import * as _ from 'lodash';
-import { IdbFacility } from 'src/app/models/idb';
 import { BetterClimateYearDetails } from 'src/app/calculations/carbon-calculations/betterClimateYearsDetails';
+import { BetterClimateReportSetup } from 'src/app/models/overview-report';
 
 @Component({
   selector: 'app-top-emissions-performers-table',
@@ -14,7 +14,8 @@ export class TopEmissionsPerformersTableComponent {
   betterClimateReport: BetterClimateReport;
   @Input()
   chartDataOption: 'scope1PercentReductions' | 'scope1ReductionContribution' | 'scope2MarketPercentReductions' | 'scope2MarketReductionContribution' | 'scope2LocationPercentReductions' | 'scope2LocationReductionContribution';
-
+  @Input()
+  betterClimateReportSetup: BetterClimateReportSetup;
 
   tableData: Array<{
     order: number,
@@ -62,7 +63,7 @@ export class TopEmissionsPerformersTableComponent {
     this.tableData = new Array();
 
     //todo: Number of top performers
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < this.betterClimateReportSetup.numberOfTopPerformers; i++) {
       let topFacilityItem: BetterClimateAnnualFacilitySummary = annualFacilityData[i];
 
       let topFacilityName: string;

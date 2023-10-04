@@ -136,7 +136,14 @@ export class AccountReportDbService {
       },
       betterClimateReportSetup: {
         emissionsDisplay: 'location',
-        initiativeNotes: []
+        initiativeNotes: [],
+        includePortfolioInformation: true,
+        includeAbsoluteEmissions: true,
+        includeGHGEmissionsReductions: true,
+        includePortfolioEnergyUse: true,
+        includeCalculationsForGraphs: true,
+        includeFacilitySummaries: true,
+        numberOfTopPerformers: 5
       }
     }
   }

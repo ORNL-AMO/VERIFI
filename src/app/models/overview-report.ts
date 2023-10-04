@@ -130,5 +130,12 @@ export interface BetterClimateReportSetup {
   initiativeNotes: Array<{
     year: number,
     note: string
-  }>
+  }>,
+  includePortfolioInformation: boolean,
+  includeAbsoluteEmissions: boolean,
+  includeGHGEmissionsReductions: boolean,
+  includePortfolioEnergyUse: boolean,
+  includeCalculationsForGraphs: boolean,
+  includeFacilitySummaries: boolean,
+  numberOfTopPerformers: number
 }

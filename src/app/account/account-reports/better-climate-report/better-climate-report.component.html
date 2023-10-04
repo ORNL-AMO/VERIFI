@@ -1,30 +1,35 @@
 <ng-container *ngIf="selectedReport && calculating == false">
-    <div class="report" [ngClass]="{'print': print}">
+    <div class="report" [ngClass]="{'print': print}"
+        *ngIf="selectedReport.betterClimateReportSetup.includePortfolioInformation">
         <app-portfolio-information-table [yearDetails]="betterClimateReport.portfolioYearDetails"
             [cellWidth]="cellWidth" [account]="account"></app-portfolio-information-table>
     </div>
-    <div class="report" [ngClass]="{'print': print}">
+    <div class="report" [ngClass]="{'print': print}"
+        *ngIf="selectedReport.betterClimateReportSetup.includeAbsoluteEmissions">
         <app-absolute-emissions-table [yearDetails]="betterClimateReport.portfolioYearDetails"
             [cellWidth]="cellWidth"></app-absolute-emissions-table>
         <app-absolute-emissions-chart
             [yearDetails]="betterClimateReport.portfolioYearDetails"></app-absolute-emissions-chart>
     </div>
 
-    <div class="report" [ngClass]="{'print': print}">
+    <div class="report" [ngClass]="{'print': print}"
+        *ngIf="selectedReport.betterClimateReportSetup.includeGHGEmissionsReductions">
         <app-emissions-reductions-table [yearDetails]="betterClimateReport.portfolioYearDetails"
             [cellWidth]="cellWidth"></app-emissions-reductions-table>
         <app-emissions-reductions-chart [yearDetails]="betterClimateReport.portfolioYearDetails">
         </app-emissions-reductions-chart>
     </div>
 
-    <div class="report" [ngClass]="{'print': print}">
+    <div class="report" [ngClass]="{'print': print}"
+        *ngIf="selectedReport.betterClimateReportSetup.includePortfolioEnergyUse">
         <app-total-portfolio-energy-use-table [yearDetails]="betterClimateReport.portfolioYearDetails"
             [cellWidth]="cellWidth"></app-total-portfolio-energy-use-table>
     </div>
     <!--TODO: Add vehicle emissions to meters-->
     <!-- <app-vehicle-energy-use-table [yearDetails]="betterClimateReport.portfolioYearDetails" [cellWidth]="cellWidth"></app-vehicle-energy-use-table> -->
 
-    <div class="report" [ngClass]="{'print': print}">
+    <div class="report" [ngClass]="{'print': print}"
+        *ngIf="selectedReport.betterClimateReportSetup.includeCalculationsForGraphs">
         <app-graph-calculations-table [yearDetails]="betterClimateReport.portfolioYearDetails"
             [cellWidth]="cellWidth"></app-graph-calculations-table>
     </div>
@@ -35,72 +40,99 @@
         </div>
     </ng-container> -->
 
-
-    <div class="report" [ngClass]="{'print': print}">
-        <h4>
-            Scope 1 Facility Emissions
-        </h4>
-        <div class="row">
-            <div class="col-lg-6 col-md-12">
-                <app-top-emissions-performers-table [betterClimateReport]="betterClimateReport"
-                    [chartDataOption]="'scope1PercentReductions'"></app-top-emissions-performers-table>
-                <app-top-performers-chart [betterClimateReport]="betterClimateReport"
-                    [chartDataOption]="'scope1PercentReductions'"></app-top-performers-chart>
+    <ng-container *ngIf="selectedReport.betterClimateReportSetup.includeFacilitySummaries">
+        <div class="report" [ngClass]="{'print': print}">
+            <h4>
+                Scope 1 Facility Emissions
+            </h4>
+            <div class="row">
+                <div class="col-lg-6 col-md-12">
+                    <app-top-emissions-performers-table [betterClimateReport]="betterClimateReport"
+                        [chartDataOption]="'scope1PercentReductions'"
+                        [betterClimateReportSetup]="selectedReport.betterClimateReportSetup"></app-top-emissions-performers-table>
+                </div>
+                <div class="col-lg-6 col-md-12">
+                    <app-top-emissions-performers-table [betterClimateReport]="betterClimateReport"
+                        [chartDataOption]="'scope1ReductionContribution'"
+                        [betterClimateReportSetup]="selectedReport.betterClimateReportSetup"></app-top-emissions-performers-table>
+                </div>
+                <div class="col-12">
+                    <app-top-performers-chart [betterClimateReport]="betterClimateReport"
+                        [chartDataOption]="'scope1PercentReductions'"
+                        [betterClimateReportSetup]="selectedReport.betterClimateReportSetup"></app-top-performers-chart>
+                </div>
+                <div class="col-12">
+                    <app-top-performers-chart [betterClimateReport]="betterClimateReport"
+                        [chartDataOption]="'scope1ReductionContribution'"
+                        [betterClimateReportSetup]="selectedReport.betterClimateReportSetup"></app-top-performers-chart>
+                </div>
             </div>
-            <div class="col-lg-6 col-md-12">
-                <app-top-emissions-performers-table [betterClimateReport]="betterClimateReport"
-                    [chartDataOption]="'scope1ReductionContribution'"></app-top-emissions-performers-table>
-                <app-top-performers-chart [betterClimateReport]="betterClimateReport"
-                    [chartDataOption]="'scope1ReductionContribution'"></app-top-performers-chart>
-            </div>
+            <hr>
+            <app-annual-facility-climate-summary-table [emissionsType]="'scope1'"
+                [betterClimateReport]="betterClimateReport"></app-annual-facility-climate-summary-table>
         </div>
-        <app-annual-facility-climate-summary-table [emissionsType]="'scope1'"
-            [betterClimateReport]="betterClimateReport"></app-annual-facility-climate-summary-table>
-    </div>
-    <div class="report" [ngClass]="{'print': print}">
-        <h4>
-            Scope 2 Market Based Facility Emissions
-        </h4>
-        <div class="row">
-            <div class="col-lg-6 col-md-12">
-                <app-top-emissions-performers-table [betterClimateReport]="betterClimateReport"
-                    [chartDataOption]="'scope2MarketPercentReductions'"></app-top-emissions-performers-table>
-                <app-top-performers-chart [betterClimateReport]="betterClimateReport"
-                    [chartDataOption]="'scope2MarketPercentReductions'"></app-top-performers-chart>
+        <div class="report" [ngClass]="{'print': print}">
+            <h4>
+                Scope 2 Market Based Facility Emissions
+            </h4>
+            <div class="row">
+                <div class="col-lg-6 col-md-12">
+                    <app-top-emissions-performers-table [betterClimateReport]="betterClimateReport"
+                        [chartDataOption]="'scope2MarketPercentReductions'"
+                        [betterClimateReportSetup]="selectedReport.betterClimateReportSetup"></app-top-emissions-performers-table>
+                </div>
+                <div class="col-lg-6 col-md-12">
+                    <app-top-emissions-performers-table [betterClimateReport]="betterClimateReport"
+                        [chartDataOption]="'scope2MarketReductionContribution'"
+                        [betterClimateReportSetup]="selectedReport.betterClimateReportSetup"></app-top-emissions-performers-table>
+                </div>
+                <div class="col-12">
+                    <app-top-performers-chart [betterClimateReport]="betterClimateReport"
+                        [chartDataOption]="'scope2MarketPercentReductions'"
+                        [betterClimateReportSetup]="selectedReport.betterClimateReportSetup"></app-top-performers-chart>
+                </div>
+                <div class="col-12">
+                    <app-top-performers-chart [betterClimateReport]="betterClimateReport"
+                        [chartDataOption]="'scope2MarketReductionContribution'"
+                        [betterClimateReportSetup]="selectedReport.betterClimateReportSetup"></app-top-performers-chart>
+                </div>
             </div>
-            <div class="col-lg-6 col-md-12">
-                <app-top-emissions-performers-table [betterClimateReport]="betterClimateReport"
-                    [chartDataOption]="'scope2MarketReductionContribution'"></app-top-emissions-performers-table>
-                <app-top-performers-chart [betterClimateReport]="betterClimateReport"
-                    [chartDataOption]="'scope2MarketReductionContribution'"></app-top-performers-chart>
-            </div>
+            <hr>
+            <app-annual-facility-climate-summary-table [emissionsType]="'scope2Market'"
+                [betterClimateReport]="betterClimateReport"></app-annual-facility-climate-summary-table>
         </div>
-        <app-annual-facility-climate-summary-table [emissionsType]="'scope2Market'"
-            [betterClimateReport]="betterClimateReport"></app-annual-facility-climate-summary-table>
-    </div>
-    <div class="report" [ngClass]="{'print': print}">
-        <h4>
-            Scope 2 Location Based Facility Emissions
-        </h4>
-        <div class="row">
-            <div class="col-lg-6 col-md-12">
-                <app-top-emissions-performers-table [betterClimateReport]="betterClimateReport"
-                    [chartDataOption]="'scope2LocationPercentReductions'"></app-top-emissions-performers-table>
-                <app-top-performers-chart [betterClimateReport]="betterClimateReport"
-                    [chartDataOption]="'scope2LocationPercentReductions'"></app-top-performers-chart>
+        <div class="report" [ngClass]="{'print': print}">
+            <h4>
+                Scope 2 Location Based Facility Emissions
+            </h4>
+            <div class="row">
+                <div class="col-lg-6 col-md-12">
+                    <app-top-emissions-performers-table [betterClimateReport]="betterClimateReport"
+                        [chartDataOption]="'scope2LocationPercentReductions'"
+                        [betterClimateReportSetup]="selectedReport.betterClimateReportSetup"></app-top-emissions-performers-table>
+                </div>
+                <div class="col-lg-6 col-md-12">
+                    <app-top-emissions-performers-table [betterClimateReport]="betterClimateReport"
+                        [chartDataOption]="'scope2LocationReductionContribution'"
+                        [betterClimateReportSetup]="selectedReport.betterClimateReportSetup"></app-top-emissions-performers-table>
+                </div>
+                <div class="col-12">
+                    <app-top-performers-chart [betterClimateReport]="betterClimateReport"
+                        [chartDataOption]="'scope2LocationPercentReductions'"
+                        [betterClimateReportSetup]="selectedReport.betterClimateReportSetup"></app-top-performers-chart>
+                </div>
+                <div class="col-12">
+                    <app-top-performers-chart [betterClimateReport]="betterClimateReport"
+                        [chartDataOption]="'scope2LocationReductionContribution'"
+                        [betterClimateReportSetup]="selectedReport.betterClimateReportSetup"></app-top-performers-chart>
+                </div>
             </div>
-            <div class="col-lg-6 col-md-12">
-                <app-top-emissions-performers-table [betterClimateReport]="betterClimateReport"
-                    [chartDataOption]="'scope2LocationReductionContribution'"></app-top-emissions-performers-table>
-                <app-top-performers-chart [betterClimateReport]="betterClimateReport"
-                    [chartDataOption]="'scope2LocationReductionContribution'"></app-top-performers-chart>
-            </div>
+            <hr>
+            <app-annual-facility-climate-summary-table [emissionsType]="'scope2Location'"
+                [betterClimateReport]="betterClimateReport"></app-annual-facility-climate-summary-table>
         </div>
-        <app-annual-facility-climate-summary-table [emissionsType]="'scope2Location'"
-            [betterClimateReport]="betterClimateReport"></app-annual-facility-climate-summary-table>
-    </div>
+    </ng-container>
 </ng-container>
-
 
 
 <div class="w-100 justify-content-center" *ngIf="calculating != false">

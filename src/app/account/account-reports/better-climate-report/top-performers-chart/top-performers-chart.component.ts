@@ -3,6 +3,7 @@ import { PlotlyService } from 'angular-plotly.js';
 import { BetterClimateAnnualFacilitySummary, BetterClimateReport } from 'src/app/calculations/carbon-calculations/betterClimateReport';
 import * as _ from 'lodash';
 import { BetterClimateYearDetails } from 'src/app/calculations/carbon-calculations/betterClimateYearsDetails';
+import { BetterClimateReportSetup } from 'src/app/models/overview-report';
 
 @Component({
   selector: 'app-top-performers-chart',
@@ -14,7 +15,8 @@ export class TopPerformersChartComponent {
   betterClimateReport: BetterClimateReport;
   @Input()
   chartDataOption: 'scope1PercentReductions' | 'scope1ReductionContribution' | 'scope2MarketPercentReductions' | 'scope2MarketReductionContribution' | 'scope2LocationPercentReductions' | 'scope2LocationReductionContribution';
-
+  @Input()
+  betterClimateReportSetup: BetterClimateReportSetup
 
   @ViewChild('performanceChart', { static: false }) performanceChart: ElementRef;
 
@@ -63,7 +65,7 @@ export class TopPerformersChartComponent {
           orientation: "h"
         },
         xaxis: {
-          hoverformat: "%b, %y",
+          // hoverformat: "%b, %y",
           dtick: 1
         },
         yaxis: {
@@ -99,7 +101,7 @@ export class TopPerformersChartComponent {
       let yearSummary: BetterClimateYearDetails = data.betterClimateYearDetails.find(summary => { return summary.year == this.betterClimateReport.reportYear })
       return yearSummary[this.chartDataOption];
     }, 'desc');
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < this.betterClimateReportSetup.numberOfTopPerformers; i++) {
       let topItem = annualFacilityData[i];
       if (topItem) {
         topBottomIds.push(topItem.facility.guid);

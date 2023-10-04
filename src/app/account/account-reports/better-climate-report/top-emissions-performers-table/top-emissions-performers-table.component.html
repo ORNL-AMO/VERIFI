@@ -6,7 +6,7 @@
             </th>
             <th class="w-25" (click)="setOrderDataField('highValueName')"
                 [ngClass]="{'active': orderDataField == 'highValueName'}">
-                Top 5
+                Top {{betterClimateReportSetup.numberOfTopPerformers}}
             </th>
             <th class="w-25" (click)="setOrderDataField('topValue')"
                 [ngClass]="{'active': orderDataField == 'topValue'}">
@@ -14,7 +14,7 @@
             </th>
             <th class="w-25" (click)="setOrderDataField('lowValueName')"
                 [ngClass]="{'active': orderDataField == 'lowValueName'}">
-                Low 5
+                Low {{betterClimateReportSetup.numberOfTopPerformers}}
             </th>
             <th class="w-25" (click)="setOrderDataField('lowValue')"
                 [ngClass]="{'active': orderDataField == 'lowValue'}">

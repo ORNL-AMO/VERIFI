@@ -20,6 +20,7 @@ export class BetterClimateSetupComponent {
   reportSetup: BetterClimateReportSetup;
   selectedReport: IdbAccountReport;
   reportYears: Array<number>;
+  numberOfPerformerOptions: Array<number> = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
   constructor(private accountReportDbService: AccountReportDbService,
     private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
