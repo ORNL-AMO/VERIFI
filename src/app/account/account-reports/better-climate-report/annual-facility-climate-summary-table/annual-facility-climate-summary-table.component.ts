@@ -14,7 +14,7 @@ export class AnnualFacilityClimateSummaryTableComponent {
   @Input()
   betterClimateReport: BetterClimateReport;
 
-  orderDataField: string = 'totalScope1Emissions';
+  orderDataField: string = 'scope1Emissions';
   orderByDirection: 'asc' | 'desc' = 'desc';
   numberOfData: number;
   orderByYear: number;
@@ -30,7 +30,7 @@ export class AnnualFacilityClimateSummaryTableComponent {
     this.accountDetails = this.betterClimateReport.portfolioYearDetails;
     this.facilityMaxMin = this.betterClimateReport.facilityMaxMins;
     if (this.emissionsType == 'scope1') {
-      this.orderDataField = 'totalScope1Emissions';
+      this.orderDataField = 'scope1Emissions';
     } else if (this.emissionsType == 'scope2Location') {
       this.orderDataField = 'scope2LocationEmissions';
     } else if (this.emissionsType == 'scope2Market') {

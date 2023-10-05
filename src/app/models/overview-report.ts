@@ -137,5 +137,6 @@ export interface BetterClimateReportSetup {
   includePortfolioEnergyUse: boolean,
   includeCalculationsForGraphs: boolean,
   includeFacilitySummaries: boolean,
-  numberOfTopPerformers: number
+  numberOfTopPerformers: number,
+  skipIntermediateYears: boolean
 }

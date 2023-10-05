@@ -1,13 +1,33 @@
 <h4>
     Absolute Emissions (Metric tonne CO<sub>2</sub>e)
 </h4>
-<table class="table table-responsive table-bordered">
+<table class="table utility-data table-sm table-bordered table-hover">
     <thead>
+        <tr class="table-mh">
+            <th [ngStyle]="{'width.%': cellWidth}"></th>
+            <th class="text-center" [attr.colspan]="yearDetails.length">
+                Emissions<br>
+                (Metric tons CO<sub>2</sub>e)
+            </th>
+            <th class="text-center" [attr.colspan]="yearDetails.length">
+                Percent Reduction
+            </th>
+            <th class="text-center" [attr.colspan]="yearDetails.length">
+                Percent Contribution
+            </th>
+
+        </tr>
         <tr>
-            <th [ngStyle]="{'width.%': cellWidth}">
+            <th>
 
             </th>
-            <th *ngFor="let yearDetail of yearDetails" [ngStyle]="{'width.%': cellWidth}">
+            <th *ngFor="let yearDetail of yearDetails">
+                {{yearDetail.year}}
+            </th>
+            <th *ngFor="let yearDetail of yearDetails">
+                {{yearDetail.year}}
+            </th>
+            <th *ngFor="let yearDetail of yearDetails">
                 {{yearDetail.year}}
             </th>
         </tr>
@@ -18,10 +38,26 @@
                 Scope 1 Emissions
             </th>
             <td *ngFor="let yearDetail of yearDetails">
-                <ng-container *ngIf="yearDetail.totalScope1Emissions">
-                    {{yearDetail.totalScope1Emissions | customNumber}}
+                <ng-container *ngIf="yearDetail.scope1Emissions">
+                    {{yearDetail.scope1Emissions | customNumber}}
                 </ng-container>
-                <ng-container *ngIf="!yearDetail.totalScope1Emissions">
+                <ng-container *ngIf="!yearDetail.scope1Emissions">
+                    &mdash;
+                </ng-container>
+            </td>
+            <td *ngFor="let yearDetail of yearDetails">
+                <ng-container *ngIf="yearDetail.scope1PercentReductions">
+                    {{yearDetail.scope1PercentReductions| number:'1.0-2'}} %
+                </ng-container>
+                <ng-container *ngIf="!yearDetail.scope1PercentReductions">
+                    &mdash;
+                </ng-container>
+            </td>
+            <td *ngFor="let yearDetail of yearDetails">
+                <ng-container *ngIf="yearDetail.scope1ReductionContribution">
+                    {{yearDetail.scope1ReductionContribution | number:'1.0-2'}} %
+                </ng-container>
+                <ng-container *ngIf="!yearDetail.scope1ReductionContribution">
                     &mdash;
                 </ng-container>
             </td>
@@ -38,6 +74,22 @@
                     &mdash;
                 </ng-container>
             </td>
+            <td *ngFor="let yearDetail of yearDetails">
+                <ng-container *ngIf="yearDetail.stationaryEmissionsPercentReductions">
+                    {{yearDetail.stationaryEmissionsPercentReductions| number:'1.0-2'}} %
+                </ng-container>
+                <ng-container *ngIf="!yearDetail.stationaryEmissionsPercentReductions">
+                    &mdash;
+                </ng-container>
+            </td>
+            <td *ngFor="let yearDetail of yearDetails">
+                <ng-container *ngIf="yearDetail.stationaryEmissionsReductionContribution">
+                    {{yearDetail.stationaryEmissionsReductionContribution | number:'1.0-2'}} %
+                </ng-container>
+                <ng-container *ngIf="!yearDetail.stationaryEmissionsReductionContribution">
+                    &mdash;
+                </ng-container>
+            </td>
         </tr>
         <tr>
             <td class="ps-3">
@@ -48,6 +100,22 @@
                     {{yearDetail.mobileEmissions | customNumber}}
                 </ng-container>
                 <ng-container *ngIf="!yearDetail.mobileEmissions">
+                    &mdash;
+                </ng-container>
+            </td>
+            <td *ngFor="let yearDetail of yearDetails">
+                <ng-container *ngIf="yearDetail.mobileEmissionsPercentReductions">
+                    {{yearDetail.mobileEmissionsPercentReductions| number:'1.0-2'}} %
+                </ng-container>
+                <ng-container *ngIf="!yearDetail.mobileEmissionsPercentReductions">
+                    &mdash;
+                </ng-container>
+            </td>
+            <td *ngFor="let yearDetail of yearDetails">
+                <ng-container *ngIf="yearDetail.mobileEmissionsReductionContribution">
+                    {{yearDetail.mobileEmissionsReductionContribution | number:'1.0-2'}} %
+                </ng-container>
+                <ng-container *ngIf="!yearDetail.mobileEmissionsReductionContribution">
                     &mdash;
                 </ng-container>
             </td>
@@ -64,6 +132,22 @@
                     &mdash;
                 </ng-container>
             </td>
+            <td *ngFor="let yearDetail of yearDetails">
+                <ng-container *ngIf="yearDetail.fugitiveEmissionsPercentReductions">
+                    {{yearDetail.fugitiveEmissionsPercentReductions| number:'1.0-2'}} %
+                </ng-container>
+                <ng-container *ngIf="!yearDetail.fugitiveEmissionsPercentReductions">
+                    &mdash;
+                </ng-container>
+            </td>
+            <td *ngFor="let yearDetail of yearDetails">
+                <ng-container *ngIf="yearDetail.fugitiveEmissionsReductionContribution">
+                    {{yearDetail.fugitiveEmissionsReductionContribution | number:'1.0-2'}} %
+                </ng-container>
+                <ng-container *ngIf="!yearDetail.fugitiveEmissionsReductionContribution">
+                    &mdash;
+                </ng-container>
+            </td>
         </tr>
         <tr>
             <td class="ps-3">
@@ -74,6 +158,22 @@
                     {{yearDetail.processEmissions | customNumber}}
                 </ng-container>
                 <ng-container *ngIf="!yearDetail.processEmissions">
+                    &mdash;
+                </ng-container>
+            </td>
+            <td *ngFor="let yearDetail of yearDetails">
+                <ng-container *ngIf="yearDetail.processEmissionsPercentReductions">
+                    {{yearDetail.processEmissionsPercentReductions| number:'1.0-2'}} %
+                </ng-container>
+                <ng-container *ngIf="!yearDetail.processEmissionsPercentReductions">
+                    &mdash;
+                </ng-container>
+            </td>
+            <td *ngFor="let yearDetail of yearDetails">
+                <ng-container *ngIf="yearDetail.processEmissionsReductionContribution">
+                    {{yearDetail.processEmissionsReductionContribution | number:'1.0-2'}} %
+                </ng-container>
+                <ng-container *ngIf="!yearDetail.processEmissionsReductionContribution">
                     &mdash;
                 </ng-container>
             </td>
@@ -128,3 +228,9 @@
         </tr> -->
     </tbody>
 </table>
+<div class="alert alert-info text-center" *ngIf="betterClimateReportSetup.emissionsDisplay == 'market'">
+    Total Emissions shown using Market-Based Scope 2 Emissions
+</div>
+<div class="alert alert-info text-center" *ngIf="betterClimateReportSetup.emissionsDisplay == 'location'">
+    Total Emissions shown using Location-Based Scope 2 Emissions
+</div>

@@ -6,18 +6,27 @@
     </div>
     <div class="report" [ngClass]="{'print': print}"
         *ngIf="selectedReport.betterClimateReportSetup.includeAbsoluteEmissions">
-        <app-absolute-emissions-table [yearDetails]="betterClimateReport.portfolioYearDetails"
-            [cellWidth]="cellWidth"></app-absolute-emissions-table>
+        <app-absolute-emissions-table [yearDetails]="betterClimateReport.portfolioYearDetails" [cellWidth]="cellWidth"
+            [betterClimateReportSetup]="selectedReport.betterClimateReportSetup"></app-absolute-emissions-table>
         <app-absolute-emissions-chart
-            [yearDetails]="betterClimateReport.portfolioYearDetails"></app-absolute-emissions-chart>
+            [yearDetails]="betterClimateReportUnfiltered.portfolioYearDetails"></app-absolute-emissions-chart>
     </div>
 
     <div class="report" [ngClass]="{'print': print}"
         *ngIf="selectedReport.betterClimateReportSetup.includeGHGEmissionsReductions">
         <app-emissions-reductions-table [yearDetails]="betterClimateReport.portfolioYearDetails"
             [cellWidth]="cellWidth"></app-emissions-reductions-table>
-        <app-emissions-reductions-chart [yearDetails]="betterClimateReport.portfolioYearDetails">
+
+        <app-emissions-reductions-chart [yearDetails]="betterClimateReportUnfiltered.portfolioYearDetails">
         </app-emissions-reductions-chart>
+        <div class="alert alert-info text-center"
+            *ngIf="selectedReport.betterClimateReportSetup.emissionsDisplay == 'market'">
+            Emissions reductions calculated using Market-Based Scope 2 Emissions
+        </div>
+        <div class="alert alert-info text-center"
+            *ngIf="selectedReport.betterClimateReportSetup.emissionsDisplay == 'location'">
+            Emissions reductions calculated using Location-Based Scope 2 Emissions
+        </div>
     </div>
 
     <div class="report" [ngClass]="{'print': print}"
@@ -57,12 +66,12 @@
                         [betterClimateReportSetup]="selectedReport.betterClimateReportSetup"></app-top-emissions-performers-table>
                 </div>
                 <div class="col-12">
-                    <app-top-performers-chart [betterClimateReport]="betterClimateReport"
+                    <app-top-performers-chart [betterClimateReport]="betterClimateReportUnfiltered"
                         [chartDataOption]="'scope1PercentReductions'"
                         [betterClimateReportSetup]="selectedReport.betterClimateReportSetup"></app-top-performers-chart>
                 </div>
                 <div class="col-12">
-                    <app-top-performers-chart [betterClimateReport]="betterClimateReport"
+                    <app-top-performers-chart [betterClimateReport]="betterClimateReportUnfiltered"
                         [chartDataOption]="'scope1ReductionContribution'"
                         [betterClimateReportSetup]="selectedReport.betterClimateReportSetup"></app-top-performers-chart>
                 </div>
@@ -87,12 +96,12 @@
                         [betterClimateReportSetup]="selectedReport.betterClimateReportSetup"></app-top-emissions-performers-table>
                 </div>
                 <div class="col-12">
-                    <app-top-performers-chart [betterClimateReport]="betterClimateReport"
+                    <app-top-performers-chart [betterClimateReport]="betterClimateReportUnfiltered"
                         [chartDataOption]="'scope2MarketPercentReductions'"
                         [betterClimateReportSetup]="selectedReport.betterClimateReportSetup"></app-top-performers-chart>
                 </div>
                 <div class="col-12">
-                    <app-top-performers-chart [betterClimateReport]="betterClimateReport"
+                    <app-top-performers-chart [betterClimateReport]="betterClimateReportUnfiltered"
                         [chartDataOption]="'scope2MarketReductionContribution'"
                         [betterClimateReportSetup]="selectedReport.betterClimateReportSetup"></app-top-performers-chart>
                 </div>
@@ -117,12 +126,12 @@
                         [betterClimateReportSetup]="selectedReport.betterClimateReportSetup"></app-top-emissions-performers-table>
                 </div>
                 <div class="col-12">
-                    <app-top-performers-chart [betterClimateReport]="betterClimateReport"
+                    <app-top-performers-chart [betterClimateReport]="betterClimateReportUnfiltered"
                         [chartDataOption]="'scope2LocationPercentReductions'"
                         [betterClimateReportSetup]="selectedReport.betterClimateReportSetup"></app-top-performers-chart>
                 </div>
                 <div class="col-12">
-                    <app-top-performers-chart [betterClimateReport]="betterClimateReport"
+                    <app-top-performers-chart [betterClimateReport]="betterClimateReportUnfiltered"
                         [chartDataOption]="'scope2LocationReductionContribution'"
                         [betterClimateReportSetup]="selectedReport.betterClimateReportSetup"></app-top-performers-chart>
                 </div>

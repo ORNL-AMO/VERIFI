@@ -50,7 +50,7 @@
                 </ng-container>
             </td>
             <td class="fill-cell"
-                [ngStyle]="{'background-size': facilitySummary.scope1Emissions | tableFill: annualFacilitySummary.totalScope1Emissions}">
+                [ngStyle]="{'background-size': facilitySummary.scope1Emissions | tableFill: annualFacilitySummary.scope1Emissions}">
                 <ng-container *ngIf="facilitySummary.scope1Emissions">
                     {{facilitySummary.scope1Emissions | customNumber}}
                 </ng-container>
@@ -87,10 +87,10 @@
 
             </th>
             <th>
-                <ng-container *ngIf="annualFacilitySummary.totalScope1Emissions">
-                    {{annualFacilitySummary.totalScope1Emissions | customNumber}}
+                <ng-container *ngIf="annualFacilitySummary.scope1Emissions">
+                    {{annualFacilitySummary.scope1Emissions | customNumber}}
                 </ng-container>
-                <ng-container *ngIf="!annualFacilitySummary.totalScope1Emissions">
+                <ng-container *ngIf="!annualFacilitySummary.scope1Emissions">
                     &mdash;
                 </ng-container>
             </th>
@@ -143,8 +143,8 @@
             <ng-container *ngIf="emissionsType == 'scope1'">
                 <ng-container
                     *ngFor="let data of annualFacilitiesSummaries[0].betterClimateYearDetails; let index = index;">
-                    <th (click)="setOrderDataField('totalScope1Emissions', data.year)"
-                        [ngClass]="{'active': orderDataField == 'totalScope1Emissions' && orderByYear == data.year}"
+                    <th (click)="setOrderDataField('scope1Emissions', data.year)"
+                        [ngClass]="{'active': orderDataField == 'scope1Emissions' && orderByYear == data.year}"
                         class="text-center">
                         {{data.year}}
                     </th>
@@ -247,8 +247,8 @@
             <ng-container *ngIf="emissionsType == 'scope1'">
                 <ng-container *ngFor="let data of facilityData.betterClimateYearDetails; let index = index;">
                     <td class="text-center fill-cell"
-                        [ngStyle]="{'background-size': data.totalScope1Emissions | tableFill: accountDetails[index].totalScope1Emissions}">
-                        {{data.totalScope1Emissions | customNumber}}
+                        [ngStyle]="{'background-size': data.scope1Emissions | tableFill: accountDetails[index].scope1Emissions}">
+                        {{data.scope1Emissions | customNumber}}
                     </td>
                 </ng-container>
 
@@ -333,7 +333,7 @@
             <ng-container *ngIf="emissionsType == 'scope1'">
                 <ng-container *ngFor="let data of accountDetails; let index = index;">
                     <th class="text-center">
-                        {{data.totalScope1Emissions | customNumber}}
+                        {{data.scope1Emissions | customNumber}}
                     </th>
                 </ng-container>
                 <!-- <ng-container *ngFor="let data of accountDetails; let index = index;">

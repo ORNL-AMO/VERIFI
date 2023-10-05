@@ -146,10 +146,10 @@
                 Scope 1 Stationary
             </td>
             <td *ngFor="let yearDetail of yearDetails; let index = index;" [ngStyle]="{'width.%': cellWidth}">
-                <ng-container *ngIf="yearDetail.scope1StationaryReductions">
-                    {{yearDetail.scope1StationaryReductions| customNumber}}
+                <ng-container *ngIf="yearDetail.stationaryEmissionsReductions">
+                    {{yearDetail.stationaryEmissionsReductions| customNumber}}
                 </ng-container>
-                <ng-container *ngIf="!yearDetail.scope1StationaryReductions">
+                <ng-container *ngIf="!yearDetail.stationaryEmissionsReductions">
                     &mdash;
                 </ng-container>
 
@@ -160,10 +160,10 @@
                 Scope 1 Mobile
             </td>
             <td *ngFor="let yearDetail of yearDetails; let index = index;">
-                <ng-container *ngIf="yearDetail.scope1MobileReductions">
-                    {{yearDetail.scope1MobileReductions| customNumber}}
+                <ng-container *ngIf="yearDetail.mobileEmissionsReductions">
+                    {{yearDetail.mobileEmissionsReductions| customNumber}}
                 </ng-container>
-                <ng-container *ngIf="!yearDetail.scope1MobileReductions">
+                <ng-container *ngIf="!yearDetail.mobileEmissionsReductions">
                     &mdash;
                 </ng-container>
             </td>
@@ -173,10 +173,10 @@
                 Scope 1 Fugitive & Process
             </td>
             <td *ngFor="let yearDetail of yearDetails; let index = index;">
-                <ng-container *ngIf="yearDetail.scope1FugitiveReductions">
-                    {{yearDetail.scope1FugitiveReductions| customNumber}}
+                <ng-container *ngIf="yearDetail.fugitiveEmissionsReductions">
+                    {{yearDetail.fugitiveEmissionsReductions| customNumber}}
                 </ng-container>
-                <ng-container *ngIf="!yearDetail.scope1FugitiveReductions">
+                <ng-container *ngIf="!yearDetail.fugitiveEmissionsReductions">
                     &mdash;
                 </ng-container>
 

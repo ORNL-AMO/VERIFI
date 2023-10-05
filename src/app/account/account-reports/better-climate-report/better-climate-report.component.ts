@@ -10,6 +10,7 @@ import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { BetterClimateReport } from 'src/app/calculations/carbon-calculations/betterClimateReport';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
+import * as _ from 'lodash';
 
 @Component({
   selector: 'app-better-climate-report',
@@ -25,6 +26,7 @@ export class BetterClimateReportComponent {
   calculating: boolean | 'error';
   worker: Worker;
   betterClimateReport: BetterClimateReport;
+  betterClimateReportUnfiltered: BetterClimateReport;
   cellWidth: number;
   constructor(private accountReportDbService: AccountReportDbService,
     private accountReportsService: AccountReportsService,
@@ -46,6 +48,7 @@ export class BetterClimateReportComponent {
     this.calculateCarbonReport();
     this.setCellWidth();
 
+
   }
 
   ngOnDestroy() {
@@ -64,8 +67,9 @@ export class BetterClimateReportComponent {
       this.worker = new Worker(new URL('src/app/web-workers/better-climate-report.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {
         if (!data.error) {
+          this.betterClimateReportUnfiltered = _.cloneDeep(data.betterClimateReport);
+          this.betterClimateReport = this.filterIntermediateYears(data.betterClimateReport);
           this.calculating = false;
-          this.betterClimateReport = data.betterClimateReport;
         } else {
           this.calculating = 'error';
         }
@@ -90,10 +94,30 @@ export class BetterClimateReportComponent {
   }
 
   setCellWidth() {
-    let numCells: number = 1;
-    for (let i = this.selectedReport.baselineYear; i <= this.selectedReport.reportYear; i++) {
-      numCells++;
+    let numberOfYears: number = this.selectedReport.reportYear - this.selectedReport.baselineYear;
+    if (numberOfYears > 3 && this.selectedReport.betterClimateReportSetup.skipIntermediateYears) {
+      this.cellWidth = 25;
+    } else {
+      this.cellWidth = (100 / (numberOfYears+2));
     }
-    this.cellWidth = (100 / numCells);
+  }
+
+  filterIntermediateYears(betterClimateReport: BetterClimateReport): BetterClimateReport {
+    let numberOfYears: number = this.selectedReport.reportYear - this.selectedReport.baselineYear;
+    if (numberOfYears > 3 && this.selectedReport.betterClimateReportSetup.skipIntermediateYears) {
+      let includedYears: Array<number> = [this.selectedReport.reportYear - 1, this.selectedReport.reportYear, this.selectedReport.baselineYear]
+      betterClimateReport.portfolioYearDetails = betterClimateReport.portfolioYearDetails.filter(summary => {
+        return includedYears.includes(summary.year)
+      });
+      betterClimateReport.facilityMaxMins = betterClimateReport.facilityMaxMins.filter(summary => {
+        return includedYears.includes(summary.year)
+      });
+      betterClimateReport.annualFacilitiesSummaries.forEach(summary => {
+        summary.betterClimateYearDetails = summary.betterClimateYearDetails.filter(summary => {
+          return includedYears.includes(summary.year)
+        });
+      });
+    }
+    return betterClimateReport;
   }
 }

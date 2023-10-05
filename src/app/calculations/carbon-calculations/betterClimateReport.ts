@@ -13,12 +13,6 @@ export class BetterClimateReport {
     portfolioYearDetails: Array<BetterClimateYearDetails>;
     annualFacilitiesSummaries: Array<BetterClimateAnnualFacilitySummary>;
     facilityMaxMins: Array<BetterClimateFacilityMaxMin>;
-    // facilityTotals: Array<{
-    //     year: number;
-    //     scope1Emissions: number;
-    //     scope2LocationEmissions: number;
-    //     scope2MarketEmissions: number;
-    // }>;
     constructor(account: IdbAccount, facilities: Array<IdbFacility>, meters: Array<IdbUtilityMeter>, meterData: Array<IdbUtilityMeterData>, baselineYear: number, reportYear: number,
         co2Emissions: Array<SubregionEmissions>, emissionsDisplay: 'market' | 'location', emissionsGoal: number) {
         this.baselineYear = baselineYear;
@@ -76,25 +70,6 @@ export class BetterClimateReport {
             })
         })
     }
-
-    // setFacilityTotals() {
-    //     this.facilityTotals = new Array();
-    //     let allBetterClimateFacilityData: Array<BetterClimateYearDetails> = this.annualFacilitiesSummaries.flatMap(annualFacility => {
-    //         return annualFacility.betterClimateYearDetails;
-    //     })
-    //     for (let year = this.baselineYear; year <= this.reportYear; year++) {
-    //         let yearBetterClimateData: Array<BetterClimateYearDetails> = allBetterClimateFacilityData.filter(data => {
-    //             return data.year == year;
-    //         });
-    //         this.facilityTotals.push({
-    //             year: year,
-    //             scope1Emissions: _.sumBy(yearBetterClimateData, 'totalScope1Emissions'),
-    //             scope2LocationEmissions: _.sumBy(yearBetterClimateData, 'scope2LocationEmissions'),
-    //             scope2MarketEmissions: _.sumBy(yearBetterClimateData, 'scope2MarketEmissions')
-    //         })
-    //     }
-
-    // }
 
     setFacilityMaxMins(){
         let allFacilityValues: Array<BetterClimateYearDetails> = this.annualFacilitiesSummaries.flatMap(summary => {

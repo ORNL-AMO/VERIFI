@@ -18,15 +18,32 @@ export class BetterClimateYearDetails {
     RECs: number;
     totalEnergyUse: number;
 
-    totalScope1Emissions: number;
-    stationaryEmissions: number;
-    mobileEmissions: number;
-    fugitiveEmissions: number;
-    processEmissions: number;
+
+    //TODO: Reduction Percentages based on total emssion (+scope 2) and relative to emission Type
+    scope1Emissions: number;
     scope1Reductions: number;
     scope1PercentReductions: number;
     scope1ReductionContribution: number;
 
+    stationaryEmissions: number;
+    stationaryEmissionsReductions: number;
+    stationaryEmissionsPercentReductions: number;
+    stationaryEmissionsReductionContribution: number;
+
+    mobileEmissions: number;
+    mobileEmissionsReductions: number;
+    mobileEmissionsPercentReductions: number;
+    mobileEmissionsReductionContribution: number;
+
+    fugitiveEmissions: number;
+    fugitiveEmissionsReductions: number;
+    fugitiveEmissionsPercentReductions: number;
+    fugitiveEmissionsReductionContribution: number;
+
+    processEmissions: number;
+    processEmissionsReductions: number;
+    processEmissionsPercentReductions: number;
+    processEmissionsReductionContribution: number;
 
     scope2MarketEmissions: number;
     scope2MarketReductions: number;
@@ -52,9 +69,7 @@ export class BetterClimateYearDetails {
     emissionsReductionChange: number;
     goalForEmissions: number;
 
-    scope1StationaryReductions: number;
-    scope1MobileReductions: number;
-    scope1FugitiveReductions: number;
+
     scope2ChangeInEnergyUse: number;
     scope2OnsiteRenewablesReductions: number;
     scope2OffsiteRenewablesReductions: number;
@@ -95,8 +110,13 @@ export class BetterClimateYearDetails {
         this.setFuelTotals(fuelTypes, calanderizedMeters);
         this.setTotalEnergyUse();
         //emissions
-        this.totalScope1Emissions = this.getEmissionsTotal(calanderizedMeters, year, [1, 2], false);
+        this.scope1Emissions = this.getEmissionsTotal(calanderizedMeters, year, [1, 2], false);
+
         this.stationaryEmissions = this.getEmissionsTotal(calanderizedMeters, year, [1], false);
+        this.setStationaryEmissionsReductions(baselineYearDetails);
+        this.setStationaryEmissionsPercentReductions(baselineYearDetails);
+        this.setStationaryEmissionsReductionContribution(baselineYearDetails);
+
         this.mobileEmissions = this.getEmissionsTotal(calanderizedMeters, year, [2], false);
         //TODO: fugitive and process coming soon
         this.fugitiveEmissions = 0;
@@ -116,7 +136,6 @@ export class BetterClimateYearDetails {
         this.setEmissionsReductionChange(previousYearDetails);
         this.setGoalForEmissions(emissionsGoal);
 
-        this.setScope1StationaryReductions(baselineYearDetails);
         this.setScope1MobileReductions(baselineYearDetails);
         this.setScope1FugitiveReductions(baselineYearDetails);
         this.setScope1Reductions(baselineYearDetails);
@@ -266,9 +285,9 @@ export class BetterClimateYearDetails {
 
     setTotalEmissions(emissionsDisplay: 'market' | 'location') {
         if (emissionsDisplay == 'location') {
-            this.totalEmissions = this.totalScope1Emissions + this.scope2LocationEmissions;
+            this.totalEmissions = this.scope1Emissions + this.scope2LocationEmissions;
         } else {
-            this.totalEmissions = this.totalScope1Emissions + this.scope2MarketEmissions;
+            this.totalEmissions = this.scope1Emissions + this.scope2MarketEmissions;
         }
     }
 
@@ -349,32 +368,32 @@ export class BetterClimateYearDetails {
         this.goalForEmissions = this.totalEmissions * (1 - emissionsGoal);
     }
 
-    setScope1StationaryReductions(baselineYearDetails: BetterClimateYearDetails) {
+    setStationaryEmissionsReductions(baselineYearDetails: BetterClimateYearDetails) {
         if (baselineYearDetails) {
-            this.scope1StationaryReductions = baselineYearDetails.stationaryEmissions - this.stationaryEmissions;
+            this.stationaryEmissionsReductions = baselineYearDetails.stationaryEmissions - this.stationaryEmissions;
         } else {
-            this.scope1StationaryReductions = 0;
+            this.stationaryEmissionsReductions = 0;
         }
     }
     setScope1MobileReductions(baselineYearDetails: BetterClimateYearDetails) {
         if (baselineYearDetails) {
-            this.scope1MobileReductions = baselineYearDetails.mobileEmissions - this.mobileEmissions;
+            this.mobileEmissionsReductions = baselineYearDetails.mobileEmissions - this.mobileEmissions;
         } else {
-            this.scope1MobileReductions = 0;
+            this.mobileEmissionsReductions = 0;
         }
     }
 
     setScope1FugitiveReductions(baselineYearDetails: BetterClimateYearDetails) {
         if (baselineYearDetails) {
-            this.scope1FugitiveReductions = baselineYearDetails.fugitiveEmissions - this.fugitiveEmissions;
+            this.fugitiveEmissionsReductions = baselineYearDetails.fugitiveEmissions - this.fugitiveEmissions;
         } else {
-            this.scope1FugitiveReductions = 0;
+            this.fugitiveEmissionsReductions = 0;
         }
     }
 
     setScope1Reductions(baselineYearDetails: BetterClimateYearDetails) {
         if (baselineYearDetails) {
-            this.scope1Reductions = baselineYearDetails.totalScope1Emissions - this.totalScope1Emissions;
+            this.scope1Reductions = baselineYearDetails.scope1Emissions - this.scope1Emissions;
         } else {
             this.scope1Reductions = 0;
         }
@@ -382,7 +401,7 @@ export class BetterClimateYearDetails {
 
     setScope1PercentReductions(baselineYearDetails: BetterClimateYearDetails) {
         if (baselineYearDetails) {
-            this.scope1PercentReductions = (this.scope1Reductions / baselineYearDetails.totalScope1Emissions) * 100;
+            this.scope1PercentReductions = (this.scope1Reductions / baselineYearDetails.scope1Emissions) * 100;
         } else {
             this.scope1PercentReductions = 0;
         }
@@ -398,6 +417,26 @@ export class BetterClimateYearDetails {
             this.scope1ReductionContribution = 0;
         }
     }
+
+    setStationaryEmissionsPercentReductions(baselineYearDetails: BetterClimateYearDetails) {
+        if (baselineYearDetails) {
+            this.stationaryEmissionsPercentReductions = (this.stationaryEmissionsReductions / baselineYearDetails.stationaryEmissions) * 100;
+        } else {
+            this.stationaryEmissionsPercentReductions = 0;
+        }
+    }
+
+    setStationaryEmissionsReductionContribution(accountDetails: BetterClimateYearDetails) {
+        if (accountDetails) {
+            this.stationaryEmissionsReductionContribution = (this.stationaryEmissions * accountDetails.stationaryEmissionsPercentReductions) / accountDetails.stationaryEmissions;
+            if (isNaN(this.stationaryEmissionsReductionContribution)) {
+                this.stationaryEmissionsReductionContribution = 0;
+            }
+        } else {
+            this.stationaryEmissionsReductionContribution = 0;
+        }
+    }
+
 
     setScope2ChangeInEnergyUse(baselineYearDetails: BetterClimateYearDetails) {
         if (baselineYearDetails) {
@@ -427,8 +466,9 @@ export class BetterClimateYearDetails {
         this.scope2GreenOfGridReductions = this.scope2ChangeInEnergyUse + this.scope2OnsiteRenewablesReductions + this.scope2OffsiteRenewablesReductions;
     }
 
+    //currently two calculations for total reductions. figure out which on to use.
     setTotalEmissionsReductions() {
-        this.totalEmissionsReductions = this.scope1StationaryReductions + this.scope1MobileReductions + this.scope1FugitiveReductions + this.scope2ChangeInEnergyUse + this.scope2OnsiteRenewablesReductions + this.scope2OffsiteRenewablesReductions + this.scope2GreenOfGridReductions;
+        this.totalEmissionsReductions = this.stationaryEmissionsReductions + this.mobileEmissionsReductions + this.fugitiveEmissionsReductions + this.scope2ChangeInEnergyUse + this.scope2OnsiteRenewablesReductions + this.scope2OffsiteRenewablesReductions + this.scope2GreenOfGridReductions;
     }
 
 

@@ -143,7 +143,8 @@ export class AccountReportDbService {
         includePortfolioEnergyUse: true,
         includeCalculationsForGraphs: true,
         includeFacilitySummaries: true,
-        numberOfTopPerformers: 5
+        numberOfTopPerformers: 5,
+        skipIntermediateYears: false
       }
     }
   }
