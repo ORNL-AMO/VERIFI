@@ -16,6 +16,10 @@ export class WeatherStationsMapComponent {
   zipCode: string;
   @Input()
   furthestDistance: number;
+  @Input()
+  isInternational: boolean = false;
+  @Input()
+  selectedCountry: string = 'CA';
 
   @ViewChild('weatherStationMap', { static: false }) weatherStationMap: ElementRef;
 
@@ -39,8 +43,8 @@ export class WeatherStationsMapComponent {
 
   ngOnChanges(changes: SimpleChanges) {
     if ((changes.stations && !changes.stations.isFirstChange())) {
-        this.setMapData();
-        this.drawChart();
+      this.setMapData();
+      this.drawChart();
     }
   }
 
@@ -51,7 +55,15 @@ export class WeatherStationsMapComponent {
         lat: string,
         name: string,
         isZip: boolean
-      } = this.mapData.find(item => { return item.isZip == true });
+      } = {
+        lng: undefined,
+        lat: undefined,
+        name: undefined,
+        isZip: false
+      };
+      if (!this.isInternational) {
+        zipCodeItem = this.mapData.find(item => { return item.isZip == true });
+      }
 
       var data = [{
         type: 'scattergeo',
@@ -89,9 +101,20 @@ export class WeatherStationsMapComponent {
         // locationmode: "USA-states",
       }];
 
+      let scope: string;
+      if (!this.isInternational) {
+        scope = 'usa';
+      } else if(this.selectedCountry == 'CA') {
+        scope = 'north america';
+      } else {
+        scope = 'europe';
+      }
+
+
+
       var layout = {
         'geo': {
-          scope: 'usa',
+          scope: scope,
           resolution: 110,
           showland: true,
           // landcolor: 'rgb(20, 90, 50)',

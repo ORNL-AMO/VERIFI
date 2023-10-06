@@ -7,7 +7,7 @@
     Explore weather stations. Set the zip code and the radius distance from that location to include weather stations.
 </p>
 <form>
-    <div class="row">
+    <div class="row" *ngIf="!isInternational">
         <div class="col-lg-4 col-md-12 col-sm-12">
             <label class="semibold" for="zipCode">Zip Code</label>
             <ng-container *ngIf="!useFacility">
@@ -36,9 +36,23 @@
             <div class="alert-danger alert" *ngIf="furthestDistance > 500">
                 For performance reasons we cannot map further then 500 miles.</div>
         </div>
+    </div> 
+
+    <div class="row" *ngIf="isInternational">
+        <div class="col-4">
+            <label class="semibold" for="country">Country</label>
+            <select class="form-select" name="country" id="country" [(ngModel)]="selectedCountry"
+                (change)="setStations()">
+                <option [ngValue]="'CA'">CANADA</option>
+                <option [ngValue]="'FI'">FINLAND</option>
+                <option [ngValue]="'UK'">United Kingdom</option>
+
+            </select>
+        </div>
     </div>
+
 </form>
 <hr>
 <app-weather-stations-table [stations]="stations"></app-weather-stations-table>
 <app-weather-stations-map [stations]="stations" [zipCode]="zipCode"
-    [furthestDistance]="furthestDistance"></app-weather-stations-map>
+    [furthestDistance]="furthestDistance" [selectedCountry]="selectedCountry" [isInternational]="isInternational"></app-weather-stations-map>

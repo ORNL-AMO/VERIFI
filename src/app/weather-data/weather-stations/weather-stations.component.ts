@@ -22,6 +22,8 @@ export class WeatherStationsComponent {
   facilities: Array<IdbFacility>;
   facilitySub: Subscription;
   selectedFacilityId: string;
+  isInternational: boolean = true;
+  selectedCountry: string = 'CA';
   constructor(private accountDbService: AccountdbService, private degreeDaysService: DegreeDaysService,
     private weatherDataService: WeatherDataService,
     private facilityDbService: FacilitydbService) {
@@ -50,10 +52,17 @@ export class WeatherStationsComponent {
 
   setStations() {
     this.weatherDataService.zipCode = this.zipCode;
-    if (this.furthestDistance <= 500) {
-      this.degreeDaysService.getClosestStation(this.zipCode, this.furthestDistance).then(stations => {
+    if(!this.isInternational){
+      if (this.furthestDistance <= 500) {
+        this.degreeDaysService.getClosestStation(this.zipCode, this.furthestDistance).then(stations => {
+          this.stations = stations;
+        });
+      }
+    }else{
+      this.degreeDaysService.getCountryStations(this.selectedCountry).then(stations => {
         this.stations = stations;
-      });
+        console.log(this.stations);
+      })
     }
   }
 
@@ -83,5 +92,13 @@ export class WeatherStationsComponent {
     this.weatherDataService.selectedFacility = this.facilities.find(facility => { return facility.guid == this.selectedFacilityId });
     this.zipCode = this.weatherDataService.selectedFacility?.zip;
     this.setStations();
+  }
+
+  setIsInternational(bool: boolean){
+    this.isInternational = bool;
+  }
+
+  setCountry(){
+
   }
 }

@@ -98,7 +98,7 @@ export class DegreeDaysService {
 
       let gapInData: boolean = false
       let minutesBetween: number = this.getMinutesBetweenDates(previousDate, localClimatologicalDataMonth[i].DATE);
-      if(minutesBetween > 720){
+      if (minutesBetween > 720) {
         gapInData = true;
       }
       let averageDryBulbTemp: number = (localClimatologicalDataMonth[i].HourlyDryBulbTemperature + previousDryBulbTemp) / 2
@@ -117,7 +117,7 @@ export class DegreeDaysService {
           coolingDegreeDifference = averageDryBulbTemp - baseCoolingTemperature;
           coolingDegreeDay = coolingDegreeDifference * portionOfDay;
         }
-        
+
         results.push({
           time: localClimatologicalDataMonth[i].DATE,
           heatingDegreeDay: heatingDegreeDay,
@@ -189,12 +189,34 @@ export class DegreeDaysService {
     return [];
   }
 
+  async getCountryStations(countryId: string): Promise<Array<WeatherStation>> {
+    let fetchStations = await fetch("https://www1.ncdc.noaa.gov/pub/data/noaa/isd-history.csv");
+    let stationsResults = await fetchStations.text();
+    let countryStations: Array<WeatherStation> = new Array();
+    let parsedData: Array<any> = Papa.parse(stationsResults, { header: true }).data;
+    for (let i = 0; i < parsedData.length; i++) {
+      let parseDataLine = parsedData[i];
+      if (parseDataLine['BEGIN'] && parseDataLine['END'] && parseDataLine['USAF'] && parseDataLine['WBAN']) {
+        let station: WeatherStation = this.parseStation(parseDataLine);
+        if (station.end < new Date(2013, 0, 1)) {
+          if (station.country == countryId) {
+            countryStations.push(station);
+          }
+        }
+      }
+    }
+    return countryStations;
+  }
+
+
+
   async getStationDataResponse(weatherStation: WeatherStation, year: number): Promise<Response> {
-    return await fetch("https://www.ncei.noaa.gov/data/local-climatological-data/access/" + year + "/" + weatherStation.ID + ".csv");
+    return await fetch("https://www.ncei.noaa.gov/data/global-hourly/access/" + year + "/" + weatherStation.ID + ".csv");
   }
 
   getStationYearLCDFromResults(weatherStation: WeatherStation, dataResults: string): Array<LocalClimatologicalData> {
     let parsedData: Array<any> = Papa.parse(dataResults, { header: true }).data;
+    console.log(parsedData);
     let localData: Array<LocalClimatologicalData> = new Array();
     // let reportTypes = [];
     for (let i = 1; i < parsedData.length; i++) {
