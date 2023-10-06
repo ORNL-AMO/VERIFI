@@ -165,8 +165,8 @@
                 </ng-container>
                 <ng-container
                     *ngFor="let data of annualFacilitiesSummaries[0].betterClimateYearDetails; let index = index;">
-                    <th class="text-center" (click)="setOrderDataField('scope1ReductionContribution', data.year)"
-                        [ngClass]="{'active': orderDataField == 'scope1ReductionContribution' && orderByYear == data.year}">
+                    <th class="text-center" (click)="setOrderDataField('scope1ReductionContributionRelative', data.year)"
+                        [ngClass]="{'active': orderDataField == 'scope1ReductionContributionRelative' && orderByYear == data.year}">
                         {{data.year}}
                     </th>
                 </ng-container>
@@ -197,8 +197,8 @@
                 </ng-container>
                 <ng-container
                     *ngFor="let data of annualFacilitiesSummaries[0].betterClimateYearDetails; let index = index;">
-                    <th class="text-center" (click)="setOrderDataField('scope2MarketReductionContribution', data.year)"
-                        [ngClass]="{'active': orderDataField == 'scope2MarketReductionContribution' && orderByYear == data.year}">
+                    <th class="text-center" (click)="setOrderDataField('scope2MarketReductionContributionRelative', data.year)"
+                        [ngClass]="{'active': orderDataField == 'scope2MarketReductionContributionRelative' && orderByYear == data.year}">
                         {{data.year}}
                     </th>
                 </ng-container>
@@ -230,8 +230,8 @@
                 <ng-container
                     *ngFor="let data of annualFacilitiesSummaries[0].betterClimateYearDetails; let index = index;">
                     <th class="text-center"
-                        (click)="setOrderDataField('scope2LocationReductionContribution', data.year)"
-                        [ngClass]="{'active': orderDataField == 'scope2LocationReductionContribution' && orderByYear == data.year}">
+                        (click)="setOrderDataField('scope2LocationReductionContributionRelative', data.year)"
+                        [ngClass]="{'active': orderDataField == 'scope2LocationReductionContributionRelative' && orderByYear == data.year}">
                         {{data.year}}
                     </th>
                 </ng-container>
@@ -265,8 +265,8 @@
                 </ng-container>
                 <ng-container *ngFor="let data of facilityData.betterClimateYearDetails; let index = index;">
                     <td class="text-center"
-                        [ngStyle]="{'background-color': data.scope1ReductionContribution | tableCellShading:facilityMaxMin[index].scope1ReductionContribution.min: facilityMaxMin[index].scope1ReductionContribution.max}">
-                        {{data.scope1ReductionContribution| number:'1.0-2'}} %
+                        [ngStyle]="{'background-color': data.scope1ReductionContributionRelative | tableCellShading:facilityMaxMin[index].scope1ReductionContributionRelative.min: facilityMaxMin[index].scope1ReductionContributionRelative.max}">
+                        {{data.scope1ReductionContributionRelative| number:'1.0-2'}} %
                     </td>
                 </ng-container>
             </ng-container>
@@ -291,8 +291,8 @@
                 </ng-container>
                 <ng-container *ngFor="let data of facilityData.betterClimateYearDetails; let index = index;">
                     <td class="text-center"
-                        [ngStyle]="{'background-color': data.scope2MarketReductionContribution | tableCellShading:facilityMaxMin[index].scope2MarketReductionContribution.min: facilityMaxMin[index].scope2MarketReductionContribution.max}">
-                        {{data.scope2MarketReductionContribution| number:'1.0-2'}} %
+                        [ngStyle]="{'background-color': data.scope2MarketReductionContributionRelative | tableCellShading:facilityMaxMin[index].scope2MarketReductionContributionRelative.min: facilityMaxMin[index].scope2MarketReductionContributionRelative.max}">
+                        {{data.scope2MarketReductionContributionRelative| number:'1.0-2'}} %
                     </td>
                 </ng-container>
             </ng-container>
@@ -317,8 +317,8 @@
                 </ng-container>
                 <ng-container *ngFor="let data of facilityData.betterClimateYearDetails; let index = index;">
                     <td class="text-center"
-                        [ngStyle]="{'background-color': data.scope2LocationReductionContribution | tableCellShading:facilityMaxMin[index].scope2LocationReductionContribution.min: facilityMaxMin[index].scope2LocationReductionContribution.max}">
-                        {{data.scope2LocationReductionContribution| number:'1.0-2'}} %
+                        [ngStyle]="{'background-color': data.scope2LocationReductionContributionRelative | tableCellShading:facilityMaxMin[index].scope2LocationReductionContributionRelative.min: facilityMaxMin[index].scope2LocationReductionContributionRelative.max}">
+                        {{data.scope2LocationReductionContributionRelative| number:'1.0-2'}} %
                     </td>
                 </ng-container>
             </ng-container>
@@ -348,7 +348,7 @@
                 </ng-container>
                 <ng-container *ngFor="let data of accountDetails; let index = index;">
                     <th class="text-center">
-                        <!-- {{data.scope1ReductionContribution | number:'1.0-2'}} % -->
+                        {{data.scope1PercentReductions| number:'1.0-2'}} %
                     </th>
                 </ng-container>
             </ng-container>
@@ -371,7 +371,7 @@
                 </ng-container>
                 <ng-container *ngFor="let data of accountDetails; let index = index;">
                     <th class="text-center">
-                        <!-- {{data.scope1ReductionContribution | number:'1.0-2'}} % -->
+                        {{data.scope2MarketPercentReductions| number:'1.0-2'}} %
                     </th>
                 </ng-container>
             </ng-container>
@@ -394,7 +394,7 @@
                 </ng-container>
                 <ng-container *ngFor="let data of accountDetails; let index = index;">
                     <th class="text-center">
-                        <!-- {{data.scope1ReductionContribution | number:'1.0-2'}} % -->
+                        {{data.scope2LocationPercentReductions| number:'1.0-2'}} %
                     </th>
                 </ng-container>
             </ng-container>

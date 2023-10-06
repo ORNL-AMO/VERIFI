@@ -14,7 +14,7 @@ export class TopPerformersChartComponent {
   @Input()
   betterClimateReport: BetterClimateReport;
   @Input()
-  chartDataOption: 'scope1PercentReductions' | 'scope1ReductionContribution' | 'scope2MarketPercentReductions' | 'scope2MarketReductionContribution' | 'scope2LocationPercentReductions' | 'scope2LocationReductionContribution';
+  chartDataOption: 'scope1PercentReductions' | 'scope1ReductionContributionRelative' | 'scope2MarketPercentReductions' | 'scope2MarketReductionContributionRelative' | 'scope2LocationPercentReductions' | 'scope2LocationReductionContributionRelative';
   @Input()
   betterClimateReportSetup: BetterClimateReportSetup
 
@@ -34,7 +34,7 @@ export class TopPerformersChartComponent {
     if (this.performanceChart) {
       var data = this.getFacilityTraces();
       let title: string = 'Savings By Facility';
-      if (this.chartDataOption == 'scope1ReductionContribution' || this.chartDataOption == 'scope2MarketReductionContribution' || this.chartDataOption == 'scope2LocationReductionContribution') {
+      if (this.chartDataOption == 'scope1ReductionContributionRelative' || this.chartDataOption == 'scope2MarketReductionContributionRelative' || this.chartDataOption == 'scope2LocationReductionContributionRelative') {
         title = 'Contribution By Facility';
       }
 

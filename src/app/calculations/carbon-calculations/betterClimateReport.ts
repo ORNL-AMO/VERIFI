@@ -86,25 +86,37 @@ export class BetterClimateReport {
                     max: _.maxBy(yearDetails, 'scope1PercentReductions').scope1PercentReductions,
                     min: _.minBy(yearDetails, 'scope1PercentReductions').scope1PercentReductions
                 },
-                scope1ReductionContribution: {
-                    max: _.maxBy(yearDetails, 'scope1ReductionContribution').scope1ReductionContribution,
-                    min: _.minBy(yearDetails, 'scope1ReductionContribution').scope1ReductionContribution
+                scope1ReductionContributionRelative: {
+                    max: _.maxBy(yearDetails, 'scope1ReductionContributionRelative').scope1ReductionContributionRelative,
+                    min: _.minBy(yearDetails, 'scope1ReductionContributionRelative').scope1ReductionContributionRelative
+                },
+                scope1ReductionContributionTotal: {
+                    max: _.maxBy(yearDetails, 'scope1ReductionContributionTotal').scope1ReductionContributionTotal,
+                    min: _.minBy(yearDetails, 'scope1ReductionContributionTotal').scope1ReductionContributionTotal
                 },
                 scope2MarketPercentReductions: {
                     max: _.maxBy(yearDetails, 'scope2MarketPercentReductions').scope2MarketPercentReductions,
                     min: _.minBy(yearDetails, 'scope2MarketPercentReductions').scope2MarketPercentReductions
                 },
-                scope2MarketReductionContribution: {
-                    max: _.maxBy(yearDetails, 'scope2MarketReductionContribution').scope2MarketReductionContribution,
-                    min: _.minBy(yearDetails, 'scope2MarketReductionContribution').scope2MarketReductionContribution
+                scope2MarketReductionContributionRelative: {
+                    max: _.maxBy(yearDetails, 'scope2MarketReductionContributionRelative').scope2MarketReductionContributionRelative,
+                    min: _.minBy(yearDetails, 'scope2MarketReductionContributionRelative').scope2MarketReductionContributionRelative
+                },
+                scope2MarketReductionContributionTotal: {
+                    max: _.maxBy(yearDetails, 'scope2MarketReductionContributionTotal').scope2MarketReductionContributionTotal,
+                    min: _.minBy(yearDetails, 'scope2MarketReductionContributionTotal').scope2MarketReductionContributionTotal
                 },
                 scope2LocationPercentReductions: {
                     max: _.maxBy(yearDetails, 'scope2LocationPercentReductions').scope2LocationPercentReductions,
                     min: _.minBy(yearDetails, 'scope2LocationPercentReductions').scope2LocationPercentReductions
                 },
-                scope2LocationReductionContribution: {
-                    max: _.maxBy(yearDetails, 'scope2LocationReductionContribution').scope2LocationReductionContribution,
-                    min: _.minBy(yearDetails, 'scope2LocationReductionContribution').scope2LocationReductionContribution
+                scope2LocationReductionContributionRelative: {
+                    max: _.maxBy(yearDetails, 'scope2LocationReductionContributionRelative').scope2LocationReductionContributionRelative,
+                    min: _.minBy(yearDetails, 'scope2LocationReductionContributionRelative').scope2LocationReductionContributionRelative
+                },
+                scope2LocationReductionContributionTotal: {
+                    max: _.maxBy(yearDetails, 'scope2LocationReductionContributionTotal').scope2LocationReductionContributionTotal,
+                    min: _.minBy(yearDetails, 'scope2LocationReductionContributionTotal').scope2LocationReductionContributionTotal
                 },
             })
         }
@@ -124,7 +136,11 @@ export interface BetterClimateFacilityMaxMin{
         max: number,
         min: number
     },
-    scope1ReductionContribution: {
+    scope1ReductionContributionRelative: {
+        max: number,
+        min: number
+    },
+    scope1ReductionContributionTotal: {
         max: number,
         min: number
     },
@@ -132,7 +148,11 @@ export interface BetterClimateFacilityMaxMin{
         max: number,
         min: number
     },
-    scope2MarketReductionContribution: {
+    scope2MarketReductionContributionRelative: {
+        max: number,
+        min: number
+    },
+    scope2MarketReductionContributionTotal: {
         max: number,
         min: number
     },
@@ -140,7 +160,11 @@ export interface BetterClimateFacilityMaxMin{
         max: number,
         min: number
     },
-    scope2LocationReductionContribution: {
+    scope2LocationReductionContributionRelative: {
+        max: number,
+        min: number
+    },
+    scope2LocationReductionContributionTotal: {
         max: number,
         min: number
     },
