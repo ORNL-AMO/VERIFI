@@ -141,7 +141,7 @@ export class AccountReportDbService {
         includeAbsoluteEmissions: true,
         includeGHGEmissionsReductions: true,
         includePortfolioEnergyUse: true,
-        includeCalculationsForGraphs: true,
+        includeCalculationsForGraphs: false,
         includeFacilitySummaries: true,
         numberOfTopPerformers: 5,
         skipIntermediateYears: false
