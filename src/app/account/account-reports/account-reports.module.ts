@@ -33,13 +33,26 @@ import { PerformanceReportGroupTableComponent } from './performance-report/perfo
 import { PerformanceReportUtilityTableComponent } from './performance-report/performance-report-utility-table/performance-report-utility-table.component';
 import { PerformanceChartComponent } from './performance-report/performance-chart/performance-chart.component';
 import { TopPerformersTableComponent } from './performance-report/top-performers-table/top-performers-table.component';
-import { TableCellShadingPipe } from './performance-report/table-cell-shading.pipe';
-import { TableFillPipe } from './performance-report/table-fill.pipe';
+import { TableCellShadingPipe } from './report-pipes/table-cell-shading.pipe';
+import { TableFillPipe } from './report-pipes/table-fill.pipe';
 import { PerformanceReportDashboardComponent } from './account-reports-dashboard/performance-report-dashboard/performance-report-dashboard.component';
 import { OverviewReportDashboardComponent } from './account-reports-dashboard/overview-report-dashboard/overview-report-dashboard.component';
 import { BetterPlantsReportDashboardComponent } from './account-reports-dashboard/better-plants-report-dashboard/better-plants-report-dashboard.component';
 import { AccountReportsDashboardTabsComponent } from './account-reports-dashboard/account-reports-dashboard-tabs/account-reports-dashboard-tabs.component';
-
+import { BetterClimateReportComponent } from './better-climate-report/better-climate-report.component';
+import { BetterClimateSetupComponent } from './account-report-setup/better-climate-setup/better-climate-setup.component';
+import { BetterClimateReportDashboardComponent } from './account-reports-dashboard/better-climate-report-dashboard/better-climate-report-dashboard.component';
+import { PortfolioInformationTableComponent } from './better-climate-report/portfolio-information-table/portfolio-information-table.component';
+import { AbsoluteEmissionsTableComponent } from './better-climate-report/absolute-emissions-table/absolute-emissions-table.component';
+import { EmissionsReductionsTableComponent } from './better-climate-report/emissions-reductions-table/emissions-reductions-table.component';
+import { TotalPortfolioEnergyUseTableComponent } from './better-climate-report/total-portfolio-energy-use-table/total-portfolio-energy-use-table.component';
+import { VehicleEnergyUseTableComponent } from './better-climate-report/vehicle-energy-use-table/vehicle-energy-use-table.component';
+import { GraphCalculationsTableComponent } from './better-climate-report/graph-calculations-table/graph-calculations-table.component';
+import { AnnualFacilityClimateSummaryTableComponent } from './better-climate-report/annual-facility-climate-summary-table/annual-facility-climate-summary-table.component';
+import { EmissionsReductionsChartComponent } from './better-climate-report/emissions-reductions-chart/emissions-reductions-chart.component';
+import { AbsoluteEmissionsChartComponent } from './better-climate-report/absolute-emissions-chart/absolute-emissions-chart.component';
+import { TopEmissionsPerformersTableComponent } from './better-climate-report/top-emissions-performers-table/top-emissions-performers-table.component';
+import { TopPerformersChartComponent } from './better-climate-report/top-performers-chart/top-performers-chart.component';
 
 
 @NgModule({
@@ -77,7 +90,21 @@ import { AccountReportsDashboardTabsComponent } from './account-reports-dashboar
     PerformanceReportDashboardComponent,
     OverviewReportDashboardComponent,
     BetterPlantsReportDashboardComponent,
-    AccountReportsDashboardTabsComponent
+    AccountReportsDashboardTabsComponent,
+    BetterClimateReportComponent,
+    BetterClimateSetupComponent,
+    BetterClimateReportDashboardComponent,
+    PortfolioInformationTableComponent,
+    AbsoluteEmissionsTableComponent,
+    EmissionsReductionsTableComponent,
+    TotalPortfolioEnergyUseTableComponent,
+    VehicleEnergyUseTableComponent,
+    GraphCalculationsTableComponent,
+    AnnualFacilityClimateSummaryTableComponent,
+    EmissionsReductionsChartComponent,
+    AbsoluteEmissionsChartComponent,
+    TopEmissionsPerformersTableComponent,
+    TopPerformersChartComponent
   ],
   imports: [
     CommonModule,

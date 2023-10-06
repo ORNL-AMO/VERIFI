@@ -29,6 +29,13 @@
                     <i class="fa fa-file"></i>
                     Performance Report</a>
             </li>
+            <li class="nav-item" [ngClass]="{'disabled': !setupValid}"
+                *ngIf="selectedReport.reportType == 'betterClimate'">
+                <a class="nav-link" routerLink="/account/reports/better-climate-report"
+                    [routerLinkActive]="['active']">
+                    <i class="fa fa-file"></i>
+                    Better Climate Report</a>
+            </li>
         </ul>
     </div>
     <div>

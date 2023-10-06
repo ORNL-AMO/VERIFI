@@ -1,0 +1,256 @@
+<h4>
+    Calculations for Graphs
+</h4>
+
+<table class="table table-responsive table-bordered">
+    <thead>
+        <tr>
+            <th [ngStyle]="{'width.%': cellWidth}">
+
+            </th>
+            <th *ngFor="let yearDetail of yearDetails" [ngStyle]="{'width.%': cellWidth}">
+                {{yearDetail.year}}
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+                Goal for Emissions
+            </td>
+            <td *ngFor="let yearDetail of yearDetails; let index = index;">
+                <!--TODO add goal from account-->
+                <ng-container *ngIf="index == 0">
+                    {{yearDetail.goalForEmissions| customNumber}}
+                </ng-container>
+                <ng-container *ngIf="index != 0">
+                    &mdash;
+                </ng-container>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Annual Percent Improvement
+            </td>
+            <td *ngFor="let yearDetail of yearDetails">
+                <ng-container *ngIf="yearDetail.annualPercentImprovement">
+                    {{yearDetail.annualPercentImprovement | number:'1.0-2'}} %
+                </ng-container>
+                <ng-container *ngIf="!yearDetail.annualPercentImprovement">
+                    &mdash;
+                </ng-container>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Scope 2 Total Energy Use (MMBtu)
+            </td>
+            <td *ngFor="let yearDetail of yearDetails">
+                <ng-container *ngIf="yearDetail.scope2EnergyUse">
+                    {{yearDetail.scope2EnergyUse | customNumber}}
+                </ng-container>
+                <ng-container *ngIf="!yearDetail.scope2EnergyUse">
+                    &mdash;
+                </ng-container>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Portfolio Average Scope 2 Emission Factor - Market Based (kg CO<sub>2</sub>e/MMBtu)
+            </td>
+            <td *ngFor="let yearDetail of yearDetails">
+                <ng-container *ngIf="yearDetail.scope2MarketEmissionsFactor">
+                    {{yearDetail.scope2MarketEmissionsFactor | customNumber}}
+                </ng-container>
+                <ng-container *ngIf="!yearDetail.scope2MarketEmissionsFactor">
+                    &mdash;
+                </ng-container>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Portfolio Average Scope 2 Emission Factor - Location Based (kg CO<sub>2</sub>e/MMBtu)
+            </td>
+            <td *ngFor="let yearDetail of yearDetails">
+                <ng-container *ngIf="yearDetail.scope2LocationEmissionsFactor">
+                    {{yearDetail.scope2LocationEmissionsFactor | customNumber}}
+                </ng-container>
+                <ng-container *ngIf="!yearDetail.scope2LocationEmissionsFactor">
+                    &mdash;
+                </ng-container>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Decrease in Scope 2 Energy Use (MMBtu)
+            </td>
+            <td *ngFor="let yearDetail of yearDetails">
+                <ng-container *ngIf="yearDetail.decreaseInScope2EnergyUse">
+                    {{yearDetail.decreaseInScope2EnergyUse | customNumber}}
+                </ng-container>
+                <ng-container *ngIf="!yearDetail.decreaseInScope2EnergyUse">
+                    &mdash;
+                </ng-container>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <!--should probably be MWh-->
+                Increase in Onsite Renewable Energy Use (MMBtu)
+            </td>
+            <td *ngFor="let yearDetail of yearDetails">
+                <ng-container *ngIf="yearDetail.increaseInOnsiteRenewables">
+                    {{yearDetail.increaseInOnsiteRenewables | customNumber}}
+                </ng-container>
+                <ng-container *ngIf="!yearDetail.increaseInOnsiteRenewables">
+                    &mdash;
+                </ng-container>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <!--should probably be MWh-->
+                Increase in Offsite Renewable Energy Use (MMBtu)
+            </td>
+            <td *ngFor="let yearDetail of yearDetails">
+                <ng-container *ngIf="yearDetail.increaseInOffsiteRenewables">
+                    {{yearDetail.increaseInOffsiteRenewables | customNumber}}
+                </ng-container>
+                <ng-container *ngIf="!yearDetail.increaseInOffsiteRenewables">
+                    &mdash;
+                </ng-container>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Emissions Reduction from Change in Scope 2 Emissions Factor (Metric tons CO<sub>2</sub>e)
+            </td>
+            <td *ngFor="let yearDetail of yearDetails">
+                <ng-container *ngIf="yearDetail.emissionsReductionChange">
+                    {{yearDetail.emissionsReductionChange | customNumber}}
+                </ng-container>
+                <ng-container *ngIf="!yearDetail.emissionsReductionChange">
+                    &mdash;
+                </ng-container>
+            </td>
+        </tr>
+    </tbody>
+</table>
+<hr>
+
+<table class="table table-responsive table-bordered">
+    <tbody>
+        <tr>
+            <td [ngStyle]="{'width.%': cellWidth}">
+                Scope 1 Stationary
+            </td>
+            <td *ngFor="let yearDetail of yearDetails; let index = index;" [ngStyle]="{'width.%': cellWidth}">
+                <ng-container *ngIf="yearDetail.stationaryEmissionsReductions">
+                    {{yearDetail.stationaryEmissionsReductions| customNumber}}
+                </ng-container>
+                <ng-container *ngIf="!yearDetail.stationaryEmissionsReductions">
+                    &mdash;
+                </ng-container>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Scope 1 Mobile
+            </td>
+            <td *ngFor="let yearDetail of yearDetails; let index = index;">
+                <ng-container *ngIf="yearDetail.mobileEmissionsReductions">
+                    {{yearDetail.mobileEmissionsReductions| customNumber}}
+                </ng-container>
+                <ng-container *ngIf="!yearDetail.mobileEmissionsReductions">
+                    &mdash;
+                </ng-container>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Scope 1 Fugitive & Process
+            </td>
+            <td *ngFor="let yearDetail of yearDetails; let index = index;">
+                <ng-container *ngIf="yearDetail.fugitiveEmissionsReductions">
+                    {{yearDetail.fugitiveEmissionsReductions| customNumber}}
+                </ng-container>
+                <ng-container *ngIf="!yearDetail.fugitiveEmissionsReductions">
+                    &mdash;
+                </ng-container>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Scope 2 Change in Energy Use
+            </td>
+            <td *ngFor="let yearDetail of yearDetails; let index = index;">
+                <ng-container *ngIf="yearDetail.scope2ChangeInEnergyUse">
+                    {{yearDetail.scope2ChangeInEnergyUse| customNumber}}
+                </ng-container>
+                <ng-container *ngIf="!yearDetail.scope2ChangeInEnergyUse">
+                    &mdash;
+                </ng-container>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Scope 2 On-site Renewables
+            </td>
+            <td *ngFor="let yearDetail of yearDetails; let index = index;">
+                <ng-container *ngIf="yearDetail.scope2OnsiteRenewablesReductions">
+                    {{yearDetail.scope2OnsiteRenewablesReductions| customNumber}}
+                </ng-container>
+                <ng-container *ngIf="!yearDetail.scope2OnsiteRenewablesReductions">
+                    &mdash;
+                </ng-container>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Scope 2 Off-site Renewables
+            </td>
+            <td *ngFor="let yearDetail of yearDetails; let index = index;">
+                <ng-container *ngIf="yearDetail.scope2OffsiteRenewablesReductions">
+                    {{yearDetail.scope2OffsiteRenewablesReductions| customNumber}}
+                </ng-container>
+                <ng-container *ngIf="!yearDetail.scope2OffsiteRenewablesReductions">
+                    &mdash;
+                </ng-container>
+
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Scope 2 Greening of Grid / Other
+            </td>
+            <td *ngFor="let yearDetail of yearDetails; let index = index;">
+                <ng-container *ngIf="yearDetail.scope2GreenOfGridReductions">
+                    {{yearDetail.scope2GreenOfGridReductions| customNumber}}
+                </ng-container>
+                <ng-container *ngIf="!yearDetail.scope2GreenOfGridReductions">
+                    &mdash;
+                </ng-container>
+
+            </td>
+        </tr>
+        <tr>
+            <th>
+                Total
+            </th>
+            <th *ngFor="let yearDetail of yearDetails; let index = index;">
+                <ng-container *ngIf="yearDetail.totalEmissionsReductions">
+                    {{yearDetail.totalEmissionsReductions| customNumber}}
+                </ng-container>
+                <ng-container *ngIf="!yearDetail.totalEmissionsReductions">
+                    &mdash;
+                </ng-container>
+
+            </th>
+        </tr>
+    </tbody>
+</table>

@@ -133,6 +133,18 @@ export class AccountReportDbService {
         includeAdjusted: true,
         includeContribution: true,
         includeSavings: true,
+      },
+      betterClimateReportSetup: {
+        emissionsDisplay: 'location',
+        initiativeNotes: [],
+        includePortfolioInformation: true,
+        includeAbsoluteEmissions: true,
+        includeGHGEmissionsReductions: true,
+        includePortfolioEnergyUse: true,
+        includeCalculationsForGraphs: false,
+        includeFacilitySummaries: true,
+        numberOfTopPerformers: 5,
+        skipIntermediateYears: false
       }
     }
   }

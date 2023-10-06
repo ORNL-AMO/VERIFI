@@ -123,3 +123,20 @@ export interface PerformanceReportSetup {
   includeSavings: boolean,
   includeTopPerformersTable: boolean
 }
+
+
+export interface BetterClimateReportSetup {
+  emissionsDisplay: 'market' | 'location',
+  initiativeNotes: Array<{
+    year: number,
+    note: string
+  }>,
+  includePortfolioInformation: boolean,
+  includeAbsoluteEmissions: boolean,
+  includeGHGEmissionsReductions: boolean,
+  includePortfolioEnergyUse: boolean,
+  includeCalculationsForGraphs: boolean,
+  includeFacilitySummaries: boolean,
+  numberOfTopPerformers: number,
+  skipIntermediateYears: boolean
+}

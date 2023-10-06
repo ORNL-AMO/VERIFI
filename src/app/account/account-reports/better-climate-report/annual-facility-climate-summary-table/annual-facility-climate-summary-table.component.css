@@ -1,0 +1,25 @@
+
+td.fill-cell {
+    background-image: linear-gradient(to right, rgba(241, 196, 15, 1) 0%, rgba(241, 196, 15, 1) 100%);
+    background-repeat: no-repeat;
+}
+
+td.fill-cell-savings {
+    background-image: linear-gradient(to right, rgba(39, 174, 96, 1) 0%, rgba(39, 174, 96, 1) 100%);
+    background-repeat: no-repeat;
+}
+
+td.fill-cell-losses {
+    background-image: linear-gradient(to right, rgba(171, 0, 5, 1) 0%, rgba(171, 0, 5, 1) 100%);
+    background-repeat: no-repeat;
+}
+
+
+
+sub{
+    color: white;
+}
+
+td{
+    text-wrap: nowrap;
+}
