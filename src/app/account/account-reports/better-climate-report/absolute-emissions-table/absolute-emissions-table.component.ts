@@ -18,4 +18,28 @@ export class AbsoluteEmissionsTableComponent {
   @Input()
   betterClimateReportSetup: BetterClimateReportSetup;
 
+  hasStationary: boolean;
+  hasMobile: boolean;
+  hasFugitive: boolean;
+  hasProcess: boolean;
+  constructor(){
+
+  }
+
+
+  ngOnInit(){
+    this.hasStationary = this.yearDetails.find(detail => {
+      return detail.stationaryEmissions != 0;
+    }) != undefined;
+    this.hasMobile = this.yearDetails.find(detail => {
+      return detail.mobileEmissions != 0;
+    }) != undefined;
+    this.hasFugitive = this.yearDetails.find(detail => {
+      return detail.fugitiveEmissions != 0;
+    }) != undefined;
+    this.hasProcess = this.yearDetails.find(detail => {
+      return detail.processEmissions != 0;
+    }) != undefined;
+  }
+
 }

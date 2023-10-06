@@ -62,7 +62,7 @@
                 </ng-container>
             </td>
         </tr>
-        <tr>
+        <tr *ngIf="hasStationary">
             <td class="ps-3">
                 Stationary Emissions
             </td>
@@ -91,7 +91,7 @@
                 </ng-container>
             </td>
         </tr>
-        <tr>
+        <tr *ngIf="hasMobile">
             <td class="ps-3">
                 Mobile Emissions
             </td>
@@ -120,7 +120,7 @@
                 </ng-container>
             </td>
         </tr>
-        <tr>
+        <tr *ngIf="hasFugitive">
             <td class="ps-3">
                 Fugitive Emissions
             </td>
@@ -149,7 +149,7 @@
                 </ng-container>
             </td>
         </tr>
-        <tr>
+        <tr *ngIf="hasProcess">
             <td class="ps-3">
                 Process Emissions
             </td>
