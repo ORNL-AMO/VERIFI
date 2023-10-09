@@ -147,5 +147,13 @@ export const dbConfig: DBConfig = {
       { name: 'accountId', keypath: 'accountId', options: { unique: false } },
     ]
   },
+  {
+    store: 'analyticsData',
+    storeConfig: { keyPath: 'id', autoIncrement: true },
+    storeSchema: [
+      { name: 'clientId', keypath: 'clientId', options: {unique: false } },
+      { name: 'modifiedDate', keypath: 'modifiedDate', options: {unique: false } },
+    ]
+  }
 ]
 };
