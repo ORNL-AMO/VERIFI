@@ -4,24 +4,28 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { v4 as uuidv4 } from 'uuid';
 import { AnalyticsDataDbService } from '../indexedDB/analytics-data-db.service';
 import { environment } from 'src/environments/environment';
+import { ElectronService } from '../electron/electron.service';
+declare let gtag: Function;
 
 @Injectable({
   providedIn: 'root'
 })
 export class AnalyticsService {
-  
+
   private clientId: string;
   analyticsSessionId: string;
   httpOptions = {
     headers: new HttpHeaders({
-      'Content-Type':  'application/json',
+      'Content-Type': 'application/json',
     })
   };
-  
-  constructor(private httpClient: HttpClient, private analyticsDataDbService: AnalyticsDataDbService) {
+
+  constructor(private httpClient: HttpClient, 
+    private analyticsDataDbService: AnalyticsDataDbService,
+    private electronService: ElectronService) {
     this.analyticsSessionId = uuidv4();
   }
-    
+
   async setClientAnalyticsId() {
     let appAnalyticsData: Array<AppAnalyticsData> = await firstValueFrom(this.analyticsDataDbService.getAppAnalyticsData());
     let clientId: string;
@@ -70,11 +74,24 @@ export class AnalyticsService {
     }
   }
 
+  async sendAnalyticsEvent(eventName: AnalyticsEventString, eventParams: EventParameters){
+    if (!this.clientId) {
+      await this.initAnalyticsSession(undefined);
+    } else {
+      let pageViewEvent: GAEvent = {
+        name: eventName,
+        params: eventParams
+      }
+      eventParams.session_id = this.analyticsSessionId;
+      this.postEventToMeasurementProtocol(pageViewEvent)
+    }
+  }
+
   postEventToMeasurementProtocol(gaEvent: GAEvent) {
     if (gaEvent.name === 'page_view') {
       this.setPageViewEventUrl(gaEvent);
     }
-      
+
     let callDebuggingEndpoint = environment.production ? false : true;
     let postBody = {
       isDebugging: callDebuggingEndpoint,
@@ -88,17 +105,17 @@ export class AnalyticsService {
     }
     //TODO: gamp for MEASUR. Need script for VERIFI
     let url: string = environment.measurUtilitiesApi + 'gamp';
-    if (environment.production) { 
+    if (environment.production) {
       this.httpClient.post<any>(url, postBody, this.httpOptions)
-      .pipe(catchError(error => [])).subscribe({
-        next: (resp) => {
-          // GA Debugging endpoint returns response
-          // GA prod endpoint returns null on success
-        },
-        error: (error: AnalyticsHttpError) => {
-          // for now all errors fail silently
-        }
-      });
+        .pipe(catchError(error => [])).subscribe({
+          next: (resp) => {
+            // GA Debugging endpoint returns response
+            // GA prod endpoint returns null on success
+          },
+          error: (error: AnalyticsHttpError) => {
+            // for now all errors fail silently
+          }
+        });
     }
   }
 
@@ -117,25 +134,31 @@ export class AnalyticsService {
   getPageWithoutId(pagePath: string) {
     let pathWithoutId: string = pagePath.replace(/[0-9]/g, '');
     pathWithoutId = pathWithoutId.replace(/\/$/, "");
-    if (pathWithoutId.includes('inventory')) {
-      pathWithoutId = pathWithoutId.replace('//', "/");
-    }
+    pathWithoutId = pathWithoutId.replace("//", "/:id/");
     return pathWithoutId;
+  }
+
+  sendWebEvent(eventName: AnalyticsEventString, eventParams: EventParameters) {
+    if(this.electronService.isElectron == false){
+      gtag('event', eventName, eventParams);
+    }else{
+      this.sendAnalyticsEvent(eventName, eventParams);
+    }
   }
 
 }
 
-export class AnalyticsHttpError extends Error {}
+export class AnalyticsHttpError extends Error { }
 
 export interface AnalyticsPayload {
   client_id: string,
   user_id?: string,
   non_personalized_ads: boolean,
-  events: Array<{name: string, params: object}>
+  events: Array<{ name: string, params: object }>
 }
 
 export interface GAEvent {
-  name: AnalyticsEventString, 
+  name: AnalyticsEventString,
   params: EventParameters
 }
 
@@ -146,7 +169,7 @@ export interface EventParameters {
   engagement_time_msec?: string,
 }
 
-export type AnalyticsEventString = 'page_view' | 'verifi_app_open';
+export type AnalyticsEventString = 'page_view' | 'verifi_app_open' | 'import_backup_file' | 'create_analysis' | 'create_account' | 'create_report';
 export type VerifiPlatformString = 'verifi-desktop' | 'verifi-web';
 
 export interface AppAnalyticsData {
