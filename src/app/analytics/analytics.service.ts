@@ -97,13 +97,14 @@ export class AnalyticsService {
       isDebugging: callDebuggingEndpoint,
       analyticsPayload: {
         client_id: this.clientId,
+        isVerifi: true,
         non_personalized_ads: true,
         events: [
           gaEvent
         ]
       }
     }
-    //TODO: gamp for MEASUR. Need script for VERIFI
+    
     let url: string = environment.measurUtilitiesApi + 'gamp';
     if (environment.production) {
       this.httpClient.post<any>(url, postBody, this.httpOptions)
