@@ -50,19 +50,11 @@ export class AppComponent {
     private analyticsService: AnalyticsService) {
     if (environment.production) {
       gtag('config', 'G-YG1QD02XSE');
-      this.analyticsService.sendWebEvent('verifi_app_open', {
-          verifi_platform: 'verifi-web',
-          page_path: undefined,
-          session_id: undefined
-      });
+      this.analyticsService.sendEvent('verifi_app_open', undefined);
       this.router.events.subscribe(event => {
         if (event instanceof NavigationEnd) {
-          let eventParams: EventParameters = {
-            page_path: this.analyticsService.getPageWithoutId(event.urlAfterRedirects),
-            verifi_platform: 'verifi-web',
-            session_id: undefined
-          };
-          this.analyticsService.sendWebEvent('page_view', eventParams);
+          let page_path: string = this.analyticsService.getPageWithoutId(event.urlAfterRedirects);
+          this.analyticsService.sendEvent('page_view', page_path);
         }
       });
     }

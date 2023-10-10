@@ -10,6 +10,7 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AnalysisService } from '../analysis.service';
 import { AnalysisCategory } from 'src/app/models/analysis';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
+import { AnalyticsService } from 'src/app/analytics/analytics.service';
 
 @Component({
   selector: 'app-analysis-dashboard',
@@ -33,7 +34,8 @@ export class AnalysisDashboardComponent implements OnInit {
     private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
     private analysisService: AnalysisService,
-    private utilityMeterGroupDbService: UtilityMeterGroupdbService) { }
+    private utilityMeterGroupDbService: UtilityMeterGroupdbService,
+    private analyticsService: AnalyticsService) { }
 
   ngOnInit(): void {
     this.routerSub = this.router.events.subscribe((event) => {
@@ -65,6 +67,7 @@ export class AnalysisDashboardComponent implements OnInit {
     let addedItem: IdbAnalysisItem = await firstValueFrom(this.analysisDbService.addWithObservable(newItem));
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.setAnalysisItems(selectedAccount, false, this.selectedFacility);
+    this.analyticsService.sendEvent('create_facility_analysis', undefined)
     this.analysisDbService.selectedAnalysisItem.next(addedItem);
     this.toastNotificationService.showToast('New Analysis Created', undefined, undefined, false, "alert-success");
     this.router.navigateByUrl('facility/' + this.selectedFacility.id + '/analysis/run-analysis');

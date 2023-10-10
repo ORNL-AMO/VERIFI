@@ -20,7 +20,7 @@ export class AnalyticsService {
     })
   };
 
-  constructor(private httpClient: HttpClient, 
+  constructor(private httpClient: HttpClient,
     private analyticsDataDbService: AnalyticsDataDbService,
     private electronService: ElectronService) {
     this.analyticsSessionId = uuidv4();
@@ -74,15 +74,15 @@ export class AnalyticsService {
     }
   }
 
-  async sendAnalyticsEvent(eventName: AnalyticsEventString, eventParams: EventParameters){
+  async sendAnalyticsEvent(eventName: AnalyticsEventString, eventParams: EventParameters) {
     if (!this.clientId) {
       await this.initAnalyticsSession(undefined);
     } else {
+      eventParams.session_id = this.analyticsSessionId;
       let pageViewEvent: GAEvent = {
         name: eventName,
         params: eventParams
       }
-      eventParams.session_id = this.analyticsSessionId;
       this.postEventToMeasurementProtocol(pageViewEvent)
     }
   }
@@ -138,11 +138,25 @@ export class AnalyticsService {
     return pathWithoutId;
   }
 
-  sendWebEvent(eventName: AnalyticsEventString, eventParams: EventParameters) {
-    if(this.electronService.isElectron == false){
-      gtag('event', eventName, eventParams);
-    }else{
-      this.sendAnalyticsEvent(eventName, eventParams);
+  sendEvent(eventName: AnalyticsEventString, path?: string) {
+    if (environment.production) {
+      if (!this.electronService.isElectron) {
+        let eventParams: EventParameters = {
+          page_path: path,
+          verifi_platform: 'verifi-web',
+          session_id: undefined
+        }
+        gtag('event', eventName, eventParams);
+      } else if (path) {
+        this.sendAnalyticsPageView(path)
+      } else {
+        let eventParams: EventParameters = {
+          page_path: path,
+          verifi_platform: 'verifi-desktop',
+          session_id: undefined
+        }
+        this.sendAnalyticsEvent(eventName, eventParams);
+      }
     }
   }
 
@@ -169,7 +183,7 @@ export interface EventParameters {
   engagement_time_msec?: string,
 }
 
-export type AnalyticsEventString = 'page_view' | 'verifi_app_open' | 'import_backup_file' | 'create_analysis' | 'create_account' | 'create_report';
+export type AnalyticsEventString = 'page_view' | 'verifi_app_open' | 'import_backup_file' | 'create_account_analysis' | 'create_facility_analysis' | 'create_account' | 'create_report';
 export type VerifiPlatformString = 'verifi-desktop' | 'verifi-web';
 
 export interface AppAnalyticsData {
