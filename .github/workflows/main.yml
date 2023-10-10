@@ -9,6 +9,6 @@ jobs:
   web:
     uses: ./.github/workflows/web.yml
 
-  # Do not enable yet - not yet implemented
-  # electron:
-  #   uses: ./.github/workflows/electron.yml
+  electron:
+    if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
+    uses: ./.github/workflows/electron.yml
