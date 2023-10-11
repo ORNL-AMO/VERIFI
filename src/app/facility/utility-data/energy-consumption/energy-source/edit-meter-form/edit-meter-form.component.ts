@@ -7,7 +7,7 @@ import { getIsEnergyMeter } from 'src/app/shared/sharedHelperFuntions';
 import { EnergyUnitOptions, UnitOption } from 'src/app/shared/unitOptions';
 import { EditMeterFormService } from './edit-meter-form.service';
 import { AgreementType, AgreementTypes, FuelTypeOption, OtherEnergyOptions, ScopeOption, ScopeOptions, SourceOptions, getFuelTypeOptions } from './editMeterOptions';
-import { MeterSource, WaterDischargeType, WaterDischargeTypes, WaterIntakeType, WaterIntakeTypes } from 'src/app/models/constantsAndTypes';
+import { MeterPhase, MeterSource, WaterDischargeType, WaterDischargeTypes, WaterIntakeType, WaterIntakeTypes } from 'src/app/models/constantsAndTypes';
 
 @Component({
   selector: 'app-edit-meter-form',
@@ -151,7 +151,11 @@ export class EditMeterFormComponent implements OnInit {
 
   checkDisplayPhase() {
     if (this.meterForm.controls.source.value == 'Other Fuels') {
-      this.displayPhase = true;
+      if (this.meterForm.controls.scope.value == 2) {
+        this.displayPhase = false;
+      } else {
+        this.displayPhase = true;
+      }
     } else {
       this.displayPhase = false;
     }
@@ -207,7 +211,12 @@ export class EditMeterFormComponent implements OnInit {
   }
 
   setFuelTypeOptions(onChange: boolean) {
-    this.fuelTypeOptions = getFuelTypeOptions(this.meterForm.controls.source.value, this.meterForm.controls.phase.value);
+    let getFuelArgs: { source: MeterSource, scope: number, phase: MeterPhase } = {
+      source: this.meterForm.controls.source.value,
+      scope: this.meterForm.controls.phase.value,
+      phase: this.meterForm.controls.scope.value
+    }
+    this.fuelTypeOptions = getFuelTypeOptions(getFuelArgs);
     let selectedEnergyOption: FuelTypeOption = this.fuelTypeOptions.find(option => { return option.value == this.meterForm.controls.fuel.value });
     if (!selectedEnergyOption && this.fuelTypeOptions.length != 0 && !onChange) {
       this.meterForm.controls.fuel.patchValue(this.fuelTypeOptions[0].value);
@@ -401,5 +410,12 @@ export class EditMeterFormComponent implements OnInit {
         this.displayRetainRecs = true;
       }
     }
+  }
+
+  setScope() {
+    if (this.meterForm.controls.scope.value == 2) {
+      this.meterForm.controls.phase.setValue('Liquid');
+    }
+    this.checkDisplayPhase();
   }
 }

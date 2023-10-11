@@ -3,7 +3,7 @@ import { BehaviorSubject } from 'rxjs';
 import { WorkBook } from 'xlsx';
 import { IdbAccount, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup, PredictorData } from '../models/idb';
 import * as XLSX from 'xlsx';
-import { AgreementType, AgreementTypes, FuelTypeOption, ScopeOption, ScopeOptions, SourceOptions, getFuelTypeOptions } from '../facility/utility-data/energy-consumption/energy-source/edit-meter-form/editMeterOptions';
+import { AgreementType, AgreementTypes, FuelTypeArgs, FuelTypeOption, ScopeOption, ScopeOptions, SourceOptions, getFuelTypeOptions } from '../facility/utility-data/energy-consumption/energy-source/edit-meter-form/editMeterOptions';
 import { FacilitydbService } from '../indexedDB/facility-db.service';
 import { AccountdbService } from '../indexedDB/account-db.service';
 import { UtilityMeterdbService } from '../indexedDB/utilityMeter-db.service';
@@ -185,7 +185,7 @@ export class UploadDataService {
           } else if (meter.source == 'Water Intake') {
             meter.waterIntakeType = meterData['Fuel'];
           } else {
-            meter.fuel = this.getFuelEnum(meterData['Fuel'], meter.source, meter.phase);
+            meter.fuel = this.getFuelEnum(meterData['Fuel'], meter);
           }
           meter.startingUnit = this.checkImportStartingUnit(meterData['Collection Unit'], meter.source, meter.phase, meter.fuel);
           meter.heatCapacity = meterData['Heat Capacity'];
@@ -195,7 +195,7 @@ export class UploadDataService {
           }
           if (!meter.heatCapacity) {
             if (!isEnergyUnit) {
-              let fuelTypeOptions: Array<FuelTypeOption> = getFuelTypeOptions(meter.source, meter.phase);
+              let fuelTypeOptions: Array<FuelTypeOption> = getFuelTypeOptions(meter);
               let fuel: FuelTypeOption = fuelTypeOptions.find(option => { return option.value == meter.fuel });
               meter.heatCapacity = this.energyUseCalculationsService.getHeatingCapacity(meter.source, meter.startingUnit, meter.energyUnit, fuel);
             }
@@ -245,7 +245,7 @@ export class UploadDataService {
           if (meter.siteToSource == undefined) {
             let selectedFuelTypeOption: FuelTypeOption;
             if (meter.fuel != undefined) {
-              let fuelTypeOptions: Array<FuelTypeOption> = getFuelTypeOptions(meter.source, meter.phase);
+              let fuelTypeOptions: Array<FuelTypeOption> = getFuelTypeOptions(meter);
               selectedFuelTypeOption = fuelTypeOptions.find(option => { return option.value == meter.fuel });
             }
             let siteToSource: number = this.energyUseCalculationsService.getSiteToSource(meter.source, selectedFuelTypeOption, meter.agreementType);
@@ -359,8 +359,8 @@ export class UploadDataService {
     return undefined;
   }
 
-  getFuelEnum(fuel: string, source: MeterSource, phase: MeterPhase): string {
-    let fuelTypeOptions = getFuelTypeOptions(source, phase);
+  getFuelEnum(fuel: string, fuelTypeArgs: FuelTypeArgs | IdbUtilityMeter): string {
+    let fuelTypeOptions = getFuelTypeOptions(fuelTypeArgs);
     let selectedEnergyOption: FuelTypeOption = fuelTypeOptions.find(option => { return option.value == fuel });
     if (selectedEnergyOption) {
       return selectedEnergyOption.value;

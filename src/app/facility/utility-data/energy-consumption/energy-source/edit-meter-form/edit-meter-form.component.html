@@ -33,7 +33,7 @@
                 <div class="col-6" *ngIf="displayScope">
                     <label for="scope">Scope</label>
                     <div class="mb-3">
-                        <select class="form-select" id="scope" type="text" formControlName="scope">
+                        <select class="form-select" id="scope" type="text" formControlName="scope" (change)="setScope()">
                             <option *ngFor="let scopeOption of scopeOptions" [ngValue]="scopeOption.value">
                                 {{scopeOption.scope}}: {{scopeOption.optionLabel}}
                             </option>

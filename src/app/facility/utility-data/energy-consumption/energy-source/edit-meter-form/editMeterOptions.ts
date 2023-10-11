@@ -1,4 +1,5 @@
 import { MeterPhase, MeterSource } from "src/app/models/constantsAndTypes"
+import { IdbUtilityMeter } from "src/app/models/idb";
 
 
 export interface FuelTypeOption {
@@ -426,22 +427,122 @@ export const AgreementTypes: Array<AgreementType> = [
     }
 ]
 
-export function getFuelTypeOptions(source: MeterSource, phase: MeterPhase): Array<FuelTypeOption> {
-    if (source == 'Other Fuels') {
-        if (phase == 'Solid') {
-            return SolidOptions;
-        } else if (phase == 'Liquid') {
-            return LiquidOptions;
-        } else if (phase == 'Gas') {
-            return GasOptions;
+export interface FuelTypeArgs { source: MeterSource, scope: number, phase: MeterPhase }
+
+
+export function getFuelTypeOptions(meter: FuelTypeArgs | IdbUtilityMeter): Array<FuelTypeOption> {
+    if (meter.source == 'Other Fuels') {
+        if (meter.scope != 2) {
+            if (meter.phase == 'Solid') {
+                return SolidOptions;
+            } else if (meter.phase == 'Liquid') {
+                return LiquidOptions;
+            } else if (meter.phase == 'Gas') {
+                return GasOptions;
+            }
+        } else {
+            //scope 2 mobile
         }
-    } else if (source == 'Other Energy') {
+    } else if (meter.source == 'Other Energy') {
         return OtherEnergyOptions;
     }
     return [];
 }
 
+export function getVehicleTypes(vehicleCategory: number): Array<VehicleType> {
+    let vehicles: Array<VehicleType> = VehicleTypes.filter(vehicle => {
+        return vehicle.vehicleCategory == vehicleCategory
+    });
+    return vehicles;
+}
 
+
+
+export const VehicleCategories: Array<VehicleCategory> = [
+    {
+        value: 1,
+        categoryLabel: 'Material Transport Onsite'
+    },
+    {
+        value: 2,
+        categoryLabel: 'On-road Vehicles'
+    },
+    {
+        value: 3,
+        categoryLabel: 'Off-road Vehicles'
+    },
+    {
+        value: 4,
+        categoryLabel: 'Non-road Vehicles'
+    }
+];
+
+export const VehicleTypes: Array<VehicleType> = [
+    //on road (vehicleCategory: 2)
+    {
+        value: 1,
+        label: 'Passenger Cars',
+        vehicleCategory: 2
+    },
+    {
+        value: 2,
+        label: "Light-Duty Trucks (Vans, Pickups, SUV's)",
+        vehicleCategory: 2
+    },
+    {
+        value: 3,
+        label: "Bus",
+        vehicleCategory: 2
+    },
+    {
+        value: 4,
+        label: "Heavy-Duty Vehicles",
+        vehicleCategory: 2
+    },
+    {
+        value: 5,
+        label: "Motorcycles",
+        vehicleCategory: 2
+    },
+    //off road (vehicleCategory: 3)
+    {
+        value: 6,
+        label: "Agricultural Equipment & Trucks",
+        vehicleCategory: 3
+    },
+    {
+        value: 7,
+        label: "Construction/Mining Equipment & Trucks",
+        vehicleCategory: 3
+    },
+    //non-road (vehicleCategory: 4)
+    {
+        value: 8,
+        label: "Aircraft",
+        vehicleCategory: 4
+    },
+    {
+        value: 9,
+        label: "Rail",
+        vehicleCategory: 4
+    },
+    {
+        value: 10,
+        label: "Water Transport",
+        vehicleCategory: 4
+    }
+];
+
+export interface VehicleCategory {
+    categoryLabel: string,
+    value: number
+}
+
+export interface VehicleType {
+    label: string,
+    value: number,
+    vehicleCategory: number
+}
 
 export interface AgreementType {
     typeLabel: string,
