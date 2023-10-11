@@ -92,15 +92,18 @@ export class PerformanceReport {
                     utilityClassification: MeterSource | 'Mixed'
                 }> = new Array();
                 facilityAnalysisItem.groups.forEach(group => {
-                    let groupMonthlySummariesClass: MonthlyAnalysisSummaryClass = facilityAnalysisSummaryClass.groupMonthlySummariesClasses.find(groupClass => {
-                        return groupClass.group.idbGroupId == group.idbGroupId;
-                    });
-                    let groupAnnualAnalysisSummaryClass: AnnualGroupAnalysisSummaryClass = new AnnualGroupAnalysisSummaryClass(group, facilityAnalysisItem, facility, calanderizedMeters, accountPredictorEntries, groupMonthlySummariesClass.getMonthlyAnalysisSummaryData());
-                    groupAnnualAnalysisSummary.push({
-                        group: group,
-                        annualAnalysisSummary: groupAnnualAnalysisSummaryClass.getAnnualAnalysisSummaries(),
-                        utilityClassification: groupAnnualAnalysisSummaryClass.utilityClassification
-                    });
+                    if (group.analysisType != 'skip' && group.analysisType != 'skipAnalysis') {
+                        let groupMonthlySummariesClass: MonthlyAnalysisSummaryClass = facilityAnalysisSummaryClass.groupMonthlySummariesClasses.find(groupClass => {
+                            return groupClass.group.idbGroupId == group.idbGroupId;
+                        });
+
+                        let groupAnnualAnalysisSummaryClass: AnnualGroupAnalysisSummaryClass = new AnnualGroupAnalysisSummaryClass(group, facilityAnalysisItem, facility, calanderizedMeters, accountPredictorEntries, groupMonthlySummariesClass.getMonthlyAnalysisSummaryData());
+                        groupAnnualAnalysisSummary.push({
+                            group: group,
+                            annualAnalysisSummary: groupAnnualAnalysisSummaryClass.getAnnualAnalysisSummaries(),
+                            utilityClassification: groupAnnualAnalysisSummaryClass.utilityClassification
+                        });
+                    }
                 });
 
                 this.annualFacilityAnalysisSummaries.push({
