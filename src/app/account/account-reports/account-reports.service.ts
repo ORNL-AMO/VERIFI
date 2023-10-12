@@ -182,7 +182,10 @@ export class AccountReportsService {
       includeCalculationsForGraphs: [betterClimateReportSetup.includeCalculationsForGraphs],
       includeFacilitySummaries: [betterClimateReportSetup.includeFacilitySummaries],
       numberOfTopPerformers: [betterClimateReportSetup.numberOfTopPerformers],
-      skipIntermediateYears: [betterClimateReportSetup.skipIntermediateYears]
+      skipIntermediateYears: [betterClimateReportSetup.skipIntermediateYears],
+      includeEmissionsInTables: [betterClimateReportSetup.includeEmissionsInTables],
+      includePercentReductionsInTables: [betterClimateReportSetup.includePercentReductionsInTables],
+      includePercentContributionsInTables: [betterClimateReportSetup.includePercentContributionsInTables]
     });
     return form;
   }
@@ -195,6 +198,9 @@ export class AccountReportsService {
     betterClimateReportSetup.includePortfolioEnergyUse = form.controls.includePortfolioEnergyUse.value;
     betterClimateReportSetup.includeFacilitySummaries = form.controls.includeFacilitySummaries.value;
     betterClimateReportSetup.skipIntermediateYears = form.controls.skipIntermediateYears.value;
+    betterClimateReportSetup.includeEmissionsInTables = form.controls.includeEmissionsInTables.value;
+    betterClimateReportSetup.includePercentReductionsInTables = form.controls.includePercentReductionsInTables.value;
+    betterClimateReportSetup.includePercentContributionsInTables = form.controls.includePercentContributionsInTables.value;
     return betterClimateReportSetup;
   }
 
@@ -212,7 +218,7 @@ export class AccountReportsService {
     } else if (report.reportType == 'performance') {
       let performanceForm: FormGroup = this.getPerformanceFormFromReport(report.performanceReportSetup);
       return performanceForm.valid;
-    }else if(report.reportType == 'betterClimate'){
+    } else if (report.reportType == 'betterClimate') {
       let betterClimateForm: FormGroup = this.getBetterCimateFormFromReport(report.betterClimateReportSetup);
       return betterClimateForm.valid;
     }
