@@ -6,6 +6,7 @@ import { IdbFacility, IdbUtilityMeterData } from 'src/app/models/idb';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
+import { AnalyticsService } from 'src/app/analytics/analytics.service';
 
 @Component({
   selector: 'app-visualization',
@@ -23,9 +24,11 @@ export class VisualizationComponent implements OnInit {
   selectedFacility: IdbFacility;
   constructor(private visualizationStateService: VisualizationStateService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private facilityDbService: FacilitydbService) { }
+    private facilityDbService: FacilitydbService,
+    private analyticsService: AnalyticsService) { }
 
   ngOnInit(): void {
+    this.analyticsService.sendEvent('use_data_visualization');
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
       if (!this.selectedFacility) {
         this.selectedFacility = val;
