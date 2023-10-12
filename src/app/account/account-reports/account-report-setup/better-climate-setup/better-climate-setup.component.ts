@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { FormGroup } from '@angular/forms';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
@@ -6,6 +7,7 @@ import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { IdbAccount, IdbAccountReport } from 'src/app/models/idb';
 import { BetterClimateReportSetup } from 'src/app/models/overview-report';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
+import { AccountReportsService } from '../../account-reports.service';
 
 @Component({
   selector: 'app-better-climate-setup',
@@ -17,14 +19,17 @@ export class BetterClimateSetupComponent {
   account: IdbAccount;
   selectedReportSub: Subscription;
   isFormChange: boolean = false;
-  reportSetup: BetterClimateReportSetup;
+  // reportSetup: BetterClimateReportSetup;
+  reportForm: FormGroup;
   selectedReport: IdbAccountReport;
   reportYears: Array<number>;
   numberOfPerformerOptions: Array<number> = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+  initiativeNotes: Array<{year: number, note: string}>;
   constructor(private accountReportDbService: AccountReportDbService,
     private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
-    private calanderizationService: CalanderizationService) {
+    private calanderizationService: CalanderizationService,
+    private accountReportsService: AccountReportsService) {
   }
 
 
@@ -33,7 +38,8 @@ export class BetterClimateSetupComponent {
     this.selectedReportSub = this.accountReportDbService.selectedReport.subscribe(val => {
       this.selectedReport = val;
       if (!this.isFormChange) {
-        this.reportSetup = val.betterClimateReportSetup;
+        this.initiativeNotes = val.betterClimateReportSetup.initiativeNotes;
+        this.reportForm = this.accountReportsService.getBetterCimateFormFromReport(val.betterClimateReportSetup);
       } else {
         this.isFormChange = false;
       }
@@ -48,14 +54,16 @@ export class BetterClimateSetupComponent {
   async save() {
     this.isFormChange = true;
     let selectedReport: IdbAccountReport = this.accountReportDbService.selectedReport.getValue()
-    selectedReport.betterClimateReportSetup = this.reportSetup;
+    // selectedReport.betterClimateReportSetup = this.reportSetup;
+    selectedReport.betterClimateReportSetup = this.accountReportsService.updateBetterClimateReportFromForm(selectedReport.betterClimateReportSetup, this.reportForm);
+    selectedReport.betterClimateReportSetup.initiativeNotes = this.initiativeNotes;
     await firstValueFrom(this.accountReportDbService.updateWithObservable(selectedReport));
     await this.dbChangesService.setAccountReports(this.account);
     this.accountReportDbService.selectedReport.next(selectedReport);
   }
 
   async addNote() {
-    this.reportSetup.initiativeNotes.push({
+    this.initiativeNotes.push({
       year: this.selectedReport.reportYear,
       note: ''
     });
@@ -63,7 +71,7 @@ export class BetterClimateSetupComponent {
   }
 
   async deleteNote(index: number){
-    this.reportSetup.initiativeNotes.splice(index, 1);
+    this.initiativeNotes.splice(index, 1);
     this.save();
   }
 
