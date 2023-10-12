@@ -17,6 +17,7 @@ import { CalanderizedMeter, MonthlyData } from '../models/calanderization';
 import * as _ from 'lodash';
 import { DbChangesService } from '../indexedDB/db-changes.service';
 import { getCalanderizedMeterData } from '../calculations/calanderization/calanderizeMeters';
+import { AnalyticsService } from '../analytics/analytics.service';
 
 @Component({
   selector: 'app-weather-data',
@@ -43,7 +44,8 @@ export class WeatherDataComponent {
     private toastNotificationService: ToastNotificationsService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private utilityMeterDbService: UtilityMeterdbService,
-    private dbChangesService: DbChangesService) {
+    private dbChangesService: DbChangesService,
+    private analyticsService: AnalyticsService) {
 
   }
 
@@ -81,6 +83,7 @@ export class WeatherDataComponent {
   }
 
   async confirmCreate() {
+    this.analyticsService.sendEvent('weather_data_predictors');
     this.weatherDataService.applyToFacility.next(false);
     this.loadingService.setLoadingMessage('Updating Predictors...');
     this.loadingService.setLoadingStatus(true);

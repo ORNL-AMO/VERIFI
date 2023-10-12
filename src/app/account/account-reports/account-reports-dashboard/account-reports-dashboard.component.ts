@@ -8,6 +8,7 @@ import * as _ from 'lodash';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { ReportType } from 'src/app/models/constantsAndTypes';
+import { AnalyticsService } from 'src/app/analytics/analytics.service';
 
 @Component({
   selector: 'app-account-reports-dashboard',
@@ -23,7 +24,8 @@ export class AccountReportsDashboardComponent {
     private accountDbService: AccountdbService,
     private accountReportDbService: AccountReportDbService,
     private dbChangesService: DbChangesService,
-    private toastNotificationService: ToastNotificationsService) { }
+    private toastNotificationService: ToastNotificationsService,
+    private analyticsService: AnalyticsService) { }
 
   ngOnInit(): void {
     this.selectedAccount = this.accountDbService.selectedAccount.getValue();
@@ -34,6 +36,7 @@ export class AccountReportsDashboardComponent {
     newReport.reportType = this.newReportType;
     let addedReport: IdbAccountReport = await firstValueFrom(this.accountReportDbService.addWithObservable(newReport));
     await this.dbChangesService.setAccountReports(this.selectedAccount);
+    this.analyticsService.sendEvent('create_report');
     this.accountReportDbService.selectedReport.next(addedReport);
     this.toastNotificationService.showToast('Report Created', undefined, undefined, false, "alert-success");
     this.router.navigateByUrl('account/reports/setup');
