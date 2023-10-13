@@ -91,7 +91,7 @@ export class WeatherStationsMapComponent {
 
       var layout = {
         'geo': {
-          scope: 'world',
+          scope: 'usa',
           resolution: 110,
           showland: true,
           // landcolor: 'rgb(20, 90, 50)',
@@ -99,10 +99,10 @@ export class WeatherStationsMapComponent {
           countrywidth: 1,
           // subunitcolor: 'rgb(255,255,255)',
           // countrycolor: 'rgb(255,255,255)',
-          // center: {
-          //   lat: zipCodeItem.lat,
-          //   lon: zipCodeItem.lng
-          // },
+          center: {
+            lat: zipCodeItem.lat,
+            lon: zipCodeItem.lng
+          },
           // projection: {
           //   scale: this.getScale()
           // }

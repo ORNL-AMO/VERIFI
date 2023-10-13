@@ -11,6 +11,7 @@ import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db
 import { BetterClimateReport } from 'src/app/calculations/carbon-calculations/betterClimateReport';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 import * as _ from 'lodash';
+import { BetterClimateReportSetup } from 'src/app/models/overview-report';
 
 @Component({
   selector: 'app-better-climate-report',
@@ -27,6 +28,7 @@ export class BetterClimateReportComponent {
   worker: Worker;
   betterClimateReport: BetterClimateReport;
   betterClimateReportUnfiltered: BetterClimateReport;
+  betterClimateReportSetup: BetterClimateReportSetup;
   cellWidth: number;
   constructor(private accountReportDbService: AccountReportDbService,
     private accountReportsService: AccountReportsService,
@@ -43,6 +45,8 @@ export class BetterClimateReportComponent {
     this.selectedReport = this.accountReportDbService.selectedReport.getValue();
     if (!this.selectedReport) {
       this.router.navigateByUrl('/account/reports/dashboard');
+    }else{
+      this.betterClimateReportSetup = this.selectedReport.betterClimateReportSetup;
     }
     this.account = this.accountDbService.selectedAccount.getValue();
     this.calculateCarbonReport();

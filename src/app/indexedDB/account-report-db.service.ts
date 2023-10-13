@@ -144,7 +144,10 @@ export class AccountReportDbService {
         includeCalculationsForGraphs: false,
         includeFacilitySummaries: true,
         numberOfTopPerformers: 5,
-        skipIntermediateYears: false
+        skipIntermediateYears: false,
+        includeEmissionsInTables: true,
+        includePercentReductionsInTables: true,
+        includePercentContributionsInTables: true
       }
     }
   }
