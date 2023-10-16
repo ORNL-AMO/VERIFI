@@ -41,11 +41,12 @@ export const GasOptions: Array<FuelTypeOption> = [
         value: 'Coke Oven Gas',
         siteToSourceMultiplier: 1,
         emissionsOutputRate: 46.8918,
-        CO2: 48.85,
+        CO2: 46.85,
         CH4: .48,
         N2O: .1,
     },
     //CHECK VALUES LPG
+    //emissionsOutputRate checks out
     {
         startingUnit: 'ft3',
         heatCapacityValue: .0027,
@@ -122,19 +123,21 @@ export const LiquidOptions: Array<FuelTypeOption> = [
         N2O: .6
     },
     //CHECK VALUES Distillate Fuel Oil (1,2,3?)
-    //using 1
+    //using 2
+    //Math give emissions rate 74.2137999
     {
         startingUnit: 'gal',
         heatCapacityValue: .141,
         value: 'Distillate Fuel Oil',
         siteToSourceMultiplier: 1,
         emissionsOutputRate: 74.33713,
-        CO2: 73.25,
+        CO2: 73.96,
         CH4: 3.0,
         N2O: .6
     },
     //CHECK VALUES: Residual Fuel Oil (No. 5, 6?)
     //using 5
+    //Math gives emissions rate 75.353799
     {
         startingUnit: 'gal',
         heatCapacityValue: .145,
@@ -184,9 +187,11 @@ export const LiquidOptions: Array<FuelTypeOption> = [
         siteToSourceMultiplier: 1,
         emissionsOutputRate: 65.1938,
         CO2: 64.94,
-        CH4: .3,
+        CH4: 3,
         N2O: .6
     },
+    //CHECK VALUE: Pentanes = Pentanes Plus ?
+    //Math gives emissions rate 70.2738
     {
         startingUnit: 'gal',
         heatCapacityValue: .1108,
@@ -218,6 +223,7 @@ export const LiquidOptions: Array<FuelTypeOption> = [
         N2O: .6
     },
     //CHECK VALUES: All Fuel Oils #x HHV doesn't match table
+    //emissionsOutputRates check out
     {
         startingUnit: 'gal',
         heatCapacityValue: .1374,
@@ -288,14 +294,15 @@ export const LiquidOptions: Array<FuelTypeOption> = [
         CH4: 3.0,
         N2O: .6
     },
-    //CHECK VALUES: Gasoline = Motor Gasoline?
+    //CHECK VALUES: Gasoline = Natural Gasoline?
+    //emissionsOutputRate checks out.
     {
         startingUnit: 'gal',
         heatCapacityValue: .12760,
         value: 'Gasoline',
         siteToSourceMultiplier: 1,
         emissionsOutputRate: 67.1338,
-        CO2: 70.22,
+        CO2: 66.88,
         CH4: 3,
         N2O: .6
     },
@@ -310,6 +317,7 @@ export const LiquidOptions: Array<FuelTypeOption> = [
         N2O: .6
     },
     //CHECK VALUE: Gas Oil = Heavy Gas Oil?
+    //emissionsOutputRate checks out.
     {
         startingUnit: 'gal',
         heatCapacityValue: .148,
@@ -320,16 +328,17 @@ export const LiquidOptions: Array<FuelTypeOption> = [
         CH4: 3,
         N2O: .6
     },
-    //CHECK VALUE: Liquefied Natural Gas = Natural Gasoline? Wrong HHV
+    //CHECK VALUE: Liquefied Natural Gas = Natural Gasoline? 
+    //emissionsOutputRate checks out.
     {
         startingUnit: 'gal',
         heatCapacityValue: .086,
         value: 'Liquefied Natural Gas (LNG)',
         siteToSourceMultiplier: 1,
         emissionsOutputRate: 53.1148,
-        CO2: 66.88,
-        CH4: 3,
-        N2O: .6
+        CO2: 53.06,
+        CH4: 1,
+        N2O: .1
     },
     {
         startingUnit: 'gal',
@@ -403,9 +412,9 @@ export const SolidOptions: Array<FuelTypeOption> = [
         value: 'Coke',
         siteToSourceMultiplier: 1,
         emissionsOutputRate: 104.4616,
-        CO2: 113.67,
-        CH4: 11,
-        N2O: 1.6
+        CO2: 102.41,
+        CH4: 32,
+        N2O: 4.2
     },
     {
         startingUnit: 'lb',

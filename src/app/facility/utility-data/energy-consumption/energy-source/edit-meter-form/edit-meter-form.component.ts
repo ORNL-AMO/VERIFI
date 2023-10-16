@@ -6,8 +6,8 @@ import { EnergyUseCalculationsService } from 'src/app/shared/helper-services/ene
 import { getIsEnergyMeter } from 'src/app/shared/sharedHelperFuntions';
 import { EnergyUnitOptions, UnitOption } from 'src/app/shared/unitOptions';
 import { EditMeterFormService } from './edit-meter-form.service';
-import { AgreementType, AgreementTypes, FuelTypeOption, OtherEnergyOptions, ScopeOption, ScopeOptions, SourceOptions, getFuelTypeOptions } from './editMeterOptions';
-import { MeterSource, WaterDischargeType, WaterDischargeTypes, WaterIntakeType, WaterIntakeTypes } from 'src/app/models/constantsAndTypes';
+import { AgreementType, AgreementTypes, FuelTypeOption, GasOptions, LiquidOptions, OtherEnergyOptions, ScopeOption, ScopeOptions, SolidOptions, SourceOptions, getFuelTypeOptions } from './editMeterOptions';
+import { MeterPhase, MeterSource, WaterDischargeType, WaterDischargeTypes, WaterIntakeType, WaterIntakeTypes } from 'src/app/models/constantsAndTypes';
 
 @Component({
   selector: 'app-edit-meter-form',
@@ -32,6 +32,7 @@ export class EditMeterFormComponent implements OnInit {
   displayFuel: boolean;
   displayScope: boolean;
   fuelTypeOptions: Array<FuelTypeOption>;
+  selectedFuelTypeOption: FuelTypeOption;
   startingUnitOptions: Array<UnitOption>;
   energySourceLabel: string = 'Fuel Type';
   displayHeatCapacity: boolean;
@@ -56,6 +57,7 @@ export class EditMeterFormComponent implements OnInit {
     private editMeterFormService: EditMeterFormService, private cd: ChangeDetectorRef) { }
 
   ngOnInit(): void {
+    // this.testFuelTypeOptions();
   }
 
   ngOnChanges() {
@@ -101,6 +103,7 @@ export class EditMeterFormComponent implements OnInit {
   }
 
   changeFuel() {
+    this.setSelectedFuelTypeOption();
     if (this.meterForm.controls.source.value == 'Other Energy') {
       this.setStartingUnitOptions();
       this.setStartingUnit();
@@ -212,7 +215,35 @@ export class EditMeterFormComponent implements OnInit {
     if (!selectedEnergyOption && this.fuelTypeOptions.length != 0 && !onChange) {
       this.meterForm.controls.fuel.patchValue(this.fuelTypeOptions[0].value);
     }
+    this.setSelectedFuelTypeOption();
   }
+
+  setSelectedFuelTypeOption() {
+    this.selectedFuelTypeOption = this.fuelTypeOptions.find(option => { return option.value == this.meterForm.controls.fuel.value });
+  }
+
+  // testFuelTypeOptions() {
+  //   GasOptions.forEach(option => {
+  //     this.checkFuelOutputRate(option, 'Gas');
+  //   });
+  //   LiquidOptions.forEach(option => {
+  //     this.checkFuelOutputRate(option, 'Liquid');
+  //   });
+  //   SolidOptions.forEach(option => {
+  //     this.checkFuelOutputRate(option, 'Solid');
+  //   });
+  // }
+
+  // checkFuelOutputRate(fuel: FuelTypeOption, phase: MeterPhase) {
+  //   let test: number = fuel.CO2 + (fuel.CH4 * (25 / 1000)) + (fuel.N2O * (298 / 1000));
+  //   if (Math.abs(test - fuel.emissionsOutputRate) > .01) {
+  //     console.log(fuel.value + ': ' + phase)
+  //     console.log(test);
+  //     console.log(fuel.emissionsOutputRate);
+  //     console.log('======');
+  //   }
+  // }
+
 
   setHeatCapacity() {
     if (this.displayHeatCapacity) {
