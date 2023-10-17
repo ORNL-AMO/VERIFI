@@ -3,7 +3,7 @@ export const LabelTooltips = {
         "tooltip": "The name of meter to be used throughout the application."
     },
     "source": {
-        "tooltip": "Utility source this meter is tracking <br> Options: <br> Electricity <br> Natural Gas <br>"
+        "tooltip": "Utility source this meter is tracking."
     },
     "siteToSource": {
         "tooltip": "Factor to account for site to source"

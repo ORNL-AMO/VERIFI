@@ -10,7 +10,7 @@ import { UtilityMeterDataFilterComponent } from './utility-meter-data/utility-me
 import { UtilityMeterDataComponent } from './utility-meter-data/utility-meter-data.component';
 import { EnergyConsumptionComponent } from './energy-consumption.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { NgbDatepickerModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { EditMeterFormModule } from './energy-source/edit-meter-form/edit-meter-form.module';
 import { HelperPipesModule } from 'src/app/shared/helper-pipes/helper-pipes.module';
 import { RouterModule } from '@angular/router';
@@ -18,7 +18,6 @@ import { UtilityMetersTableComponent } from './energy-source/utility-meters-tabl
 import { UtilityMeterDataTableComponent } from './utility-meter-data/utility-meter-data-table/utility-meter-data-table.component';
 import { EditBillComponent } from './utility-meter-data/edit-bill/edit-bill.component';
 import { TableItemsDropdownModule } from 'src/app/shared/table-items-dropdown/table-items-dropdown.module';
-
 @NgModule({
   declarations: [
     EditMeterComponent,

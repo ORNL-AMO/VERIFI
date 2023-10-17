@@ -73,6 +73,7 @@ export class EditMeterFormComponent implements OnInit {
     this.checkShowHeatCapacity();
     this.checkShowSiteToSource();
     this.setDisplayEmissionsValues();
+    console.log('changed')
   }
 
   changeSource() {

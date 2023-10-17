@@ -5,8 +5,6 @@ import { LabelWithTooltipModule } from 'src/app/shared/label-with-tooltip/label-
 import { EditMeterFormComponent } from './edit-meter-form.component';
 import { HelperPipesModule } from 'src/app/shared/helper-pipes/helper-pipes.module';
 
-
-
 @NgModule({
   declarations: [
     EditMeterFormComponent
