@@ -376,6 +376,12 @@ export class EditMeterFormComponent implements OnInit {
     } else {
       this.meterForm.controls.retainRECs.patchValue(true);
     }
+
+    if (this.meterForm.controls.agreementType.value == 2) {
+      this.meterForm.controls.directConnection.patchValue(true);
+    } else {
+      this.meterForm.controls.directConnection.patchValue(false);
+    }
     this.checkShowSiteToSource();
     this.setSiteToSource();
     this.setDisplayEmissionsValues();
