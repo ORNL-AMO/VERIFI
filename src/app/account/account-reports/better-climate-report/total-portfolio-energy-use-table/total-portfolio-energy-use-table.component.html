@@ -1,0 +1,133 @@
+<h4>
+    Total Energy Use for Portfolio
+</h4>
+
+<table class="table table-responsive table-bordered">
+    <thead>
+        <tr>
+            <th [ngStyle]="{'width.%': cellWidth}">
+
+            </th>
+            <th *ngFor="let yearDetail of yearDetails" [ngStyle]="{'width.%': cellWidth}">
+                {{yearDetail.year}}
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+                Total Electricity Consumption (MWh)
+            </td>
+            <td *ngFor="let yearDetail of yearDetails">
+                <ng-container *ngIf="yearDetail.totalElectricity">
+                    {{yearDetail.totalElectricity | customNumber}}
+                </ng-container>
+                <ng-container *ngIf="!yearDetail.totalElectricity">
+                    &mdash;
+                </ng-container>
+            </td>
+        </tr>
+        <tr>
+            <td class="ps-3">
+                Renewable Energy Generated and Used On-site (MWh)
+            </td>
+            <td *ngFor="let yearDetail of yearDetails">
+                <ng-container *ngIf="yearDetail.onSiteGeneratedElectricity">
+                    {{yearDetail.onSiteGeneratedElectricity | customNumber}}
+                </ng-container>
+                <ng-container *ngIf="!yearDetail.onSiteGeneratedElectricity">
+                    &mdash;
+                </ng-container>
+            </td>
+        </tr>
+        <tr>
+            <td class="ps-3">
+                Purchased or Acquired Electricity (MWh)
+            </td>
+            <td *ngFor="let yearDetail of yearDetails">
+                <ng-container *ngIf="yearDetail.purchasedElectricity">
+                    {{yearDetail.purchasedElectricity | customNumber}}
+                </ng-container>
+                <ng-container *ngIf="!yearDetail.purchasedElectricity">
+                    &mdash;
+                </ng-container>
+            </td>
+        </tr>
+        <tr>
+            <td class="ps-5">
+                Physical PPAs, Competitive or Utility Products, CCAs, Self-supply (MWh) </td>
+            <td *ngFor="let yearDetail of yearDetails">
+                <ng-container *ngIf="yearDetail.pppaElectricity">
+                    {{yearDetail.pppaElectricity | customNumber}}
+                </ng-container>
+                <ng-container *ngIf="!yearDetail.pppaElectricity">
+                    &mdash;
+                </ng-container>
+            </td>
+        </tr>
+        <tr>
+            <td class="ps-5">
+                Financial / Virtual PPAs (MWh) </td>
+            <td *ngFor="let yearDetail of yearDetails">
+                <ng-container *ngIf="yearDetail.vppaElectricity">
+                    {{yearDetail.vppaElectricity | customNumber}}
+                </ng-container>
+                <ng-container *ngIf="!yearDetail.vppaElectricity">
+                    &mdash;
+                </ng-container>
+            </td>
+        </tr>
+        <tr>
+            <td class="ps-5">
+                Unbundle RECs (MWh)
+            </td>
+            <td *ngFor="let yearDetail of yearDetails">
+                <ng-container *ngIf="yearDetail.RECs">
+                    {{yearDetail.RECs | customNumber}}
+                </ng-container>
+                <ng-container *ngIf="!yearDetail.RECs">
+                    &mdash;
+                </ng-container>
+            </td>
+        </tr>
+        <tr>
+            <td class="ps-5">
+                Remaining Grid (MWh)
+            </td>
+            <td *ngFor="let yearDetail of yearDetails">
+                <ng-container *ngIf="yearDetail.gridElectricity">
+                    {{yearDetail.gridElectricity | customNumber}}
+                </ng-container>
+                <ng-container *ngIf="!yearDetail.gridElectricity">
+                    &mdash;
+                </ng-container>
+            </td>
+        </tr>
+        <tr *ngFor="let fuel of yearDetails[0].fuelTotals; let index = index;">
+            <td>
+                {{fuel.fuelType}} (MMBtu)
+            </td>
+            <td *ngFor="let yearDetail of yearDetails">
+                <ng-container *ngIf="yearDetail.fuelTotals[index].total">
+                    {{yearDetail.fuelTotals[index].total | customNumber}}
+                </ng-container>
+                <ng-container *ngIf="!yearDetail.fuelTotals[index].total">
+                    &mdash;
+                </ng-container>
+            </td>
+        </tr>
+        <tr>
+            <th>
+                Total Energy Use (MMBtu)
+            </th>
+            <th *ngFor="let yearDetail of yearDetails">
+                <ng-container *ngIf="yearDetail.totalEnergyUse">
+                    {{yearDetail.totalEnergyUse | customNumber}}
+                </ng-container>
+                <ng-container *ngIf="!yearDetail.totalEnergyUse">
+                    &mdash;
+                </ng-container>
+            </th>
+        </tr>
+    </tbody>
+</table>

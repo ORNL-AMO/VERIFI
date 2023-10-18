@@ -16,6 +16,7 @@ import { EGridService } from './shared/helper-services/e-grid.service';
 import { firstValueFrom } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { ToastNotificationsService } from './core-components/toast-notifications/toast-notifications.service';
+import { AnalyticsService, EventParameters } from './analytics/analytics.service';
 
 // declare ga as a function to access the JS code in TS
 declare let gtag: Function;
@@ -45,17 +46,17 @@ export class AppComponent {
     private updateDbEntryService: UpdateDbEntryService,
     private customEmissionsDbService: CustomEmissionsDbService,
     private accountReportDbService: AccountReportDbService,
-    private toastNotificationService: ToastNotificationsService) {
+    private toastNotificationService: ToastNotificationsService,
+    private analyticsService: AnalyticsService) {
     if (environment.production) {
+      gtag('config', 'G-YG1QD02XSE');
+      this.analyticsService.sendEvent('verifi_app_open', undefined);
       this.router.events.subscribe(event => {
         if (event instanceof NavigationEnd) {
-          gtag('config', 'G-YG1QD02XSE',
-            {
-              'page_path': event.urlAfterRedirects
-            }
-          );
+          let page_path: string = this.analyticsService.getPageWithoutId(event.urlAfterRedirects);
+          this.analyticsService.sendEvent('page_view', page_path);
         }
-      })
+      });
     }
   }
 

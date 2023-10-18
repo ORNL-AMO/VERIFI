@@ -10,6 +10,7 @@ import { DbChangesService } from '../indexedDB/db-changes.service';
 import { SetupWizardService } from './setup-wizard.service';
 import * as XLSX from 'xlsx';
 import { FileReference, UploadDataService } from '../upload-data/upload-data.service';
+import { AnalyticsService } from '../analytics/analytics.service';
 
 @Component({
   selector: 'app-setup-wizard',
@@ -34,7 +35,8 @@ export class SetupWizardComponent implements OnInit {
     private setupWizardService: SetupWizardService,
     private toastNotificationService: ToastNotificationsService,
     private dbChangesService: DbChangesService,
-    private uploadDataService: UploadDataService
+    private uploadDataService: UploadDataService,
+    private analyticsService: AnalyticsService
   ) { }
 
   ngOnInit(): void {
@@ -53,6 +55,7 @@ export class SetupWizardComponent implements OnInit {
   }
 
   async submitData() {
+    this.analyticsService.sendEvent('create_account');
     this.loadingService.setLoadingMessage("Creating Account...");
     this.loadingService.setLoadingStatus(true);
     let account: IdbAccount = this.setupWizardService.account.getValue();
