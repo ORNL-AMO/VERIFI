@@ -33,6 +33,9 @@ import { OverviewReportDashboardComponent } from "../account/account-reports/acc
 import { PerformanceReportDashboardComponent } from "../account/account-reports/account-reports-dashboard/performance-report-dashboard/performance-report-dashboard.component";
 import { BetterClimateReportDashboardComponent } from "../account/account-reports/account-reports-dashboard/better-climate-report-dashboard/better-climate-report-dashboard.component";
 import { BetterClimateReportComponent } from "../account/account-reports/better-climate-report/better-climate-report.component";
+import { CustomFuelDataComponent } from "../account/custom-database/custom-fuel-data/custom-fuel-data.component";
+import { CustomFuelDataDashboardComponent } from "../account/custom-database/custom-fuel-data/custom-fuel-data-dashboard/custom-fuel-data-dashboard.component";
+import { CustomFuelDataFormComponent } from "../account/custom-database/custom-fuel-data/custom-fuel-data-form/custom-fuel-data-form.component";
 
 export const AccountRoutes: Route = {
     path: 'account',
@@ -133,6 +136,16 @@ export const AccountRoutes: Route = {
 
                     ]
                 },
+                {
+                    path: 'fuels', component: CustomFuelDataComponent,
+                    children: [
+                        { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
+                        { path: 'dashboard', component: CustomFuelDataDashboardComponent },
+                        { path: 'edit/:id', component: CustomFuelDataFormComponent },
+                        { path: 'add', component: CustomFuelDataFormComponent }
+
+                    ]
+                }
             ]
         }
     ]
