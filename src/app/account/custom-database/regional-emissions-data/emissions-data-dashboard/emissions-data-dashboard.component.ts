@@ -31,7 +31,7 @@ export class EmissionsDataDashboardComponent implements OnInit {
   }
 
   deleteItem(customEmissionsItem: IdbCustomEmissionsItem) {
-
+    //TODO...
   }
 
   editItem(customEmissionsItem: IdbCustomEmissionsItem) {

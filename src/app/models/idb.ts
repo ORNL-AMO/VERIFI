@@ -1,3 +1,4 @@
+import { FuelTypeOption } from '../facility/utility-data/energy-consumption/energy-source/edit-meter-form/editMeterOptions';
 import { AccountAnalysisSetupErrors } from './accountAnalysis';
 import { AnalysisCategory, AnalysisGroup, AnalysisSetupErrors } from './analysis';
 import { MonthlyData } from './calanderization';
@@ -333,4 +334,10 @@ export interface IdbCustomEmissionsItem {
     residualEmissionRates: Array<{ co2Emissions: number, year: number }>,
 }
 
-
+export interface IdbCustomFuel extends FuelTypeOption {
+    id?: number,
+    accountId: string,
+    date: Date,
+    guid: string,
+    phase: MeterPhase
+}

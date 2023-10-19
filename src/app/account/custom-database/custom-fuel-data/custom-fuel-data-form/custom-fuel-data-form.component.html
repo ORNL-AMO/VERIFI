@@ -1,1 +1,74 @@
-<p>custom-fuel-data-form works!</p>
+<div class="card">
+    <div class="card-body">
+        <form>
+            <div class="row">
+                <div class="col-6">
+                    <div class="form-group">
+                        <label for="fuelName">Fuel Name</label>
+                        <div class="input-group">
+                            <input class="form-control" id="fuelName" type="text" [(ngModel)]="editCustomFuel.value"
+                                name="fuelName" required (input)="checkInvalid()"
+                                [ngClass]="{'ng-invalid': invalidValue}">
+                        </div>
+                        <div *ngIf="invalidValue" class="alert alert-danger">
+                            {{invalidValue}}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="d-flex justify-content-end align-items-center h-100">
+                        <button class="btn btn-secondary me-2" (click)="navigateHome()">Cancel</button>
+                        <button class="btn btn-success" [disabled]="isInvalid" (click)="save()">
+                            <span class="fa fa-save"></span>
+                            Save</button>
+                    </div>
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <!--phase-->
+                <div class="col-6">
+                    <label for="phase">Phase <span class="required">*</span> </label>
+                    <div class="mb-3">
+                        <select class="form-select" id="phase" type="text" [(ngModel)]="editCustomFuel.phase">
+                            <option [ngValue]="'Solid'">Solid</option>
+                            <option [ngValue]="'Liquid'">Liquid</option>
+                            <option [ngValue]="'Gas'">Gas</option>
+                        </select>
+                    </div>
+                </div>
+                <!--heat capacity-->
+                <!-- <div class="col-6">
+                    <label for="heatCapacity">Heat Capacity <span class="required">*</span> </label>
+                    <div class="input-group mb-3">
+                        <input id="heatCapacity" class="form-control" type="number" formControlName="heatCapacity"
+                            onfocus="this.select();">
+                        <span class="input-group-text"><span
+                                [innerHTML]="meterForm.controls.energyUnit.value | settingsLabel"></span>/<span
+                                [innerHTML]="meterForm.controls.startingUnit.value | settingsLabel"></span>
+                        </span>
+                    </div>
+                    <div class="alert-danger alert" *ngIf="meterForm.get('heatCapacity').hasError('required')">Heat
+                        capacity is
+                        required</div>
+                    <div class="alert-danger alert" *ngIf="meterForm.get('heatCapacity').hasError('min')">Value can't be
+                        less
+                        than 0</div>
+                    <div class="alert-warning alert" *ngIf="meterForm.controls.heatCapacity.value === 0">Heat capacity
+                        should be greater than 0</div>
+                </div> -->
+                <!--
+                        startingUnit
+                        heatCapacityValue
+                        siteToSourceMultiplier
+                        emnissionsOutputRate
+                        otherEnergyType
+                        CO2
+                        CH4
+                        N2O
+                        isBiofuel
+                    -->
+            </div>
+        </form>
+    </div>
+</div>

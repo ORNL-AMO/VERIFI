@@ -30,26 +30,25 @@
         </div>
     </div>
 </div>
-<!-- 
+
 <div class="row mt-2">
 
-    <div class="col-4" *ngFor="let customEmissionsItem of customEmissionsItems">
+    <div class="col-4" *ngFor="let fuel of customFuels">
         <div class="card">
             <div class="card-body">
                 <div class="d-flex justify-content-between">
                     <div class="emissions-title">
-                        <h5 class="card-title">{{customEmissionsItem.subregion}}</h5>
+                        <h5 class="card-title">{{fuel.value}}</h5>
                     </div>
                     <div>
-                        <button class="btn btn-sm btn-secondary me-2"
-                            *ngIf="customEmissionsItem.subregion != 'U.S. Average'"
-                            (click)="deleteItem(customEmissionsItem)"><span class="fa fa-trash"></span></button>
-                        <button class="btn btn-sm btn-secondary" (click)="editItem(customEmissionsItem)"><span
+                        <button class="btn btn-sm btn-secondary me-2" (click)="deleteItem(fuel)"><span
+                                class="fa fa-trash"></span></button>
+                        <button class="btn btn-sm btn-secondary" (click)="editItem(fuel)"><span
                                 class="fa fa-edit"></span></button>
                     </div>
                 </div>
                 <hr>
-                <table class="table table-hover" *ngIf="customEmissionsItem.locationEmissionRates.length != 0">
+                <!--         <table class="table table-hover" *ngIf="customEmissionsItem.locationEmissionRates.length != 0">
                     <thead>
                         <tr>
                             <th colspan="2">
@@ -111,8 +110,8 @@
                 </table>
                 <div class="alert alert-warning" *ngIf="customEmissionsItem.residualEmissionRates.length == 0">
                     No Residual Emissions Rates Found For Subregion
-                </div>
+                </div>-->
             </div>
         </div>
     </div>
-</div> -->
+</div>

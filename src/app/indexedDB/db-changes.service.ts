@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { LoadingService } from '../core-components/loading/loading.service';
 import { ToastNotificationsService } from '../core-components/toast-notifications/toast-notifications.service';
-import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport, IdbAnalysisItem, IdbCustomEmissionsItem, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from '../models/idb';
+import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport, IdbAnalysisItem, IdbCustomEmissionsItem, IdbCustomFuel, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from '../models/idb';
 import { AccountAnalysisDbService } from './account-analysis-db.service';
 import { AccountdbService } from './account-db.service';
 import { AccountReportDbService } from './account-report-db.service';
@@ -14,6 +14,7 @@ import { UtilityMeterdbService } from './utilityMeter-db.service';
 import { UtilityMeterDatadbService } from './utilityMeterData-db.service';
 import { UtilityMeterGroupdbService } from './utilityMeterGroup-db.service';
 import { first, firstValueFrom } from 'rxjs';
+import { CustomFuelDbService } from './custom-fuel-db.service';
 
 @Injectable({
   providedIn: 'root'
@@ -29,7 +30,8 @@ export class DbChangesService {
     private customEmissionsDbService: CustomEmissionsDbService,
     private loadingService: LoadingService,
     private toastNotificationService: ToastNotificationsService,
-    private accountReportDbService: AccountReportDbService) { }
+    private accountReportDbService: AccountReportDbService,
+    private customFuelDbService: CustomFuelDbService) { }
 
   async updateAccount(account: IdbAccount) {
     let updatedAccount: IdbAccount = await firstValueFrom(this.accountDbService.updateWithObservable(account));
@@ -72,6 +74,8 @@ export class DbChangesService {
     await this.setMeterGroups(account);
     //set custom emissions
     await this.setCustomEmissions(account);
+    //set custom fuels
+    await this.setCustomFuels(account);
     //set analysis
     await this.setAnalysisItems(account, skipUpdates);
     //set account analysis
@@ -226,6 +230,11 @@ export class DbChangesService {
       customEmissionsItems.push(uSAverageItem);
     }
     this.customEmissionsDbService.accountEmissionsItems.next(customEmissionsItems);
+  }
+
+  async setCustomFuels(account: IdbAccount) {
+    let customFuels: Array<IdbCustomFuel> = await this.customFuelDbService.getAllAccountCustomFuels(account.guid);
+    this.customFuelDbService.accountCustomFuels.next(customFuels);
   }
 
   async deleteFacility(facility: IdbFacility, selectedAccount: IdbAccount) {
