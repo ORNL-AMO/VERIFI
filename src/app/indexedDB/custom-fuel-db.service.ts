@@ -72,7 +72,7 @@ export class CustomFuelDbService {
       CO2: undefined,
       CH4: undefined,
       N2O: undefined,
-      isBiofuel: undefined,
+      isBiofuel: false,
       phase: 'Gas'
     }
   }

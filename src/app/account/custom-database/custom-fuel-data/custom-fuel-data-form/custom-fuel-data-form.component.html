@@ -27,10 +27,11 @@
             <hr>
             <div class="row">
                 <!--phase-->
-                <div class="col-6">
+                <div class="col-3">
                     <label for="phase">Phase <span class="required">*</span> </label>
                     <div class="mb-3">
-                        <select class="form-select" id="phase" type="text" [(ngModel)]="editCustomFuel.phase">
+                        <select name="phase" class="form-select" id="phase" type="text"
+                            [(ngModel)]="editCustomFuel.phase">
                             <option [ngValue]="'Solid'">Solid</option>
                             <option [ngValue]="'Liquid'">Liquid</option>
                             <option [ngValue]="'Gas'">Gas</option>
@@ -38,31 +39,58 @@
                     </div>
                 </div>
                 <!--heat capacity-->
-                <!-- <div class="col-6">
+                <div class="col-3">
                     <label for="heatCapacity">Heat Capacity <span class="required">*</span> </label>
                     <div class="input-group mb-3">
-                        <input id="heatCapacity" class="form-control" type="number" formControlName="heatCapacity"
-                            onfocus="this.select();">
-                        <span class="input-group-text"><span
-                                [innerHTML]="meterForm.controls.energyUnit.value | settingsLabel"></span>/<span
-                                [innerHTML]="meterForm.controls.startingUnit.value | settingsLabel"></span>
+                        <input name="heatCapacity" id="heatCapacity" class="form-control" type="number"
+                            [(ngModel)]="editCustomFuel.heatCapacityValue" onfocus="this.select();">
+                        <span class="input-group-text">
+                            <ng-container *ngIf="editCustomFuel.phase == 'Gas'">
+                                <span [innerHTML]="selectedAccount.energyUnit| settingsLabel"></span>/<span
+                                    [innerHTML]="selectedAccount.volumeGasUnit| settingsLabel"></span>
+                            </ng-container>
+                            <ng-container *ngIf="editCustomFuel.phase == 'Liquid'">
+                                <span [innerHTML]="selectedAccount.energyUnit| settingsLabel"></span>/<span
+                                    [innerHTML]="selectedAccount.volumeLiquidUnit| settingsLabel"></span>
+                            </ng-container>
+                            <ng-container *ngIf="editCustomFuel.phase == 'Solid'">
+                                <span [innerHTML]="selectedAccount.energyUnit| settingsLabel"></span>/<span
+                                    [innerHTML]="selectedAccount.massUnit| settingsLabel"></span>
+                            </ng-container>
                         </span>
                     </div>
-                    <div class="alert-danger alert" *ngIf="meterForm.get('heatCapacity').hasError('required')">Heat
+                    <!-- <div class="alert-danger alert" *ngIf="meterForm.get('heatCapacity').hasError('required')">Heat
                         capacity is
                         required</div>
                     <div class="alert-danger alert" *ngIf="meterForm.get('heatCapacity').hasError('min')">Value can't be
                         less
                         than 0</div>
                     <div class="alert-warning alert" *ngIf="meterForm.controls.heatCapacity.value === 0">Heat capacity
-                        should be greater than 0</div>
-                </div> -->
+                        should be greater than 0</div> -->
+                </div>
+                <div class="col-3">
+                    <label for="siteToSourceMultiplier">Site to Source Multiplier <span class="required">*</span>
+                    </label>
+                    <div class="input-group mb-3">
+                        <input name="siteToSourceMultiplier" id="siteToSourceMultiplier" class="form-control"
+                            type="number" [(ngModel)]="editCustomFuel.siteToSourceMultiplier" onfocus="this.select();">
+                    </div>
+                </div>
+                <div class="col-3">
+                    <label for="isBiofuel">Is this a Biofuel? <span class="required">*</span>
+                    </label>
+                    <div class="mb-3">
+                        <select name="isBiofuel" class="form-select" id="isBiofuel" type="isBiofuel"
+                            [(ngModel)]="editCustomFuel.isBiofuel">
+                            <option [ngValue]="true">Yes</option>
+                            <option [ngValue]="false">No</option>
+                        </select>
+                    </div>
+                </div>
+                
+
                 <!--
-                        startingUnit
-                        heatCapacityValue
-                        siteToSourceMultiplier
                         emnissionsOutputRate
-                        otherEnergyType
                         CO2
                         CH4
                         N2O

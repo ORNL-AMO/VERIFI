@@ -19,6 +19,7 @@ export class CustomFuelDataFormComponent {
   previousValue: string;
   accountCustomFuels: Array<IdbCustomFuel>;
   allFuelNames: Array<string>;
+  selectedAccount: IdbAccount;
   constructor(private router: Router, private customFuelDbService: CustomFuelDbService,
     private activatedRoute: ActivatedRoute,
     private accountDbService: AccountdbService) {
@@ -29,9 +30,9 @@ export class CustomFuelDataFormComponent {
     this.accountCustomFuels = this.customFuelDbService.accountCustomFuels.getValue();
     this.setAllFuelNames();
     this.isAdd = this.router.url.includes('add');
+    this.selectedAccount = this.accountDbService.selectedAccount.getValue();
     if (this.isAdd) {
-      let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-      this.editCustomFuel = this.customFuelDbService.getNewAccountCustomFuel(selectedAccount);
+      this.editCustomFuel = this.customFuelDbService.getNewAccountCustomFuel(this.selectedAccount);
     } else {
       this.activatedRoute.params.subscribe(params => {
         let elementId: string = params['id'];
