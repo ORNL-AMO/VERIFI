@@ -95,9 +95,9 @@ export class AnalyticsService {
     let callDebuggingEndpoint = environment.production ? false : true;
     let postBody = {
       isDebugging: callDebuggingEndpoint,
+      isVerifi: true,
       analyticsPayload: {
         client_id: this.clientId,
-        isVerifi: true,
         non_personalized_ads: true,
         events: [
           gaEvent
