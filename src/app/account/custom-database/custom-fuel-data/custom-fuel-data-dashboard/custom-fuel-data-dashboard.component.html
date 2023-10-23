@@ -48,6 +48,84 @@
                     </div>
                 </div>
                 <hr>
+                <table class="table table-hover table-bordered table-sm">
+                    <tbody>
+                        <tr>
+                            <th class="w-50">
+                                Phase
+                            </th>
+                            <td>
+                                {{fuel.phase}}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>
+                                HHV
+                            </th>
+                            <td>
+                                {{fuel.heatCapacityValue}}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>
+                                Site To Source
+                            </th>
+                            <td>
+                                {{fuel.siteToSourceMultiplier}}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>
+                                Biofuel?
+                            </th>
+                            <td>
+                                <ng-container *ngIf="fuel.isBiofuel">
+                                    Yes
+                                </ng-container>
+                                <ng-container *ngIf="!fuel.isBiofuel">
+                                    No
+                                </ng-container>
+                            </td>
+                        </tr>
+                        <ng-container *ngIf="!fuel.directEmissionsRate">
+                            <tr>
+                                <th>
+                                    CO<sub>2</sub> Factor
+                                </th>
+                                <td>
+                                    {{fuel.CO2}}
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+                                    CH<sub>4</sub> Factor
+                                </th>
+                                <td>
+                                    {{fuel.CH4}}
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+                                    N<sub>2</sub>O Factor
+                                </th>
+                                <td>
+                                    {{fuel.N2O}}
+                                </td>
+                            </tr>
+                        </ng-container>
+                        <tr>
+                            <th>
+                                Emissions Output Rate
+                            </th>
+                            <td>
+                                {{fuel.emissionsOutputRate}}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+
+
                 <!--         <table class="table table-hover" *ngIf="customEmissionsItem.locationEmissionRates.length != 0">
                     <thead>
                         <tr>

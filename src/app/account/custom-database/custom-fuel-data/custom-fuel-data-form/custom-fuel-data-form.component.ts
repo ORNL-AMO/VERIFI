@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
 import { FuelTypeOption, GasOptions, LiquidOptions, OtherEnergyOptions, SolidOptions } from 'src/app/facility/utility-data/energy-consumption/energy-source/edit-meter-form/editMeterOptions';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
@@ -91,8 +92,27 @@ export class CustomFuelDataFormComponent {
     });
   }
 
-  save() {
+  async save() {
+    this.editCustomFuel.value = this.form.controls.fuelName.value;
+    this.editCustomFuel.phase = this.form.controls.phase.value;
+    this.editCustomFuel.heatCapacityValue = this.form.controls.heatCapacityValue.value;
+    this.editCustomFuel.siteToSourceMultiplier = this.form.controls.siteToSourceMultiplier.value;
+    this.editCustomFuel.isBiofuel = this.form.controls.isBiofuel.value;
+    this.editCustomFuel.CO2 = this.form.controls.CO2.value;
+    this.editCustomFuel.CH4 = this.form.controls.CH4.value;
+    this.editCustomFuel.N2O = this.form.controls.N2O.value;
+    this.editCustomFuel.emissionsOutputRate = this.form.controls.emissionsOutputRate.value;
+    this.editCustomFuel.directEmissionsRate = this.form.controls.directEmissionsRate.value;
 
+    if (this.isAdd) {
+      await firstValueFrom(this.customFuelDbService.addWithObservable(this.editCustomFuel));
+    } else {
+      await firstValueFrom(this.customFuelDbService.updateWithObservable(this.editCustomFuel));
+    }
+    let allCustomFuels: Array<IdbCustomFuel> = await firstValueFrom(this.customFuelDbService.getAll());
+    let accountCustomFuels: Array<IdbCustomFuel> = allCustomFuels.filter(fuel => { return fuel.accountId == this.selectedAccount.guid });
+    this.customFuelDbService.accountCustomFuels.next(accountCustomFuels);
+    this.navigateHome();
   }
 
   navigateHome() {
