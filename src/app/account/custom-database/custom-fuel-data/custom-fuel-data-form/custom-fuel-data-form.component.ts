@@ -1,9 +1,10 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { GasOptions, LiquidOptions, OtherEnergyOptions, SolidOptions } from 'src/app/facility/utility-data/energy-consumption/energy-source/edit-meter-form/editMeterOptions';
+import { FuelTypeOption, GasOptions, LiquidOptions, OtherEnergyOptions, SolidOptions } from 'src/app/facility/utility-data/energy-consumption/energy-source/edit-meter-form/editMeterOptions';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
+import { MeterPhase } from 'src/app/models/constantsAndTypes';
 import { IdbAccount, IdbCustomFuel } from 'src/app/models/idb';
 
 @Component({
@@ -21,8 +22,8 @@ export class CustomFuelDataFormComponent {
   accountCustomFuels: Array<IdbCustomFuel>;
   allFuelNames: Array<string>;
   selectedAccount: IdbAccount;
-
   form: FormGroup;
+  displayFuelModal: boolean = false;
   constructor(private router: Router, private customFuelDbService: CustomFuelDbService,
     private activatedRoute: ActivatedRoute,
     private accountDbService: AccountdbService,
@@ -128,6 +129,26 @@ export class CustomFuelDataFormComponent {
     let N2O: number = this.form.controls.N2O.value;
     let outputRate: number = CO2 + (CH4 * (25 / 1000)) + (N2O * (298 / 1000));
     this.form.controls.emissionsOutputRate.patchValue(outputRate);
+  }
+
+  showFuelModal() {
+    this.displayFuelModal = true;
+  }
+
+  hideFuelModal(selectedOption: { phase: MeterPhase, option: FuelTypeOption }) {
+    this.displayFuelModal = false;
+    if (selectedOption) {
+      this.form.controls.phase.patchValue(selectedOption.phase);
+      this.form.controls.CO2.patchValue(selectedOption.option.CO2);
+      this.form.controls.CH4.patchValue(selectedOption.option.CH4);
+      this.form.controls.N2O.patchValue(selectedOption.option.N2O);
+      this.form.controls.heatCapacityValue.patchValue(selectedOption.option.heatCapacityValue);
+      this.form.controls.siteToSourceMultiplier.patchValue(selectedOption.option.siteToSourceMultiplier);
+      this.form.controls.isBiofuel.patchValue(selectedOption.option.isBiofuel || false);
+      this.form.controls.directEmissionsRate.patchValue(false);
+      this.form.controls.fuelName.patchValue(selectedOption.option.value + ' (Modified)');
+      this.form.controls.emissionsOutputRate.patchValue(selectedOption.option.emissionsOutputRate);
+    }
   }
 
 }

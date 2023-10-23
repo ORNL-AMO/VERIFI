@@ -17,6 +17,9 @@
                 </div>
                 <div class="col-6">
                     <div class="d-flex justify-content-end align-items-center h-100">
+                        <button class="btn action-btn me-2" (click)="showFuelModal()">
+                            <span class="fa fa-filter-list"></span> Modify Existing
+                        </button>
                         <button class="btn btn-secondary me-2" (click)="navigateHome()">Cancel</button>
                         <button class="btn btn-success" [disabled]="form.invalid || isInvalid" (click)="save()">
                             <span class="fa fa-save"></span>
@@ -140,3 +143,6 @@
         </form>
     </div>
 </div>
+
+
+<app-existing-fuels-modal *ngIf="displayFuelModal" (emitClose)="hideFuelModal($event)"></app-existing-fuels-modal>

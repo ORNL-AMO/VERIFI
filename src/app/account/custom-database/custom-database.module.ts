@@ -10,6 +10,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CustomFuelDataComponent } from './custom-fuel-data/custom-fuel-data.component';
 import { CustomFuelDataDashboardComponent } from './custom-fuel-data/custom-fuel-data-dashboard/custom-fuel-data-dashboard.component';
 import { CustomFuelDataFormComponent } from './custom-fuel-data/custom-fuel-data-form/custom-fuel-data-form.component';
+import { ExistingFuelsModalComponent } from './custom-fuel-data/custom-fuel-data-form/existing-fuels-modal/existing-fuels-modal.component';
 
 
 
@@ -21,7 +22,8 @@ import { CustomFuelDataFormComponent } from './custom-fuel-data/custom-fuel-data
     EmissionsDataDashboardComponent,
     CustomFuelDataComponent,
     CustomFuelDataDashboardComponent,
-    CustomFuelDataFormComponent
+    CustomFuelDataFormComponent,
+    ExistingFuelsModalComponent
   ],
   imports: [
     CommonModule,
