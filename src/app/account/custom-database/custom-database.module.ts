@@ -27,7 +27,8 @@ import { CustomFuelDataFormComponent } from './custom-fuel-data/custom-fuel-data
     CommonModule,
     RouterModule,
     HelperPipesModule,
-    FormsModule
+    FormsModule,
+    ReactiveFormsModule
   ]
 })
 export class CustomDatabaseModule { }

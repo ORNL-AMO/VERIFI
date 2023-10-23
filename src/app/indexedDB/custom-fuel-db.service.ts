@@ -73,7 +73,8 @@ export class CustomFuelDbService {
       CH4: undefined,
       N2O: undefined,
       isBiofuel: false,
-      phase: 'Gas'
+      phase: 'Gas',
+      directEmissionsRate: false
     }
   }
 }

@@ -339,5 +339,6 @@ export interface IdbCustomFuel extends FuelTypeOption {
     accountId: string,
     date: Date,
     guid: string,
-    phase: MeterPhase
+    phase: MeterPhase,
+    directEmissionsRate: boolean
 }

@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { GasOptions, LiquidOptions, OtherEnergyOptions, SolidOptions } from 'src/app/facility/utility-data/energy-consumption/energy-source/edit-meter-form/editMeterOptions';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
@@ -20,9 +21,12 @@ export class CustomFuelDataFormComponent {
   accountCustomFuels: Array<IdbCustomFuel>;
   allFuelNames: Array<string>;
   selectedAccount: IdbAccount;
+
+  form: FormGroup;
   constructor(private router: Router, private customFuelDbService: CustomFuelDbService,
     private activatedRoute: ActivatedRoute,
-    private accountDbService: AccountdbService) {
+    private accountDbService: AccountdbService,
+    private formBuilder: FormBuilder) {
 
   }
 
@@ -33,11 +37,13 @@ export class CustomFuelDataFormComponent {
     this.selectedAccount = this.accountDbService.selectedAccount.getValue();
     if (this.isAdd) {
       this.editCustomFuel = this.customFuelDbService.getNewAccountCustomFuel(this.selectedAccount);
+      this.setForm(this.editCustomFuel);
     } else {
       this.activatedRoute.params.subscribe(params => {
         let elementId: string = params['id'];
         let selectedItem: IdbCustomFuel = this.accountCustomFuels.find(item => { return item.guid == elementId });
         this.editCustomFuel = JSON.parse(JSON.stringify(selectedItem));
+        this.setForm(this.editCustomFuel);
         this.previousValue = selectedItem.value;
         this.checkInvalid();
       });
@@ -51,10 +57,11 @@ export class CustomFuelDataFormComponent {
 
   setValueInvalid() {
     let invalidValue: string = undefined;
-    if (!this.editCustomFuel.value) {
+    let currentValue: string = this.form.controls.fuelName.value;
+    if (!currentValue) {
       invalidValue = 'Fuel name required.';
     } else {
-      let checkExists: string = this.allFuelNames.find(fuelName => { return fuelName == this.editCustomFuel.value });
+      let checkExists: string = this.allFuelNames.find(fuelName => { return fuelName == currentValue });
       if (checkExists) {
         if (this.isAdd || (this.previousValue != checkExists)) {
           invalidValue = 'Unique name required for fuel. Current name already exists.';
@@ -89,6 +96,38 @@ export class CustomFuelDataFormComponent {
 
   navigateHome() {
     this.router.navigateByUrl('/account/custom-data/fuels');
+  }
+
+  setForm(editItem: IdbCustomFuel) {
+    this.form = this.formBuilder.group({
+      'fuelName': [editItem.value, [Validators.required]],
+      'phase': [editItem.phase, [Validators.required]],
+      'heatCapacityValue': [editItem.heatCapacityValue, [Validators.required]],
+      'siteToSourceMultiplier': [editItem.siteToSourceMultiplier, [Validators.required]],
+      'isBiofuel': [editItem.isBiofuel, [Validators.required]],
+      'CO2': [editItem.CO2, [Validators.required]],
+      'CH4': [editItem.CH4, [Validators.required]],
+      'N2O': [editItem.N2O, [Validators.required]],
+      'emissionsOutputRate': [editItem.emissionsOutputRate, [Validators.required]],
+      'directEmissionsRate': [editItem.directEmissionsRate]
+    });
+    this.setDisableOutputRate();
+  }
+
+  setDisableOutputRate() {
+    if (this.form.controls.directEmissionsRate.value == false) {
+      this.form.controls.emissionsOutputRate.disable();
+    } else {
+      this.form.controls.emissionsOutputRate.enable();
+    }
+  }
+
+  setOutputRate() {
+    let CO2: number = this.form.controls.CO2.value;
+    let CH4: number = this.form.controls.CH4.value;
+    let N2O: number = this.form.controls.N2O.value;
+    let outputRate: number = CO2 + (CH4 * (25 / 1000)) + (N2O * (298 / 1000));
+    this.form.controls.emissionsOutputRate.patchValue(outputRate);
   }
 
 }
