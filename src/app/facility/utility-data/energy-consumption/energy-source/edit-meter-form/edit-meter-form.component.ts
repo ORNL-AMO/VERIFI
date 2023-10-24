@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
 import { FormGroup, ValidatorFn } from '@angular/forms';
-import { IdbFacility } from 'src/app/models/idb';
+import { IdbCustomFuel, IdbFacility } from 'src/app/models/idb';
 import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
 import { EnergyUseCalculationsService } from 'src/app/shared/helper-services/energy-use-calculations.service';
 import { getIsEnergyMeter } from 'src/app/shared/sharedHelperFuntions';
@@ -8,6 +8,7 @@ import { EnergyUnitOptions, UnitOption } from 'src/app/shared/unitOptions';
 import { EditMeterFormService } from './edit-meter-form.service';
 import { AgreementType, AgreementTypes, FuelTypeOption, GasOptions, LiquidOptions, OtherEnergyOptions, ScopeOption, ScopeOptions, SolidOptions, SourceOptions, getFuelTypeOptions } from './editMeterOptions';
 import { MeterPhase, MeterSource, WaterDischargeType, WaterDischargeTypes, WaterIntakeType, WaterIntakeTypes } from 'src/app/models/constantsAndTypes';
+import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
 
 @Component({
   selector: 'app-edit-meter-form',
@@ -52,12 +53,15 @@ export class EditMeterFormComponent implements OnInit {
   waterDischargeTypes: Array<WaterDischargeType> = WaterDischargeTypes;
   displayWaterIntakeTypes: boolean;
   displayWaterDischargeTypes: boolean;
+  customFuels: Array<IdbCustomFuel>;
   constructor(
     private energyUnitsHelperService: EnergyUnitsHelperService, private energyUseCalculationsService: EnergyUseCalculationsService,
-    private editMeterFormService: EditMeterFormService, private cd: ChangeDetectorRef) { }
+    private editMeterFormService: EditMeterFormService, private cd: ChangeDetectorRef,
+    private customFuelDbService: CustomFuelDbService) { }
 
   ngOnInit(): void {
     // this.testFuelTypeOptions();
+    this.customFuels = this.customFuelDbService.accountCustomFuels.getValue();
   }
 
   ngOnChanges() {
@@ -211,7 +215,7 @@ export class EditMeterFormComponent implements OnInit {
   }
 
   setFuelTypeOptions(onChange: boolean) {
-    this.fuelTypeOptions = getFuelTypeOptions(this.meterForm.controls.source.value, this.meterForm.controls.phase.value);
+    this.fuelTypeOptions = getFuelTypeOptions(this.meterForm.controls.source.value, this.meterForm.controls.phase.value, this.customFuels);
     let selectedEnergyOption: FuelTypeOption = this.fuelTypeOptions.find(option => { return option.value == this.meterForm.controls.fuel.value });
     if (!selectedEnergyOption && this.fuelTypeOptions.length != 0 && !onChange) {
       this.meterForm.controls.fuel.patchValue(this.fuelTypeOptions[0].value);

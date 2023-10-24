@@ -1,4 +1,5 @@
 import { MeterPhase, MeterSource } from "src/app/models/constantsAndTypes"
+import { IdbCustomFuel } from "src/app/models/idb";
 
 
 export interface FuelTypeOption {
@@ -597,14 +598,29 @@ export const AgreementTypes: Array<AgreementType> = [
     }
 ]
 
-export function getFuelTypeOptions(source: MeterSource, phase: MeterPhase): Array<FuelTypeOption> {
+export function getFuelTypeOptions(source: MeterSource, phase: MeterPhase, customFuels: Array<IdbCustomFuel>): Array<FuelTypeOption> {
     if (source == 'Other Fuels') {
+        let sourceCustomFuels: Array<IdbCustomFuel> = customFuels.filter(cFuel => {
+            return cFuel.phase == phase
+        });
+        let fuels: Array<FuelTypeOption> = sourceCustomFuels.map(option => {
+            return option
+        });
         if (phase == 'Solid') {
-            return SolidOptions;
+            SolidOptions.forEach(option => {
+                fuels.push(option);
+            });
+            return fuels;
         } else if (phase == 'Liquid') {
-            return LiquidOptions;
+            LiquidOptions.forEach(option => {
+                fuels.push(option);
+            });
+            return fuels;
         } else if (phase == 'Gas') {
-            return GasOptions;
+            GasOptions.forEach(option => {
+                fuels.push(option);
+            });
+            return fuels;
         }
     } else if (source == 'Other Energy') {
         return OtherEnergyOptions;

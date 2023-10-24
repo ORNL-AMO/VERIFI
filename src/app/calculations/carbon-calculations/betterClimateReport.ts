@@ -1,5 +1,5 @@
 import { CalanderizedMeter } from "src/app/models/calanderization";
-import { IdbAccount, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from "src/app/models/idb";
+import { IdbAccount, IdbCustomFuel, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from "src/app/models/idb";
 import { getCalanderizedMeterData } from "../calanderization/calanderizeMeters";
 import * as _ from 'lodash';
 import { setEmissionsForCalanderizedMeters } from "../emissions-calculations/emissions";
@@ -14,11 +14,11 @@ export class BetterClimateReport {
     annualFacilitiesSummaries: Array<BetterClimateAnnualFacilitySummary>;
     facilityMaxMins: Array<BetterClimateFacilityMaxMin>;
     constructor(account: IdbAccount, facilities: Array<IdbFacility>, meters: Array<IdbUtilityMeter>, meterData: Array<IdbUtilityMeterData>, baselineYear: number, reportYear: number,
-        co2Emissions: Array<SubregionEmissions>, emissionsDisplay: 'market' | 'location', emissionsGoal: number) {
+        co2Emissions: Array<SubregionEmissions>, emissionsDisplay: 'market' | 'location', emissionsGoal: number, customFuels: Array<IdbCustomFuel>) {
         this.baselineYear = baselineYear;
         this.reportYear = reportYear;
         let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(meters, meterData, account, false, { energyIsSource: false, neededUnits: 'MMBtu' });
-        calanderizedMeters = setEmissionsForCalanderizedMeters(calanderizedMeters, false, facilities, co2Emissions);
+        calanderizedMeters = setEmissionsForCalanderizedMeters(calanderizedMeters, false, facilities, co2Emissions, customFuels);
 
 
         this.setPortfolioYearDetails(calanderizedMeters, facilities, emissionsDisplay, emissionsGoal);

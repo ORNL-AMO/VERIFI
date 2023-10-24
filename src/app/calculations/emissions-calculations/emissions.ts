@@ -1,17 +1,17 @@
 import { CalanderizedMeter, MonthlyData } from "src/app/models/calanderization";
-import { IdbFacility, IdbUtilityMeter } from "src/app/models/idb";
+import { IdbCustomFuel, IdbFacility, IdbUtilityMeter } from "src/app/models/idb";
 import { ConvertValue } from "../conversions/convertValue";
 import { EmissionsResults, SubregionEmissions } from "src/app/models/eGridEmissions";
 import * as _ from 'lodash';
 import { MeterPhase, MeterSource } from "src/app/models/constantsAndTypes";
 import { FuelTypeOption, getFuelTypeOptions } from "src/app/facility/utility-data/energy-consumption/energy-source/edit-meter-form/editMeterOptions";
 
-export function setEmissionsForCalanderizedMeters(calanderizedMeterData: Array<CalanderizedMeter>, energyIsSource: boolean, facilities: Array<IdbFacility>, co2Emissions: Array<SubregionEmissions>): Array<CalanderizedMeter> {
+export function setEmissionsForCalanderizedMeters(calanderizedMeterData: Array<CalanderizedMeter>, energyIsSource: boolean, facilities: Array<IdbFacility>, co2Emissions: Array<SubregionEmissions>, customFuels: Array<IdbCustomFuel>): Array<CalanderizedMeter> {
     for (let i = 0; i < calanderizedMeterData.length; i++) {
         let cMeter: CalanderizedMeter = calanderizedMeterData[i];
         for (let x = 0; x < cMeter.monthlyData.length; x++) {
             let monthlyData: MonthlyData = cMeter.monthlyData[x];
-            let emissions: EmissionsResults = getEmissions(cMeter.meter, monthlyData.energyUse, cMeter.energyUnit, monthlyData.year, energyIsSource, facilities, co2Emissions);
+            let emissions: EmissionsResults = getEmissions(cMeter.meter, monthlyData.energyUse, cMeter.energyUnit, monthlyData.year, energyIsSource, facilities, co2Emissions, customFuels);
             cMeter.monthlyData[x].RECs = emissions.RECs;
             cMeter.monthlyData[x].locationEmissions = emissions.locationEmissions;
             cMeter.monthlyData[x].marketEmissions = emissions.marketEmissions;
@@ -22,7 +22,7 @@ export function setEmissionsForCalanderizedMeters(calanderizedMeterData: Array<C
     return calanderizedMeterData;
 }
 
-export function getEmissions(meter: IdbUtilityMeter, energyUse: number, energyUnit: string, year: number, energyIsSource: boolean, facilities: Array<IdbFacility>, co2Emissions: Array<SubregionEmissions>): EmissionsResults {
+export function getEmissions(meter: IdbUtilityMeter, energyUse: number, energyUnit: string, year: number, energyIsSource: boolean, facilities: Array<IdbFacility>, co2Emissions: Array<SubregionEmissions>, customFuels: Array<IdbCustomFuel>): EmissionsResults {
     let isCompressedAir: boolean = (meter.source == 'Other Energy' && meter.fuel == 'Purchased Compressed Air');
     if (meter.source == 'Electricity' || meter.source == 'Natural Gas' || meter.source == 'Other Fuels' || isCompressedAir) {
         if (energyIsSource && meter.siteToSource != 0) {
@@ -52,7 +52,7 @@ export function getEmissions(meter: IdbUtilityMeter, energyUse: number, energyUn
                 locationEmissions = 0;
             }
         } else {
-            marketEmissionsOutputRate = getFuelEmissionsOutputRate(meter.source, meter.fuel, meter.phase);
+            marketEmissionsOutputRate = getFuelEmissionsOutputRate(meter.source, meter.fuel, meter.phase, customFuels);
             locationEmissions = convertedEnergyUse * marketEmissionsOutputRate;
             marketEmissions = convertedEnergyUse * marketEmissionsOutputRate;
         }
@@ -108,13 +108,13 @@ export function getEmissionsRate(subregion: string, year: number, co2Emissions: 
     return { marketRate: 0, locationRate: 0 };
 }
 
-export function getFuelEmissionsOutputRate(source: MeterSource, fuel: string, phase: MeterPhase): number {
+export function getFuelEmissionsOutputRate(source: MeterSource, fuel: string, phase: MeterPhase, customFuels: Array<IdbCustomFuel>): number {
     //emissions rates in kg/MMBtu
     let emissionsRate: number;
     if (source == 'Natural Gas') {
         emissionsRate = 53.1148;
     } else if (source == 'Other Fuels') {
-        let fuelTypeOptions: Array<FuelTypeOption> = getFuelTypeOptions(source, phase);
+        let fuelTypeOptions: Array<FuelTypeOption> = getFuelTypeOptions(source, phase, customFuels);
         let selectedFuel: FuelTypeOption = fuelTypeOptions.find(option => { return option.value == fuel })
         if (selectedFuel) {
             emissionsRate = selectedFuel.emissionsOutputRate;

@@ -64,6 +64,18 @@
                             </th>
                             <td>
                                 {{fuel.heatCapacityValue}}
+                                <ng-container *ngIf="fuel.phase == 'Gas'">
+                                    <span [innerHTML]="selectedAccount.energyUnit| settingsLabel"></span>/<span
+                                        [innerHTML]="selectedAccount.volumeGasUnit| settingsLabel"></span>
+                                </ng-container>
+                                <ng-container *ngIf="fuel.phase == 'Liquid'">
+                                    <span [innerHTML]="selectedAccount.energyUnit| settingsLabel"></span>/<span
+                                        [innerHTML]="selectedAccount.volumeLiquidUnit| settingsLabel"></span>
+                                </ng-container>
+                                <ng-container *ngIf="fuel.phase == 'Solid'"> <span
+                                        [innerHTML]="selectedAccount.energyUnit| settingsLabel"></span>/<span
+                                        [innerHTML]="selectedAccount.massUnit| settingsLabel"></span>
+                                </ng-container>
                             </td>
                         </tr>
                         <tr>
@@ -93,7 +105,7 @@
                                     CO<sub>2</sub> Factor
                                 </th>
                                 <td>
-                                    {{fuel.CO2}}
+                                    {{fuel.CO2}} kg CO<sub>2</sub>/MMBtu
                                 </td>
                             </tr>
                             <tr>
@@ -101,7 +113,7 @@
                                     CH<sub>4</sub> Factor
                                 </th>
                                 <td>
-                                    {{fuel.CH4}}
+                                    {{fuel.CH4}} g CO<sub>2</sub>/MMBtu
                                 </td>
                             </tr>
                             <tr>
@@ -109,7 +121,7 @@
                                     N<sub>2</sub>O Factor
                                 </th>
                                 <td>
-                                    {{fuel.N2O}}
+                                    {{fuel.N2O}} g N<sub>2</sub>O/MMBtu
                                 </td>
                             </tr>
                         </ng-container>
@@ -118,7 +130,7 @@
                                 Emissions Output Rate
                             </th>
                             <td>
-                                {{fuel.emissionsOutputRate}}
+                                {{fuel.emissionsOutputRate}} kg CO<sub>2</sub>e
                             </td>
                         </tr>
                     </tbody>

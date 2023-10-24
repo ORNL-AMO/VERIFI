@@ -1,8 +1,9 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
-import { IdbCustomFuel } from 'src/app/models/idb';
+import { IdbAccount, IdbCustomFuel } from 'src/app/models/idb';
 
 @Component({
   selector: 'app-custom-fuel-data-dashboard',
@@ -13,16 +14,24 @@ export class CustomFuelDataDashboardComponent {
 
   customFuels: Array<IdbCustomFuel>;
   customFuelsSub: Subscription;
-  constructor(private customFuelDbService: CustomFuelDbService, private router: Router) { }
+  selectedAccount: IdbAccount;
+  selectedAccountSub: Subscription;
+  constructor(private customFuelDbService: CustomFuelDbService, private router: Router,
+    private accountDbService: AccountdbService) { }
 
   ngOnInit(): void {
     this.customFuelsSub = this.customFuelDbService.accountCustomFuels.subscribe(val => {
       this.customFuels = val;
     });
+
+    this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(val => {
+      this.selectedAccount = val;
+    });
   }
 
   ngOnDestroy() {
     this.customFuelsSub.unsubscribe();
+    this.selectedAccountSub.unsubscribe();
   }
 
 

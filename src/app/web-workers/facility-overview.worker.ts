@@ -12,7 +12,7 @@ addEventListener('message', ({ data }) => {
         let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(data.meters, data.meterData, data.facility, true, { energyIsSource: data.energyIsSource, neededUnits: undefined });
         if (data.co2Emissions) {
             //set emissions values
-            calanderizedMeters = setEmissionsForCalanderizedMeters(calanderizedMeters, data.energyIsSource, [data.facility], data.co2Emissions);
+            calanderizedMeters = setEmissionsForCalanderizedMeters(calanderizedMeters, data.energyIsSource, [data.facility], data.co2Emissions, data.customFuels);
         }
         let dateRange: { endDate: Date, startDate: Date };
         if (!data.dateRange) {

@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
-import { IdbAccount, IdbAccountReport, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import { IdbAccount, IdbAccountReport, IdbCustomFuel, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { AccountReportsService } from '../account-reports.service';
 import { Router } from '@angular/router';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
@@ -12,6 +12,7 @@ import { BetterClimateReport } from 'src/app/calculations/carbon-calculations/be
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 import * as _ from 'lodash';
 import { BetterClimateReportSetup } from 'src/app/models/overview-report';
+import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
 
 @Component({
   selector: 'app-better-climate-report',
@@ -36,7 +37,8 @@ export class BetterClimateReportComponent {
     private facilityDbService: FacilitydbService,
     private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private eGridService: EGridService) { }
+    private eGridService: EGridService,
+    private customFuelDbService: CustomFuelDbService) { }
 
   ngOnInit(): void {
     this.printSub = this.accountReportsService.print.subscribe(print => {
@@ -45,7 +47,7 @@ export class BetterClimateReportComponent {
     this.selectedReport = this.accountReportDbService.selectedReport.getValue();
     if (!this.selectedReport) {
       this.router.navigateByUrl('/account/reports/dashboard');
-    }else{
+    } else {
       this.betterClimateReportSetup = this.selectedReport.betterClimateReportSetup;
     }
     this.account = this.accountDbService.selectedAccount.getValue();
@@ -67,6 +69,7 @@ export class BetterClimateReportComponent {
     let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
+    let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue()
     if (typeof Worker !== 'undefined') {
       this.worker = new Worker(new URL('src/app/web-workers/better-climate-report.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {
@@ -89,7 +92,8 @@ export class BetterClimateReportComponent {
         meterData: accountMeterData,
         co2Emissions: this.eGridService.co2Emissions,
         emissionsDisplay: this.selectedReport.betterClimateReportSetup.emissionsDisplay,
-        emissionsGoal: this.account.sustainabilityQuestions.greenhouseReductionPercent
+        emissionsGoal: this.account.sustainabilityQuestions.greenhouseReductionPercent,
+        customFuels: customFuels
       });
     } else {
       // Web Workers are not supported in this environment
@@ -102,7 +106,7 @@ export class BetterClimateReportComponent {
     if (numberOfYears > 3 && this.selectedReport.betterClimateReportSetup.skipIntermediateYears) {
       this.cellWidth = 25;
     } else {
-      this.cellWidth = (100 / (numberOfYears+2));
+      this.cellWidth = (100 / (numberOfYears + 2));
     }
   }
 

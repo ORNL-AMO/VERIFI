@@ -195,7 +195,7 @@ export class UploadDataService {
           }
           if (!meter.heatCapacity) {
             if (!isEnergyUnit) {
-              let fuelTypeOptions: Array<FuelTypeOption> = getFuelTypeOptions(meter.source, meter.phase);
+              let fuelTypeOptions: Array<FuelTypeOption> = getFuelTypeOptions(meter.source, meter.phase, []);
               let fuel: FuelTypeOption = fuelTypeOptions.find(option => { return option.value == meter.fuel });
               meter.heatCapacity = this.energyUseCalculationsService.getHeatingCapacity(meter.source, meter.startingUnit, meter.energyUnit, fuel);
             }
@@ -245,7 +245,7 @@ export class UploadDataService {
           if (meter.siteToSource == undefined) {
             let selectedFuelTypeOption: FuelTypeOption;
             if (meter.fuel != undefined) {
-              let fuelTypeOptions: Array<FuelTypeOption> = getFuelTypeOptions(meter.source, meter.phase);
+              let fuelTypeOptions: Array<FuelTypeOption> = getFuelTypeOptions(meter.source, meter.phase, []);
               selectedFuelTypeOption = fuelTypeOptions.find(option => { return option.value == meter.fuel });
             }
             let siteToSource: number = this.energyUseCalculationsService.getSiteToSource(meter.source, selectedFuelTypeOption, meter.agreementType);
@@ -360,7 +360,7 @@ export class UploadDataService {
   }
 
   getFuelEnum(fuel: string, source: MeterSource, phase: MeterPhase): string {
-    let fuelTypeOptions = getFuelTypeOptions(source, phase);
+    let fuelTypeOptions = getFuelTypeOptions(source, phase, []);
     let selectedEnergyOption: FuelTypeOption = fuelTypeOptions.find(option => { return option.value == fuel });
     if (selectedEnergyOption) {
       return selectedEnergyOption.value;

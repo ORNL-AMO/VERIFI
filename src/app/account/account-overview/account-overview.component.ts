@@ -3,12 +3,13 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountOverviewService } from './account-overview.service';
 import { Subscription } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { IdbAccount, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import { IdbAccount, IdbCustomFuel, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { Router } from '@angular/router';
 import * as _ from 'lodash';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
+import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
 
 @Component({
   selector: 'app-account-overview',
@@ -24,10 +25,12 @@ export class AccountOverviewComponent implements OnInit {
 
   dateRangeSub: Subscription;
   dateRange: { startDate: Date, endDate: Date };
+  customFuels: Array<IdbCustomFuel>;
   constructor(private accountDbService: AccountdbService, private accountOverviewService: AccountOverviewService,
     private facilityDbService: FacilitydbService, private router: Router, private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private eGridService: EGridService) { }
+    private eGridService: EGridService,
+    private customFuelDbService: CustomFuelDbService) { }
 
   ngOnInit(): void {
     this.accountSub = this.accountDbService.selectedAccount.subscribe(val => {
@@ -68,6 +71,7 @@ export class AccountOverviewComponent implements OnInit {
     let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
+    let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
     if (typeof Worker !== 'undefined') {
       this.worker = new Worker(new URL('src/app/web-workers/account-overview.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {
@@ -100,7 +104,8 @@ export class AccountOverviewComponent implements OnInit {
         account: this.account,
         energyIsSource: this.account.energyIsSource,
         inOverview: true,
-        co2Emissions: this.eGridService.co2Emissions
+        co2Emissions: this.eGridService.co2Emissions,
+        customFuels: customFuels
       });
 
 
