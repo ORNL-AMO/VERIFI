@@ -198,4 +198,22 @@ export class CustomFuelDataFormComponent {
     this.isFuelInUse = (fuelMeter != undefined);
   }
 
+  setRate(val: boolean) {
+    this.form.controls.directEmissionsRate.patchValue(val);
+    if (val == true) {
+      this.form.controls.emissionsOutputRate.enable();
+      this.form.controls.CO2.setValidators([]);
+      this.form.controls.CH4.setValidators([]);
+      this.form.controls.N2O.setValidators([]);
+    } else {
+      this.form.controls.emissionsOutputRate.disable();
+      this.form.controls.CO2.setValidators([Validators.required]);
+      this.form.controls.CH4.setValidators([Validators.required]);
+      this.form.controls.N2O.setValidators([Validators.required]);
+      this.setOutputRate();
+    }
+    this.form.controls.CO2.updateValueAndValidity();
+    this.form.controls.CH4.updateValueAndValidity();
+    this.form.controls.N2O.updateValueAndValidity();
+  }
 }

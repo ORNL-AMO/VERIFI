@@ -46,7 +46,7 @@
                 <!--heat capacity-->
                 <div class="col-3">
                     <label for="heatCapacityValue">Heat Capacity <span class="required">*</span> </label>
-                    <div class="input-group mb-3">
+                    <div class="input-group">
                         <input name="heatCapacityValue" id="heatCapacityValue" class="form-control" type="number"
                             formControlName="heatCapacityValue" onfocus="this.select();">
                         <span class="input-group-text">
@@ -76,7 +76,7 @@
                 <div class="col-3">
                     <label for="siteToSourceMultiplier">Site to Source Multiplier <span class="required">*</span>
                     </label>
-                    <div class="input-group mb-3">
+                    <div class="input-group">
                         <input name="siteToSourceMultiplier" id="siteToSourceMultiplier" class="form-control"
                             type="number" formControlName="siteToSourceMultiplier" onfocus="this.select();">
                     </div>
@@ -93,53 +93,64 @@
                     </div>
                 </div>
 
-
-                <div class="col-3">
-                    <label for="CO2">CO<sub>2</sub> Factor
-                    </label>
-                    <div class="input-group mb-3">
-                        <input name="CO2" id="CO2" class="form-control" type="number" formControlName="CO2"
-                            onfocus="this.select();" (input)="setOutputRate()">
-                        <span class="input-group-text">
-                            kg CO<sub>2</sub>/MMBtu
-                        </span>
+                <ng-container *ngIf="form.controls.directEmissionsRate.value == false">
+                    <div class="col-3">
+                        <label for="CO2">CO<sub>2</sub> Factor <span class="required">*</span>
+                        </label>
+                        <div class="input-group">
+                            <input name="CO2" id="CO2" class="form-control" type="number" formControlName="CO2"
+                                onfocus="this.select();" (input)="setOutputRate()">
+                            <span class="input-group-text">
+                                kg CO<sub>2</sub>/MMBtu
+                            </span>
+                        </div>
                     </div>
-                </div>
 
-                <div class="col-3">
-                    <label for="CH4">CH<sub>4</sub> Factor
-                    </label>
-                    <div class="input-group mb-3">
-                        <input name="CH4" id="CH4" class="form-control" type="number" formControlName="CH4"
-                            onfocus="this.select();" (input)="setOutputRate()">
-                        <span class="input-group-text">
-                            g CO<sub>2</sub>/MMBtu
-                        </span>
+                    <div class="col-3">
+                        <label for="CH4">CH<sub>4</sub> Factor <span class="required">*</span>
+                        </label>
+                        <div class="input-group">
+                            <input name="CH4" id="CH4" class="form-control" type="number" formControlName="CH4"
+                                onfocus="this.select();" (input)="setOutputRate()">
+                            <span class="input-group-text">
+                                g CO<sub>2</sub>/MMBtu
+                            </span>
+                        </div>
                     </div>
-                </div>
 
 
-                <div class="col-3">
-                    <label for="N2O">N<sub>2</sub>O Factor
-                    </label>
-                    <div class="input-group mb-3">
-                        <input name="N2O" id="N2O" class="form-control" type="number" formControlName="N2O"
-                            onfocus="this.select();" (input)="setOutputRate()">
-                        <span class="input-group-text">
-                            g N<sub>2</sub>O/MMBtu
-                        </span>
+                    <div class="col-3">
+                        <label for="N2O">N<sub>2</sub>O Factor <span class="required">*</span>
+                        </label>
+                        <div class="input-group">
+                            <input name="N2O" id="N2O" class="form-control" type="number" formControlName="N2O"
+                                onfocus="this.select();" (input)="setOutputRate()">
+                            <span class="input-group-text">
+                                g N<sub>2</sub>O/MMBtu
+                            </span>
+                        </div>
                     </div>
-                </div>
+                </ng-container>
 
                 <div class="col-3">
-                    <label for="emissionsOutputRate">Emissions Output Rate
+                    <label for="emissionsOutputRate">Emissions Output Rate <span class="required">*</span>
+
                     </label>
-                    <div class="input-group mb-3">
+                    <div class="input-group">
                         <input name="emissionsOutputRate" id="emissionsOutputRate" class="form-control" type="number"
                             formControlName="emissionsOutputRate" onfocus="this.select();">
                         <span class="input-group-text">
                             kg CO<sub>2</sub>e
                         </span>
+                    </div>
+                    <div class="text-right w-100">
+                        <ng-container *ngIf="form.controls.directEmissionsRate.value == false">
+                            <a class="float-right" (click)="setRate(true)">Set Rate</a>
+                        </ng-container>
+                        <ng-container *ngIf="form.controls.directEmissionsRate.value == true">
+                            <a class="float-right" (click)="setRate(false)">Calculate Rate</a>
+                        </ng-container>
+
                     </div>
                 </div>
             </div>
