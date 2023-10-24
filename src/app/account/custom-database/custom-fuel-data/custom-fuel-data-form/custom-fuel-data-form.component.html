@@ -1,5 +1,8 @@
 <div class="card">
     <div class="card-body">
+        <div *ngIf="isFuelInUse" class="alert alert-warning text-center">
+            WARNING: This fuel is used by one or more meters. Altering this fuel will alter the corresponding meters.
+        </div>
         <form [formGroup]="form">
             <div class="row">
                 <div class="col-6">

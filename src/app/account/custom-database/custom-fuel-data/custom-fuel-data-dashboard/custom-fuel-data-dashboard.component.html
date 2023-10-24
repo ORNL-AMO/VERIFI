@@ -30,7 +30,7 @@
         </div>
     </div>
 </div>
-
+<hr>
 <div class="row mt-2">
 
     <div class="col-4" *ngFor="let fuel of customFuels">
@@ -135,73 +135,26 @@
                         </tr>
                     </tbody>
                 </table>
-
-
-
-                <!--         <table class="table table-hover" *ngIf="customEmissionsItem.locationEmissionRates.length != 0">
-                    <thead>
-                        <tr>
-                            <th colspan="2">
-                                Location Emissions Rates
-                            </th>
-                        </tr>
-                        <tr>
-                            <th class="w-50">
-                                Year
-                            </th>
-                            <th class="w-50">
-                                Emissions Rate <br>(tonne CO<sub>2</sub>/kWh)
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr
-                            *ngFor="let emissionRate of customEmissionsItem.locationEmissionRates  | orderBy: 'year': 'asc'">
-                            <td>
-                                {{emissionRate.year}}
-                            </td>
-                            <td>
-                                {{emissionRate.co2Emissions | number}}
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                <div class="alert alert-warning" *ngIf="customEmissionsItem.locationEmissionRates.length == 0">
-                    No Location Emissions Rates Found For Subregion
-                </div>
-                <hr>
-                <table class="table" *ngIf="customEmissionsItem.residualEmissionRates.length != 0">
-                    <thead>
-                        <tr>
-                            <th colspan="2">
-                                Residual Emissions Rates
-                            </th>
-                        </tr>
-                        <tr>
-                            <th class="w-50">
-                                Year
-                            </th>
-                            <th class="w-50">
-                                Emissions Rate <br>(tonne CO<sub>2</sub>/kWh)
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr
-                            *ngFor="let emissionRate of customEmissionsItem.residualEmissionRates  | orderBy: 'year': 'asc'">
-                            <td>
-                                {{emissionRate.year}}
-                            </td>
-                            <td>
-                                {{emissionRate.co2Emissions | number}}
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                <div class="alert alert-warning" *ngIf="customEmissionsItem.residualEmissionRates.length == 0">
-                    No Residual Emissions Rates Found For Subregion
-                </div>-->
             </div>
         </div>
+    </div>
+</div>
+
+<div [ngClass]="{'windowOverlay': itemToDelete}"></div>
+<div class="popup" [class.open]="itemToDelete">
+    <div class="popup-header">Delete Fuel {{itemToDelete?.value}}?
+        <button class="item-right" (click)="cancelDelete()">x</button>
+    </div>
+    <div class="popup-body">
+        <div *ngIf="!deleteFuelInUse" class="alert alert-danger">
+            Are you sure you want to delete this custom fuel? This cannot be undone.
+        </div>
+        <div *ngIf="deleteFuelInUse" class="alert alert-danger">
+            One or more meters are using this fuel. This fuel cannot be deleted while it is in use. 
+        </div>
+    </div>
+    <div class="popup-footer text-end">
+        <button class="btn btn-secondary" (click)="cancelDelete()">Cancel</button>
+        <button class="btn btn-danger" [disabled]="deleteFuelInUse" (click)="confirmDelete()">Confirm Delete</button>
     </div>
 </div>

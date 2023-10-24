@@ -53,7 +53,6 @@ export class EditMeterFormComponent implements OnInit {
   waterDischargeTypes: Array<WaterDischargeType> = WaterDischargeTypes;
   displayWaterIntakeTypes: boolean;
   displayWaterDischargeTypes: boolean;
-  customFuels: Array<IdbCustomFuel>;
   constructor(
     private energyUnitsHelperService: EnergyUnitsHelperService, private energyUseCalculationsService: EnergyUseCalculationsService,
     private editMeterFormService: EditMeterFormService, private cd: ChangeDetectorRef,
@@ -61,7 +60,6 @@ export class EditMeterFormComponent implements OnInit {
 
   ngOnInit(): void {
     // this.testFuelTypeOptions();
-    this.customFuels = this.customFuelDbService.accountCustomFuels.getValue();
   }
 
   ngOnChanges() {
@@ -77,7 +75,6 @@ export class EditMeterFormComponent implements OnInit {
     this.checkShowHeatCapacity();
     this.checkShowSiteToSource();
     this.setDisplayEmissionsValues();
-    console.log('changed')
   }
 
   changeSource() {
@@ -215,7 +212,8 @@ export class EditMeterFormComponent implements OnInit {
   }
 
   setFuelTypeOptions(onChange: boolean) {
-    this.fuelTypeOptions = getFuelTypeOptions(this.meterForm.controls.source.value, this.meterForm.controls.phase.value, this.customFuels);
+    let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
+    this.fuelTypeOptions = getFuelTypeOptions(this.meterForm.controls.source.value, this.meterForm.controls.phase.value, customFuels);
     let selectedEnergyOption: FuelTypeOption = this.fuelTypeOptions.find(option => { return option.value == this.meterForm.controls.fuel.value });
     if (!selectedEnergyOption && this.fuelTypeOptions.length != 0 && !onChange) {
       this.meterForm.controls.fuel.patchValue(this.fuelTypeOptions[0].value);

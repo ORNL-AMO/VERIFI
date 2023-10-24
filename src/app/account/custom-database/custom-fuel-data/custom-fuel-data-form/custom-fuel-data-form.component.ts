@@ -5,8 +5,9 @@ import { firstValueFrom } from 'rxjs';
 import { FuelTypeOption, GasOptions, LiquidOptions, OtherEnergyOptions, SolidOptions } from 'src/app/facility/utility-data/energy-consumption/energy-source/edit-meter-form/editMeterOptions';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
+import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { MeterPhase } from 'src/app/models/constantsAndTypes';
-import { IdbAccount, IdbCustomFuel } from 'src/app/models/idb';
+import { IdbAccount, IdbCustomFuel, IdbUtilityMeter } from 'src/app/models/idb';
 
 @Component({
   selector: 'app-custom-fuel-data-form',
@@ -25,10 +26,12 @@ export class CustomFuelDataFormComponent {
   selectedAccount: IdbAccount;
   form: FormGroup;
   displayFuelModal: boolean = false;
+  isFuelInUse: boolean = false;
   constructor(private router: Router, private customFuelDbService: CustomFuelDbService,
     private activatedRoute: ActivatedRoute,
     private accountDbService: AccountdbService,
-    private formBuilder: FormBuilder) {
+    private formBuilder: FormBuilder,
+    private utilityMeterDbService: UtilityMeterdbService) {
 
   }
 
@@ -45,6 +48,7 @@ export class CustomFuelDataFormComponent {
         let elementId: string = params['id'];
         let selectedItem: IdbCustomFuel = this.accountCustomFuels.find(item => { return item.guid == elementId });
         this.editCustomFuel = JSON.parse(JSON.stringify(selectedItem));
+        this.setIsFuelInUse();
         this.setForm(this.editCustomFuel);
         this.previousValue = selectedItem.value;
         this.checkInvalid();
@@ -107,6 +111,23 @@ export class CustomFuelDataFormComponent {
     if (this.isAdd) {
       await firstValueFrom(this.customFuelDbService.addWithObservable(this.editCustomFuel));
     } else {
+      if (this.isFuelInUse && this.editCustomFuel.value != this.previousValue) {
+        //update meters
+        let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+        let needsUpdate: boolean = false;
+        for (let i = 0; i < accountMeters.length; i++) {
+          if (accountMeters[i].fuel == this.previousValue) {
+            needsUpdate = true;
+            accountMeters[i].fuel = this.editCustomFuel.value;
+            await firstValueFrom(this.utilityMeterDbService.updateWithObservable(accountMeters[i]));
+          }
+        }
+        let allMeters: Array<IdbUtilityMeter> = await firstValueFrom(this.utilityMeterDbService.getAll());
+        let accountMetersUpdates: Array<IdbUtilityMeter> = allMeters.filter(meter => {
+          return meter.accountId == this.selectedAccount.guid;
+        });
+        this.utilityMeterDbService.accountMeters.next(accountMetersUpdates);
+      }
       await firstValueFrom(this.customFuelDbService.updateWithObservable(this.editCustomFuel));
     }
     let allCustomFuels: Array<IdbCustomFuel> = await firstValueFrom(this.customFuelDbService.getAll());
@@ -169,6 +190,12 @@ export class CustomFuelDataFormComponent {
       this.form.controls.fuelName.patchValue(selectedOption.option.value + ' (Modified)');
       this.form.controls.emissionsOutputRate.patchValue(selectedOption.option.emissionsOutputRate);
     }
+  }
+
+  setIsFuelInUse() {
+    let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+    let fuelMeter: IdbUtilityMeter = accountMeters.find(meter => { return meter.fuel == this.editCustomFuel.value });
+    this.isFuelInUse = (fuelMeter != undefined);
   }
 
 }
