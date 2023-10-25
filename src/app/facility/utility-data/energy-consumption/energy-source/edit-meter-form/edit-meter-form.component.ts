@@ -2,8 +2,7 @@ import { ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
 import { FormGroup, ValidatorFn } from '@angular/forms';
 import { IdbCustomFuel, IdbFacility } from 'src/app/models/idb';
 import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
-import { EnergyUseCalculationsService } from 'src/app/shared/helper-services/energy-use-calculations.service';
-import { getIsEnergyMeter } from 'src/app/shared/sharedHelperFuntions';
+import { getHeatingCapacity, getIsEnergyMeter, getSiteToSource } from 'src/app/shared/sharedHelperFuntions';
 import { EnergyUnitOptions, UnitOption } from 'src/app/shared/unitOptions';
 import { EditMeterFormService } from './edit-meter-form.service';
 import { AgreementType, AgreementTypes, FuelTypeOption, GasOptions, LiquidOptions, OtherEnergyOptions, ScopeOption, ScopeOptions, SolidOptions, SourceOptions, getFuelTypeOptions } from './editMeterOptions';
@@ -54,7 +53,7 @@ export class EditMeterFormComponent implements OnInit {
   displayWaterIntakeTypes: boolean;
   displayWaterDischargeTypes: boolean;
   constructor(
-    private energyUnitsHelperService: EnergyUnitsHelperService, private energyUseCalculationsService: EnergyUseCalculationsService,
+    private energyUnitsHelperService: EnergyUnitsHelperService,
     private editMeterFormService: EditMeterFormService, private cd: ChangeDetectorRef,
     private customFuelDbService: CustomFuelDbService) { }
 
@@ -250,8 +249,10 @@ export class EditMeterFormComponent implements OnInit {
 
   setHeatCapacity() {
     if (this.displayHeatCapacity) {
+      console.log(this.fuelTypeOptions);
       let selectedEnergyOption: FuelTypeOption = this.fuelTypeOptions.find(option => { return option.value == this.meterForm.controls.fuel.value });
-      let heatCapacity: number = this.energyUseCalculationsService.getHeatingCapacity(this.meterForm.controls.source.value, this.meterForm.controls.startingUnit.value, this.meterForm.controls.energyUnit.value, selectedEnergyOption)
+      console.log(selectedEnergyOption);
+      let heatCapacity: number = getHeatingCapacity(this.meterForm.controls.source.value, this.meterForm.controls.startingUnit.value, this.meterForm.controls.energyUnit.value, selectedEnergyOption)
       this.meterForm.controls.heatCapacity.patchValue(heatCapacity);
     }
   }
@@ -259,7 +260,7 @@ export class EditMeterFormComponent implements OnInit {
   setSiteToSource() {
     if (this.displaySiteToSource) {
       let selectedFuelTypeOption: FuelTypeOption = this.fuelTypeOptions.find(option => { return option.value == this.meterForm.controls.fuel.value });
-      let siteToSource: number = this.energyUseCalculationsService.getSiteToSource(this.meterForm.controls.source.value, selectedFuelTypeOption, this.meterForm.controls.agreementType.value);
+      let siteToSource: number = getSiteToSource(this.meterForm.controls.source.value, selectedFuelTypeOption, this.meterForm.controls.agreementType.value);
       this.meterForm.controls.siteToSource.patchValue(siteToSource);
     } else {
       this.meterForm.controls.siteToSource.patchValue(1);

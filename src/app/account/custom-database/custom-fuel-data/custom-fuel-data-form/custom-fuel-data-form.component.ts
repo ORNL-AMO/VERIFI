@@ -1,13 +1,15 @@
 import { Component } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
+import { ConvertValue } from 'src/app/calculations/conversions/convertValue';
 import { FuelTypeOption, GasOptions, LiquidOptions, OtherEnergyOptions, SolidOptions } from 'src/app/facility/utility-data/energy-consumption/energy-source/edit-meter-form/editMeterOptions';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { MeterPhase } from 'src/app/models/constantsAndTypes';
 import { IdbAccount, IdbCustomFuel, IdbUtilityMeter } from 'src/app/models/idb';
+import { convertHeatCapacity } from 'src/app/shared/sharedHelperFuntions';
 
 @Component({
   selector: 'app-custom-fuel-data-form',
@@ -27,6 +29,7 @@ export class CustomFuelDataFormComponent {
   form: FormGroup;
   displayFuelModal: boolean = false;
   isFuelInUse: boolean = false;
+
   constructor(private router: Router, private customFuelDbService: CustomFuelDbService,
     private activatedRoute: ActivatedRoute,
     private accountDbService: AccountdbService,
@@ -42,6 +45,7 @@ export class CustomFuelDataFormComponent {
     this.selectedAccount = this.accountDbService.selectedAccount.getValue();
     if (this.isAdd) {
       this.editCustomFuel = this.customFuelDbService.getNewAccountCustomFuel(this.selectedAccount);
+      this.setUnits();
       this.setForm(this.editCustomFuel);
     } else {
       this.activatedRoute.params.subscribe(params => {
@@ -102,12 +106,20 @@ export class CustomFuelDataFormComponent {
     this.editCustomFuel.heatCapacityValue = this.form.controls.heatCapacityValue.value;
     this.editCustomFuel.siteToSourceMultiplier = this.form.controls.siteToSourceMultiplier.value;
     this.editCustomFuel.isBiofuel = this.form.controls.isBiofuel.value;
+    //TODO: Convert values, fuels saved in MMBtu
     this.editCustomFuel.CO2 = this.form.controls.CO2.value;
     this.editCustomFuel.CH4 = this.form.controls.CH4.value;
     this.editCustomFuel.N2O = this.form.controls.N2O.value;
+    if (this.selectedAccount.energyUnit != 'MMBtu') {
+      let conversionHelper: number = new ConvertValue(1, 'MMBtu', this.selectedAccount.energyUnit).convertedValue;
+      this.editCustomFuel.CO2 = this.editCustomFuel.CO2 / conversionHelper;
+      this.editCustomFuel.CH4 = this.editCustomFuel.CH4 / conversionHelper;
+      this.editCustomFuel.N2O = this.editCustomFuel.N2O / conversionHelper;
+    }
+
+
     this.editCustomFuel.emissionsOutputRate = this.form.controls.emissionsOutputRate.value;
     this.editCustomFuel.directEmissionsRate = this.form.controls.directEmissionsRate.value;
-
     if (this.isAdd) {
       await firstValueFrom(this.customFuelDbService.addWithObservable(this.editCustomFuel));
     } else {
@@ -141,15 +153,20 @@ export class CustomFuelDataFormComponent {
   }
 
   setForm(editItem: IdbCustomFuel) {
+    let chemicalValidators: Array<ValidatorFn> = [];
+    if (editItem.directEmissionsRate == false) {
+      chemicalValidators = [Validators.required]
+    }
+
     this.form = this.formBuilder.group({
       'fuelName': [editItem.value, [Validators.required]],
       'phase': [editItem.phase, [Validators.required]],
       'heatCapacityValue': [editItem.heatCapacityValue, [Validators.required]],
       'siteToSourceMultiplier': [editItem.siteToSourceMultiplier, [Validators.required]],
       'isBiofuel': [editItem.isBiofuel, [Validators.required]],
-      'CO2': [editItem.CO2, [Validators.required]],
-      'CH4': [editItem.CH4, [Validators.required]],
-      'N2O': [editItem.N2O, [Validators.required]],
+      'CO2': [editItem.CO2, chemicalValidators],
+      'CH4': [editItem.CH4, chemicalValidators],
+      'N2O': [editItem.N2O, chemicalValidators],
       'emissionsOutputRate': [editItem.emissionsOutputRate, [Validators.required]],
       'directEmissionsRate': [editItem.directEmissionsRate]
     });
@@ -168,6 +185,12 @@ export class CustomFuelDataFormComponent {
     let CO2: number = this.form.controls.CO2.value;
     let CH4: number = this.form.controls.CH4.value;
     let N2O: number = this.form.controls.N2O.value;
+    if (this.selectedAccount.energyUnit != 'MMBtu') {
+      let conversionHelper: number = new ConvertValue(1, 'MMBtu', this.selectedAccount.energyUnit).convertedValue;
+      CO2 = CO2 / conversionHelper;
+      CH4 = CH4 / conversionHelper;
+      N2O = N2O / conversionHelper;
+    }
     let outputRate: number = CO2 + (CH4 * (25 / 1000)) + (N2O * (298 / 1000));
     this.form.controls.emissionsOutputRate.patchValue(outputRate);
   }
@@ -180,10 +203,20 @@ export class CustomFuelDataFormComponent {
     this.displayFuelModal = false;
     if (selectedOption) {
       this.form.controls.phase.patchValue(selectedOption.phase);
-      this.form.controls.CO2.patchValue(selectedOption.option.CO2);
-      this.form.controls.CH4.patchValue(selectedOption.option.CH4);
-      this.form.controls.N2O.patchValue(selectedOption.option.N2O);
-      this.form.controls.heatCapacityValue.patchValue(selectedOption.option.heatCapacityValue);
+      let CO2: number = selectedOption.option.CO2;
+      let CH4: number = selectedOption.option.CH4;
+      let N2O: number = selectedOption.option.N2O;
+      let heatCapacityValue: number = convertHeatCapacity(selectedOption.option, this.editCustomFuel.startingUnit, this.selectedAccount.energyUnit);
+      if (this.selectedAccount.energyUnit != 'MMBtu') {
+        let conversionHelper: number = new ConvertValue(1, 'MMBtu', this.selectedAccount.energyUnit).convertedValue;
+        CO2 = CO2 / conversionHelper;
+        CH4 = CH4 / conversionHelper;
+        N2O = N2O / conversionHelper;
+      }
+      this.form.controls.CO2.patchValue(CO2);
+      this.form.controls.CH4.patchValue(CH4);
+      this.form.controls.N2O.patchValue(N2O);
+      this.form.controls.heatCapacityValue.patchValue(heatCapacityValue);
       this.form.controls.siteToSourceMultiplier.patchValue(selectedOption.option.siteToSourceMultiplier);
       this.form.controls.isBiofuel.patchValue(selectedOption.option.isBiofuel || false);
       this.form.controls.directEmissionsRate.patchValue(false);
@@ -205,6 +238,9 @@ export class CustomFuelDataFormComponent {
       this.form.controls.CO2.setValidators([]);
       this.form.controls.CH4.setValidators([]);
       this.form.controls.N2O.setValidators([]);
+      this.form.controls.CO2.patchValue(0);
+      this.form.controls.CH4.patchValue(0);
+      this.form.controls.N2O.patchValue(0);
     } else {
       this.form.controls.emissionsOutputRate.disable();
       this.form.controls.CO2.setValidators([Validators.required]);
@@ -215,5 +251,15 @@ export class CustomFuelDataFormComponent {
     this.form.controls.CO2.updateValueAndValidity();
     this.form.controls.CH4.updateValueAndValidity();
     this.form.controls.N2O.updateValueAndValidity();
+  }
+
+  setUnits() {
+    if (this.form.controls.phase.value == 'Gas') {
+      this.editCustomFuel.startingUnit = this.selectedAccount.volumeGasUnit;
+    } else if (this.form.controls.phase.value == 'Liquid') {
+      this.editCustomFuel.startingUnit = this.selectedAccount.volumeLiquidUnit;
+    } else if (this.form.controls.phase.value == 'Solid') {
+      this.editCustomFuel.startingUnit = this.selectedAccount.massUnit;
+    }
   }
 }

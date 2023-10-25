@@ -11,14 +11,13 @@ import { PredictordbService } from '../indexedDB/predictors-db.service';
 import { UtilityMeterDatadbService } from '../indexedDB/utilityMeterData-db.service';
 import { EnergyUnitsHelperService } from '../shared/helper-services/energy-units-helper.service';
 import { EditMeterFormService } from '../facility/utility-data/energy-consumption/energy-source/edit-meter-form/edit-meter-form.service';
-import { EnergyUseCalculationsService } from '../shared/helper-services/energy-use-calculations.service';
 import { UtilityMeterGroupdbService } from '../indexedDB/utilityMeterGroup-db.service';
 import { UnitOption } from '../shared/unitOptions';
 import { Countries, Country } from '../shared/form-data/countries';
 import { EGridService } from '../shared/helper-services/e-grid.service';
 import * as _ from 'lodash';
 import { State, States } from '../shared/form-data/states';
-import { getIsEnergyMeter, getIsEnergyUnit } from '../shared/sharedHelperFuntions';
+import { getHeatingCapacity, getIsEnergyMeter, getIsEnergyUnit, getSiteToSource } from '../shared/sharedHelperFuntions';
 import { MeterPhase, MeterSource } from '../models/constantsAndTypes';
 import { SubRegionData } from '../models/eGridEmissions';
 import { getMeterDataCopy } from '../calculations/conversions/convertMeterData';
@@ -37,7 +36,6 @@ export class UploadDataService {
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private energyUnitsHelperService: EnergyUnitsHelperService,
     private editMeterFormService: EditMeterFormService,
-    private energyUseCalculationsService: EnergyUseCalculationsService,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
     private eGridService: EGridService) {
     this.allFilesSet = new BehaviorSubject<boolean>(false);
@@ -197,7 +195,7 @@ export class UploadDataService {
             if (!isEnergyUnit) {
               let fuelTypeOptions: Array<FuelTypeOption> = getFuelTypeOptions(meter.source, meter.phase, []);
               let fuel: FuelTypeOption = fuelTypeOptions.find(option => { return option.value == meter.fuel });
-              meter.heatCapacity = this.energyUseCalculationsService.getHeatingCapacity(meter.source, meter.startingUnit, meter.energyUnit, fuel);
+              meter.heatCapacity = getHeatingCapacity(meter.source, meter.startingUnit, meter.energyUnit, fuel);
             }
           }
           // meter.heatCapacity = meterData['Heat Capacity'];
@@ -248,7 +246,7 @@ export class UploadDataService {
               let fuelTypeOptions: Array<FuelTypeOption> = getFuelTypeOptions(meter.source, meter.phase, []);
               selectedFuelTypeOption = fuelTypeOptions.find(option => { return option.value == meter.fuel });
             }
-            let siteToSource: number = this.energyUseCalculationsService.getSiteToSource(meter.source, selectedFuelTypeOption, meter.agreementType);
+            let siteToSource: number = getSiteToSource(meter.source, selectedFuelTypeOption, meter.agreementType);
             meter.siteToSource = siteToSource;
           }
           meter.meterReadingDataApplication = this.getMeterReadingDataApplication(meterData['Calendarize Data?']);
@@ -654,11 +652,11 @@ export class UploadDataService {
         }
         let showHeatCapacity: boolean = this.editMeterFormService.checkShowHeatCapacity(newMeter.source, newMeter.startingUnit);
         if (showHeatCapacity) {
-          newMeter.heatCapacity = this.energyUseCalculationsService.getHeatingCapacity(newMeter.source, newMeter.startingUnit, newMeter.energyUnit);
+          newMeter.heatCapacity = getHeatingCapacity(newMeter.source, newMeter.startingUnit, newMeter.energyUnit);
         }
         let showSiteToSource: boolean = this.editMeterFormService.checkShowSiteToSource(newMeter.source, newMeter.startingUnit, newMeter.includeInEnergy);
         if (showSiteToSource) {
-          newMeter.siteToSource = this.energyUseCalculationsService.getSiteToSource(newMeter.source);
+          newMeter.siteToSource = getSiteToSource(newMeter.source);
         }
       }
     }

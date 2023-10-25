@@ -42,7 +42,7 @@
                     </td>
                     <td>
                         <ng-container *ngIf="option.heatCapacityValue">
-                            {{option.heatCapacityValue}}
+                            {{option.heatCapacityValue| emissionsDisplay:selectedAccount.energyUnit:'HHV'}}
                         </ng-container>
                         <ng-container *ngIf="!option.heatCapacityValue">
                             &mdash;
@@ -50,7 +50,7 @@
                     </td>
                     <td>
                         <ng-container *ngIf="option.CO2">
-                            {{option.CO2}}
+                            {{option.CO2| emissionsDisplay:selectedAccount.energyUnit:'CO2'}}
                         </ng-container>
                         <ng-container *ngIf="!option.CO2">
                             &mdash;
@@ -58,7 +58,7 @@
                     </td>
                     <td>
                         <ng-container *ngIf="option.CH4">
-                            {{option.CH4}}
+                            {{option.CH4| emissionsDisplay:selectedAccount.energyUnit:'CH4'}}
                         </ng-container>
                         <ng-container *ngIf="!option.CH4">
                             &mdash;
@@ -66,7 +66,7 @@
                     </td>
                     <td>
                         <ng-container *ngIf="option.N2O">
-                            {{option.N2O}}
+                            {{option.N2O| emissionsDisplay:selectedAccount.energyUnit:'N2O'}}
                         </ng-container>
                         <ng-container *ngIf="!option.N2O">
                             &mdash;
@@ -92,7 +92,7 @@
                     </td>
                     <td>
                         <ng-container *ngIf="option.heatCapacityValue">
-                            {{option.heatCapacityValue}}
+                            {{option.heatCapacityValue| emissionsDisplay:selectedAccount.energyUnit:'HHV'}}
                         </ng-container>
                         <ng-container *ngIf="!option.heatCapacityValue">
                             &mdash;
@@ -100,7 +100,7 @@
                     </td>
                     <td>
                         <ng-container *ngIf="option.CO2">
-                            {{option.CO2}}
+                            {{option.CO2| emissionsDisplay:selectedAccount.energyUnit:'CO2'}}
                         </ng-container>
                         <ng-container *ngIf="!option.CO2">
                             &mdash;
@@ -108,7 +108,7 @@
                     </td>
                     <td>
                         <ng-container *ngIf="option.CH4">
-                            {{option.CH4}}
+                            {{option.CH4| emissionsDisplay:selectedAccount.energyUnit:'CH4'}}
                         </ng-container>
                         <ng-container *ngIf="!option.CH4">
                             &mdash;
@@ -116,7 +116,7 @@
                     </td>
                     <td>
                         <ng-container *ngIf="option.N2O">
-                            {{option.N2O}}
+                            {{option.N2O| emissionsDisplay:selectedAccount.energyUnit:'N2O'}}
                         </ng-container>
                         <ng-container *ngIf="!option.N2O">
                             &mdash;
@@ -142,7 +142,7 @@
                     </td>
                     <td>
                         <ng-container *ngIf="option.heatCapacityValue">
-                            {{option.heatCapacityValue}}
+                            {{option.heatCapacityValue| emissionsDisplay:selectedAccount.energyUnit:'HHV'}}
                         </ng-container>
                         <ng-container *ngIf="!option.heatCapacityValue">
                             &mdash;
@@ -150,7 +150,7 @@
                     </td>
                     <td>
                         <ng-container *ngIf="option.CO2">
-                            {{option.CO2}}
+                            {{option.CO2| emissionsDisplay:selectedAccount.energyUnit:'CO2'}}
                         </ng-container>
                         <ng-container *ngIf="!option.CO2">
                             &mdash;
@@ -158,7 +158,7 @@
                     </td>
                     <td>
                         <ng-container *ngIf="option.CH4">
-                            {{option.CH4}}
+                            {{option.CH4| emissionsDisplay:selectedAccount.energyUnit:'CH4'}}
                         </ng-container>
                         <ng-container *ngIf="!option.CH4">
                             &mdash;
@@ -166,7 +166,7 @@
                     </td>
                     <td>
                         <ng-container *ngIf="option.N2O">
-                            {{option.N2O}}
+                            {{option.N2O| emissionsDisplay:selectedAccount.energyUnit:'N2O'}}
                         </ng-container>
                         <ng-container *ngIf="!option.N2O">
                             &mdash;

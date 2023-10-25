@@ -36,7 +36,8 @@
                 <div class="col-3">
                     <label for="phase">Phase <span class="required">*</span> </label>
                     <div class="mb-3">
-                        <select name="phase" class="form-select" id="phase" type="text" formControlName="phase">
+                        <select name="phase" class="form-select" id="phase" type="text" formControlName="phase"
+                            (change)="setUnits()">
                             <option [ngValue]="'Solid'">Solid</option>
                             <option [ngValue]="'Liquid'">Liquid</option>
                             <option [ngValue]="'Gas'">Gas</option>
@@ -50,18 +51,8 @@
                         <input name="heatCapacityValue" id="heatCapacityValue" class="form-control" type="number"
                             formControlName="heatCapacityValue" onfocus="this.select();">
                         <span class="input-group-text">
-                            <ng-container *ngIf="form.controls.phase.value == 'Gas'">
-                                <span [innerHTML]="selectedAccount.energyUnit| settingsLabel"></span>/<span
-                                    [innerHTML]="selectedAccount.volumeGasUnit| settingsLabel"></span>
-                            </ng-container>
-                            <ng-container *ngIf="form.controls.phase.value == 'Liquid'">
-                                <span [innerHTML]="selectedAccount.energyUnit| settingsLabel"></span>/<span
-                                    [innerHTML]="selectedAccount.volumeLiquidUnit| settingsLabel"></span>
-                            </ng-container>
-                            <ng-container *ngIf="form.controls.phase.value == 'Solid'">
-                                <span [innerHTML]="selectedAccount.energyUnit| settingsLabel"></span>/<span
-                                    [innerHTML]="selectedAccount.massUnit| settingsLabel"></span>
-                            </ng-container>
+                            <span [innerHTML]="selectedAccount.energyUnit| settingsLabel"></span>/<span
+                                [innerHTML]="editCustomFuel.startingUnit"></span>
                         </span>
                     </div>
                     <!-- <div class="alert-danger alert" *ngIf="meterForm.get('heatCapacity').hasError('required')">Heat
@@ -101,7 +92,7 @@
                             <input name="CO2" id="CO2" class="form-control" type="number" formControlName="CO2"
                                 onfocus="this.select();" (input)="setOutputRate()">
                             <span class="input-group-text">
-                                kg CO<sub>2</sub>/MMBtu
+                                kg CO<sub>2</sub>/<span [innerHTML]="selectedAccount.energyUnit| settingsLabel"></span>
                             </span>
                         </div>
                     </div>
@@ -113,7 +104,7 @@
                             <input name="CH4" id="CH4" class="form-control" type="number" formControlName="CH4"
                                 onfocus="this.select();" (input)="setOutputRate()">
                             <span class="input-group-text">
-                                g CO<sub>2</sub>/MMBtu
+                                g CO<sub>2</sub>/<span [innerHTML]="selectedAccount.energyUnit| settingsLabel"></span>
                             </span>
                         </div>
                     </div>
@@ -126,7 +117,7 @@
                             <input name="N2O" id="N2O" class="form-control" type="number" formControlName="N2O"
                                 onfocus="this.select();" (input)="setOutputRate()">
                             <span class="input-group-text">
-                                g N<sub>2</sub>O/MMBtu
+                                g N<sub>2</sub>O/<span [innerHTML]="selectedAccount.energyUnit| settingsLabel"></span>
                             </span>
                         </div>
                     </div>

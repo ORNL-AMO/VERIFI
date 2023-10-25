@@ -186,7 +186,9 @@
                                     </td>
                                     <td>
                                         <ng-container *ngIf="selectedFuelTypeOption.CO2">
-                                            {{selectedFuelTypeOption.CO2}} kg CO<sub>2</sub>/MMBtu
+                                            {{selectedFuelTypeOption.CO2|
+                                            emissionsDisplay:meterForm.controls.energyUnit.value:'CO2'}} kg
+                                            CO<sub>2</sub>/{{meterForm.controls.energyUnit.value}}
                                         </ng-container>
                                         <ng-container *ngIf="!selectedFuelTypeOption.CO2">
                                             &mdash;
@@ -199,11 +201,13 @@
                                     </td>
                                     <td>
                                         <ng-container *ngIf="selectedFuelTypeOption.CH4">
-                                            {{selectedFuelTypeOption.CH4}} g CH<sub>4</sub>/MMBtu
+                                            {{selectedFuelTypeOption.CH4|
+                                            emissionsDisplay:meterForm.controls.energyUnit.value:'N2O'}} g
+                                            CH<sub>4</sub>/{{meterForm.controls.energyUnit.value}}
                                         </ng-container>
                                         <ng-container *ngIf="!selectedFuelTypeOption.CH4">
                                             &mdash;
-                                        </ng-container>                                        
+                                        </ng-container>
                                     </td>
                                 </tr>
                                 <tr>
@@ -212,11 +216,13 @@
                                     </td>
                                     <td>
                                         <ng-container *ngIf="selectedFuelTypeOption.N2O">
-                                            {{selectedFuelTypeOption.N2O}} g N<sub>2</sub>O/MMBtu
+                                            {{selectedFuelTypeOption.N2O|
+                                            emissionsDisplay:meterForm.controls.energyUnit.value:'N2O'}} g
+                                            N<sub>2</sub>O/{{meterForm.controls.energyUnit.value}}
                                         </ng-container>
                                         <ng-container *ngIf="!selectedFuelTypeOption.N2O">
                                             &mdash;
-                                        </ng-container>          
+                                        </ng-container>
                                     </td>
                                 </tr>
                                 <tr>
@@ -229,7 +235,7 @@
                                         </ng-container>
                                         <ng-container *ngIf="!selectedFuelTypeOption.emissionsOutputRate">
                                             &mdash;
-                                        </ng-container>       
+                                        </ng-container>
                                     </td>
 
                                 </tr>
