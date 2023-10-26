@@ -45,8 +45,8 @@ export class CustomFuelDataFormComponent {
     this.selectedAccount = this.accountDbService.selectedAccount.getValue();
     if (this.isAdd) {
       this.editCustomFuel = this.customFuelDbService.getNewAccountCustomFuel(this.selectedAccount);
-      this.setUnits();
       this.setForm(this.editCustomFuel);
+      this.setUnits();
     } else {
       this.activatedRoute.params.subscribe(params => {
         let elementId: string = params['id'];
