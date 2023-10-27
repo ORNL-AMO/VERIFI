@@ -10,5 +10,6 @@ jobs:
     uses: ./.github/workflows/web.yml
 
   electron:
-    if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
+    # Use below `if` when release stage is reintegrated
+    # if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
     uses: ./.github/workflows/electron.yml
