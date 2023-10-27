@@ -113,22 +113,25 @@ jobs:
             !/__w/VERIFI/output/verifi/builder-debug.yml
             !/__w/VERIFI/output/verifi/*-unpacked
           retention-days: 7
-          
-  release:
-    runs-on: ubuntu-22.04
-    needs: [build-mac, build-winux]
-    steps:
-      - name: Get artifacts
-        uses: actions/download-artifact@v3
-      - name: Release
-        env:
-          VERSION: ${{ needs.build-mac.outputs.BUILD_VERSION }}
-        uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
-        with:
-          name: VERIFI v${{ env.VERSION }}
-          draft: true
-          generate_release_notes: true
-          files: |
-            build-mac/*
-            build-winux/*
+
+  ###
+  # TODO: Test stage before using. Artifacts will have to be downloaded and uploaded to releases manually for now. 
+  ###
+  # release:
+  #   runs-on: ubuntu-22.04
+  #   needs: [build-mac, build-winux]
+  #   steps:
+  #     - name: Get artifacts
+  #       uses: actions/download-artifact@v3
+  #     - name: Release
+  #       env:
+  #         VERSION: ${{ needs.build-mac.outputs.BUILD_VERSION }}
+  #       uses: softprops/action-gh-release@v1
+  #       if: startsWith(github.ref, 'refs/tags/')
+  #       with:
+  #         name: VERIFI v${{ env.VERSION }}
+  #         draft: true
+  #         generate_release_notes: true
+  #         files: |
+  #           build-mac/*
+  #           build-winux/*
