@@ -45,5 +45,5 @@ jobs:
         run: |
           tar -czf $BACKUP_DIR/verifi_$(printf '%(%Y-%m-%d)T\n' -1)_${GITHUB_SHA::7}.tar.gz $APACHE_DIR/verifi
           rm -rf $APACHE_DIR/verifi/*
-          chgrp -R apache ./verifi
           mv -v ./verifi/* $APACHE_DIR/verifi/
+          chgrp -R apache ./verifi
