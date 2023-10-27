@@ -12,6 +12,7 @@ import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { JStatRegressionModel } from 'src/app/models/analysis';
 import { firstValueFrom } from 'rxjs';
+import { AnalyticsService } from 'src/app/analytics/analytics.service';
 
 @Injectable({
   providedIn: 'root'
@@ -21,7 +22,8 @@ export class BackupDataService {
   constructor(private accountDbService: AccountdbService, private facilityDbService: FacilitydbService, private predictorsDbService: PredictordbService,
     private utilityMeterDbService: UtilityMeterdbService, private utilityMeterDataDbService: UtilityMeterDatadbService,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService, private loadingService: LoadingService, private accountAnalysisDbService: AccountAnalysisDbService,
-    private analysisDbService: AnalysisDbService, private accountReportsDbService: AccountReportDbService) { }
+    private analysisDbService: AnalysisDbService, private accountReportsDbService: AccountReportDbService,
+    private analyticsService: AnalyticsService) { }
 
 
   backupAccount() {
@@ -103,6 +105,7 @@ export class BackupDataService {
   }
 
   async importAccountBackupFile(backupFile: BackupFile): Promise<IdbAccount> {
+    this.analyticsService.sendEvent('import_backup_file');
     this.loadingService.setLoadingMessage('Adding Account...');
     let accountGUIDs: { oldId: string, newId: string } = {
       oldId: backupFile.account.guid,
@@ -269,6 +272,7 @@ export class BackupDataService {
   }
 
   async importFacilityBackupFile(backupFile: BackupFile, accountGUID: string): Promise<IdbFacility> {
+    this.analyticsService.sendEvent('import_backup_file');
     this.loadingService.setLoadingMessage('Adding Facility...');
     delete backupFile.facility.id;
     backupFile.facility.accountId = accountGUID;

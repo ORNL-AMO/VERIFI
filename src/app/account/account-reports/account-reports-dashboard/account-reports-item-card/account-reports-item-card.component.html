@@ -6,6 +6,7 @@
                     <span class="fa fa-file" *ngIf="report.reportType == 'betterPlants'"></span>
                     <span class="fa fa-chart-simple" *ngIf="report.reportType == 'dataOverview'"></span>
                     <span class="fa fa-table" *ngIf="report.reportType == 'performance'"></span>
+                    <span class="fa fa-table" *ngIf="report.reportType == 'betterClimate'"></span>
                     {{report.name}}
                     <span class="fa fa-exclamation-circle" *ngIf="!isValid"></span>
                 </a>
@@ -23,7 +24,7 @@
     </div>
     <div class="card-body d-flex flex-column">
         <div class="d-flex flex-column"
-            *ngIf="report.reportType == 'betterPlants' || report.reportType == 'performance'">
+            *ngIf="report.reportType != 'dataOverview'">
             <ul class="list-group list-group-flush">
                 <li class="list-group-item">
                     Baseline Year: {{report.baselineYear}}
@@ -63,6 +64,9 @@
             </div>
             <div class="bold" *ngIf="report.reportType == 'dataOverview'">
                 Data Report
+            </div>
+            <div class="bold" *ngIf="report.reportType == 'betterClimate'">
+                Better Climate Report
             </div>
             <div class="bold" *ngIf="report.reportType == 'performance'">
                 <ng-container *ngIf="(report.performanceReportSetup.analysisItemId | analysisCategory) == 'Water'">

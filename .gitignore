@@ -6,3 +6,7 @@ embedded.provisionprofile
 .env
 
 .angular
+
+.vscode
+
+.DS_Store
