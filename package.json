@@ -59,7 +59,7 @@
     "electron": "electron .",
     "pack": "electron-builder --dir",
     "dist": "electron-builder",
-    "dist-nopub": "electron-builder --publish never"
+    "dist-nopublish": "electron-builder --publish never"
   },
   "private": true,
   "dependencies": {
