@@ -155,7 +155,14 @@ export interface IdbUtilityMeter {
     isValid?: boolean,
     skipImport?: boolean,
     waterIntakeType?: WaterIntakeType,
-    waterDischargeType?: WaterDischargeType
+    waterDischargeType?: WaterDischargeType,
+    vehicleCategory?: number,
+    vehicleType?: number,
+    vehicleCollectionType?: number,
+    vehicleCollectionUnit?: string,
+    vehicleFuel?: string
+
+
 }
 
 export interface IdbUtilityMeterData {

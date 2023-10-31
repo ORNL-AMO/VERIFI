@@ -1,0 +1,76 @@
+<form [formGroup]="meterForm">
+    <div class="row">
+        <!-- vehicleCategory -->
+        <div class="col-6">
+            <label for="vehicleCategory">Vehicle Category <span class="required">*</span> </label>
+            <div class="mb-3">
+                <select class="form-select" id="vehicleCategory" type="text" formControlName="fuel"
+                    (change)="changeCategory()">
+                    <option *ngFor="let category of vehicleCategories" [ngValue]="category.value">
+                        {{category.value}}
+                    </option>
+                </select>
+            </div>
+            <div class="alert-danger alert" *ngIf="meterForm.get('vehicleCategory').hasError('required')">Vehicle
+                category is
+                required</div>
+        </div>
+        <!--vehicleType-->
+        <div class="col-6">
+            <label for="vehicleType">Vehicle Type <span class="required">*</span> </label>
+            <div class="mb-3">
+                <select class="form-select" id="vehicleType" type="text" formControlName="fuel" (change)="changeType()">
+                    <option *ngFor="let vType of vehicleTypes" [ngValue]="vType.value">
+                        {{vType.value}}
+                    </option>
+                </select>
+            </div>
+            <div class="alert-danger alert" *ngIf="meterForm.get('vehicleType').hasError('required')">Vehicle category
+                is
+                required</div>
+        </div>
+        <!--vehicleCollectionType-->
+        <div class="col-6">
+            <label for="vehicleCollectionType">Collection Method <span class="required">*</span> </label>
+            <div class="mb-3">
+                <select class="form-select" id="vehicleCollectionType" type="text" formControlName="fuel"
+                    (change)="changeCollectionType()">
+                    <option *ngFor="let vCollectionType of vehicleCollectionTypes" [ngValue]="vCollectionType.value">
+                        {{vCollectionType.value}}
+                    </option>
+                </select>
+            </div>
+            <div class="alert-danger alert" *ngIf="meterForm.get('vehicleCollectionType').hasError('required')">Vehicle
+                collection method is
+                required</div>
+        </div>
+        <!--vehicleCollectionType-->
+        <div class="col-6">
+            <label for="vehicleCollectionUnit">Collection Unit <span class="required">*</span> </label>
+            <div class="mb-3">
+                <select class="form-select" id="vehicleCollectionUnit" type="text" formControlName="fuel"
+                    (change)="changeCollectionUnit()">
+                    <option *ngFor="let option of collectionUnitOptions" [ngValue]="option.value">
+                        {{option.value}}
+                    </option>
+                </select>
+            </div>
+            <div class="alert-danger alert" *ngIf="meterForm.get('vehicleCollectionUnit').hasError('required')">Vehicle
+                collection unit is
+                required</div>
+        </div>
+        <!--vehicleFuel-->
+        <div class="col-6">
+            <label for="vehicleFuel">Fuel <span class="required">*</span> </label>
+            <div class="mb-3">
+                <select class="form-select" id="vehicleFuel" type="text" formControlName="fuel" (change)="changeFuel()">
+                    <option *ngFor="let option of fuelOptions" [ngValue]="option.value">
+                        {{option.value}}
+                    </option>
+                </select>
+            </div>
+            <div class="alert-danger alert" *ngIf="meterForm.get('vehicleFuel').hasError('required')">Fuel selection is
+                required</div>
+        </div>
+    </div>
+</form>

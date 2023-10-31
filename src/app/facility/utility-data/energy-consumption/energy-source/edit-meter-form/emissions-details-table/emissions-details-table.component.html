@@ -1,0 +1,64 @@
+<label>Fuel Emissions</label>
+<table class="table table-sm table-bordered">
+    <tbody>
+        <tr>
+            <td>
+                CO<sub>2</sub> Factor
+            </td>
+            <td>
+                <ng-container *ngIf="selectedFuelTypeOption.CO2">
+                    {{selectedFuelTypeOption.CO2|
+                    emissionsDisplay:meterForm.controls.energyUnit.value:'CO2'}} kg
+                    CO<sub>2</sub>/{{meterForm.controls.energyUnit.value}}
+                </ng-container>
+                <ng-container *ngIf="!selectedFuelTypeOption.CO2">
+                    &mdash;
+                </ng-container>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                CH<sub>4</sub> Factor
+            </td>
+            <td>
+                <ng-container *ngIf="selectedFuelTypeOption.CH4">
+                    {{selectedFuelTypeOption.CH4|
+                    emissionsDisplay:meterForm.controls.energyUnit.value:'N2O'}} g
+                    CH<sub>4</sub>/{{meterForm.controls.energyUnit.value}}
+                </ng-container>
+                <ng-container *ngIf="!selectedFuelTypeOption.CH4">
+                    &mdash;
+                </ng-container>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                N<sub>2</sub>O Factor
+            </td>
+            <td>
+                <ng-container *ngIf="selectedFuelTypeOption.N2O">
+                    {{selectedFuelTypeOption.N2O|
+                    emissionsDisplay:meterForm.controls.energyUnit.value:'N2O'}} g
+                    N<sub>2</sub>O/{{meterForm.controls.energyUnit.value}}
+                </ng-container>
+                <ng-container *ngIf="!selectedFuelTypeOption.N2O">
+                    &mdash;
+                </ng-container>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Emissions Rate
+            </td>
+            <td>
+                <ng-container *ngIf="selectedFuelTypeOption.emissionsOutputRate">
+                    {{selectedFuelTypeOption.emissionsOutputRate}} kg CO<sub>2</sub>e
+                </ng-container>
+                <ng-container *ngIf="!selectedFuelTypeOption.emissionsOutputRate">
+                    &mdash;
+                </ng-container>
+            </td>
+
+        </tr>
+    </tbody>
+</table>

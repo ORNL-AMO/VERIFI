@@ -40,7 +40,12 @@ export class EditMeterFormService {
       directConnection: [meter.directConnection],
       greenPurchaseFraction: [meter.greenPurchaseFraction * 100, [Validators.min(0), Validators.max(100)]],
       waterIntakeType: [meter.waterIntakeType, waterIntakeValidation],
-      waterDischargeType: [meter.waterDischargeType, waterDischargeValidation]
+      waterDischargeType: [meter.waterDischargeType, waterDischargeValidation],
+      vehicleCategory: [meter.vehicleCategory],
+      vehicleType: [meter.vehicleType],
+      vehicleCollectionType: [meter.vehicleCollectionType],
+      vehicleCollectionUnit: [meter.vehicleCollectionUnit],
+      vehicleFuel: [meter.vehicleFuel]
     });
     // if(form.controls.source.value == 'Electricity'){
     //   form.controls.startingUnit.disable();
@@ -72,6 +77,11 @@ export class EditMeterFormService {
     meter.greenPurchaseFraction = form.controls.greenPurchaseFraction.value / 100;
     meter.waterDischargeType = form.controls.waterDischargeType.value;
     meter.waterIntakeType = form.controls.waterIntakeType.value;
+    meter.vehicleCategory = form.controls.vehicleCategory.value;
+    meter.vehicleType = form.controls.vehicleType.value;
+    meter.vehicleCollectionType = form.controls.vehicleCollectionType.value;
+    meter.vehicleCollectionUnit = form.controls.vehicleCollectionUnit.value;
+    meter.vehicleFuel = form.controls.vehicleFuel.value;
     //set multipliers
     meter = this.setMultipliers(meter);
     return meter;

@@ -5,8 +5,8 @@ import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-
 import { getHeatingCapacity, getIsEnergyMeter, getSiteToSource } from 'src/app/shared/sharedHelperFuntions';
 import { EnergyUnitOptions, UnitOption } from 'src/app/shared/unitOptions';
 import { EditMeterFormService } from './edit-meter-form.service';
-import { AgreementType, AgreementTypes, FuelTypeOption, GasOptions, LiquidOptions, OtherEnergyOptions, ScopeOption, ScopeOptions, SolidOptions, SourceOptions, getFuelTypeOptions } from './editMeterOptions';
-import { MeterPhase, MeterSource, WaterDischargeType, WaterDischargeTypes, WaterIntakeType, WaterIntakeTypes } from 'src/app/models/constantsAndTypes';
+import { FuelTypeOption, OtherEnergyOptions, ScopeOption, ScopeOptions, SourceOptions, getFuelTypeOptions } from './editMeterOptions';
+import { MeterSource, WaterDischargeType, WaterDischargeTypes, WaterIntakeType, WaterIntakeTypes } from 'src/app/models/constantsAndTypes';
 import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
 
 @Component({
@@ -23,7 +23,6 @@ export class EditMeterFormComponent implements OnInit {
   facility: IdbFacility;
 
 
-  agreementTypes: Array<AgreementType> = AgreementTypes;
   scopeOptions: Array<ScopeOption> = ScopeOptions;
   hasDifferentCollectionUnits: boolean;
   hasDifferentEmissions: boolean;
@@ -368,24 +367,6 @@ export class EditMeterFormComponent implements OnInit {
 
 
   changeAgreementType() {
-    //RECs or VPPA
-    if (this.meterForm.controls.agreementType.value != 4 && this.meterForm.controls.agreementType.value != 6) {
-      this.meterForm.controls.includeInEnergy.patchValue(true);
-    } else {
-      this.meterForm.controls.includeInEnergy.patchValue(false);
-    }
-
-    if (this.meterForm.controls.agreementType.value == 1) {
-      this.meterForm.controls.retainRECs.patchValue(false);
-    } else {
-      this.meterForm.controls.retainRECs.patchValue(true);
-    }
-
-    if (this.meterForm.controls.agreementType.value == 2) {
-      this.meterForm.controls.directConnection.patchValue(true);
-    } else {
-      this.meterForm.controls.directConnection.patchValue(false);
-    }
     this.checkShowSiteToSource();
     this.setSiteToSource();
     this.setDisplayEmissionsValues();
