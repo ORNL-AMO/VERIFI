@@ -1,5 +1,17 @@
 import { Component, Input } from '@angular/core';
 import { FormGroup, Validators } from '@angular/forms';
+import { FuelTypeOption } from 'src/app/shared/fuel-options/fuelTypeOption';
+import { MobileAircraftOptions } from 'src/app/shared/fuel-options/mobileAircraftOptions';
+import { MobileBusOptions } from 'src/app/shared/fuel-options/mobileBusOptions';
+import { MobileHeavyDutyTruckOptions } from 'src/app/shared/fuel-options/mobileHeavyDutyVehicleOptions';
+import { MobileLightDutyTruckOptions } from 'src/app/shared/fuel-options/mobileLightDutyTruckOptions';
+import { MobileMotorcycleOptions } from 'src/app/shared/fuel-options/mobileMotorcycleOptions';
+import { MobileOffRoadAgricultureOptions } from 'src/app/shared/fuel-options/mobileOffRoadAgricultureOptions';
+import { MobileOffRoadConstructionOptions } from 'src/app/shared/fuel-options/mobileOffRoadConstructionOptions';
+import { MobilePassangerCarOptions } from 'src/app/shared/fuel-options/mobilePassangerCarOptions';
+import { MobileRailOptions } from 'src/app/shared/fuel-options/mobileRailOptions';
+import { MobileTransportOnsiteOptions } from 'src/app/shared/fuel-options/mobileTransportOnsiteOptions';
+import { MobileWaterTransportOptions } from 'src/app/shared/fuel-options/mobileWaterTransportOptions';
 import { EnergyUnitOptions, UnitOption, VolumeGasOptions, VolumeLiquidOptions } from 'src/app/shared/unitOptions';
 
 @Component({
@@ -16,7 +28,7 @@ export class VehicleFormComponent {
   vehicleTypes: Array<VehicleType> = [];
   vehicleCollectionTypes: Array<{ value: number, label: string }> = [{ value: 1, label: 'Fuel Usage' }, { value: 2, label: 'Mileage' }];
   collectionUnitOptions: Array<UnitOption> = [];
-  fuelOptions: Array<string> = [];
+  fuelOptions: Array<FuelTypeOption> = [];
   //TODO: set
   hasDifferentEnergyUnits: boolean = false;
   constructor() {
@@ -89,7 +101,7 @@ export class VehicleFormComponent {
 
   setFuelOptions() {
     if (this.meterForm.controls.vehicleCategory.value == 1) {
-      this.fuelOptions = MaterialTransportOnsiteFuels;
+      this.fuelOptions = MobileTransportOnsiteOptions;
     } else {
       let vehicleType: VehicleType = VehicleTypes.find(vType => {
         return vType.value == this.meterForm.controls.vehicleType.value;
@@ -99,7 +111,7 @@ export class VehicleFormComponent {
       }
     }
 
-    let checkExists: string = this.fuelOptions.find(option => {
+    let checkExists: FuelTypeOption = this.fuelOptions.find(option => {
       return option == this.meterForm.controls.vehicleFuel.value;
     });
     if (!checkExists) {
@@ -144,71 +156,68 @@ export type VehicleType = {
   value: number,
   label: string,
   category: number,
-  fuelOptions: Array<string>
+  fuelOptions: Array<FuelTypeOption>
 }
 
-export const MaterialTransportOnsiteFuels: Array<string> = ['Propane', 'Diesel', 'Gasoline'];
-export const PassengerCarFuels: Array<string> = ['Gasoline', 'Diesel', 'Ethanol', 'Compressed Natural Gas (CNG)', 'Liquified Petroleum Gas (LPG)', 'Biodiesel']
-export const OffRoadVehicleFuels: Array<string> = ['Gasoline (2-stroke)', 'Gasoline (4-stroke)', 'Diesel', 'Liquified Petroleum Gas (LPG)']
 export const VehicleTypes: Array<VehicleType> = [
   {
     value: 1,
     label: 'Passenger Cars',
     category: 2,
-    fuelOptions: PassengerCarFuels
+    fuelOptions: MobilePassangerCarOptions
   },
   {
     value: 2,
     label: "Light-Duty Trucks (Vans, Pickups, SUV's)",
     category: 2,
-    fuelOptions: PassengerCarFuels
+    fuelOptions: MobileLightDutyTruckOptions
   },
   {
     value: 3,
     label: "Bus",
     category: 2,
-    fuelOptions: PassengerCarFuels
+    fuelOptions: MobileBusOptions
   },
   {
     value: 4,
     label: "Heavy-Duty Vehicles",
     category: 2,
-    fuelOptions: PassengerCarFuels
+    fuelOptions: MobileHeavyDutyTruckOptions
   },
   {
     value: 5,
     label: "Motorcycles",
     category: 2,
-    fuelOptions: ['Gasoline']
+    fuelOptions: MobileMotorcycleOptions
   },
   {
     value: 6,
-    label: "Agricultural Equuipment & Trucks",
+    label: "Agricultural Equipment & Trucks",
     category: 3,
-    fuelOptions: OffRoadVehicleFuels
+    fuelOptions: MobileOffRoadAgricultureOptions
   },
   {
     value: 7,
     label: "Construction/Mining Equipment & Trucks",
     category: 3,
-    fuelOptions: OffRoadVehicleFuels
+    fuelOptions: MobileOffRoadConstructionOptions
   },
   {
     value: 8,
     label: "Aircraft",
     category: 4,
-    fuelOptions: ['Jet Fuel', 'Aviation Gasoline']
+    fuelOptions: MobileAircraftOptions
   },
   {
     value: 9,
     label: "Rail",
     category: 4,
-    fuelOptions: ['Diesel']
+    fuelOptions: MobileRailOptions
   },
   {
     value: 10,
     label: 'Water Transport',
     category: 4,
-    fuelOptions: ['Residual Fuel Oil', 'Gasoline', 'Diesel']
+    fuelOptions: MobileWaterTransportOptions
   }
 ]

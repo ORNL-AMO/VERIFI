@@ -84,8 +84,8 @@
             <label for="vehicleFuel">Fuel <span class="required">*</span> </label>
             <div class="mb-3">
                 <select class="form-select" id="vehicleFuel" type="text" formControlName="vehicleFuel">
-                    <option *ngFor="let option of fuelOptions" [ngValue]="option">
-                        {{option}}
+                    <option *ngFor="let option of fuelOptions" [ngValue]="option.value">
+                        {{option.value}}
                     </option>
                 </select>
             </div>
