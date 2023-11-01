@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormGroup } from '@angular/forms';
-import { AgreementType, AgreementTypes } from '../editMeterOptions';
+import { AgreementType, AgreementTypes } from 'src/app/models/agreementType';
 
 @Component({
   selector: 'app-additional-electricity-options-form',

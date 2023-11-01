@@ -1,7 +1,8 @@
 import { IdbAccount, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from "src/app/models/idb";
 import { getIsEnergyMeter, getIsEnergyUnit } from "src/app/shared/sharedHelperFuntions";
 import * as _ from 'lodash';
-import { FuelTypeOption, OtherEnergyOptions } from "src/app/facility/utility-data/energy-consumption/energy-source/edit-meter-form/editMeterOptions";
+import { FuelTypeOption } from "src/app/shared/fuel-options/fuelTypeOption";
+import { StationaryOtherEnergyOptions } from "src/app/shared/fuel-options/stationaryOtherEnergyOptions";
 
 export function getPreviousMonthsBill(month: number, year: number, meterReadings: Array<IdbUtilityMeterData>): IdbUtilityMeterData {
     //set to the 5th to not conflict
@@ -76,7 +77,7 @@ export function getUnitFromMeter(accountMeter: IdbUtilityMeter, accountOrFacilit
     } else if (accountMeter.source == 'Water Intake' || accountMeter.source == 'Water Discharge') {
         return accountOrFacility.volumeLiquidUnit;
     } else if (accountMeter.source == 'Other Energy') {
-        let selectedEnergyOption: FuelTypeOption = OtherEnergyOptions.find(option => { return option.value == accountMeter.fuel });
+        let selectedEnergyOption: FuelTypeOption = StationaryOtherEnergyOptions.find(option => { return option.value == accountMeter.fuel });
         if (selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Steam') {
             return accountOrFacility.massUnit;
         } else if (selectedEnergyOption.otherEnergyType && (selectedEnergyOption.otherEnergyType == 'Chilled Water' || selectedEnergyOption.otherEnergyType == 'Hot Water')) {

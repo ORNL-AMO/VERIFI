@@ -3,7 +3,6 @@ import { BehaviorSubject } from 'rxjs';
 import { WorkBook } from 'xlsx';
 import { IdbAccount, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup, PredictorData } from '../models/idb';
 import * as XLSX from 'xlsx';
-import { AgreementType, AgreementTypes, FuelTypeOption, ScopeOption, ScopeOptions, SourceOptions, getFuelTypeOptions } from '../facility/utility-data/energy-consumption/energy-source/edit-meter-form/editMeterOptions';
 import { FacilitydbService } from '../indexedDB/facility-db.service';
 import { AccountdbService } from '../indexedDB/account-db.service';
 import { UtilityMeterdbService } from '../indexedDB/utilityMeter-db.service';
@@ -18,9 +17,13 @@ import { EGridService } from '../shared/helper-services/e-grid.service';
 import * as _ from 'lodash';
 import { State, States } from '../shared/form-data/states';
 import { getHeatingCapacity, getIsEnergyMeter, getIsEnergyUnit, getSiteToSource } from '../shared/sharedHelperFuntions';
-import { MeterPhase, MeterSource } from '../models/constantsAndTypes';
+import { MeterPhase, MeterSource, AllSources } from '../models/constantsAndTypes';
 import { SubRegionData } from '../models/eGridEmissions';
 import { getMeterDataCopy } from '../calculations/conversions/convertMeterData';
+import { FuelTypeOption } from '../shared/fuel-options/fuelTypeOption';
+import { getFuelTypeOptions } from '../shared/fuel-options/getFuelTypeOptions';
+import { ScopeOption, ScopeOptions } from '../models/scopeOption';
+import { AgreementType, AgreementTypes } from '../models/agreementType';
 
 @Injectable({
   providedIn: 'root'
@@ -367,7 +370,7 @@ export class UploadDataService {
   }
 
   getMeterSource(source: string): MeterSource {
-    let selectedSource: MeterSource = SourceOptions.find(sourceOption => { return sourceOption == source });
+    let selectedSource: MeterSource = AllSources.find(sourceOption => { return sourceOption == source });
     return selectedSource;
   }
 

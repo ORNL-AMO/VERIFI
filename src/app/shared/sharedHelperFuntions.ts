@@ -1,6 +1,6 @@
 import { ConvertValue } from "../calculations/conversions/convertValue";
-import { FuelTypeOption } from "../facility/utility-data/energy-consumption/energy-source/edit-meter-form/editMeterOptions";
 import { MeterSource } from "../models/constantsAndTypes";
+import { FuelTypeOption } from "./fuel-options/fuelTypeOption";
 import { EnergyUnitOptions, UnitOption } from "./unitOptions";
 
 export function getGUID(): string {

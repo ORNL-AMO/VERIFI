@@ -1,4 +1,4 @@
-import { FuelTypeOption } from '../facility/utility-data/energy-consumption/energy-source/edit-meter-form/editMeterOptions';
+import { FuelTypeOption } from '../shared/fuel-options/fuelTypeOption';
 import { AccountAnalysisSetupErrors } from './accountAnalysis';
 import { AnalysisCategory, AnalysisGroup, AnalysisSetupErrors } from './analysis';
 import { MonthlyData } from './calanderization';

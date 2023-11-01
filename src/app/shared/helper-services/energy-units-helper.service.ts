@@ -2,10 +2,14 @@ import { Injectable } from '@angular/core';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbAccount, IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
-import { FuelTypeOption, GasOptions, LiquidOptions, OtherEnergyOptions, SolidOptions, SourceOptions } from 'src/app/facility/utility-data/energy-consumption/energy-source/edit-meter-form/editMeterOptions';
 import { ChilledWaterUnitOptions, EnergyUnitOptions, MassUnitOptions, UnitOption, VolumeGasOptions, VolumeLiquidOptions } from '../unitOptions';
 import { getIsEnergyMeter, getIsEnergyUnit } from '../sharedHelperFuntions';
-import { MeterPhase, MeterSource } from 'src/app/models/constantsAndTypes';
+import { AllSources, MeterPhase, MeterSource } from 'src/app/models/constantsAndTypes';
+import { FuelTypeOption } from '../fuel-options/fuelTypeOption';
+import { StationaryGasOptions } from '../fuel-options/stationaryGasOptions';
+import { StationaryLiquidOptions } from '../fuel-options/stationaryLiquidOptions';
+import { StationarySolidOptions } from '../fuel-options/stationarySolidOptions';
+import { StationaryOtherEnergyOptions } from '../fuel-options/stationaryOtherEnergyOptions';
 
 @Injectable({
   providedIn: 'root'
@@ -89,7 +93,7 @@ export class EnergyUnitsHelperService {
     } else if (facilityMeter.source == 'Water Intake' || facilityMeter.source == 'Water Discharge') {
       return selectedFacility.volumeLiquidUnit;
     } else if (facilityMeter.source == 'Other Energy') {
-      let selectedEnergyOption: FuelTypeOption = JSON.parse(JSON.stringify(OtherEnergyOptions.find(option => { return option.value == facilityMeter.fuel })));
+      let selectedEnergyOption: FuelTypeOption = JSON.parse(JSON.stringify(StationaryOtherEnergyOptions.find(option => { return option.value == facilityMeter.fuel })));
       if (selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Steam') {
         return selectedFacility.massUnit;
       } else if (selectedEnergyOption.otherEnergyType && (selectedEnergyOption.otherEnergyType == 'Chilled Water' || selectedEnergyOption.otherEnergyType == 'Hot Water')) {
@@ -119,7 +123,7 @@ export class EnergyUnitsHelperService {
     } else if (accountMeter.source == 'Water Intake' || accountMeter.source == 'Water Discharge') {
       return selectedAccount.volumeLiquidUnit;
     } else if (accountMeter.source == 'Other Energy') {
-      let selectedEnergyOption: FuelTypeOption = JSON.parse(JSON.stringify(OtherEnergyOptions.find(option => { return option.value == accountMeter.fuel })));
+      let selectedEnergyOption: FuelTypeOption = JSON.parse(JSON.stringify(StationaryOtherEnergyOptions.find(option => { return option.value == accountMeter.fuel })));
       if (selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Steam') {
         return selectedAccount.massUnit;
       } else if (selectedEnergyOption.otherEnergyType && (selectedEnergyOption.otherEnergyType == 'Chilled Water' || selectedEnergyOption.otherEnergyType == 'Hot Water')) {
@@ -161,7 +165,7 @@ export class EnergyUnitsHelperService {
         return MassUnitOptions.concat(EnergyUnitOptions);
       }
     } else if (source == 'Other Energy') {
-      let selectedEnergyOption: FuelTypeOption = OtherEnergyOptions.find(option => { return option.value == fuel });
+      let selectedEnergyOption: FuelTypeOption = StationaryOtherEnergyOptions.find(option => { return option.value == fuel });
       if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Steam') {
         return MassUnitOptions.concat(EnergyUnitOptions);
       } else if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Chilled Water') {
@@ -194,7 +198,7 @@ export class EnergyUnitsHelperService {
         return MassUnitOptions;
       }
     } else if (source == 'Other Energy') {
-      let selectedEnergyOption: FuelTypeOption = OtherEnergyOptions.find(option => { return option.value == fuel });
+      let selectedEnergyOption: FuelTypeOption = StationaryOtherEnergyOptions.find(option => { return option.value == fuel });
       if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Steam') {
         return MassUnitOptions;
       } else if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Chilled Water') {
@@ -211,7 +215,7 @@ export class EnergyUnitsHelperService {
 
 
   parseSource(name: string): MeterSource {
-    let source: MeterSource = SourceOptions.find(option => {
+    let source: MeterSource = AllSources.find(option => {
       let lowerCaseOption: string = option.toLocaleLowerCase();
       let lowerCaseName: string = name.toLocaleLowerCase();
       return lowerCaseName.includes(lowerCaseOption)
@@ -258,7 +262,7 @@ export class EnergyUnitsHelperService {
 
 
   parseFuelType(name: string): { phase: MeterPhase, fuelTypeOption: FuelTypeOption } {
-    let fuelTypeOption: FuelTypeOption = GasOptions.find(option => {
+    let fuelTypeOption: FuelTypeOption = StationaryGasOptions.find(option => {
       let lowerCaseOption: string = option.value.toLocaleLowerCase();
       let lowerCaseName: string = name.toLocaleLowerCase();
       return lowerCaseName.includes(lowerCaseOption)
@@ -266,7 +270,7 @@ export class EnergyUnitsHelperService {
     if (fuelTypeOption) {
       return { phase: 'Gas', fuelTypeOption: fuelTypeOption };
     }
-    fuelTypeOption = LiquidOptions.find(option => {
+    fuelTypeOption = StationaryLiquidOptions.find(option => {
       let lowerCaseOption: string = option.value.toLocaleLowerCase();
       let lowerCaseName: string = name.toLocaleLowerCase();
       return lowerCaseName.includes(lowerCaseOption)
@@ -274,7 +278,7 @@ export class EnergyUnitsHelperService {
     if (fuelTypeOption) {
       return { phase: 'Liquid', fuelTypeOption: fuelTypeOption };
     }
-    fuelTypeOption = SolidOptions.find(option => {
+    fuelTypeOption = StationarySolidOptions.find(option => {
       let lowerCaseOption: string = option.value.toLocaleLowerCase();
       let lowerCaseName: string = name.toLocaleLowerCase();
       return lowerCaseName.includes(lowerCaseOption)
@@ -317,7 +321,7 @@ export class EnergyUnitsHelperService {
             hasDifferentCollectionUnits = true;
           }
         } else if (source == 'Other Energy') {
-          let selectedEnergyOption: FuelTypeOption = OtherEnergyOptions.find(option => { return option.value == fuel });
+          let selectedEnergyOption: FuelTypeOption = StationaryOtherEnergyOptions.find(option => { return option.value == fuel });
           if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Steam') {
             if (startingUnit != selectedFacility.massUnit) {
               hasDifferentCollectionUnits = true;

@@ -5,9 +5,12 @@ import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-
 import { getHeatingCapacity, getIsEnergyMeter, getSiteToSource } from 'src/app/shared/sharedHelperFuntions';
 import { EnergyUnitOptions, UnitOption } from 'src/app/shared/unitOptions';
 import { EditMeterFormService } from './edit-meter-form.service';
-import { FuelTypeOption, OtherEnergyOptions, ScopeOption, ScopeOptions, SourceOptions, getFuelTypeOptions } from './editMeterOptions';
-import { MeterSource, WaterDischargeType, WaterDischargeTypes, WaterIntakeType, WaterIntakeTypes } from 'src/app/models/constantsAndTypes';
+import { AllSources, MeterSource, WaterDischargeType, WaterDischargeTypes, WaterIntakeType, WaterIntakeTypes } from 'src/app/models/constantsAndTypes';
 import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
+import { FuelTypeOption } from 'src/app/shared/fuel-options/fuelTypeOption';
+import { StationaryOtherEnergyOptions } from 'src/app/shared/fuel-options/stationaryOtherEnergyOptions';
+import { getFuelTypeOptions } from 'src/app/shared/fuel-options/getFuelTypeOptions';
+import { ScopeOption, ScopeOptions } from 'src/app/models/scopeOption';
 
 @Component({
   selector: 'app-edit-meter-form',
@@ -37,7 +40,7 @@ export class EditMeterFormComponent implements OnInit {
   displayHeatCapacity: boolean;
   displaySiteToSource: boolean;
   displayEmissionsOutputRate: boolean;
-  sourceOptions: Array<string> = SourceOptions;
+  sourceOptions: Array<string> = AllSources;
   changingUnits: boolean = false;
   energyUnitOptions: Array<UnitOption> = EnergyUnitOptions;
   displayEnergyUnits: boolean = true;
@@ -297,7 +300,7 @@ export class EditMeterFormComponent implements OnInit {
         facilityUnit = this.facility.massUnit;
       }
     } else if (selectedMeterSource == 'Other Energy') {
-      let selectedEnergyOption: FuelTypeOption = OtherEnergyOptions.find(option => { return option.value == this.meterForm.controls.fuel.value });
+      let selectedEnergyOption: FuelTypeOption = StationaryOtherEnergyOptions.find(option => { return option.value == this.meterForm.controls.fuel.value });
       if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Steam') {
         facilityUnit = this.facility.massUnit;
       } else if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Chilled Water') {

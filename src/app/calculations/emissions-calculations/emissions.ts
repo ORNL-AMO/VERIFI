@@ -4,7 +4,8 @@ import { ConvertValue } from "../conversions/convertValue";
 import { EmissionsResults, SubregionEmissions } from "src/app/models/eGridEmissions";
 import * as _ from 'lodash';
 import { MeterPhase, MeterSource } from "src/app/models/constantsAndTypes";
-import { FuelTypeOption, getFuelTypeOptions } from "src/app/facility/utility-data/energy-consumption/energy-source/edit-meter-form/editMeterOptions";
+import { FuelTypeOption } from "src/app/shared/fuel-options/fuelTypeOption";
+import { getFuelTypeOptions } from "src/app/shared/fuel-options/getFuelTypeOptions";
 
 export function setEmissionsForCalanderizedMeters(calanderizedMeterData: Array<CalanderizedMeter>, energyIsSource: boolean, facilities: Array<IdbFacility>, co2Emissions: Array<SubregionEmissions>, customFuels: Array<IdbCustomFuel>): Array<CalanderizedMeter> {
     for (let i = 0; i < calanderizedMeterData.length; i++) {

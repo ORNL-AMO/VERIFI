@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { ScopeOption, ScopeOptions } from 'src/app/facility/utility-data/energy-consumption/energy-source/edit-meter-form/editMeterOptions';
+import { ScopeOption, ScopeOptions } from 'src/app/models/scopeOption';
 
 @Pipe({
   name: 'scopeLabel'

@@ -1,8 +1,11 @@
 import { Component, EventEmitter, Output } from '@angular/core';
-import { FuelTypeOption, GasOptions, LiquidOptions, SolidOptions } from 'src/app/facility/utility-data/energy-consumption/energy-source/edit-meter-form/editMeterOptions';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { MeterPhase } from 'src/app/models/constantsAndTypes';
 import { IdbAccount } from 'src/app/models/idb';
+import { FuelTypeOption } from 'src/app/shared/fuel-options/fuelTypeOption';
+import { StationaryGasOptions } from 'src/app/shared/fuel-options/stationaryGasOptions';
+import { StationaryLiquidOptions } from 'src/app/shared/fuel-options/stationaryLiquidOptions';
+import { StationarySolidOptions } from 'src/app/shared/fuel-options/stationarySolidOptions';
 
 @Component({
   selector: 'app-existing-fuels-modal',
@@ -13,9 +16,9 @@ export class ExistingFuelsModalComponent {
   @Output('emitClose')
   emitClose: EventEmitter<{ phase: MeterPhase, option: FuelTypeOption }> = new EventEmitter();
 
-  gasOptions: Array<FuelTypeOption> = GasOptions;
-  liquidOptions: Array<FuelTypeOption> = LiquidOptions;
-  solidOptions: Array<FuelTypeOption> = SolidOptions;
+  gasOptions: Array<FuelTypeOption> = StationaryGasOptions;
+  liquidOptions: Array<FuelTypeOption> = StationaryLiquidOptions;
+  solidOptions: Array<FuelTypeOption> = StationarySolidOptions;
 
   displayModal: boolean = false;
   selectedAccount: IdbAccount;

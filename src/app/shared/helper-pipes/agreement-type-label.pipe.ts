@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { AgreementType, AgreementTypes } from 'src/app/facility/utility-data/energy-consumption/energy-source/edit-meter-form/editMeterOptions';
+import { AgreementType, AgreementTypes } from 'src/app/models/agreementType';
 
 @Pipe({
   name: 'agreementTypeLabel'
