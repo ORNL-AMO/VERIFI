@@ -4,10 +4,10 @@
         <div class="col-6">
             <label for="vehicleCategory">Vehicle Category <span class="required">*</span> </label>
             <div class="mb-3">
-                <select class="form-select" id="vehicleCategory" type="text" formControlName="fuel"
-                    (change)="changeCategory()">
+                <select class="form-select" id="vehicleCategory" type="text" formControlName="vehicleCategory"
+                    (change)="setVehicleTypes()">
                     <option *ngFor="let category of vehicleCategories" [ngValue]="category.value">
-                        {{category.value}}
+                        {{category.label}}
                     </option>
                 </select>
             </div>
@@ -16,12 +16,13 @@
                 required</div>
         </div>
         <!--vehicleType-->
-        <div class="col-6">
+        <div class="col-6" *ngIf="meterForm.controls.vehicleCategory.value != 1">
             <label for="vehicleType">Vehicle Type <span class="required">*</span> </label>
             <div class="mb-3">
-                <select class="form-select" id="vehicleType" type="text" formControlName="fuel" (change)="changeType()">
+                <select class="form-select" id="vehicleType" type="text" formControlName="vehicleType"
+                    (change)="setFuelOptions()">
                     <option *ngFor="let vType of vehicleTypes" [ngValue]="vType.value">
-                        {{vType.value}}
+                        {{vType.label}}
                     </option>
                 </select>
             </div>
@@ -30,13 +31,13 @@
                 required</div>
         </div>
         <!--vehicleCollectionType-->
-        <div class="col-6">
+        <div class="col-6" *ngIf="meterForm.controls.vehicleCategory.value == 2">
             <label for="vehicleCollectionType">Collection Method <span class="required">*</span> </label>
             <div class="mb-3">
-                <select class="form-select" id="vehicleCollectionType" type="text" formControlName="fuel"
-                    (change)="changeCollectionType()">
+                <select class="form-select" id="vehicleCollectionType" type="text"
+                    formControlName="vehicleCollectionType" (change)="setCollectionUnitOptions()">
                     <option *ngFor="let vCollectionType of vehicleCollectionTypes" [ngValue]="vCollectionType.value">
-                        {{vCollectionType.value}}
+                        {{vCollectionType.label}}
                     </option>
                 </select>
             </div>
@@ -48,10 +49,10 @@
         <div class="col-6">
             <label for="vehicleCollectionUnit">Collection Unit <span class="required">*</span> </label>
             <div class="mb-3">
-                <select class="form-select" id="vehicleCollectionUnit" type="text" formControlName="fuel"
-                    (change)="changeCollectionUnit()">
+                <select class="form-select" id="vehicleCollectionUnit" type="text"
+                    formControlName="vehicleCollectionUnit" (change)="changeCollectionUnit()">
                     <option *ngFor="let option of collectionUnitOptions" [ngValue]="option.value">
-                        {{option.value}}
+                        <span [innerHTML]="option.display"></span>
                     </option>
                 </select>
             </div>
@@ -63,13 +64,28 @@
         <div class="col-6">
             <label for="vehicleFuel">Fuel <span class="required">*</span> </label>
             <div class="mb-3">
-                <select class="form-select" id="vehicleFuel" type="text" formControlName="fuel" (change)="changeFuel()">
-                    <option *ngFor="let option of fuelOptions" [ngValue]="option.value">
-                        {{option.value}}
+                <select class="form-select" id="vehicleFuel" type="text" formControlName="vehicleFuel">
+                    <option *ngFor="let option of fuelOptions" [ngValue]="option">
+                        {{option}}
                     </option>
                 </select>
             </div>
             <div class="alert-danger alert" *ngIf="meterForm.get('vehicleFuel').hasError('required')">Fuel selection is
+                required</div>
+        </div>
+        <!--vehicleFuelEfficiency-->
+        <div class="col-6"
+            *ngIf="meterForm.controls.vehicleCategory.value == 2 && meterForm.controls.vehicleCollectionType.value == 2">
+            <label for="vehicleFuelEfficiency">Average Fuel Efficiency <span class="required">*</span> </label>
+            <div class="input-group mb-3">
+                <input id="vehicleFuelEfficiency" class="form-control" type="number"
+                    formControlName="vehicleFuelEfficiency" onfocus="this.select();">
+                <span class="input-group-text"><span
+                        [innerHTML]="meterForm.controls.vehicleCollectionUnit.value | settingsLabel"></span>/gal
+                </span>
+            </div>
+            <div class="alert-danger alert" *ngIf="meterForm.get('vehicleFuelEfficiency').hasError('required')">Fuel
+                efficiency is
                 required</div>
         </div>
     </div>

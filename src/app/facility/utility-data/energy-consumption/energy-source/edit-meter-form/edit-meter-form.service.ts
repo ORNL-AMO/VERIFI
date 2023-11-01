@@ -45,7 +45,8 @@ export class EditMeterFormService {
       vehicleType: [meter.vehicleType],
       vehicleCollectionType: [meter.vehicleCollectionType],
       vehicleCollectionUnit: [meter.vehicleCollectionUnit],
-      vehicleFuel: [meter.vehicleFuel]
+      vehicleFuel: [meter.vehicleFuel],
+      vehicleFuelEfficiency: [meter.vehicleFuelEfficiency]
     });
     // if(form.controls.source.value == 'Electricity'){
     //   form.controls.startingUnit.disable();
@@ -82,6 +83,7 @@ export class EditMeterFormService {
     meter.vehicleCollectionType = form.controls.vehicleCollectionType.value;
     meter.vehicleCollectionUnit = form.controls.vehicleCollectionUnit.value;
     meter.vehicleFuel = form.controls.vehicleFuel.value;
+    meter.vehicleFuelEfficiency = form.controls.vehicleFuelEfficiency.value;
     //set multipliers
     meter = this.setMultipliers(meter);
     return meter;
@@ -147,14 +149,14 @@ export class EditMeterFormService {
     }
   }
 
-  getWaterIntakeValidation(source: MeterSource): Array<ValidatorFn>{
+  getWaterIntakeValidation(source: MeterSource): Array<ValidatorFn> {
     if (source == 'Water Intake') {
       return [Validators.required]
     }
     return [];
   }
 
-  getWaterDischargeValidation(source: MeterSource): Array<ValidatorFn>{
+  getWaterDischargeValidation(source: MeterSource): Array<ValidatorFn> {
     if (source == 'Water Discharge') {
       return [Validators.required]
     }
