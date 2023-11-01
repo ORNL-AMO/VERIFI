@@ -60,6 +60,25 @@
                 collection unit is
                 required</div>
         </div>
+        <!--energyUnit-->
+        <div class="col-6">
+            <label for="energyUnit">Energy Unit <span class="required">*</span> </label>
+            <div class="mb-3">
+                <select class="form-select" id="energyUnit" type="text" formControlName="energyUnit"
+                    (change)="changeEnergyUnit()">
+                    <option *ngFor="let energyUnitOption of energyUnitOptions" [ngValue]="energyUnitOption.value">
+                        <span [innerHTML]="energyUnitOption.display"></span>
+                    </option>
+                </select>
+            </div>
+            <div class="alert-danger alert" *ngIf="meterForm.get('energyUnit').hasError('required')">Energy
+                unit
+                is
+                required</div>
+            <div class="alert alert-warning" *ngIf="hasDifferentEnergyUnits">
+                Units selected differ from the facility settings.
+            </div>
+        </div>
         <!--vehicleFuel-->
         <div class="col-6">
             <label for="vehicleFuel">Fuel <span class="required">*</span> </label>

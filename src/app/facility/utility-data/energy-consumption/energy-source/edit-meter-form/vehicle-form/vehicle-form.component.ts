@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { FormGroup, Validators } from '@angular/forms';
-import { UnitOption, VolumeGasOptions, VolumeLiquidOptions } from 'src/app/shared/unitOptions';
+import { EnergyUnitOptions, UnitOption, VolumeGasOptions, VolumeLiquidOptions } from 'src/app/shared/unitOptions';
 
 @Component({
   selector: 'app-vehicle-form',
@@ -12,10 +12,13 @@ export class VehicleFormComponent {
   meterForm: FormGroup;
 
   vehicleCategories: Array<VehicleCategory> = VehicleCategories;
+  energyUnitOptions: Array<UnitOption> = EnergyUnitOptions;
   vehicleTypes: Array<VehicleType> = [];
   vehicleCollectionTypes: Array<{ value: number, label: string }> = [{ value: 1, label: 'Fuel Usage' }, { value: 2, label: 'Mileage' }];
   collectionUnitOptions: Array<UnitOption> = [];
   fuelOptions: Array<string> = [];
+  //TODO: set
+  hasDifferentEnergyUnits: boolean = false;
   constructor() {
   }
 
@@ -107,6 +110,10 @@ export class VehicleFormComponent {
 
   changeCollectionUnit() {
 
+  }
+
+  changeEnergyUnit(){
+    
   }
 }
 

@@ -18,6 +18,7 @@ import { UtilityMetersTableComponent } from './energy-source/utility-meters-tabl
 import { UtilityMeterDataTableComponent } from './utility-meter-data/utility-meter-data-table/utility-meter-data-table.component';
 import { EditBillComponent } from './utility-meter-data/edit-bill/edit-bill.component';
 import { TableItemsDropdownModule } from 'src/app/shared/table-items-dropdown/table-items-dropdown.module';
+import { EditVehicleMeterBillComponent } from './utility-meter-data/edit-vehicle-meter-bill/edit-vehicle-meter-bill.component';
 @NgModule({
   declarations: [
     EditMeterComponent,
@@ -31,7 +32,8 @@ import { TableItemsDropdownModule } from 'src/app/shared/table-items-dropdown/ta
     EnergyConsumptionComponent,
     UtilityMetersTableComponent,
     UtilityMeterDataTableComponent,
-    EditBillComponent
+    EditBillComponent,
+    EditVehicleMeterBillComponent
   ],
   imports: [
     CommonModule,
