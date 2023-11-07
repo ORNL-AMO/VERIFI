@@ -18,29 +18,35 @@ import { MobileWaterTransportOptions } from "./mobileWaterTransportOptions";
 
 
 
-export function getFuelTypeOptions(source: MeterSource, phase: MeterPhase, customFuels: Array<IdbCustomFuel>): Array<FuelTypeOption> {
+export function getFuelTypeOptions(source: MeterSource, phase: MeterPhase, customFuels: Array<IdbCustomFuel>, scope: number): Array<FuelTypeOption> {
     if (source == 'Other Fuels') {
-        let sourceCustomFuels: Array<IdbCustomFuel> = customFuels.filter(cFuel => {
-            return cFuel.phase == phase
-        });
-        let fuels: Array<FuelTypeOption> = sourceCustomFuels.map(option => {
-            return option
-        });
-        if (phase == 'Solid') {
-            StationarySolidOptions.forEach(option => {
-                fuels.push(option);
+        if (scope == 1) {
+            //scope 1 stationary
+            let sourceCustomFuels: Array<IdbCustomFuel> = customFuels.filter(cFuel => {
+                return cFuel.phase == phase
             });
-            return fuels;
-        } else if (phase == 'Liquid') {
-            StationaryLiquidOptions.forEach(option => {
-                fuels.push(option);
+            let fuels: Array<FuelTypeOption> = sourceCustomFuels.map(option => {
+                return option
             });
-            return fuels;
-        } else if (phase == 'Gas') {
-            StationaryGasOptions.forEach(option => {
-                fuels.push(option);
-            });
-            return fuels;
+            if (phase == 'Solid') {
+                StationarySolidOptions.forEach(option => {
+                    fuels.push(option);
+                });
+                return fuels;
+            } else if (phase == 'Liquid') {
+                StationaryLiquidOptions.forEach(option => {
+                    fuels.push(option);
+                });
+                return fuels;
+            } else if (phase == 'Gas') {
+                StationaryGasOptions.forEach(option => {
+                    fuels.push(option);
+                });
+                return fuels;
+            }
+        } else if (scope == 2) {
+            //scope 1 mobile
+            return getAllMobileFuelTypes();
         }
     } else if (source == 'Other Energy') {
         return StationaryOtherEnergyOptions;

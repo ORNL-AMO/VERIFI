@@ -66,10 +66,10 @@
             <div class="mb-3">
                 <select class="form-select" id="vehicleDistanceUnit" type="text" formControlName="vehicleDistanceUnit">
                     <option [ngValue]="'mi'">
-                        Miles
+                        Miles (mi)
                     </option>
                     <option [ngValue]="'km'">
-                        Kilometers
+                        Kilometers (km)
                     </option>
                 </select>
             </div>
@@ -117,8 +117,8 @@
                 <input id="vehicleFuelEfficiency" class="form-control" type="number"
                     formControlName="vehicleFuelEfficiency" onfocus="this.select();">
                 <span class="input-group-text"><span
-                        [innerHTML]="meterForm.controls.vehicleCollectionUnit.value | settingsLabel"></span>/<span
-                        [innerHTML]="meterForm.controls.vehicleDistanceUnit.value | settingsLabel"></span>
+                        [innerHTML]="meterForm.controls.vehicleDistanceUnit.value | settingsLabel"></span>/<span
+                        [innerHTML]="meterForm.controls.vehicleCollectionUnit.value | settingsLabel"></span>
                 </span>
             </div>
             <div class="alert-danger alert" *ngIf="meterForm.get('vehicleFuelEfficiency').hasError('required')">Fuel
