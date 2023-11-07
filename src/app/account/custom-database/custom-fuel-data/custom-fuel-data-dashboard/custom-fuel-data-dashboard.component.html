@@ -63,7 +63,7 @@
                                 HHV
                             </th>
                             <td>
-                                {{fuel.heatCapacityValue | emissionsDisplay:selectedAccount.energyUnit:'HHV'}}
+                                {{fuel | emissionsDisplay:selectedAccount.energyUnit:'HHV'}}
                                 <span [innerHTML]="selectedAccount.energyUnit| settingsLabel"></span>/<span
                                     [innerHTML]="fuel.startingUnit| settingsLabel"></span>
                             </td>
@@ -95,7 +95,7 @@
                                     CO<sub>2</sub> Factor
                                 </th>
                                 <td>
-                                    {{fuel.CO2| emissionsDisplay:selectedAccount.energyUnit:'CO2'}} kg
+                                    {{fuel| emissionsDisplay:selectedAccount.energyUnit:'CO2'}} kg
                                     CO<sub>2</sub>/<span [innerHTML]="selectedAccount.energyUnit| settingsLabel"></span>
                                 </td>
                             </tr>
@@ -104,7 +104,7 @@
                                     CH<sub>4</sub> Factor
                                 </th>
                                 <td>
-                                    {{fuel.CH4| emissionsDisplay:selectedAccount.energyUnit:'CH4'}} g
+                                    {{fuel| emissionsDisplay:selectedAccount.energyUnit:'CH4'}} g
                                     CO<sub>2</sub>/<span [innerHTML]="selectedAccount.energyUnit| settingsLabel"></span>
                                 </td>
                             </tr>
@@ -113,7 +113,7 @@
                                     N<sub>2</sub>O Factor
                                 </th>
                                 <td>
-                                    {{fuel.N2O| emissionsDisplay:selectedAccount.energyUnit:'N2O'}} g
+                                    {{fuel| emissionsDisplay:selectedAccount.energyUnit:'N2O'}} g
                                     N<sub>2</sub>O/<span [innerHTML]="selectedAccount.energyUnit| settingsLabel"></span>
                                 </td>
                             </tr>

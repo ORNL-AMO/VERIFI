@@ -3,12 +3,12 @@
     <table class="table table-sm table-bordered">
         <tbody>
             <tr>
-                <td>
+                <td class="w-50">
                     CO<sub>2</sub> Factor
                 </td>
-                <td>
+                <td class="w-50">
                     <ng-container *ngIf="selectedFuelTypeOption.CO2">
-                        {{selectedFuelTypeOption.CO2|
+                        {{selectedFuelTypeOption|
                         emissionsDisplay:meterForm.controls.energyUnit.value:'CO2'}} kg
                         CO<sub>2</sub>/{{meterForm.controls.energyUnit.value}}
                     </ng-container>
@@ -23,7 +23,7 @@
                 </td>
                 <td>
                     <ng-container *ngIf="selectedFuelTypeOption.CH4">
-                        {{selectedFuelTypeOption.CH4|
+                        {{selectedFuelTypeOption|
                         emissionsDisplay:meterForm.controls.energyUnit.value:'CH4'}} g
                         CH<sub>4</sub>/{{meterForm.controls.energyUnit.value}}
                     </ng-container>
@@ -38,7 +38,7 @@
                 </td>
                 <td>
                     <ng-container *ngIf="selectedFuelTypeOption.N2O">
-                        {{selectedFuelTypeOption.N2O|
+                        {{selectedFuelTypeOption|
                         emissionsDisplay:meterForm.controls.energyUnit.value:'N2O'}} g
                         N<sub>2</sub>O/{{meterForm.controls.energyUnit.value}}
                     </ng-container>
@@ -70,13 +70,14 @@
     <table class="table table-sm table-bordered">
         <tbody>
             <tr>
-                <td>
+                <td class="w-50">
                     CO<sub>2</sub> Factor
                 </td>
-                <td>
+                <td class="w-50">
                     <ng-container *ngIf="selectedFuelTypeOption.CO2">
-                        {{selectedFuelTypeOption.CO2}} g
-                        CO<sub>2</sub>/gallon
+                        {{selectedFuelTypeOption|
+                        emissionsDisplay:meterForm.controls.energyUnit.value:'CO2':meterForm.controls.vehicleCollectionUnit.value}}
+                        g CO<sub>2</sub>/<span [innerHTML]="meterForm.controls.vehicleCollectionUnit.value"></span>
                     </ng-container>
                     <ng-container *ngIf="!selectedFuelTypeOption.CO2">
                         &mdash;
@@ -89,10 +90,15 @@
                 </td>
                 <td>
                     <ng-container *ngIf="selectedFuelTypeOption.CH4">
-                        {{selectedFuelTypeOption.CH4}} g
-                        CH<sub>4</sub>/
-                        <ng-container *ngIf="selectedFuelTypeOption.isOnRoad">mile</ng-container>
-                        <ng-container *ngIf="!selectedFuelTypeOption.isOnRoad">gallon</ng-container>
+                        {{selectedFuelTypeOption|
+                        emissionsDisplay:meterForm.controls.energyUnit.value:'CH4':meterForm.controls.vehicleCollectionUnit.value:meterForm.controls.vehicleDistanceUnit.value}}
+                        g CH<sub>4</sub>/
+                        <ng-container *ngIf="selectedFuelTypeOption.isOnRoad">
+                            <span [innerHTML]="meterForm.controls.vehicleDistanceUnit.value"></span>
+                        </ng-container>
+                        <ng-container *ngIf="!selectedFuelTypeOption.isOnRoad">
+                            <span [innerHTML]="meterForm.controls.vehicleCollectionUnit.value"></span>
+                        </ng-container>
 
                     </ng-container>
                     <ng-container *ngIf="!selectedFuelTypeOption.CH4">
@@ -106,10 +112,15 @@
                 </td>
                 <td>
                     <ng-container *ngIf="selectedFuelTypeOption.N2O">
-                        {{selectedFuelTypeOption.N2O}} g
-                        N<sub>2</sub>O/
-                        <ng-container *ngIf="selectedFuelTypeOption.isOnRoad">mile</ng-container>
-                        <ng-container *ngIf="!selectedFuelTypeOption.isOnRoad">gallon</ng-container>
+                        {{selectedFuelTypeOption|
+                        emissionsDisplay:meterForm.controls.energyUnit.value:'N2O':meterForm.controls.vehicleCollectionUnit.value:meterForm.controls.vehicleDistanceUnit.value}}
+                        g N<sub>2</sub>O/
+                        <ng-container *ngIf="selectedFuelTypeOption.isOnRoad">
+                            <span [innerHTML]="meterForm.controls.vehicleDistanceUnit.value"></span>
+                        </ng-container>
+                        <ng-container *ngIf="!selectedFuelTypeOption.isOnRoad">
+                            <span [innerHTML]="meterForm.controls.vehicleCollectionUnit.value"></span>
+                        </ng-container>
                     </ng-container>
                     <ng-container *ngIf="!selectedFuelTypeOption.N2O">
                         &mdash;

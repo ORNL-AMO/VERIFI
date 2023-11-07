@@ -388,8 +388,8 @@ export class EditMeterFormComponent implements OnInit {
       //purchased electricity
       this.scopeOptions = [ScopeOptions[2]]
     } else if (selectedMeterSource == 'Other Energy') {
-      //all options
-      this.scopeOptions = ScopeOptions;
+      //all options except mobile
+      this.scopeOptions = ScopeOptions.filter(option => {return option.value != 2});
     } else if (selectedMeterSource == 'Natural Gas') {
       //Stationary
       this.scopeOptions = [ScopeOptions[0]];
