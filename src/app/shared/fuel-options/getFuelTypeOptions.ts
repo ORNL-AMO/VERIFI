@@ -5,6 +5,16 @@ import { StationarySolidOptions } from "./stationarySolidOptions";
 import { StationaryLiquidOptions } from "./stationaryLiquidOptions";
 import { StationaryGasOptions } from "./stationaryGasOptions";
 import { StationaryOtherEnergyOptions } from "./stationaryOtherEnergyOptions";
+import { MobileBusOptions } from "./mobileBusOptions";
+import { MobileHeavyDutyTruckOptions } from "./mobileHeavyDutyVehicleOptions";
+import { MobileLightDutyTruckOptions } from "./mobileLightDutyTruckOptions";
+import { MobileMotorcycleOptions } from "./mobileMotorcycleOptions";
+import { MobileOffRoadAgricultureOptions } from "./mobileOffRoadAgricultureOptions";
+import { MobileOffRoadConstructionOptions } from "./mobileOffRoadConstructionOptions";
+import { MobilePassangerCarOptions } from "./mobilePassangerCarOptions";
+import { MobileRailOptions } from "./mobileRailOptions";
+import { MobileTransportOnsiteOptions } from "./mobileTransportOnsiteOptions";
+import { MobileWaterTransportOptions } from "./mobileWaterTransportOptions";
 
 
 
@@ -36,4 +46,17 @@ export function getFuelTypeOptions(source: MeterSource, phase: MeterPhase, custo
         return StationaryOtherEnergyOptions;
     }
     return [];
+}
+
+export function getAllMobileFuelTypes(): Array<FuelTypeOption> {
+    return [].concat(MobileHeavyDutyTruckOptions,
+        MobileBusOptions,
+        MobileLightDutyTruckOptions,
+        MobileMotorcycleOptions,
+        MobileOffRoadAgricultureOptions,
+        MobileOffRoadConstructionOptions,
+        MobilePassangerCarOptions,
+        MobileRailOptions,
+        MobileTransportOnsiteOptions,
+        MobileWaterTransportOptions);
 }

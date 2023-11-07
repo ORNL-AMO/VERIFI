@@ -46,7 +46,8 @@ export class EditMeterFormService {
       vehicleCollectionType: [meter.vehicleCollectionType],
       vehicleCollectionUnit: [meter.vehicleCollectionUnit],
       vehicleFuel: [meter.vehicleFuel],
-      vehicleFuelEfficiency: [meter.vehicleFuelEfficiency]
+      vehicleFuelEfficiency: [meter.vehicleFuelEfficiency],
+      vehicleDistanceUnit: [meter.vehicleDistanceUnit]
     });
     // if(form.controls.source.value == 'Electricity'){
     //   form.controls.startingUnit.disable();
@@ -84,6 +85,7 @@ export class EditMeterFormService {
     meter.vehicleCollectionUnit = form.controls.vehicleCollectionUnit.value;
     meter.vehicleFuel = form.controls.vehicleFuel.value;
     meter.vehicleFuelEfficiency = form.controls.vehicleFuelEfficiency.value;
+    meter.vehicleDistanceUnit = form.controls.vehicleDistanceUnit.value;
     //set multipliers
     meter = this.setMultipliers(meter);
     return meter;

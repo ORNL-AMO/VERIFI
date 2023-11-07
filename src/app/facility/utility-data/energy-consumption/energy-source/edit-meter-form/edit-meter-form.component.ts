@@ -390,7 +390,11 @@ export class EditMeterFormComponent implements OnInit {
     } else if (selectedMeterSource == 'Other Energy') {
       //all options
       this.scopeOptions = ScopeOptions;
-    } else if (selectedMeterSource == 'Natural Gas' || selectedMeterSource == 'Other Fuels') {
+    } else if (selectedMeterSource == 'Natural Gas') {
+      //Stationary
+      this.scopeOptions = [ScopeOptions[0]];
+    }
+    else if (selectedMeterSource == 'Other Fuels') {
       //Scope 1
       this.scopeOptions = ScopeOptions.filter(option => { return option.scope == 'Scope 1' });
     }

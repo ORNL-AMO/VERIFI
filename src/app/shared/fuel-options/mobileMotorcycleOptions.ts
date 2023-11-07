@@ -6,10 +6,12 @@ export const MobileMotorcycleOptions: Array<FuelTypeOption> = [
         heatCapacityValue: .12760,
         value: 'Gasoline',
         siteToSourceMultiplier: 1,
-        emissionsOutputRate: 67.1338,
+        emissionsOutputRate: undefined,
         CO2: 8.78,
         //CH4 and N2O in g/mile
         CH4: .0070,
-        N2O: .0083
+        N2O: .0083,
+        isMobile: true,
+        isOnRoad: true
     }
 ]

@@ -3,6 +3,8 @@ import { FormGroup } from '@angular/forms';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { MeterSource } from 'src/app/models/constantsAndTypes';
 import { IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import { FuelTypeOption } from 'src/app/shared/fuel-options/fuelTypeOption';
+import { getAllMobileFuelTypes } from 'src/app/shared/fuel-options/getFuelTypeOptions';
 
 @Component({
   selector: 'app-edit-vehicle-meter-bill',
@@ -26,14 +28,18 @@ export class EditVehicleMeterBillComponent {
   source: MeterSource;
   energyUnit: string;
   volumeUnit: string;
-  marketEmissions: number = 0;
-  locationEmissions: number = 0;
+  isBiofuel: boolean;
+  carbonEmissions: number = 0;
+  biogenicEmissions: number = 0;
+  otherEmissions: number = 0;
+  totalEmissions: number = 0;
+  meterFuel: FuelTypeOption;
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService) {
   }
 
   ngOnInit(): void {
-    // this.showEmissions = this.editMeterFormService.checkShowEmissionsOutputRate(this.editMeter);
-    // this.setTotalEmissions();
+    this.setFuel();
+    this.setTotalEmissions();
   }
 
   ngOnChanges() {
@@ -41,11 +47,19 @@ export class EditVehicleMeterBillComponent {
     this.energyUnit = this.editMeter.energyUnit;
     this.volumeUnit = this.editMeter.vehicleCollectionUnit;
     this.checkDate();
-    // this.setTotalEmissions();
+    this.setFuel();
+    this.setTotalEmissions();
+  }
+
+  setFuel() {
+    let mobileTypeFuels: Array<FuelTypeOption> = getAllMobileFuelTypes();
+    this.meterFuel = mobileTypeFuels.find(fuel => {
+      return fuel.value == this.editMeter.vehicleFuel;
+    });
   }
 
   calculateTotalEnergyUse() {
-
+    this.setTotalEmissions();
   }
 
   checkDate() {
@@ -65,6 +79,31 @@ export class EditVehicleMeterBillComponent {
   }
 
   setTotalEmissions() {
-
+    if (this.meterDataForm.controls.totalVolume.value) {
+      if (this.editMeter.vehicleCategory != 2 || this.editMeter.vehicleCollectionType == 1) {
+        if (this.meterFuel.isBiofuel) {
+          this.biogenicEmissions = this.meterDataForm.controls.totalVolume.value * this.meterFuel.CO2;
+          this.carbonEmissions = 0;
+        } else {
+          this.carbonEmissions = this.meterDataForm.controls.totalVolume.value * this.meterFuel.CO2;
+          this.biogenicEmissions = 0;
+        }
+      } else {
+        if (this.meterFuel.isBiofuel) {
+          this.biogenicEmissions = this.meterDataForm.controls.totalVolume.value * this.editMeter.vehicleFuelEfficiency * this.meterFuel.CO2;
+          this.carbonEmissions = 0;
+        } else {
+          this.carbonEmissions = this.meterDataForm.controls.totalVolume.value * this.editMeter.vehicleFuelEfficiency * this.meterFuel.CO2;
+          this.biogenicEmissions = 0;
+        }
+      }
+      this.otherEmissions = (25 * this.meterDataForm.controls.totalVolume.value * this.meterFuel.CH4) + (298 * this.meterDataForm.controls.totalVolume.value * this.meterFuel.N2O);
+      this.totalEmissions = this.otherEmissions + this.carbonEmissions + this.biogenicEmissions;
+    } else {
+      this.carbonEmissions = 0;
+      this.biogenicEmissions = 0;
+      this.otherEmissions = 0;
+      this.totalEmissions = this.carbonEmissions + this.biogenicEmissions + this.otherEmissions;
+    }
   }
 }

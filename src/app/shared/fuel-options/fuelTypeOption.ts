@@ -8,5 +8,7 @@ export interface FuelTypeOption {
     CO2: number,
     CH4: number,
     N2O: number,
-    isBiofuel?: boolean
+    isBiofuel?: boolean,
+    isMobile?: boolean,
+    isOnRoad?: boolean
 }

@@ -9,9 +9,10 @@ export const MobileAircraftOptions: Array<FuelTypeOption> = [
         siteToSourceMultiplier: 1,
         emissionsOutputRate: undefined,
         CO2: 9.75,
-        //CH4 and N2O in g/mile
+        //CH4 and N2O in g/gallon
         CH4: .0,
-        N2O: .30
+        N2O: .30,
+        isMobile: true
     },    
     {
         startingUnit: 'gal',
@@ -20,9 +21,9 @@ export const MobileAircraftOptions: Array<FuelTypeOption> = [
         siteToSourceMultiplier: 1,
         emissionsOutputRate: undefined,
         CO2: 8.31,
-        //YEAR USED: 2020
-        //CH4 and N2O in g/mile
+        //CH4 and N2O in g/gallon
         CH4: 7.06,
-        N2O: .11
+        N2O: .11,
+        isMobile: true
     }
 ]

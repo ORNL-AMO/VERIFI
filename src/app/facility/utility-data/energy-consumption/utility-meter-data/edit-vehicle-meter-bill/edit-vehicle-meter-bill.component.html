@@ -31,7 +31,8 @@
                     onfocus="this.select();" min="0" max="999999999999999">
                 <span class="input-group-text" [innerHTML]="volumeUnit | settingsLabel"></span>
             </div>
-            <div class="alert alert-danger" *ngIf="meterDataForm.get('totalVolume').hasError('required')">Total fuel use is
+            <div class="alert alert-danger" *ngIf="meterDataForm.get('totalVolume').hasError('required')">Total fuel use
+                is
                 required</div>
             <div class="alert alert-danger" *ngIf="meterDataForm.get('totalVolume').hasError('min')">Can't be less than
                 0
@@ -62,20 +63,42 @@
                 greater than 0</div>
         </div>
         <div class="col-md-6 col-sm-12">
-            <label for="marketEmissions">
-                Total Market-Based Emissions
-            </label>
-            <div class="input-group mb-3">
-                {{marketEmissions | number:'1.0-0'}} tonne CO<sub>2</sub>e
-            </div>
-        </div>
-        <div class="col-md-6 col-sm-12">
-            <label for="locationEmissions">
-                Total Location-Based Emissions
-            </label>
-            <div class="input-group mb-3">
-                {{locationEmissions | number:'1.0-0'}} tonne CO<sub>2</sub>e
-            </div>
+            <table class="table table-sm table-bordered">
+                <tbody>
+                    <tr *ngIf="!meterFuel.isBiofuel">
+                        <th>
+                            Carbon Emissions
+                        </th>
+                        <td>
+                            {{carbonEmissions | number:'1.0-0'}} tonne CO<sub>2</sub>e
+                        </td>
+                    </tr>
+                    <tr *ngIf="meterFuel.isBiofuel">
+                        <th>
+                            Biogenic Emissions
+                        </th>
+                        <td>
+                            {{biogenicEmissions | number:'1.0-0'}} tonne CO<sub>2</sub>e
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            Other Emissions
+                        </th>
+                        <td>
+                            {{otherEmissions | number:'1.0-0'}} tonne CO<sub>2</sub>e
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            Total Emissions
+                        </th>
+                        <td>
+                            {{totalEmissions | number:'1.0-0'}} tonne CO<sub>2</sub>e
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 
