@@ -48,7 +48,11 @@ export class EditVehicleMeterBillComponent {
   ngOnChanges() {
     this.source = this.editMeter.source;
     this.energyUnit = this.editMeter.energyUnit;
-    this.volumeUnit = this.editMeter.vehicleCollectionUnit;
+    if(this.editMeter.vehicleCollectionType == 1){
+      this.volumeUnit = this.editMeter.vehicleCollectionUnit;
+    }else{
+      this.volumeUnit = this.editMeter.vehicleDistanceUnit;
+    }
     this.checkDate();
     this.setFuel();
     this.setTotalEmissions();

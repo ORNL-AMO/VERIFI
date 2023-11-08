@@ -134,11 +134,11 @@ export class UtilityMeterDataService {
 
   getDefaultVehicleFilters(): VehicleDataFilters {
     return {
-      totalVolume: true,
+      totalEnergy: true,
       totalCost: true,
       mobileBiogenicEmissions: true,
-      mobileCarbonEmissions: true,
-      mobileOtherEmissions: true,
+      mobileCarbonEmissions: false,
+      mobileOtherEmissions: false,
       mobileTotalEmissions: true,
       otherCharge: true
     }

@@ -136,7 +136,7 @@ export class UtilityMeterDataFilterComponent implements OnInit {
       }
     } else if (this.meter.scope == 2) {
       this.vehicleDataFilters = {
-        totalVolume: true,
+        totalEnergy: true,
         totalCost: true,
         otherCharge: true,
         mobileBiogenicEmissions: true,
@@ -197,7 +197,7 @@ export class UtilityMeterDataFilterComponent implements OnInit {
       }
     } else if (this.meter.scope == 2) {
       this.vehicleDataFilters = {
-        totalVolume: false,
+        totalEnergy: false,
         totalCost: false,
         otherCharge: false,
         mobileBiogenicEmissions: false,

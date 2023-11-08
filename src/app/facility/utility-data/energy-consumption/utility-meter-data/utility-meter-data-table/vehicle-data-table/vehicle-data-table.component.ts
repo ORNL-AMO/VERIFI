@@ -44,7 +44,6 @@ export class VehicleDataTableComponent {
 
   showEmissionsSection: boolean;
   showDetailedCharges: boolean;
-  showEnergyColumn: boolean;
   volumeUnit: string;
   energyUnit: string
   constructor(private utilityMeterDataService: UtilityMeterDataService,
@@ -74,8 +73,11 @@ export class VehicleDataTableComponent {
   }
 
   setData() {
-    //todo: distance
-    this.volumeUnit = this.selectedMeter.vehicleCollectionUnit;
+    if(this.selectedMeter.vehicleCollectionType == 1){
+      this.volumeUnit = this.selectedMeter.vehicleCollectionUnit;
+    }else{
+      this.volumeUnit = this.selectedMeter.vehicleDistanceUnit;
+    }
     this.showEstimated = (this.selectedMeterData.find(dataItem => { return dataItem.isEstimated == true })) != undefined;
     this.setEmissions();
     this.energyUnit = this.selectedMeter.energyUnit;
@@ -145,7 +147,7 @@ export class VehicleDataTableComponent {
 
   setNumColumns() {
     this.numDetailedCharges = 0;
-    this.numGeneralInformation = 2;
+    this.numGeneralInformation = 3;
     this.numEmissions = 0;
     this.showEmissionsSection = (this.vehicleDataFilters.mobileOtherEmissions || this.vehicleDataFilters.mobileBiogenicEmissions || this.vehicleDataFilters.mobileCarbonEmissions || this.vehicleDataFilters.mobileTotalEmissions);
     this.showDetailedCharges = this.vehicleDataFilters.otherCharge;
@@ -164,7 +166,7 @@ export class VehicleDataTableComponent {
     if (!this.vehicleDataFilters.totalCost) {
       this.numGeneralInformation--;
     }
-    if (!this.vehicleDataFilters.totalVolume) {
+    if (!this.vehicleDataFilters.totalEnergy) {
       this.numGeneralInformation--;
     }
     if (this.vehicleDataFilters.totalCost) {

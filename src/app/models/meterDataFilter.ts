@@ -56,7 +56,7 @@ export interface GeneralUtilityDataFilters{
 
 
 export interface VehicleDataFilters{
-  totalVolume: boolean,
+  totalEnergy: boolean,
   totalCost: boolean,
   mobileBiogenicEmissions: boolean,
   mobileCarbonEmissions: boolean,

@@ -174,9 +174,9 @@
         <div class="row" *ngIf="meter.source != 'Electricity' && meter.scope == 2">
             <div class="col">
                 <div class="form-check">
-                    <input class="form-check-input" type="checkbox" name="totalVolume" id="totalVolume"
-                        [(ngModel)]="vehicleDataFilters.totalVolume" (change)="save()">
-                    <label for="totalVolume" class="form-check-label">Total Volume</label>
+                    <input class="form-check-input" type="checkbox" name="totalEnergy" id="totalEnergy"
+                        [(ngModel)]="vehicleDataFilters.totalEnergy" (change)="save()">
+                    <label for="totalEnergy" class="form-check-label">Total Energy</label>
                 </div>
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" name="totalCost" id="totalCost"
