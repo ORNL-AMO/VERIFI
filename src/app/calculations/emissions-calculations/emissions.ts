@@ -70,7 +70,6 @@ export function getEmissions(meter: IdbUtilityMeter, energyUse: number, energyUn
     }
 
     //NG or non mobile
-    console.log(meter.scope);
     if (meter.source == 'Natural Gas' || (meter.source == 'Other Fuels' && meter.scope != 2)) {
         if (energyIsSource && meter.siteToSource != 0) {
             energyUse = energyUse / meter.siteToSource;
@@ -82,7 +81,6 @@ export function getEmissions(meter: IdbUtilityMeter, energyUse: number, energyUn
         locationEmissions = (convertedEnergyUse * marketEmissionsOutputRate) / 1000;
         marketEmissions = (convertedEnergyUse * marketEmissionsOutputRate) / 1000;
     } else if (meter.source == 'Other Fuels' && meter.scope == 2) {
-        console.log('HERE?: ' + totalVolume)
         let fuelOptions: Array<FuelTypeOption> = getAllMobileFuelTypes();
         let meterFuel: FuelTypeOption = fuelOptions.find(option => {
             return option.value == meter.vehicleFuel

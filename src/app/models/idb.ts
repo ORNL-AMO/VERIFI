@@ -3,7 +3,7 @@ import { AccountAnalysisSetupErrors } from './accountAnalysis';
 import { AnalysisCategory, AnalysisGroup, AnalysisSetupErrors } from './analysis';
 import { MonthlyData } from './calanderization';
 import { FacilityClassification, MeterPhase, MeterSource, ReportType, WaterDischargeType, WaterIntakeType } from './constantsAndTypes';
-import { ElectricityDataFilters, GeneralUtilityDataFilters } from './meterDataFilter';
+import { ElectricityDataFilters, GeneralUtilityDataFilters, VehicleDataFilters } from './meterDataFilter';
 import { BetterClimateReportSetup, BetterPlantsReportSetup, DataOverviewReportSetup, PerformanceReportSetup } from './overview-report';
 import { SustainabilityQuestions } from './sustainabilityQuestions';
 
@@ -68,6 +68,7 @@ export interface IdbFacility {
     tableElectricityFilters?: ElectricityDataFilters,
     electricityInputFilters?: ElectricityDataFilters,
     tableGeneralUtilityFilters?: GeneralUtilityDataFilters,
+    tableVehicleDataFilters?: VehicleDataFilters,
     //units
     unitsOfMeasure: string,
     energyUnit: string,
@@ -191,7 +192,11 @@ export interface IdbUtilityMeterData {
     excessRECs?: number,
     excessRECsEmissions?: number,
     isEstimated?: boolean,
-
+    //vehicle emissions
+    mobileBiogenicEmissions?: number,
+    mobileCarbonEmissions?: number,
+    mobileOtherEmissions?: number,
+    mobileTotalEmissions?: number,
 
     //electricity
     totalRealDemand?: number,
@@ -219,6 +224,7 @@ export interface IdbUtilityMeterData {
     //non-electricity
     demandUsage?: number,
     demandCharge?: number
+
 }
 
 export interface IdbPredictorEntry {

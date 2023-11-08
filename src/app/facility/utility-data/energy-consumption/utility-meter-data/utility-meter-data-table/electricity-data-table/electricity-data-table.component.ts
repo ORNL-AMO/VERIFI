@@ -1,7 +1,7 @@
 import { Component, ElementRef, EventEmitter, Input, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { IdbCustomFuel, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
-import { UtilityMeterDataService } from '../utility-meter-data.service';
+import { UtilityMeterDataService } from '../../utility-meter-data.service';
 import * as _ from 'lodash';
 import { CopyTableService } from 'src/app/shared/helper-services/copy-table.service';
 import { AdditionalChargesFilters, DetailedChargesFilters, EmissionsFilters, GeneralInformationFilters } from 'src/app/models/meterDataFilter';
@@ -14,7 +14,7 @@ import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
 @Component({
   selector: 'app-electricity-data-table',
   templateUrl: './electricity-data-table.component.html',
-  styleUrls: ['./electricity-data-table.component.css', '../utility-meter-data.component.css']
+  styleUrls: ['./electricity-data-table.component.css']
 })
 export class ElectricityDataTableComponent implements OnInit {
   @Input()

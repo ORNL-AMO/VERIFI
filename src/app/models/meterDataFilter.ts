@@ -53,3 +53,14 @@ export interface GeneralUtilityDataFilters{
   deliveryCharge: boolean,
   otherCharge: boolean,
 }
+
+
+export interface VehicleDataFilters{
+  totalVolume: boolean,
+  totalCost: boolean,
+  mobileBiogenicEmissions: boolean,
+  mobileCarbonEmissions: boolean,
+  mobileOtherEmissions: boolean,
+  mobileTotalEmissions: boolean,
+  otherCharge: boolean,
+}
