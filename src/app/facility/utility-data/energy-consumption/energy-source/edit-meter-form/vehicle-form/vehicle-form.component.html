@@ -5,7 +5,7 @@
             <label for="vehicleCategory">Vehicle Category <span class="required">*</span> </label>
             <div class="mb-3">
                 <select class="form-select" id="vehicleCategory" type="text" formControlName="vehicleCategory"
-                    (change)="setVehicleTypes()">
+                    (change)="changeVehicleCategory()">
                     <option *ngFor="let category of vehicleCategories" [ngValue]="category.value">
                         {{category.label}}
                     </option>

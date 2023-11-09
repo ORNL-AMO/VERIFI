@@ -653,11 +653,11 @@ export class UploadDataService {
         } else {
           newMeter.energyUnit = selectedFacility.energyUnit;
         }
-        let showHeatCapacity: boolean = this.editMeterFormService.checkShowHeatCapacity(newMeter.source, newMeter.startingUnit);
+        let showHeatCapacity: boolean = this.editMeterFormService.checkShowHeatCapacity(newMeter.source, newMeter.startingUnit, newMeter.scope);
         if (showHeatCapacity) {
           newMeter.heatCapacity = getHeatingCapacity(newMeter.source, newMeter.startingUnit, newMeter.energyUnit);
         }
-        let showSiteToSource: boolean = this.editMeterFormService.checkShowSiteToSource(newMeter.source, newMeter.startingUnit, newMeter.includeInEnergy);
+        let showSiteToSource: boolean = this.editMeterFormService.checkShowSiteToSource(newMeter.source, newMeter.includeInEnergy, newMeter.scope);
         if (showSiteToSource) {
           newMeter.siteToSource = getSiteToSource(newMeter.source);
         }

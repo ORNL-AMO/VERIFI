@@ -20,6 +20,7 @@ import { MobileWaterTransportOptions } from "./mobileWaterTransportOptions";
 
 export function getFuelTypeOptions(source: MeterSource, phase: MeterPhase, customFuels: Array<IdbCustomFuel>, scope: number): Array<FuelTypeOption> {
     if (source == 'Other Fuels') {
+        console.log(scope);
         if (scope == 1) {
             //scope 1 stationary
             let sourceCustomFuels: Array<IdbCustomFuel> = customFuels.filter(cFuel => {

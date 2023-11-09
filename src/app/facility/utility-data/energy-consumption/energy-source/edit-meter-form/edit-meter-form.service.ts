@@ -12,12 +12,14 @@ export class EditMeterFormService {
   constructor(private formBuilder: FormBuilder) { }
 
   getFormFromMeter(meter: IdbUtilityMeter): FormGroup {
-    let fuelValidators: Array<ValidatorFn> = this.getFuelValidation(meter.source);
-    let phaseValidators: Array<ValidatorFn> = this.getPhaseValidation(meter.source);
-    let heatCapacityValidators: Array<ValidatorFn> = this.getHeatCapacitValidation(meter.source, meter.startingUnit);
-    let siteToSourceValidators: Array<ValidatorFn> = this.getSiteToSourceValidation(meter.source, meter.startingUnit, meter.includeInEnergy);
+    let fuelValidators: Array<ValidatorFn> = this.getFuelValidation(meter.source, meter.scope);
+    let phaseValidators: Array<ValidatorFn> = this.getPhaseValidation(meter.source, meter.scope);
+    let heatCapacityValidators: Array<ValidatorFn> = this.getHeatCapacitValidation(meter.source, meter.startingUnit, meter.scope);
+    let siteToSourceValidators: Array<ValidatorFn> = this.getSiteToSourceValidation(meter.source, meter.includeInEnergy, meter.scope);
     let waterIntakeValidation: Array<ValidatorFn> = this.getWaterIntakeValidation(meter.source);
     let waterDischargeValidation: Array<ValidatorFn> = this.getWaterDischargeValidation(meter.source);
+    let basicVehicleValidation: Array<ValidatorFn> = this.getBasicVehicleValidation(meter.scope);
+    let additionalVehicleValidation: Array<ValidatorFn> = this.getAdditionalVehicleValidation(meter.scope, meter.vehicleCategory)
     let form: FormGroup = this.formBuilder.group({
       meterNumber: [meter.meterNumber],
       accountNumber: [meter.accountNumber],
@@ -29,7 +31,6 @@ export class EditMeterFormService {
       supplier: [meter.supplier],
       notes: [meter.notes],
       source: [meter.source, Validators.required],
-      group: [meter.group],
       fuel: [meter.fuel, fuelValidators],
       startingUnit: [meter.startingUnit, Validators.required],
       energyUnit: [meter.energyUnit, Validators.required],
@@ -41,13 +42,13 @@ export class EditMeterFormService {
       greenPurchaseFraction: [meter.greenPurchaseFraction * 100, [Validators.min(0), Validators.max(100)]],
       waterIntakeType: [meter.waterIntakeType, waterIntakeValidation],
       waterDischargeType: [meter.waterDischargeType, waterDischargeValidation],
-      vehicleCategory: [meter.vehicleCategory],
-      vehicleType: [meter.vehicleType],
-      vehicleCollectionType: [meter.vehicleCollectionType],
-      vehicleCollectionUnit: [meter.vehicleCollectionUnit],
-      vehicleFuel: [meter.vehicleFuel],
-      vehicleFuelEfficiency: [meter.vehicleFuelEfficiency],
-      vehicleDistanceUnit: [meter.vehicleDistanceUnit]
+      vehicleCategory: [meter.vehicleCategory, basicVehicleValidation],
+      vehicleType: [meter.vehicleType, additionalVehicleValidation],
+      vehicleCollectionType: [meter.vehicleCollectionType, additionalVehicleValidation],
+      vehicleCollectionUnit: [meter.vehicleCollectionUnit, basicVehicleValidation],
+      vehicleFuel: [meter.vehicleFuel, basicVehicleValidation],
+      vehicleFuelEfficiency: [meter.vehicleFuelEfficiency, additionalVehicleValidation],
+      vehicleDistanceUnit: [meter.vehicleDistanceUnit, additionalVehicleValidation]
     });
     // if(form.controls.source.value == 'Electricity'){
     //   form.controls.startingUnit.disable();
@@ -67,7 +68,6 @@ export class EditMeterFormService {
     meter.supplier = form.controls.supplier.value;
     meter.notes = form.controls.notes.value;
     meter.source = form.controls.source.value;
-    meter.group = form.controls.group.value;
     meter.fuel = form.controls.fuel.value;
     meter.startingUnit = form.controls.startingUnit.value;
     meter.energyUnit = form.controls.energyUnit.value;
@@ -117,24 +117,24 @@ export class EditMeterFormService {
   }
 
 
-  getFuelValidation(source: MeterSource): Array<ValidatorFn> {
-    if (source == 'Other Fuels' || source == 'Other Energy') {
+  getFuelValidation(source: MeterSource, scope: number): Array<ValidatorFn> {
+    if ((source == 'Other Fuels' && scope != 2) || source == 'Other Energy') {
       return [Validators.required];
     } else {
       return [];
     }
   }
 
-  getPhaseValidation(source: MeterSource): Array<ValidatorFn> {
-    if (source == 'Other Fuels') {
+  getPhaseValidation(source: MeterSource, scope: number): Array<ValidatorFn> {
+    if (source == 'Other Fuels' && scope != 2) {
       return [Validators.required];
     } else {
       return [];
     }
   }
 
-  getHeatCapacitValidation(source: MeterSource, startingUnit: string): Array<ValidatorFn> {
-    let checkShowHeatCapacity: boolean = this.checkShowHeatCapacity(source, startingUnit);
+  getHeatCapacitValidation(source: MeterSource, startingUnit: string, scope: number): Array<ValidatorFn> {
+    let checkShowHeatCapacity: boolean = this.checkShowHeatCapacity(source, startingUnit, scope);
     if (checkShowHeatCapacity) {
       return [Validators.required, Validators.min(0)];
     } else {
@@ -142,8 +142,8 @@ export class EditMeterFormService {
     }
   }
 
-  getSiteToSourceValidation(source: MeterSource, startingUnit: string, includeInEnergy: boolean): Array<ValidatorFn> {
-    let checkShowSiteToSource: boolean = this.checkShowSiteToSource(source, startingUnit, includeInEnergy);
+  getSiteToSourceValidation(source: MeterSource, includeInEnergy: boolean, scope: number): Array<ValidatorFn> {
+    let checkShowSiteToSource: boolean = this.checkShowSiteToSource(source, includeInEnergy, scope);
     if (checkShowSiteToSource) {
       return [Validators.required, Validators.min(0)];
     } else {
@@ -165,16 +165,31 @@ export class EditMeterFormService {
     return [];
   }
 
-  checkShowHeatCapacity(source: MeterSource, startingUnit: string): boolean {
-    if (source != 'Water Intake' && source != 'Water Discharge' && source != 'Other Utility' && startingUnit) {
+  getBasicVehicleValidation(scope: number): Array<ValidatorFn> {
+    if (scope == 2) {
+      return [Validators.required]
+    }
+    return [];
+  }
+
+
+  getAdditionalVehicleValidation(scope: number, vehicleCategory: number): Array<ValidatorFn> {
+    if (scope == 2 && vehicleCategory != 1) {
+      return [Validators.required]
+    }
+    return [];
+  }
+
+  checkShowHeatCapacity(source: MeterSource, startingUnit: string, scope: number): boolean {
+    if (source != 'Water Intake' && source != 'Water Discharge' && source != 'Other Utility' && startingUnit && scope != 2) {
       return (getIsEnergyUnit(startingUnit) == false);
     } else {
       return false;
     }
   }
 
-  checkShowSiteToSource(source: MeterSource, startingUnit: string, includeInEnergy: boolean): boolean {
-    if (!includeInEnergy) {
+  checkShowSiteToSource(source: MeterSource, includeInEnergy: boolean, scope: number): boolean {
+    if (!includeInEnergy || scope == 2) {
       return false;
     } else if (source == "Electricity" || source == "Natural Gas" || source == 'Other Energy') {
       return true;
