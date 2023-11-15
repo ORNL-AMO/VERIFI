@@ -1,7 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
 import * as ExcelJS from 'exceljs';
-import { AgreementType, AgreementTypes, ScopeOption, ScopeOptions } from 'src/app/facility/utility-data/energy-consumption/energy-source/edit-meter-form/editMeterOptions';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
@@ -11,6 +10,8 @@ import { IdbAccount, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtility
 import * as _ from 'lodash';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { getIsEnergyUnit } from '../sharedHelperFuntions';
+import { ScopeOption, ScopeOptions } from 'src/app/models/scopeOption';
+import { AgreementType, AgreementTypes } from 'src/app/models/agreementType';
 
 @Injectable({
   providedIn: 'root'

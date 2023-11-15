@@ -1,0 +1,133 @@
+<form [formGroup]="meterForm">
+    <div class="row">
+        <!-- vehicleCategory -->
+        <div class="col-6">
+            <label for="vehicleCategory">Vehicle Category <span class="required">*</span> </label>
+            <div class="mb-3">
+                <select class="form-select" id="vehicleCategory" type="text" formControlName="vehicleCategory"
+                    (change)="changeVehicleCategory()">
+                    <option *ngFor="let category of vehicleCategories" [ngValue]="category.value">
+                        {{category.label}}
+                    </option>
+                </select>
+            </div>
+            <div class="alert-danger alert" *ngIf="meterForm.get('vehicleCategory').hasError('required')">Vehicle
+                category is
+                required</div>
+        </div>
+        <!--vehicleType-->
+        <div class="col-6" *ngIf="meterForm.controls.vehicleCategory.value != 1">
+            <label for="vehicleType">Vehicle Type <span class="required">*</span> </label>
+            <div class="mb-3">
+                <select class="form-select" id="vehicleType" type="text" formControlName="vehicleType"
+                    (change)="setFuelOptions()">
+                    <option *ngFor="let vType of vehicleTypes" [ngValue]="vType.value">
+                        {{vType.label}}
+                    </option>
+                </select>
+            </div>
+            <div class="alert-danger alert" *ngIf="meterForm.get('vehicleType').hasError('required')">Vehicle category
+                is
+                required</div>
+        </div>
+        <!--vehicleCollectionType-->
+        <div class="col-6" *ngIf="meterForm.controls.vehicleCategory.value == 2">
+            <label for="vehicleCollectionType">Collection Method <span class="required">*</span> </label>
+            <div class="mb-3">
+                <select class="form-select" id="vehicleCollectionType" type="text"
+                    formControlName="vehicleCollectionType" (change)="setCollectionUnitOptions()">
+                    <option *ngFor="let vCollectionType of vehicleCollectionTypes" [ngValue]="vCollectionType.value">
+                        {{vCollectionType.label}}
+                    </option>
+                </select>
+            </div>
+            <div class="alert-danger alert" *ngIf="meterForm.get('vehicleCollectionType').hasError('required')">Vehicle
+                collection method is
+                required</div>
+        </div>
+        <!--vehicleCollectionType-->
+        <div class="col-6">
+            <label for="vehicleCollectionUnit">Collection Unit <span class="required">*</span> </label>
+            <div class="mb-3">
+                <select class="form-select" id="vehicleCollectionUnit" type="text"
+                    formControlName="vehicleCollectionUnit">
+                    <option *ngFor="let option of collectionUnitOptions" [ngValue]="option.value">
+                        <span [innerHTML]="option.display"></span>
+                    </option>
+                </select>
+            </div>
+            <div class="alert-danger alert" *ngIf="meterForm.get('vehicleCollectionUnit').hasError('required')">Vehicle
+                collection unit is
+                required</div>
+        </div>
+        <!--vehicleCollectionType-->
+        <div class="col-6" *ngIf="meterForm.controls.vehicleCategory.value == 2">
+            <label for="vehicleDistanceUnit">Distance Unit <span class="required">*</span> </label>
+            <div class="mb-3">
+                <select class="form-select" id="vehicleDistanceUnit" type="text" formControlName="vehicleDistanceUnit">
+                    <option [ngValue]="'mi'">
+                        Miles (mi)
+                    </option>
+                    <option [ngValue]="'km'">
+                        Kilometers (km)
+                    </option>
+                </select>
+            </div>
+            <div class="alert-danger alert" *ngIf="meterForm.get('vehicleDistanceUnit').hasError('required')">Vehicle
+                collection unit is
+                required</div>
+        </div>
+        <!--energyUnit-->
+        <div class="col-6">
+            <label for="energyUnit">Energy Unit <span class="required">*</span> </label>
+            <div class="mb-3">
+                <select class="form-select" id="energyUnit" type="text" formControlName="energyUnit"
+                    (change)="setHasDifferentEnergyUnits()">
+                    <option *ngFor="let energyUnitOption of energyUnitOptions" [ngValue]="energyUnitOption.value">
+                        <span [innerHTML]="energyUnitOption.display"></span>
+                    </option>
+                </select>
+            </div>
+            <div class="alert-danger alert" *ngIf="meterForm.get('energyUnit').hasError('required')">Energy
+                unit
+                is
+                required</div>
+            <div class="alert alert-warning" *ngIf="hasDifferentEnergyUnits">
+                Units selected differ from the facility settings.
+            </div>
+        </div>
+        <!--vehicleFuel-->
+        <div class="col-6">
+            <label for="vehicleFuel">Fuel <span class="required">*</span> </label>
+            <div class="mb-3">
+                <select class="form-select" id="vehicleFuel" type="text" formControlName="vehicleFuel"
+                    (change)="setSelectedFuelType()">
+                    <option *ngFor="let option of fuelOptions" [ngValue]="option.value">
+                        {{option.value}}
+                    </option>
+                </select>
+            </div>
+            <div class="alert-danger alert" *ngIf="meterForm.get('vehicleFuel').hasError('required')">Fuel selection is
+                required</div>
+        </div>
+        <!--vehicleFuelEfficiency-->
+        <div class="col-6" *ngIf="meterForm.controls.vehicleCategory.value == 2">
+            <label for="vehicleFuelEfficiency">Average Fuel Efficiency <span class="required">*</span> </label>
+            <div class="input-group mb-3">
+                <input id="vehicleFuelEfficiency" class="form-control" type="number"
+                    formControlName="vehicleFuelEfficiency" onfocus="this.select();">
+                <span class="input-group-text"><span
+                        [innerHTML]="meterForm.controls.vehicleDistanceUnit.value | settingsLabel"></span>/<span
+                        [innerHTML]="meterForm.controls.vehicleCollectionUnit.value | settingsLabel"></span>
+                </span>
+            </div>
+            <div class="alert-danger alert" *ngIf="meterForm.get('vehicleFuelEfficiency').hasError('required')">Fuel
+                efficiency is
+                required</div>
+        </div>
+    </div>
+</form>
+
+
+<app-emissions-details-table *ngIf="selectedFuelTypeOption" [selectedFuelTypeOption]="selectedFuelTypeOption"
+    [meterForm]="meterForm"></app-emissions-details-table>

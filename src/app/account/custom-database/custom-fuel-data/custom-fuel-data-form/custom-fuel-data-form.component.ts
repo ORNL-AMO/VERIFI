@@ -3,12 +3,16 @@ import { FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms'
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { ConvertValue } from 'src/app/calculations/conversions/convertValue';
-import { FuelTypeOption, GasOptions, LiquidOptions, OtherEnergyOptions, SolidOptions } from 'src/app/facility/utility-data/energy-consumption/energy-source/edit-meter-form/editMeterOptions';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { MeterPhase } from 'src/app/models/constantsAndTypes';
 import { IdbAccount, IdbCustomFuel, IdbUtilityMeter } from 'src/app/models/idb';
+import { FuelTypeOption } from 'src/app/shared/fuel-options/fuelTypeOption';
+import { StationaryGasOptions } from 'src/app/shared/fuel-options/stationaryGasOptions';
+import { StationaryLiquidOptions } from 'src/app/shared/fuel-options/stationaryLiquidOptions';
+import { StationaryOtherEnergyOptions } from 'src/app/shared/fuel-options/stationaryOtherEnergyOptions';
+import { StationarySolidOptions } from 'src/app/shared/fuel-options/stationarySolidOptions';
 import { convertHeatCapacity } from 'src/app/shared/sharedHelperFuntions';
 
 @Component({
@@ -86,16 +90,16 @@ export class CustomFuelDataFormComponent {
       return fuel.value;
     });
 
-    LiquidOptions.forEach(option => {
+    StationaryLiquidOptions.forEach(option => {
       this.allFuelNames.push(option.value)
     });
-    GasOptions.forEach(option => {
+    StationaryGasOptions.forEach(option => {
       this.allFuelNames.push(option.value);
     });
-    SolidOptions.forEach(option => {
+    StationarySolidOptions.forEach(option => {
       this.allFuelNames.push(option.value);
     });
-    OtherEnergyOptions.forEach(option => {
+    StationaryOtherEnergyOptions.forEach(option => {
       this.allFuelNames.push(option.value);
     });
   }

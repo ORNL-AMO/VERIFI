@@ -64,11 +64,16 @@
                     (setChecked)="setHasCheckedItems()" (setEdit)="setEditMeterData($event)"
                     (setDelete)="setDeleteMeterData($event)">
                 </app-electricity-data-table>
-                <app-general-utility-data-table *ngIf="selectedMeter.source != 'Electricity'"
+                <app-general-utility-data-table *ngIf="selectedMeter.source != 'Electricity' && selectedMeter.scope != 2"
                     [selectedMeter]="selectedMeter" [selectedMeterData]="meterData" [itemsPerPage]="itemsPerPage"
                     (setChecked)="setHasCheckedItems()" (setEdit)="setEditMeterData($event)"
                     (setDelete)="setDeleteMeterData($event)">
                 </app-general-utility-data-table>
+                <app-vehicle-data-table *ngIf="selectedMeter.source != 'Electricity' && selectedMeter.scope == 2"
+                    [selectedMeter]="selectedMeter" [selectedMeterData]="meterData" [itemsPerPage]="itemsPerPage"
+                    (setChecked)="setHasCheckedItems()" (setEdit)="setEditMeterData($event)"
+                    (setDelete)="setDeleteMeterData($event)">
+                </app-vehicle-data-table>
             </div>
         </div>
     </div>

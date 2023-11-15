@@ -14,5 +14,13 @@ export interface SubregionEmissions {
 }
 
 export interface EmissionsResults {
-  RECs: number, locationEmissions: number, marketEmissions: number, excessRECs: number, excessRECsEmissions: number
+  RECs: number, 
+  locationEmissions: number, 
+  marketEmissions: number, 
+  excessRECs: number, 
+  excessRECsEmissions: number,
+  mobileCarbonEmissions: number,
+  mobileBiogenicEmissions: number,
+  mobileOtherEmissions: number,
+  mobileTotalEmissions: number
 }

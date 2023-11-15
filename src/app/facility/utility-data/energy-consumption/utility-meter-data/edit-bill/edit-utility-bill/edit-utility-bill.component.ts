@@ -2,7 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbCustomFuel, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
-import { EditMeterFormService } from '../../energy-source/edit-meter-form/edit-meter-form.service';
+import { EditMeterFormService } from '../../../energy-source/edit-meter-form/edit-meter-form.service';
 import { MeterSource } from 'src/app/models/constantsAndTypes';
 import { EmissionsResults } from 'src/app/models/eGridEmissions';
 import { getEmissions } from 'src/app/calculations/emissions-calculations/emissions';
@@ -81,7 +81,7 @@ export class EditUtilityBillComponent implements OnInit {
     if (this.meterDataForm.controls.totalEnergyUse.value && this.showEmissions) {
       let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
       let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
-      let emissionsValues: EmissionsResults = getEmissions(this.editMeter, this.meterDataForm.controls.totalEnergyUse.value, this.editMeter.energyUnit, new Date(this.meterDataForm.controls.readDate.value).getFullYear(), false, [facility], this.eGridService.co2Emissions, customFuels);
+      let emissionsValues: EmissionsResults = getEmissions(this.editMeter, this.meterDataForm.controls.totalEnergyUse.value, this.editMeter.energyUnit, new Date(this.meterDataForm.controls.readDate.value).getFullYear(), false, [facility], this.eGridService.co2Emissions, customFuels, 0, undefined, undefined);
       this.marketEmissions = emissionsValues.marketEmissions;
       this.locationEmissions = emissionsValues.locationEmissions;
     } else {
