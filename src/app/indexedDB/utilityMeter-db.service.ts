@@ -109,7 +109,12 @@ export class UtilityMeterdbService {
             locationGHGMultiplier: 1,
             marketGHGMultiplier: 1,
             recsMultiplier: 0,
-            greenPurchaseFraction: .5
+            greenPurchaseFraction: .5,
+            vehicleCategory: 1,
+            vehicleCollectionType: 1,
+            vehicleDistanceUnit: 'mi',
+            vehicleCollectionUnit: 'gal'
+
         }
     }
 

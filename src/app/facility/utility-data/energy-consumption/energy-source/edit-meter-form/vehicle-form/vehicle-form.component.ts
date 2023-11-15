@@ -25,7 +25,6 @@ export class VehicleFormComponent {
   vehicleCollectionTypes: Array<{ value: number, label: string }> = [{ value: 1, label: 'Fuel Usage' }, { value: 2, label: 'Mileage' }];
   collectionUnitOptions: Array<UnitOption> = [];
   fuelOptions: Array<FuelTypeOption> = [];
-  //TODO: set
   hasDifferentEnergyUnits: boolean = false;
   selectedFuelTypeOption: FuelTypeOption;
   constructor(private editMeterFormService: EditMeterFormService,) {

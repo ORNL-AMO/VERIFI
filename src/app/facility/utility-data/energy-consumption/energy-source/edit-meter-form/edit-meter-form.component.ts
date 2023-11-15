@@ -60,7 +60,6 @@ export class EditMeterFormComponent implements OnInit {
     private customFuelDbService: CustomFuelDbService) { }
 
   ngOnInit(): void {
-    // this.testFuelTypeOptions();
   }
 
   ngOnChanges() {
@@ -222,22 +221,6 @@ export class EditMeterFormComponent implements OnInit {
     this.meterForm.controls.waterDischargeType.updateValueAndValidity();
   }
 
-  setFormValidation() {
-    //vehicle
-    if (this.meterForm.controls.scope.value == 2) {
-
-    } else {
-
-    }
-    //not required
-    //phase
-    //heatCapacity
-    //siteToSource
-    //fuel
-    //startingUnit
-    //agreementType
-  }
-
   setFuelTypeOptions(onChange: boolean) {
     let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
     this.fuelTypeOptions = getFuelTypeOptions(this.meterForm.controls.source.value, this.meterForm.controls.phase.value, customFuels, this.meterForm.controls.scope.value);
@@ -251,29 +234,6 @@ export class EditMeterFormComponent implements OnInit {
   setSelectedFuelTypeOption() {
     this.selectedFuelTypeOption = this.fuelTypeOptions.find(option => { return option.value == this.meterForm.controls.fuel.value });
   }
-
-  // testFuelTypeOptions() {
-  //   GasOptions.forEach(option => {
-  //     this.checkFuelOutputRate(option, 'Gas');
-  //   });
-  //   LiquidOptions.forEach(option => {
-  //     this.checkFuelOutputRate(option, 'Liquid');
-  //   });
-  //   SolidOptions.forEach(option => {
-  //     this.checkFuelOutputRate(option, 'Solid');
-  //   });
-  // }
-
-  // checkFuelOutputRate(fuel: FuelTypeOption, phase: MeterPhase) {
-  //   let test: number = fuel.CO2 + (fuel.CH4 * (25 / 1000)) + (fuel.N2O * (298 / 1000));
-  //   if (Math.abs(test - fuel.emissionsOutputRate) > .01) {
-  //     console.log(fuel.value + ': ' + phase)
-  //     console.log(test);
-  //     console.log(fuel.emissionsOutputRate);
-  //     console.log('======');
-  //   }
-  // }
-
 
   setHeatCapacity() {
     if (this.displayHeatCapacity) {
