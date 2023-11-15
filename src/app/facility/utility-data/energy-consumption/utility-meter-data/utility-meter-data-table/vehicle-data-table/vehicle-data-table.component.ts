@@ -73,9 +73,9 @@ export class VehicleDataTableComponent {
   }
 
   setData() {
-    if(this.selectedMeter.vehicleCollectionType == 1){
+    if (this.selectedMeter.vehicleCollectionType == 1) {
       this.volumeUnit = this.selectedMeter.vehicleCollectionUnit;
-    }else{
+    } else {
       this.volumeUnit = this.selectedMeter.vehicleDistanceUnit;
     }
     this.showEstimated = (this.selectedMeterData.find(dataItem => { return dataItem.isEstimated == true })) != undefined;
@@ -136,7 +136,7 @@ export class VehicleDataTableComponent {
     let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
     this.selectedMeterData.forEach(dataItem => {
-      let emissionsValues: EmissionsResults = getEmissions(this.selectedMeter, dataItem.totalEnergyUse, this.selectedMeter.energyUnit, new Date(dataItem.readDate).getFullYear(), false, [facility], [], customFuels, dataItem.totalVolume);
+      let emissionsValues: EmissionsResults = getEmissions(this.selectedMeter, dataItem.totalEnergyUse, this.selectedMeter.energyUnit, new Date(dataItem.readDate).getFullYear(), false, [facility], [], customFuels, dataItem.totalVolume, this.selectedMeter.vehicleCollectionUnit, this.selectedMeter.vehicleDistanceUnit);
       dataItem.mobileBiogenicEmissions = emissionsValues.mobileBiogenicEmissions;
       dataItem.mobileCarbonEmissions = emissionsValues.mobileCarbonEmissions;
       dataItem.mobileOtherEmissions = emissionsValues.mobileOtherEmissions;

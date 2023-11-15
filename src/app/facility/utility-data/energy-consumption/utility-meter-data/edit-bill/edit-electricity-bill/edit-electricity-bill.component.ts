@@ -93,7 +93,7 @@ export class EditElectricityBillComponent implements OnInit {
     if (this.meterDataForm.controls.totalEnergyUse.value) {
       let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
       let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
-      let emissionsValues: EmissionsResults = getEmissions(this.editMeter, this.meterDataForm.controls.totalEnergyUse.value, this.editMeter.energyUnit, new Date(this.meterDataForm.controls.readDate.value).getFullYear(), false, [facility], this.eGridService.co2Emissions, customFuels, 0);
+      let emissionsValues: EmissionsResults = getEmissions(this.editMeter, this.meterDataForm.controls.totalEnergyUse.value, this.editMeter.energyUnit, new Date(this.meterDataForm.controls.readDate.value).getFullYear(), false, [facility], this.eGridService.co2Emissions, customFuels, 0, undefined, undefined);
       this.totalLocationEmissions = emissionsValues.locationEmissions;
       this.totalMarketEmissions = emissionsValues.marketEmissions;
       this.RECs = emissionsValues.RECs;

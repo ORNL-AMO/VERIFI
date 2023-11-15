@@ -48,9 +48,9 @@ export class EditVehicleMeterBillComponent {
   ngOnChanges() {
     this.source = this.editMeter.source;
     this.energyUnit = this.editMeter.energyUnit;
-    if(this.editMeter.vehicleCollectionType == 1){
+    if (this.editMeter.vehicleCollectionType == 1) {
       this.volumeUnit = this.editMeter.vehicleCollectionUnit;
-    }else{
+    } else {
       this.volumeUnit = this.editMeter.vehicleDistanceUnit;
     }
     this.checkDate();
@@ -90,7 +90,7 @@ export class EditVehicleMeterBillComponent {
   setTotalEmissions() {
     if (this.meterDataForm.controls.totalVolume.value) {
       let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-      let emissionsValues: EmissionsResults = getEmissions(this.editMeter, this.meterDataForm.controls.totalEnergyUse.value, this.editMeter.energyUnit, new Date(this.meterDataForm.controls.readDate.value).getFullYear(), false, [facility], [], [], this.meterDataForm.controls.totalVolume.value);
+      let emissionsValues: EmissionsResults = getEmissions(this.editMeter, this.meterDataForm.controls.totalEnergyUse.value, this.editMeter.energyUnit, new Date(this.meterDataForm.controls.readDate.value).getFullYear(), false, [facility], [], [], this.meterDataForm.controls.totalVolume.value, this.meterDataForm.controls.vehicleCollectionUnit.value, this.meterDataForm.controls.vehicleDistanceUnit.value);
       this.carbonEmissions = emissionsValues.mobileCarbonEmissions;
       this.biogenicEmissions = emissionsValues.mobileBiogenicEmissions;
       this.otherEmissions = emissionsValues.mobileOtherEmissions;

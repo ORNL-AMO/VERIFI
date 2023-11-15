@@ -12,7 +12,7 @@ export function setEmissionsForCalanderizedMeters(calanderizedMeterData: Array<C
         let cMeter: CalanderizedMeter = calanderizedMeterData[i];
         for (let x = 0; x < cMeter.monthlyData.length; x++) {
             let monthlyData: MonthlyData = cMeter.monthlyData[x];
-            let emissions: EmissionsResults = getEmissions(cMeter.meter, monthlyData.energyUse, cMeter.energyUnit, monthlyData.year, energyIsSource, facilities, co2Emissions, customFuels, monthlyData.energyConsumption);
+            let emissions: EmissionsResults = getEmissions(cMeter.meter, monthlyData.energyUse, cMeter.energyUnit, monthlyData.year, energyIsSource, facilities, co2Emissions, customFuels, monthlyData.energyConsumption, cMeter.meter.vehicleCollectionUnit, cMeter.meter.vehicleDistanceUnit);
             cMeter.monthlyData[x].RECs = emissions.RECs;
             cMeter.monthlyData[x].locationEmissions = emissions.locationEmissions;
             cMeter.monthlyData[x].marketEmissions = emissions.marketEmissions;
@@ -23,7 +23,17 @@ export function setEmissionsForCalanderizedMeters(calanderizedMeterData: Array<C
     return calanderizedMeterData;
 }
 
-export function getEmissions(meter: IdbUtilityMeter, energyUse: number, energyUnit: string, year: number, energyIsSource: boolean, facilities: Array<IdbFacility>, co2Emissions: Array<SubregionEmissions>, customFuels: Array<IdbCustomFuel>, totalVolume: number): EmissionsResults {
+export function getEmissions(meter: IdbUtilityMeter,
+    energyUse: number,
+    energyUnit: string,
+    year: number,
+    energyIsSource: boolean,
+    facilities: Array<IdbFacility>,
+    co2Emissions: Array<SubregionEmissions>,
+    customFuels: Array<IdbCustomFuel>,
+    totalVolume: number,
+    vehicleCollectionUnit: string,
+    vehicleDistanceUnit: string): EmissionsResults {
     let isCompressedAir: boolean = (meter.source == 'Other Energy' && meter.fuel == 'Purchased Compressed Air');
 
     let locationEmissions: number = 0;
@@ -85,8 +95,13 @@ export function getEmissions(meter: IdbUtilityMeter, energyUse: number, energyUn
         let meterFuel: FuelTypeOption = fuelOptions.find(option => {
             return option.value == meter.vehicleFuel
         });
+
         //not On Road Vehicle or On Road Calcuatated by consumption
         if (meter.vehicleCategory != 2 || meter.vehicleCollectionType == 1) {
+            if (vehicleCollectionUnit != 'gal') {
+                //convert to gal
+                totalVolume = new ConvertValue(totalVolume, vehicleCollectionUnit, 'gal').convertedValue;
+            }
             if (meterFuel.isBiofuel) {
                 mobileBiogenicEmissions = totalVolume * meterFuel.CO2;
                 mobileCarbonEmissions = 0;
@@ -95,6 +110,10 @@ export function getEmissions(meter: IdbUtilityMeter, energyUse: number, energyUn
                 mobileBiogenicEmissions = 0;
             }
         } else {
+            if (vehicleDistanceUnit != 'mi') {
+                //convert to gal
+                totalVolume = new ConvertValue(totalVolume, vehicleDistanceUnit, 'mi').convertedValue;
+            }
             //On Road calculated by mile
             if (meterFuel.isBiofuel) {
                 mobileBiogenicEmissions = totalVolume * meter.vehicleFuelEfficiency * meterFuel.CO2;

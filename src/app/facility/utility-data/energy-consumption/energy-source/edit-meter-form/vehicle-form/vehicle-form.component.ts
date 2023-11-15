@@ -6,6 +6,7 @@ import { EnergyUnitOptions, UnitOption, VolumeGasOptions, VolumeLiquidOptions } 
 import { VehicleCategories, VehicleCategory } from 'src/app/shared/vehicle-data/vehicleCategory';
 import { VehicleType, VehicleTypes } from 'src/app/shared/vehicle-data/vehicleType';
 import { EditMeterFormService } from '../edit-meter-form.service';
+import { IdbFacility } from 'src/app/models/idb';
 
 @Component({
   selector: 'app-vehicle-form',
@@ -15,6 +16,8 @@ import { EditMeterFormService } from '../edit-meter-form.service';
 export class VehicleFormComponent {
   @Input()
   meterForm: FormGroup;
+  @Input()
+  facility: IdbFacility;
 
   vehicleCategories: Array<VehicleCategory> = VehicleCategories;
   energyUnitOptions: Array<UnitOption> = EnergyUnitOptions;
@@ -25,7 +28,7 @@ export class VehicleFormComponent {
   //TODO: set
   hasDifferentEnergyUnits: boolean = false;
   selectedFuelTypeOption: FuelTypeOption;
-  constructor(private editMeterFormService: EditMeterFormService) {
+  constructor(private editMeterFormService: EditMeterFormService,) {
   }
 
   ngOnInit() {
@@ -45,6 +48,7 @@ export class VehicleFormComponent {
     this.setVehicleTypes();
     this.setCollectionUnitOptions();
     this.setFuelOptions();
+    this.setHasDifferentEnergyUnits();
   }
 
   changeVehicleCategory(){
@@ -104,20 +108,11 @@ export class VehicleFormComponent {
     this.setSelectedFuelType();
   }
 
-  changeCollectionUnit() {
-
-  }
-
-  changeEnergyUnit() {
-
-  }
-
   setSelectedFuelType() {
     this.selectedFuelTypeOption = this.fuelOptions.find(option => {
       return option.value == this.meterForm.controls.vehicleFuel.value;
     });
   }
-
 
   updateVehicleValidation() {
     let additionalVehicleValidation: Array<ValidatorFn> = this.editMeterFormService.getAdditionalVehicleValidation(this.meterForm.controls.scope.value, this.meterForm.controls.vehicleCategory.value);
@@ -133,5 +128,9 @@ export class VehicleFormComponent {
 
     this.meterForm.controls.vehicleDistanceUnit.setValidators(additionalVehicleValidation);
     this.meterForm.controls.vehicleDistanceUnit.updateValueAndValidity();
+  }
+
+  setHasDifferentEnergyUnits(){
+    this.hasDifferentEnergyUnits = this.facility.energyUnit != this.meterForm.controls.energyUnit.value;
   }
 }

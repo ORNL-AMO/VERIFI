@@ -33,7 +33,8 @@
                 <div class="col-6" *ngIf="displayScope">
                     <label for="scope">Scope</label>
                     <div class="mb-3">
-                        <select class="form-select" id="scope" type="text" formControlName="scope" (change)="changeScope()">
+                        <select class="form-select" id="scope" type="text" formControlName="scope"
+                            (change)="changeScope()">
                             <option *ngFor="let scopeOption of scopeOptions" [ngValue]="scopeOption.value">
                                 {{scopeOption.scope}}: {{scopeOption.optionLabel}}
                             </option>
@@ -191,11 +192,13 @@
                     </div>
                 </ng-container>
             </div>
-            <app-vehicle-form *ngIf="meterForm.controls.scope.value == 2" [meterForm]="meterForm"></app-vehicle-form>
+            <app-vehicle-form *ngIf="meterForm.controls.scope.value == 2" [meterForm]="meterForm"
+                [facility]="facility"></app-vehicle-form>
             <p class="alert alert-warning" *ngIf="meterDataExists && !changingUnits"> Data
                 found for this
                 meter. Meter setup values should not be changed after entering meter readings. Calculations are done
-                based off of these values. <a (click)="enableChangeUnits()">Click here to change values if necessary.</a>
+                based off of these values. <a (click)="enableChangeUnits()">Click here to change values if
+                    necessary.</a>
             </p>
             <p class="alert alert-warning" *ngIf="changingUnits">
                 Data found for this meter. Be careful changing the collection values, <b>amount entered in meter
