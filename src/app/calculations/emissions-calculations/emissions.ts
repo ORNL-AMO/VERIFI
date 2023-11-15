@@ -98,6 +98,7 @@ export function getEmissions(meter: IdbUtilityMeter,
 
         //not On Road Vehicle or On Road Calcuatated by consumption
         if (meter.vehicleCategory != 2 || meter.vehicleCollectionType == 1) {
+            //TOTAL VOLUME IS IN gal
             if (vehicleCollectionUnit != 'gal') {
                 //convert to gal
                 totalVolume = new ConvertValue(totalVolume, vehicleCollectionUnit, 'gal').convertedValue;
@@ -109,9 +110,16 @@ export function getEmissions(meter: IdbUtilityMeter,
                 mobileCarbonEmissions = totalVolume * meterFuel.CO2;
                 mobileBiogenicEmissions = 0;
             }
+            //miles = gal * mpg 
+            let miles = (totalVolume * meter.vehicleFuelEfficiency)
+            let totalCH4 = miles * 25 * meterFuel.CH4;
+            let totalN20 = miles * 298 * meterFuel.N2O;
+            mobileOtherEmissions = totalCH4 + totalN20;
+
         } else {
+            //TOTAL VOLUME IS IN MILES
             if (vehicleDistanceUnit != 'mi') {
-                //convert to gal
+                //convert to miles
                 totalVolume = new ConvertValue(totalVolume, vehicleDistanceUnit, 'mi').convertedValue;
             }
             //On Road calculated by mile
@@ -122,9 +130,9 @@ export function getEmissions(meter: IdbUtilityMeter,
                 mobileCarbonEmissions = totalVolume * meter.vehicleFuelEfficiency * meterFuel.CO2;
                 mobileBiogenicEmissions = 0;
             }
+            mobileOtherEmissions = (25 * totalVolume * meterFuel.CH4) + (298 * totalVolume * meterFuel.N2O);
         }
-        mobileOtherEmissions = (25 * totalVolume * meterFuel.CH4) + (298 * totalVolume * meterFuel.N2O);
-        mobileTotalEmissions = mobileOtherEmissions + mobileCarbonEmissions + mobileBiogenicEmissions;
+        mobileTotalEmissions = mobileOtherEmissions + mobileCarbonEmissions;
     }
 
 
