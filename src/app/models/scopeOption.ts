@@ -1,7 +1,7 @@
 export interface ScopeOption {
     optionLabel: string,
     value: number,
-    scope: 'Scope 1' | 'Scope 2'
+    scope: 'Scope 1' | 'Scope 2' | 'Scope'
 }
 
 export const ScopeOptions: Array<ScopeOption> = [
@@ -24,5 +24,15 @@ export const ScopeOptions: Array<ScopeOption> = [
         optionLabel: 'Other',
         value: 4,
         scope: 'Scope 2'
+    },
+    {
+        optionLabel: 'Fugitive',
+        value: 5,
+        scope: 'Scope 1'
+    },
+    {
+        optionLabel: 'N/A',
+        value: 100,
+        scope: 'Scope'
     }
 ]

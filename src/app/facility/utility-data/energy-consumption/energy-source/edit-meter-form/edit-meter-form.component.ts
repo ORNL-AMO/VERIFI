@@ -344,7 +344,7 @@ export class EditMeterFormComponent implements OnInit {
 
   checkDisplaySource() {
     let selectedMeterSource: MeterSource = this.meterForm.controls.source.value;
-    if (selectedMeterSource == 'Water Intake' || selectedMeterSource == 'Water Discharge' || selectedMeterSource == 'Other Utility') {
+    if (selectedMeterSource == 'Water Intake' || selectedMeterSource == 'Water Discharge') {
       this.displayScope = false;
     } else {
       this.displayScope = true;
@@ -383,10 +383,12 @@ export class EditMeterFormComponent implements OnInit {
     } else if (selectedMeterSource == 'Natural Gas') {
       //Stationary
       this.scopeOptions = [ScopeOptions[0]];
-    }
-    else if (selectedMeterSource == 'Other Fuels') {
-      //Scope 1
-      this.scopeOptions = ScopeOptions.filter(option => { return option.scope == 'Scope 1' });
+    } else if (selectedMeterSource == 'Other Fuels') {
+      //Scope 1 (non-fugitive)
+      this.scopeOptions = ScopeOptions.filter(option => { return option.scope == 'Scope 1' && option.value != 5 });
+    } else if (selectedMeterSource == 'Other Utility') {
+      //Scope 1 (non-fugitive)
+      this.scopeOptions = ScopeOptions.filter(option => { return option.value == 100 || option.value == 5 });
     }
   }
 
