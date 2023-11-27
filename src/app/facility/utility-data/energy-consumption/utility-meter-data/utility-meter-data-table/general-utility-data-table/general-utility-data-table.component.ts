@@ -90,7 +90,7 @@ export class GeneralUtilityDataTableComponent implements OnInit {
   setData() {
     this.showVolumeColumn = (this.selectedMeterData.find(dataItem => { return dataItem.totalVolume != undefined && dataItem.totalVolume != 0 }) != undefined);
     this.volumeUnit = this.selectedMeter.startingUnit;
-    if (this.selectedMeter.source == 'Other Utility') {
+    if (this.selectedMeter.source == 'Other') {
       this.showEnergyColumn = (getIsEnergyUnit(this.selectedMeter.startingUnit) == true);
     } else {
       this.showEnergyColumn = getIsEnergyMeter(this.selectedMeter.source);

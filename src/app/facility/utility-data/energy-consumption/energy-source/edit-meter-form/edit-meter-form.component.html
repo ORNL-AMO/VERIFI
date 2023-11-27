@@ -186,6 +186,39 @@
                             capacity
                             should be greater than 0</div>
                     </div>
+
+
+                    <div class="col-6" *ngIf="meterForm.controls.scope.value == 5">
+                        <label for="refrigerationCharge">Refrigeration Charge <span class="required">*</span> </label>
+                        <div class="mb-3">
+                            <select class="form-select" id="refrigerationCharge" type="text"
+                                formControlName="refrigerationCharge" (change)="setGlobalWarmingPotential()">
+                                <option *ngFor="let gwp of globalWarmingPotentials" [ngValue]="gwp.value">
+                                    <span [innerHTML]="gwp.display"></span>
+                                </option>
+                            </select>
+                        </div>
+                        <div class="alert-danger alert"
+                            *ngIf="meterForm.get('refrigerationCharge').hasError('required')">Refrigeration charge is
+                            required</div>
+                    </div>
+
+                    <div class="col-6" *ngIf="meterForm.controls.scope.value == 5">
+                        <label for="globalWarmingPotential">Global Warming Potential <span class="required">*</span>
+                        </label>
+                        <div class="input-group mb-3">
+                            <input id="globalWarmingPotential" class="form-control" type="number"
+                                formControlName="globalWarmingPotential" onfocus="this.select();">
+                            <span class="input-group-text">kg/<span
+                                    [innerHTML]="meterForm.controls.startingUnit.value | settingsLabel"></span>
+                            </span>
+                        </div>
+                        <div class="alert-danger alert"
+                            *ngIf="meterForm.get('globalWarmingPotential').hasError('required')">Global Warming Potential
+                            is required</div>
+                    </div>
+
+
                     <div class="col-6" *ngIf="selectedFuelTypeOption">
                         <app-emissions-details-table [selectedFuelTypeOption]="selectedFuelTypeOption"
                             [meterForm]="meterForm"></app-emissions-details-table>

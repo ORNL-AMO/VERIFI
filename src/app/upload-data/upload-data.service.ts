@@ -188,7 +188,7 @@ export class UploadDataService {
           } else {
             meter.fuel = this.getFuelEnum(meterData['Fuel'], meter.source, meter.phase, meter.scope);
           }
-          meter.startingUnit = this.checkImportStartingUnit(meterData['Collection Unit'], meter.source, meter.phase, meter.fuel);
+          meter.startingUnit = this.checkImportStartingUnit(meterData['Collection Unit'], meter.source, meter.phase, meter.fuel, meter.scope);
           meter.heatCapacity = meterData['Heat Capacity'];
           let isEnergyUnit: boolean = getIsEnergyUnit(meter.startingUnit);
           if (isEnergyUnit) {
@@ -793,9 +793,9 @@ export class UploadDataService {
     return fileReference.predictorEntries;
   }
 
-  checkImportStartingUnit(importUnit: string, source: MeterSource, phase: MeterPhase, fuel: string): string {
+  checkImportStartingUnit(importUnit: string, source: MeterSource, phase: MeterPhase, fuel: string, scope: number): string {
     if (source) {
-      let startingUnitOptions: Array<UnitOption> = this.energyUnitsHelperService.getStartingUnitOptions(source, phase, fuel);
+      let startingUnitOptions: Array<UnitOption> = this.energyUnitsHelperService.getStartingUnitOptions(source, phase, fuel, scope);
       let selectedUnitOption: UnitOption = startingUnitOptions.find(unitOption => { return unitOption.value == importUnit });
       if (selectedUnitOption) {
         return selectedUnitOption.value;

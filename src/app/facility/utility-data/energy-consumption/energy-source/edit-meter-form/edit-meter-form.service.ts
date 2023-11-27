@@ -20,6 +20,7 @@ export class EditMeterFormService {
     let waterDischargeValidation: Array<ValidatorFn> = this.getWaterDischargeValidation(meter.source);
     let basicVehicleValidation: Array<ValidatorFn> = this.getBasicVehicleValidation(meter.scope);
     let additionalVehicleValidation: Array<ValidatorFn> = this.getAdditionalVehicleValidation(meter.scope, meter.vehicleCategory)
+    let refrigerationValidation: Array<ValidatorFn> = this.getRefrigerationValidation(meter.scope);
     let form: FormGroup = this.formBuilder.group({
       meterNumber: [meter.meterNumber],
       accountNumber: [meter.accountNumber],
@@ -49,8 +50,8 @@ export class EditMeterFormService {
       vehicleFuel: [meter.vehicleFuel, basicVehicleValidation],
       vehicleFuelEfficiency: [meter.vehicleFuelEfficiency, additionalVehicleValidation],
       vehicleDistanceUnit: [meter.vehicleDistanceUnit, additionalVehicleValidation],
-      refrigerationCharge: [meter.refrigerationCharge],
-      globalWarmingPotential: [meter.refrigerationCharge]
+      refrigerationCharge: [meter.refrigerationCharge, refrigerationValidation],
+      globalWarmingPotential: [meter.refrigerationCharge, refrigerationValidation]
     });
     // if(form.controls.source.value == 'Electricity'){
     //   form.controls.startingUnit.disable();
@@ -176,6 +177,12 @@ export class EditMeterFormService {
     return [];
   }
 
+  getRefrigerationValidation(scope: number): Array<ValidatorFn> {
+    if (scope == 5) {
+      return [Validators.required]
+    }
+    return [];
+  }
 
   getAdditionalVehicleValidation(scope: number, vehicleCategory: number): Array<ValidatorFn> {
     if (scope == 2 && vehicleCategory != 1) {
@@ -185,7 +192,7 @@ export class EditMeterFormService {
   }
 
   checkShowHeatCapacity(source: MeterSource, startingUnit: string, scope: number): boolean {
-    if (source != 'Water Intake' && source != 'Water Discharge' && source != 'Other Utility' && startingUnit && scope != 2) {
+    if (source != 'Water Intake' && source != 'Water Discharge' && source != 'Other' && startingUnit && scope != 2) {
       return (getIsEnergyUnit(startingUnit) == false);
     } else {
       return false;
@@ -269,7 +276,7 @@ export class EditMeterFormService {
       return 1;
     } else if (source == 'Other Fuels') {
       return 1;
-    } else if (source == 'Other Utility') {
+    } else if (source == 'Other') {
       return 100;
     } else {
       return undefined;

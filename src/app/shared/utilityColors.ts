@@ -17,7 +17,7 @@ export const UtilityColors = {
     "Water Discharge": {
         "color": "#0072B2"
     },
-    "Other Utility": {
+    "Other": {
         "color": "#009E73"
     }
 }

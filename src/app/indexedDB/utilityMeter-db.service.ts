@@ -114,7 +114,6 @@ export class UtilityMeterdbService {
             vehicleCollectionType: 1,
             vehicleDistanceUnit: 'mi',
             vehicleCollectionUnit: 'gal'
-
         }
     }
 

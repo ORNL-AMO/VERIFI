@@ -229,10 +229,10 @@ export class FacilitiesUsageStackedBarChartComponent {
       data.push({
         x: this.barChartData.map(dataItem => { return dataItem.facilityName }),
         y: this.barChartData.map(dataItem => { return dataItem.otherUtility.energyCost }),
-        name: 'Other Utility',
+        name: 'Other',
         type: 'bar',
         marker: {
-          color: UtilityColors['Other Utility'].color
+          color: UtilityColors['Other'].color
         }
       })
     }
@@ -401,7 +401,7 @@ export class FacilitiesUsageStackedBarChartComponent {
                 wasteWater.energyUse = (wasteWater.energyUse + Number(dataItem.energyConsumption));
                 wasteWater.energyCost = (wasteWater.energyCost + Number(dataItem.energyCost));
               }
-              else if (cMeter.meter.source == 'Other Utility') {
+              else if (cMeter.meter.source == 'Other') {
                 otherUtility.energyUse = (otherUtility.energyUse + Number(dataItem.energyUse));
                 otherUtility.energyCost = (otherUtility.energyCost + Number(dataItem.energyCost));
               }

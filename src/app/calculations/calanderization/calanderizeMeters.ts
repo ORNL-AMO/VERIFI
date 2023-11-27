@@ -31,7 +31,7 @@ export function getCalanderizedMeterData(meters: Array<IdbUtilityMeter>, allMete
         let showEmissions: boolean = (meter.source == "Electricity" || meter.source == "Natural Gas" || meter.source == "Other Fuels");
 
         let showEnergyUse: boolean;
-        if (meter.source == 'Other Utility') {
+        if (meter.source == 'Other') {
             showEnergyUse = getIsEnergyUnit(meter.startingUnit);
         } else {
             showEnergyUse = getIsEnergyMeter(meter.source);

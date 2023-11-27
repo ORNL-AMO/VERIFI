@@ -22,7 +22,7 @@ export class EnergyUnitsHelperService {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     if (selectedAccount) {
       let isEnergyMeter: boolean;
-      if (meter.source == 'Other Utility') {
+      if (meter.source == 'Other') {
         isEnergyMeter = getIsEnergyUnit(meter.startingUnit);
       } else {
         isEnergyMeter = getIsEnergyMeter(meter.source);
@@ -43,7 +43,7 @@ export class EnergyUnitsHelperService {
     let selectedFacility: IdbFacility = accountFacilities.find(facility => { return meter.facilityId == facility.guid });
     if (selectedFacility) {
       let isEnergyMeter: boolean;
-      if (meter.source == 'Other Utility') {
+      if (meter.source == 'Other') {
         isEnergyMeter = getIsEnergyUnit(meter.startingUnit);
       } else {
         isEnergyMeter = getIsEnergyMeter(meter.source);
@@ -101,7 +101,7 @@ export class EnergyUnitsHelperService {
       } else if (selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Compressed Air') {
         return selectedFacility.volumeGasUnit;
       }
-    } else if (facilityMeter.source == 'Other Utility') {
+    } else if (facilityMeter.source == 'Other') {
       return facilityMeter.startingUnit;
     }
   }
@@ -131,7 +131,7 @@ export class EnergyUnitsHelperService {
       } else if (selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Compressed Air') {
         return selectedAccount.volumeGasUnit;
       }
-    } else if (accountMeter.source == 'Other Utility') {
+    } else if (accountMeter.source == 'Other') {
       return accountMeter.startingUnit;
     }
   }
@@ -151,7 +151,7 @@ export class EnergyUnitsHelperService {
   //   }
   // }
 
-  getStartingUnitOptions(source: MeterSource, phase: MeterPhase, fuel: string): Array<UnitOption> {
+  getStartingUnitOptions(source: MeterSource, phase: MeterPhase, fuel: string, scope: number): Array<UnitOption> {
     if (source == 'Electricity' || !source) {
       return EnergyUnitOptions;
     } else if (source == 'Natural Gas') {
@@ -177,13 +177,17 @@ export class EnergyUnitsHelperService {
       }
     } else if (source == 'Water Intake' || source == 'Water Discharge') {
       return VolumeLiquidOptions;
-    } else if (source == 'Other Utility') {
-      return VolumeGasOptions.concat(VolumeLiquidOptions).concat(MassUnitOptions).concat(ChilledWaterUnitOptions);
+    } else if (source == 'Other') {
+      if (scope == 5) {
+        return MassUnitOptions;
+      } else {
+        return VolumeGasOptions.concat(VolumeLiquidOptions).concat(MassUnitOptions).concat(ChilledWaterUnitOptions);
+      }
     }
     return EnergyUnitOptions;
   }
 
-  getStartingUnitOptionsExistingData(source: MeterSource, phase: MeterPhase, fuel: string, startingUnit: string): Array<UnitOption> {
+  getStartingUnitOptionsExistingData(source: MeterSource, phase: MeterPhase, fuel: string, startingUnit: string, scope: number): Array<UnitOption> {
     let isEnergyUnit: boolean = getIsEnergyUnit(startingUnit);
     if (isEnergyUnit) {
       return EnergyUnitOptions;
@@ -208,7 +212,7 @@ export class EnergyUnitsHelperService {
       }
     } else if (source == 'Water Intake' || source == 'Water Discharge') {
       return VolumeLiquidOptions;
-    } else if (source == 'Other Utility') {
+    } else if (source == 'Other') {
       return VolumeGasOptions.concat(VolumeLiquidOptions).concat(MassUnitOptions).concat(ChilledWaterUnitOptions);
     }
   }
