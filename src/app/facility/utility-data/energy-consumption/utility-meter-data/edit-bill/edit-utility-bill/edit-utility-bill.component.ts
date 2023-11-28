@@ -9,6 +9,7 @@ import { getEmissions } from 'src/app/calculations/emissions-calculations/emissi
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
+import * as _ from 'lodash';
 
 @Component({
   selector: 'app-edit-utility-bill',
@@ -40,6 +41,7 @@ export class EditUtilityBillComponent implements OnInit {
   showEmissions: boolean;
   totalLabel: 'Total Volume' | 'Total Refrigerant Lost';
   displayFugitiveTableModal: boolean = false;
+  showCopyLast: boolean;
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService,
     private facilityDbService: FacilitydbService, private editMeterFormService: EditMeterFormService,
     private eGridService: EGridService,
@@ -48,6 +50,8 @@ export class EditUtilityBillComponent implements OnInit {
   ngOnInit(): void {
     this.showEmissions = this.editMeterFormService.checkShowEmissionsOutputRate(this.editMeter);
     this.setTotalEmissions();
+    this.setShowCopyLast();
+
   }
 
   ngOnChanges() {
@@ -116,5 +120,18 @@ export class EditUtilityBillComponent implements OnInit {
 
   hideFugitiveTableModal() {
     this.displayFugitiveTableModal = false;
+  }
+
+  setShowCopyLast() {
+    let allSelectedMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataFromMeterId(this.editMeter.guid);
+    this.showCopyLast = (allSelectedMeterData.length != 0);
+  }
+
+  copyLastReading() {
+    let allSelectedMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataFromMeterId(this.editMeter.guid);
+    allSelectedMeterData = _.orderBy(allSelectedMeterData, 'readDate');
+    let lastReading: IdbUtilityMeterData = allSelectedMeterData[allSelectedMeterData.length - 1];
+    this.meterDataForm.controls.totalVolume.patchValue(lastReading.totalVolume);
+    this.setTotalEmissions();
   }
 }
