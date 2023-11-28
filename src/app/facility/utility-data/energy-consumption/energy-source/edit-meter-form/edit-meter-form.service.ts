@@ -56,6 +56,7 @@ export class EditMeterFormService {
     // if(form.controls.source.value == 'Electricity'){
     //   form.controls.startingUnit.disable();
     // }
+    form.controls.globalWarmingPotential.disable();
     return form;
   }
 
@@ -210,7 +211,7 @@ export class EditMeterFormService {
   }
 
   checkShowEmissionsOutputRate(meter: IdbUtilityMeter): boolean {
-    if (meter.source == 'Electricity' || meter.source == 'Natural Gas' || meter.source == 'Other Fuels' || (meter.source == 'Other Energy' && meter.fuel == 'Purchased Compressed Air')) {
+    if (meter.source == 'Electricity' || meter.source == 'Natural Gas' || meter.source == 'Other Fuels' || (meter.source == 'Other Energy' && meter.fuel == 'Purchased Compressed Air') || (meter.source == 'Other' && meter.scope == 5)) {
       return true;
     } else {
       return false;

@@ -20,6 +20,7 @@ import { EditBillComponent } from './utility-meter-data/edit-bill/edit-bill.comp
 import { TableItemsDropdownModule } from 'src/app/shared/table-items-dropdown/table-items-dropdown.module';
 import { EditVehicleMeterBillComponent } from './utility-meter-data/edit-bill/edit-vehicle-meter-bill/edit-vehicle-meter-bill.component';
 import { VehicleDataTableComponent } from './utility-meter-data/utility-meter-data-table/vehicle-data-table/vehicle-data-table.component';
+import { RefrigerationCalculationTableComponent } from './utility-meter-data/edit-bill/edit-utility-bill/refrigeration-calculation-table/refrigeration-calculation-table.component';
 @NgModule({
   declarations: [
     EditMeterComponent,
@@ -35,7 +36,8 @@ import { VehicleDataTableComponent } from './utility-meter-data/utility-meter-da
     UtilityMeterDataTableComponent,
     EditBillComponent,
     EditVehicleMeterBillComponent,
-    VehicleDataTableComponent
+    VehicleDataTableComponent,
+    RefrigerationCalculationTableComponent
   ],
   imports: [
     CommonModule,

@@ -36,7 +36,10 @@ export class EditUtilityBillComponent implements OnInit {
   volumeUnit: string;
   marketEmissions: number = 0;
   locationEmissions: number = 0;
+  fugitiveEmissions: number = 0;
   showEmissions: boolean;
+  totalLabel: 'Total Volume' | 'Total Refrigerant Lost';
+  displayFugitiveTableModal: boolean = false;
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService,
     private facilityDbService: FacilitydbService, private editMeterFormService: EditMeterFormService,
     private eGridService: EGridService,
@@ -53,6 +56,7 @@ export class EditUtilityBillComponent implements OnInit {
     this.volumeUnit = this.editMeter.startingUnit;
     this.checkDate();
     this.setTotalEmissions();
+    this.setTotalLabel();
   }
 
   calculateTotalEnergyUse() {
@@ -78,16 +82,39 @@ export class EditUtilityBillComponent implements OnInit {
   }
 
   setTotalEmissions() {
-    if (this.meterDataForm.controls.totalEnergyUse.value && this.showEmissions) {
+    if ((this.meterDataForm.controls.totalEnergyUse.value || this.meterDataForm.controls.totalVolume.value) && this.showEmissions) {
       let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
       let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
-      let emissionsValues: EmissionsResults = getEmissions(this.editMeter, this.meterDataForm.controls.totalEnergyUse.value, this.editMeter.energyUnit, new Date(this.meterDataForm.controls.readDate.value).getFullYear(), false, [facility], this.eGridService.co2Emissions, customFuels, 0, undefined, undefined);
+      //meed to use total volume for fugitive/process emissions
+      let emissionsValues: EmissionsResults = getEmissions(this.editMeter,
+        this.meterDataForm.controls.totalEnergyUse.value,
+        this.editMeter.energyUnit,
+        new Date(this.meterDataForm.controls.readDate.value).getFullYear(),
+        false, [facility], this.eGridService.co2Emissions, customFuels,
+        this.meterDataForm.controls.totalVolume.value, undefined, undefined);
       this.marketEmissions = emissionsValues.marketEmissions;
       this.locationEmissions = emissionsValues.locationEmissions;
+      this.fugitiveEmissions = emissionsValues.fugitiveEmissions;
     } else {
       this.marketEmissions = 0;
       this.locationEmissions = 0;
+      this.fugitiveEmissions = 0;
     }
   }
 
+  setTotalLabel() {
+    if (this.editMeter.scope == 5) {
+      this.totalLabel = 'Total Refrigerant Lost';
+    } else {
+      this.totalLabel = 'Total Volume';
+    }
+  }
+
+  showFugitiveEmissionsTable() {
+    this.displayFugitiveTableModal = true;
+  }
+
+  hideFugitiveTableModal() {
+    this.displayFugitiveTableModal = false;
+  }
 }
