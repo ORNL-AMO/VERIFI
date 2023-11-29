@@ -164,7 +164,7 @@ export interface IdbUtilityMeter {
     vehicleFuel?: string,
     vehicleFuelEfficiency?: number,
     vehicleDistanceUnit?: string
-    refrigerationCharge?: number,
+    globalWarmingPotentialOption?: number,
     globalWarmingPotential?: number
 
 }

@@ -227,9 +227,9 @@ export class EditMeterFormComponent implements OnInit {
   }
 
   updateRefrigerationValidation() {
-    let refrigerationValidation: Array<ValidatorFn> = this.editMeterFormService.getRefrigerationValidation(this.meterForm.controls.scope.value);
-    this.meterForm.controls.refrigerationCharge.setValidators(refrigerationValidation);
-    this.meterForm.controls.refrigerationCharge.updateValueAndValidity();
+    let refrigerationValidation: Array<ValidatorFn> = this.editMeterFormService.getGlobalWarmingPotentialValidation(this.meterForm.controls.scope.value);
+    this.meterForm.controls.globalWarmingPotentialOption.setValidators(refrigerationValidation);
+    this.meterForm.controls.globalWarmingPotentialOption.updateValueAndValidity();
     this.meterForm.controls.globalWarmingPotential.setValidators(refrigerationValidation);
     this.meterForm.controls.globalWarmingPotential.updateValueAndValidity();
   }
@@ -407,7 +407,7 @@ export class EditMeterFormComponent implements OnInit {
       this.scopeOptions = ScopeOptions.filter(option => { return option.scope == 'Scope 1' && option.value != 5 });
     } else if (selectedMeterSource == 'Other') {
       //Scope 1 (non-fugitive)
-      this.scopeOptions = ScopeOptions.filter(option => { return option.value == 100 || option.value == 5 });
+      this.scopeOptions = ScopeOptions.filter(option => { return option.value == 100 || option.value == 5 || option.value == 6 });
     }
   }
 
@@ -467,9 +467,9 @@ export class EditMeterFormComponent implements OnInit {
   }
 
   setGlobalWarmingPotential() {
-    if (this.meterForm.controls.scope.value == 5) {
+    if (this.meterForm.controls.scope.value == 5 || this.meterForm.controls.scope.value == 6) {
       let globalWarmingPotential: GlobalWarmingPotential = this.globalWarmingPotentials.find(potential => {
-        return potential.value == this.meterForm.controls.refrigerationCharge.value;
+        return potential.value == this.meterForm.controls.globalWarmingPotentialOption.value;
       });
       if (globalWarmingPotential) {
         let conversionHelper: number = new ConvertValue(1, 'kg', this.meterForm.controls.startingUnit.value).convertedValue;

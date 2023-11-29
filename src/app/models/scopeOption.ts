@@ -31,6 +31,11 @@ export const ScopeOptions: Array<ScopeOption> = [
         scope: 'Scope 1'
     },
     {
+        optionLabel: 'Process',
+        value: 6,
+        scope: 'Scope 1'
+    },
+    {
         optionLabel: 'N/A',
         value: 100,
         scope: 'Scope'

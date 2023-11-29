@@ -134,7 +134,7 @@ export function getEmissions(meter: IdbUtilityMeter,
             mobileOtherEmissions = (25 * totalVolume * meterFuel.CH4) + (298 * totalVolume * meterFuel.N2O);
         }
         mobileTotalEmissions = mobileOtherEmissions + mobileCarbonEmissions;
-    } else if(meter.source == 'Other' && meter.scope == 5){
+    } else if(meter.source == 'Other' && (meter.scope == 5 || meter.scope == 6)){
         //fugitive emissions
         fugitiveEmissions = totalVolume * meter.globalWarmingPotential;
     }

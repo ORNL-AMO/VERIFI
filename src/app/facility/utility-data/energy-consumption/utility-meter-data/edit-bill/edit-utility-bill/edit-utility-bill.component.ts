@@ -39,7 +39,7 @@ export class EditUtilityBillComponent implements OnInit {
   locationEmissions: number = 0;
   fugitiveEmissions: number = 0;
   showEmissions: boolean;
-  totalLabel: 'Total Volume' | 'Total Refrigerant Lost';
+  totalLabel: 'Total Volume' | 'Total Refrigerant Lost' | 'Total Process Emissions';
   displayFugitiveTableModal: boolean = false;
   showCopyLast: boolean;
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService,
@@ -109,6 +109,8 @@ export class EditUtilityBillComponent implements OnInit {
   setTotalLabel() {
     if (this.editMeter.scope == 5) {
       this.totalLabel = 'Total Refrigerant Lost';
+    } else if(this.editMeter.scope == 6){
+      this.totalLabel = 'Total Process Emissions';
     } else {
       this.totalLabel = 'Total Volume';
     }
