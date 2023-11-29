@@ -8,6 +8,24 @@ export interface GlobalWarmingPotential {
 
 export const GlobalWarmingPotentials: Array<GlobalWarmingPotential> = [
     {
+        value: 101,
+        label: 'CO2',
+        display: 'CO&#8322;',
+        gwp: 1
+    },    
+    {
+        value: 102,
+        label: 'CH4',
+        display: 'CH&#8324;',
+        gwp: 25
+    },    
+    {
+        value: 103,
+        label: 'N2O',
+        display: 'N&#8322;O',
+        gwp: 298
+    },
+    {
         value: 1,
         label: 'HFC-23',
         display: 'HFC-23',
@@ -124,61 +142,61 @@ export const GlobalWarmingPotentials: Array<GlobalWarmingPotential> = [
     {
         value: 20,
         label: 'SF6',
-        display: 'SF<sub>6</sub>',
+        display: 'SF&#x2086;',
         gwp: 22800
     },
     {
         value: 21,
         label: 'NF3',
-        display: 'NF<sub>3</sub>',
+        display: 'NF&#8323;',
         gwp: 17200
     },
     {
         value: 22,
         label: 'CF4',
-        display: 'CF<sub>4</sub>',
+        display: 'CF&#x2084;',
         gwp: 7390
     },
     {
         value: 23,
         label: 'C2F6',
-        display: 'C<sub>2</sub>F<sub>6</sub>',
+        display: 'C&#x2082;F&#x2086;',
         gwp: 12200
     },
     {
         value: 24,
         label: 'C3F8',
-        display: 'C<sub>3</sub>F<sub>8</sub>',
+        display: 'C&#8323;F&#x2088;',
         gwp: 8830
     },
     {
         value: 25,
         label: 'c-C4F8',
-        display: 'c-C<sub>4</sub>F<sub>8</sub>',
+        display: 'c-C&#x2084;F&#x2088;',
         gwp: 3500
     },
     {
         value: 26,
         label: 'C4F10',
-        display: 'C<sub>4</sub>F<sub>10</sub>',
+        display: 'C&#x2084;F&#8321;&#8320;',
         gwp: 8860
     },
     {
         value: 27,
         label: 'C5F12',
-        display: 'C<sub>5</sub>F<sub>12</sub>',
+        display: 'C&#8325;F&#8321;&#8322;',
         gwp: 9160
     },
     {
         value: 28,
         label: 'C6F14',
-        display: 'C<sub>6</sub>F<sub>14</sub>',
+        display: 'C&#x2086;F&#8321;&#8324;',
         gwp: 9300
     },
     {
         value: 29,
         label: 'C10F18',
-        display: 'C<sub>10</sub>F<sub>18</sub>',
+        display: 'C&#8321;&#8320;F&#8321;&#8328;',
         //>7500?
         gwp: 7500
     },
