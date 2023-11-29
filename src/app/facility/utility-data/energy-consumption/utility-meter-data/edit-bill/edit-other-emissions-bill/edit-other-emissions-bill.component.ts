@@ -12,11 +12,11 @@ import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
 import * as _ from 'lodash';
 
 @Component({
-  selector: 'app-edit-utility-bill',
-  templateUrl: './edit-utility-bill.component.html',
-  styleUrls: ['./edit-utility-bill.component.css']
+  selector: 'app-edit-other-emissions-bill',
+  templateUrl: './edit-other-emissions-bill.component.html',
+  styleUrls: ['./edit-other-emissions-bill.component.css']
 })
-export class EditUtilityBillComponent implements OnInit {
+export class EditOtherEmissionsBillComponent {
   @Input()
   editMeterData: IdbUtilityMeterData;
   @Input()
@@ -26,18 +26,14 @@ export class EditUtilityBillComponent implements OnInit {
   @Input()
   editMeter: IdbUtilityMeter;
   @Input()
-  displayVolumeInput: boolean;
-  @Input()
-  displayEnergyUse: boolean;
-  @Input()
   invalidDate: boolean;
 
-  energyUnit: string;
-  source: MeterSource;
+
   volumeUnit: string;
-  marketEmissions: number = 0;
-  locationEmissions: number = 0;
-  showEmissions: boolean;
+  fugitiveEmissions: number = 0;
+  processEmissions: number = 0;
+  totalLabel: 'Total Refrigerant Lost' | 'Total Process Emissions';
+  displayFugitiveTableModal: boolean = false;
   showCopyLast: boolean;
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService,
     private facilityDbService: FacilitydbService, private editMeterFormService: EditMeterFormService,
@@ -45,17 +41,16 @@ export class EditUtilityBillComponent implements OnInit {
     private customFuelDbService: CustomFuelDbService) { }
 
   ngOnInit(): void {
-    this.showEmissions = this.editMeterFormService.checkShowEmissionsOutputRate(this.editMeter);
     this.setTotalEmissions();
+    this.setShowCopyLast();
 
   }
 
   ngOnChanges() {
-    this.source = this.editMeter.source;
-    this.energyUnit = this.editMeter.energyUnit;
     this.volumeUnit = this.editMeter.startingUnit;
     this.checkDate();
     this.setTotalEmissions();
+    this.setTotalLabel();
   }
 
   calculateTotalEnergyUse() {
@@ -81,7 +76,7 @@ export class EditUtilityBillComponent implements OnInit {
   }
 
   setTotalEmissions() {
-    if ((this.meterDataForm.controls.totalEnergyUse.value || this.meterDataForm.controls.totalVolume.value) && this.showEmissions) {
+    if (this.meterDataForm.controls.totalVolume.value) {
       let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
       let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
       //meed to use total volume for fugitive/process emissions
@@ -91,11 +86,40 @@ export class EditUtilityBillComponent implements OnInit {
         new Date(this.meterDataForm.controls.readDate.value).getFullYear(),
         false, [facility], this.eGridService.co2Emissions, customFuels,
         this.meterDataForm.controls.totalVolume.value, undefined, undefined);
-      this.marketEmissions = emissionsValues.marketEmissions;
-      this.locationEmissions = emissionsValues.locationEmissions;
+      this.fugitiveEmissions = emissionsValues.fugitiveEmissions;
+      this.processEmissions = emissionsValues.processEmissions;
     } else {
-      this.marketEmissions = 0;
-      this.locationEmissions = 0;
+      this.fugitiveEmissions = 0;
+      this.processEmissions = 0;
     }
+  }
+
+  setTotalLabel() {
+    if (this.editMeter.scope == 5) {
+      this.totalLabel = 'Total Refrigerant Lost';
+    } else if (this.editMeter.scope == 6) {
+      this.totalLabel = 'Total Process Emissions';
+    }
+  }
+
+  showFugitiveEmissionsTable() {
+    this.displayFugitiveTableModal = true;
+  }
+
+  hideFugitiveTableModal() {
+    this.displayFugitiveTableModal = false;
+  }
+
+  setShowCopyLast() {
+    let allSelectedMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataFromMeterId(this.editMeter.guid);
+    this.showCopyLast = (allSelectedMeterData.length != 0);
+  }
+
+  copyLastReading() {
+    let allSelectedMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataFromMeterId(this.editMeter.guid);
+    allSelectedMeterData = _.orderBy(allSelectedMeterData, 'readDate');
+    let lastReading: IdbUtilityMeterData = allSelectedMeterData[allSelectedMeterData.length - 1];
+    this.meterDataForm.controls.totalVolume.patchValue(lastReading.totalVolume);
+    this.setTotalEmissions();
   }
 }

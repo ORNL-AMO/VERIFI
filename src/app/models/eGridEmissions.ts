@@ -23,5 +23,6 @@ export interface EmissionsResults {
   mobileBiogenicEmissions: number,
   mobileOtherEmissions: number,
   mobileTotalEmissions: number,
-  fugitiveEmissions: number
+  fugitiveEmissions: number,
+  processEmissions: number
 }

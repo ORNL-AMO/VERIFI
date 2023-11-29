@@ -46,6 +46,7 @@ export function getEmissions(meter: IdbUtilityMeter,
     let mobileOtherEmissions: number = 0;
     let mobileTotalEmissions: number = 0;
     let fugitiveEmissions: number = 0;
+    let processEmissions: number = 0;
 
     if (meter.source == 'Electricity' || isCompressedAir) {
         if (energyIsSource && meter.siteToSource != 0) {
@@ -134,12 +135,15 @@ export function getEmissions(meter: IdbUtilityMeter,
             mobileOtherEmissions = (25 * totalVolume * meterFuel.CH4) + (298 * totalVolume * meterFuel.N2O);
         }
         mobileTotalEmissions = mobileOtherEmissions + mobileCarbonEmissions;
-    } else if(meter.source == 'Other' && (meter.scope == 5 || meter.scope == 6)){
-        //fugitive emissions
-        fugitiveEmissions = totalVolume * meter.globalWarmingPotential;
+    } else if(meter.source == 'Other' && meter.scope == 5){
+        if(meter.scope == 5){
+            //fugitive emissions
+            fugitiveEmissions = totalVolume * meter.globalWarmingPotential;
+        }else if(meter.scope == 6){
+            //process emissions
+            processEmissions = totalVolume * meter.globalWarmingPotential;
+        }
     }
-
-
     return {
         RECs: RECs,
         locationEmissions: locationEmissions,
@@ -150,7 +154,8 @@ export function getEmissions(meter: IdbUtilityMeter,
         mobileCarbonEmissions: mobileCarbonEmissions,
         mobileOtherEmissions: mobileOtherEmissions,
         mobileTotalEmissions: mobileTotalEmissions,
-        fugitiveEmissions: fugitiveEmissions
+        fugitiveEmissions: fugitiveEmissions,
+        processEmissions: processEmissions
     };
 }
 
