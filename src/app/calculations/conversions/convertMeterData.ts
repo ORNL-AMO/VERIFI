@@ -25,8 +25,12 @@ export function convertMeterData(meter: IdbUtilityMeter, meterData: Array<IdbUti
         if (!facilityUnit) {
             facilityUnit = getUnitFromMeter(meter, accountOrFacility);
         }
+        let startingUnit: string = meter.startingUnit;
+        if (meter.source == 'Other Fuels' && meter.scope == 2) {
+            startingUnit = meter.vehicleCollectionUnit;
+        }
         for (let index: number = 0; index < copyMeterData.length; index++) {
-            copyMeterData[index].totalVolume = new ConvertValue(copyMeterData[index].totalVolume, meter.startingUnit, facilityUnit).convertedValue;
+            copyMeterData[index].totalVolume = new ConvertValue(copyMeterData[index].totalVolume, startingUnit, facilityUnit).convertedValue;
         }
     }
     return copyMeterData;

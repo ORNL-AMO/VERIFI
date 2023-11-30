@@ -2,7 +2,7 @@ import { Component, Input } from '@angular/core';
 import { FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { FuelTypeOption } from 'src/app/shared/fuel-options/fuelTypeOption';
 import { MobileTransportOnsiteOptions } from 'src/app/shared/fuel-options/mobileTransportOnsiteOptions';
-import { EnergyUnitOptions, UnitOption, VolumeGasOptions, VolumeLiquidOptions } from 'src/app/shared/unitOptions';
+import { EnergyUnitOptions, UnitOption, VolumeLiquidOptions } from 'src/app/shared/unitOptions';
 import { VehicleCategories, VehicleCategory } from 'src/app/shared/vehicle-data/vehicleCategory';
 import { VehicleType, VehicleTypes } from 'src/app/shared/vehicle-data/vehicleType';
 import { EditMeterFormService } from '../edit-meter-form.service';
@@ -27,7 +27,7 @@ export class VehicleFormComponent {
   fuelOptions: Array<FuelTypeOption> = [];
   hasDifferentEnergyUnits: boolean = false;
   selectedFuelTypeOption: FuelTypeOption;
-  constructor(private editMeterFormService: EditMeterFormService,) {
+  constructor(private editMeterFormService: EditMeterFormService) {
   }
 
   ngOnInit() {
@@ -99,7 +99,7 @@ export class VehicleFormComponent {
     }
 
     let checkExists: FuelTypeOption = this.fuelOptions.find(option => {
-      return option == this.meterForm.controls.vehicleFuel.value;
+      return option.value == this.meterForm.controls.vehicleFuel.value;
     });
     if (!checkExists) {
       this.meterForm.controls.vehicleFuel.patchValue(this.fuelOptions[0].value);

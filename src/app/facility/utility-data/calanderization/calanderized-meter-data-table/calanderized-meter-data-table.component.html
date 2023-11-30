@@ -39,14 +39,14 @@
                 Excess
                 RECs <br>Emissions<br> (tonne CO<sub>2</sub>e)</th>
             <!--mobile-->
-            <th (click)="setOrderDataField('mobileCarbonEmissions')"
-                [ngClass]="{'active': orderDataField == 'mobileCarbonEmissions'}"
-                *ngIf="calanderizedMeter.showMobileEmissions">
-                Mobile Carbon<br>Emissions<br> (tonne CO<sub>2</sub>e)</th>
             <th (click)="setOrderDataField('mobileBiogenicEmissions')"
                 [ngClass]="{'active': orderDataField == 'mobileBiogenicEmissions'}"
                 *ngIf="calanderizedMeter.showMobileEmissions">
                 Mobile Biogenic<br>Emissions<br> (tonne CO<sub>2</sub>e)</th>
+            <th (click)="setOrderDataField('mobileCarbonEmissions')"
+                [ngClass]="{'active': orderDataField == 'mobileCarbonEmissions'}"
+                *ngIf="calanderizedMeter.showMobileEmissions">
+                Mobile Carbon<br>Emissions<br> (tonne CO<sub>2</sub>e)</th>
             <th (click)="setOrderDataField('mobileOtherEmissions')"
                 [ngClass]="{'active': orderDataField == 'mobileOtherEmissions'}"
                 *ngIf="calanderizedMeter.showMobileEmissions">
@@ -90,9 +90,9 @@
                 {{data.excessRECsEmissions | customNumber}}
             </td>
             <!--mobile-->
-            <td *ngIf="calanderizedMeter.showMobileEmissions">{{data.mobileCarbonEmissions | customNumber}}
-            </td>
             <td *ngIf="calanderizedMeter.showMobileEmissions">{{data.mobileBiogenicEmissions | customNumber}}
+            </td>
+            <td *ngIf="calanderizedMeter.showMobileEmissions">{{data.mobileCarbonEmissions | customNumber}}
             </td>
             <td *ngIf="calanderizedMeter.showMobileEmissions">{{data.mobileOtherEmissions | customNumber}}
             </td>
