@@ -112,7 +112,7 @@ export class EditBillComponent implements OnInit {
   setMeterDataForm() {
     if (this.editMeter.source == 'Electricity') {
       this.meterDataForm = this.utilityMeterDataService.getElectricityMeterDataForm(this.editMeterData);
-    } else if (this.editMeter.source == 'Other Utility') {
+    } else if (this.editMeter.source == 'Other') {
       this.displayVolumeInput = (getIsEnergyUnit(this.editMeter.startingUnit) == false);
       this.displayEnergyUse = (getIsEnergyUnit(this.editMeter.startingUnit) == true);
       this.meterDataForm = this.utilityMeterDataService.getGeneralMeterDataForm(this.editMeterData, this.displayVolumeInput, this.displayEnergyUse);

@@ -109,9 +109,9 @@ export class UpdateDbEntryService {
     }
 
     if (!analysisItem.baselineYear) {
-      if(account && account.sustainabilityQuestions){
+      if (account && account.sustainabilityQuestions) {
         analysisItem.baselineYear = account.sustainabilityQuestions.energyReductionBaselineYear;
-      }else{
+      } else {
         analysisItem.baselineYear = 2017;
       }
       isChanged = true;
@@ -135,6 +135,9 @@ export class UpdateDbEntryService {
       isChanged = true;
       utilityMeter.source = 'Water Discharge';
       utilityMeter.waterDischargeType = 'Municipal Sewer';
+    } else if (source == 'Other Utility') {
+      isChanged = true;
+      utilityMeter.source = 'Other';
     }
     return { utilityMeter: utilityMeter, isChanged: isChanged };
   }

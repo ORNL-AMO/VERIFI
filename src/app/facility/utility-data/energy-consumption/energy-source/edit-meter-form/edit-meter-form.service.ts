@@ -20,6 +20,7 @@ export class EditMeterFormService {
     let waterDischargeValidation: Array<ValidatorFn> = this.getWaterDischargeValidation(meter.source);
     let basicVehicleValidation: Array<ValidatorFn> = this.getBasicVehicleValidation(meter.scope);
     let additionalVehicleValidation: Array<ValidatorFn> = this.getAdditionalVehicleValidation(meter.scope, meter.vehicleCategory)
+    let globalWarmingPotentialValidation: Array<ValidatorFn> = this.getGlobalWarmingPotentialValidation(meter.scope);
     let form: FormGroup = this.formBuilder.group({
       meterNumber: [meter.meterNumber],
       accountNumber: [meter.accountNumber],
@@ -48,11 +49,14 @@ export class EditMeterFormService {
       vehicleCollectionUnit: [meter.vehicleCollectionUnit, basicVehicleValidation],
       vehicleFuel: [meter.vehicleFuel, basicVehicleValidation],
       vehicleFuelEfficiency: [meter.vehicleFuelEfficiency, additionalVehicleValidation],
-      vehicleDistanceUnit: [meter.vehicleDistanceUnit, additionalVehicleValidation]
+      vehicleDistanceUnit: [meter.vehicleDistanceUnit, additionalVehicleValidation],
+      globalWarmingPotentialOption: [meter.globalWarmingPotentialOption, globalWarmingPotentialValidation],
+      globalWarmingPotential: [meter.globalWarmingPotential, globalWarmingPotentialValidation]
     });
     // if(form.controls.source.value == 'Electricity'){
     //   form.controls.startingUnit.disable();
     // }
+    form.controls.globalWarmingPotential.disable();
     return form;
   }
 
@@ -86,6 +90,8 @@ export class EditMeterFormService {
     meter.vehicleFuel = form.controls.vehicleFuel.value;
     meter.vehicleFuelEfficiency = form.controls.vehicleFuelEfficiency.value;
     meter.vehicleDistanceUnit = form.controls.vehicleDistanceUnit.value;
+    meter.globalWarmingPotentialOption = form.controls.globalWarmingPotentialOption.value;
+    meter.globalWarmingPotential = form.controls.globalWarmingPotential.value;
     //set multipliers
     meter = this.setMultipliers(meter);
     return meter;
@@ -172,6 +178,12 @@ export class EditMeterFormService {
     return [];
   }
 
+  getGlobalWarmingPotentialValidation(scope: number): Array<ValidatorFn> {
+    if (scope == 5 || scope == 6) {
+      return [Validators.required]
+    }
+    return [];
+  }
 
   getAdditionalVehicleValidation(scope: number, vehicleCategory: number): Array<ValidatorFn> {
     if (scope == 2 && vehicleCategory != 1) {
@@ -181,7 +193,7 @@ export class EditMeterFormService {
   }
 
   checkShowHeatCapacity(source: MeterSource, startingUnit: string, scope: number): boolean {
-    if (source != 'Water Intake' && source != 'Water Discharge' && source != 'Other Utility' && startingUnit && scope != 2) {
+    if (source != 'Water Intake' && source != 'Water Discharge' && source != 'Other' && startingUnit && scope != 2) {
       return (getIsEnergyUnit(startingUnit) == false);
     } else {
       return false;
@@ -199,7 +211,7 @@ export class EditMeterFormService {
   }
 
   checkShowEmissionsOutputRate(meter: IdbUtilityMeter): boolean {
-    if (meter.source == 'Electricity' || meter.source == 'Natural Gas' || meter.source == 'Other Fuels' || (meter.source == 'Other Energy' && meter.fuel == 'Purchased Compressed Air')) {
+    if (meter.source == 'Electricity' || meter.source == 'Natural Gas' || meter.source == 'Other Fuels' || (meter.source == 'Other Energy' && meter.fuel == 'Purchased Compressed Air') || (meter.source == 'Other' && meter.scope == 5)) {
       return true;
     } else {
       return false;
@@ -265,6 +277,8 @@ export class EditMeterFormService {
       return 1;
     } else if (source == 'Other Fuels') {
       return 1;
+    } else if (source == 'Other') {
+      return 100;
     } else {
       return undefined;
     }

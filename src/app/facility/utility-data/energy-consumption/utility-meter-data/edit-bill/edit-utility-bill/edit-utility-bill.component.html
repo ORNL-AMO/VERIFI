@@ -23,18 +23,18 @@
 
   <div class="row">
     <div *ngIf="displayVolumeInput" class="col-md-6 col-sm-12">
-      <label for="totalVolume">Total Volume <span class="required">*</span> </label>
+      <label for="totalVolume">Total Volume <span class="required">*</span></label>
       <div class="input-group mb-3">
         <input id="totalVolume" class="form-control" type="number" formControlName="totalVolume"
           (input)="calculateTotalEnergyUse()" [class.warning]="meterDataForm.controls.totalVolume.value === 0"
           onfocus="this.select();" min="0" max="999999999999999">
         <span class="input-group-text" [innerHTML]="volumeUnit | settingsLabel"></span>
       </div>
-      <div class="alert alert-danger" *ngIf="meterDataForm.get('totalVolume').hasError('required')">Total volume use is
+      <div class="alert alert-danger" *ngIf="meterDataForm.get('totalVolume').hasError('required')">Total Volume is
         required</div>
       <div class="alert alert-danger" *ngIf="meterDataForm.get('totalVolume').hasError('min')">Can't be less than 0
       </div>
-      <div class="alert alert-warning" *ngIf="meterDataForm.controls.totalVolume.value === 0">Total volume should be
+      <div class="alert alert-warning" *ngIf="meterDataForm.controls.totalVolume.value === 0">Total Volume should be
         greater
         than 0</div>
     </div>
@@ -55,24 +55,26 @@
         be
         greater than 0</div>
     </div>
-    <div *ngIf="showEmissions" class="col-md-6 col-sm-12">
-      <label for="marketEmissions">
-        Total Market-Based Emissions
-      </label>
-      <div class="input-group mb-3">
-        {{marketEmissions | number:'1.0-0'}} tonne CO<sub>2</sub>e
-      </div>
-    </div>
-    <div *ngIf="showEmissions" class="col-md-6 col-sm-12">
-      <label for="locationEmissions">
-        Total Location-Based Emissions
-      </label>
-      <div class="input-group mb-3">
-        {{locationEmissions | number:'1.0-0'}} tonne CO<sub>2</sub>e
-      </div>
-    </div>
-  </div>
 
+    <ng-container *ngIf="showEmissions">
+      <div class="col-md-6 col-sm-12">
+        <label for="marketEmissions">
+          Total Market-Based Emissions
+        </label>
+        <div class="input-group mb-3">
+          {{marketEmissions | number:'1.0-0'}} tonne CO<sub>2</sub>e
+        </div>
+      </div>
+      <div class="col-md-6 col-sm-12">
+        <label for="locationEmissions">
+          Total Location-Based Emissions
+        </label>
+        <div class="input-group mb-3">
+          {{locationEmissions | number:'1.0-0'}} tonne CO<sub>2</sub>e
+        </div>
+      </div>
+    </ng-container>
+  </div>
   <label for="totalCost">Total Cost</label>
   <div class="input-group mb-3">
     <input id="totalCost" class="form-control" type="number" formControlName="totalCost" onfocus="this.select();"

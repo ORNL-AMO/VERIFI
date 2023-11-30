@@ -1,4 +1,5 @@
 import { MeterSource } from "./constantsAndTypes";
+import { EmissionsResults } from "./eGridEmissions";
 import { IdbUtilityMeter, IdbUtilityMeterGroup } from "./idb";
 
 export interface CalanderizedMeter {
@@ -7,11 +8,14 @@ export interface CalanderizedMeter {
     monthlyData: Array<MonthlyData>,
     showConsumption: boolean,
     showEnergyUse: boolean,
-    showEmissions: boolean,
+    showStandardEmissions: boolean,
+    showFugitiveEmissions: boolean,
+    showProcessEmissions: boolean,
+    showMobileEmissions: boolean,
     energyUnit: string,
 }
 
-export interface MonthlyData {
+export interface MonthlyData extends EmissionsResults {
     month: string,
     monthNumValue: number,
     year: number,
@@ -20,11 +24,6 @@ export interface MonthlyData {
     energyUse: number,
     energyCost: number,
     date: Date,
-    locationEmissions: number, 
-    marketEmissions: number,    
-    RECs: number,
-    excessRECs: number, 
-    excessRECsEmissions: number,
     readingType: 'mixed' | 'metered' | 'estimated'
 }
 

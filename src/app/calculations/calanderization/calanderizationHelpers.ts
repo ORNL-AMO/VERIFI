@@ -45,7 +45,7 @@ export function getNextMonthsBill(month: number, year: number, meterReadings: Ar
 export function getConsumptionUnit(meter: IdbUtilityMeter, accountOrFacility: IdbAccount | IdbFacility): string {
     if (accountOrFacility) {
         let isEnergyMeter: boolean;
-        if (meter.source == 'Other Utility') {
+        if (meter.source == 'Other') {
             isEnergyMeter = getIsEnergyUnit(meter.startingUnit);
         } else {
             isEnergyMeter = getIsEnergyMeter(meter.source);
@@ -67,12 +67,21 @@ export function getUnitFromMeter(accountMeter: IdbUtilityMeter, accountOrFacilit
     } else if (accountMeter.source == 'Natural Gas') {
         return accountOrFacility.volumeGasUnit;
     } else if (accountMeter.source == 'Other Fuels') {
-        if (accountMeter.phase == 'Gas') {
-            return accountOrFacility.volumeGasUnit;
-        } else if (accountMeter.phase == 'Liquid') {
-            return accountOrFacility.volumeLiquidUnit;
-        } else if (accountMeter.phase == 'Solid') {
-            return accountOrFacility.massUnit;
+        if (accountMeter.scope != 2) {
+            if (accountMeter.phase == 'Gas') {
+                return accountOrFacility.volumeGasUnit;
+            } else if (accountMeter.phase == 'Liquid') {
+                return accountOrFacility.volumeLiquidUnit;
+            } else if (accountMeter.phase == 'Solid') {
+                return accountOrFacility.massUnit;
+            }
+        } else {
+            //Fuel Usage
+            if (accountMeter.vehicleCollectionType == 1) {
+                return accountOrFacility.volumeLiquidUnit;
+            } else {
+                return accountMeter.vehicleDistanceUnit;
+            }
         }
     } else if (accountMeter.source == 'Water Intake' || accountMeter.source == 'Water Discharge') {
         return accountOrFacility.volumeLiquidUnit;
@@ -85,7 +94,7 @@ export function getUnitFromMeter(accountMeter: IdbUtilityMeter, accountOrFacilit
         } else if (selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Compressed Air') {
             return accountOrFacility.volumeGasUnit;
         }
-    } else if (accountMeter.source == 'Other Utility') {
+    } else if (accountMeter.source == 'Other') {
         return accountMeter.startingUnit;
     }
 }

@@ -12,12 +12,18 @@ export function setEmissionsForCalanderizedMeters(calanderizedMeterData: Array<C
         let cMeter: CalanderizedMeter = calanderizedMeterData[i];
         for (let x = 0; x < cMeter.monthlyData.length; x++) {
             let monthlyData: MonthlyData = cMeter.monthlyData[x];
-            let emissions: EmissionsResults = getEmissions(cMeter.meter, monthlyData.energyUse, cMeter.energyUnit, monthlyData.year, energyIsSource, facilities, co2Emissions, customFuels, monthlyData.energyConsumption, cMeter.meter.vehicleCollectionUnit, cMeter.meter.vehicleDistanceUnit);
+            let emissions: EmissionsResults = getEmissions(cMeter.meter, monthlyData.energyUse, cMeter.energyUnit, monthlyData.year, energyIsSource, facilities, co2Emissions, customFuels, monthlyData.energyConsumption, cMeter.consumptionUnit, cMeter.meter.vehicleDistanceUnit);
             cMeter.monthlyData[x].RECs = emissions.RECs;
             cMeter.monthlyData[x].locationEmissions = emissions.locationEmissions;
             cMeter.monthlyData[x].marketEmissions = emissions.marketEmissions;
             cMeter.monthlyData[x].excessRECs = emissions.excessRECs;
             cMeter.monthlyData[x].excessRECsEmissions = emissions.excessRECsEmissions;
+            cMeter.monthlyData[x].mobileCarbonEmissions = emissions.mobileCarbonEmissions;
+            cMeter.monthlyData[x].mobileBiogenicEmissions = emissions.mobileBiogenicEmissions;
+            cMeter.monthlyData[x].mobileOtherEmissions = emissions.mobileOtherEmissions;
+            cMeter.monthlyData[x].mobileTotalEmissions = emissions.mobileTotalEmissions;
+            cMeter.monthlyData[x].fugitiveEmissions = emissions.fugitiveEmissions;
+            cMeter.monthlyData[x].processEmissions = emissions.processEmissions;
         }
     }
     return calanderizedMeterData;
@@ -45,6 +51,8 @@ export function getEmissions(meter: IdbUtilityMeter,
     let mobileCarbonEmissions: number = 0;
     let mobileOtherEmissions: number = 0;
     let mobileTotalEmissions: number = 0;
+    let fugitiveEmissions: number = 0;
+    let processEmissions: number = 0;
 
     if (meter.source == 'Electricity' || isCompressedAir) {
         if (energyIsSource && meter.siteToSource != 0) {
@@ -133,9 +141,15 @@ export function getEmissions(meter: IdbUtilityMeter,
             mobileOtherEmissions = (25 * totalVolume * meterFuel.CH4) + (298 * totalVolume * meterFuel.N2O);
         }
         mobileTotalEmissions = mobileOtherEmissions + mobileCarbonEmissions;
+    } else if(meter.source == 'Other'){
+        if(meter.scope == 5){
+            //fugitive emissions
+            fugitiveEmissions = totalVolume * meter.globalWarmingPotential;
+        }else if(meter.scope == 6){
+            //process emissions
+            processEmissions = totalVolume * meter.globalWarmingPotential;
+        }
     }
-
-
     return {
         RECs: RECs,
         locationEmissions: locationEmissions,
@@ -145,7 +159,9 @@ export function getEmissions(meter: IdbUtilityMeter,
         mobileBiogenicEmissions: mobileBiogenicEmissions,
         mobileCarbonEmissions: mobileCarbonEmissions,
         mobileOtherEmissions: mobileOtherEmissions,
-        mobileTotalEmissions: mobileTotalEmissions
+        mobileTotalEmissions: mobileTotalEmissions,
+        fugitiveEmissions: fugitiveEmissions,
+        processEmissions: processEmissions
     };
 }
 

@@ -186,6 +186,56 @@
                             capacity
                             should be greater than 0</div>
                     </div>
+
+
+                    <div class="col-6"
+                        *ngIf="meterForm.controls.scope.value == 5 || meterForm.controls.scope.value == 6">
+
+                        <label *ngIf="meterForm.controls.scope.value == 5"
+                            for="globalWarmingPotentialOption">Refrigeration Charge <span class="required">*</span>
+                        </label>
+                        <label *ngIf="meterForm.controls.scope.value == 6" for="globalWarmingPotentialOption">Process
+                            Emissions <span class="required">*</span> </label>
+                        <div class="mb-3">
+                            <select class="form-select" id="globalWarmingPotentialOption" type="text"
+                                formControlName="globalWarmingPotentialOption" (change)="setGlobalWarmingPotential()">
+                                <option *ngFor="let gwp of globalWarmingPotentials" [ngValue]="gwp.value">
+                                    <span [innerHTML]="gwp.display"></span>
+                                </option>
+                            </select>
+                        </div>
+                        <ng-container *ngIf="meterForm.controls.scope.value == 5">
+                            <div class="alert-danger alert"
+                                *ngIf="meterForm.get('globalWarmingPotentialOption').hasError('required')">Refrigeration
+                                charge is
+                                required</div>
+                        </ng-container>
+                        <ng-container *ngIf="meterForm.controls.scope.value == 6">
+                            <div class="alert-danger alert"
+                                *ngIf="meterForm.get('globalWarmingPotentialOption').hasError('required')">Process
+                                emissions is
+                                required</div>
+                        </ng-container>
+                    </div>
+
+                    <div class="col-6"
+                        *ngIf="meterForm.controls.scope.value == 5 || meterForm.controls.scope.value == 6">
+                        <label for="globalWarmingPotential">Global Warming Potential <span class="required">*</span>
+                        </label>
+                        <div class="input-group mb-3">
+                            <input id="globalWarmingPotential" class="form-control" type="number"
+                                formControlName="globalWarmingPotential" onfocus="this.select();">
+                            <span class="input-group-text">kg/<span
+                                    [innerHTML]="meterForm.controls.startingUnit.value | settingsLabel"></span>
+                            </span>
+                        </div>
+                        <div class="alert-danger alert"
+                            *ngIf="meterForm.get('globalWarmingPotential').hasError('required')">Global Warming
+                            Potential
+                            is required</div>
+                    </div>
+
+
                     <div class="col-6" *ngIf="selectedFuelTypeOption">
                         <app-emissions-details-table [selectedFuelTypeOption]="selectedFuelTypeOption"
                             [meterForm]="meterForm"></app-emissions-details-table>

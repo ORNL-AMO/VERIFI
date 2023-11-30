@@ -24,7 +24,7 @@ export class UtilityUseAndCost {
         average: IUseAndCost;
         previousYear: IUseAndCost;
     };
-    //other sources: "Other Utility"
+    //other sources: "Other"
     // otherUtilityUseAndCost: Array<UseAndCost>;
     allSourcesUseAndCost: Array<UseAndCost>;
     allSourcesTotal: {

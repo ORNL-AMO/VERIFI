@@ -48,7 +48,7 @@ export class MeterGroupingService {
       meterGroupTypes = this.addEnergyMetersWithoutGroups(waterMeters, 'Water', meterGroupTypes);
     }
     //Other
-    let otherMeters: Array<CalanderizedMeter> = metersWithoutGroups.filter(cMeter => { return cMeter.meter.source == 'Other Utility' });
+    let otherMeters: Array<CalanderizedMeter> = metersWithoutGroups.filter(cMeter => { return cMeter.meter.source == 'Other' });
     if (otherMeters.length != 0) {
       meterGroupTypes = this.addEnergyMetersWithoutGroups(otherMeters, 'Other', meterGroupTypes);
     }
@@ -166,6 +166,12 @@ export class MeterGroupingService {
         RECs: _.sumBy(filteredData, 'RECs'),
         excessRECs: _.sumBy(filteredData, 'excessRECs'), 
         excessRECsEmissions: _.sumBy(filteredData, 'excessRECsEmissions'),
+        mobileCarbonEmissions: _.sumBy(filteredData, 'mobileCarbonEmissions'),
+        mobileBiogenicEmissions: _.sumBy(filteredData, 'mobileBiogenicEmissions'),
+        mobileOtherEmissions: _.sumBy(filteredData, 'mobileOtherEmissions'),
+        mobileTotalEmissions: _.sumBy(filteredData, 'mobileTotalEmissions'),
+        fugitiveEmissions: _.sumBy(filteredData, 'fugitiveEmissions'),
+        processEmissions: _.sumBy(filteredData, 'processEmissions'),
         readingType: undefined
       })
       startDate = new Date(startDate.getFullYear(), startDate.getMonth() + 1);

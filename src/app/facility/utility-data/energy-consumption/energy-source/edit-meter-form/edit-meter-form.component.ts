@@ -11,6 +11,8 @@ import { FuelTypeOption } from 'src/app/shared/fuel-options/fuelTypeOption';
 import { StationaryOtherEnergyOptions } from 'src/app/shared/fuel-options/stationaryOtherEnergyOptions';
 import { getFuelTypeOptions } from 'src/app/shared/fuel-options/getFuelTypeOptions';
 import { ScopeOption, ScopeOptions } from 'src/app/models/scopeOption';
+import { GlobalWarmingPotential, GlobalWarmingPotentials } from 'src/app/models/globalWarmingPotentials';
+import { ConvertValue } from 'src/app/calculations/conversions/convertValue';
 
 @Component({
   selector: 'app-edit-meter-form',
@@ -25,7 +27,7 @@ export class EditMeterFormComponent implements OnInit {
   @Input()
   facility: IdbFacility;
 
-
+  globalWarmingPotentials: Array<GlobalWarmingPotential> = GlobalWarmingPotentials;
   scopeOptions: Array<ScopeOption> = ScopeOptions;
   hasDifferentCollectionUnits: boolean;
   hasDifferentEmissions: boolean;
@@ -138,6 +140,7 @@ export class EditMeterFormComponent implements OnInit {
     this.setHeatCapacity();
     this.setSiteToSource();
     this.checkHasDifferentUnits();
+    this.setGlobalWarmingPotential();
     this.cd.detectChanges();
   }
 
@@ -152,6 +155,8 @@ export class EditMeterFormComponent implements OnInit {
     this.updateHeatCapacityValidation();
     this.updateWaterValidation();
     this.updateVehicleValidation();
+    this.setStartingUnitOptions();
+    this.updateRefrigerationValidation();
     this.cd.detectChanges();
   }
 
@@ -221,6 +226,14 @@ export class EditMeterFormComponent implements OnInit {
     this.meterForm.controls.waterDischargeType.updateValueAndValidity();
   }
 
+  updateRefrigerationValidation() {
+    let refrigerationValidation: Array<ValidatorFn> = this.editMeterFormService.getGlobalWarmingPotentialValidation(this.meterForm.controls.scope.value);
+    this.meterForm.controls.globalWarmingPotentialOption.setValidators(refrigerationValidation);
+    this.meterForm.controls.globalWarmingPotentialOption.updateValueAndValidity();
+    this.meterForm.controls.globalWarmingPotential.setValidators(refrigerationValidation);
+    this.meterForm.controls.globalWarmingPotential.updateValueAndValidity();
+  }
+
   setFuelTypeOptions(onChange: boolean) {
     let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
     this.fuelTypeOptions = getFuelTypeOptions(this.meterForm.controls.source.value, this.meterForm.controls.phase.value, customFuels, this.meterForm.controls.scope.value);
@@ -263,9 +276,15 @@ export class EditMeterFormComponent implements OnInit {
 
   setStartingUnitOptions() {
     if (!this.meterDataExists) {
-      this.startingUnitOptions = this.energyUnitsHelperService.getStartingUnitOptions(this.meterForm.controls.source.value, this.meterForm.controls.phase.value, this.meterForm.controls.fuel.value);
+      this.startingUnitOptions = this.energyUnitsHelperService.getStartingUnitOptions(this.meterForm.controls.source.value, this.meterForm.controls.phase.value, this.meterForm.controls.fuel.value, this.meterForm.controls.scope.value);
     } else {
-      this.startingUnitOptions = this.energyUnitsHelperService.getStartingUnitOptionsExistingData(this.meterForm.controls.source.value, this.meterForm.controls.phase.value, this.meterForm.controls.fuel.value, this.meterForm.controls.startingUnit.value);
+      this.startingUnitOptions = this.energyUnitsHelperService.getStartingUnitOptionsExistingData(this.meterForm.controls.source.value, this.meterForm.controls.phase.value, this.meterForm.controls.fuel.value, this.meterForm.controls.startingUnit.value, this.meterForm.controls.scope.value);
+    }
+    let checkExists: UnitOption = this.startingUnitOptions.find(option => {
+      return option.value == this.meterForm.controls.startingUnit.value;
+    });
+    if (!checkExists) {
+      this.setStartingUnit();
     }
     this.cd.detectChanges();
   }
@@ -298,7 +317,7 @@ export class EditMeterFormComponent implements OnInit {
       }
     } else if (selectedMeterSource == 'Water Intake' || selectedMeterSource == 'Water Discharge') {
       facilityUnit = this.facility.volumeLiquidUnit;
-    } else if (selectedMeterSource == 'Other Utility') {
+    } else if (selectedMeterSource == 'Other') {
       facilityUnit = this.facility.massUnit;
     }
     this.meterForm.controls.startingUnit.patchValue(facilityUnit);
@@ -344,7 +363,7 @@ export class EditMeterFormComponent implements OnInit {
 
   checkDisplaySource() {
     let selectedMeterSource: MeterSource = this.meterForm.controls.source.value;
-    if (selectedMeterSource == 'Water Intake' || selectedMeterSource == 'Water Discharge' || selectedMeterSource == 'Other Utility') {
+    if (selectedMeterSource == 'Water Intake' || selectedMeterSource == 'Water Discharge') {
       this.displayScope = false;
     } else {
       this.displayScope = true;
@@ -379,14 +398,16 @@ export class EditMeterFormComponent implements OnInit {
       this.scopeOptions = [ScopeOptions[2]]
     } else if (selectedMeterSource == 'Other Energy') {
       //all options except mobile
-      this.scopeOptions = ScopeOptions.filter(option => { return option.value != 2 });
+      this.scopeOptions = [ScopeOptions[3]];
     } else if (selectedMeterSource == 'Natural Gas') {
       //Stationary
       this.scopeOptions = [ScopeOptions[0]];
-    }
-    else if (selectedMeterSource == 'Other Fuels') {
-      //Scope 1
-      this.scopeOptions = ScopeOptions.filter(option => { return option.scope == 'Scope 1' });
+    } else if (selectedMeterSource == 'Other Fuels') {
+      //Scope 1 (non-fugitive)
+      this.scopeOptions = ScopeOptions.filter(option => { return option.scope == 'Scope 1' && option.value != 5  && option.value != 6});
+    } else if (selectedMeterSource == 'Other') {
+      //Scope 1 (non-fugitive)
+      this.scopeOptions = ScopeOptions.filter(option => { return option.value == 100 || option.value == 5 || option.value == 6 });
     }
   }
 
@@ -443,5 +464,18 @@ export class EditMeterFormComponent implements OnInit {
 
     this.meterForm.controls.vehicleDistanceUnit.setValidators(additionalVehicleValidation);
     this.meterForm.controls.vehicleDistanceUnit.updateValueAndValidity();
+  }
+
+  setGlobalWarmingPotential() {
+    if (this.meterForm.controls.scope.value == 5 || this.meterForm.controls.scope.value == 6) {
+      let globalWarmingPotential: GlobalWarmingPotential = this.globalWarmingPotentials.find(potential => {
+        return potential.value == this.meterForm.controls.globalWarmingPotentialOption.value;
+      });
+      if (globalWarmingPotential) {
+        let conversionHelper: number = new ConvertValue(1, 'kg', this.meterForm.controls.startingUnit.value).convertedValue;
+        let convertedGWP: number = globalWarmingPotential.gwp / conversionHelper;
+        this.meterForm.controls.globalWarmingPotential.patchValue(convertedGWP);
+      }
+    }
   }
 }
