@@ -198,6 +198,8 @@ export interface IdbUtilityMeterData {
     mobileCarbonEmissions?: number,
     mobileOtherEmissions?: number,
     mobileTotalEmissions?: number,
+    processEmissions?: number,
+    fugitiveEmissions?: number,
 
     //electricity
     totalRealDemand?: number,

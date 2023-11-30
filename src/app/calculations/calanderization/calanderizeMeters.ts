@@ -28,7 +28,26 @@ export function getCalanderizedMeterData(meters: Array<IdbUtilityMeter>, allMete
             showConsumption = calanderizedMeter.find(cMeter => { return cMeter.energyConsumption != cMeter.energyUse }) != undefined;
         }
         let consumptionUnit: string = getUnitFromMeter(meter, accountOrFacility);
-        let showEmissions: boolean = (meter.source == "Electricity" || meter.source == "Natural Gas" || meter.source == "Other Fuels");
+        let showStandardEmissions: boolean = false;
+        let showProcessEmissions: boolean = false;
+        let showFugitiveEmissions: boolean = false;
+        let showMobileEmissions: boolean = false;
+
+        if (meter.source == "Electricity" || meter.source == "Natural Gas") {
+            showStandardEmissions = true;
+        } else if (meter.source == 'Other Fuels') {
+            if (meter.scope == 2) {
+                showMobileEmissions = true;
+            } else {
+                showStandardEmissions = true;
+            }
+        } else if (meter.source == 'Other') {
+            if (meter.scope == 5) {
+                showFugitiveEmissions = true;
+            } else if (meter.scope == 6) {
+                showProcessEmissions = true;
+            }
+        }
 
         let showEnergyUse: boolean;
         if (meter.source == 'Other') {
@@ -44,7 +63,10 @@ export function getCalanderizedMeterData(meters: Array<IdbUtilityMeter>, allMete
             showConsumption: showConsumption,
             showEnergyUse: showEnergyUse,
             energyUnit: calanderizedenergyUnit,
-            showEmissions: showEmissions
+            showStandardEmissions: showStandardEmissions,
+            showFugitiveEmissions: showFugitiveEmissions,
+            showMobileEmissions: showMobileEmissions,
+            showProcessEmissions: showProcessEmissions
         });
     });
     return calanderizedMeterData;
@@ -196,13 +218,13 @@ function calanderizeMeterDataBackwards(meter: IdbUtilityMeter, meterData: Array<
                 readingType = 'metered';
             }
 
-            if(isNaN(totals.totalConsumption)){
+            if (isNaN(totals.totalConsumption)) {
                 totals.totalConsumption = 0;
             }
-            if(isNaN(totals.totalEnergyUse)){
+            if (isNaN(totals.totalEnergyUse)) {
                 totals.totalEnergyUse = 0;
             }
-            if(isNaN(totals.totalCost)){
+            if (isNaN(totals.totalCost)) {
                 totals.totalCost = 0;
             }
             calanderizeData.push({
@@ -219,6 +241,12 @@ function calanderizeMeterDataBackwards(meter: IdbUtilityMeter, meterData: Array<
                 RECs: 0,
                 excessRECs: 0,
                 excessRECsEmissions: 0,
+                mobileCarbonEmissions: 0,
+                mobileBiogenicEmissions: 0,
+                mobileOtherEmissions: 0,
+                mobileTotalEmissions: 0,
+                fugitiveEmissions: 0,
+                processEmissions: 0,
                 readingType: readingType
             });
             startDate.setUTCMonth(startDate.getUTCMonth() + 1);
@@ -388,6 +416,12 @@ function calanderizeMeterDataFullMonth(meter: IdbUtilityMeter, meterData: Array<
                 RECs: 0,
                 excessRECs: 0,
                 excessRECsEmissions: 0,
+                mobileCarbonEmissions: 0,
+                mobileBiogenicEmissions: 0,
+                mobileOtherEmissions: 0,
+                mobileTotalEmissions: 0,
+                fugitiveEmissions: 0,
+                processEmissions: 0,
                 readingType: readingType
             });
             startDate.setUTCMonth(startDate.getUTCMonth() + 1);
@@ -441,6 +475,12 @@ function calanderizeFullYear(meter: IdbUtilityMeter, meterData: Array<IdbUtility
                 RECs: 0,
                 excessRECs: 0,
                 excessRECsEmissions: 0,
+                mobileCarbonEmissions: 0,
+                mobileBiogenicEmissions: 0,
+                mobileOtherEmissions: 0,
+                mobileTotalEmissions: 0,
+                fugitiveEmissions: 0,
+                processEmissions: 0,
                 readingType: readingType
             });
         });

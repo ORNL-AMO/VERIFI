@@ -18,6 +18,12 @@ export function setEmissionsForCalanderizedMeters(calanderizedMeterData: Array<C
             cMeter.monthlyData[x].marketEmissions = emissions.marketEmissions;
             cMeter.monthlyData[x].excessRECs = emissions.excessRECs;
             cMeter.monthlyData[x].excessRECsEmissions = emissions.excessRECsEmissions;
+            cMeter.monthlyData[x].mobileCarbonEmissions = emissions.mobileCarbonEmissions;
+            cMeter.monthlyData[x].mobileBiogenicEmissions = emissions.mobileBiogenicEmissions;
+            cMeter.monthlyData[x].mobileOtherEmissions = emissions.mobileOtherEmissions;
+            cMeter.monthlyData[x].mobileTotalEmissions = emissions.mobileTotalEmissions;
+            cMeter.monthlyData[x].fugitiveEmissions = emissions.fugitiveEmissions;
+            cMeter.monthlyData[x].processEmissions = emissions.processEmissions;
         }
     }
     return calanderizedMeterData;
@@ -135,7 +141,7 @@ export function getEmissions(meter: IdbUtilityMeter,
             mobileOtherEmissions = (25 * totalVolume * meterFuel.CH4) + (298 * totalVolume * meterFuel.N2O);
         }
         mobileTotalEmissions = mobileOtherEmissions + mobileCarbonEmissions;
-    } else if(meter.source == 'Other' && meter.scope == 5){
+    } else if(meter.source == 'Other'){
         if(meter.scope == 5){
             //fugitive emissions
             fugitiveEmissions = totalVolume * meter.globalWarmingPotential;
