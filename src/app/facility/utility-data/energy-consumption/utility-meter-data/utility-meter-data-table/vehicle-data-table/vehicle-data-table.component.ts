@@ -54,8 +54,6 @@ export class VehicleDataTableComponent {
   }
 
   ngOnInit(): void {
-    this.setData();
-
     if (this.selectedMeterData.length != 0) {
       let hasFalseChecked: IdbUtilityMeterData = this.selectedMeterData.find(meterDataItem => { return meterDataItem.checked == false });
       this.allChecked = (hasFalseChecked == undefined);
@@ -70,6 +68,10 @@ export class VehicleDataTableComponent {
 
   ngOnDestory() {
     this.filterSub.unsubscribe();
+  }
+
+  ngOnChanges() {
+    this.setData();
   }
 
   setData() {
