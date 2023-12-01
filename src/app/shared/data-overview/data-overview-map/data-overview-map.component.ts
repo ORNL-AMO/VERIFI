@@ -140,9 +140,9 @@ export class DataOverviewMapComponent {
           dataTypeAmount = accountOverviewFacility.totalCost;
         } else if (this.dataType == 'emissions') {
           if (this.emissionsDisplay == 'location') {
-            dataTypeAmount = accountOverviewFacility.totalLocationEmissions;
+            dataTypeAmount = accountOverviewFacility.emissions.locationEmissions;
           } else {
-            dataTypeAmount = accountOverviewFacility.totalMarketEmissions;
+            dataTypeAmount = accountOverviewFacility.emissions.marketEmissions;
           }
         } else if (this.dataType == 'water') {
           dataTypeAmount = accountOverviewFacility.totalUsage;

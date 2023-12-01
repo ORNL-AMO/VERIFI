@@ -4,6 +4,8 @@ import * as _ from 'lodash';
 import { YearMonthData } from "src/app/models/dashboard";
 import { getYearlyUsageNumbers } from "../shared-calculations/calanderizationFunctions";
 import { EnergySources, WaterSources } from "src/app/models/constantsAndTypes";
+import { EmissionsResults } from "src/app/models/eGridEmissions";
+import { getEmissionsTotalsFromMonthlyData } from "../shared-calculations/calculationsHelpers";
 
 export class AccountOverviewData {
 
@@ -14,8 +16,7 @@ export class AccountOverviewData {
     facilitiesEnergy: Array<AccountOverviewFacility>;
     totalEnergyUsage: number;
     totalEnergyCost: number;
-    totalMarketEmissions: number;
-    totalLocationEmissions: number;
+    totalEmissions: EmissionsResults;
 
     facilitiesCost: Array<AccountOverviewFacility>;
     numberOfMeters: number;
@@ -32,8 +33,7 @@ export class AccountOverviewData {
         this.setEnergyFacilities(calanderizedMeters, facilities, dateRange);
         this.setTotalEnergyUsage();
         this.setTotalEnergyCost();
-        this.setTotalLocationEmissions();
-        this.setTotalMarketEmissions();
+        this.setTotalEmissions();
         //costs
         this.setAllSourcesYearMonthData(calanderizedMeters);
         this.setCostFacilities(calanderizedMeters, facilities, dateRange);
@@ -53,7 +53,7 @@ export class AccountOverviewData {
             return EnergySources.includes(cMeter.meter.source);
         });
         sourceMeters.forEach(cMeter => {
-            if(cMeter.meter.includeInEnergy == false){
+            if (cMeter.meter.includeInEnergy == false) {
                 cMeter.monthlyData.forEach(monthlyData => {
                     monthlyData.energyUse = 0;
                     monthlyData.energyConsumption = 0;
@@ -88,24 +88,31 @@ export class AccountOverviewData {
     }
 
     setTotalEnergyUsage() {
-        this.totalEnergyUsage = _.sumBy(this.facilitiesEnergy, 'totalUsage');
+        this.totalEnergyUsage = _.sumBy(this.facilitiesEnergy, (overviewFacility: AccountOverviewFacility) => { return overviewFacility.totalUsage });
     }
 
     setTotalEnergyCost() {
-        this.totalEnergyCost = _.sumBy(this.facilitiesEnergy, 'totalCost');
+        this.totalEnergyCost = _.sumBy(this.facilitiesEnergy, (overviewFacility: AccountOverviewFacility) => { return overviewFacility.totalCost });
         if (isNaN(this.totalEnergyCost)) {
             this.totalEnergyCost = 0;
         }
     }
 
-    setTotalLocationEmissions() {
-        this.totalLocationEmissions = _.sumBy(this.facilitiesEnergy, 'totalLocationEmissions');
+    setTotalEmissions() {
+        this.totalEmissions = {
+            RECs: _.sumBy(this.facilitiesEnergy, (overviewFacility: AccountOverviewFacility) => { return overviewFacility.emissions.RECs }),
+            locationEmissions: _.sumBy(this.facilitiesEnergy, (overviewFacility: AccountOverviewFacility) => { return overviewFacility.emissions.locationEmissions }),
+            marketEmissions: _.sumBy(this.facilitiesEnergy, (overviewFacility: AccountOverviewFacility) => { return overviewFacility.emissions.marketEmissions }),
+            excessRECs: _.sumBy(this.facilitiesEnergy, (overviewFacility: AccountOverviewFacility) => { return overviewFacility.emissions.excessRECs }),
+            excessRECsEmissions: _.sumBy(this.facilitiesEnergy, (overviewFacility: AccountOverviewFacility) => { return overviewFacility.emissions.excessRECsEmissions }),
+            mobileCarbonEmissions: _.sumBy(this.facilitiesEnergy, (overviewFacility: AccountOverviewFacility) => { return overviewFacility.emissions.mobileCarbonEmissions }),
+            mobileBiogenicEmissions: _.sumBy(this.facilitiesEnergy, (overviewFacility: AccountOverviewFacility) => { return overviewFacility.emissions.mobileBiogenicEmissions }),
+            mobileOtherEmissions: _.sumBy(this.facilitiesEnergy, (overviewFacility: AccountOverviewFacility) => { return overviewFacility.emissions.mobileOtherEmissions }),
+            mobileTotalEmissions: _.sumBy(this.facilitiesEnergy, (overviewFacility: AccountOverviewFacility) => { return overviewFacility.emissions.mobileTotalEmissions }),
+            fugitiveEmissions: _.sumBy(this.facilitiesEnergy, (overviewFacility: AccountOverviewFacility) => { return overviewFacility.emissions.fugitiveEmissions }),
+            processEmissions: _.sumBy(this.facilitiesEnergy, (overviewFacility: AccountOverviewFacility) => { return overviewFacility.emissions.processEmissions })
+        }
     }
-
-    setTotalMarketEmissions() {
-        this.totalMarketEmissions = _.sumBy(this.facilitiesEnergy, 'totalMarketEmissions');
-    }
-
 
     //costs
     setCostFacilities(calanderizedMeters: Array<CalanderizedMeter>, facilities: Array<IdbFacility>, dateRange: { startDate: Date, endDate: Date }) {
@@ -117,14 +124,14 @@ export class AccountOverviewData {
     }
 
     setTotalAccountCost() {
-        this.totalAccountCost = _.sumBy(this.facilitiesCost, 'totalCost');
+        this.totalAccountCost = _.sumBy(this.facilitiesCost, (overviewFacility: AccountOverviewFacility) => { return overviewFacility.totalCost });
         if (isNaN(this.totalAccountCost)) {
             this.totalAccountCost = 0;
         }
     }
 
     setNumberOfMeters() {
-        this.numberOfMeters = _.sumBy(this.facilitiesCost, 'numberOfMeters');
+        this.numberOfMeters = _.sumBy(this.facilitiesCost, (overviewFacility: AccountOverviewFacility) => { return overviewFacility.numberOfMeters });
     }
 
 
@@ -141,11 +148,11 @@ export class AccountOverviewData {
     }
 
     setTotalWaterConsumption() {
-        this.totalWaterConsumption = _.sumBy(this.facilitiesWater, 'totalUsage');
+        this.totalWaterConsumption = _.sumBy(this.facilitiesWater, (overviewFacility: AccountOverviewFacility) => { return overviewFacility.totalUsage });
     }
 
     setTotalWaterCost() {
-        this.totalWaterCost = _.sumBy(this.facilitiesWater, 'totalCost');
+        this.totalWaterCost = _.sumBy(this.facilitiesWater, (overviewFacility: AccountOverviewFacility) => { return overviewFacility.totalCost });
         if (isNaN(this.totalWaterCost)) {
             this.totalWaterCost = 0;
         }
@@ -158,8 +165,7 @@ export class AccountOverviewFacility {
     monthlyData: Array<MonthlyData>;
     totalUsage: number;
     totalCost: number;
-    totalMarketEmissions: number;
-    totalLocationEmissions: number;
+    emissions: EmissionsResults;
     facility: IdbFacility;
     numberOfMeters: number;
     constructor(calanderizedMeters: Array<CalanderizedMeter>, facility: IdbFacility, dateRange: { startDate: Date, endDate: Date }, dataType: 'energy' | 'cost' | 'water') {
@@ -169,9 +175,7 @@ export class AccountOverviewFacility {
         this.setMonthlyData(facilityMeters, new Date(dateRange.startDate), new Date(dateRange.endDate));
         this.setTotalUsage(dataType);
         this.setTotalCost();
-        if (dataType == 'energy') {
-            this.setTotalEmissions();
-        }
+        this.setTotalEmissions();
     }
 
     setMonthlyData(calanderizedMeters: Array<CalanderizedMeter>, startDate: Date, endDate: Date) {
@@ -186,22 +190,21 @@ export class AccountOverviewFacility {
 
     setTotalUsage(dataType: 'energy' | 'cost' | 'water') {
         if (dataType == 'energy') {
-            this.totalUsage = _.sumBy(this.monthlyData, 'energyUse');
+            this.totalUsage = _.sumBy(this.monthlyData, (mData: MonthlyData) => { return mData.energyUse });
         } else if (dataType == 'water') {
-            this.totalUsage = _.sumBy(this.monthlyData, 'energyConsumption');
+            this.totalUsage = _.sumBy(this.monthlyData, (mData: MonthlyData) => { return mData.energyConsumption });
         }
     }
 
     setTotalCost() {
-        this.totalCost = _.sumBy(this.monthlyData, 'energyCost');
+        this.totalCost = _.sumBy(this.monthlyData, (mData: MonthlyData) => { return mData.energyCost });
         if (isNaN(this.totalCost)) {
             this.totalCost = 0;
         }
     }
 
     setTotalEmissions() {
-        this.totalMarketEmissions = _.sumBy(this.monthlyData, 'marketEmissions');
-        this.totalLocationEmissions = _.sumBy(this.monthlyData, 'locationEmissions');
+        this.emissions = getEmissionsTotalsFromMonthlyData(this.monthlyData);
     }
 }
 

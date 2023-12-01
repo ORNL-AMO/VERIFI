@@ -59,7 +59,16 @@ export function getYearlyUsageNumbers(calanderizedMeters: Array<CalanderizedMete
             let energyCost: number = 0;
             let marketEmissions: number = 0;
             let locationEmissions: number = 0;
+            let excessRECs: number = 0;
+            let excessRECsEmissions: number = 0;
+            let mobileCarbonEmissions: number = 0;
+            let mobileBiogenicEmissions: number = 0;
+            let mobileOtherEmissions: number = 0;
+            let mobileTotalEmissions: number = 0;
+            let fugitiveEmissions: number = 0;
+            let processEmissions: number = 0;
             let consumption: number = 0;
+            let RECs: number = 0;
             for (let i = 0; i < yearData.length; i++) {
                 if (yearData[i].month == month) {
                     energyUse += yearData[i].energyUse;
@@ -67,6 +76,15 @@ export function getYearlyUsageNumbers(calanderizedMeters: Array<CalanderizedMete
                     marketEmissions += yearData[i].marketEmissions;
                     locationEmissions += yearData[i].locationEmissions;
                     consumption += yearData[i].energyConsumption;
+                    excessRECs += yearData[i].excessRECs;
+                    excessRECsEmissions += yearData[i].excessRECsEmissions;
+                    mobileCarbonEmissions += yearData[i].mobileCarbonEmissions;
+                    mobileBiogenicEmissions += yearData[i].mobileBiogenicEmissions;
+                    mobileOtherEmissions += yearData[i].mobileOtherEmissions;
+                    mobileTotalEmissions += yearData[i].mobileTotalEmissions;
+                    fugitiveEmissions += yearData[i].fugitiveEmissions;
+                    processEmissions += yearData[i].processEmissions;
+                    RECs += yearData[i].RECs;
                 }
             }
             yearMonthData.push({
@@ -75,7 +93,16 @@ export function getYearlyUsageNumbers(calanderizedMeters: Array<CalanderizedMete
                 energyCost: energyCost,
                 marketEmissions: marketEmissions,
                 locationEmissions: locationEmissions,
-                consumption: consumption
+                consumption: consumption,
+                RECs: RECs,
+                excessRECs: excessRECs,
+                excessRECsEmissions: excessRECsEmissions,
+                mobileCarbonEmissions: mobileCarbonEmissions,
+                mobileBiogenicEmissions: mobileBiogenicEmissions,
+                mobileOtherEmissions: mobileOtherEmissions,
+                mobileTotalEmissions: mobileTotalEmissions,
+                fugitiveEmissions: fugitiveEmissions,
+                processEmissions: processEmissions
             })
         })
     });

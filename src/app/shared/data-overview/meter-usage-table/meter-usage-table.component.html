@@ -40,10 +40,10 @@
                     {{overviewMeter.totalCost | customNumber:true }}
                 </td>
                 <td *ngIf="dataType =='emissions' && emissionsDisplay == 'market'">
-                    {{overviewMeter.totalMarketEmissions |customNumber }}
+                    {{overviewMeter.emissions.marketEmissions |customNumber }}
                 </td>
                 <td *ngIf="dataType =='emissions' && emissionsDisplay == 'location'">
-                    {{overviewMeter.totalLocationEmissions |customNumber }}
+                    {{overviewMeter.emissions.locationEmissions |customNumber }}
                 </td>
             </tr>
         </tbody>
@@ -72,10 +72,10 @@
                     {{facilityOverviewData.totalFacilityCost | customNumber:true }}
                 </th>
                 <th *ngIf="dataType =='emissions' && emissionsDisplay == 'market'">
-                    {{facilityOverviewData.totalMarketEmissions | customNumber }}
+                    {{facilityOverviewData.emissionsTotals.marketEmissions| customNumber }}
                 </th>
                 <th *ngIf="dataType =='emissions' && emissionsDisplay == 'location'">
-                    {{facilityOverviewData.totalLocationEmissions | customNumber }}
+                    {{facilityOverviewData.emissionsTotals.locationEmissions| customNumber }}
                 </th>
             </tr>
         </tfoot>

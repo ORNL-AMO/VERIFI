@@ -82,9 +82,9 @@ export class UtilitiesUsageChartComponent {
             yValues = sourceData.annualSourceDataItems.map(data => { return data.totalCost });
           } else if (this.dataType == 'emissions') {
             if (this.emissionsDisplay == 'market') {
-              yValues = sourceData.annualSourceDataItems.map(data => { return data.totalMarketEmissions });
+              yValues = sourceData.annualSourceDataItems.map(data => { return data.totalEmissions.marketEmissions });
             } else {
-              yValues = sourceData.annualSourceDataItems.map(data => { return data.totalLocationEmissions });
+              yValues = sourceData.annualSourceDataItems.map(data => { return data.totalEmissions.locationEmissions });
             }
           } else if (this.dataType == 'energyUse') {
             yValues = sourceData.annualSourceDataItems.map(data => { return data.totalEnergyUsage });

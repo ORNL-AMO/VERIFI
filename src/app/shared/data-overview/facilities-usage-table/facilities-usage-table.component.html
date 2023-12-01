@@ -72,10 +72,10 @@
                     {{accountOverviewData.totalAccountCost | customNumber:true}}
                 </th>
                 <th *ngIf="dataType == 'emissions' && emissionsDisplay == 'market'">
-                    {{accountOverviewData.totalMarketEmissions | customNumber}}
+                    {{accountOverviewData.totalEmissions.marketEmissions| customNumber}}
                 </th>
                 <th *ngIf="dataType == 'emissions' && emissionsDisplay == 'location'">
-                    {{accountOverviewData.totalLocationEmissions | customNumber}}
+                    {{accountOverviewData.totalEmissions.locationEmissions| customNumber}}
                 </th>
             </tr>
         </tfoot>

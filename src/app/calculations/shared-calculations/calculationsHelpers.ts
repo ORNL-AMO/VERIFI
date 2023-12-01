@@ -1,6 +1,8 @@
 import { MonthlyData } from "src/app/models/calanderization";
 import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, PredictorData } from "src/app/models/idb";
 import { getFiscalYear } from "./calanderizationFunctions";
+import { EmissionsResults } from "src/app/models/eGridEmissions";
+import * as _ from 'lodash';
 
 export function getMonthlyStartAndEndDate(facilityOrAccount: IdbFacility | IdbAccount, analysisItem: IdbAnalysisItem | IdbAccountAnalysisItem): { baselineDate: Date, endDate: Date } {
     let baselineDate: Date;
@@ -86,4 +88,27 @@ export function getIncludedMeters(meters: Array<IdbUtilityMeter>, selectedAnalys
         }
     });
     return includedMeters;
+}
+
+export function getEmissionsTotalsFromMonthlyData(data: Array<MonthlyData>): EmissionsResults {
+    return {
+        marketEmissions: checkValueNaN(_.sumBy(data, (d: MonthlyData) => { return d.marketEmissions })),
+        locationEmissions: checkValueNaN(_.sumBy(data, (d: MonthlyData) => { return d.locationEmissions })),
+        RECs: checkValueNaN(_.sumBy(data, (d: MonthlyData) => { return d.RECs })),
+        excessRECs: checkValueNaN(_.sumBy(data, (d: MonthlyData) => { return d.excessRECs })),
+        excessRECsEmissions: checkValueNaN(_.sumBy(data, (d: MonthlyData) => { return d.excessRECsEmissions })),
+        mobileCarbonEmissions: checkValueNaN(_.sumBy(data, (d: MonthlyData) => { return d.mobileCarbonEmissions })),
+        mobileBiogenicEmissions: checkValueNaN(_.sumBy(data, (d: MonthlyData) => { return d.mobileBiogenicEmissions })),
+        mobileOtherEmissions: checkValueNaN(_.sumBy(data, (d: MonthlyData) => { return d.mobileOtherEmissions })),
+        mobileTotalEmissions: checkValueNaN(_.sumBy(data, (d: MonthlyData) => { return d.mobileTotalEmissions })),
+        fugitiveEmissions: checkValueNaN(_.sumBy(data, (d: MonthlyData) => { return d.fugitiveEmissions })),
+        processEmissions: checkValueNaN(_.sumBy(data, (d: MonthlyData) => { return d.processEmissions }))
+    }
+}
+
+export function checkValueNaN(val: number): number {
+    if (isNaN(val)) {
+        return 0;
+    }
+    return val;
 }

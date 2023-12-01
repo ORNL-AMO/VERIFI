@@ -124,9 +124,9 @@ export class MeterUsageDonutComponent {
       return this.facilityOverviewMeters.map(meterOverview => { return meterOverview.totalCost });
     } else if (this.dataType == 'emissions') {
       if (this.emissionsDisplay == 'location') {
-        return this.facilityOverviewMeters.map(meterOverview => { return meterOverview.totalLocationEmissions });
+        return this.facilityOverviewMeters.map(meterOverview => { return meterOverview.emissions.locationEmissions });
       } else {
-        return this.facilityOverviewMeters.map(meterOverview => { return meterOverview.totalMarketEmissions });
+        return this.facilityOverviewMeters.map(meterOverview => { return meterOverview.emissions.marketEmissions });
       }
     }
   }

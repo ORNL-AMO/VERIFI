@@ -40,6 +40,7 @@ export class FacilityEmissionsOverviewComponent implements OnInit {
 
     this.utilityUseAndCostSub = this.facilityOverviewService.utilityUseAndCost.subscribe(val => {
       this.utilityUseAndCost = val;
+      console.log(this.utilityUseAndCost);
     });
 
     this.facilityOverviewDataSub = this.facilityOverviewService.facilityOverviewData.subscribe(val => {

@@ -423,19 +423,19 @@ export class FacilitiesUsageStackedBarChartComponent {
       }
     });
     if (this.dataType == 'cost') {
-      this.barChartData = _.orderBy(this.barChartData, (data) => {
+      this.barChartData = _.orderBy(this.barChartData, (data: StackedBarChartData) => {
         return (data.electricity.energyCost + data.naturalGas.energyCost + data.otherFuels.energyCost + data.otherEnergy.energyCost + data.water.energyCost + data.wasteWater.energyCost + data.otherUtility.energyCost);
       }, 'desc');
     } else if (this.dataType == 'emissions') {
-      this.barChartData = _.orderBy(this.barChartData, (data) => {
+      this.barChartData = _.orderBy(this.barChartData, (data: StackedBarChartData) => {
         return (data.electricity.marketEmissions + data.naturalGas.marketEmissions + data.otherFuels.marketEmissions + data.otherEnergy.marketEmissions);
       }, 'desc');
     } else if (this.dataType == 'energyUse') {
-      this.barChartData = _.orderBy(this.barChartData, (data) => {
+      this.barChartData = _.orderBy(this.barChartData, (data: StackedBarChartData) => {
         return (data.electricity.energyUse + data.naturalGas.energyUse + data.otherFuels.energyUse + data.otherEnergy.energyUse);
       }, 'desc');
     } else if (this.dataType == 'water') {
-      this.barChartData = _.orderBy(this.barChartData, (data) => {
+      this.barChartData = _.orderBy(this.barChartData, (data: StackedBarChartData) => {
         return (data.water.energyUse + data.wasteWater.energyUse);
       }, 'desc');
     }
