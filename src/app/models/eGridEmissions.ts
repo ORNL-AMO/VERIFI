@@ -29,7 +29,6 @@ export interface EmissionsResults {
 
 export type EmissionsTypes = 'Mobile' | 'Fugitive' | 'Process' | 'Location' | 'Market';
 
-
 export function getEmissionsTypeColor(emissionsType: EmissionsTypes): string {
   if (emissionsType == 'Fugitive') {
     return '#AB0005';
@@ -42,4 +41,14 @@ export function getEmissionsTypeColor(emissionsType: EmissionsTypes): string {
   } else if (emissionsType == 'Process') {
     return '#9A7D0A';
   }
+}
+
+export function getEmissionsTypes(emissionsDisplay: 'location' | 'market'): Array<EmissionsTypes> {
+  let emissionsTypes: Array<EmissionsTypes> = ['Mobile', 'Fugitive', 'Process'];
+  if (emissionsDisplay == 'location') {
+    emissionsTypes.push('Location');
+  } else {
+    emissionsTypes.push('Market')
+  }
+  return emissionsTypes;
 }

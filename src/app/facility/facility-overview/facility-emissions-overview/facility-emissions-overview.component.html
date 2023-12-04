@@ -19,12 +19,12 @@
                         <div class="col-6">
                             <app-meter-usage-table [dataType]="'emissions'"
                                 [facilityOverviewData]="facilityOverviewData"
-                                [facilityOverviewMeters]="facilityOverviewData.energyMeters"></app-meter-usage-table>
+                                [facilityOverviewMeters]="facilityOverviewData.costMeters"></app-meter-usage-table>
 
                         </div>
                         <div class="col-6">
-                            <app-meter-usage-donut [dataType]="'emissions'" [facilityId]="facilityId"
-                                [facilityOverviewMeters]="facilityOverviewData.energyMeters"></app-meter-usage-donut>
+                            <app-emissions-donut [facilityId]="facilityId"
+                                [facilityOverviewMeters]="facilityOverviewData.costMeters"></app-emissions-donut>
                         </div>
                     </div>
                 </div>

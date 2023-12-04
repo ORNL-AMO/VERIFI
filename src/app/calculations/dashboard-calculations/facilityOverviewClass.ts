@@ -35,11 +35,11 @@ export class FacilityOverviewData {
         this.setEnergyMeters(calanderizedMeters, dateRange);
         this.setTotalEnergyUsage();
         this.setTotalEnergyCost();
-        this.setEmissionsTotals();
         //costs
         this.setAllSourcesYearMonthData(calanderizedMeters);
         this.setCostMeters(calanderizedMeters, dateRange);
         this.setTotalAccountCost();
+        this.setEmissionsTotals();
         //water
         let hasWater: CalanderizedMeter = calanderizedMeters.find(cMeter => { return WaterSources.includes(cMeter.meter.source) })
         if (hasWater) {
@@ -109,17 +109,17 @@ export class FacilityOverviewData {
 
     setEmissionsTotals() {
         this.emissionsTotals = {
-            RECs: _.sumBy(this.energyMeters, (fMeter: FacilityOverviewMeter) => { return fMeter.emissions.RECs }),
-            locationEmissions: _.sumBy(this.energyMeters, (fMeter: FacilityOverviewMeter) => { return fMeter.emissions.locationEmissions }),
-            marketEmissions: _.sumBy(this.energyMeters, (fMeter: FacilityOverviewMeter) => { return fMeter.emissions.marketEmissions }),
-            excessRECs: _.sumBy(this.energyMeters, (fMeter: FacilityOverviewMeter) => { return fMeter.emissions.excessRECs }),
-            excessRECsEmissions: _.sumBy(this.energyMeters, (fMeter: FacilityOverviewMeter) => { return fMeter.emissions.excessRECsEmissions }),
-            mobileCarbonEmissions: _.sumBy(this.energyMeters, (fMeter: FacilityOverviewMeter) => { return fMeter.emissions.mobileCarbonEmissions }),
-            mobileBiogenicEmissions: _.sumBy(this.energyMeters, (fMeter: FacilityOverviewMeter) => { return fMeter.emissions.mobileBiogenicEmissions }),
-            mobileOtherEmissions: _.sumBy(this.energyMeters, (fMeter: FacilityOverviewMeter) => { return fMeter.emissions.mobileOtherEmissions }),
-            mobileTotalEmissions: _.sumBy(this.energyMeters, (fMeter: FacilityOverviewMeter) => { return fMeter.emissions.mobileTotalEmissions }),
-            fugitiveEmissions: _.sumBy(this.energyMeters, (fMeter: FacilityOverviewMeter) => { return fMeter.emissions.fugitiveEmissions }),
-            processEmissions: _.sumBy(this.energyMeters, (fMeter: FacilityOverviewMeter) => { return fMeter.emissions.processEmissions })
+            RECs: _.sumBy(this.costMeters, (fMeter: FacilityOverviewMeter) => { return fMeter.emissions.RECs }),
+            locationEmissions: _.sumBy(this.costMeters, (fMeter: FacilityOverviewMeter) => { return fMeter.emissions.locationEmissions }),
+            marketEmissions: _.sumBy(this.costMeters, (fMeter: FacilityOverviewMeter) => { return fMeter.emissions.marketEmissions }),
+            excessRECs: _.sumBy(this.costMeters, (fMeter: FacilityOverviewMeter) => { return fMeter.emissions.excessRECs }),
+            excessRECsEmissions: _.sumBy(this.costMeters, (fMeter: FacilityOverviewMeter) => { return fMeter.emissions.excessRECsEmissions }),
+            mobileCarbonEmissions: _.sumBy(this.costMeters, (fMeter: FacilityOverviewMeter) => { return fMeter.emissions.mobileCarbonEmissions }),
+            mobileBiogenicEmissions: _.sumBy(this.costMeters, (fMeter: FacilityOverviewMeter) => { return fMeter.emissions.mobileBiogenicEmissions }),
+            mobileOtherEmissions: _.sumBy(this.costMeters, (fMeter: FacilityOverviewMeter) => { return fMeter.emissions.mobileOtherEmissions }),
+            mobileTotalEmissions: _.sumBy(this.costMeters, (fMeter: FacilityOverviewMeter) => { return fMeter.emissions.mobileTotalEmissions }),
+            fugitiveEmissions: _.sumBy(this.costMeters, (fMeter: FacilityOverviewMeter) => { return fMeter.emissions.fugitiveEmissions }),
+            processEmissions: _.sumBy(this.costMeters, (fMeter: FacilityOverviewMeter) => { return fMeter.emissions.processEmissions })
         }
     }
 

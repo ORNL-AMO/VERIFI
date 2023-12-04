@@ -8,7 +8,7 @@ import * as _ from 'lodash';
 import { Subscription } from 'rxjs';
 import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
 import { AllSources, EnergySources, MeterSource, WaterSources } from 'src/app/models/constantsAndTypes';
-import { EmissionsTypes, getEmissionsTypeColor } from 'src/app/models/eGridEmissions';
+import { EmissionsTypes, getEmissionsTypeColor, getEmissionsTypes } from 'src/app/models/eGridEmissions';
 import { Month, Months } from '../../form-data/months';
 
 @Component({
@@ -66,12 +66,7 @@ export class EmissionsStackedLineChartComponent {
         return (dataItemDate >= this.dateRange.startDate) && (dataItemDate <= this.dateRange.endDate);
       });
 
-      let emissionsTypes: Array<EmissionsTypes> = ['Mobile', 'Fugitive', 'Process'];
-      if (this.emissionsDisplay == 'location') {
-        emissionsTypes.push('Location');
-      } else {
-        emissionsTypes.push('Market')
-      }
+      let emissionsTypes: Array<EmissionsTypes> = getEmissionsTypes(this.emissionsDisplay);
       emissionsTypes.forEach(emissionType => {
         let trace = this.getTraceData(emissionType, monthlyDataInRange);
         traceData.push(trace)
