@@ -16,6 +16,7 @@ import { EnergyConsumptionTableComponent } from './utility-consumption-table/ene
 import { EmissionsConsumptionTableComponent } from './utility-consumption-table/emissions-consumption-table/emissions-consumption-table.component';
 import { CostsConsumptionTableComponent } from './utility-consumption-table/costs-consumption-table/costs-consumption-table.component';
 import { WaterConsumptionTableComponent } from './utility-consumption-table/water-consumption-table/water-consumption-table.component';
+import { EmissionsStackedLineChartComponent } from './emissions-stacked-line-chart/emissions-stacked-line-chart.component';
 
 
 
@@ -34,7 +35,8 @@ import { WaterConsumptionTableComponent } from './utility-consumption-table/wate
     EnergyConsumptionTableComponent,
     EmissionsConsumptionTableComponent,
     CostsConsumptionTableComponent,
-    WaterConsumptionTableComponent
+    WaterConsumptionTableComponent,
+    EmissionsStackedLineChartComponent
   ],
   imports: [
     CommonModule,
@@ -50,7 +52,8 @@ import { WaterConsumptionTableComponent } from './utility-consumption-table/wate
     MeterUsageDonutComponent,
     MeterUsageTableComponent,
     UtilityConsumptionTableComponent,
-    UtilitiesUsageChartComponent
+    UtilitiesUsageChartComponent,
+    EmissionsStackedLineChartComponent
   ]
 })
 export class DataOverviewModule { }
