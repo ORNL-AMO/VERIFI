@@ -181,6 +181,8 @@ export class UtilityUseAndCost {
             fugitiveEmissions: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.fugitiveEmissions }),
             processEmissionsChange: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.processEmissionsChange }),
             processEmissions: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.processEmissions }),
+            totalWithLocationEmissions: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.totalWithLocationEmissions }),
+            totalWithMarketEmissions: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.totalWithMarketEmissions }),
             cost: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.cost }),
             costChange: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.costChange })
         }
@@ -282,6 +284,8 @@ export class UseAndCost {
             fugitiveEmissions: emissionsTotals.fugitiveEmissions / numberOfMonths,
             processEmissionsChange: 0,
             processEmissions: emissionsTotals.processEmissions / numberOfMonths,
+            totalWithLocationEmissions: emissionsTotals.totalWithLocationEmissions / numberOfMonths,
+            totalWithMarketEmissions: emissionsTotals.totalWithMarketEmissions / numberOfMonths,
             cost: totalCost / numberOfMonths,
             costChange: 0
         }
@@ -338,6 +342,8 @@ export class UseAndCost {
                     fugitiveEmissions: emissionsTotals.fugitiveEmissions,
                     processEmissionsChange: 0,
                     processEmissions: emissionsTotals.processEmissions,
+                    totalWithLocationEmissions: emissionsTotals.totalWithLocationEmissions,
+                    totalWithMarketEmissions: emissionsTotals.totalWithMarketEmissions,
                     cost: cost,
                     costChange: 0
                 }
@@ -379,7 +385,9 @@ export function getEmptyIUseAnCost(): IUseAndCost {
         processEmissionsChange: 0,
         processEmissions: 0,
         cost: 0,
-        costChange: 0
+        costChange: 0,
+        totalWithLocationEmissions: 0,
+        totalWithMarketEmissions: 0,
     }
 }
 

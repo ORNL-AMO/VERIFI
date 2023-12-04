@@ -24,7 +24,9 @@ export interface EmissionsResults {
   mobileOtherEmissions: number,
   mobileTotalEmissions: number,
   fugitiveEmissions: number,
-  processEmissions: number
+  processEmissions: number,
+  totalWithMarketEmissions: number,
+  totalWithLocationEmissions: number
 }
 
 export type EmissionsTypes = 'Mobile' | 'Fugitive' | 'Process' | 'Location' | 'Market';

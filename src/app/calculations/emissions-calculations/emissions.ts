@@ -161,7 +161,9 @@ export function getEmissions(meter: IdbUtilityMeter,
         mobileOtherEmissions: mobileOtherEmissions,
         mobileTotalEmissions: mobileTotalEmissions,
         fugitiveEmissions: fugitiveEmissions,
-        processEmissions: processEmissions
+        processEmissions: processEmissions,
+        totalWithLocationEmissions: (locationEmissions + mobileTotalEmissions + fugitiveEmissions + processEmissions),
+        totalWithMarketEmissions: (marketEmissions + mobileTotalEmissions + fugitiveEmissions + processEmissions)
     };
 }
 

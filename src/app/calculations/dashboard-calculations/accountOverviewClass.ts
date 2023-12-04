@@ -16,28 +16,30 @@ export class AccountOverviewData {
     facilitiesEnergy: Array<AccountOverviewFacility>;
     totalEnergyUsage: number;
     totalEnergyCost: number;
-    totalEmissions: EmissionsResults;
+    emissionsTotals: EmissionsResults;
 
     facilitiesCost: Array<AccountOverviewFacility>;
-    numberOfMeters: number;
+    numberOoverviewFacilitys: number;
     totalAccountCost: number;
 
     facilitiesWater: Array<AccountOverviewFacility>;
     totalWaterConsumption: number;
     totalWaterCost: number;
     calanderizedMeters: Array<CalanderizedMeter>;
+    numberOfMeters: number;
     constructor(calanderizedMeters: Array<CalanderizedMeter>, facilities: Array<IdbFacility>, account: IdbAccount, dateRange: { startDate: Date, endDate: Date }) {
         this.calanderizedMeters = calanderizedMeters;
+        this.numberOfMeters = this.calanderizedMeters?.length;
         //energy
         this.setEnergyYearMonthData(calanderizedMeters);
         this.setEnergyFacilities(calanderizedMeters, facilities, dateRange);
         this.setTotalEnergyUsage();
         this.setTotalEnergyCost();
-        this.setTotalEmissions();
         //costs
         this.setAllSourcesYearMonthData(calanderizedMeters);
         this.setCostFacilities(calanderizedMeters, facilities, dateRange);
         this.setTotalAccountCost();
+        this.setTotalEmissions();
         //water
         let hasWater: CalanderizedMeter = calanderizedMeters.find(cMeter => { return WaterSources.includes(cMeter.meter.source) })
         if (hasWater) {
@@ -99,18 +101,26 @@ export class AccountOverviewData {
     }
 
     setTotalEmissions() {
-        this.totalEmissions = {
-            RECs: _.sumBy(this.facilitiesEnergy, (overviewFacility: AccountOverviewFacility) => { return overviewFacility.emissions.RECs }),
-            locationEmissions: _.sumBy(this.facilitiesEnergy, (overviewFacility: AccountOverviewFacility) => { return overviewFacility.emissions.locationEmissions }),
-            marketEmissions: _.sumBy(this.facilitiesEnergy, (overviewFacility: AccountOverviewFacility) => { return overviewFacility.emissions.marketEmissions }),
-            excessRECs: _.sumBy(this.facilitiesEnergy, (overviewFacility: AccountOverviewFacility) => { return overviewFacility.emissions.excessRECs }),
-            excessRECsEmissions: _.sumBy(this.facilitiesEnergy, (overviewFacility: AccountOverviewFacility) => { return overviewFacility.emissions.excessRECsEmissions }),
-            mobileCarbonEmissions: _.sumBy(this.facilitiesEnergy, (overviewFacility: AccountOverviewFacility) => { return overviewFacility.emissions.mobileCarbonEmissions }),
-            mobileBiogenicEmissions: _.sumBy(this.facilitiesEnergy, (overviewFacility: AccountOverviewFacility) => { return overviewFacility.emissions.mobileBiogenicEmissions }),
-            mobileOtherEmissions: _.sumBy(this.facilitiesEnergy, (overviewFacility: AccountOverviewFacility) => { return overviewFacility.emissions.mobileOtherEmissions }),
-            mobileTotalEmissions: _.sumBy(this.facilitiesEnergy, (overviewFacility: AccountOverviewFacility) => { return overviewFacility.emissions.mobileTotalEmissions }),
-            fugitiveEmissions: _.sumBy(this.facilitiesEnergy, (overviewFacility: AccountOverviewFacility) => { return overviewFacility.emissions.fugitiveEmissions }),
-            processEmissions: _.sumBy(this.facilitiesEnergy, (overviewFacility: AccountOverviewFacility) => { return overviewFacility.emissions.processEmissions })
+        let locationEmissions: number = _.sumBy(this.facilitiesCost, (overviewFacility: AccountOverviewFacility) => { return overviewFacility.emissions.locationEmissions });
+        let marketEmissions: number = _.sumBy(this.facilitiesCost, (overviewFacility: AccountOverviewFacility) => { return overviewFacility.emissions.marketEmissions });
+        let mobileTotalEmissions: number = _.sumBy(this.facilitiesCost, (overviewFacility: AccountOverviewFacility) => { return overviewFacility.emissions.mobileTotalEmissions });
+        let fugitiveEmissions: number = _.sumBy(this.facilitiesCost, (overviewFacility: AccountOverviewFacility) => { return overviewFacility.emissions.fugitiveEmissions });
+        let processEmissions: number = _.sumBy(this.facilitiesCost, (overviewFacility: AccountOverviewFacility) => { return overviewFacility.emissions.processEmissions });
+
+        this.emissionsTotals = {
+            RECs: _.sumBy(this.facilitiesCost, (overviewFacility: AccountOverviewFacility) => { return overviewFacility.emissions.RECs }),
+            locationEmissions: locationEmissions,
+            marketEmissions: marketEmissions,
+            excessRECs: _.sumBy(this.facilitiesCost, (overviewFacility: AccountOverviewFacility) => { return overviewFacility.emissions.excessRECs }),
+            excessRECsEmissions: _.sumBy(this.facilitiesCost, (overviewFacility: AccountOverviewFacility) => { return overviewFacility.emissions.excessRECsEmissions }),
+            mobileCarbonEmissions: _.sumBy(this.facilitiesCost, (overviewFacility: AccountOverviewFacility) => { return overviewFacility.emissions.mobileCarbonEmissions }),
+            mobileBiogenicEmissions: _.sumBy(this.facilitiesCost, (overviewFacility: AccountOverviewFacility) => { return overviewFacility.emissions.mobileBiogenicEmissions }),
+            mobileOtherEmissions: _.sumBy(this.facilitiesCost, (overviewFacility: AccountOverviewFacility) => { return overviewFacility.emissions.mobileOtherEmissions }),
+            mobileTotalEmissions: mobileTotalEmissions,
+            fugitiveEmissions: fugitiveEmissions,
+            processEmissions: processEmissions,
+            totalWithLocationEmissions: (locationEmissions + mobileTotalEmissions + fugitiveEmissions + processEmissions),
+            totalWithMarketEmissions: (marketEmissions + mobileTotalEmissions + fugitiveEmissions + processEmissions)
         }
     }
 
@@ -130,8 +140,8 @@ export class AccountOverviewData {
         }
     }
 
-    setNumberOfMeters() {
-        this.numberOfMeters = _.sumBy(this.facilitiesCost, (overviewFacility: AccountOverviewFacility) => { return overviewFacility.numberOfMeters });
+    setNumberOoverviewFacilitys() {
+        this.numberOoverviewFacilitys = _.sumBy(this.facilitiesCost, (overviewFacility: AccountOverviewFacility) => { return overviewFacility.numberOoverviewFacilitys });
     }
 
 
@@ -167,11 +177,11 @@ export class AccountOverviewFacility {
     totalCost: number;
     emissions: EmissionsResults;
     facility: IdbFacility;
-    numberOfMeters: number;
+    numberOoverviewFacilitys: number;
     constructor(calanderizedMeters: Array<CalanderizedMeter>, facility: IdbFacility, dateRange: { startDate: Date, endDate: Date }, dataType: 'energy' | 'cost' | 'water') {
         this.facility = facility;
         let facilityMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => { return cMeter.meter.facilityId == facility.guid });
-        this.numberOfMeters = facilityMeters.length;
+        this.numberOoverviewFacilitys = facilityMeters.length;
         this.setMonthlyData(facilityMeters, new Date(dateRange.startDate), new Date(dateRange.endDate));
         this.setTotalUsage(dataType);
         this.setTotalCost();

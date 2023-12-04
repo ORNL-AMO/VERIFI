@@ -172,7 +172,9 @@ export class MeterGroupingService {
         mobileTotalEmissions: _.sumBy(filteredData, 'mobileTotalEmissions'),
         fugitiveEmissions: _.sumBy(filteredData, 'fugitiveEmissions'),
         processEmissions: _.sumBy(filteredData, 'processEmissions'),
-        readingType: undefined
+        readingType: undefined,
+        totalWithLocationEmissions: 0,
+        totalWithMarketEmissions: 0
       })
       startDate = new Date(startDate.getFullYear(), startDate.getMonth() + 1);
     }

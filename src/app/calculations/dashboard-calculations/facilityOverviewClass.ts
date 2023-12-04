@@ -108,18 +108,26 @@ export class FacilityOverviewData {
     }
 
     setEmissionsTotals() {
+        let locationEmissions: number = _.sumBy(this.costMeters, (fMeter: FacilityOverviewMeter) => { return fMeter.emissions.locationEmissions });
+        let marketEmissions: number = _.sumBy(this.costMeters, (fMeter: FacilityOverviewMeter) => { return fMeter.emissions.marketEmissions });
+        let mobileTotalEmissions: number = _.sumBy(this.costMeters, (fMeter: FacilityOverviewMeter) => { return fMeter.emissions.mobileTotalEmissions });
+        let fugitiveEmissions: number = _.sumBy(this.costMeters, (fMeter: FacilityOverviewMeter) => { return fMeter.emissions.fugitiveEmissions });
+        let processEmissions: number = _.sumBy(this.costMeters, (fMeter: FacilityOverviewMeter) => { return fMeter.emissions.processEmissions });
+
         this.emissionsTotals = {
             RECs: _.sumBy(this.costMeters, (fMeter: FacilityOverviewMeter) => { return fMeter.emissions.RECs }),
-            locationEmissions: _.sumBy(this.costMeters, (fMeter: FacilityOverviewMeter) => { return fMeter.emissions.locationEmissions }),
-            marketEmissions: _.sumBy(this.costMeters, (fMeter: FacilityOverviewMeter) => { return fMeter.emissions.marketEmissions }),
+            locationEmissions: locationEmissions,
+            marketEmissions: marketEmissions,
             excessRECs: _.sumBy(this.costMeters, (fMeter: FacilityOverviewMeter) => { return fMeter.emissions.excessRECs }),
             excessRECsEmissions: _.sumBy(this.costMeters, (fMeter: FacilityOverviewMeter) => { return fMeter.emissions.excessRECsEmissions }),
             mobileCarbonEmissions: _.sumBy(this.costMeters, (fMeter: FacilityOverviewMeter) => { return fMeter.emissions.mobileCarbonEmissions }),
             mobileBiogenicEmissions: _.sumBy(this.costMeters, (fMeter: FacilityOverviewMeter) => { return fMeter.emissions.mobileBiogenicEmissions }),
             mobileOtherEmissions: _.sumBy(this.costMeters, (fMeter: FacilityOverviewMeter) => { return fMeter.emissions.mobileOtherEmissions }),
-            mobileTotalEmissions: _.sumBy(this.costMeters, (fMeter: FacilityOverviewMeter) => { return fMeter.emissions.mobileTotalEmissions }),
-            fugitiveEmissions: _.sumBy(this.costMeters, (fMeter: FacilityOverviewMeter) => { return fMeter.emissions.fugitiveEmissions }),
-            processEmissions: _.sumBy(this.costMeters, (fMeter: FacilityOverviewMeter) => { return fMeter.emissions.processEmissions })
+            mobileTotalEmissions: mobileTotalEmissions,
+            fugitiveEmissions: fugitiveEmissions,
+            processEmissions: processEmissions,
+            totalWithLocationEmissions: (locationEmissions + mobileTotalEmissions + fugitiveEmissions + processEmissions),
+            totalWithMarketEmissions: (marketEmissions + mobileTotalEmissions + fugitiveEmissions + processEmissions)
         }
     }
 
@@ -218,19 +226,7 @@ export class FacilityOverviewMeter {
     }
 
     setEmissions() {
-        this.emissions = {
-            RECs: _.sumBy(this.monthlyData, (mData: MonthlyData) => { return mData.RECs }),
-            locationEmissions: _.sumBy(this.monthlyData, (mData: MonthlyData) => { return mData.locationEmissions }),
-            marketEmissions: _.sumBy(this.monthlyData, (mData: MonthlyData) => { return mData.marketEmissions }),
-            excessRECs: _.sumBy(this.monthlyData, (mData: MonthlyData) => { return mData.excessRECs }),
-            excessRECsEmissions: _.sumBy(this.monthlyData, (mData: MonthlyData) => { return mData.excessRECsEmissions }),
-            mobileCarbonEmissions: _.sumBy(this.monthlyData, (mData: MonthlyData) => { return mData.mobileCarbonEmissions }),
-            mobileBiogenicEmissions: _.sumBy(this.monthlyData, (mData: MonthlyData) => { return mData.mobileBiogenicEmissions }),
-            mobileOtherEmissions: _.sumBy(this.monthlyData, (mData: MonthlyData) => { return mData.mobileOtherEmissions }),
-            mobileTotalEmissions: _.sumBy(this.monthlyData, (mData: MonthlyData) => { return mData.mobileTotalEmissions }),
-            fugitiveEmissions: _.sumBy(this.monthlyData, (mData: MonthlyData) => { return mData.fugitiveEmissions }),
-            processEmissions: _.sumBy(this.monthlyData, (mData: MonthlyData) => { return mData.processEmissions })
-        }
+        this.emissions = getEmissionsTotalsFromMonthlyData(this.monthlyData);
     }
 
 

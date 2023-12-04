@@ -247,7 +247,9 @@ function calanderizeMeterDataBackwards(meter: IdbUtilityMeter, meterData: Array<
                 mobileTotalEmissions: 0,
                 fugitiveEmissions: 0,
                 processEmissions: 0,
-                readingType: readingType
+                readingType: readingType,
+                totalWithLocationEmissions: 0,
+                totalWithMarketEmissions: 0
             });
             startDate.setUTCMonth(startDate.getUTCMonth() + 1);
         }
@@ -422,7 +424,9 @@ function calanderizeMeterDataFullMonth(meter: IdbUtilityMeter, meterData: Array<
                 mobileTotalEmissions: 0,
                 fugitiveEmissions: 0,
                 processEmissions: 0,
-                readingType: readingType
+                readingType: readingType,
+                totalWithLocationEmissions: 0,
+                totalWithMarketEmissions: 0
             });
             startDate.setUTCMonth(startDate.getUTCMonth() + 1);
         }
@@ -481,7 +485,9 @@ function calanderizeFullYear(meter: IdbUtilityMeter, meterData: Array<IdbUtility
                 mobileTotalEmissions: 0,
                 fugitiveEmissions: 0,
                 processEmissions: 0,
-                readingType: readingType
+                readingType: readingType,
+                totalWithLocationEmissions: 0,
+                totalWithMarketEmissions: 0
             });
         });
     });

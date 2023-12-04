@@ -91,18 +91,25 @@ export function getIncludedMeters(meters: Array<IdbUtilityMeter>, selectedAnalys
 }
 
 export function getEmissionsTotalsFromMonthlyData(data: Array<MonthlyData>): EmissionsResults {
+    let locationEmissions: number = _.sumBy(data, (mData: MonthlyData) => { return mData.locationEmissions });
+    let marketEmissions: number = _.sumBy(data, (mData: MonthlyData) => { return mData.marketEmissions });
+    let mobileTotalEmissions: number = _.sumBy(data, (mData: MonthlyData) => { return mData.mobileTotalEmissions });
+    let fugitiveEmissions: number = _.sumBy(data, (mData: MonthlyData) => { return mData.fugitiveEmissions });
+    let processEmissions: number = _.sumBy(data, (mData: MonthlyData) => { return mData.processEmissions });
     return {
-        marketEmissions: checkValueNaN(_.sumBy(data, (d: MonthlyData) => { return d.marketEmissions })),
-        locationEmissions: checkValueNaN(_.sumBy(data, (d: MonthlyData) => { return d.locationEmissions })),
+        marketEmissions: marketEmissions,
+        locationEmissions: locationEmissions,
         RECs: checkValueNaN(_.sumBy(data, (d: MonthlyData) => { return d.RECs })),
         excessRECs: checkValueNaN(_.sumBy(data, (d: MonthlyData) => { return d.excessRECs })),
         excessRECsEmissions: checkValueNaN(_.sumBy(data, (d: MonthlyData) => { return d.excessRECsEmissions })),
         mobileCarbonEmissions: checkValueNaN(_.sumBy(data, (d: MonthlyData) => { return d.mobileCarbonEmissions })),
         mobileBiogenicEmissions: checkValueNaN(_.sumBy(data, (d: MonthlyData) => { return d.mobileBiogenicEmissions })),
         mobileOtherEmissions: checkValueNaN(_.sumBy(data, (d: MonthlyData) => { return d.mobileOtherEmissions })),
-        mobileTotalEmissions: checkValueNaN(_.sumBy(data, (d: MonthlyData) => { return d.mobileTotalEmissions })),
-        fugitiveEmissions: checkValueNaN(_.sumBy(data, (d: MonthlyData) => { return d.fugitiveEmissions })),
-        processEmissions: checkValueNaN(_.sumBy(data, (d: MonthlyData) => { return d.processEmissions }))
+        mobileTotalEmissions: mobileTotalEmissions,
+        fugitiveEmissions: fugitiveEmissions,
+        processEmissions: processEmissions,
+        totalWithLocationEmissions: (locationEmissions + mobileTotalEmissions + fugitiveEmissions + processEmissions),
+        totalWithMarketEmissions: (marketEmissions + mobileTotalEmissions + fugitiveEmissions + processEmissions)
     }
 }
 

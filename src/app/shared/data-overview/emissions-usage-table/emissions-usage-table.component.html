@@ -1,0 +1,105 @@
+<div class="table-responsive">
+    <table class="table utility-data table-sm table-bordered table-hover">
+        <thead>
+            <tr>
+                <th>Emissions Type</th>
+                <th>
+                    Total With Market <br>Emissions (tonne CO<sub>2</sub>e)
+                </th>
+                <th>
+                    Total With Location <br>Emissions (tonne CO<sub>2</sub>e)
+                </th>
+            </tr>
+        </thead>
+        <tbody class="table-group-divider">
+            <tr>
+                <td>
+                    <span class="badge"
+                        [ngStyle]="{background: '#99A3A4', color: '#99A3A4' }">
+                        &mdash;
+                    </span>
+                    Mobile
+                </td>
+                <td>
+                    {{facilityOverviewData.emissionsTotals.mobileTotalEmissions | customNumber}}
+                </td>
+                <td>
+                    {{facilityOverviewData.emissionsTotals.mobileTotalEmissions | customNumber}}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <span class="badge"
+                        [ngStyle]="{background: '#AB0005', color: '#AB0005' }">
+                        &mdash;
+                    </span>
+                    Fugitive
+                </td>
+                <td>
+                    {{facilityOverviewData.emissionsTotals.fugitiveEmissions | customNumber}}
+                </td>
+                <td>
+                    {{facilityOverviewData.emissionsTotals.fugitiveEmissions | customNumber}}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <span class="badge"
+                        [ngStyle]="{background: '#9A7D0A', color: '#9A7D0A' }">
+                        &mdash;
+                    </span>
+                    Process
+                </td>
+                <td>
+                    {{facilityOverviewData.emissionsTotals.processEmissions | customNumber}}
+                </td>
+                <td>
+                    {{facilityOverviewData.emissionsTotals.processEmissions | customNumber}}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <span class="badge"
+                        [ngStyle]="{background: '#4A235A', color: '#4A235A' }">
+                        &mdash;
+                    </span>
+                    Location
+                </td>
+                <td>
+                    &mdash;
+                </td>
+                <td>
+                    {{facilityOverviewData.emissionsTotals.locationEmissions | customNumber}}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <span class="badge"
+                        [ngStyle]="{background: '#A04000', color: '#A04000' }">
+                        &mdash;
+                    </span>
+                    Market
+                </td>
+                <td>
+                    {{facilityOverviewData.emissionsTotals.marketEmissions | customNumber}}
+                </td>
+                <td>
+                    &mdash;
+                </td>
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr>
+                <th>
+                    Total
+                </th>
+                <th>
+                    {{facilityOverviewData.emissionsTotals.totalWithMarketEmissions | customNumber}}
+                </th>
+                <th>
+                    {{facilityOverviewData.emissionsTotals.totalWithLocationEmissions | customNumber}}
+                </th>
+            </tr>
+        </tfoot>
+    </table>
+</div>
