@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { IUseAndCost, UseAndCost } from 'src/app/calculations/dashboard-calculations/useAndCostClass';
+import { IUseAndCost } from 'src/app/calculations/dashboard-calculations/useAndCostClass';
 import { Subscription } from 'rxjs';
 import { AccountOverviewService } from 'src/app/account/account-overview/account-overview.service';
 import { FacilityOverviewService } from 'src/app/facility/facility-overview/facility-overview.service';
@@ -12,8 +12,6 @@ import { FacilityOverviewService } from 'src/app/facility/facility-overview/faci
 export class EmissionsConsumptionTableComponent {
   @Input()
   facilityId: string;
-  @Input()
-  sourcesUseAndCost: Array<UseAndCost>;
   @Input()
   useAndCostTotal: {
       average: IUseAndCost;
@@ -41,6 +39,7 @@ export class EmissionsConsumptionTableComponent {
         //FACILITY
         this.emissionsDisplaySub = this.facilityOverviewService.emissionsDisplay.subscribe(val => {
           this.emissionsDisplay = val;
+          console.log(this.emissionsDisplay)
         });
       }
   }

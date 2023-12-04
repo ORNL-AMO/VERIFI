@@ -39,10 +39,10 @@
                 </div>
                 <div class="card-body">
                     <app-utility-consumption-table [dataType]="'emissions'"
-                        [sourcesUseAndCost]="utilityUseAndCost.energyUseAndCost"
-                        [useAndCostTotal]="utilityUseAndCost.energyTotal"
+                        [sourcesUseAndCost]="utilityUseAndCost.allSourcesUseAndCost"
+                        [useAndCostTotal]="utilityUseAndCost.allSourcesTotal"
                         [previousYear]="utilityUseAndCost.previousYear"
-                        [dateRange]="dateRange"></app-utility-consumption-table>
+                        [dateRange]="dateRange" [facilityId]="facilityId"></app-utility-consumption-table>
                 </div>
             </div>
         </div>

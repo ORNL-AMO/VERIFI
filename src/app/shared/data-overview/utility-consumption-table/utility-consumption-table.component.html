@@ -5,8 +5,7 @@
         [previousYear]="previousYear"></app-energy-consumption-table>
     <!--emissions-->
     <app-emissions-consumption-table *ngIf="dataType == 'emissions'" [dateRange]="dateRange" [facilityId]="facilityId"
-        [sourcesUseAndCost]="sourcesUseAndCost" [useAndCostTotal]="useAndCostTotal"
-        [previousYear]="previousYear"></app-emissions-consumption-table>
+        [useAndCostTotal]="useAndCostTotal" [previousYear]="previousYear"></app-emissions-consumption-table>
 
     <!--costs-->
     <app-costs-consumption-table *ngIf="dataType == 'cost'" [dateRange]="dateRange" [facilityId]="facilityId"
