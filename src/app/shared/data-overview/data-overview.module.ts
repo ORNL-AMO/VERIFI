@@ -20,6 +20,7 @@ import { EmissionsStackedLineChartComponent } from './emissions-stacked-line-cha
 import { EmissionsDonutComponent } from './emissions-donut/emissions-donut.component';
 import { EmissionsUsageTableComponent } from './emissions-usage-table/emissions-usage-table.component';
 import { EmissionsUsageChartComponent } from './emissions-usage-chart/emissions-usage-chart.component';
+import { FacilitiesEmissionsStackedBarChartComponent } from './facilities-emissions-stacked-bar-chart/facilities-emissions-stacked-bar-chart.component';
 
 
 
@@ -42,7 +43,8 @@ import { EmissionsUsageChartComponent } from './emissions-usage-chart/emissions-
     EmissionsStackedLineChartComponent,
     EmissionsDonutComponent,
     EmissionsUsageTableComponent,
-    EmissionsUsageChartComponent
+    EmissionsUsageChartComponent,
+    FacilitiesEmissionsStackedBarChartComponent
   ],
   imports: [
     CommonModule,
@@ -62,7 +64,8 @@ import { EmissionsUsageChartComponent } from './emissions-usage-chart/emissions-
     EmissionsStackedLineChartComponent,
     EmissionsDonutComponent,
     EmissionsUsageTableComponent,
-    EmissionsUsageChartComponent
+    EmissionsUsageChartComponent,
+    FacilitiesEmissionsStackedBarChartComponent
   ]
 })
 export class DataOverviewModule { }
