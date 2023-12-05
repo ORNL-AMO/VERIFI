@@ -79,13 +79,13 @@ export class EmissionsUsageChartComponent {
             total = _.sumBy(yearData, (dataItem: AnnualSourceDataItem) => {
               return dataItem.totalEmissions.fugitiveEmissions
             });
-          } else if (eType == 'Scope 2: Location') {
+          } else if (eType == 'Scope 2: Electricity (Location)') {
             total = _.sumBy(yearData, (dataItem: AnnualSourceDataItem) => {
-              return dataItem.totalEmissions.locationEmissions
+              return dataItem.totalEmissions.locationElectricityEmissions;
             });
-          } else if (eType == 'Scope 2: Market') {
+          } else if (eType == 'Scope 2: Electricity (Market)') {
             total = _.sumBy(yearData, (dataItem: AnnualSourceDataItem) => {
-              return dataItem.totalEmissions.marketEmissions
+              return dataItem.totalEmissions.marketElectricityEmissions;
             });
           } else if (eType == 'Scope 1: Mobile') {
             total = _.sumBy(yearData, (dataItem: AnnualSourceDataItem) => {

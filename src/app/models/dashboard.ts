@@ -14,8 +14,6 @@ export interface StackedBarChartData {
 export interface UtilityItem {
     energyUse: number,
     energyCost: number,
-    marketEmissions: number,
-    locationEmissions: number
 }
 
 export interface YearMonthData extends EmissionsResults {

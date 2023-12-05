@@ -289,11 +289,11 @@ export class BetterClimateYearDetails {
         });
         if (isMarketEmissions) {
             return _.sumBy(monthlyData, (monthlyData: MonthlyData) => {
-                return monthlyData.marketEmissions;
+                return monthlyData.totalWithMarketEmissions;
             });
         } else {
             return _.sumBy(monthlyData, (monthlyData: MonthlyData) => {
-                return monthlyData.locationEmissions;
+                return monthlyData.totalWithLocationEmissions;
             });
         }
     }

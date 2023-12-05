@@ -65,7 +65,8 @@
     <ng-container *ngIf="overviewReport.includeEmissionsSection">
         <hr>
         <!--account emissions-->
-        <div class="row justify-content-center print-break-before">
+        <!--TODO: Update emissions report-->
+        <!-- <div class="row justify-content-center print-break-before">
             <div class="report-page" [ngClass]="{'col-11': !print, 'col-12': print}">
                 <h4>{{dataOverviewFacility.facility.guid | facilityName}} Emissions</h4>
                 <app-facility-section-report [dataType]="'emissions'" [facility]="dataOverviewFacility.facility"
@@ -79,7 +80,7 @@
                     [dateRange]="dataOverviewFacility.dateRange"
                     [previousYear]="dataOverviewFacility.utilityUseAndCost.previousYear"></app-facility-section-report>
             </div>
-        </div>
+        </div> -->
     </ng-container>
 </ng-container>
 <div class="alert alert-danger" *ngIf="dataOverviewFacility.calculationError">

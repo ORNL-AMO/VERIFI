@@ -129,13 +129,13 @@ export class EmissionsStackedLineChartComponent {
         total = _.sumBy(currentMonthsData, (mData: MonthlyData) => {
           return mData.fugitiveEmissions
         });
-      } else if (emissionsType == 'Scope 2: Location') {
+      } else if (emissionsType == 'Scope 2: Electricity (Location)') {
         total = _.sumBy(currentMonthsData, (mData: MonthlyData) => {
-          return mData.locationEmissions
+          return mData.locationElectricityEmissions;
         });
-      } else if (emissionsType == 'Scope 2: Market') {
+      } else if (emissionsType == 'Scope 2: Electricity (Market)') {
         total = _.sumBy(currentMonthsData, (mData: MonthlyData) => {
-          return mData.marketEmissions
+          return mData.marketElectricityEmissions
         });
       } else if (emissionsType == 'Scope 1: Mobile') {
         total = _.sumBy(currentMonthsData, (mData: MonthlyData) => {

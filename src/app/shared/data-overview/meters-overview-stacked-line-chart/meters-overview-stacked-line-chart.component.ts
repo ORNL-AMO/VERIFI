@@ -16,7 +16,7 @@ import { AllSources, EnergySources, MeterSource, WaterSources } from 'src/app/mo
 })
 export class MetersOverviewStackedLineChartComponent {
   @Input()
-  dataType: 'energyUse' | 'emissions' | 'cost' | 'water';
+  dataType: 'energyUse' | 'cost' | 'water';
   @Input()
   facilityId: string;
   @Input()
@@ -27,29 +27,13 @@ export class MetersOverviewStackedLineChartComponent {
   @ViewChild('stackedAreaChart', { static: false }) stackedAreaChart: ElementRef;
 
   selectedFacility: IdbFacility;
-  emissionsDisplay: 'market' | 'location';
-  emissionsDisplaySub: Subscription;
   constructor(private plotlyService: PlotlyService, private facilityOverviewService: FacilityOverviewService,
     private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
     let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     this.selectedFacility = facilities.find(facility => { return facility.guid == this.facilityId });
-
-    if (this.dataType == 'emissions') {
-      this.emissionsDisplaySub = this.facilityOverviewService.emissionsDisplay.subscribe(val => {
-        this.emissionsDisplay = val;
-        this.drawChart();
-      });
-    } else {
-      this.drawChart();
-    }
-  }
-
-  ngOnDestroy() {
-    if (this.dataType == 'emissions') {
-      this.emissionsDisplaySub.unsubscribe();
-    }
+    this.drawChart();
   }
 
   ngAfterViewInit() {
@@ -84,12 +68,6 @@ export class MetersOverviewStackedLineChartComponent {
               y.push(dataItem.energyUse);
             } else if (this.dataType == 'cost') {
               y.push(dataItem.energyCost);
-            } else if (this.dataType == 'emissions') {
-              if (this.emissionsDisplay == 'location') {
-                y.push(dataItem.locationEmissions);
-              } else {
-                y.push(dataItem.marketEmissions);
-              }
             } else if (this.dataType == 'water') {
               y.push(dataItem.energyConsumption);
             }
@@ -149,8 +127,6 @@ export class MetersOverviewStackedLineChartComponent {
   getYAxisTitle(): string {
     if (this.dataType == 'energyUse') {
       return "Utility Usage (" + this.selectedFacility.energyUnit + ")";
-    } else if (this.dataType == 'emissions') {
-      return "Utility Emissions (tonne CO<sub>2</sub>e)";
     } else if (this.dataType == 'cost') {
       return "Utility Costs";
     } else if (this.dataType == 'water') {
@@ -161,8 +137,6 @@ export class MetersOverviewStackedLineChartComponent {
   getHoverTemplate(): string {
     if (this.dataType == 'energyUse') {
       return '%{text} (%{x}): %{y:,.0f} ' + this.selectedFacility.energyUnit + ' <extra></extra>';
-    } else if (this.dataType == 'emissions') {
-      return '%{text} (%{x}): %{y:,.0f} tonne CO<sub>2</sub>e <extra></extra>';
     } else if (this.dataType == 'cost') {
       return '%{text} (%{x}): %{y:$,.0f} <extra></extra>';
     } else if (this.dataType == 'water') {
@@ -171,7 +145,7 @@ export class MetersOverviewStackedLineChartComponent {
   }
 
   getIncludedSources(): Array<MeterSource> {
-    if (this.dataType == 'energyUse' || this.dataType == 'emissions') {
+    if (this.dataType == 'energyUse') {
       return EnergySources;
     } else if (this.dataType == 'cost') {
       return AllSources;

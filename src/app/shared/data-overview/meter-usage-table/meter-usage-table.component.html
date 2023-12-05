@@ -10,13 +10,7 @@
                 </th>
                 <th *ngIf="dataType =='water'">Consumption <br>(<span [innerHTML]="waterUnit | settingsLabel"></span>)
                 </th>
-                <th *ngIf="dataType != 'emissions'">Utility Cost</th>
-                <th *ngIf="dataType == 'emissions' && emissionsDisplay == 'market'">
-                    Market-Based <br>Emissions (tonne CO<sub>2</sub>e)
-                </th>
-                <th *ngIf="dataType == 'emissions' && emissionsDisplay == 'location'">
-                    Location-Based <br>Emissions (tonne CO<sub>2</sub>e)
-                </th>
+                <th>Utility Cost</th>
             </tr>
         </thead>
         <tbody class="table-group-divider">
@@ -36,14 +30,8 @@
                 <td *ngIf="dataType =='water'">
                     {{overviewMeter.totalUsage | customNumber}}
                 </td>
-                <td *ngIf="dataType != 'emissions'">
+                <td>
                     {{overviewMeter.totalCost | customNumber:true }}
-                </td>
-                <td *ngIf="dataType =='emissions' && emissionsDisplay == 'market'">
-                    {{overviewMeter.emissions.marketEmissions |customNumber }}
-                </td>
-                <td *ngIf="dataType =='emissions' && emissionsDisplay == 'location'">
-                    {{overviewMeter.emissions.locationEmissions |customNumber }}
                 </td>
             </tr>
         </tbody>
@@ -70,12 +58,6 @@
                 </th>
                 <th *ngIf="dataType == 'cost'">
                     {{facilityOverviewData.totalFacilityCost | customNumber:true }}
-                </th>
-                <th *ngIf="dataType =='emissions' && emissionsDisplay == 'market'">
-                    {{facilityOverviewData.emissionsTotals.marketEmissions| customNumber }}
-                </th>
-                <th *ngIf="dataType =='emissions' && emissionsDisplay == 'location'">
-                    {{facilityOverviewData.emissionsTotals.locationEmissions| customNumber }}
                 </th>
             </tr>
         </tfoot>

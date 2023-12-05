@@ -91,27 +91,27 @@ export class FacilitiesEmissionsStackedBarChartComponent {
         }
       });
     }
-    if (this.emissionsDisplay == 'location' && this.accountOverviewFacilities.findIndex(overviewFacility => { return overviewFacility.emissions.locationEmissions != 0 }) != 1) {
-      let yValues: Array<number> = this.accountOverviewFacilities.map(overviewFacility => { return overviewFacility.emissions.locationEmissions });
+    if (this.emissionsDisplay == 'location' && this.accountOverviewFacilities.findIndex(overviewFacility => { return overviewFacility.emissions.locationElectricityEmissions != 0 }) != 1) {
+      let yValues: Array<number> = this.accountOverviewFacilities.map(overviewFacility => { return overviewFacility.emissions.locationElectricityEmissions });
       data.push({
         x: this.accountOverviewFacilities.map(overviewFacility => { return overviewFacility.facility.name }),
         y: yValues,
         name: 'Location',
         type: 'bar',
         marker: {
-          color: getEmissionsTypeColor('Scope 2: Location')
+          color: getEmissionsTypeColor('Scope 2: Electricity (Location)')
         }
       });
     }
-    if (this.emissionsDisplay == 'market' && this.accountOverviewFacilities.findIndex(overviewFacility => { return overviewFacility.emissions.marketEmissions != 0 }) != 1) {
-      let yValues: Array<number> = this.accountOverviewFacilities.map(overviewFacility => { return overviewFacility.emissions.marketEmissions });
+    if (this.emissionsDisplay == 'market' && this.accountOverviewFacilities.findIndex(overviewFacility => { return overviewFacility.emissions.marketElectricityEmissions != 0 }) != 1) {
+      let yValues: Array<number> = this.accountOverviewFacilities.map(overviewFacility => { return overviewFacility.emissions.marketElectricityEmissions });
       data.push({
         x: this.accountOverviewFacilities.map(overviewFacility => { return overviewFacility.facility.name }),
         y: yValues,
         name: 'Market',
         type: 'bar',
         marker: {
-          color: getEmissionsTypeColor('Scope 2: Market')
+          color: getEmissionsTypeColor('Scope 2: Electricity (Market)')
         }
       });
     }

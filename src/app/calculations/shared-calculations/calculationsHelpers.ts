@@ -91,25 +91,25 @@ export function getIncludedMeters(meters: Array<IdbUtilityMeter>, selectedAnalys
 }
 
 export function getEmissionsTotalsFromMonthlyData(data: Array<MonthlyData>): EmissionsResults {
-    let locationEmissions: number = _.sumBy(data, (mData: MonthlyData) => { return mData.locationEmissions });
-    let marketEmissions: number = _.sumBy(data, (mData: MonthlyData) => { return mData.marketEmissions });
-    let mobileTotalEmissions: number = _.sumBy(data, (mData: MonthlyData) => { return mData.mobileTotalEmissions });
-    let fugitiveEmissions: number = _.sumBy(data, (mData: MonthlyData) => { return mData.fugitiveEmissions });
-    let processEmissions: number = _.sumBy(data, (mData: MonthlyData) => { return mData.processEmissions });
     return {
-        marketEmissions: marketEmissions,
-        locationEmissions: locationEmissions,
-        RECs: checkValueNaN(_.sumBy(data, (d: MonthlyData) => { return d.RECs })),
-        excessRECs: checkValueNaN(_.sumBy(data, (d: MonthlyData) => { return d.excessRECs })),
-        excessRECsEmissions: checkValueNaN(_.sumBy(data, (d: MonthlyData) => { return d.excessRECsEmissions })),
-        mobileCarbonEmissions: checkValueNaN(_.sumBy(data, (d: MonthlyData) => { return d.mobileCarbonEmissions })),
-        mobileBiogenicEmissions: checkValueNaN(_.sumBy(data, (d: MonthlyData) => { return d.mobileBiogenicEmissions })),
-        mobileOtherEmissions: checkValueNaN(_.sumBy(data, (d: MonthlyData) => { return d.mobileOtherEmissions })),
-        mobileTotalEmissions: mobileTotalEmissions,
-        fugitiveEmissions: fugitiveEmissions,
-        processEmissions: processEmissions,
-        totalWithLocationEmissions: (locationEmissions + mobileTotalEmissions + fugitiveEmissions + processEmissions),
-        totalWithMarketEmissions: (marketEmissions + mobileTotalEmissions + fugitiveEmissions + processEmissions)
+        RECs: _.sumBy(data, (mData: MonthlyData) => { return mData.RECs }),
+        locationElectricityEmissions: _.sumBy(data, (mData: MonthlyData) => { return mData.locationElectricityEmissions }),
+        marketElectricityEmissions: _.sumBy(data, (mData: MonthlyData) => { return mData.marketElectricityEmissions }),
+        otherScope2Emissions: _.sumBy(data, (mData: MonthlyData) => { return mData.otherScope2Emissions }),
+        scope2LocationEmissions: _.sumBy(data, (mData: MonthlyData) => { return mData.scope2LocationEmissions }),
+        scope2MarketEmissions: _.sumBy(data, (mData: MonthlyData) => { return mData.scope2MarketEmissions }),
+        excessRECs: _.sumBy(data, (mData: MonthlyData) => { return mData.excessRECs }),
+        excessRECsEmissions: _.sumBy(data, (mData: MonthlyData) => { return mData.excessRECsEmissions }),
+        mobileCarbonEmissions: _.sumBy(data, (mData: MonthlyData) => { return mData.mobileCarbonEmissions }),
+        mobileBiogenicEmissions: _.sumBy(data, (mData: MonthlyData) => { return mData.mobileBiogenicEmissions }),
+        mobileOtherEmissions: _.sumBy(data, (mData: MonthlyData) => { return mData.mobileOtherEmissions }),
+        mobileTotalEmissions: _.sumBy(data, (mData: MonthlyData) => { return mData.mobileTotalEmissions }),
+        fugitiveEmissions: _.sumBy(data, (mData: MonthlyData) => { return mData.fugitiveEmissions }),
+        processEmissions: _.sumBy(data, (mData: MonthlyData) => { return mData.processEmissions }),
+        stationaryEmissions: _.sumBy(data, (mData: MonthlyData) => { return mData.stationaryEmissions }),
+        totalScope1Emissions: _.sumBy(data, (mData: MonthlyData) => { return mData.totalScope1Emissions }),
+        totalWithMarketEmissions: _.sumBy(data, (mData: MonthlyData) => { return mData.totalWithMarketEmissions }),
+        totalWithLocationEmissions: _.sumBy(data, (mData: MonthlyData) => { return mData.totalWithLocationEmissions }),
     }
 }
 

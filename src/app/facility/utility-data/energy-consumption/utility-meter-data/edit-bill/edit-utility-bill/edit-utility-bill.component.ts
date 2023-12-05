@@ -91,8 +91,10 @@ export class EditUtilityBillComponent implements OnInit {
         new Date(this.meterDataForm.controls.readDate.value).getFullYear(),
         false, [facility], this.eGridService.co2Emissions, customFuels,
         this.meterDataForm.controls.totalVolume.value, undefined, undefined);
-      this.marketEmissions = emissionsValues.marketEmissions;
-      this.locationEmissions = emissionsValues.locationEmissions;
+
+      //TODO: Check emissions values to show for non-electricity bills
+      this.marketEmissions = emissionsValues.totalWithMarketEmissions;
+      this.locationEmissions = emissionsValues.totalWithLocationEmissions;
     } else {
       this.marketEmissions = 0;
       this.locationEmissions = 0;

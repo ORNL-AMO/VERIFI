@@ -112,14 +112,14 @@ export class EmissionsDonutComponent {
           return facilityData.emissions.fugitiveEmissions
         }));
         includedEmissionsTypes.push(eType);
-      } else if (eType == 'Scope 2: Location' && this.facilityOverviewMeters.findIndex(overviewMeter => { return overviewMeter.emissions.locationEmissions != 0 }) != -1) {
+      } else if (eType == 'Scope 2: Electricity (Location)' && this.facilityOverviewMeters.findIndex(overviewMeter => { return overviewMeter.emissions.locationElectricityEmissions != 0 }) != -1) {
         values.push(_.sumBy(this.facilityOverviewMeters, (facilityData: FacilityOverviewMeter) => {
-          return facilityData.emissions.locationEmissions
+          return facilityData.emissions.locationElectricityEmissions;
         }));
         includedEmissionsTypes.push(eType);
-      } else if (eType == 'Scope 2: Market' && this.facilityOverviewMeters.findIndex(overviewMeter => { return overviewMeter.emissions.marketEmissions != 0 }) != -1) {
+      } else if (eType == 'Scope 2: Electricity (Market)' && this.facilityOverviewMeters.findIndex(overviewMeter => { return overviewMeter.emissions.marketElectricityEmissions != 0 }) != -1) {
         values.push(_.sumBy(this.facilityOverviewMeters, (facilityData: FacilityOverviewMeter) => {
-          return facilityData.emissions.marketEmissions
+          return facilityData.emissions.marketElectricityEmissions
         }));
         includedEmissionsTypes.push(eType);
       } else if (eType == 'Scope 1: Mobile' && this.facilityOverviewMeters.findIndex(overviewMeter => { return overviewMeter.emissions.mobileTotalEmissions != 0 }) != -1) {

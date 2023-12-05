@@ -15,8 +15,11 @@ export interface SubregionEmissions {
 
 export interface EmissionsResults {
   RECs: number,
-  locationEmissions: number,
-  marketEmissions: number,
+  locationElectricityEmissions: number,
+  marketElectricityEmissions: number,
+  otherScope2Emissions: number,
+  scope2LocationEmissions: number,
+  scope2MarketEmissions: number,
   excessRECs: number,
   excessRECsEmissions: number,
   mobileCarbonEmissions: number,
@@ -25,22 +28,22 @@ export interface EmissionsResults {
   mobileTotalEmissions: number,
   fugitiveEmissions: number,
   processEmissions: number,
+  stationaryEmissions: number,
+  totalScope1Emissions: number,
   totalWithMarketEmissions: number,
   totalWithLocationEmissions: number,
-  //TODO: stationary?
-  //TODO: scope2 other
 }
 
 
 
-export type EmissionsTypes = 'Scope 1: Stationary' | 'Scope 1: Mobile' | 'Scope 1: Fugitive' | 'Scope 1: Process' | 'Scope 2: Location' | 'Scope 2: Market' | 'Scope 2: Other';
+export type EmissionsTypes = 'Scope 1: Stationary' | 'Scope 1: Mobile' | 'Scope 1: Fugitive' | 'Scope 1: Process' | 'Scope 2: Electricity (Location)' | 'Scope 2: Electricity (Market)' | 'Scope 2: Other';
 
 export function getEmissionsTypeColor(emissionsType: EmissionsTypes): string {
   if (emissionsType == 'Scope 1: Fugitive') {
     return '#AB0005';
-  } else if (emissionsType == 'Scope 2: Location') {
+  } else if (emissionsType == 'Scope 2: Electricity (Location)') {
     return '#4A235A';
-  } else if (emissionsType == 'Scope 2: Market') {
+  } else if (emissionsType == 'Scope 2: Electricity (Market)') {
     return '#A04000';
   } else if (emissionsType == 'Scope 1: Mobile') {
     return '#99A3A4';
@@ -56,9 +59,9 @@ export function getEmissionsTypeColor(emissionsType: EmissionsTypes): string {
 export function getEmissionsTypes(emissionsDisplay: 'location' | 'market'): Array<EmissionsTypes> {
   let emissionsTypes: Array<EmissionsTypes> = ['Scope 1: Stationary', 'Scope 1: Mobile', 'Scope 1: Fugitive', 'Scope 1: Process', 'Scope 2: Other'];
   if (emissionsDisplay == 'location') {
-    emissionsTypes.push('Scope 2: Location');
+    emissionsTypes.push('Scope 2: Electricity (Location)');
   } else {
-    emissionsTypes.push('Scope 2: Market');
+    emissionsTypes.push('Scope 2: Electricity (Market)');
   }
   return emissionsTypes;
 }

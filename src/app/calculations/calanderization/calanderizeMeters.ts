@@ -236,9 +236,13 @@ function calanderizeMeterDataBackwards(meter: IdbUtilityMeter, meterData: Array<
                 energyUse: totals.totalEnergyUse,
                 energyCost: totals.totalCost,
                 date: new Date(year, month),
-                marketEmissions: 0,
-                locationEmissions: 0,
+                readingType: readingType,
                 RECs: 0,
+                locationElectricityEmissions: 0,
+                marketElectricityEmissions: 0,
+                otherScope2Emissions: 0,
+                scope2LocationEmissions: 0,
+                scope2MarketEmissions: 0,
                 excessRECs: 0,
                 excessRECsEmissions: 0,
                 mobileCarbonEmissions: 0,
@@ -247,9 +251,10 @@ function calanderizeMeterDataBackwards(meter: IdbUtilityMeter, meterData: Array<
                 mobileTotalEmissions: 0,
                 fugitiveEmissions: 0,
                 processEmissions: 0,
-                readingType: readingType,
+                stationaryEmissions: 0,
+                totalScope1Emissions: 0,
+                totalWithMarketEmissions: 0,
                 totalWithLocationEmissions: 0,
-                totalWithMarketEmissions: 0
             });
             startDate.setUTCMonth(startDate.getUTCMonth() + 1);
         }
@@ -413,9 +418,13 @@ function calanderizeMeterDataFullMonth(meter: IdbUtilityMeter, meterData: Array<
                 energyUse: totalEnergyUse,
                 energyCost: totalCost,
                 date: new Date(year, month),
-                marketEmissions: 0,
-                locationEmissions: 0,
+                readingType: readingType,
                 RECs: 0,
+                locationElectricityEmissions: 0,
+                marketElectricityEmissions: 0,
+                otherScope2Emissions: 0,
+                scope2LocationEmissions: 0,
+                scope2MarketEmissions: 0,
                 excessRECs: 0,
                 excessRECsEmissions: 0,
                 mobileCarbonEmissions: 0,
@@ -424,9 +433,10 @@ function calanderizeMeterDataFullMonth(meter: IdbUtilityMeter, meterData: Array<
                 mobileTotalEmissions: 0,
                 fugitiveEmissions: 0,
                 processEmissions: 0,
-                readingType: readingType,
+                stationaryEmissions: 0,
+                totalScope1Emissions: 0,
+                totalWithMarketEmissions: 0,
                 totalWithLocationEmissions: 0,
-                totalWithMarketEmissions: 0
             });
             startDate.setUTCMonth(startDate.getUTCMonth() + 1);
         }
@@ -474,9 +484,13 @@ function calanderizeFullYear(meter: IdbUtilityMeter, meterData: Array<IdbUtility
                 energyUse: monthlyEnergyUse,
                 energyCost: monthlyCost,
                 date: new Date(year, month.monthNumValue),
-                marketEmissions: 0,
-                locationEmissions: 0,
+                readingType: readingType,
                 RECs: 0,
+                locationElectricityEmissions: 0,
+                marketElectricityEmissions: 0,
+                otherScope2Emissions: 0,
+                scope2LocationEmissions: 0,
+                scope2MarketEmissions: 0,
                 excessRECs: 0,
                 excessRECsEmissions: 0,
                 mobileCarbonEmissions: 0,
@@ -485,9 +499,10 @@ function calanderizeFullYear(meter: IdbUtilityMeter, meterData: Array<IdbUtility
                 mobileTotalEmissions: 0,
                 fugitiveEmissions: 0,
                 processEmissions: 0,
-                readingType: readingType,
+                stationaryEmissions: 0,
+                totalScope1Emissions: 0,
+                totalWithMarketEmissions: 0,
                 totalWithLocationEmissions: 0,
-                totalWithMarketEmissions: 0
             });
         });
     });

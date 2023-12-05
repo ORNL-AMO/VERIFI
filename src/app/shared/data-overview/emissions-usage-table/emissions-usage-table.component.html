@@ -61,28 +61,28 @@
             <tr>
                 <td>
                     <span class="badge"
-                        [ngStyle]="{background: getEmissionsTypeColor('Scope 2: Location'), color: getEmissionsTypeColor('Scope 2: Location') }">
+                        [ngStyle]="{background: getEmissionsTypeColor('Scope 2: Electricity (Location)'), color: getEmissionsTypeColor('Scope 2: Electricity (Location)') }">
                         &mdash;
                     </span>
-                    Scope 2: Location
+                    Scope 2: Electricity (Location)
                 </td>
                 <td>
                     &mdash;
                 </td>
                 <td>
-                    {{overviewData.emissionsTotals.locationEmissions | customNumber}}
+                    {{overviewData.emissionsTotals.locationElectricityEmissions | customNumber}}
                 </td>
             </tr>
             <tr>
                 <td>
                     <span class="badge"
-                        [ngStyle]="{background: getEmissionsTypeColor('Scope 2: Market'), color: getEmissionsTypeColor('Scope 2: Market') }">
+                        [ngStyle]="{background: getEmissionsTypeColor('Scope 2: Electricity (Market)'), color: getEmissionsTypeColor('Scope 2: Electricity (Market)') }">
                         &mdash;
                     </span>
-                    Scope 2: Market
+                    Scope 2: Electricity (Market)
                 </td>
                 <td>
-                    {{overviewData.emissionsTotals.marketEmissions | customNumber}}
+                    {{overviewData.emissionsTotals.marketElectricityEmissions | customNumber}}
                 </td>
                 <td>
                     &mdash;

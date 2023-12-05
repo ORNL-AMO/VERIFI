@@ -176,32 +176,43 @@ export class UtilityUseAndCost {
         return {
             energyUse: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.energyUse }),
             energyUseChange: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.energyUseChange }),
-            marketEmissions: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.marketEmissions }),
-            marketEmissionsChange: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.marketEmissionsChange }),
-            locationEmissions: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.locationEmissions }),
-            locationEmissionsChange: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.locationEmissionsChange }),
+ 
             RECsChange: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.RECsChange }),
-            RECs: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.RECs }),
+            locationElectricityEmissionsChange: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.locationElectricityEmissionsChange }),
+            marketElectricityEmissionsChange: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.marketElectricityEmissionsChange }),
+            otherScope2EmissionsChange: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.otherScope2EmissionsChange }),
+            scope2LocationEmissionsChange: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.scope2LocationEmissionsChange }),
+            scope2MarketEmissionsChange: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.scope2MarketEmissionsChange }),
             excessRECsChange: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.excessRECsChange }),
-            excessRECs: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.excessRECs }),
             excessRECsEmissionsChange: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.excessRECsEmissionsChange }),
-            excessRECsEmissions: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.excessRECsEmissions }),
             mobileCarbonEmissionsChange: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.mobileCarbonEmissionsChange }),
-            mobileCarbonEmissions: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.mobileCarbonEmissions }),
             mobileBiogenicEmissionsChange: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.mobileBiogenicEmissionsChange }),
-            mobileBiogenicEmissions: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.mobileBiogenicEmissions }),
             mobileOtherEmissionsChange: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.mobileOtherEmissionsChange }),
-            mobileOtherEmissions: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.mobileOtherEmissions }),
             mobileTotalEmissionsChange: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.mobileTotalEmissionsChange }),
-            mobileTotalEmissions: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.mobileTotalEmissions }),
             fugitiveEmissionsChange: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.fugitiveEmissionsChange }),
-            fugitiveEmissions: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.fugitiveEmissions }),
             processEmissionsChange: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.processEmissionsChange }),
+            stationaryEmissionsChange: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.stationaryEmissionsChange }),
+            totalScope1EmissionsChange: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.totalScope1EmissionsChange }),
+            totalWithMarketEmissionsChange: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.totalWithMarketEmissionsChange }),
+            totalWithLocationEmissionsChange: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.totalWithLocationEmissionsChange }),
+            RECs: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.RECs }),
+            locationElectricityEmissions: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.locationElectricityEmissions }),
+            marketElectricityEmissions: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.marketElectricityEmissions }),
+            otherScope2Emissions: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.otherScope2Emissions }),
+            scope2LocationEmissions: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.scope2LocationEmissions }),
+            scope2MarketEmissions:_.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.scope2MarketEmissions }),
+            excessRECs: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.excessRECs }),
+            excessRECsEmissions:_.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.excessRECsEmissions }),
+            mobileCarbonEmissions: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.mobileCarbonEmissions }),
+            mobileBiogenicEmissions: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.mobileBiogenicEmissions }),
+            mobileOtherEmissions: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.mobileOtherEmissions }),
+            mobileTotalEmissions: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.mobileTotalEmissions }),
+            fugitiveEmissions: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.fugitiveEmissions }),
             processEmissions: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.processEmissions }),
-            totalWithLocationEmissions: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.totalWithLocationEmissions }),
-            totalEmissionsWithLocationChange: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.totalEmissionsWithLocationChange }),
+            stationaryEmissions: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.stationaryEmissions }),
+            totalScope1Emissions: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.totalScope1Emissions }),
             totalWithMarketEmissions: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.totalWithMarketEmissions }),
-            totalEmissionsWithMarketChange: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.totalEmissionsWithMarketChange }),
+            totalWithLocationEmissions: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.totalWithLocationEmissions }),
             cost: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.cost }),
             costChange: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.costChange })
         }
@@ -246,9 +257,12 @@ export class UseAndCost {
     setPreviousYearChangeValues() {
         this.previousYear.costChange = (this.previousYear.cost - this.end.cost);
         this.previousYear.energyUseChange = (this.previousYear.energyUse - this.end.energyUse);
-        this.previousYear.marketEmissionsChange = (this.previousYear.marketEmissions - this.end.marketEmissions);
-        this.previousYear.locationEmissionsChange = (this.previousYear.locationEmissions - this.end.locationEmissions);
-
+        this.previousYear.RECsChange = (this.previousYear.RECs - this.end.RECs);
+        this.previousYear.locationElectricityEmissionsChange = (this.previousYear.locationElectricityEmissions - this.end.locationElectricityEmissions);
+        this.previousYear.marketElectricityEmissionsChange = (this.previousYear.marketElectricityEmissions - this.end.marketElectricityEmissions);
+        this.previousYear.otherScope2EmissionsChange = (this.previousYear.otherScope2Emissions - this.end.otherScope2Emissions);
+        this.previousYear.scope2LocationEmissionsChange = (this.previousYear.scope2LocationEmissions - this.end.scope2LocationEmissions);
+        this.previousYear.scope2MarketEmissionsChange = (this.previousYear.scope2MarketEmissions - this.end.scope2MarketEmissions);
         this.previousYear.excessRECsChange = (this.previousYear.excessRECs - this.end.excessRECs);
         this.previousYear.excessRECsEmissionsChange = (this.previousYear.excessRECsEmissions - this.end.excessRECsEmissions);
         this.previousYear.mobileCarbonEmissionsChange = (this.previousYear.mobileCarbonEmissions - this.end.mobileCarbonEmissions);
@@ -257,8 +271,10 @@ export class UseAndCost {
         this.previousYear.mobileTotalEmissionsChange = (this.previousYear.mobileTotalEmissions - this.end.mobileTotalEmissions);
         this.previousYear.fugitiveEmissionsChange = (this.previousYear.fugitiveEmissions - this.end.fugitiveEmissions);
         this.previousYear.processEmissionsChange = (this.previousYear.processEmissions - this.end.processEmissions);
-        this.previousYear.totalEmissionsWithLocationChange = (this.previousYear.totalWithLocationEmissions - this.end.totalWithLocationEmissions);
-        this.previousYear.totalEmissionsWithMarketChange = (this.previousYear.totalWithMarketEmissions - this.end.totalWithMarketEmissions);
+        this.previousYear.stationaryEmissionsChange = (this.previousYear.stationaryEmissions - this.end.stationaryEmissions);
+        this.previousYear.totalScope1EmissionsChange = (this.previousYear.totalScope1Emissions - this.end.totalScope1Emissions);
+        this.previousYear.totalWithMarketEmissionsChange = (this.previousYear.totalWithMarketEmissions - this.end.totalWithMarketEmissions);
+        this.previousYear.totalWithLocationEmissionsChange = (this.previousYear.totalWithLocationEmissions - this.end.totalWithLocationEmissions);
     }
 
     setAverage(monthlyData: Array<MonthlyData>, startDate: Date, endDate: Date, isEnergy: boolean) {
@@ -283,32 +299,43 @@ export class UseAndCost {
         this.average = {
             energyUse: totalEnergyUse / numberOfMonths,
             energyUseChange: 0,
-            marketEmissions: emissionsTotals.marketEmissions / numberOfMonths,
-            marketEmissionsChange: 0,
-            locationEmissions: emissionsTotals.locationEmissions / numberOfMonths,
-            locationEmissionsChange: 0,
+ 
             RECsChange: 0,
-            RECs: emissionsTotals.RECs / numberOfMonths,
+            locationElectricityEmissionsChange: 0,
+            marketElectricityEmissionsChange: 0,
+            otherScope2EmissionsChange: 0,
+            scope2LocationEmissionsChange: 0,
+            scope2MarketEmissionsChange: 0,
             excessRECsChange: 0,
-            excessRECs: emissionsTotals.excessRECs / numberOfMonths,
             excessRECsEmissionsChange: 0,
-            excessRECsEmissions: emissionsTotals.excessRECsEmissions / numberOfMonths,
             mobileCarbonEmissionsChange: 0,
-            mobileCarbonEmissions: emissionsTotals.mobileCarbonEmissions / numberOfMonths,
             mobileBiogenicEmissionsChange: 0,
-            mobileBiogenicEmissions: emissionsTotals.mobileBiogenicEmissions / numberOfMonths,
             mobileOtherEmissionsChange: 0,
-            mobileOtherEmissions: emissionsTotals.mobileOtherEmissions / numberOfMonths,
             mobileTotalEmissionsChange: 0,
-            mobileTotalEmissions: emissionsTotals.mobileTotalEmissions / numberOfMonths,
             fugitiveEmissionsChange: 0,
-            fugitiveEmissions: emissionsTotals.fugitiveEmissions / numberOfMonths,
             processEmissionsChange: 0,
+            stationaryEmissionsChange: 0,
+            totalScope1EmissionsChange: 0,
+            totalWithMarketEmissionsChange: 0,
+            totalWithLocationEmissionsChange: 0,
+            RECs: emissionsTotals.RECs / numberOfMonths,
+            locationElectricityEmissions: emissionsTotals.locationElectricityEmissions / numberOfMonths,
+            marketElectricityEmissions: emissionsTotals.marketElectricityEmissions / numberOfMonths,
+            otherScope2Emissions: emissionsTotals.otherScope2Emissions / numberOfMonths,
+            scope2LocationEmissions: emissionsTotals.scope2LocationEmissions / numberOfMonths,
+            scope2MarketEmissions: emissionsTotals.scope2MarketEmissions / numberOfMonths,
+            excessRECs: emissionsTotals.excessRECs / numberOfMonths,
+            excessRECsEmissions: emissionsTotals.excessRECsEmissions / numberOfMonths,
+            mobileCarbonEmissions: emissionsTotals.mobileCarbonEmissions / numberOfMonths,
+            mobileBiogenicEmissions: emissionsTotals.mobileBiogenicEmissions / numberOfMonths,
+            mobileOtherEmissions: emissionsTotals.mobileOtherEmissions / numberOfMonths,
+            mobileTotalEmissions: emissionsTotals.mobileTotalEmissions / numberOfMonths,
+            fugitiveEmissions: emissionsTotals.fugitiveEmissions / numberOfMonths,
             processEmissions: emissionsTotals.processEmissions / numberOfMonths,
-            totalWithLocationEmissions: emissionsTotals.totalWithLocationEmissions / numberOfMonths,
-            totalEmissionsWithLocationChange: 0,
+            stationaryEmissions: emissionsTotals.stationaryEmissions / numberOfMonths,
+            totalScope1Emissions: emissionsTotals.totalScope1Emissions / numberOfMonths,
             totalWithMarketEmissions: emissionsTotals.totalWithMarketEmissions / numberOfMonths,
-            totalEmissionsWithMarketChange: 0,
+            totalWithLocationEmissions: emissionsTotals.totalWithLocationEmissions / numberOfMonths,
             cost: totalCost / numberOfMonths,
             costChange: 0
         }
@@ -317,9 +344,12 @@ export class UseAndCost {
     setAverageChangeValues() {
         this.average.costChange = (this.average.cost - this.end.cost);
         this.average.energyUseChange = (this.average.energyUse - this.end.energyUse);
-        this.average.marketEmissionsChange = (this.average.marketEmissions - this.end.marketEmissions);
-        this.average.locationEmissionsChange = (this.average.locationEmissions - this.end.locationEmissions);
-
+        this.average.RECsChange = (this.average.RECs - this.end.RECs);
+        this.average.locationElectricityEmissionsChange = (this.average.locationElectricityEmissions - this.end.locationElectricityEmissions);
+        this.average.marketElectricityEmissionsChange = (this.average.marketElectricityEmissions - this.end.marketElectricityEmissions);
+        this.average.otherScope2EmissionsChange = (this.average.otherScope2Emissions - this.end.otherScope2Emissions);
+        this.average.scope2LocationEmissionsChange = (this.average.scope2LocationEmissions - this.end.scope2LocationEmissions);
+        this.average.scope2MarketEmissionsChange = (this.average.scope2MarketEmissions - this.end.scope2MarketEmissions);
         this.average.excessRECsChange = (this.average.excessRECs - this.end.excessRECs);
         this.average.excessRECsEmissionsChange = (this.average.excessRECsEmissions - this.end.excessRECsEmissions);
         this.average.mobileCarbonEmissionsChange = (this.average.mobileCarbonEmissions - this.end.mobileCarbonEmissions);
@@ -328,8 +358,10 @@ export class UseAndCost {
         this.average.mobileTotalEmissionsChange = (this.average.mobileTotalEmissions - this.end.mobileTotalEmissions);
         this.average.fugitiveEmissionsChange = (this.average.fugitiveEmissions - this.end.fugitiveEmissions);
         this.average.processEmissionsChange = (this.average.processEmissions - this.end.processEmissions);
-        this.average.totalEmissionsWithLocationChange = (this.average.totalWithLocationEmissions - this.end.totalWithLocationEmissions);
-        this.average.totalEmissionsWithMarketChange = (this.average.totalWithMarketEmissions - this.end.totalWithMarketEmissions);
+        this.average.stationaryEmissionsChange = (this.average.stationaryEmissions - this.end.stationaryEmissions);
+        this.average.totalScope1EmissionsChange = (this.average.totalScope1Emissions - this.end.totalScope1Emissions);
+        this.average.totalWithMarketEmissionsChange = (this.average.totalWithMarketEmissions - this.end.totalWithMarketEmissions);
+        this.average.totalWithLocationEmissionsChange = (this.average.totalWithLocationEmissions - this.end.totalWithLocationEmissions);
     }
 
     getDateIUseAndCostValues(date: Date, monthlyData: Array<MonthlyData>, isEnergy: boolean): IUseAndCost {
@@ -354,32 +386,43 @@ export class UseAndCost {
                 return {
                     energyUse: energyUse,
                     energyUseChange: 0,
-                    marketEmissions: emissionsTotals.marketEmissions,
-                    marketEmissionsChange: 0,
-                    locationEmissions: emissionsTotals.locationEmissions,
-                    locationEmissionsChange: 0,
+        
                     RECsChange: 0,
-                    RECs: emissionsTotals.RECs,
+                    locationElectricityEmissionsChange: 0,
+                    marketElectricityEmissionsChange: 0,
+                    otherScope2EmissionsChange: 0,
+                    scope2LocationEmissionsChange: 0,
+                    scope2MarketEmissionsChange: 0,
                     excessRECsChange: 0,
-                    excessRECs: emissionsTotals.excessRECs,
                     excessRECsEmissionsChange: 0,
-                    excessRECsEmissions: emissionsTotals.excessRECsEmissions,
                     mobileCarbonEmissionsChange: 0,
-                    mobileCarbonEmissions: emissionsTotals.mobileCarbonEmissions,
                     mobileBiogenicEmissionsChange: 0,
-                    mobileBiogenicEmissions: emissionsTotals.mobileBiogenicEmissions,
                     mobileOtherEmissionsChange: 0,
-                    mobileOtherEmissions: emissionsTotals.mobileOtherEmissions,
                     mobileTotalEmissionsChange: 0,
-                    mobileTotalEmissions: emissionsTotals.mobileTotalEmissions,
                     fugitiveEmissionsChange: 0,
-                    fugitiveEmissions: emissionsTotals.fugitiveEmissions,
                     processEmissionsChange: 0,
+                    stationaryEmissionsChange: 0,
+                    totalScope1EmissionsChange: 0,
+                    totalWithMarketEmissionsChange: 0,
+                    totalWithLocationEmissionsChange: 0,
+                    RECs: emissionsTotals.RECs,
+                    locationElectricityEmissions: emissionsTotals.locationElectricityEmissions,
+                    marketElectricityEmissions: emissionsTotals.marketElectricityEmissions,
+                    otherScope2Emissions: emissionsTotals.otherScope2Emissions,
+                    scope2LocationEmissions: emissionsTotals.scope2LocationEmissions,
+                    scope2MarketEmissions: emissionsTotals.scope2MarketEmissions,
+                    excessRECs: emissionsTotals.excessRECs,
+                    excessRECsEmissions: emissionsTotals.excessRECsEmissions,
+                    mobileCarbonEmissions: emissionsTotals.mobileCarbonEmissions,
+                    mobileBiogenicEmissions: emissionsTotals.mobileBiogenicEmissions,
+                    mobileOtherEmissions: emissionsTotals.mobileOtherEmissions,
+                    mobileTotalEmissions: emissionsTotals.mobileTotalEmissions,
+                    fugitiveEmissions: emissionsTotals.fugitiveEmissions,
                     processEmissions: emissionsTotals.processEmissions,
-                    totalWithLocationEmissions: emissionsTotals.totalWithLocationEmissions,
-                    totalEmissionsWithLocationChange: 0,
+                    stationaryEmissions: emissionsTotals.stationaryEmissions,
+                    totalScope1Emissions: emissionsTotals.totalScope1Emissions,
                     totalWithMarketEmissions: emissionsTotals.totalWithMarketEmissions,
-                    totalEmissionsWithMarketChange: 0,
+                    totalWithLocationEmissions: emissionsTotals.totalWithLocationEmissions,
                     cost: cost,
                     costChange: 0
                 }
@@ -398,34 +441,46 @@ export function getEmptyIUseAnCost(): IUseAndCost {
     return {
         energyUse: 0,
         energyUseChange: 0,
-        marketEmissions: 0,
-        marketEmissionsChange: 0,
-        locationEmissions: 0,
-        locationEmissionsChange: 0,
+
         RECsChange: 0,
-        RECs: 0,
+        locationElectricityEmissionsChange: 0,
+        marketElectricityEmissionsChange: 0,
+        otherScope2EmissionsChange: 0,
+        scope2LocationEmissionsChange: 0,
+        scope2MarketEmissionsChange: 0,
         excessRECsChange: 0,
-        excessRECs: 0,
         excessRECsEmissionsChange: 0,
-        excessRECsEmissions: 0,
         mobileCarbonEmissionsChange: 0,
-        mobileCarbonEmissions: 0,
         mobileBiogenicEmissionsChange: 0,
-        mobileBiogenicEmissions: 0,
         mobileOtherEmissionsChange: 0,
-        mobileOtherEmissions: 0,
         mobileTotalEmissionsChange: 0,
-        mobileTotalEmissions: 0,
         fugitiveEmissionsChange: 0,
-        fugitiveEmissions: 0,
         processEmissionsChange: 0,
+        stationaryEmissionsChange: 0,
+        totalScope1EmissionsChange: 0,
+        totalWithMarketEmissionsChange: 0,
+        totalWithLocationEmissionsChange: 0,
+        RECs: 0,
+        locationElectricityEmissions: 0,
+        marketElectricityEmissions: 0,
+        otherScope2Emissions: 0,
+        scope2LocationEmissions: 0,
+        scope2MarketEmissions: 0,
+        excessRECs: 0,
+        excessRECsEmissions: 0,
+        mobileCarbonEmissions: 0,
+        mobileBiogenicEmissions: 0,
+        mobileOtherEmissions: 0,
+        mobileTotalEmissions: 0,
+        fugitiveEmissions: 0,
         processEmissions: 0,
-        cost: 0,
-        costChange: 0,
-        totalWithLocationEmissions: 0,
-        totalEmissionsWithLocationChange: 0,
+        stationaryEmissions: 0,
+        totalScope1Emissions: 0,
         totalWithMarketEmissions: 0,
-        totalEmissionsWithMarketChange: 0
+        totalWithLocationEmissions: 0,
+
+        cost: 0,
+        costChange: 0
     }
 }
 
@@ -444,9 +499,12 @@ export interface IUseAndCost extends EmissionsResults {
     energyUse: number,
     energyUseChange: number,
 
-    marketEmissionsChange: number,
-    locationEmissionsChange: number,
     RECsChange: number,
+    locationElectricityEmissionsChange: number,
+    marketElectricityEmissionsChange: number,
+    otherScope2EmissionsChange: number,
+    scope2LocationEmissionsChange: number,
+    scope2MarketEmissionsChange: number,
     excessRECsChange: number,
     excessRECsEmissionsChange: number,
     mobileCarbonEmissionsChange: number,
@@ -454,10 +512,11 @@ export interface IUseAndCost extends EmissionsResults {
     mobileOtherEmissionsChange: number,
     mobileTotalEmissionsChange: number,
     fugitiveEmissionsChange: number,
-    processEmissionsChange: number
-    totalEmissionsWithMarketChange: number,
-    totalEmissionsWithLocationChange: number,
-
+    processEmissionsChange: number,
+    stationaryEmissionsChange: number,
+    totalScope1EmissionsChange: number,
+    totalWithMarketEmissionsChange: number,
+    totalWithLocationEmissionsChange: number,
     cost: number,
     costChange: number
 };
