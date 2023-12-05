@@ -87,7 +87,7 @@ export class FacilitiesEmissionsStackedBarChartComponent {
         name: 'Fugitive',
         type: 'bar',
         marker: {
-          color: getEmissionsTypeColor('Fugitive')
+          color: getEmissionsTypeColor('Scope 1: Fugitive')
         }
       });
     }
@@ -99,7 +99,7 @@ export class FacilitiesEmissionsStackedBarChartComponent {
         name: 'Location',
         type: 'bar',
         marker: {
-          color: getEmissionsTypeColor('Location')
+          color: getEmissionsTypeColor('Scope 2: Location')
         }
       });
     }
@@ -111,7 +111,7 @@ export class FacilitiesEmissionsStackedBarChartComponent {
         name: 'Market',
         type: 'bar',
         marker: {
-          color: getEmissionsTypeColor('Market')
+          color: getEmissionsTypeColor('Scope 2: Market')
         }
       });
     }
@@ -123,7 +123,7 @@ export class FacilitiesEmissionsStackedBarChartComponent {
         name: 'Mobile',
         type: 'bar',
         marker: {
-          color: getEmissionsTypeColor('Mobile')
+          color: getEmissionsTypeColor('Scope 1: Mobile')
         }
       });
     }
@@ -136,10 +136,12 @@ export class FacilitiesEmissionsStackedBarChartComponent {
         name: 'Process',
         type: 'bar',
         marker: {
-          color: getEmissionsTypeColor('Process')
+          color: getEmissionsTypeColor('Scope 1: Process')
         }
       });
     }
+    //TODO: Scope 1 stationary
+    //TODO: Scope 2 other
 
     data = _.orderBy(data, (d) => { return _.sum(d.y) }, 'desc');
     return data;

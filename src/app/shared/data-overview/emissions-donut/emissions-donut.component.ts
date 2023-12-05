@@ -61,11 +61,12 @@ export class EmissionsDonutComponent {
       this.facilityOverviewMeters = _.orderBy(this.facilityOverviewMeters, (meterOverview) => { return meterOverview.meter.source });
 
       let emissionsTypes: Array<EmissionsTypes> = getEmissionsTypes(this.emissionsDisplay);
+      let valuesAndTypes: { values: Array<number>, includedEmissionsTypes: Array<EmissionsTypes> } = this.getValues(emissionsTypes);
       var data = [{
-        values: this.getValues(emissionsTypes),
-        labels: emissionsTypes.map(eType => { return eType }),
+        values: valuesAndTypes.values,
+        labels: valuesAndTypes.includedEmissionsTypes.map(eType => { return eType }),
         marker: {
-          colors: emissionsTypes.map(eType => { return getEmissionsTypeColor(eType) }),
+          colors: valuesAndTypes.includedEmissionsTypes.map(eType => { return getEmissionsTypeColor(eType) }),
           line: {
             color: '#fff',
             width: 5
@@ -102,31 +103,47 @@ export class EmissionsDonutComponent {
 
 
 
-  getValues(emissionsTypes: Array<EmissionsTypes>): Array<number> {
+  getValues(emissionsTypes: Array<EmissionsTypes>): { values: Array<number>, includedEmissionsTypes: Array<EmissionsTypes> } {
     let values: Array<number> = new Array();
+    let includedEmissionsTypes: Array<EmissionsTypes> = new Array();
     emissionsTypes.forEach(eType => {
-      if (eType == 'Fugitive') {
+      if (eType == 'Scope 1: Fugitive' && this.facilityOverviewMeters.findIndex(overviewMeter => { return overviewMeter.emissions.fugitiveEmissions != 0 }) != -1) {
         values.push(_.sumBy(this.facilityOverviewMeters, (facilityData: FacilityOverviewMeter) => {
           return facilityData.emissions.fugitiveEmissions
         }));
-      } else if (eType == 'Location') {
+        includedEmissionsTypes.push(eType);
+      } else if (eType == 'Scope 2: Location' && this.facilityOverviewMeters.findIndex(overviewMeter => { return overviewMeter.emissions.locationEmissions != 0 }) != -1) {
         values.push(_.sumBy(this.facilityOverviewMeters, (facilityData: FacilityOverviewMeter) => {
           return facilityData.emissions.locationEmissions
         }));
-      } else if (eType == 'Market') {
+        includedEmissionsTypes.push(eType);
+      } else if (eType == 'Scope 2: Market' && this.facilityOverviewMeters.findIndex(overviewMeter => { return overviewMeter.emissions.marketEmissions != 0 }) != -1) {
         values.push(_.sumBy(this.facilityOverviewMeters, (facilityData: FacilityOverviewMeter) => {
           return facilityData.emissions.marketEmissions
         }));
-      } else if (eType == 'Mobile') {
+        includedEmissionsTypes.push(eType);
+      } else if (eType == 'Scope 1: Mobile' && this.facilityOverviewMeters.findIndex(overviewMeter => { return overviewMeter.emissions.mobileTotalEmissions != 0 }) != -1) {
         values.push(_.sumBy(this.facilityOverviewMeters, (facilityData: FacilityOverviewMeter) => {
           return facilityData.emissions.mobileTotalEmissions
         }));
-      } else if (eType == 'Process') {
+        includedEmissionsTypes.push(eType);
+      } else if (eType == 'Scope 1: Process' && this.facilityOverviewMeters.findIndex(overviewMeter => { return overviewMeter.emissions.processEmissions != 0 }) != -1) {
         values.push(_.sumBy(this.facilityOverviewMeters, (facilityData: FacilityOverviewMeter) => {
           return facilityData.emissions.processEmissions
         }));
+        includedEmissionsTypes.push(eType);
+      } else if (eType == 'Scope 1: Stationary') {
+        //TODO: stationary
+        // total = _.sumBy(yearData, (dataItem: AnnualSourceDataItem) => {
+        //   return dataItem.totalEmissions.
+        // });
+      } else if (eType == 'Scope 2: Other') {
+        //TODO: scope2 other
+        // total = _.sumBy(yearData, (dataItem: AnnualSourceDataItem) => {
+        //   return dataItem.totalEmissions.
+        // });
       }
     })
-    return values;
+    return { values: values, includedEmissionsTypes: includedEmissionsTypes };
   }
 }

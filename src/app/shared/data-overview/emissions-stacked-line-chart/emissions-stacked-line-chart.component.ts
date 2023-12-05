@@ -69,7 +69,9 @@ export class EmissionsStackedLineChartComponent {
       let emissionsTypes: Array<EmissionsTypes> = getEmissionsTypes(this.emissionsDisplay);
       emissionsTypes.forEach(emissionType => {
         let trace = this.getTraceData(emissionType, monthlyDataInRange);
-        traceData.push(trace)
+        if (trace) {
+          traceData.push(trace)
+        }
       });
 
       // let xrange;
@@ -123,42 +125,60 @@ export class EmissionsStackedLineChartComponent {
       })
       x.push(month.abbreviation + ', ' + startDate.getFullYear());
       let total: number;
-      if (emissionsType == 'Fugitive') {
+      if (emissionsType == 'Scope 1: Fugitive') {
         total = _.sumBy(currentMonthsData, (mData: MonthlyData) => {
           return mData.fugitiveEmissions
         });
-      } else if (emissionsType == 'Location') {
+      } else if (emissionsType == 'Scope 2: Location') {
         total = _.sumBy(currentMonthsData, (mData: MonthlyData) => {
           return mData.locationEmissions
         });
-      } else if (emissionsType == 'Market') {
+      } else if (emissionsType == 'Scope 2: Market') {
         total = _.sumBy(currentMonthsData, (mData: MonthlyData) => {
           return mData.marketEmissions
         });
-      } else if (emissionsType == 'Mobile') {
+      } else if (emissionsType == 'Scope 1: Mobile') {
         total = _.sumBy(currentMonthsData, (mData: MonthlyData) => {
           return mData.mobileTotalEmissions
         });
-      } else if (emissionsType == 'Process') {
+      } else if (emissionsType == 'Scope 1: Process') {
         total = _.sumBy(currentMonthsData, (mData: MonthlyData) => {
           return mData.processEmissions
         });
+      } else if (emissionsType == 'Scope 1: Stationary') {
+        //TODO: stationary
+        // total = _.sumBy(yearData, (dataItem: AnnualSourceDataItem) => {
+        //   return dataItem.totalEmissions.
+        // });
+      } else if (emissionsType == 'Scope 2: Other') {
+        //TODO: scope2 other
+        // total = _.sumBy(yearData, (dataItem: AnnualSourceDataItem) => {
+        //   return dataItem.totalEmissions.
+        // });
       }
-      y.push(total);
+      if (total) {
+        y.push(total);
+      }
       startDate.setMonth(startDate.getMonth() + 1);
     }
-    let trace = {
-      x: x,
-      y: y,
-      name: emissionsType,
-      text: x.map(item => { return emissionsType }),
-      stackgroup: 'one',
-      marker: {
-        color: getEmissionsTypeColor(emissionsType),
-      },
-      hovertemplate: '%{text} (%{x}): %{y:,.0f} tonne CO<sub>2</sub>e <extra></extra>',
+    if (y.findIndex(item => { return item != 0 }) != -1) {
+      if (emissionsType == 'Scope 1: Stationary') {
+        console.log(y);
+      }
+      let trace = {
+        x: x,
+        y: y,
+        name: emissionsType,
+        text: x.map(item => { return emissionsType }),
+        stackgroup: 'one',
+        marker: {
+          color: getEmissionsTypeColor(emissionsType),
+        },
+        hovertemplate: '%{text} (%{x}): %{y:,.0f} tonne CO<sub>2</sub>e <extra></extra>',
+      }
+      return trace;
     }
-    return trace;
+    return
   }
 
 }

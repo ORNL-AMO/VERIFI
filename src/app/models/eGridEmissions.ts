@@ -26,31 +26,39 @@ export interface EmissionsResults {
   fugitiveEmissions: number,
   processEmissions: number,
   totalWithMarketEmissions: number,
-  totalWithLocationEmissions: number
+  totalWithLocationEmissions: number,
+  //TODO: stationary?
+  //TODO: scope2 other
 }
 
-export type EmissionsTypes = 'Mobile' | 'Fugitive' | 'Process' | 'Location' | 'Market';
+
+
+export type EmissionsTypes = 'Scope 1: Stationary' | 'Scope 1: Mobile' | 'Scope 1: Fugitive' | 'Scope 1: Process' | 'Scope 2: Location' | 'Scope 2: Market' | 'Scope 2: Other';
 
 export function getEmissionsTypeColor(emissionsType: EmissionsTypes): string {
-  if (emissionsType == 'Fugitive') {
+  if (emissionsType == 'Scope 1: Fugitive') {
     return '#AB0005';
-  } else if (emissionsType == 'Location') {
+  } else if (emissionsType == 'Scope 2: Location') {
     return '#4A235A';
-  } else if (emissionsType == 'Market') {
+  } else if (emissionsType == 'Scope 2: Market') {
     return '#A04000';
-  } else if (emissionsType == 'Mobile') {
+  } else if (emissionsType == 'Scope 1: Mobile') {
     return '#99A3A4';
-  } else if (emissionsType == 'Process') {
+  } else if (emissionsType == 'Scope 1: Process') {
     return '#9A7D0A';
+  } else if (emissionsType == 'Scope 1: Stationary') {
+    //todo
+  } else if (emissionsType == 'Scope 2: Other') {
+    //todo
   }
 }
 
 export function getEmissionsTypes(emissionsDisplay: 'location' | 'market'): Array<EmissionsTypes> {
-  let emissionsTypes: Array<EmissionsTypes> = ['Mobile', 'Fugitive', 'Process'];
+  let emissionsTypes: Array<EmissionsTypes> = ['Scope 1: Stationary', 'Scope 1: Mobile', 'Scope 1: Fugitive', 'Scope 1: Process', 'Scope 2: Other'];
   if (emissionsDisplay == 'location') {
-    emissionsTypes.push('Location');
+    emissionsTypes.push('Scope 2: Location');
   } else {
-    emissionsTypes.push('Market')
+    emissionsTypes.push('Scope 2: Market');
   }
   return emissionsTypes;
 }

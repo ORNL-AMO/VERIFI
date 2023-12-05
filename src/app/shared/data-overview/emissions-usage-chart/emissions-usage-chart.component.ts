@@ -75,40 +75,53 @@ export class EmissionsUsageChartComponent {
             return sData.fiscalYear == year;
           });
           let total: number;
-          if (eType == 'Fugitive') {
+          if (eType == 'Scope 1: Fugitive') {
             total = _.sumBy(yearData, (dataItem: AnnualSourceDataItem) => {
               return dataItem.totalEmissions.fugitiveEmissions
             });
-          } else if (eType == 'Location') {
+          } else if (eType == 'Scope 2: Location') {
             total = _.sumBy(yearData, (dataItem: AnnualSourceDataItem) => {
               return dataItem.totalEmissions.locationEmissions
             });
-          } else if (eType == 'Market') {
+          } else if (eType == 'Scope 2: Market') {
             total = _.sumBy(yearData, (dataItem: AnnualSourceDataItem) => {
               return dataItem.totalEmissions.marketEmissions
             });
-          } else if (eType == 'Mobile') {
+          } else if (eType == 'Scope 1: Mobile') {
             total = _.sumBy(yearData, (dataItem: AnnualSourceDataItem) => {
               return dataItem.totalEmissions.mobileTotalEmissions
             });
-          } else if (eType == 'Process') {
+          } else if (eType == 'Scope 1: Process') {
             total = _.sumBy(yearData, (dataItem: AnnualSourceDataItem) => {
               return dataItem.totalEmissions.processEmissions
             });
+          } else if (eType == 'Scope 1: Stationary') {
+            //TODO: stationary
+            // total = _.sumBy(yearData, (dataItem: AnnualSourceDataItem) => {
+            //   return dataItem.totalEmissions.
+            // });
+          } else if (eType == 'Scope 2: Other') {
+            //TODO: scope2 other
+            // total = _.sumBy(yearData, (dataItem: AnnualSourceDataItem) => {
+            //   return dataItem.totalEmissions.
+            // });
           }
-          yValues.push(total);
+          if(total != undefined){
+            yValues.push(total);
+          }
         });
-
-        let trace = {
-          x: years,
-          y: yValues,
-          name: eType,
-          type: 'bar',
-          marker: {
-            color: getEmissionsTypeColor(eType),
+        if (yValues.findIndex(y => { return y != 0 }) != -1) {
+          let trace = {
+            x: years,
+            y: yValues,
+            name: eType,
+            type: 'bar',
+            marker: {
+              color: getEmissionsTypeColor(eType),
+            }
           }
+          traceData.push(trace);
         }
-        traceData.push(trace);
       });
 
       traceData = _.orderBy(traceData, (tData) => {
