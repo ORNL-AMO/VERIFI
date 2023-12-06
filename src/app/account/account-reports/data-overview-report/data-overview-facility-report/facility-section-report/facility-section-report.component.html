@@ -1,16 +1,15 @@
 <div class="row justify-content-center">
     <div class="col-12" *ngIf="sectionOptions.includeMeterUsageStackedLineChart">
-        <app-meters-overview-stacked-line-chart [dataType]="dataType" [facilityId]="facility.guid"
-            [calanderizedMeters]="calanderizedMeters" [dateRange]="dateRange"></app-meters-overview-stacked-line-chart>
+        <app-emissions-stacked-line-chart [calanderizedMeters]="calanderizedMeters"
+            [dateRange]="dateRange"></app-emissions-stacked-line-chart>
     </div>
-    <div class="print-break-before" *ngIf="sectionOptions.includeMeterUsageTable" [ngClass]="{'col-10': print, 'col-6': !print}">
-        <app-meter-usage-table [dataType]="dataType" [facilityOverviewData]="facilityOverviewData"
-            [facilityOverviewMeters]="facilityOverviewMeters" [waterUnit]="waterUnit"
-            [energyUnit]="energyUnit"></app-meter-usage-table>
+    <div class="print-break-before" *ngIf="sectionOptions.includeMeterUsageTable"
+        [ngClass]="{'col-10': print, 'col-6': !print}">
+        <app-emissions-usage-table [overviewData]="facilityOverviewData"></app-emissions-usage-table>
     </div>
     <div *ngIf="sectionOptions.includeMeterUsageTable" [ngClass]="{'col-10': print, 'col-6': !print}">
-        <app-meter-usage-donut [dataType]="dataType" [facilityId]="facility.guid"
-            [facilityOverviewMeters]="facilityOverviewMeters"></app-meter-usage-donut>
+        <app-emissions-donut [facilityId]="facility.guid"
+            [facilityOverviewMeters]="facilityOverviewMeters"></app-emissions-donut>
     </div>
 </div>
 <div class="row hide-print">
@@ -27,8 +26,8 @@
 </div>
 <div class="row print-break-avoid" *ngIf="sectionOptions.includeAnnualBarChart">
     <div class="col-12">
-        <app-utilities-usage-chart [dataType]="dataType" [facilityId]="facility.guid"
-            [annualSourceData]="annualSourceData"></app-utilities-usage-chart>
+        <app-emissions-usage-chart [facilityId]="facility.guid"
+            [annualSourceData]="annualSourceData"></app-emissions-usage-chart>
     </div>
 </div>
 <div class="row print-break-avoid" *ngIf="sectionOptions.includeMonthlyLineChartForFacility">

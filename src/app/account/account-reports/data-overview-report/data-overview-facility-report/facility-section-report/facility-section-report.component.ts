@@ -16,7 +16,7 @@ import { AccountReportsService } from '../../../account-reports.service';
 })
 export class FacilitySectionReportComponent {
   @Input()
-  dataType: 'energyUse' | 'cost' | 'water';
+  dataType: 'energyUse' | 'cost' | 'water' | 'emissions';
   @Input()
   facility: IdbFacility;
   @Input()

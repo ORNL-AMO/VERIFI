@@ -17,23 +17,17 @@ import { Month, Months } from '../../form-data/months';
 })
 export class EmissionsStackedLineChartComponent {
   @Input()
-  facilityId: string;
-  @Input()
   calanderizedMeters: Array<CalanderizedMeter>;
   @Input()
   dateRange: { startDate: Date, endDate: Date };
 
   @ViewChild('stackedAreaChart', { static: false }) stackedAreaChart: ElementRef;
 
-  selectedFacility: IdbFacility;
   emissionsDisplay: 'market' | 'location';
   emissionsDisplaySub: Subscription;
-  constructor(private plotlyService: PlotlyService, private facilityOverviewService: FacilityOverviewService,
-    private facilityDbService: FacilitydbService) { }
+  constructor(private plotlyService: PlotlyService, private facilityOverviewService: FacilityOverviewService) { }
 
   ngOnInit(): void {
-    let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
-    this.selectedFacility = facilities.find(facility => { return facility.guid == this.facilityId });
     this.emissionsDisplaySub = this.facilityOverviewService.emissionsDisplay.subscribe(val => {
       this.emissionsDisplay = val;
       this.drawChart();

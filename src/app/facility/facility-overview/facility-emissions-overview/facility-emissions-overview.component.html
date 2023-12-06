@@ -9,7 +9,7 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-12">
-                            <app-emissions-stacked-line-chart [facilityId]="facilityId"
+                            <app-emissions-stacked-line-chart
                                 [calanderizedMeters]="facilityOverviewData.calanderizedMeters"
                                 [dateRange]="dateRange"></app-emissions-stacked-line-chart>
                             <hr>
@@ -41,8 +41,8 @@
                     <app-utility-consumption-table [dataType]="'emissions'"
                         [sourcesUseAndCost]="utilityUseAndCost.allSourcesUseAndCost"
                         [useAndCostTotal]="utilityUseAndCost.allSourcesTotal"
-                        [previousYear]="utilityUseAndCost.previousYear"
-                        [dateRange]="dateRange" [facilityId]="facilityId"></app-utility-consumption-table>
+                        [previousYear]="utilityUseAndCost.previousYear" [dateRange]="dateRange"
+                        [facilityId]="facilityId"></app-utility-consumption-table>
                 </div>
             </div>
         </div>

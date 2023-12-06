@@ -3,7 +3,8 @@
         <app-data-overview-map [dataType]="dataType"
             [accountOverviewFacilities]="accountOverviewFacilities"></app-data-overview-map>
     </div>
-    <div class="print-break-before" *ngIf="sectionOptions.includeFacilityTable" [ngClass]="{'col-10': print, 'col-6': !print}">
+    <div class="print-break-before" *ngIf="sectionOptions.includeFacilityTable"
+        [ngClass]="{'col-10': print, 'col-6': !print}">
         <app-facilities-usage-table [dataType]="dataType" [accountOverviewFacilities]="accountOverviewFacilities"
             [accountOverviewData]="accountOverviewData" [waterUnit]="waterUnit"
             [energyUnit]="energyUnit"></app-facilities-usage-table>
@@ -27,9 +28,12 @@
 </div>
 <div class="row print-break-avoid" *ngIf="sectionOptions.includeStackedBarChart">
     <div class="col-12">
-        <app-facilities-usage-stacked-bar-chart [dataType]="dataType" [calanderizedMeters]="calanderizedMeters"
+        <!-- <app-facilities-usage-stacked-bar-chart [dataType]="dataType" [calanderizedMeters]="calanderizedMeters"
             [waterUnit]="waterUnit" [energyUnit]="energyUnit" [reportOptions]="sectionOptions"
-            [dateRange]="dateRange"></app-facilities-usage-stacked-bar-chart>
+            [dateRange]="dateRange"></app-facilities-usage-stacked-bar-chart> -->
+        <app-emissions-stacked-line-chart [calanderizedMeters]="calanderizedMeters"
+            [dateRange]="dateRange"></app-emissions-stacked-line-chart>
+
     </div>
 </div>
 <div class="row print-break-avoid" *ngIf="sectionOptions.includeMonthlyLineChart">
