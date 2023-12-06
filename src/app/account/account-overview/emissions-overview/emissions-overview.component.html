@@ -16,12 +16,23 @@
                     </div>
                     <div class="row">
                         <div class="col-6">
-                            <app-emissions-usage-table [overviewData]="accountOverviewData"
-                                [inAccount]="true"></app-emissions-usage-table>
+                            <app-facilities-usage-table [dataType]="'emissions'"
+                                [accountOverviewFacilities]="accountOverviewData.facilitiesCost"
+                                [accountOverviewData]="accountOverviewData"></app-facilities-usage-table>
                         </div>
                         <div class="col-6">
                             <app-facility-usage-donut [dataType]="'emissions'"
                                 [accountOverviewFacilities]="accountOverviewData.facilitiesCost"></app-facility-usage-donut>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-6">
+                            <app-emissions-usage-table [overviewData]="accountOverviewData"
+                                [inAccount]="true"></app-emissions-usage-table>
+                        </div>
+                        <div class="col-6">
+                            <app-emissions-donut
+                                [accountOverviewFacility]="accountOverviewData.facilitiesCost"></app-emissions-donut>
                         </div>
                     </div>
                 </div>

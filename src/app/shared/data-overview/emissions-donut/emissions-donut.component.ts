@@ -3,10 +3,10 @@ import * as _ from 'lodash';
 import { Subscription } from 'rxjs';
 import { PlotlyService } from 'angular-plotly.js';
 import { FacilityOverviewService } from 'src/app/facility/facility-overview/facility-overview.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { IdbFacility } from 'src/app/models/idb';
 import { FacilityOverviewMeter } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';
-import { EmissionsTypes, getEmissionsTypeColor, getEmissionsTypes } from 'src/app/models/eGridEmissions';
+import { EmissionsResults, EmissionsTypes, getEmissionsTypeColor, getEmissionsTypes } from 'src/app/models/eGridEmissions';
+import { AccountOverviewFacility } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
+import { AccountOverviewService } from 'src/app/account/account-overview/account-overview.service';
 
 @Component({
   selector: 'app-emissions-donut',
@@ -19,26 +19,31 @@ export class EmissionsDonutComponent {
   @Input()
   facilityOverviewMeters: Array<FacilityOverviewMeter>;
   @Input()
+  accountOverviewFacility: Array<AccountOverviewFacility>;
+  @Input()
   inHomeScreen: boolean;
 
   @ViewChild('emissionsDonut', { static: false }) emissionsDonut: ElementRef;
-  selectedFacility: IdbFacility;
   emissionsDisplay: 'market' | 'location';
   emissionsDisplaySub: Subscription;
 
   constructor(private plotlyService: PlotlyService, private facilityOverviewService: FacilityOverviewService,
-    private facilityDbService: FacilitydbService) { }
+    private accountOverviewService: AccountOverviewService) { }
 
   ngOnInit(): void {
-    let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
-    this.selectedFacility = facilities.find(facility => { return facility.guid == this.facilityId });
-
-
-    this.emissionsDisplaySub = this.facilityOverviewService.emissionsDisplay.subscribe(val => {
-      this.emissionsDisplay = val;
-      this.drawChart();
-    });
+    if (this.facilityId) {
+      this.emissionsDisplaySub = this.facilityOverviewService.emissionsDisplay.subscribe(val => {
+        this.emissionsDisplay = val;
+        this.drawChart();
+      });
+    } else {
+      this.emissionsDisplaySub = this.accountOverviewService.emissionsDisplay.subscribe(val => {
+        this.emissionsDisplay = val;
+        this.drawChart();
+      });
+    }
   }
+
 
   ngOnDestroy() {
     if (this.emissionsDisplaySub) {
@@ -57,9 +62,7 @@ export class EmissionsDonutComponent {
   }
 
   drawChart() {
-    if (this.emissionsDonut && this.facilityOverviewMeters) {
-      this.facilityOverviewMeters = _.orderBy(this.facilityOverviewMeters, (meterOverview) => { return meterOverview.meter.source });
-
+    if (this.emissionsDonut && (this.facilityOverviewMeters || this.accountOverviewFacility)) {
       let emissionsTypes: Array<EmissionsTypes> = getEmissionsTypes(this.emissionsDisplay);
       let valuesAndTypes: { values: Array<number>, includedEmissionsTypes: Array<EmissionsTypes> } = this.getValues(emissionsTypes);
       var data = [{
@@ -104,42 +107,52 @@ export class EmissionsDonutComponent {
 
 
   getValues(emissionsTypes: Array<EmissionsTypes>): { values: Array<number>, includedEmissionsTypes: Array<EmissionsTypes> } {
+    let allEmissions: Array<EmissionsResults>;
+    if (this.facilityOverviewMeters) {
+      allEmissions = this.facilityOverviewMeters.flatMap(overviewMeter => {
+        return overviewMeter.emissions;
+      })
+    } else if (this.accountOverviewFacility) {
+      allEmissions = this.accountOverviewFacility.flatMap(overviewFacility => {
+        return overviewFacility.emissions;
+      })
+    }
     let values: Array<number> = new Array();
     let includedEmissionsTypes: Array<EmissionsTypes> = new Array();
     emissionsTypes.forEach(eType => {
-      if (eType == 'Scope 1: Fugitive' && this.facilityOverviewMeters.findIndex(overviewMeter => { return overviewMeter.emissions.fugitiveEmissions != 0 }) != -1) {
-        values.push(_.sumBy(this.facilityOverviewMeters, (facilityData: FacilityOverviewMeter) => {
-          return facilityData.emissions.fugitiveEmissions
+      if (eType == 'Scope 1: Fugitive' && allEmissions.findIndex(emissions => { return emissions.fugitiveEmissions != 0 }) != -1) {
+        values.push(_.sumBy(allEmissions, (emissions: EmissionsResults) => {
+          return emissions.fugitiveEmissions
         }));
         includedEmissionsTypes.push(eType);
-      } else if (eType == 'Scope 2: Electricity (Location)' && this.facilityOverviewMeters.findIndex(overviewMeter => { return overviewMeter.emissions.locationElectricityEmissions != 0 }) != -1) {
-        values.push(_.sumBy(this.facilityOverviewMeters, (facilityData: FacilityOverviewMeter) => {
-          return facilityData.emissions.locationElectricityEmissions;
+      } else if (eType == 'Scope 2: Electricity (Location)' && allEmissions.findIndex(emissions => { return emissions.locationElectricityEmissions != 0 }) != -1) {
+        values.push(_.sumBy(allEmissions, (emissions: EmissionsResults) => {
+          return emissions.locationElectricityEmissions;
         }));
         includedEmissionsTypes.push(eType);
-      } else if (eType == 'Scope 2: Electricity (Market)' && this.facilityOverviewMeters.findIndex(overviewMeter => { return overviewMeter.emissions.marketElectricityEmissions != 0 }) != -1) {
-        values.push(_.sumBy(this.facilityOverviewMeters, (facilityData: FacilityOverviewMeter) => {
-          return facilityData.emissions.marketElectricityEmissions
+      } else if (eType == 'Scope 2: Electricity (Market)' && allEmissions.findIndex(emissions => { return emissions.marketElectricityEmissions != 0 }) != -1) {
+        values.push(_.sumBy(allEmissions, (emissions: EmissionsResults) => {
+          return emissions.marketElectricityEmissions
         }));
         includedEmissionsTypes.push(eType);
-      } else if (eType == 'Scope 1: Mobile' && this.facilityOverviewMeters.findIndex(overviewMeter => { return overviewMeter.emissions.mobileTotalEmissions != 0 }) != -1) {
-        values.push(_.sumBy(this.facilityOverviewMeters, (facilityData: FacilityOverviewMeter) => {
-          return facilityData.emissions.mobileTotalEmissions
+      } else if (eType == 'Scope 1: Mobile' && allEmissions.findIndex(emissions => { return emissions.mobileTotalEmissions != 0 }) != -1) {
+        values.push(_.sumBy(allEmissions, (emissions: EmissionsResults) => {
+          return emissions.mobileTotalEmissions
         }));
         includedEmissionsTypes.push(eType);
-      } else if (eType == 'Scope 1: Process' && this.facilityOverviewMeters.findIndex(overviewMeter => { return overviewMeter.emissions.processEmissions != 0 }) != -1) {
-        values.push(_.sumBy(this.facilityOverviewMeters, (facilityData: FacilityOverviewMeter) => {
-          return facilityData.emissions.processEmissions
+      } else if (eType == 'Scope 1: Process' && allEmissions.findIndex(emissions => { return emissions.processEmissions != 0 }) != -1) {
+        values.push(_.sumBy(allEmissions, (emissions: EmissionsResults) => {
+          return emissions.processEmissions
         }));
         includedEmissionsTypes.push(eType);
-      } else if (eType == 'Scope 1: Stationary') {
-        values.push(_.sumBy(this.facilityOverviewMeters, (facilityData: FacilityOverviewMeter) => {
-          return facilityData.emissions.stationaryEmissions;
+      } else if (eType == 'Scope 1: Stationary' && allEmissions.findIndex(emissions => { return emissions.stationaryEmissions != 0 }) != -1) {
+        values.push(_.sumBy(allEmissions, (emissions: EmissionsResults) => {
+          return emissions.stationaryEmissions;
         }));
         includedEmissionsTypes.push(eType);
-      } else if (eType == 'Scope 2: Other') {
-        values.push(_.sumBy(this.facilityOverviewMeters, (facilityData: FacilityOverviewMeter) => {
-          return facilityData.emissions.otherScope2Emissions;
+      } else if (eType == 'Scope 2: Other' && allEmissions.findIndex(emissions => { return emissions.otherScope2Emissions != 0 }) != -1) {
+        values.push(_.sumBy(allEmissions, (emissions: EmissionsResults) => {
+          return emissions.otherScope2Emissions;
         }));
         includedEmissionsTypes.push(eType);
       }
