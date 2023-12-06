@@ -45,7 +45,6 @@ export class EditMeterFormComponent implements OnInit {
   sourceOptions: Array<string> = AllSources;
   changingUnits: boolean = false;
   energyUnitOptions: Array<UnitOption> = EnergyUnitOptions;
-  displayEnergyUnits: boolean = true;
   isEnergyMeter: boolean;
   collectionUnitIsEnergy: boolean;
 
@@ -112,6 +111,7 @@ export class EditMeterFormComponent implements OnInit {
     if (this.meterForm.controls.source.value == 'Other Energy') {
       this.setStartingUnitOptions();
       this.setStartingUnit();
+      this.setUnitBooleans();
     }
     this.updateHeatCapacityValidation();
     this.checkShowHeatCapacity();

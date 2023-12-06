@@ -62,8 +62,6 @@ export function getEmissions(meter: IdbUtilityMeter,
     let fugitiveEmissions: number = 0;
     let processEmissions: number = 0;
     let stationaryEmissions: number = 0;
-
-    //TODO: need to handle "Other Energy" and "Compressed Air"
     let scope2Other: number = 0;
 
     if (meter.source == 'Electricity' || isCompressedAir) {
@@ -75,12 +73,19 @@ export function getEmissions(meter: IdbUtilityMeter,
         let emissionsRates: { marketRate: number, locationRate: number } = getEmissionsRate(facility.eGridSubregion, year, co2Emissions);
         let marketEmissionsOutputRate: number = emissionsRates.marketRate;
 
-        if (meter.includeInEnergy) {
-            locationElectricityEmissions = convertedEnergyUse * emissionsRates.locationRate * meter.locationGHGMultiplier;
-            marketElectricityEmissions = convertedEnergyUse * emissionsRates.marketRate * meter.marketGHGMultiplier;
+        if (!isCompressedAir) {
+            if (meter.includeInEnergy) {
+                locationElectricityEmissions = convertedEnergyUse * emissionsRates.locationRate * meter.locationGHGMultiplier;
+                marketElectricityEmissions = convertedEnergyUse * emissionsRates.marketRate * meter.marketGHGMultiplier;
+            } else {
+                marketElectricityEmissions = 0;
+                locationElectricityEmissions = 0;
+            }
         } else {
+            //Purchased Compressed Air
             marketElectricityEmissions = 0;
             locationElectricityEmissions = 0;
+            scope2Other = convertedEnergyUse * emissionsRates.locationRate * meter.locationGHGMultiplier;
         }
         RECs = convertedEnergyUse * meter.recsMultiplier;
         let emissionsEnergyUse: number = convertedEnergyUse;
@@ -106,10 +111,11 @@ export function getEmissions(meter: IdbUtilityMeter,
         }
         //non-electricity emissions rates are in MMBtu
         let convertedEnergyUse: number = new ConvertValue(energyUse, energyUnit, 'MMBtu').convertedValue;
-        let marketEmissionsOutputRate: number = getFuelEmissionsOutputRate(meter.source, meter.fuel, meter.phase, customFuels, meter.scope);
+        let outputRate: number = getFuelEmissionsOutputRate(meter.source, meter.fuel, meter.phase, customFuels, meter.scope);
         //emissions calculated in kg CO2e using emissions factors, converted to tonne CO2e
-        stationaryEmissions = (convertedEnergyUse * marketEmissionsOutputRate) / 1000;
+        stationaryEmissions = (convertedEnergyUse * outputRate) / 1000;
     } else if (meter.source == 'Other Fuels' && meter.scope == 2) {
+        //Mobile emissions
         let fuelOptions: Array<FuelTypeOption> = getAllMobileFuelTypes();
         let meterFuel: FuelTypeOption = fuelOptions.find(option => {
             return option.value == meter.vehicleFuel
@@ -153,6 +159,7 @@ export function getEmissions(meter: IdbUtilityMeter,
         }
         mobileTotalEmissions = mobileOtherEmissions + mobileCarbonEmissions;
     } else if (meter.source == 'Other') {
+        //Fugitive or process
         if (meter.scope == 5) {
             //fugitive emissions
             fugitiveEmissions = totalVolume * meter.globalWarmingPotential;
@@ -160,6 +167,11 @@ export function getEmissions(meter: IdbUtilityMeter,
             //process emissions
             processEmissions = totalVolume * meter.globalWarmingPotential;
         }
+    } else if (meter.source == 'Other Energy') {
+        let convertedEnergyUse: number = new ConvertValue(energyUse, energyUnit, 'MMBtu').convertedValue;
+        let outputRate: number = getFuelEmissionsOutputRate(meter.source, meter.fuel, meter.phase, customFuels, meter.scope);
+        //emissions calculated in kg CO2e using emissions factors, converted to tonne CO2e
+        scope2Other = (convertedEnergyUse * outputRate) / 1000;
     }
     let totalScope1Emissions: number = mobileTotalEmissions + fugitiveEmissions + processEmissions + stationaryEmissions;
 
@@ -182,7 +194,7 @@ export function getEmissions(meter: IdbUtilityMeter,
         fugitiveEmissions: fugitiveEmissions,
         processEmissions: processEmissions,
         totalWithLocationEmissions: totalScope1Emissions + scope2LocationEmissions,
-        totalWithMarketEmissions: scope2MarketEmissions,
+        totalWithMarketEmissions: totalScope1Emissions + scope2MarketEmissions,
         otherScope2Emissions: scope2Other,
         totalScope1Emissions: totalScope1Emissions,
         stationaryEmissions: stationaryEmissions
@@ -219,7 +231,7 @@ export function getFuelEmissionsOutputRate(source: MeterSource, fuel: string, ph
     let emissionsRate: number;
     if (source == 'Natural Gas') {
         emissionsRate = 53.1148;
-    } else if (source == 'Other Fuels') {
+    } else if (source == 'Other Fuels' || source == 'Other Energy') {
         let fuelTypeOptions: Array<FuelTypeOption> = getFuelTypeOptions(source, phase, customFuels, scope);
         let selectedFuel: FuelTypeOption = fuelTypeOptions.find(option => { return option.value == fuel })
         if (selectedFuel) {
@@ -229,3 +241,26 @@ export function getFuelEmissionsOutputRate(source: MeterSource, fuel: string, ph
     return emissionsRate;
 }
 
+
+export function getZeroEmissionsResults(): EmissionsResults {
+    return {
+        RECs: 0,
+        locationElectricityEmissions: 0,
+        marketElectricityEmissions: 0,
+        otherScope2Emissions: 0,
+        scope2LocationEmissions: 0,
+        scope2MarketEmissions: 0,
+        excessRECs: 0,
+        excessRECsEmissions: 0,
+        mobileCarbonEmissions: 0,
+        mobileBiogenicEmissions: 0,
+        mobileOtherEmissions: 0,
+        mobileTotalEmissions: 0,
+        fugitiveEmissions: 0,
+        processEmissions: 0,
+        stationaryEmissions: 0,
+        totalScope1Emissions: 0,
+        totalWithMarketEmissions: 0,
+        totalWithLocationEmissions: 0
+    }
+}
