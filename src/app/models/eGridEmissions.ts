@@ -42,17 +42,17 @@ export function getEmissionsTypeColor(emissionsType: EmissionsTypes): string {
   if (emissionsType == 'Scope 1: Fugitive') {
     return '#AB0005';
   } else if (emissionsType == 'Scope 2: Electricity (Location)') {
-    return '#4A235A';
+    return '#B9770E';
   } else if (emissionsType == 'Scope 2: Electricity (Market)') {
-    return '#A04000';
+    return '#9A7D0A';
   } else if (emissionsType == 'Scope 1: Mobile') {
     return '#99A3A4';
   } else if (emissionsType == 'Scope 1: Process') {
-    return '#9A7D0A';
+    return '#8E44AD';
   } else if (emissionsType == 'Scope 1: Stationary') {
-    //todo
+    return '#515A5A';
   } else if (emissionsType == 'Scope 2: Other') {
-    //todo
+    return '#A04000';
   }
 }
 

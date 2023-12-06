@@ -133,15 +133,15 @@ export class EmissionsDonutComponent {
         }));
         includedEmissionsTypes.push(eType);
       } else if (eType == 'Scope 1: Stationary') {
-        //TODO: stationary
-        // total = _.sumBy(yearData, (dataItem: AnnualSourceDataItem) => {
-        //   return dataItem.totalEmissions.
-        // });
+        values.push(_.sumBy(this.facilityOverviewMeters, (facilityData: FacilityOverviewMeter) => {
+          return facilityData.emissions.stationaryEmissions;
+        }));
+        includedEmissionsTypes.push(eType);
       } else if (eType == 'Scope 2: Other') {
-        //TODO: scope2 other
-        // total = _.sumBy(yearData, (dataItem: AnnualSourceDataItem) => {
-        //   return dataItem.totalEmissions.
-        // });
+        values.push(_.sumBy(this.facilityOverviewMeters, (facilityData: FacilityOverviewMeter) => {
+          return facilityData.emissions.otherScope2Emissions;
+        }));
+        includedEmissionsTypes.push(eType);
       }
     })
     return { values: values, includedEmissionsTypes: includedEmissionsTypes };

@@ -96,15 +96,13 @@ export class EmissionsUsageChartComponent {
               return dataItem.totalEmissions.processEmissions
             });
           } else if (eType == 'Scope 1: Stationary') {
-            //TODO: stationary
-            // total = _.sumBy(yearData, (dataItem: AnnualSourceDataItem) => {
-            //   return dataItem.totalEmissions.
-            // });
+            total = _.sumBy(yearData, (dataItem: AnnualSourceDataItem) => {
+              return dataItem.totalEmissions.stationaryEmissions;
+            });
           } else if (eType == 'Scope 2: Other') {
-            //TODO: scope2 other
-            // total = _.sumBy(yearData, (dataItem: AnnualSourceDataItem) => {
-            //   return dataItem.totalEmissions.
-            // });
+            total = _.sumBy(yearData, (dataItem: AnnualSourceDataItem) => {
+              return dataItem.totalEmissions.otherScope2Emissions;
+            });
           }
           if(total != undefined){
             yValues.push(total);

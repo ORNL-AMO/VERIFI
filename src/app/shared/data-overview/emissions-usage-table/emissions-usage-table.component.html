@@ -12,6 +12,22 @@
             </tr>
         </thead>
         <tbody class="table-group-divider">
+            <!--Scope 1 stationary-->
+            <tr>
+                <td>
+                    <span class="badge"
+                        [ngStyle]="{background: getEmissionsTypeColor('Scope 1: Stationary'), color: getEmissionsTypeColor('Scope 1: Stationary') }">
+                        &mdash;
+                    </span>
+                    Scope 1: Stationary
+                </td>
+                <td>
+                    {{overviewData.emissionsTotals.stationaryEmissions | customNumber}}
+                </td>
+                <td>
+                    {{overviewData.emissionsTotals.stationaryEmissions | customNumber}}
+                </td>
+            </tr>
             <tr>
                 <td>
                     <span class="badge"
@@ -57,23 +73,26 @@
                     {{overviewData.emissionsTotals.processEmissions | customNumber}}
                 </td>
             </tr>
-            <!--Scope 1 stationary-->
             <tr>
                 <td>
+                    <span class="badge"
+                        [ngStyle]="{background: getEmissionsTypeColor('Scope 2: Electricity (Market)'), color: getEmissionsTypeColor('Scope 2: Electricity (Market)') }">
+                        &mdash;
+                    </span>
                     <span class="badge"
                         [ngStyle]="{background: getEmissionsTypeColor('Scope 2: Electricity (Location)'), color: getEmissionsTypeColor('Scope 2: Electricity (Location)') }">
                         &mdash;
                     </span>
-                    Scope 2: Electricity (Location)
+                    Scope 2: Electricity
                 </td>
                 <td>
-                    &mdash;
+                    {{overviewData.emissionsTotals.marketElectricityEmissions | customNumber}}
                 </td>
                 <td>
                     {{overviewData.emissionsTotals.locationElectricityEmissions | customNumber}}
                 </td>
             </tr>
-            <tr>
+            <!-- <tr>
                 <td>
                     <span class="badge"
                         [ngStyle]="{background: getEmissionsTypeColor('Scope 2: Electricity (Market)'), color: getEmissionsTypeColor('Scope 2: Electricity (Market)') }">
@@ -87,8 +106,23 @@
                 <td>
                     &mdash;
                 </td>
-            </tr>
+            </tr> -->
             <!--TODO: scope 2 other-->
+            <tr>
+                <td>
+                    <span class="badge"
+                        [ngStyle]="{background: getEmissionsTypeColor('Scope 2: Other'), color: getEmissionsTypeColor('Scope 2: Other') }">
+                        &mdash;
+                    </span>
+                    Scope 2: Other
+                </td>
+                <td>
+                    {{overviewData.emissionsTotals.otherScope2Emissions | customNumber}}
+                </td>
+                <td>
+                    {{overviewData.emissionsTotals.otherScope2Emissions | customNumber}}
+                </td>
+            </tr>
         </tbody>
         <tfoot>
             <tr>

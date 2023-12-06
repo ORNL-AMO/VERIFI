@@ -7,7 +7,6 @@ import { UtilityColors } from '../../utilityColors';
 import * as _ from 'lodash';
 import { Subscription } from 'rxjs';
 import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
-import { AllSources, EnergySources, MeterSource, WaterSources } from 'src/app/models/constantsAndTypes';
 import { EmissionsTypes, getEmissionsTypeColor, getEmissionsTypes } from 'src/app/models/eGridEmissions';
 import { Month, Months } from '../../form-data/months';
 
@@ -146,15 +145,13 @@ export class EmissionsStackedLineChartComponent {
           return mData.processEmissions
         });
       } else if (emissionsType == 'Scope 1: Stationary') {
-        //TODO: stationary
-        // total = _.sumBy(yearData, (dataItem: AnnualSourceDataItem) => {
-        //   return dataItem.totalEmissions.
-        // });
+        total = _.sumBy(currentMonthsData, (mData: MonthlyData) => {
+          return mData.stationaryEmissions;
+        });
       } else if (emissionsType == 'Scope 2: Other') {
-        //TODO: scope2 other
-        // total = _.sumBy(yearData, (dataItem: AnnualSourceDataItem) => {
-        //   return dataItem.totalEmissions.
-        // });
+        total = _.sumBy(currentMonthsData, (mData: MonthlyData) => {
+          return mData.otherScope2Emissions;
+        });
       }
       if (total) {
         y.push(total);
@@ -162,9 +159,6 @@ export class EmissionsStackedLineChartComponent {
       startDate.setMonth(startDate.getMonth() + 1);
     }
     if (y.findIndex(item => { return item != 0 }) != -1) {
-      if (emissionsType == 'Scope 1: Stationary') {
-        console.log(y);
-      }
       let trace = {
         x: x,
         y: y,
