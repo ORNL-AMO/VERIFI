@@ -35,12 +35,8 @@
 </div>
 <div class="row print-break-avoid" *ngIf="sectionOptions.includeStackedBarChart">
     <div class="col-12">
-        <!-- <app-facilities-usage-stacked-bar-chart [dataType]="dataType" [calanderizedMeters]="calanderizedMeters"
-            [waterUnit]="waterUnit" [energyUnit]="energyUnit" [reportOptions]="sectionOptions"
-            [dateRange]="dateRange"></app-facilities-usage-stacked-bar-chart> -->
-        <app-emissions-stacked-line-chart [calanderizedMeters]="calanderizedMeters"
-            [dateRange]="dateRange"></app-emissions-stacked-line-chart>
-
+        <app-facilities-emissions-stacked-bar-chart
+            [accountOverviewFacilities]="accountOverviewData.facilitiesCost"></app-facilities-emissions-stacked-bar-chart>
     </div>
 </div>
 <div class="row print-break-avoid" *ngIf="sectionOptions.includeMonthlyLineChart">
