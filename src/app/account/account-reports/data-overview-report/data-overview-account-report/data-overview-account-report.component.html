@@ -63,11 +63,11 @@
                 <h4>Account Emissions</h4>
                 <app-account-section-report [dataType]="'emissions'" [dateRange]="accountData.dateRange"
                     [previousYear]="accountData.utilityUseAndCost.previousYear"
-                    [accountOverviewFacilities]="accountData.accountOverviewData.facilitiesEnergy"
-                    [sourcesUseAndCost]="accountData.utilityUseAndCost.energyUseAndCost"
-                    [useAndCostTotal]="accountData.utilityUseAndCost.energyTotal"
+                    [accountOverviewFacilities]="accountData.accountOverviewData.facilitiesCost"
+                    [sourcesUseAndCost]="accountData.utilityUseAndCost.allSourcesUseAndCost"
+                    [useAndCostTotal]="accountData.utilityUseAndCost.allSourcesTotal"
                     [accountOverviewData]="accountData.accountOverviewData"
-                    [yearMonthData]="accountData.accountOverviewData.energyYearMonthData"
+                    [yearMonthData]="accountData.accountOverviewData.allSourcesYearMonthData"
                     [calanderizedMeters]="accountData.calanderizedMeters"></app-account-section-report>
             </div>
         </div>

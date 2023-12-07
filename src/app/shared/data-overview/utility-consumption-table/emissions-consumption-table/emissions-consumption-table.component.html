@@ -3,7 +3,7 @@
         <tr class="table-mh">
             <th class="w-25"></th>
             <th class="w-25">
-                Latest Month 
+                Latest Month
                 <br><span class="small" *ngIf="dateRange.endDate">
                     ({{dateRange.endDate | date: 'MMM, y'}})</span>
             </th>
@@ -34,118 +34,411 @@
         </tr>
     </thead>
     <tbody class="table-group-divider">
-        <tr *ngFor="let useAndCost of sourcesUseAndCost">
+        <!--Mobile-->
+        <tr>
             <td>
-                {{useAndCost.source}}
+                Scope 1: Mobile
             </td>
-            <!--Last Month-->
-            <td class="text-center" *ngIf="emissionsDisplay == 'market'">
-                <span *ngIf="useAndCost.end.marketEmissions">
-                    {{useAndCost.end.marketEmissions | customNumber}}
+            <td class="text-center">
+                <span *ngIf="useAndCostTotal.end.mobileTotalEmissions">
+                    {{useAndCostTotal.end.mobileTotalEmissions | customNumber}}
                 </span>
-                <span *ngIf="!useAndCost.end.marketEmissions">
+                <span *ngIf="!useAndCostTotal.end.mobileTotalEmissions">
                     &mdash;
                 </span>
             </td>
-            <td class="text-center" *ngIf="emissionsDisplay == 'location'">
-                <span *ngIf="useAndCost.end.locationEmissions">
-                    {{useAndCost.end.locationEmissions | customNumber}}
+            <td>
+                <div class="d-flex w-100">
+                    <div class="w-50 text-right pe-1 print-full">
+                        <span *ngIf="useAndCostTotal.previousYear.mobileTotalEmissions">
+                            {{useAndCostTotal.previousYear.mobileTotalEmissions | customNumber}}
+                        </span>
+                        <span *ngIf="!useAndCostTotal.previousYear.mobileTotalEmissions">
+                            &mdash;
+                        </span>
+                    </div>
+                    <div class="w-50 ps-1 hide-print">
+                        <span *ngIf="useAndCostTotal.previousYear.mobileTotalEmissionsChange" class="small ps-2 badge"
+                            [ngClass]="{'bg-danger': useAndCostTotal.previousYear.mobileTotalEmissionsChange < 0, 'bg-success': useAndCostTotal.previousYear.mobileTotalEmissionsChange > 0}">
+                            <span class="fa fa-chevron-down"
+                                *ngIf="useAndCostTotal.previousYear.mobileTotalEmissionsChange > 0"></span>
+                            <span class="fa fa-chevron-up"
+                                *ngIf="useAndCostTotal.previousYear.mobileTotalEmissionsChange < 0"></span>
+                            {{useAndCostTotal.previousYear.mobileTotalEmissionsChange | customNumber}}
+                        </span>
+                    </div>
+                </div>
+            </td>
+            <td>
+                <div class="d-flex w-100">
+                    <div class="w-50 text-right pe-1 print-full">
+                        <span *ngIf="useAndCostTotal.average.mobileTotalEmissions">
+                            {{useAndCostTotal.average.mobileTotalEmissions | customNumber}}
+                        </span>
+                        <span *ngIf="!useAndCostTotal.average.mobileTotalEmissions">
+                            &mdash;
+                        </span>
+                    </div>
+                    <div class="w-50 ps-1 hide-print">
+                        <span *ngIf="useAndCostTotal.average.mobileTotalEmissionsChange" class="small ps-2 badge"
+                            [ngClass]="{'bg-danger': useAndCostTotal.average.mobileTotalEmissionsChange < 0, 'bg-success': useAndCostTotal.average.mobileTotalEmissionsChange > 0}">
+                            <span class="fa fa-chevron-down"
+                                *ngIf="useAndCostTotal.average.mobileTotalEmissionsChange > 0"></span>
+                            <span class="fa fa-chevron-up"
+                                *ngIf="useAndCostTotal.average.mobileTotalEmissionsChange < 0"></span>
+                            {{useAndCostTotal.average.mobileTotalEmissionsChange | customNumber}}
+                        </span>
+                    </div>
+                </div>
+            </td>
+        </tr>
+        <!--fugitive-->
+        <tr>
+            <td>
+                Scope 1: Fugitive
+            </td>
+            <td class="text-center">
+                <span *ngIf="useAndCostTotal.end.fugitiveEmissions">
+                    {{useAndCostTotal.end.fugitiveEmissions | customNumber}}
                 </span>
-                <span *ngIf="!useAndCost.end.locationEmissions">
+                <span *ngIf="!useAndCostTotal.end.fugitiveEmissions">
                     &mdash;
                 </span>
             </td>
-            <!--Year prior-->
-            <td *ngIf="emissionsDisplay == 'market'">
+            <td>
                 <div class="d-flex w-100">
                     <div class="w-50 text-right pe-1 print-full">
-                        <span *ngIf="useAndCost.previousYear.marketEmissions">
-                            {{useAndCost.previousYear.marketEmissions | customNumber}}
+                        <span *ngIf="useAndCostTotal.previousYear.fugitiveEmissions">
+                            {{useAndCostTotal.previousYear.fugitiveEmissions | customNumber}}
                         </span>
-                        <span *ngIf="!useAndCost.previousYear.marketEmissions">
+                        <span *ngIf="!useAndCostTotal.previousYear.fugitiveEmissions">
                             &mdash;
                         </span>
                     </div>
                     <div class="w-50 ps-1 hide-print">
-                        <span *ngIf="useAndCost.previousYear.marketEmissionsChange" class="small ps-2 badge"
-                            [ngClass]="{'bg-danger': useAndCost.previousYear.marketEmissionsChange < 0, 'bg-success': useAndCost.previousYear.marketEmissionsChange > 0}">
+                        <span *ngIf="useAndCostTotal.previousYear.fugitiveEmissionsChange" class="small ps-2 badge"
+                            [ngClass]="{'bg-danger': useAndCostTotal.previousYear.fugitiveEmissionsChange < 0, 'bg-success': useAndCostTotal.previousYear.fugitiveEmissionsChange > 0}">
                             <span class="fa fa-chevron-down"
-                                *ngIf="useAndCost.previousYear.marketEmissionsChange > 0"></span>
+                                *ngIf="useAndCostTotal.previousYear.fugitiveEmissionsChange > 0"></span>
                             <span class="fa fa-chevron-up"
-                                *ngIf="useAndCost.previousYear.marketEmissionsChange < 0"></span>
-                            {{useAndCost.previousYear.marketEmissionsChange | customNumber}}
+                                *ngIf="useAndCostTotal.previousYear.fugitiveEmissionsChange < 0"></span>
+                            {{useAndCostTotal.previousYear.fugitiveEmissionsChange | customNumber}}
                         </span>
                     </div>
                 </div>
             </td>
-            <td *ngIf="emissionsDisplay == 'location'">
+            <td>
                 <div class="d-flex w-100">
                     <div class="w-50 text-right pe-1 print-full">
-                        <span *ngIf="useAndCost.previousYear.locationEmissions">
-                            {{useAndCost.previousYear.locationEmissions | customNumber}}
+                        <span *ngIf="useAndCostTotal.average.fugitiveEmissions">
+                            {{useAndCostTotal.average.fugitiveEmissions | customNumber}}
                         </span>
-                        <span *ngIf="!useAndCost.previousYear.locationEmissions">
+                        <span *ngIf="!useAndCostTotal.average.fugitiveEmissions">
                             &mdash;
                         </span>
                     </div>
                     <div class="w-50 ps-1 hide-print">
-                        <span *ngIf="useAndCost.previousYear.locationEmissionsChange" class="small ps-2 badge"
-                            [ngClass]="{'bg-danger': useAndCost.previousYear.locationEmissionsChange < 0, 'bg-success': useAndCost.previousYear.locationEmissionsChange > 0}">
+                        <span *ngIf="useAndCostTotal.average.fugitiveEmissionsChange" class="small ps-2 badge"
+                            [ngClass]="{'bg-danger': useAndCostTotal.average.fugitiveEmissionsChange < 0, 'bg-success': useAndCostTotal.average.fugitiveEmissionsChange > 0}">
                             <span class="fa fa-chevron-down"
-                                *ngIf="useAndCost.previousYear.locationEmissionsChange > 0"></span>
+                                *ngIf="useAndCostTotal.average.fugitiveEmissionsChange > 0"></span>
                             <span class="fa fa-chevron-up"
-                                *ngIf="useAndCost.previousYear.locationEmissionsChange < 0"></span>
-                            {{useAndCost.previousYear.locationEmissionsChange | customNumber}}
+                                *ngIf="useAndCostTotal.average.fugitiveEmissionsChange < 0"></span>
+                            {{useAndCostTotal.average.fugitiveEmissionsChange | customNumber}}
                         </span>
                     </div>
                 </div>
             </td>
-
-            <!--Average-->
-            <td *ngIf="emissionsDisplay == 'market'">
-                <div class="d-flex w-100">
-                    <div class="w-50 text-right pe-1 print-full">
-                        <span *ngIf="useAndCost.average.marketEmissions">
-                            {{useAndCost.average.marketEmissions | customNumber}}
-                        </span>
-                        <span *ngIf="!useAndCost.average.marketEmissions">
-                            &mdash;
-                        </span>
-                    </div>
-                    <div class="w-50 ps-1 hide-print">
-                        <span *ngIf="useAndCost.average.marketEmissionsChange" class="small ps-2 badge"
-                            [ngClass]="{'bg-danger': useAndCost.average.marketEmissionsChange < 0, 'bg-success': useAndCost.average.marketEmissionsChange > 0}">
-                            <span class="fa fa-chevron-down"
-                                *ngIf="useAndCost.average.marketEmissionsChange > 0"></span>
-                            <span class="fa fa-chevron-up" *ngIf="useAndCost.average.marketEmissionsChange < 0"></span>
-                            {{useAndCost.average.marketEmissionsChange | customNumber}}
-                        </span>
-                    </div>
-                </div>
+        </tr>
+        <!--process-->
+        <tr>
+            <td>
+                Scope 1: Process
             </td>
-            <td *ngIf="emissionsDisplay == 'location'">
+            <td class="text-center">
+                <span *ngIf="useAndCostTotal.end.processEmissions">
+                    {{useAndCostTotal.end.processEmissions | customNumber}}
+                </span>
+                <span *ngIf="!useAndCostTotal.end.processEmissions">
+                    &mdash;
+                </span>
+            </td>
+            <td>
                 <div class="d-flex w-100">
                     <div class="w-50 text-right pe-1 print-full">
-                        <span *ngIf="useAndCost.average.locationEmissions">
-                            {{useAndCost.average.locationEmissions | customNumber}}
+                        <span *ngIf="useAndCostTotal.previousYear.processEmissions">
+                            {{useAndCostTotal.previousYear.processEmissions | customNumber}}
                         </span>
-                        <span *ngIf="!useAndCost.average.locationEmissions">
+                        <span *ngIf="!useAndCostTotal.previousYear.processEmissions">
                             &mdash;
                         </span>
                     </div>
                     <div class="w-50 ps-1 hide-print">
-                        <span *ngIf="useAndCost.average.locationEmissionsChange" class="small ps-2 badge"
-                            [ngClass]="{'bg-danger': useAndCost.average.locationEmissionsChange < 0, 'bg-success': useAndCost.average.locationEmissionsChange > 0}">
+                        <span *ngIf="useAndCostTotal.previousYear.processEmissionsChange" class="small ps-2 badge"
+                            [ngClass]="{'bg-danger': useAndCostTotal.previousYear.processEmissionsChange < 0, 'bg-success': useAndCostTotal.previousYear.processEmissionsChange > 0}">
                             <span class="fa fa-chevron-down"
-                                *ngIf="useAndCost.average.locationEmissionsChange > 0"></span>
+                                *ngIf="useAndCostTotal.previousYear.processEmissionsChange > 0"></span>
                             <span class="fa fa-chevron-up"
-                                *ngIf="useAndCost.average.locationEmissionsChange < 0"></span>
-                            {{useAndCost.average.locationEmissionsChange | customNumber}}
+                                *ngIf="useAndCostTotal.previousYear.processEmissionsChange < 0"></span>
+                            {{useAndCostTotal.previousYear.processEmissionsChange | customNumber}}
                         </span>
                     </div>
                 </div>
             </td>
-
+            <td>
+                <div class="d-flex w-100">
+                    <div class="w-50 text-right pe-1 print-full">
+                        <span *ngIf="useAndCostTotal.average.processEmissions">
+                            {{useAndCostTotal.average.processEmissions | customNumber}}
+                        </span>
+                        <span *ngIf="!useAndCostTotal.average.processEmissions">
+                            &mdash;
+                        </span>
+                    </div>
+                    <div class="w-50 ps-1 hide-print">
+                        <span *ngIf="useAndCostTotal.average.processEmissionsChange" class="small ps-2 badge"
+                            [ngClass]="{'bg-danger': useAndCostTotal.average.processEmissionsChange < 0, 'bg-success': useAndCostTotal.average.processEmissionsChange > 0}">
+                            <span class="fa fa-chevron-down"
+                                *ngIf="useAndCostTotal.average.processEmissionsChange > 0"></span>
+                            <span class="fa fa-chevron-up"
+                                *ngIf="useAndCostTotal.average.processEmissionsChange < 0"></span>
+                            {{useAndCostTotal.average.processEmissionsChange | customNumber}}
+                        </span>
+                    </div>
+                </div>
+            </td>
+        </tr>
+        <!--Stationary-->
+        <tr>
+            <td>
+                Scope 1: Stationary
+            </td>
+            <td class="text-center">
+                <span *ngIf="useAndCostTotal.end.stationaryEmissions">
+                    {{useAndCostTotal.end.stationaryEmissions | customNumber}}
+                </span>
+                <span *ngIf="!useAndCostTotal.end.stationaryEmissions">
+                    &mdash;
+                </span>
+            </td>
+            <td>
+                <div class="d-flex w-100">
+                    <div class="w-50 text-right pe-1 print-full">
+                        <span *ngIf="useAndCostTotal.previousYear.stationaryEmissions">
+                            {{useAndCostTotal.previousYear.stationaryEmissions | customNumber}}
+                        </span>
+                        <span *ngIf="!useAndCostTotal.previousYear.stationaryEmissions">
+                            &mdash;
+                        </span>
+                    </div>
+                    <div class="w-50 ps-1 hide-print">
+                        <span *ngIf="useAndCostTotal.previousYear.stationaryEmissionsChange" class="small ps-2 badge"
+                            [ngClass]="{'bg-danger': useAndCostTotal.previousYear.stationaryEmissionsChange < 0, 'bg-success': useAndCostTotal.previousYear.stationaryEmissionsChange > 0}">
+                            <span class="fa fa-chevron-down"
+                                *ngIf="useAndCostTotal.previousYear.stationaryEmissionsChange > 0"></span>
+                            <span class="fa fa-chevron-up"
+                                *ngIf="useAndCostTotal.previousYear.stationaryEmissionsChange < 0"></span>
+                            {{useAndCostTotal.previousYear.stationaryEmissionsChange | customNumber}}
+                        </span>
+                    </div>
+                </div>
+            </td>
+            <td>
+                <div class="d-flex w-100">
+                    <div class="w-50 text-right pe-1 print-full">
+                        <span *ngIf="useAndCostTotal.average.stationaryEmissions">
+                            {{useAndCostTotal.average.stationaryEmissions | customNumber}}
+                        </span>
+                        <span *ngIf="!useAndCostTotal.average.stationaryEmissions">
+                            &mdash;
+                        </span>
+                    </div>
+                    <div class="w-50 ps-1 hide-print">
+                        <span *ngIf="useAndCostTotal.average.processEmissionsChange" class="small ps-2 badge"
+                            [ngClass]="{'bg-danger': useAndCostTotal.average.stationaryEmissionsChange < 0, 'bg-success': useAndCostTotal.average.stationaryEmissionsChange > 0}">
+                            <span class="fa fa-chevron-down"
+                                *ngIf="useAndCostTotal.average.stationaryEmissionsChange > 0"></span>
+                            <span class="fa fa-chevron-up"
+                                *ngIf="useAndCostTotal.average.stationaryEmissionsChange < 0"></span>
+                            {{useAndCostTotal.average.stationaryEmissionsChange | customNumber}}
+                        </span>
+                    </div>
+                </div>
+            </td>
+        </tr>
+        <!--Location-->
+        <tr *ngIf="emissionsDisplay == 'location'">
+            <td>
+                Scope 2: Electricity (Location)
+            </td>
+            <td class="text-center">
+                <span *ngIf="useAndCostTotal.end.locationElectricityEmissions">
+                    {{useAndCostTotal.end.locationElectricityEmissions | customNumber}}
+                </span>
+                <span *ngIf="!useAndCostTotal.end.locationElectricityEmissions">
+                    &mdash;
+                </span>
+            </td>
+            <td>
+                <div class="d-flex w-100">
+                    <div class="w-50 text-right pe-1 print-full">
+                        <span *ngIf="useAndCostTotal.previousYear.locationElectricityEmissions">
+                            {{useAndCostTotal.previousYear.locationElectricityEmissions | customNumber}}
+                        </span>
+                        <span *ngIf="!useAndCostTotal.previousYear.locationElectricityEmissions">
+                            &mdash;
+                        </span>
+                    </div>
+                    <div class="w-50 ps-1 hide-print">
+                        <span *ngIf="useAndCostTotal.previousYear.locationElectricityEmissionsChange" class="small ps-2 badge"
+                            [ngClass]="{'bg-danger': useAndCostTotal.previousYear.locationElectricityEmissionsChange < 0, 'bg-success': useAndCostTotal.previousYear.locationElectricityEmissionsChange > 0}">
+                            <span class="fa fa-chevron-down"
+                                *ngIf="useAndCostTotal.previousYear.locationElectricityEmissionsChange > 0"></span>
+                            <span class="fa fa-chevron-up"
+                                *ngIf="useAndCostTotal.previousYear.locationElectricityEmissionsChange < 0"></span>
+                            {{useAndCostTotal.previousYear.locationElectricityEmissionsChange | customNumber}}
+                        </span>
+                    </div>
+                </div>
+            </td>
+            <td>
+                <div class="d-flex w-100">
+                    <div class="w-50 text-right pe-1 print-full">
+                        <span *ngIf="useAndCostTotal.average.locationElectricityEmissions">
+                            {{useAndCostTotal.average.locationElectricityEmissions | customNumber}}
+                        </span>
+                        <span *ngIf="!useAndCostTotal.average.locationElectricityEmissions">
+                            &mdash;
+                        </span>
+                    </div>
+                    <div class="w-50 ps-1 hide-print">
+                        <span *ngIf="useAndCostTotal.average.locationElectricityEmissionsChange" class="small ps-2 badge"
+                            [ngClass]="{'bg-danger': useAndCostTotal.average.locationElectricityEmissionsChange < 0, 'bg-success': useAndCostTotal.average.locationElectricityEmissionsChange > 0}">
+                            <span class="fa fa-chevron-down"
+                                *ngIf="useAndCostTotal.average.locationElectricityEmissionsChange > 0"></span>
+                            <span class="fa fa-chevron-up"
+                                *ngIf="useAndCostTotal.average.locationElectricityEmissionsChange < 0"></span>
+                            {{useAndCostTotal.average.locationElectricityEmissionsChange | customNumber}}
+                        </span>
+                    </div>
+                </div>
+            </td>
+        </tr>
+        <!--Market-->
+        <tr *ngIf="emissionsDisplay == 'market'">
+            <td>
+                Scope 2: Electricity (Market)
+            </td>
+            <td class="text-center">
+                <span *ngIf="useAndCostTotal.end.marketElectricityEmissions">
+                    {{useAndCostTotal.end.marketElectricityEmissions | customNumber}}
+                </span>
+                <span *ngIf="!useAndCostTotal.end.marketElectricityEmissions">
+                    &mdash;
+                </span>
+            </td>
+            <td>
+                <div class="d-flex w-100">
+                    <div class="w-50 text-right pe-1 print-full">
+                        <span *ngIf="useAndCostTotal.previousYear.marketElectricityEmissions">
+                            {{useAndCostTotal.previousYear.marketElectricityEmissions | customNumber}}
+                        </span>
+                        <span *ngIf="!useAndCostTotal.previousYear.marketElectricityEmissions">
+                            &mdash;
+                        </span>
+                    </div>
+                    <div class="w-50 ps-1 hide-print">
+                        <span *ngIf="useAndCostTotal.previousYear.marketElectricityEmissionsChange" class="small ps-2 badge"
+                            [ngClass]="{'bg-danger': useAndCostTotal.previousYear.marketElectricityEmissionsChange < 0, 'bg-success': useAndCostTotal.previousYear.marketElectricityEmissionsChange > 0}">
+                            <span class="fa fa-chevron-down"
+                                *ngIf="useAndCostTotal.previousYear.marketElectricityEmissionsChange > 0"></span>
+                            <span class="fa fa-chevron-up"
+                                *ngIf="useAndCostTotal.previousYear.marketElectricityEmissionsChange < 0"></span>
+                            {{useAndCostTotal.previousYear.marketElectricityEmissionsChange | customNumber}}
+                        </span>
+                    </div>
+                </div>
+            </td>
+            <td>
+                <div class="d-flex w-100">
+                    <div class="w-50 text-right pe-1 print-full">
+                        <span *ngIf="useAndCostTotal.average.marketElectricityEmissions">
+                            {{useAndCostTotal.average.marketElectricityEmissions | customNumber}}
+                        </span>
+                        <span *ngIf="!useAndCostTotal.average.marketElectricityEmissions">
+                            &mdash;
+                        </span>
+                    </div>
+                    <div class="w-50 ps-1 hide-print">
+                        <span *ngIf="useAndCostTotal.average.marketElectricityEmissionsChange" class="small ps-2 badge"
+                            [ngClass]="{'bg-danger': useAndCostTotal.average.marketElectricityEmissionsChange < 0, 'bg-success': useAndCostTotal.average.marketElectricityEmissionsChange > 0}">
+                            <span class="fa fa-chevron-down"
+                                *ngIf="useAndCostTotal.average.marketElectricityEmissionsChange > 0"></span>
+                            <span class="fa fa-chevron-up"
+                                *ngIf="useAndCostTotal.average.marketElectricityEmissionsChange < 0"></span>
+                            {{useAndCostTotal.average.marketElectricityEmissionsChange | customNumber}}
+                        </span>
+                    </div>
+                </div>
+            </td>
+        </tr>
+        <!--Scope 2: OTHER-->
+        <tr *ngIf="emissionsDisplay == 'market'">
+            <td>
+                Scope 2: Other
+            </td>
+            <td class="text-center">
+                <span *ngIf="useAndCostTotal.end.otherScope2Emissions">
+                    {{useAndCostTotal.end.otherScope2Emissions | customNumber}}
+                </span>
+                <span *ngIf="!useAndCostTotal.end.otherScope2Emissions">
+                    &mdash;
+                </span>
+            </td>
+            <td>
+                <div class="d-flex w-100">
+                    <div class="w-50 text-right pe-1 print-full">
+                        <span *ngIf="useAndCostTotal.previousYear.otherScope2Emissions">
+                            {{useAndCostTotal.previousYear.otherScope2Emissions | customNumber}}
+                        </span>
+                        <span *ngIf="!useAndCostTotal.previousYear.otherScope2Emissions">
+                            &mdash;
+                        </span>
+                    </div>
+                    <div class="w-50 ps-1 hide-print">
+                        <span *ngIf="useAndCostTotal.previousYear.otherScope2EmissionsChange" class="small ps-2 badge"
+                            [ngClass]="{'bg-danger': useAndCostTotal.previousYear.otherScope2EmissionsChange < 0, 'bg-success': useAndCostTotal.previousYear.otherScope2EmissionsChange > 0}">
+                            <span class="fa fa-chevron-down"
+                                *ngIf="useAndCostTotal.previousYear.otherScope2EmissionsChange > 0"></span>
+                            <span class="fa fa-chevron-up"
+                                *ngIf="useAndCostTotal.previousYear.otherScope2EmissionsChange < 0"></span>
+                            {{useAndCostTotal.previousYear.otherScope2EmissionsChange | customNumber}}
+                        </span>
+                    </div>
+                </div>
+            </td>
+            <td>
+                <div class="d-flex w-100">
+                    <div class="w-50 text-right pe-1 print-full">
+                        <span *ngIf="useAndCostTotal.average.otherScope2Emissions">
+                            {{useAndCostTotal.average.otherScope2Emissions | customNumber}}
+                        </span>
+                        <span *ngIf="!useAndCostTotal.average.otherScope2Emissions">
+                            &mdash;
+                        </span>
+                    </div>
+                    <div class="w-50 ps-1 hide-print">
+                        <span *ngIf="useAndCostTotal.average.otherScope2EmissionsChange" class="small ps-2 badge"
+                            [ngClass]="{'bg-danger': useAndCostTotal.average.otherScope2EmissionsChange < 0, 'bg-success': useAndCostTotal.average.otherScope2EmissionsChange > 0}">
+                            <span class="fa fa-chevron-down"
+                                *ngIf="useAndCostTotal.average.otherScope2EmissionsChange > 0"></span>
+                            <span class="fa fa-chevron-up"
+                                *ngIf="useAndCostTotal.average.otherScope2EmissionsChange < 0"></span>
+                            {{useAndCostTotal.average.otherScope2EmissionsChange | customNumber}}
+                        </span>
+                    </div>
+                </div>
+            </td>
         </tr>
     </tbody>
     <tfoot>
@@ -155,18 +448,18 @@
             </th>
             <!--previous month-->
             <th class="text-center" *ngIf="emissionsDisplay == 'market'">
-                <span *ngIf="useAndCostTotal.end.marketEmissions">
-                    {{useAndCostTotal.end.marketEmissions | customNumber}}
+                <span *ngIf="useAndCostTotal.end.totalWithMarketEmissions">
+                    {{useAndCostTotal.end.totalWithMarketEmissions | customNumber}}
                 </span>
-                <span *ngIf="!useAndCostTotal.end.marketEmissions">
+                <span *ngIf="!useAndCostTotal.end.totalWithMarketEmissions">
                     &mdash;
                 </span>
             </th>
             <th class="text-center" *ngIf="emissionsDisplay == 'location'">
-                <span *ngIf="useAndCostTotal.end.locationEmissions">
-                    {{useAndCostTotal.end.locationEmissions | customNumber}}
+                <span *ngIf="useAndCostTotal.end.totalWithLocationEmissionsChange">
+                    {{useAndCostTotal.end.totalWithLocationEmissionsChange | customNumber}}
                 </span>
-                <span *ngIf="!useAndCostTotal.end.locationEmissions">
+                <span *ngIf="!useAndCostTotal.end.totalWithLocationEmissionsChange">
                     &mdash;
                 </span>
             </th>
@@ -175,21 +468,21 @@
             <th *ngIf="emissionsDisplay == 'market'">
                 <div class="d-flex w-100">
                     <div class="w-50 text-right pe-1 print-full">
-                        <span *ngIf="useAndCostTotal.previousYear.marketEmissions">
-                            {{useAndCostTotal.previousYear.marketEmissions | customNumber}}
+                        <span *ngIf="useAndCostTotal.previousYear.totalWithMarketEmissions">
+                            {{useAndCostTotal.previousYear.totalWithMarketEmissions | customNumber}}
                         </span>
-                        <span *ngIf="!useAndCostTotal.previousYear.marketEmissions">
+                        <span *ngIf="!useAndCostTotal.previousYear.totalWithMarketEmissions">
                             &mdash;
                         </span>
                     </div>
                     <div class="w-50 ps-1 hide-print">
-                        <span *ngIf="useAndCostTotal.previousYear.marketEmissionsChange" class="small ps-2 badge"
-                            [ngClass]="{'bg-danger': useAndCostTotal.previousYear.marketEmissionsChange < 0, 'bg-success': useAndCostTotal.previousYear.marketEmissionsChange > 0}">
+                        <span *ngIf="useAndCostTotal.previousYear.totalWithMarketEmissionsChange" class="small ps-2 badge"
+                            [ngClass]="{'bg-danger': useAndCostTotal.previousYear.totalWithMarketEmissionsChange < 0, 'bg-success': useAndCostTotal.previousYear.totalWithMarketEmissionsChange > 0}">
                             <span class="fa fa-chevron-down"
-                                *ngIf="useAndCostTotal.previousYear.marketEmissionsChange > 0"></span>
+                                *ngIf="useAndCostTotal.previousYear.totalWithMarketEmissionsChange > 0"></span>
                             <span class="fa fa-chevron-up"
-                                *ngIf="useAndCostTotal.previousYear.marketEmissionsChange < 0"></span>
-                            {{useAndCostTotal.previousYear.marketEmissionsChange | customNumber}}
+                                *ngIf="useAndCostTotal.previousYear.totalWithMarketEmissionsChange < 0"></span>
+                            {{useAndCostTotal.previousYear.totalWithMarketEmissionsChange | customNumber}}
                         </span>
                     </div>
                 </div>
@@ -197,21 +490,21 @@
             <th *ngIf="emissionsDisplay == 'location'">
                 <div class="d-flex w-100">
                     <div class="w-50 text-right pe-1 print-full">
-                        <span *ngIf="useAndCostTotal.previousYear.locationEmissions">
-                            {{useAndCostTotal.previousYear.locationEmissions | customNumber}}
+                        <span *ngIf="useAndCostTotal.previousYear.totalWithLocationEmissionsChange">
+                            {{useAndCostTotal.previousYear.totalWithLocationEmissionsChange | customNumber}}
                         </span>
-                        <span *ngIf="!useAndCostTotal.previousYear.locationEmissions">
+                        <span *ngIf="!useAndCostTotal.previousYear.totalWithLocationEmissionsChange">
                             &mdash;
                         </span>
                     </div>
                     <div class="w-50 ps-1 hide-print">
-                        <span *ngIf="useAndCostTotal.previousYear.locationEmissionsChange" class="small ps-2 badge"
-                            [ngClass]="{'bg-danger': useAndCostTotal.previousYear.locationEmissionsChange < 0, 'bg-success': useAndCostTotal.previousYear.locationEmissionsChange > 0}">
+                        <span *ngIf="useAndCostTotal.previousYear.totalWithLocationEmissionsChange" class="small ps-2 badge"
+                            [ngClass]="{'bg-danger': useAndCostTotal.previousYear.totalWithLocationEmissionsChange < 0, 'bg-success': useAndCostTotal.previousYear.totalWithLocationEmissionsChange > 0}">
                             <span class="fa fa-chevron-down"
-                                *ngIf="useAndCostTotal.previousYear.locationEmissionsChange > 0"></span>
+                                *ngIf="useAndCostTotal.previousYear.totalWithLocationEmissionsChange > 0"></span>
                             <span class="fa fa-chevron-up"
-                                *ngIf="useAndCostTotal.previousYear.locationEmissionsChange < 0"></span>
-                            {{useAndCostTotal.previousYear.locationEmissionsChange | customNumber}}
+                                *ngIf="useAndCostTotal.previousYear.totalWithLocationEmissionsChange < 0"></span>
+                            {{useAndCostTotal.previousYear.totalWithLocationEmissionsChange | customNumber}}
                         </span>
                     </div>
                 </div>
@@ -221,21 +514,21 @@
             <th *ngIf="emissionsDisplay == 'market'">
                 <div class="d-flex w-100">
                     <div class="w-50 text-right pe-1 print-full">
-                        <span *ngIf="useAndCostTotal.average.marketEmissions">
-                            {{useAndCostTotal.average.marketEmissions | customNumber}}
+                        <span *ngIf="useAndCostTotal.average.totalWithMarketEmissions">
+                            {{useAndCostTotal.average.totalWithMarketEmissions | customNumber}}
                         </span>
-                        <span *ngIf="!useAndCostTotal.average.marketEmissions">
+                        <span *ngIf="!useAndCostTotal.average.totalWithMarketEmissions">
                             &mdash;
                         </span>
                     </div>
                     <div class="w-50 ps-1 hide-print">
-                        <span *ngIf="useAndCostTotal.average.marketEmissionsChange" class="small ps-2 badge"
-                            [ngClass]="{'bg-danger': useAndCostTotal.average.marketEmissionsChange < 0, 'bg-success': useAndCostTotal.average.marketEmissionsChange > 0}">
+                        <span *ngIf="useAndCostTotal.average.totalWithMarketEmissionsChange" class="small ps-2 badge"
+                            [ngClass]="{'bg-danger': useAndCostTotal.average.totalWithMarketEmissionsChange < 0, 'bg-success': useAndCostTotal.average.totalWithMarketEmissionsChange > 0}">
                             <span class="fa fa-chevron-down"
-                                *ngIf="useAndCostTotal.average.marketEmissionsChange > 0"></span>
+                                *ngIf="useAndCostTotal.average.totalWithMarketEmissionsChange > 0"></span>
                             <span class="fa fa-chevron-up"
-                                *ngIf="useAndCostTotal.average.marketEmissionsChange < 0"></span>
-                            {{useAndCostTotal.average.marketEmissionsChange | customNumber}}
+                                *ngIf="useAndCostTotal.average.totalWithMarketEmissionsChange < 0"></span>
+                            {{useAndCostTotal.average.totalWithMarketEmissionsChange | customNumber}}
                         </span>
                     </div>
                 </div>
@@ -243,21 +536,21 @@
             <th *ngIf="emissionsDisplay == 'location'">
                 <div class="d-flex w-100">
                     <div class="w-50 text-right pe-1 print-full">
-                        <span *ngIf="useAndCostTotal.average.locationEmissions">
-                            {{useAndCostTotal.average.locationEmissions | customNumber}}
+                        <span *ngIf="useAndCostTotal.average.totalWithLocationEmissionsChange">
+                            {{useAndCostTotal.average.totalWithLocationEmissionsChange | customNumber}}
                         </span>
-                        <span *ngIf="!useAndCostTotal.average.locationEmissions">
+                        <span *ngIf="!useAndCostTotal.average.totalWithLocationEmissionsChange">
                             &mdash;
                         </span>
                     </div>
                     <div class="w-50 ps-1 hide-print">
-                        <span *ngIf="useAndCostTotal.average.locationEmissionsChange" class="small ps-2 badge"
-                            [ngClass]="{'bg-danger': useAndCostTotal.average.locationEmissionsChange < 0, 'bg-success': useAndCostTotal.average.locationEmissionsChange > 0}">
+                        <span *ngIf="useAndCostTotal.average.totalWithLocationEmissionsChange" class="small ps-2 badge"
+                            [ngClass]="{'bg-danger': useAndCostTotal.average.totalWithLocationEmissionsChange < 0, 'bg-success': useAndCostTotal.average.totalWithLocationEmissionsChange > 0}">
                             <span class="fa fa-chevron-down"
-                                *ngIf="useAndCostTotal.average.locationEmissionsChange > 0"></span>
+                                *ngIf="useAndCostTotal.average.totalWithLocationEmissionsChange > 0"></span>
                             <span class="fa fa-chevron-up"
-                                *ngIf="useAndCostTotal.average.locationEmissionsChange < 0"></span>
-                            {{useAndCostTotal.average.locationEmissionsChange | customNumber}}
+                                *ngIf="useAndCostTotal.average.totalWithLocationEmissionsChange < 0"></span>
+                            {{useAndCostTotal.average.totalWithLocationEmissionsChange | customNumber}}
                         </span>
                     </div>
                 </div>

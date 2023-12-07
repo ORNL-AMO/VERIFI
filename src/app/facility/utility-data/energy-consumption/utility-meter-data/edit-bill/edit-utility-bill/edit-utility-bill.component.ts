@@ -5,7 +5,7 @@ import { IdbCustomFuel, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from
 import { EditMeterFormService } from '../../../energy-source/edit-meter-form/edit-meter-form.service';
 import { MeterSource } from 'src/app/models/constantsAndTypes';
 import { EmissionsResults } from 'src/app/models/eGridEmissions';
-import { getEmissions } from 'src/app/calculations/emissions-calculations/emissions';
+import { getEmissions, getZeroEmissionsResults } from 'src/app/calculations/emissions-calculations/emissions';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
@@ -35,17 +35,18 @@ export class EditUtilityBillComponent implements OnInit {
   energyUnit: string;
   source: MeterSource;
   volumeUnit: string;
-  marketEmissions: number = 0;
-  locationEmissions: number = 0;
+  emissionsResults: EmissionsResults;
   showEmissions: boolean;
-  showCopyLast: boolean;
+  showMarketEmissions: boolean;
+  showStationaryEmissions: boolean;
+  showScope2OtherEmissions: boolean;
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService,
     private facilityDbService: FacilitydbService, private editMeterFormService: EditMeterFormService,
     private eGridService: EGridService,
     private customFuelDbService: CustomFuelDbService) { }
 
   ngOnInit(): void {
-    this.showEmissions = this.editMeterFormService.checkShowEmissionsOutputRate(this.editMeter);
+    this.setShowEmissions();
     this.setTotalEmissions();
 
   }
@@ -55,7 +56,15 @@ export class EditUtilityBillComponent implements OnInit {
     this.energyUnit = this.editMeter.energyUnit;
     this.volumeUnit = this.editMeter.startingUnit;
     this.checkDate();
+    this.setShowEmissions();
     this.setTotalEmissions();
+  }
+
+  setShowEmissions(){
+    this.showEmissions = this.editMeterFormService.checkShowEmissionsOutputRate(this.editMeter);
+    this.showMarketEmissions = this.editMeter.source == 'Electricity';
+    this.showStationaryEmissions = this.editMeter.source == 'Natural Gas' || this.editMeter.source == 'Other Fuels';
+    this.showScope2OtherEmissions = this.editMeter.source == 'Other Energy';
   }
 
   calculateTotalEnergyUse() {
@@ -85,17 +94,14 @@ export class EditUtilityBillComponent implements OnInit {
       let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
       let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
       //meed to use total volume for fugitive/process emissions
-      let emissionsValues: EmissionsResults = getEmissions(this.editMeter,
+      this.emissionsResults = getEmissions(this.editMeter,
         this.meterDataForm.controls.totalEnergyUse.value,
         this.editMeter.energyUnit,
         new Date(this.meterDataForm.controls.readDate.value).getFullYear(),
         false, [facility], this.eGridService.co2Emissions, customFuels,
         this.meterDataForm.controls.totalVolume.value, undefined, undefined);
-      this.marketEmissions = emissionsValues.marketEmissions;
-      this.locationEmissions = emissionsValues.locationEmissions;
     } else {
-      this.marketEmissions = 0;
-      this.locationEmissions = 0;
+      this.emissionsResults = getZeroEmissionsResults();
     }
   }
 }

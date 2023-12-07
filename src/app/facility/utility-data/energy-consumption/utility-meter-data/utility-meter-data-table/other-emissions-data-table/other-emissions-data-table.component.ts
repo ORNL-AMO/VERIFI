@@ -1,4 +1,4 @@
-import { Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { IdbCustomFuel, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { GeneralUtilityDataFilters, VehicleDataFilters } from 'src/app/models/meterDataFilter';
@@ -55,7 +55,6 @@ export class OtherEmissionsDataTableComponent {
   }
 
   ngOnInit(): void {
-    this.setData();
 
     if (this.selectedMeterData.length != 0) {
       let hasFalseChecked: IdbUtilityMeterData = this.selectedMeterData.find(meterDataItem => { return meterDataItem.checked == false });
@@ -71,6 +70,10 @@ export class OtherEmissionsDataTableComponent {
 
   ngOnDestory() {
     this.filterSub.unsubscribe();
+  }
+
+  ngOnChanges() {
+    this.setData();
   }
 
   setData() {

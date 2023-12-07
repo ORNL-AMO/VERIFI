@@ -154,9 +154,9 @@ export class MonthlyUtilityUsageLineChartComponent {
         return yearMonthData.energyCost;
       } else if (this.dataType == 'emissions') {
         if (this.emissionsDisplay == 'location') {
-          return yearMonthData.locationEmissions;
+          return yearMonthData.totalWithLocationEmissions;
         } else {
-          return yearMonthData.marketEmissions;
+          return yearMonthData.totalWithMarketEmissions;
         }
       } else if (this.dataType == 'water') {
         return yearMonthData.consumption;

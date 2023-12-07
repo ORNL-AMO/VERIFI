@@ -10,19 +10,29 @@
                     <div class="row">
                         <div class="col-12">
                             <app-data-overview-map [dataType]="'emissions'"
-                                [accountOverviewFacilities]="accountOverviewData.facilitiesEnergy"></app-data-overview-map>
+                                [accountOverviewFacilities]="accountOverviewData.facilitiesCost"></app-data-overview-map>
                             <hr>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-6">
                             <app-facilities-usage-table [dataType]="'emissions'"
-                                [accountOverviewFacilities]="accountOverviewData.facilitiesEnergy"
+                                [accountOverviewFacilities]="accountOverviewData.facilitiesCost"
                                 [accountOverviewData]="accountOverviewData"></app-facilities-usage-table>
                         </div>
                         <div class="col-6">
                             <app-facility-usage-donut [dataType]="'emissions'"
-                                [accountOverviewFacilities]="accountOverviewData.facilitiesEnergy"></app-facility-usage-donut>
+                                [accountOverviewFacilities]="accountOverviewData.facilitiesCost"></app-facility-usage-donut>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-6">
+                            <app-emissions-usage-table [overviewData]="accountOverviewData"
+                                [inAccount]="true"></app-emissions-usage-table>
+                        </div>
+                        <div class="col-6">
+                            <app-emissions-donut
+                                [accountOverviewFacility]="accountOverviewData.facilitiesCost"></app-emissions-donut>
                         </div>
                     </div>
                 </div>
@@ -38,8 +48,8 @@
                 </div>
                 <div class="card-body">
                     <app-utility-consumption-table [dataType]="'emissions'"
-                        [sourcesUseAndCost]="utilityUseAndCost.energyUseAndCost"
-                        [useAndCostTotal]="utilityUseAndCost.energyTotal"
+                        [sourcesUseAndCost]="utilityUseAndCost.allSourcesUseAndCost"
+                        [useAndCostTotal]="utilityUseAndCost.allSourcesTotal"
                         [previousYear]="utilityUseAndCost.previousYear"
                         [dateRange]="dateRange"></app-utility-consumption-table>
                 </div>
@@ -54,9 +64,8 @@
                     <h4 class="mb-0">Utility Emissions</h4>
                 </div>
                 <div class="card-body">
-                    <app-facilities-usage-stacked-bar-chart [dataType]="'emissions'"
-                        [calanderizedMeters]="accountOverviewData.calanderizedMeters"
-                        [dateRange]="dateRange"></app-facilities-usage-stacked-bar-chart>
+                    <app-facilities-emissions-stacked-bar-chart
+                        [accountOverviewFacilities]="accountOverviewData.facilitiesCost"></app-facilities-emissions-stacked-bar-chart>
                 </div>
             </div>
         </div>

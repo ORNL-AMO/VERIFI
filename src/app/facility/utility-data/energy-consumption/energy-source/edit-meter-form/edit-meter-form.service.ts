@@ -211,7 +211,7 @@ export class EditMeterFormService {
   }
 
   checkShowEmissionsOutputRate(meter: IdbUtilityMeter): boolean {
-    if (meter.source == 'Electricity' || meter.source == 'Natural Gas' || meter.source == 'Other Fuels' || (meter.source == 'Other Energy' && meter.fuel == 'Purchased Compressed Air') || (meter.source == 'Other' && meter.scope == 5)) {
+    if (meter.source == 'Electricity' || meter.source == 'Natural Gas' || meter.source == 'Other Fuels' || meter.source == 'Other Energy' || (meter.source == 'Other' && meter.scope == 5)) {
       return true;
     } else {
       return false;

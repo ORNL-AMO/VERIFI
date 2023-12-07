@@ -88,7 +88,6 @@ export class EditOtherEmissionsBillComponent {
         this.meterDataForm.controls.totalVolume.value, undefined, undefined);
       this.fugitiveEmissions = emissionsValues.fugitiveEmissions;
       this.processEmissions = emissionsValues.processEmissions;
-      console.log(this.processEmissions);
     } else {
       this.fugitiveEmissions = 0;
       this.processEmissions = 0;

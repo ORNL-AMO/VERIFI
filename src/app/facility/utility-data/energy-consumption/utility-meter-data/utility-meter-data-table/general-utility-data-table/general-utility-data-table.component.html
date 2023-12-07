@@ -65,6 +65,7 @@
                 {{meterData.totalEnergyUse | customNumber}}
             </td>
             <td *ngIf="generalUtilityDataFilters.totalCost">{{meterData.totalCost | customNumber:true}}</td>
+            <!--TODO: update table and filters for emissions (scope2other, stationary)-->
             <td *ngIf="generalUtilityDataFilters.totalMarketEmissions && showEmissions">{{meterData.totalMarketEmissions
                 | customNumber}}</td>
             <td *ngIf="generalUtilityDataFilters.totalLocationEmissions && showEmissions">

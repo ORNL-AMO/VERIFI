@@ -57,25 +57,73 @@ export function getYearlyUsageNumbers(calanderizedMeters: Array<CalanderizedMete
         months.forEach(month => {
             let energyUse: number = 0;
             let energyCost: number = 0;
-            let marketEmissions: number = 0;
-            let locationEmissions: number = 0;
             let consumption: number = 0;
+            let RECs: number = 0;
+            let locationElectricityEmissions: number = 0;
+            let marketElectricityEmissions: number = 0;
+            let otherScope2Emissions: number = 0;
+            let scope2LocationEmissions: number = 0;
+            let scope2MarketEmissions: number = 0;
+            let excessRECs: number = 0;
+            let excessRECsEmissions: number = 0;
+            let mobileCarbonEmissions: number = 0;
+            let mobileBiogenicEmissions: number = 0;
+            let mobileOtherEmissions: number = 0;
+            let mobileTotalEmissions: number = 0;
+            let fugitiveEmissions: number = 0;
+            let processEmissions: number = 0;
+            let stationaryEmissions: number = 0;
+            let totalScope1Emissions: number = 0;
+            let totalWithMarketEmissions: number = 0;
+            let totalWithLocationEmissions: number = 0;
             for (let i = 0; i < yearData.length; i++) {
                 if (yearData[i].month == month) {
                     energyUse += yearData[i].energyUse;
                     energyCost += yearData[i].energyCost;
-                    marketEmissions += yearData[i].marketEmissions;
-                    locationEmissions += yearData[i].locationEmissions;
                     consumption += yearData[i].energyConsumption;
+                    RECs += yearData[i].RECs;
+                    locationElectricityEmissions += yearData[i].locationElectricityEmissions;
+                    marketElectricityEmissions += yearData[i].marketElectricityEmissions;
+                    otherScope2Emissions += yearData[i].otherScope2Emissions;
+                    scope2LocationEmissions += yearData[i].scope2LocationEmissions;
+                    scope2MarketEmissions += yearData[i].scope2MarketEmissions;
+                    excessRECs += yearData[i].excessRECs;
+                    excessRECsEmissions += yearData[i].excessRECsEmissions;
+                    mobileCarbonEmissions += yearData[i].mobileCarbonEmissions;
+                    mobileBiogenicEmissions += yearData[i].mobileBiogenicEmissions;
+                    mobileOtherEmissions += yearData[i].mobileOtherEmissions;
+                    mobileTotalEmissions += yearData[i].mobileTotalEmissions;
+                    fugitiveEmissions += yearData[i].fugitiveEmissions;
+                    processEmissions += yearData[i].processEmissions;
+                    stationaryEmissions += yearData[i].stationaryEmissions;
+                    totalScope1Emissions += yearData[i].totalScope1Emissions;
+                    totalWithMarketEmissions += yearData[i].totalWithMarketEmissions;
+                    totalWithLocationEmissions += yearData[i].totalWithLocationEmissions;
                 }
             }
             yearMonthData.push({
                 yearMonth: { year: year, month: month, fiscalYear: year },
                 energyUse: energyUse,
                 energyCost: energyCost,
-                marketEmissions: marketEmissions,
-                locationEmissions: locationEmissions,
-                consumption: consumption
+                consumption: consumption,
+                RECs: RECs,
+                locationElectricityEmissions: locationElectricityEmissions,
+                marketElectricityEmissions: marketElectricityEmissions,
+                otherScope2Emissions: otherScope2Emissions,
+                scope2LocationEmissions: scope2LocationEmissions,
+                scope2MarketEmissions: scope2MarketEmissions,
+                excessRECs: excessRECs,
+                excessRECsEmissions: excessRECsEmissions,
+                mobileCarbonEmissions: mobileCarbonEmissions,
+                mobileBiogenicEmissions: mobileBiogenicEmissions,
+                mobileOtherEmissions: mobileOtherEmissions,
+                mobileTotalEmissions: mobileTotalEmissions,
+                fugitiveEmissions: fugitiveEmissions,
+                processEmissions: processEmissions,
+                stationaryEmissions: stationaryEmissions,
+                totalScope1Emissions: totalScope1Emissions,
+                totalWithMarketEmissions: totalWithMarketEmissions,
+                totalWithLocationEmissions: totalWithLocationEmissions,
             })
         })
     });

@@ -187,6 +187,8 @@ export interface IdbUtilityMeterData {
     checked: boolean,
     meterNumber?: string,
     totalImportConsumption?: number
+    
+    //TODO: Check emissions usage for meters...
     totalMarketEmissions?: number,
     totalLocationEmissions?: number,
     RECs?: number,
