@@ -1,13 +1,10 @@
 import { Component, ElementRef, ViewChild, Input, SimpleChanges } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { Subscription } from 'rxjs';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbFacility } from 'src/app/models/idb';
 import * as _ from 'lodash';
-import { UtilityColors } from 'src/app/shared/utilityColors';
 import { FacilityOverviewService } from 'src/app/facility/facility-overview/facility-overview.service';
 import { AnnualSourceData, AnnualSourceDataItem } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';
-import { EnergySources, WaterSources } from 'src/app/models/constantsAndTypes';
 import { EmissionsTypes, getEmissionsTypeColor, getEmissionsTypes } from 'src/app/models/eGridEmissions';
 
 @Component({
@@ -17,8 +14,6 @@ import { EmissionsTypes, getEmissionsTypeColor, getEmissionsTypes } from 'src/ap
 })
 export class EmissionsUsageChartComponent {
   @Input()
-  facilityId: string;
-  @Input()
   annualSourceData: Array<AnnualSourceData>;
 
   @ViewChild('utilityBarChart', { static: false }) utilityBarChart: ElementRef;
@@ -26,13 +21,9 @@ export class EmissionsUsageChartComponent {
   emissionsDisplay: 'market' | 'location';
   emissionsDisplaySub: Subscription;
   selectedFacility: IdbFacility;
-  constructor(private plotlyService: PlotlyService, private facilityOverviewService: FacilityOverviewService,
-    private facilityDbService: FacilitydbService) { }
+  constructor(private plotlyService: PlotlyService, private facilityOverviewService: FacilityOverviewService) { }
 
   ngOnInit(): void {
-    let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
-    this.selectedFacility = facilities.find(facility => { return facility.guid == this.facilityId });
-
     this.emissionsDisplaySub = this.facilityOverviewService.emissionsDisplay.subscribe(val => {
       this.emissionsDisplay = val;
       this.drawChart();

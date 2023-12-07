@@ -19,7 +19,6 @@ export class AccountOverviewData {
     emissionsTotals: EmissionsResults;
 
     facilitiesCost: Array<AccountOverviewFacility>;
-    numberOoverviewFacilitys: number;
     totalAccountCost: number;
 
     facilitiesWater: Array<AccountOverviewFacility>;
@@ -139,11 +138,6 @@ export class AccountOverviewData {
         }
     }
 
-    setNumberOoverviewFacilitys() {
-        this.numberOoverviewFacilitys = _.sumBy(this.facilitiesCost, (overviewFacility: AccountOverviewFacility) => { return overviewFacility.numberOoverviewFacilitys });
-    }
-
-
     //water
     setWaterFacilities(calanderizedMeters: Array<CalanderizedMeter>, facilities: Array<IdbFacility>, dateRange: { startDate: Date, endDate: Date }) {
         let sourceMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => {
@@ -176,11 +170,9 @@ export class AccountOverviewFacility {
     totalCost: number;
     emissions: EmissionsResults;
     facility: IdbFacility;
-    numberOoverviewFacilitys: number;
     constructor(calanderizedMeters: Array<CalanderizedMeter>, facility: IdbFacility, dateRange: { startDate: Date, endDate: Date }, dataType: 'energy' | 'cost' | 'water') {
         this.facility = facility;
         let facilityMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => { return cMeter.meter.facilityId == facility.guid });
-        this.numberOoverviewFacilitys = facilityMeters.length;
         this.setMonthlyData(facilityMeters, new Date(dateRange.startDate), new Date(dateRange.endDate));
         this.setTotalUsage(dataType);
         this.setTotalCost();
