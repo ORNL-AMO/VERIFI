@@ -13,6 +13,13 @@
         <app-facility-usage-donut [dataType]="dataType " [accountOverviewFacilities]="accountOverviewFacilities"
             [waterUnit]="waterUnit" [energyUnit]="energyUnit"></app-facility-usage-donut>
     </div>
+    <div class="print-break-before" *ngIf="sectionOptions.includeFacilityTable"
+        [ngClass]="{'col-10': print, 'col-6': !print}">
+        <app-emissions-usage-table [overviewData]="accountOverviewData" [inAccount]="true"></app-emissions-usage-table>
+    </div>
+    <div *ngIf="sectionOptions.includeFacilityDonut" [ngClass]="{'col-10': print, 'col-6': !print}">
+        <app-emissions-donut [accountOverviewFacility]="accountOverviewData.facilitiesCost"></app-emissions-donut>
+    </div>
 </div>
 <div class="row hide-print">
     <div class="col-12">

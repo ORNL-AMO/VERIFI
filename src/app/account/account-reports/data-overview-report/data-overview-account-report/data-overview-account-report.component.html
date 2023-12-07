@@ -61,15 +61,14 @@
         <div class="row justify-content-center print-break-before">
             <div class="report-page" [ngClass]="{'col-11': !print, 'col-12': print}">
                 <h4>Account Emissions</h4>
-                <!--TODO: EMISSIONS REPORT-->
-                <!-- <app-account-section-report [dataType]="'emissions'" [dateRange]="accountData.dateRange"
+                <app-account-section-report [dataType]="'emissions'" [dateRange]="accountData.dateRange"
                     [previousYear]="accountData.utilityUseAndCost.previousYear"
-                    [accountOverviewFacilities]="accountData.accountOverviewData.facilitiesEnergy"
-                    [sourcesUseAndCost]="accountData.utilityUseAndCost.energyUseAndCost"
-                    [useAndCostTotal]="accountData.utilityUseAndCost.energyTotal"
+                    [accountOverviewFacilities]="accountData.accountOverviewData.facilitiesCost"
+                    [sourcesUseAndCost]="accountData.utilityUseAndCost.allSourcesUseAndCost"
+                    [useAndCostTotal]="accountData.utilityUseAndCost.allSourcesTotal"
                     [accountOverviewData]="accountData.accountOverviewData"
-                    [yearMonthData]="accountData.accountOverviewData.energyYearMonthData"
-                    [calanderizedMeters]="accountData.calanderizedMeters"></app-account-section-report> -->
+                    [yearMonthData]="accountData.accountOverviewData.allSourcesYearMonthData"
+                    [calanderizedMeters]="accountData.calanderizedMeters"></app-account-section-report>
             </div>
         </div>
     </ng-container>
