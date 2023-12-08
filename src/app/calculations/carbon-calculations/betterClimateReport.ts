@@ -17,11 +17,9 @@ export class BetterClimateReport {
         co2Emissions: Array<SubregionEmissions>, emissionsDisplay: 'market' | 'location', emissionsGoal: number, customFuels: Array<IdbCustomFuel>) {
         this.baselineYear = baselineYear;
         this.reportYear = reportYear;
+        account.energyIsSource = false;
         let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(meters, meterData, account, false, { energyIsSource: false, neededUnits: 'MMBtu' });
-        console.log(calanderizedMeters);
         calanderizedMeters = setEmissionsForCalanderizedMeters(calanderizedMeters, false, facilities, co2Emissions, customFuels);
-
-
         this.setPortfolioYearDetails(calanderizedMeters, facilities, emissionsDisplay, emissionsGoal);
         this.setAnnualFacilitiesSummaries(calanderizedMeters, facilities, emissionsDisplay);
         // this.setFacilityTotals();
@@ -97,6 +95,8 @@ export class BetterClimateReport {
     }
 
     getMaxMin(yearDetails: Array<BetterClimateYearDetails>, maxMinType: MaxMinTypes): { max: number, min: number } {
+        let min: number = 0;
+        let max: number = 0;
         if (maxMinType == 'scope1PercentReductions') {
             let maxYearDetail: BetterClimateYearDetails = _.maxBy(yearDetails, (detail: BetterClimateYearDetails) => {
                 return detail.percentReductions.totalScope1Emissions;
@@ -104,9 +104,11 @@ export class BetterClimateReport {
             let minYearDetail: BetterClimateYearDetails = _.minBy(yearDetails, (detail: BetterClimateYearDetails) => {
                 return detail.percentReductions.totalScope1Emissions;
             });
-            return {
-                max: maxYearDetail.percentReductions.totalScope1Emissions,
-                min: minYearDetail.percentReductions.totalScope1Emissions
+            if (maxYearDetail) {
+                max = maxYearDetail.percentReductions.totalScope1Emissions;
+            }
+            if (minYearDetail) {
+                min = minYearDetail.percentReductions.totalScope1Emissions
             }
         } else if (maxMinType == 'scope1ReductionContributionRelative') {
             let maxYearDetail: BetterClimateYearDetails = _.maxBy(yearDetails, (detail: BetterClimateYearDetails) => {
@@ -115,9 +117,11 @@ export class BetterClimateReport {
             let minYearDetail: BetterClimateYearDetails = _.minBy(yearDetails, (detail: BetterClimateYearDetails) => {
                 return detail.relativeContribution.totalScope1Emissions;
             });
-            return {
-                max: maxYearDetail.relativeContribution.totalScope1Emissions,
-                min: minYearDetail.relativeContribution.totalScope1Emissions
+            if (maxYearDetail) {
+                max = maxYearDetail.relativeContribution.totalScope1Emissions;
+            }
+            if (minYearDetail) {
+                min = minYearDetail.relativeContribution.totalScope1Emissions
             }
         } else if (maxMinType == 'scope1ReductionContributionTotal') {
             let maxYearDetail: BetterClimateYearDetails = _.maxBy(yearDetails, (detail: BetterClimateYearDetails) => {
@@ -126,9 +130,11 @@ export class BetterClimateReport {
             let minYearDetail: BetterClimateYearDetails = _.minBy(yearDetails, (detail: BetterClimateYearDetails) => {
                 return detail.totalContribution.totalScope1Emissions;
             });
-            return {
-                max: maxYearDetail.totalContribution.totalScope1Emissions,
-                min: minYearDetail.totalContribution.totalScope1Emissions
+            if (maxYearDetail) {
+                max = maxYearDetail.totalContribution.totalScope1Emissions;
+            }
+            if (minYearDetail) {
+                min = minYearDetail.totalContribution.totalScope1Emissions
             }
         } else if (maxMinType == 'scope2MarketPercentReductions') {
             let maxYearDetail: BetterClimateYearDetails = _.maxBy(yearDetails, (detail: BetterClimateYearDetails) => {
@@ -137,9 +143,11 @@ export class BetterClimateReport {
             let minYearDetail: BetterClimateYearDetails = _.minBy(yearDetails, (detail: BetterClimateYearDetails) => {
                 return detail.percentReductions.scope2MarketEmissions;
             });
-            return {
-                max: maxYearDetail.percentReductions.scope2MarketEmissions,
-                min: minYearDetail.percentReductions.scope2MarketEmissions
+            if (maxYearDetail) {
+                max = maxYearDetail.percentReductions.scope2MarketEmissions;
+            }
+            if (minYearDetail) {
+                min = minYearDetail.percentReductions.scope2MarketEmissions;
             }
         } else if (maxMinType == 'scope2MarketReductionContributionRelative') {
             let maxYearDetail: BetterClimateYearDetails = _.maxBy(yearDetails, (detail: BetterClimateYearDetails) => {
@@ -148,9 +156,11 @@ export class BetterClimateReport {
             let minYearDetail: BetterClimateYearDetails = _.minBy(yearDetails, (detail: BetterClimateYearDetails) => {
                 return detail.relativeContribution.scope2MarketEmissions;
             });
-            return {
-                max: maxYearDetail.relativeContribution.scope2MarketEmissions,
-                min: minYearDetail.relativeContribution.scope2MarketEmissions
+            if (maxYearDetail) {
+                max = maxYearDetail.relativeContribution.scope2MarketEmissions;
+            }
+            if (minYearDetail) {
+                min = minYearDetail.relativeContribution.scope2MarketEmissions;
             }
         } else if (maxMinType == 'scope2MarketReductionContributionTotal') {
             let maxYearDetail: BetterClimateYearDetails = _.maxBy(yearDetails, (detail: BetterClimateYearDetails) => {
@@ -159,9 +169,11 @@ export class BetterClimateReport {
             let minYearDetail: BetterClimateYearDetails = _.minBy(yearDetails, (detail: BetterClimateYearDetails) => {
                 return detail.totalContribution.scope2MarketEmissions;
             });
-            return {
-                max: maxYearDetail.totalContribution.scope2MarketEmissions,
-                min: minYearDetail.totalContribution.scope2MarketEmissions
+            if (maxYearDetail) {
+                max = maxYearDetail.totalContribution.scope2MarketEmissions;
+            }
+            if (minYearDetail) {
+                min = minYearDetail.totalContribution.scope2MarketEmissions;
             }
         } else if (maxMinType == 'scope2LocationPercentReductions') {
             let maxYearDetail: BetterClimateYearDetails = _.maxBy(yearDetails, (detail: BetterClimateYearDetails) => {
@@ -170,9 +182,11 @@ export class BetterClimateReport {
             let minYearDetail: BetterClimateYearDetails = _.minBy(yearDetails, (detail: BetterClimateYearDetails) => {
                 return detail.percentReductions.scope2LocationEmissions;
             });
-            return {
-                max: maxYearDetail.percentReductions.scope2LocationEmissions,
-                min: minYearDetail.percentReductions.scope2LocationEmissions
+            if (maxYearDetail) {
+                max = maxYearDetail.percentReductions.scope2LocationEmissions;
+            }
+            if (minYearDetail) {
+                min = minYearDetail.percentReductions.scope2LocationEmissions;
             }
         } else if (maxMinType == 'scope2LocationReductionContributionRelative') {
             let maxYearDetail: BetterClimateYearDetails = _.maxBy(yearDetails, (detail: BetterClimateYearDetails) => {
@@ -181,9 +195,11 @@ export class BetterClimateReport {
             let minYearDetail: BetterClimateYearDetails = _.minBy(yearDetails, (detail: BetterClimateYearDetails) => {
                 return detail.relativeContribution.scope2LocationEmissions;
             });
-            return {
-                max: maxYearDetail.relativeContribution.scope2LocationEmissions,
-                min: minYearDetail.relativeContribution.scope2LocationEmissions
+            if (maxYearDetail) {
+                max = maxYearDetail.relativeContribution.scope2LocationEmissions;
+            }
+            if (minYearDetail) {
+                min = minYearDetail.relativeContribution.scope2LocationEmissions;
             }
         } else if (maxMinType == 'scope2LocationReductionContributionTotal') {
             let maxYearDetail: BetterClimateYearDetails = _.maxBy(yearDetails, (detail: BetterClimateYearDetails) => {
@@ -192,11 +208,19 @@ export class BetterClimateReport {
             let minYearDetail: BetterClimateYearDetails = _.minBy(yearDetails, (detail: BetterClimateYearDetails) => {
                 return detail.totalContribution.scope2LocationEmissions;
             });
-            return {
-                max: maxYearDetail.totalContribution.scope2LocationEmissions,
-                min: minYearDetail.totalContribution.scope2LocationEmissions
+            if (maxYearDetail) {
+                max = maxYearDetail.totalContribution.scope2LocationEmissions;
+            }
+            if (minYearDetail) {
+                min = minYearDetail.totalContribution.scope2LocationEmissions;
             }
         }
+
+        return {
+            min: min,
+            max: max
+        }
+
     }
 
 }

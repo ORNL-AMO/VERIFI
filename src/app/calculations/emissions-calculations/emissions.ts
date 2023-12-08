@@ -72,7 +72,6 @@ export function getEmissions(meter: IdbUtilityMeter,
         let facility: IdbFacility = facilities.find(facility => { return facility.guid == meter.facilityId });
         let emissionsRates: { marketRate: number, locationRate: number } = getEmissionsRate(facility.eGridSubregion, year, co2Emissions);
         let marketEmissionsOutputRate: number = emissionsRates.marketRate;
-
         if (!isCompressedAir) {
             if (meter.includeInEnergy) {
                 locationElectricityEmissions = convertedEnergyUse * emissionsRates.locationRate * meter.locationGHGMultiplier;
@@ -87,6 +86,7 @@ export function getEmissions(meter: IdbUtilityMeter,
             locationElectricityEmissions = 0;
             scope2Other = convertedEnergyUse * emissionsRates.locationRate * meter.locationGHGMultiplier;
         }
+
         RECs = convertedEnergyUse * meter.recsMultiplier;
         let emissionsEnergyUse: number = convertedEnergyUse;
         if (meter.includeInEnergy == false) {

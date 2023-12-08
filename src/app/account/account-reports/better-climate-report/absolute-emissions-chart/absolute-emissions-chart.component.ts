@@ -11,7 +11,8 @@ import { getEmissionsTypeColor } from 'src/app/models/eGridEmissions';
 export class AbsoluteEmissionsChartComponent {
   @Input()
   yearDetails: Array<BetterClimateYearDetails>;
-
+  @Input()
+  emissionsDisplay: 'market' | 'location'
   @ViewChild('absoluteEmissionsStackedBarChart', { static: false }) absoluteEmissionsStackedBarChart: ElementRef;
 
   constructor(private plotlyService: PlotlyService) {
@@ -25,26 +26,26 @@ export class AbsoluteEmissionsChartComponent {
 
   drawChart() {
     let data = new Array();
-    if(this.yearDetails.find(dataItem => { return dataItem.emissionsResults.scope2MarketEmissions != 0 })){
+    if(this.emissionsDisplay == 'market' && this.yearDetails.find(dataItem => { return dataItem.emissionsResults.scope2MarketEmissions != 0 })){
       data.push({
         x: this.yearDetails.map(dataItem => { return dataItem.year }),
         y: this.yearDetails.map(dataItem => { return dataItem.emissionsResults.scope2MarketEmissions }),
-        name: 'Scope 2 Market Emissions',
+        name: 'Scope 2: Electricity (Market)',
         type: 'bar',
         marker: {
-          color: getEmissionsTypeColor('Scope 2 Market')
+          color: getEmissionsTypeColor('Scope 2: Electricity (Market)')
         }
       });
     }
 
-    if(this.yearDetails.find(dataItem => { return dataItem.emissionsResults.scope2LocationEmissions != 0 })){
+    if(this.emissionsDisplay == 'location' && this.yearDetails.find(dataItem => { return dataItem.emissionsResults.scope2LocationEmissions != 0 })){
       data.push({
         x: this.yearDetails.map(dataItem => { return dataItem.year }),
         y: this.yearDetails.map(dataItem => { return dataItem.emissionsResults.scope2LocationEmissions }),
-        name: 'Scope 2 Location Emissions',
+        name: 'Scope 2: Electricity (Location)',
         type: 'bar',
         marker: {
-          color: getEmissionsTypeColor('Scope 2 Location')
+          color: getEmissionsTypeColor('Scope 2: Electricity (Location)')
         }
       });
     }
@@ -54,7 +55,7 @@ export class AbsoluteEmissionsChartComponent {
       data.push({
         x: this.yearDetails.map(dataItem => { return dataItem.year }),
         y: this.yearDetails.map(dataItem => { return dataItem.emissionsResults.stationaryEmissions }),
-        name: 'Scope 1 Stationary Emissions',
+        name: 'Scope 1: Stationary',
         type: 'bar',
         marker: {
           color: getEmissionsTypeColor('Scope 1: Stationary')
@@ -65,7 +66,7 @@ export class AbsoluteEmissionsChartComponent {
       data.push({
         x: this.yearDetails.map(dataItem => { return dataItem.year }),
         y: this.yearDetails.map(dataItem => { return dataItem.emissionsResults.mobileTotalEmissions }),
-        name: 'Scope 1 Mobile Emissions',
+        name: 'Scope 1: Mobile',
         type: 'bar',
         marker: {
           color: getEmissionsTypeColor('Scope 1: Mobile')
@@ -77,7 +78,7 @@ export class AbsoluteEmissionsChartComponent {
       data.push({
         x: this.yearDetails.map(dataItem => { return dataItem.year }),
         y: this.yearDetails.map(dataItem => { return dataItem.emissionsResults.fugitiveEmissions }),
-        name: 'Scope 1 Fugitive Emissions',
+        name: 'Scope 1: Fugitive',
         type: 'bar',
         marker: {
           color: getEmissionsTypeColor('Scope 1: Fugitive')
@@ -89,7 +90,7 @@ export class AbsoluteEmissionsChartComponent {
       data.push({
         x: this.yearDetails.map(dataItem => { return dataItem.year }),
         y: this.yearDetails.map(dataItem => { return dataItem.emissionsResults.processEmissions }),
-        name: 'Process Emissions',
+        name: 'Scope 1: Process',
         type: 'bar',
         marker: {
           color: getEmissionsTypeColor('Scope 1: Process')

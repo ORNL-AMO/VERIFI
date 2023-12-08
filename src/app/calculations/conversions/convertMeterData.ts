@@ -23,7 +23,7 @@ export function convertMeterData(meter: IdbUtilityMeter, meterData: Array<IdbUti
     if (needConvertVolume) {
         //TODO: Check correct units are being used where needed...
         let facilityUnit: string;
-        if(neededUnit && !getIsEnergyUnit(neededUnit)){
+        if (neededUnit && !getIsEnergyUnit(neededUnit)) {
             facilityUnit = neededUnit;
         }
         if (!facilityUnit) {
