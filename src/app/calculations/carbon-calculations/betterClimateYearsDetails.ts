@@ -2,6 +2,9 @@ import { CalanderizedMeter, MonthlyData } from "src/app/models/calanderization";
 import { IdbFacility } from "src/app/models/idb";
 import * as _ from 'lodash';
 import { ConvertValue } from "../conversions/convertValue";
+import { EmissionsResults } from "src/app/models/eGridEmissions";
+import { getEmissionsTotalsFromMonthlyData } from "../shared-calculations/calculationsHelpers";
+import { getZeroEmissionsResults } from "../emissions-calculations/emissions";
 
 export class BetterClimateYearDetails {
 
@@ -18,55 +21,62 @@ export class BetterClimateYearDetails {
     RECs: number;
     totalEnergyUse: number;
 
+    emissionsResults: EmissionsResults;
+    reductions: EmissionsResults;
+    percentReductions: EmissionsResults;
+    relativeContribution: EmissionsResults;
+    totalContribution: EmissionsResults;
 
     //TODO: Reduction Percentages based on total emssion (+scope 2) and relative to emission Type
-    scope1Emissions: number;
-    scope1Reductions: number;
-    scope1PercentReductions: number;
-    scope1ReductionContributionRelative: number;
-    scope1ReductionContributionTotal: number;
+    // scope1Emissions: number;
+    // scope1Reductions: number;
+    // scope1PercentReductions: number;
+    // scope1ReductionContributionRelative: number;
+    // scope1ReductionContributionTotal: number;
 
-    stationaryEmissions: number;
-    stationaryEmissionsReductions: number;
-    stationaryEmissionsPercentReductions: number;
-    stationaryEmissionsReductionContributionRelative: number;
-    stationaryEmissionsReductionContributionTotal: number;
+    // stationaryEmissions: number;
+    // stationaryEmissionsReductions: number;
+    // stationaryEmissionsPercentReductions: number;
+    // stationaryEmissionsReductionContributionRelative: number;
+    // stationaryEmissionsReductionContributionTotal: number;
 
-    mobileEmissions: number;
-    mobileEmissionsReductions: number;
-    mobileEmissionsPercentReductions: number;
-    mobileEmissionsReductionContributionRelative: number;
-    mobileEmissionsReductionContributionTotal: number;
+    // mobileEmissions: number;
+    // mobileEmissionsReductions: number;
+    // mobileEmissionsPercentReductions: number;
+    // mobileEmissionsReductionContributionRelative: number;
+    // mobileEmissionsReductionContributionTotal: number;
 
-    fugitiveEmissions: number;
-    fugitiveEmissionsReductions: number;
-    fugitiveEmissionsPercentReductions: number;
-    fugitiveEmissionsReductionContributionRelative: number;
-    fugitiveEmissionsReductionContributionTotal: number;
+    // fugitiveEmissions: number;
+    // fugitiveEmissionsReductions: number;
+    // fugitiveEmissionsPercentReductions: number;
+    // fugitiveEmissionsReductionContributionRelative: number;
+    // fugitiveEmissionsReductionContributionTotal: number;
 
-    processEmissions: number;
-    processEmissionsReductions: number;
-    processEmissionsPercentReductions: number;
-    processEmissionsReductionContributionRelative: number;
-    processEmissionsReductionContributionTotal: number;
+    // processEmissions: number;
+    // processEmissionsReductions: number;
+    // processEmissionsPercentReductions: number;
+    // processEmissionsReductionContributionRelative: number;
+    // processEmissionsReductionContributionTotal: number;
 
-    scope2MarketEmissions: number;
-    scope2MarketReductions: number;
-    scope2MarketPercentReductions: number;
-    scope2MarketReductionContributionRelative: number;
-    scope2MarketReductionContributionTotal: number;
+    // scope2MarketEmissions: number;
+    // scope2MarketReductions: number;
+    // scope2MarketPercentReductions: number;
+    // scope2MarketReductionContributionRelative: number;
+    // scope2MarketReductionContributionTotal: number;
 
-    scope2LocationEmissions: number;
-    scope2LocationReductions: number;
-    scope2LocationPercentReductions: number;
-    scope2LocationReductionContributionRelative: number;
-    scope2LocationReductionContributionTotal: number;
+    // scope2LocationEmissions: number;
+    // scope2LocationReductions: number;
+    // scope2LocationPercentReductions: number;
+    // scope2LocationReductionContributionRelative: number;
+    // scope2LocationReductionContributionTotal: number;
 
 
     totalEmissions: number;
     totalEmissionsReduction: number;
     percentEmissionsReduction: number;
+
     annualPercentImprovement: number;
+
     scope2EnergyUse: number;
     scope2MarketEmissionsFactor: number;
     scope2LocationEmissionsFactor: number;
@@ -81,7 +91,8 @@ export class BetterClimateYearDetails {
     scope2OnsiteRenewablesReductions: number;
     scope2OffsiteRenewablesReductions: number;
     scope2GreenOfGridReductions: number;
-    totalEmissionsReductions: number;
+    // totalEmissionsReductions: number;
+
     constructor(year: number,
         calanderizedMeters: Array<CalanderizedMeter>,
         facilities: Array<IdbFacility>,
@@ -93,6 +104,16 @@ export class BetterClimateYearDetails {
         this.year = year;
         this.setFacilityIds(calanderizedMeters);
         this.setTotalSquareFeet(facilities);
+        this.setEmissionsResults(calanderizedMeters, year);
+
+        this.setTotalEmissions(emissionsDisplay);
+        this.setTotalEmissionsReduction(baselineYearDetails);
+        this.setPercentEmissionsReduction(baselineYearDetails);
+
+        this.setReductions(baselineYearDetails);
+        this.setPercentReductions(baselineYearDetails);
+        this.setRelativeContribution(accountDetails);
+        this.setTotalContribution();
 
         //electricity
         let electricityMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => {
@@ -117,26 +138,23 @@ export class BetterClimateYearDetails {
         this.setFuelTotals(fuelTypes, calanderizedMeters);
         this.setTotalEnergyUse();
         //emissions
-        this.scope1Emissions = this.getEmissionsTotal(calanderizedMeters, year, [1, 2], false);
+        // this.scope1Emissions = this.getEmissionsTotal(calanderizedMeters, year, [1, 2], false);
 
-        this.stationaryEmissions = this.getEmissionsTotal(calanderizedMeters, year, [1], false);
-        this.setStationaryEmissionsReductions(baselineYearDetails);
-        this.setStationaryEmissionsPercentReductions(baselineYearDetails);
-        this.setStationaryEmissionsReductionContributionRelative(baselineYearDetails);
+        // this.stationaryEmissions = this.getEmissionsTotal(calanderizedMeters, year, [1], false);
+        // this.setStationaryEmissionsReductions(baselineYearDetails);
+        // this.setStationaryEmissionsPercentReductions(baselineYearDetails);
+        // this.setStationaryEmissionsReductionContributionRelative(baselineYearDetails);
 
 
 
         //TODO: fugitive and process and mobile coming soon
-        this.mobileEmissions = this.getEmissionsTotal(calanderizedMeters, year, [2], false);
-        this.fugitiveEmissions = 0;
-        this.processEmissions = 0;
+        // this.mobileEmissions = this.getEmissionsTotal(calanderizedMeters, year, [2], false);
+        // this.fugitiveEmissions =  this.getEmissionsTotal(calanderizedMeters, year, [5], false);
+        // this.processEmissions =  this.getEmissionsTotal(calanderizedMeters, year, [6], false);
 
-        this.scope2MarketEmissions = this.getEmissionsTotal(calanderizedMeters, year, [3, 4], true);
-        this.scope2LocationEmissions = this.getEmissionsTotal(calanderizedMeters, year, [3, 4], false);
+        // this.scope2MarketEmissions = this.getEmissionsTotal(calanderizedMeters, year, [3, 4], true);
+        // this.scope2LocationEmissions = this.getEmissionsTotal(calanderizedMeters, year, [3, 4], false);
 
-        this.setTotalEmissions(emissionsDisplay);
-        this.setTotalEmissionsReduction(baselineYearDetails);
-        this.setPercentEmissionsReduction(baselineYearDetails);
         this.setAnnualPercentImprovement(previousYearDetails);
         this.setScope2EnergyUse(calanderizedMeters, year);
         this.setScope2EmissionsFactors();
@@ -145,32 +163,32 @@ export class BetterClimateYearDetails {
         this.setEmissionsReductionChange(previousYearDetails);
         this.setGoalForEmissions(emissionsGoal);
 
-        this.setScope1MobileReductions(baselineYearDetails);
-        this.setScope1FugitiveReductions(baselineYearDetails);
-        this.setScope1Reductions(baselineYearDetails);
-        this.setScope1PercentReductions(baselineYearDetails);
+        // this.setScope1MobileReductions(baselineYearDetails);
+        // this.setScope1FugitiveReductions(baselineYearDetails);
+        // this.setScope1Reductions(baselineYearDetails);
+        // this.setScope1PercentReductions(baselineYearDetails);
         this.setScope2ChangeInEnergyUse(baselineYearDetails);
         this.setScope2OnsiteRenewablesReductions(baselineYearDetails);
         this.setScope2OffsiteRenewablesReductions(baselineYearDetails);
         this.setScope2GreenOfTheGridReductions();
-        this.setTotalEmissionsReductions();
+        // this.setTotalEmissionsReductions();
 
 
-        this.setScope2MarketReductions(baselineYearDetails);
-        this.setScope2MarketPercentReductions(baselineYearDetails);
-        this.setScope2LocationReductions(baselineYearDetails);
-        this.setScope2LocationPercentReductions(baselineYearDetails);
+        // this.setScope2MarketReductions(baselineYearDetails);
+        // this.setScope2MarketPercentReductions(baselineYearDetails);
+        // this.setScope2LocationReductions(baselineYearDetails);
+        // this.setScope2LocationPercentReductions(baselineYearDetails);
 
 
-        this.setScope1ReductionContributionTotal(accountDetails);
-        this.setScope2MarketReductionContributionTotal(accountDetails);
-        this.setScope2LocationReductionContributionTotal(accountDetails);
-        this.setStationaryEmissionsReductionContributionTotal(accountDetails);
-        if (accountDetails) {
-            this.setScope1ReductionContributionRelative(accountDetails);
-            this.setScope2MarketReductionContributionRelative(accountDetails);
-            this.setScope2LocationReductionContributionRelative(accountDetails);
-        }
+        // this.setScope1ReductionContributionTotal(accountDetails);
+        // this.setScope2MarketReductionContributionTotal(accountDetails);
+        // this.setScope2LocationReductionContributionTotal(accountDetails);
+        // this.setStationaryEmissionsReductionContributionTotal(accountDetails);
+        // if (accountDetails) {
+        //     this.setScope1ReductionContributionRelative(accountDetails);
+        //     this.setScope2MarketReductionContributionRelative(accountDetails);
+        //     this.setScope2LocationReductionContributionRelative(accountDetails);
+        // }
     }
 
     setFacilityIds(calanderizedMeters: Array<CalanderizedMeter>) {
@@ -193,6 +211,145 @@ export class BetterClimateYearDetails {
                 this.totalSquareFeet += facility.size;
             }
         })
+    }
+
+    setEmissionsResults(calanderizedMeters: Array<CalanderizedMeter>, year: number) {
+        let monthlyData: Array<MonthlyData> = calanderizedMeters.flatMap(cMeter => {
+            return cMeter.monthlyData;
+        });
+        let yearData: Array<MonthlyData> = monthlyData.filter(mData => {
+            return mData.fiscalYear == year;
+        })
+        this.emissionsResults = getEmissionsTotalsFromMonthlyData(yearData);
+    }
+
+    setReductions(baselineYearDetails: BetterClimateYearDetails) {
+        if (baselineYearDetails) {
+            this.reductions = {
+                RECs: this.calculateReductions(baselineYearDetails.emissionsResults.RECs, this.emissionsResults.RECs),
+                locationElectricityEmissions: this.calculateReductions(baselineYearDetails.emissionsResults.locationElectricityEmissions, this.emissionsResults.locationElectricityEmissions),
+                marketElectricityEmissions: this.calculateReductions(baselineYearDetails.emissionsResults.marketElectricityEmissions, this.emissionsResults.marketElectricityEmissions),
+                otherScope2Emissions: this.calculateReductions(baselineYearDetails.emissionsResults.otherScope2Emissions, this.emissionsResults.otherScope2Emissions),
+                scope2LocationEmissions: this.calculateReductions(baselineYearDetails.emissionsResults.scope2LocationEmissions, this.emissionsResults.scope2LocationEmissions),
+                scope2MarketEmissions: this.calculateReductions(baselineYearDetails.emissionsResults.scope2MarketEmissions, this.emissionsResults.scope2MarketEmissions),
+                excessRECs: this.calculateReductions(baselineYearDetails.emissionsResults.excessRECs, this.emissionsResults.excessRECs),
+                excessRECsEmissions: this.calculateReductions(baselineYearDetails.emissionsResults.excessRECsEmissions, this.emissionsResults.excessRECsEmissions),
+                mobileCarbonEmissions: this.calculateReductions(baselineYearDetails.emissionsResults.mobileCarbonEmissions, this.emissionsResults.mobileCarbonEmissions),
+                mobileBiogenicEmissions: this.calculateReductions(baselineYearDetails.emissionsResults.mobileBiogenicEmissions, this.emissionsResults.mobileBiogenicEmissions),
+                mobileOtherEmissions: this.calculateReductions(baselineYearDetails.emissionsResults.mobileOtherEmissions, this.emissionsResults.mobileOtherEmissions),
+                mobileTotalEmissions: this.calculateReductions(baselineYearDetails.emissionsResults.mobileTotalEmissions, this.emissionsResults.mobileTotalEmissions),
+                fugitiveEmissions: this.calculateReductions(baselineYearDetails.emissionsResults.fugitiveEmissions, this.emissionsResults.fugitiveEmissions),
+                processEmissions: this.calculateReductions(baselineYearDetails.emissionsResults.processEmissions, this.emissionsResults.processEmissions),
+                stationaryEmissions: this.calculateReductions(baselineYearDetails.emissionsResults.stationaryEmissions, this.emissionsResults.stationaryEmissions),
+                totalScope1Emissions: this.calculateReductions(baselineYearDetails.emissionsResults.totalScope1Emissions, this.emissionsResults.totalScope1Emissions),
+                totalWithMarketEmissions: this.calculateReductions(baselineYearDetails.emissionsResults.totalWithMarketEmissions, this.emissionsResults.totalWithMarketEmissions),
+                totalWithLocationEmissions: this.calculateReductions(baselineYearDetails.emissionsResults.totalWithLocationEmissions, this.emissionsResults.totalWithLocationEmissions),
+            }
+        } else {
+            this.reductions = getZeroEmissionsResults();
+        }
+    }
+
+    calculateReductions(baselineValue: number, currentYearValue: number): number {
+        return baselineValue - currentYearValue;
+    }
+
+    setPercentReductions(baselineYearDetails: BetterClimateYearDetails) {
+        if (baselineYearDetails) {
+            this.percentReductions = {
+                RECs: this.calculatePercentReductions(baselineYearDetails.emissionsResults.RECs, this.emissionsResults.RECs),
+                locationElectricityEmissions: this.calculatePercentReductions(baselineYearDetails.emissionsResults.locationElectricityEmissions, this.emissionsResults.locationElectricityEmissions),
+                marketElectricityEmissions: this.calculatePercentReductions(baselineYearDetails.emissionsResults.marketElectricityEmissions, this.emissionsResults.marketElectricityEmissions),
+                otherScope2Emissions: this.calculatePercentReductions(baselineYearDetails.emissionsResults.otherScope2Emissions, this.emissionsResults.otherScope2Emissions),
+                scope2LocationEmissions: this.calculatePercentReductions(baselineYearDetails.emissionsResults.scope2LocationEmissions, this.emissionsResults.scope2LocationEmissions),
+                scope2MarketEmissions: this.calculatePercentReductions(baselineYearDetails.emissionsResults.scope2MarketEmissions, this.emissionsResults.scope2MarketEmissions),
+                excessRECs: this.calculatePercentReductions(baselineYearDetails.emissionsResults.excessRECs, this.emissionsResults.excessRECs),
+                excessRECsEmissions: this.calculatePercentReductions(baselineYearDetails.emissionsResults.excessRECsEmissions, this.emissionsResults.excessRECsEmissions),
+                mobileCarbonEmissions: this.calculatePercentReductions(baselineYearDetails.emissionsResults.mobileCarbonEmissions, this.emissionsResults.mobileCarbonEmissions),
+                mobileBiogenicEmissions: this.calculatePercentReductions(baselineYearDetails.emissionsResults.mobileBiogenicEmissions, this.emissionsResults.mobileBiogenicEmissions),
+                mobileOtherEmissions: this.calculatePercentReductions(baselineYearDetails.emissionsResults.mobileOtherEmissions, this.emissionsResults.mobileOtherEmissions),
+                mobileTotalEmissions: this.calculatePercentReductions(baselineYearDetails.emissionsResults.mobileTotalEmissions, this.emissionsResults.mobileTotalEmissions),
+                fugitiveEmissions: this.calculatePercentReductions(baselineYearDetails.emissionsResults.fugitiveEmissions, this.emissionsResults.fugitiveEmissions),
+                processEmissions: this.calculatePercentReductions(baselineYearDetails.emissionsResults.processEmissions, this.emissionsResults.processEmissions),
+                stationaryEmissions: this.calculatePercentReductions(baselineYearDetails.emissionsResults.stationaryEmissions, this.emissionsResults.stationaryEmissions),
+                totalScope1Emissions: this.calculatePercentReductions(baselineYearDetails.emissionsResults.totalScope1Emissions, this.emissionsResults.totalScope1Emissions),
+                totalWithMarketEmissions: this.calculatePercentReductions(baselineYearDetails.emissionsResults.totalWithMarketEmissions, this.emissionsResults.totalWithMarketEmissions),
+                totalWithLocationEmissions: this.calculatePercentReductions(baselineYearDetails.emissionsResults.totalWithLocationEmissions, this.emissionsResults.totalWithLocationEmissions),
+            }
+        } else {
+            this.percentReductions = getZeroEmissionsResults();
+        }
+    }
+
+    calculatePercentReductions(baselineValue: number, currentYearValue: number): number {
+        return (currentYearValue / baselineValue) * 100
+    }
+
+    setRelativeContribution(accountDetails: BetterClimateYearDetails) {
+        if (accountDetails) {
+            this.relativeContribution = {
+                RECs: this.calculateRelativeContribution(accountDetails.percentReductions.RECs, accountDetails.reductions.RECs, this.reductions.RECs),
+                locationElectricityEmissions: this.calculateRelativeContribution(accountDetails.percentReductions.locationElectricityEmissions, accountDetails.reductions.locationElectricityEmissions, this.reductions.locationElectricityEmissions),
+                marketElectricityEmissions: this.calculateRelativeContribution(accountDetails.percentReductions.marketElectricityEmissions, accountDetails.reductions.marketElectricityEmissions, this.reductions.marketElectricityEmissions),
+                otherScope2Emissions: this.calculateRelativeContribution(accountDetails.percentReductions.otherScope2Emissions, accountDetails.reductions.otherScope2Emissions, this.reductions.otherScope2Emissions),
+                scope2LocationEmissions: this.calculateRelativeContribution(accountDetails.percentReductions.scope2LocationEmissions, accountDetails.reductions.scope2LocationEmissions, this.reductions.scope2LocationEmissions),
+                scope2MarketEmissions: this.calculateRelativeContribution(accountDetails.percentReductions.scope2MarketEmissions, accountDetails.reductions.scope2MarketEmissions, this.reductions.scope2MarketEmissions),
+                excessRECs: this.calculateRelativeContribution(accountDetails.percentReductions.excessRECs, accountDetails.reductions.excessRECs, this.reductions.excessRECs),
+                excessRECsEmissions: this.calculateRelativeContribution(accountDetails.percentReductions.excessRECsEmissions, accountDetails.reductions.excessRECsEmissions, this.reductions.excessRECsEmissions),
+                mobileCarbonEmissions: this.calculateRelativeContribution(accountDetails.percentReductions.mobileCarbonEmissions, accountDetails.reductions.mobileCarbonEmissions, this.reductions.mobileCarbonEmissions),
+                mobileBiogenicEmissions: this.calculateRelativeContribution(accountDetails.percentReductions.mobileBiogenicEmissions, accountDetails.reductions.mobileBiogenicEmissions, this.reductions.mobileBiogenicEmissions),
+                mobileOtherEmissions: this.calculateRelativeContribution(accountDetails.percentReductions.mobileOtherEmissions, accountDetails.reductions.mobileOtherEmissions, this.reductions.mobileOtherEmissions),
+                mobileTotalEmissions: this.calculateRelativeContribution(accountDetails.percentReductions.mobileTotalEmissions, accountDetails.reductions.mobileTotalEmissions, this.reductions.mobileTotalEmissions),
+                fugitiveEmissions: this.calculateRelativeContribution(accountDetails.percentReductions.fugitiveEmissions, accountDetails.reductions.fugitiveEmissions, this.reductions.fugitiveEmissions),
+                processEmissions: this.calculateRelativeContribution(accountDetails.percentReductions.processEmissions, accountDetails.reductions.processEmissions, this.reductions.processEmissions),
+                stationaryEmissions: this.calculateRelativeContribution(accountDetails.percentReductions.stationaryEmissions, accountDetails.reductions.stationaryEmissions, this.reductions.stationaryEmissions),
+                totalScope1Emissions: this.calculateRelativeContribution(accountDetails.percentReductions.totalScope1Emissions, accountDetails.reductions.totalScope1Emissions, this.reductions.totalScope1Emissions),
+                totalWithMarketEmissions: this.calculateRelativeContribution(accountDetails.percentReductions.totalWithMarketEmissions, accountDetails.reductions.totalWithMarketEmissions, this.reductions.totalWithMarketEmissions),
+                totalWithLocationEmissions: this.calculateRelativeContribution(accountDetails.percentReductions.totalWithLocationEmissions, accountDetails.reductions.totalWithLocationEmissions, this.reductions.totalWithLocationEmissions),
+            }
+        } else {
+            this.relativeContribution = getZeroEmissionsResults();
+        }
+    }
+
+    calculateRelativeContribution(accountDetailsPercentReductions: number, accountReductions: number, yearReductions: number) {
+        let relativeContribution: number = (yearReductions * accountDetailsPercentReductions) / accountReductions;
+        if (isNaN(relativeContribution)) {
+            return 0;
+        } else {
+            return relativeContribution;
+        }
+    }
+
+    setTotalContribution() {
+        this.totalContribution = {
+            RECs: this.calculateTotalContribution(this.percentEmissionsReduction, this.totalEmissionsReduction, this.reductions.RECs),
+            locationElectricityEmissions: this.calculateTotalContribution(this.percentEmissionsReduction, this.totalEmissionsReduction, this.reductions.locationElectricityEmissions),
+            marketElectricityEmissions: this.calculateTotalContribution(this.percentEmissionsReduction, this.totalEmissionsReduction, this.reductions.marketElectricityEmissions),
+            otherScope2Emissions: this.calculateTotalContribution(this.percentEmissionsReduction, this.totalEmissionsReduction, this.reductions.otherScope2Emissions),
+            scope2LocationEmissions: this.calculateTotalContribution(this.percentEmissionsReduction, this.totalEmissionsReduction, this.reductions.scope2LocationEmissions),
+            scope2MarketEmissions: this.calculateTotalContribution(this.percentEmissionsReduction, this.totalEmissionsReduction, this.reductions.scope2MarketEmissions),
+            excessRECs: this.calculateTotalContribution(this.percentEmissionsReduction, this.totalEmissionsReduction, this.reductions.excessRECs),
+            excessRECsEmissions: this.calculateTotalContribution(this.percentEmissionsReduction, this.totalEmissionsReduction, this.reductions.excessRECsEmissions),
+            mobileCarbonEmissions: this.calculateTotalContribution(this.percentEmissionsReduction, this.totalEmissionsReduction, this.reductions.mobileCarbonEmissions),
+            mobileBiogenicEmissions: this.calculateTotalContribution(this.percentEmissionsReduction, this.totalEmissionsReduction, this.reductions.mobileBiogenicEmissions),
+            mobileOtherEmissions: this.calculateTotalContribution(this.percentEmissionsReduction, this.totalEmissionsReduction, this.reductions.mobileOtherEmissions),
+            mobileTotalEmissions: this.calculateTotalContribution(this.percentEmissionsReduction, this.totalEmissionsReduction, this.reductions.mobileTotalEmissions),
+            fugitiveEmissions: this.calculateTotalContribution(this.percentEmissionsReduction, this.totalEmissionsReduction, this.reductions.fugitiveEmissions),
+            processEmissions: this.calculateTotalContribution(this.percentEmissionsReduction, this.totalEmissionsReduction, this.reductions.processEmissions),
+            stationaryEmissions: this.calculateTotalContribution(this.percentEmissionsReduction, this.totalEmissionsReduction, this.reductions.stationaryEmissions),
+            totalScope1Emissions: this.calculateTotalContribution(this.percentEmissionsReduction, this.totalEmissionsReduction, this.reductions.totalScope1Emissions),
+            totalWithMarketEmissions: this.calculateTotalContribution(this.percentEmissionsReduction, this.totalEmissionsReduction, this.reductions.totalWithMarketEmissions),
+            totalWithLocationEmissions: this.calculateTotalContribution(this.percentEmissionsReduction, this.totalEmissionsReduction, this.reductions.totalWithLocationEmissions),
+        }
+    }
+
+    calculateTotalContribution(percentEmissionsReduction: number, totalEmissionsReduction: number, yearReductions: number) {
+        let totalContribution: number = (yearReductions * percentEmissionsReduction) / totalEmissionsReduction;
+        if (isNaN(totalContribution)) {
+            totalContribution = 0;
+        }
+        return totalContribution;
     }
 
     setTotalElectricity(monthlyData: Array<MonthlyData>) {
@@ -300,9 +457,9 @@ export class BetterClimateYearDetails {
 
     setTotalEmissions(emissionsDisplay: 'market' | 'location') {
         if (emissionsDisplay == 'location') {
-            this.totalEmissions = this.scope1Emissions + this.scope2LocationEmissions;
+            this.totalEmissions = this.emissionsResults.totalWithLocationEmissions;
         } else {
-            this.totalEmissions = this.scope1Emissions + this.scope2MarketEmissions;
+            this.totalEmissions = this.emissionsResults.totalWithMarketEmissions;
         }
     }
 
@@ -346,8 +503,8 @@ export class BetterClimateYearDetails {
     }
 
     setScope2EmissionsFactors() {
-        this.scope2LocationEmissionsFactor = (this.scope2EnergyUse / this.scope2LocationEmissions) * 1000;
-        this.scope2MarketEmissionsFactor = (this.scope2EnergyUse / this.scope2MarketEmissions) * 1000;
+        this.scope2LocationEmissionsFactor = (this.scope2EnergyUse / this.emissionsResults.scope2LocationEmissions) * 1000;
+        this.scope2MarketEmissionsFactor = (this.scope2EnergyUse / this.emissionsResults.scope2MarketEmissions) * 1000;
     }
 
     setDecreaseInScope2EnergyUse(baselineYearDetails: BetterClimateYearDetails) {
@@ -383,96 +540,96 @@ export class BetterClimateYearDetails {
         this.goalForEmissions = this.totalEmissions * (1 - emissionsGoal);
     }
 
-    setStationaryEmissionsReductions(baselineYearDetails: BetterClimateYearDetails) {
-        if (baselineYearDetails) {
-            this.stationaryEmissionsReductions = baselineYearDetails.stationaryEmissions - this.stationaryEmissions;
-        } else {
-            this.stationaryEmissionsReductions = 0;
-        }
-    }
-    setScope1MobileReductions(baselineYearDetails: BetterClimateYearDetails) {
-        if (baselineYearDetails) {
-            this.mobileEmissionsReductions = baselineYearDetails.mobileEmissions - this.mobileEmissions;
-        } else {
-            this.mobileEmissionsReductions = 0;
-        }
-    }
+    // setStationaryEmissionsReductions(baselineYearDetails: BetterClimateYearDetails) {
+    //     if (baselineYearDetails) {
+    //         this.stationaryEmissionsReductions = baselineYearDetails.emissionsResults.stationaryEmissions - this.emissionsResults.stationaryEmissions;
+    //     } else {
+    //         this.stationaryEmissionsReductions = 0;
+    //     }
+    // }
+    // setScope1MobileReductions(baselineYearDetails: BetterClimateYearDetails) {
+    //     if (baselineYearDetails) {
+    //         this.mobileEmissionsReductions = baselineYearDetails.emissionsResults.mobileTotalEmissions - this.emissionsResults.mobileTotalEmissions;
+    //     } else {
+    //         this.mobileEmissionsReductions = 0;
+    //     }
+    // }
 
-    setScope1FugitiveReductions(baselineYearDetails: BetterClimateYearDetails) {
-        if (baselineYearDetails) {
-            this.fugitiveEmissionsReductions = baselineYearDetails.fugitiveEmissions - this.fugitiveEmissions;
-        } else {
-            this.fugitiveEmissionsReductions = 0;
-        }
-    }
+    // setScope1FugitiveReductions(baselineYearDetails: BetterClimateYearDetails) {
+    //     if (baselineYearDetails) {
+    //         this.fugitiveEmissionsReductions = baselineYearDetails.emissionsResults.fugitiveEmissions - this.emissionsResults.fugitiveEmissions;
+    //     } else {
+    //         this.fugitiveEmissionsReductions = 0;
+    //     }
+    // }
 
-    setScope1Reductions(baselineYearDetails: BetterClimateYearDetails) {
-        if (baselineYearDetails) {
-            this.scope1Reductions = baselineYearDetails.scope1Emissions - this.scope1Emissions;
-        } else {
-            this.scope1Reductions = 0;
-        }
-    }
+    // setScope1Reductions(baselineYearDetails: BetterClimateYearDetails) {
+    //     if (baselineYearDetails) {
+    //         this.scope1Reductions = baselineYearDetails.emissionsResults.totalScope1Emissions - this.emissionsResults.totalScope1Emissions;
+    //     } else {
+    //         this.scope1Reductions = 0;
+    //     }
+    // }
 
-    setScope1PercentReductions(baselineYearDetails: BetterClimateYearDetails) {
-        if (baselineYearDetails) {
-            this.scope1PercentReductions = (this.scope1Reductions / baselineYearDetails.scope1Emissions) * 100;
-        } else {
-            this.scope1PercentReductions = 0;
-        }
-    }
+    // setScope1PercentReductions(baselineYearDetails: BetterClimateYearDetails) {
+    //     if (baselineYearDetails) {
+    //         this.scope1PercentReductions = (this.scope1Reductions / baselineYearDetails.emissionsResults.totalScope1Emissions) * 100;
+    //     } else {
+    //         this.scope1PercentReductions = 0;
+    //     }
+    // }
 
-    setScope1ReductionContributionRelative(accountDetails: BetterClimateYearDetails) {
-        if (accountDetails) {
-            this.scope1ReductionContributionRelative = (this.scope1Reductions * accountDetails.scope1PercentReductions) / accountDetails.scope1Reductions;
-            if (isNaN(this.scope1ReductionContributionRelative)) {
-                this.scope1ReductionContributionRelative = 0;
-            }
-        } else {
-            this.scope1ReductionContributionRelative = 0;
-        }
-    }
+    // setScope1ReductionContributionRelative(accountDetails: BetterClimateYearDetails) {
+    //     if (accountDetails) {
+    //         this.scope1ReductionContributionRelative = (this.scope1Reductions * accountDetails.scope1PercentReductions) / accountDetails.scope1Reductions;
+    //         if (isNaN(this.scope1ReductionContributionRelative)) {
+    //             this.scope1ReductionContributionRelative = 0;
+    //         }
+    //     } else {
+    //         this.scope1ReductionContributionRelative = 0;
+    //     }
+    // }
 
-    setScope1ReductionContributionTotal(accountDetails: BetterClimateYearDetails) {
-        if (accountDetails) {
-            this.scope1ReductionContributionTotal = (this.scope1Reductions * accountDetails.percentEmissionsReduction) / accountDetails.totalEmissionsReduction;
-        } else {
-            this.scope1ReductionContributionTotal = (this.scope1Reductions * this.percentEmissionsReduction) / this.totalEmissionsReduction;
-        }
-        if (isNaN(this.scope1ReductionContributionTotal)) {
-            this.scope1ReductionContributionTotal = 0;
-        }
-    }
+    // setScope1ReductionContributionTotal(accountDetails: BetterClimateYearDetails) {
+    //     if (accountDetails) {
+    //         this.scope1ReductionContributionTotal = (this.scope1Reductions * accountDetails.percentEmissionsReduction) / accountDetails.totalEmissionsReduction;
+    //     } else {
+    //         this.scope1ReductionContributionTotal = (this.scope1Reductions * this.percentEmissionsReduction) / this.totalEmissionsReduction;
+    //     }
+    //     if (isNaN(this.scope1ReductionContributionTotal)) {
+    //         this.scope1ReductionContributionTotal = 0;
+    //     }
+    // }
 
-    setStationaryEmissionsPercentReductions(baselineYearDetails: BetterClimateYearDetails) {
-        if (baselineYearDetails) {
-            this.stationaryEmissionsPercentReductions = (this.stationaryEmissionsReductions / baselineYearDetails.stationaryEmissions) * 100;
-        } else {
-            this.stationaryEmissionsPercentReductions = 0;
-        }
-    }
+    // setStationaryEmissionsPercentReductions(baselineYearDetails: BetterClimateYearDetails) {
+    //     if (baselineYearDetails) {
+    //         this.stationaryEmissionsPercentReductions = (this.stationaryEmissionsReductions / baselineYearDetails.emissionsResults.stationaryEmissions) * 100;
+    //     } else {
+    //         this.stationaryEmissionsPercentReductions = 0;
+    //     }
+    // }
 
-    setStationaryEmissionsReductionContributionRelative(accountDetails: BetterClimateYearDetails) {
-        if (accountDetails) {
-            this.stationaryEmissionsReductionContributionRelative = (this.stationaryEmissions * accountDetails.stationaryEmissionsPercentReductions) / accountDetails.stationaryEmissions;
-            if (isNaN(this.stationaryEmissionsReductionContributionRelative)) {
-                this.stationaryEmissionsReductionContributionRelative = 0;
-            }
-        } else {
-            this.stationaryEmissionsReductionContributionRelative = 0;
-        }
-    }
+    // setStationaryEmissionsReductionContributionRelative(accountDetails: BetterClimateYearDetails) {
+    //     if (accountDetails) {
+    //         this.stationaryEmissionsReductionContributionRelative = (this.emissionsResults.stationaryEmissions * accountDetails.stationaryEmissionsPercentReductions) / accountDetails.emissionsResults.stationaryEmissions;
+    //         if (isNaN(this.stationaryEmissionsReductionContributionRelative)) {
+    //             this.stationaryEmissionsReductionContributionRelative = 0;
+    //         }
+    //     } else {
+    //         this.stationaryEmissionsReductionContributionRelative = 0;
+    //     }
+    // }
 
-    setStationaryEmissionsReductionContributionTotal(accountDetails: BetterClimateYearDetails) {
-        if (accountDetails) {
-            this.stationaryEmissionsReductionContributionTotal = (this.stationaryEmissions * accountDetails.percentEmissionsReduction) / accountDetails.totalEmissionsReduction;
-        } else {
-            this.stationaryEmissionsReductionContributionTotal = (this.stationaryEmissionsReductions * this.percentEmissionsReduction) / this.totalEmissionsReduction;
-        }
-        if (isNaN(this.stationaryEmissionsReductionContributionTotal)) {
-            this.stationaryEmissionsReductionContributionTotal = 0;
-        }
-    }
+    // setStationaryEmissionsReductionContributionTotal(accountDetails: BetterClimateYearDetails) {
+    //     if (accountDetails) {
+    //         this.stationaryEmissionsReductionContributionTotal = (this.emissionsResults.stationaryEmissions * accountDetails.percentEmissionsReduction) / accountDetails.totalEmissionsReduction;
+    //     } else {
+    //         this.stationaryEmissionsReductionContributionTotal = (this.stationaryEmissionsReductions * this.percentEmissionsReduction) / this.totalEmissionsReduction;
+    //     }
+    //     if (isNaN(this.stationaryEmissionsReductionContributionTotal)) {
+    //         this.stationaryEmissionsReductionContributionTotal = 0;
+    //     }
+    // }
 
     setScope2ChangeInEnergyUse(baselineYearDetails: BetterClimateYearDetails) {
         if (baselineYearDetails) {
@@ -484,7 +641,7 @@ export class BetterClimateYearDetails {
 
     setScope2OnsiteRenewablesReductions(baselineYearDetails: BetterClimateYearDetails) {
         if (baselineYearDetails) {
-            this.scope2OnsiteRenewablesReductions = baselineYearDetails.scope2LocationEmissions * this.increaseInOnsiteRenewables / 1000
+            this.scope2OnsiteRenewablesReductions = baselineYearDetails.emissionsResults.scope2LocationEmissions * this.increaseInOnsiteRenewables / 1000
         } else {
             this.scope2OnsiteRenewablesReductions = 0;
         }
@@ -492,7 +649,7 @@ export class BetterClimateYearDetails {
 
     setScope2OffsiteRenewablesReductions(baselineYearDetails: BetterClimateYearDetails) {
         if (baselineYearDetails) {
-            this.scope2OffsiteRenewablesReductions = baselineYearDetails.scope2LocationEmissions * this.increaseInOffsiteRenewables / 1000
+            this.scope2OffsiteRenewablesReductions = baselineYearDetails.emissionsResults.scope2LocationEmissions * this.increaseInOffsiteRenewables / 1000
         } else {
             this.scope2OffsiteRenewablesReductions = 0;
         }
@@ -503,84 +660,84 @@ export class BetterClimateYearDetails {
     }
 
     //currently two calculations for total reductions. figure out which on to use.
-    setTotalEmissionsReductions() {
-        this.totalEmissionsReductions = this.stationaryEmissionsReductions + this.mobileEmissionsReductions + this.fugitiveEmissionsReductions + this.scope2ChangeInEnergyUse + this.scope2OnsiteRenewablesReductions + this.scope2OffsiteRenewablesReductions + this.scope2GreenOfGridReductions;
-    }
+    // setTotalEmissionsReductions() {
+    //     this.totalEmissionsReductions = this.stationaryEmissionsReductions + this.mobileEmissionsReductions + this.fugitiveEmissionsReductions + this.scope2ChangeInEnergyUse + this.scope2OnsiteRenewablesReductions + this.scope2OffsiteRenewablesReductions + this.scope2GreenOfGridReductions;
+    // }
 
 
-    setScope2MarketReductions(baselineYearDetails: BetterClimateYearDetails) {
-        if (baselineYearDetails) {
-            this.scope2MarketReductions = baselineYearDetails.scope2MarketEmissions - this.scope2MarketEmissions;
-        } else {
-            this.scope2MarketReductions = 0;
-        }
-    }
+    // setScope2MarketReductions(baselineYearDetails: BetterClimateYearDetails) {
+    //     if (baselineYearDetails) {
+    //         this.scope2MarketReductions = baselineYearDetails.emissionsResults.scope2MarketEmissions - this.emissionsResults.scope2MarketEmissions;
+    //     } else {
+    //         this.scope2MarketReductions = 0;
+    //     }
+    // }
 
-    setScope2MarketPercentReductions(baselineYearDetails: BetterClimateYearDetails) {
-        if (baselineYearDetails) {
-            this.scope2MarketPercentReductions = (this.scope2MarketReductions / baselineYearDetails.scope2MarketEmissions) * 100;
-        } else {
-            this.scope2MarketPercentReductions = 0;
-        }
-    }
+    // setScope2MarketPercentReductions(baselineYearDetails: BetterClimateYearDetails) {
+    //     if (baselineYearDetails) {
+    //         this.scope2MarketPercentReductions = (this.scope2MarketReductions / baselineYearDetails.emissionsResults.scope2MarketEmissions) * 100;
+    //     } else {
+    //         this.scope2MarketPercentReductions = 0;
+    //     }
+    // }
 
-    setScope2MarketReductionContributionRelative(accountDetails: BetterClimateYearDetails) {
-        if (accountDetails) {
-            this.scope2MarketReductionContributionRelative = (this.scope2MarketReductions * accountDetails.scope2MarketPercentReductions) / accountDetails.scope2MarketReductions;
-            if (isNaN(this.scope2MarketReductionContributionRelative)) {
-                this.scope2MarketReductionContributionRelative = 0;
-            }
-        } else {
-            this.scope2MarketReductionContributionRelative = 0;
-        }
-    }
+    // setScope2MarketReductionContributionRelative(accountDetails: BetterClimateYearDetails) {
+    //     if (accountDetails) {
+    //         this.scope2MarketReductionContributionRelative = (this.scope2MarketReductions * accountDetails.scope2MarketPercentReductions) / accountDetails.scope2MarketReductions;
+    //         if (isNaN(this.scope2MarketReductionContributionRelative)) {
+    //             this.scope2MarketReductionContributionRelative = 0;
+    //         }
+    //     } else {
+    //         this.scope2MarketReductionContributionRelative = 0;
+    //     }
+    // }
 
-    setScope2MarketReductionContributionTotal(accountDetails: BetterClimateYearDetails) {
-        if (accountDetails) {
-            this.scope2MarketReductionContributionTotal = (this.scope2MarketReductions * accountDetails.percentEmissionsReduction) / accountDetails.totalEmissionsReduction;
-        } else {
-            this.scope2MarketReductionContributionTotal = (this.scope2MarketReductions * this.percentEmissionsReduction) / this.totalEmissionsReduction;
-        }
-        if (isNaN(this.scope2MarketReductionContributionTotal)) {
-            this.scope2MarketReductionContributionTotal = 0;
-        }
-    }
+    // setScope2MarketReductionContributionTotal(accountDetails: BetterClimateYearDetails) {
+    //     if (accountDetails) {
+    //         this.scope2MarketReductionContributionTotal = (this.scope2MarketReductions * accountDetails.percentEmissionsReduction) / accountDetails.totalEmissionsReduction;
+    //     } else {
+    //         this.scope2MarketReductionContributionTotal = (this.scope2MarketReductions * this.percentEmissionsReduction) / this.totalEmissionsReduction;
+    //     }
+    //     if (isNaN(this.scope2MarketReductionContributionTotal)) {
+    //         this.scope2MarketReductionContributionTotal = 0;
+    //     }
+    // }
 
-    setScope2LocationReductions(baselineYearDetails: BetterClimateYearDetails) {
-        if (baselineYearDetails) {
-            this.scope2LocationReductions = baselineYearDetails.scope2LocationEmissions - this.scope2LocationEmissions;
-        } else {
-            this.scope2LocationReductions = 0;
-        }
-    }
+    // setScope2LocationReductions(baselineYearDetails: BetterClimateYearDetails) {
+    //     if (baselineYearDetails) {
+    //         this.scope2LocationReductions = baselineYearDetails.emissionsResults.scope2LocationEmissions - this.emissionsResults.scope2LocationEmissions;
+    //     } else {
+    //         this.scope2LocationReductions = 0;
+    //     }
+    // }
 
-    setScope2LocationPercentReductions(baselineYearDetails: BetterClimateYearDetails) {
-        if (baselineYearDetails) {
-            this.scope2LocationPercentReductions = (this.scope2LocationReductions / baselineYearDetails.scope2LocationEmissions) * 100;
-        } else {
-            this.scope2LocationPercentReductions = 0;
-        }
-    }
+    // setScope2LocationPercentReductions(baselineYearDetails: BetterClimateYearDetails) {
+    //     if (baselineYearDetails) {
+    //         this.scope2LocationPercentReductions = (this.scope2LocationReductions / baselineYearDetails.emissionsResults.scope2LocationEmissions) * 100;
+    //     } else {
+    //         this.scope2LocationPercentReductions = 0;
+    //     }
+    // }
 
-    setScope2LocationReductionContributionRelative(accountDetails: BetterClimateYearDetails) {
-        if (accountDetails) {
-            this.scope2LocationReductionContributionRelative = (this.scope2LocationReductions * accountDetails.scope2LocationPercentReductions) / accountDetails.scope2LocationReductions;
-            if (isNaN(this.scope2LocationReductionContributionRelative)) {
-                this.scope2LocationReductionContributionRelative = 0;
-            }
-        } else {
-            this.scope2LocationReductionContributionRelative = 0;
-        }
-    }
+    // setScope2LocationReductionContributionRelative(accountDetails: BetterClimateYearDetails) {
+    //     if (accountDetails) {
+    //         this.scope2LocationReductionContributionRelative = (this.scope2LocationReductions * accountDetails.scope2LocationPercentReductions) / accountDetails.scope2LocationReductions;
+    //         if (isNaN(this.scope2LocationReductionContributionRelative)) {
+    //             this.scope2LocationReductionContributionRelative = 0;
+    //         }
+    //     } else {
+    //         this.scope2LocationReductionContributionRelative = 0;
+    //     }
+    // }
 
-    setScope2LocationReductionContributionTotal(accountDetails: BetterClimateYearDetails) {
-        if (accountDetails) {
-            this.scope2LocationReductionContributionTotal = (this.scope2LocationReductions * accountDetails.percentEmissionsReduction) / accountDetails.totalEmissionsReduction;
-        } else {
-            this.scope2LocationReductionContributionTotal = (this.scope2LocationReductions * this.percentEmissionsReduction) / this.totalEmissionsReduction;
-        }
-        if (isNaN(this.scope2LocationReductionContributionTotal)) {
-            this.scope2LocationReductionContributionTotal = 0;
-        }
-    }
+    // setScope2LocationReductionContributionTotal(accountDetails: BetterClimateYearDetails) {
+    //     if (accountDetails) {
+    //         this.scope2LocationReductionContributionTotal = (this.scope2LocationReductions * accountDetails.percentEmissionsReduction) / accountDetails.totalEmissionsReduction;
+    //     } else {
+    //         this.scope2LocationReductionContributionTotal = (this.scope2LocationReductions * this.percentEmissionsReduction) / this.totalEmissionsReduction;
+    //     }
+    //     if (isNaN(this.scope2LocationReductionContributionTotal)) {
+    //         this.scope2LocationReductionContributionTotal = 0;
+    //     }
+    // }
 }

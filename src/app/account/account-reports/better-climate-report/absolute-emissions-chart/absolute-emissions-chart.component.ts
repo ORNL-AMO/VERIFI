@@ -1,7 +1,7 @@
 import { Component, ElementRef, Input, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { BetterClimateYearDetails } from 'src/app/calculations/carbon-calculations/betterClimateYearsDetails';
-import { EmissionsColors } from 'src/app/shared/utilityColors';
+import { getEmissionsTypeColor } from 'src/app/models/eGridEmissions';
 
 @Component({
   selector: 'app-absolute-emissions-chart',
@@ -25,74 +25,74 @@ export class AbsoluteEmissionsChartComponent {
 
   drawChart() {
     let data = new Array();
-    if(this.yearDetails.find(dataItem => { return dataItem.scope2MarketEmissions != 0 })){
+    if(this.yearDetails.find(dataItem => { return dataItem.emissionsResults.scope2MarketEmissions != 0 })){
       data.push({
         x: this.yearDetails.map(dataItem => { return dataItem.year }),
-        y: this.yearDetails.map(dataItem => { return dataItem.scope2MarketEmissions }),
+        y: this.yearDetails.map(dataItem => { return dataItem.emissionsResults.scope2MarketEmissions }),
         name: 'Scope 2 Market Emissions',
         type: 'bar',
         marker: {
-          color: EmissionsColors["scope2Market"]
+          color: getEmissionsTypeColor('Scope 2 Market')
         }
       });
     }
 
-    if(this.yearDetails.find(dataItem => { return dataItem.scope2LocationEmissions != 0 })){
+    if(this.yearDetails.find(dataItem => { return dataItem.emissionsResults.scope2LocationEmissions != 0 })){
       data.push({
         x: this.yearDetails.map(dataItem => { return dataItem.year }),
-        y: this.yearDetails.map(dataItem => { return dataItem.scope2LocationEmissions }),
+        y: this.yearDetails.map(dataItem => { return dataItem.emissionsResults.scope2LocationEmissions }),
         name: 'Scope 2 Location Emissions',
         type: 'bar',
         marker: {
-          color: EmissionsColors["scope2Location"]
+          color: getEmissionsTypeColor('Scope 2 Location')
         }
       });
     }
 
     
-    if(this.yearDetails.find(dataItem => { return dataItem.stationaryEmissions != 0 })){
+    if(this.yearDetails.find(dataItem => { return dataItem.emissionsResults.stationaryEmissions != 0 })){
       data.push({
         x: this.yearDetails.map(dataItem => { return dataItem.year }),
-        y: this.yearDetails.map(dataItem => { return dataItem.stationaryEmissions }),
-        name: 'Stationary Emissions',
+        y: this.yearDetails.map(dataItem => { return dataItem.emissionsResults.stationaryEmissions }),
+        name: 'Scope 1 Stationary Emissions',
         type: 'bar',
         marker: {
-          color: EmissionsColors["stationary"]
+          color: getEmissionsTypeColor('Scope 1: Stationary')
         }
       });
     }
-    if(this.yearDetails.find(dataItem => { return dataItem.mobileEmissions != 0 })){
+    if(this.yearDetails.find(dataItem => { return dataItem.emissionsResults.mobileTotalEmissions != 0 })){
       data.push({
         x: this.yearDetails.map(dataItem => { return dataItem.year }),
-        y: this.yearDetails.map(dataItem => { return dataItem.mobileEmissions }),
-        name: 'Mobile Emissions',
+        y: this.yearDetails.map(dataItem => { return dataItem.emissionsResults.mobileTotalEmissions }),
+        name: 'Scope 1 Mobile Emissions',
         type: 'bar',
         marker: {
-          color: EmissionsColors["mobile"]
-        }
-      });
-    }
-
-    if(this.yearDetails.find(dataItem => { return dataItem.fugitiveEmissions != 0 })){
-      data.push({
-        x: this.yearDetails.map(dataItem => { return dataItem.year }),
-        y: this.yearDetails.map(dataItem => { return dataItem.fugitiveEmissions }),
-        name: 'Fugitive Emissions',
-        type: 'bar',
-        marker: {
-          color: EmissionsColors["fugitive"]
+          color: getEmissionsTypeColor('Scope 1: Mobile')
         }
       });
     }
 
-    if(this.yearDetails.find(dataItem => { return dataItem.processEmissions != 0 })){
+    if(this.yearDetails.find(dataItem => { return dataItem.emissionsResults.fugitiveEmissions != 0 })){
       data.push({
         x: this.yearDetails.map(dataItem => { return dataItem.year }),
-        y: this.yearDetails.map(dataItem => { return dataItem.processEmissions }),
+        y: this.yearDetails.map(dataItem => { return dataItem.emissionsResults.fugitiveEmissions }),
+        name: 'Scope 1 Fugitive Emissions',
+        type: 'bar',
+        marker: {
+          color: getEmissionsTypeColor('Scope 1: Fugitive')
+        }
+      });
+    }
+
+    if(this.yearDetails.find(dataItem => { return dataItem.emissionsResults.processEmissions != 0 })){
+      data.push({
+        x: this.yearDetails.map(dataItem => { return dataItem.year }),
+        y: this.yearDetails.map(dataItem => { return dataItem.emissionsResults.processEmissions }),
         name: 'Process Emissions',
         type: 'bar',
         marker: {
-          color: EmissionsColors["process"]
+          color: getEmissionsTypeColor('Scope 1: Process')
         }
       });
     }

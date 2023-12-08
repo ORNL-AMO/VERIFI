@@ -70,7 +70,8 @@ export class BetterClimateReportComponent {
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
     let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue()
-    if (typeof Worker !== 'undefined') {
+    // if (typeof Worker !== 'undefined') {
+      if(false){
       this.worker = new Worker(new URL('src/app/web-workers/better-climate-report.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {
         if (!data.error) {
@@ -97,7 +98,13 @@ export class BetterClimateReportComponent {
       });
     } else {
       // Web Workers are not supported in this environment
+      let betterClimateReport: BetterClimateReport = new BetterClimateReport(this.account, accountFacilities, accountMeters, accountMeterData, this.selectedReport.baselineYear, this.selectedReport.reportYear,
+        this.eGridService.co2Emissions, this.selectedReport.betterClimateReportSetup.emissionsDisplay, this.account.sustainabilityQuestions.greenhouseReductionPercent, customFuels);
+      this.betterClimateReportUnfiltered = _.cloneDeep(betterClimateReport);
+      this.betterClimateReport = this.filterIntermediateYears(betterClimateReport);
       this.calculating = false;
+
+
     }
   }
 

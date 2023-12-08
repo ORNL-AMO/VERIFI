@@ -29,16 +29,16 @@ export class AbsoluteEmissionsTableComponent {
 
   ngOnInit(){
     this.hasStationary = this.yearDetails.find(detail => {
-      return detail.stationaryEmissions != 0;
+      return detail.emissionsResults.stationaryEmissions != 0;
     }) != undefined;
     this.hasMobile = this.yearDetails.find(detail => {
-      return detail.mobileEmissions != 0;
+      return detail.emissionsResults.mobileTotalEmissions != 0;
     }) != undefined;
     this.hasFugitive = this.yearDetails.find(detail => {
-      return detail.fugitiveEmissions != 0;
+      return detail.emissionsResults.fugitiveEmissions != 0;
     }) != undefined;
     this.hasProcess = this.yearDetails.find(detail => {
-      return detail.processEmissions != 0;
+      return detail.emissionsResults.processEmissions != 0;
     }) != undefined;
   }
 

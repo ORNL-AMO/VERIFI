@@ -1,5 +1,5 @@
 import { IdbAccount, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from "src/app/models/idb";
-import { checkShowSiteToSource, getIsEnergyMeter } from "src/app/shared/sharedHelperFuntions";
+import { checkShowSiteToSource, getIsEnergyMeter, getIsEnergyUnit } from "src/app/shared/sharedHelperFuntions";
 import { getUnitFromMeter } from "../calanderization/calanderizationHelpers";
 import { ConvertValue } from "./convertValue";
 
@@ -21,7 +21,11 @@ export function convertMeterData(meter: IdbUtilityMeter, meterData: Array<IdbUti
     }
     let needConvertVolume: boolean = copyMeterData.find(mData => { return mData.totalVolume != undefined }) != undefined;
     if (needConvertVolume) {
-        let facilityUnit: string = neededUnit;
+        //TODO: Check correct units are being used where needed...
+        let facilityUnit: string;
+        if(neededUnit && !getIsEnergyUnit(neededUnit)){
+            facilityUnit = neededUnit;
+        }
         if (!facilityUnit) {
             facilityUnit = getUnitFromMeter(meter, accountOrFacility);
         }
