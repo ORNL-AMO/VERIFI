@@ -49,6 +49,18 @@ export class AbsoluteEmissionsChartComponent {
         }
       });
     }
+    
+    if(this.yearDetails.find(dataItem => { return dataItem.emissionsResults.otherScope2Emissions != 0 })){
+      data.push({
+        x: this.yearDetails.map(dataItem => { return dataItem.year }),
+        y: this.yearDetails.map(dataItem => { return dataItem.emissionsResults.otherScope2Emissions }),
+        name: 'Scope 2: Other',
+        type: 'bar',
+        marker: {
+          color: getEmissionsTypeColor('Scope 2: Other')
+        }
+      });
+    }
 
     
     if(this.yearDetails.find(dataItem => { return dataItem.emissionsResults.stationaryEmissions != 0 })){
@@ -97,6 +109,7 @@ export class AbsoluteEmissionsChartComponent {
         }
       });
     }
+
 
 
     var layout = {

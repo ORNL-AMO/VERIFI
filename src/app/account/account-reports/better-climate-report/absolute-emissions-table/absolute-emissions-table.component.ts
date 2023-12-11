@@ -23,6 +23,7 @@ export class AbsoluteEmissionsTableComponent {
   hasFugitive: boolean;
   hasProcess: boolean;
   hasBiomass: boolean;
+  hasOtherScope2: boolean;
   constructor() {
 
   }
@@ -43,6 +44,9 @@ export class AbsoluteEmissionsTableComponent {
     }) != undefined;
     this.hasBiomass = this.yearDetails.find(detail => {
       return detail.emissionsResults.mobileBiogenicEmissions != 0;
+    }) != undefined;
+    this.hasOtherScope2 = this.yearDetails.find(detail => {
+      return detail.emissionsResults.otherScope2Emissions != 0;
     }) != undefined;
   }
 

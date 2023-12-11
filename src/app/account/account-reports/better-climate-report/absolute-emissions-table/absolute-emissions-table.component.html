@@ -292,6 +292,43 @@
             </ng-container>
         </tr>
         <tr>
+            <td class="ps-3">
+                Other Scope 2 Emissions
+            </td>
+            <ng-container *ngIf="betterClimateReportSetup.includeEmissionsInTables">
+                <td *ngFor="let yearDetail of yearDetails">
+                    <ng-container *ngIf="yearDetail.emissionsResults.otherScope2Emissions">
+                        {{yearDetail.emissionsResults.otherScope2Emissions | customNumber}}
+                    </ng-container>
+                    <ng-container *ngIf="!yearDetail.emissionsResults.otherScope2Emissions">
+                        &mdash;
+                    </ng-container>
+                </td>
+            </ng-container>
+            <ng-container *ngIf="betterClimateReportSetup.includePercentReductionsInTables">
+                <td *ngFor="let yearDetail of yearDetails">
+                    <ng-container *ngIf="yearDetail.percentReductions.otherScope2Emissions">
+                        {{yearDetail.percentReductions.otherScope2Emissions| number:'1.0-2'}} %
+                    </ng-container>
+                    <ng-container *ngIf="!yearDetail.percentReductions.otherScope2Emissions">
+                        &mdash;
+                    </ng-container>
+                </td>
+            </ng-container>
+            <ng-container *ngIf="betterClimateReportSetup.includePercentContributionsInTables">
+                <td *ngFor="let yearDetail of yearDetails">
+                    <ng-container
+                        *ngIf="yearDetail.totalContribution.otherScope2Emissions">
+                        {{yearDetail.totalContribution.otherScope2Emissions| number:'1.0-2'}} %
+                    </ng-container>
+                    <ng-container
+                        *ngIf="!yearDetail.totalContribution.otherScope2Emissions">
+                        &mdash;
+                    </ng-container>
+                </td>
+            </ng-container>
+        </tr>
+        <tr>
             <th>
                 Total Emissions (Metric Tons)
             </th>
