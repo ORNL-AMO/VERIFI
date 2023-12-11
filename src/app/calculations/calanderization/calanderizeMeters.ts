@@ -458,6 +458,9 @@ function calanderizeFullYear(meter: IdbUtilityMeter, meterData: Array<IdbUtility
         let monthlyEnergyUse: number = _.sumBy(currentYearData, (yearData: IdbUtilityMeterData) => { return yearData.totalEnergyUse }) / 12;
         let monthlyCost: number = _.sumBy(currentYearData, (yearData: IdbUtilityMeterData) => { return yearData.totalCost }) / 12;
         let monthlyConsumption: number = _.sumBy(currentYearData, (yearData: IdbUtilityMeterData) => { return yearData.totalVolume }) / 12;
+        if(isNaN(monthlyConsumption)){
+            monthlyConsumption = 0;
+        }
         let readingType: 'mixed' | 'metered' | 'estimated';
         let readingsEstimated: Array<boolean> = currentYearData.map(reading => { return reading.isEstimated });
         let uniqEstimated: Array<boolean> = _.uniq(readingsEstimated);

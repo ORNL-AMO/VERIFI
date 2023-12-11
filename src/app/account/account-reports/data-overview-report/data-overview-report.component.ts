@@ -15,6 +15,7 @@ import { FacilityOverviewData } from 'src/app/calculations/dashboard-calculation
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
+import { setEmissionsForCalanderizedMeters } from 'src/app/calculations/emissions-calculations/emissions';
 
 @Component({
   selector: 'app-data-overview-report',
@@ -189,7 +190,9 @@ export class DataOverviewReportComponent {
       });
     } else {
       // Web Workers are not supported in this environment.
+      //TODO: need custom fuels for account overview calanderization
       this.accountData.calanderizedMeters = getCalanderizedMeterData(meters, meterData, this.account, false, { energyIsSource: this.overviewReport.energyIsSource, neededUnits: undefined });
+      this.accountData.calanderizedMeters = setEmissionsForCalanderizedMeters(this.accountData.calanderizedMeters, this.overviewReport.energyIsSource, includedFacilities, this.eGridService.co2Emissions, undefined);
       this.accountData.accountOverviewData = new AccountOverviewData(this.accountData.calanderizedMeters, facilities, this.account, this.accountData.dateRange);
       this.accountData.utilityUseAndCost = new UtilityUseAndCost(this.accountData.calanderizedMeters, this.accountData.dateRange);
       this.calculatingAccounts = false;
