@@ -35,7 +35,7 @@
     </thead>
     <tbody class="table-group-divider">
         <!--Mobile-->
-        <tr>
+        <tr *ngIf="showMobile">
             <td>
                 Scope 1: Mobile
             </td>
@@ -93,7 +93,7 @@
             </td>
         </tr>
         <!--fugitive-->
-        <tr>
+        <tr *ngIf="showFugitive">
             <td>
                 Scope 1: Fugitive
             </td>
@@ -151,7 +151,7 @@
             </td>
         </tr>
         <!--process-->
-        <tr>
+        <tr *ngIf="showProcess">
             <td>
                 Scope 1: Process
             </td>
@@ -209,7 +209,7 @@
             </td>
         </tr>
         <!--Stationary-->
-        <tr>
+        <tr *ngIf="showStationary">
             <td>
                 Scope 1: Stationary
             </td>
@@ -267,7 +267,7 @@
             </td>
         </tr>
         <!--Location-->
-        <tr *ngIf="emissionsDisplay == 'location'">
+        <tr *ngIf="emissionsDisplay == 'location' && showScope2LocationElectricity">
             <td>
                 Scope 2: Electricity (Location)
             </td>
@@ -325,7 +325,7 @@
             </td>
         </tr>
         <!--Market-->
-        <tr *ngIf="emissionsDisplay == 'market'">
+        <tr *ngIf="emissionsDisplay == 'market' && showScope2MarketElectricity">
             <td>
                 Scope 2: Electricity (Market)
             </td>
@@ -383,7 +383,7 @@
             </td>
         </tr>
         <!--Scope 2: OTHER-->
-        <tr *ngIf="emissionsDisplay == 'market'">
+        <tr *ngIf="showScope2Other">
             <td>
                 Scope 2: Other
             </td>
