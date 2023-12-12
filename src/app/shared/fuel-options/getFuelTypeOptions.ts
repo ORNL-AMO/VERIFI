@@ -19,12 +19,12 @@ import { VehicleType, VehicleTypes } from "../vehicle-data/vehicleType";
 
 
 
-export function getFuelTypeOptions(source: MeterSource, phase: MeterPhase, customFuels: Array<IdbCustomFuel>, scope: number): Array<FuelTypeOption> {
+export function getFuelTypeOptions(source: MeterSource, phase: MeterPhase, customFuels: Array<IdbCustomFuel>, scope: number, vehicleCategory: number, vehicleType: number): Array<FuelTypeOption> {
     if (source == 'Other Fuels') {
         if (scope == 1) {
             //scope 1 stationary
             let sourceCustomFuels: Array<IdbCustomFuel> = customFuels.filter(cFuel => {
-                return cFuel.phase == phase
+                return cFuel.phase == phase && cFuel.isMobile == false
             });
             let fuels: Array<FuelTypeOption> = sourceCustomFuels.map(option => {
                 return option
@@ -47,7 +47,7 @@ export function getFuelTypeOptions(source: MeterSource, phase: MeterPhase, custo
             }
         } else if (scope == 2) {
             //scope 1 mobile
-            return getAllMobileFuelTypes();
+            return getMobileFuelTypes(vehicleCategory, vehicleType, customFuels);
         }
     } else if (source == 'Other Energy') {
         return StationaryOtherEnergyOptions;
@@ -68,15 +68,32 @@ export function getAllMobileFuelTypes(): Array<FuelTypeOption> {
         MobileWaterTransportOptions);
 }
 
-export function getFuelTypesFromMeter(meter: IdbUtilityMeter): Array<FuelTypeOption> {
-    if (meter.vehicleCategory == 1) {
-        return MobileTransportOnsiteOptions;
-    } else {
-        let vehicleType: VehicleType = VehicleTypes.find(vType => {
-            return vType.value == meter.vehicleType;
+export function getMobileFuelTypes(vehicleCategory: number, vehicleType: number, customMobileFuels: Array<IdbCustomFuel>): Array<FuelTypeOption> {
+    let fuels: Array<FuelTypeOption> = [];
+
+    if (vehicleCategory == 1 || vehicleCategory == 3 || vehicleCategory == 4) {
+        fuels = customMobileFuels.filter(fuel => {
+            return fuel.isMobile == true && fuel.isOnRoad == false;
         });
-        if (vehicleType) {
-            return vehicleType.fuelOptions;
+    } else {
+        fuels = customMobileFuels.filter(fuel => {
+            return fuel.isMobile == true && fuel.isOnRoad == true;
+        });
+    }
+
+    if (vehicleCategory == 1) {
+        MobileTransportOnsiteOptions.forEach(transportOption => {
+            fuels.push(transportOption);
+        })
+    } else {
+        let vehicle: VehicleType = VehicleTypes.find(vType => {
+            return vType.value == vehicleType;
+        });
+        if (vehicle) {
+            vehicle.fuelOptions.forEach(option => {
+                fuels.push(option);
+            })
         }
     }
+    return fuels;
 }

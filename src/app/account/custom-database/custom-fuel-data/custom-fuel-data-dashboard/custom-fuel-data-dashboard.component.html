@@ -50,7 +50,25 @@
                 <hr>
                 <table class="table table-hover table-bordered table-sm">
                     <tbody>
-                        <tr>
+                        <tr *ngIf="fuel.isMobile == false">
+                            <th class="w-50">
+                                Fuel Type
+                            </th>
+                            <td>
+                                <ng-container *ngIf="fuel.isMobile">Mobile</ng-container>
+                                <ng-container *ngIf="!fuel.isMobile">Stationary</ng-container>
+                            </td>
+                        </tr>
+                        <tr *ngIf="fuel.isMobile == true">
+                            <th class="w-50">
+                                Is On-road?
+                            </th>
+                            <td>
+                                <ng-container *ngIf="fuel.isOnRoad">On-road</ng-container>
+                                <ng-container *ngIf="!fuel.isOnRoad">Off-road</ng-container>
+                            </td>
+                        </tr>
+                        <tr *ngIf="fuel.isMobile == false">
                             <th class="w-50">
                                 Phase
                             </th>
@@ -68,7 +86,7 @@
                                     [innerHTML]="fuel.startingUnit| settingsLabel"></span>
                             </td>
                         </tr>
-                        <tr>
+                        <tr *ngIf="fuel.isMobile == false">
                             <th>
                                 Site To Source
                             </th>
@@ -118,7 +136,7 @@
                                 </td>
                             </tr>
                         </ng-container>
-                        <tr>
+                        <tr *ngIf="fuel.isMobile == false">
                             <th>
                                 Emissions Output Rate
                             </th>

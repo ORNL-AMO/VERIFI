@@ -9,6 +9,7 @@ import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service
 import { MeterPhase } from 'src/app/models/constantsAndTypes';
 import { IdbAccount, IdbCustomFuel, IdbUtilityMeter } from 'src/app/models/idb';
 import { FuelTypeOption } from 'src/app/shared/fuel-options/fuelTypeOption';
+import { getAllMobileFuelTypes } from 'src/app/shared/fuel-options/getFuelTypeOptions';
 import { StationaryGasOptions } from 'src/app/shared/fuel-options/stationaryGasOptions';
 import { StationaryLiquidOptions } from 'src/app/shared/fuel-options/stationaryLiquidOptions';
 import { StationaryOtherEnergyOptions } from 'src/app/shared/fuel-options/stationaryOtherEnergyOptions';
@@ -102,6 +103,10 @@ export class CustomFuelDataFormComponent {
     StationaryOtherEnergyOptions.forEach(option => {
       this.allFuelNames.push(option.value);
     });
+    let allMobileFuels: Array<FuelTypeOption> = getAllMobileFuelTypes();
+    allMobileFuels.forEach(mobileFuel => {
+      this.allFuelNames.push(mobileFuel.value);
+    })
   }
 
   async save() {
@@ -110,6 +115,8 @@ export class CustomFuelDataFormComponent {
     this.editCustomFuel.heatCapacityValue = this.form.controls.heatCapacityValue.value;
     this.editCustomFuel.siteToSourceMultiplier = this.form.controls.siteToSourceMultiplier.value;
     this.editCustomFuel.isBiofuel = this.form.controls.isBiofuel.value;
+    this.editCustomFuel.isMobile = this.form.controls.isMobile.value;
+    this.editCustomFuel.isOnRoad = this.form.controls.isOnRoad.value;
 
     this.editCustomFuel.CO2 = this.form.controls.CO2.value;
     this.editCustomFuel.CH4 = this.form.controls.CH4.value;

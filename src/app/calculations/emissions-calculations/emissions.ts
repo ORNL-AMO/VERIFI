@@ -5,7 +5,7 @@ import { EmissionsResults, SubregionEmissions } from "src/app/models/eGridEmissi
 import * as _ from 'lodash';
 import { MeterPhase, MeterSource } from "src/app/models/constantsAndTypes";
 import { FuelTypeOption } from "src/app/shared/fuel-options/fuelTypeOption";
-import { getAllMobileFuelTypes, getFuelTypeOptions, getFuelTypesFromMeter } from "src/app/shared/fuel-options/getFuelTypeOptions";
+import { getFuelTypeOptions, getMobileFuelTypes } from "src/app/shared/fuel-options/getFuelTypeOptions";
 
 export function setEmissionsForCalanderizedMeters(calanderizedMeterData: Array<CalanderizedMeter>, energyIsSource: boolean, facilities: Array<IdbFacility>, co2Emissions: Array<SubregionEmissions>, customFuels: Array<IdbCustomFuel>): Array<CalanderizedMeter> {
     for (let i = 0; i < calanderizedMeterData.length; i++) {
@@ -111,12 +111,12 @@ export function getEmissions(meter: IdbUtilityMeter,
         }
         //non-electricity emissions rates are in MMBtu
         let convertedEnergyUse: number = new ConvertValue(energyUse, energyUnit, 'MMBtu').convertedValue;
-        let outputRate: number = getFuelEmissionsOutputRate(meter.source, meter.fuel, meter.phase, customFuels, meter.scope);
+        let outputRate: number = getFuelEmissionsOutputRate(meter.source, meter.fuel, meter.phase, customFuels, meter.scope, meter.vehicleCategory, meter.vehicleType);
         //emissions calculated in kg CO2e using emissions factors, converted to tonne CO2e
         stationaryEmissions = (convertedEnergyUse * outputRate) / 1000;
     } else if (meter.source == 'Other Fuels' && meter.scope == 2) {
         //Mobile emissions
-        let fuelOptions: Array<FuelTypeOption> = getFuelTypesFromMeter(meter);
+        let fuelOptions: Array<FuelTypeOption> = getMobileFuelTypes(meter.vehicleCategory, meter.vehicleType, customFuels);
         let meterFuel: FuelTypeOption = fuelOptions.find(option => {
             return option.value == meter.vehicleFuel
         });
@@ -169,7 +169,7 @@ export function getEmissions(meter: IdbUtilityMeter,
         }
     } else if (meter.source == 'Other Energy') {
         let convertedEnergyUse: number = new ConvertValue(energyUse, energyUnit, 'MMBtu').convertedValue;
-        let outputRate: number = getFuelEmissionsOutputRate(meter.source, meter.fuel, meter.phase, customFuels, meter.scope);
+        let outputRate: number = getFuelEmissionsOutputRate(meter.source, meter.fuel, meter.phase, customFuels, meter.scope, meter.vehicleCategory, meter.vehicleType);
         //emissions calculated in kg CO2e using emissions factors, converted to tonne CO2e
         scope2Other = (convertedEnergyUse * outputRate) / 1000;
     }
@@ -226,13 +226,13 @@ export function getEmissionsRate(subregion: string, year: number, co2Emissions: 
     return { marketRate: 0, locationRate: 0 };
 }
 
-export function getFuelEmissionsOutputRate(source: MeterSource, fuel: string, phase: MeterPhase, customFuels: Array<IdbCustomFuel>, scope: number): number {
+export function getFuelEmissionsOutputRate(source: MeterSource, fuel: string, phase: MeterPhase, customFuels: Array<IdbCustomFuel>, scope: number, vehicleCategory: number, vehicleType: number): number {
     //emissions rates in kg/MMBtu
     let emissionsRate: number;
     if (source == 'Natural Gas') {
         emissionsRate = 53.1148;
     } else if (source == 'Other Fuels' || source == 'Other Energy') {
-        let fuelTypeOptions: Array<FuelTypeOption> = getFuelTypeOptions(source, phase, customFuels, scope);
+        let fuelTypeOptions: Array<FuelTypeOption> = getFuelTypeOptions(source, phase, customFuels, scope, vehicleCategory, vehicleType);
         let selectedFuel: FuelTypeOption = fuelTypeOptions.find(option => { return option.value == fuel })
         if (selectedFuel) {
             emissionsRate = selectedFuel.emissionsOutputRate;

@@ -62,6 +62,27 @@ export class ExistingFuelsModalComponent {
       phase = 'Solid';
     } else {
       phase = 'Liquid';
+      if (this.fuelType == 'mobileHeavyDutyTruck') {
+        option.value = option.value + ' (Heavy Duty Truck)';
+      } if (this.fuelType == 'mobileBus') {
+        option.value = option.value + ' (Bus)';
+      } if (this.fuelType == 'mobileLightDutyTruck') {
+        option.value = option.value + ' (Light Duty Truck)';
+      } if (this.fuelType == 'mobileMotorcycle') {
+        option.value = option.value + ' (Motorcycle)';
+      } if (this.fuelType == 'mobileOffRoadAgricultural') {
+        option.value = option.value + ' (Off-road Agricultural)';
+      } if (this.fuelType == 'mobileOffRoadConstruction') {
+        option.value = option.value + ' (Off-road Construction)';
+      } if (this.fuelType == 'mobilePassangerCars') {
+        option.value = option.value + ' (Passanger Cars)';
+      } if (this.fuelType == 'mobileRail') {
+        option.value = option.value + ' (Rail)';
+      } if (this.fuelType == 'mobileTransportOnsite') {
+        option.value = option.value + ' (Transport Onsite)';
+      } if (this.fuelType == 'mobileWaterTransport') {
+        option.value = option.value + ' (Water Transport)';
+      }
     };
     this.emitClose.emit({ phase: phase, option: option });
   }
