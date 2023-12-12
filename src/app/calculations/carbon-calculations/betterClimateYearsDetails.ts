@@ -13,6 +13,7 @@ export class BetterClimateYearDetails {
     totalSquareFeet: number;
     totalElectricity: number;
     fuelTotals: Array<{ fuelType: string, total: number }>;
+    vehicleFuelTotals: Array<{ fuelType: string, total: number }>;
     onSiteGeneratedElectricity: number;
     purchasedElectricity: number;
     gridElectricity: number;
@@ -20,6 +21,7 @@ export class BetterClimateYearDetails {
     vppaElectricity: number;
     RECs: number;
     totalEnergyUse: number;
+    totalVehicleEnergyUse: number;
 
     emissionsResults: EmissionsResults;
     reductions: EmissionsResults;
@@ -87,9 +89,10 @@ export class BetterClimateYearDetails {
         this.vppaElectricity = this.getElectricityUse(electricityMeters, year, 4);
         this.RECs = this.getElectricityUse(electricityMeters, year, 6);
         //fuel
-        let fuelTypes: Array<string> = this.getFuelTypes(calanderizedMeters);
-        this.setFuelTotals(fuelTypes, calanderizedMeters);
+        this.setFuelTotals(calanderizedMeters);
+        this.setVehicleFuelTotals(calanderizedMeters);
         this.setTotalEnergyUse();
+        this.setVehicleTotalEnergyUse();
 
         this.setAnnualPercentImprovement(previousYearDetails);
         this.setScope2EnergyUse(calanderizedMeters, year);
@@ -272,9 +275,10 @@ export class BetterClimateYearDetails {
         this.totalElectricity = new ConvertValue(sumElectricity, 'MMBtu', 'MWh').convertedValue;
     }
 
-    setFuelTotals(meterTypes: Array<string>, calanderizedMeters: Array<CalanderizedMeter>) {
+    setFuelTotals(calanderizedMeters: Array<CalanderizedMeter>) {
+        let fuelTypes: Array<string> = this.getFuelTypes(calanderizedMeters);
         this.fuelTotals = new Array();
-        meterTypes.forEach(type => {
+        fuelTypes.forEach(type => {
             let typeCalanderizedMeters: Array<CalanderizedMeter>;
             if (type == 'Natural Gas') {
                 typeCalanderizedMeters = calanderizedMeters.filter(cMeter => {
@@ -307,7 +311,10 @@ export class BetterClimateYearDetails {
             if (cMeter.meter.source == 'Natural Gas') {
                 meterTypes.push(cMeter.meter.source);
             } else if (cMeter.meter.source == 'Other Fuels') {
-                meterTypes.push(cMeter.meter.fuel);
+                //non vehicles
+                if (cMeter.meter.scope != 2) {
+                    meterTypes.push(cMeter.meter.fuel);
+                }
             } else if (cMeter.meter.source == 'Other Energy') {
                 meterTypes.push(cMeter.meter.fuel);
             }
@@ -345,6 +352,40 @@ export class BetterClimateYearDetails {
             return monthlyData.energyConsumption;
         });
         return new ConvertValue(sumElectricity, 'MMBtu', 'MWh').convertedValue;
+    }
+
+    setVehicleFuelTotals(calanderizedMeters: Array<CalanderizedMeter>) {
+        this.vehicleFuelTotals = new Array();
+        let vehicleMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => {
+            return cMeter.meter.scope == 2;
+        });
+        let vehicleFuels: Array<string> = vehicleMeters.flatMap(vMeter => {
+            return vMeter.meter.vehicleFuel
+        });
+        vehicleFuels = _.uniq(vehicleFuels);
+        vehicleFuels.forEach(vFuel => {
+            let typeCalanderizedMeters: Array<CalanderizedMeter> = vehicleMeters.filter(vMeter => {
+                return vMeter.meter.vehicleFuel == vFuel;
+            });
+            let monthlyData: Array<MonthlyData> = typeCalanderizedMeters.flatMap(cMeter => {
+                return cMeter.monthlyData;
+            });
+            monthlyData = monthlyData.filter(mData => {
+                return mData.fiscalYear == this.year;
+            });
+            let sumConsumption: number = _.sumBy(monthlyData, (monthlyData: MonthlyData) => {
+                return monthlyData.energyUse;
+            });
+            this.vehicleFuelTotals.push({
+                fuelType: vFuel,
+                total: sumConsumption
+            });
+        });
+
+    }
+
+    setVehicleTotalEnergyUse(){
+        this.totalVehicleEnergyUse = _.sumBy(this.vehicleFuelTotals, 'total');
     }
 
     setTotalEmissions(emissionsDisplay: 'market' | 'location') {

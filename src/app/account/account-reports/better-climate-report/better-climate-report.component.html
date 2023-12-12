@@ -29,7 +29,10 @@
             [cellWidth]="cellWidth"></app-total-portfolio-energy-use-table>
     </div>
     <!--TODO: Add vehicle emissions to meters-->
-    <!-- <app-vehicle-energy-use-table [yearDetails]="betterClimateReport.portfolioYearDetails" [cellWidth]="cellWidth"></app-vehicle-energy-use-table> -->
+    <div class="report" [ngClass]="{'print': print}" *ngIf="betterClimateReportSetup.includeVehicleEnergyUse">
+        <app-vehicle-energy-use-table [yearDetails]="betterClimateReport.portfolioYearDetails"
+            [cellWidth]="cellWidth"></app-vehicle-energy-use-table>
+    </div>
 
     <div class="report" [ngClass]="{'print': print}" *ngIf="betterClimateReportSetup.includeCalculationsForGraphs">
         <app-graph-calculations-table [yearDetails]="betterClimateReport.portfolioYearDetails"

@@ -1,1 +1,44 @@
-<p>vehicle-energy-use-table works!</p>
+<h4>
+    Energy Use for Vehicles
+</h4>
+
+<table class="table table-responsive table-bordered">
+    <thead>
+        <tr>
+            <th [ngStyle]="{'width.%': cellWidth}">
+
+            </th>
+            <th *ngFor="let yearDetail of yearDetails" [ngStyle]="{'width.%': cellWidth}">
+                {{yearDetail.year}}
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr *ngFor="let fuel of yearDetails[0].vehicleFuelTotals; let index = index;">
+            <td>
+                {{fuel.fuelType}} (MMBtu)
+            </td>
+            <td *ngFor="let yearDetail of yearDetails">
+                <ng-container *ngIf="yearDetail.vehicleFuelTotals[index].total">
+                    {{yearDetail.vehicleFuelTotals[index].total | customNumber}}
+                </ng-container>
+                <ng-container *ngIf="!yearDetail.vehicleFuelTotals[index].total">
+                    &mdash;
+                </ng-container>
+            </td>
+        </tr>
+        <tr>
+            <th>
+                Total Energy Use (MMBtu)
+            </th>
+            <th *ngFor="let yearDetail of yearDetails">
+                <ng-container *ngIf="yearDetail.totalVehicleEnergyUse">
+                    {{yearDetail.totalVehicleEnergyUse | customNumber}}
+                </ng-container>
+                <ng-container *ngIf="!yearDetail.totalVehicleEnergyUse">
+                    &mdash;
+                </ng-container>
+            </th>
+        </tr>
+    </tbody>
+</table>

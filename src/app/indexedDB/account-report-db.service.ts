@@ -147,7 +147,8 @@ export class AccountReportDbService {
         skipIntermediateYears: false,
         includeEmissionsInTables: true,
         includePercentReductionsInTables: true,
-        includePercentContributionsInTables: true
+        includePercentContributionsInTables: true,
+        includeVehicleEnergyUse: true
       }
     }
   }
