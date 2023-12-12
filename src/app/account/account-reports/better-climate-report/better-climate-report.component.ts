@@ -70,8 +70,7 @@ export class BetterClimateReportComponent {
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
     let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue()
-    // if (typeof Worker !== 'undefined') {
-      if(false){
+    if (typeof Worker !== 'undefined') {
       this.worker = new Worker(new URL('src/app/web-workers/better-climate-report.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {
         if (!data.error) {

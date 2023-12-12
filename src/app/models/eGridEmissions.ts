@@ -38,7 +38,7 @@ export interface EmissionsResults {
 
 export type EmissionsTypes = 'Scope 1: Stationary' | 'Scope 1: Mobile' | 'Scope 1: Fugitive' | 'Scope 1: Process' | 'Scope 2: Electricity (Location)' | 'Scope 2: Electricity (Market)' | 'Scope 2: Other';
 
-export function getEmissionsTypeColor(emissionsType: EmissionsTypes | "All Emissions" | "Scope 2 Market" | "Scope 2 Location" | "Scope 1"): string {
+export function getEmissionsTypeColor(emissionsType: EmissionsTypes): string {
   if (emissionsType == 'Scope 1: Fugitive') {
     return '#AB0005';
   } else if (emissionsType == 'Scope 2: Electricity (Location)') {
@@ -53,15 +53,7 @@ export function getEmissionsTypeColor(emissionsType: EmissionsTypes | "All Emiss
     return '#515A5A';
   } else if (emissionsType == 'Scope 2: Other') {
     return '#A04000';
-  } else if (emissionsType == "All Emissions") {
-
-  } else if (emissionsType == "Scope 1") {
-
-  } else if (emissionsType == "Scope 2 Market") {
-
-  } else if (emissionsType == "Scope 2 Location") {
-
-  }
+  } 
 }
 
 export function getEmissionsTypes(emissionsDisplay: 'location' | 'market'): Array<EmissionsTypes> {
