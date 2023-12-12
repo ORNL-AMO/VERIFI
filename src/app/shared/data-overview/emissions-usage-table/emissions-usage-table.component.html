@@ -13,7 +13,7 @@
         </thead>
         <tbody class="table-group-divider">
             <!--Scope 1 stationary-->
-            <tr>
+            <tr *ngIf="overviewData.emissionsTotals.stationaryEmissions">
                 <td>
                     <span class="badge"
                         [ngStyle]="{background: getEmissionsTypeColor('Scope 1: Stationary'), color: getEmissionsTypeColor('Scope 1: Stationary') }">
@@ -28,7 +28,7 @@
                     {{overviewData.emissionsTotals.stationaryEmissions | customNumber}}
                 </td>
             </tr>
-            <tr>
+            <tr *ngIf="overviewData.emissionsTotals.mobileTotalEmissions">
                 <td>
                     <span class="badge"
                         [ngStyle]="{background: getEmissionsTypeColor('Scope 1: Mobile'), color: getEmissionsTypeColor('Scope 1: Mobile') }">
@@ -43,7 +43,7 @@
                     {{overviewData.emissionsTotals.mobileTotalEmissions | customNumber}}
                 </td>
             </tr>
-            <tr>
+            <tr *ngIf="overviewData.emissionsTotals.fugitiveEmissions">
                 <td>
                     <span class="badge"
                         [ngStyle]="{background: getEmissionsTypeColor('Scope 1: Fugitive'), color: getEmissionsTypeColor('Scope 1: Fugitive') }">
@@ -58,7 +58,7 @@
                     {{overviewData.emissionsTotals.fugitiveEmissions | customNumber}}
                 </td>
             </tr>
-            <tr>
+            <tr *ngIf="overviewData.emissionsTotals.processEmissions">
                 <td>
                     <span class="badge"
                         [ngStyle]="{background: getEmissionsTypeColor('Scope 1: Process'), color: getEmissionsTypeColor('Scope 1: Process') }">
@@ -73,7 +73,7 @@
                     {{overviewData.emissionsTotals.processEmissions | customNumber}}
                 </td>
             </tr>
-            <tr>
+            <tr *ngIf="overviewData.emissionsTotals.marketElectricityEmissions || overviewData.emissionsTotals.locationElectricityEmissions">
                 <td>
                     <span class="badge"
                         [ngStyle]="{background: getEmissionsTypeColor('Scope 2: Electricity (Market)'), color: getEmissionsTypeColor('Scope 2: Electricity (Market)') }">
@@ -92,7 +92,7 @@
                     {{overviewData.emissionsTotals.locationElectricityEmissions | customNumber}}
                 </td>
             </tr>
-            <tr>
+            <tr *ngIf="overviewData.emissionsTotals.otherScope2Emissions">
                 <td>
                     <span class="badge"
                         [ngStyle]="{background: getEmissionsTypeColor('Scope 2: Other'), color: getEmissionsTypeColor('Scope 2: Other') }">

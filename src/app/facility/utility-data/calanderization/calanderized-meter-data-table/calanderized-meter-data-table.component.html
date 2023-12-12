@@ -78,9 +78,9 @@
             <td *ngIf="calanderizedMeter.showEnergyUse">{{data.energyUse | customNumber}}
             </td>
             <!--location/market emissions-->
-            <td *ngIf="calanderizedMeter.showStandardEmissions">{{data.marketEmissions | customNumber}}
+            <td *ngIf="calanderizedMeter.showStandardEmissions">{{data.totalWithMarketEmissions | customNumber}}
             </td>
-            <td *ngIf="calanderizedMeter.showStandardEmissions">{{data.locationEmissions | customNumber}}
+            <td *ngIf="calanderizedMeter.showStandardEmissions">{{data.totalWithLocationEmissions | customNumber}}
             </td>
             <td *ngIf="calanderizedMeter.showStandardEmissions">{{data.RECs | customNumber}}
             </td>

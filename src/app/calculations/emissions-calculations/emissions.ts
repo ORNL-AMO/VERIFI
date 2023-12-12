@@ -5,7 +5,7 @@ import { EmissionsResults, SubregionEmissions } from "src/app/models/eGridEmissi
 import * as _ from 'lodash';
 import { MeterPhase, MeterSource } from "src/app/models/constantsAndTypes";
 import { FuelTypeOption } from "src/app/shared/fuel-options/fuelTypeOption";
-import { getAllMobileFuelTypes, getFuelTypeOptions } from "src/app/shared/fuel-options/getFuelTypeOptions";
+import { getAllMobileFuelTypes, getFuelTypeOptions, getFuelTypesFromMeter } from "src/app/shared/fuel-options/getFuelTypeOptions";
 
 export function setEmissionsForCalanderizedMeters(calanderizedMeterData: Array<CalanderizedMeter>, energyIsSource: boolean, facilities: Array<IdbFacility>, co2Emissions: Array<SubregionEmissions>, customFuels: Array<IdbCustomFuel>): Array<CalanderizedMeter> {
     for (let i = 0; i < calanderizedMeterData.length; i++) {
@@ -72,7 +72,6 @@ export function getEmissions(meter: IdbUtilityMeter,
         let facility: IdbFacility = facilities.find(facility => { return facility.guid == meter.facilityId });
         let emissionsRates: { marketRate: number, locationRate: number } = getEmissionsRate(facility.eGridSubregion, year, co2Emissions);
         let marketEmissionsOutputRate: number = emissionsRates.marketRate;
-
         if (!isCompressedAir) {
             if (meter.includeInEnergy) {
                 locationElectricityEmissions = convertedEnergyUse * emissionsRates.locationRate * meter.locationGHGMultiplier;
@@ -87,6 +86,7 @@ export function getEmissions(meter: IdbUtilityMeter,
             locationElectricityEmissions = 0;
             scope2Other = convertedEnergyUse * emissionsRates.locationRate * meter.locationGHGMultiplier;
         }
+
         RECs = convertedEnergyUse * meter.recsMultiplier;
         let emissionsEnergyUse: number = convertedEnergyUse;
         if (meter.includeInEnergy == false) {
@@ -116,7 +116,7 @@ export function getEmissions(meter: IdbUtilityMeter,
         stationaryEmissions = (convertedEnergyUse * outputRate) / 1000;
     } else if (meter.source == 'Other Fuels' && meter.scope == 2) {
         //Mobile emissions
-        let fuelOptions: Array<FuelTypeOption> = getAllMobileFuelTypes();
+        let fuelOptions: Array<FuelTypeOption> = getFuelTypesFromMeter(meter);
         let meterFuel: FuelTypeOption = fuelOptions.find(option => {
             return option.value == meter.vehicleFuel
         });
@@ -136,7 +136,7 @@ export function getEmissions(meter: IdbUtilityMeter,
                 mobileBiogenicEmissions = 0;
             }
             //miles = gal * mpg 
-            let miles = (totalVolume * meter.vehicleFuelEfficiency)
+            let miles = (totalVolume * meter.vehicleFuelEfficiency);
             let totalCH4 = miles * 25 * meterFuel.CH4;
             let totalN20 = miles * 298 * meterFuel.N2O;
             mobileOtherEmissions = totalCH4 + totalN20;

@@ -26,7 +26,7 @@
 </div>
 <div class="row print-break-avoid" *ngIf="sectionOptions.includeAnnualBarChart">
     <div class="col-12">
-        <app-emissions-usage-chart
+        <app-emissions-usage-chart [facilityId]="facility.guid"
             [annualSourceData]="annualSourceData"></app-emissions-usage-chart>
     </div>
 </div>

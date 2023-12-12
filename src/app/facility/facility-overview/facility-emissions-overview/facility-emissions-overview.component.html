@@ -55,7 +55,7 @@
                     <h4 class="mb-0">Annual Utility Emissions</h4>
                 </div>
                 <div class="card-body">
-                    <app-emissions-usage-chart
+                    <app-emissions-usage-chart [facilityId]="facilityId"
                         [annualSourceData]="facilityOverviewData.annualSourceData"></app-emissions-usage-chart>
                 </div>
             </div>

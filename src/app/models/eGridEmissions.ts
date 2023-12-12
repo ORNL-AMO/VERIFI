@@ -53,7 +53,7 @@ export function getEmissionsTypeColor(emissionsType: EmissionsTypes): string {
     return '#515A5A';
   } else if (emissionsType == 'Scope 2: Other') {
     return '#A04000';
-  }
+  } 
 }
 
 export function getEmissionsTypes(emissionsDisplay: 'location' | 'market'): Array<EmissionsTypes> {

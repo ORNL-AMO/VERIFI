@@ -1,5 +1,5 @@
 import { MeterPhase, MeterSource } from "src/app/models/constantsAndTypes";
-import { IdbCustomFuel } from "src/app/models/idb";
+import { IdbCustomFuel, IdbUtilityMeter } from "src/app/models/idb";
 import { FuelTypeOption } from "./fuelTypeOption";
 import { StationarySolidOptions } from "./stationarySolidOptions";
 import { StationaryLiquidOptions } from "./stationaryLiquidOptions";
@@ -15,6 +15,7 @@ import { MobilePassangerCarOptions } from "./mobilePassangerCarOptions";
 import { MobileRailOptions } from "./mobileRailOptions";
 import { MobileTransportOnsiteOptions } from "./mobileTransportOnsiteOptions";
 import { MobileWaterTransportOptions } from "./mobileWaterTransportOptions";
+import { VehicleType, VehicleTypes } from "../vehicle-data/vehicleType";
 
 
 
@@ -65,4 +66,17 @@ export function getAllMobileFuelTypes(): Array<FuelTypeOption> {
         MobileRailOptions,
         MobileTransportOnsiteOptions,
         MobileWaterTransportOptions);
+}
+
+export function getFuelTypesFromMeter(meter: IdbUtilityMeter): Array<FuelTypeOption> {
+    if (meter.vehicleCategory == 1) {
+        return MobileTransportOnsiteOptions;
+    } else {
+        let vehicleType: VehicleType = VehicleTypes.find(vType => {
+            return vType.value == meter.vehicleType;
+        });
+        if (vehicleType) {
+            return vehicleType.fuelOptions;
+        }
+    }
 }

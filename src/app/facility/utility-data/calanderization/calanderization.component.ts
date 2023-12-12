@@ -106,7 +106,6 @@ export class CalanderizationComponent implements OnInit {
       let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
       let calanderizedMeterData: Array<CalanderizedMeter> = getCalanderizedMeterData([this.selectedMeter], facilityMeterData, this.selectedFacility);
       let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
-      this.setDateRange(calanderizedMeterData);
       calanderizedMeterData = this.filterMeterDataDateRanges(calanderizedMeterData);
       let cMetersWithEmissions: Array<CalanderizedMeter> = setEmissionsForCalanderizedMeters([calanderizedMeterData[0]], this.selectedFacility.energyIsSource, [this.selectedFacility], this.eGridService.co2Emissions, customFuels);
       this.calanderizedMeter = cMetersWithEmissions[0];
