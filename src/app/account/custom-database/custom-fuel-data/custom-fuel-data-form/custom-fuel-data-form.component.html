@@ -32,8 +32,29 @@
             </div>
             <hr>
             <div class="row">
-                <!--phase-->
+                <!--isMobile-->
                 <div class="col-3">
+                    <label for="isMobile">Fuel Type <span class="required">*</span> </label>
+                    <div class="mb-3">
+                        <select name="isMobile" class="form-select" id="isMobile" type="text" formControlName="isMobile"
+                            (change)="setIsMobile()">
+                            <option [ngValue]="false">Stationary</option>
+                            <option [ngValue]="true">Mobile</option>
+                        </select>
+                    </div>
+                </div>
+                <!--isMobile-->
+                <div class="col-3" *ngIf="form.controls.isMobile.value == true">
+                    <label for="isOnRoad">Is On-road? <span class="required">*</span> </label>
+                    <div class="mb-3">
+                        <select name="isOnRoad" class="form-select" id="isOnRoad" type="text" formControlName="isOnRoad">
+                            <option [ngValue]="false">No</option>
+                            <option [ngValue]="true">Yes</option>
+                        </select>
+                    </div>
+                </div>
+                <!--phase-->
+                <div class="col-3" *ngIf="form.controls.isMobile.value == false">
                     <label for="phase">Phase <span class="required">*</span> </label>
                     <div class="mb-3">
                         <select name="phase" class="form-select" id="phase" type="text" formControlName="phase"
@@ -64,7 +85,7 @@
                     <div class="alert-warning alert" *ngIf="meterForm.controls.heatCapacity.value === 0">Heat capacity
                         should be greater than 0</div> -->
                 </div>
-                <div class="col-3">
+                <div class="col-3" *ngIf="form.controls.isMobile.value == false">
                     <label for="siteToSourceMultiplier">Site to Source Multiplier <span class="required">*</span>
                     </label>
                     <div class="input-group">
@@ -123,7 +144,7 @@
                     </div>
                 </ng-container>
 
-                <div class="col-3">
+                <div class="col-3" *ngIf="form.controls.isMobile.value == false">
                     <label for="emissionsOutputRate">Emissions Output Rate <span class="required">*</span>
 
                     </label>

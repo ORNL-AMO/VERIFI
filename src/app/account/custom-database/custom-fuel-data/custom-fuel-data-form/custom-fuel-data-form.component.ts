@@ -173,7 +173,9 @@ export class CustomFuelDataFormComponent {
       'CH4': [editItem.CH4, chemicalValidators],
       'N2O': [editItem.N2O, chemicalValidators],
       'emissionsOutputRate': [editItem.emissionsOutputRate, [Validators.required]],
-      'directEmissionsRate': [editItem.directEmissionsRate]
+      'directEmissionsRate': [editItem.directEmissionsRate],
+      'isMobile': [editItem.isMobile],
+      'isOnRoad': [editItem.isOnRoad]
     });
     this.setDisableOutputRate();
   }
@@ -187,17 +189,19 @@ export class CustomFuelDataFormComponent {
   }
 
   setOutputRate() {
-    let CO2: number = this.form.controls.CO2.value;
-    let CH4: number = this.form.controls.CH4.value;
-    let N2O: number = this.form.controls.N2O.value;
-    if (this.selectedAccount.energyUnit != 'MMBtu') {
-      let conversionHelper: number = new ConvertValue(1, 'MMBtu', this.selectedAccount.energyUnit).convertedValue;
-      CO2 = CO2 / conversionHelper;
-      CH4 = CH4 / conversionHelper;
-      N2O = N2O / conversionHelper;
+    if (this.form.controls.isMobile.value == false) {
+      let CO2: number = this.form.controls.CO2.value;
+      let CH4: number = this.form.controls.CH4.value;
+      let N2O: number = this.form.controls.N2O.value;
+      if (this.selectedAccount.energyUnit != 'MMBtu') {
+        let conversionHelper: number = new ConvertValue(1, 'MMBtu', this.selectedAccount.energyUnit).convertedValue;
+        CO2 = CO2 / conversionHelper;
+        CH4 = CH4 / conversionHelper;
+        N2O = N2O / conversionHelper;
+      }
+      let outputRate: number = CO2 + (CH4 * (25 / 1000)) + (N2O * (298 / 1000));
+      this.form.controls.emissionsOutputRate.patchValue(outputRate);
     }
-    let outputRate: number = CO2 + (CH4 * (25 / 1000)) + (N2O * (298 / 1000));
-    this.form.controls.emissionsOutputRate.patchValue(outputRate);
   }
 
   showFuelModal() {
@@ -227,6 +231,8 @@ export class CustomFuelDataFormComponent {
       this.form.controls.directEmissionsRate.patchValue(false);
       this.form.controls.fuelName.patchValue(selectedOption.option.value + ' (Modified)');
       this.form.controls.emissionsOutputRate.patchValue(selectedOption.option.emissionsOutputRate);
+      this.form.controls.isMobile.patchValue(selectedOption.option.isMobile);
+      this.form.controls.isOnRoad.patchValue(selectedOption.option.isOnRoad || false);
     }
   }
 
@@ -266,5 +272,9 @@ export class CustomFuelDataFormComponent {
     } else if (this.form.controls.phase.value == 'Solid') {
       this.editCustomFuel.startingUnit = this.selectedAccount.massUnit;
     }
+  }
+
+  setIsMobile() {
+
   }
 }
