@@ -110,10 +110,11 @@ export class CustomFuelDataFormComponent {
     this.editCustomFuel.heatCapacityValue = this.form.controls.heatCapacityValue.value;
     this.editCustomFuel.siteToSourceMultiplier = this.form.controls.siteToSourceMultiplier.value;
     this.editCustomFuel.isBiofuel = this.form.controls.isBiofuel.value;
-    //TODO: Convert values, fuels saved in MMBtu
+
     this.editCustomFuel.CO2 = this.form.controls.CO2.value;
     this.editCustomFuel.CH4 = this.form.controls.CH4.value;
     this.editCustomFuel.N2O = this.form.controls.N2O.value;
+    //Fuels saved in MMBtu
     if (this.selectedAccount.energyUnit != 'MMBtu') {
       let conversionHelper: number = new ConvertValue(1, 'MMBtu', this.selectedAccount.energyUnit).convertedValue;
       this.editCustomFuel.CO2 = this.editCustomFuel.CO2 / conversionHelper;

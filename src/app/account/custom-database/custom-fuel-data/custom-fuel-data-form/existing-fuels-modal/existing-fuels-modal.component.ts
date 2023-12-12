@@ -19,7 +19,7 @@ export class ExistingFuelsModalComponent {
   gasOptions: Array<FuelTypeOption> = StationaryGasOptions;
   liquidOptions: Array<FuelTypeOption> = StationaryLiquidOptions;
   solidOptions: Array<FuelTypeOption> = StationarySolidOptions;
-
+  option: FuelTypeOption = StationarySolidOptions[0];
   displayModal: boolean = false;
   selectedAccount: IdbAccount;
   constructor(private accountDbService: AccountdbService) {
