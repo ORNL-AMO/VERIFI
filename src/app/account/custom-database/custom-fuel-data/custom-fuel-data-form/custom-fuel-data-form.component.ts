@@ -9,6 +9,7 @@ import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service
 import { MeterPhase } from 'src/app/models/constantsAndTypes';
 import { IdbAccount, IdbCustomFuel, IdbUtilityMeter } from 'src/app/models/idb';
 import { FuelTypeOption } from 'src/app/shared/fuel-options/fuelTypeOption';
+import { getAllMobileFuelTypes } from 'src/app/shared/fuel-options/getFuelTypeOptions';
 import { StationaryGasOptions } from 'src/app/shared/fuel-options/stationaryGasOptions';
 import { StationaryLiquidOptions } from 'src/app/shared/fuel-options/stationaryLiquidOptions';
 import { StationaryOtherEnergyOptions } from 'src/app/shared/fuel-options/stationaryOtherEnergyOptions';
@@ -102,6 +103,10 @@ export class CustomFuelDataFormComponent {
     StationaryOtherEnergyOptions.forEach(option => {
       this.allFuelNames.push(option.value);
     });
+    let allMobileFuels: Array<FuelTypeOption> = getAllMobileFuelTypes();
+    allMobileFuels.forEach(mobileFuel => {
+      this.allFuelNames.push(mobileFuel.value);
+    })
   }
 
   async save() {
@@ -110,10 +115,13 @@ export class CustomFuelDataFormComponent {
     this.editCustomFuel.heatCapacityValue = this.form.controls.heatCapacityValue.value;
     this.editCustomFuel.siteToSourceMultiplier = this.form.controls.siteToSourceMultiplier.value;
     this.editCustomFuel.isBiofuel = this.form.controls.isBiofuel.value;
-    //TODO: Convert values, fuels saved in MMBtu
+    this.editCustomFuel.isMobile = this.form.controls.isMobile.value;
+    this.editCustomFuel.isOnRoad = this.form.controls.isOnRoad.value;
+
     this.editCustomFuel.CO2 = this.form.controls.CO2.value;
     this.editCustomFuel.CH4 = this.form.controls.CH4.value;
     this.editCustomFuel.N2O = this.form.controls.N2O.value;
+    //Fuels saved in MMBtu
     if (this.selectedAccount.energyUnit != 'MMBtu') {
       let conversionHelper: number = new ConvertValue(1, 'MMBtu', this.selectedAccount.energyUnit).convertedValue;
       this.editCustomFuel.CO2 = this.editCustomFuel.CO2 / conversionHelper;
@@ -172,7 +180,9 @@ export class CustomFuelDataFormComponent {
       'CH4': [editItem.CH4, chemicalValidators],
       'N2O': [editItem.N2O, chemicalValidators],
       'emissionsOutputRate': [editItem.emissionsOutputRate, [Validators.required]],
-      'directEmissionsRate': [editItem.directEmissionsRate]
+      'directEmissionsRate': [editItem.directEmissionsRate],
+      'isMobile': [editItem.isMobile],
+      'isOnRoad': [editItem.isOnRoad]
     });
     this.setDisableOutputRate();
   }
@@ -186,17 +196,19 @@ export class CustomFuelDataFormComponent {
   }
 
   setOutputRate() {
-    let CO2: number = this.form.controls.CO2.value;
-    let CH4: number = this.form.controls.CH4.value;
-    let N2O: number = this.form.controls.N2O.value;
-    if (this.selectedAccount.energyUnit != 'MMBtu') {
-      let conversionHelper: number = new ConvertValue(1, 'MMBtu', this.selectedAccount.energyUnit).convertedValue;
-      CO2 = CO2 / conversionHelper;
-      CH4 = CH4 / conversionHelper;
-      N2O = N2O / conversionHelper;
+    if (this.form.controls.isMobile.value == false) {
+      let CO2: number = this.form.controls.CO2.value;
+      let CH4: number = this.form.controls.CH4.value;
+      let N2O: number = this.form.controls.N2O.value;
+      if (this.selectedAccount.energyUnit != 'MMBtu') {
+        let conversionHelper: number = new ConvertValue(1, 'MMBtu', this.selectedAccount.energyUnit).convertedValue;
+        CO2 = CO2 / conversionHelper;
+        CH4 = CH4 / conversionHelper;
+        N2O = N2O / conversionHelper;
+      }
+      let outputRate: number = CO2 + (CH4 * (25 / 1000)) + (N2O * (298 / 1000));
+      this.form.controls.emissionsOutputRate.patchValue(outputRate);
     }
-    let outputRate: number = CO2 + (CH4 * (25 / 1000)) + (N2O * (298 / 1000));
-    this.form.controls.emissionsOutputRate.patchValue(outputRate);
   }
 
   showFuelModal() {
@@ -226,18 +238,26 @@ export class CustomFuelDataFormComponent {
       this.form.controls.directEmissionsRate.patchValue(false);
       this.form.controls.fuelName.patchValue(selectedOption.option.value + ' (Modified)');
       this.form.controls.emissionsOutputRate.patchValue(selectedOption.option.emissionsOutputRate);
+      this.form.controls.isMobile.patchValue(selectedOption.option.isMobile);
+      this.form.controls.isOnRoad.patchValue(selectedOption.option.isOnRoad || false);
     }
   }
 
   setIsFuelInUse() {
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
-    let fuelMeter: IdbUtilityMeter = accountMeters.find(meter => { return meter.fuel == this.editCustomFuel.value });
+    let fuelMeter: IdbUtilityMeter = accountMeters.find(meter => {
+      if (meter.scope != 2) {
+        return meter.fuel == this.editCustomFuel.value
+      } else {
+        return meter.vehicleFuel == this.editCustomFuel.value
+      }
+    });
     this.isFuelInUse = (fuelMeter != undefined);
   }
 
-  setRate(val: boolean) {
-    this.form.controls.directEmissionsRate.patchValue(val);
-    if (val == true) {
+  setRate(setDirectRate: boolean) {
+    this.form.controls.directEmissionsRate.patchValue(setDirectRate);
+    if (setDirectRate == true) {
       this.form.controls.emissionsOutputRate.enable();
       this.form.controls.CO2.setValidators([]);
       this.form.controls.CH4.setValidators([]);
@@ -264,6 +284,18 @@ export class CustomFuelDataFormComponent {
       this.editCustomFuel.startingUnit = this.selectedAccount.volumeLiquidUnit;
     } else if (this.form.controls.phase.value == 'Solid') {
       this.editCustomFuel.startingUnit = this.selectedAccount.massUnit;
+    }
+  }
+
+  setIsMobile() {
+    if(this.form.controls.isMobile.value == true){
+      this.form.controls.siteToSourceMultiplier.patchValue(1);
+      this.form.controls.phase.patchValue('Liquid');
+      this.form.controls.heatCapacityValue.patchValue(1);
+      this.setUnits();
+      this.setRate(false);
+    }else{
+      this.setOutputRate();
     }
   }
 }

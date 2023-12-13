@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
 import { FormGroup, ValidatorFn } from '@angular/forms';
-import { IdbCustomFuel, IdbFacility } from 'src/app/models/idb';
+import { IdbCustomFuel, IdbCustomGWP, IdbFacility } from 'src/app/models/idb';
 import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
 import { getHeatingCapacity, getIsEnergyMeter, getSiteToSource } from 'src/app/shared/sharedHelperFuntions';
 import { EnergyUnitOptions, UnitOption } from 'src/app/shared/unitOptions';
@@ -13,6 +13,7 @@ import { getFuelTypeOptions } from 'src/app/shared/fuel-options/getFuelTypeOptio
 import { ScopeOption, ScopeOptions } from 'src/app/models/scopeOption';
 import { GlobalWarmingPotential, GlobalWarmingPotentials } from 'src/app/models/globalWarmingPotentials';
 import { ConvertValue } from 'src/app/calculations/conversions/convertValue';
+import { CustomGWPDbService } from 'src/app/indexedDB/custom-gwp-db.service';
 
 @Component({
   selector: 'app-edit-meter-form',
@@ -27,7 +28,7 @@ export class EditMeterFormComponent implements OnInit {
   @Input()
   facility: IdbFacility;
 
-  globalWarmingPotentials: Array<GlobalWarmingPotential> = GlobalWarmingPotentials;
+  globalWarmingPotentials: Array<GlobalWarmingPotential>;
   scopeOptions: Array<ScopeOption> = ScopeOptions;
   hasDifferentCollectionUnits: boolean;
   hasDifferentEmissions: boolean;
@@ -58,9 +59,11 @@ export class EditMeterFormComponent implements OnInit {
   constructor(
     private energyUnitsHelperService: EnergyUnitsHelperService,
     private editMeterFormService: EditMeterFormService, private cd: ChangeDetectorRef,
-    private customFuelDbService: CustomFuelDbService) { }
+    private customFuelDbService: CustomFuelDbService,
+    private customGWPDbService: CustomGWPDbService) { }
 
   ngOnInit(): void {
+    this.setGlobalWarmingPotentials();
   }
 
   ngOnChanges() {
@@ -236,7 +239,7 @@ export class EditMeterFormComponent implements OnInit {
 
   setFuelTypeOptions(onChange: boolean) {
     let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
-    this.fuelTypeOptions = getFuelTypeOptions(this.meterForm.controls.source.value, this.meterForm.controls.phase.value, customFuels, this.meterForm.controls.scope.value);
+    this.fuelTypeOptions = getFuelTypeOptions(this.meterForm.controls.source.value, this.meterForm.controls.phase.value, customFuels, this.meterForm.controls.scope.value, this.meterForm.controls.vehicleCategory.value, this.meterForm.controls.vehicleType.value);
     let selectedEnergyOption: FuelTypeOption = this.fuelTypeOptions.find(option => { return option.value == this.meterForm.controls.fuel.value });
     if (!selectedEnergyOption && this.fuelTypeOptions.length != 0 && !onChange) {
       this.meterForm.controls.fuel.patchValue(this.fuelTypeOptions[0].value);
@@ -404,7 +407,7 @@ export class EditMeterFormComponent implements OnInit {
       this.scopeOptions = [ScopeOptions[0]];
     } else if (selectedMeterSource == 'Other Fuels') {
       //Scope 1 (non-fugitive)
-      this.scopeOptions = ScopeOptions.filter(option => { return option.scope == 'Scope 1' && option.value != 5  && option.value != 6});
+      this.scopeOptions = ScopeOptions.filter(option => { return option.scope == 'Scope 1' && option.value != 5 && option.value != 6 });
     } else if (selectedMeterSource == 'Other') {
       //Scope 1 (non-fugitive)
       this.scopeOptions = ScopeOptions.filter(option => { return option.value == 100 || option.value == 5 || option.value == 6 });
@@ -477,5 +480,16 @@ export class EditMeterFormComponent implements OnInit {
         this.meterForm.controls.globalWarmingPotential.patchValue(convertedGWP);
       }
     }
+  }
+
+  setGlobalWarmingPotentials() {
+    this.globalWarmingPotentials = new Array();
+    let customGWPs: Array<IdbCustomGWP> = this.customGWPDbService.accountCustomGWPs.getValue();
+    customGWPs.forEach(gwpOption => {
+      this.globalWarmingPotentials.push(gwpOption);
+    });
+    GlobalWarmingPotentials.forEach(gwpOption => {
+      this.globalWarmingPotentials.push(gwpOption);
+    });
   }
 }

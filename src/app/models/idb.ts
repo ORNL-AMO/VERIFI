@@ -3,6 +3,7 @@ import { AccountAnalysisSetupErrors } from './accountAnalysis';
 import { AnalysisCategory, AnalysisGroup, AnalysisSetupErrors } from './analysis';
 import { MonthlyData } from './calanderization';
 import { FacilityClassification, MeterPhase, MeterSource, ReportType, WaterDischargeType, WaterIntakeType } from './constantsAndTypes';
+import { GlobalWarmingPotential } from './globalWarmingPotentials';
 import { ElectricityDataFilters, GeneralUtilityDataFilters, VehicleDataFilters } from './meterDataFilter';
 import { BetterClimateReportSetup, BetterPlantsReportSetup, DataOverviewReportSetup, PerformanceReportSetup } from './overview-report';
 import { SustainabilityQuestions } from './sustainabilityQuestions';
@@ -187,7 +188,7 @@ export interface IdbUtilityMeterData {
     checked: boolean,
     meterNumber?: string,
     totalImportConsumption?: number
-    
+
     //TODO: Check emissions usage for meters...
     totalMarketEmissions?: number,
     totalLocationEmissions?: number,
@@ -361,4 +362,11 @@ export interface IdbCustomFuel extends FuelTypeOption {
     guid: string,
     phase: MeterPhase,
     directEmissionsRate: boolean
+}
+
+export interface IdbCustomGWP extends GlobalWarmingPotential {
+    id?: number,
+    accountId: string,
+    date: Date,
+    guid: string
 }

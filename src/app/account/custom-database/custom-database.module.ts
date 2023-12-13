@@ -11,6 +11,10 @@ import { CustomFuelDataComponent } from './custom-fuel-data/custom-fuel-data.com
 import { CustomFuelDataDashboardComponent } from './custom-fuel-data/custom-fuel-data-dashboard/custom-fuel-data-dashboard.component';
 import { CustomFuelDataFormComponent } from './custom-fuel-data/custom-fuel-data-form/custom-fuel-data-form.component';
 import { ExistingFuelsModalComponent } from './custom-fuel-data/custom-fuel-data-form/existing-fuels-modal/existing-fuels-modal.component';
+import { CustomGWPComponent } from './custom-gwp/custom-gwp.component';
+import { CustomGwpDashboardComponent } from './custom-gwp/custom-gwp-dashboard/custom-gwp-dashboard.component';
+import { CustomGwpFormComponent } from './custom-gwp/custom-gwp-form/custom-gwp-form.component';
+import { ExistingGwpsModalComponent } from './custom-gwp/custom-gwp-form/existing-gwps-modal/existing-gwps-modal.component';
 
 
 
@@ -23,7 +27,11 @@ import { ExistingFuelsModalComponent } from './custom-fuel-data/custom-fuel-data
     CustomFuelDataComponent,
     CustomFuelDataDashboardComponent,
     CustomFuelDataFormComponent,
-    ExistingFuelsModalComponent
+    ExistingFuelsModalComponent,
+    CustomGWPComponent,
+    CustomGwpDashboardComponent,
+    CustomGwpFormComponent,
+    ExistingGwpsModalComponent
   ],
   imports: [
     CommonModule,

@@ -74,7 +74,9 @@ export class CustomFuelDbService {
       N2O: undefined,
       isBiofuel: false,
       phase: 'Gas',
-      directEmissionsRate: false
+      directEmissionsRate: false,
+      isMobile: false,
+      isOnRoad: false
     }
   }
 }

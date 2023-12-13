@@ -1,12 +1,13 @@
 import { Component, Input } from '@angular/core';
 import { FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { FuelTypeOption } from 'src/app/shared/fuel-options/fuelTypeOption';
-import { MobileTransportOnsiteOptions } from 'src/app/shared/fuel-options/mobileTransportOnsiteOptions';
 import { EnergyUnitOptions, UnitOption, VolumeLiquidOptions } from 'src/app/shared/unitOptions';
 import { VehicleCategories, VehicleCategory } from 'src/app/shared/vehicle-data/vehicleCategory';
 import { VehicleType, VehicleTypes } from 'src/app/shared/vehicle-data/vehicleType';
 import { EditMeterFormService } from '../edit-meter-form.service';
-import { IdbFacility } from 'src/app/models/idb';
+import { IdbCustomFuel, IdbFacility } from 'src/app/models/idb';
+import { getMobileFuelTypes } from 'src/app/shared/fuel-options/getFuelTypeOptions';
+import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
 
 @Component({
   selector: 'app-vehicle-form',
@@ -27,7 +28,7 @@ export class VehicleFormComponent {
   fuelOptions: Array<FuelTypeOption> = [];
   hasDifferentEnergyUnits: boolean = false;
   selectedFuelTypeOption: FuelTypeOption;
-  constructor(private editMeterFormService: EditMeterFormService) {
+  constructor(private editMeterFormService: EditMeterFormService, private customFuelDbService: CustomFuelDbService) {
   }
 
   ngOnInit() {
@@ -50,7 +51,7 @@ export class VehicleFormComponent {
     this.setHasDifferentEnergyUnits();
   }
 
-  changeVehicleCategory(){
+  changeVehicleCategory() {
     this.setVehicleTypes();
     this.updateVehicleValidation();
   }
@@ -87,17 +88,8 @@ export class VehicleFormComponent {
   }
 
   setFuelOptions() {
-    if (this.meterForm.controls.vehicleCategory.value == 1) {
-      this.fuelOptions = MobileTransportOnsiteOptions;
-    } else {
-      let vehicleType: VehicleType = VehicleTypes.find(vType => {
-        return vType.value == this.meterForm.controls.vehicleType.value;
-      });
-      if (vehicleType) {
-        this.fuelOptions = vehicleType.fuelOptions;
-      }
-    }
-
+    let allFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
+    this.fuelOptions = getMobileFuelTypes(this.meterForm.controls.vehicleCategory.value, this.meterForm.controls.vehicleType.value, allFuels)
     let checkExists: FuelTypeOption = this.fuelOptions.find(option => {
       return option.value == this.meterForm.controls.vehicleFuel.value;
     });
@@ -115,7 +107,7 @@ export class VehicleFormComponent {
 
   updateVehicleValidation() {
     let additionalVehicleValidation: Array<ValidatorFn> = this.editMeterFormService.getAdditionalVehicleValidation(this.meterForm.controls.scope.value, this.meterForm.controls.vehicleCategory.value);
-   
+
     this.meterForm.controls.vehicleType.setValidators(additionalVehicleValidation);
     this.meterForm.controls.vehicleType.updateValueAndValidity();
 
@@ -129,7 +121,7 @@ export class VehicleFormComponent {
     this.meterForm.controls.vehicleDistanceUnit.updateValueAndValidity();
   }
 
-  setHasDifferentEnergyUnits(){
+  setHasDifferentEnergyUnits() {
     this.hasDifferentEnergyUnits = this.facility.energyUnit != this.meterForm.controls.energyUnit.value;
   }
 }
