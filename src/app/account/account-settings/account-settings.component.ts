@@ -18,6 +18,7 @@ import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { CustomEmissionsDbService } from 'src/app/indexedDB/custom-emissions-db.service';
 import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
+import { CustomGWPDbService } from 'src/app/indexedDB/custom-gwp-db.service';
 
 @Component({
   selector: 'app-account-settings',
@@ -63,7 +64,8 @@ export class AccountSettingsComponent implements OnInit {
     private accountAnalysisDbService: AccountAnalysisDbService,
     private dbChangesService: DbChangesService,
     private customEmissionsDbService: CustomEmissionsDbService,
-    private customFuelDbService: CustomFuelDbService
+    private customFuelDbService: CustomFuelDbService,
+    private customGWPDbService: CustomGWPDbService
   ) { }
 
   ngOnInit() {
@@ -148,6 +150,8 @@ export class AccountSettingsComponent implements OnInit {
     await this.customEmissionsDbService.deleteAccountEmissionsItems();
     this.loadingService.setLoadingMessage("Deleting Custom Fuels...")
     await this.customFuelDbService.deleteAccountCustomFuels();   
+    this.loadingService.setLoadingMessage("Deleting Custom GWPs");
+    await this.customGWPDbService.deleteAccountCustomGWP();
     
     this.loadingService.setLoadingMessage("Deleting Account...");
     await firstValueFrom(this.accountDbService.deleteAccountWithObservable(this.selectedAccount.id));

@@ -2,8 +2,6 @@ import { Component, Input, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbCustomFuel, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
-import { EditMeterFormService } from '../../../energy-source/edit-meter-form/edit-meter-form.service';
-import { MeterSource } from 'src/app/models/constantsAndTypes';
 import { EmissionsResults } from 'src/app/models/eGridEmissions';
 import { getEmissions } from 'src/app/calculations/emissions-calculations/emissions';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
@@ -36,7 +34,7 @@ export class EditOtherEmissionsBillComponent {
   displayFugitiveTableModal: boolean = false;
   showCopyLast: boolean;
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private facilityDbService: FacilitydbService, private editMeterFormService: EditMeterFormService,
+    private facilityDbService: FacilitydbService,
     private eGridService: EGridService,
     private customFuelDbService: CustomFuelDbService) { }
 

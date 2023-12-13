@@ -42,6 +42,7 @@ export class CustomGwpFormComponent {
     this.selectedAccount = this.accountDbService.selectedAccount.getValue();
     if (this.isAdd) {
       this.editCustomGWP = this.customGWPDbService.getNewAccountCustomGWP(this.selectedAccount);
+      console.log(this.editCustomGWP);
       this.setForm(this.editCustomGWP);
     } else {
       this.activatedRoute.params.subscribe(params => {
@@ -63,11 +64,11 @@ export class CustomGwpFormComponent {
 
   setValueInvalid() {
     let invalidValue: string = undefined;
-    let currentValue: string = this.form.controls.fuelName.value;
+    let currentValue: string = this.form.controls.gwpLabel.value;
     if (!currentValue) {
       invalidValue = 'GWP name required.';
     } else {
-      let checkExists: string = this.allGWPNames.find(fuelName => { return fuelName == currentValue });
+      let checkExists: string = this.allGWPNames.find(gwpLabel => { return gwpLabel == currentValue });
       if (checkExists) {
         if (this.isAdd || (this.previousValue != checkExists)) {
           invalidValue = 'Unique name required for fuel. Current name already exists.';
@@ -90,6 +91,8 @@ export class CustomGwpFormComponent {
   async save() {
     this.editCustomGWP.label = this.form.controls.gwpLabel.value;
     this.editCustomGWP.gwp = this.form.controls.gwp.value;
+    this.editCustomGWP.display = this.form.controls.gwpLabel.value;
+
     //Fuels saved in MMBtu
     if (this.selectedAccount.energyUnit != 'MMBtu') {
       // let conversionHelper: number = new ConvertValue(1, 'MMBtu', this.selectedAccount.energyUnit).convertedValue;
@@ -150,7 +153,7 @@ export class CustomGwpFormComponent {
   hideGWPModal(selectedOption: GlobalWarmingPotential ) {
     this.displayGWPModal = false;
     if (selectedOption) {
-      this.form.controls.label.patchValue(selectedOption.label);
+      this.form.controls.gwpLabel.patchValue(selectedOption.label);
       // let CO2: number = selectedOption.option.CO2;
       // let CH4: number = selectedOption.option.CH4;
       // let N2O: number = selectedOption.option.N2O;

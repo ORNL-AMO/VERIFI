@@ -38,7 +38,7 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between">
                     <div class="emissions-title">
-                        <h5 class="card-title">{{customGWP.value}}</h5>
+                        <h5 class="card-title">{{customGWP.label}}</h5>
                     </div>
                     <div>
                         <button class="btn btn-sm btn-secondary me-2" (click)="deleteItem(customGWP)"><span
@@ -51,11 +51,11 @@
                 <table class="table table-hover table-bordered table-sm">
                     <tbody>
                         <tr>
-                            <td>
+                            <td class="w-50">
                                 Warming Potential
                             </td>
                             <td>
-                                {{customGWP.gwp}}
+                                {{customGWP.gwp}} kg/kg
                             </td>
                         </tr>
                     </tbody>

@@ -24,21 +24,21 @@ import { CustomDatabaseComponent } from "src/app/account/custom-database/custom-
 import { EmissionsDataDashboardComponent } from "src/app/account/custom-database/regional-emissions-data/emissions-data-dashboard/emissions-data-dashboard.component";
 import { EmissionsDataFormComponent } from "src/app/account/custom-database/regional-emissions-data/emissions-data-form/emissions-data-form.component";
 import { RegionalEmissionsDataComponent } from "src/app/account/custom-database/regional-emissions-data/regional-emissions-data.component";
-import { AccountAnalysisEnergyDashboardComponent } from "../account/account-analysis/account-analysis-dashboard/account-analysis-energy-dashboard/account-analysis-energy-dashboard.component";
-import { AccountAnalysisWaterDashboardComponent } from "../account/account-analysis/account-analysis-dashboard/account-analysis-water-dashboard/account-analysis-water-dashboard.component";
-import { AccountAnalysisFacilitiesSummaryComponent } from "../account/account-analysis/account-analysis-results/account-analysis-facilities-summary/account-analysis-facilities-summary.component";
-import { PerformanceReportComponent } from "../account/account-reports/performance-report/performance-report.component";
-import { BetterPlantsReportDashboardComponent } from "../account/account-reports/account-reports-dashboard/better-plants-report-dashboard/better-plants-report-dashboard.component";
-import { OverviewReportDashboardComponent } from "../account/account-reports/account-reports-dashboard/overview-report-dashboard/overview-report-dashboard.component";
-import { PerformanceReportDashboardComponent } from "../account/account-reports/account-reports-dashboard/performance-report-dashboard/performance-report-dashboard.component";
-import { BetterClimateReportDashboardComponent } from "../account/account-reports/account-reports-dashboard/better-climate-report-dashboard/better-climate-report-dashboard.component";
-import { BetterClimateReportComponent } from "../account/account-reports/better-climate-report/better-climate-report.component";
-import { CustomFuelDataComponent } from "../account/custom-database/custom-fuel-data/custom-fuel-data.component";
-import { CustomFuelDataDashboardComponent } from "../account/custom-database/custom-fuel-data/custom-fuel-data-dashboard/custom-fuel-data-dashboard.component";
-import { CustomFuelDataFormComponent } from "../account/custom-database/custom-fuel-data/custom-fuel-data-form/custom-fuel-data-form.component";
-import { CustomGWPComponent } from "../account/custom-database/custom-gwp/custom-gwp.component";
-import { CustomGwpDashboardComponent } from "../account/custom-database/custom-GWP/custom-gwp-dashboard/custom-gwp-dashboard.component";
-import { CustomGwpFormComponent } from "../account/custom-database/custom-GWP/custom-gwp-form/custom-gwp-form.component";
+import { AccountAnalysisEnergyDashboardComponent } from "src/app/account/account-analysis/account-analysis-dashboard/account-analysis-energy-dashboard/account-analysis-energy-dashboard.component";
+import { AccountAnalysisWaterDashboardComponent } from "src/app/account/account-analysis/account-analysis-dashboard/account-analysis-water-dashboard/account-analysis-water-dashboard.component";
+import { AccountAnalysisFacilitiesSummaryComponent } from "src/app/account/account-analysis/account-analysis-results/account-analysis-facilities-summary/account-analysis-facilities-summary.component";
+import { PerformanceReportComponent } from "src/app/account/account-reports/performance-report/performance-report.component";
+import { BetterPlantsReportDashboardComponent } from "src/app/account/account-reports/account-reports-dashboard/better-plants-report-dashboard/better-plants-report-dashboard.component";
+import { OverviewReportDashboardComponent } from "src/app/account/account-reports/account-reports-dashboard/overview-report-dashboard/overview-report-dashboard.component";
+import { PerformanceReportDashboardComponent } from "src/app/account/account-reports/account-reports-dashboard/performance-report-dashboard/performance-report-dashboard.component";
+import { BetterClimateReportDashboardComponent } from "src/app/account/account-reports/account-reports-dashboard/better-climate-report-dashboard/better-climate-report-dashboard.component";
+import { BetterClimateReportComponent } from "src/app/account/account-reports/better-climate-report/better-climate-report.component";
+import { CustomFuelDataComponent } from "src/app/account/custom-database/custom-fuel-data/custom-fuel-data.component";
+import { CustomFuelDataDashboardComponent } from "src/app/account/custom-database/custom-fuel-data/custom-fuel-data-dashboard/custom-fuel-data-dashboard.component";
+import { CustomFuelDataFormComponent } from "src/app/account/custom-database/custom-fuel-data/custom-fuel-data-form/custom-fuel-data-form.component";
+import { CustomGWPComponent } from "src/app/account/custom-database/custom-gwp/custom-gwp.component";
+import { CustomGwpDashboardComponent } from "src/app/account/custom-database/custom-gwp/custom-gwp-dashboard/custom-gwp-dashboard.component";
+import { CustomGwpFormComponent } from "src/app/account/custom-database/custom-gwp/custom-gwp-form/custom-gwp-form.component";
 
 export const AccountRoutes: Route = {
     path: 'account',

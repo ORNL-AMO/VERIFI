@@ -12,9 +12,9 @@ import { CustomFuelDataDashboardComponent } from './custom-fuel-data/custom-fuel
 import { CustomFuelDataFormComponent } from './custom-fuel-data/custom-fuel-data-form/custom-fuel-data-form.component';
 import { ExistingFuelsModalComponent } from './custom-fuel-data/custom-fuel-data-form/existing-fuels-modal/existing-fuels-modal.component';
 import { CustomGWPComponent } from './custom-gwp/custom-gwp.component';
-import { CustomGwpDashboardComponent } from './custom-GWP/custom-gwp-dashboard/custom-gwp-dashboard.component';
-import { CustomGwpFormComponent } from './custom-GWP/custom-gwp-form/custom-gwp-form.component';
-import { ExistingGwpsModalComponent } from './custom-GWP/custom-gwp-form/existing-gwps-modal/existing-gwps-modal.component';
+import { CustomGwpDashboardComponent } from './custom-gwp/custom-gwp-dashboard/custom-gwp-dashboard.component';
+import { CustomGwpFormComponent } from './custom-gwp/custom-gwp-form/custom-gwp-form.component';
+import { ExistingGwpsModalComponent } from './custom-gwp/custom-gwp-form/existing-gwps-modal/existing-gwps-modal.component';
 
 
 

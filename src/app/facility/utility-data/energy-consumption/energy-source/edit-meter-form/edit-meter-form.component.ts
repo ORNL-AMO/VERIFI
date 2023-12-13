@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
 import { FormGroup, ValidatorFn } from '@angular/forms';
-import { IdbCustomFuel, IdbFacility } from 'src/app/models/idb';
+import { IdbCustomFuel, IdbCustomGWP, IdbFacility } from 'src/app/models/idb';
 import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
 import { getHeatingCapacity, getIsEnergyMeter, getSiteToSource } from 'src/app/shared/sharedHelperFuntions';
 import { EnergyUnitOptions, UnitOption } from 'src/app/shared/unitOptions';
@@ -13,6 +13,7 @@ import { getFuelTypeOptions } from 'src/app/shared/fuel-options/getFuelTypeOptio
 import { ScopeOption, ScopeOptions } from 'src/app/models/scopeOption';
 import { GlobalWarmingPotential, GlobalWarmingPotentials } from 'src/app/models/globalWarmingPotentials';
 import { ConvertValue } from 'src/app/calculations/conversions/convertValue';
+import { CustomGWPDbService } from 'src/app/indexedDB/custom-gwp-db.service';
 
 @Component({
   selector: 'app-edit-meter-form',
@@ -27,7 +28,7 @@ export class EditMeterFormComponent implements OnInit {
   @Input()
   facility: IdbFacility;
 
-  globalWarmingPotentials: Array<GlobalWarmingPotential> = GlobalWarmingPotentials;
+  globalWarmingPotentials: Array<GlobalWarmingPotential>;
   scopeOptions: Array<ScopeOption> = ScopeOptions;
   hasDifferentCollectionUnits: boolean;
   hasDifferentEmissions: boolean;
@@ -58,9 +59,11 @@ export class EditMeterFormComponent implements OnInit {
   constructor(
     private energyUnitsHelperService: EnergyUnitsHelperService,
     private editMeterFormService: EditMeterFormService, private cd: ChangeDetectorRef,
-    private customFuelDbService: CustomFuelDbService) { }
+    private customFuelDbService: CustomFuelDbService,
+    private customGWPDbService: CustomGWPDbService) { }
 
   ngOnInit(): void {
+    this.setGlobalWarmingPotentials();
   }
 
   ngOnChanges() {
@@ -477,5 +480,17 @@ export class EditMeterFormComponent implements OnInit {
         this.meterForm.controls.globalWarmingPotential.patchValue(convertedGWP);
       }
     }
+  }
+
+  setGlobalWarmingPotentials() {
+    this.globalWarmingPotentials = new Array();
+    let customGWPs: Array<IdbCustomGWP> = this.customGWPDbService.accountCustomGWPs.getValue();
+    console.log(customGWPs);
+    customGWPs.forEach(gwpOption => {
+      this.globalWarmingPotentials.push(gwpOption);
+    });
+    GlobalWarmingPotentials.forEach(gwpOption => {
+      this.globalWarmingPotentials.push(gwpOption);
+    });
   }
 }

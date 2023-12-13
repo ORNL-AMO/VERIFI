@@ -63,10 +63,24 @@ export class CustomGWPDbService {
       accountId: selectedAccount.guid,
       guid: Math.random().toString(36).substr(2, 9),
       date: new Date(),
-      value: undefined,
+      value: this.getUniqValue(),
       label: undefined,
       display: undefined,
       gwp: undefined
     }
   }
+
+  getUniqValue(){
+    let accountCustomGWPs: Array<IdbCustomGWP> = this.accountCustomGWPs.getValue();
+    let existingValues: Array<number> = accountCustomGWPs.map(cGWP => {
+      return cGWP.value;
+    });
+    let uniqVal: number = Math.floor(Math.random() * 50000)
+    while(existingValues.includes(uniqVal)){
+      uniqVal = Math.floor(Math.random() * 50000);
+      console.log(uniqVal);
+    }
+    return uniqVal;
+  }
+
 }

@@ -1,13 +1,12 @@
 import { Component, Input } from '@angular/core';
 import { FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { FuelTypeOption } from 'src/app/shared/fuel-options/fuelTypeOption';
-import { MobileTransportOnsiteOptions } from 'src/app/shared/fuel-options/mobileTransportOnsiteOptions';
 import { EnergyUnitOptions, UnitOption, VolumeLiquidOptions } from 'src/app/shared/unitOptions';
 import { VehicleCategories, VehicleCategory } from 'src/app/shared/vehicle-data/vehicleCategory';
 import { VehicleType, VehicleTypes } from 'src/app/shared/vehicle-data/vehicleType';
 import { EditMeterFormService } from '../edit-meter-form.service';
 import { IdbCustomFuel, IdbFacility } from 'src/app/models/idb';
-import { getFuelTypeOptions, getMobileFuelTypes } from 'src/app/shared/fuel-options/getFuelTypeOptions';
+import { getMobileFuelTypes } from 'src/app/shared/fuel-options/getFuelTypeOptions';
 import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
 
 @Component({
