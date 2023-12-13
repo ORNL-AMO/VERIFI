@@ -3,6 +3,7 @@ import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
 import { IdbAccount, IdbCustomGWP } from '../models/idb';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { LoadingService } from '../core-components/loading/loading.service';
+import { GlobalWarmingPotentials } from '../models/globalWarmingPotentials';
 
 @Injectable({
   providedIn: 'root'
@@ -75,6 +76,9 @@ export class CustomGWPDbService {
     let existingValues: Array<number> = accountCustomGWPs.map(cGWP => {
       return cGWP.value;
     });
+    GlobalWarmingPotentials.forEach(gwpOption => {
+      existingValues.push(gwpOption.value);
+    })
     let uniqVal: number = Math.floor(Math.random() * 50000)
     while(existingValues.includes(uniqVal)){
       uniqVal = Math.floor(Math.random() * 50000);

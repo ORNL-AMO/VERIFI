@@ -67,10 +67,8 @@ export class CustomGwpFormComponent {
       invalidValue = 'GWP name required.';
     } else {
       let checkExists: string = this.allGWPNames.find(gwpLabel => { return gwpLabel == currentValue });
-      if (checkExists) {
-        if (this.isAdd) {
+      if (checkExists && this.isAdd) {
           invalidValue = 'Unique name required for fuel. Current name already exists.';
-        }
       }
     }
     this.invalidValue = invalidValue;
