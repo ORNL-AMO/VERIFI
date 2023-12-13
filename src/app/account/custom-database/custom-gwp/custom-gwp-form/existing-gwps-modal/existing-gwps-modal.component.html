@@ -8,74 +8,24 @@
             <thead>
                 <tr>
                     <th>
-                        Fuel Name
+                        Option
                     </th>
                     <th>
-                        HHV
-                    </th>
-                    <th>
-                        CO<sub>2</sub> Factor
-                    </th>
-                    <th>
-                        CH<sub>4</sub> Factor
-                    </th>
-                    <th>
-                        N<sub>2</sub>O Factor
-                    </th>
-                    <th>
-                        Emissions Output Rate<br>
-                        <span>
-                            kg CO<sub>2</sub>e
-                        </span>
+                        Global Warming Potential
                     </th>
                 </tr>
             </thead>
             <tbody>
-                <!-- <tr *ngFor="let option of selectedFuelTypeOptions | orderBy: 'value'">
+                <tr *ngFor="let option of globalWarmingPotentials">
                     <td class="ps-2">
-                        <a class="click-link" (click)="selectOption(option)">{{option.value}}</a>
+                        <a class="click-link" (click)="selectOption(option)">
+                            {{option.label}}
+                        </a>
                     </td>
                     <td>
-                        <ng-container *ngIf="option.heatCapacityValue">
-                            {{option| emissionsDisplay:selectedAccount.energyUnit:'HHV'}}
-                        </ng-container>
-                        <ng-container *ngIf="!option.heatCapacityValue">
-                            &mdash;
-                        </ng-container>
+                        {{option.gwp | number}} kg/kg
                     </td>
-                    <td>
-                        <ng-container *ngIf="option.CO2">
-                            {{option| emissionsDisplay:selectedAccount.energyUnit:'CO2'}}
-                        </ng-container>
-                        <ng-container *ngIf="!option.CO2">
-                            &mdash;
-                        </ng-container>
-                    </td>
-                    <td>
-                        <ng-container *ngIf="option.CH4">
-                            {{option| emissionsDisplay:selectedAccount.energyUnit:'CH4'}}
-                        </ng-container>
-                        <ng-container *ngIf="!option.CH4">
-                            &mdash;
-                        </ng-container>
-                    </td>
-                    <td>
-                        <ng-container *ngIf="option.N2O">
-                            {{option| emissionsDisplay:selectedAccount.energyUnit:'N2O'}}
-                        </ng-container>
-                        <ng-container *ngIf="!option.N2O">
-                            &mdash;
-                        </ng-container>
-                    </td>
-                    <td>
-                        <ng-container *ngIf="option.emissionsOutputRate">
-                            {{option.emissionsOutputRate}}
-                        </ng-container>
-                        <ng-container *ngIf="!option.emissionsOutputRate">
-                            &mdash;
-                        </ng-container>
-                    </td>
-                </tr> -->
+                </tr>
             </tbody>
         </table>
     </div>

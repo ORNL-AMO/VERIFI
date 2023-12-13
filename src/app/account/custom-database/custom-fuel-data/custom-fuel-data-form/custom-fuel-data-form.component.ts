@@ -255,9 +255,9 @@ export class CustomFuelDataFormComponent {
     this.isFuelInUse = (fuelMeter != undefined);
   }
 
-  setRate(val: boolean) {
-    this.form.controls.directEmissionsRate.patchValue(val);
-    if (val == true) {
+  setRate(setDirectRate: boolean) {
+    this.form.controls.directEmissionsRate.patchValue(setDirectRate);
+    if (setDirectRate == true) {
       this.form.controls.emissionsOutputRate.enable();
       this.form.controls.CO2.setValidators([]);
       this.form.controls.CH4.setValidators([]);
@@ -288,6 +288,14 @@ export class CustomFuelDataFormComponent {
   }
 
   setIsMobile() {
-
+    if(this.form.controls.isMobile.value == true){
+      this.form.controls.siteToSourceMultiplier.patchValue(1);
+      this.form.controls.phase.patchValue('Liquid');
+      this.form.controls.heatCapacityValue.patchValue(1);
+      this.setUnits();
+      this.setRate(false);
+    }else{
+      this.setOutputRate();
+    }
   }
 }

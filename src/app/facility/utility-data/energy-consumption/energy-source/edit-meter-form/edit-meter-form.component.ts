@@ -485,7 +485,6 @@ export class EditMeterFormComponent implements OnInit {
   setGlobalWarmingPotentials() {
     this.globalWarmingPotentials = new Array();
     let customGWPs: Array<IdbCustomGWP> = this.customGWPDbService.accountCustomGWPs.getValue();
-    console.log(customGWPs);
     customGWPs.forEach(gwpOption => {
       this.globalWarmingPotentials.push(gwpOption);
     });

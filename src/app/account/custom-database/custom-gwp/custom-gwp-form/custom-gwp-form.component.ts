@@ -19,7 +19,7 @@ export class CustomGwpFormComponent {
   editCustomGWP: IdbCustomGWP;
   isInvalid: boolean;
   invalidValue: string;
-  previousValue: string;
+  previousValue: number;
   accountCustomGWPs: Array<IdbCustomGWP>;
   allGWPNames: Array<string>;
   selectedAccount: IdbAccount;
@@ -32,7 +32,6 @@ export class CustomGwpFormComponent {
     private accountDbService: AccountdbService,
     private formBuilder: FormBuilder,
     private utilityMeterDbService: UtilityMeterdbService) {
-
   }
 
   ngOnInit() {
@@ -42,7 +41,6 @@ export class CustomGwpFormComponent {
     this.selectedAccount = this.accountDbService.selectedAccount.getValue();
     if (this.isAdd) {
       this.editCustomGWP = this.customGWPDbService.getNewAccountCustomGWP(this.selectedAccount);
-      console.log(this.editCustomGWP);
       this.setForm(this.editCustomGWP);
     } else {
       this.activatedRoute.params.subscribe(params => {
@@ -51,7 +49,7 @@ export class CustomGwpFormComponent {
         this.editCustomGWP = JSON.parse(JSON.stringify(selectedItem));
         this.setIsGWPInUse();
         this.setForm(this.editCustomGWP);
-        this.previousValue = selectedItem.label;
+        this.previousValue = selectedItem.value;
         this.checkInvalid();
       });
     }
@@ -70,7 +68,7 @@ export class CustomGwpFormComponent {
     } else {
       let checkExists: string = this.allGWPNames.find(gwpLabel => { return gwpLabel == currentValue });
       if (checkExists) {
-        if (this.isAdd || (this.previousValue != checkExists)) {
+        if (this.isAdd) {
           invalidValue = 'Unique name required for fuel. Current name already exists.';
         }
       }
@@ -93,32 +91,19 @@ export class CustomGwpFormComponent {
     this.editCustomGWP.gwp = this.form.controls.gwp.value;
     this.editCustomGWP.display = this.form.controls.gwpLabel.value;
 
-    //Fuels saved in MMBtu
-    if (this.selectedAccount.energyUnit != 'MMBtu') {
-      // let conversionHelper: number = new ConvertValue(1, 'MMBtu', this.selectedAccount.energyUnit).convertedValue;
-      // this.editCustomFuel.CO2 = this.editCustomFuel.CO2 / conversionHelper;
-      // this.editCustomFuel.CH4 = this.editCustomFuel.CH4 / conversionHelper;
-      // this.editCustomFuel.N2O = this.editCustomFuel.N2O / conversionHelper;
-    }
-
-
-    // this.editCustomFuel.emissionsOutputRate = this.form.controls.emissionsOutputRate.value;
-    // this.editCustomFuel.directEmissionsRate = this.form.controls.directEmissionsRate.value;
     if (this.isAdd) {
       await firstValueFrom(this.customGWPDbService.addWithObservable(this.editCustomGWP));
     } else {
-      if (this.isGWPInUse && this.editCustomGWP.label != this.previousValue) {
+      if (this.isGWPInUse) {
         //update meters
         let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
         let needsUpdate: boolean = false;
-        //TODO: Update gwp based on value
         for (let i = 0; i < accountMeters.length; i++) {
-          // if (accountMeters[i].globalWarmingPotentialOption == this.previousValue) {
-          //   needsUpdate = true;
-          //   // accountMeters[i].globalWarmingPotentialOption = this.editCustomGWP.value;
-          //   accountMeters[i].globalWarmingPotential = this.editCustomGWP.gwp;
-          //   await firstValueFrom(this.utilityMeterDbService.updateWithObservable(accountMeters[i]));
-          // }
+          if (accountMeters[i].globalWarmingPotentialOption == this.previousValue) {
+            needsUpdate = true;
+            accountMeters[i].globalWarmingPotential = this.editCustomGWP.gwp;
+            await firstValueFrom(this.utilityMeterDbService.updateWithObservable(accountMeters[i]));
+          }
         }
         let allMeters: Array<IdbUtilityMeter> = await firstValueFrom(this.utilityMeterDbService.getAll());
         let accountMetersUpdates: Array<IdbUtilityMeter> = allMeters.filter(meter => {
@@ -139,7 +124,6 @@ export class CustomGwpFormComponent {
   }
 
   setForm(editItem: IdbCustomGWP) {
-
     this.form = this.formBuilder.group({
       'gwpLabel': [editItem.label, [Validators.required]],
       'gwp': [editItem.gwp, [Validators.required]],
@@ -150,20 +134,10 @@ export class CustomGwpFormComponent {
     this.displayGWPModal = true;
   }
 
-  hideGWPModal(selectedOption: GlobalWarmingPotential ) {
+  hideGWPModal(selectedOption: GlobalWarmingPotential) {
     this.displayGWPModal = false;
     if (selectedOption) {
-      this.form.controls.gwpLabel.patchValue(selectedOption.label);
-      // let CO2: number = selectedOption.option.CO2;
-      // let CH4: number = selectedOption.option.CH4;
-      // let N2O: number = selectedOption.option.N2O;
-      // let heatCapacityValue: number = convertHeatCapacity(selectedOption.option, this.editCustomFuel.startingUnit, this.selectedAccount.energyUnit);
-      // if (this.selectedAccount.energyUnit != 'MMBtu') {
-      //   let conversionHelper: number = new ConvertValue(1, 'MMBtu', this.selectedAccount.energyUnit).convertedValue;
-      //   CO2 = CO2 / conversionHelper;
-      //   CH4 = CH4 / conversionHelper;
-      //   N2O = N2O / conversionHelper;
-      // }
+      this.form.controls.gwpLabel.patchValue(selectedOption.label + ' (Modified)');
       this.form.controls.gwp.patchValue(selectedOption.gwp);
     }
   }

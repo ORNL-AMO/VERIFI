@@ -66,7 +66,7 @@
                     </div>
                 </div>
                 <!--heat capacity-->
-                <div class="col-3">
+                <div class="col-3" *ngIf="form.controls.isMobile.value == false">
                     <label for="heatCapacityValue">Heat Capacity <span class="required">*</span> </label>
                     <div class="input-group">
                         <input name="heatCapacityValue" id="heatCapacityValue" class="form-control" type="number"
@@ -76,14 +76,6 @@
                                 [innerHTML]="editCustomFuel.startingUnit"></span>
                         </span>
                     </div>
-                    <!-- <div class="alert-danger alert" *ngIf="meterForm.get('heatCapacity').hasError('required')">Heat
-                        capacity is
-                        required</div>
-                    <div class="alert-danger alert" *ngIf="meterForm.get('heatCapacity').hasError('min')">Value can't be
-                        less
-                        than 0</div>
-                    <div class="alert-warning alert" *ngIf="meterForm.controls.heatCapacity.value === 0">Heat capacity
-                        should be greater than 0</div> -->
                 </div>
                 <div class="col-3" *ngIf="form.controls.isMobile.value == false">
                     <label for="siteToSourceMultiplier">Site to Source Multiplier <span class="required">*</span>
