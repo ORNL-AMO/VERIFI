@@ -1,0 +1,59 @@
+<div class="card">
+    <div class="card-body">
+        <div *ngIf="isGWPInUse" class="alert alert-warning text-center">
+            WARNING: This GWP is used by one or more meters. Altering this GWP will alter the corresponding meters.
+        </div>
+        <form [formGroup]="form">
+            <div class="row">
+                <div class="col-6">
+                </div>
+                <div class="col-6">
+                    <div class="d-flex justify-content-end align-items-center h-100">
+                        <button class="btn action-btn me-2" (click)="showGWPModal()">
+                            <span class="fa fa-filter-list"></span> Modify Existing
+                        </button>
+                        <button class="btn btn-secondary me-2" (click)="navigateHome()">Cancel</button>
+                        <button class="btn btn-success" [disabled]="form.invalid || isInvalid" (click)="save()">
+                            <span class="fa fa-save"></span>
+                            Save</button>
+                    </div>
+                </div>
+            </div>
+            <hr>
+            <div class="row justify-content-center">
+                <div class="col-3">
+                    <label for="gwpLabel">GWP Label</label>
+                    <div class="input-group">
+                        <input class="form-control" id="gwpLabel" type="text" formControlName="gwpLabel" name="gwpLabel"
+                            required (input)="checkInvalid()" [ngClass]="{'ng-invalid': invalidValue}">
+                    </div>
+                    <div *ngIf="invalidValue" class="alert alert-danger">
+                        {{invalidValue}}
+                    </div>
+                </div>
+                <!--gwp-->
+                <div class="col-3">
+                    <label for="gwp">Global Warming Potential <span class="required">*</span> </label>
+                    <div class="input-group">
+                        <input name="gwp" id="gwp" class="form-control" type="number" formControlName="gwp"
+                            onfocus="this.select();">
+                        <span class="input-group-text">kg/kg</span>
+                        <!-- <span
+                                [innerHTML]="meterForm.controls.startingUnit.value | settingsLabel"></span> -->
+                    </div>
+                    <!-- <div class="alert-danger alert" *ngIf="meterForm.get('heatCapacity').hasError('required')">Heat
+                        capacity is
+                        required</div>
+                    <div class="alert-danger alert" *ngIf="meterForm.get('heatCapacity').hasError('min')">Value can't be
+                        less
+                        than 0</div>
+                    <div class="alert-warning alert" *ngIf="meterForm.controls.heatCapacity.value === 0">Heat capacity
+                        should be greater than 0</div> -->
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<app-existing-gwps-modal *ngIf="displayGWPModal" (emitClose)="hideGWPModal($event)"></app-existing-gwps-modal>

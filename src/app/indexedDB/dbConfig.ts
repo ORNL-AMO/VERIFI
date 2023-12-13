@@ -162,5 +162,12 @@ export const dbConfig: DBConfig = {
       { name: 'accountId', keypath: 'accountId', options: { unique: false } },
     ]
   },
+  {
+    store: 'customGWP',
+    storeConfig: { keyPath: 'id', autoIncrement: true },
+    storeSchema: [
+      { name: 'accountId', keypath: 'accountId', options: { unique: false } },
+    ]
+  },
   ]
 };

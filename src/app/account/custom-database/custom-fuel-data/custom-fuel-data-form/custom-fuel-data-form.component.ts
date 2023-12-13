@@ -245,7 +245,13 @@ export class CustomFuelDataFormComponent {
 
   setIsFuelInUse() {
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
-    let fuelMeter: IdbUtilityMeter = accountMeters.find(meter => { return meter.fuel == this.editCustomFuel.value });
+    let fuelMeter: IdbUtilityMeter = accountMeters.find(meter => {
+      if (meter.scope != 2) {
+        return meter.fuel == this.editCustomFuel.value
+      } else {
+        return meter.vehicleFuel == this.editCustomFuel.value
+      }
+    });
     this.isFuelInUse = (fuelMeter != undefined);
   }
 

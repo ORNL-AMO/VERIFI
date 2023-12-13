@@ -36,6 +36,9 @@ import { BetterClimateReportComponent } from "../account/account-reports/better-
 import { CustomFuelDataComponent } from "../account/custom-database/custom-fuel-data/custom-fuel-data.component";
 import { CustomFuelDataDashboardComponent } from "../account/custom-database/custom-fuel-data/custom-fuel-data-dashboard/custom-fuel-data-dashboard.component";
 import { CustomFuelDataFormComponent } from "../account/custom-database/custom-fuel-data/custom-fuel-data-form/custom-fuel-data-form.component";
+import { CustomGWPComponent } from "../account/custom-database/custom-gwp/custom-gwp.component";
+import { CustomGwpDashboardComponent } from "../account/custom-database/custom-GWP/custom-gwp-dashboard/custom-gwp-dashboard.component";
+import { CustomGwpFormComponent } from "../account/custom-database/custom-GWP/custom-gwp-form/custom-gwp-form.component";
 
 export const AccountRoutes: Route = {
     path: 'account',
@@ -143,6 +146,16 @@ export const AccountRoutes: Route = {
                         { path: 'dashboard', component: CustomFuelDataDashboardComponent },
                         { path: 'edit/:id', component: CustomFuelDataFormComponent },
                         { path: 'add', component: CustomFuelDataFormComponent }
+
+                    ]
+                },
+                {
+                    path: 'gwp', component: CustomGWPComponent,
+                    children: [
+                        { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
+                        { path: 'dashboard', component: CustomGwpDashboardComponent },
+                        { path: 'edit/:id', component: CustomGwpFormComponent },
+                        { path: 'add', component: CustomGwpFormComponent }
 
                     ]
                 }
