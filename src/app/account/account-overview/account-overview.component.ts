@@ -10,6 +10,11 @@ import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
+import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
+import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
+import { setEmissionsForCalanderizedMeters } from 'src/app/calculations/emissions-calculations/emissions';
+import { AccountOverviewData } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
+import { UtilityUseAndCost } from 'src/app/calculations/dashboard-calculations/useAndCostClass';
 
 @Component({
   selector: 'app-account-overview',
@@ -111,7 +116,27 @@ export class AccountOverviewComponent implements OnInit {
 
     } else {
       // Web Workers are not supported in this environment.
-
+      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(meters, meterData, this.account, true, { energyIsSource: this.account.energyIsSource, neededUnits: undefined });
+      calanderizedMeters = setEmissionsForCalanderizedMeters(calanderizedMeters, this.account.energyIsSource, facilities, this.eGridService.co2Emissions, customFuels);
+      if (!this.dateRange) {
+        if (calanderizedMeters && calanderizedMeters.length > 0) {
+          let monthlyData: Array<MonthlyData> = calanderizedMeters.flatMap(val => { return val.monthlyData });
+          let latestData: MonthlyData = _.maxBy(monthlyData, 'date');
+          let maxDate: Date = new Date(latestData.year, latestData.monthNumValue);
+          let minDate: Date = new Date(maxDate.getUTCFullYear() - 1, maxDate.getMonth(), 1);
+          minDate.setMonth(minDate.getMonth() + 1);
+          this.dateRange = {
+            endDate: maxDate,
+            startDate: minDate
+          };
+          this.accountOverviewService.dateRange.next(this.dateRange);
+        }
+      }
+      let accountOverviewData: AccountOverviewData = new AccountOverviewData(calanderizedMeters, facilities, this.account, this.dateRange);
+      let utilityUseAndCost: UtilityUseAndCost = new UtilityUseAndCost(calanderizedMeters, this.dateRange);
+      this.accountOverviewService.accountOverviewData.next(accountOverviewData);
+      this.accountOverviewService.utilityUseAndCost.next(utilityUseAndCost);
+      this.accountOverviewService.calculating.next(false);
     }
   }
 
