@@ -11,6 +11,9 @@ import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/model
 import { AnnualAccountAnalysisSummaryClass } from 'src/app/calculations/analysis-calculations/annualAccountAnalysisSummaryClass';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
+import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
+import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
+import { AccountOverviewData } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
 
 @Component({
   selector: 'app-account-home',
@@ -223,7 +226,23 @@ export class AccountHomeComponent implements OnInit {
       });
     } else {
       // Web Workers are not supported in this environment.
-
+      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(meters, meterData, this.account, true, { energyIsSource: this.account.energyIsSource, neededUnits: undefined });
+      let dateRange: { endDate: Date, startDate: Date };
+      if (calanderizedMeters && calanderizedMeters.length > 0) {
+        let monthlyData: Array<MonthlyData> = calanderizedMeters.flatMap(val => { return val.monthlyData });
+        let latestData: MonthlyData = _.maxBy(monthlyData, 'date');
+        let startData: MonthlyData = _.minBy(monthlyData, 'date');
+        let maxDate: Date = new Date(latestData.year, latestData.monthNumValue);
+        let minDate: Date = new Date(startData.year, startData.monthNumValue);
+        minDate.setMonth(minDate.getMonth() + 1);
+        dateRange = {
+          endDate: maxDate,
+          startDate: minDate
+        };
+      }
+      let accountOverviewData: AccountOverviewData = new AccountOverviewData(calanderizedMeters, facilities, this.account, dateRange);
+      this.accountHomeService.accountOverviewData.next(accountOverviewData);
+      this.accountHomeService.calculatingOverview.next(false);
     }
   }
 
