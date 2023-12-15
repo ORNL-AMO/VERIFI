@@ -50,6 +50,7 @@ addEventListener('message', ({ data }) => {
         }
         postMessage(results);
     } catch (err) {
+        console.log(err);
         let results = {
             facilityOverviewData: undefined,
             utilityUseAndCost: undefined,
