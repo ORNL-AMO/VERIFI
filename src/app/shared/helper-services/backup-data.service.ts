@@ -50,7 +50,6 @@ export class BackupDataService {
       backupFileType: "Account",
       origin: "VERIFI"
     };
-    console.log(backupFile.customEmissionsItems);
     let backupName: string = backupFile.account.name.split(' ').join('_') + '_Backup_';
     this.downloadBackup(backupFile, backupName);
   }
