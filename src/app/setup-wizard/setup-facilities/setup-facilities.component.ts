@@ -4,7 +4,7 @@ import { Subscription } from 'rxjs';
 import { IdbFacility } from 'src/app/models/idb';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { SettingsFormsService } from 'src/app/shared/settings-forms/settings-forms.service';
-import { FileReference, UploadDataService } from 'src/app/upload-data/upload-data.service';
+import { UploadDataService } from 'src/app/upload-data/upload-data.service';
 import { SetupWizardService } from '../setup-wizard.service';
 import * as XLSX from 'xlsx';
 
@@ -142,8 +142,9 @@ export class SetupFacilitiesComponent implements OnInit {
             reader.onload = (e: any) => {
               const bstr: string = e.target.result;
               let workBook: XLSX.WorkBook = XLSX.read(bstr, { type: 'binary', cellDates: true });
-              let isTemplate: boolean = this.uploadDataService.checkSheetNamesForTemplate(workBook.SheetNames);
-              if (!isTemplate) {
+              console.log(workBook);
+              let isTemplate: "V1" | "V2" | "Non-template" = this.uploadDataService.checkSheetNamesForTemplate(workBook.SheetNames);
+              if (isTemplate == "Non-template") {
                 this.fileUploadError = 'File selected is not a VERIFI template. Please upload template file.'
               }else{
                 this.fileUploadError = undefined;
