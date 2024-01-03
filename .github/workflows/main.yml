@@ -1,0 +1,16 @@
+name: CI/CD
+on:
+  push:
+    branches:
+      - 'master'
+  workflow_dispatch:
+    
+jobs:
+  web:
+    uses: ./.github/workflows/web.yml
+
+  electron:
+    # Use below `if` when release stage is reintegrated
+    # if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
+    uses: ./.github/workflows/electron.yml
+    secrets: inherit

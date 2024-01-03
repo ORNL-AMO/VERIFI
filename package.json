@@ -1,7 +1,7 @@
 {
   "name": "verifi",
   "description": "Application for analyzing utility usage",
-  "version": "0.10.5-beta",
+  "version": "0.10.6-beta",
   "main": "main.js",
   "author": "Advanced Manufacturing Office",
   "repository": "https://github.com/ORNL-AMO/VERIFI.git",
@@ -44,7 +44,7 @@
       ],
       "icon": "src/assets/electron-icons/icon-512x512.png",
       "hardenedRuntime": true,
-      "provisioningProfile": "embedded.provisionprofile",
+      "provisioningProfile": "./embedded.provisionprofile",
       "entitlements": "entitlements.mac.inherit.plist",
       "entitlementsInherit": "entitlements.mac.inherit.plist",
       "gatekeeperAssess": false
@@ -62,7 +62,8 @@
     "e2e": "ng e2e",
     "electron": "electron .",
     "pack": "electron-builder --dir",
-    "dist": "electron-builder"
+    "dist": "electron-builder",
+    "dist-nopublish": "electron-builder --publish never"
   },
   "private": true,
   "dependencies": {
