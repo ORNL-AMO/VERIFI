@@ -190,6 +190,7 @@ export class UploadDataV2Service {
               meter.vehicleDistanceUnit = vehicleData.vehicleDistanceUnit;
               meter.vehicleFuel = getFuelEnum(excelMeter['Fuel or Emission'], meter.source, meter.phase, meter.scope, meter.vehicleCategory, meter.vehicleType);
               meter.vehicleFuelEfficiency = excelMeter['Heat Capacity or Fuel Efficiency'];
+              meter.heatCapacity = this.parseHeatCapacity(excelMeter, meter, isEnergyUnit);
             }
           } else if (meter.source == 'Other Energy') {
             //parse other energy
@@ -290,7 +291,6 @@ export class UploadDataV2Service {
         dbDataPoint = this.utilityMeterDataDbService.getNewIdbUtilityMeterData(meter);
       }
       dbDataPoint.readDate = readDate;
-      //TODO: fill out data
       let totalVolume: number = 0;
       let energyUse: number = 0;
       let totalConsumption: number = checkImportCellNumber(dataPoint['Total Consumption']);
@@ -334,6 +334,15 @@ export class UploadDataV2Service {
       }
       dbDataPoint.readDate = readDate;
       //TODO: fill out data
+      dbDataPoint.totalVolume = dataPoint['Total Consumption or Total Distance'];
+      if (meter.vehicleCollectionType == 1) {
+        dbDataPoint.totalEnergyUse = dbDataPoint.totalVolume * meter.heatCapacity
+      } else {
+        let fuelConsumption: number = dbDataPoint.totalVolume / meter.vehicleFuelEfficiency;
+        dbDataPoint.totalEnergyUse = fuelConsumption * meter.heatCapacity;
+      }
+      dbDataPoint.totalCost = dataPoint['Total Cost'];
+      dbDataPoint.otherCharge = dataPoint['Other Charge'];
     });
     return importMeterData;
   }
@@ -375,7 +384,11 @@ export class UploadDataV2Service {
     if (!heatCapacity && !isEnergyUnit) {
       let fuelTypeOptions: Array<FuelTypeOption> = getFuelTypeOptions(meter.source, meter.phase, [], meter.scope, meter.vehicleCategory, meter.vehicleType);
       let fuel: FuelTypeOption = fuelTypeOptions.find(option => { return option.value == meter.fuel });
-      heatCapacity = getHeatingCapacity(meter.source, meter.startingUnit, meter.energyUnit, fuel);
+      if (meter.scope != 2) {
+        heatCapacity = getHeatingCapacity(meter.source, meter.startingUnit, meter.energyUnit, fuel);
+      } else {
+        heatCapacity = getHeatingCapacity(meter.source, meter.vehicleCollectionUnit, meter.energyUnit, fuel);
+      }
     }
     return heatCapacity
   }

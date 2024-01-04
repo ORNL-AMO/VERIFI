@@ -8,6 +8,7 @@ import { EditMeterFormService } from '../edit-meter-form.service';
 import { IdbCustomFuel, IdbFacility } from 'src/app/models/idb';
 import { getMobileFuelTypes } from 'src/app/shared/fuel-options/getFuelTypeOptions';
 import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
+import { getHeatingCapacity } from 'src/app/shared/sharedHelperFuntions';
 
 @Component({
   selector: 'app-vehicle-form',
@@ -103,6 +104,12 @@ export class VehicleFormComponent {
     this.selectedFuelTypeOption = this.fuelOptions.find(option => {
       return option.value == this.meterForm.controls.vehicleFuel.value;
     });
+    this.setHeatCapacity();
+  }
+
+  setHeatCapacity(){
+    let heatCapacity: number = getHeatingCapacity(this.meterForm.controls.source.value, this.meterForm.controls.vehicleCollectionUnit.value, this.meterForm.controls.energyUnit.value, this.selectedFuelTypeOption);
+    this.meterForm.controls.heatCapacity.patchValue(heatCapacity);
   }
 
   updateVehicleValidation() {
@@ -119,6 +126,11 @@ export class VehicleFormComponent {
 
     this.meterForm.controls.vehicleDistanceUnit.setValidators(additionalVehicleValidation);
     this.meterForm.controls.vehicleDistanceUnit.updateValueAndValidity();
+  }
+
+  changeEnergyUnit(){
+    this.setHasDifferentEnergyUnits();
+    this.setHeatCapacity();
   }
 
   setHasDifferentEnergyUnits() {

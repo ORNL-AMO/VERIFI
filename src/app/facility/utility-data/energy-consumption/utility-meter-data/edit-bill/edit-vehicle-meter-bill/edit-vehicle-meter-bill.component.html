@@ -24,7 +24,7 @@
 
     <div class="row">
         <div class="col-md-6 col-sm-12">
-            <label for="totalVolume">Total Fuel Usage <span class="required">*</span> </label>
+            <label for="totalVolume">{{totalVolumeLabel}} <span class="required">*</span> </label>
             <div class="input-group mb-3">
                 <input id="totalVolume" class="form-control" type="number" formControlName="totalVolume"
                     (input)="calculateTotalEnergyUse()" [class.warning]="meterDataForm.controls.totalVolume.value === 0"
