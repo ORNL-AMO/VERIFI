@@ -37,15 +37,15 @@ export class UploadDataV2Service {
 
   parseTemplate(workbook: XLSX.WorkBook): ParsedTemplate {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    //TODO: Make sure at least one facility found or throw error...
     let importFacilities: Array<IdbFacility> = this.getImportFacilities(workbook, selectedAccount);
-    let importMetersAndGroups: { meters: Array<IdbUtilityMeter>, newGroups: Array<IdbUtilityMeterGroup> } = this.getImportMeters(workbook, importFacilities, selectedAccount);
-    let predictorEntries: Array<IdbPredictorEntry> = this.getPredictorData(workbook, importFacilities, selectedAccount);
-    let importMeterData: Array<IdbUtilityMeterData> = this.getUtilityMeterData(workbook, importMetersAndGroups.meters);
-
-
-    return { importFacilities: importFacilities, importMeters: importMetersAndGroups.meters, predictorEntries: predictorEntries, meterData: importMeterData, newGroups: importMetersAndGroups.newGroups }
-
+    if(importFacilities.length == 0){
+      throw('No Facilities Found!')
+    }else{
+      let importMetersAndGroups: { meters: Array<IdbUtilityMeter>, newGroups: Array<IdbUtilityMeterGroup> } = this.getImportMeters(workbook, importFacilities, selectedAccount);
+      let predictorEntries: Array<IdbPredictorEntry> = this.getPredictorData(workbook, importFacilities, selectedAccount);
+      let importMeterData: Array<IdbUtilityMeterData> = this.getUtilityMeterData(workbook, importMetersAndGroups.meters);  
+      return { importFacilities: importFacilities, importMeters: importMetersAndGroups.meters, predictorEntries: predictorEntries, meterData: importMeterData, newGroups: importMetersAndGroups.newGroups }
+    }
   }
 
   getImportFacilities(workbook: XLSX.WorkBook, selectedAccount: IdbAccount): Array<IdbFacility> {

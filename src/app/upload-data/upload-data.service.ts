@@ -82,7 +82,6 @@ export class UploadDataService {
     } else {
       //parse template
       let templateData: ParsedTemplate = this.parseTemplate(workBook, isTemplate);
-      // let meterFacilityGroups: Array<FacilityGroup> = this.getMeterFacilityGroups(templateData);
       let predictorFacilityGroups: Array<FacilityGroup> = this.getPredictorFacilityGroups(templateData);
       let fileName: string = 'Upload File';
       if (file) {

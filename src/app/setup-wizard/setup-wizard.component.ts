@@ -28,6 +28,7 @@ export class SetupWizardComponent implements OnInit {
   utilityDataSub: Subscription;
 
   submitSub: Subscription;
+  templateError: boolean;
   constructor(
     private accountdbService: AccountdbService,
     private facilityDbService: FacilitydbService,
@@ -68,11 +69,18 @@ export class SetupWizardComponent implements OnInit {
       let allAccounts: Array<IdbAccount> = await firstValueFrom(this.accountdbService.getAll());
       this.accountdbService.allAccounts.next(allAccounts);
       await this.dbChangesService.selectAccount(account, false);
-      let fileReference: FileReference = this.uploadDataService.getFileReference(undefined, workbook);
-      this.uploadDataService.fileReferences = [fileReference];
-      this.loadingService.setLoadingStatus(false);
-      this.toastNotificationService.showToast("Account Created!", "Use the upload data wizard to finish uploading facility data!", 10000, false, "alert-success", true);
-      this.router.navigateByUrl('upload/data-setup/file-setup/' + fileReference.id + '/template-facilities');
+      try {
+        this.templateError = false;
+        let fileReference: FileReference = this.uploadDataService.getFileReference(undefined, workbook);
+        this.uploadDataService.fileReferences = [fileReference];
+        this.loadingService.setLoadingStatus(false);
+        this.toastNotificationService.showToast("Account Created!", "Use the upload data wizard to finish uploading facility data!", 10000, false, "alert-success", true);
+        this.router.navigateByUrl('upload/data-setup/file-setup/' + fileReference.id + '/template-facilities');
+      } catch (err) {
+        this.templateError = true;
+        this.loadingService.setLoadingStatus(false);
+        this.toastNotificationService.showToast('An Error Occured!', "No facilities found in template. Facilities needed.", 10000, false, "alert-danger", false);
+      }
 
     } else {
       let facilities: Array<IdbFacility> = this.setupWizardService.facilities.getValue();
