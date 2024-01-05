@@ -37,6 +37,7 @@ export class EditVehicleMeterBillComponent {
   otherEmissions: number = 0;
   totalEmissions: number = 0;
   meterFuel: FuelTypeOption;
+  totalVolumeLabel: 'Total Fuel Usage' | 'Total Distance';
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private facilityDbService: FacilitydbService) {
   }
 
@@ -49,8 +50,10 @@ export class EditVehicleMeterBillComponent {
     this.source = this.editMeter.source;
     this.energyUnit = this.editMeter.energyUnit;
     if (this.editMeter.vehicleCollectionType == 1) {
+      this.totalVolumeLabel = 'Total Fuel Usage';
       this.volumeUnit = this.editMeter.vehicleCollectionUnit;
     } else {
+      this.totalVolumeLabel = 'Total Distance';
       this.volumeUnit = this.editMeter.vehicleDistanceUnit;
     }
     this.checkDate();
@@ -66,7 +69,14 @@ export class EditVehicleMeterBillComponent {
   }
 
   calculateTotalEnergyUse() {
-    let totalEnergyUse: number = this.meterDataForm.controls.totalVolume.value * this.editMeter.heatCapacity;
+    let totalEnergyUse: number;
+    let totalVolume: number = this.meterDataForm.controls.totalVolume.value;
+    if (this.editMeter.vehicleCollectionType == 1) {
+      totalEnergyUse = totalVolume * this.editMeter.heatCapacity
+    } else {
+      let fuelConsumption: number = totalVolume / this.editMeter.vehicleFuelEfficiency;
+      totalEnergyUse = fuelConsumption * this.editMeter.heatCapacity;
+    }
     this.meterDataForm.controls.totalEnergyUse.patchValue(totalEnergyUse);
     this.setTotalEmissions();
   }

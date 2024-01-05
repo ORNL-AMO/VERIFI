@@ -16,7 +16,8 @@ import { IdbAccount, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtility
 import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { getIsEnergyMeter, getIsEnergyUnit } from 'src/app/shared/sharedHelperFuntions';
-import { FileReference, UploadDataService } from 'src/app/upload-data/upload-data.service';
+import { FileReference } from 'src/app/upload-data/upload-data-models';
+import { UploadDataService } from 'src/app/upload-data/upload-data.service';
 
 @Component({
   selector: 'app-confirm-and-submit',

@@ -1,9 +1,10 @@
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ColumnGroup, ColumnItem, FileReference, UploadDataService } from 'src/app/upload-data/upload-data.service';
+import { UploadDataService } from 'src/app/upload-data/upload-data.service';
 import * as _ from 'lodash';
 import { Subscription } from 'rxjs';
+import { ColumnGroup, ColumnItem, FileReference } from 'src/app/upload-data/upload-data-models';
 @Component({
   selector: 'app-identify-columns',
   templateUrl: './identify-columns.component.html',

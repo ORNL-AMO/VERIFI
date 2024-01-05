@@ -1,7 +1,8 @@
 import { ConvertValue } from "../calculations/conversions/convertValue";
-import { MeterSource } from "../models/constantsAndTypes";
+import { MeterPhase, MeterSource } from "../models/constantsAndTypes";
 import { FuelTypeOption } from "./fuel-options/fuelTypeOption";
-import { EnergyUnitOptions, UnitOption } from "./unitOptions";
+import { StationaryOtherEnergyOptions } from "./fuel-options/stationaryOtherEnergyOptions";
+import { ChilledWaterUnitOptions, EnergyUnitOptions, MassUnitOptions, UnitOption, VolumeGasOptions, VolumeLiquidOptions } from "./unitOptions";
 
 export function getGUID(): string {
     return Math.random().toString(36).substr(2, 9);
@@ -110,3 +111,39 @@ export function convertElectricityEmissions(emissionsRate: number, energyUnit: s
     }
     return emissionsRate;
 }
+
+export function getStartingUnitOptions(source: MeterSource, phase: MeterPhase, fuel: string, scope: number): Array<UnitOption> {
+    if (source == 'Electricity' || !source) {
+      return EnergyUnitOptions;
+    } else if (source == 'Natural Gas') {
+      return VolumeGasOptions.concat(EnergyUnitOptions);
+    } else if (source == 'Other Fuels') {
+      if (phase == 'Gas') {
+        return VolumeGasOptions.concat(EnergyUnitOptions);
+      } else if (phase == 'Liquid') {
+        return VolumeLiquidOptions.concat(EnergyUnitOptions);
+      } else if (phase == 'Solid') {
+        return MassUnitOptions.concat(EnergyUnitOptions);
+      }
+    } else if (source == 'Other Energy') {
+      let selectedEnergyOption: FuelTypeOption = StationaryOtherEnergyOptions.find(option => { return option.value == fuel });
+      if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Steam') {
+        return MassUnitOptions.concat(EnergyUnitOptions);
+      } else if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Chilled Water') {
+        return EnergyUnitOptions.concat(ChilledWaterUnitOptions)
+      } else if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Hot Water') {
+        return EnergyUnitOptions;
+      } else if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Compressed Air') {
+        return EnergyUnitOptions.concat(VolumeGasOptions);
+      }
+    } else if (source == 'Water Intake' || source == 'Water Discharge') {
+      return VolumeLiquidOptions;
+    } else if (source == 'Other') {
+      if (scope == 5 || scope == 6) {
+        return MassUnitOptions;
+      } else {
+        return VolumeGasOptions.concat(VolumeLiquidOptions).concat(MassUnitOptions).concat(ChilledWaterUnitOptions);
+      }
+    }
+    return EnergyUnitOptions;
+  }

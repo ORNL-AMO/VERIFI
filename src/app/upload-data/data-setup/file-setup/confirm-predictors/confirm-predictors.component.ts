@@ -2,8 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { IdbPredictorEntry } from 'src/app/models/idb';
-import { FileReference, UploadDataService } from 'src/app/upload-data/upload-data.service';
+import { UploadDataService } from 'src/app/upload-data/upload-data.service';
 import * as _ from 'lodash';
+import { FileReference } from 'src/app/upload-data/upload-data-models';
 
 @Component({
   selector: 'app-confirm-predictors',

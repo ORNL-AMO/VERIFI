@@ -4,9 +4,10 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { UtilityMeterDataService } from 'src/app/facility/utility-data/energy-consumption/utility-meter-data/utility-meter-data.service';
 import { IdbFacility, IdbUtilityMeterData } from 'src/app/models/idb';
-import { FileReference, UploadDataService } from 'src/app/upload-data/upload-data.service';
+import { UploadDataService } from 'src/app/upload-data/upload-data.service';
 import * as _ from 'lodash';
 import { getIsEnergyMeter, getIsEnergyUnit } from 'src/app/shared/sharedHelperFuntions';
+import { FileReference } from 'src/app/upload-data/upload-data-models';
 
 @Component({
   selector: 'app-confirm-readings',

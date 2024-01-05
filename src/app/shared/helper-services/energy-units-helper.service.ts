@@ -136,57 +136,6 @@ export class EnergyUnitsHelperService {
     }
   }
 
-
-  // isEnergyUnit(unit: string): boolean {
-  //   let findEnergyUnit: UnitOption = EnergyUnitOptions.find(unitOption => { return unitOption.value == unit });
-  //   return findEnergyUnit != undefined;
-  // }
-
-
-  // isEnergyMeter(source: MeterSource): boolean {
-  //   if (source == 'Electricity' || source == 'Natural Gas' || source == 'Other Fuels' || source == 'Other Energy') {
-  //     return true;
-  //   } else {
-  //     return false;
-  //   }
-  // }
-
-  getStartingUnitOptions(source: MeterSource, phase: MeterPhase, fuel: string, scope: number): Array<UnitOption> {
-    if (source == 'Electricity' || !source) {
-      return EnergyUnitOptions;
-    } else if (source == 'Natural Gas') {
-      return VolumeGasOptions.concat(EnergyUnitOptions);
-    } else if (source == 'Other Fuels') {
-      if (phase == 'Gas') {
-        return VolumeGasOptions.concat(EnergyUnitOptions);
-      } else if (phase == 'Liquid') {
-        return VolumeLiquidOptions.concat(EnergyUnitOptions);
-      } else if (phase == 'Solid') {
-        return MassUnitOptions.concat(EnergyUnitOptions);
-      }
-    } else if (source == 'Other Energy') {
-      let selectedEnergyOption: FuelTypeOption = StationaryOtherEnergyOptions.find(option => { return option.value == fuel });
-      if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Steam') {
-        return MassUnitOptions.concat(EnergyUnitOptions);
-      } else if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Chilled Water') {
-        return EnergyUnitOptions.concat(ChilledWaterUnitOptions)
-      } else if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Hot Water') {
-        return EnergyUnitOptions;
-      } else if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Compressed Air') {
-        return EnergyUnitOptions.concat(VolumeGasOptions);
-      }
-    } else if (source == 'Water Intake' || source == 'Water Discharge') {
-      return VolumeLiquidOptions;
-    } else if (source == 'Other') {
-      if (scope == 5 || scope == 6) {
-        return MassUnitOptions;
-      } else {
-        return VolumeGasOptions.concat(VolumeLiquidOptions).concat(MassUnitOptions).concat(ChilledWaterUnitOptions);
-      }
-    }
-    return EnergyUnitOptions;
-  }
-
   getStartingUnitOptionsExistingData(source: MeterSource, phase: MeterPhase, fuel: string, startingUnit: string, scope: number): Array<UnitOption> {
     let isEnergyUnit: boolean = getIsEnergyUnit(startingUnit);
     if (isEnergyUnit) {
