@@ -13,12 +13,10 @@ import { EditMeterFormService } from '../facility/utility-data/energy-consumptio
 import { UtilityMeterGroupdbService } from '../indexedDB/utilityMeterGroup-db.service';
 import { UnitOption } from '../shared/unitOptions';
 import { Countries, Country } from '../shared/form-data/countries';
-import { EGridService } from '../shared/helper-services/e-grid.service';
 import * as _ from 'lodash';
 import { State, States } from '../shared/form-data/states';
 import { getHeatingCapacity, getIsEnergyMeter, getIsEnergyUnit, getSiteToSource, getStartingUnitOptions } from '../shared/sharedHelperFuntions';
 import { MeterPhase, MeterSource, AllSources } from '../models/constantsAndTypes';
-import { SubRegionData } from '../models/eGridEmissions';
 import { getMeterDataCopy } from '../calculations/conversions/convertMeterData';
 import { FuelTypeOption } from '../shared/fuel-options/fuelTypeOption';
 import { getFuelTypeOptions } from '../shared/fuel-options/getFuelTypeOptions';
@@ -43,7 +41,6 @@ export class UploadDataService {
     private energyUnitsHelperService: EnergyUnitsHelperService,
     private editMeterFormService: EditMeterFormService,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
-    private eGridService: EGridService,
     private uploadDataV1Service: UploadDataV1Service,
     private uploadDataV2Service: UploadDataV2Service) {
     this.allFilesSet = new BehaviorSubject<boolean>(false);

@@ -8,20 +8,14 @@ import { PredictordbService } from '../indexedDB/predictors-db.service';
 import { UtilityMeterDatadbService } from '../indexedDB/utilityMeterData-db.service';
 import { EnergyUnitsHelperService } from '../shared/helper-services/energy-units-helper.service';
 import { EditMeterFormService } from '../facility/utility-data/energy-consumption/energy-source/edit-meter-form/edit-meter-form.service';
-import { UtilityMeterGroupdbService } from '../indexedDB/utilityMeterGroup-db.service';
-import { UnitOption } from '../shared/unitOptions';
-import { Countries, Country } from '../shared/form-data/countries';
 import { EGridService } from '../shared/helper-services/e-grid.service';
 import * as _ from 'lodash';
-import { State, States } from '../shared/form-data/states';
-import { getHeatingCapacity, getIsEnergyMeter, getIsEnergyUnit, getSiteToSource, getStartingUnitOptions } from '../shared/sharedHelperFuntions';
-import { MeterPhase, MeterSource, AllSources } from '../models/constantsAndTypes';
+import { getHeatingCapacity, getIsEnergyMeter, getIsEnergyUnit, getSiteToSource } from '../shared/sharedHelperFuntions';
+import { MeterPhase } from '../models/constantsAndTypes';
 import { SubRegionData } from '../models/eGridEmissions';
 import { getMeterDataCopy } from '../calculations/conversions/convertMeterData';
 import { FuelTypeOption } from '../shared/fuel-options/fuelTypeOption';
 import { getFuelTypeOptions } from '../shared/fuel-options/getFuelTypeOptions';
-import { ScopeOption, ScopeOptions } from '../models/scopeOption';
-import { AgreementType, AgreementTypes } from '../models/agreementType';
 import { ColumnGroup, ColumnItem, FacilityGroup, FileReference, ParsedTemplate } from './upload-data-models';
 import { checkImportCellNumber, checkImportStartingUnit, checkSameDay, checkSameMonth, getAgreementType, getCountryCode, getFuelEnum, getMeterReadingDataApplication, getMeterSource, getPhase, getScope, getState, getYesNoBool, getZip } from './upload-helper-functions';
 import { UploadDataSharedFunctionsService } from './upload-data-shared-functions.service';
@@ -37,7 +31,6 @@ export class UploadDataV1Service {
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private energyUnitsHelperService: EnergyUnitsHelperService,
     private editMeterFormService: EditMeterFormService,
-    private utilityMeterGroupDbService: UtilityMeterGroupdbService,
     private eGridService: EGridService,
     private uploadDataSharedFunctionsService: UploadDataSharedFunctionsService) { }
 
@@ -186,72 +179,8 @@ export class UploadDataV1Service {
     })
     //electricity readings
     let importMeterData: Array<IdbUtilityMeterData> = this.getMeterDataEntries(workbook, importMeters);
-    //predictors
-
-    let predictorsData = XLSX.utils.sheet_to_json(workbook.Sheets['Predictors']);
-    // debugger
-    let predictorEntries: Array<IdbPredictorEntry> = new Array();
-    let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.getAccountPerdictorsCopy();
-    importFacilities.forEach(facility => {
-      let facilityPredictorData = predictorsData.filter(data => { return data['Facility Name'] == facility.name });
-      let facilityPredictorEntries: Array<IdbPredictorEntry> = accountPredictorEntries.filter(entry => { return entry.facilityId == facility.guid });
-      let existingFacilityPredictorData: Array<PredictorData> = new Array();
-      if (facilityPredictorEntries.length != 0) {
-        existingFacilityPredictorData = facilityPredictorEntries[0].predictors.map(predictor => { return predictor });
-      }
-      if (facilityPredictorData.length != 0) {
-        Object.keys(facilityPredictorData[0]).forEach((key) => {
-          if (key != 'Facility Name' && key != 'Date') {
-            let predictorIndex: number = existingFacilityPredictorData.findIndex(predictor => { return predictor.name == key });
-            if (predictorIndex == -1) {
-              let hasData: boolean = false;
-              facilityPredictorData.forEach(dataItem => {
-                if (dataItem[key] != 0) {
-                  hasData = true;
-                }
-              });
-              if (hasData) {
-                let newPredictor: PredictorData = this.predictorDbService.getNewPredictor([]);
-                let nameTest: string = key.toLocaleLowerCase();
-                if (!nameTest.includes('cdd') && !nameTest.includes('hdd')) {
-                  newPredictor.production = true;
-                }
-                newPredictor.name = key;
-                existingFacilityPredictorData.push(newPredictor);
-                facilityPredictorEntries.forEach(predictorEntry => {
-                  predictorEntry.predictors.push(newPredictor);
-                });
-              }
-            }
-          }
-        });
-      }
-      facilityPredictorData.forEach(dataItem => {
-        let dataItemDate: Date = new Date(dataItem['Date']);
-        let facilityPredictorEntry: IdbPredictorEntry = facilityPredictorEntries.find(entry => {
-          return checkSameMonth(dataItemDate, new Date(entry.date))
-        });
-        if (!facilityPredictorEntry) {
-          facilityPredictorEntry = this.predictorDbService.getNewIdbPredictorEntry(facility.guid, selectedAccount.guid, dataItemDate);
-          if (facilityPredictorEntries.length != 0) {
-            facilityPredictorEntry.predictors = JSON.parse(JSON.stringify(facilityPredictorEntries[0].predictors));
-          } else {
-            facilityPredictorEntry.predictors = JSON.parse(JSON.stringify(existingFacilityPredictorData));
-          }
-        }
-        Object.keys(dataItem).forEach((key) => {
-          if (key != 'Facility Name' && key != 'Date') {
-            let predictorIndex: number = facilityPredictorEntry.predictors.findIndex(predictor => { return predictor.name == key });
-            if (predictorIndex != -1) {
-              facilityPredictorEntry.predictors[predictorIndex].amount = dataItem[key];
-            }
-          }
-        });
-        if (facilityPredictorEntry.predictors.length != 0) {
-          predictorEntries.push(JSON.parse(JSON.stringify(facilityPredictorEntry)));
-        }
-      });
-    })
+    //predictors    
+    let predictorEntries: Array<IdbPredictorEntry> = this.uploadDataSharedFunctionsService.getPredictorData(workbook, importFacilities, selectedAccount);
     return { importFacilities: importFacilities, importMeters: importMeters, predictorEntries: predictorEntries, meterData: importMeterData, newGroups: newGroups }
   }
 

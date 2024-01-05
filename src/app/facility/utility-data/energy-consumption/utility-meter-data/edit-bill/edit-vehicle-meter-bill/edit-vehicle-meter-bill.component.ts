@@ -77,7 +77,6 @@ export class EditVehicleMeterBillComponent {
       let fuelConsumption: number = totalVolume / this.editMeter.vehicleFuelEfficiency;
       totalEnergyUse = fuelConsumption * this.editMeter.heatCapacity;
     }
-    // let totalEnergyUse: number = * this.editMeter.heatCapacity;
     this.meterDataForm.controls.totalEnergyUse.patchValue(totalEnergyUse);
     this.setTotalEmissions();
   }

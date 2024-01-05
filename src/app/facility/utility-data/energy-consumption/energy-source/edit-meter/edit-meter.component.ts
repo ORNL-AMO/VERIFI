@@ -83,7 +83,6 @@ export class EditMeterComponent implements OnInit {
       await this.checkMeterData();
     }
     let meterToSave: IdbUtilityMeter = this.editMeterFormService.updateMeterFromForm(this.editMeter, this.meterForm);
-    console.log(meterToSave);
     if (this.addOrEdit == 'edit') {
       await firstValueFrom(this.utilityMeterDbService.updateWithObservable(meterToSave));
     } else if (this.addOrEdit == 'add') {
