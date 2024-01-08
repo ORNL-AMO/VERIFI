@@ -13,9 +13,8 @@ import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { IdbAccount, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from 'src/app/models/idb';
-import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
-import { getIsEnergyMeter, getIsEnergyUnit } from 'src/app/shared/sharedHelperFuntions';
+import { checkShowHeatCapacity, getIsEnergyMeter, getIsEnergyUnit } from 'src/app/shared/sharedHelperFuntions';
 import { FileReference } from 'src/app/upload-data/upload-data-models';
 import { UploadDataService } from 'src/app/upload-data/upload-data.service';
 
@@ -40,8 +39,7 @@ export class ConfirmAndSubmitComponent implements OnInit {
     private accountDbService: AccountdbService,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
     private sharedDataService: SharedDataService,
-    private utilityMeterDataService: UtilityMeterDataService,
-    private energyUnitsHelperService: EnergyUnitsHelperService) { }
+    private utilityMeterDataService: UtilityMeterDataService) { }
 
   ngOnInit(): void {
     this.paramsSub = this.activatedRoute.parent.params.subscribe(param => {
@@ -102,7 +100,8 @@ export class ConfirmAndSubmitComponent implements OnInit {
       } else {
         let displayVolumeInput: boolean = (getIsEnergyUnit(meter.startingUnit) == false);
         let displayEnergyUse: boolean = getIsEnergyMeter(meter.source);
-        form = this.utilityMeterDataService.getGeneralMeterDataForm(meterData, displayVolumeInput, displayEnergyUse);
+        let displayHeatCapacity: boolean = checkShowHeatCapacity(meter.source, meter.startingUnit, meter.scope);
+        form = this.utilityMeterDataService.getGeneralMeterDataForm(meterData, displayVolumeInput, displayEnergyUse, displayHeatCapacity);
       }
 
       if (form.valid) {

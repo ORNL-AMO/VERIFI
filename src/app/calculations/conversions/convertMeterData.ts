@@ -7,7 +7,7 @@ export function convertMeterData(meter: IdbUtilityMeter, meterData: Array<IdbUti
     let copyMeterData: Array<IdbUtilityMeterData> = meterData.map(data => { return getMeterDataCopy(data) });
     let isEnergyMeter: boolean = getIsEnergyMeter(meter.source);
     if (isEnergyMeter) {
-        let showSiteToSource: boolean = checkShowSiteToSource(meter.source, meter.includeInEnergy);
+        let showSiteToSource: boolean = checkShowSiteToSource(meter.source, meter.includeInEnergy, meter.scope);
         for (let index: number = 0; index < copyMeterData.length; index++) {
             if (showSiteToSource && (accountOrFacility.energyIsSource || energyIsSource)) {
                 copyMeterData[index].totalEnergyUse = copyMeterData[index].totalEnergyUse * meter.siteToSource;
@@ -42,7 +42,7 @@ export function convertMeterData(meter: IdbUtilityMeter, meterData: Array<IdbUti
 
 
 export function applySiteToSourceMultiplier(meter: IdbUtilityMeter, meterData: Array<IdbUtilityMeterData>): Array<IdbUtilityMeterData> {
-    let showSiteToSource: boolean = checkShowSiteToSource(meter.source, meter.includeInEnergy);
+    let showSiteToSource: boolean = checkShowSiteToSource(meter.source, meter.includeInEnergy, meter.scope);
     if (showSiteToSource && meter.siteToSource) {
         for (let index = 0; index < meterData.length; index++) {
             meterData[index].totalEnergyUse = meterData[index].totalEnergyUse * meter.siteToSource;

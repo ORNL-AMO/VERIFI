@@ -6,7 +6,7 @@ import { UtilityMeterDataService } from 'src/app/facility/utility-data/energy-co
 import { IdbFacility, IdbUtilityMeterData } from 'src/app/models/idb';
 import { UploadDataService } from 'src/app/upload-data/upload-data.service';
 import * as _ from 'lodash';
-import { getIsEnergyMeter, getIsEnergyUnit } from 'src/app/shared/sharedHelperFuntions';
+import { checkShowHeatCapacity, getIsEnergyMeter, getIsEnergyUnit } from 'src/app/shared/sharedHelperFuntions';
 import { FileReference } from 'src/app/upload-data/upload-data-models';
 
 @Component({
@@ -101,7 +101,8 @@ export class ConfirmReadingsComponent implements OnInit {
           } else {
             let displayVolumeInput: boolean = (getIsEnergyUnit(meter.startingUnit) == false);
             let displayEnergyUse: boolean = getIsEnergyMeter(meter.source);
-            form = this.utilityMeterDataService.getGeneralMeterDataForm(reading, displayVolumeInput, displayEnergyUse);
+            let displayHeatCapacity: boolean = checkShowHeatCapacity(meter.source, meter.startingUnit, meter.scope);
+            form = this.utilityMeterDataService.getGeneralMeterDataForm(reading, displayVolumeInput, displayEnergyUse, displayHeatCapacity);
           }
           if (form.invalid) {
             invalidReadings.push(reading);

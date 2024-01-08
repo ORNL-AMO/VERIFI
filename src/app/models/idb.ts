@@ -229,7 +229,9 @@ export interface IdbUtilityMeterData {
     otherCharge?: number
     //non-electricity
     demandUsage?: number,
-    demandCharge?: number
+    demandCharge?: number,
+
+    heatCapacity?:  number
 
 }
 

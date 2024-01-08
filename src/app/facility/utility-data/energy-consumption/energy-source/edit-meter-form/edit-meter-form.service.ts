@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { MeterSource } from 'src/app/models/constantsAndTypes';
 import { IdbUtilityMeter } from 'src/app/models/idb';
-import { getIsEnergyUnit } from 'src/app/shared/sharedHelperFuntions';
+import { checkShowHeatCapacity, checkShowSiteToSource } from 'src/app/shared/sharedHelperFuntions';
 
 @Injectable({
   providedIn: 'root'
@@ -140,8 +140,8 @@ export class EditMeterFormService {
   }
 
   getHeatCapacitValidation(source: MeterSource, startingUnit: string, scope: number): Array<ValidatorFn> {
-    let checkShowHeatCapacity: boolean = this.checkShowHeatCapacity(source, startingUnit, scope);
-    if (checkShowHeatCapacity) {
+    let _checkShowHeatCapacity: boolean = checkShowHeatCapacity(source, startingUnit, scope);
+    if (_checkShowHeatCapacity) {
       return [Validators.required, Validators.min(0)];
     } else {
       return [];
@@ -149,8 +149,8 @@ export class EditMeterFormService {
   }
 
   getSiteToSourceValidation(source: MeterSource, includeInEnergy: boolean, scope: number): Array<ValidatorFn> {
-    let checkShowSiteToSource: boolean = this.checkShowSiteToSource(source, includeInEnergy, scope);
-    if (checkShowSiteToSource) {
+    let _checkShowSiteToSource: boolean = checkShowSiteToSource(source, includeInEnergy, scope);
+    if (_checkShowSiteToSource) {
       return [Validators.required, Validators.min(0)];
     } else {
       return [];
@@ -192,31 +192,6 @@ export class EditMeterFormService {
     return [];
   }
 
-  checkShowHeatCapacity(source: MeterSource, startingUnit: string, scope: number): boolean {
-    if (source != 'Water Intake' && source != 'Water Discharge' && source != 'Other' && startingUnit && scope != 2) {
-      return (getIsEnergyUnit(startingUnit) == false);
-    } else {
-      return false;
-    }
-  }
-
-  checkShowSiteToSource(source: MeterSource, includeInEnergy: boolean, scope: number): boolean {
-    if (!includeInEnergy || scope == 2) {
-      return false;
-    } else if (source == "Electricity" || source == "Natural Gas" || source == 'Other Energy') {
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  checkShowEmissionsOutputRate(meter: IdbUtilityMeter): boolean {
-    if (meter.source == 'Electricity' || meter.source == 'Natural Gas' || meter.source == 'Other Fuels' || meter.source == 'Other Energy' || (meter.source == 'Other' && meter.scope == 5)) {
-      return true;
-    } else {
-      return false;
-    }
-  }
 
   getMultipliers(includeInEnergy: boolean, retainRECs: boolean, directConnection: boolean, greenPurchaseFraction?: number): {
     // GHGMultiplier: number,

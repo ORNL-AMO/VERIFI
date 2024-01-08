@@ -9,7 +9,7 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbAccount, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
-import { getIsEnergyMeter, getIsEnergyUnit } from 'src/app/shared/sharedHelperFuntions';
+import { checkShowHeatCapacity, getIsEnergyMeter, getIsEnergyUnit } from 'src/app/shared/sharedHelperFuntions';
 import { UtilityMeterDataService } from '../utility-meter-data.service';
 import { firstValueFrom, Observable, of } from 'rxjs';
 
@@ -26,6 +26,7 @@ export class EditBillComponent implements OnInit {
   meterDataForm: FormGroup;
   displayVolumeInput: boolean;
   displayEnergyUse: boolean;
+  displayHeatCapacity: boolean;
   invalidDate: boolean;
   showFilterDropdown: boolean = false;
   constructor(private activatedRoute: ActivatedRoute, private utilityMeterDataDbService: UtilityMeterDatadbService,
@@ -39,6 +40,7 @@ export class EditBillComponent implements OnInit {
       let meterId: number = parseInt(parentParams['id']);
       let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
       this.editMeter = accountMeters.find(meter => { return meter.id == meterId });
+      this.setDisplayHeatCapacity();
       this.activatedRoute.params.subscribe(params => {
         let meterReadingId: number = parseInt(params['id']);
         if (meterReadingId) {
@@ -115,11 +117,11 @@ export class EditBillComponent implements OnInit {
     } else if (this.editMeter.source == 'Other') {
       this.displayVolumeInput = (getIsEnergyUnit(this.editMeter.startingUnit) == false);
       this.displayEnergyUse = (getIsEnergyUnit(this.editMeter.startingUnit) == true);
-      this.meterDataForm = this.utilityMeterDataService.getGeneralMeterDataForm(this.editMeterData, this.displayVolumeInput, this.displayEnergyUse);
+      this.meterDataForm = this.utilityMeterDataService.getGeneralMeterDataForm(this.editMeterData, this.displayVolumeInput, this.displayEnergyUse, this.displayHeatCapacity);
     } else {
       this.displayVolumeInput = (getIsEnergyUnit(this.editMeter.startingUnit) == false);
       this.displayEnergyUse = getIsEnergyMeter(this.editMeter.source);
-      this.meterDataForm = this.utilityMeterDataService.getGeneralMeterDataForm(this.editMeterData, this.displayVolumeInput, this.displayEnergyUse);
+      this.meterDataForm = this.utilityMeterDataService.getGeneralMeterDataForm(this.editMeterData, this.displayVolumeInput, this.displayEnergyUse, this.displayHeatCapacity);
       if (this.displayVolumeInput) {
         this.meterDataForm.controls.totalEnergyUse.disable();
       }
@@ -137,5 +139,9 @@ export class EditBillComponent implements OnInit {
       return of(result);
     }
     return of(true);
+  }
+
+  setDisplayHeatCapacity() {
+    this.displayHeatCapacity = checkShowHeatCapacity(this.editMeter.source, this.editMeter.startingUnit, this.editMeter.scope);
   }
 }

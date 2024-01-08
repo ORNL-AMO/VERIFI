@@ -23,13 +23,14 @@
     *ngIf="editMeter.source != 'Electricity' && editMeter.scope != 2 && editMeter.scope != 5 && editMeter.scope != 6"
     [editMeterData]="editMeterData" [addOrEdit]="addOrEdit" [editMeter]="editMeter"
     [displayVolumeInput]="displayVolumeInput" [displayEnergyUse]="displayEnergyUse" [meterDataForm]="meterDataForm"
-    [invalidDate]="invalidDate">
+    [invalidDate]="invalidDate" [displayHeatCapacity]="displayHeatCapacity">
 </app-edit-utility-bill>
 <app-edit-vehicle-meter-bill *ngIf="editMeter.source != 'Electricity' && editMeter.scope == 2"
     [editMeterData]="editMeterData" [addOrEdit]="addOrEdit" [editMeter]="editMeter" [meterDataForm]="meterDataForm"
     [invalidDate]="invalidDate">
 </app-edit-vehicle-meter-bill>
-<app-edit-other-emissions-bill *ngIf="editMeter.source != 'Electricity' && (editMeter.scope == 5 || editMeter.scope == 6)"
+<app-edit-other-emissions-bill
+    *ngIf="editMeter.source != 'Electricity' && (editMeter.scope == 5 || editMeter.scope == 6)"
     [editMeterData]="editMeterData" [addOrEdit]="addOrEdit" [editMeter]="editMeter" [meterDataForm]="meterDataForm"
     [invalidDate]="invalidDate">
 </app-edit-other-emissions-bill>

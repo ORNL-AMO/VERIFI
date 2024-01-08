@@ -3,10 +3,9 @@ import { IdbCustomFuel, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from
 import { UtilityMeterDataService } from '../../utility-meter-data.service';
 import * as _ from 'lodash';
 import { CopyTableService } from 'src/app/shared/helper-services/copy-table.service';
-import { EditMeterFormService } from '../../../energy-source/edit-meter-form/edit-meter-form.service';
 import { Subscription } from 'rxjs';
 import { GeneralUtilityDataFilters } from 'src/app/models/meterDataFilter';
-import { getIsEnergyMeter, getIsEnergyUnit } from 'src/app/shared/sharedHelperFuntions';
+import { checkShowEmissionsOutputRate, getIsEnergyMeter, getIsEnergyUnit } from 'src/app/shared/sharedHelperFuntions';
 import { EmissionsResults } from 'src/app/models/eGridEmissions';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
@@ -54,7 +53,7 @@ export class GeneralUtilityDataTableComponent implements OnInit {
   showDetailedCharges: boolean;
   showEstimated: boolean;
   constructor(public utilityMeterDataService: UtilityMeterDataService,
-    private copyTableService: CopyTableService, private editMeterFormService: EditMeterFormService,
+    private copyTableService: CopyTableService,
     private eGridService: EGridService, private facilityDbService: FacilitydbService,
     private customFuelDbService: CustomFuelDbService) { }
 
@@ -95,7 +94,7 @@ export class GeneralUtilityDataTableComponent implements OnInit {
     } else {
       this.showEnergyColumn = getIsEnergyMeter(this.selectedMeter.source);
     }
-    this.showEmissions = this.editMeterFormService.checkShowEmissionsOutputRate(this.selectedMeter);
+    this.showEmissions = checkShowEmissionsOutputRate(this.selectedMeter);
     this.showEstimated = (this.selectedMeterData.find(dataItem => { return dataItem.isEstimated == true })) != undefined;
     if (this.showEmissions) {
       this.setEmissions();

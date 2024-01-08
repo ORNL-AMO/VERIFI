@@ -120,7 +120,8 @@ export class UtilityMeterDatadbService {
             //non-electricity
             demandUsage: undefined,
             demandCharge: undefined,
-            meterNumber: meter.meterNumber
+            meterNumber: meter.meterNumber,
+            heatCapacity: meter.heatCapacity
         }
     }
 

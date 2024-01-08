@@ -10,6 +10,7 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
 import * as _ from 'lodash';
+import { checkShowEmissionsOutputRate } from 'src/app/shared/sharedHelperFuntions';
 
 @Component({
   selector: 'app-edit-utility-bill',
@@ -31,6 +32,8 @@ export class EditUtilityBillComponent implements OnInit {
   displayEnergyUse: boolean;
   @Input()
   invalidDate: boolean;
+  @Input()
+  displayHeatCapacity: boolean;
 
   energyUnit: string;
   source: MeterSource;
@@ -61,7 +64,7 @@ export class EditUtilityBillComponent implements OnInit {
   }
 
   setShowEmissions(){
-    this.showEmissions = this.editMeterFormService.checkShowEmissionsOutputRate(this.editMeter);
+    this.showEmissions = checkShowEmissionsOutputRate(this.editMeter);
     this.showMarketEmissions = this.editMeter.source == 'Electricity';
     this.showStationaryEmissions = this.editMeter.source == 'Natural Gas' || this.editMeter.source == 'Other Fuels';
     this.showScope2OtherEmissions = this.editMeter.source == 'Other Energy';

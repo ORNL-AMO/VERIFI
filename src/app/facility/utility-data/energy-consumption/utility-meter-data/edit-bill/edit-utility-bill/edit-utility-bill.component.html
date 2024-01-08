@@ -56,6 +56,23 @@
         greater than 0</div>
     </div>
 
+    <div *ngIf="displayHeatCapacity" class="col-md-6 col-sm-12">
+      <label for="heatCapacity">Heat Capacity <span class="required">*</span></label>
+      <div class="input-group mb-3">
+        <input id="heatCapacity" class="form-control" type="number" formControlName="heatCapacity"
+          onfocus="this.select();" min="0" max="999999999999999" (input)="setTotalEmissions()">
+        <span class="input-group-text"><span [innerHTML]="editMeter.energyUnit | settingsLabel"></span>/<span
+            [innerHTML]="editMeter.startingUnit | settingsLabel"></span>
+        </span>
+      </div>
+      <div class="alert alert-danger" *ngIf="meterDataForm.get('heatCapacity').hasError('required')">Total heat
+        capacity
+        is
+        required</div>
+      <div class="alert alert-danger" *ngIf="meterDataForm.get('heatCapacity').hasError('min')">Can't be less than 0
+      </div>
+    </div>
+
     <ng-container *ngIf="showEmissions && emissionsResults">
       <ng-container *ngIf="showMarketEmissions">
         <div class="col-md-6 col-sm-12">
