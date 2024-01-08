@@ -260,7 +260,7 @@ export class BackupDataService {
 
 
     this.loadingService.setLoadingMessage('Adding Custom Emissions...');
-    for (let i = 0; i < backupFile.customEmissionsItems.length; i++) {
+    for (let i = 0; i < backupFile.customEmissionsItems?.length; i++) {
       let customEmissionsItem: IdbCustomEmissionsItem = backupFile.customEmissionsItems[i];
       customEmissionsItem.accountId = accountGUIDs.newId;
       delete customEmissionsItem.id;
@@ -268,7 +268,7 @@ export class BackupDataService {
     }
 
     this.loadingService.setLoadingMessage('Adding Custom Fuels...');
-    for (let i = 0; i < backupFile.customFuels.length; i++) {
+    for (let i = 0; i < backupFile.customFuels?.length; i++) {
       let customFuel: IdbCustomFuel = backupFile.customFuels[i];
       customFuel.accountId = accountGUIDs.newId;
       delete customFuel.id;
@@ -276,7 +276,7 @@ export class BackupDataService {
     }
 
     this.loadingService.setLoadingMessage('Adding Custom GWPs...');
-    for (let i = 0; i < backupFile.customGWPs.length; i++) {
+    for (let i = 0; i < backupFile.customGWPs?.length; i++) {
       let customGWP: IdbCustomGWP = backupFile.customGWPs[i];
       customGWP.accountId = accountGUIDs.newId;
       delete customGWP.id;
