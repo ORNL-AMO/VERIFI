@@ -43,15 +43,16 @@ export class EditUtilityBillComponent implements OnInit {
   showMarketEmissions: boolean;
   showStationaryEmissions: boolean;
   showScope2OtherEmissions: boolean;
+  usingMeterHeatCapacity: boolean;
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private facilityDbService: FacilitydbService, private editMeterFormService: EditMeterFormService,
+    private facilityDbService: FacilitydbService,
     private eGridService: EGridService,
     private customFuelDbService: CustomFuelDbService) { }
 
   ngOnInit(): void {
     this.setShowEmissions();
     this.setTotalEmissions();
-
+    this.setUsingMeterHeatCapacity();
   }
 
   ngOnChanges() {
@@ -63,7 +64,7 @@ export class EditUtilityBillComponent implements OnInit {
     this.setTotalEmissions();
   }
 
-  setShowEmissions(){
+  setShowEmissions() {
     this.showEmissions = checkShowEmissionsOutputRate(this.editMeter);
     this.showMarketEmissions = this.editMeter.source == 'Electricity';
     this.showStationaryEmissions = this.editMeter.source == 'Natural Gas' || this.editMeter.source == 'Other Fuels';
@@ -71,7 +72,7 @@ export class EditUtilityBillComponent implements OnInit {
   }
 
   calculateTotalEnergyUse() {
-    let totalEnergyUse: number = this.meterDataForm.controls.totalVolume.value * this.editMeter.heatCapacity;
+    let totalEnergyUse: number = this.meterDataForm.controls.totalVolume.value * this.meterDataForm.controls.heatCapacity.value;
     this.meterDataForm.controls.totalEnergyUse.patchValue(totalEnergyUse);
     this.setTotalEmissions();
   }
@@ -105,6 +106,26 @@ export class EditUtilityBillComponent implements OnInit {
         this.meterDataForm.controls.totalVolume.value, undefined, undefined);
     } else {
       this.emissionsResults = getZeroEmissionsResults();
+    }
+  }
+
+  editHeatCapacity() {
+    this.meterDataForm.controls.heatCapacity.enable();
+    this.usingMeterHeatCapacity = false;
+    this.calculateTotalEnergyUse();
+  }
+
+  useMeterHeatCapacity() {
+    this.meterDataForm.controls.heatCapacity.patchValue(this.editMeter.heatCapacity);
+    this.meterDataForm.controls.heatCapacity.disable();
+    this.usingMeterHeatCapacity = true;
+    this.calculateTotalEnergyUse();
+  }
+
+  setUsingMeterHeatCapacity() {
+    this.usingMeterHeatCapacity = (this.meterDataForm.controls.heatCapacity.value == this.editMeter.heatCapacity);
+    if (!this.usingMeterHeatCapacity) {
+      this.meterDataForm.controls.heatCapacity.enable();
     }
   }
 }

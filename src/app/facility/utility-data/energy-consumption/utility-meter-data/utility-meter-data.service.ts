@@ -42,7 +42,7 @@ export class UtilityMeterDataService {
           this.tableGeneralUtilityFilters.next(selectedFacility.tableGeneralUtilityFilters)
         }
 
-        if(selectedFacility.tableVehicleDataFilters){
+        if (selectedFacility.tableVehicleDataFilters) {
           this.tableVehicleDataFilters.next(selectedFacility.tableVehicleDataFilters);
         }
       }
@@ -240,7 +240,7 @@ export class UtilityMeterDataService {
       heatCapacityValidators = [Validators.required, Validators.min(0)];
     }
 
-    return this.formBuilder.group({
+    let form: FormGroup = this.formBuilder.group({
       readDate: [dateString, Validators.required],
       totalVolume: [meterData.totalVolume, totalVolumeValidators],
       totalEnergyUse: [meterData.totalEnergyUse, totalEnergyUseValidators],
@@ -251,6 +251,8 @@ export class UtilityMeterDataService {
       isEstimated: [meterData.isEstimated || false],
       heatCapacity: [meterData.heatCapacity, heatCapacityValidators]
     });
+    form.controls.heatCapacity.disable();
+    return form;
   }
 
   updateGeneralMeterDataFromForm(meterData: IdbUtilityMeterData, form: FormGroup): IdbUtilityMeterData {

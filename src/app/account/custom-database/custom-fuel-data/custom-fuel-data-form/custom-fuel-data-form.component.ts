@@ -143,6 +143,7 @@ export class CustomFuelDataFormComponent {
           if (accountMeters[i].fuel == this.previousValue) {
             needsUpdate = true;
             accountMeters[i].fuel = this.editCustomFuel.value;
+            //TODO: Update heat capacity and corresponding energy use in meter data....
             await firstValueFrom(this.utilityMeterDbService.updateWithObservable(accountMeters[i]));
           }
         }
