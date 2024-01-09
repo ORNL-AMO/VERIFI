@@ -121,7 +121,8 @@ export class UtilityMeterDatadbService {
             demandUsage: undefined,
             demandCharge: undefined,
             meterNumber: meter.meterNumber,
-            heatCapacity: meter.heatCapacity
+            heatCapacity: meter.heatCapacity,
+            vehicleFuelEfficiency: meter.vehicleFuelEfficiency
         }
     }
 

@@ -218,7 +218,7 @@ export class UtilityMeterDataService {
   }
 
 
-  getGeneralMeterDataForm(meterData: IdbUtilityMeterData, displayVolumeInput: boolean, displayEnergyInput: boolean, displayHeatCapacity: boolean): FormGroup {
+  getGeneralMeterDataForm(meterData: IdbUtilityMeterData, displayVolumeInput: boolean, displayEnergyInput: boolean, displayHeatCapacity: boolean, displayFuelEfficiency: boolean): FormGroup {
     //need to use date string for calander to work in form 
     let dateString: string;
     if (meterData.readDate && isNaN(new Date(meterData.readDate).getTime()) == false) {
@@ -240,6 +240,11 @@ export class UtilityMeterDataService {
       heatCapacityValidators = [Validators.required, Validators.min(0)];
     }
 
+    let vehicleFuelEfficiencyValidators: Array<ValidatorFn> = [];
+    if (displayFuelEfficiency) {
+      vehicleFuelEfficiencyValidators = [Validators.required, Validators.min(0)];
+    }
+
     let form: FormGroup = this.formBuilder.group({
       readDate: [dateString, Validators.required],
       totalVolume: [meterData.totalVolume, totalVolumeValidators],
@@ -249,9 +254,11 @@ export class UtilityMeterDataService {
       deliveryCharge: [meterData.deliveryCharge],
       otherCharge: [meterData.otherCharge],
       isEstimated: [meterData.isEstimated || false],
-      heatCapacity: [meterData.heatCapacity, heatCapacityValidators]
+      heatCapacity: [meterData.heatCapacity, heatCapacityValidators],
+      vehicleFuelEfficiency: [meterData.vehicleFuelEfficiency, vehicleFuelEfficiencyValidators]
     });
     form.controls.heatCapacity.disable();
+    form.controls.vehicleFuelEfficiency.disable();
     return form;
   }
 
@@ -267,6 +274,7 @@ export class UtilityMeterDataService {
     meterData.otherCharge = form.controls.otherCharge.value;
     meterData.isEstimated = form.controls.isEstimated.value;
     meterData.heatCapacity = form.controls.heatCapacity.value;
+    meterData.vehicleFuelEfficiency = form.controls.vehicleFuelEfficiency.value;
     return meterData;
   }
 }

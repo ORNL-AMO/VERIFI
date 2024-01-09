@@ -231,7 +231,8 @@ export interface IdbUtilityMeterData {
     demandUsage?: number,
     demandCharge?: number,
 
-    heatCapacity?:  number
+    heatCapacity?:  number,
+    vehicleFuelEfficiency?: number,
 
 }
 

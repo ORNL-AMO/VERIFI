@@ -141,6 +141,4 @@ export class UpdateDbEntryService {
     }
     return { utilityMeter: utilityMeter, isChanged: isChanged };
   }
-
-
 }

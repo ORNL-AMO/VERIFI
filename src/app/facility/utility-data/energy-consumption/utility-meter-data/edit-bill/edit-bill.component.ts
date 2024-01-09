@@ -27,6 +27,7 @@ export class EditBillComponent implements OnInit {
   displayVolumeInput: boolean;
   displayEnergyUse: boolean;
   displayHeatCapacity: boolean;
+  displayVehicleFuelEfficiency: boolean;
   invalidDate: boolean;
   showFilterDropdown: boolean = false;
   constructor(private activatedRoute: ActivatedRoute, private utilityMeterDataDbService: UtilityMeterDatadbService,
@@ -117,13 +118,17 @@ export class EditBillComponent implements OnInit {
     } else if (this.editMeter.source == 'Other') {
       this.displayVolumeInput = (getIsEnergyUnit(this.editMeter.startingUnit) == false);
       this.displayEnergyUse = (getIsEnergyUnit(this.editMeter.startingUnit) == true);
-      this.meterDataForm = this.utilityMeterDataService.getGeneralMeterDataForm(this.editMeterData, this.displayVolumeInput, this.displayEnergyUse, this.displayHeatCapacity);
+      this.meterDataForm = this.utilityMeterDataService.getGeneralMeterDataForm(this.editMeterData, this.displayVolumeInput, this.displayEnergyUse, this.displayHeatCapacity, false);
     } else {
       this.displayVolumeInput = (getIsEnergyUnit(this.editMeter.startingUnit) == false);
       this.displayEnergyUse = getIsEnergyMeter(this.editMeter.source);
-      this.meterDataForm = this.utilityMeterDataService.getGeneralMeterDataForm(this.editMeterData, this.displayVolumeInput, this.displayEnergyUse, this.displayHeatCapacity);
+      this.displayVehicleFuelEfficiency = (this.editMeter.scope == 2 && this.editMeter.vehicleCategory == 2);
+      this.meterDataForm = this.utilityMeterDataService.getGeneralMeterDataForm(this.editMeterData, this.displayVolumeInput, this.displayEnergyUse, this.displayHeatCapacity, this.displayVehicleFuelEfficiency);
       if (this.displayVolumeInput) {
         this.meterDataForm.controls.totalEnergyUse.disable();
+      }
+      if(this.displayHeatCapacity && this.meterDataForm.controls.heatCapacity.value == undefined){
+        this.meterDataForm.controls.heatCapacity.patchValue(this.editMeter.heatCapacity);
       }
     }
   }
