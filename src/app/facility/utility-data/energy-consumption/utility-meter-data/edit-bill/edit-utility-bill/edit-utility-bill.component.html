@@ -56,6 +56,36 @@
         greater than 0</div>
     </div>
 
+    <div *ngIf="displayHeatCapacity" class="col-md-6 col-sm-12">
+      <label for="heatCapacity">Heat Capacity <span class="required">*</span></label>
+      <div class="input-group mb-3">
+        <span class="input-group-text p-0">
+          <button *ngIf="usingMeterHeatCapacity" class="btn btn-sm" (click)="editHeatCapacity()">
+            <span class="fa fa-edit"></span>
+          </button>
+          <button *ngIf="!usingMeterHeatCapacity" class="btn btn-sm" (click)="useMeterHeatCapacity()">
+            <span class="fa fa-undo"></span>
+          </button>
+
+        </span>
+        <input id="heatCapacity" class="form-control" type="number" formControlName="heatCapacity"
+          onfocus="this.select();" min="0" max="999999999999999" (input)="calculateTotalEnergyUse()">
+        <span class="input-group-text"><span [innerHTML]="editMeter.energyUnit | settingsLabel"></span>/<span
+            [innerHTML]="editMeter.startingUnit | settingsLabel"></span>
+        </span>
+      </div>
+      <div class="alert alert-danger" *ngIf="meterDataForm.get('heatCapacity').hasError('required')">Total heat
+        capacity
+        is
+        required</div>
+      <div class="alert alert-danger" *ngIf="meterDataForm.get('heatCapacity').hasError('min')">Can't be less than 0
+      </div>
+      <div class="alert alert-info" *ngIf="!usingMeterHeatCapacity">
+        Custom heat capacity set for this reading. Click "<span class="fa fa-undo"></span>" to use the meter's heat
+        capacity.
+      </div>
+    </div>
+
     <ng-container *ngIf="showEmissions && emissionsResults">
       <ng-container *ngIf="showMarketEmissions">
         <div class="col-md-6 col-sm-12">

@@ -301,6 +301,7 @@ export class UploadDataV2Service {
       } else {
         totalVolume = totalConsumption;
         if (displayEnergyUse && totalVolume) {
+          //TODO: heat capacity comes from utility data or meter
           energyUse = totalVolume * meter.heatCapacity;
         }
       }

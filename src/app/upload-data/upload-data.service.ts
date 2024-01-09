@@ -15,7 +15,7 @@ import { UnitOption } from '../shared/unitOptions';
 import { Countries, Country } from '../shared/form-data/countries';
 import * as _ from 'lodash';
 import { State, States } from '../shared/form-data/states';
-import { getHeatingCapacity, getIsEnergyMeter, getIsEnergyUnit, getSiteToSource, getStartingUnitOptions } from '../shared/sharedHelperFuntions';
+import { checkShowHeatCapacity, checkShowSiteToSource, getHeatingCapacity, getIsEnergyMeter, getIsEnergyUnit, getSiteToSource, getStartingUnitOptions } from '../shared/sharedHelperFuntions';
 import { MeterPhase, MeterSource, AllSources } from '../models/constantsAndTypes';
 import { getMeterDataCopy } from '../calculations/conversions/convertMeterData';
 import { FuelTypeOption } from '../shared/fuel-options/fuelTypeOption';
@@ -454,11 +454,11 @@ export class UploadDataService {
         } else {
           newMeter.energyUnit = selectedFacility.energyUnit;
         }
-        let showHeatCapacity: boolean = this.editMeterFormService.checkShowHeatCapacity(newMeter.source, newMeter.startingUnit, newMeter.scope);
+        let showHeatCapacity: boolean = checkShowHeatCapacity(newMeter.source, newMeter.startingUnit, newMeter.scope);
         if (showHeatCapacity) {
           newMeter.heatCapacity = getHeatingCapacity(newMeter.source, newMeter.startingUnit, newMeter.energyUnit);
         }
-        let showSiteToSource: boolean = this.editMeterFormService.checkShowSiteToSource(newMeter.source, newMeter.includeInEnergy, newMeter.scope);
+        let showSiteToSource: boolean = checkShowSiteToSource(newMeter.source, newMeter.includeInEnergy, newMeter.scope);
         if (showSiteToSource) {
           newMeter.siteToSource = getSiteToSource(newMeter.source);
         }

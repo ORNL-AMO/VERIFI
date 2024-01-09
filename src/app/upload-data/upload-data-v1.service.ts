@@ -10,7 +10,7 @@ import { EnergyUnitsHelperService } from '../shared/helper-services/energy-units
 import { EditMeterFormService } from '../facility/utility-data/energy-consumption/energy-source/edit-meter-form/edit-meter-form.service';
 import { EGridService } from '../shared/helper-services/e-grid.service';
 import * as _ from 'lodash';
-import { getHeatingCapacity, getIsEnergyMeter, getIsEnergyUnit, getSiteToSource } from '../shared/sharedHelperFuntions';
+import { checkShowHeatCapacity, checkShowSiteToSource, getHeatingCapacity, getIsEnergyMeter, getIsEnergyUnit, getSiteToSource } from '../shared/sharedHelperFuntions';
 import { MeterPhase } from '../models/constantsAndTypes';
 import { SubRegionData } from '../models/eGridEmissions';
 import { getMeterDataCopy } from '../calculations/conversions/convertMeterData';
@@ -410,11 +410,11 @@ export class UploadDataV1Service {
         } else {
           newMeter.energyUnit = selectedFacility.energyUnit;
         }
-        let showHeatCapacity: boolean = this.editMeterFormService.checkShowHeatCapacity(newMeter.source, newMeter.startingUnit, newMeter.scope);
+        let showHeatCapacity: boolean = checkShowHeatCapacity(newMeter.source, newMeter.startingUnit, newMeter.scope);
         if (showHeatCapacity) {
           newMeter.heatCapacity = getHeatingCapacity(newMeter.source, newMeter.startingUnit, newMeter.energyUnit);
         }
-        let showSiteToSource: boolean = this.editMeterFormService.checkShowSiteToSource(newMeter.source, newMeter.includeInEnergy, newMeter.scope);
+        let showSiteToSource: boolean = checkShowSiteToSource(newMeter.source, newMeter.includeInEnergy, newMeter.scope);
         if (showSiteToSource) {
           newMeter.siteToSource = getSiteToSource(newMeter.source);
         }

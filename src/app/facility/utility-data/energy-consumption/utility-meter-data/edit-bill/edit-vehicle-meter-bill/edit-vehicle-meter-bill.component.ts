@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { FormGroup } from '@angular/forms';
+import { FormControl, FormGroup } from '@angular/forms';
 import { getEmissions } from 'src/app/calculations/emissions-calculations/emissions';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
@@ -27,6 +27,8 @@ export class EditVehicleMeterBillComponent {
   displayEnergyUse: boolean;
   @Input()
   invalidDate: boolean;
+  @Input()
+  displayVehicleFuelEfficiency: boolean;
 
   source: MeterSource;
   energyUnit: string;
@@ -37,24 +39,36 @@ export class EditVehicleMeterBillComponent {
   otherEmissions: number = 0;
   totalEmissions: number = 0;
   meterFuel: FuelTypeOption;
-  totalVolumeLabel: 'Total Fuel Usage' | 'Total Distance';
+  totalVolumeLabel: 'Total Fuel Consumption' | 'Total Distance';
+  usingMeterFuelEfficiency: boolean;
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private facilityDbService: FacilitydbService) {
   }
 
   ngOnInit(): void {
     this.setFuel();
     this.setTotalEmissions();
+    this.setUsingMeterFuelEfficiency();
   }
 
   ngOnChanges() {
     this.source = this.editMeter.source;
     this.energyUnit = this.editMeter.energyUnit;
     if (this.editMeter.vehicleCollectionType == 1) {
-      this.totalVolumeLabel = 'Total Fuel Usage';
+      this.totalVolumeLabel = 'Total Fuel Consumption';
       this.volumeUnit = this.editMeter.vehicleCollectionUnit;
+      if (this.editMeter.vehicleCategory == 2) {
+        this.meterDataForm.addControl('totalDistance', new FormControl());
+        this.meterDataForm.controls.totalDistance.disable();
+        this.setTotalDistance();
+      }
     } else {
       this.totalVolumeLabel = 'Total Distance';
       this.volumeUnit = this.editMeter.vehicleDistanceUnit;
+      if (this.editMeter.vehicleCategory == 2) {
+        this.meterDataForm.addControl('totalFuelConsumption', new FormControl());
+        this.meterDataForm.controls.totalFuelConsumption.disable();
+        this.setTotalFuelConsumption();
+      }
     }
     this.checkDate();
     this.setFuel();
@@ -70,15 +84,30 @@ export class EditVehicleMeterBillComponent {
 
   calculateTotalEnergyUse() {
     let totalEnergyUse: number;
-    let totalVolume: number = this.meterDataForm.controls.totalVolume.value;
     if (this.editMeter.vehicleCollectionType == 1) {
-      totalEnergyUse = totalVolume * this.editMeter.heatCapacity
+      this.setTotalDistance();
+      totalEnergyUse = this.meterDataForm.controls.totalVolume.value * this.editMeter.heatCapacity
     } else {
-      let fuelConsumption: number = totalVolume / this.editMeter.vehicleFuelEfficiency;
-      totalEnergyUse = fuelConsumption * this.editMeter.heatCapacity;
+      //total volume = distance
+      this.setTotalFuelConsumption();
+      totalEnergyUse = this.meterDataForm.controls.totalFuelConsumption.value * this.editMeter.heatCapacity;
     }
     this.meterDataForm.controls.totalEnergyUse.patchValue(totalEnergyUse);
     this.setTotalEmissions();
+  }
+
+  setTotalFuelConsumption() {
+    if (this.editMeter.vehicleCategory == 2) {
+      let fuelConsumption: number = this.meterDataForm.controls.totalVolume.value / this.meterDataForm.controls.vehicleFuelEfficiency.value;
+      this.meterDataForm.controls.totalFuelConsumption.patchValue(fuelConsumption);
+    }
+  }
+
+  setTotalDistance() {
+    if (this.editMeter.vehicleCategory == 2) {
+      let totalDistance: number = this.meterDataForm.controls.totalVolume.value * this.meterDataForm.controls.vehicleFuelEfficiency.value;
+      this.meterDataForm.controls.totalDistance.patchValue(totalDistance);
+    }
   }
 
   checkDate() {
@@ -110,6 +139,26 @@ export class EditVehicleMeterBillComponent {
       this.biogenicEmissions = 0;
       this.otherEmissions = 0;
       this.totalEmissions = 0;
+    }
+  }
+
+  editFuelEfficiency() {
+    this.meterDataForm.controls.vehicleFuelEfficiency.enable();
+    this.usingMeterFuelEfficiency = false;
+    this.calculateTotalEnergyUse();
+  }
+
+  useMeterFuelEfficiency() {
+    this.meterDataForm.controls.vehicleFuelEfficiency.patchValue(this.editMeter.vehicleFuelEfficiency);
+    this.meterDataForm.controls.vehicleFuelEfficiency.disable();
+    this.usingMeterFuelEfficiency = true;
+    this.calculateTotalEnergyUse();
+  }
+
+  setUsingMeterFuelEfficiency() {
+    this.usingMeterFuelEfficiency = (this.meterDataForm.controls.vehicleFuelEfficiency.value == this.editMeter.vehicleFuelEfficiency);
+    if (!this.usingMeterFuelEfficiency) {
+      this.meterDataForm.controls.vehicleFuelEfficiency.enable();
     }
   }
 }

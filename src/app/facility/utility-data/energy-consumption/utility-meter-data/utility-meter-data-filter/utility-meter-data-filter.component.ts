@@ -4,8 +4,7 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { AdditionalChargesFilters, DetailedChargesFilters, ElectricityDataFilters, EmissionsFilters, GeneralInformationFilters, GeneralUtilityDataFilters, VehicleDataFilters } from 'src/app/models/meterDataFilter';
 import { IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
 import { UtilityMeterDataService } from '../utility-meter-data.service';
-import { getIsEnergyUnit } from 'src/app/shared/sharedHelperFuntions';
-import { EditMeterFormService } from '../../energy-source/edit-meter-form/edit-meter-form.service';
+import { checkShowEmissionsOutputRate, getIsEnergyUnit } from 'src/app/shared/sharedHelperFuntions';
 
 @Component({
   selector: 'app-utility-meter-data-filter',
@@ -27,7 +26,7 @@ export class UtilityMeterDataFilterComponent implements OnInit {
   showEmissions: boolean;
   vehicleDataFilters: VehicleDataFilters;
   constructor(private utilityMeterDataService: UtilityMeterDataService, private facilityDbService: FacilitydbService,
-    private dbChangesService: DbChangesService, private editMeterFormService: EditMeterFormService) { }
+    private dbChangesService: DbChangesService) { }
 
   ngOnInit(): void {
   }
@@ -54,7 +53,7 @@ export class UtilityMeterDataFilterComponent implements OnInit {
       this.displayVolumeInput = true;
 
     } else {
-      this.showEmissions = this.editMeterFormService.checkShowEmissionsOutputRate(this.meter);
+      this.showEmissions = checkShowEmissionsOutputRate(this.meter);
       this.displayVolumeInput = (getIsEnergyUnit(this.meter.startingUnit) == false);
     }
   }

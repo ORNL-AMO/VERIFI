@@ -1,5 +1,6 @@
 import { ConvertValue } from "../calculations/conversions/convertValue";
 import { MeterPhase, MeterSource } from "../models/constantsAndTypes";
+import { IdbUtilityMeter } from "../models/idb";
 import { FuelTypeOption } from "./fuel-options/fuelTypeOption";
 import { StationaryOtherEnergyOptions } from "./fuel-options/stationaryOtherEnergyOptions";
 import { ChilledWaterUnitOptions, EnergyUnitOptions, MassUnitOptions, UnitOption, VolumeGasOptions, VolumeLiquidOptions } from "./unitOptions";
@@ -15,16 +16,6 @@ export function getIsEnergyUnit(unit: string): boolean {
 
 export function getIsEnergyMeter(source: MeterSource): boolean {
     if (source == 'Electricity' || source == 'Natural Gas' || source == 'Other Fuels' || source == 'Other Energy') {
-        return true;
-    } else {
-        return false;
-    }
-}
-
-export function checkShowSiteToSource(source: MeterSource, includeInEnergy: boolean): boolean {
-    if (!includeInEnergy) {
-        return false;
-    } else if (source == "Electricity" || source == "Natural Gas" || source == 'Other Energy') {
         return true;
     } else {
         return false;
@@ -146,4 +137,30 @@ export function getStartingUnitOptions(source: MeterSource, phase: MeterPhase, f
       }
     }
     return EnergyUnitOptions;
+  }
+
+  export function checkShowHeatCapacity(source: MeterSource, startingUnit: string, scope: number): boolean {
+      if (source != 'Water Intake' && source != 'Water Discharge' && source != 'Other' && startingUnit && scope != 2) {
+          return (getIsEnergyUnit(startingUnit) == false);
+      } else {
+          return false;
+      }
+  }
+  
+  export function checkShowSiteToSource(source: MeterSource, includeInEnergy: boolean, scope: number): boolean {
+      if (!includeInEnergy || scope == 2) {
+          return false;
+      } else if (source == "Electricity" || source == "Natural Gas" || source == 'Other Energy') {
+          return true;
+      } else {
+          return false;
+      }
+  }
+  
+  export function checkShowEmissionsOutputRate(meter: IdbUtilityMeter): boolean {
+      if (meter.source == 'Electricity' || meter.source == 'Natural Gas' || meter.source == 'Other Fuels' || meter.source == 'Other Energy' || (meter.source == 'Other' && meter.scope == 5)) {
+          return true;
+      } else {
+          return false;
+      }
   }

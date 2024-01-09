@@ -43,6 +43,57 @@
                 than 0</div>
         </div>
 
+        <div *ngIf="displayVehicleFuelEfficiency" class="col-md-6 col-sm-12">
+            <label for="vehicleFuelEfficiency">Fuel Efficiency <span class="required">*</span></label>
+            <div class="input-group mb-3">
+                <span class="input-group-text p-0">
+                    <button *ngIf="usingMeterFuelEfficiency" class="btn btn-sm" (click)="editFuelEfficiency()">
+                        <span class="fa fa-edit"></span>
+                    </button>
+                    <button *ngIf="!usingMeterFuelEfficiency" class="btn btn-sm" (click)="useMeterFuelEfficiency()">
+                        <span class="fa fa-undo"></span>
+                    </button>
+
+                </span>
+                <input id="vehicleFuelEfficiency" class="form-control" type="number"
+                    formControlName="vehicleFuelEfficiency" onfocus="this.select();" min="0" max="999999999999999"
+                    (input)="calculateTotalEnergyUse()">
+                <span class="input-group-text"><span
+                        [innerHTML]="editMeter.vehicleDistanceUnit | settingsLabel"></span>/<span
+                        [innerHTML]="editMeter.vehicleCollectionUnit | settingsLabel"></span>
+                </span>
+            </div>
+            <div class="alert alert-danger" *ngIf="meterDataForm.get('vehicleFuelEfficiency').hasError('required')">Fuel
+                Efficiency
+                is
+                required</div>
+            <div class="alert alert-danger" *ngIf="meterDataForm.get('vehicleFuelEfficiency').hasError('min')">Can't be
+                less than 0
+            </div>
+            <div class="alert alert-info" *ngIf="!usingMeterFuelEfficiency">
+                Custom fuel efficiency set for this reading. Click "<span class="fa fa-undo"></span>" to use the meter's
+                average fuel efficiency.
+            </div>
+        </div>
+        <ng-container *ngIf="editMeter.vehicleCategory == 2">
+            <div class="col-md-6 col-sm-12" *ngIf="editMeter.vehicleCollectionType == 2">
+                <label for="totalFuelConsumption">Estimated Fuel Consumption</label>
+                <div class="input-group mb-3">
+                    <input id="totalFuelConsumption" class="form-control" type="number"
+                        formControlName="totalFuelConsumption">
+                    <span class="input-group-text" [innerHTML]="editMeter.vehicleCollectionUnit | settingsLabel"></span>
+                </div>
+            </div>
+
+
+            <div class="col-md-6 col-sm-12" *ngIf="editMeter.vehicleCollectionType == 1">
+                <label for="totalDistance">Estimated Distance</label>
+                <div class="input-group mb-3">
+                    <input id="totalDistance" class="form-control" type="number" formControlName="totalDistance">
+                    <span class="input-group-text" [innerHTML]="editMeter.vehicleDistanceUnit | settingsLabel"></span>
+                </div>
+            </div>
+        </ng-container>
         <div class="col-md-6 col-sm-12">
             <label for="totalEnergyUse">Total Energy Use <span class="required">*</span></label>
             <div class="input-group mb-3">
