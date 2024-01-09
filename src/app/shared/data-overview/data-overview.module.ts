@@ -21,6 +21,8 @@ import { EmissionsDonutComponent } from './emissions-donut/emissions-donut.compo
 import { EmissionsUsageTableComponent } from './emissions-usage-table/emissions-usage-table.component';
 import { EmissionsUsageChartComponent } from './emissions-usage-chart/emissions-usage-chart.component';
 import { FacilitiesEmissionsStackedBarChartComponent } from './facilities-emissions-stacked-bar-chart/facilities-emissions-stacked-bar-chart.component';
+import { AccountUtilityUsageTableComponent } from './account-utility-usage-table/account-utility-usage-table.component';
+import { AccountUtilityUsageDonutComponent } from './account-utility-usage-donut/account-utility-usage-donut.component';
 
 
 
@@ -44,7 +46,9 @@ import { FacilitiesEmissionsStackedBarChartComponent } from './facilities-emissi
     EmissionsDonutComponent,
     EmissionsUsageTableComponent,
     EmissionsUsageChartComponent,
-    FacilitiesEmissionsStackedBarChartComponent
+    FacilitiesEmissionsStackedBarChartComponent,
+    AccountUtilityUsageTableComponent,
+    AccountUtilityUsageDonutComponent
   ],
   imports: [
     CommonModule,
@@ -65,7 +69,9 @@ import { FacilitiesEmissionsStackedBarChartComponent } from './facilities-emissi
     EmissionsDonutComponent,
     EmissionsUsageTableComponent,
     EmissionsUsageChartComponent,
-    FacilitiesEmissionsStackedBarChartComponent
+    FacilitiesEmissionsStackedBarChartComponent,
+    AccountUtilityUsageTableComponent,
+    AccountUtilityUsageDonutComponent
   ]
 })
 export class DataOverviewModule { }
