@@ -1,15 +1,30 @@
 <div class="row justify-content-center">
     <div class="col-12" *ngIf="sectionOptions.includeMeterUsageStackedLineChart">
-        <app-emissions-stacked-line-chart [calanderizedMeters]="calanderizedMeters"
-            [dateRange]="dateRange"></app-emissions-stacked-line-chart>
+        <ng-container *ngIf="dataType == 'emissions'">
+            <app-emissions-stacked-line-chart [calanderizedMeters]="calanderizedMeters"
+                [dateRange]="dateRange"></app-emissions-stacked-line-chart>
+        </ng-container>
+        <ng-container *ngIf="dataType != 'emissions'">
+            <app-meters-overview-stacked-line-chart [dataType]="dataType" [facilityId]="facility.guid"
+                [calanderizedMeters]="facilityOverviewData.calanderizedMeters"
+                [dateRange]="dateRange"></app-meters-overview-stacked-line-chart>
+        </ng-container>
+
     </div>
     <div class="print-break-before" *ngIf="sectionOptions.includeMeterUsageTable"
         [ngClass]="{'col-10': print, 'col-6': !print}">
         <app-emissions-usage-table [overviewData]="facilityOverviewData"></app-emissions-usage-table>
     </div>
     <div *ngIf="sectionOptions.includeMeterUsageTable" [ngClass]="{'col-10': print, 'col-6': !print}">
-        <app-emissions-donut [facilityId]="facility.guid"
-            [facilityOverviewMeters]="facilityOverviewMeters"></app-emissions-donut>
+        <ng-container *ngIf="dataType == 'emissions'">
+            <app-emissions-donut [facilityId]="facility.guid"
+                [facilityOverviewMeters]="facilityOverviewMeters"></app-emissions-donut>
+        </ng-container>
+        <ng-container *ngIf="dataType != 'emissions'">
+            <app-meter-usage-donut [dataType]="dataType" [facilityId]="facility.guid"
+                [facilityOverviewMeters]="facilityOverviewData.energyMeters"></app-meter-usage-donut>
+        </ng-container>
+
     </div>
 </div>
 <div class="row hide-print">
@@ -26,8 +41,14 @@
 </div>
 <div class="row print-break-avoid" *ngIf="sectionOptions.includeAnnualBarChart">
     <div class="col-12">
-        <app-emissions-usage-chart [facilityId]="facility.guid"
-            [annualSourceData]="annualSourceData"></app-emissions-usage-chart>
+        <ng-container *ngIf="dataType == 'emissions'">
+            <app-emissions-usage-chart [facilityId]="facility.guid"
+                [annualSourceData]="annualSourceData"></app-emissions-usage-chart>
+        </ng-container>
+        <ng-container *ngIf="dataType != 'emissions'">
+            <app-utilities-usage-chart [dataType]="dataType" [facilityId]="facility.guid"
+                [annualSourceData]="facilityOverviewData.annualSourceData"></app-utilities-usage-chart>
+        </ng-container>
     </div>
 </div>
 <div class="row print-break-avoid" *ngIf="sectionOptions.includeMonthlyLineChartForFacility">

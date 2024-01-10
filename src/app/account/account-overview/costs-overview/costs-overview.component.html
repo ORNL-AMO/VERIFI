@@ -32,6 +32,16 @@
                                 [accountOverviewFacilities]="accountOverviewData.facilitiesCost"></app-facility-usage-donut>
                         </div>
                     </div>
+                    <div class="row">
+                        <div class="col-6">
+                            <app-account-utility-usage-table [dataType]="'cost'"
+                                [accountOverviewData]="accountOverviewData"></app-account-utility-usage-table>
+                        </div>
+                        <div class="col-6">
+                            <app-account-utility-usage-donut [dataType]="'cost'"
+                                [accountOverviewData]="accountOverviewData"></app-account-utility-usage-donut>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

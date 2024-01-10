@@ -6,6 +6,7 @@ import { getYearlyUsageNumbers } from "../shared-calculations/calanderizationFun
 import { EnergySources, WaterSources } from "src/app/models/constantsAndTypes";
 import { EmissionsResults } from "src/app/models/eGridEmissions";
 import { getEmissionsTotalsFromMonthlyData } from "../shared-calculations/calculationsHelpers";
+import { SourceTotals } from "./sourceTotalsClass";
 
 export class AccountOverviewData {
 
@@ -26,6 +27,9 @@ export class AccountOverviewData {
     totalWaterCost: number;
     calanderizedMeters: Array<CalanderizedMeter>;
     numberOfMeters: number;
+
+
+    sourceTotals: SourceTotals;
     constructor(calanderizedMeters: Array<CalanderizedMeter>, facilities: Array<IdbFacility>, account: IdbAccount, dateRange: { startDate: Date, endDate: Date }) {
         this.calanderizedMeters = calanderizedMeters;
         this.numberOfMeters = this.calanderizedMeters?.length;
@@ -47,6 +51,8 @@ export class AccountOverviewData {
             this.setTotalWaterCost();
             this.setWaterYearMonthData(calanderizedMeters);
         }
+
+        this.sourceTotals = new SourceTotals(calanderizedMeters, dateRange);
     }
 
     setEnergyYearMonthData(calanderizedMeters: Array<CalanderizedMeter>) {
@@ -170,9 +176,11 @@ export class AccountOverviewFacility {
     totalCost: number;
     emissions: EmissionsResults;
     facility: IdbFacility;
+    numberOfMeters: number;
     constructor(calanderizedMeters: Array<CalanderizedMeter>, facility: IdbFacility, dateRange: { startDate: Date, endDate: Date }, dataType: 'energy' | 'cost' | 'water') {
         this.facility = facility;
         let facilityMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => { return cMeter.meter.facilityId == facility.guid });
+        this.numberOfMeters = facilityMeters.length;
         this.setMonthlyData(facilityMeters, new Date(dateRange.startDate), new Date(dateRange.endDate));
         this.setTotalUsage(dataType);
         this.setTotalCost();

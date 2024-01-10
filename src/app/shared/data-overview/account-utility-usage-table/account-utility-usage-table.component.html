@@ -1,0 +1,48 @@
+<div class="table-responsive">
+    <table class="table utility-data table-sm table-bordered table-hover">
+        <thead>
+            <tr>
+                <th>Facility</th>
+                <th *ngIf="dataType == 'energyUse'">Utility Usage<br> (<span [innerHTML]="energyUnit | settingsLabel"></span>)
+                </th>
+                <th *ngIf="dataType == 'cost'"># of Meters</th>
+                <th>Utility Cost </th>
+            </tr>
+        </thead>
+        <tbody class="table-group-divider">
+            <tr *ngFor="let sourceTotal of sourceTotalsArr">
+                <td>
+                    <span class="badge" [ngStyle]="{background: sourceTotal.color, color: sourceTotal.color }">
+                        &mdash;
+                    </span>
+                    {{sourceTotal.sourceLabel}}
+                </td>
+                <td *ngIf="dataType == 'energyUse'">
+                    {{sourceTotal.energyUse | customNumber}}
+                </td>
+                <td *ngIf="dataType == 'cost'">
+                    {{sourceTotal.numberOfMeters}}
+                </td>
+                <td>
+                    {{sourceTotal.cost | customNumber:true }}
+                </td>
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr>
+                <th>
+                    Total
+                </th>
+                <th *ngIf="dataType == 'energyUse'">
+                    {{accountOverviewData.totalEnergyUsage | customNumber}}
+                </th>
+                <th *ngIf="dataType == 'cost'">
+                    {{accountOverviewData.numberOfMeters}}
+                </th>
+                <th>
+                    {{accountOverviewData.totalEnergyCost | customNumber:true }}
+                </th>
+            </tr>
+        </tfoot>
+    </table>
+</div>
