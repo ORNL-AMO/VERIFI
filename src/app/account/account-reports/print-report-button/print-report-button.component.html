@@ -1,6 +1,6 @@
 <div class="button-div hide-print" [ngClass]="{'help-open':helpPanelOpen}">
     <div class="d-flex flex-column">
-        <div class="p-2">
+        <div class="p-2" *ngIf="selectedReport.reportType == 'betterPlants'">
             <button class="btn action-btn w-100" (click)="generateExcel()">
                 <span class="fa fa-file-excel"></span>
             </button>

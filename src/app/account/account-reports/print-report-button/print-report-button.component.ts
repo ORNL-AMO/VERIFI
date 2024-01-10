@@ -2,6 +2,8 @@ import { Component } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { HelpPanelService } from 'src/app/help-panel/help-panel.service';
 import { AccountReportsService } from '../account-reports.service';
+import { IdbAccountReport } from 'src/app/models/idb';
+import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 
 @Component({
   selector: 'app-print-report-button',
@@ -14,12 +16,15 @@ export class PrintReportButtonComponent {
   printSub: Subscription;
   helpPanelOpen: boolean;
   helpPanelOpenSub: Subscription;
+  selectedReport: IdbAccountReport;
   constructor(private accountReportsService: AccountReportsService,
-    private helpPanelService: HelpPanelService) {
+    private helpPanelService: HelpPanelService,
+    private accountReportDbService: AccountReportDbService) {
 
   }
 
   ngOnInit() {
+    this.selectedReport = this.accountReportDbService.selectedReport.getValue();
     this.printSub = this.accountReportsService.print.subscribe(print => {
       this.print = print;
       if (this.print) {
