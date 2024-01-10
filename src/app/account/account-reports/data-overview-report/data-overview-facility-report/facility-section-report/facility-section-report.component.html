@@ -4,7 +4,7 @@
             <app-emissions-stacked-line-chart [calanderizedMeters]="calanderizedMeters"
                 [dateRange]="dateRange"></app-emissions-stacked-line-chart>
         </ng-container>
-        <ng-container *ngIf="dataType == 'cost' || dataType == 'energyUse'">
+        <ng-container *ngIf="dataType != 'emissions'">
             <app-meters-overview-stacked-line-chart [dataType]="dataType" [facilityId]="facility.guid"
                 [calanderizedMeters]="facilityOverviewData.calanderizedMeters"
                 [dateRange]="dateRange"></app-meters-overview-stacked-line-chart>
@@ -20,7 +20,7 @@
             <app-emissions-donut [facilityId]="facility.guid"
                 [facilityOverviewMeters]="facilityOverviewMeters"></app-emissions-donut>
         </ng-container>
-        <ng-container *ngIf="dataType == 'cost' || dataType == 'energyUse'">
+        <ng-container *ngIf="dataType != 'emissions'">
             <app-meter-usage-donut [dataType]="dataType" [facilityId]="facility.guid"
                 [facilityOverviewMeters]="facilityOverviewData.energyMeters"></app-meter-usage-donut>
         </ng-container>
@@ -45,8 +45,8 @@
             <app-emissions-usage-chart [facilityId]="facility.guid"
                 [annualSourceData]="annualSourceData"></app-emissions-usage-chart>
         </ng-container>
-        <ng-container *ngIf="dataType == 'cost' || dataType == 'energyUse'">
-            <app-utilities-usage-chart [dataType]="'energyUse'" [facilityId]="facility.guid"
+        <ng-container *ngIf="dataType != 'emissions'">
+            <app-utilities-usage-chart [dataType]="dataType" [facilityId]="facility.guid"
                 [annualSourceData]="facilityOverviewData.annualSourceData"></app-utilities-usage-chart>
         </ng-container>
     </div>

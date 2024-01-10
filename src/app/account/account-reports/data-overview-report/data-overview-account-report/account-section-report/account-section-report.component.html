@@ -53,7 +53,7 @@
             <app-facilities-emissions-stacked-bar-chart
                 [accountOverviewFacilities]="accountOverviewData.facilitiesCost"></app-facilities-emissions-stacked-bar-chart>
         </ng-container>
-        <ng-container *ngIf="dataType == 'cost' || dataType == 'energyUse'">
+        <ng-container *ngIf="dataType != 'emissions'">
             <app-facilities-usage-stacked-bar-chart [dataType]="dataType"
                 [calanderizedMeters]="accountOverviewData.calanderizedMeters" [energyUnit]="energyUnit"
                 [dateRange]="dateRange"></app-facilities-usage-stacked-bar-chart>
