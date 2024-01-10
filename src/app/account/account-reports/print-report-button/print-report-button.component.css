@@ -1,6 +1,6 @@
-.print-button-div{
+.excel-button-div{
     position: fixed;
-    bottom: 15px;
+    bottom: 100px;
     right: 15px;
     background-color: white;
     border-radius: 25px;
@@ -8,10 +8,49 @@
     opacity: .75
 }
 
-.print-button-div:hover{
+
+
+.print-button-div{
+    position: fixed;
+    bottom: 15px;
+    right: 15px;
+    background-color: white;
+    /* border-radius: 25px; */
+    padding: 9.5px;
+    opacity: .75
+}
+
+
+
+
+.button-div{
+    position: fixed;
+    bottom: 0px;
+    right: 0px;
+    background-color: white;
+    /* border-radius: 25px; */
+    padding: 9.5px;
+    opacity: .75
+}
+
+.button-div:hover{
     opacity: 1;
 }
 
-.print-button-div.help-open{
+/* .button-div.help-open{
     right: 275px;
+} */
+
+.fa{
+    font-size: 25px
+}
+
+.button-div.help-open{
+    right: 260px;
+}
+
+@media (max-width: 1500px) {
+    .button-div.help-open{
+        right: 200px;
+    }
 }

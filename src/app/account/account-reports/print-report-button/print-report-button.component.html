@@ -1,5 +1,14 @@
-<div class="print-button-div hide-print" [ngClass]="{'help-open':helpPanelOpen}">
-    <button class="btn action-btn" (click)="togglePrint()">
-        <span class="fa fa-print"></span>
-    </button>
+<div class="button-div hide-print" [ngClass]="{'help-open':helpPanelOpen}">
+    <div class="d-flex flex-column">
+        <div class="p-2">
+            <button class="btn action-btn w-100" (click)="generateExcel()">
+                <span class="fa fa-file-excel"></span>
+            </button>
+        </div>
+        <div class="p-2">
+            <button class="btn action-btn" (click)="togglePrint()">
+                <span class="fa fa-file-pdf"></span>
+            </button>
+        </div>
+    </div>
 </div>

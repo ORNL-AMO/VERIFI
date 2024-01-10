@@ -14,6 +14,7 @@ import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.serv
 import { AccountReportsService } from '../account-reports.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { ConvertValue } from 'src/app/calculations/conversions/convertValue';
+import { BetterPlantsExcelWriterService } from '../better-plants-excel-writer.service';
 
 @Component({
   selector: 'app-better-plants-report',
@@ -30,6 +31,7 @@ export class BetterPlantsReportComponent implements OnInit {
   calculating: boolean | 'error';
   worker: Worker;
   selectedAnalysisItem: IdbAccountAnalysisItem;
+  generateExcelSub: Subscription
   constructor(private accountReportDbService: AccountReportDbService,
     private accountReportsService: AccountReportsService,
     private router: Router, private accountDbService: AccountdbService,
@@ -38,12 +40,18 @@ export class BetterPlantsReportComponent implements OnInit {
     private analysisDbService: AnalysisDbService,
     private accountAnalysisDbService: AccountAnalysisDbService,
     private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService) { }
+    private utilityMeterDataDbService: UtilityMeterDatadbService,
+    private betterPlantsExcelWriterService: BetterPlantsExcelWriterService) { }
 
   ngOnInit(): void {
     this.printSub = this.accountReportsService.print.subscribe(print => {
       this.print = print;
     });
+    this.generateExcelSub = this.accountReportsService.generateExcel.subscribe(generateExcel => {
+      if (generateExcel == true) {
+        this.generateExcelReport();
+      }
+    })
     this.selectedReport = this.accountReportDbService.selectedReport.getValue();
     if (!this.selectedReport) {
       this.router.navigateByUrl('/account/reports/dashboard');
@@ -145,13 +153,20 @@ export class BetterPlantsReportComponent implements OnInit {
         );
         let betterPlantsSummary: BetterPlantsSummary = betterPlantsReportClass.getBetterPlantsSummary();
         this.betterPlantsSummaries.push(betterPlantsSummary);
-        if(this.selectedReport.betterPlantsReportSetup.includeAllYears){
+        if (this.selectedReport.betterPlantsReportSetup.includeAllYears) {
           reportYear--;
-        }else{
+        } else {
           reportYear = this.selectedReport.baselineYear;
         }
       }
       this.calculating = false;
     }
+  }
+
+
+  generateExcelReport() {
+    //TODO: Do we want to generate a report for every year?
+    this.betterPlantsExcelWriterService.exportToExcel(this.selectedReport, this.account, this.betterPlantsSummaries[0]);
+    this.accountReportsService.generateExcel.next(false);
   }
 }
