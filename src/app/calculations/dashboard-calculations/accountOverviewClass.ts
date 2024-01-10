@@ -52,7 +52,7 @@ export class AccountOverviewData {
             this.setWaterYearMonthData(calanderizedMeters);
         }
 
-        this.sourceTotals = new SourceTotals(calanderizedMeters);
+        this.sourceTotals = new SourceTotals(calanderizedMeters, dateRange);
     }
 
     setEnergyYearMonthData(calanderizedMeters: Array<CalanderizedMeter>) {
@@ -176,9 +176,11 @@ export class AccountOverviewFacility {
     totalCost: number;
     emissions: EmissionsResults;
     facility: IdbFacility;
+    numberOfMeters: number;
     constructor(calanderizedMeters: Array<CalanderizedMeter>, facility: IdbFacility, dateRange: { startDate: Date, endDate: Date }, dataType: 'energy' | 'cost' | 'water') {
         this.facility = facility;
         let facilityMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => { return cMeter.meter.facilityId == facility.guid });
+        this.numberOfMeters = facilityMeters.length;
         this.setMonthlyData(facilityMeters, new Date(dateRange.startDate), new Date(dateRange.endDate));
         this.setTotalUsage(dataType);
         this.setTotalCost();
