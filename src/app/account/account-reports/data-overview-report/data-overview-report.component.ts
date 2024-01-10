@@ -96,7 +96,6 @@ export class DataOverviewReportComponent {
   calculateFacilitiesSummary(facilityIndex: number, accountFacilities: Array<IdbFacility>, accountMeterGroups: Array<IdbUtilityMeterGroup>, startDate: Date, endDate: Date) {
     let facilityId: string = this.includedFacilities[facilityIndex];
     let facility: IdbFacility = accountFacilities.find(facility => { return facility.guid == facilityId });
-    console.log(facility.name);
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == facilityId });
     let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
