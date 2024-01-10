@@ -13,6 +13,8 @@ export class AccountUtilityUsageTableComponent {
   accountOverviewData: AccountOverviewData;
   @Input()
   energyUnit: string;
+  @Input()
+  dataType: 'energyUse' | 'cost';
 
   sourceTotalsArr: Array<SourceTotalTableItem>;
   constructor() {
@@ -30,34 +32,23 @@ export class AccountUtilityUsageTableComponent {
 
   setTotalsArr() {
     this.sourceTotalsArr = new Array();
-    if (this.accountOverviewData.sourceTotals.electricity.energyUse) {
-      this.sourceTotalsArr.push(this.getArrItem(this.accountOverviewData.sourceTotals.electricity));
-    }
-    if (this.accountOverviewData.sourceTotals.naturalGas.energyUse) {
-      this.sourceTotalsArr.push(this.getArrItem(this.accountOverviewData.sourceTotals.naturalGas));
-    }
-    if (this.accountOverviewData.sourceTotals.otherFuels.energyUse) {
-      this.sourceTotalsArr.push(this.getArrItem(this.accountOverviewData.sourceTotals.otherFuels));
-    }
-    if (this.accountOverviewData.sourceTotals.otherEnergy.energyUse) {
-      this.sourceTotalsArr.push(this.getArrItem(this.accountOverviewData.sourceTotals.otherEnergy));
-    }
-    if (this.accountOverviewData.sourceTotals.waterIntake.energyUse) {
-      this.sourceTotalsArr.push(this.getArrItem(this.accountOverviewData.sourceTotals.waterIntake));
-    }
-    if (this.accountOverviewData.sourceTotals.waterDischarge.energyUse) {
-      this.sourceTotalsArr.push(this.getArrItem(this.accountOverviewData.sourceTotals.waterDischarge));
-    }
-    if (this.accountOverviewData.sourceTotals.other.energyUse) {
-      this.sourceTotalsArr.push(this.getArrItem(this.accountOverviewData.sourceTotals.other));
-    }
+    this.addArrItem(this.accountOverviewData.sourceTotals.electricity);
+    this.addArrItem(this.accountOverviewData.sourceTotals.naturalGas);
+    this.addArrItem(this.accountOverviewData.sourceTotals.otherFuels);
+    this.addArrItem(this.accountOverviewData.sourceTotals.otherEnergy);
+    this.addArrItem(this.accountOverviewData.sourceTotals.waterIntake);
+    this.addArrItem(this.accountOverviewData.sourceTotals.waterDischarge);
+    this.addArrItem(this.accountOverviewData.sourceTotals.other);
   }
 
-  getArrItem(sourceTotal: SourceTotal): SourceTotalTableItem {
-    return { ...sourceTotal, color: UtilityColors[sourceTotal.sourceLabel]?.color }
+  addArrItem(sourceTotal: SourceTotal) {
+    if (this.dataType == 'energyUse' && sourceTotal.energyUse) {
+      this.sourceTotalsArr.push({ ...sourceTotal, color: UtilityColors[sourceTotal.sourceLabel]?.color })
+    } else if (this.dataType == 'cost' && sourceTotal.cost) {
+      this.sourceTotalsArr.push({ ...sourceTotal, color: UtilityColors[sourceTotal.sourceLabel]?.color })
+    }
   }
 }
-
 
 export interface SourceTotalTableItem extends SourceTotal {
   color: string

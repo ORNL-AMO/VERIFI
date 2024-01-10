@@ -25,6 +25,7 @@ export class SourceTotals {
         let sourceMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => {
             return cMeter.meter.source == source;
         });
+        let numberOfMeters: number = sourceMeters.length;
         let monthlyData: Array<MonthlyData> = sourceMeters.flatMap(sMeter => {
             return sMeter.monthlyData;
         });
@@ -41,7 +42,8 @@ export class SourceTotals {
             }),
             cost: _.sumBy(filteredMonthlyData, (mData: MonthlyData) => {
                 return mData.energyCost
-            })
+            }),
+            numberOfMeters: numberOfMeters
         }
     }
 }
@@ -50,5 +52,6 @@ export class SourceTotals {
 export interface SourceTotal {
     sourceLabel: string,
     energyUse: number,
-    cost: number
+    cost: number,
+    numberOfMeters: number
 }

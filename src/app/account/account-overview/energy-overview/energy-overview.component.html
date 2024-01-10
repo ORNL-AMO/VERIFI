@@ -29,19 +29,12 @@
                     </div>
                     <div class="row">
                         <div class="col-6">
-                            <!-- <app-facilities-usage-table [dataType]="'energyUse'"
-                                [accountOverviewFacilities]="accountOverviewData.facilitiesEnergy"
-                                [accountOverviewData]="accountOverviewData"
-                                [energyUnit]="energyUnit"></app-facilities-usage-table> -->
                             <app-account-utility-usage-table [accountOverviewData]="accountOverviewData"
-                                [energyUnit]="energyUnit"></app-account-utility-usage-table>
+                                [energyUnit]="energyUnit" [dataType]="'energyUse'"></app-account-utility-usage-table>
                         </div>
                         <div class="col-6">
-                            <!-- <app-facility-usage-donut [dataType]="'energyUse'"
-                                [accountOverviewFacilities]="accountOverviewData.facilitiesEnergy"
-                                [energyUnit]="energyUnit"></app-facility-usage-donut> -->
                             <app-account-utility-usage-donut [accountOverviewData]="accountOverviewData"
-                                [energyUnit]="energyUnit"></app-account-utility-usage-donut>
+                                [energyUnit]="energyUnit" [dataType]="'energyUse'"></app-account-utility-usage-donut>
                         </div>
                     </div>
                 </div>

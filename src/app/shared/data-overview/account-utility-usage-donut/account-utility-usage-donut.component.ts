@@ -14,6 +14,8 @@ export class AccountUtilityUsageDonutComponent {
   accountOverviewData: AccountOverviewData;
   @Input()
   energyUnit: string;
+  @Input()
+  dataType: 'energyUse' | 'cost';
 
 
   @ViewChild('donutChart', { static: false }) donutChart: ElementRef;
@@ -36,7 +38,7 @@ export class AccountUtilityUsageDonutComponent {
       let sourceTotals: Array<SourceTotal> = this.getSourceTotals(this.accountOverviewData.sourceTotals);
       if (this.accountOverviewData.sourceTotals)
         var data = [{
-          values: sourceTotals.map(sTotal => { return sTotal.energyUse }),
+          values: sourceTotals.map(sTotal => { return this.getSourceValue(sTotal) }),
           labels: sourceTotals.map(sTotal => { return sTotal.sourceLabel }),
           marker: {
             colors: sourceTotals.map(sTotal => { return UtilityColors[sTotal.sourceLabel]?.color }),
@@ -68,7 +70,15 @@ export class AccountUtilityUsageDonutComponent {
     }
   }
 
-  getSourceTotals(sourceTotals: SourceTotals): Array<SourceTotal> {
+  getSourceTotals(sourceTotals: SourceTotals): Array<SourceTotal>{
+    if(this.dataType == 'energyUse'){
+      return this.getSourceTotalsEnergy(sourceTotals);
+    }else if(this.dataType == 'cost'){
+      return this.getSourceTotalsCost(sourceTotals);
+    }
+  }
+
+  getSourceTotalsEnergy(sourceTotals: SourceTotals): Array<SourceTotal> {
     let sourceTotalsArr: Array<SourceTotal> = new Array();
     if (sourceTotals.electricity.energyUse) {
       sourceTotalsArr.push(sourceTotals.electricity);
@@ -92,5 +102,39 @@ export class AccountUtilityUsageDonutComponent {
       sourceTotalsArr.push(sourceTotals.other);
     }
     return sourceTotalsArr;
+  }
+
+  getSourceTotalsCost(sourceTotals: SourceTotals): Array<SourceTotal> {
+    let sourceTotalsArr: Array<SourceTotal> = new Array();
+    if (sourceTotals.electricity.cost) {
+      sourceTotalsArr.push(sourceTotals.electricity);
+    }
+    if (sourceTotals.naturalGas.cost) {
+      sourceTotalsArr.push(sourceTotals.naturalGas);
+    }
+    if (sourceTotals.otherFuels.cost) {
+      sourceTotalsArr.push(sourceTotals.otherFuels);
+    }
+    if (sourceTotals.otherEnergy.cost) {
+      sourceTotalsArr.push(sourceTotals.otherEnergy);
+    }
+    if (sourceTotals.waterIntake.cost) {
+      sourceTotalsArr.push(sourceTotals.waterIntake);
+    }
+    if (sourceTotals.waterDischarge.cost) {
+      sourceTotalsArr.push(sourceTotals.waterDischarge);
+    }
+    if (sourceTotals.other.cost) {
+      sourceTotalsArr.push(sourceTotals.other);
+    }
+    return sourceTotalsArr;
+  }
+
+  getSourceValue(sourceTotal: SourceTotal): number{
+    if(this.dataType == 'energyUse'){
+      return sourceTotal.energyUse;
+    }else if(this.dataType == 'cost'){
+      return sourceTotal.cost;
+    }
   }
 }
