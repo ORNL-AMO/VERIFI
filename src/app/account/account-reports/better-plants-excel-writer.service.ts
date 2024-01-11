@@ -12,7 +12,7 @@ export class BetterPlantsExcelWriterService {
 
   constructor() { }
 
-  exportToExcel(report: IdbAccountReport, account: IdbAccount, betterPlantsSummary: BetterPlantsSummary, analysisItem: IdbAccountAnalysisItem) {
+  exportToExcel(report: IdbAccountReport, account: IdbAccount, betterPlantsSummaries: Array<BetterPlantsSummary>, analysisItem: IdbAccountAnalysisItem) {
     let workbook = new ExcelJS.Workbook();
     var request = new XMLHttpRequest();
     let requestURL: string;
@@ -26,9 +26,15 @@ export class BetterPlantsExcelWriterService {
     request.onload = () => {
       workbook.xlsx.load(request.response).then(() => {
         if (analysisItem.analysisCategory == 'energy') {
-          this.writeEnergyReportInformation(workbook, account, report, betterPlantsSummary);
+          if (report.betterPlantsReportSetup.includeAllYears) {
+            betterPlantsSummaries.forEach(betterPlantsSummary => {
+              this.writeEnergyReportInformation(workbook, account, report, betterPlantsSummary);
+            });
+          } else {
+            this.writeEnergyReportInformation(workbook, account, report, betterPlantsSummaries[0]);
+          }
         } else if (analysisItem.analysisCategory == 'water') {
-          this.writeWaterReportInformation(workbook, account, report, betterPlantsSummary);
+          this.writeWaterReportInformation(workbook, account, report, betterPlantsSummaries[0]);
         }
         workbook.xlsx.writeBuffer().then(excelData => {
           let blob: Blob = new Blob([excelData], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
@@ -47,7 +53,18 @@ export class BetterPlantsExcelWriterService {
   }
 
   writeEnergyReportInformation(workbook: ExcelJS.Workbook, account: IdbAccount, report: IdbAccountReport, betterPlantsSummary: BetterPlantsSummary) {
-    let worksheet: ExcelJS.Worksheet = workbook.getWorksheet('Annual Form');
+    let worksheet: ExcelJS.Worksheet;
+    if (report.betterPlantsReportSetup.includeAllYears) {
+      //create copy of worksheet for each report
+      let reportYearWorksheet: ExcelJS.Worksheet = workbook.getWorksheet('Annual Form')
+      worksheet = workbook.addWorksheet('Annual Form (' + betterPlantsSummary.reportYear + ')');
+      worksheet.model = Object.assign(reportYearWorksheet.model, {
+        mergeCells: reportYearWorksheet.model['merges']
+      });
+    } else {
+      worksheet = workbook.getWorksheet('Annual Form');
+    }
+    worksheet.name = 'Annual Form (' + betterPlantsSummary.reportYear + ')';
     //account name
     worksheet.getCell('D3').value = account.name;
     //contact name
@@ -61,7 +78,7 @@ export class BetterPlantsExcelWriterService {
     //NAICS of participating plants
     worksheet.getCell('D8').value = getNAICS(account);
     //Year of reported data
-    worksheet.getCell('D9').value = report.reportYear;
+    worksheet.getCell('D9').value = betterPlantsSummary.reportYear;
     //base year
     worksheet.getCell('D10').value = report.baselineYear;
 

@@ -167,7 +167,7 @@ export class BetterPlantsReportComponent implements OnInit {
   generateExcelReport() {
     //TODO: Do we want to generate a report for every year?
     //TODO: We do in fact want to do this :(
-    this.betterPlantsExcelWriterService.exportToExcel(this.selectedReport, this.account, this.betterPlantsSummaries[0], this.selectedAnalysisItem);
+    this.betterPlantsExcelWriterService.exportToExcel(this.selectedReport, this.account, this.betterPlantsSummaries, this.selectedAnalysisItem);
     this.accountReportsService.generateExcel.next(false);
   }
 }
