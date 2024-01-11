@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import * as ExcelJS from 'exceljs';
-import { IdbAccount, IdbAccountReport, IdbFacility } from 'src/app/models/idb';
+import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport, IdbFacility } from 'src/app/models/idb';
 import { BetterPlantsSummary } from 'src/app/models/overview-report';
 import { getNAICS } from 'src/app/shared/form-data/naics-data';
 import * as _ from 'lodash';
@@ -9,31 +9,33 @@ import * as _ from 'lodash';
   providedIn: 'root'
 })
 export class BetterPlantsExcelWriterService {
-  formName: string = 'BBBP-Challenge-Annual-Reporting-Form.xlsx';
+
   constructor() { }
 
-
-  exportToExcel(report: IdbAccountReport, account: IdbAccount, betterPlantsSummary: BetterPlantsSummary) {
+  exportToExcel(report: IdbAccountReport, account: IdbAccount, betterPlantsSummary: BetterPlantsSummary, analysisItem: IdbAccountAnalysisItem) {
     let workbook = new ExcelJS.Workbook();
     var request = new XMLHttpRequest();
-    request.open('GET', 'assets/csv_templates/BBBP-Challenge-Annual-Reporting-Form.xlsx', true);
+    let requestURL: string;
+    if (analysisItem.analysisCategory == 'energy') {
+      requestURL = 'BBBP-Challenge-Annual-Reporting-Form';
+    } else if (analysisItem.analysisCategory == 'water') {
+      requestURL = 'BBBP-Water-Data-Collection-Form';
+    }
+    request.open('GET', 'assets/csv_templates/' + requestURL + '.xlsx', true);
     request.responseType = 'blob';
     request.onload = () => {
       workbook.xlsx.load(request.response).then(() => {
-        this.writeReportInformation(workbook, account, report, betterPlantsSummary);
+        if (analysisItem.analysisCategory == 'energy') {
+          this.writeEnergyReportInformation(workbook, account, report, betterPlantsSummary);
+        } else if (analysisItem.analysisCategory == 'water') {
+          this.writeWaterReportInformation(workbook, account, report, betterPlantsSummary);
+        }
         workbook.xlsx.writeBuffer().then(excelData => {
           let blob: Blob = new Blob([excelData], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
           let a = document.createElement("a");
           let url = window.URL.createObjectURL(blob);
           a.href = url;
-          // let date = new Date();
-          // let datePipe = new DatePipe('en-us');
-          // let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-          // let accountName: string = account.name;
-          // accountName = accountName.replaceAll(' ', '-');
-          // accountName = accountName.replaceAll('.', '_');
-          // a.download = 'BP-REPORT-' + datePipe.transform(date, 'MM-dd-yyyy');
-          a.download = 'BP-REPORT'
+          a.download = requestURL;
           document.body.appendChild(a);
           a.click();
           window.URL.revokeObjectURL(url);
@@ -44,7 +46,7 @@ export class BetterPlantsExcelWriterService {
     request.send();
   }
 
-  writeReportInformation(workbook: ExcelJS.Workbook, account: IdbAccount, report: IdbAccountReport, betterPlantsSummary: BetterPlantsSummary) {
+  writeEnergyReportInformation(workbook: ExcelJS.Workbook, account: IdbAccount, report: IdbAccountReport, betterPlantsSummary: BetterPlantsSummary) {
     let worksheet: ExcelJS.Worksheet = workbook.getWorksheet('Annual Form');
     //account name
     worksheet.getCell('D3').value = account.name;
@@ -157,7 +159,6 @@ export class BetterPlantsExcelWriterService {
       worksheet.getCell('E25').value = betterPlantsSummary.reportYearEnergyResults.otherEnergyUse;
     }
 
-
     //baseline adjustment
     worksheet.getCell('D27').value = betterPlantsSummary.reportYearAnalysisSummary.baselineAdjustmentForNormalization;
     //baseline adjustment for other
@@ -192,6 +193,83 @@ export class BetterPlantsExcelWriterService {
     this.addPerformanceLevel(35, undefined, worksheet.getCell('E64'), betterPlantsSummary);
   }
 
+  writeWaterReportInformation(workbook: ExcelJS.Workbook, account: IdbAccount, report: IdbAccountReport, betterPlantsSummary: BetterPlantsSummary) {
+    let worksheet: ExcelJS.Worksheet = workbook.getWorksheet('Baseline Form');
+    //account name
+    worksheet.getCell('E8').value = account.name;
+    //contact name
+    worksheet.getCell('E9').value = account.contactName;
+    //E10 = contact title. not tracked in VERIFI.
+
+    //address
+    worksheet.getCell('E11').value = account.address + ' ' + account.city + ', ' + account.state + ' ' + account.zip + ' ' + account.country;
+    //phone
+    worksheet.getCell('E12').value = account.contactPhone;
+    //email
+    worksheet.getCell('E13').value = account.contactEmail;
+    //NAICS of participating plants
+    worksheet.getCell('E14').value = getNAICS(account);
+    //Year of reported data
+    worksheet.getCell('E15').value = report.reportYear;
+    //base year
+    worksheet.getCell('E16').value = report.baselineYear;
+
+    //# participating facilities
+    worksheet.getCell('E19').value = betterPlantsSummary.reportYearWaterResults.numberOfFacilities;
+    worksheet.getCell('F19').value = betterPlantsSummary.baselineYearWaterResults.numberOfFacilities;
+    //# participating facilities that are manufacturing plants
+    worksheet.getCell('E20').value = betterPlantsSummary.reportYearWaterResults.numberOfManufacturingFacilities;
+    worksheet.getCell('F20').value = betterPlantsSummary.baselineYearWaterResults.numberOfManufacturingFacilities;
+
+    //water utility (public or private)
+    worksheet.getCell('E24').value = betterPlantsSummary.baselineYearWaterResults.waterUtility.use;
+    worksheet.getCell('F24').value = this.getMeteredOrEstimated(betterPlantsSummary.baselineYearWaterResults.waterUtility.meteredType);
+    worksheet.getCell('G24').value = betterPlantsSummary.reportYearWaterResults.waterUtility.use;
+    worksheet.getCell('H24').value = this.getMeteredOrEstimated(betterPlantsSummary.reportYearWaterResults.waterUtility.meteredType);
+    //surface freshwater
+    worksheet.getCell('E25').value = betterPlantsSummary.baselineYearWaterResults.surfaceFreshwater.use
+    worksheet.getCell('F25').value = this.getMeteredOrEstimated(betterPlantsSummary.baselineYearWaterResults.surfaceFreshwater.meteredType);
+    worksheet.getCell('G25').value = betterPlantsSummary.reportYearWaterResults.surfaceFreshwater.use;
+    worksheet.getCell('H25').value = this.getMeteredOrEstimated(betterPlantsSummary.reportYearWaterResults.surfaceFreshwater.meteredType);
+    //ground freshwater
+    worksheet.getCell('E26').value = betterPlantsSummary.baselineYearWaterResults.groundFreshwater.use
+    worksheet.getCell('F26').value = this.getMeteredOrEstimated(betterPlantsSummary.baselineYearWaterResults.groundFreshwater.meteredType);
+    worksheet.getCell('G26').value = betterPlantsSummary.reportYearWaterResults.groundFreshwater.use;
+    worksheet.getCell('H26').value = this.getMeteredOrEstimated(betterPlantsSummary.reportYearWaterResults.groundFreshwater.meteredType);
+    //other freshwater
+    worksheet.getCell('E27').value = betterPlantsSummary.baselineYearWaterResults.otherFreshwater.use
+    worksheet.getCell('F27').value = this.getMeteredOrEstimated(betterPlantsSummary.baselineYearWaterResults.otherFreshwater.meteredType);
+    worksheet.getCell('G27').value = betterPlantsSummary.reportYearWaterResults.otherFreshwater.use;
+    worksheet.getCell('H27').value = this.getMeteredOrEstimated(betterPlantsSummary.reportYearWaterResults.otherFreshwater.meteredType);
+    //total saline water intake
+    worksheet.getCell('E28').value = betterPlantsSummary.baselineYearWaterResults.salineWaterIntake.use
+    worksheet.getCell('F28').value = this.getMeteredOrEstimated(betterPlantsSummary.baselineYearWaterResults.salineWaterIntake.meteredType);
+    worksheet.getCell('G28').value = betterPlantsSummary.reportYearWaterResults.salineWaterIntake.use;
+    worksheet.getCell('H28').value = this.getMeteredOrEstimated(betterPlantsSummary.reportYearWaterResults.salineWaterIntake.meteredType);
+    //rainwater
+    worksheet.getCell('E29').value = betterPlantsSummary.baselineYearWaterResults.rainwater.use
+    worksheet.getCell('F29').value = this.getMeteredOrEstimated(betterPlantsSummary.baselineYearWaterResults.rainwater.meteredType);
+    worksheet.getCell('G29').value = betterPlantsSummary.reportYearWaterResults.rainwater.use;
+    worksheet.getCell('H29').value = this.getMeteredOrEstimated(betterPlantsSummary.reportYearWaterResults.rainwater.meteredType);
+    //externally supplied recycled
+    worksheet.getCell('E30').value = betterPlantsSummary.baselineYearWaterResults.externallySuppliedRecycled.use
+    worksheet.getCell('F30').value = this.getMeteredOrEstimated(betterPlantsSummary.baselineYearWaterResults.externallySuppliedRecycled.meteredType);
+    worksheet.getCell('G30').value = betterPlantsSummary.reportYearWaterResults.externallySuppliedRecycled.use;
+    worksheet.getCell('H30').value = this.getMeteredOrEstimated(betterPlantsSummary.reportYearWaterResults.externallySuppliedRecycled.meteredType);
+    //total water intake
+    worksheet.getCell('E31').value = betterPlantsSummary.baselineYearWaterResults.totalWaterIntake;
+    // worksheet.getCell('F31').value;
+    worksheet.getCell('G31').value = betterPlantsSummary.reportYearWaterResults.totalWaterIntake;
+    // worksheet.getCell('H31').value;
+    //total water intake included in target
+    worksheet.getCell('E32').value = betterPlantsSummary.baselineYearWaterResults.totalWaterIntakeIncludeAdditional
+    // worksheet.getCell('F32').value;
+    worksheet.getCell('G32').value = betterPlantsSummary.reportYearWaterResults.totalWaterIntakeIncludeAdditional;
+    // worksheet.getCell('H32').value;
+
+
+
+  }
 
   addPerformanceLevel(min: number, max: number, cell: ExcelJS.Cell, betterPlantsSummary: BetterPlantsSummary) {
     let facilities: Array<{ facility: IdbFacility, performance: number }> = betterPlantsSummary.facilityPerformance.filter(facilityPerformance => {
@@ -203,8 +281,19 @@ export class BetterPlantsExcelWriterService {
         return facilityPerformance.performance < max;
       }
     });
-    if(facilities.length != 0){
+    if (facilities.length != 0) {
       cell.value = facilities.length
-    }    
+    }
+  }
+
+  getMeteredOrEstimated(meteredType: 'Metered' | 'Estimated' | 'Mixed' | 'N/A'): 'metered' | 'estimated' | 'mixed' {
+    if (meteredType == 'Metered') {
+      return 'metered';
+    } else if (meteredType == 'Estimated') {
+      return 'estimated';
+    } else if (meteredType == 'Mixed') {
+      return 'mixed';
+    }
+    return;
   }
 }
