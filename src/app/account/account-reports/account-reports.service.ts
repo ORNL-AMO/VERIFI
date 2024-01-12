@@ -10,8 +10,10 @@ import { BehaviorSubject } from 'rxjs';
 export class AccountReportsService {
 
   print: BehaviorSubject<boolean>;
+  generateExcel: BehaviorSubject<boolean>;
   constructor(private formBuilder: FormBuilder) {
     this.print = new BehaviorSubject<boolean>(false);
+    this.generateExcel = new BehaviorSubject<boolean>(false);
   }
 
   getSetupFormFromReport(report: IdbAccountReport): FormGroup {
