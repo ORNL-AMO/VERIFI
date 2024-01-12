@@ -14,7 +14,7 @@ import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.serv
 import { AccountReportsService } from '../account-reports.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { ConvertValue } from 'src/app/calculations/conversions/convertValue';
-import { BetterPlantsExcelWriterService } from '../better-plants-excel-writer.service';
+import { BetterPlantsExcelWriterService } from '../excel-writer-services/better-plants-excel-writer.service';
 
 @Component({
   selector: 'app-better-plants-report',
