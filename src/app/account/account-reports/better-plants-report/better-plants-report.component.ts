@@ -63,6 +63,7 @@ export class BetterPlantsReportComponent implements OnInit {
 
   ngOnDestroy() {
     this.printSub.unsubscribe();
+    this.generateExcelSub.unsubscribe();
     if (this.worker) {
       this.worker.terminate();
     }
@@ -165,8 +166,6 @@ export class BetterPlantsReportComponent implements OnInit {
 
 
   generateExcelReport() {
-    //TODO: Do we want to generate a report for every year?
-    //TODO: We do in fact want to do this :(
     this.betterPlantsExcelWriterService.exportToExcel(this.selectedReport, this.account, this.betterPlantsSummaries, this.selectedAnalysisItem);
     this.accountReportsService.generateExcel.next(false);
   }
