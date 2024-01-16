@@ -143,6 +143,7 @@ export class BetterClimateReportComponent {
   }
 
   generateExcelReport(){
-
+    this.betterClimateExcelWriterService.exportToExcel(this.selectedReport, this.account, this.betterClimateReport);
+    this.accountReportsService.generateExcel.next(false);
   }
 }

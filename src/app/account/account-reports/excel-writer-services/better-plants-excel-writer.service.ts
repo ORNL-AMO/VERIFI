@@ -21,6 +21,7 @@ export class BetterPlantsExcelWriterService {
     } else if (analysisItem.analysisCategory == 'water') {
       requestURL = 'BBBP-Water-Data-Collection-Form-modified';
     }
+    
     request.open('GET', 'assets/csv_templates/' + requestURL + '.xlsx', true);
     request.responseType = 'blob';
     request.onload = () => {
@@ -42,6 +43,7 @@ export class BetterPlantsExcelWriterService {
             this.writeWaterReportInformation(workbook, account, report, betterPlantsSummaries[0]);
           }
         }
+        console.log(workbook);
         workbook.xlsx.writeBuffer().then(excelData => {
           let blob: Blob = new Blob([excelData], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
           let a = document.createElement("a");
