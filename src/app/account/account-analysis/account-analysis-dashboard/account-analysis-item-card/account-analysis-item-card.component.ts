@@ -73,22 +73,27 @@ export class AccountAnalysisItemCardComponent implements OnInit {
   }
 
   async setUseItem() {
-    let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
-    let categoryItems: Array<IdbAccountAnalysisItem> = accountAnalysisItems.filter(item => {return item.analysisCategory == this.analysisItem.analysisCategory});
-    for (let i = 0; i < categoryItems.length; i++) {
-      if (categoryItems[i].guid == this.analysisItem.guid) {
-        if (categoryItems[i].selectedYearAnalysis) {
+    let canSelectItem: boolean = this.getCanSelectItem(this.selectedAccount, this.analysisItem);
+    if (canSelectItem) {
+      let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
+      let categoryItems: Array<IdbAccountAnalysisItem> = accountAnalysisItems.filter(item => { return item.analysisCategory == this.analysisItem.analysisCategory });
+      for (let i = 0; i < categoryItems.length; i++) {
+        if (categoryItems[i].guid == this.analysisItem.guid) {
+          if (categoryItems[i].selectedYearAnalysis) {
+            categoryItems[i].selectedYearAnalysis = false;
+          } else {
+            categoryItems[i].selectedYearAnalysis = true;
+          }
+          await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(categoryItems[i]));
+        } else if (categoryItems[i].reportYear == this.analysisItem.reportYear && categoryItems[i].selectedYearAnalysis) {
           categoryItems[i].selectedYearAnalysis = false;
-        } else {
-          categoryItems[i].selectedYearAnalysis = true;
+          await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(categoryItems[i]));
         }
-        await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(categoryItems[i]));
-      } else if (categoryItems[i].reportYear == this.analysisItem.reportYear && categoryItems[i].selectedYearAnalysis) {
-        categoryItems[i].selectedYearAnalysis = false;
-        await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(categoryItems[i]));
       }
+      await this.dbChangesService.setAccountAnalysisItems(this.selectedAccount, false);
+    } else {
+      this.toastNotificationService.showToast('Analysis Item Cannot Be Selected', "This baseline year does not match your facility baseline year. This analysis cannot be included in reports or figures relating to the facility energy goal.", 10000, false, 'alert-danger');
     }
-    await this.dbChangesService.setAccountAnalysisItems(this.selectedAccount, false);
   }
 
   async createCopy() {
@@ -101,5 +106,22 @@ export class AccountAnalysisItemCardComponent implements OnInit {
     this.accountAnalysisDbService.selectedAnalysisItem.next(addedItem);
     this.toastNotificationService.showToast('Analysis Item Copy Created', undefined, undefined, false, "alert-success");
     this.router.navigateByUrl('account/analysis/setup');
+  }
+
+
+  getCanSelectItem(account: IdbAccount, analysisItem: IdbAccountAnalysisItem): boolean {
+    if (analysisItem.analysisCategory == 'energy') {
+      if (analysisItem.baselineYear != account.sustainabilityQuestions.energyReductionBaselineYear) {
+        return false
+      } else {
+        return true;
+      }
+    } else if (analysisItem.analysisCategory == 'water') {
+      if (analysisItem.baselineYear != account.sustainabilityQuestions.waterReductionBaselineYear) {
+        return false
+      } else {
+        return true;
+      }
+    }
   }
 }

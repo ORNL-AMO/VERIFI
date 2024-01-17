@@ -30,13 +30,13 @@
                             <div class="form-check">
                                 <input type="radio" class="form-check-input" name="energyIsSource" [value]="true"
                                     id="sourceEnergy" [(ngModel)]="analysisItem.energyIsSource"
-                                    (change)="setSiteSource()" [disabled]="disableForm">
+                                    (change)="setSiteSource()" [disabled]="disableForm || showInUseMessage">
                                 <label class="form-check-label" for="sourceEnergy">Source Energy</label>
                             </div>
                             <div class="form-check">
                                 <input type="radio" class="form-check-input" name="energyIsSource" [value]="false"
                                     id="siteEnergy" [(ngModel)]="analysisItem.energyIsSource" (change)="setSiteSource()"
-                                    [disabled]="disableForm">
+                                    [disabled]="disableForm || showInUseMessage">
                                 <label class="form-check-label" for="siteEnergy">Site Energy</label>
                             </div>
                         </div>
@@ -77,7 +77,7 @@
                     <div class="col-7">
                         <select required class="form-select" id="baselineYear" name="baselineYear"
                             [(ngModel)]="analysisItem.baselineYear" (change)="changeReportYear()"
-                            [disabled]="disableForm">
+                            [disabled]="disableForm || showInUseMessage">
                             <option *ngFor="let year of yearOptions" [ngValue]="year">
                                 {{year| yearDisplay: facility.fiscalYear}}</option>
                         </select>
@@ -102,7 +102,7 @@
                     <div class="col-7">
                         <select required class="form-select" name="reportYear" id="reportYear"
                             [(ngModel)]="analysisItem.reportYear" (change)="changeReportYear()"
-                            [disabled]="disableForm">
+                            [disabled]="disableForm || showInUseMessage">
                             <option *ngFor="let year of yearOptions" [ngValue]="year">{{year| yearDisplay:
                                 facility.fiscalYear}}
                             </option>
