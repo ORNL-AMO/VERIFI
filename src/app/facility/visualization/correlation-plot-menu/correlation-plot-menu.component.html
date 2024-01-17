@@ -124,6 +124,24 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="p-2">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" type="checkbox"
+                                    name="totalEnergyTimeSeriesYAxis1" id="totalEnergyTimeSeriesYAxis1"
+                                    [(ngModel)]="correlationPlotOptions.totalEnergyTimeSeriesYAxis1"
+                                    (change)="setTimeSeriesLeftAxis()">
+                                <label class="form-check-label" for="totalEnergyTimeSeriesYAxis1">Total Facility
+                                    Energy</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" type="checkbox"
+                                    name="totalSelectedEnergyTimeSeriesYAxis1" id="totalSelectedEnergyTimeSeriesYAxis1"
+                                    [(ngModel)]="correlationPlotOptions.totalSelectedEnergyTimeSeriesYAxis1"
+                                    (change)="setTimeSeriesLeftAxis()" [disabled]="disableY1SelectedTotal">
+                                <label class="form-check-label" for="totalSelectedEnergyTimeSeriesYAxis1">Total Selected
+                                    Energy</label>
+                            </div>
+                        </div>
                     </div>
 
 
@@ -167,6 +185,24 @@
                                     <label class="form-check-label"
                                         for="{{timeSeriesPredictor.label+'TimeSeriesPredictorYAxis2'}}">{{timeSeriesPredictor.label}}</label>
                                 </div>
+                            </div>
+                        </div>
+                        <div class="p-2">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" type="checkbox"
+                                    name="totalEnergyTimeSeriesYAxis2" id="totalEnergyTimeSeriesYAxis2"
+                                    [(ngModel)]="correlationPlotOptions.totalEnergyTimeSeriesYAxis2"
+                                    (change)="setTimeSeriesRightAxis()">
+                                <label class="form-check-label" for="totalEnergyTimeSeriesYAxis2">Total Facility
+                                    Energy</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" type="checkbox"
+                                    name="totalSelectedEnergyTimeSeriesYAxis2" id="totalSelectedEnergyTimeSeriesYAxis2"
+                                    [(ngModel)]="correlationPlotOptions.totalSelectedEnergyTimeSeriesYAxis2"
+                                    (change)="setTimeSeriesRightAxis()" [disabled]="disableY2SelectedTotal">
+                                <label class="form-check-label" for="totalSelectedEnergyTimeSeriesYAxis2">Total Selected
+                                    Energy</label>
                             </div>
                         </div>
                     </div>
