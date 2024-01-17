@@ -1,8 +1,6 @@
 import { Injectable } from '@angular/core';
 import * as ExcelJS from 'exceljs';
-import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport, IdbFacility } from 'src/app/models/idb';
-import { BetterPlantsSummary } from 'src/app/models/overview-report';
-import { getNAICS } from 'src/app/shared/form-data/naics-data';
+import { IdbAccount, IdbAccountReport } from 'src/app/models/idb';
 import * as _ from 'lodash';
 import { BetterClimateReport } from 'src/app/calculations/carbon-calculations/betterClimateReport';
 import { BetterClimateYearDetails } from 'src/app/calculations/carbon-calculations/betterClimateYearsDetails';
@@ -19,7 +17,6 @@ export class BetterClimateExcelWriterService {
     let workbook = new ExcelJS.Workbook();
     var request = new XMLHttpRequest();
     let requestURL: string = 'Better-Climate-Challenge-Emissions-Reporting';
-    // let requestURL: string = 'Better-Climate-Challenge-Emissions-Reporting-2023-form-(koa)'
     request.open('GET', 'assets/csv_templates/' + requestURL + '.xlsx', true);
     request.responseType = 'blob';
     request.onload = () => {
@@ -49,15 +46,15 @@ export class BetterClimateExcelWriterService {
 
     //calander/fiscal year
     if (account.fiscalYear == "calendarYear") {
-      worksheet.getCell('J9').value = 'Calendar Year';
+      worksheet.getCell('J9').value = 'Calendar Year (December 31)';
     } else {
-      worksheet.getCell('J9').value = 'Fiscal Year';
+      worksheet.getCell('J9').value = this.getFiscalYearEnd(account.fiscalYearMonth);
     }
     //market or location goal?
     if (report.betterClimateReportSetup.emissionsDisplay == 'location') {
-      worksheet.getCell('J10').value = 'Location';
+      worksheet.getCell('J10').value = 'Location-Based GHG Goal';
     } else {
-      worksheet.getCell('J10').value = 'Market';
+      worksheet.getCell('J10').value = 'Market-Based GHG Goal';
     }
 
     let columnLetters = ['D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q'];
@@ -122,75 +119,120 @@ export class BetterClimateExcelWriterService {
     // worksheet.getCell(columnLetter + '44').value 
 
     //district steam
-    worksheet.getCell(columnLetter + '45').value = this.getFuelValue(['Purchased Steam'], yearDetail.fuelTotals);
+    let fuelVals: { usedFuels: Array<string>, usage: number } = { usedFuels: [], usage: 0 };
+    fuelVals = this.getFuelValue(fuelVals.usedFuels, ['Purchased Steam'], yearDetail.fuelTotals);
+    worksheet.getCell(columnLetter + '45').value = fuelVals.usage;
     //district hot water 
-    worksheet.getCell(columnLetter + '46').value = this.getFuelValue(['District Hot Water'], yearDetail.fuelTotals);
+    fuelVals = this.getFuelValue(fuelVals.usedFuels, ['District Hot Water'], yearDetail.fuelTotals);
+    worksheet.getCell(columnLetter + '46').value = fuelVals.usage;
     //district chilled water
-    worksheet.getCell(columnLetter + '47').value = this.getFuelValue(['Purchased Chilled Water (Engine-driven Compressor)', 'Purchased Chilled Water (Electric-driven Compressor)', 'Purchased Chilled Water (Absorption Chiller)'], yearDetail.fuelTotals);
+    fuelVals = this.getFuelValue(fuelVals.usedFuels, ['Purchased Chilled Water (Engine-driven Compressor)', 'Purchased Chilled Water (Electric-driven Compressor)', 'Purchased Chilled Water (Absorption Chiller)'], yearDetail.fuelTotals);
+    worksheet.getCell(columnLetter + '47').value = fuelVals.usage;
     //natural gas
-    worksheet.getCell(columnLetter + '48').value = this.getFuelValue(['Natural Gas'], yearDetail.fuelTotals);
-    //distillate or light fuel oil 
-    //TODO: (including "Fuel Oil #...?")
-    worksheet.getCell(columnLetter + '49').value = this.getFuelValue(['Distillate Fuel Oil'], yearDetail.fuelTotals);
+    fuelVals = this.getFuelValue(fuelVals.usedFuels, ['Natural Gas'], yearDetail.fuelTotals);
+    worksheet.getCell(columnLetter + '48').value = fuelVals.usage;
+    //distillate or light fuel oil 1, 2, 4
+    fuelVals = this.getFuelValue(fuelVals.usedFuels, ['Distillate Fuel Oil', 'Fuel Oil #1', 'Fuel Oil #2', 'Fuel Oil #4'], yearDetail.fuelTotals);
+    worksheet.getCell(columnLetter + '49').value = fuelVals.usage;
     //propane
-    worksheet.getCell(columnLetter + '50').value = this.getFuelValue(['Propane'], yearDetail.fuelTotals);
+    fuelVals = this.getFuelValue(fuelVals.usedFuels, ['Propane'], yearDetail.fuelTotals);
+    worksheet.getCell(columnLetter + '50').value = fuelVals.usage;
     //coke 
     //TODO: (Use both here?)
-    worksheet.getCell(columnLetter + '51').value = this.getFuelValue(['Coke Oven Gas', 'Coke'], yearDetail.fuelTotals);
+    fuelVals = this.getFuelValue(fuelVals.usedFuels, ['Coke Oven Gas', 'Coke'], yearDetail.fuelTotals);
+    worksheet.getCell(columnLetter + '51').value = fuelVals.usage;
     //coal 
-    //TODO: (All types of coal?)
-    worksheet.getCell(columnLetter + '52').value = this.getFuelValue(['Coal (anthracite)', 'Coal (bituminous)', 'Coal (Lignite)', 'Coal (subbituminous)'], yearDetail.fuelTotals);
-    //redisual or heavy fuel oil 
-    //TODO: (including "Fuel Oil #...?")
-    worksheet.getCell(columnLetter + '53').value = this.getFuelValue(['Residual Fuel Oil'], yearDetail.fuelTotals);
+    fuelVals = this.getFuelValue(fuelVals.usedFuels, ['Coal (anthracite)', 'Coal (bituminous)', 'Coal (Lignite)', 'Coal (subbituminous)'], yearDetail.fuelTotals);
+    worksheet.getCell(columnLetter + '52').value = fuelVals.usage;
+    //redisual or heavy fuel oil 5, 6
+    //TODO: Navy Special & Bunker C
+    fuelVals = this.getFuelValue(fuelVals.usedFuels, ['Residual Fuel Oil', 'Fuel Oil #5', 'Fuel Oil #6 (high sulfur)', 'Fuel Oil #6 (low sulfur)'], yearDetail.fuelTotals);
+    worksheet.getCell(columnLetter + '53').value = fuelVals.usage;
     //biomass
-    worksheet.getCell(columnLetter + '54').value = this.getFuelValue(['Biomass'], yearDetail.fuelTotals);
+    fuelVals = this.getFuelValue(fuelVals.usedFuels, ['Biomass'], yearDetail.fuelTotals);
+    worksheet.getCell(columnLetter + '54').value = fuelVals.usage;
     //renewable natural gas
-    //TODO: idk what to do for "Renewable Natural Gas"
-    worksheet.getCell(columnLetter + '55').value = this.getFuelValue([], yearDetail.fuelTotals);
+    //TODO: idk what to do for "Renewable Natural Gas": issue 1418
+    fuelVals = this.getFuelValue(fuelVals.usedFuels, [], yearDetail.fuelTotals);
+    worksheet.getCell(columnLetter + '55').value = fuelVals.usage;
     //hydrogen
-    //TODO: We don't have "Hydrogen"
-    worksheet.getCell(columnLetter + '56').value = this.getFuelValue([], yearDetail.fuelTotals);
+    //TODO: We don't have "Hydrogen": issue 1418
+    fuelVals = this.getFuelValue(fuelVals.usedFuels, [], yearDetail.fuelTotals);
+    worksheet.getCell(columnLetter + '56').value = fuelVals.usage;
     //gasoline
     //TODO: Include vehicles?
-    worksheet.getCell(columnLetter + '57').value = this.getFuelValue(['Gasoline'], yearDetail.fuelTotals);
+    fuelVals = this.getFuelValue(fuelVals.usedFuels, ['Gasoline'], yearDetail.fuelTotals);
+    worksheet.getCell(columnLetter + '57').value = fuelVals.usage;
     //diesel
-    worksheet.getCell(columnLetter + '58').value = this.getFuelValue(['Diesel'], yearDetail.fuelTotals);
+    fuelVals = this.getFuelValue(fuelVals.usedFuels, ['Diesel'], yearDetail.fuelTotals);
+    worksheet.getCell(columnLetter + '58').value = fuelVals.usage;
     //biodiesel
-    worksheet.getCell(columnLetter + '59').value = this.getFuelValue(['Biodiesel (100%)'], yearDetail.fuelTotals);
+    fuelVals = this.getFuelValue(fuelVals.usedFuels, ['Biodiesel (100%)'], yearDetail.fuelTotals);
+    worksheet.getCell(columnLetter + '59').value = fuelVals.usage;
     //compressed natural gas
-    //TODO: No CNG in stationary..
-    worksheet.getCell(columnLetter + '60').value = this.getFuelValue([], yearDetail.fuelTotals);
+    //TODO: No Compressed Natural Gas CNG: issue 1418
+    fuelVals = this.getFuelValue(fuelVals.usedFuels, [], yearDetail.fuelTotals);
+    worksheet.getCell(columnLetter + '60').value = fuelVals.usage;
     //liquified natural gas
-    worksheet.getCell(columnLetter + '61').value = this.getFuelValue(['Liquefied Natural Gas (LNG)'], yearDetail.fuelTotals);
+    fuelVals = this.getFuelValue(fuelVals.usedFuels, ['Liquefied Natural Gas (LNG)'], yearDetail.fuelTotals);
+    worksheet.getCell(columnLetter + '61').value = fuelVals.usage;
     //ethanol fuel blend
-    worksheet.getCell(columnLetter + '62').value = this.getFuelValue(['Ethanol (100%)'], yearDetail.fuelTotals);
-    //TODO: handle all other fuels we are tracking in these rows
+    fuelVals = this.getFuelValue(fuelVals.usedFuels, ['Ethanol (100%)'], yearDetail.fuelTotals);
+    worksheet.getCell(columnLetter + '62').value = fuelVals.usage;
+    //row 63 and 64
     //other fuel (please specify)
-    worksheet.getCell(columnLetter + '63').value = this.getFuelValue([], yearDetail.fuelTotals);
-    //other fuel (please specify)
-    worksheet.getCell(columnLetter + '64').value = this.getFuelValue([], yearDetail.fuelTotals);
+    let otherFuelVals: { otherFuels: Array<string>, usage: number } = this.getOtherFuelValue(fuelVals.usedFuels, yearDetail.fuelTotals);
+    if (otherFuelVals.otherFuels.length == 1 || otherFuelVals.otherFuels.length > 2) {
+      //if 1 other fuel or more then 2. Put all values in row 63
+      let cellName: string = 'Other Fuel ('
+      otherFuelVals.otherFuels.forEach((fuel, index) => {
+        cellName = cellName + fuel;
+        if (index != otherFuelVals.otherFuels.length - 1) {
+          cellName = cellName + ', ';
+        }
+      });
+      cellName = cellName + ') (MMBtu)';
+      worksheet.getCell('B63').value = cellName;
+      worksheet.getCell(columnLetter + '63').value = otherFuelVals.usage;
+    } else if (otherFuelVals.otherFuels.length == 2) {
+      fuelVals = this.getFuelValue([], [otherFuelVals.otherFuels[0]], yearDetail.fuelTotals);
+      worksheet.getCell(columnLetter + '63').value = fuelVals.usage;
+      worksheet.getCell('B63').value = 'Other Fuel (' + otherFuelVals.otherFuels[0] + ') (MMBtu)';
+
+      fuelVals = this.getFuelValue([], [otherFuelVals.otherFuels[1]], yearDetail.fuelTotals);
+      worksheet.getCell(columnLetter + '64').value = fuelVals.usage;
+      worksheet.getCell('B64').value = 'Other Fuel (' + otherFuelVals.otherFuels[1] + ') (MMBtu)';
+    }
+
     //total energy use CALCULATED
     // worksheet.getCell(columnLetter + '65').value 
 
     //Section 5: Energy use for vehicles
     //Electricity use
-    //TODO: Need to track electrical vehicles...?
-    worksheet.getCell(columnLetter + '69').value = this.getFuelValue([], yearDetail.vehicleFuelTotals);
+    //TODO: Need to track electrical vehicles: issue 1419   
+    let vehicleFuelVals: { usedFuels: Array<string>, usage: number } = { usedFuels: [], usage: 0 };
+    vehicleFuelVals = this.getFuelValue(vehicleFuelVals.usedFuels, [], yearDetail.fuelTotals);
+    worksheet.getCell(columnLetter + '69').value = vehicleFuelVals.usage;
     //Gasoline
-    worksheet.getCell(columnLetter + '70').value = this.getFuelValue(['Gasoline', 'Gasoline (2-stroke)', 'Gasoline (4-stroke)', ], yearDetail.vehicleFuelTotals);
+    vehicleFuelVals = this.getFuelValue(vehicleFuelVals.usedFuels, ['Gasoline', 'Gasoline (2-stroke)', 'Gasoline (4-stroke)'], yearDetail.fuelTotals);
+    worksheet.getCell(columnLetter + '70').value = vehicleFuelVals.usage;
     //Diesel
-    worksheet.getCell(columnLetter + '71').value = this.getFuelValue(['Diesel'], yearDetail.vehicleFuelTotals);
+    vehicleFuelVals = this.getFuelValue(vehicleFuelVals.usedFuels, ['Diesel'], yearDetail.fuelTotals);
+    worksheet.getCell(columnLetter + '71').value = vehicleFuelVals.usage;
     //Biodiesel
-    worksheet.getCell(columnLetter + '72').value = this.getFuelValue(['Biodiesel'], yearDetail.vehicleFuelTotals);
+    vehicleFuelVals = this.getFuelValue(vehicleFuelVals.usedFuels, ['Biodiesel'], yearDetail.fuelTotals);
+    worksheet.getCell(columnLetter + '72').value = vehicleFuelVals.usage;
     //compressed natural gas
-    //TODO: Don't have Compressed Natural Gas?
-    worksheet.getCell(columnLetter + '73').value = this.getFuelValue([], yearDetail.vehicleFuelTotals);
+    //TODO: Don't have Compressed Natural Gas: issue 1418
+    vehicleFuelVals = this.getFuelValue(vehicleFuelVals.usedFuels, [], yearDetail.fuelTotals);
+    worksheet.getCell(columnLetter + '73').value = vehicleFuelVals.usage;
     //liquified natural gas
-    worksheet.getCell(columnLetter + '74').value = this.getFuelValue(['LPG'], yearDetail.vehicleFuelTotals);
+    vehicleFuelVals = this.getFuelValue(vehicleFuelVals.usedFuels, ['LPG'], yearDetail.fuelTotals);
+    worksheet.getCell(columnLetter + '74').value = vehicleFuelVals.usage;
     //ethanol fuel blend
-    worksheet.getCell(columnLetter + '75').value = this.getFuelValue(['Ethanol (100%)'], yearDetail.vehicleFuelTotals);
-    
+    vehicleFuelVals = this.getFuelValue(vehicleFuelVals.usedFuels, ['Ethanol (100%)'], yearDetail.fuelTotals);
+    worksheet.getCell(columnLetter + '75').value = vehicleFuelVals.usage;
+
     //other fuel (gasoline, diesel, propane)
     //TODO: how to handle this..
     // worksheet.getCell(columnLetter + '76').value
@@ -202,14 +244,76 @@ export class BetterClimateExcelWriterService {
     // worksheet.getCell(columnLetter + '78').value 
   }
 
-  getFuelValue(fuelTypes: Array<string>, fuelTotals: Array<{ fuelType: string, total: number }>): number {
-    let fuelTotal: { fuelType: string, total: number } = fuelTotals.find(fuelTotal => {
-      return fuelTypes.includes(fuelTotal.fuelType);
+  getFuelValue(usedFuels: Array<string>, fuelTypes: Array<string>, fuelTotals: Array<{ fuelType: string, total: number }>): { usedFuels: Array<string>, usage: number } {
+    let totalUsage: number = 0;
+    fuelTypes.forEach(fuelType => {
+      let fuelTotal: { fuelType: string, total: number } = fuelTotals.find(fuelTotal => {
+        return fuelType == fuelTotal.fuelType;
+      });
+      if (fuelTotal) {
+        totalUsage += fuelTotal.total;
+        usedFuels.push(fuelType);
+      }
     });
-    if (fuelTotal) {
-      return fuelTotal.total;
+    return { usedFuels: usedFuels, usage: totalUsage };
+  }
+
+  getOtherFuelValue(usedFuels: Array<string>, fuelTotals: Array<{ fuelType: string, total: number }>): { otherFuels: Array<string>, usage: number } {
+    let otherFuels: Array<string> = [];
+    let totalUsage: number = 0;
+    fuelTotals.forEach(fuelTotal => {
+      if (!usedFuels.includes(fuelTotal.fuelType)) {
+        otherFuels.push(fuelTotal.fuelType);
+        totalUsage += fuelTotal.total
+      }
+    });
+
+    return {
+      otherFuels: otherFuels,
+      usage: totalUsage
     }
-    return 0;
+
+  }
+
+  getFiscalYearEnd(fiscalYearMonth: number): string {
+    switch (fiscalYearMonth) {
+      case 0: {
+        return 'January 31'
+      }
+      case 1: {
+        return 'February 29'
+      }
+      case 2: {
+        return 'March 31'
+      }
+      case 3: {
+        return 'April 30'
+      }
+      case 4: {
+        return 'May 31'
+      }
+      case 5: {
+        return 'June 30'
+      }
+      case 6: {
+        return 'July 31'
+      }
+      case 7: {
+        return 'August 31'
+      }
+      case 7: {
+        return 'September 30'
+      }
+      case 7: {
+        return 'October 31'
+      }
+      case 7: {
+        return 'November 30'
+      }
+      default: {
+        return 'Calendar Year (December 31)'
+      }
+    }
   }
 
 }
