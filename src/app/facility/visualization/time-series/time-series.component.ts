@@ -1,7 +1,7 @@
 import { Component, ElementRef, ViewChild, OnInit } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import * as _ from 'lodash';
-import { CorrelationPlotOptions, VisualizationStateService } from '../visualization-state.service';
+import { AxisOption, CorrelationPlotOptions, VisualizationStateService } from '../visualization-state.service';
 
 @Component({
   selector: 'app-time-series',
@@ -119,6 +119,68 @@ export class TimeSeriesComponent implements OnInit {
           });
         }
       });
+
+
+      if (this.correlationPlotOptions.totalEnergyTimeSeriesYAxis1) {
+        y1Labels.push('Total Facility Energy');
+        let values: Array<number> = this.visualizationStateService.getTotalEnergyUse(dates);
+        traceData.push({
+          x: dates,
+          y: values,
+          name: 'Total Facility Energy',
+          type: 'scatter',
+          yaxis: 'y',
+          line: { width: 3 }
+        });
+      }
+
+      if (this.correlationPlotOptions.totalSelectedEnergyTimeSeriesYAxis1) {
+        y1Labels.push('Total Selected Energy');
+        let axisOptions: Array<AxisOption> = this.correlationPlotOptions.timeSeriesGroupYAxis1Options;
+        if (this.correlationPlotOptions.asMeters) {
+          axisOptions = this.correlationPlotOptions.timeSeriesMeterYAxis1Options;
+        }
+        let values: Array<number> = this.visualizationStateService.getTotalEnergyUse(dates, axisOptions, this.correlationPlotOptions.asMeters);
+        traceData.push({
+          x: dates,
+          y: values,
+          name: 'Total Selected Energy',
+          type: 'scatter',
+          yaxis: 'y',
+          line: { width: 3 }
+        });
+      }
+
+      if (this.correlationPlotOptions.totalEnergyTimeSeriesYAxis2) {
+        y2Labels.push('Total Facility Energy');
+        let values: Array<number> = this.visualizationStateService.getTotalEnergyUse(dates);
+        traceData.push({
+          x: dates,
+          y: values,
+          name: 'Total Energy',
+          type: 'scatter',
+          yaxis: 'y2',
+          line: { width: 3, dash: 'dashdot' }
+        });
+      }
+
+      if (this.correlationPlotOptions.totalSelectedEnergyTimeSeriesYAxis2) {
+        y1Labels.push('Total Selected Energy');
+        let axisOptions: Array<AxisOption> = this.correlationPlotOptions.timeSeriesGroupYAxis2Options;
+        if (this.correlationPlotOptions.asMeters) {
+          axisOptions = this.correlationPlotOptions.timeSeriesMeterYAxis2Options;
+        }
+        let values: Array<number> = this.visualizationStateService.getTotalEnergyUse(dates, axisOptions, this.correlationPlotOptions.asMeters);
+        traceData.push({
+          x: dates,
+          y: values,
+          name: 'Total Energy',
+          type: 'scatter',
+          yaxis: 'y2',
+          line: { width: 3, dash: 'dashdot' }
+        });
+      }
+
 
 
       var layout = {
