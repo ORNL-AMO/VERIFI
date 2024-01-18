@@ -140,7 +140,7 @@ export interface IdbUtilityMeter {
     fuel?: string
     visible?: boolean
     importWizardName?: string
-    meterReadingDataApplication?: "backward" | "fullMonth" | 'fullYear',
+    meterReadingDataApplication?: MeterReadingDataApplication,
     unitsDifferent?: boolean,
     ignoreDuplicateMonths?: boolean,
     ignoreMissingMonths?: boolean,
@@ -277,8 +277,9 @@ export interface PredictorData {
     weatherDataWarning?: boolean
 }
 
-export type PredictorType = 'Standard' | 'Conversion' | 'Math' | 'Weather'
-export type WeatherDataType = 'HDD' | 'CDD'
+export type PredictorType = 'Standard' | 'Conversion' | 'Math' | 'Weather';
+export type WeatherDataType = 'HDD' | 'CDD';
+export type MeterReadingDataApplication = "backward" | "fullMonth" | "fullYear";
 
 export interface IdbAccountReport {
     id?: number,

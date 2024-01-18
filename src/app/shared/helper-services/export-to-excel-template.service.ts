@@ -6,12 +6,14 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { IdbAccount, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import { IdbAccount, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup, MeterReadingDataApplication } from 'src/app/models/idb';
 import * as _ from 'lodash';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { getIsEnergyUnit } from '../sharedHelperFuntions';
 import { ScopeOption, ScopeOptions } from 'src/app/models/scopeOption';
 import { AgreementType, AgreementTypes } from 'src/app/models/agreementType';
+import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
+import { VehicleTypes } from '../vehicle-data/vehicleType';
 
 @Injectable({
   providedIn: 'root'
@@ -23,7 +25,8 @@ export class ExportToExcelTemplateService {
     private predictorDbService: PredictordbService,
     private facilityDbService: FacilitydbService,
     private accountDbService: AccountdbService,
-    private loadingService: LoadingService) { }
+    private loadingService: LoadingService,
+    private utilityMeterGroupDbService: UtilityMeterGroupdbService) { }
 
 
   exportFacilityData(facilityId?: string) {
@@ -70,18 +73,6 @@ export class ExportToExcelTemplateService {
 
   getFacilityWorksheet(workbook: ExcelJS.Workbook, facilityId?: string): ExcelJS.Worksheet {
     let worksheet: ExcelJS.Worksheet = workbook.getWorksheet('Facilities');
-    worksheet.getCell('A1').value = 'Facility Name';
-    worksheet.getCell('B1').value = 'Address';
-    worksheet.getCell('C1').value = 'Country';
-    worksheet.getCell('D1').value = 'State';
-    worksheet.getCell('E1').value = 'City';
-    worksheet.getCell('F1').value = 'Zip';
-    worksheet.getCell('G1').value = 'NAICS Code 2';
-    worksheet.getCell('H1').value = 'NAICS Code 3';
-    worksheet.getCell('I1').value = 'Contact Name';
-    worksheet.getCell('J1').value = 'Contact Phone';
-    worksheet.getCell('K1').value = 'Contact Email';
-
     let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     if (facilityId) {
       accountFacilities = accountFacilities.filter(facility => { return facility.guid == facilityId });
@@ -115,26 +106,6 @@ export class ExportToExcelTemplateService {
 
   getMetersWorksheet(workbook: ExcelJS.Workbook, facilityId?: string): ExcelJS.Worksheet {
     let worksheet: ExcelJS.Worksheet = workbook.getWorksheet('Meters-Utilities');
-    worksheet.getCell('A1').value = 'Facility Name';
-    worksheet.getCell('B1').value = 'Meter Number';
-    worksheet.getCell('C1').value = 'Account Number';
-    worksheet.getCell('D1').value = 'Source';
-    worksheet.getCell('E1').value = 'Meter Name';
-    worksheet.getCell('F1').value = 'Utility Supplier';
-    worksheet.getCell('G1').value = 'Notes';
-    worksheet.getCell('H1').value = 'Building / Location';
-    worksheet.getCell('I1').value = 'Meter Group';
-    worksheet.getCell('J1').value = 'Phase';
-    worksheet.getCell('K1').value = 'Fuel';
-    worksheet.getCell('L1').value = 'Collection Unit';
-    worksheet.getCell('M1').value = 'Heat Capacity';
-    worksheet.getCell('N1').value = 'Site To Source';
-    worksheet.getCell('O1').value = 'Calendarize Data?';
-    worksheet.getCell('P1').value = 'Scope';
-    worksheet.getCell('Q1').value = 'Agreement Type';
-    worksheet.getCell('R1').value = 'Include In Energy';
-    worksheet.getCell('S1').value = 'Retain RECS';
-
     let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     if (facilityId) {
       facilityMeters = facilityMeters.filter(meter => { return meter.facilityId == facilityId });
@@ -143,16 +114,38 @@ export class ExportToExcelTemplateService {
     let index: number = 2;
     facilityMeters.forEach(meter => {
       let facilityName: string = accountFacilities.find(facility => { return facility.guid == meter.facilityId }).name;
+      //A: Facility name
       worksheet.getCell('A' + index).value = facilityName;
+      //B: Metter Number (unique)
       worksheet.getCell('B' + index).value = meter.meterNumber;
-      worksheet.getCell('C' + index).value = meter.accountNumber;
-      worksheet.getCell('D' + index).value = meter.source;
+      //C: Source
+      worksheet.getCell('C' + index).value = meter.source;
+      //D: Scope
+      worksheet.getCell('D' + index).value = this.getScope(meter.scope);
+      //E: Meter Name (Display)
       worksheet.getCell('E' + index).value = meter.name;
-      worksheet.getCell('F' + index).value = meter.supplier;
-      worksheet.getCell('G' + index).value = meter.notes;
+      //F: Meter Group
+      worksheet.getCell('F' + index).value = this.getGroupName(meter.groupId);
+      //G: Calendarize Data?
+      worksheet.getCell('G' + index).value = this.getCalanderizeDataOption(meter.meterReadingDataApplication);
+      //H: Phase or Vehicle
       worksheet.getCell('H' + index).value = meter.location;
+      //I: Fuel or Emissions
       worksheet.getCell('I' + index).value = meter.group;
+      //J: Collection Unit
       worksheet.getCell('J' + index).value = meter.phase;
+      //K: Energy Unit
+      //L: Distance Unit
+      //M: Estimation Method
+      //N: Heat Capacity or Fuel Efficiency
+      //O: Include in Energy
+      //P: Site To Source
+      //Q: Agreement Type
+      //R: Retain RECs
+      //S: Account Number
+      //T: Utility Supplier
+      //U: Notes
+      //V: Building / Location
       if (meter.source == 'Water Discharge') {
         worksheet.getCell('K' + index).value = meter.waterDischargeType;
       } else if (meter.source == 'Water Intake') {
@@ -180,13 +173,6 @@ export class ExportToExcelTemplateService {
     return 'No';
   }
 
-  getCalendarization(val: "backward" | "fullMonth" | 'fullYear'): 'Yes' | 'No' {
-    if (val == 'backward') {
-      return 'Yes';
-    }
-    return 'No';
-  }
-
   getScope(scope: number): string {
     let selectedScope: ScopeOption = ScopeOptions.find(option => { return option.value == scope });
     if (selectedScope) {
@@ -205,32 +191,32 @@ export class ExportToExcelTemplateService {
 
   getElectricityWorksheet(workbook: ExcelJS.Workbook, facilityId?: string): ExcelJS.Worksheet {
     let worksheet: ExcelJS.Worksheet = workbook.getWorksheet('Electricity');
-    worksheet.getCell('A1').value = 'Meter Number';
-    worksheet.getCell('B1').value = 'Read Date';
-    worksheet.getCell('C1').value = 'Total Consumption';
-    worksheet.getCell('D1').value = 'Total Real Demand';
-    worksheet.getCell('E1').value = 'Total Billed Demand';
-    worksheet.getCell('F1').value = 'Total Cost';
-    worksheet.getCell('G1').value = 'Non-energy Charge';
-    worksheet.getCell('H1').value = 'Block 1 Consumption';
-    worksheet.getCell('I1').value = 'Block 1 Consumption Charge';
-    worksheet.getCell('J1').value = 'Block 2 Consumption';
-    worksheet.getCell('K1').value = 'Block 2 Consumption Charge';
-    worksheet.getCell('L1').value = 'Block 3 Consumption';
-    worksheet.getCell('M1').value = 'Block 3 Consumption Charge';
-    worksheet.getCell('N1').value = 'Other Consumption';
-    worksheet.getCell('O1').value = 'Other Consumption Charge';
-    worksheet.getCell('P1').value = 'On Peak Amount';
-    worksheet.getCell('Q1').value = 'On Peak Charge';
-    worksheet.getCell('R1').value = 'Off Peak Amount';
-    worksheet.getCell('S1').value = 'Off Peak Charge';
-    worksheet.getCell('T1').value = 'Transmission & Delivery Charge';
-    worksheet.getCell('U1').value = 'Power Factor';
-    worksheet.getCell('V1').value = 'Power Factor Charge';
-    worksheet.getCell('W1').value = 'Local Sales Tax';
-    worksheet.getCell('X1').value = 'State Sales Tax';
-    worksheet.getCell('Y1').value = 'Late Payment';
-    worksheet.getCell('Z1').value = 'Other Charge';
+    // worksheet.getCell('A1').value = 'Meter Number';
+    // worksheet.getCell('B1').value = 'Read Date';
+    // worksheet.getCell('C1').value = 'Total Consumption';
+    // worksheet.getCell('D1').value = 'Total Real Demand';
+    // worksheet.getCell('E1').value = 'Total Billed Demand';
+    // worksheet.getCell('F1').value = 'Total Cost';
+    // worksheet.getCell('G1').value = 'Non-energy Charge';
+    // worksheet.getCell('H1').value = 'Block 1 Consumption';
+    // worksheet.getCell('I1').value = 'Block 1 Consumption Charge';
+    // worksheet.getCell('J1').value = 'Block 2 Consumption';
+    // worksheet.getCell('K1').value = 'Block 2 Consumption Charge';
+    // worksheet.getCell('L1').value = 'Block 3 Consumption';
+    // worksheet.getCell('M1').value = 'Block 3 Consumption Charge';
+    // worksheet.getCell('N1').value = 'Other Consumption';
+    // worksheet.getCell('O1').value = 'Other Consumption Charge';
+    // worksheet.getCell('P1').value = 'On Peak Amount';
+    // worksheet.getCell('Q1').value = 'On Peak Charge';
+    // worksheet.getCell('R1').value = 'Off Peak Amount';
+    // worksheet.getCell('S1').value = 'Off Peak Charge';
+    // worksheet.getCell('T1').value = 'Transmission & Delivery Charge';
+    // worksheet.getCell('U1').value = 'Power Factor';
+    // worksheet.getCell('V1').value = 'Power Factor Charge';
+    // worksheet.getCell('W1').value = 'Local Sales Tax';
+    // worksheet.getCell('X1').value = 'State Sales Tax';
+    // worksheet.getCell('Y1').value = 'Late Payment';
+    // worksheet.getCell('Z1').value = 'Other Charge';
     let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     if (facilityId) {
       facilityMeters = facilityMeters.filter(meter => { return meter.facilityId == facilityId });
@@ -276,18 +262,18 @@ export class ExportToExcelTemplateService {
 
   getNonElectricityWorksheet(workbook: ExcelJS.Workbook, facilityId?: string): ExcelJS.Worksheet {
     let worksheet: ExcelJS.Worksheet = workbook.getWorksheet('Non-electricity');
-    worksheet.getCell('A1').value = 'Meter Number';
-    worksheet.getCell('B1').value = 'Read Date';
-    worksheet.getCell('C1').value = 'Total Consumption';
-    worksheet.getCell('D1').value = 'Total Cost';
-    worksheet.getCell('E1').value = 'Commodity Charge';
-    worksheet.getCell('F1').value = 'Delivery Charge';
-    worksheet.getCell('G1').value = 'Other Charge';
-    worksheet.getCell('H1').value = 'Demand Usage';
-    worksheet.getCell('I1').value = 'Demand Charge';
-    worksheet.getCell('J1').value = 'Local Sales Tax';
-    worksheet.getCell('K1').value = 'State Sales Tax';
-    worksheet.getCell('L1').value = 'Late Payment';
+    // worksheet.getCell('A1').value = 'Meter Number';
+    // worksheet.getCell('B1').value = 'Read Date';
+    // worksheet.getCell('C1').value = 'Total Consumption';
+    // worksheet.getCell('D1').value = 'Total Cost';
+    // worksheet.getCell('E1').value = 'Commodity Charge';
+    // worksheet.getCell('F1').value = 'Delivery Charge';
+    // worksheet.getCell('G1').value = 'Other Charge';
+    // worksheet.getCell('H1').value = 'Demand Usage';
+    // worksheet.getCell('I1').value = 'Demand Charge';
+    // worksheet.getCell('J1').value = 'Local Sales Tax';
+    // worksheet.getCell('K1').value = 'State Sales Tax';
+    // worksheet.getCell('L1').value = 'Late Payment';
     let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     if (facilityId) {
       facilityMeters = facilityMeters.filter(meter => { return meter.facilityId == facilityId });
@@ -328,8 +314,8 @@ export class ExportToExcelTemplateService {
     alphabet = alphabet.concat(additionalAlphabet);
     additionalAlphabet = alpha.map(x => { return 'B' + String.fromCharCode(x) });
     alphabet = alphabet.concat(additionalAlphabet);
-    worksheet.getCell('A1').value = 'Facility Name';
-    worksheet.getCell('B1').value = 'Date';
+    // worksheet.getCell('A1').value = 'Facility Name';
+    // worksheet.getCell('B1').value = 'Date';
     let alphaIndex: number = 2;
 
     let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
@@ -394,6 +380,56 @@ export class ExportToExcelTemplateService {
   getFormatedDate(dateReading: Date): string {
     let readingDate: Date = new Date(dateReading)
     return readingDate.getFullYear() + '-' + (readingDate.getMonth() + 1) + '-' + readingDate.getDate();
+  }
+
+  getGroupName(groupId: string): string {
+    let groups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.accountMeterGroups.getValue();
+    let group: IdbUtilityMeterGroup = groups.find(group => { return group.guid == groupId });
+    if (group) {
+      return group.name;
+    }
+    return '';
+  }
+
+  getCalanderizeDataOption(meterReadingDataApplication: MeterReadingDataApplication): 'Calendarize' | 'Do Not Calenderize' | 'Evenly Distribute' {
+    if (meterReadingDataApplication == 'backward') {
+      return 'Calendarize';
+    } else if (meterReadingDataApplication == 'fullMonth') {
+      return 'Do Not Calenderize';
+    } else if (meterReadingDataApplication == 'fullYear') {
+      return 'Evenly Distribute';
+    };
+  }
+
+  getPhaseOrVehicle(meter: IdbUtilityMeter): string {
+    if(meter.scope == 2){
+      if(meter.vehicleCategory == 1){
+        return 'Material Transport Onsite';
+      }else if(meter.vehicleCategory == 2){
+        let vehicleType = VehicleTypes.find(vType => {
+          return vType.value == meter.vehicleType
+        });
+        if(vehicleType.label == 'Passenger Cars'){
+          return 'On-Road Vehicle, Passenger Cars';
+        }else if(vehicleType.label == "Light-Duty Trucks (Vans, Pickups, SUV's)"){
+          return 'On-Road Vehicle, Light-Duty Trucks';
+        }else if(vehicleType.label == 'Bus'){
+          return 'On-Road Vehicle, Bus';
+        }else if(vehicleType.label == 'Heavy-Duty Vehicles'){
+          return 'On-Road Vehicle, Heavy-Duty Trucks';
+        }else if(vehicleType.label == 'Motorcycles'){
+          return 'On-Road Vehicle, Motorcycles';
+        }
+      }
+           
+      // Off-Road Vehicle, Ag. Equipment & Trucks
+      // Off-Road Vehicle, Construction/Mine Equipment & Trucks
+      // Non-Road Vehicle, Aircraft
+      // Non-Road Vehicle, Rail
+      // Non-Road Vehicle, Water Transport
+    }else if(meter.source == 'Other Fuels'){
+      return meter.phase;
+    }
   }
 
 }
