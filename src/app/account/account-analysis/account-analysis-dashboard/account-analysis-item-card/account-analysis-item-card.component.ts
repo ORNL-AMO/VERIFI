@@ -92,7 +92,7 @@ export class AccountAnalysisItemCardComponent implements OnInit {
       }
       await this.dbChangesService.setAccountAnalysisItems(this.selectedAccount, false);
     } else {
-      this.toastNotificationService.showToast('Analysis Item Cannot Be Selected', "This baseline year does not match your facility baseline year. This analysis cannot be included in reports or figures relating to the facility energy goal.", 10000, false, 'alert-danger');
+      this.toastNotificationService.showToast('Analysis Item Cannot Be Selected', "This baseline year does not match the account baseline year. This analysis cannot be included in reports or figures relating to the account energy goal.", 10000, false, 'alert-danger');
     }
   }
 
