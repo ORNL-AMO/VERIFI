@@ -13,6 +13,7 @@ import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 import * as _ from 'lodash';
 import { BetterClimateReportSetup } from 'src/app/models/overview-report';
 import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
+import { BetterClimateExcelWriterService } from '../excel-writer-services/better-climate-excel-writer.service';
 
 @Component({
   selector: 'app-better-climate-report',
@@ -31,6 +32,7 @@ export class BetterClimateReportComponent {
   betterClimateReportUnfiltered: BetterClimateReport;
   betterClimateReportSetup: BetterClimateReportSetup;
   cellWidth: number;
+  generateExcelSub: Subscription;
   constructor(private accountReportDbService: AccountReportDbService,
     private accountReportsService: AccountReportsService,
     private router: Router, private accountDbService: AccountdbService,
@@ -38,7 +40,8 @@ export class BetterClimateReportComponent {
     private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private eGridService: EGridService,
-    private customFuelDbService: CustomFuelDbService) { }
+    private customFuelDbService: CustomFuelDbService,
+    private betterClimateExcelWriterService: BetterClimateExcelWriterService) { }
 
   ngOnInit(): void {
     this.printSub = this.accountReportsService.print.subscribe(print => {
@@ -54,7 +57,11 @@ export class BetterClimateReportComponent {
     this.calculateCarbonReport();
     this.setCellWidth();
 
-
+    this.generateExcelSub = this.accountReportsService.generateExcel.subscribe(generateExcel => {
+      if (generateExcel == true) {
+        this.generateExcelReport();
+      }
+    });
   }
 
   ngOnDestroy() {
@@ -133,5 +140,10 @@ export class BetterClimateReportComponent {
       });
     }
     return betterClimateReport;
+  }
+
+  generateExcelReport(){
+    this.betterClimateExcelWriterService.exportToExcel(this.selectedReport, this.account, this.betterClimateReport);
+    this.accountReportsService.generateExcel.next(false);
   }
 }
