@@ -171,7 +171,11 @@ export class VisualizationStateService {
       timeSeriesGroupYAxis1Options: timeSeriesGroupYAxis1Options,
       timeSeriesGroupYAxis2Options: timeSeriesGroupYAxis2Options,
       timeSeriesPredictorYAxis1Options: timeSeriesPredictorYAxis1Options,
-      timeSeriesPredictorYAxis2Options: timeSeriesPredictorYAxis2Options
+      timeSeriesPredictorYAxis2Options: timeSeriesPredictorYAxis2Options,
+      totalEnergyTimeSeriesYAxis1: false,
+      totalEnergyTimeSeriesYAxis2: false,
+      totalSelectedEnergyTimeSeriesYAxis1: false,
+      totalSelectedEnergyTimeSeriesYAxis2: false,
     });
   }
 
@@ -243,6 +247,52 @@ export class VisualizationStateService {
     return values;
   }
 
+  getTotalEnergyUse(dates: Array<Date>, axisOptions?: Array<AxisOption>, asMeters?: boolean): Array<number> {
+    let values: Array<number> = [];
+    // let groupMonthlyData: Array<MonthlyData> = groupMeters.flatMap(cMeter => {
+    //   return cMeter.monthlyData;
+    // });
+    let allMonthlyData: Array<MonthlyData>;
+    if (!axisOptions) {
+      allMonthlyData = this.calanderizedMeters.flatMap(cMeter => {
+        return cMeter.monthlyData;
+      })
+    } else {
+      let selectedOptionsIds: Array<string> = [];
+      axisOptions.forEach(option => {
+        if (option.selected) {
+          selectedOptionsIds.push(option.itemId);
+        }
+      });
+      let includedMeters: Array<CalanderizedMeter>;
+      if (asMeters) {
+        includedMeters = this.calanderizedMeters.filter(cMeter => {
+          return selectedOptionsIds.includes(cMeter.meter.guid);
+        });
+      } else {
+        includedMeters = this.calanderizedMeters.filter(cMeter => {
+          return selectedOptionsIds.includes(cMeter.meter.groupId);
+        });
+      }
+      allMonthlyData = includedMeters.flatMap(cMeter => {
+        return cMeter.monthlyData
+      });
+    }
+
+    dates.forEach(date => {
+      let monthlyData: Array<MonthlyData> = allMonthlyData.filter(mData => {
+        return mData.date.getMonth() == date.getMonth() && mData.date.getFullYear() == date.getFullYear();
+      })
+      if (monthlyData) {
+        let value: number = _.sumBy(monthlyData, 'energyUse')
+        values.push(value);
+      } else {
+        values.push(0);
+      }
+    });
+    return values;
+  }
+
   getDates(): Array<Date> {
     let dateRange: { minDate: Date, maxDate: Date } = this.dateRange.getValue();
     let dates: Array<Date> = new Array();
@@ -277,6 +327,10 @@ export interface CorrelationPlotOptions {
   timeSeriesGroupYAxis2Options: Array<AxisOption>,
   timeSeriesPredictorYAxis1Options: Array<AxisOption>
   timeSeriesPredictorYAxis2Options: Array<AxisOption>
+  totalEnergyTimeSeriesYAxis1: boolean,
+  totalEnergyTimeSeriesYAxis2: boolean,
+  totalSelectedEnergyTimeSeriesYAxis1: boolean,
+  totalSelectedEnergyTimeSeriesYAxis2: boolean,
 }
 
 export interface AxisOption {
