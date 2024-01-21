@@ -88,6 +88,7 @@ export class ConfirmReadingsComponent implements OnInit {
 
   setSummary() {
     let dataSummaries: Array<MeterDataSummary> = new Array();
+    console.log(this.fileReference.meterData);
     this.fileReference.meters.forEach(meter => {
       if (!meter.skipImport) {
         let meterReadings: Array<IdbUtilityMeterData> = this.fileReference.meterData.filter(data => { return data.meterId == meter.guid });
@@ -106,7 +107,10 @@ export class ConfirmReadingsComponent implements OnInit {
             form = this.utilityMeterDataService.getGeneralMeterDataForm(reading, displayVolumeInput, displayEnergyUse, displayHeatCapacity, displayVehicleFuelEfficiency);
           }
           if (form.invalid) {
+            console.log(meter.name);
+            console.log(reading);
             invalidReadings.push(reading);
+            console.log('====')
           } else {
             if (reading.id) {
               existingReadings.push(reading);
