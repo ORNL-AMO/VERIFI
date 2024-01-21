@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import * as XLSX from 'xlsx';
 import { ParsedTemplate } from './upload-data-models';
-import { IdbAccount, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup, PredictorData } from '../models/idb';
+import { IdbAccount, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup, MeterReadingDataApplication, PredictorData } from '../models/idb';
 import { AccountdbService } from '../indexedDB/account-db.service';
 import { FacilitydbService } from '../indexedDB/facility-db.service';
 import * as _ from 'lodash';
@@ -36,12 +36,12 @@ export class UploadDataV2Service {
   parseTemplate(workbook: XLSX.WorkBook): ParsedTemplate {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let importFacilities: Array<IdbFacility> = this.getImportFacilities(workbook, selectedAccount);
-    if(importFacilities.length == 0){
-      throw('No Facilities Found!')
-    }else{
+    if (importFacilities.length == 0) {
+      throw ('No Facilities Found!')
+    } else {
       let importMetersAndGroups: { meters: Array<IdbUtilityMeter>, newGroups: Array<IdbUtilityMeterGroup> } = this.getImportMeters(workbook, importFacilities, selectedAccount);
       let predictorEntries: Array<IdbPredictorEntry> = this.uploadDataSharedFunctionsService.getPredictorData(workbook, importFacilities, selectedAccount);
-      let importMeterData: Array<IdbUtilityMeterData> = this.getUtilityMeterData(workbook, importMetersAndGroups.meters);  
+      let importMeterData: Array<IdbUtilityMeterData> = this.getUtilityMeterData(workbook, importMetersAndGroups.meters);
       return { importFacilities: importFacilities, importMeters: importMetersAndGroups.meters, predictorEntries: predictorEntries, meterData: importMeterData, newGroups: importMetersAndGroups.newGroups }
     }
   }
@@ -119,17 +119,9 @@ export class UploadDataV2Service {
             meter.groupId = groupData.group.guid;
           }
 
-          meter.startingUnit = checkImportStartingUnit(excelMeter['Collection Unit'], meter.source, meter.phase, meter.fuel, meter.scope);
-          let isEnergyUnit: boolean = getIsEnergyUnit(meter.startingUnit);
-          if (isEnergyUnit) {
-            meter.energyUnit = meter.startingUnit;
-          } else {
-            meter.energyUnit = excelMeter['Energy Unit'];
-          }
-
-
           if (meter.source == 'Electricity') {
             //parse electricity
+            this.setMeterUnits(excelMeter, meter);
             meter.agreementType = getAgreementType(excelMeter['Agreement Type']);
             if (meter.agreementType == undefined) {
               meter.agreementType = 1;
@@ -173,6 +165,8 @@ export class UploadDataV2Service {
           } else if (meter.source == 'Natural Gas') {
             //pares NG
             meter.phase = 'Gas';
+            this.setMeterUnits(excelMeter, meter);
+            let isEnergyUnit: boolean = getIsEnergyUnit(meter.startingUnit);
             meter.heatCapacity = this.parseHeatCapacity(excelMeter, meter, isEnergyUnit);
             meter.siteToSource = this.parseSiteToSource(excelMeter, meter);
           } else if (meter.source == 'Other Fuels') {
@@ -180,8 +174,11 @@ export class UploadDataV2Service {
               //parse stationary if not vehicle
               meter.phase = getPhase(excelMeter['Phase or Vehicle']);
               meter.fuel = getFuelEnum(excelMeter['Fuel or Emission'], meter.source, meter.phase, meter.scope, meter.vehicleCategory, meter.vehicleType);
+              this.setMeterUnits(excelMeter, meter);
+              let isEnergyUnit: boolean = getIsEnergyUnit(meter.startingUnit);
               meter.heatCapacity = this.parseHeatCapacity(excelMeter, meter, isEnergyUnit);
             } else if (meter.scope == 2) {
+              meter.phase = 'Liquid';
               let vehicleData = this.parseVehicleData(excelMeter);
               meter.vehicleCategory = vehicleData.vehicleCategory;
               meter.vehicleType = vehicleData.vehicleType;
@@ -190,21 +187,28 @@ export class UploadDataV2Service {
               meter.vehicleDistanceUnit = vehicleData.vehicleDistanceUnit;
               meter.vehicleFuel = getFuelEnum(excelMeter['Fuel or Emission'], meter.source, meter.phase, meter.scope, meter.vehicleCategory, meter.vehicleType);
               meter.vehicleFuelEfficiency = excelMeter['Heat Capacity or Fuel Efficiency'];
+              this.setMeterUnits(excelMeter, meter);
+              let isEnergyUnit: boolean = getIsEnergyUnit(meter.startingUnit);
               meter.heatCapacity = this.parseHeatCapacity(excelMeter, meter, isEnergyUnit);
             }
           } else if (meter.source == 'Other Energy') {
             //parse other energy
             meter.fuel = getFuelEnum(excelMeter['Fuel or Emission'], meter.source, meter.phase, meter.scope, meter.vehicleCategory, meter.vehicleType);
+            this.setMeterUnits(excelMeter, meter);
+            let isEnergyUnit: boolean = getIsEnergyUnit(meter.startingUnit);
             meter.heatCapacity = this.parseHeatCapacity(excelMeter, meter, isEnergyUnit);
             meter.siteToSource = this.parseSiteToSource(excelMeter, meter);
           } else if (meter.source == 'Water Discharge') {
             //parse water discharge
             meter.waterDischargeType = excelMeter['Fuel or Emission'];
+            this.setMeterUnits(excelMeter, meter);
           } else if (meter.source == 'Water Intake') {
             //parse water intake
             meter.waterIntakeType = excelMeter['Fuel or Emission'];
+            this.setMeterUnits(excelMeter, meter);
           } else if (meter.source == 'Other') {
             //parse other
+            this.setMeterUnits(excelMeter, meter);
             if (meter.scope == 5 || meter.scope == 6) {
               let parseGWPData = this.parseGlobalWarmingPotentials(excelMeter, meter.startingUnit);
               meter.globalWarmingPotential = parseGWPData.globalWarmingPotential;
@@ -212,13 +216,23 @@ export class UploadDataV2Service {
             }
           }
 
-          meter.meterReadingDataApplication = getMeterReadingDataApplication(excelMeter['Calendarize Data?']);
+          meter.meterReadingDataApplication = this.getMeterReadingDataApplicationV2(excelMeter['Calendarize Data?']);
           meter = this.editMeterFormService.setMultipliers(meter);
           importMeters.push(meter);
         }
       }
     })
     return { meters: importMeters, newGroups: newGroups };
+  }
+
+  setMeterUnits(excelMeter, meter: IdbUtilityMeter) {
+    meter.startingUnit = checkImportStartingUnit(excelMeter['Collection Unit'], meter.source, meter.phase, meter.fuel, meter.scope);
+    let isEnergyUnit: boolean = getIsEnergyUnit(meter.startingUnit);
+    if (isEnergyUnit) {
+      meter.energyUnit = meter.startingUnit;
+    } else {
+      meter.energyUnit = excelMeter['Energy Unit'];
+    }
   }
 
   getUtilityMeterData(workbook: XLSX.WorkBook, importMeters: Array<IdbUtilityMeter>): Array<IdbUtilityMeterData> {
@@ -517,5 +531,15 @@ export class UploadDataV2Service {
       globalWarmingPotential: undefined,
       globalWarmingPotentialOption: undefined
     }
+  }
+
+  getMeterReadingDataApplicationV2(excelSelection: 'Calendarize' | 'Do Not Calenderize' | 'Evenly Distribute'): MeterReadingDataApplication {
+    if (excelSelection == 'Calendarize') {
+      return 'backward';
+    } else if (excelSelection == 'Do Not Calenderize') {
+      return 'fullMonth';
+    } else if (excelSelection == 'Evenly Distribute') {
+      return 'fullYear';
+    };
   }
 }
