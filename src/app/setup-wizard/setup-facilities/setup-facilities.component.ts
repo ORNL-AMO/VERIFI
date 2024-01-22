@@ -150,10 +150,11 @@ export class SetupFacilitiesComponent implements OnInit {
                 this.fileUploadError = 'File selected is not a VERIFI template. Please upload template file.'
               } else {
                 try {
-                  let fileReference: FileReference = this.uploadDataService.getFileReference(undefined, workBook);
+                  let fileReference: FileReference = this.uploadDataService.getFileReference(file, workBook, true);
                   this.fileUploadError = undefined;
                   this.setupWizardService.facilityTemplateWorkbook.next(workBook);
                 } catch (err) {
+                  console.log(err);
                   this.fileUploadError = 'No facilities found in template.'
                   this.toastNotificationService.showToast('An Error Occured!', "No facilities found in template. Facilities needed.", 10000, false, "alert-danger", false);
                 }

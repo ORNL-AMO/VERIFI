@@ -18,6 +18,7 @@ import { UtilityMeterDatadbService } from '../indexedDB/utilityMeterData-db.serv
 import { getMeterDataCopy } from '../calculations/conversions/convertMeterData';
 import { ConvertValue } from '../calculations/conversions/convertValue';
 import { GlobalWarmingPotential, GlobalWarmingPotentials } from '../models/globalWarmingPotentials';
+import { SetupWizardService } from '../setup-wizard/setup-wizard.service';
 
 @Injectable({
   providedIn: 'root'
@@ -30,12 +31,20 @@ export class UploadDataV2Service {
     private utilityMeterDbService: UtilityMeterdbService,
     private uploadDataSharedFunctionsService: UploadDataSharedFunctionsService,
     private editMeterFormService: EditMeterFormService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService) { }
+    private utilityMeterDataDbService: UtilityMeterDatadbService,
+    private setupWizardService: SetupWizardService) { }
 
 
-  parseTemplate(workbook: XLSX.WorkBook): ParsedTemplate {
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+  parseTemplate(workbook: XLSX.WorkBook, inSetupWizard: boolean): ParsedTemplate {
+    let selectedAccount: IdbAccount;
+    if (inSetupWizard) {
+      selectedAccount = this.setupWizardService.account.getValue();
+    } else {
+      selectedAccount = this.accountDbService.selectedAccount.getValue();
+    }
+    console.log(selectedAccount);
     let importFacilities: Array<IdbFacility> = this.getImportFacilities(workbook, selectedAccount);
+    console.log(importFacilities);
     if (importFacilities.length == 0) {
       throw ('No Facilities Found!')
     } else {
@@ -52,6 +61,7 @@ export class UploadDataV2Service {
     let accountFacilities: Array<IdbFacility> = this.facilityDbService.getAccountFacilitiesCopy();
     facilitiesData.forEach(facilityDataRow => {
       let facilityName: string = facilityDataRow['Facility Name'];
+      console.log(facilityName);
       if (facilityName) {
         let facility: IdbFacility = accountFacilities.find(facility => { return facility.name == facilityName });
         if (!facility) {
@@ -512,6 +522,8 @@ export class UploadDataV2Service {
     //on-road
     if (vehicleCategory == 2) {
       vehicleCollectionType = this.getVehicleCollectionType(excelMeter['Estimation Method']);
+    } else {
+      vehicleCollectionType = 1;
     }
 
     vehicleDistanceUnit = excelMeter['Distance Unit'];
