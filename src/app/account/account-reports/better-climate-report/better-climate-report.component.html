@@ -26,9 +26,14 @@
 
     <div class="report" [ngClass]="{'print': print}" *ngIf="betterClimateReportSetup.includePortfolioEnergyUse">
         <app-total-portfolio-energy-use-table [yearDetails]="betterClimateReport.portfolioYearDetails"
-            [cellWidth]="cellWidth"></app-total-portfolio-energy-use-table>
+            [cellWidth]="cellWidth" [tableType]="'total'"></app-total-portfolio-energy-use-table>
     </div>
-    <!--TODO: Add vehicle emissions to meters-->
+
+    <div class="report" [ngClass]="{'print': print}" *ngIf="betterClimateReportSetup.includeStationaryEnergyUse">
+        <app-total-portfolio-energy-use-table [yearDetails]="betterClimateReport.portfolioYearDetails"
+            [cellWidth]="cellWidth" [tableType]="'stationary'"></app-total-portfolio-energy-use-table>
+    </div>
+
     <div class="report" [ngClass]="{'print': print}" *ngIf="betterClimateReportSetup.includeVehicleEnergyUse">
         <app-vehicle-energy-use-table [yearDetails]="betterClimateReport.portfolioYearDetails"
             [cellWidth]="cellWidth"></app-vehicle-energy-use-table>

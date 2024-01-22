@@ -24,6 +24,11 @@
                 <label class="form-check-label" for="includePortfolioEnergyUse">Portfolio Energy Use</label>
             </div>
             <div class="form-check">
+                <input type="checkbox" class="form-check-input" name="includeStationaryEnergyUse"
+                    id="includeStationaryEnergyUse" formControlName="includeStationaryEnergyUse" (change)="save()">
+                <label class="form-check-label" for="includeStationaryEnergyUse">Stationary Energy Use</label>
+            </div>
+            <div class="form-check">
                 <input type="checkbox" class="form-check-input" name="includeVehicleEnergyUse"
                     id="includeVehicleEnergyUse" formControlName="includeVehicleEnergyUse" (change)="save()">
                 <label class="form-check-label" for="includeVehicleEnergyUse">Vehicle Energy Use</label>
@@ -133,11 +138,11 @@
                                 account.fiscalYear}}</option>
                         </select>
                     </div>
-                    <div class="col-9">
+                    <div class="col-8">
                         <textarea class="form-control" name="{{'initiativeNote'+index}}" id="{{'initiativeNote'+index}}"
                             [(ngModel)]="initiativeNote.note" (input)="save()" rows="1"></textarea>
                     </div>
-                    <div class="col-1">
+                    <div class="col-2">
                         <button class="btn btn-danger" (click)="deleteNote(index)">
                             <span class="fa fa-trash"></span>
                         </button>

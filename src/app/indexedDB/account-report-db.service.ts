@@ -148,7 +148,8 @@ export class AccountReportDbService {
         includeEmissionsInTables: true,
         includePercentReductionsInTables: true,
         includePercentContributionsInTables: true,
-        includeVehicleEnergyUse: true
+        includeVehicleEnergyUse: true,
+        includeStationaryEnergyUse: true,
       }
     }
   }

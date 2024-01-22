@@ -4,13 +4,16 @@ import { IdbAccount, IdbAccountReport } from 'src/app/models/idb';
 import * as _ from 'lodash';
 import { BetterClimateReport } from 'src/app/calculations/carbon-calculations/betterClimateReport';
 import { BetterClimateYearDetails } from 'src/app/calculations/carbon-calculations/betterClimateYearsDetails';
+import { LoadingService } from 'src/app/core-components/loading/loading.service';
+import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class BetterClimateExcelWriterService {
 
-  constructor() { }
+  constructor(private loadingService: LoadingService,
+    private toastNotificationService: ToastNotificationsService) { }
 
   exportToExcel(report: IdbAccountReport, account: IdbAccount, betterClimateReport: BetterClimateReport) {
     console.log('export to excell....')
@@ -22,6 +25,8 @@ export class BetterClimateExcelWriterService {
     request.onload = () => {
       workbook.xlsx.load(request.response).then(() => {
         this.writePortfolioEmissions(workbook, account, report, betterClimateReport);
+        this.writeFacilityEmissions(workbook, report, betterClimateReport);
+        this.writeReductionInitiatives(workbook, report);
         workbook.xlsx.writeBuffer().then(excelData => {
           let blob: Blob = new Blob([excelData], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
           let a = document.createElement("a");
@@ -32,9 +37,15 @@ export class BetterClimateExcelWriterService {
           a.click();
           window.URL.revokeObjectURL(url);
           document.body.removeChild(a);
+          this.loadingService.setLoadingStatus(false);
         });
       });
     };
+
+    request.onerror = () => {
+      this.toastNotificationService.showToast('An Error Occurred', 'Something went wrong while generating the excel report. Notifiy ORNL for further assistance.', 1000, false, 'alert-danger');
+      this.loadingService.setLoadingStatus(false);
+    }
     request.send();
   }
 
@@ -61,7 +72,6 @@ export class BetterClimateExcelWriterService {
     betterClimateReport.portfolioYearDetails.forEach((yearDetail, index) => {
       this.writeYearColumn(worksheet, columnLetters[index], yearDetail);
     });
-
   }
 
   writeYearColumn(worksheet: ExcelJS.Worksheet, columnLetter: string, yearDetail: BetterClimateYearDetails) {
@@ -120,6 +130,7 @@ export class BetterClimateExcelWriterService {
 
     //district steam
     let fuelVals: { usedFuels: Array<string>, usage: number } = { usedFuels: [], usage: 0 };
+
     fuelVals = this.getFuelValue(fuelVals.usedFuels, ['Purchased Steam'], yearDetail.fuelTotals);
     worksheet.getCell(columnLetter + '45').value = fuelVals.usage;
     //district hot water 
@@ -138,15 +149,14 @@ export class BetterClimateExcelWriterService {
     fuelVals = this.getFuelValue(fuelVals.usedFuels, ['Propane'], yearDetail.fuelTotals);
     worksheet.getCell(columnLetter + '50').value = fuelVals.usage;
     //coke 
-    //TODO: (Use both here?)
-    fuelVals = this.getFuelValue(fuelVals.usedFuels, ['Coke Oven Gas', 'Coke'], yearDetail.fuelTotals);
+    fuelVals = this.getFuelValue(fuelVals.usedFuels, ['Coke'], yearDetail.fuelTotals);
     worksheet.getCell(columnLetter + '51').value = fuelVals.usage;
     //coal 
     fuelVals = this.getFuelValue(fuelVals.usedFuels, ['Coal (anthracite)', 'Coal (bituminous)', 'Coal (Lignite)', 'Coal (subbituminous)'], yearDetail.fuelTotals);
     worksheet.getCell(columnLetter + '52').value = fuelVals.usage;
     //redisual or heavy fuel oil 5, 6
     //TODO: Navy Special & Bunker C
-    fuelVals = this.getFuelValue(fuelVals.usedFuels, ['Residual Fuel Oil', 'Fuel Oil #5', 'Fuel Oil #6 (high sulfur)', 'Fuel Oil #6 (low sulfur)'], yearDetail.fuelTotals);
+    fuelVals = this.getFuelValue(fuelVals.usedFuels, ['Residual Fuel Oil', 'Fuel Oil #5 (Navy Special)', 'Fuel Oil #6 (high sulfur)', 'Fuel Oil #6 (low sulfur)'], yearDetail.fuelTotals);
     worksheet.getCell(columnLetter + '53').value = fuelVals.usage;
     //biomass
     fuelVals = this.getFuelValue(fuelVals.usedFuels, ['Biomass'], yearDetail.fuelTotals);
@@ -180,6 +190,7 @@ export class BetterClimateExcelWriterService {
     fuelVals = this.getFuelValue(fuelVals.usedFuels, ['Ethanol (100%)'], yearDetail.fuelTotals);
     worksheet.getCell(columnLetter + '62').value = fuelVals.usage;
     //row 63 and 64
+    //Two rows, fill out both if two other fuels, otherwise just first row
     //other fuel (please specify)
     let otherFuelVals: { otherFuels: Array<string>, usage: number } = this.getOtherFuelValue(fuelVals.usedFuels, yearDetail.fuelTotals);
     if (otherFuelVals.otherFuels.length == 1 || otherFuelVals.otherFuels.length > 2) {
@@ -211,38 +222,58 @@ export class BetterClimateExcelWriterService {
     //Electricity use
     //TODO: Need to track electrical vehicles: issue 1419   
     let vehicleFuelVals: { usedFuels: Array<string>, usage: number } = { usedFuels: [], usage: 0 };
-    vehicleFuelVals = this.getFuelValue(vehicleFuelVals.usedFuels, [], yearDetail.fuelTotals);
+    vehicleFuelVals = this.getFuelValue(vehicleFuelVals.usedFuels, [], yearDetail.vehicleFuelTotals);
     worksheet.getCell(columnLetter + '69').value = vehicleFuelVals.usage;
     //Gasoline
-    vehicleFuelVals = this.getFuelValue(vehicleFuelVals.usedFuels, ['Gasoline', 'Gasoline (2-stroke)', 'Gasoline (4-stroke)'], yearDetail.fuelTotals);
+    vehicleFuelVals = this.getFuelValue(vehicleFuelVals.usedFuels, ['Gasoline', 'Gasoline (2-stroke)', 'Gasoline (4-stroke)'], yearDetail.vehicleFuelTotals);
     worksheet.getCell(columnLetter + '70').value = vehicleFuelVals.usage;
     //Diesel
-    vehicleFuelVals = this.getFuelValue(vehicleFuelVals.usedFuels, ['Diesel'], yearDetail.fuelTotals);
+    vehicleFuelVals = this.getFuelValue(vehicleFuelVals.usedFuels, ['Diesel'], yearDetail.vehicleFuelTotals);
     worksheet.getCell(columnLetter + '71').value = vehicleFuelVals.usage;
     //Biodiesel
-    vehicleFuelVals = this.getFuelValue(vehicleFuelVals.usedFuels, ['Biodiesel'], yearDetail.fuelTotals);
+    vehicleFuelVals = this.getFuelValue(vehicleFuelVals.usedFuels, ['Biodiesel'], yearDetail.vehicleFuelTotals);
     worksheet.getCell(columnLetter + '72').value = vehicleFuelVals.usage;
     //compressed natural gas
     //TODO: Don't have Compressed Natural Gas: issue 1418
-    vehicleFuelVals = this.getFuelValue(vehicleFuelVals.usedFuels, [], yearDetail.fuelTotals);
+    vehicleFuelVals = this.getFuelValue(vehicleFuelVals.usedFuels, [], yearDetail.vehicleFuelTotals);
     worksheet.getCell(columnLetter + '73').value = vehicleFuelVals.usage;
     //liquified natural gas
-    vehicleFuelVals = this.getFuelValue(vehicleFuelVals.usedFuels, ['LPG'], yearDetail.fuelTotals);
+    vehicleFuelVals = this.getFuelValue(vehicleFuelVals.usedFuels, ['LPG'], yearDetail.vehicleFuelTotals);
     worksheet.getCell(columnLetter + '74').value = vehicleFuelVals.usage;
     //ethanol fuel blend
-    vehicleFuelVals = this.getFuelValue(vehicleFuelVals.usedFuels, ['Ethanol (100%)'], yearDetail.fuelTotals);
+    vehicleFuelVals = this.getFuelValue(vehicleFuelVals.usedFuels, ['Ethanol (100%)'], yearDetail.vehicleFuelTotals);
     worksheet.getCell(columnLetter + '75').value = vehicleFuelVals.usage;
 
-    //other fuel (gasoline, diesel, propane)
-    //TODO: how to handle this..
-    // worksheet.getCell(columnLetter + '76').value
-    //other fuel (please specify)
-    //TODO: how to handle this..
-    // worksheet.getCell(columnLetter + '77').value
+
+    //other fuels
+    //Two rows, fill out both if two other fuels, otherwise just first row
+    let otherVehicleFuelVals: { otherFuels: Array<string>, usage: number } = this.getOtherFuelValue(vehicleFuelVals.usedFuels, yearDetail.vehicleFuelTotals);
+    if (otherVehicleFuelVals.otherFuels.length == 1 || otherVehicleFuelVals.otherFuels.length > 2) {
+      //if 1 other fuel or more then 2. Put all values in row 63
+      let cellName: string = 'Other Fuel ('
+      otherVehicleFuelVals.otherFuels.forEach((fuel, index) => {
+        cellName = cellName + fuel;
+        if (index != otherVehicleFuelVals.otherFuels.length - 1) {
+          cellName = cellName + ', ';
+        }
+      });
+      cellName = cellName + ') (MMBtu)';
+      worksheet.getCell('B76').value = cellName;
+      worksheet.getCell(columnLetter + '76').value = otherVehicleFuelVals.usage;
+    } else if (otherVehicleFuelVals.otherFuels.length == 2) {
+      fuelVals = this.getFuelValue([], [otherVehicleFuelVals.otherFuels[0]], yearDetail.fuelTotals);
+      worksheet.getCell(columnLetter + '76').value = fuelVals.usage;
+      worksheet.getCell('B76').value = 'Other Fuels (' + otherVehicleFuelVals.otherFuels[0] + ') (MMBtu)';
+
+      fuelVals = this.getFuelValue([], [otherVehicleFuelVals.otherFuels[1]], yearDetail.fuelTotals);
+      worksheet.getCell(columnLetter + '77').value = fuelVals.usage;
+      worksheet.getCell('B77').value = 'Other Fuels (' + otherVehicleFuelVals.otherFuels[1] + ') (MMBtu)';
+    }
 
     //total vehicle energy use CALCULATED
     // worksheet.getCell(columnLetter + '78').value 
   }
+
 
   getFuelValue(usedFuels: Array<string>, fuelTypes: Array<string>, fuelTotals: Array<{ fuelType: string, total: number }>): { usedFuels: Array<string>, usage: number } {
     let totalUsage: number = 0;
@@ -314,6 +345,49 @@ export class BetterClimateExcelWriterService {
         return 'Calendar Year (December 31)'
       }
     }
+  }
+
+
+  writeFacilityEmissions(workbook: ExcelJS.Workbook, report: IdbAccountReport, betterClimateReport: BetterClimateReport) {
+    let worksheet: ExcelJS.Worksheet = workbook.getWorksheet('Facility Emissions');
+    //C6 Reporting Year
+    worksheet.getCell('C6').value = report.reportYear;
+    //start row 9
+    let rowIndex: number = 9;
+    betterClimateReport.annualFacilitiesSummaries.forEach(facilitySummary => {
+      //B: Facility Name
+      worksheet.getCell('B' + rowIndex).value = facilitySummary.facility.name;
+      //C: Sq. Ft
+      worksheet.getCell('C' + rowIndex).value = facilitySummary.facility.size;
+      //D: Latitude
+      // worksheet.getCell('B' + rowIndex).value = facilitySummary.facility;
+      //E: Longitude
+      // worksheet.getCell('B' + rowIndex).value = facilitySummary.facility;
+      let reportYearDetail: BetterClimateYearDetails = facilitySummary.betterClimateYearDetails.find(yDetail => {
+        return yDetail.year == report.reportYear;
+      });
+      if (reportYearDetail) {
+        //F: Scope 1 Emissions
+        worksheet.getCell('F' + rowIndex).value = reportYearDetail.emissionsResults.totalScope1Emissions;
+        //G: Scope 2 location-based emissions
+        worksheet.getCell('G' + rowIndex).value = reportYearDetail.emissionsResults.scope2LocationEmissions;
+        //H: Scope 2 market-based emissions
+        worksheet.getCell('H' + rowIndex).value = reportYearDetail.emissionsResults.scope2MarketEmissions;
+      }
+      rowIndex++;
+    })
+  }
+
+  writeReductionInitiatives(workbook: ExcelJS.Workbook, report: IdbAccountReport) {
+    let worksheet: ExcelJS.Worksheet = workbook.getWorksheet('Emissions Reduction Initiatives');
+    let rowIndex: number = 7;
+    report.betterClimateReportSetup.initiativeNotes.forEach(iNote => {
+      //B: year
+      worksheet.getCell('B' + rowIndex).value = iNote.year;
+      //C: note
+      worksheet.getCell('C' + rowIndex).value = iNote.note;
+      rowIndex++;
+    });
   }
 
 }

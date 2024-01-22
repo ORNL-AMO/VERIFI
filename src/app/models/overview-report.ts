@@ -142,5 +142,6 @@ export interface BetterClimateReportSetup {
   includeEmissionsInTables: boolean,
   includePercentReductionsInTables: boolean,
   includePercentContributionsInTables: boolean,
-  includeVehicleEnergyUse: boolean
+  includeVehicleEnergyUse: boolean,
+  includeStationaryEnergyUse: boolean
 }

@@ -139,6 +139,11 @@ export class UpdateDbEntryService {
       isChanged = true;
       utilityMeter.source = 'Other';
     }
+
+    if (utilityMeter.fuel == 'Fuel Oil #5') {
+      isChanged = true;
+      utilityMeter.fuel = "Fuel Oil #5 (Navy Special)";
+    }
     return { utilityMeter: utilityMeter, isChanged: isChanged };
   }
 }
