@@ -65,7 +65,9 @@
                             &mdash;
                         </ng-container>
                     </td>
-                    <td>{{meter.scope | scopeLabel}}</td>
+                    <td>    
+                        <span [innerHTML]="meter.scope | scopeLabel"></span>
+                    </td>
                     <td>
                         <ng-container *ngIf="meter.scope != 2">
                             <span [innerHTML]="meter.startingUnit | settingsLabel"></span>

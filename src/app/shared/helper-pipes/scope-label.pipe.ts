@@ -11,7 +11,7 @@ export class ScopeLabelPipe implements PipeTransform {
     if (scope) {
       return scope.optionLabel;
     } else {
-      return '';
+      return '&mdash;';
     }
   }
 

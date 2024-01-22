@@ -49,7 +49,7 @@ export class UploadDataService {
   }
 
 
-  getFileReference(file: File, workBook: XLSX.WorkBook): FileReference {
+  getFileReference(file: File, workBook: XLSX.WorkBook, inSetupWizard: boolean): FileReference {
     let isTemplate: "V1" | "V2" | "Non-template" = this.checkSheetNamesForTemplate(workBook.SheetNames);
     if (isTemplate == "Non-template") {
       let accountFacilities: Array<IdbFacility> = this.facilityDbService.getAccountFacilitiesCopy();
@@ -78,7 +78,7 @@ export class UploadDataService {
       };
     } else {
       //parse template
-      let templateData: ParsedTemplate = this.parseTemplate(workBook, isTemplate);
+      let templateData: ParsedTemplate = this.parseTemplate(workBook, isTemplate, inSetupWizard);
       let predictorFacilityGroups: Array<FacilityGroup> = this.getPredictorFacilityGroups(templateData);
       let fileName: string = 'Upload File';
       if (file) {
@@ -122,12 +122,12 @@ export class UploadDataService {
     }
   }
 
-  parseTemplate(workbook: XLSX.WorkBook, templateVersion: "V1" | "V2"): ParsedTemplate {
+  parseTemplate(workbook: XLSX.WorkBook, templateVersion: "V1" | "V2", inSetupWizard: boolean): ParsedTemplate {
     if (templateVersion == "V1") {
       return this.uploadDataV1Service.parseTemplate(workbook);
     } else if (templateVersion == "V2") {
       console.log('V2!');
-      return this.uploadDataV2Service.parseTemplate(workbook);
+      return this.uploadDataV2Service.parseTemplate(workbook, inSetupWizard);
     }
   }
 

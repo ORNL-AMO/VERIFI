@@ -71,7 +71,7 @@ export class SetupWizardComponent implements OnInit {
       await this.dbChangesService.selectAccount(account, false);
       try {
         this.templateError = false;
-        let fileReference: FileReference = this.uploadDataService.getFileReference(undefined, workbook);
+        let fileReference: FileReference = this.uploadDataService.getFileReference(undefined, workbook, false);
         this.uploadDataService.fileReferences = [fileReference];
         this.loadingService.setLoadingStatus(false);
         this.toastNotificationService.showToast("Account Created!", "Use the upload data wizard to finish uploading facility data!", 10000, false, "alert-success", true);
