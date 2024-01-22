@@ -42,9 +42,7 @@ export class UploadDataV2Service {
     } else {
       selectedAccount = this.accountDbService.selectedAccount.getValue();
     }
-    console.log(selectedAccount);
     let importFacilities: Array<IdbFacility> = this.getImportFacilities(workbook, selectedAccount);
-    console.log(importFacilities);
     if (importFacilities.length == 0) {
       throw ('No Facilities Found!')
     } else {
@@ -61,7 +59,6 @@ export class UploadDataV2Service {
     let accountFacilities: Array<IdbFacility> = this.facilityDbService.getAccountFacilitiesCopy();
     facilitiesData.forEach(facilityDataRow => {
       let facilityName: string = facilityDataRow['Facility Name'];
-      console.log(facilityName);
       if (facilityName) {
         let facility: IdbFacility = accountFacilities.find(facility => { return facility.name == facilityName });
         if (!facility) {
@@ -353,7 +350,6 @@ export class UploadDataV2Service {
 
   getMobileFuelData(workbook: XLSX.WorkBook, importMeters: Array<IdbUtilityMeter>, importMeterData: Array<IdbUtilityMeterData>, utilityMeterData: Array<IdbUtilityMeterData>): Array<IdbUtilityMeterData> {
     let excelData = XLSX.utils.sheet_to_json(workbook.Sheets['Mobile Fuel']);
-    console.log(excelData);
     excelData.forEach(dataPoint => {
       let meterNumber: string = dataPoint['Meter Number'];
       let readDate: Date = new Date(dataPoint['Read Date']);
