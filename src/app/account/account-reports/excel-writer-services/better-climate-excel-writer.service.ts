@@ -120,6 +120,7 @@ export class BetterClimateExcelWriterService {
 
     //district steam
     let fuelVals: { usedFuels: Array<string>, usage: number } = { usedFuels: [], usage: 0 };
+    
     fuelVals = this.getFuelValue(fuelVals.usedFuels, ['Purchased Steam'], yearDetail.fuelTotals);
     worksheet.getCell(columnLetter + '45').value = fuelVals.usage;
     //district hot water 
@@ -138,15 +139,14 @@ export class BetterClimateExcelWriterService {
     fuelVals = this.getFuelValue(fuelVals.usedFuels, ['Propane'], yearDetail.fuelTotals);
     worksheet.getCell(columnLetter + '50').value = fuelVals.usage;
     //coke 
-    //TODO: (Use both here?)
-    fuelVals = this.getFuelValue(fuelVals.usedFuels, ['Coke Oven Gas', 'Coke'], yearDetail.fuelTotals);
+    fuelVals = this.getFuelValue(fuelVals.usedFuels, ['Coke'], yearDetail.fuelTotals);
     worksheet.getCell(columnLetter + '51').value = fuelVals.usage;
     //coal 
     fuelVals = this.getFuelValue(fuelVals.usedFuels, ['Coal (anthracite)', 'Coal (bituminous)', 'Coal (Lignite)', 'Coal (subbituminous)'], yearDetail.fuelTotals);
     worksheet.getCell(columnLetter + '52').value = fuelVals.usage;
     //redisual or heavy fuel oil 5, 6
     //TODO: Navy Special & Bunker C
-    fuelVals = this.getFuelValue(fuelVals.usedFuels, ['Residual Fuel Oil', 'Fuel Oil #5', 'Fuel Oil #6 (high sulfur)', 'Fuel Oil #6 (low sulfur)'], yearDetail.fuelTotals);
+    fuelVals = this.getFuelValue(fuelVals.usedFuels, ['Residual Fuel Oil', 'Fuel Oil #5 (Navy Special)', 'Fuel Oil #6 (high sulfur)', 'Fuel Oil #6 (low sulfur)'], yearDetail.fuelTotals);
     worksheet.getCell(columnLetter + '53').value = fuelVals.usage;
     //biomass
     fuelVals = this.getFuelValue(fuelVals.usedFuels, ['Biomass'], yearDetail.fuelTotals);
@@ -211,26 +211,26 @@ export class BetterClimateExcelWriterService {
     //Electricity use
     //TODO: Need to track electrical vehicles: issue 1419   
     let vehicleFuelVals: { usedFuels: Array<string>, usage: number } = { usedFuels: [], usage: 0 };
-    vehicleFuelVals = this.getFuelValue(vehicleFuelVals.usedFuels, [], yearDetail.fuelTotals);
+    vehicleFuelVals = this.getFuelValue(vehicleFuelVals.usedFuels, [], yearDetail.vehicleFuelTotals);
     worksheet.getCell(columnLetter + '69').value = vehicleFuelVals.usage;
     //Gasoline
-    vehicleFuelVals = this.getFuelValue(vehicleFuelVals.usedFuels, ['Gasoline', 'Gasoline (2-stroke)', 'Gasoline (4-stroke)'], yearDetail.fuelTotals);
+    vehicleFuelVals = this.getFuelValue(vehicleFuelVals.usedFuels, ['Gasoline', 'Gasoline (2-stroke)', 'Gasoline (4-stroke)'], yearDetail.vehicleFuelTotals);
     worksheet.getCell(columnLetter + '70').value = vehicleFuelVals.usage;
     //Diesel
-    vehicleFuelVals = this.getFuelValue(vehicleFuelVals.usedFuels, ['Diesel'], yearDetail.fuelTotals);
+    vehicleFuelVals = this.getFuelValue(vehicleFuelVals.usedFuels, ['Diesel'], yearDetail.vehicleFuelTotals);
     worksheet.getCell(columnLetter + '71').value = vehicleFuelVals.usage;
     //Biodiesel
-    vehicleFuelVals = this.getFuelValue(vehicleFuelVals.usedFuels, ['Biodiesel'], yearDetail.fuelTotals);
+    vehicleFuelVals = this.getFuelValue(vehicleFuelVals.usedFuels, ['Biodiesel'], yearDetail.vehicleFuelTotals);
     worksheet.getCell(columnLetter + '72').value = vehicleFuelVals.usage;
     //compressed natural gas
     //TODO: Don't have Compressed Natural Gas: issue 1418
-    vehicleFuelVals = this.getFuelValue(vehicleFuelVals.usedFuels, [], yearDetail.fuelTotals);
+    vehicleFuelVals = this.getFuelValue(vehicleFuelVals.usedFuels, [], yearDetail.vehicleFuelTotals);
     worksheet.getCell(columnLetter + '73').value = vehicleFuelVals.usage;
     //liquified natural gas
-    vehicleFuelVals = this.getFuelValue(vehicleFuelVals.usedFuels, ['LPG'], yearDetail.fuelTotals);
+    vehicleFuelVals = this.getFuelValue(vehicleFuelVals.usedFuels, ['LPG'], yearDetail.vehicleFuelTotals);
     worksheet.getCell(columnLetter + '74').value = vehicleFuelVals.usage;
     //ethanol fuel blend
-    vehicleFuelVals = this.getFuelValue(vehicleFuelVals.usedFuels, ['Ethanol (100%)'], yearDetail.fuelTotals);
+    vehicleFuelVals = this.getFuelValue(vehicleFuelVals.usedFuels, ['Ethanol (100%)'], yearDetail.vehicleFuelTotals);
     worksheet.getCell(columnLetter + '75').value = vehicleFuelVals.usage;
 
     //other fuel (gasoline, diesel, propane)

@@ -14,14 +14,16 @@ export class BetterClimateYearDetails {
     totalElectricity: number;
     fuelTotals: Array<{ fuelType: string, total: number }>;
     vehicleFuelTotals: Array<{ fuelType: string, total: number }>;
+    stationaryFuelTotals: Array<{ fuelType: string, total: number }>;
     onSiteGeneratedElectricity: number;
     purchasedElectricity: number;
     gridElectricity: number;
     pppaElectricity: number;
     vppaElectricity: number;
     RECs: number;
-    totalEnergyUse: number;
+    totalStationaryEnergyUse: number;
     totalVehicleEnergyUse: number;
+    totalEnergyUse: number;
 
     emissionsResults: EmissionsResults;
     reductions: EmissionsResults;
@@ -89,10 +91,12 @@ export class BetterClimateYearDetails {
         this.vppaElectricity = this.getElectricityUse(electricityMeters, year, 4);
         this.RECs = this.getElectricityUse(electricityMeters, year, 6);
         //fuel
-        this.setFuelTotals(calanderizedMeters);
+        this.setStationaryFuelTotals(calanderizedMeters);
         this.setVehicleFuelTotals(calanderizedMeters);
-        this.setTotalEnergyUse();
+        this.fuelTotals = _.concat(this.stationaryFuelTotals, this.vehicleFuelTotals);
+        this.setTotalStationaryEnergyUse();
         this.setVehicleTotalEnergyUse();
+        this.totalEnergyUse = this.totalStationaryEnergyUse + this.totalVehicleEnergyUse;
 
         this.setAnnualPercentImprovement(previousYearDetails);
         this.setScope2EnergyUse(calanderizedMeters, year);
@@ -275,9 +279,9 @@ export class BetterClimateYearDetails {
         this.totalElectricity = new ConvertValue(sumElectricity, 'MMBtu', 'MWh').convertedValue;
     }
 
-    setFuelTotals(calanderizedMeters: Array<CalanderizedMeter>) {
+    setStationaryFuelTotals(calanderizedMeters: Array<CalanderizedMeter>) {
         let fuelTypes: Array<string> = this.getFuelTypes(calanderizedMeters);
-        this.fuelTotals = new Array();
+        this.stationaryFuelTotals = new Array();
         fuelTypes.forEach(type => {
             let typeCalanderizedMeters: Array<CalanderizedMeter>;
             if (type == 'Natural Gas') {
@@ -298,7 +302,7 @@ export class BetterClimateYearDetails {
             let sumConsumption: number = _.sumBy(monthlyData, (monthlyData: MonthlyData) => {
                 return monthlyData.energyConsumption;
             });
-            this.fuelTotals.push({
+            this.stationaryFuelTotals.push({
                 fuelType: type,
                 total: sumConsumption
             });
@@ -323,10 +327,10 @@ export class BetterClimateYearDetails {
         return uniqMeterTypes;
     }
 
-    setTotalEnergyUse() {
+    setTotalStationaryEnergyUse() {
         let convertedElectricityUse: number = new ConvertValue(this.totalElectricity, 'MWh', 'MMBtu').convertedValue;
-        let totalFuelUsage: number = _.sumBy(this.fuelTotals, 'total');
-        this.totalEnergyUse = convertedElectricityUse + totalFuelUsage;
+        let totalFuelUsage: number = _.sumBy(this.stationaryFuelTotals, 'total');
+        this.totalStationaryEnergyUse = convertedElectricityUse + totalFuelUsage;
     }
 
     getElectricityUse(electricityMeters: Array<CalanderizedMeter>, year: number, agreementType: number) {
@@ -384,7 +388,7 @@ export class BetterClimateYearDetails {
 
     }
 
-    setVehicleTotalEnergyUse(){
+    setVehicleTotalEnergyUse() {
         this.totalVehicleEnergyUse = _.sumBy(this.vehicleFuelTotals, 'total');
     }
 

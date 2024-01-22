@@ -11,4 +11,6 @@ export class TotalPortfolioEnergyUseTableComponent {
   yearDetails: Array<BetterClimateYearDetails>;
   @Input()
   cellWidth: number;
+  @Input()
+  tableType: 'total' | 'stationary';
 }

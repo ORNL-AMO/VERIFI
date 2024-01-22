@@ -24,6 +24,11 @@
                 <label class="form-check-label" for="includePortfolioEnergyUse">Portfolio Energy Use</label>
             </div>
             <div class="form-check">
+                <input type="checkbox" class="form-check-input" name="includeStationaryEnergyUse"
+                    id="includeStationaryEnergyUse" formControlName="includeStationaryEnergyUse" (change)="save()">
+                <label class="form-check-label" for="includeStationaryEnergyUse">Stationary Energy Use</label>
+            </div>
+            <div class="form-check">
                 <input type="checkbox" class="form-check-input" name="includeVehicleEnergyUse"
                     id="includeVehicleEnergyUse" formControlName="includeVehicleEnergyUse" (change)="save()">
                 <label class="form-check-label" for="includeVehicleEnergyUse">Vehicle Energy Use</label>

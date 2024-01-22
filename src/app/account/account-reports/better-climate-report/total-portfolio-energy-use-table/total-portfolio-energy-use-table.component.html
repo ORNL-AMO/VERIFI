@@ -1,5 +1,9 @@
-<h4>
+<h4 *ngIf="tableType == 'total'">
     Total Energy Use for Portfolio
+</h4>
+
+<h4 *ngIf="tableType == 'stationary'">
+    Total Stationary Energy Use for Portfolio
 </h4>
 
 <table class="table table-responsive table-bordered">
@@ -103,31 +107,61 @@
                 </ng-container>
             </td>
         </tr>
-        <tr *ngFor="let fuel of yearDetails[0].fuelTotals; let index = index;">
-            <td>
-                {{fuel.fuelType}} (MMBtu)
-            </td>
-            <td *ngFor="let yearDetail of yearDetails">
-                <ng-container *ngIf="yearDetail.fuelTotals[index].total">
-                    {{yearDetail.fuelTotals[index].total | customNumber}}
-                </ng-container>
-                <ng-container *ngIf="!yearDetail.fuelTotals[index].total">
-                    &mdash;
-                </ng-container>
-            </td>
-        </tr>
-        <tr>
-            <th>
-                Total Energy Use (MMBtu)
-            </th>
-            <th *ngFor="let yearDetail of yearDetails">
-                <ng-container *ngIf="yearDetail.totalEnergyUse">
-                    {{yearDetail.totalEnergyUse | customNumber}}
-                </ng-container>
-                <ng-container *ngIf="!yearDetail.totalEnergyUse">
-                    &mdash;
-                </ng-container>
-            </th>
-        </tr>
+        <ng-container *ngIf="tableType == 'total'">
+            <tr *ngFor="let fuel of yearDetails[0].fuelTotals; let index = index;">
+                <td>
+                    {{fuel.fuelType}} (MMBtu)
+                </td>
+                <td *ngFor="let yearDetail of yearDetails">
+                    <ng-container *ngIf="yearDetail.fuelTotals[index].total">
+                        {{yearDetail.fuelTotals[index].total | customNumber}}
+                    </ng-container>
+                    <ng-container *ngIf="!yearDetail.fuelTotals[index].total">
+                        &mdash;
+                    </ng-container>
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    Total Energy Use (MMBtu)
+                </th>
+                <th *ngFor="let yearDetail of yearDetails">
+                    <ng-container *ngIf="yearDetail.totalEnergyUse">
+                        {{yearDetail.totalEnergyUse | customNumber}}
+                    </ng-container>
+                    <ng-container *ngIf="!yearDetail.totalEnergyUse">
+                        &mdash;
+                    </ng-container>
+                </th>
+            </tr>
+        </ng-container>
+        <ng-container *ngIf="tableType == 'stationary'">
+            <tr *ngFor="let fuel of yearDetails[0].stationaryFuelTotals; let index = index;">
+                <td>
+                    {{fuel.fuelType}} (MMBtu)
+                </td>
+                <td *ngFor="let yearDetail of yearDetails">
+                    <ng-container *ngIf="yearDetail.stationaryFuelTotals[index].total">
+                        {{yearDetail.stationaryFuelTotals[index].total | customNumber}}
+                    </ng-container>
+                    <ng-container *ngIf="!yearDetail.stationaryFuelTotals[index].total">
+                        &mdash;
+                    </ng-container>
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    Total Energy Use (MMBtu)
+                </th>
+                <th *ngFor="let yearDetail of yearDetails">
+                    <ng-container *ngIf="yearDetail.totalStationaryEnergyUse">
+                        {{yearDetail.totalStationaryEnergyUse | customNumber}}
+                    </ng-container>
+                    <ng-container *ngIf="!yearDetail.totalStationaryEnergyUse">
+                        &mdash;
+                    </ng-container>
+                </th>
+            </tr>
+        </ng-container>
     </tbody>
 </table>

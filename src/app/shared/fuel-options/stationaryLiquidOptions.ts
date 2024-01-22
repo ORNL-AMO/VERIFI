@@ -156,7 +156,7 @@ export const StationaryLiquidOptions: Array<FuelTypeOption> = [
     {
         startingUnit: 'gal',
         heatCapacityValue: .1488,
-        value: 'Fuel Oil #5',
+        value: 'Fuel Oil #5 (Navy Special)',
         siteToSourceMultiplier: 1,
         emissionsOutputRate: 73.1838,
         CO2: 72.93,
