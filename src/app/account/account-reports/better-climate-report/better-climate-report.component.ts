@@ -14,6 +14,7 @@ import * as _ from 'lodash';
 import { BetterClimateReportSetup } from 'src/app/models/overview-report';
 import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
 import { BetterClimateExcelWriterService } from '../excel-writer-services/better-climate-excel-writer.service';
+import { LoadingService } from 'src/app/core-components/loading/loading.service';
 
 @Component({
   selector: 'app-better-climate-report',
@@ -41,7 +42,8 @@ export class BetterClimateReportComponent {
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private eGridService: EGridService,
     private customFuelDbService: CustomFuelDbService,
-    private betterClimateExcelWriterService: BetterClimateExcelWriterService) { }
+    private betterClimateExcelWriterService: BetterClimateExcelWriterService,
+    private loadingService: LoadingService) { }
 
   ngOnInit(): void {
     this.printSub = this.accountReportsService.print.subscribe(print => {
@@ -142,7 +144,10 @@ export class BetterClimateReportComponent {
     return betterClimateReport;
   }
 
-  generateExcelReport(){
+  generateExcelReport() {
+    this.loadingService.setLoadingMessage('Generating Better Climate Excel Report...');
+    this.loadingService.setLoadingStatus(true);
+    //export to excell method sets loading status to false upon completion or error.
     this.betterClimateExcelWriterService.exportToExcel(this.selectedReport, this.account, this.betterClimateReport);
     this.accountReportsService.generateExcel.next(false);
   }
