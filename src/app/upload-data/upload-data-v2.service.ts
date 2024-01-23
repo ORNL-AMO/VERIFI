@@ -120,7 +120,7 @@ export class UploadDataV2Service {
           meter.supplier = excelMeter['Utility Supplier'];
           meter.notes = excelMeter['Notes'];
           meter.location = excelMeter['Building / Location'];
-          let groupData: { group: IdbUtilityMeterGroup, newGroups: Array<IdbUtilityMeterGroup> } = this.uploadDataSharedFunctionsService.getMeterGroup(excelMeter['Meter Group'], facility.guid, newGroups);
+          let groupData: { group: IdbUtilityMeterGroup, newGroups: Array<IdbUtilityMeterGroup> } = this.uploadDataSharedFunctionsService.getMeterGroup(excelMeter['Meter Group'], facility.guid, newGroups, selectedAccount);
           newGroups = groupData.newGroups;
           if (groupData.group) {
             meter.groupId = groupData.group.guid;
@@ -128,7 +128,7 @@ export class UploadDataV2Service {
 
           if (meter.source == 'Electricity') {
             //parse electricity
-            this.setMeterUnits(excelMeter, meter);
+            this.setMeterUnits(excelMeter, meter, facility);
             meter.agreementType = getAgreementType(excelMeter['Agreement Type']);
             if (meter.agreementType == undefined) {
               meter.agreementType = 1;
@@ -172,7 +172,7 @@ export class UploadDataV2Service {
           } else if (meter.source == 'Natural Gas') {
             //pares NG
             meter.phase = 'Gas';
-            this.setMeterUnits(excelMeter, meter);
+            this.setMeterUnits(excelMeter, meter, facility);
             let isEnergyUnit: boolean = getIsEnergyUnit(meter.startingUnit);
             meter.heatCapacity = this.parseHeatCapacity(excelMeter, meter, isEnergyUnit);
             meter.siteToSource = this.parseSiteToSource(excelMeter, meter);
@@ -181,7 +181,7 @@ export class UploadDataV2Service {
               //parse stationary if not vehicle
               meter.phase = getPhase(excelMeter['Phase or Vehicle']);
               meter.fuel = getFuelEnum(excelMeter['Fuel or Emission'], meter.source, meter.phase, meter.scope, meter.vehicleCategory, meter.vehicleType);
-              this.setMeterUnits(excelMeter, meter);
+              this.setMeterUnits(excelMeter, meter, facility);
               let isEnergyUnit: boolean = getIsEnergyUnit(meter.startingUnit);
               meter.heatCapacity = this.parseHeatCapacity(excelMeter, meter, isEnergyUnit);
             } else if (meter.scope == 2) {
@@ -194,28 +194,28 @@ export class UploadDataV2Service {
               meter.vehicleDistanceUnit = vehicleData.vehicleDistanceUnit;
               meter.vehicleFuel = getFuelEnum(excelMeter['Fuel or Emission'], meter.source, meter.phase, meter.scope, meter.vehicleCategory, meter.vehicleType);
               meter.vehicleFuelEfficiency = excelMeter['Heat Capacity or Fuel Efficiency'];
-              this.setMeterUnits(excelMeter, meter);
+              this.setMeterUnits(excelMeter, meter, facility);
               let isEnergyUnit: boolean = getIsEnergyUnit(meter.startingUnit);
               meter.heatCapacity = this.parseHeatCapacity(excelMeter, meter, isEnergyUnit);
             }
           } else if (meter.source == 'Other Energy') {
             //parse other energy
             meter.fuel = getFuelEnum(excelMeter['Fuel or Emission'], meter.source, meter.phase, meter.scope, meter.vehicleCategory, meter.vehicleType);
-            this.setMeterUnits(excelMeter, meter);
+            this.setMeterUnits(excelMeter, meter, facility);
             let isEnergyUnit: boolean = getIsEnergyUnit(meter.startingUnit);
             meter.heatCapacity = this.parseHeatCapacity(excelMeter, meter, isEnergyUnit);
             meter.siteToSource = this.parseSiteToSource(excelMeter, meter);
           } else if (meter.source == 'Water Discharge') {
             //parse water discharge
             meter.waterDischargeType = excelMeter['Fuel or Emission'];
-            this.setMeterUnits(excelMeter, meter);
+            this.setMeterUnits(excelMeter, meter, facility);
           } else if (meter.source == 'Water Intake') {
             //parse water intake
             meter.waterIntakeType = excelMeter['Fuel or Emission'];
-            this.setMeterUnits(excelMeter, meter);
+            this.setMeterUnits(excelMeter, meter, facility);
           } else if (meter.source == 'Other') {
             //parse other
-            this.setMeterUnits(excelMeter, meter);
+            this.setMeterUnits(excelMeter, meter, facility);
             if (meter.scope == 5 || meter.scope == 6) {
               let parseGWPData = this.parseGlobalWarmingPotentials(excelMeter, meter.startingUnit);
               meter.globalWarmingPotential = parseGWPData.globalWarmingPotential;
@@ -232,13 +232,15 @@ export class UploadDataV2Service {
     return { meters: importMeters, newGroups: newGroups };
   }
 
-  setMeterUnits(excelMeter, meter: IdbUtilityMeter) {
+  setMeterUnits(excelMeter, meter: IdbUtilityMeter, facility: IdbFacility) {
     meter.startingUnit = checkImportStartingUnit(excelMeter['Collection Unit'], meter.source, meter.phase, meter.fuel, meter.scope);
     let isEnergyUnit: boolean = getIsEnergyUnit(meter.startingUnit);
     if (isEnergyUnit) {
       meter.energyUnit = meter.startingUnit;
-    } else {
+    } else if(excelMeter['Energy Unit']) {
       meter.energyUnit = excelMeter['Energy Unit'];
+    }else{
+      meter.energyUnit = facility.energyUnit;
     }
   }
 
@@ -404,6 +406,7 @@ export class UploadDataV2Service {
         dbDataPoint.latePayment = checkImportCellNumber(dataPoint['Late Payment']);
         importMeterData.push(dbDataPoint);
       } else {
+        console.log(meterNumber);
         console.log('no meter');
       }
     });
