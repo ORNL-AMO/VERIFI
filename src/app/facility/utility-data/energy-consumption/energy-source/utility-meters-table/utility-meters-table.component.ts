@@ -169,4 +169,8 @@ export class UtilityMetersTableComponent implements OnInit {
     await this.dbChangesService.setMeters(account, facility);
     this.selectEditMeter(copyMeter);
   }
+
+  openDataQualityModal(){
+     this.sharedDataService.dataQualityModalOpen.next(true);
+  }
 }

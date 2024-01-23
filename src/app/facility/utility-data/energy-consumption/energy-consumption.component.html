@@ -14,3 +14,15 @@
         <router-outlet></router-outlet>
     </div>
 </div>
+
+
+
+<div [ngClass]="{'windowOverlay': dataQualityModalOpen}"></div>
+<div class="popup" [class.open]="dataQualityModalOpen">
+    <div class="popup-header">Data Quality Report
+        <button class="item-right" (click)="closeDataQualityModal()">x</button>
+    </div>
+    <div class="popup-body">
+        <app-data-quality-check></app-data-quality-check>
+    </div>
+</div>

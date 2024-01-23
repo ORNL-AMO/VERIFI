@@ -38,3 +38,12 @@
 .nav-tabs .nav-link.active, .nav-tabs .nav-link.active i.fa{
     color: #ff6000;
 }
+
+
+.popup{
+    left: 1%;
+    top: 1%;
+    right: 1%;
+    bottom: 1%;
+    width: auto;
+}

@@ -13,9 +13,11 @@ export class SharedDataService {
   openCreateReportModal: BehaviorSubject<boolean>;
   energyHomeCarouselIndex: BehaviorSubject<number>;
   waterHomeCarouselIndex: BehaviorSubject<number>;
+  dataQualityModalOpen: BehaviorSubject<boolean>;
   constructor(private localStorageService: LocalStorageService) {
     this.modalOpen = new BehaviorSubject<boolean>(false);
     this.sidebarOpen = new BehaviorSubject<boolean>(true);
+    this.dataQualityModalOpen = new BehaviorSubject<boolean>(false);
     let initialItemsPerPage: number = this.getInitialItemsPerPage();
     if (initialItemsPerPage) {
       this.itemsPerPage = new BehaviorSubject<number>(initialItemsPerPage);
