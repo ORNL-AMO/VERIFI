@@ -93,7 +93,7 @@ export class UploadDataV1Service {
           meter.supplier = meterData['Utility Supplier'];
           meter.notes = meterData['Notes'];
           meter.location = meterData['Building / Location'];
-          let groupData: { group: IdbUtilityMeterGroup, newGroups: Array<IdbUtilityMeterGroup> } = this.uploadDataSharedFunctionsService.getMeterGroup(meterData['Meter Group'], facility.guid, newGroups);
+          let groupData: { group: IdbUtilityMeterGroup, newGroups: Array<IdbUtilityMeterGroup> } = this.uploadDataSharedFunctionsService.getMeterGroup(meterData['Meter Group'], facility.guid, newGroups, selectedAccount);
           newGroups = groupData.newGroups;
           if (groupData.group) {
             meter.groupId = groupData.group.guid;

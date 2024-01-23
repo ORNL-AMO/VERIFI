@@ -120,7 +120,7 @@ export class UploadDataV2Service {
           meter.supplier = excelMeter['Utility Supplier'];
           meter.notes = excelMeter['Notes'];
           meter.location = excelMeter['Building / Location'];
-          let groupData: { group: IdbUtilityMeterGroup, newGroups: Array<IdbUtilityMeterGroup> } = this.uploadDataSharedFunctionsService.getMeterGroup(excelMeter['Meter Group'], facility.guid, newGroups);
+          let groupData: { group: IdbUtilityMeterGroup, newGroups: Array<IdbUtilityMeterGroup> } = this.uploadDataSharedFunctionsService.getMeterGroup(excelMeter['Meter Group'], facility.guid, newGroups, selectedAccount);
           newGroups = groupData.newGroups;
           if (groupData.group) {
             meter.groupId = groupData.group.guid;
