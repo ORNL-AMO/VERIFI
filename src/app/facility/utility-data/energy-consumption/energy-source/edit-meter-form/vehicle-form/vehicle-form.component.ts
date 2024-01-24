@@ -2,7 +2,7 @@ import { Component, Input } from '@angular/core';
 import { FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { FuelTypeOption } from 'src/app/shared/fuel-options/fuelTypeOption';
 import { EnergyUnitOptions, UnitOption, VolumeLiquidOptions } from 'src/app/shared/unitOptions';
-import { VehicleCategories, VehicleCategory } from 'src/app/shared/vehicle-data/vehicleCategory';
+import { VehicleCategories, VehicleCategory, VehicleCollectionType, VehicleCollectionTypes } from 'src/app/shared/vehicle-data/vehicleCategory';
 import { VehicleType, VehicleTypes } from 'src/app/shared/vehicle-data/vehicleType';
 import { EditMeterFormService } from '../edit-meter-form.service';
 import { IdbCustomFuel, IdbFacility } from 'src/app/models/idb';
@@ -24,7 +24,7 @@ export class VehicleFormComponent {
   vehicleCategories: Array<VehicleCategory> = VehicleCategories;
   energyUnitOptions: Array<UnitOption> = EnergyUnitOptions;
   vehicleTypes: Array<VehicleType> = [];
-  vehicleCollectionTypes: Array<{ value: number, label: string }> = [{ value: 1, label: 'Fuel Usage' }, { value: 2, label: 'Mileage' }];
+  vehicleCollectionTypes: Array<VehicleCollectionType> = VehicleCollectionTypes;
   collectionUnitOptions: Array<UnitOption> = [];
   fuelOptions: Array<FuelTypeOption> = [];
   hasDifferentEnergyUnits: boolean = false;
@@ -71,7 +71,7 @@ export class VehicleFormComponent {
       this.meterForm.controls.vehicleType.setValidators([]);
     }
 
-    if (this.meterForm.controls.vehicleType.value != 2 && this.meterForm.controls.vehicleCollectionType.value == 2) {
+    if (this.meterForm.controls.vehicleCategory.value != 2 && this.meterForm.controls.vehicleCollectionType.value == 2) {
       this.meterForm.controls.vehicleCollectionType.patchValue(1);
       this.setCollectionUnitOptions();
     }

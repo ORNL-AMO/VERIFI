@@ -111,7 +111,12 @@
                     {{meter.source}}
                 </td>
                 <td>
-                    <span [innerHTML]="meter.startingUnit | settingsLabel"></span>
+                    <ng-container *ngIf="meter.scope != 2">
+                        <span [innerHTML]="meter.startingUnit | settingsLabel"></span>
+                    </ng-container>
+                    <ng-container *ngIf="meter.scope == 2">
+                        <span [innerHTML]="meter.vehicleCollectionUnit | settingsLabel"></span>
+                    </ng-container>
                 </td>
                 <td>
                     <select class="form-select" id="meterGroup" [(ngModel)]="meter.groupId">

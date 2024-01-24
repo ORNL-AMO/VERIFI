@@ -625,12 +625,12 @@ export class ExportToExcelTemplateService {
     }
   }
 
-  getEstimationMethod(meter: IdbUtilityMeter): 'Distance' | 'Fuel Use' {
+  getEstimationMethod(meter: IdbUtilityMeter): 'Mileage' | 'Fuel Usage' {
     if (meter.scope == 2 && meter.vehicleCategory == 2) {
       if (meter.vehicleCollectionType == 1) {
-        return 'Fuel Use';
+        return 'Fuel Usage';
       } else if (meter.vehicleCollectionType == 2) {
-        return 'Distance';
+        return 'Mileage';
       }
     }
     return;
