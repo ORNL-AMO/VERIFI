@@ -194,9 +194,12 @@ export class UploadDataV2Service {
               meter.vehicleDistanceUnit = vehicleData.vehicleDistanceUnit;
               meter.vehicleFuel = getFuelEnum(excelMeter['Fuel or Emission'], meter.source, meter.phase, meter.scope, meter.vehicleCategory, meter.vehicleType);
               meter.vehicleFuelEfficiency = excelMeter['Heat Capacity or Fuel Efficiency'];
-              this.setMeterUnits(excelMeter, meter, facility);
-              let isEnergyUnit: boolean = getIsEnergyUnit(meter.startingUnit);
-              meter.heatCapacity = this.parseHeatCapacity(excelMeter, meter, isEnergyUnit);
+              if (excelMeter['Energy Unit']) {
+                meter.energyUnit = excelMeter['Energy Unit'];
+              } else {
+                meter.energyUnit = facility.energyUnit;
+              }
+              meter.heatCapacity = this.parseHeatCapacity(excelMeter, meter, false);
             }
           } else if (meter.source == 'Other Energy') {
             //parse other energy
@@ -208,10 +211,12 @@ export class UploadDataV2Service {
           } else if (meter.source == 'Water Discharge') {
             //parse water discharge
             meter.waterDischargeType = excelMeter['Fuel or Emission'];
+            meter.includeInEnergy = false;
             this.setMeterUnits(excelMeter, meter, facility);
           } else if (meter.source == 'Water Intake') {
             //parse water intake
             meter.waterIntakeType = excelMeter['Fuel or Emission'];
+            meter.includeInEnergy = false;
             this.setMeterUnits(excelMeter, meter, facility);
           } else if (meter.source == 'Other') {
             //parse other
@@ -237,9 +242,9 @@ export class UploadDataV2Service {
     let isEnergyUnit: boolean = getIsEnergyUnit(meter.startingUnit);
     if (isEnergyUnit) {
       meter.energyUnit = meter.startingUnit;
-    } else if(excelMeter['Energy Unit']) {
+    } else if (excelMeter['Energy Unit']) {
       meter.energyUnit = excelMeter['Energy Unit'];
-    }else{
+    } else {
       meter.energyUnit = facility.energyUnit;
     }
   }
@@ -362,8 +367,8 @@ export class UploadDataV2Service {
           dbDataPoint = this.utilityMeterDataDbService.getNewIdbUtilityMeterData(meter);
         }
         dbDataPoint.readDate = readDate;
-        //TODO: fill out data
         dbDataPoint.totalVolume = dataPoint['Total Consumption or Total Distance'];
+        //1: Fuel Usage, 2: Mileage
         if (meter.vehicleCollectionType == 1) {
           dbDataPoint.totalEnergyUse = dbDataPoint.totalVolume * meter.heatCapacity
         } else {
@@ -537,9 +542,10 @@ export class UploadDataV2Service {
   }
 
   getVehicleCollectionType(collectionLabel: string): number {
-    if (collectionLabel == 'Fuel Use') {
+    console.log(collectionLabel);
+    if (collectionLabel == 'Fuel Usage') {
       return 1;
-    } else if (collectionLabel == 'Distance') {
+    } else if (collectionLabel == 'Mileage') {
       return 2;
     }
     return;

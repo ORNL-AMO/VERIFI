@@ -20,3 +20,13 @@ export const VehicleCategories: Array<VehicleCategory> = [
         label: 'Non-Road Vehicles'
     }
 ];
+
+
+export interface VehicleCollectionType {
+    value: number,
+    label: 'Fuel Usage' | 'Mileage'
+}
+
+export const VehicleCollectionTypes: Array<VehicleCollectionType> = [
+    { value: 1, label: 'Fuel Usage' }, { value: 2, label: 'Mileage' }
+]
