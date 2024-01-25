@@ -411,7 +411,6 @@ export class UploadDataV2Service {
         dbDataPoint.latePayment = checkImportCellNumber(dataPoint['Late Payment']);
         importMeterData.push(dbDataPoint);
       } else {
-        console.log(meterNumber);
         console.log('no meter');
       }
     });
@@ -543,7 +542,6 @@ export class UploadDataV2Service {
   }
 
   getVehicleCollectionType(collectionLabel: string): number {
-    console.log(collectionLabel);
     if (collectionLabel == 'Fuel Usage') {
       return 1;
     } else if (collectionLabel == 'Mileage') {

@@ -132,14 +132,14 @@ export function getEmissions(meter: IdbUtilityMeter,
                 mobileBiogenicEmissions = totalVolume * meterFuel.CO2;
                 mobileCarbonEmissions = 0;
             } else {
-                mobileCarbonEmissions = totalVolume * meterFuel.CO2;
+                mobileCarbonEmissions = (totalVolume * meterFuel.CO2) / 1000;
                 mobileBiogenicEmissions = 0;
             }
             //miles = gal * mpg 
             let miles = (totalVolume * meter.vehicleFuelEfficiency);
             let totalCH4 = miles * 25 * meterFuel.CH4;
             let totalN2O = miles * 298 * meterFuel.N2O;
-            mobileOtherEmissions = totalCH4 + totalN2O;
+            mobileOtherEmissions = ((totalCH4 + totalN2O) / 1000) / 1000;
 
         } else {
             //TOTAL VOLUME IS IN MILES
@@ -152,22 +152,14 @@ export function getEmissions(meter: IdbUtilityMeter,
                 mobileBiogenicEmissions = (totalVolume * (1 / meter.vehicleFuelEfficiency) * meterFuel.CO2) / 1000;
                 mobileCarbonEmissions = 0;
             } else {
-                // console.log('volume: ' + totalVolume);
-                // console.log('Fuel CO2: ' + meterFuel.CO2);
                 mobileCarbonEmissions = (totalVolume * (1 / meter.vehicleFuelEfficiency) * meterFuel.CO2) / 1000;
-                // console.log('Carbon Emissions: ' +mobileCarbonEmissions);
                 mobileBiogenicEmissions = 0;
             }
             let totalCH4 = ((25 * totalVolume * meterFuel.CH4) / 1000) / 1000;
             let totalN2O = ((298 * totalVolume * meterFuel.N2O) / 1000) / 1000;
-            // console.log('totalCH4: ' +totalCH4);
-            // console.log('totalN2O: ' +totalN2O);
             mobileOtherEmissions = (totalCH4 + totalN2O);
-            // console.log('mobileOtherEmissions: ' +mobileOtherEmissions);
         }
         mobileTotalEmissions = mobileOtherEmissions + mobileCarbonEmissions;
-        // console.log('mobileTotalEmissions: ' +mobileTotalEmissions);
-        // console.log('=====');
     } else if (meter.source == 'Other') {
         //Fugitive or process
         if (meter.scope == 5) {
