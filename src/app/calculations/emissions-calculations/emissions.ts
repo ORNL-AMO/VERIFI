@@ -138,8 +138,8 @@ export function getEmissions(meter: IdbUtilityMeter,
             //miles = gal * mpg 
             let miles = (totalVolume * meter.vehicleFuelEfficiency);
             let totalCH4 = miles * 25 * meterFuel.CH4;
-            let totalN20 = miles * 298 * meterFuel.N2O;
-            mobileOtherEmissions = totalCH4 + totalN20;
+            let totalN2O = miles * 298 * meterFuel.N2O;
+            mobileOtherEmissions = totalCH4 + totalN2O;
 
         } else {
             //TOTAL VOLUME IS IN MILES
@@ -149,15 +149,25 @@ export function getEmissions(meter: IdbUtilityMeter,
             }
             //On Road calculated by mile
             if (meterFuel.isBiofuel) {
-                mobileBiogenicEmissions = totalVolume * meter.vehicleFuelEfficiency * meterFuel.CO2;
+                mobileBiogenicEmissions = (totalVolume * (1 / meter.vehicleFuelEfficiency) * meterFuel.CO2) / 1000;
                 mobileCarbonEmissions = 0;
             } else {
-                mobileCarbonEmissions = totalVolume * meter.vehicleFuelEfficiency * meterFuel.CO2;
+                // console.log('volume: ' + totalVolume);
+                // console.log('Fuel CO2: ' + meterFuel.CO2);
+                mobileCarbonEmissions = (totalVolume * (1 / meter.vehicleFuelEfficiency) * meterFuel.CO2) / 1000;
+                // console.log('Carbon Emissions: ' +mobileCarbonEmissions);
                 mobileBiogenicEmissions = 0;
             }
-            mobileOtherEmissions = (25 * totalVolume * meterFuel.CH4) + (298 * totalVolume * meterFuel.N2O);
+            let totalCH4 = ((25 * totalVolume * meterFuel.CH4) / 1000) / 1000;
+            let totalN2O = ((298 * totalVolume * meterFuel.N2O) / 1000) / 1000;
+            // console.log('totalCH4: ' +totalCH4);
+            // console.log('totalN2O: ' +totalN2O);
+            mobileOtherEmissions = (totalCH4 + totalN2O);
+            // console.log('mobileOtherEmissions: ' +mobileOtherEmissions);
         }
         mobileTotalEmissions = mobileOtherEmissions + mobileCarbonEmissions;
+        // console.log('mobileTotalEmissions: ' +mobileTotalEmissions);
+        // console.log('=====');
     } else if (meter.source == 'Other') {
         //Fugitive or process
         if (meter.scope == 5) {
