@@ -53,7 +53,7 @@ export class MetersOverviewStackedLineChartComponent {
       // let dataPointSize: number = 0;
       this.calanderizedMeters.forEach(cMeter => {
         if (this.checkIncludeMeter(cMeter.meter)) {
-          let x: Array<string> = new Array();
+          let x: Array<Date> = new Array();
           let y: Array<number> = new Array();
           // if (dataPointSize < cMeter.monthlyData.length - 1) {
           //   dataPointSize = cMeter.monthlyData.length - 1;
@@ -63,7 +63,7 @@ export class MetersOverviewStackedLineChartComponent {
             return (dataItemDate >= this.dateRange.startDate) && (dataItemDate <= this.dateRange.endDate);
           });
           monthlyDataInRange.forEach(dataItem => {
-            x.push(dataItem.month + ', ' + dataItem.year);
+            x.push(dataItem.date);
             if (this.dataType == 'energyUse') {
               y.push(dataItem.energyUse);
             } else if (this.dataType == 'cost') {
@@ -103,6 +103,7 @@ export class MetersOverviewStackedLineChartComponent {
         xaxis: {
           // autotick: false,
           // range: xrange
+          type: 'date'
         },
         yaxis: {
           title: {
