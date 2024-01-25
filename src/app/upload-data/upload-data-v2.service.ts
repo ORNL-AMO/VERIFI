@@ -444,12 +444,13 @@ export class UploadDataV2Service {
 
   parseHeatCapacity(excelMeter: any, meter: IdbUtilityMeter, isEnergyUnit: boolean): number {
     let heatCapacity: number = excelMeter['Heat Capacity or Fuel Efficiency'];
-    if (!heatCapacity && !isEnergyUnit) {
+    if ((!heatCapacity && !isEnergyUnit) || meter.scope == 2) {
       let fuelTypeOptions: Array<FuelTypeOption> = getFuelTypeOptions(meter.source, meter.phase, [], meter.scope, meter.vehicleCategory, meter.vehicleType);
-      let fuel: FuelTypeOption = fuelTypeOptions.find(option => { return option.value == meter.fuel });
       if (meter.scope != 2) {
+        let fuel: FuelTypeOption = fuelTypeOptions.find(option => { return option.value == meter.fuel });
         heatCapacity = getHeatingCapacity(meter.source, meter.startingUnit, meter.energyUnit, fuel);
       } else {
+        let fuel: FuelTypeOption = fuelTypeOptions.find(option => { return option.value == meter.vehicleFuel });
         heatCapacity = getHeatingCapacity(meter.source, meter.vehicleCollectionUnit, meter.energyUnit, fuel);
       }
     }
