@@ -74,8 +74,8 @@ export function getEmissions(meter: IdbUtilityMeter,
         let marketEmissionsOutputRate: number = emissionsRates.marketRate;
         if (!isCompressedAir) {
             if (meter.includeInEnergy) {
-                locationElectricityEmissions = convertedEnergyUse * emissionsRates.locationRate * meter.locationGHGMultiplier;
-                marketElectricityEmissions = convertedEnergyUse * emissionsRates.marketRate * meter.marketGHGMultiplier;
+                locationElectricityEmissions = (convertedEnergyUse * emissionsRates.locationRate * meter.locationGHGMultiplier ) / 1000;
+                marketElectricityEmissions = (convertedEnergyUse * emissionsRates.marketRate * meter.marketGHGMultiplier) / 1000;
             } else {
                 marketElectricityEmissions = 0;
                 locationElectricityEmissions = 0;
@@ -84,7 +84,7 @@ export function getEmissions(meter: IdbUtilityMeter,
             //Purchased Compressed Air
             marketElectricityEmissions = 0;
             locationElectricityEmissions = 0;
-            scope2Other = convertedEnergyUse * emissionsRates.locationRate * meter.locationGHGMultiplier;
+            scope2Other = (convertedEnergyUse * emissionsRates.locationRate * meter.locationGHGMultiplier) / 1000;
         }
 
         RECs = convertedEnergyUse * meter.recsMultiplier;
@@ -164,10 +164,12 @@ export function getEmissions(meter: IdbUtilityMeter,
         //Fugitive or process
         if (meter.scope == 5) {
             //fugitive emissions
-            fugitiveEmissions = totalVolume * meter.globalWarmingPotential;
+            fugitiveEmissions = totalVolume * meter.globalWarmingPotential / 1000;
         } else if (meter.scope == 6) {
             //process emissions
-            processEmissions = totalVolume * meter.globalWarmingPotential;
+            // console.log(totalVolume);
+            // console.log(meter.globalWarmingPotential);
+            processEmissions = totalVolume * meter.globalWarmingPotential / 1000;
         }
     } else if (meter.source == 'Other Energy') {
         let convertedEnergyUse: number = new ConvertValue(energyUse, energyUnit, 'MMBtu').convertedValue;

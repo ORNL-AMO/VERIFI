@@ -150,6 +150,8 @@ export class EmissionsStackedLineChartComponent {
       }
       if (total) {
         y.push(total);
+      }else{
+        y.push(0);
       }
       startDate.setMonth(startDate.getMonth() + 1);
     }
