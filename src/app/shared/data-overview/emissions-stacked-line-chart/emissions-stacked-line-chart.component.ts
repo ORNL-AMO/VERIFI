@@ -82,7 +82,8 @@ export class EmissionsStackedLineChartComponent {
         },
         xaxis: {
           // autotick: false,
-          // range: xrange
+          // range: xrange,
+          type: 'date'
         },
         yaxis: {
           title: {
@@ -105,7 +106,7 @@ export class EmissionsStackedLineChartComponent {
   }
 
   getTraceData(emissionsType: EmissionsTypes, monthlyDataInRange: Array<MonthlyData>) {
-    let x: Array<string> = new Array();
+    let x: Array<Date> = new Array();
     let y: Array<number> = new Array();
     let startDate: Date = new Date(this.dateRange.startDate);
     let endDate: Date = new Date(this.dateRange.endDate);
@@ -113,10 +114,10 @@ export class EmissionsStackedLineChartComponent {
       let currentMonthsData: Array<MonthlyData> = monthlyDataInRange.filter(mData => {
         return mData.monthNumValue == startDate.getMonth() && mData.year == startDate.getFullYear()
       });
-      let month: Month = Months.find(month => {
-        return month.monthNumValue == startDate.getMonth();
-      })
-      x.push(month.abbreviation + ', ' + startDate.getFullYear());
+      // let month: Month = Months.find(month => {
+      //   return month.monthNumValue == startDate.getMonth();
+      // })
+      x.push(new Date(startDate));
       let total: number;
       if (emissionsType == 'Scope 1: Fugitive') {
         total = _.sumBy(currentMonthsData, (mData: MonthlyData) => {
