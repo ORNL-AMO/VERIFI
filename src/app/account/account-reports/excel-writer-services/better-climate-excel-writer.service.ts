@@ -24,21 +24,25 @@ export class BetterClimateExcelWriterService {
     request.responseType = 'blob';
     request.onload = () => {
       workbook.xlsx.load(request.response).then(() => {
+        console.log(workbook);
         this.writePortfolioEmissions(workbook, account, report, betterClimateReport);
         this.writeFacilityEmissions(workbook, report, betterClimateReport);
         this.writeReductionInitiatives(workbook, report);
         workbook.xlsx.writeBuffer().then(excelData => {
-          let blob: Blob = new Blob([excelData], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-          let a = document.createElement("a");
-          let url = window.URL.createObjectURL(blob);
-          a.href = url;
-          a.download = requestURL;
-          document.body.appendChild(a);
-          a.click();
-          window.URL.revokeObjectURL(url);
-          document.body.removeChild(a);
-          this.loadingService.setLoadingStatus(false);
+          console.log('it worked')
+        //   let blob: Blob = new Blob([excelData], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        //   let a = document.createElement("a");
+        //   let url = window.URL.createObjectURL(blob);
+        //   a.href = url;
+        //   a.download = requestURL;
+        //   document.body.appendChild(a);
+        //   a.click();
+        //   window.URL.revokeObjectURL(url);
+        //   document.body.removeChild(a);
+        //   this.loadingService.setLoadingStatus(false);
         });
+        this.loadingService.setLoadingStatus(false);
+
       });
     };
 
