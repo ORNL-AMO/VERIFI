@@ -74,8 +74,8 @@ export function getEmissions(meter: IdbUtilityMeter,
         let marketEmissionsOutputRate: number = emissionsRates.marketRate;
         if (!isCompressedAir) {
             if (meter.includeInEnergy) {
-                locationElectricityEmissions = convertedEnergyUse * emissionsRates.locationRate * meter.locationGHGMultiplier;
-                marketElectricityEmissions = convertedEnergyUse * emissionsRates.marketRate * meter.marketGHGMultiplier;
+                locationElectricityEmissions = (convertedEnergyUse * emissionsRates.locationRate * meter.locationGHGMultiplier ) / 1000;
+                marketElectricityEmissions = (convertedEnergyUse * emissionsRates.marketRate * meter.marketGHGMultiplier) / 1000;
             } else {
                 marketElectricityEmissions = 0;
                 locationElectricityEmissions = 0;
@@ -84,7 +84,7 @@ export function getEmissions(meter: IdbUtilityMeter,
             //Purchased Compressed Air
             marketElectricityEmissions = 0;
             locationElectricityEmissions = 0;
-            scope2Other = convertedEnergyUse * emissionsRates.locationRate * meter.locationGHGMultiplier;
+            scope2Other = (convertedEnergyUse * emissionsRates.locationRate * meter.locationGHGMultiplier) / 1000;
         }
 
         RECs = convertedEnergyUse * meter.recsMultiplier;
@@ -132,14 +132,14 @@ export function getEmissions(meter: IdbUtilityMeter,
                 mobileBiogenicEmissions = totalVolume * meterFuel.CO2;
                 mobileCarbonEmissions = 0;
             } else {
-                mobileCarbonEmissions = totalVolume * meterFuel.CO2;
+                mobileCarbonEmissions = (totalVolume * meterFuel.CO2) / 1000;
                 mobileBiogenicEmissions = 0;
             }
             //miles = gal * mpg 
             let miles = (totalVolume * meter.vehicleFuelEfficiency);
             let totalCH4 = miles * 25 * meterFuel.CH4;
-            let totalN20 = miles * 298 * meterFuel.N2O;
-            mobileOtherEmissions = totalCH4 + totalN20;
+            let totalN2O = miles * 298 * meterFuel.N2O;
+            mobileOtherEmissions = ((totalCH4 + totalN2O) / 1000) / 1000;
 
         } else {
             //TOTAL VOLUME IS IN MILES
@@ -149,23 +149,27 @@ export function getEmissions(meter: IdbUtilityMeter,
             }
             //On Road calculated by mile
             if (meterFuel.isBiofuel) {
-                mobileBiogenicEmissions = totalVolume * meter.vehicleFuelEfficiency * meterFuel.CO2;
+                mobileBiogenicEmissions = (totalVolume * (1 / meter.vehicleFuelEfficiency) * meterFuel.CO2) / 1000;
                 mobileCarbonEmissions = 0;
             } else {
-                mobileCarbonEmissions = totalVolume * meter.vehicleFuelEfficiency * meterFuel.CO2;
+                mobileCarbonEmissions = (totalVolume * (1 / meter.vehicleFuelEfficiency) * meterFuel.CO2) / 1000;
                 mobileBiogenicEmissions = 0;
             }
-            mobileOtherEmissions = (25 * totalVolume * meterFuel.CH4) + (298 * totalVolume * meterFuel.N2O);
+            let totalCH4 = ((25 * totalVolume * meterFuel.CH4) / 1000) / 1000;
+            let totalN2O = ((298 * totalVolume * meterFuel.N2O) / 1000) / 1000;
+            mobileOtherEmissions = (totalCH4 + totalN2O);
         }
         mobileTotalEmissions = mobileOtherEmissions + mobileCarbonEmissions;
     } else if (meter.source == 'Other') {
         //Fugitive or process
         if (meter.scope == 5) {
             //fugitive emissions
-            fugitiveEmissions = totalVolume * meter.globalWarmingPotential;
+            fugitiveEmissions = totalVolume * meter.globalWarmingPotential / 1000;
         } else if (meter.scope == 6) {
             //process emissions
-            processEmissions = totalVolume * meter.globalWarmingPotential;
+            // console.log(totalVolume);
+            // console.log(meter.globalWarmingPotential);
+            processEmissions = totalVolume * meter.globalWarmingPotential / 1000;
         }
     } else if (meter.source == 'Other Energy') {
         let convertedEnergyUse: number = new ConvertValue(energyUse, energyUnit, 'MMBtu').convertedValue;

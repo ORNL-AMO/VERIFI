@@ -77,11 +77,7 @@ export class OtherEmissionsDataTableComponent {
   }
 
   setData() {
-    if (this.selectedMeter.vehicleCollectionType == 1) {
-      this.volumeUnit = this.selectedMeter.vehicleCollectionUnit;
-    } else {
-      this.volumeUnit = this.selectedMeter.vehicleDistanceUnit;
-    }
+    this.volumeUnit = this.selectedMeter.startingUnit;
     this.showEstimated = (this.selectedMeterData.find(dataItem => { return dataItem.isEstimated == true })) != undefined;
     this.setEmissions();
     this.energyUnit = this.selectedMeter.energyUnit;

@@ -1,20 +1,20 @@
 import { Injectable } from '@angular/core';
 import { IdbAccount, IdbFacility, IdbPredictorEntry, IdbUtilityMeterGroup, PredictorData } from '../models/idb';
 import { UtilityMeterGroupdbService } from '../indexedDB/utilityMeterGroup-db.service';
-import { AccountdbService } from '../indexedDB/account-db.service';
 import { checkSameMonth } from './upload-helper-functions';
 import { PredictordbService } from '../indexedDB/predictors-db.service';
 import * as XLSX from 'xlsx';
+import { MeterSource } from '../models/constantsAndTypes';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UploadDataSharedFunctionsService {
 
-  constructor(private utilityMeterGroupDbService: UtilityMeterGroupdbService, private accountDbService: AccountdbService,
+  constructor(private utilityMeterGroupDbService: UtilityMeterGroupdbService,
     private predictorDbService: PredictordbService) { }
 
-  getMeterGroup(groupName: string, facilityId: string, newGroups: Array<IdbUtilityMeterGroup>): { group: IdbUtilityMeterGroup, newGroups: Array<IdbUtilityMeterGroup> } {
+  getMeterGroup(groupName: string, facilityId: string, newGroups: Array<IdbUtilityMeterGroup>, account: IdbAccount, meterSource: MeterSource): { group: IdbUtilityMeterGroup, newGroups: Array<IdbUtilityMeterGroup> } {
     let accountGroups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.getAccountMeterGroupsCopy();
     let facilityGroups: Array<IdbUtilityMeterGroup> = accountGroups.filter(accountGroup => { return accountGroup.facilityId == facilityId });
     let dbGroup: IdbUtilityMeterGroup = facilityGroups.find(group => { return group.name == groupName || group.guid == groupName });
@@ -26,8 +26,13 @@ export class UploadDataSharedFunctionsService {
       if (dbGroup) {
         return { group: dbGroup, newGroups: newGroups }
       } else if (groupName) {
-        let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-        dbGroup = this.utilityMeterGroupDbService.getNewIdbUtilityMeterGroup("Energy", groupName, facilityId, account.guid);
+        let newGroupType: 'Energy' | 'Water' | 'Other' = 'Energy';
+        if (meterSource == 'Water Discharge' || meterSource == 'Water Intake') {
+          newGroupType = 'Water';
+        } else if (meterSource == 'Other') {
+          newGroupType = 'Other';
+        }
+        dbGroup = this.utilityMeterGroupDbService.getNewIdbUtilityMeterGroup(newGroupType, groupName, facilityId, account.guid);
         newGroups.push(dbGroup);
         return { group: dbGroup, newGroups: newGroups }
       } else {
