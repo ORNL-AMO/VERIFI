@@ -1,0 +1,41 @@
+<div class="table-responsive">
+    <table class="table utility-data table-sm table-bordered table-hover">
+        <thead>
+            <tr>
+                <th>Utility</th>
+                <th>Water Consumption<br> (<span [innerHTML]="waterUnit | settingsLabel"></span>)
+                </th>
+                <th>Water Cost </th>
+            </tr>
+        </thead>
+        <tbody class="table-group-divider">
+            <tr *ngFor="let waterTotal of waterTotalsArr">
+                <td>
+                    <span class="badge" [ngStyle]="{background: waterTotal.color, color: waterTotal.color }">
+                        &mdash;
+                    </span>
+                    {{waterTotal.waterType}}
+                </td>
+                <td>
+                    {{waterTotal.totalConsumption| customNumber}}
+                </td>
+                <td>
+                    {{waterTotal.totalCost | customNumber:true }}
+                </td>
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr>
+                <th>
+                    Total
+                </th>
+                <th>
+                    {{accountOverviewData.totalWaterConsumption | customNumber}}
+                </th>
+                <th>
+                    {{accountOverviewData.totalWaterCost | customNumber:true }}
+                </th>
+            </tr>
+        </tfoot>
+    </table>
+</div>

@@ -23,6 +23,9 @@ import { EmissionsUsageChartComponent } from './emissions-usage-chart/emissions-
 import { FacilitiesEmissionsStackedBarChartComponent } from './facilities-emissions-stacked-bar-chart/facilities-emissions-stacked-bar-chart.component';
 import { AccountUtilityUsageTableComponent } from './account-utility-usage-table/account-utility-usage-table.component';
 import { AccountUtilityUsageDonutComponent } from './account-utility-usage-donut/account-utility-usage-donut.component';
+import { AccountWaterUsageTableComponent } from './account-water-usage-table/account-water-usage-table.component';
+import { AccountWaterUsageDonutComponent } from './account-water-usage-donut/account-water-usage-donut.component';
+import { AccountWaterStackedBarChartComponent } from './account-water-stacked-bar-chart/account-water-stacked-bar-chart.component';
 
 
 
@@ -48,7 +51,10 @@ import { AccountUtilityUsageDonutComponent } from './account-utility-usage-donut
     EmissionsUsageChartComponent,
     FacilitiesEmissionsStackedBarChartComponent,
     AccountUtilityUsageTableComponent,
-    AccountUtilityUsageDonutComponent
+    AccountUtilityUsageDonutComponent,
+    AccountWaterUsageTableComponent,
+    AccountWaterUsageDonutComponent,
+    AccountWaterStackedBarChartComponent
   ],
   imports: [
     CommonModule,
@@ -71,7 +77,10 @@ import { AccountUtilityUsageDonutComponent } from './account-utility-usage-donut
     EmissionsUsageChartComponent,
     FacilitiesEmissionsStackedBarChartComponent,
     AccountUtilityUsageTableComponent,
-    AccountUtilityUsageDonutComponent
+    AccountUtilityUsageDonutComponent,
+    AccountWaterUsageTableComponent,
+    AccountWaterUsageDonutComponent,
+    AccountWaterStackedBarChartComponent
   ]
 })
 export class DataOverviewModule { }
