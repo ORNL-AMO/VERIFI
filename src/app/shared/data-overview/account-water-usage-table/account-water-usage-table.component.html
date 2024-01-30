@@ -9,7 +9,7 @@
             </tr>
         </thead>
         <tbody class="table-group-divider">
-            <tr *ngFor="let waterTotal of waterTotalsArr">
+            <tr *ngFor="let waterTotal of accountOverviewData.waterTypeData">
                 <td>
                     <span class="badge" [ngStyle]="{background: waterTotal.color, color: waterTotal.color }">
                         &mdash;

@@ -1,7 +1,6 @@
 import { Component, ElementRef, Input, SimpleChanges, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { AccountOverviewData, AccountOverviewFacility, WaterTypeData } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
-import { UtilityColors } from '../../utilityColors';
 import * as _ from 'lodash';
 
 @Component({
@@ -73,14 +72,6 @@ export class AccountWaterStackedBarChartComponent {
         responsive: true,
       };
       this.plotlyService.newPlot(this.stackedBarChart.nativeElement, data, layout, config);
-    }
-  }
-
-  getColor(waterType: WaterTypeData): string {
-    if (waterType.isIntake) {
-      return UtilityColors['Water Intake'].color
-    } else {
-      return UtilityColors['Water Discharge'].color
     }
   }
 

@@ -1,7 +1,6 @@
 import { Component, ElementRef, Input, SimpleChanges, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
-import { AccountOverviewData, WaterTypeData } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
-import { UtilityColors } from '../../utilityColors';
+import { AccountOverviewData } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
 
 @Component({
   selector: 'app-account-water-usage-donut',
@@ -36,7 +35,6 @@ export class AccountWaterUsageDonutComponent {
           values: this.accountOverviewData.waterTypeData.map(waterData => { return waterData.totalConsumption }),
           labels: this.accountOverviewData.waterTypeData.map(waterData => { return waterData.waterType }),
           marker: {
-            // colors: this.accountOverviewData.waterTypeData.map((total, index) => { return WaterColors[index] }),
             colors: this.accountOverviewData.waterTypeData.map((total, index) => { return total.color }),
             line: {
               color: '#fff',
@@ -63,14 +61,6 @@ export class AccountWaterUsageDonutComponent {
         responsive: true
       }
       this.plotlyService.newPlot(this.donutChart.nativeElement, data, layout, config);
-    }
-  }
-
-  getColor(waterType: WaterTypeData): string {
-    if (waterType.isIntake) {
-      return UtilityColors['Water Intake'].color
-    } else {
-      return UtilityColors['Water Discharge'].color
     }
   }
 }
