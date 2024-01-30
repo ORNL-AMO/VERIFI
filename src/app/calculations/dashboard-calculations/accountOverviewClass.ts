@@ -125,6 +125,9 @@ export class AccountOverviewData {
             totalScope1Emissions: _.sumBy(this.facilitiesCost, (overviewFacility: AccountOverviewFacility) => { return overviewFacility.emissions.totalScope1Emissions }),
             totalWithMarketEmissions: _.sumBy(this.facilitiesCost, (overviewFacility: AccountOverviewFacility) => { return overviewFacility.emissions.totalWithMarketEmissions }),
             totalWithLocationEmissions: _.sumBy(this.facilitiesCost, (overviewFacility: AccountOverviewFacility) => { return overviewFacility.emissions.totalWithLocationEmissions }),
+            totalBiogenicEmissions: _.sumBy(this.facilitiesCost, (overviewFacility: AccountOverviewFacility) => { return overviewFacility.emissions.totalBiogenicEmissions }),
+            stationaryBiogenicEmmissions: _.sumBy(this.facilitiesCost, (overviewFacility: AccountOverviewFacility) => { return overviewFacility.emissions.stationaryBiogenicEmmissions }),
+
         }
     }
 

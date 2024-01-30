@@ -28,10 +28,12 @@ export interface EmissionsResults {
   mobileTotalEmissions: number,
   fugitiveEmissions: number,
   processEmissions: number,
+  stationaryBiogenicEmmissions: number,
   stationaryEmissions: number,
   totalScope1Emissions: number,
   totalWithMarketEmissions: number,
   totalWithLocationEmissions: number,
+  totalBiogenicEmissions: number
 }
 
 

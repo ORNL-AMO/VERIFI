@@ -43,7 +43,7 @@ export class AbsoluteEmissionsTableComponent {
       return detail.emissionsResults.processEmissions != 0;
     }) != undefined;
     this.hasBiomass = this.yearDetails.find(detail => {
-      return detail.emissionsResults.mobileBiogenicEmissions != 0;
+      return detail.emissionsResults.totalBiogenicEmissions != 0;
     }) != undefined;
     this.hasOtherScope2 = this.yearDetails.find(detail => {
       return detail.emissionsResults.otherScope2Emissions != 0;

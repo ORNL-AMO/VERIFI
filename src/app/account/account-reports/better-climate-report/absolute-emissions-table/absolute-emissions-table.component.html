@@ -369,30 +369,30 @@
             </td>
             <ng-container *ngIf="betterClimateReportSetup.includeEmissionsInTables">
                 <td *ngFor="let yearDetail of yearDetails">
-                    <ng-container *ngIf="yearDetail.emissionsResults.mobileBiogenicEmissions">
-                        {{yearDetail.emissionsResults.mobileBiogenicEmissions | customNumber}}
+                    <ng-container *ngIf="yearDetail.emissionsResults.totalBiogenicEmissions">
+                        {{yearDetail.emissionsResults.totalBiogenicEmissions | customNumber}}
                     </ng-container>
-                    <ng-container *ngIf="!yearDetail.emissionsResults.mobileBiogenicEmissions">
+                    <ng-container *ngIf="!yearDetail.emissionsResults.totalBiogenicEmissions">
                         &mdash;
                     </ng-container>
                 </td>
             </ng-container>
             <ng-container *ngIf="betterClimateReportSetup.includePercentReductionsInTables">
                 <td *ngFor="let yearDetail of yearDetails">
-                    <ng-container *ngIf="yearDetail.percentReductions.mobileBiogenicEmissions">
-                        {{yearDetail.percentReductions.mobileBiogenicEmissions| number:'1.0-2'}} %
+                    <ng-container *ngIf="yearDetail.percentReductions.totalBiogenicEmissions">
+                        {{yearDetail.percentReductions.totalBiogenicEmissions| number:'1.0-2'}} %
                     </ng-container>
-                    <ng-container *ngIf="!yearDetail.percentReductions.mobileBiogenicEmissions">
+                    <ng-container *ngIf="!yearDetail.percentReductions.totalBiogenicEmissions">
                         &mdash;
                     </ng-container>
                 </td>
             </ng-container>
             <ng-container *ngIf="betterClimateReportSetup.includePercentContributionsInTables">
                 <td *ngFor="let yearDetail of yearDetails">
-                    <ng-container *ngIf="yearDetail.totalContribution.mobileBiogenicEmissions">
-                        {{yearDetail.totalContribution.mobileBiogenicEmissions | number:'1.0-2'}} %
+                    <ng-container *ngIf="yearDetail.totalContribution.totalBiogenicEmissions">
+                        {{yearDetail.totalContribution.totalBiogenicEmissions | number:'1.0-2'}} %
                     </ng-container>
-                    <ng-container *ngIf="!yearDetail.totalContribution.mobileBiogenicEmissions">
+                    <ng-container *ngIf="!yearDetail.totalContribution.totalBiogenicEmissions">
                         &mdash;
                     </ng-container>
                 </td>

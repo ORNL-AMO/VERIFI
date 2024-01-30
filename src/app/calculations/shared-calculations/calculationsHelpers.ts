@@ -106,10 +106,12 @@ export function getEmissionsTotalsFromMonthlyData(data: Array<MonthlyData>): Emi
         mobileTotalEmissions: _.sumBy(data, (mData: MonthlyData) => { return mData.mobileTotalEmissions }),
         fugitiveEmissions: _.sumBy(data, (mData: MonthlyData) => { return mData.fugitiveEmissions }),
         processEmissions: _.sumBy(data, (mData: MonthlyData) => { return mData.processEmissions }),
+        stationaryBiogenicEmmissions:  _.sumBy(data, (mData: MonthlyData) => { return mData.stationaryBiogenicEmmissions }),
         stationaryEmissions: _.sumBy(data, (mData: MonthlyData) => { return mData.stationaryEmissions }),
         totalScope1Emissions: _.sumBy(data, (mData: MonthlyData) => { return mData.totalScope1Emissions }),
         totalWithMarketEmissions: _.sumBy(data, (mData: MonthlyData) => { return mData.totalWithMarketEmissions }),
         totalWithLocationEmissions: _.sumBy(data, (mData: MonthlyData) => { return mData.totalWithLocationEmissions }),
+        totalBiogenicEmissions:  _.sumBy(data, (mData: MonthlyData) => { return mData.totalBiogenicEmissions }),
     }
 }
 

@@ -76,6 +76,8 @@ export function getYearlyUsageNumbers(calanderizedMeters: Array<CalanderizedMete
             let totalScope1Emissions: number = 0;
             let totalWithMarketEmissions: number = 0;
             let totalWithLocationEmissions: number = 0;
+            let totalBiogenicEmissions: number = 0;
+            let stationaryBiogenicEmmissions: number = 0;
             for (let i = 0; i < yearData.length; i++) {
                 if (yearData[i].month == month) {
                     energyUse += yearData[i].energyUse;
@@ -99,6 +101,8 @@ export function getYearlyUsageNumbers(calanderizedMeters: Array<CalanderizedMete
                     totalScope1Emissions += yearData[i].totalScope1Emissions;
                     totalWithMarketEmissions += yearData[i].totalWithMarketEmissions;
                     totalWithLocationEmissions += yearData[i].totalWithLocationEmissions;
+                    totalBiogenicEmissions += yearData[i].totalBiogenicEmissions;
+                    stationaryBiogenicEmmissions += yearData[i].stationaryBiogenicEmmissions;
                 }
             }
             yearMonthData.push({
@@ -124,6 +128,8 @@ export function getYearlyUsageNumbers(calanderizedMeters: Array<CalanderizedMete
                 totalScope1Emissions: totalScope1Emissions,
                 totalWithMarketEmissions: totalWithMarketEmissions,
                 totalWithLocationEmissions: totalWithLocationEmissions,
+                totalBiogenicEmissions: totalBiogenicEmissions,
+                stationaryBiogenicEmmissions: stationaryBiogenicEmmissions
             })
         })
     });

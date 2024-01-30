@@ -213,6 +213,8 @@ export class UtilityUseAndCost {
             totalScope1Emissions: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.totalScope1Emissions }),
             totalWithMarketEmissions: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.totalWithMarketEmissions }),
             totalWithLocationEmissions: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.totalWithLocationEmissions }),
+            totalBiogenicEmissions: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.totalBiogenicEmissions }),
+            stationaryBiogenicEmmissions: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.stationaryBiogenicEmmissions }),
             cost: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.cost }),
             costChange: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.costChange })
         }
@@ -336,6 +338,8 @@ export class UseAndCost {
             totalScope1Emissions: emissionsTotals.totalScope1Emissions / numberOfMonths,
             totalWithMarketEmissions: emissionsTotals.totalWithMarketEmissions / numberOfMonths,
             totalWithLocationEmissions: emissionsTotals.totalWithLocationEmissions / numberOfMonths,
+            totalBiogenicEmissions: emissionsTotals.totalBiogenicEmissions / numberOfMonths,
+            stationaryBiogenicEmmissions: emissionsTotals.stationaryBiogenicEmmissions / numberOfMonths,
             cost: totalCost / numberOfMonths,
             costChange: 0
         }
@@ -423,6 +427,8 @@ export class UseAndCost {
                     totalScope1Emissions: emissionsTotals.totalScope1Emissions,
                     totalWithMarketEmissions: emissionsTotals.totalWithMarketEmissions,
                     totalWithLocationEmissions: emissionsTotals.totalWithLocationEmissions,
+                    totalBiogenicEmissions: emissionsTotals.totalBiogenicEmissions,
+                    stationaryBiogenicEmmissions: emissionsTotals.stationaryBiogenicEmmissions,
                     cost: cost,
                     costChange: 0
                 }
@@ -478,7 +484,8 @@ export function getEmptyIUseAnCost(): IUseAndCost {
         totalScope1Emissions: 0,
         totalWithMarketEmissions: 0,
         totalWithLocationEmissions: 0,
-
+        stationaryBiogenicEmmissions: 0,
+        totalBiogenicEmissions: 0,
         cost: 0,
         costChange: 0
     }

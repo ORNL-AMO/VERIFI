@@ -164,6 +164,8 @@ export class BetterClimateYearDetails {
                 totalScope1Emissions: this.calculateReductions(baselineYearDetails.emissionsResults.totalScope1Emissions, this.emissionsResults.totalScope1Emissions),
                 totalWithMarketEmissions: this.calculateReductions(baselineYearDetails.emissionsResults.totalWithMarketEmissions, this.emissionsResults.totalWithMarketEmissions),
                 totalWithLocationEmissions: this.calculateReductions(baselineYearDetails.emissionsResults.totalWithLocationEmissions, this.emissionsResults.totalWithLocationEmissions),
+                totalBiogenicEmissions: this.calculateReductions(baselineYearDetails.emissionsResults.totalBiogenicEmissions, this.emissionsResults.totalBiogenicEmissions),
+                stationaryBiogenicEmmissions: this.calculateReductions(baselineYearDetails.emissionsResults.stationaryBiogenicEmmissions, this.emissionsResults.stationaryBiogenicEmmissions),
             }
         } else {
             this.reductions = getZeroEmissionsResults();
@@ -195,6 +197,8 @@ export class BetterClimateYearDetails {
                 totalScope1Emissions: this.calculatePercentReductions(baselineYearDetails.emissionsResults.totalScope1Emissions, this.reductions.totalScope1Emissions),
                 totalWithMarketEmissions: this.calculatePercentReductions(baselineYearDetails.emissionsResults.totalWithMarketEmissions, this.reductions.totalWithMarketEmissions),
                 totalWithLocationEmissions: this.calculatePercentReductions(baselineYearDetails.emissionsResults.totalWithLocationEmissions, this.reductions.totalWithLocationEmissions),
+                totalBiogenicEmissions: this.calculatePercentReductions(baselineYearDetails.emissionsResults.totalBiogenicEmissions, this.reductions.totalBiogenicEmissions),
+                stationaryBiogenicEmmissions: this.calculatePercentReductions(baselineYearDetails.emissionsResults.stationaryBiogenicEmmissions, this.reductions.stationaryBiogenicEmmissions),
             }
         } else {
             this.percentReductions = getZeroEmissionsResults();
@@ -226,6 +230,8 @@ export class BetterClimateYearDetails {
                 totalScope1Emissions: this.calculateRelativeContribution(accountDetails.percentReductions.totalScope1Emissions, accountDetails.reductions.totalScope1Emissions, this.reductions.totalScope1Emissions),
                 totalWithMarketEmissions: this.calculateRelativeContribution(accountDetails.percentReductions.totalWithMarketEmissions, accountDetails.reductions.totalWithMarketEmissions, this.reductions.totalWithMarketEmissions),
                 totalWithLocationEmissions: this.calculateRelativeContribution(accountDetails.percentReductions.totalWithLocationEmissions, accountDetails.reductions.totalWithLocationEmissions, this.reductions.totalWithLocationEmissions),
+                totalBiogenicEmissions: this.calculateRelativeContribution(accountDetails.percentReductions.totalBiogenicEmissions, accountDetails.reductions.totalBiogenicEmissions, this.reductions.totalBiogenicEmissions),
+                stationaryBiogenicEmmissions: this.calculateRelativeContribution(accountDetails.percentReductions.stationaryBiogenicEmmissions, accountDetails.reductions.stationaryBiogenicEmmissions, this.reductions.stationaryBiogenicEmmissions),
             }
         } else {
             this.relativeContribution = getZeroEmissionsResults();
@@ -261,6 +267,8 @@ export class BetterClimateYearDetails {
             totalScope1Emissions: this.calculateTotalContribution(this.percentEmissionsReduction, this.totalEmissionsReduction, this.reductions.totalScope1Emissions),
             totalWithMarketEmissions: this.calculateTotalContribution(this.percentEmissionsReduction, this.totalEmissionsReduction, this.reductions.totalWithMarketEmissions),
             totalWithLocationEmissions: this.calculateTotalContribution(this.percentEmissionsReduction, this.totalEmissionsReduction, this.reductions.totalWithLocationEmissions),
+            totalBiogenicEmissions: this.calculateTotalContribution(this.percentEmissionsReduction, this.totalEmissionsReduction, this.reductions.totalBiogenicEmissions),
+            stationaryBiogenicEmmissions: this.calculateTotalContribution(this.percentEmissionsReduction, this.totalEmissionsReduction, this.reductions.stationaryBiogenicEmmissions),
         }
     }
 
