@@ -7,6 +7,7 @@ import { EnergySources, WaterSources } from "src/app/models/constantsAndTypes";
 import { EmissionsResults } from "src/app/models/eGridEmissions";
 import { getEmissionsTotalsFromMonthlyData } from "../shared-calculations/calculationsHelpers";
 import { SourceTotals } from "./sourceTotalsClass";
+import { WaterDischargeColors, WaterIntakeColors } from "src/app/shared/utilityColors";
 
 export class AccountOverviewData {
 
@@ -23,6 +24,7 @@ export class AccountOverviewData {
     totalAccountCost: number;
 
     facilitiesWater: Array<AccountOverviewFacility>;
+    waterTypeData: Array<WaterTypeData>;
     totalWaterConsumption: number;
     totalWaterCost: number;
     calanderizedMeters: Array<CalanderizedMeter>;
@@ -50,6 +52,7 @@ export class AccountOverviewData {
             this.setTotalWaterConsumption();
             this.setTotalWaterCost();
             this.setWaterYearMonthData(calanderizedMeters);
+            this.setWaterTypeData(calanderizedMeters, dateRange);
         }
 
         this.sourceTotals = new SourceTotals(calanderizedMeters, dateRange);
@@ -166,6 +169,32 @@ export class AccountOverviewData {
             this.totalWaterCost = 0;
         }
     }
+
+    setWaterTypeData(calanderizedMeters: Array<CalanderizedMeter>, dateRange: { startDate: Date, endDate: Date }) {
+        this.waterTypeData = new Array();
+        let waterIntakeMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => {
+            return cMeter.meter.source == 'Water Intake';
+        })
+        let waterIntakeTypes: Array<string> = waterIntakeMeters.flatMap(cMeter => {
+            return cMeter.meter.waterIntakeType;
+        });
+        waterIntakeTypes = _.uniq(waterIntakeTypes);
+        waterIntakeTypes.forEach((type, index) => {
+            let waterTypeData: WaterTypeData = new WaterTypeData(type, waterIntakeMeters, dateRange, true, WaterIntakeColors[index]);
+            this.waterTypeData.push(waterTypeData)
+        });
+        let waterDischargeMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => {
+            return cMeter.meter.source == 'Water Discharge';
+        })
+        let waterDischargeTypes: Array<string> = waterDischargeMeters.flatMap(cMeter => {
+            return cMeter.meter.waterDischargeType;
+        });
+        waterDischargeTypes = _.uniq(waterDischargeTypes);
+        waterDischargeTypes.forEach((type, index) => {
+            let waterTypeData: WaterTypeData = new WaterTypeData(type, waterDischargeMeters, dateRange, false, WaterDischargeColors[index]);
+            this.waterTypeData.push(waterTypeData)
+        });
+    }
 }
 
 
@@ -177,6 +206,7 @@ export class AccountOverviewFacility {
     emissions: EmissionsResults;
     facility: IdbFacility;
     numberOfMeters: number;
+    waterTypeData: Array<WaterTypeData>;
     constructor(calanderizedMeters: Array<CalanderizedMeter>, facility: IdbFacility, dateRange: { startDate: Date, endDate: Date }, dataType: 'energy' | 'cost' | 'water') {
         this.facility = facility;
         let facilityMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => { return cMeter.meter.facilityId == facility.guid });
@@ -185,6 +215,9 @@ export class AccountOverviewFacility {
         this.setTotalUsage(dataType);
         this.setTotalCost();
         this.setTotalEmissions();
+        if (dataType == 'water') {
+            this.setWaterTypeData(facilityMeters, dateRange);
+        }
     }
 
     setMonthlyData(calanderizedMeters: Array<CalanderizedMeter>, startDate: Date, endDate: Date) {
@@ -215,5 +248,72 @@ export class AccountOverviewFacility {
     setTotalEmissions() {
         this.emissions = getEmissionsTotalsFromMonthlyData(this.monthlyData);
     }
+
+    setWaterTypeData(calanderizedMeters: Array<CalanderizedMeter>, dateRange: { startDate: Date, endDate: Date }) {
+        this.waterTypeData = new Array();
+        let waterIntakeMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => {
+            return cMeter.meter.source == 'Water Intake';
+        })
+        let waterIntakeTypes: Array<string> = waterIntakeMeters.flatMap(cMeter => {
+            return cMeter.meter.waterIntakeType;
+        });
+        waterIntakeTypes = _.uniq(waterIntakeTypes);
+        waterIntakeTypes.forEach(type => {
+            let waterTypeData: WaterTypeData = new WaterTypeData(type, waterIntakeMeters, dateRange, true, undefined);
+            this.waterTypeData.push(waterTypeData)
+        });
+        let waterDischargeMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => {
+            return cMeter.meter.source == 'Water Discharge';
+        })
+        let waterDischargeTypes: Array<string> = waterDischargeMeters.flatMap(cMeter => {
+            return cMeter.meter.waterDischargeType;
+        });
+        waterDischargeTypes = _.uniq(waterDischargeTypes);
+        waterDischargeTypes.forEach(type => {
+            let waterTypeData: WaterTypeData = new WaterTypeData(type, waterDischargeMeters, dateRange, false, undefined);
+            this.waterTypeData.push(waterTypeData)
+        });
+    }
 }
 
+export class WaterTypeData {
+
+    monthlyData: Array<MonthlyData>;
+    waterType: string;
+    totalConsumption: number;
+    totalCost: number;
+    isIntake: boolean;
+    color: string;
+    constructor(waterType: string, calanderizedMeters: Array<CalanderizedMeter>, dateRange: { startDate: Date, endDate: Date }, isIntake: boolean, color: string) {
+        this.color = color;
+        this.isIntake = isIntake;
+        this.waterType = waterType;
+        this.setMonthlyData(waterType, calanderizedMeters, dateRange.startDate, dateRange.endDate);
+        this.setTotalUsage();
+        this.setTotalCost();
+    }
+
+    setMonthlyData(waterType: string, calanderizedMeters: Array<CalanderizedMeter>, startDate: Date, endDate: Date) {
+        let waterTypeMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => {
+            return cMeter.meter.waterIntakeType == waterType || cMeter.meter.waterDischargeType == waterType;
+        });
+        let allMonthlyData: Array<MonthlyData> = waterTypeMeters.flatMap(cMeter => { return cMeter.monthlyData });
+        this.monthlyData = allMonthlyData.filter(monthlyData => {
+            let itemDate: Date = new Date(monthlyData.date);
+            if (itemDate >= startDate && itemDate <= endDate) {
+                return monthlyData;
+            }
+        });
+    }
+
+    setTotalUsage() {
+        this.totalConsumption = _.sumBy(this.monthlyData, (mData: MonthlyData) => { return mData.energyConsumption });
+    }
+
+    setTotalCost() {
+        this.totalCost = _.sumBy(this.monthlyData, (mData: MonthlyData) => { return mData.energyCost });
+        if (isNaN(this.totalCost)) {
+            this.totalCost = 0;
+        }
+    }
+}

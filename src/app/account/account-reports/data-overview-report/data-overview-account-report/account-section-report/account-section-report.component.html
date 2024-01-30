@@ -34,6 +34,17 @@
                 [dataType]="dataType"></app-account-utility-usage-donut>
         </div>
     </ng-container>
+    <ng-container *ngIf="dataType == 'water'">
+        <div class="print-break-before" *ngIf="sectionOptions.includeFacilityTable"
+            [ngClass]="{'col-10': print, 'col-6': !print}">
+            <app-account-water-usage-table [accountOverviewData]="accountOverviewData"
+                [waterUnit]="waterUnit"></app-account-water-usage-table>
+        </div>
+        <div *ngIf="sectionOptions.includeFacilityDonut" [ngClass]="{'col-10': print, 'col-6': !print}">
+            <app-account-water-usage-donut [accountOverviewData]="accountOverviewData"
+                [waterUnit]="waterUnit"></app-account-water-usage-donut>
+        </div>
+    </ng-container>
 </div>
 <div class="row hide-print">
     <div class="col-12">
@@ -53,10 +64,14 @@
             <app-facilities-emissions-stacked-bar-chart
                 [accountOverviewFacilities]="accountOverviewData.facilitiesCost"></app-facilities-emissions-stacked-bar-chart>
         </ng-container>
-        <ng-container *ngIf="dataType != 'emissions'">
+        <ng-container *ngIf="dataType != 'emissions' && dataType != 'water'">
             <app-facilities-usage-stacked-bar-chart [dataType]="dataType"
                 [calanderizedMeters]="accountOverviewData.calanderizedMeters" [energyUnit]="energyUnit"
                 [dateRange]="dateRange"></app-facilities-usage-stacked-bar-chart>
+        </ng-container>
+        <ng-container *ngIf="dataType == 'water'">
+            <app-account-water-stacked-bar-chart [accountOverviewData]="accountOverviewData"
+                [waterUnit]="waterUnit"></app-account-water-stacked-bar-chart>
         </ng-container>
     </div>
 </div>

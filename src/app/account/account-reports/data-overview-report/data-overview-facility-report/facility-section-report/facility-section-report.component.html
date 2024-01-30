@@ -13,18 +13,30 @@
     </div>
     <div class="print-break-before" *ngIf="sectionOptions.includeMeterUsageTable"
         [ngClass]="{'col-10': print, 'col-6': !print}">
-        <app-emissions-usage-table [overviewData]="facilityOverviewData"></app-emissions-usage-table>
+        <app-emissions-usage-table *ngIf="dataType == 'emissions'"
+            [overviewData]="facilityOverviewData"></app-emissions-usage-table>
+
+        <app-meter-usage-table *ngIf="dataType == 'energyUse'" [dataType]="'energyUse'"
+            [facilityOverviewData]="facilityOverviewData" [facilityOverviewMeters]="facilityOverviewData.energyMeters"
+            [energyUnit]="energyUnit"></app-meter-usage-table>
+
+        <app-meter-usage-table *ngIf="dataType == 'cost'" [dataType]="'cost'"
+            [facilityOverviewData]="facilityOverviewData"
+            [facilityOverviewMeters]="facilityOverviewData.costMeters"></app-meter-usage-table>
+
+        <app-meter-usage-table *ngIf="dataType == 'water'" [dataType]="'water'"
+            [facilityOverviewData]="facilityOverviewData" [facilityOverviewMeters]="facilityOverviewData.waterMeters"
+            [waterUnit]="waterUnit"></app-meter-usage-table>
     </div>
     <div *ngIf="sectionOptions.includeMeterUsageTable" [ngClass]="{'col-10': print, 'col-6': !print}">
-        <ng-container *ngIf="dataType == 'emissions'">
-            <app-emissions-donut [facilityId]="facility.guid"
-                [facilityOverviewMeters]="facilityOverviewMeters"></app-emissions-donut>
-        </ng-container>
-        <ng-container *ngIf="dataType != 'emissions'">
-            <app-meter-usage-donut [dataType]="dataType" [facilityId]="facility.guid"
-                [facilityOverviewMeters]="facilityOverviewData.energyMeters"></app-meter-usage-donut>
-        </ng-container>
-
+        <app-emissions-donut *ngIf="dataType == 'emissions'" [facilityId]="facility.guid"
+            [facilityOverviewMeters]="facilityOverviewMeters"></app-emissions-donut>
+        <app-meter-usage-donut *ngIf="dataType == 'energyUse'" [dataType]="dataType" [facilityId]="facility.guid"
+            [facilityOverviewMeters]="facilityOverviewData.energyMeters"></app-meter-usage-donut>
+        <app-meter-usage-donut *ngIf="dataType == 'cost'" [dataType]="dataType" [facilityId]="facility.guid"
+            [facilityOverviewMeters]="facilityOverviewData.costMeters"></app-meter-usage-donut>
+        <app-meter-usage-donut *ngIf="dataType == 'water'" [dataType]="dataType" [facilityId]="facility.guid"
+            [facilityOverviewMeters]="facilityOverviewData.waterMeters"></app-meter-usage-donut>
     </div>
 </div>
 <div class="row hide-print">
