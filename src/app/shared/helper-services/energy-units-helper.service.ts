@@ -168,12 +168,19 @@ export class EnergyUnitsHelperService {
 
 
   parseSource(name: string): MeterSource {
+    let lowerCaseName: string = name.toLocaleLowerCase();
     let source: MeterSource = AllSources.find(option => {
       let lowerCaseOption: string = option.toLocaleLowerCase();
-      let lowerCaseName: string = name.toLocaleLowerCase();
       return lowerCaseName.includes(lowerCaseOption)
     })
-    return source;
+    if (source) {
+      return source;
+    } else if (lowerCaseName.includes('elec')) {
+      return 'Electricity'
+    } else if (name.includes(' NG ')) {
+      return 'Natural Gas';
+    }
+    return;
   }
 
   parseStartingUnit(name: string): string {

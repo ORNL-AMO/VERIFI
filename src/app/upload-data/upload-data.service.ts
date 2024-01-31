@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { WorkBook } from 'xlsx';
 import { IdbAccount, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup, PredictorData } from '../models/idb';
 import * as XLSX from 'xlsx';
 import { FacilitydbService } from '../indexedDB/facility-db.service';
@@ -12,16 +11,10 @@ import { EnergyUnitsHelperService } from '../shared/helper-services/energy-units
 import { EditMeterFormService } from '../facility/utility-data/energy-consumption/energy-source/edit-meter-form/edit-meter-form.service';
 import { UtilityMeterGroupdbService } from '../indexedDB/utilityMeterGroup-db.service';
 import { UnitOption } from '../shared/unitOptions';
-import { Countries, Country } from '../shared/form-data/countries';
-import * as _ from 'lodash';
-import { State, States } from '../shared/form-data/states';
 import { checkShowHeatCapacity, checkShowSiteToSource, getHeatingCapacity, getIsEnergyMeter, getIsEnergyUnit, getSiteToSource, getStartingUnitOptions } from '../shared/sharedHelperFuntions';
-import { MeterPhase, MeterSource, AllSources } from '../models/constantsAndTypes';
+import { MeterPhase, MeterSource } from '../models/constantsAndTypes';
 import { getMeterDataCopy } from '../calculations/conversions/convertMeterData';
-import { FuelTypeOption } from '../shared/fuel-options/fuelTypeOption';
-import { getFuelTypeOptions } from '../shared/fuel-options/getFuelTypeOptions';
-import { ScopeOption, ScopeOptions } from '../models/scopeOption';
-import { AgreementType, AgreementTypes } from '../models/agreementType';
+import { FuelTypeOption } from '../shared/fuel-options/fuelTypeOption';;
 import { ColumnGroup, ColumnItem, FacilityGroup, FileReference, ParsedTemplate } from './upload-data-models';
 import { UploadDataV1Service } from './upload-data-v1.service';
 import { UploadDataV2Service } from './upload-data-v2.service';
@@ -154,47 +147,6 @@ export class UploadDataService {
     }
   }
 
-  getPhase(phase: string): MeterPhase {
-    if (phase == 'Gas' || phase == 'Liquid' || phase == 'Solid') {
-      return phase;
-    }
-    return undefined;
-  }
-
-  getFuelEnum(fuel: string, source: MeterSource, phase: MeterPhase, scope: number, vehicleCategory: number, vehicleType: number): string {
-    let fuelTypeOptions = getFuelTypeOptions(source, phase, [], scope, vehicleCategory, vehicleType);
-    let selectedEnergyOption: FuelTypeOption = fuelTypeOptions.find(option => { return option.value == fuel });
-    if (selectedEnergyOption) {
-      return selectedEnergyOption.value;
-    }
-    return undefined;
-  }
-
-  getMeterSource(source: string): MeterSource {
-    let selectedSource: MeterSource = AllSources.find(sourceOption => { return sourceOption == source });
-    return selectedSource;
-  }
-
-  getCountryCode(country: string): string {
-    if (country) {
-      let findCountry: Country = Countries.find(countryOption => { return countryOption.name == country });
-      if (findCountry) {
-        return findCountry.code
-      }
-    }
-    return;
-  }
-
-  getMeterReadingDataApplication(yesOrNo: 'Yes' | 'No'): 'backward' | 'fullMonth' {
-    if (yesOrNo == 'Yes') {
-      return 'backward'
-    } else if ('No') {
-      return 'fullMonth';
-    } else {
-      return;
-    }
-  }
-
   getMeterDataEntries(workbook: XLSX.WorkBook, importMeters: Array<IdbUtilityMeter>): Array<IdbUtilityMeterData> {
     //electricity readings
     let importMeterData: Array<IdbUtilityMeterData> = new Array();
@@ -310,32 +262,6 @@ export class UploadDataService {
 
   checkSameMonth(date1: Date, date2: Date): boolean {
     return date1.getUTCFullYear() == date2.getUTCFullYear() && date1.getUTCMonth() == date2.getUTCMonth();
-  }
-
-  getScope(formScope: string): number {
-    let scopeOption: ScopeOption = ScopeOptions.find(option => { return (option.scope + ': ' + option.optionLabel) == formScope });
-    if (scopeOption) {
-      return scopeOption.value;
-    } else {
-      return undefined
-    }
-  }
-
-  getYesNoBool(val: string): boolean {
-    if (val == 'Yes') {
-      return true;
-    } else if (val == 'No') {
-      return false;
-    }
-  }
-
-  getAgreementType(formAgreementType: string): number {
-    let agreementType: AgreementType = AgreementTypes.find(type => { return type.typeLabel == formAgreementType });
-    if (agreementType) {
-      return agreementType.value;
-    } else {
-      return undefined;
-    }
   }
 
   getMeterFacilityGroups(templateData: { importFacilities: Array<IdbFacility>, importMeters: Array<IdbUtilityMeter> }): Array<FacilityGroup> {
@@ -606,33 +532,6 @@ export class UploadDataService {
       }
     }
     return undefined;
-  }
-
-  getState(stateStr: string): string {
-    if (stateStr) {
-      let state: State = States.find(state => {
-        return stateStr.toLocaleLowerCase() == state.abbreviation.toLocaleLowerCase() || stateStr.toLocaleLowerCase() == state.name.toLocaleLowerCase();
-      });
-      if (state) {
-        return state.name;
-      }
-    }
-    return;
-  }
-
-  getZip(zip: string): string {
-    if (zip) {
-      if (zip.length == 5) {
-        return zip;
-      } else {
-        let neededZeros: number = 5 - zip.length;
-        for (let i = 0; i < neededZeros; i++) {
-          zip = '0' + zip;
-        }
-        return zip;
-      }
-    }
-    return;
   }
 
   checkImportCellNumber(value: any): number {
