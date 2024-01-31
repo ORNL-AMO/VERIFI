@@ -27,6 +27,16 @@
                                 [energyUnit]="energyUnit"></app-facility-usage-donut>
                         </div>
                     </div>
+                    <div class="row">
+                        <div class="col-6">
+                            <app-account-utility-usage-table [accountOverviewData]="accountOverviewData"
+                                [energyUnit]="energyUnit" [dataType]="'energyUse'"></app-account-utility-usage-table>
+                        </div>
+                        <div class="col-6">
+                            <app-account-utility-usage-donut [accountOverviewData]="accountOverviewData"
+                                [energyUnit]="energyUnit" [dataType]="'energyUse'"></app-account-utility-usage-donut>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -41,8 +51,9 @@
                 <div class="card-body">
                     <app-utility-consumption-table [dataType]="'energyUse'"
                         [sourcesUseAndCost]="utilityUseAndCost.energyUseAndCost"
-                        [useAndCostTotal]="utilityUseAndCost.energyTotal" [previousYear]="utilityUseAndCost.previousYear"
-                        [dateRange]="dateRange" [energyUnit]="energyUnit"></app-utility-consumption-table>
+                        [useAndCostTotal]="utilityUseAndCost.energyTotal"
+                        [previousYear]="utilityUseAndCost.previousYear" [dateRange]="dateRange"
+                        [energyUnit]="energyUnit"></app-utility-consumption-table>
                 </div>
             </div>
         </div>
@@ -56,8 +67,7 @@
                 </div>
                 <div class="card-body">
                     <app-facilities-usage-stacked-bar-chart [dataType]="'energyUse'"
-                        [calanderizedMeters]="accountOverviewData.calanderizedMeters"
-                        [energyUnit]="energyUnit"
+                        [calanderizedMeters]="accountOverviewData.calanderizedMeters" [energyUnit]="energyUnit"
                         [dateRange]="dateRange"></app-facilities-usage-stacked-bar-chart>
                 </div>
             </div>

@@ -17,6 +17,8 @@ import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.
 import { BackupDataService } from 'src/app/shared/helper-services/backup-data.service';
 import { ExportToExcelTemplateService } from 'src/app/shared/helper-services/export-to-excel-template.service';
 import { CustomEmissionsDbService } from 'src/app/indexedDB/custom-emissions-db.service';
+import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
+import { CustomGWPDbService } from 'src/app/indexedDB/custom-gwp-db.service';
 
 @Component({
   selector: 'app-manage-accounts',
@@ -44,7 +46,9 @@ export class ManageAccountsComponent {
     private accountAnalysisDbService: AccountAnalysisDbService,
     private backupDataService: BackupDataService,
     private exportToExcelTemplateService: ExportToExcelTemplateService,
-    private customEmissionsDbService: CustomEmissionsDbService
+    private customEmissionsDbService: CustomEmissionsDbService,
+    private customFuelDbService: CustomFuelDbService,
+    private customGWPDbService: CustomGWPDbService
   ) {
   }
 
@@ -136,6 +140,10 @@ export class ManageAccountsComponent {
     await this.accountAnalysisDbService.deleteAccountAnalysisItems();
     this.loadingService.setLoadingMessage("Deleting Custom Emissions...")
     await this.customEmissionsDbService.deleteAccountEmissionsItems();
+    this.loadingService.setLoadingMessage("Deleting Custom Fuels...")
+    await this.customFuelDbService.deleteAccountCustomFuels();   
+    this.loadingService.setLoadingMessage("Deleting Custom GWPs...");
+    await this.customGWPDbService.deleteAccountCustomGWP();
     this.loadingService.setLoadingMessage("Deleting Account...");
     await firstValueFrom(this.accountDbService.deleteAccountWithObservable(this.selectedAccount.id));
     this.accounts = await firstValueFrom(this.accountDbService.getAll());

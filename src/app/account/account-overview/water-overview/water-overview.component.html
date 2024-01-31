@@ -27,6 +27,17 @@
                                 [waterUnit]="waterUnit"></app-facility-usage-donut>
                         </div>
                     </div>
+                    <div class="row">
+                        <div class="col-6">
+                            <app-account-water-usage-table [accountOverviewData]="accountOverviewData"
+                                [waterUnit]="waterUnit"></app-account-water-usage-table>
+
+                        </div>
+                        <div class="col-6">
+                            <app-account-water-usage-donut [accountOverviewData]="accountOverviewData"
+                                [waterUnit]="waterUnit"></app-account-water-usage-donut>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -55,9 +66,8 @@
                     <h4 class="mb-0">Water Consumption</h4>
                 </div>
                 <div class="card-body">
-                    <app-facilities-usage-stacked-bar-chart [dataType]="'water'"
-                        [calanderizedMeters]="accountOverviewData.calanderizedMeters" [waterUnit]="waterUnit"
-                        [dateRange]="dateRange"></app-facilities-usage-stacked-bar-chart>
+                    <app-account-water-stacked-bar-chart [accountOverviewData]="accountOverviewData"
+                        [waterUnit]="waterUnit"></app-account-water-stacked-bar-chart>
                 </div>
             </div>
         </div>

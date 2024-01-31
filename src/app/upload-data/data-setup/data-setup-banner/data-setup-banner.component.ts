@@ -2,7 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
-import { FileReference, UploadDataService } from '../../upload-data.service';
+import { UploadDataService } from '../../upload-data.service';
+import { FileReference } from '../../upload-data-models';
 
 @Component({
   selector: 'app-data-setup-banner',

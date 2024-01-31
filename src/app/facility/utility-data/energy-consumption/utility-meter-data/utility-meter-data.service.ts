@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { BehaviorSubject } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { AdditionalChargesFilters, DetailedChargesFilters, ElectricityDataFilters, EmissionsFilters, GeneralInformationFilters, GeneralUtilityDataFilters } from 'src/app/models/meterDataFilter';
+import { AdditionalChargesFilters, DetailedChargesFilters, ElectricityDataFilters, EmissionsFilters, GeneralInformationFilters, GeneralUtilityDataFilters, VehicleDataFilters } from 'src/app/models/meterDataFilter';
 import { IdbUtilityMeterData } from 'src/app/models/idb';
 import * as _ from 'lodash';
 
@@ -14,7 +14,7 @@ export class UtilityMeterDataService {
 
   tableElectricityFilters: BehaviorSubject<ElectricityDataFilters>;
   tableGeneralUtilityFilters: BehaviorSubject<GeneralUtilityDataFilters>;
-
+  tableVehicleDataFilters: BehaviorSubject<VehicleDataFilters>;
   electricityInputFilters: BehaviorSubject<ElectricityDataFilters>;
 
   constructor(private formBuilder: FormBuilder, private facilityDbService: FacilitydbService) {
@@ -22,7 +22,11 @@ export class UtilityMeterDataService {
     this.tableElectricityFilters = new BehaviorSubject<ElectricityDataFilters>(defaultFilters);
     this.electricityInputFilters = new BehaviorSubject<ElectricityDataFilters>(defaultFilters);
     let defaultGeneralFilters: GeneralUtilityDataFilters = this.getDefaultGeneralFilters();
-    this.tableGeneralUtilityFilters = new BehaviorSubject<GeneralUtilityDataFilters>(defaultGeneralFilters)
+    this.tableGeneralUtilityFilters = new BehaviorSubject<GeneralUtilityDataFilters>(defaultGeneralFilters);
+
+    let defaultVehicleFilters: VehicleDataFilters = this.getDefaultVehicleFilters();
+    this.tableVehicleDataFilters = new BehaviorSubject<VehicleDataFilters>(defaultVehicleFilters);
+
     this.facilityDbService.selectedFacility.subscribe(selectedFacility => {
       if (selectedFacility) {
         if (selectedFacility.electricityInputFilters) {
@@ -36,6 +40,10 @@ export class UtilityMeterDataService {
 
         if (selectedFacility.tableGeneralUtilityFilters) {
           this.tableGeneralUtilityFilters.next(selectedFacility.tableGeneralUtilityFilters)
+        }
+
+        if (selectedFacility.tableVehicleDataFilters) {
+          this.tableVehicleDataFilters.next(selectedFacility.tableVehicleDataFilters);
         }
       }
     });
@@ -124,6 +132,18 @@ export class UtilityMeterDataService {
     }
   }
 
+  getDefaultVehicleFilters(): VehicleDataFilters {
+    return {
+      totalEnergy: true,
+      totalCost: true,
+      mobileBiogenicEmissions: true,
+      mobileCarbonEmissions: false,
+      mobileOtherEmissions: false,
+      mobileTotalEmissions: true,
+      otherCharge: true
+    }
+  }
+
   getElectricityMeterDataForm(meterData: IdbUtilityMeterData): FormGroup {
     //need to use date string for calander to work in form
     let dateString: string;
@@ -198,7 +218,7 @@ export class UtilityMeterDataService {
   }
 
 
-  getGeneralMeterDataForm(meterData: IdbUtilityMeterData, displayVolumeInput: boolean, displayEnergyInput: boolean): FormGroup {
+  getGeneralMeterDataForm(meterData: IdbUtilityMeterData, displayVolumeInput: boolean, displayEnergyInput: boolean, displayHeatCapacity: boolean, displayFuelEfficiency: boolean): FormGroup {
     //need to use date string for calander to work in form 
     let dateString: string;
     if (meterData.readDate && isNaN(new Date(meterData.readDate).getTime()) == false) {
@@ -214,7 +234,18 @@ export class UtilityMeterDataService {
     if (displayEnergyInput) {
       totalEnergyUseValidators = [Validators.required, Validators.min(0)];
     }
-    return this.formBuilder.group({
+
+    let heatCapacityValidators: Array<ValidatorFn> = [];
+    if (displayHeatCapacity) {
+      heatCapacityValidators = [Validators.required, Validators.min(0)];
+    }
+
+    let vehicleFuelEfficiencyValidators: Array<ValidatorFn> = [];
+    if (displayFuelEfficiency) {
+      vehicleFuelEfficiencyValidators = [Validators.required, Validators.min(0)];
+    }
+
+    let form: FormGroup = this.formBuilder.group({
       readDate: [dateString, Validators.required],
       totalVolume: [meterData.totalVolume, totalVolumeValidators],
       totalEnergyUse: [meterData.totalEnergyUse, totalEnergyUseValidators],
@@ -222,8 +253,13 @@ export class UtilityMeterDataService {
       commodityCharge: [meterData.commodityCharge],
       deliveryCharge: [meterData.deliveryCharge],
       otherCharge: [meterData.otherCharge],
-      isEstimated: [meterData.isEstimated || false]
+      isEstimated: [meterData.isEstimated || false],
+      heatCapacity: [meterData.heatCapacity, heatCapacityValidators],
+      vehicleFuelEfficiency: [meterData.vehicleFuelEfficiency, vehicleFuelEfficiencyValidators]
     });
+    form.controls.heatCapacity.disable();
+    form.controls.vehicleFuelEfficiency.disable();
+    return form;
   }
 
   updateGeneralMeterDataFromForm(meterData: IdbUtilityMeterData, form: FormGroup): IdbUtilityMeterData {
@@ -237,6 +273,8 @@ export class UtilityMeterDataService {
     meterData.deliveryCharge = form.controls.deliveryCharge.value;
     meterData.otherCharge = form.controls.otherCharge.value;
     meterData.isEstimated = form.controls.isEstimated.value;
+    meterData.heatCapacity = form.controls.heatCapacity.value;
+    meterData.vehicleFuelEfficiency = form.controls.vehicleFuelEfficiency.value;
     return meterData;
   }
 }

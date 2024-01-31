@@ -1,8 +1,10 @@
+import { FuelTypeOption } from '../shared/fuel-options/fuelTypeOption';
 import { AccountAnalysisSetupErrors } from './accountAnalysis';
 import { AnalysisCategory, AnalysisGroup, AnalysisSetupErrors } from './analysis';
 import { MonthlyData } from './calanderization';
 import { FacilityClassification, MeterPhase, MeterSource, ReportType, WaterDischargeType, WaterIntakeType } from './constantsAndTypes';
-import { ElectricityDataFilters, GeneralUtilityDataFilters } from './meterDataFilter';
+import { GlobalWarmingPotential } from './globalWarmingPotentials';
+import { ElectricityDataFilters, GeneralUtilityDataFilters, VehicleDataFilters } from './meterDataFilter';
 import { BetterClimateReportSetup, BetterPlantsReportSetup, DataOverviewReportSetup, PerformanceReportSetup } from './overview-report';
 import { SustainabilityQuestions } from './sustainabilityQuestions';
 
@@ -67,6 +69,7 @@ export interface IdbFacility {
     tableElectricityFilters?: ElectricityDataFilters,
     electricityInputFilters?: ElectricityDataFilters,
     tableGeneralUtilityFilters?: GeneralUtilityDataFilters,
+    tableVehicleDataFilters?: VehicleDataFilters,
     //units
     unitsOfMeasure: string,
     energyUnit: string,
@@ -137,7 +140,7 @@ export interface IdbUtilityMeter {
     fuel?: string
     visible?: boolean
     importWizardName?: string
-    meterReadingDataApplication?: "backward" | "fullMonth" | 'fullYear',
+    meterReadingDataApplication?: MeterReadingDataApplication,
     unitsDifferent?: boolean,
     ignoreDuplicateMonths?: boolean,
     ignoreMissingMonths?: boolean,
@@ -154,7 +157,17 @@ export interface IdbUtilityMeter {
     isValid?: boolean,
     skipImport?: boolean,
     waterIntakeType?: WaterIntakeType,
-    waterDischargeType?: WaterDischargeType
+    waterDischargeType?: WaterDischargeType,
+    vehicleCategory?: number,
+    vehicleType?: number,
+    vehicleCollectionType?: number,
+    vehicleCollectionUnit?: string,
+    vehicleFuel?: string,
+    vehicleFuelEfficiency?: number,
+    vehicleDistanceUnit?: string
+    globalWarmingPotentialOption?: number,
+    globalWarmingPotential?: number
+
 }
 
 export interface IdbUtilityMeterData {
@@ -175,13 +188,21 @@ export interface IdbUtilityMeterData {
     checked: boolean,
     meterNumber?: string,
     totalImportConsumption?: number
+
+    //TODO: Check emissions usage for meters...
     totalMarketEmissions?: number,
     totalLocationEmissions?: number,
     RECs?: number,
     excessRECs?: number,
     excessRECsEmissions?: number,
     isEstimated?: boolean,
-
+    //vehicle emissions
+    mobileBiogenicEmissions?: number,
+    mobileCarbonEmissions?: number,
+    mobileOtherEmissions?: number,
+    mobileTotalEmissions?: number,
+    processEmissions?: number,
+    fugitiveEmissions?: number,
 
     //electricity
     totalRealDemand?: number,
@@ -208,7 +229,11 @@ export interface IdbUtilityMeterData {
     otherCharge?: number
     //non-electricity
     demandUsage?: number,
-    demandCharge?: number
+    demandCharge?: number,
+
+    heatCapacity?:  number,
+    vehicleFuelEfficiency?: number,
+
 }
 
 export interface IdbPredictorEntry {
@@ -252,8 +277,9 @@ export interface PredictorData {
     weatherDataWarning?: boolean
 }
 
-export type PredictorType = 'Standard' | 'Conversion' | 'Math' | 'Weather'
-export type WeatherDataType = 'HDD' | 'CDD'
+export type PredictorType = 'Standard' | 'Conversion' | 'Math' | 'Weather';
+export type WeatherDataType = 'HDD' | 'CDD';
+export type MeterReadingDataApplication = "backward" | "fullMonth" | "fullYear";
 
 export interface IdbAccountReport {
     id?: number,
@@ -333,4 +359,18 @@ export interface IdbCustomEmissionsItem {
     residualEmissionRates: Array<{ co2Emissions: number, year: number }>,
 }
 
+export interface IdbCustomFuel extends FuelTypeOption {
+    id?: number,
+    accountId: string,
+    date: Date,
+    guid: string,
+    phase: MeterPhase,
+    directEmissionsRate: boolean
+}
 
+export interface IdbCustomGWP extends GlobalWarmingPotential {
+    id?: number,
+    accountId: string,
+    date: Date,
+    guid: string
+}

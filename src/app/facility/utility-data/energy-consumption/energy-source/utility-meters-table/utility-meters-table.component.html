@@ -30,31 +30,17 @@
             <thead class="sortable">
                 <tr>
                     <th (click)="setOrderDataField('name')" [ngClass]="{'active': orderDataField == 'name'}">Name</th>
+                    <!-- <th (click)="setOrderDataField('meterNumber')"
+                        [ngClass]="{'active': orderDataField == 'meterNumber'}">
+                        Meter #</th> -->
                     <th (click)="setOrderDataField('source')" [ngClass]="{'active': orderDataField == 'source'}">Source
                     </th>
-                    <!--<th><i>Group</i></th>-->
-                    <th (click)="setOrderDataField('meterNumber')"
-                        [ngClass]="{'active': orderDataField == 'meterNumber'}">
-                        Meter #</th>
-                    <th (click)="setOrderDataField('accountNumber')"
-                        [ngClass]="{'active': orderDataField == 'accountNumber'}">Account #</th>
-                    <th (click)="setOrderDataField('location')" [ngClass]="{'active': orderDataField == 'location'}">
-                        Building / Location</th>
-                    <th (click)="setOrderDataField('supplier')" [ngClass]="{'active': orderDataField == 'supplier'}">
-                        Utility
-                        Supplier</th>
-                    <th (click)="setOrderDataField('notes')" [ngClass]="{'active': orderDataField == 'notes'}">Notes
+                    <th (click)="setOrderDataField('fuel')" [ngClass]="{'active': orderDataField == 'fuel'}">Fuel
+                    </th>
+                    <th (click)="setOrderDataField('scope')" [ngClass]="{'active': orderDataField == 'scope'}">Scope
                     </th>
                     <th (click)="setOrderDataField('startingUnit')"
                         [ngClass]="{'active': orderDataField == 'startingUnit'}">Collection Units</th>
-                    <!-- <th (click)="setOrderDataField('heatCapacity')"
-                        [ngClass]="{'active': orderDataField == 'heatCapacity'}">Heat Capacity</th> -->
-                    <th (click)="setOrderDataField('scope')" [ngClass]="{'active': orderDataField == 'scope'}">Scope
-                    </th>
-                    <th (click)="setOrderDataField('agreementType')"
-                        [ngClass]="{'active': orderDataField == 'agreementType'}">Agreement Type</th>
-                    <th (click)="setOrderDataField('siteToSource')"
-                        [ngClass]="{'active': orderDataField == 'siteToSource'}">STS</th>
                     <th *ngIf="!copyingTable">Actions</th>
                 </tr>
             </thead>
@@ -64,20 +50,37 @@
                     <td [ngClass]="{'invalid': isMeterInvalid(meter)}">
                         <a (click)="selectEditMeter(meter)">{{meter.name}}</a>
                     </td>
+                    <!-- <td>{{meter.meterNumber}}</td> -->
                     <td>{{meter.source}}</td>
-                    <!--<td>{{meter.group}}</td>-->
-                    <td>{{meter.meterNumber}}</td>
-                    <td>{{meter.accountNumber}}</td>
-                    <td>{{meter.location}}</td>
-                    <td>{{meter.supplier}}</td>
-                    <td>{{meter.notes}}</td>
                     <td>
-                        <span [innerHTML]="meter.startingUnit | settingsLabel"></span>
+                        <ng-container *ngIf="meter.source == 'Other Fuels' || meter.source == 'Other Energy'">
+                            <ng-container *ngIf="meter.scope != 2">
+                                {{meter.fuel}}
+                            </ng-container>
+                            <ng-container *ngIf="meter.scope == 2">
+                                {{meter.vehicleFuel}}
+                            </ng-container>
+                        </ng-container>
+                        <ng-container *ngIf="meter.source != 'Other Fuels' && meter.source != 'Other Energy'">
+                            &mdash;
+                        </ng-container>
                     </td>
-                    <!-- <td>{{meter.heatCapacity}}</td> -->
-                    <td>{{meter.scope | scopeLabel}}</td>
-                    <td>{{meter.agreementType | agreementTypeLabel}}</td>
-                    <td>{{meter.siteToSource}}</td>
+                    <td>    
+                        <span [innerHTML]="meter.scope | scopeLabel"></span>
+                    </td>
+                    <td>
+                        <ng-container *ngIf="meter.scope != 2">
+                            <span [innerHTML]="meter.startingUnit | settingsLabel"></span>
+                        </ng-container>
+                        <ng-container *ngIf="meter.scope == 2">
+                            <ng-container *ngIf="meter.vehicleCollectionType == 1">
+                                <span [innerHTML]="meter.vehicleCollectionUnit | settingsLabel"></span>
+                            </ng-container>
+                            <ng-container *ngIf="meter.vehicleCollectionType == 2">
+                                <span [innerHTML]="meter.vehicleDistanceUnit | settingsLabel"></span>
+                            </ng-container>
+                        </ng-container>
+                    </td>
                     <td class="actions" *ngIf="!copyingTable">
                         <div class="btn-group">
                             <button class="btn btn-sm btn-outline" (click)="selectEditMeter(meter)" title="Edit">

@@ -5,7 +5,7 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
-import { IdbAccount, IdbAccountReport, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from 'src/app/models/idb';
+import { IdbAccount, IdbAccountReport, IdbCustomFuel, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from 'src/app/models/idb';
 import { DataOverviewReportSetup } from 'src/app/models/overview-report';
 import { AccountReportsService } from '../account-reports.service';
 import { Subscription } from 'rxjs';
@@ -15,6 +15,8 @@ import { FacilityOverviewData } from 'src/app/calculations/dashboard-calculation
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
+import { setEmissionsForCalanderizedMeters } from 'src/app/calculations/emissions-calculations/emissions';
+import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
 
 @Component({
   selector: 'app-data-overview-report',
@@ -46,7 +48,8 @@ export class DataOverviewReportComponent {
     private utilityMeterDbService: UtilityMeterdbService,
     private accountReportsService: AccountReportsService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private eGridService: EGridService) {
+    private eGridService: EGridService,
+    private customFuelDbService: CustomFuelDbService) {
 
   }
 
@@ -97,7 +100,7 @@ export class DataOverviewReportComponent {
     let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == facilityId });
     let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
     let dataOverviewFacility: DataOverviewFacility = this.initDataOverviewFacility(facility, startDate, endDate);
-
+    let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
     if (typeof Worker !== 'undefined') {
       this.facilitiesWorker = new Worker(new URL('src/app/web-workers/facility-overview.worker', import.meta.url));
       this.facilitiesWorker.onmessage = ({ data }) => {
@@ -125,14 +128,16 @@ export class DataOverviewReportComponent {
         meters: facilityMeters,
         meterData: meterData,
         inOverview: false,
-        co2Emissions: this.eGridService.co2Emissions
+        co2Emissions: this.eGridService.co2Emissions,
+        customFuels: customFuels
       });
 
 
 
     } else {
       // Web Workers are not supported in this environment.
-      this.accountData.calanderizedMeters = getCalanderizedMeterData(facilityMeters, meterData, this.account, false, { energyIsSource: this.overviewReport.energyIsSource, neededUnits: undefined });
+      dataOverviewFacility.calanderizedMeters = getCalanderizedMeterData(facilityMeters, meterData, this.account, false, { energyIsSource: this.overviewReport.energyIsSource, neededUnits: undefined });
+      dataOverviewFacility.calanderizedMeters = setEmissionsForCalanderizedMeters(dataOverviewFacility.calanderizedMeters, this.overviewReport.energyIsSource, [facility], this.eGridService.co2Emissions, customFuels);
       dataOverviewFacility.facilityOverviewData = new FacilityOverviewData(dataOverviewFacility.calanderizedMeters, dataOverviewFacility.dateRange, facility);
       dataOverviewFacility.utilityUseAndCost = new UtilityUseAndCost(dataOverviewFacility.calanderizedMeters, dataOverviewFacility.dateRange);
       this.facilitiesData.push(dataOverviewFacility);
@@ -157,6 +162,7 @@ export class DataOverviewReportComponent {
     let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
     let startDate: Date = new Date(selectedReport.startYear, selectedReport.startMonth, 1);
     let endDate: Date = new Date(selectedReport.endYear, selectedReport.endMonth, 1);
+    let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
 
 
     this.accountData = this.initDataOverviewAccount(this.account, startDate, endDate);
@@ -185,11 +191,13 @@ export class DataOverviewReportComponent {
         meterData: meterData,
         account: this.account,
         energyIsSource: this.overviewReport.energyIsSource,
-        co2Emissions: this.eGridService.co2Emissions
+        co2Emissions: this.eGridService.co2Emissions,
+        customFuels: customFuels
       });
     } else {
       // Web Workers are not supported in this environment.
       this.accountData.calanderizedMeters = getCalanderizedMeterData(meters, meterData, this.account, false, { energyIsSource: this.overviewReport.energyIsSource, neededUnits: undefined });
+      this.accountData.calanderizedMeters = setEmissionsForCalanderizedMeters(this.accountData.calanderizedMeters, this.overviewReport.energyIsSource, includedFacilities, this.eGridService.co2Emissions, customFuels);
       this.accountData.accountOverviewData = new AccountOverviewData(this.accountData.calanderizedMeters, facilities, this.account, this.accountData.dateRange);
       this.accountData.utilityUseAndCost = new UtilityUseAndCost(this.accountData.calanderizedMeters, this.accountData.dateRange);
       this.calculatingAccounts = false;

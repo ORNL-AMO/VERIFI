@@ -4,9 +4,11 @@ import { Subscription } from 'rxjs';
 import { IdbFacility } from 'src/app/models/idb';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { SettingsFormsService } from 'src/app/shared/settings-forms/settings-forms.service';
-import { FileReference, UploadDataService } from 'src/app/upload-data/upload-data.service';
+import { UploadDataService } from 'src/app/upload-data/upload-data.service';
 import { SetupWizardService } from '../setup-wizard.service';
 import * as XLSX from 'xlsx';
+import { FileReference } from 'src/app/upload-data/upload-data-models';
+import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 
 @Component({
   selector: 'app-setup-facilities',
@@ -37,7 +39,8 @@ export class SetupFacilitiesComponent implements OnInit {
   constructor(private setupWizardService: SetupWizardService, private sharedDataService: SharedDataService,
     private router: Router, private settingsFormService: SettingsFormsService,
     private uploadDataService: UploadDataService,
-    private cd: ChangeDetectorRef) { }
+    private cd: ChangeDetectorRef,
+    private toastNotificationService: ToastNotificationsService) { }
 
   ngOnInit(): void {
     this.selectedFacilitySub = this.setupWizardService.selectedFacility.subscribe(val => {
@@ -46,7 +49,7 @@ export class SetupFacilitiesComponent implements OnInit {
         this.setValidation(this.selectedFacility);
         this.setUnitsClass();
         this.setReportsClass();
-      }else{
+      } else {
         this.setupWizardService.canContinue.next(false);
       }
     });
@@ -61,9 +64,9 @@ export class SetupFacilitiesComponent implements OnInit {
 
     this.templateSub = this.setupWizardService.facilityTemplateWorkbook.subscribe(workbook => {
       this.hasTemplate = (workbook != undefined);
-      if(this.hasTemplate){
+      if (this.hasTemplate) {
         this.setupWizardService.canContinue.next(true);
-      }else if(this.facilities.length == 0){
+      } else if (this.facilities.length == 0) {
         this.setupWizardService.canContinue.next(false);
       }
     })
@@ -142,12 +145,20 @@ export class SetupFacilitiesComponent implements OnInit {
             reader.onload = (e: any) => {
               const bstr: string = e.target.result;
               let workBook: XLSX.WorkBook = XLSX.read(bstr, { type: 'binary', cellDates: true });
-              let isTemplate: boolean = this.uploadDataService.checkSheetNamesForTemplate(workBook.SheetNames);
-              if (!isTemplate) {
+              let isTemplate: "V1" | "V2" | "Non-template" = this.uploadDataService.checkSheetNamesForTemplate(workBook.SheetNames);
+              if (isTemplate == "Non-template") {
                 this.fileUploadError = 'File selected is not a VERIFI template. Please upload template file.'
-              }else{
-                this.fileUploadError = undefined;
-                this.setupWizardService.facilityTemplateWorkbook.next(workBook);
+              } else {
+                try {
+                  let fileReference: FileReference = this.uploadDataService.getFileReference(file, workBook, true);
+                  this.fileUploadError = undefined;
+                  this.setupWizardService.facilityTemplateWorkbook.next(workBook);
+                } catch (err) {
+                  console.log(err);
+                  this.fileUploadError = 'No facilities found in template.'
+                  this.toastNotificationService.showToast('An Error Occured!', "No facilities found in template. Facilities needed.", 10000, false, "alert-danger", false);
+                }
+
               }
             };
             reader.readAsBinaryString(file);
@@ -159,16 +170,16 @@ export class SetupFacilitiesComponent implements OnInit {
     }
   }
 
-  resetOption(){
+  resetOption() {
     this.setupWizardService.facilityTemplateWorkbook.next(undefined);
   }
 
-  
-  setDragEnter(){
+
+  setDragEnter() {
     this.dragOver = true;
   }
 
-  setDragOut(){
+  setDragOut() {
     this.dragOver = false;
   }
 

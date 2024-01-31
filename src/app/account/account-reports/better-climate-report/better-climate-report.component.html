@@ -6,7 +6,7 @@
     <div class="report" [ngClass]="{'print': print}" *ngIf="betterClimateReportSetup.includeAbsoluteEmissions">
         <app-absolute-emissions-table [yearDetails]="betterClimateReport.portfolioYearDetails" [cellWidth]="cellWidth"
             [betterClimateReportSetup]="betterClimateReportSetup"></app-absolute-emissions-table>
-        <app-absolute-emissions-chart
+        <app-absolute-emissions-chart [emissionsDisplay]="betterClimateReportSetup.emissionsDisplay"
             [yearDetails]="betterClimateReportUnfiltered.portfolioYearDetails"></app-absolute-emissions-chart>
     </div>
 
@@ -26,10 +26,18 @@
 
     <div class="report" [ngClass]="{'print': print}" *ngIf="betterClimateReportSetup.includePortfolioEnergyUse">
         <app-total-portfolio-energy-use-table [yearDetails]="betterClimateReport.portfolioYearDetails"
-            [cellWidth]="cellWidth"></app-total-portfolio-energy-use-table>
+            [cellWidth]="cellWidth" [tableType]="'total'"></app-total-portfolio-energy-use-table>
     </div>
-    <!--TODO: Add vehicle emissions to meters-->
-    <!-- <app-vehicle-energy-use-table [yearDetails]="betterClimateReport.portfolioYearDetails" [cellWidth]="cellWidth"></app-vehicle-energy-use-table> -->
+
+    <div class="report" [ngClass]="{'print': print}" *ngIf="betterClimateReportSetup.includeStationaryEnergyUse">
+        <app-total-portfolio-energy-use-table [yearDetails]="betterClimateReport.portfolioYearDetails"
+            [cellWidth]="cellWidth" [tableType]="'stationary'"></app-total-portfolio-energy-use-table>
+    </div>
+
+    <div class="report" [ngClass]="{'print': print}" *ngIf="betterClimateReportSetup.includeVehicleEnergyUse">
+        <app-vehicle-energy-use-table [yearDetails]="betterClimateReport.portfolioYearDetails"
+            [cellWidth]="cellWidth"></app-vehicle-energy-use-table>
+    </div>
 
     <div class="report" [ngClass]="{'print': print}" *ngIf="betterClimateReportSetup.includeCalculationsForGraphs">
         <app-graph-calculations-table [yearDetails]="betterClimateReport.portfolioYearDetails"

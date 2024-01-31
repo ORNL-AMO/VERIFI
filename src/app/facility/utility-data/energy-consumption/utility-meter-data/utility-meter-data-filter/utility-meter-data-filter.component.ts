@@ -1,12 +1,10 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { AdditionalChargesFilters, DetailedChargesFilters, ElectricityDataFilters, EmissionsFilters, GeneralInformationFilters, GeneralUtilityDataFilters } from 'src/app/models/meterDataFilter';
+import { AdditionalChargesFilters, DetailedChargesFilters, ElectricityDataFilters, EmissionsFilters, GeneralInformationFilters, GeneralUtilityDataFilters, VehicleDataFilters } from 'src/app/models/meterDataFilter';
 import { IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
 import { UtilityMeterDataService } from '../utility-meter-data.service';
-import { getIsEnergyUnit } from 'src/app/shared/sharedHelperFuntions';
-import { EditMeterFormService } from '../../energy-source/edit-meter-form/edit-meter-form.service';
-import { MeterSource } from 'src/app/models/constantsAndTypes';
+import { checkShowEmissionsOutputRate, getIsEnergyUnit } from 'src/app/shared/sharedHelperFuntions';
 
 @Component({
   selector: 'app-utility-meter-data-filter',
@@ -26,8 +24,9 @@ export class UtilityMeterDataFilterComponent implements OnInit {
   generalUtilityDataFilters: GeneralUtilityDataFilters;
   displayVolumeInput: boolean;
   showEmissions: boolean;
+  vehicleDataFilters: VehicleDataFilters;
   constructor(private utilityMeterDataService: UtilityMeterDataService, private facilityDbService: FacilitydbService,
-    private dbChangesService: DbChangesService, private editMeterFormService: EditMeterFormService) { }
+    private dbChangesService: DbChangesService) { }
 
   ngOnInit(): void {
   }
@@ -44,11 +43,19 @@ export class UtilityMeterDataFilterComponent implements OnInit {
       this.detailedChargesFilters = electricityDataFilters.detailedCharges;
       this.emissionsFilters = electricityDataFilters.emissionsFilters;
       this.generalInformationFilters = electricityDataFilters.generalInformationFilters;
-    } else {
+    } else if (this.meter.scope != 2) {
       this.generalUtilityDataFilters = this.utilityMeterDataService.tableGeneralUtilityFilters.getValue();
     }
-    this.showEmissions = this.editMeterFormService.checkShowEmissionsOutputRate(this.meter);
-    this.displayVolumeInput = (getIsEnergyUnit(this.meter.startingUnit) == false);
+
+    if (this.meter.scope == 2) {
+      this.vehicleDataFilters = this.utilityMeterDataService.tableVehicleDataFilters.getValue();
+      this.showEmissions = true;
+      this.displayVolumeInput = true;
+
+    } else {
+      this.showEmissions = checkShowEmissionsOutputRate(this.meter);
+      this.displayVolumeInput = (getIsEnergyUnit(this.meter.startingUnit) == false);
+    }
   }
 
   async save() {
@@ -67,9 +74,13 @@ export class UtilityMeterDataFilterComponent implements OnInit {
       } else {
         selectedFacility.electricityInputFilters = electricityDataFilters;
       }
-    } else {
+    } else if (this.meter.scope != 2) {
       if (this.filterType == 'table') {
         selectedFacility.tableGeneralUtilityFilters = this.generalUtilityDataFilters;
+      }
+    } else if (this.meter.scope == 2) {
+      if (this.filterType == 'table') {
+        selectedFacility.tableVehicleDataFilters = this.vehicleDataFilters;
       }
     }
     await this.dbChangesService.updateFacilities(selectedFacility);
@@ -112,7 +123,7 @@ export class UtilityMeterDataFilterComponent implements OnInit {
         billedDemand: true
 
       }
-    } else {
+    } else if (this.meter.scope != 2) {
       this.generalUtilityDataFilters = {
         totalVolume: true,
         totalCost: true,
@@ -121,6 +132,16 @@ export class UtilityMeterDataFilterComponent implements OnInit {
         commodityCharge: true,
         deliveryCharge: true,
         otherCharge: true,
+      }
+    } else if (this.meter.scope == 2) {
+      this.vehicleDataFilters = {
+        totalEnergy: true,
+        totalCost: true,
+        otherCharge: true,
+        mobileBiogenicEmissions: true,
+        mobileCarbonEmissions: true,
+        mobileOtherEmissions: true,
+        mobileTotalEmissions: true,
       }
     }
     await this.save();
@@ -163,7 +184,7 @@ export class UtilityMeterDataFilterComponent implements OnInit {
         billedDemand: false
 
       }
-    } else {
+    } else if (this.meter.scope != 2) {
       this.generalUtilityDataFilters = {
         totalVolume: false,
         totalCost: false,
@@ -172,6 +193,16 @@ export class UtilityMeterDataFilterComponent implements OnInit {
         commodityCharge: false,
         deliveryCharge: false,
         otherCharge: false,
+      }
+    } else if (this.meter.scope == 2) {
+      this.vehicleDataFilters = {
+        totalEnergy: false,
+        totalCost: false,
+        otherCharge: false,
+        mobileBiogenicEmissions: false,
+        mobileCarbonEmissions: false,
+        mobileOtherEmissions: false,
+        mobileTotalEmissions: false,
       }
     }
     await this.save();

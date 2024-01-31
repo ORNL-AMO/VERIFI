@@ -48,7 +48,7 @@ export class MeterGroupingService {
       meterGroupTypes = this.addEnergyMetersWithoutGroups(waterMeters, 'Water', meterGroupTypes);
     }
     //Other
-    let otherMeters: Array<CalanderizedMeter> = metersWithoutGroups.filter(cMeter => { return cMeter.meter.source == 'Other Utility' });
+    let otherMeters: Array<CalanderizedMeter> = metersWithoutGroups.filter(cMeter => { return cMeter.meter.source == 'Other' });
     if (otherMeters.length != 0) {
       meterGroupTypes = this.addEnergyMetersWithoutGroups(otherMeters, 'Other', meterGroupTypes);
     }
@@ -161,12 +161,25 @@ export class MeterGroupingService {
         energyUse: _.sumBy(filteredData, 'energyUse'),
         energyCost: _.sumBy(filteredData, 'energyCost'),
         date: startDate,
-        marketEmissions: _.sumBy(filteredData, 'marketEmissions'),
-        locationEmissions: _.sumBy(filteredData, 'locationEmissions'),
-        RECs: _.sumBy(filteredData, 'RECs'),
-        excessRECs: _.sumBy(filteredData, 'excessRECs'), 
-        excessRECsEmissions: _.sumBy(filteredData, 'excessRECsEmissions'),
-        readingType: undefined
+        readingType: undefined,
+        RECs: _.sumBy(filteredData, (mData: MonthlyData) => { return mData.RECs }),
+        locationElectricityEmissions: _.sumBy(filteredData, (mData: MonthlyData) => { return mData.locationElectricityEmissions }),
+        marketElectricityEmissions: _.sumBy(filteredData, (mData: MonthlyData) => { return mData.marketElectricityEmissions }),
+        otherScope2Emissions: _.sumBy(filteredData, (mData: MonthlyData) => { return mData.otherScope2Emissions }),
+        scope2LocationEmissions: _.sumBy(filteredData, (mData: MonthlyData) => { return mData.scope2LocationEmissions }),
+        scope2MarketEmissions: _.sumBy(filteredData, (mData: MonthlyData) => { return mData.scope2MarketEmissions }),
+        excessRECs: _.sumBy(filteredData, (mData: MonthlyData) => { return mData.excessRECs }),
+        excessRECsEmissions: _.sumBy(filteredData, (mData: MonthlyData) => { return mData.excessRECsEmissions }),
+        mobileCarbonEmissions: _.sumBy(filteredData, (mData: MonthlyData) => { return mData.mobileCarbonEmissions }),
+        mobileBiogenicEmissions: _.sumBy(filteredData, (mData: MonthlyData) => { return mData.mobileBiogenicEmissions }),
+        mobileOtherEmissions: _.sumBy(filteredData, (mData: MonthlyData) => { return mData.mobileOtherEmissions }),
+        mobileTotalEmissions: _.sumBy(filteredData, (mData: MonthlyData) => { return mData.mobileTotalEmissions }),
+        fugitiveEmissions: _.sumBy(filteredData, (mData: MonthlyData) => { return mData.fugitiveEmissions }),
+        processEmissions: _.sumBy(filteredData, (mData: MonthlyData) => { return mData.processEmissions }),
+        stationaryEmissions: _.sumBy(filteredData, (mData: MonthlyData) => { return mData.stationaryEmissions }),
+        totalScope1Emissions: _.sumBy(filteredData, (mData: MonthlyData) => { return mData.totalScope1Emissions }),
+        totalWithMarketEmissions: _.sumBy(filteredData, (mData: MonthlyData) => { return mData.totalWithMarketEmissions }),
+        totalWithLocationEmissions: _.sumBy(filteredData, (mData: MonthlyData) => { return mData.totalWithLocationEmissions })
       })
       startDate = new Date(startDate.getFullYear(), startDate.getMonth() + 1);
     }

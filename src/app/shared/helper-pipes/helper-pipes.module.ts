@@ -16,6 +16,7 @@ import { YearDisplayPipe } from './year-display.pipe';
 import { AnalysisTypeLabelPipe } from './analysis-type-label.pipe';
 import { TotalPipe } from './total.pipe';
 import { AnalysisCategoryPipe } from './analysis-category.pipe';
+import { EmissionsDisplayPipe } from './emissions-display.pipe';
 
 @NgModule({
   declarations: [
@@ -34,7 +35,8 @@ import { AnalysisCategoryPipe } from './analysis-category.pipe';
     YearDisplayPipe,
     AnalysisTypeLabelPipe,
     TotalPipe,
-    AnalysisCategoryPipe
+    AnalysisCategoryPipe,
+    EmissionsDisplayPipe
   ],
   imports: [
     CommonModule
@@ -55,7 +57,8 @@ import { AnalysisCategoryPipe } from './analysis-category.pipe';
     YearDisplayPipe,
     AnalysisTypeLabelPipe,
     TotalPipe,
-    AnalysisCategoryPipe
+    AnalysisCategoryPipe,
+    EmissionsDisplayPipe
   ]
 })
 export class HelperPipesModule { }

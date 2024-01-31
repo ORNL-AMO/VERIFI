@@ -10,7 +10,7 @@ import { FacilityOverviewData, FacilityOverviewMeter } from 'src/app/calculation
 })
 export class MeterUsageTableComponent {
   @Input()
-  dataType: 'energyUse' | 'emissions' | 'cost' | 'water';
+  dataType: 'energyUse' | 'cost' | 'water';
   @Input()
   waterUnit: string;
   @Input()
@@ -20,28 +20,11 @@ export class MeterUsageTableComponent {
   @Input()
   facilityOverviewData: FacilityOverviewData
 
-  emissionsDisplay: 'market' | 'location';
-  emissionsDisplaySub: Subscription;
-
-  orderByValue: 'energyUsage' | 'energyCost' | 'marketEmissions' | 'consumption';
-  constructor(
-    private facilityOverviewService: FacilityOverviewService) { }
+  orderByValue: 'energyUsage' | 'energyCost' | 'consumption';
+  constructor() { }
 
   ngOnInit(): void {
-
-
-    if (this.dataType == 'emissions') {
-      this.emissionsDisplaySub = this.facilityOverviewService.emissionsDisplay.subscribe(val => {
-        this.emissionsDisplay = val;
-      });
-    }
     this.setOrderByValue();
-  }
-
-  ngOnDestroy() {
-    if (this.emissionsDisplaySub) {
-      this.emissionsDisplaySub.unsubscribe();
-    }
   }
 
   setOrderByValue() {
@@ -49,8 +32,6 @@ export class MeterUsageTableComponent {
       this.orderByValue = 'energyUsage';
     } else if (this.dataType == 'cost') {
       this.orderByValue = 'energyCost';
-    } else if (this.dataType == 'emissions') {
-      this.orderByValue = 'marketEmissions';
     } else if (this.dataType == 'water') {
       this.orderByValue = 'consumption';
     }

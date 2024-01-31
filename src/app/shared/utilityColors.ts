@@ -17,19 +17,27 @@ export const UtilityColors = {
     "Water Discharge": {
         "color": "#0072B2"
     },
-    "Other Utility": {
+    "Other": {
         "color": "#009E73"
     }
 }
 
+export const WaterIntakeColors: Array<string> = [
+    '#1B4F72',
+    '#2E86C1',
+    '#85C1E9',
+    '#424949',
+    '#3498DB',
+    '#707B7C',
+    '#B2BABB',
+];
 
-export const EmissionsColors = {
-    "stationary": "#B9770E",
-    "mobile": "#873600",
-    "fugitive": "#17202A",
-    "process": "#B94A0E",
-    "scope1": "#95A5A6",
-    "scope2Market": "#273746",
-    "scope2Location": "#566573",
-    "allEmissions": "#17202A"
-}
+export const WaterDischargeColors: Array<string> = [
+    '#4A235A',
+    '#7D3C98',
+    '#D2B4DE',
+    '#7B7D7D',
+    '#D0D3D4',
+    '#F0F3F4',
+]
+

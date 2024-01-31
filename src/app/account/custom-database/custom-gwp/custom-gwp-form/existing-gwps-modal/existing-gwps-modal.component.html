@@ -1,0 +1,32 @@
+<div [ngClass]="{'windowOverlay': displayModal}"></div>
+<div class="popup" [class.open]="displayModal">
+    <div class="popup-header">Select Fuel
+        <button class="item-right" (click)="cancelSelectFuel()">x</button>
+    </div>
+    <div class="popup-body">
+        <table class="table table-bordered table-sm table-hover">
+            <thead>
+                <tr>
+                    <th>
+                        Option
+                    </th>
+                    <th>
+                        Global Warming Potential
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let option of globalWarmingPotentials">
+                    <td class="ps-2">
+                        <a class="click-link" (click)="selectOption(option)">
+                            {{option.label}}
+                        </a>
+                    </td>
+                    <td>
+                        {{option.gwp | number}} kg/kg
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

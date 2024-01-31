@@ -187,7 +187,9 @@ export class AccountReportsService {
       skipIntermediateYears: [betterClimateReportSetup.skipIntermediateYears],
       includeEmissionsInTables: [betterClimateReportSetup.includeEmissionsInTables],
       includePercentReductionsInTables: [betterClimateReportSetup.includePercentReductionsInTables],
-      includePercentContributionsInTables: [betterClimateReportSetup.includePercentContributionsInTables]
+      includePercentContributionsInTables: [betterClimateReportSetup.includePercentContributionsInTables],
+      includeVehicleEnergyUse: [betterClimateReportSetup.includeVehicleEnergyUse],
+      includeStationaryEnergyUse: [betterClimateReportSetup.includeStationaryEnergyUse]
     });
     return form;
   }
@@ -203,6 +205,8 @@ export class AccountReportsService {
     betterClimateReportSetup.includeEmissionsInTables = form.controls.includeEmissionsInTables.value;
     betterClimateReportSetup.includePercentReductionsInTables = form.controls.includePercentReductionsInTables.value;
     betterClimateReportSetup.includePercentContributionsInTables = form.controls.includePercentContributionsInTables.value;
+    betterClimateReportSetup.includeVehicleEnergyUse = form.controls.includeVehicleEnergyUse.value;
+    betterClimateReportSetup.includeStationaryEnergyUse = form.controls.includeStationaryEnergyUse.value;
     return betterClimateReportSetup;
   }
 

@@ -68,8 +68,18 @@ export class AnnualFacilityClimateSummaryTableComponent {
     } else {
       this.annualFacilitiesSummaries = _.orderBy(this.annualFacilitiesSummaries, (data: BetterClimateAnnualFacilitySummary) => {
         let betterClimateFacility: BetterClimateYearDetails = data.betterClimateYearDetails.find(summary => { return summary.year == this.orderByYear })
-        return betterClimateFacility[this.orderDataField];
+        return this.getValue(betterClimateFacility);
       }, this.orderByDirection);
+    }
+  }
+
+  getValue(betterClimateFacility: BetterClimateYearDetails){
+    if(this.orderDataField == 'scope1Emissions'){
+      return betterClimateFacility.emissionsResults.totalScope1Emissions;
+    }else if(this.orderDataField == 'scope2LocationEmissions'){
+      return betterClimateFacility.emissionsResults.scope2LocationEmissions;
+    }else if(this.orderDataField == 'scope2MarketEmissions'){
+      return betterClimateFacility.emissionsResults.scope2MarketEmissions;
     }
   }
 }

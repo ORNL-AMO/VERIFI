@@ -45,7 +45,7 @@ export class TopPerformersChartComponent {
           mode: "lines+markers",
           name: 'Corporate',
           x: this.betterClimateReport.portfolioYearDetails.map(data => { return data.year }),
-          y: this.betterClimateReport.portfolioYearDetails.map(data => { return data[this.chartDataOption] }),
+          y: this.betterClimateReport.portfolioYearDetails.map(data => { return this.getValue(data) }),
           line: { dash: 'dot', color: '#17202A', width: 6 },
           marker: {
             size: 8
@@ -99,7 +99,7 @@ export class TopPerformersChartComponent {
     let annualFacilityData: Array<BetterClimateAnnualFacilitySummary> = this.betterClimateReport.annualFacilitiesSummaries.map(data => { return data });
     annualFacilityData = _.orderBy(annualFacilityData, (data: BetterClimateAnnualFacilitySummary) => {
       let yearSummary: BetterClimateYearDetails = data.betterClimateYearDetails.find(summary => { return summary.year == this.betterClimateReport.reportYear })
-      return yearSummary[this.chartDataOption];
+      return this.getValue(yearSummary);
     }, 'desc');
     for (let i = 0; i < this.betterClimateReportSetup.numberOfTopPerformers; i++) {
       let topItem = annualFacilityData[i];
@@ -123,7 +123,7 @@ export class TopPerformersChartComponent {
         mode: "lines+markers",
         name: facilityData.facility.name,
         x: facilityData.betterClimateYearDetails.map(data => { return data.year }),
-        y: facilityData.betterClimateYearDetails.map(data => { return this.getPercentValue(data[this.chartDataOption]) }),
+        y: facilityData.betterClimateYearDetails.map(data => { return this.getPercentValue(this.getValue(data)) }),
         line: { color: facilityData.facility.color, width: 2 },
         marker: {
           size: 4
@@ -133,5 +133,22 @@ export class TopPerformersChartComponent {
       data.push(facilityTrace);
     });
     return data;
+  }
+
+
+  getValue(yearSummary: BetterClimateYearDetails): number {
+    if (this.chartDataOption == 'scope1PercentReductions') {
+      return yearSummary.percentReductions.totalScope1Emissions;
+    } else if (this.chartDataOption == 'scope1ReductionContributionRelative') {
+      return yearSummary.relativeContribution.totalScope1Emissions;
+    } else if (this.chartDataOption == 'scope2MarketPercentReductions') {
+      return yearSummary.percentReductions.scope2MarketEmissions;
+    } else if (this.chartDataOption == 'scope2MarketReductionContributionRelative') {
+      return yearSummary.relativeContribution.scope2MarketEmissions;
+    } else if (this.chartDataOption == 'scope2LocationPercentReductions') {
+      return yearSummary.percentReductions.scope2LocationEmissions;
+    } else if (this.chartDataOption == 'scope2LocationReductionContributionRelative') {
+      return yearSummary.relativeContribution.scope2LocationEmissions;
+    }
   }
 }

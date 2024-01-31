@@ -22,23 +22,31 @@ export class AbsoluteEmissionsTableComponent {
   hasMobile: boolean;
   hasFugitive: boolean;
   hasProcess: boolean;
-  constructor(){
+  hasBiomass: boolean;
+  hasOtherScope2: boolean;
+  constructor() {
 
   }
 
 
-  ngOnInit(){
+  ngOnInit() {
     this.hasStationary = this.yearDetails.find(detail => {
-      return detail.stationaryEmissions != 0;
+      return detail.emissionsResults.stationaryEmissions != 0;
     }) != undefined;
     this.hasMobile = this.yearDetails.find(detail => {
-      return detail.mobileEmissions != 0;
+      return detail.emissionsResults.mobileTotalEmissions != 0;
     }) != undefined;
     this.hasFugitive = this.yearDetails.find(detail => {
-      return detail.fugitiveEmissions != 0;
+      return detail.emissionsResults.fugitiveEmissions != 0;
     }) != undefined;
     this.hasProcess = this.yearDetails.find(detail => {
-      return detail.processEmissions != 0;
+      return detail.emissionsResults.processEmissions != 0;
+    }) != undefined;
+    this.hasBiomass = this.yearDetails.find(detail => {
+      return detail.emissionsResults.mobileBiogenicEmissions != 0;
+    }) != undefined;
+    this.hasOtherScope2 = this.yearDetails.find(detail => {
+      return detail.emissionsResults.otherScope2Emissions != 0;
     }) != undefined;
   }
 

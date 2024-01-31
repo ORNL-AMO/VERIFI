@@ -28,10 +28,29 @@ export function getCalanderizedMeterData(meters: Array<IdbUtilityMeter>, allMete
             showConsumption = calanderizedMeter.find(cMeter => { return cMeter.energyConsumption != cMeter.energyUse }) != undefined;
         }
         let consumptionUnit: string = getUnitFromMeter(meter, accountOrFacility);
-        let showEmissions: boolean = (meter.source == "Electricity" || meter.source == "Natural Gas" || meter.source == "Other Fuels");
+        let showStandardEmissions: boolean = false;
+        let showProcessEmissions: boolean = false;
+        let showFugitiveEmissions: boolean = false;
+        let showMobileEmissions: boolean = false;
+
+        if (meter.source == "Electricity" || meter.source == "Natural Gas") {
+            showStandardEmissions = true;
+        } else if (meter.source == 'Other Fuels') {
+            if (meter.scope == 2) {
+                showMobileEmissions = true;
+            } else {
+                showStandardEmissions = true;
+            }
+        } else if (meter.source == 'Other') {
+            if (meter.scope == 5) {
+                showFugitiveEmissions = true;
+            } else if (meter.scope == 6) {
+                showProcessEmissions = true;
+            }
+        }
 
         let showEnergyUse: boolean;
-        if (meter.source == 'Other Utility') {
+        if (meter.source == 'Other') {
             showEnergyUse = getIsEnergyUnit(meter.startingUnit);
         } else {
             showEnergyUse = getIsEnergyMeter(meter.source);
@@ -44,7 +63,10 @@ export function getCalanderizedMeterData(meters: Array<IdbUtilityMeter>, allMete
             showConsumption: showConsumption,
             showEnergyUse: showEnergyUse,
             energyUnit: calanderizedenergyUnit,
-            showEmissions: showEmissions
+            showStandardEmissions: showStandardEmissions,
+            showFugitiveEmissions: showFugitiveEmissions,
+            showMobileEmissions: showMobileEmissions,
+            showProcessEmissions: showProcessEmissions
         });
     });
     return calanderizedMeterData;
@@ -196,13 +218,13 @@ function calanderizeMeterDataBackwards(meter: IdbUtilityMeter, meterData: Array<
                 readingType = 'metered';
             }
 
-            if(isNaN(totals.totalConsumption)){
+            if (isNaN(totals.totalConsumption)) {
                 totals.totalConsumption = 0;
             }
-            if(isNaN(totals.totalEnergyUse)){
+            if (isNaN(totals.totalEnergyUse)) {
                 totals.totalEnergyUse = 0;
             }
-            if(isNaN(totals.totalCost)){
+            if (isNaN(totals.totalCost)) {
                 totals.totalCost = 0;
             }
             calanderizeData.push({
@@ -214,12 +236,25 @@ function calanderizeMeterDataBackwards(meter: IdbUtilityMeter, meterData: Array<
                 energyUse: totals.totalEnergyUse,
                 energyCost: totals.totalCost,
                 date: new Date(year, month),
-                marketEmissions: 0,
-                locationEmissions: 0,
+                readingType: readingType,
                 RECs: 0,
+                locationElectricityEmissions: 0,
+                marketElectricityEmissions: 0,
+                otherScope2Emissions: 0,
+                scope2LocationEmissions: 0,
+                scope2MarketEmissions: 0,
                 excessRECs: 0,
                 excessRECsEmissions: 0,
-                readingType: readingType
+                mobileCarbonEmissions: 0,
+                mobileBiogenicEmissions: 0,
+                mobileOtherEmissions: 0,
+                mobileTotalEmissions: 0,
+                fugitiveEmissions: 0,
+                processEmissions: 0,
+                stationaryEmissions: 0,
+                totalScope1Emissions: 0,
+                totalWithMarketEmissions: 0,
+                totalWithLocationEmissions: 0,
             });
             startDate.setUTCMonth(startDate.getUTCMonth() + 1);
         }
@@ -383,12 +418,25 @@ function calanderizeMeterDataFullMonth(meter: IdbUtilityMeter, meterData: Array<
                 energyUse: totalEnergyUse,
                 energyCost: totalCost,
                 date: new Date(year, month),
-                marketEmissions: 0,
-                locationEmissions: 0,
+                readingType: readingType,
                 RECs: 0,
+                locationElectricityEmissions: 0,
+                marketElectricityEmissions: 0,
+                otherScope2Emissions: 0,
+                scope2LocationEmissions: 0,
+                scope2MarketEmissions: 0,
                 excessRECs: 0,
                 excessRECsEmissions: 0,
-                readingType: readingType
+                mobileCarbonEmissions: 0,
+                mobileBiogenicEmissions: 0,
+                mobileOtherEmissions: 0,
+                mobileTotalEmissions: 0,
+                fugitiveEmissions: 0,
+                processEmissions: 0,
+                stationaryEmissions: 0,
+                totalScope1Emissions: 0,
+                totalWithMarketEmissions: 0,
+                totalWithLocationEmissions: 0,
             });
             startDate.setUTCMonth(startDate.getUTCMonth() + 1);
         }
@@ -407,9 +455,19 @@ function calanderizeFullYear(meter: IdbUtilityMeter, meterData: Array<IdbUtility
             return new Date(mData.readDate).getFullYear() == year
         });
 
-        let monthlyEnergyUse: number = _.sumBy(currentYearData, 'totalEnergyUse') / 12;
-        let monthlyCost: number = _.sumBy(currentYearData, 'totalCost') / 12;
-        let monthlyConsumption: number = _.sumBy(currentYearData, 'totalEnergyUse') / 12;
+        let monthlyEnergyUse: number = _.sumBy(currentYearData, (yearData: IdbUtilityMeterData) => { return yearData.totalEnergyUse }) / 12;
+        let monthlyCost: number = _.sumBy(currentYearData, (yearData: IdbUtilityMeterData) => { return yearData.totalCost }) / 12;
+        let isEnteredAsEnergy: boolean = getIsEnergyUnit(meter.startingUnit);
+        let monthlyConsumption: number = _.sumBy(currentYearData, (yearData: IdbUtilityMeterData) => {
+            if (isEnteredAsEnergy) {
+                return yearData.totalEnergyUse;
+            } else {
+                return yearData.totalVolume
+            }
+        }) / 12;
+        if (isNaN(monthlyConsumption)) {
+            monthlyConsumption = 0;
+        }
         let readingType: 'mixed' | 'metered' | 'estimated';
         let readingsEstimated: Array<boolean> = currentYearData.map(reading => { return reading.isEstimated });
         let uniqEstimated: Array<boolean> = _.uniq(readingsEstimated);
@@ -436,12 +494,25 @@ function calanderizeFullYear(meter: IdbUtilityMeter, meterData: Array<IdbUtility
                 energyUse: monthlyEnergyUse,
                 energyCost: monthlyCost,
                 date: new Date(year, month.monthNumValue),
-                marketEmissions: 0,
-                locationEmissions: 0,
+                readingType: readingType,
                 RECs: 0,
+                locationElectricityEmissions: 0,
+                marketElectricityEmissions: 0,
+                otherScope2Emissions: 0,
+                scope2LocationEmissions: 0,
+                scope2MarketEmissions: 0,
                 excessRECs: 0,
                 excessRECsEmissions: 0,
-                readingType: readingType
+                mobileCarbonEmissions: 0,
+                mobileBiogenicEmissions: 0,
+                mobileOtherEmissions: 0,
+                mobileTotalEmissions: 0,
+                fugitiveEmissions: 0,
+                processEmissions: 0,
+                stationaryEmissions: 0,
+                totalScope1Emissions: 0,
+                totalWithMarketEmissions: 0,
+                totalWithLocationEmissions: 0,
             });
         });
     });

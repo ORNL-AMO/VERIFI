@@ -4,7 +4,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbFacility } from 'src/app/models/idb';
-import { ColumnItem, FacilityGroup, FileReference, UploadDataService } from '../../../upload-data.service';
+import { UploadDataService } from '../../../upload-data.service';
+import { ColumnItem, FacilityGroup, FileReference } from 'src/app/upload-data/upload-data-models';
 
 @Component({
   selector: 'app-set-facility-meters',
