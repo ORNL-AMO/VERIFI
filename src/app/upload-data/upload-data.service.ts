@@ -538,6 +538,9 @@ export class UploadDataService {
         let existingFacilityPredictorData: Array<PredictorData> = new Array();
         if (facilityPredictorEntries.length != 0) {
           existingFacilityPredictorData = facilityPredictorEntries[0].predictors.map(predictor => { return predictor });
+          existingFacilityPredictorData.forEach(predictorData => {
+            predictorData.amount = undefined;
+          });
         }
         if (group.groupItems.length != 0) {
           group.groupItems.forEach((predictorItem) => {
