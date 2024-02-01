@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { FormControl, FormGroup } from '@angular/forms';
+import { FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { EditMeterFormService } from 'src/app/facility/utility-data/energy-consumption/energy-source/edit-meter-form/edit-meter-form.service';
+import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from 'src/app/models/idb';
 import { FileReference } from 'src/app/upload-data/upload-data-models';
@@ -39,8 +40,9 @@ export class ManageMetersComponent implements OnInit {
   };
   paramsSub: Subscription;
   editMeterForm: FormGroup;
-  editMeterIndex: number;
+  editMeter: IdbUtilityMeter;
   editMeterFacility: IdbFacility;
+  editMeterPrevGUID: string;
   metersIncluded: boolean;
   facilityGroups: Array<{
     facilityId: string,
@@ -50,9 +52,12 @@ export class ManageMetersComponent implements OnInit {
   calanderizeAllOnToggle: 'fullYear' | 'backward' | 'fullMonth' = 'fullMonth';
   hasNoCalanderizationSelection: boolean = false;
   skipAll: boolean = false;
+  showExisting: boolean = false;
+  existingMeterOptions: Array<IdbUtilityMeter> = [];
   constructor(private activatedRoute: ActivatedRoute, private uploadDataService: UploadDataService,
     private editMeterFormService: EditMeterFormService, private router: Router,
-    private utilityMeterGroupDbService: UtilityMeterGroupdbService) { }
+    private utilityMeterGroupDbService: UtilityMeterGroupdbService,
+    private utilityMeterDbService: UtilityMeterdbService) { }
 
   ngOnInit(): void {
     this.paramsSub = this.activatedRoute.parent.params.subscribe(param => {
@@ -110,21 +115,39 @@ export class ManageMetersComponent implements OnInit {
     return;
   }
 
-  editMeter(meter: IdbUtilityMeter) {
-    this.editMeterIndex = this.fileReference.meters.findIndex(fileMeter => { return fileMeter.guid == meter.guid });
+  setEditMeter(meter: IdbUtilityMeter) {
+    if (meter.id == undefined) {
+      this.editMeterPrevGUID = meter.guid;
+    }
+    this.editMeter = this.fileReference.meters.find(fileMeter => { return fileMeter.guid == meter.guid });
     this.editMeterFacility = this.fileReference.importFacilities.find(facility => { return facility.guid == meter.facilityId });
     this.editMeterForm = this.editMeterFormService.getFormFromMeter(meter);
   }
 
   cancelEdit() {
+    this.editMeter = undefined;
     this.editMeterForm = undefined;
     this.editMeterFacility = undefined;
-    this.editMeterIndex = undefined;
+    this.editMeterPrevGUID = undefined;
   }
 
   submitMeter() {
-    this.fileReference.meters[this.editMeterIndex] = this.editMeterFormService.updateMeterFromForm(this.fileReference.meters[this.editMeterIndex], this.editMeterForm);
-    this.fileReference.meters[this.editMeterIndex].isValid = this.editMeterFormService.getFormFromMeter(this.fileReference.meters[this.editMeterIndex]).valid;
+    if (this.editMeter.guid != this.editMeterPrevGUID) {
+      //need to update data meter id when changed.
+      this.fileReference.meterData.forEach(mData => {
+        if (mData.meterId == this.editMeterPrevGUID) {
+          mData.guid = this.editMeter.guid;
+        }
+      });
+    }
+    let editMeterIndex: number;
+    if (this.editMeterPrevGUID) {
+      editMeterIndex = this.fileReference.meters.findIndex(fileMeter => { return fileMeter.guid == this.editMeterPrevGUID });
+    } else {
+      editMeterIndex = this.fileReference.meters.findIndex(fileMeter => { return fileMeter.guid == this.editMeter.guid });
+    }
+    this.fileReference.meters[editMeterIndex] = this.editMeterFormService.updateMeterFromForm(this.editMeter, this.editMeterForm);
+    this.fileReference.meters[editMeterIndex].isValid = this.editMeterFormService.getFormFromMeter(this.fileReference.meters[editMeterIndex]).valid;
     this.fileReference.meterData = this.uploadDataService.getMeterDataEntries(this.fileReference.workbook, this.fileReference.meters);
     this.cancelEdit();
     this.setValidMeters();
@@ -285,5 +308,26 @@ export class ManageMetersComponent implements OnInit {
       meter.skipImport = this.skipAll;
     });
     this.setValidMeters();
+  }
+
+  setShowExisting() {
+    let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+    let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(aMeter => {
+      return aMeter.facilityId == this.editMeter.facilityId;
+    });
+    let existingMetersInUse: Array<string> = this.fileReference.meters.flatMap(meter => {
+      return meter.guid
+    });
+    this.existingMeterOptions = facilityMeters.filter(fMeter => {
+      return !existingMetersInUse.includes(fMeter.guid);
+    });
+    this.showExisting = true;
+  }
+
+
+  selectExistingMeter(meter: IdbUtilityMeter) {
+    this.editMeter = meter;
+    this.editMeterForm = this.editMeterFormService.getFormFromMeter(meter);
+    this.showExisting = false;
   }
 }
