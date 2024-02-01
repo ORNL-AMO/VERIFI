@@ -94,7 +94,7 @@
                     {{getFacilityName(meter.facilityId)}}
                 </td>
                 <td>
-                    <a class="click-link" (click)="editMeter(meter)" *ngIf="!meter.skipImport">{{meter.name}}
+                    <a class="click-link" (click)="setEditMeter(meter)" *ngIf="!meter.skipImport">{{meter.name}}
                         <span *ngIf="!meter.isValid">(click to edit)</span>
                     </a>
                     <span *ngIf="meter.skipImport">{{meter.name}}</span>
@@ -153,10 +153,37 @@
     </table>
 </div>
 
-<app-edit-meter-form *ngIf="editMeterForm" [meterForm]="editMeterForm" [facility]="editMeterFacility">
-</app-edit-meter-form>
+<ng-container *ngIf="editMeterForm">
+    <app-edit-meter-form [meterForm]="editMeterForm" [facility]="editMeterFacility">
+    </app-edit-meter-form>
 
-
+    <ng-container *ngIf="editMeter.id == undefined">
+        <div class="d-flex w-100 alert alert-warning" *ngIf="!showExisting">
+            If this is showing up as a new meter and you would like the data to be applied to an existing meter.
+            <a class="ps-1 click-link" (click)="setShowExisting()">Click here</a>.
+        </div>
+        <div class="d-flex flex-column">
+            <ng-container *ngIf="showExisting && existingMeterOptions.length != 0">
+                <div class="alert alert-info">
+                    Select an available existing meter:
+                </div>
+                <ul>
+                    <li *ngFor="let existingMeter of existingMeterOptions">
+                        <a class="click-link" (click)="selectExistingMeter(existingMeter)">
+                            {{existingMeter.name}}
+                        </a>
+                    </li>
+                </ul>
+            </ng-container>
+            <ng-container *ngIf="showExisting && existingMeterOptions.length == 0">
+                <div class="alert alert-info">
+                    No existing meters are available for selection. Either no meters exist for the corresponding
+                    facility or all existing meters are already being used for import.
+                </div>
+            </ng-container>
+        </div>
+    </ng-container>
+</ng-container>
 
 <div class="alert alert-warning p-2" *ngIf="!metersIncluded">
     No import meters found. Go back to column selection and include meters or click continue to move on to predictors.
