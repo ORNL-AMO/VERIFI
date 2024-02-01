@@ -78,7 +78,12 @@
                         data-bs-toggle="tooltip" data-bs-placement="top"
                         title="Gaps found in weather data for this reading. It may not be accurate."
                         data-bs-html="true"></span>
-                    {{predictor.amount | customNumber}}
+                    <ng-container *ngIf="predictor.amount != undefined">
+                        {{predictor.amount | customNumber}}
+                    </ng-container>
+                    <ng-container *ngIf="predictor.amount == undefined">
+                        &mdash;
+                    </ng-container>
                 </td>
                 <td class="actions" *ngIf="!copyingTable">
                     <div class="btn-group">

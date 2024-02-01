@@ -17,11 +17,9 @@ import { DataOverviewReportSetup } from 'src/app/models/overview-report';
 })
 export class FacilitiesUsageStackedBarChartComponent {
   @Input()
-  dataType: 'energyUse' | 'cost' | 'water';
+  dataType: 'energyUse' | 'cost';
   @Input()
   calanderizedMeters: Array<CalanderizedMeter>;
-  @Input()
-  waterUnit: string;
   @Input()
   energyUnit: string;
   @Input()
@@ -59,10 +57,7 @@ export class FacilitiesUsageStackedBarChartComponent {
           data = this.getEnergyUseData();
         } else if (this.dataType == 'cost') {
           data = this.getCostData();
-        } else if (this.dataType == 'water') {
-          data = this.getWaterData();
-        }
-
+        } 
 
         var layout = {
           barmode: 'stack',
@@ -223,34 +218,6 @@ export class FacilitiesUsageStackedBarChartComponent {
   }
 
 
-  getWaterData(): Array<any> {
-    let data = new Array();
-    if (this.barChartData.findIndex(dataItem => { return dataItem.water.energyUse != 0 }) != -1) {
-      data.push({
-        x: this.barChartData.map(dataItem => { return dataItem.facilityName }),
-        y: this.barChartData.map(dataItem => { return dataItem.water.energyUse }),
-        name: 'Water',
-        type: 'bar',
-        marker: {
-          color: UtilityColors["Water Intake"].color
-        }
-      });
-    }
-    if (this.barChartData.findIndex(dataItem => { return dataItem.wasteWater.energyUse != 0 }) != -1) {
-      data.push({
-        x: this.barChartData.map(dataItem => { return dataItem.facilityName }),
-        y: this.barChartData.map(dataItem => { return dataItem.wasteWater.energyUse }),
-        name: 'Waste Water',
-        type: 'bar',
-        marker: {
-          color: UtilityColors["Water Discharge"].color
-        }
-      })
-    }
-    return data;
-  }
-
-
   setBarChartData() {
     this.barChartData = new Array();
 
@@ -344,8 +311,6 @@ export class FacilitiesUsageStackedBarChartComponent {
       return "Utility Usage (" + this.energyUnit + ")";
     } else if (this.dataType == 'cost') {
       return "Utility Costs";
-    } else if (this.dataType == 'water') {
-      return "Water Usage (" + this.waterUnit + ")"
     }
   }
 
