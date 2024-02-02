@@ -59,7 +59,7 @@ export class AnalysisSetupComponent implements OnInit {
   }
 
   changeReportYear() {
-    this.analysisItem = this.analysisService.setBaselineAdjustments(this.analysisItem);
+    this.analysisItem = this.analysisService.setDataAdjustments(this.analysisItem);
     this.setBaselineYearWarning();
     if (!this.baselineYearWarning) {
       let allFacilityAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.facilityAnalysisItems.getValue();

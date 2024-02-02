@@ -168,6 +168,7 @@
                     </div>
                 </div>
             </div>
+            <!--data adjustment-->
             <div class="col-md-6 col-sm-12"
                 *ngIf="group.analysisType != 'skip' && group.analysisType != 'skipAnalysis'">
                 <ng-container
@@ -191,17 +192,71 @@
                         </label>
                     </div>
                     <div class="col-6">
-                        <label class="switch" for="hasBaselineAdjustement">
-                            <input class="checkbox" type="checkbox" id="hasBaselineAdjustement"
-                                name="hasBaselineAdjustement" [(ngModel)]="group.hasBaselineAdjustement"
+                        <label class="switch" for="hasDataAdjustement">
+                            <input class="checkbox" type="checkbox" id="hasDataAdjustement" name="hasDataAdjustement"
+                                [(ngModel)]="group.hasDataAdjustement" (change)="saveItem()">
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                </div>
+                <div class="row sub-column" *ngIf="group.hasDataAdjustement">
+                    <div class="col-12 mt-2" *ngFor="let dataAdjustment of group.dataAdjustments; let index = index;">
+                        <div class="row">
+                            <div class="col-6">
+                                <label for="{{'dataAdjustment_'+index}}">{{dataAdjustment.year | yearDisplay:
+                                    facility.fiscalYear}}</label>
+                            </div>
+                            <div class="col-6">
+                                <div class="input-group">
+                                    <input class="form-control" type="number" name="{{'dataAdjustment_'+index}}"
+                                        id="{{'dataAdjustment_'+index}}" [(ngModel)]="dataAdjustment.amount"
+                                        (input)="saveItem()" min="0">
+                                    <span *ngIf="analysisItem.analysisCategory == 'energy'" class="input-group-text"
+                                        [innerHTML]="analysisItem.energyUnit | settingsLabel:'/yr'"></span>
+                                    <span *ngIf="analysisItem.analysisCategory == 'water'" class="input-group-text"
+                                        [innerHTML]="analysisItem.waterUnit | settingsLabel:'/yr'"></span>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--baseline adjustment-->
+            <div class="col-md-6 col-sm-12"
+                *ngIf="group.analysisType != 'skip' && group.analysisType != 'skipAnalysis'">
+                <ng-container
+                    *ngIf="group.analysisType == 'regression' || group.analysisType == 'absoluteEnergyConsumption'">
+                    <app-label-with-tooltip [field]="'groupBaselineAdjustment'" [label]="'3. Add Baseline Adjustment'"
+                        [isBold]="true" [labelId]="'hasBaselineAdjustment'"></app-label-with-tooltip>
+                </ng-container>
+                <ng-container *ngIf="group.analysisType == 'energyIntensity'">
+                    <app-label-with-tooltip [field]="'groupBaselineAdjustment'" [label]="'4. Add Baseline Adjustment'"
+                        [isBold]="true" [labelId]="'hasBaselineAdjustment'"></app-label-with-tooltip>
+                </ng-container>
+                <ng-container *ngIf="group.analysisType == 'modifiedEnergyIntensity'">
+                    <app-label-with-tooltip [field]="'groupBaselineAdjustment'" [label]="'5. Add Baseline Adjustment'"
+                        [isBold]="true" [labelId]="'hasBaselineAdjustment'"></app-label-with-tooltip>
+                </ng-container>
+
+                <div class="row sub-column">
+                    <div class="col-6">
+                        <label for="hasBaselineAdjustment">
+                            Has Baseline Adjustement
+                        </label>
+                    </div>
+                    <div class="col-6">
+                        <label class="switch" for="hasBaselineAdjustment">
+                            <input class="checkbox" type="checkbox" id="hasBaselineAdjustment"
+                                name="hasBaselineAdjustment" [(ngModel)]="group.hasBaselineAdjustmentV2"
                                 (change)="saveItem()">
                             <span class="slider round"></span>
                         </label>
                     </div>
                 </div>
-                <div class="row sub-column" *ngIf="group.hasBaselineAdjustement">
+                <div class="row sub-column" *ngIf="group.hasBaselineAdjustmentV2">
                     <div class="col-12 mt-2"
-                        *ngFor="let baselineAdjustment of group.baselineAdjustments; let index = index;">
+                        *ngFor="let baselineAdjustment of group.baselineAdjustmentsV2; let index = index;">
                         <div class="row">
                             <div class="col-6">
                                 <label for="{{'baselineAdjustment_'+index}}">{{baselineAdjustment.year | yearDisplay:
@@ -224,17 +279,14 @@
                     </div>
                 </div>
             </div>
-
-        </div>
-
-        <!--regression-->
-        <div class="row mb-2" *ngIf="group.analysisType == 'regression'">
-            <div class="col-md-6 col-sm-12">
-                <label class="bold">3. Regression Model</label>
+            <!--regression-->
+            <div class="col-md-6 col-sm-12" *ngIf="group.analysisType == 'regression'">
+                <label class="bold">4. Regression Model</label>
                 <div class="alert alert-info text-center p-2">
                     Use "Regression Model" tab to setup the regression model for this group.
                 </div>
             </div>
         </div>
+
     </form>
 </ng-container>

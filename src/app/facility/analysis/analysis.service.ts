@@ -88,17 +88,23 @@ export class AnalysisService {
     });
   }
 
-  setBaselineAdjustments(analysisItem: IdbAnalysisItem): IdbAnalysisItem {
+  setDataAdjustments(analysisItem: IdbAnalysisItem): IdbAnalysisItem {
     if (analysisItem.baselineYear < analysisItem.reportYear) {
       analysisItem.groups.forEach(group => {
-        let yearAdjustments: Array<{ year: number, amount: number }> = new Array();
+        let yearDataAdjustments: Array<{ year: number, amount: number }> = new Array();
+        let yearBaselineAdjustments: Array<{ year: number, amount: number }> = new Array();
         for (let year: number = analysisItem.baselineYear + 1; year <= analysisItem.reportYear; year++) {
-          yearAdjustments.push({
+          yearDataAdjustments.push({
+            year: year,
+            amount: 0
+          })
+          yearBaselineAdjustments.push({
             year: year,
             amount: 0
           })
         }
-        group.baselineAdjustments = yearAdjustments;
+        group.dataAdjustments = yearDataAdjustments;
+        group.baselineAdjustmentsV2 = yearBaselineAdjustments;
       });
     }
     return analysisItem;
