@@ -37,5 +37,11 @@ export const LabelTooltips = {
     },
     "selectImportFacility": {
         "tooltip": "Predictors and meters will be automatically mapped to selected facility."
+    },
+    "groupDataAdjustment": {
+        "tooltip": "This is for if you have a new baseload energy consumption to remove from each year (entering a positive number implies removal of energy). <br>ONLY use this if you are reaching, or within one or two years of reaching your goal."
+    },
+    "groupBaselineAdjustment": {
+        "tooltip": "This is for if you have brought equipment from a closed facility to this facility. <br>ONLY use this if you are reaching, or within one or two years of reaching your goal."
     }
 }

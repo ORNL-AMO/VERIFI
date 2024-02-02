@@ -170,16 +170,24 @@
             </div>
             <div class="col-md-6 col-sm-12"
                 *ngIf="group.analysisType != 'skip' && group.analysisType != 'skipAnalysis'">
-                <label class="bold">
-                    <span
-                        *ngIf="group.analysisType == 'regression' || group.analysisType == 'absoluteEnergyConsumption'">2.</span>
-                    <span *ngIf="group.analysisType == 'energyIntensity'">3.</span>
-                    <span *ngIf="group.analysisType == 'modifiedEnergyIntensity'">4.</span>
-                    Add Baseline Adjustment</label>
+                <ng-container
+                    *ngIf="group.analysisType == 'regression' || group.analysisType == 'absoluteEnergyConsumption'">
+                    <app-label-with-tooltip [field]="'groupDataAdjustment'" [label]="'2. Add Data Adjustment'"
+                        [isBold]="true" [labelId]="'hasDataAdjustment'"></app-label-with-tooltip>
+                </ng-container>
+                <ng-container *ngIf="group.analysisType == 'energyIntensity'">
+                    <app-label-with-tooltip [field]="'groupDataAdjustment'" [label]="'3. Add Data Adjustment'"
+                        [isBold]="true" [labelId]="'hasDataAdjustment'"></app-label-with-tooltip>
+                </ng-container>
+                <ng-container *ngIf="group.analysisType == 'modifiedEnergyIntensity'">
+                    <app-label-with-tooltip [field]="'groupDataAdjustment'" [label]="'4. Add Data Adjustment'"
+                        [isBold]="true" [labelId]="'hasDataAdjustment'"></app-label-with-tooltip>
+                </ng-container>
+
                 <div class="row sub-column">
                     <div class="col-6">
-                        <label for="reportYear">
-                            Has Baseline Adjustement
+                        <label for="hasDataAdjustment">
+                            Has Data Adjustement
                         </label>
                     </div>
                     <div class="col-6">
