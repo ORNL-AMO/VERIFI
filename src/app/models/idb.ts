@@ -335,11 +335,21 @@ export interface IdbAccountAnalysisItem {
         facilityId: string,
         analysisItemId: string
     }>,
-    hasBaselineAdjustement: boolean,
-    baselineAdjustments: Array<{
-        year: number,
-        amount: number
+    hasDataAdjustement: boolean,
+    dataAdjustments: Array<{
+      year: number,
+      amount: number
     }>,
+    hasBaselineAdjustmentV2: boolean,
+    baselineAdjustmentsV2: Array<{
+      year: number,
+      amount: number
+    }>,
+    // hasBaselineAdjustement: boolean,
+    // baselineAdjustments: Array<{
+    //     year: number,
+    //     amount: number
+    // }>,
     selectedYearAnalysis?: boolean,
     analysisCategory: AnalysisCategory,
     waterUnit: string,

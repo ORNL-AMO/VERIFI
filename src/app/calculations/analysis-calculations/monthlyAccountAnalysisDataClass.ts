@@ -56,9 +56,9 @@ export class MonthlyAccountAnalysisDataClass {
 
     setBaselineAdjustmentForOther(accountAnalysisItem: IdbAccountAnalysisItem, baselineYear: number, annualUsageValues: Array<{ year: number, usage: number }>) {
         this.baselineAdjustmentForOther = _.sumBy(this.currentMonthData, 'baselineAdjustmentForOther');
-        if (accountAnalysisItem.hasBaselineAdjustement && this.fiscalYear != baselineYear) {
+        if (accountAnalysisItem.hasBaselineAdjustmentV2 && this.fiscalYear != baselineYear) {
             let annualEnergyUse: number = annualUsageValues.find(usageVal => { return usageVal.year == this.fiscalYear })?.usage;
-            let yearAdjustment: { year: number, amount: number } = accountAnalysisItem.baselineAdjustments.find(bAdjustement => { return bAdjustement.year == this.fiscalYear; })
+            let yearAdjustment: { year: number, amount: number } = accountAnalysisItem.baselineAdjustmentsV2.find(bAdjustement => { return bAdjustement.year == this.fiscalYear; })
             if (yearAdjustment && yearAdjustment.amount) {
                 let accountBaselineAdjustementForOther: number = (this.energyUse / annualEnergyUse) * yearAdjustment.amount;
                 this.baselineAdjustmentForOther = this.baselineAdjustmentForOther + accountBaselineAdjustementForOther;
