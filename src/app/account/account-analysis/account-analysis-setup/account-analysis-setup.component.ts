@@ -66,13 +66,19 @@ export class AccountAnalysisSetupComponent implements OnInit {
   async changeReportYear() {
     if (this.analysisItem.baselineYear < this.analysisItem.reportYear) {
       let yearAdjustments: Array<{ year: number, amount: number }> = new Array();
+      let dataAdjustments: Array<{ year: number, amount: number }> = new Array();
       for (let year: number = this.analysisItem.baselineYear + 1; year <= this.analysisItem.reportYear; year++) {
         yearAdjustments.push({
           year: year,
           amount: 0
-        })
+        });
+        dataAdjustments.push({
+          year: year,
+          amount: 0
+        });
       }
-      this.analysisItem.baselineAdjustments = yearAdjustments;
+      this.analysisItem.baselineAdjustmentsV2 = yearAdjustments;
+      this.analysisItem.dataAdjustments = dataAdjustments;
     }
     this.setBaselineYearWarning();
     if (!this.baselineYearWarning) {

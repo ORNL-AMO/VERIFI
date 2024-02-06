@@ -44,7 +44,7 @@
             <div class="mb-3  col-sm-12" [ngClass]="{'col-12':inAccount, 'col-md-6':!inAccount}">
                 <!-- <label>NAICS Code</label> -->
                 <app-label-with-tooltip [label]="'NAICS Code'" [field]="'naicsCode'" [labelId]="'naics1'"
-                    [isRequired]="false">
+                    [isRequired]="false" [isFloatRight]="true">
                 </app-label-with-tooltip>
                 <select class="form-select" formControlName="naics1" (change)="checkNAICS()" id="naics1">
                     <option *ngFor="let naics of firstNaicsList" [ngValue]="naics.code">{{naics.code}} -
@@ -88,7 +88,7 @@
                         <div class="col-md-6 col-sm-12">
                             <!-- <label>Facility Color</label> -->
                             <app-label-with-tooltip [label]="'Facility Color'" [field]="'facilityColor'"
-                                [labelId]="'facilityColor'" [isRequired]="false">
+                                [labelId]="'facilityColor'" [isRequired]="false" [isFloatRight]="true">
                             </app-label-with-tooltip>
                             <input type="color" class="form-control" formControlName="color" (input)="saveChanges()"
                                 [ngStyle]="{'background-color':form.controls.color.value}" id="facilityColor">
@@ -203,7 +203,7 @@
                 <div class="col-6">
                     <!-- <label>Facility Color</label> -->
                     <app-label-with-tooltip [label]="'Facility Color'" [field]="'facilityColor'"
-                        [labelId]="'facilityColor'" [isRequired]="false">
+                        [labelId]="'facilityColor'" [isRequired]="false" [isFloatRight]="true">
                     </app-label-with-tooltip>
                     <input type="color" class="form-control" formControlName="color" (input)="saveChanges()"
                         [ngStyle]="{'background-color':form.controls.color.value}" id="facilityColor">
@@ -215,7 +215,7 @@
             <div class="mb-3 col-6">
                 <!-- <label>NAICS Code</label> -->
                 <app-label-with-tooltip [label]="'NAICS Code'" [field]="'naicsCode'" [labelId]="'naics1'"
-                    [isRequired]="false">
+                    [isRequired]="false" [isFloatRight]="true">
                 </app-label-with-tooltip>
                 <select class="form-select" formControlName="naics1" (change)="checkNAICS()" id="naics1">
                     <option *ngFor="let naics of firstNaicsList" [ngValue]="naics.code">{{naics.code}} -

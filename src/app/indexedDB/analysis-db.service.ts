@@ -127,10 +127,12 @@ export class AnalysisDbService {
           specifiedMonthlyPercentBaseload: false,
           averagePercentBaseload: undefined,
           monthlyPercentBaseload: this.getMonthlyPercentBaseload(),
-          hasBaselineAdjustement: false,
-          baselineAdjustments: [],
+          hasDataAdjustement: false,
+          dataAdjustments: [],
           userDefinedModel: true,
-          models: undefined
+          models: undefined,
+          hasBaselineAdjustmentV2: false,
+          baselineAdjustmentsV2: []
         }
         analysisGroup.groupErrors = this.analysisValidationService.getGroupErrors(analysisGroup);
         itemGroups.push(analysisGroup);
@@ -265,9 +267,11 @@ export class AnalysisDbService {
         specifiedMonthlyPercentBaseload: false,
         averagePercentBaseload: undefined,
         monthlyPercentBaseload: this.getMonthlyPercentBaseload(),
-        hasBaselineAdjustement: false,
-        baselineAdjustments: [],
-        userDefinedModel: false
+        hasDataAdjustement: false,
+        dataAdjustments: [],
+        userDefinedModel: false,
+        hasBaselineAdjustmentV2: false,
+        baselineAdjustmentsV2: []
       }
       analysisGroup.groupErrors = this.analysisValidationService.getGroupErrors(analysisGroup);
       item.groups.push(analysisGroup);

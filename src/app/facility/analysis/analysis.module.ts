@@ -30,6 +30,7 @@ import { AnalysisItemCardComponent } from './analysis-dashboard/analysis-item-ca
 import { EnergyDashboardComponent } from './analysis-dashboard/energy-dashboard/energy-dashboard.component';
 import { WaterDashboardComponent } from './analysis-dashboard/water-dashboard/water-dashboard.component';
 import { AnalysisDashboardTabsComponent } from './analysis-dashboard/analysis-dashboard-tabs/analysis-dashboard-tabs.component';
+import { LabelWithTooltipModule } from 'src/app/shared/label-with-tooltip/label-with-tooltip.module';
 
 
 
@@ -67,7 +68,8 @@ import { AnalysisDashboardTabsComponent } from './analysis-dashboard/analysis-da
     NgbPaginationModule,
     SharedAnalysisModule,
     CalculatingSpinnerModule,
-    TableItemsDropdownModule
+    TableItemsDropdownModule,
+    LabelWithTooltipModule
   ]
 })
 export class AnalysisModule { }

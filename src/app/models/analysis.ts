@@ -197,8 +197,13 @@ export interface AnalysisGroup {
     monthNum: number,
     percent: number
   }>,
-  hasBaselineAdjustement: boolean,
-  baselineAdjustments: Array<{
+  hasDataAdjustement: boolean,
+  dataAdjustments: Array<{
+    year: number,
+    amount: number
+  }>,
+  hasBaselineAdjustmentV2: boolean,
+  baselineAdjustmentsV2: Array<{
     year: number,
     amount: number
   }>,

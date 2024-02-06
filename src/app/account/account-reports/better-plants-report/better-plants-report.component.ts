@@ -75,8 +75,9 @@ export class BetterPlantsReportComponent implements OnInit {
     this.selectedAnalysisItem = JSON.parse(JSON.stringify(selectedAnalysisItem));
     if (this.selectedAnalysisItem.analysisCategory == 'energy') {
       if (this.selectedAnalysisItem.energyUnit != 'MMBtu') {
-        if (this.selectedAnalysisItem.baselineAdjustments) {
-          this.selectedAnalysisItem.baselineAdjustments.forEach(adjustment => {
+        //TODO: Check baselineAdjustmentsV2 use vs dataAdjustments
+        if (this.selectedAnalysisItem.baselineAdjustmentsV2) {
+          this.selectedAnalysisItem.baselineAdjustmentsV2.forEach(adjustment => {
             if (adjustment.amount != 0) {
               adjustment.amount = new ConvertValue(adjustment.amount, this.selectedAnalysisItem.energyUnit, 'MMBtu').convertedValue;
             }
@@ -87,8 +88,9 @@ export class BetterPlantsReportComponent implements OnInit {
       this.selectedAnalysisItem.energyUnit = 'MMBtu';
     } else if (this.selectedAnalysisItem.analysisCategory == 'water') {
       if (this.selectedAnalysisItem.waterUnit != 'kgal') {
-        if (this.selectedAnalysisItem.baselineAdjustments) {
-          this.selectedAnalysisItem.baselineAdjustments.forEach(adjustment => {
+        //TODO: Check baselineAdjustmentsV2 use vs dataAdjustments
+        if (this.selectedAnalysisItem.baselineAdjustmentsV2) {
+          this.selectedAnalysisItem.baselineAdjustmentsV2.forEach(adjustment => {
             if (adjustment.amount != 0) {
               adjustment.amount = new ConvertValue(adjustment.amount, this.selectedAnalysisItem.waterUnit, 'kgal').convertedValue;
             }
