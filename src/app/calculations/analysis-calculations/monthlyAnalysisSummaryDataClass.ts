@@ -13,6 +13,9 @@ export class MonthlyAnalysisSummaryDataClass {
     energyUse: number;
     modeledEnergy: number;
     baselineAdjustmentForOther: number;
+    dataAdjustment: number;
+    modelYearDataAdjustment: number;
+
     predictorUsage: Array<{
         usage: number,
         predictorId: string
@@ -45,6 +48,8 @@ export class MonthlyAnalysisSummaryDataClass {
         this.setModeledEnergy(monthlyGroupAnalysisClass.selectedGroup.analysisType, monthlyGroupAnalysisClass.predictorVariables, monthlyGroupAnalysisClass.baselineYearEnergyIntensity);
         this.setAnnualEnergyUse(monthlyGroupAnalysisClass.annualMeterDataUsage);
         this.setBaselineAdjustmentForOther(monthlyGroupAnalysisClass.baselineYear);
+        this.setModelYearDataAdjustment(monthlyGroupAnalysisClass.modelYear);
+        this.setDataAdjustment();
         this.setMonthlyAnalysisCalculatedValues(monthlyGroupAnalysisClass.baselineYear, previousMonthsSummaryData);
     }
 
@@ -68,9 +73,9 @@ export class MonthlyAnalysisSummaryDataClass {
 
     setEnergyUse(analysisCategory: AnalysisCategory) {
         if (analysisCategory == 'energy') {
-            this.energyUse = _.sumBy(this.monthMeterData, 'energyUse');
+            this.energyUse = _.sumBy(this.monthMeterData, (data: MonthlyData) => { return data.energyUse });
         } else if (analysisCategory == 'water') {
-            this.energyUse = _.sumBy(this.monthMeterData, 'energyConsumption');
+            this.energyUse = _.sumBy(this.monthMeterData, (data: MonthlyData) => { return data.energyConsumption });
         }
     }
 
@@ -168,13 +173,35 @@ export class MonthlyAnalysisSummaryDataClass {
 
     setBaselineAdjustmentForOther(baselineYear: number) {
         this.baselineAdjustmentForOther = 0;
-        if (this.group.hasDataAdjustement && this.fiscalYear != baselineYear) {
-            let yearAdjustment: { year: number, amount: number } = this.group.dataAdjustments.find(bAdjustement => { return bAdjustement.year == this.fiscalYear; })
+        if (this.group.hasBaselineAdjustmentV2 && this.fiscalYear != baselineYear) {
+            let yearAdjustment: { year: number, amount: number } = this.group.baselineAdjustmentsV2.find(bAdjustement => { return bAdjustement.year == this.fiscalYear; })
             if (yearAdjustment && yearAdjustment.amount) {
                 this.baselineAdjustmentForOther = (this.energyUse / this.annualEnergyUse) * yearAdjustment.amount;
             }
         }
     }
+
+
+    setModelYearDataAdjustment(modelYear: number) {
+        this.modelYearDataAdjustment = 0;
+        if (this.group.hasDataAdjustement) {
+            let yearAdjustment: { year: number, amount: number } = this.group.dataAdjustments.find(bAdjustement => { return bAdjustement.year == modelYear; })
+            if (yearAdjustment && yearAdjustment.amount) {
+                this.modelYearDataAdjustment = (this.energyUse / this.annualEnergyUse) * yearAdjustment.amount;
+            }
+        }
+    }
+
+    setDataAdjustment() {
+        this.dataAdjustment = 0;
+        if (this.group.hasDataAdjustement) {
+            let yearAdjustment: { year: number, amount: number } = this.group.dataAdjustments.find(bAdjustement => { return bAdjustement.year == this.fiscalYear; })
+            if (yearAdjustment && yearAdjustment.amount) {
+                this.dataAdjustment = (this.energyUse / this.annualEnergyUse) * yearAdjustment.amount;
+            }
+        }
+    }
+
 
     setMonthlyAnalysisCalculatedValues(baselineYear: number, previousMonthsSummaryData: Array<MonthlyAnalysisSummaryDataClass>) {
         let previousMonthsAnalysisCalculatedValues: Array<MonthlyAnalysisCalculatedValues> = previousMonthsSummaryData.map(data => { return data.monthlyAnalysisCalculatedValues });
@@ -185,7 +212,9 @@ export class MonthlyAnalysisSummaryDataClass {
             this.fiscalYear,
             baselineYear,
             previousMonthsAnalysisCalculatedValues,
-            this.baselineActualEnergyUse
+            this.baselineActualEnergyUse,
+            this.modelYearDataAdjustment,
+            this.dataAdjustment
         );
     }
 

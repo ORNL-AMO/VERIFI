@@ -346,7 +346,8 @@ export class BetterPlantsExcelWriterService {
 
     worksheet.getCell('E41').value = betterPlantsSummary.reportYearAnalysisSummary.baselineAdjustmentForNormalization
     worksheet.getCell('E42').value = report.betterPlantsReportSetup.baselineAdjustmentNotes
-    worksheet.getCell('E43').value = betterPlantsSummary.reportYearAnalysisSummary.adjustedForNormalization
+    //TODO: UPDATE ADJUSTMENT VARIABLE HERE
+    // worksheet.getCell('E43').value = betterPlantsSummary.reportYearAnalysisSummary.adjustedForNormalization
 
     let cellLetters = ['E', 'F', 'G', 'H', 'I']
     betterPlantsSummary.reportYearWaterResults.unitsUsed.forEach((unit, index) => {
