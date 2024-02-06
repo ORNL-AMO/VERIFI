@@ -8,6 +8,7 @@ permissions:
 
 jobs:
   build-mac:
+    if: github.ref_name == 'master'
     runs-on: macos-13
     steps:
       - name: Checkout
@@ -83,6 +84,7 @@ jobs:
       BUILD_VERSION: ${{ steps.output.outputs.BUILD_VERSION }}
 
   build-winux:
+    if: github.ref_name == 'master'
     runs-on: ubuntu-22.04
     container:
       image: electronuserland/builder:wine
@@ -122,6 +124,7 @@ jobs:
           retention-days: 7
 
   release:
+    if: github.ref_name == 'master'
     runs-on: ubuntu-22.04
     needs: [build-mac, build-winux]
     env:
