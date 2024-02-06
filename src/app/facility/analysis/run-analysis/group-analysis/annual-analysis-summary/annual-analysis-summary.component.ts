@@ -41,7 +41,7 @@ export class AnnualAnalysisSummaryComponent implements OnInit {
     let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
     let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.accountPredictorEntries.getValue();
 
-    if (typeof Worker !== 'undefined') {
+    if (typeof Worker !== 'undefined' && false) {
       this.worker = new Worker(new URL('src/app/web-workers/annual-group-analysis.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {
         if (!data.error) {
@@ -67,6 +67,7 @@ export class AnnualAnalysisSummaryComponent implements OnInit {
       let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, facilityMeterData, this.facility, false, { energyIsSource: this.analysisItem.energyIsSource, neededUnits: getNeededUnits(this.analysisItem) });
       let annualAnalysisSummaryClass: AnnualGroupAnalysisSummaryClass = new AnnualGroupAnalysisSummaryClass(this.group, this.analysisItem, this.facility, calanderizedMeters, accountPredictorEntries);
       this.annualAnalysisSummary = annualAnalysisSummaryClass.getAnnualAnalysisSummaries();
+      this.calculating = false;
     }
   }
 

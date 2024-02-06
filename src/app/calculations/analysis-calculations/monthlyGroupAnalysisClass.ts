@@ -92,10 +92,10 @@ export class MonthlyGroupAnalysisClass {
     for (let year = this.baselineYear + 1; year <= this.endDate.getUTCFullYear(); year++) {
       let yearMeterData: Array<MonthlyData> = this.groupMonthlyData.filter(data => { return data.year == year });
       if (this.analysisItem.analysisCategory == 'energy') {
-        let totalUsage: number = _.sumBy(yearMeterData, 'energyUse');
+        let totalUsage: number = _.sumBy(yearMeterData, (data: MonthlyData) => { return data.energyUse });
         this.annualMeterDataUsage.push({ year: year, usage: totalUsage });
       } else if (this.analysisItem.analysisCategory == 'water') {
-        let totalUsage: number = _.sumBy(yearMeterData, 'energyConsumption');
+        let totalUsage: number = _.sumBy(yearMeterData,( data: MonthlyData) => { return data.energyConsumption });
         this.annualMeterDataUsage.push({ year: year, usage: totalUsage });
       }
     }

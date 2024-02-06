@@ -147,7 +147,8 @@ export class AnnualAnalysisSummaryDataClass {
     }
 
     setAdjustedStar() {
-        this.adjustedStar = (this.baselineEnergyUse + this.baselineAdjustment) * ((this.modeledEnergy - this.modelYearDataAdjustment) / (this.baselineEnergyUse - this.modelYearDataAdjustment));
+        this.adjustedStar = (this.baselineEnergyUse + this.baselineAdjustmentForOther) * ((this.modeledEnergy - this.modelYearDataAdjustment) / (this.baselineEnergyUse - this.modelYearDataAdjustment));
+
     }
 
     setAdjustedStarStar() {
@@ -158,7 +159,7 @@ export class AnnualAnalysisSummaryDataClass {
         this.adjusted = this.adjustedStarStar;
     }
 
-    setAdjustmentForOther(){
+    setAdjustmentForOther() {
         this.adjustmentForOther = this.adjustedStarStar - this.adjustedStar;
     }
 
