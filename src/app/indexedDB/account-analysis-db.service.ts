@@ -105,7 +105,7 @@ export class AccountAnalysisDbService {
       hasDataAdjustement: false,
       dataAdjustments: [],
       hasBaselineAdjustmentV2: false,
-      baselineAdjustmentsV2: [],
+      baselineAdjustmentsV2: 0,
       waterUnit: selectedAccount.volumeLiquidUnit,
       analysisCategory: analysisCategory,
       setupErrors: {

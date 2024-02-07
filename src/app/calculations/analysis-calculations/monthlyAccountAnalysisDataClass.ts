@@ -80,9 +80,8 @@ export class MonthlyAccountAnalysisDataClass {
         this.baselineAdjustmentForOther = _.sumBy(this.currentMonthData, (data: MonthlyAnalysisSummaryDataClass) => { return data.baselineAdjustmentForOther });
         if (accountAnalysisItem.hasBaselineAdjustmentV2 && this.fiscalYear != baselineYear) {
             let annualEnergyUse: number = annualUsageValues.find(usageVal => { return usageVal.year == this.fiscalYear })?.usage;
-            let yearAdjustment: { year: number, amount: number } = accountAnalysisItem.baselineAdjustmentsV2.find(bAdjustement => { return bAdjustement.year == this.fiscalYear; })
-            if (yearAdjustment && yearAdjustment.amount) {
-                let accountBaselineAdjustementForOther: number = (this.energyUse / annualEnergyUse) * yearAdjustment.amount;
+            if (accountAnalysisItem.baselineAdjustmentsV2) {
+                let accountBaselineAdjustementForOther: number = (this.energyUse / annualEnergyUse) * accountAnalysisItem.baselineAdjustmentsV2;
                 this.baselineAdjustmentForOther = this.baselineAdjustmentForOther + accountBaselineAdjustementForOther;
             }
         }

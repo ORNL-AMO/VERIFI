@@ -77,11 +77,7 @@ export class BetterPlantsReportComponent implements OnInit {
       if (this.selectedAnalysisItem.energyUnit != 'MMBtu') {
         //TODO: Check baselineAdjustmentsV2 use vs dataAdjustments
         if (this.selectedAnalysisItem.baselineAdjustmentsV2) {
-          this.selectedAnalysisItem.baselineAdjustmentsV2.forEach(adjustment => {
-            if (adjustment.amount != 0) {
-              adjustment.amount = new ConvertValue(adjustment.amount, this.selectedAnalysisItem.energyUnit, 'MMBtu').convertedValue;
-            }
-          });
+          this.selectedAnalysisItem.baselineAdjustmentsV2 = new ConvertValue(this.selectedAnalysisItem.baselineAdjustmentsV2, this.selectedAnalysisItem.energyUnit, 'MMBtu').convertedValue;
         }
         this.selectedAnalysisItem.energyUnit = 'MMBtu';
       }
@@ -90,11 +86,7 @@ export class BetterPlantsReportComponent implements OnInit {
       if (this.selectedAnalysisItem.waterUnit != 'kgal') {
         //TODO: Check baselineAdjustmentsV2 use vs dataAdjustments
         if (this.selectedAnalysisItem.baselineAdjustmentsV2) {
-          this.selectedAnalysisItem.baselineAdjustmentsV2.forEach(adjustment => {
-            if (adjustment.amount != 0) {
-              adjustment.amount = new ConvertValue(adjustment.amount, this.selectedAnalysisItem.waterUnit, 'kgal').convertedValue;
-            }
-          });
+          this.selectedAnalysisItem.baselineAdjustmentsV2 = new ConvertValue(this.selectedAnalysisItem.baselineAdjustmentsV2, this.selectedAnalysisItem.waterUnit, 'kgal').convertedValue;
         }
         this.selectedAnalysisItem.waterUnit = 'kgal';
       }

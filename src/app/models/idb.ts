@@ -341,10 +341,7 @@ export interface IdbAccountAnalysisItem {
       amount: number
     }>,
     hasBaselineAdjustmentV2: boolean,
-    baselineAdjustmentsV2: Array<{
-      year: number,
-      amount: number
-    }>,
+    baselineAdjustmentsV2: number,
     // hasBaselineAdjustement: boolean,
     // baselineAdjustments: Array<{
     //     year: number,
