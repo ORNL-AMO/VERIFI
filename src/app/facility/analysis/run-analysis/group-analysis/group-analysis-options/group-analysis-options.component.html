@@ -171,25 +171,21 @@
             <!--data adjustment-->
             <div class="col-md-6 col-sm-12"
                 *ngIf="group.analysisType != 'skip' && group.analysisType != 'skipAnalysis'">
-                <ng-container
-                    *ngIf="group.analysisType == 'regression' || group.analysisType == 'absoluteEnergyConsumption'">
-                    <app-label-with-tooltip [field]="'groupDataAdjustment'" [label]="'2. Add Data Adjustment'"
-                        [isBold]="true" [labelId]="'hasDataAdjustment'"></app-label-with-tooltip>
-                </ng-container>
-                <ng-container *ngIf="group.analysisType == 'energyIntensity'">
-                    <app-label-with-tooltip [field]="'groupDataAdjustment'" [label]="'3. Add Data Adjustment'"
-                        [isBold]="true" [labelId]="'hasDataAdjustment'"></app-label-with-tooltip>
-                </ng-container>
-                <ng-container *ngIf="group.analysisType == 'modifiedEnergyIntensity'">
-                    <app-label-with-tooltip [field]="'groupDataAdjustment'" [label]="'4. Add Data Adjustment'"
-                        [isBold]="true" [labelId]="'hasDataAdjustment'"></app-label-with-tooltip>
-                </ng-container>
-
                 <div class="row sub-column">
                     <div class="col-6">
-                        <label for="hasDataAdjustment">
-                            Has Data Adjustement
-                        </label>
+                        <ng-container
+                            *ngIf="group.analysisType == 'regression' || group.analysisType == 'absoluteEnergyConsumption'">
+                            <app-label-with-tooltip [field]="'groupDataAdjustment'" [label]="'2. Add Data Adjustment'"
+                                [isBold]="true" [labelId]="'hasDataAdjustment'"></app-label-with-tooltip>
+                        </ng-container>
+                        <ng-container *ngIf="group.analysisType == 'energyIntensity'">
+                            <app-label-with-tooltip [field]="'groupDataAdjustment'" [label]="'3. Add Data Adjustment'"
+                                [isBold]="true" [labelId]="'hasDataAdjustment'"></app-label-with-tooltip>
+                        </ng-container>
+                        <ng-container *ngIf="group.analysisType == 'modifiedEnergyIntensity'">
+                            <app-label-with-tooltip [field]="'groupDataAdjustment'" [label]="'4. Add Data Adjustment'"
+                                [isBold]="true" [labelId]="'hasDataAdjustment'"></app-label-with-tooltip>
+                        </ng-container>
                     </div>
                     <div class="col-6">
                         <label class="switch" for="hasDataAdjustement">
@@ -225,25 +221,24 @@
             <!--baseline adjustment-->
             <div class="col-md-6 col-sm-12"
                 *ngIf="group.analysisType != 'skip' && group.analysisType != 'skipAnalysis'">
-                <ng-container
-                    *ngIf="group.analysisType == 'regression' || group.analysisType == 'absoluteEnergyConsumption'">
-                    <app-label-with-tooltip [field]="'groupBaselineAdjustment'" [label]="'3. Add Baseline Adjustment'"
-                        [isBold]="true" [labelId]="'hasBaselineAdjustment'"></app-label-with-tooltip>
-                </ng-container>
-                <ng-container *ngIf="group.analysisType == 'energyIntensity'">
-                    <app-label-with-tooltip [field]="'groupBaselineAdjustment'" [label]="'4. Add Baseline Adjustment'"
-                        [isBold]="true" [labelId]="'hasBaselineAdjustment'"></app-label-with-tooltip>
-                </ng-container>
-                <ng-container *ngIf="group.analysisType == 'modifiedEnergyIntensity'">
-                    <app-label-with-tooltip [field]="'groupBaselineAdjustment'" [label]="'5. Add Baseline Adjustment'"
-                        [isBold]="true" [labelId]="'hasBaselineAdjustment'"></app-label-with-tooltip>
-                </ng-container>
-
                 <div class="row sub-column">
                     <div class="col-6">
-                        <label for="hasBaselineAdjustment">
-                            Has Baseline Adjustement
-                        </label>
+                        <ng-container
+                            *ngIf="group.analysisType == 'regression' || group.analysisType == 'absoluteEnergyConsumption'">
+                            <app-label-with-tooltip [field]="'groupBaselineAdjustment'"
+                                [label]="'3. Add Baseline Adjustment'" [isBold]="true"
+                                [labelId]="'hasBaselineAdjustment'"></app-label-with-tooltip>
+                        </ng-container>
+                        <ng-container *ngIf="group.analysisType == 'energyIntensity'">
+                            <app-label-with-tooltip [field]="'groupBaselineAdjustment'"
+                                [label]="'4. Add Baseline Adjustment'" [isBold]="true"
+                                [labelId]="'hasBaselineAdjustment'"></app-label-with-tooltip>
+                        </ng-container>
+                        <ng-container *ngIf="group.analysisType == 'modifiedEnergyIntensity'">
+                            <app-label-with-tooltip [field]="'groupBaselineAdjustment'"
+                                [label]="'5. Add Baseline Adjustment'" [isBold]="true"
+                                [labelId]="'hasBaselineAdjustment'"></app-label-with-tooltip>
+                        </ng-container>
                     </div>
                     <div class="col-6">
                         <label class="switch" for="hasBaselineAdjustment">
@@ -255,18 +250,16 @@
                     </div>
                 </div>
                 <div class="row sub-column" *ngIf="group.hasBaselineAdjustmentV2">
-                    <div class="col-12 mt-2"
-                        *ngFor="let baselineAdjustment of group.baselineAdjustmentsV2; let index = index;">
+                    <div class="col-12 mt-2">
                         <div class="row">
                             <div class="col-6">
-                                <label for="{{'baselineAdjustment_'+index}}">{{baselineAdjustment.year | yearDisplay:
+                                <label for="baselineAdjustmentsV2">{{analysisItem.baselineYear | yearDisplay:
                                     facility.fiscalYear}}</label>
                             </div>
                             <div class="col-6">
                                 <div class="input-group">
-                                    <!-- <span class="input-group-text">{{baselineAdjustment.year}}</span> -->
-                                    <input class="form-control" type="number" name="{{'baselineAdjustment_'+index}}"
-                                        id="{{'baselineAdjustment_'+index}}" [(ngModel)]="baselineAdjustment.amount"
+                                    <input class="form-control" type="number" name="baselineAdjustmentsV2"
+                                        id="baselineAdjustmentsV2" [(ngModel)]="group.baselineAdjustmentsV2"
                                         (input)="saveItem()" min="0">
                                     <span *ngIf="analysisItem.analysisCategory == 'energy'" class="input-group-text"
                                         [innerHTML]="analysisItem.energyUnit | settingsLabel:'/yr'"></span>

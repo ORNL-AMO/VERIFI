@@ -31,11 +31,11 @@
                 [ngClass]="{'active': orderDataField == 'modeledEnergy'}">
                 Modeled
             </th>
-            <th *ngIf="analysisTableColumns.adjustedForNormalization"
+            <!-- <th *ngIf="analysisTableColumns.adjustedForNormalization"
                 (click)="setOrderDataField('adjustedForNormalization')"
                 [ngClass]="{'active': orderDataField == 'adjustedForNormalization'}">
                 Adjusted for<br> Normalization
-            </th>
+            </th> -->
             <th *ngIf="analysisTableColumns.adjusted" (click)="setOrderDataField('adjusted')"
                 [ngClass]="{'active': orderDataField == 'adjusted'}">
                 Adjusted
@@ -113,7 +113,7 @@
             </td>
 
 
-            <td *ngIf="analysisTableColumns.adjustedForNormalization">
+            <!-- <td *ngIf="analysisTableColumns.adjustedForNormalization">
                 <span *ngIf="summary.adjustedForNormalization"
                     [ngClass]="{'red': summary.adjustedForNormalization < 0}">
                     {{summary.adjustedForNormalization | customNumber}}
@@ -121,7 +121,7 @@
                 <span *ngIf="!summary.adjustedForNormalization">
                     &mdash;
                 </span>
-            </td>
+            </td> -->
             <td *ngIf="analysisTableColumns.adjusted">
                 <span *ngIf="summary.adjusted" [ngClass]="{'red': summary.adjusted < 0}">
                     {{summary.adjusted | customNumber}}

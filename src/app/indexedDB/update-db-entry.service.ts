@@ -99,14 +99,7 @@ export class UpdateDbEntryService {
 
         if (group.baselineAdjustmentsV2 == undefined) {
           group.hasBaselineAdjustmentV2 = false;
-          let yearBaselineAdjustments: Array<{ year: number, amount: number }> = new Array();
-          for (let year: number = analysisItem.baselineYear + 1; year <= analysisItem.reportYear; year++) {
-            yearBaselineAdjustments.push({
-              year: year,
-              amount: 0
-            })
-          }
-          group.baselineAdjustmentsV2 = yearBaselineAdjustments;
+          group.baselineAdjustmentsV2 = 0;
           isChanged = true;
         }
       });
@@ -152,7 +145,7 @@ export class UpdateDbEntryService {
           amount: 0
         })
       }
-      analysisItem.baselineAdjustmentsV2 = yearBaselineAdjustments;
+      analysisItem.baselineAdjustmentsV2 = 0;
       isChanged = true;
     }
 

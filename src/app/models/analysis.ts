@@ -53,7 +53,7 @@ export interface MonthlyAnalysisSummaryData {
   date: Date,
   energyUse: number,
   modeledEnergy: number,
-  adjustedForNormalization: number,
+  // adjustedForNormalization: number,
   adjusted: number,
   baselineAdjustmentForNormalization: number,
   baselineAdjustmentForOther: number,
@@ -72,13 +72,15 @@ export interface MonthlyAnalysisSummaryData {
   rollingSavings: number,
   rolling12MonthImprovement: number,
   // groupsSummaryData?: Array<MonthlyAnalysisSummaryData>,
+  modelYearDataAdjustment: number,
+  dataAdjustment: number
 }
 
 export interface AnnualAnalysisSummary {
   year: number,
   energyUse: number,
   modeledEnergy: number,
-  adjustedForNormalization: number,
+  // adjustedForNormalization: number,
   adjusted: number,
   baselineAdjustmentForNormalization: number,
   baselineAdjustmentForOther: number,
@@ -203,10 +205,7 @@ export interface AnalysisGroup {
     amount: number
   }>,
   hasBaselineAdjustmentV2: boolean,
-  baselineAdjustmentsV2: Array<{
-    year: number,
-    amount: number
-  }>,
+  baselineAdjustmentsV2: number,
   userDefinedModel: boolean,
   models?: Array<JStatRegressionModel>,
   selectedModelId?: string,
