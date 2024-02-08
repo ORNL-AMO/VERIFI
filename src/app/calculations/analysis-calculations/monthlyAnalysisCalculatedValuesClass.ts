@@ -125,7 +125,7 @@ export class MonthlyAnalysisCalculatedValues {
     }
 
     setAdjustedStarStar(dataAdjustment: number) {
-        this.adjustedStarStar = this.adjustedStar * (this.energyUse / (this.energyUse - dataAdjustment));
+        this.adjustedStarStar = this.adjustedStar * this.energyUse / (this.energyUse - dataAdjustment);
     }
 
     setAdjusted() {
