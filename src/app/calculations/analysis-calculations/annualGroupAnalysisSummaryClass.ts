@@ -69,7 +69,7 @@ export class AnnualGroupAnalysisSummaryClass {
                 year: summaryDataClass.year,
                 energyUse: summaryDataClass.energyUse,
                 modeledEnergy: summaryDataClass.modeledEnergy,
-                // adjustedForNormalization: summaryDataClass.adjustedForNormalization,
+                adjustementForNormalization: summaryDataClass.adjustementForNormalization,
                 adjusted: summaryDataClass.adjusted,
                 baselineAdjustmentForNormalization: summaryDataClass.baselineAdjustmentForNormalization,
                 baselineAdjustmentForOther: summaryDataClass.baselineAdjustmentForOther,

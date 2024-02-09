@@ -44,7 +44,7 @@ export class MonthlyAnalysisSummaryClass {
                 date: summaryDataItem.date,
                 energyUse: summaryDataItem.energyUse,
                 modeledEnergy: summaryDataItem.modeledEnergy,
-                // adjustedForNormalization: summaryDataItem.monthlyAnalysisCalculatedValues.adjustedForNormalization,
+                adjustementForNormalization: summaryDataItem.monthlyAnalysisCalculatedValues.adjustementForNormalization,
                 adjusted: summaryDataItem.monthlyAnalysisCalculatedValues.adjusted,
                 baselineAdjustmentForNormalization: summaryDataItem.monthlyAnalysisCalculatedValues.baselineAdjustmentForNormalization,
                 baselineAdjustmentForOther: summaryDataItem.baselineAdjustmentForOther,
@@ -60,7 +60,9 @@ export class MonthlyAnalysisSummaryClass {
                 rollingSavings: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.rollingSavings),
                 rolling12MonthImprovement: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.rolling12MonthImprovement) * 100,
                 modelYearDataAdjustment: summaryDataItem.modelYearDataAdjustment,
-                dataAdjustment: summaryDataItem.dataAdjustment
+                dataAdjustment: summaryDataItem.dataAdjustment,
+                adjustedStar: summaryDataItem.monthlyAnalysisCalculatedValues.adjustedStar,
+                adjustedStarStar: summaryDataItem.monthlyAnalysisCalculatedValues.adjustedStarStar
             }
         })
     }

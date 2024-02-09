@@ -67,6 +67,7 @@ export class AnnualAnalysisSummaryComponent implements OnInit {
       let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, facilityMeterData, this.facility, false, { energyIsSource: this.analysisItem.energyIsSource, neededUnits: getNeededUnits(this.analysisItem) });
       let annualAnalysisSummaryClass: AnnualGroupAnalysisSummaryClass = new AnnualGroupAnalysisSummaryClass(this.group, this.analysisItem, this.facility, calanderizedMeters, accountPredictorEntries);
       this.annualAnalysisSummary = annualAnalysisSummaryClass.getAnnualAnalysisSummaries();
+      console.log(this.annualAnalysisSummary);
       this.calculating = false;
     }
   }

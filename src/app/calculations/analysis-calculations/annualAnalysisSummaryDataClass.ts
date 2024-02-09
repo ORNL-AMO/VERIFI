@@ -75,17 +75,21 @@ export class AnnualAnalysisSummaryDataClass {
     }
 
     setYearAnalysisSummaryData(monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>) {
-        this.yearAnalysisSummaryData = _.filter(monthlyAnalysisSummaryData, (data) => {
+        this.yearAnalysisSummaryData = _.filter(monthlyAnalysisSummaryData, (data: MonthlyAnalysisSummaryData) => {
             return data.fiscalYear == this.year;
         });
     }
 
     setEnergyUse() {
-        this.energyUse = _.sumBy(this.yearAnalysisSummaryData, 'energyUse');
+        this.energyUse = _.sumBy(this.yearAnalysisSummaryData, (data: MonthlyAnalysisSummaryData) => {
+            return data.energyUse;
+        });
     }
 
     setModeledEnergy() {
-        this.modeledEnergy = _.sumBy(this.yearAnalysisSummaryData, 'modeledEnergy');
+        this.modeledEnergy = _.sumBy(this.yearAnalysisSummaryData, (data: MonthlyAnalysisSummaryData) => {
+            return data.modeledEnergy;
+        });
     }
 
     setBaselineEnergyUse(previousYearsSummaryData: Array<AnnualAnalysisSummaryDataClass>) {
@@ -127,7 +131,10 @@ export class AnnualAnalysisSummaryDataClass {
     }
 
     setAdjustmentForNormalization() {
-        this.adjustementForNormalization = this.adjustedStar - (this.baselineEnergyUse + this.baselineAdjustment)
+        this.adjustementForNormalization = this.adjustedStar - (this.baselineEnergyUse + this.baselineAdjustmentForOther);
+        if ((this.adjustementForNormalization > 0 && this.adjustementForNormalization < 0.00001) || (this.adjustementForNormalization < 0 && this.adjustementForNormalization > -0.00001)) {
+            this.adjustementForNormalization = 0;
+        }
     }
 
     setBaselineAdjustmentForNormalization(previousYearsSummaryData: Array<AnnualAnalysisSummaryDataClass>) {

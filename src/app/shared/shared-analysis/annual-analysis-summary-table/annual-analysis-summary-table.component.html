@@ -31,11 +31,17 @@
                 [ngClass]="{'active': orderDataField == 'modeledEnergy'}">
                 Modeled
             </th>
-            <!-- <th *ngIf="analysisTableColumns.adjustedForNormalization"
+            <th *ngIf="analysisTableColumns.adjustedForNormalization"
                 (click)="setOrderDataField('adjustedForNormalization')"
                 [ngClass]="{'active': orderDataField == 'adjustedForNormalization'}">
-                Adjusted for<br> Normalization
-            </th> -->
+                Adjustment for<br> Normalization
+            </th>
+            <th>
+                Adjusted &#42;
+            </th>
+            <th>
+                Adjusted &#42; &#42;
+            </th>
             <th *ngIf="analysisTableColumns.adjusted" (click)="setOrderDataField('adjusted')"
                 [ngClass]="{'active': orderDataField == 'adjusted'}">
                 Adjusted
@@ -113,15 +119,31 @@
             </td>
 
 
-            <!-- <td *ngIf="analysisTableColumns.adjustedForNormalization">
-                <span *ngIf="summary.adjustedForNormalization"
-                    [ngClass]="{'red': summary.adjustedForNormalization < 0}">
-                    {{summary.adjustedForNormalization | customNumber}}
+            <td *ngIf="analysisTableColumns.adjustedForNormalization">
+                <span *ngIf="summary.adjustementForNormalization"
+                    [ngClass]="{'red': summary.adjustementForNormalization < 0}">
+                    {{summary.adjustementForNormalization | customNumber}}
                 </span>
-                <span *ngIf="!summary.adjustedForNormalization">
+                <span *ngIf="!summary.adjustementForNormalization">
                     &mdash;
                 </span>
-            </td> -->
+            </td>
+            <td>
+                <span *ngIf="summary.adjustedStar">
+                    {{summary.adjustedStar | customNumber}}
+                </span>
+                <span *ngIf="!summary.adjustedStar">
+                    &mdash;
+                </span>
+            </td>
+            <td>
+                <span *ngIf="summary.adjustedStarStar">
+                    {{summary.adjustedStarStar | customNumber}}
+                </span>
+                <span *ngIf="!summary.adjustedStarStar">
+                    &mdash;
+                </span>
+            </td>
             <td *ngIf="analysisTableColumns.adjusted">
                 <span *ngIf="summary.adjusted" [ngClass]="{'red': summary.adjusted < 0}">
                     {{summary.adjusted | customNumber}}

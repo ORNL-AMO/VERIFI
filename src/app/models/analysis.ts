@@ -53,7 +53,7 @@ export interface MonthlyAnalysisSummaryData {
   date: Date,
   energyUse: number,
   modeledEnergy: number,
-  // adjustedForNormalization: number,
+  adjustementForNormalization: number,
   adjusted: number,
   baselineAdjustmentForNormalization: number,
   baselineAdjustmentForOther: number,
@@ -73,14 +73,16 @@ export interface MonthlyAnalysisSummaryData {
   rolling12MonthImprovement: number,
   // groupsSummaryData?: Array<MonthlyAnalysisSummaryData>,
   modelYearDataAdjustment: number,
-  dataAdjustment: number
+  dataAdjustment: number,
+  adjustedStar: number,
+  adjustedStarStar: number
 }
 
 export interface AnnualAnalysisSummary {
   year: number,
   energyUse: number,
   modeledEnergy: number,
-  // adjustedForNormalization: number,
+  adjustementForNormalization: number,
   adjusted: number,
   baselineAdjustmentForNormalization: number,
   baselineAdjustmentForOther: number,

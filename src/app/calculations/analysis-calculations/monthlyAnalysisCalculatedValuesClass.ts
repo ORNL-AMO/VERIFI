@@ -54,14 +54,14 @@ export class MonthlyAnalysisCalculatedValues {
         this.setAdjustedStar(baselineActualEnergyUse, modelYearDataAdjusted, baselineAdjustmentForOther);
         this.setAdjustedStarStar(dataAdjustment);
         this.setAdjusted();
-        this.setAdjustmentForNormalization(baselineActualEnergyUse);
+        this.setAdjustmentForNormalization(baselineActualEnergyUse, baselineAdjustmentForOther);
+        this.setBaselineAdjustmentForNormalization(baselineActualEnergyUse);
+        this.setBaselineAdjustment(baselineAdjustmentForOther);
         this.setAdjustmentForOther();
         this.setSEnPI();
         this.setSavings();
         this.setPercentSavingsComparedToBaseline();
         this.setYearToDateSavings(baselineYear);
-        this.setBaselineAdjustmentForNormalization(baselineActualEnergyUse);
-        this.setBaselineAdjustment(baselineAdjustmentForOther);
         this.setRollingSavingsValues(previousMonthValues);
         this.setYearToDatePercentSavings();
     }
@@ -158,8 +158,11 @@ export class MonthlyAnalysisCalculatedValues {
         }
     }
 
-    setAdjustmentForNormalization(baselineActualEnergyUse: number) {
-        this.adjustementForNormalization = this.adjustedStar - (baselineActualEnergyUse + this.baselineAdjustment)
+    setAdjustmentForNormalization(baselineActualEnergyUse: number, baselineAdjustmentForOther: number) {
+        this.adjustementForNormalization = this.adjustedStar - (baselineActualEnergyUse + baselineAdjustmentForOther);
+        if ((this.adjustementForNormalization > 0 && this.adjustementForNormalization < 0.00001) || (this.adjustementForNormalization < 0 && this.adjustementForNormalization > -0.00001)) {
+            this.adjustementForNormalization = 0;
+        }
     }
 
     setBaselineAdjustmentForNormalization(baselineActualEnergyUse: number) {
@@ -175,7 +178,7 @@ export class MonthlyAnalysisCalculatedValues {
 
     setBaselineAdjustment(baselineAdjustmentForOther: number) {
         if (this.summaryDataIndex >= 11) {
-            this.baselineAdjustment = this.baselineAdjustmentForNormalization + baselineAdjustmentForOther;
+            this.baselineAdjustment = this.adjustementForNormalization + baselineAdjustmentForOther;
             if ((this.baselineAdjustment > 0 && this.baselineAdjustment < 0.00001) || (this.baselineAdjustment < 0 && this.baselineAdjustment > -0.00001)) {
                 this.baselineAdjustment = 0;
             }
@@ -205,7 +208,7 @@ export class MonthlyAnalysisCalculatedValues {
     convertResults(startingUnit: string, endingUnit: string) {
         this.energyUse = new ConvertValue(this.energyUse, startingUnit, endingUnit).convertedValue;
         this.modeledEnergy = new ConvertValue(this.modeledEnergy, startingUnit, endingUnit).convertedValue;
-        // this.adjustedForNormalization = new ConvertValue(this.adjustedForNormalization, startingUnit, endingUnit).convertedValue;
+        this.adjustementForNormalization = new ConvertValue(this.adjustementForNormalization, startingUnit, endingUnit).convertedValue;
         this.adjustementForNormalization = new ConvertValue(this.adjustementForNormalization, startingUnit, endingUnit).convertedValue;
         this.baselineAdjustmentForNormalization = new ConvertValue(this.baselineAdjustmentForNormalization, startingUnit, endingUnit).convertedValue;
         this.adjusted = new ConvertValue(this.adjusted, startingUnit, endingUnit).convertedValue;
