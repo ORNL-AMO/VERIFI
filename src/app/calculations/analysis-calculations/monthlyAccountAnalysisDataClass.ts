@@ -3,10 +3,8 @@ import { MonthlyAnalysisCalculatedValues } from "./monthlyAnalysisCalculatedValu
 import { MonthlyAnalysisSummaryDataClass } from "./monthlyAnalysisSummaryDataClass";
 import * as _ from 'lodash';
 import { getFiscalYear } from "../shared-calculations/calanderizationFunctions";
-import { MonthlyAnalysisSummaryData } from "src/app/models/analysis";
+
 export class MonthlyAccountAnalysisDataClass {
-
-
     date: Date;
     energyUse: number;
     modeledEnergy: number;
