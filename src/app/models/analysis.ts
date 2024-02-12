@@ -207,7 +207,10 @@ export interface AnalysisGroup {
     amount: number
   }>,
   hasBaselineAdjustmentV2: boolean,
-  baselineAdjustmentsV2: number,
+  baselineAdjustmentsV2: Array<{
+    year: number,
+    amount: number
+  }>,
   userDefinedModel: boolean,
   models?: Array<JStatRegressionModel>,
   selectedModelId?: string,

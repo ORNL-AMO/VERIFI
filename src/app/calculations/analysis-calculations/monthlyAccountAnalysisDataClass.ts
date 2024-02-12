@@ -81,12 +81,14 @@ export class MonthlyAccountAnalysisDataClass {
         if (accountAnalysisItem.hasBaselineAdjustmentV2 && this.fiscalYear != baselineYear) {
             let annualEnergyUse: number = annualUsageValues.find(usageVal => { return usageVal.year == this.fiscalYear })?.usage;
             if (accountAnalysisItem.baselineAdjustmentsV2) {
-                let accountBaselineAdjustementForOther: number = (this.energyUse / annualEnergyUse) * accountAnalysisItem.baselineAdjustmentsV2;
-                this.baselineAdjustmentForOther = this.baselineAdjustmentForOther + accountBaselineAdjustementForOther;
+                let yearAdjustment: { year: number, amount: number } = accountAnalysisItem.baselineAdjustmentsV2.find(dataAdjustment => { return dataAdjustment.year == this.fiscalYear; })
+                if (yearAdjustment && yearAdjustment.amount) {
+                    let accountBaselineAdjustment: number = (this.energyUse / annualEnergyUse) * yearAdjustment.amount;
+                    this.baselineAdjustmentForOther = this.baselineAdjustmentForOther + accountBaselineAdjustment;
+                }
             }
         }
     }
-
 
     setMonthIndex(previousMonthsSummaryData: Array<MonthlyAccountAnalysisDataClass>) {
         let summaryDataIndex: number = previousMonthsSummaryData.length;

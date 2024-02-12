@@ -92,13 +92,19 @@ export class AnalysisService {
     if (analysisItem.baselineYear < analysisItem.reportYear) {
       analysisItem.groups.forEach(group => {
         let yearDataAdjustments: Array<{ year: number, amount: number }> = new Array();
+        let baselineAdjustments: Array<{ year: number, amount: number }> = new Array();
         for (let year: number = analysisItem.baselineYear + 1; year <= analysisItem.reportYear; year++) {
           yearDataAdjustments.push({
             year: year,
             amount: 0
-          })
+          });
+          baselineAdjustments.push({
+            year: year,
+            amount: 0
+          });
         }
         group.dataAdjustments = yearDataAdjustments;
+        group.baselineAdjustmentsV2 = baselineAdjustments;
       });
     }
     return analysisItem;
