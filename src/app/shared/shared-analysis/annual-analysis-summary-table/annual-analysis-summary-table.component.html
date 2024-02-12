@@ -31,17 +31,6 @@
                 [ngClass]="{'active': orderDataField == 'modeledEnergy'}">
                 Modeled
             </th>
-            <!-- <th *ngIf="analysisTableColumns.adjustedForNormalization"
-                (click)="setOrderDataField('adjustedForNormalization')"
-                [ngClass]="{'active': orderDataField == 'adjustedForNormalization'}">
-                Adjustment for<br> Normalization
-            </th> -->
-            <th>
-                Adjusted &#42;
-            </th>
-            <th>
-                Adjusted &#42; &#42;
-            </th>
             <th *ngIf="analysisTableColumns.adjusted" (click)="setOrderDataField('adjusted')"
                 [ngClass]="{'active': orderDataField == 'adjusted'}">
                 Adjusted
@@ -114,33 +103,6 @@
                     {{summary.modeledEnergy | customNumber}}
                 </span>
                 <span *ngIf="!summary.modeledEnergy">
-                    &mdash;
-                </span>
-            </td>
-
-
-            <!-- <td *ngIf="analysisTableColumns.adjustedForNormalization">
-                <span *ngIf="summary.adjustementForNormalization"
-                    [ngClass]="{'red': summary.adjustementForNormalization < 0}">
-                    {{summary.adjustementForNormalization | customNumber}}
-                </span>
-                <span *ngIf="!summary.adjustementForNormalization">
-                    &mdash;
-                </span>
-            </td> -->
-            <td>
-                <span *ngIf="summary.adjustedStar">
-                    {{summary.adjustedStar | customNumber}}
-                </span>
-                <span *ngIf="!summary.adjustedStar">
-                    &mdash;
-                </span>
-            </td>
-            <td>
-                <span *ngIf="summary.adjustedStarStar">
-                    {{summary.adjustedStarStar | customNumber}}
-                </span>
-                <span *ngIf="!summary.adjustedStarStar">
                     &mdash;
                 </span>
             </td>

@@ -52,7 +52,6 @@ export class AnnualFacilityAnalysisSummaryClass {
                 year: summaryDataClass.year,
                 energyUse: summaryDataClass.energyUse,
                 modeledEnergy: summaryDataClass.modeledEnergy,
-                // adjustementForNormalization: summaryDataClass.adjustementForNormalization,
                 adjusted: summaryDataClass.adjusted,
                 baselineAdjustmentForNormalization: summaryDataClass.baselineAdjustmentForNormalization,
                 baselineAdjustmentForOtherV2: summaryDataClass.baselineAdjustmentForOtherV2,

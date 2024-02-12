@@ -20,7 +20,6 @@ export class MonthlyAnalysisSummaryClass {
         this.monthlyAnalysisSummaryData = new Array();
         let baselineDate: Date = new Date(this.monthlyGroupAnalysisClass.baselineDate);
         while (baselineDate < this.monthlyGroupAnalysisClass.endDate) {
-            // let monthlyanalysisSummaryDataCopy: Array<MonthlyAnalysisSummaryDataClass> = JSON.parse(JSON.stringify(this.monthlyAnalysisSummaryData))
             let monthlyAnalysisSummaryDataClass: MonthlyAnalysisSummaryDataClass = new MonthlyAnalysisSummaryDataClass(this.monthlyGroupAnalysisClass, baselineDate, this.monthlyAnalysisSummaryData)
             this.monthlyAnalysisSummaryData.push(monthlyAnalysisSummaryDataClass);
             let currentMonth: number = baselineDate.getUTCMonth()
@@ -44,7 +43,6 @@ export class MonthlyAnalysisSummaryClass {
                 date: summaryDataItem.date,
                 energyUse: summaryDataItem.energyUse,
                 modeledEnergy: summaryDataItem.modeledEnergy,
-                // adjustementForNormalization: summaryDataItem.monthlyAnalysisCalculatedValues.adjustementForNormalization,
                 adjusted: summaryDataItem.monthlyAnalysisCalculatedValues.adjusted,
                 baselineAdjustmentForNormalization: summaryDataItem.monthlyAnalysisCalculatedValues.baselineAdjustmentForNormalization,
                 baselineAdjustmentForOtherV2: summaryDataItem.monthlyAnalysisCalculatedValues.baselineAdjustmentForOtherV2,

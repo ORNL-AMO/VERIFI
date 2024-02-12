@@ -52,7 +52,6 @@ export class AnalysisService {
         energy: true,
         actualEnergy: true,
         modeledEnergy: true,
-        adjustedForNormalization: true,
         adjusted: true,
         baselineAdjustmentForNormalization: true,
         baselineAdjustmentForOther: true,

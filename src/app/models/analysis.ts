@@ -116,7 +116,6 @@ export interface AnalysisTableColumns {
   energy: boolean,
   actualEnergy: boolean,
   modeledEnergy: boolean,
-  adjustedForNormalization: boolean,
   adjusted: boolean,
   baselineAdjustmentForNormalization: boolean,
   baselineAdjustmentForOther: boolean,
