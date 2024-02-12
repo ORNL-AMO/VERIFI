@@ -231,7 +231,7 @@ export interface IdbUtilityMeterData {
     demandUsage?: number,
     demandCharge?: number,
 
-    heatCapacity?:  number,
+    heatCapacity?: number,
     vehicleFuelEfficiency?: number,
 
 }
@@ -337,11 +337,14 @@ export interface IdbAccountAnalysisItem {
     }>,
     hasDataAdjustement: boolean,
     dataAdjustments: Array<{
-      year: number,
-      amount: number
+        year: number,
+        amount: number
     }>,
     hasBaselineAdjustmentV2: boolean,
-    baselineAdjustmentsV2: number,
+    baselineAdjustmentsV2: Array<{
+        year: number,
+        amount: number
+    }>,
     // hasBaselineAdjustement: boolean,
     // baselineAdjustments: Array<{
     //     year: number,

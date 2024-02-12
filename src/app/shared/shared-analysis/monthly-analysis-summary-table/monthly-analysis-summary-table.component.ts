@@ -96,16 +96,16 @@ export class MonthlyAnalysisSummaryTableComponent implements OnInit {
   }
 
   setNumEnergyColumns() {
-    let numEnergyColumns: number = 0;
+    let numEnergyColumns: number = 2;
     if (this.analysisTableColumns.actualEnergy) {
       numEnergyColumns++;
     }
     if (this.analysisTableColumns.modeledEnergy) {
       numEnergyColumns++;
     }
-    // if (this.analysisTableColumns.adjustedForNormalization) {
-    //   numEnergyColumns++;
-    // }
+    if (this.analysisTableColumns.adjustedForNormalization) {
+      numEnergyColumns++;
+    }
     if (this.analysisTableColumns.adjusted) {
       numEnergyColumns++;
     }

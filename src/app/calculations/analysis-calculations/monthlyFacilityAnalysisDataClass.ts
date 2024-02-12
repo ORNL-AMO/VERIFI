@@ -10,7 +10,7 @@ export class MonthlyFacilityAnalysisDataClass {
     date: Date;
     energyUse: number;
     modeledEnergy: number;
-    baselineAdjustmentForOther: number;
+    baselineAdjustmentInput: number;
     predictorUsage: Array<{
         usage: number,
         predictorId: string
@@ -40,7 +40,7 @@ export class MonthlyFacilityAnalysisDataClass {
         this.setPredictorUsage(facilityPredictorEntries);
         this.setEnergyUse();
         this.setModeledEnergy();
-        this.setBaselineAdjustmentForOther();
+        this.setBaselineAdjustmentInput();
         this.setDataAdjustment();
         this.setModelYearDataAdjustment();
         this.setMonthIndex(previousMonthsSummaryData);
@@ -92,8 +92,8 @@ export class MonthlyFacilityAnalysisDataClass {
         this.modeledEnergy = _.sumBy(this.currentMonthData, (data: MonthlyAnalysisSummaryDataClass) => {return data.modeledEnergy});
     }
 
-    setBaselineAdjustmentForOther() {
-        this.baselineAdjustmentForOther = _.sumBy(this.currentMonthData, (data: MonthlyAnalysisSummaryDataClass) => {return data.baselineAdjustmentForOther});
+    setBaselineAdjustmentInput() {
+        this.baselineAdjustmentInput = _.sumBy(this.currentMonthData, (data: MonthlyAnalysisSummaryDataClass) => {return data.baselineAdjustmentInput});
     }
 
     setModelYearDataAdjustment() {
@@ -130,7 +130,7 @@ export class MonthlyFacilityAnalysisDataClass {
         this.monthlyAnalysisCalculatedValues = new MonthlyAnalysisCalculatedValues(
             this.energyUse,
             this.modeledEnergy,
-            this.baselineAdjustmentForOther,
+            this.baselineAdjustmentInput,
             this.fiscalYear,
             baselineYear,
             previousMonthsAnalysisCalculatedValues,
@@ -143,7 +143,7 @@ export class MonthlyFacilityAnalysisDataClass {
     convertResults(startingUnit: string, endingUnit: string) {
         this.energyUse = new ConvertValue(this.energyUse, startingUnit, endingUnit).convertedValue;
         this.modeledEnergy = new ConvertValue(this.modeledEnergy, startingUnit, endingUnit).convertedValue;
-        this.baselineAdjustmentForOther = new ConvertValue(this.baselineAdjustmentForOther, startingUnit, endingUnit).convertedValue;
+        this.baselineAdjustmentInput = new ConvertValue(this.baselineAdjustmentInput, startingUnit, endingUnit).convertedValue;
         this.monthlyAnalysisCalculatedValues.convertResults(startingUnit, endingUnit);
     }
 }

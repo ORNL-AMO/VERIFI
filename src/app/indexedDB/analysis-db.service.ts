@@ -132,7 +132,7 @@ export class AnalysisDbService {
           userDefinedModel: true,
           models: undefined,
           hasBaselineAdjustmentV2: false,
-          baselineAdjustmentsV2: 0
+          baselineAdjustmentsV2: []
         }
         analysisGroup.groupErrors = this.analysisValidationService.getGroupErrors(analysisGroup);
         itemGroups.push(analysisGroup);
@@ -271,7 +271,7 @@ export class AnalysisDbService {
         dataAdjustments: [],
         userDefinedModel: false,
         hasBaselineAdjustmentV2: false,
-        baselineAdjustmentsV2: 0
+        baselineAdjustmentsV2: []
       }
       analysisGroup.groupErrors = this.analysisValidationService.getGroupErrors(analysisGroup);
       item.groups.push(analysisGroup);

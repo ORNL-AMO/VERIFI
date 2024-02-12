@@ -12,7 +12,7 @@ export class AnnualAnalysisSummaryDataClass {
     // adjustedForNormalization: number;
     adjusted: number;
     baselineAdjustmentForNormalization: number;
-    baselineAdjustmentForOther: number;
+    baselineAdjustmentForOtherV2: number;
     baselineAdjustment: number;
     SEnPI: number;
     savings: number;
@@ -38,8 +38,9 @@ export class AnnualAnalysisSummaryDataClass {
     modelYearDataAdjustment: number;
     //adjustment corresponding to the current year
     dataAdjustment: number;
-    adjustementForNormalization: number;
+    // adjustementForNormalization: number;
     adjustmentForOther: number;
+    baselineAdjustmentInput: number;
     constructor(
         monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
         year: number,
@@ -54,15 +55,17 @@ export class AnnualAnalysisSummaryDataClass {
         this.setModeledEnergy();
         this.setBaselineEnergyUse(previousYearsSummaryData);
         this.setBaselineModeledEnergy(previousYearsSummaryData);
+        this.setBaselineAdjustmentInput()
         // this.setAdjustedForNormalization();
-        this.setBaselineAdjustmentForOther();
+        // this.setBaselineAdjustmentForOther();
         this.setModelYearDataAdjustment();
         this.setDataAdjustment();
         this.setAdjustedStar();
         this.setAdjustedStarStar();
         this.setAdjusted();
         this.setAdjustmentForOther();
-        this.setAdjustmentForNormalization();
+        this.setBaselineAdjustmentForOtherV2();
+        // this.setAdjustmentForNormalization();
         this.setBaselineAdjustmentForNormalization(previousYearsSummaryData);
         this.setBaselineAdjustment(previousYearsSummaryData);
         this.setSEnPI();
@@ -75,17 +78,21 @@ export class AnnualAnalysisSummaryDataClass {
     }
 
     setYearAnalysisSummaryData(monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>) {
-        this.yearAnalysisSummaryData = _.filter(monthlyAnalysisSummaryData, (data) => {
+        this.yearAnalysisSummaryData = _.filter(monthlyAnalysisSummaryData, (data: MonthlyAnalysisSummaryData) => {
             return data.fiscalYear == this.year;
         });
     }
 
     setEnergyUse() {
-        this.energyUse = _.sumBy(this.yearAnalysisSummaryData, 'energyUse');
+        this.energyUse = _.sumBy(this.yearAnalysisSummaryData, (data: MonthlyAnalysisSummaryData) => {
+            return data.energyUse;
+        });
     }
 
     setModeledEnergy() {
-        this.modeledEnergy = _.sumBy(this.yearAnalysisSummaryData, 'modeledEnergy');
+        this.modeledEnergy = _.sumBy(this.yearAnalysisSummaryData, (data: MonthlyAnalysisSummaryData) => {
+            return data.modeledEnergy;
+        });
     }
 
     setBaselineEnergyUse(previousYearsSummaryData: Array<AnnualAnalysisSummaryDataClass>) {
@@ -108,10 +115,18 @@ export class AnnualAnalysisSummaryDataClass {
     //     this.adjustedForNormalization = this.modeledEnergy + this.baselineEnergyUse - this.baselineModeledEnergyUse;
     // }
 
-    setBaselineAdjustmentForOther() {
-        this.baselineAdjustmentForOther = _.sumBy(this.yearAnalysisSummaryData, (data: MonthlyAnalysisSummaryData) => {
-            return data.baselineAdjustmentForOther;
+    setBaselineAdjustmentInput() {
+        this.baselineAdjustmentInput = _.sumBy(this.yearAnalysisSummaryData, (data: MonthlyAnalysisSummaryData) => {
+            return data.baselineAdjustmentInput;
         })
+    }
+
+
+    setBaselineAdjustmentForOtherV2() {
+        // this.baselineAdjustmentForOther = _.sumBy(this.yearAnalysisSummaryData, (data: MonthlyAnalysisSummaryData) => {
+        //     return data.baselineAdjustmentForOther;
+        // })
+        this.baselineAdjustmentForOtherV2 = this.adjustedStarStar - this.adjustedStar;
     }
 
     setModelYearDataAdjustment() {
@@ -126,13 +141,16 @@ export class AnnualAnalysisSummaryDataClass {
         });
     }
 
-    setAdjustmentForNormalization() {
-        this.adjustementForNormalization = this.adjustedStar - (this.baselineEnergyUse + this.baselineAdjustment)
-    }
+    // setAdjustmentForNormalization() {
+    //     this.adjustementForNormalization = this.adjustedStar - (this.baselineEnergyUse + this.baselineAdjustmentForOther);
+    //     if ((this.adjustementForNormalization > 0 && this.adjustementForNormalization < 0.00001) || (this.adjustementForNormalization < 0 && this.adjustementForNormalization > -0.00001)) {
+    //         this.adjustementForNormalization = 0;
+    //     }
+    // }
 
     setBaselineAdjustmentForNormalization(previousYearsSummaryData: Array<AnnualAnalysisSummaryDataClass>) {
         if (previousYearsSummaryData.length != 0) {
-            this.baselineAdjustmentForNormalization = this.adjustementForNormalization - this.baselineEnergyUse;
+            this.baselineAdjustmentForNormalization = this.adjustedStar - (this.baselineEnergyUse + this.baselineAdjustmentInput);
         } else {
             this.baselineAdjustmentForNormalization = 0;
         }
@@ -140,14 +158,14 @@ export class AnnualAnalysisSummaryDataClass {
 
     setBaselineAdjustment(previousYearsSummaryData: Array<AnnualAnalysisSummaryDataClass>) {
         if (previousYearsSummaryData.length != 0) {
-            this.baselineAdjustment = this.baselineAdjustmentForNormalization + this.baselineAdjustmentForOther;
+            this.baselineAdjustment = this.baselineAdjustmentForNormalization + this.baselineAdjustmentForOtherV2;
         } else {
             this.baselineAdjustment = 0;
         }
     }
 
     setAdjustedStar() {
-        this.adjustedStar = (this.baselineEnergyUse + this.baselineAdjustmentForOther) * ((this.modeledEnergy - this.modelYearDataAdjustment) / (this.baselineEnergyUse - this.modelYearDataAdjustment));
+        this.adjustedStar = (this.baselineEnergyUse + this.baselineAdjustmentInput) * ((this.modeledEnergy - this.modelYearDataAdjustment) / (this.baselineEnergyUse - this.modelYearDataAdjustment));
 
     }
 

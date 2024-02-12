@@ -61,10 +61,10 @@ export class AnnualAccountAnalysisSummaryClass {
                 year: summaryDataClass.year,
                 energyUse: summaryDataClass.energyUse,
                 modeledEnergy: summaryDataClass.modeledEnergy,
-                // adjustedForNormalization: summaryDataClass.adjustedForNormalization,
+                // adjustementForNormalization: summaryDataClass.adjustementForNormalization,
                 adjusted: summaryDataClass.adjusted,
                 baselineAdjustmentForNormalization: summaryDataClass.baselineAdjustmentForNormalization,
-                baselineAdjustmentForOther: summaryDataClass.baselineAdjustmentForOther,
+                baselineAdjustmentForOtherV2: summaryDataClass.baselineAdjustmentForOtherV2,
                 baselineAdjustment: summaryDataClass.baselineAdjustment,
                 SEnPI: checkAnalysisValue(summaryDataClass.SEnPI),
                 savings: checkAnalysisValue(summaryDataClass.savings),
@@ -72,7 +72,9 @@ export class AnnualAccountAnalysisSummaryClass {
                 annualSavingsPercentImprovement: checkAnalysisValue(summaryDataClass.annualSavingsPercentImprovement) * 100,
                 cummulativeSavings: checkAnalysisValue(summaryDataClass.cummulativeSavings),
                 newSavings: checkAnalysisValue(summaryDataClass.newSavings),
-                predictorUsage: summaryDataClass.predictorUsage
+                predictorUsage: summaryDataClass.predictorUsage,
+                adjustedStar: summaryDataClass.adjustedStar,
+                adjustedStarStar: summaryDataClass.adjustedStarStar
             }
         })
     }
