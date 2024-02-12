@@ -56,8 +56,8 @@ export class MonthlyAnalysisCalculatedValues {
         this.setAdjusted();
         // this.setAdjustmentForNormalization(baselineActualEnergyUse, baselineAdjustmentForOther);
         this.setBaselineAdjustmentForNormalization(baselineActualEnergyUse, baselineAdjustementInput);
-        this.setBaselineAdjustment(baselineAdjustementInput);
         this.setBaselineAdjustmentForOtherV2();
+        this.setBaselineAdjustment();
         this.setSEnPI();
         this.setSavings();
         this.setPercentSavingsComparedToBaseline();
@@ -122,6 +122,16 @@ export class MonthlyAnalysisCalculatedValues {
 
     setAdjustedStar(baselineActualEnergyUse: number, modelYearDataAdjustment: number, baselineAdjustementInput: number) {
         this.adjustedStar = (baselineActualEnergyUse + baselineAdjustementInput) * ((this.modeledEnergy - modelYearDataAdjustment) / (baselineActualEnergyUse - modelYearDataAdjustment));
+        if(this.fiscalYear == 2018){
+            // console.log('baselineActualEnergyUse:' + baselineActualEnergyUse);
+            // console.log('baselineAdjustementInput:' + baselineAdjustementInput);
+            // console.log('modeledEnergy:' + this.modeledEnergy);
+            // console.log('modelYearDataAdjustment:' + modelYearDataAdjustment);
+            // console.log('baselineActualEnergyUse:' + baselineActualEnergyUse);
+            // console.log('modelYearDataAdjustment:' + modelYearDataAdjustment);
+            // console.log(this.adjustedStar);
+            // console.log('=====');
+        }
     }
 
     setAdjustedStarStar(dataAdjustment: number) {
@@ -176,12 +186,12 @@ export class MonthlyAnalysisCalculatedValues {
         }
     }
 
-    setBaselineAdjustment(baselineAdjustmentForOther: number) {
+    setBaselineAdjustment() {
         if (this.summaryDataIndex >= 11) {
-            this.baselineAdjustment = this.baselineAdjustmentForNormalization + baselineAdjustmentForOther;
-            if ((this.baselineAdjustment > 0 && this.baselineAdjustment < 0.00001) || (this.baselineAdjustment < 0 && this.baselineAdjustment > -0.00001)) {
-                this.baselineAdjustment = 0;
-            }
+            this.baselineAdjustment = this.baselineAdjustmentForNormalization + this.baselineAdjustmentForOtherV2;
+            // if ((this.baselineAdjustment > 0 && this.baselineAdjustment < 0.00001) || (this.baselineAdjustment < 0 && this.baselineAdjustment > -0.00001)) {
+            //     this.baselineAdjustment = 0;
+            // }
         } else {
             this.baselineAdjustment = 0;
         }

@@ -158,7 +158,7 @@ export class AnnualAnalysisSummaryDataClass {
 
     setBaselineAdjustment(previousYearsSummaryData: Array<AnnualAnalysisSummaryDataClass>) {
         if (previousYearsSummaryData.length != 0) {
-            this.baselineAdjustment = this.baselineAdjustmentForNormalization + this.baselineAdjustmentInput;
+            this.baselineAdjustment = this.baselineAdjustmentForNormalization + this.baselineAdjustmentForOtherV2;
         } else {
             this.baselineAdjustment = 0;
         }
