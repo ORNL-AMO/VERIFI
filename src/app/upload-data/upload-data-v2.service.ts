@@ -325,13 +325,18 @@ export class UploadDataV2Service {
         let totalConsumption: number = checkImportCellNumber(dataPoint['Total Consumption']);
         let displayVolumeInput: boolean = (getIsEnergyUnit(meter.startingUnit) == false);
         let displayEnergyUse: boolean = getIsEnergyMeter(meter.source);
+        let hhv: number = checkImportCellNumber(dataPoint['Higher Heating Value']);
+        if (hhv) {
+          dbDataPoint.heatCapacity = hhv;
+        } else {
+          dbDataPoint.heatCapacity = meter.heatCapacity;
+        }
         if (!displayVolumeInput) {
           energyUse = totalConsumption;
         } else {
           totalVolume = totalConsumption;
           if (displayEnergyUse && totalVolume) {
-            //TODO: heat capacity comes from utility data or meter
-            energyUse = totalVolume * meter.heatCapacity;
+            energyUse = totalVolume * dbDataPoint.heatCapacity;
           }
         }
 
@@ -368,11 +373,17 @@ export class UploadDataV2Service {
         }
         dbDataPoint.readDate = readDate;
         dbDataPoint.totalVolume = dataPoint['Total Consumption or Total Distance'];
+        let fuelEff: number = checkImportCellNumber(dataPoint['Fuel Efficiency']);
+        if (fuelEff) {
+          dbDataPoint.vehicleFuelEfficiency = fuelEff;
+        } else {
+          dbDataPoint.vehicleFuelEfficiency = meter.vehicleFuelEfficiency;
+        }
         //1: Fuel Usage, 2: Mileage
         if (meter.vehicleCollectionType == 1) {
           dbDataPoint.totalEnergyUse = dbDataPoint.totalVolume * meter.heatCapacity
         } else {
-          let fuelConsumption: number = dbDataPoint.totalVolume / meter.vehicleFuelEfficiency;
+          let fuelConsumption: number = dbDataPoint.totalVolume / dbDataPoint.vehicleFuelEfficiency;
           dbDataPoint.totalEnergyUse = fuelConsumption * meter.heatCapacity;
         }
         dbDataPoint.totalCost = dataPoint['Total Cost'];
