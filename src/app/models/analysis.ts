@@ -53,10 +53,10 @@ export interface MonthlyAnalysisSummaryData {
   date: Date,
   energyUse: number,
   modeledEnergy: number,
-  adjustementForNormalization: number,
+  // adjustementForNormalization: number,
   adjusted: number,
   baselineAdjustmentForNormalization: number,
-  baselineAdjustmentForOther: number,
+  baselineAdjustmentForOtherV2: number,
   baselineAdjustment: number,
   predictorUsage?: Array<{
     usage: number,
@@ -75,17 +75,18 @@ export interface MonthlyAnalysisSummaryData {
   modelYearDataAdjustment: number,
   dataAdjustment: number,
   adjustedStar: number,
-  adjustedStarStar: number
+  adjustedStarStar: number,
+  baselineAdjustmentInput: number
 }
 
 export interface AnnualAnalysisSummary {
   year: number,
   energyUse: number,
   modeledEnergy: number,
-  adjustementForNormalization: number,
+  // adjustementForNormalization: number,
   adjusted: number,
   baselineAdjustmentForNormalization: number,
-  baselineAdjustmentForOther: number,
+  baselineAdjustmentForOtherV2: number,
   baselineAdjustment: number,
   SEnPI: number,
   savings: number,
@@ -97,6 +98,8 @@ export interface AnnualAnalysisSummary {
     usage: number,
     predictorId: string
   }>,
+  adjustedStar: number,
+  adjustedStarStar: number
 }
 
 

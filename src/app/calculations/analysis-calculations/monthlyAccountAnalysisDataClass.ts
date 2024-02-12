@@ -10,7 +10,7 @@ export class MonthlyAccountAnalysisDataClass {
     date: Date;
     energyUse: number;
     modeledEnergy: number;
-    baselineAdjustmentForOther: number;
+    baselineAdjustmentInput: number;
     fiscalYear: number;
     monthlyAnalysisCalculatedValues: MonthlyAnalysisCalculatedValues;
 
@@ -35,7 +35,7 @@ export class MonthlyAccountAnalysisDataClass {
         this.setCurrentMonthData(allFacilityAnalysisData);
         this.setEnergyUse();
         this.setModeledEnergy();
-        this.setBaselineAdjustmentForOther(analysisItem, baselineYear, annualUsageValues);
+        this.setBaselineAdjustmentInput(analysisItem, baselineYear, annualUsageValues);
         this.setMonthIndex(previousMonthsSummaryData);
         this.setBaselineActualEnergyUse(baselineYear, previousMonthsSummaryData);
         this.setMonthlyAnalysisCalculatedValues(baselineYear, previousMonthsSummaryData);
@@ -76,15 +76,15 @@ export class MonthlyAccountAnalysisDataClass {
         }
     }
 
-    setBaselineAdjustmentForOther(accountAnalysisItem: IdbAccountAnalysisItem, baselineYear: number, annualUsageValues: Array<{ year: number, usage: number }>) {
-        this.baselineAdjustmentForOther = _.sumBy(this.currentMonthData, (data: MonthlyAnalysisSummaryDataClass) => { return data.baselineAdjustmentForOther });
+    setBaselineAdjustmentInput(accountAnalysisItem: IdbAccountAnalysisItem, baselineYear: number, annualUsageValues: Array<{ year: number, usage: number }>) {
+        this.baselineAdjustmentInput = _.sumBy(this.currentMonthData, (data: MonthlyAnalysisSummaryDataClass) => { return data.baselineAdjustmentInput });
         if (accountAnalysisItem.hasBaselineAdjustmentV2 && this.fiscalYear != baselineYear) {
             let annualEnergyUse: number = annualUsageValues.find(usageVal => { return usageVal.year == this.fiscalYear })?.usage;
             if (accountAnalysisItem.baselineAdjustmentsV2) {
                 let yearAdjustment: { year: number, amount: number } = accountAnalysisItem.baselineAdjustmentsV2.find(dataAdjustment => { return dataAdjustment.year == this.fiscalYear; })
                 if (yearAdjustment && yearAdjustment.amount) {
                     let accountBaselineAdjustment: number = (this.energyUse / annualEnergyUse) * yearAdjustment.amount;
-                    this.baselineAdjustmentForOther = this.baselineAdjustmentForOther + accountBaselineAdjustment;
+                    this.baselineAdjustmentInput = this.baselineAdjustmentInput + accountBaselineAdjustment;
                 }
             }
         }
@@ -116,7 +116,7 @@ export class MonthlyAccountAnalysisDataClass {
         this.monthlyAnalysisCalculatedValues = new MonthlyAnalysisCalculatedValues(
             this.energyUse,
             this.modeledEnergy,
-            this.baselineAdjustmentForOther,
+            this.baselineAdjustmentInput,
             this.fiscalYear,
             baselineYear,
             previousMonthsAnalysisCalculatedValues,

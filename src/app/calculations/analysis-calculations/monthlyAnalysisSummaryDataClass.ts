@@ -12,7 +12,7 @@ export class MonthlyAnalysisSummaryDataClass {
     date: Date;
     energyUse: number;
     modeledEnergy: number;
-    baselineAdjustmentForOther: number;
+    baselineAdjustmentInput: number;
     dataAdjustment: number;
     modelYearDataAdjustment: number;
 
@@ -47,7 +47,7 @@ export class MonthlyAnalysisSummaryDataClass {
         this.setBaselineActualEnergyUse(monthlyGroupAnalysisClass.baselineYear, previousMonthsSummaryData);
         this.setModeledEnergy(monthlyGroupAnalysisClass.selectedGroup.analysisType, monthlyGroupAnalysisClass.predictorVariables, monthlyGroupAnalysisClass.baselineYearEnergyIntensity);
         this.setAnnualEnergyUse(monthlyGroupAnalysisClass.annualMeterDataUsage);
-        this.setBaselineAdjustmentForOther();
+        this.setBaselineAdjustmentInput();
         this.setModelYearDataAdjustment(monthlyGroupAnalysisClass.modelYear);
         this.setDataAdjustment();
         this.setMonthlyAnalysisCalculatedValues(monthlyGroupAnalysisClass.baselineYear, previousMonthsSummaryData);
@@ -171,12 +171,12 @@ export class MonthlyAnalysisSummaryDataClass {
 
     }
 
-    setBaselineAdjustmentForOther() {
-        this.baselineAdjustmentForOther = 0;
+    setBaselineAdjustmentInput() {
+        this.baselineAdjustmentInput = 0;
         if (this.group.hasBaselineAdjustmentV2) {
             let yearAdjustment: { year: number, amount: number } = this.group.baselineAdjustmentsV2.find(bAdjustement => { return bAdjustement.year == this.fiscalYear; })
             if (yearAdjustment && yearAdjustment.amount) {
-                this.baselineAdjustmentForOther = (this.energyUse / this.annualEnergyUse) * yearAdjustment.amount;
+                this.baselineAdjustmentInput = (this.energyUse / this.annualEnergyUse) * yearAdjustment.amount;
             }
         }
     }
@@ -208,7 +208,7 @@ export class MonthlyAnalysisSummaryDataClass {
         this.monthlyAnalysisCalculatedValues = new MonthlyAnalysisCalculatedValues(
             this.energyUse,
             this.modeledEnergy,
-            this.baselineAdjustmentForOther,
+            this.baselineAdjustmentInput,
             this.fiscalYear,
             baselineYear,
             previousMonthsAnalysisCalculatedValues,
@@ -221,7 +221,7 @@ export class MonthlyAnalysisSummaryDataClass {
     convertResults(startingUnit: string, endingUnit: string) {
         this.energyUse = new ConvertValue(this.energyUse, startingUnit, endingUnit).convertedValue;
         this.modeledEnergy = new ConvertValue(this.modeledEnergy, startingUnit, endingUnit).convertedValue;
-        this.baselineAdjustmentForOther = new ConvertValue(this.baselineAdjustmentForOther, startingUnit, endingUnit).convertedValue;
+        this.baselineAdjustmentInput = new ConvertValue(this.baselineAdjustmentInput, startingUnit, endingUnit).convertedValue;
         this.monthlyAnalysisCalculatedValues.convertResults(startingUnit, endingUnit);
     }
 }
