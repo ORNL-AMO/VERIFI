@@ -96,9 +96,6 @@ export class AnnualAnalysisSummaryTableComponent implements OnInit {
     if (this.analysisTableColumns.modeledEnergy) {
       numEnergyColumns++;
     }
-    if (this.analysisTableColumns.adjustedForNormalization) {
-      numEnergyColumns++;
-    }
     if (this.analysisTableColumns.adjusted) {
       numEnergyColumns++;
     }

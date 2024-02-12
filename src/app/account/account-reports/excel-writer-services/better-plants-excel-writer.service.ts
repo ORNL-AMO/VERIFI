@@ -187,7 +187,7 @@ export class BetterPlantsExcelWriterService {
     //baseline adjustment
     worksheet.getCell('D27').value = betterPlantsSummary.reportYearAnalysisSummary.baselineAdjustmentForNormalization;
     //baseline adjustment for other
-    worksheet.getCell('D28').value = betterPlantsSummary.reportYearAnalysisSummary.baselineAdjustmentForOther;
+    worksheet.getCell('D28').value = betterPlantsSummary.reportYearAnalysisSummary.baselineAdjustmentForOtherV2;
     //new energy savings for current year
     worksheet.getCell('E30').value = betterPlantsSummary.reportYearAnalysisSummary.newSavings
     //annual change in energy intensity for current year
@@ -346,7 +346,8 @@ export class BetterPlantsExcelWriterService {
 
     worksheet.getCell('E41').value = betterPlantsSummary.reportYearAnalysisSummary.baselineAdjustmentForNormalization
     worksheet.getCell('E42').value = report.betterPlantsReportSetup.baselineAdjustmentNotes
-    worksheet.getCell('E43').value = betterPlantsSummary.reportYearAnalysisSummary.adjustedForNormalization
+    //TODO: UPDATE ADJUSTMENT VARIABLE HERE
+    // worksheet.getCell('E43').value = betterPlantsSummary.reportYearAnalysisSummary.adjustedForNormalization
 
     let cellLetters = ['E', 'F', 'G', 'H', 'I']
     betterPlantsSummary.reportYearWaterResults.unitsUsed.forEach((unit, index) => {

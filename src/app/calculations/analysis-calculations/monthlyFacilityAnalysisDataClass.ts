@@ -10,7 +10,7 @@ export class MonthlyFacilityAnalysisDataClass {
     date: Date;
     energyUse: number;
     modeledEnergy: number;
-    baselineAdjustmentForOther: number;
+    baselineAdjustmentInput: number;
     predictorUsage: Array<{
         usage: number,
         predictorId: string
@@ -23,6 +23,8 @@ export class MonthlyFacilityAnalysisDataClass {
     baselineActualEnergyUse: number;
     monthIndex: number;
     facilityGUID: string;
+    dataAdjustment: number;
+    modelYearDataAdjustment: number;
     constructor(
         allFacilityAnalysisData: Array<MonthlyAnalysisSummaryDataClass>,
         monthDate: Date,
@@ -38,7 +40,9 @@ export class MonthlyFacilityAnalysisDataClass {
         this.setPredictorUsage(facilityPredictorEntries);
         this.setEnergyUse();
         this.setModeledEnergy();
-        this.setBaselineAdjustmentForOther();
+        this.setBaselineAdjustmentInput();
+        this.setDataAdjustment();
+        this.setModelYearDataAdjustment();
         this.setMonthIndex(previousMonthsSummaryData);
         this.setBaselineActualEnergyUse(baselineYear, previousMonthsSummaryData);
         this.setMonthlyAnalysisCalculatedValues(baselineYear, previousMonthsSummaryData);
@@ -81,15 +85,23 @@ export class MonthlyFacilityAnalysisDataClass {
     }
 
     setEnergyUse() {
-        this.energyUse = _.sumBy(this.currentMonthData, 'energyUse');
+        this.energyUse = _.sumBy(this.currentMonthData, (data: MonthlyAnalysisSummaryDataClass) => {return data.energyUse});
     }
 
     setModeledEnergy() {
-        this.modeledEnergy = _.sumBy(this.currentMonthData, 'modeledEnergy');
+        this.modeledEnergy = _.sumBy(this.currentMonthData, (data: MonthlyAnalysisSummaryDataClass) => {return data.modeledEnergy});
     }
 
-    setBaselineAdjustmentForOther() {
-        this.baselineAdjustmentForOther = _.sumBy(this.currentMonthData, 'baselineAdjustmentForOther');
+    setBaselineAdjustmentInput() {
+        this.baselineAdjustmentInput = _.sumBy(this.currentMonthData, (data: MonthlyAnalysisSummaryDataClass) => {return data.baselineAdjustmentInput});
+    }
+
+    setModelYearDataAdjustment() {
+        this.modelYearDataAdjustment = _.sumBy(this.currentMonthData, (data: MonthlyAnalysisSummaryDataClass) => {return data.modelYearDataAdjustment});
+    }
+
+    setDataAdjustment() {
+        this.dataAdjustment = _.sumBy(this.currentMonthData, (data: MonthlyAnalysisSummaryDataClass) => {return data.dataAdjustment});
     }
 
     setMonthIndex(previousMonthsSummaryData: Array<MonthlyFacilityAnalysisDataClass>) {
@@ -118,18 +130,20 @@ export class MonthlyFacilityAnalysisDataClass {
         this.monthlyAnalysisCalculatedValues = new MonthlyAnalysisCalculatedValues(
             this.energyUse,
             this.modeledEnergy,
-            this.baselineAdjustmentForOther,
+            this.baselineAdjustmentInput,
             this.fiscalYear,
             baselineYear,
             previousMonthsAnalysisCalculatedValues,
-            this.baselineActualEnergyUse
+            this.baselineActualEnergyUse,
+            this.modelYearDataAdjustment,
+            this.dataAdjustment
         );
     }
 
     convertResults(startingUnit: string, endingUnit: string) {
         this.energyUse = new ConvertValue(this.energyUse, startingUnit, endingUnit).convertedValue;
         this.modeledEnergy = new ConvertValue(this.modeledEnergy, startingUnit, endingUnit).convertedValue;
-        this.baselineAdjustmentForOther = new ConvertValue(this.baselineAdjustmentForOther, startingUnit, endingUnit).convertedValue;
+        this.baselineAdjustmentInput = new ConvertValue(this.baselineAdjustmentInput, startingUnit, endingUnit).convertedValue;
         this.monthlyAnalysisCalculatedValues.convertResults(startingUnit, endingUnit);
     }
 }

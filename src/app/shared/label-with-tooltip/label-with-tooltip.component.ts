@@ -20,6 +20,8 @@ export class LabelWithTooltipComponent implements OnInit {
   isBold: boolean;
   @Input()
   isSemiBold: boolean;
+  @Input()
+  isFloatRight: boolean;
 
   helpTooltip: { tooltip: string };
   showTooltipHover: boolean = false;

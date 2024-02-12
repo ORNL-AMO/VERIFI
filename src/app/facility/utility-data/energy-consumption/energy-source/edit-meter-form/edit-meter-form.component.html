@@ -4,7 +4,7 @@
             <p class="bold">Meter Information</p>
             <div>
                 <app-label-with-tooltip [label]="'Name'" [field]="'meterName'" [labelId]="'meterName'"
-                    [isRequired]="true">
+                    [isRequired]="true" [isFloatRight]="true">
                 </app-label-with-tooltip>
                 <div class="mb-3">
                     <input id="meterName" class="form-control" type="text" formControlName="name"
@@ -17,7 +17,7 @@
             <div class="row">
                 <div class="col-6">
                     <app-label-with-tooltip [label]="'Source'" [field]="'source'" [labelId]="'source'"
-                        [isRequired]="true">
+                        [isRequired]="true" [isFloatRight]="true">
                     </app-label-with-tooltip>
                     <!-- <label for="source">Source <span class="required">*</span> </label> -->
                     <div class="mb-3">
@@ -46,7 +46,7 @@
                     <div class="col-6">
                         <!-- <label for="startingUnit">Collection Unit <span class="required">*</span> </label> -->
                         <app-label-with-tooltip [label]="'Collection Unit'" [field]="'startingUnit'"
-                            [labelId]="'startingUnit'" [isRequired]="true">
+                            [labelId]="'startingUnit'" [isRequired]="true" [isFloatRight]="true">
                         </app-label-with-tooltip>
                         <div class="mb-3">
                             <select class="form-select" id="startingUnit" type="text" formControlName="startingUnit"
@@ -87,7 +87,8 @@
                     </div>
                     <div class="col-6" *ngIf="displaySiteToSource">
                         <app-label-with-tooltip [label]="'Site to source'" [field]="'siteToSource'"
-                            [labelId]="'siteToSource'" [isRequired]="true"></app-label-with-tooltip>
+                            [labelId]="'siteToSource'" [isRequired]="true"
+                            [isFloatRight]="true"></app-label-with-tooltip>
                         <!-- <label for="siteToSource">Site to source <span class="required">*</span> </label> -->
                         <div class="mb-3">
                             <input id="siteToSource" class="form-control" type="number" formControlName="siteToSource"

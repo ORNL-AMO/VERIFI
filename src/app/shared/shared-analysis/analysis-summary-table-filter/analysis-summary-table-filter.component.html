@@ -25,13 +25,6 @@
                     <label class="form-check-label" for="modeledEnergy">{{modeledUseLabel}}</label>
                 </div>
                 <div class="form-check">
-                    <input class="form-check-input" type="checkbox" name="adjustedForNormalization"
-                        [(ngModel)]="analysisTableColumns.adjustedForNormalization" (change)="save()"
-                        id="adjustedForNormalization">
-                    <label class="form-check-label" for="adjustedForNormalization">Adjusted for
-                        Normalization</label>
-                </div>
-                <div class="form-check">
                     <input class="form-check-input" type="checkbox" name="adjusted"
                         [(ngModel)]="analysisTableColumns.adjusted" (change)="save()" id="adjusted">
                     <label class="form-check-label" for="adjusted">Adjusted</label>

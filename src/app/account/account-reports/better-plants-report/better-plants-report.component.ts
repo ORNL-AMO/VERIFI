@@ -75,24 +75,22 @@ export class BetterPlantsReportComponent implements OnInit {
     this.selectedAnalysisItem = JSON.parse(JSON.stringify(selectedAnalysisItem));
     if (this.selectedAnalysisItem.analysisCategory == 'energy') {
       if (this.selectedAnalysisItem.energyUnit != 'MMBtu') {
-        if (this.selectedAnalysisItem.baselineAdjustments) {
-          this.selectedAnalysisItem.baselineAdjustments.forEach(adjustment => {
-            if (adjustment.amount != 0) {
-              adjustment.amount = new ConvertValue(adjustment.amount, this.selectedAnalysisItem.energyUnit, 'MMBtu').convertedValue;
-            }
-          });
+        //TODO: Check baselineAdjustmentsV2 use vs dataAdjustments
+        if (this.selectedAnalysisItem.baselineAdjustmentsV2) {
+          this.selectedAnalysisItem.baselineAdjustmentsV2.forEach(baselineAdjustment => {
+            baselineAdjustment.amount = new ConvertValue(baselineAdjustment.amount, this.selectedAnalysisItem.energyUnit, 'MMBtu').convertedValue;
+          })
         }
         this.selectedAnalysisItem.energyUnit = 'MMBtu';
       }
       this.selectedAnalysisItem.energyUnit = 'MMBtu';
     } else if (this.selectedAnalysisItem.analysisCategory == 'water') {
       if (this.selectedAnalysisItem.waterUnit != 'kgal') {
-        if (this.selectedAnalysisItem.baselineAdjustments) {
-          this.selectedAnalysisItem.baselineAdjustments.forEach(adjustment => {
-            if (adjustment.amount != 0) {
-              adjustment.amount = new ConvertValue(adjustment.amount, this.selectedAnalysisItem.waterUnit, 'kgal').convertedValue;
-            }
-          });
+        //TODO: Check baselineAdjustmentsV2 use vs dataAdjustments
+        if (this.selectedAnalysisItem.baselineAdjustmentsV2) {
+          this.selectedAnalysisItem.baselineAdjustmentsV2.forEach(baselineAdjustment => {
+            baselineAdjustment.amount = new ConvertValue(baselineAdjustment.amount, this.selectedAnalysisItem.waterUnit, 'kgal').convertedValue;
+          })
         }
         this.selectedAnalysisItem.waterUnit = 'kgal';
       }

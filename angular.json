@@ -99,14 +99,14 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "verifi:build"
+            "buildTarget": "verifi:build"
           },
           "configurations": {
             "production": {
-              "browserTarget": "verifi:build:production"
+              "buildTarget": "verifi:build:production"
             },
             "development": {
-              "browserTarget": "verifi:build:development"
+              "buildTarget": "verifi:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -114,7 +114,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "verifi:build"
+            "buildTarget": "verifi:build"
           }
         },
         "test": {
