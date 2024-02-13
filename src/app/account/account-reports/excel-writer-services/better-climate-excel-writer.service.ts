@@ -26,11 +26,12 @@ export class BetterClimateExcelWriterService {
   exportToExcel(report: IdbAccountReport, account: IdbAccount, betterClimateReport: BetterClimateReport) {
     let workbook = new ExcelJS.Workbook();
     var request = new XMLHttpRequest();
-    let requestURL: string = 'Better-Climate-Challenge-Emissions-Reporting';
+    let requestURL: string = 'Better-Climate-Challenge-Emissions-Reporting-copy';
     request.open('GET', 'assets/csv_templates/' + requestURL + '.xlsx', true);
     request.responseType = 'blob';
     request.onload = () => {
       workbook.xlsx.load(request.response).then(() => {
+        console.log(workbook);
         this.writePortfolioEmissions(workbook, account, report, betterClimateReport);
         this.writeFacilityEmissions(workbook, report, betterClimateReport);
         this.writeReductionInitiatives(workbook, report);
@@ -60,6 +61,11 @@ export class BetterClimateExcelWriterService {
 
   writePortfolioEmissions(workbook: ExcelJS.Workbook, account: IdbAccount, report: IdbAccountReport, betterClimateReport: BetterClimateReport) {
     let worksheet: ExcelJS.Worksheet = workbook.getWorksheet('Portfolio Emissions');
+    
+    // worksheet.model = Object.assign(worksheet.model, {
+    //   mergeCells: worksheet.model['merges']
+    // });
+    
     worksheet.getCell('D12').value = account.sustainabilityQuestions.greenhouseReductionPercent / 100;
     worksheet.getCell('D13').value = report.baselineYear;
     worksheet.getCell('D14').value = account.sustainabilityQuestions.greenhouseReductionTargetYear;
