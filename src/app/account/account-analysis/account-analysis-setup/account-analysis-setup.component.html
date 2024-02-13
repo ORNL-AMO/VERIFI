@@ -113,18 +113,20 @@
                             </label>
                         </div>
                     </div>
-                    <div class="d-flex flex-column" *ngIf="analysisItem.hasBaselineAdjustmentV2">
-                        <div class="row form-group">
+
+                    <ng-container *ngIf="analysisItem.hasBaselineAdjustmentV2">
+                        <div class="form-group row"
+                            *ngFor="let baselineAdjustment of analysisItem.baselineAdjustmentsV2; let index = index;">
                             <div class="col-5">
-                                <label for="baselineAdjustmentsV2">{{analysisItem.baselineYear| yearDisplay:
+                                <label for="{{'baselineAdjustment_'+index}}">{{baselineAdjustment.year |
+                                    yearDisplay:
                                     account.fiscalYear}}</label>
                             </div>
                             <div class="col-7">
                                 <div class="input-group">
-                                    <!-- <span class="input-group-text">{{baselineAdjustment.year}}</span> -->
-                                    <input class="form-control" type="number" name="baselineAdjustmentsV2"
-                                        id="baselineAdjustmentsV2" [(ngModel)]="analysisItem.baselineAdjustmentsV2"
-                                        (change)="saveItem()" min="0">
+                                    <input class="form-control" type="number" name="{{'baselineAdjustment_'+index}}"
+                                        id="{{'baselineAdjustment_'+index}}" [(ngModel)]="baselineAdjustment.amount"
+                                        (input)="saveItem()" min="0">
                                     <span *ngIf="analysisItem.analysisCategory == 'energy'" class="input-group-text"
                                         [innerHTML]="analysisItem.energyUnit | settingsLabel:'/yr'"></span>
                                     <span *ngIf="analysisItem.analysisCategory == 'water'" class="input-group-text"
@@ -132,7 +134,7 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </ng-container>
                 </div>
                 <div class="col-6">
                     <div class="form-group row">
