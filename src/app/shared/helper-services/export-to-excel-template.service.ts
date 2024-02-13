@@ -328,7 +328,7 @@ export class ExportToExcelTemplateService {
         //C: Total Consumption or Total Distance
         worksheet.getCell('C' + index).value = dataReading.totalVolume;
         //D: Fuel Efficiency
-        worksheet.getCell('D' + index).value = dataReading.totalVolume;
+        worksheet.getCell('D' + index).value = dataReading.vehicleFuelEfficiency;
         //E: Total Cost
         worksheet.getCell('E' + index).value = dataReading.totalCost;
         //F: Other Charge
