@@ -168,7 +168,9 @@ export class UploadDataV2Service {
               meter.siteToSource = this.parseSiteToSource(excelMeter, meter);
             }
 
-
+            if (meter.agreementType == 2) {
+              meter.directConnection = true;
+            }
           } else if (meter.source == 'Natural Gas') {
             //pares NG
             meter.phase = 'Gas';
