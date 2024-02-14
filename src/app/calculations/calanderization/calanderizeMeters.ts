@@ -83,11 +83,11 @@ function calanderizeMeterData(meter: IdbUtilityMeter, meterData: Array<IdbUtilit
     facilities: Array<IdbFacility>): Array<MonthlyData> {
     if (meter.meterReadingDataApplication == 'fullMonth' || !meter.meterReadingDataApplication) {
         //used as default
-        return calanderizeMeterDataFullMonth(meter, meterData, energyIsSource, monthDisplayShort, accountOrFacility, co2Emissions, customFuels, facilities);
+        return calanderizeMeterDataFullMonth(meter, meterData, energyIsSource, monthDisplayShort, accountOrFacility, co2Emissions, customFuels, facilities, calanderizedEnergyUnit);
     } else if (meter.meterReadingDataApplication == 'backward') {
-        return calanderizeMeterDataBackwards(meter, meterData, energyIsSource, monthDisplayShort, accountOrFacility, co2Emissions, customFuels, facilities);
+        return calanderizeMeterDataBackwards(meter, meterData, energyIsSource, monthDisplayShort, accountOrFacility, co2Emissions, customFuels, facilities, calanderizedEnergyUnit);
     } else if (meter.meterReadingDataApplication == 'fullYear') {
-        return calanderizeFullYear(meter, meterData, energyIsSource, monthDisplayShort, accountOrFacility, co2Emissions, customFuels, facilities);
+        return calanderizeFullYear(meter, meterData, energyIsSource, monthDisplayShort, accountOrFacility, co2Emissions, customFuels, facilities, calanderizedEnergyUnit);
     }
 }
 
@@ -96,7 +96,8 @@ function calanderizeMeterData(meter: IdbUtilityMeter, meterData: Array<IdbUtilit
 function calanderizeMeterDataBackwards(meter: IdbUtilityMeter, meterData: Array<IdbUtilityMeterData>, energyIsSource: boolean, monthDisplayShort: boolean, accountOrFacility: IdbAccount | IdbFacility,
     co2Emissions: Array<SubregionEmissions>,
     customFuels: Array<IdbCustomFuel>,
-    facilities: Array<IdbFacility>): Array<MonthlyData> {
+    facilities: Array<IdbFacility>,
+    energyUnit: string): Array<MonthlyData> {
     let calanderizeData: Array<MonthlyData> = new Array();
     let orderedMeterData: Array<IdbUtilityMeterData> = _.orderBy(meterData, (data) => { return new Date(data.readDate) });
 
@@ -130,7 +131,7 @@ function calanderizeMeterDataBackwards(meter: IdbUtilityMeter, meterData: Array<
                 if (currentMonthsReadings.length == 1) {
                     //1. current month has 1 bill
                     let currentMonthReading: IdbUtilityMeterData = currentMonthsReadings[0];
-                    totals = getBillPeriodTotal(previousMonthReading, currentMonthReading, nextMonthsReading, meter, energyIsSource, co2Emissions, customFuels, facilities);
+                    totals = getBillPeriodTotal(previousMonthReading, currentMonthReading, nextMonthsReading, meter, energyIsSource, co2Emissions, customFuels, facilities, energyUnit);
                 } else if (currentMonthsReadings.length > 1) {
                     //2. current month has multiple bills
                     let readingSummaries: Array<CalanderizedReadingSummary> = new Array();
@@ -149,7 +150,7 @@ function calanderizeMeterDataBackwards(meter: IdbUtilityMeter, meterData: Array<
                             currentMonthReading = currentMonthsReadings[readingIndex];
                             nextReading = currentMonthsReadings[readingIndex + 1];
                         }
-                        let tmpReadingSummaries: Array<CalanderizedReadingSummary> = getBillPeriodTotal(previousMonthReading, currentMonthReading, nextReading, meter, energyIsSource, co2Emissions, customFuels, facilities).readingSummaries;
+                        let tmpReadingSummaries: Array<CalanderizedReadingSummary> = getBillPeriodTotal(previousMonthReading, currentMonthReading, nextReading, meter, energyIsSource, co2Emissions, customFuels, facilities, energyUnit).readingSummaries;
                         readingSummaries = readingSummaries.concat(tmpReadingSummaries);
                     }
                     readingSummaries = _.uniqWith(readingSummaries, _.isEqual)
@@ -251,7 +252,8 @@ function calanderizeMeterDataBackwards(meter: IdbUtilityMeter, meterData: Array<
 function getBillPeriodTotal(previousReading: IdbUtilityMeterData, currentReading: IdbUtilityMeterData, nextReading: IdbUtilityMeterData, meter: IdbUtilityMeter, energyIsSource: boolean,
     co2Emissions: Array<SubregionEmissions>,
     customFuels: Array<IdbCustomFuel>,
-    facilities: Array<IdbFacility>): {
+    facilities: Array<IdbFacility>,
+    energyUnit: string): {
         totalConsumption: number,
         totalEnergyUse: number,
         totalCost: number,
@@ -261,8 +263,6 @@ function getBillPeriodTotal(previousReading: IdbUtilityMeterData, currentReading
     let totalEnergyUse: number = 0;
     let totalConsumption: number = 0;
     let totalCost: number = 0;
-    let totalEmissions: EmissionsResults = getZeroEmissionsResults();
-
 
     let currentDate: Date = new Date(currentReading.readDate);
     let previousReadingDate: Date = new Date(previousReading.readDate)
@@ -286,7 +286,7 @@ function getBillPeriodTotal(previousReading: IdbUtilityMeterData, currentReading
         hhvOrFuelEfficiencyCurrent = currentReading.vehicleFuelEfficiency;
     }
 
-    let emissionsForCurrent: EmissionsResults = getEmissions(meter, energyUseForCurrent, meter.energyUnit, currentDate.getFullYear(), energyIsSource,
+    let emissionsForCurrent: EmissionsResults = getEmissions(meter, energyUseForCurrent, energyUnit, currentDate.getFullYear(), energyIsSource,
         facilities,
         co2Emissions,
         customFuels,
@@ -294,6 +294,12 @@ function getBillPeriodTotal(previousReading: IdbUtilityMeterData, currentReading
         meter.vehicleCollectionUnit,
         meter.vehicleDistanceUnit,
         hhvOrFuelEfficiencyCurrent);
+
+    if (isNaN(emissionsForCurrent.mobileCarbonEmissions)) {
+        console.log(currentReading);
+        console.log(meter);
+        console.log('===')
+    }
 
     let costForCurrent: number = (currentReading.totalCost / daysFromPrevious) * daysFromCurrent;
 
@@ -320,7 +326,7 @@ function getBillPeriodTotal(previousReading: IdbUtilityMeterData, currentReading
         //vehicle
         hhvOrFuelEfficiencyNext = nextReading.vehicleFuelEfficiency;
     }
-    let emissionsForNext: EmissionsResults = getEmissions(meter, energyUseForNext, meter.energyUnit, currentDate.getFullYear(), energyIsSource,
+    let emissionsForNext: EmissionsResults = getEmissions(meter, energyUseForNext, energyUnit, currentDate.getFullYear(), energyIsSource,
         facilities,
         co2Emissions,
         customFuels,
@@ -372,7 +378,8 @@ function getBillPeriodTotal(previousReading: IdbUtilityMeterData, currentReading
 function calanderizeMeterDataFullMonth(meter: IdbUtilityMeter, meterData: Array<IdbUtilityMeterData>, energyIsSource: boolean, monthDisplayShort: boolean, accountOrFacility: IdbAccount | IdbFacility,
     co2Emissions: Array<SubregionEmissions>,
     customFuels: Array<IdbCustomFuel>,
-    facilities: Array<IdbFacility>): Array<MonthlyData> {
+    facilities: Array<IdbFacility>,
+    energyUnit: string): Array<MonthlyData> {
     let calanderizeData: Array<MonthlyData> = new Array();
     let orderedMeterData: Array<IdbUtilityMeterData> = _.orderBy(meterData, (data) => { return new Date(data.readDate) });
     if (orderedMeterData.length != 0) {
@@ -406,7 +413,7 @@ function calanderizeMeterDataFullMonth(meter: IdbUtilityMeter, meterData: Array<
                     //vehicle
                     hhvOrFuelEfficiency = reading.vehicleFuelEfficiency;
                 }
-                let emissions: EmissionsResults = getEmissions(meter, totalMonthEnergyUse, meter.energyUnit, year, energyIsSource,
+                let emissions: EmissionsResults = getEmissions(meter, totalMonthEnergyUse, energyUnit, year, energyIsSource,
                     facilities,
                     co2Emissions,
                     customFuels,
@@ -466,7 +473,8 @@ function calanderizeMeterDataFullMonth(meter: IdbUtilityMeter, meterData: Array<
 function calanderizeFullYear(meter: IdbUtilityMeter, meterData: Array<IdbUtilityMeterData>, energyIsSource: boolean, monthDisplayShort: boolean, accountOrFacility: IdbAccount | IdbFacility,
     co2Emissions: Array<SubregionEmissions>,
     customFuels: Array<IdbCustomFuel>,
-    facilities: Array<IdbFacility>): Array<MonthlyData> {
+    facilities: Array<IdbFacility>,
+    energyUnit: string): Array<MonthlyData> {
     let calanderizeData: Array<MonthlyData> = new Array();
     let orderedMeterData: Array<IdbUtilityMeterData> = _.orderBy(meterData, (data) => { return new Date(data.readDate) });
     let years: Array<number> = orderedMeterData.map(mData => { return new Date(mData.readDate).getFullYear() })
@@ -504,7 +512,7 @@ function calanderizeFullYear(meter: IdbUtilityMeter, meterData: Array<IdbUtility
             avgHhvOrFuelEfficiency = totalHHV / currentYearData.length;
 
         }
-        let emissions: EmissionsResults = getEmissions(meter, monthlyEnergyUse, meter.energyUnit, year, energyIsSource,
+        let emissions: EmissionsResults = getEmissions(meter, monthlyEnergyUse, energyUnit, year, energyIsSource,
             facilities,
             co2Emissions,
             customFuels,

@@ -1,4 +1,3 @@
-import { CalanderizedMeter, MonthlyData } from "src/app/models/calanderization";
 import { IdbCustomFuel, IdbFacility, IdbUtilityMeter } from "src/app/models/idb";
 import { ConvertValue } from "../conversions/convertValue";
 import { EmissionsResults, SubregionEmissions } from "src/app/models/eGridEmissions";
@@ -6,35 +5,6 @@ import * as _ from 'lodash';
 import { MeterPhase, MeterSource } from "src/app/models/constantsAndTypes";
 import { FuelTypeOption } from "src/app/shared/fuel-options/fuelTypeOption";
 import { getFuelTypeOptions, getMobileFuelTypes } from "src/app/shared/fuel-options/getFuelTypeOptions";
-
-// export function setEmissionsForCalanderizedMeters(calanderizedMeterData: Array<CalanderizedMeter>, energyIsSource: boolean, facilities: Array<IdbFacility>, co2Emissions: Array<SubregionEmissions>, customFuels: Array<IdbCustomFuel>): Array<CalanderizedMeter> {
-//     for (let i = 0; i < calanderizedMeterData.length; i++) {
-//         let cMeter: CalanderizedMeter = calanderizedMeterData[i];
-//         for (let x = 0; x < cMeter.monthlyData.length; x++) {
-//             let monthlyData: MonthlyData = cMeter.monthlyData[x];
-//             let emissions: EmissionsResults = getEmissions(cMeter.meter, monthlyData.energyUse, cMeter.energyUnit, monthlyData.year, energyIsSource, facilities, co2Emissions, customFuels, monthlyData.energyConsumption, cMeter.consumptionUnit, cMeter.meter.vehicleDistanceUnit, monthlyData.hhvOrVehicleFuelEfficiency);
-//             cMeter.monthlyData[x].RECs = emissions.RECs;
-//             cMeter.monthlyData[x].locationElectricityEmissions = emissions.locationElectricityEmissions;
-//             cMeter.monthlyData[x].marketElectricityEmissions = emissions.marketElectricityEmissions;
-//             cMeter.monthlyData[x].otherScope2Emissions = emissions.otherScope2Emissions;
-//             cMeter.monthlyData[x].scope2LocationEmissions = emissions.scope2LocationEmissions;
-//             cMeter.monthlyData[x].scope2MarketEmissions = emissions.scope2MarketEmissions;
-//             cMeter.monthlyData[x].excessRECs = emissions.excessRECs;
-//             cMeter.monthlyData[x].excessRECsEmissions = emissions.excessRECsEmissions;
-//             cMeter.monthlyData[x].mobileCarbonEmissions = emissions.mobileCarbonEmissions;
-//             cMeter.monthlyData[x].mobileBiogenicEmissions = emissions.mobileBiogenicEmissions;
-//             cMeter.monthlyData[x].mobileOtherEmissions = emissions.mobileOtherEmissions;
-//             cMeter.monthlyData[x].mobileTotalEmissions = emissions.mobileTotalEmissions;
-//             cMeter.monthlyData[x].fugitiveEmissions = emissions.fugitiveEmissions;
-//             cMeter.monthlyData[x].processEmissions = emissions.processEmissions;
-//             cMeter.monthlyData[x].stationaryEmissions = emissions.stationaryEmissions;
-//             cMeter.monthlyData[x].totalScope1Emissions = emissions.totalScope1Emissions;
-//             cMeter.monthlyData[x].totalWithMarketEmissions = emissions.totalWithMarketEmissions;
-//             cMeter.monthlyData[x].totalWithLocationEmissions = emissions.totalWithLocationEmissions;
-//         }
-//     }
-//     return calanderizedMeterData;
-// }
 
 export function getEmissions(meter: IdbUtilityMeter,
     energyUse: number,
@@ -153,10 +123,6 @@ export function getEmissions(meter: IdbUtilityMeter,
                 mobileBiogenicEmissions = (totalVolume * (1 / hhvOrFuelEfficiency) * meterFuel.CO2) / 1000;
                 mobileCarbonEmissions = 0;
             } else {
-
-                // console.log('totalVolume: ' + totalVolume);
-                // console.log('vehicleFuelEfficiency: ' + hhvOrFuelEfficiency)
-                // console.log('CO2: ' + meterFuel.CO2);
                 mobileCarbonEmissions = (totalVolume * (1 / hhvOrFuelEfficiency) * meterFuel.CO2) / 1000;
                 mobileBiogenicEmissions = 0;
             }
@@ -172,8 +138,6 @@ export function getEmissions(meter: IdbUtilityMeter,
             fugitiveEmissions = totalVolume * meter.globalWarmingPotential / 1000;
         } else if (meter.scope == 6) {
             //process emissions
-            // console.log(totalVolume);
-            // console.log(meter.globalWarmingPotential);
             processEmissions = totalVolume * meter.globalWarmingPotential / 1000;
         }
     } else if (meter.source == 'Other Energy') {
