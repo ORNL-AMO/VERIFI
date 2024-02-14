@@ -113,7 +113,7 @@ export class MonthlyAnalysisCalculatedValues {
     }
 
     setAdjustedStar(baselineActualEnergyUse: number, modelYearDataAdjustment: number, baselineAdjustementInput: number) {
-        this.adjustedStar = (baselineActualEnergyUse + baselineAdjustementInput) * ((this.modeledEnergy - modelYearDataAdjustment) / (baselineActualEnergyUse - modelYearDataAdjustment));
+        this.adjustedStar = (baselineActualEnergyUse + baselineAdjustementInput) * ((this.modeledEnergy - modelYearDataAdjustment) / (this.baselineModeledEnergyUse - modelYearDataAdjustment));
     }
 
     setAdjustedStarStar(dataAdjustment: number) {
