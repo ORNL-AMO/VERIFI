@@ -68,6 +68,7 @@ export class DataOverviewMapComponent {
 
   drawChart() {
     if (this.utilityUsageMap && this.mapData && this.mapData.length != 0) {
+      console.log(this.mapData);
       let cmax: number = _.maxBy(this.mapData, 'dataTypeAmount').dataTypeAmount;;
       // let lats: Array<number> = this.mapData.map(item => { return Number(item.lat) });
       // let lons: Array<number> = this.mapData.map(item => { return Number(item.lng) });
@@ -131,6 +132,7 @@ export class DataOverviewMapComponent {
   setMapData() {
     this.mapData = new Array();
     this.accountOverviewFacilities.forEach(accountOverviewFacility => {
+      console.log(accountOverviewFacility);
       let findLatLong = this.eGridService.zipLatLong.find(zipLL => { return zipLL.ZIP == accountOverviewFacility.facility.zip });
       if (findLatLong) {
         let dataTypeAmount: number;

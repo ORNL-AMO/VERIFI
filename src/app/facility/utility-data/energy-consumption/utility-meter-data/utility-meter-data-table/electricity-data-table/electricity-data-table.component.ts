@@ -159,7 +159,7 @@ export class ElectricityDataTableComponent implements OnInit {
     let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
     this.selectedMeterData.forEach(dataItem => {
-      let emissionsValues: EmissionsResults = getEmissions(this.selectedMeter, dataItem.totalEnergyUse, this.selectedMeter.energyUnit, new Date(dataItem.readDate).getFullYear(), false, [facility], this.eGridService.co2Emissions, customFuels, 0, undefined, undefined);
+      let emissionsValues: EmissionsResults = getEmissions(this.selectedMeter, dataItem.totalEnergyUse, this.selectedMeter.energyUnit, new Date(dataItem.readDate).getFullYear(), false, [facility], this.eGridService.co2Emissions, customFuels, 0, undefined, undefined, dataItem.heatCapacity);
       dataItem.totalMarketEmissions = emissionsValues.marketElectricityEmissions;
       dataItem.totalLocationEmissions = emissionsValues.locationElectricityEmissions;
       dataItem.RECs = emissionsValues.RECs;

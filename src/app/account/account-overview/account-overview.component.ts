@@ -12,7 +12,6 @@ import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
 import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
 import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
-import { setEmissionsForCalanderizedMeters } from 'src/app/calculations/emissions-calculations/emissions';
 import { AccountOverviewData } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
 import { UtilityUseAndCost } from 'src/app/calculations/dashboard-calculations/useAndCostClass';
 
@@ -116,8 +115,7 @@ export class AccountOverviewComponent implements OnInit {
 
     } else {
       // Web Workers are not supported in this environment.
-      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(meters, meterData, this.account, true, { energyIsSource: this.account.energyIsSource, neededUnits: undefined });
-      calanderizedMeters = setEmissionsForCalanderizedMeters(calanderizedMeters, this.account.energyIsSource, facilities, this.eGridService.co2Emissions, customFuels);
+      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(meters, meterData, this.account, true, { energyIsSource: this.account.energyIsSource, neededUnits: undefined }, this.eGridService.co2Emissions, customFuels, facilities);
       if (!this.dateRange) {
         if (calanderizedMeters && calanderizedMeters.length > 0) {
           let monthlyData: Array<MonthlyData> = calanderizedMeters.flatMap(val => { return val.monthlyData });
