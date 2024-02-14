@@ -18,6 +18,7 @@ export class BetterClimateExcelWriterService {
   /*
     NOTES REGARDING BETTER CLIMATE CHALLANGE EMISSIONS REPORTING EXCEL FILE
     If you are updating the excel file with a new version make sure you:
+    - Check hidden tabs, we have removed "Display" tab
     - Removed conditional formatting from given excel
     - Check name manager for links to sharepoint
     - Double check that rows are properly mapped still :(  
@@ -26,12 +27,11 @@ export class BetterClimateExcelWriterService {
   exportToExcel(report: IdbAccountReport, account: IdbAccount, betterClimateReport: BetterClimateReport) {
     let workbook = new ExcelJS.Workbook();
     var request = new XMLHttpRequest();
-    let requestURL: string = 'Better-Climate-Challenge-Emissions-Reporting-copy';
+    let requestURL: string = 'Better-Climate-Challenge-Emissions-Reporting';
     request.open('GET', 'assets/csv_templates/' + requestURL + '.xlsx', true);
     request.responseType = 'blob';
     request.onload = () => {
       workbook.xlsx.load(request.response).then(() => {
-        console.log(workbook);
         this.writePortfolioEmissions(workbook, account, report, betterClimateReport);
         this.writeFacilityEmissions(workbook, report, betterClimateReport);
         this.writeReductionInitiatives(workbook, report);
@@ -40,7 +40,7 @@ export class BetterClimateExcelWriterService {
           let a = document.createElement("a");
           let url = window.URL.createObjectURL(blob);
           a.href = url;
-          a.download = requestURL;
+          a.download = requestURL + '_VERIFI';
           document.body.appendChild(a);
           a.click();
           window.URL.revokeObjectURL(url);
@@ -61,13 +61,12 @@ export class BetterClimateExcelWriterService {
 
   writePortfolioEmissions(workbook: ExcelJS.Workbook, account: IdbAccount, report: IdbAccountReport, betterClimateReport: BetterClimateReport) {
     let worksheet: ExcelJS.Worksheet = workbook.getWorksheet('Portfolio Emissions');
-    
-    // worksheet.model = Object.assign(worksheet.model, {
-    //   mergeCells: worksheet.model['merges']
-    // });
-    
+    worksheet.getCell('D10').value = account.name;
+
     worksheet.getCell('D12').value = account.sustainabilityQuestions.greenhouseReductionPercent / 100;
+
     worksheet.getCell('D13').value = report.baselineYear;
+
     worksheet.getCell('D14').value = account.sustainabilityQuestions.greenhouseReductionTargetYear;
 
     //calander/fiscal year
@@ -83,7 +82,9 @@ export class BetterClimateExcelWriterService {
       worksheet.getCell('J13').value = 'Market-Based GHG Goal';
     }
 
-    //TODO: enrgy efficiency target J14
+    if(account.sustainabilityQuestions.energyReductionGoal){
+      worksheet.getCell('J13').value = account.sustainabilityQuestions.energyReductionPercent;
+    }
 
     let columnLetters = ['D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q'];
     betterClimateReport.portfolioYearDetails.forEach((yearDetail, index) => {
@@ -124,7 +125,7 @@ export class BetterClimateExcelWriterService {
 
     //bioenergy and biomass
     //TODO: may need to include bio-energy for stationary fuels
-    worksheet.getCell(columnLetter + '29').value = yearDetail.emissionsResults.totalBiogenicEmissions;
+    worksheet.getCell(columnLetter + '34').value = yearDetail.emissionsResults.totalBiogenicEmissions;
 
     //Section 3: GHG Emission Reductions
     //GHG Emission Reductions metric tons CALCULATED
@@ -207,7 +208,7 @@ export class BetterClimateExcelWriterService {
     //ethanol fuel blend
     fuelVals = this.getFuelValue(fuelVals.usedFuels, ['Ethanol (100%)'], yearDetail.fuelTotals);
     worksheet.getCell(columnLetter + '67').value = fuelVals.usage;
-    //row 63 and 64
+    //row 68 and 69
     //Two rows, fill out both if two other fuels, otherwise just first row
     //other fuel (please specify)
     let otherFuelVals: { otherFuels: Array<string>, usage: number } = this.getOtherFuelValue(fuelVals.usedFuels, yearDetail.fuelTotals);
@@ -407,5 +408,4 @@ export class BetterClimateExcelWriterService {
       rowIndex++;
     });
   }
-
 }
