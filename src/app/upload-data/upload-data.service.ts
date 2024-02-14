@@ -411,6 +411,7 @@ export class UploadDataService {
 
     let utilityData: Array<IdbUtilityMeterData> = new Array();
     fileReference.meters.forEach(meter => {
+      console.log(meter);
       if (!meter.skipImport) {
         fileReference.headerMap.forEach(dataRow => {
           let readDate: Date = new Date(dataRow[dateColumnVal]);
@@ -426,6 +427,12 @@ export class UploadDataService {
             let totalVolume: number = 0;
             let energyUse: number = 0;
             let totalConsumption: number = dataRow[meter.importWizardName];
+            let i = 0;
+            if(i == 0){
+              console.log(meter);
+              console.log(dataRow);
+              i++;
+            }
             let displayVolumeInput: boolean = (getIsEnergyUnit(meter.startingUnit) == false);
             let displayEnergyUse: boolean = getIsEnergyMeter(meter.source);
             if (!displayVolumeInput) {
