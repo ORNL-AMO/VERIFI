@@ -15,7 +15,6 @@ import { FacilityOverviewData } from 'src/app/calculations/dashboard-calculation
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
-import { setEmissionsForCalanderizedMeters } from 'src/app/calculations/emissions-calculations/emissions';
 import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
 
 @Component({
@@ -136,8 +135,7 @@ export class DataOverviewReportComponent {
 
     } else {
       // Web Workers are not supported in this environment.
-      dataOverviewFacility.calanderizedMeters = getCalanderizedMeterData(facilityMeters, meterData, this.account, false, { energyIsSource: this.overviewReport.energyIsSource, neededUnits: undefined });
-      dataOverviewFacility.calanderizedMeters = setEmissionsForCalanderizedMeters(dataOverviewFacility.calanderizedMeters, this.overviewReport.energyIsSource, [facility], this.eGridService.co2Emissions, customFuels);
+      dataOverviewFacility.calanderizedMeters = getCalanderizedMeterData(facilityMeters, meterData, this.account, false, { energyIsSource: this.overviewReport.energyIsSource, neededUnits: undefined }, this.eGridService.co2Emissions, customFuels, [facility]);
       dataOverviewFacility.facilityOverviewData = new FacilityOverviewData(dataOverviewFacility.calanderizedMeters, dataOverviewFacility.dateRange, facility);
       dataOverviewFacility.utilityUseAndCost = new UtilityUseAndCost(dataOverviewFacility.calanderizedMeters, dataOverviewFacility.dateRange);
       this.facilitiesData.push(dataOverviewFacility);
@@ -196,8 +194,7 @@ export class DataOverviewReportComponent {
       });
     } else {
       // Web Workers are not supported in this environment.
-      this.accountData.calanderizedMeters = getCalanderizedMeterData(meters, meterData, this.account, false, { energyIsSource: this.overviewReport.energyIsSource, neededUnits: undefined });
-      this.accountData.calanderizedMeters = setEmissionsForCalanderizedMeters(this.accountData.calanderizedMeters, this.overviewReport.energyIsSource, includedFacilities, this.eGridService.co2Emissions, customFuels);
+      this.accountData.calanderizedMeters = getCalanderizedMeterData(meters, meterData, this.account, false, { energyIsSource: this.overviewReport.energyIsSource, neededUnits: undefined }, this.eGridService.co2Emissions, customFuels, includedFacilities);
       this.accountData.accountOverviewData = new AccountOverviewData(this.accountData.calanderizedMeters, facilities, this.account, this.accountData.dateRange);
       this.accountData.utilityUseAndCost = new UtilityUseAndCost(this.accountData.calanderizedMeters, this.accountData.dateRange);
       this.calculatingAccounts = false;

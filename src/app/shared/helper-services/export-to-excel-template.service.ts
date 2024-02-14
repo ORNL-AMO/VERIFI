@@ -282,22 +282,24 @@ export class ExportToExcelTemplateService {
         }
         //D: Total Cost
         worksheet.getCell('D' + index).value = dataReading.totalCost;
-        //E: Commodity Charge
-        worksheet.getCell('E' + index).value = dataReading.commodityCharge;
-        //F: Delivery Charge
-        worksheet.getCell('F' + index).value = dataReading.deliveryCharge;
-        //G: Other Charge
-        worksheet.getCell('G' + index).value = dataReading.otherCharge;
-        //H: Demand Usage
-        worksheet.getCell('H' + index).value = dataReading.demandUsage;
-        //I: Demand Charge
-        worksheet.getCell('I' + index).value = dataReading.demandCharge;
-        //J: Local Sales Tax
-        worksheet.getCell('J' + index).value = dataReading.localSalesTax;
-        //K: State Sales Tax
-        worksheet.getCell('K' + index).value = dataReading.stateSalesTax;
-        //L: Late Payment
-        worksheet.getCell('L' + index).value = dataReading.latePayment;
+        //E: Higher Heating Value
+        worksheet.getCell('E' + index).value = dataReading.heatCapacity;
+        //F: Commodity Charge
+        worksheet.getCell('F' + index).value = dataReading.commodityCharge;
+        //G: Delivery Charge
+        worksheet.getCell('G' + index).value = dataReading.deliveryCharge;
+        //H: Other Charge
+        worksheet.getCell('H' + index).value = dataReading.otherCharge;
+        //I: Demand Usage
+        worksheet.getCell('I' + index).value = dataReading.demandUsage;
+        //J: Demand Charge
+        worksheet.getCell('J' + index).value = dataReading.demandCharge;
+        //K: Local Sales Tax
+        worksheet.getCell('K' + index).value = dataReading.localSalesTax;
+        //L: State Sales Tax
+        worksheet.getCell('L' + index).value = dataReading.stateSalesTax;
+        //M: Late Payment
+        worksheet.getCell('M' + index).value = dataReading.latePayment;
         index++;
       })
     })
@@ -325,10 +327,12 @@ export class ExportToExcelTemplateService {
         worksheet.getCell('B' + index).value = this.getFormatedDate(dataReading.readDate);
         //C: Total Consumption or Total Distance
         worksheet.getCell('C' + index).value = dataReading.totalVolume;
-        //D: Total Cost
-        worksheet.getCell('D' + index).value = dataReading.totalCost;
-        //E: Other Charge
-        worksheet.getCell('E' + index).value = dataReading.otherCharge;
+        //D: Fuel Efficiency
+        worksheet.getCell('D' + index).value = dataReading.vehicleFuelEfficiency;
+        //E: Total Cost
+        worksheet.getCell('E' + index).value = dataReading.totalCost;
+        //F: Other Charge
+        worksheet.getCell('F' + index).value = dataReading.otherCharge;
         index++;
       })
     })
@@ -359,21 +363,21 @@ export class ExportToExcelTemplateService {
         //D: Total Cost
         worksheet.getCell('D' + index).value = dataReading.totalCost;
         //E: Commodity Charge
-        worksheet.getCell('D' + index).value = dataReading.commodityCharge;
+        worksheet.getCell('E' + index).value = dataReading.commodityCharge;
         //F: Delivery Charge
-        worksheet.getCell('D' + index).value = dataReading.deliveryCharge;
+        worksheet.getCell('F' + index).value = dataReading.deliveryCharge;
         //G: Other Charge
-        worksheet.getCell('D' + index).value = dataReading.otherCharge;
+        worksheet.getCell('G' + index).value = dataReading.otherCharge;
         //H: Demand Usage
-        worksheet.getCell('D' + index).value = dataReading.demandUsage;
+        worksheet.getCell('H' + index).value = dataReading.demandUsage;
         //I: Demand Charge
-        worksheet.getCell('D' + index).value = dataReading.demandCharge;
+        worksheet.getCell('I' + index).value = dataReading.demandCharge;
         //J: Local Sales Tax
-        worksheet.getCell('D' + index).value = dataReading.localSalesTax;
+        worksheet.getCell('J' + index).value = dataReading.localSalesTax;
         //K: State Sales Tax
-        worksheet.getCell('D' + index).value = dataReading.stateSalesTax;
+        worksheet.getCell('K' + index).value = dataReading.stateSalesTax;
         //L: Late Payment
-        worksheet.getCell('E' + index).value = dataReading.latePayment;
+        worksheet.getCell('L' + index).value = dataReading.latePayment;
         index++;
       })
     })

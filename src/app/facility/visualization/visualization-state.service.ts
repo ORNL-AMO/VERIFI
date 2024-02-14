@@ -34,7 +34,7 @@ export class VisualizationStateService {
   setCalanderizedMeters(facility: IdbFacility) {
     let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
     let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
-    this.calanderizedMeters = getCalanderizedMeterData(facilityMeters, meterData, facility, true);
+    this.calanderizedMeters = getCalanderizedMeterData(facilityMeters, meterData, facility, true, undefined, [], [], [facility]);
 
   }
 

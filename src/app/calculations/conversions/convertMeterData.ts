@@ -102,6 +102,8 @@ export function getMeterDataCopy(meterData: IdbUtilityMeterData): IdbUtilityMete
         otherCharge: meterData.otherCharge,
         //non-electricity
         demandUsage: meterData.demandUsage,
-        demandCharge: meterData.demandCharge
+        demandCharge: meterData.demandCharge,
+        heatCapacity: meterData.heatCapacity,
+        vehicleFuelEfficiency: meterData.vehicleFuelEfficiency
     }
 }

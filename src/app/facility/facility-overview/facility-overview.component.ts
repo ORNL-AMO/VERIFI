@@ -11,7 +11,6 @@ import * as _ from 'lodash';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
-import { setEmissionsForCalanderizedMeters } from 'src/app/calculations/emissions-calculations/emissions';
 import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
 import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
 
@@ -116,8 +115,7 @@ export class FacilityOverviewComponent implements OnInit {
       if (this.facilityOverviewService.utilityUseAndCost.getValue() == undefined) {
         this.facilityOverviewService.calculating.next(true);
       }
-      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(meters, meterData, this.facility, false);
-      calanderizedMeters = setEmissionsForCalanderizedMeters(calanderizedMeters, this.facility.energyIsSource, [this.facility], this.eGridService.co2Emissions, this.customFuels);
+      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(meters, meterData, this.facility, false, undefined, this.eGridService.co2Emissions, this.customFuels, [this.facility]);
       let facilityOverviewData: FacilityOverviewData = new FacilityOverviewData(calanderizedMeters, this.dateRange, this.facility);
       let utilityUseAndCost: UtilityUseAndCost = new UtilityUseAndCost(calanderizedMeters, this.dateRange);
       this.facilityOverviewService.facilityOverviewData.next(facilityOverviewData);

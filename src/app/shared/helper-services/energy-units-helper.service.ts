@@ -177,7 +177,7 @@ export class EnergyUnitsHelperService {
       return source;
     } else if (lowerCaseName.includes('elec')) {
       return 'Electricity'
-    } else if (name.includes(' NG ')) {
+    } else if (name.includes('NG ') || name.includes(' NG ')) {
       return 'Natural Gas';
     }
     return;

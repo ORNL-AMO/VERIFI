@@ -138,6 +138,12 @@ export class ManageMetersComponent implements OnInit {
         if (mData.meterId == this.editMeterPrevGUID) {
           mData.guid = this.editMeter.guid;
         }
+        if(!mData.heatCapacity){
+          mData.heatCapacity = this.editMeter.heatCapacity;
+        }
+        if(this.editMeter.scope == 2 && mData.vehicleFuelEfficiency){
+          mData.vehicleFuelEfficiency = this.editMeter.vehicleFuelEfficiency;
+        }
       });
     }
     let editMeterIndex: number;
@@ -326,7 +332,9 @@ export class ManageMetersComponent implements OnInit {
 
 
   selectExistingMeter(meter: IdbUtilityMeter) {
+    let importWizardName: string = this.editMeter.importWizardName;
     this.editMeter = meter;
+    this.editMeter.importWizardName = importWizardName;
     this.editMeterForm = this.editMeterFormService.getFormFromMeter(meter);
     this.showExisting = false;
   }
