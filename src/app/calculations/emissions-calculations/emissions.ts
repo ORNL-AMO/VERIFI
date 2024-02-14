@@ -35,7 +35,6 @@ export function getEmissions(meter: IdbUtilityMeter,
     let stationaryEmissions: number = 0;
     let scope2Other: number = 0;
     let stationaryBiogenicEmmissions: number = 0;
-    let totalBiogenicEmissions: number = 0;
 
     if (meter.source == 'Electricity' || isCompressedAir) {
         if (energyIsSource && meter.siteToSource != 0) {
@@ -274,6 +273,8 @@ export function combineEmissionsResults(results: Array<EmissionsResults>): Emiss
         stationaryEmissions: _.sumBy(results, (result: EmissionsResults) => { return result.stationaryEmissions }),
         totalScope1Emissions: _.sumBy(results, (result: EmissionsResults) => { return result.totalScope1Emissions }),
         totalWithMarketEmissions: _.sumBy(results, (result: EmissionsResults) => { return result.totalWithMarketEmissions }),
-        totalWithLocationEmissions: _.sumBy(results, (result: EmissionsResults) => { return result.totalWithLocationEmissions })
+        totalWithLocationEmissions: _.sumBy(results, (result: EmissionsResults) => { return result.totalWithLocationEmissions }),
+        stationaryBiogenicEmmissions: _.sumBy(results, (result: EmissionsResults) => { return result.stationaryBiogenicEmmissions }), 
+        totalBiogenicEmissions: _.sumBy(results, (result: EmissionsResults) => { return result.totalBiogenicEmissions })
     }
 }
