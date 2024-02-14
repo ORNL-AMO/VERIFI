@@ -43,7 +43,6 @@ export class BetterPlantsExcelWriterService {
             this.writeWaterReportInformation(workbook, account, report, betterPlantsSummaries[0]);
           }
         }
-        console.log(workbook);
         workbook.xlsx.writeBuffer().then(excelData => {
           let blob: Blob = new Blob([excelData], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
           let a = document.createElement("a");

@@ -34,6 +34,7 @@ export function getEmissions(meter: IdbUtilityMeter,
     let processEmissions: number = 0;
     let stationaryEmissions: number = 0;
     let scope2Other: number = 0;
+    let stationaryBiogenicEmmissions: number = 0;
 
     if (meter.source == 'Electricity' || isCompressedAir) {
         if (energyIsSource && meter.siteToSource != 0) {
@@ -82,9 +83,14 @@ export function getEmissions(meter: IdbUtilityMeter,
         }
         //non-electricity emissions rates are in MMBtu
         let convertedEnergyUse: number = new ConvertValue(energyUse, energyUnit, 'MMBtu').convertedValue;
-        let outputRate: number = getFuelEmissionsOutputRate(meter.source, meter.fuel, meter.phase, customFuels, meter.scope, meter.vehicleCategory, meter.vehicleType);
+        let outputRateResult: { outputRate: number, isBiogenic: boolean } = getFuelEmissionsOutputRate(meter.source, meter.fuel, meter.phase, customFuels, meter.scope, meter.vehicleCategory, meter.vehicleType);
         //emissions calculated in kg CO2e using emissions factors, converted to tonne CO2e
-        stationaryEmissions = (convertedEnergyUse * outputRate) / 1000;
+        let totalEmissions: number = (convertedEnergyUse * outputRateResult.outputRate) / 1000
+        if (outputRateResult.isBiogenic) {
+            stationaryBiogenicEmmissions = totalEmissions;
+        } else {
+            stationaryEmissions = totalEmissions;
+        }
     } else if (meter.source == 'Other Fuels' && meter.scope == 2) {
         //Mobile emissions
         let fuelOptions: Array<FuelTypeOption> = getMobileFuelTypes(meter.vehicleCategory, meter.vehicleType, customFuels);
@@ -142,7 +148,7 @@ export function getEmissions(meter: IdbUtilityMeter,
         }
     } else if (meter.source == 'Other Energy') {
         let convertedEnergyUse: number = new ConvertValue(energyUse, energyUnit, 'MMBtu').convertedValue;
-        let outputRate: number = getFuelEmissionsOutputRate(meter.source, meter.fuel, meter.phase, customFuels, meter.scope, meter.vehicleCategory, meter.vehicleType);
+        let outputRate: number = getFuelEmissionsOutputRate(meter.source, meter.fuel, meter.phase, customFuels, meter.scope, meter.vehicleCategory, meter.vehicleType).outputRate;
         //emissions calculated in kg CO2e using emissions factors, converted to tonne CO2e
         scope2Other = (convertedEnergyUse * outputRate) / 1000;
     }
@@ -170,7 +176,9 @@ export function getEmissions(meter: IdbUtilityMeter,
         totalWithMarketEmissions: totalScope1Emissions + scope2MarketEmissions,
         otherScope2Emissions: scope2Other,
         totalScope1Emissions: totalScope1Emissions,
-        stationaryEmissions: stationaryEmissions
+        stationaryEmissions: stationaryEmissions,
+        stationaryBiogenicEmmissions: stationaryBiogenicEmmissions,
+        totalBiogenicEmissions: stationaryBiogenicEmmissions + mobileBiogenicEmissions
     };
 }
 
@@ -199,9 +207,10 @@ export function getEmissionsRate(subregion: string, year: number, co2Emissions: 
     return { marketRate: 0, locationRate: 0 };
 }
 
-export function getFuelEmissionsOutputRate(source: MeterSource, fuel: string, phase: MeterPhase, customFuels: Array<IdbCustomFuel>, scope: number, vehicleCategory: number, vehicleType: number): number {
+export function getFuelEmissionsOutputRate(source: MeterSource, fuel: string, phase: MeterPhase, customFuels: Array<IdbCustomFuel>, scope: number, vehicleCategory: number, vehicleType: number): { outputRate: number, isBiogenic: boolean } {
     //emissions rates in kg/MMBtu
     let emissionsRate: number;
+    let isBiogenic: boolean = false;
     if (source == 'Natural Gas') {
         emissionsRate = 53.1148;
     } else if (source == 'Other Fuels' || source == 'Other Energy') {
@@ -209,9 +218,13 @@ export function getFuelEmissionsOutputRate(source: MeterSource, fuel: string, ph
         let selectedFuel: FuelTypeOption = fuelTypeOptions.find(option => { return option.value == fuel })
         if (selectedFuel) {
             emissionsRate = selectedFuel.emissionsOutputRate;
+            isBiogenic = selectedFuel.isBiofuel;
         }
     }
-    return emissionsRate;
+    return {
+        outputRate: emissionsRate,
+        isBiogenic: isBiogenic
+    };
 }
 
 
@@ -234,7 +247,9 @@ export function getZeroEmissionsResults(): EmissionsResults {
         stationaryEmissions: 0,
         totalScope1Emissions: 0,
         totalWithMarketEmissions: 0,
-        totalWithLocationEmissions: 0
+        totalWithLocationEmissions: 0,
+        totalBiogenicEmissions: 0,
+        stationaryBiogenicEmmissions: 0
     }
 }
 
@@ -258,6 +273,8 @@ export function combineEmissionsResults(results: Array<EmissionsResults>): Emiss
         stationaryEmissions: _.sumBy(results, (result: EmissionsResults) => { return result.stationaryEmissions }),
         totalScope1Emissions: _.sumBy(results, (result: EmissionsResults) => { return result.totalScope1Emissions }),
         totalWithMarketEmissions: _.sumBy(results, (result: EmissionsResults) => { return result.totalWithMarketEmissions }),
-        totalWithLocationEmissions: _.sumBy(results, (result: EmissionsResults) => { return result.totalWithLocationEmissions })
+        totalWithLocationEmissions: _.sumBy(results, (result: EmissionsResults) => { return result.totalWithLocationEmissions }),
+        stationaryBiogenicEmmissions: _.sumBy(results, (result: EmissionsResults) => { return result.stationaryBiogenicEmmissions }), 
+        totalBiogenicEmissions: _.sumBy(results, (result: EmissionsResults) => { return result.totalBiogenicEmissions })
     }
 }

@@ -127,6 +127,8 @@ export class FacilityOverviewData {
             totalScope1Emissions: _.sumBy(this.costMeters, (fMeter: FacilityOverviewMeter) => { return fMeter.emissions.totalScope1Emissions }),
             totalWithMarketEmissions: _.sumBy(this.costMeters, (fMeter: FacilityOverviewMeter) => { return fMeter.emissions.totalWithMarketEmissions }),
             totalWithLocationEmissions: _.sumBy(this.costMeters, (fMeter: FacilityOverviewMeter) => { return fMeter.emissions.totalWithLocationEmissions }),
+            totalBiogenicEmissions: _.sumBy(this.costMeters, (fMeter: FacilityOverviewMeter) => { return fMeter.emissions.totalBiogenicEmissions }),
+            stationaryBiogenicEmmissions: _.sumBy(this.costMeters, (fMeter: FacilityOverviewMeter) => { return fMeter.emissions.stationaryBiogenicEmmissions }),
         }
     }
 
