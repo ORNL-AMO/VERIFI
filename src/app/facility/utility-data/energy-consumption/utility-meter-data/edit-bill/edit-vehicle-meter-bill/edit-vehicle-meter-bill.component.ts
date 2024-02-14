@@ -129,8 +129,11 @@ export class EditVehicleMeterBillComponent {
   setTotalEmissions() {
     if (this.meterDataForm.controls.totalVolume.value) {
       let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-      let emissionsValues: EmissionsResults = getEmissions(this.editMeter, this.meterDataForm.controls.totalEnergyUse.value, this.editMeter.energyUnit, new Date(this.meterDataForm.controls.readDate.value).getFullYear(), false, [facility], [], [], this.meterDataForm.controls.totalVolume.value, this.editMeter.vehicleCollectionUnit, this.editMeter.vehicleDistanceUnit);
-      this.carbonEmissions = emissionsValues.mobileCarbonEmissions;
+      let emissionsValues: EmissionsResults = getEmissions(this.editMeter, this.meterDataForm.controls.totalEnergyUse.value, this.editMeter.energyUnit,
+        new Date(this.meterDataForm.controls.readDate.value).getFullYear(), false, [facility], [], [],
+        this.meterDataForm.controls.totalVolume.value, this.editMeter.vehicleCollectionUnit, this.editMeter.vehicleDistanceUnit, this.meterDataForm.controls.vehicleFuelEfficiency.value);
+      
+        this.carbonEmissions = emissionsValues.mobileCarbonEmissions;
       this.biogenicEmissions = emissionsValues.mobileBiogenicEmissions;
       this.otherEmissions = emissionsValues.mobileOtherEmissions;
       this.totalEmissions = emissionsValues.mobileTotalEmissions;

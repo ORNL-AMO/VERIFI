@@ -176,7 +176,7 @@ export class UtilityUseAndCost {
         return {
             energyUse: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.energyUse }),
             energyUseChange: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.energyUseChange }),
- 
+
             RECsChange: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.RECsChange }),
             locationElectricityEmissionsChange: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.locationElectricityEmissionsChange }),
             marketElectricityEmissionsChange: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.marketElectricityEmissionsChange }),
@@ -200,9 +200,9 @@ export class UtilityUseAndCost {
             marketElectricityEmissions: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.marketElectricityEmissions }),
             otherScope2Emissions: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.otherScope2Emissions }),
             scope2LocationEmissions: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.scope2LocationEmissions }),
-            scope2MarketEmissions:_.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.scope2MarketEmissions }),
+            scope2MarketEmissions: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.scope2MarketEmissions }),
             excessRECs: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.excessRECs }),
-            excessRECsEmissions:_.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.excessRECsEmissions }),
+            excessRECsEmissions: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.excessRECsEmissions }),
             mobileCarbonEmissions: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.mobileCarbonEmissions }),
             mobileBiogenicEmissions: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.mobileBiogenicEmissions }),
             mobileOtherEmissions: _.sumBy(allData, (useAndCost: IUseAndCost) => { return useAndCost.mobileOtherEmissions }),
@@ -299,7 +299,7 @@ export class UseAndCost {
         this.average = {
             energyUse: totalEnergyUse / numberOfMonths,
             energyUseChange: 0,
- 
+
             RECsChange: 0,
             locationElectricityEmissionsChange: 0,
             marketElectricityEmissionsChange: 0,
@@ -373,20 +373,19 @@ export class UseAndCost {
             if (selectedDateData.length != 0) {
                 let energyUse: number = 0;
                 if (isEnergy) {
-                    energyUse = _.sumBy(selectedDateData, 'energyUse');
+                    energyUse = _.sumBy(selectedDateData, (data: MonthlyData) => { return data.energyUse });
                 } else {
-                    energyUse = _.sumBy(selectedDateData, 'energyConsumption');
+                    energyUse = _.sumBy(selectedDateData, (data: MonthlyData) => { return data.energyConsumption });
                 }
                 let emissionsTotals: EmissionsResults = getEmissionsTotalsFromMonthlyData(selectedDateData);
-
-                let cost: number = _.sumBy(selectedDateData, 'energyCost')
+                let cost: number = _.sumBy(selectedDateData, (data: MonthlyData) => { return data.energyCost })
                 if (isNaN(cost)) {
                     cost = 0;
                 }
                 return {
                     energyUse: energyUse,
                     energyUseChange: 0,
-        
+
                     RECsChange: 0,
                     locationElectricityEmissionsChange: 0,
                     marketElectricityEmissionsChange: 0,

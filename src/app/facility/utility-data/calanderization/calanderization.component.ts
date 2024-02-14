@@ -12,7 +12,6 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { UtilityColors } from 'src/app/shared/utilityColors';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
-import { setEmissionsForCalanderizedMeters } from 'src/app/calculations/emissions-calculations/emissions';
 import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
 import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
 
@@ -104,11 +103,10 @@ export class CalanderizationComponent implements OnInit {
   setCalanderizedMeterData() {
     if (this.selectedMeter && this.calanderizedDataFilters) {
       let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
-      let calanderizedMeterData: Array<CalanderizedMeter> = getCalanderizedMeterData([this.selectedMeter], facilityMeterData, this.selectedFacility);
       let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
+      let calanderizedMeterData: Array<CalanderizedMeter> = getCalanderizedMeterData([this.selectedMeter], facilityMeterData, this.selectedFacility, false, undefined, this.eGridService.co2Emissions, customFuels, [this.selectedFacility]);
       calanderizedMeterData = this.filterMeterDataDateRanges(calanderizedMeterData);
-      let cMetersWithEmissions: Array<CalanderizedMeter> = setEmissionsForCalanderizedMeters([calanderizedMeterData[0]], this.selectedFacility.energyIsSource, [this.selectedFacility], this.eGridService.co2Emissions, customFuels);
-      this.calanderizedMeter = cMetersWithEmissions[0];
+      this.calanderizedMeter = calanderizedMeterData[0];
     }
   }
 

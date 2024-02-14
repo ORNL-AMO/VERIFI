@@ -83,7 +83,7 @@ export class EditOtherEmissionsBillComponent {
         this.editMeter.energyUnit,
         new Date(this.meterDataForm.controls.readDate.value).getFullYear(),
         false, [facility], this.eGridService.co2Emissions, customFuels,
-        this.meterDataForm.controls.totalVolume.value, undefined, undefined);
+        this.meterDataForm.controls.totalVolume.value, undefined, undefined, undefined);
       this.fugitiveEmissions = emissionsValues.fugitiveEmissions;
       this.processEmissions = emissionsValues.processEmissions;
     } else {
