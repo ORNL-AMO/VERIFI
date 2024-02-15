@@ -74,6 +74,7 @@ export function getEmissions(meter: IdbUtilityMeter,
         excessRECs = new ConvertValue(excessRECs, 'kWh', 'MWh').convertedValue;
         RECs = new ConvertValue(RECs, 'kWh', 'MWh').convertedValue;
         excessRECsEmissions = excessRECsEmissions / 1000;
+        marketElectricityEmissions = marketElectricityEmissions - excessRECsEmissions;
     }
 
     //NG or non mobile
@@ -274,7 +275,7 @@ export function combineEmissionsResults(results: Array<EmissionsResults>): Emiss
         totalScope1Emissions: _.sumBy(results, (result: EmissionsResults) => { return result.totalScope1Emissions }),
         totalWithMarketEmissions: _.sumBy(results, (result: EmissionsResults) => { return result.totalWithMarketEmissions }),
         totalWithLocationEmissions: _.sumBy(results, (result: EmissionsResults) => { return result.totalWithLocationEmissions }),
-        stationaryBiogenicEmmissions: _.sumBy(results, (result: EmissionsResults) => { return result.stationaryBiogenicEmmissions }), 
+        stationaryBiogenicEmmissions: _.sumBy(results, (result: EmissionsResults) => { return result.stationaryBiogenicEmmissions }),
         totalBiogenicEmissions: _.sumBy(results, (result: EmissionsResults) => { return result.totalBiogenicEmissions })
     }
 }
