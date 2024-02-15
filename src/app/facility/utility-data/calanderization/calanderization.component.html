@@ -117,7 +117,7 @@
 
                 <div>
                     <app-calanderized-meter-data-table *ngIf="dataDisplay == 'table'" [itemsPerPage]="itemsPerPage"
-                        [calanderizedMeter]="calanderizedMeter">
+                            [calanderizedMeter]="calanderizedMeter" [consumptionLabel]="consumptionLabel">
                     </app-calanderized-meter-data-table>
                     <app-calanderization-chart *ngIf="dataDisplay == 'graph'" [meterData]="calanderizedMeter"
                         [displayGraphEnergy]="displayGraphEnergy" [displayGraphCost]="displayGraphCost">

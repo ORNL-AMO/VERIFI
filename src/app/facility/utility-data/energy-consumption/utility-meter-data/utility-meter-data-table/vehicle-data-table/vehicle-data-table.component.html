@@ -23,7 +23,7 @@
             <th (click)="setOrderDataField('readDate')" [ngClass]="{'active': orderDataField == 'readDate'}"
                 class="row-year">Meter Read Date</th>
             <th (click)="setOrderDataField('totalVolume')" [ngClass]="{'active': orderDataField == 'totalVolume'}">
-                Total Consumption<br> (<span [innerHTML]="volumeUnit | settingsLabel"></span>)
+                Total {{consumptionLabel}}<br> (<span [innerHTML]="volumeUnit | settingsLabel"></span>)
             </th>
             <th (click)="setOrderDataField('totalEnergyUse')" [ngClass]="{'active': orderDataField == 'totalEnergyUse'}"
                 *ngIf="vehicleDataFilters.totalEnergy">Total Energy<br> (<span [innerHTML]="energyUnit | settingsLabel"></span>)</th>

@@ -46,6 +46,7 @@ export class VehicleDataTableComponent {
   showDetailedCharges: boolean;
   volumeUnit: string;
   energyUnit: string
+  consumptionLabel: 'Consumption' | 'Distance';
   constructor(private utilityMeterDataService: UtilityMeterDataService,
     private copyTableService: CopyTableService,
     private customFuelDbService: CustomFuelDbService,
@@ -72,6 +73,11 @@ export class VehicleDataTableComponent {
 
   ngOnChanges() {
     this.setData();
+    if(this.selectedMeter.scope != 2){
+      this.consumptionLabel = 'Consumption';
+    }else{
+      this.consumptionLabel = 'Distance';
+    }
   }
 
   setData() {

@@ -311,12 +311,6 @@ function getBillPeriodTotal(previousReading: IdbUtilityMeterData, currentReading
         meter.vehicleDistanceUnit,
         hhvOrFuelEfficiencyCurrent);
 
-    if (isNaN(emissionsForCurrent.mobileCarbonEmissions)) {
-        console.log(currentReading);
-        console.log(meter);
-        console.log('===')
-    }
-
     let costForCurrent: number = (currentReading.totalCost / daysFromPrevious) * daysFromCurrent;
 
     //days from next bill to current bill reading
@@ -410,7 +404,7 @@ function calanderizeMeterDataFullMonth(meter: IdbUtilityMeter, meterData: Array<
             let readingSummaries: Array<CalanderizedReadingSummary> = new Array();
             currentMonthsReadings.forEach(reading => {
                 let totalMonthEnergyUse: number = 0;
-                let totalMonthEnergyConsumption: number = 0;
+                let totalConsumption: number = 0;
                 let totalMonthCost: number = Number(reading.totalCost);
                 //energy use
                 let isEnergyMeter: boolean = getIsEnergyMeter(meter.source);
@@ -419,10 +413,10 @@ function calanderizeMeterDataFullMonth(meter: IdbUtilityMeter, meterData: Array<
                 }
                 //energy consumption (data input not as energy)
                 let isEnergyUnit: boolean = getIsEnergyUnit(meter.startingUnit);
-                if (!isEnergyUnit) {
-                    totalMonthEnergyConsumption = Number(reading.totalVolume);
+                if (!isEnergyUnit || meter.scope == 2) {
+                    totalConsumption = Number(reading.totalVolume);
                 } else {
-                    totalMonthEnergyConsumption = totalMonthEnergyUse;
+                    totalConsumption = totalMonthEnergyUse;
                 }
                 let hhvOrFuelEfficiency: number = reading.heatCapacity;
                 if (meter.scope == 2) {
@@ -433,12 +427,12 @@ function calanderizeMeterDataFullMonth(meter: IdbUtilityMeter, meterData: Array<
                     facilities,
                     co2Emissions,
                     customFuels,
-                    totalMonthEnergyConsumption,
+                    totalConsumption,
                     meter.vehicleCollectionUnit,
                     meter.vehicleDistanceUnit,
                     hhvOrFuelEfficiency);
                 readingSummaries.push({
-                    consumption: totalMonthEnergyConsumption,
+                    consumption: totalConsumption,
                     energyUse: totalMonthEnergyUse,
                     cost: totalMonthCost,
                     emissionsResults: emissions,
