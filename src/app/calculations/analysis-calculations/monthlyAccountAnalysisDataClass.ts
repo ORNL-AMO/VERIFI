@@ -33,6 +33,8 @@ export class MonthlyAccountAnalysisDataClass {
         this.setCurrentMonthData(allFacilityAnalysisData);
         this.setEnergyUse();
         this.setModeledEnergy();
+        this.setModelYearDataAdjustment();
+        this.setDataAdjustment(analysisItem, baselineYear, annualUsageValues);
         this.setBaselineAdjustmentInput(analysisItem, baselineYear, annualUsageValues);
         this.setMonthIndex(previousMonthsSummaryData);
         this.setBaselineActualEnergyUse(baselineYear, previousMonthsSummaryData);
