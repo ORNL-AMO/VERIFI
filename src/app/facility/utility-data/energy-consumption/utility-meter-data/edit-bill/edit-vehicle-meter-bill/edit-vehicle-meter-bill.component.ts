@@ -1,13 +1,14 @@
 import { Component, Input } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { getEmissions } from 'src/app/calculations/emissions-calculations/emissions';
+import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { MeterSource } from 'src/app/models/constantsAndTypes';
 import { EmissionsResults } from 'src/app/models/eGridEmissions';
-import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import { IdbCustomFuel, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { FuelTypeOption } from 'src/app/shared/fuel-options/fuelTypeOption';
-import { getAllMobileFuelTypes } from 'src/app/shared/fuel-options/getFuelTypeOptions';
+import { getAllMobileFuelTypes, getMobileFuelTypes } from 'src/app/shared/fuel-options/getFuelTypeOptions';
 
 @Component({
   selector: 'app-edit-vehicle-meter-bill',
@@ -41,7 +42,8 @@ export class EditVehicleMeterBillComponent {
   meterFuel: FuelTypeOption;
   totalVolumeLabel: 'Total Fuel Consumption' | 'Total Distance';
   usingMeterFuelEfficiency: boolean;
-  constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private facilityDbService: FacilitydbService) {
+  constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private facilityDbService: FacilitydbService,
+    private customFuelDbService: CustomFuelDbService) {
   }
 
   ngOnInit(): void {
@@ -76,7 +78,8 @@ export class EditVehicleMeterBillComponent {
   }
 
   setFuel() {
-    let mobileTypeFuels: Array<FuelTypeOption> = getAllMobileFuelTypes();
+    let allFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
+    let mobileTypeFuels: Array<FuelTypeOption> = getMobileFuelTypes(this.editMeter.vehicleCategory, this.editMeter.vehicleType, allFuels)
     this.meterFuel = mobileTypeFuels.find(fuel => {
       return fuel.value == this.editMeter.vehicleFuel;
     });
@@ -129,11 +132,12 @@ export class EditVehicleMeterBillComponent {
   setTotalEmissions() {
     if (this.meterDataForm.controls.totalVolume.value) {
       let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+      let allFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
       let emissionsValues: EmissionsResults = getEmissions(this.editMeter, this.meterDataForm.controls.totalEnergyUse.value, this.editMeter.energyUnit,
-        new Date(this.meterDataForm.controls.readDate.value).getFullYear(), false, [facility], [], [],
+        new Date(this.meterDataForm.controls.readDate.value).getFullYear(), false, [facility], [], allFuels,
         this.meterDataForm.controls.totalVolume.value, this.editMeter.vehicleCollectionUnit, this.editMeter.vehicleDistanceUnit, this.meterDataForm.controls.vehicleFuelEfficiency.value);
-      
-        this.carbonEmissions = emissionsValues.mobileCarbonEmissions;
+
+      this.carbonEmissions = emissionsValues.mobileCarbonEmissions;
       this.biogenicEmissions = emissionsValues.mobileBiogenicEmissions;
       this.otherEmissions = emissionsValues.mobileOtherEmissions;
       this.totalEmissions = emissionsValues.mobileTotalEmissions;
