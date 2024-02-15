@@ -11,7 +11,7 @@
                 Month</th>
             <th (click)="setOrderDataField('energyConsumption')"
                 [ngClass]="{'active': orderDataField == 'energyConsumption'}" *ngIf="calanderizedMeter.showConsumption">
-                Total Consumption<br> (<span [innerHTML]="calanderizedMeter.consumptionUnit | settingsLabel"></span>)
+                Total {{consumptionLabel}}<br> (<span [innerHTML]="calanderizedMeter.consumptionUnit | settingsLabel"></span>)
             </th>
             <th (click)="setOrderDataField('energyUse')" [ngClass]="{'active': orderDataField == 'energyUse'}"
                 *ngIf="calanderizedMeter.showEnergyUse">

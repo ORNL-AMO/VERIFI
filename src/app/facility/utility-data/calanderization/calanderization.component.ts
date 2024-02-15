@@ -43,6 +43,7 @@ export class CalanderizationComponent implements OnInit {
   selectedFacility: IdbFacility;
   displayDataApplicationModal: boolean = false;
   hasMeterData: boolean;
+  consumptionLabel: 'Consumption' | 'Distance';
   constructor(private calanderizationService: CalanderizationService, private utilityMeterDbService: UtilityMeterdbService,
     private facilityDbService: FacilitydbService,
     private dbChangesService: DbChangesService, private accountDbService: AccountdbService,
@@ -107,6 +108,11 @@ export class CalanderizationComponent implements OnInit {
       let calanderizedMeterData: Array<CalanderizedMeter> = getCalanderizedMeterData([this.selectedMeter], facilityMeterData, this.selectedFacility, false, undefined, this.eGridService.co2Emissions, customFuels, [this.selectedFacility]);
       calanderizedMeterData = this.filterMeterDataDateRanges(calanderizedMeterData);
       this.calanderizedMeter = calanderizedMeterData[0];
+      if(this.selectedMeter.scope != 2){
+        this.consumptionLabel = 'Consumption';
+      }else{
+        this.consumptionLabel = 'Distance';
+      }
     }
   }
 

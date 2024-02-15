@@ -62,7 +62,7 @@ export function getConsumptionUnit(meter: IdbUtilityMeter, accountOrFacility: Id
 }
 
 export function getUnitFromMeter(accountMeter: IdbUtilityMeter, accountOrFacility: IdbAccount | IdbFacility): string {
-    if (accountMeter.source == 'Electricity' || getIsEnergyUnit(accountMeter.startingUnit)) {
+    if (accountMeter.source == 'Electricity' || (getIsEnergyUnit(accountMeter.startingUnit) && accountMeter.scope != 2)) {
         return accountOrFacility.energyUnit;
     } else if (accountMeter.source == 'Natural Gas') {
         return accountOrFacility.volumeGasUnit;
