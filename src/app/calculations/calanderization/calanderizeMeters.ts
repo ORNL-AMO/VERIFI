@@ -160,6 +160,8 @@ function calanderizeMeterDataBackwards(meter: IdbUtilityMeter, meterData: Array<
                     totals.totalConsumption += summaryConsumption;
                     totals.totalEnergyUse += summaryEnergyUse;
                     totals.totalCost += summaryCost;
+                    let emissionsResults: Array<EmissionsResults> = readingSummaries.flatMap(result => { return result.emissionsResults });
+                    totals.totalEmissions = combineEmissionsResults(emissionsResults);
                 } else if (currentMonthsReadings.length == 0) {
                     //3. current month has 0 bills
                     //find number of days between next month and previous month
@@ -190,6 +192,20 @@ function calanderizeMeterDataBackwards(meter: IdbUtilityMeter, meterData: Array<
                     } else {
                         totals.totalConsumption = energyUseForMonth;
                     }
+                    let hhvOrFuelEfficiencyCurrent: number = nextMonthsReading.heatCapacity;
+                    if (meter.scope == 2) {
+                        //vehicle
+                        hhvOrFuelEfficiencyCurrent = nextMonthsReading.vehicleFuelEfficiency;
+                    }
+
+                    totals.totalEmissions = getEmissions(meter, totals.totalEnergyUse, energyUnit, year, energyIsSource,
+                        facilities,
+                        co2Emissions,
+                        customFuels,
+                        totals.totalConsumption,
+                        meter.vehicleCollectionUnit,
+                        meter.vehicleDistanceUnit,
+                        hhvOrFuelEfficiencyCurrent);
                 }
             }
 
