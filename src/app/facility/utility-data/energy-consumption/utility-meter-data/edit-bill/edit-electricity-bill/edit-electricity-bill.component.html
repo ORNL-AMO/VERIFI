@@ -25,7 +25,12 @@
       </div>
       <!--energy use-->
       <label for="totalEnergyUse">
-        Total Energy Use
+        <ng-container *ngIf="editMeter.agreementType != 4 && editMeter.agreementType != 6">
+          Total Energy Use
+        </ng-container>
+        <ng-container *ngIf="editMeter.agreementType == 4 || editMeter.agreementType == 6">
+          Total RECs
+        </ng-container>
         <span class="required">*</span>
       </label>
       <div class="input-group mb-3">
@@ -34,68 +39,81 @@
           (input)="setTotalEmissions()">
         <span class="input-group-text" [innerHTML]="energyUnit | settingsLabel"></span>
       </div>
-      <div class="alert alert-danger" *ngIf="meterDataForm.get('totalEnergyUse').hasError('required')">Total energy use is
+      <div class="alert alert-danger" *ngIf="meterDataForm.get('totalEnergyUse').hasError('required')">Total energy use
+        is
         required</div>
-      <div class="alert alert-danger" *ngIf="meterDataForm.get('totalEnergyUse').hasError('min')">Can't be less than 0</div>
-      <div class="alert alert-warning" *ngIf="meterDataForm.controls.totalEnergyUse.value === 0">Total energy use should be
+      <div class="alert alert-danger" *ngIf="meterDataForm.get('totalEnergyUse').hasError('min')">Can't be less than 0
+      </div>
+      <div class="alert alert-warning" *ngIf="meterDataForm.controls.totalEnergyUse.value === 0">Total energy use should
+        be
         greater than 0</div>
 
-      <!--calculated emissions-->
-      <div class="row">
-        <div class="col-6">
-          <label for="totalMarketEmissions">
-            Total Market-Based Emissions
-          </label>
-          <div class="input-group mb-3">
-            {{totalMarketEmissions | number:'1.0-0'}} tonne CO<sub>2</sub>e
+      <ng-container *ngIf="editMeter.agreementType != 4 && editMeter.agreementType != 6">
+        <!--calculated emissions-->
+        <div class="row">
+          <div class="col-6">
+            <label for="totalMarketEmissions">
+              Total Market-Based Emissions
+            </label>
+            <div class="input-group mb-3">
+              {{totalMarketEmissions | number:'1.0-0'}} tonne CO<sub>2</sub>e
+            </div>
+          </div>
+          <div class="col-6">
+            <label for="totalLocationEmissions">
+              Total Location-Based Emissions
+            </label>
+            <div class="input-group mb-3">
+              {{totalLocationEmissions | number:'1.0-0'}} tonne CO<sub>2</sub>e
+            </div>
           </div>
         </div>
-        <div class="col-6">
-          <label for="totalLocationEmissions">
-            Total Location-Based Emissions
-          </label>
-          <div class="input-group mb-3">
-            {{totalLocationEmissions | number:'1.0-0'}} tonne CO<sub>2</sub>e
-          </div>
-        </div>
-      </div>
-
+      </ng-container>
     </div>
 
     <div class="col">
-      <!--real demand-->
-      <label for="totalRealDemand">
-        Total Real Demand
-      </label>
-      <div class="input-group mb-3">
-        <input id="totalRealDemand" class="form-control" type="number" formControlName="totalRealDemand"
-          [class.warning]="meterDataForm.controls.totalRealDemand.value === 0" onfocus="this.select();" min="0">
-        <span class="input-group-text">kW</span>
-      </div>
-      <div class="alert alert-danger" *ngIf="meterDataForm.get('totalRealDemand').hasError('required')">Total demand is
-        required</div>
-      <div class="alert alert-danger" *ngIf="meterDataForm.get('totalRealDemand').hasError('min')">Can't be less than 0</div>
-      <div class="alert alert-warning" *ngIf="meterDataForm.controls.totalRealDemand.value === 0">Total demand should be
-        greater
-        than 0</div>
+      <ng-container *ngIf="editMeter.agreementType != 4 && editMeter.agreementType != 6">
+        <!--real demand-->
+        <label for="totalRealDemand">
+          Total Real Demand
+        </label>
+        <div class="input-group mb-3">
+          <input id="totalRealDemand" class="form-control" type="number" formControlName="totalRealDemand"
+            [class.warning]="meterDataForm.controls.totalRealDemand.value === 0" onfocus="this.select();" min="0">
+          <span class="input-group-text">kW</span>
+        </div>
+        <div class="alert alert-danger" *ngIf="meterDataForm.get('totalRealDemand').hasError('required')">Total demand
+          is
+          required</div>
+        <div class="alert alert-danger" *ngIf="meterDataForm.get('totalRealDemand').hasError('min')">Can't be less than
+          0
+        </div>
+        <div class="alert alert-warning" *ngIf="meterDataForm.controls.totalRealDemand.value === 0">Total demand should
+          be
+          greater
+          than 0</div>
 
-      <!--billed demand-->
-      <label for="totalBilledDemand">
-        Total Billed Demand
-      </label>
-      <div class="input-group mb-3">
-        <input id="totalBilledDemand" class="form-control" type="number" formControlName="totalBilledDemand"
-          [class.warning]="meterDataForm.controls.totalBilledDemand.value === 0" onfocus="this.select();" min="0">
-        <span class="input-group-text">kW</span>
-      </div>
-      <div class="alert alert-danger" *ngIf="meterDataForm.get('totalBilledDemand').hasError('required')">Total demand is
-        required</div>
-      <div class="alert alert-danger" *ngIf="meterDataForm.get('totalBilledDemand').hasError('min')">Can't be less than
-        0</div>
-      <div class="alert alert-warning" *ngIf="meterDataForm.controls.totalBilledDemand.value === 0">Total demand should be
-        greater
-        than 0</div>
-
+        <!--billed demand-->
+        <label for="totalBilledDemand">
+          Total Billed Demand
+        </label>
+        <div class="input-group mb-3">
+          <input id="totalBilledDemand" class="form-control" type="number" formControlName="totalBilledDemand"
+            [class.warning]="meterDataForm.controls.totalBilledDemand.value === 0" onfocus="this.select();" min="0">
+          <span class="input-group-text">kW</span>
+        </div>
+        <div class="alert alert-danger" *ngIf="meterDataForm.get('totalBilledDemand').hasError('required')">Total demand
+          is
+          required</div>
+        <div class="alert alert-danger" *ngIf="meterDataForm.get('totalBilledDemand').hasError('min')">Can't be less
+          than
+          0</div>
+        <div class="alert alert-warning" *ngIf="meterDataForm.controls.totalBilledDemand.value === 0">Total demand
+          should
+          be
+          greater
+          than 0</div>
+      </ng-container>
       <!--total cost-->
       <label for="totalCost">
         Total Cost
