@@ -137,7 +137,6 @@ export class CalanderizationComponent implements OnInit {
 
   setDateRange(calanderizedMeterData: Array<CalanderizedMeter>) {
     if (calanderizedMeterData.length != 0) {
-      console.log('here...');
       if (!this.calanderizedDataFilters.selectedDateMax || !this.calanderizedDataFilters.selectedDateMin) {
         let allMeterData: Array<MonthlyData> = calanderizedMeterData.flatMap(calanderizedMeter => { return calanderizedMeter.monthlyData });
         if (allMeterData.length != 0) {
@@ -156,7 +155,6 @@ export class CalanderizationComponent implements OnInit {
               minDate: minDateEntry.date,
               maxDate: maxDateEntry.date
             }
-            console.log(this.calanderizedDataFilters);
             this.calanderizationService.calanderizedDataFilters.next(this.calanderizedDataFilters);
           }
         }
