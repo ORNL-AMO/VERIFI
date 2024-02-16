@@ -44,6 +44,7 @@ export class CalanderizationComponent implements OnInit {
   displayDataApplicationModal: boolean = false;
   hasMeterData: boolean;
   consumptionLabel: 'Consumption' | 'Distance';
+  isRECs: boolean;
   constructor(private calanderizationService: CalanderizationService, private utilityMeterDbService: UtilityMeterdbService,
     private facilityDbService: FacilitydbService,
     private dbChangesService: DbChangesService, private accountDbService: AccountdbService,
@@ -108,11 +109,17 @@ export class CalanderizationComponent implements OnInit {
       let calanderizedMeterData: Array<CalanderizedMeter> = getCalanderizedMeterData([this.selectedMeter], facilityMeterData, this.selectedFacility, false, undefined, this.eGridService.co2Emissions, customFuels, [this.selectedFacility]);
       calanderizedMeterData = this.filterMeterDataDateRanges(calanderizedMeterData);
       this.calanderizedMeter = calanderizedMeterData[0];
-      if(this.selectedMeter.scope != 2){
+      if (this.selectedMeter.scope != 2) {
         this.consumptionLabel = 'Consumption';
-      }else{
+      } else {
         this.consumptionLabel = 'Distance';
       }
+      if (this.selectedMeter.source != 'Electricity') {
+        this.isRECs = false;
+      } else {
+        this.isRECs = (this.selectedMeter.agreementType == 4 || this.selectedMeter.agreementType == 6);
+      }
+      this.setDateRange(calanderizedMeterData)
     }
   }
 

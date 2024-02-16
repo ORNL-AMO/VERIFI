@@ -50,11 +50,13 @@ export class ElectricityDataTableComponent implements OnInit {
   numGeneralInformation: number;
   numEmissions: number;
   showEstimated: boolean;
+  isRECs: boolean;
   constructor(private utilityMeterDataService: UtilityMeterDataService, private copyTableService: CopyTableService,
     private eGridService: EGridService, private facilityDbService: FacilitydbService,
     private customFuelDbService: CustomFuelDbService) { }
 
   ngOnInit(): void {
+    this.setIsRECs();
     this.energyUnit = this.selectedMeter.startingUnit;
     if (this.selectedMeterData.length != 0) {
       let hasFalseChecked: IdbUtilityMeterData = this.selectedMeterData.find(meterDataItem => { return meterDataItem.checked == false });
@@ -77,9 +79,12 @@ export class ElectricityDataTableComponent implements OnInit {
     if (changes.itemsPerPage && !changes.itemsPerPage.firstChange) {
       this.allChecked = false;
       this.checkAll();
-    } else if (changes.selectedMeter && !changes.selectedMeter.firstChange) {
+    }
+    if (changes.selectedMeter && !changes.selectedMeter.firstChange) {
       this.energyUnit = this.selectedMeter.startingUnit;
-    } else if (changes.selectedMeterData) {
+      this.setIsRECs();
+    }
+    if (changes.selectedMeterData) {
       this.showEstimated = (this.selectedMeterData.find(dataItem => { return dataItem.isEstimated == true })) != undefined;
     }
     this.setEmissions();
@@ -98,6 +103,10 @@ export class ElectricityDataTableComponent implements OnInit {
       });
     }
     this.setChecked.emit(true);
+  }
+
+  setIsRECs() {
+    this.isRECs = (this.selectedMeter.agreementType == 4 || this.selectedMeter.agreementType == 6);
   }
 
   toggleChecked() {

@@ -25,6 +25,7 @@ export class UtilityMeterDataFilterComponent implements OnInit {
   displayVolumeInput: boolean;
   showEmissions: boolean;
   vehicleDataFilters: VehicleDataFilters;
+  isRECs: boolean;
   constructor(private utilityMeterDataService: UtilityMeterDataService, private facilityDbService: FacilitydbService,
     private dbChangesService: DbChangesService) { }
 
@@ -33,6 +34,7 @@ export class UtilityMeterDataFilterComponent implements OnInit {
 
   ngOnChanges() {
     if (this.meter.source == 'Electricity') {
+      this.isRECs = (this.meter.agreementType == 4 || this.meter.agreementType == 6);
       let electricityDataFilters: ElectricityDataFilters;
       if (this.filterType == 'table') {
         electricityDataFilters = this.utilityMeterDataService.tableElectricityFilters.getValue();
@@ -45,6 +47,10 @@ export class UtilityMeterDataFilterComponent implements OnInit {
       this.generalInformationFilters = electricityDataFilters.generalInformationFilters;
     } else if (this.meter.scope != 2) {
       this.generalUtilityDataFilters = this.utilityMeterDataService.tableGeneralUtilityFilters.getValue();
+    }
+
+    if (this.meter.source != 'Electricity') {
+      this.isRECs = false;
     }
 
     if (this.meter.scope == 2) {
