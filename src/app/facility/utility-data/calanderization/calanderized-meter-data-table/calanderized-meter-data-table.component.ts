@@ -14,6 +14,8 @@ export class CalanderizedMeterDataTableComponent implements OnInit {
   itemsPerPage: number;
   @Input()
   consumptionLabel: 'Consumption' | 'Distance';
+  @Input()
+  isRECs: boolean;
 
   @ViewChild('meterDataTable', { static: false }) meterDataTable: ElementRef;
   orderDataField: string = 'date';

@@ -1,4 +1,4 @@
-<div class="dropdown">
+<div class="dropdown" [hidden]="isRECs">
     <button class="btn action-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside"
         aria-expanded="false">
         Choose Columns
@@ -13,28 +13,32 @@
                         [(ngModel)]="generalInformationFilters.totalCost" (change)="save()">
                     <label class="form-check-label" for="totalCost">Total Cost</label>
                 </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" name="realDemand" id="realDemand"
-                        [(ngModel)]="generalInformationFilters.realDemand" (change)="save()">
-                    <label for="realDemand" class="form-check-label">Real Demand</label>
-                </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" name="billedDemand" id="billedDemand"
-                        [(ngModel)]="generalInformationFilters.billedDemand" (change)="save()">
-                    <label for="billedDemand" class="form-check-label">Billed Demand</label>
-                </div>
+                <ng-container *ngIf="!isRECs">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="realDemand" id="realDemand"
+                            [(ngModel)]="generalInformationFilters.realDemand" (change)="save()">
+                        <label for="realDemand" class="form-check-label">Real Demand</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="billedDemand" id="billedDemand"
+                            [(ngModel)]="generalInformationFilters.billedDemand" (change)="save()">
+                        <label for="billedDemand" class="form-check-label">Billed Demand</label>
+                    </div>
+                </ng-container>
             </div>
             <div class="col" *ngIf="filterType == 'table'">
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" name="marketEmissions" id="marketEmissions"
-                        [(ngModel)]="emissionsFilters.marketEmissions" (change)="save()">
-                    <label for="marketEmissions" class="form-check-label">Market Emissions</label>
-                </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" name="locationEmissions" id="locationEmissions"
-                        [(ngModel)]="emissionsFilters.locationEmissions" (change)="save()">
-                    <label for="locationEmissions" class="form-check-label">Location Emissions</label>
-                </div>
+                <ng-container *ngIf="!isRECs">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="marketEmissions" id="marketEmissions"
+                            [(ngModel)]="emissionsFilters.marketEmissions" (change)="save()">
+                        <label for="marketEmissions" class="form-check-label">Market Emissions</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="locationEmissions" id="locationEmissions"
+                            [(ngModel)]="emissionsFilters.locationEmissions" (change)="save()">
+                        <label for="locationEmissions" class="form-check-label">Location Emissions</label>
+                    </div>
+                </ng-container>
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" name="recs" id="recs"
                         [(ngModel)]="emissionsFilters.recs" (change)="save()">
