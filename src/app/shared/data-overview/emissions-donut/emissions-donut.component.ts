@@ -56,7 +56,7 @@ export class EmissionsDonutComponent {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if (!changes.dataType && (changes.facilityOverviewMeters && !changes.facilityOverviewMeters.isFirstChange())) {
+    if (!changes.dataType || (changes.facilityOverviewMeters && !changes.facilityOverviewMeters.isFirstChange())) {
       this.drawChart();
     }
   }
@@ -84,7 +84,6 @@ export class EmissionsDonutComponent {
         automargin: true,
         sort: false
       }];
-
       let height: number;
       if (this.inHomeScreen) {
         height = 350;
@@ -132,7 +131,11 @@ export class EmissionsDonutComponent {
         includedEmissionsTypes.push(eType);
       } else if (eType == 'Scope 2: Electricity (Market)' && allEmissions.findIndex(emissions => { return emissions.marketElectricityEmissions != 0 }) != -1) {
         values.push(_.sumBy(allEmissions, (emissions: EmissionsResults) => {
-          return emissions.marketElectricityEmissions
+          if (emissions.marketElectricityEmissions > 0) {
+            return emissions.marketElectricityEmissions;
+          } else {
+            return 0;
+          }
         }));
         includedEmissionsTypes.push(eType);
       } else if (eType == 'Scope 1: Mobile' && allEmissions.findIndex(emissions => { return emissions.mobileTotalEmissions != 0 }) != -1) {
