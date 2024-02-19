@@ -18,7 +18,7 @@ jobs:
       - name: Node setup
         uses: actions/setup-node@v3
         with:
-          node-version: 16.14.2
+          node-version: 20.10.0
       - name: Cache setup
         uses: actions/cache@v3
         with:
@@ -97,7 +97,7 @@ jobs:
       - name: Node setup
         uses: actions/setup-node@v3
         with:
-          node-version: 16.14.2
+          node-version: 20.10.0
       - name: Cache setup
         uses: actions/cache@v3
         with:
