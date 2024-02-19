@@ -120,7 +120,9 @@ export class UtilityMeterDatadbService {
             //non-electricity
             demandUsage: undefined,
             demandCharge: undefined,
-            meterNumber: meter.meterNumber
+            meterNumber: meter.meterNumber,
+            heatCapacity: meter.heatCapacity,
+            vehicleFuelEfficiency: meter.vehicleFuelEfficiency
         }
     }
 
@@ -152,29 +154,4 @@ export class UtilityMeterDatadbService {
         let accountMeterData: Array<IdbUtilityMeterData> = this.accountMeterData.getValue();
         return accountMeterData.filter(meterData => { return meterData.meterId == meterId });
     }
-
-
-    // getYearOptions(facilityId?: string): Array<number> {
-    //     let meterData: Array<IdbUtilityMeterData>;
-    //     let accountMeterData: Array<IdbUtilityMeterData> = this.accountMeterData.getValue();
-    //     if (facilityId) {
-    //         meterData = accountMeterData.filter(meterData => { return meterData.facilityId == facilityId });
-    //     } else {
-    //         meterData = accountMeterData
-    //     }
-    //     if (meterData.length != 0) {
-    //         let orderedMeterData: Array<IdbUtilityMeterData> = _.orderBy(meterData, (data) => { return new Date(data.readDate) });
-    //         let firstBill: IdbUtilityMeterData = orderedMeterData[0];
-    //         let lastBill: IdbUtilityMeterData = orderedMeterData[orderedMeterData.length - 1];
-    //         let yearStart: number = new Date(firstBill.readDate).getUTCFullYear();
-    //         let yearEnd: number = new Date(lastBill.readDate).getUTCFullYear();
-    //         let yearOptions: Array<number> = new Array();
-    //         for (let i = yearStart; i <= yearEnd; i++) {
-    //             yearOptions.push(i);
-    //         }
-    //         return yearOptions;
-    //     } else {
-    //         return
-    //     }
-    // }
 }

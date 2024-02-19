@@ -1,13 +1,19 @@
 import { ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
 import { FormGroup, ValidatorFn } from '@angular/forms';
-import { IdbFacility } from 'src/app/models/idb';
+import { IdbCustomFuel, IdbCustomGWP, IdbFacility } from 'src/app/models/idb';
 import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
-import { EnergyUseCalculationsService } from 'src/app/shared/helper-services/energy-use-calculations.service';
-import { getIsEnergyMeter } from 'src/app/shared/sharedHelperFuntions';
+import { checkShowHeatCapacity, checkShowSiteToSource, getHeatingCapacity, getIsEnergyMeter, getSiteToSource, getStartingUnitOptions } from 'src/app/shared/sharedHelperFuntions';
 import { EnergyUnitOptions, UnitOption } from 'src/app/shared/unitOptions';
 import { EditMeterFormService } from './edit-meter-form.service';
-import { AgreementType, AgreementTypes, FuelTypeOption, OtherEnergyOptions, ScopeOption, ScopeOptions, SourceOptions, getFuelTypeOptions } from './editMeterOptions';
-import { MeterSource, WaterDischargeType, WaterDischargeTypes, WaterIntakeType, WaterIntakeTypes } from 'src/app/models/constantsAndTypes';
+import { AllSources, MeterSource, WaterDischargeType, WaterDischargeTypes, WaterIntakeType, WaterIntakeTypes } from 'src/app/models/constantsAndTypes';
+import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
+import { FuelTypeOption } from 'src/app/shared/fuel-options/fuelTypeOption';
+import { StationaryOtherEnergyOptions } from 'src/app/shared/fuel-options/stationaryOtherEnergyOptions';
+import { getFuelTypeOptions } from 'src/app/shared/fuel-options/getFuelTypeOptions';
+import { ScopeOption, ScopeOptions } from 'src/app/models/scopeOption';
+import { GlobalWarmingPotential, GlobalWarmingPotentials } from 'src/app/models/globalWarmingPotentials';
+import { ConvertValue } from 'src/app/calculations/conversions/convertValue';
+import { CustomGWPDbService } from 'src/app/indexedDB/custom-gwp-db.service';
 
 @Component({
   selector: 'app-edit-meter-form',
@@ -22,8 +28,7 @@ export class EditMeterFormComponent implements OnInit {
   @Input()
   facility: IdbFacility;
 
-
-  agreementTypes: Array<AgreementType> = AgreementTypes;
+  globalWarmingPotentials: Array<GlobalWarmingPotential>;
   scopeOptions: Array<ScopeOption> = ScopeOptions;
   hasDifferentCollectionUnits: boolean;
   hasDifferentEmissions: boolean;
@@ -32,15 +37,15 @@ export class EditMeterFormComponent implements OnInit {
   displayFuel: boolean;
   displayScope: boolean;
   fuelTypeOptions: Array<FuelTypeOption>;
+  selectedFuelTypeOption: FuelTypeOption;
   startingUnitOptions: Array<UnitOption>;
   energySourceLabel: string = 'Fuel Type';
   displayHeatCapacity: boolean;
   displaySiteToSource: boolean;
   displayEmissionsOutputRate: boolean;
-  sourceOptions: Array<string> = SourceOptions;
+  sourceOptions: Array<string> = AllSources;
   changingUnits: boolean = false;
   energyUnitOptions: Array<UnitOption> = EnergyUnitOptions;
-  displayEnergyUnits: boolean = true;
   isEnergyMeter: boolean;
   collectionUnitIsEnergy: boolean;
 
@@ -52,10 +57,13 @@ export class EditMeterFormComponent implements OnInit {
   displayWaterIntakeTypes: boolean;
   displayWaterDischargeTypes: boolean;
   constructor(
-    private energyUnitsHelperService: EnergyUnitsHelperService, private energyUseCalculationsService: EnergyUseCalculationsService,
-    private editMeterFormService: EditMeterFormService, private cd: ChangeDetectorRef) { }
+    private energyUnitsHelperService: EnergyUnitsHelperService,
+    private editMeterFormService: EditMeterFormService, private cd: ChangeDetectorRef,
+    private customFuelDbService: CustomFuelDbService,
+    private customGWPDbService: CustomGWPDbService) { }
 
   ngOnInit(): void {
+    this.setGlobalWarmingPotentials();
   }
 
   ngOnChanges() {
@@ -79,6 +87,7 @@ export class EditMeterFormComponent implements OnInit {
     } else {
       this.meterForm.controls.energyUnit.patchValue(this.facility.energyUnit);
     }
+    this.setDefaultScope();
     this.setFuelTypeOptions(false);
     this.checkDisplayFuel();
     this.checkDisplayPhase();
@@ -90,20 +99,22 @@ export class EditMeterFormComponent implements OnInit {
     this.updatePhaseAndFuelValidation();
     this.updateHeatCapacityValidation();
     this.updateWaterValidation();
+    this.updateVehicleValidation();
     this.checkShowHeatCapacity();
     this.checkShowSiteToSource();
     this.setUnitBooleans();
     this.setHeatCapacity();
     this.setSiteToSource();
-    this.setDefaultScope();
     this.setDisplayEmissionsValues();
     this.cd.detectChanges();
   }
 
   changeFuel() {
+    this.setSelectedFuelTypeOption();
     if (this.meterForm.controls.source.value == 'Other Energy') {
       this.setStartingUnitOptions();
       this.setStartingUnit();
+      this.setUnitBooleans();
     }
     this.updateHeatCapacityValidation();
     this.checkShowHeatCapacity();
@@ -132,6 +143,7 @@ export class EditMeterFormComponent implements OnInit {
     this.setHeatCapacity();
     this.setSiteToSource();
     this.checkHasDifferentUnits();
+    this.setGlobalWarmingPotential();
     this.cd.detectChanges();
   }
 
@@ -140,6 +152,17 @@ export class EditMeterFormComponent implements OnInit {
     this.checkHasDifferentUnits();
     this.cd.detectChanges();
   }
+
+  changeScope() {
+    this.updatePhaseAndFuelValidation();
+    this.updateHeatCapacityValidation();
+    this.updateWaterValidation();
+    this.updateVehicleValidation();
+    this.setStartingUnitOptions();
+    this.updateRefrigerationValidation();
+    this.cd.detectChanges();
+  }
+
 
   setEnergySourceLabel() {
     if (this.meterForm.controls.source.value == 'Other Fuels') {
@@ -179,17 +202,17 @@ export class EditMeterFormComponent implements OnInit {
   }
 
   updatePhaseAndFuelValidation() {
-    let fuelValidators: Array<ValidatorFn> = this.editMeterFormService.getFuelValidation(this.meterForm.controls.source.value);
+    let fuelValidators: Array<ValidatorFn> = this.editMeterFormService.getFuelValidation(this.meterForm.controls.source.value, this.meterForm.controls.scope.value);
     this.meterForm.controls.fuel.setValidators(fuelValidators);
     this.meterForm.controls.fuel.updateValueAndValidity();
 
-    let phaseValidators: Array<ValidatorFn> = this.editMeterFormService.getPhaseValidation(this.meterForm.controls.source.value);
+    let phaseValidators: Array<ValidatorFn> = this.editMeterFormService.getPhaseValidation(this.meterForm.controls.source.value, this.meterForm.controls.scope.value);
     this.meterForm.controls.phase.setValidators(phaseValidators);
     this.meterForm.controls.phase.updateValueAndValidity();
   }
 
   updateHeatCapacityValidation() {
-    let heatCapacityValidators: Array<ValidatorFn> = this.editMeterFormService.getHeatCapacitValidation(this.meterForm.controls.source.value, this.meterForm.controls.startingUnit.value);
+    let heatCapacityValidators: Array<ValidatorFn> = this.editMeterFormService.getHeatCapacitValidation(this.meterForm.controls.source.value, this.meterForm.controls.startingUnit.value, this.meterForm.controls.scope.value);
     this.meterForm.controls.heatCapacity.setValidators(heatCapacityValidators);
     this.meterForm.controls.heatCapacity.updateValueAndValidity();
     let siteToSourceValidation: Array<ValidatorFn> = this.editMeterFormService.getSiteToSourceValidation(this.meterForm.controls.source.value, this.meterForm.controls.startingUnit.value, this.meterForm.controls.includeInEnergy.value);
@@ -206,18 +229,32 @@ export class EditMeterFormComponent implements OnInit {
     this.meterForm.controls.waterDischargeType.updateValueAndValidity();
   }
 
+  updateRefrigerationValidation() {
+    let refrigerationValidation: Array<ValidatorFn> = this.editMeterFormService.getGlobalWarmingPotentialValidation(this.meterForm.controls.scope.value);
+    this.meterForm.controls.globalWarmingPotentialOption.setValidators(refrigerationValidation);
+    this.meterForm.controls.globalWarmingPotentialOption.updateValueAndValidity();
+    this.meterForm.controls.globalWarmingPotential.setValidators(refrigerationValidation);
+    this.meterForm.controls.globalWarmingPotential.updateValueAndValidity();
+  }
+
   setFuelTypeOptions(onChange: boolean) {
-    this.fuelTypeOptions = getFuelTypeOptions(this.meterForm.controls.source.value, this.meterForm.controls.phase.value);
+    let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
+    this.fuelTypeOptions = getFuelTypeOptions(this.meterForm.controls.source.value, this.meterForm.controls.phase.value, customFuels, this.meterForm.controls.scope.value, this.meterForm.controls.vehicleCategory.value, this.meterForm.controls.vehicleType.value);
     let selectedEnergyOption: FuelTypeOption = this.fuelTypeOptions.find(option => { return option.value == this.meterForm.controls.fuel.value });
     if (!selectedEnergyOption && this.fuelTypeOptions.length != 0 && !onChange) {
       this.meterForm.controls.fuel.patchValue(this.fuelTypeOptions[0].value);
     }
+    this.setSelectedFuelTypeOption();
+  }
+
+  setSelectedFuelTypeOption() {
+    this.selectedFuelTypeOption = this.fuelTypeOptions.find(option => { return option.value == this.meterForm.controls.fuel.value });
   }
 
   setHeatCapacity() {
     if (this.displayHeatCapacity) {
       let selectedEnergyOption: FuelTypeOption = this.fuelTypeOptions.find(option => { return option.value == this.meterForm.controls.fuel.value });
-      let heatCapacity: number = this.energyUseCalculationsService.getHeatingCapacity(this.meterForm.controls.source.value, this.meterForm.controls.startingUnit.value, this.meterForm.controls.energyUnit.value, selectedEnergyOption)
+      let heatCapacity: number = getHeatingCapacity(this.meterForm.controls.source.value, this.meterForm.controls.startingUnit.value, this.meterForm.controls.energyUnit.value, selectedEnergyOption)
       this.meterForm.controls.heatCapacity.patchValue(heatCapacity);
     }
   }
@@ -225,7 +262,7 @@ export class EditMeterFormComponent implements OnInit {
   setSiteToSource() {
     if (this.displaySiteToSource) {
       let selectedFuelTypeOption: FuelTypeOption = this.fuelTypeOptions.find(option => { return option.value == this.meterForm.controls.fuel.value });
-      let siteToSource: number = this.energyUseCalculationsService.getSiteToSource(this.meterForm.controls.source.value, selectedFuelTypeOption, this.meterForm.controls.agreementType.value);
+      let siteToSource: number = getSiteToSource(this.meterForm.controls.source.value, selectedFuelTypeOption, this.meterForm.controls.agreementType.value);
       this.meterForm.controls.siteToSource.patchValue(siteToSource);
     } else {
       this.meterForm.controls.siteToSource.patchValue(1);
@@ -233,18 +270,24 @@ export class EditMeterFormComponent implements OnInit {
   }
 
   checkShowHeatCapacity() {
-    this.displayHeatCapacity = this.editMeterFormService.checkShowHeatCapacity(this.meterForm.controls.source.value, this.meterForm.controls.startingUnit.value);
+    this.displayHeatCapacity = checkShowHeatCapacity(this.meterForm.controls.source.value, this.meterForm.controls.startingUnit.value, this.meterForm.controls.scope.value);
   }
 
   checkShowSiteToSource() {
-    this.displaySiteToSource = this.editMeterFormService.checkShowSiteToSource(this.meterForm.controls.source.value, this.meterForm.controls.startingUnit.value, this.meterForm.controls.includeInEnergy.value);
+    this.displaySiteToSource = checkShowSiteToSource(this.meterForm.controls.source.value, this.meterForm.controls.includeInEnergy.value, this.meterForm.controls.scope.value);
   }
 
   setStartingUnitOptions() {
     if (!this.meterDataExists) {
-      this.startingUnitOptions = this.energyUnitsHelperService.getStartingUnitOptions(this.meterForm.controls.source.value, this.meterForm.controls.phase.value, this.meterForm.controls.fuel.value);
+      this.startingUnitOptions = getStartingUnitOptions(this.meterForm.controls.source.value, this.meterForm.controls.phase.value, this.meterForm.controls.fuel.value, this.meterForm.controls.scope.value);
     } else {
-      this.startingUnitOptions = this.energyUnitsHelperService.getStartingUnitOptionsExistingData(this.meterForm.controls.source.value, this.meterForm.controls.phase.value, this.meterForm.controls.fuel.value, this.meterForm.controls.startingUnit.value);
+      this.startingUnitOptions = this.energyUnitsHelperService.getStartingUnitOptionsExistingData(this.meterForm.controls.source.value, this.meterForm.controls.phase.value, this.meterForm.controls.fuel.value, this.meterForm.controls.startingUnit.value, this.meterForm.controls.scope.value);
+    }
+    let checkExists: UnitOption = this.startingUnitOptions.find(option => {
+      return option.value == this.meterForm.controls.startingUnit.value;
+    });
+    if (!checkExists) {
+      this.setStartingUnit();
     }
     this.cd.detectChanges();
   }
@@ -265,7 +308,7 @@ export class EditMeterFormComponent implements OnInit {
         facilityUnit = this.facility.massUnit;
       }
     } else if (selectedMeterSource == 'Other Energy') {
-      let selectedEnergyOption: FuelTypeOption = OtherEnergyOptions.find(option => { return option.value == this.meterForm.controls.fuel.value });
+      let selectedEnergyOption: FuelTypeOption = StationaryOtherEnergyOptions.find(option => { return option.value == this.meterForm.controls.fuel.value });
       if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Steam') {
         facilityUnit = this.facility.massUnit;
       } else if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Chilled Water') {
@@ -277,7 +320,7 @@ export class EditMeterFormComponent implements OnInit {
       }
     } else if (selectedMeterSource == 'Water Intake' || selectedMeterSource == 'Water Discharge') {
       facilityUnit = this.facility.volumeLiquidUnit;
-    } else if (selectedMeterSource == 'Other Utility') {
+    } else if (selectedMeterSource == 'Other') {
       facilityUnit = this.facility.massUnit;
     }
     this.meterForm.controls.startingUnit.patchValue(facilityUnit);
@@ -303,6 +346,10 @@ export class EditMeterFormComponent implements OnInit {
     this.meterForm.controls.startingUnit.enable();
     this.meterForm.controls.energyUnit.enable();
     this.meterForm.controls.heatCapacity.enable();
+
+    this.meterForm.controls.vehicleCollectionUnit.enable();
+    this.meterForm.controls.vehicleDistanceUnit.enable();
+    this.meterForm.controls.vehicleFuelEfficiency.enable();
     this.changingUnits = true;
   }
 
@@ -319,7 +366,7 @@ export class EditMeterFormComponent implements OnInit {
 
   checkDisplaySource() {
     let selectedMeterSource: MeterSource = this.meterForm.controls.source.value;
-    if (selectedMeterSource == 'Water Intake' || selectedMeterSource == 'Water Discharge' || selectedMeterSource == 'Other Utility') {
+    if (selectedMeterSource == 'Water Intake' || selectedMeterSource == 'Water Discharge') {
       this.displayScope = false;
     } else {
       this.displayScope = true;
@@ -333,24 +380,6 @@ export class EditMeterFormComponent implements OnInit {
 
 
   changeAgreementType() {
-    //RECs or VPPA
-    if (this.meterForm.controls.agreementType.value != 4 && this.meterForm.controls.agreementType.value != 6) {
-      this.meterForm.controls.includeInEnergy.patchValue(true);
-    } else {
-      this.meterForm.controls.includeInEnergy.patchValue(false);
-    }
-
-    if (this.meterForm.controls.agreementType.value == 1) {
-      this.meterForm.controls.retainRECs.patchValue(false);
-    } else {
-      this.meterForm.controls.retainRECs.patchValue(true);
-    }
-
-    if (this.meterForm.controls.agreementType.value == 2) {
-      this.meterForm.controls.directConnection.patchValue(true);
-    } else {
-      this.meterForm.controls.directConnection.patchValue(false);
-    }
     this.checkShowSiteToSource();
     this.setSiteToSource();
     this.setDisplayEmissionsValues();
@@ -371,11 +400,17 @@ export class EditMeterFormComponent implements OnInit {
       //purchased electricity
       this.scopeOptions = [ScopeOptions[2]]
     } else if (selectedMeterSource == 'Other Energy') {
-      //all options
-      this.scopeOptions = ScopeOptions;
-    } else if (selectedMeterSource == 'Natural Gas' || selectedMeterSource == 'Other Fuels') {
-      //Scope 1
-      this.scopeOptions = ScopeOptions.filter(option => { return option.scope == 'Scope 1' });
+      //all options except mobile
+      this.scopeOptions = [ScopeOptions[3]];
+    } else if (selectedMeterSource == 'Natural Gas') {
+      //Stationary
+      this.scopeOptions = [ScopeOptions[0]];
+    } else if (selectedMeterSource == 'Other Fuels') {
+      //Scope 1 (non-fugitive)
+      this.scopeOptions = ScopeOptions.filter(option => { return option.scope == 'Scope 1' && option.value != 5 && option.value != 6 });
+    } else if (selectedMeterSource == 'Other') {
+      //Scope 1 (non-fugitive)
+      this.scopeOptions = ScopeOptions.filter(option => { return option.value == 100 || option.value == 5 || option.value == 6 });
     }
   }
 
@@ -407,5 +442,54 @@ export class EditMeterFormComponent implements OnInit {
         this.displayRetainRecs = true;
       }
     }
+  }
+
+  updateVehicleValidation() {
+    let basicVehicleValidation: Array<ValidatorFn> = this.editMeterFormService.getBasicVehicleValidation(this.meterForm.controls.scope.value);
+    let additionalVehicleValidation: Array<ValidatorFn> = this.editMeterFormService.getAdditionalVehicleValidation(this.meterForm.controls.scope.value, this.meterForm.controls.vehicleCategory.value);
+    this.meterForm.controls.vehicleCategory.setValidators(basicVehicleValidation);
+    this.meterForm.controls.vehicleCategory.updateValueAndValidity();
+
+    this.meterForm.controls.vehicleType.setValidators(additionalVehicleValidation);
+    this.meterForm.controls.vehicleType.updateValueAndValidity();
+
+    this.meterForm.controls.vehicleCollectionType.setValidators(additionalVehicleValidation);
+    this.meterForm.controls.vehicleCollectionType.updateValueAndValidity();
+
+    this.meterForm.controls.vehicleCollectionUnit.setValidators(basicVehicleValidation);
+    this.meterForm.controls.vehicleCollectionUnit.updateValueAndValidity();
+
+    this.meterForm.controls.vehicleFuel.setValidators(basicVehicleValidation);
+    this.meterForm.controls.vehicleFuel.updateValueAndValidity();
+
+    this.meterForm.controls.vehicleFuelEfficiency.setValidators(additionalVehicleValidation);
+    this.meterForm.controls.vehicleFuelEfficiency.updateValueAndValidity();
+
+    this.meterForm.controls.vehicleDistanceUnit.setValidators(additionalVehicleValidation);
+    this.meterForm.controls.vehicleDistanceUnit.updateValueAndValidity();
+  }
+
+  setGlobalWarmingPotential() {
+    if (this.meterForm.controls.scope.value == 5 || this.meterForm.controls.scope.value == 6) {
+      let globalWarmingPotential: GlobalWarmingPotential = this.globalWarmingPotentials.find(potential => {
+        return potential.value == this.meterForm.controls.globalWarmingPotentialOption.value;
+      });
+      if (globalWarmingPotential) {
+        let conversionHelper: number = new ConvertValue(1, 'kg', this.meterForm.controls.startingUnit.value).convertedValue;
+        let convertedGWP: number = globalWarmingPotential.gwp / conversionHelper;
+        this.meterForm.controls.globalWarmingPotential.patchValue(convertedGWP);
+      }
+    }
+  }
+
+  setGlobalWarmingPotentials() {
+    this.globalWarmingPotentials = new Array();
+    let customGWPs: Array<IdbCustomGWP> = this.customGWPDbService.accountCustomGWPs.getValue();
+    customGWPs.forEach(gwpOption => {
+      this.globalWarmingPotentials.push(gwpOption);
+    });
+    GlobalWarmingPotentials.forEach(gwpOption => {
+      this.globalWarmingPotentials.push(gwpOption);
+    });
   }
 }

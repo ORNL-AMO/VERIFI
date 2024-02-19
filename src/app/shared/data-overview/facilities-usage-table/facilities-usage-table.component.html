@@ -1,7 +1,7 @@
 <div class="table-responsive">
     <table class="table utility-data table-sm table-bordered table-hover">
         <thead>
-            <tr [ngClass]="{'emissions': dataType == 'emissions'}">
+            <tr>
                 <th>Facility</th>
                 <th *ngIf="dataType == 'energyUse'">Utility Usage<br> (<span
                         [innerHTML]="energyUnit | settingsLabel"></span>)
@@ -11,11 +11,11 @@
                 </th>
                 <th *ngIf="dataType == 'cost'"># of Meters</th>
                 <th *ngIf="dataType != 'emissions'">Utility Cost </th>
-                <th *ngIf="dataType == 'emissions' && emissionsDisplay == 'market'">
-                    Market-Based <br>Emissions (tonne CO<sub>2</sub>e)
+                <th *ngIf="dataType == 'emissions'">
+                    Total With Market <br>Emissions (tonne CO<sub>2</sub>e)
                 </th>
-                <th *ngIf="dataType == 'emissions' && emissionsDisplay == 'location'">
-                    Location-Based <br>Emissions (tonne CO<sub>2</sub>e)
+                <th *ngIf="dataType == 'emissions'">
+                    Total With Location <br>Emissions (tonne CO<sub>2</sub>e)
                 </th>
             </tr>
         </thead>
@@ -40,11 +40,11 @@
                 <td *ngIf="dataType != 'emissions'">
                     {{summary.totalCost | customNumber:true }}
                 </td>
-                <td *ngIf="dataType == 'emissions' && emissionsDisplay == 'market'">
-                    {{summary.totalMarketEmissions | customNumber}}
+                <td *ngIf="dataType == 'emissions'">
+                    {{summary.emissions.totalWithMarketEmissions | customNumber}}
                 </td>
-                <td *ngIf="dataType == 'emissions' && emissionsDisplay == 'location'">
-                    {{summary.totalLocationEmissions | customNumber}}
+                <td *ngIf="dataType == 'emissions'">
+                    {{summary.emissions.totalWithLocationEmissions | customNumber}}
                 </td>
             </tr>
         </tbody>
@@ -71,11 +71,11 @@
                 <th *ngIf="dataType == 'cost'">
                     {{accountOverviewData.totalAccountCost | customNumber:true}}
                 </th>
-                <th *ngIf="dataType == 'emissions' && emissionsDisplay == 'market'">
-                    {{accountOverviewData.totalMarketEmissions | customNumber}}
+                <th *ngIf="dataType == 'emissions'">
+                    {{accountOverviewData.emissionsTotals.totalWithMarketEmissions| customNumber}}
                 </th>
-                <th *ngIf="dataType == 'emissions' && emissionsDisplay == 'location'">
-                    {{accountOverviewData.totalLocationEmissions | customNumber}}
+                <th *ngIf="dataType == 'emissions'">
+                    {{accountOverviewData.emissionsTotals.totalWithLocationEmissions | customNumber}}
                 </th>
             </tr>
         </tfoot>

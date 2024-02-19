@@ -1,0 +1,176 @@
+<p class="bold">Vehicle Information</p>
+<form class="meterForm" [formGroup]="meterDataForm">
+
+    <div class="row">
+        <div class="col-6">
+            <label for="readDate">Meter Read Date <span class="required">*</span> </label>
+            <div class="input-group mb-3">
+                <input id="readDate" class="form-control" type="date" formControlName="readDate" (change)="checkDate()"
+                    [ngClass]="{'error': invalidDate}">
+            </div>
+            <div class="alert alert-danger" *ngIf="meterDataForm.get('readDate').hasError('required')">Meter read date
+                is
+                required</div>
+            <div class="alert alert-danger" *ngIf="invalidDate">Meter already has data entered for selected date</div>
+        </div>
+        <div class="col-6">
+            <label for="isEstimated">Is Estimated Reading?</label>
+            <select class="form-select" name="isEstimated" id="isEstimated" formControlName="isEstimated">
+                <option class="form-control" [ngValue]="true">Yes</option>
+                <option class="form-control" [ngValue]="false">No</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 col-sm-12">
+            <label for="totalVolume">{{totalVolumeLabel}} <span class="required">*</span> </label>
+            <div class="input-group mb-3">
+                <input id="totalVolume" class="form-control" type="number" formControlName="totalVolume"
+                    (input)="calculateTotalEnergyUse()" [class.warning]="meterDataForm.controls.totalVolume.value === 0"
+                    onfocus="this.select();" min="0" max="999999999999999">
+                <span class="input-group-text" [innerHTML]="volumeUnit | settingsLabel"></span>
+            </div>
+            <div class="alert alert-danger" *ngIf="meterDataForm.get('totalVolume').hasError('required')">Total fuel use
+                is
+                required</div>
+            <div class="alert alert-danger" *ngIf="meterDataForm.get('totalVolume').hasError('min')">Can't be less than
+                0
+            </div>
+            <div class="alert alert-warning" *ngIf="meterDataForm.controls.totalVolume.value === 0">Total usage should
+                be
+                greater
+                than 0</div>
+        </div>
+
+        <div *ngIf="displayVehicleFuelEfficiency" class="col-md-6 col-sm-12">
+            <label for="vehicleFuelEfficiency">Fuel Efficiency <span class="required">*</span></label>
+            <div class="input-group mb-3">
+                <span class="input-group-text p-0">
+                    <button *ngIf="usingMeterFuelEfficiency" class="btn btn-sm" (click)="editFuelEfficiency()">
+                        <span class="fa fa-edit"></span>
+                    </button>
+                    <button *ngIf="!usingMeterFuelEfficiency" class="btn btn-sm" (click)="useMeterFuelEfficiency()">
+                        <span class="fa fa-undo"></span>
+                    </button>
+
+                </span>
+                <input id="vehicleFuelEfficiency" class="form-control" type="number"
+                    formControlName="vehicleFuelEfficiency" onfocus="this.select();" min="0" max="999999999999999"
+                    (input)="calculateTotalEnergyUse()">
+                <span class="input-group-text"><span
+                        [innerHTML]="editMeter.vehicleDistanceUnit | settingsLabel"></span>/<span
+                        [innerHTML]="editMeter.vehicleCollectionUnit | settingsLabel"></span>
+                </span>
+            </div>
+            <div class="alert alert-danger" *ngIf="meterDataForm.get('vehicleFuelEfficiency').hasError('required')">Fuel
+                Efficiency
+                is
+                required</div>
+            <div class="alert alert-danger" *ngIf="meterDataForm.get('vehicleFuelEfficiency').hasError('min')">Can't be
+                less than 0
+            </div>
+            <div class="alert alert-info" *ngIf="!usingMeterFuelEfficiency">
+                Custom fuel efficiency set for this reading. Click "<span class="fa fa-undo"></span>" to use the meter's
+                average fuel efficiency.
+            </div>
+        </div>
+        <ng-container *ngIf="editMeter.vehicleCategory == 2">
+            <div class="col-md-6 col-sm-12" *ngIf="editMeter.vehicleCollectionType == 2">
+                <label for="totalFuelConsumption">Estimated Fuel Consumption</label>
+                <div class="input-group mb-3">
+                    <input id="totalFuelConsumption" class="form-control" type="number"
+                        formControlName="totalFuelConsumption">
+                    <span class="input-group-text" [innerHTML]="editMeter.vehicleCollectionUnit | settingsLabel"></span>
+                </div>
+            </div>
+
+
+            <div class="col-md-6 col-sm-12" *ngIf="editMeter.vehicleCollectionType == 1">
+                <label for="totalDistance">Estimated Distance</label>
+                <div class="input-group mb-3">
+                    <input id="totalDistance" class="form-control" type="number" formControlName="totalDistance">
+                    <span class="input-group-text" [innerHTML]="editMeter.vehicleDistanceUnit | settingsLabel"></span>
+                </div>
+            </div>
+        </ng-container>
+        <div class="col-md-6 col-sm-12">
+            <label for="totalEnergyUse">Total Energy Use <span class="required">*</span></label>
+            <div class="input-group mb-3">
+                <input id="totalEnergyUse" class="form-control" type="number" formControlName="totalEnergyUse"
+                    onfocus="this.select();" min="0" max="999999999999999" (input)="setTotalEmissions()">
+                <span class="input-group-text" [innerHTML]="energyUnit | settingsLabel"></span>
+            </div>
+            <div class="alert alert-danger" *ngIf="meterDataForm.get('totalEnergyUse').hasError('required')">Total
+                energy use
+                is
+                required</div>
+            <div class="alert alert-danger" *ngIf="meterDataForm.get('totalEnergyUse').hasError('min')">Can't be less
+                than 0
+            </div>
+            <div class="alert alert-warning" *ngIf="meterDataForm.controls.totalEnergyUse.value === 0">Total energy use
+                should
+                be
+                greater than 0</div>
+        </div>
+        <div class="col-md-6 col-sm-12">
+            <table class="table table-sm table-bordered">
+                <tbody>
+                    <tr *ngIf="!meterFuel.isBiofuel">
+                        <th>
+                            Carbon Emissions
+                        </th>
+                        <td>
+                            {{carbonEmissions | number:'1.0-2'}} tonne CO<sub>2</sub>e
+                        </td>
+                    </tr>
+                    <tr *ngIf="meterFuel.isBiofuel">
+                        <th>
+                            Biogenic Emissions
+                        </th>
+                        <td>
+                            {{biogenicEmissions | number:'1.0-2'}} tonne CO<sub>2</sub>e
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            Other Emissions
+                        </th>
+                        <td>
+                            {{otherEmissions | number:'1.0-2'}} tonne CO<sub>2</sub>e
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>
+                            Total Emissions
+                        </th>
+                        <td>
+                            {{totalEmissions | number:'1.0-2'}} tonne CO<sub>2</sub>e
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <label for="totalCost">Total Cost</label>
+    <div class="input-group mb-3">
+        <input id="totalCost" class="form-control" type="number" formControlName="totalCost" onfocus="this.select();"
+            min="0" max="999999999999999">
+        <span class="input-group-text">$</span>
+    </div>
+    <div class="alert alert-danger" *ngIf="meterDataForm.get('totalCost').hasError('required')">Total cost is required
+    </div>
+    <div class="alert alert-danger" *ngIf="meterDataForm.get('totalCost').hasError('min')">Can't be less than 0</div>
+    <div class="alert alert-warning" *ngIf="meterDataForm.controls.totalCost.value === 0">Total cost should be greater
+        than
+        0</div>
+
+
+    <label for="otherCharge">Other Charges</label>
+    <div class="input-group mb-3">
+        <input id="otherCharge" class="form-control" type="number" formControlName="otherCharge"
+            onfocus="this.select();" min="0" max="999999999999999">
+        <span class="input-group-text">$</span>
+    </div>
+</form>

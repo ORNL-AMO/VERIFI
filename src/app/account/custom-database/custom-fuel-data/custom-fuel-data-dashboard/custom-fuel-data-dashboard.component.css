@@ -1,0 +1,20 @@
+
+
+.fa-plus-circle{
+    font-size: 30px;
+}
+
+.add-card .card-body:hover{
+    background-color: #efefef;
+    cursor: pointer;
+}
+
+.emissions-title h5.card-title{
+    margin-bottom: 0px;
+    margin-top: 5px;
+}
+
+.btn-sm{
+    margin-top: 0px;
+    margin-bottom: 0px;
+}

@@ -65,30 +65,30 @@
                         </div>
                     </ng-container>
                     <div class="form-group row">
-                        <label for="hasBaselineAdjustement" class="col-5 col-form-label">
-                            Has Baseline Adjustement
-                        </label>
+                        <div class="col-5">
+                            <app-label-with-tooltip [field]="'accountDataAdjustment'" [label]="'Has Data Adjustment'"
+                                [labelId]="'hasDataAdjustement'"></app-label-with-tooltip>
+                        </div>
                         <div class="col-7 switch-col">
-                            <label class="switch" for="hasBaselineAdjustement">
-                                <input class="checkbox" type="checkbox" id="hasBaselineAdjustement"
-                                    name="hasBaselineAdjustement" [(ngModel)]="analysisItem.hasBaselineAdjustement"
+                            <label class="switch" for="hasDataAdjustement">
+                                <input class="checkbox" type="checkbox" id="hasDataAdjustement"
+                                    name="hasDataAdjustement" [(ngModel)]="analysisItem.hasDataAdjustement"
                                     (change)="saveItem()">
                                 <span class="slider round"></span>
                             </label>
                         </div>
                     </div>
-                    <div class="d-flex flex-column" *ngIf="analysisItem.hasBaselineAdjustement">
+                    <div class="d-flex flex-column" *ngIf="analysisItem.hasDataAdjustement">
                         <div class="row form-group"
-                            *ngFor="let baselineAdjustment of analysisItem.baselineAdjustments; let index = index;">
+                            *ngFor="let dataAdjustment of analysisItem.dataAdjustments; let index = index;">
                             <div class="col-5">
-                                <label for="{{'baselineAdjustment_'+index}}">{{baselineAdjustment.year| yearDisplay:
+                                <label for="{{'dataAdjustment_'+index}}">{{dataAdjustment.year| yearDisplay:
                                     account.fiscalYear}}</label>
                             </div>
                             <div class="col-7">
                                 <div class="input-group">
-                                    <!-- <span class="input-group-text">{{baselineAdjustment.year}}</span> -->
-                                    <input class="form-control" type="number" name="{{'baselineAdjustment_'+index}}"
-                                        id="{{'baselineAdjustment_'+index}}" [(ngModel)]="baselineAdjustment.amount"
+                                    <input class="form-control" type="number" name="{{'dataAdjustment_'+index}}"
+                                        id="{{'dataAdjustment_'+index}}" [(ngModel)]="dataAdjustment.amount"
                                         (change)="saveItem()" min="0">
                                     <span *ngIf="analysisItem.analysisCategory == 'energy'" class="input-group-text"
                                         [innerHTML]="analysisItem.energyUnit | settingsLabel:'/yr'"></span>
@@ -98,6 +98,43 @@
                             </div>
                         </div>
                     </div>
+                    <div class="form-group row">
+                        <div class="col-5">
+                            <app-label-with-tooltip [field]="'accountBaselineAdjustment'"
+                                [label]="'Has Baseline Adjustment'"
+                                [labelId]="'hasBaselineAdjustementV2'"></app-label-with-tooltip>
+                        </div>
+                        <div class="col-7 switch-col">
+                            <label class="switch" for="hasBaselineAdjustmentV2">
+                                <input class="checkbox" type="checkbox" id="hasBaselineAdjustmentV2"
+                                    name="hasBaselineAdjustmentV2" [(ngModel)]="analysisItem.hasBaselineAdjustmentV2"
+                                    (change)="saveItem()">
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <ng-container *ngIf="analysisItem.hasBaselineAdjustmentV2">
+                        <div class="form-group row"
+                            *ngFor="let baselineAdjustment of analysisItem.baselineAdjustmentsV2; let index = index;">
+                            <div class="col-5">
+                                <label for="{{'baselineAdjustment_'+index}}">{{baselineAdjustment.year |
+                                    yearDisplay:
+                                    account.fiscalYear}}</label>
+                            </div>
+                            <div class="col-7">
+                                <div class="input-group">
+                                    <input class="form-control" type="number" name="{{'baselineAdjustment_'+index}}"
+                                        id="{{'baselineAdjustment_'+index}}" [(ngModel)]="baselineAdjustment.amount"
+                                        (input)="saveItem()" min="0">
+                                    <span *ngIf="analysisItem.analysisCategory == 'energy'" class="input-group-text"
+                                        [innerHTML]="analysisItem.energyUnit | settingsLabel:'/yr'"></span>
+                                    <span *ngIf="analysisItem.analysisCategory == 'water'" class="input-group-text"
+                                        [innerHTML]="analysisItem.waterUnit | settingsLabel:'/yr'"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </ng-container>
                 </div>
                 <div class="col-6">
                     <div class="form-group row">

@@ -10,8 +10,10 @@ import { BehaviorSubject } from 'rxjs';
 export class AccountReportsService {
 
   print: BehaviorSubject<boolean>;
+  generateExcel: BehaviorSubject<boolean>;
   constructor(private formBuilder: FormBuilder) {
     this.print = new BehaviorSubject<boolean>(false);
+    this.generateExcel = new BehaviorSubject<boolean>(false);
   }
 
   getSetupFormFromReport(report: IdbAccountReport): FormGroup {
@@ -185,7 +187,9 @@ export class AccountReportsService {
       skipIntermediateYears: [betterClimateReportSetup.skipIntermediateYears],
       includeEmissionsInTables: [betterClimateReportSetup.includeEmissionsInTables],
       includePercentReductionsInTables: [betterClimateReportSetup.includePercentReductionsInTables],
-      includePercentContributionsInTables: [betterClimateReportSetup.includePercentContributionsInTables]
+      includePercentContributionsInTables: [betterClimateReportSetup.includePercentContributionsInTables],
+      includeVehicleEnergyUse: [betterClimateReportSetup.includeVehicleEnergyUse],
+      includeStationaryEnergyUse: [betterClimateReportSetup.includeStationaryEnergyUse]
     });
     return form;
   }
@@ -197,10 +201,13 @@ export class AccountReportsService {
     betterClimateReportSetup.includeGHGEmissionsReductions = form.controls.includeGHGEmissionsReductions.value;
     betterClimateReportSetup.includePortfolioEnergyUse = form.controls.includePortfolioEnergyUse.value;
     betterClimateReportSetup.includeFacilitySummaries = form.controls.includeFacilitySummaries.value;
+    betterClimateReportSetup.numberOfTopPerformers = form.controls.numberOfTopPerformers.value;
     betterClimateReportSetup.skipIntermediateYears = form.controls.skipIntermediateYears.value;
     betterClimateReportSetup.includeEmissionsInTables = form.controls.includeEmissionsInTables.value;
     betterClimateReportSetup.includePercentReductionsInTables = form.controls.includePercentReductionsInTables.value;
     betterClimateReportSetup.includePercentContributionsInTables = form.controls.includePercentContributionsInTables.value;
+    betterClimateReportSetup.includeVehicleEnergyUse = form.controls.includeVehicleEnergyUse.value;
+    betterClimateReportSetup.includeStationaryEnergyUse = form.controls.includeStationaryEnergyUse.value;
     return betterClimateReportSetup;
   }
 

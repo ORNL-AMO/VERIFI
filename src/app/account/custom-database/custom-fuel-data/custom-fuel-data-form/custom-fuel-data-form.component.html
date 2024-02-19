@@ -1,0 +1,166 @@
+<div class="card">
+    <div class="card-body">
+        <div *ngIf="isFuelInUse" class="alert alert-warning text-center">
+            WARNING: This fuel is used by one or more meters. Altering this fuel will alter the corresponding meters.
+        </div>
+        <form [formGroup]="form">
+            <div class="row">
+                <div class="col-6">
+                    <div class="form-group">
+                        <label for="fuelName">Fuel Name</label>
+                        <div class="input-group">
+                            <input class="form-control" id="fuelName" type="text" formControlName="fuelName"
+                                name="fuelName" required (input)="checkInvalid()"
+                                [ngClass]="{'ng-invalid': invalidValue}">
+                        </div>
+                        <div *ngIf="invalidValue" class="alert alert-danger">
+                            {{invalidValue}}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="d-flex justify-content-end align-items-center h-100">
+                        <button class="btn action-btn me-2" (click)="showFuelModal()">
+                            <span class="fa fa-filter-list"></span> Modify Existing
+                        </button>
+                        <button class="btn btn-secondary me-2" (click)="navigateHome()">Cancel</button>
+                        <button class="btn btn-success" [disabled]="form.invalid || isInvalid" (click)="save()">
+                            <span class="fa fa-save"></span>
+                            Save</button>
+                    </div>
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <!--isMobile-->
+                <div class="col-3">
+                    <label for="isMobile">Fuel Type <span class="required">*</span> </label>
+                    <div class="mb-3">
+                        <select name="isMobile" class="form-select" id="isMobile" type="text" formControlName="isMobile"
+                            (change)="setIsMobile()">
+                            <option [ngValue]="false">Stationary</option>
+                            <option [ngValue]="true">Mobile</option>
+                        </select>
+                    </div>
+                </div>
+                <!--isMobile-->
+                <div class="col-3" *ngIf="form.controls.isMobile.value == true">
+                    <label for="isOnRoad">Is On-road? <span class="required">*</span> </label>
+                    <div class="mb-3">
+                        <select name="isOnRoad" class="form-select" id="isOnRoad" type="text" formControlName="isOnRoad">
+                            <option [ngValue]="false">No</option>
+                            <option [ngValue]="true">Yes</option>
+                        </select>
+                    </div>
+                </div>
+                <!--phase-->
+                <div class="col-3" *ngIf="form.controls.isMobile.value == false">
+                    <label for="phase">Phase <span class="required">*</span> </label>
+                    <div class="mb-3">
+                        <select name="phase" class="form-select" id="phase" type="text" formControlName="phase"
+                            (change)="setUnits()">
+                            <option [ngValue]="'Solid'">Solid</option>
+                            <option [ngValue]="'Liquid'">Liquid</option>
+                            <option [ngValue]="'Gas'">Gas</option>
+                        </select>
+                    </div>
+                </div>
+                <!--heat capacity-->
+                <div class="col-3" *ngIf="form.controls.isMobile.value == false">
+                    <label for="heatCapacityValue">Heat Capacity <span class="required">*</span> </label>
+                    <div class="input-group">
+                        <input name="heatCapacityValue" id="heatCapacityValue" class="form-control" type="number"
+                            formControlName="heatCapacityValue" onfocus="this.select();">
+                        <span class="input-group-text">
+                            <span [innerHTML]="selectedAccount.energyUnit| settingsLabel"></span>/<span
+                                [innerHTML]="editCustomFuel.startingUnit"></span>
+                        </span>
+                    </div>
+                </div>
+                <div class="col-3" *ngIf="form.controls.isMobile.value == false">
+                    <label for="siteToSourceMultiplier">Site to Source Multiplier <span class="required">*</span>
+                    </label>
+                    <div class="input-group">
+                        <input name="siteToSourceMultiplier" id="siteToSourceMultiplier" class="form-control"
+                            type="number" formControlName="siteToSourceMultiplier" onfocus="this.select();">
+                    </div>
+                </div>
+                <div class="col-3">
+                    <label for="isBiofuel">Is this a Biofuel? <span class="required">*</span>
+                    </label>
+                    <div class="mb-3">
+                        <select name="isBiofuel" class="form-select" id="isBiofuel" type="isBiofuel"
+                            formControlName="isBiofuel">
+                            <option [ngValue]="true">Yes</option>
+                            <option [ngValue]="false">No</option>
+                        </select>
+                    </div>
+                </div>
+
+                <ng-container *ngIf="form.controls.directEmissionsRate.value == false">
+                    <div class="col-3">
+                        <label for="CO2">CO<sub>2</sub> Factor <span class="required">*</span>
+                        </label>
+                        <div class="input-group">
+                            <input name="CO2" id="CO2" class="form-control" type="number" formControlName="CO2"
+                                onfocus="this.select();" (input)="setOutputRate()">
+                            <span class="input-group-text">
+                                kg CO<sub>2</sub>/<span [innerHTML]="selectedAccount.energyUnit| settingsLabel"></span>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="col-3">
+                        <label for="CH4">CH<sub>4</sub> Factor <span class="required">*</span>
+                        </label>
+                        <div class="input-group">
+                            <input name="CH4" id="CH4" class="form-control" type="number" formControlName="CH4"
+                                onfocus="this.select();" (input)="setOutputRate()">
+                            <span class="input-group-text">
+                                g CO<sub>2</sub>/<span [innerHTML]="selectedAccount.energyUnit| settingsLabel"></span>
+                            </span>
+                        </div>
+                    </div>
+
+
+                    <div class="col-3">
+                        <label for="N2O">N<sub>2</sub>O Factor <span class="required">*</span>
+                        </label>
+                        <div class="input-group">
+                            <input name="N2O" id="N2O" class="form-control" type="number" formControlName="N2O"
+                                onfocus="this.select();" (input)="setOutputRate()">
+                            <span class="input-group-text">
+                                g N<sub>2</sub>O/<span [innerHTML]="selectedAccount.energyUnit| settingsLabel"></span>
+                            </span>
+                        </div>
+                    </div>
+                </ng-container>
+
+                <div class="col-3" *ngIf="form.controls.isMobile.value == false">
+                    <label for="emissionsOutputRate">Emissions Output Rate <span class="required">*</span>
+
+                    </label>
+                    <div class="input-group">
+                        <input name="emissionsOutputRate" id="emissionsOutputRate" class="form-control" type="number"
+                            formControlName="emissionsOutputRate" onfocus="this.select();">
+                        <span class="input-group-text">
+                            kg CO<sub>2</sub>e
+                        </span>
+                    </div>
+                    <div class="text-right w-100">
+                        <ng-container *ngIf="form.controls.directEmissionsRate.value == false">
+                            <a class="float-right" (click)="setRate(true)">Set Rate</a>
+                        </ng-container>
+                        <ng-container *ngIf="form.controls.directEmissionsRate.value == true">
+                            <a class="float-right" (click)="setRate(false)">Calculate Rate</a>
+                        </ng-container>
+
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<app-existing-fuels-modal *ngIf="displayFuelModal" (emitClose)="hideFuelModal($event)"></app-existing-fuels-modal>

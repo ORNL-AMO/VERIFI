@@ -11,12 +11,14 @@ import { UpdateDbEntryService } from './indexedDB/update-db-entry.service';
 import { UtilityMeterdbService } from './indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from './indexedDB/utilityMeterData-db.service';
 import { UtilityMeterGroupdbService } from './indexedDB/utilityMeterGroup-db.service';
-import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport, IdbAnalysisItem, IdbCustomEmissionsItem, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from './models/idb';
+import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport, IdbAnalysisItem, IdbCustomEmissionsItem, IdbCustomFuel, IdbCustomGWP, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from './models/idb';
 import { EGridService } from './shared/helper-services/e-grid.service';
 import { firstValueFrom } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { ToastNotificationsService } from './core-components/toast-notifications/toast-notifications.service';
-import { AnalyticsService, EventParameters } from './analytics/analytics.service';
+import { AnalyticsService } from './analytics/analytics.service';
+import { CustomFuelDbService } from './indexedDB/custom-fuel-db.service';
+import { CustomGWPDbService } from './indexedDB/custom-gwp-db.service';
 
 // declare ga as a function to access the JS code in TS
 declare let gtag: Function;
@@ -47,7 +49,9 @@ export class AppComponent {
     private customEmissionsDbService: CustomEmissionsDbService,
     private accountReportDbService: AccountReportDbService,
     private toastNotificationService: ToastNotificationsService,
-    private analyticsService: AnalyticsService) {
+    private analyticsService: AnalyticsService,
+    private customFuelDbservice: CustomFuelDbService,
+    private customGWPDbService: CustomGWPDbService) {
     if (environment.production) {
       gtag('config', 'G-YG1QD02XSE');
       this.analyticsService.sendEvent('verifi_app_open', undefined);
@@ -88,6 +92,8 @@ export class AppComponent {
         await this.initializeFacilityAnalysisItems(account);
         await this.initializeAccountAnalysisItems(account);
         await this.initializeCustomEmissions(account);
+        await this.initializeCustomFuels(account);
+        await this.initializeCustomGWPs(account);
         let updatedAccount: { account: IdbAccount, isChanged: boolean } = this.updateDbEntryService.updateAccount(account);
         if (updatedAccount.isChanged) {
           await firstValueFrom(this.accountDbService.updateWithObservable(updatedAccount.account));
@@ -209,7 +215,6 @@ export class AppComponent {
     this.utilityMeterGroupDbService.accountMeterGroups.next(accountMeterGroups);
   }
 
-
   async initializeCustomEmissions(account: IdbAccount) {
     this.loadingMessage = 'Loading Emissions Rates...';
     let customEmissionsItems: Array<IdbCustomEmissionsItem> = await this.customEmissionsDbService.getAllAccountCustomEmissions(account.guid);
@@ -220,5 +225,17 @@ export class AppComponent {
     }
     await this.eGridService.parseEGridData();
     this.customEmissionsDbService.accountEmissionsItems.next(customEmissionsItems);
+  }
+
+  async initializeCustomFuels(account: IdbAccount) {
+    this.loadingMessage = 'Loading Custom Fuels...';
+    let customFuels: Array<IdbCustomFuel> = await this.customFuelDbservice.getAllAccountCustomFuels(account.guid);
+    this.customFuelDbservice.accountCustomFuels.next(customFuels);
+  }  
+
+  async initializeCustomGWPs(account: IdbAccount){
+    this.loadingMessage = 'Loading Custom GWPs...';
+    let customGWPs: Array<IdbCustomGWP> = await this.customGWPDbService.getAllAccountCustomGWP(account.guid);
+    this.customGWPDbService.accountCustomGWPs.next(customGWPs);
   }
 }

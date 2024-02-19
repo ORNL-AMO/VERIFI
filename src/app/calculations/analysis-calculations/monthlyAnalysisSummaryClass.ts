@@ -20,7 +20,6 @@ export class MonthlyAnalysisSummaryClass {
         this.monthlyAnalysisSummaryData = new Array();
         let baselineDate: Date = new Date(this.monthlyGroupAnalysisClass.baselineDate);
         while (baselineDate < this.monthlyGroupAnalysisClass.endDate) {
-            // let monthlyanalysisSummaryDataCopy: Array<MonthlyAnalysisSummaryDataClass> = JSON.parse(JSON.stringify(this.monthlyAnalysisSummaryData))
             let monthlyAnalysisSummaryDataClass: MonthlyAnalysisSummaryDataClass = new MonthlyAnalysisSummaryDataClass(this.monthlyGroupAnalysisClass, baselineDate, this.monthlyAnalysisSummaryData)
             this.monthlyAnalysisSummaryData.push(monthlyAnalysisSummaryDataClass);
             let currentMonth: number = baselineDate.getUTCMonth()
@@ -44,10 +43,9 @@ export class MonthlyAnalysisSummaryClass {
                 date: summaryDataItem.date,
                 energyUse: summaryDataItem.energyUse,
                 modeledEnergy: summaryDataItem.modeledEnergy,
-                adjustedForNormalization: summaryDataItem.monthlyAnalysisCalculatedValues.adjustedForNormalization,
                 adjusted: summaryDataItem.monthlyAnalysisCalculatedValues.adjusted,
                 baselineAdjustmentForNormalization: summaryDataItem.monthlyAnalysisCalculatedValues.baselineAdjustmentForNormalization,
-                baselineAdjustmentForOther: summaryDataItem.baselineAdjustmentForOther,
+                baselineAdjustmentForOtherV2: summaryDataItem.monthlyAnalysisCalculatedValues.baselineAdjustmentForOtherV2,
                 baselineAdjustment: summaryDataItem.monthlyAnalysisCalculatedValues.baselineAdjustment,
                 predictorUsage: summaryDataItem.predictorUsage,
                 fiscalYear: summaryDataItem.fiscalYear,
@@ -59,6 +57,11 @@ export class MonthlyAnalysisSummaryClass {
                 yearToDatePercentSavings: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.yearToDatePercentSavings) * 100,
                 rollingSavings: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.rollingSavings),
                 rolling12MonthImprovement: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.rolling12MonthImprovement) * 100,
+                modelYearDataAdjustment: summaryDataItem.modelYearDataAdjustment,
+                dataAdjustment: summaryDataItem.dataAdjustment,
+                adjustedStar: summaryDataItem.monthlyAnalysisCalculatedValues.adjustedStar,
+                adjustedStarStar: summaryDataItem.monthlyAnalysisCalculatedValues.adjustedStarStar,
+                baselineAdjustmentInput: summaryDataItem.baselineAdjustmentInput
             }
         })
     }

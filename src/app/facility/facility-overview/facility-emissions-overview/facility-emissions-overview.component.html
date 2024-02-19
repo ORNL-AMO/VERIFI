@@ -9,22 +9,21 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-12">
-                            <app-meters-overview-stacked-line-chart [dataType]="'emissions'" [facilityId]="facilityId"
+                            <app-emissions-stacked-line-chart
                                 [calanderizedMeters]="facilityOverviewData.calanderizedMeters"
-                                [dateRange]="dateRange"></app-meters-overview-stacked-line-chart>
+                                [dateRange]="dateRange"></app-emissions-stacked-line-chart>
                             <hr>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-6">
-                            <app-meter-usage-table [dataType]="'emissions'"
-                                [facilityOverviewData]="facilityOverviewData"
-                                [facilityOverviewMeters]="facilityOverviewData.energyMeters"></app-meter-usage-table>
+                            <app-emissions-usage-table
+                                [overviewData]="facilityOverviewData"></app-emissions-usage-table>
 
                         </div>
                         <div class="col-6">
-                            <app-meter-usage-donut [dataType]="'emissions'" [facilityId]="facilityId"
-                                [facilityOverviewMeters]="facilityOverviewData.energyMeters"></app-meter-usage-donut>
+                            <app-emissions-donut [facilityId]="facilityId"
+                                [facilityOverviewMeters]="facilityOverviewData.costMeters"></app-emissions-donut>
                         </div>
                     </div>
                 </div>
@@ -40,10 +39,10 @@
                 </div>
                 <div class="card-body">
                     <app-utility-consumption-table [dataType]="'emissions'"
-                        [sourcesUseAndCost]="utilityUseAndCost.energyUseAndCost"
-                        [useAndCostTotal]="utilityUseAndCost.energyTotal"
-                        [previousYear]="utilityUseAndCost.previousYear"
-                        [dateRange]="dateRange"></app-utility-consumption-table>
+                        [sourcesUseAndCost]="utilityUseAndCost.allSourcesUseAndCost"
+                        [useAndCostTotal]="utilityUseAndCost.allSourcesTotal"
+                        [previousYear]="utilityUseAndCost.previousYear" [dateRange]="dateRange"
+                        [facilityId]="facilityId"></app-utility-consumption-table>
                 </div>
             </div>
         </div>
@@ -56,8 +55,8 @@
                     <h4 class="mb-0">Annual Utility Emissions</h4>
                 </div>
                 <div class="card-body">
-                    <app-utilities-usage-chart [dataType]="'emissions'" [facilityId]="facilityId"
-                        [annualSourceData]="facilityOverviewData.annualSourceData"></app-utilities-usage-chart>
+                    <app-emissions-usage-chart [facilityId]="facilityId"
+                        [annualSourceData]="facilityOverviewData.annualSourceData"></app-emissions-usage-chart>
                 </div>
             </div>
         </div>

@@ -67,7 +67,7 @@ export class UtilityMeterdbService {
 
     async deleteMeterEntriesAsync(meterEntries: Array<IdbUtilityMeter>) {
         for (let i = 0; i < meterEntries.length; i++) {
-            this.loadingService.setLoadingMessage('Deleting Meters (' + i + '/' + meterEntries.length + ')...' );
+            this.loadingService.setLoadingMessage('Deleting Meters (' + i + '/' + meterEntries.length + ')...');
             await firstValueFrom(this.deleteIndexWithObservable(meterEntries[i].id));
         }
     }
@@ -109,7 +109,11 @@ export class UtilityMeterdbService {
             locationGHGMultiplier: 1,
             marketGHGMultiplier: 1,
             recsMultiplier: 0,
-            greenPurchaseFraction: .5
+            greenPurchaseFraction: .5,
+            vehicleCategory: 1,
+            vehicleCollectionType: 1,
+            vehicleDistanceUnit: 'mi',
+            vehicleCollectionUnit: 'gal'
         }
     }
 
@@ -128,4 +132,15 @@ export class UtilityMeterdbService {
         let metersCopy: Array<IdbUtilityMeter> = JSON.parse(JSON.stringify(accountMeters));
         return metersCopy;
     }
+
+    setTemporaryMeterNumbersForExport() {
+        let accountMeters: Array<IdbUtilityMeter> = this.accountMeters.getValue();
+        accountMeters.forEach(meter => {
+            if (meter.meterNumber == undefined) {
+                let noSpaceSource: string = meter.source.replace(' ', '_');
+                meter.meterNumber = noSpaceSource + '_' + meter.guid;
+            }
+        });
+    }
+
 }

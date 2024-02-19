@@ -22,6 +22,7 @@ import { AccountAnalysisWaterDashboardComponent } from './account-analysis-dashb
 import { AccountAnalysisEnergyDashboardComponent } from './account-analysis-dashboard/account-analysis-energy-dashboard/account-analysis-energy-dashboard.component';
 import { AccountAnalysisDashboardTabsComponent } from './account-analysis-dashboard/account-analysis-dashboard-tabs/account-analysis-dashboard-tabs.component';
 import { AccountAnalysisFacilitiesSummaryComponent } from './account-analysis-results/account-analysis-facilities-summary/account-analysis-facilities-summary.component';
+import { LabelWithTooltipModule } from 'src/app/shared/label-with-tooltip/label-with-tooltip.module';
 
 
 @NgModule({
@@ -50,7 +51,8 @@ import { AccountAnalysisFacilitiesSummaryComponent } from './account-analysis-re
     HelperPipesModule,
     SharedAnalysisModule,
     CalculatingSpinnerModule,
-    TableItemsDropdownModule
+    TableItemsDropdownModule,
+    LabelWithTooltipModule
   ]
 })
 export class AccountAnalysisModule { }

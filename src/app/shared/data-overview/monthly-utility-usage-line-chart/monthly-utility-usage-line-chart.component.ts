@@ -78,6 +78,7 @@ export class MonthlyUtilityUsageLineChartComponent {
       }
       let years: Array<number> = this.yearMonthData.flatMap(data => { return data.yearMonth.fiscalYear });
       years = _.uniq(years);
+      years = _.orderBy(years, (year) => { return year }, 'asc');
       let months: Array<Month> = Months.map(month => { return month });
       if (accountOrFacility.fiscalYear == 'nonCalendarYear') {
         let monthStartIndex: number = months.findIndex(month => { return month.monthNumValue == accountOrFacility.fiscalYearMonth });
@@ -154,9 +155,9 @@ export class MonthlyUtilityUsageLineChartComponent {
         return yearMonthData.energyCost;
       } else if (this.dataType == 'emissions') {
         if (this.emissionsDisplay == 'location') {
-          return yearMonthData.locationEmissions;
+          return yearMonthData.totalWithLocationEmissions;
         } else {
-          return yearMonthData.marketEmissions;
+          return yearMonthData.totalWithMarketEmissions;
         }
       } else if (this.dataType == 'water') {
         return yearMonthData.consumption;

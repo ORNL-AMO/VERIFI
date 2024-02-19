@@ -12,6 +12,10 @@ export class CalanderizedMeterDataTableComponent implements OnInit {
   calanderizedMeter: CalanderizedMeter;
   @Input()
   itemsPerPage: number;
+  @Input()
+  consumptionLabel: 'Consumption' | 'Distance';
+  @Input()
+  isRECs: boolean;
 
   @ViewChild('meterDataTable', { static: false }) meterDataTable: ElementRef;
   orderDataField: string = 'date';

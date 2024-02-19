@@ -3,7 +3,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbFacility } from 'src/app/models/idb';
-import { FileReference, UploadDataService } from 'src/app/upload-data/upload-data.service';
+import { FileReference } from 'src/app/upload-data/upload-data-models';
+import { UploadDataService } from 'src/app/upload-data/upload-data.service';
 import * as XLSX from 'xlsx';
 
 @Component({

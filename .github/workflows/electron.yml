@@ -8,7 +8,8 @@ permissions:
 
 jobs:
   build-mac:
-    runs-on: macos-12
+    if: github.ref_name == 'master'
+    runs-on: macos-13
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -17,7 +18,7 @@ jobs:
       - name: Node setup
         uses: actions/setup-node@v3
         with:
-          node-version: 16.14.2
+          node-version: 20.10.0
       - name: Cache setup
         uses: actions/cache@v3
         with:
@@ -31,6 +32,9 @@ jobs:
           APPLE_PROV_PROF_BASE64: ${{ secrets.APPLE_PROV_PROF_BASE64 }}
           APPLE_CERT_SECRET: ${{ secrets.APPLE_CERT_SECRET }}
           APPLE_KEYCHAIN_SECRET: ${{ secrets.APPLE_KEYCHAIN_SECRET }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SECRET: ${{ secrets.APPLE_APP_SECRET }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: |
           CERT_A_PATH=$RUNNER_TEMP/app_certificate.p12
           CERT_I_PATH=$RUNNER_TEMP/ins_certificate.p12
@@ -57,10 +61,14 @@ jobs:
         run: npm run build-prod-electron
       - name: Package [Mac]
         run: npm run dist-nopublish
+      - name: Notarize
+        run: |
+          xcrun notarytool submit --wait --apple-id "$APPLE_ID" --password "$APPLE_APP_SECRET" --team-id "$APPLE_TEAM_ID" $(find ../output -name "VERIFI-*.*.*.dmg")
+          xcrun stapler staple $(find ../output -name "VERIFI-*.*.*.dmg")
       - name: Prepare output
         id: output
         run: |
-          VERSION=$(grep -A3 'version:' ../output/verifi/latest-mac.yml | tail -n1 | awk '{ print $2}')
+          VERSION=$(grep -A3 'version:' ../output/verifi/latest-mac.yml | head -n1 | awk '{print $2}')
           echo "BUILD_VERSION=$VERSION" >> "$GITHUB_OUTPUT"
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
@@ -76,6 +84,7 @@ jobs:
       BUILD_VERSION: ${{ steps.output.outputs.BUILD_VERSION }}
 
   build-winux:
+    if: github.ref_name == 'master'
     runs-on: ubuntu-22.04
     container:
       image: electronuserland/builder:wine
@@ -88,7 +97,7 @@ jobs:
       - name: Node setup
         uses: actions/setup-node@v3
         with:
-          node-version: 16.14.2
+          node-version: 20.10.0
       - name: Cache setup
         uses: actions/cache@v3
         with:
@@ -114,24 +123,22 @@ jobs:
             !/__w/VERIFI/output/verifi/*-unpacked
           retention-days: 7
 
-  ###
-  # TODO: Test stage before using. Artifacts will have to be downloaded and uploaded to releases manually for now. 
-  ###
-  # release:
-  #   runs-on: ubuntu-22.04
-  #   needs: [build-mac, build-winux]
-  #   steps:
-  #     - name: Get artifacts
-  #       uses: actions/download-artifact@v3
-  #     - name: Release
-  #       env:
-  #         VERSION: ${{ needs.build-mac.outputs.BUILD_VERSION }}
-  #       uses: softprops/action-gh-release@v1
-  #       if: startsWith(github.ref, 'refs/tags/')
-  #       with:
-  #         name: VERIFI v${{ env.VERSION }}
-  #         draft: true
-  #         generate_release_notes: true
-  #         files: |
-  #           build-mac/*
-  #           build-winux/*
+  release:
+    if: github.ref_name == 'master'
+    runs-on: ubuntu-22.04
+    needs: [build-mac, build-winux]
+    env:
+      VERSION: ${{ needs.build-mac.outputs.BUILD_VERSION }}
+    steps:
+      - name: Get artifacts
+        uses: actions/download-artifact@v3
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        # if: startsWith(github.ref, 'refs/tags/') # Uncomment if enabling tag gating
+        with:
+          name: VERIFI v${{ env.VERSION }}
+          draft: true # Comment out if enabling tag gating and publishing via action
+          generate_release_notes: true
+          files: |
+            build-mac/*
+            build-winux/*

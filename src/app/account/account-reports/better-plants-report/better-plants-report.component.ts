@@ -14,6 +14,7 @@ import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.serv
 import { AccountReportsService } from '../account-reports.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { ConvertValue } from 'src/app/calculations/conversions/convertValue';
+import { BetterPlantsExcelWriterService } from '../excel-writer-services/better-plants-excel-writer.service';
 
 @Component({
   selector: 'app-better-plants-report',
@@ -30,6 +31,7 @@ export class BetterPlantsReportComponent implements OnInit {
   calculating: boolean | 'error';
   worker: Worker;
   selectedAnalysisItem: IdbAccountAnalysisItem;
+  generateExcelSub: Subscription
   constructor(private accountReportDbService: AccountReportDbService,
     private accountReportsService: AccountReportsService,
     private router: Router, private accountDbService: AccountdbService,
@@ -38,12 +40,18 @@ export class BetterPlantsReportComponent implements OnInit {
     private analysisDbService: AnalysisDbService,
     private accountAnalysisDbService: AccountAnalysisDbService,
     private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService) { }
+    private utilityMeterDataDbService: UtilityMeterDatadbService,
+    private betterPlantsExcelWriterService: BetterPlantsExcelWriterService) { }
 
   ngOnInit(): void {
     this.printSub = this.accountReportsService.print.subscribe(print => {
       this.print = print;
     });
+    this.generateExcelSub = this.accountReportsService.generateExcel.subscribe(generateExcel => {
+      if (generateExcel == true) {
+        this.generateExcelReport();
+      }
+    })
     this.selectedReport = this.accountReportDbService.selectedReport.getValue();
     if (!this.selectedReport) {
       this.router.navigateByUrl('/account/reports/dashboard');
@@ -55,6 +63,7 @@ export class BetterPlantsReportComponent implements OnInit {
 
   ngOnDestroy() {
     this.printSub.unsubscribe();
+    this.generateExcelSub.unsubscribe();
     if (this.worker) {
       this.worker.terminate();
     }
@@ -66,24 +75,22 @@ export class BetterPlantsReportComponent implements OnInit {
     this.selectedAnalysisItem = JSON.parse(JSON.stringify(selectedAnalysisItem));
     if (this.selectedAnalysisItem.analysisCategory == 'energy') {
       if (this.selectedAnalysisItem.energyUnit != 'MMBtu') {
-        if (this.selectedAnalysisItem.baselineAdjustments) {
-          this.selectedAnalysisItem.baselineAdjustments.forEach(adjustment => {
-            if (adjustment.amount != 0) {
-              adjustment.amount = new ConvertValue(adjustment.amount, this.selectedAnalysisItem.energyUnit, 'MMBtu').convertedValue;
-            }
-          });
+        //TODO: Check baselineAdjustmentsV2 use vs dataAdjustments
+        if (this.selectedAnalysisItem.baselineAdjustmentsV2) {
+          this.selectedAnalysisItem.baselineAdjustmentsV2.forEach(baselineAdjustment => {
+            baselineAdjustment.amount = new ConvertValue(baselineAdjustment.amount, this.selectedAnalysisItem.energyUnit, 'MMBtu').convertedValue;
+          })
         }
         this.selectedAnalysisItem.energyUnit = 'MMBtu';
       }
       this.selectedAnalysisItem.energyUnit = 'MMBtu';
     } else if (this.selectedAnalysisItem.analysisCategory == 'water') {
       if (this.selectedAnalysisItem.waterUnit != 'kgal') {
-        if (this.selectedAnalysisItem.baselineAdjustments) {
-          this.selectedAnalysisItem.baselineAdjustments.forEach(adjustment => {
-            if (adjustment.amount != 0) {
-              adjustment.amount = new ConvertValue(adjustment.amount, this.selectedAnalysisItem.waterUnit, 'kgal').convertedValue;
-            }
-          });
+        //TODO: Check baselineAdjustmentsV2 use vs dataAdjustments
+        if (this.selectedAnalysisItem.baselineAdjustmentsV2) {
+          this.selectedAnalysisItem.baselineAdjustmentsV2.forEach(baselineAdjustment => {
+            baselineAdjustment.amount = new ConvertValue(baselineAdjustment.amount, this.selectedAnalysisItem.waterUnit, 'kgal').convertedValue;
+          })
         }
         this.selectedAnalysisItem.waterUnit = 'kgal';
       }
@@ -145,13 +152,19 @@ export class BetterPlantsReportComponent implements OnInit {
         );
         let betterPlantsSummary: BetterPlantsSummary = betterPlantsReportClass.getBetterPlantsSummary();
         this.betterPlantsSummaries.push(betterPlantsSummary);
-        if(this.selectedReport.betterPlantsReportSetup.includeAllYears){
+        if (this.selectedReport.betterPlantsReportSetup.includeAllYears) {
           reportYear--;
-        }else{
+        } else {
           reportYear = this.selectedReport.baselineYear;
         }
       }
       this.calculating = false;
     }
+  }
+
+
+  generateExcelReport() {
+    this.betterPlantsExcelWriterService.exportToExcel(this.selectedReport, this.account, this.betterPlantsSummaries, this.selectedAnalysisItem);
+    this.accountReportsService.generateExcel.next(false);
   }
 }
