@@ -201,6 +201,7 @@ export class AccountReportsService {
     betterClimateReportSetup.includeGHGEmissionsReductions = form.controls.includeGHGEmissionsReductions.value;
     betterClimateReportSetup.includePortfolioEnergyUse = form.controls.includePortfolioEnergyUse.value;
     betterClimateReportSetup.includeFacilitySummaries = form.controls.includeFacilitySummaries.value;
+    betterClimateReportSetup.numberOfTopPerformers = form.controls.numberOfTopPerformers.value;
     betterClimateReportSetup.skipIntermediateYears = form.controls.skipIntermediateYears.value;
     betterClimateReportSetup.includeEmissionsInTables = form.controls.includeEmissionsInTables.value;
     betterClimateReportSetup.includePercentReductionsInTables = form.controls.includePercentReductionsInTables.value;
