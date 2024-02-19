@@ -303,6 +303,10 @@ export class BackupDataService {
           modificationNotes: undefined,
         }
       }
+
+      if (accountReport.reportType == 'performance') {
+        accountReport.performanceReportSetup.analysisItemId = this.getNewId(accountReport.performanceReportSetup.analysisItemId, accountAnalysisGUIDs);
+      }
       await firstValueFrom(this.accountReportsDbService.addWithObservable(accountReport));
     }
     return newAccount;
