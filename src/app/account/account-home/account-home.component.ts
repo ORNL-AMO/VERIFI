@@ -119,8 +119,7 @@ export class AccountHomeComponent implements OnInit {
       this.annualEnergyAnalysisWorker.onmessage = ({ data }) => {
         this.annualEnergyAnalysisWorker.terminate();
         if (!data.error) {
-          this.accountHomeService.annualEnergyAnalysisSummary.next(data.annualAnalysisSummaries);
-          this.accountHomeService.monthlyEnergyAnalysisData.next(data.monthlyAnalysisSummaryData);
+          this.setEnergyBehaviorSubjects(data.annualAnalysisSummaries, data.monthlyAnalysisSummaryData);
           this.accountHomeService.calculatingEnergy.next(false);
         } else {
           this.accountHomeService.annualEnergyAnalysisSummary.next(undefined);
@@ -144,9 +143,19 @@ export class AccountHomeComponent implements OnInit {
       let annualAnalysisSummaryClass: AnnualAccountAnalysisSummaryClass = new AnnualAccountAnalysisSummaryClass(this.accountHomeService.latestEnergyAnalysisItem, this.account, accountFacilities, accountPredictorEntries, accountAnalysisItems, true, accountMeters, accountMeterData);
       let annualAnalysisSummaries: Array<AnnualAnalysisSummary> = annualAnalysisSummaryClass.getAnnualAnalysisSummaries();
       let monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData> = annualAnalysisSummaryClass.monthlyAnalysisSummaryData;
-      this.accountHomeService.annualEnergyAnalysisSummary.next(annualAnalysisSummaries);
-      this.accountHomeService.monthlyEnergyAnalysisData.next(monthlyAnalysisSummaryData);
+      this.setEnergyBehaviorSubjects(annualAnalysisSummaries, monthlyAnalysisSummaryData);
     }
+  }
+
+  setEnergyBehaviorSubjects(annualAnalysisSummaries: Array<AnnualAnalysisSummary>, monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>) {
+    annualAnalysisSummaries = annualAnalysisSummaries.filter(summary => {
+      return isNaN(summary.adjusted) == false;
+    })
+    monthlyAnalysisSummaryData = monthlyAnalysisSummaryData.filter(summary => {
+      return isNaN(summary.adjusted) == false;
+    })
+    this.accountHomeService.annualEnergyAnalysisSummary.next(annualAnalysisSummaries);
+    this.accountHomeService.monthlyEnergyAnalysisData.next(monthlyAnalysisSummaryData);
   }
 
   setAnnualWaterAnalysisSummary() {
@@ -162,8 +171,7 @@ export class AccountHomeComponent implements OnInit {
       this.annualWaterAnalysisWorker.onmessage = ({ data }) => {
         this.annualWaterAnalysisWorker.terminate();
         if (!data.error) {
-          this.accountHomeService.annualWaterAnalysisSummary.next(data.annualAnalysisSummaries);
-          this.accountHomeService.monthlyWaterAnalysisData.next(data.monthlyAnalysisSummaryData);
+          this.setWaterBehaviorSubjects(data.annualAnalysisSummaries, data.monthlyAnalysisSummaryData);
           this.accountHomeService.calculatingWater.next(false);
         } else {
           this.accountHomeService.annualWaterAnalysisSummary.next(undefined);
@@ -187,9 +195,19 @@ export class AccountHomeComponent implements OnInit {
       let annualAnalysisSummaryClass: AnnualAccountAnalysisSummaryClass = new AnnualAccountAnalysisSummaryClass(this.accountHomeService.latestWaterAnalysisItem, this.account, accountFacilities, accountPredictorEntries, accountAnalysisItems, true, accountMeters, accountMeterData);
       let annualAnalysisSummaries: Array<AnnualAnalysisSummary> = annualAnalysisSummaryClass.getAnnualAnalysisSummaries();
       let monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData> = annualAnalysisSummaryClass.monthlyAnalysisSummaryData;
-      this.accountHomeService.annualWaterAnalysisSummary.next(annualAnalysisSummaries);
-      this.accountHomeService.monthlyWaterAnalysisData.next(monthlyAnalysisSummaryData);
+      this.setWaterBehaviorSubjects(annualAnalysisSummaries, monthlyAnalysisSummaryData);
     }
+  }
+
+  setWaterBehaviorSubjects(annualAnalysisSummaries: Array<AnnualAnalysisSummary>, monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>) {
+    annualAnalysisSummaries = annualAnalysisSummaries.filter(summary => {
+      return isNaN(summary.adjusted) == false;
+    })
+    monthlyAnalysisSummaryData = monthlyAnalysisSummaryData.filter(summary => {
+      return isNaN(summary.adjusted) == false;
+    })
+    this.accountHomeService.annualWaterAnalysisSummary.next(annualAnalysisSummaries);
+    this.accountHomeService.monthlyWaterAnalysisData.next(monthlyAnalysisSummaryData);
   }
 
   goNext() {
@@ -206,7 +224,7 @@ export class AccountHomeComponent implements OnInit {
     let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
     let co2Emissions: Array<SubregionEmissions> = this.eGridService.co2Emissions;
     let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
-    
+
     if (typeof Worker !== 'undefined') {
       this.accountOverviewWorker = new Worker(new URL('src/app/web-workers/account-overview.worker', import.meta.url));
       this.accountOverviewWorker.onmessage = ({ data }) => {

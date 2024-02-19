@@ -32,8 +32,6 @@ export interface EmissionsFilters {
   marketEmissions: boolean,
   locationEmissions: boolean,
   recs: boolean,
-  excessRecs: boolean,
-  excessRecsEmissions: boolean
 }
 
 export interface GeneralInformationFilters {

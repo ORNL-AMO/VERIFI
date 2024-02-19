@@ -50,12 +50,6 @@
             </th>
             <th *ngIf="emissionsFilters.recs" (click)="setOrderDataField('RECs')"
                 [ngClass]="{'active': orderDataField == 'RECs'}">RECs<br> (MWh)</th>
-            <th *ngIf="emissionsFilters.excessRecs" (click)="setOrderDataField('excessRECs')"
-                [ngClass]="{'active': orderDataField == 'excessRECs'}">Excess
-                RECs<br> (MWh)</th>
-            <th *ngIf="emissionsFilters.excessRecsEmissions" (click)="setOrderDataField('excessRECsEmissions')"
-                [ngClass]="{'active': orderDataField == 'excessRECsEmissions'}">Excess
-                RECs<br> Emissions (tonne CO<sub>2</sub>e)</th>
 
             <!-- block1Consumption -->
             <th *ngIf="detailedChargesFilters.block1" (click)="setOrderDataField('block1Consumption')"
@@ -161,8 +155,6 @@
             <td *ngIf="emissionsFilters.marketEmissions">{{meterData.totalMarketEmissions | customNumber}}</td>
             <td *ngIf="emissionsFilters.locationEmissions">{{meterData.totalLocationEmissions | customNumber}}</td>
             <td *ngIf="emissionsFilters.recs">{{meterData.RECs | customNumber}}</td>
-            <td *ngIf="emissionsFilters.excessRecs">{{meterData.excessRECs | customNumber}}</td>
-            <td *ngIf="emissionsFilters.excessRecsEmissions">{{meterData.excessRECsEmissions | customNumber}}</td>
 
             <td *ngIf="detailedChargesFilters.block1">{{meterData.block1Consumption | customNumber}}</td>
             <td *ngIf="detailedChargesFilters.block1">{{meterData.block1ConsumptionCharge | customNumber:true}}</td>

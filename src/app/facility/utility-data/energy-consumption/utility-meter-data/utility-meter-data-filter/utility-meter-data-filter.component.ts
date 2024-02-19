@@ -117,9 +117,7 @@ export class UtilityMeterDataFilterComponent implements OnInit {
         showSection: true,
         marketEmissions: true,
         locationEmissions: true,
-        recs: true,
-        excessRecs: true,
-        excessRecsEmissions: true
+        recs: true
 
       }
       this.generalInformationFilters = {
@@ -178,9 +176,7 @@ export class UtilityMeterDataFilterComponent implements OnInit {
         showSection: false,
         marketEmissions: false,
         locationEmissions: false,
-        recs: false,
-        excessRecs: false,
-        excessRecsEmissions: false
+        recs: false
 
       }
       this.generalInformationFilters = {
@@ -231,8 +227,7 @@ export class UtilityMeterDataFilterComponent implements OnInit {
       this.generalInformationFilters.totalCost || this.generalInformationFilters.realDemand || this.generalInformationFilters.billedDemand);
 
     this.emissionsFilters.showSection = (
-      this.emissionsFilters.marketEmissions || this.emissionsFilters.locationEmissions || this.emissionsFilters.recs ||
-      this.emissionsFilters.excessRecs || this.emissionsFilters.excessRecsEmissions
+      this.emissionsFilters.marketEmissions || this.emissionsFilters.locationEmissions || this.emissionsFilters.recs
     )
   };
 }

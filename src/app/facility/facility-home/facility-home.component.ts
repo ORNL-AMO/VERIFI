@@ -97,8 +97,7 @@ export class FacilityHomeComponent implements OnInit {
       this.annualEnergyAnalysisWorker = new Worker(new URL('src/app/web-workers/annual-facility-analysis.worker', import.meta.url));
       this.annualEnergyAnalysisWorker.onmessage = ({ data }) => {
         if (!data.error) {
-          this.facilityHomeService.annualEnergyAnalysisSummary.next(data.annualAnalysisSummaries);
-          this.facilityHomeService.monthlyFacilityEnergyAnalysisData.next(data.monthlyAnalysisSummaryData);
+          this.setEnergyBehaviorSubjects(data.annualAnalysisSummaries, data.monthlyAnalysisSummaryData)
           this.facilityHomeService.calculatingEnergy.next(false);
         } else {
           this.facilityHomeService.annualEnergyAnalysisSummary.next(undefined);
@@ -123,10 +122,22 @@ export class FacilityHomeComponent implements OnInit {
       let annualAnalysisSummaryClass: AnnualFacilityAnalysisSummaryClass = new AnnualFacilityAnalysisSummaryClass(this.facilityHomeService.latestEnergyAnalysisItem, this.facility, calanderizedMeters, accountPredictorEntries, true);
       let annualAnalysisSummaries: Array<AnnualAnalysisSummary> = annualAnalysisSummaryClass.getAnnualAnalysisSummaries();
       let monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData> = annualAnalysisSummaryClass.monthlyAnalysisSummaryData;
-      this.facilityHomeService.annualEnergyAnalysisSummary.next(annualAnalysisSummaries);
-      this.facilityHomeService.monthlyFacilityEnergyAnalysisData.next(monthlyAnalysisSummaryData);
+      this.setEnergyBehaviorSubjects(annualAnalysisSummaries, monthlyAnalysisSummaryData);
     }
   }
+
+
+  setEnergyBehaviorSubjects(annualAnalysisSummaries: Array<AnnualAnalysisSummary>, monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>) {
+    annualAnalysisSummaries = annualAnalysisSummaries.filter(summary => {
+      return isNaN(summary.adjusted) == false;
+    })
+    monthlyAnalysisSummaryData = monthlyAnalysisSummaryData.filter(summary => {
+      return isNaN(summary.adjusted) == false;
+    })
+    this.facilityHomeService.annualEnergyAnalysisSummary.next(annualAnalysisSummaries);
+    this.facilityHomeService.monthlyFacilityEnergyAnalysisData.next(monthlyAnalysisSummaryData);
+  }
+
 
   setAnnualWaterAnalysisSummary() {
     let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.accountPredictorEntries.getValue();
@@ -137,8 +148,7 @@ export class FacilityHomeComponent implements OnInit {
       this.annualWaterAnalysisWorker = new Worker(new URL('src/app/web-workers/annual-facility-analysis.worker', import.meta.url));
       this.annualWaterAnalysisWorker.onmessage = ({ data }) => {
         if (!data.error) {
-          this.facilityHomeService.annualWaterAnalysisSummary.next(data.annualAnalysisSummaries);
-          this.facilityHomeService.monthlyFacilityWaterAnalysisData.next(data.monthlyAnalysisSummaryData);
+          this.setWaterBehaviorSubjects(data.annualAnalysisSummaries, data.monthlyAnalysisSummaryData);
           this.facilityHomeService.calculatingWater.next(false);
         } else {
           this.facilityHomeService.annualWaterAnalysisSummary.next(undefined);
@@ -162,9 +172,19 @@ export class FacilityHomeComponent implements OnInit {
       let annualAnalysisSummaryClass: AnnualFacilityAnalysisSummaryClass = new AnnualFacilityAnalysisSummaryClass(this.facilityHomeService.latestWaterAnalysisItem, this.facility, calanderizedMeters, accountPredictorEntries, true);
       let annualAnalysisSummaries: Array<AnnualAnalysisSummary> = annualAnalysisSummaryClass.getAnnualAnalysisSummaries();
       let monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData> = annualAnalysisSummaryClass.monthlyAnalysisSummaryData;
-      this.facilityHomeService.annualWaterAnalysisSummary.next(annualAnalysisSummaries);
-      this.facilityHomeService.monthlyFacilityWaterAnalysisData.next(monthlyAnalysisSummaryData);
+      this.setWaterBehaviorSubjects(annualAnalysisSummaries, monthlyAnalysisSummaryData);
     }
+  }
+
+  setWaterBehaviorSubjects(annualAnalysisSummaries: Array<AnnualAnalysisSummary>, monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>) {
+    annualAnalysisSummaries = annualAnalysisSummaries.filter(summary => {
+      return isNaN(summary.adjusted) == false;
+    })
+    monthlyAnalysisSummaryData = monthlyAnalysisSummaryData.filter(summary => {
+      return isNaN(summary.adjusted) == false;
+    })
+    this.facilityHomeService.annualWaterAnalysisSummary.next(annualAnalysisSummaries);
+    this.facilityHomeService.monthlyFacilityWaterAnalysisData.next(monthlyAnalysisSummaryData);
   }
 
   setFacilityOverview() {
