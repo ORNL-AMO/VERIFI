@@ -62,6 +62,10 @@ jobs:
       - name: Package [Mac]
         run: npm run dist-nopublish
       - name: Notarize
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SECRET: ${{ secrets.APPLE_APP_SECRET }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: |
           xcrun notarytool submit --wait --apple-id "$APPLE_ID" --password "$APPLE_APP_SECRET" --team-id "$APPLE_TEAM_ID" $(find ../output -name "VERIFI-*.*.*.dmg")
           xcrun stapler staple $(find ../output -name "VERIFI-*.*.*.dmg")
