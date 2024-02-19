@@ -64,7 +64,6 @@ export class PerformanceSetupComponent {
     this.accountAnalysisItems = analysisOptions.filter(option => { return option.reportYear == report.reportYear && option.energyIsSource });
     this.setSelectedAnalysisItem();
     if (!this.selectedAnalysisItem) {
-      console.log('patched...?')
       this.performanceReportForm.controls.analysisItemId.patchValue(undefined);
       this.performanceReportForm.controls.analysisItemId.updateValueAndValidity();
       this.save();
