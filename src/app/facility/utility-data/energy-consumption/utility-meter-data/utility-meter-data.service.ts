@@ -114,9 +114,7 @@ export class UtilityMeterDataService {
       showSection: true,
       marketEmissions: true,
       locationEmissions: true,
-      recs: true,
-      excessRecs: true,
-      excessRecsEmissions: true
+      recs: true
     }
   }
 

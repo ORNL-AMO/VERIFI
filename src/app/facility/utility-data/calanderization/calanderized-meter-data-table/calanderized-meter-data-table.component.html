@@ -33,11 +33,11 @@
             <th (click)="setOrderDataField('RECs')" [ngClass]="{'active': orderDataField == 'RECs'}"
                 *ngIf="calanderizedMeter.showStandardEmissions">RECs<br> (MWh)</th>
             <th (click)="setOrderDataField('excessRECs')" [ngClass]="{'active': orderDataField == 'excessRECs'}"
-                *ngIf="calanderizedMeter.showStandardEmissions">Excess
+                *ngIf="calanderizedMeter.showStandardEmissions && isRECs">Excess
                 RECs<br> (MWh)</th>
             <th (click)="setOrderDataField('excessRECsEmissions')"
                 [ngClass]="{'active': orderDataField == 'excessRECsEmissions'}"
-                *ngIf="calanderizedMeter.showStandardEmissions">
+                *ngIf="calanderizedMeter.showStandardEmissions && isRECs">
                 Excess
                 RECs <br>Emissions<br> (tonne CO<sub>2</sub>e)</th>
             <!--mobile-->
@@ -86,9 +86,9 @@
             </td>
             <td *ngIf="calanderizedMeter.showStandardEmissions">{{data.RECs | customNumber}}
             </td>
-            <td *ngIf="calanderizedMeter.showStandardEmissions">{{data.excessRECs | customNumber}}
+            <td *ngIf="calanderizedMeter.showStandardEmissions && isRECs">{{data.excessRECs | customNumber}}
             </td>
-            <td *ngIf="calanderizedMeter.showStandardEmissions">
+            <td *ngIf="calanderizedMeter.showStandardEmissions && isRECs">
                 {{data.excessRECsEmissions | customNumber}}
             </td>
             <!--mobile-->
