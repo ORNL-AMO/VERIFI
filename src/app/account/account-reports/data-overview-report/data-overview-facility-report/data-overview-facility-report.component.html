@@ -70,12 +70,12 @@
                 <h4>{{dataOverviewFacility.facility.guid | facilityName}} Emissions</h4>
                 <app-facility-section-report [dataType]="'emissions'" [facility]="dataOverviewFacility.facility"
                     [calanderizedMeters]="dataOverviewFacility.calanderizedMeters"
-                    [yearMonthData]="dataOverviewFacility.facilityOverviewData.energyYearMonthData"
+                    [yearMonthData]="dataOverviewFacility.facilityOverviewData.allSourcesYearMonthData"
                     [annualSourceData]="dataOverviewFacility.facilityOverviewData.annualSourceData"
-                    [facilityOverviewMeters]="dataOverviewFacility.facilityOverviewData.energyMeters"
+                    [facilityOverviewMeters]="dataOverviewFacility.facilityOverviewData.costMeters"
                     [facilityOverviewData]="dataOverviewFacility.facilityOverviewData"
-                    [sourcesUseAndCost]="dataOverviewFacility.utilityUseAndCost.energyUseAndCost"
-                    [useAndCostTotal]="dataOverviewFacility.utilityUseAndCost.energyTotal"
+                    [sourcesUseAndCost]="dataOverviewFacility.utilityUseAndCost.allSourcesUseAndCost"
+                    [useAndCostTotal]="dataOverviewFacility.utilityUseAndCost.allSourcesTotal"
                     [dateRange]="dataOverviewFacility.dateRange"
                     [previousYear]="dataOverviewFacility.utilityUseAndCost.previousYear"></app-facility-section-report>
             </div>

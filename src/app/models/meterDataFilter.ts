@@ -32,8 +32,6 @@ export interface EmissionsFilters {
   marketEmissions: boolean,
   locationEmissions: boolean,
   recs: boolean,
-  excessRecs: boolean,
-  excessRecsEmissions: boolean
 }
 
 export interface GeneralInformationFilters {
@@ -51,5 +49,16 @@ export interface GeneralUtilityDataFilters{
   totalLocationEmissions: boolean,
   commodityCharge: boolean,
   deliveryCharge: boolean,
+  otherCharge: boolean,
+}
+
+
+export interface VehicleDataFilters{
+  totalEnergy: boolean,
+  totalCost: boolean,
+  mobileBiogenicEmissions: boolean,
+  mobileCarbonEmissions: boolean,
+  mobileOtherEmissions: boolean,
+  mobileTotalEmissions: boolean,
   otherCharge: boolean,
 }

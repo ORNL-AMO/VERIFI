@@ -98,7 +98,7 @@
                         </div>
 
                         <div class="btn-group ps-2"
-                            *ngIf="selectedMeter.source != 'Water Discharge' && selectedMeter.source != 'Water Intake' && selectedMeter.source != 'Other Utility'">
+                            *ngIf="selectedMeter.source != 'Water Discharge' && selectedMeter.source != 'Water Intake' && selectedMeter.source != 'Other'">
                             <button class="btn toggle-btn" (click)="setFacilityEnergyIsSource(true)"
                                 [ngClass]="{'active': selectedFacility.energyIsSource == true}">
                                 <span class="fa fa-chevron-right"></span>
@@ -117,7 +117,7 @@
 
                 <div>
                     <app-calanderized-meter-data-table *ngIf="dataDisplay == 'table'" [itemsPerPage]="itemsPerPage"
-                        [calanderizedMeter]="calanderizedMeter">
+                            [calanderizedMeter]="calanderizedMeter" [consumptionLabel]="consumptionLabel" [isRECs]="isRECs">
                     </app-calanderized-meter-data-table>
                     <app-calanderization-chart *ngIf="dataDisplay == 'graph'" [meterData]="calanderizedMeter"
                         [displayGraphEnergy]="displayGraphEnergy" [displayGraphCost]="displayGraphCost">

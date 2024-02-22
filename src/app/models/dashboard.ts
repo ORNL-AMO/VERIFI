@@ -1,3 +1,5 @@
+import { EmissionsResults } from "./eGridEmissions"
+
 export interface StackedBarChartData {
     facilityName: string
     electricity: UtilityItem,
@@ -12,11 +14,9 @@ export interface StackedBarChartData {
 export interface UtilityItem {
     energyUse: number,
     energyCost: number,
-    marketEmissions: number,
-    locationEmissions: number
 }
 
-export interface YearMonthData {
+export interface YearMonthData extends EmissionsResults {
     yearMonth: {
         year: number,
         month: string,
@@ -24,7 +24,5 @@ export interface YearMonthData {
     },
     energyUse: number,
     energyCost: number,
-    marketEmissions: number,
-    locationEmissions: number,
     consumption: number
 }

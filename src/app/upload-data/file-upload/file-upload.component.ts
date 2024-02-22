@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { FileReference, UploadDataService } from '../upload-data.service';
+import { UploadDataService } from '../upload-data.service';
 import * as XLSX from 'xlsx';
 import { ExportToExcelTemplateService } from 'src/app/shared/helper-services/export-to-excel-template.service';
+import { FileReference } from '../upload-data-models';
 
 @Component({
   selector: 'app-file-upload',
@@ -56,10 +57,11 @@ export class FileUploadComponent implements OnInit {
     reader.onload = (e: any) => {
       const bstr: string = e.target.result;
       let workBook: XLSX.WorkBook = XLSX.read(bstr, { type: 'binary', cellDates: true });
-      try{
-        let fileReference: FileReference = this.uploadDataService.getFileReference(file, workBook);
+      try {
+        console.log('try!')
+        let fileReference: FileReference = this.uploadDataService.getFileReference(file, workBook, false);
         this.fileReferences.push(fileReference);
-      }catch (err){
+      } catch (err) {
         console.log(err);
         this.fileUploadError = true;
       }
@@ -67,15 +69,15 @@ export class FileUploadComponent implements OnInit {
     reader.readAsBinaryString(file);
   }
 
-  setDragEnter(){
+  setDragEnter() {
     this.dragOver = true;
   }
 
-  setDragOut(){
+  setDragOut() {
     this.dragOver = false;
   }
 
-  downloadTemplate(){
+  downloadTemplate() {
     this.exportToExcelTemplateService.exportFacilityData();
   }
 }

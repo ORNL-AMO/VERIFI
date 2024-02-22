@@ -1,7 +1,7 @@
 import { Component, ElementRef, Input, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { BetterClimateYearDetails } from 'src/app/calculations/carbon-calculations/betterClimateYearsDetails';
-import { EmissionsColors } from 'src/app/shared/utilityColors';
+import { getEmissionsTypeColor } from 'src/app/models/eGridEmissions';
 
 @Component({
   selector: 'app-emissions-reductions-chart',
@@ -33,7 +33,7 @@ export class EmissionsReductionsChartComponent {
       type: 'bar',
       yaxis: 'y1',
       marker: {
-        color: EmissionsColors["allEmissions"]
+        color: getEmissionsTypeColor('All Emissions')
       }
       // text: monthlyDataInRange.map(item => { return cMeter.meter.name }),
       // stackgroup: 'one',

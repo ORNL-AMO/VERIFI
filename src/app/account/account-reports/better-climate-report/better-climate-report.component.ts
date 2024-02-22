@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
-import { IdbAccount, IdbAccountReport, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import { IdbAccount, IdbAccountReport, IdbCustomFuel, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { AccountReportsService } from '../account-reports.service';
 import { Router } from '@angular/router';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
@@ -12,6 +12,9 @@ import { BetterClimateReport } from 'src/app/calculations/carbon-calculations/be
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 import * as _ from 'lodash';
 import { BetterClimateReportSetup } from 'src/app/models/overview-report';
+import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
+import { BetterClimateExcelWriterService } from '../excel-writer-services/better-climate-excel-writer.service';
+import { LoadingService } from 'src/app/core-components/loading/loading.service';
 
 @Component({
   selector: 'app-better-climate-report',
@@ -30,13 +33,17 @@ export class BetterClimateReportComponent {
   betterClimateReportUnfiltered: BetterClimateReport;
   betterClimateReportSetup: BetterClimateReportSetup;
   cellWidth: number;
+  generateExcelSub: Subscription;
   constructor(private accountReportDbService: AccountReportDbService,
     private accountReportsService: AccountReportsService,
     private router: Router, private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService,
     private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private eGridService: EGridService) { }
+    private eGridService: EGridService,
+    private customFuelDbService: CustomFuelDbService,
+    private betterClimateExcelWriterService: BetterClimateExcelWriterService,
+    private loadingService: LoadingService) { }
 
   ngOnInit(): void {
     this.printSub = this.accountReportsService.print.subscribe(print => {
@@ -45,18 +52,23 @@ export class BetterClimateReportComponent {
     this.selectedReport = this.accountReportDbService.selectedReport.getValue();
     if (!this.selectedReport) {
       this.router.navigateByUrl('/account/reports/dashboard');
-    }else{
+    } else {
       this.betterClimateReportSetup = this.selectedReport.betterClimateReportSetup;
     }
     this.account = this.accountDbService.selectedAccount.getValue();
     this.calculateCarbonReport();
     this.setCellWidth();
 
-
+    this.generateExcelSub = this.accountReportsService.generateExcel.subscribe(generateExcel => {
+      if (generateExcel == true) {
+        this.generateExcelReport();
+      }
+    });
   }
 
   ngOnDestroy() {
     this.printSub.unsubscribe();
+    this.generateExcelSub.unsubscribe();
     if (this.worker) {
       this.worker.terminate();
     }
@@ -67,6 +79,7 @@ export class BetterClimateReportComponent {
     let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
+    let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue()
     if (typeof Worker !== 'undefined') {
       this.worker = new Worker(new URL('src/app/web-workers/better-climate-report.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {
@@ -89,11 +102,18 @@ export class BetterClimateReportComponent {
         meterData: accountMeterData,
         co2Emissions: this.eGridService.co2Emissions,
         emissionsDisplay: this.selectedReport.betterClimateReportSetup.emissionsDisplay,
-        emissionsGoal: this.account.sustainabilityQuestions.greenhouseReductionPercent
+        emissionsGoal: this.account.sustainabilityQuestions.greenhouseReductionPercent,
+        customFuels: customFuels
       });
     } else {
       // Web Workers are not supported in this environment
+      let betterClimateReport: BetterClimateReport = new BetterClimateReport(this.account, accountFacilities, accountMeters, accountMeterData, this.selectedReport.baselineYear, this.selectedReport.reportYear,
+        this.eGridService.co2Emissions, this.selectedReport.betterClimateReportSetup.emissionsDisplay, this.account.sustainabilityQuestions.greenhouseReductionPercent, customFuels);
+      this.betterClimateReportUnfiltered = _.cloneDeep(betterClimateReport);
+      this.betterClimateReport = this.filterIntermediateYears(betterClimateReport);
       this.calculating = false;
+
+
     }
   }
 
@@ -102,7 +122,7 @@ export class BetterClimateReportComponent {
     if (numberOfYears > 3 && this.selectedReport.betterClimateReportSetup.skipIntermediateYears) {
       this.cellWidth = 25;
     } else {
-      this.cellWidth = (100 / (numberOfYears+2));
+      this.cellWidth = (100 / (numberOfYears + 2));
     }
   }
 
@@ -123,5 +143,13 @@ export class BetterClimateReportComponent {
       });
     }
     return betterClimateReport;
+  }
+
+  generateExcelReport() {
+    this.loadingService.setLoadingMessage('Generating Better Climate Excel Report...');
+    this.loadingService.setLoadingStatus(true);
+    //export to excell method sets loading status to false upon completion or error.
+    this.betterClimateExcelWriterService.exportToExcel(this.selectedReport, this.account, this.betterClimateReportUnfiltered);
+    this.accountReportsService.generateExcel.next(false);
   }
 }

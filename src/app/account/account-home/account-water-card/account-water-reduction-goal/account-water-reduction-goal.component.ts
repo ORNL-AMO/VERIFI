@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
-import { IdbAccount } from 'src/app/models/idb';
+import { IdbAccount, IdbAccountAnalysisItem } from 'src/app/models/idb';
 import { AccountHomeService } from '../../account-home.service';
 import * as _ from 'lodash';
 
@@ -32,8 +32,9 @@ export class AccountWaterReductionGoalComponent {
     });
 
     this.latestSummarySub = this.accountHomeService.monthlyWaterAnalysisData.subscribe(val => {
+      let latestAnalysisItem: IdbAccountAnalysisItem = this.accountHomeService.latestWaterAnalysisItem;
       this.latestAnalysisSummary = _.maxBy(val, 'date');
-      if (this.latestAnalysisSummary) {
+      if (this.latestAnalysisSummary && latestAnalysisItem?.selectedYearAnalysis) {
         this.latestAnalysisDate = new Date(this.latestAnalysisSummary.date);
         this.setProgressPercentages();
       } else {

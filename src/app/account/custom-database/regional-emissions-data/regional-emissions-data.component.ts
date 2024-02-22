@@ -1,31 +1,10 @@
-import { Component, OnInit } from '@angular/core';
-import { Subscription } from 'rxjs';
-import { CustomEmissionsDbService } from 'src/app/indexedDB/custom-emissions-db.service';
-import { IdbCustomEmissionsItem } from 'src/app/models/idb';
+import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-regional-emissions-data',
   templateUrl: './regional-emissions-data.component.html',
   styleUrls: ['./regional-emissions-data.component.css']
 })
-export class RegionalEmissionsDataComponent implements OnInit {
+export class RegionalEmissionsDataComponent {
 
-  customEmissionsItems: Array<IdbCustomEmissionsItem>;
-  customEmissionsItemsSub: Subscription;
-  constructor(private customEmissionsDbService: CustomEmissionsDbService) { }
-
-  ngOnInit(): void {
-    this.customEmissionsItemsSub = this.customEmissionsDbService.accountEmissionsItems.subscribe(val => {
-      this.customEmissionsItems = val;
-    });
-  }
-
-  ngOnDestroy(){
-    this.customEmissionsItemsSub.unsubscribe();
-  }
-
-
-  addNewItem(){
-    
-  }
 }

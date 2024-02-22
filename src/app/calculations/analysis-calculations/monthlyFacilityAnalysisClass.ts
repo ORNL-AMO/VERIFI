@@ -97,10 +97,9 @@ export class MonthlyFacilityAnalysisClass {
                 date: summaryDataItem.date,
                 energyUse: summaryDataItem.energyUse,
                 modeledEnergy: summaryDataItem.modeledEnergy,
-                adjustedForNormalization: summaryDataItem.monthlyAnalysisCalculatedValues.adjustedForNormalization,
                 adjusted: summaryDataItem.monthlyAnalysisCalculatedValues.adjusted,
                 baselineAdjustmentForNormalization: summaryDataItem.monthlyAnalysisCalculatedValues.baselineAdjustmentForNormalization,
-                baselineAdjustmentForOther: summaryDataItem.baselineAdjustmentForOther,
+                baselineAdjustmentForOtherV2: summaryDataItem.monthlyAnalysisCalculatedValues.baselineAdjustmentForOtherV2,
                 baselineAdjustment: summaryDataItem.monthlyAnalysisCalculatedValues.baselineAdjustment,
                 predictorUsage: summaryDataItem.predictorUsage,
                 fiscalYear: summaryDataItem.fiscalYear,
@@ -112,6 +111,11 @@ export class MonthlyFacilityAnalysisClass {
                 yearToDatePercentSavings: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.yearToDatePercentSavings) * 100,
                 rollingSavings: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.rollingSavings),
                 rolling12MonthImprovement: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.rolling12MonthImprovement) * 100,
+                dataAdjustment: summaryDataItem.dataAdjustment,
+                modelYearDataAdjustment: summaryDataItem.modelYearDataAdjustment,
+                adjustedStar: summaryDataItem.monthlyAnalysisCalculatedValues.adjustedStar,
+                adjustedStarStar: summaryDataItem.monthlyAnalysisCalculatedValues.adjustedStarStar,
+                baselineAdjustmentInput: summaryDataItem.baselineAdjustmentInput
             }
         })
     }

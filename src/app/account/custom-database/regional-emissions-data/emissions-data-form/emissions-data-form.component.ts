@@ -160,7 +160,7 @@ export class EmissionsDataFormComponent implements OnInit {
       }
       successMessage = 'Custom Emissions Updated!'
     }
-    
+
     let customEmissionsItems: Array<IdbCustomEmissionsItem> = await this.customEmissionsDbService.getAllAccountCustomEmissions(this.editCustomEmissions.accountId);
     this.customEmissionsDbService.accountEmissionsItems.next(customEmissionsItems);
     this.loadingService.setLoadingStatus(false);

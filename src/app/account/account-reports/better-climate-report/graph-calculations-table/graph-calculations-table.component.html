@@ -146,10 +146,10 @@
                 Scope 1 Stationary
             </td>
             <td *ngFor="let yearDetail of yearDetails; let index = index;" [ngStyle]="{'width.%': cellWidth}">
-                <ng-container *ngIf="yearDetail.stationaryEmissionsReductions">
-                    {{yearDetail.stationaryEmissionsReductions| customNumber}}
+                <ng-container *ngIf="yearDetail.reductions.stationaryEmissions">
+                    {{yearDetail.reductions.stationaryEmissions| customNumber}}
                 </ng-container>
-                <ng-container *ngIf="!yearDetail.stationaryEmissionsReductions">
+                <ng-container *ngIf="!yearDetail.reductions.stationaryEmissions">
                     &mdash;
                 </ng-container>
 
@@ -160,10 +160,10 @@
                 Scope 1 Mobile
             </td>
             <td *ngFor="let yearDetail of yearDetails; let index = index;">
-                <ng-container *ngIf="yearDetail.mobileEmissionsReductions">
-                    {{yearDetail.mobileEmissionsReductions| customNumber}}
+                <ng-container *ngIf="yearDetail.reductions.mobileTotalEmissions">
+                    {{yearDetail.reductions.mobileTotalEmissions| customNumber}}
                 </ng-container>
-                <ng-container *ngIf="!yearDetail.mobileEmissionsReductions">
+                <ng-container *ngIf="!yearDetail.reductions.mobileTotalEmissions">
                     &mdash;
                 </ng-container>
             </td>
@@ -173,10 +173,10 @@
                 Scope 1 Fugitive & Process
             </td>
             <td *ngFor="let yearDetail of yearDetails; let index = index;">
-                <ng-container *ngIf="yearDetail.fugitiveEmissionsReductions">
-                    {{yearDetail.fugitiveEmissionsReductions| customNumber}}
+                <ng-container *ngIf="yearDetail.reductions.fugitiveEmissions">
+                    {{yearDetail.reductions.fugitiveEmissions| customNumber}}
                 </ng-container>
-                <ng-container *ngIf="!yearDetail.fugitiveEmissionsReductions">
+                <ng-container *ngIf="!yearDetail.reductions.fugitiveEmissions">
                     &mdash;
                 </ng-container>
 
@@ -243,10 +243,10 @@
                 Total
             </th>
             <th *ngFor="let yearDetail of yearDetails; let index = index;">
-                <ng-container *ngIf="yearDetail.totalEmissionsReductions">
-                    {{yearDetail.totalEmissionsReductions| customNumber}}
+                <ng-container *ngIf="yearDetail.totalEmissionsReduction">
+                    {{yearDetail.totalEmissionsReduction| customNumber}}
                 </ng-container>
-                <ng-container *ngIf="!yearDetail.totalEmissionsReductions">
+                <ng-container *ngIf="!yearDetail.totalEmissionsReduction">
                     &mdash;
                 </ng-container>
 

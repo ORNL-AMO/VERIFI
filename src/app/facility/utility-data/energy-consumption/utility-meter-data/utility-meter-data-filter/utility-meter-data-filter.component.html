@@ -1,4 +1,4 @@
-<div class="dropdown">
+<div class="dropdown" [hidden]="isRECs">
     <button class="btn action-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside"
         aria-expanded="false">
         Choose Columns
@@ -13,43 +13,37 @@
                         [(ngModel)]="generalInformationFilters.totalCost" (change)="save()">
                     <label class="form-check-label" for="totalCost">Total Cost</label>
                 </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" name="realDemand" id="realDemand"
-                        [(ngModel)]="generalInformationFilters.realDemand" (change)="save()">
-                    <label for="realDemand" class="form-check-label">Real Demand</label>
-                </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" name="billedDemand" id="billedDemand"
-                        [(ngModel)]="generalInformationFilters.billedDemand" (change)="save()">
-                    <label for="billedDemand" class="form-check-label">Billed Demand</label>
-                </div>
+                <ng-container *ngIf="!isRECs">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="realDemand" id="realDemand"
+                            [(ngModel)]="generalInformationFilters.realDemand" (change)="save()">
+                        <label for="realDemand" class="form-check-label">Real Demand</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="billedDemand" id="billedDemand"
+                            [(ngModel)]="generalInformationFilters.billedDemand" (change)="save()">
+                        <label for="billedDemand" class="form-check-label">Billed Demand</label>
+                    </div>
+                </ng-container>
             </div>
             <div class="col" *ngIf="filterType == 'table'">
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" name="marketEmissions" id="marketEmissions"
-                        [(ngModel)]="emissionsFilters.marketEmissions" (change)="save()">
-                    <label for="marketEmissions" class="form-check-label">Market Emissions</label>
-                </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" name="locationEmissions" id="locationEmissions"
-                        [(ngModel)]="emissionsFilters.locationEmissions" (change)="save()">
-                    <label for="locationEmissions" class="form-check-label">Location Emissions</label>
-                </div>
+                <ng-container *ngIf="!isRECs">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="marketEmissions" id="marketEmissions"
+                            [(ngModel)]="emissionsFilters.marketEmissions" (change)="save()">
+                        <label for="marketEmissions" class="form-check-label">Market Emissions</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="locationEmissions" id="locationEmissions"
+                            [(ngModel)]="emissionsFilters.locationEmissions" (change)="save()">
+                        <label for="locationEmissions" class="form-check-label">Location Emissions</label>
+                    </div>
+                </ng-container>
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" name="recs" id="recs"
                         [(ngModel)]="emissionsFilters.recs" (change)="save()">
 
                     <label for="recs" class="form-check-label">RECs</label>
-                </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" name="excessRecs" id="excessRecs"
-                        [(ngModel)]="emissionsFilters.excessRecs" (change)="save()">
-                    <label for="excessRecs" class="form-check-label">Excess RECs</label>
-                </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" name="excessRecsEmissions" id="excessRecsEmissions"
-                        [(ngModel)]="emissionsFilters.excessRecsEmissions" (change)="save()">
-                    <label for="excessRecsEmissions" class="form-check-label">Excess RECs Emissions</label>
                 </div>
             </div>
             <div class="col">
@@ -125,8 +119,8 @@
                 </div>
             </div>
         </div>
-        <!--non electricity filters-->
-        <div class="row" *ngIf="meter.source != 'Electricity'">
+        <!--non electricity filters, non-vehicles-->
+        <div class="row" *ngIf="meter.source != 'Electricity' && meter.scope != 2">
             <div class="col">
                 <div class="form-check" *ngIf="displayVolumeInput">
                     <input class="form-check-input" type="checkbox" name="totalVolume" id="totalVolume"
@@ -167,6 +161,55 @@
                     <input class="form-check-input" type="checkbox" name="otherCharge" id="otherCharge"
                         [(ngModel)]="generalUtilityDataFilters.otherCharge" (change)="save()">
                     <label for="otherCharge" class="form-check-label">Other Charge</label>
+                </div>
+            </div>
+        </div>
+        <!--non electricity filters, non-vehicles-->
+        <div class="row" *ngIf="meter.source != 'Electricity' && meter.scope == 2">
+            <div class="col">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="totalEnergy" id="totalEnergy"
+                        [(ngModel)]="vehicleDataFilters.totalEnergy" (change)="save()">
+                    <label for="totalEnergy" class="form-check-label">Total Energy</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="totalCost" id="totalCost"
+                        [(ngModel)]="vehicleDataFilters.totalCost" (change)="save()">
+                    <label for="totalCost" class="form-check-label">Total Cost</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="otherCharge" id="otherCharge"
+                        [(ngModel)]="vehicleDataFilters.otherCharge" (change)="save()">
+                    <label for="otherCharge" class="form-check-label">Other Charge</label>
+                </div>
+            </div>
+            <div class="col">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="mobileBiogenicEmissions"
+                        id="mobileBiogenicEmissions" [(ngModel)]="vehicleDataFilters.mobileBiogenicEmissions"
+                        (change)="save()">
+                    <label for="mobileBiogenicEmissions" class="form-check-label">Biogenic Emissions</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="mobileCarbonEmissions"
+                        id="mobileCarbonEmissions" [(ngModel)]="vehicleDataFilters.mobileCarbonEmissions"
+                        (change)="save()">
+                    <label for="mobileCarbonEmissions" class="form-check-label">Carbon
+                        Emissions</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="mobileOtherEmissions"
+                        id="mobileOtherEmissions" [(ngModel)]="vehicleDataFilters.mobileOtherEmissions"
+                        (change)="save()">
+                    <label for="mobileOtherEmissions" class="form-check-label">Other
+                        Emissions</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="mobileTotalEmissions"
+                        id="mobileTotalEmissions" [(ngModel)]="vehicleDataFilters.mobileTotalEmissions"
+                        (change)="save()">
+                    <label for="mobileTotalEmissions" class="form-check-label">Total
+                        Emissions</label>
                 </div>
             </div>
         </div>

@@ -12,8 +12,10 @@
     </div>
 </div>
 <div *ngIf="meterData.length != 0">
-    <div class="d-flex w-100 justify-content-between mb-2">
-        <app-utility-meter-data-filter [meter]="selectedMeter" [filterType]="'table'">
+    <div class="d-flex w-100 mb-2" [ngClass]="{'justify-content-between': selectedMeter.scope != 5 && selectedMeter.scope != 6, 
+'justify-content-end': selectedMeter.scope == 5 || selectedMeter.scope == 6}">
+        <app-utility-meter-data-filter *ngIf="selectedMeter.scope != 5 && selectedMeter.scope != 6"
+            [meter]="selectedMeter" [filterType]="'table'">
         </app-utility-meter-data-filter>
 
         <div class="d-flex">
@@ -64,11 +66,23 @@
                     (setChecked)="setHasCheckedItems()" (setEdit)="setEditMeterData($event)"
                     (setDelete)="setDeleteMeterData($event)">
                 </app-electricity-data-table>
-                <app-general-utility-data-table *ngIf="selectedMeter.source != 'Electricity'"
+                <app-general-utility-data-table
+                    *ngIf="selectedMeter.source != 'Electricity' && (selectedMeter.scope != 2 && selectedMeter.scope != 5 && selectedMeter.scope != 6)"
                     [selectedMeter]="selectedMeter" [selectedMeterData]="meterData" [itemsPerPage]="itemsPerPage"
                     (setChecked)="setHasCheckedItems()" (setEdit)="setEditMeterData($event)"
                     (setDelete)="setDeleteMeterData($event)">
                 </app-general-utility-data-table>
+                <app-vehicle-data-table *ngIf="selectedMeter.source != 'Electricity' && selectedMeter.scope == 2"
+                    [selectedMeter]="selectedMeter" [selectedMeterData]="meterData" [itemsPerPage]="itemsPerPage"
+                    (setChecked)="setHasCheckedItems()" (setEdit)="setEditMeterData($event)"
+                    (setDelete)="setDeleteMeterData($event)">
+                </app-vehicle-data-table>
+                <app-other-emissions-data-table
+                    *ngIf="selectedMeter.source != 'Electricity' && (selectedMeter.scope == 5 || selectedMeter.scope ==6)"
+                    [selectedMeter]="selectedMeter" [selectedMeterData]="meterData" [itemsPerPage]="itemsPerPage"
+                    (setChecked)="setHasCheckedItems()" (setEdit)="setEditMeterData($event)"
+                    (setDelete)="setDeleteMeterData($event)">
+                </app-other-emissions-data-table>
             </div>
         </div>
     </div>

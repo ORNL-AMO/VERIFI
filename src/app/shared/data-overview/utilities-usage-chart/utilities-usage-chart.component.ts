@@ -16,16 +16,13 @@ import { EnergySources, WaterSources } from 'src/app/models/constantsAndTypes';
 })
 export class UtilitiesUsageChartComponent {
   @Input()
-  dataType: 'energyUse' | 'emissions' | 'cost' | 'water';
+  dataType: 'energyUse' | 'cost' | 'water';
   @Input()
   facilityId: string;
   @Input()
   annualSourceData: Array<AnnualSourceData>;
 
   @ViewChild('utilityBarChart', { static: false }) utilityBarChart: ElementRef;
-
-  emissionsDisplay: 'market' | 'location';
-  emissionsDisplaySub: Subscription;
   selectedFacility: IdbFacility;
   constructor(private plotlyService: PlotlyService, private facilityOverviewService: FacilityOverviewService,
     private facilityDbService: FacilitydbService) { }
@@ -33,22 +30,7 @@ export class UtilitiesUsageChartComponent {
   ngOnInit(): void {
     let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     this.selectedFacility = facilities.find(facility => { return facility.guid == this.facilityId });
-
-    if (this.dataType == 'emissions') {
-      this.emissionsDisplaySub = this.facilityOverviewService.emissionsDisplay.subscribe(val => {
-        this.emissionsDisplay = val;
-        this.drawChart();
-      });
-    } else {
-      this.drawChart();
-    }
-  }
-
-  ngOnDestroy() {
-    // this.monthlySourceDataSub.unsubscribe();
-    if (this.emissionsDisplaySub) {
-      this.emissionsDisplaySub.unsubscribe();
-    }
+    this.drawChart();
   }
 
   ngAfterViewInit() {
@@ -80,12 +62,6 @@ export class UtilitiesUsageChartComponent {
           let yValues: Array<number> = new Array();
           if (this.dataType == 'cost') {
             yValues = sourceData.annualSourceDataItems.map(data => { return data.totalCost });
-          } else if (this.dataType == 'emissions') {
-            if (this.emissionsDisplay == 'market') {
-              yValues = sourceData.annualSourceDataItems.map(data => { return data.totalMarketEmissions });
-            } else {
-              yValues = sourceData.annualSourceDataItems.map(data => { return data.totalLocationEmissions });
-            }
           } else if (this.dataType == 'energyUse') {
             yValues = sourceData.annualSourceDataItems.map(data => { return data.totalEnergyUsage });
           } else if (this.dataType == 'water') {
@@ -140,8 +116,6 @@ export class UtilitiesUsageChartComponent {
   getYAxisTitle(): string {
     if (this.dataType == 'energyUse') {
       return "Utility Usage (" + this.selectedFacility.energyUnit + ")";
-    } else if (this.dataType == 'emissions') {
-      return "Utility Emissions (tonne CO<sub>2</sub>e)";
     } else if (this.dataType == 'water') {
       return "Utility Usage (" + this.selectedFacility.volumeLiquidUnit + ")";
     } else if (this.dataType == 'cost') {
@@ -152,7 +126,7 @@ export class UtilitiesUsageChartComponent {
   checkIncludeData(sourceData: AnnualSourceData): boolean {
     if (this.dataType == 'cost') {
       return true;
-    } else if (this.dataType == 'energyUse' || this.dataType == 'emissions') {
+    } else if (this.dataType == 'energyUse') {
       return EnergySources.includes(sourceData.source);
     } else if (this.dataType == 'water') {
       return WaterSources.includes(sourceData.source);

@@ -3,17 +3,12 @@
 import { getCalanderizedMeterData } from "../calculations/calanderization/calanderizeMeters";
 import { FacilityOverviewData } from "../calculations/dashboard-calculations/facilityOverviewClass";
 import { UtilityUseAndCost } from "../calculations/dashboard-calculations/useAndCostClass";
-import { setEmissionsForCalanderizedMeters } from "../calculations/emissions-calculations/emissions";
 import { CalanderizedMeter, MonthlyData } from "../models/calanderization";
 import * as _ from 'lodash';
 
 addEventListener('message', ({ data }) => {
     try {
-        let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(data.meters, data.meterData, data.facility, true, { energyIsSource: data.energyIsSource, neededUnits: undefined });
-        if (data.co2Emissions) {
-            //set emissions values
-            calanderizedMeters = setEmissionsForCalanderizedMeters(calanderizedMeters, data.energyIsSource, [data.facility], data.co2Emissions);
-        }
+        let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(data.meters, data.meterData, data.facility, true, { energyIsSource: data.energyIsSource, neededUnits: undefined }, data.co2Emissions, data.customFuels, [data.facility]);
         let dateRange: { endDate: Date, startDate: Date };
         if (!data.dateRange) {
             if (calanderizedMeters && calanderizedMeters.length > 0) {
@@ -50,6 +45,7 @@ addEventListener('message', ({ data }) => {
         }
         postMessage(results);
     } catch (err) {
+        console.log(err);
         let results = {
             facilityOverviewData: undefined,
             utilityUseAndCost: undefined,

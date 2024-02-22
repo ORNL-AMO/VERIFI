@@ -1,0 +1,125 @@
+<div class="table-responsive">
+    <table class="table utility-data table-sm table-bordered table-hover">
+        <thead>
+            <tr>
+                <th>Emissions Type</th>
+                <th>
+                    Total With Market <br>Emissions (tonne CO<sub>2</sub>e)
+                </th>
+                <th>
+                    Total With Location <br>Emissions (tonne CO<sub>2</sub>e)
+                </th>
+            </tr>
+        </thead>
+        <tbody class="table-group-divider">
+            <!--Scope 1 stationary-->
+            <tr *ngIf="overviewData.emissionsTotals.stationaryEmissions">
+                <td>
+                    <span class="badge"
+                        [ngStyle]="{background: getEmissionsTypeColor('Scope 1: Stationary'), color: getEmissionsTypeColor('Scope 1: Stationary') }">
+                        &mdash;
+                    </span>
+                    Scope 1: Stationary
+                </td>
+                <td>
+                    {{overviewData.emissionsTotals.stationaryEmissions | customNumber}}
+                </td>
+                <td>
+                    {{overviewData.emissionsTotals.stationaryEmissions | customNumber}}
+                </td>
+            </tr>
+            <tr *ngIf="overviewData.emissionsTotals.mobileTotalEmissions">
+                <td>
+                    <span class="badge"
+                        [ngStyle]="{background: getEmissionsTypeColor('Scope 1: Mobile'), color: getEmissionsTypeColor('Scope 1: Mobile') }">
+                        &mdash;
+                    </span>
+                    Scope 1: Mobile
+                </td>
+                <td>
+                    {{overviewData.emissionsTotals.mobileTotalEmissions | customNumber}}
+                </td>
+                <td>
+                    {{overviewData.emissionsTotals.mobileTotalEmissions | customNumber}}
+                </td>
+            </tr>
+            <tr *ngIf="overviewData.emissionsTotals.fugitiveEmissions">
+                <td>
+                    <span class="badge"
+                        [ngStyle]="{background: getEmissionsTypeColor('Scope 1: Fugitive'), color: getEmissionsTypeColor('Scope 1: Fugitive') }">
+                        &mdash;
+                    </span>
+                    Scope 1: Fugitive
+                </td>
+                <td>
+                    {{overviewData.emissionsTotals.fugitiveEmissions | customNumber}}
+                </td>
+                <td>
+                    {{overviewData.emissionsTotals.fugitiveEmissions | customNumber}}
+                </td>
+            </tr>
+            <tr *ngIf="overviewData.emissionsTotals.processEmissions">
+                <td>
+                    <span class="badge"
+                        [ngStyle]="{background: getEmissionsTypeColor('Scope 1: Process'), color: getEmissionsTypeColor('Scope 1: Process') }">
+                        &mdash;
+                    </span>
+                    Scope 1: Process
+                </td>
+                <td>
+                    {{overviewData.emissionsTotals.processEmissions | customNumber}}
+                </td>
+                <td>
+                    {{overviewData.emissionsTotals.processEmissions | customNumber}}
+                </td>
+            </tr>
+            <tr *ngIf="overviewData.emissionsTotals.marketElectricityEmissions || overviewData.emissionsTotals.locationElectricityEmissions">
+                <td>
+                    <span class="badge"
+                        [ngStyle]="{background: getEmissionsTypeColor('Scope 2: Electricity (Market)'), color: getEmissionsTypeColor('Scope 2: Electricity (Market)') }">
+                        &mdash;
+                    </span>
+                    <span class="badge"
+                        [ngStyle]="{background: getEmissionsTypeColor('Scope 2: Electricity (Location)'), color: getEmissionsTypeColor('Scope 2: Electricity (Location)') }">
+                        &mdash;
+                    </span>
+                    Scope 2: Electricity
+                </td>
+                <td>
+                    {{overviewData.emissionsTotals.marketElectricityEmissions | customNumber}}
+                </td>
+                <td>
+                    {{overviewData.emissionsTotals.locationElectricityEmissions | customNumber}}
+                </td>
+            </tr>
+            <tr *ngIf="overviewData.emissionsTotals.otherScope2Emissions">
+                <td>
+                    <span class="badge"
+                        [ngStyle]="{background: getEmissionsTypeColor('Scope 2: Other'), color: getEmissionsTypeColor('Scope 2: Other') }">
+                        &mdash;
+                    </span>
+                    Scope 2: Other
+                </td>
+                <td>
+                    {{overviewData.emissionsTotals.otherScope2Emissions | customNumber}}
+                </td>
+                <td>
+                    {{overviewData.emissionsTotals.otherScope2Emissions | customNumber}}
+                </td>
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr>
+                <th>
+                    Total
+                </th>
+                <th>
+                    {{overviewData.emissionsTotals.totalWithMarketEmissions | customNumber}}
+                </th>
+                <th>
+                    {{overviewData.emissionsTotals.totalWithLocationEmissions | customNumber}}
+                </th>
+            </tr>
+        </tfoot>
+    </table>
+</div>

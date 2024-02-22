@@ -10,7 +10,7 @@
 <div class="row">
     <div class="col-6">
         <app-label-with-tooltip [field]="'selectWorksheet'" [label]="'Select Worksheet'" [isBold]="true"
-            [labelId]="'worksheetName'"></app-label-with-tooltip>
+            [labelId]="'worksheetName'" [isFloatRight]="true"></app-label-with-tooltip>
         <select class="form-select" name="worksheetName" [(ngModel)]="fileReference.selectedWorksheetName"
             (change)="setSelectedWorksheetName()" id="worksheetName">
             <option *ngFor="let name of worksheetNames" [ngValue]="name">
@@ -24,7 +24,7 @@
     </div>
     <div class="col-6">
         <app-label-with-tooltip [field]="'selectImportFacility'" [label]="'Select Import Facility'" [isBold]="true"
-            [labelId]="'selectedFacilityId'"></app-label-with-tooltip>
+            [labelId]="'selectedFacilityId'" [isFloatRight]="true"></app-label-with-tooltip>
         <select class="form-select" name="selectedFacilityId" [(ngModel)]="fileReference.selectedFacilityId"
             (change)="setImportFacility()">
             <option [ngValue]="undefined">

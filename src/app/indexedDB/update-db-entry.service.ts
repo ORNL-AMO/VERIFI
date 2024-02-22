@@ -79,14 +79,6 @@ export class UpdateDbEntryService {
         if (!group.groupErrors) {
           group.groupErrors = this.analysisValidationService.getGroupErrors(group);
           isChanged = true;
-        }
-      });
-    }
-    if (analysisItem.groups) {
-      analysisItem.groups.forEach(group => {
-        if (!group.groupErrors) {
-          group.groupErrors = this.analysisValidationService.getGroupErrors(group);
-          isChanged = true;
         } else {
           let groupErrors: GroupErrors = this.analysisValidationService.getGroupErrors(group);
           Object.keys(groupErrors).forEach(key => {
@@ -95,6 +87,27 @@ export class UpdateDbEntryService {
               isChanged = true;
             }
           });
+        }
+
+        if (group['baselineAdjustments'] != undefined) {
+          group.hasDataAdjustement = group['hasBaselineAdjustement'];
+          delete group['hasBaselineAdjustement'];
+          group.dataAdjustments = group['baselineAdjustments'];
+          delete group['baselineAdjustments'];
+          isChanged = true;
+        }
+
+        if (group.baselineAdjustmentsV2 == undefined) {
+          group.hasBaselineAdjustmentV2 = false;
+          let yearBaselineAdjustments: Array<{ year: number, amount: number }> = new Array();
+          for (let year: number = analysisItem.baselineYear + 1; year <= analysisItem.reportYear; year++) {
+            yearBaselineAdjustments.push({
+              year: year,
+              amount: 0
+            })
+          }
+          group.baselineAdjustmentsV2 = yearBaselineAdjustments;
+          isChanged = true;
         }
       });
     }
@@ -109,9 +122,9 @@ export class UpdateDbEntryService {
     }
 
     if (!analysisItem.baselineYear) {
-      if(account && account.sustainabilityQuestions){
+      if (account && account.sustainabilityQuestions) {
         analysisItem.baselineYear = account.sustainabilityQuestions.energyReductionBaselineYear;
-      }else{
+      } else {
         analysisItem.baselineYear = 2017;
       }
       isChanged = true;
@@ -121,6 +134,28 @@ export class UpdateDbEntryService {
       analysisItem.setupErrors = this.analysisValidationService.getAccountAnalysisSetupErrors(analysisItem, facilityAnalysisItems);
       isChanged = true;
     }
+
+    if (analysisItem['baselineAdjustments'] != undefined) {
+      analysisItem.hasDataAdjustement = analysisItem['hasBaselineAdjustement'];
+      delete analysisItem['hasBaselineAdjustement'];
+      analysisItem.dataAdjustments = analysisItem['baselineAdjustments'];
+      delete analysisItem['baselineAdjustments'];
+      isChanged = true;
+    }
+
+    if (analysisItem.baselineAdjustmentsV2 == undefined) {
+      analysisItem.hasBaselineAdjustmentV2 = false;
+      let yearBaselineAdjustments: Array<{ year: number, amount: number }> = new Array();
+      for (let year: number = analysisItem.baselineYear + 1; year <= analysisItem.reportYear; year++) {
+        yearBaselineAdjustments.push({
+          year: year,
+          amount: 0
+        })
+      }
+      analysisItem.baselineAdjustmentsV2 = yearBaselineAdjustments;
+      isChanged = true;
+    }
+
     return { analysisItem: analysisItem, isChanged: isChanged };
   }
 
@@ -135,9 +170,15 @@ export class UpdateDbEntryService {
       isChanged = true;
       utilityMeter.source = 'Water Discharge';
       utilityMeter.waterDischargeType = 'Municipal Sewer';
+    } else if (source == 'Other Utility') {
+      isChanged = true;
+      utilityMeter.source = 'Other';
+    }
+
+    if (utilityMeter.fuel == 'Fuel Oil #5') {
+      isChanged = true;
+      utilityMeter.fuel = "Fuel Oil #5 (Navy Special)";
     }
     return { utilityMeter: utilityMeter, isChanged: isChanged };
   }
-
-
 }

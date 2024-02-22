@@ -10,30 +10,63 @@
             <th (click)="setOrderDataField('date')" [ngClass]="{'active': orderDataField == 'date'}" class="row-year">
                 Month</th>
             <th (click)="setOrderDataField('energyConsumption')"
-                [ngClass]="{'active': orderDataField == 'energyConsumption'}" *ngIf="calanderizedMeter.showConsumption">
-                Total Consumption<br> (<span [innerHTML]="calanderizedMeter.consumptionUnit | settingsLabel"></span>)
+                [ngClass]="{'active': orderDataField == 'energyConsumption'}"
+                *ngIf="calanderizedMeter.showConsumption && !isRECs">
+                Total {{consumptionLabel}}<br> (<span
+                    [innerHTML]="calanderizedMeter.consumptionUnit | settingsLabel"></span>)
             </th>
             <th (click)="setOrderDataField('energyUse')" [ngClass]="{'active': orderDataField == 'energyUse'}"
-                *ngIf="calanderizedMeter.showEnergyUse">
+                *ngIf="calanderizedMeter.showEnergyUse && !isRECs">
                 Total Energy<br> (<span [innerHTML]="calanderizedMeter.energyUnit | settingsLabel"></span>)
             </th>
+            <!--location/market-->
             <th (click)="setOrderDataField('marketEmissions')"
-                [ngClass]="{'active': orderDataField == 'marketEmissions'}" *ngIf="calanderizedMeter.showEmissions">
+                [ngClass]="{'active': orderDataField == 'marketEmissions'}"
+                *ngIf="calanderizedMeter.showStandardEmissions && !isRECs">
                 Total <br>Market-Based<br>Emissions (tonne
                 CO<sub>2</sub>e)</th>
             <th (click)="setOrderDataField('locationEmissions')"
-                [ngClass]="{'active': orderDataField == 'locationEmissions'}" *ngIf="calanderizedMeter.showEmissions">
+                [ngClass]="{'active': orderDataField == 'locationEmissions'}"
+                *ngIf="calanderizedMeter.showStandardEmissions && !isRECs">
                 Total <br>Location-Based<br>Emissions (tonne
                 CO<sub>2</sub>e)</th>
             <th (click)="setOrderDataField('RECs')" [ngClass]="{'active': orderDataField == 'RECs'}"
-                *ngIf="calanderizedMeter.showEmissions">RECs<br> (MWh)</th>
+                *ngIf="calanderizedMeter.showStandardEmissions">RECs<br> (MWh)</th>
             <th (click)="setOrderDataField('excessRECs')" [ngClass]="{'active': orderDataField == 'excessRECs'}"
-                *ngIf="calanderizedMeter.showEmissions">Excess
+                *ngIf="calanderizedMeter.showStandardEmissions && isRECs">Excess
                 RECs<br> (MWh)</th>
             <th (click)="setOrderDataField('excessRECsEmissions')"
-                [ngClass]="{'active': orderDataField == 'excessRECsEmissions'}" *ngIf="calanderizedMeter.showEmissions">
+                [ngClass]="{'active': orderDataField == 'excessRECsEmissions'}"
+                *ngIf="calanderizedMeter.showStandardEmissions && isRECs">
                 Excess
                 RECs <br>Emissions<br> (tonne CO<sub>2</sub>e)</th>
+            <!--mobile-->
+            <th (click)="setOrderDataField('mobileBiogenicEmissions')"
+                [ngClass]="{'active': orderDataField == 'mobileBiogenicEmissions'}"
+                *ngIf="calanderizedMeter.showMobileEmissions">
+                Mobile Biogenic<br>Emissions<br> (tonne CO<sub>2</sub>e)</th>
+            <th (click)="setOrderDataField('mobileCarbonEmissions')"
+                [ngClass]="{'active': orderDataField == 'mobileCarbonEmissions'}"
+                *ngIf="calanderizedMeter.showMobileEmissions">
+                Mobile Carbon<br>Emissions<br> (tonne CO<sub>2</sub>e)</th>
+            <th (click)="setOrderDataField('mobileOtherEmissions')"
+                [ngClass]="{'active': orderDataField == 'mobileOtherEmissions'}"
+                *ngIf="calanderizedMeter.showMobileEmissions">
+                Mobile Other<br>Emissions<br> (tonne CO<sub>2</sub>e)</th>
+            <th (click)="setOrderDataField('mobileTotalEmissions')"
+                [ngClass]="{'active': orderDataField == 'mobileTotalEmissions'}"
+                *ngIf="calanderizedMeter.showMobileEmissions">
+                Mobile Total<br>Emissions<br> (tonne CO<sub>2</sub>e)</th>
+            <!--fugitive-->
+            <th (click)="setOrderDataField('fugitiveEmissions')"
+                [ngClass]="{'active': orderDataField == 'fugitiveEmissions'}"
+                *ngIf="calanderizedMeter.showFugitiveEmissions">
+                Fugitive<br>Emissions<br> (tonne CO<sub>2</sub>e)</th>
+            <!--process-->
+            <th (click)="setOrderDataField('processEmissions')"
+                [ngClass]="{'active': orderDataField == 'processEmissions'}"
+                *ngIf="calanderizedMeter.showProcessEmissions">
+                Process<br>Emissions<br> (tonne CO<sub>2</sub>e)</th>
             <th (click)="setOrderDataField('energyCost')" [ngClass]="{'active': orderDataField == 'energyCost'}">Total
                 Cost</th>
         </tr>
@@ -42,20 +75,36 @@
         <tr *ngFor="let data of calanderizedMeter.monthlyData| orderBy: orderDataField: orderByDirection | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage"
             [ngClass]="{'use-and-consumption': data.energyConsumption && data.energyUse}">
             <td>{{data.date | date: 'MMMM, y'}}</td>
-            <td *ngIf="calanderizedMeter.showConsumption">{{data.energyConsumption |customNumber}}
+            <td *ngIf="calanderizedMeter.showConsumption && !isRECs">{{data.energyConsumption |customNumber}}
             </td>
-            <td *ngIf="calanderizedMeter.showEnergyUse">{{data.energyUse | customNumber}}
+            <td *ngIf="calanderizedMeter.showEnergyUse && !isRECs">{{data.energyUse | customNumber}}
             </td>
-            <td *ngIf="calanderizedMeter.showEmissions">{{data.marketEmissions | customNumber}}
+            <!--location/market emissions-->
+            <td *ngIf="calanderizedMeter.showStandardEmissions && !isRECs">{{data.totalWithMarketEmissions | customNumber}}
             </td>
-            <td *ngIf="calanderizedMeter.showEmissions">{{data.locationEmissions | customNumber}}
+            <td *ngIf="calanderizedMeter.showStandardEmissions && !isRECs">{{data.totalWithLocationEmissions | customNumber}}
             </td>
-            <td *ngIf="calanderizedMeter.showEmissions">{{data.RECs | customNumber}}
+            <td *ngIf="calanderizedMeter.showStandardEmissions">{{data.RECs | customNumber}}
             </td>
-            <td *ngIf="calanderizedMeter.showEmissions">{{data.excessRECs | customNumber}}
+            <td *ngIf="calanderizedMeter.showStandardEmissions && isRECs">{{data.excessRECs | customNumber}}
             </td>
-            <td *ngIf="calanderizedMeter.showEmissions">
+            <td *ngIf="calanderizedMeter.showStandardEmissions && isRECs">
                 {{data.excessRECsEmissions | customNumber}}
+            </td>
+            <!--mobile-->
+            <td *ngIf="calanderizedMeter.showMobileEmissions">{{data.mobileBiogenicEmissions | customNumber}}
+            </td>
+            <td *ngIf="calanderizedMeter.showMobileEmissions">{{data.mobileCarbonEmissions | customNumber}}
+            </td>
+            <td *ngIf="calanderizedMeter.showMobileEmissions">{{data.mobileOtherEmissions | customNumber}}
+            </td>
+            <td *ngIf="calanderizedMeter.showMobileEmissions">{{data.mobileTotalEmissions | customNumber}}
+            </td>
+            <!--fugitive-->
+            <td *ngIf="calanderizedMeter.showFugitiveEmissions">{{data.fugitiveEmissions | customNumber}}
+            </td>
+            <!--process-->
+            <td *ngIf="calanderizedMeter.showProcessEmissions">{{data.processEmissions | customNumber}}
             </td>
             <td>{{data.energyCost | customNumber:true}}
             </td>
