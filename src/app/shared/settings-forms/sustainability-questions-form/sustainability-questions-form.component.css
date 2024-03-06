@@ -1,3 +1,8 @@
 .form-check{
     margin-left: .5rem;
 }
+
+.form-check.new-facility .form-check-input, .form-check.new-facility .form-check-label{
+    font-weight: bold;
+    font-size: large;
+}
