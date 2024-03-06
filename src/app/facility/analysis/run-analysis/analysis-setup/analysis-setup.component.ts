@@ -14,6 +14,8 @@ import { VolumeLiquidOptions } from 'src/app/shared/unitOptions';
 import { AnalysisValidationService } from 'src/app/shared/helper-services/analysis-validation.service';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
+import { RegressionModelsService } from 'src/app/shared/shared-analysis/calculations/regression-models.service';
+import { AnalysisGroup } from 'src/app/models/analysis';
 @Component({
   selector: 'app-analysis-setup',
   templateUrl: './analysis-setup.component.html',
@@ -42,7 +44,8 @@ export class AnalysisSetupComponent implements OnInit {
     private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
     private calanderizationService: CalanderizationService,
-    private accountAnalysisDbService: AccountAnalysisDbService) { }
+    private accountAnalysisDbService: AccountAnalysisDbService,
+    private regressionModelsService: RegressionModelsService) { }
 
   ngOnInit(): void {
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
@@ -179,12 +182,20 @@ export class AnalysisSetupComponent implements OnInit {
     this.displayChangeReportYear = true;
   }
 
-  cancelChangeReportYear(){
+  cancelChangeReportYear() {
     this.displayChangeReportYear = false;
   }
 
-  async saveNewReportYear(){
+  async saveNewReportYear() {
     this.analysisItem.reportYear = this.newReportYear;
+    for (let i = 0; i < this.analysisItem.groups.length; i++) {
+      let group: AnalysisGroup = this.analysisItem.groups[i];
+      if (group.analysisType == 'regression') {
+        for (let m = 0; m < group.models.length; m++) {
+          this.analysisItem.groups[i].models[m] = this.regressionModelsService.updateModelReportYear(this.analysisItem.groups[i].models[m], this.analysisItem.reportYear, this.facility, this.analysisItem.baselineYear);
+        }
+      }
+    }
     this.displayChangeReportYear = false;
     await this.saveItem();
   }
