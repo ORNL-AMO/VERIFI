@@ -28,11 +28,14 @@ export class AnalysisSetupComponent implements OnInit {
   facility: IdbFacility;
   analysisItem: IdbAnalysisItem;
   yearOptions: Array<number>;
+  reportYears: Array<number>;
   baselineYearWarning: string;
   disableForm: boolean;
   showInUseMessage: boolean;
   hasModelsGenerated: boolean;
   displayEnableForm: boolean = false;
+  displayChangeReportYear: boolean = false;
+  newReportYear: number;
   constructor(private facilityDbService: FacilitydbService, private analysisDbService: AnalysisDbService,
     private analysisService: AnalysisService, private router: Router,
     private analysisValidationService: AnalysisValidationService,
@@ -45,6 +48,7 @@ export class AnalysisSetupComponent implements OnInit {
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
     this.facility = this.facilityDbService.selectedFacility.getValue();
     this.yearOptions = this.calanderizationService.getYearOptionsFacility(this.facility.guid, this.analysisItem.analysisCategory);
+    this.setReportYears();
     this.setBaselineYearWarning();
     this.setComponentBools();
   }
@@ -58,7 +62,7 @@ export class AnalysisSetupComponent implements OnInit {
     this.analysisDbService.selectedAnalysisItem.next(this.analysisItem);
   }
 
-  changeReportYear() {
+  async changeReportYear() {
     this.analysisItem = this.analysisService.setDataAdjustments(this.analysisItem);
     this.setBaselineYearWarning();
     if (!this.baselineYearWarning) {
@@ -73,7 +77,8 @@ export class AnalysisSetupComponent implements OnInit {
     } else {
       this.analysisItem.selectedYearAnalysis = false;
     }
-    this.saveItem();
+    this.setReportYears();
+    await this.saveItem();
   }
 
   async setSiteSource() {
@@ -147,5 +152,40 @@ export class AnalysisSetupComponent implements OnInit {
     await this.saveItem();
     this.setComponentBools();
     this.displayEnableForm = undefined;
+  }
+
+  setReportYears() {
+    if (this.analysisItem.baselineYear) {
+      let modelYears: Array<number> = [this.analysisItem.baselineYear];
+
+      this.analysisItem.groups.forEach(group => {
+        if (group.analysisType == 'regression') {
+          modelYears.push(group.regressionModelYear);
+        }
+      });
+
+      let minNeededModelYear: number = _.max(modelYears);
+
+      this.reportYears = this.yearOptions.filter(year => {
+        return year > minNeededModelYear;
+      });
+    } else {
+      this.reportYears = [];
+    }
+  }
+
+  showChangeReportYear() {
+    this.newReportYear = this.analysisItem.reportYear;
+    this.displayChangeReportYear = true;
+  }
+
+  cancelChangeReportYear(){
+    this.displayChangeReportYear = false;
+  }
+
+  async saveNewReportYear(){
+    this.analysisItem.reportYear = this.newReportYear;
+    this.displayChangeReportYear = false;
+    await this.saveItem();
   }
 }
