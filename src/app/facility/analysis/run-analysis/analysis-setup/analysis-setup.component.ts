@@ -159,7 +159,7 @@ export class AnalysisSetupComponent implements OnInit {
       let modelYears: Array<number> = [this.analysisItem.baselineYear];
 
       this.analysisItem.groups.forEach(group => {
-        if (group.analysisType == 'regression') {
+        if (group.analysisType == 'regression' && group.regressionModelYear) {
           modelYears.push(group.regressionModelYear);
         }
       });
