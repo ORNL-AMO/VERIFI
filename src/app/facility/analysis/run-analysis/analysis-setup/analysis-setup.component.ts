@@ -196,6 +196,7 @@ export class AnalysisSetupComponent implements OnInit {
         }
       }
     }
+    this.changeReportYear();
     this.displayChangeReportYear = false;
     await this.saveItem();
   }

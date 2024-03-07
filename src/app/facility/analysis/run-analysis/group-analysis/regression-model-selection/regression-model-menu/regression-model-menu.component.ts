@@ -18,6 +18,7 @@ import { AnalysisValidationService } from 'src/app/shared/helper-services/analys
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
 import { getNeededUnits } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
+import { LoadingService } from 'src/app/core-components/loading/loading.service';
 @Component({
   selector: 'app-regression-model-menu',
   templateUrl: './regression-model-menu.component.html',
@@ -37,6 +38,7 @@ export class RegressionModelMenuComponent implements OnInit {
   selectedFacility: IdbFacility;
   isFormChange: boolean;
   analysisItem: IdbAnalysisItem;
+  numVariableOptions: Array<number>;
   constructor(private analysisDbService: AnalysisDbService, private analysisService: AnalysisService,
     private dbChangesService: DbChangesService, private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService,
@@ -44,7 +46,8 @@ export class RegressionModelMenuComponent implements OnInit {
     private utilityMeterDbService: UtilityMeterdbService, private utilityMeterDataDbService: UtilityMeterDatadbService,
     private analysisValidationService: AnalysisValidationService,
     private sharedDataService: SharedDataService,
-    private calanderizationService: CalanderizationService) { }
+    private calanderizationService: CalanderizationService,
+    private loadingService: LoadingService) { }
 
   ngOnInit(): void {
     this.selectedFacility = this.facilityDbService.selectedFacility.getValue();
@@ -54,13 +57,13 @@ export class RegressionModelMenuComponent implements OnInit {
     this.selectedGroupSub = this.analysisService.selectedGroup.subscribe(group => {
       if (!this.isFormChange) {
         this.group = JSON.parse(JSON.stringify(group));
+        this.setNumVariableOptions();
         if (this.group.models && this.group.models.length != 0) {
           this.checkModelData();
           this.checkHasValidModels();
         } else if (this.group.models == undefined) {
           this.generateModels();
         } else {
-
           this.noValidModels = false;
         }
       } else {
@@ -77,6 +80,7 @@ export class RegressionModelMenuComponent implements OnInit {
     this.isFormChange = true;
     let groupIndex: number = this.analysisItem.groups.findIndex(group => { return group.idbGroupId == this.group.idbGroupId });
     this.group.groupErrors = this.analysisValidationService.getGroupErrors(this.group);
+    this.setNumVariableOptions();
     this.analysisItem.groups[groupIndex] = this.group;
     this.analysisItem.setupErrors = this.analysisValidationService.getAnalysisItemErrors(this.analysisItem);
     await firstValueFrom(this.analysisDbService.updateWithObservable(this.analysisItem));
@@ -101,37 +105,43 @@ export class RegressionModelMenuComponent implements OnInit {
   }
 
   generateModels(autoSelect?: boolean) {
-    let analysisItem: IdbAnalysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
-    let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
-    let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
-    let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, facilityMeterData, this.selectedFacility, false, { energyIsSource: this.analysisItem.energyIsSource, neededUnits: getNeededUnits(this.analysisItem) }, [], [], [this.selectedFacility]);
+    this.loadingService.setLoadingMessage("Generating Regression Models...");
+    this.loadingService.setLoadingStatus(true);
+    setTimeout(() => {
 
-    this.group.models = this.regressionsModelsService.getModels(this.group, calanderizedMeters, this.selectedFacility, analysisItem);
-    if (this.group.models) {
-      this.modelingError = false;
-      this.checkHasValidModels();
-      this.hasLaterDate = false;
-      this.group.dateModelsGenerated = new Date();
-      if (autoSelect) {
-        let minPValModel: JStatRegressionModel = _.maxBy(this.group.models, 'adjust_R2');
-        if (minPValModel) {
-          this.group.selectedModelId = minPValModel.modelId;
-          this.group.regressionConstant = minPValModel.coef[0];
-          this.group.regressionModelYear = minPValModel.modelYear;
-          this.group.predictorVariables.forEach(variable => {
-            let coefIndex: number = minPValModel.predictorVariables.findIndex(pVariable => { return pVariable.id == variable.id });
-            if (coefIndex != -1) {
-              variable.regressionCoefficient = minPValModel.coef[coefIndex + 1];
-            } else {
-              variable.regressionCoefficient = 0;
-            }
-          });
+      let analysisItem: IdbAnalysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
+      let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
+      let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
+      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, facilityMeterData, this.selectedFacility, false, { energyIsSource: this.analysisItem.energyIsSource, neededUnits: getNeededUnits(this.analysisItem) }, [], [], [this.selectedFacility]);
+
+      this.group.models = this.regressionsModelsService.getModels(this.group, calanderizedMeters, this.selectedFacility, analysisItem);
+      if (this.group.models) {
+        this.modelingError = false;
+        this.checkHasValidModels();
+        this.hasLaterDate = false;
+        this.group.dateModelsGenerated = new Date();
+        if (autoSelect) {
+          let minPValModel: JStatRegressionModel = _.maxBy(this.group.models, 'adjust_R2');
+          if (minPValModel) {
+            this.group.selectedModelId = minPValModel.modelId;
+            this.group.regressionConstant = minPValModel.coef[0];
+            this.group.regressionModelYear = minPValModel.modelYear;
+            this.group.predictorVariables.forEach(variable => {
+              let coefIndex: number = minPValModel.predictorVariables.findIndex(pVariable => { return pVariable.id == variable.id });
+              if (coefIndex != -1) {
+                variable.regressionCoefficient = minPValModel.coef[coefIndex + 1];
+              } else {
+                variable.regressionCoefficient = 0;
+              }
+            });
+          }
         }
+      } else {
+        this.modelingError = true;
       }
-    } else {
-      this.modelingError = true;
-    }
-    this.saveItem();
+      this.loadingService.setLoadingStatus(false);
+      this.saveItem();
+    }, 100)
   }
 
 
@@ -211,5 +221,26 @@ export class RegressionModelMenuComponent implements OnInit {
     this.group.regressionConstant = undefined;
     this.saveItem();
     this.showConfirmPredictorChangeModel = false;
+  }
+
+  setNumVariableOptions() {
+    this.numVariableOptions = new Array();
+    let variableNum: number = 1;
+    this.group.predictorVariables.forEach(pVariable => {
+      if (pVariable.productionInAnalysis) {
+        this.numVariableOptions.push(variableNum);
+        variableNum++;
+      }
+    });
+    if (this.numVariableOptions.length > 0) {
+      let valueExists: number = this.numVariableOptions.find(option => {
+        return option == this.group.maxModelVariables;
+      });
+      if (valueExists == undefined) {
+        this.group.maxModelVariables = this.numVariableOptions[this.numVariableOptions.length - 1];
+      }
+    } else {
+      this.group.maxModelVariables = 0;
+    }
   }
 }

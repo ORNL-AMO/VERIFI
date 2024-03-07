@@ -24,3 +24,7 @@ tr.border-top, tfoot.border-top{
 td.invalid{
     color: red;
 }
+
+.no-break{
+    text-wrap: nowrap;
+}

@@ -29,8 +29,7 @@ export class RegressionModelsService {
       }
     });
     if (predictorVariableIds.length != 0) {
-      let allPredictorVariableCombos: Array<Array<string>> = this.getPredictorCombos(predictorVariableIds);
-
+      let allPredictorVariableCombos: Array<Array<string>> = this.getPredictorCombos(predictorVariableIds, analysisGroup.maxModelVariables);
       let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.accountPredictorEntries.getValue();
       let facilityPredictorData: Array<IdbPredictorEntry> = accountPredictorEntries.filter(entry => {
         return entry.facilityId == facility.guid;
@@ -258,9 +257,12 @@ export class RegressionModelsService {
     return model;
   }
 
-  getPredictorCombos(predictorIds: Array<string>): Array<Array<string>> {
+  getPredictorCombos(predictorIds: Array<string>, maxModelVariables: number): Array<Array<string>> {
     let allCombos: Array<Array<string>> = [];
-    for (let i = 1; i < 5; i++) {
+    if (!maxModelVariables) {
+      maxModelVariables = 4;
+    }
+    for (let i = 1; i <= maxModelVariables; i++) {
       this.getCombinations(predictorIds, i, allCombos);
     }
     return allCombos;

@@ -217,7 +217,8 @@ export interface AnalysisGroup {
   models?: Array<JStatRegressionModel>,
   selectedModelId?: string,
   dateModelsGenerated?: Date,
-  regressionModelNotes?: string
+  regressionModelNotes?: string,
+  maxModelVariables: number
 }
 
 export interface GroupErrors {

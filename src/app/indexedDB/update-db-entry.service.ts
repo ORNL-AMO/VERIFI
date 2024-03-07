@@ -109,6 +109,10 @@ export class UpdateDbEntryService {
           group.baselineAdjustmentsV2 = yearBaselineAdjustments;
           isChanged = true;
         }
+        if(group.maxModelVariables == undefined){
+          group.maxModelVariables = 4;
+          isChanged= true;
+        }
       });
     }
     return { analysisItem: analysisItem, isChanged: isChanged };
