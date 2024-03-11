@@ -1,4 +1,4 @@
-import { IdbAccount, IdbAccountAnalysisItem } from "src/app/models/idb";
+import { IdbAccount } from "src/app/models/idb";
 import { MonthlyAnalysisCalculatedValues } from "./monthlyAnalysisCalculatedValuesClass";
 import { MonthlyAnalysisSummaryDataClass } from "./monthlyAnalysisSummaryDataClass";
 import * as _ from 'lodash';
@@ -25,9 +25,7 @@ export class MonthlyAccountAnalysisDataClass {
         monthDate: Date,
         previousMonthsSummaryData: Array<MonthlyAccountAnalysisDataClass>,
         baselineYear: number,
-        account: IdbAccount,
-        analysisItem: IdbAccountAnalysisItem,
-        annualUsageValues: Array<{ year: number, usage: number }>) {
+        account: IdbAccount) {
         this.date = monthDate;
         this.setFiscalYear(account);
         this.setCurrentMonthData(allFacilityAnalysisData);
