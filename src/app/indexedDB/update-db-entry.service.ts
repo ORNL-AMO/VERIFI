@@ -138,28 +138,6 @@ export class UpdateDbEntryService {
       analysisItem.setupErrors = this.analysisValidationService.getAccountAnalysisSetupErrors(analysisItem, facilityAnalysisItems);
       isChanged = true;
     }
-
-    if (analysisItem['baselineAdjustments'] != undefined) {
-      analysisItem.hasDataAdjustement = analysisItem['hasBaselineAdjustement'];
-      delete analysisItem['hasBaselineAdjustement'];
-      analysisItem.dataAdjustments = analysisItem['baselineAdjustments'];
-      delete analysisItem['baselineAdjustments'];
-      isChanged = true;
-    }
-
-    if (analysisItem.baselineAdjustmentsV2 == undefined) {
-      analysisItem.hasBaselineAdjustmentV2 = false;
-      let yearBaselineAdjustments: Array<{ year: number, amount: number }> = new Array();
-      for (let year: number = analysisItem.baselineYear + 1; year <= analysisItem.reportYear; year++) {
-        yearBaselineAdjustments.push({
-          year: year,
-          amount: 0
-        })
-      }
-      analysisItem.baselineAdjustmentsV2 = yearBaselineAdjustments;
-      isChanged = true;
-    }
-
     return { analysisItem: analysisItem, isChanged: isChanged };
   }
 
