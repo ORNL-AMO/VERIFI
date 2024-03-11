@@ -167,7 +167,9 @@ export class AnnualAnalysisSummaryDataClass {
 
     setSavings(previousYearsSummaryData: Array<AnnualAnalysisSummaryDataClass>) {
         if (previousYearsSummaryData.length != 0) {
-            this.savings = this.adjusted - this.energyUse;
+            this.savings = _.sumBy(this.yearAnalysisSummaryData, (data: MonthlyAnalysisSummaryData) => {
+                return data.savings;
+            });
         } else {
             this.savings = 0;
         }

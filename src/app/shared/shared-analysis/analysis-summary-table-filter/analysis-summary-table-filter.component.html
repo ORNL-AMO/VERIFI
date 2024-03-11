@@ -19,7 +19,7 @@
                         [(ngModel)]="analysisTableColumns.actualEnergy" (change)="save()" id="actualEnergy">
                     <label class="form-check-label" for="actualEnergy">{{actualUseLabel}}</label>
                 </div>
-                <div class="form-check">
+                <div class="form-check" *ngIf="tableContext == 'monthGroup'">
                     <input class="form-check-input" type="checkbox" name="modeledEnergy"
                         [(ngModel)]="analysisTableColumns.modeledEnergy" (change)="save()" id="modeledEnergy">
                     <label class="form-check-label" for="modeledEnergy">{{modeledUseLabel}}</label>
