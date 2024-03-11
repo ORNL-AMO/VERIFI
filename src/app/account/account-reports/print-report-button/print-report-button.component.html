@@ -2,12 +2,12 @@
     <div class="d-flex flex-column">
         <div class="p-2"
             *ngIf="selectedReport.reportType == 'betterPlants' || selectedReport.reportType == 'betterClimate'">
-            <button class="btn action-btn w-100" (click)="generateExcel()">
+            <button class="btn action-btn w-100" (click)="generateExcel()" title="Generate Excel Report">
                 <span class="fa fa-file-excel"></span>
             </button>
         </div>
         <div class="p-2">
-            <button class="btn action-btn" (click)="togglePrint()">
+            <button class="btn action-btn" (click)="togglePrint()" title="Generate PDF Report">
                 <span class="fa fa-file-pdf"></span>
             </button>
         </div>
