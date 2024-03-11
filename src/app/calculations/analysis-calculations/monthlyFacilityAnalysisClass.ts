@@ -78,8 +78,6 @@ export class MonthlyFacilityAnalysisClass {
                 this.allFacilityAnalysisData,
                 monthDate,
                 this.facilityPredictorEntries,
-                this.facilityMonthSummaries,
-                this.baselineYear,
                 facility
             );
             this.facilityMonthSummaries.push(monthSummary);
@@ -95,12 +93,12 @@ export class MonthlyFacilityAnalysisClass {
         return this.facilityMonthSummaries.map(summaryDataItem => {
             return {
                 date: summaryDataItem.date,
-                energyUse: summaryDataItem.energyUse,
-                modeledEnergy: summaryDataItem.modeledEnergy,
+                energyUse: summaryDataItem.monthlyAnalysisCalculatedValues.energyUse,
+                modeledEnergy: undefined,
                 adjusted: summaryDataItem.monthlyAnalysisCalculatedValues.adjusted,
-                baselineAdjustmentForNormalization: summaryDataItem.monthlyAnalysisCalculatedValues.baselineAdjustmentForNormalization,
-                baselineAdjustmentForOtherV2: summaryDataItem.monthlyAnalysisCalculatedValues.baselineAdjustmentForOtherV2,
-                baselineAdjustment: summaryDataItem.monthlyAnalysisCalculatedValues.baselineAdjustment,
+                baselineAdjustmentForNormalization: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.baselineAdjustmentForNormalization),
+                baselineAdjustmentForOtherV2: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.baselineAdjustmentForOtherV2),
+                baselineAdjustment: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.baselineAdjustment),
                 predictorUsage: summaryDataItem.predictorUsage,
                 fiscalYear: summaryDataItem.fiscalYear,
                 group: undefined,
@@ -113,8 +111,6 @@ export class MonthlyFacilityAnalysisClass {
                 rolling12MonthImprovement: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.rolling12MonthImprovement) * 100,
                 dataAdjustment: summaryDataItem.dataAdjustment,
                 modelYearDataAdjustment: summaryDataItem.modelYearDataAdjustment,
-                adjustedStar: summaryDataItem.monthlyAnalysisCalculatedValues.adjustedStar,
-                adjustedStarStar: summaryDataItem.monthlyAnalysisCalculatedValues.adjustedStarStar,
                 baselineAdjustmentInput: summaryDataItem.baselineAdjustmentInput
             }
         })

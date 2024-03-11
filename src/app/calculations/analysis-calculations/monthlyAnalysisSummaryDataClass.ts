@@ -2,10 +2,10 @@ import { MonthlyData } from "src/app/models/calanderization";
 import { IdbFacility, IdbPredictorEntry, PredictorData } from "src/app/models/idb";
 import { MonthlyGroupAnalysisClass } from "./monthlyGroupAnalysisClass";
 import * as _ from 'lodash';
-import { MonthlyAnalysisCalculatedValues } from "./monthlyAnalysisCalculatedValuesClass";
 import { getFiscalYear } from "../shared-calculations/calanderizationFunctions";
 import { AnalysisCategory, AnalysisGroup, AnalysisType } from "src/app/models/analysis";
 import { ConvertValue } from "../conversions/convertValue";
+import { GroupMonthlyAnalysisCalculatedValues } from "./groupMonthlyAnalysisCalculatedValuesClass";
 
 export class MonthlyAnalysisSummaryDataClass {
     //results
@@ -22,7 +22,7 @@ export class MonthlyAnalysisSummaryDataClass {
     }>;
     fiscalYear: number;
     group: AnalysisGroup;
-    monthlyAnalysisCalculatedValues: MonthlyAnalysisCalculatedValues;
+    monthlyAnalysisCalculatedValues: GroupMonthlyAnalysisCalculatedValues;
 
     //used for calcs
     monthPredictorData: Array<IdbPredictorEntry>;
@@ -204,8 +204,8 @@ export class MonthlyAnalysisSummaryDataClass {
 
 
     setMonthlyAnalysisCalculatedValues(baselineYear: number, previousMonthsSummaryData: Array<MonthlyAnalysisSummaryDataClass>) {
-        let previousMonthsAnalysisCalculatedValues: Array<MonthlyAnalysisCalculatedValues> = previousMonthsSummaryData.map(data => { return data.monthlyAnalysisCalculatedValues });
-        this.monthlyAnalysisCalculatedValues = new MonthlyAnalysisCalculatedValues(
+        let previousMonthsAnalysisCalculatedValues: Array<GroupMonthlyAnalysisCalculatedValues> = previousMonthsSummaryData.map(data => { return data.monthlyAnalysisCalculatedValues });
+        this.monthlyAnalysisCalculatedValues = new GroupMonthlyAnalysisCalculatedValues(
             this.energyUse,
             this.modeledEnergy,
             this.baselineAdjustmentInput,
