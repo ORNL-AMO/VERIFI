@@ -82,7 +82,7 @@ export interface MonthlyAnalysisSummaryData {
 export interface AnnualAnalysisSummary {
   year: number,
   energyUse: number,
-  modeledEnergy: number,
+  // modeledEnergy: number,
   // adjustementForNormalization: number,
   adjusted: number,
   baselineAdjustmentForNormalization: number,

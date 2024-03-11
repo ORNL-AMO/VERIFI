@@ -27,10 +27,6 @@
                 [ngClass]="{'active': orderDataField == 'energyUse'}">
                 Actual
             </th>
-            <th *ngIf="analysisTableColumns.modeledEnergy" (click)="setOrderDataField('modeledEnergy')"
-                [ngClass]="{'active': orderDataField == 'modeledEnergy'}">
-                Modeled
-            </th>
             <th *ngIf="analysisTableColumns.adjusted" (click)="setOrderDataField('adjusted')"
                 [ngClass]="{'active': orderDataField == 'adjusted'}">
                 Adjusted
@@ -95,14 +91,6 @@
                     {{summary.energyUse | customNumber}}
                 </span>
                 <span *ngIf="!summary.energyUse">
-                    &mdash;
-                </span>
-            </td>
-            <td *ngIf="analysisTableColumns.modeledEnergy">
-                <span *ngIf="summary.modeledEnergy" [ngClass]="{'red': summary.modeledEnergy < 0}">
-                    {{summary.modeledEnergy | customNumber}}
-                </span>
-                <span *ngIf="!summary.modeledEnergy">
                     &mdash;
                 </span>
             </td>
