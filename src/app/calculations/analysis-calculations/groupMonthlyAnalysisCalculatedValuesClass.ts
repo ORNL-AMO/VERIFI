@@ -1,6 +1,6 @@
 import * as _ from 'lodash';
 import { ConvertValue } from '../conversions/convertValue';
-export class MonthlyAnalysisCalculatedValues {
+export class GroupMonthlyAnalysisCalculatedValues {
     //results
     energyUse: number;
     modeledEnergy: number;
@@ -35,7 +35,7 @@ export class MonthlyAnalysisCalculatedValues {
         baselineAdjustementInput: number,
         fiscalYear: number,
         baselineYear: number,
-        previousMonthValues: Array<MonthlyAnalysisCalculatedValues>,
+        previousMonthValues: Array<GroupMonthlyAnalysisCalculatedValues>,
         baselineActualEnergyUse: number,
         modelYearDataAdjusted: number,
         dataAdjustment: number
@@ -62,7 +62,7 @@ export class MonthlyAnalysisCalculatedValues {
         this.setYearToDatePercentSavings();
     }
 
-    initializeYearToDateValues(previousMonthsValues: Array<MonthlyAnalysisCalculatedValues>) {
+    initializeYearToDateValues(previousMonthsValues: Array<GroupMonthlyAnalysisCalculatedValues>) {
         this.summaryDataIndex = previousMonthsValues.length;
         if (this.summaryDataIndex == 0) {
             this.monthIndex = 0;
@@ -72,7 +72,7 @@ export class MonthlyAnalysisCalculatedValues {
             this.yearToDateBaselineModeledEnergyUse = 0;
             this.yearToDateAdjustedEnergyUse = 0;
         } else {
-            let previousMonthSummaryData: MonthlyAnalysisCalculatedValues = previousMonthsValues[this.summaryDataIndex - 1];
+            let previousMonthSummaryData: GroupMonthlyAnalysisCalculatedValues = previousMonthsValues[this.summaryDataIndex - 1];
             if (previousMonthSummaryData.fiscalYear == this.fiscalYear) {
                 this.monthIndex = previousMonthSummaryData.monthIndex + 1;
                 this.yearToDateBaselineActualEnergyUse = previousMonthSummaryData.yearToDateBaselineActualEnergyUse;
@@ -103,7 +103,7 @@ export class MonthlyAnalysisCalculatedValues {
         this.yearToDateActualEnergyUse = this.yearToDateActualEnergyUse + this.energyUse;
     }
 
-    setBaselineModeledEnergyUse(baselineYear: number, previousMonthsValues: Array<MonthlyAnalysisCalculatedValues>) {
+    setBaselineModeledEnergyUse(baselineYear: number, previousMonthsValues: Array<GroupMonthlyAnalysisCalculatedValues>) {
         if (this.fiscalYear == baselineYear) {
             this.baselineModeledEnergyUse = this.modeledEnergy;
         } else {
@@ -166,11 +166,11 @@ export class MonthlyAnalysisCalculatedValues {
         }
     }
 
-    setRollingSavingsValues(previousMonthsValues: Array<MonthlyAnalysisCalculatedValues>) {
+    setRollingSavingsValues(previousMonthsValues: Array<GroupMonthlyAnalysisCalculatedValues>) {
         if (this.summaryDataIndex > 11) {
-            let last11MonthsData: Array<MonthlyAnalysisCalculatedValues> = previousMonthsValues.splice(this.summaryDataIndex - 11, this.summaryDataIndex);
-            let total12MonthsEnergyUse: number = _.sumBy(last11MonthsData, (data: MonthlyAnalysisCalculatedValues) => { return data.energyUse }) + this.energyUse;
-            let total12MonthsAdjusedBaseline: number = _.sumBy(last11MonthsData, (data: MonthlyAnalysisCalculatedValues) => { return data.adjusted }) + this.adjusted;
+            let last11MonthsData: Array<GroupMonthlyAnalysisCalculatedValues> = previousMonthsValues.splice(this.summaryDataIndex - 11, this.summaryDataIndex);
+            let total12MonthsEnergyUse: number = _.sumBy(last11MonthsData, (data: GroupMonthlyAnalysisCalculatedValues) => { return data.energyUse }) + this.energyUse;
+            let total12MonthsAdjusedBaseline: number = _.sumBy(last11MonthsData, (data: GroupMonthlyAnalysisCalculatedValues) => { return data.adjusted }) + this.adjusted;
             this.rollingSavings = total12MonthsAdjusedBaseline - total12MonthsEnergyUse;
             this.rolling12MonthImprovement = this.rollingSavings / total12MonthsAdjusedBaseline;
         } else {

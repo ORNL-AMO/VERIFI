@@ -34,7 +34,7 @@ export class MonthlyAccountAnalysisClass {
         this.setStartAndEndDate(account, accountAnalysisItem, calculateAllMonthlyData);
         this.setBaselineYear(account);
         this.setAnnualUsageValues();
-        this.setAccountMonthSummaries(account, accountAnalysisItem);
+        this.setAccountMonthSummaries(account);
     }
 
     setStartAndEndDate(account: IdbAccount, analysisItem: IdbAccountAnalysisItem, calculateAllMonthlyData: boolean) {
@@ -101,15 +101,13 @@ export class MonthlyAccountAnalysisClass {
         }
     }
 
-    setAccountMonthSummaries(account: IdbAccount, accountAnalysisItem: IdbAccountAnalysisItem) {
+    setAccountMonthSummaries(account: IdbAccount) {
         this.accountMonthSummaries = new Array();
         let monthDate: Date = new Date(this.startDate);
         while (monthDate < this.endDate) {
             let monthSummary: MonthlyAccountAnalysisDataClass = new MonthlyAccountAnalysisDataClass(
                 this.allAccountAnalysisData,
                 monthDate,
-                this.accountMonthSummaries,
-                this.baselineYear,
                 account
             );
             this.accountMonthSummaries.push(monthSummary);
@@ -123,12 +121,12 @@ export class MonthlyAccountAnalysisClass {
         return this.accountMonthSummaries.map(summaryDataItem => {
             return {
                 date: summaryDataItem.date,
-                energyUse: summaryDataItem.energyUse,
-                modeledEnergy: summaryDataItem.modeledEnergy,
+                energyUse: summaryDataItem.monthlyAnalysisCalculatedValues.energyUse,
+                modeledEnergy: undefined,
                 adjusted: summaryDataItem.monthlyAnalysisCalculatedValues.adjusted,
-                baselineAdjustmentForNormalization: summaryDataItem.monthlyAnalysisCalculatedValues.baselineAdjustmentForNormalization,
-                baselineAdjustmentForOtherV2: summaryDataItem.monthlyAnalysisCalculatedValues.baselineAdjustmentForOtherV2,
-                baselineAdjustment: summaryDataItem.monthlyAnalysisCalculatedValues.baselineAdjustment,
+                baselineAdjustmentForNormalization: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.baselineAdjustmentForNormalization),
+                baselineAdjustmentForOtherV2: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.baselineAdjustmentForOtherV2),
+                baselineAdjustment: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.baselineAdjustment),
                 fiscalYear: summaryDataItem.fiscalYear,
                 group: undefined,
                 SEnPI: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.SEnPI),
@@ -140,8 +138,8 @@ export class MonthlyAccountAnalysisClass {
                 rolling12MonthImprovement: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.rolling12MonthImprovement) * 100,
                 dataAdjustment: summaryDataItem.dataAdjustment,
                 modelYearDataAdjustment: summaryDataItem.modelYearDataAdjustment,
-                adjustedStar: summaryDataItem.monthlyAnalysisCalculatedValues.adjustedStar,
-                adjustedStarStar: summaryDataItem.monthlyAnalysisCalculatedValues.adjustedStarStar,
+                // adjustedStar: summaryDataItem.monthlyAnalysisCalculatedValues.adjustedStar,
+                // adjustedStarStar: summaryDataItem.monthlyAnalysisCalculatedValues.adjustedStarStar,
                 baselineAdjustmentInput: summaryDataItem.baselineAdjustmentInput
 
             }

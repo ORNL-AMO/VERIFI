@@ -28,7 +28,6 @@ export class MonthlyAnalysisSummaryClass {
         }
     }
 
-
     getResults(): MonthlyAnalysisSummary {
         return {
             predictorVariables: this.monthlyGroupAnalysisClass.predictorVariables,
@@ -44,9 +43,9 @@ export class MonthlyAnalysisSummaryClass {
                 energyUse: summaryDataItem.energyUse,
                 modeledEnergy: summaryDataItem.modeledEnergy,
                 adjusted: summaryDataItem.monthlyAnalysisCalculatedValues.adjusted,
-                baselineAdjustmentForNormalization: summaryDataItem.monthlyAnalysisCalculatedValues.baselineAdjustmentForNormalization,
-                baselineAdjustmentForOtherV2: summaryDataItem.monthlyAnalysisCalculatedValues.baselineAdjustmentForOtherV2,
-                baselineAdjustment: summaryDataItem.monthlyAnalysisCalculatedValues.baselineAdjustment,
+                baselineAdjustmentForNormalization: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.baselineAdjustmentForNormalization),
+                baselineAdjustmentForOtherV2: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.baselineAdjustmentForOtherV2),
+                baselineAdjustment: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.baselineAdjustment),
                 predictorUsage: summaryDataItem.predictorUsage,
                 fiscalYear: summaryDataItem.fiscalYear,
                 group: summaryDataItem.group,
