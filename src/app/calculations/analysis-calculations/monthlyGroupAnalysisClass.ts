@@ -20,11 +20,12 @@ export class MonthlyGroupAnalysisClass {
   annualMeterDataUsage: Array<{ year: number, usage: number }>;
   baselineYearEnergyIntensity: number;
   modelYear: number;
+  isNew: boolean;
   constructor(selectedGroup: AnalysisGroup, analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, accountPredictorEntries: Array<IdbPredictorEntry>, calculateAllMonthlyData: boolean) {
     this.selectedGroup = selectedGroup;
     this.analysisItem = analysisItem;
     this.facility = facility;
-
+    this.isNew = this.facility.isNewFacility;
     let calanderizedFacilityMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => { return cMeter.meter.facilityId == facility.guid })
     this.setModelYear();
     this.setFacilityPredictorData(accountPredictorEntries);
