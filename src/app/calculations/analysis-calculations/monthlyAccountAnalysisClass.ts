@@ -108,7 +108,9 @@ export class MonthlyAccountAnalysisClass {
             let monthSummary: MonthlyAccountAnalysisDataClass = new MonthlyAccountAnalysisDataClass(
                 this.allAccountAnalysisData,
                 monthDate,
-                account
+                account,
+                this.accountMonthSummaries,
+                this.baselineYear
             );
             this.accountMonthSummaries.push(monthSummary);
             let currentMonth: number = monthDate.getUTCMonth()

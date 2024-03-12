@@ -1,6 +1,7 @@
 import * as _ from 'lodash';
 import { ConvertValue } from '../conversions/convertValue';
 import { MonthlyAnalysisSummaryDataClass } from './monthlyAnalysisSummaryDataClass';
+import { MonthlyFacilityAnalysisDataClass } from './monthlyFacilityAnalysisDataClass';
 export class MonthlyAnalysisCalculatedValuesSummation {
     //results
     energyUse: number;
@@ -25,24 +26,53 @@ export class MonthlyAnalysisCalculatedValuesSummation {
     baselineAdjustmentForOtherV2: number;
     constructor(
         currentMonthData: Array<MonthlyAnalysisSummaryDataClass>,
-        baselineAdjustmentForNew: number
+        baselineAdjustmentForNew: number,
+        previousMonthsValues: Array<MonthlyAnalysisCalculatedValuesSummation>,
+        baselineYear: number,
+        fiscalYear: number
     ) {
+        this.fiscalYear = fiscalYear;
+        this.initializeYearToDateValues(previousMonthsValues);
         this.setEnergyUse(currentMonthData);
         this.setYearToDateBaselineActualEnergyUse(currentMonthData);
-        this.setYearToDateActualEnergyUse(currentMonthData);
+        this.setYearToDateActualEnergyUse();
         this.setAdjusted(currentMonthData);
-        this.setYearToDateAdjustedEnergyUse(currentMonthData);
+        this.setYearToDateAdjustedEnergyUse();
         this.setBaselineAdjustmentForOtherV2(currentMonthData, baselineAdjustmentForNew);
-        this.setSEnPI(currentMonthData);
-        this.setSavings(currentMonthData);
-        this.setPercentSavingsComparedToBaseline(currentMonthData);
-        this.setYearToDateSavings(currentMonthData);
+        this.setSEnPI();
+        this.setSavings();
+        this.setPercentSavingsComparedToBaseline();
+        this.setYearToDateSavings(baselineYear);
         this.setBaselineAdjustmentForNormalization(currentMonthData);
         this.setBaselineAdjustment(currentMonthData);
-        this.setRollingSavings(currentMonthData);
-        this.setRolling12MonthImprovement(currentMonthData);
-        this.setYearToDatePercentSavings(currentMonthData);
+        this.setRollingSavingsValues(previousMonthsValues)
+        this.setYearToDatePercentSavings();
     }
+
+
+    initializeYearToDateValues(previousMonthsValues: Array<MonthlyAnalysisCalculatedValuesSummation>) {
+        this.summaryDataIndex = previousMonthsValues.length;
+        if (this.summaryDataIndex == 0) {
+            this.monthIndex = 0;
+            this.yearToDateBaselineActualEnergyUse = 0;
+            this.yearToDateActualEnergyUse = 0;
+            this.yearToDateAdjustedEnergyUse = 0;
+        } else {
+            let previousMonthSummaryData: MonthlyAnalysisCalculatedValuesSummation = previousMonthsValues[this.summaryDataIndex - 1];
+            if (previousMonthSummaryData.fiscalYear == this.fiscalYear) {
+                this.monthIndex = previousMonthSummaryData.monthIndex + 1;
+                this.yearToDateBaselineActualEnergyUse = previousMonthSummaryData.yearToDateBaselineActualEnergyUse;
+                this.yearToDateActualEnergyUse = previousMonthSummaryData.yearToDateActualEnergyUse;
+                this.yearToDateAdjustedEnergyUse = previousMonthSummaryData.yearToDateAdjustedEnergyUse;
+            } else {
+                this.monthIndex = 0;
+                this.yearToDateBaselineActualEnergyUse = 0;
+                this.yearToDateActualEnergyUse = 0;
+                this.yearToDateAdjustedEnergyUse = 0;
+            }
+        }
+    }
+
 
     setEnergyUse(currentMonthData: Array<MonthlyAnalysisSummaryDataClass>) {
         this.energyUse = _.sumBy(currentMonthData, (data: MonthlyAnalysisSummaryDataClass) => {
@@ -56,10 +86,8 @@ export class MonthlyAnalysisCalculatedValuesSummation {
         });
     }
 
-    setYearToDateActualEnergyUse(currentMonthData: Array<MonthlyAnalysisSummaryDataClass>) {
-        this.yearToDateActualEnergyUse = _.sumBy(currentMonthData, (data: MonthlyAnalysisSummaryDataClass) => {
-            return data.monthlyAnalysisCalculatedValues.yearToDateActualEnergyUse;
-        });
+    setYearToDateActualEnergyUse() {
+        this.yearToDateActualEnergyUse = this.yearToDateActualEnergyUse + this.energyUse;
     }
 
     setAdjusted(currentMonthData: Array<MonthlyAnalysisSummaryDataClass>) {
@@ -68,10 +96,8 @@ export class MonthlyAnalysisCalculatedValuesSummation {
         });
     }
 
-    setYearToDateAdjustedEnergyUse(currentMonthData: Array<MonthlyAnalysisSummaryDataClass>) {
-        this.yearToDateAdjustedEnergyUse = _.sumBy(currentMonthData, (data: MonthlyAnalysisSummaryDataClass) => {
-            return data.monthlyAnalysisCalculatedValues.yearToDateAdjustedEnergyUse;
-        });
+    setYearToDateAdjustedEnergyUse() {
+        this.yearToDateAdjustedEnergyUse = this.yearToDateAdjustedEnergyUse + this.adjusted;
     }
 
     setBaselineAdjustmentForOtherV2(currentMonthData: Array<MonthlyAnalysisSummaryDataClass>, baselineAdjustmentForNew: number) {
@@ -81,28 +107,25 @@ export class MonthlyAnalysisCalculatedValuesSummation {
         this.baselineAdjustmentForOtherV2 = this.baselineAdjustmentForOtherV2 + baselineAdjustmentForNew;
     }
 
-    setSEnPI(currentMonthData: Array<MonthlyAnalysisSummaryDataClass>) {
-        this.SEnPI = _.sumBy(currentMonthData, (data: MonthlyAnalysisSummaryDataClass) => {
-            return data.monthlyAnalysisCalculatedValues.SEnPI;
-        });
+    setSEnPI() {
+        this.SEnPI = this.energyUse / this.adjusted;
     }
 
-    setSavings(currentMonthData: Array<MonthlyAnalysisSummaryDataClass>) {
-        this.savings = _.sumBy(currentMonthData, (data: MonthlyAnalysisSummaryDataClass) => {
-            return data.monthlyAnalysisCalculatedValues.savings;
-        });
+    setSavings() {
+        this.savings = this.adjusted - this.energyUse;
     }
 
-    setPercentSavingsComparedToBaseline(currentMonthData: Array<MonthlyAnalysisSummaryDataClass>) {
-        this.percentSavingsComparedToBaseline = _.sumBy(currentMonthData, (data: MonthlyAnalysisSummaryDataClass) => {
-            return data.monthlyAnalysisCalculatedValues.percentSavingsComparedToBaseline;
-        });
+    setPercentSavingsComparedToBaseline() {
+        this.percentSavingsComparedToBaseline = this.savings / this.adjusted;
     }
 
-    setYearToDateSavings(currentMonthData: Array<MonthlyAnalysisSummaryDataClass>) {
-        this.yearToDateSavings = _.sumBy(currentMonthData, (data: MonthlyAnalysisSummaryDataClass) => {
-            return data.monthlyAnalysisCalculatedValues.yearToDateSavings;
-        });
+    setYearToDateSavings(baselineYear: number) {
+        if (this.fiscalYear != baselineYear) {
+            this.yearToDateSavings = (this.yearToDateAdjustedEnergyUse - this.yearToDateActualEnergyUse)
+
+        } else {
+            this.yearToDateSavings = 0;
+        }
     }
 
     setBaselineAdjustmentForNormalization(currentMonthData: Array<MonthlyAnalysisSummaryDataClass>) {
@@ -117,22 +140,21 @@ export class MonthlyAnalysisCalculatedValuesSummation {
         });
     }
 
-    setRollingSavings(currentMonthData: Array<MonthlyAnalysisSummaryDataClass>) {
-        this.rollingSavings = _.sumBy(currentMonthData, (data: MonthlyAnalysisSummaryDataClass) => {
-            return data.monthlyAnalysisCalculatedValues.rollingSavings;
-        });
+    setRollingSavingsValues(previousMonthsValues: Array<MonthlyAnalysisCalculatedValuesSummation>) {
+        if (this.summaryDataIndex > 11) {
+            let last11MonthsData: Array<MonthlyAnalysisCalculatedValuesSummation> = previousMonthsValues.splice(this.summaryDataIndex - 11, this.summaryDataIndex);
+            let total12MonthsEnergyUse: number = _.sumBy(last11MonthsData, (data: MonthlyAnalysisCalculatedValuesSummation) => { return data.energyUse }) + this.energyUse;
+            let total12MonthsAdjusedBaseline: number = _.sumBy(last11MonthsData, (data: MonthlyAnalysisCalculatedValuesSummation) => { return data.adjusted }) + this.adjusted;
+            this.rollingSavings = total12MonthsAdjusedBaseline - total12MonthsEnergyUse;
+            this.rolling12MonthImprovement = this.rollingSavings / total12MonthsAdjusedBaseline;
+        } else {
+            this.rolling12MonthImprovement = 0;
+            this.rollingSavings = 0;
+        }
     }
 
-    setRolling12MonthImprovement(currentMonthData: Array<MonthlyAnalysisSummaryDataClass>) {
-        this.rolling12MonthImprovement = _.sumBy(currentMonthData, (data: MonthlyAnalysisSummaryDataClass) => {
-            return data.monthlyAnalysisCalculatedValues.rolling12MonthImprovement;
-        });
-    }
-
-    setYearToDatePercentSavings(currentMonthData: Array<MonthlyAnalysisSummaryDataClass>) {
-        this.yearToDatePercentSavings = _.sumBy(currentMonthData, (data: MonthlyAnalysisSummaryDataClass) => {
-            return data.monthlyAnalysisCalculatedValues.yearToDatePercentSavings;
-        });
+    setYearToDatePercentSavings() {
+        this.yearToDatePercentSavings = (this.yearToDateSavings / this.yearToDateAdjustedEnergyUse)
     }
 
     convertResults(startingUnit: string, endingUnit: string) {

@@ -78,7 +78,9 @@ export class MonthlyFacilityAnalysisClass {
                 this.allFacilityAnalysisData,
                 monthDate,
                 this.facilityPredictorEntries,
-                facility
+                facility,
+                this.facilityMonthSummaries,
+                this.analysisItem.baselineYear
             );
             this.facilityMonthSummaries.push(monthSummary);
             let currentMonth: number = monthDate.getUTCMonth()
@@ -86,8 +88,6 @@ export class MonthlyFacilityAnalysisClass {
             monthDate = new Date(monthDate.getUTCFullYear(), nextMonth, 1);
         }
     }
-
-
 
     getMonthlyAnalysisSummaryData(): Array<MonthlyAnalysisSummaryData> {
         return this.facilityMonthSummaries.map(summaryDataItem => {

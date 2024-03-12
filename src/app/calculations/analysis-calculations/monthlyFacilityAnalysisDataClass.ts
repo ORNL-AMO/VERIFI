@@ -26,7 +26,9 @@ export class MonthlyFacilityAnalysisDataClass {
         allFacilityAnalysisData: Array<MonthlyAnalysisSummaryDataClass>,
         monthDate: Date,
         facilityPredictorEntries: Array<IdbPredictorEntry>,
-        facility: IdbFacility) {
+        facility: IdbFacility,
+        priviousMonthsValues: Array<MonthlyFacilityAnalysisDataClass>,
+        baselineYear: number) {
         this.facilityGUID = facility.guid;
         this.date = monthDate;
         this.setFiscalYear(facility);
@@ -36,7 +38,7 @@ export class MonthlyFacilityAnalysisDataClass {
         this.setBaselineAdjustmentInput();
         this.setDataAdjustment();
         this.setModelYearDataAdjustment();
-        this.setMonthlyAnalysisCalculatedValues();
+        this.setMonthlyAnalysisCalculatedValues(priviousMonthsValues, baselineYear);
     }
 
     setCurrentMonthData(allFacilityAnalysisData: Array<MonthlyAnalysisSummaryDataClass>) {
@@ -87,8 +89,9 @@ export class MonthlyFacilityAnalysisDataClass {
         this.dataAdjustment = _.sumBy(this.currentMonthData, (data: MonthlyAnalysisSummaryDataClass) => { return data.dataAdjustment });
     }
 
-    setMonthlyAnalysisCalculatedValues() {
-        this.monthlyAnalysisCalculatedValues = new MonthlyAnalysisCalculatedValuesSummation(this.currentMonthData, 0);
+    setMonthlyAnalysisCalculatedValues(previousMonthsSummaryData: Array<MonthlyFacilityAnalysisDataClass>, baselineYear: number) {
+        let previousMonthsAnalysisCalculatedValues: Array<MonthlyAnalysisCalculatedValuesSummation> = previousMonthsSummaryData.map(data => { return data.monthlyAnalysisCalculatedValues });
+        this.monthlyAnalysisCalculatedValues = new MonthlyAnalysisCalculatedValuesSummation(this.currentMonthData, 0, previousMonthsAnalysisCalculatedValues, baselineYear, this.fiscalYear);
     }
 
     convertResults(startingUnit: string, endingUnit: string) {
