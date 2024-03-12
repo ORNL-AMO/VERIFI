@@ -51,8 +51,8 @@ export class GroupMonthlyAnalysisCalculatedValues {
         this.setAdjustedStar(baselineActualEnergyUse, modelYearDataAdjusted, baselineAdjustementInput);
         this.setAdjustedStarStar(dataAdjustment);
         this.setAdjusted();
-        this.setBaselineAdjustmentForNormalization(baselineActualEnergyUse, baselineAdjustementInput);
-        this.setBaselineAdjustmentForOtherV2();
+        this.setBaselineAdjustmentForNormalization(baselineActualEnergyUse, modelYearDataAdjusted, dataAdjustment);
+        this.setBaselineAdjustmentForOtherV2(baselineAdjustementInput, modelYearDataAdjusted, dataAdjustment);
         this.setBaselineAdjustment();
         this.setSEnPI();
         this.setSavings();
@@ -112,8 +112,8 @@ export class GroupMonthlyAnalysisCalculatedValues {
         this.yearToDateBaselineModeledEnergyUse = this.yearToDateBaselineModeledEnergyUse + this.baselineModeledEnergyUse;
     }
 
-    setAdjustedStar(baselineActualEnergyUse: number, modelYearDataAdjustment: number, baselineAdjustementInput: number) {
-        this.adjustedStar = (baselineActualEnergyUse + baselineAdjustementInput) * ((this.modeledEnergy - modelYearDataAdjustment) / (this.baselineModeledEnergyUse - modelYearDataAdjustment));
+    setAdjustedStar(baselineActualEnergyUse: number, modelYearDataAdjusted: number, baselineAdjustementInput: number) {
+        this.adjustedStar = (baselineActualEnergyUse + baselineAdjustementInput) * ((this.modeledEnergy - modelYearDataAdjusted) / (this.baselineModeledEnergyUse - modelYearDataAdjusted));
     }
 
     setAdjustedStarStar(dataAdjustment: number) {
@@ -125,8 +125,8 @@ export class GroupMonthlyAnalysisCalculatedValues {
         this.yearToDateAdjustedEnergyUse = this.yearToDateAdjustedEnergyUse + this.adjusted;
     }
 
-    setBaselineAdjustmentForOtherV2() {
-        this.baselineAdjustmentForOtherV2 = this.adjustedStarStar - this.adjustedStar;
+    setBaselineAdjustmentForOtherV2(baselineAdjustementInput: number, modelYearDataAdjusted: number, dataAdjustment: number) {
+        this.baselineAdjustmentForOtherV2 = (baselineAdjustementInput) * ((this.modeledEnergy - modelYearDataAdjusted) / (this.baselineModeledEnergyUse - modelYearDataAdjusted)) * this.energyUse / (this.energyUse - dataAdjustment);
     }
 
     setSEnPI() {
@@ -150,9 +150,9 @@ export class GroupMonthlyAnalysisCalculatedValues {
         }
     }
 
-    setBaselineAdjustmentForNormalization(baselineActualEnergyUse: number, baselineAdjustementInput: number) {
+    setBaselineAdjustmentForNormalization(baselineActualEnergyUse: number, modelYearDataAdjustment: number, dataAdjustment: number) {
         if (this.summaryDataIndex >= 11) {
-            this.baselineAdjustmentForNormalization = this.adjustedStar - (baselineActualEnergyUse + baselineAdjustementInput);
+            this.baselineAdjustmentForNormalization = ((baselineActualEnergyUse) * ((this.modeledEnergy - modelYearDataAdjustment) / (this.baselineModeledEnergyUse - modelYearDataAdjustment)) * (this.energyUse / (this.energyUse - dataAdjustment))) - baselineActualEnergyUse;
         } else {
             this.baselineAdjustmentForNormalization = 0;
         }

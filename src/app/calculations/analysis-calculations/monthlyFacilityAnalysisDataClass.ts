@@ -88,7 +88,7 @@ export class MonthlyFacilityAnalysisDataClass {
     }
 
     setMonthlyAnalysisCalculatedValues() {
-        this.monthlyAnalysisCalculatedValues = new MonthlyAnalysisCalculatedValuesSummation(this.currentMonthData);
+        this.monthlyAnalysisCalculatedValues = new MonthlyAnalysisCalculatedValuesSummation(this.currentMonthData, 0);
     }
 
     convertResults(startingUnit: string, endingUnit: string) {

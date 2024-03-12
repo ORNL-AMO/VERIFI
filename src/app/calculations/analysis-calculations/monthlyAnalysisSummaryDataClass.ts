@@ -31,14 +31,19 @@ export class MonthlyAnalysisSummaryDataClass {
     annualEnergyUse: number;
     baselineActualEnergyUse: number;
     monthIndex: number;
+    isNew: boolean;
+    isBaselineYear: boolean;
     constructor(
         monthlyGroupAnalysisClass: MonthlyGroupAnalysisClass,
         monthDate: Date,
-        previousMonthsSummaryData: Array<MonthlyAnalysisSummaryDataClass>
+        previousMonthsSummaryData: Array<MonthlyAnalysisSummaryDataClass>,
+        facility: IdbFacility
     ) {
         this.date = monthDate;
         this.group = monthlyGroupAnalysisClass.selectedGroup;
+        this.isNew = facility.isNewFacility;
         this.setFiscalYear(monthlyGroupAnalysisClass.facility);
+        this.setIsBaselineYear(monthlyGroupAnalysisClass.baselineYear);
         this.setMonthPredictorData(monthlyGroupAnalysisClass.facilityPredictorData);
         this.setMonthMeterData(monthlyGroupAnalysisClass.groupMonthlyData);
         this.setMonthIndex(previousMonthsSummaryData);
@@ -55,6 +60,10 @@ export class MonthlyAnalysisSummaryDataClass {
 
     setFiscalYear(facility: IdbFacility) {
         this.fiscalYear = getFiscalYear(new Date(this.date), facility);
+    }
+
+    setIsBaselineYear(baselineYear: number) {
+        this.isBaselineYear = (baselineYear == this.fiscalYear);
     }
 
     setMonthPredictorData(facilityPredictorData: Array<IdbPredictorEntry>) {

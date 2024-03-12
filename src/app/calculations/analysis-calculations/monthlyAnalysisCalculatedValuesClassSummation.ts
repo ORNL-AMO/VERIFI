@@ -24,14 +24,15 @@ export class MonthlyAnalysisCalculatedValuesSummation {
     monthIndex: number;
     baselineAdjustmentForOtherV2: number;
     constructor(
-        currentMonthData: Array<MonthlyAnalysisSummaryDataClass>
+        currentMonthData: Array<MonthlyAnalysisSummaryDataClass>,
+        baselineAdjustmentForNew: number
     ) {
         this.setEnergyUse(currentMonthData);
         this.setYearToDateBaselineActualEnergyUse(currentMonthData);
         this.setYearToDateActualEnergyUse(currentMonthData);
         this.setAdjusted(currentMonthData);
         this.setYearToDateAdjustedEnergyUse(currentMonthData);
-        this.setBaselineAdjustmentForOtherV2(currentMonthData);
+        this.setBaselineAdjustmentForOtherV2(currentMonthData, baselineAdjustmentForNew);
         this.setSEnPI(currentMonthData);
         this.setSavings(currentMonthData);
         this.setPercentSavingsComparedToBaseline(currentMonthData);
@@ -73,10 +74,11 @@ export class MonthlyAnalysisCalculatedValuesSummation {
         });
     }
 
-    setBaselineAdjustmentForOtherV2(currentMonthData: Array<MonthlyAnalysisSummaryDataClass>) {
+    setBaselineAdjustmentForOtherV2(currentMonthData: Array<MonthlyAnalysisSummaryDataClass>, baselineAdjustmentForNew: number) {
         this.baselineAdjustmentForOtherV2 = _.sumBy(currentMonthData, (data: MonthlyAnalysisSummaryDataClass) => {
             return data.monthlyAnalysisCalculatedValues.baselineAdjustmentForOtherV2;
         });
+        this.baselineAdjustmentForOtherV2 = this.baselineAdjustmentForOtherV2 + baselineAdjustmentForNew;
     }
 
     setSEnPI(currentMonthData: Array<MonthlyAnalysisSummaryDataClass>) {

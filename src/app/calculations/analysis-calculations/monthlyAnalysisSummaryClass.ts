@@ -13,14 +13,14 @@ export class MonthlyAnalysisSummaryClass {
     constructor(selectedGroup: AnalysisGroup, analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, accountPredictorEntries: Array<IdbPredictorEntry>, calculateAllMonthlyData: boolean) {
         this.group = selectedGroup;
         this.monthlyGroupAnalysisClass = new MonthlyGroupAnalysisClass(selectedGroup, analysisItem, facility, calanderizedMeters, accountPredictorEntries, calculateAllMonthlyData);
-        this.setMonthlyAnalysisSummaryData();
+        this.setMonthlyAnalysisSummaryData(facility);
     }
 
-    setMonthlyAnalysisSummaryData() {
+    setMonthlyAnalysisSummaryData(facility: IdbFacility) {
         this.monthlyAnalysisSummaryData = new Array();
         let baselineDate: Date = new Date(this.monthlyGroupAnalysisClass.baselineDate);
         while (baselineDate < this.monthlyGroupAnalysisClass.endDate) {
-            let monthlyAnalysisSummaryDataClass: MonthlyAnalysisSummaryDataClass = new MonthlyAnalysisSummaryDataClass(this.monthlyGroupAnalysisClass, baselineDate, this.monthlyAnalysisSummaryData)
+            let monthlyAnalysisSummaryDataClass: MonthlyAnalysisSummaryDataClass = new MonthlyAnalysisSummaryDataClass(this.monthlyGroupAnalysisClass, baselineDate, this.monthlyAnalysisSummaryData, facility)
             this.monthlyAnalysisSummaryData.push(monthlyAnalysisSummaryDataClass);
             let currentMonth: number = baselineDate.getUTCMonth()
             let nextMonth: number = currentMonth + 1;

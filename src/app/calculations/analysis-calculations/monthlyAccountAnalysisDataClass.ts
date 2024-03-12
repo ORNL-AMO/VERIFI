@@ -15,6 +15,8 @@ export class MonthlyAccountAnalysisDataClass {
     modelYearDataAdjustment: number;
     //adjustment corresponding to the current year
     dataAdjustment: number;
+
+    baselineAdjustmentForNew: number;
     constructor(
         allFacilityAnalysisData: Array<MonthlyAnalysisSummaryDataClass>,
         monthDate: Date,
@@ -25,6 +27,7 @@ export class MonthlyAccountAnalysisDataClass {
         this.setModelYearDataAdjustment();
         this.setDataAdjustment();
         this.setBaselineAdjustmentInput();
+        this.setBaselineAdjustmentForNew(allFacilityAnalysisData);
         this.setMonthlyAnalysisCalculatedValues();
     }
 
@@ -51,8 +54,21 @@ export class MonthlyAccountAnalysisDataClass {
         this.baselineAdjustmentInput = _.sumBy(this.currentMonthData, (data: MonthlyAnalysisSummaryDataClass) => { return data.baselineAdjustmentInput });
     }
 
+    setBaselineAdjustmentForNew(allFacilityAnalysisData: Array<MonthlyAnalysisSummaryDataClass>) {
+        //Filter out baseline data of new facilities corresponding to the month
+        //Jan account -> Baseline Year of Jan for new facility
+        let allBaselineDataForNewFacilitiesThisMonth: Array<MonthlyAnalysisSummaryDataClass> = allFacilityAnalysisData.filter(summaryData => {
+            let summaryDataDate: Date = new Date(summaryData.date);
+            return summaryDataDate.getUTCMonth() == this.date.getUTCMonth() && (summaryData.isNew && summaryData.isBaselineYear);
+        });
+
+        this.baselineAdjustmentForNew = _.sumBy(allBaselineDataForNewFacilitiesThisMonth, (data: MonthlyAnalysisSummaryDataClass) => {
+            return data.energyUse;
+        });
+    }
+
     setMonthlyAnalysisCalculatedValues() {
-        this.monthlyAnalysisCalculatedValues = new MonthlyAnalysisCalculatedValuesSummation(this.currentMonthData);
+        this.monthlyAnalysisCalculatedValues = new MonthlyAnalysisCalculatedValuesSummation(this.currentMonthData, this.baselineAdjustmentForNew);
     }
 
 }
