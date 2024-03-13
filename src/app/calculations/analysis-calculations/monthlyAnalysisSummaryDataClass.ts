@@ -33,6 +33,7 @@ export class MonthlyAnalysisSummaryDataClass {
     monthIndex: number;
     isNew: boolean;
     isBaselineYear: boolean;
+    baselineYear: number
     constructor(
         monthlyGroupAnalysisClass: MonthlyGroupAnalysisClass,
         monthDate: Date,
@@ -42,6 +43,7 @@ export class MonthlyAnalysisSummaryDataClass {
         this.date = monthDate;
         this.group = monthlyGroupAnalysisClass.selectedGroup;
         this.isNew = facility.isNewFacility;
+        this.baselineYear = monthlyGroupAnalysisClass.baselineYear;
         this.setFiscalYear(monthlyGroupAnalysisClass.facility);
         this.setIsBaselineYear(monthlyGroupAnalysisClass.baselineYear);
         this.setMonthPredictorData(monthlyGroupAnalysisClass.facilityPredictorData);

@@ -61,7 +61,7 @@ export class MonthlyAccountAnalysisDataClass {
         //Jan account -> Baseline Year of Jan for new facility
         let allBaselineDataForNewFacilitiesThisMonth: Array<MonthlyAnalysisSummaryDataClass> = allFacilityAnalysisData.filter(summaryData => {
             let summaryDataDate: Date = new Date(summaryData.date);
-            return summaryDataDate.getUTCMonth() == this.date.getUTCMonth() && (summaryData.isNew && summaryData.isBaselineYear);
+            return summaryDataDate.getUTCMonth() == this.date.getUTCMonth() && (summaryData.isNew && summaryData.isBaselineYear) && (summaryData.baselineYear <= this.date.getUTCFullYear());
         });
 
         this.baselineAdjustmentForNew = _.sumBy(allBaselineDataForNewFacilitiesThisMonth, (data: MonthlyAnalysisSummaryDataClass) => {
