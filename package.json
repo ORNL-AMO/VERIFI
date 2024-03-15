@@ -1,7 +1,7 @@
 {
   "name": "verifi",
   "description": "Application for analyzing utility usage",
-  "version": "0.11.0-beta",
+  "version": "0.11.1-beta",
   "main": "main.js",
   "author": "Advanced Manufacturing Office",
   "repository": "https://github.com/ORNL-AMO/VERIFI.git",
@@ -99,7 +99,7 @@
     "zone.js": "0.14.3"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "17.1.2",
+    "@angular-devkit/build-angular": "17.2.0",
     "@angular/cli": "17.1.2",
     "@angular/compiler-cli": "17.1.2",
     "@angular/language-service": "17.1.2",
@@ -108,7 +108,7 @@
     "@types/jasminewd2": "^2.0.10",
     "@types/node": "14.14.35",
     "electron": "26.3.0",
-    "electron-builder": "24.6.4",
+    "electron-builder": "24.13.3",
     "exceljs": "4.3.0",
     "jasmine-core": "4.6.0",
     "jasmine-spec-reporter": "7.0.0",

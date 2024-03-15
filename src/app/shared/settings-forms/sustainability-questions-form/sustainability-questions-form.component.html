@@ -238,7 +238,7 @@
 </form>
 <ng-container *ngIf="sustainQuestionsDontMatchAccount">
     <hr>
-    <p class="alert alert-warning" *ngIf="selectedFacility.isNewFacility == false">
+    <p class="alert alert-warning" *ngIf="selectedFacility.isNewFacility != true">
         Facility sustainability answers are different then the answers set for the account. If you would like to
         use the account answers for this facility click here: <a class="click-link"
             (click)="setAccountSustainQuestions()">Use Account Answers</a><br><br>
@@ -247,7 +247,7 @@
     </p>
     <form>
         <!--energy reduction-->
-        <div class="form-check">
+        <div class="form-check new-facility">
             <input type="checkbox" class="form-check-input" name="isNewFacility"
                 [(ngModel)]="selectedFacility.isNewFacility" (change)="saveChanges()" id="isNewFacility">
             <label class="form-check-label" for="isNewFacility">This is a new facility</label>

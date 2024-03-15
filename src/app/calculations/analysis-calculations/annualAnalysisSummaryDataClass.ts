@@ -8,7 +8,6 @@ export class AnnualAnalysisSummaryDataClass {
 
     year: number;
     energyUse: number;
-    modeledEnergy: number;
     adjusted: number;
     baselineAdjustmentForNormalization: number;
     baselineAdjustmentForOtherV2: number;
@@ -26,18 +25,13 @@ export class AnnualAnalysisSummaryDataClass {
 
 
     yearAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>;
-    baselineEnergyUse: number;
-    baselineModeledEnergyUse: number;
     previousYearPercentSavings: number;
     previousYearSavings: number;
 
-    adjustedStar: number;
-    adjustedStarStar: number;
     //adjustment corresponding to the model year
     modelYearDataAdjustment: number;
     //adjustment corresponding to the current year
     dataAdjustment: number;
-    adjustmentForOther: number;
     baselineAdjustmentInput: number;
     constructor(
         monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
@@ -50,21 +44,15 @@ export class AnnualAnalysisSummaryDataClass {
         this.setYearAnalysisSummaryData(monthlyAnalysisSummaryData);
         this.setPredictorUsage(accountPredictorEntries, facility);
         this.setEnergyUse();
-        this.setModeledEnergy();
-        this.setBaselineEnergyUse(previousYearsSummaryData);
-        this.setBaselineModeledEnergy(previousYearsSummaryData);
         this.setBaselineAdjustmentInput()
         this.setModelYearDataAdjustment();
         this.setDataAdjustment();
-        this.setAdjustedStar();
-        this.setAdjustedStarStar();
         this.setAdjusted();
-        this.setAdjustmentForOther();
         this.setBaselineAdjustmentForOtherV2();
-        this.setBaselineAdjustmentForNormalization(previousYearsSummaryData);
-        this.setBaselineAdjustment(previousYearsSummaryData);
+        this.setBaselineAdjustmentForNormalization();
+        this.setBaselineAdjustment();
         this.setSEnPI();
-        this.setSavings(previousYearsSummaryData);
+        this.setSavings();
         this.setTotalSavingsPercentImprovement();
         this.setPreviousYearSavings(previousYearsSummaryData);
         this.setAnnualSavingsPercentImprovement();
@@ -84,28 +72,6 @@ export class AnnualAnalysisSummaryDataClass {
         });
     }
 
-    setModeledEnergy() {
-        this.modeledEnergy = _.sumBy(this.yearAnalysisSummaryData, (data: MonthlyAnalysisSummaryData) => {
-            return data.modeledEnergy;
-        });
-    }
-
-    setBaselineEnergyUse(previousYearsSummaryData: Array<AnnualAnalysisSummaryDataClass>) {
-        if (previousYearsSummaryData.length != 0) {
-            this.baselineEnergyUse = previousYearsSummaryData[0].baselineEnergyUse;
-        } else {
-            this.baselineEnergyUse = this.energyUse;
-        }
-    }
-
-    setBaselineModeledEnergy(previousYearsSummaryData: Array<AnnualAnalysisSummaryDataClass>) {
-        if (previousYearsSummaryData.length != 0) {
-            this.baselineModeledEnergyUse = previousYearsSummaryData[0].baselineModeledEnergyUse;
-        } else {
-            this.baselineModeledEnergyUse = this.modeledEnergy;
-        }
-    }
-
     setBaselineAdjustmentInput() {
         this.baselineAdjustmentInput = _.sumBy(this.yearAnalysisSummaryData, (data: MonthlyAnalysisSummaryData) => {
             return data.baselineAdjustmentInput;
@@ -113,7 +79,9 @@ export class AnnualAnalysisSummaryDataClass {
     }
 
     setBaselineAdjustmentForOtherV2() {
-        this.baselineAdjustmentForOtherV2 = this.adjustedStarStar - this.adjustedStar;
+        this.baselineAdjustmentForOtherV2 = _.sumBy(this.yearAnalysisSummaryData, (data: MonthlyAnalysisSummaryData) => {
+            return data.baselineAdjustmentForOtherV2;
+        });
     }
 
     setModelYearDataAdjustment() {
@@ -128,49 +96,34 @@ export class AnnualAnalysisSummaryDataClass {
         });
     }
 
-    setBaselineAdjustmentForNormalization(previousYearsSummaryData: Array<AnnualAnalysisSummaryDataClass>) {
-        if (previousYearsSummaryData.length != 0) {
-            this.baselineAdjustmentForNormalization = this.adjustedStar - (this.baselineEnergyUse + this.baselineAdjustmentInput);
-        } else {
-            this.baselineAdjustmentForNormalization = 0;
-        }
+    setBaselineAdjustmentForNormalization() {
+        this.baselineAdjustmentForNormalization = _.sumBy(this.yearAnalysisSummaryData, (data: MonthlyAnalysisSummaryData) => {
+            return data.baselineAdjustmentForNormalization;
+        });
     }
 
-    setBaselineAdjustment(previousYearsSummaryData: Array<AnnualAnalysisSummaryDataClass>) {
-        if (previousYearsSummaryData.length != 0) {
-            this.baselineAdjustment = this.baselineAdjustmentForNormalization + this.baselineAdjustmentForOtherV2;
-        } else {
-            this.baselineAdjustment = 0;
-        }
-    }
-
-    setAdjustedStar() {
-        this.adjustedStar = (this.baselineEnergyUse + this.baselineAdjustmentInput) * ((this.modeledEnergy - this.modelYearDataAdjustment) / (this.baselineModeledEnergyUse - this.modelYearDataAdjustment));
-
-    }
-
-    setAdjustedStarStar() {
-        this.adjustedStarStar = this.adjustedStar * (this.energyUse / (this.energyUse - this.dataAdjustment));
+    setBaselineAdjustment() {
+        this.baselineAdjustment = _.sumBy(this.yearAnalysisSummaryData, (data: MonthlyAnalysisSummaryData) => {
+            return data.baselineAdjustment;
+        });
     }
 
     setAdjusted() {
-        this.adjusted = this.adjustedStarStar;
-    }
-
-    setAdjustmentForOther() {
-        this.adjustmentForOther = this.adjustedStarStar - this.adjustedStar;
+        this.adjusted = _.sumBy(this.yearAnalysisSummaryData, (data: MonthlyAnalysisSummaryData) => {
+            return data.adjusted;
+        });
     }
 
     setSEnPI() {
-        this.SEnPI = this.energyUse / this.adjusted;
+        this.SEnPI = _.sumBy(this.yearAnalysisSummaryData, (data: MonthlyAnalysisSummaryData) => {
+            return data.SEnPI;
+        });
     }
 
-    setSavings(previousYearsSummaryData: Array<AnnualAnalysisSummaryDataClass>) {
-        if (previousYearsSummaryData.length != 0) {
-            this.savings = this.adjusted - this.energyUse;
-        } else {
-            this.savings = 0;
-        }
+    setSavings() {
+        this.savings = _.sumBy(this.yearAnalysisSummaryData, (data: MonthlyAnalysisSummaryData) => {
+            return data.savings;
+        });
     }
 
     setTotalSavingsPercentImprovement() {

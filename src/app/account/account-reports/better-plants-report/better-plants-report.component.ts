@@ -13,7 +13,6 @@ import { BetterPlantsReportClass } from 'src/app/calculations/better-plants-calc
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { AccountReportsService } from '../account-reports.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { ConvertValue } from 'src/app/calculations/conversions/convertValue';
 import { BetterPlantsExcelWriterService } from '../excel-writer-services/better-plants-excel-writer.service';
 
 @Component({
@@ -73,28 +72,6 @@ export class BetterPlantsReportComponent implements OnInit {
     let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
     let selectedAnalysisItem: IdbAccountAnalysisItem = accountAnalysisItems.find(item => { return item.guid == this.selectedReport.betterPlantsReportSetup.analysisItemId });
     this.selectedAnalysisItem = JSON.parse(JSON.stringify(selectedAnalysisItem));
-    if (this.selectedAnalysisItem.analysisCategory == 'energy') {
-      if (this.selectedAnalysisItem.energyUnit != 'MMBtu') {
-        //TODO: Check baselineAdjustmentsV2 use vs dataAdjustments
-        if (this.selectedAnalysisItem.baselineAdjustmentsV2) {
-          this.selectedAnalysisItem.baselineAdjustmentsV2.forEach(baselineAdjustment => {
-            baselineAdjustment.amount = new ConvertValue(baselineAdjustment.amount, this.selectedAnalysisItem.energyUnit, 'MMBtu').convertedValue;
-          })
-        }
-        this.selectedAnalysisItem.energyUnit = 'MMBtu';
-      }
-      this.selectedAnalysisItem.energyUnit = 'MMBtu';
-    } else if (this.selectedAnalysisItem.analysisCategory == 'water') {
-      if (this.selectedAnalysisItem.waterUnit != 'kgal') {
-        //TODO: Check baselineAdjustmentsV2 use vs dataAdjustments
-        if (this.selectedAnalysisItem.baselineAdjustmentsV2) {
-          this.selectedAnalysisItem.baselineAdjustmentsV2.forEach(baselineAdjustment => {
-            baselineAdjustment.amount = new ConvertValue(baselineAdjustment.amount, this.selectedAnalysisItem.waterUnit, 'kgal').convertedValue;
-          })
-        }
-        this.selectedAnalysisItem.waterUnit = 'kgal';
-      }
-    }
   }
 
   setBetterPlantsSummary() {
