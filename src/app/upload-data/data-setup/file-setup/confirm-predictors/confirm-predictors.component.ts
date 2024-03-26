@@ -5,6 +5,7 @@ import { IdbPredictorEntry } from 'src/app/models/idb';
 import { UploadDataService } from 'src/app/upload-data/upload-data.service';
 import * as _ from 'lodash';
 import { FileReference } from 'src/app/upload-data/upload-data-models';
+import { LoadingService } from 'src/app/core-components/loading/loading.service';
 
 @Component({
   selector: 'app-confirm-predictors',
@@ -40,7 +41,7 @@ export class ConfirmPredictorsComponent implements OnInit {
   predictorsExist: boolean;
   skipAll: boolean = false;
   constructor(private activatedRoute: ActivatedRoute, private uploadDataService: UploadDataService,
-    private router: Router) { }
+    private router: Router, private loadingService: LoadingService) { }
 
   ngOnInit(): void {
     this.paramsSub = this.activatedRoute.parent.params.subscribe(param => {
@@ -55,8 +56,12 @@ export class ConfirmPredictorsComponent implements OnInit {
     this.paramsSub.unsubscribe();
   }
 
-  continue() {
+  async continue() {
+    this.loadingService.setLoadingMessage("Updating predictor entries...");
+    this.loadingService.setLoadingStatus(true);
     this.fileReference.predictorEntries = this.uploadDataService.updateProductionPredictorData(this.fileReference);
+    this.fileReference.predictorEntries = await this.uploadDataService.updateDegreeDays(this.fileReference);
+    this.loadingService.setLoadingStatus(false);
     this.router.navigateByUrl('/upload/data-setup/file-setup/' + this.fileReference.id + '/submit');
   }
 
