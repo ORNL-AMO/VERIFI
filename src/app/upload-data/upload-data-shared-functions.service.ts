@@ -51,6 +51,9 @@ export class UploadDataSharedFunctionsService {
       let existingFacilityPredictorData: Array<PredictorData> = new Array();
       if (facilityPredictorEntries.length != 0) {
         existingFacilityPredictorData = facilityPredictorEntries[0].predictors.map(predictor => { return predictor });
+        existingFacilityPredictorData.forEach(predictorData => {
+          predictorData.amount = undefined;
+        });
       }
       if (facilityPredictorData.length != 0) {
         Object.keys(facilityPredictorData[0]).forEach((key) => {

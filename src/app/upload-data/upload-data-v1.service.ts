@@ -494,6 +494,9 @@ export class UploadDataV1Service {
         let existingFacilityPredictorData: Array<PredictorData> = new Array();
         if (facilityPredictorEntries.length != 0) {
           existingFacilityPredictorData = facilityPredictorEntries[0].predictors.map(predictor => { return predictor });
+          existingFacilityPredictorData.forEach(predictorData => {
+            predictorData.amount = undefined;
+          });
         }
         if (group.groupItems.length != 0) {
           group.groupItems.forEach((predictorItem) => {
@@ -531,25 +534,4 @@ export class UploadDataV1Service {
     });
     return predictorData;
   }
-
-
-  updateProductionPredictorData(fileReference: FileReference): Array<IdbPredictorEntry> {
-    fileReference.predictorFacilityGroups.forEach(group => {
-      let facilityPredictorEntries: Array<IdbPredictorEntry> = fileReference.predictorEntries.filter(entry => { return entry.facilityId == group.facilityId });
-      group.groupItems.forEach(groupItem => {
-        facilityPredictorEntries.forEach(predictorEntry => {
-          predictorEntry.predictors.forEach(predictor => {
-            if (predictor.name == groupItem.value) {
-              predictor.production = groupItem.isProductionPredictor;
-              predictor.productionInAnalysis = groupItem.isProductionPredictor;
-            }
-          })
-        })
-      })
-    });
-    return fileReference.predictorEntries;
-  }
-
-
-
 }
