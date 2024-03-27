@@ -102,8 +102,6 @@ export class AccountAnalysisDbService {
       energyUnit: selectedAccount.energyUnit,
       facilityAnalysisItems: facilityAnalysisItems,
       energyIsSource: selectedAccount.energyIsSource,
-      hasBaselineAdjustement: false,
-      baselineAdjustments: [],
       waterUnit: selectedAccount.volumeLiquidUnit,
       analysisCategory: analysisCategory,
       setupErrors: {

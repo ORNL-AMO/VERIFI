@@ -1,0 +1,383 @@
+<table class="table utility-data table-sm table-bordered table-hover">
+    <thead class="sortable">
+        <tr class="table-mh">
+            <th colspan="1"></th>
+            <th *ngIf="betterClimateReportSetup.includeEmissionsInTables" class="text-center"
+                [attr.colspan]="annualFacilitiesSummaries[0].betterClimateYearDetails.length">
+                Emissions<br>
+                (Metric tons CO<sub>2</sub>e)
+            </th>
+            <th *ngIf="betterClimateReportSetup.includePercentReductionsInTables" class="text-center"
+                [attr.colspan]="annualFacilitiesSummaries[0].betterClimateYearDetails.length">
+                Percent Reduction
+            </th>
+            <th *ngIf="betterClimateReportSetup.includePercentContributionsInTables" class="text-center"
+                [attr.colspan]="annualFacilitiesSummaries[0].betterClimateYearDetails.length">
+                Percent Contribution
+            </th>
+
+        </tr>
+
+        <tr>
+            <th (click)="setOrderDataField('facilityName', undefined)"
+                [ngClass]="{'active': orderDataField == 'facilityName'}">
+                Facility Name
+            </th>
+            <!--scope 1-->
+            <ng-container *ngIf="emissionsType == 'scope1'">
+                <ng-container *ngIf="betterClimateReportSetup.includeEmissionsInTables">
+                    <ng-container
+                        *ngFor="let data of annualFacilitiesSummaries[0].betterClimateYearDetails; let index = index;">
+                        <th (click)="setOrderDataField('scope1Emissions', data.year)"
+                            [ngClass]="{'active': orderDataField == 'scope1Emissions' && orderByYear == data.year}"
+                            class="text-center">
+                            {{data.year}}
+                        </th>
+                    </ng-container>
+                </ng-container>
+                <ng-container *ngIf="betterClimateReportSetup.includePercentReductionsInTables">
+                    <ng-container
+                        *ngFor="let data of annualFacilitiesSummaries[0].betterClimateYearDetails; let index = index;">
+                        <th class="text-center" (click)="setOrderDataField('scope1PercentReductions', data.year)"
+                            [ngClass]="{'active': orderDataField == 'scope1PercentReductions' && orderByYear == data.year}">
+                            {{data.year}}
+                        </th>
+                    </ng-container>
+                </ng-container>
+                <ng-container *ngIf="betterClimateReportSetup.includePercentContributionsInTables">
+                    <ng-container
+                        *ngFor="let data of annualFacilitiesSummaries[0].betterClimateYearDetails; let index = index;">
+                        <th class="text-center"
+                            (click)="setOrderDataField('scope1ReductionContributionRelative', data.year)"
+                            [ngClass]="{'active': orderDataField == 'scope1ReductionContributionRelative' && orderByYear == data.year}">
+                            {{data.year}}
+                        </th>
+                    </ng-container>
+                </ng-container>
+            </ng-container>
+            <!--scope 2 market-->
+            <ng-container *ngIf="emissionsType == 'scope2Market'">
+                <ng-container *ngIf="betterClimateReportSetup.includeEmissionsInTables">
+                    <ng-container
+                        *ngFor="let data of annualFacilitiesSummaries[0].betterClimateYearDetails; let index = index;">
+                        <th (click)="setOrderDataField('scope2MarketEmissions', data.year)"
+                            [ngClass]="{'active': orderDataField == 'scope2MarketEmissions' && orderByYear == data.year}"
+                            class="text-center">
+                            {{data.year}}
+                        </th>
+                    </ng-container>
+                </ng-container>
+                <ng-container *ngIf="betterClimateReportSetup.includePercentReductionsInTables">
+                    <ng-container
+                        *ngFor="let data of annualFacilitiesSummaries[0].betterClimateYearDetails; let index = index;">
+                        <th class="text-center" (click)="setOrderDataField('scope2MarketPercentReductions', data.year)"
+                            [ngClass]="{'active': orderDataField == 'scope2MarketPercentReductions' && orderByYear == data.year}">
+                            {{data.year}}
+                        </th>
+                    </ng-container>
+                </ng-container>
+                <ng-container *ngIf="betterClimateReportSetup.includePercentContributionsInTables">
+                    <ng-container
+                        *ngFor="let data of annualFacilitiesSummaries[0].betterClimateYearDetails; let index = index;">
+                        <th class="text-center"
+                            (click)="setOrderDataField('scope2MarketReductionContributionRelative', data.year)"
+                            [ngClass]="{'active': orderDataField == 'scope2MarketReductionContributionRelative' && orderByYear == data.year}">
+                            {{data.year}}
+                        </th>
+                    </ng-container>
+                </ng-container>
+            </ng-container>
+            <!--scope 2 location-->
+            <ng-container *ngIf="emissionsType == 'scope2Location'">
+                <ng-container *ngIf="betterClimateReportSetup.includeEmissionsInTables">
+                    <ng-container
+                        *ngFor="let data of annualFacilitiesSummaries[0].betterClimateYearDetails; let index = index;">
+                        <th (click)="setOrderDataField('scope2LocationEmissions', data.year)"
+                            [ngClass]="{'active': orderDataField == 'scope2LocationEmissions' && orderByYear == data.year}"
+                            class="text-center">
+                            {{data.year}}
+                        </th>
+                    </ng-container>
+                </ng-container>
+                <ng-container *ngIf="betterClimateReportSetup.includePercentReductionsInTables">
+                    <ng-container
+                        *ngFor="let data of annualFacilitiesSummaries[0].betterClimateYearDetails; let index = index;">
+                        <th class="text-center"
+                            (click)="setOrderDataField('scope2LocationPercentReductions', data.year)"
+                            [ngClass]="{'active': orderDataField == 'scope2LocationPercentReductions' && orderByYear == data.year}">
+                            {{data.year}}
+                        </th>
+                    </ng-container>
+                </ng-container>
+                <ng-container *ngIf="betterClimateReportSetup.includePercentContributionsInTables">
+                    <ng-container
+                        *ngFor="let data of annualFacilitiesSummaries[0].betterClimateYearDetails; let index = index;">
+                        <th class="text-center"
+                            (click)="setOrderDataField('scope2LocationReductionContributionRelative', data.year)"
+                            [ngClass]="{'active': orderDataField == 'scope2LocationReductionContributionRelative' && orderByYear == data.year}">
+                            {{data.year}}
+                        </th>
+                    </ng-container>
+                </ng-container>
+            </ng-container>
+        </tr>
+    </thead>
+    <tbody>
+        <tr *ngFor="let facilityData of annualFacilitiesSummaries">
+            <td>
+                {{facilityData.facility.name}}
+            </td>
+            <!--scope 1-->
+            <ng-container *ngIf="emissionsType == 'scope1'">
+                <ng-container *ngIf="betterClimateReportSetup.includeEmissionsInTables">
+                    <ng-container *ngFor="let data of facilityData.betterClimateYearDetails; let index = index;">
+                        <td class="text-center fill-cell"
+                            [ngStyle]="{'background-size': data.emissionsResults.totalScope1Emissions| tableFill: accountDetails[index].emissionsResults.totalScope1Emissions}">
+                            <ng-container *ngIf="data.emissionsResults.totalScope1Emissions">
+                                {{data.emissionsResults.totalScope1Emissions | customNumber}}
+                            </ng-container>
+                            <ng-container *ngIf="!data.emissionsResults.totalScope1Emissions">
+                                &mdash;
+                            </ng-container>
+                        </td>
+                    </ng-container>
+                </ng-container>
+
+                <ng-container *ngIf="betterClimateReportSetup.includePercentReductionsInTables">
+                    <ng-container *ngFor="let data of facilityData.betterClimateYearDetails; let index = index;">
+                        <td class="text-center"
+                            [ngStyle]="{'background-color': data.percentReductions.totalScope1Emissions| tableCellShading:facilityMaxMin[index].scope1PercentReductions.min: facilityMaxMin[index].scope1PercentReductions.max}">
+                            <ng-container *ngIf="data.percentReductions.totalScope1Emissions">
+                                {{data.percentReductions.totalScope1Emissions| number:'1.0-2'}} %
+                            </ng-container>
+                            <ng-container *ngIf="!data.percentReductions.totalScope1Emissions">
+                                &mdash;
+                            </ng-container>
+                        </td>
+                    </ng-container>
+                </ng-container>
+                <ng-container *ngIf="betterClimateReportSetup.includePercentContributionsInTables">
+                    <ng-container *ngFor="let data of facilityData.betterClimateYearDetails; let index = index;">
+                        <td class="text-center"
+                            [ngStyle]="{'background-color': data.relativeContribution.totalScope1Emissions| tableCellShading:facilityMaxMin[index].scope1ReductionContributionRelative.min: facilityMaxMin[index].scope1ReductionContributionRelative.max}">
+                            <ng-container *ngIf="data.relativeContribution.totalScope1Emissions">
+                                {{data.relativeContribution.totalScope1Emissions| number:'1.0-2'}} %
+                            </ng-container>
+                            <ng-container *ngIf="!data.relativeContribution.totalScope1Emissions">
+                                &mdash;
+                            </ng-container>
+                        </td>
+                    </ng-container>
+                </ng-container>
+            </ng-container>
+            <!--scope 2 market-->
+            <ng-container *ngIf="emissionsType == 'scope2Market'">
+                <ng-container *ngIf="betterClimateReportSetup.includeEmissionsInTables">
+                    <ng-container *ngFor="let data of facilityData.betterClimateYearDetails; let index = index;">
+                        <td class="text-center fill-cell"
+                            [ngStyle]="{'background-size': data.emissionsResults.scope2MarketEmissions| tableFill: accountDetails[index].emissionsResults.scope2MarketEmissions}">
+                            <ng-container *ngIf="data.emissionsResults.scope2MarketEmissions">
+                                {{data.emissionsResults.scope2MarketEmissions | customNumber}}
+                            </ng-container>
+                            <ng-container *ngIf="!data.emissionsResults.scope2MarketEmissions">
+                                &mdash;
+                            </ng-container>
+                        </td>
+                    </ng-container>
+                </ng-container>
+                <ng-container *ngIf="betterClimateReportSetup.includePercentReductionsInTables">
+                    <ng-container *ngFor="let data of facilityData.betterClimateYearDetails; let index = index;">
+                        <td class="text-center"
+                            [ngStyle]="{'background-color': data.percentReductions.scope2MarketEmissions| tableCellShading:facilityMaxMin[index].scope2MarketPercentReductions.min: facilityMaxMin[index].scope2MarketPercentReductions.max}">
+                            <ng-container *ngIf="data.percentReductions.scope2MarketEmissions">
+                                {{data.percentReductions.scope2MarketEmissions| number:'1.0-2'}} %
+                            </ng-container>
+                            <ng-container *ngIf="!data.percentReductions.scope2MarketEmissions">
+                                &mdash;
+                            </ng-container>
+                        </td>
+                    </ng-container>
+                </ng-container>
+                <ng-container *ngIf="betterClimateReportSetup.includePercentContributionsInTables">
+                    <ng-container *ngFor="let data of facilityData.betterClimateYearDetails; let index = index;">
+                        <td class="text-center"
+                            [ngStyle]="{'background-color': data.relativeContribution.scope2MarketEmissions| tableCellShading:facilityMaxMin[index].scope2MarketReductionContributionRelative.min: facilityMaxMin[index].scope2MarketReductionContributionRelative.max}">
+                            <ng-container *ngIf="data.relativeContribution.scope2MarketEmissions">
+                                {{data.relativeContribution.scope2MarketEmissions| number:'1.0-2'}} %
+                            </ng-container>
+                            <ng-container *ngIf="!data.relativeContribution.scope2MarketEmissions">
+                                &mdash;
+                            </ng-container>
+                        </td>
+                    </ng-container>
+                </ng-container>
+            </ng-container>
+            <!--scope 2 location-->
+            <ng-container *ngIf="emissionsType == 'scope2Location'">
+                <ng-container *ngIf="betterClimateReportSetup.includeEmissionsInTables">
+                    <ng-container *ngFor="let data of facilityData.betterClimateYearDetails; let index = index;">
+                        <td class="text-center fill-cell"
+                            [ngStyle]="{'background-size': data.emissionsResults.scope2LocationEmissions | tableFill: accountDetails[index].emissionsResults.scope2LocationEmissions}">
+                            <ng-container *ngIf="data.emissionsResults.scope2LocationEmissions">
+                                {{data.emissionsResults.scope2LocationEmissions | customNumber}}
+                            </ng-container>
+                            <ng-container *ngIf="!data.emissionsResults.scope2LocationEmissions">
+                                &mdash;
+                            </ng-container>
+                        </td>
+                    </ng-container>
+                </ng-container>
+                <ng-container *ngIf="betterClimateReportSetup.includePercentReductionsInTables">
+                    <ng-container *ngFor="let data of facilityData.betterClimateYearDetails; let index = index;">
+                        <td class="text-center"
+                            [ngStyle]="{'background-color': data.percentReductions.scope2LocationEmissions| tableCellShading:facilityMaxMin[index].scope2LocationPercentReductions.min: facilityMaxMin[index].scope2LocationPercentReductions.max}">
+                            <ng-container *ngIf="data.percentReductions.scope2LocationEmissions">
+                                {{data.percentReductions.scope2LocationEmissions| number:'1.0-2'}} %
+                            </ng-container>
+                            <ng-container *ngIf="!data.percentReductions.scope2LocationEmissions">
+                                &mdash;
+                            </ng-container>
+                        </td>
+                    </ng-container>
+                </ng-container>
+                <ng-container *ngIf="betterClimateReportSetup.includePercentContributionsInTables">
+                    <ng-container *ngFor="let data of facilityData.betterClimateYearDetails; let index = index;">
+                        <td class="text-center"
+                            [ngStyle]="{'background-color': data.relativeContribution.scope2LocationEmissions| tableCellShading:facilityMaxMin[index].scope2LocationReductionContributionRelative.min: facilityMaxMin[index].scope2LocationReductionContributionRelative.max}">
+                            <ng-container *ngIf="data.relativeContribution.scope2LocationEmissions">
+                                {{data.relativeContribution.scope2LocationEmissions| number:'1.0-2'}} %
+                            </ng-container>
+                            <ng-container *ngIf="!data.relativeContribution.scope2LocationEmissions">
+                                &mdash;
+                            </ng-container>
+                        </td>
+                    </ng-container>
+                </ng-container>
+            </ng-container>
+        </tr>
+    </tbody>
+    <tfoot>
+        <tr>
+            <th>
+                Totals
+            </th>
+            <!--scope 1-->
+            <ng-container *ngIf="emissionsType == 'scope1'">
+                <ng-container *ngIf="betterClimateReportSetup.includeEmissionsInTables">
+                    <ng-container *ngFor="let data of accountDetails; let index = index;">
+                        <th class="text-center">
+                            <ng-container *ngIf="data.emissionsResults.totalScope1Emissions">
+                                {{data.emissionsResults.totalScope1Emissions | customNumber}}
+                            </ng-container>
+                            <ng-container *ngIf="!data.emissionsResults.totalScope1Emissions">
+                                &mdash;
+                            </ng-container>
+                        </th>
+                    </ng-container>
+                </ng-container>
+                <ng-container *ngIf="betterClimateReportSetup.includePercentReductionsInTables">
+                    <ng-container *ngFor="let data of accountDetails; let index = index;">
+                        <th class="text-center">
+                            <ng-container *ngIf="data.percentReductions.totalScope1Emissions">
+                                {{data.percentReductions.totalScope1Emissions| number:'1.0-2'}} %
+                            </ng-container>
+                            <ng-container *ngIf="!data.percentReductions.totalScope1Emissions">
+                                &mdash;
+                            </ng-container>
+                        </th>
+                    </ng-container>
+                </ng-container>
+                <ng-container *ngIf="betterClimateReportSetup.includePercentContributionsInTables">
+                    <ng-container *ngFor="let data of accountDetails; let index = index;">
+                        <th class="text-center">
+                            <ng-container *ngIf="data.percentReductions.totalScope1Emissions">
+                                {{data.percentReductions.totalScope1Emissions| number:'1.0-2'}} %
+                            </ng-container>
+                            <ng-container *ngIf="!data.percentReductions.totalScope1Emissions">
+                                &mdash;
+                            </ng-container>
+                        </th>
+                    </ng-container>
+                </ng-container>
+            </ng-container>
+            <!--scope 2 market-->
+            <ng-container *ngIf="emissionsType == 'scope2Market'">
+                <ng-container *ngIf="betterClimateReportSetup.includeEmissionsInTables">
+                    <ng-container *ngFor="let data of accountDetails; let index = index;">
+                        <th class="text-center">
+                            <ng-container *ngIf="data.emissionsResults.scope2MarketEmissions">
+                                {{data.emissionsResults.scope2MarketEmissions | customNumber}}
+                            </ng-container>
+                            <ng-container *ngIf="!data.emissionsResults.scope2MarketEmissions">
+                                &mdash;
+                            </ng-container>
+                        </th>
+                    </ng-container>
+                </ng-container>
+                <ng-container *ngIf="betterClimateReportSetup.includePercentReductionsInTables">
+                    <ng-container *ngFor="let data of accountDetails; let index = index;">
+                        <th class="text-center">
+                            <ng-container *ngIf="data.percentReductions.scope2MarketEmissions">
+                                {{data.percentReductions.scope2MarketEmissions| number:'1.0-2'}} %
+                            </ng-container>
+                            <ng-container *ngIf="!data.percentReductions.scope2MarketEmissions">
+                                &mdash;
+                            </ng-container>
+                        </th>
+                    </ng-container>
+                </ng-container>
+                <ng-container *ngIf="betterClimateReportSetup.includePercentContributionsInTables">
+                    <ng-container *ngFor="let data of accountDetails; let index = index;">
+                        <th class="text-center">
+                            <ng-container *ngIf="data.percentReductions.scope2MarketEmissions">
+                                {{data.percentReductions.scope2MarketEmissions| number:'1.0-2'}} %
+                            </ng-container>
+                            <ng-container *ngIf="!data.percentReductions.scope2MarketEmissions">
+                                &mdash;
+                            </ng-container>
+                        </th>
+                    </ng-container>
+                </ng-container>
+            </ng-container>
+            <!--scope 2 location-->
+            <ng-container *ngIf="emissionsType == 'scope2Location'">
+                <ng-container *ngIf="betterClimateReportSetup.includeEmissionsInTables">
+                    <ng-container *ngFor="let data of accountDetails; let index = index;">
+                        <th class="text-center">
+                            <ng-container *ngIf="data.emissionsResults.scope2LocationEmissions">
+                                {{data.emissionsResults.scope2LocationEmissions | customNumber}}
+                            </ng-container>
+                            <ng-container *ngIf="!data.emissionsResults.scope2LocationEmissions">
+                                &mdash;
+                            </ng-container>
+                        </th>
+                    </ng-container>
+                </ng-container>
+                <ng-container *ngIf="betterClimateReportSetup.includePercentReductionsInTables">
+                    <ng-container *ngFor="let data of accountDetails; let index = index;">
+                        <th class="text-center">
+                            <ng-container *ngIf="data.percentReductions.scope2LocationEmissions">
+                                {{data.percentReductions.scope2LocationEmissions| number:'1.0-2'}} %
+                            </ng-container>
+                            <ng-container *ngIf="!data.percentReductions.scope2LocationEmissions">
+                                &mdash;
+                            </ng-container>
+                        </th>
+                    </ng-container>
+                </ng-container>
+                <ng-container *ngIf="betterClimateReportSetup.includePercentContributionsInTables">
+                    <ng-container *ngFor="let data of accountDetails; let index = index;">
+                        <th class="text-center">
+                            <ng-container *ngIf="data.percentReductions.scope2LocationEmissions">
+                                {{data.percentReductions.scope2LocationEmissions| number:'1.0-2'}} %
+                            </ng-container>
+                            <ng-container *ngIf="!data.percentReductions.scope2LocationEmissions">
+                                &mdash;
+                            </ng-container>
+                        </th>
+                    </ng-container>
+                </ng-container>
+            </ng-container>
+        </tr>
+    </tfoot>
+</table>

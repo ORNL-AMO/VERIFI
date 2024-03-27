@@ -30,13 +30,13 @@
                             <div class="form-check">
                                 <input type="radio" class="form-check-input" name="energyIsSource" [value]="true"
                                     id="sourceEnergy" [(ngModel)]="analysisItem.energyIsSource"
-                                    (change)="setSiteSource()" [disabled]="disableForm">
+                                    (change)="setSiteSource()" [disabled]="disableForm || showInUseMessage">
                                 <label class="form-check-label" for="sourceEnergy">Source Energy</label>
                             </div>
                             <div class="form-check">
                                 <input type="radio" class="form-check-input" name="energyIsSource" [value]="false"
                                     id="siteEnergy" [(ngModel)]="analysisItem.energyIsSource" (change)="setSiteSource()"
-                                    [disabled]="disableForm">
+                                    [disabled]="disableForm || showInUseMessage">
                                 <label class="form-check-label" for="siteEnergy">Site Energy</label>
                             </div>
                         </div>
@@ -77,7 +77,7 @@
                     <div class="col-7">
                         <select required class="form-select" id="baselineYear" name="baselineYear"
                             [(ngModel)]="analysisItem.baselineYear" (change)="changeReportYear()"
-                            [disabled]="disableForm">
+                            [disabled]="disableForm || showInUseMessage">
                             <option *ngFor="let year of yearOptions" [ngValue]="year">
                                 {{year| yearDisplay: facility.fiscalYear}}</option>
                         </select>
@@ -102,8 +102,8 @@
                     <div class="col-7">
                         <select required class="form-select" name="reportYear" id="reportYear"
                             [(ngModel)]="analysisItem.reportYear" (change)="changeReportYear()"
-                            [disabled]="disableForm">
-                            <option *ngFor="let year of yearOptions" [ngValue]="year">{{year| yearDisplay:
+                            [disabled]="disableForm || showInUseMessage">
+                            <option *ngFor="let year of reportYears" [ngValue]="year">{{year| yearDisplay:
                                 facility.fiscalYear}}
                             </option>
                         </select>
@@ -160,17 +160,26 @@
         </div>
     </div>
     <div class="row" *ngIf="hasModelsGenerated">
-        <div class="col-12 alert alert-warning text-center">
+        <div class="col-12 alert alert-warning">
             One or more groups have regression models generated. These settings were used to create the models and are
-            now locked. To clear the models so that you can modify these settings <a class="click-link"
-                (click)="showEnableForm()">click here</a>.
+            now locked.
+            <ul class="mb-0">
+                <li *ngIf="!showInUseMessage">
+                    <a class="click-link" (click)="showChangeReportYear()">To change the report year and keep your
+                        models click here.</a>
+                </li>
+                <li>
+                    <a class="click-link" (click)="showEnableForm()">To clear the models so that you can modify all
+                        settings click here</a>
+                </li>
+            </ul>
         </div>
     </div>
 </div>
 
 
-<div [ngClass]="{'windowOverlay': displayEnableForm}"></div>
-<div class="popup" [class.open]="displayEnableForm">
+<div [ngClass]="{'windowOverlay': displayEnableForm || displayChangeReportYear}"></div>
+<div class="popup" [ngClass]="{'open': displayEnableForm}">
     <div class="popup-header">Are you sure?
         <button class="item-right" (click)="cancelEnableForm()">x</button>
     </div>
@@ -187,5 +196,30 @@
     <div class="saveCancel popup-footer text-end">
         <button class="btn btn-secondary" (click)="cancelEnableForm()">Cancel</button>
         <button class="btn action-btn" (click)="confirmEnableForm()">Clear Models</button>
+    </div>
+</div>
+
+
+<div class="popup" [ngClass]="{'open': displayChangeReportYear}">
+    <div class="popup-header">Select New Report Year
+        <button class="item-right" (click)="cancelChangeReportYear()">x</button>
+    </div>
+    <div class="popup-body">
+        <div class="form-group row">
+            <label for="reportYear" class="col-5 col-form-label">
+                Report Year
+            </label>
+            <div class="col-7">
+                <select required class="form-select" name="reportYear" id="reportYear" [(ngModel)]="newReportYear">
+                    <option *ngFor="let year of reportYears" [ngValue]="year">{{year| yearDisplay:
+                        facility.fiscalYear}}
+                    </option>
+                </select>
+            </div>
+        </div>
+    </div>
+    <div class="saveCancel popup-footer text-end">
+        <button class="btn btn-secondary" (click)="cancelChangeReportYear()">Cancel</button>
+        <button class="btn action-btn" (click)="saveNewReportYear()">Update Report Year</button>
     </div>
 </div>

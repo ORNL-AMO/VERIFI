@@ -1,0 +1,66 @@
+<p class="bold">Contract Agreement</p>
+<form [formGroup]="meterForm">
+    <div class="row">
+        <div class="col-lg-6 col-md-12 col-sm-12">
+            <label for="agreementType">Agreement Type</label>
+            <div class="mb-3">
+                <select class="form-select" id="agreementType" type="text" formControlName="agreementType"
+                    (change)="changeAgreementType()">
+                    <option *ngFor="let agreementType of agreementTypes" [ngValue]="agreementType.value">
+                        {{agreementType.typeLabel}}
+                    </option>
+                </select>
+            </div>
+        </div>
+        <div class="col-lg-6 col-md-12 col-sm-12" *ngIf="meterForm.controls.agreementType.value == 5">
+            <label for="greenPurchaseFraction">Fraction of Green Electricity </label>
+            <div class="input-group mb-3">
+                <input id="greenPurchaseFraction" class="form-control" type="number"
+                    formControlName="greenPurchaseFraction" onfocus="this.select();">
+                <span class="input-group-text">%</span>
+            </div>
+        </div>
+    </div>
+    <div class="row pb-2" *ngIf="displayIncludeEnergy">
+        <div class="col align-items-center">
+            <div class="d-flex">
+                <label class="switch" for="includeInEnergy">
+                    <input class="checkbox" type="checkbox" id="includeInEnergy" name="includeInEnergy"
+                        formControlName="includeInEnergy" (change)="setIncludeEnergy()">
+                    <span class="slider round"></span>
+                </label>
+                <div class="ps-2">
+                    Include In Energy
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row pb-2" *ngIf="displayRetainRecs">
+        <div class="col align-items-center">
+            <div class="d-flex">
+                <label class="switch" for="retainRECs">
+                    <input class="checkbox" type="checkbox" id="retainRECs" name="retainRECs"
+                        formControlName="retainRECs">
+                    <span class="slider round"></span>
+                </label>
+                <div class="ps-2">
+                    Retain RECs
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row pb-2" *ngIf="meterForm.controls.agreementType.value == 2">
+        <div class="col align-items-center">
+            <div class="d-flex">
+                <label class="switch" for="directConnection">
+                    <input class="checkbox" type="checkbox" id="directConnection" name="directConnection"
+                        formControlName="directConnection">
+                    <span class="slider round"></span>
+                </label>
+                <div class="ps-2">
+                    Direct Connection
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

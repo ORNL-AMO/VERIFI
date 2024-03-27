@@ -1,0 +1,11 @@
+.fa-plus-circle{
+    font-size: 30px;
+}
+
+.add-card .card-body:hover{
+    background-color: #efefef;
+    cursor: pointer;
+}
+.form-select.auto-width{
+    width: auto;
+}

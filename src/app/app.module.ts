@@ -28,6 +28,7 @@ import { CreateReportModalComponent } from './core-components/create-report-moda
 import { WeatherDataModule } from './weather-data/weather-data.module';
 import { ManageAccountsComponent } from './core-components/manage-accounts/manage-accounts.component';
 import { ElectronBackupFileComponent } from './core-components/electron-backup-file/electron-backup-file.component';
+import { HttpClientModule } from '@angular/common/http';
 
 @NgModule({
   declarations: [
@@ -61,7 +62,8 @@ import { ElectronBackupFileComponent } from './core-components/electron-backup-f
     HelperPipesModule,
     NgbTypeaheadModule,
     UploadDataModule,
-    WeatherDataModule
+    WeatherDataModule,
+    HttpClientModule
   ],
   providers: [],
   bootstrap: [AppComponent]

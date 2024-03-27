@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { IdbAccountReport } from 'src/app/models/idb';
-import { BetterPlantsReportSetup, DataOverviewReportSetup, PerformanceReportSetup } from 'src/app/models/overview-report';
+import { BetterClimateReportSetup, BetterPlantsReportSetup, DataOverviewReportSetup, PerformanceReportSetup } from 'src/app/models/overview-report';
 import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
@@ -10,14 +10,16 @@ import { BehaviorSubject } from 'rxjs';
 export class AccountReportsService {
 
   print: BehaviorSubject<boolean>;
+  generateExcel: BehaviorSubject<boolean>;
   constructor(private formBuilder: FormBuilder) {
     this.print = new BehaviorSubject<boolean>(false);
+    this.generateExcel = new BehaviorSubject<boolean>(false);
   }
 
   getSetupFormFromReport(report: IdbAccountReport): FormGroup {
     let yearValidators: Array<ValidatorFn> = [];
     let dateValidators: Array<ValidatorFn> = [];
-    if (report.reportType == 'betterPlants' || report.reportType == 'performance') {
+    if (report.reportType == 'betterPlants' || report.reportType == 'performance' || report.reportType == 'betterClimate') {
       yearValidators = [Validators.required];
     } else if (report.reportType == 'dataOverview') {
       dateValidators = [Validators.required];
@@ -172,6 +174,43 @@ export class AccountReportsService {
   }
 
 
+  getBetterCimateFormFromReport(betterClimateReportSetup: BetterClimateReportSetup): FormGroup {
+    let form: FormGroup = this.formBuilder.group({
+      emissionsDisplay: [betterClimateReportSetup.emissionsDisplay, Validators.required],
+      includePortfolioInformation: [betterClimateReportSetup.emissionsDisplay],
+      includeAbsoluteEmissions: [betterClimateReportSetup.includePortfolioInformation],
+      includeGHGEmissionsReductions: [betterClimateReportSetup.includeGHGEmissionsReductions],
+      includePortfolioEnergyUse: [betterClimateReportSetup.includePortfolioEnergyUse],
+      includeCalculationsForGraphs: [betterClimateReportSetup.includeCalculationsForGraphs],
+      includeFacilitySummaries: [betterClimateReportSetup.includeFacilitySummaries],
+      numberOfTopPerformers: [betterClimateReportSetup.numberOfTopPerformers],
+      skipIntermediateYears: [betterClimateReportSetup.skipIntermediateYears],
+      includeEmissionsInTables: [betterClimateReportSetup.includeEmissionsInTables],
+      includePercentReductionsInTables: [betterClimateReportSetup.includePercentReductionsInTables],
+      includePercentContributionsInTables: [betterClimateReportSetup.includePercentContributionsInTables],
+      includeVehicleEnergyUse: [betterClimateReportSetup.includeVehicleEnergyUse],
+      includeStationaryEnergyUse: [betterClimateReportSetup.includeStationaryEnergyUse]
+    });
+    return form;
+  }
+
+  updateBetterClimateReportFromForm(betterClimateReportSetup: BetterClimateReportSetup, form: FormGroup): BetterClimateReportSetup {
+    betterClimateReportSetup.emissionsDisplay = form.controls.emissionsDisplay.value;
+    betterClimateReportSetup.includePortfolioInformation = form.controls.includePortfolioInformation.value;
+    betterClimateReportSetup.includeAbsoluteEmissions = form.controls.includeAbsoluteEmissions.value;
+    betterClimateReportSetup.includeGHGEmissionsReductions = form.controls.includeGHGEmissionsReductions.value;
+    betterClimateReportSetup.includePortfolioEnergyUse = form.controls.includePortfolioEnergyUse.value;
+    betterClimateReportSetup.includeFacilitySummaries = form.controls.includeFacilitySummaries.value;
+    betterClimateReportSetup.numberOfTopPerformers = form.controls.numberOfTopPerformers.value;
+    betterClimateReportSetup.skipIntermediateYears = form.controls.skipIntermediateYears.value;
+    betterClimateReportSetup.includeEmissionsInTables = form.controls.includeEmissionsInTables.value;
+    betterClimateReportSetup.includePercentReductionsInTables = form.controls.includePercentReductionsInTables.value;
+    betterClimateReportSetup.includePercentContributionsInTables = form.controls.includePercentContributionsInTables.value;
+    betterClimateReportSetup.includeVehicleEnergyUse = form.controls.includeVehicleEnergyUse.value;
+    betterClimateReportSetup.includeStationaryEnergyUse = form.controls.includeStationaryEnergyUse.value;
+    return betterClimateReportSetup;
+  }
+
   isReportValid(report: IdbAccountReport): boolean {
     let setupForm: FormGroup = this.getSetupFormFromReport(report);
     if (setupForm.invalid) {
@@ -186,6 +225,9 @@ export class AccountReportsService {
     } else if (report.reportType == 'performance') {
       let performanceForm: FormGroup = this.getPerformanceFormFromReport(report.performanceReportSetup);
       return performanceForm.valid;
+    } else if (report.reportType == 'betterClimate') {
+      let betterClimateForm: FormGroup = this.getBetterCimateFormFromReport(report.betterClimateReportSetup);
+      return betterClimateForm.valid;
     }
   }
 }

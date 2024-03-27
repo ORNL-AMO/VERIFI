@@ -1,0 +1,43 @@
+<p class="bold">Other Information</p>
+<form [formGroup]="meterForm">
+    <div class="row">
+        <div class="col">
+            <label for="meterNumber">Meter Number</label>
+            <div class="mb-3">
+                <input id="meterNumber" class="form-control" type="text" formControlName="meterNumber"
+                    onfocus="this.select();" minlength="0" maxlength="35">
+            </div>
+        </div>
+
+        <div class="col">
+            <label for="accountNumber">Account Number</label>
+            <div class="mb-3">
+                <input id="accountNumber" class="form-control" type="text" formControlName="accountNumber"
+                    onfocus="this.select();" minlength="0" maxlength="20">
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <label for="location">Building / Location</label>
+            <div class="mb-3">
+                <input id="location" class="form-control" type="text" formControlName="location"
+                    onfocus="this.select();" minlength="0" maxlength="42">
+            </div>
+        </div>
+
+        <div class="col">
+            <label for="supplier">Utility Supplier</label>
+            <div class="mb-3">
+                <input id="supplier" class="form-control" type="text" formControlName="supplier"
+                    onfocus="this.select();" minlength="0" maxlength="20">
+            </div>
+        </div>
+    </div>
+
+    <label for="notes">Notes</label>
+    <div class="mb-3">
+        <textarea id="notes" class="form-control" formControlName="notes"></textarea>
+    </div>
+</form>

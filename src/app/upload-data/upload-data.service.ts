@@ -1,9 +1,7 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
-import { WorkBook } from 'xlsx';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { IdbAccount, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup, PredictorData } from '../models/idb';
 import * as XLSX from 'xlsx';
-import { AgreementType, AgreementTypes, FuelTypeOption, ScopeOption, ScopeOptions, SourceOptions, getFuelTypeOptions } from '../facility/utility-data/energy-consumption/energy-source/edit-meter-form/editMeterOptions';
 import { FacilitydbService } from '../indexedDB/facility-db.service';
 import { AccountdbService } from '../indexedDB/account-db.service';
 import { UtilityMeterdbService } from '../indexedDB/utilityMeter-db.service';
@@ -11,17 +9,18 @@ import { PredictordbService } from '../indexedDB/predictors-db.service';
 import { UtilityMeterDatadbService } from '../indexedDB/utilityMeterData-db.service';
 import { EnergyUnitsHelperService } from '../shared/helper-services/energy-units-helper.service';
 import { EditMeterFormService } from '../facility/utility-data/energy-consumption/energy-source/edit-meter-form/edit-meter-form.service';
-import { EnergyUseCalculationsService } from '../shared/helper-services/energy-use-calculations.service';
 import { UtilityMeterGroupdbService } from '../indexedDB/utilityMeterGroup-db.service';
 import { UnitOption } from '../shared/unitOptions';
-import { Countries, Country } from '../shared/form-data/countries';
-import { EGridService } from '../shared/helper-services/e-grid.service';
-import * as _ from 'lodash';
-import { State, States } from '../shared/form-data/states';
-import { getIsEnergyMeter, getIsEnergyUnit } from '../shared/sharedHelperFuntions';
+import { checkShowHeatCapacity, checkShowSiteToSource, getHeatingCapacity, getIsEnergyMeter, getIsEnergyUnit, getSiteToSource, getStartingUnitOptions } from '../shared/sharedHelperFuntions';
 import { MeterPhase, MeterSource } from '../models/constantsAndTypes';
-import { SubRegionData } from '../models/eGridEmissions';
 import { getMeterDataCopy } from '../calculations/conversions/convertMeterData';
+import { FuelTypeOption } from '../shared/fuel-options/fuelTypeOption';;
+import { ColumnGroup, ColumnItem, FacilityGroup, FileReference, ParsedTemplate } from './upload-data-models';
+import { UploadDataV1Service } from './upload-data-v1.service';
+import { UploadDataV2Service } from './upload-data-v2.service';
+import { DetailDegreeDay } from '../models/degreeDays';
+import { DegreeDaysService } from '../shared/helper-services/degree-days.service';
+import * as _ from 'lodash';
 
 @Injectable({
   providedIn: 'root'
@@ -37,18 +36,19 @@ export class UploadDataService {
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private energyUnitsHelperService: EnergyUnitsHelperService,
     private editMeterFormService: EditMeterFormService,
-    private energyUseCalculationsService: EnergyUseCalculationsService,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
-    private eGridService: EGridService) {
+    private uploadDataV1Service: UploadDataV1Service,
+    private uploadDataV2Service: UploadDataV2Service,
+    private degreeDaysService: DegreeDaysService) {
     this.allFilesSet = new BehaviorSubject<boolean>(false);
     this.fileReferences = new Array();
     this.uploadMeters = new Array();
   }
 
 
-  getFileReference(file: File, workBook: XLSX.WorkBook): FileReference {
-    let isTemplate: boolean = this.checkSheetNamesForTemplate(workBook.SheetNames);
-    if (!isTemplate) {
+  getFileReference(file: File, workBook: XLSX.WorkBook, inSetupWizard: boolean): FileReference {
+    let isTemplate: "V1" | "V2" | "Non-template" = this.checkSheetNamesForTemplate(workBook.SheetNames);
+    if (isTemplate == "Non-template") {
       let accountFacilities: Array<IdbFacility> = this.facilityDbService.getAccountFacilitiesCopy();
 
       return {
@@ -57,7 +57,7 @@ export class UploadDataService {
         dataSubmitted: false,
         id: Math.random().toString(36).substr(2, 9),
         workbook: workBook,
-        isTemplate: isTemplate,
+        isTemplate: false,
         selectedWorksheetName: workBook.Workbook.Sheets[0].name,
         selectedWorksheetData: [],
         columnGroups: [],
@@ -75,8 +75,7 @@ export class UploadDataService {
       };
     } else {
       //parse template
-      let templateData: ParsedTemplate = this.parseTemplate(workBook);
-      // let meterFacilityGroups: Array<FacilityGroup> = this.getMeterFacilityGroups(templateData);
+      let templateData: ParsedTemplate = this.parseTemplate(workBook, isTemplate, inSetupWizard);
       let predictorFacilityGroups: Array<FacilityGroup> = this.getPredictorFacilityGroups(templateData);
       let fileName: string = 'Upload File';
       if (file) {
@@ -88,7 +87,7 @@ export class UploadDataService {
         dataSubmitted: false,
         id: Math.random().toString(36).substr(2, 9),
         workbook: workBook,
-        isTemplate: isTemplate,
+        isTemplate: true,
         selectedWorksheetName: undefined,
         selectedWorksheetData: [],
         columnGroups: [],
@@ -107,226 +106,26 @@ export class UploadDataService {
     }
   }
 
-  checkSheetNamesForTemplate(sheetNames: Array<string>): boolean {
-    if (sheetNames[0] == "Help" && sheetNames[1] == 'Facilities' && sheetNames[2] == "Meters-Utilities" && sheetNames[3] == "Electricity" && sheetNames[4] == "Non-electricity" && sheetNames[5] == "Predictors") {
-      return true;
+  checkSheetNamesForTemplate(sheetNames: Array<string>): "V1" | "V2" | "Non-template" {
+    if (sheetNames[0] == "V2" && sheetNames[1] == "Help" && sheetNames[2] == "HIDE_Lists" && sheetNames[3] == "HIDE_Meter_Lists" &&
+      sheetNames[4] == "Facilities" && sheetNames[5] == "Meters-Utilities" && sheetNames[6] == "HIDE_Meters-Utilites" && sheetNames[7] == "Electricity"
+      && sheetNames[8] == "Stationary Fuel - Other Energy" && sheetNames[9] == "Mobile Fuel" && sheetNames[10] == "Water" && sheetNames[11] == "Other Utility - Emission"
+      && sheetNames[12] == "Predictors" && sheetNames[13] == "Fix Me" && sheetNames[14] == "HIDE_NAICS3") {
+      return "V2";
+    } else if (sheetNames[0] == "Help" && sheetNames[1] == 'Facilities' && sheetNames[2] == "Meters-Utilities" && sheetNames[3] == "Electricity" && sheetNames[4] == "Non-electricity" && sheetNames[5] == "Predictors") {
+      return "V1";
     } else {
-      return false;
+      return "Non-template";
     }
   }
 
-  parseTemplate(workbook: XLSX.WorkBook): ParsedTemplate {
-    let facilitiesData = XLSX.utils.sheet_to_json(workbook.Sheets['Facilities']);
-    let importFacilities: Array<IdbFacility> = new Array();
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    let accountFacilities: Array<IdbFacility> = this.facilityDbService.getAccountFacilitiesCopy();
-    facilitiesData.forEach(facilityDataRow => {
-      let facilityName: string = facilityDataRow['Facility Name'];
-      if (facilityName) {
-        let facility: IdbFacility = accountFacilities.find(facility => { return facility.name == facilityName });
-        if (!facility) {
-          facility = this.facilityDbService.getNewIdbFacility(selectedAccount);
-          facility.name = facilityName;
-        }
-        facility.address = facilityDataRow['Address'];
-        facility.country = this.getCountryCode(facilityDataRow['Country']);
-        facility.state = this.getState(facilityDataRow['State']);
-        facility.city = facilityDataRow['City'];
-        facility.zip = this.getZip(facilityDataRow['Zip']);
-        facility.naics2 = facilityDataRow['NAICS Code 2'];
-        facility.naics3 = facilityDataRow['NAICS Code 3'];
-        facility.contactName = facilityDataRow['Contact Name'];
-        facility.contactPhone = facilityDataRow['Contact Phone'];
-        facility.contactEmail = facilityDataRow['Contact Email'];
-        if (facility.zip && facility.zip.length == 5) {
-          let subRegionData: SubRegionData = _.find(this.eGridService.subRegionsByZipcode, (val) => { return val.zip == facility.zip });
-          if (subRegionData) {
-            if (subRegionData.subregions.length != 0) {
-              facility.eGridSubregion = subRegionData.subregions[0]
-            }
-          }
-        }
-        importFacilities.push(facility);
-      }
-    })
-    let metersData = XLSX.utils.sheet_to_json(workbook.Sheets['Meters-Utilities']);
-    let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.getAccountMetersCopy();
-    let importMeters: Array<IdbUtilityMeter> = new Array();
-    let newGroups: Array<IdbUtilityMeterGroup> = new Array();
-    metersData.forEach(meterData => {
-      let facilityName: string = meterData['Facility Name'];
-      if (facilityName) {
-        let facility: IdbFacility = importFacilities.find(facility => { return facility.name == facilityName });
-        if (facility) {
-          let meterNumber: string = meterData['Meter Number'];
-          let meter: IdbUtilityMeter = accountMeters.find(aMeter => { return aMeter.meterNumber == meterNumber });
-          if (!meter || !facility.id || facility.guid != meter.facilityId) {
-            meter = this.utilityMeterDbService.getNewIdbUtilityMeter(facility.guid, selectedAccount.guid, true, facility.energyUnit);
-          }
-
-          meter.meterNumber = meterNumber;
-          meter.accountNumber = meterData['Account Number'];
-          meter.source = this.getMeterSource(meterData['Source']);
-          meter.name = meterData['Meter Name'];
-          if (!meter.name) {
-            meter.name = 'Meter ' + meterNumber;
-          }
-          meter.supplier = meterData['Utility Supplier'];
-          meter.notes = meterData['Notes'];
-          meter.location = meterData['Building / Location'];
-          let groupData: { group: IdbUtilityMeterGroup, newGroups: Array<IdbUtilityMeterGroup> } = this.getMeterGroup(meterData['Meter Group'], facility.guid, newGroups);
-          newGroups = groupData.newGroups;
-          if (groupData.group) {
-            meter.groupId = groupData.group.guid;
-          }
-          meter.phase = this.getPhase(meterData['Phase']);
-          if (meter.source == 'Water Discharge') {
-            meter.waterDischargeType = meterData['Fuel'];
-          } else if (meter.source == 'Water Intake') {
-            meter.waterIntakeType = meterData['Fuel'];
-          } else {
-            meter.fuel = this.getFuelEnum(meterData['Fuel'], meter.source, meter.phase);
-          }
-          meter.startingUnit = this.checkImportStartingUnit(meterData['Collection Unit'], meter.source, meter.phase, meter.fuel);
-          meter.heatCapacity = meterData['Heat Capacity'];
-          let isEnergyUnit: boolean = getIsEnergyUnit(meter.startingUnit);
-          if (isEnergyUnit) {
-            meter.energyUnit = meter.startingUnit;
-          }
-          if (!meter.heatCapacity) {
-            if (!isEnergyUnit) {
-              let fuelTypeOptions: Array<FuelTypeOption> = getFuelTypeOptions(meter.source, meter.phase);
-              let fuel: FuelTypeOption = fuelTypeOptions.find(option => { return option.value == meter.fuel });
-              meter.heatCapacity = this.energyUseCalculationsService.getHeatingCapacity(meter.source, meter.startingUnit, meter.energyUnit, fuel);
-            }
-          }
-          // meter.heatCapacity = meterData['Heat Capacity'];
-          meter.siteToSource = meterData['Site To Source'];
-          meter.scope = this.getScope(meterData['Scope']);
-          if (meter.scope == undefined) {
-            meter.scope = this.editMeterFormService.getDefaultScope(meter.source);
-          }
-          meter.agreementType = this.getAgreementType(meterData['Agreement Type']);
-          if (meter.agreementType == undefined && meter.source == 'Electricity') {
-            meter.agreementType = 1;
-          }
-          meter.includeInEnergy = this.getYesNoBool(meterData['Include In Energy']);
-          if (meter.includeInEnergy == undefined) {
-            if (meter.agreementType != 4 && meter.agreementType != 6) {
-              meter.includeInEnergy = true;
-            } else {
-              meter.includeInEnergy = false;
-            }
-          }
-          meter.retainRECs = this.getYesNoBool(meterData['Retain RECS']);
-          if (meter.retainRECs == undefined && meter.source == 'Electricity') {
-            if (meter.agreementType == 1) {
-              meter.retainRECs = false;
-            } else {
-              meter.retainRECs = true;
-            }
-          }
-
-          if (meter.agreementType != undefined) {
-            if (meter.agreementType == 1) {
-              //grid
-              meter.includeInEnergy = true;
-              meter.retainRECs = false;
-            } else if (meter.agreementType == 4 || meter.agreementType == 6) {
-              //VPPA || RECs
-              meter.includeInEnergy = false;
-            } else if (meter.agreementType == 5) {
-              //Utility green product
-              meter.includeInEnergy = true;
-            }
-          }
-
-
-          if (meter.siteToSource == undefined) {
-            let selectedFuelTypeOption: FuelTypeOption;
-            if (meter.fuel != undefined) {
-              let fuelTypeOptions: Array<FuelTypeOption> = getFuelTypeOptions(meter.source, meter.phase);
-              selectedFuelTypeOption = fuelTypeOptions.find(option => { return option.value == meter.fuel });
-            }
-            let siteToSource: number = this.energyUseCalculationsService.getSiteToSource(meter.source, selectedFuelTypeOption, meter.agreementType);
-            meter.siteToSource = siteToSource;
-          }
-          meter.meterReadingDataApplication = this.getMeterReadingDataApplication(meterData['Calendarize Data?']);
-
-          meter = this.editMeterFormService.setMultipliers(meter);
-          importMeters.push(meter);
-        }
-      }
-    })
-    //electricity readings
-    let importMeterData: Array<IdbUtilityMeterData> = this.getMeterDataEntries(workbook, importMeters);
-    //predictors
-
-    let predictorsData = XLSX.utils.sheet_to_json(workbook.Sheets['Predictors']);
-    // debugger
-    let predictorEntries: Array<IdbPredictorEntry> = new Array();
-    let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.getAccountPerdictorsCopy();
-    importFacilities.forEach(facility => {
-      let facilityPredictorData = predictorsData.filter(data => { return data['Facility Name'] == facility.name });
-      let facilityPredictorEntries: Array<IdbPredictorEntry> = accountPredictorEntries.filter(entry => { return entry.facilityId == facility.guid });
-      let existingFacilityPredictorData: Array<PredictorData> = new Array();
-      if (facilityPredictorEntries.length != 0) {
-        existingFacilityPredictorData = facilityPredictorEntries[0].predictors.map(predictor => { return predictor });
-      }
-      if (facilityPredictorData.length != 0) {
-        Object.keys(facilityPredictorData[0]).forEach((key) => {
-          if (key != 'Facility Name' && key != 'Date') {
-            let predictorIndex: number = existingFacilityPredictorData.findIndex(predictor => { return predictor.name == key });
-            if (predictorIndex == -1) {
-              let hasData: boolean = false;
-              facilityPredictorData.forEach(dataItem => {
-                if (dataItem[key] != 0) {
-                  hasData = true;
-                }
-              });
-              if (hasData) {
-                let newPredictor: PredictorData = this.predictorDbService.getNewPredictor([]);
-                let nameTest: string = key.toLocaleLowerCase();
-                if (!nameTest.includes('cdd') && !nameTest.includes('hdd')) {
-                  newPredictor.production = true;
-                }
-                newPredictor.name = key;
-                existingFacilityPredictorData.push(newPredictor);
-                facilityPredictorEntries.forEach(predictorEntry => {
-                  predictorEntry.predictors.push(newPredictor);
-                });
-              }
-            }
-          }
-        });
-      }
-      facilityPredictorData.forEach(dataItem => {
-        let dataItemDate: Date = new Date(dataItem['Date']);
-        let facilityPredictorEntry: IdbPredictorEntry = facilityPredictorEntries.find(entry => {
-          return this.checkSameMonth(dataItemDate, new Date(entry.date))
-        });
-        if (!facilityPredictorEntry) {
-          facilityPredictorEntry = this.predictorDbService.getNewIdbPredictorEntry(facility.guid, selectedAccount.guid, dataItemDate);
-          if (facilityPredictorEntries.length != 0) {
-            facilityPredictorEntry.predictors = JSON.parse(JSON.stringify(facilityPredictorEntries[0].predictors));
-          } else {
-            facilityPredictorEntry.predictors = JSON.parse(JSON.stringify(existingFacilityPredictorData));
-          }
-        }
-        Object.keys(dataItem).forEach((key) => {
-          if (key != 'Facility Name' && key != 'Date') {
-            let predictorIndex: number = facilityPredictorEntry.predictors.findIndex(predictor => { return predictor.name == key });
-            if (predictorIndex != -1) {
-              facilityPredictorEntry.predictors[predictorIndex].amount = dataItem[key];
-            }
-          }
-        });
-        if (facilityPredictorEntry.predictors.length != 0) {
-          predictorEntries.push(JSON.parse(JSON.stringify(facilityPredictorEntry)));
-        }
-      });
-    })
-    return { importFacilities: importFacilities, importMeters: importMeters, predictorEntries: predictorEntries, meterData: importMeterData, newGroups: newGroups }
+  parseTemplate(workbook: XLSX.WorkBook, templateVersion: "V1" | "V2", inSetupWizard: boolean): ParsedTemplate {
+    if (templateVersion == "V1") {
+      return this.uploadDataV1Service.parseTemplate(workbook);
+    } else if (templateVersion == "V2") {
+      console.log('V2!');
+      return this.uploadDataV2Service.parseTemplate(workbook, inSetupWizard);
+    }
   }
 
 
@@ -352,53 +151,12 @@ export class UploadDataService {
     }
   }
 
-  getPhase(phase: string): MeterPhase {
-    if (phase == 'Gas' || phase == 'Liquid' || phase == 'Solid') {
-      return phase;
-    }
-    return undefined;
-  }
-
-  getFuelEnum(fuel: string, source: MeterSource, phase: MeterPhase): string {
-    let fuelTypeOptions = getFuelTypeOptions(source, phase);
-    let selectedEnergyOption: FuelTypeOption = fuelTypeOptions.find(option => { return option.value == fuel });
-    if (selectedEnergyOption) {
-      return selectedEnergyOption.value;
-    }
-    return undefined;
-  }
-
-  getMeterSource(source: string): MeterSource {
-    let selectedSource: MeterSource = SourceOptions.find(sourceOption => { return sourceOption == source });
-    return selectedSource;
-  }
-
-  getCountryCode(country: string): string {
-    if (country) {
-      let findCountry: Country = Countries.find(countryOption => { return countryOption.name == country });
-      if (findCountry) {
-        return findCountry.code
-      }
-    }
-    return;
-  }
-
-  getMeterReadingDataApplication(yesOrNo: 'Yes' | 'No'): 'backward' | 'fullMonth' {
-    if (yesOrNo == 'Yes') {
-      return 'backward'
-    } else if ('No') {
-      return 'fullMonth';
-    } else {
-      return;
-    }
-  }
-
   getMeterDataEntries(workbook: XLSX.WorkBook, importMeters: Array<IdbUtilityMeter>): Array<IdbUtilityMeterData> {
     //electricity readings
     let importMeterData: Array<IdbUtilityMeterData> = new Array();
     let electricityData = XLSX.utils.sheet_to_json(workbook.Sheets['Electricity']);
     let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
-    let utilityMeterData: Array<IdbUtilityMeterData> = accountMeterData.map(meterData => {return getMeterDataCopy(meterData)});
+    let utilityMeterData: Array<IdbUtilityMeterData> = accountMeterData.map(meterData => { return getMeterDataCopy(meterData) });
 
     electricityData.forEach(dataPoint => {
       let meterNumber: string = dataPoint['Meter Number'];
@@ -508,32 +266,6 @@ export class UploadDataService {
 
   checkSameMonth(date1: Date, date2: Date): boolean {
     return date1.getUTCFullYear() == date2.getUTCFullYear() && date1.getUTCMonth() == date2.getUTCMonth();
-  }
-
-  getScope(formScope: string): number {
-    let scopeOption: ScopeOption = ScopeOptions.find(option => { return (option.scope + ': ' + option.optionLabel) == formScope });
-    if (scopeOption) {
-      return scopeOption.value;
-    } else {
-      return undefined
-    }
-  }
-
-  getYesNoBool(val: string): boolean {
-    if (val == 'Yes') {
-      return true;
-    } else if (val == 'No') {
-      return false;
-    }
-  }
-
-  getAgreementType(formAgreementType: string): number {
-    let agreementType: AgreementType = AgreementTypes.find(type => { return type.typeLabel == formAgreementType });
-    if (agreementType) {
-      return agreementType.value;
-    } else {
-      return undefined;
-    }
   }
 
   getMeterFacilityGroups(templateData: { importFacilities: Array<IdbFacility>, importMeters: Array<IdbUtilityMeter> }): Array<FacilityGroup> {
@@ -652,13 +384,13 @@ export class UploadDataService {
         } else {
           newMeter.energyUnit = selectedFacility.energyUnit;
         }
-        let showHeatCapacity: boolean = this.editMeterFormService.checkShowHeatCapacity(newMeter.source, newMeter.startingUnit);
+        let showHeatCapacity: boolean = checkShowHeatCapacity(newMeter.source, newMeter.startingUnit, newMeter.scope);
         if (showHeatCapacity) {
-          newMeter.heatCapacity = this.energyUseCalculationsService.getHeatingCapacity(newMeter.source, newMeter.startingUnit, newMeter.energyUnit);
+          newMeter.heatCapacity = getHeatingCapacity(newMeter.source, newMeter.startingUnit, newMeter.energyUnit);
         }
-        let showSiteToSource: boolean = this.editMeterFormService.checkShowSiteToSource(newMeter.source, newMeter.startingUnit, newMeter.includeInEnergy);
+        let showSiteToSource: boolean = checkShowSiteToSource(newMeter.source, newMeter.includeInEnergy, newMeter.scope);
         if (showSiteToSource) {
-          newMeter.siteToSource = this.energyUseCalculationsService.getSiteToSource(newMeter.source);
+          newMeter.siteToSource = getSiteToSource(newMeter.source);
         }
       }
     }
@@ -679,7 +411,7 @@ export class UploadDataService {
     let dateColumnGroup: ColumnGroup = fileReference.columnGroups.find(group => { return group.groupLabel == 'Date' });
     let dateColumnVal: string = dateColumnGroup.groupItems[0].value;
     let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
-    let accountUtilityData: Array<IdbUtilityMeterData> = accountMeterData.map(meterData => {return getMeterDataCopy(meterData)});
+    let accountUtilityData: Array<IdbUtilityMeterData> = accountMeterData.map(meterData => { return getMeterDataCopy(meterData) });
 
     let utilityData: Array<IdbUtilityMeterData> = new Array();
     fileReference.meters.forEach(meter => {
@@ -736,6 +468,9 @@ export class UploadDataService {
         let existingFacilityPredictorData: Array<PredictorData> = new Array();
         if (facilityPredictorEntries.length != 0) {
           existingFacilityPredictorData = facilityPredictorEntries[0].predictors.map(predictor => { return predictor });
+          existingFacilityPredictorData.forEach(predictorData => {
+            predictorData.amount = undefined;
+          });
         }
         if (group.groupItems.length != 0) {
           group.groupItems.forEach((predictorItem) => {
@@ -792,9 +527,45 @@ export class UploadDataService {
     return fileReference.predictorEntries;
   }
 
-  checkImportStartingUnit(importUnit: string, source: MeterSource, phase: MeterPhase, fuel: string): string {
+
+  async updateDegreeDays(fileReference: FileReference): Promise<Array<IdbPredictorEntry>> {
+    for (let i = 0; i < fileReference.predictorEntries.length; i++) {
+      let entry: IdbPredictorEntry = fileReference.predictorEntries[i];
+      //set degree days for new entries
+      if (!entry.id) {
+        for (let p = 0; p < entry.predictors.length; p++) {
+          let predictorData: PredictorData = entry.predictors[p];
+          if (predictorData.predictorType == 'Weather') {
+            //set degree days
+            let dataDate: Date = new Date(entry.date)
+            let degreeDays: Array<DetailDegreeDay> = await this.degreeDaysService.getDailyDataFromMonth(dataDate.getMonth(), dataDate.getFullYear(), predictorData.heatingBaseTemperature, predictorData.coolingBaseTemperature, predictorData.weatherStationId);
+            let hasErrors: DetailDegreeDay = degreeDays.find(degreeDay => {
+              return degreeDay.gapInData == true
+            });
+            if (predictorData.weatherDataType == 'CDD') {
+              let totalCDD: number = _.sumBy(degreeDays, 'coolingDegreeDay');
+              predictorData.amount = totalCDD;
+              predictorData.weatherStationId = degreeDays[0]?.stationId;
+              predictorData.weatherStationName = degreeDays[0]?.stationName;
+              predictorData.weatherDataWarning = hasErrors != undefined;
+            }
+            if (predictorData.weatherDataType == 'HDD') {
+              let totalHDD: number = _.sumBy(degreeDays, 'heatingDegreeDay');
+              predictorData.amount = totalHDD;
+              predictorData.weatherStationId = degreeDays[0]?.stationId;
+              predictorData.weatherStationName = degreeDays[0]?.stationName;
+              predictorData.weatherDataWarning = hasErrors != undefined;
+            }
+          }
+        }
+      }
+    }
+    return fileReference.predictorEntries;
+  }
+
+  checkImportStartingUnit(importUnit: string, source: MeterSource, phase: MeterPhase, fuel: string, scope: number): string {
     if (source) {
-      let startingUnitOptions: Array<UnitOption> = this.energyUnitsHelperService.getStartingUnitOptions(source, phase, fuel);
+      let startingUnitOptions: Array<UnitOption> = getStartingUnitOptions(source, phase, fuel, scope);
       let selectedUnitOption: UnitOption = startingUnitOptions.find(unitOption => { return unitOption.value == importUnit });
       if (selectedUnitOption) {
         return selectedUnitOption.value;
@@ -803,93 +574,10 @@ export class UploadDataService {
     return undefined;
   }
 
-  getState(stateStr: string): string {
-    if (stateStr) {
-      let state: State = States.find(state => {
-        return stateStr.toLocaleLowerCase() == state.abbreviation.toLocaleLowerCase() || stateStr.toLocaleLowerCase() == state.name.toLocaleLowerCase();
-      });
-      if (state) {
-        return state.name;
-      }
-    }
-    return;
-  }
-
-  getZip(zip: string): string {
-    if (zip) {
-      if (zip.length == 5) {
-        return zip;
-      } else {
-        let neededZeros: number = 5 - zip.length;
-        for (let i = 0; i < neededZeros; i++) {
-          zip = '0' + zip;
-        }
-        return zip;
-      }
-    }
-    return;
-  }
-
   checkImportCellNumber(value: any): number {
     if (value != undefined && value != null) {
       return Number(value);
     }
     return;
   }
-}
-
-
-export interface FileReference {
-  name: string,
-  // type: '.csv' | '.xlsx',
-  file: File,
-  dataSubmitted: boolean,
-  id: string,
-  workbook: WorkBook,
-  isTemplate: boolean,
-  selectedWorksheetName: string,
-  selectedWorksheetData: Array<Array<string>>,
-  columnGroups: Array<ColumnGroup>,
-  meterFacilityGroups: Array<FacilityGroup>,
-  predictorFacilityGroups: Array<FacilityGroup>,
-  headerMap: Array<any>,
-  importFacilities: Array<IdbFacility>,
-  meters: Array<IdbUtilityMeter>,
-  meterData: Array<IdbUtilityMeterData>,
-  predictorEntries: Array<IdbPredictorEntry>,
-  skipExistingReadingsMeterIds: Array<string>
-  skipExistingPredictorFacilityIds: Array<string>,
-  newMeterGroups: Array<IdbUtilityMeterGroup>,
-  selectedFacilityId: string
-}
-
-export interface ColumnGroup {
-  groupLabel: string,
-  groupItems: Array<ColumnItem>,
-  id: string
-}
-
-export interface FacilityGroup {
-  facilityId: string,
-  groupItems: Array<ColumnItem>,
-  facilityName: string,
-  color: string
-}
-
-export interface ColumnItem {
-  index: number,
-  value: string,
-  id: string,
-  isProductionPredictor?: boolean,
-  isExisting?: boolean
-  // fileName?: string
-}
-
-
-export interface ParsedTemplate {
-  importFacilities: Array<IdbFacility>,
-  importMeters: Array<IdbUtilityMeter>,
-  predictorEntries: Array<IdbPredictorEntry>,
-  meterData: Array<IdbUtilityMeterData>,
-  newGroups: Array<IdbUtilityMeterGroup>
 }

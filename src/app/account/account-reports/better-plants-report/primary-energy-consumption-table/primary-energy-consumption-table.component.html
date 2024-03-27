@@ -143,8 +143,7 @@
             <tr
                 *ngIf="betterPlantsSummary.baselineYearEnergyResults.otherGasUse || betterPlantsSummary.reportYearEnergyResults.otherGasUse">
                 <td>
-                    Other Gas (<span
-                        *ngFor="let fuel of betterPlantsSummary.baselineYearEnergyResults.otherGasFuels">{{fuel}}</span>)
+                    Other Gas
                     (<span *ngFor="let fuel of otherGasFuels; let index = index;">{{fuel}}<span class="pe-1"
                             *ngIf="index != otherGasFuels.length - 1">,</span> </span>)
                 </td>
@@ -227,7 +226,7 @@
                     Baseline Year or Other Operational Changes, (+/- MMBtu)
                 </td>
                 <td>
-                    {{betterPlantsSummary.reportYearAnalysisSummary.baselineAdjustmentForOther | customNumber}}
+                    {{betterPlantsSummary.reportYearAnalysisSummary.baselineAdjustmentForOtherV2 | customNumber}}
                 </td>
             </tr>
             <tr>

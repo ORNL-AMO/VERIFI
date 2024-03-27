@@ -5,7 +5,7 @@ import { PredictordbService } from '../../indexedDB/predictors-db.service';
 import { UtilityMeterdbService } from '../../indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from '../../indexedDB/utilityMeterData-db.service';
 import { UtilityMeterGroupdbService } from '../../indexedDB/utilityMeterGroup-db.service';
-import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport, IdbAnalysisItem, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from '../../models/idb';
+import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport, IdbAnalysisItem, IdbCustomEmissionsItem, IdbCustomFuel, IdbCustomGWP, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from '../../models/idb';
 import { LoadingService } from '../../core-components/loading/loading.service';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
@@ -13,6 +13,10 @@ import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.serv
 import { JStatRegressionModel } from 'src/app/models/analysis';
 import { firstValueFrom } from 'rxjs';
 import { ElectronBackupsDbService } from 'src/app/indexedDB/electron-backups-db.service';
+import { AnalyticsService } from 'src/app/analytics/analytics.service';
+import { CustomEmissionsDbService } from 'src/app/indexedDB/custom-emissions-db.service';
+import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
+import { CustomGWPDbService } from 'src/app/indexedDB/custom-gwp-db.service';
 
 @Injectable({
   providedIn: 'root'
@@ -23,7 +27,11 @@ export class BackupDataService {
     private utilityMeterDbService: UtilityMeterdbService, private utilityMeterDataDbService: UtilityMeterDatadbService,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService, private loadingService: LoadingService, private accountAnalysisDbService: AccountAnalysisDbService,
     private analysisDbService: AnalysisDbService, private accountReportsDbService: AccountReportDbService,
-    private electronBackupsDbService: ElectronBackupsDbService) { }
+    private electronBackupsDbService: ElectronBackupsDbService,
+    private analyticsService: AnalyticsService,
+    private customEmissionsDbService: CustomEmissionsDbService,
+    private customFuelDbService: CustomFuelDbService,
+    private customGWPDbService: CustomGWPDbService) { }
 
 
   backupAccount() {
@@ -43,6 +51,9 @@ export class BackupDataService {
       accountAnalysisItems: this.accountAnalysisDbService.accountAnalysisItems.getValue(),
       facilityAnalysisItems: this.analysisDbService.accountAnalysisItems.getValue(),
       predictorData: this.predictorsDbService.accountPredictorEntries.getValue(),
+      customEmissionsItems: this.customEmissionsDbService.accountEmissionsItems.getValue(),
+      customFuels: this.customFuelDbService.accountCustomFuels.getValue(),
+      customGWPs: this.customGWPDbService.accountCustomGWPs.getValue(),
       facility: undefined,
       backupFileType: "Account",
       origin: "VERIFI",
@@ -84,6 +95,9 @@ export class BackupDataService {
       accountAnalysisItems: undefined,
       facilityAnalysisItems: facilityAnalysisItems,
       predictorData: facilityPredictorData,
+      customEmissionsItems: this.customEmissionsDbService.accountEmissionsItems.getValue(),
+      customFuels: this.customFuelDbService.accountCustomFuels.getValue(),
+      customGWPs: this.customGWPDbService.accountCustomGWPs.getValue(),
       backupFileType: "Facility",
       origin: "VERIFI",
       timeStamp: new Date(),
@@ -115,6 +129,7 @@ export class BackupDataService {
   }
 
   async importAccountBackupFile(backupFile: BackupFile): Promise<IdbAccount> {
+    this.analyticsService.sendEvent('import_backup_file');
     this.loadingService.setLoadingMessage('Adding Account...');
     let accountGUIDs: { oldId: string, newId: string } = {
       oldId: backupFile.account.guid,
@@ -256,6 +271,32 @@ export class BackupDataService {
       await firstValueFrom(this.accountAnalysisDbService.addWithObservable(accountAnalysisItem));
     }
 
+
+    this.loadingService.setLoadingMessage('Adding Custom Emissions...');
+    for (let i = 0; i < backupFile.customEmissionsItems?.length; i++) {
+      let customEmissionsItem: IdbCustomEmissionsItem = backupFile.customEmissionsItems[i];
+      customEmissionsItem.accountId = accountGUIDs.newId;
+      delete customEmissionsItem.id;
+      await firstValueFrom(this.customEmissionsDbService.addWithObservable(customEmissionsItem));
+    }
+
+    this.loadingService.setLoadingMessage('Adding Custom Fuels...');
+    for (let i = 0; i < backupFile.customFuels?.length; i++) {
+      let customFuel: IdbCustomFuel = backupFile.customFuels[i];
+      customFuel.accountId = accountGUIDs.newId;
+      delete customFuel.id;
+      await firstValueFrom(this.customFuelDbService.addWithObservable(customFuel));
+    }
+
+    this.loadingService.setLoadingMessage('Adding Custom GWPs...');
+    for (let i = 0; i < backupFile.customGWPs?.length; i++) {
+      let customGWP: IdbCustomGWP = backupFile.customGWPs[i];
+      customGWP.accountId = accountGUIDs.newId;
+      delete customGWP.id;
+      await firstValueFrom(this.customGWPDbService.addWithObservable(customGWP));
+    }
+
+
     this.loadingService.setLoadingMessage('Adding Account Reports...');
     for (let i = 0; i < backupFile.accountReports?.length; i++) {
       let accountReport: IdbAccountReport = backupFile.accountReports[i];
@@ -275,12 +316,17 @@ export class BackupDataService {
           modificationNotes: undefined,
         }
       }
+
+      if (accountReport.reportType == 'performance') {
+        accountReport.performanceReportSetup.analysisItemId = this.getNewId(accountReport.performanceReportSetup.analysisItemId, accountAnalysisGUIDs);
+      }
       await firstValueFrom(this.accountReportsDbService.addWithObservable(accountReport));
     }
     return newAccount;
   }
 
   async importFacilityBackupFile(backupFile: BackupFile, accountGUID: string): Promise<IdbFacility> {
+    this.analyticsService.sendEvent('import_backup_file');
     this.loadingService.setLoadingMessage('Adding Facility...');
     delete backupFile.facility.id;
     backupFile.facility.accountId = accountGUID;
@@ -376,6 +422,29 @@ export class BackupDataService {
       await firstValueFrom(this.predictorsDbService.addWithObservable(predictorEntry));
     }
 
+    this.loadingService.setLoadingMessage('Adding Custom Emissions...');
+    for (let i = 0; i < backupFile.customEmissionsItems.length; i++) {
+      let customEmissionsItem: IdbCustomEmissionsItem = backupFile.customEmissionsItems[i];
+      customEmissionsItem.accountId = accountGUID;
+      delete customEmissionsItem.id;
+      await firstValueFrom(this.customEmissionsDbService.addWithObservable(customEmissionsItem));
+    }
+
+    this.loadingService.setLoadingMessage('Adding Custom Fuels...');
+    for (let i = 0; i < backupFile.customFuels.length; i++) {
+      let customFuel: IdbCustomFuel = backupFile.customFuels[i];
+      customFuel.accountId = accountGUID;
+      delete customFuel.id;
+      await firstValueFrom(this.customFuelDbService.addWithObservable(customFuel));
+    }
+
+    this.loadingService.setLoadingMessage('Adding Custom GWPs...');
+    for (let i = 0; i < backupFile.customGWPs.length; i++) {
+      let customGWP: IdbCustomGWP = backupFile.customGWPs[i];
+      customGWP.accountId = accountGUID;
+      delete customGWP.id;
+      await firstValueFrom(this.customGWPDbService.addWithObservable(customGWP));
+    }
 
     this.loadingService.setLoadingMessage('Updating Account Analysis Items...');
     let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
@@ -447,6 +516,23 @@ export class BackupDataService {
     }
     await firstValueFrom(this.electronBackupsDbService.deleteWithObservable(account.guid));
 
+    //custom emissions items
+    let customEmissionsItems: Array<IdbCustomEmissionsItem> = this.customEmissionsDbService.accountEmissionsItems.getValue();
+    for (let i = 0; i < customEmissionsItems.length; i++) {
+      await firstValueFrom(this.customEmissionsDbService.deleteWithObservable(customEmissionsItems[i].id));
+    }
+
+    //custom fuels
+    let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
+    for (let i = 0; i < customFuels.length; i++) {
+      await firstValueFrom(this.customFuelDbService.deleteWithObservable(customFuels[i].id));
+    }
+
+    //custom GWPs
+    let customGWPs: Array<IdbCustomGWP> = this.customGWPDbService.accountCustomGWPs.getValue();
+    for (let i = 0; i < customGWPs.length; i++) {
+      await firstValueFrom(this.customGWPDbService.deleteWithObservable(customGWPs[i].id));
+    }
   }
 
   async deleteFacilityData(facility: IdbFacility) {
@@ -567,6 +653,9 @@ export interface BackupFile {
   accountAnalysisItems: Array<IdbAccountAnalysisItem>,
   facilityAnalysisItems: Array<IdbAnalysisItem>,
   predictorData: Array<IdbPredictorEntry>,
+  customEmissionsItems: Array<IdbCustomEmissionsItem>,
+  customFuels: Array<IdbCustomFuel>,
+  customGWPs: Array<IdbCustomGWP>,
   origin: "VERIFI",
   backupFileType: "Account" | "Facility",
   timeStamp: Date,

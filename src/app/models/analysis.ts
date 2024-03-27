@@ -53,10 +53,9 @@ export interface MonthlyAnalysisSummaryData {
   date: Date,
   energyUse: number,
   modeledEnergy: number,
-  adjustedForNormalization: number,
   adjusted: number,
   baselineAdjustmentForNormalization: number,
-  baselineAdjustmentForOther: number,
+  baselineAdjustmentForOtherV2: number,
   baselineAdjustment: number,
   predictorUsage?: Array<{
     usage: number,
@@ -71,17 +70,19 @@ export interface MonthlyAnalysisSummaryData {
   yearToDatePercentSavings: number,
   rollingSavings: number,
   rolling12MonthImprovement: number,
-  // groupsSummaryData?: Array<MonthlyAnalysisSummaryData>,
+  modelYearDataAdjustment: number,
+  dataAdjustment: number,
+  baselineAdjustmentInput: number
 }
 
 export interface AnnualAnalysisSummary {
   year: number,
   energyUse: number,
-  modeledEnergy: number,
-  adjustedForNormalization: number,
+  // modeledEnergy: number,
+  // adjustementForNormalization: number,
   adjusted: number,
   baselineAdjustmentForNormalization: number,
-  baselineAdjustmentForOther: number,
+  baselineAdjustmentForOtherV2: number,
   baselineAdjustment: number,
   SEnPI: number,
   savings: number,
@@ -93,6 +94,8 @@ export interface AnnualAnalysisSummary {
     usage: number,
     predictorId: string
   }>,
+  // adjustedStar: number,
+  // adjustedStarStar: number
 }
 
 
@@ -109,7 +112,6 @@ export interface AnalysisTableColumns {
   energy: boolean,
   actualEnergy: boolean,
   modeledEnergy: boolean,
-  adjustedForNormalization: boolean,
   adjusted: boolean,
   baselineAdjustmentForNormalization: boolean,
   baselineAdjustmentForOther: boolean,
@@ -197,8 +199,13 @@ export interface AnalysisGroup {
     monthNum: number,
     percent: number
   }>,
-  hasBaselineAdjustement: boolean,
-  baselineAdjustments: Array<{
+  hasDataAdjustement: boolean,
+  dataAdjustments: Array<{
+    year: number,
+    amount: number
+  }>,
+  hasBaselineAdjustmentV2: boolean,
+  baselineAdjustmentsV2: Array<{
     year: number,
     amount: number
   }>,
@@ -206,7 +213,8 @@ export interface AnalysisGroup {
   models?: Array<JStatRegressionModel>,
   selectedModelId?: string,
   dateModelsGenerated?: Date,
-  regressionModelNotes?: string
+  regressionModelNotes?: string,
+  maxModelVariables: number
 }
 
 export interface GroupErrors {

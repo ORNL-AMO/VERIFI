@@ -1,7 +1,8 @@
 import { IdbAccount, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from "src/app/models/idb";
 import { getIsEnergyMeter, getIsEnergyUnit } from "src/app/shared/sharedHelperFuntions";
 import * as _ from 'lodash';
-import { FuelTypeOption, OtherEnergyOptions } from "src/app/facility/utility-data/energy-consumption/energy-source/edit-meter-form/editMeterOptions";
+import { FuelTypeOption } from "src/app/shared/fuel-options/fuelTypeOption";
+import { StationaryOtherEnergyOptions } from "src/app/shared/fuel-options/stationaryOtherEnergyOptions";
 
 export function getPreviousMonthsBill(month: number, year: number, meterReadings: Array<IdbUtilityMeterData>): IdbUtilityMeterData {
     //set to the 5th to not conflict
@@ -44,7 +45,7 @@ export function getNextMonthsBill(month: number, year: number, meterReadings: Ar
 export function getConsumptionUnit(meter: IdbUtilityMeter, accountOrFacility: IdbAccount | IdbFacility): string {
     if (accountOrFacility) {
         let isEnergyMeter: boolean;
-        if (meter.source == 'Other Utility') {
+        if (meter.source == 'Other') {
             isEnergyMeter = getIsEnergyUnit(meter.startingUnit);
         } else {
             isEnergyMeter = getIsEnergyMeter(meter.source);
@@ -61,22 +62,31 @@ export function getConsumptionUnit(meter: IdbUtilityMeter, accountOrFacility: Id
 }
 
 export function getUnitFromMeter(accountMeter: IdbUtilityMeter, accountOrFacility: IdbAccount | IdbFacility): string {
-    if (accountMeter.source == 'Electricity' || getIsEnergyUnit(accountMeter.startingUnit)) {
+    if (accountMeter.source == 'Electricity' || (getIsEnergyUnit(accountMeter.startingUnit) && accountMeter.scope != 2)) {
         return accountOrFacility.energyUnit;
     } else if (accountMeter.source == 'Natural Gas') {
         return accountOrFacility.volumeGasUnit;
     } else if (accountMeter.source == 'Other Fuels') {
-        if (accountMeter.phase == 'Gas') {
-            return accountOrFacility.volumeGasUnit;
-        } else if (accountMeter.phase == 'Liquid') {
-            return accountOrFacility.volumeLiquidUnit;
-        } else if (accountMeter.phase == 'Solid') {
-            return accountOrFacility.massUnit;
+        if (accountMeter.scope != 2) {
+            if (accountMeter.phase == 'Gas') {
+                return accountOrFacility.volumeGasUnit;
+            } else if (accountMeter.phase == 'Liquid') {
+                return accountOrFacility.volumeLiquidUnit;
+            } else if (accountMeter.phase == 'Solid') {
+                return accountOrFacility.massUnit;
+            }
+        } else {
+            //Fuel Usage
+            if (accountMeter.vehicleCollectionType == 1) {
+                return accountOrFacility.volumeLiquidUnit;
+            } else {
+                return accountMeter.vehicleDistanceUnit;
+            }
         }
     } else if (accountMeter.source == 'Water Intake' || accountMeter.source == 'Water Discharge') {
         return accountOrFacility.volumeLiquidUnit;
     } else if (accountMeter.source == 'Other Energy') {
-        let selectedEnergyOption: FuelTypeOption = OtherEnergyOptions.find(option => { return option.value == accountMeter.fuel });
+        let selectedEnergyOption: FuelTypeOption = StationaryOtherEnergyOptions.find(option => { return option.value == accountMeter.fuel });
         if (selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Steam') {
             return accountOrFacility.massUnit;
         } else if (selectedEnergyOption.otherEnergyType && (selectedEnergyOption.otherEnergyType == 'Chilled Water' || selectedEnergyOption.otherEnergyType == 'Hot Water')) {
@@ -84,7 +94,7 @@ export function getUnitFromMeter(accountMeter: IdbUtilityMeter, accountOrFacilit
         } else if (selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Compressed Air') {
             return accountOrFacility.volumeGasUnit;
         }
-    } else if (accountMeter.source == 'Other Utility') {
+    } else if (accountMeter.source == 'Other') {
         return accountMeter.startingUnit;
     }
 }

@@ -61,28 +61,22 @@ export class AccountAnalysisSetupComponent implements OnInit {
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.setAccountAnalysisItems(account, false);
     this.accountAnalysisDbService.selectedAnalysisItem.next(this.analysisItem);
-    this.setBaselineYearWarning();
   }
 
-  async changeReportYear() {
-    if (this.analysisItem.baselineYear < this.analysisItem.reportYear) {
-      let yearAdjustments: Array<{ year: number, amount: number }> = new Array();
-      for (let year: number = this.analysisItem.baselineYear + 1; year <= this.analysisItem.reportYear; year++) {
-        yearAdjustments.push({
-          year: year,
-          amount: 0
-        })
-      }
-      this.analysisItem.baselineAdjustments = yearAdjustments;
+  async changeReportYear() {  
+    this.setBaselineYearWarning();
+    if (!this.baselineYearWarning) {
+      let allAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
+      let selectYearAnalysis: boolean = true;
+      allAnalysisItems.forEach(item => {
+        if (item.reportYear == this.analysisItem.reportYear && item.selectedYearAnalysis) {
+          selectYearAnalysis = false;
+        }
+      });
+      this.analysisItem.selectedYearAnalysis = selectYearAnalysis;
+    } else {
+      this.analysisItem.selectedYearAnalysis = false;
     }
-    let allAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
-    let selectYearAnalysis: boolean = true;
-    allAnalysisItems.forEach(item => {
-      if (item.reportYear == this.analysisItem.reportYear && item.selectedYearAnalysis) {
-        selectYearAnalysis = false;
-      }
-    });
-    this.analysisItem.selectedYearAnalysis = selectYearAnalysis;
     await this.saveItem();
   }
 

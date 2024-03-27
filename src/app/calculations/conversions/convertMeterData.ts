@@ -1,5 +1,5 @@
 import { IdbAccount, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from "src/app/models/idb";
-import { checkShowSiteToSource, getIsEnergyMeter } from "src/app/shared/sharedHelperFuntions";
+import { checkShowSiteToSource, getIsEnergyMeter, getIsEnergyUnit } from "src/app/shared/sharedHelperFuntions";
 import { getUnitFromMeter } from "../calanderization/calanderizationHelpers";
 import { ConvertValue } from "./convertValue";
 
@@ -7,7 +7,7 @@ export function convertMeterData(meter: IdbUtilityMeter, meterData: Array<IdbUti
     let copyMeterData: Array<IdbUtilityMeterData> = meterData.map(data => { return getMeterDataCopy(data) });
     let isEnergyMeter: boolean = getIsEnergyMeter(meter.source);
     if (isEnergyMeter) {
-        let showSiteToSource: boolean = checkShowSiteToSource(meter.source, meter.includeInEnergy);
+        let showSiteToSource: boolean = checkShowSiteToSource(meter.source, meter.includeInEnergy, meter.scope);
         for (let index: number = 0; index < copyMeterData.length; index++) {
             if (showSiteToSource && (accountOrFacility.energyIsSource || energyIsSource)) {
                 copyMeterData[index].totalEnergyUse = copyMeterData[index].totalEnergyUse * meter.siteToSource;
@@ -21,12 +21,25 @@ export function convertMeterData(meter: IdbUtilityMeter, meterData: Array<IdbUti
     }
     let needConvertVolume: boolean = copyMeterData.find(mData => { return mData.totalVolume != undefined }) != undefined;
     if (needConvertVolume) {
-        let facilityUnit: string = neededUnit;
+        let facilityUnit: string;
+        if (neededUnit && !getIsEnergyUnit(neededUnit)) {
+            facilityUnit = neededUnit;
+        }
         if (!facilityUnit) {
             facilityUnit = getUnitFromMeter(meter, accountOrFacility);
         }
-        for (let index: number = 0; index < copyMeterData.length; index++) {
-            copyMeterData[index].totalVolume = new ConvertValue(copyMeterData[index].totalVolume, meter.startingUnit, facilityUnit).convertedValue;
+        let startingUnit: string = meter.startingUnit;
+        if (meter.source == 'Other Fuels' && meter.scope == 2) {
+            startingUnit = meter.vehicleCollectionUnit;
+        }
+        if (meter.scope != 2) {
+            for (let index: number = 0; index < copyMeterData.length; index++) {
+                copyMeterData[index].totalVolume = new ConvertValue(copyMeterData[index].totalVolume, startingUnit, facilityUnit).convertedValue;
+            }
+        } else if (meter.vehicleCollectionType == 1) {
+            for (let index: number = 0; index < copyMeterData.length; index++) {
+                copyMeterData[index].totalVolume = new ConvertValue(copyMeterData[index].totalVolume, startingUnit, facilityUnit).convertedValue;
+            }
         }
     }
     return copyMeterData;
@@ -34,7 +47,7 @@ export function convertMeterData(meter: IdbUtilityMeter, meterData: Array<IdbUti
 
 
 export function applySiteToSourceMultiplier(meter: IdbUtilityMeter, meterData: Array<IdbUtilityMeterData>): Array<IdbUtilityMeterData> {
-    let showSiteToSource: boolean = checkShowSiteToSource(meter.source, meter.includeInEnergy);
+    let showSiteToSource: boolean = checkShowSiteToSource(meter.source, meter.includeInEnergy, meter.scope);
     if (showSiteToSource && meter.siteToSource) {
         for (let index = 0; index < meterData.length; index++) {
             meterData[index].totalEnergyUse = meterData[index].totalEnergyUse * meter.siteToSource;
@@ -95,6 +108,8 @@ export function getMeterDataCopy(meterData: IdbUtilityMeterData): IdbUtilityMete
         otherCharge: meterData.otherCharge,
         //non-electricity
         demandUsage: meterData.demandUsage,
-        demandCharge: meterData.demandCharge
+        demandCharge: meterData.demandCharge,
+        heatCapacity: meterData.heatCapacity,
+        vehicleFuelEfficiency: meterData.vehicleFuelEfficiency
     }
 }

@@ -1,6 +1,6 @@
 import { MonthlyAnalysisSummaryData } from "src/app/models/analysis";
 import { CalanderizedMeter } from "src/app/models/calanderization";
-import { IdbAccount, IdbAnalysisItem, IdbFacility, IdbPredictorEntry } from "src/app/models/idb";
+import { IdbAnalysisItem, IdbFacility, IdbPredictorEntry } from "src/app/models/idb";
 import { AnnualAnalysisSummaryDataClass } from "./annualAnalysisSummaryDataClass";
 import { AnnualAnalysisSummary } from 'src/app/models/analysis';
 import { MonthlyFacilityAnalysisClass } from "./monthlyFacilityAnalysisClass";
@@ -51,19 +51,17 @@ export class AnnualFacilityAnalysisSummaryClass {
             return {
                 year: summaryDataClass.year,
                 energyUse: summaryDataClass.energyUse,
-                modeledEnergy: summaryDataClass.modeledEnergy,
-                adjustedForNormalization: summaryDataClass.adjustedForNormalization,
                 adjusted: summaryDataClass.adjusted,
-                baselineAdjustmentForNormalization: summaryDataClass.baselineAdjustmentForNormalization,
-                baselineAdjustmentForOther: summaryDataClass.baselineAdjustmentForOther,
-                baselineAdjustment: summaryDataClass.baselineAdjustment,
+                baselineAdjustmentForNormalization: checkAnalysisValue(summaryDataClass.baselineAdjustmentForNormalization),
+                baselineAdjustmentForOtherV2: checkAnalysisValue(summaryDataClass.baselineAdjustmentForOtherV2),
+                baselineAdjustment: checkAnalysisValue(summaryDataClass.baselineAdjustment),
                 SEnPI: checkAnalysisValue(summaryDataClass.SEnPI),
                 savings: checkAnalysisValue(summaryDataClass.savings),
                 totalSavingsPercentImprovement: checkAnalysisValue(summaryDataClass.totalSavingsPercentImprovement) * 100,
                 annualSavingsPercentImprovement: checkAnalysisValue(summaryDataClass.annualSavingsPercentImprovement) * 100,
                 cummulativeSavings: checkAnalysisValue(summaryDataClass.cummulativeSavings),
                 newSavings: checkAnalysisValue(summaryDataClass.newSavings),
-                predictorUsage: summaryDataClass.predictorUsage
+                predictorUsage: summaryDataClass.predictorUsage,
             }
         })
     }

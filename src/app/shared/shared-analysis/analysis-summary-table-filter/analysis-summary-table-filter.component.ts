@@ -51,7 +51,6 @@ export class AnalysisSummaryTableFilterComponent implements OnInit {
     if (this.analysisTableColumns.energy == false) {
       this.analysisTableColumns.actualEnergy = false;
       this.analysisTableColumns.modeledEnergy = false;
-      this.analysisTableColumns.adjustedForNormalization = false;
       this.analysisTableColumns.adjusted = false;
       this.analysisTableColumns.baselineAdjustmentForNormalization = false;
       this.analysisTableColumns.baselineAdjustmentForOther = false;
@@ -59,7 +58,6 @@ export class AnalysisSummaryTableFilterComponent implements OnInit {
     } else {
       this.analysisTableColumns.actualEnergy = true;
       this.analysisTableColumns.modeledEnergy = true;
-      this.analysisTableColumns.adjustedForNormalization = true;
       this.analysisTableColumns.adjusted = true;
       this.analysisTableColumns.baselineAdjustmentForNormalization = true;
       this.analysisTableColumns.baselineAdjustmentForOther = true;
@@ -101,7 +99,6 @@ export class AnalysisSummaryTableFilterComponent implements OnInit {
   setEnergyColumns() {
     this.analysisTableColumns.energy = (this.analysisTableColumns.actualEnergy
       || this.analysisTableColumns.modeledEnergy
-      || this.analysisTableColumns.adjustedForNormalization
       || this.analysisTableColumns.adjusted
       || this.analysisTableColumns.baselineAdjustmentForNormalization
       || this.analysisTableColumns.baselineAdjustmentForOther
@@ -203,7 +200,6 @@ export class AnalysisSummaryTableFilterComponent implements OnInit {
     this.analysisTableColumns.energy = true;
     this.analysisTableColumns.actualEnergy = true;
     this.analysisTableColumns.modeledEnergy = true;
-    this.analysisTableColumns.adjustedForNormalization = true;
     this.analysisTableColumns.adjusted = true;
     this.analysisTableColumns.baselineAdjustmentForNormalization = true;
     this.analysisTableColumns.baselineAdjustmentForOther = true;

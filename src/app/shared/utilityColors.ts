@@ -17,7 +17,27 @@ export const UtilityColors = {
     "Water Discharge": {
         "color": "#0072B2"
     },
-    "Other Utility": {
+    "Other": {
         "color": "#009E73"
     }
 }
+
+export const WaterIntakeColors: Array<string> = [
+    '#1B4F72',
+    '#2E86C1',
+    '#85C1E9',
+    '#424949',
+    '#3498DB',
+    '#707B7C',
+    '#B2BABB',
+];
+
+export const WaterDischargeColors: Array<string> = [
+    '#4A235A',
+    '#7D3C98',
+    '#D2B4DE',
+    '#7B7D7D',
+    '#D0D3D4',
+    '#F0F3F4',
+]
+

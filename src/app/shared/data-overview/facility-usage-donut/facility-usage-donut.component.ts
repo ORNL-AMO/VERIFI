@@ -50,7 +50,7 @@ export class FacilityUsageDonutComponent {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if (!changes.dataType && (changes.accountOverviewFacilities && !changes.accountOverviewFacilities.isFirstChange())) {
+    if (!changes.dataType || (changes.accountOverviewFacilities && !changes.accountOverviewFacilities.isFirstChange())) {
       this.drawChart();
     }
   }
@@ -77,7 +77,7 @@ export class FacilityUsageDonutComponent {
       }];
 
       let height: number;
-      if(this.inHomeScreen){
+      if (this.inHomeScreen) {
         height = 350;
       }
 
@@ -116,9 +116,15 @@ export class FacilityUsageDonutComponent {
       return this.accountOverviewFacilities.map(summary => { return summary.totalUsage });
     } else if (this.dataType == 'emissions') {
       if (this.emissionsDisplay == 'location') {
-        return this.accountOverviewFacilities.map(summary => { return summary.totalLocationEmissions });
+        return this.accountOverviewFacilities.map(summary => { return summary.emissions.totalWithLocationEmissions });
       } else {
-        return this.accountOverviewFacilities.map(summary => { return summary.totalMarketEmissions });
+        return this.accountOverviewFacilities.map(summary => {
+          if (summary.emissions.totalWithMarketEmissions > 0) {
+            return summary.emissions.totalWithMarketEmissions;
+          } else {
+            return 0
+          }
+        });
       }
     }
 

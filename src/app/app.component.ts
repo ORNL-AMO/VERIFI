@@ -11,7 +11,7 @@ import { UpdateDbEntryService } from './indexedDB/update-db-entry.service';
 import { UtilityMeterdbService } from './indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from './indexedDB/utilityMeterData-db.service';
 import { UtilityMeterGroupdbService } from './indexedDB/utilityMeterGroup-db.service';
-import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport, IdbAnalysisItem, IdbCustomEmissionsItem, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from './models/idb';
+import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport, IdbAnalysisItem, IdbCustomEmissionsItem, IdbCustomFuel, IdbCustomGWP, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from './models/idb';
 import { EGridService } from './shared/helper-services/e-grid.service';
 import { firstValueFrom } from 'rxjs';
 import { environment } from 'src/environments/environment';
@@ -19,6 +19,9 @@ import { ToastNotificationsService } from './core-components/toast-notifications
 import { AutomaticBackupsService } from './electron/automatic-backups.service';
 import { ElectronBackupsDbService } from './indexedDB/electron-backups-db.service';
 import { ElectronService } from './electron/electron.service';
+import { AnalyticsService } from './analytics/analytics.service';
+import { CustomFuelDbService } from './indexedDB/custom-fuel-db.service';
+import { CustomGWPDbService } from './indexedDB/custom-gwp-db.service';
 
 // declare ga as a function to access the JS code in TS
 declare let gtag: Function;
@@ -51,17 +54,19 @@ export class AppComponent {
     private toastNotificationService: ToastNotificationsService,
     private automaticBackupsService: AutomaticBackupsService,
     private electronBackupsDbService: ElectronBackupsDbService,
-    private electronService: ElectronService) {
+    private electronService: ElectronService,
+    private analyticsService: AnalyticsService,
+    private customFuelDbservice: CustomFuelDbService,
+    private customGWPDbService: CustomGWPDbService) {
     if (environment.production) {
+      gtag('config', 'G-YG1QD02XSE');
+      this.analyticsService.sendEvent('verifi_app_open', undefined);
       this.router.events.subscribe(event => {
         if (event instanceof NavigationEnd) {
-          gtag('config', 'G-YG1QD02XSE',
-            {
-              'page_path': event.urlAfterRedirects
-            }
-          );
+          let page_path: string = this.analyticsService.getPageWithoutId(event.urlAfterRedirects);
+          this.analyticsService.sendEvent('page_view', page_path);
         }
-      })
+      });
     }
   }
 
@@ -95,6 +100,8 @@ export class AppComponent {
         await this.initializeAccountAnalysisItems(account);
         await this.initializeCustomEmissions(account);
         await this.initializeElectronBackups();
+        await this.initializeCustomFuels(account);
+        await this.initializeCustomGWPs(account);
         let updatedAccount: { account: IdbAccount, isChanged: boolean } = this.updateDbEntryService.updateAccount(account);
         if (updatedAccount.isChanged) {
           await firstValueFrom(this.accountDbService.updateWithObservable(updatedAccount.account));
@@ -217,7 +224,6 @@ export class AppComponent {
     this.utilityMeterGroupDbService.accountMeterGroups.next(accountMeterGroups);
   }
 
-
   async initializeCustomEmissions(account: IdbAccount) {
     this.loadingMessage = 'Loading Emissions Rates...';
     let customEmissionsItems: Array<IdbCustomEmissionsItem> = await this.customEmissionsDbService.getAllAccountCustomEmissions(account.guid);
@@ -235,5 +241,17 @@ export class AppComponent {
       this.loadingMessage = 'Loading Account Backups...';
       this.electronBackupsDbService.accountBackups = await firstValueFrom(this.electronBackupsDbService.getAll());
     }
+  }
+  
+  async initializeCustomFuels(account: IdbAccount) {
+    this.loadingMessage = 'Loading Custom Fuels...';
+    let customFuels: Array<IdbCustomFuel> = await this.customFuelDbservice.getAllAccountCustomFuels(account.guid);
+    this.customFuelDbservice.accountCustomFuels.next(customFuels);
+  }  
+
+  async initializeCustomGWPs(account: IdbAccount){
+    this.loadingMessage = 'Loading Custom GWPs...';
+    let customGWPs: Array<IdbCustomGWP> = await this.customGWPDbService.getAllAccountCustomGWP(account.guid);
+    this.customGWPDbService.accountCustomGWPs.next(customGWPs);
   }
 }

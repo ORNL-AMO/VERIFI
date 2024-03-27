@@ -7,6 +7,14 @@ import { HelperPipesModule } from 'src/app/shared/helper-pipes/helper-pipes.modu
 import { EmissionsDataFormComponent } from './regional-emissions-data/emissions-data-form/emissions-data-form.component';
 import { EmissionsDataDashboardComponent } from './regional-emissions-data/emissions-data-dashboard/emissions-data-dashboard.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { CustomFuelDataComponent } from './custom-fuel-data/custom-fuel-data.component';
+import { CustomFuelDataDashboardComponent } from './custom-fuel-data/custom-fuel-data-dashboard/custom-fuel-data-dashboard.component';
+import { CustomFuelDataFormComponent } from './custom-fuel-data/custom-fuel-data-form/custom-fuel-data-form.component';
+import { ExistingFuelsModalComponent } from './custom-fuel-data/custom-fuel-data-form/existing-fuels-modal/existing-fuels-modal.component';
+import { CustomGWPComponent } from './custom-gwp/custom-gwp.component';
+import { CustomGwpDashboardComponent } from './custom-gwp/custom-gwp-dashboard/custom-gwp-dashboard.component';
+import { CustomGwpFormComponent } from './custom-gwp/custom-gwp-form/custom-gwp-form.component';
+import { ExistingGwpsModalComponent } from './custom-gwp/custom-gwp-form/existing-gwps-modal/existing-gwps-modal.component';
 
 
 
@@ -15,13 +23,22 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
     CustomDatabaseComponent,
     RegionalEmissionsDataComponent,
     EmissionsDataFormComponent,
-    EmissionsDataDashboardComponent
+    EmissionsDataDashboardComponent,
+    CustomFuelDataComponent,
+    CustomFuelDataDashboardComponent,
+    CustomFuelDataFormComponent,
+    ExistingFuelsModalComponent,
+    CustomGWPComponent,
+    CustomGwpDashboardComponent,
+    CustomGwpFormComponent,
+    ExistingGwpsModalComponent
   ],
   imports: [
     CommonModule,
     RouterModule,
     HelperPipesModule,
-    FormsModule
+    FormsModule,
+    ReactiveFormsModule
   ]
 })
 export class CustomDatabaseModule { }

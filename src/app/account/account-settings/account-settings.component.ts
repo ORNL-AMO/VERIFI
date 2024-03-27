@@ -20,6 +20,8 @@ import { CustomEmissionsDbService } from 'src/app/indexedDB/custom-emissions-db.
 import { ElectronService } from 'src/app/electron/electron.service';
 import { ElectronBackupsDbService } from 'src/app/indexedDB/electron-backups-db.service';
 import { AutomaticBackupsService } from 'src/app/electron/automatic-backups.service';
+import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
+import { CustomGWPDbService } from 'src/app/indexedDB/custom-gwp-db.service';
 
 @Component({
   selector: 'app-account-settings',
@@ -74,7 +76,9 @@ export class AccountSettingsComponent implements OnInit {
     private electronService: ElectronService,
     private cd: ChangeDetectorRef,
     private electronBackupsDbService: ElectronBackupsDbService,
-    private automaticBackupsService: AutomaticBackupsService
+    private automaticBackupsService: AutomaticBackupsService,
+    private customFuelDbService: CustomFuelDbService,
+    private customGWPDbService: CustomGWPDbService
   ) { }
 
   ngOnInit() {
@@ -169,6 +173,11 @@ export class AccountSettingsComponent implements OnInit {
     this.loadingService.setLoadingMessage("Deleting Custom Emissions...")
     await this.customEmissionsDbService.deleteAccountEmissionsItems();
     await this.electronBackupsDbService.deleteWithObservable(this.selectedAccount.guid);
+    this.loadingService.setLoadingMessage("Deleting Custom Fuels...")
+    await this.customFuelDbService.deleteAccountCustomFuels();   
+    this.loadingService.setLoadingMessage("Deleting Custom GWPs");
+    await this.customGWPDbService.deleteAccountCustomGWP();
+    
     this.loadingService.setLoadingMessage("Deleting Account...");
     await firstValueFrom(this.accountDbService.deleteAccountWithObservable(this.selectedAccount.id));
     // Then navigate to another account

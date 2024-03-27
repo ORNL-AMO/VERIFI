@@ -128,6 +128,9 @@ export class FacilityOverviewBannerComponent implements OnInit {
     let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
     let allYears: Array<number> = facilityMeterData.flatMap(meterData => { return new Date(meterData.readDate).getFullYear() });
     allYears = _.uniq(allYears);
+    allYears = _.orderBy(allYears, (year) => {
+      return year;
+    }, 'asc');
     this.years = allYears;
   }
 }

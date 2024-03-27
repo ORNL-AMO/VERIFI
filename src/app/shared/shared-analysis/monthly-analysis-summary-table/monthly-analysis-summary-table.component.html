@@ -1,4 +1,5 @@
-<table class="table utility-data table-sm table-bordered table-hover" #dataTable [ngClass]="{'copying-table': copyingTable}">
+<table class="table utility-data table-sm table-bordered table-hover" #dataTable
+    [ngClass]="{'copying-table': copyingTable}">
     <thead class="sortable">
         <tr class="table-mh">
             <th class="first-column" colspan="2"></th>
@@ -29,34 +30,30 @@
                 [ngClass]="{'active': orderDataField == 'energyUse'}">
                 Actual
             </th>
-            <th *ngIf="analysisTableColumns.modeledEnergy" (click)="setOrderDataField('modeledEnergy')"
+            <th *ngIf="analysisTableColumns.modeledEnergy && group" (click)="setOrderDataField('modeledEnergy')"
                 [ngClass]="{'active': orderDataField == 'modeledEnergy'}">
                 Modeled
-            </th>
-            <th *ngIf="analysisTableColumns.adjustedForNormalization" (click)="setOrderDataField('adjustedForNormalization')"
-                [ngClass]="{'active': orderDataField == 'adjustedForNormalization'}">
-                Adjusted for<br> Normalization
             </th>
             <th *ngIf="analysisTableColumns.adjusted" (click)="setOrderDataField('adjusted')"
                 [ngClass]="{'active': orderDataField == 'adjusted'}">
                 Adjusted
             </th>
-            <th *ngIf="analysisTableColumns.baselineAdjustmentForNormalization" (click)="setOrderDataField('baselineAdjustmentForNormalization')"
+            <th *ngIf="analysisTableColumns.baselineAdjustmentForNormalization"
+                (click)="setOrderDataField('baselineAdjustmentForNormalization')"
                 [ngClass]="{'active': orderDataField == 'baselineAdjustmentForNormalization'}">
                 Baseline<br> Adjustment<br> for Normalization
             </th>
-            
-            <th *ngIf="analysisTableColumns.baselineAdjustmentForOther" (click)="setOrderDataField('baselineAdjustmentForOther')"
+
+            <th *ngIf="analysisTableColumns.baselineAdjustmentForOther"
+                (click)="setOrderDataField('baselineAdjustmentForOther')"
                 [ngClass]="{'active': orderDataField == 'baselineAdjustmentForOther'}">
                 Baseline<br> Adjustment<br> for Other
             </th>
-            
+
             <th *ngIf="analysisTableColumns.baselineAdjustment" (click)="setOrderDataField('baselineAdjustment')"
                 [ngClass]="{'active': orderDataField == 'baselineAdjustment'}">
                 Total<br>Baseline<br> Adjustment
             </th>
-            
-
 
             <th *ngFor="let predictorVariable of predictorColumns" (click)="setOrderDataField(predictorVariable.name)"
                 [ngClass]="{'active': orderDataField == predictorVariable.name}">
@@ -111,18 +108,9 @@
                     {{data.energyUse | customNumber}}
                 </span>
             </td>
-            <td *ngIf="analysisTableColumns.modeledEnergy">
+            <td *ngIf="analysisTableColumns.modeledEnergy && group">
                 <span [ngClass]="{'red': data.modeledEnergy <= 0}">
                     {{data.modeledEnergy | customNumber}}
-                </span>
-            </td>
-            
-            <td *ngIf="analysisTableColumns.adjustedForNormalization">
-                <span *ngIf="data.adjustedForNormalization" [ngClass]="{'red': data.adjustedForNormalization < 0}">
-                    {{data.adjustedForNormalization | customNumber}}
-                </span>
-                <span *ngIf="!data.adjustedForNormalization">
-                    &mdash;
                 </span>
             </td>
             <td *ngIf="analysisTableColumns.adjusted">
@@ -135,7 +123,8 @@
             </td>
 
             <td *ngIf="analysisTableColumns.baselineAdjustmentForNormalization">
-                <span *ngIf="data.baselineAdjustmentForNormalization" [ngClass]="{'red': data.baselineAdjustmentForNormalization < 0}">
+                <span *ngIf="data.baselineAdjustmentForNormalization"
+                    [ngClass]="{'red': data.baselineAdjustmentForNormalization < 0}">
                     {{data.baselineAdjustmentForNormalization | customNumber}}
                 </span>
                 <span *ngIf="!data.baselineAdjustmentForNormalization">
@@ -143,10 +132,11 @@
                 </span>
             </td>
             <td *ngIf="analysisTableColumns.baselineAdjustmentForOther">
-                <span *ngIf="data.baselineAdjustmentForOther" [ngClass]="{'red': data.baselineAdjustmentForOther < 0}">
-                    {{data.baselineAdjustmentForOther | customNumber}}
+                <span *ngIf="data.baselineAdjustmentForOtherV2"
+                    [ngClass]="{'red': data.baselineAdjustmentForOther < 0}">
+                    {{data.baselineAdjustmentForOtherV2 | customNumber}}
                 </span>
-                <span *ngIf="!data.baselineAdjustmentForOther">
+                <span *ngIf="!data.baselineAdjustmentForOtherV2">
                     &mdash;
                 </span>
             </td>

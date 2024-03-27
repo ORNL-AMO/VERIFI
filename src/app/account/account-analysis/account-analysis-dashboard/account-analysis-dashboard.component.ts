@@ -8,6 +8,7 @@ import { IdbAccount, IdbAccountAnalysisItem, IdbUtilityMeterGroup } from 'src/ap
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { AnalysisCategory } from 'src/app/models/analysis';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { AnalyticsService } from 'src/app/analytics/analytics.service';
 
 @Component({
   selector: 'app-account-analysis-dashboard',
@@ -26,7 +27,8 @@ export class AccountAnalysisDashboardComponent implements OnInit {
   constructor(private router: Router, private accountAnalysisDbService: AccountAnalysisDbService, private toastNotificationService: ToastNotificationsService,
     private dbChangesService: DbChangesService,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
-    private accountDbService: AccountdbService) { }
+    private accountDbService: AccountdbService,
+    private analyticsService: AnalyticsService) { }
 
   ngOnInit(): void {
     this.routerSub = this.router.events.subscribe((event) => {
@@ -48,6 +50,7 @@ export class AccountAnalysisDashboardComponent implements OnInit {
     let newItem: IdbAccountAnalysisItem = this.accountAnalysisDbService.getNewAccountAnalysisItem(this.newAnalysisCategory);
     let addedItem: IdbAccountAnalysisItem = await firstValueFrom(this.accountAnalysisDbService.addWithObservable(newItem));
     await this.dbChangesService.setAccountAnalysisItems(this.selectedAccount, false);
+    this.analyticsService.sendEvent('create_account_analysis');
     this.accountAnalysisDbService.selectedAnalysisItem.next(addedItem);
     this.toastNotificationService.showToast('Analysis Item Created', undefined, undefined, false, "alert-success");
     this.router.navigateByUrl('account/analysis/setup');

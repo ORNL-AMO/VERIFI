@@ -127,6 +127,6 @@ export class AccountOverviewBannerComponent implements OnInit {
     let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
     let allYears: Array<number> = accountMeterData.flatMap(meterData => { return new Date(meterData.readDate).getFullYear() });
     allYears = _.uniq(allYears);
-    this.years = allYears;
+    this.years = _.orderBy(allYears, (year) => { return year }, 'desc');
   }
 }

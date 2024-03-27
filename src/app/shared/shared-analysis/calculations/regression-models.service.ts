@@ -29,8 +29,7 @@ export class RegressionModelsService {
       }
     });
     if (predictorVariableIds.length != 0) {
-      let allPredictorVariableCombos: Array<Array<string>> = this.getPredictorCombos(predictorVariableIds);
-
+      let allPredictorVariableCombos: Array<Array<string>> = this.getPredictorCombos(predictorVariableIds, analysisGroup.maxModelVariables);
       let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.accountPredictorEntries.getValue();
       let facilityPredictorData: Array<IdbPredictorEntry> = accountPredictorEntries.filter(entry => {
         return entry.facilityId == facility.guid;
@@ -197,7 +196,7 @@ export class RegressionModelsService {
     }
   }
 
-  setModelVaildAndNotes(model: JStatRegressionModel, facilityPredictorData: Array<IdbPredictorEntry>, reportYear: number, facility: IdbFacility, baselinYear: number): JStatRegressionModel {
+  setModelVaildAndNotes(model: JStatRegressionModel, facilityPredictorData: Array<IdbPredictorEntry>, reportYear: number, facility: IdbFacility, baselineYear: number): JStatRegressionModel {
     let modelNotes: Array<string> = new Array();
     model['isValid'] = true;
 
@@ -249,7 +248,7 @@ export class RegressionModelsService {
       modelNotes.push('No production variable in model');
     }
 
-    let validationCheck: { SEPNotes: Array<string>, SEPValidation: Array<SEPValidation> } = this.checkSEPNotes(model, facilityPredictorData, reportYear, facility, baselinYear);
+    let validationCheck: { SEPNotes: Array<string>, SEPValidation: Array<SEPValidation> } = this.checkSEPNotes(model, facilityPredictorData, reportYear, facility, baselineYear);
     validationCheck.SEPNotes.forEach(note => {
       modelNotes.push(note);
     });
@@ -258,9 +257,12 @@ export class RegressionModelsService {
     return model;
   }
 
-  getPredictorCombos(predictorIds: Array<string>): Array<Array<string>> {
+  getPredictorCombos(predictorIds: Array<string>, maxModelVariables: number): Array<Array<string>> {
     let allCombos: Array<Array<string>> = [];
-    for (let i = 1; i < 5; i++) {
+    if (!maxModelVariables) {
+      maxModelVariables = 4;
+    }
+    for (let i = 1; i <= maxModelVariables; i++) {
       this.getCombinations(predictorIds, i, allCombos);
     }
     return allCombos;
@@ -426,6 +428,12 @@ export class RegressionModelsService {
       SEPNotes: SEPNotes,
       SEPValidation: SEPValidation
     };
+  }
+
+  updateModelReportYear(model: JStatRegressionModel, reportYear: number, facility: IdbFacility, baselineYear: number): JStatRegressionModel {
+    let facilityPredictorData: Array<IdbPredictorEntry> = this.predictorDbService.facilityPredictorEntries.getValue();
+    model = this.setModelVaildAndNotes(model, facilityPredictorData, reportYear, facility, baselineYear);
+    return model;
   }
 
 }

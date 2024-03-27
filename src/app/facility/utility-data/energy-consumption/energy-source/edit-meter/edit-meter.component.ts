@@ -51,6 +51,21 @@ export class EditMeterComponent implements OnInit {
           this.meterForm.controls.fuel.disable();
           this.meterForm.controls.heatCapacity.disable();
           this.meterForm.controls.energyUnit.disable();
+
+          this.meterForm.controls.scope.disable();
+
+          this.meterForm.controls.waterIntakeType.disable();
+          this.meterForm.controls.waterDischargeType.disable();
+
+          this.meterForm.controls.vehicleCategory.disable();
+          this.meterForm.controls.vehicleType.disable();
+          this.meterForm.controls.vehicleCollectionType.disable();
+          this.meterForm.controls.vehicleCollectionUnit.disable();
+          this.meterForm.controls.vehicleFuel.disable();
+          this.meterForm.controls.vehicleFuelEfficiency.disable();
+          this.meterForm.controls.vehicleDistanceUnit.disable();
+          
+
         }
       } else {
         this.addOrEdit = 'add';

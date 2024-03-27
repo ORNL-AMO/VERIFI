@@ -6,6 +6,16 @@
             <option [ngValue]="true">Calculate Models</option>
             <option [ngValue]="false">User Defined Model</option>
         </select>
+        <ng-container *ngIf="group.userDefinedModel == true">
+            <label class="bold">Max Variable Combinations</label>
+            <select required class="form-select" id="maxModelVariables" id="maxModelVariables"
+                [(ngModel)]="group.maxModelVariables" (change)="changeModelType()">
+                <option *ngFor="let option of numVariableOptions" [ngValue]="option">{{option}}</option>
+            </select>
+            <div class="d-flex alert alert-warning" *ngIf="group.maxModelVariables > 6">
+                Larger numbers of variable combinations will take longer to generate models.
+            </div>
+        </ng-container>
         <div class="d-flex flex-fill justify-content-center align-items-center">
             <div class="p-0" *ngIf="group.userDefinedModel">
                 <div class="p-2" *ngIf="!group.models || group.models.length == 0">

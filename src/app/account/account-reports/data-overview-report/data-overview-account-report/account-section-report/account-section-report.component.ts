@@ -17,7 +17,7 @@ import { AccountReportsService } from '../../../account-reports.service';
 })
 export class AccountSectionReportComponent {
   @Input()
-  dataType: 'energyUse' | 'emissions' | 'cost' | 'water';
+  dataType: 'energyUse' | 'cost' | 'water' | 'emissions';
   @Input()
   dateRange: {
     startDate: Date,

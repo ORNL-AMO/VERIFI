@@ -1,0 +1,12 @@
+.popup{
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    width: auto;
+}
+
+.popup-body{
+    max-height: 93vh;
+    overflow-y: auto;
+}

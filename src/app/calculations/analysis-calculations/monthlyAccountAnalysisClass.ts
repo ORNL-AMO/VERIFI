@@ -34,7 +34,7 @@ export class MonthlyAccountAnalysisClass {
         this.setStartAndEndDate(account, accountAnalysisItem, calculateAllMonthlyData);
         this.setBaselineYear(account);
         this.setAnnualUsageValues();
-        this.setAccountMonthSummaries(account, accountAnalysisItem);
+        this.setAccountMonthSummaries(account);
     }
 
     setStartAndEndDate(account: IdbAccount, analysisItem: IdbAccountAnalysisItem, calculateAllMonthlyData: boolean) {
@@ -68,7 +68,7 @@ export class MonthlyAccountAnalysisClass {
                 let analysisItem: IdbAnalysisItem = allAccountAnalysisItems.find(accountItem => { return item.analysisItemId == accountItem.guid });
                 let facility: IdbFacility = accountFacilities.find(facility => { return facility.guid == item.facilityId });
                 let facilityMeters: Array<IdbUtilityMeter> = meters.filter(meter => { return meter.facilityId == facility.guid });
-                let calanderizedMeterData: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, meterData, facility, false, { energyIsSource: analysisItem.energyIsSource, neededUnits: getNeededUnits(analysisItem) });
+                let calanderizedMeterData: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, meterData, facility, false, { energyIsSource: analysisItem.energyIsSource, neededUnits: getNeededUnits(analysisItem) }, [], [], accountFacilities);
                 let monthlyFacilityAnalysisClass: MonthlyFacilityAnalysisClass = new MonthlyFacilityAnalysisClass(
                     analysisItem,
                     facility,
@@ -101,19 +101,16 @@ export class MonthlyAccountAnalysisClass {
         }
     }
 
-    setAccountMonthSummaries(account: IdbAccount, accountAnalysisItem: IdbAccountAnalysisItem) {
+    setAccountMonthSummaries(account: IdbAccount) {
         this.accountMonthSummaries = new Array();
         let monthDate: Date = new Date(this.startDate);
         while (monthDate < this.endDate) {
             let monthSummary: MonthlyAccountAnalysisDataClass = new MonthlyAccountAnalysisDataClass(
                 this.allAccountAnalysisData,
                 monthDate,
-                // this.facilityPredictorEntries,
-                this.accountMonthSummaries,
-                this.baselineYear,
                 account,
-                accountAnalysisItem,
-                this.annualUsageValues
+                this.accountMonthSummaries,
+                this.baselineYear
             );
             this.accountMonthSummaries.push(monthSummary);
             let currentMonth: number = monthDate.getUTCMonth()
@@ -126,14 +123,12 @@ export class MonthlyAccountAnalysisClass {
         return this.accountMonthSummaries.map(summaryDataItem => {
             return {
                 date: summaryDataItem.date,
-                energyUse: summaryDataItem.energyUse,
-                modeledEnergy: summaryDataItem.modeledEnergy,
-                adjustedForNormalization: summaryDataItem.monthlyAnalysisCalculatedValues.adjustedForNormalization,
+                energyUse: summaryDataItem.monthlyAnalysisCalculatedValues.energyUse,
+                modeledEnergy: undefined,
                 adjusted: summaryDataItem.monthlyAnalysisCalculatedValues.adjusted,
-                baselineAdjustmentForNormalization: summaryDataItem.monthlyAnalysisCalculatedValues.baselineAdjustmentForNormalization,
-                baselineAdjustmentForOther: summaryDataItem.baselineAdjustmentForOther,
-                baselineAdjustment: summaryDataItem.monthlyAnalysisCalculatedValues.baselineAdjustment,
-                // predictorUsage: summaryDataItem.predictorUsage,
+                baselineAdjustmentForNormalization: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.baselineAdjustmentForNormalization),
+                baselineAdjustmentForOtherV2: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.baselineAdjustmentForOtherV2),
+                baselineAdjustment: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.baselineAdjustment),
                 fiscalYear: summaryDataItem.fiscalYear,
                 group: undefined,
                 SEnPI: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.SEnPI),
@@ -143,6 +138,12 @@ export class MonthlyAccountAnalysisClass {
                 yearToDatePercentSavings: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.yearToDatePercentSavings) * 100,
                 rollingSavings: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.rollingSavings),
                 rolling12MonthImprovement: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.rolling12MonthImprovement) * 100,
+                dataAdjustment: summaryDataItem.dataAdjustment,
+                modelYearDataAdjustment: summaryDataItem.modelYearDataAdjustment,
+                // adjustedStar: summaryDataItem.monthlyAnalysisCalculatedValues.adjustedStar,
+                // adjustedStarStar: summaryDataItem.monthlyAnalysisCalculatedValues.adjustedStarStar,
+                baselineAdjustmentInput: summaryDataItem.baselineAdjustmentInput
+
             }
         })
     }

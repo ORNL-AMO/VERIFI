@@ -3,7 +3,7 @@ import { Subscription, firstValueFrom } from 'rxjs';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { CalanderizationFilters, CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
-import { IdbAccount, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import { IdbAccount, IdbCustomFuel, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { CalanderizationService } from '../../../shared/helper-services/calanderization.service';
 import * as _ from 'lodash';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
@@ -12,8 +12,8 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { UtilityColors } from 'src/app/shared/utilityColors';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
-import { setEmissionsForCalanderizedMeters } from 'src/app/calculations/emissions-calculations/emissions';
 import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
+import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
 
 @Component({
   selector: 'app-calanderization',
@@ -43,12 +43,15 @@ export class CalanderizationComponent implements OnInit {
   selectedFacility: IdbFacility;
   displayDataApplicationModal: boolean = false;
   hasMeterData: boolean;
+  consumptionLabel: 'Consumption' | 'Distance';
+  isRECs: boolean;
   constructor(private calanderizationService: CalanderizationService, private utilityMeterDbService: UtilityMeterdbService,
     private facilityDbService: FacilitydbService,
     private dbChangesService: DbChangesService, private accountDbService: AccountdbService,
     private sharedDataService: SharedDataService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private eGridService: EGridService) { }
+    private eGridService: EGridService,
+    private customFuelDbService: CustomFuelDbService) { }
 
   ngOnInit(): void {
     this.displayGraphCost = this.calanderizationService.displayGraphCost;
@@ -102,11 +105,21 @@ export class CalanderizationComponent implements OnInit {
   setCalanderizedMeterData() {
     if (this.selectedMeter && this.calanderizedDataFilters) {
       let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
-      let calanderizedMeterData: Array<CalanderizedMeter> = getCalanderizedMeterData([this.selectedMeter], facilityMeterData, this.selectedFacility);
-      this.setDateRange(calanderizedMeterData);
+      let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
+      let calanderizedMeterData: Array<CalanderizedMeter> = getCalanderizedMeterData([this.selectedMeter], facilityMeterData, this.selectedFacility, false, undefined, this.eGridService.co2Emissions, customFuels, [this.selectedFacility]);
       calanderizedMeterData = this.filterMeterDataDateRanges(calanderizedMeterData);
-      let cMetersWithEmissions: Array<CalanderizedMeter> = setEmissionsForCalanderizedMeters([calanderizedMeterData[0]], this.selectedFacility.energyIsSource, [this.selectedFacility], this.eGridService.co2Emissions);
-      this.calanderizedMeter = cMetersWithEmissions[0];
+      this.calanderizedMeter = calanderizedMeterData[0];
+      if (this.selectedMeter.scope != 2) {
+        this.consumptionLabel = 'Consumption';
+      } else {
+        this.consumptionLabel = 'Distance';
+      }
+      if (this.selectedMeter.source != 'Electricity') {
+        this.isRECs = false;
+      } else {
+        this.isRECs = (this.selectedMeter.agreementType == 4 || this.selectedMeter.agreementType == 6);
+      }
+      this.setDateRange(calanderizedMeterData)
     }
   }
 
