@@ -52,10 +52,10 @@ export class GroupMonthlyAnalysisCalculatedValues {
         this.setAdjustedStarStar(dataAdjustment);
         this.setAdjusted();
         this.setBaselineAdjustmentForNormalization(baselineActualEnergyUse, modelYearDataAdjusted, dataAdjustment);
-        this.setBaselineAdjustmentForOtherV2(baselineAdjustementInput, modelYearDataAdjusted, dataAdjustment);
+        this.setBaselineAdjustmentForOtherV2(baselineAdjustementInput, modelYearDataAdjusted, dataAdjustment, baselineActualEnergyUse);
         this.setBaselineAdjustment();
         this.setSEnPI();
-        this.setSavings();
+        this.setSavings(baselineActualEnergyUse, baselineAdjustementInput, modelYearDataAdjusted, dataAdjustment);
         this.setPercentSavingsComparedToBaseline();
         this.setYearToDateSavings(baselineYear);
         this.setRollingSavingsValues(previousMonthValues);
@@ -113,11 +113,23 @@ export class GroupMonthlyAnalysisCalculatedValues {
     }
 
     setAdjustedStar(baselineActualEnergyUse: number, modelYearDataAdjusted: number, baselineAdjustementInput: number) {
-        this.adjustedStar = (baselineActualEnergyUse + baselineAdjustementInput) * ((this.modeledEnergy - modelYearDataAdjusted) / (this.baselineModeledEnergyUse - modelYearDataAdjusted));
+        if (this.baselineModeledEnergyUse - modelYearDataAdjusted == 0) {
+            if (this.modeledEnergy - modelYearDataAdjusted == 0) {  //M_i = 0 subcase is the weird one
+                this.adjustedStar = (baselineActualEnergyUse + baselineAdjustementInput);
+            } else {
+                this.adjustedStar = (this.modeledEnergy - modelYearDataAdjusted)
+            }
+        } else {
+            this.adjustedStar = (baselineActualEnergyUse + baselineAdjustementInput) * ((this.modeledEnergy - modelYearDataAdjusted) / (this.baselineModeledEnergyUse - modelYearDataAdjusted));
+        }
     }
 
     setAdjustedStarStar(dataAdjustment: number) {
-        this.adjustedStarStar = this.adjustedStar * this.energyUse / (this.energyUse - dataAdjustment);
+        if (this.energyUse == 0) {
+            this.adjustedStarStar = this.adjustedStar;
+        } else {
+            this.adjustedStarStar = this.adjustedStar * this.energyUse / (this.energyUse - dataAdjustment);
+        }
     }
 
     setAdjusted() {
@@ -125,16 +137,37 @@ export class GroupMonthlyAnalysisCalculatedValues {
         this.yearToDateAdjustedEnergyUse = this.yearToDateAdjustedEnergyUse + this.adjusted;
     }
 
-    setBaselineAdjustmentForOtherV2(baselineAdjustementInput: number, modelYearDataAdjusted: number, dataAdjustment: number) {
-        this.baselineAdjustmentForOtherV2 = (baselineAdjustementInput) * ((this.modeledEnergy - modelYearDataAdjusted) / (this.baselineModeledEnergyUse - modelYearDataAdjusted)) * this.energyUse / (this.energyUse - dataAdjustment);
+    setBaselineAdjustmentForOtherV2(baselineAdjustementInput: number, modelYearDataAdjusted: number, dataAdjustment: number, baselineActualEnergyUse: number) {
+        if ((this.energyUse - dataAdjustment) == 0 && this.energyUse != 0) {
+            this.baselineAdjustmentForOtherV2 = baselineAdjustementInput;
+        } else {
+            let adjustedStarStarRatio: number = 1;
+            if (this.energyUse != 0) {
+                adjustedStarStarRatio = this.energyUse / (this.energyUse - dataAdjustment);
+            }
+
+            if ((this.baselineModeledEnergyUse - modelYearDataAdjusted) == 0) {
+                if ((this.modeledEnergy - modelYearDataAdjusted) == 0) {
+                    this.baselineAdjustmentForOtherV2 = baselineAdjustementInput * adjustedStarStarRatio;
+                } else {
+                    this.baselineAdjustmentForOtherV2 = 0;
+                }
+            } else {
+                this.baselineAdjustmentForOtherV2 = baselineAdjustementInput * ((this.modeledEnergy - modelYearDataAdjusted) / (this.baselineModeledEnergyUse - modelYearDataAdjusted)) * adjustedStarStarRatio;
+            }
+        }
     }
 
     setSEnPI() {
         this.SEnPI = this.energyUse / this.adjusted;
     }
 
-    setSavings() {
-        this.savings = this.adjusted - this.energyUse;
+    setSavings(baselineActualEnergyUse: number, baselineAdjustementInput: number, modelYearDataAdjusted: number, dataAdjustment: number) {
+        if ((baselineActualEnergyUse + baselineAdjustementInput) != 0 && (this.baselineModeledEnergyUse - modelYearDataAdjusted) != 0 && (this.modeledEnergy - modelYearDataAdjusted) != 0) {
+            this.savings = this.adjusted - this.energyUse;
+        } else {
+            this.savings = ((baselineActualEnergyUse + baselineAdjustementInput) - (this.baselineModeledEnergyUse - modelYearDataAdjusted)) + ((this.modeledEnergy - modelYearDataAdjusted) - (this.energyUse - dataAdjustment))
+        }
     }
 
     setPercentSavingsComparedToBaseline() {
@@ -152,7 +185,19 @@ export class GroupMonthlyAnalysisCalculatedValues {
 
     setBaselineAdjustmentForNormalization(baselineActualEnergyUse: number, modelYearDataAdjustment: number, dataAdjustment: number) {
         if (this.summaryDataIndex >= 11) {
-            this.baselineAdjustmentForNormalization = ((baselineActualEnergyUse) * ((this.modeledEnergy - modelYearDataAdjustment) / (this.baselineModeledEnergyUse - modelYearDataAdjustment)) * (this.energyUse / (this.energyUse - dataAdjustment))) - baselineActualEnergyUse;
+            let adjustedStarStarRatio: number = 1;
+            if (this.energyUse != 0) {
+                adjustedStarStarRatio = this.energyUse / (this.energyUse - dataAdjustment);
+            }
+            if ((this.baselineModeledEnergyUse - modelYearDataAdjustment) == 0) {
+                if (this.modeledEnergy - modelYearDataAdjustment) {
+                    this.baselineAdjustmentForNormalization = baselineActualEnergyUse * adjustedStarStarRatio - baselineActualEnergyUse;
+                } else {
+                    this.baselineAdjustmentForNormalization = (this.modeledEnergy - modelYearDataAdjustment) * adjustedStarStarRatio - baselineActualEnergyUse;
+                }
+            } else {
+                this.baselineAdjustmentForNormalization = baselineActualEnergyUse * ((this.modeledEnergy - modelYearDataAdjustment) / (this.baselineModeledEnergyUse - modelYearDataAdjustment)) * adjustedStarStarRatio - baselineActualEnergyUse
+            }
         } else {
             this.baselineAdjustmentForNormalization = 0;
         }

@@ -115,9 +115,7 @@ export class AnnualAnalysisSummaryDataClass {
     }
 
     setSEnPI() {
-        this.SEnPI = _.sumBy(this.yearAnalysisSummaryData, (data: MonthlyAnalysisSummaryData) => {
-            return data.SEnPI;
-        });
+        this.SEnPI = this.energyUse / this.adjusted;
     }
 
     setSavings() {
