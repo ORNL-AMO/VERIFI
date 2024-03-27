@@ -153,7 +153,7 @@ export class GroupMonthlyAnalysisCalculatedValues {
                     this.baselineAdjustmentForOtherV2 = 0;
                 }
             } else {
-                this.baselineAdjustmentForOtherV2 = baselineAdjustementInput * ((this.modeledEnergy - modelYearDataAdjusted) / (this.baselineModeledEnergyUse - modelYearDataAdjusted)) * adjustedStarStarRatio - baselineActualEnergyUse;
+                this.baselineAdjustmentForOtherV2 = baselineAdjustementInput * ((this.modeledEnergy - modelYearDataAdjusted) / (this.baselineModeledEnergyUse - modelYearDataAdjusted)) * adjustedStarStarRatio;
             }
         }
     }
