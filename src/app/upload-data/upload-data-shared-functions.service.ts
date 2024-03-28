@@ -45,12 +45,13 @@ export class UploadDataSharedFunctionsService {
     let predictorsData = XLSX.utils.sheet_to_json(workbook.Sheets['Predictors']);
     let predictorEntries: Array<IdbPredictorEntry> = new Array();
     let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.getAccountPerdictorsCopy();
+    let hasNewData: boolean = false;
     importFacilities.forEach(facility => {
       let facilityPredictorData = predictorsData.filter(data => { return data['Facility Name'] == facility.name });
       let facilityPredictorEntries: Array<IdbPredictorEntry> = accountPredictorEntries.filter(entry => { return entry.facilityId == facility.guid });
       let existingFacilityPredictorData: Array<PredictorData> = new Array();
       if (facilityPredictorEntries.length != 0) {
-        existingFacilityPredictorData = facilityPredictorEntries[0].predictors.map(predictor => { return predictor });
+        existingFacilityPredictorData = facilityPredictorEntries[0].predictors.map(predictor => { return JSON.parse(JSON.stringify(predictor)) });
         existingFacilityPredictorData.forEach(predictorData => {
           predictorData.amount = undefined;
         });
@@ -60,6 +61,7 @@ export class UploadDataSharedFunctionsService {
           if (key != 'Facility Name' && key != 'Date') {
             let predictorIndex: number = existingFacilityPredictorData.findIndex(predictor => { return predictor.name == key });
             if (predictorIndex == -1) {
+              hasNewData = true;
               let hasData: boolean = false;
               facilityPredictorData.forEach(dataItem => {
                 if (dataItem[key] != 0) {
@@ -75,13 +77,14 @@ export class UploadDataSharedFunctionsService {
                 newPredictor.name = key;
                 existingFacilityPredictorData.push(newPredictor);
                 facilityPredictorEntries.forEach(predictorEntry => {
-                  predictorEntry.predictors.push(newPredictor);
+                  predictorEntry.predictors.push(JSON.parse(JSON.stringify(newPredictor)));
                 });
               }
             }
           }
         });
       }
+      let uploadDates: Array<Date> = new Array();
       facilityPredictorData.forEach(dataItem => {
         let dataItemDate: Date = new Date(dataItem['Date']);
         let facilityPredictorEntry: IdbPredictorEntry = facilityPredictorEntries.find(entry => {
@@ -94,6 +97,8 @@ export class UploadDataSharedFunctionsService {
           } else {
             facilityPredictorEntry.predictors = JSON.parse(JSON.stringify(existingFacilityPredictorData));
           }
+        } else {
+          uploadDates.push(dataItemDate);
         }
         Object.keys(dataItem).forEach((key) => {
           if (key != 'Facility Name' && key != 'Date') {
@@ -107,6 +112,15 @@ export class UploadDataSharedFunctionsService {
           predictorEntries.push(JSON.parse(JSON.stringify(facilityPredictorEntry)));
         }
       });
+      //uploading new entries means we need to update all previous entries.
+      if (hasNewData) {
+        facilityPredictorEntries.forEach(entry => {
+          let uploadedAlready: Date = uploadDates.find(date => { return checkSameMonth(new Date(entry.date), date) });
+          if (uploadedAlready == undefined) {
+            predictorEntries.push(JSON.parse(JSON.stringify(entry)));
+          }
+        });
+      }
     })
     return predictorEntries;
   }

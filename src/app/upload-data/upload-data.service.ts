@@ -460,6 +460,7 @@ export class UploadDataService {
 
     let predictorData: Array<IdbPredictorEntry> = new Array();
     let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.getAccountPerdictorsCopy();
+    let hasNewData: boolean = false;
     fileReference.predictorFacilityGroups.forEach(group => {
       if (group.facilityName != 'Unmapped Predictors' && group.groupItems.length != 0) {
         let facilityPredictorEntries: Array<IdbPredictorEntry> = accountPredictorEntries.filter(entry => {
@@ -467,7 +468,7 @@ export class UploadDataService {
         });
         let existingFacilityPredictorData: Array<PredictorData> = new Array();
         if (facilityPredictorEntries.length != 0) {
-          existingFacilityPredictorData = facilityPredictorEntries[0].predictors.map(predictor => { return predictor });
+          existingFacilityPredictorData = facilityPredictorEntries[0].predictors.map(predictor => { return JSON.parse(JSON.stringify(predictor)) });
           existingFacilityPredictorData.forEach(predictorData => {
             predictorData.amount = undefined;
           });
@@ -476,15 +477,18 @@ export class UploadDataService {
           group.groupItems.forEach((predictorItem) => {
             let predictorIndex: number = existingFacilityPredictorData.findIndex(predictor => { return predictor.name == predictorItem.value });
             if (predictorIndex == -1) {
+              hasNewData = true;
               let newPredictor: PredictorData = this.predictorDbService.getNewPredictor([]);
               newPredictor.name = predictorItem.value;
               existingFacilityPredictorData.push(newPredictor);
               facilityPredictorEntries.forEach(predictorEntry => {
-                predictorEntry.predictors.push(newPredictor);
+                predictorEntry.predictors.push(JSON.parse(JSON.stringify(newPredictor)));
               });
             }
           });
         }
+
+        let uploadDates: Array<Date> = new Array();
         fileReference.headerMap.forEach(dataRow => {
           let readDate: Date = new Date(dataRow[dateColumnVal]);
           if (!isNaN(readDate.valueOf())) {
@@ -494,6 +498,8 @@ export class UploadDataService {
             if (!predictorEntry) {
               predictorEntry = this.predictorDbService.getNewIdbPredictorEntry(group.facilityId, selectedAccount.guid, readDate);
               predictorEntry.predictors = JSON.parse(JSON.stringify(existingFacilityPredictorData));
+            } else {
+              uploadDates.push(readDate);
             }
             group.groupItems.forEach(item => {
               let entryDataIndex: number = predictorEntry.predictors.findIndex(predictor => { return predictor.name == item.value });
@@ -504,6 +510,15 @@ export class UploadDataService {
             predictorData.push(JSON.parse(JSON.stringify(predictorEntry)));
           }
         });
+        //uploading new entries means we need to update all previous entries.
+        if (hasNewData) {
+          facilityPredictorEntries.forEach(entry => {
+            let uploadedAlready: Date = uploadDates.find(date => { return this.checkSameMonth(new Date(entry.date), date) });
+            if (uploadedAlready == undefined) {
+              predictorData.push(JSON.parse(JSON.stringify(entry)));
+            }
+          });
+        }
       }
     });
     return predictorData;
