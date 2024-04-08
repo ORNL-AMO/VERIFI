@@ -62,28 +62,6 @@
                                 {{latestBackupFile.account.sharedFileAuthor}}
                             </td>
                         </tr>
-                        <!-- <tr>
-                            <td>
-                                Which would you like to update?
-                            </td>
-                            <td>
-                                <div class="form-check">
-                                    <input type="radio" class="form-check-input" name="overwriteOption"
-                                        [(ngModel)]="overwriteOption" [value]="'updateAccount'" id="updateAccount">
-                                    <label class="form-check-label" for="updateAccount">Update Account from
-                                        Backup</label>
-                                </div>
-                            </td>
-                            <td>
-
-                                <div class="form-check">
-                                    <input type="radio" class="form-check-input" name="overwriteOption"
-                                        [(ngModel)]="overwriteOption" [value]="'overwriteFile'" id="overwriteFile">
-                                    <label class="form-check-label" for="overwriteFile">Update Backup from
-                                        Account</label>
-                                </div>
-                            </td>
-                        </tr> -->
                     </tbody>
                 </table>
                 <label class="semibold"> Which would you like to update?
@@ -91,14 +69,14 @@
                 <div class="form-check">
                     <input type="radio" class="form-check-input" name="overwriteOption" [(ngModel)]="overwriteOption"
                         [value]="'updateAccount'" id="updateAccount">
-                    <label class="form-check-label" for="updateAccount"><b>Update Account</b> from
-                        Backup</label>
+                    <label class="form-check-label" for="updateAccount"><b>Update {{account.name}}</b> with the data
+                        from the backup file.</label>
                 </div>
                 <div class="form-check">
                     <input type="radio" class="form-check-input" name="overwriteOption" [(ngModel)]="overwriteOption"
                         [value]="'overwriteFile'" id="overwriteFile">
-                    <label class="form-check-label" for="overwriteFile"><b>Update Backup</b> from
-                        Account</label>
+                    <label class="form-check-label" for="overwriteFile">Update the <b>backup file</b> with the current
+                        state of {{account.name}}.</label>
                 </div>
                 <hr>
             </ng-container>

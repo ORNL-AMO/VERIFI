@@ -6,7 +6,8 @@ const { autoUpdater } = require('electron-updater');
 const jetpack = require('fs-jetpack');
 
 function isDev() {
-    return process.mainModule.filename.indexOf('app.asar') === -1;
+    return false;
+    // return require.filename.indexOf('app.asar') === -1;
 };
 
 app.allowRendererProcessReuse = false
