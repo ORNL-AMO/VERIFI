@@ -121,7 +121,7 @@ export class UploadDataService {
 
   parseTemplate(workbook: XLSX.WorkBook, templateVersion: "V1" | "V2", inSetupWizard: boolean): ParsedTemplate {
     if (templateVersion == "V1") {
-      return this.uploadDataV1Service.parseTemplate(workbook);
+      return this.uploadDataV1Service.parseTemplate(workbook, inSetupWizard);
     } else if (templateVersion == "V2") {
       console.log('V2!');
       return this.uploadDataV2Service.parseTemplate(workbook, inSetupWizard);
