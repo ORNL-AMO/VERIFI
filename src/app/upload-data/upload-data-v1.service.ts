@@ -129,7 +129,6 @@ export class UploadDataV1Service {
           // meter.heatCapacity = meterData['Heat Capacity'];
           meter.siteToSource = meterData['Site To Source'];
           meter.scope = getScope(meterData['Scope']);
-          console.log(meter.name + ': ' + meter.scope);
           if (meter.scope == undefined) {
             meter.scope = this.editMeterFormService.getDefaultScope(meter.source);
           }
