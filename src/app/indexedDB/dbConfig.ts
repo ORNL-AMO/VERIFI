@@ -2,7 +2,7 @@ import { DBConfig } from "ngx-indexed-db";
 
 export const dbConfig: DBConfig = {
   name: 'verifi',
-  version: 14,
+  version: 15,
   objectStoresMeta: [{
     store: 'accounts',
     storeConfig: { keyPath: 'id', autoIncrement: true },
@@ -11,7 +11,6 @@ export const dbConfig: DBConfig = {
       { name: 'industry', keypath: 'industry', options: { unique: false } },
       { name: 'naics', keypath: 'naics', options: { unique: false } },
       { name: 'notes', keypath: 'notes', options: { unique: false } },
-      { name: 'img', keypath: 'img', options: { unique: false } }
     ]
   },
   {
@@ -24,12 +23,8 @@ export const dbConfig: DBConfig = {
       { name: 'country', keypath: 'country', options: { unique: false } },
       { name: 'state', keypath: 'state', options: { unique: false } },
       { name: 'address', keypath: 'address', options: { unique: false } },
-      { name: 'type', keypath: 'type', options: { unique: false } },
-      { name: 'tier', keypath: 'tier', options: { unique: false } },
       { name: 'size', keypath: 'size', options: { unique: false } },
       { name: 'units', keypath: 'units', options: { unique: false } },
-      { name: 'division', keypath: 'division', options: { unique: false } },
-      { name: 'img', keypath: 'img', options: { unique: false } }
     ]
   },
   {

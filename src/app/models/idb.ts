@@ -43,7 +43,8 @@ export interface IdbAccount {
     color?: string,
     contactName: string,
     contactEmail: string,
-    contactPhone: string
+    contactPhone: string,
+    deleteAccount?: boolean
 }
 
 export interface IdbFacility {

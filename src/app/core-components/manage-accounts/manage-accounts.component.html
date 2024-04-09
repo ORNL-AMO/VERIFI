@@ -26,34 +26,46 @@
     <div class="row">
         <div class="col-3 pb-2" *ngFor="let account of accounts; let index = index;">
             <div class="card">
-                <div class="card-header">
-                    <a class="click-link large" (click)="goToAccount(account, index)">{{account.name}}</a>
-                </div>
-                <div class="card-body justify-content-center">
-                    <div class="p-1">
-                        <button class="btn btn-danger" (click)="deleteAccount(account)">
-                            <span class="fa fa-trash-can"></span> Delete Account
-                        </button>
+                <ng-container *ngIf="!account.deleteAccount">
+                    <div class="card-header">
+                        <a class="click-link large" (click)="goToAccount(account, index)">{{account.name}}</a>
                     </div>
-                    <div class="p-1">
-                        <button class="btn action-btn" (click)="backupAccount(account)">
-                            <span class="fa fa-download"></span> Backup Account
-                        </button>
-                    </div>
-                    <div class="p-1">
-                        <button class="btn action-btn" (click)="exportToExcel(account)">
-                            <span class="fa fa-download"></span> Export Account Facilities To Excel
-                        </button>
-                    </div>
-                    <div class="p-1" *ngIf="accountErrors[index]">
-                        <div class="alert alert-danger">
-                            {{accountErrors[index]}}
+                    <div class="card-body justify-content-center">
+                        <div class="p-1">
+                            <button class="btn btn-danger" (click)="deleteAccount(account)">
+                                <span class="fa fa-trash-can"></span> Delete Account
+                            </button>
+                        </div>
+                        <div class="p-1">
+                            <button class="btn action-btn" (click)="backupAccount(account)">
+                                <span class="fa fa-download"></span> Backup Account
+                            </button>
+                        </div>
+                        <div class="p-1">
+                            <button class="btn action-btn" (click)="exportToExcel(account)">
+                                <span class="fa fa-download"></span> Export Account Facilities To Excel
+                            </button>
+                        </div>
+                        <div class="p-1" *ngIf="accountErrors[index]">
+                            <div class="alert alert-danger">
+                                {{accountErrors[index]}}
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="card-footer">
-                    Last Backup: {{account.lastBackup | date}}
-                </div>
+                    <div class="card-footer">
+                        Last Backup: {{account.lastBackup | date}}
+                    </div>
+                </ng-container>
+                <ng-container *ngIf="account.deleteAccount">
+                    <div class="card-header">
+                        {{account.name}}
+                    </div>
+                    <div class="card-body">
+                        <p class="alert alert-danger">
+                            This account is being deleted.
+                        </p>
+                    </div>
+                </ng-container>
             </div>
         </div>
     </div>

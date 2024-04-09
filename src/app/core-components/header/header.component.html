@@ -25,7 +25,7 @@
                 <li>
                     <a *ngFor="let account of accountList| orderBy:'name':'asc'"
                         [class.active]="activeAccount?.id === account.id" class="dropdown-item"
-                        (click)="switchAccount(account)"> {{account.name}}</a>
+                        (click)="switchAccount(account)" [class.disable]="account.deleteAccount"> {{account.name}}</a>
                 </li>
                 <li>
                     <hr class="dropdown-divider">
