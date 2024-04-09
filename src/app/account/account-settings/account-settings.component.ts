@@ -19,6 +19,7 @@ import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.serv
 import { CustomEmissionsDbService } from 'src/app/indexedDB/custom-emissions-db.service';
 import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
 import { CustomGWPDbService } from 'src/app/indexedDB/custom-gwp-db.service';
+import { DeleteDataService } from 'src/app/indexedDB/delete-data.service';
 
 @Component({
   selector: 'app-account-settings',
@@ -127,47 +128,20 @@ export class AccountSettingsComponent implements OnInit {
 
   async confirmAccountDelete() {
     this.showDeleteAccount = false;
-
-    this.loadingService.setLoadingStatus(true);
-
-    // Delete all info associated with account
-    this.loadingService.setLoadingMessage("Deleting Account Predictors...");
-    await this.predictorDbService.deleteAllSelectedAccountPredictors();
-    this.loadingService.setLoadingMessage("Deleting Account Meter Data...");
-    await this.utilityMeterDataDbService.deleteAllSelectedAccountMeterData();
-    this.loadingService.setLoadingMessage("Deleting Account Meters...");
-    await this.utilityMeterDbService.deleteAllSelectedAccountMeters();
-    this.loadingService.setLoadingMessage("Deleting Account Meter Groups...");
-    await this.utilityMeterGroupDbService.deleteAllSelectedAccountMeterGroups();
-    this.loadingService.setLoadingMessage("Deleting Account Facilities...");
-    await this.facilityDbService.deleteAllSelectedAccountFacilities();
-    this.loadingService.setLoadingMessage("Deleting Reports...")
-    await this.accountReportDbService.deleteAccountReports();
-    this.loadingService.setLoadingMessage("Deleting Analysis Items...")
-    await this.analysisDbService.deleteAccountAnalysisItems();
-    await this.accountAnalysisDbService.deleteAccountAnalysisItems();
-    this.loadingService.setLoadingMessage("Deleting Custom Emissions...")
-    await this.customEmissionsDbService.deleteAccountEmissionsItems();
-    this.loadingService.setLoadingMessage("Deleting Custom Fuels...")
-    await this.customFuelDbService.deleteAccountCustomFuels();   
-    this.loadingService.setLoadingMessage("Deleting Custom GWPs");
-    await this.customGWPDbService.deleteAccountCustomGWP();
-    
-    this.loadingService.setLoadingMessage("Deleting Account...");
-    await firstValueFrom(this.accountDbService.deleteAccountWithObservable(this.selectedAccount.id));
-
-    // Then navigate to another account
+    this.selectedAccount.deleteAccount = true;
+    await firstValueFrom(this.accountDbService.updateWithObservable(this.selectedAccount));
     let accounts: Array<IdbAccount> = await firstValueFrom(this.accountDbService.getAll());
     this.accountDbService.allAccounts.next(accounts);
-    if (accounts.length != 0) {
+    let nonDeleteAccounts: Array<IdbAccount> = accounts.filter(acc => {
+      return acc.deleteAccount == false;
+    })
+    if (nonDeleteAccounts.length != 0) {
       this.accountDbService.selectedAccount.next(undefined);
       this.router.navigateByUrl('/manage-accounts');
     } else {
       this.accountDbService.selectedAccount.next(undefined);
       this.router.navigateByUrl('/setup-wizard');
     }
-    this.loadingService.setLoadingStatus(false);
-    this.toastNotificationService.showToast('Account Deleted!', undefined, undefined, false, 'alert-success');
   }
 
   setDeleteFacilityEntry(facility: IdbFacility) {

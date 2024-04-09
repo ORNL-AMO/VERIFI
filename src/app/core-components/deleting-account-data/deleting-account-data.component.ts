@@ -46,10 +46,8 @@ export class DeletingAccountDataComponent {
 
     this.deleteDataService.isDeleting.subscribe(isDeleting => {
       if (isDeleting) {
-        console.log('CREATE TOAST');
         this.createToast();
       } else {
-        console.log('CLOSE TOAST');
         this.closeToast();
         this.deleteDataService.setAccountToDelete(this.allDeleteAccounts);
       }

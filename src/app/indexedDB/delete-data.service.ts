@@ -71,23 +71,22 @@ export class DeleteDataService {
 
   setAccountToDelete(allDeleteAccounts: Array<IdbAccount>) {
     if (allDeleteAccounts.length > 0 && !this.accountToDelete) {
-      console.log('1: Set account to delete...');
       this.accountToDelete = allDeleteAccounts[0];
       this.gatherAndDelete()
     }
   }
 
-
   gatherAndDelete() {
-    this.isDeleting.next(true);
-    //predictors
-    console.log('2: Deleting, gathering data...');
-    this.predictorDbService.getAll().subscribe((allPredictors: Array<IdbPredictorEntry>) => {
-      this.accountPredictors = allPredictors.filter(idbPredictor => {
-        return idbPredictor.accountId == this.accountToDelete.guid;
-      })
-      this.deletePredictor(0)
-    });
+    if (this.accountToDelete) {
+      this.isDeleting.next(true);
+      //predictors
+      this.predictorDbService.getAll().subscribe((allPredictors: Array<IdbPredictorEntry>) => {
+        this.accountPredictors = allPredictors.filter(idbPredictor => {
+          return idbPredictor.accountId == this.accountToDelete.guid;
+        })
+        this.deletePredictor(0)
+      });
+    }
   }
 
   //predictors
@@ -99,7 +98,6 @@ export class DeleteDataService {
           this.deletePredictor(index + 1);
         });
       } else {
-        console.log('4: Deleting predictors done, deleting meter data...');
         this.utilityMeterDataDbService.getAll().subscribe((allMeterData: Array<IdbUtilityMeterData>) => {
           this.accountMeterData = allMeterData.filter(idbMeterData => {
             return idbMeterData.accountId == this.accountToDelete.guid;
@@ -119,7 +117,6 @@ export class DeleteDataService {
           this.deleteMeterData(index + 1);
         });
       } else {
-        console.log('5: Deleting meter data done, deleting meters...');
         this.utilityMeterDbService.getAll().subscribe((allMeters: Array<IdbUtilityMeter>) => {
           this.accountMeters = allMeters.filter(idbMeter => {
             return idbMeter.accountId == this.accountToDelete.guid;
@@ -139,7 +136,6 @@ export class DeleteDataService {
           this.deleteMeters(index + 1);
         });
       } else {
-        console.log('6: Deleting meters done, deleting groups...');
         this.utilityMeterGroupDbService.getAll().subscribe((allGroups: Array<IdbUtilityMeterGroup>) => {
           this.accountGroups = allGroups.filter(group => {
             return group.accountId == this.accountToDelete.guid;
@@ -159,7 +155,6 @@ export class DeleteDataService {
           this.deleteGroups(index + 1);
         });
       } else {
-        console.log('7: Deleting groups done, deleting facility anlaysis...');
         this.analysisDbService.getAll().subscribe((allFacilityAnalysis: Array<IdbAnalysisItem>) => {
           this.accountFacilityAnalysis = allFacilityAnalysis.filter(analysisItem => {
             return analysisItem.accountId == this.accountToDelete.guid;
@@ -179,7 +174,6 @@ export class DeleteDataService {
           this.deleteFacilityAnalysis(index + 1);
         });
       } else {
-        console.log('8: Deleting facility analysis done, deleting facilities...');
         this.facilityDbService.getAll().subscribe((allFacilities: Array<IdbFacility>) => {
           this.accountFacilities = allFacilities.filter(facility => {
             return facility.accountId == this.accountToDelete.guid;
@@ -199,7 +193,6 @@ export class DeleteDataService {
           this.deleteFacilites(index + 1);
         });
       } else {
-        console.log('9: Deleting facilities done, deleting accounts analysis...');
         this.accountAnalysisDbService.getAll().subscribe((allAccountAnalysis: Array<IdbAccountAnalysisItem>) => {
           this.accountAnalysisItems = allAccountAnalysis.filter(accountAnalysisItem => {
             return accountAnalysisItem.accountId == this.accountToDelete.guid;
@@ -219,7 +212,6 @@ export class DeleteDataService {
           this.deleteAccountAnalysis(index + 1);
         });
       } else {
-        console.log('10: Deleting account analysis done, deleting reports...');
         this.accountReportDbService.getAll().subscribe((allReports: Array<IdbAccountReport>) => {
           this.accountReports = allReports.filter(report => {
             return report.accountId == this.accountToDelete.guid;
@@ -239,7 +231,6 @@ export class DeleteDataService {
           this.deleteReports(index + 1);
         });
       } else {
-        console.log('11: Deleting reports done, deleting fuels...');
         this.customFuelDbService.getAll().subscribe((allCustomFuels: Array<IdbCustomFuel>) => {
           this.accountFuels = allCustomFuels.filter(fuel => {
             return fuel.accountId == this.accountToDelete.guid;
@@ -259,7 +250,6 @@ export class DeleteDataService {
           this.deleteCustomFuels(index + 1);
         });
       } else {
-        console.log('12: Deleting custom fuels done, deleting emissions...');
         this.customEmissionsDbService.getAll().subscribe((allCustomEmissions: Array<IdbCustomEmissionsItem>) => {
           this.accountEmissions = allCustomEmissions.filter(emissions => {
             return emissions.accountId == this.accountToDelete.guid;
@@ -279,7 +269,6 @@ export class DeleteDataService {
           this.deleteEmissions(index + 1);
         });
       } else {
-        console.log('13: Deleting emissions done, deleting custom GWPs...');
         this.customGWPDbService.getAll().subscribe((allGWPs: Array<IdbCustomGWP>) => {
           this.accountGWPs = allGWPs.filter(gwp => {
             return gwp.accountId == this.accountToDelete.guid;
@@ -299,7 +288,6 @@ export class DeleteDataService {
           this.deleteCustomGWPs(index + 1);
         });
       } else {
-        console.log('14: Deleting custom GWPs done, deleting account...');
         this.deleteAccount();
       }
     }
