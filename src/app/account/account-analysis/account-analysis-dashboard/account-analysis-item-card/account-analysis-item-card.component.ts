@@ -96,19 +96,6 @@ export class AccountAnalysisItemCardComponent implements OnInit {
     }
   }
 
-  async createCopy() {
-    let newItem: IdbAccountAnalysisItem = JSON.parse(JSON.stringify(this.analysisItem));
-    delete newItem.id;
-    newItem.name = newItem.name + ' (Copy)';
-    newItem.guid = Math.random().toString(36).substr(2, 9);
-    let addedItem: IdbAccountAnalysisItem = await firstValueFrom(this.accountAnalysisDbService.addWithObservable(newItem));
-    await this.dbChangesService.setAccountAnalysisItems(this.selectedAccount, false);
-    this.accountAnalysisDbService.selectedAnalysisItem.next(addedItem);
-    this.toastNotificationService.showToast('Analysis Item Copy Created', undefined, undefined, false, "alert-success");
-    this.router.navigateByUrl('account/analysis/setup');
-  }
-
-
   getCanSelectItem(account: IdbAccount, analysisItem: IdbAccountAnalysisItem): boolean {
     if (analysisItem.analysisCategory == 'energy') {
       if (analysisItem.baselineYear != account.sustainabilityQuestions.energyReductionBaselineYear) {
