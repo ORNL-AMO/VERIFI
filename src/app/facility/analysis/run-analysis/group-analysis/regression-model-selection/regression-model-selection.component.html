@@ -81,7 +81,7 @@
                     </td>
                     <td *ngIf="!model.errorModeling">
                         <span *ngFor="let pVal of model.t.p; let index = index">
-                            <span *ngIf="index != 0">{{model.predictorVariables[index-1].name}}: {{pVal | number:'0.2-2'}}
+                            <span class="no-break" *ngIf="index != 0">{{model.predictorVariables[index-1].name}}: {{pVal | number:'0.2-2'}}
                                 <br>
                             </span>
                         </span>

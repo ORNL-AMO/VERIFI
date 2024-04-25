@@ -4,6 +4,7 @@ import { Subscription } from 'rxjs';
 import { AccountOverviewService } from 'src/app/account/account-overview/account-overview.service';
 import { AccountOverviewData, AccountOverviewFacility } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
 import { IdbFacility } from 'src/app/models/idb';
+import * as _ from 'lodash';
 
 @Component({
   selector: 'app-facilities-usage-table',
@@ -56,13 +57,23 @@ export class FacilitiesUsageTableComponent {
     if (this.dataType == 'cost') {
       this.orderByField = 'totalCost';
     } else if (this.dataType == 'emissions') {
-      if (this.emissionsDisplay == 'location') {
-        this.orderByField = 'totalLocationEmissions';
-      } else {
-        this.orderByField = 'totalMarketEmissions';
-      }
+      this.orderByEmissions();
     } else {
       this.orderByField = 'totalUsage';
+    }
+  }
+
+  orderByEmissions() {
+    if (this.emissionsDisplay == 'location') {
+      this.orderByField = 'totalLocationEmissions';
+      this.accountOverviewFacilities = _.orderBy(this.accountOverviewFacilities, (accountOverviewFacility: AccountOverviewFacility) => {
+        return accountOverviewFacility.emissions.totalWithLocationEmissions
+      }, 'desc');
+    } else {
+      this.orderByField = 'totalMarketEmissions';
+      this.accountOverviewFacilities = _.orderBy(this.accountOverviewFacilities, (accountOverviewFacility: AccountOverviewFacility) => {
+        return accountOverviewFacility.emissions.totalWithMarketEmissions
+      }, 'desc');
     }
   }
 }

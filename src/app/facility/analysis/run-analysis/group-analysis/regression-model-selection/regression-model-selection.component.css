@@ -24,3 +24,8 @@ td{
 tr.selected-model{
     border: solid !important;
 }
+
+
+.no-break{
+    text-wrap: nowrap;
+}

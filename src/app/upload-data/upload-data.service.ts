@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { IdbAccount, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup, PredictorData } from '../models/idb';
 import * as XLSX from 'xlsx';
 import { FacilitydbService } from '../indexedDB/facility-db.service';
@@ -18,6 +18,9 @@ import { FuelTypeOption } from '../shared/fuel-options/fuelTypeOption';;
 import { ColumnGroup, ColumnItem, FacilityGroup, FileReference, ParsedTemplate } from './upload-data-models';
 import { UploadDataV1Service } from './upload-data-v1.service';
 import { UploadDataV2Service } from './upload-data-v2.service';
+import { DetailDegreeDay } from '../models/degreeDays';
+import { DegreeDaysService } from '../shared/helper-services/degree-days.service';
+import * as _ from 'lodash';
 
 @Injectable({
   providedIn: 'root'
@@ -35,7 +38,8 @@ export class UploadDataService {
     private editMeterFormService: EditMeterFormService,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
     private uploadDataV1Service: UploadDataV1Service,
-    private uploadDataV2Service: UploadDataV2Service) {
+    private uploadDataV2Service: UploadDataV2Service,
+    private degreeDaysService: DegreeDaysService) {
     this.allFilesSet = new BehaviorSubject<boolean>(false);
     this.fileReferences = new Array();
     this.uploadMeters = new Array();
@@ -117,7 +121,7 @@ export class UploadDataService {
 
   parseTemplate(workbook: XLSX.WorkBook, templateVersion: "V1" | "V2", inSetupWizard: boolean): ParsedTemplate {
     if (templateVersion == "V1") {
-      return this.uploadDataV1Service.parseTemplate(workbook);
+      return this.uploadDataV1Service.parseTemplate(workbook, inSetupWizard);
     } else if (templateVersion == "V2") {
       console.log('V2!');
       return this.uploadDataV2Service.parseTemplate(workbook, inSetupWizard);
@@ -456,6 +460,7 @@ export class UploadDataService {
 
     let predictorData: Array<IdbPredictorEntry> = new Array();
     let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.getAccountPerdictorsCopy();
+    let hasNewData: boolean = false;
     fileReference.predictorFacilityGroups.forEach(group => {
       if (group.facilityName != 'Unmapped Predictors' && group.groupItems.length != 0) {
         let facilityPredictorEntries: Array<IdbPredictorEntry> = accountPredictorEntries.filter(entry => {
@@ -463,7 +468,7 @@ export class UploadDataService {
         });
         let existingFacilityPredictorData: Array<PredictorData> = new Array();
         if (facilityPredictorEntries.length != 0) {
-          existingFacilityPredictorData = facilityPredictorEntries[0].predictors.map(predictor => { return predictor });
+          existingFacilityPredictorData = facilityPredictorEntries[0].predictors.map(predictor => { return JSON.parse(JSON.stringify(predictor)) });
           existingFacilityPredictorData.forEach(predictorData => {
             predictorData.amount = undefined;
           });
@@ -472,15 +477,18 @@ export class UploadDataService {
           group.groupItems.forEach((predictorItem) => {
             let predictorIndex: number = existingFacilityPredictorData.findIndex(predictor => { return predictor.name == predictorItem.value });
             if (predictorIndex == -1) {
+              hasNewData = true;
               let newPredictor: PredictorData = this.predictorDbService.getNewPredictor([]);
               newPredictor.name = predictorItem.value;
               existingFacilityPredictorData.push(newPredictor);
               facilityPredictorEntries.forEach(predictorEntry => {
-                predictorEntry.predictors.push(newPredictor);
+                predictorEntry.predictors.push(JSON.parse(JSON.stringify(newPredictor)));
               });
             }
           });
         }
+
+        let uploadDates: Array<Date> = new Array();
         fileReference.headerMap.forEach(dataRow => {
           let readDate: Date = new Date(dataRow[dateColumnVal]);
           if (!isNaN(readDate.valueOf())) {
@@ -490,6 +498,8 @@ export class UploadDataService {
             if (!predictorEntry) {
               predictorEntry = this.predictorDbService.getNewIdbPredictorEntry(group.facilityId, selectedAccount.guid, readDate);
               predictorEntry.predictors = JSON.parse(JSON.stringify(existingFacilityPredictorData));
+            } else {
+              uploadDates.push(readDate);
             }
             group.groupItems.forEach(item => {
               let entryDataIndex: number = predictorEntry.predictors.findIndex(predictor => { return predictor.name == item.value });
@@ -500,6 +510,15 @@ export class UploadDataService {
             predictorData.push(JSON.parse(JSON.stringify(predictorEntry)));
           }
         });
+        //uploading new entries means we need to update all previous entries.
+        if (hasNewData) {
+          facilityPredictorEntries.forEach(entry => {
+            let uploadedAlready: Date = uploadDates.find(date => { return this.checkSameMonth(new Date(entry.date), date) });
+            if (uploadedAlready == undefined) {
+              predictorData.push(JSON.parse(JSON.stringify(entry)));
+            }
+          });
+        }
       }
     });
     return predictorData;
@@ -520,6 +539,42 @@ export class UploadDataService {
         })
       })
     });
+    return fileReference.predictorEntries;
+  }
+
+
+  async updateDegreeDays(fileReference: FileReference): Promise<Array<IdbPredictorEntry>> {
+    for (let i = 0; i < fileReference.predictorEntries.length; i++) {
+      let entry: IdbPredictorEntry = fileReference.predictorEntries[i];
+      //set degree days for new entries
+      if (!entry.id) {
+        for (let p = 0; p < entry.predictors.length; p++) {
+          let predictorData: PredictorData = entry.predictors[p];
+          if (predictorData.predictorType == 'Weather') {
+            //set degree days
+            let dataDate: Date = new Date(entry.date)
+            let degreeDays: Array<DetailDegreeDay> = await this.degreeDaysService.getDailyDataFromMonth(dataDate.getMonth(), dataDate.getFullYear(), predictorData.heatingBaseTemperature, predictorData.coolingBaseTemperature, predictorData.weatherStationId);
+            let hasErrors: DetailDegreeDay = degreeDays.find(degreeDay => {
+              return degreeDay.gapInData == true
+            });
+            if (predictorData.weatherDataType == 'CDD') {
+              let totalCDD: number = _.sumBy(degreeDays, 'coolingDegreeDay');
+              predictorData.amount = totalCDD;
+              predictorData.weatherStationId = degreeDays[0]?.stationId;
+              predictorData.weatherStationName = degreeDays[0]?.stationName;
+              predictorData.weatherDataWarning = hasErrors != undefined;
+            }
+            if (predictorData.weatherDataType == 'HDD') {
+              let totalHDD: number = _.sumBy(degreeDays, 'heatingDegreeDay');
+              predictorData.amount = totalHDD;
+              predictorData.weatherStationId = degreeDays[0]?.stationId;
+              predictorData.weatherStationName = degreeDays[0]?.stationName;
+              predictorData.weatherDataWarning = hasErrors != undefined;
+            }
+          }
+        }
+      }
+    }
     return fileReference.predictorEntries;
   }
 

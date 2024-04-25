@@ -13,21 +13,20 @@ export class MonthlyAnalysisSummaryClass {
     constructor(selectedGroup: AnalysisGroup, analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, accountPredictorEntries: Array<IdbPredictorEntry>, calculateAllMonthlyData: boolean) {
         this.group = selectedGroup;
         this.monthlyGroupAnalysisClass = new MonthlyGroupAnalysisClass(selectedGroup, analysisItem, facility, calanderizedMeters, accountPredictorEntries, calculateAllMonthlyData);
-        this.setMonthlyAnalysisSummaryData();
+        this.setMonthlyAnalysisSummaryData(facility);
     }
 
-    setMonthlyAnalysisSummaryData() {
+    setMonthlyAnalysisSummaryData(facility: IdbFacility) {
         this.monthlyAnalysisSummaryData = new Array();
         let baselineDate: Date = new Date(this.monthlyGroupAnalysisClass.baselineDate);
         while (baselineDate < this.monthlyGroupAnalysisClass.endDate) {
-            let monthlyAnalysisSummaryDataClass: MonthlyAnalysisSummaryDataClass = new MonthlyAnalysisSummaryDataClass(this.monthlyGroupAnalysisClass, baselineDate, this.monthlyAnalysisSummaryData)
+            let monthlyAnalysisSummaryDataClass: MonthlyAnalysisSummaryDataClass = new MonthlyAnalysisSummaryDataClass(this.monthlyGroupAnalysisClass, baselineDate, this.monthlyAnalysisSummaryData, facility)
             this.monthlyAnalysisSummaryData.push(monthlyAnalysisSummaryDataClass);
             let currentMonth: number = baselineDate.getUTCMonth()
             let nextMonth: number = currentMonth + 1;
             baselineDate = new Date(baselineDate.getUTCFullYear(), nextMonth, 1);
         }
     }
-
 
     getResults(): MonthlyAnalysisSummary {
         return {
@@ -44,9 +43,9 @@ export class MonthlyAnalysisSummaryClass {
                 energyUse: summaryDataItem.energyUse,
                 modeledEnergy: summaryDataItem.modeledEnergy,
                 adjusted: summaryDataItem.monthlyAnalysisCalculatedValues.adjusted,
-                baselineAdjustmentForNormalization: summaryDataItem.monthlyAnalysisCalculatedValues.baselineAdjustmentForNormalization,
-                baselineAdjustmentForOtherV2: summaryDataItem.monthlyAnalysisCalculatedValues.baselineAdjustmentForOtherV2,
-                baselineAdjustment: summaryDataItem.monthlyAnalysisCalculatedValues.baselineAdjustment,
+                baselineAdjustmentForNormalization: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.baselineAdjustmentForNormalization),
+                baselineAdjustmentForOtherV2: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.baselineAdjustmentForOtherV2),
+                baselineAdjustment: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.baselineAdjustment),
                 predictorUsage: summaryDataItem.predictorUsage,
                 fiscalYear: summaryDataItem.fiscalYear,
                 group: summaryDataItem.group,

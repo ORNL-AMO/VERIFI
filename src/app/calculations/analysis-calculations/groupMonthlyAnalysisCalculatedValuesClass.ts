@@ -1,6 +1,6 @@
 import * as _ from 'lodash';
 import { ConvertValue } from '../conversions/convertValue';
-export class MonthlyAnalysisCalculatedValues {
+export class GroupMonthlyAnalysisCalculatedValues {
     //results
     energyUse: number;
     modeledEnergy: number;
@@ -35,7 +35,7 @@ export class MonthlyAnalysisCalculatedValues {
         baselineAdjustementInput: number,
         fiscalYear: number,
         baselineYear: number,
-        previousMonthValues: Array<MonthlyAnalysisCalculatedValues>,
+        previousMonthValues: Array<GroupMonthlyAnalysisCalculatedValues>,
         baselineActualEnergyUse: number,
         modelYearDataAdjusted: number,
         dataAdjustment: number
@@ -51,18 +51,18 @@ export class MonthlyAnalysisCalculatedValues {
         this.setAdjustedStar(baselineActualEnergyUse, modelYearDataAdjusted, baselineAdjustementInput);
         this.setAdjustedStarStar(dataAdjustment);
         this.setAdjusted();
-        this.setBaselineAdjustmentForNormalization(baselineActualEnergyUse, baselineAdjustementInput);
-        this.setBaselineAdjustmentForOtherV2();
+        this.setBaselineAdjustmentForNormalization(baselineActualEnergyUse, modelYearDataAdjusted, dataAdjustment);
+        this.setBaselineAdjustmentForOtherV2(baselineAdjustementInput, modelYearDataAdjusted, dataAdjustment, baselineActualEnergyUse);
         this.setBaselineAdjustment();
         this.setSEnPI();
-        this.setSavings();
+        this.setSavings(baselineActualEnergyUse, baselineAdjustementInput, modelYearDataAdjusted, dataAdjustment);
         this.setPercentSavingsComparedToBaseline();
         this.setYearToDateSavings(baselineYear);
         this.setRollingSavingsValues(previousMonthValues);
         this.setYearToDatePercentSavings();
     }
 
-    initializeYearToDateValues(previousMonthsValues: Array<MonthlyAnalysisCalculatedValues>) {
+    initializeYearToDateValues(previousMonthsValues: Array<GroupMonthlyAnalysisCalculatedValues>) {
         this.summaryDataIndex = previousMonthsValues.length;
         if (this.summaryDataIndex == 0) {
             this.monthIndex = 0;
@@ -72,7 +72,7 @@ export class MonthlyAnalysisCalculatedValues {
             this.yearToDateBaselineModeledEnergyUse = 0;
             this.yearToDateAdjustedEnergyUse = 0;
         } else {
-            let previousMonthSummaryData: MonthlyAnalysisCalculatedValues = previousMonthsValues[this.summaryDataIndex - 1];
+            let previousMonthSummaryData: GroupMonthlyAnalysisCalculatedValues = previousMonthsValues[this.summaryDataIndex - 1];
             if (previousMonthSummaryData.fiscalYear == this.fiscalYear) {
                 this.monthIndex = previousMonthSummaryData.monthIndex + 1;
                 this.yearToDateBaselineActualEnergyUse = previousMonthSummaryData.yearToDateBaselineActualEnergyUse;
@@ -103,7 +103,7 @@ export class MonthlyAnalysisCalculatedValues {
         this.yearToDateActualEnergyUse = this.yearToDateActualEnergyUse + this.energyUse;
     }
 
-    setBaselineModeledEnergyUse(baselineYear: number, previousMonthsValues: Array<MonthlyAnalysisCalculatedValues>) {
+    setBaselineModeledEnergyUse(baselineYear: number, previousMonthsValues: Array<GroupMonthlyAnalysisCalculatedValues>) {
         if (this.fiscalYear == baselineYear) {
             this.baselineModeledEnergyUse = this.modeledEnergy;
         } else {
@@ -112,12 +112,24 @@ export class MonthlyAnalysisCalculatedValues {
         this.yearToDateBaselineModeledEnergyUse = this.yearToDateBaselineModeledEnergyUse + this.baselineModeledEnergyUse;
     }
 
-    setAdjustedStar(baselineActualEnergyUse: number, modelYearDataAdjustment: number, baselineAdjustementInput: number) {
-        this.adjustedStar = (baselineActualEnergyUse + baselineAdjustementInput) * ((this.modeledEnergy - modelYearDataAdjustment) / (this.baselineModeledEnergyUse - modelYearDataAdjustment));
+    setAdjustedStar(baselineActualEnergyUse: number, modelYearDataAdjusted: number, baselineAdjustementInput: number) {
+        if (this.baselineModeledEnergyUse - modelYearDataAdjusted == 0) {
+            if (this.modeledEnergy - modelYearDataAdjusted == 0) {  //M_i = 0 subcase is the weird one
+                this.adjustedStar = (baselineActualEnergyUse + baselineAdjustementInput);
+            } else {
+                this.adjustedStar = (this.modeledEnergy - modelYearDataAdjusted)
+            }
+        } else {
+            this.adjustedStar = (baselineActualEnergyUse + baselineAdjustementInput) * ((this.modeledEnergy - modelYearDataAdjusted) / (this.baselineModeledEnergyUse - modelYearDataAdjusted));
+        }
     }
 
     setAdjustedStarStar(dataAdjustment: number) {
-        this.adjustedStarStar = this.adjustedStar * this.energyUse / (this.energyUse - dataAdjustment);
+        if (this.energyUse == 0) {
+            this.adjustedStarStar = this.adjustedStar;
+        } else {
+            this.adjustedStarStar = this.adjustedStar * this.energyUse / (this.energyUse - dataAdjustment);
+        }
     }
 
     setAdjusted() {
@@ -125,16 +137,37 @@ export class MonthlyAnalysisCalculatedValues {
         this.yearToDateAdjustedEnergyUse = this.yearToDateAdjustedEnergyUse + this.adjusted;
     }
 
-    setBaselineAdjustmentForOtherV2() {
-        this.baselineAdjustmentForOtherV2 = this.adjustedStarStar - this.adjustedStar;
+    setBaselineAdjustmentForOtherV2(baselineAdjustementInput: number, modelYearDataAdjusted: number, dataAdjustment: number, baselineActualEnergyUse: number) {
+        if ((this.energyUse - dataAdjustment) == 0 && this.energyUse != 0) {
+            this.baselineAdjustmentForOtherV2 = baselineAdjustementInput;
+        } else {
+            let adjustedStarStarRatio: number = 1;
+            if (this.energyUse != 0) {
+                adjustedStarStarRatio = this.energyUse / (this.energyUse - dataAdjustment);
+            }
+
+            if ((this.baselineModeledEnergyUse - modelYearDataAdjusted) == 0) {
+                if ((this.modeledEnergy - modelYearDataAdjusted) == 0) {
+                    this.baselineAdjustmentForOtherV2 = baselineAdjustementInput * adjustedStarStarRatio;
+                } else {
+                    this.baselineAdjustmentForOtherV2 = 0;
+                }
+            } else {
+                this.baselineAdjustmentForOtherV2 = baselineAdjustementInput * ((this.modeledEnergy - modelYearDataAdjusted) / (this.baselineModeledEnergyUse - modelYearDataAdjusted)) * adjustedStarStarRatio;
+            }
+        }
     }
 
     setSEnPI() {
         this.SEnPI = this.energyUse / this.adjusted;
     }
 
-    setSavings() {
-        this.savings = this.adjusted - this.energyUse;
+    setSavings(baselineActualEnergyUse: number, baselineAdjustementInput: number, modelYearDataAdjusted: number, dataAdjustment: number) {
+        if ((baselineActualEnergyUse + baselineAdjustementInput) != 0 && (this.baselineModeledEnergyUse - modelYearDataAdjusted) != 0 && (this.modeledEnergy - modelYearDataAdjusted) != 0) {
+            this.savings = this.adjusted - this.energyUse;
+        } else {
+            this.savings = ((baselineActualEnergyUse + baselineAdjustementInput) - (this.baselineModeledEnergyUse - modelYearDataAdjusted)) + ((this.modeledEnergy - modelYearDataAdjusted) - (this.energyUse - dataAdjustment))
+        }
     }
 
     setPercentSavingsComparedToBaseline() {
@@ -150,9 +183,21 @@ export class MonthlyAnalysisCalculatedValues {
         }
     }
 
-    setBaselineAdjustmentForNormalization(baselineActualEnergyUse: number, baselineAdjustementInput: number) {
+    setBaselineAdjustmentForNormalization(baselineActualEnergyUse: number, modelYearDataAdjustment: number, dataAdjustment: number) {
         if (this.summaryDataIndex >= 11) {
-            this.baselineAdjustmentForNormalization = this.adjustedStar - (baselineActualEnergyUse + baselineAdjustementInput);
+            let adjustedStarStarRatio: number = 1;
+            if (this.energyUse != 0) {
+                adjustedStarStarRatio = this.energyUse / (this.energyUse - dataAdjustment);
+            }
+            if ((this.baselineModeledEnergyUse - modelYearDataAdjustment) == 0) {
+                if (this.modeledEnergy - modelYearDataAdjustment) {
+                    this.baselineAdjustmentForNormalization = baselineActualEnergyUse * adjustedStarStarRatio - baselineActualEnergyUse;
+                } else {
+                    this.baselineAdjustmentForNormalization = (this.modeledEnergy - modelYearDataAdjustment) * adjustedStarStarRatio - baselineActualEnergyUse;
+                }
+            } else {
+                this.baselineAdjustmentForNormalization = baselineActualEnergyUse * ((this.modeledEnergy - modelYearDataAdjustment) / (this.baselineModeledEnergyUse - modelYearDataAdjustment)) * adjustedStarStarRatio - baselineActualEnergyUse
+            }
         } else {
             this.baselineAdjustmentForNormalization = 0;
         }
@@ -166,11 +211,11 @@ export class MonthlyAnalysisCalculatedValues {
         }
     }
 
-    setRollingSavingsValues(previousMonthsValues: Array<MonthlyAnalysisCalculatedValues>) {
+    setRollingSavingsValues(previousMonthsValues: Array<GroupMonthlyAnalysisCalculatedValues>) {
         if (this.summaryDataIndex > 11) {
-            let last11MonthsData: Array<MonthlyAnalysisCalculatedValues> = previousMonthsValues.splice(this.summaryDataIndex - 11, this.summaryDataIndex);
-            let total12MonthsEnergyUse: number = _.sumBy(last11MonthsData, (data: MonthlyAnalysisCalculatedValues) => { return data.energyUse }) + this.energyUse;
-            let total12MonthsAdjusedBaseline: number = _.sumBy(last11MonthsData, (data: MonthlyAnalysisCalculatedValues) => { return data.adjusted }) + this.adjusted;
+            let last11MonthsData: Array<GroupMonthlyAnalysisCalculatedValues> = previousMonthsValues.splice(this.summaryDataIndex - 11, this.summaryDataIndex);
+            let total12MonthsEnergyUse: number = _.sumBy(last11MonthsData, (data: GroupMonthlyAnalysisCalculatedValues) => { return data.energyUse }) + this.energyUse;
+            let total12MonthsAdjusedBaseline: number = _.sumBy(last11MonthsData, (data: GroupMonthlyAnalysisCalculatedValues) => { return data.adjusted }) + this.adjusted;
             this.rollingSavings = total12MonthsAdjusedBaseline - total12MonthsEnergyUse;
             this.rolling12MonthImprovement = this.rollingSavings / total12MonthsAdjusedBaseline;
         } else {

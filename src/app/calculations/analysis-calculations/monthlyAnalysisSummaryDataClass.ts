@@ -2,10 +2,10 @@ import { MonthlyData } from "src/app/models/calanderization";
 import { IdbFacility, IdbPredictorEntry, PredictorData } from "src/app/models/idb";
 import { MonthlyGroupAnalysisClass } from "./monthlyGroupAnalysisClass";
 import * as _ from 'lodash';
-import { MonthlyAnalysisCalculatedValues } from "./monthlyAnalysisCalculatedValuesClass";
 import { getFiscalYear } from "../shared-calculations/calanderizationFunctions";
 import { AnalysisCategory, AnalysisGroup, AnalysisType } from "src/app/models/analysis";
 import { ConvertValue } from "../conversions/convertValue";
+import { GroupMonthlyAnalysisCalculatedValues } from "./groupMonthlyAnalysisCalculatedValuesClass";
 
 export class MonthlyAnalysisSummaryDataClass {
     //results
@@ -22,7 +22,7 @@ export class MonthlyAnalysisSummaryDataClass {
     }>;
     fiscalYear: number;
     group: AnalysisGroup;
-    monthlyAnalysisCalculatedValues: MonthlyAnalysisCalculatedValues;
+    monthlyAnalysisCalculatedValues: GroupMonthlyAnalysisCalculatedValues;
 
     //used for calcs
     monthPredictorData: Array<IdbPredictorEntry>;
@@ -31,14 +31,21 @@ export class MonthlyAnalysisSummaryDataClass {
     annualEnergyUse: number;
     baselineActualEnergyUse: number;
     monthIndex: number;
+    isNew: boolean;
+    isBaselineYear: boolean;
+    baselineYear: number
     constructor(
         monthlyGroupAnalysisClass: MonthlyGroupAnalysisClass,
         monthDate: Date,
-        previousMonthsSummaryData: Array<MonthlyAnalysisSummaryDataClass>
+        previousMonthsSummaryData: Array<MonthlyAnalysisSummaryDataClass>,
+        facility: IdbFacility
     ) {
         this.date = monthDate;
         this.group = monthlyGroupAnalysisClass.selectedGroup;
+        this.isNew = facility.isNewFacility;
+        this.baselineYear = monthlyGroupAnalysisClass.baselineYear;
         this.setFiscalYear(monthlyGroupAnalysisClass.facility);
+        this.setIsBaselineYear(monthlyGroupAnalysisClass.baselineYear);
         this.setMonthPredictorData(monthlyGroupAnalysisClass.facilityPredictorData);
         this.setMonthMeterData(monthlyGroupAnalysisClass.groupMonthlyData);
         this.setMonthIndex(previousMonthsSummaryData);
@@ -55,6 +62,10 @@ export class MonthlyAnalysisSummaryDataClass {
 
     setFiscalYear(facility: IdbFacility) {
         this.fiscalYear = getFiscalYear(new Date(this.date), facility);
+    }
+
+    setIsBaselineYear(baselineYear: number) {
+        this.isBaselineYear = (baselineYear == this.fiscalYear);
     }
 
     setMonthPredictorData(facilityPredictorData: Array<IdbPredictorEntry>) {
@@ -204,8 +215,8 @@ export class MonthlyAnalysisSummaryDataClass {
 
 
     setMonthlyAnalysisCalculatedValues(baselineYear: number, previousMonthsSummaryData: Array<MonthlyAnalysisSummaryDataClass>) {
-        let previousMonthsAnalysisCalculatedValues: Array<MonthlyAnalysisCalculatedValues> = previousMonthsSummaryData.map(data => { return data.monthlyAnalysisCalculatedValues });
-        this.monthlyAnalysisCalculatedValues = new MonthlyAnalysisCalculatedValues(
+        let previousMonthsAnalysisCalculatedValues: Array<GroupMonthlyAnalysisCalculatedValues> = previousMonthsSummaryData.map(data => { return data.monthlyAnalysisCalculatedValues });
+        this.monthlyAnalysisCalculatedValues = new GroupMonthlyAnalysisCalculatedValues(
             this.energyUse,
             this.modeledEnergy,
             this.baselineAdjustmentInput,
