@@ -25,7 +25,7 @@ export class WeatherDataService {
   selectedMonth: Date = new Date(2022, 6, 8);
   selectedDate: Date = new Date(2022, 6, 8);
   heatingTemp: number = 60;
-  coolingTemp: number = 70;
+  coolingTemp: number = 60;
   zipCode: string = "37830";
 
   applyToFacility: BehaviorSubject<boolean>;
