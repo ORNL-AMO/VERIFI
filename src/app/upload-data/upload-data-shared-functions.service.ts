@@ -94,8 +94,14 @@ export class UploadDataSharedFunctionsService {
           facilityPredictorEntry = this.predictorDbService.getNewIdbPredictorEntry(facility.guid, selectedAccount.guid, dataItemDate);
           if (facilityPredictorEntries.length != 0) {
             facilityPredictorEntry.predictors = JSON.parse(JSON.stringify(facilityPredictorEntries[0].predictors));
+            facilityPredictorEntry.predictors.forEach(predictor => {
+              predictor.amount = undefined;
+            });
           } else {
             facilityPredictorEntry.predictors = JSON.parse(JSON.stringify(existingFacilityPredictorData));
+            facilityPredictorEntry.predictors.forEach(predictor => {
+              predictor.amount = undefined;
+            });
           }
         } else {
           uploadDates.push(dataItemDate);

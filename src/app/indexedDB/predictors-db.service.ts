@@ -249,7 +249,7 @@ export class PredictordbService {
             let predictorEntry: IdbPredictorEntry = facilityPredictorEntries[index];
             for (let predictorIndex = 0; predictorIndex < predictorEntry.predictors.length; predictorIndex++) {
                 let predictorData: PredictorData = predictorEntry.predictors[predictorIndex];
-                if (predictorData.predictorType == 'Weather') {
+                if (predictorData.predictorType == 'Weather' && !predictorData.weatherOverride) {
                     //get degree days
                     let dataDate: Date = new Date(predictorEntry.date)
                     this.loadingService.setLoadingMessage('Calculating Degree Days ' + Months[dataDate.getMonth()].name + ', ' + dataDate.getFullYear() + '...')
@@ -280,7 +280,7 @@ export class PredictordbService {
             let predictorEntry: IdbPredictorEntry = facilityPredictorEntries[index];
             let predictorIndex: number = predictorEntry.predictors.findIndex(predictor => { return predictor.id == facilityPredictor.id });
             let predictorData: PredictorData = predictorEntry.predictors[predictorIndex];
-            if (predictorData.predictorType == 'Weather') {
+            if (predictorData.predictorType == 'Weather' && !predictorData.weatherOverride) {
                 //get degree days
                 let dataDate: Date = new Date(predictorEntry.date)
                 this.loadingService.setLoadingMessage('Calculating Degree Days ' + Months[dataDate.getMonth()].name + ', ' + dataDate.getFullYear() + '...')
