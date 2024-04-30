@@ -153,8 +153,6 @@ export class BetterPlantsReportClass {
     }
 
     setPercentTotalWaterImprovement() {
-        console.log(this.totalWaterSavings);
-        console.log(this.adjustedBaselinePrimaryWater);
         this.percentTotalWaterImprovement = (this.totalWaterSavings / this.adjustedBaselinePrimaryWater) * 100
     }
 
