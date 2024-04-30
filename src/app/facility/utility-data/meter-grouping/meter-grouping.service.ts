@@ -7,6 +7,7 @@ import { BehaviorSubject } from 'rxjs';
 import { Month, Months } from 'src/app/shared/form-data/months';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { getFirstBillEntryFromCalanderizedMeterData, getFiscalYear, getLastBillEntryFromCalanderizedMeterData } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
+import { getIsEnergyMeter } from 'src/app/shared/sharedHelperFuntions';
 @Injectable({
   providedIn: 'root'
 })
@@ -38,7 +39,7 @@ export class MeterGroupingService {
     //set no groups
     let metersWithoutGroups: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => { return !meterGroupIds.includes(cMeter.meter.groupId) });
     //Energy (Electricity/Natural Gas)
-    let energyMeters: Array<CalanderizedMeter> = metersWithoutGroups.filter(cMeter => { return cMeter.meter.source == 'Electricity' || cMeter.meter.source == 'Natural Gas' || cMeter.meter.source == 'Other Fuels' || cMeter.meter.source == 'Other Energy' });
+    let energyMeters: Array<CalanderizedMeter> = metersWithoutGroups.filter(cMeter => { return getIsEnergyMeter(cMeter.meter.source)});
     if (energyMeters.length != 0) {
       meterGroupTypes = this.addEnergyMetersWithoutGroups(energyMeters, 'Energy', meterGroupTypes);
     }
