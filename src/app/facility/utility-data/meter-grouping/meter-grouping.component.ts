@@ -53,6 +53,8 @@ export class MeterGroupingComponent implements OnInit {
   selectedFacility: IdbFacility;
   facilityMeterGroups: Array<IdbUtilityMeterGroup>;
   calanderizedMeters: Array<CalanderizedMeter>;
+  showEditMeterModal: boolean = false;
+  meterToEdit: IdbUtilityMeter;
   constructor(private utilityMeterGroupDbService: UtilityMeterGroupdbService,
     private utilityMeterDbService: UtilityMeterdbService, private facilityDbService: FacilitydbService,
     private loadingService: LoadingService, private toastNoticationService: ToastNotificationsService,
@@ -244,5 +246,27 @@ export class MeterGroupingComponent implements OnInit {
       this.selectedFacility.energyIsSource = energyIsSource;
       await this.dbChangesService.updateFacilities(this.selectedFacility);
     }
+  }
+
+  openEditMeterModal(meter: IdbUtilityMeter){
+    this.meterToEdit = meter;
+    this.showEditMeterModal = true;
+    this.sharedDataService.modalOpen.next(true);
+  }
+
+  closeEditMeter(){
+    this.meterToEdit = undefined;
+    this.showEditMeterModal = false;
+    this.sharedDataService.modalOpen.next(false);
+  }
+
+  async saveMeterEdit(){    
+    await firstValueFrom(this.utilityMeterDbService.updateWithObservable(this.meterToEdit));
+    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    await this.dbChangesService.setMeters(selectedAccount, this.selectedFacility);
+    await this.dbChangesService.setAnalysisItems(selectedAccount, false, this.selectedFacility);
+    this.setCalanderizedMeters();
+    this.setGroupTypes();
+    this.closeEditMeter();
   }
 }
