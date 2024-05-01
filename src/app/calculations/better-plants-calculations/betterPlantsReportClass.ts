@@ -9,6 +9,7 @@ import { BetterPlantsWaterSummaryClass } from "./betterPlantsWaterSummaryClass";
 import { getCalanderizedMeterData } from "../calanderization/calanderizeMeters";
 import { getNeededUnits } from "../shared-calculations/calanderizationFunctions";
 import { getIncludedMeters } from "../shared-calculations/calculationsHelpers";
+import { ConvertValue } from "../conversions/convertValue";
 
 export class BetterPlantsReportClass {
 
@@ -40,13 +41,18 @@ export class BetterPlantsReportClass {
         this.reportYear = reportYear;
         selectedAnalysisItem.reportYear = reportYear;
         this.setFacilityPerformance(selectedAnalysisItem, facilities, accountPredictorEntries, accountAnalysisItems, meters, meterData);
-        let includedBaselineMeters: Array<IdbUtilityMeter> = getIncludedMeters(meters, selectedAnalysisItem, accountAnalysisItems, baselineYear);
-        let calanderizedBaselineMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(includedBaselineMeters, meterData, account, false, { energyIsSource: selectedAnalysisItem.energyIsSource, neededUnits: getNeededUnits(selectedAnalysisItem) }, [], [], facilities);
-        let includedReportMeters: Array<IdbUtilityMeter> = getIncludedMeters(meters, selectedAnalysisItem, accountAnalysisItems, reportYear);
-        let calanderizedReportMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(includedReportMeters, meterData, account, false, { energyIsSource: selectedAnalysisItem.energyIsSource, neededUnits: getNeededUnits(selectedAnalysisItem) }, [], [], facilities);
 
         this.setReportAndBaselineYearSummaries(selectedAnalysisItem, account, facilities, accountPredictorEntries, accountAnalysisItems, baselineYear, reportYear, meters, meterData);
 
+        let neededUnits: 'MMBtu' | 'kgal' = 'MMBtu';
+        if(selectedAnalysisItem.analysisCategory == 'water'){
+            neededUnits = 'kgal';
+        }
+
+        let includedBaselineMeters: Array<IdbUtilityMeter> = getIncludedMeters(meters, selectedAnalysisItem, accountAnalysisItems, baselineYear);
+        let calanderizedBaselineMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(includedBaselineMeters, meterData, account, false, { energyIsSource: selectedAnalysisItem.energyIsSource, neededUnits: neededUnits }, [], [], facilities);
+        let includedReportMeters: Array<IdbUtilityMeter> = getIncludedMeters(meters, selectedAnalysisItem, accountAnalysisItems, reportYear);
+        let calanderizedReportMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(includedReportMeters, meterData, account, false, { energyIsSource: selectedAnalysisItem.energyIsSource, neededUnits: neededUnits }, [], [], facilities);
         this.setReportYearEnergySummaryClass(calanderizedReportMeters, reportYear);
         this.setBaselineYearEnergySummaryClass(calanderizedBaselineMeters, baselineYear);
         this.setAdjustBaselinePrimaryEnergy();
@@ -100,8 +106,12 @@ export class BetterPlantsReportClass {
         meterData: Array<IdbUtilityMeterData>) {
         let annualAccountAnalysisSummaryClass: AnnualAccountAnalysisSummaryClass = new AnnualAccountAnalysisSummaryClass(accountAnalysisItem, account, accountFacilities, accountPredictorEntries, allAccountAnalysisItems, false, meters, meterData);
         let annualAnalysisSummaries: Array<AnnualAnalysisSummary> = annualAccountAnalysisSummaryClass.getAnnualAnalysisSummaries();
+        //report
         this.reportYearAnalysisSummary = annualAnalysisSummaries.find(summary => { return summary.year == reportYear });
+        this.reportYearAnalysisSummary = this.convertAnnualAnalysisSummary(this.reportYearAnalysisSummary, accountAnalysisItem);
+        //baseline
         this.baselineYearAnalysisSummary = annualAnalysisSummaries.find(summary => { return summary.year == baselineYear });
+        this.baselineYearAnalysisSummary = this.convertAnnualAnalysisSummary(this.baselineYearAnalysisSummary, accountAnalysisItem);
     }
 
     //Energy
@@ -146,7 +156,6 @@ export class BetterPlantsReportClass {
         this.percentTotalWaterImprovement = (this.totalWaterSavings / this.adjustedBaselinePrimaryWater) * 100
     }
 
-
     getBetterPlantsSummary(): BetterPlantsSummary {
         return {
             reportYear: this.reportYear,
@@ -165,5 +174,23 @@ export class BetterPlantsReportClass {
             baselineYearWaterResults: this.baselineYearWaterSummaryClass.getBetterPlantsWaterSummary(),
             reportYearWaterResults: this.reportYearWaterSummaryClass.getBetterPlantsWaterSummary()
         }
+    }
+
+    convertAnnualAnalysisSummary(summary: AnnualAnalysisSummary, analysisItem: IdbAccountAnalysisItem): AnnualAnalysisSummary {
+        let startingUnit: string = analysisItem.energyUnit;
+        let neededUnits: 'MMBtu' | 'kgal' = 'MMBtu';
+        if(analysisItem.analysisCategory == 'water'){
+            neededUnits = 'kgal';
+            startingUnit = analysisItem.waterUnit;
+        }
+        summary.energyUse = new ConvertValue(summary.energyUse, startingUnit, neededUnits).convertedValue;
+        summary.adjusted = new ConvertValue(summary.adjusted, startingUnit, neededUnits).convertedValue
+        summary.baselineAdjustmentForNormalization = new ConvertValue(summary.baselineAdjustmentForNormalization, startingUnit, neededUnits).convertedValue
+        summary.baselineAdjustmentForOtherV2 = new ConvertValue(summary.baselineAdjustmentForOtherV2, startingUnit, neededUnits).convertedValue
+        summary.baselineAdjustment = new ConvertValue(summary.baselineAdjustment, startingUnit, neededUnits).convertedValue
+        summary.savings = new ConvertValue(summary.savings, startingUnit, neededUnits).convertedValue
+        summary.cummulativeSavings = new ConvertValue(summary.cummulativeSavings, startingUnit, neededUnits).convertedValue
+        summary.newSavings = new ConvertValue(summary.newSavings, startingUnit, neededUnits).convertedValue
+        return summary;
     }
 }

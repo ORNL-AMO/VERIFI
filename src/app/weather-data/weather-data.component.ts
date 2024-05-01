@@ -26,7 +26,6 @@ import { AnalyticsService } from '../analytics/analytics.service';
 })
 export class WeatherDataComponent {
 
-  zipCode: string;
   applyToFacility: boolean;
   applyToFacilitySub: Subscription;
   selectedFacility: IdbFacility;
@@ -64,9 +63,6 @@ export class WeatherDataComponent {
         }
       }
     });
-
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    this.zipCode = selectedAccount.zip;
   }
 
   ngOnDestroy() {
