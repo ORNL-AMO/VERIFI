@@ -30,19 +30,10 @@ export class VisualizationComponent implements OnInit {
   ngOnInit(): void {
     this.analyticsService.sendEvent('use_data_visualization');
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
-      if (!this.selectedFacility) {
-        this.selectedFacility = val;
-        this.visualizationStateService.setCalanderizedMeters(this.selectedFacility);
-        this.initializeDate();
-        this.visualizationStateService.initilizeCorrelationPlotOptions();
-      } else {
-        this.visualizationStateService.setCalanderizedMeters(this.selectedFacility);
-      }
-      if (this.selectedFacility.guid != val.guid) {
-        this.selectedFacility = val;
-        this.initializeDate();
-        this.visualizationStateService.initilizeCorrelationPlotOptions();
-      }
+      this.selectedFacility = val;
+      this.visualizationStateService.setCalanderizedMeters(this.selectedFacility);
+      this.initializeDate();
+      this.visualizationStateService.initilizeCorrelationPlotOptions();
     });
 
     this.utilityMeterDataSub = this.utilityMeterDataDbService.facilityMeterData.subscribe(val => {
