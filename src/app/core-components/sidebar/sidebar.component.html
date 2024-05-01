@@ -3,7 +3,7 @@
         <i class="fa" [ngClass]="{'fa-align-left': !open, 'fa-align-right': open}"></i>
     </a>
     <hr>
-    <a title="Account Overview" class="nav-link" routerLink="/account" [routerLinkActive]="['active-head']"
+    <a title="Account Home" class="nav-link" routerLink="/account" [routerLinkActive]="['active-head']"
         [ngClass]="{'open': open}" (mouseenter)="setHoverAccount(true)" (mouseleave)="setHoverAccount(false)"><i
             class="fa fa-building"></i>
         <span [hidden]="!open" class="ps-2 nav-label bold">
@@ -14,7 +14,7 @@
     <div class="d-flex"
         [ngClass]="{'flex-column not-open': !open, 'icon-row open': open, 'hidden': checkHideAccountLinks()}"
         (mouseenter)="setHoverAccount(true)" (mouseleave)="setHoverAccount(false)">
-        <a title="Account Overview" class="nav-link" routerLink="/account/home" [routerLinkActive]="['active']"><i
+        <a title="Account Home" class="nav-link" routerLink="/account/home" [routerLinkActive]="['active']"><i
                 class="fa fa-home"></i>
         </a>
         <a title="Account Overview" class="nav-link" routerLink="/account/overview" [routerLinkActive]="['active']"><i
@@ -37,7 +37,7 @@
     <div *ngFor="let facility of facilityList | facilityList:(showAllFacilities && open); let index = index;"
         [ngClass]="{'open': open, 'not-open': !open}" (mouseenter)="setHoverIndex(index)"
         (mouseleave)="setHoverIndex(undefined)">
-        <a title="Facility Overview" class="nav-link" routerLink="/facility/{{facility.id}}"
+        <a title="Facility Home" class="nav-link" routerLink="/facility/{{facility.id}}"
             [routerLinkActive]="['active-head']"><i class="fa fa-industry" [ngStyle]="{color: facility.color}"></i>
             <span [hidden]="!open" class="ps-2 nav-label">
                 {{facility.guid | facilityName}}

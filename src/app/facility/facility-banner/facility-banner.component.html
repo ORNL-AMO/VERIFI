@@ -5,27 +5,28 @@
             {{selectedFacility.name}}
         </div>
         <ul class="nav nav-tabs">
-            <li class="nav-item">
+            <li class="nav-item" title="Facility Home">
                 <a class="nav-link" routerLink="home" [routerLinkActive]="['active']"><i class="fa fa-home"></i>Home</a>
             </li>
-            <li class="nav-item">
+            <li class="nav-item" title="Facility Utility Data Management">
                 <a class="nav-link" routerLink="utility" [routerLinkActive]="['active']"><i
                         class="fa fa-book"></i>Utility
                     Data</a>
             </li>
-            <li class="nav-item" [ngClass]="{'disabled': facilityMeterData.length == 0}">
+            <li class="nav-item" title="Facility Data Overview" [ngClass]="{'disabled': facilityMeterData.length == 0}">
                 <a class="nav-link" routerLink="overview" [routerLinkActive]="['active']"><i
                         class="fa fa-chart-column"></i>Overview</a>
             </li>
-            <li class="nav-item" [ngClass]="{'disabled': facilityMeterData.length == 0}">
+            <li class="nav-item" title="Facility Data Visualization"
+                [ngClass]="{'disabled': facilityMeterData.length == 0}">
                 <a class="nav-link" routerLink="visualization" [routerLinkActive]="['active']"><i
                         class="fa fa-chart-line"></i>Data Visualization</a>
             </li>
-            <li class="nav-item" [ngClass]="{'disabled': facilityMeterData.length == 0}">
+            <li class="nav-item" title="Facility Analysis" [ngClass]="{'disabled': facilityMeterData.length == 0}">
                 <a class="nav-link" routerLink="analysis" [routerLinkActive]="['active']"><i
                         class="fa fa-microscope"></i>Analysis</a>
             </li>
-            <li class="nav-item">
+            <li class="nav-item" title="Facility Settings">
                 <a class="nav-link" routerLink="settings" [routerLinkActive]="['active']"><i
                         class="fa fa-cog"></i>Settings</a>
             </li>
