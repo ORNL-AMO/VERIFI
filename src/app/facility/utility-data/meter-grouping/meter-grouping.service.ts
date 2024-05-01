@@ -53,13 +53,18 @@ export class MeterGroupingService {
     if (otherMeters.length != 0) {
       meterGroupTypes = this.addEnergyMetersWithoutGroups(otherMeters, 'Other', meterGroupTypes);
     } else {
-      meterGroupTypes.push({
-        groupType: "Other",
-        meterGroups: [],
-        id: Math.random().toString(36).substr(2, 9),
-        meterGroupIds: [],
-        totalUsage: 0
+      let hasOther: MeterGroupType = meterGroupTypes.find(mGroupType => {
+        return mGroupType.groupType == 'Other'
       });
+      if (!hasOther) {
+        meterGroupTypes.push({
+          groupType: "Other",
+          meterGroups: [],
+          id: Math.random().toString(36).substr(2, 9),
+          meterGroupIds: [],
+          totalUsage: 0
+        });
+      }
     }
     //set fraction usage
     for (let i = 0; i < meterGroupTypes.length; i++) {
