@@ -1,7 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { MeterGroupType } from 'src/app/models/calanderization';
-import { IdbUtilityMeter, IdbUtilityMeterGroup } from 'src/app/models/idb';
+import { IdbUtilityMeter } from 'src/app/models/idb';
 import { getIsEnergyMeter } from 'src/app/shared/sharedHelperFuntions';
 
 @Component({
@@ -19,19 +18,21 @@ export class EditMeterInGroupFormComponent {
   @Output('emitSave')
   emitSave: EventEmitter<boolean> = new EventEmitter<boolean>();
 
-  meterGroupTypes: Array<MeterGroupType>
+  meterGroupTypes: Array<MeterGroupType>;
+  originalGroupId: string;
   constructor() {
 
   }
 
   ngOnInit() {
+    this.originalGroupId = this.meterToEdit.groupId;
     this.meterGroupTypes = new Array();
     this.allMeterGroupTypes.forEach(meterGroupType => {
-      if(meterGroupType.groupType == 'Other'){
+      if (meterGroupType.groupType == 'Other') {
         this.meterGroupTypes.push(meterGroupType);
-      }else if(meterGroupType.groupType == 'Energy' && getIsEnergyMeter(this.meterToEdit.source)){
+      } else if (meterGroupType.groupType == 'Energy' && getIsEnergyMeter(this.meterToEdit.source)) {
         this.meterGroupTypes.push(meterGroupType);
-      }else if(meterGroupType.groupType == 'Water' && (this.meterToEdit.source == 'Water Intake' || this.meterToEdit.source == 'Water Discharge')){
+      } else if (meterGroupType.groupType == 'Water' && (this.meterToEdit.source == 'Water Intake' || this.meterToEdit.source == 'Water Discharge')) {
         this.meterGroupTypes.push(meterGroupType);
       }
     })
@@ -42,6 +43,7 @@ export class EditMeterInGroupFormComponent {
   }
 
   cancel() {
+    this.meterToEdit.groupId = this.originalGroupId;
     this.emitClose.emit(true);
   }
 }

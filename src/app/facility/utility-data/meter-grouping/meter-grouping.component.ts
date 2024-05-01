@@ -249,7 +249,7 @@ export class MeterGroupingComponent implements OnInit {
   }
 
   openEditMeterModal(meter: IdbUtilityMeter){
-    this.meterToEdit = JSON.parse(JSON.stringify(meter));
+    this.meterToEdit = meter;
     this.showEditMeterModal = true;
     this.sharedDataService.modalOpen.next(true);
   }
