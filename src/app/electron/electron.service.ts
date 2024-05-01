@@ -105,7 +105,6 @@ export class ElectronService {
 
 
   sendSaveData(backupFile: BackupFile, isArchive?: boolean, isCreateNewFile?: boolean) {
-    console.log('send save data===>><<<=====')
     if (!window["electronAPI"] || !backupFile) {
       return;
     }

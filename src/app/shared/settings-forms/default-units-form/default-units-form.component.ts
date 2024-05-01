@@ -123,7 +123,6 @@ export class DefaultUnitsFormComponent implements OnInit {
         this.selectedAccount = this.settingsFormsService.updateAccountFromUnitsForm(this.form, this.selectedAccount);
         let updatedAccount: IdbAccount = await firstValueFrom(this.accountDbService.updateWithObservable(this.selectedAccount));
         let allAccounts: Array<IdbAccount> = await firstValueFrom(this.accountDbService.getAll());
-        console.log('update units form')
         this.accountDbService.selectedAccount.next(updatedAccount);
         this.accountDbService.allAccounts.next(allAccounts);
       }

@@ -247,7 +247,6 @@ export class AccountSettingsComponent implements OnInit {
   async automaticBackup() {
     this.updatingFilePath = true;
     this.backupFile = this.backupDataService.getAccountBackupFile();
-    // await this.electronBackupsDbService.addOrUpdateFile(this.backupFile.dataBackupId, this.backupFile.account.guid);
     this.electronService.openDialog(this.backupFile);
   }
 
@@ -259,7 +258,6 @@ export class AccountSettingsComponent implements OnInit {
     this.selectedAccount.dataBackupId = this.backupFile.dataBackupId;
     this.updatingFilePath = false;
     await this.dbChangesService.updateAccount(this.selectedAccount);
-    // this.automaticBackupsService.initializingAccount = false;
     this.cd.detectChanges();
   }
 

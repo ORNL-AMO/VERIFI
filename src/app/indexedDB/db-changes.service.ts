@@ -148,7 +148,6 @@ export class DbChangesService {
   async updateFacilities(selectedFacility: IdbFacility, onSelect?: boolean) {
     let updatedFacility: IdbFacility = await firstValueFrom(this.facilityDbService.updateWithObservable(selectedFacility));
     let accountFacilites: Array<IdbFacility> = await this.facilityDbService.getAllAccountFacilities(selectedFacility.accountId);
-    console.log('why is this being called..........shit dawg')
     this.facilityDbService.accountFacilities.next(accountFacilites);
     if (!onSelect) {
       this.facilityDbService.selectedFacility.next(updatedFacility);

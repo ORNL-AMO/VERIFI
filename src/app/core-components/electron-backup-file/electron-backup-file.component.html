@@ -6,11 +6,7 @@
         <div class="popup-header">Backup File Found
         </div>
         <div class="popup-body" *ngIf="latestBackupFile && electronBackup">
-            <!-- <p>
-                A backup file for this account was found from {{latestBackupFile.timeStamp | date:'medium'}}
-            </p> -->
             <ng-container *ngIf="differingBackups">
-                <!-- <hr> -->
                 <p> The data found in the backup file corresponding to this account differs from the data in the
                     account.</p>
 
@@ -88,7 +84,6 @@
                 </p>
             </ng-container>
 
-            <!-- <hr> -->
             <ng-container
                 *ngIf="differingBackups || (account.archiveOption != 'always' && account.archiveOption != 'never') || forceModal">
                 <label class="semibold">
