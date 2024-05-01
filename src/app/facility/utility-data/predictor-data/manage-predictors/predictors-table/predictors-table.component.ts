@@ -181,6 +181,7 @@ export class PredictorsTableComponent {
   goToWeatherData() {
     let facility: IdbFacility = this.facilitydbService.selectedFacility.getValue();
     this.weatherDataService.selectedFacility = facility;
+    this.weatherDataService.zipCode = facility.zip;
     this.router.navigateByUrl('/weather-data');
   }
 

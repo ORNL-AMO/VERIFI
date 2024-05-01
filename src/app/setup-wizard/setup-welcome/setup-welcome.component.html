@@ -37,8 +37,22 @@
         </div>
         <br>
         <hr>
-        <div class="text-center loadData box">Want a quick start? <a (click)="loadTestData();">Load our test data</a> or
+        <div class="text-center loadData box">Want a quick start? <a (click)="openLoadTestData();">Load our test data</a> or
             <a (click)="openImportBackup();">Load Account Backup</a>
         </div>
+    </div>
+</div>
+
+<div [ngClass]="{'windowOverlay': showTestDataModal}"></div>
+<div class="popup" [ngClass]="{'open': showTestDataModal}">
+    <div class="popup-header">Load Example Account
+        <button class="item-right" (click)="cancelTestData()">x</button>
+    </div>
+    <div class="popup-body">
+        Do you want to load in an example account with test data? You can use this data to view all the functionality of VERIFI.
+    </div>
+    <div class="popup-footer text-end">
+        <button class="btn btn-secondary" (click)="cancelTestData()">Cancel</button>
+        <button class="btn btn-success" (click)="loadTestData()">Load Example</button>
     </div>
 </div>

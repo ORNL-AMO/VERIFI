@@ -6,20 +6,14 @@
                     [ngClass]="{'fa-circle-check':analysisItem.selectedYearAnalysis, 'fa-circle':!analysisItem.selectedYearAnalysis}"
                     (click)="setUseItem()"></span>
                 <a class="item-name click-link" (click)="selectAnalysisItem()">
-                    
+
                     <span class="ms-2 fa fa-exclamation-circle"
                         *ngIf="analysisItem.setupErrors.hasError || analysisItem.setupErrors.facilitiesSelectionsInvalid"></span>
                     {{analysisItem.name}}
                 </a>
             </div>
 
-            <!-- <span class="badge report-year pull-right">
-            {{analysisItem.reportYear}}
-        </span> -->
             <div class="d-flex">
-                <button class="btn action-btn btn-sm" (click)="createCopy()">
-                    <i class="fa fa-copy" title="Copy"></i>
-                </button>
                 <button class="btn action-btn btn-sm ms-1" (click)="deleteItem()">
                     <i class="fa fa-trash" title="Delete"></i>
                 </button>
@@ -33,19 +27,6 @@
                 Baseline Year: {{analysisItem.baselineYear | yearDisplay:selectedAccount.fiscalYear}}
             </span>
         </div>
-        <!-- <div class="d-flex flex-column">
-            <div>
-                Include Facilities:
-            </div>
-            <ng-container *ngFor="let facilityItem of analysisItem.facilityAnalysisItems; let index = index;">
-                <ng-container *ngIf="facilityItem.analysisItemId && facilityItem.analysisItemId != 'skip'">
-                    {{facilityItem.facilityId | facilityName}}
-                    <div *ngIf="analysisItem.facilityAnalysisItems.length-1 != index;">
-                        <hr>
-                    </div>
-                </ng-container>
-            </ng-container>
-        </div> -->
     </div>
     <div class="card-footer bg-white">
         <div class="d-flex justify-content-between">

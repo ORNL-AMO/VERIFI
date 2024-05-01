@@ -550,7 +550,7 @@ export class UploadDataService {
       if (!entry.id) {
         for (let p = 0; p < entry.predictors.length; p++) {
           let predictorData: PredictorData = entry.predictors[p];
-          if (predictorData.predictorType == 'Weather') {
+          if (predictorData.predictorType == 'Weather' && !predictorData.weatherOverride) {
             //set degree days
             let dataDate: Date = new Date(entry.date)
             let degreeDays: Array<DetailDegreeDay> = await this.degreeDaysService.getDailyDataFromMonth(dataDate.getMonth(), dataDate.getFullYear(), predictorData.heatingBaseTemperature, predictorData.coolingBaseTemperature, predictorData.weatherStationId);

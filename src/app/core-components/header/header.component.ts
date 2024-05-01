@@ -64,7 +64,7 @@ export class HeaderComponent implements OnInit {
 
   ngOnInit() {
     this.allAccountsSub = this.accountdbService.allAccounts.subscribe(allAccounts => {
-      this.accountList = allAccounts;
+      this.accountList = allAccounts.filter(account => { return !account.deleteAccount });
     });
 
     this.selectedAccountSub = this.accountdbService.selectedAccount.subscribe(selectedAccount => {

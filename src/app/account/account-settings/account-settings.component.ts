@@ -6,22 +6,13 @@ import { ImportBackupModalService } from 'src/app/core-components/import-backup-
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport, IdbFacility } from 'src/app/models/idb';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
-import { CustomEmissionsDbService } from 'src/app/indexedDB/custom-emissions-db.service';
 import { ElectronService } from 'src/app/electron/electron.service';
-import { ElectronBackupsDbService } from 'src/app/indexedDB/electron-backups-db.service';
 import { AutomaticBackupsService } from 'src/app/electron/automatic-backups.service';
-import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
-import { CustomGWPDbService } from 'src/app/indexedDB/custom-gwp-db.service';
 
 @Component({
   selector: 'app-account-settings',
@@ -60,25 +51,16 @@ export class AccountSettingsComponent implements OnInit {
     private router: Router,
     private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService,
-    private predictorDbService: PredictordbService,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private utilityMeterGroupDbService: UtilityMeterGroupdbService,
     private loadingService: LoadingService,
     private backupDataService: BackupDataService,
-    private analysisDbService: AnalysisDbService,
     private accountReportDbService: AccountReportDbService,
     private importBackupModalService: ImportBackupModalService,
     private toastNotificationService: ToastNotificationsService,
     private accountAnalysisDbService: AccountAnalysisDbService,
     private dbChangesService: DbChangesService,
-    private customEmissionsDbService: CustomEmissionsDbService,
     private electronService: ElectronService,
     private cd: ChangeDetectorRef,
-    private electronBackupsDbService: ElectronBackupsDbService,
     private automaticBackupsService: AutomaticBackupsService,
-    private customFuelDbService: CustomFuelDbService,
-    private customGWPDbService: CustomGWPDbService
   ) { }
 
   ngOnInit() {
@@ -151,47 +133,20 @@ export class AccountSettingsComponent implements OnInit {
 
   async confirmAccountDelete() {
     this.showDeleteAccount = false;
-
-    this.loadingService.setLoadingStatus(true);
-
-    // Delete all info associated with account
-    this.loadingService.setLoadingMessage("Deleting Account Predictors...");
-    await this.predictorDbService.deleteAllSelectedAccountPredictors();
-    this.loadingService.setLoadingMessage("Deleting Account Meter Data...");
-    await this.utilityMeterDataDbService.deleteAllSelectedAccountMeterData();
-    this.loadingService.setLoadingMessage("Deleting Account Meters...");
-    await this.utilityMeterDbService.deleteAllSelectedAccountMeters();
-    this.loadingService.setLoadingMessage("Deleting Account Meter Groups...");
-    await this.utilityMeterGroupDbService.deleteAllSelectedAccountMeterGroups();
-    this.loadingService.setLoadingMessage("Deleting Account Facilities...");
-    await this.facilityDbService.deleteAllSelectedAccountFacilities();
-    this.loadingService.setLoadingMessage("Deleting Reports...")
-    await this.accountReportDbService.deleteAccountReports();
-    this.loadingService.setLoadingMessage("Deleting Analysis Items...")
-    await this.analysisDbService.deleteAccountAnalysisItems();
-    await this.accountAnalysisDbService.deleteAccountAnalysisItems();
-    this.loadingService.setLoadingMessage("Deleting Custom Emissions...")
-    await this.customEmissionsDbService.deleteAccountEmissionsItems();
-    await this.electronBackupsDbService.deleteWithObservable(this.selectedAccount.guid);
-    this.loadingService.setLoadingMessage("Deleting Custom Fuels...")
-    await this.customFuelDbService.deleteAccountCustomFuels();   
-    this.loadingService.setLoadingMessage("Deleting Custom GWPs");
-    await this.customGWPDbService.deleteAccountCustomGWP();
-    
-    this.loadingService.setLoadingMessage("Deleting Account...");
-    await firstValueFrom(this.accountDbService.deleteAccountWithObservable(this.selectedAccount.id));
-    // Then navigate to another account
+    this.selectedAccount.deleteAccount = true;
+    await firstValueFrom(this.accountDbService.updateWithObservable(this.selectedAccount));
     let accounts: Array<IdbAccount> = await firstValueFrom(this.accountDbService.getAll());
     this.accountDbService.allAccounts.next(accounts);
-    if (accounts.length != 0) {
+    let nonDeleteAccounts: Array<IdbAccount> = accounts.filter(acc => {
+      return acc.deleteAccount == false;
+    })
+    if (nonDeleteAccounts.length != 0) {
       this.accountDbService.selectedAccount.next(undefined);
       this.router.navigateByUrl('/manage-accounts');
     } else {
       this.accountDbService.selectedAccount.next(undefined);
       this.router.navigateByUrl('/setup-wizard');
     }
-    this.loadingService.setLoadingStatus(false);
-    this.toastNotificationService.showToast('Account Deleted!', undefined, undefined, false, 'alert-success');
   }
 
   setDeleteFacilityEntry(facility: IdbFacility) {

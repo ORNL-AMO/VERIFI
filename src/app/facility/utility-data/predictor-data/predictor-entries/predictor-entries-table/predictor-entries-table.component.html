@@ -74,9 +74,13 @@
                 </td>
                 <td>{{predictorEntry.date | date:'MMM, yyyy'}}</td>
                 <td *ngFor="let predictor of predictorEntry.predictors">
-                    <span *ngIf="predictor.weatherDataWarning" class="fa  fa-exclamation-circle"
+                    <span *ngIf="predictor.weatherDataWarning" class="fa fa-exclamation-circle"
                         data-bs-toggle="tooltip" data-bs-placement="top"
                         title="Gaps found in weather data for this reading. It may not be accurate."
+                        data-bs-html="true"></span>
+                    <span *ngIf="predictor.weatherOverride" class="fa fa-asterisk"
+                        data-bs-toggle="tooltip" data-bs-placement="top"
+                        title="Weather data manually set."
                         data-bs-html="true"></span>
                     <ng-container *ngIf="predictor.amount != undefined">
                         {{predictor.amount | customNumber}}
