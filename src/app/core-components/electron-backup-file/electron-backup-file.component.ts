@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { Subscription, firstValueFrom } from 'rxjs';
 import { AutomaticBackupsService } from 'src/app/electron/automatic-backups.service';
 import { ElectronService } from 'src/app/electron/electron.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
@@ -10,6 +10,7 @@ import { ToastNotificationsService } from '../toast-notifications/toast-notifica
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { LoadingService } from '../loading/loading.service';
 import { DatePipe } from '@angular/common';
+import { DeleteDataService } from 'src/app/indexedDB/delete-data.service';
 
 @Component({
   selector: 'app-electron-backup-file',
@@ -38,7 +39,8 @@ export class ElectronBackupFileComponent {
     private dbChangesService: DbChangesService,
     private backupDataService: BackupDataService,
     private loadingService: LoadingService,
-    private cd: ChangeDetectorRef) {
+    private cd: ChangeDetectorRef,
+    private deleteDataService: DeleteDataService) {
 
   }
 
@@ -102,7 +104,7 @@ export class ElectronBackupFileComponent {
         this.forceModal = false;
       }
       this.cd.detectChanges();
-    }else if(this.latestBackupFile){
+    } else if (this.latestBackupFile) {
       this.automaticBackupsService.initializingAccount = false;
     }
   }
@@ -126,18 +128,24 @@ export class ElectronBackupFileComponent {
         this.showModal = false;
         this.loadingService.setLoadingMessage('Overwriting account. This may take a moment.');
         this.loadingService.setLoadingStatus(true);
-        await this.backupDataService.deleteAccountData(this.account);
+        this.deleteDataService.pauseDelete.next(true);
+        this.account.deleteAccount = true;
+        await firstValueFrom(this.accountDbService.updateWithObservable(this.account));
+        let accounts: Array<IdbAccount> = await firstValueFrom(this.accountDbService.getAll());
+        this.accountDbService.allAccounts.next(accounts);
 
         let backupPath: string = this.account.dataBackupFilePath;
         let sharedFileAuthor: string = this.account.sharedFileAuthor;
         let isSharedBackupFile: boolean = this.account.isSharedBackupFile;
-        this.account = await this.backupDataService.importAccountBackupFile(this.latestBackupFile);
-        this.account.dataBackupFilePath = backupPath;
-        this.account.sharedFileAuthor = sharedFileAuthor;
-        this.account.isSharedBackupFile = isSharedBackupFile;
+        let newAccount: IdbAccount = await this.backupDataService.importAccountBackupFile(this.latestBackupFile);
+        newAccount.dataBackupFilePath = backupPath;
+        newAccount.sharedFileAuthor = sharedFileAuthor;
+        newAccount.isSharedBackupFile = isSharedBackupFile;
 
-        await this.dbChangesService.updateAccount(this.account);
-        await this.dbChangesService.selectAccount(this.account, false);
+        await this.dbChangesService.updateAccount(newAccount);
+        await this.dbChangesService.selectAccount(newAccount, false);
+        this.deleteDataService.pauseDelete.next(false);
+        this.deleteDataService.gatherAndDelete();
         this.loadingService.setLoadingStatus(false);
         needUpdate = false;
       }
