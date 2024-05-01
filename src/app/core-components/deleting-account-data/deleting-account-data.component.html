@@ -1,5 +1,5 @@
 <ng-container *ngIf="!destroyToast">
-    <div class="card card-toast alert alert-info" [@toast]="showToast" *ngIf="deletingMessaging">
+    <div class="card card-toast alert alert-info" [@toast]="showToast" *ngIf="deletingMessaging" (mouseup)="finishDrag()" (drag)="mouseDown($event)">
             <div class="card-header">
                 <i class="fa fa-info-circle item-left me-2"></i>
                 {{deletingMessaging.message}}

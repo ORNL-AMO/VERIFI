@@ -88,4 +88,12 @@ export class DeletingAccountDataComponent {
   async cancelDelete() {
     await this.deleteDataService.cancelDelete();
   }
+
+  mouseDown($event) {
+    console.log($event)
+  }
+
+  finishDrag() {
+    console.log('done..')
+  }
 }
