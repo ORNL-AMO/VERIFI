@@ -71,20 +71,20 @@
         <span *ngIf="showAllFacilities"><i class="fa fa-chevron-up"></i> Show First Four Facilities</span>
     </a>
     <hr *ngIf="facilityList.length > 4 && open">
-    <a class="nav-link" routerLink="/upload" [routerLinkActive]="['active']"><i class="fa fa-upload"></i> <span
-            [hidden]="!open" class="ps-2 nav-label">Upload Data</span> </a>
-    <a class="nav-link" routerLink="/weather-data" [routerLinkActive]="['active']"><i class="fa fa-temperature-half"></i> <span
-            [hidden]="!open" class="ps-2 nav-label">Weather Data</span> </a>
-    <a class="nav-link" routerLink="/help" [routerLinkActive]="['active']"
+    <a title="Upload Data" class="nav-link" routerLink="/upload" [routerLinkActive]="['active']"><i
+            class="fa fa-upload"></i> <span [hidden]="!open" class="ps-2 nav-label">Upload Data</span> </a>
+    <a title="Weather Data" class="nav-link" routerLink="/weather-data" [routerLinkActive]="['active']"><i
+            class="fa fa-temperature-half"></i> <span [hidden]="!open" class="ps-2 nav-label">Weather Data</span> </a>
+    <a title="Help Content" class="nav-link" routerLink="/help" [routerLinkActive]="['active']"
         [routerLinkActiveOptions]="{ exact: true }"><i class="fa fa-question"></i> <span [hidden]="!open"
             class="ps-2 nav-label">Help</span> </a>
-    <a class="nav-link" routerLink="/about" [routerLinkActive]="['active']"
+    <a title="About" class="nav-link" routerLink="/about" [routerLinkActive]="['active']"
         [routerLinkActiveOptions]="{ exact: true }"><i class="fa fa-info-circle"></i> <span [hidden]="!open"
             class="ps-2 nav-label">About</span></a>
-    <a class="nav-link" routerLink="/feedback" [routerLinkActive]="['active']"
+    <a title="Feedback" class="nav-link" routerLink="/feedback" [routerLinkActive]="['active']"
         [routerLinkActiveOptions]="{ exact: true }"><i class="fa fa-inbox"></i> <span [hidden]="!open"
             class="ps-2 nav-label">Feedback</span></a>
-    <a class="nav-link" routerLink="/acknowledgments" [routerLinkActive]="['active']"
+    <a title="Acknowledgments" class="nav-link" routerLink="/acknowledgments" [routerLinkActive]="['active']"
         [routerLinkActiveOptions]="{ exact: true }"><i class="fa fa-trophy"></i>
         <span [hidden]="!open" class="ps-2 nav-label">Acknowledgments</span></a>
     <hr>
