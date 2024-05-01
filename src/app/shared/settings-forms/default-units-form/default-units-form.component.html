@@ -113,7 +113,7 @@
                     </div>
                 </div>
                 <select class="form-select" *ngIf="zipCodeSubRegionData.length > 1" name="eGridSubregion"
-                    id="eGridSubregion" formControlName="eGridSubregion" (change)="setSelectedSubregionEmissions()">
+                    id="eGridSubregion" formControlName="eGridSubregion" (change)="setSelectedSubregionEmissions(true)">
                     <option *ngFor="let subregion of zipCodeSubRegionData" [ngValue]="subregion">{{subregion}}</option>
                 </select>
                 <span *ngIf="zipCodeSubRegionData.length == 1">

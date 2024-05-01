@@ -8,6 +8,10 @@ import { Router } from '@angular/router';
 import { ToastNotificationsService } from '../toast-notifications/toast-notifications.service';
 import { BackupDataService } from 'src/app/shared/helper-services/backup-data.service';
 import { ExportToExcelTemplateService } from 'src/app/shared/helper-services/export-to-excel-template.service';
+import { CustomEmissionsDbService } from 'src/app/indexedDB/custom-emissions-db.service';
+import { ElectronBackupsDbService } from 'src/app/indexedDB/electron-backups-db.service';
+import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
+import { CustomGWPDbService } from 'src/app/indexedDB/custom-gwp-db.service';
 
 @Component({
   selector: 'app-manage-accounts',
@@ -28,6 +32,10 @@ export class ManageAccountsComponent {
     private toastNotificationService: ToastNotificationsService,
     private backupDataService: BackupDataService,
     private exportToExcelTemplateService: ExportToExcelTemplateService,
+    private customEmissionsDbService: CustomEmissionsDbService,
+    private electronBackupsDbService: ElectronBackupsDbService,
+    private customFuelDbService: CustomFuelDbService,
+    private customGWPDbService: CustomGWPDbService
   ) {
   }
 
@@ -106,10 +114,8 @@ export class ManageAccountsComponent {
   }
 
   async confirmAccountDelete() {
-
     this.showDeleteAccount = false;
     this.selectedAccount.deleteAccount = true;
-    console.log('update with delete bool set...')
     await firstValueFrom(this.accountDbService.updateWithObservable(this.selectedAccount));
     this.accounts = await firstValueFrom(this.accountDbService.getAll());
     this.accountDbService.allAccounts.next(this.accounts);

@@ -143,6 +143,12 @@ export const dbConfig: DBConfig = {
     ]
   },
   {
+    store: 'electronBackups',
+    storeConfig: { keyPath: 'id', autoIncrement: true },
+    storeSchema: [
+    ]
+  },
+  {
     store: 'analyticsData',
     storeConfig: { keyPath: 'id', autoIncrement: true },
     storeSchema: [

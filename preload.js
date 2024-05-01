@@ -11,13 +11,13 @@ contextBridge.exposeInMainWorld(
     "electronAPI", {
         send: (channel, data) => {
             // whitelist channels
-            let validChannels = ["ready", "update", "relaunch"];
+            let validChannels = ["ready", "update", "relaunch", "saveData", "fileExists", "openDialog", "getDataFile"];
             if (validChannels.includes(channel)) {
                 ipcRenderer.send(channel, data);
             }
         },
         on: (channel, func) => {
-            let validChannels = ["release-info", "available", "error", "update-downloaded"];
+            let validChannels = ["release-info", "available", "error", "update-downloaded", "file-path", "file-exists", "data-file"];
             if (validChannels.includes(channel)) {
                 // Deliberately strip event as it includes `sender` 
                 ipcRenderer.on(channel, (event, ...args) => func(...args));

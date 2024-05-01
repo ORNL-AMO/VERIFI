@@ -137,7 +137,9 @@ export class AccountdbService {
             energyIsSource: true,
             contactName: undefined,
             contactEmail: undefined,
-            contactPhone: undefined
+            contactPhone: undefined,
+            archiveOption: 'skip',
+            isSharedBackupFile: false
         }
     }
 }

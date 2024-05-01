@@ -11,9 +11,10 @@ import { AccountAnalysisDbService } from './account-analysis-db.service';
 import { CustomEmissionsDbService } from './custom-emissions-db.service';
 import { CustomFuelDbService } from './custom-fuel-db.service';
 import { CustomGWPDbService } from './custom-gwp-db.service';
-import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport, IdbAnalysisItem, IdbCustomEmissionsItem, IdbCustomFuel, IdbCustomGWP, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from '../models/idb';
+import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport, IdbAnalysisItem, IdbCustomEmissionsItem, IdbCustomFuel, IdbCustomGWP, IdbElectronBackup, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from '../models/idb';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
+import { ElectronBackupsDbService } from './electron-backups-db.service';
 
 @Injectable({
   providedIn: 'root'
@@ -38,6 +39,7 @@ export class DeleteDataService {
   accountFuels: Array<IdbCustomFuel>;
   accountEmissions: Array<IdbCustomEmissionsItem>;
   accountGWPs: Array<IdbCustomGWP>;
+  accountElectronBackups: Array<IdbElectronBackup>;
   accountFacilityAnalysis: Array<IdbAnalysisItem>;
   accountAnalysisItems: Array<IdbAccountAnalysisItem>;
 
@@ -54,7 +56,8 @@ export class DeleteDataService {
     private customEmissionsDbService: CustomEmissionsDbService,
     private customFuelDbService: CustomFuelDbService,
     private customGWPDbService: CustomGWPDbService,
-    private dbService: NgxIndexedDBService) {
+    private dbService: NgxIndexedDBService,
+    private electronBackupsDbService: ElectronBackupsDbService) {
     this.isDeleting = new BehaviorSubject<boolean>(false);
     this.deletingMessaging = new BehaviorSubject(undefined);
     this.pauseDelete = new BehaviorSubject<boolean>(false);
@@ -266,7 +269,7 @@ export class DeleteDataService {
     if (!this.pauseDelete.getValue()) {
       if (index < this.accountEmissions.length) {
         this.dbService.delete('customEmissionsItems', this.accountEmissions[index].id).subscribe(() => {
-          this.setDeletingMessage(index, this.accountFuels.length, 'Deleting Emissions..');
+          this.setDeletingMessage(index, this.accountEmissions.length, 'Deleting Emissions..');
           this.deleteEmissions(index + 1);
         });
       } else {
@@ -285,8 +288,27 @@ export class DeleteDataService {
     if (!this.pauseDelete.getValue()) {
       if (index < this.accountGWPs.length) {
         this.dbService.delete('customGWP', this.accountGWPs[index].id).subscribe(() => {
-          this.setDeletingMessage(index, this.accountFuels.length, 'Deleting Custom GWPs..');
+          this.setDeletingMessage(index, this.accountGWPs.length, 'Deleting Custom GWPs..');
           this.deleteCustomGWPs(index + 1);
+        });
+      } else {
+        this.electronBackupsDbService.getAll().subscribe((allBackups: Array<IdbElectronBackup>) => {
+          this.accountElectronBackups = allBackups.filter(electronBackup => {
+            return electronBackup.accountId == this.accountToDelete.guid;
+          });
+          this.deleteElectronBackups(0)
+        });
+      }
+    }
+  }
+
+  //electron backups
+  deleteElectronBackups(index: number) {
+    if (!this.pauseDelete.getValue()) {
+      if (index < this.accountElectronBackups.length) {
+        this.dbService.delete('electronBackups', this.accountElectronBackups[index].id).subscribe(() => {
+          this.setDeletingMessage(index, this.accountElectronBackups.length, 'Deleting Electron Backups..');
+          this.deleteElectronBackups(index + 1);
         });
       } else {
         this.deleteAccount();

@@ -44,6 +44,11 @@ export interface IdbAccount {
     contactName: string,
     contactEmail: string,
     contactPhone: string,
+    dataBackupFilePath?: string,
+    dataBackupId?: string,
+    archiveOption: 'always' | 'never' | 'justOnce' | 'skip',
+    isSharedBackupFile?: boolean,
+    sharedFileAuthor?: string
     deleteAccount?: boolean
 }
 
@@ -363,6 +368,14 @@ export interface IdbCustomFuel extends FuelTypeOption {
     guid: string,
     phase: MeterPhase,
     directEmissionsRate: boolean
+}
+
+export interface IdbElectronBackup {
+    id?: number,
+    accountId: string,
+    guid: string,
+    dataBackupId: string,
+    timeStamp: Date
 }
 
 export interface IdbCustomGWP extends GlobalWarmingPotential {

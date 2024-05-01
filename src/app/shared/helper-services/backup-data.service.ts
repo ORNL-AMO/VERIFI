@@ -12,6 +12,7 @@ import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { JStatRegressionModel } from 'src/app/models/analysis';
 import { firstValueFrom } from 'rxjs';
+import { ElectronBackupsDbService } from 'src/app/indexedDB/electron-backups-db.service';
 import { AnalyticsService } from 'src/app/analytics/analytics.service';
 import { CustomEmissionsDbService } from 'src/app/indexedDB/custom-emissions-db.service';
 import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
@@ -26,6 +27,7 @@ export class BackupDataService {
     private utilityMeterDbService: UtilityMeterdbService, private utilityMeterDataDbService: UtilityMeterDatadbService,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService, private loadingService: LoadingService, private accountAnalysisDbService: AccountAnalysisDbService,
     private analysisDbService: AnalysisDbService, private accountReportsDbService: AccountReportDbService,
+    private electronBackupsDbService: ElectronBackupsDbService,
     private analyticsService: AnalyticsService,
     private customEmissionsDbService: CustomEmissionsDbService,
     private customFuelDbService: CustomFuelDbService,
@@ -33,6 +35,12 @@ export class BackupDataService {
 
 
   backupAccount() {
+    let backupFile: BackupFile = this.getAccountBackupFile();
+    let backupName: string = backupFile.account.name.split(' ').join('_') + '_Backup_';
+    this.downloadBackup(backupFile, backupName);
+  }
+
+  getAccountBackupFile(): BackupFile {
     let backupFile: BackupFile = {
       account: this.accountDbService.selectedAccount.getValue(),
       facilities: this.facilityDbService.accountFacilities.getValue(),
@@ -48,11 +56,14 @@ export class BackupDataService {
       customGWPs: this.customGWPDbService.accountCustomGWPs.getValue(),
       facility: undefined,
       backupFileType: "Account",
-      origin: "VERIFI"
+      origin: "VERIFI",
+      timeStamp: new Date(),
+      dataBackupId: Math.random().toString(36).substr(2, 9)
     };
-    let backupName: string = backupFile.account.name.split(' ').join('_') + '_Backup_';
-    this.downloadBackup(backupFile, backupName);
+    return backupFile;
   }
+
+
 
   backupFacility(facility: IdbFacility) {
     let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
@@ -88,7 +99,9 @@ export class BackupDataService {
       customFuels: this.customFuelDbService.accountCustomFuels.getValue(),
       customGWPs: this.customGWPDbService.accountCustomGWPs.getValue(),
       backupFileType: "Facility",
-      origin: "VERIFI"
+      origin: "VERIFI",
+      timeStamp: new Date(),
+      dataBackupId: Math.random().toString(36).substr(2, 9)
     }
     let backupName: string = backupFile.facility.name.split(' ').join('_') + '_Backup_';
     this.downloadBackup(backupFile, backupName);
@@ -578,7 +591,9 @@ export interface BackupFile {
   customFuels: Array<IdbCustomFuel>,
   customGWPs: Array<IdbCustomGWP>,
   origin: "VERIFI",
-  backupFileType: "Account" | "Facility"
+  backupFileType: "Account" | "Facility",
+  timeStamp: Date,
+  dataBackupId: string
 }
 
 

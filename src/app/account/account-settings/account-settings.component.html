@@ -88,6 +88,80 @@
     <hr>
 
     <div class="row">
+        <div class="col-lg-6" *ngIf="isElectron">
+            <h4>
+                <span class="badge bg-success">
+                    <span class="fa fa-file-arrow-down"></span>
+                </span>
+                Automatic Account Backup
+            </h4>
+            <ng-container *ngIf="!selectedAccount.dataBackupFilePath">
+                <p>Save an automatic backup of this account's data saved to your machine or shared drive. The backup can
+                    be used to restore the data if it is lost or if you want to revert back to an older state of the
+                    account.</p>
+                <button class="btn btn-outline" (click)="automaticBackup()">Select Automatic Backup Location</button>
+            </ng-container>
+            <ng-container *ngIf="selectedAccount.dataBackupFilePath">
+                <p>
+                    Automatic backups are enabled for this account. This account is automatically backed up at: <br>
+                    <a class="click-link" (click)="automaticBackup()">{{selectedAccount.dataBackupFilePath}}</a>
+                </p>
+                <form>
+                    <label class="semibold">
+                        Is this a shared file?
+                    </label>
+                    <div class="form-check">
+                        <input type="radio" class="form-check-input" name="isSharedBackupFile"
+                            [(ngModel)]="selectedAccount.isSharedBackupFile" [value]="true" id="isShared"
+                            (change)="changeIsShared()">
+                        <label class="form-check-label" for="isShared">Yes this is a shared file that may be edited
+                            by someone else on a different computer.</label>
+                    </div>
+                    <div class="form-check">
+                        <input type="radio" class="form-check-input" name="isSharedBackupFile"
+                            [(ngModel)]="selectedAccount.isSharedBackupFile" [value]="false" id="isNotShared"
+                            (change)="changeIsShared()">
+                        <label class="form-check-label" for="isNotShared">No this computer is the only one that will
+                            modify this file.</label>
+                    </div>
+                    <div *ngIf="selectedAccount.isSharedBackupFile">
+                        <label class="semibold">
+                            Shared File Author
+                        </label>
+                        <input type="text" class="form-control" id="sharedFileAuthor"
+                            [(ngModel)]="selectedAccount.sharedFileAuthor" name="sharedFileAuthor"
+                            (input)="saveChanges()">
+                    </div>
+                    <hr>
+
+                    <label>
+                        Additionally, you can choose to automatically archive the state of the account everytime that
+                        the account is accessed. A popup will show when the account is accessed allowing you to choose
+                        when to archive the account. Otherwise you can select to never create an archive or to create an
+                        archive whenever the account is accessed without the popup window.
+                    </label>
+                    <div class="form-check">
+                        <input type="radio" class="form-check-input" name="archiveOption"
+                            [(ngModel)]="selectedAccount.archiveOption" [value]="'skip'" id="skip"
+                            (change)="saveChanges()">
+                        <label class="form-check-label" for="skip">Ask Me To Archive When Account Is Accessed</label>
+                    </div>
+                    <div class="form-check">
+                        <input type="radio" class="form-check-input" name="archiveOption"
+                            [(ngModel)]="selectedAccount.archiveOption" [value]="'always'" id="always"
+                            (change)="saveChanges()">
+                        <label class="form-check-label" for="always">Always Archive</label>
+                    </div>
+                    <div class="form-check">
+                        <input type="radio" class="form-check-input" name="archiveOption"
+                            [(ngModel)]="selectedAccount.archiveOption" [value]="'never'" id="never"
+                            (change)="saveChanges()">
+                        <label class="form-check-label" for="never">Never Archive</label>
+                    </div>
+                </form>
+            </ng-container>
+
+        </div>
         <div class="col-lg-6">
             <h4>Backup Account</h4>
             <p>You can protect your files from accidental loss by creating a backup. We recommend backing up your data
@@ -95,7 +169,6 @@
                 information
                 then selected the facility from the table above and export from that page.</p>
             <button class="btn btn-outline" (click)="backupAccount()">Backup Account</button>
-
         </div>
         <div class="col-lg-6">
             <h4>Import Backup Data</h4>

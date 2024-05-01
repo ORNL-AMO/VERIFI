@@ -1,25 +1,18 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription, firstValueFrom } from 'rxjs';
-import { BackupDataService } from 'src/app/shared/helper-services/backup-data.service';
+import { BackupDataService, BackupFile } from 'src/app/shared/helper-services/backup-data.service';
 import { ImportBackupModalService } from 'src/app/core-components/import-backup-modal/import-backup-modal.service';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport, IdbFacility } from 'src/app/models/idb';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
-import { CustomEmissionsDbService } from 'src/app/indexedDB/custom-emissions-db.service';
-import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
-import { CustomGWPDbService } from 'src/app/indexedDB/custom-gwp-db.service';
-import { DeleteDataService } from 'src/app/indexedDB/delete-data.service';
+import { ElectronService } from 'src/app/electron/electron.service';
+import { AutomaticBackupsService } from 'src/app/electron/automatic-backups.service';
 
 @Component({
   selector: 'app-account-settings',
@@ -48,28 +41,30 @@ export class AccountSettingsComponent implements OnInit {
       sustainabilityQuestions: true,
       financialReporting: true
     };
+
+  savedFilePath: string;
+  savedFilePathSub: Subscription;
+  updatingFilePath: boolean = false;
+  isElectron: boolean;
+  backupFile: BackupFile;
   constructor(
     private router: Router,
     private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService,
-    private predictorDbService: PredictordbService,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private utilityMeterGroupDbService: UtilityMeterGroupdbService,
     private loadingService: LoadingService,
     private backupDataService: BackupDataService,
-    private analysisDbService: AnalysisDbService,
     private accountReportDbService: AccountReportDbService,
     private importBackupModalService: ImportBackupModalService,
     private toastNotificationService: ToastNotificationsService,
     private accountAnalysisDbService: AccountAnalysisDbService,
     private dbChangesService: DbChangesService,
-    private customEmissionsDbService: CustomEmissionsDbService,
-    private customFuelDbService: CustomFuelDbService,
-    private customGWPDbService: CustomGWPDbService
+    private electronService: ElectronService,
+    private cd: ChangeDetectorRef,
+    private automaticBackupsService: AutomaticBackupsService,
   ) { }
 
   ngOnInit() {
+    this.isElectron = this.electronService.isElectron;
     this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(val => {
       this.selectedAccount = val;
     });
@@ -78,11 +73,21 @@ export class AccountSettingsComponent implements OnInit {
       this.facilityList = val;
       this.setOrderOptions();
     });
+    if (this.isElectron) {
+      this.savedFilePathSub = this.electronService.savedFilePath.subscribe(savedFilePath => {
+        if (this.updatingFilePath) {
+          this.updateFilePath(savedFilePath)
+        }
+      });
+    }
   }
 
   ngOnDestroy() {
     this.selectedAccountSub.unsubscribe();
     this.accountFacilitiesSub.unsubscribe();
+    if (this.savedFilePathSub) {
+      this.savedFilePathSub.unsubscribe();
+    }
   }
 
   switchFacility(facility: IdbFacility) {
@@ -236,5 +241,35 @@ export class AccountSettingsComponent implements OnInit {
 
   closeApplySettingsModel() {
     this.displayApplyFacilitySettings = false;
+  }
+
+
+  async automaticBackup() {
+    this.updatingFilePath = true;
+    this.backupFile = this.backupDataService.getAccountBackupFile();
+    this.electronService.openDialog(this.backupFile);
+  }
+
+  async updateFilePath(savedFilePath: string) {
+    console.log('update file path')
+    this.automaticBackupsService.initializingAccount = false;
+    this.automaticBackupsService.creatingFile = true;
+    this.selectedAccount.dataBackupFilePath = savedFilePath;
+    this.selectedAccount.dataBackupId = this.backupFile.dataBackupId;
+    this.updatingFilePath = false;
+    await this.dbChangesService.updateAccount(this.selectedAccount);
+    this.cd.detectChanges();
+  }
+
+  async saveChanges() {
+    await this.dbChangesService.updateAccount(this.selectedAccount);
+  }
+
+  async changeIsShared() {
+    //this is bad code but the "sharedFileAuthor" field won't show unless I have the 
+    //detectChanges() call..
+    //#isWhatItIs
+    await this.saveChanges();
+    this.cd.detectChanges();
   }
 }

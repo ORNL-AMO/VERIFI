@@ -1,5 +1,5 @@
-import { Component, ElementRef, Input, OnInit } from '@angular/core';
-import { Router, Event, NavigationStart } from '@angular/router';
+import { ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { AccountdbService } from "../../indexedDB/account-db.service";
 import { FacilitydbService } from "../../indexedDB/facility-db.service";
 import { UtilityMeterdbService } from "../../indexedDB/utilityMeter-db.service";
@@ -15,6 +15,7 @@ import { LoadingService } from '../loading/loading.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { ElectronService } from 'src/app/electron/electron.service';
 import { ToastNotificationsService } from '../toast-notifications/toast-notifications.service';
+import { AutomaticBackupsService } from 'src/app/electron/automatic-backups.service';
 
 @Component({
   selector: 'app-header',
@@ -33,7 +34,6 @@ export class HeaderComponent implements OnInit {
   allAccountsSub: Subscription;
   selectedAccountSub: Subscription;
   showSearch: boolean = false;
-  lastBackupDate: Date;
   resetDatabase: boolean = false;
 
   updateAvailableSub: Subscription;
@@ -41,6 +41,9 @@ export class HeaderComponent implements OnInit {
   showUpdateModal: boolean = false;
   updateErrorSub: Subscription;
   updateError: boolean;
+
+  savingBackup: boolean;
+  savingBackupSub: Subscription;
   constructor(
     private router: Router,
     public accountdbService: AccountdbService,
@@ -53,7 +56,9 @@ export class HeaderComponent implements OnInit {
     private loadingService: LoadingService,
     private dbChangesService: DbChangesService,
     private electronService: ElectronService,
-    private toastNotificationService: ToastNotificationsService
+    private toastNotificationService: ToastNotificationsService,
+    private cd: ChangeDetectorRef,
+    private automaticBackupService: AutomaticBackupsService
   ) {
   }
 
@@ -65,11 +70,7 @@ export class HeaderComponent implements OnInit {
     this.selectedAccountSub = this.accountdbService.selectedAccount.subscribe(selectedAccount => {
       this.resetDatabase = false;
       this.activeAccount = selectedAccount;
-      if (selectedAccount) {
-        this.lastBackupDate = selectedAccount.lastBackup;
-      } else {
-        this.lastBackupDate = undefined;
-      }
+      this.cd.detectChanges();
     });
 
     if (this.electronService.isElectron) {
@@ -79,6 +80,10 @@ export class HeaderComponent implements OnInit {
       this.updateErrorSub = this.electronService.updateError.subscribe(val => {
         this.updateError = val;
       });
+      this.savingBackupSub = this.automaticBackupService.saving.subscribe(val => {
+        this.savingBackup = val;
+        this.cd.detectChanges();
+      })
     }
   }
 
@@ -91,6 +96,9 @@ export class HeaderComponent implements OnInit {
     if (this.updateErrorSub) {
       this.updateErrorSub.unsubscribe();
     }
+    if (this.savingBackupSub) {
+      this.savingBackupSub.unsubscribe();
+    }
   }
 
   addNewAccount() {
@@ -98,18 +106,19 @@ export class HeaderComponent implements OnInit {
   }
 
   async switchAccount(account: IdbAccount) {
-    if (!account.deleteAccount) {
-      this.loadingService.setLoadingMessage("Switching accounts...");
-      this.loadingService.setLoadingStatus(true);
-      try {
-        await this.dbChangesService.selectAccount(account, false);
-        this.loadingService.setLoadingStatus(false);
-        this.router.navigate(['/']);
-      } catch (err) {
-        this.toastNotificationService.showToast('An Error Occured', 'There was an error when trying to switch to ' + account.name + '. The action was unable to be completed.', 15000, false, 'alert-danger');
-        this.loadingService.setLoadingStatus(false);
-        this.router.navigate(['/manage-accounts']);
-      }
+    this.loadingService.setLoadingMessage("Switching accounts...");
+    this.loadingService.setLoadingStatus(true);
+    try {
+      this.automaticBackupService.initializingAccount = true;
+      this.electronService.accountLatestBackupFile.next(undefined);
+      await this.dbChangesService.selectAccount(account, false);
+      this.loadingService.setLoadingStatus(false);
+      this.automaticBackupService.initializeAccount();
+      this.router.navigate(['/']);
+    } catch (err) {
+      this.toastNotificationService.showToast('An Error Occured', 'There was an error when trying to switch to ' + account.name + '. The action was unable to be completed.', 15000, false, 'alert-danger');
+      this.loadingService.setLoadingStatus(false);
+      this.router.navigate(['/manage-accounts']);
     }
   }
 
@@ -153,5 +162,10 @@ export class HeaderComponent implements OnInit {
 
   goToManageAccounts() {
     this.router.navigate(['/manage-accounts']);
+  }
+
+  checkLatestFile() {
+    this.automaticBackupService.forceModal = true;
+    this.electronService.getDataFile(this.activeAccount.dataBackupFilePath);
   }
 }
