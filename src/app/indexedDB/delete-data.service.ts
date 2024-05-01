@@ -13,7 +13,7 @@ import { CustomFuelDbService } from './custom-fuel-db.service';
 import { CustomGWPDbService } from './custom-gwp-db.service';
 import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport, IdbAnalysisItem, IdbCustomEmissionsItem, IdbCustomFuel, IdbCustomGWP, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from '../models/idb';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, firstValueFrom } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -41,7 +41,7 @@ export class DeleteDataService {
   accountFacilityAnalysis: Array<IdbAnalysisItem>;
   accountAnalysisItems: Array<IdbAccountAnalysisItem>;
 
-  pauseDelete: boolean = false;
+  pauseDelete: BehaviorSubject<boolean>;
   constructor(private accountDbService: AccountdbService,
     private predictorDbService: PredictordbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
@@ -57,6 +57,7 @@ export class DeleteDataService {
     private dbService: NgxIndexedDBService) {
     this.isDeleting = new BehaviorSubject<boolean>(false);
     this.deletingMessaging = new BehaviorSubject(undefined);
+    this.pauseDelete = new BehaviorSubject<boolean>(false);
   }
 
 
@@ -91,7 +92,7 @@ export class DeleteDataService {
 
   //predictors
   deletePredictor(index: number) {
-    if (!this.pauseDelete) {
+    if (!this.pauseDelete.getValue()) {
       if (index < this.accountPredictors.length) {
         this.dbService.delete('predictors', this.accountPredictors[index].id).subscribe(() => {
           this.setDeletingMessage(index, this.accountPredictors.length, 'Deleting Predictor Data..');
@@ -110,7 +111,7 @@ export class DeleteDataService {
 
   //meter data
   deleteMeterData(index: number) {
-    if (!this.pauseDelete) {
+    if (!this.pauseDelete.getValue()) {
       if (index < this.accountMeterData.length) {
         this.dbService.delete('utilityMeterData', this.accountMeterData[index].id).subscribe(() => {
           this.setDeletingMessage(index, this.accountMeterData.length, 'Deleting Meter Data..');
@@ -129,7 +130,7 @@ export class DeleteDataService {
 
   //meters
   deleteMeters(index: number) {
-    if (!this.pauseDelete) {
+    if (!this.pauseDelete.getValue()) {
       if (index < this.accountMeters.length) {
         this.dbService.delete('utilityMeter', this.accountMeters[index].id).subscribe(() => {
           this.setDeletingMessage(index, this.accountMeters.length, 'Deleting Meters..');
@@ -148,7 +149,7 @@ export class DeleteDataService {
 
   //groups
   deleteGroups(index: number) {
-    if (!this.pauseDelete) {
+    if (!this.pauseDelete.getValue()) {
       if (index < this.accountGroups.length) {
         this.dbService.delete('utilityMeterGroups', this.accountGroups[index].id).subscribe(() => {
           this.setDeletingMessage(index, this.accountGroups.length, 'Deleting Meter Groups..');
@@ -167,7 +168,7 @@ export class DeleteDataService {
 
   //facility analysis
   deleteFacilityAnalysis(index: number) {
-    if (!this.pauseDelete) {
+    if (!this.pauseDelete.getValue()) {
       if (index < this.accountFacilityAnalysis.length) {
         this.dbService.delete('analysisItems', this.accountFacilityAnalysis[index].id).subscribe(() => {
           this.setDeletingMessage(index, this.accountFacilityAnalysis.length, 'Deleting Facility Analysis..');
@@ -186,7 +187,7 @@ export class DeleteDataService {
 
   //facilities
   deleteFacilites(index: number) {
-    if (!this.pauseDelete) {
+    if (!this.pauseDelete.getValue()) {
       if (index < this.accountFacilities.length) {
         this.dbService.delete('facilities', this.accountFacilities[index].id).subscribe(() => {
           this.setDeletingMessage(index, this.accountFacilities.length, 'Deleting Facilities..');
@@ -205,7 +206,7 @@ export class DeleteDataService {
 
   //account analysis
   deleteAccountAnalysis(index: number) {
-    if (!this.pauseDelete) {
+    if (!this.pauseDelete.getValue()) {
       if (index < this.accountAnalysisItems.length) {
         this.dbService.delete('accountAnalysisItems', this.accountAnalysisItems[index].id).subscribe(() => {
           this.setDeletingMessage(index, this.accountAnalysisItems.length, 'Deleting Account Analysis..');
@@ -224,7 +225,7 @@ export class DeleteDataService {
 
   //reports
   deleteReports(index: number) {
-    if (!this.pauseDelete) {
+    if (!this.pauseDelete.getValue()) {
       if (index < this.accountReports.length) {
         this.dbService.delete('accountReports', this.accountReports[index].id).subscribe(() => {
           this.setDeletingMessage(index, this.accountReports.length, 'Deleting Account Reports..');
@@ -243,7 +244,7 @@ export class DeleteDataService {
 
   //custom fuels
   deleteCustomFuels(index: number) {
-    if (!this.pauseDelete) {
+    if (!this.pauseDelete.getValue()) {
       if (index < this.accountFuels.length) {
         this.dbService.delete('customFuels', this.accountFuels[index].id).subscribe(() => {
           this.setDeletingMessage(index, this.accountFuels.length, 'Deleting Fuels..');
@@ -262,7 +263,7 @@ export class DeleteDataService {
 
   //custom emissions
   deleteEmissions(index: number) {
-    if (!this.pauseDelete) {
+    if (!this.pauseDelete.getValue()) {
       if (index < this.accountEmissions.length) {
         this.dbService.delete('customEmissionsItems', this.accountEmissions[index].id).subscribe(() => {
           this.setDeletingMessage(index, this.accountFuels.length, 'Deleting Emissions..');
@@ -281,7 +282,7 @@ export class DeleteDataService {
 
   //custom gwps
   deleteCustomGWPs(index: number) {
-    if (!this.pauseDelete) {
+    if (!this.pauseDelete.getValue()) {
       if (index < this.accountGWPs.length) {
         this.dbService.delete('customGWP', this.accountGWPs[index].id).subscribe(() => {
           this.setDeletingMessage(index, this.accountFuels.length, 'Deleting Custom GWPs..');
@@ -309,6 +310,12 @@ export class DeleteDataService {
     });
   }
 
-
+  async cancelDelete() {
+    this.accountToDelete.deleteAccount = false;
+    await firstValueFrom(this.accountDbService.updateWithObservable(this.accountToDelete));
+    this.finishDeleteAccount();
+    this.isDeleting.next(false);
+    this.pauseDelete.next(false);
+  }
 
 }

@@ -13,7 +13,7 @@
                     <div class="progress-bar bg-success" [ngStyle]="{'width.%': deletingMessaging.percent}"></div>
                 </div>
                 <p class="mb-0" *ngIf="pauseDelete">
-                    Deleting of account paused.
+                    Deleting of account paused. <a (click)="cancelDelete()">Cancel Delete</a>
                 </p>
             </div>
     </div>

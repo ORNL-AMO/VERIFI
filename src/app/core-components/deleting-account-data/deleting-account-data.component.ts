@@ -3,6 +3,7 @@ import { DeleteDataService } from 'src/app/indexedDB/delete-data.service';
 import { trigger, state, style, animate, transition } from '@angular/animations';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idb';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-deleting-account-data',
@@ -28,6 +29,7 @@ export class DeletingAccountDataComponent {
   showToast: 'show' | 'hide' = 'hide';
   destroyToast: boolean = true;
   pauseDelete: boolean;
+  pauseDeleteSub: Subscription;
   allDeleteAccounts: Array<IdbAccount>;
   constructor(private deleteDataService: DeleteDataService,
     private accountDbService: AccountdbService
@@ -36,7 +38,9 @@ export class DeletingAccountDataComponent {
 
 
   ngOnInit() {
-    this.pauseDelete = this.deleteDataService.pauseDelete;
+    this.deleteDataService.pauseDelete.subscribe(pauseDelete => {
+      this.pauseDelete = pauseDelete;
+    });
     this.accountDbService.allAccounts.subscribe(accounts => {
       this.allDeleteAccounts = accounts.filter(account => {
         return account.deleteAccount;
@@ -74,12 +78,14 @@ export class DeletingAccountDataComponent {
 
   togglePauseDelete() {
     if (this.pauseDelete == false) {
-      this.deleteDataService.pauseDelete = true;
-      this.pauseDelete = true;
+      this.deleteDataService.pauseDelete.next(true);
     } else {
-      this.deleteDataService.pauseDelete = false;
-      this.pauseDelete = false;
+      this.deleteDataService.pauseDelete.next(false);
       this.deleteDataService.gatherAndDelete();
     }
+  }
+
+  async cancelDelete() {
+    await this.deleteDataService.cancelDelete();
   }
 }
