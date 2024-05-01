@@ -28,6 +28,7 @@ import { CreateReportModalComponent } from './core-components/create-report-moda
 import { WeatherDataModule } from './weather-data/weather-data.module';
 import { ManageAccountsComponent } from './core-components/manage-accounts/manage-accounts.component';
 import { HttpClientModule } from '@angular/common/http';
+import { DeletingAccountDataComponent } from './core-components/deleting-account-data/deleting-account-data.component';
 
 @NgModule({
   declarations: [
@@ -42,7 +43,8 @@ import { HttpClientModule } from '@angular/common/http';
     SearchBarComponent,
     FacilityListPipe,
     CreateReportModalComponent,
-    ManageAccountsComponent
+    ManageAccountsComponent,
+    DeletingAccountDataComponent
   ],
   imports: [
     BrowserModule,

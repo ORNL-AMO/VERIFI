@@ -59,7 +59,7 @@ export class HeaderComponent implements OnInit {
 
   ngOnInit() {
     this.allAccountsSub = this.accountdbService.allAccounts.subscribe(allAccounts => {
-      this.accountList = allAccounts;
+      this.accountList = allAccounts.filter(account => { return !account.deleteAccount });
     });
 
     this.selectedAccountSub = this.accountdbService.selectedAccount.subscribe(selectedAccount => {
@@ -88,7 +88,7 @@ export class HeaderComponent implements OnInit {
     if (this.updateAvailableSub) {
       this.updateAvailableSub.unsubscribe();
     }
-    if(this.updateErrorSub){
+    if (this.updateErrorSub) {
       this.updateErrorSub.unsubscribe();
     }
   }
@@ -98,16 +98,18 @@ export class HeaderComponent implements OnInit {
   }
 
   async switchAccount(account: IdbAccount) {
-    this.loadingService.setLoadingMessage("Switching accounts...");
-    this.loadingService.setLoadingStatus(true);
-    try {
-      await this.dbChangesService.selectAccount(account, false);
-      this.loadingService.setLoadingStatus(false);
-      this.router.navigate(['/']);
-    } catch (err) {
-      this.toastNotificationService.showToast('An Error Occured', 'There was an error when trying to switch to ' + account.name + '. The action was unable to be completed.', 15000, false, 'alert-danger');
-      this.loadingService.setLoadingStatus(false);
-      this.router.navigate(['/manage-accounts']);
+    if (!account.deleteAccount) {
+      this.loadingService.setLoadingMessage("Switching accounts...");
+      this.loadingService.setLoadingStatus(true);
+      try {
+        await this.dbChangesService.selectAccount(account, false);
+        this.loadingService.setLoadingStatus(false);
+        this.router.navigate(['/']);
+      } catch (err) {
+        this.toastNotificationService.showToast('An Error Occured', 'There was an error when trying to switch to ' + account.name + '. The action was unable to be completed.', 15000, false, 'alert-danger');
+        this.loadingService.setLoadingStatus(false);
+        this.router.navigate(['/manage-accounts']);
+      }
     }
   }
 
