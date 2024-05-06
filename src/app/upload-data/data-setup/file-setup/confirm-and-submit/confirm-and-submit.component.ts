@@ -106,18 +106,18 @@ export class ConfirmAndSubmitComponent implements OnInit {
         }
 
         if (form.valid) {
-          if (meterData.id) {
-            let skipMeterData: boolean = false;
-            for (let x = 0; x < this.fileReference.skipExistingReadingsMeterIds.length; x++) {
-              if (this.fileReference.skipExistingReadingsMeterIds[x] == meterData.meterId) {
-                skipMeterData = true;
-              }
+          let skipMeterData: boolean = false;
+          for (let x = 0; x < this.fileReference.skipExistingReadingsMeterIds.length; x++) {
+            if (this.fileReference.skipExistingReadingsMeterIds[x] == meterData.meterId) {
+              skipMeterData = true;
             }
-            if (!skipMeterData) {
+          }
+          if (!skipMeterData) {
+            if (meterData.id) {
               await firstValueFrom(this.utilityMeterDataDbService.updateWithObservable(meterData));
+            } else {
+              await firstValueFrom(this.utilityMeterDataDbService.addWithObservable(meterData));
             }
-          } else {
-            await firstValueFrom(this.utilityMeterDataDbService.addWithObservable(meterData));
           }
         }
       }
