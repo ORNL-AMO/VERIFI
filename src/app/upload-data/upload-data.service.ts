@@ -331,6 +331,8 @@ export class UploadDataService {
           let meter: IdbUtilityMeter = accountMeters.find(accMeter => { return accMeter.name == groupItem.value && accMeter.facilityId == facility.guid });
           if (!meter) {
             meter = this.getNewMeterFromExcelColumn(groupItem, facility);
+          } else {
+            meter.importWizardName = groupItem.value;
           }
           meters.push(meter);
         });
