@@ -252,6 +252,7 @@ export class ManageMetersComponent implements OnInit {
   setValidMeters() {
     let isAllValid: boolean = true;
     this.fileReference.meters.forEach(meter => {
+      console.log(meter.name + ": " + meter.skipImport);
       if (!meter.isValid && !meter.skipImport) {
         isAllValid = false;
       }

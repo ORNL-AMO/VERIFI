@@ -415,6 +415,7 @@ export class UploadDataService {
 
     let utilityData: Array<IdbUtilityMeterData> = new Array();
     fileReference.meters.forEach(meter => {
+      console.log(meter.name + ": " + meter.skipImport)
       if (!meter.skipImport) {
         fileReference.headerMap.forEach(dataRow => {
           let readDate: Date = new Date(dataRow[dateColumnVal]);
