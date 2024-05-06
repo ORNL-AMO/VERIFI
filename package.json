@@ -43,7 +43,7 @@
         "zip"
       ],
       "icon": "src/assets/electron-icons/icon-512x512.png",
-      "hardenedRuntime": false,
+      "hardenedRuntime": true,
       "provisioningProfile": "./embedded.provisionprofile",
       "entitlements": "entitlements.mac.inherit.plist",
       "entitlementsInherit": "entitlements.mac.inherit.plist",
