@@ -23,7 +23,7 @@ export class UpdateDbEntryService {
       isChanged = true;
     }
 
-    if(!account.archiveOption){
+    if (!account.archiveOption) {
       account.archiveOption = 'skip';
       isChanged = true;
     }
@@ -114,9 +114,9 @@ export class UpdateDbEntryService {
           group.baselineAdjustmentsV2 = yearBaselineAdjustments;
           isChanged = true;
         }
-        if(group.maxModelVariables == undefined){
+        if (group.maxModelVariables == undefined) {
           group.maxModelVariables = 4;
-          isChanged= true;
+          isChanged = true;
         }
       });
     }
@@ -165,6 +165,11 @@ export class UpdateDbEntryService {
     if (utilityMeter.fuel == 'Fuel Oil #5') {
       isChanged = true;
       utilityMeter.fuel = "Fuel Oil #5 (Navy Special)";
+    }
+
+    if (utilityMeter.importWizardName) {
+      delete utilityMeter.importWizardName;
+      isChanged = true;
     }
     return { utilityMeter: utilityMeter, isChanged: isChanged };
   }
