@@ -74,12 +74,12 @@ export class ConfirmAndSubmitComponent implements OnInit {
     this.loadingService.setLoadingMessage('Uploading Meters..');
     for (let i = 0; i < this.fileReference.meters.length; i++) {
       let meter: IdbUtilityMeter = this.fileReference.meters[i];
-      if (meter.id) {
-        if (!meter.skipImport) {
+      if (!meter.skipImport) {
+        if (meter.id) {
           await firstValueFrom(this.utilityMeterDbService.updateWithObservable(meter));
+        } else {
+          await firstValueFrom(this.utilityMeterDbService.addWithObservable(meter));
         }
-      } else {
-        await firstValueFrom(this.utilityMeterDbService.addWithObservable(meter));
       }
     }
 
@@ -93,20 +93,19 @@ export class ConfirmAndSubmitComponent implements OnInit {
     for (let i = 0; i < this.fileReference.meterData.length; i++) {
       let meterData: IdbUtilityMeterData = this.fileReference.meterData[i];
       let meter: IdbUtilityMeter = this.fileReference.meters.find(meter => { return meter.guid == meterData.meterId })
+      if (!meter.skipImport) {
+        let form: FormGroup;
+        if (meter.source == 'Electricity') {
+          form = this.utilityMeterDataService.getElectricityMeterDataForm(meterData);
+        } else {
+          let displayVolumeInput: boolean = (getIsEnergyUnit(meter.startingUnit) == false);
+          let displayEnergyUse: boolean = getIsEnergyMeter(meter.source);
+          let displayHeatCapacity: boolean = checkShowHeatCapacity(meter.source, meter.startingUnit, meter.scope);
+          let displayVehicleFuelEfficiency: boolean = (meter.scope == 2 && meter.vehicleCategory == 2);
+          form = this.utilityMeterDataService.getGeneralMeterDataForm(meterData, displayVolumeInput, displayEnergyUse, displayHeatCapacity, displayVehicleFuelEfficiency);
+        }
 
-      let form: FormGroup;
-      if (meter.source == 'Electricity') {
-        form = this.utilityMeterDataService.getElectricityMeterDataForm(meterData);
-      } else {
-        let displayVolumeInput: boolean = (getIsEnergyUnit(meter.startingUnit) == false);
-        let displayEnergyUse: boolean = getIsEnergyMeter(meter.source);
-        let displayHeatCapacity: boolean = checkShowHeatCapacity(meter.source, meter.startingUnit, meter.scope);
-        let displayVehicleFuelEfficiency: boolean = (meter.scope == 2 && meter.vehicleCategory == 2);
-        form = this.utilityMeterDataService.getGeneralMeterDataForm(meterData, displayVolumeInput, displayEnergyUse, displayHeatCapacity, displayVehicleFuelEfficiency);
-      }
-
-      if (form.valid) {
-        if (meterData.id) {
+        if (form.valid) {
           let skipMeterData: boolean = false;
           for (let x = 0; x < this.fileReference.skipExistingReadingsMeterIds.length; x++) {
             if (this.fileReference.skipExistingReadingsMeterIds[x] == meterData.meterId) {
@@ -114,10 +113,12 @@ export class ConfirmAndSubmitComponent implements OnInit {
             }
           }
           if (!skipMeterData) {
-            await firstValueFrom(this.utilityMeterDataDbService.updateWithObservable(meterData));
+            if (meterData.id) {
+              await firstValueFrom(this.utilityMeterDataDbService.updateWithObservable(meterData));
+            } else {
+              await firstValueFrom(this.utilityMeterDataDbService.addWithObservable(meterData));
+            }
           }
-        } else {
-          await firstValueFrom(this.utilityMeterDataDbService.addWithObservable(meterData));
         }
       }
     }
