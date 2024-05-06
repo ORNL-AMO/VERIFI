@@ -10,7 +10,7 @@
 
     <ng-container *ngIf="meterGroupTypes.length > 1">
         <label for="groupType">Group Type <span class="required">*</span></label>
-        <select id="groupType" class="form-control mb-3" formControlName="groupType">
+        <select id="groupType" class="form-select mb-3" formControlName="groupType">
             <option [value]="'Energy'">Energy</option>
             <option [value]="'Water'">Water</option>
             <option [value]="'Other'">Other</option>
@@ -20,7 +20,7 @@
 
     <label for="name">Description</label>
     <div class="input-group mb-3">
-        <textarea formControlName="description" minlength="1" maxlength="65"></textarea>
+        <textarea class="form-control" formControlName="description" minlength="1" maxlength="65"></textarea>
     </div>
 </form>
 <div class="saveCancel item-right">

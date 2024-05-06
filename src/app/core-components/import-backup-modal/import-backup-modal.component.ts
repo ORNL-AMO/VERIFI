@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { Subscription, firstValueFrom } from 'rxjs';
 import { BackupDataService, BackupFile } from 'src/app/shared/helper-services/backup-data.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
@@ -9,6 +9,7 @@ import { ImportBackupModalService } from './import-backup-modal.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { Router } from '@angular/router';
 import { ToastNotificationsService } from '../toast-notifications/toast-notifications.service';
+import { DeleteDataService } from 'src/app/indexedDB/delete-data.service';
 
 @Component({
   selector: 'app-import-backup-modal',
@@ -36,7 +37,8 @@ export class ImportBackupModalComponent implements OnInit {
     private importBackupModalService: ImportBackupModalService,
     private dbChangesService: DbChangesService,
     private router: Router,
-    private toastNotificationService: ToastNotificationsService) { }
+    private toastNotificationService: ToastNotificationsService,
+    private deleteDataService: DeleteDataService) { }
 
   ngOnInit(): void {
     this.showModalSub = this.importBackupModalService.showModal.subscribe(value => {
@@ -139,15 +141,24 @@ export class ImportBackupModalComponent implements OnInit {
   }
 
   async importNewAccount(backupFile: BackupFile) {
+    this.deleteDataService.pauseDelete.next(true);
     let newAccount: IdbAccount = await this.backupDataService.importAccountBackupFile(backupFile);
     await this.dbChangesService.updateAccount(newAccount);
     await this.dbChangesService.selectAccount(newAccount, false);
+    this.deleteDataService.pauseDelete.next(false);
+    this.deleteDataService.gatherAndDelete();
   }
 
   async importExistingAccount(backupFile: BackupFile) {
     //delete existing account and data
-    await this.backupDataService.deleteAccountData(this.selectedAccount);
+    this.deleteDataService.pauseDelete.next(true);
+    this.selectedAccount.deleteAccount = true;
+    await firstValueFrom(this.accountDbService.updateWithObservable(this.selectedAccount));
+    let accounts: Array<IdbAccount> = await firstValueFrom(this.accountDbService.getAll());
+    this.accountDbService.allAccounts.next(accounts);
     await this.importNewAccount(backupFile);
+    this.deleteDataService.pauseDelete.next(false);
+    this.deleteDataService.gatherAndDelete();
   }
 
   async importNewFacility(backupFile: BackupFile) {
@@ -155,7 +166,6 @@ export class ImportBackupModalComponent implements OnInit {
     let currentAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.selectAccount(currentAccount, false);
     this.dbChangesService.selectFacility(newFacility);
-
   }
 
   async importExistingFacility(backupFile: BackupFile) {

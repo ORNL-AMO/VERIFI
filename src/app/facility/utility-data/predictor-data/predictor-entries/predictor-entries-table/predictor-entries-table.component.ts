@@ -248,6 +248,9 @@ export class PredictorEntriesTableComponent {
   goToWeatherData() {
     let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     this.weatherDataService.selectedFacility = facility;
+    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    this.weatherDataService.selectedFacility = selectedFacility;
+    this.weatherDataService.zipCode = selectedFacility.zip;
     this.router.navigateByUrl('/weather-data');
   }
 }

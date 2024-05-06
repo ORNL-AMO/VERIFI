@@ -1,0 +1,19 @@
+
+.card.card-toast {
+    position: fixed;
+    z-index: 800;
+    left: 0px;
+    bottom: 0px;
+    margin: 10px;
+    margin-bottom: 50px;
+    min-width: 300px;
+    max-width: 500px;
+}
+
+.card-header i.fa{
+    font-size: 20px;
+}
+
+.card.card-toast .card-header{
+    background-color: none;
+}

@@ -16,6 +16,9 @@ import { EGridService } from './shared/helper-services/e-grid.service';
 import { firstValueFrom } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { ToastNotificationsService } from './core-components/toast-notifications/toast-notifications.service';
+import { AutomaticBackupsService } from './electron/automatic-backups.service';
+import { ElectronBackupsDbService } from './indexedDB/electron-backups-db.service';
+import { ElectronService } from './electron/electron.service';
 import { AnalyticsService } from './analytics/analytics.service';
 import { CustomFuelDbService } from './indexedDB/custom-fuel-db.service';
 import { CustomGWPDbService } from './indexedDB/custom-gwp-db.service';
@@ -49,6 +52,9 @@ export class AppComponent {
     private customEmissionsDbService: CustomEmissionsDbService,
     private accountReportDbService: AccountReportDbService,
     private toastNotificationService: ToastNotificationsService,
+    private automaticBackupsService: AutomaticBackupsService,
+    private electronBackupsDbService: ElectronBackupsDbService,
+    private electronService: ElectronService,
     private analyticsService: AnalyticsService,
     private customFuelDbservice: CustomFuelDbService,
     private customGWPDbService: CustomGWPDbService) {
@@ -66,6 +72,7 @@ export class AppComponent {
 
   ngOnInit() {
     this.initializeData();
+    this.automaticBackupsService.subscribeData();
   }
 
   async initializeData() {
@@ -92,6 +99,7 @@ export class AppComponent {
         await this.initializeFacilityAnalysisItems(account);
         await this.initializeAccountAnalysisItems(account);
         await this.initializeCustomEmissions(account);
+        await this.initializeElectronBackups();
         await this.initializeCustomFuels(account);
         await this.initializeCustomGWPs(account);
         let updatedAccount: { account: IdbAccount, isChanged: boolean } = this.updateDbEntryService.updateAccount(account);
@@ -102,8 +110,10 @@ export class AppComponent {
           this.accountDbService.selectedAccount.next(account);
         }
         this.dataInitialized = true;
+        this.automaticBackupsService.initializeAccount();
       } else {
         await this.eGridService.parseEGridData();
+        await this.initializeElectronBackups();
 
         this.dataInitialized = true;
         this.router.navigateByUrl('setup-wizard');
@@ -111,6 +121,7 @@ export class AppComponent {
     } catch (err) {
       console.log(err);
       await this.eGridService.parseEGridData();
+      await this.initializeElectronBackups();
       this.toastNotificationService.showToast('An Error Occured', 'There was an error when trying to initialize the application data.', 15000, false, 'alert-danger');
       this.router.navigateByUrl('/manage-accounts');
       this.dataInitialized = true;
@@ -178,8 +189,6 @@ export class AppComponent {
     }
   }
 
-
-
   async initializePredictors(account: IdbAccount) {
     //set predictors
     this.loadingMessage = "Loading Predictors..";
@@ -227,6 +236,13 @@ export class AppComponent {
     this.customEmissionsDbService.accountEmissionsItems.next(customEmissionsItems);
   }
 
+  async initializeElectronBackups() {
+    if (this.electronService.isElectron) {
+      this.loadingMessage = 'Loading Account Backups...';
+      this.electronBackupsDbService.accountBackups = await firstValueFrom(this.electronBackupsDbService.getAll());
+    }
+  }
+  
   async initializeCustomFuels(account: IdbAccount) {
     this.loadingMessage = 'Loading Custom Fuels...';
     let customFuels: Array<IdbCustomFuel> = await this.customFuelDbservice.getAllAccountCustomFuels(account.guid);

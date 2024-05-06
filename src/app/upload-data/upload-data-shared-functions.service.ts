@@ -17,12 +17,30 @@ export class UploadDataSharedFunctionsService {
   getMeterGroup(groupName: string, facilityId: string, newGroups: Array<IdbUtilityMeterGroup>, account: IdbAccount, meterSource: MeterSource): { group: IdbUtilityMeterGroup, newGroups: Array<IdbUtilityMeterGroup> } {
     let accountGroups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.getAccountMeterGroupsCopy();
     let facilityGroups: Array<IdbUtilityMeterGroup> = accountGroups.filter(accountGroup => { return accountGroup.facilityId == facilityId });
-    let dbGroup: IdbUtilityMeterGroup = facilityGroups.find(group => { return group.name == groupName || group.guid == groupName });
+    let dbGroup: IdbUtilityMeterGroup = facilityGroups.find(group => {
+      if (group.groupType == 'Energy' && (meterSource == 'Electricity' || meterSource == 'Natural Gas' || meterSource == 'Other Energy' || meterSource == 'Other Fuels')) {
+        return group.name == groupName || group.guid == groupName
+      } else if (group.groupType == 'Water' && (meterSource == 'Water Intake' || meterSource == 'Water Discharge')) {
+        return group.name == groupName || group.guid == groupName
+      } else if (group.groupType == 'Other') {
+        return group.name == groupName || group.guid == groupName
+      }
+      return false;
+    });
     if (dbGroup) {
       return { group: dbGroup, newGroups: newGroups }
     } else {
       let newFacilityGroups: Array<IdbUtilityMeterGroup> = newGroups.filter(group => { return group.facilityId == facilityId });
-      dbGroup = newFacilityGroups.find(newGroup => { return newGroup.name == groupName });
+      dbGroup = newFacilityGroups.find(newGroup => {
+        if (newGroup.groupType == 'Energy' && (meterSource == 'Electricity' || meterSource == 'Natural Gas' || meterSource == 'Other Energy' || meterSource == 'Other Fuels')) {
+          return newGroup.name == groupName || newGroup.guid == groupName
+        } else if (newGroup.groupType == 'Water' && (meterSource == 'Water Intake' || meterSource == 'Water Discharge')) {
+          return newGroup.name == groupName || newGroup.guid == groupName
+        } else if (newGroup.groupType == 'Other') {
+          return newGroup.name == groupName || newGroup.guid == groupName
+        }
+        return false;
+      });
       if (dbGroup) {
         return { group: dbGroup, newGroups: newGroups }
       } else if (groupName) {
@@ -94,8 +112,14 @@ export class UploadDataSharedFunctionsService {
           facilityPredictorEntry = this.predictorDbService.getNewIdbPredictorEntry(facility.guid, selectedAccount.guid, dataItemDate);
           if (facilityPredictorEntries.length != 0) {
             facilityPredictorEntry.predictors = JSON.parse(JSON.stringify(facilityPredictorEntries[0].predictors));
+            facilityPredictorEntry.predictors.forEach(predictor => {
+              predictor.amount = undefined;
+            });
           } else {
             facilityPredictorEntry.predictors = JSON.parse(JSON.stringify(existingFacilityPredictorData));
+            facilityPredictorEntry.predictors.forEach(predictor => {
+              predictor.amount = undefined;
+            });
           }
         } else {
           uploadDates.push(dataItemDate);

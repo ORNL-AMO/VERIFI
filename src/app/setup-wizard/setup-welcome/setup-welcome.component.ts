@@ -16,6 +16,7 @@ import { firstValueFrom } from 'rxjs';
 export class SetupWelcomeComponent implements OnInit {
 
   backupFile: any;
+  showTestDataModal: boolean = false;
   constructor(private loadingService: LoadingService, private accountDbService: AccountdbService,
     private backupDataService: BackupDataService,
     private importBackupModalService: ImportBackupModalService, private router: Router,
@@ -25,6 +26,7 @@ export class SetupWelcomeComponent implements OnInit {
   }
 
   loadTestData() {
+    this.showTestDataModal = false;
     this.loadingService.setLoadingMessage('Loading Example Data..');
     this.loadingService.setLoadingStatus(true);
     var request = new XMLHttpRequest();
@@ -39,7 +41,7 @@ export class SetupWelcomeComponent implements OnInit {
           let tmpBackupFile: BackupFile = JSON.parse(test);
           let newAccount: IdbAccount = await this.backupDataService.importAccountBackupFile(tmpBackupFile);
           await this.dbChangesService.updateAccount(newAccount);
-          await this.dbChangesService.selectAccount(newAccount,false);
+          await this.dbChangesService.selectAccount(newAccount, false);
           let allAccounts: Array<IdbAccount> = await firstValueFrom(this.accountDbService.getAll());
           this.accountDbService.allAccounts.next(allAccounts);
           await this.dbChangesService.selectAccount(newAccount, false);
@@ -61,6 +63,13 @@ export class SetupWelcomeComponent implements OnInit {
 
   goToAccountSetup() {
     this.router.navigateByUrl('setup-wizard/account-setup');
+  }
 
+  openLoadTestData() {
+    this.showTestDataModal = true;
+  }
+
+  cancelTestData() {
+    this.showTestDataModal = false;
   }
 }

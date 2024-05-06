@@ -39,8 +39,8 @@ export class WeatherStationsComponent {
     } else {
       this.zipCode = this.weatherDataService.zipCode;
     }
-    this.setStations();
     this.selectedFacilityId = this.weatherDataService.selectedFacility?.guid;
+    this.setStations();
   }
 
   ngOnDestroy() {

@@ -138,10 +138,10 @@ export class ManageMetersComponent implements OnInit {
         if (mData.meterId == this.editMeterPrevGUID) {
           mData.guid = this.editMeter.guid;
         }
-        if(!mData.heatCapacity){
+        if (!mData.heatCapacity) {
           mData.heatCapacity = this.editMeter.heatCapacity;
         }
-        if(this.editMeter.scope == 2 && mData.vehicleFuelEfficiency){
+        if (this.editMeter.scope == 2 && mData.vehicleFuelEfficiency) {
           mData.vehicleFuelEfficiency = this.editMeter.vehicleFuelEfficiency;
         }
       });
@@ -285,7 +285,11 @@ export class ManageMetersComponent implements OnInit {
       if (!meter.groupId) {
         let groupOptions: Array<IdbUtilityMeterGroup> = this.getFacilityMeterGroups(meter.facilityId);
         let findGroup: IdbUtilityMeterGroup = groupOptions.find(group => {
-          return group.name == meter.source;
+          if (meter.source == 'Electricity' && (meter.agreementType == 4 || meter.agreementType == 6)) {
+            return group.name == 'Other (non-energy)';
+          } else {
+            return group.name == meter.source;
+          }
         });
         if (findGroup) {
           meter.groupId = findGroup.guid;

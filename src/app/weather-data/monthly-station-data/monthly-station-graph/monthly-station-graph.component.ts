@@ -81,6 +81,12 @@ export class MonthlyStationGraphComponent {
         })
       }
 
+      let startRange: Date = new Date(this.selectedMonth);
+      startRange.setDate(1);
+      let endRange: Date = new Date(startRange);
+      endRange.setMonth(endRange.getMonth()+1);
+      endRange.setDate(1);
+
       traceData.push({
         x: this.detailedDegreeDays.map(data => { return data.time }),
         y: this.detailedDegreeDays.map(data => { return data.dryBulbTemp }),
@@ -106,6 +112,7 @@ export class MonthlyStationGraphComponent {
         },
         xaxis: {
           automargin: true,
+          range: [startRange, endRange]
         },
         yaxis: {
           automargin: true,
