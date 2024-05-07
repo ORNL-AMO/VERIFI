@@ -77,7 +77,6 @@ export class EditPredictorEntryComponent {
   setPredictorEntryEdit(predictorId: string) {
     let facilityPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.facilityPredictorEntries.getValue();
     let predictorEntry: IdbPredictorEntry = facilityPredictorEntries.find(entry => { return entry.guid == predictorId });
-    console.log(predictorEntry);
     this.predictorEntry = JSON.parse(JSON.stringify(predictorEntry));
   }
 
