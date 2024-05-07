@@ -77,6 +77,7 @@ export class EditPredictorEntryComponent {
   setPredictorEntryEdit(predictorId: string) {
     let facilityPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.facilityPredictorEntries.getValue();
     let predictorEntry: IdbPredictorEntry = facilityPredictorEntries.find(entry => { return entry.guid == predictorId });
+    console.log(predictorEntry);
     this.predictorEntry = JSON.parse(JSON.stringify(predictorEntry));
   }
 
@@ -163,7 +164,7 @@ export class EditPredictorEntryComponent {
             updatedPredictorIds.push(hddPredictor.id);
           }
         }
-      }else{
+      } else {
         hasWeatherOverride = true;
       }
     }
@@ -204,7 +205,7 @@ export class EditPredictorEntryComponent {
     this.hasWeatherOverride = true;
   }
 
-  async revertManualWeatherData(){
+  async revertManualWeatherData() {
     this.predictorEntry.predictors.forEach(predictor => {
       if (predictor.predictorType == 'Weather') {
         predictor.weatherOverride = false;
