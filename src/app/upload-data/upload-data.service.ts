@@ -151,113 +151,15 @@ export class UploadDataService {
     }
   }
 
+
   getMeterDataEntries(workbook: XLSX.WorkBook, importMeters: Array<IdbUtilityMeter>): Array<IdbUtilityMeterData> {
-    //electricity readings
-    let importMeterData: Array<IdbUtilityMeterData> = new Array();
-    let electricityData = XLSX.utils.sheet_to_json(workbook.Sheets['Electricity']);
-    let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
-    let utilityMeterData: Array<IdbUtilityMeterData> = accountMeterData.map(meterData => { return getMeterDataCopy(meterData) });
-
-    electricityData.forEach(dataPoint => {
-      let meterNumber: string = dataPoint['Meter Number'];
-      let readDate: Date = new Date(dataPoint['Read Date']);
-      let meter: IdbUtilityMeter = importMeters.find(meter => { return meter.meterNumber == meterNumber });
-      if (meter) {
-        let dbDataPoint: IdbUtilityMeterData = utilityMeterData.find(meterDataItem => {
-          if (meterDataItem.meterId == meter.guid) {
-            let dateItemDate: Date = new Date(meterDataItem.readDate);
-            return this.checkSameDay(dateItemDate, readDate);
-          } else {
-            return false;
-          }
-        })
-        if (!dbDataPoint) {
-          dbDataPoint = this.utilityMeterDataDbService.getNewIdbUtilityMeterData(meter);
-        }
-        dbDataPoint.readDate = readDate;
-        dbDataPoint.totalEnergyUse = this.checkImportCellNumber(dataPoint['Total Consumption']);
-        dbDataPoint.totalRealDemand = this.checkImportCellNumber(dataPoint['Total Real Demand']);
-        dbDataPoint.totalBilledDemand = this.checkImportCellNumber(dataPoint['Total Billed Demand']);
-        dbDataPoint.totalCost = this.checkImportCellNumber(dataPoint['Total Cost']);
-        dbDataPoint.nonEnergyCharge = this.checkImportCellNumber(dataPoint['Non-energy Charge']);
-        dbDataPoint.block1Consumption = this.checkImportCellNumber(dataPoint['Block 1 Consumption']);
-        dbDataPoint.block1ConsumptionCharge = this.checkImportCellNumber(dataPoint['Block 1 Consumption Charge']);
-        dbDataPoint.block2Consumption = this.checkImportCellNumber(dataPoint['Block 2 Consumption']);
-        dbDataPoint.block2ConsumptionCharge = this.checkImportCellNumber(dataPoint['Block 2 Consumption Charge']);
-        dbDataPoint.block3Consumption = this.checkImportCellNumber(dataPoint['Block 3 Consumption']);
-        dbDataPoint.block3ConsumptionCharge = this.checkImportCellNumber(dataPoint['Block 3 Consumption Charge']);
-        dbDataPoint.otherConsumption = this.checkImportCellNumber(dataPoint['Other Consumption']);
-        dbDataPoint.otherConsumptionCharge = this.checkImportCellNumber(dataPoint['Other Consumption Charge']);
-        dbDataPoint.onPeakAmount = this.checkImportCellNumber(dataPoint['On Peak Amount']);
-        dbDataPoint.onPeakCharge = this.checkImportCellNumber(dataPoint['On Peak Charge']);
-        dbDataPoint.offPeakAmount = this.checkImportCellNumber(dataPoint['Off Peak Amount']);
-        dbDataPoint.offPeakCharge = this.checkImportCellNumber(dataPoint['Off Peak Charge']);
-        dbDataPoint.transmissionAndDeliveryCharge = this.checkImportCellNumber(dataPoint['Transmission & Delivery Charge']);
-        dbDataPoint.powerFactor = this.checkImportCellNumber(dataPoint['Power Factor']);
-        dbDataPoint.powerFactorCharge = this.checkImportCellNumber(dataPoint['Power Factor Charge']);
-        dbDataPoint.localSalesTax = this.checkImportCellNumber(dataPoint['Local Sales Tax']);
-        dbDataPoint.stateSalesTax = this.checkImportCellNumber(dataPoint['State Sales Tax']);
-        dbDataPoint.latePayment = this.checkImportCellNumber(dataPoint['Late Payment']);
-        dbDataPoint.otherCharge = this.checkImportCellNumber(dataPoint['Other Charge']);
-
-
-
-        importMeterData.push(dbDataPoint);
-      } else {
-        console.log('no meter');
-      }
-    })
-
-
-    let noElectricityData = XLSX.utils.sheet_to_json(workbook.Sheets['Non-electricity']);
-    noElectricityData.forEach(dataPoint => {
-      let meterNumber: string = dataPoint['Meter Number'];
-      let readDate: Date = new Date(dataPoint['Read Date']);
-      let meter: IdbUtilityMeter = importMeters.find(meter => { return meter.meterNumber == meterNumber });
-      if (meter) {
-        let dbDataPoint: IdbUtilityMeterData = utilityMeterData.find(meterDataItem => {
-          if (meterDataItem.meterId == meter.guid) {
-            let dateItemDate: Date = new Date(meterDataItem.readDate);
-            return this.checkSameDay(dateItemDate, readDate);
-          } else {
-            return false;
-          }
-        })
-        if (!dbDataPoint) {
-          dbDataPoint = this.utilityMeterDataDbService.getNewIdbUtilityMeterData(meter);
-        }
-        let totalVolume: number = 0;
-        let energyUse: number = 0;
-        let totalConsumption: number = this.checkImportCellNumber(dataPoint['Total Consumption']);
-        let displayVolumeInput: boolean = (getIsEnergyUnit(meter.startingUnit) == false);
-        let displayEnergyUse: boolean = getIsEnergyMeter(meter.source);
-        if (!displayVolumeInput) {
-          energyUse = totalConsumption;
-        } else {
-          totalVolume = totalConsumption;
-          if (displayEnergyUse && totalVolume) {
-            energyUse = totalVolume * meter.heatCapacity;
-          }
-        }
-
-        dbDataPoint.readDate = readDate;
-        dbDataPoint.totalVolume = totalVolume;
-        dbDataPoint.totalEnergyUse = energyUse;
-        dbDataPoint.totalCost = this.checkImportCellNumber(dataPoint['Total Cost']);
-        dbDataPoint.commodityCharge = this.checkImportCellNumber(dataPoint['Commodity Charge']);
-        dbDataPoint.deliveryCharge = this.checkImportCellNumber(dataPoint['Delivery Charge']);
-        dbDataPoint.otherCharge = this.checkImportCellNumber(dataPoint['Other Charge']);
-        dbDataPoint.demandUsage = this.checkImportCellNumber(dataPoint['Demand Usage']);
-        dbDataPoint.demandCharge = this.checkImportCellNumber(dataPoint['Demand Charge']);
-        dbDataPoint.localSalesTax = this.checkImportCellNumber(dataPoint['Local Sales Tax']);
-        dbDataPoint.stateSalesTax = this.checkImportCellNumber(dataPoint['State Sales Tax']);
-        dbDataPoint.latePayment = this.checkImportCellNumber(dataPoint['Late Payment']);
-        importMeterData.push(dbDataPoint);
-      } else {
-        console.log('no meter');
-      }
-    });
-    return importMeterData;
+    let isTemplate: "V1" | "V2" | "Non-template" = this.checkSheetNamesForTemplate(workbook.SheetNames);
+    if (isTemplate == "V1") {
+      return this.uploadDataV1Service.getMeterDataEntries(workbook, importMeters);
+    } else if (isTemplate == "V2") {
+      return this.uploadDataV2Service.getUtilityMeterData(workbook, importMeters);
+    }
+    return [];
   }
 
   checkSameDay(date1: Date, date2: Date): boolean {
