@@ -45,8 +45,8 @@
             </div>
             <div class="col">
                 <div class="input-group mb-2">
-                    <ng-container *ngIf="predictor.predictorType == 'Weather'">
-                        <span class="input-group-text" *ngIf="predictor.weatherDataWarning || predictor.weatherOverride">
+                    <ng-container *ngIf="predictor.predictorType == 'Weather' && (predictor.weatherDataWarning || predictor.weatherOverride)">
+                        <span class="input-group-text">
                             <span class="fa fa-exclamation-circle" *ngIf="predictor.weatherDataWarning"></span>
                             <span class="fa fa-asterisk" *ngIf="predictor.weatherOverride"></span>
                         </span>
@@ -58,6 +58,16 @@
                         [disabled]="predictor.predictorType == 'Weather' && !predictor.weatherOverride"
                         (input)="setChanged()">
                     <span class="input-group-text" *ngIf="predictor.unit">{{predictor.unit}}</span>
+                    <ng-container *ngIf="predictor.predictorType == 'Weather' && (predictor.weatherDataWarning || predictor.weatherOverride)">
+                        <span class="input-group-text p-0">
+                            <button class="btn btn-dark btn-sm h-100" *ngIf="!predictor.weatherOverride" (click)="setWeatherManually()">
+                                <span class="fa fa-edit"></span>
+                            </button>
+                            <button class="btn btn-dark btn-sm h-100" *ngIf="predictor.weatherOverride" (click)="revertManualWeatherData()">
+                                <span class="fa fa-calculator"></span>
+                            </button>
+                        </span>
+                    </ng-container>
                 </div>
             </div>
         </div>

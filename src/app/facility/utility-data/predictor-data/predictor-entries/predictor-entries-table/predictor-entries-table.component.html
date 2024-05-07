@@ -22,12 +22,10 @@
 </div>
 
 <div class="alert alert-warning text-center" *ngIf="hasWeatherDataWarnings">
-    <span class="fa fa-exclamation-circle"></span> Indicates that the predictor entry was calculated off of weather
-    readings with gaps of twelve hours or more. The data may not be
-    accurate. For closer inspection of that weather data click the <span class="fa fa-thermometer-half"></span>
-    button. It may be best to choose a different weather station
-    to pull data from, use the <a (click)="goToWeatherData()">Weather Data</a> page to explore other stations in the
-    area of this facility.
+    <span class="fa fa-exclamation-circle"></span> Indicates that the predictor entry was calculated from weather data with gaps of twelve hours or more and the
+    results may not be accurate. To inspect the weather data for that month, click the <span class="fa fa-thermometer-half"></span> button. To manually override
+    the values click the <span class="fa fa-pencil"></span>  button. If you have several <span class="fa fa-exclamation-circle"></span>, it may be best to select a different weather station for
+    this facility - use the <a (click)="goToWeatherData()">Weather Data</a> page to explore other stations in the area of this facility.
 </div>
 <ng-container *ngIf="facilityPredictorEntries.length != 0">
     <table class="table utility-data table-sm table-bordered table-hover" #predictorTable
@@ -74,14 +72,12 @@
                 </td>
                 <td>{{predictorEntry.date | date:'MMM, yyyy'}}</td>
                 <td *ngFor="let predictor of predictorEntry.predictors">
-                    <span *ngIf="predictor.weatherDataWarning" class="fa fa-exclamation-circle"
-                        data-bs-toggle="tooltip" data-bs-placement="top"
+                    <span *ngIf="predictor.weatherDataWarning" class="fa fa-exclamation-circle" data-bs-toggle="tooltip"
+                        data-bs-placement="top"
                         title="Gaps found in weather data for this reading. It may not be accurate."
                         data-bs-html="true"></span>
-                    <span *ngIf="predictor.weatherOverride" class="fa fa-asterisk"
-                        data-bs-toggle="tooltip" data-bs-placement="top"
-                        title="Weather data manually set."
-                        data-bs-html="true"></span>
+                    <span *ngIf="predictor.weatherOverride" class="fa fa-asterisk" data-bs-toggle="tooltip"
+                        data-bs-placement="top" title="Weather data manually set." data-bs-html="true"></span>
                     <ng-container *ngIf="predictor.amount != undefined">
                         {{predictor.amount | customNumber}}
                     </ng-container>
