@@ -96,8 +96,8 @@
                 Automatic Account Backup
             </h4>
             <ng-container *ngIf="!selectedAccount.dataBackupFilePath">
-                <p>Save an automatic backup of this account's data saved to your machine or shared drive. The backup can
-                    be used to restore the data if it is lost or if you want to revert back to an older state of the
+                <p>Save an automatic backup of this account's data to your machine or a shared drive. The backup can be
+                    used to restore the data if it is lost or if you want to revert back to an older state of the
                     account.</p>
                 <button class="btn btn-outline" (click)="automaticBackup()">Select Automatic Backup Location</button>
             </ng-container>
@@ -112,17 +112,17 @@
                     </label>
                     <div class="form-check">
                         <input type="radio" class="form-check-input" name="isSharedBackupFile"
-                            [(ngModel)]="selectedAccount.isSharedBackupFile" [value]="true" id="isShared"
-                            (change)="changeIsShared()">
-                        <label class="form-check-label" for="isShared">Yes this is a shared file that may be edited
-                            by someone else on a different computer.</label>
-                    </div>
-                    <div class="form-check">
-                        <input type="radio" class="form-check-input" name="isSharedBackupFile"
                             [(ngModel)]="selectedAccount.isSharedBackupFile" [value]="false" id="isNotShared"
                             (change)="changeIsShared()">
                         <label class="form-check-label" for="isNotShared">No this computer is the only one that will
                             modify this file.</label>
+                    </div>
+                    <div class="form-check">
+                        <input type="radio" class="form-check-input" name="isSharedBackupFile"
+                            [(ngModel)]="selectedAccount.isSharedBackupFile" [value]="true" id="isShared"
+                            (change)="changeIsShared()">
+                        <label class="form-check-label" for="isShared">Yes this is a shared file that may be edited
+                            by someone else on a different computer.</label>
                     </div>
                     <div *ngIf="selectedAccount.isSharedBackupFile">
                         <label class="semibold">
@@ -135,10 +135,10 @@
                     <hr>
 
                     <label>
-                        Additionally, you can choose to automatically archive the state of the account everytime that
-                        the account is accessed. A popup will show when the account is accessed allowing you to choose
-                        when to archive the account. Otherwise you can select to never create an archive or to create an
-                        archive whenever the account is accessed without the popup window.
+                        Additionally, VERIFI can create a version history of the state of your account when your account
+                        is opened. Use this setting to determine if VERIFI should create a version history every time
+                        you open the account, only when you want it to, or never. This will create a series of backup
+                        files within the same directory as main backup.
                     </label>
                     <div class="form-check">
                         <input type="radio" class="form-check-input" name="archiveOption"
