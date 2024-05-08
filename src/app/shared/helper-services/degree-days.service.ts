@@ -89,7 +89,7 @@ export class DegreeDaysService {
       let previousDryBulbTemp: number;
       if (i == 0) {
         let startDate: Date = new Date(localClimatologicalDataMonth[i].DATE);
-        previousDate = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate(), 0, 0);
+        previousDate = new Date(startDate.getFullYear(), startDate.getMonth(), 1, 0, 0);
         previousDryBulbTemp = localClimatologicalDataMonth[i].HourlyDryBulbTemperature;
       } else {
         previousDate = new Date(localClimatologicalDataMonth[i - 1].DATE)

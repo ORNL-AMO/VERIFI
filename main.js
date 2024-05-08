@@ -1,11 +1,14 @@
-const { app, BrowserWindow, ipcMain, Menu, shell } = require('electron');
+const { app, BrowserWindow, ipcMain, Menu, shell, dialog } = require('electron');
 const path = require('path');
 const url = require('url');
 const log = require('electron-log');
 const { autoUpdater } = require('electron-updater');
+const jetpack = require('fs-jetpack');
 
 function isDev() {
-    return process.mainModule.filename.indexOf('app.asar') === -1;
+    //TODO: check for isDev. Latest electron update breaks old
+    // return require.filename.indexOf('app.asar') === -1;
+    return false;
 };
 
 app.allowRendererProcessReuse = false
@@ -21,15 +24,15 @@ let win = null;
 app.on('ready', function () {
     // Initialize the window to our specified dimensions
     win = new BrowserWindow({
-        width: 1000,
-        height: 600,
+        width: 1300,
+        height: 1500,
         webPreferences: {
             contextIsolation: true,
             nodeIntegration: false,
             preload: path.join(__dirname, 'preload.js')
         },
     });
-    win.maximize();
+    // win.maximize();
 
     // Specify entry point
     win.loadURL(url.format({
@@ -137,4 +140,48 @@ app.on('activate', () => {
 
 app.on('window-all-closed', function () {
     app.quit();
+});
+
+
+ipcMain.on("saveData", (event, arg) => {
+    log.info('saveData called');
+    delete arg.fileData.account.dataBackupFilePath;
+    if (jetpack.exists(arg.fileName)) {
+        log.info('saved existing')
+        jetpack.writeAsync(arg.fileName, arg.fileData);
+    } else if (arg.isArchive) {
+        log.info('createArchiveFile')
+        jetpack.writeAsync(arg.fileName, arg.fileData);
+    } else if (arg.isCreateNewFile) {
+        log.info('createNewFile')
+        jetpack.writeAsync(arg.fileName, arg.fileData);
+    }
+});
+
+ipcMain.on("openDialog", (event, arg) => {
+    log.info('openDialog');
+    let saveDialogOptions = {
+        filters: [{
+            name: "JSON Files",
+            extensions: ["json"]
+        }],
+        defaultPath: arg.fileName
+    }
+    dialog.showSaveDialog(win, saveDialogOptions).then(results => {
+        win.webContents.send('file-path', results.filePath);
+        // log.info('save new')
+        // jetpack.writeAsync(results.filePath, arg.fileData);
+    });
+
+});
+
+ipcMain.on("fileExists", (event, arg) => {
+    log.info("check for data");
+    let results = jetpack.exists(arg.fileName);
+    win.webContents.send('file-exists', results);
+})
+
+ipcMain.on("getDataFile", (event, arg) => {
+    let dataFile = jetpack.read(arg.fileName, 'json');
+    win.webContents.send('data-file', dataFile);
 });

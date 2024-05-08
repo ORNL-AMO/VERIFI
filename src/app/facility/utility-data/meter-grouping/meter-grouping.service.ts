@@ -1,12 +1,13 @@
 import { Injectable } from '@angular/core';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { CalanderizedMeter, MeterGroupType, MonthlyData } from 'src/app/models/calanderization';
-import { IdbFacility, IdbUtilityMeterGroup } from 'src/app/models/idb';
+import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterGroup } from 'src/app/models/idb';
 import * as _ from 'lodash';
 import { BehaviorSubject } from 'rxjs';
 import { Month, Months } from 'src/app/shared/form-data/months';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { getFirstBillEntryFromCalanderizedMeterData, getFiscalYear, getLastBillEntryFromCalanderizedMeterData } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
+import { getIsEnergyMeter } from 'src/app/shared/sharedHelperFuntions';
 @Injectable({
   providedIn: 'root'
 })
@@ -38,7 +39,7 @@ export class MeterGroupingService {
     //set no groups
     let metersWithoutGroups: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => { return !meterGroupIds.includes(cMeter.meter.groupId) });
     //Energy (Electricity/Natural Gas)
-    let energyMeters: Array<CalanderizedMeter> = metersWithoutGroups.filter(cMeter => { return cMeter.meter.source == 'Electricity' || cMeter.meter.source == 'Natural Gas' || cMeter.meter.source == 'Other Fuels' || cMeter.meter.source == 'Other Energy' });
+    let energyMeters: Array<CalanderizedMeter> = metersWithoutGroups.filter(cMeter => { return this.getIsEnergyGroup(cMeter.meter) });
     if (energyMeters.length != 0) {
       meterGroupTypes = this.addEnergyMetersWithoutGroups(energyMeters, 'Energy', meterGroupTypes);
     }
@@ -48,9 +49,22 @@ export class MeterGroupingService {
       meterGroupTypes = this.addEnergyMetersWithoutGroups(waterMeters, 'Water', meterGroupTypes);
     }
     //Other
-    let otherMeters: Array<CalanderizedMeter> = metersWithoutGroups.filter(cMeter => { return cMeter.meter.source == 'Other' });
+    let otherMeters: Array<CalanderizedMeter> = metersWithoutGroups.filter(cMeter => { return this.getIsOtherGroup(cMeter.meter) });
     if (otherMeters.length != 0) {
       meterGroupTypes = this.addEnergyMetersWithoutGroups(otherMeters, 'Other', meterGroupTypes);
+    } else {
+      let hasOther: MeterGroupType = meterGroupTypes.find(mGroupType => {
+        return mGroupType.groupType == 'Other'
+      });
+      if (!hasOther) {
+        meterGroupTypes.push({
+          groupType: "Other",
+          meterGroups: [],
+          id: Math.random().toString(36).substr(2, 9),
+          meterGroupIds: [],
+          totalUsage: 0
+        });
+      }
     }
     //set fraction usage
     for (let i = 0; i < meterGroupTypes.length; i++) {
@@ -186,5 +200,30 @@ export class MeterGroupingService {
       startDate = new Date(startDate.getFullYear(), startDate.getMonth() + 1);
     }
     return combinedMeterData;
+  }
+
+  getIsEnergyGroup(meter: IdbUtilityMeter): boolean {
+    if (getIsEnergyMeter(meter.source)) {
+      if (meter.source != 'Electricity') {
+        return true;
+      } else if ((meter.agreementType != 4) && (meter.agreementType != 6)) {
+        //Don't include VPPA and RECs
+        return true;
+      }
+    }
+    return false;
+  }
+
+
+  getIsOtherGroup(meter: IdbUtilityMeter): boolean {
+    if (meter.source == 'Other') {
+      return true;
+    } else if (meter.source == 'Electricity') {
+      //VPPA and RECs in other
+      if (meter.agreementType == 4 || meter.agreementType == 6) {
+        return true;
+      }
+    }
+    return false;
   }
 }

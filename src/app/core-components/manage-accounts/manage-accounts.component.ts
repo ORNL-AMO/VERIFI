@@ -1,22 +1,15 @@
 import { Component } from '@angular/core';
-import { firstValueFrom } from 'rxjs';
+import { Subscription, firstValueFrom } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idb';
 import { LoadingService } from '../loading/loading.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { Router } from '@angular/router';
 import { ToastNotificationsService } from '../toast-notifications/toast-notifications.service';
-import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { BackupDataService } from 'src/app/shared/helper-services/backup-data.service';
 import { ExportToExcelTemplateService } from 'src/app/shared/helper-services/export-to-excel-template.service';
 import { CustomEmissionsDbService } from 'src/app/indexedDB/custom-emissions-db.service';
+import { ElectronBackupsDbService } from 'src/app/indexedDB/electron-backups-db.service';
 import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
 import { CustomGWPDbService } from 'src/app/indexedDB/custom-gwp-db.service';
 
@@ -33,20 +26,14 @@ export class ManageAccountsComponent {
   showDeleteAccount: boolean = false;
   selectedAccount: IdbAccount;
   resetDatabase: boolean = false;
+  allAccountsSub: Subscription;
   constructor(private accountDbService: AccountdbService, private loadingService: LoadingService,
     private dbChangesService: DbChangesService, private router: Router,
     private toastNotificationService: ToastNotificationsService,
-    private predictorDbService: PredictordbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterGroupDbService: UtilityMeterGroupdbService,
-    private facilityDbService: FacilitydbService,
-    private accountReportDbService: AccountReportDbService,
-    private analysisDbService: AnalysisDbService,
-    private accountAnalysisDbService: AccountAnalysisDbService,
     private backupDataService: BackupDataService,
     private exportToExcelTemplateService: ExportToExcelTemplateService,
     private customEmissionsDbService: CustomEmissionsDbService,
+    private electronBackupsDbService: ElectronBackupsDbService,
     private customFuelDbService: CustomFuelDbService,
     private customGWPDbService: CustomGWPDbService
   ) {
@@ -54,7 +41,17 @@ export class ManageAccountsComponent {
 
   ngOnInit() {
     this.accountDbService.selectedAccount.next(undefined);
-    this.setAccounts();
+    this.allAccountsSub = this.accountDbService.allAccounts.subscribe(accounts => {
+      this.accounts = accounts;
+      this.accountErrors = this.accounts.map(account => { return undefined });
+      if (this.accounts.length == 0) {
+        this.router.navigateByUrl('/setup-wizard');
+      }
+    });
+  }
+
+  ngOnDestroy() {
+    this.allAccountsSub.unsubscribe();
   }
 
   async setAccounts() {
@@ -71,7 +68,6 @@ export class ManageAccountsComponent {
     this.showDeleteAccount = false;
     this.selectedAccount = undefined;
   }
-
 
   async backupAccount(account: IdbAccount) {
     this.loadingService.setLoadingMessage("Backing up accounts...");
@@ -119,43 +115,12 @@ export class ManageAccountsComponent {
 
   async confirmAccountDelete() {
     this.showDeleteAccount = false;
-    this.loadingService.setLoadingStatus(true);
-    this.loadingService.setLoadingMessage('Fetching account data...')
-    await this.dbChangesService.selectAccount(this.selectedAccount, true);
-    // Delete all info associated with account
-    this.loadingService.setLoadingMessage("Deleting Account Predictors...");
-    await this.predictorDbService.deleteAllSelectedAccountPredictors();
-    this.loadingService.setLoadingMessage("Deleting Account Meter Data...");
-    await this.utilityMeterDataDbService.deleteAllSelectedAccountMeterData();
-    this.loadingService.setLoadingMessage("Deleting Account Meters...");
-    await this.utilityMeterDbService.deleteAllSelectedAccountMeters();
-    this.loadingService.setLoadingMessage("Deleting Account Meter Groups...");
-    await this.utilityMeterGroupDbService.deleteAllSelectedAccountMeterGroups();
-    this.loadingService.setLoadingMessage("Deleting Account Facilities...");
-    await this.facilityDbService.deleteAllSelectedAccountFacilities();
-    this.loadingService.setLoadingMessage("Deleting Reports...")
-    await this.accountReportDbService.deleteAccountReports();
-    this.loadingService.setLoadingMessage("Deleting Analysis Items...")
-    await this.analysisDbService.deleteAccountAnalysisItems();
-    await this.accountAnalysisDbService.deleteAccountAnalysisItems();
-    this.loadingService.setLoadingMessage("Deleting Custom Emissions...")
-    await this.customEmissionsDbService.deleteAccountEmissionsItems();
-    this.loadingService.setLoadingMessage("Deleting Custom Fuels...")
-    await this.customFuelDbService.deleteAccountCustomFuels();   
-    this.loadingService.setLoadingMessage("Deleting Custom GWPs...");
-    await this.customGWPDbService.deleteAccountCustomGWP();
-    this.loadingService.setLoadingMessage("Deleting Account...");
-    await firstValueFrom(this.accountDbService.deleteAccountWithObservable(this.selectedAccount.id));
+    this.selectedAccount.deleteAccount = true;
+    await firstValueFrom(this.accountDbService.updateWithObservable(this.selectedAccount));
     this.accounts = await firstValueFrom(this.accountDbService.getAll());
     this.accountDbService.allAccounts.next(this.accounts);
     this.accountDbService.selectedAccount.next(undefined);
-    this.loadingService.setLoadingStatus(false);
-    this.toastNotificationService.showToast('Account Deleted!', undefined, undefined, false, 'alert-success');
-    if (this.accounts.length == 0) {
-      this.router.navigateByUrl('/setup-wizard');
-    }
   }
-
 
   async deleteDatabase() {
     this.loadingService.setLoadingStatus(true);

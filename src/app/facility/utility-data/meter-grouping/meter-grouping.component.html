@@ -163,7 +163,9 @@
 
                     <div [cdkDragData]="meter" class="group-meters" *ngFor="let meter of meterGroup.groupData" cdkDrag>
                         <!-- id={{meter.id}}> -->
-                        <i class="fa fa-th"></i>
+                        <button class="btn btn-sm text-center btn-outline" (click)="openEditMeterModal(meter)">
+                            <span class="fa fa-pencil"></span>
+                        </button>
                         <span> {{meter.name}}</span>
                         <span class="item-right">{{meter.source}}</span>
                     </div>
@@ -196,7 +198,16 @@
     </div>
 </div>
 
-<div [ngClass]="{'windowOverlay': groupToDelete || groupToEdit}"></div>
+<div class="window" [class.open]="showEditMeterModal">
+    <div class="windowContent">
+        <app-edit-meter-in-group-form *ngIf="showEditMeterModal" [meterToEdit]="meterToEdit"
+            (emitClose)="closeEditMeter()" [allMeterGroupTypes]="meterGroupTypes" (emitSave)="saveMeterEdit()">
+        </app-edit-meter-in-group-form>
+    </div>
+</div>
+
+
+<div [ngClass]="{'windowOverlay': groupToDelete || groupToEdit || showEditMeterModal}"></div>
 <div class="popup" [class.open]="groupToDelete">
     <div class="popup-header" *ngIf="groupToDelete">Delete Meter Data {{groupToDelete.name}}
         <button class="item-right" (click)="closeDeleteGroup()">x</button>

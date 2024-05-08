@@ -27,7 +27,9 @@ import { UploadDataModule } from './upload-data/upload-data.module';
 import { CreateReportModalComponent } from './core-components/create-report-modal/create-report-modal.component';
 import { WeatherDataModule } from './weather-data/weather-data.module';
 import { ManageAccountsComponent } from './core-components/manage-accounts/manage-accounts.component';
+import { ElectronBackupFileComponent } from './core-components/electron-backup-file/electron-backup-file.component';
 import { HttpClientModule } from '@angular/common/http';
+import { DeletingAccountDataComponent } from './core-components/deleting-account-data/deleting-account-data.component';
 
 @NgModule({
   declarations: [
@@ -42,7 +44,9 @@ import { HttpClientModule } from '@angular/common/http';
     SearchBarComponent,
     FacilityListPipe,
     CreateReportModalComponent,
-    ManageAccountsComponent
+    ManageAccountsComponent,
+    ElectronBackupFileComponent,
+    DeletingAccountDataComponent
   ],
   imports: [
     BrowserModule,

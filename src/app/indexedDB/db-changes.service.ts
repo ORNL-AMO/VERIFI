@@ -89,9 +89,11 @@ export class DbChangesService {
   }
 
   selectFacility(facility: IdbFacility) {
-    facility = this.updateDbEntryService.updateFacility(facility).facility;
-    this.updateFacilities(facility, true);
-    console.log('DB Changes Select Facility');
+    let updateFacility: { facility: IdbFacility, isChanged: boolean } = this.updateDbEntryService.updateFacility(facility);
+    if(updateFacility.isChanged){
+      facility = updateFacility.facility;
+      this.updateFacilities(facility, true);
+    }
     //set predictors
     this.setFacilityPredictors(facility);
     //set meters

@@ -19,6 +19,7 @@ import { getFuelTypeOptions } from '../shared/fuel-options/getFuelTypeOptions';
 import { ColumnGroup, ColumnItem, FacilityGroup, FileReference, ParsedTemplate } from './upload-data-models';
 import { checkImportCellNumber, checkImportStartingUnit, checkSameDay, checkSameMonth, getAgreementType, getCountryCode, getFuelEnum, getMeterReadingDataApplication, getMeterSource, getPhase, getScope, getState, getYesNoBool, getZip } from './upload-helper-functions';
 import { UploadDataSharedFunctionsService } from './upload-data-shared-functions.service';
+import { SetupWizardService } from '../setup-wizard/setup-wizard.service';
 
 @Injectable({
   providedIn: 'root'
@@ -32,12 +33,18 @@ export class UploadDataV1Service {
     private energyUnitsHelperService: EnergyUnitsHelperService,
     private editMeterFormService: EditMeterFormService,
     private eGridService: EGridService,
-    private uploadDataSharedFunctionsService: UploadDataSharedFunctionsService) { }
+    private uploadDataSharedFunctionsService: UploadDataSharedFunctionsService,
+    private setupWizardService: SetupWizardService) { }
 
-  parseTemplate(workbook: XLSX.WorkBook): ParsedTemplate {
+  parseTemplate(workbook: XLSX.WorkBook, inSetupWizard: boolean): ParsedTemplate {
     let facilitiesData = XLSX.utils.sheet_to_json(workbook.Sheets['Facilities']);
     let importFacilities: Array<IdbFacility> = new Array();
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let selectedAccount: IdbAccount;
+    if (inSetupWizard) {
+      selectedAccount = this.setupWizardService.account.getValue();
+    } else {
+      selectedAccount = this.accountDbService.selectedAccount.getValue();
+    }
     let accountFacilities: Array<IdbFacility> = this.facilityDbService.getAccountFacilitiesCopy();
     facilitiesData.forEach(facilityDataRow => {
       let facilityName: string = facilityDataRow['Facility Name'];
@@ -486,6 +493,7 @@ export class UploadDataV1Service {
 
     let predictorData: Array<IdbPredictorEntry> = new Array();
     let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.getAccountPerdictorsCopy();
+    let hasNewData: boolean = false;
     fileReference.predictorFacilityGroups.forEach(group => {
       if (group.facilityName != 'Unmapped Predictors' && group.groupItems.length != 0) {
         let facilityPredictorEntries: Array<IdbPredictorEntry> = accountPredictorEntries.filter(entry => {
@@ -493,7 +501,7 @@ export class UploadDataV1Service {
         });
         let existingFacilityPredictorData: Array<PredictorData> = new Array();
         if (facilityPredictorEntries.length != 0) {
-          existingFacilityPredictorData = facilityPredictorEntries[0].predictors.map(predictor => { return predictor });
+          existingFacilityPredictorData = facilityPredictorEntries[0].predictors.map(predictor => { return JSON.parse(JSON.stringify(predictor)) });
           existingFacilityPredictorData.forEach(predictorData => {
             predictorData.amount = undefined;
           });
@@ -502,15 +510,17 @@ export class UploadDataV1Service {
           group.groupItems.forEach((predictorItem) => {
             let predictorIndex: number = existingFacilityPredictorData.findIndex(predictor => { return predictor.name == predictorItem.value });
             if (predictorIndex == -1) {
+              hasNewData = true;
               let newPredictor: PredictorData = this.predictorDbService.getNewPredictor([]);
               newPredictor.name = predictorItem.value;
               existingFacilityPredictorData.push(newPredictor);
               facilityPredictorEntries.forEach(predictorEntry => {
-                predictorEntry.predictors.push(newPredictor);
+                predictorEntry.predictors.push(JSON.parse(JSON.stringify(newPredictor)));
               });
             }
           });
         }
+        let uploadDates: Array<Date> = new Array();
         fileReference.headerMap.forEach(dataRow => {
           let readDate: Date = new Date(dataRow[dateColumnVal]);
           if (!isNaN(readDate.valueOf())) {
@@ -530,6 +540,15 @@ export class UploadDataV1Service {
             predictorData.push(JSON.parse(JSON.stringify(predictorEntry)));
           }
         });
+        //uploading new entries means we need to update all previous entries.
+        if (hasNewData) {
+          facilityPredictorEntries.forEach(entry => {
+            let uploadedAlready: Date = uploadDates.find(date => { return checkSameMonth(new Date(entry.date), date) });
+            if (uploadedAlready == undefined) {
+              predictorData.push(JSON.parse(JSON.stringify(entry)));
+            }
+          });
+        }
       }
     });
     return predictorData;

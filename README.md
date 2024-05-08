@@ -31,9 +31,6 @@ The Department of Energy Advanced Manufacturing Office has tasked Oak Ridge Nati
 
 - Run `npm run test` to execute the unit tests via [Karma](https://karma-runner.github.io).
 
-- Run `npm run e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
-
-
 ## For Developers
 
 - When developing in electron window use `npm run build-watch` and a re-build will trigger on save of changes

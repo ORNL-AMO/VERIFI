@@ -43,7 +43,13 @@ export interface IdbAccount {
     color?: string,
     contactName: string,
     contactEmail: string,
-    contactPhone: string
+    contactPhone: string,
+    dataBackupFilePath?: string,
+    dataBackupId?: string,
+    archiveOption: 'always' | 'never' | 'justOnce' | 'skip',
+    isSharedBackupFile?: boolean,
+    sharedFileAuthor?: string
+    deleteAccount?: boolean
 }
 
 export interface IdbFacility {
@@ -274,7 +280,8 @@ export interface PredictorData {
     weatherStationName?: string,
     heatingBaseTemperature?: number,
     coolingBaseTemperature?: number,
-    weatherDataWarning?: boolean
+    weatherDataWarning?: boolean,
+    weatherOverride?: boolean
 }
 
 export type PredictorType = 'Standard' | 'Conversion' | 'Math' | 'Weather';
@@ -361,6 +368,14 @@ export interface IdbCustomFuel extends FuelTypeOption {
     guid: string,
     phase: MeterPhase,
     directEmissionsRate: boolean
+}
+
+export interface IdbElectronBackup {
+    id?: number,
+    accountId: string,
+    guid: string,
+    dataBackupId: string,
+    timeStamp: Date
 }
 
 export interface IdbCustomGWP extends GlobalWarmingPotential {

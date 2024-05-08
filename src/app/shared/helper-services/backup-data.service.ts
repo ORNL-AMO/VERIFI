@@ -12,6 +12,7 @@ import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { JStatRegressionModel } from 'src/app/models/analysis';
 import { firstValueFrom } from 'rxjs';
+import { ElectronBackupsDbService } from 'src/app/indexedDB/electron-backups-db.service';
 import { AnalyticsService } from 'src/app/analytics/analytics.service';
 import { CustomEmissionsDbService } from 'src/app/indexedDB/custom-emissions-db.service';
 import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
@@ -26,6 +27,7 @@ export class BackupDataService {
     private utilityMeterDbService: UtilityMeterdbService, private utilityMeterDataDbService: UtilityMeterDatadbService,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService, private loadingService: LoadingService, private accountAnalysisDbService: AccountAnalysisDbService,
     private analysisDbService: AnalysisDbService, private accountReportsDbService: AccountReportDbService,
+    private electronBackupsDbService: ElectronBackupsDbService,
     private analyticsService: AnalyticsService,
     private customEmissionsDbService: CustomEmissionsDbService,
     private customFuelDbService: CustomFuelDbService,
@@ -33,6 +35,12 @@ export class BackupDataService {
 
 
   backupAccount() {
+    let backupFile: BackupFile = this.getAccountBackupFile();
+    let backupName: string = backupFile.account.name.split(' ').join('_') + '_Backup_';
+    this.downloadBackup(backupFile, backupName);
+  }
+
+  getAccountBackupFile(): BackupFile {
     let backupFile: BackupFile = {
       account: this.accountDbService.selectedAccount.getValue(),
       facilities: this.facilityDbService.accountFacilities.getValue(),
@@ -48,11 +56,14 @@ export class BackupDataService {
       customGWPs: this.customGWPDbService.accountCustomGWPs.getValue(),
       facility: undefined,
       backupFileType: "Account",
-      origin: "VERIFI"
+      origin: "VERIFI",
+      timeStamp: new Date(),
+      dataBackupId: Math.random().toString(36).substr(2, 9)
     };
-    let backupName: string = backupFile.account.name.split(' ').join('_') + '_Backup_';
-    this.downloadBackup(backupFile, backupName);
+    return backupFile;
   }
+
+
 
   backupFacility(facility: IdbFacility) {
     let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
@@ -88,7 +99,9 @@ export class BackupDataService {
       customFuels: this.customFuelDbService.accountCustomFuels.getValue(),
       customGWPs: this.customGWPDbService.accountCustomGWPs.getValue(),
       backupFileType: "Facility",
-      origin: "VERIFI"
+      origin: "VERIFI",
+      timeStamp: new Date(),
+      dataBackupId: Math.random().toString(36).substr(2, 9)
     }
     let backupName: string = backupFile.facility.name.split(' ').join('_') + '_Backup_';
     this.downloadBackup(backupFile, backupName);
@@ -456,71 +469,6 @@ export class BackupDataService {
     return newFacility;
   }
 
-
-  async deleteAccountData(account: IdbAccount) {
-    //delete account
-    await firstValueFrom(this.accountDbService.deleteAccountWithObservable(account.id));
-    let accountFacilites: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
-    for (let i = 0; i < accountFacilites.length; i++) {
-      await firstValueFrom(this.facilityDbService.deleteWithObservable(accountFacilites[i].id));
-    }
-    //delete meters
-    let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
-    for (let i = 0; i < accountMeters.length; i++) {
-      await firstValueFrom(this.utilityMeterDbService.deleteIndexWithObservable(accountMeters[i].id));
-    }
-    //delete meter data
-    let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
-    for (let i = 0; i < accountMeterData.length; i++) {
-      await firstValueFrom(this.utilityMeterDataDbService.deleteWithObservable(accountMeterData[i].id));
-    }
-    //delete predictors
-    let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorsDbService.accountPredictorEntries.getValue();
-    for (let i = 0; i < accountPredictorEntries.length; i++) {
-      await firstValueFrom(this.predictorsDbService.deleteIndexWithObservable(accountPredictorEntries[i].id));
-    }
-    //delete meter groups
-    let accountMeterGroups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.accountMeterGroups.getValue();
-    for (let i = 0; i < accountMeterGroups.length; i++) {
-      await firstValueFrom(this.utilityMeterGroupDbService.deleteWithObservable(accountMeterGroups[i].id));
-    }
-
-    //delete account reports
-    let accountReports: Array<IdbAccountReport> = this.accountReportsDbService.accountReports.getValue();
-    for (let i = 0; i < accountReports.length; i++) {
-      await firstValueFrom(this.accountReportsDbService.deleteWithObservable(accountReports[i].id));
-    }
-
-    //delete account analysis
-    let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
-    for (let i = 0; i < accountAnalysisItems.length; i++) {
-      await firstValueFrom(this.accountAnalysisDbService.deleteWithObservable(accountAnalysisItems[i].id));
-    }
-    //delete facility analysis
-    let facilityAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
-    for (let i = 0; i < facilityAnalysisItems.length; i++) {
-      await firstValueFrom(this.analysisDbService.deleteWithObservable(facilityAnalysisItems[i].id));
-    }
-
-    //custom emissions items
-    let customEmissionsItems: Array<IdbCustomEmissionsItem> = this.customEmissionsDbService.accountEmissionsItems.getValue();
-    for (let i = 0; i < customEmissionsItems.length; i++) {
-      await firstValueFrom(this.customEmissionsDbService.deleteWithObservable(customEmissionsItems[i].id));
-    }
-
-    //custom fuels
-    let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
-    for (let i = 0; i < customFuels.length; i++) {
-      await firstValueFrom(this.customFuelDbService.deleteWithObservable(customFuels[i].id));
-    }
-
-    //custom GWPs
-    let customGWPs: Array<IdbCustomGWP> = this.customGWPDbService.accountCustomGWPs.getValue();
-    for (let i = 0; i < customGWPs.length; i++) {
-      await firstValueFrom(this.customGWPDbService.deleteWithObservable(customGWPs[i].id));
-    }
-  }
-
   async deleteFacilityData(facility: IdbFacility) {
     await firstValueFrom(this.facilityDbService.deleteWithObservable(facility.id));
     //delete meters
@@ -643,7 +591,9 @@ export interface BackupFile {
   customFuels: Array<IdbCustomFuel>,
   customGWPs: Array<IdbCustomGWP>,
   origin: "VERIFI",
-  backupFileType: "Account" | "Facility"
+  backupFileType: "Account" | "Facility",
+  timeStamp: Date,
+  dataBackupId: string
 }
 
 

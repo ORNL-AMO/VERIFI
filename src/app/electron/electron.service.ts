@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { LocalStorageService } from 'ngx-webstorage';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { ToastNotificationsService } from '../core-components/toast-notifications/toast-notifications.service';
+import { BackupFile } from '../shared/helper-services/backup-data.service';
 
 @Injectable({
   providedIn: 'root'
@@ -13,11 +14,16 @@ export class ElectronService {
   updateInfo: BehaviorSubject<{ releaseName: string, releaseNotes: string }>;
   updateError: BehaviorSubject<boolean>;
   isElectron: boolean;
+  savedFilePath: BehaviorSubject<string>;
+  fileExists: BehaviorSubject<boolean>;
+  accountLatestBackupFile: BehaviorSubject<BackupFile>;
   constructor(private localStorageService: LocalStorageService, private toastNotificationService: ToastNotificationsService) {
-
+    this.savedFilePath = new BehaviorSubject<string>(undefined);
+    this.accountLatestBackupFile = new BehaviorSubject<BackupFile>(undefined);
     this.updateAvailable = new BehaviorSubject<boolean>(false);
     this.updateInfo = new BehaviorSubject<{ releaseName: string, releaseNotes: string }>(undefined);
     this.updateError = new BehaviorSubject<boolean>(false);
+    this.fileExists = new BehaviorSubject<boolean>(false);
     this.isElectron = window["electronAPI"]
     if (this.isElectron) {
       this.listen();
@@ -40,20 +46,37 @@ export class ElectronService {
       console.log(data)
       this.updateInfo.next(data);
     });
+
     window["electronAPI"].on("available", (data) => {
       console.log('available');
       console.log(data)
       this.updateAvailable.next(true);
     });
+
     window["electronAPI"].on("error", (data) => {
       console.log('error');
       console.log(data)
       this.updateError.next(true);
     });
+
     window["electronAPI"].on("update-downloaded", (data) => {
       console.log('update-downloaded');
       console.log(data)
     });
+
+    window["electronAPI"].on("file-path", (data) => {
+      console.log('electron service file-path...')
+      this.savedFilePath.next(data);
+    });
+
+    window["electronAPI"].on("file-exists", (data) => {
+      this.fileExists.next(data == 'file');
+    });
+
+    window["electronAPI"].on("data-file", (data) => {
+      this.accountLatestBackupFile.next(data);
+    });
+
   }
 
   //Used to tell electron that app is ready
@@ -73,13 +96,68 @@ export class ElectronService {
     window["electronAPI"].send("update");
   }
 
-  sendAppRelaunch(){
-    if(!window["electronAPI"]){
+  sendAppRelaunch() {
+    if (!window["electronAPI"]) {
       return;
     }
-    console.log('relaunch1');
     window["electronAPI"].send("relaunch");
   }
+
+
+  sendSaveData(backupFile: BackupFile, isArchive?: boolean, isCreateNewFile?: boolean) {
+    if (!window["electronAPI"] || !backupFile) {
+      return;
+    }
+    let args: { fileName: string, fileData: any, isArchive: boolean, isCreateNewFile: boolean } = {
+      fileName: undefined,
+      fileData: backupFile,
+      isArchive: isArchive,
+      isCreateNewFile: isCreateNewFile
+    }
+    if (backupFile.account.dataBackupFilePath || isArchive) {
+      args.fileName = backupFile.account.dataBackupFilePath;
+    } else {
+      args.fileName = backupFile.account.name + '.json';
+    }
+    window["electronAPI"].send("saveData", args);
+  }
+
+  checkFileExists(dataBackupFilePath: string) {
+    if (!window["electronAPI"] || !dataBackupFilePath) {
+      return;
+    }
+    let args: { fileName: string } = {
+      fileName: dataBackupFilePath
+    }
+    window["electronAPI"].send("fileExists", args);
+  }
+
+  openDialog(backupFile: BackupFile) {
+    if (!window["electronAPI"]) {
+      return;
+    }
+    let args: { fileName: string, fileData: any } = {
+      fileName: undefined,
+      fileData: backupFile
+    }
+    if (backupFile.account.dataBackupFilePath) {
+      args.fileName = backupFile.account.dataBackupFilePath;
+    } else {
+      args.fileName = backupFile.account.name + '.json';
+    }
+    window["electronAPI"].send("openDialog", args);
+  }
+
+  getDataFile(dataBackupFilePath: string){
+    if (!window["electronAPI"]) {
+      return;
+    }
+    let args: { fileName: string } = {
+      fileName: dataBackupFilePath
+    }
+    window["electronAPI"].send("getDataFile", args);
+  }
+
 
   showWebDisclaimer() {
     let title: string = "VERIFI Web";
