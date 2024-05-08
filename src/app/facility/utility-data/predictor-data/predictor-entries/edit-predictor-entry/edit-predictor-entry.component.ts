@@ -163,7 +163,7 @@ export class EditPredictorEntryComponent {
             updatedPredictorIds.push(hddPredictor.id);
           }
         }
-      }else{
+      } else {
         hasWeatherOverride = true;
       }
     }
@@ -204,7 +204,7 @@ export class EditPredictorEntryComponent {
     this.hasWeatherOverride = true;
   }
 
-  async revertManualWeatherData(){
+  async revertManualWeatherData() {
     this.predictorEntry.predictors.forEach(predictor => {
       if (predictor.predictorType == 'Weather') {
         predictor.weatherOverride = false;
