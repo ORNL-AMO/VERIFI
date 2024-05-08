@@ -152,7 +152,12 @@ export class ElectronBackupFileComponent {
     }
 
     if (needUpdate) {
-      this.account.archiveOption = this.archiveOption;
+      //archive created. set to skip for settings.
+      if (this.archiveOption == 'justOnce') {
+        this.account.archiveOption = 'skip';
+      } else {
+        this.account.archiveOption = this.archiveOption;
+      }
       await this.dbChangesService.updateAccount(this.account);
     }
 
@@ -163,12 +168,14 @@ export class ElectronBackupFileComponent {
   createArchive() {
     let dataBackupFilePath: string = this.account.dataBackupFilePath;
     let archiveBackup: BackupFile = this.backupDataService.getAccountBackupFile();
+    archiveBackup.account = JSON.parse(JSON.stringify(archiveBackup.account));
     let sub: string = dataBackupFilePath.substring(0, dataBackupFilePath.length - 5);
     let date: Date = new Date(archiveBackup.timeStamp);
 
     let datePipe: DatePipe = new DatePipe(navigator.language);
     let stringFormat: string = 'shortTime';
     let timeStr = datePipe.transform(archiveBackup.timeStamp, stringFormat);
+    timeStr = timeStr.replace(':', '_').replace(' ', '_').replace('.', '_');
     let dateStr: string = (date.getMonth() + 1) + "-" + date.getDate() + "-" + date.getFullYear() + '_' + timeStr;
     archiveBackup.account.dataBackupFilePath = sub + '_' + dateStr + '.json';
     this.electronService.sendSaveData(archiveBackup, true);
