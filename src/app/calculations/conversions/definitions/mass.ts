@@ -85,9 +85,16 @@ export const mass = {
             , to_anchor: 1000
         }, ton: {
             name: {
-                singular: 'Imperial Ton',
-                plural: 'Imperial Ton',
-                display: '(Ton)'
+                singular: 'Long Ton',
+                plural: 'Long Ton',
+                display: '(Long Ton)'
+            }
+            , to_anchor: 2240
+        }, shortTon: {
+            name: {
+                singular: 'Short Ton',
+                plural: 'Short Ton',
+                display: '(Short Ton)'
             }
             , to_anchor: 2240
         }
