@@ -80,7 +80,8 @@ export interface BetterPlantsReportSetup {
   modificationNotes: string,
   methodologyNotes?: string,
   baselineYearWaterPilotGoal?: number,
-  reportYearWaterPilotGoal?: number
+  reportYearWaterPilotGoal?: number,
+  includePerformanceTable?: boolean
 }
 
 export interface DataOverviewReportSetup {

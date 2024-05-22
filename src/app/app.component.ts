@@ -181,6 +181,13 @@ export class AppComponent {
   async initializeAccountReports(account: IdbAccount) {
     this.loadingMessage = "Loading Reports..."
     let accountReports: Array<IdbAccountReport> = await this.accountReportDbService.getAllAccountReports(account.guid);
+    for (let i = 0; i < accountReports.length; i++) {
+      let updateReport: { report: IdbAccountReport, isChanged: boolean } = this.updateDbEntryService.updateReport(accountReports[i]);
+      if (updateReport.isChanged) {
+        accountReports[i] = updateReport.report;
+        await firstValueFrom(this.accountReportDbService.updateWithObservable(accountReports[i]));
+      };
+    }
     this.accountReportDbService.accountReports.next(accountReports);
     let accountReportId: number = this.accountReportDbService.getInitialReport();
     if (accountReportId) {
@@ -242,14 +249,14 @@ export class AppComponent {
       this.electronBackupsDbService.accountBackups = await firstValueFrom(this.electronBackupsDbService.getAll());
     }
   }
-  
+
   async initializeCustomFuels(account: IdbAccount) {
     this.loadingMessage = 'Loading Custom Fuels...';
     let customFuels: Array<IdbCustomFuel> = await this.customFuelDbservice.getAllAccountCustomFuels(account.guid);
     this.customFuelDbservice.accountCustomFuels.next(customFuels);
-  }  
+  }
 
-  async initializeCustomGWPs(account: IdbAccount){
+  async initializeCustomGWPs(account: IdbAccount) {
     this.loadingMessage = 'Loading Custom GWPs...';
     let customGWPs: Array<IdbCustomGWP> = await this.customGWPDbService.getAllAccountCustomGWP(account.guid);
     this.customGWPDbService.accountCustomGWPs.next(customGWPs);

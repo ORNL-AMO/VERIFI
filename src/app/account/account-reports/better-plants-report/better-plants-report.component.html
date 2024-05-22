@@ -139,7 +139,7 @@
             </div>
         </ng-container>
         <!--end water-->
-        <div class="row justify-content-center print-break-avoid">
+        <div class="row justify-content-center print-break-avoid" *ngIf="selectedReport.betterPlantsReportSetup.includePerformanceTable">
             <div class="col-6">
                 <app-facility-performance-table [betterPlantsSummary]="betterPlantsSummary"
                     [betterPlantsReportSetup]="selectedReport.betterPlantsReportSetup">
