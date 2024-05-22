@@ -83,7 +83,8 @@ export class BetterClimateExcelWriterService {
     }
 
     if(account.sustainabilityQuestions.energyReductionGoal){
-      worksheet.getCell('J13').value = account.sustainabilityQuestions.energyReductionPercent;
+      console.log()
+      worksheet.getCell('J14').value = account.sustainabilityQuestions.energyReductionPercent / 100;
     }
 
     let columnLetters = ['D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q'];
