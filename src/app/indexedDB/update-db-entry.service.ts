@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility, IdbUtilityMeter } from '../models/idb';
+import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport, IdbAnalysisItem, IdbFacility, IdbUtilityMeter } from '../models/idb';
 import { AnalysisSetupErrors, GroupErrors } from '../models/analysis';
 import { FacilitydbService } from './facility-db.service';
 import { AnalysisValidationService } from '../shared/helper-services/analysis-validation.service';
@@ -172,5 +172,19 @@ export class UpdateDbEntryService {
       isChanged = true;
     }
     return { utilityMeter: utilityMeter, isChanged: isChanged };
+  }
+
+
+  updateReport(report: IdbAccountReport): { report: IdbAccountReport, isChanged: boolean } {
+    let isChanged: boolean = false;
+    if (report.reportType == 'betterPlants' && report.betterPlantsReportSetup && report.betterPlantsReportSetup.includePerformanceTable == undefined) {
+      console.log('set include performance');
+      isChanged = true;
+      report.betterPlantsReportSetup.includePerformanceTable = true;
+    }
+    return {
+      report: report,
+      isChanged: isChanged
+    }
   }
 }
