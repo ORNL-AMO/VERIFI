@@ -156,8 +156,13 @@ export const MassUnitOptions: Array<UnitOption> = [
         unitsOfMeasure: 'Metric'
     },
     {
-        display: 'Tons',
+        display: 'Long Ton',
         value: 'ton',
+        unitsOfMeasure: 'Imperial'
+    },
+    {
+        display: 'Short Ton',
+        value: 'shortTon',
         unitsOfMeasure: 'Imperial'
     },
     {
