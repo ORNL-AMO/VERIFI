@@ -178,7 +178,6 @@ export class UpdateDbEntryService {
   updateReport(report: IdbAccountReport): { report: IdbAccountReport, isChanged: boolean } {
     let isChanged: boolean = false;
     if (report.reportType == 'betterPlants' && report.betterPlantsReportSetup && report.betterPlantsReportSetup.includePerformanceTable == undefined) {
-      console.log('set include performance');
       isChanged = true;
       report.betterPlantsReportSetup.includePerformanceTable = true;
     }
