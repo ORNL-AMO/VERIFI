@@ -1,35 +1,25 @@
-.wrapper{
-    margin-bottom: 100px;
-    padding: 0px;
+.setup-wizard-content{
+    height: calc(100% - 4rem);
+    overflow-y: auto;
 }
 
-.nav{
-    border-right: solid #145A32;
-    width: 210px;
+.form-paper{
+    /* min-height: 100%; */
+    background-color: white;
+    padding: 1rem;
 }
 
-.nav-item{
-    border-bottom: groove 1px;
+.setup-wizard-footer.navbar{
+    height: 4rem;
+    background-color: #ff6000 !important;
+    /* opacity: .5; */
 }
 
-/* .badge{
-    background-color: #145A32;
-    color: white;
+/* .setup-wizard-footer.navbar:hover{
+    opacity: 1;
 } */
 
-.nav-link{
-    font-size: 16px;
-}
 
-.nav-link.active{
-    background-color: #efefef;
-}
-
-.nav-link:hover{
-    cursor: pointer;
-    background-color: #efefef;
-}
-
-.disabled .badge {
-    background-color: #efefef !important;
+.fa{
+    color: white;
 }

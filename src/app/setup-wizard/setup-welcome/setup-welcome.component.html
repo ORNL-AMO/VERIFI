@@ -1,4 +1,4 @@
-<div class="wrapper main-content h-100">
+<!-- <div class="wrapper main-content h-100">
     <div class="empty-state text-center">
         <div class="d-flex justify-content-center">
             <h1>Welcome to </h1>
@@ -41,7 +41,111 @@
             <a (click)="openImportBackup();">Load Account Backup</a>
         </div>
     </div>
+</div> -->
+
+<div class="wrapper shadow">
+
+    <div class="row justify-content-center">
+        <div class="col-12">
+            <div class="d-flex justify-content-center">
+                <h1>Welcome to </h1>
+                <h1 class="verifi ps-2 pe-2">VERIFI</h1>
+                <h1>Corporate Account Setup</h1>
+            </div>
+        </div>
+        <div class="col-lg-8 col-md-12 text-center">
+            <p class="large">VERIFI is a tool used to track and analyze utility consumption data at both a coorporate
+                and facility level.
+                Use the account setup wizard to create a new corporate account and it's corresponding facilities.</p>
+        </div>
+        <div class="col-12">
+            <hr>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-12 text-center">
+            <p class="large bold">
+                There are a few options for getting started.
+            </p>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-3">
+            <div class="card h-100">
+                <div class="card-header">
+                    Create New Account
+                </div>
+                <div class="card-body">
+                    Fill out the account details using the setup wizard.
+                </div>
+                <div class="card-footer justify-content-end">
+                    <div class="d-flex w-100 justify-content-end">
+                        <div>
+                            <button class="btn nav-btn" (click)="goToAccountSetup();">
+                                Get Started
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-3">
+            <div class="card h-100">
+                <div class="card-header">
+                    Upload Account Backup
+                </div>
+                <div class="card-body">
+                    Use this method if you have an account backup file that was exported from a different VERIFI system.
+                </div>
+                <div class="card-footer justify-content-end">
+                    <div class="d-flex w-100 justify-content-end">
+                        <div>
+                            <button class="btn btn-primary" (click)="openImportBackup();">
+                                Upload Backup
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-3">
+            <div class="card h-100">
+                <div class="card-header">
+                    Load Example Account
+                </div>
+                <div class="card-body">
+                    Load in an example account to let you test out VERIFI's capabilities with example data created to
+                    mirror a real world company.
+                </div>
+                <div class="card-footer">
+                    <div class="d-flex w-100 justify-content-end">
+                        <div>
+                            <button class="btn btn-success" (click)="openLoadTestData();">
+                                Load Example
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <hr>
+        </div>
+        <div class="col-12 text-end">
+            <p>
+                If you need help along the way, click or hover the <span class="fa fa-question-circle"></span> icon and
+                help text will appear.
+            </p>
+        </div>
+    </div>
+
 </div>
+
+
 
 <div [ngClass]="{'windowOverlay': showTestDataModal}"></div>
 <div class="popup" [ngClass]="{'open': showTestDataModal}">
@@ -49,7 +153,8 @@
         <button class="item-right" (click)="cancelTestData()">x</button>
     </div>
     <div class="popup-body">
-        Do you want to load in an example account with test data? You can use this data to view all the functionality of VERIFI.
+        Do you want to load in an example account with test data? You can use this data to view all the functionality of
+        VERIFI.
     </div>
     <div class="popup-footer text-end">
         <button class="btn btn-secondary" (click)="cancelTestData()">Cancel</button>

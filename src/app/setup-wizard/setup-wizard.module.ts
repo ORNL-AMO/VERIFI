@@ -15,6 +15,7 @@ import { CorporateReportingSetupComponent } from './setup-account/corporate-repo
 import { FacilityInformationSetupComponent } from './setup-facilities/facility-information-setup/facility-information-setup.component';
 import { FacilityUnitsSetupComponent } from './setup-facilities/facility-units-setup/facility-units-setup.component';
 import { FacilityReportingSetupComponent } from './setup-facilities/facility-reporting-setup/facility-reporting-setup.component';
+import { SetupWizardSidebarComponent } from './setup-wizard-sidebar/setup-wizard-sidebar.component';
 
 @NgModule({
   declarations: [
@@ -30,7 +31,8 @@ import { FacilityReportingSetupComponent } from './setup-facilities/facility-rep
     CorporateReportingSetupComponent,
     FacilityInformationSetupComponent,
     FacilityUnitsSetupComponent,
-    FacilityReportingSetupComponent
+    FacilityReportingSetupComponent,
+    SetupWizardSidebarComponent
   ],
   imports: [
     CommonModule,

@@ -1,5 +1,4 @@
-.wrapper {
-    background-color: #f1f1f100;
+/* .wrapper {
     margin: 0px 30px;
     padding: 20px 30px 30px;
 
@@ -13,7 +12,6 @@
     margin: 3px;
     padding: 20px;
     border-radius: 4px;
-    /* box-shadow: 2px 3px 10px #d6d6d6; */
   }
 
   .empty-state .box p {
@@ -47,4 +45,17 @@
   .box.account-setup-box:hover{
     cursor: pointer;
     border: solid gray 2px;
-  }
+  } */
+
+h1.verifi:first-letter {
+  color: #ff6000;
+}
+
+.large{
+  font-size: 16px;
+}
+
+.card-header, .card-footer{
+  background-color: white;
+  font-weight: bold;
+}
