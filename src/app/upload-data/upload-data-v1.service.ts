@@ -432,7 +432,7 @@ export class UploadDataV1Service {
     //we can still access the data using this value
     newMeter.importWizardName = groupItem.value;
     //start with random meter number
-    newMeter.meterNumber = Math.random().toString(36).substr(2, 9);
+    newMeter.meterNumber = selectedFacility.name.replace(' ', '_') + '_' + newMeter.source.replace(' ', '_') + '_' + Math.random().toString(36).substr(2, 3);
 
     //set emissions mulitpliers
     newMeter = this.editMeterFormService.setMultipliers(newMeter);
