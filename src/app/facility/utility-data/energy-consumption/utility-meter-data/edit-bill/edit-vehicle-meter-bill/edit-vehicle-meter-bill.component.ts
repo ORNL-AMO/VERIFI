@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
-import { getEmissions } from 'src/app/calculations/emissions-calculations/emissions';
+import { getEmissions, getZeroEmissionsResults } from 'src/app/calculations/emissions-calculations/emissions';
 import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
@@ -8,7 +8,7 @@ import { MeterSource } from 'src/app/models/constantsAndTypes';
 import { EmissionsResults } from 'src/app/models/eGridEmissions';
 import { IdbCustomFuel, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { FuelTypeOption } from 'src/app/shared/fuel-options/fuelTypeOption';
-import { getAllMobileFuelTypes, getMobileFuelTypes } from 'src/app/shared/fuel-options/getFuelTypeOptions';
+import { getMobileFuelTypes } from 'src/app/shared/fuel-options/getFuelTypeOptions';
 
 @Component({
   selector: 'app-edit-vehicle-meter-bill',
@@ -35,10 +35,7 @@ export class EditVehicleMeterBillComponent {
   energyUnit: string;
   volumeUnit: string;
   isBiofuel: boolean;
-  carbonEmissions: number = 0;
-  biogenicEmissions: number = 0;
-  otherEmissions: number = 0;
-  totalEmissions: number = 0;
+  emissionsValues: EmissionsResults;
   meterFuel: FuelTypeOption;
   totalVolumeLabel: 'Total Fuel Consumption' | 'Total Distance';
   usingMeterFuelEfficiency: boolean;
@@ -133,19 +130,11 @@ export class EditVehicleMeterBillComponent {
     if (this.meterDataForm.controls.totalVolume.value) {
       let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
       let allFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
-      let emissionsValues: EmissionsResults = getEmissions(this.editMeter, this.meterDataForm.controls.totalEnergyUse.value, this.editMeter.energyUnit,
+      this.emissionsValues = getEmissions(this.editMeter, this.meterDataForm.controls.totalEnergyUse.value, this.editMeter.energyUnit,
         new Date(this.meterDataForm.controls.readDate.value).getFullYear(), false, [facility], [], allFuels,
         this.meterDataForm.controls.totalVolume.value, this.editMeter.vehicleCollectionUnit, this.editMeter.vehicleDistanceUnit, this.meterDataForm.controls.vehicleFuelEfficiency.value);
-
-      this.carbonEmissions = emissionsValues.mobileCarbonEmissions;
-      this.biogenicEmissions = emissionsValues.mobileBiogenicEmissions;
-      this.otherEmissions = emissionsValues.mobileOtherEmissions;
-      this.totalEmissions = emissionsValues.mobileTotalEmissions;
     } else {
-      this.carbonEmissions = 0;
-      this.biogenicEmissions = 0;
-      this.otherEmissions = 0;
-      this.totalEmissions = 0;
+      this.emissionsValues = getZeroEmissionsResults();
     }
   }
 

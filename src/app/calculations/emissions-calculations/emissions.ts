@@ -43,6 +43,7 @@ export function getEmissions(meter: IdbUtilityMeter,
         let convertedEnergyUse: number = new ConvertValue(energyUse, energyUnit, 'kWh').convertedValue;
         let facility: IdbFacility = facilities.find(facility => { return facility.guid == meter.facilityId });
         let emissionsRates: { marketRate: number, locationRate: number } = getEmissionsRate(facility.eGridSubregion, year, co2Emissions);
+        console.log(emissionsRates);
         let marketEmissionsOutputRate: number = emissionsRates.marketRate;
         if (!isCompressedAir) {
             if (meter.includeInEnergy) {
@@ -194,12 +195,16 @@ export function getEmissionsRate(subregion: string, year: number, co2Emissions: 
                 let closestYearRate: { co2Emissions: number, year: number } = _.minBy(subregionEmissions.locationEmissionRates, (emissionRate: { co2Emissions: number, year: number }) => {
                     return Math.abs(emissionRate.year - year);
                 });
+                console.log('location')
+                console.log(closestYearRate);
                 locationRate = closestYearRate.co2Emissions;
             }
             if (subregionEmissions.residualEmissionRates.length != 0) {
                 let closestYearRate: { co2Emissions: number, year: number } = _.minBy(subregionEmissions.residualEmissionRates, (emissionRate: { co2Emissions: number, year: number }) => {
                     return Math.abs(emissionRate.year - year);
                 });
+                console.log('market');
+                console.log(closestYearRate);
                 marketRate = closestYearRate.co2Emissions;
             }
             return { marketRate: marketRate, locationRate: locationRate };
