@@ -69,7 +69,8 @@ export class EGridService {
     csvResults.forEach(result => {
       let subregion: string = result['SUBRGN'];
       if (subregion) {
-        let co2Emissions: number = Number(result['CO2e']);
+        //TODO: issue 1597 update to handle AR5
+        let co2Emissions: number = Number(result['CO2e_AR4']);
         let year: number = Number(result['YEAR']);
         let category: 'LocationMix' | 'ResidualMix' = result['CATEGORY'];
         subregionEmissions = this.addEmissionRate(subregion, co2Emissions, year, category, subregionEmissions);
