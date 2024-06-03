@@ -74,5 +74,6 @@ export const StationaryGasOptions: Array<FuelTypeOption> = [
         CO2: 52.07,
         CH4: 3.2,
         N2O: .63,
+        isBiofuel: true
     }
 ]
