@@ -65,7 +65,6 @@ export class EGridService {
 
 
   setCo2Emissions(csvResults: Array<any>) {
-    console.log('set..')
     let subregionEmissions = new Array<SubregionEmissions>();
     csvResults.forEach(result => {
       let subregion: string = result['SUBRGN'];
