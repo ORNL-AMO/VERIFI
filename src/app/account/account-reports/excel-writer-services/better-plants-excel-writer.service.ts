@@ -21,7 +21,7 @@ export class BetterPlantsExcelWriterService {
     } else if (analysisItem.analysisCategory == 'water') {
       requestURL = 'BBBP-Water-Data-Collection-Form-modified';
     }
-    
+
     request.open('GET', 'assets/csv_templates/' + requestURL + '.xlsx', true);
     request.responseType = 'blob';
     request.onload = () => {
@@ -203,18 +203,20 @@ export class BetterPlantsExcelWriterService {
       worksheet.getCell('C44').value = report.betterPlantsReportSetup.modificationNotes;
     }
 
-    this.addPerformanceLevel(undefined, 0, worksheet.getCell('E53'), betterPlantsSummary);
-    this.addPerformanceLevel(0, 2, worksheet.getCell('E54'), betterPlantsSummary);
-    this.addPerformanceLevel(2, 4, worksheet.getCell('E55'), betterPlantsSummary);
-    this.addPerformanceLevel(4, 6, worksheet.getCell('E56'), betterPlantsSummary);
-    this.addPerformanceLevel(6, 8, worksheet.getCell('E57'), betterPlantsSummary);
-    this.addPerformanceLevel(8, 10, worksheet.getCell('E58'), betterPlantsSummary);
-    this.addPerformanceLevel(10, 15, worksheet.getCell('E59'), betterPlantsSummary);
-    this.addPerformanceLevel(15, 20, worksheet.getCell('E60'), betterPlantsSummary);
-    this.addPerformanceLevel(20, 25, worksheet.getCell('E61'), betterPlantsSummary);
-    this.addPerformanceLevel(25, 30, worksheet.getCell('E62'), betterPlantsSummary);
-    this.addPerformanceLevel(30, 35, worksheet.getCell('E63'), betterPlantsSummary);
-    this.addPerformanceLevel(35, undefined, worksheet.getCell('E64'), betterPlantsSummary);
+    if (report.betterPlantsReportSetup.includePerformanceTable) {
+      this.addPerformanceLevel(undefined, 0, worksheet.getCell('E53'), betterPlantsSummary);
+      this.addPerformanceLevel(0, 2, worksheet.getCell('E54'), betterPlantsSummary);
+      this.addPerformanceLevel(2, 4, worksheet.getCell('E55'), betterPlantsSummary);
+      this.addPerformanceLevel(4, 6, worksheet.getCell('E56'), betterPlantsSummary);
+      this.addPerformanceLevel(6, 8, worksheet.getCell('E57'), betterPlantsSummary);
+      this.addPerformanceLevel(8, 10, worksheet.getCell('E58'), betterPlantsSummary);
+      this.addPerformanceLevel(10, 15, worksheet.getCell('E59'), betterPlantsSummary);
+      this.addPerformanceLevel(15, 20, worksheet.getCell('E60'), betterPlantsSummary);
+      this.addPerformanceLevel(20, 25, worksheet.getCell('E61'), betterPlantsSummary);
+      this.addPerformanceLevel(25, 30, worksheet.getCell('E62'), betterPlantsSummary);
+      this.addPerformanceLevel(30, 35, worksheet.getCell('E63'), betterPlantsSummary);
+      this.addPerformanceLevel(35, undefined, worksheet.getCell('E64'), betterPlantsSummary);
+    }
   }
 
   writeWaterReportInformation(workbook: ExcelJS.Workbook, account: IdbAccount, report: IdbAccountReport, betterPlantsSummary: BetterPlantsSummary) {
@@ -229,7 +231,7 @@ export class BetterPlantsExcelWriterService {
     } else {
       worksheet = workbook.getWorksheet('Baseline Form');
     }
-    
+
     worksheet.name = 'Baseline Form (' + betterPlantsSummary.reportYear + ')';
 
     //account name
@@ -371,18 +373,20 @@ export class BetterPlantsExcelWriterService {
       worksheet.getCell('D61').value = report.betterPlantsReportSetup.modificationNotes;
     }
 
-    this.addPerformanceLevel(undefined, 0, worksheet.getCell('E71'), betterPlantsSummary);
-    this.addPerformanceLevel(0, 2, worksheet.getCell('E72'), betterPlantsSummary);
-    this.addPerformanceLevel(2, 4, worksheet.getCell('E73'), betterPlantsSummary);
-    this.addPerformanceLevel(4, 6, worksheet.getCell('E74'), betterPlantsSummary);
-    this.addPerformanceLevel(6, 8, worksheet.getCell('E75'), betterPlantsSummary);
-    this.addPerformanceLevel(8, 10, worksheet.getCell('E76'), betterPlantsSummary);
-    this.addPerformanceLevel(10, 15, worksheet.getCell('E77'), betterPlantsSummary);
-    this.addPerformanceLevel(15, 20, worksheet.getCell('E78'), betterPlantsSummary);
-    this.addPerformanceLevel(20, 25, worksheet.getCell('E79'), betterPlantsSummary);
-    this.addPerformanceLevel(25, 30, worksheet.getCell('E80'), betterPlantsSummary);
-    this.addPerformanceLevel(30, 35, worksheet.getCell('E81'), betterPlantsSummary);
-    this.addPerformanceLevel(35, undefined, worksheet.getCell('E82'), betterPlantsSummary);
+    if (report.betterPlantsReportSetup.includePerformanceTable) {
+      this.addPerformanceLevel(undefined, 0, worksheet.getCell('E71'), betterPlantsSummary);
+      this.addPerformanceLevel(0, 2, worksheet.getCell('E72'), betterPlantsSummary);
+      this.addPerformanceLevel(2, 4, worksheet.getCell('E73'), betterPlantsSummary);
+      this.addPerformanceLevel(4, 6, worksheet.getCell('E74'), betterPlantsSummary);
+      this.addPerformanceLevel(6, 8, worksheet.getCell('E75'), betterPlantsSummary);
+      this.addPerformanceLevel(8, 10, worksheet.getCell('E76'), betterPlantsSummary);
+      this.addPerformanceLevel(10, 15, worksheet.getCell('E77'), betterPlantsSummary);
+      this.addPerformanceLevel(15, 20, worksheet.getCell('E78'), betterPlantsSummary);
+      this.addPerformanceLevel(20, 25, worksheet.getCell('E79'), betterPlantsSummary);
+      this.addPerformanceLevel(25, 30, worksheet.getCell('E80'), betterPlantsSummary);
+      this.addPerformanceLevel(30, 35, worksheet.getCell('E81'), betterPlantsSummary);
+      this.addPerformanceLevel(35, undefined, worksheet.getCell('E82'), betterPlantsSummary);
+    }
   }
 
   addPerformanceLevel(min: number, max: number, cell: ExcelJS.Cell, betterPlantsSummary: BetterPlantsSummary) {
