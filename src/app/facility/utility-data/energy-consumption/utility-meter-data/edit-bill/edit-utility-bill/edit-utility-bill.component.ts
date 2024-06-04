@@ -10,6 +10,8 @@ import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
 import * as _ from 'lodash';
 import { checkShowEmissionsOutputRate } from 'src/app/shared/sharedHelperFuntions';
+import { FuelTypeOption } from 'src/app/shared/fuel-options/fuelTypeOption';
+import { getFuelTypeOptions } from 'src/app/shared/fuel-options/getFuelTypeOptions';
 
 @Component({
   selector: 'app-edit-utility-bill',
@@ -39,16 +41,17 @@ export class EditUtilityBillComponent implements OnInit {
   volumeUnit: string;
   emissionsResults: EmissionsResults;
   showEmissions: boolean;
-  showMarketEmissions: boolean;
   showStationaryEmissions: boolean;
   showScope2OtherEmissions: boolean;
   usingMeterHeatCapacity: boolean;
+  isBiofuel: boolean;
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService,
     private facilityDbService: FacilitydbService,
     private eGridService: EGridService,
     private customFuelDbService: CustomFuelDbService) { }
 
   ngOnInit(): void {
+    this.setIsBiofuel();
     this.setShowEmissions();
     this.setTotalEmissions();
     this.setUsingMeterHeatCapacity();
@@ -65,7 +68,6 @@ export class EditUtilityBillComponent implements OnInit {
 
   setShowEmissions() {
     this.showEmissions = checkShowEmissionsOutputRate(this.editMeter);
-    this.showMarketEmissions = this.editMeter.source == 'Electricity';
     this.showStationaryEmissions = this.editMeter.source == 'Natural Gas' || this.editMeter.source == 'Other Fuels';
     this.showScope2OtherEmissions = this.editMeter.source == 'Other Energy';
   }
@@ -126,6 +128,19 @@ export class EditUtilityBillComponent implements OnInit {
     this.usingMeterHeatCapacity = (this.meterDataForm.controls.heatCapacity.value == this.editMeter.heatCapacity);
     if (!this.usingMeterHeatCapacity) {
       this.meterDataForm.controls.heatCapacity.enable();
+    }
+  }
+
+  setIsBiofuel() {
+    if (this.editMeter.source != 'Natural Gas') {
+      let allFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
+      let fuels: Array<FuelTypeOption> = getFuelTypeOptions(this.editMeter.source, this.editMeter.phase, allFuels, this.editMeter.scope, undefined, undefined)
+      let meterFuel: FuelTypeOption = fuels.find(fuel => {
+        return fuel.value == this.editMeter.fuel;
+      });
+      this.isBiofuel = meterFuel.isBiofuel;
+    } else {
+      this.isBiofuel = false;
     }
   }
 }

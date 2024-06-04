@@ -29,6 +29,8 @@ export interface EmissionsResults {
   fugitiveEmissions: number,
   processEmissions: number,
   stationaryBiogenicEmmissions: number,
+  stationaryCarbonEmissions: number,
+  stationaryOtherEmissions: number,
   stationaryEmissions: number,
   totalScope1Emissions: number,
   totalWithMarketEmissions: number,
