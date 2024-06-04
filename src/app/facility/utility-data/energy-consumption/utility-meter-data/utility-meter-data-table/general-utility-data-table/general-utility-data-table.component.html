@@ -33,7 +33,8 @@
                 Cost</th>
 
             <ng-container *ngIf="showEmissions">
-                <ng-container *ngIf="selectedMeter.source == 'Natural Gas' || selectedMeter.source == 'Other Fuels'">
+                <ng-template [ngIf]="selectedMeter.source == 'Natural Gas' || selectedMeter.source == 'Other Fuels'"
+                    [ngIfElse]="otherEnergyHeadersBlock">
 
                     <th *ngIf="generalUtilityDataFilters.stationaryBiogenicEmmissions"
                         (click)="setOrderDataField('stationaryBiogenicEmmissions')"
@@ -53,10 +54,17 @@
                         (tonne
                         CO<sub>2</sub>e)</th>
 
-                </ng-container>
-                <th *ngIf="generalUtilityDataFilters.totalEmissions" (click)="setOrderDataField('stationaryEmissions')"
-                    [ngClass]="{'active': orderDataField == 'stationaryEmissions'}">Total <br>Emissions (tonne
-                    CO<sub>2</sub>e)</th>
+                    <th *ngIf="generalUtilityDataFilters.totalEmissions"
+                        (click)="setOrderDataField('stationaryEmissions')"
+                        [ngClass]="{'active': orderDataField == 'stationaryEmissions'}">Total <br>Emissions (tonne
+                        CO<sub>2</sub>e)</th>
+                </ng-template>
+                <ng-template #otherEnergyHeadersBlock>
+                    <th *ngIf="generalUtilityDataFilters.totalEmissions"
+                        (click)="setOrderDataField('otherScope2Emissions')"
+                        [ngClass]="{'active': orderDataField == 'otherScope2Emissions'}">Total <br>Emissions (tonne
+                        CO<sub>2</sub>e)</th>
+                </ng-template>
 
 
             </ng-container>
@@ -90,7 +98,8 @@
 
             <!--TODO: update table and filters for emissions (scope2other, stationary)-->
             <ng-container *ngIf="showEmissions">
-                <ng-template [ngIf]="selectedMeter.source == 'Natural Gas' || selectedMeter.source == 'Other Fuels'" [ngIfElse]="otherEnergyBlock">
+                <ng-template [ngIf]="selectedMeter.source == 'Natural Gas' || selectedMeter.source == 'Other Fuels'"
+                    [ngIfElse]="otherEnergyBlock">
 
                     <td *ngIf="generalUtilityDataFilters.stationaryBiogenicEmmissions">
                         {{meterData.stationaryBiogenicEmmissions
