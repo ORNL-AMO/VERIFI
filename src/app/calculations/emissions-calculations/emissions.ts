@@ -1,4 +1,4 @@
-import { IdbCustomFuel, IdbFacility, IdbUtilityMeter } from "src/app/models/idb";
+import { IdbCustomFuel, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from "src/app/models/idb";
 import { ConvertValue } from "../conversions/convertValue";
 import { EmissionsResults, SubregionEmissions } from "src/app/models/eGridEmissions";
 import * as _ from 'lodash';
@@ -319,4 +319,30 @@ export function combineEmissionsResults(results: Array<EmissionsResults>): Emiss
         stationaryCarbonEmissions: _.sumBy(results, (result: EmissionsResults) => { return result.stationaryCarbonEmissions }),
         stationaryOtherEmissions: _.sumBy(results, (result: EmissionsResults) => { return result.stationaryOtherEmissions })
     }
+}
+
+export function setUtilityDataEmissionsValues(utilityData: IdbUtilityMeterData, emissionsResults: EmissionsResults): IdbUtilityMeterData {
+    utilityData.RECs = emissionsResults.RECs;
+    utilityData.locationElectricityEmissions = emissionsResults.locationElectricityEmissions;
+    utilityData.marketElectricityEmissions = emissionsResults.marketElectricityEmissions;
+    utilityData.otherScope2Emissions = emissionsResults.otherScope2Emissions;
+    utilityData.scope2LocationEmissions = emissionsResults.scope2LocationEmissions;
+    utilityData.scope2MarketEmissions = emissionsResults.scope2MarketEmissions;
+    utilityData.excessRECs = emissionsResults.excessRECs;
+    utilityData.excessRECsEmissions = emissionsResults.excessRECsEmissions;
+    utilityData.mobileCarbonEmissions = emissionsResults.mobileCarbonEmissions;
+    utilityData.mobileBiogenicEmissions = emissionsResults.mobileBiogenicEmissions;
+    utilityData.mobileOtherEmissions = emissionsResults.mobileOtherEmissions;
+    utilityData.mobileTotalEmissions = emissionsResults.mobileTotalEmissions;
+    utilityData.fugitiveEmissions = emissionsResults.fugitiveEmissions;
+    utilityData.processEmissions = emissionsResults.processEmissions;
+    utilityData.stationaryEmissions = emissionsResults.stationaryEmissions;
+    utilityData.totalScope1Emissions = emissionsResults.totalScope1Emissions;
+    utilityData.totalWithMarketEmissions = emissionsResults.totalWithMarketEmissions;
+    utilityData.totalWithLocationEmissions = emissionsResults.totalWithLocationEmissions;
+    utilityData.totalBiogenicEmissions = emissionsResults.totalBiogenicEmissions;
+    utilityData.stationaryBiogenicEmmissions = emissionsResults.stationaryBiogenicEmmissions;
+    utilityData.stationaryCarbonEmissions = emissionsResults.stationaryCarbonEmissions;
+    utilityData.stationaryOtherEmissions = emissionsResults.stationaryOtherEmissions;
+    return utilityData;
 }

@@ -9,7 +9,7 @@ import { checkShowEmissionsOutputRate, getIsEnergyMeter, getIsEnergyUnit } from 
 import { EmissionsResults } from 'src/app/models/eGridEmissions';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { getEmissions } from 'src/app/calculations/emissions-calculations/emissions';
+import { getEmissions, setUtilityDataEmissionsValues } from 'src/app/calculations/emissions-calculations/emissions';
 import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
 
 @Component({
@@ -184,29 +184,41 @@ export class GeneralUtilityDataTableComponent implements OnInit {
     let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
     this.selectedMeterData.forEach(dataItem => {
       let emissionsValues: EmissionsResults = getEmissions(this.selectedMeter, dataItem.totalEnergyUse, this.selectedMeter.energyUnit, new Date(dataItem.readDate).getFullYear(), false, [facility], this.eGridService.co2Emissions, customFuels, dataItem.totalVolume, undefined, undefined, dataItem.heatCapacity);
-      //TODO: Check after updating utility data
-      dataItem.totalMarketEmissions = emissionsValues.totalWithMarketEmissions;
-      dataItem.totalLocationEmissions = emissionsValues.totalWithLocationEmissions;
-      dataItem.RECs = emissionsValues.RECs;
-      dataItem.excessRECs = emissionsValues.excessRECs;
-      dataItem.excessRECsEmissions = emissionsValues.excessRECsEmissions;
-    })
+      dataItem = setUtilityDataEmissionsValues(dataItem, emissionsValues);
+    });
   }
 
   setNumColumns() {
     this.numDetailedCharges = 0;
     this.numGeneralInformation = 2;
     this.numEmissions = 0;
-    this.showEmissionsSection = (this.generalUtilityDataFilters.totalMarketEmissions || this.generalUtilityDataFilters.totalLocationEmissions) && this.showEmissions;
-    this.showDetailedCharges = (this.generalUtilityDataFilters.commodityCharge || this.generalUtilityDataFilters.deliveryCharge || this.generalUtilityDataFilters.otherCharge);
-    if (this.showEmissions) {
-      if (this.generalUtilityDataFilters.totalLocationEmissions) {
-        this.numEmissions++;
+    if (this.selectedMeter.source == 'Other Fuels' || this.selectedMeter.source == 'Natural Gas') {
+      this.showEmissionsSection = (this.generalUtilityDataFilters.stationaryBiogenicEmmissions || this.generalUtilityDataFilters.stationaryCarbonEmissions || this.generalUtilityDataFilters.stationaryOtherEmissions || this.generalUtilityDataFilters.totalEmissions) && this.showEmissions;
+      if (this.showEmissions) {
+        if (this.generalUtilityDataFilters.stationaryBiogenicEmmissions) {
+          this.numEmissions++;
+        }
+        if (this.generalUtilityDataFilters.stationaryCarbonEmissions) {
+          this.numEmissions++;
+        }
+        if (this.generalUtilityDataFilters.stationaryOtherEmissions) {
+          this.numEmissions++;
+        }
+        if (this.generalUtilityDataFilters.totalEmissions) {
+          this.numEmissions++;
+        }
       }
-      if (this.generalUtilityDataFilters.totalMarketEmissions) {
-        this.numEmissions++;
+    } else {
+      this.showEmissionsSection = this.generalUtilityDataFilters.totalEmissions && this.showEmissions;
+      if (this.showEmissions) {
+        if (this.generalUtilityDataFilters.totalEmissions) {
+          this.numEmissions++;
+        }
       }
     }
+
+    this.showDetailedCharges = (this.generalUtilityDataFilters.commodityCharge || this.generalUtilityDataFilters.deliveryCharge || this.generalUtilityDataFilters.otherCharge);
+
     if (this.generalUtilityDataFilters.totalVolume && this.showVolumeColumn) {
       this.numGeneralInformation++;
     }
