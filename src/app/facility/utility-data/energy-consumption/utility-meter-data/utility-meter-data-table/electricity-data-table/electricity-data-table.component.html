@@ -152,8 +152,8 @@
             <td *ngIf="generalInformationFilters.realDemand">{{meterData.totalRealDemand | customNumber}}</td>
             <td *ngIf="generalInformationFilters.billedDemand">{{meterData.totalBilledDemand | customNumber}}</td>
 
-            <td *ngIf="emissionsFilters.marketEmissions">{{meterData.totalMarketEmissions | customNumber}}</td>
-            <td *ngIf="emissionsFilters.locationEmissions">{{meterData.totalLocationEmissions | customNumber}}</td>
+            <td *ngIf="emissionsFilters.marketEmissions">{{meterData.totalWithMarketEmissions | customNumber}}</td>
+            <td *ngIf="emissionsFilters.locationEmissions">{{meterData.totalWithLocationEmissions | customNumber}}</td>
             <td *ngIf="emissionsFilters.recs">{{meterData.RECs | customNumber}}</td>
 
             <td *ngIf="detailedChargesFilters.block1">{{meterData.block1Consumption | customNumber}}</td>

@@ -1,4 +1,4 @@
-<ng-container *ngIf="!selectedFuelTypeOption.isMobile">
+<ng-container *ngIf="meterForm.controls.source.value != 'Other Fuels'">
     <label>Fuel Emissions</label>
     <table class="table table-sm table-bordered">
         <tbody>
@@ -65,7 +65,7 @@
     </table>
 </ng-container>
 
-<ng-container *ngIf="selectedFuelTypeOption.isMobile">
+<ng-container *ngIf="meterForm.controls.source.value == 'Other Fuels'">
     <label>Fuel Emissions</label>
     <table class="table table-sm table-bordered">
         <tbody>

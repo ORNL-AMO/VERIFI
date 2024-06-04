@@ -6,7 +6,7 @@ import * as _ from 'lodash';
 import { CopyTableService } from 'src/app/shared/helper-services/copy-table.service';
 import { AdditionalChargesFilters, DetailedChargesFilters, EmissionsFilters, GeneralInformationFilters } from 'src/app/models/meterDataFilter';
 import { EmissionsResults } from 'src/app/models/eGridEmissions';
-import { getEmissions } from 'src/app/calculations/emissions-calculations/emissions';
+import { getEmissions, setUtilityDataEmissionsValues } from 'src/app/calculations/emissions-calculations/emissions';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
@@ -169,12 +169,8 @@ export class ElectricityDataTableComponent implements OnInit {
     let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
     this.selectedMeterData.forEach(dataItem => {
       let emissionsValues: EmissionsResults = getEmissions(this.selectedMeter, dataItem.totalEnergyUse, this.selectedMeter.energyUnit, new Date(dataItem.readDate).getFullYear(), false, [facility], this.eGridService.co2Emissions, customFuels, 0, undefined, undefined, dataItem.heatCapacity);
-      dataItem.totalMarketEmissions = emissionsValues.marketElectricityEmissions;
-      dataItem.totalLocationEmissions = emissionsValues.locationElectricityEmissions;
-      dataItem.RECs = emissionsValues.RECs;
-      dataItem.excessRECs = emissionsValues.excessRECs;
-      dataItem.excessRECsEmissions = emissionsValues.excessRECsEmissions;
-    })
+      dataItem = setUtilityDataEmissionsValues(dataItem, emissionsValues);
+    });
   }
 
   setColumnNumbers() {

@@ -131,11 +131,13 @@ export class UtilityMeterDataFilterComponent implements OnInit {
       this.generalUtilityDataFilters = {
         totalVolume: true,
         totalCost: true,
-        totalMarketEmissions: true,
-        totalLocationEmissions: true,
         commodityCharge: true,
         deliveryCharge: true,
         otherCharge: true,
+        stationaryBiogenicEmmissions: true,
+        stationaryCarbonEmissions: true,
+        stationaryOtherEmissions: true,
+        totalEmissions: true,
       }
     } else if (this.meter.scope == 2) {
       this.vehicleDataFilters = {
@@ -190,11 +192,13 @@ export class UtilityMeterDataFilterComponent implements OnInit {
       this.generalUtilityDataFilters = {
         totalVolume: false,
         totalCost: false,
-        totalMarketEmissions: false,
-        totalLocationEmissions: false,
         commodityCharge: false,
         deliveryCharge: false,
         otherCharge: false,
+        stationaryBiogenicEmmissions: false,
+        stationaryCarbonEmissions: false,
+        stationaryOtherEmissions: false,
+        totalEmissions: false,
       }
     } else if (this.meter.scope == 2) {
       this.vehicleDataFilters = {

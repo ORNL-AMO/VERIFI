@@ -87,32 +87,44 @@
     </div>
 
     <ng-container *ngIf="showEmissions && emissionsResults">
-      <ng-container *ngIf="showMarketEmissions">
-        <div class="col-md-6 col-sm-12">
-          <label for="marketEmissions">
-            Total Market-Based Emissions
-          </label>
-          <div class="input-group mb-3">
-            {{emissionsResults.marketElectricityEmissions| number:'1.0-0'}} tonne CO<sub>2</sub>e
-          </div>
-        </div>
-        <div class="col-md-6 col-sm-12">
-          <label for="locationEmissions">
-            Total Location-Based Emissions
-          </label>
-          <div class="input-group mb-3">
-            {{emissionsResults.locationElectricityEmissions| number:'1.0-0'}} tonne CO<sub>2</sub>e
-          </div>
-        </div>
-      </ng-container>
       <ng-container *ngIf="showStationaryEmissions">
         <div class="col-md-6 col-sm-12">
-          <label for="marketEmissions">
-            Total Stationary Emissions
-          </label>
-          <div class="input-group mb-3">
-            {{emissionsResults.stationaryEmissions| number:'1.0-0'}} tonne CO<sub>2</sub>e
-          </div>
+          <table class="table table-sm table-bordered">
+            <tbody>
+                <tr *ngIf="!isBiofuel">
+                    <th>
+                        Carbon Emissions
+                    </th>
+                    <td>
+                        {{emissionsResults.stationaryCarbonEmissions| number:'1.0-2'}} tonne CO<sub>2</sub>e
+                    </td>
+                </tr>
+                <tr *ngIf="isBiofuel">
+                    <th>
+                        Biogenic Emissions
+                    </th>
+                    <td>
+                        {{emissionsResults.stationaryBiogenicEmmissions| number:'1.0-2'}} tonne CO<sub>2</sub>e
+                    </td>
+                </tr>
+                <tr>
+                    <th>
+                        Other Emissions
+                    </th>
+                    <td>
+                        {{emissionsResults.stationaryOtherEmissions| number:'1.0-2'}} tonne CO<sub>2</sub>e
+                    </td>
+                </tr>
+                <tr>
+                    <th>
+                        Total Emissions
+                    </th>
+                    <td>
+                        {{emissionsResults.stationaryEmissions| number:'1.0-2'}} tonne CO<sub>2</sub>e
+                    </td>
+                </tr>
+            </tbody>
+        </table>
         </div>
       </ng-container>
       <ng-container *ngIf="showScope2OtherEmissions">
