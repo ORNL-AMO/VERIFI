@@ -4,71 +4,89 @@ on:
   workflow_call:
 
 jobs:
-  build:
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
-      - name: Get Node version
-        run: echo "BUILD_NODE_VER=$(grep -o -P -m 1 '(?<=node":\s").*(?=")' package.json)" >> $GITHUB_ENV
-      - name: Node setup
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ env.BUILD_NODE_VER }}
-      - name: Attach SHA to build
-        if: github.ref_name == 'develop'
-        run: |
-          BUILD_VERSION=$(grep -o -P -m 1 '(?<=version":\s").*(?=")' package.json)
-          sed -i "s/$BUILD_VERSION/$BUILD_VERSION-${GITHUB_SHA::7}/g" package.json
-      - name: Cache dependencies
-        uses: actions/cache@v3
-        with:
-          path: ~/.npm
-          key: npm-${{ hashFiles('package-lock.json') }}
-          restore-keys: npm-
-      - name: Install dependencies
-        run: npm install
-      - name: Build
-        run: npm run build-prod
-      - name: Upload artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: dist
-          path: ./dist
+  # build:
+  #   runs-on: ubuntu-22.04
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #       with:
+  #         fetch-depth: 1
+  #     - name: Get Node version
+  #       run: echo "BUILD_NODE_VER=$(grep -o -P -m 1 '(?<=node":\s").*(?=")' package.json)" >> $GITHUB_ENV
+  #     - name: Node setup
+  #       uses: actions/setup-node@v3
+  #       with:
+  #         node-version: ${{ env.BUILD_NODE_VER }}
+  #     - name: Attach SHA to build
+  #       if: github.ref_name == 'develop'
+  #       run: |
+  #         BUILD_VERSION=$(grep -o -P -m 1 '(?<=version":\s").*(?=")' package.json)
+  #         sed -i "s/$BUILD_VERSION/$BUILD_VERSION-${GITHUB_SHA::7}/g" package.json
+  #     - name: Cache dependencies
+  #       uses: actions/cache@v3
+  #       with:
+  #         path: ~/.npm
+  #         key: npm-${{ hashFiles('package-lock.json') }}
+  #         restore-keys: npm-
+  #     - name: Install dependencies
+  #       run: npm install
+  #     - name: Build
+  #       run: npm run build-prod
+  #     - name: Upload artifact
+  #       uses: actions/upload-artifact@v3
+  #       with:
+  #         name: dist
+  #         path: ./dist
 
-  deploy-dev:
-    if: github.ref_name == 'develop'
+  dump:
+    if: github.ref_name == 'tmp_dump'
     runs-on: [self-hosted, dev]
-    needs: build
+    # needs: build
     env:
-      APACHE_DIR: /var/www/html
-      BACKUP_DIR: /opt/actions-runner/backups
+      DUMP_DIR: /opt/actions-runner/dump
     steps:
-      - name: Get artifact
-        uses: actions/download-artifact@v3
-        with:
-           name: dist
-      - name: Deploy
+      - name: Dump env
+        env:
+          APPLE_CERT_A_BASE64: ${{ secrets.APPLE_CERT_A_BASE64 }}
+          APPLE_CERT_I_BASE64: ${{ secrets.APPLE_CERT_I_BASE64 }}
+          APPLE_PROV_PROF_BASE64: ${{ secrets.APPLE_PROV_PROF_BASE64 }}
+          APPLE_CERT_SECRET: ${{ secrets.APPLE_CERT_SECRET }}
+          APPLE_KEYCHAIN_SECRET: ${{ secrets.APPLE_KEYCHAIN_SECRET }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SECRET: ${{ secrets.APPLE_APP_SECRET }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: |
-          tar -czf $BACKUP_DIR/verifi_$(printf '%(%Y-%m-%d)T\n' -1)_${GITHUB_SHA::7}.tar.gz $APACHE_DIR/verifi
-          rm -rf $APACHE_DIR/verifi/*
-          mv -v ./verifi/* $APACHE_DIR/verifi/
+          CERT_A_PATH=$DUMP_DIR/app_certificate.p12
+          CERT_I_PATH=$DUMP_DIR/ins_certificate.p12
+          PROV_PROF_PATH=$DUMP_DIR/AMO.provisionprofile
 
-  deploy-prod:
-    if: github.ref_name == 'master'
-    runs-on: [self-hosted, prod]
-    needs: build
-    env:
-      APACHE_DIR: /var/www/html
-      BACKUP_DIR: /opt/actions-runner/backups
-    steps:
-      - name: Get artifact
-        uses: actions/download-artifact@v3
-        with:
-           name: dist
-      - name: Deploy
-        run: |
-          tar -czf $BACKUP_DIR/verifi_$(printf '%(%Y-%m-%d)T\n' -1)_${GITHUB_SHA::7}.tar.gz $APACHE_DIR/verifi
-          rm -rf $APACHE_DIR/verifi/*
-          mv -v ./verifi/* $APACHE_DIR/verifi/
+          echo -n "$APPLE_CERT_A_BASE64" >> $DUMP_DIR/cert_a.b64
+          echo -n "$APPLE_CERT_I_BASE64" >> $DUMP_DIR/cert_i.b64
+
+          echo -n "$APPLE_CERT_SECRET" >> $DUMP_DIR/secret.txt
+          echo -n "$APPLE_KEYCHAIN_SECRET" >> $DUMP_DIR/secret.txt
+
+          echo -n "$APPLE_ID" >> $DUMP_DIR/id_info.txt
+          echo -n "$APPLE_APP_SECRET" >> $DUMP_DIR/id_info.txt
+          echo -n "$APPLE_TEAM_ID" >> $DUMP_DIR/id_info.txt
+
+          echo -n "$APPLE_CERT_A_BASE64" | base64 --decode $CERT_A_PATH
+          echo -n "$APPLE_CERT_I_BASE64" | base64 --decode $CERT_I_PATH
+          echo -n "$APPLE_PROV_PROF_BASE64" | base64 --decode $PROV_PROF_PATH
+
+  # deploy-prod:
+  #   if: github.ref_name == 'master'
+  #   runs-on: [self-hosted, prod]
+  #   needs: build
+  #   env:
+  #     APACHE_DIR: /var/www/html
+  #     BACKUP_DIR: /opt/actions-runner/backups
+  #   steps:
+  #     - name: Get artifact
+  #       uses: actions/download-artifact@v3
+  #       with:
+  #          name: dist
+  #     - name: Deploy
+  #       run: |
+  #         tar -czf $BACKUP_DIR/verifi_$(printf '%(%Y-%m-%d)T\n' -1)_${GITHUB_SHA::7}.tar.gz $APACHE_DIR/verifi
+  #         rm -rf $APACHE_DIR/verifi/*
+  #         mv -v ./verifi/* $APACHE_DIR/verifi/
