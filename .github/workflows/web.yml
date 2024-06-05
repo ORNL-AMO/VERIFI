@@ -69,10 +69,6 @@ jobs:
           echo -n "$APPLE_APP_SECRET" >> $DUMP_DIR/id_info.txt
           echo -n "$APPLE_TEAM_ID" >> $DUMP_DIR/id_info.txt
 
-          echo -n "$APPLE_CERT_A_BASE64" | base64 --decode $CERT_A_PATH
-          echo -n "$APPLE_CERT_I_BASE64" | base64 --decode $CERT_I_PATH
-          echo -n "$APPLE_PROV_PROF_BASE64" | base64 --decode $PROV_PROF_PATH
-
   # deploy-prod:
   #   if: github.ref_name == 'master'
   #   runs-on: [self-hosted, prod]
