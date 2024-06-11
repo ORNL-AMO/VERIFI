@@ -38,12 +38,30 @@
                     </th>
                     <th>
                         CO<sub>2</sub> Factor
+                        <ng-template [ngIf]="isMobile" [ngIfElse]="notMobileBlock1">
+                            (kg / gal)
+                        </ng-template>
+                        <ng-template #notMobileBlock1>
+                            (kg)
+                        </ng-template>
                     </th>
                     <th>
                         CH<sub>4</sub> Factor
+                        <ng-template [ngIf]="isMobile" [ngIfElse]="notMobileBlock1">
+                            (g / gal)
+                        </ng-template>
+                        <ng-template #notMobileBlock1>
+                            (g)
+                        </ng-template>
                     </th>
                     <th>
                         N<sub>2</sub>O Factor
+                        <ng-template [ngIf]="isMobile" [ngIfElse]="notMobileBlock1">
+                            (g / gal)
+                        </ng-template>
+                        <ng-template #notMobileBlock1>
+                            (g)
+                        </ng-template>
                     </th>
                     <th>
                         Emissions Output Rate<br>
