@@ -1,28 +1,44 @@
 <form>
     <div class="row">
         <div class="col-12">
-            <label class="semibold">Facility Meter Groups to Include</label>
-        </div>
-        <div class="col-2 pb-2" *ngFor="let facilityOption of selectedReport.betterClimateReportSetup.includedFacilityGroups">
             <div class="form-check">
-                <input type="checkbox" class="form-check-input" name="{{'includeFacility_'+facilityOption.facilityId}}"
-                    id="{{'includeFacility_'+facilityOption.facilityId}}" [(ngModel)]="facilityOption.include"
-                    (change)="save()">
-                <label class="form-check-label bold"
-                    for="{{'includeFacility_'+facilityOption.facilityId}}">{{facilityOption.facilityId |
-                    facilityName}}</label>
+                <input type="radio" class="form-check-input" name="selectMeterData" [value]="false" id="includeAll"
+                    [(ngModel)]="selectedReport.betterClimateReportSetup.selectMeterData">
+                <label class="form-check-label" for="includeAll">Include all account meter data</label>
             </div>
-            <ng-container *ngIf="facilityOption.include">
-                <div class="form-check secondary-check" *ngFor="let groupOption of facilityOption.groups">
-                    <input type="checkbox" class="form-check-input" name="{{'includeGroup_'+groupOption.groupId}}"
-                        id="{{'includeGroup_'+groupOption.groupId}}" [(ngModel)]="groupOption.include"
-                        (change)="save()">
-                    <label class="form-check-label"
-                        for="{{'includeFacility_'+facilityOption.facilityId}}">{{groupOption.groupId |
-                        groupName}}</label>
-                </div>
-            </ng-container>
+            <div class="form-check">
+                <input type="radio" class="form-check-input" name="selectMeterData" [value]="true"
+                    id="selectMeterGroups" [(ngModel)]="selectedReport.betterClimateReportSetup.selectMeterData">
+                <label class="form-check-label" for="selectMeterGroups">Select meter groups to include</label>
+            </div>
         </div>
+        <ng-container *ngIf="selectedReport.betterClimateReportSetup.selectMeterData">
+            <div class="col-12 pt-2">
+                <label class="semibold">Facility Meter Groups:</label>
+            </div>
+            <div class="col-2 pb-2"
+                *ngFor="let facilityOption of selectedReport.betterClimateReportSetup.includedFacilityGroups">
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input"
+                        name="{{'includeFacility_'+facilityOption.facilityId}}"
+                        id="{{'includeFacility_'+facilityOption.facilityId}}" [(ngModel)]="facilityOption.include"
+                        (change)="save()">
+                    <label class="form-check-label bold"
+                        for="{{'includeFacility_'+facilityOption.facilityId}}">{{facilityOption.facilityId |
+                        facilityName}}</label>
+                </div>
+                <ng-container *ngIf="facilityOption.include">
+                    <div class="form-check secondary-check" *ngFor="let groupOption of facilityOption.groups">
+                        <input type="checkbox" class="form-check-input" name="{{'includeGroup_'+groupOption.groupId}}"
+                            id="{{'includeGroup_'+groupOption.groupId}}" [(ngModel)]="groupOption.include"
+                            (change)="save()">
+                        <label class="form-check-label"
+                            for="{{'includeFacility_'+facilityOption.facilityId}}">{{groupOption.groupId |
+                            groupName}}</label>
+                    </div>
+                </ng-container>
+            </div>
+        </ng-container>
         <div class="col-12">
             <hr>
         </div>
@@ -34,7 +50,7 @@
 
 <form [formGroup]="reportForm">
     <div class="row">
-        <div class="col">
+        <div class="col-4">
             <label class="semibold">Report Sections to Include</label>
             <div class="form-check">
                 <input type="checkbox" class="form-check-input" name="includePortfolioInformation"
@@ -79,7 +95,7 @@
             </div>
         </div>
 
-        <div class="col">
+        <div class="col-4">
             <label class="semibold">Reporting toward a market-based or location-based
                 goal?</label>
             <div class="form-check">
@@ -95,7 +111,7 @@
 
 
         </div>
-        <div class="col">
+        <div class="col-4">
             <label class="semibold">
                 Data Table Options
             </label>

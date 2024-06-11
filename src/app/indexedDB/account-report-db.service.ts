@@ -152,6 +152,7 @@ export class AccountReportDbService {
         includePercentContributionsInTables: true,
         includeVehicleEnergyUse: true,
         includeStationaryEnergyUse: true,
+        selectMeterData: false,
         includedFacilityGroups: facilities.map(facility => {
           return {
             facilityId: facility.guid,

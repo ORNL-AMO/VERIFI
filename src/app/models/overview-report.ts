@@ -145,6 +145,7 @@ export interface BetterClimateReportSetup {
   includePercentContributionsInTables: boolean,
   includeVehicleEnergyUse: boolean,
   includeStationaryEnergyUse: boolean,
+  selectMeterData: boolean,
   includedFacilityGroups: Array<{
     facilityId: string,
     include: boolean,

@@ -225,33 +225,41 @@ export class BetterClimateReport {
     }
 
     getSelectedFacilities(betterClimateReportSetup: BetterClimateReportSetup, facilities: Array<IdbFacility>): Array<IdbFacility> {
-        let selectedFacilities: Array<IdbFacility> = new Array();
-        betterClimateReportSetup.includedFacilityGroups.forEach(facilityOption => {
-            if (facilityOption.include) {
-                let facility: IdbFacility = facilities.find(facility => { return facility.guid == facilityOption.facilityId });
-                selectedFacilities.push(facility);
-            }
-        });
-        return selectedFacilities;
+        if (betterClimateReportSetup.selectMeterData) {
+            let selectedFacilities: Array<IdbFacility> = new Array();
+            betterClimateReportSetup.includedFacilityGroups.forEach(facilityOption => {
+                if (facilityOption.include) {
+                    let facility: IdbFacility = facilities.find(facility => { return facility.guid == facilityOption.facilityId });
+                    selectedFacilities.push(facility);
+                }
+            });
+            return selectedFacilities;
+        } else {
+            return facilities;
+        }
     }
 
     getSelectedMeters(betterClimateReportSetup: BetterClimateReportSetup, meters: Array<IdbUtilityMeter>): Array<IdbUtilityMeter> {
-        let selectedMeters: Array<IdbUtilityMeter> = new Array();
-        betterClimateReportSetup.includedFacilityGroups.forEach(facilityOption => {
-            if (facilityOption.include) {
-                facilityOption.groups.forEach(groupOption => {
-                    if (groupOption.include) {
-                        let groupMeters: Array<IdbUtilityMeter> = meters.filter(meter => {
-                            return meter.groupId == groupOption.groupId;
-                        });
-                        groupMeters.forEach(meter => {
-                            selectedMeters.push(meter);
-                        })
-                    }
-                });
-            }
-        });
-        return selectedMeters;
+        if (betterClimateReportSetup.selectMeterData) {
+            let selectedMeters: Array<IdbUtilityMeter> = new Array();
+            betterClimateReportSetup.includedFacilityGroups.forEach(facilityOption => {
+                if (facilityOption.include) {
+                    facilityOption.groups.forEach(groupOption => {
+                        if (groupOption.include) {
+                            let groupMeters: Array<IdbUtilityMeter> = meters.filter(meter => {
+                                return meter.groupId == groupOption.groupId;
+                            });
+                            groupMeters.forEach(meter => {
+                                selectedMeters.push(meter);
+                            })
+                        }
+                    });
+                }
+            });
+            return selectedMeters;
+        } else {
+            return meters;
+        }
     }
 
 }

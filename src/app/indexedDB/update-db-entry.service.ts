@@ -182,37 +182,43 @@ export class UpdateDbEntryService {
       report.betterPlantsReportSetup.includePerformanceTable = true;
     }
 
-    if (report.reportType == 'betterClimate' && report.betterClimateReportSetup && report.betterClimateReportSetup.includedFacilityGroups == undefined) {
-      console.log('here...?')
-      let includedFacilityGroups: Array<{
-        facilityId: string,
-        include: boolean,
-        groups: Array<{
-          groupId: string,
-          include: boolean
-        }>
-      }> = new Array();
+    if (report.reportType == 'betterClimate' && report.betterClimateReportSetup) {
+      if (report.betterClimateReportSetup.selectMeterData == undefined) {
+        report.betterClimateReportSetup.selectMeterData = false;
+        isChanged = true;
+      }
+      if (report.betterClimateReportSetup.includedFacilityGroups == undefined) {
+        console.log('here...?')
+        let includedFacilityGroups: Array<{
+          facilityId: string,
+          include: boolean,
+          groups: Array<{
+            groupId: string,
+            include: boolean
+          }>
+        }> = new Array();
 
-      facilities.forEach(facility => {
-        if (facility.accountId == report.accountId) {
-          let facilityGroups: Array<{ groupId: string, include: boolean }> = new Array();
-          groups.forEach(group => {
-            if (group.facilityId == facility.guid) {
-              facilityGroups.push({
-                groupId: group.guid,
-                include: true
-              });
-            }
-          });
-          includedFacilityGroups.push({
-            facilityId: facility.guid,
-            include: true,
-            groups: facilityGroups
-          });
-        }
-      });
-      report.betterClimateReportSetup.includedFacilityGroups = includedFacilityGroups;
-      isChanged = true;
+        facilities.forEach(facility => {
+          if (facility.accountId == report.accountId) {
+            let facilityGroups: Array<{ groupId: string, include: boolean }> = new Array();
+            groups.forEach(group => {
+              if (group.facilityId == facility.guid) {
+                facilityGroups.push({
+                  groupId: group.guid,
+                  include: true
+                });
+              }
+            });
+            includedFacilityGroups.push({
+              facilityId: facility.guid,
+              include: true,
+              groups: facilityGroups
+            });
+          }
+        });
+        report.betterClimateReportSetup.includedFacilityGroups = includedFacilityGroups;
+        isChanged = true;
+      }
     }
 
 
