@@ -106,7 +106,12 @@ export class CalanderizationComponent implements OnInit {
     if (this.selectedMeter && this.calanderizedDataFilters) {
       let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
       let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
-      let calanderizedMeterData: Array<CalanderizedMeter> = getCalanderizedMeterData([this.selectedMeter], facilityMeterData, this.selectedFacility, false, undefined, this.eGridService.co2Emissions, customFuels, [this.selectedFacility]);
+      let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
+      let allCalanderizedMeterData: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, facilityMeterData, this.selectedFacility, false, undefined, this.eGridService.co2Emissions, customFuels, [this.selectedFacility]);
+
+      let calanderizedMeterData: Array<CalanderizedMeter> = allCalanderizedMeterData.filter(cMeter => {
+        return cMeter.meter.guid == this.selectedMeter.guid
+      });
       calanderizedMeterData = this.filterMeterDataDateRanges(calanderizedMeterData);
       this.calanderizedMeter = calanderizedMeterData[0];
       if (this.selectedMeter.scope != 2) {
@@ -119,7 +124,7 @@ export class CalanderizationComponent implements OnInit {
       } else {
         this.isRECs = (this.selectedMeter.agreementType == 4 || this.selectedMeter.agreementType == 6);
       }
-      this.setDateRange(calanderizedMeterData)
+      this.setDateRange(allCalanderizedMeterData)
     }
   }
 
