@@ -9,7 +9,6 @@ import * as _ from 'lodash';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { UtilityColors } from 'src/app/shared/utilityColors';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
@@ -268,13 +267,6 @@ export class CalanderizationComponent implements OnInit {
       this.setCalanderizedMeterData();
     } else {
       this.hasMeterData = false;
-    }
-  }
-
-
-  getColor(): string {
-    if (UtilityColors[this.selectedMeter.source]) {
-      return UtilityColors[this.selectedMeter.source].color
     }
   }
 }
