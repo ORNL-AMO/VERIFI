@@ -18,6 +18,7 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { getFirstBillEntryFromCalanderizedMeterData, getLastBillEntryFromCalanderizedMeterData } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
 import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
+import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 
 @Component({
   selector: 'app-meter-grouping',
@@ -60,7 +61,8 @@ export class MeterGroupingComponent implements OnInit {
     private loadingService: LoadingService, private toastNoticationService: ToastNotificationsService,
     private meterGroupingService: MeterGroupingService, private analysisDbService: AnalysisDbService, private sharedDataService: SharedDataService,
     private dbChangesService: DbChangesService, private accountDbService: AccountdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService) { }
+    private utilityMeterDataDbService: UtilityMeterDatadbService,
+    private accountReportDbService: AccountReportDbService) { }
 
   ngOnInit(): void {
     this.dataDisplay = this.meterGroupingService.dataDisplay;
@@ -200,6 +202,9 @@ export class MeterGroupingComponent implements OnInit {
     //update analysis items
     await this.analysisDbService.deleteGroup(this.groupToDelete.guid);
     await this.dbChangesService.setAnalysisItems(selectedAccount, false, this.selectedFacility);
+    //update BCC reports
+    await this.accountReportDbService.updateReportsRemoveGroup(this.groupToDelete.guid);
+    await this.dbChangesService.setAccountReports(selectedAccount);
     this.closeDeleteGroup();
     this.loadingService.setLoadingStatus(false);
     this.toastNoticationService.showToast("Meter Group Deleted!", undefined, undefined, false, "alert-success");
@@ -248,19 +253,19 @@ export class MeterGroupingComponent implements OnInit {
     }
   }
 
-  openEditMeterModal(meter: IdbUtilityMeter){
+  openEditMeterModal(meter: IdbUtilityMeter) {
     this.meterToEdit = meter;
     this.showEditMeterModal = true;
     this.sharedDataService.modalOpen.next(true);
   }
 
-  closeEditMeter(){
+  closeEditMeter() {
     this.meterToEdit = undefined;
     this.showEditMeterModal = false;
     this.sharedDataService.modalOpen.next(false);
   }
 
-  async saveMeterEdit(){    
+  async saveMeterEdit() {
     await firstValueFrom(this.utilityMeterDbService.updateWithObservable(this.meterToEdit));
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.setMeters(selectedAccount, this.selectedFacility);

@@ -2,11 +2,11 @@ import { Injectable } from '@angular/core';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { LocalStorageService } from 'ngx-webstorage';
 import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
-import { IdbAccount, IdbAccountReport, IdbFacility } from '../models/idb';
+import { IdbAccount, IdbAccountReport, IdbFacility, IdbUtilityMeterGroup } from '../models/idb';
 import { AccountdbService } from './account-db.service';
 import { FacilitydbService } from './facility-db.service';
 import { LoadingService } from '../core-components/loading/loading.service';
-import { ParseTreeResult } from '@angular/compiler';
+import { UtilityMeterGroupdbService } from './utilityMeterGroup-db.service';
 
 @Injectable({
   providedIn: 'root'
@@ -18,7 +18,8 @@ export class AccountReportDbService {
   constructor(private dbService: NgxIndexedDBService, private localStorageService: LocalStorageService,
     private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService,
-    private loadingService: LoadingService) {
+    private loadingService: LoadingService,
+    private utilityMeterGroupDbService: UtilityMeterGroupdbService) {
     this.accountReports = new BehaviorSubject<Array<IdbAccountReport>>([]);
     this.selectedReport = new BehaviorSubject<IdbAccountReport>(undefined);
     //subscribe after initialization
@@ -75,6 +76,7 @@ export class AccountReportDbService {
       account = this.accountDbService.selectedAccount.getValue();
     }
     let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    let groups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.accountMeterGroups.getValue();
     return {
       accountId: account.guid,
       guid: Math.random().toString(36).substr(2, 9),
@@ -150,17 +152,57 @@ export class AccountReportDbService {
         includePercentContributionsInTables: true,
         includeVehicleEnergyUse: true,
         includeStationaryEnergyUse: true,
+        includedFacilityGroups: facilities.map(facility => {
+          return {
+            facilityId: facility.guid,
+            include: true,
+            groups: this.getFacilityGroups(facility.guid, groups)
+          }
+        }),
+
       }
     }
   }
+
+
+  getFacilityGroups(facilityId: string, groups: Array<IdbUtilityMeterGroup>): Array<{ groupId: string, include: boolean }> {
+    let facilityGroups: Array<{ groupId: string, include: boolean }> = new Array();
+    groups.forEach(group => {
+      if (group.facilityId == facilityId) {
+        facilityGroups.push({
+          groupId: group.guid,
+          include: true
+        });
+      }
+    });
+    return facilityGroups;
+  }
+
 
   async updateReportsRemoveFacility(facilityId: string) {
     let accountReports: Array<IdbAccountReport> = this.accountReports.getValue();
     for (let i = 0; i < accountReports.length; i++) {
       let report: IdbAccountReport = accountReports[i];
       report.dataOverviewReportSetup.includedFacilities = report.dataOverviewReportSetup.includedFacilities.filter(facility => { return facility.facilityId != facilityId });
-
+      if (report.betterClimateReportSetup.includedFacilityGroups) {
+        report.betterClimateReportSetup.includedFacilityGroups = report.betterClimateReportSetup.includedFacilityGroups.filter(facility => { return facility.facilityId != facilityId });
+      }
       this.loadingService.setLoadingMessage('Removing Facility From Reports (' + i + '/' + accountReports.length + ')...');
+      await firstValueFrom(this.updateWithObservable(report));
+    }
+  }
+
+  async updateReportsRemoveGroup(groupId: string) {
+    let accountReports: Array<IdbAccountReport> = this.accountReports.getValue();
+    for (let i = 0; i < accountReports.length; i++) {
+      let report: IdbAccountReport = accountReports[i];
+      if (report.betterClimateReportSetup.includedFacilityGroups) {
+        for (let facilityIndex: number = 0; facilityIndex < report.betterClimateReportSetup.includedFacilityGroups.length; facilityIndex++) {
+          report.betterClimateReportSetup.includedFacilityGroups[facilityIndex].groups = report.betterClimateReportSetup.includedFacilityGroups[facilityIndex].groups.filter(group => { return group.groupId != groupId });
+        }
+
+      }
+      this.loadingService.setLoadingMessage('Removing Group From Reports (' + i + '/' + accountReports.length + ')...');
       await firstValueFrom(this.updateWithObservable(report));
     }
   }

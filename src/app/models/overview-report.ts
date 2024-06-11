@@ -115,7 +115,7 @@ export interface PerformanceReportSetup {
   analysisItemId: string,
   includeFacilityPerformanceDetails: boolean,
   includeUtilityPerformanceDetails: boolean,
-  includeGroupPerformanceDetails: boolean, 
+  includeGroupPerformanceDetails: boolean,
   groupPerformanceByYear: boolean,
   numberOfTopPerformers: number,
   includeActual: boolean,
@@ -144,5 +144,13 @@ export interface BetterClimateReportSetup {
   includePercentReductionsInTables: boolean,
   includePercentContributionsInTables: boolean,
   includeVehicleEnergyUse: boolean,
-  includeStationaryEnergyUse: boolean
+  includeStationaryEnergyUse: boolean,
+  includedFacilityGroups: Array<{
+    facilityId: string,
+    include: boolean,
+    groups: Array<{
+      groupId: string,
+      include: boolean
+    }>
+  }>
 }
