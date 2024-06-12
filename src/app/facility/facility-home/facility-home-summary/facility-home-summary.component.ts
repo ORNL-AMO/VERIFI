@@ -7,7 +7,6 @@ import * as _ from 'lodash';
 import { FacilityHomeService } from '../facility-home.service';
 import { Router } from '@angular/router';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { UtilityColors } from 'src/app/shared/utilityColors';
 import { ExportToExcelTemplateService } from 'src/app/shared/helper-services/export-to-excel-template.service';
 import { getNAICS } from 'src/app/shared/form-data/naics-data';
 import { MeterSource } from 'src/app/models/constantsAndTypes';
@@ -120,12 +119,6 @@ export class FacilityHomeSummaryComponent implements OnInit {
     let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == this.facility.guid });
     let sources: Array<MeterSource> = facilityMeters.map(meter => { return meter.source });
     this.sources = _.uniq(sources);
-  }
-
-  getColor(source: MeterSource): string {
-    if (UtilityColors[source]) {
-      return UtilityColors[source].color
-    }
   }
 
   setNAICS() {

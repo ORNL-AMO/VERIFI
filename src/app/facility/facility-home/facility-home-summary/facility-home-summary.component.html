@@ -22,7 +22,7 @@
                     <span *ngIf="!naics">&mdash;</span>
                 </p>
                 <span class="badge me-2" *ngFor="let source of sources"
-                    [ngStyle]="{'background-color': getColor(source)}">{{source}}</span>
+                    [ngStyle]="{'background-color': source | meterSourceColor}">{{source}}</span>
             </div>
             <div class="col-8">
                 <div class="d-flex justify-content-center flex-wrap">

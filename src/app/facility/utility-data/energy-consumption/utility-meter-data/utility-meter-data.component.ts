@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { IdbUtilityMeter } from 'src/app/models/idb';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
-import { UtilityColors } from 'src/app/shared/utilityColors';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -48,12 +47,6 @@ export class UtilityMeterDataComponent implements OnInit {
       this.label = 'Edit Bill';
     } else {
       this.label = 'Bills';
-    }
-  }
-
-  getColor(): string {
-    if (UtilityColors[this.selectedMeter.source]) {
-      return UtilityColors[this.selectedMeter.source].color
     }
   }
 }

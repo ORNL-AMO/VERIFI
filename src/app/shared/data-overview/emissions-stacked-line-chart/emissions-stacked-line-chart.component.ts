@@ -1,14 +1,11 @@
 import { Component, ElementRef, ViewChild, Input, SimpleChanges } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { FacilityOverviewService } from 'src/app/facility/facility-overview/facility-overview.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
-import { UtilityColors } from '../../utilityColors';
 import * as _ from 'lodash';
 import { Subscription } from 'rxjs';
 import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
 import { EmissionsTypes, getEmissionsTypeColor, getEmissionsTypes } from 'src/app/models/eGridEmissions';
-import { Month, Months } from '../../form-data/months';
+
 
 @Component({
   selector: 'app-emissions-stacked-line-chart',

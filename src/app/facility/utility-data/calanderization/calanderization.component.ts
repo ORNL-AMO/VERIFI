@@ -9,7 +9,6 @@ import * as _ from 'lodash';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { UtilityColors } from 'src/app/shared/utilityColors';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
@@ -106,7 +105,12 @@ export class CalanderizationComponent implements OnInit {
     if (this.selectedMeter && this.calanderizedDataFilters) {
       let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
       let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
-      let calanderizedMeterData: Array<CalanderizedMeter> = getCalanderizedMeterData([this.selectedMeter], facilityMeterData, this.selectedFacility, false, undefined, this.eGridService.co2Emissions, customFuels, [this.selectedFacility]);
+      let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
+      let allCalanderizedMeterData: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, facilityMeterData, this.selectedFacility, false, undefined, this.eGridService.co2Emissions, customFuels, [this.selectedFacility]);
+
+      let calanderizedMeterData: Array<CalanderizedMeter> = allCalanderizedMeterData.filter(cMeter => {
+        return cMeter.meter.guid == this.selectedMeter.guid
+      });
       calanderizedMeterData = this.filterMeterDataDateRanges(calanderizedMeterData);
       this.calanderizedMeter = calanderizedMeterData[0];
       if (this.selectedMeter.scope != 2) {
@@ -119,7 +123,7 @@ export class CalanderizationComponent implements OnInit {
       } else {
         this.isRECs = (this.selectedMeter.agreementType == 4 || this.selectedMeter.agreementType == 6);
       }
-      this.setDateRange(calanderizedMeterData)
+      this.setDateRange(allCalanderizedMeterData)
     }
   }
 
@@ -263,13 +267,6 @@ export class CalanderizationComponent implements OnInit {
       this.setCalanderizedMeterData();
     } else {
       this.hasMeterData = false;
-    }
-  }
-
-
-  getColor(): string {
-    if (UtilityColors[this.selectedMeter.source]) {
-      return UtilityColors[this.selectedMeter.source].color
     }
   }
 }
