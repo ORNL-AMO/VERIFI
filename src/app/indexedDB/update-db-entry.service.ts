@@ -188,7 +188,6 @@ export class UpdateDbEntryService {
         isChanged = true;
       }
       if (report.betterClimateReportSetup.includedFacilityGroups == undefined) {
-        console.log('here...?')
         let includedFacilityGroups: Array<{
           facilityId: string,
           include: boolean,

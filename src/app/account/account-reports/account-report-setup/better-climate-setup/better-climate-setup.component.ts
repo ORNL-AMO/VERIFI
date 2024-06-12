@@ -37,7 +37,6 @@ export class BetterClimateSetupComponent {
     this.account = this.accountDbService.selectedAccount.getValue();
     this.selectedReportSub = this.accountReportDbService.selectedReport.subscribe(val => {
       this.selectedReport = val;
-      console.log(this.selectedReport);
       if (!this.isFormChange) {
         this.initiativeNotes = val.betterClimateReportSetup.initiativeNotes;
         this.reportForm = this.accountReportsService.getBetterCimateFormFromReport(val.betterClimateReportSetup);
