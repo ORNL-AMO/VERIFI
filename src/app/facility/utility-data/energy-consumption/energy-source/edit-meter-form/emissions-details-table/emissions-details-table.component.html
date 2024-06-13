@@ -77,7 +77,7 @@
                     <ng-container *ngIf="selectedFuelTypeOption.CO2">
                         {{selectedFuelTypeOption|
                         emissionsDisplay:meterForm.controls.energyUnit.value:'CO2':meterForm.controls.vehicleCollectionUnit.value}}
-                        g CO<sub>2</sub>/<span [innerHTML]="meterForm.controls.vehicleCollectionUnit.value"></span>
+                        kg CO<sub>2</sub>/<span [innerHTML]="meterForm.controls.vehicleCollectionUnit.value"></span>
                     </ng-container>
                     <ng-container *ngIf="!selectedFuelTypeOption.CO2">
                         &mdash;
