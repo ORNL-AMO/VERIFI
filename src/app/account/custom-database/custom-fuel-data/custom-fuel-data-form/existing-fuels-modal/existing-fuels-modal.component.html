@@ -47,19 +47,19 @@
                     </th>
                     <th>
                         CH<sub>4</sub> Factor
-                        <ng-template [ngIf]="isMobile" [ngIfElse]="notMobileBlock1">
+                        <ng-template [ngIf]="isMobile" [ngIfElse]="notMobileBlock2">
                             (g / gal)
                         </ng-template>
-                        <ng-template #notMobileBlock1>
+                        <ng-template #notMobileBlock2>
                             (g)
                         </ng-template>
                     </th>
                     <th>
                         N<sub>2</sub>O Factor
-                        <ng-template [ngIf]="isMobile" [ngIfElse]="notMobileBlock1">
+                        <ng-template [ngIf]="isMobile" [ngIfElse]="notMobileBlock3">
                             (g / gal)
                         </ng-template>
-                        <ng-template #notMobileBlock1>
+                        <ng-template #notMobileBlock3>
                             (g)
                         </ng-template>
                     </th>
