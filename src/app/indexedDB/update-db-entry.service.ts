@@ -162,6 +162,16 @@ export class UpdateDbEntryService {
       utilityMeter.source = 'Other';
     }
 
+    if(utilityMeter.startingUnit == 'Dtherm'){
+      utilityMeter.startingUnit = 'DTherm';
+      isChanged = true;
+    }
+
+    if(utilityMeter.energyUnit == 'Dtherm'){
+      utilityMeter.energyUnit = 'DTherm';
+      isChanged = true;
+    }
+
     if (utilityMeter.fuel == 'Fuel Oil #5') {
       isChanged = true;
       utilityMeter.fuel = "Fuel Oil #5 (Navy Special)";
