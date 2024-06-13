@@ -37,7 +37,7 @@ export const EnergyUnitOptions: Array<UnitOption> = [
     },
     {
         display: 'Dekatherms (DTherms)',
-        value: 'Dtherms',
+        value: 'DTherms',
         unitsOfMeasure: 'Metric'
     },
     {
