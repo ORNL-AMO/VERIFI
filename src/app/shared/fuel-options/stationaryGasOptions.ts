@@ -21,8 +21,6 @@ export const StationaryGasOptions: Array<FuelTypeOption> = [
         CH4: .48,
         N2O: .1,
     },
-    //CHECK VALUES LPG
-    //emissionsOutputRate checks out
     {
         startingUnit: 'ft3',
         heatCapacityValue: .0027,
@@ -43,7 +41,6 @@ export const StationaryGasOptions: Array<FuelTypeOption> = [
         CH4: 3,
         N2O: .6,
     },
-    //CHECK VALUES Butane
     {
         startingUnit: 'ft3',
         heatCapacityValue: .00328,
@@ -54,7 +51,6 @@ export const StationaryGasOptions: Array<FuelTypeOption> = [
         CH4: 3,
         N2O: .6,
     },
-    //CHECK VALUES Isobutane
     {
         startingUnit: 'ft3',
         heatCapacityValue: .0031,
