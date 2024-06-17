@@ -183,11 +183,9 @@ export class BetterClimateExcelWriterService {
     fuelVals = this.getFuelValue(fuelVals.usedFuels, ['Biomass'], yearDetail.fuelTotals);
     worksheet.getCell(columnLetter + '59').value = fuelVals.usage;
     //renewable natural gas
-    //TODO: "Renewable Natural Gas": issue 1418
     fuelVals = this.getFuelValue(fuelVals.usedFuels, ["Renewable Natural Gas"], yearDetail.fuelTotals);
     worksheet.getCell(columnLetter + '60').value = fuelVals.usage;
     //hydrogen
-    //TODO: We don't have "Hydrogen": issue 1418
     fuelVals = this.getFuelValue(fuelVals.usedFuels, ["Hydrogen"], yearDetail.fuelTotals);
     worksheet.getCell(columnLetter + '61').value = fuelVals.usage;
     //gasoline
