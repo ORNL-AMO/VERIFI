@@ -35,7 +35,7 @@
                                     Year
                                 </th>
                                 <th class="w-50">
-                                    Emissions Rate <br>(tonne CO<sub>2</sub>/kWh)
+                                    Emissions Rate <br>(kg CO<sub>2</sub>/kWh)
                                 </th>
                                 <th *ngIf="editCustomEmissions.locationEmissionRates.length != 1">
 
@@ -58,7 +58,7 @@
                                             name="{{'locationCo2Emissions_'+index}}"
                                             id="{{'locationCo2Emissions_'+index}}" (input)="checkInvalid()" required
                                             min="0">
-                                        <span class="input-group-text">tonne CO<sub>2</sub>/kWh</span>
+                                        <span class="input-group-text">kg CO<sub>2</sub>/kWh</span>
                                     </div>
                                 </td>
                                 <td class="p-0" *ngIf="editCustomEmissions.locationEmissionRates.length != 1">
@@ -86,7 +86,7 @@
                                     Year
                                 </th>
                                 <th class="w-50">
-                                    Emissions Rate <br>(tonne CO<sub>2</sub>/kWh)
+                                    Emissions Rate <br>(kg CO<sub>2</sub>/kWh)
                                 </th>
                                 <th *ngIf="editCustomEmissions.residualEmissionRates.length != 1">
 
@@ -109,7 +109,7 @@
                                             name="{{'residualCo2Emissions_'+index}}"
                                             id="{{'residualCo2Emissions_'+index}}" (input)="checkInvalid()" required
                                             min="0">
-                                        <span class="input-group-text">tonne CO<sub>2</sub>/kWh</span>
+                                        <span class="input-group-text">kg CO<sub>2</sub>/kWh</span>
                                     </div>
                                 </td>
                                 <td class="p-0" *ngIf="editCustomEmissions.residualEmissionRates.length != 1">

@@ -1,9 +1,10 @@
 import { CalanderizedMeter } from "src/app/models/calanderization";
-import { IdbAccount, IdbCustomFuel, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from "src/app/models/idb";
+import { IdbAccount, IdbCustomFuel, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from "src/app/models/idb";
 import { getCalanderizedMeterData } from "../calanderization/calanderizeMeters";
 import * as _ from 'lodash';
 import { SubregionEmissions } from "src/app/models/eGridEmissions";
 import { BetterClimateYearDetails } from "./betterClimateYearsDetails";
+import { BetterClimateReportSetup } from "src/app/models/overview-report";
 
 export class BetterClimateReport {
 
@@ -12,14 +13,17 @@ export class BetterClimateReport {
     portfolioYearDetails: Array<BetterClimateYearDetails>;
     annualFacilitiesSummaries: Array<BetterClimateAnnualFacilitySummary>;
     facilityMaxMins: Array<BetterClimateFacilityMaxMin>;
-    constructor(account: IdbAccount, facilities: Array<IdbFacility>, meters: Array<IdbUtilityMeter>, meterData: Array<IdbUtilityMeterData>, baselineYear: number, reportYear: number,
-        co2Emissions: Array<SubregionEmissions>, emissionsDisplay: 'market' | 'location', emissionsGoal: number, customFuels: Array<IdbCustomFuel>) {
+    constructor(account: IdbAccount, accountFacilities: Array<IdbFacility>, accountMeters: Array<IdbUtilityMeter>, meterData: Array<IdbUtilityMeterData>, baselineYear: number, reportYear: number,
+        co2Emissions: Array<SubregionEmissions>, emissionsDisplay: 'market' | 'location', emissionsGoal: number, customFuels: Array<IdbCustomFuel>,
+        betterClimateReportSetup: BetterClimateReportSetup) {
+        let selectedFacilities: Array<IdbFacility> = this.getSelectedFacilities(betterClimateReportSetup, accountFacilities);
+        let selectedMeters: Array<IdbUtilityMeter> = this.getSelectedMeters(betterClimateReportSetup, accountMeters);
         this.baselineYear = baselineYear;
         this.reportYear = reportYear;
         account.energyIsSource = false;
-        let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(meters, meterData, account, false, { energyIsSource: false, neededUnits: 'MMBtu' }, co2Emissions, customFuels, facilities);
-        this.setPortfolioYearDetails(calanderizedMeters, facilities, emissionsDisplay, emissionsGoal);
-        this.setAnnualFacilitiesSummaries(calanderizedMeters, facilities, emissionsDisplay);
+        let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(selectedMeters, meterData, account, false, { energyIsSource: false, neededUnits: 'MMBtu' }, co2Emissions, customFuels, selectedFacilities);
+        this.setPortfolioYearDetails(calanderizedMeters, selectedFacilities, emissionsDisplay, emissionsGoal);
+        this.setAnnualFacilitiesSummaries(calanderizedMeters, selectedFacilities, emissionsDisplay);
         // this.setFacilityTotals();
         this.setFacilityMaxMins();
     }
@@ -218,7 +222,44 @@ export class BetterClimateReport {
             min: min,
             max: max
         }
+    }
 
+    getSelectedFacilities(betterClimateReportSetup: BetterClimateReportSetup, facilities: Array<IdbFacility>): Array<IdbFacility> {
+        if (betterClimateReportSetup.selectMeterData) {
+            let selectedFacilities: Array<IdbFacility> = new Array();
+            betterClimateReportSetup.includedFacilityGroups.forEach(facilityOption => {
+                if (facilityOption.include) {
+                    let facility: IdbFacility = facilities.find(facility => { return facility.guid == facilityOption.facilityId });
+                    selectedFacilities.push(facility);
+                }
+            });
+            return selectedFacilities;
+        } else {
+            return facilities;
+        }
+    }
+
+    getSelectedMeters(betterClimateReportSetup: BetterClimateReportSetup, meters: Array<IdbUtilityMeter>): Array<IdbUtilityMeter> {
+        if (betterClimateReportSetup.selectMeterData) {
+            let selectedMeters: Array<IdbUtilityMeter> = new Array();
+            betterClimateReportSetup.includedFacilityGroups.forEach(facilityOption => {
+                if (facilityOption.include) {
+                    facilityOption.groups.forEach(groupOption => {
+                        if (groupOption.include) {
+                            let groupMeters: Array<IdbUtilityMeter> = meters.filter(meter => {
+                                return meter.groupId == groupOption.groupId;
+                            });
+                            groupMeters.forEach(meter => {
+                                selectedMeters.push(meter);
+                            })
+                        }
+                    });
+                }
+            });
+            return selectedMeters;
+        } else {
+            return meters;
+        }
     }
 
 }

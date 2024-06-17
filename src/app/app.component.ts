@@ -91,11 +91,11 @@ export class AppComponent {
       if (account) {
         await this.initializeFacilities(account);
         // await this.initializeReports(account);
+        await this.initilizeMeterGroups(account);
         await this.initializeAccountReports(account);
         await this.initializePredictors(account);
         await this.initializeMeters(account);
         await this.initializeMeterData(account);
-        await this.initilizeMeterGroups(account);
         await this.initializeFacilityAnalysisItems(account);
         await this.initializeAccountAnalysisItems(account);
         await this.initializeCustomEmissions(account);
@@ -181,6 +181,15 @@ export class AppComponent {
   async initializeAccountReports(account: IdbAccount) {
     this.loadingMessage = "Loading Reports..."
     let accountReports: Array<IdbAccountReport> = await this.accountReportDbService.getAllAccountReports(account.guid);
+    let groups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.accountMeterGroups.getValue();
+    let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    for (let i = 0; i < accountReports.length; i++) {
+      let updateReport: { report: IdbAccountReport, isChanged: boolean } = this.updateDbEntryService.updateReport(accountReports[i], facilities, groups);
+      if (updateReport.isChanged) {
+        accountReports[i] = updateReport.report;
+        await firstValueFrom(this.accountReportDbService.updateWithObservable(accountReports[i]));
+      };
+    }
     this.accountReportDbService.accountReports.next(accountReports);
     let accountReportId: number = this.accountReportDbService.getInitialReport();
     if (accountReportId) {
@@ -242,14 +251,14 @@ export class AppComponent {
       this.electronBackupsDbService.accountBackups = await firstValueFrom(this.electronBackupsDbService.getAll());
     }
   }
-  
+
   async initializeCustomFuels(account: IdbAccount) {
     this.loadingMessage = 'Loading Custom Fuels...';
     let customFuels: Array<IdbCustomFuel> = await this.customFuelDbservice.getAllAccountCustomFuels(account.guid);
     this.customFuelDbservice.accountCustomFuels.next(customFuels);
-  }  
+  }
 
-  async initializeCustomGWPs(account: IdbAccount){
+  async initializeCustomGWPs(account: IdbAccount) {
     this.loadingMessage = 'Loading Custom GWPs...';
     let customGWPs: Array<IdbCustomGWP> = await this.customGWPDbService.getAllAccountCustomGWP(account.guid);
     this.customGWPDbService.accountCustomGWPs.next(customGWPs);

@@ -104,9 +104,17 @@ export class CustomEmissionsDbService {
       {
         year: 2023,
         co2Emissions: 0.388753292
+      },
+      {
+        year: 2024,
+        co2Emissions: 0.375338761752
       }
     ];
     uSAverageItem.residualEmissionRates = [
+      {
+        year: 2023,
+        co2Emissions: 0.428527644879606
+      },
       {
         year: 2022,
         co2Emissions: 0.382795242

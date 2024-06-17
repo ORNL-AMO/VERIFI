@@ -122,11 +122,13 @@ export class UtilityMeterDataService {
     return {
       totalVolume: true,
       totalCost: true,
-      totalMarketEmissions: true,
-      totalLocationEmissions: true,
       commodityCharge: true,
       deliveryCharge: true,
       otherCharge: true,
+      stationaryBiogenicEmmissions: true,
+      stationaryCarbonEmissions: true,
+      stationaryOtherEmissions: true,
+      totalEmissions: true,
     }
   }
 

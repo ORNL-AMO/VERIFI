@@ -108,7 +108,7 @@ export class WeatherDataComponent {
     let cddPredictor: PredictorData;
     if (this.weatherDataSelection == 'HDD' || this.weatherDataSelection == 'degreeDays') {
       hddPredictor = this.predictorDbService.getNewPredictor(facilityPredictorsCopy);
-      hddPredictor.name = 'HDD Generated';
+      hddPredictor.name = 'HDD Generated ' + '(' + this.weatherDataService.heatingTemp + "F)";
       hddPredictor.predictorType = 'Weather';
       hddPredictor.weatherDataType = 'HDD';
       hddPredictor.heatingBaseTemperature = this.weatherDataService.heatingTemp;
@@ -117,7 +117,7 @@ export class WeatherDataComponent {
     }
     if (this.weatherDataSelection == 'CDD' || this.weatherDataSelection == 'degreeDays') {
       cddPredictor = this.predictorDbService.getNewPredictor(facilityPredictorsCopy)
-      cddPredictor.name = 'CDD Generated';
+      cddPredictor.name = 'CDD Generated ' + '(' + this.weatherDataService.coolingTemp + "F)";
       cddPredictor.predictorType = 'Weather';
       cddPredictor.weatherDataType = 'CDD';
       cddPredictor.coolingBaseTemperature = this.weatherDataService.coolingTemp;

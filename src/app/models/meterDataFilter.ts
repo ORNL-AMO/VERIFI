@@ -45,11 +45,13 @@ export interface GeneralInformationFilters {
 export interface GeneralUtilityDataFilters{
   totalVolume: boolean,
   totalCost: boolean,
-  totalMarketEmissions: boolean,
-  totalLocationEmissions: boolean,
   commodityCharge: boolean,
   deliveryCharge: boolean,
   otherCharge: boolean,
+  stationaryBiogenicEmmissions: boolean,
+  stationaryCarbonEmissions: boolean,
+  stationaryOtherEmissions: boolean,
+  totalEmissions: boolean,
 }
 
 

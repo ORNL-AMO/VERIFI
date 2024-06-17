@@ -59,7 +59,8 @@ export const StationarySolidOptions: Array<FuelTypeOption> = [
         emissionsOutputRate: 113.8916,
         CO2: 111.84,
         CH4: 32,
-        N2O: 4.2
+        N2O: 4.2,
+        isBiofuel: true
     },
     {
         startingUnit: 'lb',
@@ -69,29 +70,30 @@ export const StationarySolidOptions: Array<FuelTypeOption> = [
         emissionsOutputRate: 95.0528,
         CO2: 93.8,
         CH4: 7.2,
-        N2O: 3.6
+        N2O: 3.6,
+        isBiofuel: true
     },
-    //CHECK VALUES: No solid biomass in table
     {
         startingUnit: 'lb',
         heatCapacityValue: .004125,
         value: 'Biomass',
         siteToSourceMultiplier: 1,
         emissionsOutputRate: 120.2216,
-        CO2: 0,
-        CH4: 0,
-        N2O: 0
+        CO2: 118.17,
+        CH4: 32,
+        N2O: 4.2,
+        isBiofuel: true
     },
-    //CHECK VALUES: No Black Liquor in table
     {
         startingUnit: 'lb',
         heatCapacityValue: .0065,
         value: 'Black Liquor',
         siteToSourceMultiplier: 1,
         emissionsOutputRate: 94.65266,
-        CO2: 0,
-        CH4: 0,
-        N2O: 0
+        CO2: 94.48,
+        CH4: 1.9,
+        N2O: 0.42,
+        isBiofuel: true
     },
     {
         startingUnit: 'lb',

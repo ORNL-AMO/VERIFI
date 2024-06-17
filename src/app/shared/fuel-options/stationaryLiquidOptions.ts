@@ -21,42 +21,36 @@ export const StationaryLiquidOptions: Array<FuelTypeOption> = [
         CH4: 3,
         N2O: .6
     },
-    //CHECK VALUES Distillate Fuel Oil (1,2,3?)
-    //using 2
-    //Math give emissions rate 74.2137999
     {
         startingUnit: 'gal',
         heatCapacityValue: .141,
         value: 'Distillate Fuel Oil',
         siteToSourceMultiplier: 1,
         emissionsOutputRate: 74.33713,
-        CO2: 73.96,
+        CO2: 74.08333,
         CH4: 3.0,
         N2O: .6
     },
-    //CHECK VALUES: Residual Fuel Oil (No. 5, 6?)
-    //using 5
-    //Math gives emissions rate 75.353799
     {
         startingUnit: 'gal',
         heatCapacityValue: .145,
         value: 'Residual Fuel Oil',
         siteToSourceMultiplier: 1,
         emissionsOutputRate: 74.2688,
-        CO2: 72.93,
+        CO2: 74.015,
         CH4: 3,
         N2O: .6
     },
-    //DOESN'T Exist in table (Residual)
+    //Fuel oil #2
     {
         startingUnit: 'gal',
         heatCapacityValue: .13869,
         value: 'Heating Oil',
         siteToSourceMultiplier: 1,
         emissionsOutputRate: 74.33713,
-        CO2: 0,
-        CH4: 0,
-        N2O: 0
+        CO2: 73.96,
+        CH4: 3,
+        N2O: 0.6
     },
     //Fuel oil #2
     {
@@ -89,8 +83,6 @@ export const StationaryLiquidOptions: Array<FuelTypeOption> = [
         CH4: 3,
         N2O: .6
     },
-    //CHECK VALUE: Pentanes = Pentanes Plus ?
-    //Math gives emissions rate 70.2738
     {
         startingUnit: 'gal',
         heatCapacityValue: .1108,
@@ -121,8 +113,6 @@ export const StationaryLiquidOptions: Array<FuelTypeOption> = [
         CH4: 3.0,
         N2O: .6
     },
-    //CHECK VALUES: All Fuel Oils #x HHV doesn't match table
-    //emissionsOutputRates check out
     {
         startingUnit: 'gal',
         heatCapacityValue: .1374,
@@ -193,8 +183,6 @@ export const StationaryLiquidOptions: Array<FuelTypeOption> = [
         CH4: 3.0,
         N2O: .6
     },
-    //CHECK VALUES: Gasoline = Natural Gasoline?
-    //emissionsOutputRate checks out.
     {
         startingUnit: 'gal',
         heatCapacityValue: .12760,
@@ -215,8 +203,6 @@ export const StationaryLiquidOptions: Array<FuelTypeOption> = [
         CH4: 3,
         N2O: .6
     },
-    //CHECK VALUE: Gas Oil = Heavy Gas Oil?
-    //emissionsOutputRate checks out.
     {
         startingUnit: 'gal',
         heatCapacityValue: .148,
@@ -227,8 +213,6 @@ export const StationaryLiquidOptions: Array<FuelTypeOption> = [
         CH4: 3,
         N2O: .6
     },
-    //CHECK VALUE: Liquefied Natural Gas = Natural Gasoline? 
-    //emissionsOutputRate checks out.
     {
         startingUnit: 'gal',
         heatCapacityValue: .086,

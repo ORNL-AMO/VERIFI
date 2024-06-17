@@ -71,7 +71,6 @@ export class EditPredictorEntryComponent {
     this.isSaved = true;
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('Predictors Updated!', undefined, undefined, false, 'alert-success');
-    this.cancel();
   }
 
   setPredictorEntryEdit(predictorId: string) {
@@ -211,5 +210,18 @@ export class EditPredictorEntryComponent {
       }
     });
     await this.setDegreeDayValues();
+  }
+
+  async saveAndQuit() {
+    await this.saveChanges();
+    this.cancel();
+  }
+
+  async saveAndAddAnother() {
+    await this.saveChanges();
+    this.setNewPredictorEntry();
+    this.setHasWeatherData();
+    this.setDegreeDayValues();
+    this.isSaved = false;
   }
 }

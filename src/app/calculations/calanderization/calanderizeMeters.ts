@@ -33,18 +33,24 @@ export function getCalanderizedMeterData(meters: Array<IdbUtilityMeter>, allMete
             showConsumption = calanderizedMeter.find(cMeter => { return cMeter.energyConsumption != cMeter.energyUse }) != undefined;
         }
         let consumptionUnit: string = getUnitFromMeter(meter, accountOrFacility);
-        let showStandardEmissions: boolean = false;
         let showProcessEmissions: boolean = false;
         let showFugitiveEmissions: boolean = false;
         let showMobileEmissions: boolean = false;
 
-        if (meter.source == "Electricity" || meter.source == "Natural Gas") {
-            showStandardEmissions = true;
+
+        let showElectricalEmissions: boolean = false;
+        let showOtherScope2Emissions: boolean = false;
+        let showStationaryEmissions: boolean = false;
+
+        if (meter.source == "Electricity") {
+            showElectricalEmissions = true;
+        } else if (meter.source == 'Natural Gas') {
+            showStationaryEmissions = true;
         } else if (meter.source == 'Other Fuels') {
             if (meter.scope == 2) {
                 showMobileEmissions = true;
             } else {
-                showStandardEmissions = true;
+                showStationaryEmissions = true;
             }
         } else if (meter.source == 'Other') {
             if (meter.scope == 5) {
@@ -68,7 +74,9 @@ export function getCalanderizedMeterData(meters: Array<IdbUtilityMeter>, allMete
             showConsumption: showConsumption,
             showEnergyUse: showEnergyUse,
             energyUnit: calanderizedenergyUnit,
-            showStandardEmissions: showStandardEmissions,
+            showStationaryEmissions: showStationaryEmissions,
+            showElectricalEmissions: showElectricalEmissions,
+            showOtherScope2Emissions: showOtherScope2Emissions,
             showFugitiveEmissions: showFugitiveEmissions,
             showMobileEmissions: showMobileEmissions,
             showProcessEmissions: showProcessEmissions

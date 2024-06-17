@@ -94,30 +94,43 @@ export class ExistingFuelsModalComponent {
   setSelectedFuelTypeOptions() {
     if (this.fuelType == 'stationaryGas') {
       this.selectedFuelTypeOptions = StationaryGasOptions;
+      this.isMobile = false;
     } else if (this.fuelType == 'stationaryLiquid') {
       this.selectedFuelTypeOptions = StationaryLiquidOptions;
+      this.isMobile = false;
     } if (this.fuelType == 'stationarySolid') {
       this.selectedFuelTypeOptions = StationarySolidOptions;
+      this.isMobile = false;
     } if (this.fuelType == 'mobileHeavyDutyTruck') {
       this.selectedFuelTypeOptions = MobileHeavyDutyTruckOptions;
+      this.isMobile = true;
     } if (this.fuelType == 'mobileBus') {
       this.selectedFuelTypeOptions = MobileBusOptions;
+      this.isMobile = true;
     } if (this.fuelType == 'mobileLightDutyTruck') {
       this.selectedFuelTypeOptions = MobileLightDutyTruckOptions;
+      this.isMobile = true;
     } if (this.fuelType == 'mobileMotorcycle') {
       this.selectedFuelTypeOptions = MobileMotorcycleOptions;
+      this.isMobile = true;
     } if (this.fuelType == 'mobileOffRoadAgricultural') {
       this.selectedFuelTypeOptions = MobileOffRoadAgricultureOptions;
+      this.isMobile = true;
     } if (this.fuelType == 'mobileOffRoadConstruction') {
       this.selectedFuelTypeOptions = MobileOffRoadConstructionOptions;
+      this.isMobile = true;
     } if (this.fuelType == 'mobilePassangerCars') {
       this.selectedFuelTypeOptions = MobilePassangerCarOptions;
+      this.isMobile = true;
     } if (this.fuelType == 'mobileRail') {
       this.selectedFuelTypeOptions = MobileRailOptions;
+      this.isMobile = true;
     } if (this.fuelType == 'mobileTransportOnsite') {
       this.selectedFuelTypeOptions = MobileTransportOnsiteOptions;
+      this.isMobile = true;
     } if (this.fuelType == 'mobileWaterTransport') {
       this.selectedFuelTypeOptions = MobileWaterTransportOptions;
+      this.isMobile = true;
     }
   }
 }

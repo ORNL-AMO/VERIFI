@@ -7,7 +7,7 @@
     </ul>
     <div class="content-padding">
         <h4>{{selectedMeter.name}} Calanderized Data
-            <span class="badge float-end" [ngStyle]="{'background-color': getColor()}">{{selectedMeter.source}}</span>
+            <span class="badge float-end" [ngStyle]="{'background-color': selectedMeter.source | meterSourceColor}">{{selectedMeter.source}}</span>
         </h4>
         <ng-container *ngIf="hasMeterData">
             <div class="p-2 text-center" *ngIf="!selectedMeter.meterReadingDataApplication">

@@ -5,7 +5,7 @@ import { getFiscalYear, getYearlyUsageNumbers } from "../shared-calculations/cal
 import * as _ from 'lodash';
 import { AllSources, EnergySources, MeterSource, WaterSources } from "src/app/models/constantsAndTypes";
 import { EmissionsResults } from "src/app/models/eGridEmissions";
-import { getEmissionsTotalsFromMonthlyData } from "../shared-calculations/calculationsHelpers";
+import { getEmissionsTotalsFromArray } from "../shared-calculations/calculationsHelpers";
 
 export class FacilityOverviewData {
 
@@ -108,28 +108,10 @@ export class FacilityOverviewData {
     }
 
     setEmissionsTotals() {
-        this.emissionsTotals = {
-            RECs: _.sumBy(this.costMeters, (fMeter: FacilityOverviewMeter) => { return fMeter.emissions.RECs }),
-            locationElectricityEmissions: _.sumBy(this.costMeters, (fMeter: FacilityOverviewMeter) => { return fMeter.emissions.locationElectricityEmissions }),
-            marketElectricityEmissions: _.sumBy(this.costMeters, (fMeter: FacilityOverviewMeter) => { return fMeter.emissions.marketElectricityEmissions }),
-            otherScope2Emissions: _.sumBy(this.costMeters, (fMeter: FacilityOverviewMeter) => { return fMeter.emissions.otherScope2Emissions }),
-            scope2LocationEmissions: _.sumBy(this.costMeters, (fMeter: FacilityOverviewMeter) => { return fMeter.emissions.scope2LocationEmissions }),
-            scope2MarketEmissions: _.sumBy(this.costMeters, (fMeter: FacilityOverviewMeter) => { return fMeter.emissions.scope2MarketEmissions }),
-            excessRECs: _.sumBy(this.costMeters, (fMeter: FacilityOverviewMeter) => { return fMeter.emissions.excessRECs }),
-            excessRECsEmissions: _.sumBy(this.costMeters, (fMeter: FacilityOverviewMeter) => { return fMeter.emissions.excessRECsEmissions }),
-            mobileCarbonEmissions: _.sumBy(this.costMeters, (fMeter: FacilityOverviewMeter) => { return fMeter.emissions.mobileCarbonEmissions }),
-            mobileBiogenicEmissions: _.sumBy(this.costMeters, (fMeter: FacilityOverviewMeter) => { return fMeter.emissions.mobileBiogenicEmissions }),
-            mobileOtherEmissions: _.sumBy(this.costMeters, (fMeter: FacilityOverviewMeter) => { return fMeter.emissions.mobileOtherEmissions }),
-            mobileTotalEmissions: _.sumBy(this.costMeters, (fMeter: FacilityOverviewMeter) => { return fMeter.emissions.mobileTotalEmissions }),
-            fugitiveEmissions: _.sumBy(this.costMeters, (fMeter: FacilityOverviewMeter) => { return fMeter.emissions.fugitiveEmissions }),
-            processEmissions: _.sumBy(this.costMeters, (fMeter: FacilityOverviewMeter) => { return fMeter.emissions.processEmissions }),
-            stationaryEmissions: _.sumBy(this.costMeters, (fMeter: FacilityOverviewMeter) => { return fMeter.emissions.stationaryEmissions }),
-            totalScope1Emissions: _.sumBy(this.costMeters, (fMeter: FacilityOverviewMeter) => { return fMeter.emissions.totalScope1Emissions }),
-            totalWithMarketEmissions: _.sumBy(this.costMeters, (fMeter: FacilityOverviewMeter) => { return fMeter.emissions.totalWithMarketEmissions }),
-            totalWithLocationEmissions: _.sumBy(this.costMeters, (fMeter: FacilityOverviewMeter) => { return fMeter.emissions.totalWithLocationEmissions }),
-            totalBiogenicEmissions: _.sumBy(this.costMeters, (fMeter: FacilityOverviewMeter) => { return fMeter.emissions.totalBiogenicEmissions }),
-            stationaryBiogenicEmmissions: _.sumBy(this.costMeters, (fMeter: FacilityOverviewMeter) => { return fMeter.emissions.stationaryBiogenicEmmissions }),
-        }
+        let allEmissionsResults: Array<EmissionsResults> = this.costMeters.map(cMeter => {
+            return cMeter.emissions
+        });
+        this.emissionsTotals = getEmissionsTotalsFromArray(allEmissionsResults);
     }
 
 
@@ -227,7 +209,7 @@ export class FacilityOverviewMeter {
     }
 
     setEmissions() {
-        this.emissions = getEmissionsTotalsFromMonthlyData(this.monthlyData);
+        this.emissions = getEmissionsTotalsFromArray(this.monthlyData);
     }
 
 
@@ -289,6 +271,6 @@ export class AnnualSourceDataItem {
         this.totalCost = _.sumBy(fiscalYearMonthlyData, (mData: MonthlyData) => { return mData.energyCost });
     }
     setTotalEmissions(fiscalYearMonthlyData: Array<MonthlyData>) {
-        this.totalEmissions = getEmissionsTotalsFromMonthlyData(fiscalYearMonthlyData);
+        this.totalEmissions = getEmissionsTotalsFromArray(fiscalYearMonthlyData);
     }
 }

@@ -196,6 +196,8 @@ export class MeterGroupingService {
         totalWithLocationEmissions: _.sumBy(filteredData, (mData: MonthlyData) => { return mData.totalWithLocationEmissions }),
         stationaryBiogenicEmmissions: _.sumBy(filteredData, (mData: MonthlyData) => { return mData.stationaryBiogenicEmmissions }),
         totalBiogenicEmissions: _.sumBy(filteredData, (mData: MonthlyData) => { return mData.totalBiogenicEmissions }),
+        stationaryCarbonEmissions: _.sumBy(filteredData, (mData: MonthlyData) => { return mData.stationaryCarbonEmissions }),
+        stationaryOtherEmissions: _.sumBy(filteredData, (mData: MonthlyData) => { return mData.stationaryOtherEmissions }),
       })
       startDate = new Date(startDate.getFullYear(), startDate.getMonth() + 1);
     }

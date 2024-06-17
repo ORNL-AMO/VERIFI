@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility, IdbUtilityMeter } from '../models/idb';
+import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport, IdbAnalysisItem, IdbFacility, IdbUtilityMeter, IdbUtilityMeterGroup } from '../models/idb';
 import { AnalysisSetupErrors, GroupErrors } from '../models/analysis';
 import { FacilitydbService } from './facility-db.service';
 import { AnalysisValidationService } from '../shared/helper-services/analysis-validation.service';
@@ -162,6 +162,16 @@ export class UpdateDbEntryService {
       utilityMeter.source = 'Other';
     }
 
+    if(utilityMeter.startingUnit == 'Dtherm'){
+      utilityMeter.startingUnit = 'DTherm';
+      isChanged = true;
+    }
+
+    if(utilityMeter.energyUnit == 'Dtherm'){
+      utilityMeter.energyUnit = 'DTherm';
+      isChanged = true;
+    }
+
     if (utilityMeter.fuel == 'Fuel Oil #5') {
       isChanged = true;
       utilityMeter.fuel = "Fuel Oil #5 (Navy Special)";
@@ -172,5 +182,58 @@ export class UpdateDbEntryService {
       isChanged = true;
     }
     return { utilityMeter: utilityMeter, isChanged: isChanged };
+  }
+
+
+  updateReport(report: IdbAccountReport, facilities: Array<IdbFacility>, groups: Array<IdbUtilityMeterGroup>): { report: IdbAccountReport, isChanged: boolean } {
+    let isChanged: boolean = false;
+    if (report.reportType == 'betterPlants' && report.betterPlantsReportSetup && report.betterPlantsReportSetup.includePerformanceTable == undefined) {
+      isChanged = true;
+      report.betterPlantsReportSetup.includePerformanceTable = true;
+    }
+
+    if (report.reportType == 'betterClimate' && report.betterClimateReportSetup) {
+      if (report.betterClimateReportSetup.selectMeterData == undefined) {
+        report.betterClimateReportSetup.selectMeterData = false;
+        isChanged = true;
+      }
+      if (report.betterClimateReportSetup.includedFacilityGroups == undefined) {
+        let includedFacilityGroups: Array<{
+          facilityId: string,
+          include: boolean,
+          groups: Array<{
+            groupId: string,
+            include: boolean
+          }>
+        }> = new Array();
+
+        facilities.forEach(facility => {
+          if (facility.accountId == report.accountId) {
+            let facilityGroups: Array<{ groupId: string, include: boolean }> = new Array();
+            groups.forEach(group => {
+              if (group.facilityId == facility.guid) {
+                facilityGroups.push({
+                  groupId: group.guid,
+                  include: true
+                });
+              }
+            });
+            includedFacilityGroups.push({
+              facilityId: facility.guid,
+              include: true,
+              groups: facilityGroups
+            });
+          }
+        });
+        report.betterClimateReportSetup.includedFacilityGroups = includedFacilityGroups;
+        isChanged = true;
+      }
+    }
+
+
+    return {
+      report: report,
+      isChanged: isChanged
+    }
   }
 }
