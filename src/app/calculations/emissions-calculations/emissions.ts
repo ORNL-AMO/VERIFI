@@ -240,7 +240,6 @@ export function getFuelEmissionsOutputRate(source: MeterSource, fuel: string, ph
     let isBiogenic: boolean = false;
     if (source == 'Natural Gas') {
         emissionsRate = 53.1148;
-        //TODO: NG output rates..
         CO2 = 53.06;
         CH4 = 1;
         N2O = .1;
