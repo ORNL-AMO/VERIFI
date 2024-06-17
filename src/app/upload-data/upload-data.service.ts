@@ -112,6 +112,14 @@ export class UploadDataService {
       && sheetNames[8] == "Stationary Fuel - Other Energy" && sheetNames[9] == "Mobile Fuel" && sheetNames[10] == "Water" && sheetNames[11] == "Other Utility - Emission"
       && sheetNames[12] == "Predictors" && sheetNames[13] == "Fix Me" && sheetNames[14] == "HIDE_NAICS3") {
       return "V2";
+    }
+    //sheet names for V2 updated issue 1627
+    else if (sheetNames[0] == "V2" && sheetNames[1] == "Getting Started" && sheetNames[2] == "HIDE_Lists" && sheetNames[3] == "HIDE_Meter_Lists" &&
+      sheetNames[4] == "Facilities" && sheetNames[5] == "Meters-Utilities" && sheetNames[6] == "HIDE_Meters-Utilites" && sheetNames[7] == "Electricity"
+      && sheetNames[8] == "Stationary Fuel - Other Energy" && sheetNames[9] == "Mobile Fuel" && sheetNames[10] == "Water" && sheetNames[11] == "Other Utility - Emission"
+      && sheetNames[12] == "Predictors" && sheetNames[13] == "Troubleshooting" && sheetNames[14] == "HIDE_NAICS3") {
+      console.log("V2.2")
+      return "V2";
     } else if (sheetNames[0] == "Help" && sheetNames[1] == 'Facilities' && sheetNames[2] == "Meters-Utilities" && sheetNames[3] == "Electricity" && sheetNames[4] == "Non-electricity" && sheetNames[5] == "Predictors") {
       return "V1";
     } else {
@@ -303,7 +311,7 @@ export class UploadDataService {
     //we can still access the data using this value
     newMeter.importWizardName = groupItem.value;
     //start with random meter number
-    newMeter.meterNumber = selectedFacility.name.replace(' ', '_') + '_' + newMeter.source .replace(' ', '_')+ '_' + Math.random().toString(36).substr(2, 3);
+    newMeter.meterNumber = selectedFacility.name.replace(' ', '_') + '_' + newMeter.source.replace(' ', '_') + '_' + Math.random().toString(36).substr(2, 3);
 
     //set emissions mulitpliers
     newMeter = this.editMeterFormService.setMultipliers(newMeter);
