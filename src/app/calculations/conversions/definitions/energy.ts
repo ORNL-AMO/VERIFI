@@ -139,6 +139,14 @@ export const energy = {
       }
       , to_anchor: 1000000
     }
+    , DTherms: {
+      name: {
+        singular: 'Dekatherm'
+        , plural: 'Dekatherms',
+        display: '(DTherm)'
+      }
+      , to_anchor: 1000000
+    }
     , galF: {
       name: {
         singular: 'Gallon-Fahrenheit'
