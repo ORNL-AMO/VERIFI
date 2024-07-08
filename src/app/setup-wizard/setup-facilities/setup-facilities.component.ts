@@ -79,9 +79,9 @@ export class SetupFacilitiesComponent implements OnInit {
     this.templateSub.unsubscribe();
   }
 
-  addFacility() {
-    this.setupWizardService.addFacility();
-  }
+  // addFacility() {
+  //   this.setupWizardService.addFacility();
+  // }
 
   selectFacility(facility: IdbFacility) {
     this.setupWizardService.selectedFacility.next(facility);
@@ -181,6 +181,14 @@ export class SetupFacilitiesComponent implements OnInit {
 
   setDragOut() {
     this.dragOver = false;
+  }
+
+  goBack(){
+
+  }
+
+  next(){
+
   }
 
 }

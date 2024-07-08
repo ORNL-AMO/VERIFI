@@ -29,15 +29,17 @@ export class SetupWizardService {
     this.facilityTemplateWorkbook = new BehaviorSubject<XLSX.WorkBook>(undefined);
   }
 
-  addFacility(){
+  addFacility(numFacilities: number) {
     let facilities: Array<IdbFacility> = this.facilities.getValue();
     let account: IdbAccount = this.account.getValue();
-    let newFacility: IdbFacility = this.facilityDbService.getNewIdbFacility(JSON.parse(JSON.stringify(account)));
-    newFacility.wizardId = Math.random().toString(36).substr(2, 9);
-    newFacility.name = 'Facility ' + (facilities.length + 1);
-    facilities.push(newFacility);
-    this.facilities.next(facilities);
-    this.selectedFacility.next(newFacility);
-    this.router.navigateByUrl('setup-wizard/facility-setup/information-setup');
+    for (let i = 0; i < numFacilities; i++) {
+      let newFacility: IdbFacility = this.facilityDbService.getNewIdbFacility(JSON.parse(JSON.stringify(account)));
+      newFacility.wizardId = Math.random().toString(36).substr(2, 9);
+      newFacility.name = 'Facility ' + (facilities.length + 1);
+      facilities.push(newFacility);
+      this.facilities.next(facilities);
+    }
+    this.selectedFacility.next(facilities[0]);
+    this.router.navigateByUrl('setup-wizard/facility-details/' + facilities[0].guid);
   }
 }

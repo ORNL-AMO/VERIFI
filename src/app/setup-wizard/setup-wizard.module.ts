@@ -12,10 +12,13 @@ import { SetupWizardFooterComponent } from './setup-wizard-footer/setup-wizard-f
 import { CorporateInformationSetupComponent } from './setup-account/corporate-information-setup/corporate-information-setup.component';
 import { CorporateUnitsSetupComponent } from './setup-account/corporate-units-setup/corporate-units-setup.component';
 import { CorporateReportingSetupComponent } from './setup-account/corporate-reporting-setup/corporate-reporting-setup.component';
-import { FacilityInformationSetupComponent } from './setup-facilities/facility-information-setup/facility-information-setup.component';
-import { FacilityUnitsSetupComponent } from './setup-facilities/facility-units-setup/facility-units-setup.component';
-import { FacilityReportingSetupComponent } from './setup-facilities/facility-reporting-setup/facility-reporting-setup.component';
+import { FacilityInformationSetupComponent } from './facility-details/facility-information-setup/facility-information-setup.component';
+import { FacilityUnitsSetupComponent } from './facility-details/facility-units-setup/facility-units-setup.component';
+import { FacilityReportingSetupComponent } from './facility-details/facility-reporting-setup/facility-reporting-setup.component';
 import { SetupWizardSidebarComponent } from './setup-wizard-sidebar/setup-wizard-sidebar.component';
+import { FacilitySetupHomeComponent } from './setup-facilities/facility-setup-home/facility-setup-home.component';
+import { FormsModule } from '@angular/forms';
+import { FacilityDetailsComponent } from './facility-details/facility-details.component';
 
 @NgModule({
   declarations: [
@@ -32,12 +35,15 @@ import { SetupWizardSidebarComponent } from './setup-wizard-sidebar/setup-wizard
     FacilityInformationSetupComponent,
     FacilityUnitsSetupComponent,
     FacilityReportingSetupComponent,
-    SetupWizardSidebarComponent
+    SetupWizardSidebarComponent,
+    FacilitySetupHomeComponent,
+    FacilityDetailsComponent
   ],
   imports: [
     CommonModule,
     RouterModule,
-    SettingsFormsModule
+    SettingsFormsModule,
+    FormsModule
   ]
 })
 export class SetupWizardModule { }

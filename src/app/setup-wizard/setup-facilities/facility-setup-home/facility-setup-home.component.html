@@ -1,0 +1,92 @@
+<div class="row justify-content-center">
+    <div class="col-12">
+        <div class="d-flex justify-content-center">
+            <h1>Facility Setup Options </h1>
+        </div>
+    </div>
+    <div class="col-lg-8 col-md-12 text-center">
+        <p class="large">VERIFI has two options for adding facilities to corporate accounts. Users with only a couple
+            facilities may want to add them manually, filling out similar forms to the coorporate information pages for
+            each of their facilities. Otherwise, accounts with many facilities can use our excel template for uploading
+            all the facility information at once.</p>
+        <p>
+            It should be noted that additional facilities can be added at a later time.
+        </p>
+        <p>
+            Additionally, utility data can
+            be uploaded within the template now or at a later time as well.
+        </p>
+    </div>
+    <div class="col-12">
+        <hr>
+    </div>
+
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-12 text-center">
+            <p class="large bold">
+                There are a two ways to add facilities.
+            </p>
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-4 h-100">
+            <div class="card h-100">
+                <div class="card-header">
+                    Add Facilities Manually
+                </div>
+                <div class="card-body">
+                    Fill out the details of each of your facilities manually. The button below will add your first
+                    facility.
+                    <hr>
+                    <form>
+                        <div class="row">
+                            <label for="numberOfFacilities" class="col-sm-6 col-form-label">
+                                Number of Facilities
+                            </label>
+                            <div class="col-6">
+                                <input class="form-control" type="number" [(ngModel)]="numberOfFacilities"
+                                    name="numberOfFacilities" id="numberOfFacilities" step="1" min="0">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="card-footer justify-content-end">
+                    <div class="d-flex w-100 justify-content-end">
+                        <div>
+                            <button class="btn nav-btn" (click)="addFacility();">
+                                <span class="fa fa-plus"></span>
+                                Add Facilities
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-4 h-100">
+            <div class="card h-100">
+                <div class="card-header">
+                    Upload Template Data
+                </div>
+                <div class="card-body">
+                    <p>
+                        An excel template has been created to upload facility and utility data. Upload the template file
+                        below to get started.
+                    </p>
+                    <input class="form-control" [ngClass]="{'drag-in': dragOver}" type="file" #importFile
+                        id="importFile" (dragenter)="setDragEnter()" (dragleave)="setDragOut()"
+                        (input)="setImportFile($event.target)" accept=".xlsx">
+                    <div class="alert alert-danger" *ngIf="fileUploadError">
+                        {{fileUploadError}}
+                    </div>
+                </div>
+                <div class="card-footer text-end">
+
+                    <a class="click-link" href="assets/csv_templates/VERIFI-Import-Data.xlsx">
+                        <span class="fa fa-download"></span>
+                        Download Template</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

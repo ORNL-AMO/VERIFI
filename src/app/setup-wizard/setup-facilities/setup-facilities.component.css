@@ -1,4 +1,4 @@
-.banner{
+/* .banner{
     background-color: white;
 }
 
@@ -57,7 +57,6 @@
     margin: 3px;
     padding: 20px;
     border-radius: 4px;
-    /* box-shadow: 2px 3px 10px #d6d6d6; */
     border: solid white;
   }
 
@@ -100,4 +99,26 @@ input[type="file"] {
 
 input[type="file"].drag-in {
   border: solid black;
+} */
+
+
+.setup-wizard-content{
+  height: calc(100% - 4rem);
+  overflow-y: auto;
+}
+
+.form-paper{
+  /* min-height: 100%; */
+  background-color: white;
+  padding: 1rem;
+}
+
+.setup-wizard-footer.navbar{
+  height: 4rem;
+  background-color: #ff6000 !important;
+  /* opacity: .5; */
+}
+
+.fa{
+  color: white;
 }

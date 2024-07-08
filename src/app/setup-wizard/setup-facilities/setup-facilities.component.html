@@ -1,4 +1,26 @@
-<ng-container *ngIf="facilities && facilities.length != 0 && !hasTemplate">
+<div class="setup-wizard-content">
+    <div class="row g-0 justify-content-center h-100 w-100 overflow-scroll">
+        <div class="col-11 pt-4 pb-4">
+            <div class="form-paper shadow">
+                <router-outlet></router-outlet>
+            </div>
+        </div>
+    </div>
+</div>
+<nav class="setup-wizard-footer navbar shadow">
+    <div class="container-fluid justify-content-between">
+        <button class="btn btn-dark" (click)="goBack()">
+            <span class="fa fa-chevron-left"></span>
+            Go Back
+        </button>
+        <button class="btn btn-dark" (click)="next()">
+            Next
+            <span class="fa fa-chevron-right"></span>
+        </button>
+    </div>
+</nav>
+
+<!-- <ng-container *ngIf="facilities && facilities.length != 0 && !hasTemplate">
     <div class="banner sticky-top d-flex justify-content-between pb-0" [ngClass]="{'modal-open': modalOpen}">
         <div>
             <ul class="nav nav-tabs sticky-top">
@@ -16,7 +38,7 @@
                     <a class="nav-link" (click)="addFacility()">+Add Another Facility
                     </a>
                 </li>
-            </ul> -->
+            </ul> --
         </div>
     </div>
     <div class="wrapper">
@@ -117,4 +139,4 @@
             </ng-container>
         </div>
     </div>
-</ng-container>
+</ng-container> -->

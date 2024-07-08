@@ -148,7 +148,7 @@ export class SetupWizardFooterComponent implements OnInit {
   }
 
   addfacility() {
-    this.setupWizardService.addFacility();
+    // this.setupWizardService.addFacility();
   }
 
   resetFacilities() {
