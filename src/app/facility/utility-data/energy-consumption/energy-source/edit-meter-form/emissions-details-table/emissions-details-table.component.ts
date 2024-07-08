@@ -8,9 +8,9 @@ import { FuelTypeOption } from 'src/app/shared/fuel-options/fuelTypeOption';
   styleUrls: ['./emissions-details-table.component.css']
 })
 export class EmissionsDetailsTableComponent {
-  @Input()
+  @Input({required: true})
   selectedFuelTypeOption: FuelTypeOption;
-  @Input()
+  @Input({required: true})
   meterForm: FormGroup;
   
 }

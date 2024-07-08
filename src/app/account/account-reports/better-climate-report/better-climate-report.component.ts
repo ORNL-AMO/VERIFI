@@ -103,12 +103,13 @@ export class BetterClimateReportComponent {
         co2Emissions: this.eGridService.co2Emissions,
         emissionsDisplay: this.selectedReport.betterClimateReportSetup.emissionsDisplay,
         emissionsGoal: this.account.sustainabilityQuestions.greenhouseReductionPercent,
-        customFuels: customFuels
+        customFuels: customFuels,
+        betterClimateReportSetup: this.selectedReport.betterClimateReportSetup
       });
     } else {
       // Web Workers are not supported in this environment
       let betterClimateReport: BetterClimateReport = new BetterClimateReport(this.account, accountFacilities, accountMeters, accountMeterData, this.selectedReport.baselineYear, this.selectedReport.reportYear,
-        this.eGridService.co2Emissions, this.selectedReport.betterClimateReportSetup.emissionsDisplay, this.account.sustainabilityQuestions.greenhouseReductionPercent, customFuels);
+        this.eGridService.co2Emissions, this.selectedReport.betterClimateReportSetup.emissionsDisplay, this.account.sustainabilityQuestions.greenhouseReductionPercent, customFuels, this.selectedReport.betterClimateReportSetup);
       this.betterClimateReportUnfiltered = _.cloneDeep(betterClimateReport);
       this.betterClimateReport = this.filterIntermediateYears(betterClimateReport);
       this.calculating = false;

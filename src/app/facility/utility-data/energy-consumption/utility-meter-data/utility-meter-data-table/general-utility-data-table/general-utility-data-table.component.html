@@ -31,14 +31,44 @@
             <th *ngIf="generalUtilityDataFilters.totalCost" (click)="setOrderDataField('totalCost')"
                 [ngClass]="{'active': orderDataField == 'totalCost'}">Total
                 Cost</th>
-            <th *ngIf="generalUtilityDataFilters.totalMarketEmissions && showEmissions"
-                (click)="setOrderDataField('totalMarketEmissions')"
-                [ngClass]="{'active': orderDataField == 'totalMarketEmissions'}">Total Market <br>Emissions (tonne
-                CO<sub>2</sub>e)</th>
-            <th *ngIf="generalUtilityDataFilters.totalLocationEmissions && showEmissions"
-                (click)="setOrderDataField('totalLocationEmissions')"
-                [ngClass]="{'active': orderDataField == 'totalLocationEmissions'}">Total Location <br>Emissions (tonne
-                CO<sub>2</sub>e)</th>
+
+            <ng-container *ngIf="showEmissions">
+                <ng-template [ngIf]="selectedMeter.source == 'Natural Gas' || selectedMeter.source == 'Other Fuels'"
+                    [ngIfElse]="otherEnergyHeadersBlock">
+
+                    <th *ngIf="generalUtilityDataFilters.stationaryBiogenicEmmissions"
+                        (click)="setOrderDataField('stationaryBiogenicEmmissions')"
+                        [ngClass]="{'active': orderDataField == 'stationaryBiogenicEmmissions'}">Total Biogenic
+                        <br>Emissions
+                        (tonne
+                        CO<sub>2</sub>e)
+                    </th>
+                    <th *ngIf="generalUtilityDataFilters.stationaryCarbonEmissions"
+                        (click)="setOrderDataField('stationaryCarbonEmissions')"
+                        [ngClass]="{'active': orderDataField == 'stationaryCarbonEmissions'}">Total Carbon <br>Emissions
+                        (tonne
+                        CO<sub>2</sub>e)</th>
+                    <th *ngIf="generalUtilityDataFilters.stationaryOtherEmissions"
+                        (click)="setOrderDataField('stationaryOtherEmissions')"
+                        [ngClass]="{'active': orderDataField == 'stationaryOtherEmissions'}">Total Other <br>Emissions
+                        (tonne
+                        CO<sub>2</sub>e)</th>
+
+                    <th *ngIf="generalUtilityDataFilters.totalEmissions"
+                        (click)="setOrderDataField('stationaryEmissions')"
+                        [ngClass]="{'active': orderDataField == 'stationaryEmissions'}">Total <br>Emissions (tonne
+                        CO<sub>2</sub>e)</th>
+                </ng-template>
+                <ng-template #otherEnergyHeadersBlock>
+                    <th *ngIf="generalUtilityDataFilters.totalEmissions"
+                        (click)="setOrderDataField('otherScope2Emissions')"
+                        [ngClass]="{'active': orderDataField == 'otherScope2Emissions'}">Total <br>Emissions (tonne
+                        CO<sub>2</sub>e)</th>
+                </ng-template>
+
+
+            </ng-container>
+
             <th *ngIf="generalUtilityDataFilters.commodityCharge" (click)="setOrderDataField('commodityCharge')"
                 [ngClass]="{'active': orderDataField == 'commodityCharge'}">Commodity Charge</th>
             <th *ngIf="generalUtilityDataFilters.deliveryCharge" (click)="setOrderDataField('deliveryCharge')"
@@ -65,11 +95,34 @@
                 {{meterData.totalEnergyUse | customNumber}}
             </td>
             <td *ngIf="generalUtilityDataFilters.totalCost">{{meterData.totalCost | customNumber:true}}</td>
+
             <!--TODO: update table and filters for emissions (scope2other, stationary)-->
-            <td *ngIf="generalUtilityDataFilters.totalMarketEmissions && showEmissions">{{meterData.totalMarketEmissions
-                | customNumber}}</td>
-            <td *ngIf="generalUtilityDataFilters.totalLocationEmissions && showEmissions">
-                {{meterData.totalLocationEmissions | customNumber}}</td>
+            <ng-container *ngIf="showEmissions">
+                <ng-template [ngIf]="selectedMeter.source == 'Natural Gas' || selectedMeter.source == 'Other Fuels'"
+                    [ngIfElse]="otherEnergyBlock">
+
+                    <td *ngIf="generalUtilityDataFilters.stationaryBiogenicEmmissions">
+                        {{meterData.stationaryBiogenicEmmissions
+                        | customNumber}}</td>
+                    <td *ngIf="generalUtilityDataFilters.stationaryCarbonEmissions">
+                        {{meterData.stationaryCarbonEmissions
+                        | customNumber}}</td>
+                    <td *ngIf="generalUtilityDataFilters.stationaryOtherEmissions">
+                        {{meterData.stationaryOtherEmissions
+                        | customNumber}}</td>
+                    <td *ngIf="generalUtilityDataFilters.totalEmissions">
+                        {{meterData.stationaryEmissions
+                        | customNumber}}</td>
+                </ng-template>
+                <ng-template #otherEnergyBlock>
+                    <td *ngIf="generalUtilityDataFilters.totalEmissions">
+                        {{meterData.otherScope2Emissions
+                        | customNumber}}</td>
+                </ng-template>
+            </ng-container>
+
+
+
             <td *ngIf="generalUtilityDataFilters.commodityCharge">{{meterData.commodityCharge | customNumber:true}}</td>
             <td *ngIf="generalUtilityDataFilters.deliveryCharge">{{meterData.deliveryCharge | customNumber:true}}</td>
             <td *ngIf="generalUtilityDataFilters.otherCharge">{{meterData.otherCharge | customNumber:true}}</td>

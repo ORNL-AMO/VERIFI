@@ -3,6 +3,7 @@ import { AccountAnalysisSetupErrors } from './accountAnalysis';
 import { AnalysisCategory, AnalysisGroup, AnalysisSetupErrors } from './analysis';
 import { MonthlyData } from './calanderization';
 import { FacilityClassification, MeterPhase, MeterSource, ReportType, WaterDischargeType, WaterIntakeType } from './constantsAndTypes';
+import { EmissionsResults } from './eGridEmissions';
 import { GlobalWarmingPotential } from './globalWarmingPotentials';
 import { ElectricityDataFilters, GeneralUtilityDataFilters, VehicleDataFilters } from './meterDataFilter';
 import { BetterClimateReportSetup, BetterPlantsReportSetup, DataOverviewReportSetup, PerformanceReportSetup } from './overview-report';
@@ -176,7 +177,7 @@ export interface IdbUtilityMeter {
 
 }
 
-export interface IdbUtilityMeterData {
+export interface IdbUtilityMeterData extends Partial<EmissionsResults> {
     //keys (id primary)
     id?: number,
     guid: string,
@@ -196,19 +197,7 @@ export interface IdbUtilityMeterData {
     totalImportConsumption?: number
 
     //TODO: Check emissions usage for meters...
-    totalMarketEmissions?: number,
-    totalLocationEmissions?: number,
-    RECs?: number,
-    excessRECs?: number,
-    excessRECsEmissions?: number,
     isEstimated?: boolean,
-    //vehicle emissions
-    mobileBiogenicEmissions?: number,
-    mobileCarbonEmissions?: number,
-    mobileOtherEmissions?: number,
-    mobileTotalEmissions?: number,
-    processEmissions?: number,
-    fugitiveEmissions?: number,
 
     //electricity
     totalRealDemand?: number,

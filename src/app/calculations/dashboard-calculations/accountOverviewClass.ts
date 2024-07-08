@@ -5,7 +5,7 @@ import { YearMonthData } from "src/app/models/dashboard";
 import { getYearlyUsageNumbers } from "../shared-calculations/calanderizationFunctions";
 import { EnergySources, WaterSources } from "src/app/models/constantsAndTypes";
 import { EmissionsResults } from "src/app/models/eGridEmissions";
-import { getEmissionsTotalsFromMonthlyData } from "../shared-calculations/calculationsHelpers";
+import { getEmissionsTotalsFromArray } from "../shared-calculations/calculationsHelpers";
 import { SourceTotals } from "./sourceTotalsClass";
 import { WaterDischargeColors, WaterIntakeColors } from "src/app/shared/utilityColors";
 
@@ -109,29 +109,10 @@ export class AccountOverviewData {
     }
 
     setTotalEmissions() {
-        this.emissionsTotals = {
-            RECs: _.sumBy(this.facilitiesCost, (overviewFacility: AccountOverviewFacility) => { return overviewFacility.emissions.RECs }),
-            locationElectricityEmissions: _.sumBy(this.facilitiesCost, (overviewFacility: AccountOverviewFacility) => { return overviewFacility.emissions.locationElectricityEmissions }),
-            marketElectricityEmissions: _.sumBy(this.facilitiesCost, (overviewFacility: AccountOverviewFacility) => { return overviewFacility.emissions.marketElectricityEmissions }),
-            otherScope2Emissions: _.sumBy(this.facilitiesCost, (overviewFacility: AccountOverviewFacility) => { return overviewFacility.emissions.otherScope2Emissions }),
-            scope2LocationEmissions: _.sumBy(this.facilitiesCost, (overviewFacility: AccountOverviewFacility) => { return overviewFacility.emissions.scope2LocationEmissions }),
-            scope2MarketEmissions: _.sumBy(this.facilitiesCost, (overviewFacility: AccountOverviewFacility) => { return overviewFacility.emissions.scope2MarketEmissions }),
-            excessRECs: _.sumBy(this.facilitiesCost, (overviewFacility: AccountOverviewFacility) => { return overviewFacility.emissions.excessRECs }),
-            excessRECsEmissions: _.sumBy(this.facilitiesCost, (overviewFacility: AccountOverviewFacility) => { return overviewFacility.emissions.excessRECsEmissions }),
-            mobileCarbonEmissions: _.sumBy(this.facilitiesCost, (overviewFacility: AccountOverviewFacility) => { return overviewFacility.emissions.mobileCarbonEmissions }),
-            mobileBiogenicEmissions: _.sumBy(this.facilitiesCost, (overviewFacility: AccountOverviewFacility) => { return overviewFacility.emissions.mobileBiogenicEmissions }),
-            mobileOtherEmissions: _.sumBy(this.facilitiesCost, (overviewFacility: AccountOverviewFacility) => { return overviewFacility.emissions.mobileOtherEmissions }),
-            mobileTotalEmissions: _.sumBy(this.facilitiesCost, (overviewFacility: AccountOverviewFacility) => { return overviewFacility.emissions.mobileTotalEmissions }),
-            fugitiveEmissions: _.sumBy(this.facilitiesCost, (overviewFacility: AccountOverviewFacility) => { return overviewFacility.emissions.fugitiveEmissions }),
-            processEmissions: _.sumBy(this.facilitiesCost, (overviewFacility: AccountOverviewFacility) => { return overviewFacility.emissions.processEmissions }),
-            stationaryEmissions: _.sumBy(this.facilitiesCost, (overviewFacility: AccountOverviewFacility) => { return overviewFacility.emissions.stationaryEmissions }),
-            totalScope1Emissions: _.sumBy(this.facilitiesCost, (overviewFacility: AccountOverviewFacility) => { return overviewFacility.emissions.totalScope1Emissions }),
-            totalWithMarketEmissions: _.sumBy(this.facilitiesCost, (overviewFacility: AccountOverviewFacility) => { return overviewFacility.emissions.totalWithMarketEmissions }),
-            totalWithLocationEmissions: _.sumBy(this.facilitiesCost, (overviewFacility: AccountOverviewFacility) => { return overviewFacility.emissions.totalWithLocationEmissions }),
-            totalBiogenicEmissions: _.sumBy(this.facilitiesCost, (overviewFacility: AccountOverviewFacility) => { return overviewFacility.emissions.totalBiogenicEmissions }),
-            stationaryBiogenicEmmissions: _.sumBy(this.facilitiesCost, (overviewFacility: AccountOverviewFacility) => { return overviewFacility.emissions.stationaryBiogenicEmmissions }),
-
-        }
+        let allEmissionsResults: Array<EmissionsResults> = this.facilitiesCost.map(fCost => {
+            return fCost.emissions
+        });
+        this.emissionsTotals = getEmissionsTotalsFromArray(allEmissionsResults);
     }
 
     //costs
@@ -249,7 +230,7 @@ export class AccountOverviewFacility {
     }
 
     setTotalEmissions() {
-        this.emissions = getEmissionsTotalsFromMonthlyData(this.monthlyData);
+        this.emissions = getEmissionsTotalsFromArray(this.monthlyData);
     }
 
     setWaterTypeData(calanderizedMeters: Array<CalanderizedMeter>, dateRange: { startDate: Date, endDate: Date }) {

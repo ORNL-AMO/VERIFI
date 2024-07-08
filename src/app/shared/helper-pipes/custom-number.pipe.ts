@@ -9,7 +9,7 @@ export class CustomNumberPipe implements PipeTransform {
   transform(value: number, isCurrency?: boolean): string {
     let valueStr: string;
     if (isNaN(value) == false && value != null) {
-      if (value < 10000) {
+      if (Math.abs(value) < 10000) {
         //5 sig figs
         valueStr = (value).toLocaleString(undefined, { maximumSignificantDigits: 5 });
       } else {

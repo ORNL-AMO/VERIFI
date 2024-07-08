@@ -132,18 +132,32 @@
                         [(ngModel)]="generalUtilityDataFilters.totalCost" (change)="save()">
                     <label for="totalCost" class="form-check-label">Total Cost</label>
                 </div>
+                <ng-container *ngIf="meter.source == 'Other Fuels' || meter.source == 'Natural Gas'">
+                    <div class="form-check" *ngIf="showEmissions">
+                        <input class="form-check-input" type="checkbox" name="stationaryBiogenicEmmissions"
+                            id="stationaryBiogenicEmmissions"
+                            [(ngModel)]="generalUtilityDataFilters.stationaryBiogenicEmmissions" (change)="save()">
+                        <label for="stationaryBiogenicEmmissions" class="form-check-label">Biogenic Emissions</label>
+                    </div>
+                    <div class="form-check" *ngIf="showEmissions">
+                        <input class="form-check-input" type="checkbox" name="stationaryCarbonEmissions"
+                            id="stationaryCarbonEmissions"
+                            [(ngModel)]="generalUtilityDataFilters.stationaryCarbonEmissions" (change)="save()">
+                        <label for="stationaryCarbonEmissions" class="form-check-label">Carbon
+                            Emissions</label>
+                    </div>
+                    <div class="form-check" *ngIf="showEmissions">
+                        <input class="form-check-input" type="checkbox" name="stationaryOtherEmissions"
+                            id="stationaryOtherEmissions"
+                            [(ngModel)]="generalUtilityDataFilters.stationaryOtherEmissions" (change)="save()">
+                        <label for="stationaryOtherEmissions" class="form-check-label">Other
+                            Emissions</label>
+                    </div>
+                </ng-container>
                 <div class="form-check" *ngIf="showEmissions">
-                    <input class="form-check-input" type="checkbox" name="totalMarketEmissions"
-                        id="totalMarketEmissions" [(ngModel)]="generalUtilityDataFilters.totalMarketEmissions"
-                        (change)="save()">
-                    <label for="totalMarketEmissions" class="form-check-label">Market Emissions</label>
-                </div>
-                <div class="form-check" *ngIf="showEmissions">
-                    <input class="form-check-input" type="checkbox" name="totalLocationEmissions"
-                        id="totalLocationEmissions" [(ngModel)]="generalUtilityDataFilters.totalLocationEmissions"
-                        (change)="save()">
-                    <label for="totalLocationEmissions" class="form-check-label">Location
-                        Emissions</label>
+                    <input class="form-check-input" type="checkbox" name="totalEmissions" id="totalEmissions"
+                        [(ngModel)]="generalUtilityDataFilters.totalEmissions" (change)="save()">
+                    <label for="totalEmissions" class="form-check-label">Total Emissions</label>
                 </div>
             </div>
             <div class="col">
