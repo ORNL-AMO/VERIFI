@@ -105,7 +105,7 @@ export class ManageAccountsComponent {
     try {
       await this.dbChangesService.selectAccount(account, false);
       this.loadingService.setLoadingStatus(false);
-      this.router.navigate(['/']);
+      this.router.navigate(['/account']);
     } catch (err) {
       this.toastNotificationService.showToast('An Error Occured', 'There was an error when trying to switch to ' + account.name + '. The action was unable to be completed.', 15000, false, 'alert-danger');
       this.accountErrors[index] = err;

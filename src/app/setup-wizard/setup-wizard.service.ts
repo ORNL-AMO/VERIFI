@@ -42,7 +42,5 @@ export class SetupWizardService {
       facilities.push(newFacility);
       this.facilities.next(facilities);
     }
-    this.selectedFacility.next(facilities[0]);
-    this.router.navigateByUrl('setup-wizard/facility-details/' + facilities[0].guid);
   }
 }

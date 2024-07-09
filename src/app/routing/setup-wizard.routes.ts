@@ -1,9 +1,6 @@
 import { Route } from "@angular/router";
 import { SetupAccountComponent } from "src/app/setup-wizard/setup-account/setup-account.component";
 import { SetupConfirmationComponent } from "src/app/setup-wizard/setup-confirmation/setup-confirmation.component";
-import { FacilityInformationSetupComponent } from "src/app/setup-wizard/facility-details/facility-information-setup/facility-information-setup.component";
-import { FacilityReportingSetupComponent } from "src/app/setup-wizard/facility-details/facility-reporting-setup/facility-reporting-setup.component";
-import { FacilityUnitsSetupComponent } from "src/app/setup-wizard/facility-details/facility-units-setup/facility-units-setup.component";
 import { SetupFacilitiesComponent } from "src/app/setup-wizard/setup-facilities/setup-facilities.component";
 import { SetupWizardComponent } from "src/app/setup-wizard/setup-wizard.component";
 import { FacilityDetailsComponent } from "../setup-wizard/facility-details/facility-details.component";
@@ -15,6 +12,7 @@ import { ProcessTemplateMetersComponent } from "../setup-wizard/setup-wizard-dat
 import { ProcessTemplateMeterReadingsComponent } from "../setup-wizard/setup-wizard-data-upload/process-template-file/process-template-meter-readings/process-template-meter-readings.component";
 import { ProcessTemplatePredictorsComponent } from "../setup-wizard/setup-wizard-data-upload/process-template-file/process-template-predictors/process-template-predictors.component";
 import { ProcessTemplateFileComponent } from "../setup-wizard/setup-wizard-data-upload/process-template-file/process-template-file.component";
+import { FacilitySettingsSetupComponent } from "../setup-wizard/facility-details/facility-settings-setup/facility-settings-setup.component";
 
 
 export const SetupWizardRoutes: Route = {
@@ -57,10 +55,8 @@ export const SetupWizardRoutes: Route = {
             path: 'facility-details/:id',
             component: FacilityDetailsComponent,
             children: [
-                { path: '', pathMatch: 'full', redirectTo: 'information-setup' },
-                { path: 'information-setup', component: FacilityInformationSetupComponent },
-                { path: 'units-setup', component: FacilityUnitsSetupComponent },
-                { path: 'reporting-setup', component: FacilityReportingSetupComponent },
+                { path: '', pathMatch: 'full', redirectTo: 'settings' },
+                { path: 'settings', component: FacilitySettingsSetupComponent },
                 { path: 'meters-setup', component: FacilityMetersSetupComponent },
             ]
         },

@@ -83,28 +83,14 @@
             <div class="ps-2 pe-2 nav-item">
                 <a class="nav-link" [routerLink]="'/setup-wizard/facility-details/'+facility.guid"
                     [routerLinkActive]="['active']">
-                    {{facility.name}}
+                    {{facility.name}} 
                 </a>
             </div>
             <div class="ps-2 pe-2 nav-item">
                 <a class="nav-link secondary-nav"
-                    [routerLink]="'/setup-wizard/facility-details/'+facility.guid+'/information-setup'"
+                    [routerLink]="'/setup-wizard/facility-details/'+facility.guid+'/settings'"
                     [routerLinkActive]="['active']">
-                    General Information
-                </a>
-            </div>
-            <div class="ps-2 pe-2 nav-item">
-                <a class="nav-link secondary-nav"
-                    [routerLink]="'/setup-wizard/facility-details/'+facility.guid+'/units-setup'"
-                    [routerLinkActive]="['active']">
-                    Units
-                </a>
-            </div>
-            <div class="ps-2 pe-2 nav-item">
-                <a class="nav-link secondary-nav"
-                    [routerLink]="'/setup-wizard/facility-details/'+facility.guid+'/reporting-setup'"
-                    [routerLinkActive]="['active']">
-                    Reporting
+                    Settings
                 </a>
             </div>
             <div class="ps-2 pe-2 nav-item">

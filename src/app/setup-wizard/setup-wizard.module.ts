@@ -8,9 +8,6 @@ import { SetupConfirmationComponent } from './setup-confirmation/setup-confirmat
 import { RouterModule } from '@angular/router';
 import { SettingsFormsModule } from '../shared/settings-forms/settings-forms.module';
 import { SetupWizardFooterComponent } from './setup-wizard-footer/setup-wizard-footer.component';
-import { FacilityInformationSetupComponent } from './facility-details/facility-information-setup/facility-information-setup.component';
-import { FacilityUnitsSetupComponent } from './facility-details/facility-units-setup/facility-units-setup.component';
-import { FacilityReportingSetupComponent } from './facility-details/facility-reporting-setup/facility-reporting-setup.component';
 import { SetupWizardSidebarComponent } from './setup-wizard-sidebar/setup-wizard-sidebar.component';
 import { FormsModule } from '@angular/forms';
 import { FacilityDetailsComponent } from './facility-details/facility-details.component';
@@ -22,6 +19,7 @@ import { ProcessTemplateFacilitiesComponent } from './setup-wizard-data-upload/p
 import { ProcessTemplateMetersComponent } from './setup-wizard-data-upload/process-template-file/process-template-meters/process-template-meters.component';
 import { ProcessTemplateMeterReadingsComponent } from './setup-wizard-data-upload/process-template-file/process-template-meter-readings/process-template-meter-readings.component';
 import { ProcessTemplatePredictorsComponent } from './setup-wizard-data-upload/process-template-file/process-template-predictors/process-template-predictors.component';
+import { FacilitySettingsSetupComponent } from './facility-details/facility-settings-setup/facility-settings-setup.component';
 
 @NgModule({
   declarations: [
@@ -31,9 +29,6 @@ import { ProcessTemplatePredictorsComponent } from './setup-wizard-data-upload/p
     SetupFacilitiesComponent,
     SetupConfirmationComponent,
     SetupWizardFooterComponent,
-    FacilityInformationSetupComponent,
-    FacilityUnitsSetupComponent,
-    FacilityReportingSetupComponent,
     SetupWizardSidebarComponent,
     FacilityDetailsComponent,
     FacilityMetersSetupComponent,
@@ -43,7 +38,8 @@ import { ProcessTemplatePredictorsComponent } from './setup-wizard-data-upload/p
     ProcessTemplateFacilitiesComponent,
     ProcessTemplateMetersComponent,
     ProcessTemplateMeterReadingsComponent,
-    ProcessTemplatePredictorsComponent
+    ProcessTemplatePredictorsComponent,
+    FacilitySettingsSetupComponent
   ],
   imports: [
     CommonModule,
