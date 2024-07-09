@@ -9,16 +9,20 @@ import { SetupWelcomeComponent } from './setup-welcome/setup-welcome.component';
 import { RouterModule } from '@angular/router';
 import { SettingsFormsModule } from '../shared/settings-forms/settings-forms.module';
 import { SetupWizardFooterComponent } from './setup-wizard-footer/setup-wizard-footer.component';
-import { CorporateInformationSetupComponent } from './setup-account/corporate-information-setup/corporate-information-setup.component';
-import { CorporateUnitsSetupComponent } from './setup-account/corporate-units-setup/corporate-units-setup.component';
-import { CorporateReportingSetupComponent } from './setup-account/corporate-reporting-setup/corporate-reporting-setup.component';
 import { FacilityInformationSetupComponent } from './facility-details/facility-information-setup/facility-information-setup.component';
 import { FacilityUnitsSetupComponent } from './facility-details/facility-units-setup/facility-units-setup.component';
 import { FacilityReportingSetupComponent } from './facility-details/facility-reporting-setup/facility-reporting-setup.component';
 import { SetupWizardSidebarComponent } from './setup-wizard-sidebar/setup-wizard-sidebar.component';
-import { FacilitySetupHomeComponent } from './setup-facilities/facility-setup-home/facility-setup-home.component';
 import { FormsModule } from '@angular/forms';
 import { FacilityDetailsComponent } from './facility-details/facility-details.component';
+import { FacilityMetersSetupComponent } from './facility-details/facility-meters-setup/facility-meters-setup.component';
+import { SetupWizardDataUploadComponent } from './setup-wizard-data-upload/setup-wizard-data-upload.component';
+import { UploadFilesComponent } from './setup-wizard-data-upload/upload-files/upload-files.component';
+import { ProcessTemplateFileComponent } from './setup-wizard-data-upload/process-template-file/process-template-file.component';
+import { ProcessTemplateFacilitiesComponent } from './setup-wizard-data-upload/process-template-file/process-template-facilities/process-template-facilities.component';
+import { ProcessTemplateMetersComponent } from './setup-wizard-data-upload/process-template-file/process-template-meters/process-template-meters.component';
+import { ProcessTemplateMeterReadingsComponent } from './setup-wizard-data-upload/process-template-file/process-template-meter-readings/process-template-meter-readings.component';
+import { ProcessTemplatePredictorsComponent } from './setup-wizard-data-upload/process-template-file/process-template-predictors/process-template-predictors.component';
 
 @NgModule({
   declarations: [
@@ -29,15 +33,19 @@ import { FacilityDetailsComponent } from './facility-details/facility-details.co
     SetupConfirmationComponent,
     SetupWelcomeComponent,
     SetupWizardFooterComponent,
-    CorporateInformationSetupComponent,
-    CorporateUnitsSetupComponent,
-    CorporateReportingSetupComponent,
     FacilityInformationSetupComponent,
     FacilityUnitsSetupComponent,
     FacilityReportingSetupComponent,
     SetupWizardSidebarComponent,
-    FacilitySetupHomeComponent,
-    FacilityDetailsComponent
+    FacilityDetailsComponent,
+    FacilityMetersSetupComponent,
+    SetupWizardDataUploadComponent,
+    UploadFilesComponent,
+    ProcessTemplateFileComponent,
+    ProcessTemplateFacilitiesComponent,
+    ProcessTemplateMetersComponent,
+    ProcessTemplateMeterReadingsComponent,
+    ProcessTemplatePredictorsComponent
   ],
   imports: [
     CommonModule,

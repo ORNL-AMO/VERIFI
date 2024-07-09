@@ -19,23 +19,26 @@ export class SetupFacilitiesComponent implements OnInit {
 
   facilitiesSub: Subscription;
   facilities: Array<IdbFacility>;
-  selectedFacility: IdbFacility;
-  selectedFacilitySub: Subscription
   modalOpen: boolean;
   modalOpenSub: Subscription;
 
-  generalInformationInvalid: boolean;
-  unitsInvalid: boolean;
-  reportingInvalid: boolean;
-  missingEmissions: boolean;
-  missingEnergyReductionGoal: boolean;
+  // generalInformationInvalid: boolean;
+  // unitsInvalid: boolean;
+  // reportingInvalid: boolean;
+  // missingEmissions: boolean;
+  // missingEnergyReductionGoal: boolean;
 
   fileUploadError: string;
   templateSub: Subscription;
   hasTemplate: boolean;
-  unitsClass: 'bg-danger' | 'bg-success' | 'bg-warning';
-  reportingClass: 'bg-danger' | 'bg-success' | 'bg-warning';
+  // unitsClass: 'bg-danger' | 'bg-success' | 'bg-warning';
+  // reportingClass: 'bg-danger' | 'bg-success' | 'bg-warning';
   dragOver: boolean = false;
+
+  numberOfFacilities: number = 4;
+  orderOptions: Array<number> = [];
+  facilityToDelete: IdbFacility;
+  displayAddFacilityModal: boolean = false;
   constructor(private setupWizardService: SetupWizardService, private sharedDataService: SharedDataService,
     private router: Router, private settingsFormService: SettingsFormsService,
     private uploadDataService: UploadDataService,
@@ -43,16 +46,16 @@ export class SetupFacilitiesComponent implements OnInit {
     private toastNotificationService: ToastNotificationsService) { }
 
   ngOnInit(): void {
-    this.selectedFacilitySub = this.setupWizardService.selectedFacility.subscribe(val => {
-      this.selectedFacility = val;
-      if (this.selectedFacility) {
-        this.setValidation(this.selectedFacility);
-        this.setUnitsClass();
-        this.setReportsClass();
-      } else {
-        this.setupWizardService.canContinue.next(false);
-      }
-    });
+    // this.selectedFacilitySub = this.setupWizardService.selectedFacility.subscribe(val => {
+    //   this.selectedFacility = val;
+    //   if (this.selectedFacility) {
+    //     this.setValidation(this.selectedFacility);
+    //     this.setUnitsClass();
+    //     this.setReportsClass();
+    //   } else {
+    //     this.setupWizardService.canContinue.next(false);
+    //   }
+    // });
 
     this.facilitiesSub = this.setupWizardService.facilities.subscribe(val => {
       this.facilities = val;
@@ -73,65 +76,66 @@ export class SetupFacilitiesComponent implements OnInit {
   }
 
   ngOnDestroy() {
-    this.selectedFacilitySub.unsubscribe();
+    // this.selectedFacilitySub.unsubscribe();
     this.facilitiesSub.unsubscribe();
     this.modalOpenSub.unsubscribe();
     this.templateSub.unsubscribe();
   }
 
-  // addFacility() {
-  //   this.setupWizardService.addFacility();
+  addFacility() {
+    this.setupWizardService.addFacility(this.numberOfFacilities);
+    this.cancelAddFacilities();
+  }
+
+  // selectFacility(facility: IdbFacility) {
+  //   this.setupWizardService.selectedFacility.next(facility);
+  //   this.router.navigateByUrl('setup-wizard/facility-setup/information-setup');
   // }
 
-  selectFacility(facility: IdbFacility) {
-    this.setupWizardService.selectedFacility.next(facility);
-    this.router.navigateByUrl('setup-wizard/facility-setup/information-setup');
-  }
+  // deleteFacility() {
+  //   this.facilities = this.facilities.filter(facility => { return facility.wizardId != this.selectedFacility.wizardId });
+  //   this.setupWizardService.selectedFacility.next(this.facilities[0]);
+  //   this.setupWizardService.facilities.next(this.facilities);
+  //   this.router.navigateByUrl('setup-wizard/facility-setup/information-setup');
+  // }
 
-  deleteFacility() {
-    this.facilities = this.facilities.filter(facility => { return facility.wizardId != this.selectedFacility.wizardId });
-    this.setupWizardService.selectedFacility.next(this.facilities[0]);
-    this.setupWizardService.facilities.next(this.facilities);
-    this.router.navigateByUrl('setup-wizard/facility-setup/information-setup');
-  }
-
-  setValidation(facility: IdbFacility) {
-    this.unitsInvalid = this.settingsFormService.getUnitsForm(facility).invalid;
-    this.reportingInvalid = this.settingsFormService.getSustainabilityQuestionsForm(facility).invalid;
-    this.generalInformationInvalid = this.settingsFormService.getGeneralInformationForm(facility).invalid;
-    this.missingEmissions = !facility.eGridSubregion;
-    this.missingEnergyReductionGoal = !facility.sustainabilityQuestions.energyReductionGoal;
-    if (this.router.url.includes('information-setup')) {
-      this.setupWizardService.canContinue.next(!this.generalInformationInvalid);
-    } else if (this.router.url.includes('units-setup')) {
-      this.setupWizardService.canContinue.next(!this.unitsInvalid);
-    } else if (this.router.url.includes('reporting-setup')) {
-      this.setupWizardService.canContinue.next(!this.reportingInvalid);
-    }
-  }
+  // setValidation(facility: IdbFacility) {
+  //   this.unitsInvalid = this.settingsFormService.getUnitsForm(facility).invalid;
+  //   this.reportingInvalid = this.settingsFormService.getSustainabilityQuestionsForm(facility).invalid;
+  //   this.generalInformationInvalid = this.settingsFormService.getGeneralInformationForm(facility).invalid;
+  //   this.missingEmissions = !facility.eGridSubregion;
+  //   this.missingEnergyReductionGoal = !facility.sustainabilityQuestions.energyReductionGoal;
+  //   if (this.router.url.includes('information-setup')) {
+  //     this.setupWizardService.canContinue.next(!this.generalInformationInvalid);
+  //   } else if (this.router.url.includes('units-setup')) {
+  //     this.setupWizardService.canContinue.next(!this.unitsInvalid);
+  //   } else if (this.router.url.includes('reporting-setup')) {
+  //     this.setupWizardService.canContinue.next(!this.reportingInvalid);
+  //   }
+  // }
 
 
-  setUnitsClass() {
-    let badgeClass: 'bg-danger' | 'bg-success' | 'bg-warning' = 'bg-success';
-    if (this.unitsInvalid) {
-      badgeClass = 'bg-danger';
-    } else if (this.missingEmissions) {
-      badgeClass = 'bg-warning';
-    }
-    this.unitsClass = badgeClass;
-    this.cd.detectChanges();
-  }
+  // setUnitsClass() {
+  //   let badgeClass: 'bg-danger' | 'bg-success' | 'bg-warning' = 'bg-success';
+  //   if (this.unitsInvalid) {
+  //     badgeClass = 'bg-danger';
+  //   } else if (this.missingEmissions) {
+  //     badgeClass = 'bg-warning';
+  //   }
+  //   this.unitsClass = badgeClass;
+  //   this.cd.detectChanges();
+  // }
 
-  setReportsClass() {
-    let badgeClass: 'bg-danger' | 'bg-success' | 'bg-warning' = 'bg-success';
-    if (this.reportingInvalid) {
-      badgeClass = 'bg-danger';
-    } else if (this.missingEnergyReductionGoal) {
-      badgeClass = 'bg-warning';
-    }
-    this.reportingClass = badgeClass;
-    this.cd.detectChanges();
-  }
+  // setReportsClass() {
+  //   let badgeClass: 'bg-danger' | 'bg-success' | 'bg-warning' = 'bg-success';
+  //   if (this.reportingInvalid) {
+  //     badgeClass = 'bg-danger';
+  //   } else if (this.missingEnergyReductionGoal) {
+  //     badgeClass = 'bg-warning';
+  //   }
+  //   this.reportingClass = badgeClass;
+  //   this.cd.detectChanges();
+  // }
 
   setImportFile(event: EventTarget) {
     let files: FileList = (event as HTMLInputElement).files;
@@ -153,6 +157,7 @@ export class SetupFacilitiesComponent implements OnInit {
                   let fileReference: FileReference = this.uploadDataService.getFileReference(file, workBook, true);
                   this.fileUploadError = undefined;
                   this.setupWizardService.facilityTemplateWorkbook.next(workBook);
+                  this.setupWizardService.facilities.next(fileReference.importFacilities);
                 } catch (err) {
                   console.log(err);
                   this.fileUploadError = 'No facilities found in template.'
@@ -183,12 +188,42 @@ export class SetupFacilitiesComponent implements OnInit {
     this.dragOver = false;
   }
 
-  goBack(){
+  goBack() {
 
   }
 
-  next(){
+  next() {
 
   }
 
+  openAddFacilityModal() {
+    this.displayAddFacilityModal = true;
+  }
+
+  cancelAddFacilities() {
+    this.displayAddFacilityModal = false;
+  }
+
+  setDeleteFacility(facility: IdbFacility) {
+    this.facilityToDelete = facility;
+  }
+
+  cancelFacilityDelete() {
+    this.facilityToDelete = undefined;
+  }
+
+  confirmDeleteFacility() {
+    this.facilities = this.facilities.filter(facility => {
+      return facility.guid == this.facilityToDelete.guid
+    });
+    this.setupWizardService.facilities.next(this.facilities);
+  }
+
+  goToFacility(facility: IdbFacility) {
+
+  }
+
+  setFacilityOrder(facility: IdbFacility) {
+
+  }
 }

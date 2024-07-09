@@ -1,114 +1,9 @@
-/* .banner{
-    background-color: white;
-}
-
-.wrapper{
-    margin-bottom: 100px;
-    padding: 0px;
-}
-
-.banner .nav-item.active a{
-    background-color: #145A32;
-    color: white !important;
-}
-
-
-.page-sidebar.nav{
-    border-right: solid #145A32;
-    width: 210px;
-}
-
-.page-sidebar .nav-item{
-    border-bottom: groove 1px;
-}
-
-
-.page-sidebar .nav-link{
-    font-size: 16px;
-}
-
-.page-sidebar .nav-link.active{
-    background-color: #efefef;
-}
-
-.page-sidebar .nav-link:hover{
-    cursor: pointer;
-    background-color: #efefef;
-}
-
-.disabled .badge {
-    background-color: #efefef !important;
-}
-
-
-
-.options.wrapper {
-    background-color: #f1f1f100;
-    margin: 0px 30px;
-    padding: 20px 30px 30px;
-
-    position:relative;
-  }
-  .options.wrapper.main-content {
-    margin-right: 25px 40px;
-  }
-  .box {
-    background-color: white;
-    margin: 3px;
-    padding: 20px;
-    border-radius: 4px;
-    border: solid white;
-  }
-
-
-
-  .empty-state .box p {
-  font-size: 22px;
-  }
-  
-  .loadData,
-  .loadData a {
-    font-size: 18px;
-
-  }
-
-
-  .loadData{
-    background-color: white;
-  }
-
-
-  .options .fa{
-    font-size: 30px;
-  }
-
-  .box.select-box:hover{
-    cursor: pointer;
-    border: solid black;
-  }
-
-  .fa-file-circle-check{
-    color: green !important;
-  }
-
-
-  
-input[type="file"] {
-  border: solid grey;
-}
-
-input[type="file"].drag-in {
-  border: solid black;
-} */
-
-
 .setup-wizard-content{
   height: calc(100% - 4rem);
   overflow-y: auto;
 }
 
 .form-paper{
-  /* min-height: 100%; */
   background-color: white;
   padding: 1rem;
 }
@@ -116,9 +11,20 @@ input[type="file"].drag-in {
 .setup-wizard-footer.navbar{
   height: 4rem;
   background-color: #ff6000 !important;
-  /* opacity: .5; */
 }
 
-.fa{
+button .fa{
   color: white;
+}
+
+a .fa{
+  color: rgba(var(--bs-link-color-rgb),var(--bs-link-opacity,1));
+}
+
+.card-header, .card-footer{
+  background-color: white;
+}
+
+.card-header{
+  font-weight: bold;
 }

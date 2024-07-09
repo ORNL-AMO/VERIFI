@@ -2,14 +2,7 @@
     <div class="row g-0 justify-content-center h-100 w-100 overflow-scroll">
         <div class="col-11 pt-4 pb-4">
             <div class="form-paper">
-                <ng-template [ngIf]="selectedFacility" [ngIfElse]="noFacilityBlock">
-                    <router-outlet></router-outlet>
-                </ng-template>
-                <ng-template #noFacilityBlock>
-                    <div class="alert alert-warning">
-                        Selected Facility Not Found.
-                    </div>
-                </ng-template>
+                <router-outlet></router-outlet>
             </div>
         </div>
     </div>

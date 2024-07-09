@@ -4,6 +4,7 @@ import { BehaviorSubject } from 'rxjs';
 import { FacilitydbService } from '../indexedDB/facility-db.service';
 import { IdbAccount, IdbFacility } from '../models/idb';
 import * as XLSX from 'xlsx';
+import { FileReference } from '../upload-data/upload-data-models';
 
 @Injectable({
   providedIn: 'root'
@@ -16,6 +17,7 @@ export class SetupWizardService {
   submit: BehaviorSubject<boolean>;
   canContinue: BehaviorSubject<boolean>;
   facilityTemplateWorkbook: BehaviorSubject<XLSX.WorkBook>;
+  fileReferences: BehaviorSubject<Array<FileReference>>
   constructor(private facilityDbService: FacilitydbService, private router: Router) {
     this.initializeData();
   }
@@ -27,6 +29,7 @@ export class SetupWizardService {
     this.facilities = new BehaviorSubject<Array<IdbFacility>>([]);
     this.canContinue = new BehaviorSubject<boolean>(true);
     this.facilityTemplateWorkbook = new BehaviorSubject<XLSX.WorkBook>(undefined);
+    this.fileReferences = new BehaviorSubject<Array<FileReference>>([]);
   }
 
   addFacility(numFacilities: number) {

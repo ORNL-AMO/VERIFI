@@ -13,4 +13,7 @@
 
 .nav-link{
     padding-left: 3px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
 }

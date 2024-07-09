@@ -1,8 +1,179 @@
 <div class="setup-wizard-content">
     <div class="row g-0 justify-content-center h-100 w-100 overflow-scroll">
         <div class="col-11 pt-4 pb-4">
-            <div class="form-paper shadow">
-                <router-outlet></router-outlet>
+            <div class="form-paper">
+                <h4>
+                    <div class="d-flex justify-content-between">
+                        <div>Account Facilities
+                        </div>
+                        <div>
+                            <button class="btn btn-sm nav-btn me-2">
+                                <span class="fa fa-upload"></span>
+                                Upload Data
+                            </button>
+                            <button class="btn btn-sm btn-success" (click)="openAddFacilityModal()">
+                                <span class="fa fa-plus"></span>
+                                Add Facilities
+                            </button>
+                        </div>
+                    </div>
+                </h4>
+                <br>
+                <ng-template [ngIf]="facilities.length > 0" [ngIfElse]="noFacilitiesBlock">
+                    <div class="table-responsive">
+                        <table class="table table-sm utility-data table-hover table-bordered">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>Facility</th>
+                                    <th>State</th>
+                                    <th>Country</th>
+                                    <th class="actions">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="table-group-divider">
+                                <tr *ngFor="let facility of facilities">
+                                    <td class="actions">
+                                        <select [(ngModel)]="facility.facilityOrder" class="form-select"
+                                            id="facilityOrder" name="facilityOrder"
+                                            (change)="setFacilityOrder(facility)">
+                                            <option *ngFor="let option of orderOptions" [ngValue]="option">{{option}}
+                                            </option>
+                                        </select>
+                                    </td>
+                                    <td><a class="click-link" (click)="goToFacility(facility)">{{facility.name}}</a>
+                                    </td>
+                                    <td>{{facility.state}}</td>
+                                    <td>{{facility.country}}</td>
+                                    <td class="actions">
+                                        <div class="btn-group">
+                                            <button class="btn btn-sm btn-outline" (click)="goToFacility(facility)"
+                                                title="Edit">
+                                                <i class="fa fa-pencil"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline" (click)="setDeleteFacility(facility)"
+                                                title="Delete">
+                                                <i class="fa fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </ng-template>
+                <ng-template #noFacilitiesBlock>
+                    <div class="alert alert-info">
+                        No facilities found for this account. Click "<span class="fa fa-plus"></span> Add Facilities" to
+                        get started.
+                    </div>
+                </ng-template>
+                <!-- <div class="row justify-content-center">
+                    <div class="col-12">
+                        <div class="d-flex justify-content-center">
+                            <h1>Facility Setup Options </h1>
+                        </div>
+                    </div>
+                    <div class="col-lg-8 col-md-12 text-center">
+                        <p class="large">VERIFI has two options for adding facilities to corporate accounts. Users with
+                            only a couple
+                            facilities may want to add them manually, filling out similar forms to the coorporate
+                            information pages for
+                            each of their facilities. Otherwise, accounts with many facilities can use our excel
+                            template for uploading
+                            all the facility information at once.</p>
+                        <p>
+                            It should be noted that additional facilities can be added at a later time.
+                        </p>
+                        <p>
+                            Additionally, utility data can
+                            be uploaded within the template now or at a later time as well.
+                        </p>
+                    </div>
+                    <div class="col-12">
+                        <hr>
+                    </div>
+
+                    <ng-template [ngIf]="facilities.length == 0" [ngIfElse]="facilitiesAddedBlock">
+                        <div class="row justify-content-center">
+                            <div class="col-lg-8 col-md-12 text-center">
+                                <p class="large bold">
+                                    There are a two ways to add facilities.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="row justify-content-center">
+                            <div class="col-4 h-100">
+                                <div class="card h-100">
+                                    <div class="card-header">
+                                        Add Facilities Manually
+                                    </div>
+                                    <div class="card-body">
+                                        Fill out the details of each of your facilities manually. The button below will
+                                        add your first
+                                        facility.
+                                        <hr>
+                                        <form>
+                                            <div class="row">
+                                                <label for="numberOfFacilities" class="col-sm-6 col-form-label">
+                                                    Number of Facilities
+                                                </label>
+                                                <div class="col-6">
+                                                    <input class="form-control" type="number"
+                                                        [(ngModel)]="numberOfFacilities" name="numberOfFacilities"
+                                                        id="numberOfFacilities" step="1" min="0">
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                    <div class="card-footer justify-content-end">
+                                        <div class="d-flex w-100 justify-content-end">
+                                            <div>
+                                                <button class="btn nav-btn" (click)="addFacility();">
+                                                    <span class="fa fa-plus"></span>
+                                                    Add Facilities
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-4 h-100">
+                                <div class="card h-100">
+                                    <div class="card-header">
+                                        Upload Template Data
+                                    </div>
+                                    <div class="card-body">
+                                        <p>
+                                            An excel template has been created to upload facility and utility data.
+                                            Upload the template file
+                                            below to get started.
+                                        </p>
+                                        <input class="form-control" [ngClass]="{'drag-in': dragOver}" type="file"
+                                            #importFile id="importFile" (dragenter)="setDragEnter()"
+                                            (dragleave)="setDragOut()" (input)="setImportFile($event.target)"
+                                            accept=".xlsx">
+                                        <div class="alert alert-danger" *ngIf="fileUploadError">
+                                            {{fileUploadError}}
+                                        </div>
+                                    </div>
+                                    <div class="card-footer text-end">
+
+                                        <a class="click-link" href="assets/csv_templates/VERIFI-Import-Data.xlsx">
+                                            <span class="fa fa-download"></span>
+                                            Download Template</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </ng-template>
+                    <ng-template #facilitiesAddedBlock>
+                        <div class="alert alert-info text-center">
+                            <span class="fa fa-revert"></span>
+                            Facilities have been added.
+                        </div>
+                    </ng-template>
+                </div>-->
             </div>
         </div>
     </div>
@@ -20,123 +191,46 @@
     </div>
 </nav>
 
-<!-- <ng-container *ngIf="facilities && facilities.length != 0 && !hasTemplate">
-    <div class="banner sticky-top d-flex justify-content-between pb-0" [ngClass]="{'modal-open': modalOpen}">
-        <div>
-            <ul class="nav nav-tabs sticky-top">
-                <li class="nav-item" *ngFor="let facility of facilities"
-                    [ngClass]="{'active': facility.wizardId == selectedFacility.wizardId}"><a class="nav-link"
-                        (click)="selectFacility(facility)">{{facility.name}}</a>
-                </li>
-            </ul>
-        </div>
 
-        <div>
-            <button class="btn action-btn mb-0" (click)="addFacility()">+Add Another Facility</button>
-            <!-- <ul class="nav nav-tabs sticky-top">
-                <li class="nav-item">
-                    <a class="nav-link" (click)="addFacility()">+Add Another Facility
-                    </a>
-                </li>
-            </ul> --
-        </div>
+
+<div [ngClass]="{'windowOverlay': (facilityToDelete || displayAddFacilityModal)}">
+</div>
+<div class="popup" [class.open]="facilityToDelete" *ngIf="facilityToDelete">
+    <div class="popup-header">Delete Facility: {{facilityToDelete.name}}
+        <button class="item-right" (click)="cancelFacilityDelete()">x</button>
     </div>
-    <div class="wrapper">
-        <div class="d-flex w-100">
-            <div class="d-flex flex-column p-2 nav page-sidebar">
-                <div class="nav-item">
-                    <a class="nav-link" routerLink="/setup-wizard/facility-setup/information-setup"
-                        [routerLinkActive]="['active']">
-                        <span class="badge"
-                            [ngClass]="{'bg-danger':generalInformationInvalid, 'bg-success': !generalInformationInvalid}">1</span>
-                        General Information
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a class="nav-link" routerLink="/setup-wizard/facility-setup/units-setup"
-                        [routerLinkActive]="['active']" [ngClass]="{'disabled': generalInformationInvalid}">
-                        <span class="badge" [ngClass]="unitsClass">2</span> Units
-                    </a>
-                </div>
-                <div class="nav-item">
-                    <a class="nav-link" routerLink="/setup-wizard/facility-setup/reporting-setup"
-                        [routerLinkActive]="['active']"
-                        [ngClass]="{'disabled': generalInformationInvalid || unitsInvalid}">
-                        <span class="badge" [ngClass]="reportingClass">3</span>
-                        Reporting
-                    </a>
+    <div class="popup-body">
+        <p>WARNING: By deleting this facility, you are also deleting all of the data associated with it.
+            Are you sure you want to preform this action?</p>
+    </div>
+    <div class="popup-footer text-end">
+        <button class="btn btn-secondary" (click)="cancelFacilityDelete()">Cancel</button>
+        <button class="btn btn-danger" (click)="confirmDeleteFacility()">Confirm Delete</button>
+    </div>
+</div>
+
+<div class="popup" [class.open]="displayAddFacilityModal" *ngIf="displayAddFacilityModal">
+    <div class="popup-header">Add Facilities
+        <button class="item-right" (click)="cancelAddFacilities()">x</button>
+    </div>
+    <div class="popup-body">
+        <form>
+            <div class="row">
+                <label for="numberOfFacilities" class="col-sm-6 col-form-label">
+                    Number of Facilities
+                </label>
+                <div class="col-6">
+                    <input class="form-control" type="number" [(ngModel)]="numberOfFacilities" name="numberOfFacilities"
+                        id="numberOfFacilities" step="1" min="0">
                 </div>
             </div>
-            <div class="flex-fill pt-2 ps-4 pe-4 pb-4">
-                <div class="d-flex w-100 justify-content-end">
-                    <div *ngIf="facilities.length > 1">
-                        <button class="btn btn-sm btn-danger" (click)="deleteFacility()">Delete Facility</button>
-                    </div>
-                </div>
-                <router-outlet></router-outlet>
-            </div>
-        </div>
+        </form>
     </div>
-</ng-container>
-
-<ng-container *ngIf="facilities && facilities.length == 0">
-
-    <div class="options wrapper main-content h-100">
-        <div class="empty-state text-center">
-            <div class="d-flex justify-content-center">
-                <h1>Select Facility Setup Method </h1>
-            </div>
-            <p>Facilities can either be added manually or our excel template can be used to upload facilities and data
-                all at once.</p>
-            <br>
-
-            <ng-container *ngIf="!hasTemplate">
-                <div class="row justify-content-center">
-                    <div class="col-3">
-                        <div class="box h-100 select-box" (click)="addFacility()">
-                            <span class="fa fa-file-edit"></span>
-                            <br>
-                            <p>Add Facilities Manually</p>
-                        </div>
-                    </div>
-                    <div class="col-3">
-                        <div class="box h-100">
-                            <input class="form-control" [ngClass]="{'drag-in': dragOver}" type="file" #importFile
-                                id="importFile" (dragenter)="setDragEnter()" (dragleave)="setDragOut()"
-                                (input)="setImportFile($event.target)" accept=".xlsx">
-                            <div class="alert alert-danger" *ngIf="fileUploadError">
-                                {{fileUploadError}}
-                            </div>
-                            <p>Upload Template Data</p>
-                        </div>
-                    </div>
-                </div>
-                <br>
-                <hr>
-
-                <div class="text-center loadData box">An excel template can be used to make uploading your data easier,
-                    use
-                    this link to download the template:<br>
-                    <a href="assets/csv_templates/VERIFI-Import-Data.xlsx">Download Data Template</a>
-                </div>
-            </ng-container>
-            <ng-container *ngIf="hasTemplate">
-                <div class="row justify-content-center">
-                    <div class="col-3">
-                        <div class="box h-100">
-                            <span class="fa fa-file-circle-check"></span>
-                            <p>Facilities will be add from template file!</p>
-                        </div>
-                    </div>
-                </div>
-                <hr>
-                <div class="row justify-content-center">
-                    <div class="col-3">
-                        <button class="btn btn-danger" (click)="resetOption()">Choose Different Method</button>
-                    </div>
-                </div>
-
-            </ng-container>
-        </div>
+    <div class="popup-footer text-end">
+        <button class="btn btn-secondary" (click)="cancelAddFacilities()">Cancel</button>
+        <button class="btn btn-success" (click)="addFacility()">
+            <span class="fa fa-plus"></span>
+            Add Facilities
+        </button>
     </div>
-</ng-container> -->
+</div>

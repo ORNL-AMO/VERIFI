@@ -1,4 +1,4 @@
-<div class="h-100 navbar d-flex flex-column align-items-start justify-content-start shadow" *ngIf="displaySidebar">
+<div class="h-100 navbar d-flex flex-column align-items-start justify-content-start" *ngIf="displaySidebar">
 
 
     <div class="ps-1 pe-1 w-100">
@@ -12,33 +12,71 @@
         </div>
         <div class="ps-2 pe-2 nav-item">
             <a class="nav-link" [routerLink]="'/setup-wizard/account-setup'" [routerLinkActive]="['active']">
-                Company Setup
+                Corporate Settings
             </a>
+        </div>
+        <!-- <div class="ps-2 pe-2 nav-item">
+            <a class="nav-link secondary-nav" [routerLink]="'/setup-wizard/account-setup/corporate-settings'"
+                [routerLinkActive]="['active']">
+                Settings
+            </a>
+        </div> -->
+        <div class="p-2 w-100">
+            <hr class="my-1">
         </div>
         <div class="ps-2 pe-2 nav-item">
-            <a class="nav-link secondary-nav" [routerLink]="'/setup-wizard/account-setup/information-setup'"
-                [routerLinkActive]="['active']">
-                General Information
+            <a class="nav-link" [routerLink]="'/setup-wizard/data-upload/upload-files'" [routerLinkActive]="['active']">
+                Data Upload
             </a>
         </div>
-        <div class="ps-2 pe-2 nav-item">
-            <a class="nav-link secondary-nav" [routerLink]="'/setup-wizard/account-setup/units-setup'"
-                [routerLinkActive]="['active']">
-                Units
-            </a>
-        </div>
-        <div class="ps-2 pe-2 nav-item">
-            <a class="nav-link secondary-nav" [routerLink]="'/setup-wizard/account-setup/reporting-setup'"
-                [routerLinkActive]="['active']">
-                Reporting
-            </a>
-        </div>
+        <ng-container *ngFor="let fileReference of fileReferences">
+            <ng-template [ngIf]="fileReference.isTemplate" [ngIfElse]="nonTemplateBlock">
+                <div class="ps-2 pe-2 nav-item">
+                    <a class="nav-link"
+                        [routerLink]="'/setup-wizard/data-upload/process-template-file/' +fileReference.id"
+                        [routerLinkActive]="['active']">
+                        {{fileReference.name}}
+                    </a>
+                </div>
+                <div class="ps-2 pe-2 nav-item">
+                    <a class="nav-link secondary-nav"
+                        [routerLink]="'/setup-wizard/data-upload/process-template-file/' +fileReference.id +'/facilities'"
+                        [routerLinkActive]="['active']">
+                        Facilities
+                    </a>
+                </div>
+                <div class="ps-2 pe-2 nav-item">
+                    <a class="nav-link secondary-nav"
+                        [routerLink]="'/setup-wizard/data-upload/process-template-file/' +fileReference.id +'/meters'"
+                        [routerLinkActive]="['active']">
+                        Meters
+                    </a>
+                </div>
+                <div class="ps-2 pe-2 nav-item">
+                    <a class="nav-link secondary-nav"
+                        [routerLink]="'/setup-wizard/data-upload/process-template-file/' +fileReference.id +'/meter-readings'"
+                        [routerLinkActive]="['active']">
+                        Readings
+                    </a>
+                </div>
+                <div class="ps-2 pe-2 nav-item">
+                    <a class="nav-link secondary-nav"
+                        [routerLink]="'/setup-wizard/data-upload/process-template-file/' +fileReference.id +'/predictors'"
+                        [routerLinkActive]="['active']">
+                        Predictors
+                    </a>
+                </div>
+            </ng-template>
+            <ng-template #nonTemplateBlock>
+
+            </ng-template>
+        </ng-container>
         <div class="p-2 w-100">
             <hr class="my-1">
         </div>
         <div class="ps-2 pe-2 nav-item">
             <a class="nav-link" [routerLink]="'/setup-wizard/facility-setup'" [routerLinkActive]="['active']">
-                Facility Setup
+                Facilities
             </a>
         </div>
         <ng-container *ngFor="let facility of facilities">
@@ -67,6 +105,13 @@
                     [routerLink]="'/setup-wizard/facility-details/'+facility.guid+'/reporting-setup'"
                     [routerLinkActive]="['active']">
                     Reporting
+                </a>
+            </div>
+            <div class="ps-2 pe-2 nav-item">
+                <a class="nav-link secondary-nav"
+                    [routerLink]="'/setup-wizard/facility-details/'+facility.guid+'/meters-setup'"
+                    [routerLinkActive]="['active']">
+                    Meters
                 </a>
             </div>
         </ng-container>
