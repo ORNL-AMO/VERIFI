@@ -30,6 +30,7 @@ import { ManageAccountsComponent } from './core-components/manage-accounts/manag
 import { ElectronBackupFileComponent } from './core-components/electron-backup-file/electron-backup-file.component';
 import { HttpClientModule } from '@angular/common/http';
 import { DeletingAccountDataComponent } from './core-components/deleting-account-data/deleting-account-data.component';
+import { HomePageComponent } from './core-components/home-page/home-page.component';
 
 @NgModule({
   declarations: [
@@ -46,7 +47,8 @@ import { DeletingAccountDataComponent } from './core-components/deleting-account
     CreateReportModalComponent,
     ManageAccountsComponent,
     ElectronBackupFileComponent,
-    DeletingAccountDataComponent
+    DeletingAccountDataComponent,
+    HomePageComponent
   ],
   imports: [
     BrowserModule,

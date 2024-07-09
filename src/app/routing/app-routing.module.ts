@@ -11,13 +11,15 @@ import { SetupWizardRoutes } from './setup-wizard.routes';
 import { UploadRoutes } from './upload.routes';
 import { WeatherDataRoutes } from './weather-data.routes';
 import { ManageAccountsComponent } from '../core-components/manage-accounts/manage-accounts.component';
+import { HomePageComponent } from '../core-components/home-page/home-page.component';
 
 const routes: Routes = [
   {
     path: '',
     pathMatch: 'full',
-    redirectTo: 'account'
+    redirectTo: 'verifi'
   },
+  { path: 'verifi', component: HomePageComponent },
   AccountRoutes,
   FacilityRoutes,
   SetupWizardRoutes,

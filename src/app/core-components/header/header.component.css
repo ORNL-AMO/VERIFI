@@ -6,6 +6,10 @@
 .navbar-brand:first-letter, .dropdown-toggle span.active{
     color: #ff6000;
 }
+a:not([href]).navbar-brand{
+    color: black !important;
+}
+
 
 a:not([href]).dropdown-item.active {
     color: #ff6000 !important;

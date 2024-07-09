@@ -1,20 +1,19 @@
-import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
-import { ImportBackupModalService } from 'src/app/core-components/import-backup-modal/import-backup-modal.service';
-import { LoadingService } from 'src/app/core-components/loading/loading.service';
+import { Component } from '@angular/core';
+import { LoadingService } from '../loading/loading.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { IdbAccount } from 'src/app/models/idb';
 import { BackupDataService, BackupFile } from 'src/app/shared/helper-services/backup-data.service';
+import { Router } from '@angular/router';
+import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
+import { ImportBackupModalService } from '../import-backup-modal/import-backup-modal.service';
+import { IdbAccount } from 'src/app/models/idb';
 import { firstValueFrom } from 'rxjs';
 
 @Component({
-  selector: 'app-setup-welcome',
-  templateUrl: './setup-welcome.component.html',
-  styleUrls: ['./setup-welcome.component.css']
+  selector: 'app-home-page',
+  templateUrl: './home-page.component.html',
+  styleUrl: './home-page.component.css'
 })
-export class SetupWelcomeComponent implements OnInit {
-
+export class HomePageComponent {
   backupFile: any;
   showTestDataModal: boolean = false;
   constructor(private loadingService: LoadingService, private accountDbService: AccountdbService,

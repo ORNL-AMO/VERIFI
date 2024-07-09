@@ -5,7 +5,6 @@ import { FacilityInformationSetupComponent } from "src/app/setup-wizard/facility
 import { FacilityReportingSetupComponent } from "src/app/setup-wizard/facility-details/facility-reporting-setup/facility-reporting-setup.component";
 import { FacilityUnitsSetupComponent } from "src/app/setup-wizard/facility-details/facility-units-setup/facility-units-setup.component";
 import { SetupFacilitiesComponent } from "src/app/setup-wizard/setup-facilities/setup-facilities.component";
-import { SetupWelcomeComponent } from "src/app/setup-wizard/setup-welcome/setup-welcome.component";
 import { SetupWizardComponent } from "src/app/setup-wizard/setup-wizard.component";
 import { FacilityDetailsComponent } from "../setup-wizard/facility-details/facility-details.component";
 import { FacilityMetersSetupComponent } from "../setup-wizard/facility-details/facility-meters-setup/facility-meters-setup.component";
@@ -22,8 +21,7 @@ export const SetupWizardRoutes: Route = {
     path: 'setup-wizard',
     component: SetupWizardComponent,
     children: [
-        { path: '', pathMatch: 'full', redirectTo: 'welcome' },
-        { path: 'welcome', component: SetupWelcomeComponent },
+        { path: '', pathMatch: 'full', redirectTo: 'account-setup' },
         {
             path: 'account-setup',
             component: SetupAccountComponent,

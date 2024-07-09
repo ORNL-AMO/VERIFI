@@ -114,7 +114,7 @@ export class HeaderComponent implements OnInit {
       await this.dbChangesService.selectAccount(account, false);
       this.loadingService.setLoadingStatus(false);
       this.automaticBackupService.initializeAccount();
-      this.router.navigate(['/']);
+      this.router.navigate(['/account']);
     } catch (err) {
       this.toastNotificationService.showToast('An Error Occured', 'There was an error when trying to switch to ' + account.name + '. The action was unable to be completed.', 15000, false, 'alert-danger');
       this.loadingService.setLoadingStatus(false);
@@ -167,5 +167,12 @@ export class HeaderComponent implements OnInit {
   checkLatestFile() {
     this.automaticBackupService.forceModal = true;
     this.electronService.getDataFile(this.activeAccount.dataBackupFilePath);
+  }
+
+  goHome() {
+    this.router.navigate(['/verifi']).then(() => {
+      this.accountdbService.selectedAccount.next(undefined);
+    });
+    
   }
 }
