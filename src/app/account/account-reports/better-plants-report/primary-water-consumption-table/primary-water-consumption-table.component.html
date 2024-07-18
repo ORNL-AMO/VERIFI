@@ -361,14 +361,35 @@
         <tbody>
             <tr>
                 <td class="w-50">
+                    Weather/Production/Other Normalizing related Adjustment for Baseline Primary Energy, (+/- thousand gallons)
+                </td>
+                <td class="w-25">
+                    {{betterPlantsSummary.reportYearAnalysisSummary.baselineAdjustmentForNormalization | customNumber}}
+
+                </td>
+                <!-- <td class="w-25">
+
+                </td> -->
+            </tr>
+            <tr>
+                <td class="w-50">
                     Baseline adjustment due to increase/decrease in the number of facilities reporting relative to
                     baseline year or other operational changes, (+/- thousand gallons):
                 </td>
                 <td class="w-25">
-                    {{betterPlantsSummary.reportYearAnalysisSummary.baselineAdjustmentForNormalization | customNumber}}
+                    {{betterPlantsSummary.reportYearAnalysisSummary.baselineAdjustmentForOtherV2 | customNumber}}
                 </td>
                 <td class="no-border">
 
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Adjusted baseline for total water intake (thousand gallons)
+                </td>
+                <td>
+                    {{betterPlantsSummary.adjustedBaselinePrimaryWater | customNumber}}
+                    <!-- {{betterPlantsSummary.reportYearAnalysisSummary.adjustedForNormalization | customNumber}} -->
                 </td>
             </tr>
             <tr>
@@ -377,14 +398,6 @@
                 </td>
                 <td colspan="2">
                     {{report.betterPlantsReportSetup.baselineAdjustmentNotes}}
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    Adjusted baseline for total water intake (thousand gallons)
-                </td>
-                <td>
-                    <!-- {{betterPlantsSummary.reportYearAnalysisSummary.adjustedForNormalization | customNumber}} -->
                 </td>
             </tr>
         </tbody>
@@ -428,6 +441,24 @@
 
     <table class="table table-sm table-hover mt-3">
         <tbody>
+            <tr>
+                <td>
+                    New Water Savings for Current Year (kGal)
+                </td>
+                <td>
+
+                    {{betterPlantsSummary.reportYearAnalysisSummary.newSavings | customNumber}}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Total Water Savings since Baseline Year (kGal)
+                </td>
+                <td>
+
+                    {{betterPlantsSummary.totalWaterSavings | customNumber}}
+                </td>
+            </tr>
             <tr>
                 <td class="w-75">
                     Annual Improvement In Water Intensity for Current Year (%)**
