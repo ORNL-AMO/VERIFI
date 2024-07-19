@@ -12,6 +12,7 @@ import { UploadRoutes } from './upload.routes';
 import { WeatherDataRoutes } from './weather-data.routes';
 import { ManageAccountsComponent } from '../core-components/manage-accounts/manage-accounts.component';
 import { HomePageComponent } from '../core-components/home-page/home-page.component';
+import { DataWizardRoutes } from './data-wizard.routes';
 
 const routes: Routes = [
   {
@@ -23,6 +24,7 @@ const routes: Routes = [
   AccountRoutes,
   FacilityRoutes,
   SetupWizardRoutes,
+  DataWizardRoutes,
   { path: 'about', component: AboutComponent },
   { path: 'acknowledgments', component: AcknowledgmentsComponent },
   { path: 'feedback', component: FeedbackComponent },

@@ -31,6 +31,7 @@ import { ElectronBackupFileComponent } from './core-components/electron-backup-f
 import { HttpClientModule } from '@angular/common/http';
 import { DeletingAccountDataComponent } from './core-components/deleting-account-data/deleting-account-data.component';
 import { HomePageComponent } from './core-components/home-page/home-page.component';
+import { DataWizardModule } from './data-wizard/data-wizard.module';
 
 @NgModule({
   declarations: [
@@ -67,7 +68,8 @@ import { HomePageComponent } from './core-components/home-page/home-page.compone
     NgbTypeaheadModule,
     UploadDataModule,
     WeatherDataModule,
-    HttpClientModule
+    HttpClientModule,
+    DataWizardModule
   ],
   providers: [],
   bootstrap: [AppComponent]

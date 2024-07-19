@@ -1,0 +1,20 @@
+.navbar{
+    background-color: white;
+    width: 200px;
+    overflow-y: auto;
+}
+
+.nav-link.active{
+    background-color: #ff6000;
+}
+
+.nav-link.secondary-nav{
+    padding-left: 10px;
+}
+
+.nav-link{
+    padding-left: 3px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}

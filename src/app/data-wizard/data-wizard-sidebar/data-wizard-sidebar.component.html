@@ -1,0 +1,118 @@
+<div class="h-100 navbar d-flex flex-column align-items-start justify-content-start">
+
+
+    <div class="ps-1 pe-1 w-100">
+        <div class="ps-2 pe-2 nav-item">
+            <a class="nav-link" [routerLink]="'/data-wizard/account'" [routerLinkActive]="['active']">
+                Corporate Settings
+            </a>
+        </div>
+        <div class="p-2 w-100">
+            <hr class="my-1">
+        </div>
+        <div class="ps-2 pe-2 nav-item">
+            <a class="nav-link" [routerLink]="'/data-wizard/data-upload/upload-files'" [routerLinkActive]="['active']">
+                Data Upload
+            </a>
+        </div>
+        <ng-container *ngFor="let fileReference of fileReferences">
+            <ng-template [ngIf]="fileReference.isTemplate" [ngIfElse]="nonTemplateBlock">
+                <div class="ps-2 pe-2 nav-item">
+                    <a class="nav-link"
+                        [routerLink]="'/data-wizard/data-upload/process-template-file/' +fileReference.id"
+                        [routerLinkActive]="['active']">
+                        {{fileReference.name}}
+                    </a>
+                </div>
+                <div class="ps-2 pe-2 nav-item">
+                    <a class="nav-link secondary-nav"
+                        [routerLink]="'/data-wizard/data-upload/process-template-file/' +fileReference.id +'/facilities'"
+                        [routerLinkActive]="['active']">
+                        Facilities
+                    </a>
+                </div>
+                <div class="ps-2 pe-2 nav-item">
+                    <a class="nav-link secondary-nav"
+                        [routerLink]="'/data-wizard/data-upload/process-template-file/' +fileReference.id +'/meters'"
+                        [routerLinkActive]="['active']">
+                        Meters
+                    </a>
+                </div>
+                <div class="ps-2 pe-2 nav-item">
+                    <a class="nav-link secondary-nav"
+                        [routerLink]="'/data-wizard/data-upload/process-template-file/' +fileReference.id +'/meter-readings'"
+                        [routerLinkActive]="['active']">
+                        Readings
+                    </a>
+                </div>
+                <div class="ps-2 pe-2 nav-item">
+                    <a class="nav-link secondary-nav"
+                        [routerLink]="'/data-wizard/data-upload/process-template-file/' +fileReference.id +'/predictors'"
+                        [routerLinkActive]="['active']">
+                        Predictors
+                    </a>
+                </div>
+            </ng-template>
+            <ng-template #nonTemplateBlock>
+
+            </ng-template>
+        </ng-container>
+        <div class="p-2 w-100">
+            <hr class="my-1">
+        </div>
+        <div class="ps-2 pe-2 nav-item">
+            <a class="nav-link" [routerLink]="'/data-wizard/facilities'" [routerLinkActive]="['active']">
+                Facilities
+            </a>
+        </div>
+        <ng-container *ngFor="let facility of facilities">
+            <div class="ps-2 pe-2 nav-item">
+                <a class="nav-link" [routerLink]="'/data-wizard/facility/'+facility.guid"
+                    [routerLinkActive]="['active']">
+                    {{facility.name}} 
+                </a>
+            </div>
+            <div class="ps-2 pe-2 nav-item">
+                <a class="nav-link secondary-nav"
+                    [routerLink]="'/data-wizard/facility/'+facility.guid+'/setup'"
+                    [routerLinkActive]="['active']">
+                    Settings
+                </a>
+            </div>
+            <div class="ps-2 pe-2 nav-item">
+                <a class="nav-link secondary-nav"
+                    [routerLink]="'/data-wizard/facility/'+facility.guid+'/meters'"
+                    [routerLinkActive]="['active']">
+                    Meters
+                </a>
+            </div>
+        </ng-container>
+        <!-- <div class="nav-item">
+            <a class="nav-link secondary-nav" [routerLink]="'/setup-wizard/facility-setup/information-setup'"
+                [routerLinkActive]="['active']">
+                General Information
+            </a>
+        </div>
+        <div class="nav-item">
+            <a class="nav-link secondary-nav" [routerLink]="'/setup-wizard/facility-setup/units-setup'"
+                [routerLinkActive]="['active']">
+                Units
+            </a>
+        </div>
+        <div class="nav-item">
+            <a class="nav-link" [routerLink]="'/setup-wizard/facility-setup/reporting-setup'"
+                [routerLinkActive]="['active']">
+                Reporting
+            </a>
+        </div>
+        <div class="nav-item">
+            <a class="nav-link" [routerLink]="'pre-visit/'+onSiteVisit.guid+'/review-pre-visit'"
+                routerLink="review-pre-visit" [routerLinkActive]="['active']">
+                Review Pre-Visit
+            </a>
+        </div> -->
+    </div>
+    <div class="p-2 w-100">
+        <hr class="my-1">
+    </div>
+</div>
