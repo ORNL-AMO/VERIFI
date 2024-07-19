@@ -16,12 +16,14 @@ import { firstValueFrom } from 'rxjs';
 export class HomePageComponent {
   backupFile: any;
   showTestDataModal: boolean = false;
+  accounts: Array<IdbAccount>;
   constructor(private loadingService: LoadingService, private accountDbService: AccountdbService,
     private backupDataService: BackupDataService,
     private importBackupModalService: ImportBackupModalService, private router: Router,
     private dbChangesService: DbChangesService) { }
 
   ngOnInit(): void {
+    this.accounts = this.accountDbService.allAccounts.getValue();
   }
 
   loadTestData() {
@@ -60,8 +62,11 @@ export class HomePageComponent {
     this.importBackupModalService.showModal.next(true);
   }
 
-  goToAccountSetup() {
-    this.router.navigateByUrl('setup-wizard/account-setup');
+  async createNewAccount() {
+    let account: IdbAccount = this.accountDbService.getNewIdbAccount();
+    account = await firstValueFrom(this.accountDbService.addWithObservable(account));
+    await this.dbChangesService.selectAccount(account, false);
+    this.router.navigateByUrl('/data-wizard/' + account.guid);
   }
 
   openLoadTestData() {
@@ -70,5 +75,15 @@ export class HomePageComponent {
 
   cancelTestData() {
     this.showTestDataModal = false;
+  }
+
+  async goToAccountHome(account: IdbAccount) {
+    await this.dbChangesService.selectAccount(account, false);
+    this.router.navigateByUrl('/account-home');
+  }
+
+  async goToDataWizard(account: IdbAccount) {
+    await this.dbChangesService.selectAccount(account, false);
+    this.router.navigateByUrl('/data-wizard/' + account.guid);
   }
 }

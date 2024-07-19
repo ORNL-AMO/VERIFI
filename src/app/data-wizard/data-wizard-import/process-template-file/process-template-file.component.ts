@@ -2,7 +2,9 @@ import { Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { FileReference } from 'src/app/upload-data/upload-data-models';
-import { SetupWizardService } from '../../setup-wizard.service';
+import { DataWizardService } from '../../data-wizard.service';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { IdbAccount } from 'src/app/models/idb';
 
 @Component({
   selector: 'app-process-template-file',
@@ -15,25 +17,31 @@ export class ProcessTemplateFileComponent {
   fileReferenceSub: Subscription;
 
   selectedFile: FileReference;
-  constructor(private activatedRoute: ActivatedRoute, private setupWizardService: SetupWizardService,
-    private router: Router
+  constructor(private activatedRoute: ActivatedRoute, private dataWizardService: DataWizardService,
+    private router: Router,
+    private accountDbService: AccountdbService
   ) {
 
   }
 
   ngOnInit() {
-    this.fileReferenceSub = this.setupWizardService.fileReferences.subscribe(fileReferences => {
+    this.fileReferenceSub = this.dataWizardService.fileReferences.subscribe(fileReferences => {
       this.fileReferences = fileReferences;
-    })
+    });
 
     this.activatedRoute.params.subscribe(params => {
       let referenceId: string = params['id'];
       this.selectedFile = this.fileReferences.find(file => {
         return file.id == referenceId;
       });
-      if(!this.selectedFile){
-        this.router.navigateByUrl('/setup-wizard')
+      if (!this.selectedFile) {
+        let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+        this.router.navigateByUrl('/data-wizard/' + account.guid);
       }
     });
+  }
+
+  ngOnDestroy() {
+    this.fileReferenceSub.unsubscribe();
   }
 }

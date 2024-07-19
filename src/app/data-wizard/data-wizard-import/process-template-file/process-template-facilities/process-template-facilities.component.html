@@ -41,7 +41,7 @@
             </tr>
         </thead>
         <tbody class="table-group-divider">
-            <tr *ngFor="let facility of fileReference.importFacilities">
+            <tr *ngFor="let facility of fileReference?.importFacilities">
                 <td>
                     {{facility.name}}
                 </td>
@@ -82,4 +82,11 @@
             </tr>
         </tbody>
     </table>
+</div>
+<div class="d-flex w-100 justify-content-end">
+    <div>
+        <button class="btn btn-success" (click)="submitFacilities()">
+            <span class="fa fa-plus"></span> Submit Facilities
+        </button>
+    </div>
 </div>

@@ -10,6 +10,11 @@ import { FacilitySetupComponent } from './facility-data/facility-setup/facility-
 import { SettingsFormsModule } from '../shared/settings-forms/settings-forms.module';
 import { DataWizardImportComponent } from './data-wizard-import/data-wizard-import.component';
 import { UploadFilesComponent } from './data-wizard-import/upload-files/upload-files.component';
+import { ProcessTemplateFileComponent } from './data-wizard-import/process-template-file/process-template-file.component';
+import { ProcessTemplateFacilitiesComponent } from './data-wizard-import/process-template-file/process-template-facilities/process-template-facilities.component';
+import { ProcessTemplateMeterReadingsComponent } from './data-wizard-import/process-template-file/process-template-meter-readings/process-template-meter-readings.component';
+import { ProcessTemplateMetersComponent } from './data-wizard-import/process-template-file/process-template-meters/process-template-meters.component';
+import { ProcessTemplatePredictorsComponent } from './data-wizard-import/process-template-file/process-template-predictors/process-template-predictors.component';
 
 
 
@@ -22,7 +27,12 @@ import { UploadFilesComponent } from './data-wizard-import/upload-files/upload-f
     FacilityDataComponent, 
     FacilitySetupComponent, 
     DataWizardImportComponent,
-    UploadFilesComponent
+    UploadFilesComponent,
+    ProcessTemplateFileComponent,
+    ProcessTemplateFacilitiesComponent,
+    ProcessTemplateMeterReadingsComponent,
+    ProcessTemplateMetersComponent,
+    ProcessTemplatePredictorsComponent
   ],
   imports: [
     CommonModule,

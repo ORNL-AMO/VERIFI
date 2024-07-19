@@ -5,6 +5,12 @@ import { AccountFacilitiesComponent } from "../data-wizard/account-facilities/ac
 import { FacilityDataComponent } from "../data-wizard/facility-data/facility-data.component";
 import { FacilitySetupComponent } from "../data-wizard/facility-data/facility-setup/facility-setup.component";
 import { DataWizardImportComponent } from "../data-wizard/data-wizard-import/data-wizard-import.component";
+import { UploadFilesComponent } from "../data-wizard/data-wizard-import/upload-files/upload-files.component";
+import { ProcessTemplateFileComponent } from "../data-wizard/data-wizard-import/process-template-file/process-template-file.component";
+import { ProcessTemplateFacilitiesComponent } from "../data-wizard/data-wizard-import/process-template-file/process-template-facilities/process-template-facilities.component";
+import { ProcessTemplateMetersComponent } from "../data-wizard/data-wizard-import/process-template-file/process-template-meters/process-template-meters.component";
+import { ProcessTemplateMeterReadingsComponent } from "../data-wizard/data-wizard-import/process-template-file/process-template-meter-readings/process-template-meter-readings.component";
+import { ProcessTemplatePredictorsComponent } from "../data-wizard/data-wizard-import/process-template-file/process-template-predictors/process-template-predictors.component";
 
 export const DataWizardRoutes: Route = {
     path: 'data-wizard/:id',
@@ -17,7 +23,22 @@ export const DataWizardRoutes: Route = {
         },
         {
             path: 'import-data',
-            component: DataWizardImportComponent
+            component: DataWizardImportComponent,
+            children: [
+                { path: '', pathMatch: 'full', redirectTo: 'upload-files' },
+                { path: 'upload-files', component: UploadFilesComponent },
+                {
+                    path: 'process-template-file/:id',
+                    component: ProcessTemplateFileComponent,
+                    children: [
+                        { path: '', pathMatch: 'full', redirectTo: 'facilities' },
+                        { path: 'facilities', component: ProcessTemplateFacilitiesComponent },
+                        { path: 'meters', component: ProcessTemplateMetersComponent },
+                        { path: 'meter-readings', component: ProcessTemplateMeterReadingsComponent },
+                        { path: 'predictors', component: ProcessTemplatePredictorsComponent }
+                    ]
+                },
+            ]
         },
         {
             path: 'facilities',

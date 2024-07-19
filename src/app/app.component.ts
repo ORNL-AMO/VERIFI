@@ -116,7 +116,7 @@ export class AppComponent {
         await this.initializeElectronBackups();
 
         this.dataInitialized = true;
-        this.router.navigateByUrl('setup-wizard');
+        this.router.navigateByUrl('verifi');
       }
     } catch (err) {
       console.log(err);

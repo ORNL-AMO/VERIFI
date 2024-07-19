@@ -6,6 +6,7 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbAccount, IdbFacility } from 'src/app/models/idb';
 import { FileReference } from 'src/app/upload-data/upload-data-models';
 import { UploadDataService } from 'src/app/upload-data/upload-data.service';
+import { DataWizardService } from '../data-wizard.service';
 
 @Component({
   selector: 'app-data-wizard-sidebar',
@@ -20,10 +21,10 @@ export class DataWizardSidebarComponent {
   facilities: Array<IdbFacility>;
   facilitiesSub: Subscription;
 
-
+  fileReferencesSub: Subscription;
   fileReferences: Array<FileReference>;
   constructor(private accountDbService: AccountdbService, private facilityDbService: FacilitydbService,
-    private uploadDataService: UploadDataService
+    private dataWizardService: DataWizardService
   ) {
   }
 
@@ -34,11 +35,14 @@ export class DataWizardSidebarComponent {
     this.facilitiesSub = this.facilityDbService.accountFacilities.subscribe(facilities => {
       this.facilities = facilities;
     });
-    this.fileReferences = this.uploadDataService.fileReferences;
+    this.fileReferencesSub = this.dataWizardService.fileReferences.subscribe(fileReferences => {
+      this.fileReferences = fileReferences;
+    })
   }
 
   ngOnDestroy() {
     this.accountSub.unsubscribe();
     this.facilitiesSub.unsubscribe();
+    this.fileReferencesSub.unsubscribe();
   }
 }
