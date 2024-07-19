@@ -190,7 +190,7 @@ export class GroupMonthlyAnalysisCalculatedValues {
                 adjustedStarStarRatio = this.energyUse / (this.energyUse - dataAdjustment);
             }
             if ((this.baselineModeledEnergyUse - modelYearDataAdjustment) == 0) {
-                if (this.modeledEnergy - modelYearDataAdjustment) {
+                if ((this.modeledEnergy - modelYearDataAdjustment) == 0) {
                     this.baselineAdjustmentForNormalization = baselineActualEnergyUse * adjustedStarStarRatio - baselineActualEnergyUse;
                 } else {
                     this.baselineAdjustmentForNormalization = (this.modeledEnergy - modelYearDataAdjustment) * adjustedStarStarRatio - baselineActualEnergyUse;
