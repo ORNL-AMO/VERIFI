@@ -5,7 +5,8 @@ import { Router } from '@angular/router';
 import * as XLSX from 'xlsx';
 import { FileReference } from 'src/app/upload-data/upload-data-models';
 import { Subscription } from 'rxjs';
-import { SetupWizardService } from '../../setup-wizard.service';
+import { DataWizardService } from '../../data-wizard.service';
+// import { SetupWizardService } from '../../setup-wizard.service';
 
 @Component({
   selector: 'app-upload-files',
@@ -19,15 +20,16 @@ export class UploadFilesComponent {
   filesUploaded: boolean = false;
   fileReferences: Array<FileReference>;
   fileReferencesSub: Subscription;
-  constructor(private setupWizardService: SetupWizardService, private router: Router,
+  constructor(private router: Router,
     private uploadDataService: UploadDataService,
-    private toastNotificationService: ToastNotificationsService
+    private toastNotificationService: ToastNotificationsService,
+    private dataWizardService: DataWizardService
   ) {
 
   }
 
   ngOnInit() {
-    this.fileReferencesSub = this.setupWizardService.fileReferences.subscribe(fileReferences => {
+    this.fileReferencesSub = this.dataWizardService.fileReferences.subscribe(fileReferences => {
       this.fileReferences = fileReferences;
     })
 
@@ -64,7 +66,7 @@ export class UploadFilesComponent {
         console.log('try!')
         let fileReference: FileReference = this.uploadDataService.getFileReference(file, workBook, true);
         this.fileReferences.push(fileReference);
-        this.setupWizardService.fileReferences.next(this.fileReferences);
+        this.dataWizardService.fileReferences.next(this.fileReferences);
       } catch (err) {
         console.log(err);
         this.fileUploadError = true;
@@ -75,7 +77,7 @@ export class UploadFilesComponent {
 
   removeReference(index: number) {
     this.fileReferences.splice(index, 1);
-    this.setupWizardService.fileReferences.next(this.fileReferences);
+    this.dataWizardService.fileReferences.next(this.fileReferences);
   }
 
   // setImportFile(event: EventTarget) {

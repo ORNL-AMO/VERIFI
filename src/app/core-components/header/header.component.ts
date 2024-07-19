@@ -101,8 +101,11 @@ export class HeaderComponent implements OnInit {
     }
   }
 
-  addNewAccount() {
-    this.router.navigateByUrl('/setup-wizard');
+  async addNewAccount() {
+    let account: IdbAccount = this.accountdbService.getNewIdbAccount();
+    account = await firstValueFrom(this.accountdbService.addWithObservable(account));
+    await this.dbChangesService.selectAccount(account, false);
+    this.router.navigateByUrl('/data-wizard/' + account.guid);
   }
 
   async switchAccount(account: IdbAccount) {
@@ -173,6 +176,6 @@ export class HeaderComponent implements OnInit {
     this.router.navigate(['/verifi']).then(() => {
       this.accountdbService.selectedAccount.next(undefined);
     });
-    
+
   }
 }

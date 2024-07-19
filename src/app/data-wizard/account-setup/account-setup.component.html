@@ -1,1 +1,35 @@
-<p>account-setup works!</p>
+<div class="data-wizard-content">
+    <div class="row g-0 justify-content-center h-100 w-100 overflow-scroll">
+        <div class="col-11 pt-4 pb-4">
+            <div class="form-paper">
+                <div class="row">
+                    <div class="col-lg-7">
+                        <h4>Corporate Information</h4>
+                        <br>
+                        <app-general-information-form [inAccount]="true"></app-general-information-form>
+                    </div>
+
+                    <div class="col-lg-5">
+                        <h4>Corporate Units</h4>
+                        <br>
+                        <app-default-units-form [inAccount]="true"></app-default-units-form>
+                    </div>
+                </div>
+                <hr>
+                <div class="row">
+                    <div class="col-lg-7">
+                        <h4>Sustainability Questions</h4>
+                        <br>
+                        <app-sustainability-questions-form [inAccount]="true">
+                        </app-sustainability-questions-form>
+                    </div>
+                    <div class="col">
+                        <h4>Financial Reporting</h4>
+                        <br>
+                        <app-financial-reporting-form [inAccount]="true"></app-financial-reporting-form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

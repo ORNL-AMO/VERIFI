@@ -7,17 +7,27 @@ import { AccountSetupComponent } from './account-setup/account-setup.component';
 import { AccountFacilitiesComponent } from './account-facilities/account-facilities.component';
 import { FacilityDataComponent } from './facility-data/facility-data.component';
 import { FacilitySetupComponent } from './facility-data/facility-setup/facility-setup.component';
+import { SettingsFormsModule } from '../shared/settings-forms/settings-forms.module';
+import { DataWizardImportComponent } from './data-wizard-import/data-wizard-import.component';
+import { UploadFilesComponent } from './data-wizard-import/upload-files/upload-files.component';
 
 
 
 @NgModule({
   declarations: [  
     DataWizardComponent, 
-    DataWizardSidebarComponent, AccountSetupComponent, AccountFacilitiesComponent, FacilityDataComponent, FacilitySetupComponent
+    DataWizardSidebarComponent, 
+    AccountSetupComponent, 
+    AccountFacilitiesComponent, 
+    FacilityDataComponent, 
+    FacilitySetupComponent, 
+    DataWizardImportComponent,
+    UploadFilesComponent
   ],
   imports: [
     CommonModule,
-    RouterModule
+    RouterModule,
+    SettingsFormsModule
   ]
 })
 export class DataWizardModule { }

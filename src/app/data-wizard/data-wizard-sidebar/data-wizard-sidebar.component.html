@@ -3,7 +3,7 @@
 
     <div class="ps-1 pe-1 w-100">
         <div class="ps-2 pe-2 nav-item">
-            <a class="nav-link" [routerLink]="'/data-wizard/account'" [routerLinkActive]="['active']">
+            <a class="nav-link" [routerLink]="'/data-wizard/'+account.guid + '/account-setup'" [routerLinkActive]="['active']">
                 Corporate Settings
             </a>
         </div>
@@ -11,7 +11,7 @@
             <hr class="my-1">
         </div>
         <div class="ps-2 pe-2 nav-item">
-            <a class="nav-link" [routerLink]="'/data-wizard/data-upload/upload-files'" [routerLinkActive]="['active']">
+            <a class="nav-link" [routerLink]="'/data-wizard/'+account.guid+'/import-data'" [routerLinkActive]="['active']">
                 Data Upload
             </a>
         </div>
@@ -19,35 +19,35 @@
             <ng-template [ngIf]="fileReference.isTemplate" [ngIfElse]="nonTemplateBlock">
                 <div class="ps-2 pe-2 nav-item">
                     <a class="nav-link"
-                        [routerLink]="'/data-wizard/data-upload/process-template-file/' +fileReference.id"
+                        [routerLink]="'/data-wizard/'+account.guid+'/import-data/process-template-file/' +fileReference.id"
                         [routerLinkActive]="['active']">
                         {{fileReference.name}}
                     </a>
                 </div>
                 <div class="ps-2 pe-2 nav-item">
                     <a class="nav-link secondary-nav"
-                        [routerLink]="'/data-wizard/data-upload/process-template-file/' +fileReference.id +'/facilities'"
+                        [routerLink]="'/data-wizard/'+account.guid+'/import-data/process-template-file/' +fileReference.id +'/facilities'"
                         [routerLinkActive]="['active']">
                         Facilities
                     </a>
                 </div>
                 <div class="ps-2 pe-2 nav-item">
                     <a class="nav-link secondary-nav"
-                        [routerLink]="'/data-wizard/data-upload/process-template-file/' +fileReference.id +'/meters'"
+                        [routerLink]="'/data-wizard/'+account.guid+'/import-data/process-template-file/' +fileReference.id +'/meters'"
                         [routerLinkActive]="['active']">
                         Meters
                     </a>
                 </div>
                 <div class="ps-2 pe-2 nav-item">
                     <a class="nav-link secondary-nav"
-                        [routerLink]="'/data-wizard/data-upload/process-template-file/' +fileReference.id +'/meter-readings'"
+                        [routerLink]="'/data-wizard/'+account.guid+'/import-data/process-template-file/' +fileReference.id +'/meter-readings'"
                         [routerLinkActive]="['active']">
                         Readings
                     </a>
                 </div>
                 <div class="ps-2 pe-2 nav-item">
                     <a class="nav-link secondary-nav"
-                        [routerLink]="'/data-wizard/data-upload/process-template-file/' +fileReference.id +'/predictors'"
+                        [routerLink]="'/data-wizard/'+account.guid+'/import-data/process-template-file/' +fileReference.id +'/predictors'"
                         [routerLinkActive]="['active']">
                         Predictors
                     </a>
@@ -61,27 +61,27 @@
             <hr class="my-1">
         </div>
         <div class="ps-2 pe-2 nav-item">
-            <a class="nav-link" [routerLink]="'/data-wizard/facilities'" [routerLinkActive]="['active']">
+            <a class="nav-link" [routerLink]="'/data-wizard/'+account.guid+'/facilities'" [routerLinkActive]="['active']">
                 Facilities
             </a>
         </div>
         <ng-container *ngFor="let facility of facilities">
             <div class="ps-2 pe-2 nav-item">
-                <a class="nav-link" [routerLink]="'/data-wizard/facility/'+facility.guid"
+                <a class="nav-link" [routerLink]="'/data-wizard/'+account.guid+'/facility/'+facility.guid"
                     [routerLinkActive]="['active']">
                     {{facility.name}} 
                 </a>
             </div>
             <div class="ps-2 pe-2 nav-item">
                 <a class="nav-link secondary-nav"
-                    [routerLink]="'/data-wizard/facility/'+facility.guid+'/setup'"
+                    [routerLink]="'/data-wizard/facility/'+account.guid+'/'+facility.guid+'/setup'"
                     [routerLinkActive]="['active']">
                     Settings
                 </a>
             </div>
             <div class="ps-2 pe-2 nav-item">
                 <a class="nav-link secondary-nav"
-                    [routerLink]="'/data-wizard/facility/'+facility.guid+'/meters'"
+                    [routerLink]="'/data-wizard/facility/'+account.guid+'/'+facility.guid+'/meters'"
                     [routerLinkActive]="['active']">
                     Meters
                 </a>

@@ -13,7 +13,6 @@ import { FormsModule } from '@angular/forms';
 import { FacilityDetailsComponent } from './facility-details/facility-details.component';
 import { FacilityMetersSetupComponent } from './facility-details/facility-meters-setup/facility-meters-setup.component';
 import { SetupWizardDataUploadComponent } from './setup-wizard-data-upload/setup-wizard-data-upload.component';
-import { UploadFilesComponent } from './setup-wizard-data-upload/upload-files/upload-files.component';
 import { ProcessTemplateFileComponent } from './setup-wizard-data-upload/process-template-file/process-template-file.component';
 import { ProcessTemplateFacilitiesComponent } from './setup-wizard-data-upload/process-template-file/process-template-facilities/process-template-facilities.component';
 import { ProcessTemplateMetersComponent } from './setup-wizard-data-upload/process-template-file/process-template-meters/process-template-meters.component';
@@ -33,7 +32,6 @@ import { FacilitySettingsSetupComponent } from './facility-details/facility-sett
     FacilityDetailsComponent,
     FacilityMetersSetupComponent,
     SetupWizardDataUploadComponent,
-    UploadFilesComponent,
     ProcessTemplateFileComponent,
     ProcessTemplateFacilitiesComponent,
     ProcessTemplateMetersComponent,

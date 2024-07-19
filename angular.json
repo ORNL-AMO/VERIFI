@@ -46,7 +46,8 @@
               "node_modules/@fortawesome/fontawesome-free/css/all.css",
               "node_modules/bootstrap/dist/css/bootstrap.min.css",
               "src/styles/printing.css",
-              "src/styles/plotly.css"
+              "src/styles/plotly.css",
+              "src/styles/dataWizard.css"
             ],
             "scripts": [
               "node_modules/plotly.js/dist/plotly.min.js",
