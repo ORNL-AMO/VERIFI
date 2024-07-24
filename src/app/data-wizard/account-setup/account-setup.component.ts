@@ -1,4 +1,7 @@
 import { Component } from '@angular/core';
+import { Router } from '@angular/router';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { IdbAccount } from 'src/app/models/idb';
 
 @Component({
   selector: 'app-account-setup',
@@ -7,4 +10,14 @@ import { Component } from '@angular/core';
 })
 export class AccountSetupComponent {
 
+
+  constructor(private router: Router, private accountDbService: AccountdbService) {
+
+  }
+
+  next() {
+    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    this.router.navigateByUrl('/data-wizard/' + account.guid + '/import-data');
+
+  }
 }

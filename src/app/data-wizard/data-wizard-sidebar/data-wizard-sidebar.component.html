@@ -74,43 +74,19 @@
             </div>
             <div class="ps-2 pe-2 nav-item">
                 <a class="nav-link secondary-nav"
-                    [routerLink]="'/data-wizard/facility/'+account.guid+'/'+facility.guid+'/setup'"
+                    [routerLink]="'/data-wizard/'+account.guid+'/facility/'+facility.guid+'/setup'"
                     [routerLinkActive]="['active']">
                     Settings
                 </a>
             </div>
             <div class="ps-2 pe-2 nav-item">
                 <a class="nav-link secondary-nav"
-                    [routerLink]="'/data-wizard/facility/'+account.guid+'/'+facility.guid+'/meters'"
+                    [routerLink]="'/data-wizard/'+account.guid+'/facility/'+facility.guid+'/meters'"
                     [routerLinkActive]="['active']">
                     Meters
                 </a>
             </div>
         </ng-container>
-        <!-- <div class="nav-item">
-            <a class="nav-link secondary-nav" [routerLink]="'/setup-wizard/facility-setup/information-setup'"
-                [routerLinkActive]="['active']">
-                General Information
-            </a>
-        </div>
-        <div class="nav-item">
-            <a class="nav-link secondary-nav" [routerLink]="'/setup-wizard/facility-setup/units-setup'"
-                [routerLinkActive]="['active']">
-                Units
-            </a>
-        </div>
-        <div class="nav-item">
-            <a class="nav-link" [routerLink]="'/setup-wizard/facility-setup/reporting-setup'"
-                [routerLinkActive]="['active']">
-                Reporting
-            </a>
-        </div>
-        <div class="nav-item">
-            <a class="nav-link" [routerLink]="'pre-visit/'+onSiteVisit.guid+'/review-pre-visit'"
-                routerLink="review-pre-visit" [routerLinkActive]="['active']">
-                Review Pre-Visit
-            </a>
-        </div> -->
     </div>
     <div class="p-2 w-100">
         <hr class="my-1">

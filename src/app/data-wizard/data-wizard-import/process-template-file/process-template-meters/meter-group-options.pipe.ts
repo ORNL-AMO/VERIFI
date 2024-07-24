@@ -2,9 +2,9 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { IdbUtilityMeterGroup } from 'src/app/models/idb';
 
 @Pipe({
-  name: 'meterGroupOptions2'
+  name: 'meterGroupOptions'
 })
-export class MeterGroupOptionsPipe2 implements PipeTransform {
+export class MeterGroupOptionsPipe implements PipeTransform {
 
   transform(groupOptions: Array<{ facilityId: string, groupOptions: Array<IdbUtilityMeterGroup> }>, facilityId: string, groupType: 'Energy' | 'Other' | 'Water'): Array<IdbUtilityMeterGroup> {
     let facilityOptions = groupOptions.filter(option => {

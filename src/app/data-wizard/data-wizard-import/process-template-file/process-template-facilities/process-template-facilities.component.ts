@@ -49,7 +49,7 @@ export class ProcessTemplateFacilitiesComponent {
   ngOnInit(): void {
     this.activatedRoute.parent.params.subscribe(param => {
       let id: string = param['id'];
-      this.fileReference = this.dataWizardService.fileReferences.getValue().find(ref => { return ref.id == id });
+      this.fileReference = this.dataWizardService.getFileReferenceById(id);
     });
   }
 
@@ -71,5 +71,14 @@ export class ProcessTemplateFacilitiesComponent {
     await this.dbChangesService.selectAccount(account, false);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('Account Facilities Updated', undefined, undefined, false, 'alert-success', false);
+  }
+
+  goBack() {
+
+  }
+
+  next() {
+    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    this.router.navigateByUrl('/data-wizard/' + account.guid + '/import-data/process-template-file/' + this.fileReference.id + '/meters');
   }
 }

@@ -11,4 +11,8 @@ export class DataWizardService {
   constructor() {
     this.fileReferences = new BehaviorSubject<Array<FileReference>>([]);
   }
+
+  getFileReferenceById(id: string): FileReference {
+    return this.fileReferences.getValue().find(ref => { return ref.id == id });
+  }
 }

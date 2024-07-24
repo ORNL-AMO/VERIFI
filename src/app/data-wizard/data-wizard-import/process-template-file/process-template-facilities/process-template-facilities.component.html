@@ -1,92 +1,113 @@
-<div class="table-responsive">
-    <table class="table utility-data table-sm table-bordered table-hover">
-        <thead class="table-mh">
-            <tr>
-                <th>
-                    Facility Name
-                </th>
-                <th>
-                    Address
-                </th>
-                <th>
-                    Country
-                </th>
-                <th>
-                    State
-                </th>
-                <th>
-                    City
-                </th>
-                <th>
-                    Zip
-                </th>
-                <th>
-                    NAICS Code 2
-                </th>
-                <th>
-                    NAICS Code 3
-                </th>
-                <th>
-                    Contact Name
-                </th>
-                <th>
-                    Contact Phone
-                </th>
-                <th>
-                    Contact Email
-                </th>
-                <th>
-                    New / Existing
-                </th>
-            </tr>
-        </thead>
-        <tbody class="table-group-divider">
-            <tr *ngFor="let facility of fileReference?.importFacilities">
-                <td>
-                    {{facility.name}}
-                </td>
-                <td>
-                    {{facility.address}}
-                </td>
-                <td>
-                    {{facility.country}}
-                </td>
-                <td>
-                    {{facility.state}}
-                </td>
-                <td>
-                    {{facility.city}}
-                </td>
-                <td>
-                    {{facility.zip}}
-                </td>
-                <td>
-                    {{facility.naics2}}
-                </td>
-                <td>
-                    {{facility.naics3}}
-                </td>
-                <td>
-                    {{facility.contactName}}
-                </td>
-                <td>
-                    {{facility.contactPhone}}
-                </td>
-                <td>
-                    {{facility.contactEmail}}
-                </td>
-                <td>
-                    <span *ngIf="facility.id">Existing</span>
-                    <span *ngIf="!facility.id">New</span>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-</div>
-<div class="d-flex w-100 justify-content-end">
-    <div>
-        <button class="btn btn-success" (click)="submitFacilities()">
-            <span class="fa fa-plus"></span> Submit Facilities
-        </button>
+<div class="data-wizard-content">
+    <div class="row g-0 justify-content-center h-100 w-100 overflow-scroll">
+        <div class="col-11 pt-4 pb-4">
+            <div class="form-paper">
+                <h4>Process File {{fileReference.name}}</h4>
+                <br>
+                <div class="table-responsive">
+                    <table class="table utility-data table-sm table-bordered table-hover">
+                        <thead class="table-mh">
+                            <tr>
+                                <th>
+                                    Facility Name
+                                </th>
+                                <th>
+                                    Address
+                                </th>
+                                <th>
+                                    Country
+                                </th>
+                                <th>
+                                    State
+                                </th>
+                                <th>
+                                    City
+                                </th>
+                                <th>
+                                    Zip
+                                </th>
+                                <th>
+                                    NAICS Code 2
+                                </th>
+                                <th>
+                                    NAICS Code 3
+                                </th>
+                                <th>
+                                    Contact Name
+                                </th>
+                                <th>
+                                    Contact Phone
+                                </th>
+                                <th>
+                                    Contact Email
+                                </th>
+                                <th>
+                                    New / Existing
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="table-group-divider">
+                            <tr *ngFor="let facility of fileReference.importFacilities">
+                                <td>
+                                    {{facility.name}}
+                                </td>
+                                <td>
+                                    {{facility.address}}
+                                </td>
+                                <td>
+                                    {{facility.country}}
+                                </td>
+                                <td>
+                                    {{facility.state}}
+                                </td>
+                                <td>
+                                    {{facility.city}}
+                                </td>
+                                <td>
+                                    {{facility.zip}}
+                                </td>
+                                <td>
+                                    {{facility.naics2}}
+                                </td>
+                                <td>
+                                    {{facility.naics3}}
+                                </td>
+                                <td>
+                                    {{facility.contactName}}
+                                </td>
+                                <td>
+                                    {{facility.contactPhone}}
+                                </td>
+                                <td>
+                                    {{facility.contactEmail}}
+                                </td>
+                                <td>
+                                    <span *ngIf="facility.id">Existing</span>
+                                    <span *ngIf="!facility.id">New</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
+
+<nav class="data-wizard-footer navbar">
+    <div class="container-fluid justify-content-between">
+        <button class="btn btn-dark" (click)="goBack()">
+            <span class="fa fa-chevron-left"></span>
+            Go Back
+        </button>
+        <div>
+            <button class="btn btn-success me-2" (click)="submitFacilities()">
+                <span class="fa fa-plus"></span> Submit Facilities
+            </button>
+            <button class="btn btn-dark" (click)="next()">
+                Next
+                <span class="fa fa-chevron-right"></span>
+            </button>
+        </div>
+    </div>
+</nav>

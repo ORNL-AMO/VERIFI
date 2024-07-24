@@ -123,18 +123,18 @@
                         <optgroup [label]="'Energy'"
                             *ngIf="meter.source != 'Water Intake' && meter.source != 'Water Discharge'">
                             <option
-                                *ngFor="let meterGroup of facilityGroups|meterGroupOptions:meter.facilityId:'Energy'"
+                                *ngFor="let meterGroup of facilityGroups|meterGroupOptions2:meter.facilityId:'Energy'"
                                 [ngValue]="meterGroup.guid">
                                 {{meterGroup.name}}</option>
                         </optgroup>
                         <optgroup [label]="'Water'"
                             *ngIf="meter.source == 'Water Intake' || meter.source == 'Water Discharge'">
-                            <option *ngFor="let meterGroup of facilityGroups|meterGroupOptions:meter.facilityId:'Water'"
+                            <option *ngFor="let meterGroup of facilityGroups|meterGroupOptions2:meter.facilityId:'Water'"
                                 [ngValue]="meterGroup.guid">
                                 {{meterGroup.name}}</option>
                         </optgroup>
                         <optgroup [label]="'Other'">
-                            <option *ngFor="let meterGroup of facilityGroups|meterGroupOptions:meter.facilityId:'Other'"
+                            <option *ngFor="let meterGroup of facilityGroups|meterGroupOptions2:meter.facilityId:'Other'"
                                 [ngValue]="meterGroup.guid">
                                 {{meterGroup.name}}</option>
                         </optgroup>

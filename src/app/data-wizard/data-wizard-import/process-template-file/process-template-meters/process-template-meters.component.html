@@ -1,1 +1,232 @@
-<p>process-template-meters works!</p>
+<div class="data-wizard-content">
+    <div class="row g-0 justify-content-center h-100 w-100 overflow-scroll">
+        <div class="col-11 pt-4 pb-4">
+            <div class="form-paper">
+                <h4>Process File {{fileReference.name}}</h4>
+                <br>
+                <div class="d-flex justify-content-end" *ngIf="!allMetersValid">
+                    <div class="d-flex flex-column">
+                        <div class="alert alert-danger p-2">
+                            One or more meters are invalid. Please fix the meter by clicking on it's name or selecting
+                            to skip importing
+                            that meter.
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-end" *ngIf="hasNoCalanderizationSelection">
+                    <div class="d-flex flex-column">
+                        <div class="alert alert-warning p-2">
+                            One or more meters are missing a calanderization method selection.
+                        </div>
+                    </div>
+                </div>
+                <div class="table-responsive" *ngIf="!editMeterForm && metersIncluded">
+                    <table class="table utility-data table-sm table-bordered table-hover">
+                        <thead class="table-mh">
+                            <tr>
+                                <th>
+                                    Facility Name
+                                </th>
+                                <th>
+                                    Meter Name
+                                </th>
+                                <th>
+                                    Is Valid?
+                                </th>
+                                <th>
+                                    Source
+                                </th>
+                                <th>
+                                    Units
+                                </th>
+                                <th>
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <div>
+                                            Group
+                                        </div>
+                                        <div>
+                                            <a class="text-end click-link" (click)="autoGroup()">Auto Group</a>
+                                        </div>
+                                    </div>
+
+                                </th>
+                                <th>
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <div>
+                                            Calanderize?
+                                        </div>
+                                        <div>
+                                            <a class="text-end click-link" (click)="toggleCalanderizeAll()">Toggle</a>
+                                        </div>
+                                    </div>
+                                </th>
+                                <th>
+                                    New / Existing
+                                </th>
+                                <th>
+                                    <div class="w-100 d-flex">
+                                        <div class="pe-1">
+                                            <input type="checkbox" class="form-check-input" [(ngModel)]="skipAll"
+                                                (change)="setSkipAll()">
+                                        </div>
+                                        <div>
+                                            Skip Import
+                                        </div>
+                                    </div>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="table-group-divider">
+                            <tr *ngFor="let meter of fileReference?.meters | orderBy: 'isValid': 'asc'"
+                                [ngClass]="{'skip': meter.skipImport, 'alert-danger': !meter.isValid}">
+                                <td>
+                                    {{getFacilityName(meter.facilityId)}}
+                                </td>
+                                <td>
+                                    <a class="click-link" (click)="setEditMeter(meter)"
+                                        *ngIf="!meter.skipImport">{{meter.name}}
+                                        <span *ngIf="!meter.isValid">(click to edit)</span>
+                                    </a>
+                                    <span *ngIf="meter.skipImport">{{meter.name}}</span>
+                                </td>
+                                <td>
+                                    <span *ngIf="meter.isValid">
+                                        Yes
+                                    </span>
+                                    <span *ngIf="!meter.isValid">
+                                        No
+                                    </span>
+                                </td>
+                                <td>
+                                    {{meter.source}}
+                                </td>
+                                <td>
+                                    <ng-container *ngIf="meter.scope != 2">
+                                        <span [innerHTML]="meter.startingUnit | settingsLabel"></span>
+                                    </ng-container>
+                                    <ng-container *ngIf="meter.scope == 2">
+                                        <span [innerHTML]="meter.vehicleCollectionUnit | settingsLabel"></span>
+                                    </ng-container>
+                                </td>
+                                <td>
+                                    <select class="form-select" id="meterGroup" [(ngModel)]="meter.groupId">
+                                        <optgroup [label]="'Energy'"
+                                            *ngIf="meter.source != 'Water Intake' && meter.source != 'Water Discharge'">
+                                            <option
+                                                *ngFor="let meterGroup of facilityGroups|meterGroupOptions:meter.facilityId:'Energy'"
+                                                [ngValue]="meterGroup.guid">
+                                                {{meterGroup.name}}</option>
+                                        </optgroup>
+                                        <optgroup [label]="'Water'"
+                                            *ngIf="meter.source == 'Water Intake' || meter.source == 'Water Discharge'">
+                                            <option
+                                                *ngFor="let meterGroup of facilityGroups|meterGroupOptions:meter.facilityId:'Water'"
+                                                [ngValue]="meterGroup.guid">
+                                                {{meterGroup.name}}</option>
+                                        </optgroup>
+                                        <optgroup [label]="'Other'">
+                                            <option
+                                                *ngFor="let meterGroup of facilityGroups|meterGroupOptions:meter.facilityId:'Other'"
+                                                [ngValue]="meterGroup.guid">
+                                                {{meterGroup.name}}</option>
+                                        </optgroup>
+                                    </select>
+                                </td>
+                                <td>
+                                    <!-- {{meter.groupId}} -->
+                                    <select class="form-select" id="meterReadingDataApplication"
+                                        [(ngModel)]="meter.meterReadingDataApplication"
+                                        (change)="setHasNoCalanderizationSelection()">
+                                        <option [ngValue]="'backward'">Calanderize</option>
+                                        <option [ngValue]="'fullMonth'">Do Not Calanderize</option>
+                                        <option [ngValue]="'fullYear'">Evenly Distribute Data Annually</option>
+                                        <option [ngValue]="undefined">Unselected</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <span *ngIf="meter.id">
+                                        Existing
+                                    </span>
+                                    <span *ngIf="!meter.id">
+                                        New
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="d-flex w-100 h-100 justify-content-center align-items-center">
+                                        <input type="checkbox" class="form-check-input" [(ngModel)]="meter.skipImport"
+                                            (change)="setValidMeters()">
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <ng-container *ngIf="editMeterForm">
+                    <div class="d-flex justify-content-between">
+                        <div class="d-flex">
+                            <button class="btn btn-secondary" (click)="cancelEdit()">Cancel</button>
+                        </div>
+                        <div class="d-flex">
+                            <button class="btn btn-success ms-2" (click)="submitMeter()">Submit</button>
+                        </div>
+                    </div>
+                    <app-edit-meter-form [meterForm]="editMeterForm" [facility]="editMeterFacility">
+                    </app-edit-meter-form>
+
+                    <ng-container *ngIf="editMeter.id == undefined">
+                        <div class="d-flex w-100 alert alert-warning" *ngIf="!showExisting">
+                            If this is showing up as a new meter and you would like the data to be applied to an
+                            existing meter.
+                            <a class="ps-1 click-link" (click)="setShowExisting()">Click here</a>.
+                        </div>
+                        <div class="d-flex flex-column">
+                            <ng-container *ngIf="showExisting && existingMeterOptions.length != 0">
+                                <div class="alert alert-info">
+                                    Select an available existing meter:
+                                </div>
+                                <ul>
+                                    <li *ngFor="let existingMeter of existingMeterOptions">
+                                        <a class="click-link" (click)="selectExistingMeter(existingMeter)">
+                                            {{existingMeter.name}}
+                                        </a>
+                                    </li>
+                                </ul>
+                            </ng-container>
+                            <ng-container *ngIf="showExisting && existingMeterOptions.length == 0">
+                                <div class="alert alert-info">
+                                    No existing meters are available for selection. Either no meters exist for the
+                                    corresponding
+                                    facility or all existing meters are already being used for import.
+                                </div>
+                            </ng-container>
+                        </div>
+                    </ng-container>
+                </ng-container>
+
+                <div class="alert alert-warning p-2" *ngIf="!metersIncluded">
+                    No import meters found. Go back to column selection and include meters or click continue to move on
+                    to predictors.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<nav class="data-wizard-footer navbar">
+    <div class="container-fluid justify-content-between">
+        <button class="btn btn-dark" (click)="goBack()">
+            <span class="fa fa-chevron-left"></span>
+            Go Back
+        </button>
+        <div>
+            <button class="btn btn-success me-2" (click)="submitMeters()">
+                <span class="fa fa-plus"></span> Submit Meters
+            </button>
+            <button class="btn btn-dark" (click)="next()">
+                Next
+                <span class="fa fa-chevron-right"></span>
+            </button>
+        </div>
+    </div>
+</nav>

@@ -1,12 +1,12 @@
 import { Component } from '@angular/core';
 import { UploadDataService } from 'src/app/upload-data/upload-data.service';
-import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { Router } from '@angular/router';
 import * as XLSX from 'xlsx';
 import { FileReference } from 'src/app/upload-data/upload-data-models';
 import { Subscription } from 'rxjs';
 import { DataWizardService } from '../../data-wizard.service';
-// import { SetupWizardService } from '../../setup-wizard.service';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { IdbAccount } from 'src/app/models/idb';
 
 @Component({
   selector: 'app-upload-files',
@@ -22,8 +22,8 @@ export class UploadFilesComponent {
   fileReferencesSub: Subscription;
   constructor(private router: Router,
     private uploadDataService: UploadDataService,
-    private toastNotificationService: ToastNotificationsService,
-    private dataWizardService: DataWizardService
+    private dataWizardService: DataWizardService,
+    private accountDbService: AccountdbService
   ) {
 
   }
@@ -31,15 +31,10 @@ export class UploadFilesComponent {
   ngOnInit() {
     this.fileReferencesSub = this.dataWizardService.fileReferences.subscribe(fileReferences => {
       this.fileReferences = fileReferences;
-    })
-
-    // this.facilitiesSub = this.setupWizardService.facilities.subscribe(facilities => {
-    //   this.facilities = facilities;
-    // });
+    });
   }
 
   ngOnDestroy() {
-    // this.facilitiesSub.unsubscribe();
     this.fileReferencesSub.unsubscribe();
   }
 
@@ -80,44 +75,6 @@ export class UploadFilesComponent {
     this.dataWizardService.fileReferences.next(this.fileReferences);
   }
 
-  // setImportFile(event: EventTarget) {
-  //   let files: FileList = (event as HTMLInputElement).files;
-  //   if (files) {
-  //     if (files.length !== 0) {
-  //       let regex3 = /.xlsx$/;
-  //       for (let index = 0; index < files.length; index++) {
-  //         if (regex3.test(files[index].name)) {
-  //           let file: File = files[index];
-  //           const reader: FileReader = new FileReader();
-  //           reader.onload = (e: any) => {
-  //             const bstr: string = e.target.result;
-  //             let workBook: XLSX.WorkBook = XLSX.read(bstr, { type: 'binary', cellDates: true });
-  //             let isTemplate: "V1" | "V2" | "Non-template" = this.uploadDataService.checkSheetNamesForTemplate(workBook.SheetNames);
-  //             if (isTemplate == "Non-template") {
-  //               this.fileUploadError = 'File selected is not a VERIFI template. Please upload template file.'
-  //             } else {
-  //               try {
-  //                 let fileReference: FileReference = this.uploadDataService.getFileReference(file, workBook, true);
-  //                 this.fileUploadError = undefined;
-  //                 this.setupWizardService.facilityTemplateWorkbook.next(workBook);
-  //                 this.setupWizardService.facilities.next(fileReference.importFacilities);
-  //               } catch (err) {
-  //                 console.log(err);
-  //                 this.fileUploadError = 'No facilities found in template.'
-  //                 this.toastNotificationService.showToast('An Error Occured!', "No facilities found in template. Facilities needed.", 10000, false, "alert-danger", false);
-  //               }
-
-  //             }
-  //           };
-  //           reader.readAsBinaryString(file);
-  //         } else {
-  //           this.fileUploadError = 'Invalid File Type.'
-  //         }
-  //       }
-  //     }
-  //   }
-  // }
-
   setDragEnter() {
     this.dragOver = true;
   }
@@ -126,8 +83,26 @@ export class UploadFilesComponent {
     this.dragOver = false;
   }
 
+  goBack() {
+    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    this.router.navigateByUrl('/data-wizard/' + account.guid + '/account-setup');
+  }
 
-  goToFacilities() {
+  next() {
+    if (this.fileReferences.length > 0) {
+      this.goToFile(this.fileReferences[0]);
+    } else {
+      let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+      this.router.navigateByUrl('/data-wizard/' + account.guid + '/facilities');
+    }
+  }
 
+  goToFile(fileReference: FileReference) {
+    if (fileReference.isTemplate) {
+      let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+      this.router.navigateByUrl('/data-wizard/' + account.guid + '/import-data/process-template-file/' + fileReference.id)
+    } else {
+      //todo
+    }
   }
 }

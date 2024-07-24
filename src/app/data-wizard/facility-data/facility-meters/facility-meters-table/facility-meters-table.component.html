@@ -1,0 +1,133 @@
+<ng-template [ngIf]="facilityMeters.length > 0" [ngIfElse]="noMetersBlock">
+
+    <div class="d-flex w-100 justify-content-end mb-2">
+        <!-- <app-table-items-dropdown></app-table-items-dropdown> -->
+        <div class="ps-2">
+            <button class="btn nav-btn" (click)="uploadData()"><i class="fa fa-upload"></i> Import Data</button>
+        </div>
+        <div class="ps-2">
+            <button class="btn action-btn" (click)="addMeter()"><i class="fa fa-plus"></i> Add
+                New Meter</button>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table utility-data table-sm table-bordered table-hover" #meterTable>
+            <thead class="sortable">
+                <tr>
+                    <th (click)="setOrderDataField('name')" [ngClass]="{'active': orderDataField == 'name'}">Name</th>
+                    <!-- <th (click)="setOrderDataField('meterNumber')"
+                        [ngClass]="{'active': orderDataField == 'meterNumber'}">
+                        Meter #</th> -->
+                    <th (click)="setOrderDataField('source')" [ngClass]="{'active': orderDataField == 'source'}">Source
+                    </th>
+                    <th (click)="setOrderDataField('fuel')" [ngClass]="{'active': orderDataField == 'fuel'}">Fuel
+                    </th>
+                    <th (click)="setOrderDataField('scope')" [ngClass]="{'active': orderDataField == 'scope'}">Scope
+                    </th>
+                    <th (click)="setOrderDataField('startingUnit')"
+                        [ngClass]="{'active': orderDataField == 'startingUnit'}">Collection Units</th>
+                    <th *ngIf="!copyingTable">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="table-group-divider">
+                <tr
+                    *ngFor="let meter of facilityMeters  | orderBy: orderDataField: orderByDirection | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage">
+                    <!-- <td [ngClass]="{'invalid': isMeterInvalid(meter)}"> -->
+                    <td>
+                        <a (click)="selectEditMeter(meter)">{{meter.name}}</a>
+                    </td>
+                    <!-- <td>{{meter.meterNumber}}</td> -->
+                    <td>{{meter.source}}</td>
+                    <td>
+                        <ng-container *ngIf="meter.source == 'Other Fuels' || meter.source == 'Other Energy'">
+                            <ng-container *ngIf="meter.scope != 2">
+                                {{meter.fuel}}
+                            </ng-container>
+                            <ng-container *ngIf="meter.scope == 2">
+                                {{meter.vehicleFuel}}
+                            </ng-container>
+                        </ng-container>
+                        <ng-container *ngIf="meter.source != 'Other Fuels' && meter.source != 'Other Energy'">
+                            &mdash;
+                        </ng-container>
+                    </td>
+                    <td>
+                        <span [innerHTML]="meter.scope | scopeLabel"></span>
+                    </td>
+                    <td>
+                        <ng-container *ngIf="meter.scope != 2">
+                            <span [innerHTML]="meter.startingUnit | settingsLabel"></span>
+                        </ng-container>
+                        <ng-container *ngIf="meter.scope == 2">
+                            <ng-container *ngIf="meter.vehicleCollectionType == 1">
+                                <span [innerHTML]="meter.vehicleCollectionUnit | settingsLabel"></span>
+                            </ng-container>
+                            <ng-container *ngIf="meter.vehicleCollectionType == 2">
+                                <span [innerHTML]="meter.vehicleDistanceUnit | settingsLabel"></span>
+                            </ng-container>
+                        </ng-container>
+                    </td>
+                    <td class="actions" *ngIf="!copyingTable">
+                        <div class="btn-group">
+                            <button class="btn btn-sm btn-outline" (click)="selectEditMeter(meter)" title="Edit">
+                                <i class="fa fa-pencil"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline" (click)="createCopy(meter)" title="Copy">
+                                <i class="fa fa-copy"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline" (click)="selectDeleteMeter(meter)" title="Delete">
+                                <i class="fa fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="d-flex w-100 justify-content-between">
+        <div>
+            <button class="btn action-btn btn-sm" (click)="copyTable()">
+                <span class="fa fa-copy"></span> Copy Table
+            </button>
+        </div>
+        <ngb-pagination [collectionSize]="facilityMeters.length" [(page)]="currentPageNumber" [pageSize]="itemsPerPage"
+            [maxSize]="5" [rotate]="true" aria-label="Pagination">
+        </ngb-pagination>
+    </div>
+</ng-template>
+
+
+
+<div [ngClass]="{'windowOverlay': meterToDelete}"></div>
+<div class="popup" [class.open]="meterToDelete">
+    <div class="popup-header" *ngIf="meterToDelete">Delete Meter: {{meterToDelete.name}}
+        <button class="item-right" (click)="cancelDelete()">x</button>
+    </div>
+    <div class="popup-body">
+        <p>WARNING: By deleting this meter, you are also deleting all of the meter data and bills associated with
+            it.
+            Are you sure you want to preform this action?</p>
+    </div>
+    <div class="saveCancel popup-footer text-end">
+        <button class="btn btn-secondary" (click)="cancelDelete()">Cancel</button>
+        <button class="btn btn-danger" (click)="deleteMeter()">Delete</button>
+    </div>
+</div>
+
+<ng-template #noMetersBlock>
+    <div *ngIf="facilityMeters.length === 0" class="text-center mt-5">
+        <h5>No utility meters found for this facility.</h5>
+        <p>Please <i class="fa fa-plus"></i> Add New Meter or <i class="fa fa-upload"></i> Import multiple meters from
+            excel.</p>
+        <div class="d-flex w-100 justify-content-center">
+            <div class="pe-1">
+                <button class="btn action-btn" (click)="addMeter()"><i class="fa fa-plus"></i> Add New Meter</button>
+            </div>
+            <div class="ps-1">
+                <button class="btn nav-btn" (click)="uploadData()"><i class="fa fa-upload"></i> Import Data</button>
+            </div>
+        </div>
+    </div>
+</ng-template>

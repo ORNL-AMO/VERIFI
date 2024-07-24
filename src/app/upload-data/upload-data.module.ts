@@ -20,7 +20,7 @@ import { ConfirmPredictorsComponent } from './data-setup/file-setup/confirm-pred
 import { ConfirmAndSubmitComponent } from './data-setup/file-setup/confirm-and-submit/confirm-and-submit.component';
 import { LabelWithTooltipModule } from '../shared/label-with-tooltip/label-with-tooltip.module';
 import { HelperPipesModule } from '../shared/helper-pipes/helper-pipes.module';
-import { MeterGroupOptionsPipe } from './data-setup/file-setup/manage-meters/meter-group-options.pipe';
+import { MeterGroupOptionsPipe2 } from './data-setup/file-setup/manage-meters/meter-group-options.pipe';
 
 
 
@@ -40,7 +40,7 @@ import { MeterGroupOptionsPipe } from './data-setup/file-setup/manage-meters/met
     ConfirmReadingsComponent,
     ConfirmPredictorsComponent,
     ConfirmAndSubmitComponent,
-    MeterGroupOptionsPipe
+    MeterGroupOptionsPipe2
   ],
   imports: [
     CommonModule,
