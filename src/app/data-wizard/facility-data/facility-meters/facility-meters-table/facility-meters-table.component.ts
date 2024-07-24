@@ -62,8 +62,13 @@ export class FacilityMetersTableComponent {
 
   }
 
-  addMeter() {
-
+  async addMeter() {
+    let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let newMeter: IdbUtilityMeter = this.utilityMeterDbService.getNewIdbUtilityMeter(facility.guid, facility.accountId, true, facility.energyUnit);
+    newMeter = await firstValueFrom(this.utilityMeterDbService.addWithObservable(newMeter));
+    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    await this.dbChangesService.setMeters(account, facility);
+    this.selectEditMeter(newMeter);
   }
 
   copyTable() {
@@ -131,7 +136,9 @@ export class FacilityMetersTableComponent {
   }
 
   selectEditMeter(meter: IdbUtilityMeter) {
-    // this.router.navigateByUrl('facility/' + this.selectedFacility.id + '/utility/energy-consumption/energy-source/edit-meter/' + meter.guid);
+    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    this.router.navigateByUrl('data-wizard/' + account.guid + '/facility/' + facility.guid + '/meters/meter/' + meter.guid);
   }
 
   async createCopy(meter: IdbUtilityMeter) {

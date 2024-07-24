@@ -22,6 +22,7 @@ import { EditMeterFormModule } from '../facility/utility-data/energy-consumption
 import { FacilityMetersComponent } from './facility-data/facility-meters/facility-meters.component';
 import { FacilityMetersTableComponent } from './facility-data/facility-meters/facility-meters-table/facility-meters-table.component';
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
+import { FacilityMeterComponent } from './facility-data/facility-meters/facility-meter/facility-meter.component';
 
 
 
@@ -42,7 +43,8 @@ import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
     ProcessTemplatePredictorsComponent,
     MeterGroupOptionsPipe,
     FacilityMetersComponent,
-    FacilityMetersTableComponent
+    FacilityMetersTableComponent,
+    FacilityMeterComponent
   ],
   imports: [
     CommonModule,

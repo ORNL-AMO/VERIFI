@@ -21,7 +21,6 @@ export class FacilityDataComponent {
   }
 
   ngOnInit() {
-
     this.activatedRoute.params.subscribe(params => {
       let facilityId: string = params['id'];
       let selectedFacility: IdbFacility = this.facilityDbService.getFacilityById(facilityId);

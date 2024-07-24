@@ -1,4 +1,7 @@
 import { Component } from '@angular/core';
+import { Subscription } from 'rxjs';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
+import { IdbFacility } from 'src/app/models/idb';
 
 @Component({
   selector: 'app-facility-meters',
@@ -7,4 +10,27 @@ import { Component } from '@angular/core';
 })
 export class FacilityMetersComponent {
 
+  facility: IdbFacility;
+  facilitySub: Subscription;
+  constructor(private facilityDbService: FacilitydbService){
+
+  }
+
+  ngOnInit(){
+    this.facilitySub = this.facilityDbService.selectedFacility.subscribe(facility => {
+      this.facility = facility;
+    });
+  }
+
+  ngOnDestroy(){
+    this.facilitySub.unsubscribe();
+  }
+  
+  goBack() {
+
+  }
+
+  next() {
+
+  }
 }

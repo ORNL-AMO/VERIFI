@@ -12,6 +12,17 @@
     padding-left: 10px;
 }
 
+.nav-link.third-nav{
+    padding-left: 20px;
+}
+
+.nav-link.fourth-nav{
+    padding-left: 30px;
+}
+
+
+
+
 .nav-link{
     padding-left: 3px;
     text-overflow: ellipsis;

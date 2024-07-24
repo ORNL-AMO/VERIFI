@@ -3,10 +3,11 @@ import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { IdbAccount, IdbFacility } from 'src/app/models/idb';
+import { IdbAccount, IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
 import { FileReference } from 'src/app/upload-data/upload-data-models';
 import { UploadDataService } from 'src/app/upload-data/upload-data.service';
 import { DataWizardService } from '../data-wizard.service';
+import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 
 @Component({
   selector: 'app-data-wizard-sidebar',
@@ -21,10 +22,14 @@ export class DataWizardSidebarComponent {
   facilities: Array<IdbFacility>;
   facilitiesSub: Subscription;
 
+  accountMeters: Array<IdbUtilityMeter>;
+  accountMetersSub: Subscription;
+
   fileReferencesSub: Subscription;
   fileReferences: Array<FileReference>;
   constructor(private accountDbService: AccountdbService, private facilityDbService: FacilitydbService,
-    private dataWizardService: DataWizardService
+    private dataWizardService: DataWizardService,
+    private utilityMeterDbService: UtilityMeterdbService
   ) {
   }
 
@@ -37,7 +42,10 @@ export class DataWizardSidebarComponent {
     });
     this.fileReferencesSub = this.dataWizardService.fileReferences.subscribe(fileReferences => {
       this.fileReferences = fileReferences;
-    })
+    });
+    this.accountMetersSub = this.utilityMeterDbService.accountMeters.subscribe(accountMeters => {
+      this.accountMeters = accountMeters;
+    });
   }
 
   ngOnDestroy() {

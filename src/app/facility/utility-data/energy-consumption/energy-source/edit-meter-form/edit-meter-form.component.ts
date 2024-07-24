@@ -21,11 +21,11 @@ import { CustomGWPDbService } from 'src/app/indexedDB/custom-gwp-db.service';
   styleUrls: ['./edit-meter-form.component.css']
 })
 export class EditMeterFormComponent implements OnInit {
-  @Input()
+  @Input({required: true})
   meterForm: FormGroup;
   @Input()
   meterDataExists: boolean;
-  @Input()
+  @Input({required: true})
   facility: IdbFacility;
 
   globalWarmingPotentials: Array<GlobalWarmingPotential>;
