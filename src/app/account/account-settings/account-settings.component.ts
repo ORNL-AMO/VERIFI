@@ -7,10 +7,8 @@ import { LoadingService } from 'src/app/core-components/loading/loading.service'
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport, IdbFacility } from 'src/app/models/idb';
-import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
+import { IdbAccount, IdbFacility } from 'src/app/models/idb';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { ElectronService } from 'src/app/electron/electron.service';
 import { AutomaticBackupsService } from 'src/app/electron/automatic-backups.service';
 
@@ -53,10 +51,8 @@ export class AccountSettingsComponent implements OnInit {
     private facilityDbService: FacilitydbService,
     private loadingService: LoadingService,
     private backupDataService: BackupDataService,
-    private accountReportDbService: AccountReportDbService,
     private importBackupModalService: ImportBackupModalService,
     private toastNotificationService: ToastNotificationsService,
-    private accountAnalysisDbService: AccountAnalysisDbService,
     private dbChangesService: DbChangesService,
     private electronService: ElectronService,
     private cd: ChangeDetectorRef,
@@ -101,25 +97,7 @@ export class AccountSettingsComponent implements OnInit {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let idbFacility: IdbFacility = this.facilityDbService.getNewIdbFacility(selectedAccount);
     let newFacility: IdbFacility = await firstValueFrom(this.facilityDbService.addWithObservable(idbFacility));
-    this.loadingService.setLoadingMessage('Updating Reports...');
-    let accountReports: Array<IdbAccountReport> = this.accountReportDbService.accountReports.getValue();
-    for (let index = 0; index < accountReports.length; index++) {
-      accountReports[index].dataOverviewReportSetup.includedFacilities.push({
-        facilityId: newFacility.guid,
-        included: false
-      });
-      await firstValueFrom(this.accountReportDbService.updateWithObservable(accountReports[index]));
-    }
-    this.loadingService.setLoadingMessage('Updating Analysis Items...');
-    let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
-    for (let index = 0; index < accountAnalysisItems.length; index++) {
-      accountAnalysisItems[index].facilityAnalysisItems.push({
-        facilityId: newFacility.guid,
-        analysisItemId: undefined
-      });
-      await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(accountAnalysisItems[index]));
-    }
-
+    await this.dbChangesService.updateDataNewFacility(newFacility);
     await this.dbChangesService.selectAccount(this.selectedAccount, false);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('New Facility Added!', undefined, undefined, false, 'alert-success');

@@ -14,6 +14,7 @@ import { ProcessTemplatePredictorsComponent } from "../data-wizard/data-wizard-i
 import { FacilityMetersComponent } from "../data-wizard/facility-data/facility-meters/facility-meters.component";
 import { FacilityMetersTableComponent } from "../data-wizard/facility-data/facility-meters/facility-meters-table/facility-meters-table.component";
 import { FacilityMeterComponent } from "../data-wizard/facility-data/facility-meters/facility-meter/facility-meter.component";
+import { FacilityMeterDataComponent } from "../data-wizard/facility-data/facility-meters/facility-meter-data/facility-meter-data.component";
 
 export const DataWizardRoutes: Route = {
     path: 'data-wizard/:id',
@@ -61,7 +62,8 @@ export const DataWizardRoutes: Route = {
                     component: FacilityMetersComponent,
                     children: [
                         { path: '', component: FacilityMetersTableComponent },
-                        { path: 'meter/:id', component: FacilityMeterComponent }
+                        { path: 'meter/:id', component: FacilityMeterComponent },
+                        { path: 'meter-data/:id', component: FacilityMeterDataComponent }
                     ]
                 }
 

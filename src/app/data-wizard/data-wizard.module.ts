@@ -23,6 +23,7 @@ import { FacilityMetersComponent } from './facility-data/facility-meters/facilit
 import { FacilityMetersTableComponent } from './facility-data/facility-meters/facility-meters-table/facility-meters-table.component';
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { FacilityMeterComponent } from './facility-data/facility-meters/facility-meter/facility-meter.component';
+import { FacilityMeterDataComponent } from './facility-data/facility-meters/facility-meter-data/facility-meter-data.component';
 
 
 
@@ -44,7 +45,8 @@ import { FacilityMeterComponent } from './facility-data/facility-meters/facility
     MeterGroupOptionsPipe,
     FacilityMetersComponent,
     FacilityMetersTableComponent,
-    FacilityMeterComponent
+    FacilityMeterComponent,
+    FacilityMeterDataComponent
   ],
   imports: [
     CommonModule,

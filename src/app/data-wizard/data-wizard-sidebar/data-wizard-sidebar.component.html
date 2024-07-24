@@ -109,6 +109,14 @@
                         {{meter.name}}
                     </a>
                 </div>
+                <div class="ps-2 pe-2 nav-item">
+                    <a class="nav-link fifth-nav"
+                        [routerLink]="'/data-wizard/'+account.guid+'/facility/'+facility.guid+'/meters/meter-data/'+meter.guid"
+                        [routerLinkActive]="['active']"
+                        [routerLinkActiveOptions]="{ exact: true }">
+                        Meter Readings
+                    </a>
+                </div>
             </ng-container>
         </ng-container>
     </div>

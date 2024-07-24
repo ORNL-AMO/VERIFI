@@ -90,7 +90,7 @@ export class DbChangesService {
 
   selectFacility(facility: IdbFacility) {
     let updateFacility: { facility: IdbFacility, isChanged: boolean } = this.updateDbEntryService.updateFacility(facility);
-    if(updateFacility.isChanged){
+    if (updateFacility.isChanged) {
       facility = updateFacility.facility;
       this.updateFacilities(facility, true);
     }
@@ -276,5 +276,26 @@ export class DbChangesService {
     await this.selectAccount(selectedAccount, false);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('Facility Deleted!', undefined, undefined, false, 'alert-success');
+  }
+
+  async updateDataNewFacility(newFacility: IdbFacility) {
+    this.loadingService.setLoadingMessage('Updating Reports...');
+    let accountReports: Array<IdbAccountReport> = this.accountReportDbService.accountReports.getValue();
+    for (let index = 0; index < accountReports.length; index++) {
+      accountReports[index].dataOverviewReportSetup.includedFacilities.push({
+        facilityId: newFacility.guid,
+        included: false
+      });
+      await firstValueFrom(this.accountReportDbService.updateWithObservable(accountReports[index]));
+    }
+    this.loadingService.setLoadingMessage('Updating Analysis Items...');
+    let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
+    for (let index = 0; index < accountAnalysisItems.length; index++) {
+      accountAnalysisItems[index].facilityAnalysisItems.push({
+        facilityId: newFacility.guid,
+        analysisItemId: undefined
+      });
+      await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(accountAnalysisItems[index]));
+    }
   }
 }
