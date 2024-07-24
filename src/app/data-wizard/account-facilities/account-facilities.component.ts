@@ -64,7 +64,6 @@ export class AccountFacilitiesComponent {
     } else {
       this.toastNotificationService.showToast('New Facility Added!', undefined, undefined, false, 'alert-success');
     }
-    // this.router.navigateByUrl('/facility/' + newFacility.id + '/settings');
     this.cancelAddFacilities();
   }
 
@@ -99,7 +98,7 @@ export class AccountFacilitiesComponent {
   }
 
   goToFacility(facility: IdbFacility) {
-    this.router.navigateByUrl('/setup-wizard/facility-details/' + facility.guid);
+    this.router.navigateByUrl('/data-wizard/' + facility.accountId + '/facility/' + facility.guid);
   }
 
   setOrderOptions() {
@@ -125,6 +124,7 @@ export class AccountFacilitiesComponent {
   }
 
   goToUploadData() {
-    this.router.navigateByUrl('/setup-wizard/data-upload');
+    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    this.router.navigateByUrl('/data-wizard/' + selectedAccount.guid + '/import-data/upload-files');
   }
 }
