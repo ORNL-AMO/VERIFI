@@ -185,7 +185,7 @@ export class AccountReportDbService {
     for (let i = 0; i < accountReports.length; i++) {
       let report: IdbAccountReport = accountReports[i];
       report.dataOverviewReportSetup.includedFacilities = report.dataOverviewReportSetup.includedFacilities.filter(facility => { return facility.facilityId != facilityId });
-      if (report.betterClimateReportSetup.includedFacilityGroups) {
+      if (report.betterClimateReportSetup && report.betterClimateReportSetup.includedFacilityGroups) {
         report.betterClimateReportSetup.includedFacilityGroups = report.betterClimateReportSetup.includedFacilityGroups.filter(facility => { return facility.facilityId != facilityId });
       }
       this.loadingService.setLoadingMessage('Removing Facility From Reports (' + i + '/' + accountReports.length + ')...');
