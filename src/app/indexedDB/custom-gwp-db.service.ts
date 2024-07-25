@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
-import { IdbAccount, IdbCustomGWP } from '../models/idb';
+import { IdbCustomGWP } from '../models/idb';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { LoadingService } from '../core-components/loading/loading.service';
 import { GlobalWarmingPotentials } from '../models/globalWarmingPotentials';
+import { IdbAccount } from '../models/idbModels/account';
 
 @Injectable({
   providedIn: 'root'

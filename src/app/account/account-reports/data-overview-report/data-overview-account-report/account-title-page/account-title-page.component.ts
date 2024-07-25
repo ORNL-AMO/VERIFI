@@ -1,7 +1,8 @@
 import { Component } from '@angular/core';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
-import { IdbAccount, IdbAccountReport } from 'src/app/models/idb';
+import { IdbAccountReport } from 'src/app/models/idb';
+import { IdbAccount } from 'src/app/models/idbModels/account';
 import { getNAICS } from 'src/app/shared/form-data/naics-data';
 
 @Component({

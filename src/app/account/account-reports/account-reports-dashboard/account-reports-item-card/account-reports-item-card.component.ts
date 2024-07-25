@@ -4,9 +4,10 @@ import { ToastNotificationsService } from 'src/app/core-components/toast-notific
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { IdbAccount, IdbAccountReport } from 'src/app/models/idb';
+import { IdbAccountReport } from 'src/app/models/idb';
 import { AccountReportsService } from '../../account-reports.service';
 import { firstValueFrom } from 'rxjs';
+import { IdbAccount } from 'src/app/models/idbModels/account';
 
 @Component({
   selector: 'app-account-reports-item-card',

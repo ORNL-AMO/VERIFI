@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { IdbAccount, IdbFacility } from 'src/app/models/idb';
+import { IdbFacility } from 'src/app/models/idb';
 import { SettingsFormsService } from 'src/app/shared/settings-forms/settings-forms.service';
 import { SetupWizardService } from '../setup-wizard.service';
+import { IdbAccount } from 'src/app/models/idbModels/account';
 
 @Component({
   selector: 'app-setup-confirmation',

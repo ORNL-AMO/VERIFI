@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { IdbAccount, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup, PredictorData } from '../models/idb';
+import { IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup, PredictorData } from '../models/idb';
 import * as XLSX from 'xlsx';
 import { FacilitydbService } from '../indexedDB/facility-db.service';
 import { AccountdbService } from '../indexedDB/account-db.service';
@@ -21,6 +21,7 @@ import { UploadDataV2Service } from './upload-data-v2.service';
 import { DetailDegreeDay } from '../models/degreeDays';
 import { DegreeDaysService } from '../shared/helper-services/degree-days.service';
 import * as _ from 'lodash';
+import { IdbAccount } from '../models/idbModels/account';
 
 @Injectable({
   providedIn: 'root'

@@ -1,8 +1,8 @@
-import { IdbAccount } from "src/app/models/idb";
 import { MonthlyAnalysisSummaryDataClass } from "./monthlyAnalysisSummaryDataClass";
 import * as _ from 'lodash';
 import { getFiscalYear } from "../shared-calculations/calanderizationFunctions";
 import { MonthlyAnalysisCalculatedValuesSummation } from "./monthlyAnalysisCalculatedValuesClassSummation";
+import { IdbAccount } from "src/app/models/idbModels/account";
 
 export class MonthlyAccountAnalysisDataClass {
     date: Date;

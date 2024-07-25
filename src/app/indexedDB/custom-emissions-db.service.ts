@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
-import { IdbAccount, IdbCustomEmissionsItem } from '../models/idb';
+import { IdbCustomEmissionsItem } from '../models/idb';
 import { LoadingService } from '../core-components/loading/loading.service';
+import { IdbAccount } from '../models/idbModels/account';
 
 @Injectable({
   providedIn: 'root'

@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { AccountdbService } from '../indexedDB/account-db.service';
-import { IdbAccount, IdbElectronBackup } from '../models/idb';
 import { ElectronService } from './electron.service';
 import { BackupDataService, BackupFile } from '../shared/helper-services/backup-data.service';
 import { AccountAnalysisDbService } from '../indexedDB/account-analysis-db.service';
@@ -16,6 +15,7 @@ import { ToastNotificationsService } from '../core-components/toast-notification
 import { DbChangesService } from '../indexedDB/db-changes.service';
 import { ElectronBackupsDbService } from '../indexedDB/electron-backups-db.service';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
+import { IdbAccount } from '../models/idbModels/account';
 
 @Injectable({
   providedIn: 'root'

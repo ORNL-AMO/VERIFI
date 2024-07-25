@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { IdbAccount, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup, PredictorData } from '../models/idb';
+import { IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup, PredictorData } from '../models/idb';
 import * as XLSX from 'xlsx';
 import { FacilitydbService } from '../indexedDB/facility-db.service';
 import { AccountdbService } from '../indexedDB/account-db.service';
@@ -20,6 +20,7 @@ import { ColumnGroup, ColumnItem, FacilityGroup, FileReference, ParsedTemplate }
 import { checkImportCellNumber, checkImportStartingUnit, checkSameDay, checkSameMonth, getAgreementType, getCountryCode, getFuelEnum, getMeterReadingDataApplication, getMeterSource, getPhase, getScope, getState, getYesNoBool, getZip } from './upload-helper-functions';
 import { UploadDataSharedFunctionsService } from './upload-data-shared-functions.service';
 import { SetupWizardService } from '../setup-wizard/setup-wizard.service';
+import { IdbAccount } from '../models/idbModels/account';
 
 @Injectable({
   providedIn: 'root'

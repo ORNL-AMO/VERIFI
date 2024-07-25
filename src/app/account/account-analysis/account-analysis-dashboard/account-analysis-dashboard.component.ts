@@ -4,11 +4,12 @@ import { Subscription, firstValueFrom } from 'rxjs';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { IdbAccount, IdbAccountAnalysisItem, IdbUtilityMeterGroup } from 'src/app/models/idb';
+import { IdbAccountAnalysisItem, IdbUtilityMeterGroup } from 'src/app/models/idb';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { AnalysisCategory } from 'src/app/models/analysis';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AnalyticsService } from 'src/app/analytics/analytics.service';
+import { IdbAccount } from 'src/app/models/idbModels/account';
 
 @Component({
   selector: 'app-account-analysis-dashboard',

@@ -2,8 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AccountdbService } from '../../indexedDB/account-db.service';
 import { FacilitydbService } from '../../indexedDB/facility-db.service';
-import { IdbAccount, IdbFacility } from '../../models/idb';
+import { IdbFacility } from '../../models/idb';
 import { MeterGroupingService } from './meter-grouping/meter-grouping.service';
+import { IdbAccount } from 'src/app/models/idbModels/account';
 
 @Component({
   selector: 'app-utility-data',

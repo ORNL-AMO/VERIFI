@@ -2,8 +2,9 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
 import { FacilitydbService } from '../indexedDB/facility-db.service';
-import { IdbAccount, IdbFacility } from '../models/idb';
+import { IdbFacility } from '../models/idb';
 import * as XLSX from 'xlsx';
+import { IdbAccount } from '../models/idbModels/account';
 
 @Injectable({
   providedIn: 'root'

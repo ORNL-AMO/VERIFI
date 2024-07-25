@@ -1,10 +1,11 @@
 import { CalanderizedMeter } from "src/app/models/calanderization";
-import { IdbAccount, IdbCustomFuel, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from "src/app/models/idb";
+import { IdbCustomFuel, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from "src/app/models/idb";
 import { getCalanderizedMeterData } from "../calanderization/calanderizeMeters";
 import * as _ from 'lodash';
 import { SubregionEmissions } from "src/app/models/eGridEmissions";
 import { BetterClimateYearDetails } from "./betterClimateYearsDetails";
 import { BetterClimateReportSetup } from "src/app/models/overview-report";
+import { IdbAccount } from "src/app/models/idbModels/account";
 
 export class BetterClimateReport {
 

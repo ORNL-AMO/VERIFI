@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
-import { IdbAccount, IdbFacility, IdbPredictorEntry, IdbUtilityMeterGroup, PredictorData } from '../models/idb';
+import { IdbFacility, IdbPredictorEntry, IdbUtilityMeterGroup, PredictorData } from '../models/idb';
 import { UtilityMeterGroupdbService } from '../indexedDB/utilityMeterGroup-db.service';
 import { checkSameMonth } from './upload-helper-functions';
 import { PredictordbService } from '../indexedDB/predictors-db.service';
 import * as XLSX from 'xlsx';
 import { MeterSource } from '../models/constantsAndTypes';
+import { IdbAccount } from '../models/idbModels/account';
 
 @Injectable({
   providedIn: 'root'

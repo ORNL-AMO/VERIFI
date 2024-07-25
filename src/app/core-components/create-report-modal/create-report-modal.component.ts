@@ -4,15 +4,15 @@ import { Subscription, firstValueFrom } from 'rxjs';
 import { Router } from '@angular/router';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport, IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
+import { IdbAccountAnalysisItem, IdbAccountReport, IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountOverviewService } from 'src/app/account/account-overview/account-overview.service';
 import { ToastNotificationsService } from '../toast-notifications/toast-notifications.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { FacilityOverviewService } from 'src/app/facility/facility-overview/facility-overview.service';
+import { IdbAccount } from 'src/app/models/idbModels/account';
 
 @Component({
   selector: 'app-create-report-modal',
@@ -33,7 +33,6 @@ export class CreateReportModalComponent {
     private accountDbService: AccountdbService,
     private accountOverviewService: AccountOverviewService,
     private toastNotificationService: ToastNotificationsService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
     private accountAnalysisDbService: AccountAnalysisDbService,
     private facilityDbService: FacilitydbService,
     private utilityMeterDbService: UtilityMeterdbService,

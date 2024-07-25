@@ -4,9 +4,9 @@ import { ImportBackupModalService } from 'src/app/core-components/import-backup-
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { IdbAccount } from 'src/app/models/idb';
 import { BackupDataService, BackupFile } from 'src/app/shared/helper-services/backup-data.service';
 import { firstValueFrom } from 'rxjs';
+import { IdbAccount } from 'src/app/models/idbModels/account';
 
 @Component({
   selector: 'app-setup-welcome',

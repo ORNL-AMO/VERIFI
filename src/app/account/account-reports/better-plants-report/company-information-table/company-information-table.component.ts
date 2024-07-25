@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { IdbAccount } from 'src/app/models/idb';
+import { IdbAccount } from 'src/app/models/idbModels/account';
 import { getNAICS } from 'src/app/shared/form-data/naics-data';
 
 @Component({

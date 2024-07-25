@@ -6,9 +6,10 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { YearMonthData } from 'src/app/models/dashboard';
-import { IdbAccount, IdbAccountReport } from 'src/app/models/idb';
+import { IdbAccountReport } from 'src/app/models/idb';
 import { DataOverviewReportSetup } from 'src/app/models/overview-report';
 import { AccountReportsService } from '../../../account-reports.service';
+import { IdbAccount } from 'src/app/models/idbModels/account';
 
 @Component({
   selector: 'app-account-section-report',

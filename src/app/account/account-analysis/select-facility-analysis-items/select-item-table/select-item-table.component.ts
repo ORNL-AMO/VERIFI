@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
+import { IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
@@ -11,6 +11,7 @@ import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { firstValueFrom } from 'rxjs';
 import { AnalysisValidationService } from 'src/app/shared/helper-services/analysis-validation.service';
+import { IdbAccount } from 'src/app/models/idbModels/account';
 @Component({
   selector: 'app-select-item-table',
   templateUrl: './select-item-table.component.html',

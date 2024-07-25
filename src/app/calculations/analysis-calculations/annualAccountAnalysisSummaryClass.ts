@@ -1,9 +1,10 @@
 import { MonthlyAnalysisSummaryData } from "src/app/models/analysis";
-import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData } from "src/app/models/idb";
+import { IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData } from "src/app/models/idb";
 import { AnnualAnalysisSummaryDataClass } from "./annualAnalysisSummaryDataClass";
 import { AnnualAnalysisSummary } from 'src/app/models/analysis';
 import { MonthlyAccountAnalysisClass } from "./monthlyAccountAnalysisClass";
 import { checkAnalysisValue } from "../shared-calculations/calculationsHelpers";
+import { IdbAccount } from "src/app/models/idbModels/account";
 
 export class AnnualAccountAnalysisSummaryClass {
 

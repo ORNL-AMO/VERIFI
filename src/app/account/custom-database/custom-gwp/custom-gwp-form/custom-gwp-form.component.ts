@@ -6,7 +6,8 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { CustomGWPDbService } from 'src/app/indexedDB/custom-gwp-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { GlobalWarmingPotential, GlobalWarmingPotentials } from 'src/app/models/globalWarmingPotentials';
-import { IdbAccount, IdbCustomGWP, IdbUtilityMeter } from 'src/app/models/idb';
+import { IdbCustomGWP, IdbUtilityMeter } from 'src/app/models/idb';
+import { IdbAccount } from 'src/app/models/idbModels/account';
 
 @Component({
   selector: 'app-custom-gwp-form',

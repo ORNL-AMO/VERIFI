@@ -2,7 +2,8 @@ import { Injectable } from '@angular/core';
 import { LocalStorageService } from 'ngx-webstorage';
 import { BehaviorSubject } from 'rxjs';
 import { AnalysisGroup, AnalysisTableColumns, AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
-import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility } from '../../models/idb';
+import { IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility } from '../../models/idb';
+import { IdbAccount } from 'src/app/models/idbModels/account';
 
 @Injectable({
   providedIn: 'root'

@@ -1,9 +1,10 @@
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { Injectable } from '@angular/core';
-import { IdbAccount, IdbFacility } from '../models/idb';
+import { IdbFacility } from '../models/idb';
 import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
 import { LocalStorageService } from 'ngx-webstorage';
 import { LoadingService } from '../core-components/loading/loading.service';
+import { IdbAccount } from '../models/idbModels/account';
 
 @Injectable({
     providedIn: 'root'
@@ -97,7 +98,6 @@ export class FacilitydbService {
             size: undefined,
             units: undefined,
             notes: undefined,
-            img: undefined,
             // id: undefined
             unitsOfMeasure: account.unitsOfMeasure,
             energyUnit: account.energyUnit,

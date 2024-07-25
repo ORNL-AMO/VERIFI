@@ -3,12 +3,13 @@ import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
-import { IdbAccount, IdbAccountReport } from 'src/app/models/idb';
+import { IdbAccountReport } from 'src/app/models/idb';
 import * as _ from 'lodash';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { ReportType } from 'src/app/models/constantsAndTypes';
 import { AnalyticsService } from 'src/app/analytics/analytics.service';
+import { IdbAccount } from 'src/app/models/idbModels/account';
 
 @Component({
   selector: 'app-account-reports-dashboard',

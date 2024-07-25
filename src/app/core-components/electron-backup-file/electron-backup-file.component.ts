@@ -4,13 +4,14 @@ import { AutomaticBackupsService } from 'src/app/electron/automatic-backups.serv
 import { ElectronService } from 'src/app/electron/electron.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { ElectronBackupsDbService } from 'src/app/indexedDB/electron-backups-db.service';
-import { IdbAccount, IdbElectronBackup } from 'src/app/models/idb';
+import { IdbElectronBackup } from 'src/app/models/idb';
 import { BackupDataService, BackupFile } from 'src/app/shared/helper-services/backup-data.service';
 import { ToastNotificationsService } from '../toast-notifications/toast-notifications.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { LoadingService } from '../loading/loading.service';
 import { DatePipe } from '@angular/common';
 import { DeleteDataService } from 'src/app/indexedDB/delete-data.service';
+import { IdbAccount } from 'src/app/models/idbModels/account';
 
 @Component({
   selector: 'app-electron-backup-file',

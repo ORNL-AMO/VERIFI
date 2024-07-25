@@ -27,49 +27,49 @@ export function getNewIdbEntry(): IdbEntry {
 }
 
 
-export interface IdbAccount {
-    //keys (id primary)
-    id?: number,
-    guid: string,
-    name: string,
-    country: string,
-    city: string,
-    state: string,
-    zip: string,
-    address: string,
-    size?: number,
-    naics1: string,
-    naics2: string,
-    naics3: string,
-    notes: string,
-    img: string
-    unitsOfMeasure: string,
-    energyUnit: string,
-    electricityUnit: string,
-    massUnit: string,
-    volumeLiquidUnit: string,
-    volumeGasUnit: string,
-    sustainabilityQuestions: SustainabilityQuestions,
-    fiscalYear: "calendarYear" | "nonCalendarYear",
-    fiscalYearMonth: number,
-    fiscalYearCalendarEnd: boolean,
-    setupWizard: boolean,
-    setupWizardComplete: boolean,
-    numberOfFacilities?: string,
-    energyIsSource: boolean,
-    lastBackup?: Date,
-    eGridSubregion?: string,
-    color?: string,
-    contactName: string,
-    contactEmail: string,
-    contactPhone: string,
-    dataBackupFilePath?: string,
-    dataBackupId?: string,
-    archiveOption: 'always' | 'never' | 'justOnce' | 'skip',
-    isSharedBackupFile?: boolean,
-    sharedFileAuthor?: string
-    deleteAccount?: boolean
-}
+// export interface IdbAccount {
+//     //keys (id primary)
+//     id?: number,
+//     guid: string,
+//     name: string,
+//     country: string,
+//     city: string,
+//     state: string,
+//     zip: string,
+//     address: string,
+//     size?: number,
+//     naics1: string,
+//     naics2: string,
+//     naics3: string,
+//     notes: string,
+//     img: string
+//     unitsOfMeasure: string,
+//     energyUnit: string,
+//     electricityUnit: string,
+//     massUnit: string,
+//     volumeLiquidUnit: string,
+//     volumeGasUnit: string,
+//     sustainabilityQuestions: SustainabilityQuestions,
+//     fiscalYear: "calendarYear" | "nonCalendarYear",
+//     fiscalYearMonth: number,
+//     fiscalYearCalendarEnd: boolean,
+//     setupWizard: boolean,
+//     setupWizardComplete: boolean,
+//     numberOfFacilities?: string,
+//     energyIsSource: boolean,
+//     lastBackup?: Date,
+//     eGridSubregion?: string,
+//     color?: string,
+//     contactName: string,
+//     contactEmail: string,
+//     contactPhone: string,
+//     dataBackupFilePath?: string,
+//     dataBackupId?: string,
+//     archiveOption: 'always' | 'never' | 'justOnce' | 'skip',
+//     isSharedBackupFile?: boolean,
+//     sharedFileAuthor?: string
+//     deleteAccount?: boolean
+// }
 
 export interface IdbFacility {
     //keys (id primary)
@@ -90,7 +90,6 @@ export interface IdbFacility {
     size?: number,
     units?: string,
     notes: string,
-    img?: string,
     tableElectricityFilters?: ElectricityDataFilters,
     electricityInputFilters?: ElectricityDataFilters,
     tableGeneralUtilityFilters?: GeneralUtilityDataFilters,

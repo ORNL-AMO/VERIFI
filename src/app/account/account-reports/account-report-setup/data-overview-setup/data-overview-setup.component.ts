@@ -4,7 +4,8 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { IdbAccount, IdbAccountReport, IdbUtilityMeter } from 'src/app/models/idb';
+import { IdbAccountReport, IdbUtilityMeter } from 'src/app/models/idb';
+import { IdbAccount } from 'src/app/models/idbModels/account';
 import { DataOverviewReportSetup } from 'src/app/models/overview-report';
 
 @Component({

@@ -6,10 +6,11 @@ import { FirstNaicsList, NAICS, SecondNaicsList, ThirdNaicsList } from 'src/app/
 import { State, States } from 'src/app/shared/form-data/states';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { IdbAccount, IdbFacility } from 'src/app/models/idb';
+import { IdbFacility } from 'src/app/models/idb';
 import { SettingsFormsService } from '../settings-forms.service';
 import { SetupWizardService } from 'src/app/setup-wizard/setup-wizard.service';
 import { FacilityClassification, FacilityClassifications } from 'src/app/models/constantsAndTypes';
+import { IdbAccount } from 'src/app/models/idbModels/account';
 
 @Component({
   selector: 'app-general-information-form',
