@@ -1,23 +1,22 @@
 import { Component, ElementRef, EventEmitter, Input, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { IdbCustomFuel, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
-import { UtilityMeterDataService } from '../../utility-meter-data.service';
 import * as _ from 'lodash';
 import { CopyTableService } from 'src/app/shared/helper-services/copy-table.service';
-import { Subscription } from 'rxjs';
-import { GeneralUtilityDataFilters } from 'src/app/models/meterDataFilter';
-import { checkShowEmissionsOutputRate, getIsEnergyMeter, getIsEnergyUnit } from 'src/app/shared/sharedHelperFuntions';
+import { AdditionalChargesFilters, DetailedChargesFilters, EmissionsFilters, GeneralInformationFilters } from 'src/app/models/meterDataFilter';
 import { EmissionsResults } from 'src/app/models/eGridEmissions';
+import { getEmissions, setUtilityDataEmissionsValues } from 'src/app/calculations/emissions-calculations/emissions';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { getEmissions, setUtilityDataEmissionsValues } from 'src/app/calculations/emissions-calculations/emissions';
 import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
+import { UtilityMeterDataService } from 'src/app/facility/utility-data/energy-consumption/utility-meter-data/utility-meter-data.service';
 
 @Component({
-  selector: 'app-general-utility-data-table',
-  templateUrl: './general-utility-data-table.component.html',
-  styleUrls: ['./general-utility-data-table.component.css']
+  selector: 'app-electricity-data-table',
+  templateUrl: './electricity-data-table.component.html',
+  styleUrls: ['./electricity-data-table.component.css']
 })
-export class GeneralUtilityDataTableComponent implements OnInit {
+export class ElectricityDataTableComponent implements OnInit {
   @Input()
   selectedMeter: IdbUtilityMeter;
   @Input()
@@ -33,46 +32,47 @@ export class GeneralUtilityDataTableComponent implements OnInit {
 
   @ViewChild('meterTable', { static: false }) meterTable: ElementRef;
 
+
+  electricityDataFilterSub: Subscription;
+  detailedChargesFilters: DetailedChargesFilters;
+  additionalChargesFilters: AdditionalChargesFilters;
+  generalInformationFilters: GeneralInformationFilters;
+  emissionsFilters: EmissionsFilters;
   allChecked: boolean;
   energyUnit: string;
-  volumeUnit: string;
-  showVolumeColumn: boolean;
-  showEnergyColumn: boolean;
+
   orderDataField: string = 'readDate';
   orderByDirection: string = 'desc';
   currentPageNumber: number = 1;
   copyingTable: boolean = false;
-  showEmissions: boolean;
-  filterSub: Subscription;
-  generalUtilityDataFilters: GeneralUtilityDataFilters;
-
   numDetailedCharges: number;
+  numAdditionalCharges: number;
   numGeneralInformation: number;
   numEmissions: number;
-  showEmissionsSection: boolean;
-  showDetailedCharges: boolean;
   showEstimated: boolean;
-  constructor(public utilityMeterDataService: UtilityMeterDataService,
-    private copyTableService: CopyTableService,
+  isRECs: boolean;
+  constructor(private utilityMeterDataService: UtilityMeterDataService, private copyTableService: CopyTableService,
     private eGridService: EGridService, private facilityDbService: FacilitydbService,
     private customFuelDbService: CustomFuelDbService) { }
 
   ngOnInit(): void {
-    this.setData();
-
+    this.setIsRECs();
+    this.energyUnit = this.selectedMeter.startingUnit;
     if (this.selectedMeterData.length != 0) {
       let hasFalseChecked: IdbUtilityMeterData = this.selectedMeterData.find(meterDataItem => { return meterDataItem.checked == false });
       this.allChecked = (hasFalseChecked == undefined);
     }
-
-    this.filterSub = this.utilityMeterDataService.tableGeneralUtilityFilters.subscribe(val => {
-      this.generalUtilityDataFilters = val;
-      this.setNumColumns();
-    })
+    this.electricityDataFilterSub = this.utilityMeterDataService.tableElectricityFilters.subscribe(electricityDataFilters => {
+      this.detailedChargesFilters = electricityDataFilters.detailedCharges;
+      this.additionalChargesFilters = electricityDataFilters.additionalCharges;
+      this.generalInformationFilters = electricityDataFilters.generalInformationFilters;
+      this.emissionsFilters = electricityDataFilters.emissionsFilters;
+      this.setColumnNumbers();
+    });
   }
 
   ngOnDestroy() {
-    this.filterSub.unsubscribe();
+    this.electricityDataFilterSub.unsubscribe();
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -80,33 +80,15 @@ export class GeneralUtilityDataTableComponent implements OnInit {
       this.allChecked = false;
       this.checkAll();
     }
-
-    if ((changes.selectedMeterData && !changes.selectedMeterData.firstChange) || (changes.selectedMeter && !changes.selectedMeter.firstChange)) {
-      this.setData();
+    if (changes.selectedMeter && !changes.selectedMeter.firstChange) {
+      this.energyUnit = this.selectedMeter.startingUnit;
+      this.setIsRECs();
     }
+    if (changes.selectedMeterData) {
+      this.showEstimated = (this.selectedMeterData.find(dataItem => { return dataItem.isEstimated == true })) != undefined;
+    }
+    this.setEmissions();
   }
-
-  setData() {
-    this.showVolumeColumn = (this.selectedMeterData.find(dataItem => { return dataItem.totalVolume != undefined && dataItem.totalVolume != 0 }) != undefined);
-    this.volumeUnit = this.selectedMeter.startingUnit;
-    if (this.selectedMeter.source == 'Other') {
-      this.showEnergyColumn = (getIsEnergyUnit(this.selectedMeter.startingUnit) == true);
-    } else {
-      this.showEnergyColumn = getIsEnergyMeter(this.selectedMeter.source);
-    }
-    this.showEmissions = checkShowEmissionsOutputRate(this.selectedMeter);
-    this.showEstimated = (this.selectedMeterData.find(dataItem => { return dataItem.isEstimated == true })) != undefined;
-    if (this.showEmissions) {
-      this.setEmissions();
-    }
-    if (this.showEnergyColumn) {
-      this.energyUnit = this.selectedMeter.energyUnit;
-    }
-    if (this.generalUtilityDataFilters) {
-      this.setNumColumns()
-    }
-  }
-
 
   checkAll() {
     if (this.allChecked) {
@@ -121,6 +103,10 @@ export class GeneralUtilityDataTableComponent implements OnInit {
       });
     }
     this.setChecked.emit(true);
+  }
+
+  setIsRECs() {
+    this.isRECs = (this.selectedMeter.agreementType == 4 || this.selectedMeter.agreementType == 6);
   }
 
   toggleChecked() {
@@ -170,7 +156,6 @@ export class GeneralUtilityDataTableComponent implements OnInit {
     return undefined;
   }
 
-
   copyTable() {
     this.copyingTable = true;
     setTimeout(() => {
@@ -183,59 +168,42 @@ export class GeneralUtilityDataTableComponent implements OnInit {
     let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
     this.selectedMeterData.forEach(dataItem => {
-      let emissionsValues: EmissionsResults = getEmissions(this.selectedMeter, dataItem.totalEnergyUse, this.selectedMeter.energyUnit, new Date(dataItem.readDate).getFullYear(), false, [facility], this.eGridService.co2Emissions, customFuels, dataItem.totalVolume, undefined, undefined, dataItem.heatCapacity);
+      let emissionsValues: EmissionsResults = getEmissions(this.selectedMeter, dataItem.totalEnergyUse, this.selectedMeter.energyUnit, new Date(dataItem.readDate).getFullYear(), false, [facility], this.eGridService.co2Emissions, customFuels, 0, undefined, undefined, dataItem.heatCapacity);
       dataItem = setUtilityDataEmissionsValues(dataItem, emissionsValues);
     });
   }
 
-  setNumColumns() {
-    this.numDetailedCharges = 0;
-    this.numGeneralInformation = 2;
-    this.numEmissions = 0;
-    if (this.selectedMeter.source == 'Other Fuels' || this.selectedMeter.source == 'Natural Gas') {
-      this.showEmissionsSection = (this.generalUtilityDataFilters.stationaryBiogenicEmmissions || this.generalUtilityDataFilters.stationaryCarbonEmissions || this.generalUtilityDataFilters.stationaryOtherEmissions || this.generalUtilityDataFilters.totalEmissions) && this.showEmissions;
-      if (this.showEmissions) {
-        if (this.generalUtilityDataFilters.stationaryBiogenicEmmissions) {
-          this.numEmissions++;
-        }
-        if (this.generalUtilityDataFilters.stationaryCarbonEmissions) {
-          this.numEmissions++;
-        }
-        if (this.generalUtilityDataFilters.stationaryOtherEmissions) {
-          this.numEmissions++;
-        }
-        if (this.generalUtilityDataFilters.totalEmissions) {
-          this.numEmissions++;
-        }
+  setColumnNumbers() {
+    let additionalChargesCount: number = 0;
+    Object.keys(this.additionalChargesFilters).forEach(key => {
+      if (key != 'showSection' && this.additionalChargesFilters[key] == true) {
+        additionalChargesCount++;
       }
-    } else {
-      this.showEmissionsSection = this.generalUtilityDataFilters.totalEmissions && this.showEmissions;
-      if (this.showEmissions) {
-        if (this.generalUtilityDataFilters.totalEmissions) {
-          this.numEmissions++;
-        }
+    });
+    this.numAdditionalCharges = additionalChargesCount;
+    let detailedChargesCount: number = 0;
+    Object.keys(this.detailedChargesFilters).forEach(key => {
+      if (key != 'showSection' && this.detailedChargesFilters[key] == true) {
+        detailedChargesCount++;
       }
-    }
+    });
+    this.numDetailedCharges = detailedChargesCount * 2;
 
-    this.showDetailedCharges = (this.generalUtilityDataFilters.commodityCharge || this.generalUtilityDataFilters.deliveryCharge || this.generalUtilityDataFilters.otherCharge);
+    let emissionCount: number = 0;
+    Object.keys(this.emissionsFilters).forEach(key => {
+      if (key != 'showSection' && this.emissionsFilters[key] == true) {
+        emissionCount++;
+      }
+    });
+    this.numEmissions = emissionCount;
 
-    if (this.generalUtilityDataFilters.totalVolume && this.showVolumeColumn) {
-      this.numGeneralInformation++;
-    }
-    if (!this.showEnergyColumn) {
-      this.numGeneralInformation--;
-    }
-    if (this.generalUtilityDataFilters.totalCost) {
-      this.numGeneralInformation++;
-    }
-    if (this.generalUtilityDataFilters.commodityCharge) {
-      this.numDetailedCharges++;
-    }
-    if (this.generalUtilityDataFilters.deliveryCharge) {
-      this.numDetailedCharges++;
-    }
-    if (this.generalUtilityDataFilters.otherCharge) {
-      this.numDetailedCharges++;
-    }
+    let generalInfoCount: number = 0;
+    Object.keys(this.generalInformationFilters).forEach(key => {
+      if (key != 'showSection' && this.generalInformationFilters[key] == true) {
+        generalInfoCount++;
+      }
+    });
+    this.numGeneralInformation = generalInfoCount + 2;
+
   }
 }

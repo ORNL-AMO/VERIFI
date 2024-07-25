@@ -30,6 +30,8 @@ export class FacilityMetersTableComponent {
   orderDataField: string = 'name';
   orderByDirection: string = 'desc';
   copyingTable: boolean = false;
+  facility: IdbFacility;
+  facilitySub: Subscription;
   constructor(
     private utilityMeterDbService: UtilityMeterdbService,
     private sharedDataService: SharedDataService,
@@ -49,12 +51,16 @@ export class FacilityMetersTableComponent {
     this.itemsPerPageSub = this.sharedDataService.itemsPerPage.subscribe(val => {
       this.itemsPerPage = val;
     });
+    this.facilitySub = this.facilityDbService.selectedFacility.subscribe(facility => {
+      this.facility = facility;
+    });
 
   }
 
   ngOnDestroy() {
     this.facilityMetersSub.unsubscribe();
     this.itemsPerPageSub.unsubscribe();
+    this.facilitySub.unsubscribe();
   }
 
 

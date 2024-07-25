@@ -1,21 +1,20 @@
-import { Component, ElementRef, EventEmitter, Input, Output, SimpleChanges, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { IdbCustomFuel, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
-import { GeneralUtilityDataFilters, VehicleDataFilters } from 'src/app/models/meterDataFilter';
-import { UtilityMeterDataService } from '../../utility-meter-data.service';
 import * as _ from 'lodash';
 import { CopyTableService } from 'src/app/shared/helper-services/copy-table.service';
 import { EmissionsResults } from 'src/app/models/eGridEmissions';
 import { getEmissions } from 'src/app/calculations/emissions-calculations/emissions';
 import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-
+import { VehicleDataFilters } from 'src/app/models/meterDataFilter';
+import { UtilityMeterDataService } from 'src/app/facility/utility-data/energy-consumption/utility-meter-data/utility-meter-data.service';
 @Component({
-  selector: 'app-other-emissions-data-table',
-  templateUrl: './other-emissions-data-table.component.html',
-  styleUrls: ['./other-emissions-data-table.component.css']
+  selector: 'app-vehicle-data-table',
+  templateUrl: './vehicle-data-table.component.html',
+  styleUrls: ['./vehicle-data-table.component.css']
 })
-export class OtherEmissionsDataTableComponent {
+export class VehicleDataTableComponent {
   @Input()
   selectedMeter: IdbUtilityMeter;
   @Input()
@@ -47,6 +46,7 @@ export class OtherEmissionsDataTableComponent {
   showDetailedCharges: boolean;
   volumeUnit: string;
   energyUnit: string
+  consumptionLabel: 'Consumption' | 'Distance';
   constructor(private utilityMeterDataService: UtilityMeterDataService,
     private copyTableService: CopyTableService,
     private customFuelDbService: CustomFuelDbService,
@@ -55,7 +55,6 @@ export class OtherEmissionsDataTableComponent {
   }
 
   ngOnInit(): void {
-
     if (this.selectedMeterData.length != 0) {
       let hasFalseChecked: IdbUtilityMeterData = this.selectedMeterData.find(meterDataItem => { return meterDataItem.checked == false });
       this.allChecked = (hasFalseChecked == undefined);
@@ -74,10 +73,19 @@ export class OtherEmissionsDataTableComponent {
 
   ngOnChanges() {
     this.setData();
+    if(this.selectedMeter.scope != 2){
+      this.consumptionLabel = 'Consumption';
+    }else{
+      this.consumptionLabel = 'Distance';
+    }
   }
 
   setData() {
-    this.volumeUnit = this.selectedMeter.startingUnit;
+    if (this.selectedMeter.vehicleCollectionType == 1) {
+      this.volumeUnit = this.selectedMeter.vehicleCollectionUnit;
+    } else {
+      this.volumeUnit = this.selectedMeter.vehicleDistanceUnit;
+    }
     this.showEstimated = (this.selectedMeterData.find(dataItem => { return dataItem.isEstimated == true })) != undefined;
     this.setEmissions();
     this.energyUnit = this.selectedMeter.energyUnit;
@@ -136,9 +144,11 @@ export class OtherEmissionsDataTableComponent {
     let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
     this.selectedMeterData.forEach(dataItem => {
-      let emissionsValues: EmissionsResults = getEmissions(this.selectedMeter, dataItem.totalEnergyUse, this.selectedMeter.energyUnit, new Date(dataItem.readDate).getFullYear(), false, [facility], [], customFuels, dataItem.totalVolume, this.selectedMeter.vehicleCollectionUnit, this.selectedMeter.vehicleDistanceUnit, dataItem.heatCapacity);
-      dataItem.processEmissions = emissionsValues.processEmissions;
-      dataItem.fugitiveEmissions = emissionsValues.fugitiveEmissions;
+      let emissionsValues: EmissionsResults = getEmissions(this.selectedMeter, dataItem.totalEnergyUse, this.selectedMeter.energyUnit, new Date(dataItem.readDate).getFullYear(), false, [facility], [], customFuels, dataItem.totalVolume, this.selectedMeter.vehicleCollectionUnit, this.selectedMeter.vehicleDistanceUnit, dataItem.vehicleFuelEfficiency);
+      dataItem.mobileBiogenicEmissions = emissionsValues.mobileBiogenicEmissions;
+      dataItem.mobileCarbonEmissions = emissionsValues.mobileCarbonEmissions;
+      dataItem.mobileOtherEmissions = emissionsValues.mobileOtherEmissions;
+      dataItem.mobileTotalEmissions = emissionsValues.mobileTotalEmissions;
     })
   }
 

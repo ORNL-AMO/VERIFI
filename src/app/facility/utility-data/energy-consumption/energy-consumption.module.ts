@@ -4,8 +4,6 @@ import { EditMeterComponent } from './energy-source/edit-meter/edit-meter.compon
 import { EnergySourceComponent } from './energy-source/energy-source.component';
 import { EditElectricityBillComponent } from './utility-meter-data/edit-bill/edit-electricity-bill/edit-electricity-bill.component';
 import { EditUtilityBillComponent } from './utility-meter-data/edit-bill/edit-utility-bill/edit-utility-bill.component';
-import { ElectricityDataTableComponent } from './utility-meter-data/utility-meter-data-table/electricity-data-table/electricity-data-table.component';
-import { GeneralUtilityDataTableComponent } from './utility-meter-data/utility-meter-data-table/general-utility-data-table/general-utility-data-table.component';
 import { UtilityMeterDataFilterComponent } from './utility-meter-data/utility-meter-data-filter/utility-meter-data-filter.component';
 import { UtilityMeterDataComponent } from './utility-meter-data/utility-meter-data.component';
 import { EnergyConsumptionComponent } from './energy-consumption.component';
@@ -19,18 +17,15 @@ import { UtilityMeterDataTableComponent } from './utility-meter-data/utility-met
 import { EditBillComponent } from './utility-meter-data/edit-bill/edit-bill.component';
 import { TableItemsDropdownModule } from 'src/app/shared/table-items-dropdown/table-items-dropdown.module';
 import { EditVehicleMeterBillComponent } from './utility-meter-data/edit-bill/edit-vehicle-meter-bill/edit-vehicle-meter-bill.component';
-import { VehicleDataTableComponent } from './utility-meter-data/utility-meter-data-table/vehicle-data-table/vehicle-data-table.component';
 import { RefrigerationCalculationTableComponent } from './utility-meter-data/edit-bill/edit-other-emissions-bill/refrigeration-calculation-table/refrigeration-calculation-table.component';
 import { EditOtherEmissionsBillComponent } from './utility-meter-data/edit-bill/edit-other-emissions-bill/edit-other-emissions-bill.component';
-import { OtherEmissionsDataTableComponent } from './utility-meter-data/utility-meter-data-table/other-emissions-data-table/other-emissions-data-table.component';
+import { MeterDataModule } from 'src/app/shared/meter-data/meter-data.module';
 @NgModule({
   declarations: [
     EditMeterComponent,
     EnergySourceComponent,
     EditElectricityBillComponent,
     EditUtilityBillComponent,
-    ElectricityDataTableComponent,
-    GeneralUtilityDataTableComponent,
     UtilityMeterDataFilterComponent,
     UtilityMeterDataComponent,
     EnergyConsumptionComponent,
@@ -38,10 +33,8 @@ import { OtherEmissionsDataTableComponent } from './utility-meter-data/utility-m
     UtilityMeterDataTableComponent,
     EditBillComponent,
     EditVehicleMeterBillComponent,
-    VehicleDataTableComponent,
     RefrigerationCalculationTableComponent,
-    EditOtherEmissionsBillComponent,
-    OtherEmissionsDataTableComponent
+    EditOtherEmissionsBillComponent
   ],
   imports: [
     CommonModule,
@@ -51,7 +44,8 @@ import { OtherEmissionsDataTableComponent } from './utility-meter-data/utility-m
     NgbPaginationModule,
     HelperPipesModule,
     RouterModule,
-    TableItemsDropdownModule
+    TableItemsDropdownModule,
+    MeterDataModule
   ]
 })
 export class EnergyConsumptionModule { }

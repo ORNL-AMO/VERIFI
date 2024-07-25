@@ -32,6 +32,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { DeletingAccountDataComponent } from './core-components/deleting-account-data/deleting-account-data.component';
 import { HomePageComponent } from './core-components/home-page/home-page.component';
 import { DataWizardModule } from './data-wizard/data-wizard.module';
+import { MeterDataModule } from './shared/meter-data/meter-data.module';
 
 @NgModule({
   declarations: [
@@ -69,7 +70,8 @@ import { DataWizardModule } from './data-wizard/data-wizard.module';
     UploadDataModule,
     WeatherDataModule,
     HttpClientModule,
-    DataWizardModule
+    DataWizardModule,
+    MeterDataModule
   ],
   providers: [],
   bootstrap: [AppComponent]

@@ -71,7 +71,7 @@
         <ng-container *ngFor="let facility of facilities">
             <div class="ps-2 pe-2 nav-item">
                 <a class="nav-link secondary-nav" [routerLink]="'/data-wizard/'+account.guid+'/facility/'+facility.guid"
-                    [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
+                    [routerLinkActive]="['active']">
                     {{facility.name}}
                 </a>
             </div>
