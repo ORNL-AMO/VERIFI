@@ -15,6 +15,10 @@ import { FacilityMetersComponent } from "../data-wizard/facility-data/facility-m
 import { FacilityMetersTableComponent } from "../data-wizard/facility-data/facility-meters/facility-meters-table/facility-meters-table.component";
 import { FacilityMeterComponent } from "../data-wizard/facility-data/facility-meters/facility-meter/facility-meter.component";
 import { FacilityMeterDataComponent } from "../data-wizard/facility-data/facility-meters/facility-meter-data/facility-meter-data.component";
+import { FacilityPredictorsComponent } from "../data-wizard/facility-data/facility-predictors/facility-predictors.component";
+import { FacilityPredictorDataComponent } from "../data-wizard/facility-data/facility-predictors/facility-predictor-data/facility-predictor-data.component";
+import { FacilityPredictorComponent } from "../data-wizard/facility-data/facility-predictors/facility-predictor/facility-predictor.component";
+import { FacilityPredictorsTableComponent } from "../data-wizard/facility-data/facility-predictors/facility-predictors-table/facility-predictors-table.component";
 
 export const DataWizardRoutes: Route = {
     path: 'data-wizard/:id',
@@ -65,8 +69,16 @@ export const DataWizardRoutes: Route = {
                         { path: 'meter/:id', component: FacilityMeterComponent },
                         { path: 'meter-data/:id', component: FacilityMeterDataComponent }
                     ]
+                },
+                {
+                    path: 'predictors',
+                    component: FacilityPredictorsComponent,
+                    children: [
+                        { path: '', component: FacilityPredictorsTableComponent },
+                        { path: 'predictor/:id', component: FacilityPredictorComponent },
+                        { path: 'predictor-data/:id', component: FacilityPredictorDataComponent }
+                    ]
                 }
-
             ]
         }
     ]

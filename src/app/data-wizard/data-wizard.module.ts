@@ -24,6 +24,10 @@ import { FacilityMetersTableComponent } from './facility-data/facility-meters/fa
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { FacilityMeterComponent } from './facility-data/facility-meters/facility-meter/facility-meter.component';
 import { FacilityMeterDataComponent } from './facility-data/facility-meters/facility-meter-data/facility-meter-data.component';
+import { FacilityPredictorsComponent } from './facility-data/facility-predictors/facility-predictors.component';
+import { FacilityPredictorDataComponent } from './facility-data/facility-predictors/facility-predictor-data/facility-predictor-data.component';
+import { FacilityPredictorComponent } from './facility-data/facility-predictors/facility-predictor/facility-predictor.component';
+import { FacilityPredictorsTableComponent } from './facility-data/facility-predictors/facility-predictors-table/facility-predictors-table.component';
 
 
 
@@ -46,7 +50,11 @@ import { FacilityMeterDataComponent } from './facility-data/facility-meters/faci
     FacilityMetersComponent,
     FacilityMetersTableComponent,
     FacilityMeterComponent,
-    FacilityMeterDataComponent
+    FacilityMeterDataComponent,
+    FacilityPredictorsComponent,
+    FacilityPredictorDataComponent,
+    FacilityPredictorComponent,
+    FacilityPredictorsTableComponent
   ],
   imports: [
     CommonModule,

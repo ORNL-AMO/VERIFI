@@ -3,11 +3,12 @@ import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { IdbAccount, IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
+import { IdbAccount, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, PredictorData } from 'src/app/models/idb';
 import { FileReference } from 'src/app/upload-data/upload-data-models';
 import { UploadDataService } from 'src/app/upload-data/upload-data.service';
 import { DataWizardService } from '../data-wizard.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
+import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 
 @Component({
   selector: 'app-data-wizard-sidebar',
@@ -27,9 +28,13 @@ export class DataWizardSidebarComponent {
 
   fileReferencesSub: Subscription;
   fileReferences: Array<FileReference>;
+
+  accountPredictorEntries: Array<IdbPredictorEntry>;
+  accountPredictorsSub: Subscription;
   constructor(private accountDbService: AccountdbService, private facilityDbService: FacilitydbService,
     private dataWizardService: DataWizardService,
-    private utilityMeterDbService: UtilityMeterdbService
+    private utilityMeterDbService: UtilityMeterdbService,
+    private predictorDbService: PredictordbService
   ) {
   }
 
@@ -46,11 +51,15 @@ export class DataWizardSidebarComponent {
     this.accountMetersSub = this.utilityMeterDbService.accountMeters.subscribe(accountMeters => {
       this.accountMeters = accountMeters;
     });
+    this.accountPredictorsSub = this.predictorDbService.accountPredictorEntries.subscribe(accountPredictorEntries => {
+      this.accountPredictorEntries = accountPredictorEntries;
+    })
   }
 
   ngOnDestroy() {
     this.accountSub.unsubscribe();
     this.facilitiesSub.unsubscribe();
     this.fileReferencesSub.unsubscribe();
+    this.accountPredictorsSub.unsubscribe();
   }
 }

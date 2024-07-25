@@ -19,6 +19,7 @@ import { AnalysisCategoryPipe } from './analysis-category.pipe';
 import { EmissionsDisplayPipe } from './emissions-display.pipe';
 import { MeterSourceColorPipe } from './meter-source-color.pipe';
 import { FacilityMetersListPipe } from './facility-meters-list.pipe';
+import { FacilityPredictorListPipe } from './facility-predictor-list.pipe';
 
 @NgModule({
   declarations: [
@@ -40,7 +41,8 @@ import { FacilityMetersListPipe } from './facility-meters-list.pipe';
     AnalysisCategoryPipe,
     EmissionsDisplayPipe,
     MeterSourceColorPipe,
-    FacilityMetersListPipe
+    FacilityMetersListPipe,
+    FacilityPredictorListPipe
   ],
   imports: [
     CommonModule
@@ -64,7 +66,8 @@ import { FacilityMetersListPipe } from './facility-meters-list.pipe';
     AnalysisCategoryPipe,
     EmissionsDisplayPipe,
     MeterSourceColorPipe,
-    FacilityMetersListPipe
+    FacilityMetersListPipe,
+    FacilityPredictorListPipe
   ]
 })
 export class HelperPipesModule { }
