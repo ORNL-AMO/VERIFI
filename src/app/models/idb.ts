@@ -1,4 +1,5 @@
 import { FuelTypeOption } from '../shared/fuel-options/fuelTypeOption';
+import { getGUID } from '../shared/sharedHelperFuntions';
 import { AccountAnalysisSetupErrors } from './accountAnalysis';
 import { AnalysisCategory, AnalysisGroup, AnalysisSetupErrors } from './analysis';
 import { MonthlyData } from './calanderization';
@@ -8,6 +9,23 @@ import { GlobalWarmingPotential } from './globalWarmingPotentials';
 import { ElectricityDataFilters, GeneralUtilityDataFilters, VehicleDataFilters } from './meterDataFilter';
 import { BetterClimateReportSetup, BetterPlantsReportSetup, DataOverviewReportSetup, PerformanceReportSetup } from './overview-report';
 import { SustainabilityQuestions } from './sustainabilityQuestions';
+
+
+export interface IdbEntry {
+    id?: number;
+    guid: string;
+    createdDate: Date;
+    modifiedDate: Date;
+}
+
+export function getNewIdbEntry(): IdbEntry {
+    return {
+        guid: getGUID(),
+        createdDate: new Date(),
+        modifiedDate: new Date()
+    }
+}
+
 
 export interface IdbAccount {
     //keys (id primary)
