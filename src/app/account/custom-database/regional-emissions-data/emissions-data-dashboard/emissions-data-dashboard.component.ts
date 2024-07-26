@@ -4,8 +4,9 @@ import { Subscription, firstValueFrom } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { CustomEmissionsDbService } from 'src/app/indexedDB/custom-emissions-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { IdbCustomEmissionsItem, IdbFacility } from 'src/app/models/idb';
+import { IdbCustomEmissionsItem } from 'src/app/models/idb';
 import { IdbAccount } from 'src/app/models/idbModels/account';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
   selector: 'app-emissions-data-dashboard',

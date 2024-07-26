@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { CustomEmissionsDbService } from 'src/app/indexedDB/custom-emissions-db.service';
-import { IdbCustomEmissionsItem, IdbFacility } from 'src/app/models/idb';
+import { IdbCustomEmissionsItem } from 'src/app/models/idb';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 import * as _ from 'lodash';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
@@ -12,6 +12,7 @@ import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { firstValueFrom } from 'rxjs';
 import { SubregionEmissions } from 'src/app/models/eGridEmissions';
 import { IdbAccount } from 'src/app/models/idbModels/account';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
   selector: 'app-emissions-data-form',

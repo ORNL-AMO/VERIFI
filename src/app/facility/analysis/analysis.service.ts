@@ -2,8 +2,9 @@ import { Injectable } from '@angular/core';
 import { LocalStorageService } from 'ngx-webstorage';
 import { BehaviorSubject } from 'rxjs';
 import { AnalysisGroup, AnalysisTableColumns, AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
-import { IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility } from '../../models/idb';
+import { IdbAccountAnalysisItem, IdbAnalysisItem } from '../../models/idb';
 import { IdbAccount } from 'src/app/models/idbModels/account';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Injectable({
   providedIn: 'root'

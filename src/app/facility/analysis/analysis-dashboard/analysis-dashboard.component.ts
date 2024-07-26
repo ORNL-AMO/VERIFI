@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { IdbAnalysisItem, IdbFacility, IdbUtilityMeterGroup } from 'src/app/models/idb';
+import { IdbAnalysisItem, IdbUtilityMeterGroup } from 'src/app/models/idb';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
@@ -12,6 +12,7 @@ import { AnalysisCategory } from 'src/app/models/analysis';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { AnalyticsService } from 'src/app/analytics/analytics.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
   selector: 'app-analysis-dashboard',

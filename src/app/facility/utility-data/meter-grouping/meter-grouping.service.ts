@@ -1,13 +1,14 @@
 import { Injectable } from '@angular/core';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { CalanderizedMeter, MeterGroupType, MonthlyData } from 'src/app/models/calanderization';
-import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterGroup } from 'src/app/models/idb';
+import { IdbUtilityMeter, IdbUtilityMeterGroup } from 'src/app/models/idb';
 import * as _ from 'lodash';
 import { BehaviorSubject } from 'rxjs';
 import { Month, Months } from 'src/app/shared/form-data/months';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { getFirstBillEntryFromCalanderizedMeterData, getFiscalYear, getLastBillEntryFromCalanderizedMeterData } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
 import { getIsEnergyMeter } from 'src/app/shared/sharedHelperFuntions';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
 @Injectable({
   providedIn: 'root'
 })

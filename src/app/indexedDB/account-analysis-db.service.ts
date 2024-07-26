@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { LocalStorageService } from 'ngx-webstorage';
 import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
-import { IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility } from '../models/idb';
+import { IdbAccountAnalysisItem, IdbAnalysisItem } from '../models/idb';
 import { AccountdbService } from './account-db.service';
 import { FacilitydbService } from './facility-db.service';
 import { AnalysisCategory } from '../models/analysis';
@@ -10,6 +10,7 @@ import { AnalysisDbService } from './analysis-db.service';
 import { AnalysisValidationService } from '../shared/helper-services/analysis-validation.service';
 import { LoadingService } from '../core-components/loading/loading.service';
 import { IdbAccount } from '../models/idbModels/account';
+import { IdbFacility } from '../models/idbModels/facility';
 
 @Injectable({
   providedIn: 'root'

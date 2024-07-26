@@ -4,7 +4,7 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
-import { IdbFacility, IdbPredictorEntry, PredictorData } from 'src/app/models/idb';
+import { IdbPredictorEntry, PredictorData } from 'src/app/models/idb';
 import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
 import * as _ from 'lodash';
 import { DetailDegreeDay } from 'src/app/models/degreeDays';
@@ -13,6 +13,7 @@ import { ToastNotificationsService } from 'src/app/core-components/toast-notific
 import { WeatherDataService } from 'src/app/weather-data/weather-data.service';
 import { firstValueFrom, Observable, of } from 'rxjs';
 import { IdbAccount } from 'src/app/models/idbModels/account';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
 @Component({
   selector: 'app-edit-predictor-entry',
   templateUrl: './edit-predictor-entry.component.html',

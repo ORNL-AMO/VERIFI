@@ -1,7 +1,7 @@
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
-import { IdbFacility, IdbPredictorEntry, IdbUtilityMeterData, PredictorData } from '../models/idb';
+import { IdbPredictorEntry, IdbUtilityMeterData, PredictorData } from '../models/idb';
 import { FacilitydbService } from './facility-db.service';
 import * as _ from 'lodash';
 import { DegreeDaysService } from '../shared/helper-services/degree-days.service';
@@ -9,6 +9,7 @@ import { DetailDegreeDay } from '../models/degreeDays';
 import { LoadingService } from '../core-components/loading/loading.service';
 import { Months } from '../shared/form-data/months';
 import { UtilityMeterDatadbService } from './utilityMeterData-db.service';
+import { IdbFacility } from '../models/idbModels/facility';
 
 @Injectable({
     providedIn: 'root'

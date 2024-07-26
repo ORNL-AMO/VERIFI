@@ -2,6 +2,7 @@ import { SustainabilityQuestions } from "../sustainabilityQuestions"
 
 
 export interface AccountAndFacility {
+    name: string,
     country: string,
     city: string,
     state: string,
@@ -12,6 +13,7 @@ export interface AccountAndFacility {
     naics2: string,
     naics3: string,
     notes: string,
+    unitsOfMeasure: string,
     energyUnit: string,
     electricityUnit: string,
     massUnit: string,

@@ -11,11 +11,12 @@ import { AccountAnalysisDbService } from './account-analysis-db.service';
 import { CustomEmissionsDbService } from './custom-emissions-db.service';
 import { CustomFuelDbService } from './custom-fuel-db.service';
 import { CustomGWPDbService } from './custom-gwp-db.service';
-import { IdbAccountAnalysisItem, IdbAccountReport, IdbAnalysisItem, IdbCustomEmissionsItem, IdbCustomFuel, IdbCustomGWP, IdbElectronBackup, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from '../models/idb';
+import { IdbAccountAnalysisItem, IdbAccountReport, IdbAnalysisItem, IdbCustomEmissionsItem, IdbCustomFuel, IdbCustomGWP, IdbElectronBackup, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from '../models/idb';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { ElectronBackupsDbService } from './electron-backups-db.service';
 import { IdbAccount } from '../models/idbModels/account';
+import { IdbFacility } from '../models/idbModels/facility';
 
 @Injectable({
   providedIn: 'root'

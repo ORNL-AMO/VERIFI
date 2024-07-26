@@ -5,7 +5,8 @@ import { Subscription } from 'rxjs';
 import { EditMeterFormService } from 'src/app/facility/utility-data/energy-consumption/energy-source/edit-meter-form/edit-meter-form.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
-import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from 'src/app/models/idb';
+import { IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from 'src/app/models/idb';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { FileReference } from 'src/app/upload-data/upload-data-models';
 import { UploadDataService } from 'src/app/upload-data/upload-data.service';
 

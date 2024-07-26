@@ -1,8 +1,9 @@
 import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
-import { IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
+import { IdbAccountAnalysisItem, IdbAnalysisItem } from 'src/app/models/idb';
 import { IdbAccount } from 'src/app/models/idbModels/account';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
   selector: 'app-monthly-analysis-summary-graph',

@@ -3,10 +3,10 @@ import { FormGroup } from '@angular/forms';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { IdbFacility } from 'src/app/models/idb';
 import { SetupWizardService } from 'src/app/setup-wizard/setup-wizard.service';
 import { SettingsFormsService } from '../settings-forms.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
   selector: 'app-sustainability-questions-form',

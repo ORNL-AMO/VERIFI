@@ -1,10 +1,9 @@
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { Injectable } from '@angular/core';
-import { IdbFacility } from '../models/idb';
 import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
 import { LocalStorageService } from 'ngx-webstorage';
 import { LoadingService } from '../core-components/loading/loading.service';
-import { IdbAccount } from '../models/idbModels/account';
+import { IdbFacility } from '../models/idbModels/facility';
 
 @Injectable({
     providedIn: 'root'
@@ -78,45 +77,45 @@ export class FacilitydbService {
         }
     }
 
-    getNewIdbFacility(account: IdbAccount): IdbFacility {
-        // let baselineYear: number = new Date().getUTCFullYear();
-        // let targetYear: number = baselineYear + 10;
-        return {
-            accountId: account.guid,
-            guid: Math.random().toString(36).substr(2, 9),
-            name: 'New Facility',
-            country: 'US',
-            color: '#' + (Math.random() * 0xFFFFFF << 0).toString(16).padStart(6, '0'),
-            city: account.city,
-            state: account.state,
-            zip: account.zip,
-            address: account.address,
-            naics1: account.naics1,
-            naics2: account.naics2,
-            naics3: account.naics3,
-            type: undefined,
-            size: undefined,
-            units: undefined,
-            notes: undefined,
-            // id: undefined
-            unitsOfMeasure: account.unitsOfMeasure,
-            energyUnit: account.energyUnit,
-            electricityUnit: account.electricityUnit,
-            volumeLiquidUnit: account.volumeLiquidUnit,
-            volumeGasUnit: account.volumeGasUnit,
-            massUnit: account.massUnit,
-            sustainabilityQuestions: account.sustainabilityQuestions,
-            fiscalYear: account.fiscalYear,
-            fiscalYearMonth: account.fiscalYearMonth,
-            fiscalYearCalendarEnd: account.fiscalYearCalendarEnd,
-            energyIsSource: account.energyIsSource,
-            contactName: undefined,
-            contactEmail: undefined,
-            contactPhone: undefined,
-            facilityOrder: undefined,
-            classification: 'Manufacturing'
-        }
-    }
+    // getNewIdbFacility(account: IdbAccount): IdbFacility {
+    //     // let baselineYear: number = new Date().getUTCFullYear();
+    //     // let targetYear: number = baselineYear + 10;
+    //     return {
+    //         accountId: account.guid,
+    //         guid: Math.random().toString(36).substr(2, 9),
+    //         name: 'New Facility',
+    //         country: 'US',
+    //         color: '#' + (Math.random() * 0xFFFFFF << 0).toString(16).padStart(6, '0'),
+    //         city: account.city,
+    //         state: account.state,
+    //         zip: account.zip,
+    //         address: account.address,
+    //         naics1: account.naics1,
+    //         naics2: account.naics2,
+    //         naics3: account.naics3,
+    //         type: undefined,
+    //         size: undefined,
+    //         units: undefined,
+    //         notes: undefined,
+    //         // id: undefined
+    //         unitsOfMeasure: account.unitsOfMeasure,
+    //         energyUnit: account.energyUnit,
+    //         electricityUnit: account.electricityUnit,
+    //         volumeLiquidUnit: account.volumeLiquidUnit,
+    //         volumeGasUnit: account.volumeGasUnit,
+    //         massUnit: account.massUnit,
+    //         sustainabilityQuestions: account.sustainabilityQuestions,
+    //         fiscalYear: account.fiscalYear,
+    //         fiscalYearMonth: account.fiscalYearMonth,
+    //         fiscalYearCalendarEnd: account.fiscalYearCalendarEnd,
+    //         energyIsSource: account.energyIsSource,
+    //         contactName: undefined,
+    //         contactEmail: undefined,
+    //         contactPhone: undefined,
+    //         facilityOrder: undefined,
+    //         classification: 'Manufacturing'
+    //     }
+    // }
 
     getFacilityNameById(id: string): string {
         let accountFacilites: Array<IdbFacility> = this.accountFacilities.getValue();

@@ -1,9 +1,10 @@
 import { CalanderizedMeter, MonthlyData } from "src/app/models/calanderization";
-import { IdbAnalysisItem, IdbFacility, IdbPredictorEntry, PredictorData } from "src/app/models/idb";
+import { IdbAnalysisItem, IdbPredictorEntry, PredictorData } from "src/app/models/idb";
 import * as _ from 'lodash';
 import { filterYearMeterData, filterYearPredictorData, getMonthlyStartAndEndDate, getPredictorUsage } from "../shared-calculations/calculationsHelpers";
 import { getFiscalYear, getLastBillEntryFromCalanderizedMeterData } from "../shared-calculations/calanderizationFunctions";
 import { AnalysisGroup } from "src/app/models/analysis";
+import { IdbFacility } from "src/app/models/idbModels/facility";
 
 export class MonthlyGroupAnalysisClass {
 

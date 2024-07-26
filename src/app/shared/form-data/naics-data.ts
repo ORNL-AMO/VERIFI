@@ -1,5 +1,5 @@
-import { IdbFacility } from "src/app/models/idb";
 import { IdbAccount } from "src/app/models/idbModels/account";
+import { IdbFacility } from "src/app/models/idbModels/facility";
 
 export function getNAICS(accountOrFacility: IdbAccount | IdbFacility): string {
   let matchingNAICS: NAICS;

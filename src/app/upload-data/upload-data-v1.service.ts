@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup, PredictorData } from '../models/idb';
+import { IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup, PredictorData } from '../models/idb';
 import * as XLSX from 'xlsx';
 import { FacilitydbService } from '../indexedDB/facility-db.service';
 import { AccountdbService } from '../indexedDB/account-db.service';
@@ -21,6 +21,7 @@ import { checkImportCellNumber, checkImportStartingUnit, checkSameDay, checkSame
 import { UploadDataSharedFunctionsService } from './upload-data-shared-functions.service';
 import { SetupWizardService } from '../setup-wizard/setup-wizard.service';
 import { IdbAccount } from '../models/idbModels/account';
+import { getNewIdbFacility, IdbFacility } from '../models/idbModels/facility';
 
 @Injectable({
   providedIn: 'root'
@@ -52,7 +53,7 @@ export class UploadDataV1Service {
       if (facilityName) {
         let facility: IdbFacility = accountFacilities.find(facility => { return facility.name == facilityName });
         if (!facility) {
-          facility = this.facilityDbService.getNewIdbFacility(selectedAccount);
+          facility = getNewIdbFacility(selectedAccount);
           facility.name = facilityName;
         }
         facility.address = facilityDataRow['Address'];

@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
-import { IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
+import { IdbAnalysisItem } from 'src/app/models/idb';
 import * as _ from 'lodash';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { AccountOverviewData } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
 import { FacilityOverviewData } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Injectable({
   providedIn: 'root'

@@ -1,13 +1,12 @@
 import { Component, ElementRef, ViewChild, Input, SimpleChanges } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
-import { FacilityOverviewService } from 'src/app/facility/facility-overview/facility-overview.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
+import { IdbUtilityMeter } from 'src/app/models/idb';
 import { UtilityColors } from '../../utilityColors';
 import * as _ from 'lodash';
-import { Subscription } from 'rxjs';
 import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
 import { AllSources, EnergySources, MeterSource, WaterSources } from 'src/app/models/constantsAndTypes';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
   selector: 'app-meters-overview-stacked-line-chart',
@@ -27,7 +26,7 @@ export class MetersOverviewStackedLineChartComponent {
   @ViewChild('stackedAreaChart', { static: false }) stackedAreaChart: ElementRef;
 
   selectedFacility: IdbFacility;
-  constructor(private plotlyService: PlotlyService, private facilityOverviewService: FacilityOverviewService,
+  constructor(private plotlyService: PlotlyService,
     private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {

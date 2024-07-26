@@ -5,7 +5,7 @@ import { PredictordbService } from '../../indexedDB/predictors-db.service';
 import { UtilityMeterdbService } from '../../indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from '../../indexedDB/utilityMeterData-db.service';
 import { UtilityMeterGroupdbService } from '../../indexedDB/utilityMeterGroup-db.service';
-import { IdbAccountAnalysisItem, IdbAccountReport, IdbAnalysisItem, IdbCustomEmissionsItem, IdbCustomFuel, IdbCustomGWP, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from '../../models/idb';
+import { IdbAccountAnalysisItem, IdbAccountReport, IdbAnalysisItem, IdbCustomEmissionsItem, IdbCustomFuel, IdbCustomGWP, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from '../../models/idb';
 import { LoadingService } from '../../core-components/loading/loading.service';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
@@ -17,6 +17,7 @@ import { CustomEmissionsDbService } from 'src/app/indexedDB/custom-emissions-db.
 import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
 import { CustomGWPDbService } from 'src/app/indexedDB/custom-gwp-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Injectable({
   providedIn: 'root'

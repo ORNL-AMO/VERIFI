@@ -1,8 +1,9 @@
 import { CalanderizedMeter, MonthlyData } from "src/app/models/calanderization";
 import * as _ from 'lodash';
 import { YearMonthData } from "src/app/models/dashboard";
-import { IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility } from "src/app/models/idb";
+import { IdbAccountAnalysisItem, IdbAnalysisItem } from "src/app/models/idb";
 import { IdbAccount } from "src/app/models/idbModels/account";
+import { IdbFacility } from "src/app/models/idbModels/facility";
 
 export function getLastBillEntryFromCalanderizedMeterData(calanderizedMeterData: Array<CalanderizedMeter>, monthlyData?: Array<MonthlyData>): MonthlyData {
     if (!monthlyData) {

@@ -4,7 +4,7 @@ import { Subscription } from 'rxjs';
 import { FacilityOverviewData } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';
 import { UtilityUseAndCost } from 'src/app/calculations/dashboard-calculations/useAndCostClass';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { IdbCustomFuel, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import { IdbCustomFuel, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { FacilityOverviewService } from './facility-overview.service';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import * as _ from 'lodash';
@@ -13,6 +13,7 @@ import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
 import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
   selector: 'app-facility-overview',

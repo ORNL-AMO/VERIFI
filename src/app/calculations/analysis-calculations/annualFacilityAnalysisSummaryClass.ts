@@ -1,11 +1,12 @@
 import { MonthlyAnalysisSummaryData } from "src/app/models/analysis";
 import { CalanderizedMeter } from "src/app/models/calanderization";
-import { IdbAnalysisItem, IdbFacility, IdbPredictorEntry } from "src/app/models/idb";
+import { IdbAnalysisItem, IdbPredictorEntry } from "src/app/models/idb";
 import { AnnualAnalysisSummaryDataClass } from "./annualAnalysisSummaryDataClass";
 import { AnnualAnalysisSummary } from 'src/app/models/analysis';
 import { MonthlyFacilityAnalysisClass } from "./monthlyFacilityAnalysisClass";
 import { checkAnalysisValue } from "../shared-calculations/calculationsHelpers";
 import { MonthlyAnalysisSummaryClass } from "./monthlyAnalysisSummaryClass";
+import { IdbFacility } from "src/app/models/idbModels/facility";
 
 export class AnnualFacilityAnalysisSummaryClass {
 

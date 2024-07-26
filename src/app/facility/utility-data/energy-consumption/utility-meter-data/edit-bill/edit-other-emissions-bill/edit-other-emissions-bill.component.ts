@@ -1,13 +1,14 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { IdbCustomFuel, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import { IdbCustomFuel, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { EmissionsResults } from 'src/app/models/eGridEmissions';
 import { getEmissions } from 'src/app/calculations/emissions-calculations/emissions';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
 import * as _ from 'lodash';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
   selector: 'app-edit-other-emissions-bill',

@@ -5,10 +5,11 @@ import { EnergyUnitOptions, UnitOption, VolumeLiquidOptions } from 'src/app/shar
 import { VehicleCategories, VehicleCategory, VehicleCollectionType, VehicleCollectionTypes } from 'src/app/shared/vehicle-data/vehicleCategory';
 import { VehicleType, VehicleTypes } from 'src/app/shared/vehicle-data/vehicleType';
 import { EditMeterFormService } from '../edit-meter-form.service';
-import { IdbCustomFuel, IdbFacility } from 'src/app/models/idb';
+import { IdbCustomFuel } from 'src/app/models/idb';
 import { getMobileFuelTypes } from 'src/app/shared/fuel-options/getFuelTypeOptions';
 import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
 import { getHeatingCapacity } from 'src/app/shared/sharedHelperFuntions';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
   selector: 'app-vehicle-form',

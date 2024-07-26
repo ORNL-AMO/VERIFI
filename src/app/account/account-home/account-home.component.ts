@@ -4,7 +4,7 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
-import { IdbAccountAnalysisItem, IdbAnalysisItem, IdbCustomFuel, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import { IdbAccountAnalysisItem, IdbAnalysisItem, IdbCustomFuel, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { AccountHomeService } from './account-home.service';
 import * as _ from 'lodash';
 import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
@@ -18,6 +18,7 @@ import { SubregionEmissions } from 'src/app/models/eGridEmissions';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
   selector: 'app-account-home',

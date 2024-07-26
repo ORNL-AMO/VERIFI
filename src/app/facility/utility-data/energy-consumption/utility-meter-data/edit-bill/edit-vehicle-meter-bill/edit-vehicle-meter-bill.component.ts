@@ -6,7 +6,8 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { MeterSource } from 'src/app/models/constantsAndTypes';
 import { EmissionsResults } from 'src/app/models/eGridEmissions';
-import { IdbCustomFuel, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import { IdbCustomFuel, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { FuelTypeOption } from 'src/app/shared/fuel-options/fuelTypeOption';
 import { getMobileFuelTypes } from 'src/app/shared/fuel-options/getFuelTypeOptions';
 

@@ -3,8 +3,9 @@ import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { AnnualAnalysisSummary } from 'src/app/models/analysis';
-import { IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
+import { IdbAnalysisItem } from 'src/app/models/idb';
 import { Subscription } from 'rxjs';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
   selector: 'app-annual-facility-analysis',

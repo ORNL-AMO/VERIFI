@@ -3,7 +3,7 @@ import { FormGroup } from '@angular/forms';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { IdbCustomEmissionsItem, IdbFacility } from 'src/app/models/idb';
+import { IdbCustomEmissionsItem } from 'src/app/models/idb';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 import { EnergyUnitOptions, MassUnitOptions, UnitOption, VolumeGasOptions, VolumeLiquidOptions } from 'src/app/shared/unitOptions';
 import * as _ from 'lodash';
@@ -14,6 +14,7 @@ import { Router } from '@angular/router';
 import { SharedDataService } from '../../helper-services/shared-data.service';
 import { SubRegionData, SubregionEmissions } from 'src/app/models/eGridEmissions';
 import { IdbAccount } from 'src/app/models/idbModels/account';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
   selector: 'app-default-units-form',

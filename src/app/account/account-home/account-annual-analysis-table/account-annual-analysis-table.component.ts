@@ -1,7 +1,8 @@
 import { Component, Input } from '@angular/core';
 import { AnnualAnalysisSummary } from 'src/app/models/analysis';
-import { IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
+import { IdbAccountAnalysisItem, IdbAnalysisItem } from 'src/app/models/idb';
 import { IdbAccount } from 'src/app/models/idbModels/account';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
   selector: 'app-account-annual-analysis-table',

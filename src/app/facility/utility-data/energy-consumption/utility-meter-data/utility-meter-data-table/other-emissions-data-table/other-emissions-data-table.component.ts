@@ -1,7 +1,7 @@
 import { Component, ElementRef, EventEmitter, Input, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { IdbCustomFuel, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
-import { GeneralUtilityDataFilters, VehicleDataFilters } from 'src/app/models/meterDataFilter';
+import { IdbCustomFuel, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import { VehicleDataFilters } from 'src/app/models/meterDataFilter';
 import { UtilityMeterDataService } from '../../utility-meter-data.service';
 import * as _ from 'lodash';
 import { CopyTableService } from 'src/app/shared/helper-services/copy-table.service';
@@ -9,6 +9,7 @@ import { EmissionsResults } from 'src/app/models/eGridEmissions';
 import { getEmissions } from 'src/app/calculations/emissions-calculations/emissions';
 import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
   selector: 'app-other-emissions-data-table',

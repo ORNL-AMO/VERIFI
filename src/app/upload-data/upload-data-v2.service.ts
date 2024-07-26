@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import * as XLSX from 'xlsx';
 import { ParsedTemplate } from './upload-data-models';
-import { IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup, MeterReadingDataApplication } from '../models/idb';
+import { IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup, MeterReadingDataApplication } from '../models/idb';
 import { AccountdbService } from '../indexedDB/account-db.service';
 import { FacilitydbService } from '../indexedDB/facility-db.service';
 import * as _ from 'lodash';
@@ -20,6 +20,7 @@ import { ConvertValue } from '../calculations/conversions/convertValue';
 import { GlobalWarmingPotential, GlobalWarmingPotentials } from '../models/globalWarmingPotentials';
 import { SetupWizardService } from '../setup-wizard/setup-wizard.service';
 import { IdbAccount } from '../models/idbModels/account';
+import { getNewIdbFacility, IdbFacility } from '../models/idbModels/facility';
 
 @Injectable({
   providedIn: 'root'
@@ -63,7 +64,7 @@ export class UploadDataV2Service {
       if (facilityName) {
         let facility: IdbFacility = accountFacilities.find(facility => { return facility.name == facilityName });
         if (!facility) {
-          facility = this.facilityDbService.getNewIdbFacility(selectedAccount);
+          facility = getNewIdbFacility(selectedAccount);
           facility.name = facilityName;
         }
         facility.address = facilityDataRow['Address'];

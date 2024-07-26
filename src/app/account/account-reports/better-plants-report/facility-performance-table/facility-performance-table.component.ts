@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { IdbFacility } from 'src/app/models/idb';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { BetterPlantsReportSetup, BetterPlantsSummary } from 'src/app/models/overview-report';
 
 @Component({

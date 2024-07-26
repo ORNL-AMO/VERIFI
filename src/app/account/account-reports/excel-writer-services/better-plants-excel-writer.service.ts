@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
 import * as ExcelJS from 'exceljs';
-import { IdbAccountAnalysisItem, IdbAccountReport, IdbFacility } from 'src/app/models/idb';
+import { IdbAccountAnalysisItem, IdbAccountReport } from 'src/app/models/idb';
 import { BetterPlantsSummary } from 'src/app/models/overview-report';
 import { getNAICS } from 'src/app/shared/form-data/naics-data';
 import * as _ from 'lodash';
 import { IdbAccount } from 'src/app/models/idbModels/account';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Injectable({
   providedIn: 'root'

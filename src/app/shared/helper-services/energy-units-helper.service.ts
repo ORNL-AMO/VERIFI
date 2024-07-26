@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
+import { IdbUtilityMeter } from 'src/app/models/idb';
 import { ChilledWaterUnitOptions, EnergyUnitOptions, MassUnitOptions, UnitOption, VolumeGasOptions, VolumeLiquidOptions } from '../unitOptions';
 import { getIsEnergyMeter, getIsEnergyUnit } from '../sharedHelperFuntions';
 import { AllSources, MeterPhase, MeterSource } from 'src/app/models/constantsAndTypes';
@@ -11,6 +11,7 @@ import { StationaryLiquidOptions } from '../fuel-options/stationaryLiquidOptions
 import { StationarySolidOptions } from '../fuel-options/stationarySolidOptions';
 import { StationaryOtherEnergyOptions } from '../fuel-options/stationaryOtherEnergyOptions';
 import { IdbAccount } from 'src/app/models/idbModels/account';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Injectable({
   providedIn: 'root'

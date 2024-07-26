@@ -1,9 +1,10 @@
 import { Component } from '@angular/core';
 import { AccountAnalysisService } from '../../account-analysis.service';
 import { Subscription } from 'rxjs';
-import { IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
+import { IdbAccountAnalysisItem, IdbAnalysisItem } from 'src/app/models/idb';
 import { MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
   selector: 'app-account-analysis-facilities-summary',

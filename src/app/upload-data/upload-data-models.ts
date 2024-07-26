@@ -1,5 +1,6 @@
 import { WorkBook } from "xlsx"
-import { IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from "../models/idb"
+import { IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from "../models/idb"
+import { IdbFacility } from "../models/idbModels/facility"
 
 export interface FileReference {
     name: string,

@@ -1,8 +1,9 @@
-import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from "src/app/models/idb";
+import { IdbUtilityMeter, IdbUtilityMeterData } from "src/app/models/idb";
 import { checkShowSiteToSource, getIsEnergyMeter, getIsEnergyUnit } from "src/app/shared/sharedHelperFuntions";
 import { getUnitFromMeter } from "../calanderization/calanderizationHelpers";
 import { ConvertValue } from "./convertValue";
 import { IdbAccount } from "src/app/models/idbModels/account";
+import { IdbFacility } from "src/app/models/idbModels/facility";
 
 export function convertMeterData(meter: IdbUtilityMeter, meterData: Array<IdbUtilityMeterData>, accountOrFacility: IdbFacility | IdbAccount, energyIsSource?: boolean, neededUnit?: string): Array<IdbUtilityMeterData> {
     let copyMeterData: Array<IdbUtilityMeterData> = meterData.map(data => { return getMeterDataCopy(data) });

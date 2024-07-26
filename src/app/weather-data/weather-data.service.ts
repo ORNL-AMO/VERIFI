@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { WeatherDataSelection, WeatherStation } from '../models/degreeDays';
 import { BehaviorSubject } from 'rxjs';
-import { IdbFacility } from '../models/idb';
+import { IdbFacility } from '../models/idbModels/facility';
 
 @Injectable({
   providedIn: 'root'

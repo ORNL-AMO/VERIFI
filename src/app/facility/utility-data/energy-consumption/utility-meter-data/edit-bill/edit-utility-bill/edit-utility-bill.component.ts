@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { IdbCustomFuel, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import { IdbCustomFuel, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { MeterSource } from 'src/app/models/constantsAndTypes';
 import { EmissionsResults } from 'src/app/models/eGridEmissions';
 import { getEmissions, getZeroEmissionsResults } from 'src/app/calculations/emissions-calculations/emissions';
@@ -12,6 +12,7 @@ import * as _ from 'lodash';
 import { checkShowEmissionsOutputRate } from 'src/app/shared/sharedHelperFuntions';
 import { FuelTypeOption } from 'src/app/shared/fuel-options/fuelTypeOption';
 import { getFuelTypeOptions } from 'src/app/shared/fuel-options/getFuelTypeOptions';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
   selector: 'app-edit-utility-bill',

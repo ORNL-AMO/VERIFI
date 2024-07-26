@@ -7,7 +7,8 @@ import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.serv
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { IdbAccountAnalysisItem, IdbAccountReport, IdbAnalysisItem, IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
+import { IdbAccountAnalysisItem, IdbAccountReport, IdbAnalysisItem, IdbUtilityMeter } from 'src/app/models/idb';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
   selector: 'app-search-bar',

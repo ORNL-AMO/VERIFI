@@ -1,11 +1,12 @@
 import { Component, Input } from '@angular/core';
 import { PerformanceReport, PerformanceReportAnnualData } from 'src/app/calculations/performance-report-calculations/performanceReport';
-import { IdbAccountAnalysisItem, IdbFacility } from 'src/app/models/idb';
+import { IdbAccountAnalysisItem } from 'src/app/models/idb';
 import * as _ from 'lodash';
 import { AnalysisGroup } from 'src/app/models/analysis';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { PerformanceReportSetup } from 'src/app/models/overview-report';
 import { IdbAccount } from 'src/app/models/idbModels/account';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
   selector: 'app-performance-report-group-table',

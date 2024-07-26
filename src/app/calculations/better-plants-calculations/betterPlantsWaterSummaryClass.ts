@@ -1,8 +1,9 @@
 import { CalanderizedMeter, MonthlyData } from "src/app/models/calanderization";
 import * as _ from 'lodash';
 import { BetterPlantsWaterSummary, WaterSummaryItem } from "src/app/models/overview-report";
-import { IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility, PredictorData } from "src/app/models/idb";
+import { IdbAccountAnalysisItem, IdbAnalysisItem, PredictorData } from "src/app/models/idb";
 import { WaterIntakeType } from "src/app/models/constantsAndTypes";
+import { IdbFacility } from "src/app/models/idbModels/facility";
 
 export class BetterPlantsWaterSummaryClass {
 

@@ -4,7 +4,7 @@ import { Subscription, firstValueFrom } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
+import { IdbUtilityMeter } from 'src/app/models/idb';
 import { ToastNotificationsService } from '../core-components/toast-notifications/toast-notifications.service';
 import { DbChangesService } from '../indexedDB/db-changes.service';
 import { SetupWizardService } from './setup-wizard.service';
@@ -13,6 +13,7 @@ import { UploadDataService } from '../upload-data/upload-data.service';
 import { AnalyticsService } from '../analytics/analytics.service';
 import { FileReference } from '../upload-data/upload-data-models';
 import { IdbAccount } from '../models/idbModels/account';
+import { IdbFacility } from '../models/idbModels/facility';
 
 @Component({
   selector: 'app-setup-wizard',

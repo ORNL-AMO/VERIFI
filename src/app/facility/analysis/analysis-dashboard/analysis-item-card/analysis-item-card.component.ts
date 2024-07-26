@@ -8,9 +8,10 @@ import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { AnalysisGroup, JStatRegressionModel } from 'src/app/models/analysis';
-import { IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility, PredictorData } from 'src/app/models/idb';
+import { IdbAccountAnalysisItem, IdbAnalysisItem, PredictorData } from 'src/app/models/idb';
 import { AnalysisService } from '../../analysis.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
   selector: 'app-analysis-item-card',

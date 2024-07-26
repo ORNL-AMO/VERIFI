@@ -5,13 +5,14 @@ import { LoadingService } from 'src/app/core-components/loading/loading.service'
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
-import { IdbFacility, IdbPredictorEntry, PredictorData } from 'src/app/models/idb';
+import { IdbPredictorEntry, PredictorData } from 'src/app/models/idb';
 import { CopyTableService } from 'src/app/shared/helper-services/copy-table.service';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import * as _ from 'lodash';
 import { WeatherDataService } from 'src/app/weather-data/weather-data.service';
 import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
 import { WeatherStation } from 'src/app/models/degreeDays';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
   selector: 'app-predictor-entries-table',

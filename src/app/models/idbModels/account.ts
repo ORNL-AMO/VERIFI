@@ -5,7 +5,6 @@ import { AccountAndFacility } from "./accountAndFacility"
 
 export interface IdbAccount extends IdbEntry, AccountAndFacility {
     name: string,
-    unitsOfMeasure: string,
     numberOfFacilities?: string,
     lastBackup?: Date,
     dataBackupFilePath?: string,

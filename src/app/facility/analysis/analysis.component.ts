@@ -4,10 +4,11 @@ import { Subscription } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
-import { IdbAnalysisItem, IdbFacility, IdbUtilityMeterData, IdbUtilityMeterGroup } from 'src/app/models/idb';
+import { IdbAnalysisItem, IdbUtilityMeterData, IdbUtilityMeterGroup } from 'src/app/models/idb';
 import { AnalysisService } from './analysis.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
   selector: 'app-analysis',
