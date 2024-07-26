@@ -311,10 +311,3 @@ export interface IdbElectronBackup {
     dataBackupId: string,
     timeStamp: Date
 }
-
-export interface IdbCustomGWP extends GlobalWarmingPotential {
-    id?: number,
-    accountId: string,
-    date: Date,
-    guid: string
-}

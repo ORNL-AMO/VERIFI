@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
-import { IdbCustomGWP } from '../models/idb';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { LoadingService } from '../core-components/loading/loading.service';
 import { GlobalWarmingPotentials } from '../models/globalWarmingPotentials';
 import { IdbAccount } from '../models/idbModels/account';
+import { IdbCustomGWP } from '../models/idbModels/customGWP';
 
 @Injectable({
   providedIn: 'root'
@@ -58,18 +58,6 @@ export class CustomGWPDbService {
   updateWithObservable(values: IdbCustomGWP): Observable<IdbCustomGWP> {
     values.date = new Date();
     return this.dbService.update('customGWP', values);
-  }
-
-  getNewAccountCustomGWP(selectedAccount: IdbAccount): IdbCustomGWP {
-    return {
-      accountId: selectedAccount.guid,
-      guid: Math.random().toString(36).substr(2, 9),
-      date: new Date(),
-      value: this.getUniqValue(),
-      label: undefined,
-      display: undefined,
-      gwp: undefined
-    }
   }
 
   getUniqValue(){
