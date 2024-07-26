@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import * as XLSX from 'xlsx';
 import { ParsedTemplate } from './upload-data-models';
-import { IdbPredictorEntry, MeterReadingDataApplication } from '../models/idb';
+import { IdbPredictorEntry } from '../models/idb';
 import { AccountdbService } from '../indexedDB/account-db.service';
 import { FacilitydbService } from '../indexedDB/facility-db.service';
 import * as _ from 'lodash';
@@ -21,7 +21,7 @@ import { GlobalWarmingPotential, GlobalWarmingPotentials } from '../models/globa
 import { SetupWizardService } from '../setup-wizard/setup-wizard.service';
 import { IdbAccount } from '../models/idbModels/account';
 import { getNewIdbFacility, IdbFacility } from '../models/idbModels/facility';
-import { getNewIdbUtilityMeter, IdbUtilityMeter } from '../models/idbModels/utilityMeter';
+import { getNewIdbUtilityMeter, IdbUtilityMeter, MeterReadingDataApplication } from '../models/idbModels/utilityMeter';
 import { IdbUtilityMeterGroup } from '../models/idbModels/utilityMeterGroup';
 import { getNewIdbUtilityMeterData, IdbUtilityMeterData } from '../models/idbModels/utilityMeterData';
 

@@ -221,7 +221,6 @@ export interface PredictorData {
 
 export type PredictorType = 'Standard' | 'Conversion' | 'Math' | 'Weather';
 export type WeatherDataType = 'HDD' | 'CDD';
-export type MeterReadingDataApplication = "backward" | "fullMonth" | "fullYear";
 
 export interface IdbAccountReport {
     id?: number,

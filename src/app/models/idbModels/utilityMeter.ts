@@ -1,6 +1,7 @@
 import { MeterPhase, MeterSource, WaterDischargeType, WaterIntakeType } from "../constantsAndTypes"
-import { getNewIdbEntry, IdbEntry, MeterReadingDataApplication } from "../idb"
+import { getNewIdbEntry, IdbEntry } from "../idb"
 
+export type MeterReadingDataApplication = "backward" | "fullMonth" | "fullYear";
 export interface IdbUtilityMeter {
     //keys (id primary)
     id?: number,
