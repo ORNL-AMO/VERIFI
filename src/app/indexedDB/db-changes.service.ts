@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { LoadingService } from '../core-components/loading/loading.service';
 import { ToastNotificationsService } from '../core-components/toast-notifications/toast-notifications.service';
-import { IdbAccountAnalysisItem, IdbAccountReport, IdbAnalysisItem, IdbCustomEmissionsItem, IdbCustomFuel, IdbPredictorEntry } from '../models/idb';
+import { IdbAccountAnalysisItem, IdbAccountReport, IdbAnalysisItem, IdbCustomEmissionsItem, IdbPredictorEntry } from '../models/idb';
 import { AccountAnalysisDbService } from './account-analysis-db.service';
 import { AccountdbService } from './account-db.service';
 import { AccountReportDbService } from './account-report-db.service';
@@ -22,6 +22,7 @@ import { IdbUtilityMeter } from '../models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from '../models/idbModels/utilityMeterData';
 import { IdbUtilityMeterGroup } from '../models/idbModels/utilityMeterGroup';
 import { IdbCustomGWP } from '../models/idbModels/customGWP';
+import { IdbCustomFuel } from '../models/idbModels/customFuel';
 
 @Injectable({
   providedIn: 'root'

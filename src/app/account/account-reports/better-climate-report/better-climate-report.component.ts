@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
-import { IdbAccountReport, IdbCustomFuel } from 'src/app/models/idb';
+import { IdbAccountReport } from 'src/app/models/idb';
 import { AccountReportsService } from '../account-reports.service';
 import { Router } from '@angular/router';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
@@ -19,6 +19,7 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
+import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
 
 @Component({
   selector: 'app-better-climate-report',

@@ -4,7 +4,6 @@ import { Subscription } from 'rxjs';
 import { FacilityOverviewData } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';
 import { UtilityUseAndCost } from 'src/app/calculations/dashboard-calculations/useAndCostClass';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { IdbCustomFuel } from 'src/app/models/idb';
 import { FacilityOverviewService } from './facility-overview.service';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import * as _ from 'lodash';
@@ -16,6 +15,7 @@ import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
+import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
 
 @Component({
   selector: 'app-facility-overview',

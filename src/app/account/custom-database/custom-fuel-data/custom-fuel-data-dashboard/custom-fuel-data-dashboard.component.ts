@@ -4,8 +4,8 @@ import { Subscription, firstValueFrom } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { IdbCustomFuel } from 'src/app/models/idb';
 import { IdbAccount } from 'src/app/models/idbModels/account';
+import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 
 @Component({

@@ -294,12 +294,3 @@ export interface IdbCustomEmissionsItem {
     locationEmissionRates: Array<{ co2Emissions: number, year: number }>,
     residualEmissionRates: Array<{ co2Emissions: number, year: number }>,
 }
-
-export interface IdbCustomFuel extends FuelTypeOption {
-    id?: number,
-    accountId: string,
-    date: Date,
-    guid: string,
-    phase: MeterPhase,
-    directEmissionsRate: boolean
-}
