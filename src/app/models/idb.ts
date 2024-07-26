@@ -303,11 +303,3 @@ export interface IdbCustomFuel extends FuelTypeOption {
     phase: MeterPhase,
     directEmissionsRate: boolean
 }
-
-export interface IdbElectronBackup {
-    id?: number,
-    accountId: string,
-    guid: string,
-    dataBackupId: string,
-    timeStamp: Date
-}
