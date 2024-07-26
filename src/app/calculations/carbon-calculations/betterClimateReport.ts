@@ -1,5 +1,5 @@
 import { CalanderizedMeter } from "src/app/models/calanderization";
-import { IdbCustomFuel, IdbUtilityMeter, IdbUtilityMeterData } from "src/app/models/idb";
+import { IdbCustomFuel } from "src/app/models/idb";
 import { getCalanderizedMeterData } from "../calanderization/calanderizeMeters";
 import * as _ from 'lodash';
 import { SubregionEmissions } from "src/app/models/eGridEmissions";
@@ -7,6 +7,8 @@ import { BetterClimateYearDetails } from "./betterClimateYearsDetails";
 import { BetterClimateReportSetup } from "src/app/models/overview-report";
 import { IdbAccount } from "src/app/models/idbModels/account";
 import { IdbFacility } from "src/app/models/idbModels/facility";
+import { IdbUtilityMeter } from "src/app/models/idbModels/utilityMeter";
+import { IdbUtilityMeterData } from "src/app/models/idbModels/utilityMeterData";
 
 export class BetterClimateReport {
 

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { MeterSource } from 'src/app/models/constantsAndTypes';
-import { IdbUtilityMeter } from 'src/app/models/idb';
+import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { checkShowHeatCapacity, checkShowSiteToSource } from 'src/app/shared/sharedHelperFuntions';
 
 @Injectable({

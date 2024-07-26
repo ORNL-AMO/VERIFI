@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { AnalysisSetupErrors, JStatRegressionModel, AnalysisGroup, GroupErrors } from 'src/app/models/analysis';
-import { IdbAccountAnalysisItem, IdbAnalysisItem, IdbUtilityMeter, PredictorData } from 'src/app/models/idb';
+import { IdbAccountAnalysisItem, IdbAnalysisItem, PredictorData } from 'src/app/models/idb';
 import { AccountAnalysisSetupErrors } from 'src/app/models/accountAnalysis';
 import { CalanderizationService } from './calanderization.service';
+import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 
 @Injectable({
   providedIn: 'root'

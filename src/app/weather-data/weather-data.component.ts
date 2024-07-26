@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { HelpPanelService } from '../help-panel/help-panel.service';
 import { AccountdbService } from '../indexedDB/account-db.service';
-import { IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, PredictorData } from '../models/idb';
+import { IdbPredictorEntry, PredictorData } from '../models/idb';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { WeatherDataService } from './weather-data.service';
 import { FacilitydbService } from '../indexedDB/facility-db.service';
@@ -20,6 +20,8 @@ import { getCalanderizedMeterData } from '../calculations/calanderization/caland
 import { AnalyticsService } from '../analytics/analytics.service';
 import { IdbAccount } from '../models/idbModels/account';
 import { IdbFacility } from '../models/idbModels/facility';
+import { IdbUtilityMeterData } from '../models/idbModels/utilityMeterData';
+import { IdbUtilityMeter } from '../models/idbModels/utilityMeter';
 
 @Component({
   selector: 'app-weather-data',

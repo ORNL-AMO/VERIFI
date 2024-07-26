@@ -3,7 +3,6 @@ import { FormGroup } from '@angular/forms';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { EditMeterFormService } from '../edit-meter-form/edit-meter-form.service';
@@ -14,6 +13,8 @@ import { getIsEnergyMeter, getIsEnergyUnit } from 'src/app/shared/sharedHelperFu
 import { Observable, firstValueFrom, of } from 'rxjs';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { getNewIdbUtilityMeter, IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
+import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 
 @Component({
   selector: 'app-edit-meter',
@@ -71,7 +72,7 @@ export class EditMeterComponent implements OnInit {
         }
       } else {
         this.addOrEdit = 'add';
-        this.editMeter = this.utilityMeterDbService.getNewIdbUtilityMeter(this.selectedFacility.guid, this.selectedFacility.accountId, true, this.selectedFacility.electricityUnit);
+        this.editMeter = getNewIdbUtilityMeter(this.selectedFacility.guid, this.selectedFacility.accountId, true, this.selectedFacility.electricityUnit);
         this.meterForm = this.editMeterFormService.getFormFromMeter(this.editMeter);
       }
     });

@@ -1,5 +1,5 @@
 import { CalanderizationOptions, CalanderizedMeter, MonthlyData } from "src/app/models/calanderization";
-import { IdbCustomFuel, IdbUtilityMeter, IdbUtilityMeterData } from "src/app/models/idb";
+import { IdbCustomFuel } from "src/app/models/idb";
 import { getIsEnergyMeter, getIsEnergyUnit } from "src/app/shared/sharedHelperFuntions";
 import * as _ from 'lodash';
 import { getFiscalYear } from "../shared-calculations/calanderizationFunctions";
@@ -10,6 +10,8 @@ import { EmissionsResults, SubregionEmissions } from "src/app/models/eGridEmissi
 import { combineEmissionsResults, getEmissions, getZeroEmissionsResults } from "../emissions-calculations/emissions";
 import { IdbAccount } from "src/app/models/idbModels/account";
 import { IdbFacility } from "src/app/models/idbModels/facility";
+import { IdbUtilityMeter } from "src/app/models/idbModels/utilityMeter";
+import { IdbUtilityMeterData } from "src/app/models/idbModels/utilityMeterData";
 
 
 export function getCalanderizedMeterData(meters: Array<IdbUtilityMeter>, allMeterData: Array<IdbUtilityMeterData>, accountOrFacility: IdbAccount | IdbFacility, monthDisplayShort: boolean, calanderizationOptions: CalanderizationOptions,

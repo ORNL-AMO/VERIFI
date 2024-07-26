@@ -2,12 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { VisualizationStateService } from './visualization-state.service';
 import * as _ from 'lodash';
-import { IdbUtilityMeterData } from 'src/app/models/idb';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
 import { AnalyticsService } from 'src/app/analytics/analytics.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 
 @Component({
   selector: 'app-visualization',

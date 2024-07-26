@@ -1,5 +1,5 @@
 import { MeterPhase, MeterSource } from "src/app/models/constantsAndTypes";
-import { IdbCustomFuel, IdbUtilityMeter } from "src/app/models/idb";
+import { IdbCustomFuel } from "src/app/models/idb";
 import { FuelTypeOption } from "./fuelTypeOption";
 import { StationarySolidOptions } from "./stationarySolidOptions";
 import { StationaryLiquidOptions } from "./stationaryLiquidOptions";

@@ -1,8 +1,8 @@
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { Injectable } from '@angular/core';
-import { IdbUtilityMeterGroup } from '../models/idb';
 import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
 import { LoadingService } from '../core-components/loading/loading.service';
+import { IdbUtilityMeterGroup } from '../models/idbModels/utilityMeterGroup';
 
 @Injectable({
     providedIn: 'root'
@@ -69,20 +69,19 @@ export class UtilityMeterGroupdbService {
     }
 
 
-    getNewIdbUtilityMeterGroup(type: 'Energy' | 'Water' | 'Other', name: string, facilityId: string, accountId: string): IdbUtilityMeterGroup {
-        return {
-            facilityId: facilityId,
-            accountId: accountId,
-            guid: Math.random().toString(36).substr(2, 9),
-            groupType: type,
-            name: name,
-            description: undefined,
-            dateModified: undefined,
-            factionOfTotalEnergy: undefined,
-            // id: undefined
-            visible: true
-        }
-    }
+    // getNewIdbUtilityMeterGroup(type: 'Energy' | 'Water' | 'Other', name: string, facilityId: string, accountId: string): IdbUtilityMeterGroup {
+    //     return {
+    //         facilityId: facilityId,
+    //         accountId: accountId,
+    //         guid: Math.random().toString(36).substr(2, 9),
+    //         groupType: type,
+    //         name: name,
+    //         description: undefined,
+    //         factionOfTotalEnergy: undefined,
+    //         // id: undefined
+    //         visible: true
+    //     }
+    // }
 
     getGroupById(groupId: string): IdbUtilityMeterGroup {
         let groups: Array<IdbUtilityMeterGroup> = this.accountMeterGroups.getValue();

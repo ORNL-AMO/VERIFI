@@ -1,11 +1,12 @@
 import { MonthlyData } from "src/app/models/calanderization";
-import { IdbAccountAnalysisItem, IdbAnalysisItem, IdbPredictorEntry, IdbUtilityMeter, PredictorData } from "src/app/models/idb";
+import { IdbAccountAnalysisItem, IdbAnalysisItem, IdbPredictorEntry, PredictorData } from "src/app/models/idb";
 import { getFiscalYear } from "./calanderizationFunctions";
 import { EmissionsResults } from "src/app/models/eGridEmissions";
 import * as _ from 'lodash';
 import { IUseAndCost } from "../dashboard-calculations/useAndCostClass";
 import { IdbAccount } from "src/app/models/idbModels/account";
 import { IdbFacility } from "src/app/models/idbModels/facility";
+import { IdbUtilityMeter } from "src/app/models/idbModels/utilityMeter";
 
 export function getMonthlyStartAndEndDate(facilityOrAccount: IdbFacility | IdbAccount, analysisItem: IdbAnalysisItem | IdbAccountAnalysisItem): { baselineDate: Date, endDate: Date } {
     let baselineDate: Date;

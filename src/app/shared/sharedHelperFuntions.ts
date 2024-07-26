@@ -1,6 +1,6 @@
 import { ConvertValue } from "../calculations/conversions/convertValue";
 import { MeterPhase, MeterSource } from "../models/constantsAndTypes";
-import { IdbUtilityMeter } from "../models/idb";
+import { IdbUtilityMeter } from "../models/idbModels/utilityMeter";
 import { FuelTypeOption } from "./fuel-options/fuelTypeOption";
 import { StationaryOtherEnergyOptions } from "./fuel-options/stationaryOtherEnergyOptions";
 import { ChilledWaterUnitOptions, EnergyUnitOptions, MassUnitOptions, UnitOption, VolumeGasOptions, VolumeLiquidOptions } from "./unitOptions";

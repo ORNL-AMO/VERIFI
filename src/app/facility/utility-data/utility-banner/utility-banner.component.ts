@@ -2,8 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { IdbUtilityMeterData } from 'src/app/models/idb';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { ExportToExcelTemplateService } from 'src/app/shared/helper-services/export-to-excel-template.service';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 

@@ -1,4 +1,6 @@
+import { MonthlyData } from "../calanderization";
 import { getNewIdbEntry, IdbEntry } from "../idb";
+import { IdbUtilityMeter } from "./utilityMeter";
 
 
 
@@ -12,8 +14,8 @@ export interface IdbUtilityMeterGroup extends IdbEntry {
     factionOfTotalEnergy?: number,
     totalEnergyUse?: number,
     totalConsumption?: number,
-    // groupData?: Array<IdbUtilityMeter>,
-    // combinedMonthlyData?: Array<MonthlyData>,
+    groupData?: Array<IdbUtilityMeter>,
+    combinedMonthlyData?: Array<MonthlyData>,
     visible?: boolean    
 }
 
@@ -23,7 +25,6 @@ export function getNewIdbUtilityMeterGroup(type: 'Energy' | 'Water' | 'Other', n
         ...idbEntry,
         facilityId: facilityId,
         accountId: accountId,
-        guid: Math.random().toString(36).substr(2, 9),
         groupType: type,
         name: name,
         description: undefined,

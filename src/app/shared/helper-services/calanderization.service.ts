@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import * as _ from 'lodash';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { CalanderizationFilters } from 'src/app/models/calanderization';
@@ -12,6 +11,8 @@ import { daysBetweenDates, getCurrentMonthsReadings, getNextMonthsBill, getPrevi
 import { getFiscalYear } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
+import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 
 @Injectable({
   providedIn: 'root'

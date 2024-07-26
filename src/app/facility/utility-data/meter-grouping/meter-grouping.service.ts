@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { CalanderizedMeter, MeterGroupType, MonthlyData } from 'src/app/models/calanderization';
-import { IdbUtilityMeter, IdbUtilityMeterGroup } from 'src/app/models/idb';
 import * as _ from 'lodash';
 import { BehaviorSubject } from 'rxjs';
 import { Month, Months } from 'src/app/shared/form-data/months';
@@ -9,6 +8,8 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { getFirstBillEntryFromCalanderizedMeterData, getFiscalYear, getLastBillEntryFromCalanderizedMeterData } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
 import { getIsEnergyMeter } from 'src/app/shared/sharedHelperFuntions';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { getNewIdbUtilityMeterGroup, IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
+import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 @Injectable({
   providedIn: 'root'
 })
@@ -114,23 +115,15 @@ export class MeterGroupingService {
 
   addEnergyMetersWithoutGroups(energyMeters: Array<CalanderizedMeter>, groupType: 'Energy' | 'Water' | 'Other', meterGroupTypes: Array<MeterGroupType>) {
     let combinedMonthlyData: Array<MonthlyData> = this.combineCalanderizedMeterData(energyMeters);
-    let meterGroup: IdbUtilityMeterGroup = {
-      //randon number id for unsaved
-      id: 1000000000000000 * Math.random(),
-      guid: Math.random().toString(36).substr(2, 9),
-      facilityId: undefined,
-      accountId: undefined,
-      groupType: groupType,
-      name: 'Ungrouped',
-      description: 'Meters with no group',
-      dateModified: undefined,
-      factionOfTotalEnergy: undefined,
-      totalEnergyUse: _.sumBy(combinedMonthlyData, 'energyUse'),
-      totalConsumption: _.sumBy(combinedMonthlyData, 'energyConsumption'),
-      groupData: energyMeters.map(cMeter => { return cMeter.meter }),
-      visible: true,
-      combinedMonthlyData: combinedMonthlyData
-    }
+    let meterGroup: IdbUtilityMeterGroup = getNewIdbUtilityMeterGroup(groupType, "Ungrouped", undefined, undefined);
+    //randon number id for unsaved
+    meterGroup.id = 1000000000000000 * Math.random();
+    meterGroup.description = 'Meters with no group';
+    meterGroup.totalEnergyUse = _.sumBy(combinedMonthlyData, 'energyUse');
+    meterGroup.totalConsumption = _.sumBy(combinedMonthlyData, 'energyConsumption');
+    meterGroup.groupData = energyMeters.map(cMeter => { return cMeter.meter });
+    meterGroup.visible = true;
+    meterGroup.combinedMonthlyData = combinedMonthlyData;
     let energyGroup: MeterGroupType = meterGroupTypes.find(meterGroup => { return meterGroup.groupType == groupType })
     if (energyGroup) {
       energyGroup.meterGroups.push(meterGroup);
