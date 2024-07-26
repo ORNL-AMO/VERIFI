@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { CustomEmissionsDbService } from 'src/app/indexedDB/custom-emissions-db.service';
-import { IdbCustomEmissionsItem } from 'src/app/models/idb';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 import * as _ from 'lodash';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
@@ -13,6 +12,7 @@ import { firstValueFrom } from 'rxjs';
 import { SubregionEmissions } from 'src/app/models/eGridEmissions';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { getNewAccountEmissionsItem, IdbCustomEmissionsItem } from 'src/app/models/idbModels/customEmissions';
 
 @Component({
   selector: 'app-emissions-data-form',
@@ -38,7 +38,7 @@ export class EmissionsDataFormComponent implements OnInit {
     this.isAdd = this.router.url.includes('add');
     if (this.isAdd) {
       let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-      this.editCustomEmissions = this.customEmissionsDbService.getNewAccountEmissionsItem(selectedAccount);
+      this.editCustomEmissions = getNewAccountEmissionsItem(selectedAccount.guid);
       this.addLocationEmissionRate();
       this.addResidualEmissionRate();
     } else {

@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
-import { IdbCustomEmissionsItem } from '../models/idb';
 import { LoadingService } from '../core-components/loading/loading.service';
 import { IdbAccount } from '../models/idbModels/account';
+import { getNewAccountEmissionsItem, IdbCustomEmissionsItem } from '../models/idbModels/customEmissions';
 
 @Injectable({
   providedIn: 'root'
@@ -59,19 +59,10 @@ export class CustomEmissionsDbService {
     return this.dbService.update('customEmissionsItems', values);
   }
 
-  getNewAccountEmissionsItem(selectedAccount: IdbAccount): IdbCustomEmissionsItem {
-    return {
-      accountId: selectedAccount.guid,
-      guid: Math.random().toString(36).substr(2, 9),
-      date: new Date(),
-      subregion: 'New Custom Subregion',
-      locationEmissionRates: [],
-      residualEmissionRates: []
-    }
-  }
+
 
   getUSAverage(selectedAccount: IdbAccount): IdbCustomEmissionsItem {
-    let uSAverageItem: IdbCustomEmissionsItem = this.getNewAccountEmissionsItem(selectedAccount);
+    let uSAverageItem: IdbCustomEmissionsItem = getNewAccountEmissionsItem(selectedAccount.guid);
     uSAverageItem.subregion = 'U.S. Average';
     uSAverageItem.locationEmissionRates = [
       {

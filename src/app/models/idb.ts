@@ -284,13 +284,3 @@ export interface IdbAccountAnalysisItem {
     facilityItemsInitialized?: boolean
 }
 
-
-export interface IdbCustomEmissionsItem {
-    id?: number,
-    accountId: string,
-    date: Date,
-    guid: string,
-    subregion: string,
-    locationEmissionRates: Array<{ co2Emissions: number, year: number }>,
-    residualEmissionRates: Array<{ co2Emissions: number, year: number }>,
-}

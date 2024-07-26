@@ -2,8 +2,8 @@ import { Injectable } from '@angular/core';
 import * as XLSX from 'xlsx';
 import * as _ from 'lodash';
 import { CustomEmissionsDbService } from 'src/app/indexedDB/custom-emissions-db.service';
-import { IdbCustomEmissionsItem } from 'src/app/models/idb';
 import { SubRegionData, SubregionEmissions } from 'src/app/models/eGridEmissions';
+import { IdbCustomEmissionsItem } from 'src/app/models/idbModels/customEmissions';
 
 @Injectable({
   providedIn: 'root'

@@ -11,7 +11,7 @@ import { UpdateDbEntryService } from './indexedDB/update-db-entry.service';
 import { UtilityMeterdbService } from './indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from './indexedDB/utilityMeterData-db.service';
 import { UtilityMeterGroupdbService } from './indexedDB/utilityMeterGroup-db.service';
-import { IdbAccountAnalysisItem, IdbAccountReport, IdbAnalysisItem, IdbCustomEmissionsItem, IdbPredictorEntry } from './models/idb';
+import { IdbAccountAnalysisItem, IdbAccountReport, IdbAnalysisItem, IdbPredictorEntry } from './models/idb';
 import { EGridService } from './shared/helper-services/e-grid.service';
 import { firstValueFrom } from 'rxjs';
 import { environment } from 'src/environments/environment';
@@ -29,6 +29,7 @@ import { IdbUtilityMeter } from './models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from './models/idbModels/utilityMeterData';
 import { IdbCustomGWP } from './models/idbModels/customGWP';
 import { IdbCustomFuel } from './models/idbModels/customFuel';
+import { IdbCustomEmissionsItem } from './models/idbModels/customEmissions';
 
 // declare ga as a function to access the JS code in TS
 declare let gtag: Function;
