@@ -8,10 +8,13 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
+import { MigratePredictorsService } from 'src/app/indexedDB/migrate-predictors.service';
+import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { WeatherStation } from 'src/app/models/degreeDays';
 import { IdbAccount, IdbFacility } from 'src/app/models/idb';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
+import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
 import { WeatherDataService } from 'src/app/weather-data/weather-data.service';
 
@@ -42,7 +45,9 @@ export class PredictorTableComponent {
     private accountAnalysisDbService: AccountAnalysisDbService,
     private dbChangesService: DbChangesService,
     private toastNotificationService: ToastNotificationsService,
-    private accountDbService: AccountdbService) {
+    private accountDbService: AccountdbService,
+    private predictorDataDbService: PredictorDataDbService,
+    private migratePredictorsService: MigratePredictorsService) {
 
   }
 
@@ -108,12 +113,15 @@ export class PredictorTableComponent {
 
 
   async confirmDelete() {
-    //TODO: delete predictor data..
     await firstValueFrom(this.predictorDbService.deleteWithObservable(this.predictorToDelete.id));
+    let predictorData: Array<IdbPredictorData> = this.predictorDataDbService.getByPredictorId(this.predictorToDelete.guid);
+    await this.predictorDataDbService.deletePredictorDataAsync(predictorData);
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.setPredictorsV2(account, this.selectedFacility);
+    await this.dbChangesService.setPredictorDataV2(account, this.selectedFacility);
     this.toastNotificationService.showToast('Predictor Deleted', undefined, 1000, false, 'alert-success');
     this.cancelDelete();
+    //TODO: update analysis..
     // let deleteIndex: number = this.facilityPredictors.findIndex(facilityPredictor => { return facilityPredictor.id == this.predictorToDelete.id });
     // this.facilityPredictors.splice(deleteIndex, 1);
     // this.predictorToDelete = undefined;
@@ -182,13 +190,11 @@ export class PredictorTableComponent {
   }
 
   checkWeatherPredictor(predictor: IdbPredictor): boolean {
-    //TODO: update weather predictor check.
-    // let facilityPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.facilityPredictorEntries.getValue();
-    // let allPredictorData: Array<PredictorData> = facilityPredictorEntries.flatMap(entry => { return entry.predictors });
-    // let findError: PredictorData = allPredictorData.find(data => {
-    //   return data.id == predictor.id && data.weatherDataWarning;
-    // });
-    // return findError != undefined;
+    let predictorData: Array<IdbPredictorData> = this.predictorDataDbService.getByPredictorId(predictor.guid);
+    let findError: IdbPredictorData = predictorData.find(data => {
+      return data.id == predictor.id && data.weatherDataWarning;
+    });
+    return findError != undefined;
     return false;
   }
 
@@ -199,5 +205,9 @@ export class PredictorTableComponent {
     this.router.navigateByUrl('/weather-data');
   }
 
+
+  migrateData() {
+    this.migratePredictorsService.migrateAccountData();
+  }
 
 }

@@ -1,5 +1,8 @@
 <div class="d-flex w-100 justify-content-end mb-2">
     <div class="ps-2">
+        <button class="btn nav-btn" (click)="migrateData()"><i class="fa fa-upload"></i> Migrate Data</button>
+    </div>
+    <div class="ps-2">
         <button class="btn nav-btn" (click)="uploadData()"><i class="fa fa-upload"></i> Import Data</button>
     </div>
     <div class="ps-2">
@@ -92,7 +95,6 @@
                 <tr *ngFor="let predictor of degreeDayPredictors">
                     <td>
                         <a (click)="selectEditPredictor(predictor)">
-
                             {{predictor.name}}</a>
                     </td>
                     <td>

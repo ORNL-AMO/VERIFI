@@ -14,14 +14,16 @@ export interface IdbPredictorData extends IdbEntry {
     weatherOverride: boolean
 }
 
-export function getNewIdbPredictorData(predictor: IdbPredictor, existingData: Array<IdbPredictorData>): IdbPredictorData {
+export function getNewIdbPredictorData(predictor: IdbPredictor, existingData?: Array<IdbPredictorData>): IdbPredictorData {
     let pDate: Date = new Date();
-    let latestEntry: IdbPredictorData = _.maxBy(existingData, (pData: IdbPredictorData) => {
-        return new Date(pData.date);
-    });
-    if (latestEntry) {
-        pDate = new Date(latestEntry.date);
-        pDate.setMonth(pDate.getMonth() + 1);
+    if (existingData) {
+        let latestEntry: IdbPredictorData = _.maxBy(existingData, (pData: IdbPredictorData) => {
+            return new Date(pData.date);
+        });
+        if (latestEntry) {
+            pDate = new Date(latestEntry.date);
+            pDate.setMonth(pDate.getMonth() + 1);
+        }
     }
     let idbEntry: IdbEntry = getNewIdbEntry();
     return {
