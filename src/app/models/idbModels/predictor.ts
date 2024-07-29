@@ -26,7 +26,7 @@ export interface IdbPredictor extends IdbEntry {
     heatingBaseTemperature: number,
     coolingBaseTemperature: number,
     weatherDataWarning: boolean,
-    weatherOverride: boolean
+    // weatherOverride: boolean
 }
 
 export function getNewIdbPredictor(accountId: string, facilityId: string): IdbPredictor {
@@ -54,6 +54,6 @@ export function getNewIdbPredictor(accountId: string, facilityId: string): IdbPr
         heatingBaseTemperature: undefined,
         coolingBaseTemperature: undefined,
         weatherDataWarning: undefined,
-        weatherOverride: undefined
+        // weatherOverride: undefined
     }
 }

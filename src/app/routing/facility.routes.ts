@@ -49,6 +49,9 @@ import { PredictorsComponent } from "../facility/utility-data/predictors/predict
 import { PredictorsManagementComponent } from "../facility/utility-data/predictors/predictors-management/predictors-management.component";
 import { PredictorTableComponent } from "../facility/utility-data/predictors/predictors-management/predictor-table/predictor-table.component";
 import { EditPredictorFormComponent } from "../facility/utility-data/predictors/predictors-management/edit-predictor-form/edit-predictor-form.component";
+import { PredictorsDataComponent } from "../facility/utility-data/predictors/predictors-data/predictors-data.component";
+import { PredictorsDataTableComponent } from "../facility/utility-data/predictors/predictors-data/predictors-data-table/predictors-data-table.component";
+import { PredictorsDataFormComponent } from "../facility/utility-data/predictors/predictors-data/predictors-data-form/predictors-data-form.component";
 
 export const FacilityRoutes: Route = {
     path: 'facility/:id',
@@ -232,6 +235,32 @@ export const FacilityRoutes: Route = {
                                     component: EditPredictorFormComponent,
                                     canDeactivate: [canDeactivateGuard]
                                 }
+                            ]
+                        },
+                        {
+                            path: 'predictor/:id',
+                            component: PredictorsDataComponent,
+                            children: [
+                                {
+                                    path: '',
+                                    pathMatch: 'full',
+                                    redirectTo: 'entries-table'
+                                },
+                                {
+                                    path: 'entries-table',
+                                    component: PredictorsDataTableComponent
+                                },
+
+                                {
+                                    path: 'edit-entry/:id',
+                                    component: PredictorsDataFormComponent,
+                                    canDeactivate: [canDeactivateGuard]
+                                },
+                                {
+                                    path: 'add-entry',
+                                    component: PredictorsDataFormComponent,
+                                    canDeactivate: [canDeactivateGuard]
+                                },
                             ]
                         }
                     ]

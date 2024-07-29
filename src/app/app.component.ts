@@ -100,7 +100,7 @@ export class AppComponent {
         await this.initilizeMeterGroups(account);
         await this.initializeAccountReports(account);
         await this.initializePredictors(account);
-
+        await this.initializePredictorData(account);
 
 
         await this.initializeMeters(account);

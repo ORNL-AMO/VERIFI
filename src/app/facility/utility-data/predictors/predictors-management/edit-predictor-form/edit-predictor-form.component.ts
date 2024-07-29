@@ -68,7 +68,7 @@ export class EditPredictorFormComponent {
         this.addOrEdit = 'add';
         this.setPredictorDataNew();
       }
-      if(this.predictor){
+      if (this.predictor) {
         this.setReferencePredictors();
         this.setStations();
       }
@@ -76,13 +76,11 @@ export class EditPredictorFormComponent {
   }
 
   setPredictorDataEdit(predictorId: string) {
-    let facilityPredictors: Array<IdbPredictor> = this.predictorDbService.facilityPredictors.getValue();
-    let predictorData: IdbPredictor = facilityPredictors.find(predictor => { return predictor.guid == predictorId });
-    if(predictorData){
+    let predictorData: IdbPredictor = this.predictorDbService.getByGuid(predictorId);
+    if (predictorData) {
       this.predictor = JSON.parse(JSON.stringify(predictorData));
       this.setPredictorForm();
-    }else{
-      console.log('....?')
+    } else {
       this.toastNotificationService.showToast('Predictor Not Found', undefined, 2000, false, 'alert-danger');
       this.cancel();
     }

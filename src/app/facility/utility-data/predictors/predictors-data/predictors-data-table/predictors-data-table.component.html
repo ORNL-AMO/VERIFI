@@ -1,0 +1,156 @@
+<div class="d-flex w-100 justify-content-end mb-2">
+    <div class="d-flex">
+        <!--Bulk Delete-->
+        <div class="pe-2 bulk-delete" [class.show]="hasCheckedItems">
+            <button class="btn btn-danger" (click)='openBulkDelete()' [disabled]="!hasCheckedItems">Bulk
+                Delete</button>
+        </div>
+        <!--Items Per Page-->
+        <app-table-items-dropdown *ngIf="predictorData.length != 0"></app-table-items-dropdown>
+        <div class="ps-2">
+            <button class="btn nav-btn" (click)="uploadData()"><i class="fa fa-upload"></i> Import
+                Data</button>
+        </div>
+
+
+        <div class="ps-2">
+            <button class="btn action-btn" (click)="addPredictorEntry()"><i class="fa fa-plus"></i> Add
+                Predictor
+                Entry</button>
+        </div>
+    </div>
+</div>
+
+<div class="alert alert-warning text-center" *ngIf="hasWeatherDataWarnings">
+    <span class="fa fa-exclamation-circle"></span> Indicates that the predictor entry was calculated from weather data
+    with gaps of twelve hours or more and the
+    results may not be accurate. To inspect the weather data for that month, click the <span
+        class="fa fa-thermometer-half"></span> button. To manually override
+    the values click the <span class="fa fa-pencil"></span> button. If you have several <span
+        class="fa fa-exclamation-circle"></span>, it may be best to select a different weather station for
+    this facility - use the <a (click)="goToWeatherData()">Weather Data</a> page to explore other stations in the area
+    of this facility.
+</div>
+<ng-template [ngIf]="predictorData.length != 0" [ngIfElse]="noDataBlock">
+    <table class="table utility-data table-sm table-bordered table-hover" #predictorTable
+        [ngClass]="{'copying-table': copyingTable}">
+        <thead class="sortable">
+            <tr>
+                <th class="input" *ngIf="!copyingTable">
+                    <input #masterCheckbox type="checkbox" (change)="checkAll()" [(ngModel)]="allChecked">
+                </th>
+                <th (click)="setOrderDataField('date')" [ngClass]="{'active': orderDataField == 'date'}">Date
+                </th>
+                <th class="header" (click)="setOrderDataField(predictor.name)"
+                    [ngClass]="{'active': orderDataField == predictor.name}">
+                    <span *ngIf="predictor.production" class="fa fa-check-circle-o"></span>
+                    <span *ngIf="predictor.predictorType == 'Weather'" class="fa fa-temperature-half"></span>
+                    {{predictor.name}}
+                    <ng-container *ngIf="predictor.unit">
+                        <br>
+                        <span class="small block">({{predictor.unit}})</span>
+                    </ng-container>
+                    <ng-container *ngIf="predictor.predictorType == 'Weather'">
+                        <br>
+                        <span class="small block">({{predictor.weatherDataType}},
+                            <ng-container *ngIf="predictor.weatherDataType == 'HDD'">
+                                {{predictor.heatingBaseTemperature}} &#8457;
+                            </ng-container>
+                            <ng-container *ngIf="predictor.weatherDataType == 'CDD'">
+                                {{predictor.coolingBaseTemperature}} &#8457;
+                            </ng-container>)</span>
+                    </ng-container>
+                </th>
+                <td class="actions" *ngIf="!copyingTable">
+
+                </td>
+            </tr>
+        </thead>
+        <tbody class="table-group-divider">
+            <tr *ngFor="let pData of predictorData">
+                <td class="input" *ngIf="!copyingTable">
+                    <input type="checkbox" name="predictorEntry" (change)="setHasChecked()" [(ngModel)]="pData.checked">
+                </td>
+                <td>{{pData.date | date:'MMM, yyyy'}}</td>
+                <td>
+                    <span *ngIf="pData.weatherDataWarning" class="fa fa-exclamation-circle" data-bs-toggle="tooltip"
+                        data-bs-placement="top"
+                        title="Gaps found in weather data for this reading. It may not be accurate."
+                        data-bs-html="true"></span>
+                    <span *ngIf="pData.weatherOverride" class="fa fa-asterisk" data-bs-toggle="tooltip"
+                        data-bs-placement="top" title="Weather data manually set." data-bs-html="true"></span>
+                    <ng-container *ngIf="pData.amount != undefined">
+                        {{pData.amount | customNumber}}
+                    </ng-container>
+                    <ng-container *ngIf="pData.amount == undefined">
+                        &mdash;
+                    </ng-container>
+                </td>
+                <td class="actions" *ngIf="!copyingTable">
+                    <div class="btn-group">
+                        <button class="btn btn-sm btn-outline" (click)="setEditPredictorData(pData)" title="Edit">
+                            <i class="fa fa-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline" (click)="setDeletePredictorData(pData)" title="Delete">
+                            <i class="fa fa-trash"></i>
+                        </button>
+                        <button *ngIf="hasWeatherData" class="btn btn-sm btn-outline" (click)="viewWeatherData(pData)"
+                            title="View Weather Data">
+                            <i class="fa fa-temperature-half"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <div class="d-flex w-100 justify-content-between">
+        <div>
+            <button class="btn action-btn btn-sm" (click)="copyTable()">
+                <span class="fa fa-copy"></span> Copy Table
+            </button>
+        </div>
+        <ngb-pagination [collectionSize]="predictorData.length" [(page)]="currentPageNumber" [pageSize]="itemsPerPage"
+            [maxSize]="5" [rotate]="true" aria-label="Pagination">
+        </ngb-pagination>
+    </div>
+</ng-template>
+<ng-template #noDataBlock>
+    <div class="alert alert-warning">
+        No predictor data found for this facility. Click "<span class="fa fa-plus"></span> Add Predictor Entry" button
+        to create your first predictor or the "<span class="fa fa-upload"></span> Import Data" button to use the upload
+        data wizard to upload data from a .xlsx file.
+    </div>
+</ng-template>
+
+
+<div [ngClass]="{'windowOverlay': predictorDataToDelete || showBulkDelete}"></div>
+<div class="popup" [class.open]="predictorDataToDelete">
+    <div class="popup-header">
+        Delete {{predictorDataToDelete?.date | date:'MMM, yyyy'}}?
+        <button class="item-right" (click)="cancelDeletePredictorData()">x</button>
+    </div>
+    <div class="popup-body">
+        <p>WARNING:
+            Are you sure you want to delete the predictor entry for {{predictorDataToDelete?.date | date:'MMM, yyyy'}}?
+            This cannot be undone.</p>
+    </div>
+    <div class="saveCancel popup-footer text-end">
+        <button class="btn btn-secondary" (click)="cancelDeletePredictorData()">Cancel</button>
+        <button class="btn btn-danger" (click)="confirmDeletePredictorData()">Confirm Delete</button>
+    </div>
+</div>
+<div class="popup" [class.open]="showBulkDelete">
+    <div class="popup-header">
+        Bulk Delete Predictors?
+        <button class="item-right" (click)="cancelBulkDelete()">x</button>
+    </div>
+    <div class="popup-body">
+        <p>WARNING:
+            Are you sure you want to delete the selected predictor entries?
+            This cannot be undone.</p>
+    </div>
+    <div class="saveCancel popup-footer text-end">
+        <button class="btn btn-secondary" (click)="cancelBulkDelete()">Cancel</button>
+        <button class="btn btn-danger" (click)="bulkDelete()">Confirm Delete</button>
+    </div>
+</div>
