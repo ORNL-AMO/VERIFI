@@ -22,6 +22,10 @@ import { ElectronService } from './electron/electron.service';
 import { AnalyticsService } from './analytics/analytics.service';
 import { CustomFuelDbService } from './indexedDB/custom-fuel-db.service';
 import { CustomGWPDbService } from './indexedDB/custom-gwp-db.service';
+import { PredictorDbService } from './indexedDB/predictor-db.service';
+import { PredictorDataDbService } from './indexedDB/predictor-data-db.service';
+import { IdbPredictor } from './models/idbModels/predictor';
+import { IdbPredictorData } from './models/idbModels/predictorData';
 
 // declare ga as a function to access the JS code in TS
 declare let gtag: Function;
@@ -57,7 +61,9 @@ export class AppComponent {
     private electronService: ElectronService,
     private analyticsService: AnalyticsService,
     private customFuelDbservice: CustomFuelDbService,
-    private customGWPDbService: CustomGWPDbService) {
+    private customGWPDbService: CustomGWPDbService,
+    private predictorDbService: PredictorDbService,
+    private predictorDataDbService: PredictorDataDbService) {
     if (environment.production) {
       gtag('config', 'G-YG1QD02XSE');
       this.analyticsService.sendEvent('verifi_app_open', undefined);
@@ -94,6 +100,9 @@ export class AppComponent {
         await this.initilizeMeterGroups(account);
         await this.initializeAccountReports(account);
         await this.initializePredictors(account);
+
+
+
         await this.initializeMeters(account);
         await this.initializeMeterData(account);
         await this.initializeFacilityAnalysisItems(account);
@@ -201,8 +210,19 @@ export class AppComponent {
   async initializePredictors(account: IdbAccount) {
     //set predictors
     this.loadingMessage = "Loading Predictors..";
+    //TODO: OLD PREDICTORS METHOD
     let predictors: Array<IdbPredictorEntry> = await this.predictorsDbService.getAllAccountPredictors(account.guid);
     this.predictorsDbService.accountPredictorEntries.next(predictors);
+    //NEW PREDICTORS V2
+    let predictorsV2: Array<IdbPredictor> = await this.predictorDbService.getAllAccountPredictors(account.guid);
+    this.predictorDbService.accountPredictors.next(predictorsV2);
+  }
+
+  async initializePredictorData(account: IdbAccount) {
+    this.loadingMessage = "Loading Predictor Data..";
+    //set predictor data (V2)
+    let predictorData: Array<IdbPredictorData> = await this.predictorDataDbService.getAllAccountPredictorData(account.guid);
+    this.predictorDataDbService.accountPredictorData.next(predictorData);
   }
 
   async initializeMeters(account: IdbAccount) {
