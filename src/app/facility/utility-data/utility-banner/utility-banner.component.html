@@ -17,9 +17,14 @@
                 Analysis Groups</a>
         </li>
         <li class="nav-item" [class.disabled]="utilityMeterData.length === 0">
+            <a class="nav-link" routerLink="predictors-deprecated" [routerLinkActive]="['active']">
+                <i class="fa fa-boxes-stacked"></i>
+                Predictors Deprecated</a>
+        </li>
+        <li class="nav-item" [class.disabled]="utilityMeterData.length === 0">
             <a class="nav-link" routerLink="predictors" [routerLinkActive]="['active']">
                 <i class="fa fa-boxes-stacked"></i>
-                Predictors</a>
+                Predictors V2</a>
         </li>
     </ul>
     <div>

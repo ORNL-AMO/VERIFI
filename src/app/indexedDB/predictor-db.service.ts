@@ -47,7 +47,7 @@ export class PredictorDbService {
       return this.dbService.update('predictor', predictor);
   }
 
-  deleteIndexWithObservable(predictorId: number): Observable<any> {
+  deleteWithObservable(predictorId: number): Observable<any> {
       return this.dbService.delete('predictor', predictorId)
   }
 
@@ -66,7 +66,7 @@ export class PredictorDbService {
   async deletePredictorsAsync(predictors: Array<IdbPredictor>) {
       for (let i = 0; i < predictors.length; i++) {
           this.loadingService.setLoadingMessage('Deleting Predictors (' + i + '/' + predictors.length + ')...');
-          await firstValueFrom(this.deleteIndexWithObservable(predictors[i].id));
+          await firstValueFrom(this.deleteWithObservable(predictors[i].id));
       }
   }
 }

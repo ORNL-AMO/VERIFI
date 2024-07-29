@@ -11,6 +11,7 @@ import { HelperPipesModule } from '../../shared/helper-pipes/helper-pipes.module
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { LabelWithTooltipModule } from '../../shared/label-with-tooltip/label-with-tooltip.module';
 import { RouterModule } from '@angular/router';
+import { PredictorsModule } from './predictors/predictors.module';
 
 @NgModule({
   declarations: [
@@ -29,6 +30,7 @@ import { RouterModule } from '@angular/router';
     LabelWithTooltipModule,
     RouterModule,
     ReactiveFormsModule,
+    PredictorsModule
   ]
 })
 export class UtilityDataModule { }

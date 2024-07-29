@@ -45,6 +45,10 @@ import { EditPredictorEntryComponent } from "../facility/utility-data/predictor-
 import { canDeactivateGuard } from "./can-deactivate.guard";
 import { EnergyDashboardComponent } from "../facility/analysis/analysis-dashboard/energy-dashboard/energy-dashboard.component";
 import { WaterDashboardComponent } from "../facility/analysis/analysis-dashboard/water-dashboard/water-dashboard.component";
+import { PredictorsComponent } from "../facility/utility-data/predictors/predictors.component";
+import { PredictorsManagementComponent } from "../facility/utility-data/predictors/predictors-management/predictors-management.component";
+import { PredictorTableComponent } from "../facility/utility-data/predictors/predictors-management/predictor-table/predictor-table.component";
+import { EditPredictorFormComponent } from "../facility/utility-data/predictors/predictors-management/edit-predictor-form/edit-predictor-form.component";
 
 export const FacilityRoutes: Route = {
     path: 'facility/:id',
@@ -141,7 +145,7 @@ export const FacilityRoutes: Route = {
                 { path: 'monthly-meter-data', component: CalanderizationComponent },
                 { path: 'meter-groups', component: MeterGroupingComponent },
                 {
-                    path: 'predictors',
+                    path: 'predictors-deprecated',
                     component: PredictorDataComponent,
                     children: [
                         { path: '', pathMatch: 'full', redirectTo: 'manage' },
@@ -195,6 +199,39 @@ export const FacilityRoutes: Route = {
                                     component: EditPredictorEntryComponent,
                                     canDeactivate: [canDeactivateGuard]
                                 },
+                            ]
+                        }
+                    ]
+                },
+                {
+                    path: 'predictors',
+                    component: PredictorsComponent,
+                    children: [
+                        { path: '', pathMatch: 'full', redirectTo: 'manage' },
+                        {
+                            path: 'manage',
+                            component: PredictorsManagementComponent,
+                            children: [
+                                {
+                                    path: '',
+                                    pathMatch: 'full',
+                                    redirectTo: 'predictor-table'
+                                },
+                                {
+                                    path: 'predictor-table',
+                                    component: PredictorTableComponent
+                                },
+
+                                {
+                                    path: 'edit-predictor/:id',
+                                    component: EditPredictorFormComponent,
+                                    canDeactivate: [canDeactivateGuard]
+                                },
+                                {
+                                    path: 'add-predictor',
+                                    component: EditPredictorFormComponent,
+                                    canDeactivate: [canDeactivateGuard]
+                                }
                             ]
                         }
                     ]
