@@ -67,7 +67,7 @@ export class EditPredictorEntryComponent {
     }
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    await this.dbChangesService.setPredictorsDeprecated(selectedAccount, selectedFacility);
+    await this.dbChangesService.setPredictors(selectedAccount, selectedFacility);
     this.isSaved = true;
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('Predictors Updated!', undefined, undefined, false, 'alert-success');
