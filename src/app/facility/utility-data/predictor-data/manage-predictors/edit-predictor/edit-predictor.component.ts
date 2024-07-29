@@ -289,7 +289,7 @@ export class EditPredictorComponent {
       startDate.setMonth(startDate.getMonth() + 1);
     }
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    await this.dbChangesService.setPredictorsDeprecated(selectedAccount, this.facility)
+    await this.dbChangesService.setPredictors(selectedAccount, this.facility)
     this.saveChanges();
   }
 
