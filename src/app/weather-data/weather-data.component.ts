@@ -5,7 +5,6 @@ import { IdbAccount, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from '.
 import { Subscription, firstValueFrom } from 'rxjs';
 import { WeatherDataService } from './weather-data.service';
 import { FacilitydbService } from '../indexedDB/facility-db.service';
-import { PredictordbService } from '../indexedDB/predictors-db.service';
 import { LoadingService } from '../core-components/loading/loading.service';
 import { Router } from '@angular/router';
 import { AnalysisDbService } from '../indexedDB/analysis-db.service';

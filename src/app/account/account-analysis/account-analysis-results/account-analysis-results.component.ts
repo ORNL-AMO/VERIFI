@@ -4,13 +4,16 @@ import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
-import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { AccountAnalysisService } from '../account-analysis.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
+import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
+import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
+import { IdbPredictor } from 'src/app/models/idbModels/predictor';
+import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 
 @Component({
   selector: 'app-account-analysis-results',
@@ -26,7 +29,8 @@ export class AccountAnalysisResultsComponent implements OnInit {
     private accountAnalysisDbService: AccountAnalysisDbService,
     private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService,
-    private predictorDbService: PredictordbService,
+    private predictorDbService: PredictorDbService,
+    private predictorDataDbService: PredictorDataDbService,
     private analysisDbService: AnalysisDbService,
     private sharedDataService: SharedDataService,
     private utilityMeterDbService: UtilityMeterdbService,
@@ -37,7 +41,8 @@ export class AccountAnalysisResultsComponent implements OnInit {
     this.account = this.accountDbService.selectedAccount.getValue();
     let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
 
-    let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.accountPredictorEntries.getValue();
+    let accountPredictorEntries: Array<IdbPredictorData> = this.predictorDataDbService.accountPredictorData.getValue();
+    let accountPredictors: Array<IdbPredictor> = this.predictorDbService.accountPredictors.getValue();
     let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
     let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
@@ -66,11 +71,12 @@ export class AccountAnalysisResultsComponent implements OnInit {
         allAccountAnalysisItems: accountAnalysisItems,
         calculateAllMonthlyData: false,
         meters: meters,
-        meterData: meterData
+        meterData: meterData,
+        accountPredictors: accountPredictors
       });
     } else {
       // Web Workers are not supported in this environment.
-      let annualAnalysisSummaryClass: AnnualAccountAnalysisSummaryClass = new AnnualAccountAnalysisSummaryClass(this.accountAnalysisItem, this.account, accountFacilities, accountPredictorEntries, accountAnalysisItems, false, meters, meterData);
+      let annualAnalysisSummaryClass: AnnualAccountAnalysisSummaryClass = new AnnualAccountAnalysisSummaryClass(this.accountAnalysisItem, this.account, accountFacilities, accountPredictorEntries, accountAnalysisItems, false, meters, meterData, accountPredictors);
       let annualAnalysisSummaries: Array<AnnualAnalysisSummary> = annualAnalysisSummaryClass.getAnnualAnalysisSummaries();
       let monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData> = annualAnalysisSummaryClass.monthlyAnalysisSummaryData;
       this.accountAnalysisService.annualAnalysisSummary.next(annualAnalysisSummaries);

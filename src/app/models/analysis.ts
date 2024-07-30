@@ -1,3 +1,4 @@
+import { IdbPredictor } from "./idbModels/predictor"
 
 export interface MonthlyGroupSummary {
   date: Date,
@@ -120,7 +121,7 @@ export interface AnalysisTableColumns {
   cummulativeSavings: boolean,
   newSavings: boolean,
   predictors: Array<{
-    predictor: AnalysisGroupPredictorVariable,
+    predictor: IdbPredictor,
     display: boolean,
     usedInAnalysis: boolean
   }>,

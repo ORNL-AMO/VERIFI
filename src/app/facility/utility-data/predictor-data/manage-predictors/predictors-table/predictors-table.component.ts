@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
-import { IdbAnalysisItem, IdbFacility, IdbPredictorEntry, PredictorData } from 'src/app/models/idb';
+import { PredictordbServiceDeprecated } from 'src/app/indexedDB/predictors-db.service';
+import { IdbAnalysisItem, IdbFacility, IdbPredictorEntryDeprecated, PredictorDataDeprecated } from 'src/app/models/idb';
 import { Subscription } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { WeatherDataService } from 'src/app/weather-data/weather-data.service';
@@ -21,19 +21,19 @@ import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.
 export class PredictorsTableComponent {
 
   facilityPredictorsSub: Subscription;
-  facilityPredictors: Array<PredictorData>;
+  facilityPredictors: Array<PredictorDataDeprecated>;
   selectedFacilitySub: Subscription;
   selectedFacility: IdbFacility;
-  predictorToDelete: PredictorData;
+  predictorToDelete: PredictorDataDeprecated;
 
-  standardPredictors: Array<PredictorData>;
-  degreeDayPredictors: Array<PredictorData>;
+  standardPredictors: Array<PredictorDataDeprecated>;
+  degreeDayPredictors: Array<PredictorDataDeprecated>;
 
   hasWeatherDataWarning: boolean;
   predictorUsedGroupIds: Array<string> = [];
 
-  predictorEntries: Array<IdbPredictorEntry>;
-  constructor(private predictorDbService: PredictordbService, private router: Router,
+  predictorEntries: Array<IdbPredictorEntryDeprecated>;
+  constructor(private predictorDbService: PredictordbServiceDeprecated, private router: Router,
     private facilitydbService: FacilitydbService, private loadingService: LoadingService,
     private weatherDataService: WeatherDataService, private degreeDaysService: DegreeDaysService,
     private analysisDbService: AnalysisDbService,
@@ -71,51 +71,51 @@ export class PredictorsTableComponent {
     this.selectedFacilitySub.unsubscribe();
   }
 
-  selectDelete(predictor: PredictorData) {
+  selectDelete(predictor: PredictorDataDeprecated) {
     this.predictorToDelete = predictor;
     let facilityAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.facilityAnalysisItems.getValue();
     let allFacilityGroups: Array<AnalysisGroup> = facilityAnalysisItems.flatMap(item => { return item.groups });
     this.predictorUsedGroupIds = new Array();
-    for (let i = 0; i < allFacilityGroups.length; i++) {
-      let predictorVariables: Array<PredictorData> = [];
-      let group: AnalysisGroup = allFacilityGroups[i];
-      if (group.analysisType == 'regression') {
-        if (group.selectedModelId) {
-          let selectedModel: JStatRegressionModel = group.models.find(model => { return model.modelId == group.selectedModelId });
-          predictorVariables = selectedModel.predictorVariables;
-        } else {
-          predictorVariables = group.predictorVariables.filter(variable => {
-            return (variable.productionInAnalysis == true);
-          });
-        }
-      } else if (group.analysisType != 'absoluteEnergyConsumption') {
-        predictorVariables = group.predictorVariables.filter(variable => {
-          return (variable.productionInAnalysis == true);
-        });
-      }
-      let isUsed: PredictorData = predictorVariables.find(predictorUsed => { return predictorUsed.id == predictor.id });
-      if (isUsed) {
-        this.predictorUsedGroupIds.push(group.idbGroupId)
-      }
-    };
+    // for (let i = 0; i < allFacilityGroups.length; i++) {
+    //   let predictorVariables: Array<PredictorDataDeprecated> = [];
+    //   let group: AnalysisGroup = allFacilityGroups[i];
+    //   if (group.analysisType == 'regression') {
+    //     if (group.selectedModelId) {
+    //       let selectedModel: JStatRegressionModel = group.models.find(model => { return model.modelId == group.selectedModelId });
+    //       predictorVariables = selectedModel.predictorVariables;
+    //     } else {
+    //       predictorVariables = group.predictorVariables.filter(variable => {
+    //         return (variable.productionInAnalysis == true);
+    //       });
+    //     }
+    //   } else if (group.analysisType != 'absoluteEnergyConsumption') {
+    //     predictorVariables = group.predictorVariables.filter(variable => {
+    //       return (variable.productionInAnalysis == true);
+    //     });
+    //   }
+    //   let isUsed: PredictorDataDeprecated = predictorVariables.find(predictorUsed => { return predictorUsed.id == predictor.id });
+    //   if (isUsed) {
+    //     this.predictorUsedGroupIds.push(group.idbGroupId)
+    //   }
+    // };
   }
 
 
   async confirmDelete() {
-    let deleteIndex: number = this.facilityPredictors.findIndex(facilityPredictor => { return facilityPredictor.id == this.predictorToDelete.id });
-    this.facilityPredictors.splice(deleteIndex, 1);
-    this.predictorToDelete = undefined;
-    if (this.predictorEntries.length > 0) {
-      this.loadingService.setLoadingMessage('Deleting Predictor Data...');
-      this.loadingService.setLoadingStatus(true);
-      await this.analysisDbService.updateAnalysisPredictors(this.facilityPredictors, this.selectedFacility.guid, this.predictorUsedGroupIds);
-      let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
-      await this.accountAnalysisDbService.updateAccountValidation(accountAnalysisItems);
-      await this.predictorDbService.updateFacilityPredictorEntries(this.facilityPredictors);
-      this.loadingService.setLoadingStatus(false);
-    }else{
-      this.predictorDbService.facilityPredictors.next(this.facilityPredictors);
-    }
+    // let deleteIndex: number = this.facilityPredictors.findIndex(facilityPredictor => { return facilityPredictor.id == this.predictorToDelete.id });
+    // this.facilityPredictors.splice(deleteIndex, 1);
+    // this.predictorToDelete = undefined;
+    // if (this.predictorEntries.length > 0) {
+    //   this.loadingService.setLoadingMessage('Deleting Predictor Data...');
+    //   this.loadingService.setLoadingStatus(true);
+    //   await this.analysisDbService.updateAnalysisPredictors(this.facilityPredictors, this.selectedFacility.guid, this.predictorUsedGroupIds);
+    //   let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
+    //   await this.accountAnalysisDbService.updateAccountValidation(accountAnalysisItems);
+    //   await this.predictorDbService.updateFacilityPredictorEntries(this.facilityPredictors);
+    //   this.loadingService.setLoadingStatus(false);
+    // }else{
+    //   this.predictorDbService.facilityPredictors.next(this.facilityPredictors);
+    // }
 
   }
 
@@ -124,7 +124,7 @@ export class PredictorsTableComponent {
   }
 
 
-  selectEditPredictor(predictor: PredictorData) {
+  selectEditPredictor(predictor: PredictorDataDeprecated) {
     this.router.navigateByUrl('facility/' + this.selectedFacility.id + '/utility/predictors/manage/edit-predictor/' + predictor.id);
   }
 
@@ -137,42 +137,42 @@ export class PredictorsTableComponent {
   }
 
 
-  async viewWeatherData(predictor: PredictorData) {
-    let weatherStation: WeatherStation = await this.degreeDaysService.getStationById(predictor.weatherStationId);
-    this.weatherDataService.selectedStation = weatherStation;
-    if (predictor.weatherDataType == 'CDD') {
-      this.weatherDataService.coolingTemp = predictor.coolingBaseTemperature;
-      let predictorPair: PredictorData = this.degreeDayPredictors.find(predictorPair => { return predictorPair.weatherStationId == predictor.weatherStationId && predictorPair.weatherDataType == 'HDD' });
-      if (predictorPair) {
-        this.weatherDataService.heatingTemp = predictorPair.heatingBaseTemperature;
-        this.weatherDataService.weatherDataSelection = 'degreeDays';
-      } else {
-        this.weatherDataService.weatherDataSelection = 'CDD';
-      }
-    } else {
-      this.weatherDataService.heatingTemp = predictor.heatingBaseTemperature;
-      let predictorPair: PredictorData = this.degreeDayPredictors.find(predictorPair => { return predictorPair.weatherStationId == predictor.weatherStationId && predictorPair.weatherDataType == 'CDD' });
-      if (predictorPair) {
-        this.weatherDataService.coolingTemp = predictorPair.coolingBaseTemperature;
-        this.weatherDataService.weatherDataSelection = 'degreeDays';
-      } else {
-        this.weatherDataService.weatherDataSelection = 'HDD';
-      }
-    }
-    let endDate: Date = new Date(weatherStation.end);
-    endDate.setFullYear(endDate.getFullYear() - 1);
-    this.weatherDataService.selectedYear = endDate.getFullYear();
-    this.weatherDataService.selectedDate = endDate;
-    this.weatherDataService.selectedMonth = endDate;
-    this.weatherDataService.selectedFacility = this.selectedFacility;
-    this.weatherDataService.zipCode = this.selectedFacility.zip;
-    this.router.navigateByUrl('weather-data/annual-station')
+  async viewWeatherData(predictor: PredictorDataDeprecated) {
+    // let weatherStation: WeatherStation = await this.degreeDaysService.getStationById(predictor.weatherStationId);
+    // this.weatherDataService.selectedStation = weatherStation;
+    // if (predictor.weatherDataType == 'CDD') {
+    //   this.weatherDataService.coolingTemp = predictor.coolingBaseTemperature;
+    //   let predictorPair: PredictorData = this.degreeDayPredictors.find(predictorPair => { return predictorPair.weatherStationId == predictor.weatherStationId && predictorPair.weatherDataType == 'HDD' });
+    //   if (predictorPair) {
+    //     this.weatherDataService.heatingTemp = predictorPair.heatingBaseTemperature;
+    //     this.weatherDataService.weatherDataSelection = 'degreeDays';
+    //   } else {
+    //     this.weatherDataService.weatherDataSelection = 'CDD';
+    //   }
+    // } else {
+    //   this.weatherDataService.heatingTemp = predictor.heatingBaseTemperature;
+    //   let predictorPair: PredictorData = this.degreeDayPredictors.find(predictorPair => { return predictorPair.weatherStationId == predictor.weatherStationId && predictorPair.weatherDataType == 'CDD' });
+    //   if (predictorPair) {
+    //     this.weatherDataService.coolingTemp = predictorPair.coolingBaseTemperature;
+    //     this.weatherDataService.weatherDataSelection = 'degreeDays';
+    //   } else {
+    //     this.weatherDataService.weatherDataSelection = 'HDD';
+    //   }
+    // }
+    // let endDate: Date = new Date(weatherStation.end);
+    // endDate.setFullYear(endDate.getFullYear() - 1);
+    // this.weatherDataService.selectedYear = endDate.getFullYear();
+    // this.weatherDataService.selectedDate = endDate;
+    // this.weatherDataService.selectedMonth = endDate;
+    // this.weatherDataService.selectedFacility = this.selectedFacility;
+    // this.weatherDataService.zipCode = this.selectedFacility.zip;
+    // this.router.navigateByUrl('weather-data/annual-station')
   }
 
-  checkWeatherPredictor(predictor: PredictorData): boolean {
-    let facilityPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.facilityPredictorEntries.getValue();
-    let allPredictorData: Array<PredictorData> = facilityPredictorEntries.flatMap(entry => { return entry.predictors });
-    let findError: PredictorData = allPredictorData.find(data => {
+  checkWeatherPredictor(predictor: PredictorDataDeprecated): boolean {
+    let facilityPredictorEntries: Array<IdbPredictorEntryDeprecated> = this.predictorDbService.facilityPredictorEntries.getValue();
+    let allPredictorData: Array<PredictorDataDeprecated> = facilityPredictorEntries.flatMap(entry => { return entry.predictors });
+    let findError: PredictorDataDeprecated = allPredictorData.find(data => {
       return data.id == predictor.id && data.weatherDataWarning;
     });
     return findError != undefined;

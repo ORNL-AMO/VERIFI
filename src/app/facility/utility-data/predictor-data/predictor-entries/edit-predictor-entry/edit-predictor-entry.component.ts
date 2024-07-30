@@ -3,8 +3,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
-import { IdbAccount, IdbFacility, IdbPredictorEntry, PredictorData } from 'src/app/models/idb';
+import { PredictordbServiceDeprecated } from 'src/app/indexedDB/predictors-db.service';
+import { IdbAccount, IdbFacility, IdbPredictorEntryDeprecated, PredictorDataDeprecated } from 'src/app/models/idb';
 import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
 import * as _ from 'lodash';
 import { DetailDegreeDay } from 'src/app/models/degreeDays';
@@ -20,13 +20,13 @@ import { firstValueFrom, Observable, of } from 'rxjs';
 export class EditPredictorEntryComponent {
 
   addOrEdit: 'add' | 'edit';
-  predictorEntry: IdbPredictorEntry;
+  predictorEntry: IdbPredictorEntryDeprecated;
   hasWeatherData: boolean;
   calculatingDegreeDays: boolean;
   hasWeatherDataWarning: boolean;
   hasWeatherOverride: boolean;
   isSaved: boolean = true;
-  constructor(private activatedRoute: ActivatedRoute, private predictorDbService: PredictordbService,
+  constructor(private activatedRoute: ActivatedRoute, private predictorDbService: PredictordbServiceDeprecated,
     private router: Router, private facilityDbService: FacilitydbService,
     private accountDbService: AccountdbService, private dbChangesService: DbChangesService,
     private degreeDaysService: DegreeDaysService,
@@ -74,8 +74,8 @@ export class EditPredictorEntryComponent {
   }
 
   setPredictorEntryEdit(predictorId: string) {
-    let facilityPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.facilityPredictorEntries.getValue();
-    let predictorEntry: IdbPredictorEntry = facilityPredictorEntries.find(entry => { return entry.guid == predictorId });
+    let facilityPredictorEntries: Array<IdbPredictorEntryDeprecated> = this.predictorDbService.facilityPredictorEntries.getValue();
+    let predictorEntry: IdbPredictorEntryDeprecated = facilityPredictorEntries.find(entry => { return entry.guid == predictorId });
     this.predictorEntry = JSON.parse(JSON.stringify(predictorEntry));
   }
 
@@ -100,21 +100,21 @@ export class EditPredictorEntryComponent {
 
   async setDegreeDayValues() {
     this.calculatingDegreeDays = true;
-    let degreeDayPredictors: Array<PredictorData> = this.predictorEntry.predictors.filter(predictor => { return predictor.predictorType == 'Weather' });
+    let degreeDayPredictors: Array<PredictorDataDeprecated> = this.predictorEntry.predictors.filter(predictor => { return predictor.predictorType == 'Weather' });
     let updatedPredictorIds: Array<string> = [];
     let hasWeatherDataWarning: boolean = false;
     let hasWeatherOverride: boolean = false;
     for (let i = 0; i < degreeDayPredictors.length; i++) {
-      let predictor: PredictorData = degreeDayPredictors[i];
+      let predictor: PredictorDataDeprecated = degreeDayPredictors[i];
       if (!predictor.weatherOverride) {
         if (!updatedPredictorIds.includes(predictor.id)) {
-          let degreeDayPair: PredictorData = degreeDayPredictors.find(predictorPair => {
+          let degreeDayPair: PredictorDataDeprecated = degreeDayPredictors.find(predictorPair => {
             return predictorPair.weatherStationId == predictor.weatherStationId && predictorPair.weatherDataType != predictor.weatherDataType && !updatedPredictorIds.includes(predictorPair.id);
           });
           let coolingBaseTemperature: number = 0;
           let heatingBaseTemperature: number = 0;
-          let cddPredictor: PredictorData;
-          let hddPredictor: PredictorData;
+          let cddPredictor: PredictorDataDeprecated;
+          let hddPredictor: PredictorDataDeprecated;
           let stationId: string = predictor.weatherStationId;
           if (predictor.weatherDataType == 'CDD') {
             cddPredictor = predictor;

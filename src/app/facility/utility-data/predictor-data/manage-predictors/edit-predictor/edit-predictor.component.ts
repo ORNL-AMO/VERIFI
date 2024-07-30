@@ -2,8 +2,8 @@ import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
-import { IdbAccount, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, PredictorData } from 'src/app/models/idb';
+import { PredictordbServiceDeprecated } from 'src/app/indexedDB/predictors-db.service';
+import { IdbAccount, IdbFacility, IdbPredictorEntryDeprecated, IdbUtilityMeter, IdbUtilityMeterData, PredictorDataDeprecated } from 'src/app/models/idb';
 import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
 import { UnitConversionTypes } from './unitConversionTypes';
 import { WeatherStation } from 'src/app/models/degreeDays';
@@ -30,17 +30,17 @@ export class EditPredictorComponent {
 
 
   addOrEdit: 'add' | 'edit';
-  predictorData: PredictorData;
+  predictorData: PredictorDataDeprecated;
   predictorForm: FormGroup;
   showReferencePredictors: boolean;
-  referencePredictors: Array<PredictorData>;
+  referencePredictors: Array<PredictorDataDeprecated>;
   unitConversionTypes: Array<{ measure: string, display: string }> = UnitConversionTypes;
   unitOptions: Array<string> = [];
   referencePredictorName: string;
   stations: Array<WeatherStation> = [];
   facility: IdbFacility;
-  facilityPredictorsEntries: Array<IdbPredictorEntry>;
-  constructor(private activatedRoute: ActivatedRoute, private predictorDbService: PredictordbService,
+  facilityPredictorsEntries: Array<IdbPredictorEntryDeprecated>;
+  constructor(private activatedRoute: ActivatedRoute, private predictorDbService: PredictordbServiceDeprecated,
     private router: Router, private facilityDbService: FacilitydbService,
     private formBuilder: FormBuilder,
     private weatherDataService: WeatherDataService,
@@ -73,14 +73,14 @@ export class EditPredictorComponent {
   }
 
   setPredictorDataEdit(predictorId: string) {
-    let facilityPredictors: Array<PredictorData> = this.predictorDbService.facilityPredictors.getValue();
-    let predictorData: PredictorData = facilityPredictors.find(predictor => { return predictor.id == predictorId });
+    let facilityPredictors: Array<PredictorDataDeprecated> = this.predictorDbService.facilityPredictors.getValue();
+    let predictorData: PredictorDataDeprecated = facilityPredictors.find(predictor => { return predictor.id == predictorId });
     this.predictorData = JSON.parse(JSON.stringify(predictorData));
     this.setPredictorForm();
   }
 
   setPredictorDataNew() {
-    let facilityPredictors: Array<PredictorData> = this.predictorDbService.facilityPredictors.getValue();
+    let facilityPredictors: Array<PredictorDataDeprecated> = this.predictorDbService.facilityPredictors.getValue();
     this.predictorData = this.predictorDbService.getNewPredictor(facilityPredictors);
     this.setPredictorForm();
   }
@@ -176,31 +176,31 @@ export class EditPredictorComponent {
   }
 
   async saveChanges(goToEntries?: boolean) {
-    this.loadingService.setLoadingMessage('Updating Predictors...');
-    this.loadingService.setLoadingStatus(true);
-    let needsWeatherDataUpdate: boolean = this.setPredictorDataFromForm();
-    this.predictorForm.markAsPristine();
-    let facilityPredictors: Array<PredictorData> = this.predictorDbService.facilityPredictors.getValue();
-    let facilityPredictorsCopy: Array<PredictorData> = JSON.parse(JSON.stringify(facilityPredictors));
-    if (this.addOrEdit == 'add') {
-      facilityPredictorsCopy.push(this.predictorData);
-      await this.predictorDbService.updateFacilityPredictorEntries(facilityPredictorsCopy);
-    } else {
-      let editPredictorIndex: number = facilityPredictorsCopy.findIndex(predictorCopy => { return predictorCopy.id == this.predictorData.id });
-      facilityPredictorsCopy[editPredictorIndex] = this.predictorData;
-      await this.predictorDbService.updateFacilityPredictorEntries(facilityPredictorsCopy);
-    }
-    if (this.predictorData.predictorType == 'Weather' && needsWeatherDataUpdate) {
-      await this.predictorDbService.updatePredictorDegreeDays(this.facility, this.predictorData);
-    }
-    await this.analysisDbService.updateAnalysisPredictors(facilityPredictorsCopy, this.facility.guid);
-    this.loadingService.setLoadingStatus(false);
-    this.toastNotificationService.showToast('Predictor Entries Updated!', undefined, undefined, false, 'alert-success');
-    if (!goToEntries) {
-      this.cancel();
-    } else {
-      this.router.navigateByUrl('facility/' + this.facility.id + '/utility/predictors/entries')
-    }
+    // this.loadingService.setLoadingMessage('Updating Predictors...');
+    // this.loadingService.setLoadingStatus(true);
+    // let needsWeatherDataUpdate: boolean = this.setPredictorDataFromForm();
+    // this.predictorForm.markAsPristine();
+    // let facilityPredictors: Array<PredictorDataDeprecated> = this.predictorDbService.facilityPredictors.getValue();
+    // let facilityPredictorsCopy: Array<PredictorDataDeprecated> = JSON.parse(JSON.stringify(facilityPredictors));
+    // if (this.addOrEdit == 'add') {
+    //   facilityPredictorsCopy.push(this.predictorData);
+    //   await this.predictorDbService.updateFacilityPredictorEntries(facilityPredictorsCopy);
+    // } else {
+    //   let editPredictorIndex: number = facilityPredictorsCopy.findIndex(predictorCopy => { return predictorCopy.id == this.predictorData.id });
+    //   facilityPredictorsCopy[editPredictorIndex] = this.predictorData;
+    //   await this.predictorDbService.updateFacilityPredictorEntries(facilityPredictorsCopy);
+    // }
+    // if (this.predictorData.predictorType == 'Weather' && needsWeatherDataUpdate) {
+    //   await this.predictorDbService.updatePredictorDegreeDays(this.facility, this.predictorData);
+    // }
+    // await this.analysisDbService.updateAnalysisPredictors(facilityPredictorsCopy, this.facility.guid);
+    // this.loadingService.setLoadingStatus(false);
+    // this.toastNotificationService.showToast('Predictor Entries Updated!', undefined, undefined, false, 'alert-success');
+    // if (!goToEntries) {
+    //   this.cancel();
+    // } else {
+    //   this.router.navigateByUrl('facility/' + this.facility.id + '/utility/predictors/entries')
+    // }
   }
 
   setShowReferencePredictors() {
@@ -208,7 +208,7 @@ export class EditPredictorComponent {
   }
 
   setReferencePredictors() {
-    let facilityPredictors: Array<PredictorData> = this.predictorDbService.facilityPredictors.getValue();
+    let facilityPredictors: Array<PredictorDataDeprecated> = this.predictorDbService.facilityPredictors.getValue();
     this.referencePredictors = facilityPredictors.filter(predictor => { return predictor.id != this.predictorData.id });
   }
 
@@ -222,8 +222,8 @@ export class EditPredictorComponent {
   // }
 
   setReferencePredictorName() {
-    let facilityPredictors: Array<PredictorData> = this.predictorDbService.facilityPredictors.getValue();
-    let referencePredictor: PredictorData = facilityPredictors.find(predictor => { return predictor.id == this.predictorForm.controls.referencePredictorId.value });
+    let facilityPredictors: Array<PredictorDataDeprecated> = this.predictorDbService.facilityPredictors.getValue();
+    let referencePredictor: PredictorDataDeprecated = facilityPredictors.find(predictor => { return predictor.id == this.predictorForm.controls.referencePredictorId.value });
     if (referencePredictor) {
       this.referencePredictorName = referencePredictor.name;
     }
@@ -265,7 +265,7 @@ export class EditPredictorComponent {
 
   goToPredictorEntry() {
     this.setPredictorDataFromForm();
-    let facilityPredictors: Array<PredictorData> = this.predictorDbService.facilityPredictors.getValue();
+    let facilityPredictors: Array<PredictorDataDeprecated> = this.predictorDbService.facilityPredictors.getValue();
     facilityPredictors.push(this.predictorData);
     this.predictorDbService.facilityPredictors.next(facilityPredictors);
     this.router.navigateByUrl('facility/' + this.facility.id + '/utility/predictors/entries/add-entry');
@@ -284,7 +284,7 @@ export class EditPredictorComponent {
     let startDate: Date = new Date(monthlyData[0].date);
     let endDate: Date = new Date(monthlyData[monthlyData.length - 1].date);
     while (startDate <= endDate) {
-      let newIdbPredictorEntry: IdbPredictorEntry = this.predictorDbService.getNewIdbPredictorEntry(this.facility.guid, this.facility.accountId, new Date(startDate));
+      let newIdbPredictorEntry: IdbPredictorEntryDeprecated = this.predictorDbService.getNewIdbPredictorEntry(this.facility.guid, this.facility.accountId, new Date(startDate));
       await firstValueFrom(this.predictorDbService.addWithObservable(newIdbPredictorEntry));
       startDate.setMonth(startDate.getMonth() + 1);
     }

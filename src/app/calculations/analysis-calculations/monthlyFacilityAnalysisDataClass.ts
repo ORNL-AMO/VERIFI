@@ -1,9 +1,11 @@
-import { IdbFacility, IdbPredictorEntry, PredictorData } from "src/app/models/idb";
+import { IdbFacility } from "src/app/models/idb";
 import * as _ from 'lodash';
 import { MonthlyAnalysisSummaryDataClass } from "./monthlyAnalysisSummaryDataClass";
 import { getFiscalYear } from "../shared-calculations/calanderizationFunctions";
 import { ConvertValue } from "../conversions/convertValue";
 import { MonthlyAnalysisCalculatedValuesSummation } from "./monthlyAnalysisCalculatedValuesClassSummation";
+import { IdbPredictorData } from "src/app/models/idbModels/predictorData";
+import { IdbPredictor } from "src/app/models/idbModels/predictor";
 
 export class MonthlyFacilityAnalysisDataClass {
 
@@ -17,7 +19,7 @@ export class MonthlyFacilityAnalysisDataClass {
     monthlyAnalysisCalculatedValues: MonthlyAnalysisCalculatedValuesSummation;
 
     currentMonthData: Array<MonthlyAnalysisSummaryDataClass>;
-    monthPredictorData: Array<IdbPredictorEntry>;
+    monthPredictorData: Array<IdbPredictorData>;
     baselineActualEnergyUse: number;
     facilityGUID: string;
     dataAdjustment: number;
@@ -25,16 +27,17 @@ export class MonthlyFacilityAnalysisDataClass {
     constructor(
         allFacilityAnalysisData: Array<MonthlyAnalysisSummaryDataClass>,
         monthDate: Date,
-        facilityPredictorEntries: Array<IdbPredictorEntry>,
+        facilityPredictorEntries: Array<IdbPredictorData>,
         facility: IdbFacility,
         priviousMonthsValues: Array<MonthlyFacilityAnalysisDataClass>,
-        baselineYear: number) {
+        baselineYear: number,
+        predictors: Array<IdbPredictor>) {
         this.facilityGUID = facility.guid;
         this.date = monthDate;
         this.setFiscalYear(facility);
         this.setCurrentMonthData(allFacilityAnalysisData);
         this.setMonthPredictorData(facilityPredictorEntries);
-        this.setPredictorUsage(facilityPredictorEntries);
+        this.setPredictorUsage(facilityPredictorEntries, predictors);
         this.setBaselineAdjustmentInput();
         this.setDataAdjustment();
         this.setModelYearDataAdjustment();
@@ -48,26 +51,25 @@ export class MonthlyFacilityAnalysisDataClass {
         });
     }
 
-    setMonthPredictorData(facilityPredictorEntries: Array<IdbPredictorEntry>) {
+    setMonthPredictorData(facilityPredictorEntries: Array<IdbPredictorData>) {
         this.monthPredictorData = facilityPredictorEntries.filter(predictorData => {
             let predictorDate: Date = new Date(predictorData.date);
             return predictorDate.getUTCFullYear() == this.date.getUTCFullYear() && predictorDate.getUTCMonth() == this.date.getUTCMonth();
         });
     }
 
-    setPredictorUsage(facilityPredictorEntries: Array<IdbPredictorEntry>) {
+    setPredictorUsage(facilityPredictorEntries: Array<IdbPredictorData>, predictors: Array<IdbPredictor>) {
         this.predictorUsage = new Array();
         if (facilityPredictorEntries.length != 0) {
-            let predictorVariables: Array<PredictorData> = facilityPredictorEntries[0].predictors;
-            predictorVariables.forEach(variable => {
+            predictors.forEach(variable => {
                 let usageVal: number = 0;
                 this.monthPredictorData.forEach(data => {
-                    let predictorData: PredictorData = data.predictors.find(predictor => { return predictor.id == variable.id });
+                    let predictorData: IdbPredictorData = facilityPredictorEntries.find(predictorData => { return predictorData.predictorId == variable.guid });
                     usageVal = usageVal + predictorData.amount;
                 });
                 this.predictorUsage.push({
                     usage: usageVal,
-                    predictorId: variable.id
+                    predictorId: variable.guid
                 });
             });
         }

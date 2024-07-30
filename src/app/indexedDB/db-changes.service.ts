@@ -1,14 +1,14 @@
 import { Injectable } from '@angular/core';
 import { LoadingService } from '../core-components/loading/loading.service';
 import { ToastNotificationsService } from '../core-components/toast-notifications/toast-notifications.service';
-import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport, IdbAnalysisItem, IdbCustomEmissionsItem, IdbCustomFuel, IdbCustomGWP, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from '../models/idb';
+import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport, IdbAnalysisItem, IdbCustomEmissionsItem, IdbCustomFuel, IdbCustomGWP, IdbFacility, IdbPredictorEntryDeprecated, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from '../models/idb';
 import { AccountAnalysisDbService } from './account-analysis-db.service';
 import { AccountdbService } from './account-db.service';
 import { AccountReportDbService } from './account-report-db.service';
 import { AnalysisDbService } from './analysis-db.service';
 import { CustomEmissionsDbService } from './custom-emissions-db.service';
 import { FacilitydbService } from './facility-db.service';
-import { PredictordbService } from './predictors-db.service';
+import { PredictordbServiceDeprecated } from './predictors-db.service';
 import { UpdateDbEntryService } from './update-db-entry.service';
 import { UtilityMeterdbService } from './utilityMeter-db.service';
 import { UtilityMeterDatadbService } from './utilityMeterData-db.service';
@@ -28,7 +28,7 @@ export class DbChangesService {
 
   constructor(private accountDbService: AccountdbService, private facilityDbService: FacilitydbService,
     private accountAnalysisDbService: AccountAnalysisDbService, private analysisDbService: AnalysisDbService,
-    private predictorsDbServiceDeprecated: PredictordbService, private utilityMeterDbService: UtilityMeterdbService,
+    private predictorsDbServiceDeprecated: PredictordbServiceDeprecated, private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
     private updateDbEntryService: UpdateDbEntryService,
@@ -172,7 +172,7 @@ export class DbChangesService {
 
   //Deprecated Predictor data
   async setPredictorsDeprecated(account: IdbAccount, facility?: IdbFacility) {
-    let predictors: Array<IdbPredictorEntry> = await this.predictorsDbServiceDeprecated.getAllAccountPredictors(account.guid);
+    let predictors: Array<IdbPredictorEntryDeprecated> = await this.predictorsDbServiceDeprecated.getAllAccountPredictors(account.guid);
     this.predictorsDbServiceDeprecated.accountPredictorEntries.next(predictors);
     if (facility) {
       this.setFacilityPredictorsDeprecated(facility);
@@ -180,8 +180,8 @@ export class DbChangesService {
   }
 
   setFacilityPredictorsDeprecated(facility: IdbFacility) {
-    let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorsDbServiceDeprecated.accountPredictorEntries.getValue();
-    let facilityPredictorEntries: Array<IdbPredictorEntry> = accountPredictorEntries.filter(item => { return item.facilityId == facility.guid });
+    let accountPredictorEntries: Array<IdbPredictorEntryDeprecated> = this.predictorsDbServiceDeprecated.accountPredictorEntries.getValue();
+    let facilityPredictorEntries: Array<IdbPredictorEntryDeprecated> = accountPredictorEntries.filter(item => { return item.facilityId == facility.guid });
     this.predictorsDbServiceDeprecated.facilityPredictorEntries.next(facilityPredictorEntries);
     if (facilityPredictorEntries.length != 0) {
       this.predictorsDbServiceDeprecated.facilityPredictors.next(facilityPredictorEntries[0].predictors);

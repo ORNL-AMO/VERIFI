@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
-import { PredictorData } from 'src/app/models/idb';
+import { PredictordbServiceDeprecated } from 'src/app/indexedDB/predictors-db.service';
+import { PredictorDataDeprecated } from 'src/app/models/idb';
 
 @Component({
   selector: 'app-predictor-tabs',
@@ -10,9 +10,9 @@ import { PredictorData } from 'src/app/models/idb';
 })
 export class PredictorTabsComponent {
 
-  facilityPredictors: Array<PredictorData>;
+  facilityPredictors: Array<PredictorDataDeprecated>;
   facilityPredictorsSub: Subscription;
-  constructor(private predictorDbService: PredictordbService){
+  constructor(private predictorDbService: PredictordbServiceDeprecated){
 
   }
 

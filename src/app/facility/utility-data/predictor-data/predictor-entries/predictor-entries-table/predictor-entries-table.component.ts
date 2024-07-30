@@ -4,8 +4,8 @@ import { Subscription, firstValueFrom } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
-import { IdbFacility, IdbPredictorEntry, PredictorData } from 'src/app/models/idb';
+import { PredictordbServiceDeprecated } from 'src/app/indexedDB/predictors-db.service';
+import { IdbFacility, IdbPredictorEntryDeprecated, PredictorDataDeprecated } from 'src/app/models/idb';
 import { CopyTableService } from 'src/app/shared/helper-services/copy-table.service';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import * as _ from 'lodash';
@@ -21,11 +21,11 @@ import { WeatherStation } from 'src/app/models/degreeDays';
 export class PredictorEntriesTableComponent {
   @ViewChild('predictorTable', { static: false }) predictorTable: ElementRef;
 
-  facilityPredictors: Array<PredictorData>;
+  facilityPredictors: Array<PredictorDataDeprecated>;
   facilityPredictorsSub: Subscription;
-  facilityPredictorEntries: Array<IdbPredictorEntry>;
+  facilityPredictorEntries: Array<IdbPredictorEntryDeprecated>;
   facilityPredictorEntriesSub: Subscription;
-  predictorEntryToDelete: IdbPredictorEntry;
+  predictorEntryToDelete: IdbPredictorEntryDeprecated;
   itemsPerPage: number;
   itemsPerPageSub: Subscription;
   currentPageNumber: number = 1;
@@ -38,7 +38,7 @@ export class PredictorEntriesTableComponent {
   hasWeatherData: boolean;
   copyingTable: boolean = false;
   hasWeatherDataWarnings: boolean = false;
-  constructor(private predictorsDbService: PredictordbService, private router: Router, private loadingService: LoadingService,
+  constructor(private predictorsDbService: PredictordbServiceDeprecated, private router: Router, private loadingService: LoadingService,
     private facilityDbService: FacilitydbService, private toastNotificationsService: ToastNotificationsService,
     private sharedDataService: SharedDataService, private copyTableService: CopyTableService,
     private weatherDataService: WeatherDataService, private degreeDaysService: DegreeDaysService) { }
@@ -72,7 +72,7 @@ export class PredictorEntriesTableComponent {
   setHasData() {
     this.hasData = (this.facilityPredictors && this.facilityPredictors.length != 0) || (this.facilityPredictorEntries && this.facilityPredictorEntries.length != 0);
     if (this.hasData) {
-      let findPredictor: PredictorData = this.facilityPredictors.find(predictor => { return predictor.predictorType == 'Weather' });
+      let findPredictor: PredictorDataDeprecated = this.facilityPredictors.find(predictor => { return predictor.predictorType == 'Weather' });
       this.hasWeatherData = findPredictor != undefined;
     } else {
       this.hasWeatherData = false;
@@ -85,7 +85,7 @@ export class PredictorEntriesTableComponent {
     this.router.navigateByUrl('facility/' + selectedFacility.id + '/utility/predictors/entries/add-entry');
   }
 
-  setDeletePredictorEntry(predictorEntry: IdbPredictorEntry) {
+  setDeletePredictorEntry(predictorEntry: IdbPredictorEntryDeprecated) {
     this.predictorEntryToDelete = predictorEntry;
   }
 
@@ -101,7 +101,7 @@ export class PredictorEntriesTableComponent {
     this.predictorEntryToDelete = undefined;
   }
 
-  setEditPredictorEntry(predictorEntry: IdbPredictorEntry) {
+  setEditPredictorEntry(predictorEntry: IdbPredictorEntryDeprecated) {
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     this.router.navigateByUrl('facility/' + selectedFacility.id + '/utility/predictors/entries/edit-entry/' + predictorEntry.guid);
   }
@@ -111,20 +111,20 @@ export class PredictorEntriesTableComponent {
   }
 
   checkAll() {
-    let orderedItems: Array<IdbPredictorEntry> = this.getOrderedData();
-    let displayedItems: Array<IdbPredictorEntry> = orderedItems.slice(((this.currentPageNumber - 1) * this.itemsPerPage), (this.currentPageNumber * this.itemsPerPage))
+    let orderedItems: Array<IdbPredictorEntryDeprecated> = this.getOrderedData();
+    let displayedItems: Array<IdbPredictorEntryDeprecated> = orderedItems.slice(((this.currentPageNumber - 1) * this.itemsPerPage), (this.currentPageNumber * this.itemsPerPage))
     displayedItems.forEach(item => {
       item.checked = this.allChecked;
     });
     this.hasCheckedItems = (this.allChecked == true);
   }
 
-  getOrderedData(): Array<IdbPredictorEntry> {
+  getOrderedData(): Array<IdbPredictorEntryDeprecated> {
     if (this.orderDataField == 'date') {
       return _.orderBy(this.facilityPredictorEntries, this.orderDataField, this.orderByDirection)
     } else {
-      return _.orderBy(this.facilityPredictorEntries, (data: IdbPredictorEntry) => {
-        let predictorData: PredictorData = data.predictors.find(predictor => { return predictor.name == this.orderDataField });
+      return _.orderBy(this.facilityPredictorEntries, (data: IdbPredictorEntryDeprecated) => {
+        let predictorData: PredictorDataDeprecated = data.predictors.find(predictor => { return predictor.name == this.orderDataField });
         if (predictorData) {
           return predictorData.amount;
         } else {
@@ -136,8 +136,8 @@ export class PredictorEntriesTableComponent {
 
   setHasChecked() {
     let hasChecked: boolean = false;
-    let predictorEntries: Array<IdbPredictorEntry> = this.getOrderedData();
-    let displayedItems: Array<IdbPredictorEntry> = predictorEntries.slice(((this.currentPageNumber - 1) * this.itemsPerPage), (this.currentPageNumber * this.itemsPerPage))
+    let predictorEntries: Array<IdbPredictorEntryDeprecated> = this.getOrderedData();
+    let displayedItems: Array<IdbPredictorEntryDeprecated> = predictorEntries.slice(((this.currentPageNumber - 1) * this.itemsPerPage), (this.currentPageNumber * this.itemsPerPage))
     displayedItems.forEach(item => {
       if (item.checked) {
         hasChecked = true;
@@ -157,7 +157,7 @@ export class PredictorEntriesTableComponent {
   async bulkDelete() {
     this.loadingService.setLoadingMessage("Deleting Predictor Entries...");
     this.loadingService.setLoadingStatus(true);
-    let checkedItems: Array<IdbPredictorEntry> = new Array();
+    let checkedItems: Array<IdbPredictorEntryDeprecated> = new Array();
     this.facilityPredictorEntries.forEach(entry => {
       if (entry.checked == true) {
         checkedItems.push(entry);
@@ -174,9 +174,9 @@ export class PredictorEntriesTableComponent {
 
   async finishDelete() {
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    let accountPredictors: Array<IdbPredictorEntry> = await this.predictorsDbService.getAllAccountPredictors(selectedFacility.accountId);
+    let accountPredictors: Array<IdbPredictorEntryDeprecated> = await this.predictorsDbService.getAllAccountPredictors(selectedFacility.accountId);
     this.predictorsDbService.accountPredictorEntries.next(accountPredictors);
-    let facilityPredictors: Array<IdbPredictorEntry> = accountPredictors.filter(predictor => { return predictor.facilityId == selectedFacility.guid });
+    let facilityPredictors: Array<IdbPredictorEntryDeprecated> = accountPredictors.filter(predictor => { return predictor.facilityId == selectedFacility.guid });
     this.predictorsDbService.facilityPredictorEntries.next(facilityPredictors);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationsService.showToast("Predictor Data Deleted!", undefined, undefined, false, "alert-success");
@@ -204,13 +204,13 @@ export class PredictorEntriesTableComponent {
     }, 200)
   }
 
-  async viewWeatherData(predictorEntry: IdbPredictorEntry) {
-    let predictor: PredictorData = predictorEntry.predictors.find(pData => { return pData.predictorType == 'Weather' });
+  async viewWeatherData(predictorEntry: IdbPredictorEntryDeprecated) {
+    let predictor: PredictorDataDeprecated = predictorEntry.predictors.find(pData => { return pData.predictorType == 'Weather' });
     let weatherStation: WeatherStation = await this.degreeDaysService.getStationById(predictor.weatherStationId);
     this.weatherDataService.selectedStation = weatherStation;
     if (predictor.weatherDataType == 'CDD') {
       this.weatherDataService.coolingTemp = predictor.coolingBaseTemperature;
-      let predictorPair: PredictorData = predictorEntry.predictors.find(predictorPair => { return predictorPair.weatherStationId == predictor.weatherStationId && predictorPair.weatherDataType == 'HDD' });
+      let predictorPair: PredictorDataDeprecated = predictorEntry.predictors.find(predictorPair => { return predictorPair.weatherStationId == predictor.weatherStationId && predictorPair.weatherDataType == 'HDD' });
       if (predictorPair) {
         this.weatherDataService.heatingTemp = predictorPair.heatingBaseTemperature;
         this.weatherDataService.weatherDataSelection = 'degreeDays';
@@ -219,7 +219,7 @@ export class PredictorEntriesTableComponent {
       }
     } else {
       this.weatherDataService.heatingTemp = predictor.heatingBaseTemperature;
-      let predictorPair: PredictorData = predictorEntry.predictors.find(predictorPair => { return predictorPair.weatherStationId == predictor.weatherStationId && predictorPair.weatherDataType == 'CDD' });
+      let predictorPair: PredictorDataDeprecated = predictorEntry.predictors.find(predictorPair => { return predictorPair.weatherStationId == predictor.weatherStationId && predictorPair.weatherDataType == 'CDD' });
       if (predictorPair) {
         this.weatherDataService.coolingTemp = predictorPair.coolingBaseTemperature;
         this.weatherDataService.weatherDataSelection = 'degreeDays';
@@ -238,8 +238,8 @@ export class PredictorEntriesTableComponent {
   }
 
   setHasWeatherDataWarning() {
-    let allPredictorData: Array<PredictorData> = this.facilityPredictorEntries.flatMap(entry => { return entry.predictors });
-    let findError: PredictorData = allPredictorData.find(data => {
+    let allPredictorData: Array<PredictorDataDeprecated> = this.facilityPredictorEntries.flatMap(entry => { return entry.predictors });
+    let findError: PredictorDataDeprecated = allPredictorData.find(data => {
       return data.predictorType == 'Weather' && data.weatherDataWarning;
     });
     this.hasWeatherDataWarnings = findError != undefined;

@@ -6,12 +6,12 @@ import { AccountReportDbService } from './indexedDB/account-report-db.service';
 import { AnalysisDbService } from './indexedDB/analysis-db.service';
 import { CustomEmissionsDbService } from './indexedDB/custom-emissions-db.service';
 import { FacilitydbService } from './indexedDB/facility-db.service';
-import { PredictordbService } from './indexedDB/predictors-db.service';
+import { PredictordbServiceDeprecated } from './indexedDB/predictors-db.service';
 import { UpdateDbEntryService } from './indexedDB/update-db-entry.service';
 import { UtilityMeterdbService } from './indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from './indexedDB/utilityMeterData-db.service';
 import { UtilityMeterGroupdbService } from './indexedDB/utilityMeterGroup-db.service';
-import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport, IdbAnalysisItem, IdbCustomEmissionsItem, IdbCustomFuel, IdbCustomGWP, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from './models/idb';
+import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport, IdbAnalysisItem, IdbCustomEmissionsItem, IdbCustomFuel, IdbCustomGWP, IdbFacility, IdbPredictorEntryDeprecated, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from './models/idb';
 import { EGridService } from './shared/helper-services/e-grid.service';
 import { firstValueFrom } from 'rxjs';
 import { environment } from 'src/environments/environment';
@@ -46,7 +46,7 @@ export class AppComponent {
     private facilityDbService: FacilitydbService,
     private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private predictorsDbService: PredictordbService,
+    private predictorsDbServiceDeprecated: PredictordbServiceDeprecated,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
     public router: Router,
     private eGridService: EGridService,
@@ -211,8 +211,8 @@ export class AppComponent {
     //set predictors
     this.loadingMessage = "Loading Predictors..";
     //TODO: OLD PREDICTORS METHOD
-    let predictors: Array<IdbPredictorEntry> = await this.predictorsDbService.getAllAccountPredictors(account.guid);
-    this.predictorsDbService.accountPredictorEntries.next(predictors);
+    let predictors: Array<IdbPredictorEntryDeprecated> = await this.predictorsDbServiceDeprecated.getAllAccountPredictors(account.guid);
+    this.predictorsDbServiceDeprecated.accountPredictorEntries.next(predictors);
     //NEW PREDICTORS V2
     let predictorsV2: Array<IdbPredictor> = await this.predictorDbService.getAllAccountPredictors(account.guid);
     this.predictorDbService.accountPredictors.next(predictorsV2);

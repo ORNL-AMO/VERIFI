@@ -1,8 +1,6 @@
 import { Injectable } from '@angular/core';
 import { IdbAccount, IdbFacility, IdbPredictorEntryDeprecated, IdbUtilityMeterGroup } from '../models/idb';
 import { UtilityMeterGroupdbService } from '../indexedDB/utilityMeterGroup-db.service';
-import { checkSameMonth } from './upload-helper-functions';
-import { PredictordbService } from '../indexedDB/predictors-db.service';
 import * as XLSX from 'xlsx';
 import { MeterSource } from '../models/constantsAndTypes';
 
@@ -11,8 +9,7 @@ import { MeterSource } from '../models/constantsAndTypes';
 })
 export class UploadDataSharedFunctionsService {
 
-  constructor(private utilityMeterGroupDbService: UtilityMeterGroupdbService,
-    private predictorDbService: PredictordbService) { }
+  constructor(private utilityMeterGroupDbService: UtilityMeterGroupdbService) { }
 
   getMeterGroup(groupName: string, facilityId: string, newGroups: Array<IdbUtilityMeterGroup>, account: IdbAccount, meterSource: MeterSource): { group: IdbUtilityMeterGroup, newGroups: Array<IdbUtilityMeterGroup> } {
     let accountGroups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.getAccountMeterGroupsCopy();

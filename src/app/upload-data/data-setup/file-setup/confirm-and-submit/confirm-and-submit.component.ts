@@ -8,7 +8,6 @@ import { UtilityMeterDataService } from 'src/app/facility/utility-data/energy-co
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
@@ -33,7 +32,6 @@ export class ConfirmAndSubmitComponent implements OnInit {
     private loadingService: LoadingService,
     private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private predictorDbService: PredictordbService,
     private toastNotificationService: ToastNotificationsService,
     private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,

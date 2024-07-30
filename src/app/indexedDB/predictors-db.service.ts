@@ -13,7 +13,7 @@ import { UtilityMeterDatadbService } from './utilityMeterData-db.service';
 @Injectable({
     providedIn: 'root'
 })
-export class PredictordbService {
+export class PredictordbServiceDeprecated {
 
     accountPredictorEntries: BehaviorSubject<Array<IdbPredictorEntryDeprecated>>;
     facilityPredictorEntries: BehaviorSubject<Array<IdbPredictorEntryDeprecated>>;

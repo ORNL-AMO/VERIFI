@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { AccountdbService } from './account-db.service';
-import { PredictordbService } from './predictors-db.service';
+import { PredictordbServiceDeprecated } from './predictors-db.service';
 import { UtilityMeterDatadbService } from './utilityMeterData-db.service';
 import { UtilityMeterdbService } from './utilityMeter-db.service';
 import { UtilityMeterGroupdbService } from './utilityMeterGroup-db.service';
@@ -11,7 +11,7 @@ import { AccountAnalysisDbService } from './account-analysis-db.service';
 import { CustomEmissionsDbService } from './custom-emissions-db.service';
 import { CustomFuelDbService } from './custom-fuel-db.service';
 import { CustomGWPDbService } from './custom-gwp-db.service';
-import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport, IdbAnalysisItem, IdbCustomEmissionsItem, IdbCustomFuel, IdbCustomGWP, IdbElectronBackup, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from '../models/idb';
+import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport, IdbAnalysisItem, IdbCustomEmissionsItem, IdbCustomFuel, IdbCustomGWP, IdbElectronBackup, IdbFacility, IdbPredictorEntryDeprecated, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from '../models/idb';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { ElectronBackupsDbService } from './electron-backups-db.service';
@@ -34,7 +34,7 @@ export class DeleteDataService {
   }>;
 
   accountToDelete: IdbAccount;
-  accountPredictorsDeprecated: Array<IdbPredictorEntry>;
+  accountPredictorsDeprecated: Array<IdbPredictorEntryDeprecated>;
   accountPredictors: Array<IdbPredictor>;
   accountPredictorData: Array<IdbPredictorData>;
 
@@ -52,7 +52,7 @@ export class DeleteDataService {
 
   pauseDelete: BehaviorSubject<boolean>;
   constructor(private accountDbService: AccountdbService,
-    private predictorDbServiceDeprecated: PredictordbService,
+    private predictorDbServiceDeprecated: PredictordbServiceDeprecated,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
@@ -93,7 +93,7 @@ export class DeleteDataService {
     if (this.accountToDelete) {
       this.isDeleting.next(true);
       //predictors
-      this.predictorDbServiceDeprecated.getAll().subscribe((allPredictors: Array<IdbPredictorEntry>) => {
+      this.predictorDbServiceDeprecated.getAll().subscribe((allPredictors: Array<IdbPredictorEntryDeprecated>) => {
         this.accountPredictorsDeprecated = allPredictors.filter(idbPredictor => {
           return idbPredictor.accountId == this.accountToDelete.guid;
         })

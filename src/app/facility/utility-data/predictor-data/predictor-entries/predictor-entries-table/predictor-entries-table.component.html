@@ -65,7 +65,7 @@
         </thead>
         <tbody class="table-group-divider">
             <tr
-                *ngFor="let predictorEntry of facilityPredictorEntries | predictorsOrderBy: orderDataField: orderByDirection | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage">
+                *ngFor="let predictorEntry of facilityPredictorEntries | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage">
                 <td class="input" *ngIf="!copyingTable">
                     <input type="checkbox" name="predictorEntry" (change)="setHasChecked()"
                         [(ngModel)]="predictorEntry.checked">

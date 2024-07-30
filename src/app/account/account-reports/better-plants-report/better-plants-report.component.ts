@@ -5,15 +5,18 @@ import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport, IdbAnalysisItem, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport, IdbAnalysisItem, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { BetterPlantsSummary } from 'src/app/models/overview-report';
 import { BetterPlantsReportClass } from 'src/app/calculations/better-plants-calculations/betterPlantsReportClass';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { AccountReportsService } from '../account-reports.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { BetterPlantsExcelWriterService } from '../excel-writer-services/better-plants-excel-writer.service';
+import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
+import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
+import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
+import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 
 @Component({
   selector: 'app-better-plants-report',
@@ -35,7 +38,8 @@ export class BetterPlantsReportComponent implements OnInit {
     private accountReportsService: AccountReportsService,
     private router: Router, private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService,
-    private predictorDbService: PredictordbService,
+    private predictorDbService: PredictorDbService,
+    private predictorDataDbService: PredictorDataDbService,
     private analysisDbService: AnalysisDbService,
     private accountAnalysisDbService: AccountAnalysisDbService,
     private utilityMeterDbService: UtilityMeterdbService,
@@ -76,7 +80,8 @@ export class BetterPlantsReportComponent implements OnInit {
 
   setBetterPlantsSummary() {
     let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
-    let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.accountPredictorEntries.getValue();
+    let accountPredictorEntries: Array<IdbPredictorData> = this.predictorDataDbService.accountPredictorData.getValue();
+    let accountPredictors: Array<IdbPredictor> = this.predictorDbService.accountPredictors.getValue();
     let accountFacilityAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
     let includedFacilityIds: Array<string> = new Array();
     this.selectedAnalysisItem.facilityAnalysisItems.forEach(item => {
@@ -109,7 +114,8 @@ export class BetterPlantsReportComponent implements OnInit {
         accountAnalysisItems: accountFacilityAnalysisItems,
         meters: includedFacilityMeters,
         meterData: accountMeterData,
-        includeAllYears: this.selectedReport.betterPlantsReportSetup.includeAllYears
+        includeAllYears: this.selectedReport.betterPlantsReportSetup.includeAllYears,
+        accountPredictors: accountPredictors
       });
     } else {
       // Web Workers are not supported in this environment.
@@ -125,7 +131,8 @@ export class BetterPlantsReportComponent implements OnInit {
           accountFacilities,
           accountFacilityAnalysisItems,
           includedFacilityMeters,
-          accountMeterData
+          accountMeterData,
+          accountPredictors
         );
         let betterPlantsSummary: BetterPlantsSummary = betterPlantsReportClass.getBetterPlantsSummary();
         this.betterPlantsSummaries.push(betterPlantsSummary);

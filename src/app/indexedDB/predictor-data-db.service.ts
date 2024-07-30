@@ -44,6 +44,7 @@ export class PredictorDataDbService {
     }
 
     updateWithObservable(predictorData: IdbPredictorData): Observable<IdbPredictorData> {
+        predictorData.modifiedDate = new Date();
         return this.dbService.update('predictorData', predictorData);
     }
 

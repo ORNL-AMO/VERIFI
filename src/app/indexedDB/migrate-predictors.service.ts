@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
-import { PredictordbService } from './predictors-db.service';
+import { PredictordbServiceDeprecated } from './predictors-db.service';
 import { PredictorDbService } from './predictor-db.service';
 import { PredictorDataDbService } from './predictor-data-db.service';
-import { IdbAccount, IdbFacility, IdbPredictorEntry, PredictorData } from '../models/idb';
+import { IdbAccount, IdbFacility, IdbPredictorEntryDeprecated, PredictorDataDeprecated } from '../models/idb';
 import { FacilitydbService } from './facility-db.service';
 import { getNewIdbPredictor, IdbPredictor } from '../models/idbModels/predictor';
 import { firstValueFrom } from 'rxjs';
@@ -17,7 +17,7 @@ import { LoadingService } from '../core-components/loading/loading.service';
 export class MigratePredictorsService {
 
   constructor(
-    private predictorDbServiceDeprecated: PredictordbService,
+    private predictorDbServiceDeprecated: PredictordbServiceDeprecated,
     private predictorDbService: PredictorDbService,
     private predictorDataDbService: PredictorDataDbService,
     private facilityDbService: FacilitydbService,
@@ -30,16 +30,16 @@ export class MigratePredictorsService {
     this.loadingService.setLoadingMessage('MIGRATION INITIATED');
     this.loadingService.setLoadingStatus(true);
     let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
-    let predictorEntries: Array<IdbPredictorEntry> = this.predictorDbServiceDeprecated.accountPredictorEntries.getValue();
+    let predictorEntries: Array<IdbPredictorEntryDeprecated> = this.predictorDbServiceDeprecated.accountPredictorEntries.getValue();
     for (let index = 0; index < facilities.length; index++) {
       let facility: IdbFacility = facilities[index];
-      let facilityEntries: Array<IdbPredictorEntry> = predictorEntries.filter(entry => {
+      let facilityEntries: Array<IdbPredictorEntryDeprecated> = predictorEntries.filter(entry => {
         return entry.facilityId == facility.guid;
       });
       if (facilityEntries.length > 0) {
-        let predictorDataDep: Array<PredictorData> = facilityEntries[0].predictors;
+        let predictorDataDep: Array<PredictorDataDeprecated> = facilityEntries[0].predictors;
         for (let i = 0; i < predictorDataDep.length; i++) {
-          let oldPredictor: PredictorData = predictorDataDep[i];
+          let oldPredictor: PredictorDataDeprecated = predictorDataDep[i];
           let newPredictor: IdbPredictor = getNewIdbPredictor(facility.accountId, facility.guid);
           newPredictor.guid = oldPredictor.id;
           newPredictor.name = oldPredictor.name;
@@ -54,8 +54,8 @@ export class MigratePredictorsService {
           newPredictor.weatherDataWarning = oldPredictor.weatherDataWarning;
           await firstValueFrom(this.predictorDbService.addWithObservable(newPredictor));
           for (let entryIndex = 0; entryIndex < facilityEntries.length; entryIndex++) {
-            let oldEntry: IdbPredictorEntry = facilityEntries[entryIndex];
-            let oldEntryPredictor: PredictorData = oldEntry.predictors.find(predictor => {
+            let oldEntry: IdbPredictorEntryDeprecated = facilityEntries[entryIndex];
+            let oldEntryPredictor: PredictorDataDeprecated = oldEntry.predictors.find(predictor => {
               return predictor.id == newPredictor.guid
             });
             let newIdbPredictorData: IdbPredictorData = getNewIdbPredictorData(newPredictor, undefined);
