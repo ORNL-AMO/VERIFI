@@ -4,7 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { UploadDataService } from 'src/app/upload-data/upload-data.service';
 import * as _ from 'lodash';
 import { Subscription } from 'rxjs';
-import { ColumnGroup, ColumnItem, FileReference } from 'src/app/upload-data/upload-data-models';
+import { ColumnGroup, ColumnItem, FileReference, getEmptyFileReference } from 'src/app/upload-data/upload-data-models';
 @Component({
   selector: 'app-identify-columns',
   templateUrl: './identify-columns.component.html',
@@ -12,28 +12,7 @@ import { ColumnGroup, ColumnItem, FileReference } from 'src/app/upload-data/uplo
 })
 export class IdentifyColumnsComponent implements OnInit {
 
-  fileReference: FileReference = {
-    name: '',
-    file: undefined,
-    dataSubmitted: false,
-    id: undefined,
-    workbook: undefined,
-    isTemplate: false,
-    selectedWorksheetName: '',
-    selectedWorksheetData: [],
-    columnGroups: [],
-    meterFacilityGroups: [],
-    predictorFacilityGroups: [],
-    headerMap: [],
-    importFacilities: [],
-    meters: [],
-    meterData: [],
-    predictorEntries: [],
-    skipExistingReadingsMeterIds: [],
-    skipExistingPredictorFacilityIds: [],
-    newMeterGroups: [],
-    selectedFacilityId: undefined
-  };
+  fileReference: FileReference = getEmptyFileReference();
   minDate: Date;
   maxDate: Date;
   columnGroupItemIds: Array<string>;

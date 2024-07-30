@@ -1,7 +1,7 @@
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
-import { IdbFacility, IdbPredictorEntry, IdbUtilityMeterData, PredictorData } from '../models/idb';
+import { IdbFacility, IdbPredictorEntryDeprecated, IdbUtilityMeterData, PredictorDataDeprecated } from '../models/idb';
 import { FacilitydbService } from './facility-db.service';
 import * as _ from 'lodash';
 import { DegreeDaysService } from '../shared/helper-services/degree-days.service';
@@ -15,31 +15,31 @@ import { UtilityMeterDatadbService } from './utilityMeterData-db.service';
 })
 export class PredictordbService {
 
-    accountPredictorEntries: BehaviorSubject<Array<IdbPredictorEntry>>;
-    facilityPredictorEntries: BehaviorSubject<Array<IdbPredictorEntry>>;
-    facilityPredictors: BehaviorSubject<Array<PredictorData>>;
+    accountPredictorEntries: BehaviorSubject<Array<IdbPredictorEntryDeprecated>>;
+    facilityPredictorEntries: BehaviorSubject<Array<IdbPredictorEntryDeprecated>>;
+    facilityPredictors: BehaviorSubject<Array<PredictorDataDeprecated>>;
     constructor(private dbService: NgxIndexedDBService, private facilityDbService: FacilitydbService, private degreeDaysService: DegreeDaysService,
         private loadingService: LoadingService, private utilityMeterDataDbService: UtilityMeterDatadbService) {
-        this.facilityPredictorEntries = new BehaviorSubject<Array<IdbPredictorEntry>>(new Array());
-        this.facilityPredictors = new BehaviorSubject<Array<PredictorData>>(new Array());
-        this.accountPredictorEntries = new BehaviorSubject<Array<IdbPredictorEntry>>(new Array());
+        this.facilityPredictorEntries = new BehaviorSubject<Array<IdbPredictorEntryDeprecated>>(new Array());
+        this.facilityPredictors = new BehaviorSubject<Array<PredictorDataDeprecated>>(new Array());
+        this.accountPredictorEntries = new BehaviorSubject<Array<IdbPredictorEntryDeprecated>>(new Array());
     }
 
-    getAll(): Observable<Array<IdbPredictorEntry>> {
+    getAll(): Observable<Array<IdbPredictorEntryDeprecated>> {
         return this.dbService.getAll('predictors');
     }
 
-    async getAllAccountPredictors(accountId: string): Promise<Array<IdbPredictorEntry>> {
-        let allPredictors: Array<IdbPredictorEntry> = await firstValueFrom(this.getAll());
-        let predictors: Array<IdbPredictorEntry> = allPredictors.filter(predictor => { return predictor.accountId == accountId });
+    async getAllAccountPredictors(accountId: string): Promise<Array<IdbPredictorEntryDeprecated>> {
+        let allPredictors: Array<IdbPredictorEntryDeprecated> = await firstValueFrom(this.getAll());
+        let predictors: Array<IdbPredictorEntryDeprecated> = allPredictors.filter(predictor => { return predictor.accountId == accountId });
         return predictors;
     }
 
-    getById(predictorId: number): Observable<IdbPredictorEntry> {
+    getById(predictorId: number): Observable<IdbPredictorEntryDeprecated> {
         return this.dbService.getByKey('predictors', predictorId);
     }
 
-    getByIndex(indexName: string, indexValue: number): Observable<IdbPredictorEntry> {
+    getByIndex(indexName: string, indexValue: number): Observable<IdbPredictorEntryDeprecated> {
         return this.dbService.getByIndex('predictors', indexName, indexValue);
     }
 
@@ -47,7 +47,7 @@ export class PredictordbService {
         return this.dbService.count('predictors');
     }
 
-    updateOnImport(values: IdbPredictorEntry): Observable<any> {
+    updateOnImport(values: IdbPredictorEntryDeprecated): Observable<any> {
         values.dbDate = new Date();
         return this.dbService.update('predictors', values);
     }
@@ -57,17 +57,17 @@ export class PredictordbService {
     }
 
     async deleteAllFacilityPredictors(facilityId: string) {
-        let accountPredictorEntries: Array<IdbPredictorEntry> = this.accountPredictorEntries.getValue();
-        let facilityPredictorEntries: Array<IdbPredictorEntry> = accountPredictorEntries.filter(entry => { return entry.facilityId == facilityId });
+        let accountPredictorEntries: Array<IdbPredictorEntryDeprecated> = this.accountPredictorEntries.getValue();
+        let facilityPredictorEntries: Array<IdbPredictorEntryDeprecated> = accountPredictorEntries.filter(entry => { return entry.facilityId == facilityId });
         await this.deletePredictorsAsync(facilityPredictorEntries);
     }
 
     async deleteAllSelectedAccountPredictors() {
-        let accountPredictorEntries: Array<IdbPredictorEntry> = this.accountPredictorEntries.getValue();
+        let accountPredictorEntries: Array<IdbPredictorEntryDeprecated> = this.accountPredictorEntries.getValue();
         await this.deletePredictorsAsync(accountPredictorEntries);
     }
 
-    async deletePredictorsAsync(accountPredictorEntries: Array<IdbPredictorEntry>) {
+    async deletePredictorsAsync(accountPredictorEntries: Array<IdbPredictorEntryDeprecated>) {
         for (let i = 0; i < accountPredictorEntries.length; i++) {
             if (i % 25 == 0 || i == 1) {
                 this.loadingService.setLoadingMessage('Deleting Predictors (' + i + '/' + accountPredictorEntries.length + ')...');
@@ -76,7 +76,7 @@ export class PredictordbService {
         }
     }
 
-    getNewIdbPredictorEntry(facilityId: string, accountId: string, date: Date): IdbPredictorEntry {
+    getNewIdbPredictorEntry(facilityId: string, accountId: string, date: Date): IdbPredictorEntryDeprecated {
         return {
             facilityId: facilityId,
             accountId: accountId,
@@ -86,8 +86,8 @@ export class PredictordbService {
         }
     }
 
-    async importNewPredictor(newPredictor: PredictorData) {
-        let facilityPredictorEntries: Array<IdbPredictorEntry> = this.facilityPredictorEntries.getValue();
+    async importNewPredictor(newPredictor: PredictorDataDeprecated) {
+        let facilityPredictorEntries: Array<IdbPredictorEntryDeprecated> = this.facilityPredictorEntries.getValue();
         for (let i = 0; i < facilityPredictorEntries.length; i++) {
             facilityPredictorEntries[i].predictors.push(newPredictor);
             await this.updateOnImport(facilityPredictorEntries[i]);
@@ -95,7 +95,7 @@ export class PredictordbService {
         }
     }
 
-    getNewPredictor(facilityPredictors: Array<PredictorData>): PredictorData {
+    getNewPredictor(facilityPredictors: Array<PredictorDataDeprecated>): PredictorDataDeprecated {
         return {
             name: 'Predictor #' + (facilityPredictors.length + 1),
             amount: undefined,
@@ -114,10 +114,10 @@ export class PredictordbService {
     }
 
 
-    getNewPredictorEntry(): IdbPredictorEntry {
+    getNewPredictorEntry(): IdbPredictorEntryDeprecated {
         let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
         let newPredictorDate: Date = new Date();
-        let facilityPredictorEntries: Array<IdbPredictorEntry> = this.facilityPredictorEntries.getValue();
+        let facilityPredictorEntries: Array<IdbPredictorEntryDeprecated> = this.facilityPredictorEntries.getValue();
         if (facilityPredictorEntries.length != 0) {
             //find last date and add a month
             let dates: Array<Date> = facilityPredictorEntries.map(entry => { return new Date(entry.date) });
@@ -131,12 +131,12 @@ export class PredictordbService {
             newPredictorDate = new Date(startReadingsDate);
         }
 
-        let predictors: Array<PredictorData> = JSON.parse(JSON.stringify(this.facilityPredictors.getValue()))
+        let predictors: Array<PredictorDataDeprecated> = JSON.parse(JSON.stringify(this.facilityPredictors.getValue()))
         predictors.forEach(predictor => {
             predictor.amount = undefined;
         });
 
-        let newPredictorEntry: IdbPredictorEntry = {
+        let newPredictorEntry: IdbPredictorEntryDeprecated = {
             facilityId: selectedFacility.guid,
             accountId: selectedFacility.accountId,
             guid: Math.random().toString(36).substr(2, 9),
@@ -146,19 +146,19 @@ export class PredictordbService {
         return newPredictorEntry;
     }
 
-    async importNewPredictorEntries(entries: Array<IdbPredictorEntry>) {
+    async importNewPredictorEntries(entries: Array<IdbPredictorEntryDeprecated>) {
         for (let index = 0; index < entries.length; index++) {
-            let entry: IdbPredictorEntry = entries[index];
+            let entry: IdbPredictorEntryDeprecated = entries[index];
             await firstValueFrom(this.addWithObservable(entry));
         }
     }
 
-    async updateFacilityPredictorEntries(updatedPredictors: Array<PredictorData>) {
-        let facilityPredictorEntries: Array<IdbPredictorEntry> = this.facilityPredictorEntries.getValue();
-        let faclilityPredictors: Array<PredictorData> = this.facilityPredictors.getValue();
+    async updateFacilityPredictorEntries(updatedPredictors: Array<PredictorDataDeprecated>) {
+        let facilityPredictorEntries: Array<IdbPredictorEntryDeprecated> = this.facilityPredictorEntries.getValue();
+        let faclilityPredictors: Array<PredictorDataDeprecated> = this.facilityPredictors.getValue();
         let facilityPredictorIds: Array<string> = faclilityPredictors.map(predictor => { return predictor.id });
         //track new predictors to add
-        let newPredictors: Array<PredictorData> = new Array();
+        let newPredictors: Array<PredictorDataDeprecated> = new Array();
         updatedPredictors.forEach(predictor => {
             if (!facilityPredictorIds.includes(predictor.id)) {
                 newPredictors.push(predictor);
@@ -181,17 +181,17 @@ export class PredictordbService {
         await this.finishPredictorChanges(selectedFacility);
     }
 
-    async updateFacilityPredictorEntriesInAccount(updatedPredictors: Array<PredictorData>, facility: IdbFacility) {
-        let accountPredictorEntries: Array<IdbPredictorEntry> = this.accountPredictorEntries.getValue();
-        let facilityPredictorEntries: Array<IdbPredictorEntry> = accountPredictorEntries.filter(predictorEntry => { return predictorEntry.facilityId == facility.guid });
+    async updateFacilityPredictorEntriesInAccount(updatedPredictors: Array<PredictorDataDeprecated>, facility: IdbFacility) {
+        let accountPredictorEntries: Array<IdbPredictorEntryDeprecated> = this.accountPredictorEntries.getValue();
+        let facilityPredictorEntries: Array<IdbPredictorEntryDeprecated> = accountPredictorEntries.filter(predictorEntry => { return predictorEntry.facilityId == facility.guid });
 
-        let faclilityPredictors: Array<PredictorData> = [];
+        let faclilityPredictors: Array<PredictorDataDeprecated> = [];
         if (facilityPredictorEntries.length > 0) {
             faclilityPredictors = facilityPredictorEntries[0].predictors;
         }
         let facilityPredictorIds: Array<string> = faclilityPredictors.map(predictor => { return predictor.id });
         //track new predictors to add
-        let newPredictors: Array<PredictorData> = new Array();
+        let newPredictors: Array<PredictorDataDeprecated> = new Array();
         updatedPredictors.forEach(predictor => {
             if (!facilityPredictorIds.includes(predictor.id)) {
                 newPredictors.push(predictor);
@@ -214,15 +214,15 @@ export class PredictordbService {
         await this.finishPredictorChanges(facility);
     }
 
-    updateEntryPredictors(entryPredictors: Array<PredictorData>, updatedPredictors: Array<PredictorData>): Array<PredictorData> {
+    updateEntryPredictors(entryPredictors: Array<PredictorDataDeprecated>, updatedPredictors: Array<PredictorDataDeprecated>): Array<PredictorDataDeprecated> {
         //remove deleted predictors
         let newPredictorIds: Array<string> = updatedPredictors.map(predictor => { return predictor.id });
         entryPredictors = entryPredictors.filter(predictor => {
             return newPredictorIds.includes(predictor.id);
         });
         //update name and unit
-        entryPredictors = _.map(entryPredictors, (predictor: PredictorData) => {
-            let updatedPredictor: PredictorData = updatedPredictors.find(val => { return val.id == predictor.id });
+        entryPredictors = _.map(entryPredictors, (predictor: PredictorDataDeprecated) => {
+            let updatedPredictor: PredictorDataDeprecated = updatedPredictors.find(val => { return val.id == predictor.id });
             predictor.name = updatedPredictor.name;
             predictor.unit = updatedPredictor.unit;
             predictor.production = updatedPredictor.production;
@@ -244,11 +244,11 @@ export class PredictordbService {
 
 
     async setDegreeDays(facility: IdbFacility) {
-        let facilityPredictorEntries: Array<IdbPredictorEntry> = this.facilityPredictorEntries.getValue();
+        let facilityPredictorEntries: Array<IdbPredictorEntryDeprecated> = this.facilityPredictorEntries.getValue();
         for (let index = 0; index < facilityPredictorEntries.length; index++) {
-            let predictorEntry: IdbPredictorEntry = facilityPredictorEntries[index];
+            let predictorEntry: IdbPredictorEntryDeprecated = facilityPredictorEntries[index];
             for (let predictorIndex = 0; predictorIndex < predictorEntry.predictors.length; predictorIndex++) {
-                let predictorData: PredictorData = predictorEntry.predictors[predictorIndex];
+                let predictorData: PredictorDataDeprecated = predictorEntry.predictors[predictorIndex];
                 if (predictorData.predictorType == 'Weather' && !predictorData.weatherOverride) {
                     //get degree days
                     let dataDate: Date = new Date(predictorEntry.date)
@@ -274,12 +274,12 @@ export class PredictordbService {
     }
 
 
-    async updatePredictorDegreeDays(facility: IdbFacility, facilityPredictor: PredictorData) {
-        let facilityPredictorEntries: Array<IdbPredictorEntry> = this.facilityPredictorEntries.getValue();
+    async updatePredictorDegreeDays(facility: IdbFacility, facilityPredictor: PredictorDataDeprecated) {
+        let facilityPredictorEntries: Array<IdbPredictorEntryDeprecated> = this.facilityPredictorEntries.getValue();
         for (let index = 0; index < facilityPredictorEntries.length; index++) {
-            let predictorEntry: IdbPredictorEntry = facilityPredictorEntries[index];
+            let predictorEntry: IdbPredictorEntryDeprecated = facilityPredictorEntries[index];
             let predictorIndex: number = predictorEntry.predictors.findIndex(predictor => { return predictor.id == facilityPredictor.id });
-            let predictorData: PredictorData = predictorEntry.predictors[predictorIndex];
+            let predictorData: PredictorDataDeprecated = predictorEntry.predictors[predictorIndex];
             if (predictorData.predictorType == 'Weather' && !predictorData.weatherOverride) {
                 //get degree days
                 let dataDate: Date = new Date(predictorEntry.date)
@@ -308,9 +308,9 @@ export class PredictordbService {
 
 
 
-    async createPredictorHeatingCoolingDegreeDays(facility: IdbFacility, heatingPredictor?: PredictorData, coolingPredictor?: PredictorData) {
-        let accountPredictorEntries: Array<IdbPredictorEntry> = this.accountPredictorEntries.getValue();
-        let facilityPredictorEntries: Array<IdbPredictorEntry> = accountPredictorEntries.filter(predictorEntry => { return predictorEntry.facilityId == facility.guid });
+    async createPredictorHeatingCoolingDegreeDays(facility: IdbFacility, heatingPredictor?: PredictorDataDeprecated, coolingPredictor?: PredictorDataDeprecated) {
+        let accountPredictorEntries: Array<IdbPredictorEntryDeprecated> = this.accountPredictorEntries.getValue();
+        let facilityPredictorEntries: Array<IdbPredictorEntryDeprecated> = accountPredictorEntries.filter(predictorEntry => { return predictorEntry.facilityId == facility.guid });
         for (let index = 0; index < facilityPredictorEntries.length; index++) {
             //get degree days
             let weatherStationId: string;
@@ -324,7 +324,7 @@ export class PredictordbService {
                 weatherStationId = coolingPredictor.weatherStationId;
                 coolingBaseTemperature = coolingPredictor.coolingBaseTemperature;
             }
-            let predictorEntry: IdbPredictorEntry = facilityPredictorEntries[index];
+            let predictorEntry: IdbPredictorEntryDeprecated = facilityPredictorEntries[index];
             let dataDate: Date = new Date(predictorEntry.date)
             this.loadingService.setLoadingMessage('Calculating Degree Days ' + Months[dataDate.getMonth()].name + ', ' + dataDate.getFullYear() + '...')
             let degreeDays: Array<DetailDegreeDay> = await this.degreeDaysService.getDailyDataFromMonth(dataDate.getMonth(), dataDate.getFullYear(), heatingBaseTemperature, coolingBaseTemperature, weatherStationId);
@@ -333,7 +333,7 @@ export class PredictordbService {
             });
             if (heatingPredictor) {
                 let heatingPredictorIndex: number = predictorEntry.predictors.findIndex(predictor => { return predictor.id == heatingPredictor.id });
-                let heatingPredictorData: PredictorData = predictorEntry.predictors[heatingPredictorIndex];
+                let heatingPredictorData: PredictorDataDeprecated = predictorEntry.predictors[heatingPredictorIndex];
                 let totalHDD: number = _.sumBy(degreeDays, 'heatingDegreeDay');
                 heatingPredictorData.amount = totalHDD;
                 heatingPredictorData.weatherStationId = degreeDays[0]?.stationId;
@@ -342,7 +342,7 @@ export class PredictordbService {
             }
             if (coolingPredictor) {
                 let coolingPredictorIndex: number = predictorEntry.predictors.findIndex(predictor => { return predictor.id == coolingPredictor.id });
-                let coolingPredictorData: PredictorData = predictorEntry.predictors[coolingPredictorIndex];
+                let coolingPredictorData: PredictorDataDeprecated = predictorEntry.predictors[coolingPredictorIndex];
                 let totalCDD: number = _.sumBy(degreeDays, 'coolingDegreeDay');
                 coolingPredictorData.amount = totalCDD;
                 coolingPredictorData.weatherStationId = degreeDays[0]?.stationId;
@@ -355,9 +355,9 @@ export class PredictordbService {
     }
 
     async finishPredictorChanges(facility: IdbFacility) {
-        let accountPredictorEntries: Array<IdbPredictorEntry> = await this.getAllAccountPredictors(facility.accountId);
+        let accountPredictorEntries: Array<IdbPredictorEntryDeprecated> = await this.getAllAccountPredictors(facility.accountId);
         this.accountPredictorEntries.next(accountPredictorEntries);
-        let updatedFacilityPredictorEntries: Array<IdbPredictorEntry> = accountPredictorEntries.filter(predictor => { return predictor.facilityId == facility.guid });
+        let updatedFacilityPredictorEntries: Array<IdbPredictorEntryDeprecated> = accountPredictorEntries.filter(predictor => { return predictor.facilityId == facility.guid });
         this.facilityPredictorEntries.next(updatedFacilityPredictorEntries);
         if (updatedFacilityPredictorEntries.length > 0) {
             this.facilityPredictors.next(updatedFacilityPredictorEntries[0].predictors);
@@ -367,21 +367,21 @@ export class PredictordbService {
     }
 
 
-    updateWithObservable(values: IdbPredictorEntry): Observable<any> {
+    updateWithObservable(values: IdbPredictorEntryDeprecated): Observable<any> {
         values.date = new Date(values.date);
         values.dbDate = new Date();
         return this.dbService.update('predictors', values)
     }
 
-    addWithObservable(predictor: IdbPredictorEntry): Observable<IdbPredictorEntry> {
+    addWithObservable(predictor: IdbPredictorEntryDeprecated): Observable<IdbPredictorEntryDeprecated> {
         predictor.date = new Date(predictor.date);
         predictor.dbDate = new Date();
         return this.dbService.add('predictors', predictor);
     }
 
-    getAccountPerdictorsCopy(): Array<IdbPredictorEntry> {
-        let accountPredictorEntries: Array<IdbPredictorEntry> = this.accountPredictorEntries.getValue();
-        let predictorsCopy: Array<IdbPredictorEntry> = JSON.parse(JSON.stringify(accountPredictorEntries));
+    getAccountPerdictorsCopy(): Array<IdbPredictorEntryDeprecated> {
+        let accountPredictorEntries: Array<IdbPredictorEntryDeprecated> = this.accountPredictorEntries.getValue();
+        let predictorsCopy: Array<IdbPredictorEntryDeprecated> = JSON.parse(JSON.stringify(accountPredictorEntries));
         return predictorsCopy;
     }
 

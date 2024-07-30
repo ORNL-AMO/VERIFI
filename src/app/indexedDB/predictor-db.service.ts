@@ -76,4 +76,11 @@ export class PredictorDbService {
             return predictor.guid == guid;
         })
     }
+
+    getByFacilityId(facilityId: string): Array<IdbPredictor> {
+        let accountPredictors: Array<IdbPredictor> = this.accountPredictors.getValue();
+        return accountPredictors.filter(predictor => {
+            return predictor.facilityId == facilityId;
+        })
+    }
 }

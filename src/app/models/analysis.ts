@@ -1,4 +1,3 @@
-import { PredictorData } from "./idb";
 
 export interface MonthlyGroupSummary {
   date: Date,
@@ -44,7 +43,7 @@ export interface MonthlyFacilityAnalysisData {
 }
 
 export interface MonthlyAnalysisSummary {
-  predictorVariables: Array<PredictorData>,
+  predictorVariables: Array<AnalysisGroupPredictorVariable>,
   modelYear: number,
   monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>
 }
@@ -121,7 +120,7 @@ export interface AnalysisTableColumns {
   cummulativeSavings: boolean,
   newSavings: boolean,
   predictors: Array<{
-    predictor: PredictorData,
+    predictor: AnalysisGroupPredictorVariable,
     display: boolean,
     usedInAnalysis: boolean
   }>,
@@ -149,7 +148,7 @@ export interface JStatRegressionModel {
     F_statistic?: number
   },
   modelYear: number,
-  predictorVariables: Array<PredictorData>,
+  predictorVariables: Array<AnalysisGroupPredictorVariable>,
   modelId: string,
   isValid: boolean,
   modelPValue: number,
@@ -189,7 +188,7 @@ export interface AnalysisSetupErrors {
 export interface AnalysisGroup {
   idbGroupId: string,
   analysisType: AnalysisType,
-  predictorVariables: Array<PredictorData>,
+  predictorVariables: Array<AnalysisGroupPredictorVariable>,
   regressionModelYear: number,
   regressionConstant: number,
   groupErrors: GroupErrors,
@@ -215,6 +214,16 @@ export interface AnalysisGroup {
   dateModelsGenerated?: Date,
   regressionModelNotes?: string,
   maxModelVariables: number
+}
+
+export interface AnalysisGroupPredictorVariable {
+  //predictor guid..
+  id: string,
+  name: string,
+  production: boolean,
+  productionInAnalysis: boolean,
+  regressionCoefficient: number,
+  unit: string
 }
 
 export interface GroupErrors {

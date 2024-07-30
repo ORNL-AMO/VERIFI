@@ -12,7 +12,7 @@ import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
-import { IdbAccount, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from 'src/app/models/idb';
+import { IdbAccount, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from 'src/app/models/idb';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { checkShowHeatCapacity, getIsEnergyMeter, getIsEnergyUnit } from 'src/app/shared/sharedHelperFuntions';
 import { FileReference } from 'src/app/upload-data/upload-data-models';
@@ -124,22 +124,23 @@ export class ConfirmAndSubmitComponent implements OnInit {
     }
 
     this.loadingService.setLoadingMessage('Uploading Predictors..');
-    for (let i = 0; i < this.fileReference.predictorEntries.length; i++) {
-      let predictorEntry: IdbPredictorEntry = this.fileReference.predictorEntries[i];
-      if (predictorEntry.id) {
-        let skipPredictorData: boolean = false;
-        for (let x = 0; x < this.fileReference.skipExistingPredictorFacilityIds.length; x++) {
-          if (this.fileReference.skipExistingPredictorFacilityIds[x] == predictorEntry.facilityId) {
-            skipPredictorData = true;
-          }
-        }
-        if (!skipPredictorData) {
-          await firstValueFrom(this.predictorDbService.updateWithObservable(predictorEntry));
-        }
-      } else {
-        await firstValueFrom(this.predictorDbService.addWithObservable(predictorEntry));
-      }
-    }
+    //TODO: 1668
+    // for (let i = 0; i < this.fileReference.predictorEntries.length; i++) {
+    //   let predictorEntry: IdbPredictorEntry = this.fileReference.predictorEntries[i];
+    //   if (predictorEntry.id) {
+    //     let skipPredictorData: boolean = false;
+    //     for (let x = 0; x < this.fileReference.skipExistingPredictorFacilityIds.length; x++) {
+    //       if (this.fileReference.skipExistingPredictorFacilityIds[x] == predictorEntry.facilityId) {
+    //         skipPredictorData = true;
+    //       }
+    //     }
+    //     if (!skipPredictorData) {
+    //       await firstValueFrom(this.predictorDbService.updateWithObservable(predictorEntry));
+    //     }
+    //   } else {
+    //     await firstValueFrom(this.predictorDbService.addWithObservable(predictorEntry));
+    //   }
+    // }
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     this.loadingService.setLoadingMessage('Finishing Up...');
     await this.dbChangesService.selectAccount(selectedAccount, false)
