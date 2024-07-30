@@ -71,7 +71,7 @@ export class MonthlyFacilityAnalysisClass {
 
     setFacilityPredictors(accountPredictors: Array<IdbPredictor>, facility: IdbFacility){
         this.facilityPredictors = accountPredictors.filter(predictor => {
-            return predictor.facilityId == this.facility.guid;
+            return predictor.facilityId == facility.guid;
         })
     }
 
