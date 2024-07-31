@@ -72,7 +72,8 @@ export class EmissionsDataFormComponent implements OnInit {
 
   setYears() {
     this.years = new Array();
-    for (let i = 1990; i <= 2022; i++) {
+    let currentYear: number = new Date().getFullYear();
+    for (let i = 1990; i <= currentYear; i++) {
       this.years.push(i);
     }
   }
