@@ -71,7 +71,6 @@ export class AccountSettingsComponent implements OnInit {
 
     this.accountFacilitiesSub = this.facilityDbService.accountFacilities.subscribe(val => {
       this.facilityList = val;
-      console.log(this.facilityList)
       this.setOrderOptions();
     });
     if (this.isElectron) {
