@@ -18,8 +18,12 @@
                         *ngIf="!facility.contactPhone && !facility.contactEmail && !facility.contactName">&mdash;</span>
                 </p>
                 <p class="card-text mb-0">NAICS:
-                    <span *ngIf="naics">{{naics}}</span>
-                    <span *ngIf="!naics">&mdash;</span>
+                    <ng-template [ngIf]="(facility | naicsDisplay)" [ngIfElse]="mdashBlock">
+                        {{facility | naicsDisplay}}
+                    </ng-template>
+                    <ng-template #mdashBlock>
+                        &mdash;
+                    </ng-template>
                 </p>
                 <span class="badge me-2" *ngFor="let source of sources"
                     [ngStyle]="{'background-color': source | meterSourceColor}">{{source}}</span>
