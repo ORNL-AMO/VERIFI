@@ -9,7 +9,9 @@
         <span *ngIf="account.address">{{account.address}} {{account.city}}, {{account.state}}
             {{account.zip}}
             {{account.country}}<br></span>
-        <span *ngIf="naics">NAICs of Participating Plants: {{naics}}</span>
+        <ng-template [ngIf]="(account | naicsDisplay)">
+            <span>NAICs of Participating Plants: {{account | naicsDisplay}}</span>
+        </ng-template>
     </div>
     <div class="col-5 text-end">
         <h5>Contact Information</h5>
