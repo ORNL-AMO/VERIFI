@@ -4,13 +4,15 @@ import { AboutComponent } from './about/about.component';
 import { AcknowledgmentsComponent } from './acknowledgments/acknowledgments.component';
 import { FeedbackComponent } from './feedback/feedback.component';
 import { HelpComponent } from './help/help.component';
+import { PrivacyNoticeComponent } from './privacy-notice/privacy-notice.component';
 
 @NgModule({
   declarations: [
     AboutComponent,
     AcknowledgmentsComponent,
     FeedbackComponent,
-    HelpComponent
+    HelpComponent,
+    PrivacyNoticeComponent
   ],
   imports: [
     CommonModule
