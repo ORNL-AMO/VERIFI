@@ -84,12 +84,12 @@ export class BetterClimateYearDetails {
         });
         this.setTotalElectricity(electricityMonthlyData);
 
-        this.onSiteGeneratedElectricity = this.getElectricityUse(electricityMeters, year, 2);
-        this.purchasedElectricity = this.getElectricityUse(electricityMeters, year, undefined);
-        this.gridElectricity = this.getElectricityUse(electricityMeters, year, 1);
-        this.pppaElectricity = this.getElectricityUse(electricityMeters, year, 3);
-        this.vppaElectricity = this.getElectricityUse(electricityMeters, year, 4);
-        this.RECs = this.getElectricityUse(electricityMeters, year, 6);
+        this.onSiteGeneratedElectricity = this.getElectricityUse(electricityMeters, year, [2]);
+        this.purchasedElectricity = this.getElectricityUse(electricityMeters, year, undefined) - this.onSiteGeneratedElectricity;
+        this.gridElectricity = this.getElectricityUse(electricityMeters, year, [1]);
+        this.pppaElectricity = this.getElectricityUse(electricityMeters, year, [3, 5]);
+        this.vppaElectricity = this.getElectricityUse(electricityMeters, year, [4]);
+        this.RECs = this.getElectricityUse(electricityMeters, year, [6]);
         //fuel
         this.setStationaryFuelTotals(calanderizedMeters);
         this.setVehicleFuelTotals(calanderizedMeters);
@@ -349,15 +349,17 @@ export class BetterClimateYearDetails {
         this.totalStationaryEnergyUse = convertedElectricityUse + totalFuelUsage;
     }
 
-    getElectricityUse(electricityMeters: Array<CalanderizedMeter>, year: number, agreementType: number) {
+    getElectricityUse(electricityMeters: Array<CalanderizedMeter>, year: number, agreementTypes: Array<number>) {
         let includedMeters: Array<CalanderizedMeter> = new Array();
         electricityMeters.forEach(cMeter => {
-            if (agreementType) {
-                if (cMeter.meter.agreementType == agreementType) {
+            if (agreementTypes) {
+                if (agreementTypes.includes(cMeter.meter.agreementType)) {
                     includedMeters.push(cMeter);
                 }
             } else {
-                if (cMeter.meter.agreementType != 2) {
+                // if (cMeter.meter.agreementType != 2) {
+                //update for #1666..
+                if (cMeter.meter.includeInEnergy) {
                     includedMeters.push(cMeter);
                 }
             }
