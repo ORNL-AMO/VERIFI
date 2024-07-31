@@ -157,7 +157,6 @@ export class GeneralInformationFormComponent implements OnInit {
         this.form.controls.naics3.updateValueAndValidity();
       }
     }
-    console.log(this.form.controls);
     this.saveChanges();
   }
 }
