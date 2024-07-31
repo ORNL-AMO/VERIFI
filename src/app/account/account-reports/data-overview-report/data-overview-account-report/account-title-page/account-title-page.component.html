@@ -11,10 +11,10 @@
     <span *ngIf="account.address">{{account.address}}, {{account.city}}, {{account.state}} {{account.zip}}
         {{account.country}}</span>
     <!--NAICS CODE-->
-    <span *ngIf="naics">
+    <ng-template [ngIf]="(account | naicsDisplay)">
         <br>
-        NAICS: {{naics}}
-    </span>
+        <span>NAICs: {{account | naicsDisplay}}</span>
+    </ng-template>
     <!--GLOBAL WARMING POTENTIAL-->
     <span *ngIf="account.eGridSubregion">
         <br>
