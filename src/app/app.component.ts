@@ -26,6 +26,8 @@ import { PredictorDbService } from './indexedDB/predictor-db.service';
 import { PredictorDataDbService } from './indexedDB/predictor-data-db.service';
 import { IdbPredictor } from './models/idbModels/predictor';
 import { IdbPredictorData } from './models/idbModels/predictorData';
+import { MigratePredictorsService } from './indexedDB/migrate-predictors.service';
+import { DbChangesService } from './indexedDB/db-changes.service';
 
 // declare ga as a function to access the JS code in TS
 declare let gtag: Function;
@@ -63,7 +65,9 @@ export class AppComponent {
     private customFuelDbservice: CustomFuelDbService,
     private customGWPDbService: CustomGWPDbService,
     private predictorDbService: PredictorDbService,
-    private predictorDataDbService: PredictorDataDbService) {
+    private predictorDataDbService: PredictorDataDbService,
+    private migratePredictorsService: MigratePredictorsService,
+    private dbChangesService: DbChangesService) {
     if (environment.production) {
       gtag('config', 'G-YG1QD02XSE');
       this.analyticsService.sendEvent('verifi_app_open', undefined);
@@ -96,13 +100,10 @@ export class AppComponent {
       await this.eGridService.parseZipCodeLongLat();
       if (account) {
         await this.initializeFacilities(account);
-        // await this.initializeReports(account);
         await this.initilizeMeterGroups(account);
         await this.initializeAccountReports(account);
-        await this.initializePredictors(account);
+        let needsMigration: boolean = await this.initializePredictors(account);
         await this.initializePredictorData(account);
-
-
         await this.initializeMeters(account);
         await this.initializeMeterData(account);
         await this.initializeFacilityAnalysisItems(account);
@@ -117,6 +118,12 @@ export class AppComponent {
           this.accountDbService.selectedAccount.next(updatedAccount.account);
         } else {
           this.accountDbService.selectedAccount.next(account);
+        }
+        if (needsMigration) {
+          console.log('migrate from app.comp!')
+          await this.migratePredictorsService.migrateAccountPredictors();
+          await this.dbChangesService.setPredictorsV2(account);
+          await this.dbChangesService.setPredictorDataV2(account);
         }
         this.dataInitialized = true;
         this.automaticBackupsService.initializeAccount();
@@ -207,15 +214,21 @@ export class AppComponent {
     }
   }
 
-  async initializePredictors(account: IdbAccount) {
+  async initializePredictors(account: IdbAccount): Promise<boolean> {
     //set predictors
     this.loadingMessage = "Loading Predictors..";
+    let needsMigration: boolean = false;
     //TODO: OLD PREDICTORS METHOD
     let predictors: Array<IdbPredictorEntryDeprecated> = await this.predictorsDbServiceDeprecated.getAllAccountPredictors(account.guid);
-    this.predictorsDbServiceDeprecated.accountPredictorEntries.next(predictors);
+    if (predictors.length > 0) {
+      this.predictorsDbServiceDeprecated.accountPredictorEntries.next(predictors);
+      needsMigration = true;
+    }
+
     //NEW PREDICTORS V2
     let predictorsV2: Array<IdbPredictor> = await this.predictorDbService.getAllAccountPredictors(account.guid);
     this.predictorDbService.accountPredictors.next(predictorsV2);
+    return needsMigration;
   }
 
   async initializePredictorData(account: IdbAccount) {

@@ -20,6 +20,7 @@ import { PredictorDbService } from './predictor-db.service';
 import { PredictorDataDbService } from './predictor-data-db.service';
 import { IdbPredictor } from '../models/idbModels/predictor';
 import { IdbPredictorData } from '../models/idbModels/predictorData';
+import { MigratePredictorsService } from './migrate-predictors.service';
 
 @Injectable({
   providedIn: 'root'
@@ -39,7 +40,8 @@ export class DbChangesService {
     private customFuelDbService: CustomFuelDbService,
     private customGWPDbService: CustomGWPDbService,
     private predictorDbService: PredictorDbService,
-    private predictorDataDbService: PredictorDataDbService) { }
+    private predictorDataDbService: PredictorDataDbService,
+    private migratePredictorsService: MigratePredictorsService) { }
 
   async updateAccount(account: IdbAccount) {
     let updatedAccount: IdbAccount = await firstValueFrom(this.accountDbService.updateWithObservable(account));
@@ -74,7 +76,7 @@ export class DbChangesService {
     await this.setAccountReports(account);
     //set predictors
     //TODO: deprecated, remove...?
-    await this.setPredictorsDeprecated(account);
+    let needsMigration = await this.setPredictorsDeprecated(account);
     await this.setPredictorsV2(account);
     await this.setPredictorDataV2(account);
     //set meters
@@ -93,8 +95,13 @@ export class DbChangesService {
     await this.setAnalysisItems(account, skipUpdates);
     //set account analysis
     await this.setAccountAnalysisItems(account, skipUpdates);
-
     this.accountDbService.selectedAccount.next(account);
+    if(needsMigration){
+      console.log('migrate db changes..')
+      await this.migratePredictorsService.migrateAccountPredictors();
+      await this.setPredictorsV2(account);
+      await this.setPredictorDataV2(account);
+    }
   }
 
   selectFacility(facility: IdbFacility) {
@@ -104,7 +111,7 @@ export class DbChangesService {
       this.updateFacilities(facility, true);
     }
     //set predictors
-    this.setFacilityPredictorsDeprecated(facility);
+    // this.setFacilityPredictorsDeprecated(facility);
     this.setFacilityPredictorsV2(facility);
     this.setFacilityPredictorDataV2(facility);
     //set meters
@@ -171,24 +178,27 @@ export class DbChangesService {
   }
 
   //Deprecated Predictor data
-  async setPredictorsDeprecated(account: IdbAccount, facility?: IdbFacility) {
+  async setPredictorsDeprecated(account: IdbAccount, facility?: IdbFacility): Promise<boolean> {
+    let needsMigration: boolean = false;
+
     let predictors: Array<IdbPredictorEntryDeprecated> = await this.predictorsDbServiceDeprecated.getAllAccountPredictors(account.guid);
     this.predictorsDbServiceDeprecated.accountPredictorEntries.next(predictors);
-    if (facility) {
-      this.setFacilityPredictorsDeprecated(facility);
+    if (predictors.length > 0) {
+      needsMigration = true;
     }
+    return needsMigration;
   }
 
-  setFacilityPredictorsDeprecated(facility: IdbFacility) {
-    let accountPredictorEntries: Array<IdbPredictorEntryDeprecated> = this.predictorsDbServiceDeprecated.accountPredictorEntries.getValue();
-    let facilityPredictorEntries: Array<IdbPredictorEntryDeprecated> = accountPredictorEntries.filter(item => { return item.facilityId == facility.guid });
-    this.predictorsDbServiceDeprecated.facilityPredictorEntries.next(facilityPredictorEntries);
-    if (facilityPredictorEntries.length != 0) {
-      this.predictorsDbServiceDeprecated.facilityPredictors.next(facilityPredictorEntries[0].predictors);
-    } else {
-      this.predictorsDbServiceDeprecated.facilityPredictors.next([]);
-    }
-  }
+  // setFacilityPredictorsDeprecated(facility: IdbFacility) {
+  //   let accountPredictorEntries: Array<IdbPredictorEntryDeprecated> = this.predictorsDbServiceDeprecated.accountPredictorEntries.getValue();
+  //   let facilityPredictorEntries: Array<IdbPredictorEntryDeprecated> = accountPredictorEntries.filter(item => { return item.facilityId == facility.guid });
+  //   this.predictorsDbServiceDeprecated.facilityPredictorEntries.next(facilityPredictorEntries);
+  //   if (facilityPredictorEntries.length != 0) {
+  //     this.predictorsDbServiceDeprecated.facilityPredictors.next(facilityPredictorEntries[0].predictors);
+  //   } else {
+  //     this.predictorsDbServiceDeprecated.facilityPredictors.next([]);
+  //   }
+  // }
 
   //Predictors V2
   async setPredictorsV2(account: IdbAccount, facility?: IdbFacility) {

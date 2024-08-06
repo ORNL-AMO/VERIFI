@@ -2,13 +2,11 @@ import { Injectable } from '@angular/core';
 import { PredictordbServiceDeprecated } from './predictors-db.service';
 import { PredictorDbService } from './predictor-db.service';
 import { PredictorDataDbService } from './predictor-data-db.service';
-import { IdbAccount, IdbFacility, IdbPredictorEntryDeprecated, PredictorDataDeprecated } from '../models/idb';
+import { IdbFacility, IdbPredictorEntryDeprecated, PredictorDataDeprecated } from '../models/idb';
 import { FacilitydbService } from './facility-db.service';
 import { getNewIdbPredictor, IdbPredictor } from '../models/idbModels/predictor';
 import { firstValueFrom } from 'rxjs';
 import { getNewIdbPredictorData, IdbPredictorData } from '../models/idbModels/predictorData';
-import { DbChangesService } from './db-changes.service';
-import { AccountdbService } from './account-db.service';
 import { LoadingService } from '../core-components/loading/loading.service';
 
 @Injectable({
@@ -21,14 +19,11 @@ export class MigratePredictorsService {
     private predictorDbService: PredictorDbService,
     private predictorDataDbService: PredictorDataDbService,
     private facilityDbService: FacilitydbService,
-    private dbChangesSerice: DbChangesService,
-    private accountDbService: AccountdbService,
     private loadingService: LoadingService
   ) { }
 
-  async migrateAccountData() {
-    this.loadingService.setLoadingMessage('MIGRATION INITIATED');
-    this.loadingService.setLoadingStatus(true);
+  async migrateAccountPredictors() {
+    this.loadingService.setLoadingMessage('Migrating predictors...');
     let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     let predictorEntries: Array<IdbPredictorEntryDeprecated> = this.predictorDbServiceDeprecated.accountPredictorEntries.getValue();
     for (let index = 0; index < facilities.length; index++) {
@@ -69,11 +64,11 @@ export class MigratePredictorsService {
         }
       }
     }
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    await this.dbChangesSerice.setPredictorsV2(account, selectedFacility);
-    await this.dbChangesSerice.setPredictorDataV2(account, selectedFacility);
-    await this.dbChangesSerice.setPredictorsDeprecated(account, selectedFacility);
-    this.loadingService.setLoadingStatus(false);
+    // let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    // let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    // await this.dbChangesSerice.setPredictorsV2(account, selectedFacility);
+    // await this.dbChangesSerice.setPredictorDataV2(account, selectedFacility);
+    // await this.dbChangesSerice.setPredictorsDeprecated(account, selectedFacility);
+    // this.loadingService.setLoadingStatus(false);
   }
 }

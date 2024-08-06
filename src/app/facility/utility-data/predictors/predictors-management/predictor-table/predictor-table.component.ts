@@ -206,8 +206,8 @@ export class PredictorTableComponent {
   }
 
 
-  migrateData() {
-    this.migratePredictorsService.migrateAccountData();
-  }
+  // migrateData() {
+  //   this.migratePredictorsService.migrateAccountData();
+  // }
 
 }
