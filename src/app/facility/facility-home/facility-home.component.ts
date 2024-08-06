@@ -171,7 +171,8 @@ export class FacilityHomeComponent implements OnInit {
         meters: facilityMeters,
         accountPredictorEntries: accountPredictorEntries,
         calculateAllMonthlyData: true,
-        meterData: facilityMeterData
+        meterData: facilityMeterData,
+        accountPredictors: accountPredictors
       });
     } else {
       // Web Workers are not supported in this environment.

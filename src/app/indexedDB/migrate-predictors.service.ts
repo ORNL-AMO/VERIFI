@@ -64,6 +64,7 @@ export class MigratePredictorsService {
             newIdbPredictorData.weatherDataWarning = oldEntryPredictor.weatherDataWarning;
             newIdbPredictorData.weatherOverride = oldEntryPredictor.weatherOverride;
             await firstValueFrom(this.predictorDataDbService.addWithObservable(newIdbPredictorData));
+            await firstValueFrom(this.predictorDbServiceDeprecated.deleteIndexWithObservable(oldEntry.id));
           }
         }
       }
@@ -72,6 +73,7 @@ export class MigratePredictorsService {
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     await this.dbChangesSerice.setPredictorsV2(account, selectedFacility);
     await this.dbChangesSerice.setPredictorDataV2(account, selectedFacility);
+    await this.dbChangesSerice.setPredictorsDeprecated(account, selectedFacility);
     this.loadingService.setLoadingStatus(false);
   }
 }
