@@ -86,10 +86,12 @@ export class BetterClimateYearDetails {
 
         this.onSiteGeneratedElectricity = this.getElectricityUse(electricityMeters, year, [2]);
         this.purchasedElectricity = this.getElectricityUse(electricityMeters, year, undefined) - this.onSiteGeneratedElectricity;
-        this.gridElectricity = this.getElectricityUse(electricityMeters, year, [1]);
         this.pppaElectricity = this.getElectricityUse(electricityMeters, year, [3, 5]);
         this.vppaElectricity = this.getElectricityUse(electricityMeters, year, [4]);
         this.RECs = this.getElectricityUse(electricityMeters, year, [6]);
+        //update #1666
+        this.gridElectricity = this.purchasedElectricity - this.pppaElectricity - this.RECs - this.vppaElectricity;
+
         //fuel
         this.setStationaryFuelTotals(calanderizedMeters);
         this.setVehicleFuelTotals(calanderizedMeters);
@@ -349,6 +351,15 @@ export class BetterClimateYearDetails {
         this.totalStationaryEnergyUse = convertedElectricityUse + totalFuelUsage;
     }
 
+    /**
+    * Aggreement types
+    * 1: Grid
+    * 2: On-site Generation
+    * 3: Physical Power Purchase Agreement (PPPA)
+    * 4: Virtual Power Purchase Agreement (VPPA)
+    * 5: Utility Green Product
+    * 6: Renewable Energy Credits (RECs)
+     */
     getElectricityUse(electricityMeters: Array<CalanderizedMeter>, year: number, agreementTypes: Array<number>) {
         let includedMeters: Array<CalanderizedMeter> = new Array();
         electricityMeters.forEach(cMeter => {
