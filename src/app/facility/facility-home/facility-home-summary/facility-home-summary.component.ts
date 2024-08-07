@@ -8,7 +8,6 @@ import { FacilityHomeService } from '../facility-home.service';
 import { Router } from '@angular/router';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { ExportToExcelTemplateService } from 'src/app/shared/helper-services/export-to-excel-template.service';
-import { getNAICS } from 'src/app/shared/form-data/naics-data';
 import { MeterSource } from 'src/app/models/constantsAndTypes';
 
 @Component({
@@ -24,7 +23,6 @@ export class FacilityHomeSummaryComponent implements OnInit {
   latestEnergyAnalysisItem: IdbAnalysisItem;
   latestWaterAnalysisItem: IdbAnalysisItem;
   sources: Array<MeterSource>;
-  naics: string;
   selectedFacilitySub: Subscription;
 
   waterAnalysisNeeded: boolean;
@@ -40,7 +38,6 @@ export class FacilityHomeSummaryComponent implements OnInit {
   ngOnInit(): void {
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
       this.facility = this.facilityDbService.selectedFacility.getValue();
-      this.setNAICS();
       this.setFacilityStatus();
     });
   }
@@ -119,10 +116,6 @@ export class FacilityHomeSummaryComponent implements OnInit {
     let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == this.facility.guid });
     let sources: Array<MeterSource> = facilityMeters.map(meter => { return meter.source });
     this.sources = _.uniq(sources);
-  }
-
-  setNAICS() {
-    this.naics = getNAICS(this.facility);
   }
 
   exportData() {
