@@ -317,13 +317,15 @@ export class BackupDataService {
         }
       }
 
-      if(accountReport.betterClimateReportSetup){
-        accountReport.betterClimateReportSetup.includedFacilityGroups.forEach(facilityGroup => {
-          facilityGroup.facilityId = this.getNewId(facilityGroup.facilityId, facilityGUIDs);
-          facilityGroup.groups.forEach(group => {
-            group.groupId = this.getNewId(group.groupId, meterGroupGUIDs);
+      if (accountReport.betterClimateReportSetup) {
+        if (accountReport.betterClimateReportSetup.includedFacilityGroups) {
+          accountReport.betterClimateReportSetup.includedFacilityGroups.forEach(facilityGroup => {
+            facilityGroup.facilityId = this.getNewId(facilityGroup.facilityId, facilityGUIDs);
+            facilityGroup.groups.forEach(group => {
+              group.groupId = this.getNewId(group.groupId, meterGroupGUIDs);
+            })
           })
-        })
+        }
       }
 
       if (accountReport.reportType == 'performance') {
