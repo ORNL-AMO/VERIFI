@@ -82,10 +82,12 @@ export class BetterClimateYearDetails {
         electricityMonthlyData = electricityMonthlyData.filter(mData => {
             return mData.fiscalYear == year;
         });
-        this.setTotalElectricity(electricityMonthlyData);
+        // this.setTotalElectricity(electricityMonthlyData);
 
         this.onSiteGeneratedElectricity = this.getElectricityUse(electricityMeters, year, [2]);
         this.purchasedElectricity = this.getElectricityUse(electricityMeters, year, undefined) - this.onSiteGeneratedElectricity;
+        this.totalElectricity = this.purchasedElectricity + this.onSiteGeneratedElectricity;
+
         this.pppaElectricity = this.getElectricityUse(electricityMeters, year, [3, 5]);
         this.vppaElectricity = this.getElectricityUse(electricityMeters, year, [4]);
         this.RECs = this.getElectricityUse(electricityMeters, year, [6]);
@@ -290,12 +292,12 @@ export class BetterClimateYearDetails {
         return totalContribution;
     }
 
-    setTotalElectricity(monthlyData: Array<MonthlyData>) {
-        let sumElectricity: number = _.sumBy(monthlyData, (monthlyData: MonthlyData) => {
-            return monthlyData.energyConsumption;
-        });
-        this.totalElectricity = new ConvertValue(sumElectricity, 'MMBtu', 'MWh').convertedValue;
-    }
+    // setTotalElectricity(monthlyData: Array<MonthlyData>) {
+    //     let sumElectricity: number = _.sumBy(monthlyData, (monthlyData: MonthlyData) => {
+    //         return monthlyData.energyConsumption;
+    //     });
+    //     this.totalElectricity = new ConvertValue(sumElectricity, 'MMBtu', 'MWh').convertedValue;
+    // }
 
     setStationaryFuelTotals(calanderizedMeters: Array<CalanderizedMeter>) {
         let fuelTypes: Array<string> = this.getFuelTypes(calanderizedMeters);
