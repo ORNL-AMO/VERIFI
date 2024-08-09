@@ -209,27 +209,31 @@ export class AnalysisDbService {
         });
         if (group.analysisType == 'regression') {
           //check selected model uses deleted predictor
-          let selectedModel: JStatRegressionModel = group.models.find(model => {
-            return model.modelId == group.selectedModelId
-          });
-          let includesDeletedVariable: boolean = selectedModel.predictorVariables.find(modelVariable => {
-            return modelVariable.id == predictorToDelete.guid
-          }) != undefined;
-          if (includesDeletedVariable) {
-            //if used then remove all models
-            group.models = undefined;
-            group.selectedModelId = undefined;
-            group.regressionModelYear = undefined;
-            group.regressionConstant = undefined;
-            group.dateModelsGenerated = undefined;
-          } else {
-            //if not used in selected model. 
-            //Remove models using predictor and keep selection.
-            group.models = group.models.filter(model => {
-              return model.predictorVariables.find(modelVariable => {
-                return modelVariable.id == predictorToDelete.guid
-              }) == undefined
+          if (group.models) {
+            let selectedModel: JStatRegressionModel = group.models.find(model => {
+              return model.modelId == group.selectedModelId
             });
+            if (selectedModel) {
+              let includesDeletedVariable: boolean = selectedModel.predictorVariables.find(modelVariable => {
+                return modelVariable.id == predictorToDelete.guid
+              }) != undefined;
+              if (includesDeletedVariable) {
+                //if used then remove all models
+                group.models = undefined;
+                group.selectedModelId = undefined;
+                group.regressionModelYear = undefined;
+                group.regressionConstant = undefined;
+                group.dateModelsGenerated = undefined;
+              } else {
+                //if not used in selected model. 
+                //Remove models using predictor and keep selection.
+                group.models = group.models.filter(model => {
+                  return model.predictorVariables.find(modelVariable => {
+                    return modelVariable.id == predictorToDelete.guid
+                  }) == undefined
+                });
+              }
+            }
           }
         }
         group.groupErrors = this.analysisValidationService.getGroupErrors(group);
@@ -242,67 +246,25 @@ export class AnalysisDbService {
     };
   }
 
-
-  async updateAnalysisPredictors(predictors: Array<IdbPredictor>, facilityId: string, predictorUsedGroupIds?: Array<string>) {
+  async addAnalysisPredictor(newPredictor: IdbPredictor) {
     let accountAnalysisItems: Array<IdbAnalysisItem> = this.accountAnalysisItems.getValue();
-    let facilityAnalysisItems: Array<IdbAnalysisItem> = accountAnalysisItems.filter(item => { return item.facilityId == facilityId });
+    let facilityAnalysisItems: Array<IdbAnalysisItem> = accountAnalysisItems.filter(item => {
+      return item.facilityId == newPredictor.facilityId;
+    });
     for (let index = 0; index < facilityAnalysisItems.length; index++) {
       let analysisItem: IdbAnalysisItem = facilityAnalysisItems[index];
-      let hasGroupErrors: boolean = false;
       analysisItem.groups.forEach(group => {
-        let groupUpdates: { predictors: Array<AnalysisGroupPredictorVariable>, deletedPredictor: boolean } = this.updatePredictorVariables(predictors, group.predictorVariables);
-        group.predictorVariables = groupUpdates.predictors;
-        if (groupUpdates.deletedPredictor && group.analysisType == 'regression' && predictorUsedGroupIds.includes(group.idbGroupId)) {
-          group.models = undefined;
-          group.selectedModelId = undefined;
-          group.regressionModelYear = undefined;
-          group.regressionConstant = undefined;
-          group.dateModelsGenerated = undefined;
-        }
-        group.groupErrors = this.analysisValidationService.getGroupErrors(group);
-        if (group.groupErrors.hasErrors) {
-          hasGroupErrors = true;
-        }
-      });
-      analysisItem.setupErrors.groupsHaveErrors = hasGroupErrors;
-      await firstValueFrom(this.updateWithObservable(analysisItem));
-    };
-  }
-
-  updatePredictorVariables(predictors: Array<IdbPredictor>, analysisPredictors: Array<AnalysisGroupPredictorVariable>): { predictors: Array<AnalysisGroupPredictorVariable>, deletedPredictor: boolean } {
-    let predictorIdsToRemove: Array<string> = new Array();
-    //update existing, check need remove
-    analysisPredictors.forEach(analysisPredictor => {
-      console.log(analysisPredictor);
-      let checkExists: IdbPredictor = predictors.find(predictor => { return analysisPredictor.id == predictor.guid });
-      console.log(checkExists);
-      if (!checkExists) {
-        console.log('remove..');
-        predictorIdsToRemove.push(analysisPredictor.id)
-      } else {
-        console.log('update..');
-        analysisPredictor.name = checkExists.name;
-        analysisPredictor.unit = checkExists.unit;
-        analysisPredictor.production = checkExists.production;
-      }
-    });
-    //remove necessary predictors
-    analysisPredictors = analysisPredictors.filter(predictor => { return !predictorIdsToRemove.includes(predictor.id) });
-    //add new predictors
-    predictors.forEach(predictor => {
-      let checkExists: AnalysisGroupPredictorVariable = analysisPredictors.find(analysisPredictor => { return predictor.guid == analysisPredictor.id });
-      if (!checkExists) {
-        analysisPredictors.push({
-          id: predictor.guid,
-          name: predictor.name,
-          production: predictor.production,
-          productionInAnalysis: true,
+        group.predictorVariables.push({
+          id: newPredictor.guid,
+          name: newPredictor.name,
+          production: newPredictor.production,
+          productionInAnalysis: newPredictor.productionInAnalysis,
           regressionCoefficient: undefined,
-          unit: predictor.unit
-        });
-      }
-    });
-    return { predictors: analysisPredictors, deletedPredictor: predictorIdsToRemove.length != 0 };
+          unit: newPredictor.unit
+        })
+      })
+      await firstValueFrom(this.updateWithObservable(analysisItem));
+    }
   }
 
 
