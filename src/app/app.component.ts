@@ -120,7 +120,7 @@ export class AppComponent {
           this.accountDbService.selectedAccount.next(account);
         }
         if (needsMigration) {
-          console.log('migrate from app.comp!')
+          this.loadingMessage = 'Migrating Predictors for V2..'
           await this.migratePredictorsService.migrateAccountPredictors();
           await this.dbChangesService.setPredictorsV2(account);
           await this.dbChangesService.setPredictorDataV2(account);

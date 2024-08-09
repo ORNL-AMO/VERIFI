@@ -97,7 +97,6 @@ export class DbChangesService {
     await this.setAccountAnalysisItems(account, skipUpdates);
     this.accountDbService.selectedAccount.next(account);
     if(needsMigration){
-      console.log('migrate db changes..')
       await this.migratePredictorsService.migrateAccountPredictors();
       await this.setPredictorsV2(account);
       await this.setPredictorDataV2(account);

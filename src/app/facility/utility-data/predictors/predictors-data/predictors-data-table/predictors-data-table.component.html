@@ -41,9 +41,8 @@
                 </th>
                 <th (click)="setOrderDataField('date')" [ngClass]="{'active': orderDataField == 'date'}">Date
                 </th>
-                <th class="header" (click)="setOrderDataField(predictor.name)"
-                    [ngClass]="{'active': orderDataField == predictor.name}">
-                    <span *ngIf="predictor.production" class="fa fa-check-circle-o"></span>
+                <th class="header" (click)="setOrderDataField('amount')"
+                    [ngClass]="{'active': orderDataField == 'amount'}">
                     <span *ngIf="predictor.predictorType == 'Weather'" class="fa fa-temperature-half"></span>
                     {{predictor.name}}
                     <ng-container *ngIf="predictor.unit">
@@ -67,7 +66,8 @@
             </tr>
         </thead>
         <tbody class="table-group-divider">
-            <tr *ngFor="let pData of predictorData">
+            <tr
+                *ngFor="let pData of predictorData | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage | orderPredictorDataTable:orderDataField:orderByDirection">
                 <td class="input" *ngIf="!copyingTable">
                     <input type="checkbox" name="predictorEntry" (change)="setHasChecked()" [(ngModel)]="pData.checked">
                 </td>
@@ -94,8 +94,8 @@
                         <button class="btn btn-sm btn-outline" (click)="setDeletePredictorData(pData)" title="Delete">
                             <i class="fa fa-trash"></i>
                         </button>
-                        <button *ngIf="hasWeatherData" class="btn btn-sm btn-outline" (click)="viewWeatherData(pData)"
-                            title="View Weather Data">
+                        <button *ngIf="predictor.predictorType == 'Weather'" class="btn btn-sm btn-outline"
+                            (click)="viewWeatherData(pData)" title="View Weather Data">
                             <i class="fa fa-temperature-half"></i>
                         </button>
                     </div>

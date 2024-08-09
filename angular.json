@@ -8,6 +8,9 @@
       "schematics": {
         "@schematics/angular:component": {
           "standalone": false
+        },
+        "@schematics/angular:pipe": {
+          "standalone": false
         }
       },
       "root": "",

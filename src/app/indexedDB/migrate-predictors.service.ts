@@ -23,7 +23,7 @@ export class MigratePredictorsService {
   ) { }
 
   async migrateAccountPredictors() {
-    this.loadingService.setLoadingMessage('Migrating predictors...');
+    this.loadingService.setLoadingMessage('Predictors have been changed. Migrating to the new layout. This may take a moment and will only happen once.');
     let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     let predictorEntries: Array<IdbPredictorEntryDeprecated> = this.predictorDbServiceDeprecated.accountPredictorEntries.getValue();
     for (let index = 0; index < facilities.length; index++) {
