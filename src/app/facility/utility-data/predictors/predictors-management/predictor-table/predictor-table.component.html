@@ -149,8 +149,8 @@
     </div>
 </ng-container>
 
-<div [ngClass]="{'windowOverlay': predictorToDelete}"></div>
-<div class="popup" [class.open]="predictorToDelete">
+<div [ngClass]="{'windowOverlay': displayDeletePredictor}"></div>
+<div class="popup" [class.open]="displayDeletePredictor">
     <div class="popup-header">
         Delete {{predictorToDelete?.name}}?
         <button class="item-right" (click)="cancelDelete()">x</button>

@@ -7,7 +7,7 @@ import { AccountdbService } from './account-db.service';
 import { FacilitydbService } from './facility-db.service';
 import { UtilityMeterGroupdbService } from './utilityMeterGroup-db.service';
 import * as _ from 'lodash';
-import { AnalysisCategory, AnalysisGroup, AnalysisGroupPredictorVariable } from '../models/analysis';
+import { AnalysisCategory, AnalysisGroup, AnalysisGroupPredictorVariable, JStatRegressionModel } from '../models/analysis';
 import { AnalysisValidationService } from '../shared/helper-services/analysis-validation.service';
 import { LoadingService } from '../core-components/loading/loading.service';
 import { PredictorDbService } from './predictor-db.service';
@@ -195,14 +195,62 @@ export class AnalysisDbService {
   }
 
 
-  async updateAnalysisPredictors(predictorEntries: Array<IdbPredictor>, facilityId: string, predictorUsedGroupIds?: Array<string>) {
+  async deleteAnalysisPredictor(predictorToDelete: IdbPredictor) {
+    let accountAnalysisItems: Array<IdbAnalysisItem> = this.accountAnalysisItems.getValue();
+    let facilityAnalysisItems: Array<IdbAnalysisItem> = accountAnalysisItems.filter(item => {
+      return item.facilityId == predictorToDelete.facilityId;
+    });
+    for (let index = 0; index < facilityAnalysisItems.length; index++) {
+      let analysisItem: IdbAnalysisItem = facilityAnalysisItems[index];
+      let hasGroupErrors: boolean = false;
+      analysisItem.groups.forEach(group => {
+        group.predictorVariables = group.predictorVariables.filter(analysisPredictor => {
+          return analysisPredictor.id != predictorToDelete.guid
+        });
+        if (group.analysisType == 'regression') {
+          //check selected model uses deleted predictor
+          let selectedModel: JStatRegressionModel = group.models.find(model => {
+            return model.modelId == group.selectedModelId
+          });
+          let includesDeletedVariable: boolean = selectedModel.predictorVariables.find(modelVariable => {
+            return modelVariable.id == predictorToDelete.guid
+          }) != undefined;
+          if (includesDeletedVariable) {
+            //if used then remove all models
+            group.models = undefined;
+            group.selectedModelId = undefined;
+            group.regressionModelYear = undefined;
+            group.regressionConstant = undefined;
+            group.dateModelsGenerated = undefined;
+          } else {
+            //if not used in selected model. 
+            //Remove models using predictor and keep selection.
+            group.models = group.models.filter(model => {
+              return model.predictorVariables.find(modelVariable => {
+                return modelVariable.id == predictorToDelete.guid
+              }) == undefined
+            });
+          }
+        }
+        group.groupErrors = this.analysisValidationService.getGroupErrors(group);
+        if (group.groupErrors.hasErrors) {
+          hasGroupErrors = true;
+        }
+      });
+      analysisItem.setupErrors.groupsHaveErrors = hasGroupErrors;
+      await firstValueFrom(this.updateWithObservable(analysisItem));
+    };
+  }
+
+
+  async updateAnalysisPredictors(predictors: Array<IdbPredictor>, facilityId: string, predictorUsedGroupIds?: Array<string>) {
     let accountAnalysisItems: Array<IdbAnalysisItem> = this.accountAnalysisItems.getValue();
     let facilityAnalysisItems: Array<IdbAnalysisItem> = accountAnalysisItems.filter(item => { return item.facilityId == facilityId });
     for (let index = 0; index < facilityAnalysisItems.length; index++) {
       let analysisItem: IdbAnalysisItem = facilityAnalysisItems[index];
       let hasGroupErrors: boolean = false;
       analysisItem.groups.forEach(group => {
-        let groupUpdates: { predictors: Array<AnalysisGroupPredictorVariable>, deletedPredictor: boolean } = this.updatePredictorVariables(predictorEntries, group.predictorVariables);
+        let groupUpdates: { predictors: Array<AnalysisGroupPredictorVariable>, deletedPredictor: boolean } = this.updatePredictorVariables(predictors, group.predictorVariables);
         group.predictorVariables = groupUpdates.predictors;
         if (groupUpdates.deletedPredictor && group.analysisType == 'regression' && predictorUsedGroupIds.includes(group.idbGroupId)) {
           group.models = undefined;
@@ -225,10 +273,14 @@ export class AnalysisDbService {
     let predictorIdsToRemove: Array<string> = new Array();
     //update existing, check need remove
     analysisPredictors.forEach(analysisPredictor => {
+      console.log(analysisPredictor);
       let checkExists: IdbPredictor = predictors.find(predictor => { return analysisPredictor.id == predictor.guid });
+      console.log(checkExists);
       if (!checkExists) {
+        console.log('remove..');
         predictorIdsToRemove.push(analysisPredictor.id)
       } else {
+        console.log('update..');
         analysisPredictor.name = checkExists.name;
         analysisPredictor.unit = checkExists.unit;
         analysisPredictor.production = checkExists.production;

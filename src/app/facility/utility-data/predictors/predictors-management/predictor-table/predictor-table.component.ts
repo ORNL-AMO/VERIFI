@@ -8,11 +8,11 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { MigratePredictorsService } from 'src/app/indexedDB/migrate-predictors.service';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
+import { AnalysisGroup, AnalysisGroupPredictorVariable, JStatRegressionModel } from 'src/app/models/analysis';
 import { WeatherStation } from 'src/app/models/degreeDays';
-import { IdbAccount, IdbFacility } from 'src/app/models/idb';
+import { IdbAccount, IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
@@ -36,7 +36,7 @@ export class PredictorTableComponent {
 
   hasWeatherDataWarning: boolean;
   predictorUsedGroupIds: Array<string> = [];
-
+  displayDeletePredictor: boolean = false;
   // predictorEntries: Array<IdbPredictorEntry>;
   constructor(private predictorDbService: PredictorDbService, private router: Router,
     private facilitydbService: FacilitydbService, private loadingService: LoadingService,
@@ -46,13 +46,11 @@ export class PredictorTableComponent {
     private dbChangesService: DbChangesService,
     private toastNotificationService: ToastNotificationsService,
     private accountDbService: AccountdbService,
-    private predictorDataDbService: PredictorDataDbService,
-    private migratePredictorsService: MigratePredictorsService) {
+    private predictorDataDbService: PredictorDataDbService) {
 
   }
 
   ngOnInit() {
-    // this.predictorEntries = this.predictorDbService.facilityPredictorEntries.getValue();
     this.facilityPredictorsSub = this.predictorDbService.facilityPredictors.subscribe(val => {
       this.facilityPredictors = val;
       this.standardPredictors = new Array();
@@ -83,66 +81,65 @@ export class PredictorTableComponent {
 
   selectDelete(predictor: IdbPredictor) {
     this.predictorToDelete = predictor;
-    //TODO: update in analysis
-    // let facilityAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.facilityAnalysisItems.getValue();
-    // let allFacilityGroups: Array<AnalysisGroup> = facilityAnalysisItems.flatMap(item => { return item.groups });
-    // this.predictorUsedGroupIds = new Array();
-    // for (let i = 0; i < allFacilityGroups.length; i++) {
-    //   let predictorVariables: Array<PredictorData> = [];
-    //   let group: AnalysisGroup = allFacilityGroups[i];
-    //   if (group.analysisType == 'regression') {
-    //     if (group.selectedModelId) {
-    //       let selectedModel: JStatRegressionModel = group.models.find(model => { return model.modelId == group.selectedModelId });
-    //       predictorVariables = selectedModel.predictorVariables;
-    //     } else {
-    //       predictorVariables = group.predictorVariables.filter(variable => {
-    //         return (variable.productionInAnalysis == true);
-    //       });
-    //     }
-    //   } else if (group.analysisType != 'absoluteEnergyConsumption') {
-    //     predictorVariables = group.predictorVariables.filter(variable => {
-    //       return (variable.productionInAnalysis == true);
-    //     });
-    //   }
-    //   let isUsed: PredictorData = predictorVariables.find(predictorUsed => { return predictorUsed.id == predictor.id });
-    //   if (isUsed) {
-    //     this.predictorUsedGroupIds.push(group.idbGroupId)
-    //   }
-    // };
+    //check if predictor is used in analysis.
+    let facilityAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.facilityAnalysisItems.getValue();
+    let allFacilityGroups: Array<AnalysisGroup> = facilityAnalysisItems.flatMap(item => { return item.groups });
+    this.predictorUsedGroupIds = new Array();
+    for (let i = 0; i < allFacilityGroups.length; i++) {
+      let predictorVariables: Array<AnalysisGroupPredictorVariable> = [];
+      let group: AnalysisGroup = allFacilityGroups[i];
+      if (group.analysisType == 'regression') {
+        if (group.selectedModelId) {
+          let selectedModel: JStatRegressionModel = group.models.find(model => { return model.modelId == group.selectedModelId });
+          predictorVariables = selectedModel.predictorVariables;
+        } else {
+          predictorVariables = group.predictorVariables.filter(variable => {
+            return (variable.productionInAnalysis == true);
+          });
+        }
+      } else if (group.analysisType != 'absoluteEnergyConsumption') {
+        predictorVariables = group.predictorVariables.filter(variable => {
+          return (variable.productionInAnalysis == true);
+        });
+      }
+      let isUsed: AnalysisGroupPredictorVariable = predictorVariables.find(predictorUsed => { return predictorUsed.id == predictor.guid });
+      if (isUsed) {
+        this.predictorUsedGroupIds.push(group.idbGroupId)
+      }
+    };
+    this.displayDeletePredictor = true;
   }
 
-
   async confirmDelete() {
+    this.loadingService.setLoadingMessage('Deleting Predictor Data...');
+    this.loadingService.setLoadingStatus(true);
+    this.displayDeletePredictor = false;
+    //delete predictor
     await firstValueFrom(this.predictorDbService.deleteWithObservable(this.predictorToDelete.id));
+    //delete predictor data
     let predictorData: Array<IdbPredictorData> = this.predictorDataDbService.getByPredictorId(this.predictorToDelete.guid);
     await this.predictorDataDbService.deletePredictorDataAsync(predictorData);
+    //set values in services
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.setPredictorsV2(account, this.selectedFacility);
     await this.dbChangesService.setPredictorDataV2(account, this.selectedFacility);
+    if (this.predictorUsedGroupIds.length > 0) {
+      //update analysis items
+      this.loadingService.setLoadingMessage('Updating analysis items...');
+      await this.analysisDbService.deleteAnalysisPredictor(this.predictorToDelete);
+      let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
+      await this.accountAnalysisDbService.updateAccountValidation(accountAnalysisItems);
+    }
+    this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('Predictor Deleted', undefined, 1000, false, 'alert-success');
     this.cancelDelete();
-    //TODO: update analysis..
-    // let deleteIndex: number = this.facilityPredictors.findIndex(facilityPredictor => { return facilityPredictor.id == this.predictorToDelete.id });
-    // this.facilityPredictors.splice(deleteIndex, 1);
-    // this.predictorToDelete = undefined;
-    // if (this.predictorEntries.length > 0) {
-    //   this.loadingService.setLoadingMessage('Deleting Predictor Data...');
-    //   this.loadingService.setLoadingStatus(true);
-    //   await this.analysisDbService.updateAnalysisPredictors(this.facilityPredictors, this.selectedFacility.guid, this.predictorUsedGroupIds);
-    //   let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
-    //   await this.accountAnalysisDbService.updateAccountValidation(accountAnalysisItems);
-    //   await this.predictorDbService.updateFacilityPredictorEntries(this.facilityPredictors);
-    //   this.loadingService.setLoadingStatus(false);
-    // } else {
-    //   this.predictorDbService.facilityPredictors.next(this.facilityPredictors);
-    // }
 
   }
 
   cancelDelete() {
+    this.displayDeletePredictor = false;
     this.predictorToDelete = undefined;
   }
-
 
   selectEditPredictor(predictor: IdbPredictor) {
     this.router.navigateByUrl('facility/' + this.selectedFacility.id + '/utility/predictors/manage/edit-predictor/' + predictor.guid);
@@ -195,7 +192,6 @@ export class PredictorTableComponent {
       return data.id == predictor.id && data.weatherDataWarning;
     });
     return findError != undefined;
-    return false;
   }
 
   goToWeatherData() {
@@ -204,10 +200,4 @@ export class PredictorTableComponent {
     this.weatherDataService.zipCode = facility.zip;
     this.router.navigateByUrl('/weather-data');
   }
-
-
-  // migrateData() {
-  //   this.migratePredictorsService.migrateAccountData();
-  // }
-
 }

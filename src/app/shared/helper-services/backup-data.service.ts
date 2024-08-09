@@ -243,8 +243,6 @@ export class BackupDataService {
       let predictorEntries: Array<IdbPredictorEntryDeprecated> = backupFile.predictorData;
       for (let index = 0; index < facilityGUIDs.length; index++) {
         let facilityGuid: { oldId: string, newId: string } = facilityGUIDs[index];
-        console.log(facilityGuid);
-        console.log(predictorEntries);
         //IDs updated above. use old id when removing
         let facilityEntries: Array<IdbPredictorEntryDeprecated> = predictorEntries.filter(entry => {
           return entry.facilityId == facilityGuid.oldId;
@@ -265,7 +263,6 @@ export class BackupDataService {
             newPredictor.heatingBaseTemperature = oldPredictor.heatingBaseTemperature;
             newPredictor.coolingBaseTemperature = oldPredictor.coolingBaseTemperature;
             newPredictor.weatherDataWarning = oldPredictor.weatherDataWarning;
-            // console.log('new predictor: ' + newPredictor.name)
             await firstValueFrom(this.predictorDbService.addWithObservable(newPredictor));
             predictorGUIDs.push({ oldId: oldPredictor.id, newId: newPredictor.guid });
             for (let entryIndex = 0; entryIndex < facilityEntries.length; entryIndex++) {
@@ -538,7 +535,6 @@ export class BackupDataService {
           newPredictor.heatingBaseTemperature = oldPredictor.heatingBaseTemperature;
           newPredictor.coolingBaseTemperature = oldPredictor.coolingBaseTemperature;
           newPredictor.weatherDataWarning = oldPredictor.weatherDataWarning;
-          // console.log('new predictor: ' + newPredictor.name)
           await firstValueFrom(this.predictorDbService.addWithObservable(newPredictor));
           predictorGUIDs.push({ oldId: oldPredictor.id, newId: newPredictor.guid });
           for (let entryIndex = 0; entryIndex < facilityEntries.length; entryIndex++) {
