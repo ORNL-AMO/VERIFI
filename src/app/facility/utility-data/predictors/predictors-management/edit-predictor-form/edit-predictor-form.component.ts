@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { getNewIdbPredictor, IdbPredictor } from 'src/app/models/idbModels/predictor';
-import { UnitConversionTypes } from '../../../predictor-data/manage-predictors/edit-predictor/unitConversionTypes';
+import { UnitConversionTypes } from './unitConversionTypes';
 import { WeatherStation } from 'src/app/models/degreeDays';
 import { IdbAccount, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { ActivatedRoute, Router } from '@angular/router';

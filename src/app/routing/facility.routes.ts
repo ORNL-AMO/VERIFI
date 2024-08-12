@@ -29,19 +29,12 @@ import { EditBillComponent } from "src/app/facility/utility-data/energy-consumpt
 import { UtilityMeterDataTableComponent } from "src/app/facility/utility-data/energy-consumption/utility-meter-data/utility-meter-data-table/utility-meter-data-table.component";
 import { UtilityMeterDataComponent } from "src/app/facility/utility-data/energy-consumption/utility-meter-data/utility-meter-data.component";
 import { MeterGroupingComponent } from "src/app/facility/utility-data/meter-grouping/meter-grouping.component";
-import { PredictorDataComponent } from "src/app/facility/utility-data/predictor-data/predictor-data.component";
 import { UtilityDataComponent } from "src/app/facility/utility-data/utility-data.component";
 import { CorrelationHeatmapComponent } from "src/app/facility/visualization/correlation-heatmap/correlation-heatmap.component";
 import { CorrelationPlotMenuComponent } from "src/app/facility/visualization/correlation-plot-menu/correlation-plot-menu.component";
 import { CorrelationPlotComponent } from "src/app/facility/visualization/correlation-plot/correlation-plot.component";
 import { TimeSeriesComponent } from "src/app/facility/visualization/time-series/time-series.component";
 import { VisualizationComponent } from "src/app/facility/visualization/visualization.component";
-import { ManagePredictorsComponent } from "../facility/utility-data/predictor-data/manage-predictors/manage-predictors.component";
-import { PredictorsTableComponent } from "../facility/utility-data/predictor-data/manage-predictors/predictors-table/predictors-table.component";
-import { EditPredictorComponent } from "../facility/utility-data/predictor-data/manage-predictors/edit-predictor/edit-predictor.component";
-import { PredictorEntriesComponent } from "../facility/utility-data/predictor-data/predictor-entries/predictor-entries.component";
-import { PredictorEntriesTableComponent } from "../facility/utility-data/predictor-data/predictor-entries/predictor-entries-table/predictor-entries-table.component";
-import { EditPredictorEntryComponent } from "../facility/utility-data/predictor-data/predictor-entries/edit-predictor-entry/edit-predictor-entry.component";
 import { canDeactivateGuard } from "./can-deactivate.guard";
 import { EnergyDashboardComponent } from "../facility/analysis/analysis-dashboard/energy-dashboard/energy-dashboard.component";
 import { WaterDashboardComponent } from "../facility/analysis/analysis-dashboard/water-dashboard/water-dashboard.component";
@@ -147,65 +140,6 @@ export const FacilityRoutes: Route = {
                 },
                 { path: 'monthly-meter-data', component: CalanderizationComponent },
                 { path: 'meter-groups', component: MeterGroupingComponent },
-                {
-                    path: 'predictors-deprecated',
-                    component: PredictorDataComponent,
-                    children: [
-                        { path: '', pathMatch: 'full', redirectTo: 'manage' },
-                        {
-                            path: 'manage',
-                            component: ManagePredictorsComponent,
-                            children: [
-                                {
-                                    path: '',
-                                    pathMatch: 'full',
-                                    redirectTo: 'predictor-table'
-                                },
-                                {
-                                    path: 'predictor-table',
-                                    component: PredictorsTableComponent
-                                },
-
-                                {
-                                    path: 'edit-predictor/:id',
-                                    component: EditPredictorComponent,
-                                    canDeactivate: [canDeactivateGuard]
-                                },
-                                {
-                                    path: 'add-predictor',
-                                    component: EditPredictorComponent,
-                                    canDeactivate: [canDeactivateGuard]
-                                }
-                            ]
-                        },
-                        {
-                            path: 'entries',
-                            component: PredictorEntriesComponent,
-                            children: [
-                                {
-                                    path: '',
-                                    pathMatch: 'full',
-                                    redirectTo: 'predictor-entries-table'
-                                },
-                                {
-                                    path: 'predictor-entries-table',
-                                    component: PredictorEntriesTableComponent
-                                },
-
-                                {
-                                    path: 'edit-entry/:id',
-                                    component: EditPredictorEntryComponent,
-                                    canDeactivate: [canDeactivateGuard]
-                                },
-                                {
-                                    path: 'add-entry',
-                                    component: EditPredictorEntryComponent,
-                                    canDeactivate: [canDeactivateGuard]
-                                },
-                            ]
-                        }
-                    ]
-                },
                 {
                     path: 'predictors',
                     component: PredictorsComponent,

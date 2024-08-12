@@ -1,7 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { UtilityDataComponent } from './utility-data.component';
-import { PredictorDataModule } from './predictor-data/predictor-data.module';
 import { MeterGroupingModule } from './meter-grouping/meter-grouping.module';
 import { EnergyConsumptionModule } from './energy-consumption/energy-consumption.module';
 import { CalanderizationModule } from './calanderization/calanderization.module';
@@ -20,7 +19,6 @@ import { PredictorsModule } from './predictors/predictors.module';
   ],
   imports: [
     CommonModule,
-    PredictorDataModule,
     MeterGroupingModule,
     EnergyConsumptionModule,
     CalanderizationModule,
