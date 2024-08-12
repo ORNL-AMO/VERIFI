@@ -7,8 +7,8 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { AnalysisGroup, JStatRegressionModel } from 'src/app/models/analysis';
-import { IdbAccountAnalysisItem, IdbAnalysisItem, PredictorData } from 'src/app/models/idb';
+import { AnalysisGroup, AnalysisGroupPredictorVariable, JStatRegressionModel } from 'src/app/models/analysis';
+import { IdbAccountAnalysisItem, IdbAnalysisItem } from 'src/app/models/idb';
 import { AnalysisService } from '../../analysis.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -24,7 +24,7 @@ export class AnalysisItemCardComponent implements OnInit {
 
   groupItems: Array<{
     group: AnalysisGroup,
-    predictorVariables: Array<PredictorData>,
+    predictorVariables: Array<AnalysisGroupPredictorVariable>,
     adjust_R2: number,
     regressionEquation: string
   }>;
@@ -53,7 +53,7 @@ export class AnalysisItemCardComponent implements OnInit {
 
   initializeGroups() {
     this.groupItems = this.analysisItem.groups.map(group => {
-      let predictorVariables: Array<PredictorData> = [];
+      let predictorVariables: Array<AnalysisGroupPredictorVariable> = [];
       let adjust_R2: number = 0;
       let regressionEquation: string = '';
       if (group.analysisType == 'regression') {
@@ -113,7 +113,7 @@ export class AnalysisItemCardComponent implements OnInit {
     return regressionEquation;
   }
 
-  getRegressionEquationNoModel(group: AnalysisGroup, predictorVariables: Array<PredictorData>): string {
+  getRegressionEquationNoModel(group: AnalysisGroup, predictorVariables: Array<AnalysisGroupPredictorVariable>): string {
     let regressionEquation: string = group.regressionConstant + ' + ';
     for (let i = 0; i < predictorVariables.length; i++) {
       regressionEquation = regressionEquation + predictorVariables[i].regressionCoefficient + '*' + predictorVariables[i].name;

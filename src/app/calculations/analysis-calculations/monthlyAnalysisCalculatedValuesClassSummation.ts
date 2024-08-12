@@ -1,7 +1,7 @@
 import * as _ from 'lodash';
 import { ConvertValue } from '../conversions/convertValue';
 import { MonthlyAnalysisSummaryDataClass } from './monthlyAnalysisSummaryDataClass';
-import { MonthlyFacilityAnalysisDataClass } from './monthlyFacilityAnalysisDataClass';
+
 export class MonthlyAnalysisCalculatedValuesSummation {
     //results
     energyUse: number;

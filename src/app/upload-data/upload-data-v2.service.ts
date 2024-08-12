@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import * as XLSX from 'xlsx';
 import { ParsedTemplate } from './upload-data-models';
-import { IdbPredictorEntry } from '../models/idb';
 import { AccountdbService } from '../indexedDB/account-db.service';
 import { FacilitydbService } from '../indexedDB/facility-db.service';
 import * as _ from 'lodash';
@@ -52,9 +51,10 @@ export class UploadDataV2Service {
       throw ('No Facilities Found!')
     } else {
       let importMetersAndGroups: { meters: Array<IdbUtilityMeter>, newGroups: Array<IdbUtilityMeterGroup> } = this.getImportMeters(workbook, importFacilities, selectedAccount);
-      let predictorEntries: Array<IdbPredictorEntry> = this.uploadDataSharedFunctionsService.getPredictorData(workbook, importFacilities, selectedAccount);
+      //TODO:
+      // let predictorEntries: Array<IdbPredictorEntry> = this.uploadDataSharedFunctionsService.getPredictorData(workbook, importFacilities, selectedAccount);
       let importMeterData: Array<IdbUtilityMeterData> = this.getUtilityMeterData(workbook, importMetersAndGroups.meters);
-      return { importFacilities: importFacilities, importMeters: importMetersAndGroups.meters, predictorEntries: predictorEntries, meterData: importMeterData, newGroups: importMetersAndGroups.newGroups }
+      return { importFacilities: importFacilities, importMeters: importMetersAndGroups.meters, predictors: [], predictorData: [], meterData: importMeterData, newGroups: importMetersAndGroups.newGroups }
     }
   }
 

@@ -9,7 +9,7 @@ import { getNeededUnits } from "../calculations/shared-calculations/calanderizat
 addEventListener('message', ({ data }) => {
     try {
         let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(data.meters, data.meterData, data.facility, false, { energyIsSource: data.analysisItem.energyIsSource, neededUnits: getNeededUnits(data.analysisItem) }, [], [], [data.facility]);
-        let annualAnalysisSummaryClass: AnnualGroupAnalysisSummaryClass = new AnnualGroupAnalysisSummaryClass(data.selectedGroup, data.analysisItem, data.facility, calanderizedMeters, data.accountPredictorEntries);
+        let annualAnalysisSummaryClass: AnnualGroupAnalysisSummaryClass = new AnnualGroupAnalysisSummaryClass(data.selectedGroup, data.analysisItem, data.facility, calanderizedMeters, data.accountPredictorEntries, undefined, data.accountPredictors);
         let annualAnalysisSummaries: Array<AnnualAnalysisSummary> = annualAnalysisSummaryClass.getAnnualAnalysisSummaries();
         postMessage({
             error: false,

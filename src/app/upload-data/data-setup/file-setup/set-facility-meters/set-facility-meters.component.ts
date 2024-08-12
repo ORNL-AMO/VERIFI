@@ -4,7 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UploadDataService } from '../../../upload-data.service';
-import { ColumnItem, FacilityGroup, FileReference } from 'src/app/upload-data/upload-data-models';
+import { ColumnItem, FacilityGroup, FileReference, getEmptyFileReference } from 'src/app/upload-data/upload-data-models';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
@@ -15,28 +15,7 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 export class SetFacilityMetersComponent implements OnInit {
 
   facilityGroupIds: Array<string>;
-  fileReference: FileReference = {
-    name: '',
-    file: undefined,
-    dataSubmitted: false,
-    id: undefined,
-    workbook: undefined,
-    isTemplate: false,
-    selectedWorksheetName: '',
-    selectedWorksheetData: [],
-    columnGroups: [],
-    headerMap: [],
-    meterFacilityGroups: [],
-    predictorFacilityGroups: [],
-    importFacilities: [],
-    meters: [],
-    meterData: [],
-    predictorEntries: [],
-    skipExistingReadingsMeterIds: [],
-    skipExistingPredictorFacilityIds: [],
-    newMeterGroups: [],
-    selectedFacilityId: undefined
-  };
+  fileReference: FileReference = getEmptyFileReference();
   paramsSub: Subscription;
   importMetersFound: boolean;
   constructor(private uploadDataService: UploadDataService, private facilityDbService: FacilitydbService,

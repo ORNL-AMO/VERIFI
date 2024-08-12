@@ -1,10 +1,8 @@
 import { Injectable } from '@angular/core';
-import { IdbPredictorEntry, PredictorData } from '../models/idb';
 import * as XLSX from 'xlsx';
 import { FacilitydbService } from '../indexedDB/facility-db.service';
 import { AccountdbService } from '../indexedDB/account-db.service';
 import { UtilityMeterdbService } from '../indexedDB/utilityMeter-db.service';
-import { PredictordbService } from '../indexedDB/predictors-db.service';
 import { UtilityMeterDatadbService } from '../indexedDB/utilityMeterData-db.service';
 import { EnergyUnitsHelperService } from '../shared/helper-services/energy-units-helper.service';
 import { EditMeterFormService } from '../facility/utility-data/energy-consumption/energy-source/edit-meter-form/edit-meter-form.service';
@@ -25,6 +23,7 @@ import { getNewIdbFacility, IdbFacility } from '../models/idbModels/facility';
 import { getNewIdbUtilityMeter, IdbUtilityMeter } from '../models/idbModels/utilityMeter';
 import { IdbUtilityMeterGroup } from '../models/idbModels/utilityMeterGroup';
 import { getNewIdbUtilityMeterData, IdbUtilityMeterData } from '../models/idbModels/utilityMeterData';
+import { IdbPredictorEntryDeprecated } from '../models/idb';
 
 @Injectable({
   providedIn: 'root'
@@ -33,7 +32,6 @@ export class UploadDataV1Service {
 
   constructor(private facilityDbService: FacilitydbService,
     private accountDbService: AccountdbService, private utilityMeterDbService: UtilityMeterdbService,
-    private predictorDbService: PredictordbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private energyUnitsHelperService: EnergyUnitsHelperService,
     private editMeterFormService: EditMeterFormService,
@@ -191,9 +189,9 @@ export class UploadDataV1Service {
     })
     //electricity readings
     let importMeterData: Array<IdbUtilityMeterData> = this.getMeterDataEntries(workbook, importMeters);
-    //predictors    
-    let predictorEntries: Array<IdbPredictorEntry> = this.uploadDataSharedFunctionsService.getPredictorData(workbook, importFacilities, selectedAccount);
-    return { importFacilities: importFacilities, importMeters: importMeters, predictorEntries: predictorEntries, meterData: importMeterData, newGroups: newGroups }
+    //predictors TODO: 1668
+    // let predictorEntries: Array<IdbPredictorEntry> = this.uploadDataSharedFunctionsService.getPredictorData(workbook, importFacilities, selectedAccount);
+    return { importFacilities: importFacilities, importMeters: importMeters, predictors: [], predictorData: [], meterData: importMeterData, newGroups: newGroups }
   }
 
   getMeterDataEntries(workbook: XLSX.WorkBook, importMeters: Array<IdbUtilityMeter>): Array<IdbUtilityMeterData> {
@@ -331,32 +329,34 @@ export class UploadDataV1Service {
   }
 
 
-  getPredictorFacilityGroups(templateData: { importFacilities: Array<IdbFacility>, predictorEntries: Array<IdbPredictorEntry> }): Array<FacilityGroup> {
-    let facilityGroups: Array<FacilityGroup> = new Array();
-    let predictorIndex: number = 0;
-    templateData.importFacilities.forEach(facility => {
-      let facilityPredictorEntry: IdbPredictorEntry = templateData.predictorEntries.find(entry => { return entry.facilityId == facility.guid });
-      let groupItems: Array<ColumnItem> = new Array();
-      if (facilityPredictorEntry) {
-        facilityPredictorEntry.predictors.forEach(predictor => {
-          groupItems.push({
-            index: predictorIndex,
-            value: predictor.name,
-            id: predictor.id,
-            isExisting: predictor.id != undefined,
-            isProductionPredictor: predictor.production
-          });
-          predictorIndex++;
-        })
-        facilityGroups.push({
-          facilityId: facility.guid,
-          groupItems: groupItems,
-          facilityName: facility.name,
-          color: facility.color
-        });
-      }
-    });
-    return facilityGroups;
+  getPredictorFacilityGroups(templateData: { importFacilities: Array<IdbFacility>, predictorEntries: Array<IdbPredictorEntryDeprecated> }): Array<FacilityGroup> {
+    // TODO: 1668
+    // let facilityGroups: Array<FacilityGroup> = new Array();
+    // let predictorIndex: number = 0;
+    // templateData.importFacilities.forEach(facility => {
+    //   let facilityPredictorEntry: IdbPredictorEntry = templateData.predictorEntries.find(entry => { return entry.facilityId == facility.guid });
+    //   let groupItems: Array<ColumnItem> = new Array();
+    //   if (facilityPredictorEntry) {
+    //     facilityPredictorEntry.predictors.forEach(predictor => {
+    //       groupItems.push({
+    //         index: predictorIndex,
+    //         value: predictor.name,
+    //         id: predictor.id,
+    //         isExisting: predictor.id != undefined,
+    //         isProductionPredictor: predictor.production
+    //       });
+    //       predictorIndex++;
+    //     })
+    //     facilityGroups.push({
+    //       facilityId: facility.guid,
+    //       groupItems: groupItems,
+    //       facilityName: facility.name,
+    //       color: facility.color
+    //     });
+    //   }
+    // });
+    // return facilityGroups;
+    return [];
   }
 
   parseMetersFromGroups(fileReference: FileReference): Array<IdbUtilityMeter> {
@@ -490,72 +490,75 @@ export class UploadDataV1Service {
   }
 
 
-  parseExcelPredictorsData(fileReference: FileReference): Array<IdbPredictorEntry> {
-    let dateColumnGroup: ColumnGroup = fileReference.columnGroups.find(group => { return group.groupLabel == 'Date' });
-    let dateColumnVal: string = dateColumnGroup.groupItems[0].value;
+  // TODO: 1668
+  parseExcelPredictorsData(fileReference: FileReference): Array<IdbPredictorEntryDeprecated> {
+    // let dateColumnGroup: ColumnGroup = fileReference.columnGroups.find(group => { return group.groupLabel == 'Date' });
+    // let dateColumnVal: string = dateColumnGroup.groupItems[0].value;
 
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    // let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
 
-    let predictorData: Array<IdbPredictorEntry> = new Array();
-    let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.getAccountPerdictorsCopy();
-    let hasNewData: boolean = false;
-    fileReference.predictorFacilityGroups.forEach(group => {
-      if (group.facilityName != 'Unmapped Predictors' && group.groupItems.length != 0) {
-        let facilityPredictorEntries: Array<IdbPredictorEntry> = accountPredictorEntries.filter(entry => {
-          return entry.facilityId == group.facilityId;
-        });
-        let existingFacilityPredictorData: Array<PredictorData> = new Array();
-        if (facilityPredictorEntries.length != 0) {
-          existingFacilityPredictorData = facilityPredictorEntries[0].predictors.map(predictor => { return JSON.parse(JSON.stringify(predictor)) });
-          existingFacilityPredictorData.forEach(predictorData => {
-            predictorData.amount = undefined;
-          });
-        }
-        if (group.groupItems.length != 0) {
-          group.groupItems.forEach((predictorItem) => {
-            let predictorIndex: number = existingFacilityPredictorData.findIndex(predictor => { return predictor.name == predictorItem.value });
-            if (predictorIndex == -1) {
-              hasNewData = true;
-              let newPredictor: PredictorData = this.predictorDbService.getNewPredictor([]);
-              newPredictor.name = predictorItem.value;
-              existingFacilityPredictorData.push(newPredictor);
-              facilityPredictorEntries.forEach(predictorEntry => {
-                predictorEntry.predictors.push(JSON.parse(JSON.stringify(newPredictor)));
-              });
-            }
-          });
-        }
-        let uploadDates: Array<Date> = new Array();
-        fileReference.headerMap.forEach(dataRow => {
-          let readDate: Date = new Date(dataRow[dateColumnVal]);
-          if (!isNaN(readDate.valueOf())) {
-            let predictorEntry: IdbPredictorEntry = facilityPredictorEntries.find(entry => {
-              return checkSameMonth(new Date(entry.date), readDate);
-            });
-            if (!predictorEntry) {
-              predictorEntry = this.predictorDbService.getNewIdbPredictorEntry(group.facilityId, selectedAccount.guid, readDate);
-              predictorEntry.predictors = JSON.parse(JSON.stringify(existingFacilityPredictorData));
-            }
-            group.groupItems.forEach(item => {
-              let entryDataIndex: number = predictorEntry.predictors.findIndex(predictor => { return predictor.name == item.value });
-              if (entryDataIndex != -1) {
-                predictorEntry.predictors[entryDataIndex].amount = Number(dataRow[item.value]);
-              }
-            });
-            predictorData.push(JSON.parse(JSON.stringify(predictorEntry)));
-          }
-        });
-        //uploading new entries means we need to update all previous entries.
-        if (hasNewData) {
-          facilityPredictorEntries.forEach(entry => {
-            let uploadedAlready: Date = uploadDates.find(date => { return checkSameMonth(new Date(entry.date), date) });
-            if (uploadedAlready == undefined) {
-              predictorData.push(JSON.parse(JSON.stringify(entry)));
-            }
-          });
-        }
-      }
-    });
-    return predictorData;
+    // let predictorData: Array<IdbPredictorEntry> = new Array();
+    // let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.getAccountPerdictorsCopy();
+    // let hasNewData: boolean = false;
+    // fileReference.predictorFacilityGroups.forEach(group => {
+    //   if (group.facilityName != 'Unmapped Predictors' && group.groupItems.length != 0) {
+    //     let facilityPredictorEntries: Array<IdbPredictorEntry> = accountPredictorEntries.filter(entry => {
+    //       return entry.facilityId == group.facilityId;
+    //     });
+    //     let existingFacilityPredictorData: Array<PredictorData> = new Array();
+    //     if (facilityPredictorEntries.length != 0) {
+    //       existingFacilityPredictorData = facilityPredictorEntries[0].predictors.map(predictor => { return JSON.parse(JSON.stringify(predictor)) });
+    //       existingFacilityPredictorData.forEach(predictorData => {
+    //         predictorData.amount = undefined;
+    //       });
+    //     }
+    //     if (group.groupItems.length != 0) {
+    //       group.groupItems.forEach((predictorItem) => {
+    //         let predictorIndex: number = existingFacilityPredictorData.findIndex(predictor => { return predictor.name == predictorItem.value });
+    //         if (predictorIndex == -1) {
+    //           hasNewData = true;
+    //           let newPredictor: PredictorData = this.predictorDbService.getNewPredictor([]);
+    //           newPredictor.name = predictorItem.value;
+    //           existingFacilityPredictorData.push(newPredictor);
+    //           facilityPredictorEntries.forEach(predictorEntry => {
+    //             predictorEntry.predictors.push(JSON.parse(JSON.stringify(newPredictor)));
+    //           });
+    //         }
+    //       });
+    //     }
+    //     let uploadDates: Array<Date> = new Array();
+    //     fileReference.headerMap.forEach(dataRow => {
+    //       let readDate: Date = new Date(dataRow[dateColumnVal]);
+    //       if (!isNaN(readDate.valueOf())) {
+    //         let predictorEntry: IdbPredictorEntry = facilityPredictorEntries.find(entry => {
+    //           return checkSameMonth(new Date(entry.date), readDate);
+    //         });
+    //         if (!predictorEntry) {
+    //           predictorEntry = this.predictorDbService.getNewIdbPredictorEntry(group.facilityId, selectedAccount.guid, readDate);
+    //           predictorEntry.predictors = JSON.parse(JSON.stringify(existingFacilityPredictorData));
+    //         }
+    //         group.groupItems.forEach(item => {
+    //           let entryDataIndex: number = predictorEntry.predictors.findIndex(predictor => { return predictor.name == item.value });
+    //           if (entryDataIndex != -1) {
+    //             predictorEntry.predictors[entryDataIndex].amount = Number(dataRow[item.value]);
+    //           }
+    //         });
+    //         predictorData.push(JSON.parse(JSON.stringify(predictorEntry)));
+    //       }
+    //     });
+    //     //uploading new entries means we need to update all previous entries.
+    //     if (hasNewData) {
+    //       facilityPredictorEntries.forEach(entry => {
+    //         let uploadedAlready: Date = uploadDates.find(date => { return checkSameMonth(new Date(entry.date), date) });
+    //         if (uploadedAlready == undefined) {
+    //           predictorData.push(JSON.parse(JSON.stringify(entry)));
+    //         }
+    //       });
+    //     }
+    //   }
+    // });
+    // return predictorData;
+    return [];
   }
+
 }

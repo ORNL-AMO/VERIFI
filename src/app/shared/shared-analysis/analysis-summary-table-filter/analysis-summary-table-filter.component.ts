@@ -1,9 +1,10 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { AnalysisGroup, AnalysisTableColumns } from 'src/app/models/analysis';
-import { IdbAccountAnalysisItem, IdbAnalysisItem, PredictorData } from 'src/app/models/idb';
+import { IdbAccountAnalysisItem, IdbAnalysisItem } from 'src/app/models/idb';
 import * as _ from 'lodash';
 import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
+import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
+import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 
 @Component({
   selector: 'app-analysis-summary-table-filter',
@@ -22,7 +23,7 @@ export class AnalysisSummaryTableFilterComponent implements OnInit {
   energyColumnLabel: string;
   actualUseLabel: string;
   modeledUseLabel: string;
-  constructor(private analysisService: AnalysisService, private predictorDbService: PredictordbService) { }
+  constructor(private analysisService: AnalysisService, private predictorDbService: PredictorDbService) { }
 
   ngOnInit(): void {
     this.analysisTableColumns = this.analysisService.analysisTableColumns.getValue();
@@ -141,17 +142,17 @@ export class AnalysisSummaryTableFilterComponent implements OnInit {
   setPredictorVariables() {
     if (this.tableContext != 'annualAccount' && this.tableContext != 'monthAccount') {
       let predictorSelections: Array<{
-        predictor: PredictorData,
+        predictor: IdbPredictor,
         display: boolean,
         usedInAnalysis: boolean
       }> = new Array();
 
-      let variableCopy: Array<PredictorData>;
+      let variableCopy: Array<IdbPredictor>;
       if (this.tableContext == 'monthGroup' || this.tableContext == 'annualGroup') {
         let analysisGroup: AnalysisGroup = this.analysisService.selectedGroup.getValue();
         variableCopy = JSON.parse(JSON.stringify(analysisGroup.predictorVariables));
       } else if (this.tableContext == 'monthFacility' || this.tableContext == 'annualFacility') {
-        let predictorVariables: Array<PredictorData> = this.predictorDbService.facilityPredictors.getValue();
+        let predictorVariables: Array<IdbPredictor> = this.predictorDbService.facilityPredictors.getValue();
         variableCopy = JSON.parse(JSON.stringify(predictorVariables));
         variableCopy.forEach(variable => {
           variable.productionInAnalysis = false;

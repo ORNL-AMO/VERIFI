@@ -9,7 +9,7 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { getNewIdbUtilityMeterGroup, IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
-import { FileReference } from 'src/app/upload-data/upload-data-models';
+import { FileReference, getEmptyFileReference } from 'src/app/upload-data/upload-data-models';
 import { UploadDataService } from 'src/app/upload-data/upload-data.service';
 
 @Component({
@@ -19,28 +19,7 @@ import { UploadDataService } from 'src/app/upload-data/upload-data.service';
 })
 export class ManageMetersComponent implements OnInit {
 
-  fileReference: FileReference = {
-    name: '',
-    file: undefined,
-    dataSubmitted: false,
-    id: undefined,
-    workbook: undefined,
-    isTemplate: false,
-    selectedWorksheetName: '',
-    selectedWorksheetData: [],
-    columnGroups: [],
-    headerMap: [],
-    meterFacilityGroups: [],
-    predictorFacilityGroups: [],
-    importFacilities: [],
-    meters: [],
-    meterData: [],
-    predictorEntries: [],
-    skipExistingReadingsMeterIds: [],
-    skipExistingPredictorFacilityIds: [],
-    newMeterGroups: [],
-    selectedFacilityId: undefined
-  };
+  fileReference: FileReference = getEmptyFileReference();
   paramsSub: Subscription;
   editMeterForm: FormGroup;
   editMeter: IdbUtilityMeter;

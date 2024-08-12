@@ -1,5 +1,5 @@
 import { MonthlyAnalysisSummaryData } from "src/app/models/analysis";
-import { IdbAccountAnalysisItem, IdbAnalysisItem, IdbPredictorEntry } from "src/app/models/idb";
+import { IdbAccountAnalysisItem, IdbAnalysisItem } from "src/app/models/idb";
 import { MonthlyAccountAnalysisDataClass } from "./monthlyAccountAnalysisDataClass";
 import { MonthlyAnalysisSummaryDataClass } from "./monthlyAnalysisSummaryDataClass";
 import { MonthlyFacilityAnalysisClass } from "./monthlyFacilityAnalysisClass";
@@ -12,6 +12,8 @@ import { IdbAccount } from "src/app/models/idbModels/account";
 import { IdbFacility } from "src/app/models/idbModels/facility";
 import { IdbUtilityMeter } from "src/app/models/idbModels/utilityMeter";
 import { IdbUtilityMeterData } from "src/app/models/idbModels/utilityMeterData";
+import { IdbPredictorData } from "src/app/models/idbModels/predictorData";
+import { IdbPredictor } from "src/app/models/idbModels/predictor";
 
 export class MonthlyAccountAnalysisClass {
 
@@ -21,20 +23,21 @@ export class MonthlyAccountAnalysisClass {
     facilitySummaries: Array<{ facility: IdbFacility, analysisItem: IdbAnalysisItem, monthlySummaryData: Array<MonthlyAnalysisSummaryData> }>
     startDate: Date;
     endDate: Date;
-    facilityPredictorEntries: Array<IdbPredictorEntry>;
+    facilityPredictorEntries: Array<IdbPredictorData>;
     baselineYear: number;
     annualUsageValues: Array<{ year: number, usage: number }>
     constructor(
         accountAnalysisItem: IdbAccountAnalysisItem,
         account: IdbAccount,
         accountFacilities: Array<IdbFacility>,
-        accountPredictorEntries: Array<IdbPredictorEntry>,
+        accountPredictorEntries: Array<IdbPredictorData>,
         allAccountAnalysisItems: Array<IdbAnalysisItem>,
         calculateAllMonthlyData: boolean,
         meters: Array<IdbUtilityMeter>,
-        meterData: Array<IdbUtilityMeterData>
+        meterData: Array<IdbUtilityMeterData>,
+        accountPredictors: Array<IdbPredictor>
     ) {
-        this.setMonthlyFacilityAnlysisClasses(accountAnalysisItem, accountFacilities, accountPredictorEntries, allAccountAnalysisItems, calculateAllMonthlyData, meters, meterData);
+        this.setMonthlyFacilityAnlysisClasses(accountAnalysisItem, accountFacilities, accountPredictorEntries, allAccountAnalysisItems, calculateAllMonthlyData, meters, meterData, accountPredictors);
         this.setStartAndEndDate(account, accountAnalysisItem, calculateAllMonthlyData);
         this.setBaselineYear(account);
         this.setAnnualUsageValues();
@@ -60,11 +63,12 @@ export class MonthlyAccountAnalysisClass {
     setMonthlyFacilityAnlysisClasses(
         accountAnalysisItem: IdbAccountAnalysisItem,
         accountFacilities: Array<IdbFacility>,
-        accountPredictorEntries: Array<IdbPredictorEntry>,
+        accountPredictorEntries: Array<IdbPredictorData>,
         allAccountAnalysisItems: Array<IdbAnalysisItem>,
         calculateAllMonthlyData: boolean,
         meters: Array<IdbUtilityMeter>,
-        meterData: Array<IdbUtilityMeterData>) {
+        meterData: Array<IdbUtilityMeterData>,
+        accountPredictors: Array<IdbPredictor>) {
         this.monthlyFacilityAnalysisClasses = new Array();
         this.facilitySummaries = new Array();
         accountAnalysisItem.facilityAnalysisItems.forEach(item => {
@@ -78,7 +82,8 @@ export class MonthlyAccountAnalysisClass {
                     facility,
                     calanderizedMeterData,
                     accountPredictorEntries,
-                    calculateAllMonthlyData
+                    calculateAllMonthlyData,
+                    accountPredictors
                 );
                 if (analysisItem.analysisCategory == 'energy' && (analysisItem.energyUnit != accountAnalysisItem.energyUnit)) {
                     monthlyFacilityAnalysisClass.convertResults(analysisItem.energyUnit, accountAnalysisItem.energyUnit);

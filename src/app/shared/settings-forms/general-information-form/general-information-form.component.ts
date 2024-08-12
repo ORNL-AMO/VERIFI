@@ -146,6 +146,8 @@ export class GeneralInformationFormComponent implements OnInit {
       if (naicsItem && naicsItem.matchNum != this.form.controls.naics1.value) {
         this.form.controls.naics2.patchValue(null);
         this.form.controls.naics2.updateValueAndValidity();
+        this.form.controls.naics3.patchValue(null);
+        this.form.controls.naics3.updateValueAndValidity();
       }
     }
 

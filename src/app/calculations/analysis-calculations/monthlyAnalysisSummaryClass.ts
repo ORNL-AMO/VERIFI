@@ -1,17 +1,18 @@
 import { AnalysisGroup, MonthlyAnalysisSummary, MonthlyAnalysisSummaryData } from "src/app/models/analysis";
 import { CalanderizedMeter } from "src/app/models/calanderization";
-import { IdbAnalysisItem, IdbPredictorEntry } from "src/app/models/idb";
+import { IdbAnalysisItem } from "src/app/models/idb";
 import { checkAnalysisValue } from "../shared-calculations/calculationsHelpers";
 import { MonthlyAnalysisSummaryDataClass } from "./monthlyAnalysisSummaryDataClass";
 import { MonthlyGroupAnalysisClass } from "./monthlyGroupAnalysisClass";
 import { IdbFacility } from "src/app/models/idbModels/facility";
+import { IdbPredictorData } from "src/app/models/idbModels/predictorData";
 
 export class MonthlyAnalysisSummaryClass {
 
     monthlyGroupAnalysisClass: MonthlyGroupAnalysisClass;
     monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryDataClass>;
     group: AnalysisGroup;
-    constructor(selectedGroup: AnalysisGroup, analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, accountPredictorEntries: Array<IdbPredictorEntry>, calculateAllMonthlyData: boolean) {
+    constructor(selectedGroup: AnalysisGroup, analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, accountPredictorEntries: Array<IdbPredictorData>, calculateAllMonthlyData: boolean) {
         this.group = selectedGroup;
         this.monthlyGroupAnalysisClass = new MonthlyGroupAnalysisClass(selectedGroup, analysisItem, facility, calanderizedMeters, accountPredictorEntries, calculateAllMonthlyData);
         this.setMonthlyAnalysisSummaryData(facility);

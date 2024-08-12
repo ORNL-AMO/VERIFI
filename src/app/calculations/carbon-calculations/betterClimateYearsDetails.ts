@@ -82,14 +82,18 @@ export class BetterClimateYearDetails {
         electricityMonthlyData = electricityMonthlyData.filter(mData => {
             return mData.fiscalYear == year;
         });
-        this.setTotalElectricity(electricityMonthlyData);
+        // this.setTotalElectricity(electricityMonthlyData);
 
-        this.onSiteGeneratedElectricity = this.getElectricityUse(electricityMeters, year, 2);
-        this.purchasedElectricity = this.getElectricityUse(electricityMeters, year, undefined);
-        this.gridElectricity = this.getElectricityUse(electricityMeters, year, 1);
-        this.pppaElectricity = this.getElectricityUse(electricityMeters, year, 3);
-        this.vppaElectricity = this.getElectricityUse(electricityMeters, year, 4);
-        this.RECs = this.getElectricityUse(electricityMeters, year, 6);
+        this.onSiteGeneratedElectricity = this.getElectricityUse(electricityMeters, year, [2]);
+        this.purchasedElectricity = this.getElectricityUse(electricityMeters, year, undefined) - this.onSiteGeneratedElectricity;
+        this.totalElectricity = this.purchasedElectricity + this.onSiteGeneratedElectricity;
+
+        this.pppaElectricity = this.getElectricityUse(electricityMeters, year, [3, 5]);
+        this.vppaElectricity = this.getElectricityUse(electricityMeters, year, [4]);
+        this.RECs = this.getElectricityUse(electricityMeters, year, [6]);
+        //update #1666
+        this.gridElectricity = this.purchasedElectricity - this.pppaElectricity - this.RECs - this.vppaElectricity;
+
         //fuel
         this.setStationaryFuelTotals(calanderizedMeters);
         this.setVehicleFuelTotals(calanderizedMeters);
@@ -288,12 +292,12 @@ export class BetterClimateYearDetails {
         return totalContribution;
     }
 
-    setTotalElectricity(monthlyData: Array<MonthlyData>) {
-        let sumElectricity: number = _.sumBy(monthlyData, (monthlyData: MonthlyData) => {
-            return monthlyData.energyConsumption;
-        });
-        this.totalElectricity = new ConvertValue(sumElectricity, 'MMBtu', 'MWh').convertedValue;
-    }
+    // setTotalElectricity(monthlyData: Array<MonthlyData>) {
+    //     let sumElectricity: number = _.sumBy(monthlyData, (monthlyData: MonthlyData) => {
+    //         return monthlyData.energyConsumption;
+    //     });
+    //     this.totalElectricity = new ConvertValue(sumElectricity, 'MMBtu', 'MWh').convertedValue;
+    // }
 
     setStationaryFuelTotals(calanderizedMeters: Array<CalanderizedMeter>) {
         let fuelTypes: Array<string> = this.getFuelTypes(calanderizedMeters);
@@ -349,15 +353,26 @@ export class BetterClimateYearDetails {
         this.totalStationaryEnergyUse = convertedElectricityUse + totalFuelUsage;
     }
 
-    getElectricityUse(electricityMeters: Array<CalanderizedMeter>, year: number, agreementType: number) {
+    /**
+    * Aggreement types
+    * 1: Grid
+    * 2: On-site Generation
+    * 3: Physical Power Purchase Agreement (PPPA)
+    * 4: Virtual Power Purchase Agreement (VPPA)
+    * 5: Utility Green Product
+    * 6: Renewable Energy Credits (RECs)
+     */
+    getElectricityUse(electricityMeters: Array<CalanderizedMeter>, year: number, agreementTypes: Array<number>) {
         let includedMeters: Array<CalanderizedMeter> = new Array();
         electricityMeters.forEach(cMeter => {
-            if (agreementType) {
-                if (cMeter.meter.agreementType == agreementType) {
+            if (agreementTypes) {
+                if (agreementTypes.includes(cMeter.meter.agreementType)) {
                     includedMeters.push(cMeter);
                 }
             } else {
-                if (cMeter.meter.agreementType != 2) {
+                // if (cMeter.meter.agreementType != 2) {
+                //update for #1666..
+                if (cMeter.meter.includeInEnergy) {
                     includedMeters.push(cMeter);
                 }
             }

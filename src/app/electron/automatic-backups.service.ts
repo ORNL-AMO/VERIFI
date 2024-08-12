@@ -7,15 +7,16 @@ import { AccountReportDbService } from '../indexedDB/account-report-db.service';
 import { CustomEmissionsDbService } from '../indexedDB/custom-emissions-db.service';
 import { AnalysisDbService } from '../indexedDB/analysis-db.service';
 import { FacilitydbService } from '../indexedDB/facility-db.service';
-import { PredictordbService } from '../indexedDB/predictors-db.service';
 import { UtilityMeterdbService } from '../indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from '../indexedDB/utilityMeterData-db.service';
 import { UtilityMeterGroupdbService } from '../indexedDB/utilityMeterGroup-db.service';
 import { ToastNotificationsService } from '../core-components/toast-notifications/toast-notifications.service';
 import { DbChangesService } from '../indexedDB/db-changes.service';
 import { ElectronBackupsDbService } from '../indexedDB/electron-backups-db.service';
-import { BehaviorSubject, firstValueFrom } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { IdbAccount } from '../models/idbModels/account';
+import { PredictorDbService } from '../indexedDB/predictor-db.service';
+import { PredictorDataDbService } from '../indexedDB/predictor-data-db.service';
 
 @Injectable({
   providedIn: 'root'
@@ -38,7 +39,8 @@ export class AutomaticBackupsService {
     private customEmissionsDbService: CustomEmissionsDbService,
     private analysisDbService: AnalysisDbService,
     private facilityDbService: FacilitydbService,
-    private predictorsDbService: PredictordbService,
+    private predictorsDbService: PredictorDbService,
+    private predictorDataDbService: PredictorDataDbService,
     private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
@@ -96,7 +98,12 @@ export class AutomaticBackupsService {
           this.saveBackup();
         }
       });
-      this.predictorsDbService.accountPredictorEntries.subscribe(val => {
+      this.predictorsDbService.accountPredictors.subscribe(val => {
+        if (val) {
+          this.saveBackup();
+        }
+      });
+      this.predictorDataDbService.accountPredictorData.subscribe(val => {
         if (val) {
           this.saveBackup();
         }

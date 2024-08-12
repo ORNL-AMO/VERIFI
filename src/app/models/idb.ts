@@ -177,7 +177,7 @@ export function getNewIdbEntry(): IdbEntry {
 
 // }
 
-export interface IdbPredictorEntry {
+export interface IdbPredictorEntryDeprecated {
     //keys (id primary)
     id?: number,
     guid: string,
@@ -189,13 +189,13 @@ export interface IdbPredictorEntry {
     // unit: string,
     // amount: number,
     date: Date,
-    predictors: Array<PredictorData>,
+    predictors: Array<PredictorDataDeprecated>,
     checked?: boolean,
     dbDate?: Date
 }
 
 
-export interface PredictorData {
+export interface PredictorDataDeprecated {
     name: string,
     amount: number,
     unit?: string,

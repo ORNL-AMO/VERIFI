@@ -12,7 +12,7 @@ export function convertMeterData(meter: IdbUtilityMeter, meterData: Array<IdbUti
     if (isEnergyMeter) {
         let showSiteToSource: boolean = checkShowSiteToSource(meter.source, meter.includeInEnergy, meter.scope);
         for (let index: number = 0; index < copyMeterData.length; index++) {
-            if (showSiteToSource && (accountOrFacility.energyIsSource || energyIsSource)) {
+            if (showSiteToSource && (accountOrFacility.energyIsSource || energyIsSource) && energyIsSource != false) {
                 copyMeterData[index].totalEnergyUse = copyMeterData[index].totalEnergyUse * meter.siteToSource;
             }
             if (!neededUnit) {

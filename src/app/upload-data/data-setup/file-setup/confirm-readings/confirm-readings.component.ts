@@ -6,7 +6,7 @@ import { UtilityMeterDataService } from 'src/app/facility/utility-data/energy-co
 import { UploadDataService } from 'src/app/upload-data/upload-data.service';
 import * as _ from 'lodash';
 import { checkShowHeatCapacity, getIsEnergyMeter, getIsEnergyUnit } from 'src/app/shared/sharedHelperFuntions';
-import { FileReference } from 'src/app/upload-data/upload-data-models';
+import { FileReference, getEmptyFileReference } from 'src/app/upload-data/upload-data-models';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 
@@ -17,28 +17,7 @@ import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 })
 export class ConfirmReadingsComponent implements OnInit {
 
-  fileReference: FileReference = {
-    name: '',
-    file: undefined,
-    dataSubmitted: false,
-    id: undefined,
-    workbook: undefined,
-    isTemplate: false,
-    selectedWorksheetName: '',
-    selectedWorksheetData: [],
-    columnGroups: [],
-    headerMap: [],
-    meterFacilityGroups: [],
-    predictorFacilityGroups: [],
-    importFacilities: [],
-    meters: [],
-    meterData: [],
-    predictorEntries: [],
-    skipExistingReadingsMeterIds: [],
-    skipExistingPredictorFacilityIds: [],
-    newMeterGroups: [],
-    selectedFacilityId: undefined
-  };
+  fileReference: FileReference = getEmptyFileReference();
   paramsSub: Subscription;
   meterDataSummaries: Array<MeterDataSummary>;
   metersIncluded: boolean;

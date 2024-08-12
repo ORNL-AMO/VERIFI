@@ -5,7 +5,6 @@ import { NaicsListPipe } from './naics-list.pipe';
 import { OrderByPipe } from './order-by.pipe';
 import { SettingsLabelPipe } from './settings-label.pipe';
 import { YearOptionsPipe } from './year-options.pipe';
-import { PredictorsOrderByPipe } from './predictors-order-by.pipe';
 import { GroupNamePipe } from './group-name.pipe';
 import { FacilityNamePipe } from './facility-name.pipe';
 import { MonthLabelPipe } from './month-label.pipe';
@@ -18,6 +17,7 @@ import { TotalPipe } from './total.pipe';
 import { AnalysisCategoryPipe } from './analysis-category.pipe';
 import { EmissionsDisplayPipe } from './emissions-display.pipe';
 import { MeterSourceColorPipe } from './meter-source-color.pipe';
+import { NaicsDisplayPipe } from './naics-display.pipe';
 
 @NgModule({
   declarations: [
@@ -26,7 +26,6 @@ import { MeterSourceColorPipe } from './meter-source-color.pipe';
     OrderByPipe,
     SettingsLabelPipe,
     YearOptionsPipe,
-    PredictorsOrderByPipe,
     GroupNamePipe,
     FacilityNamePipe,
     MonthLabelPipe,
@@ -38,7 +37,8 @@ import { MeterSourceColorPipe } from './meter-source-color.pipe';
     TotalPipe,
     AnalysisCategoryPipe,
     EmissionsDisplayPipe,
-    MeterSourceColorPipe
+    MeterSourceColorPipe,
+    NaicsDisplayPipe
   ],
   imports: [
     CommonModule
@@ -49,7 +49,6 @@ import { MeterSourceColorPipe } from './meter-source-color.pipe';
     OrderByPipe,
     SettingsLabelPipe,
     YearOptionsPipe,
-    PredictorsOrderByPipe,
     GroupNamePipe,
     FacilityNamePipe,
     MonthLabelPipe,
@@ -61,7 +60,8 @@ import { MeterSourceColorPipe } from './meter-source-color.pipe';
     TotalPipe,
     AnalysisCategoryPipe,
     EmissionsDisplayPipe,
-    MeterSourceColorPipe
+    MeterSourceColorPipe,
+    NaicsDisplayPipe
   ]
 })
 export class HelperPipesModule { }

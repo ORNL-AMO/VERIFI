@@ -3,8 +3,7 @@ import { Subscription } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
-import { IdbAccountAnalysisItem, IdbAnalysisItem, IdbPredictorEntry } from 'src/app/models/idb';
+import { IdbAccountAnalysisItem, IdbAnalysisItem } from 'src/app/models/idb';
 import { AccountHomeService } from './account-home.service';
 import * as _ from 'lodash';
 import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
@@ -22,6 +21,10 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
+import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
+import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
+import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
+import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 
 @Component({
   selector: 'app-account-home',
@@ -46,7 +49,8 @@ export class AccountHomeComponent implements OnInit {
   carrouselIndex: number = 0;
   constructor(private facilityDbService: FacilitydbService, private accountDbService: AccountdbService,
     private accountHomeService: AccountHomeService,
-    private predictorDbService: PredictordbService,
+    private predictorDbService: PredictorDbService,
+    private predictorDataDbService: PredictorDataDbService,
     private analysisDbService: AnalysisDbService,
     private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
@@ -112,7 +116,8 @@ export class AccountHomeComponent implements OnInit {
   }
 
   setAnnualEnergyAnalysisSummary() {
-    let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.accountPredictorEntries.getValue();
+    let accountPredictorEntries: Array<IdbPredictorData> = this.predictorDataDbService.accountPredictorData.getValue();
+    let accountPredictors: Array<IdbPredictor> = this.predictorDbService.accountPredictors.getValue();
     let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
@@ -141,11 +146,12 @@ export class AccountHomeComponent implements OnInit {
         allAccountAnalysisItems: accountAnalysisItems,
         calculateAllMonthlyData: true,
         meters: accountMeters,
-        meterData: accountMeterData
+        meterData: accountMeterData,
+        accountPredictors: accountPredictors
       });
     } else {
       // Web Workers are not supported in this environment.
-      let annualAnalysisSummaryClass: AnnualAccountAnalysisSummaryClass = new AnnualAccountAnalysisSummaryClass(this.accountHomeService.latestEnergyAnalysisItem, this.account, accountFacilities, accountPredictorEntries, accountAnalysisItems, true, accountMeters, accountMeterData);
+      let annualAnalysisSummaryClass: AnnualAccountAnalysisSummaryClass = new AnnualAccountAnalysisSummaryClass(this.accountHomeService.latestEnergyAnalysisItem, this.account, accountFacilities, accountPredictorEntries, accountAnalysisItems, true, accountMeters, accountMeterData, accountPredictors);
       let annualAnalysisSummaries: Array<AnnualAnalysisSummary> = annualAnalysisSummaryClass.getAnnualAnalysisSummaries();
       let monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData> = annualAnalysisSummaryClass.monthlyAnalysisSummaryData;
       this.setEnergyBehaviorSubjects(annualAnalysisSummaries, monthlyAnalysisSummaryData);
@@ -164,7 +170,8 @@ export class AccountHomeComponent implements OnInit {
   }
 
   setAnnualWaterAnalysisSummary() {
-    let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.accountPredictorEntries.getValue();
+    let accountPredictorEntries: Array<IdbPredictorData> = this.predictorDataDbService.accountPredictorData.getValue();
+    let accountPredictors: Array<IdbPredictor> = this.predictorDbService.accountPredictors.getValue();
     let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
 
@@ -193,11 +200,12 @@ export class AccountHomeComponent implements OnInit {
         allAccountAnalysisItems: accountAnalysisItems,
         calculateAllMonthlyData: true,
         meters: accountMeters,
-        meterData: accountMeterData
+        meterData: accountMeterData,
+        accountPredictors: accountPredictors
       });
     } else {
       // Web Workers are not supported in this environment.
-      let annualAnalysisSummaryClass: AnnualAccountAnalysisSummaryClass = new AnnualAccountAnalysisSummaryClass(this.accountHomeService.latestWaterAnalysisItem, this.account, accountFacilities, accountPredictorEntries, accountAnalysisItems, true, accountMeters, accountMeterData);
+      let annualAnalysisSummaryClass: AnnualAccountAnalysisSummaryClass = new AnnualAccountAnalysisSummaryClass(this.accountHomeService.latestWaterAnalysisItem, this.account, accountFacilities, accountPredictorEntries, accountAnalysisItems, true, accountMeters, accountMeterData, accountPredictors);
       let annualAnalysisSummaries: Array<AnnualAnalysisSummary> = annualAnalysisSummaryClass.getAnnualAnalysisSummaries();
       let monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData> = annualAnalysisSummaryClass.monthlyAnalysisSummaryData;
       this.setWaterBehaviorSubjects(annualAnalysisSummaries, monthlyAnalysisSummaryData);

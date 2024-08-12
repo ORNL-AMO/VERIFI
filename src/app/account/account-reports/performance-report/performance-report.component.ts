@@ -5,9 +5,8 @@ import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { IdbAccountAnalysisItem, IdbAccountReport, IdbAnalysisItem, IdbPredictorEntry } from 'src/app/models/idb';
+import { IdbAccountAnalysisItem, IdbAccountReport, IdbAnalysisItem } from 'src/app/models/idb';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { AccountReportsService } from '../account-reports.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
@@ -16,6 +15,10 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
+import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
+import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
+import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
+import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 
 @Component({
   selector: 'app-performance-report',
@@ -35,11 +38,12 @@ export class PerformanceReportComponent {
     private accountReportsService: AccountReportsService,
     private router: Router, private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService,
-    private predictorDbService: PredictordbService,
     private analysisDbService: AnalysisDbService,
     private accountAnalysisDbService: AccountAnalysisDbService,
     private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService) { }
+    private utilityMeterDataDbService: UtilityMeterDatadbService,
+    private predictorDbService: PredictorDbService,
+    private predictorDataDbService: PredictorDataDbService) { }
 
   ngOnInit(): void {
     this.printSub = this.accountReportsService.print.subscribe(print => {
@@ -68,7 +72,8 @@ export class PerformanceReportComponent {
 
   setBetterPlantsSummary() {
     let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
-    let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.accountPredictorEntries.getValue();
+    let accountPredictorEntries: Array<IdbPredictorData> = this.predictorDataDbService.accountPredictorData.getValue();
+    let accountPredictors: Array<IdbPredictor> = this.predictorDbService.accountPredictors.getValue();
     let accountFacilityAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
     let includedFacilityIds: Array<string> = new Array();
     this.selectedAnalysisItem.facilityAnalysisItems.forEach(item => {
@@ -101,6 +106,7 @@ export class PerformanceReportComponent {
         accountAnalysisItems: accountFacilityAnalysisItems,
         meters: includedFacilityMeters,
         meterData: accountMeterData,
+        accountPredictors: accountPredictors
       });
     } else {
       // Web Workers are not supported in this environment.
@@ -113,7 +119,8 @@ export class PerformanceReportComponent {
         accountFacilities,
         accountFacilityAnalysisItems,
         includedFacilityMeters,
-        accountMeterData);
+        accountMeterData,
+        accountPredictors);
       this.calculating = false;
     }
   }
