@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { PredictordbServiceDeprecated } from './predictors-db.service';
+import { PredictordbServiceDeprecated } from './predictors-deprecated-db.service';
 import { PredictorDbService } from './predictor-db.service';
 import { PredictorDataDbService } from './predictor-data-db.service';
 import { IdbFacility, IdbPredictorEntryDeprecated, PredictorDataDeprecated } from '../models/idb';

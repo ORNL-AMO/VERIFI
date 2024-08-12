@@ -8,7 +8,7 @@ import { AccountReportDbService } from './account-report-db.service';
 import { AnalysisDbService } from './analysis-db.service';
 import { CustomEmissionsDbService } from './custom-emissions-db.service';
 import { FacilitydbService } from './facility-db.service';
-import { PredictordbServiceDeprecated } from './predictors-db.service';
+import { PredictordbServiceDeprecated } from './predictors-deprecated-db.service';
 import { UpdateDbEntryService } from './update-db-entry.service';
 import { UtilityMeterdbService } from './utilityMeter-db.service';
 import { UtilityMeterDatadbService } from './utilityMeterData-db.service';

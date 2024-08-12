@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { AccountdbService } from './account-db.service';
-import { PredictordbServiceDeprecated } from './predictors-db.service';
+import { PredictordbServiceDeprecated } from './predictors-deprecated-db.service';
 import { UtilityMeterDatadbService } from './utilityMeterData-db.service';
 import { UtilityMeterdbService } from './utilityMeter-db.service';
 import { UtilityMeterGroupdbService } from './utilityMeterGroup-db.service';

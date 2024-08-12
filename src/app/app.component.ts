@@ -6,7 +6,7 @@ import { AccountReportDbService } from './indexedDB/account-report-db.service';
 import { AnalysisDbService } from './indexedDB/analysis-db.service';
 import { CustomEmissionsDbService } from './indexedDB/custom-emissions-db.service';
 import { FacilitydbService } from './indexedDB/facility-db.service';
-import { PredictordbServiceDeprecated } from './indexedDB/predictors-db.service';
+import { PredictordbServiceDeprecated } from './indexedDB/predictors-deprecated-db.service';
 import { UpdateDbEntryService } from './indexedDB/update-db-entry.service';
 import { UtilityMeterdbService } from './indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from './indexedDB/utilityMeterData-db.service';
