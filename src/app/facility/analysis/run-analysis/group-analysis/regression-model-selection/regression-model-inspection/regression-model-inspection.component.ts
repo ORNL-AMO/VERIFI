@@ -6,12 +6,13 @@ import { getNeededUnits } from 'src/app/calculations/shared-calculations/calande
 import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
+import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { AnalysisGroup, JStatRegressionModel, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
-import { IdbAnalysisItem, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import { IdbAnalysisItem, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 
 @Component({
   selector: 'app-regression-model-inspection',
@@ -36,7 +37,7 @@ export class RegressionModelInspectionComponent implements OnInit {
   isSelectedModel: boolean;
   compareSelectedModel: boolean = false;
   analysisItem: IdbAnalysisItem;
-  accountPredictorEntries: Array<IdbPredictorEntry>;
+  accountPredictorEntries: Array<IdbPredictorData>;
   selectedGroup: AnalysisGroup;
   selectedModel: JStatRegressionModel;
   facilityMeters: Array<IdbUtilityMeter>;
@@ -44,7 +45,7 @@ export class RegressionModelInspectionComponent implements OnInit {
   constructor(private analysisService: AnalysisService,
     private analysisDbService: AnalysisDbService,
     private facilityDbService: FacilitydbService,
-    private predictorDbService: PredictordbService,
+    private predictorDataDbService: PredictorDataDbService,
     private plotlyService: PlotlyService,
     private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService) { }
@@ -54,7 +55,7 @@ export class RegressionModelInspectionComponent implements OnInit {
     this.isSelectedModel = this.selectedGroup.selectedModelId == this.model.modelId;
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
     this.selectedFacility = this.facilityDbService.selectedFacility.getValue();
-    this.accountPredictorEntries = this.predictorDbService.accountPredictorEntries.getValue();
+    this.accountPredictorEntries = this.predictorDataDbService.accountPredictorData.getValue();
     this.facilityMeters = this.utilityMeterDbService.facilityMeters.getValue();
     this.facilityMeterData = this.utilityMeterDataDbService.facilityMeterData.getValue();
 

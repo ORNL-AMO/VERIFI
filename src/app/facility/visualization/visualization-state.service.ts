@@ -1,14 +1,17 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
-import { IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup, PredictorData } from 'src/app/models/idb';
+import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from 'src/app/models/idb';
 import { getIsEnergyMeter } from 'src/app/shared/sharedHelperFuntions';
 import * as _ from 'lodash';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
+import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
+import { IdbPredictor } from 'src/app/models/idbModels/predictor';
+import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
+import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 
 @Injectable({
   providedIn: 'root'
@@ -22,9 +25,10 @@ export class VisualizationStateService {
 
   correlationPlotOptions: BehaviorSubject<CorrelationPlotOptions>;
 
-  constructor(private predictorDbService: PredictordbService,
+  constructor(private predictorDbService: PredictorDbService,
     private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService, private utilityMeterGroupDbService: UtilityMeterGroupdbService) {
+    private utilityMeterDataDbService: UtilityMeterDatadbService, private utilityMeterGroupDbService: UtilityMeterGroupdbService,
+    private predictorDataDbService: PredictorDataDbService) {
     this.dateRange = new BehaviorSubject<{ minDate: Date, maxDate: Date }>(undefined);
 
     this.menuOpen = new BehaviorSubject<boolean>(true);
@@ -122,34 +126,34 @@ export class VisualizationStateService {
         selected: false
       });
     });
-    let predictors: Array<PredictorData> = this.predictorDbService.facilityPredictors.getValue();
+    let predictors: Array<IdbPredictor> = this.predictorDbService.facilityPredictors.getValue();
     predictors.forEach((predictor, index) => {
       xAxisPredictorOptions.push({
-        itemId: predictor.id,
+        itemId: predictor.guid,
         label: predictor.name,
         type: 'predictor',
         selected: true
       });
       yAxisPredictorOptions.push({
-        itemId: predictor.id,
+        itemId: predictor.guid,
         label: predictor.name,
         type: 'predictor',
         selected: false
       });
       r2PredictorOptions.push({
-        itemId: predictor.id,
+        itemId: predictor.guid,
         label: predictor.name,
         type: 'predictor',
         selected: true
       });
       timeSeriesPredictorYAxis1Options.push({
-        itemId: predictor.id,
+        itemId: predictor.guid,
         label: predictor.name,
         type: 'predictor',
         selected: false
       });
       timeSeriesPredictorYAxis2Options.push({
-        itemId: predictor.id,
+        itemId: predictor.guid,
         label: predictor.name,
         type: 'predictor',
         selected: true
@@ -225,20 +229,13 @@ export class VisualizationStateService {
 
       });
     } else if (axisOption.type == 'predictor') {
-      let facilityPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.facilityPredictorEntries.getValue();
+      let facilityPredictorEntries: Array<IdbPredictorData> = this.predictorDataDbService.facilityPredictorData.getValue();
       dates.forEach(date => {
-        let monthPredictorEntry: IdbPredictorEntry = facilityPredictorEntries.find(entry => {
-          return entry.date.getMonth() == date.getMonth() && entry.date.getFullYear() == date.getFullYear();
+        let monthPredictorEntry: IdbPredictorData = facilityPredictorEntries.find(entry => {
+          return entry.predictorId == axisOption.itemId && entry.date.getMonth() == date.getMonth() && entry.date.getFullYear() == date.getFullYear();
         });
         if (monthPredictorEntry) {
-          let predictor: PredictorData = monthPredictorEntry.predictors.find(predictor => {
-            return predictor.id == axisOption.itemId;
-          });
-          if (predictor) {
-            values.push(predictor.amount);
-          } else {
-            values.push(0);
-          }
+          values.push(monthPredictorEntry.amount);
         } else {
           values.push(0);
         }

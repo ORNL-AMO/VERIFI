@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { AnalysisSetupErrors, JStatRegressionModel, AnalysisGroup, GroupErrors } from 'src/app/models/analysis';
-import { IdbAccountAnalysisItem, IdbAnalysisItem, IdbUtilityMeter, PredictorData } from 'src/app/models/idb';
+import { AnalysisSetupErrors, JStatRegressionModel, AnalysisGroup, GroupErrors, AnalysisGroupPredictorVariable } from 'src/app/models/analysis';
+import { IdbAccountAnalysisItem, IdbAnalysisItem, IdbUtilityMeter } from 'src/app/models/idb';
 import { AccountAnalysisSetupErrors } from 'src/app/models/accountAnalysis';
 import { CalanderizationService } from './calanderization.service';
 
@@ -70,7 +70,7 @@ export class AnalysisValidationService {
         missingRegressionConstant = this.checkValueValid(group.regressionConstant) == false;
         missingRegressionModelYear = this.checkValueValid(group.regressionModelYear) == false;
         for (let index = 0; index < group.predictorVariables.length; index++) {
-          let variable: PredictorData = group.predictorVariables[index];
+          let variable: AnalysisGroupPredictorVariable = group.predictorVariables[index];
           if (variable.productionInAnalysis && !this.checkValueValid(variable.regressionCoefficient)) {
             missingRegressionPredictorCoef = true;
           }
@@ -84,7 +84,7 @@ export class AnalysisValidationService {
       } else {
         let hasProductionVariable: boolean = false;
         for (let index = 0; index < group.predictorVariables.length; index++) {
-          let variable: PredictorData = group.predictorVariables[index];
+          let variable: AnalysisGroupPredictorVariable = group.predictorVariables[index];
           if (variable.production) {
             hasProductionVariable = true;
           }
@@ -125,7 +125,7 @@ export class AnalysisValidationService {
   }
 
 
-  checkMissingProductionVariables(predictorVariables: Array<PredictorData>) {
+  checkMissingProductionVariables(predictorVariables: Array<AnalysisGroupPredictorVariable>) {
     let hasProductionVariable: boolean = false;
     predictorVariables.forEach(variable => {
       if (variable.productionInAnalysis) {

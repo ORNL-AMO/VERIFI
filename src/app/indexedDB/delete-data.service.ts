@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { AccountdbService } from './account-db.service';
-import { PredictordbService } from './predictors-db.service';
+import { PredictordbServiceDeprecated } from './predictors-deprecated-db.service';
 import { UtilityMeterDatadbService } from './utilityMeterData-db.service';
 import { UtilityMeterdbService } from './utilityMeter-db.service';
 import { UtilityMeterGroupdbService } from './utilityMeterGroup-db.service';
@@ -11,10 +11,14 @@ import { AccountAnalysisDbService } from './account-analysis-db.service';
 import { CustomEmissionsDbService } from './custom-emissions-db.service';
 import { CustomFuelDbService } from './custom-fuel-db.service';
 import { CustomGWPDbService } from './custom-gwp-db.service';
-import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport, IdbAnalysisItem, IdbCustomEmissionsItem, IdbCustomFuel, IdbCustomGWP, IdbElectronBackup, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from '../models/idb';
+import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport, IdbAnalysisItem, IdbCustomEmissionsItem, IdbCustomFuel, IdbCustomGWP, IdbElectronBackup, IdbFacility, IdbPredictorEntryDeprecated, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from '../models/idb';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { ElectronBackupsDbService } from './electron-backups-db.service';
+import { PredictorDbService } from './predictor-db.service';
+import { PredictorDataDbService } from './predictor-data-db.service';
+import { IdbPredictor } from '../models/idbModels/predictor';
+import { IdbPredictorData } from '../models/idbModels/predictorData';
 
 @Injectable({
   providedIn: 'root'
@@ -30,7 +34,10 @@ export class DeleteDataService {
   }>;
 
   accountToDelete: IdbAccount;
-  accountPredictors: Array<IdbPredictorEntry>;
+  accountPredictorsDeprecated: Array<IdbPredictorEntryDeprecated>;
+  accountPredictors: Array<IdbPredictor>;
+  accountPredictorData: Array<IdbPredictorData>;
+
   accountMeterData: Array<IdbUtilityMeterData>;
   accountMeters: Array<IdbUtilityMeter>;
   accountGroups: Array<IdbUtilityMeterGroup>;
@@ -45,7 +52,7 @@ export class DeleteDataService {
 
   pauseDelete: BehaviorSubject<boolean>;
   constructor(private accountDbService: AccountdbService,
-    private predictorDbService: PredictordbService,
+    private predictorDbServiceDeprecated: PredictordbServiceDeprecated,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
@@ -57,7 +64,9 @@ export class DeleteDataService {
     private customFuelDbService: CustomFuelDbService,
     private customGWPDbService: CustomGWPDbService,
     private dbService: NgxIndexedDBService,
-    private electronBackupsDbService: ElectronBackupsDbService) {
+    private electronBackupsDbService: ElectronBackupsDbService,
+    private predictorDbService: PredictorDbService,
+    private predictorDataDbService: PredictorDataDbService) {
     this.isDeleting = new BehaviorSubject<boolean>(false);
     this.deletingMessaging = new BehaviorSubject(undefined);
     this.pauseDelete = new BehaviorSubject<boolean>(false);
@@ -84,21 +93,59 @@ export class DeleteDataService {
     if (this.accountToDelete) {
       this.isDeleting.next(true);
       //predictors
-      this.predictorDbService.getAll().subscribe((allPredictors: Array<IdbPredictorEntry>) => {
-        this.accountPredictors = allPredictors.filter(idbPredictor => {
+      this.predictorDbServiceDeprecated.getAll().subscribe((allPredictors: Array<IdbPredictorEntryDeprecated>) => {
+        this.accountPredictorsDeprecated = allPredictors.filter(idbPredictor => {
           return idbPredictor.accountId == this.accountToDelete.guid;
         })
-        this.deletePredictor(0)
+        this.deletePredictorDeprecated(0)
       });
     }
   }
 
-  //predictors
+  //predictors (deprecated)
+  deletePredictorDeprecated(index: number) {
+    if (!this.pauseDelete.getValue()) {
+      if (index < this.accountPredictorsDeprecated.length) {
+        this.dbService.delete('predictors', this.accountPredictorsDeprecated[index].id).subscribe(() => {
+          this.setDeletingMessage(index, this.accountPredictorsDeprecated.length, 'Deleting Predictor Data..');
+          this.deletePredictor(index + 1);
+        });
+      } else {
+        this.predictorDbService.getAll().subscribe((allPredictorData: Array<IdbPredictor>) => {
+          this.accountPredictors = allPredictorData.filter(idbPredictor => {
+            return idbPredictor.accountId == this.accountToDelete.guid;
+          });
+          this.deletePredictor(0)
+        });
+      }
+    }
+  }
+
+  //v2 Predictors
   deletePredictor(index: number) {
     if (!this.pauseDelete.getValue()) {
       if (index < this.accountPredictors.length) {
-        this.dbService.delete('predictors', this.accountPredictors[index].id).subscribe(() => {
-          this.setDeletingMessage(index, this.accountPredictors.length, 'Deleting Predictor Data..');
+        this.dbService.delete('predictor', this.accountPredictors[index].id).subscribe(() => {
+          this.setDeletingMessage(index, this.accountPredictors.length, 'Deleting Predictor..');
+          this.deletePredictor(index + 1);
+        });
+      } else {
+        this.predictorDataDbService.getAll().subscribe((allPredictorData: Array<IdbPredictorData>) => {
+          this.accountPredictorData = allPredictorData.filter(idbPredictorData => {
+            return idbPredictorData.accountId == this.accountToDelete.guid;
+          });
+          this.deletePredictorData(0)
+        });
+      }
+    }
+  }
+
+  //v2 Predictor data
+  deletePredictorData(index: number) {
+    if (!this.pauseDelete.getValue()) {
+      if (index < this.accountPredictorData.length) {
+        this.dbService.delete('predictorData', this.accountPredictorData[index].id).subscribe(() => {
+          this.setDeletingMessage(index, this.accountPredictorData.length, 'Deleting Predictor Data..');
           this.deletePredictor(index + 1);
         });
       } else {

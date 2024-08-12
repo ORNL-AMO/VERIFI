@@ -1,7 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { UtilityDataComponent } from './utility-data.component';
-import { PredictorDataModule } from './predictor-data/predictor-data.module';
 import { MeterGroupingModule } from './meter-grouping/meter-grouping.module';
 import { EnergyConsumptionModule } from './energy-consumption/energy-consumption.module';
 import { CalanderizationModule } from './calanderization/calanderization.module';
@@ -11,6 +10,7 @@ import { HelperPipesModule } from '../../shared/helper-pipes/helper-pipes.module
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { LabelWithTooltipModule } from '../../shared/label-with-tooltip/label-with-tooltip.module';
 import { RouterModule } from '@angular/router';
+import { PredictorsModule } from './predictors/predictors.module';
 
 @NgModule({
   declarations: [
@@ -19,7 +19,6 @@ import { RouterModule } from '@angular/router';
   ],
   imports: [
     CommonModule,
-    PredictorDataModule,
     MeterGroupingModule,
     EnergyConsumptionModule,
     CalanderizationModule,
@@ -29,6 +28,7 @@ import { RouterModule } from '@angular/router';
     LabelWithTooltipModule,
     RouterModule,
     ReactiveFormsModule,
+    PredictorsModule
   ]
 })
 export class UtilityDataModule { }
