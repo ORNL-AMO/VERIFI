@@ -9,7 +9,6 @@ export function getNAICS(accountOrFacility: IdbAccount | IdbFacility): string {
   } else if (accountOrFacility.naics1) {
     matchingNAICS = FirstNaicsList.find(item => { return item.code == accountOrFacility.naics1 });
   }
-
   if (matchingNAICS) {
     return matchingNAICS.code + ' - ' + matchingNAICS.industryType;
   }

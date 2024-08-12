@@ -17,6 +17,7 @@ import { TotalPipe } from './total.pipe';
 import { AnalysisCategoryPipe } from './analysis-category.pipe';
 import { EmissionsDisplayPipe } from './emissions-display.pipe';
 import { MeterSourceColorPipe } from './meter-source-color.pipe';
+import { NaicsDisplayPipe } from './naics-display.pipe';
 
 @NgModule({
   declarations: [
@@ -36,7 +37,8 @@ import { MeterSourceColorPipe } from './meter-source-color.pipe';
     TotalPipe,
     AnalysisCategoryPipe,
     EmissionsDisplayPipe,
-    MeterSourceColorPipe
+    MeterSourceColorPipe,
+    NaicsDisplayPipe
   ],
   imports: [
     CommonModule
@@ -58,7 +60,8 @@ import { MeterSourceColorPipe } from './meter-source-color.pipe';
     TotalPipe,
     AnalysisCategoryPipe,
     EmissionsDisplayPipe,
-    MeterSourceColorPipe
+    MeterSourceColorPipe,
+    NaicsDisplayPipe
   ]
 })
 export class HelperPipesModule { }
