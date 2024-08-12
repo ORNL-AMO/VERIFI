@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { IdbAccountAnalysisItem, IdbAccountReport, IdbAnalysisItem } from '../models/idb';
+import { IdbAccountAnalysisItem, IdbAnalysisItem } from '../models/idb';
 import { AnalysisSetupErrors, GroupErrors } from '../models/analysis';
 import { FacilitydbService } from './facility-db.service';
 import { AnalysisValidationService } from '../shared/helper-services/analysis-validation.service';
@@ -7,6 +7,7 @@ import { IdbAccount } from '../models/idbModels/account';
 import { IdbFacility } from '../models/idbModels/facility';
 import { IdbUtilityMeter } from '../models/idbModels/utilityMeter';
 import { IdbUtilityMeterGroup } from '../models/idbModels/utilityMeterGroup';
+import { IdbAccountReport } from '../models/idbModels/accountReport';
 
 @Injectable({
   providedIn: 'root'

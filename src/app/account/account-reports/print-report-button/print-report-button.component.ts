@@ -2,8 +2,8 @@ import { Component } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { HelpPanelService } from 'src/app/help-panel/help-panel.service';
 import { AccountReportsService } from '../account-reports.service';
-import { IdbAccountReport } from 'src/app/models/idb';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
+import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 
 @Component({
   selector: 'app-print-report-button',

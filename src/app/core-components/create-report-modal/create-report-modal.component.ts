@@ -4,7 +4,7 @@ import { Subscription, firstValueFrom } from 'rxjs';
 import { Router } from '@angular/router';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { IdbAccountAnalysisItem, IdbAccountReport } from 'src/app/models/idb';
+import { IdbAccountAnalysisItem } from 'src/app/models/idb';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountOverviewService } from 'src/app/account/account-overview/account-overview.service';
 import { ToastNotificationsService } from '../toast-notifications/toast-notifications.service';
@@ -15,6 +15,9 @@ import { FacilityOverviewService } from 'src/app/facility/facility-overview/faci
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
+import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
+import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
+import { getNewIdbAccountReport, IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 
 @Component({
   selector: 'app-create-report-modal',
@@ -38,7 +41,8 @@ export class CreateReportModalComponent {
     private accountAnalysisDbService: AccountAnalysisDbService,
     private facilityDbService: FacilitydbService,
     private utilityMeterDbService: UtilityMeterdbService,
-    private facilityOverviewService: FacilityOverviewService) {
+    private facilityOverviewService: FacilityOverviewService,
+    private utilityMeterGroupDbService: UtilityMeterGroupdbService) {
 
   }
 
@@ -82,8 +86,10 @@ export class CreateReportModalComponent {
   }
 
   getNewReport(): IdbAccountReport {
-    let newReport: IdbAccountReport = this.accountReportDbService.getNewAccountReport();
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    let groups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.accountMeterGroups.getValue();
+    let newReport: IdbAccountReport = getNewIdbAccountReport(account, facilities, groups);
     if (this.router.url.includes('account/overview')) {
       newReport.reportType = 'dataOverview';
       let dateRange: { startDate: Date, endDate: Date } = this.accountOverviewService.dateRange.getValue();

@@ -222,25 +222,25 @@ export interface PredictorDataDeprecated {
 export type PredictorType = 'Standard' | 'Conversion' | 'Math' | 'Weather';
 export type WeatherDataType = 'HDD' | 'CDD';
 
-export interface IdbAccountReport {
-    id?: number,
-    guid: string,
-    accountId: string,
-    overviewReportId?: string,
-    baselineYear: number,
-    reportYear: number,
-    startMonth: number,
-    startYear: number,
-    endMonth: number,
-    endYear: number,
-    date: Date,
-    name: string,
-    reportType: ReportType,
-    betterPlantsReportSetup: BetterPlantsReportSetup,
-    dataOverviewReportSetup: DataOverviewReportSetup,
-    performanceReportSetup: PerformanceReportSetup,
-    betterClimateReportSetup: BetterClimateReportSetup
-}
+// export interface IdbAccountReport {
+//     id?: number,
+//     guid: string,
+//     accountId: string,
+//     overviewReportId?: string,
+//     baselineYear: number,
+//     reportYear: number,
+//     startMonth: number,
+//     startYear: number,
+//     endMonth: number,
+//     endYear: number,
+//     date: Date,
+//     name: string,
+//     reportType: ReportType,
+//     betterPlantsReportSetup: BetterPlantsReportSetup,
+//     dataOverviewReportSetup: DataOverviewReportSetup,
+//     performanceReportSetup: PerformanceReportSetup,
+//     betterClimateReportSetup: BetterClimateReportSetup
+// }
 
 
 

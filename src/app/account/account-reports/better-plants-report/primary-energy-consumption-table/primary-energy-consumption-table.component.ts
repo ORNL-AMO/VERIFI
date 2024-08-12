@@ -1,8 +1,8 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { IdbAccountReport } from 'src/app/models/idb';
 import { BetterPlantsSummary } from 'src/app/models/overview-report';
 import * as _ from 'lodash';
 import { IdbAccount } from 'src/app/models/idbModels/account';
+import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 
 @Component({
   selector: 'app-primary-energy-consumption-table',

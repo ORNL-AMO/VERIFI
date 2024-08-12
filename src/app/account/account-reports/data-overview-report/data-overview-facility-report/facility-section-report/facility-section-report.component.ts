@@ -5,10 +5,10 @@ import { IUseAndCost, UseAndCost } from 'src/app/calculations/dashboard-calculat
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { YearMonthData } from 'src/app/models/dashboard';
-import { IdbAccountReport } from 'src/app/models/idb';
 import { DataOverviewReportSetup } from 'src/app/models/overview-report';
 import { AccountReportsService } from '../../../account-reports.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 
 @Component({
   selector: 'app-facility-section-report',

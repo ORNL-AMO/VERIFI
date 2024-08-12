@@ -2,13 +2,14 @@ import { Component } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
-import { IdbAccountAnalysisItem, IdbAccountReport } from 'src/app/models/idb';
+import { IdbAccountAnalysisItem } from 'src/app/models/idb';
 import { AccountReportsService } from '../../account-reports.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { Router } from '@angular/router';
 import { IdbAccount } from 'src/app/models/idbModels/account';
+import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 
 @Component({
   selector: 'app-performance-setup',
