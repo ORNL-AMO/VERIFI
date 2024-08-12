@@ -20,7 +20,7 @@ import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.serv
 import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { getNewIdbPredictorData, IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { getNewIdbPredictor, IdbPredictor } from 'src/app/models/idbModels/predictor';
-import { PredictordbServiceDeprecated } from 'src/app/indexedDB/predictors-db.service';
+import { PredictordbServiceDeprecated } from 'src/app/indexedDB/predictors-deprecated-db.service';
 
 @Injectable({
   providedIn: 'root'
