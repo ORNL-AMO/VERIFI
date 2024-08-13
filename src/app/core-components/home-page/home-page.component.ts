@@ -79,7 +79,7 @@ export class HomePageComponent {
 
   async goToAccountHome(account: IdbAccount) {
     await this.dbChangesService.selectAccount(account, false);
-    this.router.navigateByUrl('/account-home');
+    this.router.navigateByUrl('/account/home');
   }
 
   async goToDataWizard(account: IdbAccount) {
