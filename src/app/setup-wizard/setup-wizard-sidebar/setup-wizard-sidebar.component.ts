@@ -1,9 +1,9 @@
 import { Component } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { IdbFacility } from 'src/app/models/idb';
 import { SetupWizardService } from '../setup-wizard.service';
 import { FileReference } from 'src/app/upload-data/upload-data-models';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
   selector: 'app-setup-wizard-sidebar',

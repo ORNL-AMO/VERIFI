@@ -3,8 +3,8 @@ import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AccountOverviewService } from 'src/app/account/account-overview/account-overview.service';
 import { AccountOverviewData, AccountOverviewFacility } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
-import { IdbFacility } from 'src/app/models/idb';
 import * as _ from 'lodash';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
   selector: 'app-facilities-usage-table',

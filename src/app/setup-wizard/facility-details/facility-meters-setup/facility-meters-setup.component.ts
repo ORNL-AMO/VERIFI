@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { IdbFacility } from 'src/app/models/idb';
 import { SetupWizardService } from '../../setup-wizard.service';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
   selector: 'app-facility-meters-setup',

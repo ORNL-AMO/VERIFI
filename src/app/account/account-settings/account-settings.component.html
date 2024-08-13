@@ -66,7 +66,9 @@
                         </select>
                     </td>
                     <td><a class="click-link" (click)="switchFacility(facility)">{{facility.name}}</a></td>
-                    <td>{{facility.naics3}}</td>
+                    <td>
+                        {{facility | naicsDisplay}}
+                    </td>
                     <td>{{facility.state}}</td>
                     <td>{{facility.country}}</td>
                     <td>{{facility.unitsOfMeasure}}</td>

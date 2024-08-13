@@ -7,7 +7,9 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { IdbAccount, IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
+import { IdbAccount } from 'src/app/models/idbModels/account';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 
 @Component({
   selector: 'app-facility-meter',

@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { IdbUtilityMeter } from 'src/app/models/idb';
+import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 @Pipe({
   name: 'facilityMetersList'
 })

@@ -1,9 +1,10 @@
 import { Component } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { IdbAccount, IdbAccountReport } from 'src/app/models/idb';
 import * as _ from 'lodash';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
+import { IdbAccount } from 'src/app/models/idbModels/account';
+import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 
 @Component({
   selector: 'app-performance-report-dashboard',

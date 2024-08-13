@@ -1,7 +1,10 @@
-import { IdbAccount, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from "src/app/models/idb";
 import { checkShowSiteToSource, getIsEnergyMeter, getIsEnergyUnit } from "src/app/shared/sharedHelperFuntions";
 import { getUnitFromMeter } from "../calanderization/calanderizationHelpers";
 import { ConvertValue } from "./convertValue";
+import { IdbAccount } from "src/app/models/idbModels/account";
+import { IdbFacility } from "src/app/models/idbModels/facility";
+import { IdbUtilityMeter } from "src/app/models/idbModels/utilityMeter";
+import { IdbUtilityMeterData } from "src/app/models/idbModels/utilityMeterData";
 
 export function convertMeterData(meter: IdbUtilityMeter, meterData: Array<IdbUtilityMeterData>, accountOrFacility: IdbFacility | IdbAccount, energyIsSource?: boolean, neededUnit?: string): Array<IdbUtilityMeterData> {
     let copyMeterData: Array<IdbUtilityMeterData> = meterData.map(data => { return getMeterDataCopy(data) });
@@ -9,7 +12,7 @@ export function convertMeterData(meter: IdbUtilityMeter, meterData: Array<IdbUti
     if (isEnergyMeter) {
         let showSiteToSource: boolean = checkShowSiteToSource(meter.source, meter.includeInEnergy, meter.scope);
         for (let index: number = 0; index < copyMeterData.length; index++) {
-            if (showSiteToSource && (accountOrFacility.energyIsSource || energyIsSource)) {
+            if (showSiteToSource && (accountOrFacility.energyIsSource || energyIsSource) && energyIsSource != false) {
                 copyMeterData[index].totalEnergyUse = copyMeterData[index].totalEnergyUse * meter.siteToSource;
             }
             if (!neededUnit) {

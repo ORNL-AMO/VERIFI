@@ -105,7 +105,7 @@
                     Predictors
                 </a>
             </div>
-            <ng-container *ngFor="let predictor of facility.guid | facilityPredictorList:accountPredictorEntries">
+            <ng-container *ngFor="let predictor of facility.guid | facilityPredictorList:accountPredictors">
                 <div class="ps-2 pe-2 nav-item">
                     <a class="nav-link fourth-nav"
                         [routerLink]="'/data-wizard/'+account.guid+'/facility/'+facility.guid+'/predictors/predictor/'+predictor.id"

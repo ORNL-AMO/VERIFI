@@ -7,8 +7,8 @@ import { DataWizardService } from 'src/app/data-wizard/data-wizard.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { IdbAccount, IdbFacility } from 'src/app/models/idb';
-import { FileReference } from 'src/app/upload-data/upload-data-models';
+import { IdbAccount } from 'src/app/models/idbModels/account';
+import { FileReference, getEmptyFileReference } from 'src/app/upload-data/upload-data-models';
 
 @Component({
   selector: 'app-process-template-facilities',
@@ -17,28 +17,7 @@ import { FileReference } from 'src/app/upload-data/upload-data-models';
 })
 export class ProcessTemplateFacilitiesComponent {
 
-  fileReference: FileReference = {
-    name: '',
-    file: undefined,
-    dataSubmitted: false,
-    id: undefined,
-    workbook: undefined,
-    isTemplate: false,
-    selectedWorksheetName: '',
-    selectedWorksheetData: [],
-    columnGroups: [],
-    headerMap: [],
-    meterFacilityGroups: [],
-    predictorFacilityGroups: [],
-    importFacilities: [],
-    meters: [],
-    meterData: [],
-    predictorEntries: [],
-    skipExistingReadingsMeterIds: [],
-    skipExistingPredictorFacilityIds: [],
-    newMeterGroups: [],
-    selectedFacilityId: undefined
-  };
+  fileReference: FileReference = getEmptyFileReference();
   constructor(private activatedRoute: ActivatedRoute, private dataWizardService: DataWizardService,
     private facilityDbService: FacilitydbService, private router: Router,
     private loadingService: LoadingService,

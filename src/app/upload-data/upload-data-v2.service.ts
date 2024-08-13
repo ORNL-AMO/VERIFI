@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import * as XLSX from 'xlsx';
 import { ParsedTemplate } from './upload-data-models';
-import { IdbAccount, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup, MeterReadingDataApplication } from '../models/idb';
 import { AccountdbService } from '../indexedDB/account-db.service';
 import { FacilitydbService } from '../indexedDB/facility-db.service';
 import * as _ from 'lodash';
@@ -19,6 +18,11 @@ import { getMeterDataCopy } from '../calculations/conversions/convertMeterData';
 import { ConvertValue } from '../calculations/conversions/convertValue';
 import { GlobalWarmingPotential, GlobalWarmingPotentials } from '../models/globalWarmingPotentials';
 import { SetupWizardService } from '../setup-wizard/setup-wizard.service';
+import { IdbAccount } from '../models/idbModels/account';
+import { getNewIdbFacility, IdbFacility } from '../models/idbModels/facility';
+import { getNewIdbUtilityMeter, IdbUtilityMeter, MeterReadingDataApplication } from '../models/idbModels/utilityMeter';
+import { IdbUtilityMeterGroup } from '../models/idbModels/utilityMeterGroup';
+import { getNewIdbUtilityMeterData, IdbUtilityMeterData } from '../models/idbModels/utilityMeterData';
 
 @Injectable({
   providedIn: 'root'
@@ -47,9 +51,10 @@ export class UploadDataV2Service {
       throw ('No Facilities Found!')
     } else {
       let importMetersAndGroups: { meters: Array<IdbUtilityMeter>, newGroups: Array<IdbUtilityMeterGroup> } = this.getImportMeters(workbook, importFacilities, selectedAccount);
-      let predictorEntries: Array<IdbPredictorEntry> = this.uploadDataSharedFunctionsService.getPredictorData(workbook, importFacilities, selectedAccount);
+      //TODO:
+      // let predictorEntries: Array<IdbPredictorEntry> = this.uploadDataSharedFunctionsService.getPredictorData(workbook, importFacilities, selectedAccount);
       let importMeterData: Array<IdbUtilityMeterData> = this.getUtilityMeterData(workbook, importMetersAndGroups.meters);
-      return { importFacilities: importFacilities, importMeters: importMetersAndGroups.meters, predictorEntries: predictorEntries, meterData: importMeterData, newGroups: importMetersAndGroups.newGroups }
+      return { importFacilities: importFacilities, importMeters: importMetersAndGroups.meters, predictors: [], predictorData: [], meterData: importMeterData, newGroups: importMetersAndGroups.newGroups }
     }
   }
 
@@ -62,7 +67,7 @@ export class UploadDataV2Service {
       if (facilityName) {
         let facility: IdbFacility = accountFacilities.find(facility => { return facility.name == facilityName });
         if (!facility) {
-          facility = this.facilityDbService.getNewIdbFacility(selectedAccount);
+          facility = getNewIdbFacility(selectedAccount);
           facility.name = facilityName;
         }
         facility.address = facilityDataRow['Address'];
@@ -102,7 +107,7 @@ export class UploadDataV2Service {
           let meterNumber: string = excelMeter['Meter Number (unique)'];
           let meter: IdbUtilityMeter = accountMeters.find(aMeter => { return aMeter.meterNumber == meterNumber });
           if (!meter || !facility.id || facility.guid != meter.facilityId) {
-            meter = this.utilityMeterDbService.getNewIdbUtilityMeter(facility.guid, selectedAccount.guid, true, facility.energyUnit);
+            meter = getNewIdbUtilityMeter(facility.guid, selectedAccount.guid, true, facility.energyUnit);
           }
 
           meter.meterNumber = meterNumber;
@@ -275,7 +280,7 @@ export class UploadDataV2Service {
       if (meter) {
         let dbDataPoint: IdbUtilityMeterData = this.getExistingDbEntry(utilityMeterData, meter, readDate);
         if (!dbDataPoint) {
-          dbDataPoint = this.utilityMeterDataDbService.getNewIdbUtilityMeterData(meter);
+          dbDataPoint = getNewIdbUtilityMeterData(meter, []);
         }
         dbDataPoint.readDate = readDate;
         dbDataPoint.totalEnergyUse = checkImportCellNumber(dataPoint['Total Consumption']);
@@ -319,7 +324,7 @@ export class UploadDataV2Service {
       if (meter) {
         let dbDataPoint: IdbUtilityMeterData = this.getExistingDbEntry(utilityMeterData, meter, readDate);
         if (!dbDataPoint) {
-          dbDataPoint = this.utilityMeterDataDbService.getNewIdbUtilityMeterData(meter);
+          dbDataPoint = getNewIdbUtilityMeterData(meter, []);
         }
         dbDataPoint.readDate = readDate;
         let totalVolume: number = 0;
@@ -371,7 +376,7 @@ export class UploadDataV2Service {
       if (meter) {
         let dbDataPoint: IdbUtilityMeterData = this.getExistingDbEntry(utilityMeterData, meter, readDate);
         if (!dbDataPoint) {
-          dbDataPoint = this.utilityMeterDataDbService.getNewIdbUtilityMeterData(meter);
+          dbDataPoint = getNewIdbUtilityMeterData(meter, []);
         }
         dbDataPoint.readDate = readDate;
         dbDataPoint.totalVolume = dataPoint['Total Consumption or Total Distance'];
@@ -408,7 +413,7 @@ export class UploadDataV2Service {
       if (meter) {
         let dbDataPoint: IdbUtilityMeterData = this.getExistingDbEntry(utilityMeterData, meter, readDate);
         if (!dbDataPoint) {
-          dbDataPoint = this.utilityMeterDataDbService.getNewIdbUtilityMeterData(meter);
+          dbDataPoint = getNewIdbUtilityMeterData(meter, []);
         }
         dbDataPoint.readDate = readDate;
         dbDataPoint.totalVolume = dataPoint['Total Consumption'];
@@ -439,7 +444,7 @@ export class UploadDataV2Service {
       if (meter) {
         let dbDataPoint: IdbUtilityMeterData = this.getExistingDbEntry(utilityMeterData, meter, readDate);
         if (!dbDataPoint) {
-          dbDataPoint = this.utilityMeterDataDbService.getNewIdbUtilityMeterData(meter);
+          dbDataPoint = getNewIdbUtilityMeterData(meter, []);
         }
         dbDataPoint.readDate = readDate;
         dbDataPoint.totalVolume = dataPoint['Total Consumption'];

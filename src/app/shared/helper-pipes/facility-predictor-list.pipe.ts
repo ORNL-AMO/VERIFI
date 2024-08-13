@@ -1,19 +1,15 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { IdbPredictorEntry, PredictorData } from 'src/app/models/idb';
+import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 
 @Pipe({
   name: 'facilityPredictorList'
 })
 export class FacilityPredictorListPipe implements PipeTransform {
 
-  transform(facilityGuid: string, accountPredictorEntries: Array<IdbPredictorEntry>): Array<PredictorData> {
-    let facilityPredictorEntry: IdbPredictorEntry = accountPredictorEntries.find(predictorEntry => {
+  transform(facilityGuid: string, accountPredictors: Array<IdbPredictor>): Array<IdbPredictor> {
+    return accountPredictors.filter(predictorEntry => {
       return predictorEntry.facilityId == facilityGuid;
     });
-    if (facilityPredictorEntry) {
-      return facilityPredictorEntry.predictors
-    }
-    return [];
   }
 
 }

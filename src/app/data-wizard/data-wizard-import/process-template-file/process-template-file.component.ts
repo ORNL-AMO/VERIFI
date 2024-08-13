@@ -4,7 +4,7 @@ import { Subscription } from 'rxjs';
 import { FileReference } from 'src/app/upload-data/upload-data-models';
 import { DataWizardService } from '../../data-wizard.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { IdbAccount } from 'src/app/models/idb';
+import { IdbAccount } from 'src/app/models/idbModels/account';
 
 @Component({
   selector: 'app-process-template-file',

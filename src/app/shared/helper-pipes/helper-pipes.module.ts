@@ -5,7 +5,6 @@ import { NaicsListPipe } from './naics-list.pipe';
 import { OrderByPipe } from './order-by.pipe';
 import { SettingsLabelPipe } from './settings-label.pipe';
 import { YearOptionsPipe } from './year-options.pipe';
-import { PredictorsOrderByPipe } from './predictors-order-by.pipe';
 import { GroupNamePipe } from './group-name.pipe';
 import { FacilityNamePipe } from './facility-name.pipe';
 import { MonthLabelPipe } from './month-label.pipe';
@@ -20,6 +19,7 @@ import { EmissionsDisplayPipe } from './emissions-display.pipe';
 import { MeterSourceColorPipe } from './meter-source-color.pipe';
 import { FacilityMetersListPipe } from './facility-meters-list.pipe';
 import { FacilityPredictorListPipe } from './facility-predictor-list.pipe';
+import { NaicsDisplayPipe } from './naics-display.pipe';
 
 @NgModule({
   declarations: [
@@ -28,7 +28,6 @@ import { FacilityPredictorListPipe } from './facility-predictor-list.pipe';
     OrderByPipe,
     SettingsLabelPipe,
     YearOptionsPipe,
-    PredictorsOrderByPipe,
     GroupNamePipe,
     FacilityNamePipe,
     MonthLabelPipe,
@@ -42,7 +41,8 @@ import { FacilityPredictorListPipe } from './facility-predictor-list.pipe';
     EmissionsDisplayPipe,
     MeterSourceColorPipe,
     FacilityMetersListPipe,
-    FacilityPredictorListPipe
+    FacilityPredictorListPipe,
+    NaicsDisplayPipe
   ],
   imports: [
     CommonModule
@@ -53,7 +53,6 @@ import { FacilityPredictorListPipe } from './facility-predictor-list.pipe';
     OrderByPipe,
     SettingsLabelPipe,
     YearOptionsPipe,
-    PredictorsOrderByPipe,
     GroupNamePipe,
     FacilityNamePipe,
     MonthLabelPipe,
@@ -67,7 +66,8 @@ import { FacilityPredictorListPipe } from './facility-predictor-list.pipe';
     EmissionsDisplayPipe,
     MeterSourceColorPipe,
     FacilityMetersListPipe,
-    FacilityPredictorListPipe
+    FacilityPredictorListPipe,
+    NaicsDisplayPipe
   ]
 })
 export class HelperPipesModule { }

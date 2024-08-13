@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { IdbFacility } from 'src/app/models/idb';
 import { Subscription } from 'rxjs';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
   selector: 'app-facility-home-help',

@@ -6,7 +6,10 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { MeterSource } from 'src/app/models/constantsAndTypes';
 import { EmissionsResults } from 'src/app/models/eGridEmissions';
-import { IdbCustomFuel, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
+import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
+import { checkMeterReadingExistForDate, IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { FuelTypeOption } from 'src/app/shared/fuel-options/fuelTypeOption';
 import { getMobileFuelTypes } from 'src/app/shared/fuel-options/getFuelTypeOptions';
 
@@ -111,9 +114,10 @@ export class EditVehicleMeterBillComponent {
   }
 
   checkDate() {
+    let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
     if (this.addOrEdit == 'add') {
       //new meter entry should have any year/month combo of existing meter reading
-      this.invalidDate = this.utilityMeterDataDbService.checkMeterReadingExistForDate(this.meterDataForm.controls.readDate.value, this.editMeter) != undefined;
+      this.invalidDate = checkMeterReadingExistForDate(this.meterDataForm.controls.readDate.value, this.editMeter, accountMeterData) != undefined;
     } else {
       //edit meter needs to allow year/month combo of the meter being edited
       let currentMeterItemDate: Date = new Date(this.editMeterData.readDate);
@@ -121,7 +125,7 @@ export class EditVehicleMeterBillComponent {
       if (currentMeterItemDate.getUTCFullYear() == changeDate.getUTCFullYear() && currentMeterItemDate.getUTCMonth() == changeDate.getUTCMonth() && currentMeterItemDate.getUTCDate() == changeDate.getUTCDate()) {
         this.invalidDate = false;
       } else {
-        this.invalidDate = this.utilityMeterDataDbService.checkMeterReadingExistForDate(this.meterDataForm.controls.readDate.value, this.editMeter) != undefined;
+        this.invalidDate = checkMeterReadingExistForDate(this.meterDataForm.controls.readDate.value, this.editMeter, accountMeterData) != undefined;
       }
     }
   }

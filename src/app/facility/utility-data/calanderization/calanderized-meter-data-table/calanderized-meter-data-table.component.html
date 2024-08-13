@@ -22,7 +22,7 @@
             <!--electricity-->
             <ng-container *ngIf="calanderizedMeter.showElectricalEmissions">
                 <th (click)="setOrderDataField('marketEmissions')"
-                    [ngClass]="{'active': orderDataField == 'marketEmissions'}" *ngIf="isRECs">
+                    [ngClass]="{'active': orderDataField == 'marketEmissions'}" *ngIf="!isRECs">
                     Total <br>Market-Based<br>Emissions (tonne
                     CO<sub>2</sub>e)</th>
                 <th (click)="setOrderDataField('locationEmissions')"

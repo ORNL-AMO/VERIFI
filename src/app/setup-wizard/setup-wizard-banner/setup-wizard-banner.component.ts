@@ -1,10 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { HelpPanelService } from 'src/app/help-panel/help-panel.service';
-import { IdbAccount, IdbFacility } from 'src/app/models/idb';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { SettingsFormsService } from 'src/app/shared/settings-forms/settings-forms.service';
 import { SetupWizardService } from '../setup-wizard.service';
+import { IdbAccount } from 'src/app/models/idbModels/account';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
   selector: 'app-setup-wizard-banner',

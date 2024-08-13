@@ -1,6 +1,5 @@
 import { CalanderizedMeter } from "src/app/models/calanderization";
 import { getCalanderizedMeterData } from "../calanderization/calanderizeMeters";
-import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData } from "src/app/models/idb";
 import { getNeededUnits } from "../shared-calculations/calanderizationFunctions";
 import { AnnualFacilityAnalysisSummaryClass } from "../analysis-calculations/annualFacilityAnalysisSummaryClass";
 import { AnalysisGroup, AnnualAnalysisSummary } from "src/app/models/analysis";
@@ -8,6 +7,14 @@ import * as _ from 'lodash';
 import { AnnualGroupAnalysisSummaryClass } from "../analysis-calculations/annualGroupAnalysisSummaryClass";
 import { MonthlyAnalysisSummaryClass } from "../analysis-calculations/monthlyAnalysisSummaryClass";
 import { MeterSource } from "src/app/models/constantsAndTypes";
+import { IdbAccount } from "src/app/models/idbModels/account";
+import { IdbFacility } from "src/app/models/idbModels/facility";
+import { IdbUtilityMeter } from "src/app/models/idbModels/utilityMeter";
+import { IdbUtilityMeterData } from "src/app/models/idbModels/utilityMeterData";
+import { IdbPredictor } from "src/app/models/idbModels/predictor";
+import { IdbPredictorData } from "src/app/models/idbModels/predictorData";
+import { IdbAccountAnalysisItem } from "src/app/models/idbModels/accountAnalysisItem";
+import { IdbAnalysisItem } from "src/app/models/idbModels/analysisItem";
 
 export class PerformanceReport {
 
@@ -56,14 +63,15 @@ export class PerformanceReport {
         baselineYear: number,
         reportYear: number,
         selectedAnalysisItem: IdbAccountAnalysisItem,
-        accountPredictorEntries: Array<IdbPredictorEntry>,
+        accountPredictorEntries: Array<IdbPredictorData>,
         account: IdbAccount,
         facilities: Array<IdbFacility>,
         accountAnalysisItems: Array<IdbAnalysisItem>,
         meters: Array<IdbUtilityMeter>,
-        meterData: Array<IdbUtilityMeterData>) {
+        meterData: Array<IdbUtilityMeterData>,
+        accountPredictors: Array<IdbPredictor>) {
         this.reportYear = reportYear;
-        this.setAnnualFacilityAnalysisSummaries(selectedAnalysisItem, facilities, accountPredictorEntries, accountAnalysisItems, meters, meterData);
+        this.setAnnualFacilityAnalysisSummaries(selectedAnalysisItem, facilities, accountPredictorEntries, accountAnalysisItems, meters, meterData, accountPredictors);
         this.setAnnualFacilityData(baselineYear, reportYear);
         this.setFacilityTotals(baselineYear, reportYear);
         this.setAnnualGroupData(baselineYear, reportYear);
@@ -73,10 +81,11 @@ export class PerformanceReport {
     setAnnualFacilityAnalysisSummaries(
         selectedAnalysisItem: IdbAccountAnalysisItem,
         facilities: Array<IdbFacility>,
-        accountPredictorEntries: Array<IdbPredictorEntry>,
+        accountPredictorEntries: Array<IdbPredictorData>,
         accountAnalysisItems: Array<IdbAnalysisItem>,
         meters: Array<IdbUtilityMeter>,
-        meterData: Array<IdbUtilityMeterData>) {
+        meterData: Array<IdbUtilityMeterData>,
+        accountPredictors: Array<IdbPredictor>) {
         this.annualFacilityAnalysisSummaries = new Array();
         selectedAnalysisItem.facilityAnalysisItems.forEach(item => {
             if (item.analysisItemId != undefined && item.analysisItemId != 'skip') {
@@ -84,7 +93,7 @@ export class PerformanceReport {
                 let facilityMeters: Array<IdbUtilityMeter> = meters.filter(meter => { return meter.facilityId == item.facilityId });
                 let facility: IdbFacility = facilities.find(facility => { return facility.guid == item.facilityId });
                 let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, meterData, facility, false, { energyIsSource: facilityAnalysisItem.energyIsSource, neededUnits: getNeededUnits(facilityAnalysisItem) }, [], [], facilities);
-                let facilityAnalysisSummaryClass: AnnualFacilityAnalysisSummaryClass = new AnnualFacilityAnalysisSummaryClass(facilityAnalysisItem, facility, calanderizedMeters, accountPredictorEntries, false);
+                let facilityAnalysisSummaryClass: AnnualFacilityAnalysisSummaryClass = new AnnualFacilityAnalysisSummaryClass(facilityAnalysisItem, facility, calanderizedMeters, accountPredictorEntries, false, accountPredictors);
                 let annualAnalysisSummary: Array<AnnualAnalysisSummary> = facilityAnalysisSummaryClass.getAnnualAnalysisSummaries();
                 let groupAnnualAnalysisSummary: Array<{
                     group: AnalysisGroup,
@@ -97,7 +106,7 @@ export class PerformanceReport {
                             return groupClass.group.idbGroupId == group.idbGroupId;
                         });
 
-                        let groupAnnualAnalysisSummaryClass: AnnualGroupAnalysisSummaryClass = new AnnualGroupAnalysisSummaryClass(group, facilityAnalysisItem, facility, calanderizedMeters, accountPredictorEntries, groupMonthlySummariesClass.getMonthlyAnalysisSummaryData());
+                        let groupAnnualAnalysisSummaryClass: AnnualGroupAnalysisSummaryClass = new AnnualGroupAnalysisSummaryClass(group, facilityAnalysisItem, facility, calanderizedMeters, accountPredictorEntries, groupMonthlySummariesClass.getMonthlyAnalysisSummaryData(), accountPredictors);
                         groupAnnualAnalysisSummary.push({
                             group: group,
                             annualAnalysisSummary: groupAnnualAnalysisSummaryClass.getAnnualAnalysisSummaries(),

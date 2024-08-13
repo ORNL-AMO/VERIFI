@@ -6,10 +6,11 @@ import { FirstNaicsList, NAICS, SecondNaicsList, ThirdNaicsList } from 'src/app/
 import { State, States } from 'src/app/shared/form-data/states';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { IdbAccount, IdbFacility } from 'src/app/models/idb';
 import { SettingsFormsService } from '../settings-forms.service';
 import { SetupWizardService } from 'src/app/setup-wizard/setup-wizard.service';
 import { FacilityClassification, FacilityClassifications } from 'src/app/models/constantsAndTypes';
+import { IdbAccount } from 'src/app/models/idbModels/account';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
   selector: 'app-general-information-form',
@@ -145,6 +146,8 @@ export class GeneralInformationFormComponent implements OnInit {
       if (naicsItem && naicsItem.matchNum != this.form.controls.naics1.value) {
         this.form.controls.naics2.patchValue(null);
         this.form.controls.naics2.updateValueAndValidity();
+        this.form.controls.naics3.patchValue(null);
+        this.form.controls.naics3.updateValueAndValidity();
       }
     }
 

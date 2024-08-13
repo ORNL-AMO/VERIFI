@@ -2,8 +2,8 @@ import { Component } from '@angular/core';
 import { DeleteDataService } from 'src/app/indexedDB/delete-data.service';
 import { trigger, state, style, animate, transition } from '@angular/animations';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { IdbAccount } from 'src/app/models/idb';
 import { Subscription } from 'rxjs';
+import { IdbAccount } from 'src/app/models/idbModels/account';
 
 @Component({
   selector: 'app-deleting-account-data',

@@ -3,8 +3,12 @@ import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
 import { AnalysisTableColumns, AnnualAnalysisSummary } from 'src/app/models/analysis';
-import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility, PredictorData } from 'src/app/models/idb';
 import { CopyTableService } from '../../helper-services/copy-table.service';
+import { IdbAccount } from 'src/app/models/idbModels/account';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { IdbPredictor } from 'src/app/models/idbModels/predictor';
+import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
+import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 
 @Component({
   selector: 'app-annual-analysis-summary-table',
@@ -30,7 +34,7 @@ export class AnnualAnalysisSummaryTableComponent implements OnInit {
 
   orderDataField: string = 'year';
   orderByDirection: 'asc' | 'desc' = 'asc';
-  predictorColumns: Array<PredictorData>;
+  predictorColumns: Array<IdbPredictor>;
   copyingTable: boolean = false;
   constructor(private analysisService: AnalysisService, private copyTableService: CopyTableService,
     private router: Router) { }
@@ -53,14 +57,14 @@ export class AnnualAnalysisSummaryTableComponent implements OnInit {
   setPredictorVariables() {
     let inAccount: boolean = this.router.url.includes('account');
     if (!inAccount) {
-      let predictorColumns: Array<PredictorData> = new Array();
+      let predictorColumns: Array<IdbPredictor> = new Array();
       this.annualAnalysisSummary.forEach((data, index) => {
         this.analysisTableColumns.predictors.forEach(predictorItem => {
           if (predictorItem.display) {
             if (index == 0) {
               predictorColumns.push(predictorItem.predictor)
             }
-            let monthData: { predictorId: string, usage: number } = data.predictorUsage.find(usageItem => { return usageItem.predictorId == predictorItem.predictor.id });
+            let monthData: { predictorId: string, usage: number } = data.predictorUsage.find(usageItem => { return usageItem.predictorId == predictorItem.predictor.guid });
             if (monthData) {
               data[predictorItem.predictor.name] = monthData.usage;
             }

@@ -1,6 +1,5 @@
 import { ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
 import { FormGroup, ValidatorFn } from '@angular/forms';
-import { IdbCustomFuel, IdbCustomGWP, IdbFacility } from 'src/app/models/idb';
 import { EnergyUnitsHelperService } from 'src/app/shared/helper-services/energy-units-helper.service';
 import { checkShowHeatCapacity, checkShowSiteToSource, getHeatingCapacity, getIsEnergyMeter, getSiteToSource, getStartingUnitOptions } from 'src/app/shared/sharedHelperFuntions';
 import { EnergyUnitOptions, UnitOption } from 'src/app/shared/unitOptions';
@@ -14,6 +13,9 @@ import { ScopeOption, ScopeOptions } from 'src/app/models/scopeOption';
 import { GlobalWarmingPotential, GlobalWarmingPotentials } from 'src/app/models/globalWarmingPotentials';
 import { ConvertValue } from 'src/app/calculations/conversions/convertValue';
 import { CustomGWPDbService } from 'src/app/indexedDB/custom-gwp-db.service';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { IdbCustomGWP } from 'src/app/models/idbModels/customGWP';
+import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
 
 @Component({
   selector: 'app-edit-meter-form',

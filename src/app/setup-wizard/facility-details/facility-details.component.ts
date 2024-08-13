@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SetupWizardService } from '../setup-wizard.service';
-import { IdbFacility } from 'src/app/models/idb';
 import { Subscription } from 'rxjs';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
   selector: 'app-facility-details',

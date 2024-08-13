@@ -5,8 +5,11 @@ import { Subscription } from 'rxjs';
 import { EditMeterFormService } from 'src/app/facility/utility-data/energy-consumption/energy-source/edit-meter-form/edit-meter-form.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
-import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from 'src/app/models/idb';
-import { FileReference } from 'src/app/upload-data/upload-data-models';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
+import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
+import { getNewIdbUtilityMeterGroup, IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
+import { FileReference, getEmptyFileReference } from 'src/app/upload-data/upload-data-models';
 import { UploadDataService } from 'src/app/upload-data/upload-data.service';
 
 @Component({
@@ -16,28 +19,7 @@ import { UploadDataService } from 'src/app/upload-data/upload-data.service';
 })
 export class ManageMetersComponent implements OnInit {
 
-  fileReference: FileReference = {
-    name: '',
-    file: undefined,
-    dataSubmitted: false,
-    id: undefined,
-    workbook: undefined,
-    isTemplate: false,
-    selectedWorksheetName: '',
-    selectedWorksheetData: [],
-    columnGroups: [],
-    headerMap: [],
-    meterFacilityGroups: [],
-    predictorFacilityGroups: [],
-    importFacilities: [],
-    meters: [],
-    meterData: [],
-    predictorEntries: [],
-    skipExistingReadingsMeterIds: [],
-    skipExistingPredictorFacilityIds: [],
-    newMeterGroups: [],
-    selectedFacilityId: undefined
-  };
+  fileReference: FileReference = getEmptyFileReference();
   paramsSub: Subscription;
   editMeterForm: FormGroup;
   editMeter: IdbUtilityMeter;
@@ -193,54 +175,47 @@ export class ManageMetersComponent implements OnInit {
       facilityMeterGroups = facilityMeterGroups.concat(newImportGroups);
       let electricityGroup: IdbUtilityMeterGroup = facilityMeterGroups.find(group => { return group.name == 'Electricity' });
       if (!electricityGroup) {
-        electricityGroup = this.utilityMeterGroupDbService.getNewIdbUtilityMeterGroup("Energy", "Electricity", importFacility.guid, importFacility.accountId);
+        electricityGroup = getNewIdbUtilityMeterGroup("Energy", "Electricity", importFacility.guid, importFacility.accountId);
         facilityMeterGroups.push(electricityGroup);
       }
       let naturalGasGroup: IdbUtilityMeterGroup = facilityMeterGroups.find(group => { return group.name == 'Natural Gas' });
       if (!naturalGasGroup) {
-        naturalGasGroup = this.utilityMeterGroupDbService.getNewIdbUtilityMeterGroup("Energy", "Natural Gas", importFacility.guid, importFacility.accountId);
+        naturalGasGroup = getNewIdbUtilityMeterGroup("Energy", "Natural Gas", importFacility.guid, importFacility.accountId);
         facilityMeterGroups.push(naturalGasGroup);
       }
       let otherFuelGroup: IdbUtilityMeterGroup = facilityMeterGroups.find(group => { return group.name == 'Other Fuels' });
       if (!otherFuelGroup) {
-        otherFuelGroup = this.utilityMeterGroupDbService.getNewIdbUtilityMeterGroup("Energy", "Other Fuels", importFacility.guid, importFacility.accountId);
+        otherFuelGroup = getNewIdbUtilityMeterGroup("Energy", "Other Fuels", importFacility.guid, importFacility.accountId);
         facilityMeterGroups.push(otherFuelGroup);
       }
 
       let otherEnergyGroup: IdbUtilityMeterGroup = facilityMeterGroups.find(group => { return group.name == 'Other Energy' });
       if (!otherEnergyGroup) {
-        otherEnergyGroup = this.utilityMeterGroupDbService.getNewIdbUtilityMeterGroup("Energy", "Other Energy", importFacility.guid, importFacility.accountId);
+        otherEnergyGroup = getNewIdbUtilityMeterGroup("Energy", "Other Energy", importFacility.guid, importFacility.accountId);
         facilityMeterGroups.push(otherEnergyGroup);
       }
 
       let waterGroup: IdbUtilityMeterGroup = facilityMeterGroups.find(group => { return group.name == 'Water Intake' });
       if (!waterGroup) {
-        waterGroup = this.utilityMeterGroupDbService.getNewIdbUtilityMeterGroup("Water", "Water Intake", importFacility.guid, importFacility.accountId);
+        waterGroup = getNewIdbUtilityMeterGroup("Water", "Water Intake", importFacility.guid, importFacility.accountId);
         facilityMeterGroups.push(waterGroup);
       }
 
 
       let wasteWaterGroup: IdbUtilityMeterGroup = facilityMeterGroups.find(group => { return group.name == 'Water Discharge' });
       if (!wasteWaterGroup) {
-        wasteWaterGroup = this.utilityMeterGroupDbService.getNewIdbUtilityMeterGroup("Water", "Water Discharge", importFacility.guid, importFacility.accountId);
+        wasteWaterGroup = getNewIdbUtilityMeterGroup("Water", "Water Discharge", importFacility.guid, importFacility.accountId);
         facilityMeterGroups.push(wasteWaterGroup);
       }
 
       let otherGroup: IdbUtilityMeterGroup = facilityMeterGroups.find(group => { return group.name == 'Other' });
       if (!otherGroup) {
-        otherGroup = this.utilityMeterGroupDbService.getNewIdbUtilityMeterGroup("Other", "Other (non-energy)", importFacility.guid, importFacility.accountId);
+        otherGroup = getNewIdbUtilityMeterGroup("Other", "Other (non-energy)", importFacility.guid, importFacility.accountId);
         facilityMeterGroups.push(otherGroup);
       }
 
-
-      facilityMeterGroups.push({
-        guid: undefined,
-        facilityId: undefined,
-        accountId: undefined,
-        //data
-        groupType: undefined,
-        name: "No Group",
-      });
+      let noGroup: IdbUtilityMeterGroup = getNewIdbUtilityMeterGroup(undefined, "No Group", undefined, undefined);
+      facilityMeterGroups.push(noGroup);
       facilityGroups.push({
         facilityId: importFacility.guid,
         groupOptions: facilityMeterGroups

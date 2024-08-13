@@ -1,7 +1,10 @@
-import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, Input, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
-import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
+import { IdbAccount } from 'src/app/models/idbModels/account';
+import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
+import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
   selector: 'app-monthly-analysis-summary-savings-graph',

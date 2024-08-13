@@ -18,6 +18,5 @@
 }
 
 .card.card-toast .card-header, .card.card-toast .btn-close{
-    /* background-color: none; */
-    color: white;
+    background-color: white;
 }

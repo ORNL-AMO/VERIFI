@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport, IdbAnalysisItem } from 'src/app/models/idb';
 import { Month, Months } from 'src/app/shared/form-data/months';
 import { EnergyUnitOptions, UnitOption, VolumeLiquidOptions } from 'src/app/shared/unitOptions';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
@@ -12,6 +11,9 @@ import { AnalysisValidationService } from 'src/app/shared/helper-services/analys
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { AccountAnalysisService } from '../account-analysis.service';
+import { IdbAccount } from 'src/app/models/idbModels/account';
+import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
+import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 
 @Component({
   selector: 'app-account-analysis-setup',

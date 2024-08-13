@@ -1,6 +1,6 @@
-import { IdbAccount, IdbFacility } from "src/app/models/idb";
+import { AccountAndFacility } from "src/app/models/idbModels/accountAndFacility";
 
-export function getNAICS(accountOrFacility: IdbAccount | IdbFacility): string {
+export function getNAICS(accountOrFacility: AccountAndFacility): string {
   let matchingNAICS: NAICS;
   if (accountOrFacility.naics3) {
     matchingNAICS = ThirdNaicsList.find(item => { return item.code == accountOrFacility.naics3 });
@@ -9,7 +9,6 @@ export function getNAICS(accountOrFacility: IdbAccount | IdbFacility): string {
   } else if (accountOrFacility.naics1) {
     matchingNAICS = FirstNaicsList.find(item => { return item.code == accountOrFacility.naics1 });
   }
-
   if (matchingNAICS) {
     return matchingNAICS.code + ' - ' + matchingNAICS.industryType;
   }

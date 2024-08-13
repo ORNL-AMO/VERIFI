@@ -1,8 +1,10 @@
 
 import { MonthlyAnalysisSummaryData } from "src/app/models/analysis";
 import * as _ from 'lodash';
-import { IdbFacility, IdbPredictorEntry, PredictorData } from "src/app/models/idb";
 import { filterYearPredictorData } from "../shared-calculations/calculationsHelpers";
+import { IdbFacility } from "src/app/models/idbModels/facility";
+import { IdbPredictorData } from "src/app/models/idbModels/predictorData";
+import { IdbPredictor } from "src/app/models/idbModels/predictor";
 
 export class AnnualAnalysisSummaryDataClass {
 
@@ -36,13 +38,14 @@ export class AnnualAnalysisSummaryDataClass {
     constructor(
         monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
         year: number,
-        accountPredictorEntries: Array<IdbPredictorEntry>,
+        accountPredictorEntries: Array<IdbPredictorData>,
         facility: IdbFacility,
-        previousYearsSummaryData: Array<AnnualAnalysisSummaryDataClass>
+        previousYearsSummaryData: Array<AnnualAnalysisSummaryDataClass>,
+        accountPredictors: Array<IdbPredictor>
     ) {
         this.year = year;
         this.setYearAnalysisSummaryData(monthlyAnalysisSummaryData);
-        this.setPredictorUsage(accountPredictorEntries, facility);
+        this.setPredictorUsage(accountPredictorEntries, facility, accountPredictors);
         this.setEnergyUse();
         this.setBaselineAdjustmentInput()
         this.setModelYearDataAdjustment();
@@ -156,22 +159,23 @@ export class AnnualAnalysisSummaryDataClass {
         this.newSavings = this.savings - this.previousYearSavings;
     }
 
-    setPredictorUsage(accountPredictorEntries: Array<IdbPredictorEntry>, facility: IdbFacility) {
+    setPredictorUsage(accountPredictorEntries: Array<IdbPredictorData>, facility: IdbFacility, accountPredictors: Array<IdbPredictor>) {
         this.predictorUsage = new Array();
         if (facility) {
-            let facilityPredictorData: Array<IdbPredictorEntry> = accountPredictorEntries.filter(entry => { return entry.facilityId == facility.guid });
-            let summaryYearPredictorData: Array<IdbPredictorEntry> = filterYearPredictorData(facilityPredictorData, this.year, facility);
+            let facilityPredictorData: Array<IdbPredictorData> = accountPredictorEntries.filter(entry => { return entry.facilityId == facility.guid });
+            let summaryYearPredictorData: Array<IdbPredictorData> = filterYearPredictorData(facilityPredictorData, this.year, facility);
             if (summaryYearPredictorData.length > 0) {
-                let predictorVariables: Array<PredictorData> = summaryYearPredictorData[0].predictors;
-                predictorVariables.forEach(variable => {
-                    let usageVal: number = 0;
-                    summaryYearPredictorData.forEach(data => {
-                        let predictorData: PredictorData = data.predictors.find(predictor => { return predictor.id == variable.id });
-                        usageVal = usageVal + predictorData.amount;
+                // let predictorVariables: Array<PredictorData> = summaryYearPredictorData[0].predictors;
+                accountPredictors.forEach(variable => {
+                    let predictorData: Array<IdbPredictorData> = summaryYearPredictorData.filter(pData => {
+                        return pData.predictorId == variable.guid
+                    });
+                    let usageVal: number = _.sumBy(predictorData, (pData: IdbPredictorData) => {
+                        return pData.amount;
                     });
                     this.predictorUsage.push({
                         usage: usageVal,
-                        predictorId: variable.id
+                        predictorId: variable.guid
                     });
                 });
             }

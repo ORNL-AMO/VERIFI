@@ -3,12 +3,17 @@ import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
-import { IdbAccount, IdbAccountReport } from 'src/app/models/idb';
 import * as _ from 'lodash';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { ReportType } from 'src/app/models/constantsAndTypes';
 import { AnalyticsService } from 'src/app/analytics/analytics.service';
+import { IdbAccount } from 'src/app/models/idbModels/account';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
+import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
+import { getNewIdbAccountReport, IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 
 @Component({
   selector: 'app-account-reports-dashboard',
@@ -25,14 +30,19 @@ export class AccountReportsDashboardComponent {
     private accountReportDbService: AccountReportDbService,
     private dbChangesService: DbChangesService,
     private toastNotificationService: ToastNotificationsService,
-    private analyticsService: AnalyticsService) { }
+    private analyticsService: AnalyticsService,
+    private facilityDbService: FacilitydbService,
+    private utilityMeterGroupDbService: UtilityMeterGroupdbService) { }
 
   ngOnInit(): void {
     this.selectedAccount = this.accountDbService.selectedAccount.getValue();
   }
 
   async createNewReport() {
-    let newReport: IdbAccountReport = this.accountReportDbService.getNewAccountReport();
+    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    let groups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.accountMeterGroups.getValue();
+    let newReport: IdbAccountReport = getNewIdbAccountReport(account, facilities, groups);
     newReport.reportType = this.newReportType;
     let addedReport: IdbAccountReport = await firstValueFrom(this.accountReportDbService.addWithObservable(newReport));
     await this.dbChangesService.setAccountReports(this.selectedAccount);
@@ -50,7 +60,7 @@ export class AccountReportsDashboardComponent {
       this.newReportType = 'betterPlants';
     } else if (this.router.url.includes('overview')) {
       this.newReportType = 'dataOverview';
-    } else if(this.router.url.includes('better-climate')){
+    } else if (this.router.url.includes('better-climate')) {
       this.newReportType = 'betterClimate';
     }
     this.displayNewReport = true;

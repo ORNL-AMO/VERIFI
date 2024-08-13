@@ -1,13 +1,11 @@
 import { Component, ElementRef, ViewChild, Input, SimpleChanges } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
-import { Subscription } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { IdbFacility } from 'src/app/models/idb';
 import * as _ from 'lodash';
 import { UtilityColors } from 'src/app/shared/utilityColors';
-import { FacilityOverviewService } from 'src/app/facility/facility-overview/facility-overview.service';
 import { AnnualSourceData } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';
 import { EnergySources, WaterSources } from 'src/app/models/constantsAndTypes';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
   selector: 'app-utilities-usage-chart',
@@ -24,7 +22,7 @@ export class UtilitiesUsageChartComponent {
 
   @ViewChild('utilityBarChart', { static: false }) utilityBarChart: ElementRef;
   selectedFacility: IdbFacility;
-  constructor(private plotlyService: PlotlyService, private facilityOverviewService: FacilityOverviewService,
+  constructor(private plotlyService: PlotlyService,
     private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {

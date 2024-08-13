@@ -1,6 +1,6 @@
 import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { MeterGroupType } from 'src/app/models/calanderization';
-import { IdbUtilityMeterGroup } from 'src/app/models/idb';
+import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
 import { CopyTableService } from 'src/app/shared/helper-services/copy-table.service';
 
 @Component({

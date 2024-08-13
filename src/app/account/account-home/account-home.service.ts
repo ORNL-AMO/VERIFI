@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
-import { IdbAccountAnalysisItem } from 'src/app/models/idb';
 import * as _ from 'lodash';
 import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { BehaviorSubject } from 'rxjs';
 import { AccountOverviewData } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
+import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 
 @Injectable({
   providedIn: 'root'

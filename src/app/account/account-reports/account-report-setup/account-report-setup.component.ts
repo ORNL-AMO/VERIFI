@@ -2,12 +2,13 @@ import { Component } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { AccountReportsService } from '../account-reports.service';
-import { IdbAccount, IdbAccountReport } from 'src/app/models/idb';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { Month, Months } from 'src/app/shared/form-data/months';
 import { firstValueFrom } from 'rxjs';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
+import { IdbAccount } from 'src/app/models/idbModels/account';
+import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 @Component({
   selector: 'app-account-report-setup',
   templateUrl: './account-report-setup.component.html',

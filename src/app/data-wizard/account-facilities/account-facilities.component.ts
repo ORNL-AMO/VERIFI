@@ -1,13 +1,14 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { firstValueFrom, Subscription } from 'rxjs';
-import { IdbAccount, IdbFacility } from 'src/app/models/idb';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
+import { getNewIdbFacility, IdbFacility } from 'src/app/models/idbModels/facility';
+import { IdbAccount } from 'src/app/models/idbModels/account';
 
 @Component({
   selector: 'app-account-facilities',
@@ -53,7 +54,7 @@ export class AccountFacilitiesComponent {
     for (let i = 0; i < this.numberOfFacilities; i++) {
       this.loadingService.setLoadingMessage('Creating Facility ' + (i + 1) + '...');
       let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-      let idbFacility: IdbFacility = this.facilityDbService.getNewIdbFacility(selectedAccount);
+      let idbFacility: IdbFacility = getNewIdbFacility(selectedAccount);
       let newFacility: IdbFacility = await firstValueFrom(this.facilityDbService.addWithObservable(idbFacility));
       await this.dbChangesService.updateDataNewFacility(newFacility);
       await this.dbChangesService.selectAccount(selectedAccount, false);

@@ -1,8 +1,8 @@
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { Injectable } from '@angular/core';
-import { IdbUtilityMeterGroup } from '../models/idb';
 import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
 import { LoadingService } from '../core-components/loading/loading.service';
+import { IdbUtilityMeterGroup } from '../models/idbModels/utilityMeterGroup';
 
 @Injectable({
     providedIn: 'root'
@@ -65,22 +65,6 @@ export class UtilityMeterGroupdbService {
         for (let i = 0; i < meterGroups.length; i++) {
             this.loadingService.setLoadingMessage('Deleting Meter Groups (' + i + '/' + meterGroups.length + ')...' );
             await firstValueFrom(this.deleteWithObservable(meterGroups[i].id));
-        }
-    }
-
-
-    getNewIdbUtilityMeterGroup(type: 'Energy' | 'Water' | 'Other', name: string, facilityId: string, accountId: string): IdbUtilityMeterGroup {
-        return {
-            facilityId: facilityId,
-            accountId: accountId,
-            guid: Math.random().toString(36).substr(2, 9),
-            groupType: type,
-            name: name,
-            description: undefined,
-            dateModified: undefined,
-            factionOfTotalEnergy: undefined,
-            // id: undefined
-            visible: true
         }
     }
 

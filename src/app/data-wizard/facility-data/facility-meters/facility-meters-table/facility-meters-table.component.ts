@@ -5,7 +5,9 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { IdbAccount, IdbFacility, IdbUtilityMeter } from 'src/app/models/idb';
+import { IdbAccount } from 'src/app/models/idbModels/account';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { getNewIdbUtilityMeter, IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { CopyTableService } from 'src/app/shared/helper-services/copy-table.service';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 
@@ -70,7 +72,7 @@ export class FacilityMetersTableComponent {
 
   async addMeter() {
     let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    let newMeter: IdbUtilityMeter = this.utilityMeterDbService.getNewIdbUtilityMeter(facility.guid, facility.accountId, true, facility.energyUnit);
+    let newMeter: IdbUtilityMeter = getNewIdbUtilityMeter(facility.guid, facility.accountId, true, facility.energyUnit);
     newMeter = await firstValueFrom(this.utilityMeterDbService.addWithObservable(newMeter));
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.setMeters(account, facility);

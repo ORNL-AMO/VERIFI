@@ -5,8 +5,8 @@ import { BackupDataService, BackupFile } from 'src/app/shared/helper-services/ba
 import { Router } from '@angular/router';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { ImportBackupModalService } from '../import-backup-modal/import-backup-modal.service';
-import { IdbAccount } from 'src/app/models/idb';
 import { firstValueFrom } from 'rxjs';
+import { getNewIdbAccount, IdbAccount } from 'src/app/models/idbModels/account';
 
 @Component({
   selector: 'app-home-page',
@@ -63,7 +63,7 @@ export class HomePageComponent {
   }
 
   async createNewAccount() {
-    let account: IdbAccount = this.accountDbService.getNewIdbAccount();
+    let account: IdbAccount = getNewIdbAccount();
     account = await firstValueFrom(this.accountDbService.addWithObservable(account));
     await this.dbChangesService.selectAccount(account, false);
     this.router.navigateByUrl('/data-wizard/' + account.guid);

@@ -5,7 +5,6 @@ import { FacilitydbService } from "../../indexedDB/facility-db.service";
 import { UtilityMeterdbService } from "../../indexedDB/utilityMeter-db.service";
 import { UtilityMeterGroupdbService } from "../../indexedDB/utilityMeterGroup-db.service";
 import { UtilityMeterDatadbService } from "../../indexedDB/utilityMeterData-db.service";
-import { IdbAccount } from 'src/app/models/idb';
 import { Subscription, firstValueFrom } from 'rxjs';
 import * as _ from 'lodash';
 import { ImportBackupModalService } from '../import-backup-modal/import-backup-modal.service';
@@ -16,6 +15,7 @@ import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { ElectronService } from 'src/app/electron/electron.service';
 import { ToastNotificationsService } from '../toast-notifications/toast-notifications.service';
 import { AutomaticBackupsService } from 'src/app/electron/automatic-backups.service';
+import { getNewIdbAccount, IdbAccount } from 'src/app/models/idbModels/account';
 
 @Component({
   selector: 'app-header',
@@ -102,7 +102,7 @@ export class HeaderComponent implements OnInit {
   }
 
   async addNewAccount() {
-    let account: IdbAccount = this.accountdbService.getNewIdbAccount();
+    let account: IdbAccount = getNewIdbAccount();
     account = await firstValueFrom(this.accountdbService.addWithObservable(account));
     await this.dbChangesService.selectAccount(account, false);
     this.router.navigateByUrl('/data-wizard/' + account.guid);

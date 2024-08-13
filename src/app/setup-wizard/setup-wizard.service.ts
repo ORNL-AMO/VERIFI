@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
-import { FacilitydbService } from '../indexedDB/facility-db.service';
-import { IdbAccount, IdbFacility } from '../models/idb';
 import * as XLSX from 'xlsx';
 import { FileReference } from '../upload-data/upload-data-models';
+import { IdbAccount } from '../models/idbModels/account';
+import { getNewIdbFacility, IdbFacility } from '../models/idbModels/facility';
+import { FacilitydbService } from '../indexedDB/facility-db.service';
 
 @Injectable({
   providedIn: 'root'
@@ -36,7 +37,7 @@ export class SetupWizardService {
     let facilities: Array<IdbFacility> = this.facilities.getValue();
     let account: IdbAccount = this.account.getValue();
     for (let i = 0; i < numFacilities; i++) {
-      let newFacility: IdbFacility = this.facilityDbService.getNewIdbFacility(JSON.parse(JSON.stringify(account)));
+      let newFacility: IdbFacility = getNewIdbFacility(JSON.parse(JSON.stringify(account)));
       newFacility.wizardId = Math.random().toString(36).substr(2, 9);
       newFacility.name = 'Facility ' + (facilities.length + 1);
       facilities.push(newFacility);

@@ -4,8 +4,9 @@ import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AnnualAnalysisSummary } from 'src/app/models/analysis';
-import { IdbAccount, IdbAccountAnalysisItem } from 'src/app/models/idb';
 import { AccountAnalysisService } from '../../account-analysis.service';
+import { IdbAccount } from 'src/app/models/idbModels/account';
+import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 
 @Component({
   selector: 'app-annual-account-analysis',

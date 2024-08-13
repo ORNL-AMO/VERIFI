@@ -2,11 +2,12 @@ import { Component } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 import { AnalysisService } from '../../analysis.service';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import * as _ from 'lodash';
 import { Router } from '@angular/router';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 
 @Component({
   selector: 'app-energy-dashboard',

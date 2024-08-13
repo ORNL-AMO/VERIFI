@@ -1,7 +1,8 @@
 import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { AnnualAnalysisSummary } from 'src/app/models/analysis';
-import { IdbAccountAnalysisItem, IdbAnalysisItem } from 'src/app/models/idb';
+import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
+import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 
 @Component({
   selector: 'app-annual-analysis-summary-graph',
