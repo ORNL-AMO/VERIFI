@@ -1,5 +1,8 @@
 import { WorkBook } from "xlsx"
-import { IdbFacility, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from "../models/idb"
+import { IdbFacility } from "../models/idbModels/facility"
+import { IdbUtilityMeter } from "../models/idbModels/utilityMeter"
+import { IdbUtilityMeterData } from "../models/idbModels/utilityMeterData"
+import { IdbUtilityMeterGroup } from "../models/idbModels/utilityMeterGroup"
 import { IdbPredictor } from "../models/idbModels/predictor"
 import { IdbPredictorData } from "../models/idbModels/predictorData"
 

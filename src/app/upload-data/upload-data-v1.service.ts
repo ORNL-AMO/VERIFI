@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { IdbAccount, IdbFacility, IdbPredictorEntryDeprecated, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from '../models/idb';
 import * as XLSX from 'xlsx';
 import { FacilitydbService } from '../indexedDB/facility-db.service';
 import { AccountdbService } from '../indexedDB/account-db.service';
@@ -19,6 +18,12 @@ import { ColumnGroup, ColumnItem, FacilityGroup, FileReference, ParsedTemplate }
 import { checkImportCellNumber, checkImportStartingUnit, checkSameDay, checkSameMonth, getAgreementType, getCountryCode, getFuelEnum, getMeterReadingDataApplication, getMeterSource, getPhase, getScope, getState, getYesNoBool, getZip } from './upload-helper-functions';
 import { UploadDataSharedFunctionsService } from './upload-data-shared-functions.service';
 import { SetupWizardService } from '../setup-wizard/setup-wizard.service';
+import { IdbAccount } from '../models/idbModels/account';
+import { getNewIdbFacility, IdbFacility } from '../models/idbModels/facility';
+import { getNewIdbUtilityMeter, IdbUtilityMeter } from '../models/idbModels/utilityMeter';
+import { IdbUtilityMeterGroup } from '../models/idbModels/utilityMeterGroup';
+import { getNewIdbUtilityMeterData, IdbUtilityMeterData } from '../models/idbModels/utilityMeterData';
+import { IdbPredictorEntryDeprecated } from '../models/idbModels/deprecatedPredictors';
 
 @Injectable({
   providedIn: 'root'
@@ -49,7 +54,7 @@ export class UploadDataV1Service {
       if (facilityName) {
         let facility: IdbFacility = accountFacilities.find(facility => { return facility.name == facilityName });
         if (!facility) {
-          facility = this.facilityDbService.getNewIdbFacility(selectedAccount);
+          facility = getNewIdbFacility(selectedAccount);
           facility.name = facilityName;
         }
         facility.address = facilityDataRow['Address'];
@@ -85,7 +90,7 @@ export class UploadDataV1Service {
           let meterNumber: string = meterData['Meter Number'];
           let meter: IdbUtilityMeter = accountMeters.find(aMeter => { return aMeter.meterNumber == meterNumber });
           if (!meter || !facility.id || facility.guid != meter.facilityId) {
-            meter = this.utilityMeterDbService.getNewIdbUtilityMeter(facility.guid, selectedAccount.guid, true, facility.energyUnit);
+            meter = getNewIdbUtilityMeter(facility.guid, selectedAccount.guid, true, facility.energyUnit);
           }
 
           meter.meterNumber = meterNumber;
@@ -210,7 +215,7 @@ export class UploadDataV1Service {
           }
         })
         if (!dbDataPoint) {
-          dbDataPoint = this.utilityMeterDataDbService.getNewIdbUtilityMeterData(meter);
+          dbDataPoint = getNewIdbUtilityMeterData(meter, []);
         }
         dbDataPoint.readDate = readDate;
         dbDataPoint.totalEnergyUse = checkImportCellNumber(dataPoint['Total Consumption']);
@@ -262,7 +267,7 @@ export class UploadDataV1Service {
           }
         })
         if (!dbDataPoint) {
-          dbDataPoint = this.utilityMeterDataDbService.getNewIdbUtilityMeterData(meter);
+          dbDataPoint = getNewIdbUtilityMeterData(meter, []);
         }
         let totalVolume: number = 0;
         let energyUse: number = 0;
@@ -373,7 +378,7 @@ export class UploadDataV1Service {
   }
 
   getNewMeterFromExcelColumn(groupItem: ColumnItem, selectedFacility: IdbFacility): IdbUtilityMeter {
-    let newMeter: IdbUtilityMeter = this.utilityMeterDbService.getNewIdbUtilityMeter(selectedFacility.guid, selectedFacility.accountId, false, selectedFacility.energyUnit);
+    let newMeter: IdbUtilityMeter = getNewIdbUtilityMeter(selectedFacility.guid, selectedFacility.accountId, false, selectedFacility.energyUnit);
     let fuelType: { phase: MeterPhase, fuelTypeOption: FuelTypeOption } = this.energyUnitsHelperService.parseFuelType(groupItem.value);
     if (fuelType) {
       newMeter.source = "Other Fuels";
@@ -456,7 +461,7 @@ export class UploadDataV1Service {
               return accountDataItem.facilityId == meter.facilityId && checkSameDay(new Date(accountDataItem.readDate), readDate) && accountDataItem.meterId == meter.guid;
             })
             if (!dataItem) {
-              dataItem = this.utilityMeterDataDbService.getNewIdbUtilityMeterData(meter);
+              dataItem = getNewIdbUtilityMeterData(meter, []);
             }
             dataItem.readDate = readDate;
 

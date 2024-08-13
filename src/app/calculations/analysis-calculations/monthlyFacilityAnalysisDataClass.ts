@@ -1,9 +1,9 @@
-import { IdbFacility } from "src/app/models/idb";
 import * as _ from 'lodash';
 import { MonthlyAnalysisSummaryDataClass } from "./monthlyAnalysisSummaryDataClass";
 import { getFiscalYear } from "../shared-calculations/calanderizationFunctions";
 import { ConvertValue } from "../conversions/convertValue";
 import { MonthlyAnalysisCalculatedValuesSummation } from "./monthlyAnalysisCalculatedValuesClassSummation";
+import { IdbFacility } from "src/app/models/idbModels/facility";
 import { IdbPredictorData } from "src/app/models/idbModels/predictorData";
 import { IdbPredictor } from "src/app/models/idbModels/predictor";
 

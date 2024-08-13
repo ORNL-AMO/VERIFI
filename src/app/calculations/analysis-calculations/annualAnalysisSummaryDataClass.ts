@@ -1,8 +1,8 @@
 
 import { MonthlyAnalysisSummaryData } from "src/app/models/analysis";
 import * as _ from 'lodash';
-import { IdbFacility } from "src/app/models/idb";
 import { filterYearPredictorData } from "../shared-calculations/calculationsHelpers";
+import { IdbFacility } from "src/app/models/idbModels/facility";
 import { IdbPredictorData } from "src/app/models/idbModels/predictorData";
 import { IdbPredictor } from "src/app/models/idbModels/predictor";
 

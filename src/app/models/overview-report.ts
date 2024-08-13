@@ -1,5 +1,5 @@
 import { AnnualAnalysisSummary } from "./analysis";
-import { IdbFacility } from "./idb";
+import { IdbFacility } from "./idbModels/facility";
 
 export interface BetterPlantsSummary {
   reportYear: number,

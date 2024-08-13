@@ -4,23 +4,33 @@ import { FacilitydbService } from '../../indexedDB/facility-db.service';
 import { UtilityMeterdbService } from '../../indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from '../../indexedDB/utilityMeterData-db.service';
 import { UtilityMeterGroupdbService } from '../../indexedDB/utilityMeterGroup-db.service';
-import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport, IdbAnalysisItem, IdbCustomEmissionsItem, IdbCustomFuel, IdbCustomGWP, IdbFacility, IdbPredictorEntryDeprecated, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup, PredictorDataDeprecated } from '../../models/idb';
 import { LoadingService } from '../../core-components/loading/loading.service';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { JStatRegressionModel } from 'src/app/models/analysis';
 import { firstValueFrom } from 'rxjs';
-import { ElectronBackupsDbService } from 'src/app/indexedDB/electron-backups-db.service';
 import { AnalyticsService } from 'src/app/analytics/analytics.service';
 import { CustomEmissionsDbService } from 'src/app/indexedDB/custom-emissions-db.service';
 import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
 import { CustomGWPDbService } from 'src/app/indexedDB/custom-gwp-db.service';
+import { IdbAccount } from 'src/app/models/idbModels/account';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
+import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
+import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
+import { IdbCustomGWP } from 'src/app/models/idbModels/customGWP';
+import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
+import { IdbCustomEmissionsItem } from 'src/app/models/idbModels/customEmissions';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { getNewIdbPredictorData, IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { getNewIdbPredictor, IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { PredictordbServiceDeprecated } from 'src/app/indexedDB/predictors-deprecated-db.service';
+import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
+import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
+import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
+import { IdbPredictorEntryDeprecated, PredictorDataDeprecated } from 'src/app/models/idbModels/deprecatedPredictors';
 
 @Injectable({
   providedIn: 'root'
@@ -31,7 +41,6 @@ export class BackupDataService {
     private utilityMeterDbService: UtilityMeterdbService, private utilityMeterDataDbService: UtilityMeterDatadbService,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService, private loadingService: LoadingService, private accountAnalysisDbService: AccountAnalysisDbService,
     private analysisDbService: AnalysisDbService, private accountReportsDbService: AccountReportDbService,
-    private electronBackupsDbService: ElectronBackupsDbService,
     private analyticsService: AnalyticsService,
     private customEmissionsDbService: CustomEmissionsDbService,
     private customFuelDbService: CustomFuelDbService,

@@ -2,16 +2,17 @@ import { Injectable } from '@angular/core';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { LocalStorageService } from 'ngx-webstorage';
 import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
-import { IdbAccount, IdbAnalysisItem, IdbFacility, IdbUtilityMeterGroup } from '../models/idb';
 import { AccountdbService } from './account-db.service';
 import { FacilitydbService } from './facility-db.service';
-import { UtilityMeterGroupdbService } from './utilityMeterGroup-db.service';
 import * as _ from 'lodash';
-import { AnalysisCategory, AnalysisGroup, AnalysisGroupPredictorVariable, JStatRegressionModel } from '../models/analysis';
+import { AnalysisGroup, AnalysisGroupPredictorVariable, JStatRegressionModel } from '../models/analysis';
 import { AnalysisValidationService } from '../shared/helper-services/analysis-validation.service';
 import { LoadingService } from '../core-components/loading/loading.service';
+import { IdbAccount } from '../models/idbModels/account';
+import { IdbFacility } from '../models/idbModels/facility';
 import { PredictorDbService } from './predictor-db.service';
 import { IdbPredictor } from '../models/idbModels/predictor';
+import { getNewAnalysisGroup, IdbAnalysisItem } from '../models/idbModels/analysisItem';
 
 @Injectable({
   providedIn: 'root'
@@ -24,7 +25,6 @@ export class AnalysisDbService {
 
   constructor(private dbService: NgxIndexedDBService, private localStorageService: LocalStorageService,
     private facilityDbService: FacilitydbService, private accountDbService: AccountdbService,
-    private utilityMeterGroupDbService: UtilityMeterGroupdbService,
     private predictorDbService: PredictorDbService,
     private analysisValidationService: AnalysisValidationService,
     private loadingService: LoadingService) {
@@ -94,86 +94,8 @@ export class AnalysisDbService {
   }
 
   updateWithObservable(values: IdbAnalysisItem): Observable<IdbAnalysisItem> {
-    values.date = new Date();
+    values.modifiedDate = new Date();
     return this.dbService.update('analysisItems', values);
-  }
-
-  getNewAnalysisItem(analysisCategory: AnalysisCategory, facilityId: string): IdbAnalysisItem {
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
-    let selectedFacility: IdbFacility = facilities.find(filter => { return filter.guid == facilityId });
-    let accountMeterGroups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.accountMeterGroups.getValue();
-    let facilityMeterGroups: Array<IdbUtilityMeterGroup> = accountMeterGroups.filter(group => { return group.facilityId == facilityId });
-    let itemGroups: Array<AnalysisGroup> = new Array();
-    let predictors: Array<IdbPredictor> = this.predictorDbService.facilityPredictors.getValue();
-    facilityMeterGroups.forEach(group => {
-      let groupTypeNeeded: 'Energy' | 'Water';
-      if (analysisCategory == 'energy') {
-        groupTypeNeeded = 'Energy';
-      } else if (analysisCategory == 'water') {
-        groupTypeNeeded = 'Water';
-      }
-      if (group.groupType == groupTypeNeeded) {
-        let predictorVariables: Array<AnalysisGroupPredictorVariable> = predictors.map(predictor => {
-          return {
-            id: predictor.guid,
-            name: predictor.name,
-            production: predictor.production,
-            productionInAnalysis: true,
-            regressionCoefficient: undefined,
-            unit: predictor.unit
-          }
-        });
-        let analysisGroup: AnalysisGroup = {
-          idbGroupId: group.guid,
-          analysisType: 'regression',
-          predictorVariables: predictorVariables,
-          regressionModelYear: undefined,
-          regressionConstant: undefined,
-          groupErrors: undefined,
-          specifiedMonthlyPercentBaseload: false,
-          averagePercentBaseload: undefined,
-          monthlyPercentBaseload: this.getMonthlyPercentBaseload(),
-          hasDataAdjustement: false,
-          dataAdjustments: [],
-          userDefinedModel: true,
-          models: undefined,
-          hasBaselineAdjustmentV2: false,
-          baselineAdjustmentsV2: [],
-          maxModelVariables: 4
-        }
-        analysisGroup.groupErrors = this.analysisValidationService.getGroupErrors(analysisGroup);
-        itemGroups.push(analysisGroup);
-      }
-    });
-
-    let baselineYear: number;
-    let name: string;
-    if (analysisCategory == 'energy') {
-      baselineYear = selectedFacility.sustainabilityQuestions.energyReductionBaselineYear
-      name = 'Energy Analysis';
-    } else if (analysisCategory == 'water') {
-      baselineYear = selectedFacility.sustainabilityQuestions.waterReductionBaselineYear
-      name = 'Water Analysis';
-    }
-
-    let analysisItem: IdbAnalysisItem = {
-      facilityId: selectedFacility.guid,
-      accountId: selectedAccount.guid,
-      guid: Math.random().toString(36).substr(2, 9),
-      date: new Date(),
-      name: name,
-      reportYear: undefined,
-      energyIsSource: selectedFacility.energyIsSource,
-      energyUnit: selectedFacility.energyUnit,
-      waterUnit: selectedFacility.volumeLiquidUnit,
-      groups: itemGroups,
-      setupErrors: undefined,
-      analysisCategory: analysisCategory,
-      baselineYear: baselineYear
-    };
-    analysisItem.setupErrors = this.analysisValidationService.getAnalysisItemErrors(analysisItem);
-    return analysisItem;
   }
 
   getUnits(predictorVariables: Array<AnalysisGroupPredictorVariable>): string {
@@ -292,24 +214,7 @@ export class AnalysisDbService {
     let facilityAnalysisItems: Array<IdbAnalysisItem> = this.facilityAnalysisItems.getValue();
     for (let index = 0; index < facilityAnalysisItems.length; index++) {
       let item: IdbAnalysisItem = facilityAnalysisItems[index];
-      let analysisGroup: AnalysisGroup = {
-        idbGroupId: groupId,
-        analysisType: 'energyIntensity',
-        predictorVariables: predictorVariables,
-        regressionConstant: undefined,
-        regressionModelYear: undefined,
-        groupErrors: undefined,
-        specifiedMonthlyPercentBaseload: false,
-        averagePercentBaseload: undefined,
-        monthlyPercentBaseload: this.getMonthlyPercentBaseload(),
-        hasDataAdjustement: false,
-        dataAdjustments: [],
-        userDefinedModel: false,
-        hasBaselineAdjustmentV2: false,
-        baselineAdjustmentsV2: [],
-        maxModelVariables: 4
-      }
-      analysisGroup.groupErrors = this.analysisValidationService.getGroupErrors(analysisGroup);
+      let analysisGroup: AnalysisGroup = getNewAnalysisGroup(groupId, predictorVariables);
       item.groups.push(analysisGroup);
       await firstValueFrom(this.updateWithObservable(item));
     };
@@ -334,14 +239,14 @@ export class AnalysisDbService {
     }
   }
 
-  getMonthlyPercentBaseload(): Array<{ monthNum: number, percent: number }> {
-    let values: Array<{ monthNum: number, percent: number }> = new Array();
-    for (let i = 0; i < 12; i++) {
-      values.push({
-        monthNum: i,
-        percent: undefined
-      })
-    }
-    return values;
-  }
+  // getMonthlyPercentBaseload(): Array<{ monthNum: number, percent: number }> {
+  //   let values: Array<{ monthNum: number, percent: number }> = new Array();
+  //   for (let i = 0; i < 12; i++) {
+  //     values.push({
+  //       monthNum: i,
+  //       percent: undefined
+  //     })
+  //   }
+  //   return values;
+  // }
 }

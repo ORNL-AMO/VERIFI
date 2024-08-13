@@ -3,7 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { DbChangesService } from '../indexedDB/db-changes.service';
 import { FacilitydbService } from '../indexedDB/facility-db.service';
-import { IdbFacility } from '../models/idb';
+import { IdbFacility } from '../models/idbModels/facility';
 
 @Component({
   selector: 'app-facility',

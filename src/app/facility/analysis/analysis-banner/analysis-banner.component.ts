@@ -4,7 +4,7 @@ import { Subscription } from 'rxjs';
 import { HelpPanelService } from 'src/app/help-panel/help-panel.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { AnalysisGroup } from 'src/app/models/analysis';
-import { IdbAnalysisItem } from 'src/app/models/idb';
+import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 
 @Component({

@@ -2,12 +2,13 @@ import { Injectable } from '@angular/core';
 import * as jStat from 'jstat';
 import { AnalysisGroup, AnalysisGroupPredictorVariable, JStatRegressionModel, SEPValidation } from 'src/app/models/analysis';
 import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
-import { IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 import * as _ from 'lodash';
 import { getFiscalYear } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
 import { getMonthlyStartAndEndDate } from 'src/app/calculations/shared-calculations/calculationsHelpers';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
+import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 @Injectable({
   providedIn: 'root'
 })

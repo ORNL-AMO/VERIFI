@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { IdbAccount, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from '../models/idb';
 import * as XLSX from 'xlsx';
 import { FacilitydbService } from '../indexedDB/facility-db.service';
 import { AccountdbService } from '../indexedDB/account-db.service';
@@ -20,6 +19,11 @@ import { UploadDataV2Service } from './upload-data-v2.service';
 import { DetailDegreeDay } from '../models/degreeDays';
 import { DegreeDaysService } from '../shared/helper-services/degree-days.service';
 import * as _ from 'lodash';
+import { IdbAccount } from '../models/idbModels/account';
+import { IdbFacility } from '../models/idbModels/facility';
+import { getNewIdbUtilityMeterGroup, IdbUtilityMeterGroup } from '../models/idbModels/utilityMeterGroup';
+import { getNewIdbUtilityMeter, IdbUtilityMeter } from '../models/idbModels/utilityMeter';
+import { getNewIdbUtilityMeterData, IdbUtilityMeterData } from '../models/idbModels/utilityMeterData';
 import { PredictorDbService } from '../indexedDB/predictor-db.service';
 import { PredictorDataDbService } from '../indexedDB/predictor-data-db.service';
 import { IdbPredictor } from '../models/idbModels/predictor';
@@ -157,7 +161,7 @@ export class UploadDataService {
         return { group: dbGroup, newGroups: newGroups }
       } else if (groupName) {
         let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-        dbGroup = this.utilityMeterGroupDbService.getNewIdbUtilityMeterGroup("Energy", groupName, facilityId, account.guid);
+        dbGroup = getNewIdbUtilityMeterGroup("Energy", groupName, facilityId, account.guid);
         newGroups.push(dbGroup);
         return { group: dbGroup, newGroups: newGroups }
       } else {
@@ -259,7 +263,7 @@ export class UploadDataService {
   }
 
   getNewMeterFromExcelColumn(groupItem: ColumnItem, selectedFacility: IdbFacility): IdbUtilityMeter {
-    let newMeter: IdbUtilityMeter = this.utilityMeterDbService.getNewIdbUtilityMeter(selectedFacility.guid, selectedFacility.accountId, false, selectedFacility.energyUnit);
+    let newMeter: IdbUtilityMeter = getNewIdbUtilityMeter(selectedFacility.guid, selectedFacility.accountId, false, selectedFacility.energyUnit);
     let fuelType: { phase: MeterPhase, fuelTypeOption: FuelTypeOption } = this.energyUnitsHelperService.parseFuelType(groupItem.value);
     if (fuelType) {
       newMeter.source = "Other Fuels";
@@ -342,7 +346,7 @@ export class UploadDataService {
               return accountDataItem.facilityId == meter.facilityId && this.checkSameDay(new Date(accountDataItem.readDate), readDate) && accountDataItem.meterId == meter.guid;
             })
             if (!dataItem) {
-              dataItem = this.utilityMeterDataDbService.getNewIdbUtilityMeterData(meter);
+              dataItem = getNewIdbUtilityMeterData(meter, []);
             }
             dataItem.readDate = readDate;
 

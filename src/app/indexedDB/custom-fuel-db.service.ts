@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
-import { IdbAccount, IdbCustomFuel } from '../models/idb';
 import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { LoadingService } from '../core-components/loading/loading.service';
+import { IdbAccount } from '../models/idbModels/account';
+import { IdbCustomFuel } from '../models/idbModels/customFuel';
 
 @Injectable({
   providedIn: 'root'
@@ -58,25 +59,5 @@ export class CustomFuelDbService {
     return this.dbService.update('customFuels', values);
   }
 
-  getNewAccountCustomFuel(selectedAccount: IdbAccount): IdbCustomFuel {
-    return {
-      accountId: selectedAccount.guid,
-      guid: Math.random().toString(36).substr(2, 9),
-      date: new Date(),
-      startingUnit: undefined,
-      heatCapacityValue: undefined,
-      value: undefined,
-      siteToSourceMultiplier: undefined,
-      emissionsOutputRate: undefined,
-      otherEnergyType: undefined,
-      CO2: undefined,
-      CH4: undefined,
-      N2O: undefined,
-      isBiofuel: false,
-      phase: 'Gas',
-      directEmissionsRate: false,
-      isMobile: false,
-      isOnRoad: false
-    }
-  }
+
 }

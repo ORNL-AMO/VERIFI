@@ -2,12 +2,13 @@ import { Injectable } from '@angular/core';
 import { PredictordbServiceDeprecated } from './predictors-deprecated-db.service';
 import { PredictorDbService } from './predictor-db.service';
 import { PredictorDataDbService } from './predictor-data-db.service';
-import { IdbFacility, IdbPredictorEntryDeprecated, PredictorDataDeprecated } from '../models/idb';
 import { FacilitydbService } from './facility-db.service';
 import { getNewIdbPredictor, IdbPredictor } from '../models/idbModels/predictor';
 import { firstValueFrom } from 'rxjs';
 import { getNewIdbPredictorData, IdbPredictorData } from '../models/idbModels/predictorData';
 import { LoadingService } from '../core-components/loading/loading.service';
+import { IdbFacility } from '../models/idbModels/facility';
+import { IdbPredictorEntryDeprecated, PredictorDataDeprecated } from '../models/idbModels/deprecatedPredictors';
 
 @Injectable({
   providedIn: 'root'

@@ -1,11 +1,11 @@
 import { MonthlyData } from "src/app/models/calanderization";
-import { IdbFacility } from "src/app/models/idb";
 import { MonthlyGroupAnalysisClass } from "./monthlyGroupAnalysisClass";
 import * as _ from 'lodash';
 import { getFiscalYear } from "../shared-calculations/calanderizationFunctions";
 import { AnalysisCategory, AnalysisGroup, AnalysisGroupPredictorVariable, AnalysisType } from "src/app/models/analysis";
 import { ConvertValue } from "../conversions/convertValue";
 import { GroupMonthlyAnalysisCalculatedValues } from "./groupMonthlyAnalysisCalculatedValuesClass";
+import { IdbFacility } from "src/app/models/idbModels/facility";
 import { IdbPredictorData } from "src/app/models/idbModels/predictorData";
 
 export class MonthlyAnalysisSummaryDataClass {

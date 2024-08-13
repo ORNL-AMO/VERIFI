@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
-import { FacilitydbService } from '../indexedDB/facility-db.service';
-import { IdbAccount, IdbFacility } from '../models/idb';
 import * as XLSX from 'xlsx';
+import { IdbAccount } from '../models/idbModels/account';
+import { getNewIdbFacility, IdbFacility } from '../models/idbModels/facility';
 
 @Injectable({
   providedIn: 'root'
@@ -16,7 +16,7 @@ export class SetupWizardService {
   submit: BehaviorSubject<boolean>;
   canContinue: BehaviorSubject<boolean>;
   facilityTemplateWorkbook: BehaviorSubject<XLSX.WorkBook>;
-  constructor(private facilityDbService: FacilitydbService, private router: Router) {
+  constructor(private router: Router) {
     this.initializeData();
   }
 
@@ -32,7 +32,7 @@ export class SetupWizardService {
   addFacility(){
     let facilities: Array<IdbFacility> = this.facilities.getValue();
     let account: IdbAccount = this.account.getValue();
-    let newFacility: IdbFacility = this.facilityDbService.getNewIdbFacility(JSON.parse(JSON.stringify(account)));
+    let newFacility: IdbFacility = getNewIdbFacility(JSON.parse(JSON.stringify(account)));
     newFacility.wizardId = Math.random().toString(36).substr(2, 9);
     newFacility.name = 'Facility ' + (facilities.length + 1);
     facilities.push(newFacility);

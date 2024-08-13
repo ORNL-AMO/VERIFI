@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { LoadingService } from '../core-components/loading/loading.service';
 import { ToastNotificationsService } from '../core-components/toast-notifications/toast-notifications.service';
-import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport, IdbAnalysisItem, IdbCustomEmissionsItem, IdbCustomFuel, IdbCustomGWP, IdbFacility, IdbPredictorEntryDeprecated, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from '../models/idb';
 import { AccountAnalysisDbService } from './account-analysis-db.service';
 import { AccountdbService } from './account-db.service';
 import { AccountReportDbService } from './account-report-db.service';
@@ -16,11 +15,23 @@ import { UtilityMeterGroupdbService } from './utilityMeterGroup-db.service';
 import { firstValueFrom } from 'rxjs';
 import { CustomFuelDbService } from './custom-fuel-db.service';
 import { CustomGWPDbService } from './custom-gwp-db.service';
+import { IdbAccount } from '../models/idbModels/account';
+import { IdbFacility } from '../models/idbModels/facility';
+import { IdbUtilityMeter } from '../models/idbModels/utilityMeter';
+import { IdbUtilityMeterData } from '../models/idbModels/utilityMeterData';
+import { IdbUtilityMeterGroup } from '../models/idbModels/utilityMeterGroup';
+import { IdbCustomGWP } from '../models/idbModels/customGWP';
+import { IdbCustomFuel } from '../models/idbModels/customFuel';
+import { IdbCustomEmissionsItem } from '../models/idbModels/customEmissions';
 import { PredictorDbService } from './predictor-db.service';
 import { PredictorDataDbService } from './predictor-data-db.service';
 import { IdbPredictor } from '../models/idbModels/predictor';
 import { IdbPredictorData } from '../models/idbModels/predictorData';
 import { MigratePredictorsService } from './migrate-predictors.service';
+import { IdbAccountReport } from '../models/idbModels/accountReport';
+import { IdbAccountAnalysisItem } from '../models/idbModels/accountAnalysisItem';
+import { IdbAnalysisItem } from '../models/idbModels/analysisItem';
+import { IdbPredictorEntryDeprecated } from '../models/idbModels/deprecatedPredictors';
 
 @Injectable({
   providedIn: 'root'

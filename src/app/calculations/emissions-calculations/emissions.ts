@@ -1,10 +1,13 @@
-import { IdbCustomFuel, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from "src/app/models/idb";
 import { ConvertValue } from "../conversions/convertValue";
 import { EmissionsResults, SubregionEmissions } from "src/app/models/eGridEmissions";
 import * as _ from 'lodash';
 import { MeterPhase, MeterSource } from "src/app/models/constantsAndTypes";
 import { FuelTypeOption } from "src/app/shared/fuel-options/fuelTypeOption";
 import { getFuelTypeOptions, getMobileFuelTypes } from "src/app/shared/fuel-options/getFuelTypeOptions";
+import { IdbFacility } from "src/app/models/idbModels/facility";
+import { IdbUtilityMeter } from "src/app/models/idbModels/utilityMeter";
+import { IdbUtilityMeterData } from "src/app/models/idbModels/utilityMeterData";
+import { IdbCustomFuel } from "src/app/models/idbModels/customFuel";
 
 export function getEmissions(meter: IdbUtilityMeter,
     energyUse: number,

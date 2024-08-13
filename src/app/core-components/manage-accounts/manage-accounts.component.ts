@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { IdbAccount } from 'src/app/models/idb';
 import { LoadingService } from '../loading/loading.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { Router } from '@angular/router';
@@ -12,6 +11,7 @@ import { CustomEmissionsDbService } from 'src/app/indexedDB/custom-emissions-db.
 import { ElectronBackupsDbService } from 'src/app/indexedDB/electron-backups-db.service';
 import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
 import { CustomGWPDbService } from 'src/app/indexedDB/custom-gwp-db.service';
+import { IdbAccount } from 'src/app/models/idbModels/account';
 
 @Component({
   selector: 'app-manage-accounts',

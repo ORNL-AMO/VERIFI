@@ -1,10 +1,10 @@
 import { CalanderizedMeter, MonthlyData } from "src/app/models/calanderization";
-import { IdbFacility } from "src/app/models/idb";
 import * as _ from 'lodash';
 import { ConvertValue } from "../conversions/convertValue";
 import { EmissionsResults } from "src/app/models/eGridEmissions";
 import { getZeroEmissionsResults } from "../emissions-calculations/emissions";
 import { getEmissionsTotalsFromArray } from "../shared-calculations/calculationsHelpers";
+import { IdbFacility } from "src/app/models/idbModels/facility";
 
 export class BetterClimateYearDetails {
 

@@ -2,11 +2,11 @@ import { Component, ElementRef, Input, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { PerformanceReport, PerformanceReportAnnualData } from 'src/app/calculations/performance-report-calculations/performanceReport';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
-import { IdbFacility } from 'src/app/models/idb';
 import { PerformanceReportSetup } from 'src/app/models/overview-report';
 import { UtilityColors } from 'src/app/shared/utilityColors';
 import * as _ from 'lodash';
 import { AnalysisGroup } from 'src/app/models/analysis';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
   selector: 'app-performance-chart',

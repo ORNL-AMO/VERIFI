@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { Month, Months } from 'src/app/shared/form-data/months';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { IdbAccount, IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 import { EnergyUnitOptions, UnitOption } from 'src/app/shared/unitOptions';
 import * as _ from 'lodash';
 import { AnalysisService } from '../../analysis.service';
@@ -16,6 +15,9 @@ import { CalanderizationService } from 'src/app/shared/helper-services/calanderi
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { RegressionModelsService } from 'src/app/shared/shared-analysis/calculations/regression-models.service';
 import { AnalysisGroup } from 'src/app/models/analysis';
+import { IdbAccount } from 'src/app/models/idbModels/account';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 @Component({
   selector: 'app-analysis-setup',
   templateUrl: './analysis-setup.component.html',

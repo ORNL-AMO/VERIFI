@@ -5,7 +5,6 @@ import { LoadingService } from 'src/app/core-components/loading/loading.service'
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
-import { IdbAccount, IdbFacility } from 'src/app/models/idb';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { CopyTableService } from 'src/app/shared/helper-services/copy-table.service';
@@ -17,6 +16,8 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { WeatherStation } from 'src/app/models/degreeDays';
 import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
 import { WeatherDataService } from 'src/app/weather-data/weather-data.service';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { IdbAccount } from 'src/app/models/idbModels/account';
 
 @Component({
   selector: 'app-predictors-data-table',

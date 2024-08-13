@@ -1,5 +1,4 @@
 import { MonthlyAnalysisSummaryData } from "src/app/models/analysis";
-import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from "src/app/models/idb";
 import { MonthlyAccountAnalysisDataClass } from "./monthlyAccountAnalysisDataClass";
 import { MonthlyAnalysisSummaryDataClass } from "./monthlyAnalysisSummaryDataClass";
 import { MonthlyFacilityAnalysisClass } from "./monthlyFacilityAnalysisClass";
@@ -8,8 +7,14 @@ import { checkAnalysisValue, getMonthlyStartAndEndDate } from "../shared-calcula
 import { getFiscalYear, getNeededUnits } from "../shared-calculations/calanderizationFunctions";
 import { CalanderizedMeter } from "src/app/models/calanderization";
 import { getCalanderizedMeterData } from "../calanderization/calanderizeMeters";
+import { IdbAccount } from "src/app/models/idbModels/account";
+import { IdbFacility } from "src/app/models/idbModels/facility";
+import { IdbUtilityMeter } from "src/app/models/idbModels/utilityMeter";
+import { IdbUtilityMeterData } from "src/app/models/idbModels/utilityMeterData";
 import { IdbPredictorData } from "src/app/models/idbModels/predictorData";
 import { IdbPredictor } from "src/app/models/idbModels/predictor";
+import { IdbAnalysisItem } from "src/app/models/idbModels/analysisItem";
+import { IdbAccountAnalysisItem } from "src/app/models/idbModels/accountAnalysisItem";
 
 export class MonthlyAccountAnalysisClass {
 

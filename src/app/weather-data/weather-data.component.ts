@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { HelpPanelService } from '../help-panel/help-panel.service';
 import { AccountdbService } from '../indexedDB/account-db.service';
-import { IdbAccount, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from '../models/idb';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { WeatherDataService } from './weather-data.service';
 import { FacilitydbService } from '../indexedDB/facility-db.service';
@@ -17,6 +16,10 @@ import * as _ from 'lodash';
 import { DbChangesService } from '../indexedDB/db-changes.service';
 import { getCalanderizedMeterData } from '../calculations/calanderization/calanderizeMeters';
 import { AnalyticsService } from '../analytics/analytics.service';
+import { IdbAccount } from '../models/idbModels/account';
+import { IdbFacility } from '../models/idbModels/facility';
+import { IdbUtilityMeterData } from '../models/idbModels/utilityMeterData';
+import { IdbUtilityMeter } from '../models/idbModels/utilityMeter';
 import { getNewIdbPredictorData, IdbPredictorData } from '../models/idbModels/predictorData';
 import { PredictorDbService } from '../indexedDB/predictor-db.service';
 import { PredictorDataDbService } from '../indexedDB/predictor-data-db.service';

@@ -7,12 +7,15 @@ import { LoadingService } from 'src/app/core-components/loading/loading.service'
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport, IdbFacility } from 'src/app/models/idb';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { ElectronService } from 'src/app/electron/electron.service';
 import { AutomaticBackupsService } from 'src/app/electron/automatic-backups.service';
+import { IdbAccount } from 'src/app/models/idbModels/account';
+import { getNewIdbFacility, IdbFacility } from 'src/app/models/idbModels/facility';
+import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
+import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 
 @Component({
   selector: 'app-account-settings',
@@ -99,7 +102,7 @@ export class AccountSettingsComponent implements OnInit {
     this.loadingService.setLoadingStatus(true);
     this.loadingService.setLoadingMessage('Creating Facility...');
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    let idbFacility: IdbFacility = this.facilityDbService.getNewIdbFacility(selectedAccount);
+    let idbFacility: IdbFacility = getNewIdbFacility(selectedAccount);
     let newFacility: IdbFacility = await firstValueFrom(this.facilityDbService.addWithObservable(idbFacility));
     this.loadingService.setLoadingMessage('Updating Reports...');
     let accountReports: Array<IdbAccountReport> = this.accountReportDbService.accountReports.getValue();
