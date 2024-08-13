@@ -4,7 +4,6 @@ import { Subscription, firstValueFrom } from 'rxjs';
 import { Router } from '@angular/router';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { IdbAccountAnalysisItem } from 'src/app/models/idb';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountOverviewService } from 'src/app/account/account-overview/account-overview.service';
 import { ToastNotificationsService } from '../toast-notifications/toast-notifications.service';
@@ -18,6 +17,7 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { getNewIdbAccountReport, IdbAccountReport } from 'src/app/models/idbModels/accountReport';
+import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 
 @Component({
   selector: 'app-create-report-modal',

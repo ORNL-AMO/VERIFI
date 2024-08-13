@@ -3,11 +3,12 @@ import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
 import { AnalysisGroup, AnalysisGroupPredictorVariable, AnalysisTableColumns, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
-import { IdbAccountAnalysisItem, IdbAnalysisItem } from 'src/app/models/idb';
 import { CopyTableService } from '../../helper-services/copy-table.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
+import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
+import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 
 @Component({
   selector: 'app-monthly-analysis-summary-table',

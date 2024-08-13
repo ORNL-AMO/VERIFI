@@ -1,6 +1,5 @@
 import { AnnualAnalysisSummary } from "src/app/models/analysis";
 import { CalanderizedMeter } from "src/app/models/calanderization";
-import { IdbAccountAnalysisItem, IdbAnalysisItem } from "src/app/models/idb";
 import { BetterPlantsSummary } from "src/app/models/overview-report";
 import { AnnualAccountAnalysisSummaryClass } from "src/app/calculations/analysis-calculations/annualAccountAnalysisSummaryClass";
 import { AnnualFacilityAnalysisSummaryClass } from "src/app/calculations/analysis-calculations/annualFacilityAnalysisSummaryClass";
@@ -16,6 +15,8 @@ import { IdbUtilityMeter } from "src/app/models/idbModels/utilityMeter";
 import { IdbUtilityMeterData } from "src/app/models/idbModels/utilityMeterData";
 import { IdbPredictorData } from "src/app/models/idbModels/predictorData";
 import { IdbPredictor } from "src/app/models/idbModels/predictor";
+import { IdbAccountAnalysisItem } from "src/app/models/idbModels/accountAnalysisItem";
+import { IdbAnalysisItem } from "src/app/models/idbModels/analysisItem";
 
 export class BetterPlantsReportClass {
 

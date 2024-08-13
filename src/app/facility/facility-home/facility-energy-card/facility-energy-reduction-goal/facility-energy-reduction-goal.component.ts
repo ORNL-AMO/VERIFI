@@ -2,10 +2,10 @@ import { Component } from '@angular/core';
 import * as _ from 'lodash';
 import { MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { Subscription } from 'rxjs';
-import { IdbAnalysisItem } from 'src/app/models/idb';
 import { FacilityHomeService } from '../../facility-home.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 
 @Component({
   selector: 'app-facility-energy-reduction-goal',

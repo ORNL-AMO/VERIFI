@@ -1,5 +1,5 @@
-import { getNewIdbEntry, IdbEntry } from "../idb"
 import { AccountAndFacility } from "./accountAndFacility"
+import { getNewIdbEntry, IdbEntry } from "./idbEntry";
 
 
 

@@ -1,6 +1,5 @@
 import { CalanderizedMeter } from "src/app/models/calanderization";
 import { getCalanderizedMeterData } from "../calanderization/calanderizeMeters";
-import { IdbAccountAnalysisItem, IdbAnalysisItem } from "src/app/models/idb";
 import { getNeededUnits } from "../shared-calculations/calanderizationFunctions";
 import { AnnualFacilityAnalysisSummaryClass } from "../analysis-calculations/annualFacilityAnalysisSummaryClass";
 import { AnalysisGroup, AnnualAnalysisSummary } from "src/app/models/analysis";
@@ -14,6 +13,8 @@ import { IdbUtilityMeter } from "src/app/models/idbModels/utilityMeter";
 import { IdbUtilityMeterData } from "src/app/models/idbModels/utilityMeterData";
 import { IdbPredictor } from "src/app/models/idbModels/predictor";
 import { IdbPredictorData } from "src/app/models/idbModels/predictorData";
+import { IdbAccountAnalysisItem } from "src/app/models/idbModels/accountAnalysisItem";
+import { IdbAnalysisItem } from "src/app/models/idbModels/analysisItem";
 
 export class PerformanceReport {
 

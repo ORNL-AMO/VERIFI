@@ -1,5 +1,5 @@
 import { MonthlyData } from "../calanderization";
-import { getNewIdbEntry, IdbEntry } from "../idb";
+import { getNewIdbEntry, IdbEntry } from "./idbEntry";
 import { IdbUtilityMeter } from "./utilityMeter";
 
 

@@ -1,5 +1,4 @@
 import { MonthlyAnalysisSummaryData } from "src/app/models/analysis";
-import { IdbAccountAnalysisItem, IdbAnalysisItem } from "src/app/models/idb";
 import { MonthlyAccountAnalysisDataClass } from "./monthlyAccountAnalysisDataClass";
 import { MonthlyAnalysisSummaryDataClass } from "./monthlyAnalysisSummaryDataClass";
 import { MonthlyFacilityAnalysisClass } from "./monthlyFacilityAnalysisClass";
@@ -14,6 +13,8 @@ import { IdbUtilityMeter } from "src/app/models/idbModels/utilityMeter";
 import { IdbUtilityMeterData } from "src/app/models/idbModels/utilityMeterData";
 import { IdbPredictorData } from "src/app/models/idbModels/predictorData";
 import { IdbPredictor } from "src/app/models/idbModels/predictor";
+import { IdbAnalysisItem } from "src/app/models/idbModels/analysisItem";
+import { IdbAccountAnalysisItem } from "src/app/models/idbModels/accountAnalysisItem";
 
 export class MonthlyAccountAnalysisClass {
 

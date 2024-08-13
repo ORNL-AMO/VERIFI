@@ -1,10 +1,11 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { AnalysisGroup, AnalysisTableColumns } from 'src/app/models/analysis';
-import { IdbAccountAnalysisItem, IdbAnalysisItem } from 'src/app/models/idb';
 import * as _ from 'lodash';
 import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
 import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
+import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
+import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 
 @Component({
   selector: 'app-analysis-summary-table-filter',

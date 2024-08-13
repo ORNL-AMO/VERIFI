@@ -11,7 +11,7 @@ import { AccountAnalysisDbService } from './account-analysis-db.service';
 import { CustomEmissionsDbService } from './custom-emissions-db.service';
 import { CustomFuelDbService } from './custom-fuel-db.service';
 import { CustomGWPDbService } from './custom-gwp-db.service';
-import { IdbAccountAnalysisItem, IdbAnalysisItem, IdbPredictorEntryDeprecated } from '../models/idb';
+import { IdbPredictorEntryDeprecated } from '../models/idb';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { ElectronBackupsDbService } from './electron-backups-db.service';
@@ -29,6 +29,8 @@ import { PredictorDataDbService } from './predictor-data-db.service';
 import { IdbPredictor } from '../models/idbModels/predictor';
 import { IdbPredictorData } from '../models/idbModels/predictorData';
 import { IdbAccountReport } from '../models/idbModels/accountReport';
+import { IdbAnalysisItem } from '../models/idbModels/analysisItem';
+import { IdbAccountAnalysisItem } from '../models/idbModels/accountAnalysisItem';
 
 @Injectable({
   providedIn: 'root'

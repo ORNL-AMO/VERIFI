@@ -1,7 +1,7 @@
 import { FuelTypeOption } from "src/app/shared/fuel-options/fuelTypeOption";
-import { getNewIdbEntry, IdbEntry } from "../idb";
 import { MeterPhase } from "../constantsAndTypes";
 import { IdbAccount } from "./account";
+import { getNewIdbEntry, IdbEntry } from "./idbEntry";
 
 export interface IdbCustomFuel extends FuelTypeOption, IdbEntry {
     id?: number,

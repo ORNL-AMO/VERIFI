@@ -6,7 +6,6 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { IdbAccountAnalysisItem, IdbAnalysisItem } from 'src/app/models/idb';
 import { BetterPlantsSummary } from 'src/app/models/overview-report';
 import { BetterPlantsReportClass } from 'src/app/calculations/better-plants-calculations/betterPlantsReportClass';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
@@ -22,6 +21,8 @@ import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
+import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
+import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 
 @Component({
   selector: 'app-better-plants-report',

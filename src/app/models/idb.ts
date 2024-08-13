@@ -11,20 +11,20 @@ import { BetterClimateReportSetup, BetterPlantsReportSetup, DataOverviewReportSe
 import { SustainabilityQuestions } from './sustainabilityQuestions';
 
 
-export interface IdbEntry {
-    id?: number;
-    guid: string;
-    createdDate: Date;
-    modifiedDate: Date;
-}
+// export interface IdbEntry {
+//     id?: number;
+//     guid: string;
+//     createdDate: Date;
+//     modifiedDate: Date;
+// }
 
-export function getNewIdbEntry(): IdbEntry {
-    return {
-        guid: getGUID(),
-        createdDate: new Date(),
-        modifiedDate: new Date()
-    }
-}
+// export function getNewIdbEntry(): IdbEntry {
+//     return {
+//         guid: getGUID(),
+//         createdDate: new Date(),
+//         modifiedDate: new Date()
+//     }
+// }
 
 
 // export interface IdbAccount {
@@ -244,43 +244,43 @@ export type WeatherDataType = 'HDD' | 'CDD';
 
 
 
-export interface IdbAnalysisItem {
-    id?: number,
-    guid: string,
-    accountId: string,
-    facilityId: string,
-    date: Date,
-    name: string,
-    analysisCategory: AnalysisCategory,
-    energyIsSource: boolean,
-    reportYear: number,
-    energyUnit: string,
-    waterUnit: string,
-    setupErrors: AnalysisSetupErrors,
-    groups: Array<AnalysisGroup>,
-    selectedYearAnalysis?: boolean,
-    baselineYear: number
-}
+// export interface IdbAnalysisItem {
+//     id?: number,
+//     guid: string,
+//     accountId: string,
+//     facilityId: string,
+//     date: Date,
+//     name: string,
+//     analysisCategory: AnalysisCategory,
+//     energyIsSource: boolean,
+//     reportYear: number,
+//     energyUnit: string,
+//     waterUnit: string,
+//     setupErrors: AnalysisSetupErrors,
+//     groups: Array<AnalysisGroup>,
+//     selectedYearAnalysis?: boolean,
+//     baselineYear: number
+// }
 
 
-export interface IdbAccountAnalysisItem {
-    id?: number,
-    guid: string,
-    accountId: string,
-    date: Date,
-    name: string,
-    energyIsSource: boolean,
-    reportYear: number,
-    energyUnit: string,
-    facilityAnalysisItems: Array<{
-        facilityId: string,
-        analysisItemId: string
-    }>,
-    selectedYearAnalysis?: boolean,
-    analysisCategory: AnalysisCategory,
-    waterUnit: string,
-    baselineYear: number,
-    setupErrors: AccountAnalysisSetupErrors,
-    facilityItemsInitialized?: boolean
-}
+// export interface IdbAccountAnalysisItem {
+//     id?: number,
+//     guid: string,
+//     accountId: string,
+//     date: Date,
+//     name: string,
+//     energyIsSource: boolean,
+//     reportYear: number,
+//     energyUnit: string,
+//     facilityAnalysisItems: Array<{
+//         facilityId: string,
+//         analysisItemId: string
+//     }>,
+//     selectedYearAnalysis?: boolean,
+//     analysisCategory: AnalysisCategory,
+//     waterUnit: string,
+//     baselineYear: number,
+//     setupErrors: AccountAnalysisSetupErrors,
+//     facilityItemsInitialized?: boolean
+// }
 

@@ -1,6 +1,6 @@
 import { GlobalWarmingPotential } from "../globalWarmingPotentials";
-import { getNewIdbEntry, IdbEntry } from "../idb";
 import { IdbAccount } from "./account";
+import { getNewIdbEntry, IdbEntry } from "./idbEntry";
 
 export interface IdbCustomGWP extends GlobalWarmingPotential, IdbEntry {
     id?: number,

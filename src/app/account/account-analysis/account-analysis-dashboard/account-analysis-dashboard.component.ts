@@ -4,13 +4,15 @@ import { Subscription, firstValueFrom } from 'rxjs';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { IdbAccountAnalysisItem } from 'src/app/models/idb';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { AnalysisCategory } from 'src/app/models/analysis';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AnalyticsService } from 'src/app/analytics/analytics.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
+import { getNewIdbAccountAnalysisItem, IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
   selector: 'app-account-analysis-dashboard',
@@ -30,7 +32,8 @@ export class AccountAnalysisDashboardComponent implements OnInit {
     private dbChangesService: DbChangesService,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
     private accountDbService: AccountdbService,
-    private analyticsService: AnalyticsService) { }
+    private analyticsService: AnalyticsService,
+    private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
     this.routerSub = this.router.events.subscribe((event) => {
@@ -49,7 +52,8 @@ export class AccountAnalysisDashboardComponent implements OnInit {
   }
 
   async createAnalysis() {
-    let newItem: IdbAccountAnalysisItem = this.accountAnalysisDbService.getNewAccountAnalysisItem(this.newAnalysisCategory);
+    let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    let newItem: IdbAccountAnalysisItem = getNewIdbAccountAnalysisItem(this.newAnalysisCategory, this.selectedAccount, accountFacilities);
     let addedItem: IdbAccountAnalysisItem = await firstValueFrom(this.accountAnalysisDbService.addWithObservable(newItem));
     await this.dbChangesService.setAccountAnalysisItems(this.selectedAccount, false);
     this.analyticsService.sendEvent('create_account_analysis');

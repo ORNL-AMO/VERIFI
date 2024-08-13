@@ -1,5 +1,5 @@
 import { EmissionsResults } from "../eGridEmissions"
-import { getNewIdbEntry, IdbEntry } from "../idb";
+import { getNewIdbEntry, IdbEntry } from "./idbEntry";
 import { IdbUtilityMeter } from "./utilityMeter";
 import * as _ from 'lodash';
 

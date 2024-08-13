@@ -1,8 +1,8 @@
 import { FacilityClassification } from "../constantsAndTypes";
-import { getNewIdbEntry, IdbEntry } from "../idb";
 import { ElectricityDataFilters, GeneralUtilityDataFilters, VehicleDataFilters } from "../meterDataFilter";
 import { IdbAccount } from "./account";
 import { AccountAndFacility } from "./accountAndFacility";
+import { getNewIdbEntry, IdbEntry } from "./idbEntry";
 
 
 export interface IdbFacility extends IdbEntry, AccountAndFacility {

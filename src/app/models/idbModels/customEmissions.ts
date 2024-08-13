@@ -1,4 +1,4 @@
-import { getNewIdbEntry, IdbEntry } from "../idb";
+import { getNewIdbEntry, IdbEntry } from "./idbEntry";
 
 export interface IdbCustomEmissionsItem extends IdbEntry {
     accountId: string,

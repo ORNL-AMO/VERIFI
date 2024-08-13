@@ -2,15 +2,11 @@ import { Injectable } from '@angular/core';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { LocalStorageService } from 'ngx-webstorage';
 import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
-import { IdbAccountAnalysisItem, IdbAnalysisItem } from '../models/idb';
-import { AccountdbService } from './account-db.service';
-import { FacilitydbService } from './facility-db.service';
-import { AnalysisCategory } from '../models/analysis';
 import { AnalysisDbService } from './analysis-db.service';
 import { AnalysisValidationService } from '../shared/helper-services/analysis-validation.service';
 import { LoadingService } from '../core-components/loading/loading.service';
-import { IdbAccount } from '../models/idbModels/account';
-import { IdbFacility } from '../models/idbModels/facility';
+import { IdbAccountAnalysisItem } from '../models/idbModels/accountAnalysisItem';
+import { IdbAnalysisItem } from '../models/idbModels/analysisItem';
 
 @Injectable({
   providedIn: 'root'
@@ -21,8 +17,6 @@ export class AccountAnalysisDbService {
   selectedAnalysisItem: BehaviorSubject<IdbAccountAnalysisItem>;
 
   constructor(private dbService: NgxIndexedDBService, private localStorageService: LocalStorageService,
-    private accountDbService: AccountdbService,
-    private facilityDbService: FacilitydbService,
     private analysisDbService: AnalysisDbService,
     private analysisValidationService: AnalysisValidationService,
     private loadingService: LoadingService) {
@@ -73,50 +67,9 @@ export class AccountAnalysisDbService {
   }
 
   updateWithObservable(values: IdbAccountAnalysisItem): Observable<IdbAccountAnalysisItem> {
-    values.date = new Date();
+    values.modifiedDate = new Date();
     return this.dbService.update('accountAnalysisItems', values);
   }
-
-  getNewAccountAnalysisItem(analysisCategory: AnalysisCategory): IdbAccountAnalysisItem {
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
-    let facilityAnalysisItems: Array<{
-      facilityId: string,
-      analysisItemId: string
-    }> = new Array();
-    accountFacilities.forEach(facility => {
-      facilityAnalysisItems.push({
-        facilityId: facility.guid,
-        analysisItemId: undefined
-      })
-    });
-    let baselineYear: number = selectedAccount.sustainabilityQuestions.energyReductionBaselineYear;
-    if (analysisCategory == 'water') {
-      baselineYear = selectedAccount.sustainabilityQuestions.waterReductionBaselineYear;
-    }
-    return {
-      accountId: selectedAccount.guid,
-      guid: Math.random().toString(36).substr(2, 9),
-      date: new Date(),
-      name: 'Account Analysis',
-      reportYear: undefined,
-      baselineYear: baselineYear,
-      energyUnit: selectedAccount.energyUnit,
-      facilityAnalysisItems: facilityAnalysisItems,
-      energyIsSource: selectedAccount.energyIsSource,
-      waterUnit: selectedAccount.volumeLiquidUnit,
-      analysisCategory: analysisCategory,
-      setupErrors: {
-        hasError: true,
-        missingName: false,
-        missingReportYear: true,
-        missingBaselineYear: false,
-        reportYearBeforeBaselineYear: false,
-        facilitiesSelectionsInvalid: true
-      }
-    }
-  }
-
 
   async deleteAccountAnalysisItems() {
     let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisItems.getValue();
