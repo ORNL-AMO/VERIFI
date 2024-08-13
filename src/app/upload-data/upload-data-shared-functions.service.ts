@@ -5,7 +5,7 @@ import { MeterSource } from '../models/constantsAndTypes';
 import { IdbAccount } from '../models/idbModels/account';
 import { IdbFacility } from '../models/idbModels/facility';
 import { getNewIdbUtilityMeterGroup, IdbUtilityMeterGroup } from '../models/idbModels/utilityMeterGroup';
-import { IdbPredictorEntryDeprecated } from '../models/idb';
+import { IdbPredictorEntryDeprecated } from '../models/idbModels/deprecatedPredictors';
 
 @Injectable({
   providedIn: 'root'

@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { LoadingService } from '../core-components/loading/loading.service';
 import { ToastNotificationsService } from '../core-components/toast-notifications/toast-notifications.service';
-import { IdbPredictorEntryDeprecated } from '../models/idb';
 import { AccountAnalysisDbService } from './account-analysis-db.service';
 import { AccountdbService } from './account-db.service';
 import { AccountReportDbService } from './account-report-db.service';
@@ -32,6 +31,7 @@ import { MigratePredictorsService } from './migrate-predictors.service';
 import { IdbAccountReport } from '../models/idbModels/accountReport';
 import { IdbAccountAnalysisItem } from '../models/idbModels/accountAnalysisItem';
 import { IdbAnalysisItem } from '../models/idbModels/analysisItem';
+import { IdbPredictorEntryDeprecated } from '../models/idbModels/deprecatedPredictors';
 
 @Injectable({
   providedIn: 'root'

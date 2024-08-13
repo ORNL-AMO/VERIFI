@@ -11,7 +11,6 @@ import { UpdateDbEntryService } from './indexedDB/update-db-entry.service';
 import { UtilityMeterdbService } from './indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from './indexedDB/utilityMeterData-db.service';
 import { UtilityMeterGroupdbService } from './indexedDB/utilityMeterGroup-db.service';
-import { IdbPredictorEntryDeprecated } from './models/idb';
 import { EGridService } from './shared/helper-services/e-grid.service';
 import { firstValueFrom } from 'rxjs';
 import { environment } from 'src/environments/environment';
@@ -39,6 +38,7 @@ import { DbChangesService } from './indexedDB/db-changes.service';
 import { IdbAccountReport } from './models/idbModels/accountReport';
 import { IdbAnalysisItem } from './models/idbModels/analysisItem';
 import { IdbAccountAnalysisItem } from './models/idbModels/accountAnalysisItem';
+import { IdbPredictorEntryDeprecated } from './models/idbModels/deprecatedPredictors';
 
 // declare ga as a function to access the JS code in TS
 declare let gtag: Function;

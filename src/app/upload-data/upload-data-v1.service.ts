@@ -23,7 +23,7 @@ import { getNewIdbFacility, IdbFacility } from '../models/idbModels/facility';
 import { getNewIdbUtilityMeter, IdbUtilityMeter } from '../models/idbModels/utilityMeter';
 import { IdbUtilityMeterGroup } from '../models/idbModels/utilityMeterGroup';
 import { getNewIdbUtilityMeterData, IdbUtilityMeterData } from '../models/idbModels/utilityMeterData';
-import { IdbPredictorEntryDeprecated } from '../models/idb';
+import { IdbPredictorEntryDeprecated } from '../models/idbModels/deprecatedPredictors';
 
 @Injectable({
   providedIn: 'root'
