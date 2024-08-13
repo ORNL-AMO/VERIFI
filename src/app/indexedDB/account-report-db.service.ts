@@ -65,114 +65,6 @@ export class AccountReportDbService {
     return this.dbService.update('accountReports', values);
   }
 
-  // getNewAccountReport(account?: IdbAccount): IdbAccountReport {
-  //   if (!account) {
-  //     account = this.accountDbService.selectedAccount.getValue();
-  //   }
-  //   let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
-  //   let groups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.accountMeterGroups.getValue();
-  //   return {
-  //     accountId: account.guid,
-  //     guid: Math.random().toString(36).substr(2, 9),
-  //     date: new Date(),
-  //     name: 'Account Report',
-  //     reportType: undefined,
-  //     reportYear: undefined,
-  //     baselineYear: undefined,
-  //     startYear: undefined,
-  //     startMonth: undefined,
-  //     endYear: undefined,
-  //     endMonth: undefined,
-  //     betterPlantsReportSetup: {
-  //       analysisItemId: undefined,
-  //       includeFacilityNames: true,
-  //       modificationNotes: undefined,
-  //       baselineAdjustmentNotes: undefined,
-  //     },
-  //     dataOverviewReportSetup: {
-  //       energyIsSource: account.energyIsSource,
-  //       emissionsDisplay: 'location',
-  //       includeMap: true,
-  //       includeFacilityTable: true,
-  //       includeFacilityDonut: true,
-  //       includeUtilityTable: true,
-  //       includeStackedBarChart: true,
-  //       includeMonthlyLineChart: true,
-  //       includeCostsSection: true,
-  //       includeEmissionsSection: true,
-  //       includeEnergySection: true,
-  //       includeWaterSection: true,
-  //       includedFacilities: facilities.map(facility => {
-  //         return {
-  //           facilityId: facility.guid,
-  //           included: true
-  //         }
-  //       }),
-  //       includeAccountReport: true,
-  //       includeFacilityReports: true,
-  //       includeMeterUsageStackedLineChart: true,
-  //       includeMeterUsageTable: true,
-  //       includeMeterUsageDonut: true,
-  //       includeUtilityTableForFacility: true,
-  //       includeAnnualBarChart: true,
-  //       includeMonthlyLineChartForFacility: true
-  //     },
-  //     performanceReportSetup: {
-  //       analysisItemId: undefined,
-  //       includeFacilityPerformanceDetails: true,
-  //       includeUtilityPerformanceDetails: true,
-  //       includeGroupPerformanceDetails: false,
-  //       groupPerformanceByYear: false,
-  //       includeTopPerformersTable: true,
-  //       numberOfTopPerformers: 5,
-  //       includeActual: false,
-  //       includeAdjusted: true,
-  //       includeContribution: true,
-  //       includeSavings: true,
-  //     },
-  //     betterClimateReportSetup: {
-  //       emissionsDisplay: 'location',
-  //       initiativeNotes: [],
-  //       includePortfolioInformation: true,
-  //       includeAbsoluteEmissions: true,
-  //       includeGHGEmissionsReductions: true,
-  //       includePortfolioEnergyUse: true,
-  //       includeCalculationsForGraphs: false,
-  //       includeFacilitySummaries: true,
-  //       numberOfTopPerformers: 5,
-  //       skipIntermediateYears: false,
-  //       includeEmissionsInTables: true,
-  //       includePercentReductionsInTables: true,
-  //       includePercentContributionsInTables: true,
-  //       includeVehicleEnergyUse: true,
-  //       includeStationaryEnergyUse: true,
-  //       selectMeterData: false,
-  //       includedFacilityGroups: facilities.map(facility => {
-  //         return {
-  //           facilityId: facility.guid,
-  //           include: true,
-  //           groups: this.getFacilityGroups(facility.guid, groups)
-  //         }
-  //       }),
-  //     }
-  //   }
-  // }
-
-
-  // getFacilityGroups(facilityId: string, groups: Array<IdbUtilityMeterGroup>): Array<{ groupId: string, include: boolean }> {
-  //   let facilityGroups: Array<{ groupId: string, include: boolean }> = new Array();
-  //   groups.forEach(group => {
-  //     if (group.facilityId == facilityId) {
-  //       facilityGroups.push({
-  //         groupId: group.guid,
-  //         include: true
-  //       });
-  //     }
-  //   });
-  //   return facilityGroups;
-  // }
-
-
   async updateReportsRemoveFacility(facilityId: string) {
     let accountReports: Array<IdbAccountReport> = this.accountReports.getValue();
     for (let i = 0; i < accountReports.length; i++) {
@@ -200,7 +92,6 @@ export class AccountReportDbService {
       await firstValueFrom(this.updateWithObservable(report));
     }
   }
-
 
   async deleteAccountReports() {
     let accountReports: Array<IdbAccountReport> = this.accountReports.getValue();

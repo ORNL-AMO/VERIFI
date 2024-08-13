@@ -71,51 +71,6 @@ export class UtilityMeterdbService {
         }
     }
 
-    // getNewIdbUtilityMeter(facilityId: string, accountId: string, setDefaults: boolean, energyUnit: string): IdbUtilityMeter {
-    //     let source: MeterSource;
-    //     let startingUnit: string;
-    //     if (setDefaults) {
-    //         source = 'Electricity';
-    //         startingUnit = energyUnit;
-    //         // startingUnit = 'kWh';
-    //         // energyUnit = 'kWh';
-    //     }
-    //     return {
-    //         facilityId: facilityId,
-    //         accountId: accountId,
-    //         guid: Math.random().toString(36).substr(2, 9),
-    //         // id: undefined,
-    //         groupId: undefined,
-    //         meterNumber: undefined,
-    //         accountNumber: undefined,
-    //         phase: "Gas",
-    //         heatCapacity: undefined,
-    //         siteToSource: 3,
-    //         name: "New Meter",
-    //         location: undefined,
-    //         supplier: undefined,
-    //         notes: undefined,
-    //         source: source,
-    //         group: undefined,
-    //         startingUnit: startingUnit,
-    //         energyUnit: energyUnit,
-    //         fuel: undefined,
-    //         scope: 3,
-    //         agreementType: 1,
-    //         includeInEnergy: true,
-    //         retainRECs: false,
-    //         directConnection: false,
-    //         locationGHGMultiplier: 1,
-    //         marketGHGMultiplier: 1,
-    //         recsMultiplier: 0,
-    //         greenPurchaseFraction: .5,
-    //         vehicleCategory: 1,
-    //         vehicleCollectionType: 1,
-    //         vehicleDistanceUnit: 'mi',
-    //         vehicleCollectionUnit: 'gal'
-    //     }
-    // }
-
     getGroupMetersByGroupId(groupId: string): Array<IdbUtilityMeter> {
         let facilityMeters: Array<IdbUtilityMeter> = this.accountMeters.getValue();
         return facilityMeters.filter(meter => { return meter.groupId == groupId });

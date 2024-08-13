@@ -68,21 +68,6 @@ export class UtilityMeterGroupdbService {
         }
     }
 
-
-    // getNewIdbUtilityMeterGroup(type: 'Energy' | 'Water' | 'Other', name: string, facilityId: string, accountId: string): IdbUtilityMeterGroup {
-    //     return {
-    //         facilityId: facilityId,
-    //         accountId: accountId,
-    //         guid: Math.random().toString(36).substr(2, 9),
-    //         groupType: type,
-    //         name: name,
-    //         description: undefined,
-    //         factionOfTotalEnergy: undefined,
-    //         // id: undefined
-    //         visible: true
-    //     }
-    // }
-
     getGroupById(groupId: string): IdbUtilityMeterGroup {
         let groups: Array<IdbUtilityMeterGroup> = this.accountMeterGroups.getValue();
         return groups.find(group => { return group.guid == groupId });
