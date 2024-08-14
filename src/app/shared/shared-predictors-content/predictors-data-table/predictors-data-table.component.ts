@@ -43,6 +43,8 @@ export class PredictorsDataTableComponent {
   predictorDataToDelete: IdbPredictorData;
   hasWeatherDataWarnings: boolean = false;
   predictor: IdbPredictor;
+
+  inDataWizard: boolean;
   constructor(private activatedRoute: ActivatedRoute, private predictorDbService: PredictorDbService,
     private predictorDataDbService: PredictorDataDbService,
     private sharedDataService: SharedDataService,
@@ -63,12 +65,20 @@ export class PredictorsDataTableComponent {
     this.predictorDataSub = this.predictorDataDbService.facilityPredictorData.subscribe(() => {
       this.setPredictorData();
     });
-
-    this.activatedRoute.parent.params.subscribe(params => {
-      let predictorId: string = params['id'];
-      this.predictor = this.predictorDbService.getByGuid(predictorId);
-      this.setPredictorData();
-    });
+    this.setInDataWizard();
+    if (this.inDataWizard) {
+      this.activatedRoute.params.subscribe(params => {
+        let predictorId: string = params['id'];
+        this.predictor = this.predictorDbService.getByGuid(predictorId);
+        this.setPredictorData();
+      });
+    } else {
+      this.activatedRoute.parent.params.subscribe(params => {
+        let predictorId: string = params['id'];
+        this.predictor = this.predictorDbService.getByGuid(predictorId);
+        this.setPredictorData();
+      });
+    }
 
 
     this.itemsPerPageSub = this.sharedDataService.itemsPerPage.subscribe(val => {
@@ -79,6 +89,10 @@ export class PredictorsDataTableComponent {
   ngOnDestroy() {
     this.itemsPerPageSub.unsubscribe();
     this.predictorDataSub.unsubscribe();
+  }
+
+  setInDataWizard() {
+    this.inDataWizard = this.router.url.includes('data-wizard');
   }
 
   setPredictorData() {

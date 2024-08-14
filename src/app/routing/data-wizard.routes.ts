@@ -21,6 +21,9 @@ import { FacilityPredictorComponent } from "../data-wizard/facility-data/facilit
 import { FacilityPredictorsTableComponent } from "../data-wizard/facility-data/facility-predictors/facility-predictors-table/facility-predictors-table.component";
 import { MeterDataComponent } from "../shared/meter-data/meter-data.component";
 import { MeterDataTableComponent } from "../shared/meter-data/meter-data-table/meter-data-table.component";
+import { PredictorTableComponent } from "../shared/shared-predictors-content/predictor-table/predictor-table.component";
+import { EditPredictorFormComponent } from "../shared/shared-predictors-content/edit-predictor-form/edit-predictor-form.component";
+import { PredictorsDataTableComponent } from "../shared/shared-predictors-content/predictors-data-table/predictors-data-table.component";
 
 export const DataWizardRoutes: Route = {
     path: 'data-wizard/:id',
@@ -82,9 +85,9 @@ export const DataWizardRoutes: Route = {
                     path: 'predictors',
                     component: FacilityPredictorsComponent,
                     children: [
-                        { path: '', component: FacilityPredictorsTableComponent },
-                        { path: 'predictor/:id', component: FacilityPredictorComponent },
-                        { path: 'predictor-data/:id', component: FacilityPredictorDataComponent }
+                        { path: '', component: PredictorTableComponent },
+                        { path: 'predictor/:id', component: EditPredictorFormComponent },
+                        { path: 'predictor-data/:id', component: PredictorsDataTableComponent }
                     ]
                 }
             ]

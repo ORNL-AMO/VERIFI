@@ -1,4 +1,7 @@
-<!-- <div class="d-flex w-100 justify-content-end mb-2">
+<div class="d-flex w-100 justify-content-end mb-2">
+    <!-- <div class="ps-2">
+        <button class="btn nav-btn" (click)="migrateData()"><i class="fa fa-upload"></i> Migrate Data</button>
+    </div> -->
     <div class="ps-2">
         <button class="btn nav-btn" (click)="uploadData()"><i class="fa fa-upload"></i> Import Data</button>
     </div>
@@ -92,7 +95,6 @@
                 <tr *ngFor="let predictor of degreeDayPredictors">
                     <td>
                         <a (click)="selectEditPredictor(predictor)">
-
                             {{predictor.name}}</a>
                     </td>
                     <td>
@@ -146,15 +148,9 @@
         data wizard to upload data from a .xlsx file.
     </div>
 </ng-container>
-<ng-container *ngIf="predictorEntries.length == 0 && facilityPredictors.length != 0">
-    <div class="alert alert-warning">
-        No entries found for this facility. A predictor entry is required to save these predictors.
-    </div>
-</ng-container>
 
-
-<div [ngClass]="{'windowOverlay': predictorToDelete}"></div>
-<div class="popup" [class.open]="predictorToDelete">
+<div [ngClass]="{'windowOverlay': displayDeletePredictor}"></div>
+<div class="popup" [class.open]="displayDeletePredictor">
     <div class="popup-header">
         Delete {{predictorToDelete?.name}}?
         <button class="item-right" (click)="cancelDelete()">x</button>
@@ -172,4 +168,4 @@
         <button class="btn btn-secondary" (click)="cancelDelete()">Cancel</button>
         <button class="btn btn-danger" (click)="confirmDelete()">Confirm Delete</button>
     </div>
-</div> -->
+</div>
