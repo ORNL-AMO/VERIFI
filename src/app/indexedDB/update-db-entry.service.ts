@@ -168,12 +168,12 @@ export class UpdateDbEntryService {
       utilityMeter.source = 'Other';
     }
 
-    if(utilityMeter.startingUnit == 'Dtherm'){
+    if (utilityMeter.startingUnit == 'Dtherm') {
       utilityMeter.startingUnit = 'DTherm';
       isChanged = true;
     }
 
-    if(utilityMeter.energyUnit == 'Dtherm'){
+    if (utilityMeter.energyUnit == 'Dtherm') {
       utilityMeter.energyUnit = 'DTherm';
       isChanged = true;
     }
@@ -234,6 +234,28 @@ export class UpdateDbEntryService {
         report.betterClimateReportSetup.includedFacilityGroups = includedFacilityGroups;
         isChanged = true;
       }
+    }
+
+    if (report.reportType == 'dataOverview' && report.dataOverviewReportSetup) {
+      if (report.dataOverviewReportSetup.includeAllMeterData == undefined) {
+        report.dataOverviewReportSetup.includeAllMeterData = true;
+        isChanged = true;
+      }
+      report.dataOverviewReportSetup.includedFacilities.forEach(facility => {
+        if (facility.includedGroups == undefined) {
+          let facilityGroups: Array<{ groupId: string, include: boolean }> = new Array();
+          groups.forEach(group => {
+            if (group.facilityId == facility.facilityId) {
+              facilityGroups.push({
+                groupId: group.guid,
+                include: true
+              });
+            }
+          });
+          facility.includedGroups = facilityGroups;
+          isChanged = true;
+        }
+      });
     }
 
 

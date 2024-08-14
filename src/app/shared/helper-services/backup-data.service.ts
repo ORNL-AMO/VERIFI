@@ -658,7 +658,13 @@ export class BackupDataService {
     for (let reportIndex = 0; reportIndex < accountReports.length; reportIndex++) {
       accountReports[reportIndex].dataOverviewReportSetup.includedFacilities.push({
         facilityId: newFacilityGUID,
-        included: false
+        included: false,
+        includedGroups: backupFile.groups.map(group => {
+          return {
+            groupId:  this.getNewId(group.guid, meterGroupGUIDs),
+            include: true
+          }
+        })
       });
       await firstValueFrom(this.accountReportsDbService.updateWithObservable(accountReports[reportIndex]));
     }

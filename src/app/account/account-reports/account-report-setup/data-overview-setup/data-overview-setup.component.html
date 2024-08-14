@@ -36,8 +36,57 @@
         </div>
     </div>
     <hr>
+    <div class="row">
+        <div class="col-12">
+            <div class="form-check">
+                <input type="radio" class="form-check-input" name="selectMeterData" [value]="true" id="includeAll"
+                    [(ngModel)]="reportSetup.includeAllMeterData" (change)="save()">
+                <label class="form-check-label" for="includeAll">Include all account meter data</label>
+            </div>
+            <div class="form-check">
+                <input type="radio" class="form-check-input" name="selectMeterData" [value]="false"
+                    id="selectMeterGroups" [(ngModel)]="reportSetup.includeAllMeterData"
+                    (change)="save()">
+                <label class="form-check-label" for="selectMeterGroups">Select meter groups to include</label>
+            </div>
+        </div>
+        <ng-container *ngIf="!reportSetup.includeAllMeterData">
+            <div class="col-12 pt-2">
+                <label class="semibold">Facility Meter Groups:</label>
+            </div>
+            <div class="col-2 pb-2"
+                *ngFor="let facilityOption of reportSetup.includedFacilities">
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input"
+                        name="{{'includeFacility_'+facilityOption.facilityId}}"
+                        id="{{'includeFacility_'+facilityOption.facilityId}}" [(ngModel)]="facilityOption.included"
+                        (change)="save()">
+                    <label class="form-check-label bold"
+                        for="{{'includeFacility_'+facilityOption.facilityId}}">{{facilityOption.facilityId |
+                        facilityName}}</label>
+                </div>
+                <ng-container *ngIf="facilityOption.included">
+                    <div class="form-check secondary-check" *ngFor="let groupOption of facilityOption.includedGroups">
+                        <input type="checkbox" class="form-check-input" name="{{'includeGroup_'+groupOption.groupId}}"
+                            id="{{'includeGroup_'+groupOption.groupId}}" [(ngModel)]="groupOption.include"
+                            (change)="save()">
+                        <label class="form-check-label"
+                            for="{{'includeGroup_'+groupOption.groupId}}">{{groupOption.groupId |
+                            groupName}}</label>
+                    </div>
+                </ng-container>
+            </div>
+        </ng-container>
+        <div class="col-12">
+            <hr>
+        </div>
+    </div>
+
+
+
+
     <div class="d-flex">
-        <div class="pe-3">
+        <!-- <div class="pe-3">
             <label class="semibold larger">Facilities to Include</label>
             <div class="section-options">
                 <div class="form-check" *ngFor="let facilityOption of reportSetup.includedFacilities">
@@ -50,8 +99,8 @@
                         facilityName}}</label>
                 </div>
             </div>
-        </div>
-        <div class="pe-3 ps-3">
+        </div> -->
+        <div class="pe-3">
             <label class="semibold larger">Sections to Include in Report</label>
             <div class="section-options">
                 <div class="form-check">

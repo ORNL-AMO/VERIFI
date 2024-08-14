@@ -4,6 +4,7 @@ import { LocalStorageService } from 'ngx-webstorage';
 import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
 import { LoadingService } from '../core-components/loading/loading.service';
 import { IdbAccountReport } from '../models/idbModels/accountReport';
+import { IdbUtilityMeterGroup } from '../models/idbModels/utilityMeterGroup';
 
 @Injectable({
   providedIn: 'root'
@@ -82,11 +83,15 @@ export class AccountReportDbService {
     let accountReports: Array<IdbAccountReport> = this.accountReports.getValue();
     for (let i = 0; i < accountReports.length; i++) {
       let report: IdbAccountReport = accountReports[i];
-      if (report.betterClimateReportSetup.includedFacilityGroups) {
+      if (report.reportType == 'betterClimate' && report.betterClimateReportSetup.includedFacilityGroups) {
         for (let facilityIndex: number = 0; facilityIndex < report.betterClimateReportSetup.includedFacilityGroups.length; facilityIndex++) {
           report.betterClimateReportSetup.includedFacilityGroups[facilityIndex].groups = report.betterClimateReportSetup.includedFacilityGroups[facilityIndex].groups.filter(group => { return group.groupId != groupId });
         }
-
+      }
+      if (report.reportType == 'dataOverview' && report.dataOverviewReportSetup.includedFacilities) {
+        for (let facilityIndex: number = 0; facilityIndex < report.dataOverviewReportSetup.includedFacilities.length; facilityIndex++) {
+          report.dataOverviewReportSetup.includedFacilities[facilityIndex].includedGroups = report.dataOverviewReportSetup.includedFacilities[facilityIndex].includedGroups.filter(group => { return group.groupId != groupId });
+        }
       }
       this.loadingService.setLoadingMessage('Removing Group From Reports (' + i + '/' + accountReports.length + ')...');
       await firstValueFrom(this.updateWithObservable(report));
@@ -111,6 +116,34 @@ export class AccountReportDbService {
       return (report.reportType == 'betterPlants' && report.betterPlantsReportSetup.analysisItemId == analysisId);
     });
     return (hasReport != undefined);
+  }
+
+  async addGroup(group: IdbUtilityMeterGroup) {
+    let accountReports: Array<IdbAccountReport> = this.accountReports.getValue();
+    for (let i = 0; i < accountReports.length; i++) {
+      let report: IdbAccountReport = accountReports[i];
+      if (report.reportType == 'betterClimate') {
+        report.betterClimateReportSetup.includedFacilityGroups.forEach(facilityGroup => {
+          if (facilityGroup.facilityId == group.facilityId) {
+            facilityGroup.groups.push({
+              groupId: group.guid,
+              include: true
+            })
+          }
+        })
+      }
+      if (report.reportType == 'dataOverview') {
+        report.dataOverviewReportSetup.includedFacilities.forEach(facilityGroup => {
+          if (facilityGroup.facilityId == group.facilityId) {
+            facilityGroup.includedGroups.push({
+              groupId: group.guid,
+              include: true
+            })
+          }
+        })
+      }
+      await firstValueFrom(this.updateWithObservable(report));
+    }
   }
 
 }
