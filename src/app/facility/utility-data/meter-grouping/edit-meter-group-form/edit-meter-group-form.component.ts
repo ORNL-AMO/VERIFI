@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
@@ -30,7 +31,8 @@ export class EditMeterGroupFormComponent implements OnInit {
   groupForm: FormGroup;
   constructor(private formBuilder: FormBuilder, private utilityMeterGroupDbService: UtilityMeterGroupdbService,
     private analysisDbService: AnalysisDbService, private toastNotificationService: ToastNotificationsService,
-    private dbChangesService: DbChangesService, private accountDbService: AccountdbService, private facilityDbService: FacilitydbService) { }
+    private dbChangesService: DbChangesService, private accountDbService: AccountdbService, private facilityDbService: FacilitydbService,
+    private accountReportDbService: AccountReportDbService) { }
 
   ngOnInit(): void {
     this.groupForm = this.formBuilder.group({
@@ -38,7 +40,7 @@ export class EditMeterGroupFormComponent implements OnInit {
       groupType: [this.groupToEdit.groupType, Validators.required],
       description: [this.groupToEdit.description]
     });
-    if(this.editOrAdd == 'edit'){
+    if (this.editOrAdd == 'edit') {
       this.groupForm.controls.groupType.disable();
     }
   }
@@ -52,10 +54,12 @@ export class EditMeterGroupFormComponent implements OnInit {
     if (this.editOrAdd == 'add') {
       let groupToAdd: IdbUtilityMeterGroup = await firstValueFrom(this.utilityMeterGroupDbService.addWithObservable(this.groupToEdit));
       await this.dbChangesService.setMeterGroups(selectedAccount, selectedFacility)
-      if(groupToAdd.groupType == 'Energy'){
+      if (groupToAdd.groupType == 'Energy') {
         await this.analysisDbService.addGroup(groupToAdd.guid);
       }
       await this.dbChangesService.setAnalysisItems(selectedAccount, false, selectedFacility);
+      await this.accountReportDbService.addGroup(groupToAdd);
+      await this.dbChangesService.setAccountReports(selectedAccount);
       this.toastNotificationService.showToast("Meter Group Added!", undefined, undefined, false, "alert-success");
     } else {
       await firstValueFrom(this.utilityMeterGroupDbService.updateWithObservable(this.groupToEdit));

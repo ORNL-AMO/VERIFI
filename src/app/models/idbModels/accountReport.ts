@@ -56,10 +56,12 @@ export function getNewIdbAccountReport(account: IdbAccount, facilities: Array<Id
             includeEmissionsSection: true,
             includeEnergySection: true,
             includeWaterSection: true,
+            includeAllMeterData: true,
             includedFacilities: facilities.map(facility => {
                 return {
                     facilityId: facility.guid,
-                    included: true
+                    included: true,
+                    includedGroups: getFacilityGroups(facility.guid, groups)
                 }
             }),
             includeAccountReport: true,
