@@ -85,7 +85,7 @@ export class UploadDataService {
     } else {
       //parse template
       let templateData: ParsedTemplate = this.parseTemplate(workBook, isTemplate, inSetupWizard);
-      // let predictorFacilityGroups: Array<FacilityGroup> = this.getPredictorFacilityGroups(templateData);
+      let predictorFacilityGroups: Array<FacilityGroup> = this.getPredictorFacilityGroups(templateData);
       let fileName: string = 'Upload File';
       if (file) {
         fileName = file.name;
@@ -101,7 +101,7 @@ export class UploadDataService {
         selectedWorksheetData: [],
         columnGroups: [],
         meterFacilityGroups: [],
-        predictorFacilityGroups: [],
+        predictorFacilityGroups: predictorFacilityGroups,
         headerMap: [],
         importFacilities: templateData.importFacilities,
         meters: templateData.importMeters,

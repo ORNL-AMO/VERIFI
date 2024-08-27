@@ -15,7 +15,7 @@ import { getMeterDataCopy } from '../calculations/conversions/convertMeterData';
 import { FuelTypeOption } from '../shared/fuel-options/fuelTypeOption';
 import { getFuelTypeOptions } from '../shared/fuel-options/getFuelTypeOptions';
 import { ColumnGroup, ColumnItem, FacilityGroup, FileReference, ParsedTemplate } from './upload-data-models';
-import { checkImportCellNumber, checkImportStartingUnit, checkSameDay, checkSameMonth, getAgreementType, getCountryCode, getFuelEnum, getMeterReadingDataApplication, getMeterSource, getPhase, getScope, getState, getYesNoBool, getZip } from './upload-helper-functions';
+import { checkImportCellNumber, checkImportStartingUnit, checkSameDay, getAgreementType, getCountryCode, getFuelEnum, getMeterReadingDataApplication, getMeterSource, getPhase, getScope, getState, getYesNoBool, getZip } from './upload-helper-functions';
 import { UploadDataSharedFunctionsService } from './upload-data-shared-functions.service';
 import { SetupWizardService } from '../setup-wizard/setup-wizard.service';
 import { IdbAccount } from '../models/idbModels/account';
@@ -24,6 +24,8 @@ import { getNewIdbUtilityMeter, IdbUtilityMeter } from '../models/idbModels/util
 import { IdbUtilityMeterGroup } from '../models/idbModels/utilityMeterGroup';
 import { getNewIdbUtilityMeterData, IdbUtilityMeterData } from '../models/idbModels/utilityMeterData';
 import { IdbPredictorEntryDeprecated } from '../models/idbModels/deprecatedPredictors';
+import { IdbPredictor } from '../models/idbModels/predictor';
+import { IdbPredictorData } from '../models/idbModels/predictorData';
 
 @Injectable({
   providedIn: 'root'
@@ -189,9 +191,10 @@ export class UploadDataV1Service {
     })
     //electricity readings
     let importMeterData: Array<IdbUtilityMeterData> = this.getMeterDataEntries(workbook, importMeters);
-    //predictors TODO: 1668
-    // let predictorEntries: Array<IdbPredictorEntry> = this.uploadDataSharedFunctionsService.getPredictorData(workbook, importFacilities, selectedAccount);
-    return { importFacilities: importFacilities, importMeters: importMeters, predictors: [], predictorData: [], meterData: importMeterData, newGroups: newGroups }
+    //predictors updated: isssue-1668
+    let importPredictors: Array<IdbPredictor> = this.uploadDataSharedFunctionsService.getPredictors(workbook, importFacilities);
+    let importPredictorData: Array<IdbPredictorData> = this.uploadDataSharedFunctionsService.getPredictorData(workbook, importFacilities, importPredictors);
+    return { importFacilities: importFacilities, importMeters: importMeters, predictors: importPredictors, predictorData: importPredictorData, meterData: importMeterData, newGroups: newGroups }
   }
 
   getMeterDataEntries(workbook: XLSX.WorkBook, importMeters: Array<IdbUtilityMeter>): Array<IdbUtilityMeterData> {
@@ -329,33 +332,33 @@ export class UploadDataV1Service {
   }
 
 
-  getPredictorFacilityGroups(templateData: { importFacilities: Array<IdbFacility>, predictorEntries: Array<IdbPredictorEntryDeprecated> }): Array<FacilityGroup> {
+  getPredictorFacilityGroups(templateData: { importFacilities: Array<IdbFacility>, predictors: Array<IdbPredictor> }): Array<FacilityGroup> {
     // TODO: 1668
-    // let facilityGroups: Array<FacilityGroup> = new Array();
-    // let predictorIndex: number = 0;
-    // templateData.importFacilities.forEach(facility => {
-    //   let facilityPredictorEntry: IdbPredictorEntry = templateData.predictorEntries.find(entry => { return entry.facilityId == facility.guid });
-    //   let groupItems: Array<ColumnItem> = new Array();
-    //   if (facilityPredictorEntry) {
-    //     facilityPredictorEntry.predictors.forEach(predictor => {
-    //       groupItems.push({
-    //         index: predictorIndex,
-    //         value: predictor.name,
-    //         id: predictor.id,
-    //         isExisting: predictor.id != undefined,
-    //         isProductionPredictor: predictor.production
-    //       });
-    //       predictorIndex++;
-    //     })
-    //     facilityGroups.push({
-    //       facilityId: facility.guid,
-    //       groupItems: groupItems,
-    //       facilityName: facility.name,
-    //       color: facility.color
-    //     });
-    //   }
-    // });
-    // return facilityGroups;
+    let facilityGroups: Array<FacilityGroup> = new Array();
+    let predictorIndex: number = 0;
+    templateData.importFacilities.forEach(facility => {
+      let facilityPredictors: Array<IdbPredictor> = templateData.predictors.filter(entry => { return entry.facilityId == facility.guid });
+      let groupItems: Array<ColumnItem> = new Array();
+      if (facilityPredictors.length > 0) {
+        facilityPredictors.forEach(predictor => {
+          groupItems.push({
+            index: predictorIndex,
+            value: predictor.name,
+            id: predictor.guid,
+            isExisting: predictor.id != undefined,
+            isProductionPredictor: predictor.production
+          });
+          predictorIndex++;
+        })
+        facilityGroups.push({
+          facilityId: facility.guid,
+          groupItems: groupItems,
+          facilityName: facility.name,
+          color: facility.color
+        });
+      }
+    });
+    return facilityGroups;
     return [];
   }
 
