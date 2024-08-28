@@ -189,9 +189,9 @@ export class UploadDataV1Service {
         }
       }
     })
-    //electricity readings
+    //meter readings
     let importMeterData: Array<IdbUtilityMeterData> = this.getMeterDataEntries(workbook, importMeters);
-    //predictors updated: isssue-1668
+    //predictors
     let importPredictors: Array<IdbPredictor> = this.uploadDataSharedFunctionsService.getPredictors(workbook, importFacilities);
     let importPredictorData: Array<IdbPredictorData> = this.uploadDataSharedFunctionsService.getPredictorData(workbook, importFacilities, importPredictors);
     return { importFacilities: importFacilities, importMeters: importMeters, predictors: importPredictors, predictorData: importPredictorData, meterData: importMeterData, newGroups: newGroups }
@@ -333,7 +333,6 @@ export class UploadDataV1Service {
 
 
   getPredictorFacilityGroups(templateData: { importFacilities: Array<IdbFacility>, predictors: Array<IdbPredictor> }): Array<FacilityGroup> {
-    // TODO: 1668
     let facilityGroups: Array<FacilityGroup> = new Array();
     let predictorIndex: number = 0;
     templateData.importFacilities.forEach(facility => {
@@ -446,122 +445,4 @@ export class UploadDataV1Service {
     newMeter = this.editMeterFormService.setMultipliers(newMeter);
     return newMeter;
   }
-
-
-  parseExcelMeterData(fileReference: FileReference): Array<IdbUtilityMeterData> {
-    let dateColumnGroup: ColumnGroup = fileReference.columnGroups.find(group => { return group.groupLabel == 'Date' });
-    let dateColumnVal: string = dateColumnGroup.groupItems[0].value;
-    let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
-    let accountUtilityData: Array<IdbUtilityMeterData> = accountMeterData.map(meterData => { return getMeterDataCopy(meterData) });
-
-    let utilityData: Array<IdbUtilityMeterData> = new Array();
-    fileReference.meters.forEach(meter => {
-      if (!meter.skipImport) {
-        fileReference.headerMap.forEach(dataRow => {
-          let readDate: Date = new Date(dataRow[dateColumnVal]);
-          if (!isNaN(readDate.valueOf())) {
-            let dataItem: IdbUtilityMeterData = accountUtilityData.find(accountDataItem => {
-              return accountDataItem.facilityId == meter.facilityId && checkSameDay(new Date(accountDataItem.readDate), readDate) && accountDataItem.meterId == meter.guid;
-            })
-            if (!dataItem) {
-              dataItem = getNewIdbUtilityMeterData(meter, []);
-            }
-            dataItem.readDate = readDate;
-
-            let totalVolume: number = 0;
-            let energyUse: number = 0;
-            let totalConsumption: number = dataRow[meter.importWizardName];
-            let displayVolumeInput: boolean = (getIsEnergyUnit(meter.startingUnit) == false);
-            let displayEnergyUse: boolean = getIsEnergyMeter(meter.source);
-            if (!displayVolumeInput) {
-              energyUse = totalConsumption;
-            } else {
-              totalVolume = totalConsumption;
-              if (displayEnergyUse && totalVolume) {
-                energyUse = totalVolume * meter.heatCapacity;
-              }
-            }
-            dataItem.totalEnergyUse = energyUse;
-            dataItem.totalImportConsumption = totalConsumption;
-            dataItem.totalVolume = totalVolume;
-            utilityData.push(dataItem);
-          }
-        });
-      }
-    });
-    return utilityData;
-  }
-
-
-  // TODO: 1668
-  parseExcelPredictorsData(fileReference: FileReference): Array<IdbPredictorEntryDeprecated> {
-    // let dateColumnGroup: ColumnGroup = fileReference.columnGroups.find(group => { return group.groupLabel == 'Date' });
-    // let dateColumnVal: string = dateColumnGroup.groupItems[0].value;
-
-    // let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-
-    // let predictorData: Array<IdbPredictorEntry> = new Array();
-    // let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.getAccountPerdictorsCopy();
-    // let hasNewData: boolean = false;
-    // fileReference.predictorFacilityGroups.forEach(group => {
-    //   if (group.facilityName != 'Unmapped Predictors' && group.groupItems.length != 0) {
-    //     let facilityPredictorEntries: Array<IdbPredictorEntry> = accountPredictorEntries.filter(entry => {
-    //       return entry.facilityId == group.facilityId;
-    //     });
-    //     let existingFacilityPredictorData: Array<PredictorData> = new Array();
-    //     if (facilityPredictorEntries.length != 0) {
-    //       existingFacilityPredictorData = facilityPredictorEntries[0].predictors.map(predictor => { return JSON.parse(JSON.stringify(predictor)) });
-    //       existingFacilityPredictorData.forEach(predictorData => {
-    //         predictorData.amount = undefined;
-    //       });
-    //     }
-    //     if (group.groupItems.length != 0) {
-    //       group.groupItems.forEach((predictorItem) => {
-    //         let predictorIndex: number = existingFacilityPredictorData.findIndex(predictor => { return predictor.name == predictorItem.value });
-    //         if (predictorIndex == -1) {
-    //           hasNewData = true;
-    //           let newPredictor: PredictorData = this.predictorDbService.getNewPredictor([]);
-    //           newPredictor.name = predictorItem.value;
-    //           existingFacilityPredictorData.push(newPredictor);
-    //           facilityPredictorEntries.forEach(predictorEntry => {
-    //             predictorEntry.predictors.push(JSON.parse(JSON.stringify(newPredictor)));
-    //           });
-    //         }
-    //       });
-    //     }
-    //     let uploadDates: Array<Date> = new Array();
-    //     fileReference.headerMap.forEach(dataRow => {
-    //       let readDate: Date = new Date(dataRow[dateColumnVal]);
-    //       if (!isNaN(readDate.valueOf())) {
-    //         let predictorEntry: IdbPredictorEntry = facilityPredictorEntries.find(entry => {
-    //           return checkSameMonth(new Date(entry.date), readDate);
-    //         });
-    //         if (!predictorEntry) {
-    //           predictorEntry = this.predictorDbService.getNewIdbPredictorEntry(group.facilityId, selectedAccount.guid, readDate);
-    //           predictorEntry.predictors = JSON.parse(JSON.stringify(existingFacilityPredictorData));
-    //         }
-    //         group.groupItems.forEach(item => {
-    //           let entryDataIndex: number = predictorEntry.predictors.findIndex(predictor => { return predictor.name == item.value });
-    //           if (entryDataIndex != -1) {
-    //             predictorEntry.predictors[entryDataIndex].amount = Number(dataRow[item.value]);
-    //           }
-    //         });
-    //         predictorData.push(JSON.parse(JSON.stringify(predictorEntry)));
-    //       }
-    //     });
-    //     //uploading new entries means we need to update all previous entries.
-    //     if (hasNewData) {
-    //       facilityPredictorEntries.forEach(entry => {
-    //         let uploadedAlready: Date = uploadDates.find(date => { return checkSameMonth(new Date(entry.date), date) });
-    //         if (uploadedAlready == undefined) {
-    //           predictorData.push(JSON.parse(JSON.stringify(entry)));
-    //         }
-    //       });
-    //     }
-    //   }
-    // });
-    // return predictorData;
-    return [];
-  }
-
 }

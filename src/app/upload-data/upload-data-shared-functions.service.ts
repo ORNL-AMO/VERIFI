@@ -5,12 +5,10 @@ import { MeterSource } from '../models/constantsAndTypes';
 import { IdbAccount } from '../models/idbModels/account';
 import { IdbFacility } from '../models/idbModels/facility';
 import { getNewIdbUtilityMeterGroup, IdbUtilityMeterGroup } from '../models/idbModels/utilityMeterGroup';
-import { IdbPredictorEntryDeprecated } from '../models/idbModels/deprecatedPredictors';
 import { getNewIdbPredictor, IdbPredictor } from '../models/idbModels/predictor';
 import { PredictorDbService } from '../indexedDB/predictor-db.service';
 import { PredictorDataDbService } from '../indexedDB/predictor-data-db.service';
 import { getNewIdbPredictorData, IdbPredictorData } from '../models/idbModels/predictorData';
-import { checkSameDate } from '../models/idbModels/utilityMeterData';
 import { checkSameMonth } from './upload-helper-functions';
 
 @Injectable({
@@ -67,10 +65,8 @@ export class UploadDataSharedFunctionsService {
     }
   }
 
-  // TODO: 1668
   getPredictorData(workbook: XLSX.WorkBook, importFacilities: Array<IdbFacility>, importPredictors: Array<IdbPredictor>): Array<IdbPredictorData> {
     let predictorsData = XLSX.utils.sheet_to_json(workbook.Sheets['Predictors']);
-    console.log(predictorsData.length);
     let importPredictorData: Array<IdbPredictorData> = new Array();
     let accountPredictorData: Array<IdbPredictorData> = this.predictorDataDbService.accountPredictorData.getValue();
 
@@ -104,7 +100,6 @@ export class UploadDataSharedFunctionsService {
         });
       });
     });
-    console.log(importPredictorData);
     return importPredictorData;
   }
 

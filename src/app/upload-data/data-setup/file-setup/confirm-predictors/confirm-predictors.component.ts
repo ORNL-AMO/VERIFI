@@ -12,7 +12,7 @@ import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
   styleUrls: ['./confirm-predictors.component.css']
 })
 export class ConfirmPredictorsComponent implements OnInit {
-  //TODO: 1668
+  
   fileReference: FileReference = getEmptyFileReference();
   paramsSub: Subscription;
   predictorDataSummaries: Array<PredictorDataSummary>;
@@ -35,6 +35,7 @@ export class ConfirmPredictorsComponent implements OnInit {
   }
 
   continue() {
+    this.fileReference.predictors = this.uploadDataService.updateProductionPredictorData(this.fileReference);
     this.router.navigateByUrl('/upload/data-setup/file-setup/' + this.fileReference.id + '/submit');
   }
 

@@ -132,7 +132,6 @@ export class ConfirmAndSubmitComponent implements OnInit {
     }
 
     this.loadingService.setLoadingMessage('Uploading Predictors..');
-    //UPDATE: ISSUE-1668
     for (let i = 0; i < this.fileReference.predictors.length; i++) {
       let predictor: IdbPredictor = this.fileReference.predictors[i];
       if (predictor.id) {
