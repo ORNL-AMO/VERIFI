@@ -6,6 +6,8 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UploadDataService } from '../../../upload-data.service';
 import { ColumnItem, FacilityGroup, FileReference, getEmptyFileReference } from 'src/app/upload-data/upload-data-models';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
+import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 
 @Component({
   selector: 'app-set-facility-predictors',
@@ -14,7 +16,6 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 })
 export class SetFacilityPredictorsComponent implements OnInit {
 
-  // facilityGroups: Array<FacilityGroup>;
   facilityGroupIds: Array<string>;
   fileReference: FileReference = getEmptyFileReference();
   paramsSub: Subscription;
@@ -86,10 +87,11 @@ export class SetFacilityPredictorsComponent implements OnInit {
   }
 
   continue() {
-    //TODO: 1668
-    // if (this.predictorsIncluded) {
-    //   this.fileReference.predictorEntries = this.uploadDataService.parseExcelPredictorsData(this.fileReference);
-    // }
+    if (this.predictorsIncluded) {
+      let parsedPredictors: { predictors: Array<IdbPredictor>, predictorData: Array<IdbPredictorData> } = this.uploadDataService.parseExcelPredictorsData(this.fileReference);
+      this.fileReference.predictors = parsedPredictors.predictors;
+      this.fileReference.predictorData = parsedPredictors.predictorData;
+    }
     this.router.navigateByUrl('/upload/data-setup/file-setup/' + this.fileReference.id + '/confirm-predictors');
   }
 
