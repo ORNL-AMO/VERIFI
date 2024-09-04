@@ -98,9 +98,19 @@ export class DegreeDaysService {
 
       let gapInData: boolean = false
       let minutesBetween: number = this.getMinutesBetweenDates(previousDate, localClimatologicalDataMonth[i].DATE);
-      if(minutesBetween > 720){
+      if (minutesBetween > 720) {
         gapInData = true;
       }
+
+      if (i == (localClimatologicalDataMonth.length - 1)) {
+        let currentDate: Date = new Date(localClimatologicalDataMonth[i].DATE);
+        let endDate: Date = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1, 0, 0);
+        let minutesBetween: number = this.getMinutesBetweenDates(localClimatologicalDataMonth[i].DATE, endDate);
+        if (minutesBetween > 720) {
+          gapInData = true;
+        }
+      }
+
       let averageDryBulbTemp: number = (localClimatologicalDataMonth[i].HourlyDryBulbTemperature + previousDryBulbTemp) / 2
       let portionOfDay: number = (minutesBetween / minutesPerDay);
       if (averageDryBulbTemp < baseHeatingTemperature || averageDryBulbTemp > baseCoolingTemperature) {
@@ -117,7 +127,7 @@ export class DegreeDaysService {
           coolingDegreeDifference = averageDryBulbTemp - baseCoolingTemperature;
           coolingDegreeDay = coolingDegreeDifference * portionOfDay;
         }
-        
+
         results.push({
           time: localClimatologicalDataMonth[i].DATE,
           heatingDegreeDay: heatingDegreeDay,
