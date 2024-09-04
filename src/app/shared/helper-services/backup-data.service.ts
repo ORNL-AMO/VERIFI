@@ -280,7 +280,10 @@ export class BackupDataService {
                 return predictor.id == newPredictor.guid
               });
               let newIdbPredictorData: IdbPredictorData = getNewIdbPredictorData(newPredictor, undefined);
-              newIdbPredictorData.date = new Date(oldEntry.date);
+              console.log(oldEntry.date);
+              newIdbPredictorData.date = this.getImportDate(oldEntry.date);
+              console.log(newIdbPredictorData.date);
+              console.log('----_____---')
               newIdbPredictorData.amount = oldEntryPredictor.amount;
               newIdbPredictorData.weatherDataWarning = oldEntryPredictor.weatherDataWarning;
               newIdbPredictorData.weatherOverride = oldEntryPredictor.weatherOverride;
@@ -552,7 +555,7 @@ export class BackupDataService {
               return predictor.id == newPredictor.guid
             });
             let newIdbPredictorData: IdbPredictorData = getNewIdbPredictorData(newPredictor, undefined);
-            newIdbPredictorData.date = new Date(oldEntry.date);
+            newIdbPredictorData.date = this.getImportDate(oldEntry.date);
             newIdbPredictorData.amount = oldEntryPredictor.amount;
             newIdbPredictorData.weatherDataWarning = oldEntryPredictor.weatherDataWarning;
             newIdbPredictorData.weatherOverride = oldEntryPredictor.weatherOverride;
