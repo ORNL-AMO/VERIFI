@@ -63,13 +63,13 @@
                         (input)="setChanged()">
                     <span class="input-group-text" *ngIf="predictor.unit">{{predictor.unit}}</span>
                     <ng-container
-                        *ngIf="predictor.predictorType == 'Weather' && (predictorData.weatherDataWarning || predictorData.weatherOverride)">
+                        *ngIf="predictor.predictorType == 'Weather'">
                         <span class="input-group-text p-0">
-                            <button class="btn btn-dark btn-sm h-100" *ngIf="!predictorData.weatherOverride"
+                            <button class="btn btn-secondary btn-sm h-100" *ngIf="!predictorData.weatherOverride"
                                 (click)="setWeatherManually()">
                                 <span class="fa fa-edit"></span>
                             </button>
-                            <button class="btn btn-dark btn-sm h-100" *ngIf="predictorData.weatherOverride"
+                            <button class="btn btn-secondary btn-sm h-100" *ngIf="predictorData.weatherOverride"
                                 (click)="revertManualWeatherData()">
                                 <span class="fa fa-calculator"></span>
                             </button>
