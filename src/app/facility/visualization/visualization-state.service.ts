@@ -235,7 +235,8 @@ export class VisualizationStateService {
       let facilityPredictorEntries: Array<IdbPredictorData> = this.predictorDataDbService.facilityPredictorData.getValue();
       dates.forEach(date => {
         let monthPredictorEntry: IdbPredictorData = facilityPredictorEntries.find(entry => {
-          return entry.predictorId == axisOption.itemId && entry.date.getMonth() == date.getMonth() && entry.date.getFullYear() == date.getFullYear();
+          let entryDate: Date = new Date(entry.date)
+          return entry.predictorId == axisOption.itemId && entryDate.getMonth() == date.getMonth() && entryDate.getFullYear() == date.getFullYear();
         });
         if (monthPredictorEntry) {
           values.push(monthPredictorEntry.amount);
