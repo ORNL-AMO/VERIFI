@@ -14,6 +14,8 @@ import { TableItemsDropdownModule } from 'src/app/shared/table-items-dropdown/ta
 import { HelperPipesModule } from 'src/app/shared/helper-pipes/helper-pipes.module';
 import { CalculatingSpinnerModule } from 'src/app/shared/calculating-spinner/calculating-spinner.module';
 import { OrderPredictorDataTablePipe } from './predictors-data/predictors-data-table/order-predictor-data-table.pipe';
+import { CalculatedPredictorDataUpdateComponent } from './predictors-data/calculated-predictor-data-update/calculated-predictor-data-update.component';
+import { OrderCalculatedPredictorDataPipe } from './predictors-data/calculated-predictor-data-update/order-calculated-predictor-data.pipe';
 
 
 
@@ -26,7 +28,9 @@ import { OrderPredictorDataTablePipe } from './predictors-data/predictors-data-t
     PredictorsDataComponent,
     PredictorsDataTableComponent,
     PredictorsDataFormComponent,
-    OrderPredictorDataTablePipe
+    OrderPredictorDataTablePipe,
+    CalculatedPredictorDataUpdateComponent,
+    OrderCalculatedPredictorDataPipe
   ],
   imports: [
     CommonModule,

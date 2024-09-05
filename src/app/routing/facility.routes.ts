@@ -45,6 +45,7 @@ import { EditPredictorFormComponent } from "../facility/utility-data/predictors/
 import { PredictorsDataComponent } from "../facility/utility-data/predictors/predictors-data/predictors-data.component";
 import { PredictorsDataTableComponent } from "../facility/utility-data/predictors/predictors-data/predictors-data-table/predictors-data-table.component";
 import { PredictorsDataFormComponent } from "../facility/utility-data/predictors/predictors-data/predictors-data-form/predictors-data-form.component";
+import { CalculatedPredictorDataUpdateComponent } from "../facility/utility-data/predictors/predictors-data/calculated-predictor-data-update/calculated-predictor-data-update.component";
 
 export const FacilityRoutes: Route = {
     path: 'facility/:id',
@@ -194,6 +195,11 @@ export const FacilityRoutes: Route = {
                                     path: 'add-entry',
                                     component: PredictorsDataFormComponent,
                                     canDeactivate: [canDeactivateGuard]
+                                },
+                                {
+                                    path: 'update-calculated-entries',
+                                    component: CalculatedPredictorDataUpdateComponent
+                                    // canDeactivate: [canDeactivateGuard]
                                 },
                             ]
                         }

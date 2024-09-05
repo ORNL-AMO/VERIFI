@@ -43,6 +43,8 @@ export class PredictorsDataTableComponent {
   predictorDataToDelete: IdbPredictorData;
   hasWeatherDataWarnings: boolean = false;
   predictor: IdbPredictor;
+
+  paramSub: Subscription;
   constructor(private activatedRoute: ActivatedRoute, private predictorDbService: PredictorDbService,
     private predictorDataDbService: PredictorDataDbService,
     private sharedDataService: SharedDataService,
@@ -64,7 +66,7 @@ export class PredictorsDataTableComponent {
       this.setPredictorData();
     });
 
-    this.activatedRoute.parent.params.subscribe(params => {
+    this.paramSub = this.activatedRoute.parent.params.subscribe(params => {
       let predictorId: string = params['id'];
       this.predictor = this.predictorDbService.getByGuid(predictorId);
       this.setPredictorData();
@@ -79,6 +81,7 @@ export class PredictorsDataTableComponent {
   ngOnDestroy() {
     this.itemsPerPageSub.unsubscribe();
     this.predictorDataSub.unsubscribe();
+    this.paramSub.unsubscribe();
   }
 
   setPredictorData() {
@@ -242,5 +245,10 @@ export class PredictorsDataTableComponent {
     this.weatherDataService.selectedFacility = selectedFacility;
     this.weatherDataService.zipCode = selectedFacility.zip;
     this.router.navigateByUrl('/weather-data');
+  }
+
+  showUpdateEntries() {
+    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    this.router.navigateByUrl('facility/' + selectedFacility.id + '/utility/predictors/predictor/' + this.predictor.guid + '/update-calculated-entries');
   }
 }

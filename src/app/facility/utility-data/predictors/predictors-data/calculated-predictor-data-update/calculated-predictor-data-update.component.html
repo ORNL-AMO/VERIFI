@@ -1,0 +1,86 @@
+<div class="d-flex w-100 justify-content-end mb-2">
+    <div class="d-flex">
+        <!--Items Per Page-->
+        <app-table-items-dropdown *ngIf="predictorData.length != 0"></app-table-items-dropdown>
+        <button class="btn btn-secondary ms-1" (click)="cancel()">Cancel</button>
+        <button class="btn btn-primary ms-1" (click)="updateEntries()" [disabled]="calculatingData">Update
+            Entries</button>
+    </div>
+</div>
+
+<div class="pt-1 pb-1 w-100 text-right" *ngIf="calculatingData">
+    Calculating degree days...
+</div>
+
+<table class="table utility-data table-sm table-bordered table-hover" #predictorTable>
+    <thead class="sortable">
+        <tr>
+            <th (click)="setOrderDataField('date')" [ngClass]="{'active': orderDataField == 'date'}">Date
+            </th>
+            <th class="header" (click)="setOrderDataField('amount')" [ngClass]="{'active': orderDataField == 'amount'}">
+                <span *ngIf="predictor.predictorType == 'Weather'" class="fa fa-temperature-half"></span>
+                {{predictor.name}}
+                <ng-container *ngIf="predictor.unit">
+                    <br>
+                    <span class="small block">({{predictor.unit}})</span>
+                </ng-container>
+                <ng-container *ngIf="predictor.predictorType == 'Weather'">
+                    <br>
+                    <span class="small block">({{predictor.weatherDataType}},
+                        <ng-container *ngIf="predictor.weatherDataType == 'HDD'">
+                            {{predictor.heatingBaseTemperature}} &#8457;
+                        </ng-container>
+                        <ng-container *ngIf="predictor.weatherDataType == 'CDD'">
+                            {{predictor.coolingBaseTemperature}} &#8457;
+                        </ng-container>)</span>
+                </ng-container>
+            </th>
+            <th (click)="setOrderDataField('updatedAmount')" [ngClass]="{'active': orderDataField == 'updatedAmount'}">
+                Updated Amount
+            </th>
+            <th (click)="setOrderDataField('changeAmount')" [ngClass]="{'active': orderDataField == 'changeAmount'}">
+                Change Amount
+            </th>
+        </tr>
+    </thead>
+    <tbody class="table-group-divider">
+        <tr
+            *ngFor="let pData of predictorData| orderCalculatedPredictorData:orderDataField:orderByDirection | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage ">
+            <td>{{pData.date | date:'MMM, yyyy'}}</td>
+            <td>
+                <span *ngIf="pData.weatherDataWarning" class="fa fa-exclamation-circle" data-bs-toggle="tooltip"
+                    data-bs-placement="top" title="Gaps found in weather data for this reading. It may not be accurate."
+                    data-bs-html="true"></span>
+                <span *ngIf="pData.weatherOverride" class="fa fa-asterisk" data-bs-toggle="tooltip"
+                    data-bs-placement="top" title="Weather data manually set." data-bs-html="true"></span>
+                <ng-container *ngIf="pData.amount != undefined">
+                    {{pData.amount | customNumber}}
+                </ng-container>
+                <ng-container *ngIf="pData.amount == undefined">
+                    &mdash;
+                </ng-container>
+            </td>
+            <td>
+                <ng-container *ngIf="pData.updatedAmount != undefined">
+                    {{pData.updatedAmount | customNumber}}
+                </ng-container>
+                <ng-container *ngIf="pData.updatedAmount == undefined">
+                    <span class="placeholder w-100"></span>
+                </ng-container>
+            </td>
+            <td>
+                <ng-container *ngIf="pData.changeAmount != undefined">
+                    {{pData.changeAmount | customNumber}}
+                </ng-container>
+                <ng-container *ngIf="pData.changeAmount == undefined">
+                    <span class="placeholder w-100"></span>
+                </ng-container>
+            </td>
+        </tr>
+    </tbody>
+</table>
+<div class="d-flex w-100 justify-content-end">
+    <ngb-pagination [collectionSize]="predictorData.length" [(page)]="currentPageNumber" [pageSize]="itemsPerPage"
+        [maxSize]="5" [rotate]="true" aria-label="Pagination">
+    </ngb-pagination>
+</div>
