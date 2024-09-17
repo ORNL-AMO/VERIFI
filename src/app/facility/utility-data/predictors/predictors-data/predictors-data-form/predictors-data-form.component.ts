@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { firstValueFrom, Observable, of } from 'rxjs';
+import { firstValueFrom, Observable, of, Subscription } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
@@ -29,6 +29,7 @@ export class PredictorsDataFormComponent {
   predictorData: IdbPredictorData;
   calculatingDegreeDays: boolean;
   isSaved: boolean = true;
+  paramsSub: Subscription;
   constructor(private activatedRoute: ActivatedRoute, private predictorDbService: PredictorDbService,
     private router: Router, private facilityDbService: FacilitydbService,
     private accountDbService: AccountdbService, private dbChangesService: DbChangesService,
@@ -40,7 +41,7 @@ export class PredictorsDataFormComponent {
   }
 
   ngOnInit() {
-    this.activatedRoute.parent.params.subscribe(params => {
+    this.paramsSub = this.activatedRoute.parent.params.subscribe(params => {
       let predictorId: string = params['id'];
       this.predictor = this.predictorDbService.getByGuid(predictorId);
     });
@@ -56,6 +57,10 @@ export class PredictorsDataFormComponent {
       }
       this.setDegreeDayValues();
     });
+  }
+
+  ngOnDestroy(){
+    this.paramsSub.unsubscribe();
   }
 
   cancel() {
