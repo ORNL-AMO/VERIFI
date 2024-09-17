@@ -128,12 +128,12 @@ export class CalculatedPredictorDataUpdateComponent {
           let totalCDD: number = _.sumBy(degreeDays, 'coolingDegreeDay');
           this.predictorData[i].updatedAmount = totalCDD;
           this.predictorData[i].changeAmount = Math.abs(this.predictorData[i].amount - this.predictorData[i].updatedAmount)
-          this.predictorData[i].weatherDataWarning = hasErrors != undefined;
+          this.predictorData[i].weatherDataWarning = hasErrors != undefined || degreeDays.length == 0;
         } else {
           let totalHDD: number = _.sumBy(degreeDays, 'heatingDegreeDay');
           this.predictorData[i].updatedAmount = totalHDD;
           this.predictorData[i].changeAmount = Math.abs(this.predictorData[i].amount - this.predictorData[i].updatedAmount)
-          this.predictorData[i].weatherDataWarning = hasErrors != undefined;
+          this.predictorData[i].weatherDataWarning = hasErrors != undefined || degreeDays.length == 0;
         }
       }
     }
@@ -153,11 +153,12 @@ export class CalculatedPredictorDataUpdateComponent {
       if (orderedData.length > 0) {
         let dataEndDate: Date = new Date(orderedData[orderedData.length - 1].date);
         dataEndDate.setMonth(dataEndDate.getMonth() + 1);
-        if (dataEndDate < endDate) {
-          await this.addDegreeDays(startDate, endDate);
+        if (dataEndDate <= endDate) {
+          await this.addDegreeDays(dataEndDate, endDate);
         }
         let dataStartDate: Date = new Date(orderedData[0].date);
-        if (startDate < dataStartDate) {
+        dataStartDate.setMonth(dataStartDate.getMonth() - 1);
+        if (startDate <= dataStartDate) {
           await this.addDegreeDays(startDate, dataStartDate);
         }
 
@@ -190,7 +191,7 @@ export class CalculatedPredictorDataUpdateComponent {
   }
 
   async addDegreeDays(startDate: Date, endDate: Date) {
-    while (startDate < endDate) {
+    while (startDate <= endDate) {
       if (this.destroyed) {
         break;
       }
