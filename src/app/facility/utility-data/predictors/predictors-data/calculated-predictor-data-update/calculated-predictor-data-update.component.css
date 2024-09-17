@@ -1,3 +1,19 @@
-.text-right{
+.text-right {
     text-align: right;
+}
+
+td.bg-success,
+td.bg-success .fa {
+    color: white;
+}
+
+label.label {
+    text-wrap: nowrap;
+    padding-right: 1rem;
+    font-weight: bold;
+}
+
+.summary-data td,
+.summary-data th {
+    text-align: center;
 }

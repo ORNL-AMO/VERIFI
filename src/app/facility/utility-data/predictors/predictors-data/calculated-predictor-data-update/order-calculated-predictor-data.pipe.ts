@@ -3,7 +3,8 @@ import { CalculatedPredictorTableItem } from './calculated-predictor-data-update
 import * as _ from 'lodash';
 
 @Pipe({
-  name: 'orderCalculatedPredictorData'
+  name: 'orderCalculatedPredictorData',
+  pure: false
 })
 export class OrderCalculatedPredictorDataPipe implements PipeTransform {
 

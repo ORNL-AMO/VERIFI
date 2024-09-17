@@ -181,6 +181,11 @@ export class EditPredictorFormComponent {
       weatherDataChange = true;
       this.predictor.weatherStationId = this.predictorForm.controls.weatherStationId.value;
     }
+    if (this.predictor.predictorType == 'Weather') {
+      this.predictor.weatherStationName = this.stations.find(station => {
+        return station.ID == this.predictor.weatherStationId;
+      })?.name;
+    }
     return weatherDataChange;
   }
 
