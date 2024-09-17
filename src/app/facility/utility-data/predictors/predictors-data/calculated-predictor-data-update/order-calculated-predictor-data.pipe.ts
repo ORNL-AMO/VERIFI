@@ -9,7 +9,13 @@ import * as _ from 'lodash';
 export class OrderCalculatedPredictorDataPipe implements PipeTransform {
 
   transform(predictorData: Array<CalculatedPredictorTableItem>, orderDataBy: string, orderDirection: string): Array<CalculatedPredictorTableItem> {
-    return _.orderBy(predictorData, orderDataBy, orderDirection);
+    if(orderDataBy == 'date'){
+      return _.orderBy(predictorData, (data: CalculatedPredictorTableItem) => {
+        return new Date(data.date);
+      }, orderDirection);
+    }else{
+      return _.orderBy(predictorData, orderDataBy, orderDirection);
+    }
   }
 
 
