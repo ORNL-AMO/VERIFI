@@ -12,7 +12,8 @@
             <th *ngIf="weatherDataSelection == 'degreeDays' || weatherDataSelection == 'CDD'">Cooling Degree<br> Days
             </th>
             <th *ngIf="weatherDataSelection == 'relativeHumidity'">Relative Humidity</th>
-            <th *ngIf="weatherDataSelection == 'relativeHumidity'">Weighted Relative Humidity</th>
+            <th *ngIf="weatherDataSelection == 'relativeHumidity'">Weighted Relative<br> Humidity</th>
+            <th *ngIf="weatherDataSelection == 'dryBulbTemp'">Weighted Dry<br> Bulb Temp</th>
         </tr>
     </thead>
     <tbody class="table-group-divider">
@@ -26,7 +27,7 @@
                 {{summaryData.percentOfDay * 100 | number}}
             </td>
             <td *ngIf="weatherDataSelection != 'relativeHumidity'">
-                {{summaryData.dryBulbTemp | number}}
+                {{summaryData.dryBulbTemp | number}} &#8457;
             </td>
             <td *ngIf="weatherDataSelection == 'degreeDays' || weatherDataSelection == 'HDD'">
                 {{summaryData.heatingDegreeDay | number}}
@@ -35,10 +36,13 @@
                 {{summaryData.coolingDegreeDay | number}}
             </td>
             <td *ngIf="weatherDataSelection == 'relativeHumidity'">
-                {{summaryData.relativeHumidity | number}} &percnt;
+                {{summaryData.relativeHumidity | number:'1.0-1'}} &percnt;
             </td>
             <td *ngIf="weatherDataSelection == 'relativeHumidity'">
-                {{summaryData.weightedRelativeHumidity | number}} &percnt;
+                {{summaryData.weightedRelativeHumidity | number:'1.0-1'}} &percnt;
+            </td>
+            <td *ngIf="weatherDataSelection == 'dryBulbTemp'">
+                {{summaryData.weightedDryBulbTemp | number:'1.0-1'}} &#8457;
             </td>
         </tr>
     </tbody>
@@ -58,10 +62,13 @@
                 {{detailedDegreeDays | total: 'coolingDegreeDay' | number}}
             </th>
             <th *ngIf="weatherDataSelection == 'relativeHumidity'">
-                {{detailedDegreeDays | average: 'relativeHumidity' | number}} &percnt;
+                {{detailedDegreeDays | average: 'relativeHumidity' | number:'1.0-1'}} &percnt;
             </th>
             <th *ngIf="weatherDataSelection == 'relativeHumidity'">
-                {{detailedDegreeDays | average: 'weightedRelativeHumidity' | number}} &percnt;
+                {{detailedDegreeDays | average: 'weightedRelativeHumidity' | number:'1.0-1'}} &percnt;
+            </th>
+            <th *ngIf="weatherDataSelection == 'relativeHumidity'">
+                {{detailedDegreeDays | average: 'weightedDryBulbTemp' | number:'1.0-1'}} &#8457;
             </th>
         </tr>
     </tfoot>

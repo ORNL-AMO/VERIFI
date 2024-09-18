@@ -149,7 +149,8 @@ export class DegreeDaysService {
           stationName: stationName,
           gapInData: gapInData,
           relativeHumidity: localClimatologicalDataMonth[i].HourlyRelativeHumidity,
-          weightedRelativeHumidity: (averageRelativeHumidity * (1 - (portionOfDay/100)))
+          weightedRelativeHumidity: (averageRelativeHumidity * (1 - (portionOfDay/100))),
+          weightedDryBulbTemp: (averageDryBulbTemp * (1 - (portionOfDay/100)))
         })
       } else {
         results.push({
@@ -165,7 +166,8 @@ export class DegreeDaysService {
           stationName: stationName,
           gapInData: gapInData,
           relativeHumidity: localClimatologicalDataMonth[i].HourlyRelativeHumidity,
-          weightedRelativeHumidity: (averageRelativeHumidity * (1 - (portionOfDay/100)))
+          weightedRelativeHumidity: (averageRelativeHumidity * (1 - (portionOfDay/100))),
+          weightedDryBulbTemp: (averageDryBulbTemp * (1 - (portionOfDay/100)))
         })
       }
     }

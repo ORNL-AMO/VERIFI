@@ -64,9 +64,10 @@ export interface DetailDegreeDay {
     gapInData: boolean,
     relativeHumidity: number,
     weightedRelativeHumidity: number,
+    weightedDryBulbTemp: number
 }
 
-export type WeatherDataSelection = 'degreeDays' | 'CDD' | 'HDD' | 'relativeHumidity';
+export type WeatherDataSelection = 'degreeDays' | 'CDD' | 'HDD' | 'relativeHumidity' | 'dryBulbTemp';
 
 export interface WeatherDataSelectionOption {
     selection: WeatherDataSelection,
@@ -89,5 +90,9 @@ export const WeatherDataSelectionOptions: Array<WeatherDataSelectionOption> = [
     {
         selection: 'relativeHumidity',
         label: 'Relative Humidty'
+    },
+    {
+        selection: 'dryBulbTemp',
+        label: 'Dry Bulb Temp.'
     }
 ]
