@@ -1,9 +1,9 @@
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { Injectable } from '@angular/core';
-import { IdbUtilityMeter, IdbUtilityMeterData } from '../models/idb';
 import { BehaviorSubject, Observable, firstValueFrom } from 'rxjs';
 import * as _ from 'lodash';
 import { LoadingService } from '../core-components/loading/loading.service';
+import { IdbUtilityMeterData } from '../models/idbModels/utilityMeterData';
 
 @Injectable({
     providedIn: 'root'
@@ -72,84 +72,7 @@ export class UtilityMeterDatadbService {
             await firstValueFrom(this.deleteWithObservable(meterDataEntries[i].id));
         }
     }
-
-    getNewIdbUtilityMeterData(meter: IdbUtilityMeter): IdbUtilityMeterData {
-        let lastMeterDate: Date = this.getLastMeterReadingDate(meter);
-        let newDate: Date = new Date();
-        if (lastMeterDate) {
-            newDate = new Date(lastMeterDate);
-            newDate.setMonth(newDate.getMonth() + 1);
-        }
-
-        return {
-            // id: undefined,
-            meterId: meter.guid,
-            guid: Math.random().toString(36).substr(2, 9),
-            facilityId: meter.facilityId,
-            accountId: meter.accountId,
-            readDate: newDate,
-            totalVolume: undefined,
-            totalEnergyUse: undefined,
-            totalCost: undefined,
-            commodityCharge: undefined,
-            deliveryCharge: undefined,
-            checked: false,
-            // Electricity Use Only
-            totalRealDemand: undefined,
-            totalBilledDemand: undefined,
-            nonEnergyCharge: undefined,
-            block1Consumption: undefined,
-            block1ConsumptionCharge: undefined,
-            block2Consumption: undefined,
-            block2ConsumptionCharge: undefined,
-            block3Consumption: undefined,
-            block3ConsumptionCharge: undefined,
-            otherConsumption: undefined,
-            otherConsumptionCharge: undefined,
-            onPeakAmount: undefined,
-            onPeakCharge: undefined,
-            offPeakAmount: undefined,
-            offPeakCharge: undefined,
-            transmissionAndDeliveryCharge: undefined,
-            powerFactor: undefined,
-            powerFactorCharge: undefined,
-            localSalesTax: undefined,
-            stateSalesTax: undefined,
-            latePayment: undefined,
-            otherCharge: undefined,
-            //non-electricity
-            demandUsage: undefined,
-            demandCharge: undefined,
-            meterNumber: meter.meterNumber,
-            heatCapacity: meter.heatCapacity,
-            vehicleFuelEfficiency: meter.vehicleFuelEfficiency
-        }
-    }
-
-
-    getLastMeterReadingDate(meter: IdbUtilityMeter): Date {
-        let allSelectedMeterData: Array<IdbUtilityMeterData> = this.getMeterDataFromMeterId(meter.guid);
-        if (allSelectedMeterData.length != 0) {
-            let lastMeterReading: IdbUtilityMeterData = _.maxBy(allSelectedMeterData, 'readDate');
-            return new Date(lastMeterReading.readDate);
-        }
-        return undefined;
-    }
-
-    checkMeterReadingExistForDate(date: Date, meter: IdbUtilityMeter): IdbUtilityMeterData {
-        let newDate: Date = new Date(date);
-        let allSelectedMeterData: Array<IdbUtilityMeterData> = this.getMeterDataFromMeterId(meter.guid);
-        let existingData: IdbUtilityMeterData = allSelectedMeterData.find(dataItem => {
-            return this.checkSameDate(newDate, dataItem);
-        });
-        return existingData;
-    }
-
-    checkSameDate(date: Date, dataItem: IdbUtilityMeterData): boolean {
-        let dataItemDate: Date = new Date(dataItem.readDate);
-        return (dataItemDate.getUTCMonth() == date.getUTCMonth()) && (dataItemDate.getUTCFullYear() == date.getUTCFullYear()) && (dataItemDate.getUTCDate() == date.getUTCDate());
-    }
-
+    
     getMeterDataFromMeterId(meterId: string): Array<IdbUtilityMeterData> {
         let accountMeterData: Array<IdbUtilityMeterData> = this.accountMeterData.getValue();
         return accountMeterData.filter(meterData => { return meterData.meterId == meterId });

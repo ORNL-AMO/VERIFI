@@ -1,12 +1,15 @@
 import { AnalysisGroup, MonthlyAnalysisSummaryData } from "src/app/models/analysis";
 import { CalanderizedMeter } from "src/app/models/calanderization";
-import { IdbAccount, IdbAnalysisItem, IdbFacility, IdbPredictorEntry } from "src/app/models/idb";
 import { AnnualAnalysisSummaryDataClass } from "./annualAnalysisSummaryDataClass";
 import { MonthlyAnalysisSummaryClass } from "./monthlyAnalysisSummaryClass";
 import { AnnualAnalysisSummary } from 'src/app/models/analysis';
 import { checkAnalysisValue } from "../shared-calculations/calculationsHelpers";
 import { MeterSource } from "src/app/models/constantsAndTypes";
 import * as _ from 'lodash';
+import { IdbFacility } from "src/app/models/idbModels/facility";
+import { IdbPredictorData } from "src/app/models/idbModels/predictorData";
+import { IdbPredictor } from "src/app/models/idbModels/predictor";
+import { IdbAnalysisItem } from "src/app/models/idbModels/analysisItem";
 
 export class AnnualGroupAnalysisSummaryClass {
 
@@ -15,7 +18,7 @@ export class AnnualGroupAnalysisSummaryClass {
     baselineYear: number;
     reportYear: number;
     utilityClassification: MeterSource | 'Mixed';
-    constructor(selectedGroup: AnalysisGroup, analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, accountPredictorEntries: Array<IdbPredictorEntry>, monthlyAnalysisSummaryData?: Array<MonthlyAnalysisSummaryData>) {
+    constructor(selectedGroup: AnalysisGroup, analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, accountPredictorEntries: Array<IdbPredictorData>, monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>, accountPredictors: Array<IdbPredictor>) {
         if (!this.monthlyAnalysisSummaryData) {
             this.setMonthlyAnalysisSummaryData(selectedGroup, analysisItem, facility, calanderizedMeters, accountPredictorEntries);
         } else {
@@ -23,10 +26,10 @@ export class AnnualGroupAnalysisSummaryClass {
         }
         this.setBaselineYear(analysisItem);
         this.setReportYear(analysisItem);
-        this.setAnnualAnalysisSummaryDataClasses(accountPredictorEntries, facility);
+        this.setAnnualAnalysisSummaryDataClasses(accountPredictorEntries, facility, accountPredictors);
     }
 
-    setMonthlyAnalysisSummaryData(selectedGroup: AnalysisGroup, analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, accountPredictorEntries: Array<IdbPredictorEntry>) {
+    setMonthlyAnalysisSummaryData(selectedGroup: AnalysisGroup, analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, accountPredictorEntries: Array<IdbPredictorData>) {
         let monthlyAnalysisSummaryClass: MonthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(selectedGroup, analysisItem, facility, calanderizedMeters, accountPredictorEntries, false);
         this.monthlyAnalysisSummaryData = monthlyAnalysisSummaryClass.getMonthlyAnalysisSummaryData();
         this.setUtilityClassification(monthlyAnalysisSummaryClass.monthlyGroupAnalysisClass.groupMeters);
@@ -41,11 +44,11 @@ export class AnnualGroupAnalysisSummaryClass {
     }
 
 
-    setAnnualAnalysisSummaryDataClasses(accountPredictorEntries: Array<IdbPredictorEntry>, facility: IdbFacility) {
+    setAnnualAnalysisSummaryDataClasses(accountPredictorEntries: Array<IdbPredictorData>, facility: IdbFacility, accountPredictors: Array<IdbPredictor>) {
         this.annualAnalysisSummaryDataClasses = new Array();
         let analysisYear: number = this.baselineYear;
         while (analysisYear <= this.reportYear) {
-            let yearAnalysisSummaryDataClass: AnnualAnalysisSummaryDataClass = new AnnualAnalysisSummaryDataClass(this.monthlyAnalysisSummaryData, analysisYear, accountPredictorEntries, facility, this.annualAnalysisSummaryDataClasses);
+            let yearAnalysisSummaryDataClass: AnnualAnalysisSummaryDataClass = new AnnualAnalysisSummaryDataClass(this.monthlyAnalysisSummaryData, analysisYear, accountPredictorEntries, facility, this.annualAnalysisSummaryDataClasses, accountPredictors);
             this.annualAnalysisSummaryDataClasses.push(yearAnalysisSummaryDataClass);
             analysisYear++;
         }

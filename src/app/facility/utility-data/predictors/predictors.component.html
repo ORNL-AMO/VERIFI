@@ -1,0 +1,16 @@
+<div class="wrapper main-content p-0">
+    <div class="banner p-0">
+        <ul class="nav nav-tabs">
+            <li class="nav-item"><a class="nav-link" routerLink="manage" [routerLinkActive]="['active']">
+                    <i class="fa fa-gauge-high"></i>
+                    Predictors</a></li>
+            <li class="nav-item" *ngFor="let predictor of predictors"><a class="nav-link"
+                    routerLink="predictor/{{predictor.guid}}" [routerLinkActive]="['active']">
+                    <i class="fa fa-file-invoice"></i>
+                    {{predictor.name}}</a></li>
+        </ul>
+    </div>
+    <div class="content-padding">
+        <router-outlet></router-outlet>
+    </div>
+</div>

@@ -1,10 +1,10 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { IdbAccount } from 'src/app/models/idb';
 import { SettingsFormsService } from 'src/app/shared/settings-forms/settings-forms.service';
 import { SetupWizardService } from '../setup-wizard.service';
 import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
+import { getNewIdbAccount, IdbAccount } from 'src/app/models/idbModels/account';
 @Component({
   selector: 'app-setup-account',
   templateUrl: './setup-account.component.html',
@@ -26,7 +26,7 @@ export class SetupAccountComponent implements OnInit {
 
   ngOnInit(): void {
     if (this.setupWizardService.account.getValue() == undefined) {
-      let newAccount: IdbAccount = this.accountdbService.getNewIdbAccount();
+      let newAccount: IdbAccount = getNewIdbAccount();
       this.setupWizardService.account.next(newAccount);
     }
 

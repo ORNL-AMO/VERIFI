@@ -1,6 +1,5 @@
 import { AnnualAnalysisSummary } from "src/app/models/analysis";
 import { CalanderizedMeter } from "src/app/models/calanderization";
-import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData } from "src/app/models/idb";
 import { BetterPlantsSummary } from "src/app/models/overview-report";
 import { AnnualAccountAnalysisSummaryClass } from "src/app/calculations/analysis-calculations/annualAccountAnalysisSummaryClass";
 import { AnnualFacilityAnalysisSummaryClass } from "src/app/calculations/analysis-calculations/annualFacilityAnalysisSummaryClass";
@@ -10,6 +9,14 @@ import { getCalanderizedMeterData } from "../calanderization/calanderizeMeters";
 import { getNeededUnits } from "../shared-calculations/calanderizationFunctions";
 import { getIncludedMeters } from "../shared-calculations/calculationsHelpers";
 import { ConvertValue } from "../conversions/convertValue";
+import { IdbAccount } from "src/app/models/idbModels/account";
+import { IdbFacility } from "src/app/models/idbModels/facility";
+import { IdbUtilityMeter } from "src/app/models/idbModels/utilityMeter";
+import { IdbUtilityMeterData } from "src/app/models/idbModels/utilityMeterData";
+import { IdbPredictorData } from "src/app/models/idbModels/predictorData";
+import { IdbPredictor } from "src/app/models/idbModels/predictor";
+import { IdbAccountAnalysisItem } from "src/app/models/idbModels/accountAnalysisItem";
+import { IdbAnalysisItem } from "src/app/models/idbModels/analysisItem";
 
 export class BetterPlantsReportClass {
 
@@ -31,18 +38,19 @@ export class BetterPlantsReportClass {
         baselineYear: number,
         reportYear: number,
         selectedAnalysisItem: IdbAccountAnalysisItem,
-        accountPredictorEntries: Array<IdbPredictorEntry>,
+        accountPredictorEntries: Array<IdbPredictorData>,
         account: IdbAccount,
         facilities: Array<IdbFacility>,
         accountAnalysisItems: Array<IdbAnalysisItem>,
         meters: Array<IdbUtilityMeter>,
-        meterData: Array<IdbUtilityMeterData>
+        meterData: Array<IdbUtilityMeterData>,
+        accountPredictors: Array<IdbPredictor>
     ) {
         this.reportYear = reportYear;
         selectedAnalysisItem.reportYear = reportYear;
-        this.setFacilityPerformance(selectedAnalysisItem, facilities, accountPredictorEntries, accountAnalysisItems, meters, meterData);
+        this.setFacilityPerformance(selectedAnalysisItem, facilities, accountPredictorEntries, accountAnalysisItems, meters, meterData, accountPredictors);
 
-        this.setReportAndBaselineYearSummaries(selectedAnalysisItem, account, facilities, accountPredictorEntries, accountAnalysisItems, baselineYear, reportYear, meters, meterData);
+        this.setReportAndBaselineYearSummaries(selectedAnalysisItem, account, facilities, accountPredictorEntries, accountAnalysisItems, baselineYear, reportYear, meters, meterData, accountPredictors);
 
         let neededUnits: 'MMBtu' | 'kgal' = 'MMBtu';
         if(selectedAnalysisItem.analysisCategory == 'water'){
@@ -69,10 +77,11 @@ export class BetterPlantsReportClass {
     setFacilityPerformance(
         selectedAnalysisItem: IdbAccountAnalysisItem,
         facilities: Array<IdbFacility>,
-        accountPredictorEntries: Array<IdbPredictorEntry>,
+        accountPredictorEntries: Array<IdbPredictorData>,
         accountAnalysisItems: Array<IdbAnalysisItem>,
         meters: Array<IdbUtilityMeter>,
-        meterData: Array<IdbUtilityMeterData>) {
+        meterData: Array<IdbUtilityMeterData>,
+        accountPredictors: Array<IdbPredictor>) {
 
         this.facilityPerformance = new Array();
         selectedAnalysisItem.facilityAnalysisItems.forEach(item => {
@@ -81,7 +90,7 @@ export class BetterPlantsReportClass {
                 let facilityMeters: Array<IdbUtilityMeter> = meters.filter(meter => { return meter.facilityId == item.facilityId });
                 let facility: IdbFacility = facilities.find(facility => { return facility.guid == item.facilityId });
                 let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, meterData, facility, false, { energyIsSource: facilityAnalysisItem.energyIsSource, neededUnits: getNeededUnits(facilityAnalysisItem) }, [], [], facilities);
-                let facilityAnalysisSummaryClass: AnnualFacilityAnalysisSummaryClass = new AnnualFacilityAnalysisSummaryClass(facilityAnalysisItem, facility, calanderizedMeters, accountPredictorEntries, false);
+                let facilityAnalysisSummaryClass: AnnualFacilityAnalysisSummaryClass = new AnnualFacilityAnalysisSummaryClass(facilityAnalysisItem, facility, calanderizedMeters, accountPredictorEntries, false, accountPredictors);
                 let annualAnalysisSummary: Array<AnnualAnalysisSummary> = facilityAnalysisSummaryClass.getAnnualAnalysisSummaries();
                 let reportYearSummary: AnnualAnalysisSummary = annualAnalysisSummary.find(summary => { return summary.year == selectedAnalysisItem.reportYear });
                 if (reportYearSummary) {
@@ -98,13 +107,14 @@ export class BetterPlantsReportClass {
         accountAnalysisItem: IdbAccountAnalysisItem,
         account: IdbAccount,
         accountFacilities: Array<IdbFacility>,
-        accountPredictorEntries: Array<IdbPredictorEntry>,
+        accountPredictorEntries: Array<IdbPredictorData>,
         allAccountAnalysisItems: Array<IdbAnalysisItem>,
         baselineYear: number,
         reportYear: number,
         meters: Array<IdbUtilityMeter>,
-        meterData: Array<IdbUtilityMeterData>) {
-        let annualAccountAnalysisSummaryClass: AnnualAccountAnalysisSummaryClass = new AnnualAccountAnalysisSummaryClass(accountAnalysisItem, account, accountFacilities, accountPredictorEntries, allAccountAnalysisItems, false, meters, meterData);
+        meterData: Array<IdbUtilityMeterData>,
+        accountPredictors: Array<IdbPredictor>) {
+        let annualAccountAnalysisSummaryClass: AnnualAccountAnalysisSummaryClass = new AnnualAccountAnalysisSummaryClass(accountAnalysisItem, account, accountFacilities, accountPredictorEntries, allAccountAnalysisItems, false, meters, meterData, accountPredictors);
         let annualAnalysisSummaries: Array<AnnualAnalysisSummary> = annualAccountAnalysisSummaryClass.getAnnualAnalysisSummaries();
         //report
         this.reportYearAnalysisSummary = annualAnalysisSummaries.find(summary => { return summary.year == reportYear });

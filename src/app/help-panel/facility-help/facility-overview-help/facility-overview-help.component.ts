@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { IdbFacility } from 'src/app/models/idb';
 import { Subscription } from 'rxjs';
 import { NavigationEnd, Router } from '@angular/router';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
   selector: 'app-facility-overview-help',
@@ -11,7 +11,7 @@ import { NavigationEnd, Router } from '@angular/router';
 })
 export class FacilityOverviewHelpComponent {
 
-  selectedFacility: IdbFacility
+  selectedFacility: IdbFacility;
   selectedFacilitySub: Subscription;
   routerSub: Subscription;
   overviewType: 'an energy consumption' | 'a utility cost' | 'a water consumption' | 'an emissions';

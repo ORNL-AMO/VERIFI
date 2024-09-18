@@ -1,8 +1,14 @@
 import { Injectable } from '@angular/core';
-import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport, IdbAnalysisItem, IdbFacility, IdbUtilityMeter, IdbUtilityMeterGroup } from '../models/idb';
 import { AnalysisSetupErrors, GroupErrors } from '../models/analysis';
 import { FacilitydbService } from './facility-db.service';
 import { AnalysisValidationService } from '../shared/helper-services/analysis-validation.service';
+import { IdbAccount } from '../models/idbModels/account';
+import { IdbFacility } from '../models/idbModels/facility';
+import { IdbUtilityMeter } from '../models/idbModels/utilityMeter';
+import { IdbUtilityMeterGroup } from '../models/idbModels/utilityMeterGroup';
+import { IdbAccountReport } from '../models/idbModels/accountReport';
+import { IdbAnalysisItem } from '../models/idbModels/analysisItem';
+import { IdbAccountAnalysisItem } from '../models/idbModels/accountAnalysisItem';
 
 @Injectable({
   providedIn: 'root'
@@ -162,12 +168,12 @@ export class UpdateDbEntryService {
       utilityMeter.source = 'Other';
     }
 
-    if(utilityMeter.startingUnit == 'Dtherm'){
+    if (utilityMeter.startingUnit == 'Dtherm') {
       utilityMeter.startingUnit = 'DTherm';
       isChanged = true;
     }
 
-    if(utilityMeter.energyUnit == 'Dtherm'){
+    if (utilityMeter.energyUnit == 'Dtherm') {
       utilityMeter.energyUnit = 'DTherm';
       isChanged = true;
     }
@@ -228,6 +234,28 @@ export class UpdateDbEntryService {
         report.betterClimateReportSetup.includedFacilityGroups = includedFacilityGroups;
         isChanged = true;
       }
+    }
+
+    if (report.reportType == 'dataOverview' && report.dataOverviewReportSetup) {
+      if (report.dataOverviewReportSetup.includeAllMeterData == undefined) {
+        report.dataOverviewReportSetup.includeAllMeterData = true;
+        isChanged = true;
+      }
+      report.dataOverviewReportSetup.includedFacilities.forEach(facility => {
+        if (facility.includedGroups == undefined) {
+          let facilityGroups: Array<{ groupId: string, include: boolean }> = new Array();
+          groups.forEach(group => {
+            if (group.facilityId == facility.facilityId) {
+              facilityGroups.push({
+                groupId: group.guid,
+                include: true
+              });
+            }
+          });
+          facility.includedGroups = facilityGroups;
+          isChanged = true;
+        }
+      });
     }
 
 

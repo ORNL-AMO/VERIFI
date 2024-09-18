@@ -17,7 +17,8 @@ addEventListener('message', ({ data }) => {
                 data.facilities,
                 data.accountAnalysisItems,
                 data.meters,
-                data.meterData
+                data.meterData,
+                data.accountPredictors
             );
             let betterPlantsSummary: BetterPlantsSummary = betterPlantsReportClass.getBetterPlantsSummary();
             betterPlantsSummaries.push(betterPlantsSummary);

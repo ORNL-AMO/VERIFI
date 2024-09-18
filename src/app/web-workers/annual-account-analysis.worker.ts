@@ -6,7 +6,7 @@ import { MonthlyFacilityAnalysisClass } from "../calculations/analysis-calculati
 
 addEventListener('message', ({ data }) => {
     try {
-        let annualAnalysisSummaryClass: AnnualAccountAnalysisSummaryClass = new AnnualAccountAnalysisSummaryClass(data.accountAnalysisItem, data.account, data.accountFacilities, data.accountPredictorEntries, data.allAccountAnalysisItems, data.calculateAllMonthlyData, data.meters, data.meterData);
+        let annualAnalysisSummaryClass: AnnualAccountAnalysisSummaryClass = new AnnualAccountAnalysisSummaryClass(data.accountAnalysisItem, data.account, data.accountFacilities, data.accountPredictorEntries, data.allAccountAnalysisItems, data.calculateAllMonthlyData, data.meters, data.meterData, data.accountPredictors);
         let annualAnalysisSummaries: Array<AnnualAnalysisSummary> = annualAnalysisSummaryClass.getAnnualAnalysisSummaries();
         let monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData> = annualAnalysisSummaryClass.monthlyAnalysisSummaryData;
         postMessage({

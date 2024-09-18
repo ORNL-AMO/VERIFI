@@ -7,7 +7,9 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { MeterPhase } from 'src/app/models/constantsAndTypes';
-import { IdbAccount, IdbCustomFuel, IdbUtilityMeter } from 'src/app/models/idb';
+import { IdbAccount } from 'src/app/models/idbModels/account';
+import { getNewAccountCustomFuel, IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
+import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { FuelTypeOption } from 'src/app/shared/fuel-options/fuelTypeOption';
 import { getAllMobileFuelTypes } from 'src/app/shared/fuel-options/getFuelTypeOptions';
 import { StationaryGasOptions } from 'src/app/shared/fuel-options/stationaryGasOptions';
@@ -49,7 +51,7 @@ export class CustomFuelDataFormComponent {
     this.isAdd = this.router.url.includes('add');
     this.selectedAccount = this.accountDbService.selectedAccount.getValue();
     if (this.isAdd) {
-      this.editCustomFuel = this.customFuelDbService.getNewAccountCustomFuel(this.selectedAccount);
+      this.editCustomFuel = getNewAccountCustomFuel(this.selectedAccount);
       this.setForm(this.editCustomFuel);
       this.setUnits();
     } else {

@@ -3,9 +3,11 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { IdbFacility } from 'src/app/models/idb';
 import { UploadDataService } from '../../../upload-data.service';
-import { ColumnItem, FacilityGroup, FileReference } from 'src/app/upload-data/upload-data-models';
+import { ColumnItem, FacilityGroup, FileReference, getEmptyFileReference } from 'src/app/upload-data/upload-data-models';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
+import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 
 @Component({
   selector: 'app-set-facility-predictors',
@@ -14,30 +16,8 @@ import { ColumnItem, FacilityGroup, FileReference } from 'src/app/upload-data/up
 })
 export class SetFacilityPredictorsComponent implements OnInit {
 
-  // facilityGroups: Array<FacilityGroup>;
   facilityGroupIds: Array<string>;
-  fileReference: FileReference = {
-    name: '',
-    file: undefined,
-    dataSubmitted: false,
-    id: undefined,
-    workbook: undefined,
-    isTemplate: false,
-    selectedWorksheetName: '',
-    selectedWorksheetData: [],
-    columnGroups: [],
-    headerMap: [],
-    meterFacilityGroups: [],
-    predictorFacilityGroups: [],
-    importFacilities: [],
-    meters: [],
-    meterData: [],
-    predictorEntries: [],
-    skipExistingReadingsMeterIds: [],
-    skipExistingPredictorFacilityIds: [],
-    newMeterGroups: [],
-    selectedFacilityId: undefined
-  };
+  fileReference: FileReference = getEmptyFileReference();
   paramsSub: Subscription;
   predictorsIncluded: boolean;
   constructor(private uploadDataService: UploadDataService, private facilityDbService: FacilitydbService, private router: Router,
@@ -108,7 +88,9 @@ export class SetFacilityPredictorsComponent implements OnInit {
 
   continue() {
     if (this.predictorsIncluded) {
-      this.fileReference.predictorEntries = this.uploadDataService.parseExcelPredictorsData(this.fileReference);
+      let parsedPredictors: { predictors: Array<IdbPredictor>, predictorData: Array<IdbPredictorData> } = this.uploadDataService.parseExcelPredictorsData(this.fileReference);
+      this.fileReference.predictors = parsedPredictors.predictors;
+      this.fileReference.predictorData = parsedPredictors.predictorData;
     }
     this.router.navigateByUrl('/upload/data-setup/file-setup/' + this.fileReference.id + '/confirm-predictors');
   }

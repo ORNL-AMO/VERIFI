@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { IdbAccount } from 'src/app/models/idb';
 import { Subscription } from 'rxjs';
 import { NavigationEnd, Router } from '@angular/router';
+import { IdbAccount } from 'src/app/models/idbModels/account';
 
 @Component({
   selector: 'app-account-overview-help',

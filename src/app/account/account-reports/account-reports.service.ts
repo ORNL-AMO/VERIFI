@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
-import { IdbAccountReport } from 'src/app/models/idb';
 import { BetterClimateReportSetup, BetterPlantsReportSetup, DataOverviewReportSetup, PerformanceReportSetup } from 'src/app/models/overview-report';
 import { BehaviorSubject } from 'rxjs';
+import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 
 @Injectable({
   providedIn: 'root'

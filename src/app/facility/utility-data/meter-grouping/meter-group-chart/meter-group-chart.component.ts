@@ -1,7 +1,7 @@
 import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { MeterGroupType } from 'src/app/models/calanderization';
-import { IdbUtilityMeterGroup } from 'src/app/models/idb';
+import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
 
 @Component({
   selector: 'app-meter-group-chart',

@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { IdbAnalysisItem } from 'src/app/models/idb';
+import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 
 @Component({
   selector: 'app-run-analysis',

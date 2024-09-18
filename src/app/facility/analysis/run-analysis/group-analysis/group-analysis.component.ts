@@ -3,9 +3,9 @@ import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
-import { IdbAnalysisItem } from 'src/app/models/idb';
 import { AnalysisService } from '../../analysis.service';
 import { AnalysisGroup } from 'src/app/models/analysis';
+import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 
 @Component({
   selector: 'app-group-analysis',

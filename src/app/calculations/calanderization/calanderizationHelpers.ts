@@ -1,8 +1,12 @@
-import { IdbAccount, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from "src/app/models/idb";
+
 import { getIsEnergyMeter, getIsEnergyUnit } from "src/app/shared/sharedHelperFuntions";
 import * as _ from 'lodash';
 import { FuelTypeOption } from "src/app/shared/fuel-options/fuelTypeOption";
 import { StationaryOtherEnergyOptions } from "src/app/shared/fuel-options/stationaryOtherEnergyOptions";
+import { IdbAccount } from "src/app/models/idbModels/account";
+import { IdbFacility } from "src/app/models/idbModels/facility";
+import { IdbUtilityMeterData } from "src/app/models/idbModels/utilityMeterData";
+import { IdbUtilityMeter } from "src/app/models/idbModels/utilityMeter";
 
 export function getPreviousMonthsBill(month: number, year: number, meterReadings: Array<IdbUtilityMeterData>): IdbUtilityMeterData {
     //set to the 5th to not conflict

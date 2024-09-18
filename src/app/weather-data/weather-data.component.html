@@ -45,7 +45,7 @@
             </select>
         </form>
         <div class="alert alert-warning"
-            *ngIf="facilityPredictorEntries?.length == 0 && facilityMeterData?.length != 0">
+            *ngIf="facilityPredictorData?.length == 0 && facilityMeterData?.length != 0">
             No facility predictor entries found. Entries will be created to match facility meter dates.
         </div>
         <div class="alert alert-danger" *ngIf="facilityMeterData?.length == 0">

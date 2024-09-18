@@ -3,10 +3,11 @@ import { PlotlyService } from 'angular-plotly.js';
 import { Subscription } from 'rxjs';
 import { AccountOverviewService } from 'src/app/account/account-overview/account-overview.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { IdbAccount, IdbFacility } from 'src/app/models/idb';
 import { EGridService } from '../../helper-services/e-grid.service';
 import * as _ from 'lodash';
 import { AccountOverviewFacility } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
+import { IdbAccount } from 'src/app/models/idbModels/account';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
   selector: 'app-data-overview-map',

@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport, IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 import { Month, Months } from 'src/app/shared/form-data/months';
 import { EnergyUnitOptions, UnitOption, VolumeLiquidOptions } from 'src/app/shared/unitOptions';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
@@ -12,11 +11,19 @@ import { AnalysisValidationService } from 'src/app/shared/helper-services/analys
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { AccountAnalysisService } from '../account-analysis.service';
+import { IdbAccount } from 'src/app/models/idbModels/account';
+import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
+import { getNewIdbAnalysisItem, IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { AnalysisType } from 'src/app/models/analysis';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
+import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
+import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
+import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 
 @Component({
   selector: 'app-account-analysis-setup',
@@ -50,7 +57,9 @@ export class AccountAnalysisSetupComponent implements OnInit {
     private facilityDbService: FacilitydbService,
     private analysisService: AnalysisService,
     private loadingService: LoadingService,
-    private toastNotificationService: ToastNotificationsService) { }
+    private toastNotificationService: ToastNotificationsService,
+    private utiltiyMeterGroupDbService: UtilityMeterGroupdbService,
+    private predictorDbService: PredictorDbService) { }
 
   ngOnInit(): void {
     this.analysisItem = this.accountAnalysisDbService.selectedAnalysisItem.getValue();
@@ -161,11 +170,13 @@ export class AccountAnalysisSetupComponent implements OnInit {
     this.closeBulkAnalysisModal();
     this.loadingService.setLoadingMessage('Creating Analysis Items...');
     this.loadingService.setLoadingStatus(true);
+    let accountMeterGroups: Array<IdbUtilityMeterGroup> = this.utiltiyMeterGroupDbService.accountMeterGroups.getValue();
+    let accountPredictors: Array<IdbPredictor> = this.predictorDbService.accountPredictors.getValue();
     let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     for (let i = 0; i < facilities.length; i++) {
       let facility: IdbFacility = facilities[i];
       this.dbChangesService.selectFacility(facility);
-      let newIdbItem: IdbAnalysisItem = this.analysisDbService.getNewAnalysisItem(this.analysisItem.analysisCategory, facility.guid);
+      let newIdbItem: IdbAnalysisItem = getNewIdbAnalysisItem(this.account, facility, accountMeterGroups, accountPredictors, this.analysisItem.analysisCategory);
       newIdbItem.energyIsSource = this.analysisItem.energyIsSource;
       newIdbItem.reportYear = this.analysisItem.reportYear;
       newIdbItem.groups.forEach(group => {

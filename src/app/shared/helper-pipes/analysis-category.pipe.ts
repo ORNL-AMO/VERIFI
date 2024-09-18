@@ -1,6 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
-import { IdbAccountAnalysisItem } from 'src/app/models/idb';
+import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 
 @Pipe({
   name: 'analysisCategory'

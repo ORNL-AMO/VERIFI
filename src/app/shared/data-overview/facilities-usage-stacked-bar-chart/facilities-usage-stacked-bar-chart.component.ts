@@ -1,14 +1,12 @@
 import { Component, ElementRef, ViewChild, Input, SimpleChanges } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
-import { Subscription } from 'rxjs';
-import { AccountOverviewService } from 'src/app/account/account-overview/account-overview.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { StackedBarChartData, UtilityItem } from 'src/app/models/dashboard';
-import { IdbFacility } from 'src/app/models/idb';
 import { UtilityColors } from '../../utilityColors';
 import * as _ from 'lodash';
 import { DataOverviewReportSetup } from 'src/app/models/overview-report';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
   selector: 'app-facilities-usage-stacked-bar-chart',

@@ -1,6 +1,7 @@
 import { MeterSource } from "./constantsAndTypes";
 import { EmissionsResults } from "./eGridEmissions";
-import { IdbUtilityMeter, IdbUtilityMeterGroup } from "./idb";
+import { IdbUtilityMeter } from "./idbModels/utilityMeter";
+import { IdbUtilityMeterGroup } from "./idbModels/utilityMeterGroup";
 
 export interface CalanderizedMeter {
     meter: IdbUtilityMeter,

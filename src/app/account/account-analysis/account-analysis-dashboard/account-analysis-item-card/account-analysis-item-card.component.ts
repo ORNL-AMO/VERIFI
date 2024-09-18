@@ -7,7 +7,9 @@ import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport } from 'src/app/models/idb';
+import { IdbAccount } from 'src/app/models/idbModels/account';
+import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
+import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 
 @Component({
   selector: 'app-account-analysis-item-card',

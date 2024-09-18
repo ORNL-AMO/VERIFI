@@ -1,5 +1,5 @@
 import { AnnualAnalysisSummary } from "./analysis";
-import { IdbFacility } from "./idb";
+import { IdbFacility } from "./idbModels/facility";
 
 export interface BetterPlantsSummary {
   reportYear: number,
@@ -97,9 +97,14 @@ export interface DataOverviewReportSetup {
   includeUtilityTable: boolean,
   includeStackedBarChart: boolean,
   includeMonthlyLineChart: boolean,
+  includeAllMeterData: boolean,
   includedFacilities: Array<{
     facilityId: string,
-    included: boolean
+    included: boolean,
+    includedGroups: Array<{
+      groupId: string,
+      include: boolean
+    }>
   }>,
   includeAccountReport: boolean,
   includeFacilityReports: boolean,
@@ -109,6 +114,7 @@ export interface DataOverviewReportSetup {
   includeUtilityTableForFacility: boolean,
   includeAnnualBarChart: boolean,
   includeMonthlyLineChartForFacility: boolean
+  
 }
 
 export interface PerformanceReportSetup {

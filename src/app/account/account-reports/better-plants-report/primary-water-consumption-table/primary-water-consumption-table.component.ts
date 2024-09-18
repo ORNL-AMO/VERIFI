@@ -1,5 +1,6 @@
 import { Component, Input } from '@angular/core';
-import { IdbAccount, IdbAccountReport } from 'src/app/models/idb';
+import { IdbAccount } from 'src/app/models/idbModels/account';
+import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { BetterPlantsSummary } from 'src/app/models/overview-report';
 
 @Component({

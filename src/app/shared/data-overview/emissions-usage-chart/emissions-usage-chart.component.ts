@@ -2,11 +2,11 @@ import { Component, ElementRef, ViewChild, Input, SimpleChanges } from '@angular
 import { PlotlyService } from 'angular-plotly.js';
 import { Subscription } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { IdbFacility } from 'src/app/models/idb';
 import * as _ from 'lodash';
 import { FacilityOverviewService } from 'src/app/facility/facility-overview/facility-overview.service';
 import { AnnualSourceData, AnnualSourceDataItem } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';
 import { EmissionsTypes, getEmissionsTypeColor, getEmissionsTypes } from 'src/app/models/eGridEmissions';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
   selector: 'app-emissions-usage-chart',

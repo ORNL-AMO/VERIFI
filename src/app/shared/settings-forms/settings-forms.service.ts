@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { IdbAccount, IdbFacility } from 'src/app/models/idb';
 import { EnergyUnitOptions, MassUnitOptions, UnitOption, VolumeGasOptions, VolumeLiquidOptions } from '../unitOptions';
+import { IdbAccount } from 'src/app/models/idbModels/account';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Injectable({
   providedIn: 'root'
