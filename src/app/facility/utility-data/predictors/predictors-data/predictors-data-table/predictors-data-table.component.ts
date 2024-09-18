@@ -214,9 +214,11 @@ export class PredictorsDataTableComponent {
     if (this.predictor.weatherDataType == 'CDD') {
       this.weatherDataService.coolingTemp = this.predictor.coolingBaseTemperature;
       this.weatherDataService.weatherDataSelection = 'CDD';
-    } else {
+    } else if(this.predictor.weatherDataType == 'HDD') {
       this.weatherDataService.heatingTemp = this.predictor.heatingBaseTemperature;
       this.weatherDataService.weatherDataSelection = 'HDD';
+    } else if(this.predictor.weatherDataType == 'relativeHumidity') {
+      this.weatherDataService.weatherDataSelection = 'relativeHumidity';
     }
     let entryDate: Date = new Date(predictorEntry.date);
     this.weatherDataService.selectedYear = entryDate.getFullYear();

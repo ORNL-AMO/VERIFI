@@ -125,13 +125,25 @@ export class CalculatedPredictorDataUpdateComponent {
           return degreeDay.gapInData == true
         });
         if (this.predictor.weatherDataType == 'CDD') {
-          let totalCDD: number = _.sumBy(degreeDays, 'coolingDegreeDay');
+          let totalCDD: number = _.sumBy(degreeDays, (degreeDay: DetailDegreeDay) => {
+            return degreeDay.coolingDegreeDay
+          });
           this.predictorData[i].updatedAmount = totalCDD;
           this.predictorData[i].changeAmount = Math.abs(this.predictorData[i].amount - this.predictorData[i].updatedAmount)
           this.predictorData[i].weatherDataWarning = hasErrors != undefined || degreeDays.length == 0;
-        } else {
-          let totalHDD: number = _.sumBy(degreeDays, 'heatingDegreeDay');
+        } else if (this.predictor.weatherDataType == 'HDD') {
+          let totalHDD: number =  _.sumBy(degreeDays, (degreeDay: DetailDegreeDay) => {
+            return degreeDay.coolingDegreeDay
+          });
           this.predictorData[i].updatedAmount = totalHDD;
+          this.predictorData[i].changeAmount = Math.abs(this.predictorData[i].amount - this.predictorData[i].updatedAmount)
+          this.predictorData[i].weatherDataWarning = hasErrors != undefined || degreeDays.length == 0;
+        }else if (this.predictor.weatherDataType == 'relativeHumidity') {
+          let meanRH: number =  _.meanBy(degreeDays, (degreeDay: DetailDegreeDay) => {
+            return degreeDay.weightedRelativeHumidity
+          });
+          console.log(degreeDays);
+          this.predictorData[i].updatedAmount = meanRH;
           this.predictorData[i].changeAmount = Math.abs(this.predictorData[i].amount - this.predictorData[i].updatedAmount)
           this.predictorData[i].weatherDataWarning = hasErrors != undefined || degreeDays.length == 0;
         }
@@ -179,7 +191,7 @@ export class CalculatedPredictorDataUpdateComponent {
         }
       } else {
         let dataEndDate: Date = new Date(endDate);
-        dataEndDate.setMonth(dataEndDate.getMonth() + 1);
+        // dataEndDate.setMonth(dataEndDate.getMonth() + 1);
         await this.addDegreeDays(startDate, dataEndDate);
       }
 
@@ -205,12 +217,25 @@ export class CalculatedPredictorDataUpdateComponent {
       let newPredictorData: IdbPredictorData = getNewIdbPredictorData(this.predictor);
       newPredictorData.date = newDate;
       if (this.predictor.weatherDataType == 'CDD') {
-        let totalCDD: number = _.sumBy(degreeDays, 'coolingDegreeDay');
+        let totalCDD: number = _.sumBy(degreeDays, (degreeDay: DetailDegreeDay) => {
+          return degreeDay.coolingDegreeDay
+        });
         newPredictorData.amount = totalCDD;
         newPredictorData.weatherDataWarning = hasErrors != undefined || degreeDays.length == 0;
-      } else {
-        let totalHDD: number = _.sumBy(degreeDays, 'heatingDegreeDay');
+      } else if (this.predictor.weatherDataType == 'HDD') {
+        let totalHDD: number = _.sumBy(degreeDays, (degreeDay: DetailDegreeDay) => {
+          return degreeDay.heatingDegreeDay
+        });
         newPredictorData.amount = totalHDD;
+        newPredictorData.weatherDataWarning = hasErrors != undefined || degreeDays.length == 0;
+      } else if (this.predictor.weatherDataType == 'relativeHumidity') {
+        let avgRH: number = _.meanBy(degreeDays, (degreeDay: DetailDegreeDay) => {
+          return degreeDay.weightedRelativeHumidity
+        });
+        if(isNaN(avgRH)){
+          avgRH = 0;
+        }
+        newPredictorData.amount = avgRH;
         newPredictorData.weatherDataWarning = hasErrors != undefined || degreeDays.length == 0;
       }
       let tableItem: CalculatedPredictorTableItem = {

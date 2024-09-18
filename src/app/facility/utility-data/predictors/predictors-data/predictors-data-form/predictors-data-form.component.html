@@ -36,13 +36,20 @@
                     {{predictor.name}}
                     <ng-container *ngIf="predictor.predictorType == 'Weather'">
                         <br>
-                        <span class="small block">({{predictor.weatherDataType}},
-                            <ng-container *ngIf="predictor.weatherDataType == 'HDD'">
-                                {{predictor.heatingBaseTemperature}} &#8457;
-                            </ng-container>
-                            <ng-container *ngIf="predictor.weatherDataType == 'CDD'">
-                                {{predictor.coolingBaseTemperature}} &#8457;
-                            </ng-container>)</span>
+                        <ng-container *ngIf="(predictor.weatherDataType == 'HDD' || predictor.weatherDataType == 'CDD')">
+                            <span class="small block">({{predictor.weatherDataType}},
+                                <ng-container *ngIf="predictor.weatherDataType == 'HDD'">
+                                    {{predictor.heatingBaseTemperature}} &#8457;
+                                </ng-container>
+                                <ng-container *ngIf="predictor.weatherDataType == 'CDD'">
+                                    {{predictor.coolingBaseTemperature}} &#8457;
+                                </ng-container>)</span>
+                        </ng-container>
+                        <ng-container *ngIf="predictor.weatherDataType == 'relativeHumidity'">
+                            <span class="small block">
+                                (Relative Humidity, %)
+                            </span>
+                        </ng-container>
                     </ng-container>
                 </label>
             </div>
@@ -62,8 +69,7 @@
                         [disabled]="predictor.predictorType == 'Weather' && !predictorData.weatherOverride"
                         (input)="setChanged()">
                     <span class="input-group-text" *ngIf="predictor.unit">{{predictor.unit}}</span>
-                    <ng-container
-                        *ngIf="predictor.predictorType == 'Weather'">
+                    <ng-container *ngIf="predictor.predictorType == 'Weather'">
                         <span class="input-group-text p-0">
                             <button class="btn btn-secondary btn-sm h-100" *ngIf="!predictorData.weatherOverride"
                                 (click)="setWeatherManually()">

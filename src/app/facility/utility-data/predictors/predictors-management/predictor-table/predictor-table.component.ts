@@ -168,7 +168,7 @@ export class PredictorTableComponent {
       } else {
         this.weatherDataService.weatherDataSelection = 'CDD';
       }
-    } else {
+    } else if (predictor.weatherDataType == 'HDD') {
       this.weatherDataService.heatingTemp = predictor.heatingBaseTemperature;
       let predictorPair: IdbPredictor = this.degreeDayPredictors.find(predictorPair => { return predictorPair.weatherStationId == predictor.weatherStationId && predictorPair.weatherDataType == 'CDD' });
       if (predictorPair) {
@@ -177,6 +177,8 @@ export class PredictorTableComponent {
       } else {
         this.weatherDataService.weatherDataSelection = 'HDD';
       }
+    } else if (predictor.weatherDataType == 'relativeHumidity') {
+      this.weatherDataService.weatherDataSelection = 'relativeHumidity';
     }
     let endDate: Date = new Date(weatherStation.end);
     endDate.setFullYear(endDate.getFullYear() - 1);

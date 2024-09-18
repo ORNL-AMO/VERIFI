@@ -140,6 +140,9 @@ export class EditPredictorFormComponent {
       } else if (this.predictorForm.controls.weatherDataType.value == 'CDD') {
         this.predictorForm.controls.heatingBaseTemperature.setValidators([]);
         this.predictorForm.controls.coolingBaseTemperature.setValidators([Validators.required]);
+      } else {
+        this.predictorForm.controls.heatingBaseTemperature.setValidators([]);
+        this.predictorForm.controls.coolingBaseTemperature.setValidators([]);
       }
     }
     this.predictorForm.controls.heatingBaseTemperature.updateValueAndValidity();
@@ -190,8 +193,7 @@ export class EditPredictorFormComponent {
     return weatherDataChange;
   }
 
-  async saveChanges(goToEntries?: boolean) {
-    //TODO: update save method..
+  async saveChanges() {
     this.loadingService.setLoadingMessage('Updating Predictors...');
     this.loadingService.setLoadingStatus(true);
     let needsWeatherDataUpdate: boolean = this.setPredictorDataFromForm();
@@ -206,17 +208,29 @@ export class EditPredictorFormComponent {
       for (let i = 0; i < predictorData.length; i++) {
         if (!predictorData[i].weatherOverride) {
           let entryDate: Date = new Date(predictorData[i].date);
-          this.loadingService.setLoadingMessage('Updating Degree Day: (' + i + '/' + predictorData.length + ')');
+          this.loadingService.setLoadingMessage('Updating Wether Predictors: (' + i + '/' + predictorData.length + ')');
           let degreeDays: Array<DetailDegreeDay> = await this.degreeDaysService.getDailyDataFromMonth(entryDate.getMonth(), entryDate.getFullYear(), this.predictor.heatingBaseTemperature, this.predictor.coolingBaseTemperature, this.predictor.weatherStationId);
           let hasErrors: DetailDegreeDay = degreeDays.find(degreeDay => {
             return degreeDay.gapInData == true
           });
           if (this.predictor.weatherDataType == 'CDD') {
-            let totalCDD: number = _.sumBy(degreeDays, 'coolingDegreeDay');
+            let totalCDD: number = _.sumBy(degreeDays, (degreeDay: DetailDegreeDay) => {
+              return degreeDay.coolingDegreeDay
+            });
             predictorData[i].amount = totalCDD;
-          } else {
-            let totalHDD: number = _.sumBy(degreeDays, 'heatingDegreeDay');
+          } else if (this.predictor.weatherDataType == 'HDD') {
+            let totalHDD: number = _.sumBy(degreeDays, (degreeDay: DetailDegreeDay) => {
+              return degreeDay.heatingDegreeDay
+            });
             predictorData[i].amount = totalHDD;
+          } else if (this.predictor.weatherDataType == 'relativeHumidity') {
+            let averageRH: number = _.meanBy(degreeDays, (degreeDay: DetailDegreeDay) => {
+              return degreeDay.weightedRelativeHumidity
+            });
+            if(isNaN(averageRH)){
+              averageRH = 0;
+            }
+            predictorData[i].amount = averageRH;
           }
           predictorData[i].weatherDataWarning = hasErrors != undefined || degreeDays.length == 0;
           await firstValueFrom(this.predictorDataDbService.updateWithObservable(predictorData[i]));
@@ -274,9 +288,11 @@ export class EditPredictorFormComponent {
     if (this.predictorForm.controls.weatherDataType.value == 'CDD') {
       this.weatherDataService.coolingTemp = this.predictorForm.controls.coolingBaseTemperature.value;
       this.weatherDataService.weatherDataSelection = 'CDD';
-    } else {
+    } else if (this.predictorForm.controls.weatherDataType.value == 'HDD') {
       this.weatherDataService.heatingTemp = this.predictorForm.controls.heatingBaseTemperature.value;
       this.weatherDataService.weatherDataSelection = 'HDD';
+    } else {
+      this.weatherDataService.weatherDataSelection = 'relativeHumidity';
     }
 
     this.weatherDataService.selectedFacility = this.facility;
@@ -291,37 +307,6 @@ export class EditPredictorFormComponent {
     } else {
       this.router.navigateByUrl('/weather-data');
     }
-  }
-
-  // goToPredictorEntry() {
-  //   this.setPredictorDataFromForm();
-  //   let facilityPredictors: Array<IdbPredictor> = this.predictorDbService.facilityPredictors.getValue();
-  //   facilityPredictors.push(this.predictorData);
-  //   this.predictorDbService.facilityPredictors.next(facilityPredictors);
-  //   this.router.navigateByUrl('facility/' + this.facility.id + '/utility/predictors/entries/add-entry');
-  // }
-
-  async generateWeatherData() {
-    this.analyticsService.sendEvent('weather_data_predictors');
-    this.loadingService.setLoadingMessage('Updating Predictors...');
-    this.loadingService.setLoadingStatus(true);
-    let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
-    let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == this.facility.guid });
-    let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
-    let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, meterData, this.facility, false, undefined, [], [], [this.facility]);
-    let monthlyData: Array<MonthlyData> = calanderizedMeters.flatMap(cMeter => { return cMeter.monthlyData });
-    monthlyData = _.orderBy(monthlyData, (dataItem: MonthlyData) => { return dataItem.date });
-    let startDate: Date = new Date(monthlyData[0].date);
-    let endDate: Date = new Date(monthlyData[monthlyData.length - 1].date);
-    //TODO: Add/Edit predictor data
-    // while (startDate <= endDate) {
-    //   let newIdbPredictorEntry: IdbPredictorEntry = this.predictorDbService.getNewIdbPredictorEntry(this.facility.guid, this.facility.accountId, new Date(startDate));
-    //   await firstValueFrom(this.predictorDbService.addWithObservable(newIdbPredictorEntry));
-    //   startDate.setMonth(startDate.getMonth() + 1);
-    // }
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    await this.dbChangesService.setPredictorsDeprecated(selectedAccount, this.facility)
-    this.saveChanges();
   }
 
   canDeactivate(): Observable<boolean> {

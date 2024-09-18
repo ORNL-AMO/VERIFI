@@ -114,14 +114,12 @@ export class DegreeDaysService {
         }
       }
 
-      let baseRelativeHumidity: number = localClimatologicalDataMonth[i].HourlyRelativeHumidity;
       let averageDryBulbTemp: number = (localClimatologicalDataMonth[i].HourlyDryBulbTemperature + previousDryBulbTemp) / 2
+ 
+
+      let baseRelativeHumidity: number = localClimatologicalDataMonth[i].HourlyRelativeHumidity;
       let averageRelativeHumidity: number = (baseRelativeHumidity + previousRelativeHumidity) / 2
       let portionOfDay: number = (minutesBetween / minutesPerDay);
-      
-      
-      
-      
       
       if (averageDryBulbTemp < baseHeatingTemperature || averageDryBulbTemp > baseCoolingTemperature) {
 

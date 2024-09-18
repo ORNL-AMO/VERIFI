@@ -115,19 +115,30 @@ export class PredictorsDataFormComponent {
         let hasErrors: DetailDegreeDay = degreeDays.find(degreeDay => {
           return degreeDay.gapInData == true
         });
-        if (!hasWeatherDataWarning && hasErrors != undefined) {
+        if (!hasWeatherDataWarning && hasErrors != undefined || degreeDays.length == 0) {
           hasWeatherDataWarning = true;
         }
         if (this.predictor.weatherDataType == 'CDD') {
-          let totalCDD: number = _.sumBy(degreeDays, 'coolingDegreeDay');
+          let totalCDD: number = _.sumBy(degreeDays, (degreeDay: DetailDegreeDay) => {
+            return degreeDay.coolingDegreeDay
+          });
           this.predictorData.amount = totalCDD;
-          this.predictorData.weatherDataWarning = hasErrors != undefined;
 
-        } else {
-          let totalHDD: number = _.sumBy(degreeDays, 'heatingDegreeDay');
+        } else if (this.predictor.weatherDataType == 'HDD') {
+          let totalHDD: number = _.sumBy(degreeDays, (degreeDay: DetailDegreeDay) => {
+            return degreeDay.heatingDegreeDay
+          });
           this.predictorData.amount = totalHDD;
-          this.predictorData.weatherDataWarning = hasErrors != undefined;
+        } else if (this.predictor.weatherDataType == 'relativeHumidity') {
+          let averageRH: number = _.meanBy(degreeDays, (degreeDay: DetailDegreeDay) => {
+            return degreeDay.weightedRelativeHumidity
+          });
+          if(isNaN(averageRH)){
+            averageRH = 0;
+          }
+          this.predictorData.amount = averageRH;
         }
+        this.predictorData.weatherDataWarning = hasErrors != undefined || degreeDays.length == 0;
       }
     }
     this.calculatingDegreeDays = false;
