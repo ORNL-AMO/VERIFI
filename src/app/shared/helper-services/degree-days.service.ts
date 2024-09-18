@@ -87,13 +87,16 @@ export class DegreeDaysService {
     for (let i = 0; i < localClimatologicalDataMonth.length; i++) {
       let previousDate: Date;
       let previousDryBulbTemp: number;
+      let previousRelativeHumidity: number;
       if (i == 0) {
         let startDate: Date = new Date(localClimatologicalDataMonth[i].DATE);
         previousDate = new Date(startDate.getFullYear(), startDate.getMonth(), 1, 0, 0);
         previousDryBulbTemp = localClimatologicalDataMonth[i].HourlyDryBulbTemperature;
+        previousRelativeHumidity = localClimatologicalDataMonth[i].HourlyRelativeHumidity;
       } else {
         previousDate = new Date(localClimatologicalDataMonth[i - 1].DATE)
         previousDryBulbTemp = localClimatologicalDataMonth[i - 1].HourlyDryBulbTemperature;
+        previousRelativeHumidity = localClimatologicalDataMonth[i - 1].HourlyRelativeHumidity;
       }
 
       let gapInData: boolean = false
@@ -111,8 +114,15 @@ export class DegreeDaysService {
         }
       }
 
+      let baseRelativeHumidity: number = localClimatologicalDataMonth[i].HourlyRelativeHumidity;
       let averageDryBulbTemp: number = (localClimatologicalDataMonth[i].HourlyDryBulbTemperature + previousDryBulbTemp) / 2
+      let averageRelativeHumidity: number = (baseRelativeHumidity + previousRelativeHumidity) / 2
       let portionOfDay: number = (minutesBetween / minutesPerDay);
+      
+      
+      
+      
+      
       if (averageDryBulbTemp < baseHeatingTemperature || averageDryBulbTemp > baseCoolingTemperature) {
 
         let heatingDegreeDay: number = 0;
@@ -139,7 +149,9 @@ export class DegreeDaysService {
           lagDryBulbTemp: averageDryBulbTemp,
           stationId: stationId,
           stationName: stationName,
-          gapInData: gapInData
+          gapInData: gapInData,
+          relativeHumidity: localClimatologicalDataMonth[i].HourlyRelativeHumidity,
+          weightedRelativeHumidity: (averageRelativeHumidity * (1 - (portionOfDay/100)))
         })
       } else {
         results.push({
@@ -153,7 +165,9 @@ export class DegreeDaysService {
           lagDryBulbTemp: averageDryBulbTemp,
           stationId: stationId,
           stationName: stationName,
-          gapInData: gapInData
+          gapInData: gapInData,
+          relativeHumidity: localClimatologicalDataMonth[i].HourlyRelativeHumidity,
+          weightedRelativeHumidity: (averageRelativeHumidity * (1 - (portionOfDay/100)))
         })
       }
     }

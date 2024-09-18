@@ -4,6 +4,7 @@
             <th>Month</th>
             <th *ngIf="weatherDataSelection == 'degreeDays' || weatherDataSelection == 'HDD'">Heating Degree Days</th>
             <th *ngIf="weatherDataSelection == 'degreeDays' || weatherDataSelection == 'CDD'">Cooling Degree Days</th>
+            <th *ngIf="weatherDataSelection == 'relativeHumidity'">Relative Humidity</th>
         </tr>
     </thead>
     <tbody class="table-group-divider">
@@ -20,9 +21,12 @@
             <td *ngIf="weatherDataSelection == 'degreeDays' || weatherDataSelection == 'CDD'">
                 {{degreeDay.coolingDegreeDays | number}}
             </td>
+            <td *ngIf="weatherDataSelection == 'relativeHumidity'">
+                {{degreeDay.relativeHumidity | number}} &percnt;
+            </td>
         </tr>
     </tbody>
-    <tfoot>
+    <tfoot *ngIf="weatherDataSelection != 'relativeHumidity'">
         <tr>
             <th>
                 Total
@@ -33,6 +37,9 @@
             <th *ngIf="weatherDataSelection == 'degreeDays' || weatherDataSelection == 'CDD'">
                 {{yearSummaryData | total: 'coolingDegreeDays' | number}}
             </th>
+            <!-- <th *ngIf="weatherDataSelection == 'degreeDays' || weatherDataSelection == 'CDD'">
+                {{yearSummaryData | total: 'coolingDegreeDays' | number}}
+            </th> -->
         </tr>
     </tfoot>
 </table>

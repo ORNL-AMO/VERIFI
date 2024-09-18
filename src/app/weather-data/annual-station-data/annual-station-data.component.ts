@@ -18,7 +18,7 @@ export class AnnualStationDataComponent {
   heatingTemp: number;
   coolingTemp: number;
   detailedDegreeDays: Array<DetailDegreeDay>;
-  yearSummaryData: Array<{ date: Date, heatingDegreeDays: number, coolingDegreeDays: number, hasErrors: boolean }>;
+  yearSummaryData: Array<AnnualStationDataSummary>;
   calculating: boolean;
   hasGapsInData: boolean;
   weatherDataSelection: WeatherDataSelection;
@@ -72,8 +72,15 @@ export class AnnualStationDataComponent {
         let monthData: Array<DetailDegreeDay> = this.detailedDegreeDays.filter(day => {
           return day.time.getMonth() == startDate.getMonth();
         });
-        let totalHeatingDegreeDays: number = _.sumBy(monthData, 'heatingDegreeDay');
-        let totalCoolingDegreeDays: number = _.sumBy(monthData, 'coolingDegreeDay');
+        let totalHeatingDegreeDays: number = _.sumBy(monthData, (detailDegreeDay: DetailDegreeDay) => {
+          return detailDegreeDay.heatingDegreeDay
+        });
+        let totalCoolingDegreeDays: number = _.sumBy(monthData, (detailDegreeDay: DetailDegreeDay) => {
+          return detailDegreeDay.coolingDegreeDay
+        });
+        let averageRelativeHumidity: number = _.meanBy(monthData, (detailDegreeDay: DetailDegreeDay) => {
+          return detailDegreeDay.weightedRelativeHumidity
+        });
         let hasErrors: DetailDegreeDay = monthData.find(degreeDay => {
           return degreeDay.gapInData == true
         });
@@ -84,7 +91,8 @@ export class AnnualStationDataComponent {
           date: new Date(startDate),
           heatingDegreeDays: totalHeatingDegreeDays,
           coolingDegreeDays: totalCoolingDegreeDays,
-          hasErrors: hasErrors != undefined
+          hasErrors: hasErrors != undefined,
+          relativeHumidity: averageRelativeHumidity
         });
         startDate.setMonth(startDate.getMonth() + 1);
       }
@@ -119,3 +127,6 @@ export class AnnualStationDataComponent {
     this.weatherDataService.weatherDataSelection = this.weatherDataSelection;
   }
 }
+
+
+export interface AnnualStationDataSummary { date: Date, heatingDegreeDays: number, coolingDegreeDays: number, hasErrors: boolean, relativeHumidity: number }

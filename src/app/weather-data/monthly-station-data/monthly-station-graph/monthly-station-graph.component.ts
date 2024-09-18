@@ -84,20 +84,42 @@ export class MonthlyStationGraphComponent {
       let startRange: Date = new Date(this.selectedMonth);
       startRange.setDate(1);
       let endRange: Date = new Date(startRange);
-      endRange.setMonth(endRange.getMonth()+1);
+      endRange.setMonth(endRange.getMonth() + 1);
       endRange.setDate(1);
 
-      traceData.push({
-        x: this.detailedDegreeDays.map(data => { return data.time }),
-        y: this.detailedDegreeDays.map(data => { return data.dryBulbTemp }),
-        type: 'scatter',
-        name: 'Dry Bulb Temp Readings',
-        yaxis: 'y2',
-        mode: 'lines+markers',
-        marker: {
-          color: '#273746'
-        }
-      });
+
+      let graphTitle: string;
+      if (this.weatherDataSelection != 'relativeHumidity') {
+        graphTitle = 'Daily Degree Days <br>(' + Months[this.selectedMonth.getMonth()].name + ', ' + this.selectedMonth.getFullYear() + ')'
+        traceData.push({
+          x: this.detailedDegreeDays.map(data => { return data.time }),
+          y: this.detailedDegreeDays.map(data => { return data.dryBulbTemp }),
+          type: 'scatter',
+          name: 'Dry Bulb Temp Readings',
+          yaxis: 'y2',
+          mode: 'lines+markers',
+          marker: {
+            color: '#273746'
+          }
+        });
+      }
+
+      if (this.weatherDataSelection == 'relativeHumidity') {
+        graphTitle = 'Relative Humidity <br>(' + Months[this.selectedMonth.getMonth()].name + ', ' + this.selectedMonth.getFullYear() + ')'
+        traceData.push({
+          x: this.detailedDegreeDays.map(data => { return data.time }),
+          y: this.detailedDegreeDays.map(data => { return data.weightedRelativeHumidity }),
+          type: 'bar',
+          name: 'Relative Humidity',
+          yaxis: 'y',
+          marker: {
+            color: '#6c3483'
+          }
+        });
+      }
+
+
+
 
       var layout = {
         legend: {
@@ -105,7 +127,7 @@ export class MonthlyStationGraphComponent {
         },
         barmode: 'group',
         title: {
-          text: 'Daily Degree Days <br>(' + Months[this.selectedMonth.getMonth()].name + ', ' + this.selectedMonth.getFullYear() + ')',
+          text: graphTitle,
           font: {
             size: 18
           },
