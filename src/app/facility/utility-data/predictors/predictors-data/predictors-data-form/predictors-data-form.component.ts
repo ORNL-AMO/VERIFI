@@ -16,6 +16,7 @@ import { WeatherDataService } from 'src/app/weather-data/weather-data.service';
 import * as _ from 'lodash';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { getDegreeDayAmount } from 'src/app/shared/sharedHelperFuntions';
 
 @Component({
   selector: 'app-predictors-data-form',
@@ -118,26 +119,7 @@ export class PredictorsDataFormComponent {
         if (!hasWeatherDataWarning && hasErrors != undefined || degreeDays.length == 0) {
           hasWeatherDataWarning = true;
         }
-        if (this.predictor.weatherDataType == 'CDD') {
-          let totalCDD: number = _.sumBy(degreeDays, (degreeDay: DetailDegreeDay) => {
-            return degreeDay.coolingDegreeDay
-          });
-          this.predictorData.amount = totalCDD;
-
-        } else if (this.predictor.weatherDataType == 'HDD') {
-          let totalHDD: number = _.sumBy(degreeDays, (degreeDay: DetailDegreeDay) => {
-            return degreeDay.heatingDegreeDay
-          });
-          this.predictorData.amount = totalHDD;
-        } else if (this.predictor.weatherDataType == 'relativeHumidity') {
-          let averageRH: number = _.meanBy(degreeDays, (degreeDay: DetailDegreeDay) => {
-            return degreeDay.weightedRelativeHumidity
-          });
-          if(isNaN(averageRH)){
-            averageRH = 0;
-          }
-          this.predictorData.amount = averageRH;
-        }
+        this.predictorData.amount = getDegreeDayAmount(degreeDays, this.predictor.weatherDataType);
         this.predictorData.weatherDataWarning = hasErrors != undefined || degreeDays.length == 0;
       }
     }

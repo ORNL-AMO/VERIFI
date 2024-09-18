@@ -179,6 +179,8 @@ export class PredictorTableComponent {
       }
     } else if (predictor.weatherDataType == 'relativeHumidity') {
       this.weatherDataService.weatherDataSelection = 'relativeHumidity';
+    } else if (predictor.weatherDataType == 'dryBulbTemp') {
+      this.weatherDataService.weatherDataSelection = 'dryBulbTemp';
     }
     let endDate: Date = new Date(weatherStation.end);
     endDate.setFullYear(endDate.getFullYear() - 1);

@@ -52,23 +52,8 @@
                         <br>
                         <span class="small block">({{predictor.unit}})</span>
                     </ng-container>
-                    <ng-container *ngIf="predictor.predictorType == 'Weather'">
-                        <br>
-                        <ng-container *ngIf="(predictor.weatherDataType == 'HDD' || predictor.weatherDataType == 'CDD')">
-                            <span class="small block">({{predictor.weatherDataType}},
-                                <ng-container *ngIf="predictor.weatherDataType == 'HDD'">
-                                    {{predictor.heatingBaseTemperature}} &#8457;
-                                </ng-container>
-                                <ng-container *ngIf="predictor.weatherDataType == 'CDD'">
-                                    {{predictor.coolingBaseTemperature}} &#8457;
-                                </ng-container>)</span>
-                        </ng-container>
-                        <ng-container *ngIf="predictor.weatherDataType == 'relativeHumidity'">
-                            <span class="small block">
-                                (Relative Humidity, %)
-                            </span>
-                        </ng-container>
-                    </ng-container>
+                    <app-weather-data-sub-label *ngIf="predictor.predictorType == 'Weather'"
+                        [predictor]="predictor"></app-weather-data-sub-label>
                 </th>
                 <td class="actions" *ngIf="!copyingTable">
 

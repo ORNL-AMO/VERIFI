@@ -9,23 +9,15 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { WeatherDataService } from 'src/app/weather-data/weather-data.service';
 import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { AnalyticsService } from 'src/app/analytics/analytics.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
-import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
-import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
-import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
 import { firstValueFrom, Observable, of } from 'rxjs';
-import * as _ from 'lodash';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
+import { getDegreeDayAmount } from 'src/app/shared/sharedHelperFuntions';
 
 @Component({
   selector: 'app-edit-predictor-form',
@@ -51,13 +43,9 @@ export class EditPredictorFormComponent {
     private weatherDataService: WeatherDataService,
     private degreeDaysService: DegreeDaysService,
     private loadingService: LoadingService,
-    private analysisDbService: AnalysisDbService,
     private toastNotificationService: ToastNotificationsService,
-    private utilityMeterDbService: UtilityMeterdbService,
     private accountDbService: AccountdbService,
     private dbChangesService: DbChangesService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private analyticsService: AnalyticsService,
     private predictorDataDbService: PredictorDataDbService) {
   }
 
@@ -213,25 +201,7 @@ export class EditPredictorFormComponent {
           let hasErrors: DetailDegreeDay = degreeDays.find(degreeDay => {
             return degreeDay.gapInData == true
           });
-          if (this.predictor.weatherDataType == 'CDD') {
-            let totalCDD: number = _.sumBy(degreeDays, (degreeDay: DetailDegreeDay) => {
-              return degreeDay.coolingDegreeDay
-            });
-            predictorData[i].amount = totalCDD;
-          } else if (this.predictor.weatherDataType == 'HDD') {
-            let totalHDD: number = _.sumBy(degreeDays, (degreeDay: DetailDegreeDay) => {
-              return degreeDay.heatingDegreeDay
-            });
-            predictorData[i].amount = totalHDD;
-          } else if (this.predictor.weatherDataType == 'relativeHumidity') {
-            let averageRH: number = _.meanBy(degreeDays, (degreeDay: DetailDegreeDay) => {
-              return degreeDay.weightedRelativeHumidity
-            });
-            if(isNaN(averageRH)){
-              averageRH = 0;
-            }
-            predictorData[i].amount = averageRH;
-          }
+          predictorData[i].amount = getDegreeDayAmount(degreeDays, this.predictor.weatherDataType);
           predictorData[i].weatherDataWarning = hasErrors != undefined || degreeDays.length == 0;
           await firstValueFrom(this.predictorDataDbService.updateWithObservable(predictorData[i]));
         }
@@ -287,13 +257,10 @@ export class EditPredictorFormComponent {
     this.weatherDataService.selectedStation = weatherStation;
     if (this.predictorForm.controls.weatherDataType.value == 'CDD') {
       this.weatherDataService.coolingTemp = this.predictorForm.controls.coolingBaseTemperature.value;
-      this.weatherDataService.weatherDataSelection = 'CDD';
     } else if (this.predictorForm.controls.weatherDataType.value == 'HDD') {
       this.weatherDataService.heatingTemp = this.predictorForm.controls.heatingBaseTemperature.value;
-      this.weatherDataService.weatherDataSelection = 'HDD';
-    } else {
-      this.weatherDataService.weatherDataSelection = 'relativeHumidity';
     }
+    this.weatherDataService.weatherDataSelection = this.predictorForm.controls.weatherDataType.value;
 
     this.weatherDataService.selectedFacility = this.facility;
     this.weatherDataService.zipCode = this.facility.zip;

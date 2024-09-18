@@ -107,6 +107,9 @@
                         <ng-container *ngIf="predictor.weatherDataType == 'relativeHumidity'">
                             Relative Humidity
                         </ng-container>
+                        <ng-container *ngIf="predictor.weatherDataType == 'dryBulbTemp'">
+                            Dry Bulb Temp
+                        </ng-container>
                     </td>
                     <td>
                         <ng-container *ngIf="predictor.weatherDataType == 'HDD'">
@@ -115,7 +118,7 @@
                         <ng-container *ngIf="predictor.weatherDataType == 'CDD'">
                             {{predictor.coolingBaseTemperature}} &#8457;
                         </ng-container>
-                        <ng-container *ngIf="predictor.weatherDataType == 'relativeHumidity'">
+                        <ng-container *ngIf="predictor.weatherDataType == 'relativeHumidity' || predictor.weatherDataType == 'dryBulbTemp'">
                             &mdash;
                         </ng-container>
                     </td>
