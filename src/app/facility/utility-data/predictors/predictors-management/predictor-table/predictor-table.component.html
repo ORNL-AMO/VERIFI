@@ -1,7 +1,4 @@
 <div class="d-flex w-100 justify-content-end mb-2">
-    <!-- <div class="ps-2">
-        <button class="btn nav-btn" (click)="migrateData()"><i class="fa fa-upload"></i> Migrate Data</button>
-    </div> -->
     <div class="ps-2">
         <button class="btn nav-btn" (click)="uploadData()"><i class="fa fa-upload"></i> Import Data</button>
     </div>
@@ -63,7 +60,7 @@
 
 <ng-container *ngIf="degreeDayPredictors.length != 0">
     <hr *ngIf="standardPredictors.length != 0">
-    <h5><span class="fa fa-temperature-half pe-1"></span>Calculated Degree Days</h5>
+    <h5><span class="fa fa-temperature-half pe-1"></span>Calculated Weather Data</h5>
     <div class="alert alert-warning text-center" *ngIf="hasWeatherDataWarning">
         <span class="fa fa-exclamation-circle"></span> Indicates that one or more predictor entries associated with this
         predictor was calculated off of weather readings with gaps of twelve hours or more. The data may not be
@@ -118,7 +115,8 @@
                         <ng-container *ngIf="predictor.weatherDataType == 'CDD'">
                             {{predictor.coolingBaseTemperature}} &#8457;
                         </ng-container>
-                        <ng-container *ngIf="predictor.weatherDataType == 'relativeHumidity' || predictor.weatherDataType == 'dryBulbTemp'">
+                        <ng-container
+                            *ngIf="predictor.weatherDataType == 'relativeHumidity' || predictor.weatherDataType == 'dryBulbTemp'">
                             &mdash;
                         </ng-container>
                     </td>
