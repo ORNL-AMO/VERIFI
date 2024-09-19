@@ -115,14 +115,17 @@ export class DegreeDaysService {
       }
 
       let averageDryBulbTemp: number = (localClimatologicalDataMonth[i].HourlyDryBulbTemperature + previousDryBulbTemp) / 2
- 
+
 
       let baseRelativeHumidity: number = localClimatologicalDataMonth[i].HourlyRelativeHumidity;
       let averageRelativeHumidity: number = (baseRelativeHumidity + previousRelativeHumidity) / 2
       let portionOfDay: number = (minutesBetween / minutesPerDay);
-      
-      if (averageDryBulbTemp < baseHeatingTemperature || averageDryBulbTemp > baseCoolingTemperature) {
 
+      // weightedRelativeHumidity: (averageRelativeHumidity * (1 - (portionOfDay/100))),
+      // weightedDryBulbTemp: (averageDryBulbTemp * (1 - (portionOfDay/100))),
+      let weightedRelativeHumidity: number = (averageRelativeHumidity * minutesBetween);
+      let weightedDryBulbTemp: number = (averageDryBulbTemp * minutesBetween);
+      if (averageDryBulbTemp < baseHeatingTemperature || averageDryBulbTemp > baseCoolingTemperature) {
         let heatingDegreeDay: number = 0;
         let heatingDegreeDifference: number = 0;
         let coolingDegreeDay: number = 0;
@@ -149,8 +152,9 @@ export class DegreeDaysService {
           stationName: stationName,
           gapInData: gapInData,
           relativeHumidity: localClimatologicalDataMonth[i].HourlyRelativeHumidity,
-          weightedRelativeHumidity: (averageRelativeHumidity * (1 - (portionOfDay/100))),
-          weightedDryBulbTemp: (averageDryBulbTemp * (1 - (portionOfDay/100)))
+          weightedRelativeHumidity: weightedRelativeHumidity,
+          weightedDryBulbTemp: weightedDryBulbTemp,
+          minutesBetween: minutesBetween
         })
       } else {
         results.push({
@@ -166,8 +170,9 @@ export class DegreeDaysService {
           stationName: stationName,
           gapInData: gapInData,
           relativeHumidity: localClimatologicalDataMonth[i].HourlyRelativeHumidity,
-          weightedRelativeHumidity: (averageRelativeHumidity * (1 - (portionOfDay/100))),
-          weightedDryBulbTemp: (averageDryBulbTemp * (1 - (portionOfDay/100)))
+          weightedRelativeHumidity: weightedRelativeHumidity,
+          weightedDryBulbTemp: weightedDryBulbTemp,
+          minutesBetween: minutesBetween
         })
       }
     }

@@ -16,6 +16,7 @@ import { MonthlyStationGraphComponent } from './monthly-station-data/monthly-sta
 import { MonthlyStationTableComponent } from './monthly-station-data/monthly-station-table/monthly-station-table.component';
 import { HelperPipesModule } from '../shared/helper-pipes/helper-pipes.module';
 import { CalculatingSpinnerModule } from '../shared/calculating-spinner/calculating-spinner.module';
+import { OrderDegreeDayDetailsPipe } from './monthly-station-data/monthly-station-table/order-degree-day-details.pipe';
 
 
 
@@ -31,6 +32,7 @@ import { CalculatingSpinnerModule } from '../shared/calculating-spinner/calculat
     MonthlyStationDataComponent,
     MonthlyStationGraphComponent,
     MonthlyStationTableComponent,
+    OrderDegreeDayDetailsPipe,
   ],
   imports: [
     CommonModule,

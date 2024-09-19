@@ -64,7 +64,8 @@ export interface DetailDegreeDay {
     gapInData: boolean,
     relativeHumidity: number,
     weightedRelativeHumidity: number,
-    weightedDryBulbTemp: number
+    weightedDryBulbTemp: number,
+    minutesBetween: number
 }
 
 export type WeatherDataSelection = 'degreeDays' | 'CDD' | 'HDD' | 'relativeHumidity' | 'dryBulbTemp';

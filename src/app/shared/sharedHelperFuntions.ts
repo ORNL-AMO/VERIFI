@@ -177,7 +177,7 @@ export function getDegreeDayAmount(degreeDays: Array<DetailDegreeDay>, weatherDa
             return degreeDay.heatingDegreeDay
         });
     } else if (weatherDataSelection == 'relativeHumidity') {
-        let averageRH: number = _.meanBy(degreeDays, (degreeDay: DetailDegreeDay) => {
+        let averageRH: number = _.sumBy(degreeDays, (degreeDay: DetailDegreeDay) => {
             return degreeDay.weightedRelativeHumidity
         });
         if (isNaN(averageRH)) {
@@ -185,7 +185,7 @@ export function getDegreeDayAmount(degreeDays: Array<DetailDegreeDay>, weatherDa
         }
         return averageRH;
     } else if (weatherDataSelection == 'dryBulbTemp') {
-        let averageTemp: number = _.meanBy(degreeDays, (degreeDay: DetailDegreeDay) => {
+        let averageTemp: number = _.sumBy(degreeDays, (degreeDay: DetailDegreeDay) => {
             return degreeDay.weightedDryBulbTemp
         });
         if (isNaN(averageTemp)) {

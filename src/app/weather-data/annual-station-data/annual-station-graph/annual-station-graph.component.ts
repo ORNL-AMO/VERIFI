@@ -79,7 +79,7 @@ export class AnnualStationGraphComponent {
         chartTitle = 'Dry Bulb Temp. <br>(' + this.selectedYear + ')'
         traceData.push({
           x: this.yearSummaryData.map(data => { return Months[data.date.getMonth()].name }),
-          y: this.yearSummaryData.map(data => { return data.relativeHumidity }),
+          y: this.yearSummaryData.map(data => { return data.dryBulbTemp }),
           type: 'bar',
           name: 'Dry Bulb Temp',
           marker: {

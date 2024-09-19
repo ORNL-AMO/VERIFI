@@ -17,6 +17,9 @@ export class MonthlyStationTableComponent {
   currentPageNumber: number = 1;
   itemsPerPage: number = 6;
   itemsPerPageSub: Subscription;
+
+  orderDataField: string = 'time';
+  orderByDirection: 'asc' | 'desc' = 'asc';
   constructor(
     private sharedDataService: SharedDataService){
   }
@@ -30,4 +33,17 @@ export class MonthlyStationTableComponent {
   ngOnDestroy() {
     this.itemsPerPageSub.unsubscribe();
   }
+
+  setOrderDataField(str: string) {
+    if (str == this.orderDataField) {
+      if (this.orderByDirection == 'desc') {
+        this.orderByDirection = 'asc';
+      } else {
+        this.orderByDirection = 'desc';
+      }
+    } else {
+      this.orderDataField = str;
+    }
+  }
+
 }

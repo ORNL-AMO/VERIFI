@@ -2,26 +2,39 @@
     <app-table-items-dropdown></app-table-items-dropdown>
 </div>
 <table class="table utility-data table-sm table-bordered table-hover">
-    <thead>
+    <thead class="sortable">
         <tr>
-            <th>Date</th>
-            <th>% of Day</th>
-            <th *ngIf="weatherDataSelection != 'relativeHumidity'">Dry<br> Bulb Temp</th>
-            <th *ngIf="weatherDataSelection == 'degreeDays' || weatherDataSelection == 'HDD'">Heating Degree<br> Days
+            <th (click)="setOrderDataField('time')" [ngClass]="{'active': orderDataField == 'time'}">
+                Date</th>
+            <th (click)="setOrderDataField('minutesBetween')"
+                [ngClass]="{'active': orderDataField == 'minutesBetween'}">
+                Reading<br> Minutes</th>
+            <th (click)="setOrderDataField('percentOfDay')" [ngClass]="{'active': orderDataField == 'percentOfDay'}">%
+                of Day</th>
+            <th (click)="setOrderDataField('dryBulbTemp')" [ngClass]="{'active': orderDataField == 'dryBulbTemp'}"
+                *ngIf="weatherDataSelection != 'relativeHumidity'">Dry<br> Bulb Temp</th>
+            <th (click)="setOrderDataField('heatingDegreeDay')"
+                [ngClass]="{'active': orderDataField == 'heatingDegreeDay'}"
+                *ngIf="weatherDataSelection == 'degreeDays' || weatherDataSelection == 'HDD'">Heating Degree<br> Days
             </th>
-            <th *ngIf="weatherDataSelection == 'degreeDays' || weatherDataSelection == 'CDD'">Cooling Degree<br> Days
+            <th (click)="setOrderDataField('coolingDegreeDay')"
+                [ngClass]="{'active': orderDataField == 'coolingDegreeDay'}"
+                *ngIf="weatherDataSelection == 'degreeDays' || weatherDataSelection == 'CDD'">Cooling Degree<br> Days
             </th>
-            <th *ngIf="weatherDataSelection == 'relativeHumidity'">Relative Humidity</th>
-            <th *ngIf="weatherDataSelection == 'relativeHumidity'">Weighted Relative<br> Humidity</th>
-            <th *ngIf="weatherDataSelection == 'dryBulbTemp'">Weighted Dry<br> Bulb Temp</th>
+            <th (click)="setOrderDataField('relativeHumidity')"
+                [ngClass]="{'active': orderDataField == 'relativeHumidity'}"
+                *ngIf="weatherDataSelection == 'relativeHumidity'">Relative <br>Humidity</th>
         </tr>
     </thead>
     <tbody class="table-group-divider">
-        <tr *ngFor="let summaryData of detailedDegreeDays| slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage"
+        <tr *ngFor="let summaryData of detailedDegreeDays | orderDegreeDayDetails: orderDataField:orderByDirection| slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage"
             [ngClass]="{'alert alert-danger': summaryData.gapInData}">
             <td>
                 <span class="fa fa-exclamation-circle" *ngIf="summaryData.gapInData"></span>
                 {{summaryData.time | date:'short'}}
+            </td>
+            <td>
+                {{summaryData.minutesBetween | number}}
             </td>
             <td>
                 {{summaryData.percentOfDay * 100 | number}}
@@ -38,12 +51,6 @@
             <td *ngIf="weatherDataSelection == 'relativeHumidity'">
                 {{summaryData.relativeHumidity | number:'1.0-1'}} &percnt;
             </td>
-            <td *ngIf="weatherDataSelection == 'relativeHumidity'">
-                {{summaryData.weightedRelativeHumidity | number:'1.0-1'}} &percnt;
-            </td>
-            <td *ngIf="weatherDataSelection == 'dryBulbTemp'">
-                {{summaryData.weightedDryBulbTemp | number:'1.0-1'}} &#8457;
-            </td>
         </tr>
     </tbody>
     <tfoot>
@@ -51,10 +58,13 @@
             <th>
                 Total
             </th>
-            <th *ngIf="weatherDataSelection != 'relativeHumidity'">
-
+            <th>
+                {{detailedDegreeDays | total: 'minutesBetween' | number}} ({{(detailedDegreeDays | total:
+                'minutesBetween') / 1440 | number:'1.0-1'}} days)
             </th>
             <th>
+
+            </th>
             <th *ngIf="weatherDataSelection == 'degreeDays' || weatherDataSelection == 'HDD'">
                 {{detailedDegreeDays | total: 'heatingDegreeDay' | number}}
             </th>
@@ -62,13 +72,12 @@
                 {{detailedDegreeDays | total: 'coolingDegreeDay' | number}}
             </th>
             <th *ngIf="weatherDataSelection == 'relativeHumidity'">
-                {{detailedDegreeDays | average: 'relativeHumidity' | number:'1.0-1'}} &percnt;
+                {{(detailedDegreeDays | total: 'weightedRelativeHumidity') / (detailedDegreeDays | total:
+                'minutesBetween') | number:'1.0-4'}} &percnt;
             </th>
-            <th *ngIf="weatherDataSelection == 'relativeHumidity'">
-                {{detailedDegreeDays | average: 'weightedRelativeHumidity' | number:'1.0-1'}} &percnt;
-            </th>
-            <th *ngIf="weatherDataSelection == 'relativeHumidity'">
-                {{detailedDegreeDays | average: 'weightedDryBulbTemp' | number:'1.0-1'}} &#8457;
+            <th *ngIf="weatherDataSelection == 'dryBulbTemp'">
+                {{(detailedDegreeDays | total: 'weightedDryBulbTemp') / (detailedDegreeDays | total: 'minutesBetween') |
+                number:'1.0-1'}} &percnt;
             </th>
         </tr>
     </tfoot>
