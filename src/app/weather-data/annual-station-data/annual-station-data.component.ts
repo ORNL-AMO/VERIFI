@@ -4,6 +4,7 @@ import { DetailDegreeDay, WeatherDataSelection, WeatherDataSelectionOption, Weat
 import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
 import * as _ from 'lodash';
 import { WeatherDataService } from '../weather-data.service';
+import { getDegreeDayAmount } from 'src/app/shared/sharedHelperFuntions';
 
 @Component({
   selector: 'app-annual-station-data',
@@ -72,18 +73,10 @@ export class AnnualStationDataComponent {
         let monthData: Array<DetailDegreeDay> = this.detailedDegreeDays.filter(day => {
           return day.time.getMonth() == startDate.getMonth();
         });
-        let totalHeatingDegreeDays: number = _.sumBy(monthData, (detailDegreeDay: DetailDegreeDay) => {
-          return detailDegreeDay.heatingDegreeDay
-        });
-        let totalCoolingDegreeDays: number = _.sumBy(monthData, (detailDegreeDay: DetailDegreeDay) => {
-          return detailDegreeDay.coolingDegreeDay
-        });
-        let averageRelativeHumidity: number = _.meanBy(monthData, (detailDegreeDay: DetailDegreeDay) => {
-          return detailDegreeDay.weightedRelativeHumidity
-        });
-        let dryBulbTemp: number = _.meanBy(monthData, (detailDegreeDay: DetailDegreeDay) => {
-          return detailDegreeDay.weightedDryBulbTemp
-        });
+        let totalHeatingDegreeDays: number = getDegreeDayAmount(monthData, 'HDD');
+        let totalCoolingDegreeDays: number =  getDegreeDayAmount(monthData, 'CDD');
+        let relativeHumidity: number =  getDegreeDayAmount(monthData, 'relativeHumidity');
+        let dryBulbTemp: number =  getDegreeDayAmount(monthData, 'dryBulbTemp');
         let hasErrors: DetailDegreeDay = monthData.find(degreeDay => {
           return degreeDay.gapInData == true
         });
@@ -95,7 +88,7 @@ export class AnnualStationDataComponent {
           heatingDegreeDays: totalHeatingDegreeDays,
           coolingDegreeDays: totalCoolingDegreeDays,
           hasErrors: hasErrors != undefined,
-          relativeHumidity: averageRelativeHumidity,
+          relativeHumidity: relativeHumidity,
           dryBulbTemp: dryBulbTemp
         });
         startDate.setMonth(startDate.getMonth() + 1);

@@ -59,25 +59,23 @@
                 Total
             </th>
             <th>
-                {{detailedDegreeDays | total: 'minutesBetween' | number}} ({{(detailedDegreeDays | total:
-                'minutesBetween') / 1440 | number:'1.0-1'}} days)
+                {{detailedDegreeDays | degreeDayTotal: 'minutesBetween' | number}}
+                ({{detailedDegreeDays | degreeDayTotal:'days'| number:'1.0-1'}} days)
             </th>
             <th>
 
             </th>
             <th *ngIf="weatherDataSelection == 'degreeDays' || weatherDataSelection == 'HDD'">
-                {{detailedDegreeDays | total: 'heatingDegreeDay' | number}}
+                {{detailedDegreeDays | degreeDayTotal: 'heatingDegreeDay' | number}}
             </th>
             <th *ngIf="weatherDataSelection == 'degreeDays' || weatherDataSelection == 'CDD'">
-                {{detailedDegreeDays | total: 'coolingDegreeDay' | number}}
+                {{detailedDegreeDays | degreeDayTotal: 'coolingDegreeDay' | number}}
             </th>
             <th *ngIf="weatherDataSelection == 'relativeHumidity'">
-                {{(detailedDegreeDays | total: 'weightedRelativeHumidity') / (detailedDegreeDays | total:
-                'minutesBetween') | number:'1.0-4'}} &percnt;
+                {{detailedDegreeDays | degreeDayTotal: 'relativeHumidity' | number:'1.0-4'}} &percnt;
             </th>
             <th *ngIf="weatherDataSelection == 'dryBulbTemp'">
-                {{(detailedDegreeDays | total: 'weightedDryBulbTemp') / (detailedDegreeDays | total: 'minutesBetween') |
-                number:'1.0-1'}} &percnt;
+                {{detailedDegreeDays | degreeDayTotal: 'dryBulbTemp' | number:'1.0-1'}} &percnt;
             </th>
         </tr>
     </tfoot>

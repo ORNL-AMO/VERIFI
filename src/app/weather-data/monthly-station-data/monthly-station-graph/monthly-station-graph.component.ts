@@ -3,6 +3,7 @@ import { PlotlyService } from 'angular-plotly.js';
 import { DetailDegreeDay, WeatherDataSelection } from 'src/app/models/degreeDays';
 import { Months } from 'src/app/shared/form-data/months';
 import * as _ from 'lodash';
+import { getDegreeDayAmount } from 'src/app/shared/sharedHelperFuntions';
 
 @Component({
   selector: 'app-monthly-station-graph',
@@ -161,10 +162,8 @@ export class MonthlyStationGraphComponent {
       }
 
       if (this.weatherDataSelection == 'dryBulbTemp') {
-        graphTitle = 'Dry Bulb Temp. <br>(' + Months[this.selectedMonth.getMonth()].name + ', ' + this.selectedMonth.getFullYear() + ')'
-        let totalMinutes: number = _.sumBy(this.detailedDegreeDays, 'minutesBetween');
-        let totalWeightedVals: number = _.sumBy(this.detailedDegreeDays, 'weightedDryBulbTemp')
-        let results = totalWeightedVals / totalMinutes;
+        graphTitle = 'Dry Bulb Temp. <br>(' + Months[this.selectedMonth.getMonth()].name + ', ' + this.selectedMonth.getFullYear() + ')';
+        let results = getDegreeDayAmount(this.detailedDegreeDays, 'dryBulbTemp');
         traceData.push({
           x: this.detailedDegreeDays.map(data => { return data.time }),
           y: this.detailedDegreeDays.map(data => { return results.toFixed(1) }),
@@ -193,10 +192,7 @@ export class MonthlyStationGraphComponent {
           }
         });
 
-
-        let totalMinutes: number = _.sumBy(this.detailedDegreeDays, 'minutesBetween');
-        let totalWeightedVals: number = _.sumBy(this.detailedDegreeDays, 'weightedRelativeHumidity')
-        let results = totalWeightedVals / totalMinutes;
+        let results = getDegreeDayAmount(this.detailedDegreeDays, 'relativeHumidity');
         traceData.push({
           x: this.detailedDegreeDays.map(data => { return data.time }),
           y: this.detailedDegreeDays.map(data => { return results.toFixed(1) }),

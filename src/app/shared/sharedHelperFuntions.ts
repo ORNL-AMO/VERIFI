@@ -177,20 +177,28 @@ export function getDegreeDayAmount(degreeDays: Array<DetailDegreeDay>, weatherDa
             return degreeDay.heatingDegreeDay
         });
     } else if (weatherDataSelection == 'relativeHumidity') {
-        let averageRH: number = _.sumBy(degreeDays, (degreeDay: DetailDegreeDay) => {
-            return degreeDay.weightedRelativeHumidity
+        let totalWeightedRH: number = _.sumBy(degreeDays, (degreeDay: DetailDegreeDay) => {
+            return degreeDay.weightedRelativeHumidity;
         });
-        if (isNaN(averageRH)) {
-            averageRH = 0;
+        let totalMinutes: number = _.sumBy(degreeDays, (degreeDay: DetailDegreeDay) => {
+            return degreeDay.minutesBetween;
+        });
+        let weightedAverage: number = (totalWeightedRH / totalMinutes);
+        if (isNaN(weightedAverage)) {
+            weightedAverage = 0;
         }
-        return averageRH;
+        return weightedAverage;
     } else if (weatherDataSelection == 'dryBulbTemp') {
-        let averageTemp: number = _.sumBy(degreeDays, (degreeDay: DetailDegreeDay) => {
-            return degreeDay.weightedDryBulbTemp
+        let totalWeightedDryBulb: number = _.sumBy(degreeDays, (degreeDay: DetailDegreeDay) => {
+            return degreeDay.weightedDryBulbTemp;
         });
-        if (isNaN(averageTemp)) {
-            averageTemp = 0;
+        let totalMinutes: number = _.sumBy(degreeDays, (degreeDay: DetailDegreeDay) => {
+            return degreeDay.minutesBetween;
+        });
+        let weightedAverage: number = (totalWeightedDryBulb / totalMinutes);
+        if (isNaN(weightedAverage)) {
+            weightedAverage = 0;
         }
-        return averageTemp;
+        return weightedAverage;
     }
 }
