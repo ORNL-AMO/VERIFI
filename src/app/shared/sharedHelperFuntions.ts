@@ -1,5 +1,6 @@
 import { ConvertValue } from "../calculations/conversions/convertValue";
 import { MeterPhase, MeterSource } from "../models/constantsAndTypes";
+import { DetailDegreeDay, WeatherDataSelection } from "../models/degreeDays";
 import { IdbUtilityMeter } from "../models/idbModels/utilityMeter";
 import { FuelTypeOption } from "./fuel-options/fuelTypeOption";
 import { StationaryOtherEnergyOptions } from "./fuel-options/stationaryOtherEnergyOptions";
@@ -105,62 +106,99 @@ export function convertElectricityEmissions(emissionsRate: number, energyUnit: s
 
 export function getStartingUnitOptions(source: MeterSource, phase: MeterPhase, fuel: string, scope: number): Array<UnitOption> {
     if (source == 'Electricity' || !source) {
-      return EnergyUnitOptions;
-    } else if (source == 'Natural Gas') {
-      return VolumeGasOptions.concat(EnergyUnitOptions);
-    } else if (source == 'Other Fuels') {
-      if (phase == 'Gas') {
-        return VolumeGasOptions.concat(EnergyUnitOptions);
-      } else if (phase == 'Liquid') {
-        return VolumeLiquidOptions.concat(EnergyUnitOptions);
-      } else if (phase == 'Solid') {
-        return MassUnitOptions.concat(EnergyUnitOptions);
-      }
-    } else if (source == 'Other Energy') {
-      let selectedEnergyOption: FuelTypeOption = StationaryOtherEnergyOptions.find(option => { return option.value == fuel });
-      if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Steam') {
-        return MassUnitOptions.concat(EnergyUnitOptions);
-      } else if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Chilled Water') {
-        return EnergyUnitOptions.concat(ChilledWaterUnitOptions)
-      } else if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Hot Water') {
         return EnergyUnitOptions;
-      } else if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Compressed Air') {
-        return EnergyUnitOptions.concat(VolumeGasOptions);
-      }
+    } else if (source == 'Natural Gas') {
+        return VolumeGasOptions.concat(EnergyUnitOptions);
+    } else if (source == 'Other Fuels') {
+        if (phase == 'Gas') {
+            return VolumeGasOptions.concat(EnergyUnitOptions);
+        } else if (phase == 'Liquid') {
+            return VolumeLiquidOptions.concat(EnergyUnitOptions);
+        } else if (phase == 'Solid') {
+            return MassUnitOptions.concat(EnergyUnitOptions);
+        }
+    } else if (source == 'Other Energy') {
+        let selectedEnergyOption: FuelTypeOption = StationaryOtherEnergyOptions.find(option => { return option.value == fuel });
+        if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Steam') {
+            return MassUnitOptions.concat(EnergyUnitOptions);
+        } else if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Chilled Water') {
+            return EnergyUnitOptions.concat(ChilledWaterUnitOptions)
+        } else if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Hot Water') {
+            return EnergyUnitOptions;
+        } else if (selectedEnergyOption && selectedEnergyOption.otherEnergyType && selectedEnergyOption.otherEnergyType == 'Compressed Air') {
+            return EnergyUnitOptions.concat(VolumeGasOptions);
+        }
     } else if (source == 'Water Intake' || source == 'Water Discharge') {
-      return VolumeLiquidOptions;
+        return VolumeLiquidOptions;
     } else if (source == 'Other') {
-      if (scope == 5 || scope == 6) {
-        return MassUnitOptions;
-      } else {
-        return VolumeGasOptions.concat(VolumeLiquidOptions).concat(MassUnitOptions).concat(ChilledWaterUnitOptions);
-      }
+        if (scope == 5 || scope == 6) {
+            return MassUnitOptions;
+        } else {
+            return VolumeGasOptions.concat(VolumeLiquidOptions).concat(MassUnitOptions).concat(ChilledWaterUnitOptions);
+        }
     }
     return EnergyUnitOptions;
-  }
+}
 
-  export function checkShowHeatCapacity(source: MeterSource, startingUnit: string, scope: number): boolean {
-      if (source != 'Water Intake' && source != 'Water Discharge' && source != 'Other' && startingUnit && scope != 2) {
-          return (getIsEnergyUnit(startingUnit) == false);
-      } else {
-          return false;
-      }
-  }
-  
-  export function checkShowSiteToSource(source: MeterSource, includeInEnergy: boolean, scope: number): boolean {
-      if (!includeInEnergy || scope == 2) {
-          return false;
-      } else if (source == "Electricity" || source == "Natural Gas" || source == 'Other Energy') {
-          return true;
-      } else {
-          return false;
-      }
-  }
-  
-  export function checkShowEmissionsOutputRate(meter: IdbUtilityMeter): boolean {
-      if (meter.source == 'Electricity' || meter.source == 'Natural Gas' || meter.source == 'Other Fuels' || meter.source == 'Other Energy' || (meter.source == 'Other' && meter.scope == 5)) {
-          return true;
-      } else {
-          return false;
-      }
-  }
+export function checkShowHeatCapacity(source: MeterSource, startingUnit: string, scope: number): boolean {
+    if (source != 'Water Intake' && source != 'Water Discharge' && source != 'Other' && startingUnit && scope != 2) {
+        return (getIsEnergyUnit(startingUnit) == false);
+    } else {
+        return false;
+    }
+}
+
+export function checkShowSiteToSource(source: MeterSource, includeInEnergy: boolean, scope: number): boolean {
+    if (!includeInEnergy || scope == 2) {
+        return false;
+    } else if (source == "Electricity" || source == "Natural Gas" || source == 'Other Energy') {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+export function checkShowEmissionsOutputRate(meter: IdbUtilityMeter): boolean {
+    if (meter.source == 'Electricity' || meter.source == 'Natural Gas' || meter.source == 'Other Fuels' || meter.source == 'Other Energy' || (meter.source == 'Other' && meter.scope == 5)) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+import * as _ from 'lodash';
+export function getDegreeDayAmount(degreeDays: Array<DetailDegreeDay>, weatherDataSelection: WeatherDataSelection): number {
+    if (weatherDataSelection == 'CDD') {
+        return _.sumBy(degreeDays, (degreeDay: DetailDegreeDay) => {
+            return degreeDay.coolingDegreeDay
+        });
+    } else if (weatherDataSelection == 'HDD') {
+        return _.sumBy(degreeDays, (degreeDay: DetailDegreeDay) => {
+            return degreeDay.heatingDegreeDay
+        });
+    } else if (weatherDataSelection == 'relativeHumidity') {
+        let totalWeightedRH: number = _.sumBy(degreeDays, (degreeDay: DetailDegreeDay) => {
+            return degreeDay.weightedRelativeHumidity;
+        });
+        let totalMinutes: number = _.sumBy(degreeDays, (degreeDay: DetailDegreeDay) => {
+            return degreeDay.minutesBetween;
+        });
+        let weightedAverage: number = (totalWeightedRH / totalMinutes);
+        if (isNaN(weightedAverage)) {
+            weightedAverage = 0;
+        }
+        return weightedAverage;
+    } else if (weatherDataSelection == 'dryBulbTemp') {
+        let totalWeightedDryBulb: number = _.sumBy(degreeDays, (degreeDay: DetailDegreeDay) => {
+            return degreeDay.weightedDryBulbTemp;
+        });
+        let totalMinutes: number = _.sumBy(degreeDays, (degreeDay: DetailDegreeDay) => {
+            return degreeDay.minutesBetween;
+        });
+        let weightedAverage: number = (totalWeightedDryBulb / totalMinutes);
+        if (isNaN(weightedAverage)) {
+            weightedAverage = 0;
+        }
+        return weightedAverage;
+    }
+}

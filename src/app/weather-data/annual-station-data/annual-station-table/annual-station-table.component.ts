@@ -2,6 +2,7 @@ import { Component, Input } from '@angular/core';
 import { Router } from '@angular/router';
 import { WeatherDataService } from '../../weather-data.service';
 import { WeatherDataSelection } from 'src/app/models/degreeDays';
+import { AnnualStationDataSummary } from '../annual-station-data.component';
 
 @Component({
   selector: 'app-annual-station-table',
@@ -10,7 +11,7 @@ import { WeatherDataSelection } from 'src/app/models/degreeDays';
 })
 export class AnnualStationTableComponent {
   @Input()
-  yearSummaryData: Array<{ date: Date, heatingDegreeDays: number, coolingDegreeDays: number, hasErrors: boolean  }>;
+  yearSummaryData: Array<AnnualStationDataSummary>;
   @Input()
   weatherDataSelection: WeatherDataSelection;
   

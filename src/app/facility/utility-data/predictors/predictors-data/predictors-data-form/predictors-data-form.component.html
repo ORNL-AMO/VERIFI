@@ -34,16 +34,8 @@
                 <label [for]="'predictor-' + predictor.id">
                     <span class="fa fa-temperature-half" *ngIf="predictor.predictorType == 'Weather'"></span>
                     {{predictor.name}}
-                    <ng-container *ngIf="predictor.predictorType == 'Weather'">
-                        <br>
-                        <span class="small block">({{predictor.weatherDataType}},
-                            <ng-container *ngIf="predictor.weatherDataType == 'HDD'">
-                                {{predictor.heatingBaseTemperature}} &#8457;
-                            </ng-container>
-                            <ng-container *ngIf="predictor.weatherDataType == 'CDD'">
-                                {{predictor.coolingBaseTemperature}} &#8457;
-                            </ng-container>)</span>
-                    </ng-container>
+                    <app-weather-data-sub-label *ngIf="predictor.predictorType == 'Weather'"
+                        [predictor]="predictor"></app-weather-data-sub-label>
                 </label>
             </div>
             <div class="col">
@@ -62,8 +54,7 @@
                         [disabled]="predictor.predictorType == 'Weather' && !predictorData.weatherOverride"
                         (input)="setChanged()">
                     <span class="input-group-text" *ngIf="predictor.unit">{{predictor.unit}}</span>
-                    <ng-container
-                        *ngIf="predictor.predictorType == 'Weather'">
+                    <ng-container *ngIf="predictor.predictorType == 'Weather'">
                         <span class="input-group-text p-0">
                             <button class="btn btn-secondary btn-sm h-100" *ngIf="!predictorData.weatherOverride"
                                 (click)="setWeatherManually()">
@@ -93,9 +84,9 @@
     calculation has been skipped. <a (click)="revertManualWeatherData()">Calculate Weather Data</a>
 </div>
 <div *ngIf="predictor.predictorType == 'Weather'" class="alert alert-info text-center">
-    Degree day predictors are denoted with a <span class="fa fa-temperature-half"></span> icon and are automatically
+    Weather data predictors are denoted with a <span class="fa fa-temperature-half"></span> icon and are automatically
     calculated.
 </div>
 
 <app-calculating-spinner *ngIf="calculatingDegreeDays"
-    [message]="'Calculating Degree Days...'"></app-calculating-spinner>
+    [message]="'Calculating Weather Data...'"></app-calculating-spinner>

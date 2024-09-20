@@ -16,6 +16,7 @@ import { SharedDataService } from 'src/app/shared/helper-services/shared-data.se
 import * as _ from 'lodash';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAccount } from 'src/app/models/idbModels/account';
+import { getDegreeDayAmount } from 'src/app/shared/sharedHelperFuntions';
 
 @Component({
   selector: 'app-calculated-predictor-data-update',
@@ -124,17 +125,9 @@ export class CalculatedPredictorDataUpdateComponent {
         let hasErrors: DetailDegreeDay = degreeDays.find(degreeDay => {
           return degreeDay.gapInData == true
         });
-        if (this.predictor.weatherDataType == 'CDD') {
-          let totalCDD: number = _.sumBy(degreeDays, 'coolingDegreeDay');
-          this.predictorData[i].updatedAmount = totalCDD;
-          this.predictorData[i].changeAmount = Math.abs(this.predictorData[i].amount - this.predictorData[i].updatedAmount)
-          this.predictorData[i].weatherDataWarning = hasErrors != undefined || degreeDays.length == 0;
-        } else {
-          let totalHDD: number = _.sumBy(degreeDays, 'heatingDegreeDay');
-          this.predictorData[i].updatedAmount = totalHDD;
-          this.predictorData[i].changeAmount = Math.abs(this.predictorData[i].amount - this.predictorData[i].updatedAmount)
-          this.predictorData[i].weatherDataWarning = hasErrors != undefined || degreeDays.length == 0;
-        }
+        this.predictorData[i].updatedAmount = getDegreeDayAmount(degreeDays, this.predictor.weatherDataType);
+        this.predictorData[i].changeAmount = Math.abs(this.predictorData[i].amount - this.predictorData[i].updatedAmount)
+        this.predictorData[i].weatherDataWarning = hasErrors != undefined || degreeDays.length == 0;
       }
     }
     this.setDataSummary();
@@ -179,7 +172,7 @@ export class CalculatedPredictorDataUpdateComponent {
         }
       } else {
         let dataEndDate: Date = new Date(endDate);
-        dataEndDate.setMonth(dataEndDate.getMonth() + 1);
+        // dataEndDate.setMonth(dataEndDate.getMonth() + 1);
         await this.addDegreeDays(startDate, dataEndDate);
       }
 
@@ -204,15 +197,8 @@ export class CalculatedPredictorDataUpdateComponent {
       });
       let newPredictorData: IdbPredictorData = getNewIdbPredictorData(this.predictor);
       newPredictorData.date = newDate;
-      if (this.predictor.weatherDataType == 'CDD') {
-        let totalCDD: number = _.sumBy(degreeDays, 'coolingDegreeDay');
-        newPredictorData.amount = totalCDD;
-        newPredictorData.weatherDataWarning = hasErrors != undefined || degreeDays.length == 0;
-      } else {
-        let totalHDD: number = _.sumBy(degreeDays, 'heatingDegreeDay');
-        newPredictorData.amount = totalHDD;
-        newPredictorData.weatherDataWarning = hasErrors != undefined || degreeDays.length == 0;
-      }
+      newPredictorData.amount = getDegreeDayAmount(degreeDays, this.predictor.weatherDataType);
+      newPredictorData.weatherDataWarning = hasErrors != undefined || degreeDays.length == 0;
       let tableItem: CalculatedPredictorTableItem = {
         ...newPredictorData,
         updatedAmount: newPredictorData.amount,

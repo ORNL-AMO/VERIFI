@@ -18,6 +18,8 @@ import { AnalysisCategoryPipe } from './analysis-category.pipe';
 import { EmissionsDisplayPipe } from './emissions-display.pipe';
 import { MeterSourceColorPipe } from './meter-source-color.pipe';
 import { NaicsDisplayPipe } from './naics-display.pipe';
+import { AveragePipe } from './average.pipe';
+import { DegreeDayTotalPipe } from './degree-day-total.pipe';
 
 @NgModule({
   declarations: [
@@ -38,7 +40,9 @@ import { NaicsDisplayPipe } from './naics-display.pipe';
     AnalysisCategoryPipe,
     EmissionsDisplayPipe,
     MeterSourceColorPipe,
-    NaicsDisplayPipe
+    NaicsDisplayPipe,
+    AveragePipe,
+    DegreeDayTotalPipe
   ],
   imports: [
     CommonModule
@@ -61,7 +65,9 @@ import { NaicsDisplayPipe } from './naics-display.pipe';
     AnalysisCategoryPipe,
     EmissionsDisplayPipe,
     MeterSourceColorPipe,
-    NaicsDisplayPipe
+    NaicsDisplayPipe,
+    AveragePipe,
+    DegreeDayTotalPipe
   ]
 })
 export class HelperPipesModule { }

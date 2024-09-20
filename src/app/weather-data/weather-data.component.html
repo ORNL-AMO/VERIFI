@@ -15,12 +15,17 @@
         This page provides a detailed look of the weather data available for use by VERIFI. The weather data is pulled
         from <a href="https://www.ncei.noaa.gov/" target="_blank">The National Centers for Environmental
             Information</a>. If quality
-        data is found VERIFI can automatically calculate heating and cooling degree days. The calculated degree days can
+        data is found, VERIFI can automatically calculate heating and cooling degree days, average relative humidity and
+        average dry bulb temperature. The calculated weather data can
         be used as predictor data for analysis.
     </p>
     <p>
         For much more information on all things degree days, visit <a href="https://www.degreedays.net/"
             target="_blank">https://www.degreedays.net/</a>
+    </p>
+    <p>
+        Average relative humidty and dry bulb temperature are calculated using a weighted average where the weights are
+        the number of minutes that a reading covers.
     </p>
     <hr>
     <router-outlet></router-outlet>
@@ -38,14 +43,17 @@
             the selected weather station and temperature threshold.</p>
         <p *ngIf="weatherDataSelection == 'degreeDays'">Select the facility to create new heating and cooling degree day
             predictors using the selected weather station and temperature thresholds.</p>
+        <p *ngIf="weatherDataSelection == 'relativeHumidity'">Select the facility to create new relative humidity
+            predictors using the weighted average relative humidity of the selected station.</p>
+        <p *ngIf="weatherDataSelection == 'dryBulbTemp'">Select the facility to create new dry bulb temperature
+            predictors using the weighted average dry bulb temp of the selected station.</p>
         <form>
             <select class="form-select" name="selectedFacility" [(ngModel)]="selectedFacility"
                 (change)="setFacilityData()">
                 <option *ngFor="let facility of facilities" [ngValue]="facility">{{facility.name}}</option>
             </select>
         </form>
-        <div class="alert alert-warning"
-            *ngIf="facilityPredictorData?.length == 0 && facilityMeterData?.length != 0">
+        <div class="alert alert-warning" *ngIf="facilityPredictorData?.length == 0 && facilityMeterData?.length != 0">
             No facility predictor entries found. Entries will be created to match facility meter dates.
         </div>
         <div class="alert alert-danger" *ngIf="facilityMeterData?.length == 0">

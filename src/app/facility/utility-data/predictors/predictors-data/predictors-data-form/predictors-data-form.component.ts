@@ -16,6 +16,7 @@ import { WeatherDataService } from 'src/app/weather-data/weather-data.service';
 import * as _ from 'lodash';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { getDegreeDayAmount } from 'src/app/shared/sharedHelperFuntions';
 
 @Component({
   selector: 'app-predictors-data-form',
@@ -115,19 +116,11 @@ export class PredictorsDataFormComponent {
         let hasErrors: DetailDegreeDay = degreeDays.find(degreeDay => {
           return degreeDay.gapInData == true
         });
-        if (!hasWeatherDataWarning && hasErrors != undefined) {
+        if (!hasWeatherDataWarning && hasErrors != undefined || degreeDays.length == 0) {
           hasWeatherDataWarning = true;
         }
-        if (this.predictor.weatherDataType == 'CDD') {
-          let totalCDD: number = _.sumBy(degreeDays, 'coolingDegreeDay');
-          this.predictorData.amount = totalCDD;
-          this.predictorData.weatherDataWarning = hasErrors != undefined;
-
-        } else {
-          let totalHDD: number = _.sumBy(degreeDays, 'heatingDegreeDay');
-          this.predictorData.amount = totalHDD;
-          this.predictorData.weatherDataWarning = hasErrors != undefined;
-        }
+        this.predictorData.amount = getDegreeDayAmount(degreeDays, this.predictor.weatherDataType);
+        this.predictorData.weatherDataWarning = hasErrors != undefined || degreeDays.length == 0;
       }
     }
     this.calculatingDegreeDays = false;
