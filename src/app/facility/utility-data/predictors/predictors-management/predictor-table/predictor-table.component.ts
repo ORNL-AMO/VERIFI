@@ -19,6 +19,7 @@ import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.se
 import { WeatherDataService } from 'src/app/weather-data/weather-data.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
+import { getGUID } from 'src/app/shared/sharedHelperFuntions';
 
 @Component({
   selector: 'app-predictor-table',
@@ -32,6 +33,7 @@ export class PredictorTableComponent {
   selectedFacilitySub: Subscription;
   selectedFacility: IdbFacility;
   predictorToDelete: IdbPredictor;
+  predictorToCopy: IdbPredictor;
 
   standardPredictors: Array<IdbPredictor>;
   degreeDayPredictors: Array<IdbPredictor>;
@@ -39,7 +41,9 @@ export class PredictorTableComponent {
   hasWeatherDataWarning: boolean;
   predictorUsedGroupIds: Array<string> = [];
   displayDeletePredictor: boolean = false;
-  // predictorEntries: Array<IdbPredictorEntry>;
+  facilities: Array<IdbFacility>;
+  selectedCopyFacilityGuid: string;
+  displayCopyModal: boolean = false;
   constructor(private predictorDbService: PredictorDbService, private router: Router,
     private facilitydbService: FacilitydbService, private loadingService: LoadingService,
     private weatherDataService: WeatherDataService, private degreeDaysService: DegreeDaysService,
@@ -53,6 +57,7 @@ export class PredictorTableComponent {
   }
 
   ngOnInit() {
+    this.facilities = this.facilitydbService.accountFacilities.getValue();
     this.facilityPredictorsSub = this.predictorDbService.facilityPredictors.subscribe(val => {
       this.facilityPredictors = val;
       this.standardPredictors = new Array();
@@ -205,5 +210,48 @@ export class PredictorTableComponent {
     this.weatherDataService.selectedFacility = facility;
     this.weatherDataService.zipCode = facility.zip;
     this.router.navigateByUrl('/weather-data');
+  }
+
+  selectCopy(predictor: IdbPredictor) {
+    this.predictorToCopy = predictor;
+    this.facilities = this.facilitydbService.accountFacilities.getValue().filter(facility => {
+      return facility.guid != this.predictorToCopy.facilityId
+    });
+    this.displayCopyModal = true;
+  }
+
+  cancelCopy() {
+    this.displayCopyModal = false;
+    this.predictorToCopy = undefined;
+  }
+
+  async confirmCopy() {
+    this.displayCopyModal = false;
+    this.loadingService.setLoadingMessage("Copying Predictor Data...")
+    this.loadingService.setLoadingStatus(true);
+    let predictorData: Array<IdbPredictorData> = this.predictorDataDbService.getByPredictorId(this.predictorToCopy.guid);
+    let newPredictor: IdbPredictor = JSON.parse(JSON.stringify(this.predictorToCopy));
+    delete newPredictor.id;
+    newPredictor.guid = getGUID();
+    newPredictor.facilityId = this.selectedCopyFacilityGuid;
+    newPredictor.name = newPredictor.name + " (copy)";
+    await firstValueFrom(this.predictorDbService.addWithObservable(newPredictor));
+    await this.analysisDbService.addAnalysisPredictor(newPredictor);
+    for (let i = 0; i < predictorData.length; i++) {
+      let newPredictorData: IdbPredictorData = JSON.parse(JSON.stringify(predictorData[i]));
+      delete newPredictorData.id;
+      newPredictorData.guid = getGUID();
+      newPredictorData.facilityId = this.selectedCopyFacilityGuid;
+      newPredictorData.predictorId = newPredictor.guid;
+      await firstValueFrom(this.predictorDataDbService.addWithObservable(newPredictorData));
+    }
+    let facility: IdbFacility = this.facilities.find(facility => { return facility.guid == this.selectedCopyFacilityGuid });
+    this.loadingService.setLoadingStatus(false);
+    this.toastNotificationService.showToast("Predictor Copy Created", undefined, undefined, false, "alert-success");
+    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    await this.dbChangesService.setPredictorsV2(account);
+    await this.dbChangesService.setPredictorDataV2(account)
+    await this.dbChangesService.selectFacility(facility);
+    this.router.navigateByUrl('/facility/' + facility.id + '/utility/predictors/manage/predictor-table');
   }
 }

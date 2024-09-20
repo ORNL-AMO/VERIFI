@@ -10,50 +10,63 @@
 
 <ng-container *ngIf="standardPredictors.length != 0">
     <h5>Standard</h5>
-    <div class="table-responsive">
-        <table class="table utility-data table-sm table-bordered table-hover" #predictorTable>
-            <thead class="sortable">
-                <tr>
-                    <th>
-                        Name
-                    </th>
-                    <th>
-                        Units
-                    </th>
-                    <th class="is-production">
-                        Is Production?
-                    </th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody class="table-group-divider">
-                <tr *ngFor="let predictor of standardPredictors">
-                    <td>
-                        <a (click)="selectEditPredictor(predictor)">
-                            {{predictor.name}}</a>
-                    </td>
-                    <td>
-                        {{predictor.unit}}
-                    </td>
-                    <td>
-                        <span *ngIf="predictor.production">Yes</span>
-                        <span *ngIf="!predictor.production">No</span>
-                    </td>
-                    <td class="actions">
-                        <div class="btn-group">
-                            <button class="btn btn-sm btn-outline" (click)="selectEditPredictor(predictor)"
-                                title="Edit">
-                                <i class="fa fa-pencil"></i>
-                            </button>
-                            <button class="btn btn-sm btn-outline" (click)="selectDelete(predictor)" title="Delete">
-                                <i class="fa fa-trash"></i>
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
+    <!-- <div class="table-responsive"> -->
+    <table class="table utility-data table-sm table-bordered table-hover" #predictorTable>
+        <thead class="sortable">
+            <tr>
+                <th>
+                    Name
+                </th>
+                <th>
+                    Units
+                </th>
+                <th class="is-production">
+                    Is Production?
+                </th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody class="table-group-divider">
+            <tr *ngFor="let predictor of standardPredictors">
+                <td>
+                    <a (click)="selectEditPredictor(predictor)">
+                        {{predictor.name}}</a>
+                </td>
+                <td>
+                    {{predictor.unit}}
+                </td>
+                <td>
+                    <span *ngIf="predictor.production">Yes</span>
+                    <span *ngIf="!predictor.production">No</span>
+                </td>
+                <td class="actions">
+                    <div class="dropdown">
+                        <button class="btn action-btn dropdown-toggle btn-sm" data-bs-toggle="dropdown"
+                            aria-expanded="false">
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a class="dropdown-item" (click)="selectEditPredictor(predictor)" title="Edit">
+                                    <i class="fa fa-pencil"></i> Edit Predictor
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" (click)="selectDelete(predictor)" title="Delete">
+                                    <i class="fa fa-trash"></i> Delete Predictor
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" (click)="selectCopy(predictor)" title="Copy To Facility">
+                                    <i class="fa fa-copy"></i> Copy To Facility
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <!-- </div> -->
 </ng-container>
 
 
@@ -69,83 +82,96 @@
         to pull data from, use the <a (click)="goToWeatherData()">Weather Data</a> page to explore other stations in the
         area of this facility.
     </div>
-    <div class="table-responsive">
-        <table class="table utility-data table-sm table-bordered table-hover" #predictorTable>
-            <thead class="sortable">
-                <tr>
-                    <th>
-                        Name
-                    </th>
-                    <th>
-                        Type
-                    </th>
-                    <th>
-                        Threshold
-                    </th>
-                    <th>
-                        Weather Station
-                    </th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody class="table-group-divider">
-                <tr *ngFor="let predictor of degreeDayPredictors">
-                    <td>
-                        <a (click)="selectEditPredictor(predictor)">
-                            {{predictor.name}}</a>
-                    </td>
-                    <td>
-                        <ng-container *ngIf="predictor.weatherDataType == 'HDD'">
-                            Heating
-                        </ng-container>
-                        <ng-container *ngIf="predictor.weatherDataType == 'CDD'">
-                            Cooling
-                        </ng-container>
-                        <ng-container *ngIf="predictor.weatherDataType == 'relativeHumidity'">
-                            Relative Humidity
-                        </ng-container>
-                        <ng-container *ngIf="predictor.weatherDataType == 'dryBulbTemp'">
-                            Dry Bulb Temp
-                        </ng-container>
-                    </td>
-                    <td>
-                        <ng-container *ngIf="predictor.weatherDataType == 'HDD'">
-                            {{predictor.heatingBaseTemperature}} &#8457;
-                        </ng-container>
-                        <ng-container *ngIf="predictor.weatherDataType == 'CDD'">
-                            {{predictor.coolingBaseTemperature}} &#8457;
-                        </ng-container>
-                        <ng-container
-                            *ngIf="predictor.weatherDataType == 'relativeHumidity' || predictor.weatherDataType == 'dryBulbTemp'">
-                            &mdash;
-                        </ng-container>
-                    </td>
-                    <td>
-                        <span class="fa fa-exclamation-circle" *ngIf="predictor.weatherDataWarning">
-                        </span>
-                        {{predictor.weatherStationName}}
+    <!-- <div class="table-responsive"> -->
+    <table class="table utility-data table-sm table-bordered table-hover" #predictorTable>
+        <thead class="sortable">
+            <tr>
+                <th>
+                    Name
+                </th>
+                <th>
+                    Type
+                </th>
+                <th>
+                    Threshold
+                </th>
+                <th>
+                    Weather Station
+                </th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody class="table-group-divider">
+            <tr *ngFor="let predictor of degreeDayPredictors">
+                <td>
+                    <a (click)="selectEditPredictor(predictor)">
+                        {{predictor.name}}</a>
+                </td>
+                <td>
+                    <ng-container *ngIf="predictor.weatherDataType == 'HDD'">
+                        Heating
+                    </ng-container>
+                    <ng-container *ngIf="predictor.weatherDataType == 'CDD'">
+                        Cooling
+                    </ng-container>
+                    <ng-container *ngIf="predictor.weatherDataType == 'relativeHumidity'">
+                        Relative Humidity
+                    </ng-container>
+                    <ng-container *ngIf="predictor.weatherDataType == 'dryBulbTemp'">
+                        Dry Bulb Temp
+                    </ng-container>
+                </td>
+                <td>
+                    <ng-container *ngIf="predictor.weatherDataType == 'HDD'">
+                        {{predictor.heatingBaseTemperature}} &#8457;
+                    </ng-container>
+                    <ng-container *ngIf="predictor.weatherDataType == 'CDD'">
+                        {{predictor.coolingBaseTemperature}} &#8457;
+                    </ng-container>
+                    <ng-container
+                        *ngIf="predictor.weatherDataType == 'relativeHumidity' || predictor.weatherDataType == 'dryBulbTemp'">
+                        &mdash;
+                    </ng-container>
+                </td>
+                <td>
+                    <span class="fa fa-exclamation-circle" *ngIf="predictor.weatherDataWarning">
+                    </span>
+                    {{predictor.weatherStationName}}
 
-                    </td>
-                    <td class="actions">
-                        <div class="btn-group">
-                            <button class="btn btn-sm btn-outline" (click)="selectEditPredictor(predictor)"
-                                title="Edit">
-                                <i class="fa fa-pencil"></i>
-                            </button>
-                            <button class="btn btn-sm btn-outline" (click)="selectDelete(predictor)" title="Delete">
-                                <i class="fa fa-trash"></i>
-                            </button>
-
-                            <button class="btn btn-sm btn-outline" (click)="viewWeatherData(predictor)"
-                                title="View Weather Data">
-                                <i class="fa fa-temperature-half"></i>
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
+                </td>
+                <td class="actions">
+                    <div class="dropdown ms-auto">
+                        <button class="btn action-btn dropdown-toggle btn-sm" data-bs-toggle="dropdown"
+                            aria-expanded="false">
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a class="dropdown-item" (click)="selectEditPredictor(predictor)" title="Edit">
+                                    <i class="fa fa-pencil"></i> Edit Predictor
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" (click)="selectDelete(predictor)" title="Delete">
+                                    <i class="fa fa-trash"></i> Delete Predictor
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" (click)="viewWeatherData(predictor)" title="View Weather Data">
+                                    <i class="fa fa-temperature-half"></i> View Weather Data
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" (click)="selectCopy(predictor)" title="Copy To Facility">
+                                    <i class="fa fa-copy"></i> Copy To Facility
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <!-- </div> -->
 </ng-container>
 
 <ng-container *ngIf="facilityPredictors.length == 0">
@@ -156,7 +182,8 @@
     </div>
 </ng-container>
 
-<div [ngClass]="{'windowOverlay': displayDeletePredictor}"></div>
+<div [ngClass]="{'windowOverlay': displayDeletePredictor || displayCopyModal}"></div>
+<!--delete-->
 <div class="popup" [class.open]="displayDeletePredictor">
     <div class="popup-header">
         Delete {{predictorToDelete?.name}}?
@@ -174,5 +201,29 @@
     <div class="saveCancel popup-footer text-end">
         <button class="btn btn-secondary" (click)="cancelDelete()">Cancel</button>
         <button class="btn btn-danger" (click)="confirmDelete()">Confirm Delete</button>
+    </div>
+</div>
+<!--copy-->
+<div class="popup" [class.open]="displayCopyModal">
+    <div class="popup-header">
+        Copy {{predictorToCopy?.name}} to different facility?
+        <button class="item-right" (click)="cancelCopy()">x</button>
+    </div>
+    <div class="popup-body">
+        <form>
+            <label>Facility To Create Copy</label>
+            <select class="form-select" name="selectedCopyFacilityGuid" [(ngModel)]="selectedCopyFacilityGuid">
+                <option *ngFor="let facility of facilities" [ngValue]="facility.guid">{{facility.name}}</option>
+                <option [ngValue]="undefined"></option>
+            </select>
+        </form>
+        <p>
+            A copy of the predictor and it's correposonding data will be created in the selected facility.
+        </p>
+    </div>
+    <div class="saveCancel popup-footer text-end">
+        <button class="btn btn-secondary" (click)="cancelCopy()">Cancel</button>
+        <button class="btn btn-success" [disabled]="selectedCopyFacilityGuid == undefined"
+            (click)="confirmCopy()">Create Copy</button>
     </div>
 </div>
