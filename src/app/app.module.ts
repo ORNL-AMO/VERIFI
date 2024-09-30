@@ -28,47 +28,40 @@ import { CreateReportModalComponent } from './core-components/create-report-moda
 import { WeatherDataModule } from './weather-data/weather-data.module';
 import { ManageAccountsComponent } from './core-components/manage-accounts/manage-accounts.component';
 import { ElectronBackupFileComponent } from './core-components/electron-backup-file/electron-backup-file.component';
-import { HttpClientModule } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { DeletingAccountDataComponent } from './core-components/deleting-account-data/deleting-account-data.component';
 
-@NgModule({
-  declarations: [
-    AppComponent,
-    HeaderComponent,
-    SidebarComponent,
-    LoadingComponent,
-    PageNotFoundComponent,
-    ToastNotificationsComponent,
-    ElectronUpdateComponent,
-    ImportBackupModalComponent,
-    SearchBarComponent,
-    FacilityListPipe,
-    CreateReportModalComponent,
-    ManageAccountsComponent,
-    ElectronBackupFileComponent,
-    DeletingAccountDataComponent
-  ],
-  imports: [
-    BrowserModule,
-    AppRoutingModule,
-    FormsModule,
-    CommonModule,
-    PlotlyViaWindowModule,
-    IndexedDBModule,
-    HelpPanelModule,
-    StaticContentModule,
-    BrowserAnimationsModule,
-    FacilityModule,
-    AccountModule,
-    SetupWizardModule,
-    HelperPipesModule,
-    NgbTypeaheadModule,
-    UploadDataModule,
-    WeatherDataModule,
-    HttpClientModule
-  ],
-  providers: [],
-  bootstrap: [AppComponent]
-})
+@NgModule({ declarations: [
+        AppComponent,
+        HeaderComponent,
+        SidebarComponent,
+        LoadingComponent,
+        PageNotFoundComponent,
+        ToastNotificationsComponent,
+        ElectronUpdateComponent,
+        ImportBackupModalComponent,
+        SearchBarComponent,
+        FacilityListPipe,
+        CreateReportModalComponent,
+        ManageAccountsComponent,
+        ElectronBackupFileComponent,
+        DeletingAccountDataComponent
+    ],
+    bootstrap: [AppComponent], imports: [BrowserModule,
+        AppRoutingModule,
+        FormsModule,
+        CommonModule,
+        PlotlyViaWindowModule,
+        IndexedDBModule,
+        HelpPanelModule,
+        StaticContentModule,
+        BrowserAnimationsModule,
+        FacilityModule,
+        AccountModule,
+        SetupWizardModule,
+        HelperPipesModule,
+        NgbTypeaheadModule,
+        UploadDataModule,
+        WeatherDataModule], providers: [provideHttpClient(withInterceptorsFromDi())] })
 
 export class AppModule { }
