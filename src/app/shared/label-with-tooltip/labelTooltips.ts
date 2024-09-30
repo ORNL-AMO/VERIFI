@@ -49,5 +49,8 @@ export const LabelTooltips = {
     },
     "accountBaselineAdjustment": {
         "tooltip": "This is for if you have brought equipment from a closed facility to this facility. <br>ONLY use this if you are reaching, or within one or two years of reaching your goal."
+    },
+    "applyBanking": {
+        "tooltip": "The previously selected analysis item will be used for savings prior to selected baseline year."
     }
 }

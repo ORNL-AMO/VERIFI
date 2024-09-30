@@ -215,7 +215,8 @@ export interface AnalysisGroup {
   selectedModelId?: string,
   dateModelsGenerated?: Date,
   regressionModelNotes?: string,
-  maxModelVariables: number
+  maxModelVariables: number,
+  applyBanking: boolean
 }
 
 export interface AnalysisGroupPredictorVariable {

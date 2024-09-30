@@ -125,7 +125,8 @@ export function getNewAnalysisGroup(groupId: string, predictorVariables: Array<A
     models: undefined,
     hasBaselineAdjustmentV2: false,
     baselineAdjustmentsV2: [],
-    maxModelVariables: 4
+    maxModelVariables: 4,
+    applyBanking: true
   }
   analysisGroup.groupErrors = {
     hasErrors: true,
