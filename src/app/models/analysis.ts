@@ -183,7 +183,8 @@ export interface AnalysisSetupErrors {
   groupsHaveErrors: boolean,
   missingBaselineYear: boolean,
   baselineYearAfterMeterDataEnd: boolean,
-  baselineYearBeforeMeterDataStart: boolean
+  baselineYearBeforeMeterDataStart: boolean,
+  bankingError: boolean
 }
 
 export interface AnalysisGroup {

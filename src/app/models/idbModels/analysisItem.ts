@@ -19,7 +19,9 @@ export interface IdbAnalysisItem extends IdbEntry {
     setupErrors: AnalysisSetupErrors,
     groups: Array<AnalysisGroup>,
     selectedYearAnalysis?: boolean,
-    baselineYear: number
+    baselineYear: number,
+    hasBanking: boolean,
+    bankedAnalysisItemId: string
 }
 
 export function getNewIdbAnalysisItem(account: IdbAccount, facility: IdbFacility, accountMeterGroups: Array<IdbUtilityMeterGroup>, accountPredictors: Array<IdbPredictor>, analysisCategory: AnalysisCategory): IdbAnalysisItem {
@@ -74,7 +76,9 @@ export function getNewIdbAnalysisItem(account: IdbAccount, facility: IdbFacility
       groups: itemGroups,
       setupErrors: undefined,
       analysisCategory: analysisCategory,
-      baselineYear: baselineYear
+      baselineYear: baselineYear,
+      hasBanking: false,
+      bankedAnalysisItemId: undefined
     };
     analysisItem.setupErrors = {
       hasError: true,
@@ -85,7 +89,8 @@ export function getNewIdbAnalysisItem(account: IdbAccount, facility: IdbFacility
       groupsHaveErrors: true,
       missingBaselineYear: false,
       baselineYearAfterMeterDataEnd: false,
-      baselineYearBeforeMeterDataStart: false
+      baselineYearBeforeMeterDataStart: false,
+      bankingError: false
     };
     return analysisItem;
 }

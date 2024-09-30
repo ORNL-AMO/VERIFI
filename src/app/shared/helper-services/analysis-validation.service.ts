@@ -32,8 +32,12 @@ export class AnalysisValidationService {
         baselineYearAfterMeterDataEnd = true;
       };
     }
+    let bankingError: boolean = false;
+    if(analysisItem.hasBanking){
+      bankingError = analysisItem.bankedAnalysisItemId == undefined;
+    }
 
-    let hasError: boolean = (missingName || noGroups || missingReportYear || reportYearBeforeBaselineYear || baselineYearAfterMeterDataEnd || baselineYearBeforeMeterDataStart);
+    let hasError: boolean = (missingName || noGroups || missingReportYear || reportYearBeforeBaselineYear || baselineYearAfterMeterDataEnd || baselineYearBeforeMeterDataStart || bankingError);
     let groupsHaveErrors: boolean = false;
     analysisItem.groups.forEach(group => {
       if (group.groupErrors && group.groupErrors.hasErrors) {
@@ -49,7 +53,8 @@ export class AnalysisValidationService {
       groupsHaveErrors: groupsHaveErrors,
       missingBaselineYear: missingBaselineYear,
       baselineYearAfterMeterDataEnd: baselineYearAfterMeterDataEnd,
-      baselineYearBeforeMeterDataStart: baselineYearBeforeMeterDataStart
+      baselineYearBeforeMeterDataStart: baselineYearBeforeMeterDataStart,
+      bankingError: bankingError
     }
   }
 

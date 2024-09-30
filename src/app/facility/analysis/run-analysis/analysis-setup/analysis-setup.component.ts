@@ -40,6 +40,8 @@ export class AnalysisSetupComponent implements OnInit {
   displayEnableForm: boolean = false;
   displayChangeReportYear: boolean = false;
   newReportYear: number;
+
+  previousAnalysisItems: Array<IdbAnalysisItem>;
   constructor(private facilityDbService: FacilitydbService, private analysisDbService: AnalysisDbService,
     private analysisService: AnalysisService, private router: Router,
     private analysisValidationService: AnalysisValidationService,
@@ -87,6 +89,7 @@ export class AnalysisSetupComponent implements OnInit {
   }
 
   async setSiteSource() {
+    this.setPreviousAnalysisYears();
     await this.saveItem();
   }
 
@@ -108,6 +111,10 @@ export class AnalysisSetupComponent implements OnInit {
         this.baselineYearWarning = undefined;
       }
     } else {
+      this.baselineYearWarning = undefined;
+    }
+    //TODO: update warning for banking
+    if(this.analysisItem.hasBanking){
       this.baselineYearWarning = undefined;
     }
   }
@@ -177,6 +184,7 @@ export class AnalysisSetupComponent implements OnInit {
     } else {
       this.reportYears = [];
     }
+    this.setPreviousAnalysisYears();
   }
 
   showChangeReportYear() {
@@ -200,6 +208,25 @@ export class AnalysisSetupComponent implements OnInit {
     }
     this.changeReportYear();
     this.displayChangeReportYear = false;
+    await this.saveItem();
+  }
+
+  setPreviousAnalysisYears() {
+    let facilityAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.facilityAnalysisItems.getValue();
+    this.previousAnalysisItems = facilityAnalysisItems.filter(analysisItem => {
+      return analysisItem.baselineYear < this.analysisItem.baselineYear && analysisItem.energyIsSource == this.analysisItem.energyIsSource;
+    });
+    if (this.previousAnalysisItems.length == 0) {
+      this.analysisItem.hasBanking = false;
+      this.analysisItem.bankedAnalysisItemId = undefined;
+    }
+  }
+
+  async changeHasBanking(){
+    if(this.analysisItem.hasBanking == false){
+      this.analysisItem.bankedAnalysisItemId = undefined;
+    }
+    this.setBaselineYearWarning();
     await this.saveItem();
   }
 }
