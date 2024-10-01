@@ -98,6 +98,7 @@
         <tr *ngFor="let data of monthlyAnalysisSummaryData | orderBy: orderDataField: orderByDirection |  slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage"
             [ngClass]="{'fiscal-year-end': checkFiscalYearEnd(data.date)}">
             <td class="no-wrap">
+                <span class="fa fa-asterisk" *ngIf="data.isBanked"></span>
                 {{data.date | date: 'MMMM, y'}}
             </td>
             <td>
@@ -223,6 +224,9 @@
         <button class="btn action-btn btn-sm" (click)="copyTable()">
             <span class="fa fa-copy"></span> Copy Table
         </button>
+    </div>
+    <div class="alert alert-info p-1" *ngIf="hasBanked">
+        <span class="fa fa-asterisk"></span> Indicates Banked Analysis
     </div>
     <ngb-pagination [collectionSize]="monthlyAnalysisSummaryData.length" [(page)]="currentPageNumber"
         [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true" aria-label="Pagination">

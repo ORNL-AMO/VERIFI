@@ -39,7 +39,8 @@ export class MonthlyAnalysisSummaryDataClass {
         monthlyGroupAnalysisClass: MonthlyGroupAnalysisClass,
         monthDate: Date,
         previousMonthsSummaryData: Array<MonthlyAnalysisSummaryDataClass>,
-        facility: IdbFacility
+        facility: IdbFacility,
+        lastBankedMonthlyAnalysis: MonthlyAnalysisSummaryDataClass
     ) {
         this.date = monthDate;
         this.group = monthlyGroupAnalysisClass.selectedGroup;
@@ -58,7 +59,7 @@ export class MonthlyAnalysisSummaryDataClass {
         this.setBaselineAdjustmentInput();
         this.setModelYearDataAdjustment(monthlyGroupAnalysisClass.modelYear);
         this.setDataAdjustment();
-        this.setMonthlyAnalysisCalculatedValues(monthlyGroupAnalysisClass.baselineYear, previousMonthsSummaryData);
+        this.setMonthlyAnalysisCalculatedValues(monthlyGroupAnalysisClass.baselineYear, previousMonthsSummaryData, lastBankedMonthlyAnalysis);
     }
 
     setFiscalYear(facility: IdbFacility) {
@@ -105,7 +106,7 @@ export class MonthlyAnalysisSummaryDataClass {
         predictorVariables.forEach(variable => {
             let usageVal: number = 0;
             this.monthPredictorData.forEach(data => {
-                if(data.predictorId == variable.id){
+                if (data.predictorId == variable.id) {
                     usageVal = usageVal + data.amount;
                 }
             });
@@ -154,7 +155,7 @@ export class MonthlyAnalysisSummaryDataClass {
         predictorVariables.forEach(variable => {
             let usageVal: number = 0;
             this.monthPredictorData.forEach(data => {
-                if(data.predictorId == variable.id){
+                if (data.predictorId == variable.id) {
                     usageVal = usageVal + data.amount;
                 }
             });
@@ -217,7 +218,8 @@ export class MonthlyAnalysisSummaryDataClass {
     }
 
 
-    setMonthlyAnalysisCalculatedValues(baselineYear: number, previousMonthsSummaryData: Array<MonthlyAnalysisSummaryDataClass>) {
+    setMonthlyAnalysisCalculatedValues(baselineYear: number, previousMonthsSummaryData: Array<MonthlyAnalysisSummaryDataClass>,
+        lastBankedMonthlyAnalysis: MonthlyAnalysisSummaryDataClass) {
         let previousMonthsAnalysisCalculatedValues: Array<GroupMonthlyAnalysisCalculatedValues> = previousMonthsSummaryData.map(data => { return data.monthlyAnalysisCalculatedValues });
         this.monthlyAnalysisCalculatedValues = new GroupMonthlyAnalysisCalculatedValues(
             this.energyUse,
@@ -228,7 +230,8 @@ export class MonthlyAnalysisSummaryDataClass {
             previousMonthsAnalysisCalculatedValues,
             this.baselineActualEnergyUse,
             this.modelYearDataAdjustment,
-            this.dataAdjustment
+            this.dataAdjustment,
+            lastBankedMonthlyAnalysis
         );
     }
 

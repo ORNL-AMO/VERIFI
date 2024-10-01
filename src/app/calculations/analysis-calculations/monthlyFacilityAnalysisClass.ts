@@ -23,14 +23,14 @@ export class MonthlyFacilityAnalysisClass {
     baselineYear: number;
     facility: IdbFacility;
     analysisItem: IdbAnalysisItem;
-    constructor(analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, accountPredictorEntries: Array<IdbPredictorData>, calculateAllMonthlyData: boolean, accountPredictors: Array<IdbPredictor>) {
+    constructor(analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, accountPredictorEntries: Array<IdbPredictorData>, calculateAllMonthlyData: boolean, accountPredictors: Array<IdbPredictor>, bankedAnalysisItem: IdbAnalysisItem) {
         this.facility = facility;
         this.analysisItem = analysisItem;
         let calanderizedFacilityMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => { return cMeter.meter.facilityId == facility.guid })
         this.setFacilityPredictorEntries(accountPredictorEntries, facility);
         this.setFacilityPredictors(accountPredictors, facility);
         this.setStartAndEndDate(facility, analysisItem, calculateAllMonthlyData, calanderizedFacilityMeters);
-        this.setGroupSummaries(analysisItem, facility, calanderizedFacilityMeters, calculateAllMonthlyData);
+        this.setGroupSummaries(analysisItem, facility, calanderizedFacilityMeters, calculateAllMonthlyData, bankedAnalysisItem);
         this.setBaselineYear(facility);
         this.setFacilityMonthSummaries(facility);
     }
@@ -53,11 +53,11 @@ export class MonthlyFacilityAnalysisClass {
         }
     }
 
-    setGroupSummaries(analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, calculateAllMonthlyData: boolean) {
+    setGroupSummaries(analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, calculateAllMonthlyData: boolean, bankedAnalysisItem: IdbAnalysisItem) {
         this.groupMonthlySummariesClasses = new Array();
         analysisItem.groups.forEach(group => {
             if (group.analysisType != 'skip' && group.analysisType != 'skipAnalysis') {
-                let monthlySummary: MonthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(group, analysisItem, facility, calanderizedMeters, this.facilityPredictorEntries, calculateAllMonthlyData);
+                let monthlySummary: MonthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(group, analysisItem, facility, calanderizedMeters, this.facilityPredictorEntries, calculateAllMonthlyData, bankedAnalysisItem);
                 this.groupMonthlySummariesClasses.push(monthlySummary);
             }
         });
@@ -121,9 +121,12 @@ export class MonthlyFacilityAnalysisClass {
                 yearToDatePercentSavings: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.yearToDatePercentSavings) * 100,
                 rollingSavings: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.rollingSavings),
                 rolling12MonthImprovement: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.rolling12MonthImprovement) * 100,
+                rolling12MonthImprovementBanked: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.rolling12MonthImprovementBanked) * 100,
+                rolling12MonthImprovementUnbanked: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.rolling12MonthImprovementUnbanked) * 100,
                 dataAdjustment: summaryDataItem.dataAdjustment,
                 modelYearDataAdjustment: summaryDataItem.modelYearDataAdjustment,
-                baselineAdjustmentInput: summaryDataItem.baselineAdjustmentInput
+                baselineAdjustmentInput: summaryDataItem.baselineAdjustmentInput,
+                isBanked: false
             }
         })
     }

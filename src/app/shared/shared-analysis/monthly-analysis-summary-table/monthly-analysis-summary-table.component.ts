@@ -42,6 +42,7 @@ export class MonthlyAnalysisSummaryTableComponent implements OnInit {
 
   predictorColumns: Array<IdbPredictor>;
   copyingTable: boolean = false;
+  hasBanked: boolean;
   constructor(private analysisService: AnalysisService, private copyTableService: CopyTableService, private router: Router) { }
 
   ngOnInit(): void {
@@ -52,6 +53,7 @@ export class MonthlyAnalysisSummaryTableComponent implements OnInit {
       this.setNumPredictorColumns();
       this.setPredictorVariables();
     })
+    this.setHasBanked();
   }
 
   ngOnDestroy() {
@@ -59,8 +61,8 @@ export class MonthlyAnalysisSummaryTableComponent implements OnInit {
   }
 
   setPredictorVariables() {
-    let inAccount: boolean =     this.router.url.includes('account');
-    if(!inAccount){
+    let inAccount: boolean = this.router.url.includes('account');
+    if (!inAccount) {
       let predictorColumns: Array<IdbPredictor> = new Array();
       this.monthlyAnalysisSummaryData.forEach((data, index) => {
         this.analysisTableColumns.predictors.forEach(predictorItem => {
@@ -78,7 +80,7 @@ export class MonthlyAnalysisSummaryTableComponent implements OnInit {
         })
       })
       this.predictorColumns = predictorColumns;
-    }else{
+    } else {
       this.predictorColumns = [];
     }
   }
@@ -178,5 +180,11 @@ export class MonthlyAnalysisSummaryTableComponent implements OnInit {
       this.copyTableService.copyTable(this.dataTable);
       this.copyingTable = false;
     }, 200)
+  }
+
+  setHasBanked() {
+    this.hasBanked = this.monthlyAnalysisSummaryData.find(data => {
+      return data.isBanked
+    }) != undefined;
   }
 }

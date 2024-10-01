@@ -46,7 +46,9 @@ export interface MonthlyFacilityAnalysisData {
 export interface MonthlyAnalysisSummary {
   predictorVariables: Array<AnalysisGroupPredictorVariable>,
   modelYear: number,
-  monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>
+  monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
+  unbankedMonthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
+  bankedMonthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>
 }
 
 export interface MonthlyAnalysisSummaryData {
@@ -70,9 +72,12 @@ export interface MonthlyAnalysisSummaryData {
   yearToDatePercentSavings: number,
   rollingSavings: number,
   rolling12MonthImprovement: number,
+  rolling12MonthImprovementBanked: number,
+  rolling12MonthImprovementUnbanked: number,
   modelYearDataAdjustment: number,
   dataAdjustment: number,
-  baselineAdjustmentInput: number
+  baselineAdjustmentInput: number,
+  isBanked: boolean
 }
 
 export interface AnnualAnalysisSummary {

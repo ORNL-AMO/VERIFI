@@ -20,7 +20,7 @@ export class MonthlyAccountAnalysisClass {
 
     allAccountAnalysisData: Array<MonthlyAnalysisSummaryDataClass>;
     accountMonthSummaries: Array<MonthlyAccountAnalysisDataClass>;
-    monthlyFacilityAnalysisClasses: Array<MonthlyFacilityAnalysisClass>; 
+    monthlyFacilityAnalysisClasses: Array<MonthlyFacilityAnalysisClass>;
     facilitySummaries: Array<{ facility: IdbFacility, analysisItem: IdbAnalysisItem, monthlySummaryData: Array<MonthlyAnalysisSummaryData> }>
     startDate: Date;
     endDate: Date;
@@ -75,6 +75,10 @@ export class MonthlyAccountAnalysisClass {
         accountAnalysisItem.facilityAnalysisItems.forEach(item => {
             if (item.analysisItemId != undefined && item.analysisItemId != 'skip') {
                 let analysisItem: IdbAnalysisItem = allAccountAnalysisItems.find(accountItem => { return item.analysisItemId == accountItem.guid });
+                let bankedAnalysisItem: IdbAnalysisItem;
+                if (analysisItem.hasBanking) {
+                    bankedAnalysisItem = allAccountAnalysisItems.find(accountItem => { return analysisItem.bankedAnalysisItemId == accountItem.guid })
+                }
                 let facility: IdbFacility = accountFacilities.find(facility => { return facility.guid == item.facilityId });
                 let facilityMeters: Array<IdbUtilityMeter> = meters.filter(meter => { return meter.facilityId == facility.guid });
                 let calanderizedMeterData: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, meterData, facility, false, { energyIsSource: analysisItem.energyIsSource, neededUnits: getNeededUnits(analysisItem) }, [], [], accountFacilities);
@@ -84,7 +88,8 @@ export class MonthlyAccountAnalysisClass {
                     calanderizedMeterData,
                     accountPredictorEntries,
                     calculateAllMonthlyData,
-                    accountPredictors
+                    accountPredictors,
+                    bankedAnalysisItem
                 );
                 if (analysisItem.analysisCategory == 'energy' && (analysisItem.energyUnit != accountAnalysisItem.energyUnit)) {
                     monthlyFacilityAnalysisClass.convertResults(analysisItem.energyUnit, accountAnalysisItem.energyUnit);
@@ -148,11 +153,14 @@ export class MonthlyAccountAnalysisClass {
                 yearToDatePercentSavings: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.yearToDatePercentSavings) * 100,
                 rollingSavings: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.rollingSavings),
                 rolling12MonthImprovement: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.rolling12MonthImprovement) * 100,
+                rolling12MonthImprovementBanked: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.rolling12MonthImprovementBanked) * 100,
+                rolling12MonthImprovementUnbanked: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.rolling12MonthImprovementUnbanked) * 100,
                 dataAdjustment: summaryDataItem.dataAdjustment,
                 modelYearDataAdjustment: summaryDataItem.modelYearDataAdjustment,
                 // adjustedStar: summaryDataItem.monthlyAnalysisCalculatedValues.adjustedStar,
                 // adjustedStarStar: summaryDataItem.monthlyAnalysisCalculatedValues.adjustedStarStar,
-                baselineAdjustmentInput: summaryDataItem.baselineAdjustmentInput
+                baselineAdjustmentInput: summaryDataItem.baselineAdjustmentInput,
+                isBanked: false
 
             }
         })

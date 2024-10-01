@@ -49,6 +49,10 @@ export class MonthlyAnalysisSummaryComponent implements OnInit {
 
     this.dataDisplay = this.analysisService.dataDisplay.getValue();
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
+    let bankedAnalysisItem: IdbAnalysisItem;
+    if(this.analysisItem.hasBanking){
+      bankedAnalysisItem = this.analysisDbService.getByGuid(this.analysisItem.bankedAnalysisItemId);
+    }
     this.group = this.analysisService.selectedGroup.getValue();
     this.facility = this.facilityDbService.selectedFacility.getValue();
     let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
@@ -74,12 +78,13 @@ export class MonthlyAnalysisSummaryComponent implements OnInit {
         facility: this.facility,
         meters: facilityMeters,
         meterData: facilityMeterData,
-        accountPredictorEntries: accountPredictorEntries
+        accountPredictorEntries: accountPredictorEntries,
+        bankedAnalysisItem: bankedAnalysisItem
       });
     } else {
       // Web Workers are not supported in this environment.
       let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, facilityMeterData, this.facility, false, { energyIsSource: this.analysisItem.energyIsSource, neededUnits: getNeededUnits(this.analysisItem) }, [], [], [this.facility]);
-      let monthlyAnalysisSummaryClass: MonthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(this.group, this.analysisItem, this.facility, calanderizedMeters, accountPredictorEntries, false);
+      let monthlyAnalysisSummaryClass: MonthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(this.group, this.analysisItem, this.facility, calanderizedMeters, accountPredictorEntries, false, bankedAnalysisItem);
       this.monthlyAnalysisSummary = monthlyAnalysisSummaryClass.getResults();
       this.calculating = false;
     }
