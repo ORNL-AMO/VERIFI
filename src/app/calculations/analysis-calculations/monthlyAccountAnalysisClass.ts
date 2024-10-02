@@ -75,10 +75,6 @@ export class MonthlyAccountAnalysisClass {
         accountAnalysisItem.facilityAnalysisItems.forEach(item => {
             if (item.analysisItemId != undefined && item.analysisItemId != 'skip') {
                 let analysisItem: IdbAnalysisItem = allAccountAnalysisItems.find(accountItem => { return item.analysisItemId == accountItem.guid });
-                let bankedAnalysisItem: IdbAnalysisItem;
-                if (analysisItem.hasBanking) {
-                    bankedAnalysisItem = allAccountAnalysisItems.find(accountItem => { return analysisItem.bankedAnalysisItemId == accountItem.guid })
-                }
                 let facility: IdbFacility = accountFacilities.find(facility => { return facility.guid == item.facilityId });
                 let facilityMeters: Array<IdbUtilityMeter> = meters.filter(meter => { return meter.facilityId == facility.guid });
                 let calanderizedMeterData: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, meterData, facility, false, { energyIsSource: analysisItem.energyIsSource, neededUnits: getNeededUnits(analysisItem) }, [], [], accountFacilities);
@@ -89,7 +85,7 @@ export class MonthlyAccountAnalysisClass {
                     accountPredictorEntries,
                     calculateAllMonthlyData,
                     accountPredictors,
-                    bankedAnalysisItem
+                    allAccountAnalysisItems
                 );
                 if (analysisItem.analysisCategory == 'energy' && (analysisItem.energyUnit != accountAnalysisItem.energyUnit)) {
                     monthlyFacilityAnalysisClass.convertResults(analysisItem.energyUnit, accountAnalysisItem.energyUnit);

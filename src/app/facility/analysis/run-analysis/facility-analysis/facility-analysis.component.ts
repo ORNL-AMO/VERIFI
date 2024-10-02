@@ -39,10 +39,7 @@ export class FacilityAnalysisComponent implements OnInit {
 
   ngOnInit(): void {
     let analysisItem: IdbAnalysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
-    let bankedAnalysisItem: IdbAnalysisItem;
-    if (analysisItem.hasBanking) {
-      bankedAnalysisItem = this.analysisDbService.getByGuid(analysisItem.bankedAnalysisItemId);
-    }
+    let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
     let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
     let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
@@ -71,12 +68,12 @@ export class FacilityAnalysisComponent implements OnInit {
         accountPredictorEntries: accountPredictorEntries,
         calculateAllMonthlyData: false,
         accountPredictors: accountPredictors,
-        bankedAnalysisItem: bankedAnalysisItem
+        accountAnalysisItems: accountAnalysisItems
       });
     } else {
       // Web Workers are not supported in this environment.     
       let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, facilityMeterData, facility, false, { energyIsSource: analysisItem.energyIsSource, neededUnits: getNeededUnits(analysisItem) }, [], [], [facility]);
-      let annualAnalysisSummaryClass: AnnualFacilityAnalysisSummaryClass = new AnnualFacilityAnalysisSummaryClass(analysisItem, facility, calanderizedMeters, accountPredictorEntries, false, accountPredictors, bankedAnalysisItem);
+      let annualAnalysisSummaryClass: AnnualFacilityAnalysisSummaryClass = new AnnualFacilityAnalysisSummaryClass(analysisItem, facility, calanderizedMeters, accountPredictorEntries, false, accountPredictors, accountAnalysisItems);
       let annualAnalysisSummaries: Array<AnnualAnalysisSummary> = annualAnalysisSummaryClass.getAnnualAnalysisSummaries();
       let monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData> = annualAnalysisSummaryClass.monthlyAnalysisSummaryData;
       this.analysisService.annualAnalysisSummary.next(annualAnalysisSummaries);

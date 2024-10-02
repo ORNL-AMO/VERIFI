@@ -23,14 +23,14 @@ export class MonthlyFacilityAnalysisClass {
     baselineYear: number;
     facility: IdbFacility;
     analysisItem: IdbAnalysisItem;
-    constructor(analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, accountPredictorEntries: Array<IdbPredictorData>, calculateAllMonthlyData: boolean, accountPredictors: Array<IdbPredictor>, bankedAnalysisItem: IdbAnalysisItem) {
+    constructor(analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, accountPredictorEntries: Array<IdbPredictorData>, calculateAllMonthlyData: boolean, accountPredictors: Array<IdbPredictor>, accountAnalysisItems: Array<IdbAnalysisItem>) {
         this.facility = facility;
         this.analysisItem = analysisItem;
         let calanderizedFacilityMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => { return cMeter.meter.facilityId == facility.guid })
         this.setFacilityPredictorEntries(accountPredictorEntries, facility);
         this.setFacilityPredictors(accountPredictors, facility);
         this.setStartAndEndDate(facility, analysisItem, calculateAllMonthlyData, calanderizedFacilityMeters);
-        this.setGroupSummaries(analysisItem, facility, calanderizedFacilityMeters, calculateAllMonthlyData, bankedAnalysisItem);
+        this.setGroupSummaries(analysisItem, facility, calanderizedFacilityMeters, calculateAllMonthlyData, accountAnalysisItems);
         this.setBaselineYear(facility);
         this.setFacilityMonthSummaries(facility);
     }
@@ -53,11 +53,11 @@ export class MonthlyFacilityAnalysisClass {
         }
     }
 
-    setGroupSummaries(analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, calculateAllMonthlyData: boolean, bankedAnalysisItem: IdbAnalysisItem) {
+    setGroupSummaries(analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, calculateAllMonthlyData: boolean, accountAnalysisItems: Array<IdbAnalysisItem>) {
         this.groupMonthlySummariesClasses = new Array();
         analysisItem.groups.forEach(group => {
             if (group.analysisType != 'skip' && group.analysisType != 'skipAnalysis') {
-                let monthlySummary: MonthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(group, analysisItem, facility, calanderizedMeters, this.facilityPredictorEntries, calculateAllMonthlyData, bankedAnalysisItem);
+                let monthlySummary: MonthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(group, analysisItem, facility, calanderizedMeters, this.facilityPredictorEntries, calculateAllMonthlyData, accountAnalysisItems);
                 this.groupMonthlySummariesClasses.push(monthlySummary);
             }
         });

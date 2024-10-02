@@ -36,6 +36,7 @@ export class AnnualAnalysisSummaryTableComponent implements OnInit {
   orderByDirection: 'asc' | 'desc' = 'asc';
   predictorColumns: Array<IdbPredictor>;
   copyingTable: boolean = false;
+  hasBanked: boolean;
   constructor(private analysisService: AnalysisService, private copyTableService: CopyTableService,
     private router: Router) { }
 
@@ -47,7 +48,8 @@ export class AnnualAnalysisSummaryTableComponent implements OnInit {
 
       this.setNumPredictorColumns();
       this.setPredictorVariables();
-    })
+    });
+    this.setHasBanked();
   }
 
   ngOnDestroy() {
@@ -153,5 +155,11 @@ export class AnnualAnalysisSummaryTableComponent implements OnInit {
       this.copyTableService.copyTable(this.dataTable);
       this.copyingTable = false;
     }, 200)
+  }
+
+  setHasBanked() {
+    this.hasBanked = this.annualAnalysisSummary.find(data => {
+      return data.isBanked
+    }) != undefined;
   }
 }

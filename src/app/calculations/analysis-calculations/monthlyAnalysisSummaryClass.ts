@@ -7,22 +7,27 @@ import { IdbFacility } from "src/app/models/idbModels/facility";
 import { IdbPredictorData } from "src/app/models/idbModels/predictorData";
 import { IdbAnalysisItem } from "src/app/models/idbModels/analysisItem";
 import { checkSameMonth } from "src/app/upload-data/upload-helper-functions";
+import * as _ from 'lodash';
 
 export class MonthlyAnalysisSummaryClass {
 
-
-    bankedMonthlyGroupAnalysisClass: MonthlyGroupAnalysisClass;
-    bankedMonthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryDataClass>;
+    bankedMonthlyAnalysisSummaryClass: MonthlyAnalysisSummaryClass
     lastBankedMonthSummaryData: MonthlyAnalysisSummaryDataClass;
 
     monthlyGroupAnalysisClass: MonthlyGroupAnalysisClass;
     monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryDataClass>;
     group: AnalysisGroup;
-    constructor(selectedGroup: AnalysisGroup, analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, accountPredictorEntries: Array<IdbPredictorData>, calculateAllMonthlyData: boolean, bankedAnalysisItem: IdbAnalysisItem) {
+    constructor(selectedGroup: AnalysisGroup, analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, accountPredictorEntries: Array<IdbPredictorData>, calculateAllMonthlyData: boolean, accountAnalysisItems: Array<IdbAnalysisItem>) {
         this.group = selectedGroup;
-        if (this.group.applyBanking) {
-            this.bankedMonthlyGroupAnalysisClass = new MonthlyGroupAnalysisClass(selectedGroup, bankedAnalysisItem, facility, calanderizedMeters, accountPredictorEntries, calculateAllMonthlyData);
-            this.setBankedMonthlyAnalysisSummaryData(facility, this.bankedMonthlyGroupAnalysisClass, analysisItem.baselineYear);
+        if (analysisItem.hasBanking && this.group.applyBanking) {
+            let bankedAnalysisItem: IdbAnalysisItem = accountAnalysisItems.find(item => {
+                return item.guid == analysisItem.bankedAnalysisItemId
+            });
+            let bankedGroup: AnalysisGroup = bankedAnalysisItem.groups.find(group => {
+                return group.idbGroupId == this.group.idbGroupId;
+            })
+            this.bankedMonthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(bankedGroup, bankedAnalysisItem, facility, calanderizedMeters, accountPredictorEntries, calculateAllMonthlyData, accountAnalysisItems);
+            this.setBankedMonthlyAnalysisSummaryData(this.bankedMonthlyAnalysisSummaryClass, analysisItem.baselineYear);
         }
         this.monthlyGroupAnalysisClass = new MonthlyGroupAnalysisClass(selectedGroup, analysisItem, facility, calanderizedMeters, accountPredictorEntries, calculateAllMonthlyData);
         this.setMonthlyAnalysisSummaryData(facility);
@@ -40,23 +45,14 @@ export class MonthlyAnalysisSummaryClass {
         }
     }
 
-    setBankedMonthlyAnalysisSummaryData(facility: IdbFacility, bankedMonthlyGroupAnalysisClass: MonthlyGroupAnalysisClass, newBaselineYear: number) {
-        this.bankedMonthlyAnalysisSummaryData = new Array();
-        let baselineDate: Date = new Date(bankedMonthlyGroupAnalysisClass.baselineDate);
-        //TODO: not sure we need to go all the way to end date and not just new baseline date..
-        while (baselineDate < bankedMonthlyGroupAnalysisClass.endDate) {
-            let monthlyAnalysisSummaryDataClass: MonthlyAnalysisSummaryDataClass = new MonthlyAnalysisSummaryDataClass(bankedMonthlyGroupAnalysisClass, baselineDate, this.bankedMonthlyAnalysisSummaryData, facility, undefined)
-            this.bankedMonthlyAnalysisSummaryData.push(monthlyAnalysisSummaryDataClass);
-            let currentMonth: number = baselineDate.getUTCMonth()
-            let nextMonth: number = currentMonth + 1;
-            baselineDate = new Date(baselineDate.getUTCFullYear(), nextMonth, 1);
-        }
-        let previousYearMonthlySummaryData: Array<MonthlyAnalysisSummaryDataClass> = this.bankedMonthlyAnalysisSummaryData.filter(data => {
+    setBankedMonthlyAnalysisSummaryData(bankedMonthlyGroupAnalysisClass: MonthlyAnalysisSummaryClass, newBaselineYear: number) {
+        let bankedMonthlyAnalysisSummaryData = bankedMonthlyGroupAnalysisClass.monthlyAnalysisSummaryData;
+        let previousYearMonthlySummaryData: Array<MonthlyAnalysisSummaryDataClass> = bankedMonthlyAnalysisSummaryData.filter(data => {
             return data.fiscalYear == (newBaselineYear - 1);
         });
-        //TODO: better way to do this..
-        this.lastBankedMonthSummaryData = previousYearMonthlySummaryData[previousYearMonthlySummaryData.length - 1];
-        console.log(this.lastBankedMonthSummaryData.date);
+        this.lastBankedMonthSummaryData = _.maxBy(previousYearMonthlySummaryData, (summaryData: MonthlyAnalysisSummaryDataClass) => {
+            return new Date(summaryData.date)
+        });
     }
 
     getResults(): MonthlyAnalysisSummary {
@@ -81,6 +77,7 @@ export class MonthlyAnalysisSummaryClass {
                 let bankedData: MonthlyAnalysisSummaryData = bankedMonthlyAnalysisSummaryData.find(data => {
                     return checkSameMonth(new Date(data.date), startBankedDate);
                 });
+                bankedData.isBanked = true;
                 combinedData.push(bankedData);
                 let currentMonth: number = startBankedDate.getUTCMonth()
                 let nextMonth: number = currentMonth + 1;
@@ -96,7 +93,6 @@ export class MonthlyAnalysisSummaryClass {
     }
 
     getUnbankedMonthlyAnalysisSummaryData(): Array<MonthlyAnalysisSummaryData> {
-        //TODO: add banked monthly readings.
         return this.monthlyAnalysisSummaryData.map(summaryDataItem => {
             return {
                 date: summaryDataItem.date,
@@ -129,36 +125,11 @@ export class MonthlyAnalysisSummaryClass {
     }
 
     getBankedMonthlyAnalysisSummaryData(): Array<MonthlyAnalysisSummaryData> {
-        //TODO: add banked monthly readings.
-        if (this.bankedMonthlyAnalysisSummaryData) {
-            return this.bankedMonthlyAnalysisSummaryData.map(summaryDataItem => {
-                return {
-                    date: summaryDataItem.date,
-                    energyUse: summaryDataItem.energyUse,
-                    modeledEnergy: summaryDataItem.modeledEnergy,
-                    adjusted: summaryDataItem.monthlyAnalysisCalculatedValues.adjusted,
-                    baselineAdjustmentForNormalization: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.baselineAdjustmentForNormalization),
-                    baselineAdjustmentForOtherV2: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.baselineAdjustmentForOtherV2),
-                    baselineAdjustment: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.baselineAdjustment),
-                    predictorUsage: summaryDataItem.predictorUsage,
-                    fiscalYear: summaryDataItem.fiscalYear,
-                    group: summaryDataItem.group,
-                    SEnPI: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.SEnPI),
-                    savings: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.savings),
-                    percentSavingsComparedToBaseline: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.percentSavingsComparedToBaseline) * 100,
-                    yearToDateSavings: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.yearToDateSavings),
-                    yearToDatePercentSavings: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.yearToDatePercentSavings) * 100,
-                    rollingSavings: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.rollingSavings),
-                    rolling12MonthImprovement: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.rolling12MonthImprovement) * 100,
-                    rolling12MonthImprovementBanked: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.rolling12MonthImprovementBanked) * 100,
-                    rolling12MonthImprovementUnbanked: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.rolling12MonthImprovementUnbanked) * 100,
-                    modelYearDataAdjustment: summaryDataItem.modelYearDataAdjustment,
-                    dataAdjustment: summaryDataItem.dataAdjustment,
-                    adjustedStar: summaryDataItem.monthlyAnalysisCalculatedValues.adjustedStar,
-                    adjustedStarStar: summaryDataItem.monthlyAnalysisCalculatedValues.adjustedStarStar,
-                    baselineAdjustmentInput: summaryDataItem.baselineAdjustmentInput,
-                    isBanked: true
-                }
+        if (this.bankedMonthlyAnalysisSummaryClass) {
+            let monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData> = this.bankedMonthlyAnalysisSummaryClass.getResults().monthlyAnalysisSummaryData;
+            return monthlyAnalysisSummaryData.map(data => {
+                data.isBanked = true;
+                return data;
             })
         } else {
             return [];

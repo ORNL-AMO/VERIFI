@@ -40,7 +40,7 @@ export class RegressionModelInspectionComponent implements OnInit {
   isSelectedModel: boolean;
   compareSelectedModel: boolean = false;
   analysisItem: IdbAnalysisItem;
-  bankedAnalysisItem: IdbAnalysisItem;
+  accountAnalysisItems: Array<IdbAnalysisItem>;
   accountPredictorEntries: Array<IdbPredictorData>;
   selectedGroup: AnalysisGroup;
   selectedModel: JStatRegressionModel;
@@ -58,9 +58,7 @@ export class RegressionModelInspectionComponent implements OnInit {
     this.selectedGroup = this.analysisService.selectedGroup.getValue();
     this.isSelectedModel = this.selectedGroup.selectedModelId == this.model.modelId;
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
-    if (this.analysisItem.hasBanking) {
-      this.bankedAnalysisItem = this.analysisDbService.getByGuid(this.analysisItem.bankedAnalysisItemId);
-    }
+    this.accountAnalysisItems = this.analysisDbService.accountAnalysisItems.getValue();
     this.selectedFacility = this.facilityDbService.selectedFacility.getValue();
     this.accountPredictorEntries = this.predictorDataDbService.accountPredictorData.getValue();
     this.facilityMeters = this.utilityMeterDbService.facilityMeters.getValue();
@@ -103,12 +101,12 @@ export class RegressionModelInspectionComponent implements OnInit {
         meters: this.facilityMeters,
         meterData: this.facilityMeterData,
         accountPredictorEntries: this.accountPredictorEntries,
-        bankedAnalysisItem: this.bankedAnalysisItem
+        accountAnalysisItems: this.accountAnalysisItems
       });
     } else {
       // Web Workers are not supported in this environment.  
       let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(this.facilityMeters, this.facilityMeterData, this.selectedFacility, false, { energyIsSource: this.analysisItem.energyIsSource, neededUnits: getNeededUnits(this.analysisItem) }, [], [], [this.selectedFacility]);
-      let monthlyAnalysisSummaryClass: MonthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(groupCopy, this.analysisItem, this.selectedFacility, calanderizedMeters, this.accountPredictorEntries, false, this.bankedAnalysisItem);
+      let monthlyAnalysisSummaryClass: MonthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(groupCopy, this.analysisItem, this.selectedFacility, calanderizedMeters, this.accountPredictorEntries, false, this.accountAnalysisItems);
       this.inspectedMonthlyAnalysisSummaryData = monthlyAnalysisSummaryClass.getResults().monthlyAnalysisSummaryData;
       this.drawChart();
     }
@@ -135,12 +133,13 @@ export class RegressionModelInspectionComponent implements OnInit {
         facility: this.selectedFacility,
         meters: this.facilityMeters,
         meterData: this.facilityMeterData,
-        accountPredictorEntries: this.accountPredictorEntries
+        accountPredictorEntries: this.accountPredictorEntries,
+        accountAnalysisItems: this.accountAnalysisItems
       });
     } else {
       // Web Workers are not supported in this environment.
       let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(this.facilityMeters, this.facilityMeterData, this.selectedFacility, false, { energyIsSource: this.analysisItem.energyIsSource, neededUnits: getNeededUnits(this.analysisItem) }, [], [], [this.selectedFacility]);
-      let monthlyAnalysisSummaryClass: MonthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(this.selectedGroup, this.analysisItem, this.selectedFacility, calanderizedMeters, this.accountPredictorEntries, false, this.bankedAnalysisItem);
+      let monthlyAnalysisSummaryClass: MonthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(this.selectedGroup, this.analysisItem, this.selectedFacility, calanderizedMeters, this.accountPredictorEntries, false, this.accountAnalysisItems);
       this.selectedMonthlyAnalysisSummaryData = monthlyAnalysisSummaryClass.getResults().monthlyAnalysisSummaryData;
       this.drawChart();
     }

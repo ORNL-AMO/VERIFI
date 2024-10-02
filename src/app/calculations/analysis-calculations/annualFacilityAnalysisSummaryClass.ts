@@ -17,15 +17,15 @@ export class AnnualFacilityAnalysisSummaryClass {
     groupMonthlySummariesClasses: Array<MonthlyAnalysisSummaryClass>
     baselineYear: number;
     reportYear: number;
-    constructor(analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, accountPredictorEntries: Array<IdbPredictorData>, calculateAllMonthlyData: boolean, accountPredictors: Array<IdbPredictor>, bankedAnalysisItem: IdbAnalysisItem) {
-        this.setMonthlyAnalysisSummaryData(analysisItem, facility, calanderizedMeters, accountPredictorEntries, calculateAllMonthlyData, accountPredictors, bankedAnalysisItem);
+    constructor(analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, accountPredictorEntries: Array<IdbPredictorData>, calculateAllMonthlyData: boolean, accountPredictors: Array<IdbPredictor>, accountAnalysisItems: Array<IdbAnalysisItem>) {
+        this.setMonthlyAnalysisSummaryData(analysisItem, facility, calanderizedMeters, accountPredictorEntries, calculateAllMonthlyData, accountPredictors, accountAnalysisItems);
         this.setBaselineYear(analysisItem);
         this.setReportYear(analysisItem);
         this.setAnnualAnalysisSummaryDataClasses(accountPredictorEntries, facility, accountPredictors);
     }
 
-    setMonthlyAnalysisSummaryData(analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, accountPredictorEntries: Array<IdbPredictorData>, calculateAllMonthlyData: boolean, accountPredictors: Array<IdbPredictor>, bankedAnalysisItem: IdbAnalysisItem) {
-        let monthlyAnalysisSummaryClass: MonthlyFacilityAnalysisClass = new MonthlyFacilityAnalysisClass(analysisItem, facility, calanderizedMeters, accountPredictorEntries, calculateAllMonthlyData, accountPredictors, bankedAnalysisItem);
+    setMonthlyAnalysisSummaryData(analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, accountPredictorEntries: Array<IdbPredictorData>, calculateAllMonthlyData: boolean, accountPredictors: Array<IdbPredictor>, accountAnalysisItems: Array<IdbAnalysisItem>) {
+        let monthlyAnalysisSummaryClass: MonthlyFacilityAnalysisClass = new MonthlyFacilityAnalysisClass(analysisItem, facility, calanderizedMeters, accountPredictorEntries, calculateAllMonthlyData, accountPredictors, accountAnalysisItems);
         this.monthlyAnalysisSummaryData = monthlyAnalysisSummaryClass.getMonthlyAnalysisSummaryData();
         this.groupMonthlySummariesClasses = monthlyAnalysisSummaryClass.groupMonthlySummariesClasses;
     }
@@ -65,6 +65,7 @@ export class AnnualFacilityAnalysisSummaryClass {
                 cummulativeSavings: checkAnalysisValue(summaryDataClass.cummulativeSavings),
                 newSavings: checkAnalysisValue(summaryDataClass.newSavings),
                 predictorUsage: summaryDataClass.predictorUsage,
+                isBanked: false
             }
         })
     }
