@@ -35,7 +35,7 @@ export class AnnualGroupAnalysisSummaryClass {
         } else {
             this.monthlyAnalysisSummaryData = monthlyAnalysisSummaryData;
         }
-        this.setBaselineYear(analysisItem);
+        this.setBaselineYear(analysisItem, selectedGroup);
         this.setReportYear(analysisItem);
         this.setAnnualAnalysisSummaryDataClasses(accountPredictorEntries, facility, accountPredictors);
     }
@@ -52,8 +52,14 @@ export class AnnualGroupAnalysisSummaryClass {
     //     this.setUtilityClassification(monthlyAnalysisSummaryClass.monthlyGroupAnalysisClass.groupMeters);
     // }
 
-    setBaselineYear(analysisItem: IdbAnalysisItem) {
-        this.baselineYear = analysisItem.baselineYear;
+    setBaselineYear(analysisItem: IdbAnalysisItem, selectedGroup: AnalysisGroup) {
+        if (!analysisItem.hasBanking) {
+            this.baselineYear = analysisItem.baselineYear;
+        } else if (!selectedGroup.applyBanking) {
+            this.baselineYear = analysisItem.baselineYear;
+        } else {
+            this.baselineYear = selectedGroup.newBaselineYear;
+        }
     }
 
     setReportYear(analysisItem: IdbAnalysisItem) {

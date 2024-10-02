@@ -25,9 +25,10 @@ export class MonthlyAnalysisSummaryClass {
             });
             let bankedGroup: AnalysisGroup = bankedAnalysisItem.groups.find(group => {
                 return group.idbGroupId == this.group.idbGroupId;
-            })
+            });
+            bankedAnalysisItem.reportYear = this.group.newBaselineYear - 1;
             this.bankedMonthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(bankedGroup, bankedAnalysisItem, facility, calanderizedMeters, accountPredictorEntries, calculateAllMonthlyData, accountAnalysisItems);
-            this.setBankedMonthlyAnalysisSummaryData(this.bankedMonthlyAnalysisSummaryClass, analysisItem.baselineYear);
+            this.setBankedMonthlyAnalysisSummaryData(this.bankedMonthlyAnalysisSummaryClass, selectedGroup.newBaselineYear);
         }
         this.monthlyGroupAnalysisClass = new MonthlyGroupAnalysisClass(selectedGroup, analysisItem, facility, calanderizedMeters, accountPredictorEntries, calculateAllMonthlyData);
         this.setMonthlyAnalysisSummaryData(facility);
@@ -112,8 +113,6 @@ export class MonthlyAnalysisSummaryClass {
                 yearToDatePercentSavings: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.yearToDatePercentSavings) * 100,
                 rollingSavings: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.rollingSavings),
                 rolling12MonthImprovement: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.rolling12MonthImprovement) * 100,
-                rolling12MonthImprovementBanked: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.rolling12MonthImprovementBanked) * 100,
-                rolling12MonthImprovementUnbanked: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.rolling12MonthImprovementUnbanked) * 100,
                 modelYearDataAdjustment: summaryDataItem.modelYearDataAdjustment,
                 dataAdjustment: summaryDataItem.dataAdjustment,
                 adjustedStar: summaryDataItem.monthlyAnalysisCalculatedValues.adjustedStar,

@@ -72,8 +72,6 @@ export interface MonthlyAnalysisSummaryData {
   yearToDatePercentSavings: number,
   rollingSavings: number,
   rolling12MonthImprovement: number,
-  rolling12MonthImprovementBanked: number,
-  rolling12MonthImprovementUnbanked: number,
   modelYearDataAdjustment: number,
   dataAdjustment: number,
   baselineAdjustmentInput: number,

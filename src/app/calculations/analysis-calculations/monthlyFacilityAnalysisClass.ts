@@ -10,6 +10,7 @@ import { IdbFacility } from "src/app/models/idbModels/facility";
 import { IdbPredictorData } from "src/app/models/idbModels/predictorData";
 import { IdbPredictor } from "src/app/models/idbModels/predictor";
 import { IdbAnalysisItem } from "src/app/models/idbModels/analysisItem";
+import { checkSameMonth } from "src/app/upload-data/upload-helper-functions";
 
 export class MonthlyFacilityAnalysisClass {
 
@@ -68,7 +69,15 @@ export class MonthlyFacilityAnalysisClass {
                 this.groupMonthlySummariesClasses.push(monthlySummary);
             }
         });
-        this.allFacilityAnalysisData = this.groupMonthlySummariesClasses.flatMap(summary => { return summary.monthlyAnalysisSummaryData });
+
+        let allMonthlyAnalysisSummaryData: Array<Array<MonthlyAnalysisSummaryDataClass>> = [];
+        this.groupMonthlySummariesClasses.forEach(groupSummaryClass => {
+            if (groupSummaryClass.bankedMonthlyAnalysisSummaryClass) {
+                allMonthlyAnalysisSummaryData.push(groupSummaryClass.bankedMonthlyAnalysisSummaryClass.monthlyAnalysisSummaryData);
+            }
+            allMonthlyAnalysisSummaryData.push(groupSummaryClass.monthlyAnalysisSummaryData)
+        })
+        this.allFacilityAnalysisData = allMonthlyAnalysisSummaryData.flatMap(summary => { return summary });
     }
 
     setFacilityPredictorEntries(accountPredictorEntries: Array<IdbPredictorData>, facility: IdbFacility) {
