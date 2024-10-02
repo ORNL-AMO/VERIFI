@@ -88,10 +88,10 @@ export class UpdateDbEntryService {
     if (analysisItem.groups) {
       analysisItem.groups.forEach(group => {
         if (!group.groupErrors) {
-          group.groupErrors = this.analysisValidationService.getGroupErrors(group);
+          group.groupErrors = this.analysisValidationService.getGroupErrors(group, analysisItem);
           isChanged = true;
         } else {
-          let groupErrors: GroupErrors = this.analysisValidationService.getGroupErrors(group);
+          let groupErrors: GroupErrors = this.analysisValidationService.getGroupErrors(group, analysisItem);
           Object.keys(groupErrors).forEach(key => {
             if (groupErrors[key] != group.groupErrors[key]) {
               group.groupErrors[key] = groupErrors[key];

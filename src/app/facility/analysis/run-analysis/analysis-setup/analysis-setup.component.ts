@@ -40,6 +40,8 @@ export class AnalysisSetupComponent implements OnInit {
   displayEnableForm: boolean = false;
   displayChangeReportYear: boolean = false;
   newReportYear: number;
+
+  facilityAnalysisItems: Array<IdbAnalysisItem>;
   constructor(private facilityDbService: FacilitydbService, private analysisDbService: AnalysisDbService,
     private analysisService: AnalysisService, private router: Router,
     private analysisValidationService: AnalysisValidationService,
@@ -87,6 +89,7 @@ export class AnalysisSetupComponent implements OnInit {
   }
 
   async setSiteSource() {
+    this.setFacilityAnalysisItems();
     await this.saveItem();
   }
 
@@ -152,7 +155,7 @@ export class AnalysisSetupComponent implements OnInit {
       group.predictorVariables.forEach(variable => {
         variable.regressionCoefficient = undefined;
       })
-      group.groupErrors = this.analysisValidationService.getGroupErrors(group);
+      group.groupErrors = this.analysisValidationService.getGroupErrors(group, this.analysisItem);
     });
     await this.saveItem();
     this.setComponentBools();
@@ -177,6 +180,7 @@ export class AnalysisSetupComponent implements OnInit {
     } else {
       this.reportYears = [];
     }
+    this.setFacilityAnalysisItems();
   }
 
   showChangeReportYear() {
@@ -200,6 +204,24 @@ export class AnalysisSetupComponent implements OnInit {
     }
     this.changeReportYear();
     this.displayChangeReportYear = false;
+    await this.saveItem();
+  }
+
+  setFacilityAnalysisItems() {
+    let facilityAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.facilityAnalysisItems.getValue();
+    this.facilityAnalysisItems = facilityAnalysisItems.filter(analysisItem => {
+      return analysisItem.energyIsSource == this.analysisItem.energyIsSource;
+    });
+    if (this.facilityAnalysisItems.length == 0) {
+      this.analysisItem.hasBanking = false;
+      this.analysisItem.bankedAnalysisItemId = undefined;
+    }
+  }
+
+  async changeHasBanking() {
+    if (this.analysisItem.hasBanking == false) {
+      this.analysisItem.bankedAnalysisItemId = undefined;
+    }
     await this.saveItem();
   }
 }

@@ -46,7 +46,9 @@ export interface MonthlyFacilityAnalysisData {
 export interface MonthlyAnalysisSummary {
   predictorVariables: Array<AnalysisGroupPredictorVariable>,
   modelYear: number,
-  monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>
+  monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
+  unbankedMonthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
+  bankedMonthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>
 }
 
 export interface MonthlyAnalysisSummaryData {
@@ -72,7 +74,8 @@ export interface MonthlyAnalysisSummaryData {
   rolling12MonthImprovement: number,
   modelYearDataAdjustment: number,
   dataAdjustment: number,
-  baselineAdjustmentInput: number
+  baselineAdjustmentInput: number,
+  isBanked: boolean
 }
 
 export interface AnnualAnalysisSummary {
@@ -96,6 +99,7 @@ export interface AnnualAnalysisSummary {
   }>,
   // adjustedStar: number,
   // adjustedStarStar: number
+  isBanked: boolean
 }
 
 
@@ -183,7 +187,8 @@ export interface AnalysisSetupErrors {
   groupsHaveErrors: boolean,
   missingBaselineYear: boolean,
   baselineYearAfterMeterDataEnd: boolean,
-  baselineYearBeforeMeterDataStart: boolean
+  baselineYearBeforeMeterDataStart: boolean,
+  bankingError: boolean
 }
 
 export interface AnalysisGroup {
@@ -214,7 +219,9 @@ export interface AnalysisGroup {
   selectedModelId?: string,
   dateModelsGenerated?: Date,
   regressionModelNotes?: string,
-  maxModelVariables: number
+  maxModelVariables: number,
+  applyBanking: boolean,
+  newBaselineYear: number
 }
 
 export interface AnalysisGroupPredictorVariable {
@@ -238,7 +245,8 @@ export interface GroupErrors {
   invalidAverageBaseload: boolean,
   invalidMonthlyBaseload: boolean,
   missingGroupMeters: boolean,
-  hasInvalidRegressionModel: boolean
+  hasInvalidRegressionModel: boolean,
+  missingBankingBaselineYear: boolean
 }
 
 

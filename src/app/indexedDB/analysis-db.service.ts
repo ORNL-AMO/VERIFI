@@ -158,7 +158,7 @@ export class AnalysisDbService {
             }
           }
         }
-        group.groupErrors = this.analysisValidationService.getGroupErrors(group);
+        group.groupErrors = this.analysisValidationService.getGroupErrors(group, analysisItem);
         if (group.groupErrors.hasErrors) {
           hasGroupErrors = true;
         }
@@ -237,6 +237,13 @@ export class AnalysisDbService {
       this.loadingService.setLoadingMessage('Deleting Facility Analysis Items (' + i + '/' + analysisItems.length + ')...');
       await firstValueFrom(this.deleteWithObservable(analysisItems[i].id));
     }
+  }
+
+  getByGuid(guid: string): IdbAnalysisItem {
+    let analysisItems: Array<IdbAnalysisItem> = this.accountAnalysisItems.getValue();
+    return analysisItems.find(item => {
+      return item.guid == guid;
+    });
   }
 
   // getMonthlyPercentBaseload(): Array<{ monthNum: number, percent: number }> {

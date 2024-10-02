@@ -76,7 +76,7 @@ export class AnalysisDashboardComponent implements OnInit {
     let accountPredictors: Array<IdbPredictor> = this.predictorDbService.accountPredictors.getValue();
     let newIdbItem: IdbAnalysisItem = getNewIdbAnalysisItem(account, this.selectedFacility, accountMeterGroups, accountPredictors, this.newAnalysisCategory);
     newIdbItem.groups.forEach(group => {
-      group.groupErrors = this.analysisValidationService.getGroupErrors(group);
+      group.groupErrors = this.analysisValidationService.getGroupErrors(group, newIdbItem);
     });
     newIdbItem.setupErrors = this.analysisValidationService.getAnalysisItemErrors(newIdbItem);
     let addedItem: IdbAnalysisItem = await firstValueFrom(this.analysisDbService.addWithObservable(newIdbItem));

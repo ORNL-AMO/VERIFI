@@ -59,8 +59,10 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-6 col-sm-12"
-                *ngIf="group.analysisType == 'energyIntensity' || group.analysisType == 'modifiedEnergyIntensity'">
+        </div>
+        <div class="row pt-3"
+            *ngIf="group.analysisType == 'energyIntensity' || group.analysisType == 'modifiedEnergyIntensity'">
+            <div class="col-md-6 col-sm-12">
                 <!--energyIntensity or modifiedEnergyIntensity production variables-->
                 <div class="row">
                     <div class="col-12">
@@ -99,7 +101,9 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-6 col-sm-12" *ngIf="group.analysisType == 'modifiedEnergyIntensity'">
+        </div>
+        <div class="row pt-3" *ngIf="group.analysisType == 'modifiedEnergyIntensity'">
+            <div class="col-md-6 col-sm-12">
                 <div class="row">
                     <!--modifiedEnergyIntensity-->
                     <div class="col-12">
@@ -168,10 +172,11 @@
                     </div>
                 </div>
             </div>
+        </div>
+        <div class="row pt-3" *ngIf="group.analysisType != 'skip' && group.analysisType != 'skipAnalysis'">
             <!--data adjustment-->
-            <div class="col-md-6 col-sm-12"
-                *ngIf="group.analysisType != 'skip' && group.analysisType != 'skipAnalysis'">
-                <div class="row sub-column">
+            <div class="col-md-6 col-sm-12">
+                <div class="row">
                     <div class="col-6">
                         <ng-container
                             *ngIf="group.analysisType == 'regression' || group.analysisType == 'absoluteEnergyConsumption'">
@@ -218,10 +223,11 @@
                     </div>
                 </div>
             </div>
+        </div>
+        <div class="row pt-3" *ngIf="group.analysisType != 'skip' && group.analysisType != 'skipAnalysis'">
             <!--baseline adjustment-->
-            <div class="col-md-6 col-sm-12"
-                *ngIf="group.analysisType != 'skip' && group.analysisType != 'skipAnalysis'">
-                <div class="row sub-column">
+            <div class="col-md-6 col-sm-12">
+                <div class="row">
                     <div class="col-6">
                         <ng-container
                             *ngIf="group.analysisType == 'regression' || group.analysisType == 'absoluteEnergyConsumption'">
@@ -273,14 +279,58 @@
                     </div>
                 </div>
             </div>
+        </div>
+        <div class="row pt-3" *ngIf="analysisItem.hasBanking && group.analysisType != 'skip'">
+            <!--banking-->
+            <div class="col-md-6 col-sm-12">
+                <div class="row">
+                    <div class="col-6">
+                        <ng-container
+                            *ngIf="group.analysisType == 'regression' || group.analysisType == 'absoluteEnergyConsumption'">
+                            <app-label-with-tooltip [field]="'applyBanking'" [label]="'4. Apply Banking'"
+                                [isBold]="true" [labelId]="'applyBanking'"></app-label-with-tooltip>
+                        </ng-container>
+                        <ng-container *ngIf="group.analysisType == 'energyIntensity'">
+                            <app-label-with-tooltip [field]="'applyBanking'" [label]="'5. Apply Banking'"
+                                [isBold]="true" [labelId]="'applyBanking'"></app-label-with-tooltip>
+                        </ng-container>
+                        <ng-container *ngIf="group.analysisType == 'modifiedEnergyIntensity'">
+                            <app-label-with-tooltip [field]="'applyBanking'" [label]="'6. Apply Banking'"
+                                [isBold]="true" [labelId]="'applyBanking'"></app-label-with-tooltip>
+                        </ng-container>
+                    </div>
+
+                    <div class="col-6">
+                        <label class="switch" for="applyBanking">
+                            <input class="checkbox" type="checkbox" id="applyBanking" name="applyBanking"
+                                [(ngModel)]="group.applyBanking" (change)="saveItem()">
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group row mt-2 sub-column" *ngIf="group.applyBanking">
+                    <label class="col-6 col-form-label">
+                        New Baseline Year
+                    </label>
+                    <div class="col-6">
+                        <select required class="form-select" id="newBaselineYear" name="newBaselineYear"
+                            [(ngModel)]="group.newBaselineYear" (change)="saveItem()" [required]="true">
+                            <option *ngFor="let year of yearOptions" [ngValue]="year">
+                                {{year| yearDisplay: facility.fiscalYear}}</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row pt-3" *ngIf="group.analysisType == 'regression'">
             <!--regression-->
-            <div class="col-md-6 col-sm-12" *ngIf="group.analysisType == 'regression'">
-                <label class="bold">4. Regression Model</label>
+            <div class="col-md-6 col-sm-12">
+                <label class="bold" *ngIf="!analysisItem.hasBanking">4. Regression Model</label>
+                <label class="bold" *ngIf="analysisItem.hasBanking">5. Regression Model</label>
                 <div class="alert alert-info text-center p-2">
                     Use "Regression Model" tab to setup the regression model for this group.
                 </div>
             </div>
         </div>
-
     </form>
 </ng-container>

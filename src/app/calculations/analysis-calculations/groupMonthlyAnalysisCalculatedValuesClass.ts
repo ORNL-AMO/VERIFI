@@ -1,19 +1,25 @@
 import * as _ from 'lodash';
 import { ConvertValue } from '../conversions/convertValue';
+import { MonthlyAnalysisSummaryDataClass } from './monthlyAnalysisSummaryDataClass';
 export class GroupMonthlyAnalysisCalculatedValues {
     //results
     energyUse: number;
     modeledEnergy: number;
+
     adjusted: number;
     baselineAdjustmentForNormalization: number;
     baselineAdjustment: number;
     fiscalYear: number;
     SEnPI: number;
+
     savings: number;
+
     percentSavingsComparedToBaseline: number;
+
     yearToDateSavings: number;
     yearToDatePercentSavings: number;
     rollingSavings: number;
+
     rolling12MonthImprovement: number;
 
     //used for calcs
@@ -38,7 +44,8 @@ export class GroupMonthlyAnalysisCalculatedValues {
         previousMonthValues: Array<GroupMonthlyAnalysisCalculatedValues>,
         baselineActualEnergyUse: number,
         modelYearDataAdjusted: number,
-        dataAdjustment: number
+        dataAdjustment: number,
+        lastBankedMonthSummaryData: MonthlyAnalysisSummaryDataClass
     ) {
         this.energyUse = energyUse;
         this.modeledEnergy = modeledEnergy;
@@ -48,7 +55,7 @@ export class GroupMonthlyAnalysisCalculatedValues {
         this.setYearToDateModeledEnergyUse();
         this.setYearToDateActualEnergyUse();
         this.setBaselineModeledEnergyUse(baselineYear, previousMonthValues);
-        this.setAdjustedStar(baselineActualEnergyUse, modelYearDataAdjusted, baselineAdjustementInput);
+        this.setAdjustedStar(baselineActualEnergyUse, modelYearDataAdjusted, baselineAdjustementInput, lastBankedMonthSummaryData);
         this.setAdjustedStarStar(dataAdjustment);
         this.setAdjusted();
         this.setBaselineAdjustmentForNormalization(baselineActualEnergyUse, modelYearDataAdjusted, dataAdjustment);
@@ -112,7 +119,7 @@ export class GroupMonthlyAnalysisCalculatedValues {
         this.yearToDateBaselineModeledEnergyUse = this.yearToDateBaselineModeledEnergyUse + this.baselineModeledEnergyUse;
     }
 
-    setAdjustedStar(baselineActualEnergyUse: number, modelYearDataAdjusted: number, baselineAdjustementInput: number) {
+    setAdjustedStar(baselineActualEnergyUse: number, modelYearDataAdjusted: number, baselineAdjustementInput: number, lastBankedMonthSummaryData: MonthlyAnalysisSummaryDataClass) {
         if (this.baselineModeledEnergyUse - modelYearDataAdjusted == 0) {
             if (this.modeledEnergy - modelYearDataAdjusted == 0) {  //M_i = 0 subcase is the weird one
                 this.adjustedStar = (baselineActualEnergyUse + baselineAdjustementInput);
@@ -121,6 +128,10 @@ export class GroupMonthlyAnalysisCalculatedValues {
             }
         } else {
             this.adjustedStar = (baselineActualEnergyUse + baselineAdjustementInput) * ((this.modeledEnergy - modelYearDataAdjusted) / (this.baselineModeledEnergyUse - modelYearDataAdjusted));
+        }
+
+        if (lastBankedMonthSummaryData) {
+            this.adjustedStar = this.adjustedStar * (1 + lastBankedMonthSummaryData.monthlyAnalysisCalculatedValues.rolling12MonthImprovement);
         }
     }
 

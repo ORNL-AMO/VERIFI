@@ -32,8 +32,12 @@ export class AnalysisValidationService {
         baselineYearAfterMeterDataEnd = true;
       };
     }
+    let bankingError: boolean = false;
+    if (analysisItem.hasBanking) {
+      bankingError = analysisItem.bankedAnalysisItemId == undefined;
+    }
 
-    let hasError: boolean = (missingName || noGroups || missingReportYear || reportYearBeforeBaselineYear || baselineYearAfterMeterDataEnd || baselineYearBeforeMeterDataStart);
+    let hasError: boolean = (missingName || noGroups || missingReportYear || reportYearBeforeBaselineYear || baselineYearAfterMeterDataEnd || baselineYearBeforeMeterDataStart || bankingError);
     let groupsHaveErrors: boolean = false;
     analysisItem.groups.forEach(group => {
       if (group.groupErrors && group.groupErrors.hasErrors) {
@@ -49,11 +53,12 @@ export class AnalysisValidationService {
       groupsHaveErrors: groupsHaveErrors,
       missingBaselineYear: missingBaselineYear,
       baselineYearAfterMeterDataEnd: baselineYearAfterMeterDataEnd,
-      baselineYearBeforeMeterDataStart: baselineYearBeforeMeterDataStart
+      baselineYearBeforeMeterDataStart: baselineYearBeforeMeterDataStart,
+      bankingError: bankingError
     }
   }
 
-  getGroupErrors(group: AnalysisGroup): GroupErrors {
+  getGroupErrors(group: AnalysisGroup, analysisItem: IdbAnalysisItem): GroupErrors {
     let missingProductionVariables: boolean = false;
     let missingRegressionConstant: boolean = false;
     let missingRegressionModelYear: boolean = false;
@@ -62,6 +67,7 @@ export class AnalysisValidationService {
     let invalidAverageBaseload: boolean = false;
     let invalidMonthlyBaseload: boolean = false;
     let noProductionVariables: boolean = false;
+    let missingBankingBaselineYear: boolean = false;
     let groupMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.getGroupMetersByGroupId(group.idbGroupId);
     let hasInvalidRegressionModel: boolean = false;
 
@@ -104,9 +110,13 @@ export class AnalysisValidationService {
           invalidAverageBaseload = true;
         }
       }
+
+      if (analysisItem.hasBanking && group.applyBanking && !group.newBaselineYear) {
+        missingBankingBaselineYear = true;
+      }
     }
     let hasErrors: boolean = (missingProductionVariables || missingRegressionConstant || missingRegressionModelYear || missingRegressionModelSelection ||
-      missingRegressionPredictorCoef || invalidAverageBaseload || invalidMonthlyBaseload || noProductionVariables || missingGroupMeters);
+      missingRegressionPredictorCoef || invalidAverageBaseload || invalidMonthlyBaseload || noProductionVariables || missingGroupMeters || missingBankingBaselineYear);
     return {
       hasErrors: hasErrors,
       missingProductionVariables: missingProductionVariables,
@@ -118,7 +128,8 @@ export class AnalysisValidationService {
       invalidMonthlyBaseload: invalidMonthlyBaseload,
       noProductionVariables: noProductionVariables,
       missingGroupMeters: missingGroupMeters,
-      hasInvalidRegressionModel: hasInvalidRegressionModel
+      hasInvalidRegressionModel: hasInvalidRegressionModel,
+      missingBankingBaselineYear: missingBankingBaselineYear
     };
   }
 

@@ -24,6 +24,7 @@ export class MonthlyFacilityAnalysisDataClass {
     facilityGUID: string;
     dataAdjustment: number;
     modelYearDataAdjustment: number;
+    isBanked: boolean;
     constructor(
         allFacilityAnalysisData: Array<MonthlyAnalysisSummaryDataClass>,
         monthDate: Date,

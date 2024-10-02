@@ -42,7 +42,7 @@ export class MonthlyGroupAnalysisClass {
   }
 
   setStartAndEndDate(calanderizedMeters: Array<CalanderizedMeter>, calculateAllMonthlyData: boolean) {
-    let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = getMonthlyStartAndEndDate(this.facility, this.analysisItem);
+    let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = getMonthlyStartAndEndDate(this.facility, this.analysisItem, this.selectedGroup);
     this.baselineDate = monthlyStartAndEndDate.baselineDate;
     if (calculateAllMonthlyData) {
       let lastBill: MonthlyData = getLastBillEntryFromCalanderizedMeterData(calanderizedMeters);
@@ -99,7 +99,7 @@ export class MonthlyGroupAnalysisClass {
         let totalUsage: number = _.sumBy(yearMeterData, (data: MonthlyData) => { return data.energyUse });
         this.annualMeterDataUsage.push({ year: year, usage: totalUsage });
       } else if (this.analysisItem.analysisCategory == 'water') {
-        let totalUsage: number = _.sumBy(yearMeterData,( data: MonthlyData) => { return data.energyConsumption });
+        let totalUsage: number = _.sumBy(yearMeterData, (data: MonthlyData) => { return data.energyConsumption });
         this.annualMeterDataUsage.push({ year: year, usage: totalUsage });
       }
     }

@@ -84,6 +84,7 @@
     <tbody class="table-group-divider">
         <tr *ngFor="let summary of annualAnalysisSummary | orderBy: orderDataField: orderByDirection">
             <td>
+                <span class="fa fa-asterisk" *ngIf="summary.isBanked"></span>
                 {{summary.year | yearDisplay: accountOrFacility.fiscalYear}}
             </td>
             <td *ngIf="analysisTableColumns.actualEnergy">
@@ -191,4 +192,13 @@
         </tr>
     </tbody>
 </table>
-<button class="btn action-btn btn-sm" (click)="copyTable()"><span class="fa fa-copy"></span> Copy Table</button>
+<div class="d-flex w-100 justify-content-between">
+    <div>
+        <button class="btn action-btn btn-sm" (click)="copyTable()">
+            <span class="fa fa-copy"></span> Copy Table
+        </button>
+    </div>
+    <div class="alert alert-info p-1" *ngIf="hasBanked">
+        <span class="fa fa-asterisk"></span> Indicates Banked Analysis
+    </div>
+</div>

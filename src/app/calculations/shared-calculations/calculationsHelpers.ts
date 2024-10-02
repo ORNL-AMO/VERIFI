@@ -7,22 +7,27 @@ import { IdbAccount } from "src/app/models/idbModels/account";
 import { IdbFacility } from "src/app/models/idbModels/facility";
 import { IdbUtilityMeter } from "src/app/models/idbModels/utilityMeter";
 import { IdbPredictorData } from "src/app/models/idbModels/predictorData";
-import { AnalysisGroupPredictorVariable } from "src/app/models/analysis";
+import { AnalysisGroup, AnalysisGroupPredictorVariable } from "src/app/models/analysis";
 import { IdbAnalysisItem } from "src/app/models/idbModels/analysisItem";
 import { IdbAccountAnalysisItem } from "src/app/models/idbModels/accountAnalysisItem";
 
-export function getMonthlyStartAndEndDate(facilityOrAccount: IdbFacility | IdbAccount, analysisItem: IdbAnalysisItem | IdbAccountAnalysisItem): { baselineDate: Date, endDate: Date } {
+export function getMonthlyStartAndEndDate(facilityOrAccount: IdbFacility | IdbAccount, analysisItem: IdbAnalysisItem | IdbAccountAnalysisItem, group: AnalysisGroup): { baselineDate: Date, endDate: Date } {
     let baselineDate: Date;
     let endDate: Date;
+    let baselineYear: number = analysisItem.baselineYear;
+    if(group && group.applyBanking && analysisItem.hasBanking){
+        baselineYear = group.newBaselineYear;
+    }
+
     if (facilityOrAccount.fiscalYear == 'calendarYear') {
-        baselineDate = new Date(analysisItem.baselineYear, 0, 1);
+        baselineDate = new Date(baselineYear, 0, 1);
         endDate = new Date(analysisItem.reportYear + 1, 0, 1);
     } else {
         if (facilityOrAccount.fiscalYearCalendarEnd) {
-            baselineDate = new Date(analysisItem.baselineYear - 1, facilityOrAccount.fiscalYearMonth);
+            baselineDate = new Date(baselineYear - 1, facilityOrAccount.fiscalYearMonth);
             endDate = new Date(analysisItem.reportYear, facilityOrAccount.fiscalYearMonth);
         } else {
-            baselineDate = new Date(analysisItem.baselineYear, facilityOrAccount.fiscalYearMonth);
+            baselineDate = new Date(baselineYear, facilityOrAccount.fiscalYearMonth);
             endDate = new Date(analysisItem.reportYear + 1, facilityOrAccount.fiscalYearMonth);
         }
     }

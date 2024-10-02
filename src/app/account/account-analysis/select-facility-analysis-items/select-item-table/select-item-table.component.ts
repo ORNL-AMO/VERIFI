@@ -113,7 +113,7 @@ export class SelectItemTableComponent implements OnInit {
     newIdbItem.reportYear = this.selectedAnalysisItem.reportYear;
     newIdbItem = this.analysisService.setDataAdjustments(newIdbItem);
     newIdbItem.groups.forEach(group => {
-      group.groupErrors = this.analysisValidationService.getGroupErrors(group);
+      group.groupErrors = this.analysisValidationService.getGroupErrors(group, newIdbItem);
     });
     newIdbItem.setupErrors = this.analysisValidationService.getAnalysisItemErrors(newIdbItem);
     newIdbItem = await firstValueFrom(this.analysisDbService.addWithObservable(newIdbItem));
