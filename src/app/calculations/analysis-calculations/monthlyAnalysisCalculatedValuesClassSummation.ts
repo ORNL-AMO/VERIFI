@@ -16,8 +16,6 @@ export class MonthlyAnalysisCalculatedValuesSummation {
     yearToDatePercentSavings: number;
     rollingSavings: number;
     rolling12MonthImprovement: number;
-    rolling12MonthImprovementUnbanked: number;
-    rolling12MonthImprovementBanked: number;
 
     //used for calcs
     yearToDateBaselineActualEnergyUse: number;
@@ -149,18 +147,11 @@ export class MonthlyAnalysisCalculatedValuesSummation {
             let total12MonthsEnergyUse: number = _.sumBy(last11MonthsData, (data: MonthlyAnalysisCalculatedValuesSummation) => { return data.energyUse }) + this.energyUse;
             let total12MonthsAdjusedBaseline: number = _.sumBy(last11MonthsData, (data: MonthlyAnalysisCalculatedValuesSummation) => { return data.adjusted }) + this.adjusted;
             this.rollingSavings = total12MonthsAdjusedBaseline - total12MonthsEnergyUse;
-            this.rolling12MonthImprovementUnbanked = this.rollingSavings / total12MonthsAdjusedBaseline;
+            this.rolling12MonthImprovement = this.rollingSavings / total12MonthsAdjusedBaseline;
         } else {
-            this.rolling12MonthImprovementUnbanked = 0;
+            this.rolling12MonthImprovement = 0;
             this.rollingSavings = 0;
         }
-
-        if (lastBankedMonthSummaryData) {
-            this.rolling12MonthImprovementBanked = lastBankedMonthSummaryData.monthlyAnalysisCalculatedValues.rolling12MonthImprovement;
-        } else {
-            this.rolling12MonthImprovementBanked = 0;
-        }
-        this.rolling12MonthImprovement = (this.rolling12MonthImprovementBanked + this.rolling12MonthImprovementUnbanked)
     }
 
     setYearToDatePercentSavings() {

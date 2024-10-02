@@ -149,8 +149,6 @@ export class MonthlyAccountAnalysisClass {
                 yearToDatePercentSavings: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.yearToDatePercentSavings) * 100,
                 rollingSavings: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.rollingSavings),
                 rolling12MonthImprovement: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.rolling12MonthImprovement) * 100,
-                rolling12MonthImprovementBanked: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.rolling12MonthImprovementBanked) * 100,
-                rolling12MonthImprovementUnbanked: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.rolling12MonthImprovementUnbanked) * 100,
                 dataAdjustment: summaryDataItem.dataAdjustment,
                 modelYearDataAdjustment: summaryDataItem.modelYearDataAdjustment,
                 // adjustedStar: summaryDataItem.monthlyAnalysisCalculatedValues.adjustedStar,
