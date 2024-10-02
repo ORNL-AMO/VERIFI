@@ -46,7 +46,7 @@ export class MonthlyAccountAnalysisClass {
     }
 
     setStartAndEndDate(account: IdbAccount, analysisItem: IdbAccountAnalysisItem, calculateAllMonthlyData: boolean) {
-        let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = getMonthlyStartAndEndDate(account, analysisItem);
+        let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = getMonthlyStartAndEndDate(account, analysisItem, undefined);
         this.startDate = monthlyStartAndEndDate.baselineDate;
         if (calculateAllMonthlyData) {
             let endDates: Array<Date> = this.monthlyFacilityAnalysisClasses.map(monthFacilityAnalysisClass => { return monthFacilityAnalysisClass.endDate });

@@ -13,6 +13,9 @@ import { IdbAnalysisItem } from "src/app/models/idbModels/analysisItem";
 
 export class MonthlyFacilityAnalysisClass {
 
+    bankedFacilityAnalysisClass: MonthlyFacilityAnalysisClass;
+
+
     allFacilityAnalysisData: Array<MonthlyAnalysisSummaryDataClass>;
     facilityMonthSummaries: Array<MonthlyFacilityAnalysisDataClass>;
     groupMonthlySummariesClasses: Array<MonthlyAnalysisSummaryClass>;
@@ -26,6 +29,10 @@ export class MonthlyFacilityAnalysisClass {
     constructor(analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, accountPredictorEntries: Array<IdbPredictorData>, calculateAllMonthlyData: boolean, accountPredictors: Array<IdbPredictor>, accountAnalysisItems: Array<IdbAnalysisItem>) {
         this.facility = facility;
         this.analysisItem = analysisItem;
+        if (analysisItem.hasBanking) {
+            let bankedAnalysisItem: IdbAnalysisItem = accountAnalysisItems.find(item => { return item.guid == analysisItem.bankedAnalysisItemId });
+            this.bankedFacilityAnalysisClass = new MonthlyFacilityAnalysisClass(bankedAnalysisItem, facility, calanderizedMeters, accountPredictorEntries, calculateAllMonthlyData, accountPredictors, accountAnalysisItems);
+        }
         let calanderizedFacilityMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => { return cMeter.meter.facilityId == facility.guid })
         this.setFacilityPredictorEntries(accountPredictorEntries, facility);
         this.setFacilityPredictors(accountPredictors, facility);
@@ -36,7 +43,7 @@ export class MonthlyFacilityAnalysisClass {
     }
 
     setStartAndEndDate(facility: IdbFacility, analysisItem: IdbAnalysisItem, calculateAllMonthlyData: boolean, calanderizedMeters: Array<CalanderizedMeter>) {
-        let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = getMonthlyStartAndEndDate(facility, analysisItem);
+        let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = getMonthlyStartAndEndDate(facility, analysisItem, undefined);
         this.startDate = monthlyStartAndEndDate.baselineDate;
         if (calculateAllMonthlyData) {
             let lastBill: MonthlyData = getLastBillEntryFromCalanderizedMeterData(calanderizedMeters);
@@ -70,7 +77,7 @@ export class MonthlyFacilityAnalysisClass {
         })
     }
 
-    setFacilityPredictors(accountPredictors: Array<IdbPredictor>, facility: IdbFacility){
+    setFacilityPredictors(accountPredictors: Array<IdbPredictor>, facility: IdbFacility) {
         this.facilityPredictors = accountPredictors.filter(predictor => {
             return predictor.facilityId == facility.guid;
         })
@@ -102,6 +109,33 @@ export class MonthlyFacilityAnalysisClass {
     }
 
     getMonthlyAnalysisSummaryData(): Array<MonthlyAnalysisSummaryData> {
+        // if (this.bankedFacilityAnalysisClass) {
+        //     let startBankedDate: Date = new Date(this.bankedFacilityAnalysisClass[0].date);
+        //     let startUnbankedDate: Date = new Date(this.facilityMonthSummaries[0].date);
+        //     let combinedData: Array<MonthlyAnalysisSummaryData> = new Array();
+        //     while (startBankedDate < startUnbankedDate) {
+        //         let bankedData: MonthlyFacilityAnalysisDataClass = this.bankedFacilityAnalysisClass.facilityMonthSummaries.find(data => {
+        //             return checkSameMonth(new Date(data.date), startBankedDate);
+        //         });
+        //         bankedData.isBanked = true;
+        //         combinedData.push(bankedData);
+        //         let currentMonth: number = startBankedDate.getUTCMonth()
+        //         let nextMonth: number = currentMonth + 1;
+        //         startBankedDate = new Date(startBankedDate.getUTCFullYear(), nextMonth, 1);
+        //     }
+        //     unbankedMonthlyAnalysisSummaryData.forEach(data => {
+        //         combinedData.push(data);
+        //     });
+        //     return combinedData;
+        // } else {
+        //     return this.annualAnalysisSummaryDataClasses.map(summaryDataClass => {
+        //         return this.getFormattedResult(summaryDataClass, false);
+        //     });
+        // }
+
+
+
+
         return this.facilityMonthSummaries.map(summaryDataItem => {
             return {
                 date: summaryDataItem.date,
@@ -130,6 +164,9 @@ export class MonthlyFacilityAnalysisClass {
             }
         })
     }
+
+
+
 
     convertResults(startingUnit: string, endingUnit: string) {
         for (let i = 0; i < this.facilityMonthSummaries.length; i++) {

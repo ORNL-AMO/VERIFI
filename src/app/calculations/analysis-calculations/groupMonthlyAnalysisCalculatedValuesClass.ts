@@ -52,9 +52,9 @@ export class GroupMonthlyAnalysisCalculatedValues {
         this.setYearToDateModeledEnergyUse();
         this.setYearToDateActualEnergyUse();
         this.setBaselineModeledEnergyUse(baselineYear, previousMonthValues);
-        this.setAdjustedStar(baselineActualEnergyUse, modelYearDataAdjusted, baselineAdjustementInput);
+        this.setAdjustedStar(baselineActualEnergyUse, modelYearDataAdjusted, baselineAdjustementInput, lastBankedMonthSummaryData);
         this.setAdjustedStarStar(dataAdjustment);
-        this.setAdjusted();
+        this.setAdjusted(lastBankedMonthSummaryData);
         this.setBaselineAdjustmentForNormalization(baselineActualEnergyUse, modelYearDataAdjusted, dataAdjustment);
         this.setBaselineAdjustmentForOtherV2(baselineAdjustementInput, modelYearDataAdjusted, dataAdjustment, baselineActualEnergyUse);
         this.setBaselineAdjustment();
@@ -62,7 +62,7 @@ export class GroupMonthlyAnalysisCalculatedValues {
         this.setSavings(baselineActualEnergyUse, baselineAdjustementInput, modelYearDataAdjusted, dataAdjustment);
         this.setPercentSavingsComparedToBaseline();
         this.setYearToDateSavings(baselineYear);
-        this.setRollingSavingsValues(previousMonthValues, lastBankedMonthSummaryData);
+        this.setRollingSavingsValues(previousMonthValues, undefined);
         this.setYearToDatePercentSavings();
     }
 
@@ -116,7 +116,7 @@ export class GroupMonthlyAnalysisCalculatedValues {
         this.yearToDateBaselineModeledEnergyUse = this.yearToDateBaselineModeledEnergyUse + this.baselineModeledEnergyUse;
     }
 
-    setAdjustedStar(baselineActualEnergyUse: number, modelYearDataAdjusted: number, baselineAdjustementInput: number) {
+    setAdjustedStar(baselineActualEnergyUse: number, modelYearDataAdjusted: number, baselineAdjustementInput: number, lastBankedMonthSummaryData: MonthlyAnalysisSummaryDataClass) {
         if (this.baselineModeledEnergyUse - modelYearDataAdjusted == 0) {
             if (this.modeledEnergy - modelYearDataAdjusted == 0) {  //M_i = 0 subcase is the weird one
                 this.adjustedStar = (baselineActualEnergyUse + baselineAdjustementInput);
@@ -125,6 +125,10 @@ export class GroupMonthlyAnalysisCalculatedValues {
             }
         } else {
             this.adjustedStar = (baselineActualEnergyUse + baselineAdjustementInput) * ((this.modeledEnergy - modelYearDataAdjusted) / (this.baselineModeledEnergyUse - modelYearDataAdjusted));
+        }
+
+        if (lastBankedMonthSummaryData) {
+            this.adjustedStar = this.adjustedStar * (1 + lastBankedMonthSummaryData.monthlyAnalysisCalculatedValues.rolling12MonthImprovement);
         }
     }
 
@@ -136,8 +140,12 @@ export class GroupMonthlyAnalysisCalculatedValues {
         }
     }
 
-    setAdjusted() {
+    setAdjusted(lastBankedMonthSummaryData: MonthlyAnalysisSummaryDataClass) {
         this.adjusted = this.adjustedStarStar;
+        // if (lastBankedMonthSummaryData) {
+        //     this.adjusted = this.adjusted * (1 + lastBankedMonthSummaryData.monthlyAnalysisCalculatedValues.rolling12MonthImprovement);
+        // }
+
         this.yearToDateAdjustedEnergyUse = this.yearToDateAdjustedEnergyUse + this.adjusted;
     }
 

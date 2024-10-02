@@ -308,6 +308,18 @@
                         </label>
                     </div>
                 </div>
+                <div class="form-group row mt-2 sub-column">
+                    <label class="col-6 col-form-label">
+                        New Baseline Year
+                    </label>
+                    <div class="col-6">
+                        <select required class="form-select" id="newBaselineYear" name="newBaselineYear"
+                            [(ngModel)]="group.newBaselineYear" (change)="saveItem()" [required]="true">
+                            <option *ngFor="let year of yearOptions" [ngValue]="year">
+                                {{year| yearDisplay: facility.fiscalYear}}</option>
+                        </select>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="row pt-3" *ngIf="group.analysisType == 'regression'">

@@ -178,7 +178,7 @@
             <td *ngIf="analysisTableColumns.percentSavingsComparedToBaseline">
                 <span *ngIf="data.percentSavingsComparedToBaseline"
                     [ngClass]="{'red': data.percentSavingsComparedToBaseline < 0}">
-                    {{data.percentSavingsComparedToBaseline | number:'1.0-2'}} %
+                    {{data.percentSavingsComparedToBaseline | number:'1.0-5'}} %
                 </span>
                 <span *ngIf="!data.percentSavingsComparedToBaseline">
                     &mdash;
@@ -210,7 +210,7 @@
             </td>
             <td *ngIf="analysisTableColumns.rolling12MonthImprovement">
                 <span *ngIf="data.rolling12MonthImprovement" [ngClass]="{'red': data.rolling12MonthImprovement < 0}">
-                    {{data.rolling12MonthImprovement | number:'1.0-2'}} %
+                    {{data.rolling12MonthImprovement | number:'1.0-5'}} %
                 </span>
                 <span *ngIf="!data.rolling12MonthImprovement">
                     &mdash;

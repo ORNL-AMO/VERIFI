@@ -181,7 +181,7 @@ export class AccountAnalysisSetupComponent implements OnInit {
       newIdbItem.reportYear = this.analysisItem.reportYear;
       newIdbItem.groups.forEach(group => {
         group.analysisType = this.analysisType;
-        group.groupErrors = this.analysisValidationService.getGroupErrors(group);
+        group.groupErrors = this.analysisValidationService.getGroupErrors(group, newIdbItem);
       });
       newIdbItem = this.analysisService.setDataAdjustments(newIdbItem);
       newIdbItem.setupErrors = this.analysisValidationService.getAnalysisItemErrors(newIdbItem);

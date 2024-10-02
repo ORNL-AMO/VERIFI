@@ -126,7 +126,8 @@ export function getNewAnalysisGroup(groupId: string, predictorVariables: Array<A
     hasBaselineAdjustmentV2: false,
     baselineAdjustmentsV2: [],
     maxModelVariables: 4,
-    applyBanking: true
+    applyBanking: true,
+    newBaselineYear: undefined
   }
   analysisGroup.groupErrors = {
     hasErrors: true,
@@ -139,7 +140,8 @@ export function getNewAnalysisGroup(groupId: string, predictorVariables: Array<A
     invalidMonthlyBaseload: true,
     noProductionVariables: true,
     missingGroupMeters: true,
-    hasInvalidRegressionModel: true
+    hasInvalidRegressionModel: true,
+    missingBankingBaselineYear: true
   };
   return analysisGroup;
 }

@@ -41,7 +41,7 @@ export class AnalysisSetupComponent implements OnInit {
   displayChangeReportYear: boolean = false;
   newReportYear: number;
 
-  previousAnalysisItems: Array<IdbAnalysisItem>;
+  facilityAnalysisItems: Array<IdbAnalysisItem>;
   constructor(private facilityDbService: FacilitydbService, private analysisDbService: AnalysisDbService,
     private analysisService: AnalysisService, private router: Router,
     private analysisValidationService: AnalysisValidationService,
@@ -89,7 +89,7 @@ export class AnalysisSetupComponent implements OnInit {
   }
 
   async setSiteSource() {
-    this.setPreviousAnalysisYears();
+    this.setFacilityAnalysisItems();
     await this.saveItem();
   }
 
@@ -111,10 +111,6 @@ export class AnalysisSetupComponent implements OnInit {
         this.baselineYearWarning = undefined;
       }
     } else {
-      this.baselineYearWarning = undefined;
-    }
-    //TODO: update warning for banking
-    if(this.analysisItem.hasBanking){
       this.baselineYearWarning = undefined;
     }
   }
@@ -159,7 +155,7 @@ export class AnalysisSetupComponent implements OnInit {
       group.predictorVariables.forEach(variable => {
         variable.regressionCoefficient = undefined;
       })
-      group.groupErrors = this.analysisValidationService.getGroupErrors(group);
+      group.groupErrors = this.analysisValidationService.getGroupErrors(group, this.analysisItem);
     });
     await this.saveItem();
     this.setComponentBools();
@@ -184,7 +180,7 @@ export class AnalysisSetupComponent implements OnInit {
     } else {
       this.reportYears = [];
     }
-    this.setPreviousAnalysisYears();
+    this.setFacilityAnalysisItems();
   }
 
   showChangeReportYear() {
@@ -211,22 +207,21 @@ export class AnalysisSetupComponent implements OnInit {
     await this.saveItem();
   }
 
-  setPreviousAnalysisYears() {
+  setFacilityAnalysisItems() {
     let facilityAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.facilityAnalysisItems.getValue();
-    this.previousAnalysisItems = facilityAnalysisItems.filter(analysisItem => {
-      return analysisItem.baselineYear < this.analysisItem.baselineYear && analysisItem.energyIsSource == this.analysisItem.energyIsSource;
+    this.facilityAnalysisItems = facilityAnalysisItems.filter(analysisItem => {
+      return analysisItem.energyIsSource == this.analysisItem.energyIsSource;
     });
-    if (this.previousAnalysisItems.length == 0) {
+    if (this.facilityAnalysisItems.length == 0) {
       this.analysisItem.hasBanking = false;
       this.analysisItem.bankedAnalysisItemId = undefined;
     }
   }
 
-  async changeHasBanking(){
-    if(this.analysisItem.hasBanking == false){
+  async changeHasBanking() {
+    if (this.analysisItem.hasBanking == false) {
       this.analysisItem.bankedAnalysisItemId = undefined;
     }
-    this.setBaselineYearWarning();
     await this.saveItem();
   }
 }

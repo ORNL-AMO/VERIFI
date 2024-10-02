@@ -29,6 +29,7 @@ export class GroupAnalysisOptionsComponent implements OnInit {
   analysisItem: IdbAnalysisItem;
   facility: IdbFacility;
   showInUseMessage: boolean;
+  bankedAnalysisYears: Array<number>;
   constructor(private analysisService: AnalysisService, private analysisDbService: AnalysisDbService,
     private accountDbService: AccountdbService, private facilityDbService: FacilitydbService,
     private dbChangesService: DbChangesService,
@@ -40,6 +41,7 @@ export class GroupAnalysisOptionsComponent implements OnInit {
   ngOnInit(): void {
     this.facility = this.facilityDbService.selectedFacility.getValue();
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
+    this.setBankedAnalysisYearOptions();
     this.setShowInUseMessage();
     this.yearOptions = this.calanderizationService.getYearOptionsFacility(this.facility.guid, this.analysisItem.analysisCategory);
     this.selectedGroupSub = this.analysisService.selectedGroup.subscribe(group => {
@@ -54,7 +56,7 @@ export class GroupAnalysisOptionsComponent implements OnInit {
   async saveItem() {
     let analysisItem: IdbAnalysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
     let groupIndex: number = analysisItem.groups.findIndex(group => { return group.idbGroupId == this.group.idbGroupId });
-    this.group.groupErrors = this.analysisValidationService.getGroupErrors(this.group);
+    this.group.groupErrors = this.analysisValidationService.getGroupErrors(this.group, analysisItem);
     analysisItem.groups[groupIndex] = this.group;
     analysisItem.setupErrors = this.analysisValidationService.getAnalysisItemErrors(analysisItem);
     await firstValueFrom(this.analysisDbService.updateWithObservable(analysisItem));
@@ -104,4 +106,10 @@ export class GroupAnalysisOptionsComponent implements OnInit {
     this.analysisService.hideInUseMessage = true;
   }
 
+  setBankedAnalysisYearOptions() {
+    this.yearOptions = new Array();
+    for (let i = this.analysisItem.baselineYear + 1; i < this.analysisItem.reportYear; i++) {
+      this.yearOptions.push(i);
+    }
+  }
 }

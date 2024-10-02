@@ -222,7 +222,8 @@ export interface AnalysisGroup {
   dateModelsGenerated?: Date,
   regressionModelNotes?: string,
   maxModelVariables: number,
-  applyBanking: boolean
+  applyBanking: boolean,
+  newBaselineYear: number
 }
 
 export interface AnalysisGroupPredictorVariable {
@@ -246,7 +247,8 @@ export interface GroupErrors {
   invalidAverageBaseload: boolean,
   invalidMonthlyBaseload: boolean,
   missingGroupMeters: boolean,
-  hasInvalidRegressionModel: boolean
+  hasInvalidRegressionModel: boolean,
+  missingBankingBaselineYear: boolean
 }
 
 

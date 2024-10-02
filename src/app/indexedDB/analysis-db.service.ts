@@ -158,7 +158,7 @@ export class AnalysisDbService {
             }
           }
         }
-        group.groupErrors = this.analysisValidationService.getGroupErrors(group);
+        group.groupErrors = this.analysisValidationService.getGroupErrors(group, analysisItem);
         if (group.groupErrors.hasErrors) {
           hasGroupErrors = true;
         }
