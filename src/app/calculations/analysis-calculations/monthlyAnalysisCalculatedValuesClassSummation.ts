@@ -45,8 +45,7 @@ export class MonthlyAnalysisCalculatedValuesSummation {
         this.setYearToDateSavings(baselineYear);
         this.setBaselineAdjustmentForNormalization(currentMonthData);
         this.setBaselineAdjustment(currentMonthData);
-        //TODO: add banked
-        this.setRollingSavingsValues(previousMonthsValues, undefined)
+        this.setRollingSavingsValues(previousMonthsValues)
         this.setYearToDatePercentSavings();
     }
 
@@ -141,7 +140,7 @@ export class MonthlyAnalysisCalculatedValuesSummation {
         }) + this.baselineAdjustmentForOtherV2;
     }
 
-    setRollingSavingsValues(previousMonthsValues: Array<MonthlyAnalysisCalculatedValuesSummation>, lastBankedMonthSummaryData: MonthlyAnalysisSummaryDataClass) {
+    setRollingSavingsValues(previousMonthsValues: Array<MonthlyAnalysisCalculatedValuesSummation>) {
         if (this.summaryDataIndex > 11) {
             let last11MonthsData: Array<MonthlyAnalysisCalculatedValuesSummation> = previousMonthsValues.splice(this.summaryDataIndex - 11, this.summaryDataIndex);
             let total12MonthsEnergyUse: number = _.sumBy(last11MonthsData, (data: MonthlyAnalysisCalculatedValuesSummation) => { return data.energyUse }) + this.energyUse;

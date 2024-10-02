@@ -10,7 +10,6 @@ import { IdbFacility } from "src/app/models/idbModels/facility";
 import { IdbPredictorData } from "src/app/models/idbModels/predictorData";
 import { IdbPredictor } from "src/app/models/idbModels/predictor";
 import { IdbAnalysisItem } from "src/app/models/idbModels/analysisItem";
-import { checkSameMonth } from "src/app/upload-data/upload-helper-functions";
 
 export class MonthlyFacilityAnalysisClass {
 
@@ -118,33 +117,6 @@ export class MonthlyFacilityAnalysisClass {
     }
 
     getMonthlyAnalysisSummaryData(): Array<MonthlyAnalysisSummaryData> {
-        // if (this.bankedFacilityAnalysisClass) {
-        //     let startBankedDate: Date = new Date(this.bankedFacilityAnalysisClass[0].date);
-        //     let startUnbankedDate: Date = new Date(this.facilityMonthSummaries[0].date);
-        //     let combinedData: Array<MonthlyAnalysisSummaryData> = new Array();
-        //     while (startBankedDate < startUnbankedDate) {
-        //         let bankedData: MonthlyFacilityAnalysisDataClass = this.bankedFacilityAnalysisClass.facilityMonthSummaries.find(data => {
-        //             return checkSameMonth(new Date(data.date), startBankedDate);
-        //         });
-        //         bankedData.isBanked = true;
-        //         combinedData.push(bankedData);
-        //         let currentMonth: number = startBankedDate.getUTCMonth()
-        //         let nextMonth: number = currentMonth + 1;
-        //         startBankedDate = new Date(startBankedDate.getUTCFullYear(), nextMonth, 1);
-        //     }
-        //     unbankedMonthlyAnalysisSummaryData.forEach(data => {
-        //         combinedData.push(data);
-        //     });
-        //     return combinedData;
-        // } else {
-        //     return this.annualAnalysisSummaryDataClasses.map(summaryDataClass => {
-        //         return this.getFormattedResult(summaryDataClass, false);
-        //     });
-        // }
-
-
-
-
         return this.facilityMonthSummaries.map(summaryDataItem => {
             return {
                 date: summaryDataItem.date,
