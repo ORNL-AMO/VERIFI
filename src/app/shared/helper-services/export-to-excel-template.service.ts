@@ -22,6 +22,7 @@ import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
+import { checkSameMonth } from 'src/app/upload-data/upload-helper-functions';
 
 @Injectable({
   providedIn: 'root'
@@ -437,6 +438,7 @@ export class ExportToExcelTemplateService {
     // worksheet.getCell('B1').value = 'Date';
     let alphaIndex: number = 2;
 
+
     let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     if (facilityId) {
       facilities = facilities.filter(facility => { return facility.guid == facilityId });
@@ -461,25 +463,42 @@ export class ExportToExcelTemplateService {
         alphaIndex++;
       });
       let index: number = 2;
-      predictorEntries.forEach(entry => {
-        let facilityName: string = facilities.find(facility => { return facility.guid == entry.facilityId }).name;
-        worksheet.getCell('A' + index).value = facilityName;
-        worksheet.getCell('B' + index).value = this.getFormatedDate(entry.date)
-        // alphaIndex = 1;
-        predictors.forEach(predictor => {
-          // let letter: string = alphabet[alphaIndex];
-          let findItem: { letter: string, predictorName: string } = predictorCellMap.find(mapObj => {
-            return mapObj.predictorName == predictor.name
-          })
-          if (!findItem) {
-            console.log('Missing Predictor Entry: ' + predictor.name)
-          } else {
-            let letter = findItem.letter;
-            worksheet.getCell(letter + index).value = entry.amount;
-          }
-          // alphaIndex++;
+      let facilityIDs: Array<string> = facilities.map(facility => { return facility.guid });
+      facilityIDs.forEach(_facilityId => {
+        let facilityPredictorEntries: Array<IdbPredictorData> = predictorEntries.filter(entry => {
+          return entry.facilityId == _facilityId;
         });
-        index++;
+        let facilityPredictors: Array<IdbPredictor> = predictors.filter(predictor => {
+          return predictor.facilityId == _facilityId;
+        });
+        
+        let predictorDates: Array<Date> = facilityPredictorEntries.map(predictor => {
+          return new Date(predictor.date)
+        });
+
+        predictorDates = _.uniqBy(predictorDates, (pDate: Date) => {
+          return pDate.getMonth() + ' ' + pDate.getFullYear();
+        })
+
+        predictorDates.forEach(pDate => {
+          let facilityName: string = facilities.find(facility => { return facility.guid == _facilityId }).name;
+          worksheet.getCell('A' + index).value = facilityName;
+          worksheet.getCell('B' + index).value = this.getFormatedDate(pDate)
+          facilityPredictors.forEach(predictor => {
+            let monthEntry: IdbPredictorData = facilityPredictorEntries.find(pData => {
+              return pData.predictorId == predictor.guid && checkSameMonth(new Date(pData.date), pDate);
+            });
+            if (monthEntry) {
+              let findItem: { letter: string, predictorName: string } = predictorCellMap.find(mapObj => {
+                return mapObj.predictorName == predictor.name
+              })
+              if (findItem) {
+                worksheet.getCell(findItem.letter + index).value = monthEntry.amount;
+              }
+            }
+          })
+          index++;
+        })
       });
     }
     return worksheet;
