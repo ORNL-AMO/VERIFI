@@ -13,6 +13,7 @@ export class GroupMonthlyAnalysisCalculatedValues {
     SEnPI: number;
 
     savings: number;
+    savingsUnbanked: number;
 
     percentSavingsComparedToBaseline: number;
 
@@ -55,14 +56,14 @@ export class GroupMonthlyAnalysisCalculatedValues {
         this.setYearToDateModeledEnergyUse();
         this.setYearToDateActualEnergyUse();
         this.setBaselineModeledEnergyUse(baselineYear, previousMonthValues);
-        this.setAdjustedStar(baselineActualEnergyUse, modelYearDataAdjusted, baselineAdjustementInput, lastBankedMonthSummaryData);
+        this.setAdjustedStar(baselineActualEnergyUse, modelYearDataAdjusted, baselineAdjustementInput);
         this.setAdjustedStarStar(dataAdjustment);
         this.setAdjusted();
         this.setBaselineAdjustmentForNormalization(baselineActualEnergyUse, modelYearDataAdjusted, dataAdjustment);
         this.setBaselineAdjustmentForOtherV2(baselineAdjustementInput, modelYearDataAdjusted, dataAdjustment, baselineActualEnergyUse);
         this.setBaselineAdjustment();
         this.setSEnPI();
-        this.setSavings(baselineActualEnergyUse, baselineAdjustementInput, modelYearDataAdjusted, dataAdjustment);
+        this.setSavings(baselineActualEnergyUse, baselineAdjustementInput, modelYearDataAdjusted, dataAdjustment, lastBankedMonthSummaryData);
         this.setPercentSavingsComparedToBaseline();
         this.setYearToDateSavings(baselineYear);
         this.setRollingSavingsValues(previousMonthValues);
@@ -119,7 +120,7 @@ export class GroupMonthlyAnalysisCalculatedValues {
         this.yearToDateBaselineModeledEnergyUse = this.yearToDateBaselineModeledEnergyUse + this.baselineModeledEnergyUse;
     }
 
-    setAdjustedStar(baselineActualEnergyUse: number, modelYearDataAdjusted: number, baselineAdjustementInput: number, lastBankedMonthSummaryData: MonthlyAnalysisSummaryDataClass) {
+    setAdjustedStar(baselineActualEnergyUse: number, modelYearDataAdjusted: number, baselineAdjustementInput: number) {
         if (this.baselineModeledEnergyUse - modelYearDataAdjusted == 0) {
             if (this.modeledEnergy - modelYearDataAdjusted == 0) {  //M_i = 0 subcase is the weird one
                 this.adjustedStar = (baselineActualEnergyUse + baselineAdjustementInput);
@@ -128,10 +129,6 @@ export class GroupMonthlyAnalysisCalculatedValues {
             }
         } else {
             this.adjustedStar = (baselineActualEnergyUse + baselineAdjustementInput) * ((this.modeledEnergy - modelYearDataAdjusted) / (this.baselineModeledEnergyUse - modelYearDataAdjusted));
-        }
-
-        if (lastBankedMonthSummaryData) {
-            this.adjustedStar = this.adjustedStar * (1 + lastBankedMonthSummaryData.monthlyAnalysisCalculatedValues.rolling12MonthImprovement);
         }
     }
 
@@ -173,11 +170,18 @@ export class GroupMonthlyAnalysisCalculatedValues {
         this.SEnPI = this.energyUse / this.adjusted;
     }
 
-    setSavings(baselineActualEnergyUse: number, baselineAdjustementInput: number, modelYearDataAdjusted: number, dataAdjustment: number) {
+    setSavings(baselineActualEnergyUse: number, baselineAdjustementInput: number, modelYearDataAdjusted: number, dataAdjustment: number, lastBankedMonthSummaryData: MonthlyAnalysisSummaryDataClass) {
         if ((baselineActualEnergyUse + baselineAdjustementInput) != 0 && (this.baselineModeledEnergyUse - modelYearDataAdjusted) != 0 && (this.modeledEnergy - modelYearDataAdjusted) != 0) {
-            this.savings = this.adjusted - this.energyUse;
+            this.savingsUnbanked = this.adjusted - this.energyUse;
+            if (lastBankedMonthSummaryData) {
+                this.savings = ((1 + lastBankedMonthSummaryData.monthlyAnalysisCalculatedValues.rolling12MonthImprovement) * this.adjusted) - this.energyUse;
+            } else {
+                this.savings = this.savingsUnbanked;
+            }
         } else {
-            this.savings = ((baselineActualEnergyUse + baselineAdjustementInput) - (this.baselineModeledEnergyUse - modelYearDataAdjusted)) + ((this.modeledEnergy - modelYearDataAdjusted) - (this.energyUse - dataAdjustment))
+            this.savingsUnbanked = ((baselineActualEnergyUse + baselineAdjustementInput) - (this.baselineModeledEnergyUse - modelYearDataAdjusted)) + ((this.modeledEnergy - modelYearDataAdjusted) - (this.energyUse - dataAdjustment))
+            //TODO: handle banking here..
+            this.savings = this.savingsUnbanked;
         }
     }
 
@@ -225,9 +229,13 @@ export class GroupMonthlyAnalysisCalculatedValues {
     setRollingSavingsValues(previousMonthsValues: Array<GroupMonthlyAnalysisCalculatedValues>) {
         if (this.summaryDataIndex > 11) {
             let last11MonthsData: Array<GroupMonthlyAnalysisCalculatedValues> = previousMonthsValues.splice(this.summaryDataIndex - 11, this.summaryDataIndex);
-            let total12MonthsEnergyUse: number = _.sumBy(last11MonthsData, (data: GroupMonthlyAnalysisCalculatedValues) => { return data.energyUse }) + this.energyUse;
-            let total12MonthsAdjusedBaseline: number = _.sumBy(last11MonthsData, (data: GroupMonthlyAnalysisCalculatedValues) => { return data.adjusted }) + this.adjusted;
-            this.rollingSavings = total12MonthsAdjusedBaseline - total12MonthsEnergyUse;
+            let total12MonthsAdjusedBaseline: number = _.sumBy(last11MonthsData, (data: GroupMonthlyAnalysisCalculatedValues) => {
+                return data.adjusted
+            }) + this.adjusted;
+            this.rollingSavings = _.sumBy(last11MonthsData, (data: GroupMonthlyAnalysisCalculatedValues) => {
+                return data.savings
+            }) + this.savings;
+
             this.rolling12MonthImprovement = this.rollingSavings / total12MonthsAdjusedBaseline;
         } else {
             this.rolling12MonthImprovement = 0;
