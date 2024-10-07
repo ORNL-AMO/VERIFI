@@ -40,7 +40,7 @@ export class MonthlyAnalysisCalculatedValuesSummation {
         this.setYearToDateAdjustedEnergyUse();
         this.setBaselineAdjustmentForOtherV2(currentMonthData, baselineAdjustmentForNew);
         this.setSEnPI();
-        this.setSavings();
+        this.setSavings(currentMonthData);
         this.setPercentSavingsComparedToBaseline();
         this.setYearToDateSavings(baselineYear);
         this.setBaselineAdjustmentForNormalization(currentMonthData);
@@ -111,8 +111,10 @@ export class MonthlyAnalysisCalculatedValuesSummation {
         this.SEnPI = this.energyUse / this.adjusted;
     }
 
-    setSavings() {
-        this.savings = this.adjusted - this.energyUse;
+    setSavings(currentMonthData: Array<MonthlyAnalysisSummaryDataClass>) {
+        this.savings = _.sumBy(currentMonthData, (data: MonthlyAnalysisSummaryDataClass) => {
+            return data.monthlyAnalysisCalculatedValues.savings;
+        });
     }
 
     setPercentSavingsComparedToBaseline() {
