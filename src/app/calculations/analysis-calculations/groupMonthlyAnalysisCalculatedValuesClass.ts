@@ -180,6 +180,8 @@ export class GroupMonthlyAnalysisCalculatedValues {
             }
         } else {
             this.savingsUnbanked = ((baselineActualEnergyUse + baselineAdjustementInput) - (this.baselineModeledEnergyUse - modelYearDataAdjusted)) + ((this.modeledEnergy - modelYearDataAdjusted) - (this.energyUse - dataAdjustment))
+            //TODO: handle banking here..
+            this.savings = this.savingsUnbanked;
         }
     }
 
