@@ -17,7 +17,7 @@ export class AnnualStationDataComponent {
   selectedYear: number;
   heatingTemp: number;
   coolingTemp: number;
-  detailedDegreeDays: Array<DetailDegreeDay>;
+  detailedDegreeDays: Array<DetailDegreeDay> | 'error';
   yearSummaryData: Array<{ date: Date, heatingDegreeDays: number, coolingDegreeDays: number, hasErrors: boolean }>;
   calculating: boolean;
   hasGapsInData: boolean;
@@ -64,7 +64,7 @@ export class AnnualStationDataComponent {
 
   setYearSummaryData() {
     let hasGapsInData: boolean = false;
-    if (this.detailedDegreeDays) {
+    if (this.detailedDegreeDays && this.detailedDegreeDays != 'error') {
       this.yearSummaryData = new Array();
       let startDate: Date = new Date(this.selectedYear, 0, 1);
       let endDate: Date = new Date(this.selectedYear + 1, 0, 1);

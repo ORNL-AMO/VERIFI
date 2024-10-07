@@ -22,6 +22,7 @@ import { ElectronService } from './electron/electron.service';
 import { AnalyticsService } from './analytics/analytics.service';
 import { CustomFuelDbService } from './indexedDB/custom-fuel-db.service';
 import { CustomGWPDbService } from './indexedDB/custom-gwp-db.service';
+import { DegreeDaysService } from './shared/helper-services/degree-days.service';
 
 // declare ga as a function to access the JS code in TS
 declare let gtag: Function;
@@ -57,7 +58,8 @@ export class AppComponent {
     private electronService: ElectronService,
     private analyticsService: AnalyticsService,
     private customFuelDbservice: CustomFuelDbService,
-    private customGWPDbService: CustomGWPDbService) {
+    private customGWPDbService: CustomGWPDbService,
+    private degreeDaysService: DegreeDaysService) {
     if (environment.production) {
       gtag('config', 'G-YG1QD02XSE');
       this.analyticsService.sendEvent('verifi_app_open', undefined);
@@ -73,6 +75,7 @@ export class AppComponent {
   ngOnInit() {
     this.initializeData();
     this.automaticBackupsService.subscribeData();
+    this.degreeDaysService.testStationResponse();
   }
 
   async initializeData() {

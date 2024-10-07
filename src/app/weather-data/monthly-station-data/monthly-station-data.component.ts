@@ -15,7 +15,7 @@ export class MonthlyStationDataComponent {
   selectedMonth: Date;
   heatingTemp: number;
   coolingTemp: number;
-  detailedDegreeDays: Array<DetailDegreeDay>;
+  detailedDegreeDays: Array<DetailDegreeDay> | 'error';
   hasGapsInData: boolean;
   gapsInDataDate: Date;
   weatherDataSelection: WeatherDataSelection;
@@ -40,15 +40,17 @@ export class MonthlyStationDataComponent {
 
   async setDegreeDays() {
     this.detailedDegreeDays = await this.degreeDaysService.getDailyDataFromMonth(this.selectedMonth.getMonth(), this.selectedMonth.getFullYear(), this.heatingTemp, this.coolingTemp, this.weatherStation.ID);
-    let errorIndex: number = this.detailedDegreeDays.findIndex(degreeDay => {
-      return degreeDay.gapInData == true;
-    })
-    if(errorIndex != -1){
-      this.hasGapsInData = true;
-      this.gapsInDataDate = new Date(this.detailedDegreeDays[errorIndex].time);
-    }else{
-      this.hasGapsInData = undefined;
-      this.gapsInDataDate = undefined;
+    if (this.detailedDegreeDays != 'error') {
+      let errorIndex: number = this.detailedDegreeDays.findIndex(degreeDay => {
+        return degreeDay.gapInData == true;
+      })
+      if (errorIndex != -1) {
+        this.hasGapsInData = true;
+        this.gapsInDataDate = new Date(this.detailedDegreeDays[errorIndex].time);
+      } else {
+        this.hasGapsInData = undefined;
+        this.gapsInDataDate = undefined;
+      }
     }
   }
 
@@ -80,7 +82,7 @@ export class MonthlyStationDataComponent {
   showApplyToFacility() {
     this.weatherDataService.applyToFacility.next(true);
   }
-  
+
   setWeatherDataOption() {
     this.weatherDataService.weatherDataSelection = this.weatherDataSelection;
   }
