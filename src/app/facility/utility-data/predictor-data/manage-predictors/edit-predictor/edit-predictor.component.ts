@@ -40,6 +40,7 @@ export class EditPredictorComponent {
   stations: Array<WeatherStation> = [];
   facility: IdbFacility;
   facilityPredictorsEntries: Array<IdbPredictorEntry>;
+  hasServerError: boolean;
   constructor(private activatedRoute: ActivatedRoute, private predictorDbService: PredictordbService,
     private router: Router, private facilityDbService: FacilitydbService,
     private formBuilder: FormBuilder,
@@ -56,6 +57,7 @@ export class EditPredictorComponent {
   }
 
   ngOnInit() {
+    this.hasServerError = this.degreeDaysService.hasServerError;
     this.facility = this.facilityDbService.selectedFacility.getValue();
     this.facilityPredictorsEntries = this.predictorDbService.facilityPredictorEntries.getValue();
     this.activatedRoute.params.subscribe(params => {
@@ -190,12 +192,17 @@ export class EditPredictorComponent {
       facilityPredictorsCopy[editPredictorIndex] = this.predictorData;
       await this.predictorDbService.updateFacilityPredictorEntries(facilityPredictorsCopy);
     }
+    let weatherDataUpdateResults: 'ok' | 'error' = 'ok';
     if (this.predictorData.predictorType == 'Weather' && needsWeatherDataUpdate) {
-      await this.predictorDbService.updatePredictorDegreeDays(this.facility, this.predictorData);
+      weatherDataUpdateResults = await this.predictorDbService.updatePredictorDegreeDays(this.facility, this.predictorData);
     }
     await this.analysisDbService.updateAnalysisPredictors(facilityPredictorsCopy, this.facility.guid);
     this.loadingService.setLoadingStatus(false);
-    this.toastNotificationService.showToast('Predictor Entries Updated!', undefined, undefined, false, 'alert-success');
+    if (weatherDataUpdateResults == 'ok') {
+      this.toastNotificationService.showToast('Predictor Entries Updated!', undefined, undefined, false, 'alert-success');
+    }else{
+      this.toastNotificationService.weatherDataErrorToast();
+    }
     if (!goToEntries) {
       this.cancel();
     } else {

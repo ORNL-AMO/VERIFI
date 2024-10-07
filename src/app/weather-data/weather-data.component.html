@@ -23,7 +23,14 @@
             target="_blank">https://www.degreedays.net/</a>
     </p>
     <hr>
-    <router-outlet></router-outlet>
+    <ng-template [ngIf]="hasServerError == false" [ngIfElse]="serverErrorBlock">
+        <router-outlet></router-outlet>
+    </ng-template>
+    <ng-template #serverErrorBlock>
+        <div class="alert alert-danger">
+            An error occured when accessing the weather data servers.
+        </div>
+    </ng-template>
 </div>
 
 <div [ngClass]="{'windowOverlay': applyToFacility}"></div>

@@ -13,6 +13,10 @@
     </div>
 </div>
 
+<div class="alert alert-danger small text-center" *ngIf="hasWeatherData && hasServerError">
+    There currently is an error with the connection to the server that is used to calculate weather predictors.
+</div>
+
 <form>
     <p class="bold">Predictor Entry Data</p>
     <div class="row">
@@ -63,7 +67,7 @@
                         (input)="setChanged()">
                     <span class="input-group-text" *ngIf="predictor.unit">{{predictor.unit}}</span>
                     <ng-container
-                        *ngIf="predictor.predictorType == 'Weather' && (predictor.weatherDataWarning || predictor.weatherOverride)">
+                        *ngIf="predictor.predictorType == 'Weather'">
                         <span class="input-group-text p-0">
                             <button class="btn btn-dark btn-sm h-100" *ngIf="!predictor.weatherOverride"
                                 (click)="setWeatherManually()">

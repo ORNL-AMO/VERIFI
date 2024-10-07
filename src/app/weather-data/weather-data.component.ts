@@ -18,6 +18,7 @@ import * as _ from 'lodash';
 import { DbChangesService } from '../indexedDB/db-changes.service';
 import { getCalanderizedMeterData } from '../calculations/calanderization/calanderizeMeters';
 import { AnalyticsService } from '../analytics/analytics.service';
+import { DegreeDaysService } from '../shared/helper-services/degree-days.service';
 
 @Component({
   selector: 'app-weather-data',
@@ -33,6 +34,8 @@ export class WeatherDataComponent {
   weatherDataSelection: WeatherDataSelection;
   facilityPredictorEntries: Array<IdbPredictorEntry>;
   facilityMeterData: Array<IdbUtilityMeterData>;
+
+  hasServerError: boolean;
   constructor(private helpPanelService: HelpPanelService, private accountDbService: AccountdbService,
     private weatherDataService: WeatherDataService,
     private facilityDbService: FacilitydbService,
@@ -44,11 +47,13 @@ export class WeatherDataComponent {
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private utilityMeterDbService: UtilityMeterdbService,
     private dbChangesService: DbChangesService,
-    private analyticsService: AnalyticsService) {
+    private analyticsService: AnalyticsService,
+    private degreeDaysService: DegreeDaysService) {
 
   }
 
   ngOnInit() {
+    this.hasServerError = this.degreeDaysService.hasServerError;
     this.applyToFacilitySub = this.weatherDataService.applyToFacility.subscribe(val => {
       this.applyToFacility = val;
       if (this.applyToFacility) {
