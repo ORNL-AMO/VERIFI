@@ -9,6 +9,7 @@ import { firstValueFrom } from 'rxjs';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
+import { ReportType } from 'src/app/models/constantsAndTypes';
 @Component({
   selector: 'app-account-report-setup',
   templateUrl: './account-report-setup.component.html',
@@ -21,8 +22,8 @@ export class AccountReportSetupComponent {
   reportYears: Array<number>;
   baselineYears: Array<number>;
   months: Array<Month> = Months;
-  selectedReport: IdbAccountReport;
   //TODO: Report years validation. Start < End (issue-1194)
+  reportType: ReportType;
   constructor(private accountReportDbService: AccountReportDbService,
     private accountReportsService: AccountReportsService,
     private dbChangesService: DbChangesService,
@@ -33,16 +34,18 @@ export class AccountReportSetupComponent {
 
   ngOnInit() {
     this.account = this.accountDbService.selectedAccount.getValue();
-    this.selectedReport = this.accountReportDbService.selectedReport.getValue()
-    this.setupForm = this.accountReportsService.getSetupFormFromReport(this.selectedReport);
+    let selectedReport: IdbAccountReport = this.accountReportDbService.selectedReport.getValue()
+    this.reportType = selectedReport.reportType;
+    this.setupForm = this.accountReportsService.getSetupFormFromReport(selectedReport);
     this.setYearOptions();
   }
 
   async save() {
-    this.selectedReport = this.accountReportsService.updateReportFromSetupForm(this.selectedReport, this.setupForm);
-    this.selectedReport = await firstValueFrom(this.accountReportDbService.updateWithObservable(this.selectedReport));
+    let selectedReport: IdbAccountReport = this.accountReportDbService.selectedReport.getValue();
+    selectedReport = this.accountReportsService.updateReportFromSetupForm(selectedReport, this.setupForm);
+    selectedReport = await firstValueFrom(this.accountReportDbService.updateWithObservable(selectedReport));
     await this.dbChangesService.setAccountReports(this.account);
-    this.accountReportDbService.selectedReport.next(this.selectedReport);
+    this.accountReportDbService.selectedReport.next(selectedReport);
   }
 
   setYearOptions() {

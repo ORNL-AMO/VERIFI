@@ -1,6 +1,6 @@
 <div class="wrapper main-content p-0">
     <div class="content-padding">
-        <h4>{{facilityReport.facilityReportType | facilityReportType}} Report Setup</h4>
+        <h4>{{facilityReportType | facilityReportType}} Report Setup</h4>
         <form>
             <div class="row">
                 <div class="col-6">
@@ -8,9 +8,12 @@
                         <label class="col-5 col-form-label semibold" for="reportName">Report Name</label>
                         <div class="col-7">
                             <input class="form-control" type="text" id="reportName" name="reportName"
-                                [(ngModel)]="facilityReport.name" (input)="save()">
+                                [(ngModel)]="reportName" (input)="saveName()">
                         </div>
                     </div>
+                </div>
+                <div class="col-12">
+                    <app-facility-analysis-report-setup></app-facility-analysis-report-setup>
                 </div>
             </div>
         </form>

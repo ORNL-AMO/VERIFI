@@ -8,6 +8,7 @@ import { FacilityAnalysisReportComponent } from './facility-analysis-report/faci
 import { FacilityReportsTabsComponent } from './facility-reports-tabs/facility-reports-tabs.component';
 import { FacilityReportSetupComponent } from './facility-report-setup/facility-report-setup.component';
 import { FacilityReportTypePipe } from './facility-report-pipes/facility-report-type.pipe';
+import { FacilityAnalysisReportSetupComponent } from './facility-report-setup/facility-analysis-report-setup/facility-analysis-report-setup.component';
 
 
 
@@ -18,7 +19,8 @@ import { FacilityReportTypePipe } from './facility-report-pipes/facility-report-
     FacilityAnalysisReportComponent,
     FacilityReportsTabsComponent,
     FacilityReportSetupComponent,
-    FacilityReportTypePipe
+    FacilityReportTypePipe,
+    FacilityAnalysisReportSetupComponent
   ],
   imports: [
     CommonModule,
