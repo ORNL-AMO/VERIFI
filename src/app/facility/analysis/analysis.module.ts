@@ -31,6 +31,8 @@ import { EnergyDashboardComponent } from './analysis-dashboard/energy-dashboard/
 import { WaterDashboardComponent } from './analysis-dashboard/water-dashboard/water-dashboard.component';
 import { AnalysisDashboardTabsComponent } from './analysis-dashboard/analysis-dashboard-tabs/analysis-dashboard-tabs.component';
 import { LabelWithTooltipModule } from 'src/app/shared/label-with-tooltip/label-with-tooltip.module';
+import { SelectBankedAnalysisComponent } from './run-analysis/analysis-setup/select-banked-analysis/select-banked-analysis.component';
+import { AnalysisItemDetailsDisplayComponent } from './analysis-item-details-display/analysis-item-details-display.component';
 
 
 
@@ -58,7 +60,9 @@ import { LabelWithTooltipModule } from 'src/app/shared/label-with-tooltip/label-
     AnalysisItemCardComponent,
     EnergyDashboardComponent,
     WaterDashboardComponent,
-    AnalysisDashboardTabsComponent
+    AnalysisDashboardTabsComponent,
+    SelectBankedAnalysisComponent,
+    AnalysisItemDetailsDisplayComponent
   ],
   imports: [
     CommonModule,

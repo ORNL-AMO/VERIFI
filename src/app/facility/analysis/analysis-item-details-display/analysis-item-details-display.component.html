@@ -1,0 +1,38 @@
+<div class="d-flex flex-column">
+    <span class="bold larger">
+        Baseline Year: {{analysisItem.baselineYear | yearDisplay:selectedFacility.fiscalYear}}
+    </span>
+    <div>
+        <hr>
+    </div>
+</div>
+<div class="d-flex flex-column" *ngFor="let groupItem of groupItems; let index = index;">
+    <div>
+        <span class="me-1 fa fa-exclamation-circle" *ngIf="groupItem.group.groupErrors.hasErrors"></span>
+        <span class="bold larger">
+            {{groupItem.group.idbGroupId | groupName}}
+        </span>
+        <span class="badge bg-secondary ms-2 pull-right">
+            {{groupItem.group.analysisType | analysisTypeLabel }}
+        </span>
+        <ng-container *ngIf="groupItem.group.analysisType != 'skip'">
+            <span class="badge bg-info ms-2 pull-right"
+                *ngFor="let predictor of groupItem.predictorVariables">{{predictor.name}}</span>
+        </ng-container>
+
+    </div>
+    <div class="pt-2"
+        *ngIf="groupItem.group.analysisType == 'regression' && !groupItem.group.groupErrors.hasErrors">
+        Modeled Energy = {{groupItem.regressionEquation}}<br>
+        <ng-container *ngIf="groupItem.group.userDefinedModel">
+            Adjusted R<sup>2</sup>: {{groupItem.adjust_R2 | number:'0.3-3'}}
+        </ng-container>
+        <ng-container *ngIf="!groupItem.group.userDefinedModel">
+            User defined model.
+        </ng-container>
+
+    </div>
+    <div *ngIf="groupItems.length-1 != index;">
+        <hr>
+    </div>
+</div>

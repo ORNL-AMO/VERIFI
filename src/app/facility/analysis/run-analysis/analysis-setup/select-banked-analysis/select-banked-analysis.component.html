@@ -1,0 +1,31 @@
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th></th>
+            <th>
+                Analysis
+            </th>
+            <th>
+                Groups
+            </th>
+            <th>
+                Banked % Savings
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr *ngFor="let item of facilityAnalysisItems">
+            <td>
+                <input type="radio" class="form-check-input" name="bankedAnalysisItemId" [value]="item.guid"
+                    id="{{item.guid}}" [(ngModel)]="analysisItem.bankedAnalysisItemId">
+            </td>
+            <td>
+                {{item.name}}
+            </td>
+            <td>
+                <app-analysis-item-details-display [analysisItem]="item"
+                    [selectedFacility]="facility"></app-analysis-item-details-display>
+            </td>
+        </tr>
+    </tbody>
+</table>
