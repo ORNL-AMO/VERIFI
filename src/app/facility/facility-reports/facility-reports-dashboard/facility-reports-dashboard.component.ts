@@ -74,7 +74,7 @@ export class FacilityReportsDashboardComponent {
   selectReport(report: IdbFacilityReport) {
     this.facilityDbReportsService.selectedReport.next(report);
     if (report.facilityReportType == 'analysis') {
-      this.router.navigateByUrl('facility/' + this.selectedFacility.id + '/reports/analysis-report');
+      this.router.navigateByUrl('facility/' + this.selectedFacility.id + '/reports/setup');
     }
   }
 }

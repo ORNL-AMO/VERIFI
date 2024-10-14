@@ -1,5 +1,6 @@
 <ng-container *ngIf="utilityMeterData.length != 0">
     <!-- <app-analysis-banner></app-analysis-banner> -->
+     <app-facility-reports-tabs class="hide-print"></app-facility-reports-tabs>
     <router-outlet></router-outlet>
 </ng-container>
 <div class="p-5" *ngIf="utilityMeterData.length == 0">

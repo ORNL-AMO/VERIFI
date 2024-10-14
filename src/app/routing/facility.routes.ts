@@ -49,7 +49,7 @@ import { CalculatedPredictorDataUpdateComponent } from "../facility/utility-data
 import { FacilityReportsComponent } from "../facility/facility-reports/facility-reports.component";
 import { FacilityReportsDashboardComponent } from "../facility/facility-reports/facility-reports-dashboard/facility-reports-dashboard.component";
 import { FacilityAnalysisReportComponent } from "../facility/facility-reports/facility-analysis-report/facility-analysis-report.component";
-import { FacilityAnalysisReportSetupComponent } from "../facility/facility-reports/facility-analysis-report/facility-analysis-report-setup/facility-analysis-report-setup.component";
+import { FacilityReportSetupComponent } from "../facility/facility-reports/facility-report-setup/facility-report-setup.component";
 
 export const FacilityRoutes: Route = {
     path: 'facility/:id',
@@ -285,16 +285,10 @@ export const FacilityRoutes: Route = {
             path: 'reports',
             component: FacilityReportsComponent,
             children: [
-                { path: '', pathMatch: 'full', redirectTo: 'reports-dashboard' },
-                { path: 'reports-dashboard', component: FacilityReportsDashboardComponent },
-                {
-                    path: 'analysis-report',
-                    component: FacilityAnalysisReportComponent,
-                    children: [
-                        { path: '', pathMatch: 'full', redirectTo: 'report-setup' },
-                        { path: 'report-setup', component: FacilityAnalysisReportSetupComponent },
-                    ]
-                }
+                { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
+                { path: 'dashboard', component: FacilityReportsDashboardComponent },
+                { path: 'setup', component: FacilityReportSetupComponent },
+                { path: 'analysis-report', component: FacilityAnalysisReportComponent }
             ]
         }
     ]
