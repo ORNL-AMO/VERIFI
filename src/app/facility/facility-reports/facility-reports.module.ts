@@ -10,6 +10,7 @@ import { FacilityReportTypePipe } from './facility-report-pipes/facility-report-
 import { FacilityAnalysisReportSetupComponent } from './facility-report-setup/facility-analysis-report-setup/facility-analysis-report-setup.component';
 import { SharedReportsModule } from 'src/app/shared/shared-reports/shared-reports.module';
 import { FacilityAnalysisReportResultsComponent } from './facility-analysis-report-results/facility-analysis-report-results.component';
+import { FacilityPrintReportButtonComponent } from './facility-print-report-button/facility-print-report-button.component';
 
 
 
@@ -21,7 +22,8 @@ import { FacilityAnalysisReportResultsComponent } from './facility-analysis-repo
     FacilityReportSetupComponent,
     FacilityReportTypePipe,
     FacilityAnalysisReportSetupComponent,
-    FacilityAnalysisReportResultsComponent
+    FacilityAnalysisReportResultsComponent,
+    FacilityPrintReportButtonComponent
   ],
   imports: [
     CommonModule,

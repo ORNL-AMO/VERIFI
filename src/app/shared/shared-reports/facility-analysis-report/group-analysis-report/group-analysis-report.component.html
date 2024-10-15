@@ -1,4 +1,4 @@
-<div class="report">
+<div class="report print-break-before" [ngClass]="{'print': print}">
     <div class="d-flex flex-column">
         <div>
             <h4>
@@ -17,8 +17,11 @@
         <app-regression-model-details *ngIf="groupItem.group.analysisType == 'regression'" [groupItem]="groupItem"
             [analysisItem]="analysisItem" [monthlyAnalysisSummaryData]="groupMonthlySummary.monthlyAnalysisSummaryData"
             [facility]="facility"></app-regression-model-details>
-        <app-monthly-analysis-summary-savings-graph [analysisItem]="analysisItem"
-            [monthlyAnalysisSummaryData]="groupMonthlySummary.monthlyAnalysisSummaryData" [facilityOrAccount]="facility">
-        </app-monthly-analysis-summary-savings-graph>
+        <div class="print-break-avoid">
+            <app-monthly-analysis-summary-savings-graph [analysisItem]="analysisItem"
+                [monthlyAnalysisSummaryData]="groupMonthlySummary.monthlyAnalysisSummaryData"
+                [facilityOrAccount]="facility">
+            </app-monthly-analysis-summary-savings-graph>
+        </div>
     </div>
 </div>
