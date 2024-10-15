@@ -21,6 +21,7 @@ import { NaicsDisplayPipe } from './naics-display.pipe';
 import { AveragePipe } from './average.pipe';
 import { DegreeDayTotalPipe } from './degree-day-total.pipe';
 import { RegressionNumberPipe } from './regression-number.pipe';
+import { FacilityAnalysisNamePipe } from './facility-analysis-name.pipe';
 
 @NgModule({
   declarations: [
@@ -44,7 +45,8 @@ import { RegressionNumberPipe } from './regression-number.pipe';
     NaicsDisplayPipe,
     AveragePipe,
     DegreeDayTotalPipe,
-    RegressionNumberPipe
+    RegressionNumberPipe,
+    FacilityAnalysisNamePipe
   ],
   imports: [
     CommonModule
@@ -70,7 +72,8 @@ import { RegressionNumberPipe } from './regression-number.pipe';
     NaicsDisplayPipe,
     AveragePipe,
     DegreeDayTotalPipe,
-    RegressionNumberPipe
+    RegressionNumberPipe,
+    FacilityAnalysisNamePipe
   ]
 })
 export class HelperPipesModule { }

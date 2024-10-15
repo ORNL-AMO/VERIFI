@@ -19,15 +19,8 @@
         <ng-template [ngIf]="facilityReports.length != 0" [ngIfElse]="noReportsBlock">
             <div class="row">
                 <div class="col-4" *ngFor="let report of facilityReports">
-                    <div class="card">
-                        <div class="card-header bg-white justify-content-between bold">
-                            <div class="d-flex justify-content-between">
-                                <a class="item-name" (click)="selectReport(report)">
-                                    {{report.name}}
-                                </a>
-                            </div>
-                        </div>
-                    </div>
+                    <app-facility-report-item-card [report]="report"
+                        [facility]="selectedFacility"></app-facility-report-item-card>
                 </div>
             </div>
         </ng-template>

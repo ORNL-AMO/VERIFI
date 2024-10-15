@@ -68,13 +68,13 @@ export class FacilityReportsDashboardComponent {
     this.analyticsService.sendEvent('create_facility_analysis', undefined)
     this.facilityDbReportsService.selectedReport.next(addedReport);
     this.toastNotificationService.showToast('New Report Created', undefined, undefined, false, "alert-success");
-    this.selectReport(addedReport);
-  }
-
-  selectReport(report: IdbFacilityReport) {
-    this.facilityDbReportsService.selectedReport.next(report);
-    if (report.facilityReportType == 'analysis') {
+    this.facilityDbReportsService.selectedReport.next(addedReport);
+    if (addedReport.facilityReportType == 'analysis') {
       this.router.navigateByUrl('facility/' + this.selectedFacility.id + '/reports/setup');
     }
   }
+
+
+
+
 }

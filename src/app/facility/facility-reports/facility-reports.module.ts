@@ -11,6 +11,8 @@ import { FacilityAnalysisReportSetupComponent } from './facility-report-setup/fa
 import { SharedReportsModule } from 'src/app/shared/shared-reports/shared-reports.module';
 import { FacilityAnalysisReportResultsComponent } from './facility-analysis-report-results/facility-analysis-report-results.component';
 import { FacilityPrintReportButtonComponent } from './facility-print-report-button/facility-print-report-button.component';
+import { FacilityReportItemCardComponent } from './facility-reports-dashboard/facility-report-item-card/facility-report-item-card.component';
+import { HelperPipesModule } from 'src/app/shared/helper-pipes/helper-pipes.module';
 
 
 
@@ -23,13 +25,15 @@ import { FacilityPrintReportButtonComponent } from './facility-print-report-butt
     FacilityReportTypePipe,
     FacilityAnalysisReportSetupComponent,
     FacilityAnalysisReportResultsComponent,
-    FacilityPrintReportButtonComponent
+    FacilityPrintReportButtonComponent,
+    FacilityReportItemCardComponent
   ],
   imports: [
     CommonModule,
     RouterModule,
     FormsModule,
-    SharedReportsModule
+    SharedReportsModule,
+    HelperPipesModule
   ]
 })
 export class FacilityReportsModule { }
