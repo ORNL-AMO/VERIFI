@@ -1,0 +1,30 @@
+<div class="report">
+    <!-- {{group.idbGroupId | groupName}}
+    </h4> -->
+    <div class="d-flex flex-column">
+        <div>
+            <h4>
+                <span class="me-1 fa fa-exclamation-circle" *ngIf="groupItem.group.groupErrors.hasErrors"></span>
+                {{groupItem.group.idbGroupId | groupName}}
+                <span class="badge bg-secondary ms-2 pull-right">
+                    {{groupItem.group.analysisType | analysisTypeLabel }}
+                </span>
+                <ng-container *ngIf="groupItem.group.analysisType != 'skip'">
+                    <span class="badge bg-info ms-2 pull-right"
+                        *ngFor="let predictor of groupItem.predictorVariables">{{predictor.name}}</span>
+                </ng-container>
+
+            </h4>
+        </div>
+        <div class="pt-2 w-100 text-center large"
+            *ngIf="groupItem.group.analysisType == 'regression' && !groupItem.group.groupErrors.hasErrors">
+            Modeled Energy = {{groupItem.regressionEquation}}<br>
+            <ng-container *ngIf="groupItem.group.userDefinedModel">
+                Adjusted R<sup>2</sup>: {{groupItem.adjust_R2 | number:'0.3-3'}}
+            </ng-container>
+            <ng-container *ngIf="!groupItem.group.userDefinedModel">
+                User defined model.
+            </ng-container>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,21 @@
+<div class="report">
+    <h4>
+        Monthly Facility Analysis
+    </h4>
+    <app-monthly-analysis-summary-table [monthlyAnalysisSummaryData]="monthlyAnalysisSummaryData"
+        [analysisItem]="analysisItem" [facilityOrAccount]="facility" [itemsPerPage]="12">
+    </app-monthly-analysis-summary-table>
+    <hr>
+    <div class="d-flex w-100">
+        <div class="w-50 pe-1">
+            <app-monthly-analysis-summary-graph [monthlyAnalysisSummaryData]="monthlyAnalysisSummaryData"
+                [analysisItem]="analysisItem" [facilityOrAccount]="facility">
+            </app-monthly-analysis-summary-graph>
+        </div>
+        <div class="w-50 ps-1">
+            <app-monthly-analysis-summary-savings-graph [analysisItem]="analysisItem"
+                [monthlyAnalysisSummaryData]="monthlyAnalysisSummaryData" [facilityOrAccount]="facility">
+            </app-monthly-analysis-summary-savings-graph>
+        </div>
+    </div>
+</div>

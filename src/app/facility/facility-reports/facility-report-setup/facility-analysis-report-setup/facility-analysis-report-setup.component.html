@@ -27,7 +27,7 @@
             <td>
                 <div class="form-check">
                     <input type="radio" class="form-check-input" name="{{item.name + '_item'}}" [value]="item.guid"
-                        id="{{item.name + '_item'}}" [(ngModel)]="facilityReport.analysisItemId">
+                        id="{{item.name + '_item'}}" [(ngModel)]="facilityReport.analysisItemId" (change)="saveChanges()">
                 </div>
             </td>
             <td>

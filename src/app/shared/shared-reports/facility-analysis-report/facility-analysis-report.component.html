@@ -1,0 +1,24 @@
+<app-calculating-spinner *ngIf="calculating != false" [message]="'Calculating Annual Results...'"
+    [error]="calculating == 'error'"></app-calculating-spinner>
+
+
+<div class="w-100 x-scroll" *ngIf="calculating == false">
+    <app-annual-facility-analysis-report [analysisItem]="analysisItem"
+        [annualAnalysisSummaries]="annualAnalysisSummaries" [facility]="facility"></app-annual-facility-analysis-report>
+    <div class="report-spacer-container">
+        <hr>
+    </div>
+    <app-monthly-facility-analysis-report [analysisItem]="analysisItem" [facility]="facility"
+        [monthlyAnalysisSummaryData]="monthlyAnalysisSummaryData"></app-monthly-facility-analysis-report>
+    <div class="report-spacer-container">
+        <hr>
+    </div>
+    <ng-container *ngFor="let group of analysisItem.groups">
+        <ng-container *ngIf="group.analysisType != 'skip'">
+            <app-group-analysis-report [group]="group"></app-group-analysis-report>
+            <div class="report-spacer-container">
+                <hr>
+            </div>
+        </ng-container>
+    </ng-container>
+</div>

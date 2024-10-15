@@ -4,11 +4,12 @@ import { FacilityReportsComponent } from './facility-reports.component';
 import { FacilityReportsDashboardComponent } from './facility-reports-dashboard/facility-reports-dashboard.component';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { FacilityAnalysisReportComponent } from './facility-analysis-report/facility-analysis-report.component';
 import { FacilityReportsTabsComponent } from './facility-reports-tabs/facility-reports-tabs.component';
 import { FacilityReportSetupComponent } from './facility-report-setup/facility-report-setup.component';
 import { FacilityReportTypePipe } from './facility-report-pipes/facility-report-type.pipe';
 import { FacilityAnalysisReportSetupComponent } from './facility-report-setup/facility-analysis-report-setup/facility-analysis-report-setup.component';
+import { SharedReportsModule } from 'src/app/shared/shared-reports/shared-reports.module';
+import { FacilityAnalysisReportResultsComponent } from './facility-analysis-report-results/facility-analysis-report-results.component';
 
 
 
@@ -16,16 +17,17 @@ import { FacilityAnalysisReportSetupComponent } from './facility-report-setup/fa
   declarations: [
     FacilityReportsComponent,
     FacilityReportsDashboardComponent,
-    FacilityAnalysisReportComponent,
     FacilityReportsTabsComponent,
     FacilityReportSetupComponent,
     FacilityReportTypePipe,
-    FacilityAnalysisReportSetupComponent
+    FacilityAnalysisReportSetupComponent,
+    FacilityAnalysisReportResultsComponent
   ],
   imports: [
     CommonModule,
     RouterModule,
-    FormsModule
+    FormsModule,
+    SharedReportsModule
   ]
 })
 export class FacilityReportsModule { }

@@ -1,0 +1,13 @@
+
+<div class="report">
+    <h4>
+        Annual Facility Analysis
+    </h4>
+    <app-annual-analysis-summary-table [annualAnalysisSummary]="annualAnalysisSummaries"
+        [analysisItem]="analysisItem" [accountOrFacility]="facility">
+    </app-annual-analysis-summary-table>
+    <hr>
+    <app-annual-analysis-summary-graph [annualAnalysisSummary]="annualAnalysisSummaries"
+        [analysisItem]="analysisItem" [inReport]="true">
+    </app-annual-analysis-summary-graph>
+</div>

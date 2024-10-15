@@ -53,8 +53,7 @@ export class PredictorDataDbService {
     }
 
     async deleteAllFacilityPredictorData(facilityId: string) {
-        let accountPredictorData: Array<IdbPredictorData> = this.accountPredictorData.getValue();
-        let facilityPredictorData: Array<IdbPredictorData> = accountPredictorData.filter(predictor => { return predictor.facilityId == facilityId });
+        let facilityPredictorData: Array<IdbPredictorData> = this.getByFacilityId(facilityId);
         await this.deletePredictorDataAsync(facilityPredictorData);
     }
 
