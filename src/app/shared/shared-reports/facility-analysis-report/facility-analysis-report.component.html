@@ -13,12 +13,20 @@
     <div class="report-spacer-container">
         <hr>
     </div>
-    <ng-container *ngFor="let group of analysisItem.groups">
+    <!-- <ng-container *ngFor="let group of analysisItem.groups">
         <ng-container *ngIf="group.analysisType != 'skip'">
-            <app-group-analysis-report [group]="group"></app-group-analysis-report>
+            <app-group-analysis-report [group]="group" [analysisItem]="analysisItem"
+                [groupMonthlySummariesClasses]="groupMonthlySummariesClasses" [facility]="facility"></app-group-analysis-report>
             <div class="report-spacer-container">
                 <hr>
             </div>
         </ng-container>
+    </ng-container> -->
+    <ng-container *ngFor="let groupMonthlySummary of groupMonthlySummaries">
+        <app-group-analysis-report [groupMonthlySummary]="groupMonthlySummary" [analysisItem]="analysisItem"
+            [facility]="facility"></app-group-analysis-report>
+        <div class="report-spacer-container">
+            <hr>
+        </div>
     </ng-container>
 </div>

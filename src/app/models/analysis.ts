@@ -48,7 +48,8 @@ export interface MonthlyAnalysisSummary {
   modelYear: number,
   monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
   unbankedMonthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
-  bankedMonthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>
+  bankedMonthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
+  group?: AnalysisGroup
 }
 
 export interface MonthlyAnalysisSummaryData {

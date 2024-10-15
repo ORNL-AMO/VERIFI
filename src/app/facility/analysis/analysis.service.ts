@@ -133,33 +133,35 @@ export class AnalysisService {
 
 
 
-  getGroupItem(group: AnalysisGroup){
+  getGroupItem(group: AnalysisGroup): AnalysisGroupItem {
     let predictorVariables: Array<AnalysisGroupPredictorVariable> = [];
-      let adjust_R2: number = 0;
-      let regressionEquation: string = '';
-      if (group.analysisType == 'regression') {
-        if (group.selectedModelId) {
-          let selectedModel: JStatRegressionModel = group.models.find(model => { return model.modelId == group.selectedModelId });
-          adjust_R2 = selectedModel.adjust_R2;
-          predictorVariables = selectedModel.predictorVariables;
-          regressionEquation = this.getRegressionsEquationFromModel(selectedModel);
-        } else {
-          predictorVariables = group.predictorVariables.filter(variable => {
-            return (variable.productionInAnalysis == true);
-          });
-          regressionEquation = this.getRegressionEquationNoModel(group, predictorVariables);
-        }
-      } else if (group.analysisType != 'absoluteEnergyConsumption') {
+    let adjust_R2: number = 0;
+    let regressionEquation: string = '';
+    let selectedModel: JStatRegressionModel;
+    if (group.analysisType == 'regression') {
+      if (group.selectedModelId) {
+        selectedModel = group.models.find(model => { return model.modelId == group.selectedModelId });
+        adjust_R2 = selectedModel.adjust_R2;
+        predictorVariables = selectedModel.predictorVariables;
+        regressionEquation = this.getRegressionsEquationFromModel(selectedModel);
+      } else {
         predictorVariables = group.predictorVariables.filter(variable => {
           return (variable.productionInAnalysis == true);
         });
+        regressionEquation = this.getRegressionEquationNoModel(group, predictorVariables);
       }
-      return {
-        group: group,
-        predictorVariables: predictorVariables,
-        adjust_R2: adjust_R2,
-        regressionEquation: regressionEquation
-      }
+    } else if (group.analysisType != 'absoluteEnergyConsumption') {
+      predictorVariables = group.predictorVariables.filter(variable => {
+        return (variable.productionInAnalysis == true);
+      });
+    }
+    return {
+      group: group,
+      predictorVariables: predictorVariables,
+      adjust_R2: adjust_R2,
+      regressionEquation: regressionEquation,
+      selectedModel: selectedModel
+    }
   }
 
   getRegressionsEquationFromModel(model: JStatRegressionModel): string {
@@ -199,5 +201,6 @@ export interface AnalysisGroupItem {
   group: AnalysisGroup,
   predictorVariables: Array<AnalysisGroupPredictorVariable>,
   adjust_R2: number,
-  regressionEquation: string
+  regressionEquation: string,
+  selectedModel: JStatRegressionModel
 }

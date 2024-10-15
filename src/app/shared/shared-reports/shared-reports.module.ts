@@ -7,6 +7,7 @@ import { AnnualFacilityAnalysisReportComponent } from './facility-analysis-repor
 import { MonthlyFacilityAnalysisReportComponent } from './facility-analysis-report/monthly-facility-analysis-report/monthly-facility-analysis-report.component';
 import { GroupAnalysisReportComponent } from './facility-analysis-report/group-analysis-report/group-analysis-report.component';
 import { HelperPipesModule } from '../helper-pipes/helper-pipes.module';
+import { RegressionModelDetailsComponent } from './facility-analysis-report/group-analysis-report/regression-model-details/regression-model-details.component';
 
 
 
@@ -15,7 +16,8 @@ import { HelperPipesModule } from '../helper-pipes/helper-pipes.module';
     FacilityAnalysisReportComponent,
     AnnualFacilityAnalysisReportComponent,
     MonthlyFacilityAnalysisReportComponent,
-    GroupAnalysisReportComponent
+    GroupAnalysisReportComponent,
+    RegressionModelDetailsComponent
   ],
   imports: [
     CommonModule,

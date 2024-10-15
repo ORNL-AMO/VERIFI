@@ -1,0 +1,188 @@
+<div class="alert alert-warning text-center" *ngIf="groupItem.selectedModel.isValid == false">
+    The selected model is invalid.
+</div>
+
+<div class="table-responsive">
+    <table class="table table-sm table-hover table-bordered">
+        <thead>
+            <tr>
+                <th>
+                    Model<br> Year
+                </th>
+                <th>
+                    Variable<br> p-Values
+                </th>
+                <th>
+                    R2
+                </th>
+                <th>
+                    Adjusted<br> R2
+                </th>
+                <th>
+                    Model<br> p-Value
+                </th>
+                <th>
+                    Formula
+                </th>
+                <th>
+                    Model Notes
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <!--inspected-->
+            <tr>
+                <td>
+                    {{groupItem.selectedModel.modelYear | yearDisplay:facility.fiscalYear}}
+                </td>
+                <td>
+                    <span *ngFor="let pVal of groupItem.selectedModel.t.p; let index = index">
+                        <span class="no-break"
+                            *ngIf="index != 0">{{groupItem.selectedModel.predictorVariables[index-1].name}}: {{pVal |
+                            number:'0.2-2'}}
+                            <br>
+                        </span>
+                    </span>
+                </td>
+                <td>
+                    {{groupItem.selectedModel.R2| number:'0.3-3'}}
+                </td>
+                <td>
+                    {{groupItem.selectedModel.adjust_R2| number:'0.3-3'}}
+                </td>
+                <td>
+                    {{groupItem.selectedModel.modelPValue| number:'0.2-2'}}
+                </td>
+                <td>
+                    <span *ngFor="let coefVal of groupItem.selectedModel.coef; let index = index;">
+                        <span *ngIf="index == 0">{{coefVal| regressionNumber}}</span>
+                        <span *ngIf="index != 0">({{coefVal|
+                            regressionNumber}}*{{groupItem.selectedModel.predictorVariables[index-1].name}})</span>
+                        <span *ngIf="index != groupItem.selectedModel.coef.length-1"> +</span>
+                    </span>
+                </td>
+                <td>
+                    <span *ngFor="let notes of groupItem.selectedModel.modelNotes">
+                        {{notes}}<br>
+                    </span>
+                    <span *ngIf="groupItem.selectedModel.modelNotes.length == 0">
+                        &mdash;
+                    </span>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<hr>
+<div class="d-flex w-100 justify-content-center">
+    <div class="pe-2">
+        <table class="table table-sm table-hover table-bordered">
+            <thead>
+                <tr>
+                    <th>
+                    </th>
+                    <th>
+
+                    </th>
+                    <th *ngFor="let sepValidation of groupItem.selectedModel.SEPValidation">
+                        {{sepValidation.predictorVariable}}
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="bg-white border-top">
+                    <td>
+
+                    </td>
+                    <td>
+                        SEP Mean Report Year Value
+                    </td>
+                    <td *ngFor="let sepValidation of groupItem.selectedModel.SEPValidation">
+                        {{sepValidation.meanReportYear | customNumber}}
+                    </td>
+                </tr>
+                <tr class="bg-white">
+                    <td>
+
+                    </td>
+                    <td>
+                        SEP Mean Baseline Year Value
+                    </td>
+                    <td *ngFor="let sepValidation of groupItem.selectedModel.SEPValidation">
+                        {{sepValidation.meanBaselineYear | customNumber}}
+                    </td>
+                </tr>
+                <tr class="bg-white border-top">
+                    <td>
+                        Range 1
+                    </td>
+                    <td>
+                        Minimum of Model Variable
+                    </td>
+                    <td *ngFor="let sepValidation of groupItem.selectedModel.SEPValidation"
+                        [ngClass]="{'alert-danger': !sepValidation.modelMinValid}">
+                        {{sepValidation.modelMin | customNumber}}
+                    </td>
+                </tr>
+                <tr class="bg-white">
+                    <td>
+
+                    </td>
+                    <td>
+                        Maximum of Model Variable
+                    </td>
+                    <td *ngFor="let sepValidation of groupItem.selectedModel.SEPValidation"
+                        [ngClass]="{'alert-danger': !sepValidation.modelMaxValid}">
+                        {{sepValidation.modelMax | customNumber}}
+                    </td>
+                </tr>
+                <tr class="bg-white border-top">
+                    <td>
+                        Range 2
+                    </td>
+                    <td>
+                        Model Mean -3 Std Dev
+                    </td>
+                    <td *ngFor="let sepValidation of groupItem.selectedModel.SEPValidation"
+                        [ngClass]="{'alert-danger': !sepValidation.modelMinus3StdDevValid}">
+                        {{sepValidation.modelMinus3StdDev | customNumber}}
+                    </td>
+                </tr>
+                <tr class="bg-white">
+                    <td>
+
+                    </td>
+                    <td>
+                        Model Mean +3 Std Dev
+                    </td>
+                    <td *ngFor="let sepValidation of groupItem.selectedModel.SEPValidation"
+                        [ngClass]="{'alert-danger': !sepValidation.modelPlus3StdDevValid}">
+                        {{sepValidation.modelPlus3StdDev | customNumber}}
+                    </td>
+                </tr>
+            </tbody>
+            <tfoot class="border-top">
+                <tr>
+                    <th>
+
+                    </th>
+                    <th>
+                        SEP Validation Check
+                    </th>
+                    <th *ngFor="let sepValidation of groupItem.selectedModel.SEPValidation">
+                        <span class="green" *ngIf="sepValidation.isValid">
+                            <span class="fa fa-circle-check"></span>
+                            Pass
+                        </span>
+                        <span *ngIf="!sepValidation.isValid">
+                            Fail
+                        </span>
+                    </th>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+<hr>
+<div #monthlyAnalysisGraph id="monthlyAnalysisGraph"></div>

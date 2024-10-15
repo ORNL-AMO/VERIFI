@@ -65,6 +65,7 @@ export class MonthlyAnalysisSummaryClass {
             unbankedMonthlyAnalysisSummaryData: unbankedMonthlyAnalysisSummaryData,
             bankedMonthlyAnalysisSummaryData: bankedMonthlyAnalysisSummaryData,
             modelYear: undefined,
+            group: this.group
         }
     }
 

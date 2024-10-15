@@ -1,5 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { AnnualFacilityAnalysisSummaryClass } from 'src/app/calculations/analysis-calculations/annualFacilityAnalysisSummaryClass';
+import { MonthlyAnalysisSummaryClass } from 'src/app/calculations/analysis-calculations/monthlyAnalysisSummaryClass';
 import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
 import { getNeededUnits } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
 import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
@@ -9,7 +10,7 @@ import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.serv
 import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
+import { AnnualAnalysisSummary, MonthlyAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -30,11 +31,11 @@ export class FacilityAnalysisReportComponent {
   worker: Worker;
   annualAnalysisSummaries: Array<AnnualAnalysisSummary>;
   monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>;
+  groupMonthlySummaries: Array<MonthlyAnalysisSummary>
   calculating: boolean | 'error' = false;
   facility: IdbFacility;
   constructor(
     private facilityDbService: FacilitydbService,
-    private analysisService: AnalysisService,
     private predictorDbService: PredictorDbService,
     private predictorDataDbService: PredictorDataDbService,
     private utilityMeterDbService: UtilityMeterdbService,
@@ -54,14 +55,11 @@ export class FacilityAnalysisReportComponent {
       this.worker.onmessage = ({ data }) => {
         this.worker.terminate();
         if (!data.error) {
-          // this.analysisService.annualAnalysisSummary.next(data.annualAnalysisSummaries);
-          // this.analysisService.monthlyAccountAnalysisData.next(data.monthlyAnalysisSummaryData);
           this.annualAnalysisSummaries = data.annualAnalysisSummaries;
           this.monthlyAnalysisSummaryData = data.monthlyAnalysisSummaryData;
+          this.groupMonthlySummaries = data.groupMonthlySummaries;
           this.calculating = false;
         } else {
-          // this.analysisService.annualAnalysisSummary.next(undefined);
-          // this.analysisService.monthlyAccountAnalysisData.next(undefined);
           this.calculating = 'error';
         }
       };
@@ -82,8 +80,9 @@ export class FacilityAnalysisReportComponent {
       let annualAnalysisSummaryClass: AnnualFacilityAnalysisSummaryClass = new AnnualFacilityAnalysisSummaryClass(this.analysisItem, this.facility, calanderizedMeters, accountPredictorEntries, false, accountPredictors, undefined);
       this.annualAnalysisSummaries = annualAnalysisSummaryClass.getAnnualAnalysisSummaries();
       this.monthlyAnalysisSummaryData = annualAnalysisSummaryClass.monthlyAnalysisSummaryData;
-      // this.analysisService.annualAnalysisSummary.next(annualAnalysisSummaries);
-      // this.analysisService.monthlyAccountAnalysisData.next(monthlyAnalysisSummaryData);
+      this.groupMonthlySummaries = annualAnalysisSummaryClass.groupMonthlySummariesClasses.flatMap(summaryClass => {
+        return summaryClass.getResults();
+      });
     }
   }
 

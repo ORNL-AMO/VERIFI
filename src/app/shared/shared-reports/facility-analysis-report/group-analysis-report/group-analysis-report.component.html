@@ -1,6 +1,4 @@
 <div class="report">
-    <!-- {{group.idbGroupId | groupName}}
-    </h4> -->
     <div class="d-flex flex-column">
         <div>
             <h4>
@@ -16,15 +14,11 @@
 
             </h4>
         </div>
-        <div class="pt-2 w-100 text-center large"
-            *ngIf="groupItem.group.analysisType == 'regression' && !groupItem.group.groupErrors.hasErrors">
-            Modeled Energy = {{groupItem.regressionEquation}}<br>
-            <ng-container *ngIf="groupItem.group.userDefinedModel">
-                Adjusted R<sup>2</sup>: {{groupItem.adjust_R2 | number:'0.3-3'}}
-            </ng-container>
-            <ng-container *ngIf="!groupItem.group.userDefinedModel">
-                User defined model.
-            </ng-container>
-        </div>
+        <app-regression-model-details *ngIf="groupItem.group.analysisType == 'regression'" [groupItem]="groupItem"
+            [analysisItem]="analysisItem" [monthlyAnalysisSummaryData]="groupMonthlySummary.monthlyAnalysisSummaryData"
+            [facility]="facility"></app-regression-model-details>
+        <app-monthly-analysis-summary-savings-graph [analysisItem]="analysisItem"
+            [monthlyAnalysisSummaryData]="groupMonthlySummary.monthlyAnalysisSummaryData" [facilityOrAccount]="facility">
+        </app-monthly-analysis-summary-savings-graph>
     </div>
 </div>
