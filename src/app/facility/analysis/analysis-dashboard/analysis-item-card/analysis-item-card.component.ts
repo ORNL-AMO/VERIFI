@@ -13,7 +13,7 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
-import { IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
+import { getNewIdbFacilityReport, IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
 
 @Component({
   selector: 'app-analysis-item-card',
@@ -41,6 +41,9 @@ export class AnalysisItemCardComponent implements OnInit {
 
   displayLinkedItemModal: boolean = false;
   viewLinkedItem: { itemId: string, type: 'accountAnalysis' | 'bankedAnalysis' | 'facilityReport' } = undefined;
+
+  displayCreateReportModal: boolean = false;
+  isBanked: boolean;
   constructor(private analysisDbService: AnalysisDbService, private router: Router, private facilityDbService: FacilitydbService,
     private analysisService: AnalysisService, private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService, private toastNotificationService: ToastNotificationsService,
@@ -189,6 +192,15 @@ export class AnalysisItemCardComponent implements OnInit {
         accountAnalysisId: undefined
       });
     }
+
+    this.isBanked = false;
+    let facilityAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.facilityAnalysisItems.getValue();
+    facilityAnalysisItems.forEach(item => {
+      if (item.hasBanking && item.bankedAnalysisItemId == this.analysisItem.guid) {
+        this.isBanked = true;
+      }
+    });
+
     let facilityReportsItems: Array<IdbFacilityReport> = this.facilityReportsDbService.facilityReports.getValue();
     facilityReportsItems.forEach(item => {
       if (item.facilityReportType == 'analysis' && item.analysisItemId == this.analysisItem.guid) {
@@ -215,7 +227,21 @@ export class AnalysisItemCardComponent implements OnInit {
   }
 
   addReport() {
+    this.displayCreateReportModal = true;
+  }
 
+  cancelCreateReport() {
+    this.displayCreateReportModal = false;
+  }
+
+  async confirmCreateReport() {
+    let newReport: IdbFacilityReport = getNewIdbFacilityReport(this.analysisItem.facilityId, this.analysisItem.accountId, 'analysis');
+    newReport.analysisItemId = this.analysisItem.guid;
+    newReport = await firstValueFrom(this.facilityReportsDbService.addWithObservable(newReport));
+    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    await this.dbChangesService.setAccountFacilityReports(selectedAccount, this.selectedFacility);
+    this.toastNotificationService.showToast('Report Created!', 'Analysis report has been created', undefined, false, 'alert-success');
+    this.goToReport(newReport.guid);
   }
 
   openLinkeItemModal(itemGuid: string, type: 'accountAnalysis' | 'bankedAnalysis' | 'facilityReport') {

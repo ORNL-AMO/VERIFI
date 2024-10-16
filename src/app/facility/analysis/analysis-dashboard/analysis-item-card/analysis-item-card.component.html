@@ -12,7 +12,8 @@
                 </a>
             </div>
             <div class="d-flex">
-                <button class="btn action-btn btn-sm" (click)="addReport()" title="Create Report">
+                <button class="btn action-btn btn-sm" (click)="addReport()" title="Create Report"
+                    *ngIf="!analysisItem.setupErrors.hasError && !analysisItem.setupErrors.groupsHaveErrors">
                     <i class="fa fa-file-circle-plus"></i>
                 </button>
                 <button class="btn action-btn btn-sm ms-1" (click)="createCopy()" title="Create Copy">
@@ -26,9 +27,14 @@
     </div>
     <div class="card-body d-flex flex-column" *ngIf="showDetail">
         <div class="d-flex flex-column">
-            <span class="bold larger">
-                Baseline Year: {{analysisItem.baselineYear | yearDisplay:selectedFacility.fiscalYear}}
-            </span>
+            <div class="d-flex justify-content-between">
+                <span class="bold larger">
+                    Baseline Year: {{analysisItem.baselineYear | yearDisplay:selectedFacility.fiscalYear}}
+                </span>
+                <span class="badge bg-dark" *ngIf="isBanked">
+                    <span class="fa fa-piggy-bank"></span> Analysis Is Banked
+                </span>
+            </div>
             <div>
                 <hr>
             </div>
@@ -64,7 +70,12 @@
                     User defined model.
                 </ng-container>
             </div>
-
+            <div class="p-0"
+                *ngIf="analysisItem.hasBanking && groupItem.group.applyBanking && !groupItem.group.groupErrors.hasErrors">
+                <span class="badge bg-dark">
+                    <span class="fa fa-piggy-bank"></span> Has Banked Savings
+                </span>
+            </div>
             <div *ngIf="!last">
                 <hr>
             </div>
@@ -80,7 +91,7 @@
                     <button *ngIf="linkedItem.bankedAnalysisId" class="btn action-btn btn-sm me-1"
                         (click)="openLinkeItemModal(linkedItem.bankedAnalysisId, 'bankedAnalysis')">
                         <i class="fa fa-piggy-bank" title="Banked Analysis"></i> {{linkedItem.bankedAnalysisId |
-                        facilityAnalysisName}}
+                        facilityAnalysisName}} (Banked)
                     </button>
                     <button *ngIf="linkedItem.accountAnalysisId" class="btn action-btn btn-sm me-1"
                         (click)="openLinkeItemModal(linkedItem.accountAnalysisId, 'accountAnalysis')">
@@ -113,7 +124,9 @@
 </div>
 
 
-<div [ngClass]="{'windowOverlay': displayDeleteModal || displayCreateCopyModal || displayLinkedItemModal}"></div>
+<div
+    [ngClass]="{'windowOverlay': displayDeleteModal || displayCreateCopyModal || displayLinkedItemModal || displayCreateReportModal}">
+</div>
 <div class="popup" [class.open]="displayDeleteModal">
     <div class="popup-header" *ngIf="displayDeleteModal">Delete: {{analysisItem.name}}
         <button class="item-right" (click)="cancelDelete()">x</button>
@@ -140,6 +153,18 @@
     </div>
 </div>
 
+<div class="popup" [class.open]="displayCreateReportModal">
+    <div class="popup-header">Create Report: {{analysisItem.name}}
+        <button class="item-right" (click)="cancelCreateReport()">x</button>
+    </div>
+    <div class="popup-body">
+        <p>Would you like to create an analysis report for {{analysisItem.name}}?</p>
+    </div>
+    <div class="saveCancel popup-footer text-end">
+        <button class="btn btn-secondary" (click)="cancelCreateReport()">Cancel</button>
+        <button class="btn btn-success" (click)="confirmCreateReport()">Create Report</button>
+    </div>
+</div>
 
 <div class="popup" [class.open]="displayLinkedItemModal">
     <ng-template [ngIf]="viewLinkedItem">
