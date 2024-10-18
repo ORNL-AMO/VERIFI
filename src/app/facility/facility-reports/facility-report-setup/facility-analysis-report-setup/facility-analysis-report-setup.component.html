@@ -27,7 +27,8 @@
             <td>
                 <div class="form-check">
                     <input type="radio" class="form-check-input" name="{{item.name + '_item'}}" [value]="item.guid"
-                        id="{{item.name + '_item'}}" [(ngModel)]="facilityReport.analysisItemId" (change)="saveChanges()">
+                        id="{{item.name + '_item'}}" [(ngModel)]="facilityReport.analysisItemId"
+                        (change)="setSelectedAnalysisItem(false)">
                 </div>
             </td>
             <td>
@@ -55,3 +56,238 @@
         Analysis Item Selection Required.
     </div>
 </div>
+<hr>
+<ng-container *ngIf="facilityReport.analysisItemId">
+    <div class="d-flex w-100 justify-content-between">
+        <span class="bold">
+            Choose Report Content
+        </span>
+        <span>
+            <a class="small click-link" (click)="setUseAllContent()">Use All Content</a>
+        </span>
+    </div>
+    <div class="row">
+        <div class="col">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="facilityAnnualResults"
+                    [(ngModel)]="facilityReport.analysisReportSettings.facilityAnnualResults" (change)="save()"
+                    id="facilityAnnualResults">
+                <label class="bold form-check-label" for="facilityAnnualResults">Facility Annual Results
+                </label>
+            </div>
+            <ng-container *ngIf="facilityReport.analysisReportSettings.facilityAnnualResults">
+                <div class="form-check ms-2">
+                    <input class="form-check-input" type="checkbox" name="facilityAnnualResultsTable"
+                        [(ngModel)]="facilityReport.analysisReportSettings.facilityAnnualResultsTable" (change)="save()"
+                        id="facilityAnnualResultsTable">
+                    <label class="form-check-label" for="facilityAnnualResultsTable">Facility Annual Results Table
+                    </label>
+                </div>
+                <div class="form-check ms-2">
+                    <input class="form-check-input" type="checkbox" name="facilityAnnualResultsGraphs"
+                        [(ngModel)]="facilityReport.analysisReportSettings.facilityAnnualResultsGraphs"
+                        (change)="save()" id="facilityAnnualResultsGraphs">
+                    <label class="form-check-label" for="facilityAnnualResultsGraphs">Facility Annual Results Graph
+                    </label>
+                </div>
+            </ng-container>
+        </div>
+        <div class="col">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="facilityMonthlyResults"
+                    [(ngModel)]="facilityReport.analysisReportSettings.facilityMonthlyResults" (change)="save()"
+                    id="facilityMonthlyResults">
+                <label class="bold form-check-label" for="facilityMonthlyResults">Facility Monthly Results
+                </label>
+            </div>
+            <ng-container *ngIf="facilityReport.analysisReportSettings.facilityMonthlyResults">
+                <div class="form-check ms-2">
+                    <input class="form-check-input" type="checkbox" name="facilityMonthlyResultsTable"
+                        [(ngModel)]="facilityReport.analysisReportSettings.facilityMonthlyResultsTable"
+                        (change)="save()" id="facilityMonthlyResultsTable">
+                    <label class="form-check-label" for="facilityMonthlyResultsTable">Facility Monthly Results Table
+                    </label>
+                </div>
+                <ng-container *ngIf="facilityReport.analysisReportSettings.facilityMonthlyResultsTable">
+                    <div class="form-check ms-3">
+                        <input class="form-check-input" type="checkbox" name="facilityMonthlyResultsTableBaselineYear"
+                            [(ngModel)]="facilityReport.analysisReportSettings.facilityMonthlyResultsTableBaselineYear"
+                            (change)="save()" id="facilityMonthlyResultsTableBaselineYear">
+                        <label class="form-check-label" for="facilityMonthlyResultsTableBaselineYear">Monthly Results
+                            Baseline Year
+                        </label>
+                    </div>
+                    <div class="form-check ms-3">
+                        <input class="form-check-input" type="checkbox" name="facilityMonthlyResultsTableReportYear"
+                            [(ngModel)]="facilityReport.analysisReportSettings.facilityMonthlyResultsTableReportYear"
+                            (change)="save()" id="facilityMonthlyResultsTableReportYear">
+                        <label class="form-check-label" for="facilityMonthlyResultsTableReportYear">Monthly Results
+                            Report Year
+                        </label>
+                    </div>
+                </ng-container>
+                <div class="form-check ms-2">
+                    <input class="form-check-input" type="checkbox" name="facilityMonthlyResultsGraphs"
+                        [(ngModel)]="facilityReport.analysisReportSettings.facilityMonthlyResultsGraphs"
+                        (change)="save()" id="facilityMonthlyResultsGraphs">
+                    <label class="form-check-label" for="facilityMonthlyResultsGraphs">Facility Monthly Results Graph
+                    </label>
+                </div>
+            </ng-container>
+        </div>
+    </div>
+
+    <hr>
+    <div class="d-flex w-100 justify-content-between">
+        <span class="bold">
+            Choose Table Columns
+        </span>
+        <span>
+            <a class="small click-link" (click)="setDefault()">Use Default Columns</a>
+        </span>
+    </div>
+    <div class="row">
+        <div class="col">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="energy" [(ngModel)]="analysisTableColumns.energy"
+                    (change)="toggleEnergyColumns()" id="energy">
+                <label class="bold form-check-label" for="energy">{{energyColumnLabel}}
+                </label>
+
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="actualEnergy"
+                    [(ngModel)]="analysisTableColumns.actualEnergy" (change)="save()" id="actualEnergy">
+                <label class="form-check-label" for="actualEnergy">{{actualUseLabel}}</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="modeledEnergy"
+                    [(ngModel)]="analysisTableColumns.modeledEnergy" (change)="save()" id="modeledEnergy">
+                <label class="form-check-label" for="modeledEnergy">{{modeledUseLabel}}</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="adjusted"
+                    [(ngModel)]="analysisTableColumns.adjusted" (change)="save()" id="adjusted">
+                <label class="form-check-label" for="adjusted">Adjusted</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="baselineAdjustmentForNormalization"
+                    [(ngModel)]="analysisTableColumns.baselineAdjustmentForNormalization" (change)="save()"
+                    id="baselineAdjustmentForNormalization">
+                <label class="form-check-label" for="baselineAdjustmentForNormalization">Baseline
+                    Adjustment for Normalization</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="baselineAdjustmentForOther"
+                    [(ngModel)]="analysisTableColumns.baselineAdjustmentForOther" (change)="save()"
+                    id="baselineAdjustmentForOther">
+                <label class="form-check-label" for="baselineAdjustmentForOther">Baseline
+                    Adjustment for Other</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="baselineAdjustment"
+                    [(ngModel)]="analysisTableColumns.baselineAdjustment" (change)="save()" id="baselineAdjustment">
+                <label class="form-check-label" for="baselineAdjustment">Baseline Adjustment</label>
+            </div>
+        </div>
+        <div class="col">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="productionVariables"
+                    [(ngModel)]="analysisTableColumns.productionVariables" (change)="toggleAllPredictors()"
+                    id="productionVariables">
+                <label class="bold form-check-label" for="productionVariables">Production Variables
+                </label>
+            </div>
+
+            <div class="form-check" *ngFor="let predictorOption of analysisTableColumns.predictors">
+                <input class="form-check-input" type="checkbox" name={{predictorOption.predictor.name}}
+                    [(ngModel)]="predictorOption.display" (change)="save()" id={{predictorOption.predictor.name}}>
+                <label class="form-check-label"
+                    for={{predictorOption.predictor.name}}>{{predictorOption.predictor.name}}
+                    <span *ngIf="predictorOption.usedInAnalysis">&#42;</span>
+                </label>
+            </div>
+        </div>
+        <div class="col">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="incrementalImprovement"
+                    [(ngModel)]="analysisTableColumns.incrementalImprovement" (change)="toggleIncrementalImprovement()"
+                    id="incrementalImprovement">
+                <label class="bold form-check-label" for="incrementalImprovement">
+                    Incremental Improvement
+                </label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="SEnPI" [(ngModel)]="analysisTableColumns.SEnPI"
+                    (change)="save()" id="SEnPI">
+                <label class="form-check-label" for="SEnPI">SEnPI</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="savings"
+                    [(ngModel)]="analysisTableColumns.savings" (change)="save()" id="savings">
+                <label class="form-check-label" for="savings">Savings</label>
+            </div>
+            <div class="col">
+                <!--groupMonth-->
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="percentSavingsComparedToBaseline"
+                        [(ngModel)]="analysisTableColumns.percentSavingsComparedToBaseline" (change)="save()"
+                        id="percentSavingsComparedToBaseline">
+                    <label class="form-check-label" for="percentSavingsComparedToBaseline">%
+                        Savings</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="yearToDateSavings"
+                        [(ngModel)]="analysisTableColumns.yearToDateSavings" (change)="save()" id="yearToDateSavings">
+                    <label class="form-check-label" for="yearToDateSavings">YTD Savings</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="yearToDatePercentSavings"
+                        [(ngModel)]="analysisTableColumns.yearToDatePercentSavings" (change)="save()"
+                        id="yearToDatePercentSavings">
+                    <label class="form-check-label" for="yearToDatePercentSavings">YTD % Savings</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="rollingSavings"
+                        [(ngModel)]="analysisTableColumns.rollingSavings" (change)="save()" id="rollingSavings">
+                    <label class="form-check-label" for="rollingSavings">Rolling Savings</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="rolling12MonthImprovement"
+                        [(ngModel)]="analysisTableColumns.rolling12MonthImprovement" (change)="save()"
+                        id="rolling12MonthImprovement">
+                    <label class="form-check-label" for="rolling12MonthImprovement">Rolling
+                        12-Month
+                        Improvement</label>
+                </div>
+            </div>
+            <div class="col">
+                <!--groupAnnual-->
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="totalSavingsPercentImprovement"
+                        [(ngModel)]="analysisTableColumns.totalSavingsPercentImprovement" (change)="save()"
+                        id="totalSavingsPercentImprovement">
+                    <label class="form-check-label" for="totalSavingsPercentImprovement">Total
+                        Savings % Improvement</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="annualSavingsPercentImprovement"
+                        [(ngModel)]="analysisTableColumns.annualSavingsPercentImprovement" (change)="save()"
+                        id="annualSavingsPercentImprovement">
+                    <label class="form-check-label" for="annualSavingsPercentImprovement">Annual
+                        Savings % Improvement</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="cummulativeSavings"
+                        [(ngModel)]="analysisTableColumns.cummulativeSavings" (change)="save()" id="cummulativeSavings">
+                    <label class="form-check-label" for="cummulativeSavings">Cumulative Savings</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="newSavings"
+                        [(ngModel)]="analysisTableColumns.newSavings" (change)="save()" id="newSavings">
+                    <label class="form-check-label" for="newSavings">New Savings</label>
+                </div>
+            </div>
+        </div>
+    </div>
+</ng-container>

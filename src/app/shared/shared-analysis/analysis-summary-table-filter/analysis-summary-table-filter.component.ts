@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { AnalysisGroup, AnalysisTableColumns } from 'src/app/models/analysis';
+import { AnalysisGroup, AnalysisGroupPredictorVariable, AnalysisTableColumns } from 'src/app/models/analysis';
 import * as _ from 'lodash';
 import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
 import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
@@ -143,12 +143,12 @@ export class AnalysisSummaryTableFilterComponent implements OnInit {
   setPredictorVariables() {
     if (this.tableContext != 'annualAccount' && this.tableContext != 'monthAccount') {
       let predictorSelections: Array<{
-        predictor: IdbPredictor,
+        predictor: AnalysisGroupPredictorVariable,
         display: boolean,
         usedInAnalysis: boolean
       }> = new Array();
 
-      let variableCopy: Array<IdbPredictor>;
+      let variableCopy: Array<AnalysisGroupPredictorVariable>;
       if (this.tableContext == 'monthGroup' || this.tableContext == 'annualGroup') {
         let analysisGroup: AnalysisGroup = this.analysisService.selectedGroup.getValue();
         variableCopy = JSON.parse(JSON.stringify(analysisGroup.predictorVariables));

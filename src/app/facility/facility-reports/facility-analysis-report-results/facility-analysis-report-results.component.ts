@@ -4,6 +4,7 @@ import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
+import { AnalysisService } from '../../analysis/analysis.service';
 
 @Component({
   selector: 'app-facility-analysis-report-results',
@@ -17,7 +18,8 @@ export class FacilityAnalysisReportResultsComponent {
 
   analysisItem: IdbAnalysisItem;
   constructor(private facilityReportsDbService: FacilityReportsDbService,
-    private analysisDbService: AnalysisDbService
+    private analysisDbService: AnalysisDbService,
+    private analysisService: AnalysisService
   ) {
 
   }
@@ -26,6 +28,7 @@ export class FacilityAnalysisReportResultsComponent {
     this.facilityReportSub = this.facilityReportsDbService.selectedReport.subscribe(report => {
       this.facilityReport = report;
       this.analysisItem = this.analysisDbService.getByGuid(this.facilityReport.analysisItemId);
+      this.analysisService.analysisTableColumns.next(this.facilityReport.analysisReportSettings.analysisTableColumns);
     });
   }
 

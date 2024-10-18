@@ -4,6 +4,7 @@ import { FacilityReportsService } from 'src/app/facility/facility-reports/facili
 import { MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { AnalysisReportSettings } from 'src/app/models/idbModels/facilityReport';
 
 @Component({
   selector: 'app-monthly-facility-analysis-report',
@@ -17,7 +18,13 @@ export class MonthlyFacilityAnalysisReportComponent {
   analysisItem: IdbAnalysisItem;
   @Input({required: true})
   monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>;
+  @Input({required: true})
+  analysisReportSettings: AnalysisReportSettings;
 
+
+
+  baselineYearAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>;
+  reportYearAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>;
   print: boolean;
   printSub: Subscription;
   constructor(private facilityReportService: FacilityReportsService) {
@@ -27,10 +34,25 @@ export class MonthlyFacilityAnalysisReportComponent {
   ngOnInit() {
     this.printSub = this.facilityReportService.print.subscribe(print => {
       this.print = print;
-    })
+    });
+    this.setBaselineYearMonthlyData();
+    this.setReportYearMonthlyData();
   }
 
   ngOnDestroy() {
     this.printSub.unsubscribe();
+  }
+
+
+  setBaselineYearMonthlyData() {
+    this.baselineYearAnalysisSummaryData = this.monthlyAnalysisSummaryData.filter(summaryData => {
+      return summaryData.fiscalYear == this.analysisItem.baselineYear;
+    })
+  }
+
+  setReportYearMonthlyData() {
+    this.reportYearAnalysisSummaryData = this.monthlyAnalysisSummaryData.filter(summaryData => {
+      return summaryData.fiscalYear == this.analysisItem.reportYear;
+    });
   }
 }

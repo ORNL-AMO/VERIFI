@@ -14,6 +14,7 @@ import { AnnualAnalysisSummary, MonthlyAnalysisSummary, MonthlyAnalysisSummaryDa
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { AnalysisReportSettings } from 'src/app/models/idbModels/facilityReport';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
@@ -27,6 +28,8 @@ import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 export class FacilityAnalysisReportComponent {
   @Input({ required: true })
   analysisItem: IdbAnalysisItem;
+  @Input({ required: true })
+  analysisReportSettings: AnalysisReportSettings;
 
   worker: Worker;
   annualAnalysisSummaries: Array<AnnualAnalysisSummary>;
@@ -91,5 +94,6 @@ export class FacilityAnalysisReportComponent {
       this.worker.terminate();
     }
   }
+
 
 }

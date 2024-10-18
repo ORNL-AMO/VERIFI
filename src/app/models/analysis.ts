@@ -126,7 +126,7 @@ export interface AnalysisTableColumns {
   cummulativeSavings: boolean,
   newSavings: boolean,
   predictors: Array<{
-    predictor: IdbPredictor,
+    predictor: AnalysisGroupPredictorVariable,
     display: boolean,
     usedInAnalysis: boolean
   }>,

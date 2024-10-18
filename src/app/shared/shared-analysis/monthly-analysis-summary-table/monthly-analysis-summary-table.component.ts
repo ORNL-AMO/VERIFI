@@ -28,6 +28,10 @@ export class MonthlyAnalysisSummaryTableComponent implements OnInit {
   predictorVariables: Array<AnalysisGroupPredictorVariable>;
   @Input()
   group: AnalysisGroup;
+  @Input()
+  inReport: boolean;
+  @Input()
+  isReportBaselineYear: boolean;
 
   @ViewChild('dataTable', { static: false }) dataTable: ElementRef;
 
@@ -40,7 +44,7 @@ export class MonthlyAnalysisSummaryTableComponent implements OnInit {
   numImprovementColumns: number;
   numPredictorColumns: number;
 
-  predictorColumns: Array<IdbPredictor>;
+  predictorColumns: Array<AnalysisGroupPredictorVariable>;
   copyingTable: boolean = false;
   hasBanked: boolean;
   constructor(private analysisService: AnalysisService, private copyTableService: CopyTableService, private router: Router) { }
@@ -63,14 +67,14 @@ export class MonthlyAnalysisSummaryTableComponent implements OnInit {
   setPredictorVariables() {
     let inAccount: boolean = this.router.url.includes('account');
     if (!inAccount) {
-      let predictorColumns: Array<IdbPredictor> = new Array();
+      let predictorColumns: Array<AnalysisGroupPredictorVariable> = new Array();
       this.monthlyAnalysisSummaryData.forEach((data, index) => {
         this.analysisTableColumns.predictors.forEach(predictorItem => {
           if (predictorItem.display) {
             if (index == 0) {
               predictorColumns.push(predictorItem.predictor)
             }
-            let monthData: { predictorId: string, usage: number } = data.predictorUsage.find(usageItem => { return usageItem.predictorId == predictorItem.predictor.guid });
+            let monthData: { predictorId: string, usage: number } = data.predictorUsage.find(usageItem => { return usageItem.predictorId == predictorItem.predictor.id });
             if (monthData) {
               data[predictorItem.predictor.name] = monthData.usage;
             }
@@ -164,9 +168,9 @@ export class MonthlyAnalysisSummaryTableComponent implements OnInit {
   }
 
   //TODO: Should be a pipe...
-  checkIsProduction(predictorVariable: IdbPredictor): boolean {
+  checkIsProduction(predictorVariable: AnalysisGroupPredictorVariable): boolean {
     if (this.group) {
-      let groupVariable: AnalysisGroupPredictorVariable = this.group.predictorVariables.find(variable => { return variable.id == predictorVariable.guid })
+      let groupVariable: AnalysisGroupPredictorVariable = this.group.predictorVariables.find(variable => { return variable.id == predictorVariable.id })
       if (groupVariable) {
         return groupVariable.productionInAnalysis;
       }

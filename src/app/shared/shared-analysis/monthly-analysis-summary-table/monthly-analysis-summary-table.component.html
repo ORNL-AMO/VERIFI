@@ -2,7 +2,16 @@
     [ngClass]="{'copying-table': copyingTable}">
     <thead class="sortable">
         <tr class="table-mh">
-            <th class="first-column" colspan="2"></th>
+            <th class="first-column" colspan="2">
+                <ng-container *ngIf="inReport">
+                    <ng-container *ngIf="isReportBaselineYear">
+                        Baseline Year
+                    </ng-container>
+                    <ng-container *ngIf="!isReportBaselineYear">
+                        Report Year
+                    </ng-container>
+                </ng-container>
+            </th>
             <th *ngIf="analysisTableColumns.energy" class="text-center th-3" [attr.colspan]="numEnergyColumns">
                 <ng-container *ngIf="analysisItem.analysisCategory == 'energy'">
                     Energy (<span [innerHTML]="analysisItem.energyUnit | settingsLabel"></span>)
@@ -220,7 +229,7 @@
     </tbody>
 </table>
 <div class="d-flex w-100 justify-content-between hide-print">
-    <div>
+    <div *ngIf="!inReport">
         <button class="btn action-btn btn-sm" (click)="copyTable()">
             <span class="fa fa-copy"></span> Copy Table
         </button>
@@ -228,7 +237,7 @@
     <div class="alert alert-info p-1" *ngIf="hasBanked">
         <span class="fa fa-asterisk"></span> Indicates Banked Analysis
     </div>
-    <ngb-pagination [collectionSize]="monthlyAnalysisSummaryData.length" [(page)]="currentPageNumber"
+    <ngb-pagination *ngIf="!inReport" [collectionSize]="monthlyAnalysisSummaryData.length" [(page)]="currentPageNumber"
         [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true" aria-label="Pagination">
     </ngb-pagination>
 </div>

@@ -2,17 +2,26 @@
     <h4>
         Monthly Facility Analysis
     </h4>
-    <app-monthly-analysis-summary-table [monthlyAnalysisSummaryData]="monthlyAnalysisSummaryData"
-        [analysisItem]="analysisItem" [facilityOrAccount]="facility" [itemsPerPage]="12">
-    </app-monthly-analysis-summary-table>
+    <ng-container *ngIf="analysisReportSettings.facilityMonthlyResultsTableBaselineYear">
+        <app-monthly-analysis-summary-table [monthlyAnalysisSummaryData]="baselineYearAnalysisSummaryData"
+            [analysisItem]="analysisItem" [facilityOrAccount]="facility" [itemsPerPage]="12" [inReport]="true"
+            [isReportBaselineYear]="true">
+        </app-monthly-analysis-summary-table>
+    </ng-container>
+    <ng-container *ngIf="analysisReportSettings.facilityMonthlyResultsTableReportYear">
+        <app-monthly-analysis-summary-table [monthlyAnalysisSummaryData]="reportYearAnalysisSummaryData"
+            [analysisItem]="analysisItem" [facilityOrAccount]="facility" [itemsPerPage]="12" [inReport]="true"
+            [isReportBaselineYear]="false">
+        </app-monthly-analysis-summary-table>
+    </ng-container>
     <hr>
-    <div class="d-flex w-100">
-        <div class="w-50 pe-1">
+    <div class="d-flex w-100 print-break-avoid" [ngClass]="{'flex-column': print}">
+        <div [ngClass]="{'w-50 pe-1': !print, 'w-100 pb-3': print}">
             <app-monthly-analysis-summary-graph [monthlyAnalysisSummaryData]="monthlyAnalysisSummaryData"
                 [analysisItem]="analysisItem" [facilityOrAccount]="facility">
             </app-monthly-analysis-summary-graph>
         </div>
-        <div class="w-50 ps-1">
+        <div [ngClass]="{'w-50 pe-1': !print, 'w-100': print}">
             <app-monthly-analysis-summary-savings-graph [analysisItem]="analysisItem"
                 [monthlyAnalysisSummaryData]="monthlyAnalysisSummaryData" [facilityOrAccount]="facility">
             </app-monthly-analysis-summary-savings-graph>
