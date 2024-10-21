@@ -11,11 +11,11 @@
 </ng-template>
 
 <ng-template #reportBlock>
-    <div class="row">
-        <div class="col-6">
+    <div class="row print-break-avoid">
+        <div [ngClass]="{'col-6': !print, 'col-12': print}">
             <div #annualEnergyIntensityAnalysisGraph id="annualEnergyIntensityAnalysisGraph"></div>
         </div>
-        <div class="col-6">
+        <div [ngClass]="{'col-6': !print, 'col-12': print}">
             <div #percentImprovementAnalysisGraph id="percentImprovementAnalysisGraph"></div>
         </div>
     </div>

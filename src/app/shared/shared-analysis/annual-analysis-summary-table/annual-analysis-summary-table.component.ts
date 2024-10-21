@@ -6,7 +6,6 @@ import { AnalysisGroupPredictorVariable, AnalysisTableColumns, AnnualAnalysisSum
 import { CopyTableService } from '../../helper-services/copy-table.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 
@@ -22,6 +21,10 @@ export class AnnualAnalysisSummaryTableComponent implements OnInit {
   analysisItem: IdbAnalysisItem | IdbAccountAnalysisItem;
   @Input()
   accountOrFacility: IdbAccount | IdbFacility;
+  @Input({required: true})
+  printBlock: 'consumption' | 'predictors' | 'savings' | 'all';
+  @Input()
+  inReport: boolean;
 
   @ViewChild('dataTable', { static: false }) dataTable: ElementRef;
 

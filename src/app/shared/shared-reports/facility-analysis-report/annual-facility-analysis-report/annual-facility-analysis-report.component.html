@@ -3,14 +3,29 @@
         Annual Facility Analysis
     </h4>
     <ng-container *ngIf="analysisReportSettings.facilityAnnualResultsTable">
-        <app-annual-analysis-summary-table [annualAnalysisSummary]="annualAnalysisSummaries"
-            [analysisItem]="analysisItem" [accountOrFacility]="facility">
-        </app-annual-analysis-summary-table>
+        <ng-template [ngIf]="!print" [ngIfElse]="printBlock">
+            <app-annual-analysis-summary-table [annualAnalysisSummary]="annualAnalysisSummaries"
+                [analysisItem]="analysisItem" [accountOrFacility]="facility" [printBlock]="'all'" [inReport]="true">
+            </app-annual-analysis-summary-table>
+        </ng-template>
+        <ng-template #printBlock>
+            <app-annual-analysis-summary-table [annualAnalysisSummary]="annualAnalysisSummaries"
+                [analysisItem]="analysisItem" [accountOrFacility]="facility" [printBlock]="'consumption'"
+                [inReport]="true">
+            </app-annual-analysis-summary-table>
+            <app-annual-analysis-summary-table [annualAnalysisSummary]="annualAnalysisSummaries"
+                [analysisItem]="analysisItem" [accountOrFacility]="facility" [printBlock]="'predictors'"
+                [inReport]="true">
+            </app-annual-analysis-summary-table>
+            <app-annual-analysis-summary-table [annualAnalysisSummary]="annualAnalysisSummaries"
+                [analysisItem]="analysisItem" [accountOrFacility]="facility" [printBlock]="'savings'" [inReport]="true">
+            </app-annual-analysis-summary-table>
+        </ng-template>
         <hr>
     </ng-container>
     <ng-container *ngIf="analysisReportSettings.facilityAnnualResultsGraphs">
         <app-annual-analysis-summary-graph [annualAnalysisSummary]="annualAnalysisSummaries"
-            [analysisItem]="analysisItem" [inReport]="true">
+            [analysisItem]="analysisItem" [inReport]="true" [print]="print">
         </app-annual-analysis-summary-graph>
     </ng-container>
 </div>
