@@ -3,16 +3,53 @@
         Monthly Facility Analysis
     </h4>
     <ng-container *ngIf="analysisReportSettings.facilityMonthlyResultsTableBaselineYear">
-        <app-monthly-analysis-summary-table [monthlyAnalysisSummaryData]="baselineYearAnalysisSummaryData"
-            [analysisItem]="analysisItem" [facilityOrAccount]="facility" [itemsPerPage]="12" [inReport]="true"
-            [isReportBaselineYear]="true">
-        </app-monthly-analysis-summary-table>
+        <ng-template [ngIf]="!print" [ngIfElse]="baselinePrintBlock">
+            <app-monthly-analysis-summary-table [monthlyAnalysisSummaryData]="baselineYearAnalysisSummaryData"
+                [analysisItem]="analysisItem" [facilityOrAccount]="facility" [itemsPerPage]="12" [inReport]="true"
+                [isReportBaselineYear]="true" [printBlock]="'all'">
+            </app-monthly-analysis-summary-table>
+        </ng-template>
+        <ng-template #baselinePrintBlock>
+            <app-monthly-analysis-summary-table [monthlyAnalysisSummaryData]="baselineYearAnalysisSummaryData"
+                [analysisItem]="analysisItem" [facilityOrAccount]="facility" [itemsPerPage]="12" [inReport]="true"
+                [isReportBaselineYear]="true" [printBlock]="'consumption'">
+            </app-monthly-analysis-summary-table>
+
+            <app-monthly-analysis-summary-table [monthlyAnalysisSummaryData]="baselineYearAnalysisSummaryData"
+                [analysisItem]="analysisItem" [facilityOrAccount]="facility" [itemsPerPage]="12" [inReport]="true"
+                [isReportBaselineYear]="true" [printBlock]="'predictors'">
+            </app-monthly-analysis-summary-table>
+
+            <!--TODO: Never Savings in Baseline Year right...?-->
+            <!-- <app-monthly-analysis-summary-table [monthlyAnalysisSummaryData]="baselineYearAnalysisSummaryData"
+                [analysisItem]="analysisItem" [facilityOrAccount]="facility" [itemsPerPage]="12" [inReport]="true"
+                [isReportBaselineYear]="true" [printBlock]="'savings'">
+            </app-monthly-analysis-summary-table> -->
+        </ng-template>
     </ng-container>
     <ng-container *ngIf="analysisReportSettings.facilityMonthlyResultsTableReportYear">
-        <app-monthly-analysis-summary-table [monthlyAnalysisSummaryData]="reportYearAnalysisSummaryData"
-            [analysisItem]="analysisItem" [facilityOrAccount]="facility" [itemsPerPage]="12" [inReport]="true"
-            [isReportBaselineYear]="false">
-        </app-monthly-analysis-summary-table>
+        <ng-template [ngIf]="!print" [ngIfElse]="reportPrintBlock">
+            <app-monthly-analysis-summary-table [monthlyAnalysisSummaryData]="reportYearAnalysisSummaryData"
+                [analysisItem]="analysisItem" [facilityOrAccount]="facility" [itemsPerPage]="12" [inReport]="true"
+                [isReportBaselineYear]="false" [printBlock]="'all'">
+            </app-monthly-analysis-summary-table>
+        </ng-template>
+        <ng-template #reportPrintBlock>
+            <app-monthly-analysis-summary-table [monthlyAnalysisSummaryData]="reportYearAnalysisSummaryData"
+                [analysisItem]="analysisItem" [facilityOrAccount]="facility" [itemsPerPage]="12" [inReport]="true"
+                [isReportBaselineYear]="false" [printBlock]="'consumption'">
+            </app-monthly-analysis-summary-table>
+
+            <app-monthly-analysis-summary-table [monthlyAnalysisSummaryData]="reportYearAnalysisSummaryData"
+                [analysisItem]="analysisItem" [facilityOrAccount]="facility" [itemsPerPage]="12" [inReport]="true"
+                [isReportBaselineYear]="false" [printBlock]="'predictors'">
+            </app-monthly-analysis-summary-table>
+
+            <app-monthly-analysis-summary-table [monthlyAnalysisSummaryData]="reportYearAnalysisSummaryData"
+                [analysisItem]="analysisItem" [facilityOrAccount]="facility" [itemsPerPage]="12" [inReport]="true"
+                [isReportBaselineYear]="false" [printBlock]="'savings'">
+            </app-monthly-analysis-summary-table>
+        </ng-template>
     </ng-container>
     <hr>
     <div class="d-flex w-100 print-break-avoid" [ngClass]="{'flex-column': print}">

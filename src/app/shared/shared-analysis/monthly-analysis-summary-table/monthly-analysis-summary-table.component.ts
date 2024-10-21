@@ -32,6 +32,8 @@ export class MonthlyAnalysisSummaryTableComponent implements OnInit {
   inReport: boolean;
   @Input()
   isReportBaselineYear: boolean;
+  @Input({required: true})
+  printBlock: 'consumption' | 'predictors' | 'savings' | 'all';
 
   @ViewChild('dataTable', { static: false }) dataTable: ElementRef;
 

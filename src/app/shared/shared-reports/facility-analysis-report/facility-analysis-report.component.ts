@@ -34,6 +34,7 @@ export class FacilityAnalysisReportComponent {
   worker: Worker;
   annualAnalysisSummaries: Array<AnnualAnalysisSummary>;
   monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>;
+  
   groupMonthlySummaries: Array<MonthlyAnalysisSummary>
   calculating: boolean | 'error' = false;
   facility: IdbFacility;
@@ -94,6 +95,5 @@ export class FacilityAnalysisReportComponent {
       this.worker.terminate();
     }
   }
-
 
 }
