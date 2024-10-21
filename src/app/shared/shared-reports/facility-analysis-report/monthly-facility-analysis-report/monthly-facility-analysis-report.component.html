@@ -10,14 +10,18 @@
             </app-monthly-analysis-summary-table>
         </ng-template>
         <ng-template #baselinePrintBlock>
-            <app-monthly-analysis-summary-table [monthlyAnalysisSummaryData]="baselineYearAnalysisSummaryData"
-                [analysisItem]="analysisItem" [facilityOrAccount]="facility" [itemsPerPage]="12" [inReport]="true"
-                [isReportBaselineYear]="true" [printBlock]="'consumption'">
+            <app-monthly-analysis-summary-table
+                *ngIf="analysisReportSettings.analysisTableColumns | includeTable: 'consumption'"
+                [monthlyAnalysisSummaryData]="baselineYearAnalysisSummaryData" [analysisItem]="analysisItem"
+                [facilityOrAccount]="facility" [itemsPerPage]="12" [inReport]="true" [isReportBaselineYear]="true"
+                [printBlock]="'consumption'">
             </app-monthly-analysis-summary-table>
 
-            <app-monthly-analysis-summary-table [monthlyAnalysisSummaryData]="baselineYearAnalysisSummaryData"
-                [analysisItem]="analysisItem" [facilityOrAccount]="facility" [itemsPerPage]="12" [inReport]="true"
-                [isReportBaselineYear]="true" [printBlock]="'predictors'">
+            <app-monthly-analysis-summary-table
+                *ngIf="analysisReportSettings.analysisTableColumns | includeTable: 'predictors'"
+                [monthlyAnalysisSummaryData]="baselineYearAnalysisSummaryData" [analysisItem]="analysisItem"
+                [facilityOrAccount]="facility" [itemsPerPage]="12" [inReport]="true" [isReportBaselineYear]="true"
+                [printBlock]="'predictors'">
             </app-monthly-analysis-summary-table>
 
             <!--TODO: Never Savings in Baseline Year right...?-->
@@ -35,19 +39,25 @@
             </app-monthly-analysis-summary-table>
         </ng-template>
         <ng-template #reportPrintBlock>
-            <app-monthly-analysis-summary-table [monthlyAnalysisSummaryData]="reportYearAnalysisSummaryData"
-                [analysisItem]="analysisItem" [facilityOrAccount]="facility" [itemsPerPage]="12" [inReport]="true"
-                [isReportBaselineYear]="false" [printBlock]="'consumption'">
+            <app-monthly-analysis-summary-table
+                *ngIf="analysisReportSettings.analysisTableColumns | includeTable: 'consumption'"
+                [monthlyAnalysisSummaryData]="reportYearAnalysisSummaryData" [analysisItem]="analysisItem"
+                [facilityOrAccount]="facility" [itemsPerPage]="12" [inReport]="true" [isReportBaselineYear]="false"
+                [printBlock]="'consumption'">
             </app-monthly-analysis-summary-table>
 
-            <app-monthly-analysis-summary-table [monthlyAnalysisSummaryData]="reportYearAnalysisSummaryData"
-                [analysisItem]="analysisItem" [facilityOrAccount]="facility" [itemsPerPage]="12" [inReport]="true"
-                [isReportBaselineYear]="false" [printBlock]="'predictors'">
+            <app-monthly-analysis-summary-table
+                *ngIf="analysisReportSettings.analysisTableColumns | includeTable: 'predictors'"
+                [monthlyAnalysisSummaryData]="reportYearAnalysisSummaryData" [analysisItem]="analysisItem"
+                [facilityOrAccount]="facility" [itemsPerPage]="12" [inReport]="true" [isReportBaselineYear]="false"
+                [printBlock]="'predictors'">
             </app-monthly-analysis-summary-table>
 
-            <app-monthly-analysis-summary-table [monthlyAnalysisSummaryData]="reportYearAnalysisSummaryData"
-                [analysisItem]="analysisItem" [facilityOrAccount]="facility" [itemsPerPage]="12" [inReport]="true"
-                [isReportBaselineYear]="false" [printBlock]="'savings'">
+            <app-monthly-analysis-summary-table
+                *ngIf="analysisReportSettings.analysisTableColumns | includeTable: 'savings'"
+                [monthlyAnalysisSummaryData]="reportYearAnalysisSummaryData" [analysisItem]="analysisItem"
+                [facilityOrAccount]="facility" [itemsPerPage]="12" [inReport]="true" [isReportBaselineYear]="false"
+                [printBlock]="'savings'">
             </app-monthly-analysis-summary-table>
         </ng-template>
     </ng-container>
