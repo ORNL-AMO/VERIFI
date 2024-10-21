@@ -1,11 +1,12 @@
 /// <reference lib="webworker" />
 
-import { AnnualAnalysisSummary, MonthlyAnalysisSummary, MonthlyAnalysisSummaryData } from "src/app/models/analysis";
+import { AnalysisGroup, AnnualAnalysisSummary, MonthlyAnalysisSummary, MonthlyAnalysisSummaryData } from "src/app/models/analysis";
 import { AnnualFacilityAnalysisSummaryClass } from "src/app/calculations/analysis-calculations/annualFacilityAnalysisSummaryClass";
 import { CalanderizedMeter } from "../models/calanderization";
 import { getCalanderizedMeterData } from "../calculations/calanderization/calanderizeMeters";
 import { getNeededUnits } from "../calculations/shared-calculations/calanderizationFunctions";
 import { MonthlyAnalysisSummaryClass } from "../calculations/analysis-calculations/monthlyAnalysisSummaryClass";
+import { AnnualAnalysisSummaryDataClass } from "../calculations/analysis-calculations/annualAnalysisSummaryDataClass";
 
 addEventListener('message', ({ data }) => {
     try {
@@ -13,13 +14,15 @@ addEventListener('message', ({ data }) => {
         let annualAnalysisSummaryClass: AnnualFacilityAnalysisSummaryClass = new AnnualFacilityAnalysisSummaryClass(data.analysisItem, data.facility, calanderizedMeters, data.accountPredictorEntries, data.calculateAllMonthlyData, data.accountPredictors, data.accountAnalysisItems);
         let annualAnalysisSummaries: Array<AnnualAnalysisSummary> = annualAnalysisSummaryClass.getAnnualAnalysisSummaries();
         let monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData> = annualAnalysisSummaryClass.monthlyAnalysisSummaryData;
-        let groupMonthlySummaries: Array<MonthlyAnalysisSummary> = annualAnalysisSummaryClass.groupMonthlySummariesClasses.flatMap(summary => {
-            return summary.getResults();
-        });
+        let groupSummaries: Array<{
+            group: AnalysisGroup,
+            monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
+            annualAnalysisSummaryData: Array<AnnualAnalysisSummary>
+        }> = annualAnalysisSummaryClass.groupSummaries;
         postMessage({
             annualAnalysisSummaries: annualAnalysisSummaries,
             monthlyAnalysisSummaryData: monthlyAnalysisSummaryData,
-            groupMonthlySummaries: groupMonthlySummaries,
+            groupSummaries: groupSummaries,
             itemId: data.analysisItem.guid,
             error: false
         });

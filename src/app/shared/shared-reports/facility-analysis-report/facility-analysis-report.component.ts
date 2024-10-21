@@ -1,4 +1,5 @@
 import { Component, Input } from '@angular/core';
+import { AnnualAnalysisSummaryDataClass } from 'src/app/calculations/analysis-calculations/annualAnalysisSummaryDataClass';
 import { AnnualFacilityAnalysisSummaryClass } from 'src/app/calculations/analysis-calculations/annualFacilityAnalysisSummaryClass';
 import { MonthlyAnalysisSummaryClass } from 'src/app/calculations/analysis-calculations/monthlyAnalysisSummaryClass';
 import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
@@ -10,7 +11,7 @@ import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.serv
 import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { AnnualAnalysisSummary, MonthlyAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
+import { AnalysisGroup, AnnualAnalysisSummary, MonthlyAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -35,7 +36,11 @@ export class FacilityAnalysisReportComponent {
   annualAnalysisSummaries: Array<AnnualAnalysisSummary>;
   monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>;
   
-  groupMonthlySummaries: Array<MonthlyAnalysisSummary>
+  groupSummaries: Array<{
+    group: AnalysisGroup,
+    monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
+    annualAnalysisSummaryData: Array<AnnualAnalysisSummary>
+}>
   calculating: boolean | 'error' = false;
   facility: IdbFacility;
   constructor(
@@ -61,7 +66,7 @@ export class FacilityAnalysisReportComponent {
         if (!data.error) {
           this.annualAnalysisSummaries = data.annualAnalysisSummaries;
           this.monthlyAnalysisSummaryData = data.monthlyAnalysisSummaryData;
-          this.groupMonthlySummaries = data.groupMonthlySummaries;
+          this.groupSummaries = data.groupSummaries;
           this.calculating = false;
         } else {
           this.calculating = 'error';
@@ -84,9 +89,7 @@ export class FacilityAnalysisReportComponent {
       let annualAnalysisSummaryClass: AnnualFacilityAnalysisSummaryClass = new AnnualFacilityAnalysisSummaryClass(this.analysisItem, this.facility, calanderizedMeters, accountPredictorEntries, false, accountPredictors, undefined);
       this.annualAnalysisSummaries = annualAnalysisSummaryClass.getAnnualAnalysisSummaries();
       this.monthlyAnalysisSummaryData = annualAnalysisSummaryClass.monthlyAnalysisSummaryData;
-      this.groupMonthlySummaries = annualAnalysisSummaryClass.groupMonthlySummariesClasses.flatMap(summaryClass => {
-        return summaryClass.getResults();
-      });
+      this.groupSummaries = annualAnalysisSummaryClass.groupSummaries;
     }
   }
 

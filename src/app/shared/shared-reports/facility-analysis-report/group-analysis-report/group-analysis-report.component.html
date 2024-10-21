@@ -15,7 +15,7 @@
                 </h4>
             </div>
             <app-regression-model-details [groupItem]="groupItem" [analysisItem]="analysisItem"
-                [monthlyAnalysisSummaryData]="groupMonthlySummary.monthlyAnalysisSummaryData"
+                [monthlyAnalysisSummaryData]="groupSummary.monthlyAnalysisSummaryData"
                 [facility]="facility"></app-regression-model-details>
         </div>
     </div>
@@ -38,8 +38,10 @@
                 </h4>
             </div>
             <!--ANNUAL RESULTS-->
-            <app-group-annual-analysis-report
-                *ngIf="analysisReportSettings.groupAnnualResults"></app-group-annual-analysis-report>
+            <app-group-annual-analysis-report [analysisItem]="analysisItem"
+                [annualAnalysisSummaryData]="groupSummary.annualAnalysisSummaryData" [facility]="facility"
+                [analysisReportSettings]="analysisReportSettings"
+                [group]="groupSummary.group"></app-group-annual-analysis-report>
         </div>
     </div>
 </ng-container>
@@ -61,9 +63,10 @@
                 </h4>
             </div>
             <!--MONTHLY RESULTS-->
-            <app-group-monthly-analysis-report *ngIf="analysisReportSettings.groupMonthlyResults"
-                [analysisItem]="analysisItem" [groupMonthlySummary]="groupMonthlySummary" [facility]="facility"
-                [analysisReportSettings]="analysisReportSettings"></app-group-monthly-analysis-report>
+            <app-group-monthly-analysis-report [analysisItem]="analysisItem"
+                [monthlyAnalysisSummaryData]="groupSummary.monthlyAnalysisSummaryData" [facility]="facility"
+                [analysisReportSettings]="analysisReportSettings"
+                [group]="groupSummary.group"></app-group-monthly-analysis-report>
         </div>
     </div>
 </ng-container>

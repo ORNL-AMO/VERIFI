@@ -2,7 +2,7 @@ import { CalanderizedMeter } from "src/app/models/calanderization";
 import { getCalanderizedMeterData } from "../calanderization/calanderizeMeters";
 import { getNeededUnits } from "../shared-calculations/calanderizationFunctions";
 import { AnnualFacilityAnalysisSummaryClass } from "../analysis-calculations/annualFacilityAnalysisSummaryClass";
-import { AnalysisGroup, AnnualAnalysisSummary } from "src/app/models/analysis";
+import { AnalysisGroup, AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from "src/app/models/analysis";
 import * as _ from 'lodash';
 import { AnnualGroupAnalysisSummaryClass } from "../analysis-calculations/annualGroupAnalysisSummaryClass";
 import { MonthlyAnalysisSummaryClass } from "../analysis-calculations/monthlyAnalysisSummaryClass";
@@ -102,11 +102,15 @@ export class PerformanceReport {
                 }> = new Array();
                 facilityAnalysisItem.groups.forEach(group => {
                     if (group.analysisType != 'skip' && group.analysisType != 'skipAnalysis') {
-                        let groupMonthlySummariesClass: MonthlyAnalysisSummaryClass = facilityAnalysisSummaryClass.groupMonthlySummariesClasses.find(groupClass => {
+                        let groupMonthlySummariesClass: {
+                            group: AnalysisGroup,
+                            monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
+                            annualAnalysisSummaryData: Array<AnnualAnalysisSummary>
+                        } = facilityAnalysisSummaryClass.groupSummaries.find(groupClass => {
                             return groupClass.group.idbGroupId == group.idbGroupId;
                         });
 
-                        let groupAnnualAnalysisSummaryClass: AnnualGroupAnalysisSummaryClass = new AnnualGroupAnalysisSummaryClass(group, facilityAnalysisItem, facility, calanderizedMeters, accountPredictorEntries, groupMonthlySummariesClass.getResults().monthlyAnalysisSummaryData, accountPredictors, accountAnalysisItems);
+                        let groupAnnualAnalysisSummaryClass: AnnualGroupAnalysisSummaryClass = new AnnualGroupAnalysisSummaryClass(group, facilityAnalysisItem, facility, calanderizedMeters, accountPredictorEntries, groupMonthlySummariesClass.monthlyAnalysisSummaryData, accountPredictors, accountAnalysisItems);
                         groupAnnualAnalysisSummary.push({
                             group: group,
                             annualAnalysisSummary: groupAnnualAnalysisSummaryClass.getAnnualAnalysisSummaries(),

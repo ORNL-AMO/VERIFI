@@ -186,15 +186,15 @@
                     <label class="form-check-label" for="groupMonthlyResults">Group Monthly Results
                     </label>
                 </div>
-                <div class="form-check ms-3">
-                    <input class="form-check-input" type="checkbox" name="groupMonthlyResultsGraphs"
-                        [(ngModel)]="facilityReport.analysisReportSettings.groupMonthlyResultsGraphs" (change)="save()"
-                        id="groupMonthlyResultsGraphs">
-                    <label class="form-check-label" for="groupMonthlyResultsGraphs">Group Monthly Results
-                        Graph
-                    </label>
-                </div>
                 <ng-container *ngIf="facilityReport.analysisReportSettings.groupMonthlyResults">
+                    <div class="form-check ms-3">
+                        <input class="form-check-input" type="checkbox" name="groupMonthlyResultsGraphs"
+                            [(ngModel)]="facilityReport.analysisReportSettings.groupMonthlyResultsGraphs" (change)="save()"
+                            id="groupMonthlyResultsGraphs">
+                        <label class="form-check-label" for="groupMonthlyResultsGraphs">Group Monthly Results
+                            Graph
+                        </label>
+                    </div>
                     <div class="form-check ms-3">
                         <input class="form-check-input" type="checkbox" name="groupMonthlyResultsTable"
                             [(ngModel)]="facilityReport.analysisReportSettings.groupMonthlyResultsTable"
