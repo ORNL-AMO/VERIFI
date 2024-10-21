@@ -30,7 +30,7 @@
     </ng-container> -->
     <ng-container *ngFor="let groupMonthlySummary of groupMonthlySummaries">
         <app-group-analysis-report [groupMonthlySummary]="groupMonthlySummary" [analysisItem]="analysisItem"
-            [facility]="facility"></app-group-analysis-report>
+            [facility]="facility" [analysisReportSettings]="analysisReportSettings"></app-group-analysis-report>
         <div class="report-spacer-container">
             <hr>
         </div>

@@ -67,6 +67,7 @@
         </span>
     </div>
     <div class="row">
+        <!--FACILITY ANNUAL RESULTS-->
         <div class="col">
             <div class="form-check">
                 <input class="form-check-input" type="checkbox" name="facilityAnnualResults"
@@ -91,8 +92,7 @@
                     </label>
                 </div>
             </ng-container>
-        </div>
-        <div class="col">
+            <!--FACILITY MONTHLY RESULTS-->
             <div class="form-check">
                 <input class="form-check-input" type="checkbox" name="facilityMonthlyResults"
                     [(ngModel)]="facilityReport.analysisReportSettings.facilityMonthlyResults" (change)="save()"
@@ -133,6 +133,102 @@
                     <label class="form-check-label" for="facilityMonthlyResultsGraphs">Facility Monthly Results Graph
                     </label>
                 </div>
+            </ng-container>
+        </div>
+        <!--GROUP REPORTS-->
+        <div class="col">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="groupReports"
+                    [(ngModel)]="facilityReport.analysisReportSettings.groupReports" (change)="save()"
+                    id="groupReports">
+                <label class="bold form-check-label" for="groupReports">Group Reports
+                </label>
+            </div>
+            <ng-container *ngIf="facilityReport.analysisReportSettings.groupReports">
+                <div class="form-check ms-2">
+                    <input class="form-check-input" type="checkbox" name="groupModelDetails"
+                        [(ngModel)]="facilityReport.analysisReportSettings.groupModelDetails" (change)="save()"
+                        id="groupModelDetails">
+                    <label class="form-check-label" for="groupModelDetails">Regression Model Details
+                    </label>
+                </div>
+
+                <div class="form-check ms-2">
+                    <input class="form-check-input" type="checkbox" name="groupAnnualResults"
+                        [(ngModel)]="facilityReport.analysisReportSettings.groupAnnualResults" (change)="save()"
+                        id="groupAnnualResults">
+                    <label class="form-check-label" for="groupAnnualResults">Group Annual Results
+                    </label>
+                </div>
+                <ng-container *ngIf="facilityReport.analysisReportSettings.groupAnnualResults">
+                    <div class="form-check ms-3">
+                        <input class="form-check-input" type="checkbox" name="groupAnnualResultsTable"
+                            [(ngModel)]="facilityReport.analysisReportSettings.groupAnnualResultsTable"
+                            (change)="save()" id="groupAnnualResultsTable">
+                        <label class="form-check-label" for="groupAnnualResultsTable">Group Annual Results Table
+                        </label>
+                    </div>
+                    <div class="form-check ms-3">
+                        <input class="form-check-input" type="checkbox" name="groupAnnualResultsGraphs"
+                            [(ngModel)]="facilityReport.analysisReportSettings.groupAnnualResultsGraphs"
+                            (change)="save()" id="groupAnnualResultsGraphs">
+                        <label class="form-check-label" for="groupAnnualResultsGraphs">Group Annual Results Graph
+                        </label>
+                    </div>
+                </ng-container>
+
+
+
+                <div class="form-check ms-2">
+                    <input class="form-check-input" type="checkbox" name="groupMonthlyResults"
+                        [(ngModel)]="facilityReport.analysisReportSettings.groupMonthlyResults" (change)="save()"
+                        id="groupMonthlyResults">
+                    <label class="form-check-label" for="groupMonthlyResults">Group Monthly Results
+                    </label>
+                </div>
+                <div class="form-check ms-3">
+                    <input class="form-check-input" type="checkbox" name="groupMonthlyResultsGraphs"
+                        [(ngModel)]="facilityReport.analysisReportSettings.groupMonthlyResultsGraphs" (change)="save()"
+                        id="groupMonthlyResultsGraphs">
+                    <label class="form-check-label" for="groupMonthlyResultsGraphs">Group Monthly Results
+                        Graph
+                    </label>
+                </div>
+                <ng-container *ngIf="facilityReport.analysisReportSettings.groupMonthlyResults">
+                    <div class="form-check ms-3">
+                        <input class="form-check-input" type="checkbox" name="groupMonthlyResultsTable"
+                            [(ngModel)]="facilityReport.analysisReportSettings.groupMonthlyResultsTable"
+                            (change)="save()" id="groupMonthlyResultsTable">
+                        <label class="form-check-label" for="groupMonthlyResultsTable">Group Monthly Results Table
+                        </label>
+                    </div>
+                    <ng-container *ngIf="facilityReport.analysisReportSettings.groupMonthlyResultsTable">
+                        <div class="form-check ms-4">
+                            <input class="form-check-input" type="checkbox" name="groupMonthlyResultsTableBaselineYear"
+                                [(ngModel)]="facilityReport.analysisReportSettings.groupMonthlyResultsTableBaselineYear"
+                                (change)="save()" id="groupMonthlyResultsTableBaselineYear">
+                            <label class="form-check-label" for="groupMonthlyResultsTableBaselineYear">Monthly Results
+                                Baseline Year
+                            </label>
+                        </div>
+                        <div class="form-check ms-4">
+                            <input class="form-check-input" type="checkbox" name="gorupMonthlyResultsTableReportYear"
+                                [(ngModel)]="facilityReport.analysisReportSettings.gorupMonthlyResultsTableReportYear"
+                                (change)="save()" id="gorupMonthlyResultsTableReportYear">
+                            <label class="form-check-label" for="gorupMonthlyResultsTableReportYear">Monthly Results
+                                Report Year
+                            </label>
+                        </div>
+                        <div class="form-check ms-4">
+                            <input class="form-check-input" type="checkbox" name="groupMonthlyResultsTableModelYear"
+                                [(ngModel)]="facilityReport.analysisReportSettings.groupMonthlyResultsTableModelYear"
+                                (change)="save()" id="groupMonthlyResultsTableModelYear">
+                            <label class="form-check-label" for="groupMonthlyResultsTableModelYear">Monthly Results
+                                Model Year
+                            </label>
+                        </div>
+                    </ng-container>
+                </ng-container>
             </ng-container>
         </div>
     </div>

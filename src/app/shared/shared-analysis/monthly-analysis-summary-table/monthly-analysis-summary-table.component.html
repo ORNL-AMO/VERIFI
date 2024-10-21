@@ -4,15 +4,9 @@
         <tr class="table-mh">
             <th class="first-column" colspan="2">
                 <ng-container *ngIf="inReport">
-                    <ng-container *ngIf="isReportBaselineYear">
-                        Baseline Year
-                    </ng-container>
-                    <ng-container *ngIf="!isReportBaselineYear">
-                        Report Year
-                    </ng-container>
+                    {{reportLabel}}
                 </ng-container>
             </th>
-
             <ng-container *ngIf="printBlock == 'all' || printBlock == 'consumption'">
                 <th *ngIf="analysisTableColumns.energy" class="text-center th-3" [attr.colspan]="numEnergyColumns">
                     <ng-container *ngIf="analysisItem.analysisCategory == 'energy'">
@@ -215,7 +209,7 @@
                 <td *ngIf="analysisTableColumns.percentSavingsComparedToBaseline">
                     <span *ngIf="data.percentSavingsComparedToBaseline"
                         [ngClass]="{'red': data.percentSavingsComparedToBaseline < 0}">
-                        {{data.percentSavingsComparedToBaseline | number:'1.0-5'}} %
+                        {{data.percentSavingsComparedToBaseline | number:'1.0-2'}} %
                     </span>
                     <span *ngIf="!data.percentSavingsComparedToBaseline">
                         &mdash;
@@ -248,7 +242,7 @@
                 <td *ngIf="analysisTableColumns.rolling12MonthImprovement">
                     <span *ngIf="data.rolling12MonthImprovement"
                         [ngClass]="{'red': data.rolling12MonthImprovement < 0}">
-                        {{data.rolling12MonthImprovement | number:'1.0-5'}} %
+                        {{data.rolling12MonthImprovement | number:'1.0-2'}} %
                     </span>
                     <span *ngIf="!data.rolling12MonthImprovement">
                         &mdash;

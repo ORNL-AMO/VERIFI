@@ -62,7 +62,17 @@ export function getAnalysisReportSettings(): AnalysisReportSettings {
         facilityMonthlyResultsTableBaselineYear: true,
         facilityMonthlyResultsTableReportYear: true,
         facilityMonthlyResultsGraphs: true,
-        groupReports: true
+        groupReports: true,
+        groupModelDetails: true,
+        groupMonthlyResults: true,
+        groupMonthlyResultsTable: true,
+        groupMonthlyResultsTableBaselineYear: true,
+        gorupMonthlyResultsTableReportYear: true,
+        groupMonthlyResultsTableModelYear: true,
+        groupMonthlyResultsGraphs: true,
+        groupAnnualResults: true,
+        groupAnnualResultsTable: true,
+        groupAnnualResultsGraphs: true
     }
 }
 
@@ -76,6 +86,15 @@ export interface AnalysisReportSettings {
     facilityMonthlyResultsTableBaselineYear: boolean,
     facilityMonthlyResultsTableReportYear: boolean,
     facilityMonthlyResultsGraphs: boolean
-    groupReports: boolean
-
+    groupReports: boolean,
+    groupModelDetails: boolean,
+    groupMonthlyResults: boolean,
+    groupMonthlyResultsTable: boolean,
+    groupMonthlyResultsTableBaselineYear: boolean,
+    gorupMonthlyResultsTableReportYear: boolean,
+    groupMonthlyResultsTableModelYear: boolean,
+    groupMonthlyResultsGraphs: boolean,
+    groupAnnualResults: boolean,
+    groupAnnualResultsTable: boolean,
+    groupAnnualResultsGraphs: boolean
 }

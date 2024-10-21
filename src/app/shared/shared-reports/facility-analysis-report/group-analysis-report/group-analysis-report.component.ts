@@ -5,6 +5,7 @@ import { FacilityReportsService } from 'src/app/facility/facility-reports/facili
 import { MonthlyAnalysisSummary } from 'src/app/models/analysis';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { AnalysisReportSettings } from 'src/app/models/idbModels/facilityReport';
 
 @Component({
   selector: 'app-group-analysis-report',
@@ -18,6 +19,9 @@ export class GroupAnalysisReportComponent {
   facility: IdbFacility;
   @Input({ required: true })
   groupMonthlySummary: MonthlyAnalysisSummary;
+  @Input({required: true})
+  analysisReportSettings: AnalysisReportSettings;
+
 
   groupItem: AnalysisGroupItem;
   print: boolean;

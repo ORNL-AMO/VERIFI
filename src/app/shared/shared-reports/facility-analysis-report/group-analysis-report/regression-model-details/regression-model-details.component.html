@@ -2,76 +2,79 @@
     The selected model is invalid.
 </div>
 
-<div class="table-responsive">
-    <table class="table table-sm table-hover table-bordered">
-        <thead>
-            <tr>
-                <th>
-                    Model<br> Year
-                </th>
-                <th>
-                    Variable<br> p-Values
-                </th>
-                <th>
-                    R2
-                </th>
-                <th>
-                    Adjusted<br> R2
-                </th>
-                <th>
-                    Model<br> p-Value
-                </th>
-                <th>
-                    Formula
-                </th>
-                <th>
-                    Model Notes
-                </th>
-            </tr>
-        </thead>
-        <tbody>
-            <!--inspected-->
-            <tr>
-                <td>
-                    {{groupItem.selectedModel.modelYear | yearDisplay:facility.fiscalYear}}
-                </td>
-                <td>
-                    <span *ngFor="let pVal of groupItem.selectedModel.t.p; let index = index">
-                        <span class="no-break"
-                            *ngIf="index != 0">{{groupItem.selectedModel.predictorVariables[index-1].name}}: {{pVal |
-                            number:'0.2-2'}}
-                            <br>
+<div class="scroll-x">
+    <div class="table-responsive">
+        <table class="table table-sm table-hover table-bordered">
+            <thead>
+                <tr>
+                    <th>
+                        Model<br> Year
+                    </th>
+                    <th>
+                        Variable<br> p-Values
+                    </th>
+                    <th>
+                        R2
+                    </th>
+                    <th>
+                        Adjusted<br> R2
+                    </th>
+                    <th>
+                        Model<br> p-Value
+                    </th>
+                    <th>
+                        Formula
+                    </th>
+                    <th>
+                        Model Notes
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <!--inspected-->
+                <tr>
+                    <td>
+                        {{groupItem.selectedModel.modelYear | yearDisplay:facility.fiscalYear}}
+                    </td>
+                    <td>
+                        <span *ngFor="let pVal of groupItem.selectedModel.t.p; let index = index">
+                            <span class="no-break"
+                                *ngIf="index != 0">{{groupItem.selectedModel.predictorVariables[index-1].name}}: {{pVal
+                                |
+                                number:'0.2-2'}}
+                                <br>
+                            </span>
                         </span>
-                    </span>
-                </td>
-                <td>
-                    {{groupItem.selectedModel.R2| number:'0.3-3'}}
-                </td>
-                <td>
-                    {{groupItem.selectedModel.adjust_R2| number:'0.3-3'}}
-                </td>
-                <td>
-                    {{groupItem.selectedModel.modelPValue| number:'0.2-2'}}
-                </td>
-                <td>
-                    <span *ngFor="let coefVal of groupItem.selectedModel.coef; let index = index;">
-                        <span *ngIf="index == 0">{{coefVal| regressionNumber}}</span>
-                        <span *ngIf="index != 0">({{coefVal|
-                            regressionNumber}}*{{groupItem.selectedModel.predictorVariables[index-1].name}})</span>
-                        <span *ngIf="index != groupItem.selectedModel.coef.length-1"> +</span>
-                    </span>
-                </td>
-                <td>
-                    <span *ngFor="let notes of groupItem.selectedModel.modelNotes">
-                        {{notes}}<br>
-                    </span>
-                    <span *ngIf="groupItem.selectedModel.modelNotes.length == 0">
-                        &mdash;
-                    </span>
-                </td>
-            </tr>
-        </tbody>
-    </table>
+                    </td>
+                    <td>
+                        {{groupItem.selectedModel.R2| number:'0.3-3'}}
+                    </td>
+                    <td>
+                        {{groupItem.selectedModel.adjust_R2| number:'0.3-3'}}
+                    </td>
+                    <td>
+                        {{groupItem.selectedModel.modelPValue| number:'0.2-2'}}
+                    </td>
+                    <td>
+                        <span *ngFor="let coefVal of groupItem.selectedModel.coef; let index = index;">
+                            <span *ngIf="index == 0">{{coefVal| regressionNumber}}</span>
+                            <span *ngIf="index != 0">({{coefVal|
+                                regressionNumber}}*{{groupItem.selectedModel.predictorVariables[index-1].name}})</span>
+                            <span *ngIf="index != groupItem.selectedModel.coef.length-1"> +</span>
+                        </span>
+                    </td>
+                    <td>
+                        <span *ngFor="let notes of groupItem.selectedModel.modelNotes">
+                            {{notes}}<br>
+                        </span>
+                        <span *ngIf="groupItem.selectedModel.modelNotes.length == 0">
+                            &mdash;
+                        </span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 </div>
 <hr class="hide-print">
 <div class="d-flex w-100 justify-content-center">

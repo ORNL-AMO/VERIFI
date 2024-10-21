@@ -31,8 +31,12 @@ export class MonthlyAnalysisSummaryTableComponent implements OnInit {
   @Input()
   inReport: boolean;
   @Input()
-  isReportBaselineYear: boolean;
-  @Input({required: true})
+  isBaselineYear: boolean;
+  @Input()
+  isReportYear: boolean;
+  @Input()
+  isGroupModelYear: boolean;
+  @Input({ required: true })
   printBlock: 'consumption' | 'predictors' | 'savings' | 'all';
 
   @ViewChild('dataTable', { static: false }) dataTable: ElementRef;
@@ -49,6 +53,7 @@ export class MonthlyAnalysisSummaryTableComponent implements OnInit {
   predictorColumns: Array<AnalysisGroupPredictorVariable>;
   copyingTable: boolean = false;
   hasBanked: boolean;
+  reportLabel: 'Baseline Year' | 'Report Year' | 'Report & Model Year' | 'Baseline & Model Year' | 'Model Year';
   constructor(private analysisService: AnalysisService, private copyTableService: CopyTableService, private router: Router) { }
 
   ngOnInit(): void {
@@ -60,6 +65,9 @@ export class MonthlyAnalysisSummaryTableComponent implements OnInit {
       this.setPredictorVariables();
     })
     this.setHasBanked();
+    if (this.inReport) {
+      this.setReportLabel();
+    }
   }
 
   ngOnDestroy() {
@@ -192,5 +200,19 @@ export class MonthlyAnalysisSummaryTableComponent implements OnInit {
     this.hasBanked = this.monthlyAnalysisSummaryData.find(data => {
       return data.isBanked
     }) != undefined;
+  }
+
+  setReportLabel() {
+    if (this.isGroupModelYear && !this.isBaselineYear && !this.isReportYear) {
+      this.reportLabel = 'Model Year';
+    } else if (!this.isGroupModelYear && this.isBaselineYear && !this.isReportYear) {
+      this.reportLabel = 'Baseline Year';
+    } else if (!this.isGroupModelYear && !this.isBaselineYear && this.isReportYear) {
+      this.reportLabel = 'Report Year';
+    } else if (this.isGroupModelYear && this.isBaselineYear && !this.isReportYear) {
+      this.reportLabel = 'Baseline & Model Year';
+    } else if (this.isGroupModelYear && !this.isBaselineYear && this.isReportYear) {
+      this.reportLabel = 'Report & Model Year';
+    }
   }
 }

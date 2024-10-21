@@ -4,9 +4,11 @@
     </h4>
     <ng-container *ngIf="analysisReportSettings.facilityAnnualResultsTable">
         <ng-template [ngIf]="!print" [ngIfElse]="printBlock">
-            <app-annual-analysis-summary-table [annualAnalysisSummary]="annualAnalysisSummaries"
-                [analysisItem]="analysisItem" [accountOrFacility]="facility" [printBlock]="'all'" [inReport]="true">
-            </app-annual-analysis-summary-table>
+            <div class="scroll-x">
+                <app-annual-analysis-summary-table [annualAnalysisSummary]="annualAnalysisSummaries"
+                    [analysisItem]="analysisItem" [accountOrFacility]="facility" [printBlock]="'all'" [inReport]="true">
+                </app-annual-analysis-summary-table>
+            </div>
         </ng-template>
         <ng-template #printBlock>
             <app-annual-analysis-summary-table

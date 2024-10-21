@@ -25,6 +25,12 @@ hr.page-spacer{
     margin-bottom: 100px;
 }
 
+.report .scroll-x{
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+
 @media print {
     .report{
         margin: 0px;
