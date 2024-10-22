@@ -64,7 +64,10 @@ export class MonthlyFacilityAnalysisDataClass {
         if (facilityPredictorEntries.length != 0) {
             predictors.forEach(variable => {
                 let usageVal: number = _.sumBy(this.monthPredictorData, (pData: IdbPredictorData) => {
-                    return pData.amount;
+                    if (pData.predictorId == variable.guid) {
+                        return pData.amount;
+                    }
+                    return 0;
                 });
                 this.predictorUsage.push({
                     usage: usageVal,

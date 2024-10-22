@@ -125,9 +125,17 @@ export class AccountAnalysisDbService {
     return correspondingItems;
   }
 
-  getAccountAnalysisItem(itemId: string): IdbAccountAnalysisItem {
+  getByGuid(itemId: string): IdbAccountAnalysisItem {
     let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisItems.getValue();
     let item: IdbAccountAnalysisItem = accountAnalysisItems.find(accItem => { return accItem.guid == itemId });
     return item;
+  }
+
+  getAccountAnalysisName(itemId: string): string {
+    let item: IdbAccountAnalysisItem = this.getByGuid(itemId);
+    if(item){
+      return item.name
+    };
+    return '';
   }
 }

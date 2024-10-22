@@ -2,11 +2,10 @@ import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
-import { AnalysisTableColumns, AnnualAnalysisSummary } from 'src/app/models/analysis';
+import { AnalysisGroupPredictorVariable, AnalysisTableColumns, AnnualAnalysisSummary } from 'src/app/models/analysis';
 import { CopyTableService } from '../../helper-services/copy-table.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 
@@ -22,6 +21,10 @@ export class AnnualAnalysisSummaryTableComponent implements OnInit {
   analysisItem: IdbAnalysisItem | IdbAccountAnalysisItem;
   @Input()
   accountOrFacility: IdbAccount | IdbFacility;
+  @Input({required: true})
+  printBlock: 'consumption' | 'predictors' | 'savings' | 'all';
+  @Input()
+  inReport: boolean;
 
   @ViewChild('dataTable', { static: false }) dataTable: ElementRef;
 
@@ -34,7 +37,7 @@ export class AnnualAnalysisSummaryTableComponent implements OnInit {
 
   orderDataField: string = 'year';
   orderByDirection: 'asc' | 'desc' = 'asc';
-  predictorColumns: Array<IdbPredictor>;
+  predictorColumns: Array<AnalysisGroupPredictorVariable>;
   copyingTable: boolean = false;
   hasBanked: boolean;
   constructor(private analysisService: AnalysisService, private copyTableService: CopyTableService,
@@ -59,14 +62,14 @@ export class AnnualAnalysisSummaryTableComponent implements OnInit {
   setPredictorVariables() {
     let inAccount: boolean = this.router.url.includes('account');
     if (!inAccount) {
-      let predictorColumns: Array<IdbPredictor> = new Array();
+      let predictorColumns: Array<AnalysisGroupPredictorVariable> = new Array();
       this.annualAnalysisSummary.forEach((data, index) => {
         this.analysisTableColumns.predictors.forEach(predictorItem => {
           if (predictorItem.display) {
             if (index == 0) {
               predictorColumns.push(predictorItem.predictor)
             }
-            let monthData: { predictorId: string, usage: number } = data.predictorUsage.find(usageItem => { return usageItem.predictorId == predictorItem.predictor.guid });
+            let monthData: { predictorId: string, usage: number } = data.predictorUsage.find(usageItem => { return usageItem.predictorId == predictorItem.predictor.id });
             if (monthData) {
               data[predictorItem.predictor.name] = monthData.usage;
             }

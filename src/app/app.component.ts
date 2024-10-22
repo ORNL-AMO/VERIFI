@@ -39,6 +39,8 @@ import { IdbAccountReport } from './models/idbModels/accountReport';
 import { IdbAnalysisItem } from './models/idbModels/analysisItem';
 import { IdbAccountAnalysisItem } from './models/idbModels/accountAnalysisItem';
 import { IdbPredictorEntryDeprecated } from './models/idbModels/deprecatedPredictors';
+import { FacilityReportsDbService } from './indexedDB/facility-reports-db.service';
+import { IdbFacilityReport } from './models/idbModels/facilityReport';
 
 // declare ga as a function to access the JS code in TS
 declare let gtag: Function;
@@ -78,7 +80,8 @@ export class AppComponent {
     private predictorDbService: PredictorDbService,
     private predictorDataDbService: PredictorDataDbService,
     private migratePredictorsService: MigratePredictorsService,
-    private dbChangesService: DbChangesService) {
+    private dbChangesService: DbChangesService,
+    private facilityReportsDbService: FacilityReportsDbService) {
     if (environment.production) {
       gtag('config', 'G-YG1QD02XSE');
       this.analyticsService.sendEvent('verifi_app_open', undefined);
@@ -118,6 +121,7 @@ export class AppComponent {
         await this.initializeMeters(account);
         await this.initializeMeterData(account);
         await this.initializeFacilityAnalysisItems(account);
+        await this.initializeFacilityReports(account);
         await this.initializeAccountAnalysisItems(account);
         await this.initializeCustomEmissions(account);
         await this.initializeElectronBackups();
@@ -307,4 +311,16 @@ export class AppComponent {
     let customGWPs: Array<IdbCustomGWP> = await this.customGWPDbService.getAllAccountCustomGWP(account.guid);
     this.customGWPDbService.accountCustomGWPs.next(customGWPs);
   }
+
+  async initializeFacilityReports(account: IdbAccount) {
+    //set analysis
+    let accountFacilityReports: Array<IdbFacilityReport> = await this.facilityReportsDbService.getAllFacilityReportsByAccountId(account.guid);
+    this.facilityReportsDbService.accountFacilityReports.next(accountFacilityReports);
+    let localStorageFacilityId: number = this.facilityReportsDbService.getInitialReport();
+    if (localStorageFacilityId) {
+      let facilityReport: IdbFacilityReport = accountFacilityReports.find(item => { return item.id == localStorageFacilityId });
+      this.facilityReportsDbService.selectedReport.next(facilityReport);
+    }
+  }
+
 }

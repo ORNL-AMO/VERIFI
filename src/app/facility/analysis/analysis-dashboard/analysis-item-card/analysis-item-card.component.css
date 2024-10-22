@@ -40,3 +40,12 @@
 .fa-circle-check:hover{
     cursor: pointer;
 }
+
+.bg-dark .fa{
+    color: white;
+    font-size: 10px;
+}
+
+.action-btn, .no-wrap{
+    text-wrap: nowrap;
+}

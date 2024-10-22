@@ -1,9 +1,22 @@
-<div [ngClass]="{'p-2': !inHomeScreen}">
-    <div #annualEnergyIntensityAnalysisGraph id="annualEnergyIntensityAnalysisGraph"></div>
-</div>
-<ng-container *ngIf="!inHomeScreen">
-    <hr class="w-100">
-    <div class="pe-2 ps-2">
-        <div #percentImprovementAnalysisGraph id="percentImprovementAnalysisGraph"></div>
+<ng-template [ngIf]="!inReport" [ngIfElse]="reportBlock">
+    <div [ngClass]="{'p-2': !inHomeScreen}">
+        <div #annualEnergyIntensityAnalysisGraph id="annualEnergyIntensityAnalysisGraph"></div>
     </div>
-</ng-container>
+    <ng-container *ngIf="!inHomeScreen">
+        <hr class="w-100">
+        <div class="pe-2 ps-2">
+            <div #percentImprovementAnalysisGraph id="percentImprovementAnalysisGraph"></div>
+        </div>
+    </ng-container>
+</ng-template>
+
+<ng-template #reportBlock>
+    <div class="row">
+        <div [ngClass]="{'col-6': !print, 'col-12 print-break-avoid': print}">
+            <div #annualEnergyIntensityAnalysisGraph id="annualEnergyIntensityAnalysisGraph"></div>
+        </div>
+        <div [ngClass]="{'col-6': !print, 'col-12 print-break-avoid': print}">
+            <div #percentImprovementAnalysisGraph id="percentImprovementAnalysisGraph"></div>
+        </div>
+    </div>
+</ng-template>

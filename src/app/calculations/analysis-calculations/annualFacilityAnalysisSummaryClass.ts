@@ -1,4 +1,4 @@
-import { MonthlyAnalysisSummaryData } from "src/app/models/analysis";
+import { AnalysisGroup, MonthlyAnalysisSummaryData } from "src/app/models/analysis";
 import { CalanderizedMeter } from "src/app/models/calanderization";
 import { AnnualAnalysisSummaryDataClass } from "./annualAnalysisSummaryDataClass";
 import { AnnualAnalysisSummary } from 'src/app/models/analysis';
@@ -14,20 +14,47 @@ export class AnnualFacilityAnalysisSummaryClass {
 
     monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>;
     annualAnalysisSummaryDataClasses: Array<AnnualAnalysisSummaryDataClass>;
-    groupMonthlySummariesClasses: Array<MonthlyAnalysisSummaryClass>
+    groupSummaries: Array<{
+        group: AnalysisGroup,
+        monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
+        annualAnalysisSummaryData: Array<AnnualAnalysisSummary>
+    }>;
     baselineYear: number;
     reportYear: number;
-    constructor(analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, accountPredictorEntries: Array<IdbPredictorData>, calculateAllMonthlyData: boolean, accountPredictors: Array<IdbPredictor>, accountAnalysisItems: Array<IdbAnalysisItem>) {
-        this.setMonthlyAnalysisSummaryData(analysisItem, facility, calanderizedMeters, accountPredictorEntries, calculateAllMonthlyData, accountPredictors, accountAnalysisItems);
+    constructor(analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, accountPredictorEntries: Array<IdbPredictorData>, calculateAllMonthlyData: boolean, accountPredictors: Array<IdbPredictor>, accountAnalysisItems: Array<IdbAnalysisItem>, includeGroupSummaries: boolean) {
         this.setBaselineYear(analysisItem);
         this.setReportYear(analysisItem);
+        this.setMonthlyAnalysisSummaryData(analysisItem, facility, calanderizedMeters, accountPredictorEntries, calculateAllMonthlyData, accountPredictors, accountAnalysisItems, includeGroupSummaries);
         this.setAnnualAnalysisSummaryDataClasses(accountPredictorEntries, facility, accountPredictors);
     }
 
-    setMonthlyAnalysisSummaryData(analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, accountPredictorEntries: Array<IdbPredictorData>, calculateAllMonthlyData: boolean, accountPredictors: Array<IdbPredictor>, accountAnalysisItems: Array<IdbAnalysisItem>) {
+    setMonthlyAnalysisSummaryData(analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, accountPredictorEntries: Array<IdbPredictorData>, calculateAllMonthlyData: boolean, accountPredictors: Array<IdbPredictor>, accountAnalysisItems: Array<IdbAnalysisItem>, includeGroupSummaries: boolean) {
         let monthlyAnalysisSummaryClass: MonthlyFacilityAnalysisClass = new MonthlyFacilityAnalysisClass(analysisItem, facility, calanderizedMeters, accountPredictorEntries, calculateAllMonthlyData, accountPredictors, accountAnalysisItems);
         this.monthlyAnalysisSummaryData = monthlyAnalysisSummaryClass.getMonthlyAnalysisSummaryData();
-        this.groupMonthlySummariesClasses = monthlyAnalysisSummaryClass.groupMonthlySummariesClasses;
+        if (includeGroupSummaries) {
+            this.setGroupMonthlyAnalysis(monthlyAnalysisSummaryClass.groupMonthlySummariesClasses, accountPredictorEntries, facility, accountPredictors)
+        }
+    }
+
+    setGroupMonthlyAnalysis(groupMonthlySummariesClasses: Array<MonthlyAnalysisSummaryClass>, accountPredictorEntries: Array<IdbPredictorData>, facility: IdbFacility, accountPredictors: Array<IdbPredictor>) {
+        this.groupSummaries = new Array();
+        groupMonthlySummariesClasses.forEach(groupMonthlySummariesClass => {
+            let analysisYear: number = this.baselineYear;
+            let annualAnalysisSummaryDataClasses: Array<AnnualAnalysisSummaryDataClass> = new Array();
+            let monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData> = groupMonthlySummariesClass.getResults().monthlyAnalysisSummaryData
+            while (analysisYear <= this.reportYear) {
+                let yearAnalysisSummaryDataClass: AnnualAnalysisSummaryDataClass = new AnnualAnalysisSummaryDataClass(monthlyAnalysisSummaryData, analysisYear, accountPredictorEntries, facility, annualAnalysisSummaryDataClasses, accountPredictors);
+                annualAnalysisSummaryDataClasses.push(yearAnalysisSummaryDataClass);
+                analysisYear++;
+            }
+            this.groupSummaries.push({
+                group: groupMonthlySummariesClass.group,
+                monthlyAnalysisSummaryData: monthlyAnalysisSummaryData,
+                annualAnalysisSummaryData: annualAnalysisSummaryDataClasses.map(annualDataClass => {
+                    return annualDataClass.getFormattedResult()
+                })
+            })
+        })
     }
 
     setBaselineYear(analysisItem: IdbAnalysisItem) {

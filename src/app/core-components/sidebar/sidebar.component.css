@@ -18,7 +18,7 @@ nav.sidebar.open{
 
 @media (max-width: 1500px) {
     nav.sidebar.open{
-        width: 200px;
+        width: 220px;
     }
 }
 

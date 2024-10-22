@@ -46,6 +46,10 @@ import { PredictorsDataComponent } from "../facility/utility-data/predictors/pre
 import { PredictorsDataTableComponent } from "../facility/utility-data/predictors/predictors-data/predictors-data-table/predictors-data-table.component";
 import { PredictorsDataFormComponent } from "../facility/utility-data/predictors/predictors-data/predictors-data-form/predictors-data-form.component";
 import { CalculatedPredictorDataUpdateComponent } from "../facility/utility-data/predictors/predictors-data/calculated-predictor-data-update/calculated-predictor-data-update.component";
+import { FacilityReportsComponent } from "../facility/facility-reports/facility-reports.component";
+import { FacilityReportsDashboardComponent } from "../facility/facility-reports/facility-reports-dashboard/facility-reports-dashboard.component";
+import { FacilityReportSetupComponent } from "../facility/facility-reports/facility-report-setup/facility-report-setup.component";
+import { FacilityAnalysisReportResultsComponent } from "../facility/facility-reports/facility-analysis-report-results/facility-analysis-report-results.component";
 
 export const FacilityRoutes: Route = {
     path: 'facility/:id',
@@ -277,5 +281,15 @@ export const FacilityRoutes: Route = {
                 }
             ]
         },
+        {
+            path: 'reports',
+            component: FacilityReportsComponent,
+            children: [
+                { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
+                { path: 'dashboard', component: FacilityReportsDashboardComponent },
+                { path: 'setup', component: FacilityReportSetupComponent },
+                { path: 'analysis-report', component: FacilityAnalysisReportResultsComponent }
+            ]
+        }
     ]
 };

@@ -54,8 +54,7 @@ export class UtilityMeterDatadbService {
     }
 
     async deleteAllFacilityMeterData(facilityId: string) {
-        let accountMeterDataEntries: Array<IdbUtilityMeterData> = this.accountMeterData.getValue();
-        let facilityMeterDataEntries: Array<IdbUtilityMeterData> = accountMeterDataEntries.filter(meterData => { return meterData.facilityId == facilityId });
+        let facilityMeterDataEntries: Array<IdbUtilityMeterData> = this.getFacilityMeterDataByFacilityGuid(facilityId);
         await this.deleteMeterDataEntriesAsync(facilityMeterDataEntries);
     }
 
@@ -72,9 +71,14 @@ export class UtilityMeterDatadbService {
             await firstValueFrom(this.deleteWithObservable(meterDataEntries[i].id));
         }
     }
-    
+
     getMeterDataFromMeterId(meterId: string): Array<IdbUtilityMeterData> {
         let accountMeterData: Array<IdbUtilityMeterData> = this.accountMeterData.getValue();
         return accountMeterData.filter(meterData => { return meterData.meterId == meterId });
+    }
+
+    getFacilityMeterDataByFacilityGuid(facilityId: string): Array<IdbUtilityMeterData> {
+        let accountMeterDataEntries: Array<IdbUtilityMeterData> = this.accountMeterData.getValue();
+        return accountMeterDataEntries.filter(meterData => { return meterData.facilityId == facilityId });
     }
 }

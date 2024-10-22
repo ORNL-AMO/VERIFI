@@ -1,0 +1,72 @@
+<!--MODEL DETAILS-->
+<ng-container *ngIf="analysisReportSettings.groupModelDetails && groupItem.group.analysisType == 'regression'">
+    <div class="report print-break-before" [ngClass]="{'print': print}">
+        <div class="d-flex flex-column">
+            <div>
+                <h4>
+                    <span class="me-1 fa fa-exclamation-circle" *ngIf="groupItem.group.groupErrors.hasErrors"></span>
+                    {{groupItem.group.idbGroupId | groupName}} Model Details
+                    <span class="badge bg-secondary ms-2 pull-right">
+                        {{groupItem.group.analysisType | analysisTypeLabel }}
+                    </span>
+                    <span class="badge bg-info ms-2 pull-right"
+                        *ngFor="let predictor of groupItem.predictorVariables">{{predictor.name}}</span>
+
+                </h4>
+            </div>
+            <app-regression-model-details [groupItem]="groupItem" [analysisItem]="analysisItem"
+                [monthlyAnalysisSummaryData]="groupSummary.monthlyAnalysisSummaryData"
+                [facility]="facility"></app-regression-model-details>
+        </div>
+    </div>
+</ng-container>
+
+<!--ANNUAL DETAILS-->
+<ng-container *ngIf="analysisReportSettings.groupAnnualResults">
+    <div class="report print-break-before" [ngClass]="{'print': print}">
+        <div class="d-flex flex-column">
+            <div>
+                <h4>
+                    <span class="me-1 fa fa-exclamation-circle" *ngIf="groupItem.group.groupErrors.hasErrors"></span>
+                    {{groupItem.group.idbGroupId | groupName}} Annual Results
+                    <span class="badge bg-secondary ms-2 pull-right">
+                        {{groupItem.group.analysisType | analysisTypeLabel }}
+                    </span>
+                    <span class="badge bg-info ms-2 pull-right"
+                        *ngFor="let predictor of groupItem.predictorVariables">{{predictor.name}}</span>
+
+                </h4>
+            </div>
+            <!--ANNUAL RESULTS-->
+            <app-group-annual-analysis-report [analysisItem]="analysisItem"
+                [annualAnalysisSummaryData]="groupSummary.annualAnalysisSummaryData" [facility]="facility"
+                [analysisReportSettings]="analysisReportSettings"
+                [group]="groupSummary.group"></app-group-annual-analysis-report>
+        </div>
+    </div>
+</ng-container>
+
+<!--MONTHLY RESULTS-->
+<ng-container *ngIf="analysisReportSettings.groupMonthlyResults">
+    <div class="report print-break-before" [ngClass]="{'print': print}">
+        <div class="d-flex flex-column">
+            <div>
+                <h4>
+                    <span class="me-1 fa fa-exclamation-circle" *ngIf="groupItem.group.groupErrors.hasErrors"></span>
+                    {{groupItem.group.idbGroupId | groupName}} Monthly Results
+                    <span class="badge bg-secondary ms-2 pull-right">
+                        {{groupItem.group.analysisType | analysisTypeLabel }}
+                    </span>
+                    <span class="badge bg-info ms-2 pull-right"
+                        *ngFor="let predictor of groupItem.predictorVariables">{{predictor.name}}</span>
+
+                </h4>
+            </div>
+            <!--MONTHLY RESULTS-->
+            <app-group-monthly-analysis-report [analysisItem]="analysisItem"
+                [monthlyAnalysisSummaryData]="groupSummary.monthlyAnalysisSummaryData" [facility]="facility"
+                [analysisReportSettings]="analysisReportSettings"
+                [group]="groupSummary.group"></app-group-monthly-analysis-report>
+        </div>
+    </div>
+</ng-container>

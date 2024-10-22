@@ -4,7 +4,7 @@
             <div class="row" *ngFor="let listItem of analysisItemsList; let index = index;">
                 <div class="col-12 text-center pb-2">
                     <span class="badge report-year">
-                        {{listItem.year | yearDisplay:selectedFacility.fiscalYear}}
+                        Report Year: {{listItem.year | yearDisplay:selectedFacility.fiscalYear}}
                     </span>
                     <ng-container *ngIf="!listItem.hasSelectedItem">
                         <br>
