@@ -58,14 +58,9 @@
 </div>
 <hr>
 <ng-container *ngIf="facilityReport.analysisItemId">
-    <div class="d-flex w-100 justify-content-between">
-        <span class="bold">
-            Choose Report Content
-        </span>
-        <span>
-            <a class="small click-link" (click)="setUseAllContent()">Use All Content</a>
-        </span>
-    </div>
+    <span class="bold">
+        Choose Report Content
+    </span>
     <div class="row">
         <!--FACILITY ANNUAL RESULTS-->
         <div class="col">
@@ -189,8 +184,8 @@
                 <ng-container *ngIf="facilityReport.analysisReportSettings.groupMonthlyResults">
                     <div class="form-check ms-3">
                         <input class="form-check-input" type="checkbox" name="groupMonthlyResultsGraphs"
-                            [(ngModel)]="facilityReport.analysisReportSettings.groupMonthlyResultsGraphs" (change)="save()"
-                            id="groupMonthlyResultsGraphs">
+                            [(ngModel)]="facilityReport.analysisReportSettings.groupMonthlyResultsGraphs"
+                            (change)="save()" id="groupMonthlyResultsGraphs">
                         <label class="form-check-label" for="groupMonthlyResultsGraphs">Group Monthly Results
                             Graph
                         </label>
