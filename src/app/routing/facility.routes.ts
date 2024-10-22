@@ -50,6 +50,7 @@ import { FacilityReportsComponent } from "../facility/facility-reports/facility-
 import { FacilityReportsDashboardComponent } from "../facility/facility-reports/facility-reports-dashboard/facility-reports-dashboard.component";
 import { FacilityReportSetupComponent } from "../facility/facility-reports/facility-report-setup/facility-report-setup.component";
 import { FacilityAnalysisReportResultsComponent } from "../facility/facility-reports/facility-analysis-report-results/facility-analysis-report-results.component";
+import { BankedGroupAnalysisComponent } from "../facility/analysis/run-analysis/group-analysis/banked-group-analysis/banked-group-analysis.component";
 
 export const FacilityRoutes: Route = {
     path: 'facility/:id',
@@ -261,7 +262,8 @@ export const FacilityRoutes: Route = {
                                 { path: 'options', component: GroupAnalysisOptionsComponent },
                                 { path: 'model-selection', component: RegressionModelSelectionComponent },
                                 { path: 'annual-analysis', component: AnnualAnalysisSummaryComponent },
-                                { path: 'monthly-analysis', component: MonthlyAnalysisSummaryComponent }
+                                { path: 'monthly-analysis', component: MonthlyAnalysisSummaryComponent },
+                                { path: 'banked-analysis', component: BankedGroupAnalysisComponent }
                             ]
                         },
                         {

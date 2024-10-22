@@ -33,6 +33,7 @@ import { LabelWithTooltipModule } from 'src/app/shared/label-with-tooltip/label-
 import { SelectBankedAnalysisComponent } from './run-analysis/analysis-setup/select-banked-analysis/select-banked-analysis.component';
 import { BankedGroupsDetailsComponent } from './run-analysis/analysis-setup/select-banked-analysis/banked-groups-details/banked-groups-details.component';
 import { SharedReportsModule } from "../../shared/shared-reports/shared-reports.module";
+import { BankedGroupAnalysisComponent } from './run-analysis/group-analysis/banked-group-analysis/banked-group-analysis.component';
 
 @NgModule({
   declarations: [
@@ -59,7 +60,8 @@ import { SharedReportsModule } from "../../shared/shared-reports/shared-reports.
     WaterDashboardComponent,
     AnalysisDashboardTabsComponent,
     SelectBankedAnalysisComponent,
-    BankedGroupsDetailsComponent
+    BankedGroupsDetailsComponent,
+    BankedGroupAnalysisComponent
   ],
   imports: [
     CommonModule,

@@ -21,11 +21,13 @@ export class GroupAnalysisComponent implements OnInit {
   label: string
   analysisItemSub: Subscription;
   showModelSelection: boolean;
+  showBanked: boolean;
   routerSub: Subscription;
   setupErrors: boolean;
   regressionErrors: boolean;
   hasErrors: boolean;
   hasInvalidRegressionModel: boolean;
+  hideLabel: boolean = false;
   constructor(private activatedRoute: ActivatedRoute, private analysisDbService: AnalysisDbService,
     private analysisService: AnalysisService, private router: Router,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService) { }
@@ -48,6 +50,7 @@ export class GroupAnalysisComponent implements OnInit {
       this.selectedGroup = val;
       if (this.selectedGroup) {
         this.showModelSelection = this.selectedGroup.analysisType == 'regression';
+        this.showBanked = this.selectedGroup.applyBanking && this.analysisItem.hasBanking;
         this.setErrorBools();
       }
     });
@@ -78,6 +81,12 @@ export class GroupAnalysisComponent implements OnInit {
         this.label = groupName + ' Regression Model';
       } else {
         this.label = groupName + ' Setup'
+      }
+
+      if (url.includes('banked-analysis')) {
+        this.hideLabel = true;
+      } else {
+        this.hideLabel = false;
       }
     }
   }
