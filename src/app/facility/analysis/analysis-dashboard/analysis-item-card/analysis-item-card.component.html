@@ -31,8 +31,16 @@
                 <span class="bold larger">
                     Baseline Year: {{analysisItem.baselineYear | yearDisplay:selectedFacility.fiscalYear}}
                 </span>
-                <span class="badge bg-dark" *ngIf="isBanked">
-                    <span class="fa fa-piggy-bank"></span> Analysis Is Banked
+                <span>
+                    <span class="me-2 badge bg-dark" *ngIf="isBanked">
+                        <span class="fa fa-piggy-bank"></span> Analysis Is Banked
+                    </span>
+                    <span class="badge bg-secondary" *ngIf="analysisItem.energyIsSource">
+                        Source Energy
+                    </span>
+                    <span class="badge bg-secondary" *ngIf="!analysisItem.energyIsSource">
+                        Site Energy
+                    </span>
                 </span>
             </div>
             <div>
@@ -83,26 +91,29 @@
         <ng-container *ngIf="linkedItems.length > 0">
             <hr>
             <div class="d-flex">
-                <span class="bold larger pe-2">
+                <div class="bold larger pe-2 no-wrap mt-1">
                     <span class="fa fa-link"> </span>
                     Linked Items:
-                </span>
-                <ng-container *ngFor="let linkedItem of linkedItems">
-                    <button *ngIf="linkedItem.bankedAnalysisId" class="btn action-btn btn-sm me-1"
-                        (click)="openLinkeItemModal(linkedItem.bankedAnalysisId, 'bankedAnalysis')">
-                        <i class="fa fa-piggy-bank" title="Banked Analysis"></i> {{linkedItem.bankedAnalysisId |
-                        facilityAnalysisName}} (Banked)
-                    </button>
-                    <button *ngIf="linkedItem.accountAnalysisId" class="btn action-btn btn-sm me-1"
-                        (click)="openLinkeItemModal(linkedItem.accountAnalysisId, 'accountAnalysis')">
-                        <i class="fa fa-building" title="Account Analysis"></i> {{linkedItem.accountAnalysisId |
-                        accountAnalysisName}}
-                    </button>
-                    <button *ngIf="linkedItem.reportId" class="btn action-btn btn-sm me-1"
-                        (click)="openLinkeItemModal(linkedItem.reportId, 'facilityReport')">
-                        <i class="fa fa-file" title="Analysis Report"></i> {{linkedItem.reportId | facilityReportName}}
-                    </button>
-                </ng-container>
+                </div>
+                <div class="d-flex flex-wrap">
+                    <ng-container *ngFor="let linkedItem of linkedItems">
+                        <button *ngIf="linkedItem.bankedAnalysisId" class="btn action-btn btn-sm me-1 mt-1"
+                            (click)="openLinkeItemModal(linkedItem.bankedAnalysisId, 'bankedAnalysis')">
+                            <i class="fa fa-piggy-bank" title="Banked Analysis"></i> {{linkedItem.bankedAnalysisId |
+                            facilityAnalysisName}} (Banked)
+                        </button>
+                        <button *ngIf="linkedItem.accountAnalysisId" class="btn action-btn btn-sm me-1 mt-1"
+                            (click)="openLinkeItemModal(linkedItem.accountAnalysisId, 'accountAnalysis')">
+                            <i class="fa fa-building" title="Account Analysis"></i> {{linkedItem.accountAnalysisId |
+                            accountAnalysisName}}
+                        </button>
+                        <button *ngIf="linkedItem.reportId" class="btn action-btn btn-sm me-1 mt-1"
+                            (click)="openLinkeItemModal(linkedItem.reportId, 'facilityReport')">
+                            <i class="fa fa-file" title="Analysis Report"></i> {{linkedItem.reportId |
+                            facilityReportName}}
+                        </button>
+                    </ng-container>
+                </div>
             </div>
         </ng-container>
     </div>
