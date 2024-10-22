@@ -81,12 +81,13 @@ export class FacilityAnalysisReportComponent {
         accountPredictorEntries: accountPredictorEntries,
         calculateAllMonthlyData: false,
         accountPredictors: accountPredictors,
-        accountAnalysisItems: accountAnalysisItems
+        accountAnalysisItems: accountAnalysisItems,
+        includeGroupSummaries: true
       });
     } else {
       // Web Workers are not supported in this environment.     
       let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, facilityMeterData, this.facility, false, { energyIsSource: this.analysisItem.energyIsSource, neededUnits: getNeededUnits(this.analysisItem) }, [], [], [this.facility]);
-      let annualAnalysisSummaryClass: AnnualFacilityAnalysisSummaryClass = new AnnualFacilityAnalysisSummaryClass(this.analysisItem, this.facility, calanderizedMeters, accountPredictorEntries, false, accountPredictors, undefined);
+      let annualAnalysisSummaryClass: AnnualFacilityAnalysisSummaryClass = new AnnualFacilityAnalysisSummaryClass(this.analysisItem, this.facility, calanderizedMeters, accountPredictorEntries, false, accountPredictors, undefined, true);
       this.annualAnalysisSummaries = annualAnalysisSummaryClass.getAnnualAnalysisSummaries();
       this.monthlyAnalysisSummaryData = annualAnalysisSummaryClass.monthlyAnalysisSummaryData;
       this.groupSummaries = annualAnalysisSummaryClass.groupSummaries;
