@@ -16,6 +16,10 @@ export class AnnualAnalysisSummaryGraphComponent implements OnInit {
   analysisItem: IdbAnalysisItem | IdbAccountAnalysisItem;
   @Input()
   inHomeScreen: boolean;
+  @Input()
+  inReport: boolean;
+  @Input()
+  print: boolean;
 
   @ViewChild('percentImprovementAnalysisGraph', { static: false }) percentImprovementAnalysisGraph: ElementRef;
   @ViewChild('annualEnergyIntensityAnalysisGraph', { static: false }) annualEnergyIntensityAnalysisGraph: ElementRef;

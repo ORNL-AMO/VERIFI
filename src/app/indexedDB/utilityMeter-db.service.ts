@@ -97,4 +97,9 @@ export class UtilityMeterdbService {
         });
     }
 
+    getFacilityMetersByFacilityGuid(facilityGuid: string): Array<IdbUtilityMeter> {
+        let accountMeters: Array<IdbUtilityMeter> = this.accountMeters.getValue();
+        return accountMeters.filter(meter => { return meter.facilityId == facilityGuid });
+    }
+
 }

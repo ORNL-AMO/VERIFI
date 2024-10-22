@@ -2,7 +2,7 @@ import { CalanderizedMeter } from "src/app/models/calanderization";
 import { getCalanderizedMeterData } from "../calanderization/calanderizeMeters";
 import { getNeededUnits } from "../shared-calculations/calanderizationFunctions";
 import { AnnualFacilityAnalysisSummaryClass } from "../analysis-calculations/annualFacilityAnalysisSummaryClass";
-import { AnalysisGroup, AnnualAnalysisSummary } from "src/app/models/analysis";
+import { AnalysisGroup, AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from "src/app/models/analysis";
 import * as _ from 'lodash';
 import { AnnualGroupAnalysisSummaryClass } from "../analysis-calculations/annualGroupAnalysisSummaryClass";
 import { MonthlyAnalysisSummaryClass } from "../analysis-calculations/monthlyAnalysisSummaryClass";
@@ -93,7 +93,7 @@ export class PerformanceReport {
                 let facilityMeters: Array<IdbUtilityMeter> = meters.filter(meter => { return meter.facilityId == item.facilityId });
                 let facility: IdbFacility = facilities.find(facility => { return facility.guid == item.facilityId });
                 let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, meterData, facility, false, { energyIsSource: facilityAnalysisItem.energyIsSource, neededUnits: getNeededUnits(facilityAnalysisItem) }, [], [], facilities);
-                let facilityAnalysisSummaryClass: AnnualFacilityAnalysisSummaryClass = new AnnualFacilityAnalysisSummaryClass(facilityAnalysisItem, facility, calanderizedMeters, accountPredictorEntries, false, accountPredictors, accountAnalysisItems);
+                let facilityAnalysisSummaryClass: AnnualFacilityAnalysisSummaryClass = new AnnualFacilityAnalysisSummaryClass(facilityAnalysisItem, facility, calanderizedMeters, accountPredictorEntries, false, accountPredictors, accountAnalysisItems, true);
                 let annualAnalysisSummary: Array<AnnualAnalysisSummary> = facilityAnalysisSummaryClass.getAnnualAnalysisSummaries();
                 let groupAnnualAnalysisSummary: Array<{
                     group: AnalysisGroup,
@@ -102,11 +102,15 @@ export class PerformanceReport {
                 }> = new Array();
                 facilityAnalysisItem.groups.forEach(group => {
                     if (group.analysisType != 'skip' && group.analysisType != 'skipAnalysis') {
-                        let groupMonthlySummariesClass: MonthlyAnalysisSummaryClass = facilityAnalysisSummaryClass.groupMonthlySummariesClasses.find(groupClass => {
+                        let groupMonthlySummariesClass: {
+                            group: AnalysisGroup,
+                            monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
+                            annualAnalysisSummaryData: Array<AnnualAnalysisSummary>
+                        } = facilityAnalysisSummaryClass.groupSummaries.find(groupClass => {
                             return groupClass.group.idbGroupId == group.idbGroupId;
                         });
 
-                        let groupAnnualAnalysisSummaryClass: AnnualGroupAnalysisSummaryClass = new AnnualGroupAnalysisSummaryClass(group, facilityAnalysisItem, facility, calanderizedMeters, accountPredictorEntries, groupMonthlySummariesClass.getResults().monthlyAnalysisSummaryData, accountPredictors, accountAnalysisItems);
+                        let groupAnnualAnalysisSummaryClass: AnnualGroupAnalysisSummaryClass = new AnnualGroupAnalysisSummaryClass(group, facilityAnalysisItem, facility, calanderizedMeters, accountPredictorEntries, groupMonthlySummariesClass.monthlyAnalysisSummaryData, accountPredictors, accountAnalysisItems);
                         groupAnnualAnalysisSummary.push({
                             group: group,
                             annualAnalysisSummary: groupAnnualAnalysisSummaryClass.getAnnualAnalysisSummaries(),

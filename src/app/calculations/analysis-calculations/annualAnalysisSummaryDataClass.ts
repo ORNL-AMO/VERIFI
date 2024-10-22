@@ -1,7 +1,7 @@
 
-import { MonthlyAnalysisSummaryData } from "src/app/models/analysis";
+import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from "src/app/models/analysis";
 import * as _ from 'lodash';
-import { filterYearPredictorData } from "../shared-calculations/calculationsHelpers";
+import { checkAnalysisValue, filterYearPredictorData } from "../shared-calculations/calculationsHelpers";
 import { IdbFacility } from "src/app/models/idbModels/facility";
 import { IdbPredictorData } from "src/app/models/idbModels/predictorData";
 import { IdbPredictor } from "src/app/models/idbModels/predictor";
@@ -181,5 +181,25 @@ export class AnnualAnalysisSummaryDataClass {
             }
         }
     }
+
+    getFormattedResult(): AnnualAnalysisSummary {
+        return {
+            year: this.year,
+            energyUse: this.energyUse,
+            adjusted: this.adjusted,
+            baselineAdjustmentForNormalization: checkAnalysisValue(this.baselineAdjustmentForNormalization),
+            baselineAdjustmentForOtherV2: checkAnalysisValue(this.baselineAdjustmentForOtherV2),
+            baselineAdjustment: checkAnalysisValue(this.baselineAdjustment),
+            SEnPI: checkAnalysisValue(this.SEnPI),
+            savings: checkAnalysisValue(this.savings),
+            totalSavingsPercentImprovement: checkAnalysisValue(this.totalSavingsPercentImprovement) * 100,
+            annualSavingsPercentImprovement: checkAnalysisValue(this.annualSavingsPercentImprovement) * 100,
+            cummulativeSavings: checkAnalysisValue(this.cummulativeSavings),
+            newSavings: checkAnalysisValue(this.newSavings),
+            predictorUsage: this.predictorUsage,
+            isBanked: false
+        }
+    }
+
 
 }

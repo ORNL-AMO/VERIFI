@@ -9,3 +9,11 @@ tr.table-mh th span{
 .no-wrap{
     white-space: nowrap;
 }
+
+.date-column{
+    width: 115px;
+}
+
+.period-column{
+    width: 70px;
+}

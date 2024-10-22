@@ -40,3 +40,7 @@
 .fa-circle-check:hover{
     cursor: pointer;
 }
+
+.bg-dark .fa{
+    color: white;
+}

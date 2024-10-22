@@ -1,0 +1,49 @@
+<div class="card">
+    <div class="card-header bg-white justify-content-between bold">
+        <div class="d-flex justify-content-between">
+            <a class="item-name click-link" (click)="selectReport()">
+                <span class="fa fa-microscope pe-2"></span>
+                {{report.name}}
+            </a>
+            <div class="d-flex">
+                <button class="btn action-btn btn-sm" (click)="createCopy()">
+                    <i class="fa fa-copy" title="Copy"></i>
+                </button>
+                <button class="btn action-btn btn-sm ms-1" (click)="deleteItem()">
+                    <i class="fa fa-trash" title="Delete"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <p class="mb-0">
+            Analysis Item: {{report.analysisItemId | facilityAnalysisName}}
+        </p>
+    </div>
+    <div class="card-footer bg-white">
+        <div class="d-flex justify-content-between">
+            <div class="bold">
+                Analysis Report
+            </div>
+            <div class="d-flex">
+                Last Modified: {{report.modifiedDate | date:'short'}}
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div [ngClass]="{'windowOverlay': displayDeleteModal}"></div>
+<div class="popup" [class.open]="displayDeleteModal">
+    <div class="popup-header" *ngIf="displayDeleteModal">Delete: {{report.name}}
+        <button class="item-right" (click)="cancelDelete()">x</button>
+    </div>
+    <div class="popup-body">
+        <p>WARNING: Deleting this report cannot be undone.</p>
+    </div>
+    <div class="saveCancel popup-footer text-end">
+        <button class="btn btn-secondary" (click)="cancelDelete()">Cancel</button>
+        <button class="btn btn-danger" (click)="confirmDelete()">Delete</button>
+    </div>
+</div>

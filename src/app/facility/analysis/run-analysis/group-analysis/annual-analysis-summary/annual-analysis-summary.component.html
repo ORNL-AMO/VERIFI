@@ -23,7 +23,7 @@
 
 <div class="w-100 x-scroll" *ngIf="calculating == false">
     <app-annual-analysis-summary-table *ngIf="dataDisplay == 'table'" [annualAnalysisSummary]="annualAnalysisSummary"
-        [analysisItem]="analysisItem" [accountOrFacility]="facility">
+        [analysisItem]="analysisItem" [accountOrFacility]="facility" [printBlock]="'all'">
     </app-annual-analysis-summary-table>
     <app-annual-analysis-summary-graph *ngIf="dataDisplay == 'graph'" [annualAnalysisSummary]="annualAnalysisSummary"
         [analysisItem]="analysisItem">

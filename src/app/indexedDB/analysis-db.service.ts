@@ -246,6 +246,14 @@ export class AnalysisDbService {
     });
   }
 
+  getAnalysisName(guid: string): string {
+    let analysisItem: IdbAnalysisItem = this.getByGuid(guid);
+    if (analysisItem) {
+      return analysisItem.name
+    }
+    return '';
+  }
+
   // getMonthlyPercentBaseload(): Array<{ monthNum: number, percent: number }> {
   //   let values: Array<{ monthNum: number, percent: number }> = new Array();
   //   for (let i = 0; i < 12; i++) {

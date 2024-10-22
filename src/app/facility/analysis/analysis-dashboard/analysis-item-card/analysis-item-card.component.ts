@@ -7,12 +7,13 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { AnalysisGroup, AnalysisGroupPredictorVariable, JStatRegressionModel } from 'src/app/models/analysis';
-import { AnalysisService } from '../../analysis.service';
+import { AnalysisGroupItem, AnalysisService } from '../../analysis.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
+import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
+import { getNewIdbFacilityReport, IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
 
 @Component({
   selector: 'app-analysis-item-card',
@@ -23,22 +24,31 @@ export class AnalysisItemCardComponent implements OnInit {
   @Input()
   analysisItem: IdbAnalysisItem;
 
-  groupItems: Array<{
-    group: AnalysisGroup,
-    predictorVariables: Array<AnalysisGroupPredictorVariable>,
-    adjust_R2: number,
-    regressionEquation: string
-  }>;
+  groupItems: Array<AnalysisGroupItem>;
 
+
+  linkedItems: Array<{
+    bankedAnalysisId: string,
+    reportId: string,
+    accountAnalysisId: string
+  }>;
 
   showDetailSub: Subscription;
   showDetail: boolean;
   displayDeleteModal: boolean = false;
+  displayCreateCopyModal: boolean = false;
   selectedFacility: IdbFacility;
+
+  displayLinkedItemModal: boolean = false;
+  viewLinkedItem: { itemId: string, type: 'accountAnalysis' | 'bankedAnalysis' | 'facilityReport' } = undefined;
+
+  displayCreateReportModal: boolean = false;
+  isBanked: boolean;
   constructor(private analysisDbService: AnalysisDbService, private router: Router, private facilityDbService: FacilitydbService,
     private analysisService: AnalysisService, private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService, private toastNotificationService: ToastNotificationsService,
-    private accountAnalysisDbService: AccountAnalysisDbService) { }
+    private accountAnalysisDbService: AccountAnalysisDbService,
+    private facilityReportsDbService: FacilityReportsDbService) { }
 
   ngOnInit(): void {
     this.selectedFacility = this.facilityDbService.selectedFacility.getValue();
@@ -46,6 +56,7 @@ export class AnalysisItemCardComponent implements OnInit {
     this.showDetailSub = this.analysisService.showDetail.subscribe(val => {
       this.showDetail = val;
     });
+    this.setLinkedItems();
   }
 
   ngOnDestroy() {
@@ -54,35 +65,11 @@ export class AnalysisItemCardComponent implements OnInit {
 
   initializeGroups() {
     this.groupItems = this.analysisItem.groups.map(group => {
-      let predictorVariables: Array<AnalysisGroupPredictorVariable> = [];
-      let adjust_R2: number = 0;
-      let regressionEquation: string = '';
-      if (group.analysisType == 'regression') {
-        if (group.selectedModelId) {
-          let selectedModel: JStatRegressionModel = group.models.find(model => { return model.modelId == group.selectedModelId });
-          adjust_R2 = selectedModel.adjust_R2;
-          predictorVariables = selectedModel.predictorVariables;
-          regressionEquation = this.getRegressionsEquationFromModel(selectedModel);
-        } else {
-          predictorVariables = group.predictorVariables.filter(variable => {
-            return (variable.productionInAnalysis == true);
-          });
-          regressionEquation = this.getRegressionEquationNoModel(group, predictorVariables);
-        }
-      } else if (group.analysisType != 'absoluteEnergyConsumption') {
-        predictorVariables = group.predictorVariables.filter(variable => {
-          return (variable.productionInAnalysis == true);
-        });
-      }
-      return {
-        group: group,
-        predictorVariables: predictorVariables,
-        adjust_R2: adjust_R2,
-        regressionEquation: regressionEquation
-      }
+      return this.analysisService.getGroupItem(group);
+    }).filter(item => {
+      return item.group.analysisType != 'skip';
     });
   }
-
 
   selectAnalysisItem() {
     this.analysisDbService.selectedAnalysisItem.next(this.analysisItem);
@@ -93,39 +80,15 @@ export class AnalysisItemCardComponent implements OnInit {
     }
   }
 
-
-  getRegressionsEquationFromModel(model: JStatRegressionModel): string {
-    //     <span *ngFor="let coefVal of model.coef; let index = index;">
-    //     <span *ngIf="index == 0">{{coefVal| customNumber}}</span>
-    //     <span *ngIf="index != 0">({{coefVal|
-    //         customNumber}}*{{model.predictorVariables[index-1].name}})</span> <span
-    //         *ngIf="index != model.coef.length-1"> +</span>
-    // </span>
-    let regressionEquation: string = '';
-    for (let i = 0; i < model.coef.length; i++) {
-      regressionEquation = regressionEquation + model.coef[i].toLocaleString(undefined, { maximumSignificantDigits: 5 });
-      if (i != 0) {
-        regressionEquation = regressionEquation + '*' + model.predictorVariables[i - 1].name;
-      }
-      if (i != model.coef.length - 1) {
-        regressionEquation = regressionEquation + ' + ';
-      }
-    }
-    return regressionEquation;
+  createCopy() {
+    this.displayCreateCopyModal = true;
   }
 
-  getRegressionEquationNoModel(group: AnalysisGroup, predictorVariables: Array<AnalysisGroupPredictorVariable>): string {
-    let regressionEquation: string = group.regressionConstant + ' + ';
-    for (let i = 0; i < predictorVariables.length; i++) {
-      regressionEquation = regressionEquation + predictorVariables[i].regressionCoefficient + '*' + predictorVariables[i].name;
-      if (i != predictorVariables.length - 1) {
-        regressionEquation = regressionEquation + ' + ';
-      }
-    }
-    return regressionEquation;
+  cancelCreateCopy() {
+    this.displayCreateCopyModal = false;
   }
 
-  async createCopy() {
+  async confirmCreateCopy() {
     let newItem: IdbAnalysisItem = JSON.parse(JSON.stringify(this.analysisItem));
     delete newItem.id;
     newItem.name = newItem.name + " (Copy)";
@@ -217,6 +180,113 @@ export class AnalysisItemCardComponent implements OnInit {
       } else {
         return true;
       }
+    }
+  }
+
+  setLinkedItems() {
+    this.linkedItems = new Array();
+    if (this.analysisItem.hasBanking && this.analysisItem.bankedAnalysisItemId) {
+      this.linkedItems.push({
+        bankedAnalysisId: this.analysisItem.bankedAnalysisItemId,
+        reportId: undefined,
+        accountAnalysisId: undefined
+      });
+    }
+
+    this.isBanked = false;
+    let facilityAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.facilityAnalysisItems.getValue();
+    facilityAnalysisItems.forEach(item => {
+      if (item.hasBanking && item.bankedAnalysisItemId == this.analysisItem.guid) {
+        this.isBanked = true;
+      }
+    });
+
+    let facilityReportsItems: Array<IdbFacilityReport> = this.facilityReportsDbService.facilityReports.getValue();
+    facilityReportsItems.forEach(item => {
+      if (item.facilityReportType == 'analysis' && item.analysisItemId == this.analysisItem.guid) {
+        this.linkedItems.push({
+          bankedAnalysisId: undefined,
+          reportId: item.guid,
+          accountAnalysisId: undefined
+        });
+      }
+
+      let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
+      for (let index = 0; index < accountAnalysisItems.length; index++) {
+        accountAnalysisItems[index].facilityAnalysisItems.forEach(item => {
+          if (item.facilityId == this.selectedFacility.guid && item.analysisItemId == this.analysisItem.guid) {
+            this.linkedItems.push({
+              bankedAnalysisId: undefined,
+              reportId: undefined,
+              accountAnalysisId: accountAnalysisItems[index].guid
+            })
+          }
+        });
+      }
+    });
+  }
+
+  addReport() {
+    this.displayCreateReportModal = true;
+  }
+
+  cancelCreateReport() {
+    this.displayCreateReportModal = false;
+  }
+
+  async confirmCreateReport() {
+    let newReport: IdbFacilityReport = getNewIdbFacilityReport(this.analysisItem.facilityId, this.analysisItem.accountId, 'analysis');
+    newReport.analysisItemId = this.analysisItem.guid;
+    newReport = await firstValueFrom(this.facilityReportsDbService.addWithObservable(newReport));
+    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    await this.dbChangesService.setAccountFacilityReports(selectedAccount, this.selectedFacility);
+    this.toastNotificationService.showToast('Report Created!', 'Analysis report has been created', undefined, false, 'alert-success');
+    this.goToReport(newReport.guid);
+  }
+
+  openLinkeItemModal(itemGuid: string, type: 'accountAnalysis' | 'bankedAnalysis' | 'facilityReport') {
+    this.viewLinkedItem = { itemId: itemGuid, type: type };
+    this.displayLinkedItemModal = true;
+  }
+
+  cancelViewLinkedItem() {
+    this.displayLinkedItemModal = false;
+    this.viewLinkedItem = undefined;
+  }
+
+  confirmViewLinkedItem() {
+    if (this.viewLinkedItem.type == 'accountAnalysis') {
+      this.goToAccountAnalysis(this.viewLinkedItem.itemId);
+    } else if (this.viewLinkedItem.type == 'bankedAnalysis') {
+      this.goToFacilityAnalysis(this.viewLinkedItem.itemId);
+    } else if (this.viewLinkedItem.type == 'facilityReport') {
+      this.goToReport(this.viewLinkedItem.itemId);
+    }
+  }
+
+  goToReport(reportGuid: string) {
+    let facilityReport: IdbFacilityReport = this.facilityReportsDbService.getByGuid(reportGuid);
+    this.facilityReportsDbService.selectedReport.next(facilityReport);
+    this.router.navigateByUrl('facility/' + this.selectedFacility.id + '/reports/setup')
+  }
+
+  goToAccountAnalysis(analysisGuid: string) {
+    let accountAnalysisItem: IdbAccountAnalysisItem = this.accountAnalysisDbService.getByGuid(analysisGuid);
+    this.accountAnalysisDbService.selectedAnalysisItem.next(accountAnalysisItem);
+    if (accountAnalysisItem.setupErrors.hasError || accountAnalysisItem.setupErrors.facilitiesSelectionsInvalid) {
+      this.router.navigateByUrl('account/analysis/setup');
+    } else {
+      this.router.navigateByUrl('account/analysis/results');
+    }
+  }
+
+  goToFacilityAnalysis(analysisGuid: string) {
+    let bankedAnalysisItem: IdbAnalysisItem = this.analysisDbService.getByGuid(analysisGuid);
+    this.analysisDbService.selectedAnalysisItem.next(bankedAnalysisItem);
+    if (bankedAnalysisItem.setupErrors.hasError || bankedAnalysisItem.setupErrors.groupsHaveErrors) {
+      this.router.navigateByUrl('facility/' + this.selectedFacility.id + '/analysis/run-analysis');
+    } else {
+      this.router.navigateByUrl('facility/' + this.selectedFacility.id + '/analysis/run-analysis/facility-analysis');
     }
   }
 }

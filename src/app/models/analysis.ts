@@ -48,7 +48,8 @@ export interface MonthlyAnalysisSummary {
   modelYear: number,
   monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
   unbankedMonthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
-  bankedMonthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>
+  bankedMonthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
+  group?: AnalysisGroup
 }
 
 export interface MonthlyAnalysisSummaryData {
@@ -125,7 +126,7 @@ export interface AnalysisTableColumns {
   cummulativeSavings: boolean,
   newSavings: boolean,
   predictors: Array<{
-    predictor: IdbPredictor,
+    predictor: AnalysisGroupPredictorVariable,
     display: boolean,
     usedInAnalysis: boolean
   }>,
