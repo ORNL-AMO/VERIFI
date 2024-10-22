@@ -1,5 +1,5 @@
 <ng-container *ngIf="analysisReportSettings.groupAnnualResultsTable">
-    <ng-template [ngIf]="!print" [ngIfElse]="printBlock">
+    <ng-template [ngIf]="!print || !(analysisReportSettings.analysisTableColumns | breakUpTableForPrint: 'annual')" [ngIfElse]="printBlock">
         <div class="scroll-x">
             <app-annual-analysis-summary-table [annualAnalysisSummary]="annualAnalysisSummaryData"
                 [analysisItem]="analysisItem" [accountOrFacility]="facility" [printBlock]="'all'" [inReport]="true">

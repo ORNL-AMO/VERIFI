@@ -173,7 +173,7 @@ export class FacilityAnalysisReportSetupComponent {
   }
 
   async setDefault() {
-    this.analysisTableColumns.incrementalImprovement = false;
+    this.analysisTableColumns.incrementalImprovement = true;
     this.analysisTableColumns.SEnPI = false;
     this.analysisTableColumns.savings = false;
     this.analysisTableColumns.percentSavingsComparedToBaseline = false;

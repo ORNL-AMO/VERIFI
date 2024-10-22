@@ -3,7 +3,7 @@
         Annual Facility Analysis
     </h4>
     <ng-container *ngIf="analysisReportSettings.facilityAnnualResultsTable">
-        <ng-template [ngIf]="!print" [ngIfElse]="printBlock">
+        <ng-template [ngIf]="!print || !(analysisReportSettings.analysisTableColumns | breakUpTableForPrint: 'annual')" [ngIfElse]="printBlock">
             <div class="scroll-x">
                 <app-annual-analysis-summary-table [annualAnalysisSummary]="annualAnalysisSummaries"
                     [analysisItem]="analysisItem" [accountOrFacility]="facility" [printBlock]="'all'" [inReport]="true">

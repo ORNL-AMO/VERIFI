@@ -3,7 +3,7 @@
         Monthly Facility Analysis
     </h4>
     <ng-container *ngIf="analysisReportSettings.facilityMonthlyResultsTableBaselineYear">
-        <ng-template [ngIf]="!print" [ngIfElse]="baselinePrintBlock">
+        <ng-template [ngIf]="!print || !(analysisReportSettings.analysisTableColumns | breakUpTableForPrint: 'monthly')" [ngIfElse]="baselinePrintBlock">
             <div class="scroll-x">
                 <app-monthly-analysis-summary-table [monthlyAnalysisSummaryData]="baselineYearAnalysisSummaryData"
                     [analysisItem]="analysisItem" [facilityOrAccount]="facility" [itemsPerPage]="12" [inReport]="true"
@@ -34,7 +34,7 @@
         </ng-template>
     </ng-container>
     <ng-container *ngIf="analysisReportSettings.facilityMonthlyResultsTableReportYear">
-        <ng-template [ngIf]="!print" [ngIfElse]="reportPrintBlock">
+        <ng-template [ngIf]="!print || !(analysisReportSettings.analysisTableColumns | breakUpTableForPrint: 'monthly')" [ngIfElse]="reportPrintBlock">
             <div class="scroll-x">
                 <app-monthly-analysis-summary-table [monthlyAnalysisSummaryData]="reportYearAnalysisSummaryData"
                     [analysisItem]="analysisItem" [facilityOrAccount]="facility" [itemsPerPage]="12" [inReport]="true"

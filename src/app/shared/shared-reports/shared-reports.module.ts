@@ -11,6 +11,7 @@ import { RegressionModelDetailsComponent } from './facility-analysis-report/grou
 import { IncludeTablePipe } from './include-table.pipe';
 import { GroupAnnualAnalysisReportComponent } from './facility-analysis-report/group-analysis-report/group-annual-analysis-report/group-annual-analysis-report.component';
 import { GroupMonthlyAnalysisReportComponent } from './facility-analysis-report/group-analysis-report/group-monthly-analysis-report/group-monthly-analysis-report.component';
+import { BreakUpTableForPrintPipe } from './break-up-table-for-print.pipe';
 
 
 
@@ -23,7 +24,8 @@ import { GroupMonthlyAnalysisReportComponent } from './facility-analysis-report/
     RegressionModelDetailsComponent,
     IncludeTablePipe,
     GroupAnnualAnalysisReportComponent,
-    GroupMonthlyAnalysisReportComponent
+    GroupMonthlyAnalysisReportComponent,
+    BreakUpTableForPrintPipe
   ],
   imports: [
     CommonModule,

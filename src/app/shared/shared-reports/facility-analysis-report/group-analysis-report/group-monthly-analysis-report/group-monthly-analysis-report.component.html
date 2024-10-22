@@ -1,6 +1,6 @@
 <!--baseline year-->
 <ng-container *ngIf="analysisReportSettings.groupMonthlyResultsTableBaselineYear">
-    <ng-template [ngIf]="!print" [ngIfElse]="baselinePrintBlock">
+    <ng-template [ngIf]="!print || !(analysisReportSettings.analysisTableColumns | breakUpTableForPrint: 'monthly')" [ngIfElse]="baselinePrintBlock">
         <div class="scroll-x">
             <app-monthly-analysis-summary-table [monthlyAnalysisSummaryData]="baselineYearAnalysisSummaryData"
                 [analysisItem]="analysisItem" [facilityOrAccount]="facility" [itemsPerPage]="12" [inReport]="true"
@@ -34,7 +34,7 @@
 <!--model year-->
 <ng-container
     *ngIf="analysisReportSettings.groupMonthlyResultsTableModelYear && !modelYearIsBaselineYear && !modelYearIsReportYear">
-    <ng-template [ngIf]="!print" [ngIfElse]="reportPrintBlock">
+    <ng-template [ngIf]="!print || !(analysisReportSettings.analysisTableColumns | breakUpTableForPrint: 'monthly')" [ngIfElse]="reportPrintBlock">
         <div class="scroll-x">
             <app-monthly-analysis-summary-table [monthlyAnalysisSummaryData]="modelYearAnalysisSummaryData"
                 [analysisItem]="analysisItem" [facilityOrAccount]="facility" [itemsPerPage]="12" [inReport]="true"
@@ -70,7 +70,7 @@
 
 <!--report year-->
 <ng-container *ngIf="analysisReportSettings.gorupMonthlyResultsTableReportYear">
-    <ng-template [ngIf]="!print" [ngIfElse]="reportPrintBlock">
+    <ng-template [ngIf]="!print || !(analysisReportSettings.analysisTableColumns | breakUpTableForPrint: 'monthly')" [ngIfElse]="reportPrintBlock">
         <div class="scroll-x">
             <app-monthly-analysis-summary-table [monthlyAnalysisSummaryData]="reportYearAnalysisSummaryData"
                 [analysisItem]="analysisItem" [facilityOrAccount]="facility" [itemsPerPage]="12" [inReport]="true"
@@ -105,13 +105,13 @@
 
 <hr>
 <ng-container *ngIf="analysisReportSettings.facilityMonthlyResultsGraphs">
-    <div class="d-flex w-100 print-break-avoid" [ngClass]="{'flex-column': print}">
-        <div [ngClass]="{'w-50 pe-1': !print, 'w-100 pb-3': print}">
+    <div class="d-flex w-100" [ngClass]="{'flex-column': print}">
+        <div [ngClass]="{'w-50 pe-1': !print, 'w-100 pb-3 print-break-avoid': print}">
             <app-monthly-analysis-summary-graph [monthlyAnalysisSummaryData]="monthlyAnalysisSummaryData"
                 [analysisItem]="analysisItem" [facilityOrAccount]="facility">
             </app-monthly-analysis-summary-graph>
         </div>
-        <div [ngClass]="{'w-50 pe-1': !print, 'w-100': print}">
+        <div [ngClass]="{'w-50 pe-1': !print, 'w-100 print-break-avoid': print}">
             <app-monthly-analysis-summary-savings-graph [analysisItem]="analysisItem"
                 [monthlyAnalysisSummaryData]="monthlyAnalysisSummaryData" [facilityOrAccount]="facility">
             </app-monthly-analysis-summary-savings-graph>
