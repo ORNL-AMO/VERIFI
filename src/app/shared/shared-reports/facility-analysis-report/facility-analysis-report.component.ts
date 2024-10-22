@@ -31,6 +31,8 @@ export class FacilityAnalysisReportComponent {
   analysisItem: IdbAnalysisItem;
   @Input({ required: true })
   analysisReportSettings: AnalysisReportSettings;
+  @Input()
+  inQuickReport: boolean;
 
   worker: Worker;
   annualAnalysisSummaries: Array<AnnualAnalysisSummary>;

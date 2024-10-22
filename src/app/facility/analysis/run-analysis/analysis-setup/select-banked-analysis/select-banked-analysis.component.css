@@ -9,3 +9,16 @@ table.table {
 .btn-column{
     width: 50px;
 }
+
+.popup{
+    top: 5px;
+    right: 5px;
+    left: 5px;
+    bottom: 5px;
+    width: auto;
+}
+
+.popup-body{
+    overflow-y: auto;
+    height: 95vh;
+}

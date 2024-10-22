@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { AnalysisReportSettings, getAnalysisReportSettings } from 'src/app/models/idbModels/facilityReport';
 
 @Component({
   selector: 'app-select-banked-analysis',
@@ -20,7 +21,21 @@ export class SelectBankedAnalysisComponent {
   emitSave: EventEmitter<boolean> = new EventEmitter();
 
   showDetail: boolean = false;
+
+  quickReportItem: IdbAnalysisItem;
+  quickReportSettings: AnalysisReportSettings = getAnalysisReportSettings();
+  displayQuickReport: boolean = false;
   save() {
     this.emitSave.emit(true);
   }
+
+  viewQuickReport(analysisItem: IdbAnalysisItem){
+    this.quickReportItem = analysisItem;
+    this.displayQuickReport = true;
+  }
+
+  hideQuickReport(){
+    this.displayQuickReport = false;
+  }
+  
 }

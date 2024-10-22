@@ -32,8 +32,7 @@ import { AnalysisDashboardTabsComponent } from './analysis-dashboard/analysis-da
 import { LabelWithTooltipModule } from 'src/app/shared/label-with-tooltip/label-with-tooltip.module';
 import { SelectBankedAnalysisComponent } from './run-analysis/analysis-setup/select-banked-analysis/select-banked-analysis.component';
 import { BankedGroupsDetailsComponent } from './run-analysis/analysis-setup/select-banked-analysis/banked-groups-details/banked-groups-details.component';
-
-
+import { SharedReportsModule } from "../../shared/shared-reports/shared-reports.module";
 
 @NgModule({
   declarations: [
@@ -71,7 +70,8 @@ import { BankedGroupsDetailsComponent } from './run-analysis/analysis-setup/sele
     SharedAnalysisModule,
     CalculatingSpinnerModule,
     TableItemsDropdownModule,
-    LabelWithTooltipModule
-  ]
+    LabelWithTooltipModule,
+    SharedReportsModule
+]
 })
 export class AnalysisModule { }

@@ -4,7 +4,7 @@
 </div>
 
 
-<div class="w-100" *ngIf="calculating == false">
+<div class="w-100" [ngClass]="{'quick-report': inQuickReport}" *ngIf="calculating == false">
     <!--annual facility-->
     <ng-container *ngIf="analysisReportSettings.facilityAnnualResults">
         <app-annual-facility-analysis-report [analysisItem]="analysisItem"

@@ -7,6 +7,11 @@
     overflow-y: auto; */
 }
 
+.quick-report .report{
+    margin: 0px;
+    padding: 0px;
+}
+
 .report.print{
     width: 725px;
 }
