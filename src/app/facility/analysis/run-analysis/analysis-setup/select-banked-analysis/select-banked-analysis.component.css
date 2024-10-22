@@ -1,0 +1,11 @@
+table.table {
+    border: solid 1px;
+}
+
+.select-column{
+    width: 35px;
+}
+
+.btn-column{
+    width: 50px;
+}

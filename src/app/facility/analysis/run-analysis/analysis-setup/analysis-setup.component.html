@@ -180,7 +180,7 @@
         </div>
     </form>
     <app-select-banked-analysis *ngIf="analysisItem.hasBanking" [facilityAnalysisItems]="facilityAnalysisItems"
-        [analysisItem]="analysisItem" [facility]="facility"></app-select-banked-analysis>
+        [analysisItem]="analysisItem" [facility]="facility" (emitSave)="saveItem()" [disabled]="disableForm"></app-select-banked-analysis>
 
 
     <div class="row">

@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
@@ -12,14 +12,15 @@ export class SelectBankedAnalysisComponent {
   facilityAnalysisItems: Array<IdbAnalysisItem>;
   @Input({ required: true })
   analysisItem: IdbAnalysisItem;
-  @Input({required: true})
+  @Input({ required: true })
   facility: IdbFacility;
-  
-  constructor() {
+  @Input()
+  disabled: boolean;
+  @Output('emitSave')
+  emitSave: EventEmitter<boolean> = new EventEmitter();
 
-  }
-
-  ngOnInit() {
-
+  showDetail: boolean = false;
+  save() {
+    this.emitSave.emit(true);
   }
 }
