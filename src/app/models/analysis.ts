@@ -101,7 +101,8 @@ export interface AnnualAnalysisSummary {
   }>,
   // adjustedStar: number,
   // adjustedStarStar: number
-  isBanked: boolean
+  isBanked: boolean,
+  isIntermediateBanked: boolean
 }
 
 

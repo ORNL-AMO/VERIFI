@@ -79,7 +79,8 @@ export class AnnualAccountAnalysisSummaryClass {
                 cummulativeSavings: checkAnalysisValue(summaryDataClass.cummulativeSavings),
                 newSavings: checkAnalysisValue(summaryDataClass.newSavings),
                 predictorUsage: summaryDataClass.predictorUsage,
-                isBanked: false
+                isBanked: false,
+                isIntermediateBanked: false
             }
         })
     }
