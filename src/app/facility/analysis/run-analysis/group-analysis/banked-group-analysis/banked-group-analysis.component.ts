@@ -55,7 +55,8 @@ export class BankedGroupAnalysisComponent {
   ngOnInit() {
     this.analysisItemSub = this.analysisDbService.selectedAnalysisItem.subscribe(val => {
       let analysisItem: IdbAnalysisItem = val;
-      this.bankedAnalysisItem = this.analysisDbService.getByGuid(analysisItem.bankedAnalysisItemId);
+      let tmpBankedAnalysisItem: IdbAnalysisItem = this.analysisDbService.getByGuid(analysisItem.bankedAnalysisItemId);
+      this.bankedAnalysisItem = JSON.parse(JSON.stringify(tmpBankedAnalysisItem));
     })
     this.selectedGroupSub = this.analysisService.selectedGroup.subscribe(val => {
       this.selectedGroup = val;
@@ -80,6 +81,8 @@ export class BankedGroupAnalysisComponent {
     let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getFacilityMeterDataByFacilityGuid(this.bankedAnalysisItem.facilityId);
     let accountPredictorEntries: Array<IdbPredictorData> = this.predictorDataDbService.getByFacilityId(this.bankedAnalysisItem.facilityId);
     let accountPredictors: Array<IdbPredictor> = this.predictorDbService.getByFacilityId(this.bankedAnalysisItem.facilityId);
+
+    // this.bankedAnalysisItem.reportYear = this.selectedGroup.bankedAnalysisYear;
     if (typeof Worker !== 'undefined') {
       this.worker = new Worker(new URL('src/app/web-workers/annual-facility-analysis.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {

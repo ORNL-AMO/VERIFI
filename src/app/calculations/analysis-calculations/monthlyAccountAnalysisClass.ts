@@ -154,7 +154,8 @@ export class MonthlyAccountAnalysisClass {
                 // adjustedStar: summaryDataItem.monthlyAnalysisCalculatedValues.adjustedStar,
                 // adjustedStarStar: summaryDataItem.monthlyAnalysisCalculatedValues.adjustedStarStar,
                 baselineAdjustmentInput: summaryDataItem.baselineAdjustmentInput,
-                isBanked: false
+                isBanked: false,
+                isIntermediateBanked: false
 
             }
         })

@@ -139,7 +139,8 @@ export class MonthlyFacilityAnalysisClass {
                 dataAdjustment: summaryDataItem.dataAdjustment,
                 modelYearDataAdjustment: summaryDataItem.modelYearDataAdjustment,
                 baselineAdjustmentInput: summaryDataItem.baselineAdjustmentInput,
-                isBanked: false
+                isBanked: false,
+                isIntermediateBanked: false
             }
         })
     }

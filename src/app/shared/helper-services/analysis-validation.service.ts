@@ -68,6 +68,7 @@ export class AnalysisValidationService {
     let invalidMonthlyBaseload: boolean = false;
     let noProductionVariables: boolean = false;
     let missingBankingBaselineYear: boolean = false;
+    let missingBankingAppliedYear: boolean = false;
     let groupMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.getGroupMetersByGroupId(group.idbGroupId);
     let hasInvalidRegressionModel: boolean = false;
 
@@ -111,12 +112,18 @@ export class AnalysisValidationService {
         }
       }
 
-      if (analysisItem.hasBanking && group.applyBanking && !group.newBaselineYear) {
-        missingBankingBaselineYear = true;
+      if (analysisItem.hasBanking && group.applyBanking) {
+        if (!group.newBaselineYear) {
+          missingBankingBaselineYear = true;
+        }
+
+        if (!group.bankedAnalysisYear) {
+          missingBankingAppliedYear = true;
+        }
       }
     }
     let hasErrors: boolean = (missingProductionVariables || missingRegressionConstant || missingRegressionModelYear || missingRegressionModelSelection ||
-      missingRegressionPredictorCoef || invalidAverageBaseload || invalidMonthlyBaseload || noProductionVariables || missingGroupMeters || missingBankingBaselineYear);
+      missingRegressionPredictorCoef || invalidAverageBaseload || invalidMonthlyBaseload || noProductionVariables || missingGroupMeters || missingBankingBaselineYear || missingBankingAppliedYear);
     return {
       hasErrors: hasErrors,
       missingProductionVariables: missingProductionVariables,
@@ -129,7 +136,8 @@ export class AnalysisValidationService {
       noProductionVariables: noProductionVariables,
       missingGroupMeters: missingGroupMeters,
       hasInvalidRegressionModel: hasInvalidRegressionModel,
-      missingBankingBaselineYear: missingBankingBaselineYear
+      missingBankingBaselineYear: missingBankingBaselineYear,
+      missingBankingAppliedYear: missingBankingAppliedYear
     };
   }
 

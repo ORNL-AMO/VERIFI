@@ -135,17 +135,28 @@
                     </span>
                 </td>
                 <td *ngIf="analysisTableColumns.modeledEnergy && group">
-                    <span [ngClass]="{'red': data.modeledEnergy <= 0}">
-                        {{data.modeledEnergy | customNumber}}
-                    </span>
+                    <ng-template [ngIf]="!data.isIntermediateBanked" [ngIfElse]="modeledEnergyMdash">
+                        <span [ngClass]="{'red': data.modeledEnergy <= 0}">
+                            {{data.modeledEnergy | customNumber}}
+                        </span>
+                    </ng-template>
+                    <ng-template #modeledEnergyMdash>
+                        <span>
+                            &mdash;
+                        </span>
+                    </ng-template>
                 </td>
                 <td *ngIf="analysisTableColumns.adjusted">
-                    <span *ngIf="data.adjusted" [ngClass]="{'red': data.adjusted < 0}">
-                        {{data.adjusted | customNumber}}
-                    </span>
-                    <span *ngIf="!data.adjusted">
-                        &mdash;
-                    </span>
+                    <ng-template [ngIf]="data.adjusted && !data.isIntermediateBanked" [ngIfElse]="adjustedMdash">
+                        <span [ngClass]="{'red': data.adjusted < 0}">
+                            {{data.adjusted | customNumber}}
+                        </span>
+                    </ng-template>
+                    <ng-template #adjustedMdash>
+                        <span>
+                            &mdash;
+                        </span>
+                    </ng-template>
                 </td>
 
                 <td *ngIf="analysisTableColumns.baselineAdjustmentForNormalization">
@@ -191,20 +202,28 @@
 
             <ng-container *ngIf="printBlock == 'all' || printBlock == 'savings'">
                 <td *ngIf="analysisTableColumns.SEnPI">
-                    <span *ngIf="data.SEnPI" [ngClass]="{'red': data.SEnPI < 0}">
-                        {{data.SEnPI | customNumber}}
-                    </span>
-                    <span *ngIf="!data.SEnPI">
-                        &mdash;
-                    </span>
+                    <ng-template [ngIf]="data.SEnPI && !data.isIntermediateBanked" [ngIfElse]="senpiMdash">
+                        <span [ngClass]="{'red': data.SEnPI < 0}">
+                            {{data.SEnPI | customNumber}}
+                        </span>
+                    </ng-template>
+                    <ng-template #senpiMdash>
+                        <span>
+                            &mdash;
+                        </span>
+                    </ng-template>
                 </td>
                 <td *ngIf="analysisTableColumns.savings">
-                    <span *ngIf="data.savings" [ngClass]="{'red': data.savings < 0}">
-                        {{data.savings | customNumber}}
-                    </span>
-                    <span *ngIf="!data.savings">
-                        &mdash;
-                    </span>
+                    <ng-template [ngIf]="data.savings && !data.isIntermediateBanked" [ngIfElse]="savingsMdash">
+                        <span [ngClass]="{'red': data.savings < 0}">
+                            {{data.savings | customNumber}}
+                        </span>
+                    </ng-template>
+                    <ng-template #savingsMdash>
+                        <span>
+                            &mdash;
+                        </span>
+                    </ng-template>
                 </td>
                 <td *ngIf="analysisTableColumns.percentSavingsComparedToBaseline">
                     <span *ngIf="data.percentSavingsComparedToBaseline"
