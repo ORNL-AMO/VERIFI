@@ -6,7 +6,6 @@ import { AnalysisGroup, AnalysisGroupPredictorVariable, AnalysisTableColumns, Mo
 import { CopyTableService } from '../../helper-services/copy-table.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 

@@ -76,7 +76,8 @@ export interface MonthlyAnalysisSummaryData {
   modelYearDataAdjustment: number,
   dataAdjustment: number,
   baselineAdjustmentInput: number,
-  isBanked: boolean
+  isBanked: boolean,
+  isIntermediateBanked: boolean
 }
 
 export interface AnnualAnalysisSummary {
@@ -100,7 +101,8 @@ export interface AnnualAnalysisSummary {
   }>,
   // adjustedStar: number,
   // adjustedStarStar: number
-  isBanked: boolean
+  isBanked: boolean,
+  isIntermediateBanked: boolean
 }
 
 
@@ -222,7 +224,8 @@ export interface AnalysisGroup {
   regressionModelNotes?: string,
   maxModelVariables: number,
   applyBanking: boolean,
-  newBaselineYear: number
+  newBaselineYear: number,
+  bankedAnalysisYear: number
 }
 
 export interface AnalysisGroupPredictorVariable {
@@ -247,7 +250,8 @@ export interface GroupErrors {
   invalidMonthlyBaseload: boolean,
   missingGroupMeters: boolean,
   hasInvalidRegressionModel: boolean,
-  missingBankingBaselineYear: boolean
+  missingBankingBaselineYear: boolean,
+  missingBankingAppliedYear: boolean
 }
 
 

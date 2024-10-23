@@ -13,7 +13,7 @@ import { IdbAnalysisItem } from "src/app/models/idbModels/analysisItem";
 
 export class AnnualGroupAnalysisSummaryClass {
 
-    bankedAnnualGroupAnalysisSummaryClass: AnnualGroupAnalysisSummaryClass;
+    // bankedAnnualGroupAnalysisSummaryClass: AnnualGroupAnalysisSummaryClass;
 
 
     monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>;
@@ -21,15 +21,19 @@ export class AnnualGroupAnalysisSummaryClass {
     baselineYear: number;
     reportYear: number;
     utilityClassification: MeterSource | 'Mixed';
+    group: AnalysisGroup;
     constructor(selectedGroup: AnalysisGroup, analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, accountPredictorEntries: Array<IdbPredictorData>, monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>, accountPredictors: Array<IdbPredictor>, accountAnalysisItems: Array<IdbAnalysisItem>) {
-        let bankedAnalysisItem: IdbAnalysisItem;
-        if (analysisItem.hasBanking) {
-            bankedAnalysisItem = accountAnalysisItems.find(item => {
-                return item.guid == analysisItem.bankedAnalysisItemId;
-            });
-            this.bankedAnnualGroupAnalysisSummaryClass = new AnnualGroupAnalysisSummaryClass(selectedGroup, bankedAnalysisItem, facility, calanderizedMeters, accountPredictorEntries, undefined, accountPredictors, accountAnalysisItems);
-        }
+        // let bankedAnalysisItem: IdbAnalysisItem;
+        // if (analysisItem.hasBanking) {
+        //     bankedAnalysisItem = accountAnalysisItems.find(item => {
+        //         return item.guid == analysisItem.bankedAnalysisItemId;
+        //     });
+        //     let bankedAnalysisCpy: IdbAnalysisItem = JSON.parse(JSON.stringify(bankedAnalysisItem));
+        //     bankedAnalysisCpy.reportYear = selectedGroup.newBaselineYear;
+        //     this.bankedAnnualGroupAnalysisSummaryClass = new AnnualGroupAnalysisSummaryClass(selectedGroup, bankedAnalysisItem, facility, calanderizedMeters, accountPredictorEntries, undefined, accountPredictors, accountAnalysisItems);
+        // }
 
+        this.group = selectedGroup;
         if (!this.monthlyAnalysisSummaryData) {
             this.setMonthlyAnalysisSummaryData(selectedGroup, analysisItem, facility, calanderizedMeters, accountPredictorEntries, accountAnalysisItems);
         } else {
@@ -53,13 +57,13 @@ export class AnnualGroupAnalysisSummaryClass {
     // }
 
     setBaselineYear(analysisItem: IdbAnalysisItem, selectedGroup: AnalysisGroup) {
-        if (!analysisItem.hasBanking) {
-            this.baselineYear = analysisItem.baselineYear;
-        } else if (!selectedGroup.applyBanking) {
-            this.baselineYear = analysisItem.baselineYear;
-        } else {
-            this.baselineYear = selectedGroup.newBaselineYear;
-        }
+        // if (!analysisItem.hasBanking) {
+        this.baselineYear = analysisItem.baselineYear;
+        // } else if (!selectedGroup.applyBanking) {
+        //     this.baselineYear = analysisItem.baselineYear;
+        // } else {
+        //     this.baselineYear = selectedGroup.newBaselineYear;
+        // }
     }
 
     setReportYear(analysisItem: IdbAnalysisItem) {
@@ -90,28 +94,28 @@ export class AnnualGroupAnalysisSummaryClass {
     }
 
     getAnnualAnalysisSummaries(): Array<AnnualAnalysisSummary> {
-        if (this.bankedAnnualGroupAnalysisSummaryClass) {
-            let startUnbankedYear: number = this.annualAnalysisSummaryDataClasses[0].year;
-            let startBankedYear: number = this.bankedAnnualGroupAnalysisSummaryClass.annualAnalysisSummaryDataClasses[0].year;
-            let combinedData: Array<AnnualAnalysisSummary> = new Array();
-            for (let indexYear = startBankedYear; indexYear < startUnbankedYear; indexYear++) {
-                let bankedData: AnnualAnalysisSummaryDataClass = this.bankedAnnualGroupAnalysisSummaryClass.annualAnalysisSummaryDataClasses.find(data => {
-                    return data.year == indexYear;
-                });
-                combinedData.push(this.getFormattedResult(bankedData, true));
-            }
-            this.annualAnalysisSummaryDataClasses.forEach(data => {
-                combinedData.push(this.getFormattedResult(data, false));
-            });
-            return combinedData;
-        } else {
-            return this.annualAnalysisSummaryDataClasses.map(summaryDataClass => {
-                return this.getFormattedResult(summaryDataClass, false);
-            });
-        }
+        // if (this.bankedAnnualGroupAnalysisSummaryClass) {
+        //     // let startUnbankedYear: number = this.annualAnalysisSummaryDataClasses[0].year;
+        //     // let startBankedYear: number = this.bankedAnnualGroupAnalysisSummaryClass.annualAnalysisSummaryDataClasses[0].year;
+        //     let combinedData: Array<AnnualAnalysisSummary> = new Array();
+        //     // for (let indexYear = startBankedYear; indexYear < startUnbankedYear; indexYear++) {
+        //     //     let bankedData: AnnualAnalysisSummaryDataClass = this.bankedAnnualGroupAnalysisSummaryClass.annualAnalysisSummaryDataClasses.find(data => {
+        //     //         return data.year == indexYear;
+        //     //     });
+        //     //     combinedData.push(this.getFormattedResult(bankedData, true));
+        //     // }
+        //     this.annualAnalysisSummaryDataClasses.forEach(data => {
+        //         combinedData.push(this.getFormattedResult(data, false));
+        //     });
+        //     return combinedData;
+        // } else {
+        return this.annualAnalysisSummaryDataClasses.map(summaryDataClass => {
+            return this.getFormattedResult(summaryDataClass);
+        });
+        // }
     }
 
-    getFormattedResult(summaryDataClass: AnnualAnalysisSummaryDataClass, isBanked: boolean): AnnualAnalysisSummary {
+    getFormattedResult(summaryDataClass: AnnualAnalysisSummaryDataClass): AnnualAnalysisSummary {
         return {
             year: summaryDataClass.year,
             energyUse: summaryDataClass.energyUse,
@@ -126,7 +130,8 @@ export class AnnualGroupAnalysisSummaryClass {
             cummulativeSavings: checkAnalysisValue(summaryDataClass.cummulativeSavings),
             newSavings: checkAnalysisValue(summaryDataClass.newSavings),
             predictorUsage: summaryDataClass.predictorUsage,
-            isBanked: isBanked
+            isBanked: summaryDataClass.isBanked,
+            isIntermediateBanked: summaryDataClass.isIntermediateBanked
         }
     }
 

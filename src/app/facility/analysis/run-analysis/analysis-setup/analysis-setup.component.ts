@@ -175,7 +175,7 @@ export class AnalysisSetupComponent implements OnInit {
       let minNeededModelYear: number = _.max(modelYears);
 
       this.reportYears = this.yearOptions.filter(year => {
-        return year > minNeededModelYear;
+        return year >= minNeededModelYear;
       });
     } else {
       this.reportYears = [];
@@ -210,7 +210,7 @@ export class AnalysisSetupComponent implements OnInit {
   setFacilityAnalysisItems() {
     let facilityAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.facilityAnalysisItems.getValue();
     this.facilityAnalysisItems = facilityAnalysisItems.filter(analysisItem => {
-      return analysisItem.energyIsSource == this.analysisItem.energyIsSource;
+      return analysisItem.energyIsSource == this.analysisItem.energyIsSource && analysisItem.guid != this.analysisItem.guid && analysisItem.analysisCategory == this.analysisItem.analysisCategory;
     });
     if (this.facilityAnalysisItems.length == 0) {
       this.analysisItem.hasBanking = false;

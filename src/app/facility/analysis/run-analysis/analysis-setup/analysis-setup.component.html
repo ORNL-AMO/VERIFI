@@ -75,20 +75,13 @@
                     <div class="col-6">
                         <label class="switch" for="hasBanking">
                             <input class="checkbox" type="checkbox" id="hasBanking" name="hasBanking"
-                                [(ngModel)]="analysisItem.hasBanking" (change)="changeHasBanking()" [disabled]="disableForm">
+                                [(ngModel)]="analysisItem.hasBanking" (change)="changeHasBanking()"
+                                [disabled]="disableForm">
                             <span class="slider round"></span>
                         </label>
                     </div>
-
-                    <!-- <div class="col-12">
-                        <div class="form-check">
-                            <input type="checkbox" class="form-check-input" name="hasBanking" id="hasBanking"
-                                [(ngModel)]="analysisItem.hasBanking" (change)="changeHasBanking()">
-                            <label class="form-check-label" for="hasBanking">Has Banking</label>
-                        </div>
-                    </div> -->
                 </div>
-                <div class="form-group row" *ngIf="analysisItem.hasBanking">
+                <!-- <div class="form-group row" *ngIf="analysisItem.hasBanking">
                     <label class="col-5 col-form-label">Banked Analysis</label>
                     <div class="col-7">
                         <select [required]="analysisItem.hasBanking" class="form-select" id="bankedAnalysisItemId"
@@ -99,7 +92,7 @@
                             </option>
                         </select>
                     </div>
-                </div>
+                </div> -->
             </div>
             <div class="col-6">
                 <div class="form-group row">
@@ -186,6 +179,10 @@
             </div>
         </div>
     </form>
+    <app-select-banked-analysis *ngIf="analysisItem.hasBanking" [facilityAnalysisItems]="facilityAnalysisItems"
+        [analysisItem]="analysisItem" [facility]="facility" (emitSave)="saveItem()" [disabled]="disableForm"></app-select-banked-analysis>
+
+
     <div class="row">
         <div class="col">
             <hr>

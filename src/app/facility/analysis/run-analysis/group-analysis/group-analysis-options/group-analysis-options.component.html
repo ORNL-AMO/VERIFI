@@ -310,6 +310,18 @@
                 </div>
                 <div class="form-group row mt-2 sub-column" *ngIf="group.applyBanking">
                     <label class="col-6 col-form-label">
+                        Applied Banking Year
+                    </label>
+                    <div class="col-6">
+                        <select required class="form-select" id="bankedAnalysisYear" name="bankedAnalysisYear"
+                            [(ngModel)]="group.bankedAnalysisYear" (change)="saveItem()" [required]="true">
+                            <option *ngFor="let year of bankedAnalysisYears" [ngValue]="year">
+                                {{year| yearDisplay: facility.fiscalYear}}</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group row mt-2 sub-column" *ngIf="group.applyBanking">
+                    <label class="col-6 col-form-label">
                         New Baseline Year
                     </label>
                     <div class="col-6">

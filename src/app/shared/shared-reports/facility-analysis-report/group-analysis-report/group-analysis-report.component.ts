@@ -1,10 +1,8 @@
 import { Component, Input } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { AnnualAnalysisSummaryDataClass } from 'src/app/calculations/analysis-calculations/annualAnalysisSummaryDataClass';
-import { MonthlyAnalysisSummaryClass } from 'src/app/calculations/analysis-calculations/monthlyAnalysisSummaryClass';
 import { AnalysisGroupItem, AnalysisService } from 'src/app/facility/analysis/analysis.service';
 import { FacilityReportsService } from 'src/app/facility/facility-reports/facility-reports.service';
-import { AnalysisGroup, AnnualAnalysisSummary, MonthlyAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
+import { AnalysisGroup, AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { AnalysisReportSettings } from 'src/app/models/idbModels/facilityReport';

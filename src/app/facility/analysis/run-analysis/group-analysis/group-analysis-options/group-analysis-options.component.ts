@@ -107,9 +107,15 @@ export class GroupAnalysisOptionsComponent implements OnInit {
   }
 
   setBankedAnalysisYearOptions() {
-    this.yearOptions = new Array();
-    for (let i = this.analysisItem.baselineYear + 1; i < this.analysisItem.reportYear; i++) {
-      this.yearOptions.push(i);
+    this.bankedAnalysisYears = new Array();
+    if (this.analysisItem.hasBanking) {
+      let bankedAnalysisItem: IdbAnalysisItem = this.analysisDbService.getByGuid(this.analysisItem.bankedAnalysisItemId);
+      if (bankedAnalysisItem) {
+        let minReportYear: number = _.min([bankedAnalysisItem.reportYear, this.analysisItem.reportYear])
+        for (let i = bankedAnalysisItem.baselineYear + 1; i < minReportYear; i++) {
+          this.bankedAnalysisYears.push(i);
+        }
+      }
     }
   }
 }

@@ -34,7 +34,8 @@ import { BreakUpTableForPrintPipe } from './break-up-table-for-print.pipe';
     HelperPipesModule
   ],
   exports: [
-    FacilityAnalysisReportComponent
+    FacilityAnalysisReportComponent,
+    GroupAnalysisReportComponent
   ]
 })
 export class SharedReportsModule { }

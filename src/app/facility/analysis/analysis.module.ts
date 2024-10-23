@@ -30,8 +30,10 @@ import { EnergyDashboardComponent } from './analysis-dashboard/energy-dashboard/
 import { WaterDashboardComponent } from './analysis-dashboard/water-dashboard/water-dashboard.component';
 import { AnalysisDashboardTabsComponent } from './analysis-dashboard/analysis-dashboard-tabs/analysis-dashboard-tabs.component';
 import { LabelWithTooltipModule } from 'src/app/shared/label-with-tooltip/label-with-tooltip.module';
-
-
+import { SelectBankedAnalysisComponent } from './run-analysis/analysis-setup/select-banked-analysis/select-banked-analysis.component';
+import { BankedGroupsDetailsComponent } from './run-analysis/analysis-setup/select-banked-analysis/banked-groups-details/banked-groups-details.component';
+import { SharedReportsModule } from "../../shared/shared-reports/shared-reports.module";
+import { BankedGroupAnalysisComponent } from './run-analysis/group-analysis/banked-group-analysis/banked-group-analysis.component';
 
 @NgModule({
   declarations: [
@@ -56,7 +58,10 @@ import { LabelWithTooltipModule } from 'src/app/shared/label-with-tooltip/label-
     AnalysisItemCardComponent,
     EnergyDashboardComponent,
     WaterDashboardComponent,
-    AnalysisDashboardTabsComponent
+    AnalysisDashboardTabsComponent,
+    SelectBankedAnalysisComponent,
+    BankedGroupsDetailsComponent,
+    BankedGroupAnalysisComponent
   ],
   imports: [
     CommonModule,
@@ -67,7 +72,8 @@ import { LabelWithTooltipModule } from 'src/app/shared/label-with-tooltip/label-
     SharedAnalysisModule,
     CalculatingSpinnerModule,
     TableItemsDropdownModule,
-    LabelWithTooltipModule
-  ]
+    LabelWithTooltipModule,
+    SharedReportsModule
+]
 })
 export class AnalysisModule { }

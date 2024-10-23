@@ -11,29 +11,40 @@ import { AnalysisGroup, AnalysisGroupPredictorVariable } from "src/app/models/an
 import { IdbAnalysisItem } from "src/app/models/idbModels/analysisItem";
 import { IdbAccountAnalysisItem } from "src/app/models/idbModels/accountAnalysisItem";
 
-export function getMonthlyStartAndEndDate(facilityOrAccount: IdbFacility | IdbAccount, analysisItem: IdbAnalysisItem | IdbAccountAnalysisItem, group: AnalysisGroup): { baselineDate: Date, endDate: Date } {
+export function getMonthlyStartAndEndDate(facilityOrAccount: IdbFacility | IdbAccount, analysisItem: IdbAnalysisItem | IdbAccountAnalysisItem, group: AnalysisGroup): { baselineDate: Date, endDate: Date, bankedAnalysisDate: Date } {
     let baselineDate: Date;
     let endDate: Date;
+    let bankedAnalysisDate: Date;
     let baselineYear: number = analysisItem.baselineYear;
-    if(group && group.applyBanking && analysisItem.hasBanking){
+    if (group && group.applyBanking && analysisItem.hasBanking) {
         baselineYear = group.newBaselineYear;
     }
 
     if (facilityOrAccount.fiscalYear == 'calendarYear') {
         baselineDate = new Date(baselineYear, 0, 1);
         endDate = new Date(analysisItem.reportYear + 1, 0, 1);
+        if (analysisItem.hasBanking && group && group.applyBanking) {
+            bankedAnalysisDate = new Date(group.bankedAnalysisYear + 1, 0, 1);
+        }
     } else {
         if (facilityOrAccount.fiscalYearCalendarEnd) {
             baselineDate = new Date(baselineYear - 1, facilityOrAccount.fiscalYearMonth);
             endDate = new Date(analysisItem.reportYear, facilityOrAccount.fiscalYearMonth);
+            if (analysisItem.hasBanking && group && group.applyBanking) {
+                bankedAnalysisDate = new Date(group.bankedAnalysisYear, facilityOrAccount.fiscalYearMonth);
+            }
         } else {
             baselineDate = new Date(baselineYear, facilityOrAccount.fiscalYearMonth);
             endDate = new Date(analysisItem.reportYear + 1, facilityOrAccount.fiscalYearMonth);
+            if (analysisItem.hasBanking && group && group.applyBanking) {
+                bankedAnalysisDate = new Date(group.bankedAnalysisYear, facilityOrAccount.fiscalYearMonth);
+            }
         }
     }
     return {
         baselineDate: baselineDate,
-        endDate: endDate
+        endDate: endDate,
+        bankedAnalysisDate: bankedAnalysisDate
     }
 }
 
