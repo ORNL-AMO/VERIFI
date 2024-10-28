@@ -75,7 +75,7 @@ export class DegreeDaysService {
   getDetailedDataForMonth(month: number, baseHeatingTemperature: number, baseCoolingTemperature: number): Array<DetailDegreeDay> {
     let results: Array<DetailDegreeDay> = new Array();
     let localClimatologicalDataMonth: Array<LocalClimatologicalData> = this.yearHourlyData.filter(lcd => {
-      return lcd.DATE.getMonth() == month;
+      return lcd.DATE.getMonth() == month && isNaN(lcd.HourlyDryBulbTemperature) == false;
     });
     let minutesPerDay: number = 1440;
     let stationId: string;
@@ -112,6 +112,10 @@ export class DegreeDaysService {
         if (minutesBetween > 720) {
           gapInData = true;
         }
+      }
+
+      if(isNaN(localClimatologicalDataMonth[i].HourlyDryBulbTemperature)){
+        console.log(localClimatologicalDataMonth[i].HourlyDryBulbTemperature);
       }
 
       let averageDryBulbTemp: number = (localClimatologicalDataMonth[i].HourlyDryBulbTemperature + previousDryBulbTemp) / 2
