@@ -19,7 +19,9 @@
         <li class="nav-item">
             <a class="nav-link" routerLink="predictors" [routerLinkActive]="['active']">
                 <i class="fa fa-boxes-stacked"></i>
-                Predictors</a>
+                Predictors
+                <i class="fa fa-exclamation-triangle weather-update" *ngIf="predictorsNeedUpdate"></i>
+            </a>
         </li>
     </ul>
     <div>
