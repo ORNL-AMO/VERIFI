@@ -228,9 +228,10 @@ export class DegreeDaysService {
     // let reportTypes = [];
     for (let i = 1; i < parsedData.length; i++) {
       let currentLine = parsedData[i];
-      let dryBulbTemp: number = parseFloat(currentLine['HourlyDewPointTemperature']);
+      let hourlyDewPointTemperature: number = parseFloat(currentLine['HourlyDewPointTemperature']);
+      let hourlyDryBulbTemperature: number = parseFloat(currentLine['HourlyDryBulbTemperature']);
       // reportTypes.push(currentLine['REPORT_TYPE']);
-      if (currentLine['REPORT_TYPE'] == 'FM-15' && isNaN(dryBulbTemp) == false) {
+      if (currentLine['REPORT_TYPE'] == 'FM-15' && isNaN(hourlyDewPointTemperature) == false && isNaN(hourlyDryBulbTemperature) == false) {
         // if (isNaN(dryBulbTemp) == false) {
         let hourData: LocalClimatologicalData = {
           stationId: weatherStation.ID,
