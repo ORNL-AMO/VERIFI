@@ -69,6 +69,9 @@ export class FacilityAnalysisReportSetupComponent {
   }
 
   async save() {
+    this.setMonthIncrementalImprovement();
+    this.setEnergyColumns();
+    this.setPredictorColumn();
     this.facilityReport.analysisReportSettings.analysisTableColumns = this.analysisTableColumns;
     this.facilityReport = await firstValueFrom(this.facilityReportsDbService.updateWithObservable(this.facilityReport));
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
@@ -142,21 +145,22 @@ export class FacilityAnalysisReportSetupComponent {
       this.analysisTableColumns.yearToDateSavings ||
       this.analysisTableColumns.yearToDatePercentSavings ||
       this.analysisTableColumns.rollingSavings ||
-      this.analysisTableColumns.rolling12MonthImprovement
-    )
-  }
-
-  setAnnualIncrementalImprovement() {
-    this.analysisTableColumns.incrementalImprovement = (
+      this.analysisTableColumns.rolling12MonthImprovement||
       this.analysisTableColumns.SEnPI ||
       this.analysisTableColumns.savings ||
       this.analysisTableColumns.totalSavingsPercentImprovement ||
       this.analysisTableColumns.annualSavingsPercentImprovement ||
       this.analysisTableColumns.cummulativeSavings ||
       this.analysisTableColumns.newSavings
-    );
+    )
   }
 
+  setPredictorColumn() {
+    let predictorOn = this.analysisTableColumns.predictors.find(predictor => {
+      return predictor.display;
+    });
+    this.analysisTableColumns.productionVariables = (predictorOn != undefined);
+  }
 
   setLabels() {
     if (this.selectedAnalysisItem) {
@@ -224,10 +228,6 @@ export class FacilityAnalysisReportSetupComponent {
       predictor.display = this.analysisTableColumns.productionVariables;
     });
     await this.save();
-  }
-
-  async setUseAllContent() {
-
   }
 
 }
