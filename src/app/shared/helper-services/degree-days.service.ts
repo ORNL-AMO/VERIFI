@@ -75,7 +75,7 @@ export class DegreeDaysService {
   getDetailedDataForMonth(month: number, baseHeatingTemperature: number, baseCoolingTemperature: number): Array<DetailDegreeDay> {
     let results: Array<DetailDegreeDay> = new Array();
     let localClimatologicalDataMonth: Array<LocalClimatologicalData> = this.yearHourlyData.filter(lcd => {
-      return lcd.DATE.getMonth() == month && isNaN(lcd.HourlyDryBulbTemperature) == false;
+      return lcd.DATE.getMonth() == month;
     });
     let minutesPerDay: number = 1440;
     let stationId: string;
@@ -112,10 +112,6 @@ export class DegreeDaysService {
         if (minutesBetween > 720) {
           gapInData = true;
         }
-      }
-
-      if(isNaN(localClimatologicalDataMonth[i].HourlyDryBulbTemperature)){
-        console.log(localClimatologicalDataMonth[i].HourlyDryBulbTemperature);
       }
 
       let averageDryBulbTemp: number = (localClimatologicalDataMonth[i].HourlyDryBulbTemperature + previousDryBulbTemp) / 2
@@ -232,9 +228,10 @@ export class DegreeDaysService {
     // let reportTypes = [];
     for (let i = 1; i < parsedData.length; i++) {
       let currentLine = parsedData[i];
-      let dryBulbTemp: number = parseFloat(currentLine['HourlyDewPointTemperature']);
+      let hourlyDewPointTemperature: number = parseFloat(currentLine['HourlyDewPointTemperature']);
+      let hourlyDryBulbTemperature: number = parseFloat(currentLine['HourlyDryBulbTemperature']);
       // reportTypes.push(currentLine['REPORT_TYPE']);
-      if (currentLine['REPORT_TYPE'] == 'FM-15' && isNaN(dryBulbTemp) == false) {
+      if (currentLine['REPORT_TYPE'] == 'FM-15' && isNaN(hourlyDewPointTemperature) == false && isNaN(hourlyDryBulbTemperature) == false) {
         // if (isNaN(dryBulbTemp) == false) {
         let hourData: LocalClimatologicalData = {
           stationId: weatherStation.ID,
