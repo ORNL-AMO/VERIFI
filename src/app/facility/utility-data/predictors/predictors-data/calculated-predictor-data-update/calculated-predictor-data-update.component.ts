@@ -17,6 +17,7 @@ import * as _ from 'lodash';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { getDegreeDayAmount } from 'src/app/shared/sharedHelperFuntions';
+import { PredictorDataHelperService } from 'src/app/shared/helper-services/predictor-data-helper.service';
 
 @Component({
   selector: 'app-calculated-predictor-data-update',
@@ -51,6 +52,8 @@ export class CalculatedPredictorDataUpdateComponent {
       changedEntries: 0
     };
   calculationDate: Date;
+  latestMeterReading: Date;
+  firstMeterReading: Date;
   constructor(private activatedRoute: ActivatedRoute, private predictorDbService: PredictorDbService,
     private predictorDataDbService: PredictorDataDbService,
     private sharedDataService: SharedDataService,
@@ -60,7 +63,8 @@ export class CalculatedPredictorDataUpdateComponent {
     private toastNotificationService: ToastNotificationsService,
     private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
-    private degreeDaysService: DegreeDaysService
+    private degreeDaysService: DegreeDaysService,
+    private predictorDataHelperService: PredictorDataHelperService
   ) {
 
   }
@@ -80,6 +84,7 @@ export class CalculatedPredictorDataUpdateComponent {
     this.itemsPerPageSub = this.sharedDataService.itemsPerPage.subscribe(val => {
       this.itemsPerPage = val;
     });
+    this.setLastMeterReading();
   }
 
   ngOnDestroy() {
@@ -88,6 +93,13 @@ export class CalculatedPredictorDataUpdateComponent {
     this.paramsSub.unsubscribe();
     this.destroyed = true;
   }
+
+  setLastMeterReading() {
+    let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    this.latestMeterReading = this.predictorDataHelperService.getLastMeterDate(facility);
+    this.firstMeterReading = this.predictorDataHelperService.getFirstMeterDate(facility);
+  }
+
 
   setPredictorData() {
     if (this.predictor) {

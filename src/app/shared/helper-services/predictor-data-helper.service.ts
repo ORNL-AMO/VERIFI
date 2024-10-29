@@ -23,8 +23,10 @@ export class PredictorDataHelperService {
     private utilityMeterDbService: UtilityMeterdbService
   ) { }
 
-  checkWeatherPredictorsNeedUpdate(facility: IdbFacility): Array<{ predictor: IdbPredictor, latestReadingDate: Date }> {
-    let facilityPredictors: Array<IdbPredictor> = this.predictorDbService.getByFacilityId(facility.guid);
+  checkWeatherPredictorsNeedUpdate(facility: IdbFacility, facilityPredictors?: Array<IdbPredictor>): Array<{ predictor: IdbPredictor, latestReadingDate: Date }> {
+    if (!facilityPredictors) {
+      facilityPredictors = this.predictorDbService.getByFacilityId(facility.guid);
+    }
     let lastReadingDate: Date = this.getLastMeterDate(facility);
     if (lastReadingDate) {
       let predictorsNeedUpdate: Array<{ predictor: IdbPredictor, latestReadingDate: Date }> = new Array();
@@ -74,6 +76,26 @@ export class PredictorDataHelperService {
     }
     return;
   }
+
+  getFirstMeterDate(facility: IdbFacility): Date {
+    let utilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getFacilityMeterDataByFacilityGuid(facility.guid);
+    let utilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.getFacilityMetersByFacilityGuid(facility.guid);
+    let filteredMeters: Array<IdbUtilityMeter> = utilityMeters.filter(meter => {
+      return meter.meterReadingDataApplication != 'fullYear';
+    });
+    let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(filteredMeters, utilityMeterData, facility, true, { energyIsSource: facility.energyIsSource, neededUnits: undefined }, [], [], [facility]);
+    let monthlyData: Array<MonthlyData> = calanderizedMeters.flatMap(cMeter => {
+      return cMeter.monthlyData;
+    });
+    let lastReading: MonthlyData = _.minBy(monthlyData, (cMeter: MonthlyData) => {
+      return new Date(cMeter.date);
+    });
+    if (lastReading) {
+      return new Date(lastReading.date);
+    }
+    return;
+  }
+
 
   getPredictorTableItem(predictor: IdbPredictor, predictorsNeedUpdate: Array<{ predictor: IdbPredictor, latestReadingDate: Date }>): PredictorTableItem {
     let needsUpdate = predictorsNeedUpdate.find(needsUpdatePredictor => {

@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
+import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
@@ -14,26 +15,28 @@ import { PredictorDataHelperService, PredictorTableItem } from 'src/app/shared/h
 export class PredictorsComponent {
 
   predictors: Array<PredictorTableItem>;
-
-  predictorsSub: Subscription;
+  predictorDataSub: Subscription;
   constructor(
     private predictorDbService: PredictorDbService,
     private predictorDataHelperService: PredictorDataHelperService,
+    private predictorDataDbService: PredictorDataDbService,
     private facilityDbService: FacilitydbService
   ) { }
 
   ngOnInit() {
-    this.predictorsSub = this.predictorDbService.facilityPredictors.subscribe(facilityPredictors => {
-      this.setPredictors(facilityPredictors);
+    this.predictorDataSub = this.predictorDataDbService.facilityPredictorData.subscribe(val => {
+      this.setPredictors();
     });
+
+
   }
 
   ngOnDestroy() {
-    this.predictorsSub.unsubscribe();
+    this.predictorDataSub.unsubscribe();
   }
 
-
-  setPredictors(predictors: Array<IdbPredictor>) {
+  setPredictors() {
+    let predictors: Array<IdbPredictor> = this.predictorDbService.facilityPredictors.getValue();
     let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     let predictorsNeedUpdate: Array<{ predictor: IdbPredictor, latestReadingDate: Date }> = this.predictorDataHelperService.checkWeatherPredictorsNeedUpdate(facility);
     this.predictors = predictors.map(predictor => {

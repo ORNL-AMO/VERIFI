@@ -18,6 +18,7 @@ import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.se
 import { WeatherDataService } from 'src/app/weather-data/weather-data.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAccount } from 'src/app/models/idbModels/account';
+import { PredictorDataHelperService } from 'src/app/shared/helper-services/predictor-data-helper.service';
 
 @Component({
   selector: 'app-predictors-data-table',
@@ -45,6 +46,8 @@ export class PredictorsDataTableComponent {
   predictor: IdbPredictor;
 
   paramSub: Subscription;
+  latestMeterDataReading: Date;
+  filterErrors: boolean = false;
   constructor(private activatedRoute: ActivatedRoute, private predictorDbService: PredictorDbService,
     private predictorDataDbService: PredictorDataDbService,
     private sharedDataService: SharedDataService,
@@ -56,7 +59,8 @@ export class PredictorsDataTableComponent {
     private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
     private degreeDaysService: DegreeDaysService,
-    private weatherDataService: WeatherDataService
+    private weatherDataService: WeatherDataService,
+    private predictorDataHelperService: PredictorDataHelperService
   ) {
 
   }
@@ -86,8 +90,19 @@ export class PredictorsDataTableComponent {
 
   setPredictorData() {
     if (this.predictor) {
+      this.setLatestMeterDataReading();
       this.predictorData = this.predictorDataDbService.getByPredictorId(this.predictor.guid);
       this.setHasWeatherDataWarning();
+    }
+  }
+
+  setLatestMeterDataReading() {
+    let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let results = this.predictorDataHelperService.checkWeatherPredictorsNeedUpdate(facility, [this.predictor]);
+    if (results.length > 0) {
+      this.latestMeterDataReading = this.predictorDataHelperService.getLastMeterDate(facility);
+    } else {
+      this.latestMeterDataReading = undefined;
     }
   }
 
@@ -249,5 +264,9 @@ export class PredictorsDataTableComponent {
   showUpdateEntries() {
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     this.router.navigateByUrl('facility/' + selectedFacility.id + '/utility/predictors/predictor/' + this.predictor.guid + '/update-calculated-entries');
+  }
+
+  toggleFilterErrors(){
+    this.filterErrors = !this.filterErrors;
   }
 }
