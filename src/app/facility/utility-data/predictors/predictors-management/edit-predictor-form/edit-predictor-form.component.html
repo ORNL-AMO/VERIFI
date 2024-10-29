@@ -3,7 +3,8 @@
         <div class="col-12 justify-content-end">
             <div class="d-flex small text-center alert alert-warning"
                 *ngIf="predictorForm.controls.predictorType.value == 'Weather' && addOrEdit == 'edit'">
-                Changing weather data properties will cause predictor data to re-calculate. Existing predictor entries may
+                Changing weather data properties will cause predictor data to re-calculate. Existing predictor entries
+                may
                 be
                 altered.
             </div>
@@ -138,7 +139,20 @@
                         temperature is
                         required</div>
                 </div>
-                <div class="col-12">
+                <div class="col-lg-6 col-md-12 col-sm-12"
+                    *ngIf="addOrEdit == 'add' && firstMeterReading && latestMeterReading">
+                    <!-- <label class="semibold" for="createPredictorData">Create Predictor Entries</label> -->
+                    <app-label-with-tooltip [field]="'createPredictorData'" [labelId]="'createPredictorData'"
+                        [isBold]="true" [label]="'Create Predictor Entries'"></app-label-with-tooltip>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" name="createPredictorData"
+                            id="createPredictorData" formControlName="createPredictorData">
+                        <label class="form-check-label" for="createPredictorData">
+                            {{firstMeterReading| date:'MMM, yyyy'}}&mdash;{{latestMeterReading|
+                            date:'MMM, yyyy'}}</label>
+                    </div>
+                </div>
+                <div class="col-12 mt-2">
                     <div class="alert alert-info">
                         Heating and cooling degree days will be calculated using the dry bulb
                         temperature readings from the selected weather station. Weather station data quality varies, you

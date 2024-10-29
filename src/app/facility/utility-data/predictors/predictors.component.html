@@ -4,10 +4,14 @@
             <li class="nav-item"><a class="nav-link" routerLink="manage" [routerLinkActive]="['active']">
                     <i class="fa fa-gauge-high"></i>
                     Predictors</a></li>
-            <li class="nav-item" *ngFor="let predictor of predictors"><a class="nav-link"
-                    routerLink="predictor/{{predictor.guid}}" [routerLinkActive]="['active']">
+            <li class="nav-item" *ngFor="let predictorItem of predictors">
+                <a class="nav-link" routerLink="predictor/{{predictorItem.predictor.guid}}"
+                    [routerLinkActive]="['active']">
                     <i class="fa fa-file-invoice"></i>
-                    {{predictor.name}}</a></li>
+                    {{predictorItem.predictor.name}}
+                    <i class="fa fa-exclamation-triangle" *ngIf="predictorItem.needsUpdate"></i>
+                </a>
+            </li>
         </ul>
     </div>
     <div class="content-padding">

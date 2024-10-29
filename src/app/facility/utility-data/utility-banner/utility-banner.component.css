@@ -35,3 +35,7 @@ li.disabled:hover .navigation-warning{
 .nav-tabs .nav-link.active, .nav-tabs .nav-link.active i.fa{
     color: #ff6000;
 }
+
+.banner a.nav-link:not(.active) .fa.fa-exclamation-triangle.weather-update{
+    color: yellow;
+}

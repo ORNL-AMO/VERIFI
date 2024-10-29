@@ -17,6 +17,7 @@ import { OrderPredictorDataTablePipe } from './predictors-data/predictors-data-t
 import { CalculatedPredictorDataUpdateComponent } from './predictors-data/calculated-predictor-data-update/calculated-predictor-data-update.component';
 import { OrderCalculatedPredictorDataPipe } from './predictors-data/calculated-predictor-data-update/order-calculated-predictor-data.pipe';
 import { WeatherDataSubLabelComponent } from './weather-data-sub-label/weather-data-sub-label.component';
+import { LabelWithTooltipModule } from "../../../shared/label-with-tooltip/label-with-tooltip.module";
 
 
 
@@ -42,7 +43,8 @@ import { WeatherDataSubLabelComponent } from './weather-data-sub-label/weather-d
     NgbPaginationModule,
     TableItemsDropdownModule,
     HelperPipesModule,
-    CalculatingSpinnerModule
-  ]
+    CalculatingSpinnerModule,
+    LabelWithTooltipModule
+]
 })
 export class PredictorsModule { }

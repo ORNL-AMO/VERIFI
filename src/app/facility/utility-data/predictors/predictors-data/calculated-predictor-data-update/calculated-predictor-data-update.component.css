@@ -17,3 +17,7 @@ label.label {
 .summary-data th {
     text-align: center;
 }
+
+.alert-warning.small{
+    width: auto;
+}

@@ -52,5 +52,8 @@ export const LabelTooltips = {
     },
     "applyBanking": {
         "tooltip": "The previously selected analysis item will be used for savings prior to selected baseline year."
+    },
+    "createPredictorData": {
+        "tooltip": "Predictor entries will be created to match the date range for meter data in this facility."
     }
 }

@@ -1,4 +1,10 @@
 <div class="d-flex w-100 justify-content-end mb-2">
+    <div class="alert alert-warning small mb-0 p-1" *ngIf="hasUpdateWarning">
+        <span>
+            <i class="fa fa-exclamation-triangle"></i>
+            Latest Meter Reading: {{hasUpdateWarning| date:'MMM, yyyy'}}
+        </span>
+    </div>
     <div class="ps-2">
         <button class="btn nav-btn" (click)="uploadData()"><i class="fa fa-upload"></i> Import Data</button>
     </div>
@@ -12,10 +18,13 @@
     <h5>Standard</h5>
     <!-- <div class="table-responsive"> -->
     <table class="table utility-data table-sm table-bordered table-hover" #predictorTable>
-        <thead class="sortable">
+        <thead>
             <tr>
-                <th>
+                <th class="predictor-name">
                     Name
+                </th>
+                <th class="predictor-name">
+                    Latest Reading
                 </th>
                 <th>
                     Units
@@ -27,17 +36,26 @@
             </tr>
         </thead>
         <tbody class="table-group-divider">
-            <tr *ngFor="let predictor of standardPredictors">
+            <tr *ngFor="let predictorTableItem of standardPredictors">
                 <td>
-                    <a (click)="selectEditPredictor(predictor)">
-                        {{predictor.name}}</a>
+                    <a (click)="selectEditPredictor(predictorTableItem.predictor)">
+                        {{predictorTableItem.predictor.name}}</a>
                 </td>
                 <td>
-                    {{predictor.unit}}
+                    <ng-template [ngIf]="predictorTableItem.latestReadingDate" [ngIfElse]="readingMdash">
+                        <i class="fa fa-exclamation-triangle" *ngIf="predictorTableItem.needsUpdate"></i>
+                        {{predictorTableItem.latestReadingDate | date:'MMM, yyyy'}}
+                    </ng-template>
+                    <ng-template #readingMdash>
+                        &mdash;
+                    </ng-template>
                 </td>
                 <td>
-                    <span *ngIf="predictor.production">Yes</span>
-                    <span *ngIf="!predictor.production">No</span>
+                    {{predictorTableItem.predictor.unit}}
+                </td>
+                <td>
+                    <span *ngIf="predictorTableItem.predictor.production">Yes</span>
+                    <span *ngIf="!predictorTableItem.predictor.production">No</span>
                 </td>
                 <td class="actions">
                     <div class="dropdown">
@@ -46,17 +64,20 @@
                         </button>
                         <ul class="dropdown-menu">
                             <li>
-                                <a class="dropdown-item" (click)="selectEditPredictor(predictor)" title="Edit">
+                                <a class="dropdown-item" (click)="selectEditPredictor(predictorTableItem.predictor)"
+                                    title="Edit">
                                     <i class="fa fa-pencil"></i> Edit Predictor
                                 </a>
                             </li>
                             <li>
-                                <a class="dropdown-item" (click)="selectDelete(predictor)" title="Delete">
+                                <a class="dropdown-item" (click)="selectDelete(predictorTableItem.predictor)"
+                                    title="Delete">
                                     <i class="fa fa-trash"></i> Delete Predictor
                                 </a>
                             </li>
                             <li>
-                                <a class="dropdown-item" (click)="selectCopy(predictor)" title="Copy To Facility">
+                                <a class="dropdown-item" (click)="selectCopy(predictorTableItem.predictor)"
+                                    title="Copy To Facility">
                                     <i class="fa fa-copy"></i> Copy To Facility
                                 </a>
                             </li>
@@ -84,10 +105,13 @@
     </div>
     <!-- <div class="table-responsive"> -->
     <table class="table utility-data table-sm table-bordered table-hover" #predictorTable>
-        <thead class="sortable">
+        <thead>
             <tr>
-                <th>
+                <th class="predictor-name">
                     Name
+                </th>
+                <th class="predictor-name">
+                    Latest Reading
                 </th>
                 <th>
                     Type
@@ -102,41 +126,50 @@
             </tr>
         </thead>
         <tbody class="table-group-divider">
-            <tr *ngFor="let predictor of degreeDayPredictors">
+            <tr *ngFor="let predictorTableItem of degreeDayPredictors">
                 <td>
-                    <a (click)="selectEditPredictor(predictor)">
-                        {{predictor.name}}</a>
+                    <a (click)="selectEditPredictor(predictorTableItem.predictor)">
+                        {{predictorTableItem.predictor.name}}</a>
                 </td>
                 <td>
-                    <ng-container *ngIf="predictor.weatherDataType == 'HDD'">
+                    <ng-template [ngIf]="predictorTableItem.latestReadingDate" [ngIfElse]="readingMdash">
+                        <i class="fa fa-exclamation-triangle" *ngIf="predictorTableItem.needsUpdate"></i>
+                        {{predictorTableItem.latestReadingDate| date:'MMM, yyyy'}}
+                    </ng-template>
+                    <ng-template #readingMdash>
+                        &mdash;
+                    </ng-template>
+                </td>
+                <td>
+                    <ng-container *ngIf="predictorTableItem.predictor.weatherDataType == 'HDD'">
                         Heating
                     </ng-container>
-                    <ng-container *ngIf="predictor.weatherDataType == 'CDD'">
+                    <ng-container *ngIf="predictorTableItem.predictor.weatherDataType == 'CDD'">
                         Cooling
                     </ng-container>
-                    <ng-container *ngIf="predictor.weatherDataType == 'relativeHumidity'">
+                    <ng-container *ngIf="predictorTableItem.predictor.weatherDataType == 'relativeHumidity'">
                         Relative Humidity
                     </ng-container>
-                    <ng-container *ngIf="predictor.weatherDataType == 'dryBulbTemp'">
+                    <ng-container *ngIf="predictorTableItem.predictor.weatherDataType == 'dryBulbTemp'">
                         Dry Bulb Temp
                     </ng-container>
                 </td>
                 <td>
-                    <ng-container *ngIf="predictor.weatherDataType == 'HDD'">
-                        {{predictor.heatingBaseTemperature}} &#8457;
+                    <ng-container *ngIf="predictorTableItem.predictor.weatherDataType == 'HDD'">
+                        {{predictorTableItem.predictor.heatingBaseTemperature}} &#8457;
                     </ng-container>
-                    <ng-container *ngIf="predictor.weatherDataType == 'CDD'">
-                        {{predictor.coolingBaseTemperature}} &#8457;
+                    <ng-container *ngIf="predictorTableItem.predictor.weatherDataType == 'CDD'">
+                        {{predictorTableItem.predictor.coolingBaseTemperature}} &#8457;
                     </ng-container>
                     <ng-container
-                        *ngIf="predictor.weatherDataType == 'relativeHumidity' || predictor.weatherDataType == 'dryBulbTemp'">
+                        *ngIf="predictorTableItem.predictor.weatherDataType == 'relativeHumidity' || predictorTableItem.predictor.weatherDataType == 'dryBulbTemp'">
                         &mdash;
                     </ng-container>
                 </td>
                 <td>
-                    <span class="fa fa-exclamation-circle" *ngIf="predictor.weatherDataWarning">
+                    <span class="fa fa-exclamation-circle" *ngIf="predictorTableItem.predictor.weatherDataWarning">
                     </span>
-                    {{predictor.weatherStationName}}
+                    {{predictorTableItem.predictor.weatherStationName}}
 
                 </td>
                 <td class="actions">
@@ -146,22 +179,26 @@
                         </button>
                         <ul class="dropdown-menu">
                             <li>
-                                <a class="dropdown-item" (click)="selectEditPredictor(predictor)" title="Edit">
+                                <a class="dropdown-item" (click)="selectEditPredictor(predictorTableItem.predictor)"
+                                    title="Edit">
                                     <i class="fa fa-pencil"></i> Edit Predictor
                                 </a>
                             </li>
                             <li>
-                                <a class="dropdown-item" (click)="selectDelete(predictor)" title="Delete">
+                                <a class="dropdown-item" (click)="selectDelete(predictorTableItem.predictor)"
+                                    title="Delete">
                                     <i class="fa fa-trash"></i> Delete Predictor
                                 </a>
                             </li>
                             <li>
-                                <a class="dropdown-item" (click)="viewWeatherData(predictor)" title="View Weather Data">
+                                <a class="dropdown-item" (click)="viewWeatherData(predictorTableItem.predictor)"
+                                    title="View Weather Data">
                                     <i class="fa fa-temperature-half"></i> View Weather Data
                                 </a>
                             </li>
                             <li>
-                                <a class="dropdown-item" (click)="selectCopy(predictor)" title="Copy To Facility">
+                                <a class="dropdown-item" (click)="selectCopy(predictorTableItem.predictor)"
+                                    title="Copy To Facility">
                                     <i class="fa fa-copy"></i> Copy To Facility
                                 </a>
                             </li>
