@@ -69,7 +69,7 @@
 
 
 <!--report year-->
-<ng-container *ngIf="analysisReportSettings.gorupMonthlyResultsTableReportYear">
+<ng-container *ngIf="analysisReportSettings.groupMonthlyResultsTableReportYear">
     <ng-template [ngIf]="!print || !(analysisReportSettings.analysisTableColumns | breakUpTableForPrint: 'monthly')" [ngIfElse]="reportPrintBlock">
         <div class="scroll-x">
             <app-monthly-analysis-summary-table [monthlyAnalysisSummaryData]="reportYearAnalysisSummaryData"

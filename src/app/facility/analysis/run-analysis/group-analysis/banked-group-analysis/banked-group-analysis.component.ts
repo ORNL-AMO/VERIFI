@@ -40,7 +40,7 @@ export class BankedGroupAnalysisComponent {
     monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
     annualAnalysisSummaryData: Array<AnnualAnalysisSummary>
   };
-  analysisReportSettings: AnalysisReportSettings = getAnalysisReportSettings();
+  analysisReportSettings: AnalysisReportSettings;
   constructor(private analysisService: AnalysisService,
     private analysisDbService: AnalysisDbService,
     private facilityDbService: FacilitydbService,
@@ -53,6 +53,7 @@ export class BankedGroupAnalysisComponent {
   }
 
   ngOnInit() {
+    this.setReportSettings();
     this.analysisItemSub = this.analysisDbService.selectedAnalysisItem.subscribe(val => {
       let analysisItem: IdbAnalysisItem = val;
       let tmpBankedAnalysisItem: IdbAnalysisItem = this.analysisDbService.getByGuid(analysisItem.bankedAnalysisItemId);
@@ -72,6 +73,11 @@ export class BankedGroupAnalysisComponent {
     }
   }
 
+  setReportSettings() {
+    this.analysisReportSettings = getAnalysisReportSettings()
+    this.analysisReportSettings.groupMonthlyResultsTable = false;
+    this.analysisReportSettings.groupMonthlyResultsTableReportYear = false;
+  }
 
   runAnalysis() {
     this.calculating = true;

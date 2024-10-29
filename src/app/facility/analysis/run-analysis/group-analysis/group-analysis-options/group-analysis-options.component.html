@@ -319,6 +319,13 @@
                                 {{year| yearDisplay: facility.fiscalYear}}</option>
                         </select>
                     </div>
+                    <div class="col-12"
+                        *ngIf="bankedGroup.analysisType == 'regression' && group.bankedAnalysisYear < bankedGroup.regressionModelYear">
+                        <div class="alert alert-warning small mb-1 mt-1">
+                            <i class="fa fa-exclamation-circle"></i>
+                            Banked analysis model year is after applied banking year.
+                        </div>
+                    </div>
                 </div>
                 <div class="form-group row mt-2 sub-column" *ngIf="group.applyBanking">
                     <label class="col-6 col-form-label">

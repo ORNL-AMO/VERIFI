@@ -30,6 +30,8 @@ export class GroupAnalysisOptionsComponent implements OnInit {
   facility: IdbFacility;
   showInUseMessage: boolean;
   bankedAnalysisYears: Array<number>;
+  bankedAnalysisItem: IdbAnalysisItem;
+  bankedGroup: AnalysisGroup;
   constructor(private analysisService: AnalysisService, private analysisDbService: AnalysisDbService,
     private accountDbService: AccountdbService, private facilityDbService: FacilitydbService,
     private dbChangesService: DbChangesService,
@@ -41,11 +43,14 @@ export class GroupAnalysisOptionsComponent implements OnInit {
   ngOnInit(): void {
     this.facility = this.facilityDbService.selectedFacility.getValue();
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
-    this.setBankedAnalysisYearOptions();
     this.setShowInUseMessage();
     this.yearOptions = this.calanderizationService.getYearOptionsFacility(this.facility.guid, this.analysisItem.analysisCategory);
     this.selectedGroupSub = this.analysisService.selectedGroup.subscribe(group => {
       this.group = group;
+      if (this.analysisItem.hasBanking && this.group.applyBanking) {
+        this.setBankedGroup();
+        this.setBankedAnalysisYearOptions();
+      }
     });
   }
 
@@ -108,14 +113,18 @@ export class GroupAnalysisOptionsComponent implements OnInit {
 
   setBankedAnalysisYearOptions() {
     this.bankedAnalysisYears = new Array();
-    if (this.analysisItem.hasBanking) {
-      let bankedAnalysisItem: IdbAnalysisItem = this.analysisDbService.getByGuid(this.analysisItem.bankedAnalysisItemId);
-      if (bankedAnalysisItem) {
-        let minReportYear: number = _.min([bankedAnalysisItem.reportYear, this.analysisItem.reportYear])
-        for (let i = bankedAnalysisItem.baselineYear + 1; i < minReportYear; i++) {
-          this.bankedAnalysisYears.push(i);
-        }
+    if (this.bankedAnalysisItem) {
+      let minReportYear: number = _.min([this.bankedAnalysisItem.reportYear, this.analysisItem.reportYear])
+      for (let i = this.bankedAnalysisItem.baselineYear + 1; i < minReportYear; i++) {
+        this.bankedAnalysisYears.push(i);
       }
     }
+  }
+
+  setBankedGroup() {
+    this.bankedAnalysisItem = this.analysisDbService.getByGuid(this.analysisItem.bankedAnalysisItemId);
+    this.bankedGroup = this.bankedAnalysisItem.groups.find(group => {
+      return group.idbGroupId == this.group.idbGroupId;
+    });
   }
 }

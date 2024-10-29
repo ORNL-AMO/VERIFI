@@ -28,8 +28,8 @@
 <div class="w-100" *ngIf="calculating == false">
     <app-monthly-analysis-summary-table *ngIf="dataDisplay == 'table'" [analysisItem]="analysisItem"
         [monthlyAnalysisSummaryData]="monthlyAnalysisSummary.monthlyAnalysisSummaryData" [itemsPerPage]="itemsPerPage"
-        [facilityOrAccount]="facility" [predictorVariables]="monthlyAnalysisSummary.predictorVariables" [group]="group"
-        [printBlock]="'all'">
+        [facilityOrAccount]="facility" [predictorVariables]="monthlyAnalysisSummary.predictorVariables"
+        [printBlock]="'all'" [group]="group">
     </app-monthly-analysis-summary-table>
     <app-monthly-analysis-summary-graph *ngIf="dataDisplay == 'graph'" [analysisItem]="analysisItem"
         [monthlyAnalysisSummaryData]="monthlyAnalysisSummary.monthlyAnalysisSummaryData" [facilityOrAccount]="facility">

@@ -2,7 +2,7 @@ import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
-import { AnalysisGroupPredictorVariable, AnalysisTableColumns, AnnualAnalysisSummary } from 'src/app/models/analysis';
+import { AnalysisGroup, AnalysisGroupPredictorVariable, AnalysisTableColumns, AnnualAnalysisSummary } from 'src/app/models/analysis';
 import { CopyTableService } from '../../helper-services/copy-table.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -25,6 +25,8 @@ export class AnnualAnalysisSummaryTableComponent implements OnInit {
   printBlock: 'consumption' | 'predictors' | 'savings' | 'all';
   @Input()
   inReport: boolean;
+  @Input()
+  group: AnalysisGroup;
 
   @ViewChild('dataTable', { static: false }) dataTable: ElementRef;
 
@@ -40,6 +42,7 @@ export class AnnualAnalysisSummaryTableComponent implements OnInit {
   predictorColumns: Array<AnalysisGroupPredictorVariable>;
   copyingTable: boolean = false;
   hasBanked: boolean;
+  modelYear: number;
   constructor(private analysisService: AnalysisService, private copyTableService: CopyTableService,
     private router: Router) { }
 
@@ -53,6 +56,7 @@ export class AnnualAnalysisSummaryTableComponent implements OnInit {
       this.setPredictorVariables();
     });
     this.setHasBanked();
+    this.setModelYear();
   }
 
   ngOnDestroy() {
@@ -164,5 +168,11 @@ export class AnnualAnalysisSummaryTableComponent implements OnInit {
     this.hasBanked = this.annualAnalysisSummary.find(data => {
       return data.isBanked
     }) != undefined;
+  }
+
+  setModelYear(){
+    if(this.group && this.group.analysisType == 'regression'){
+      this.modelYear = this.group.regressionModelYear;
+    }
   }
 }

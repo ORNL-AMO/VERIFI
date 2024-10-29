@@ -59,7 +59,7 @@ export class RegressionModelDetailsComponent {
         var trace2 = {
           type: "scatter",
           mode: "markers",
-          name: 'Potential Model Year',
+          name: 'Model Year',
           x: potentialModelYearData.map(results => { return results.date }),
           y: potentialModelYearData.map(results => { return results.modeledEnergy }),
           line: { color: '#8E44AD', width: 4 },
