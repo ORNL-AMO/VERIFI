@@ -93,6 +93,9 @@ export class PredictorsDataTableComponent {
       this.setLatestMeterDataReading();
       this.predictorData = this.predictorDataDbService.getByPredictorId(this.predictor.guid);
       this.setHasWeatherDataWarning();
+      if (this.filterErrors) {
+        this.filterErrors = false;
+      }
     }
   }
 
@@ -266,7 +269,7 @@ export class PredictorsDataTableComponent {
     this.router.navigateByUrl('facility/' + selectedFacility.id + '/utility/predictors/predictor/' + this.predictor.guid + '/update-calculated-entries');
   }
 
-  toggleFilterErrors(){
+  toggleFilterErrors() {
     this.filterErrors = !this.filterErrors;
   }
 }
