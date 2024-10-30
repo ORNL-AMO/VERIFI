@@ -6,8 +6,9 @@
                                         <span class="fa fa-exclamation-circle" *ngIf="setupErrors"></span>
                                         <i class="fa fa-gears"></i>
                                         Analysis Options</a></li>
-                        <li class="nav-item" *ngIf="showBanked"><a class="nav-link" routerLink="banked-analysis"
-                                        [routerLinkActive]="['active']">
+                        <li class="nav-item"
+                                *ngIf="showBanked && selectedGroup.analysisType != 'skip' && selectedGroup.analysisType != 'skipAnalysis'">
+                                <a class="nav-link" routerLink="banked-analysis" [routerLinkActive]="['active']">
                                         <i class="fa fa-piggy-bank"></i>
                                         Banked Analysis</a></li>
                         <li class="nav-item"

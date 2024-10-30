@@ -25,7 +25,7 @@ export class GroupAnalysisOptionsComponent implements OnInit {
   group: AnalysisGroup;
   selectedGroupSub: Subscription;
   showUnitsWarning: boolean;
-  yearOptions: Array<number>;
+  baselineYearOptions: Array<number>;
   analysisItem: IdbAnalysisItem;
   facility: IdbFacility;
   showInUseMessage: boolean;
@@ -44,7 +44,7 @@ export class GroupAnalysisOptionsComponent implements OnInit {
     this.facility = this.facilityDbService.selectedFacility.getValue();
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
     this.setShowInUseMessage();
-    this.yearOptions = this.calanderizationService.getYearOptionsFacility(this.facility.guid, this.analysisItem.analysisCategory);
+    this.setBaselineYearOptions();
     this.selectedGroupSub = this.analysisService.selectedGroup.subscribe(group => {
       this.group = group;
       if (this.analysisItem.hasBanking && this.group.applyBanking) {
@@ -109,6 +109,13 @@ export class GroupAnalysisOptionsComponent implements OnInit {
   hideInUseMessage() {
     this.showInUseMessage = false;
     this.analysisService.hideInUseMessage = true;
+  }
+
+  setBaselineYearOptions(){
+    this.baselineYearOptions = new Array();
+    for(let i = this.analysisItem.baselineYear; i < this.analysisItem.reportYear; i++){
+      this.baselineYearOptions.push(i);
+    }
   }
 
   setBankedAnalysisYearOptions() {

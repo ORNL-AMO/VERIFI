@@ -100,7 +100,8 @@ export class GroupAnalysisComponent implements OnInit {
         this.selectedGroup.groupErrors.missingRegressionModelSelection ||
         this.selectedGroup.groupErrors.missingRegressionPredictorCoef);
       this.setupErrors = (this.selectedGroup.groupErrors.invalidAverageBaseload || this.selectedGroup.groupErrors.noProductionVariables ||
-        this.selectedGroup.groupErrors.invalidAverageBaseload || this.selectedGroup.groupErrors.invalidMonthlyBaseload || this.selectedGroup.groupErrors.missingGroupMeters)
+        this.selectedGroup.groupErrors.invalidAverageBaseload || this.selectedGroup.groupErrors.invalidMonthlyBaseload || this.selectedGroup.groupErrors.missingGroupMeters
+        || this.selectedGroup.groupErrors.invalidBankingYears || this.selectedGroup.groupErrors.missingBankingAppliedYear || this.selectedGroup.groupErrors.missingBankingBaselineYear)
     } else {
       this.regressionErrors = false;
       this.setupErrors = false;

@@ -143,7 +143,8 @@ export function getNewAnalysisGroup(groupId: string, predictorVariables: Array<A
     missingGroupMeters: true,
     hasInvalidRegressionModel: true,
     missingBankingBaselineYear: true,
-    missingBankingAppliedYear: true
+    missingBankingAppliedYear: true,
+    invalidBankingYears: false
   };
   return analysisGroup;
 }

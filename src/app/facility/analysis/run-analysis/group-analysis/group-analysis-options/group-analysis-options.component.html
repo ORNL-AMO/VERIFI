@@ -280,7 +280,7 @@
                 </div>
             </div>
         </div>
-        <div class="row pt-3" *ngIf="analysisItem.hasBanking && group.analysisType != 'skip'">
+        <div class="row pt-3" *ngIf="analysisItem.hasBanking && group.analysisType != 'skip' && group.analysisType != 'skipAnalysis'">
             <!--banking-->
             <div class="col-md-6 col-sm-12">
                 <div class="row">
@@ -334,9 +334,15 @@
                     <div class="col-6">
                         <select required class="form-select" id="newBaselineYear" name="newBaselineYear"
                             [(ngModel)]="group.newBaselineYear" (change)="saveItem()" [required]="true">
-                            <option *ngFor="let year of yearOptions" [ngValue]="year">
+                            <option *ngFor="let year of baselineYearOptions" [ngValue]="year">
                                 {{year| yearDisplay: facility.fiscalYear}}</option>
                         </select>
+                    </div>
+                    <div class="col-12" *ngIf="group.bankedAnalysisYear >= group.newBaselineYear">
+                        <div class="alert alert-danger small mb-1 mt-1">
+                            <i class="fa fa-exclamation-circle"></i>
+                            Banked analysis year cannot be after new baseline year.
+                        </div>
                     </div>
                 </div>
             </div>
