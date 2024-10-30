@@ -8,7 +8,7 @@
                 </ng-container>
             </th>
             <ng-container *ngIf="printBlock == 'all' || printBlock == 'consumption'">
-                <th *ngIf="analysisTableColumns.energy && numEnergyColumns > 0" class="text-center th-3" [attr.colspan]="numEnergyColumns">
+                <th *ngIf="numEnergyColumns > 0" class="text-center th-3" [attr.colspan]="numEnergyColumns">
                     <ng-container *ngIf="analysisItem.analysisCategory == 'energy'">
                         Energy (<span [innerHTML]="analysisItem.energyUnit | settingsLabel"></span>)
                     </ng-container>
@@ -25,7 +25,7 @@
             </ng-container>
 
             <ng-container *ngIf="printBlock == 'all' || printBlock == 'savings'">
-                <th *ngIf="analysisTableColumns.incrementalImprovement && numImprovementColumns > 0" class="text-center"
+                <th *ngIf="numImprovementColumns > 0" class="text-center"
                     [attr.colspan]="numImprovementColumns">
                     Incremental Improvement
                 </th>
