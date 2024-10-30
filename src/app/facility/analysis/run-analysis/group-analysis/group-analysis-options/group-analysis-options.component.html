@@ -280,7 +280,8 @@
                 </div>
             </div>
         </div>
-        <div class="row pt-3" *ngIf="analysisItem.hasBanking && group.analysisType != 'skip' && group.analysisType != 'skipAnalysis'">
+        <div class="row pt-3"
+            *ngIf="analysisItem.hasBanking && group.analysisType != 'skip' && group.analysisType != 'skipAnalysis'">
             <!--banking-->
             <div class="col-md-6 col-sm-12">
                 <div class="row">
@@ -303,7 +304,7 @@
                     <div class="col-6">
                         <label class="switch" for="applyBanking">
                             <input class="checkbox" type="checkbox" id="applyBanking" name="applyBanking"
-                                [(ngModel)]="group.applyBanking" (change)="saveItem()">
+                                [(ngModel)]="group.applyBanking" (change)="saveItem()" [disabled]="hasModelsGenerated">
                             <span class="slider round"></span>
                         </label>
                     </div>
@@ -314,7 +315,8 @@
                     </label>
                     <div class="col-6">
                         <select required class="form-select" id="bankedAnalysisYear" name="bankedAnalysisYear"
-                            [(ngModel)]="group.bankedAnalysisYear" (change)="saveItem()" [required]="true">
+                            [(ngModel)]="group.bankedAnalysisYear" (change)="saveItem()" [required]="true"
+                            [disabled]="hasModelsGenerated">
                             <option *ngFor="let year of bankedAnalysisYears" [ngValue]="year">
                                 {{year| yearDisplay: facility.fiscalYear}}</option>
                         </select>
@@ -333,7 +335,8 @@
                     </label>
                     <div class="col-6">
                         <select required class="form-select" id="newBaselineYear" name="newBaselineYear"
-                            [(ngModel)]="group.newBaselineYear" (change)="saveItem()" [required]="true">
+                            [(ngModel)]="group.newBaselineYear" (change)="saveItem()" [required]="true"
+                            [disabled]="hasModelsGenerated">
                             <option *ngFor="let year of baselineYearOptions" [ngValue]="year">
                                 {{year| yearDisplay: facility.fiscalYear}}</option>
                         </select>
@@ -343,6 +346,20 @@
                             <i class="fa fa-exclamation-circle"></i>
                             Banked analysis year cannot be after new baseline year.
                         </div>
+                    </div>
+                </div>
+                <div class="row" *ngIf="hasModelsGenerated">
+                    <div class="col-12 mt-2 alert alert-warning">
+                        This group has regression models generated. These settings were used to create the models and
+                        are
+                        now locked.
+                        <ul class="mb-0">
+                            <li>
+                                <a class="click-link" (click)="showEnableForm()">To clear the models so that you can
+                                    modify all
+                                    settings click here</a>
+                            </li>
+                        </ul>
                     </div>
                 </div>
             </div>
@@ -359,3 +376,26 @@
         </div>
     </form>
 </ng-container>
+
+
+
+<div [ngClass]="{'windowOverlay': displayEnableForm}"></div>
+<div class="popup" [ngClass]="{'open': displayEnableForm}">
+    <div class="popup-header">Are you sure?
+        <button class="item-right" (click)="cancelEnableForm()">x</button>
+    </div>
+    <div class="popup-body">
+        Are you sure you want to clear the existing regression models in this group? This cannot be undone!
+        <hr>
+        <!-- <div class="row"> -->
+        <div class="col-12 alert alert-info text-center" *ngIf="showInUseMessage">
+            This analysis is used in one or more account analysis. Altering the models in this analysis may effect
+            the results of the corresponding account analysis.
+        </div>
+        <!-- </div> -->
+    </div>
+    <div class="saveCancel popup-footer text-end">
+        <button class="btn btn-secondary" (click)="cancelEnableForm()">Cancel</button>
+        <button class="btn action-btn" (click)="confirmEnableForm()">Clear Models</button>
+    </div>
+</div>

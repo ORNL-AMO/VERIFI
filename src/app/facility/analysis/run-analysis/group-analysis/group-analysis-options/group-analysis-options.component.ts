@@ -9,7 +9,6 @@ import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { Router } from '@angular/router';
 import { AnalysisGroup } from 'src/app/models/analysis';
 import { AnalysisValidationService } from 'src/app/shared/helper-services/analysis-validation.service';
-import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -32,11 +31,12 @@ export class GroupAnalysisOptionsComponent implements OnInit {
   bankedAnalysisYears: Array<number>;
   bankedAnalysisItem: IdbAnalysisItem;
   bankedGroup: AnalysisGroup;
+  hasModelsGenerated: boolean;
+  displayEnableForm: boolean = false;
   constructor(private analysisService: AnalysisService, private analysisDbService: AnalysisDbService,
     private accountDbService: AccountdbService, private facilityDbService: FacilitydbService,
     private dbChangesService: DbChangesService,
     private analysisValidationService: AnalysisValidationService,
-    private calanderizationService: CalanderizationService,
     private router: Router,
     private accountAnalysisDbService: AccountAnalysisDbService) { }
 
@@ -50,6 +50,7 @@ export class GroupAnalysisOptionsComponent implements OnInit {
       if (this.analysisItem.hasBanking && this.group.applyBanking) {
         this.setBankedGroup();
         this.setBankedAnalysisYearOptions();
+        this.setHasModelsGenerated();
       }
     });
   }
@@ -111,9 +112,9 @@ export class GroupAnalysisOptionsComponent implements OnInit {
     this.analysisService.hideInUseMessage = true;
   }
 
-  setBaselineYearOptions(){
+  setBaselineYearOptions() {
     this.baselineYearOptions = new Array();
-    for(let i = this.analysisItem.baselineYear; i < this.analysisItem.reportYear; i++){
+    for (let i = this.analysisItem.baselineYear; i < this.analysisItem.reportYear; i++) {
       this.baselineYearOptions.push(i);
     }
   }
@@ -133,5 +134,38 @@ export class GroupAnalysisOptionsComponent implements OnInit {
     this.bankedGroup = this.bankedAnalysisItem.groups.find(group => {
       return group.idbGroupId == this.group.idbGroupId;
     });
+  }
+
+  setHasModelsGenerated() {
+    if (this.group.models && this.group.models.length > 0) {
+      this.hasModelsGenerated = true;
+    } else {
+      this.hasModelsGenerated = false;
+    }
+  }
+
+
+  showEnableForm() {
+    this.displayEnableForm = true;
+  }
+
+  cancelEnableForm() {
+    this.displayEnableForm = false;
+  }
+
+  async confirmEnableForm() {
+    this.analysisItem.groups.forEach(group => {
+      group.models = [];
+      group.selectedModelId = undefined;
+      group.regressionConstant = undefined;
+      group.regressionModelYear = undefined;
+      group.regressionConstant = undefined;
+      group.predictorVariables.forEach(variable => {
+        variable.regressionCoefficient = undefined;
+      })
+    });
+    await this.saveItem();
+    this.setHasModelsGenerated();
+    this.cancelEnableForm();
   }
 }
