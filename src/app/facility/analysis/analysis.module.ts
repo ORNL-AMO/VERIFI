@@ -34,6 +34,7 @@ import { SelectBankedAnalysisComponent } from './run-analysis/analysis-setup/sel
 import { BankedGroupsDetailsComponent } from './run-analysis/analysis-setup/select-banked-analysis/banked-groups-details/banked-groups-details.component';
 import { SharedReportsModule } from "../../shared/shared-reports/shared-reports.module";
 import { BankedGroupAnalysisComponent } from './run-analysis/group-analysis/banked-group-analysis/banked-group-analysis.component';
+import { BankedGroupResultsTableComponent } from './run-analysis/group-analysis/group-analysis-options/banked-group-results-table/banked-group-results-table.component';
 
 @NgModule({
   declarations: [
@@ -61,7 +62,8 @@ import { BankedGroupAnalysisComponent } from './run-analysis/group-analysis/bank
     AnalysisDashboardTabsComponent,
     SelectBankedAnalysisComponent,
     BankedGroupsDetailsComponent,
-    BankedGroupAnalysisComponent
+    BankedGroupAnalysisComponent,
+    BankedGroupResultsTableComponent
   ],
   imports: [
     CommonModule,
