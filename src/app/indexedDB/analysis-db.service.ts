@@ -189,6 +189,37 @@ export class AnalysisDbService {
     }
   }
 
+  async updateAnalysisPredictor(predictor: IdbPredictor) {
+    let accountAnalysisItems: Array<IdbAnalysisItem> = this.accountAnalysisItems.getValue();
+    let facilityAnalysisItems: Array<IdbAnalysisItem> = accountAnalysisItems.filter(item => {
+      return item.facilityId == predictor.facilityId;
+    });
+    for (let index = 0; index < facilityAnalysisItems.length; index++) {
+      let analysisItem: IdbAnalysisItem = facilityAnalysisItems[index];
+      analysisItem.groups.forEach(group => {
+        group.predictorVariables.forEach(pVariable => {
+          if (pVariable.id == predictor.guid) {
+            pVariable.name = predictor.name;
+            pVariable.production = predictor.production;
+            pVariable.unit = predictor.unit;
+          }
+        })
+        if(group.models){
+          group.models.forEach(model => {
+            model.predictorVariables.forEach(pVariable => {
+              if (pVariable.id == predictor.guid) {
+                pVariable.name = predictor.name;
+                pVariable.production = predictor.production;
+                pVariable.unit = predictor.unit;
+              }
+            })
+          })
+        }
+      })
+      await firstValueFrom(this.updateWithObservable(analysisItem));
+    }
+  }
+
 
   async deleteGroup(groupId: string) {
     let facilityAnalysisItems: Array<IdbAnalysisItem> = this.facilityAnalysisItems.getValue();
