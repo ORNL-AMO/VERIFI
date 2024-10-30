@@ -20,6 +20,7 @@ import { getNewIdbPredictorData, IdbPredictorData } from 'src/app/models/idbMode
 import { getDegreeDayAmount } from 'src/app/shared/sharedHelperFuntions';
 import { PredictorDataHelperService } from 'src/app/shared/helper-services/predictor-data-helper.service';
 import { DatePipe } from '@angular/common';
+import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 
 @Component({
   selector: 'app-edit-predictor-form',
@@ -52,7 +53,8 @@ export class EditPredictorFormComponent {
     private accountDbService: AccountdbService,
     private dbChangesService: DbChangesService,
     private predictorDataDbService: PredictorDataDbService,
-    private predictorDataHelperService: PredictorDataHelperService) {
+    private predictorDataHelperService: PredictorDataHelperService,
+    private analysisDbService: AnalysisDbService) {
   }
 
   ngOnInit() {
@@ -223,10 +225,16 @@ export class EditPredictorFormComponent {
         await this.addWeatherData();
       }
     }
-    // await this.analysisDbService.updateAnalysisPredictors(facilityPredictorsCopy, this.facility.guid);
+
+    if (this.addOrEdit == 'add') {
+      await this.analysisDbService.addAnalysisPredictor(this.predictor);
+    } else {
+      await this.analysisDbService.updateAnalysisPredictor(this.predictor);
+    }
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.setPredictorsV2(account, this.facility);
     await this.dbChangesService.setPredictorDataV2(account, this.facility);
+    await this.dbChangesService.setAnalysisItems(account, true, this.facility);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('Predictor Entries Updated!', undefined, undefined, false, 'alert-success');
     this.cancel();

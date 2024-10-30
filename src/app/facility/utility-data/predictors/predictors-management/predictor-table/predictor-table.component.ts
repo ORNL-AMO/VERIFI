@@ -118,13 +118,11 @@ export class PredictorTableComponent {
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.setPredictorsV2(account, this.selectedFacility);
     await this.dbChangesService.setPredictorDataV2(account, this.selectedFacility);
-    if (this.predictorUsedGroupIds.length > 0) {
-      //update analysis items
-      this.loadingService.setLoadingMessage('Updating analysis items...');
-      await this.analysisDbService.deleteAnalysisPredictor(this.predictorToDelete);
-      let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
-      await this.accountAnalysisDbService.updateAccountValidation(accountAnalysisItems);
-    }
+    //update analysis items
+    this.loadingService.setLoadingMessage('Updating analysis items...');
+    await this.analysisDbService.deleteAnalysisPredictor(this.predictorToDelete);
+    let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
+    await this.accountAnalysisDbService.updateAccountValidation(accountAnalysisItems);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('Predictor Deleted', undefined, 1000, false, 'alert-success');
     this.cancelDelete();

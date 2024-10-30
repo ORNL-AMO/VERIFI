@@ -30,7 +30,7 @@ export class MonthlyAnalysisSummaryClass {
                 return group.idbGroupId == this.group.idbGroupId;
             });
             let bankedAnalysisCpy: IdbAnalysisItem = JSON.parse(JSON.stringify(bankedAnalysisItem));
-            bankedAnalysisCpy.reportYear = this.group.newBaselineYear;
+            bankedAnalysisCpy.reportYear = this.group.bankedAnalysisYear;
             this.bankedMonthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(bankedGroup, bankedAnalysisCpy, this.facility, calanderizedMeters, accountPredictorEntries, calculateAllMonthlyData, accountAnalysisItems);
             this.setBankedMonthlyAnalysisSummaryData(this.bankedMonthlyAnalysisSummaryClass, selectedGroup.bankedAnalysisYear);
         }

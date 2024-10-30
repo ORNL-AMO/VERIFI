@@ -8,7 +8,7 @@
                 </ng-container>
             </th>
             <ng-container *ngIf="printBlock == 'all' || printBlock == 'consumption'">
-                <th *ngIf="analysisTableColumns.energy" class="text-center th-3" [attr.colspan]="numEnergyColumns">
+                <th *ngIf="numEnergyColumns > 0" class="text-center th-3" [attr.colspan]="numEnergyColumns">
                     <ng-container *ngIf="analysisItem.analysisCategory == 'energy'">
                         Energy (<span [innerHTML]="analysisItem.energyUnit | settingsLabel"></span>)
                     </ng-container>
@@ -25,7 +25,7 @@
             </ng-container>
 
             <ng-container *ngIf="printBlock == 'all' || printBlock == 'savings'">
-                <th *ngIf="analysisTableColumns.incrementalImprovement" class="text-center"
+                <th *ngIf="numImprovementColumns > 0" class="text-center"
                     [attr.colspan]="numImprovementColumns">
                     Incremental Improvement
                 </th>
@@ -121,7 +121,9 @@
         <tr *ngFor="let data of monthlyAnalysisSummaryData | orderBy: orderDataField: orderByDirection |  slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage"
             [ngClass]="{'fiscal-year-end': checkFiscalYearEnd(data.date)}">
             <td class="no-wrap">
-                <span class="fa fa-asterisk" *ngIf="data.isBanked"></span>
+                <span class="fa fa-piggy-bank" *ngIf="data.isBanked && !data.isIntermediateBanked"></span>
+                <span class="fa fa-asterisk" *ngIf="data.isIntermediateBanked"></span>
+                <span class="fa fa-star" *ngIf="data.fiscalYear == modelYear"></span>
                 {{data.date | date: 'MMMM, y'}}
             </td>
             <td>
@@ -277,8 +279,14 @@
             <span class="fa fa-copy"></span> Copy Table
         </button>
     </div>
-    <div class="alert alert-info p-1" *ngIf="hasBanked">
-        <span class="fa fa-asterisk"></span> Indicates Banked Analysis
+    <div class="alert alert-info p-1" *ngIf="hasBanked || modelYear">
+        <ng-container *ngIf="hasBanked">
+            <span class="fa fa-piggy-bank"></span> Indicates Banked Analysis Year<br>
+            <span class="fa fa-asterisk"></span> Indicates Intermediate Analysis Year<br>
+        </ng-container>
+        <ng-container *ngIf="modelYear">
+            <span class="fa fa-star"></span> Indicates Model Year<br>
+        </ng-container>
     </div>
     <ngb-pagination *ngIf="!inReport" [collectionSize]="monthlyAnalysisSummaryData.length" [(page)]="currentPageNumber"
         [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true" aria-label="Pagination">

@@ -251,7 +251,8 @@ export interface GroupErrors {
   missingGroupMeters: boolean,
   hasInvalidRegressionModel: boolean,
   missingBankingBaselineYear: boolean,
-  missingBankingAppliedYear: boolean
+  missingBankingAppliedYear: boolean,
+  invalidBankingYears: boolean
 }
 
 

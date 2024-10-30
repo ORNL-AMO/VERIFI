@@ -1,36 +1,34 @@
 import { Component } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { AnalysisGroup, AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
-import { AnalysisService } from '../../../analysis.service';
-import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
+import { AnnualFacilityAnalysisSummaryClass } from 'src/app/calculations/analysis-calculations/annualFacilityAnalysisSummaryClass';
+import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
+import { getNeededUnits } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
+import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
+import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
+import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
+import { AnalysisGroup, AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
+import { CalanderizedMeter } from 'src/app/models/calanderization';
+import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { IdbPredictor } from 'src/app/models/idbModels/predictor';
+import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
-import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
-import { IdbPredictor } from 'src/app/models/idbModels/predictor';
-import { CalanderizedMeter } from 'src/app/models/calanderization';
-import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
-import { AnnualFacilityAnalysisSummaryClass } from 'src/app/calculations/analysis-calculations/annualFacilityAnalysisSummaryClass';
-import { getNeededUnits } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
-import { AnalysisReportSettings, getAnalysisReportSettings } from 'src/app/models/idbModels/facilityReport';
 
 @Component({
-  selector: 'app-banked-group-analysis',
-  templateUrl: './banked-group-analysis.component.html',
-  styleUrl: './banked-group-analysis.component.css'
+  selector: 'app-banked-group-results-table',
+  templateUrl: './banked-group-results-table.component.html',
+  styleUrl: './banked-group-results-table.component.css'
 })
-export class BankedGroupAnalysisComponent {
+export class BankedGroupResultsTableComponent {
 
   selectedGroupSub: Subscription;
   selectedGroup: AnalysisGroup;
   analysisItemSub: Subscription;
-  // analysisItem: IdbAnalysisItem;
   bankedAnalysisItem: IdbAnalysisItem;
   facility: IdbFacility;
   calculating: boolean | 'error' = true;
@@ -40,7 +38,8 @@ export class BankedGroupAnalysisComponent {
     monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
     annualAnalysisSummaryData: Array<AnnualAnalysisSummary>
   };
-  analysisReportSettings: AnalysisReportSettings;
+  modelYear: number;
+  bankedSavings: number;
   constructor(private analysisService: AnalysisService,
     private analysisDbService: AnalysisDbService,
     private facilityDbService: FacilitydbService,
@@ -53,7 +52,6 @@ export class BankedGroupAnalysisComponent {
   }
 
   ngOnInit() {
-    this.setReportSettings();
     this.analysisItemSub = this.analysisDbService.selectedAnalysisItem.subscribe(val => {
       let analysisItem: IdbAnalysisItem = val;
       let tmpBankedAnalysisItem: IdbAnalysisItem = this.analysisDbService.getByGuid(analysisItem.bankedAnalysisItemId);
@@ -61,7 +59,12 @@ export class BankedGroupAnalysisComponent {
     })
     this.selectedGroupSub = this.analysisService.selectedGroup.subscribe(val => {
       this.selectedGroup = val;
-      this.runAnalysis();
+      this.setModelYear();
+      if (!this.groupSummary || this.groupSummary.group.idbGroupId != this.selectedGroup.idbGroupId) {
+        this.runAnalysis();
+      } else {
+        this.setBankedSavings();
+      }
     });
   }
 
@@ -71,12 +74,6 @@ export class BankedGroupAnalysisComponent {
     if (this.worker) {
       this.worker.terminate();
     }
-  }
-
-  setReportSettings() {
-    this.analysisReportSettings = getAnalysisReportSettings()
-    this.analysisReportSettings.groupMonthlyResultsTable = false;
-    this.analysisReportSettings.groupMonthlyResultsTableReportYear = false;
   }
 
   runAnalysis() {
@@ -98,6 +95,7 @@ export class BankedGroupAnalysisComponent {
             return summary.group.idbGroupId == this.selectedGroup.idbGroupId;
           });
           this.calculating = false;
+          this.setBankedSavings();
         } else {
           this.calculating = 'error';
         }
@@ -121,7 +119,27 @@ export class BankedGroupAnalysisComponent {
       this.groupSummary = annualAnalysisSummaryClass.groupSummaries.find(summary => {
         return summary.group.idbGroupId == this.selectedGroup.idbGroupId;
       });
+      this.setBankedSavings();
+    }
+  }
 
+  setModelYear() {
+    let bankedAnalysisGroup: AnalysisGroup = this.bankedAnalysisItem.groups.find(group => {
+      return group.idbGroupId == this.selectedGroup.idbGroupId;
+    })
+    if (bankedAnalysisGroup.analysisType == 'regression') {
+      this.modelYear = bankedAnalysisGroup.regressionModelYear;
+    } else {
+      this.modelYear = undefined;
+    }
+  }
+
+  setBankedSavings() {
+    let bankedSavingsYear: AnnualAnalysisSummary = this.groupSummary.annualAnalysisSummaryData.find(summaryData => {
+      return summaryData.year == this.selectedGroup.bankedAnalysisYear;
+    });
+    if (bankedSavingsYear) {
+      this.bankedSavings = bankedSavingsYear.totalSavingsPercentImprovement;
     }
   }
 }

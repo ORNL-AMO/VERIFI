@@ -1,0 +1,165 @@
+<h5>
+    Banked Group Savings
+</h5>
+<div class="p-3" *ngIf="calculating != false">
+    <app-calculating-spinner [message]="'Calculating Banked Results...'"
+        [error]="calculating == 'error'"></app-calculating-spinner>
+</div>
+
+<ng-container *ngIf="calculating == false">
+    <table class="table utility-data table-sm table-bordered table-hover print-break-avoid" #dataTable>
+        <thead class="sortable">
+            <tr class="table-mh">
+                <th class="first-column"></th>
+                <th class="text-center th-3" colspan="2">
+                    <ng-container *ngIf="bankedAnalysisItem.analysisCategory == 'energy'">
+                        Energy (<span [innerHTML]="bankedAnalysisItem.energyUnit | settingsLabel"></span>)
+                    </ng-container>
+                    <ng-container *ngIf="bankedAnalysisItem.analysisCategory == 'water'">
+                        Consumption (<span [innerHTML]="bankedAnalysisItem.waterUnit | settingsLabel"></span>)
+                    </ng-container>
+                </th>
+                <th class="text-center th-3" colspan="3">
+                    Incremental Improvement
+                </th>
+
+            </tr>
+            <tr>
+                <th class="period-column">
+                    Year
+                </th>
+                <th>
+                    Actual
+                </th>
+                <th>
+                    Adjusted
+                </th>
+
+                <!-- <th>
+                    Total<br>Baseline<br> Adjustment
+                </th> -->
+                <!-- <th>
+                    Savings
+                </th> -->
+                <th>
+                    Total Savings <br> % Improvement
+                </th>
+                <th>
+                    Annual Savings <br> % Improvement
+                </th>
+                <th>
+                    Cumulative <br> Savings
+                </th>
+            </tr>
+        </thead>
+        <tbody class="table-group-divider">
+            <ng-container *ngFor="let summary of groupSummary.annualAnalysisSummaryData">
+                <ng-container *ngIf="summary.year < selectedGroup.newBaselineYear || !selectedGroup.newBaselineYear">
+                    <tr>
+                        <td>
+                            <span class="fa fa-piggy-bank"
+                                *ngIf="selectedGroup.bankedAnalysisYear >= summary.year"></span>
+                            <span class="fa fa-asterisk" *ngIf="selectedGroup.bankedAnalysisYear < summary.year"></span>
+                            <span class="fa fa-star" *ngIf="summary.year == modelYear"></span>
+                            {{summary.year | yearDisplay: facility.fiscalYear}}
+                        </td>
+
+
+                        <td>
+                            <span *ngIf="summary.energyUse" [ngClass]="{'red': summary.energyUse < 0}">
+                                {{summary.energyUse | customNumber}}
+                            </span>
+                            <span *ngIf="!summary.energyUse">
+                                &mdash;
+                            </span>
+                        </td>
+                        <td>
+                            <ng-template
+                                [ngIf]="summary.adjusted && selectedGroup.bankedAnalysisYear >= summary.year || !selectedGroup.bankedAnalysisYear"
+                                [ngIfElse]="adjustedMdash">
+                                <span [ngClass]="{'red': summary.adjusted < 0}">
+                                    {{summary.adjusted | customNumber}}
+                                </span>
+                            </ng-template>
+                            <ng-template #adjustedMdash>
+                                <span>
+                                    &mdash;
+                                </span>
+                            </ng-template>
+                        </td>
+                        <!-- <td>
+                    <span *ngIf="summary.baselineAdjustment" [ngClass]="{'red': summary.baselineAdjustment < 0}">
+                        {{summary.baselineAdjustment | customNumber}}
+                    </span>
+                    <span *ngIf="!summary.baselineAdjustment">
+                        &mdash;
+                    </span>
+                </td> -->
+                        <!-- <td>
+                    <ng-template [ngIf]="summary.savings && !summary.isIntermediateBanked" [ngIfElse]="savingsMdash">
+                        <span [ngClass]="{'red': summary.savings < 0}">
+                            {{summary.savings | customNumber}}
+                        </span>
+                    </ng-template>
+                    <ng-template #savingsMdash>
+                        <span>
+                            &mdash;
+                        </span>
+                    </ng-template>
+                </td> -->
+                        <td>
+                            <ng-template
+                                [ngIf]="selectedGroup.bankedAnalysisYear >= summary.year || !selectedGroup.bankedAnalysisYear"
+                                [ngIfElse]="bankedSavingsBlock">
+                                <span *ngIf="summary.totalSavingsPercentImprovement"
+                                    [ngClass]="{'red': summary.totalSavingsPercentImprovement < 0}">
+                                    {{summary.totalSavingsPercentImprovement | number:'1.0-2'}} %
+                                </span>
+                                <span *ngIf="!summary.totalSavingsPercentImprovement">
+                                    &mdash;
+                                </span>
+                            </ng-template>
+                            <ng-template #bankedSavingsBlock>
+                                {{bankedSavings | number:'1.0-2'}} %
+                            </ng-template>
+                        </td>
+                        <td>
+                            <ng-template
+                                [ngIf]="summary.annualSavingsPercentImprovement && selectedGroup.bankedAnalysisYear >= summary.year || !selectedGroup.bankedAnalysisYear"
+                                [ngIfElse]="savingsMdash">
+                                <span [ngClass]="{'red': summary.annualSavingsPercentImprovement < 0}">
+                                    {{summary.annualSavingsPercentImprovement | number:'1.0-2'}} %
+                                </span>
+                            </ng-template>
+                            <ng-template #savingsMdash>
+                                &mdash;
+                            </ng-template>
+                        </td>
+                        <td>
+                            <ng-template
+                                [ngIf]="summary.cummulativeSavings && selectedGroup.bankedAnalysisYear >= summary.year || !selectedGroup.bankedAnalysisYear"
+                                [ngIfElse]="cummulativeSavingsMdash">
+                                <span [ngClass]="{'red': summary.cummulativeSavings < 0}">
+                                    {{summary.cummulativeSavings | customNumber}}
+                                </span>
+                            </ng-template>
+                            <ng-template #cummulativeSavingsMdash>
+                                &mdash;
+                            </ng-template>
+                        </td>
+                    </tr>
+                </ng-container>
+            </ng-container>
+        </tbody>
+    </table>
+    <div class="d-flex w-100 justify-content-end hide-print">
+        <div class="alert alert-info p-1">
+            <span class="fa fa-piggy-bank"></span> Banked Analysis Year<br>
+            <span class="fa fa-asterisk"></span> Intermediate Analysis Year<br>
+            <ng-container *ngIf="modelYear">
+                <span class="fa fa-star"></span> Banked Model Year<br>
+            </ng-container>
+        </div>
+    </div>
+
+</ng-container>

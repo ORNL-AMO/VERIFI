@@ -53,6 +53,7 @@ export class MonthlyAnalysisSummaryTableComponent implements OnInit {
   copyingTable: boolean = false;
   hasBanked: boolean;
   reportLabel: 'Baseline Year' | 'Report Year' | 'Report & Model Year' | 'Baseline & Model Year' | 'Model Year';
+  modelYear: number;
   constructor(private analysisService: AnalysisService, private copyTableService: CopyTableService, private router: Router) { }
 
   ngOnInit(): void {
@@ -64,6 +65,7 @@ export class MonthlyAnalysisSummaryTableComponent implements OnInit {
       this.setPredictorVariables();
     })
     this.setHasBanked();
+    this.setModelYear();
     if (this.inReport) {
       this.setReportLabel();
     }
@@ -212,6 +214,12 @@ export class MonthlyAnalysisSummaryTableComponent implements OnInit {
       this.reportLabel = 'Baseline & Model Year';
     } else if (this.isGroupModelYear && !this.isBaselineYear && this.isReportYear) {
       this.reportLabel = 'Report & Model Year';
+    }
+  }
+
+  setModelYear() {
+    if (this.group && this.group.analysisType == 'regression') {
+      this.modelYear = this.group.regressionModelYear;
     }
   }
 }

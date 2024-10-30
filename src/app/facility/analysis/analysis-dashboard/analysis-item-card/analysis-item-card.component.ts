@@ -210,20 +210,20 @@ export class AnalysisItemCardComponent implements OnInit {
           accountAnalysisId: undefined
         });
       }
-
-      let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
-      for (let index = 0; index < accountAnalysisItems.length; index++) {
-        accountAnalysisItems[index].facilityAnalysisItems.forEach(item => {
-          if (item.facilityId == this.selectedFacility.guid && item.analysisItemId == this.analysisItem.guid) {
-            this.linkedItems.push({
-              bankedAnalysisId: undefined,
-              reportId: undefined,
-              accountAnalysisId: accountAnalysisItems[index].guid
-            })
-          }
-        });
-      }
     });
+
+    let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
+    for (let index = 0; index < accountAnalysisItems.length; index++) {
+      accountAnalysisItems[index].facilityAnalysisItems.forEach(item => {
+        if (item.facilityId == this.selectedFacility.guid && item.analysisItemId == this.analysisItem.guid) {
+          this.linkedItems.push({
+            bankedAnalysisId: undefined,
+            reportId: undefined,
+            accountAnalysisId: accountAnalysisItems[index].guid
+          })
+        }
+      });
+    }
   }
 
   addReport() {

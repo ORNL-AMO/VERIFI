@@ -78,6 +78,7 @@ export class FacilityAnalysisComponent implements OnInit {
       let monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData> = annualAnalysisSummaryClass.monthlyAnalysisSummaryData;
       this.analysisService.annualAnalysisSummary.next(annualAnalysisSummaries);
       this.analysisService.monthlyAccountAnalysisData.next(monthlyAnalysisSummaryData);
+      this.analysisService.calculating.next(false);
     }
   }
 

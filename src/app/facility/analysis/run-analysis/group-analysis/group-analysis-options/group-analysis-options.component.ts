@@ -9,7 +9,6 @@ import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { Router } from '@angular/router';
 import { AnalysisGroup } from 'src/app/models/analysis';
 import { AnalysisValidationService } from 'src/app/shared/helper-services/analysis-validation.service';
-import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -25,27 +24,34 @@ export class GroupAnalysisOptionsComponent implements OnInit {
   group: AnalysisGroup;
   selectedGroupSub: Subscription;
   showUnitsWarning: boolean;
-  yearOptions: Array<number>;
+  baselineYearOptions: Array<number>;
   analysisItem: IdbAnalysisItem;
   facility: IdbFacility;
   showInUseMessage: boolean;
   bankedAnalysisYears: Array<number>;
+  bankedAnalysisItem: IdbAnalysisItem;
+  bankedGroup: AnalysisGroup;
+  hasModelsGenerated: boolean;
+  displayEnableForm: boolean = false;
   constructor(private analysisService: AnalysisService, private analysisDbService: AnalysisDbService,
     private accountDbService: AccountdbService, private facilityDbService: FacilitydbService,
     private dbChangesService: DbChangesService,
     private analysisValidationService: AnalysisValidationService,
-    private calanderizationService: CalanderizationService,
     private router: Router,
     private accountAnalysisDbService: AccountAnalysisDbService) { }
 
   ngOnInit(): void {
     this.facility = this.facilityDbService.selectedFacility.getValue();
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
-    this.setBankedAnalysisYearOptions();
     this.setShowInUseMessage();
-    this.yearOptions = this.calanderizationService.getYearOptionsFacility(this.facility.guid, this.analysisItem.analysisCategory);
+    this.setBaselineYearOptions();
     this.selectedGroupSub = this.analysisService.selectedGroup.subscribe(group => {
       this.group = group;
+      if (this.analysisItem.hasBanking && this.group.applyBanking) {
+        this.setBankedGroup();
+        this.setBankedAnalysisYearOptions();
+        this.setHasModelsGenerated();
+      }
     });
   }
 
@@ -106,16 +112,60 @@ export class GroupAnalysisOptionsComponent implements OnInit {
     this.analysisService.hideInUseMessage = true;
   }
 
+  setBaselineYearOptions() {
+    this.baselineYearOptions = new Array();
+    for (let i = this.analysisItem.baselineYear; i < this.analysisItem.reportYear; i++) {
+      this.baselineYearOptions.push(i);
+    }
+  }
+
   setBankedAnalysisYearOptions() {
     this.bankedAnalysisYears = new Array();
-    if (this.analysisItem.hasBanking) {
-      let bankedAnalysisItem: IdbAnalysisItem = this.analysisDbService.getByGuid(this.analysisItem.bankedAnalysisItemId);
-      if (bankedAnalysisItem) {
-        let minReportYear: number = _.min([bankedAnalysisItem.reportYear, this.analysisItem.reportYear])
-        for (let i = bankedAnalysisItem.baselineYear + 1; i < minReportYear; i++) {
-          this.bankedAnalysisYears.push(i);
-        }
+    if (this.bankedAnalysisItem) {
+      let minReportYear: number = _.min([this.bankedAnalysisItem.reportYear, this.analysisItem.reportYear])
+      for (let i = this.bankedAnalysisItem.baselineYear + 1; i < minReportYear; i++) {
+        this.bankedAnalysisYears.push(i);
       }
     }
+  }
+
+  setBankedGroup() {
+    this.bankedAnalysisItem = this.analysisDbService.getByGuid(this.analysisItem.bankedAnalysisItemId);
+    this.bankedGroup = this.bankedAnalysisItem.groups.find(group => {
+      return group.idbGroupId == this.group.idbGroupId;
+    });
+  }
+
+  setHasModelsGenerated() {
+    if (this.group.models && this.group.models.length > 0) {
+      this.hasModelsGenerated = true;
+    } else {
+      this.hasModelsGenerated = false;
+    }
+  }
+
+
+  showEnableForm() {
+    this.displayEnableForm = true;
+  }
+
+  cancelEnableForm() {
+    this.displayEnableForm = false;
+  }
+
+  async confirmEnableForm() {
+    this.analysisItem.groups.forEach(group => {
+      group.models = [];
+      group.selectedModelId = undefined;
+      group.regressionConstant = undefined;
+      group.regressionModelYear = undefined;
+      group.regressionConstant = undefined;
+      group.predictorVariables.forEach(variable => {
+        variable.regressionCoefficient = undefined;
+      })
+    });
+    await this.saveItem();
+    this.setHasModelsGenerated();
+    this.cancelEnableForm();
   }
 }

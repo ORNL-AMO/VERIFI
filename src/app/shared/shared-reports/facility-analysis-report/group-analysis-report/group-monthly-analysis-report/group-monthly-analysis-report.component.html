@@ -1,6 +1,7 @@
 <!--baseline year-->
 <ng-container *ngIf="analysisReportSettings.groupMonthlyResultsTableBaselineYear">
-    <ng-template [ngIf]="!print || !(analysisReportSettings.analysisTableColumns | breakUpTableForPrint: 'monthly')" [ngIfElse]="baselinePrintBlock">
+    <ng-template [ngIf]="!print || !(analysisReportSettings.analysisTableColumns | breakUpTableForPrint: 'monthly')"
+        [ngIfElse]="baselinePrintBlock">
         <div class="scroll-x">
             <app-monthly-analysis-summary-table [monthlyAnalysisSummaryData]="baselineYearAnalysisSummaryData"
                 [analysisItem]="analysisItem" [facilityOrAccount]="facility" [itemsPerPage]="12" [inReport]="true"
@@ -33,8 +34,9 @@
 
 <!--model year-->
 <ng-container
-    *ngIf="analysisReportSettings.groupMonthlyResultsTableModelYear && !modelYearIsBaselineYear && !modelYearIsReportYear">
-    <ng-template [ngIf]="!print || !(analysisReportSettings.analysisTableColumns | breakUpTableForPrint: 'monthly')" [ngIfElse]="reportPrintBlock">
+    *ngIf="analysisReportSettings.groupMonthlyResultsTableModelYear && !modelYearIsBaselineYear && !modelYearIsReportYear && modelYearAnalysisSummaryData">
+    <ng-template [ngIf]="!print || !(analysisReportSettings.analysisTableColumns | breakUpTableForPrint: 'monthly')"
+        [ngIfElse]="reportPrintBlock">
         <div class="scroll-x">
             <app-monthly-analysis-summary-table [monthlyAnalysisSummaryData]="modelYearAnalysisSummaryData"
                 [analysisItem]="analysisItem" [facilityOrAccount]="facility" [itemsPerPage]="12" [inReport]="true"
@@ -69,8 +71,9 @@
 
 
 <!--report year-->
-<ng-container *ngIf="analysisReportSettings.gorupMonthlyResultsTableReportYear">
-    <ng-template [ngIf]="!print || !(analysisReportSettings.analysisTableColumns | breakUpTableForPrint: 'monthly')" [ngIfElse]="reportPrintBlock">
+<ng-container *ngIf="analysisReportSettings.groupMonthlyResultsTableReportYear">
+    <ng-template [ngIf]="!print || !(analysisReportSettings.analysisTableColumns | breakUpTableForPrint: 'monthly')"
+        [ngIfElse]="reportPrintBlock">
         <div class="scroll-x">
             <app-monthly-analysis-summary-table [monthlyAnalysisSummaryData]="reportYearAnalysisSummaryData"
                 [analysisItem]="analysisItem" [facilityOrAccount]="facility" [itemsPerPage]="12" [inReport]="true"

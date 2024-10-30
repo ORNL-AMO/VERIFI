@@ -1,7 +1,5 @@
 import { AnalysisTableColumns } from "../analysis";
 import { getNewIdbEntry, IdbEntry } from "./idbEntry";
-import { IdbPredictor } from "./predictor";
-
 
 export interface IdbFacilityReport extends IdbEntry {
     facilityId: string,
@@ -67,7 +65,7 @@ export function getAnalysisReportSettings(): AnalysisReportSettings {
         groupMonthlyResults: true,
         groupMonthlyResultsTable: true,
         groupMonthlyResultsTableBaselineYear: true,
-        gorupMonthlyResultsTableReportYear: true,
+        groupMonthlyResultsTableReportYear: true,
         groupMonthlyResultsTableModelYear: true,
         groupMonthlyResultsGraphs: true,
         groupAnnualResults: true,
@@ -91,7 +89,7 @@ export interface AnalysisReportSettings {
     groupMonthlyResults: boolean,
     groupMonthlyResultsTable: boolean,
     groupMonthlyResultsTableBaselineYear: boolean,
-    gorupMonthlyResultsTableReportYear: boolean,
+    groupMonthlyResultsTableReportYear: boolean,
     groupMonthlyResultsTableModelYear: boolean,
     groupMonthlyResultsGraphs: boolean,
     groupAnnualResults: boolean,
