@@ -54,6 +54,9 @@ export class CalculatedPredictorDataUpdateComponent {
   calculationDate: Date;
   latestMeterReading: Date;
   firstMeterReading: Date;
+
+  displayUpdatesModal: boolean = false;
+  checkForUpdates: boolean = false;
   constructor(private activatedRoute: ActivatedRoute, private predictorDbService: PredictorDbService,
     private predictorDataDbService: PredictorDataDbService,
     private sharedDataService: SharedDataService,
@@ -70,6 +73,7 @@ export class CalculatedPredictorDataUpdateComponent {
   }
 
   ngOnInit() {
+    this.setLastMeterReading();
     this.predictorDataSub = this.predictorDataDbService.facilityPredictorData.subscribe(() => {
       this.setPredictorData();
     });
@@ -84,7 +88,6 @@ export class CalculatedPredictorDataUpdateComponent {
     this.itemsPerPageSub = this.sharedDataService.itemsPerPage.subscribe(val => {
       this.itemsPerPage = val;
     });
-    this.setLastMeterReading();
   }
 
   ngOnDestroy() {
@@ -113,33 +116,53 @@ export class CalculatedPredictorDataUpdateComponent {
           added: false
         }
       });
-      this.setUpdatedAmount();
       this.predictorData = _.orderBy(this.predictorData, (pData: CalculatedPredictorTableItem) => {
         return new Date(pData.date)
       });
       if (this.predictorData.length > 0) {
         this.startDate = new Date(this.predictorData[0].date);
         this.endDate = new Date(this.predictorData[this.predictorData.length - 1].date);
+        if (this.endDate < this.latestMeterReading) {
+          this.endDate = new Date(this.latestMeterReading);
+          this.updateDataDateChange();
+        }
       }
     }
   }
 
-  async setUpdatedAmount() {
+  async setUpdatedAmount(updateAll: boolean) {
+    this.checkForUpdates = true;
+    this.closeCheckForUpdatesModal();
     this.calculatingData = true;
-    for (let i = 0; i < this.predictorData.length; i++) {
+    let predictorStart: number = 0;
+
+    let existingPredictorIndex: Array<number> = this.predictorData.map((p, idx) => {
+      if (p.id && p.updatedAmount == undefined) {
+        return idx
+      };
+      return undefined;
+    });
+    existingPredictorIndex = existingPredictorIndex.filter(idx => {
+      return idx != undefined;
+    });
+    if (existingPredictorIndex.length > 6 && !updateAll) {
+      predictorStart = (existingPredictorIndex.length - 6);
+    }
+    for (let i = predictorStart; i < existingPredictorIndex.length; i++) {
       if (this.destroyed) {
         break;
       }
-      if (!this.predictorData[i].weatherOverride && !this.predictorData[i].updatedAmount) {
+      let predictorIndex: number = existingPredictorIndex[i];
+      if (!this.predictorData[predictorIndex].weatherOverride && !this.predictorData[predictorIndex].updatedAmount) {
         let stationId: string = this.predictor.weatherStationId;
-        let entryDate: Date = new Date(this.predictorData[i].date);
+        let entryDate: Date = new Date(this.predictorData[predictorIndex].date);
         let degreeDays: Array<DetailDegreeDay> = await this.degreeDaysService.getDailyDataFromMonth(entryDate.getMonth(), entryDate.getFullYear(), this.predictor.heatingBaseTemperature, this.predictor.coolingBaseTemperature, stationId);
         let hasErrors: DetailDegreeDay = degreeDays.find(degreeDay => {
           return degreeDay.gapInData == true
         });
-        this.predictorData[i].updatedAmount = getDegreeDayAmount(degreeDays, this.predictor.weatherDataType);
-        this.predictorData[i].changeAmount = Math.abs(this.predictorData[i].amount - this.predictorData[i].updatedAmount)
-        this.predictorData[i].weatherDataWarning = hasErrors != undefined || degreeDays.length == 0;
+        this.predictorData[predictorIndex].updatedAmount = getDegreeDayAmount(degreeDays, this.predictor.weatherDataType);
+        this.predictorData[predictorIndex].changeAmount = Math.abs(this.predictorData[predictorIndex].amount - this.predictorData[predictorIndex].updatedAmount)
+        this.predictorData[predictorIndex].weatherDataWarning = hasErrors != undefined || degreeDays.length == 0;
       }
     }
     this.setDataSummary();
@@ -234,7 +257,7 @@ export class CalculatedPredictorDataUpdateComponent {
         this.dataSummary.newEntries++;
       } else if (pData.deleted) {
         this.dataSummary.deletedEntries++;
-      } else if (pData.changeAmount != 0) {
+      } else if (pData.changeAmount != 0 && pData.changeAmount != undefined) {
         this.dataSummary.changedEntries++
       }
     })
@@ -299,6 +322,14 @@ export class CalculatedPredictorDataUpdateComponent {
     //-1 on month
     this.startDate = new Date(Number(yearMonth[0]), Number(yearMonth[1]) - 1, 1);
     await this.updateDataDateChange();
+  }
+
+  openCheckForUpdatesModal() {
+    this.displayUpdatesModal = true;
+  }
+
+  closeCheckForUpdatesModal() {
+    this.displayUpdatesModal = false;
   }
 }
 
