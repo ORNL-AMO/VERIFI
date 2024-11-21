@@ -90,12 +90,12 @@
                     [ngClass]="{'active': orderDataField == 'savings'}">
                     Savings
                 </th>
-               <th *ngIf="analysisTableColumns.percentSavingsComparedToBaseline"
+               <!--<th *ngIf="analysisTableColumns.percentSavingsComparedToBaseline"
                     (click)="setOrderDataField('percentSavingsComparedToBaseline')"
                     [ngClass]="{'active': orderDataField == 'percentSavingsComparedToBaseline'}">
                     % Savings
                 </th>
-                <!-- <th *ngIf="analysisTableColumns.yearToDateSavings" (click)="setOrderDataField('yearToDateSavings')"
+                 <th *ngIf="analysisTableColumns.yearToDateSavings" (click)="setOrderDataField('yearToDateSavings')"
                     [ngClass]="{'active': orderDataField == 'yearToDateSavings'}">
                     YTD<br> Savings
                 </th>
@@ -232,7 +232,7 @@
                         </span>
                     </ng-template>
                 </td>
-                <td *ngIf="analysisTableColumns.percentSavingsComparedToBaseline">
+               <!--  <td *ngIf="analysisTableColumns.percentSavingsComparedToBaseline">
                     <span *ngIf="data.percentSavingsComparedToBaseline"
                         [ngClass]="{'red': data.percentSavingsComparedToBaseline < 0}">
                         {{data.percentSavingsComparedToBaseline | number:'1.0-2'}} %
@@ -241,7 +241,7 @@
                         &mdash;
                     </span>
                 </td>
-               <!--  <td *ngIf="analysisTableColumns.yearToDateSavings">
+                <td *ngIf="analysisTableColumns.yearToDateSavings">
                     <span *ngIf="data.yearToDateSavings" [ngClass]="{'red': data.yearToDateSavings < 0}">
                         {{data.yearToDateSavings | customNumber}}
                     </span>

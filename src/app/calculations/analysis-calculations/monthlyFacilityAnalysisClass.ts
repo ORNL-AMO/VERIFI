@@ -30,7 +30,6 @@ export class MonthlyFacilityAnalysisClass {
         this.facility = facility;
         this.analysisItem = analysisItem;
         if (analysisItem.hasBanking) {
-            console.log('has banking..')
             let bankedAnalysisItem: IdbAnalysisItem = accountAnalysisItems.find(item => { return item.guid == analysisItem.bankedAnalysisItemId });
             this.bankedFacilityAnalysisClass = new MonthlyFacilityAnalysisClass(bankedAnalysisItem, facility, calanderizedMeters, accountPredictorEntries, false, accountPredictors, accountAnalysisItems);
         }

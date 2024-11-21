@@ -152,9 +152,9 @@ export class MonthlyAnalysisSummaryTableComponent implements OnInit {
     if (this.analysisTableColumns.savings) {
       numImprovementColumns++;
     }
-    if (this.analysisTableColumns.percentSavingsComparedToBaseline) {
-      numImprovementColumns++;
-    }
+    // if (this.analysisTableColumns.percentSavingsComparedToBaseline) {
+    //   numImprovementColumns++;
+    // }
     // if (this.analysisTableColumns.yearToDateSavings) {
     //   numImprovementColumns++;
     // }

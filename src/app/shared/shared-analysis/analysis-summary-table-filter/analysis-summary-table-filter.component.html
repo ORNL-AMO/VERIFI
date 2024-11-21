@@ -87,7 +87,7 @@
                     <label class="form-check-label" for="savings">Savings</label>
                 </div>
                 <!--groupMonth-->
-                 <div class="form-check"
+                 <!--<div class="form-check"
                     *ngIf="(tableContext == 'monthGroup' || tableContext == 'monthFacility' || tableContext == 'monthAccount')">
                     <input class="form-check-input" type="checkbox" name="percentSavingsComparedToBaseline"
                         [(ngModel)]="analysisTableColumns.percentSavingsComparedToBaseline" (change)="save()"
@@ -95,7 +95,7 @@
                     <label class="form-check-label" for="percentSavingsComparedToBaseline">%
                         Savings</label>
                 </div>
-                <!--<div class="form-check"
+                <div class="form-check"
                     *ngIf="tableContext == 'monthGroup' || tableContext == 'monthFacility' || tableContext == 'monthAccount'">
                     <input class="form-check-input" type="checkbox" name="yearToDateSavings"
                         [(ngModel)]="analysisTableColumns.yearToDateSavings" (change)="save()" id="yearToDateSavings">
