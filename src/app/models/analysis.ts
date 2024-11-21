@@ -77,7 +77,8 @@ export interface MonthlyAnalysisSummaryData {
   dataAdjustment: number,
   baselineAdjustmentInput: number,
   isBanked: boolean,
-  isIntermediateBanked: boolean
+  isIntermediateBanked: boolean,
+  savingsBanked: number
 }
 
 export interface AnnualAnalysisSummary {
@@ -91,6 +92,7 @@ export interface AnnualAnalysisSummary {
   baselineAdjustment: number,
   SEnPI: number,
   savings: number,
+  savingsBanked: number,
   totalSavingsPercentImprovement: number,
   annualSavingsPercentImprovement: number,
   cummulativeSavings: number,

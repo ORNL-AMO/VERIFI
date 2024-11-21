@@ -202,8 +202,12 @@ export class BetterPlantsExcelWriterService {
       worksheet.getCell('C39').value = report.betterPlantsReportSetup.baselineAdjustmentNotes;
     }
     //modification notes
-    if (report.betterPlantsReportSetup.modificationNotes) {
+    if (report.betterPlantsReportSetup.modificationNotes && !betterPlantsSummary.totalEnergySavingsBanked) {
       worksheet.getCell('C44').value = report.betterPlantsReportSetup.modificationNotes;
+    } else if (!report.betterPlantsReportSetup.modificationNotes && betterPlantsSummary.totalEnergySavingsBanked) {
+      worksheet.getCell('C44').value = betterPlantsSummary.totalEnergySavingsBanked + ' MMBtu of banked savings included.';
+    } else if (report.betterPlantsReportSetup.modificationNotes && betterPlantsSummary.totalEnergySavingsBanked) {
+      worksheet.getCell('C44').value = report.betterPlantsReportSetup.modificationNotes + '; ' + betterPlantsSummary.totalEnergySavingsBanked + ' MMBtu of banked savings included.';
     }
 
     if (report.betterPlantsReportSetup.includePerformanceTable) {

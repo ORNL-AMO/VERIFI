@@ -131,7 +131,8 @@ export class AnnualGroupAnalysisSummaryClass {
             newSavings: checkAnalysisValue(summaryDataClass.newSavings),
             predictorUsage: summaryDataClass.predictorUsage,
             isBanked: summaryDataClass.isBanked,
-            isIntermediateBanked: summaryDataClass.isIntermediateBanked
+            isIntermediateBanked: summaryDataClass.isIntermediateBanked,
+            savingsBanked: checkAnalysisValue(summaryDataClass.savingsBanked)
         }
     }
 

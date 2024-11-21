@@ -16,6 +16,7 @@ export class AnnualAnalysisSummaryDataClass {
     baselineAdjustment: number;
     SEnPI: number;
     savings: number;
+    savingsBanked: number;
     totalSavingsPercentImprovement: number;
     annualSavingsPercentImprovement: number;
     cummulativeSavings: number;
@@ -141,6 +142,9 @@ export class AnnualAnalysisSummaryDataClass {
         this.savings = _.sumBy(this.yearAnalysisSummaryData, (data: MonthlyAnalysisSummaryData) => {
             return data.savings;
         });
+        this.savingsBanked = _.sumBy(this.yearAnalysisSummaryData, (data: MonthlyAnalysisSummaryData) => {
+            return data.savingsBanked;
+        });
     }
 
     setTotalSavingsPercentImprovement() {
@@ -160,7 +164,7 @@ export class AnnualAnalysisSummaryDataClass {
 
     setAnnualSavingsPercentImprovement() {
         this.annualSavingsPercentImprovement = this.totalSavingsPercentImprovement - this.previousYearPercentSavings;
-        if(this.isIntermediateBanked){
+        if (this.isIntermediateBanked) {
             this.annualSavingsPercentImprovement = 0;
         }
     }
@@ -168,8 +172,8 @@ export class AnnualAnalysisSummaryDataClass {
     setCummulativeSavings(previousYearsSummaryData: Array<AnnualAnalysisSummaryDataClass>) {
         if (previousYearsSummaryData.length != 0 && !this.isIntermediateBanked) {
             let previousYearData: Array<AnnualAnalysisSummaryDataClass> = previousYearsSummaryData.filter(data => { return data.year < this.year })
-            let sumSavings: number = _.sumBy(previousYearData, (data: AnnualAnalysisSummaryDataClass) => {return data.cummulativeSavings});
-            this.cummulativeSavings =  sumSavings + this.savings;
+            let sumSavings: number = _.sumBy(previousYearData, (data: AnnualAnalysisSummaryDataClass) => { return data.cummulativeSavings });
+            this.cummulativeSavings = sumSavings + this.savings;
         } else {
             this.cummulativeSavings = 0;
         }
@@ -177,7 +181,7 @@ export class AnnualAnalysisSummaryDataClass {
 
     setNewSavings() {
         this.newSavings = this.savings - this.previousYearSavings;
-        if(this.isIntermediateBanked){
+        if (this.isIntermediateBanked) {
             this.newSavings = 0;
         }
     }
@@ -221,7 +225,8 @@ export class AnnualAnalysisSummaryDataClass {
             newSavings: checkAnalysisValue(this.newSavings),
             predictorUsage: this.predictorUsage,
             isBanked: this.isBanked,
-            isIntermediateBanked: this.isIntermediateBanked
+            isIntermediateBanked: this.isIntermediateBanked,
+            savingsBanked: checkAnalysisValue(this.savingsBanked)
         }
     }
 

@@ -80,7 +80,8 @@ export class AnnualAccountAnalysisSummaryClass {
                 newSavings: checkAnalysisValue(summaryDataClass.newSavings),
                 predictorUsage: summaryDataClass.predictorUsage,
                 isBanked: false,
-                isIntermediateBanked: false
+                isIntermediateBanked: false,
+                savingsBanked: checkAnalysisValue(summaryDataClass.savingsBanked)
             }
         })
     }

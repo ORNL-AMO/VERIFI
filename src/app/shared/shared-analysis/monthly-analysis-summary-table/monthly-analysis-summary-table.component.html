@@ -91,7 +91,7 @@
                     [ngClass]="{'active': orderDataField == 'savings'}">
                     Savings
                 </th>
-                <th *ngIf="analysisTableColumns.percentSavingsComparedToBaseline"
+                <!-- <th *ngIf="analysisTableColumns.percentSavingsComparedToBaseline"
                     (click)="setOrderDataField('percentSavingsComparedToBaseline')"
                     [ngClass]="{'active': orderDataField == 'percentSavingsComparedToBaseline'}">
                     % Savings
@@ -99,7 +99,7 @@
                 <th *ngIf="analysisTableColumns.yearToDateSavings" (click)="setOrderDataField('yearToDateSavings')"
                     [ngClass]="{'active': orderDataField == 'yearToDateSavings'}">
                     YTD<br> Savings
-                </th>
+                </th> -->
                 <th *ngIf="analysisTableColumns.yearToDatePercentSavings"
                     (click)="setOrderDataField('yearToDatePercentSavings')"
                     [ngClass]="{'active': orderDataField == 'yearToDatePercentSavings'}">
@@ -227,7 +227,7 @@
                         </span>
                     </ng-template>
                 </td>
-                <td *ngIf="analysisTableColumns.percentSavingsComparedToBaseline">
+                <!-- <td *ngIf="analysisTableColumns.percentSavingsComparedToBaseline">
                     <span *ngIf="data.percentSavingsComparedToBaseline"
                         [ngClass]="{'red': data.percentSavingsComparedToBaseline < 0}">
                         {{data.percentSavingsComparedToBaseline | number:'1.0-2'}} %
@@ -243,7 +243,7 @@
                     <span *ngIf="!data.yearToDateSavings">
                         &mdash;
                     </span>
-                </td>
+                </td> -->
                 <td *ngIf="analysisTableColumns.yearToDatePercentSavings">
                     <span *ngIf="data.yearToDatePercentSavings" [ngClass]="{'red': data.yearToDatePercentSavings < 0}">
                         {{data.yearToDatePercentSavings | number:'1.0-2'}} %

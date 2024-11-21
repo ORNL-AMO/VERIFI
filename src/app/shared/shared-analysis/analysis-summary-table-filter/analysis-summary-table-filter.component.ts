@@ -72,8 +72,8 @@ export class AnalysisSummaryTableFilterComponent implements OnInit {
     if (this.analysisTableColumns.incrementalImprovement == false) {
       this.analysisTableColumns.SEnPI = false;
       this.analysisTableColumns.savings = false;
-      this.analysisTableColumns.percentSavingsComparedToBaseline = false;
-      this.analysisTableColumns.yearToDateSavings = false;
+      // this.analysisTableColumns.percentSavingsComparedToBaseline = false;
+      // this.analysisTableColumns.yearToDateSavings = false;
       this.analysisTableColumns.yearToDatePercentSavings = false;
       this.analysisTableColumns.rollingSavings = false;
       this.analysisTableColumns.rolling12MonthImprovement = false;
@@ -84,8 +84,8 @@ export class AnalysisSummaryTableFilterComponent implements OnInit {
     } else {
       this.analysisTableColumns.SEnPI = true;
       this.analysisTableColumns.savings = true;
-      this.analysisTableColumns.percentSavingsComparedToBaseline = true;
-      this.analysisTableColumns.yearToDateSavings = true;
+      // this.analysisTableColumns.percentSavingsComparedToBaseline = true;
+      // this.analysisTableColumns.yearToDateSavings = true;
       this.analysisTableColumns.yearToDatePercentSavings = true;
       this.analysisTableColumns.rollingSavings = true;
       this.analysisTableColumns.rolling12MonthImprovement = true;

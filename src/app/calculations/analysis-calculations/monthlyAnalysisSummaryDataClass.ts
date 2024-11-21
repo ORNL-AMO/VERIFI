@@ -37,12 +37,14 @@ export class MonthlyAnalysisSummaryDataClass {
     isBankedAnalysis: boolean;
     baselineYear: number;
     bankedAnalysisYear: number;
+    originalBaselineYearBaselineActualEnergyUse: number;
     constructor(
         monthlyGroupAnalysisClass: MonthlyGroupAnalysisClass,
         monthDate: Date,
         previousMonthsSummaryData: Array<MonthlyAnalysisSummaryDataClass>,
         facility: IdbFacility,
-        lastBankedMonthlyAnalysis: MonthlyAnalysisSummaryDataClass
+        lastBankedMonthlyAnalysis: MonthlyAnalysisSummaryDataClass,
+        baselineActualSummaryData: Array<MonthlyAnalysisSummaryDataClass>
     ) {
         this.date = monthDate;
         this.group = monthlyGroupAnalysisClass.selectedGroup;
@@ -57,7 +59,7 @@ export class MonthlyAnalysisSummaryDataClass {
         this.setMonthIndex(previousMonthsSummaryData);
         this.setEnergyUse(monthlyGroupAnalysisClass.analysisItem.analysisCategory);
         this.setPredictorAndProductionUsage(monthlyGroupAnalysisClass.selectedGroup.predictorVariables);
-        this.setBaselineActualEnergyUse(previousMonthsSummaryData);
+        this.setBaselineActualEnergyUse(previousMonthsSummaryData, baselineActualSummaryData);
         this.setModeledEnergy(monthlyGroupAnalysisClass.selectedGroup.analysisType, monthlyGroupAnalysisClass.predictorVariables, monthlyGroupAnalysisClass.baselineYearEnergyIntensity);
         this.setAnnualEnergyUse(monthlyGroupAnalysisClass.annualMeterDataUsage);
         this.setBaselineAdjustmentInput();
@@ -104,7 +106,10 @@ export class MonthlyAnalysisSummaryDataClass {
         }
     }
 
-    setBaselineActualEnergyUse(previousMonthsSummaryData: Array<MonthlyAnalysisSummaryDataClass>) {
+    setBaselineActualEnergyUse(previousMonthsSummaryData: Array<MonthlyAnalysisSummaryDataClass>, baselineActualSummaryData: Array<MonthlyAnalysisSummaryDataClass>) {
+        if (baselineActualSummaryData) {
+            this.originalBaselineYearBaselineActualEnergyUse = baselineActualSummaryData[this.monthIndex].energyUse;
+        }
         if (this.isBaselineYear || this.isBankedAnalysis) {
             this.baselineActualEnergyUse = this.energyUse;
         } else {
@@ -244,7 +249,8 @@ export class MonthlyAnalysisSummaryDataClass {
             this.baselineActualEnergyUse,
             this.modelYearDataAdjustment,
             this.dataAdjustment,
-            lastBankedMonthlyAnalysis
+            lastBankedMonthlyAnalysis,
+            this.originalBaselineYearBaselineActualEnergyUse
         );
     }
 
