@@ -136,6 +136,7 @@ export class FacilityHomeComponent implements OnInit {
       let annualAnalysisSummaries: Array<AnnualAnalysisSummary> = annualAnalysisSummaryClass.getAnnualAnalysisSummaries();
       let monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData> = annualAnalysisSummaryClass.monthlyAnalysisSummaryData;
       this.setEnergyBehaviorSubjects(annualAnalysisSummaries, monthlyAnalysisSummaryData);
+      this.facilityHomeService.calculatingEnergy.next(false);
     }
   }
 
@@ -189,6 +190,7 @@ export class FacilityHomeComponent implements OnInit {
       let annualAnalysisSummaries: Array<AnnualAnalysisSummary> = annualAnalysisSummaryClass.getAnnualAnalysisSummaries();
       let monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData> = annualAnalysisSummaryClass.monthlyAnalysisSummaryData;
       this.setWaterBehaviorSubjects(annualAnalysisSummaries, monthlyAnalysisSummaryData);
+      this.facilityHomeService.calculatingWater.next(false);
     }
   }
 

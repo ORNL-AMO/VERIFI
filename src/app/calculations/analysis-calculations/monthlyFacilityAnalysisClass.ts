@@ -30,8 +30,9 @@ export class MonthlyFacilityAnalysisClass {
         this.facility = facility;
         this.analysisItem = analysisItem;
         if (analysisItem.hasBanking) {
+            console.log('has banking..')
             let bankedAnalysisItem: IdbAnalysisItem = accountAnalysisItems.find(item => { return item.guid == analysisItem.bankedAnalysisItemId });
-            this.bankedFacilityAnalysisClass = new MonthlyFacilityAnalysisClass(bankedAnalysisItem, facility, calanderizedMeters, accountPredictorEntries, calculateAllMonthlyData, accountPredictors, accountAnalysisItems);
+            this.bankedFacilityAnalysisClass = new MonthlyFacilityAnalysisClass(bankedAnalysisItem, facility, calanderizedMeters, accountPredictorEntries, false, accountPredictors, accountAnalysisItems);
         }
         let calanderizedFacilityMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => { return cMeter.meter.facilityId == facility.guid })
         this.setFacilityPredictorEntries(accountPredictorEntries, facility);
