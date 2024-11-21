@@ -134,7 +134,8 @@ export interface AnalysisTableColumns {
     display: boolean,
     usedInAnalysis: boolean
   }>,
-  predictorGroupId: string
+  predictorGroupId: string,
+  bankedSavings: boolean
 }
 
 

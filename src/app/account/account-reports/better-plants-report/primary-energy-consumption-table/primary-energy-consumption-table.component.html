@@ -237,6 +237,14 @@
                     {{betterPlantsSummary.adjustedBaselinePrimaryEnergy | customNumber}}
                 </td>
             </tr>
+            <tr *ngIf="betterPlantsSummary.totalEnergySavingsBanked">
+                <td colspan="2">
+                    Additional Banked Energy Savings (MMBtu)
+                </td>
+                <td>
+                    {{betterPlantsSummary.totalEnergySavingsBanked | customNumber}}
+                </td>
+            </tr>
             <tr>
                 <td colspan="2">
                     New Energy Savings for Current Year (MMBtu)

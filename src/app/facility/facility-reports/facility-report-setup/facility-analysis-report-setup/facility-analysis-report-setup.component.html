@@ -314,6 +314,11 @@
                 <label class="form-check-label" for="SEnPI">SEnPI</label>
             </div>
             <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="bankedSavings"
+                    [(ngModel)]="analysisTableColumns.bankedSavings" (change)="save()" id="bankedSavings">
+                <label class="form-check-label" for="bankedSavings">Banked Savings</label>
+            </div>
+            <div class="form-check">
                 <input class="form-check-input" type="checkbox" name="savings"
                     [(ngModel)]="analysisTableColumns.savings" (change)="save()" id="savings">
                 <label class="form-check-label" for="savings">Savings</label>
@@ -331,13 +336,13 @@
                     <input class="form-check-input" type="checkbox" name="yearToDateSavings"
                         [(ngModel)]="analysisTableColumns.yearToDateSavings" (change)="save()" id="yearToDateSavings">
                     <label class="form-check-label" for="yearToDateSavings">YTD Savings</label>
-                </div> -->
+                </div>
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" name="yearToDatePercentSavings"
                         [(ngModel)]="analysisTableColumns.yearToDatePercentSavings" (change)="save()"
                         id="yearToDatePercentSavings">
                     <label class="form-check-label" for="yearToDatePercentSavings">YTD % Savings</label>
-                </div>
+                </div> -->
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" name="rollingSavings"
                         [(ngModel)]="analysisTableColumns.rollingSavings" (change)="save()" id="rollingSavings">

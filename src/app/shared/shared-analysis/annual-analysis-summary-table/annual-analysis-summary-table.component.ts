@@ -139,6 +139,9 @@ export class AnnualAnalysisSummaryTableComponent implements OnInit {
     if (this.analysisTableColumns.annualSavingsPercentImprovement) {
       numImprovementColumns++;
     }
+    if (this.analysisTableColumns.bankedSavings) {
+      numImprovementColumns++;
+    }
     if (this.analysisTableColumns.cummulativeSavings) {
       numImprovementColumns++;
     }

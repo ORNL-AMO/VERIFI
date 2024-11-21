@@ -73,6 +73,10 @@
                     [ngClass]="{'active': orderDataField == 'SEnPI'}">
                     SEnPI
                 </th>
+                <th *ngIf="analysisTableColumns.bankedSavings" (click)="setOrderDataField('bankedSavings')"
+                    [ngClass]="{'active': orderDataField == 'savingsBanked'}">
+                    Banked <br>Savings
+                </th>
                 <th *ngIf="analysisTableColumns.savings" (click)="setOrderDataField('savings')"
                     [ngClass]="{'active': orderDataField == 'savings'}">
                     Savings
@@ -184,6 +188,18 @@
                         </span>
                     </ng-template>
                     <ng-template #senpiMdash>
+                        <span>
+                            &mdash;
+                        </span>
+                    </ng-template>
+                </td>
+                <td *ngIf="analysisTableColumns.bankedSavings">
+                    <ng-template [ngIf]="summary.savingsBanked && !summary.isIntermediateBanked" [ngIfElse]="bankedSavingsMdash">
+                        <span [ngClass]="{'red': summary.savingsBanked < 0}">
+                            {{summary.savingsBanked | customNumber}}
+                        </span>
+                    </ng-template>
+                    <ng-template #bankedSavingsMdash>
                         <span>
                             &mdash;
                         </span>

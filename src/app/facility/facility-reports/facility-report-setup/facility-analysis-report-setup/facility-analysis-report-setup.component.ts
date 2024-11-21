@@ -104,7 +104,8 @@ export class FacilityAnalysisReportSetupComponent {
       this.analysisTableColumns.savings = false;
       // this.analysisTableColumns.percentSavingsComparedToBaseline = false;
       // this.analysisTableColumns.yearToDateSavings = false;
-      this.analysisTableColumns.yearToDatePercentSavings = false;
+      // this.analysisTableColumns.yearToDatePercentSavings = false;
+      this.analysisTableColumns.bankedSavings = false;
       this.analysisTableColumns.rollingSavings = false;
       this.analysisTableColumns.rolling12MonthImprovement = false;
       this.analysisTableColumns.totalSavingsPercentImprovement = false;
@@ -116,7 +117,8 @@ export class FacilityAnalysisReportSetupComponent {
       this.analysisTableColumns.savings = true;
       // this.analysisTableColumns.percentSavingsComparedToBaseline = true;
       // this.analysisTableColumns.yearToDateSavings = true;
-      this.analysisTableColumns.yearToDatePercentSavings = true;
+      // this.analysisTableColumns.yearToDatePercentSavings = true;
+      this.analysisTableColumns.bankedSavings = true;
       this.analysisTableColumns.rollingSavings = true;
       this.analysisTableColumns.rolling12MonthImprovement = true;
       this.analysisTableColumns.totalSavingsPercentImprovement = true;
@@ -145,7 +147,7 @@ export class FacilityAnalysisReportSetupComponent {
       this.analysisTableColumns.yearToDateSavings ||
       this.analysisTableColumns.yearToDatePercentSavings ||
       this.analysisTableColumns.rollingSavings ||
-      this.analysisTableColumns.rolling12MonthImprovement||
+      this.analysisTableColumns.rolling12MonthImprovement ||
       this.analysisTableColumns.SEnPI ||
       this.analysisTableColumns.savings ||
       this.analysisTableColumns.totalSavingsPercentImprovement ||

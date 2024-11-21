@@ -82,6 +82,11 @@
                     <label class="form-check-label" for="SEnPI">SEnPI</label>
                 </div>
                 <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="bankedSavings"
+                        [(ngModel)]="analysisTableColumns.bankedSavings" (change)="save()" id="bankedSavings">
+                    <label class="form-check-label" for="bankedSavings">Banked Savings</label>
+                </div>
+                <div class="form-check">
                     <input class="form-check-input" type="checkbox" name="savings"
                         [(ngModel)]="analysisTableColumns.savings" (change)="save()" id="savings">
                     <label class="form-check-label" for="savings">Savings</label>

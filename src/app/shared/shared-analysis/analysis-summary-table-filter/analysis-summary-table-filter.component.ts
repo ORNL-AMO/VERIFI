@@ -81,6 +81,7 @@ export class AnalysisSummaryTableFilterComponent implements OnInit {
       this.analysisTableColumns.annualSavingsPercentImprovement = false;
       this.analysisTableColumns.cummulativeSavings = false;
       this.analysisTableColumns.newSavings = false;
+      this.analysisTableColumns.bankedSavings = false;
     } else {
       this.analysisTableColumns.SEnPI = true;
       this.analysisTableColumns.savings = true;
@@ -93,6 +94,7 @@ export class AnalysisSummaryTableFilterComponent implements OnInit {
       this.analysisTableColumns.annualSavingsPercentImprovement = true;
       this.analysisTableColumns.cummulativeSavings = true;
       this.analysisTableColumns.newSavings = true;
+      this.analysisTableColumns.bankedSavings = true;
     }
     this.save();
   }
@@ -210,6 +212,7 @@ export class AnalysisSummaryTableFilterComponent implements OnInit {
     this.analysisTableColumns.annualSavingsPercentImprovement = true;
     this.analysisTableColumns.cummulativeSavings = true;
     this.analysisTableColumns.newSavings = true;
+    this.analysisTableColumns.bankedSavings = false;
     this.analysisTableColumns.predictors.forEach(predictor => {
       if (predictor.usedInAnalysis) {
         predictor.display = true;

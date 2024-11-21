@@ -58,12 +58,8 @@
                         <p>
                             <span
                                 *ngIf="selectedReport.betterPlantsReportSetup.modificationNotes">{{selectedReport.betterPlantsReportSetup.modificationNotes}}<br></span>
-                            <span *ngIf="betterPlantsSummary.totalEnergySavingsBanked">
-                                {{betterPlantsSummary.totalEnergySavingsBanked | customNumber}} MMBtu of banked savings
-                                included.
-                            </span>
                             <span
-                                *ngIf="!selectedReport.betterPlantsReportSetup.modificationNotes && !betterPlantsSummary.totalEnergySavingsBanked">N/A</span>
+                                *ngIf="!selectedReport.betterPlantsReportSetup.modificationNotes">N/A</span>
                         </p>
                     </div>
                 </div>
@@ -130,12 +126,7 @@
                         <p>
                             <span
                                 *ngIf="selectedReport.betterPlantsReportSetup.modificationNotes">{{selectedReport.betterPlantsReportSetup.modificationNotes}}<br></span>
-                            <span *ngIf="betterPlantsSummary.totalWaterSavingsBanked">
-                                {{betterPlantsSummary.totalWaterSavingsBanked | customNumber}} kGal of banked savings
-                                included.
-                            </span>
-                            <span
-                                *ngIf="!selectedReport.betterPlantsReportSetup.modificationNotes && !betterPlantsSummary.totalEnergySavingsBanked">N/A</span>
+                            <span *ngIf="!selectedReport.betterPlantsReportSetup.modificationNotes">N/A</span>
                         </p>
                     </div>
                 </div>
