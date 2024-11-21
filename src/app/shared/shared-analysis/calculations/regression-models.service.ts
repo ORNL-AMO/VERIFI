@@ -291,7 +291,7 @@ export class RegressionModelsService {
     let reportYearPredictorData: Array<IdbPredictorData> = new Array();
     let baselineYearPredictorData: Array<IdbPredictorData> = new Array();
     for (let i = 0; i < facilityPredictorData.length; i++) {
-      let fiscalYear: number = getFiscalYear(facilityPredictorData[i].date, facility);
+      let fiscalYear: number = getFiscalYear(new Date(facilityPredictorData[i].date), facility);
       if (fiscalYear == reportYear) {
         reportYearPredictorData.push(facilityPredictorData[i]);
       }
