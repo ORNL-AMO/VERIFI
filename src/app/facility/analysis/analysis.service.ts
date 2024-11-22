@@ -65,7 +65,8 @@ export class AnalysisService {
         newSavings: true,
         predictors: [],
         predictorGroupId: undefined,
-        bankedSavings: true
+        bankedSavings: false,
+        savingsUnbanked: false
       }
     }
     this.analysisTableColumns = new BehaviorSubject<AnalysisTableColumns>(analysisTableColumns);

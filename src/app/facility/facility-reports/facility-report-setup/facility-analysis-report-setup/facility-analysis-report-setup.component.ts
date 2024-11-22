@@ -106,6 +106,7 @@ export class FacilityAnalysisReportSetupComponent {
       // this.analysisTableColumns.yearToDateSavings = false;
       // this.analysisTableColumns.yearToDatePercentSavings = false;
       this.analysisTableColumns.bankedSavings = false;
+      this.analysisTableColumns.savingsUnbanked = false;
       this.analysisTableColumns.rollingSavings = false;
       this.analysisTableColumns.rolling12MonthImprovement = false;
       this.analysisTableColumns.totalSavingsPercentImprovement = false;
@@ -119,6 +120,7 @@ export class FacilityAnalysisReportSetupComponent {
       // this.analysisTableColumns.yearToDateSavings = true;
       // this.analysisTableColumns.yearToDatePercentSavings = true;
       this.analysisTableColumns.bankedSavings = true;
+      this.analysisTableColumns.savingsUnbanked = true;
       this.analysisTableColumns.rollingSavings = true;
       this.analysisTableColumns.rolling12MonthImprovement = true;
       this.analysisTableColumns.totalSavingsPercentImprovement = true;
@@ -143,9 +145,9 @@ export class FacilityAnalysisReportSetupComponent {
     this.analysisTableColumns.incrementalImprovement = (
       this.analysisTableColumns.SEnPI ||
       this.analysisTableColumns.savings ||
-      this.analysisTableColumns.percentSavingsComparedToBaseline ||
-      this.analysisTableColumns.yearToDateSavings ||
-      this.analysisTableColumns.yearToDatePercentSavings ||
+      // this.analysisTableColumns.percentSavingsComparedToBaseline ||
+      // this.analysisTableColumns.yearToDateSavings ||
+      // this.analysisTableColumns.yearToDatePercentSavings ||
       this.analysisTableColumns.rollingSavings ||
       this.analysisTableColumns.rolling12MonthImprovement ||
       this.analysisTableColumns.SEnPI ||
@@ -153,7 +155,9 @@ export class FacilityAnalysisReportSetupComponent {
       this.analysisTableColumns.totalSavingsPercentImprovement ||
       this.analysisTableColumns.annualSavingsPercentImprovement ||
       this.analysisTableColumns.cummulativeSavings ||
-      this.analysisTableColumns.newSavings
+      this.analysisTableColumns.newSavings ||
+      this.analysisTableColumns.bankedSavings ||
+      this.analysisTableColumns.savingsUnbanked
     )
   }
 
@@ -199,6 +203,8 @@ export class FacilityAnalysisReportSetupComponent {
     this.analysisTableColumns.annualSavingsPercentImprovement = true;
     this.analysisTableColumns.cummulativeSavings = true;
     this.analysisTableColumns.newSavings = true;
+    this.analysisTableColumns.bankedSavings = false;
+    this.analysisTableColumns.savingsUnbanked = false;
     await this.save();
   }
 

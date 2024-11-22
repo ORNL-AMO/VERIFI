@@ -319,6 +319,11 @@
                 <label class="form-check-label" for="bankedSavings">Banked Savings</label>
             </div>
             <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="savingsUnbanked"
+                    [(ngModel)]="analysisTableColumns.savingsUnbanked" (change)="save()" id="savingsUnbanked">
+                <label class="form-check-label" for="savingsUnbanked">Unbanked Savings</label>
+            </div>
+            <div class="form-check">
                 <input class="form-check-input" type="checkbox" name="savings"
                     [(ngModel)]="analysisTableColumns.savings" (change)="save()" id="savings">
                 <label class="form-check-label" for="savings">Savings</label>

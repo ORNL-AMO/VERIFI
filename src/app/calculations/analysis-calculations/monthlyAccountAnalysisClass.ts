@@ -156,7 +156,8 @@ export class MonthlyAccountAnalysisClass {
                 baselineAdjustmentInput: summaryDataItem.baselineAdjustmentInput,
                 isBanked: false,
                 isIntermediateBanked: false,
-                savingsBanked: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.savingsBanked)
+                savingsBanked: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.savingsBanked),
+                savingsUnbanked: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.savingsUnbanked)
 
             }
         })

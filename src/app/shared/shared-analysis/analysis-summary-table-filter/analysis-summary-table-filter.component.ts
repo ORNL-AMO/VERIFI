@@ -72,9 +72,9 @@ export class AnalysisSummaryTableFilterComponent implements OnInit {
     if (this.analysisTableColumns.incrementalImprovement == false) {
       this.analysisTableColumns.SEnPI = false;
       this.analysisTableColumns.savings = false;
-      this.analysisTableColumns.percentSavingsComparedToBaseline = false;
-      this.analysisTableColumns.yearToDateSavings = false;
-      this.analysisTableColumns.yearToDatePercentSavings = false;
+      // this.analysisTableColumns.percentSavingsComparedToBaseline = false;
+      // this.analysisTableColumns.yearToDateSavings = false;
+      // this.analysisTableColumns.yearToDatePercentSavings = false;
       this.analysisTableColumns.rollingSavings = false;
       this.analysisTableColumns.rolling12MonthImprovement = false;
       this.analysisTableColumns.totalSavingsPercentImprovement = false;
@@ -82,12 +82,13 @@ export class AnalysisSummaryTableFilterComponent implements OnInit {
       this.analysisTableColumns.cummulativeSavings = false;
       this.analysisTableColumns.newSavings = false;
       this.analysisTableColumns.bankedSavings = false;
+      this.analysisTableColumns.savingsUnbanked = false;
     } else {
       this.analysisTableColumns.SEnPI = true;
       this.analysisTableColumns.savings = true;
-      this.analysisTableColumns.percentSavingsComparedToBaseline = true;
-      this.analysisTableColumns.yearToDateSavings = true;
-      this.analysisTableColumns.yearToDatePercentSavings = true;
+      // this.analysisTableColumns.percentSavingsComparedToBaseline = true;
+      // this.analysisTableColumns.yearToDateSavings = true;
+      // this.analysisTableColumns.yearToDatePercentSavings = true;
       this.analysisTableColumns.rollingSavings = true;
       this.analysisTableColumns.rolling12MonthImprovement = true;
       this.analysisTableColumns.totalSavingsPercentImprovement = true;
@@ -95,6 +96,7 @@ export class AnalysisSummaryTableFilterComponent implements OnInit {
       this.analysisTableColumns.cummulativeSavings = true;
       this.analysisTableColumns.newSavings = true;
       this.analysisTableColumns.bankedSavings = true;
+      this.analysisTableColumns.savingsUnbanked = true;
     }
     this.save();
   }
@@ -113,11 +115,13 @@ export class AnalysisSummaryTableFilterComponent implements OnInit {
     this.analysisTableColumns.incrementalImprovement = (
       this.analysisTableColumns.SEnPI ||
       this.analysisTableColumns.savings ||
-      this.analysisTableColumns.percentSavingsComparedToBaseline ||
-      this.analysisTableColumns.yearToDateSavings ||
-      this.analysisTableColumns.yearToDatePercentSavings ||
+      // this.analysisTableColumns.percentSavingsComparedToBaseline ||
+      // this.analysisTableColumns.yearToDateSavings ||
+      // this.analysisTableColumns.yearToDatePercentSavings ||
       this.analysisTableColumns.rollingSavings ||
-      this.analysisTableColumns.rolling12MonthImprovement
+      this.analysisTableColumns.rolling12MonthImprovement ||
+      this.analysisTableColumns.savingsUnbanked ||
+      this.analysisTableColumns.bankedSavings
     )
   }
 
@@ -128,7 +132,9 @@ export class AnalysisSummaryTableFilterComponent implements OnInit {
       this.analysisTableColumns.totalSavingsPercentImprovement ||
       this.analysisTableColumns.annualSavingsPercentImprovement ||
       this.analysisTableColumns.cummulativeSavings ||
-      this.analysisTableColumns.newSavings
+      this.analysisTableColumns.newSavings||
+      this.analysisTableColumns.savingsUnbanked ||
+      this.analysisTableColumns.bankedSavings
     );
   }
 
@@ -195,9 +201,9 @@ export class AnalysisSummaryTableFilterComponent implements OnInit {
     this.analysisTableColumns.incrementalImprovement = false;
     this.analysisTableColumns.SEnPI = false;
     this.analysisTableColumns.savings = false;
-    this.analysisTableColumns.percentSavingsComparedToBaseline = false;
-    this.analysisTableColumns.yearToDateSavings = false;
-    this.analysisTableColumns.yearToDatePercentSavings = false;
+    // this.analysisTableColumns.percentSavingsComparedToBaseline = false;
+    // this.analysisTableColumns.yearToDateSavings = false;
+    // this.analysisTableColumns.yearToDatePercentSavings = false;
     this.analysisTableColumns.rollingSavings = false;
     this.analysisTableColumns.rolling12MonthImprovement = false;
     this.analysisTableColumns.productionVariables = true;
@@ -213,6 +219,7 @@ export class AnalysisSummaryTableFilterComponent implements OnInit {
     this.analysisTableColumns.cummulativeSavings = true;
     this.analysisTableColumns.newSavings = true;
     this.analysisTableColumns.bankedSavings = false;
+    this.analysisTableColumns.savingsUnbanked = false;
     this.analysisTableColumns.predictors.forEach(predictor => {
       if (predictor.usedInAnalysis) {
         predictor.display = true;
@@ -223,12 +230,12 @@ export class AnalysisSummaryTableFilterComponent implements OnInit {
     this.save();
   }
 
-  setLabels(){
-    if(this.analysisItem.analysisCategory == 'water'){
+  setLabels() {
+    if (this.analysisItem.analysisCategory == 'water') {
       this.actualUseLabel = 'Actual Consumption';
       this.modeledUseLabel = 'Modeled Consumption';
       this.energyColumnLabel = 'Consumption Columns';
-    }else if(this.analysisItem.analysisCategory == 'energy'){
+    } else if (this.analysisItem.analysisCategory == 'energy') {
       this.actualUseLabel = 'Actual Energy Use';
       this.modeledUseLabel = 'Modeled Energy Use';
       this.energyColumnLabel = 'Energy Columns';

@@ -90,6 +90,10 @@
                     [ngClass]="{'active': orderDataField == 'savingsBanked'}">
                     Banked<br> Savings
                 </th>
+                <th *ngIf="analysisTableColumns.savingsUnbanked" (click)="setOrderDataField('savingsUnbanked')"
+                    [ngClass]="{'active': orderDataField == 'savingsUnbanked'}">
+                    Unbanked <br>Savings
+                </th>
                 <th *ngIf="analysisTableColumns.savings" (click)="setOrderDataField('savings')"
                     [ngClass]="{'active': orderDataField == 'savings'}">
                     Savings
@@ -231,6 +235,18 @@
                         </span>
                     </ng-template>
                     <ng-template #bankedSavingsMdash>
+                        <span>
+                            &mdash;
+                        </span>
+                    </ng-template>
+                </td>
+                <td *ngIf="analysisTableColumns.savingsUnbanked">
+                    <ng-template [ngIf]="data.savingsUnbanked && !data.isIntermediateBanked" [ngIfElse]="unbankedSavingsMdash">
+                        <span [ngClass]="{'red': data.savingsUnbanked < 0}">
+                            {{data.savingsUnbanked | customNumber}}
+                        </span>
+                    </ng-template>
+                    <ng-template #unbankedSavingsMdash>
                         <span>
                             &mdash;
                         </span>

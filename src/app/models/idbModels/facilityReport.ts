@@ -51,7 +51,8 @@ export function getAnalysisReportSettings(): AnalysisReportSettings {
             newSavings: true,
             predictors: [],
             predictorGroupId: undefined,
-            bankedSavings: true
+            bankedSavings: false,
+            savingsUnbanked: false
         },
         facilityAnnualResults: true,
         facilityAnnualResultsTable: true,

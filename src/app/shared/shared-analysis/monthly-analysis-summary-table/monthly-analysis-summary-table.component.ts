@@ -152,6 +152,9 @@ export class MonthlyAnalysisSummaryTableComponent implements OnInit {
     if (this.analysisTableColumns.savings) {
       numImprovementColumns++;
     }
+    if(this.analysisTableColumns.savingsUnbanked){
+      numImprovementColumns++;
+    }
     if(this.analysisTableColumns.bankedSavings){
       numImprovementColumns++;
     }

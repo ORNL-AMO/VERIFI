@@ -146,7 +146,8 @@ export class MonthlyAnalysisSummaryClass {
                 baselineAdjustmentInput: summaryDataItem.baselineAdjustmentInput,
                 isBanked: summaryDataItem.isBankedAnalysis,
                 isIntermediateBanked: summaryDataItem.isBankedAnalysis,
-                savingsBanked: summaryDataItem.monthlyAnalysisCalculatedValues.savingsBanked
+                savingsBanked: summaryDataItem.monthlyAnalysisCalculatedValues.savingsBanked,
+                savingsUnbanked: summaryDataItem.monthlyAnalysisCalculatedValues.savingsUnbanked
             }
         })
     }

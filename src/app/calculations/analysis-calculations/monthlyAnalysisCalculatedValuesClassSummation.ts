@@ -12,6 +12,7 @@ export class MonthlyAnalysisCalculatedValuesSummation {
     SEnPI: number;
     savings: number;
     savingsBanked: number;
+    savingsUnbanked: number;
     percentSavingsComparedToBaseline: number;
     yearToDateSavings: number;
     yearToDatePercentSavings: number;
@@ -115,6 +116,10 @@ export class MonthlyAnalysisCalculatedValuesSummation {
     setSavings(currentMonthData: Array<MonthlyAnalysisSummaryDataClass>) {
         this.savings = _.sumBy(currentMonthData, (data: MonthlyAnalysisSummaryDataClass) => {
             return data.monthlyAnalysisCalculatedValues.savings;
+        });
+
+        this.savingsUnbanked = _.sumBy(currentMonthData, (data: MonthlyAnalysisSummaryDataClass) => {
+            return data.monthlyAnalysisCalculatedValues.savingsUnbanked;
         });
 
         this.savingsBanked = _.sumBy(currentMonthData, (data: MonthlyAnalysisSummaryDataClass) => {

@@ -17,6 +17,7 @@ export class AnnualAnalysisSummaryDataClass {
     SEnPI: number;
     savings: number;
     savingsBanked: number;
+    savingsUnbanked: number;
     totalSavingsPercentImprovement: number;
     annualSavingsPercentImprovement: number;
     cummulativeSavings: number;
@@ -142,6 +143,9 @@ export class AnnualAnalysisSummaryDataClass {
         this.savings = _.sumBy(this.yearAnalysisSummaryData, (data: MonthlyAnalysisSummaryData) => {
             return data.savings;
         });
+        this.savingsUnbanked = _.sumBy(this.yearAnalysisSummaryData, (data: MonthlyAnalysisSummaryData) => {
+            return data.savingsUnbanked;
+        });
         this.savingsBanked = _.sumBy(this.yearAnalysisSummaryData, (data: MonthlyAnalysisSummaryData) => {
             return data.savingsBanked;
         });
@@ -226,7 +230,8 @@ export class AnnualAnalysisSummaryDataClass {
             predictorUsage: this.predictorUsage,
             isBanked: this.isBanked,
             isIntermediateBanked: this.isIntermediateBanked,
-            savingsBanked: checkAnalysisValue(this.savingsBanked)
+            savingsBanked: checkAnalysisValue(this.savingsBanked),
+            savingsUnbanked: checkAnalysisValue(this.savingsUnbanked)
         }
     }
 
