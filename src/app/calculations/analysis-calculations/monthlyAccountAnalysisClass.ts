@@ -155,7 +155,9 @@ export class MonthlyAccountAnalysisClass {
                 // adjustedStarStar: summaryDataItem.monthlyAnalysisCalculatedValues.adjustedStarStar,
                 baselineAdjustmentInput: summaryDataItem.baselineAdjustmentInput,
                 isBanked: false,
-                isIntermediateBanked: false
+                isIntermediateBanked: false,
+                savingsBanked: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.savingsBanked),
+                savingsUnbanked: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.savingsUnbanked)
 
             }
         })

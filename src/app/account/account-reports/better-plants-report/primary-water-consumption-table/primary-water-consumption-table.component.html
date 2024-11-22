@@ -446,6 +446,22 @@
                     {{betterPlantsSummary.reportYearAnalysisSummary.newSavings | customNumber}}
                 </td>
             </tr>
+            <tr *ngIf="betterPlantsSummary.totalWaterSavingsUnbanked">
+                <td colspan="2">
+                    Unbanked Water Savings (kGal)
+                </td>
+                <td>
+                    {{betterPlantsSummary.totalWaterSavingsUnbanked | customNumber}}
+                </td>
+            </tr>
+            <tr *ngIf="betterPlantsSummary.totalWaterSavingsBanked">
+                <td colspan="2">
+                    Banked Water Savings (kGal)
+                </td>
+                <td>
+                    {{betterPlantsSummary.totalWaterSavingsBanked | customNumber}}
+                </td>
+            </tr>
             <tr>
                 <td>
                     Total Water Savings since Baseline Year (kGal)

@@ -42,6 +42,8 @@ export class AnnualAnalysisSummaryTableComponent implements OnInit {
   predictorColumns: Array<AnalysisGroupPredictorVariable>;
   copyingTable: boolean = false;
   hasBanked: boolean;
+  hasBankedSavings: boolean;
+  hasTransitionYear: boolean;
   modelYear: number;
   constructor(private analysisService: AnalysisService, private copyTableService: CopyTableService,
     private router: Router) { }
@@ -137,6 +139,12 @@ export class AnnualAnalysisSummaryTableComponent implements OnInit {
     if (this.analysisTableColumns.annualSavingsPercentImprovement) {
       numImprovementColumns++;
     }
+    if (this.analysisTableColumns.savingsUnbanked) {
+      numImprovementColumns++;
+    }
+    if (this.analysisTableColumns.bankedSavings) {
+      numImprovementColumns++;
+    }
     if (this.analysisTableColumns.cummulativeSavings) {
       numImprovementColumns++;
     }
@@ -167,6 +175,12 @@ export class AnnualAnalysisSummaryTableComponent implements OnInit {
   setHasBanked() {
     this.hasBanked = this.annualAnalysisSummary.find(data => {
       return data.isBanked
+    }) != undefined;
+    this.hasBankedSavings = this.annualAnalysisSummary.find(data => {
+      return data.savingsBanked
+    }) != undefined;
+    this.hasTransitionYear = this.annualAnalysisSummary.find(data => {
+      return data.isIntermediateBanked
     }) != undefined;
   }
 

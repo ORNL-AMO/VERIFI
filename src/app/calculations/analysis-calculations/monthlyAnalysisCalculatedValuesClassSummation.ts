@@ -11,6 +11,8 @@ export class MonthlyAnalysisCalculatedValuesSummation {
     fiscalYear: number;
     SEnPI: number;
     savings: number;
+    savingsBanked: number;
+    savingsUnbanked: number;
     percentSavingsComparedToBaseline: number;
     yearToDateSavings: number;
     yearToDatePercentSavings: number;
@@ -115,6 +117,14 @@ export class MonthlyAnalysisCalculatedValuesSummation {
         this.savings = _.sumBy(currentMonthData, (data: MonthlyAnalysisSummaryDataClass) => {
             return data.monthlyAnalysisCalculatedValues.savings;
         });
+
+        this.savingsUnbanked = _.sumBy(currentMonthData, (data: MonthlyAnalysisSummaryDataClass) => {
+            return data.monthlyAnalysisCalculatedValues.savingsUnbanked;
+        });
+
+        this.savingsBanked = _.sumBy(currentMonthData, (data: MonthlyAnalysisSummaryDataClass) => {
+            return data.monthlyAnalysisCalculatedValues.savingsBanked;
+        });
     }
 
     setPercentSavingsComparedToBaseline() {
@@ -145,9 +155,10 @@ export class MonthlyAnalysisCalculatedValuesSummation {
     setRollingSavingsValues(previousMonthsValues: Array<MonthlyAnalysisCalculatedValuesSummation>) {
         if (this.summaryDataIndex > 11) {
             let last11MonthsData: Array<MonthlyAnalysisCalculatedValuesSummation> = previousMonthsValues.splice(this.summaryDataIndex - 11, this.summaryDataIndex);
-            let total12MonthsEnergyUse: number = _.sumBy(last11MonthsData, (data: MonthlyAnalysisCalculatedValuesSummation) => { return data.energyUse }) + this.energyUse;
+            // let total12MonthsEnergyUse: number = _.sumBy(last11MonthsData, (data: MonthlyAnalysisCalculatedValuesSummation) => { return data.energyUse }) + this.energyUse;
             let total12MonthsAdjusedBaseline: number = _.sumBy(last11MonthsData, (data: MonthlyAnalysisCalculatedValuesSummation) => { return data.adjusted }) + this.adjusted;
-            this.rollingSavings = total12MonthsAdjusedBaseline - total12MonthsEnergyUse;
+            this.rollingSavings = _.sumBy(last11MonthsData, (data: MonthlyAnalysisCalculatedValuesSummation) => { return data.savings }) + this.savings;
+            // this.rollingSavings = total12MonthsAdjusedBaseline - total12MonthsEnergyUse;
             this.rolling12MonthImprovement = this.rollingSavings / total12MonthsAdjusedBaseline;
         } else {
             this.rolling12MonthImprovement = 0;

@@ -77,7 +77,9 @@ export interface MonthlyAnalysisSummaryData {
   dataAdjustment: number,
   baselineAdjustmentInput: number,
   isBanked: boolean,
-  isIntermediateBanked: boolean
+  isIntermediateBanked: boolean,
+  savingsBanked: number
+  savingsUnbanked: number
 }
 
 export interface AnnualAnalysisSummary {
@@ -91,6 +93,8 @@ export interface AnnualAnalysisSummary {
   baselineAdjustment: number,
   SEnPI: number,
   savings: number,
+  savingsBanked: number,
+  savingsUnbanked: number,
   totalSavingsPercentImprovement: number,
   annualSavingsPercentImprovement: number,
   cummulativeSavings: number,
@@ -132,7 +136,9 @@ export interface AnalysisTableColumns {
     display: boolean,
     usedInAnalysis: boolean
   }>,
-  predictorGroupId: string
+  predictorGroupId: string,
+  bankedSavings: boolean,
+  savingsUnbanked: boolean
 }
 
 

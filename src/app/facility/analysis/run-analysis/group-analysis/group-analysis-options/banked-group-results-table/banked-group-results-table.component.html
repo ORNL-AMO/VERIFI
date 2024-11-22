@@ -59,7 +59,7 @@
                         <td>
                             <span class="fa fa-piggy-bank"
                                 *ngIf="selectedGroup.bankedAnalysisYear >= summary.year"></span>
-                            <span class="fa fa-asterisk" *ngIf="selectedGroup.bankedAnalysisYear < summary.year"></span>
+                            <span class="fa fa-paint-roller" *ngIf="selectedGroup.bankedAnalysisYear < summary.year"></span>
                             <span class="fa fa-star" *ngIf="summary.year == modelYear"></span>
                             {{summary.year | yearDisplay: facility.fiscalYear}}
                         </td>
@@ -155,7 +155,7 @@
     <div class="d-flex w-100 justify-content-end hide-print">
         <div class="alert alert-info p-1">
             <span class="fa fa-piggy-bank"></span> Banked Analysis Year<br>
-            <span class="fa fa-asterisk"></span> Intermediate Analysis Year<br>
+            <span class="fa fa-paint-roller"></span> Transition Year<br>
             <ng-container *ngIf="modelYear">
                 <span class="fa fa-star"></span> Banked Model Year<br>
             </ng-container>

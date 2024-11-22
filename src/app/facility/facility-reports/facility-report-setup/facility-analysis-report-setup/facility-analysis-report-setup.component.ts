@@ -102,9 +102,11 @@ export class FacilityAnalysisReportSetupComponent {
     if (this.analysisTableColumns.incrementalImprovement == false) {
       this.analysisTableColumns.SEnPI = false;
       this.analysisTableColumns.savings = false;
-      this.analysisTableColumns.percentSavingsComparedToBaseline = false;
-      this.analysisTableColumns.yearToDateSavings = false;
-      this.analysisTableColumns.yearToDatePercentSavings = false;
+      // this.analysisTableColumns.percentSavingsComparedToBaseline = false;
+      // this.analysisTableColumns.yearToDateSavings = false;
+      // this.analysisTableColumns.yearToDatePercentSavings = false;
+      this.analysisTableColumns.bankedSavings = false;
+      this.analysisTableColumns.savingsUnbanked = false;
       this.analysisTableColumns.rollingSavings = false;
       this.analysisTableColumns.rolling12MonthImprovement = false;
       this.analysisTableColumns.totalSavingsPercentImprovement = false;
@@ -114,9 +116,11 @@ export class FacilityAnalysisReportSetupComponent {
     } else {
       this.analysisTableColumns.SEnPI = true;
       this.analysisTableColumns.savings = true;
-      this.analysisTableColumns.percentSavingsComparedToBaseline = true;
-      this.analysisTableColumns.yearToDateSavings = true;
-      this.analysisTableColumns.yearToDatePercentSavings = true;
+      // this.analysisTableColumns.percentSavingsComparedToBaseline = true;
+      // this.analysisTableColumns.yearToDateSavings = true;
+      // this.analysisTableColumns.yearToDatePercentSavings = true;
+      this.analysisTableColumns.bankedSavings = true;
+      this.analysisTableColumns.savingsUnbanked = true;
       this.analysisTableColumns.rollingSavings = true;
       this.analysisTableColumns.rolling12MonthImprovement = true;
       this.analysisTableColumns.totalSavingsPercentImprovement = true;
@@ -141,17 +145,19 @@ export class FacilityAnalysisReportSetupComponent {
     this.analysisTableColumns.incrementalImprovement = (
       this.analysisTableColumns.SEnPI ||
       this.analysisTableColumns.savings ||
-      this.analysisTableColumns.percentSavingsComparedToBaseline ||
-      this.analysisTableColumns.yearToDateSavings ||
-      this.analysisTableColumns.yearToDatePercentSavings ||
+      // this.analysisTableColumns.percentSavingsComparedToBaseline ||
+      // this.analysisTableColumns.yearToDateSavings ||
+      // this.analysisTableColumns.yearToDatePercentSavings ||
       this.analysisTableColumns.rollingSavings ||
-      this.analysisTableColumns.rolling12MonthImprovement||
+      this.analysisTableColumns.rolling12MonthImprovement ||
       this.analysisTableColumns.SEnPI ||
       this.analysisTableColumns.savings ||
       this.analysisTableColumns.totalSavingsPercentImprovement ||
       this.analysisTableColumns.annualSavingsPercentImprovement ||
       this.analysisTableColumns.cummulativeSavings ||
-      this.analysisTableColumns.newSavings
+      this.analysisTableColumns.newSavings ||
+      this.analysisTableColumns.bankedSavings ||
+      this.analysisTableColumns.savingsUnbanked
     )
   }
 
@@ -197,6 +203,8 @@ export class FacilityAnalysisReportSetupComponent {
     this.analysisTableColumns.annualSavingsPercentImprovement = true;
     this.analysisTableColumns.cummulativeSavings = true;
     this.analysisTableColumns.newSavings = true;
+    this.analysisTableColumns.bankedSavings = false;
+    this.analysisTableColumns.savingsUnbanked = false;
     await this.save();
   }
 

@@ -52,6 +52,8 @@ export class MonthlyAnalysisSummaryTableComponent implements OnInit {
   predictorColumns: Array<AnalysisGroupPredictorVariable>;
   copyingTable: boolean = false;
   hasBanked: boolean;
+  hasBankedSavings: boolean;
+  hasTransitionYear: boolean;
   reportLabel: 'Baseline Year' | 'Report Year' | 'Report & Model Year' | 'Baseline & Model Year' | 'Model Year';
   modelYear: number;
   constructor(private analysisService: AnalysisService, private copyTableService: CopyTableService, private router: Router) { }
@@ -150,15 +152,21 @@ export class MonthlyAnalysisSummaryTableComponent implements OnInit {
     if (this.analysisTableColumns.savings) {
       numImprovementColumns++;
     }
-    if (this.analysisTableColumns.percentSavingsComparedToBaseline) {
+    if(this.analysisTableColumns.savingsUnbanked){
       numImprovementColumns++;
     }
-    if (this.analysisTableColumns.yearToDateSavings) {
+    if(this.analysisTableColumns.bankedSavings){
       numImprovementColumns++;
     }
-    if (this.analysisTableColumns.yearToDatePercentSavings) {
-      numImprovementColumns++;
-    }
+    // if (this.analysisTableColumns.percentSavingsComparedToBaseline) {
+    //   numImprovementColumns++;
+    // }
+    // if (this.analysisTableColumns.yearToDateSavings) {
+    //   numImprovementColumns++;
+    // }
+    // if (this.analysisTableColumns.yearToDatePercentSavings) {
+    //   numImprovementColumns++;
+    // }
     if (this.analysisTableColumns.rollingSavings) {
       numImprovementColumns++;
     }
@@ -200,6 +208,12 @@ export class MonthlyAnalysisSummaryTableComponent implements OnInit {
   setHasBanked() {
     this.hasBanked = this.monthlyAnalysisSummaryData.find(data => {
       return data.isBanked
+    }) != undefined;
+    this.hasBankedSavings = this.monthlyAnalysisSummaryData.find(data => {
+      return data.savingsBanked
+    }) != undefined;
+    this.hasTransitionYear = this.monthlyAnalysisSummaryData.find(data => {
+      return data.isIntermediateBanked
     }) != undefined;
   }
 

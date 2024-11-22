@@ -29,8 +29,12 @@ export class BetterPlantsReportClass {
     baselineYearWaterSummaryClass: BetterPlantsWaterSummaryClass;
     adjustedBaselinePrimaryEnergy: number;
     totalEnergySavings: number;
+    totalUnbankedEnergySavings: number;
+    totalBankedEnergySavings: number;
     percentTotalEnergyImprovement: number;
     totalWaterSavings: number;
+    totalUnbankedWaterSavings: number;
+    totalBankedWaterSavings: number;
     percentTotalWaterImprovement: number;
     adjustedBaselinePrimaryWater: number;
     reportYear: number;
@@ -53,7 +57,7 @@ export class BetterPlantsReportClass {
         this.setReportAndBaselineYearSummaries(selectedAnalysisItem, account, facilities, accountPredictorEntries, accountAnalysisItems, baselineYear, reportYear, meters, meterData, accountPredictors);
 
         let neededUnits: 'MMBtu' | 'kgal' = 'MMBtu';
-        if(selectedAnalysisItem.analysisCategory == 'water'){
+        if (selectedAnalysisItem.analysisCategory == 'water') {
             neededUnits = 'kgal';
         }
 
@@ -138,7 +142,9 @@ export class BetterPlantsReportClass {
     }
 
     setTotalEnergySavings() {
-        this.totalEnergySavings = this.adjustedBaselinePrimaryEnergy - this.reportYearEnergySummaryClass.totalEnergyUse;
+        this.totalBankedEnergySavings = this.reportYearAnalysisSummary.savingsBanked;
+        this.totalUnbankedEnergySavings = this.adjustedBaselinePrimaryEnergy - this.reportYearEnergySummaryClass.totalEnergyUse;
+        this.totalEnergySavings = this.totalUnbankedEnergySavings + this.totalBankedEnergySavings;
     }
 
     setPercentTotalEnergyImprovement() {
@@ -159,7 +165,9 @@ export class BetterPlantsReportClass {
     }
 
     setTotalWaterSavings() {
-        this.totalWaterSavings = this.adjustedBaselinePrimaryWater - this.reportYearWaterSummaryClass.totalWaterIntake;
+        this.totalBankedWaterSavings = this.reportYearAnalysisSummary.savingsBanked;
+        this.totalUnbankedWaterSavings = this.adjustedBaselinePrimaryWater - this.reportYearWaterSummaryClass.totalWaterIntake;
+        this.totalWaterSavings = this.totalUnbankedWaterSavings + this.totalBankedWaterSavings;
     }
 
     setPercentTotalWaterImprovement() {
@@ -182,14 +190,18 @@ export class BetterPlantsReportClass {
             baselineYearEnergyResults: this.baselineYearEnergySummaryClass.getBetterPlantsEnergySummary(),
             reportYearEnergyResults: this.reportYearEnergySummaryClass.getBetterPlantsEnergySummary(),
             baselineYearWaterResults: this.baselineYearWaterSummaryClass.getBetterPlantsWaterSummary(),
-            reportYearWaterResults: this.reportYearWaterSummaryClass.getBetterPlantsWaterSummary()
+            reportYearWaterResults: this.reportYearWaterSummaryClass.getBetterPlantsWaterSummary(),
+            totalEnergySavingsBanked: this.totalBankedEnergySavings,
+            totalWaterSavingsBanked: this.totalBankedWaterSavings,
+            totalEnergySavingsUnbanked: this.totalUnbankedEnergySavings,
+            totalWaterSavingsUnbanked: this.totalUnbankedWaterSavings
         }
     }
 
     convertAnnualAnalysisSummary(summary: AnnualAnalysisSummary, analysisItem: IdbAccountAnalysisItem): AnnualAnalysisSummary {
         let startingUnit: string = analysisItem.energyUnit;
         let neededUnits: 'MMBtu' | 'kgal' = 'MMBtu';
-        if(analysisItem.analysisCategory == 'water'){
+        if (analysisItem.analysisCategory == 'water') {
             neededUnits = 'kgal';
             startingUnit = analysisItem.waterUnit;
         }

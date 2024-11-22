@@ -4,8 +4,7 @@
         <tr class="table-mh">
             <th class="first-column"></th>
             <ng-container *ngIf="printBlock == 'all' || printBlock == 'consumption'">
-                <th *ngIf="numEnergyColumns > 0" class="text-center th-3"
-                    [attr.colspan]="numEnergyColumns">
+                <th *ngIf="numEnergyColumns > 0" class="text-center th-3" [attr.colspan]="numEnergyColumns">
                     <ng-container *ngIf="analysisItem.analysisCategory == 'energy'">
                         Energy (<span [innerHTML]="analysisItem.energyUnit | settingsLabel"></span>)
                     </ng-container>
@@ -21,8 +20,7 @@
             </ng-container>
 
             <ng-container *ngIf="printBlock == 'all' || printBlock == 'savings'">
-                <th *ngIf="numImprovementColumns > 0"
-                    class="text-center th-3" [attr.colspan]="numImprovementColumns">
+                <th *ngIf="numImprovementColumns > 0" class="text-center th-3" [attr.colspan]="numImprovementColumns">
                     Incremental Improvement
                 </th>
             </ng-container>
@@ -75,6 +73,14 @@
                     [ngClass]="{'active': orderDataField == 'SEnPI'}">
                     SEnPI
                 </th>
+                <th *ngIf="analysisTableColumns.bankedSavings" (click)="setOrderDataField('bankedSavings')"
+                    [ngClass]="{'active': orderDataField == 'savingsBanked'}">
+                    Banked <br>Savings
+                </th>
+                <th *ngIf="analysisTableColumns.savingsUnbanked" (click)="setOrderDataField('savingsUnbanked')"
+                    [ngClass]="{'active': orderDataField == 'savingsUnbanked'}">
+                    Unbanked <br>Savings
+                </th>
                 <th *ngIf="analysisTableColumns.savings" (click)="setOrderDataField('savings')"
                     [ngClass]="{'active': orderDataField == 'savings'}">
                     Savings
@@ -104,7 +110,8 @@
         <tr *ngFor="let summary of annualAnalysisSummary | orderBy: orderDataField: orderByDirection">
             <td>
                 <span class="fa fa-piggy-bank" *ngIf="summary.isBanked && !summary.isIntermediateBanked"></span>
-                <span class="fa fa-asterisk" *ngIf="summary.isIntermediateBanked"></span>
+                <span class="fa fa-building-columns" *ngIf="summary.savingsBanked"></span>
+                <span class="fa fa-paint-roller" *ngIf="summary.isIntermediateBanked"></span>
                 <span class="fa fa-star" *ngIf="summary.year == modelYear"></span>
                 {{summary.year | yearDisplay: accountOrFacility.fiscalYear}}
             </td>
@@ -142,21 +149,27 @@
                     </span>
                 </td>
                 <td *ngIf="analysisTableColumns.baselineAdjustmentForOther">
-                    <span *ngIf="summary.baselineAdjustmentForOtherV2"
-                        [ngClass]="{'red': summary.baselineAdjustmentForOtherV2 < 0}">
-                        {{summary.baselineAdjustmentForOtherV2 | customNumber}}
-                    </span>
-                    <span *ngIf="!summary.baselineAdjustmentForOtherV2">
+                    <ng-template [ngIf]="summary.baselineAdjustmentForOtherV2 && !summary.isIntermediateBanked"
+                        [ngIfElse]="baselineAdjustementForOtherMdash">
+                        <span *ngIf="summary.baselineAdjustmentForOtherV2 && !summary.isIntermediateBanked"
+                            [ngClass]="{'red': summary.baselineAdjustmentForOtherV2 < 0}">
+                            {{summary.baselineAdjustmentForOtherV2 | customNumber}}
+                        </span>
+                    </ng-template>
+                    <ng-template #baselineAdjustementForOtherMdash>
                         &mdash;
-                    </span>
+                    </ng-template>
                 </td>
                 <td *ngIf="analysisTableColumns.baselineAdjustment">
-                    <span *ngIf="summary.baselineAdjustment" [ngClass]="{'red': summary.baselineAdjustment < 0}">
-                        {{summary.baselineAdjustment | customNumber}}
-                    </span>
-                    <span *ngIf="!summary.baselineAdjustment">
+                    <ng-template [ngIf]="summary.baselineAdjustment && !summary.isIntermediateBanked"
+                        [ngIfElse]="baselineAdjustementMdash">
+                        <span [ngClass]="{'red': summary.baselineAdjustment < 0}">
+                            {{summary.baselineAdjustment | customNumber}}
+                        </span>
+                    </ng-template>
+                    <ng-template #baselineAdjustementMdash>
                         &mdash;
-                    </span>
+                    </ng-template>
                 </td>
             </ng-container>
 
@@ -179,6 +192,30 @@
                         </span>
                     </ng-template>
                     <ng-template #senpiMdash>
+                        <span>
+                            &mdash;
+                        </span>
+                    </ng-template>
+                </td>
+                <td *ngIf="analysisTableColumns.bankedSavings">
+                    <ng-template [ngIf]="summary.savingsBanked && !summary.isIntermediateBanked" [ngIfElse]="bankedSavingsMdash">
+                        <span [ngClass]="{'red': summary.savingsBanked < 0}">
+                            {{summary.savingsBanked | customNumber}}
+                        </span>
+                    </ng-template>
+                    <ng-template #bankedSavingsMdash>
+                        <span>
+                            &mdash;
+                        </span>
+                    </ng-template>
+                </td>
+                <td *ngIf="analysisTableColumns.savingsUnbanked">
+                    <ng-template [ngIf]="summary.savingsUnbanked && !summary.isIntermediateBanked" [ngIfElse]="unbankedSavingsMdash">
+                        <span [ngClass]="{'red': summary.savingsUnbanked < 0}">
+                            {{summary.savingsUnbanked | customNumber}}
+                        </span>
+                    </ng-template>
+                    <ng-template #unbankedSavingsMdash>
                         <span>
                             &mdash;
                         </span>
@@ -240,10 +277,15 @@
             <span class="fa fa-copy"></span> Copy Table
         </button>
     </div>
-    <div class="alert alert-info p-1" *ngIf="hasBanked || modelYear">
+    <div class="alert alert-info p-1" *ngIf="hasBanked || modelYear || hasBankedSavings || hasTransitionYear">
         <ng-container *ngIf="hasBanked">
             <span class="fa fa-piggy-bank"></span> Indicates Banked Analysis Year<br>
-            <span class="fa fa-asterisk"></span> Indicates Intermediate Analysis Year<br>
+        </ng-container>
+        <ng-container *ngIf="hasBankedSavings">
+            <span class="fa fa-building-columns"></span> Indicates Banked Savings Added<br>
+        </ng-container>
+        <ng-container *ngIf="hasTransitionYear">
+            <span class="fa fa-paint-roller"></span> Indicates Transition Analysis Year<br>
         </ng-container>
         <ng-container *ngIf="modelYear">
             <span class="fa fa-star"></span> Indicates Model Year<br>

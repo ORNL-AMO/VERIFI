@@ -31,7 +31,7 @@ export class MonthlyFacilityAnalysisClass {
         this.analysisItem = analysisItem;
         if (analysisItem.hasBanking) {
             let bankedAnalysisItem: IdbAnalysisItem = accountAnalysisItems.find(item => { return item.guid == analysisItem.bankedAnalysisItemId });
-            this.bankedFacilityAnalysisClass = new MonthlyFacilityAnalysisClass(bankedAnalysisItem, facility, calanderizedMeters, accountPredictorEntries, calculateAllMonthlyData, accountPredictors, accountAnalysisItems);
+            this.bankedFacilityAnalysisClass = new MonthlyFacilityAnalysisClass(bankedAnalysisItem, facility, calanderizedMeters, accountPredictorEntries, false, accountPredictors, accountAnalysisItems);
         }
         let calanderizedFacilityMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => { return cMeter.meter.facilityId == facility.guid })
         this.setFacilityPredictorEntries(accountPredictorEntries, facility);
@@ -140,7 +140,9 @@ export class MonthlyFacilityAnalysisClass {
                 modelYearDataAdjustment: summaryDataItem.modelYearDataAdjustment,
                 baselineAdjustmentInput: summaryDataItem.baselineAdjustmentInput,
                 isBanked: false,
-                isIntermediateBanked: false
+                isIntermediateBanked: false,
+                savingsBanked: summaryDataItem.monthlyAnalysisCalculatedValues.savingsBanked,
+                savingsUnbanked: summaryDataItem.monthlyAnalysisCalculatedValues.savingsUnbanked
             }
         })
     }
