@@ -29,9 +29,11 @@ export class BetterPlantsReportClass {
     baselineYearWaterSummaryClass: BetterPlantsWaterSummaryClass;
     adjustedBaselinePrimaryEnergy: number;
     totalEnergySavings: number;
+    totalUnbankedEnergySavings: number;
     totalBankedEnergySavings: number;
     percentTotalEnergyImprovement: number;
     totalWaterSavings: number;
+    totalUnbankedWaterSavings: number;
     totalBankedWaterSavings: number;
     percentTotalWaterImprovement: number;
     adjustedBaselinePrimaryWater: number;
@@ -141,7 +143,8 @@ export class BetterPlantsReportClass {
 
     setTotalEnergySavings() {
         this.totalBankedEnergySavings = this.reportYearAnalysisSummary.savingsBanked;
-        this.totalEnergySavings = (this.adjustedBaselinePrimaryEnergy - this.reportYearEnergySummaryClass.totalEnergyUse) + this.totalBankedEnergySavings;
+        this.totalUnbankedEnergySavings = this.adjustedBaselinePrimaryEnergy - this.reportYearEnergySummaryClass.totalEnergyUse;
+        this.totalEnergySavings = this.totalUnbankedEnergySavings + this.totalBankedEnergySavings;
     }
 
     setPercentTotalEnergyImprovement() {
@@ -163,7 +166,8 @@ export class BetterPlantsReportClass {
 
     setTotalWaterSavings() {
         this.totalBankedWaterSavings = this.reportYearAnalysisSummary.savingsBanked;
-        this.totalWaterSavings = (this.adjustedBaselinePrimaryWater - this.reportYearWaterSummaryClass.totalWaterIntake) + this.totalBankedWaterSavings;
+        this.totalUnbankedWaterSavings = this.adjustedBaselinePrimaryWater - this.reportYearWaterSummaryClass.totalWaterIntake;
+        this.totalWaterSavings = this.totalUnbankedWaterSavings + this.totalBankedWaterSavings;
     }
 
     setPercentTotalWaterImprovement() {
@@ -188,7 +192,9 @@ export class BetterPlantsReportClass {
             baselineYearWaterResults: this.baselineYearWaterSummaryClass.getBetterPlantsWaterSummary(),
             reportYearWaterResults: this.reportYearWaterSummaryClass.getBetterPlantsWaterSummary(),
             totalEnergySavingsBanked: this.totalBankedEnergySavings,
-            totalWaterSavingsBanked: this.totalBankedWaterSavings
+            totalWaterSavingsBanked: this.totalBankedWaterSavings,
+            totalEnergySavingsUnbanked: this.totalUnbankedEnergySavings,
+            totalWaterSavingsUnbanked: this.totalUnbankedWaterSavings
         }
     }
 

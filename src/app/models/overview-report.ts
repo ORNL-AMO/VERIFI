@@ -10,8 +10,10 @@ export interface BetterPlantsSummary {
   adjustedBaselinePrimaryWater: number,
   // baselineAdjustment: number,
   totalEnergySavings: number,
+  totalEnergySavingsUnbanked: number,
   totalEnergySavingsBanked: number,
   totalWaterSavings: number,
+  totalWaterSavingsUnbanked: number;
   totalWaterSavingsBanked: number,
   baselineYearEnergyResults: BetterPlantsEnergySummary,
   reportYearEnergyResults: BetterPlantsEnergySummary,
