@@ -14,7 +14,7 @@ addEventListener('message', ({ data }) => {
             data.accountAnalysisItems,
             data.meters,
             data.meterData,
-            data.predictors);
+            data.accountPredictors);
         postMessage({
             error: false,
             performanceReport: performanceReport
