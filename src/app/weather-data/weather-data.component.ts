@@ -43,6 +43,8 @@ export class WeatherDataComponent {
   // facilityPredictorEntries: Array<IdbPredictorEntry>;
   facilityMeterData: Array<IdbUtilityMeterData>;
   facilityPredictorData: Array<IdbPredictorData>;
+
+  hasServerError: boolean;
   constructor(private helpPanelService: HelpPanelService, private accountDbService: AccountdbService,
     private weatherDataService: WeatherDataService,
     private facilityDbService: FacilitydbService,
@@ -61,6 +63,7 @@ export class WeatherDataComponent {
   }
 
   ngOnInit() {
+    this.hasServerError = this.degreeDaysService.hasServerError;
     this.applyToFacilitySub = this.weatherDataService.applyToFacility.subscribe(val => {
       this.applyToFacility = val;
       if (this.applyToFacility) {
@@ -176,42 +179,43 @@ export class WeatherDataComponent {
       let stringFormat: string = 'MMM y';
       let dateStr = datePipe.transform(startDate.toLocaleDateString(), stringFormat);
       this.loadingService.setLoadingMessage('Calculating Predictors: ' + dateStr + ' ...');
-      let degreeDays: Array<DetailDegreeDay> = await this.degreeDaysService.getDailyDataFromMonth(entryDate.getMonth(), entryDate.getFullYear(), this.weatherDataService.heatingTemp, this.weatherDataService.coolingTemp, this.weatherDataService.selectedStation.ID)
+      let degreeDays: 'error' | Array<DetailDegreeDay> = await this.degreeDaysService.getDailyDataFromMonth(entryDate.getMonth(), entryDate.getFullYear(), this.weatherDataService.heatingTemp, this.weatherDataService.coolingTemp, this.weatherDataService.selectedStation.ID)
+      if (degreeDays != 'error') {
+        let hasErrors: DetailDegreeDay = degreeDays.find(degreeDay => {
+          return degreeDay.gapInData == true
+        });
 
-      let hasErrors: DetailDegreeDay = degreeDays.find(degreeDay => {
-        return degreeDay.gapInData == true
-      });
+        if (cddPredictor) {
+          let newCddPredictorData: IdbPredictorData = getNewIdbPredictorData(cddPredictor);
+          newCddPredictorData.date = new Date(entryDate);
+          newCddPredictorData.amount = getDegreeDayAmount(degreeDays, 'CDD');
+          newCddPredictorData.weatherDataWarning = hasErrors != undefined;
+          await firstValueFrom(this.predictorDataDbService.addWithObservable(newCddPredictorData));
+        }
 
-      if (cddPredictor) {
-        let newCddPredictorData: IdbPredictorData = getNewIdbPredictorData(cddPredictor);
-        newCddPredictorData.date = new Date(entryDate);
-        newCddPredictorData.amount = getDegreeDayAmount(degreeDays, 'CDD');
-        newCddPredictorData.weatherDataWarning = hasErrors != undefined;
-        await firstValueFrom(this.predictorDataDbService.addWithObservable(newCddPredictorData));
-      }
+        if (hddPredictor) {
+          let newHddPredictorData: IdbPredictorData = getNewIdbPredictorData(hddPredictor);
+          newHddPredictorData.date = new Date(entryDate);
+          newHddPredictorData.amount = getDegreeDayAmount(degreeDays, 'HDD');
+          newHddPredictorData.weatherDataWarning = hasErrors != undefined;
+          await firstValueFrom(this.predictorDataDbService.addWithObservable(newHddPredictorData));
+        }
 
-      if (hddPredictor) {
-        let newHddPredictorData: IdbPredictorData = getNewIdbPredictorData(hddPredictor);
-        newHddPredictorData.date = new Date(entryDate);
-        newHddPredictorData.amount = getDegreeDayAmount(degreeDays, 'HDD');
-        newHddPredictorData.weatherDataWarning = hasErrors != undefined;
-        await firstValueFrom(this.predictorDataDbService.addWithObservable(newHddPredictorData));
-      }
+        if (relativeHumidityPredictor) {
+          let newRHPredictorData: IdbPredictorData = getNewIdbPredictorData(relativeHumidityPredictor);
+          newRHPredictorData.date = new Date(entryDate);
+          newRHPredictorData.amount = getDegreeDayAmount(degreeDays, 'relativeHumidity');
+          newRHPredictorData.weatherDataWarning = hasErrors != undefined;
+          await firstValueFrom(this.predictorDataDbService.addWithObservable(newRHPredictorData));
+        }
 
-      if (relativeHumidityPredictor) {
-        let newRHPredictorData: IdbPredictorData = getNewIdbPredictorData(relativeHumidityPredictor);
-        newRHPredictorData.date = new Date(entryDate);
-        newRHPredictorData.amount = getDegreeDayAmount(degreeDays, 'relativeHumidity');
-        newRHPredictorData.weatherDataWarning = hasErrors != undefined;
-        await firstValueFrom(this.predictorDataDbService.addWithObservable(newRHPredictorData));
-      }
-
-      if (dryBulbTempPredictor) {
-        let newDryBulbTempPredictorData: IdbPredictorData = getNewIdbPredictorData(dryBulbTempPredictor);
-        newDryBulbTempPredictorData.date = new Date(entryDate);
-        newDryBulbTempPredictorData.amount = getDegreeDayAmount(degreeDays, 'dryBulbTemp');
-        newDryBulbTempPredictorData.weatherDataWarning = hasErrors != undefined;
-        await firstValueFrom(this.predictorDataDbService.addWithObservable(newDryBulbTempPredictorData));
+        if (dryBulbTempPredictor) {
+          let newDryBulbTempPredictorData: IdbPredictorData = getNewIdbPredictorData(dryBulbTempPredictor);
+          newDryBulbTempPredictorData.date = new Date(entryDate);
+          newDryBulbTempPredictorData.amount = getDegreeDayAmount(degreeDays, 'dryBulbTemp');
+          newDryBulbTempPredictorData.weatherDataWarning = hasErrors != undefined;
+          await firstValueFrom(this.predictorDataDbService.addWithObservable(newDryBulbTempPredictorData));
+        }
       }
       startDate.setMonth(startDate.getMonth() + 1);
     }

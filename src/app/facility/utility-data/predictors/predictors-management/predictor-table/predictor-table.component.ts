@@ -148,36 +148,38 @@ export class PredictorTableComponent {
 
 
   async viewWeatherData(predictor: IdbPredictor) {
-    let weatherStation: WeatherStation = await this.degreeDaysService.getStationById(predictor.weatherStationId);
-    this.weatherDataService.selectedStation = weatherStation;
-    if (predictor.weatherDataType == 'CDD') {
-      this.weatherDataService.coolingTemp = predictor.coolingBaseTemperature;
-      let predictorPair: IdbPredictor = this.degreeDayPredictors.find(predictorPair => { return predictorPair.predictor.weatherStationId == predictor.weatherStationId && predictorPair.predictor.weatherDataType == 'HDD' }).predictor;
-      if (predictorPair) {
-        this.weatherDataService.heatingTemp = predictorPair.heatingBaseTemperature;
-        this.weatherDataService.weatherDataSelection = 'degreeDays';
-      } else {
-        this.weatherDataService.weatherDataSelection = 'CDD';
+    let weatherStation: 'error' | WeatherStation = await this.degreeDaysService.getStationById(predictor.weatherStationId);
+    if (weatherStation != 'error') {
+      this.weatherDataService.selectedStation = weatherStation;
+      if (predictor.weatherDataType == 'CDD') {
+        this.weatherDataService.coolingTemp = predictor.coolingBaseTemperature;
+        let predictorPair: IdbPredictor = this.degreeDayPredictors.find(predictorPair => { return predictorPair.predictor.weatherStationId == predictor.weatherStationId && predictorPair.predictor.weatherDataType == 'HDD' }).predictor;
+        if (predictorPair) {
+          this.weatherDataService.heatingTemp = predictorPair.heatingBaseTemperature;
+          this.weatherDataService.weatherDataSelection = 'degreeDays';
+        } else {
+          this.weatherDataService.weatherDataSelection = 'CDD';
+        }
+      } else if (predictor.weatherDataType == 'HDD') {
+        this.weatherDataService.heatingTemp = predictor.heatingBaseTemperature;
+        let predictorPair: IdbPredictor = this.degreeDayPredictors.find(predictorPair => { return predictorPair.predictor.weatherStationId == predictor.weatherStationId && predictorPair.predictor.weatherDataType == 'CDD' }).predictor;
+        if (predictorPair) {
+          this.weatherDataService.coolingTemp = predictorPair.coolingBaseTemperature;
+          this.weatherDataService.weatherDataSelection = 'degreeDays';
+        } else {
+          this.weatherDataService.weatherDataSelection = 'HDD';
+        }
+      } else if (predictor.weatherDataType == 'relativeHumidity') {
+        this.weatherDataService.weatherDataSelection = 'relativeHumidity';
+      } else if (predictor.weatherDataType == 'dryBulbTemp') {
+        this.weatherDataService.weatherDataSelection = 'dryBulbTemp';
       }
-    } else if (predictor.weatherDataType == 'HDD') {
-      this.weatherDataService.heatingTemp = predictor.heatingBaseTemperature;
-      let predictorPair: IdbPredictor = this.degreeDayPredictors.find(predictorPair => { return predictorPair.predictor.weatherStationId == predictor.weatherStationId && predictorPair.predictor.weatherDataType == 'CDD' }).predictor;
-      if (predictorPair) {
-        this.weatherDataService.coolingTemp = predictorPair.coolingBaseTemperature;
-        this.weatherDataService.weatherDataSelection = 'degreeDays';
-      } else {
-        this.weatherDataService.weatherDataSelection = 'HDD';
-      }
-    } else if (predictor.weatherDataType == 'relativeHumidity') {
-      this.weatherDataService.weatherDataSelection = 'relativeHumidity';
-    } else if (predictor.weatherDataType == 'dryBulbTemp') {
-      this.weatherDataService.weatherDataSelection = 'dryBulbTemp';
+      let endDate: Date = new Date(weatherStation.end);
+      endDate.setFullYear(endDate.getFullYear() - 1);
+      this.weatherDataService.selectedYear = endDate.getFullYear();
+      this.weatherDataService.selectedDate = endDate;
+      this.weatherDataService.selectedMonth = endDate;
     }
-    let endDate: Date = new Date(weatherStation.end);
-    endDate.setFullYear(endDate.getFullYear() - 1);
-    this.weatherDataService.selectedYear = endDate.getFullYear();
-    this.weatherDataService.selectedDate = endDate;
-    this.weatherDataService.selectedMonth = endDate;
     this.weatherDataService.selectedFacility = this.selectedFacility;
     this.weatherDataService.zipCode = this.selectedFacility.zip;
     this.router.navigateByUrl('weather-data/annual-station')

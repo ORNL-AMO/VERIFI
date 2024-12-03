@@ -227,13 +227,15 @@ export class PredictorsDataTableComponent {
   }
 
   async viewWeatherData(predictorEntry: IdbPredictorData) {
-    let weatherStation: WeatherStation = await this.degreeDaysService.getStationById(this.predictor.weatherStationId);
-    this.weatherDataService.selectedStation = weatherStation;
-    this.weatherDataService.weatherDataSelection = this.predictor.weatherDataType;
-    if (this.predictor.weatherDataType == 'CDD') {
-      this.weatherDataService.coolingTemp = this.predictor.coolingBaseTemperature;
-    } else if (this.predictor.weatherDataType == 'HDD') {
-      this.weatherDataService.heatingTemp = this.predictor.heatingBaseTemperature;
+    let weatherStation: WeatherStation | 'error' = await this.degreeDaysService.getStationById(this.predictor.weatherStationId);
+    if (weatherStation != 'error') {
+      this.weatherDataService.selectedStation = weatherStation;
+      this.weatherDataService.weatherDataSelection = this.predictor.weatherDataType;
+      if (this.predictor.weatherDataType == 'CDD') {
+        this.weatherDataService.coolingTemp = this.predictor.coolingBaseTemperature;
+      } else if (this.predictor.weatherDataType == 'HDD') {
+        this.weatherDataService.heatingTemp = this.predictor.heatingBaseTemperature;
+      }
     }
     let entryDate: Date = new Date(predictorEntry.date);
     this.weatherDataService.selectedYear = entryDate.getFullYear();
