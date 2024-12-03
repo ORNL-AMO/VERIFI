@@ -41,6 +41,7 @@ import { IdbAccountAnalysisItem } from './models/idbModels/accountAnalysisItem';
 import { IdbPredictorEntryDeprecated } from './models/idbModels/deprecatedPredictors';
 import { FacilityReportsDbService } from './indexedDB/facility-reports-db.service';
 import { IdbFacilityReport } from './models/idbModels/facilityReport';
+import { DegreeDaysService } from './shared/helper-services/degree-days.service';
 
 // declare ga as a function to access the JS code in TS
 declare let gtag: Function;
@@ -81,7 +82,8 @@ export class AppComponent {
     private predictorDataDbService: PredictorDataDbService,
     private migratePredictorsService: MigratePredictorsService,
     private dbChangesService: DbChangesService,
-    private facilityReportsDbService: FacilityReportsDbService) {
+    private facilityReportsDbService: FacilityReportsDbService,
+    private degreeDaysService: DegreeDaysService) {
     if (environment.production) {
       gtag('config', 'G-YG1QD02XSE');
       this.analyticsService.sendEvent('verifi_app_open', undefined);
@@ -97,6 +99,7 @@ export class AppComponent {
   ngOnInit() {
     this.initializeData();
     this.automaticBackupsService.subscribeData();
+    this.degreeDaysService.testStationResponse();
   }
 
   async initializeData() {

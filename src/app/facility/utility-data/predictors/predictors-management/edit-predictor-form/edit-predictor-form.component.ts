@@ -212,13 +212,17 @@ export class EditPredictorFormComponent {
           if (!predictorData[i].weatherOverride) {
             let entryDate: Date = new Date(predictorData[i].date);
             this.loadingService.setLoadingMessage('Updating Weather Predictors: (' + i + '/' + predictorData.length + ')');
-            let degreeDays: Array<DetailDegreeDay> = await this.degreeDaysService.getDailyDataFromMonth(entryDate.getMonth(), entryDate.getFullYear(), this.predictor.heatingBaseTemperature, this.predictor.coolingBaseTemperature, this.predictor.weatherStationId);
-            let hasErrors: DetailDegreeDay = degreeDays.find(degreeDay => {
-              return degreeDay.gapInData == true
-            });
-            predictorData[i].amount = getDegreeDayAmount(degreeDays, this.predictor.weatherDataType);
-            predictorData[i].weatherDataWarning = hasErrors != undefined || degreeDays.length == 0;
-            await firstValueFrom(this.predictorDataDbService.updateWithObservable(predictorData[i]));
+            let degreeDays: 'error' | Array<DetailDegreeDay> = await this.degreeDaysService.getDailyDataFromMonth(entryDate.getMonth(), entryDate.getFullYear(), this.predictor.heatingBaseTemperature, this.predictor.coolingBaseTemperature, this.predictor.weatherStationId);
+            if (degreeDays != 'error') {
+              let hasErrors: DetailDegreeDay = degreeDays.find(degreeDay => {
+                return degreeDay.gapInData == true
+              });
+              predictorData[i].amount = getDegreeDayAmount(degreeDays, this.predictor.weatherDataType);
+              predictorData[i].weatherDataWarning = hasErrors != undefined || degreeDays.length == 0;
+              await firstValueFrom(this.predictorDataDbService.updateWithObservable(predictorData[i]));
+            } else {
+              this.toastNotificationService.weatherDataErrorToast();
+            }
           }
         }
       } else if (this.addOrEdit == 'add' && this.predictorForm.controls.createPredictorData.value) {
@@ -327,15 +331,19 @@ export class EditPredictorFormComponent {
         let newDate: Date = new Date(startDate);
         let dateString = datePipe.transform(newDate, stringFormat);
         this.loadingService.setLoadingMessage('Adding Weather Predictors: ' + dateString);
-        let degreeDays: Array<DetailDegreeDay> = await this.degreeDaysService.getDailyDataFromMonth(newDate.getMonth(), newDate.getFullYear(), this.predictor.heatingBaseTemperature, this.predictor.coolingBaseTemperature, this.predictor.weatherStationId);
-        let hasErrors: DetailDegreeDay = degreeDays.find(degreeDay => {
-          return degreeDay.gapInData == true
-        });
-        let newPredictorData: IdbPredictorData = getNewIdbPredictorData(this.predictor);
-        newPredictorData.date = newDate;
-        newPredictorData.amount = getDegreeDayAmount(degreeDays, this.predictor.weatherDataType);
-        newPredictorData.weatherDataWarning = hasErrors != undefined || degreeDays.length == 0;
-        await firstValueFrom(this.predictorDataDbService.addWithObservable(newPredictorData));
+        let degreeDays: 'error' | Array<DetailDegreeDay> = await this.degreeDaysService.getDailyDataFromMonth(newDate.getMonth(), newDate.getFullYear(), this.predictor.heatingBaseTemperature, this.predictor.coolingBaseTemperature, this.predictor.weatherStationId);
+        if (degreeDays != 'error') {
+          let hasErrors: DetailDegreeDay = degreeDays.find(degreeDay => {
+            return degreeDay.gapInData == true
+          });
+          let newPredictorData: IdbPredictorData = getNewIdbPredictorData(this.predictor);
+          newPredictorData.date = newDate;
+          newPredictorData.amount = getDegreeDayAmount(degreeDays, this.predictor.weatherDataType);
+          newPredictorData.weatherDataWarning = hasErrors != undefined || degreeDays.length == 0;
+          await firstValueFrom(this.predictorDataDbService.addWithObservable(newPredictorData));
+        }else{
+          this.toastNotificationService.weatherDataErrorToast();
+        }
         startDate.setMonth(startDate.getMonth() + 1);
       }
     }
