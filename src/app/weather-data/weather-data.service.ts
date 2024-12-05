@@ -38,7 +38,6 @@ export class WeatherDataService {
 
 
   getStations(zipCode: string, distance: number): Observable<any> {
-    console.log('get!')
     let currentDate: Date = new Date();
     let data = {
       "zip": zipCode,
@@ -58,13 +57,14 @@ export class WeatherDataService {
 
 
   getHourlyData(stationId: string, startDate: Date, endDate: Date, parameters: Array<WeatherDataParams>) {
+    let monthAfterEndDate: Date = new Date(endDate);
+    monthAfterEndDate.setMonth(monthAfterEndDate.getMonth() + 1);
     let data = {
       "station_id": stationId,
       "start_date": getWeatherDataDate(startDate),
-      "end_date": getWeatherDataDate(endDate),
+      "end_date": getWeatherDataDate(monthAfterEndDate),
       "parameters": ['dry_bulb_temp', 'humidity', 'dew_point_temp', 'wet_bulb_temp', 'pressure', 'precipitation', 'wind_speed']
     };
-    console.log(data);
     let httpOptions = {
       responseType: 'text' as const,
       headers: new HttpHeaders({

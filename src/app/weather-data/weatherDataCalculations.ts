@@ -8,7 +8,7 @@ export function getMonthlyDataFromYear(hourlyData: Array<WeatherDataReading>, ye
     let endDate: Date = new Date(year + 1, 0, 1);
     let detailedDegreeDays: Array<DetailDegreeDay> = new Array();
     while (startDate < endDate) {
-        let monthDetailedDegreeDay: Array<DetailDegreeDay> = getDetailedDataForMonth(hourlyData, startDate.getMonth(), baseHeatingTemperature, baseCoolingTemperature, station);
+        let monthDetailedDegreeDay: Array<DetailDegreeDay> = getDetailedDataForMonth(hourlyData, startDate.getMonth(), year, baseHeatingTemperature, baseCoolingTemperature, station.ID, station.name);
         monthDetailedDegreeDay.forEach(detailDegreeDay => {
             detailedDegreeDays.push(detailDegreeDay);
         });
@@ -17,11 +17,11 @@ export function getMonthlyDataFromYear(hourlyData: Array<WeatherDataReading>, ye
     return detailedDegreeDays;
 }
 
-export function getDetailedDataForMonth(hourlyData: Array<WeatherDataReading>, month: number, baseHeatingTemperature: number, baseCoolingTemperature: number, station: WeatherStation): Array<DetailDegreeDay> {
+export function getDetailedDataForMonth(hourlyData: Array<WeatherDataReading>, month: number, year: number, baseHeatingTemperature: number, baseCoolingTemperature: number, stationId: string, stationName: string): Array<DetailDegreeDay> {
     let results: Array<DetailDegreeDay> = new Array();
     let localClimatologicalDataMonth: Array<WeatherDataReading> = hourlyData.filter(lcd => {
         lcd.time = new Date(lcd.time);
-        return lcd.time.getMonth() == month;
+        return lcd.time.getMonth() == month && lcd.time.getFullYear() == year && isNaN(lcd.dry_bulb_temp) == false;
     });
     let minutesPerDay: number = 1440;
     for (let i = 0; i < localClimatologicalDataMonth.length; i++) {
@@ -100,8 +100,8 @@ export function getDetailedDataForMonth(hourlyData: Array<WeatherDataReading>, m
                 percentOfDay: portionOfDay,
                 dryBulbTemp: localClimatologicalDataMonth[i].dry_bulb_temp,
                 lagDryBulbTemp: averageDryBulbTemp,
-                stationId: station.ID,
-                stationName: station.name,
+                stationId: stationId,
+                stationName: stationName,
                 gapInData: gapInData,
                 relativeHumidity: localClimatologicalDataMonth[i].humidity,
                 weightedRelativeHumidity: weightedRelativeHumidity,
@@ -118,8 +118,8 @@ export function getDetailedDataForMonth(hourlyData: Array<WeatherDataReading>, m
                 percentOfDay: portionOfDay,
                 dryBulbTemp: localClimatologicalDataMonth[i].dry_bulb_temp,
                 lagDryBulbTemp: averageDryBulbTemp,
-                stationId: station.ID,
-                stationName: station.name,
+                stationId: stationId,
+                stationName: stationName,
                 gapInData: gapInData,
                 relativeHumidity: localClimatologicalDataMonth[i].humidity,
                 weightedRelativeHumidity: weightedRelativeHumidity,
