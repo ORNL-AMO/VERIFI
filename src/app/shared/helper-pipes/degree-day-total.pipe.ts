@@ -20,8 +20,18 @@ export class DegreeDayTotalPipe implements PipeTransform {
       });
       return totalMinutes / 1440;
     } else {
-      let weatherDataSelection: WeatherDataSelection = sumBy as WeatherDataSelection;
-      return getDegreeDayAmount(values, weatherDataSelection);
+      let weatherDataSelection: WeatherDataSelection;
+      if (sumBy == 'coolingDegreeDay') {
+        weatherDataSelection = 'CDD';
+      } else if (sumBy == 'heatingDegreeDay') {
+        weatherDataSelection = 'HDD';
+      } else if (sumBy == 'dryBulbTemp') {
+        weatherDataSelection = 'dryBulbTemp';
+      } else if (sumBy == 'relativeHumidity') {
+        weatherDataSelection = 'relativeHumidity';
+      }
+      let results = getDegreeDayAmount(values, weatherDataSelection);
+      return results;
     }
   }
 

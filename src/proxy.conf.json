@@ -1,0 +1,7 @@
+{
+    "/api": {
+      "target": "https://lcd.ornl.gov",
+      "secure": false,
+      "changeOrigin": true
+    }
+  }

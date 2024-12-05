@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { WeatherStation } from 'src/app/models/degreeDays';
 import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
-import { WeatherDataService } from '../weather-data.service';
+import { getWeatherStation, WeatherDataService } from '../weather-data.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { Subscription } from 'rxjs';
 import { IdbAccount } from 'src/app/models/idbModels/account';
@@ -50,12 +50,26 @@ export class WeatherStationsComponent {
 
 
   setStations() {
-    this.weatherDataService.zipCode = this.zipCode;
-    if (this.furthestDistance <= 500) {
-      this.degreeDaysService.getClosestStation(this.zipCode, this.furthestDistance).then(stations => {
-        this.stations = stations;
+    console.log('set stations..')
+    if (this.zipCode && this.zipCode.length == 5 && this.furthestDistance) {
+      this.weatherDataService.getStations(this.zipCode, this.furthestDistance).subscribe(results => {
+        this.stations = JSON.parse(results).stations.map(station => {
+          return getWeatherStation(station)
+        });
+        console.log(this.stations);
       });
+    } else {
+      this.stations = [];
     }
+
+
+
+    // this.weatherDataService.zipCode = this.zipCode;
+    // if (this.furthestDistance <= 500) {
+    //   this.degreeDaysService.getClosestStation(this.zipCode, this.furthestDistance).then(stations => {
+    //     this.stations = stations;
+    //   });
+    // }
   }
 
   toggleUseZip() {

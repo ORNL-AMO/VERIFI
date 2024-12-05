@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { WeatherDataSelection, WeatherStation } from '../models/degreeDays';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { IdbFacility } from '../models/idbModels/facility';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
@@ -31,7 +32,89 @@ export class WeatherDataService {
   applyToFacility: BehaviorSubject<boolean>;
   selectedFacility: IdbFacility;
   weatherDataSelection: WeatherDataSelection = 'degreeDays';
-  constructor() {
+  constructor(private httpClient: HttpClient) {
     this.applyToFacility = new BehaviorSubject<boolean>(false);
   }
+
+
+  getStations(zipCode: string, distance: number): Observable<any> {
+    console.log('get!')
+    let currentDate: Date = new Date();
+    let data = {
+      "zip": zipCode,
+      "radial_distance": distance,
+      "start_date": "2013-03-01",
+      "end_date": currentDate.getFullYear() + '-' + currentDate.getMonth() + '-' + currentDate.getDate()
+    };
+
+    let httpOptions = {
+      responseType: 'text' as const,
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json',
+      })
+    };
+    return this.httpClient.post('/api/stations', data, httpOptions);
+  }
+
+
+  getHourlyData(stationId: string, startDate: Date, endDate: Date, parameters: Array<WeatherDataParams>) {
+    let data = {
+      "station_id": stationId,
+      "start_date": getWeatherDataDate(startDate),
+      "end_date": getWeatherDataDate(endDate),
+      "parameters": ['dry_bulb_temp', 'humidity', 'dew_point_temp', 'wet_bulb_temp', 'pressure', 'precipitation', 'wind_speed']
+    };
+    console.log(data);
+    let httpOptions = {
+      responseType: 'text' as const,
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json',
+      })
+    };
+    return this.httpClient.post('/api/data', data, httpOptions);
+  }
+}
+
+export function getWeatherDataDate(date: Date): string {
+  return date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
+}
+
+
+export type WeatherDataParams = 'dry_bulb_temp' | 'humidity' | 'dew_point_temp' | 'wet_bulb_temp' | 'pressure' | 'precipitation' | 'wind_speed';
+
+export function getWeatherStation(response: WeatherStationResponse): WeatherStation {
+  return {
+    name: response.name,
+    country: undefined,
+    state: undefined,
+    lat: undefined,
+    lon: undefined,
+    begin: new Date(response.data_begin_date),
+    end: new Date(response.data_end_date),
+    USAF: undefined,
+    WBAN: undefined,
+    ID: response.station_id,
+    distanceFrom: response.distance
+    //ratingPercent
+  }
+}
+
+export interface WeatherStationResponse {
+  "station_id": string,
+  "name": string,
+  "data_begin_date": string,
+  "data_end_date": string,
+  "distance": number,
+  "rating_percent ": number
+}
+
+export interface WeatherDataReading {
+  "time": Date,
+  'dry_bulb_temp': number,
+  'humidity': number,
+  'dew_point_temp': number,
+  'wet_bulb_temp': number,
+  'pressure': number,
+  'precipitation': number,
+  'wind_speed': number
 }

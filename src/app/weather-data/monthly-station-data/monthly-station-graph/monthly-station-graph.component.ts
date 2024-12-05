@@ -34,7 +34,7 @@ export class MonthlyStationGraphComponent {
 
   ngOnChanges(changes: SimpleChanges) {
     if ((changes.degreeDays && !changes.degreeDays.isFirstChange()) || (changes.weatherDataSelection && !changes.weatherDataSelection.isFirstChange()) ||
-      (changes.selectedMonth && !changes.selectedMonth.isFirstChange())) {
+      (changes.selectedMonth && !changes.selectedMonth.isFirstChange()) || (changes.detailedDegreeDays && !changes.detailedDegreeDays.isFirstChange())) {
       this.drawChart();
     }
   }
