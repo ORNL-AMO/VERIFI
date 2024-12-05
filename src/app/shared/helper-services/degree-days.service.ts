@@ -160,22 +160,12 @@ export class DegreeDaysService {
           let heatingDegreeDifference: number = 0;
           let coolingDegreeDay: number = 0;
           let coolingDegreeDifference: number = 0;
-          if (averageDryBulbTemp < baseHeatingTemperature) {
-            heatingDegreeDifference = baseHeatingTemperature - averageDryBulbTemp;
-            heatingDegreeDay = heatingDegreeDifference * portionOfDay;
-          }
-
           let gapInData: boolean = false
           let minutesBetween: number = this.getMinutesBetweenDates(previousDate, localClimatologicalDataMonth[i].DATE);
           if (minutesBetween > 720) {
             gapInData = true;
           }
           if (averageDryBulbTemp < baseHeatingTemperature || averageDryBulbTemp > baseCoolingTemperature) {
-
-            let heatingDegreeDay: number = 0;
-            let heatingDegreeDifference: number = 0;
-            let coolingDegreeDay: number = 0;
-            let coolingDegreeDifference: number = 0;
             if (averageDryBulbTemp < baseHeatingTemperature) {
               heatingDegreeDifference = baseHeatingTemperature - averageDryBulbTemp;
               heatingDegreeDay = heatingDegreeDifference * portionOfDay;

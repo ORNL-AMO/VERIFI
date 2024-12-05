@@ -150,9 +150,6 @@ export class BackupDataService {
   }
 
   async importAccountBackupFile(backupFile: BackupFile): Promise<IdbAccount> {
-
-    console.log(backupFile);
-
     this.analyticsService.sendEvent('import_backup_file');
     this.loadingService.setLoadingMessage('Adding Account...');
     let accountGUIDs: { oldId: string, newId: string } = {
@@ -324,6 +321,7 @@ export class BackupDataService {
         delete predictorData.id;
         predictorData.guid = newGUID;
         predictorData.accountId = accountGUIDs.newId;
+        predictorData.date = this.getImportDate(predictorData.date);
         predictorData.facilityId = this.getNewId(predictorData.facilityId, facilityGUIDs);
         predictorData.predictorId = this.getNewId(predictorData.predictorId, predictorGUIDs);
         await firstValueFrom(this.predictorDataDbService.addWithObservable(predictorData));
