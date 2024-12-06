@@ -2,13 +2,16 @@ import { Component, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { IdbAnalysisItem, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import * as _ from 'lodash';
 import { FacilityHomeService } from '../facility-home.service';
 import { Router } from '@angular/router';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { ExportToExcelTemplateService } from 'src/app/shared/helper-services/export-to-excel-template.service';
 import { MeterSource } from 'src/app/models/constantsAndTypes';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
+import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
+import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 
 @Component({
   selector: 'app-facility-home-summary',
@@ -18,7 +21,7 @@ import { MeterSource } from 'src/app/models/constantsAndTypes';
 export class FacilityHomeSummaryComponent implements OnInit {
 
 
-  facility: IdbFacility
+  facility: IdbFacility;
   lastBill: IdbUtilityMeterData;
   latestEnergyAnalysisItem: IdbAnalysisItem;
   latestWaterAnalysisItem: IdbAnalysisItem;

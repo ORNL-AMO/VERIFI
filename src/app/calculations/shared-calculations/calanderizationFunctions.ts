@@ -1,7 +1,10 @@
 import { CalanderizedMeter, MonthlyData } from "src/app/models/calanderization";
 import * as _ from 'lodash';
 import { YearMonthData } from "src/app/models/dashboard";
-import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility } from "src/app/models/idb";
+import { IdbAccount } from "src/app/models/idbModels/account";
+import { IdbFacility } from "src/app/models/idbModels/facility";
+import { IdbAccountAnalysisItem } from "src/app/models/idbModels/accountAnalysisItem";
+import { IdbAnalysisItem } from "src/app/models/idbModels/analysisItem";
 
 export function getLastBillEntryFromCalanderizedMeterData(calanderizedMeterData: Array<CalanderizedMeter>, monthlyData?: Array<MonthlyData>): MonthlyData {
     if (!monthlyData) {
@@ -144,6 +147,7 @@ export function getYearlyUsageNumbers(calanderizedMeters: Array<CalanderizedMete
 
 
 export function getFiscalYear(date: Date, facilityOrAccount: IdbFacility | IdbAccount): number {
+    date = new Date(date);
     if (facilityOrAccount.fiscalYear == 'calendarYear') {
         return date.getUTCFullYear();
     } else {

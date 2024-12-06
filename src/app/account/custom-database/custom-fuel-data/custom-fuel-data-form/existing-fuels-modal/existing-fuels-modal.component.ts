@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { MeterPhase } from 'src/app/models/constantsAndTypes';
-import { IdbAccount } from 'src/app/models/idb';
+import { IdbAccount } from 'src/app/models/idbModels/account';
 import { FuelTypeOption } from 'src/app/shared/fuel-options/fuelTypeOption';
 import { MobileBusOptions } from 'src/app/shared/fuel-options/mobileBusOptions';
 import { MobileHeavyDutyTruckOptions } from 'src/app/shared/fuel-options/mobileHeavyDutyVehicleOptions';

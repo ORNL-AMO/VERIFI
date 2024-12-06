@@ -1,9 +1,12 @@
 import { Injectable } from '@angular/core';
 import * as ExcelJS from 'exceljs';
-import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport, IdbFacility } from 'src/app/models/idb';
 import { BetterPlantsSummary } from 'src/app/models/overview-report';
 import { getNAICS } from 'src/app/shared/form-data/naics-data';
 import * as _ from 'lodash';
+import { IdbAccount } from 'src/app/models/idbModels/account';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
+import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 
 @Injectable({
   providedIn: 'root'
@@ -195,8 +198,12 @@ export class BetterPlantsExcelWriterService {
     worksheet.getCell('E34').value = betterPlantsSummary.percentTotalEnergyImprovement / 100;
 
     //baseline adjustment notes
-    if (report.betterPlantsReportSetup.baselineAdjustmentNotes) {
+    if (report.betterPlantsReportSetup.baselineAdjustmentNotes && !betterPlantsSummary.totalEnergySavingsBanked) {
       worksheet.getCell('C39').value = report.betterPlantsReportSetup.baselineAdjustmentNotes;
+    } else if (!report.betterPlantsReportSetup.baselineAdjustmentNotes && betterPlantsSummary.totalEnergySavingsBanked) {
+      worksheet.getCell('C39').value = betterPlantsSummary.totalEnergySavingsBanked + ' MMBtu of banked savings included.';
+    } else if (report.betterPlantsReportSetup.baselineAdjustmentNotes && betterPlantsSummary.totalEnergySavingsBanked) {
+      worksheet.getCell('C39').value = report.betterPlantsReportSetup.baselineAdjustmentNotes + '; ' + betterPlantsSummary.totalEnergySavingsBanked + ' MMBtu of banked savings included.';
     }
     //modification notes
     if (report.betterPlantsReportSetup.modificationNotes) {
@@ -365,9 +372,14 @@ export class BetterPlantsExcelWriterService {
     worksheet.getCell('E51').value = betterPlantsSummary.percentTotalWaterImprovement
 
     //baseline adjustment notes
-    if (report.betterPlantsReportSetup.baselineAdjustmentNotes) {
+    if (report.betterPlantsReportSetup.baselineAdjustmentNotes && !betterPlantsSummary.totalWaterSavingsBanked) {
       worksheet.getCell('D55').value = report.betterPlantsReportSetup.baselineAdjustmentNotes;
+    } else if (!report.betterPlantsReportSetup.baselineAdjustmentNotes && betterPlantsSummary.totalWaterSavingsBanked) {
+      worksheet.getCell('D55').value = betterPlantsSummary.totalWaterSavingsBanked + ' kGal of banked savings included.';
+    } else if (report.betterPlantsReportSetup.baselineAdjustmentNotes && betterPlantsSummary.totalWaterSavingsBanked) {
+      worksheet.getCell('D55').value = report.betterPlantsReportSetup.baselineAdjustmentNotes + '; ' + betterPlantsSummary.totalWaterSavingsBanked + ' kGal of banked savings included.';
     }
+
     //modification notes
     if (report.betterPlantsReportSetup.modificationNotes) {
       worksheet.getCell('D61').value = report.betterPlantsReportSetup.modificationNotes;

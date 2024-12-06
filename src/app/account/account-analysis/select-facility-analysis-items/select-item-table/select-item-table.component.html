@@ -42,7 +42,7 @@
             </tr>
         </thead>
         <tbody class="table-group-divider">
-            <tr *ngFor="let analysisItem of facilityAnalysisItems | orderBy: 'date'">
+            <tr *ngFor="let analysisItem of facilityAnalysisItems | orderBy: 'modifiedDate'">
                 <td class="radio-td">
                     <input type="radio" class="rowToggle" [(ngModel)]="selectedFacilityItemId"
                         [value]="analysisItem.guid" name="{{analysisItem.id+'_selectedFacilityItemId'}}"
@@ -66,7 +66,7 @@
                         <br>
                     </span>
                 </td>
-                <td>{{analysisItem.date | date:'short'}}</td>
+                <td>{{analysisItem.modifiedDate | date:'short'}}</td>
                 <td class="actions">
                     <!-- <div class="d-flex">
                         <i class="fa fa-pencil" title="Edit" (click)="editItem(analysisItem)"></i>

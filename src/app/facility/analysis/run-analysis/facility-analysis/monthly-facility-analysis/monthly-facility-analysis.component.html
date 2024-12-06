@@ -25,7 +25,7 @@
     </app-monthly-analysis-summary-graph>
     <app-monthly-analysis-summary-table *ngIf="dataDisplay == 'table'"
         [monthlyAnalysisSummaryData]="monthlyFacilityAnalysisData" [analysisItem]="analysisItem"
-        [facilityOrAccount]="facility" [itemsPerPage]="itemsPerPage">
+        [facilityOrAccount]="facility" [itemsPerPage]="itemsPerPage" [printBlock]="'all'">
     </app-monthly-analysis-summary-table>
     <app-monthly-analysis-summary-savings-graph *ngIf="dataDisplay == 'graph'" [analysisItem]="analysisItem"
         [monthlyAnalysisSummaryData]="monthlyFacilityAnalysisData" [facilityOrAccount]="facility">

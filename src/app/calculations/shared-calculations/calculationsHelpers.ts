@@ -1,32 +1,54 @@
 import { MonthlyData } from "src/app/models/calanderization";
-import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, PredictorData } from "src/app/models/idb";
 import { getFiscalYear } from "./calanderizationFunctions";
 import { EmissionsResults } from "src/app/models/eGridEmissions";
 import * as _ from 'lodash';
 import { IUseAndCost } from "../dashboard-calculations/useAndCostClass";
+import { IdbAccount } from "src/app/models/idbModels/account";
+import { IdbFacility } from "src/app/models/idbModels/facility";
+import { IdbUtilityMeter } from "src/app/models/idbModels/utilityMeter";
+import { IdbPredictorData } from "src/app/models/idbModels/predictorData";
+import { AnalysisGroup, AnalysisGroupPredictorVariable } from "src/app/models/analysis";
+import { IdbAnalysisItem } from "src/app/models/idbModels/analysisItem";
+import { IdbAccountAnalysisItem } from "src/app/models/idbModels/accountAnalysisItem";
 
-export function getMonthlyStartAndEndDate(facilityOrAccount: IdbFacility | IdbAccount, analysisItem: IdbAnalysisItem | IdbAccountAnalysisItem): { baselineDate: Date, endDate: Date } {
+export function getMonthlyStartAndEndDate(facilityOrAccount: IdbFacility | IdbAccount, analysisItem: IdbAnalysisItem | IdbAccountAnalysisItem, group: AnalysisGroup): { baselineDate: Date, endDate: Date, bankedAnalysisDate: Date } {
     let baselineDate: Date;
     let endDate: Date;
+    let bankedAnalysisDate: Date;
+    let baselineYear: number = analysisItem.baselineYear;
+    if (group && group.applyBanking && analysisItem.hasBanking) {
+        baselineYear = group.newBaselineYear;
+    }
+
     if (facilityOrAccount.fiscalYear == 'calendarYear') {
-        baselineDate = new Date(analysisItem.baselineYear, 0, 1);
+        baselineDate = new Date(baselineYear, 0, 1);
         endDate = new Date(analysisItem.reportYear + 1, 0, 1);
+        if (analysisItem.hasBanking && group && group.applyBanking) {
+            bankedAnalysisDate = new Date(group.bankedAnalysisYear + 1, 0, 1);
+        }
     } else {
         if (facilityOrAccount.fiscalYearCalendarEnd) {
-            baselineDate = new Date(analysisItem.baselineYear - 1, facilityOrAccount.fiscalYearMonth);
+            baselineDate = new Date(baselineYear - 1, facilityOrAccount.fiscalYearMonth);
             endDate = new Date(analysisItem.reportYear, facilityOrAccount.fiscalYearMonth);
+            if (analysisItem.hasBanking && group && group.applyBanking) {
+                bankedAnalysisDate = new Date(group.bankedAnalysisYear, facilityOrAccount.fiscalYearMonth);
+            }
         } else {
-            baselineDate = new Date(analysisItem.baselineYear, facilityOrAccount.fiscalYearMonth);
+            baselineDate = new Date(baselineYear, facilityOrAccount.fiscalYearMonth);
             endDate = new Date(analysisItem.reportYear + 1, facilityOrAccount.fiscalYearMonth);
+            if (analysisItem.hasBanking && group && group.applyBanking) {
+                bankedAnalysisDate = new Date(group.bankedAnalysisYear, facilityOrAccount.fiscalYearMonth);
+            }
         }
     }
     return {
         baselineDate: baselineDate,
-        endDate: endDate
+        endDate: endDate,
+        bankedAnalysisDate: bankedAnalysisDate
     }
 }
 
-export function filterYearPredictorData(predictorData: Array<IdbPredictorEntry>, year: number, facilityOrAccount: IdbFacility | IdbAccount): Array<IdbPredictorEntry> {
+export function filterYearPredictorData(predictorData: Array<IdbPredictorData>, year: number, facilityOrAccount: IdbFacility | IdbAccount): Array<IdbPredictorData> {
     if (facilityOrAccount.fiscalYear == 'calendarYear') {
         return predictorData.filter(predictorData => {
             return new Date(predictorData.date).getUTCFullYear() == year;
@@ -52,12 +74,14 @@ export function filterYearMeterData(meterData: Array<MonthlyData>, year: number,
     }
 }
 
-export function getPredictorUsage(predictorVariables: Array<PredictorData>, predictorData: Array<IdbPredictorEntry>): number {
+export function getPredictorUsage(predictorVariables: Array<AnalysisGroupPredictorVariable>, predictorData: Array<IdbPredictorData>): number {
     let totalPredictorUsage: number = 0;
     predictorVariables.forEach(variable => {
-        predictorData.forEach(data => {
-            let predictorData: PredictorData = data.predictors.find(predictor => { return predictor.id == variable.id });
-            totalPredictorUsage = totalPredictorUsage + predictorData.amount;
+        let variableData: Array<IdbPredictorData> = predictorData.filter(pData => {
+            return pData.predictorId == variable.id;
+        })
+        totalPredictorUsage = totalPredictorUsage + _.sumBy(variableData, (pData: IdbPredictorData) => {
+            return pData.amount;
         });
     });
     return totalPredictorUsage;
@@ -107,14 +131,14 @@ export function getEmissionsTotalsFromArray(data: Array<MonthlyData | EmissionsR
         mobileTotalEmissions: _.sumBy(data, (mData: MonthlyData | EmissionsResults) => { return mData.mobileTotalEmissions }),
         fugitiveEmissions: _.sumBy(data, (mData: MonthlyData | EmissionsResults) => { return mData.fugitiveEmissions }),
         processEmissions: _.sumBy(data, (mData: MonthlyData | EmissionsResults) => { return mData.processEmissions }),
-        stationaryBiogenicEmmissions:  _.sumBy(data, (mData: MonthlyData | EmissionsResults) => { return mData.stationaryBiogenicEmmissions }),
+        stationaryBiogenicEmmissions: _.sumBy(data, (mData: MonthlyData | EmissionsResults) => { return mData.stationaryBiogenicEmmissions }),
         stationaryEmissions: _.sumBy(data, (mData: MonthlyData | EmissionsResults) => { return mData.stationaryEmissions }),
         totalScope1Emissions: _.sumBy(data, (mData: MonthlyData | EmissionsResults) => { return mData.totalScope1Emissions }),
         totalWithMarketEmissions: _.sumBy(data, (mData: MonthlyData | EmissionsResults) => { return mData.totalWithMarketEmissions }),
         totalWithLocationEmissions: _.sumBy(data, (mData: MonthlyData | EmissionsResults) => { return mData.totalWithLocationEmissions }),
-        totalBiogenicEmissions:  _.sumBy(data, (mData: MonthlyData | EmissionsResults) => { return mData.totalBiogenicEmissions }),
-        stationaryCarbonEmissions:  _.sumBy(data, (mData: MonthlyData | EmissionsResults) => { return mData.stationaryCarbonEmissions }),
-        stationaryOtherEmissions:  _.sumBy(data, (mData: MonthlyData | EmissionsResults) => { return mData.stationaryOtherEmissions }),
+        totalBiogenicEmissions: _.sumBy(data, (mData: MonthlyData | EmissionsResults) => { return mData.totalBiogenicEmissions }),
+        stationaryCarbonEmissions: _.sumBy(data, (mData: MonthlyData | EmissionsResults) => { return mData.stationaryCarbonEmissions }),
+        stationaryOtherEmissions: _.sumBy(data, (mData: MonthlyData | EmissionsResults) => { return mData.stationaryOtherEmissions }),
     }
 }
 

@@ -1,230 +1,336 @@
-<table class="table utility-data table-sm table-bordered table-hover" #dataTable
+<table class="table utility-data table-sm table-bordered table-hover print-break-avoid" #dataTable
     [ngClass]="{'copying-table': copyingTable}">
     <thead class="sortable">
         <tr class="table-mh">
-            <th class="first-column" colspan="2"></th>
-            <th *ngIf="analysisTableColumns.energy" class="text-center th-3" [attr.colspan]="numEnergyColumns">
-                <ng-container *ngIf="analysisItem.analysisCategory == 'energy'">
-                    Energy (<span [innerHTML]="analysisItem.energyUnit | settingsLabel"></span>)
-                </ng-container>
-                <ng-container *ngIf="analysisItem.analysisCategory == 'water'">
-                    Consumption (<span [innerHTML]="analysisItem.waterUnit | settingsLabel"></span>)
+            <th class="first-column" colspan="2">
+                <ng-container *ngIf="inReport">
+                    {{reportLabel}}
                 </ng-container>
             </th>
-            <th *ngIf="predictorColumns.length != 0" class="text-center" [attr.colspan]="predictorColumns.length">
-                Production Variables
-            </th>
-            <th *ngIf="analysisTableColumns.incrementalImprovement" class="text-center"
-                [attr.colspan]="numImprovementColumns">
-                Incremental Improvement
-            </th>
+            <ng-container *ngIf="printBlock == 'all' || printBlock == 'consumption'">
+                <th *ngIf="numEnergyColumns > 0" class="text-center th-3" [attr.colspan]="numEnergyColumns">
+                    <ng-container *ngIf="analysisItem.analysisCategory == 'energy'">
+                        Energy (<span [innerHTML]="analysisItem.energyUnit | settingsLabel"></span>)
+                    </ng-container>
+                    <ng-container *ngIf="analysisItem.analysisCategory == 'water'">
+                        Consumption (<span [innerHTML]="analysisItem.waterUnit | settingsLabel"></span>)
+                    </ng-container>
+                </th>
+            </ng-container>
+
+            <ng-container *ngIf="printBlock == 'all' || printBlock == 'predictors'">
+                <th *ngIf="predictorColumns.length != 0" class="text-center" [attr.colspan]="predictorColumns.length">
+                    Production Variables
+                </th>
+            </ng-container>
+
+            <ng-container *ngIf="printBlock == 'all' || printBlock == 'savings'">
+                <th *ngIf="numImprovementColumns > 0" class="text-center" [attr.colspan]="numImprovementColumns">
+                    Incremental Improvement
+                </th>
+            </ng-container>
         </tr>
         <tr>
-            <th (click)="setOrderDataField('date')" [ngClass]="{'active': orderDataField == 'date'}">
+            <th class="date-column" (click)="setOrderDataField('date')"
+                [ngClass]="{'active': orderDataField == 'date'}">
                 Date
             </th>
-            <th (click)="setOrderDataField('fiscalYear')" [ngClass]="{'active': orderDataField == 'fiscalYear'}">
+            <th class="period-column" (click)="setOrderDataField('fiscalYear')"
+                [ngClass]="{'active': orderDataField == 'fiscalYear'}">
                 Period
             </th>
-            <th *ngIf="analysisTableColumns.actualEnergy" (click)="setOrderDataField('energyUse')"
-                [ngClass]="{'active': orderDataField == 'energyUse'}">
-                Actual
-            </th>
-            <th *ngIf="analysisTableColumns.modeledEnergy && group" (click)="setOrderDataField('modeledEnergy')"
-                [ngClass]="{'active': orderDataField == 'modeledEnergy'}">
-                Modeled
-            </th>
-            <th *ngIf="analysisTableColumns.adjusted" (click)="setOrderDataField('adjusted')"
-                [ngClass]="{'active': orderDataField == 'adjusted'}">
-                Adjusted
-            </th>
-            <th *ngIf="analysisTableColumns.baselineAdjustmentForNormalization"
-                (click)="setOrderDataField('baselineAdjustmentForNormalization')"
-                [ngClass]="{'active': orderDataField == 'baselineAdjustmentForNormalization'}">
-                Baseline<br> Adjustment<br> for Normalization
-            </th>
+            <ng-container *ngIf="printBlock == 'all' || printBlock == 'consumption'">
+                <th *ngIf="analysisTableColumns.actualEnergy" (click)="setOrderDataField('energyUse')"
+                    [ngClass]="{'active': orderDataField == 'energyUse'}">
+                    Actual
+                </th>
+                <th *ngIf="analysisTableColumns.modeledEnergy && group" (click)="setOrderDataField('modeledEnergy')"
+                    [ngClass]="{'active': orderDataField == 'modeledEnergy'}">
+                    Modeled
+                </th>
+                <th *ngIf="analysisTableColumns.adjusted" (click)="setOrderDataField('adjusted')"
+                    [ngClass]="{'active': orderDataField == 'adjusted'}">
+                    Adjusted
+                </th>
+                <th *ngIf="analysisTableColumns.baselineAdjustmentForNormalization"
+                    (click)="setOrderDataField('baselineAdjustmentForNormalization')"
+                    [ngClass]="{'active': orderDataField == 'baselineAdjustmentForNormalization'}">
+                    Baseline<br> Adjustment<br> for Normalization
+                </th>
 
-            <th *ngIf="analysisTableColumns.baselineAdjustmentForOther"
-                (click)="setOrderDataField('baselineAdjustmentForOther')"
-                [ngClass]="{'active': orderDataField == 'baselineAdjustmentForOther'}">
-                Baseline<br> Adjustment<br> for Other
-            </th>
+                <th *ngIf="analysisTableColumns.baselineAdjustmentForOther"
+                    (click)="setOrderDataField('baselineAdjustmentForOther')"
+                    [ngClass]="{'active': orderDataField == 'baselineAdjustmentForOther'}">
+                    Baseline<br> Adjustment<br> for Other
+                </th>
 
-            <th *ngIf="analysisTableColumns.baselineAdjustment" (click)="setOrderDataField('baselineAdjustment')"
-                [ngClass]="{'active': orderDataField == 'baselineAdjustment'}">
-                Total<br>Baseline<br> Adjustment
-            </th>
+                <th *ngIf="analysisTableColumns.baselineAdjustment" (click)="setOrderDataField('baselineAdjustment')"
+                    [ngClass]="{'active': orderDataField == 'baselineAdjustment'}">
+                    Total<br>Baseline<br> Adjustment
+                </th>
+            </ng-container>
 
-            <th *ngFor="let predictorVariable of predictorColumns" (click)="setOrderDataField(predictorVariable.name)"
-                [ngClass]="{'active': orderDataField == predictorVariable.name}">
-                {{predictorVariable.name}} <span *ngIf="checkIsProduction(predictorVariable)">&#x2a;</span>
-                <br *ngIf="predictorVariable.unit">
-                <span class="small" *ngIf="predictorVariable.unit">({{predictorVariable.unit}})</span>
-            </th>
-            <th *ngIf="analysisTableColumns.SEnPI" (click)="setOrderDataField('SEnPI')"
-                [ngClass]="{'active': orderDataField == 'SEnPI'}">
-                SEnPI_i
-            </th>
-            <th *ngIf="analysisTableColumns.savings" (click)="setOrderDataField('savings')"
-                [ngClass]="{'active': orderDataField == 'savings'}">
-                Savings
-            </th>
-            <th *ngIf="analysisTableColumns.percentSavingsComparedToBaseline"
-                (click)="setOrderDataField('percentSavingsComparedToBaseline')"
-                [ngClass]="{'active': orderDataField == 'percentSavingsComparedToBaseline'}">
-                % Savings
-            </th>
-            <th *ngIf="analysisTableColumns.yearToDateSavings" (click)="setOrderDataField('yearToDateSavings')"
-                [ngClass]="{'active': orderDataField == 'yearToDateSavings'}">
-                YTD<br> Savings
-            </th>
-            <th *ngIf="analysisTableColumns.yearToDatePercentSavings"
-                (click)="setOrderDataField('yearToDatePercentSavings')"
-                [ngClass]="{'active': orderDataField == 'yearToDatePercentSavings'}">
-                YTD<br> % Savings
-            </th>
-            <th *ngIf="analysisTableColumns.rollingSavings" (click)="setOrderDataField('rollingSavings')"
-                [ngClass]="{'active': orderDataField == 'rollingSavings'}">
-                Rolling<br> Savings
-            </th>
-            <th *ngIf="analysisTableColumns.rolling12MonthImprovement"
-                (click)="setOrderDataField('rolling12MonthImprovement')"
-                [ngClass]="{'active': orderDataField == 'rolling12MonthImprovement'}">
-                Rolling<br> 12-Month<br> Improvement
-            </th>
+            <ng-container *ngIf="printBlock == 'all' || printBlock == 'predictors'">
+                <th *ngFor="let predictorVariable of predictorColumns"
+                    (click)="setOrderDataField(predictorVariable.name)"
+                    [ngClass]="{'active': orderDataField == predictorVariable.name}">
+                    {{predictorVariable.name}} <span *ngIf="checkIsProduction(predictorVariable)">&#x2a;</span>
+                    <br *ngIf="predictorVariable.unit">
+                    <span class="small" *ngIf="predictorVariable.unit">({{predictorVariable.unit}})</span>
+                </th>
+            </ng-container>
+
+
+            <ng-container *ngIf="printBlock == 'all' || printBlock == 'savings'">
+                <th *ngIf="analysisTableColumns.SEnPI" (click)="setOrderDataField('SEnPI')"
+                    [ngClass]="{'active': orderDataField == 'SEnPI'}">
+                    SEnPI_i
+                </th>
+                <th *ngIf="analysisTableColumns.bankedSavings" (click)="setOrderDataField('bankedSavings')"
+                    [ngClass]="{'active': orderDataField == 'savingsBanked'}">
+                    Banked<br> Savings
+                </th>
+                <th *ngIf="analysisTableColumns.savingsUnbanked" (click)="setOrderDataField('savingsUnbanked')"
+                    [ngClass]="{'active': orderDataField == 'savingsUnbanked'}">
+                    Unbanked <br>Savings
+                </th>
+                <th *ngIf="analysisTableColumns.savings" (click)="setOrderDataField('savings')"
+                    [ngClass]="{'active': orderDataField == 'savings'}">
+                    Savings
+                </th>
+               <!--<th *ngIf="analysisTableColumns.percentSavingsComparedToBaseline"
+                    (click)="setOrderDataField('percentSavingsComparedToBaseline')"
+                    [ngClass]="{'active': orderDataField == 'percentSavingsComparedToBaseline'}">
+                    % Savings
+                </th>
+                 <th *ngIf="analysisTableColumns.yearToDateSavings" (click)="setOrderDataField('yearToDateSavings')"
+                    [ngClass]="{'active': orderDataField == 'yearToDateSavings'}">
+                    YTD<br> Savings
+                </th>
+                <th *ngIf="analysisTableColumns.yearToDatePercentSavings"
+                    (click)="setOrderDataField('yearToDatePercentSavings')"
+                    [ngClass]="{'active': orderDataField == 'yearToDatePercentSavings'}">
+                    YTD<br> % Savings
+                </th> -->
+                <th *ngIf="analysisTableColumns.rollingSavings" (click)="setOrderDataField('rollingSavings')"
+                    [ngClass]="{'active': orderDataField == 'rollingSavings'}">
+                    Rolling<br> Savings
+                </th>
+                <th *ngIf="analysisTableColumns.rolling12MonthImprovement"
+                    (click)="setOrderDataField('rolling12MonthImprovement')"
+                    [ngClass]="{'active': orderDataField == 'rolling12MonthImprovement'}">
+                    Rolling<br> 12-Month<br> Improvement
+                </th>
+            </ng-container>
         </tr>
     </thead>
     <tbody class="table-group-divider">
         <tr *ngFor="let data of monthlyAnalysisSummaryData | orderBy: orderDataField: orderByDirection |  slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage"
             [ngClass]="{'fiscal-year-end': checkFiscalYearEnd(data.date)}">
             <td class="no-wrap">
+                <span class="fa fa-piggy-bank" *ngIf="data.isBanked && !data.isIntermediateBanked"></span>
+                <span class="fa fa-building-columns" *ngIf="data.savingsBanked"></span>
+                <span class="fa fa-paint-roller" *ngIf="data.isIntermediateBanked"></span>
+                <span class="fa fa-star" *ngIf="data.fiscalYear == modelYear"></span>
                 {{data.date | date: 'MMMM, y'}}
             </td>
             <td>
                 {{data.fiscalYear | yearDisplay: facilityOrAccount.fiscalYear}}
             </td>
-            <td *ngIf="analysisTableColumns.actualEnergy">
-                <span [ngClass]="{'red': data.energyUse <= 0}">
-                    {{data.energyUse | customNumber}}
-                </span>
-            </td>
-            <td *ngIf="analysisTableColumns.modeledEnergy && group">
-                <span [ngClass]="{'red': data.modeledEnergy <= 0}">
-                    {{data.modeledEnergy | customNumber}}
-                </span>
-            </td>
-            <td *ngIf="analysisTableColumns.adjusted">
-                <span *ngIf="data.adjusted" [ngClass]="{'red': data.adjusted < 0}">
-                    {{data.adjusted | customNumber}}
-                </span>
-                <span *ngIf="!data.adjusted">
-                    &mdash;
-                </span>
-            </td>
 
-            <td *ngIf="analysisTableColumns.baselineAdjustmentForNormalization">
-                <span *ngIf="data.baselineAdjustmentForNormalization"
-                    [ngClass]="{'red': data.baselineAdjustmentForNormalization < 0}">
-                    {{data.baselineAdjustmentForNormalization | customNumber}}
-                </span>
-                <span *ngIf="!data.baselineAdjustmentForNormalization">
-                    &mdash;
-                </span>
-            </td>
-            <td *ngIf="analysisTableColumns.baselineAdjustmentForOther">
-                <span *ngIf="data.baselineAdjustmentForOtherV2"
-                    [ngClass]="{'red': data.baselineAdjustmentForOther < 0}">
-                    {{data.baselineAdjustmentForOtherV2 | customNumber}}
-                </span>
-                <span *ngIf="!data.baselineAdjustmentForOtherV2">
-                    &mdash;
-                </span>
-            </td>
-            <td *ngIf="analysisTableColumns.baselineAdjustment">
-                <span *ngIf="data.baselineAdjustment" [ngClass]="{'red': data.baselineAdjustment < 0}">
-                    {{data.baselineAdjustment | customNumber}}
-                </span>
-                <span *ngIf="!data.baselineAdjustment">
-                    &mdash;
-                </span>
-            </td>
+            <ng-container *ngIf="printBlock == 'all' || printBlock == 'consumption'">
+                <td *ngIf="analysisTableColumns.actualEnergy">
+                    <span [ngClass]="{'red': data.energyUse <= 0}">
+                        {{data.energyUse | customNumber}}
+                    </span>
+                </td>
+                <td *ngIf="analysisTableColumns.modeledEnergy && group">
+                    <ng-template [ngIf]="!data.isIntermediateBanked" [ngIfElse]="modeledEnergyMdash">
+                        <span [ngClass]="{'red': data.modeledEnergy <= 0}">
+                            {{data.modeledEnergy | customNumber}}
+                        </span>
+                    </ng-template>
+                    <ng-template #modeledEnergyMdash>
+                        <span>
+                            &mdash;
+                        </span>
+                    </ng-template>
+                </td>
+                <td *ngIf="analysisTableColumns.adjusted">
+                    <ng-template [ngIf]="data.adjusted && !data.isIntermediateBanked" [ngIfElse]="adjustedMdash">
+                        <span [ngClass]="{'red': data.adjusted < 0}">
+                            {{data.adjusted | customNumber}}
+                        </span>
+                    </ng-template>
+                    <ng-template #adjustedMdash>
+                        <span>
+                            &mdash;
+                        </span>
+                    </ng-template>
+                </td>
+
+                <td *ngIf="analysisTableColumns.baselineAdjustmentForNormalization">
+                    <span *ngIf="data.baselineAdjustmentForNormalization"
+                        [ngClass]="{'red': data.baselineAdjustmentForNormalization < 0}">
+                        {{data.baselineAdjustmentForNormalization | customNumber}}
+                    </span>
+                    <span *ngIf="!data.baselineAdjustmentForNormalization">
+                        &mdash;
+                    </span>
+                </td>
+                <td *ngIf="analysisTableColumns.baselineAdjustmentForOther">
+                    <ng-template [ngIf]="data.baselineAdjustmentForOtherV2 && !data.isIntermediateBanked"
+                        [ngIfElse]="baselineAdjustmentForOtherMdash">
+                        <span [ngClass]="{'red': data.baselineAdjustmentForOther < 0}">
+                            {{data.baselineAdjustmentForOtherV2 | customNumber}}
+                        </span>
+                    </ng-template>
+                    <ng-template #baselineAdjustmentForOtherMdash>
+                        &mdash;
+                    </ng-template>
+                </td>
+                <td *ngIf="analysisTableColumns.baselineAdjustment">
+                    <ng-template [ngIf]="data.baselineAdjustment && !data.isIntermediateBanked"
+                        [ngIfElse]="baselineAdjustmentMdash">
+                        <span [ngClass]="{'red': data.baselineAdjustment < 0}">
+                            {{data.baselineAdjustment | customNumber}}
+                        </span>
+                    </ng-template>
+                    <ng-template #baselineAdjustmentMdash>
+                        &mdash;
+                    </ng-template>
+                </td>
+            </ng-container>
+
+            <ng-container *ngIf="printBlock == 'all' || printBlock == 'predictors'">
+                <td *ngFor="let predictorVariable of predictorColumns">
+                    <span *ngIf="data[predictorVariable.name]">
+                        {{data[predictorVariable.name] | customNumber}}
+                    </span>
+                    <span *ngIf="!data[predictorVariable.name]">
+                        &mdash;
+                    </span>
+                </td>
+            </ng-container>
 
 
-            <td *ngFor="let predictorVariable of predictorColumns">
-                <span *ngIf="data[predictorVariable.name]">
-                    {{data[predictorVariable.name] | customNumber}}
-                </span>
-                <span *ngIf="!data[predictorVariable.name]">
-                    &mdash;
-                </span>
-            </td>
-            <td *ngIf="analysisTableColumns.SEnPI">
-                <span *ngIf="data.SEnPI" [ngClass]="{'red': data.SEnPI < 0}">
-                    {{data.SEnPI | customNumber}}
-                </span>
-                <span *ngIf="!data.SEnPI">
-                    &mdash;
-                </span>
-            </td>
-            <td *ngIf="analysisTableColumns.savings">
-                <span *ngIf="data.savings" [ngClass]="{'red': data.savings < 0}">
-                    {{data.savings | customNumber}}
-                </span>
-                <span *ngIf="!data.savings">
-                    &mdash;
-                </span>
-            </td>
-            <td *ngIf="analysisTableColumns.percentSavingsComparedToBaseline">
-                <span *ngIf="data.percentSavingsComparedToBaseline"
-                    [ngClass]="{'red': data.percentSavingsComparedToBaseline < 0}">
-                    {{data.percentSavingsComparedToBaseline | number:'1.0-2'}} %
-                </span>
-                <span *ngIf="!data.percentSavingsComparedToBaseline">
-                    &mdash;
-                </span>
-            </td>
-            <td *ngIf="analysisTableColumns.yearToDateSavings">
-                <span *ngIf="data.yearToDateSavings" [ngClass]="{'red': data.yearToDateSavings < 0}">
-                    {{data.yearToDateSavings | customNumber}}
-                </span>
-                <span *ngIf="!data.yearToDateSavings">
-                    &mdash;
-                </span>
-            </td>
-            <td *ngIf="analysisTableColumns.yearToDatePercentSavings">
-                <span *ngIf="data.yearToDatePercentSavings" [ngClass]="{'red': data.yearToDatePercentSavings < 0}">
-                    {{data.yearToDatePercentSavings | number:'1.0-2'}} %
-                </span>
-                <span *ngIf="!data.yearToDatePercentSavings">
-                    &mdash;
-                </span>
-            </td>
-            <td *ngIf="analysisTableColumns.rollingSavings">
-                <span *ngIf="data.rollingSavings" [ngClass]="{'red': data.rollingSavings < 0}">
-                    {{data.rollingSavings | customNumber}}
-                </span>
-                <span *ngIf="!data.rollingSavings">
-                    &mdash;
-                </span>
-            </td>
-            <td *ngIf="analysisTableColumns.rolling12MonthImprovement">
-                <span *ngIf="data.rolling12MonthImprovement" [ngClass]="{'red': data.rolling12MonthImprovement < 0}">
-                    {{data.rolling12MonthImprovement | number:'1.0-2'}} %
-                </span>
-                <span *ngIf="!data.rolling12MonthImprovement">
-                    &mdash;
-                </span>
-            </td>
+
+            <ng-container *ngIf="printBlock == 'all' || printBlock == 'savings'">
+                <td *ngIf="analysisTableColumns.SEnPI">
+                    <ng-template [ngIf]="data.SEnPI && !data.isIntermediateBanked" [ngIfElse]="senpiMdash">
+                        <span [ngClass]="{'red': data.SEnPI < 0}">
+                            {{data.SEnPI | customNumber}}
+                        </span>
+                    </ng-template>
+                    <ng-template #senpiMdash>
+                        <span>
+                            &mdash;
+                        </span>
+                    </ng-template>
+                </td>
+                <td *ngIf="analysisTableColumns.bankedSavings">
+                    <ng-template [ngIf]="data.savingsBanked && !data.isIntermediateBanked" [ngIfElse]="bankedSavingsMdash">
+                        <span [ngClass]="{'red': data.savingsBanked < 0}">
+                            {{data.savingsBanked | customNumber}}
+                        </span>
+                    </ng-template>
+                    <ng-template #bankedSavingsMdash>
+                        <span>
+                            &mdash;
+                        </span>
+                    </ng-template>
+                </td>
+                <td *ngIf="analysisTableColumns.savingsUnbanked">
+                    <ng-template [ngIf]="data.savingsUnbanked && !data.isIntermediateBanked" [ngIfElse]="unbankedSavingsMdash">
+                        <span [ngClass]="{'red': data.savingsUnbanked < 0}">
+                            {{data.savingsUnbanked | customNumber}}
+                        </span>
+                    </ng-template>
+                    <ng-template #unbankedSavingsMdash>
+                        <span>
+                            &mdash;
+                        </span>
+                    </ng-template>
+                </td>
+                <td *ngIf="analysisTableColumns.savings">
+                    <ng-template [ngIf]="data.savings && !data.isIntermediateBanked" [ngIfElse]="savingsMdash">
+                        <span [ngClass]="{'red': data.savings < 0}">
+                            {{data.savings | customNumber}}
+                        </span>
+                    </ng-template>
+                    <ng-template #savingsMdash>
+                        <span>
+                            &mdash;
+                        </span>
+                    </ng-template>
+                </td>
+               <!--  <td *ngIf="analysisTableColumns.percentSavingsComparedToBaseline">
+                    <span *ngIf="data.percentSavingsComparedToBaseline"
+                        [ngClass]="{'red': data.percentSavingsComparedToBaseline < 0}">
+                        {{data.percentSavingsComparedToBaseline | number:'1.0-2'}} %
+                    </span>
+                    <span *ngIf="!data.percentSavingsComparedToBaseline">
+                        &mdash;
+                    </span>
+                </td>
+                <td *ngIf="analysisTableColumns.yearToDateSavings">
+                    <span *ngIf="data.yearToDateSavings" [ngClass]="{'red': data.yearToDateSavings < 0}">
+                        {{data.yearToDateSavings | customNumber}}
+                    </span>
+                    <span *ngIf="!data.yearToDateSavings">
+                        &mdash;
+                    </span>
+                </td>
+                <td *ngIf="analysisTableColumns.yearToDatePercentSavings">
+                    <span *ngIf="data.yearToDatePercentSavings" [ngClass]="{'red': data.yearToDatePercentSavings < 0}">
+                        {{data.yearToDatePercentSavings | number:'1.0-2'}} %
+                    </span>
+                    <span *ngIf="!data.yearToDatePercentSavings">
+                        &mdash;
+                    </span>
+                </td> -->
+                <td *ngIf="analysisTableColumns.rollingSavings">
+                    <span *ngIf="data.rollingSavings" [ngClass]="{'red': data.rollingSavings < 0}">
+                        {{data.rollingSavings | customNumber}}
+                    </span>
+                    <span *ngIf="!data.rollingSavings">
+                        &mdash;
+                    </span>
+                </td>
+                <td *ngIf="analysisTableColumns.rolling12MonthImprovement">
+                    <span *ngIf="data.rolling12MonthImprovement"
+                        [ngClass]="{'red': data.rolling12MonthImprovement < 0}">
+                        {{data.rolling12MonthImprovement | number:'1.0-2'}} %
+                    </span>
+                    <span *ngIf="!data.rolling12MonthImprovement">
+                        &mdash;
+                    </span>
+                </td>
+            </ng-container>
         </tr>
     </tbody>
 </table>
-<div class="d-flex w-100 justify-content-between">
-    <div>
+<div class="d-flex w-100 justify-content-between hide-print">
+    <div *ngIf="!inReport">
         <button class="btn action-btn btn-sm" (click)="copyTable()">
             <span class="fa fa-copy"></span> Copy Table
         </button>
     </div>
-    <ngb-pagination [collectionSize]="monthlyAnalysisSummaryData.length" [(page)]="currentPageNumber"
+    <div class="alert alert-info p-1" *ngIf="hasBanked || modelYear || hasBankedSavings || hasTransitionYear">
+        <ng-container *ngIf="hasBanked">
+            <span class="fa fa-piggy-bank"></span> Indicates Banked Analysis Year<br>
+        </ng-container>
+        <ng-container *ngIf="hasBankedSavings">
+            <span class="fa fa-building-columns"></span> Indicates Banked Savings Added<br>
+        </ng-container>
+        <ng-container *ngIf="hasTransitionYear">
+            <span class="fa fa-paint-roller"></span> Indicates Transition Analysis Year<br>
+        </ng-container>
+        <ng-container *ngIf="modelYear">
+            <span class="fa fa-star"></span> Indicates Model Year<br>
+        </ng-container>
+    </div>
+    <ngb-pagination *ngIf="!inReport" [collectionSize]="monthlyAnalysisSummaryData.length" [(page)]="currentPageNumber"
         [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true" aria-label="Pagination">
     </ngb-pagination>
 </div>

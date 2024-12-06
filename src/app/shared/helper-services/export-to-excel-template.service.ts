@@ -3,10 +3,8 @@ import { Injectable } from '@angular/core';
 import * as ExcelJS from 'exceljs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { IdbAccount, IdbCustomGWP, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup, MeterReadingDataApplication } from 'src/app/models/idb';
 import * as _ from 'lodash';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { checkShowHeatCapacity, getIsEnergyUnit } from '../sharedHelperFuntions';
@@ -15,6 +13,16 @@ import { AgreementType, AgreementTypes } from 'src/app/models/agreementType';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { VehicleTypes } from '../vehicle-data/vehicleType';
 import { GlobalWarmingPotential, GlobalWarmingPotentials } from 'src/app/models/globalWarmingPotentials';
+import { IdbAccount } from 'src/app/models/idbModels/account';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { IdbUtilityMeter, MeterReadingDataApplication } from 'src/app/models/idbModels/utilityMeter';
+import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
+import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
+import { IdbPredictor } from 'src/app/models/idbModels/predictor';
+import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
+import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
+import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
+import { checkSameMonth } from 'src/app/upload-data/upload-helper-functions';
 
 @Injectable({
   providedIn: 'root'
@@ -23,11 +31,12 @@ export class ExportToExcelTemplateService {
 
   constructor(private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private predictorDbService: PredictordbService,
     private facilityDbService: FacilitydbService,
     private accountDbService: AccountdbService,
     private loadingService: LoadingService,
-    private utilityMeterGroupDbService: UtilityMeterGroupdbService) { }
+    private utilityMeterGroupDbService: UtilityMeterGroupdbService,
+    private predictorDbService: PredictorDbService,
+    private predictorDataDbService: PredictorDataDbService) { }
 
 
   exportFacilityData(facilityId?: string) {
@@ -429,18 +438,21 @@ export class ExportToExcelTemplateService {
     // worksheet.getCell('B1').value = 'Date';
     let alphaIndex: number = 2;
 
+
     let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     if (facilityId) {
       facilities = facilities.filter(facility => { return facility.guid == facilityId });
     }
-    let predictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.accountPredictorEntries.getValue();
+    let predictorEntries: Array<IdbPredictorData> = this.predictorDataDbService.accountPredictorData.getValue();
+    let predictors: Array<IdbPredictor> = this.predictorDbService.accountPredictors.getValue();
     if (facilityId) {
       predictorEntries = predictorEntries.filter(entry => { return entry.facilityId == facilityId });
+      predictors = predictors.filter(predictor => { return predictor.facilityId == facilityId });
     }
     let predictorCellMap: Array<{ letter: string, predictorName: string }> = new Array();
     if (predictorEntries.length != 0) {
       // predictorEntries[0].predictors.forEach(predictor => {
-      let predictorNames: Array<string> = this.getAllPredictorNames(predictorEntries, facilities);
+      let predictorNames: Array<string> = this.getAllPredictorNames(predictors, facilities);
       predictorNames.forEach(name => {
         let letter: string = alphabet[alphaIndex];
         worksheet.getCell(letter + '1').value = name;
@@ -451,37 +463,54 @@ export class ExportToExcelTemplateService {
         alphaIndex++;
       });
       let index: number = 2;
-      predictorEntries.forEach(entry => {
-        let facilityName: string = facilities.find(facility => { return facility.guid == entry.facilityId }).name;
-        worksheet.getCell('A' + index).value = facilityName;
-        worksheet.getCell('B' + index).value = this.getFormatedDate(entry.date)
-        // alphaIndex = 1;
-        entry.predictors.forEach(predictor => {
-          // let letter: string = alphabet[alphaIndex];
-          let findItem: { letter: string, predictorName: string } = predictorCellMap.find(mapObj => {
-            return mapObj.predictorName == predictor.name
-          })
-          if (!findItem) {
-            console.log('Missing Predictor Entry: ' + predictor.name)
-          } else {
-            let letter = findItem.letter;
-            worksheet.getCell(letter + index).value = predictor.amount;
-          }
-          // alphaIndex++;
+      let facilityIDs: Array<string> = facilities.map(facility => { return facility.guid });
+      facilityIDs.forEach(_facilityId => {
+        let facilityPredictorEntries: Array<IdbPredictorData> = predictorEntries.filter(entry => {
+          return entry.facilityId == _facilityId;
         });
-        index++;
+        let facilityPredictors: Array<IdbPredictor> = predictors.filter(predictor => {
+          return predictor.facilityId == _facilityId;
+        });
+        
+        let predictorDates: Array<Date> = facilityPredictorEntries.map(predictor => {
+          return new Date(predictor.date)
+        });
+
+        predictorDates = _.uniqBy(predictorDates, (pDate: Date) => {
+          return pDate.getMonth() + ' ' + pDate.getFullYear();
+        })
+
+        predictorDates.forEach(pDate => {
+          let facilityName: string = facilities.find(facility => { return facility.guid == _facilityId }).name;
+          worksheet.getCell('A' + index).value = facilityName;
+          worksheet.getCell('B' + index).value = this.getFormatedDate(pDate)
+          facilityPredictors.forEach(predictor => {
+            let monthEntry: IdbPredictorData = facilityPredictorEntries.find(pData => {
+              return pData.predictorId == predictor.guid && checkSameMonth(new Date(pData.date), pDate);
+            });
+            if (monthEntry) {
+              let findItem: { letter: string, predictorName: string } = predictorCellMap.find(mapObj => {
+                return mapObj.predictorName == predictor.name
+              })
+              if (findItem) {
+                worksheet.getCell(findItem.letter + index).value = monthEntry.amount;
+              }
+            }
+          })
+          index++;
+        })
       });
     }
     return worksheet;
   }
 
 
-  getAllPredictorNames(predictorEntries: Array<IdbPredictorEntry>, facilities: Array<IdbFacility>): Array<string> {
+  getAllPredictorNames(predictorEntries: Array<IdbPredictor>, facilities: Array<IdbFacility>): Array<string> {
     let predictorNames: Array<string> = new Array();
     facilities.forEach(facility => {
-      let facilityPredictors: Array<IdbPredictorEntry> = predictorEntries.filter(entry => { return entry.facilityId == facility.guid });
+      let facilityPredictors: Array<IdbPredictor> = predictorEntries.filter(entry => { return entry.facilityId == facility.guid });
       if (facilityPredictors.length > 0) {
-        let facilityPredictorNames: Array<string> = facilityPredictors[0].predictors.map(predictor => { return predictor.name })
+        let facilityPredictorNames: Array<string> = facilityPredictors.map(predictor => { return predictor.name })
         predictorNames = _.union(predictorNames, facilityPredictorNames)
       }
     });

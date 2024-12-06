@@ -1,5 +1,4 @@
 import { MonthlyAnalysisSummaryData } from "src/app/models/analysis";
-import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData } from "src/app/models/idb";
 import { MonthlyAccountAnalysisDataClass } from "./monthlyAccountAnalysisDataClass";
 import { MonthlyAnalysisSummaryDataClass } from "./monthlyAnalysisSummaryDataClass";
 import { MonthlyFacilityAnalysisClass } from "./monthlyFacilityAnalysisClass";
@@ -8,29 +7,38 @@ import { checkAnalysisValue, getMonthlyStartAndEndDate } from "../shared-calcula
 import { getFiscalYear, getNeededUnits } from "../shared-calculations/calanderizationFunctions";
 import { CalanderizedMeter } from "src/app/models/calanderization";
 import { getCalanderizedMeterData } from "../calanderization/calanderizeMeters";
+import { IdbAccount } from "src/app/models/idbModels/account";
+import { IdbFacility } from "src/app/models/idbModels/facility";
+import { IdbUtilityMeter } from "src/app/models/idbModels/utilityMeter";
+import { IdbUtilityMeterData } from "src/app/models/idbModels/utilityMeterData";
+import { IdbPredictorData } from "src/app/models/idbModels/predictorData";
+import { IdbPredictor } from "src/app/models/idbModels/predictor";
+import { IdbAnalysisItem } from "src/app/models/idbModels/analysisItem";
+import { IdbAccountAnalysisItem } from "src/app/models/idbModels/accountAnalysisItem";
 
 export class MonthlyAccountAnalysisClass {
 
     allAccountAnalysisData: Array<MonthlyAnalysisSummaryDataClass>;
     accountMonthSummaries: Array<MonthlyAccountAnalysisDataClass>;
-    monthlyFacilityAnalysisClasses: Array<MonthlyFacilityAnalysisClass>; 
+    monthlyFacilityAnalysisClasses: Array<MonthlyFacilityAnalysisClass>;
     facilitySummaries: Array<{ facility: IdbFacility, analysisItem: IdbAnalysisItem, monthlySummaryData: Array<MonthlyAnalysisSummaryData> }>
     startDate: Date;
     endDate: Date;
-    facilityPredictorEntries: Array<IdbPredictorEntry>;
+    facilityPredictorEntries: Array<IdbPredictorData>;
     baselineYear: number;
     annualUsageValues: Array<{ year: number, usage: number }>
     constructor(
         accountAnalysisItem: IdbAccountAnalysisItem,
         account: IdbAccount,
         accountFacilities: Array<IdbFacility>,
-        accountPredictorEntries: Array<IdbPredictorEntry>,
+        accountPredictorEntries: Array<IdbPredictorData>,
         allAccountAnalysisItems: Array<IdbAnalysisItem>,
         calculateAllMonthlyData: boolean,
         meters: Array<IdbUtilityMeter>,
-        meterData: Array<IdbUtilityMeterData>
+        meterData: Array<IdbUtilityMeterData>,
+        accountPredictors: Array<IdbPredictor>
     ) {
-        this.setMonthlyFacilityAnlysisClasses(accountAnalysisItem, accountFacilities, accountPredictorEntries, allAccountAnalysisItems, calculateAllMonthlyData, meters, meterData);
+        this.setMonthlyFacilityAnlysisClasses(accountAnalysisItem, accountFacilities, accountPredictorEntries, allAccountAnalysisItems, calculateAllMonthlyData, meters, meterData, accountPredictors);
         this.setStartAndEndDate(account, accountAnalysisItem, calculateAllMonthlyData);
         this.setBaselineYear(account);
         this.setAnnualUsageValues();
@@ -38,7 +46,7 @@ export class MonthlyAccountAnalysisClass {
     }
 
     setStartAndEndDate(account: IdbAccount, analysisItem: IdbAccountAnalysisItem, calculateAllMonthlyData: boolean) {
-        let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = getMonthlyStartAndEndDate(account, analysisItem);
+        let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = getMonthlyStartAndEndDate(account, analysisItem, undefined);
         this.startDate = monthlyStartAndEndDate.baselineDate;
         if (calculateAllMonthlyData) {
             let endDates: Array<Date> = this.monthlyFacilityAnalysisClasses.map(monthFacilityAnalysisClass => { return monthFacilityAnalysisClass.endDate });
@@ -56,11 +64,12 @@ export class MonthlyAccountAnalysisClass {
     setMonthlyFacilityAnlysisClasses(
         accountAnalysisItem: IdbAccountAnalysisItem,
         accountFacilities: Array<IdbFacility>,
-        accountPredictorEntries: Array<IdbPredictorEntry>,
+        accountPredictorEntries: Array<IdbPredictorData>,
         allAccountAnalysisItems: Array<IdbAnalysisItem>,
         calculateAllMonthlyData: boolean,
         meters: Array<IdbUtilityMeter>,
-        meterData: Array<IdbUtilityMeterData>) {
+        meterData: Array<IdbUtilityMeterData>,
+        accountPredictors: Array<IdbPredictor>) {
         this.monthlyFacilityAnalysisClasses = new Array();
         this.facilitySummaries = new Array();
         accountAnalysisItem.facilityAnalysisItems.forEach(item => {
@@ -74,7 +83,9 @@ export class MonthlyAccountAnalysisClass {
                     facility,
                     calanderizedMeterData,
                     accountPredictorEntries,
-                    calculateAllMonthlyData
+                    calculateAllMonthlyData,
+                    accountPredictors,
+                    allAccountAnalysisItems
                 );
                 if (analysisItem.analysisCategory == 'energy' && (analysisItem.energyUnit != accountAnalysisItem.energyUnit)) {
                     monthlyFacilityAnalysisClass.convertResults(analysisItem.energyUnit, accountAnalysisItem.energyUnit);
@@ -142,7 +153,11 @@ export class MonthlyAccountAnalysisClass {
                 modelYearDataAdjustment: summaryDataItem.modelYearDataAdjustment,
                 // adjustedStar: summaryDataItem.monthlyAnalysisCalculatedValues.adjustedStar,
                 // adjustedStarStar: summaryDataItem.monthlyAnalysisCalculatedValues.adjustedStarStar,
-                baselineAdjustmentInput: summaryDataItem.baselineAdjustmentInput
+                baselineAdjustmentInput: summaryDataItem.baselineAdjustmentInput,
+                isBanked: false,
+                isIntermediateBanked: false,
+                savingsBanked: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.savingsBanked),
+                savingsUnbanked: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.savingsUnbanked)
 
             }
         })

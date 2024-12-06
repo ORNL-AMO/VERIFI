@@ -1,0 +1,252 @@
+<ng-template [ngIf]="predictorForm">
+    <div class="row">
+        <div class="col-12 justify-content-end">
+            <div class="d-flex small text-center alert alert-warning"
+                *ngIf="predictorForm.controls.predictorType.value == 'Weather' && addOrEdit == 'edit'">
+                Changing weather data properties will cause predictor data to re-calculate. Existing predictor entries
+                may
+                be
+                altered.
+            </div>
+            <div class="d-flex justify-content-end">
+                <button class="btn btn-secondary me-2" (click)="cancel()">Cancel</button>
+                <button class="btn btn-primary" (click)="saveChanges()" [disabled]="predictorForm.invalid">
+                    <span *ngIf="addOrEdit == 'add'">Add Predictor</span>
+                    <span *ngIf="addOrEdit == 'edit'">Save Changes</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    <form [formGroup]="predictorForm">
+        <p class="bold">Predictor Information</p>
+        <div class="row">
+            <div class="col-lg-6 col-md-12 col-sm-12">
+                <label class="semibold" for="name">Name</label>
+                <div class="mb-3">
+                    <input id="name" class="form-control" type="text" formControlName="name" onfocus="this.select();"
+                        minlength="0" maxlength="100">
+                </div>
+                <div class="alert alert-danger" *ngIf="predictorForm.get('name').hasError('required')">Predictor name is
+                    required</div>
+            </div>
+            <div class="col-lg-6 col-md-12 col-sm-12">
+                <label class="semibold" for="isProductionPredictor">Is Production?</label>
+                <div class="mb-3">
+                    <select id="isProductionPredictor" class="form-select" formControlName="production">
+                        <option [ngValue]="true">Yes</option>
+                        <option [ngValue]="false">No</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-lg-6 col-md-12 col-sm-12">
+                <label class="semibold" for="predictorUnit">Unit</label>
+                <div class="mb-3">
+                    <input id="predictorUnit" class="form-control" type="text" formControlName="unit"
+                        onfocus="this.select();" minlength="0" maxlength="100">
+                </div>
+            </div>
+            <div class="col-lg-6 col-md-12 col-sm-12">
+                <label class="semibold" for="description">Description</label>
+                <div class="mb-3">
+                    <textarea id="description" class="form-control" type="text" formControlName="description"
+                        onfocus="this.select();"></textarea>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <hr>
+            </div>
+            <div class="col-lg-6 col-md-12 col-sm-12">
+                <label class="semibold" for="predictorType">Predictor Type</label>
+                <div class="mb-3">
+                    <select id="predictorType" class="form-select" formControlName="predictorType"
+                        (change)="changePredictorType()">
+                        <option [value]="'Standard'">Standard</option>
+                        <!-- <option [value]="'Conversion'">Conversion</option>
+                    <option [value]="'Math'">Math</option> -->
+                        <option [value]="'Weather'">Weather</option>
+                    </select>
+                </div>
+            </div>
+            <!--weather-->
+            <ng-container *ngIf="predictorForm.controls.predictorType.value == 'Weather'">
+                <div class="col-lg-6 col-md-12 col-sm-12">
+                    <label class="semibold" for="weatherDataType">Weather Predictor Type</label>
+                    <div class="mb-3">
+                        <select id="weatherDataType" class="form-select" formControlName="weatherDataType"
+                            (change)="setValidators()">
+                            <option [value]="'HDD'">Heating Degree Days</option>
+                            <option [value]="'CDD'">Cooling Degree Days</option>
+                            <option [value]="'relativeHumidity'">Relative Humidity</option>
+                            <option [value]="'dryBulbTemp'">Dry Bulb Temp</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-lg-6 col-md-12 col-sm-12">
+                    <label class="semibold" for="weatherStationId">Weather Station <span>(within 50 miles of
+                            {{facility.zip}})</span></label>
+                    <ng-container *ngIf="stations.length != 0">
+                        <div class="mb-3">
+                            <select id="weatherStationId" class="form-select" formControlName="weatherStationId">
+                                <option *ngFor="let station of stations" [ngValue]="station.ID">{{station.name}}
+                                    ({{station.distanceFrom | number}} miles)</option>
+                            </select>
+                        </div>
+                        <div class="alert alert-danger"
+                            *ngIf="predictorForm.get('weatherStationId').hasError('required')">
+                            Weather station is
+                            required</div>
+                    </ng-container>
+                    <ng-template [ngIf]="!findingStations" [ngIfElse]="findingStationsBlock">
+                        <div *ngIf="stations.length == 0" class="alert alert-danger">
+                            No stations found within 50 miles of the facility zip. Use the weather data portion of
+                            VERIFI for
+                            more information.
+                        </div>
+                    </ng-template>
+                    <ng-template #findingStationsBlock>
+                        Searching for weather stations...
+                    </ng-template>
+                </div>
+                <div class="col-lg-6 col-md-12 col-sm-12" *ngIf="predictorForm.controls.weatherDataType.value == 'HDD'">
+                    <label class="semibold" for="heatingBaseTemperature">Heating Base Temperature</label>
+                    <div class="mb-3 input-group">
+                        <input id="heatingBaseTemperature" class="form-control" type="number"
+                            formControlName="heatingBaseTemperature" onfocus="this.select();"
+                            name="heatingBaseTemperature">
+                        <span class="input-group-text">
+                            &#8457;
+                        </span>
+                    </div>
+                    <div class="alert alert-danger"
+                        *ngIf="predictorForm.get('heatingBaseTemperature').hasError('required')">Heating base
+                        temperature is
+                        required</div>
+                </div>
+                <div class="col-lg-6 col-md-12 col-sm-12" *ngIf="predictorForm.controls.weatherDataType.value == 'CDD'">
+                    <label class="semibold" for="coolingBaseTemperature">Cooling Base Temperature</label>
+                    <div class="mb-3 input-group">
+                        <input id="coolingBaseTemperature" class="form-control" type="number"
+                            formControlName="coolingBaseTemperature" onfocus="this.select();"
+                            name="coolingBaseTemperature">
+                        <span class="input-group-text">
+                            &#8457;
+                        </span>
+                    </div>
+                    <div class="alert alert-danger"
+                        *ngIf="predictorForm.get('coolingBaseTemperature').hasError('required')">Cooling base
+                        temperature is
+                        required</div>
+                </div>
+                <div class="col-lg-6 col-md-12 col-sm-12"
+                    *ngIf="addOrEdit == 'add' && firstMeterReading && latestMeterReading">
+                    <!-- <label class="semibold" for="createPredictorData">Create Predictor Entries</label> -->
+                    <app-label-with-tooltip [field]="'createPredictorData'" [labelId]="'createPredictorData'"
+                        [isBold]="true" [label]="'Create Predictor Entries'"></app-label-with-tooltip>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" name="createPredictorData"
+                            id="createPredictorData" formControlName="createPredictorData">
+                        <label class="form-check-label" for="createPredictorData">
+                            {{firstMeterReading| date:'MMM, yyyy'}}&mdash;{{latestMeterReading|
+                            date:'MMM, yyyy'}}</label>
+                    </div>
+                </div>
+                <div class="col-12 mt-2">
+                    <div class="alert alert-info">
+                        Heating and cooling degree days will be calculated using the dry bulb
+                        temperature readings from the selected weather station. Weather station data quality varies, you
+                        may
+                        need to try multiple weather stations before getting accurate degree days. Explore station data
+                        and
+                        calculation results in VERIFI's <a (click)="goToWeatherData()">Weather Data</a> page.
+                    </div>
+                </div>
+            </ng-container>
+
+            <!--Math/Conversion-->
+            <div class="col-lg-6 col-md-12 col-sm-12" *ngIf="showReferencePredictors">
+                <label class="semibold" for="referencePredictorId">Reference Predictor</label>
+                <div class="mb-3">
+                    <select id="referencePredictorId" class="form-select" formControlName="referencePredictorId"
+                        (change)="setReferencePredictorName()">
+                        <option *ngFor="let predictor of referencePredictors" [value]="predictor.id">{{predictor.name}}
+                        </option>
+                    </select>
+                </div>
+            </div>
+            <!--Conversion method not implemented yet-->
+            <!-- <ng-container *ngIf="predictorForm.controls.predictorType.value == 'Conversion'">
+            <div class="col-lg-6 col-md-12 col-sm-12">
+                <label class="semibold" for="conversionType">Conversion Type</label>
+                <div class="mb-3">
+                    <select id="conversionType" class="form-select" formControlName="conversionType"
+                        (change)="setUnitOptions()">
+                        <option *ngFor="let conversionType of unitConversionTypes" [value]="conversionType.measure">
+                            {{conversionType.display}}
+                        </option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-lg-6 col-md-12 col-sm-12">
+                <label class="semibold" for="convertFrom">Convert From</label>
+                <div class="mb-3">
+                    <select id="convertFrom" class="form-select" formControlName="convertFrom">
+                        <option *ngFor="let unitOption of unitOptions" [value]="unitOption">
+                            <span [innerHTML]="unitOption | settingsLabel"></span>
+                        </option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-lg-6 col-md-12 col-sm-12">
+                <label class="semibold" for="convertTo">Convert To</label>
+                <div class="mb-3">
+                    <select id="convertTo" class="form-select" formControlName="convertTo">
+                        <option *ngFor="let unitOption of unitOptions" [value]="unitOption">
+                            <span [innerHTML]="unitOption | settingsLabel"></span>
+                        </option>
+                    </select>
+                </div>
+            </div>
+        </ng-container> -->
+            <ng-container *ngIf="predictorForm.controls.predictorType.value == 'Math'">
+                <div class="col-lg-6 col-md-12 col-sm-12">
+                    <label class="semibold" for="mathAction">Math Action</label>
+                    <div class="mb-3">
+                        <select id="mathAction" class="form-select" formControlName="mathAction">
+                            <option [value]="'add'">Add (&plus;)</option>
+                            <option [value]="'subtract'">Subtract (&minus;)</option>
+                            <option [value]="'multiply'">Multiply (&times;)</option>
+                            <option [value]="'divide'">Divide (&divide;)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-lg-6 col-md-12 col-sm-12">
+                    <label class="semibold" for="mathAmount">Action Amount</label>
+                    <div class="mb-3 input-group">
+                        <span class="input-group-text"
+                            *ngIf="predictorForm.controls.mathAction.value == 'add'">&plus;</span>
+                        <span class="input-group-text"
+                            *ngIf="predictorForm.controls.mathAction.value == 'subtract'">&minus;</span>
+                        <span class="input-group-text"
+                            *ngIf="predictorForm.controls.mathAction.value == 'multiply'">&times;</span>
+                        <span class="input-group-text"
+                            *ngIf="predictorForm.controls.mathAction.value == 'divide'">&divide;</span>
+                        <input type="number" id="mathAmount" class="form-control" formControlName="mathAmount">
+                    </div>
+                </div>
+                <div class="col-lg-6 col-md-12 col-sm-12">
+                    <label class="semibold" for="mathAmount">Result</label>
+                    <div class="mb-3">
+                        {{predictorForm.controls.name.value}} &equals; {{referencePredictorName}}
+                        <span *ngIf="predictorForm.controls.mathAction.value == 'add'">&plus;</span>
+                        <span *ngIf="predictorForm.controls.mathAction.value == 'subtract'">&minus;</span>
+                        <span *ngIf="predictorForm.controls.mathAction.value == 'multiply'">&times;</span>
+                        <span *ngIf="predictorForm.controls.mathAction.value == 'divide'">&divide;</span>
+                        {{predictorForm.controls.mathAmount.value}}
+                    </div>
+                </div>
+            </ng-container>
+        </div>
+    </form>
+</ng-template>

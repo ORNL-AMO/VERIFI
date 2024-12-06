@@ -1,4 +1,4 @@
-import { PredictorData } from "./idb";
+import { IdbPredictor } from "./idbModels/predictor"
 
 export interface MonthlyGroupSummary {
   date: Date,
@@ -44,9 +44,12 @@ export interface MonthlyFacilityAnalysisData {
 }
 
 export interface MonthlyAnalysisSummary {
-  predictorVariables: Array<PredictorData>,
+  predictorVariables: Array<AnalysisGroupPredictorVariable>,
   modelYear: number,
-  monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>
+  monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
+  unbankedMonthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
+  bankedMonthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
+  group?: AnalysisGroup
 }
 
 export interface MonthlyAnalysisSummaryData {
@@ -72,7 +75,11 @@ export interface MonthlyAnalysisSummaryData {
   rolling12MonthImprovement: number,
   modelYearDataAdjustment: number,
   dataAdjustment: number,
-  baselineAdjustmentInput: number
+  baselineAdjustmentInput: number,
+  isBanked: boolean,
+  isIntermediateBanked: boolean,
+  savingsBanked: number
+  savingsUnbanked: number
 }
 
 export interface AnnualAnalysisSummary {
@@ -86,6 +93,8 @@ export interface AnnualAnalysisSummary {
   baselineAdjustment: number,
   SEnPI: number,
   savings: number,
+  savingsBanked: number,
+  savingsUnbanked: number,
   totalSavingsPercentImprovement: number,
   annualSavingsPercentImprovement: number,
   cummulativeSavings: number,
@@ -96,6 +105,8 @@ export interface AnnualAnalysisSummary {
   }>,
   // adjustedStar: number,
   // adjustedStarStar: number
+  isBanked: boolean,
+  isIntermediateBanked: boolean
 }
 
 
@@ -121,11 +132,13 @@ export interface AnalysisTableColumns {
   cummulativeSavings: boolean,
   newSavings: boolean,
   predictors: Array<{
-    predictor: PredictorData,
+    predictor: AnalysisGroupPredictorVariable,
     display: boolean,
     usedInAnalysis: boolean
   }>,
-  predictorGroupId: string
+  predictorGroupId: string,
+  bankedSavings: boolean,
+  savingsUnbanked: boolean
 }
 
 
@@ -149,7 +162,7 @@ export interface JStatRegressionModel {
     F_statistic?: number
   },
   modelYear: number,
-  predictorVariables: Array<PredictorData>,
+  predictorVariables: Array<AnalysisGroupPredictorVariable>,
   modelId: string,
   isValid: boolean,
   modelPValue: number,
@@ -183,13 +196,14 @@ export interface AnalysisSetupErrors {
   groupsHaveErrors: boolean,
   missingBaselineYear: boolean,
   baselineYearAfterMeterDataEnd: boolean,
-  baselineYearBeforeMeterDataStart: boolean
+  baselineYearBeforeMeterDataStart: boolean,
+  bankingError: boolean
 }
 
 export interface AnalysisGroup {
   idbGroupId: string,
   analysisType: AnalysisType,
-  predictorVariables: Array<PredictorData>,
+  predictorVariables: Array<AnalysisGroupPredictorVariable>,
   regressionModelYear: number,
   regressionConstant: number,
   groupErrors: GroupErrors,
@@ -214,7 +228,20 @@ export interface AnalysisGroup {
   selectedModelId?: string,
   dateModelsGenerated?: Date,
   regressionModelNotes?: string,
-  maxModelVariables: number
+  maxModelVariables: number,
+  applyBanking: boolean,
+  newBaselineYear: number,
+  bankedAnalysisYear: number
+}
+
+export interface AnalysisGroupPredictorVariable {
+  //predictor guid..
+  id: string,
+  name: string,
+  production: boolean,
+  productionInAnalysis: boolean,
+  regressionCoefficient: number,
+  unit: string
 }
 
 export interface GroupErrors {
@@ -228,7 +255,10 @@ export interface GroupErrors {
   invalidAverageBaseload: boolean,
   invalidMonthlyBaseload: boolean,
   missingGroupMeters: boolean,
-  hasInvalidRegressionModel: boolean
+  hasInvalidRegressionModel: boolean,
+  missingBankingBaselineYear: boolean,
+  missingBankingAppliedYear: boolean,
+  invalidBankingYears: boolean
 }
 
 

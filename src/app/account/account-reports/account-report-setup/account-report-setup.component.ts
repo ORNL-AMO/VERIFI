@@ -2,12 +2,14 @@ import { Component } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { AccountReportsService } from '../account-reports.service';
-import { IdbAccount, IdbAccountReport } from 'src/app/models/idb';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { Month, Months } from 'src/app/shared/form-data/months';
 import { firstValueFrom } from 'rxjs';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
+import { IdbAccount } from 'src/app/models/idbModels/account';
+import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
+import { ReportType } from 'src/app/models/constantsAndTypes';
 @Component({
   selector: 'app-account-report-setup',
   templateUrl: './account-report-setup.component.html',
@@ -21,7 +23,7 @@ export class AccountReportSetupComponent {
   baselineYears: Array<number>;
   months: Array<Month> = Months;
   //TODO: Report years validation. Start < End (issue-1194)
-  reportType: 'Better Plants' | 'Data Overview' | 'Performance' | 'Better Climate Report';
+  reportType: ReportType;
   constructor(private accountReportDbService: AccountReportDbService,
     private accountReportsService: AccountReportsService,
     private dbChangesService: DbChangesService,
@@ -33,23 +35,15 @@ export class AccountReportSetupComponent {
   ngOnInit() {
     this.account = this.accountDbService.selectedAccount.getValue();
     let selectedReport: IdbAccountReport = this.accountReportDbService.selectedReport.getValue()
-    if(selectedReport.reportType == 'betterPlants'){
-      this.reportType = 'Better Plants';
-    }else if(selectedReport.reportType == 'dataOverview'){
-      this.reportType = 'Data Overview';
-    }else if(selectedReport.reportType == 'performance'){
-      this.reportType = 'Performance';
-    } else if(selectedReport.reportType == 'betterClimate'){
-      this.reportType = 'Better Climate Report';
-    }
+    this.reportType = selectedReport.reportType;
     this.setupForm = this.accountReportsService.getSetupFormFromReport(selectedReport);
     this.setYearOptions();
   }
 
   async save() {
-    let selectedReport: IdbAccountReport = this.accountReportDbService.selectedReport.getValue()
+    let selectedReport: IdbAccountReport = this.accountReportDbService.selectedReport.getValue();
     selectedReport = this.accountReportsService.updateReportFromSetupForm(selectedReport, this.setupForm);
-    await firstValueFrom(this.accountReportDbService.updateWithObservable(selectedReport));
+    selectedReport = await firstValueFrom(this.accountReportDbService.updateWithObservable(selectedReport));
     await this.dbChangesService.setAccountReports(this.account);
     this.accountReportDbService.selectedReport.next(selectedReport);
   }

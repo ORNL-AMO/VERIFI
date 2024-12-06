@@ -1,6 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
-import { IdbAccountReport, IdbFacility } from 'src/app/models/idb';
+import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
   selector: 'app-facility-title-page',

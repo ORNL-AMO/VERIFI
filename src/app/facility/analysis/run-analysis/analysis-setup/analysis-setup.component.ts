@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { Month, Months } from 'src/app/shared/form-data/months';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { IdbAccount, IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
 import { EnergyUnitOptions, UnitOption } from 'src/app/shared/unitOptions';
 import * as _ from 'lodash';
 import { AnalysisService } from '../../analysis.service';
@@ -16,6 +15,9 @@ import { CalanderizationService } from 'src/app/shared/helper-services/calanderi
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { RegressionModelsService } from 'src/app/shared/shared-analysis/calculations/regression-models.service';
 import { AnalysisGroup } from 'src/app/models/analysis';
+import { IdbAccount } from 'src/app/models/idbModels/account';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 @Component({
   selector: 'app-analysis-setup',
   templateUrl: './analysis-setup.component.html',
@@ -38,6 +40,8 @@ export class AnalysisSetupComponent implements OnInit {
   displayEnableForm: boolean = false;
   displayChangeReportYear: boolean = false;
   newReportYear: number;
+
+  facilityAnalysisItems: Array<IdbAnalysisItem>;
   constructor(private facilityDbService: FacilitydbService, private analysisDbService: AnalysisDbService,
     private analysisService: AnalysisService, private router: Router,
     private analysisValidationService: AnalysisValidationService,
@@ -85,6 +89,7 @@ export class AnalysisSetupComponent implements OnInit {
   }
 
   async setSiteSource() {
+    this.setFacilityAnalysisItems();
     await this.saveItem();
   }
 
@@ -150,7 +155,7 @@ export class AnalysisSetupComponent implements OnInit {
       group.predictorVariables.forEach(variable => {
         variable.regressionCoefficient = undefined;
       })
-      group.groupErrors = this.analysisValidationService.getGroupErrors(group);
+      group.groupErrors = this.analysisValidationService.getGroupErrors(group, this.analysisItem);
     });
     await this.saveItem();
     this.setComponentBools();
@@ -170,11 +175,12 @@ export class AnalysisSetupComponent implements OnInit {
       let minNeededModelYear: number = _.max(modelYears);
 
       this.reportYears = this.yearOptions.filter(year => {
-        return year > minNeededModelYear;
+        return year >= minNeededModelYear;
       });
     } else {
       this.reportYears = [];
     }
+    this.setFacilityAnalysisItems();
   }
 
   showChangeReportYear() {
@@ -198,6 +204,24 @@ export class AnalysisSetupComponent implements OnInit {
     }
     this.changeReportYear();
     this.displayChangeReportYear = false;
+    await this.saveItem();
+  }
+
+  setFacilityAnalysisItems() {
+    let facilityAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.facilityAnalysisItems.getValue();
+    this.facilityAnalysisItems = facilityAnalysisItems.filter(analysisItem => {
+      return analysisItem.energyIsSource == this.analysisItem.energyIsSource && analysisItem.guid != this.analysisItem.guid && analysisItem.analysisCategory == this.analysisItem.analysisCategory;
+    });
+    if (this.facilityAnalysisItems.length == 0) {
+      this.analysisItem.hasBanking = false;
+      this.analysisItem.bankedAnalysisItemId = undefined;
+    }
+  }
+
+  async changeHasBanking() {
+    if (this.analysisItem.hasBanking == false) {
+      this.analysisItem.bankedAnalysisItemId = undefined;
+    }
     await this.saveItem();
   }
 }

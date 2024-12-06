@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { IdbElectronBackup } from '../models/idb';
 import { Observable, firstValueFrom } from 'rxjs';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
+import { getNewIdbElectronBackup, IdbElectronBackup } from '../models/idbModels/electronBackup';
 
 @Injectable({
     providedIn: 'root'
@@ -55,12 +55,7 @@ export class ElectronBackupsDbService {
             this.accountBackups[accountBackupIndex].timeStamp = new Date();
             await firstValueFrom(this.updateWithObservable(this.accountBackups[accountBackupIndex]));
         } else {
-            let newBackup: IdbElectronBackup = {
-                accountId: accountId,
-                dataBackupId: dataBackupId,
-                guid: Math.random().toString(36).substr(2, 9),
-                timeStamp: new Date()
-            };
+            let newBackup: IdbElectronBackup = getNewIdbElectronBackup(accountId, dataBackupId);
             newBackup = await firstValueFrom(this.addWithObservable(newBackup));
             this.accountBackups.push(newBackup);
         }

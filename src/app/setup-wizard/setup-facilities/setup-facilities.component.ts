@@ -1,7 +1,6 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { IdbFacility } from 'src/app/models/idb';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { SettingsFormsService } from 'src/app/shared/settings-forms/settings-forms.service';
 import { UploadDataService } from 'src/app/upload-data/upload-data.service';
@@ -9,6 +8,7 @@ import { SetupWizardService } from '../setup-wizard.service';
 import * as XLSX from 'xlsx';
 import { FileReference } from 'src/app/upload-data/upload-data-models';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
   selector: 'app-setup-facilities',

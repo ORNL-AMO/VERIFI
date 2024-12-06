@@ -1,41 +1,53 @@
 import { MonthlyAnalysisSummaryData } from "src/app/models/analysis";
 import { CalanderizedMeter, MonthlyData } from "src/app/models/calanderization";
-import { IdbAnalysisItem, IdbFacility, IdbPredictorEntry } from "src/app/models/idb";
 import { getFiscalYear, getLastBillEntryFromCalanderizedMeterData } from "../shared-calculations/calanderizationFunctions";
 import { checkAnalysisValue, getMonthlyStartAndEndDate } from "../shared-calculations/calculationsHelpers";
 import { MonthlyAnalysisSummaryClass } from "./monthlyAnalysisSummaryClass";
 import { MonthlyAnalysisSummaryDataClass } from "./monthlyAnalysisSummaryDataClass";
 import { MonthlyFacilityAnalysisDataClass } from "./monthlyFacilityAnalysisDataClass";
 import * as _ from 'lodash';
+import { IdbFacility } from "src/app/models/idbModels/facility";
+import { IdbPredictorData } from "src/app/models/idbModels/predictorData";
+import { IdbPredictor } from "src/app/models/idbModels/predictor";
+import { IdbAnalysisItem } from "src/app/models/idbModels/analysisItem";
 
 export class MonthlyFacilityAnalysisClass {
+
+    bankedFacilityAnalysisClass: MonthlyFacilityAnalysisClass;
+
 
     allFacilityAnalysisData: Array<MonthlyAnalysisSummaryDataClass>;
     facilityMonthSummaries: Array<MonthlyFacilityAnalysisDataClass>;
     groupMonthlySummariesClasses: Array<MonthlyAnalysisSummaryClass>;
     startDate: Date;
     endDate: Date;
-    facilityPredictorEntries: Array<IdbPredictorEntry>;
+    facilityPredictorEntries: Array<IdbPredictorData>;
+    facilityPredictors: Array<IdbPredictor>;
     baselineYear: number;
     facility: IdbFacility;
     analysisItem: IdbAnalysisItem;
-    constructor(analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, accountPredictorEntries: Array<IdbPredictorEntry>, calculateAllMonthlyData: boolean) {
+    constructor(analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, accountPredictorEntries: Array<IdbPredictorData>, calculateAllMonthlyData: boolean, accountPredictors: Array<IdbPredictor>, accountAnalysisItems: Array<IdbAnalysisItem>) {
         this.facility = facility;
         this.analysisItem = analysisItem;
+        if (analysisItem.hasBanking) {
+            let bankedAnalysisItem: IdbAnalysisItem = accountAnalysisItems.find(item => { return item.guid == analysisItem.bankedAnalysisItemId });
+            this.bankedFacilityAnalysisClass = new MonthlyFacilityAnalysisClass(bankedAnalysisItem, facility, calanderizedMeters, accountPredictorEntries, false, accountPredictors, accountAnalysisItems);
+        }
         let calanderizedFacilityMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => { return cMeter.meter.facilityId == facility.guid })
         this.setFacilityPredictorEntries(accountPredictorEntries, facility);
+        this.setFacilityPredictors(accountPredictors, facility);
         this.setStartAndEndDate(facility, analysisItem, calculateAllMonthlyData, calanderizedFacilityMeters);
-        this.setGroupSummaries(analysisItem, facility, calanderizedFacilityMeters, calculateAllMonthlyData);
+        this.setGroupSummaries(analysisItem, facility, calanderizedFacilityMeters, calculateAllMonthlyData, accountAnalysisItems);
         this.setBaselineYear(facility);
         this.setFacilityMonthSummaries(facility);
     }
 
     setStartAndEndDate(facility: IdbFacility, analysisItem: IdbAnalysisItem, calculateAllMonthlyData: boolean, calanderizedMeters: Array<CalanderizedMeter>) {
-        let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = getMonthlyStartAndEndDate(facility, analysisItem);
+        let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = getMonthlyStartAndEndDate(facility, analysisItem, undefined);
         this.startDate = monthlyStartAndEndDate.baselineDate;
         if (calculateAllMonthlyData) {
             let lastBill: MonthlyData = getLastBillEntryFromCalanderizedMeterData(calanderizedMeters);
-            let lastPredictorEntry: IdbPredictorEntry = _.maxBy(this.facilityPredictorEntries, 'date');
+            let lastPredictorEntry: IdbPredictorData = _.maxBy(this.facilityPredictorEntries, (data: IdbPredictorData) => { return new Date(data.date) });
             if (lastPredictorEntry && lastBill.date > lastPredictorEntry.date) {
                 this.endDate = new Date(lastPredictorEntry.date);
             } else {
@@ -48,20 +60,34 @@ export class MonthlyFacilityAnalysisClass {
         }
     }
 
-    setGroupSummaries(analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, calculateAllMonthlyData: boolean) {
+    setGroupSummaries(analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, calculateAllMonthlyData: boolean, accountAnalysisItems: Array<IdbAnalysisItem>) {
         this.groupMonthlySummariesClasses = new Array();
         analysisItem.groups.forEach(group => {
             if (group.analysisType != 'skip' && group.analysisType != 'skipAnalysis') {
-                let monthlySummary: MonthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(group, analysisItem, facility, calanderizedMeters, this.facilityPredictorEntries, calculateAllMonthlyData);
+                let monthlySummary: MonthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(group, analysisItem, facility, calanderizedMeters, this.facilityPredictorEntries, calculateAllMonthlyData, accountAnalysisItems);
                 this.groupMonthlySummariesClasses.push(monthlySummary);
             }
         });
-        this.allFacilityAnalysisData = this.groupMonthlySummariesClasses.flatMap(summary => { return summary.monthlyAnalysisSummaryData });
+
+        let allMonthlyAnalysisSummaryData: Array<Array<MonthlyAnalysisSummaryDataClass>> = [];
+        this.groupMonthlySummariesClasses.forEach(groupSummaryClass => {
+            if (groupSummaryClass.bankedMonthlyAnalysisSummaryClass) {
+                allMonthlyAnalysisSummaryData.push(groupSummaryClass.bankedMonthlyAnalysisSummaryClass.monthlyAnalysisSummaryData);
+            }
+            allMonthlyAnalysisSummaryData.push(groupSummaryClass.monthlyAnalysisSummaryData)
+        })
+        this.allFacilityAnalysisData = allMonthlyAnalysisSummaryData.flatMap(summary => { return summary });
     }
 
-    setFacilityPredictorEntries(accountPredictorEntries: Array<IdbPredictorEntry>, facility: IdbFacility) {
+    setFacilityPredictorEntries(accountPredictorEntries: Array<IdbPredictorData>, facility: IdbFacility) {
         this.facilityPredictorEntries = accountPredictorEntries.filter(entry => {
             return entry.facilityId == facility.guid;
+        })
+    }
+
+    setFacilityPredictors(accountPredictors: Array<IdbPredictor>, facility: IdbFacility) {
+        this.facilityPredictors = accountPredictors.filter(predictor => {
+            return predictor.facilityId == facility.guid;
         })
     }
 
@@ -80,7 +106,8 @@ export class MonthlyFacilityAnalysisClass {
                 this.facilityPredictorEntries,
                 facility,
                 this.facilityMonthSummaries,
-                this.analysisItem.baselineYear
+                this.analysisItem.baselineYear,
+                this.facilityPredictors
             );
             this.facilityMonthSummaries.push(monthSummary);
             let currentMonth: number = monthDate.getUTCMonth()
@@ -111,10 +138,17 @@ export class MonthlyFacilityAnalysisClass {
                 rolling12MonthImprovement: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.rolling12MonthImprovement) * 100,
                 dataAdjustment: summaryDataItem.dataAdjustment,
                 modelYearDataAdjustment: summaryDataItem.modelYearDataAdjustment,
-                baselineAdjustmentInput: summaryDataItem.baselineAdjustmentInput
+                baselineAdjustmentInput: summaryDataItem.baselineAdjustmentInput,
+                isBanked: false,
+                isIntermediateBanked: false,
+                savingsBanked: summaryDataItem.monthlyAnalysisCalculatedValues.savingsBanked,
+                savingsUnbanked: summaryDataItem.monthlyAnalysisCalculatedValues.savingsUnbanked
             }
         })
     }
+
+
+
 
     convertResults(startingUnit: string, endingUnit: string) {
         for (let i = 0; i < this.facilityMonthSummaries.length; i++) {

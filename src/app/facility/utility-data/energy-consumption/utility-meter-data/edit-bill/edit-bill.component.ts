@@ -8,10 +8,13 @@ import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { IdbAccount, IdbFacility, IdbUtilityMeter, IdbUtilityMeterData } from 'src/app/models/idb';
 import { checkShowHeatCapacity, getIsEnergyMeter, getIsEnergyUnit } from 'src/app/shared/sharedHelperFuntions';
 import { UtilityMeterDataService } from '../utility-meter-data.service';
 import { firstValueFrom, Observable, of } from 'rxjs';
+import { IdbAccount } from 'src/app/models/idbModels/account';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { getNewIdbUtilityMeterData, IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
+import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 
 @Component({
   selector: 'app-edit-bill',
@@ -51,7 +54,8 @@ export class EditBillComponent implements OnInit {
           this.editMeterData = accountMeterData.find(data => { return data.id == meterReadingId });
         } else {
           //new Reading
-          this.editMeterData = this.utilityMeterDataDbService.getNewIdbUtilityMeterData(this.editMeter);
+          let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
+          this.editMeterData = getNewIdbUtilityMeterData(this.editMeter, accountMeterData);
           this.addOrEdit = 'add';
         }
         this.setMeterDataForm();
@@ -103,7 +107,8 @@ export class EditBillComponent implements OnInit {
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.setMeterData(selectedAccount, selectedFacility);
-    this.editMeterData = this.utilityMeterDataDbService.getNewIdbUtilityMeterData(this.editMeter);
+    let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
+    this.editMeterData = getNewIdbUtilityMeterData(this.editMeter, accountMeterData);
     this.editMeterData.readDate = new Date(meterDataToSave.readDate);
     this.editMeterData.readDate.setMonth(this.editMeterData.readDate.getUTCMonth() + 1);
     this.setMeterDataForm();

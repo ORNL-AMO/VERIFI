@@ -4,6 +4,7 @@ import { DetailDegreeDay, WeatherDataSelection, WeatherDataSelectionOption, Weat
 import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
 import * as _ from 'lodash';
 import { WeatherDataService } from '../weather-data.service';
+import { getDegreeDayAmount } from 'src/app/shared/sharedHelperFuntions';
 
 @Component({
   selector: 'app-annual-station-data',
@@ -17,8 +18,8 @@ export class AnnualStationDataComponent {
   selectedYear: number;
   heatingTemp: number;
   coolingTemp: number;
-  detailedDegreeDays: Array<DetailDegreeDay> | 'error';
-  yearSummaryData: Array<{ date: Date, heatingDegreeDays: number, coolingDegreeDays: number, hasErrors: boolean }>;
+  detailedDegreeDays: 'error' | Array<DetailDegreeDay>;
+  yearSummaryData: Array<AnnualStationDataSummary>;
   calculating: boolean;
   hasGapsInData: boolean;
   weatherDataSelection: WeatherDataSelection;
@@ -72,8 +73,10 @@ export class AnnualStationDataComponent {
         let monthData: Array<DetailDegreeDay> = this.detailedDegreeDays.filter(day => {
           return day.time.getMonth() == startDate.getMonth();
         });
-        let totalHeatingDegreeDays: number = _.sumBy(monthData, 'heatingDegreeDay');
-        let totalCoolingDegreeDays: number = _.sumBy(monthData, 'coolingDegreeDay');
+        let totalHeatingDegreeDays: number = getDegreeDayAmount(monthData, 'HDD');
+        let totalCoolingDegreeDays: number =  getDegreeDayAmount(monthData, 'CDD');
+        let relativeHumidity: number =  getDegreeDayAmount(monthData, 'relativeHumidity');
+        let dryBulbTemp: number =  getDegreeDayAmount(monthData, 'dryBulbTemp');
         let hasErrors: DetailDegreeDay = monthData.find(degreeDay => {
           return degreeDay.gapInData == true
         });
@@ -84,7 +87,9 @@ export class AnnualStationDataComponent {
           date: new Date(startDate),
           heatingDegreeDays: totalHeatingDegreeDays,
           coolingDegreeDays: totalCoolingDegreeDays,
-          hasErrors: hasErrors != undefined
+          hasErrors: hasErrors != undefined,
+          relativeHumidity: relativeHumidity,
+          dryBulbTemp: dryBulbTemp
         });
         startDate.setMonth(startDate.getMonth() + 1);
       }
@@ -119,3 +124,6 @@ export class AnnualStationDataComponent {
     this.weatherDataService.weatherDataSelection = this.weatherDataSelection;
   }
 }
+
+
+export interface AnnualStationDataSummary { date: Date, heatingDegreeDays: number, coolingDegreeDays: number, hasErrors: boolean, relativeHumidity: number, dryBulbTemp: number }

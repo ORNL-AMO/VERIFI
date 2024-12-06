@@ -2,6 +2,10 @@ tr.table-mh th.th-3 span{
     padding: 0px !important;
 }
 
-th.first-column{
+/* th.first-column{
     width:10%;
+} */
+
+.period-column{
+    width: 70px;
 }

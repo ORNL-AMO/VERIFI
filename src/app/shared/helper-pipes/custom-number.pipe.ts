@@ -10,8 +10,12 @@ export class CustomNumberPipe implements PipeTransform {
     let valueStr: string;
     if (isNaN(value) == false && value != null) {
       if (Math.abs(value) < 10000) {
-        //5 sig figs
-        valueStr = (value).toLocaleString(undefined, { maximumSignificantDigits: 5 });
+        if (Math.abs(value) < .00001) {
+          valueStr = '0';
+        } else {
+          //5 sig figs
+          valueStr = (value).toLocaleString(undefined, { maximumSignificantDigits: 5 });
+        }
       } else {
         //no decimals
         valueStr = (value).toLocaleString(undefined, { maximumFractionDigits: 0, minimumIntegerDigits: 1 });

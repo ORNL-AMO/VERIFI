@@ -2,9 +2,12 @@ import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
-import { AnalysisTableColumns, AnnualAnalysisSummary } from 'src/app/models/analysis';
-import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility, PredictorData } from 'src/app/models/idb';
+import { AnalysisGroup, AnalysisGroupPredictorVariable, AnalysisTableColumns, AnnualAnalysisSummary } from 'src/app/models/analysis';
 import { CopyTableService } from '../../helper-services/copy-table.service';
+import { IdbAccount } from 'src/app/models/idbModels/account';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
+import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 
 @Component({
   selector: 'app-annual-analysis-summary-table',
@@ -18,6 +21,12 @@ export class AnnualAnalysisSummaryTableComponent implements OnInit {
   analysisItem: IdbAnalysisItem | IdbAccountAnalysisItem;
   @Input()
   accountOrFacility: IdbAccount | IdbFacility;
+  @Input({required: true})
+  printBlock: 'consumption' | 'predictors' | 'savings' | 'all';
+  @Input()
+  inReport: boolean;
+  @Input()
+  group: AnalysisGroup;
 
   @ViewChild('dataTable', { static: false }) dataTable: ElementRef;
 
@@ -30,8 +39,12 @@ export class AnnualAnalysisSummaryTableComponent implements OnInit {
 
   orderDataField: string = 'year';
   orderByDirection: 'asc' | 'desc' = 'asc';
-  predictorColumns: Array<PredictorData>;
+  predictorColumns: Array<AnalysisGroupPredictorVariable>;
   copyingTable: boolean = false;
+  hasBanked: boolean;
+  hasBankedSavings: boolean;
+  hasTransitionYear: boolean;
+  modelYear: number;
   constructor(private analysisService: AnalysisService, private copyTableService: CopyTableService,
     private router: Router) { }
 
@@ -43,7 +56,9 @@ export class AnnualAnalysisSummaryTableComponent implements OnInit {
 
       this.setNumPredictorColumns();
       this.setPredictorVariables();
-    })
+    });
+    this.setHasBanked();
+    this.setModelYear();
   }
 
   ngOnDestroy() {
@@ -53,7 +68,7 @@ export class AnnualAnalysisSummaryTableComponent implements OnInit {
   setPredictorVariables() {
     let inAccount: boolean = this.router.url.includes('account');
     if (!inAccount) {
-      let predictorColumns: Array<PredictorData> = new Array();
+      let predictorColumns: Array<AnalysisGroupPredictorVariable> = new Array();
       this.annualAnalysisSummary.forEach((data, index) => {
         this.analysisTableColumns.predictors.forEach(predictorItem => {
           if (predictorItem.display) {
@@ -124,6 +139,12 @@ export class AnnualAnalysisSummaryTableComponent implements OnInit {
     if (this.analysisTableColumns.annualSavingsPercentImprovement) {
       numImprovementColumns++;
     }
+    if (this.analysisTableColumns.savingsUnbanked) {
+      numImprovementColumns++;
+    }
+    if (this.analysisTableColumns.bankedSavings) {
+      numImprovementColumns++;
+    }
     if (this.analysisTableColumns.cummulativeSavings) {
       numImprovementColumns++;
     }
@@ -149,5 +170,23 @@ export class AnnualAnalysisSummaryTableComponent implements OnInit {
       this.copyTableService.copyTable(this.dataTable);
       this.copyingTable = false;
     }, 200)
+  }
+
+  setHasBanked() {
+    this.hasBanked = this.annualAnalysisSummary.find(data => {
+      return data.isBanked
+    }) != undefined;
+    this.hasBankedSavings = this.annualAnalysisSummary.find(data => {
+      return data.savingsBanked
+    }) != undefined;
+    this.hasTransitionYear = this.annualAnalysisSummary.find(data => {
+      return data.isIntermediateBanked
+    }) != undefined;
+  }
+
+  setModelYear(){
+    if(this.group && this.group.analysisType == 'regression'){
+      this.modelYear = this.group.regressionModelYear;
+    }
   }
 }

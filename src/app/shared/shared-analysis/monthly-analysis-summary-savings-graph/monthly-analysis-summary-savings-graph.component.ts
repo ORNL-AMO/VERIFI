@@ -1,7 +1,11 @@
-import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, Input, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
-import { MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
-import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility } from 'src/app/models/idb';
+import { AnalysisGroup, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
+import { IdbAccount } from 'src/app/models/idbModels/account';
+import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
+import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
+import * as _ from 'lodash';
 
 @Component({
   selector: 'app-monthly-analysis-summary-savings-graph',
@@ -9,14 +13,16 @@ import { IdbAccount, IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility } from
   styleUrls: ['./monthly-analysis-summary-savings-graph.component.css']
 })
 export class MonthlyAnalysisSummarySavingsGraphComponent {
-  @Input()
+  @Input({ required: true })
   monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>;
-  @Input()
+  @Input({ required: true })
   analysisItem: IdbAnalysisItem | IdbAccountAnalysisItem;
-  @Input()
+  @Input({ required: true })
   facilityOrAccount: IdbFacility | IdbAccount;
   @Input()
   inHomeScreen: boolean;
+  @Input()
+  group: AnalysisGroup;
 
   @ViewChild('monthlyAnalysisSavingsGraph', { static: false }) monthlyAnalysisSavingsGraph: ElementRef;
 
@@ -32,119 +38,207 @@ export class MonthlyAnalysisSummarySavingsGraphComponent {
 
   drawChart() {
     if (this.monthlyAnalysisSavingsGraph) {
-
-      var trace1 = {
-        type: "bar",
-        mode: "none",
-        name: 'Savings',
-        x: this.monthlyAnalysisSummaryData.map(results => { return results.date }),
-        y: this.monthlyAnalysisSummaryData.map(results => {
-          if (results.rolling12MonthImprovement >= 0) {
-            return results.rolling12MonthImprovement
-          } else {
-            return 0;
-          }
-        }),
-        marker: {
-          color: '#58D68D'
-        },
+      let hasBanking: boolean = this.monthlyAnalysisSummaryData.find(result => {
+        return result.isBanked;
+      }) != undefined;
+      if (hasBanking && this.group) {
+        this.drawChartBanking();
+      } else {
+        this.drawChartNoBanking();
       }
-
-      var trace2 = {
-        type: "bar",
-        mode: "none",
-        name: 'Losses',
-        x: this.monthlyAnalysisSummaryData.map(results => { return results.date }),
-        y: this.monthlyAnalysisSummaryData.map(results => {
-          if (results.rolling12MonthImprovement < 0) {
-            return results.rolling12MonthImprovement
-          } else {
-            return undefined;
-          }
-        }),
-        marker: {
-          color: '#EC7063',
-        },
-      }
-
-      //traces for filled area line chart
-      // var trace1 = {
-      //   type: "scatter",
-      //   mode: "none",
-      //   name: 'Savings',
-      //   x: this.monthlyAnalysisSummaryData.map(results => { return results.date }),
-      //   y: this.monthlyAnalysisSummaryData.map(results => {
-      //     if (results.rolling12MonthImprovement >= 0) {
-      //       return results.rolling12MonthImprovement
-      //     } else {
-      //       return 0;
-      //     }
-      //   }),
-      //   line: { color: '#27AE60', width: 4 },
-      //   fill: 'tozeroy',
-      //   fillcolor: '#58D68D',
-      //   marker: {
-      //     // size: 8
-      //   },
-      //   stackgroup: 'one'
-      // }
-
-      // var trace2 = {
-      //   type: "scatter",
-      //   mode: "none",
-      //   name: 'Losses',
-      //   x: this.monthlyAnalysisSummaryData.map(results => { return results.date }),
-      //   y: this.monthlyAnalysisSummaryData.map(results => {
-      //     if (results.rolling12MonthImprovement < 0) {
-      //       return results.rolling12MonthImprovement
-      //     } else {
-      //       return undefined;
-      //     }
-      //   }),
-      //   line: { color: '#E74C3C', width: 4 },
-      //   fill: 'tozeroy',
-      //   fillcolor: '#EC7063',
-      //   marker: {
-      //     // size: 8
-      //   },
-      //   stackgroup: 'two'
-      // }
-
-
-      var data = [trace2, trace1];
-
-      let height: number;
-      if (this.inHomeScreen) {
-        height = 350;
-      }
-      var layout = {
-        height: height,
-        barmode: 'stack',
-        legend: {
-          orientation: "h"
-        },
-        xaxis: {
-          hoverformat: "%b, %y"
-        },
-        yaxis: {
-          title: {
-            text: 'Percent Savings',
-            font: {
-              size: 16
-            },
-            // standoff: 18
-          },
-          ticksuffix: '%',
-          hoverformat: ",.1f",
-          automargin: true,
-        },
-        margin: { r: 0, t: 50 }
-      };
-      var config = {
-        displaylogo: false,
-        responsive: true
-      };
-      this.plotlyService.newPlot(this.monthlyAnalysisSavingsGraph.nativeElement, data, layout, config);
     }
+  }
+
+  drawChartNoBanking() {
+    var trace1 = {
+      type: "bar",
+      mode: "none",
+      name: 'Savings',
+      x: this.monthlyAnalysisSummaryData.map(results => { return results.date }),
+      y: this.monthlyAnalysisSummaryData.map(results => {
+        if (results.rolling12MonthImprovement >= 0) {
+          return results.rolling12MonthImprovement
+        } else {
+          return 0;
+        }
+      }),
+      marker: {
+        color: '#58D68D'
+      },
+    }
+
+    var trace2 = {
+      type: "bar",
+      mode: "none",
+      name: 'Losses',
+      x: this.monthlyAnalysisSummaryData.map(results => { return results.date }),
+      y: this.monthlyAnalysisSummaryData.map(results => {
+        if (results.rolling12MonthImprovement < 0) {
+          return results.rolling12MonthImprovement
+        } else {
+          return undefined;
+        }
+      }),
+      marker: {
+        color: '#EC7063',
+      },
+    }
+
+
+    var data = [trace2, trace1];
+
+    let height: number;
+    if (this.inHomeScreen) {
+      height = 350;
+    }
+    var layout = {
+      height: height,
+      barmode: 'stack',
+      legend: {
+        orientation: "h"
+      },
+      xaxis: {
+        hoverformat: "%b, %y"
+      },
+      yaxis: {
+        title: {
+          text: 'Percent Savings',
+          font: {
+            size: 16
+          },
+          // standoff: 18
+        },
+        ticksuffix: '%',
+        hoverformat: ",.1f",
+        automargin: true,
+      },
+      margin: { r: 0, t: 50 }
+    };
+    var config = {
+      displaylogo: false,
+      responsive: true
+    };
+    this.plotlyService.newPlot(this.monthlyAnalysisSavingsGraph.nativeElement, data, layout, config);
+  }
+
+  drawChartBanking() {
+    let bankedResults: Array<MonthlyAnalysisSummaryData> = this.monthlyAnalysisSummaryData.filter(results => {
+      return results.isBanked == true;
+    })
+
+    let latestBanked: MonthlyAnalysisSummaryData = _.maxBy(bankedResults, (results: MonthlyAnalysisSummaryData) => {
+      return new Date(results.date);
+    });
+    console.log(latestBanked);
+
+    var bankedSavings = {
+      type: "bar",
+      mode: "none",
+      name: 'Banked Savings',
+      x: this.monthlyAnalysisSummaryData.map(results => { return results.date }),
+      y: this.monthlyAnalysisSummaryData.map(results => {
+        if (results.isBanked && !results.isIntermediateBanked && results.rolling12MonthImprovement >= 0) {
+          return results.rolling12MonthImprovement
+        } else if (results.isIntermediateBanked && latestBanked.percentSavingsComparedToBaseline >= 0) {
+          return latestBanked.percentSavingsComparedToBaseline;
+        } else {
+          return 0
+        }
+      }),
+      marker: {
+        color: '#2E86C1'
+      },
+    }
+
+    var savings = {
+      type: "bar",
+      mode: "none",
+      name: 'Savings',
+      x: this.monthlyAnalysisSummaryData.map(results => { return results.date }),
+      y: this.monthlyAnalysisSummaryData.map(results => {
+        if (results.isBanked) {
+          return 0
+        } else if (results.rolling12MonthImprovement >= 0) {
+          return results.rolling12MonthImprovement;
+        } else {
+          return 0;
+        }
+      }),
+      marker: {
+        color: '#58D68D'
+      },
+    }
+
+    var bankedLosses = {
+      type: "bar",
+      mode: "none",
+      name: 'Banked Losses',
+      x: this.monthlyAnalysisSummaryData.map(results => { return results.date }),
+      y: this.monthlyAnalysisSummaryData.map(results => {
+        if (results.isBanked && results.rolling12MonthImprovement < 0) {
+          return results.rolling12MonthImprovement
+        } else if (results.rolling12MonthImprovement < 0) {
+          return results.rolling12MonthImprovement;
+        } else {
+          return 0
+        }
+      }),
+      marker: {
+        color: '#EC7063'
+      },
+    }
+
+    var losses = {
+      type: "bar",
+      mode: "none",
+      name: 'Losses',
+      x: this.monthlyAnalysisSummaryData.map(results => { return results.date }),
+      y: this.monthlyAnalysisSummaryData.map(results => {
+        if (results.rolling12MonthImprovement < 0) {
+          return results.rolling12MonthImprovement
+        } else {
+          return undefined;
+        }
+      }),
+      marker: {
+        color: '#EC7063',
+      },
+    }
+
+
+    var data = [bankedSavings, bankedLosses, savings, losses];
+
+    let height: number;
+    if (this.inHomeScreen) {
+      height = 350;
+    }
+    var layout = {
+      height: height,
+      barmode: 'stack',
+      legend: {
+        orientation: "h"
+      },
+      xaxis: {
+        hoverformat: "%b, %y"
+      },
+      yaxis: {
+        title: {
+          text: 'Percent Savings',
+          font: {
+            size: 16
+          },
+          // standoff: 18
+        },
+        ticksuffix: '%',
+        hoverformat: ",.1f",
+        automargin: true,
+      },
+      margin: { r: 0, t: 50 }
+    };
+    var config = {
+      displaylogo: false,
+      responsive: true
+    };
+    this.plotlyService.newPlot(this.monthlyAnalysisSavingsGraph.nativeElement, data, layout, config);
   }
 }

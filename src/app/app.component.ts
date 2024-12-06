@@ -6,12 +6,11 @@ import { AccountReportDbService } from './indexedDB/account-report-db.service';
 import { AnalysisDbService } from './indexedDB/analysis-db.service';
 import { CustomEmissionsDbService } from './indexedDB/custom-emissions-db.service';
 import { FacilitydbService } from './indexedDB/facility-db.service';
-import { PredictordbService } from './indexedDB/predictors-db.service';
+import { PredictordbServiceDeprecated } from './indexedDB/predictors-deprecated-db.service';
 import { UpdateDbEntryService } from './indexedDB/update-db-entry.service';
 import { UtilityMeterdbService } from './indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from './indexedDB/utilityMeterData-db.service';
 import { UtilityMeterGroupdbService } from './indexedDB/utilityMeterGroup-db.service';
-import { IdbAccount, IdbAccountAnalysisItem, IdbAccountReport, IdbAnalysisItem, IdbCustomEmissionsItem, IdbCustomFuel, IdbCustomGWP, IdbFacility, IdbPredictorEntry, IdbUtilityMeter, IdbUtilityMeterData, IdbUtilityMeterGroup } from './models/idb';
 import { EGridService } from './shared/helper-services/e-grid.service';
 import { firstValueFrom } from 'rxjs';
 import { environment } from 'src/environments/environment';
@@ -22,6 +21,26 @@ import { ElectronService } from './electron/electron.service';
 import { AnalyticsService } from './analytics/analytics.service';
 import { CustomFuelDbService } from './indexedDB/custom-fuel-db.service';
 import { CustomGWPDbService } from './indexedDB/custom-gwp-db.service';
+import { IdbAccount } from './models/idbModels/account';
+import { IdbFacility } from './models/idbModels/facility';
+import { IdbUtilityMeterGroup } from './models/idbModels/utilityMeterGroup';
+import { IdbUtilityMeter } from './models/idbModels/utilityMeter';
+import { IdbUtilityMeterData } from './models/idbModels/utilityMeterData';
+import { IdbCustomGWP } from './models/idbModels/customGWP';
+import { IdbCustomFuel } from './models/idbModels/customFuel';
+import { IdbCustomEmissionsItem } from './models/idbModels/customEmissions';
+import { PredictorDbService } from './indexedDB/predictor-db.service';
+import { PredictorDataDbService } from './indexedDB/predictor-data-db.service';
+import { IdbPredictor } from './models/idbModels/predictor';
+import { IdbPredictorData } from './models/idbModels/predictorData';
+import { MigratePredictorsService } from './indexedDB/migrate-predictors.service';
+import { DbChangesService } from './indexedDB/db-changes.service';
+import { IdbAccountReport } from './models/idbModels/accountReport';
+import { IdbAnalysisItem } from './models/idbModels/analysisItem';
+import { IdbAccountAnalysisItem } from './models/idbModels/accountAnalysisItem';
+import { IdbPredictorEntryDeprecated } from './models/idbModels/deprecatedPredictors';
+import { FacilityReportsDbService } from './indexedDB/facility-reports-db.service';
+import { IdbFacilityReport } from './models/idbModels/facilityReport';
 import { DegreeDaysService } from './shared/helper-services/degree-days.service';
 
 // declare ga as a function to access the JS code in TS
@@ -43,7 +62,7 @@ export class AppComponent {
     private facilityDbService: FacilitydbService,
     private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private predictorsDbService: PredictordbService,
+    private predictorsDbServiceDeprecated: PredictordbServiceDeprecated,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
     public router: Router,
     private eGridService: EGridService,
@@ -59,6 +78,11 @@ export class AppComponent {
     private analyticsService: AnalyticsService,
     private customFuelDbservice: CustomFuelDbService,
     private customGWPDbService: CustomGWPDbService,
+    private predictorDbService: PredictorDbService,
+    private predictorDataDbService: PredictorDataDbService,
+    private migratePredictorsService: MigratePredictorsService,
+    private dbChangesService: DbChangesService,
+    private facilityReportsDbService: FacilityReportsDbService,
     private degreeDaysService: DegreeDaysService) {
     if (environment.production) {
       gtag('config', 'G-YG1QD02XSE');
@@ -93,13 +117,14 @@ export class AppComponent {
       await this.eGridService.parseZipCodeLongLat();
       if (account) {
         await this.initializeFacilities(account);
-        // await this.initializeReports(account);
         await this.initilizeMeterGroups(account);
         await this.initializeAccountReports(account);
-        await this.initializePredictors(account);
+        let needsMigration: boolean = await this.initializePredictors(account);
+        await this.initializePredictorData(account);
         await this.initializeMeters(account);
         await this.initializeMeterData(account);
         await this.initializeFacilityAnalysisItems(account);
+        await this.initializeFacilityReports(account);
         await this.initializeAccountAnalysisItems(account);
         await this.initializeCustomEmissions(account);
         await this.initializeElectronBackups();
@@ -111,6 +136,12 @@ export class AppComponent {
           this.accountDbService.selectedAccount.next(updatedAccount.account);
         } else {
           this.accountDbService.selectedAccount.next(account);
+        }
+        if (needsMigration) {
+          this.loadingMessage = 'Migrating Predictors for V2..'
+          await this.migratePredictorsService.migrateAccountPredictors();
+          await this.dbChangesService.setPredictorsV2(account);
+          await this.dbChangesService.setPredictorDataV2(account);
         }
         this.dataInitialized = true;
         this.automaticBackupsService.initializeAccount();
@@ -201,11 +232,28 @@ export class AppComponent {
     }
   }
 
-  async initializePredictors(account: IdbAccount) {
+  async initializePredictors(account: IdbAccount): Promise<boolean> {
     //set predictors
     this.loadingMessage = "Loading Predictors..";
-    let predictors: Array<IdbPredictorEntry> = await this.predictorsDbService.getAllAccountPredictors(account.guid);
-    this.predictorsDbService.accountPredictorEntries.next(predictors);
+    let needsMigration: boolean = false;
+    //TODO: OLD PREDICTORS METHOD
+    let predictors: Array<IdbPredictorEntryDeprecated> = await this.predictorsDbServiceDeprecated.getAllAccountPredictors(account.guid);
+    if (predictors.length > 0) {
+      this.predictorsDbServiceDeprecated.accountPredictorEntries.next(predictors);
+      needsMigration = true;
+    }
+
+    //NEW PREDICTORS V2
+    let predictorsV2: Array<IdbPredictor> = await this.predictorDbService.getAllAccountPredictors(account.guid);
+    this.predictorDbService.accountPredictors.next(predictorsV2);
+    return needsMigration;
+  }
+
+  async initializePredictorData(account: IdbAccount) {
+    this.loadingMessage = "Loading Predictor Data..";
+    //set predictor data (V2)
+    let predictorData: Array<IdbPredictorData> = await this.predictorDataDbService.getAllAccountPredictorData(account.guid);
+    this.predictorDataDbService.accountPredictorData.next(predictorData);
   }
 
   async initializeMeters(account: IdbAccount) {
@@ -266,4 +314,16 @@ export class AppComponent {
     let customGWPs: Array<IdbCustomGWP> = await this.customGWPDbService.getAllAccountCustomGWP(account.guid);
     this.customGWPDbService.accountCustomGWPs.next(customGWPs);
   }
+
+  async initializeFacilityReports(account: IdbAccount) {
+    //set analysis
+    let accountFacilityReports: Array<IdbFacilityReport> = await this.facilityReportsDbService.getAllFacilityReportsByAccountId(account.guid);
+    this.facilityReportsDbService.accountFacilityReports.next(accountFacilityReports);
+    let localStorageFacilityId: number = this.facilityReportsDbService.getInitialReport();
+    if (localStorageFacilityId) {
+      let facilityReport: IdbFacilityReport = accountFacilityReports.find(item => { return item.id == localStorageFacilityId });
+      this.facilityReportsDbService.selectedReport.next(facilityReport);
+    }
+  }
+
 }

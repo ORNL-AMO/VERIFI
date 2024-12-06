@@ -1,7 +1,8 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { IdbAccount, IdbAccountReport } from 'src/app/models/idb';
 import { BetterPlantsSummary } from 'src/app/models/overview-report';
 import * as _ from 'lodash';
+import { IdbAccount } from 'src/app/models/idbModels/account';
+import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 
 @Component({
   selector: 'app-primary-energy-consumption-table',
@@ -47,13 +48,13 @@ export class PrimaryEnergyConsumptionTableComponent implements OnInit {
     if (this.account.fiscalYearCalendarEnd) {
       this.baselineFiscalYearStart = new Date(this.report.baselineYear - 1, this.account.fiscalYearMonth);
       this.baselineFiscalYearEnd = new Date(this.report.baselineYear, this.account.fiscalYearMonth - 1);
-      this.reportFiscalYearStart = new Date(this.report.reportYear - 1, this.account.fiscalYearMonth);
-      this.reportFiscalYearEnd = new Date(this.report.reportYear, this.account.fiscalYearMonth - 1);
+      this.reportFiscalYearStart = new Date(this.betterPlantsSummary.reportYear - 1, this.account.fiscalYearMonth);
+      this.reportFiscalYearEnd = new Date(this.betterPlantsSummary.reportYear, this.account.fiscalYearMonth - 1);
     } else {
       this.baselineFiscalYearStart = new Date(this.report.baselineYear, this.account.fiscalYearMonth);
       this.baselineFiscalYearEnd = new Date(this.report.baselineYear + 1, this.account.fiscalYearMonth - 1);
-      this.reportFiscalYearStart = new Date(this.report.reportYear, this.account.fiscalYearMonth);
-      this.reportFiscalYearEnd = new Date(this.report.reportYear + 1, this.account.fiscalYearMonth - 1);
+      this.reportFiscalYearStart = new Date(this.betterPlantsSummary.reportYear, this.account.fiscalYearMonth);
+      this.reportFiscalYearEnd = new Date(this.betterPlantsSummary.reportYear + 1, this.account.fiscalYearMonth - 1);
     }
 
   }

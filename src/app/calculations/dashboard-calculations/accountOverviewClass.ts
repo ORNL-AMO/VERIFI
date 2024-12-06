@@ -1,5 +1,4 @@
 import { CalanderizedMeter, MonthlyData } from "src/app/models/calanderization";
-import { IdbAccount, IdbFacility } from "src/app/models/idb";
 import * as _ from 'lodash';
 import { YearMonthData } from "src/app/models/dashboard";
 import { getYearlyUsageNumbers } from "../shared-calculations/calanderizationFunctions";
@@ -8,6 +7,8 @@ import { EmissionsResults } from "src/app/models/eGridEmissions";
 import { getEmissionsTotalsFromArray } from "../shared-calculations/calculationsHelpers";
 import { SourceTotals } from "./sourceTotalsClass";
 import { WaterDischargeColors, WaterIntakeColors } from "src/app/shared/utilityColors";
+import { IdbAccount } from "src/app/models/idbModels/account";
+import { IdbFacility } from "src/app/models/idbModels/facility";
 
 export class AccountOverviewData {
 

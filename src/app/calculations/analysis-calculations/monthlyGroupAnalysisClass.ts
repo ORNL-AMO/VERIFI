@@ -1,27 +1,32 @@
 import { CalanderizedMeter, MonthlyData } from "src/app/models/calanderization";
-import { IdbAnalysisItem, IdbFacility, IdbPredictorEntry, PredictorData } from "src/app/models/idb";
 import * as _ from 'lodash';
 import { filterYearMeterData, filterYearPredictorData, getMonthlyStartAndEndDate, getPredictorUsage } from "../shared-calculations/calculationsHelpers";
 import { getFiscalYear, getLastBillEntryFromCalanderizedMeterData } from "../shared-calculations/calanderizationFunctions";
 import { AnalysisGroup } from "src/app/models/analysis";
+import { IdbFacility } from "src/app/models/idbModels/facility";
+import { AnalysisGroupPredictorVariable } from "src/app/models/analysis";
+import { IdbPredictorData } from "src/app/models/idbModels/predictorData";
+import { IdbAnalysisItem } from "src/app/models/idbModels/analysisItem";
 
 export class MonthlyGroupAnalysisClass {
 
   selectedGroup: AnalysisGroup;
   analysisItem: IdbAnalysisItem;
   facility: IdbFacility;
-  facilityPredictorData: Array<IdbPredictorEntry>;
+  facilityPredictorData: Array<IdbPredictorData>;
+  bankedAnalysisDate: Date;
   baselineDate: Date;
   endDate: Date;
-  predictorVariables: Array<PredictorData>;
+  predictorVariables: Array<AnalysisGroupPredictorVariable>;
   groupMeters: Array<CalanderizedMeter>;
   groupMonthlyData: Array<MonthlyData>;
   baselineYear: number;
+  bankedAnalysisYear: number;
   annualMeterDataUsage: Array<{ year: number, usage: number }>;
   baselineYearEnergyIntensity: number;
   modelYear: number;
   isNew: boolean;
-  constructor(selectedGroup: AnalysisGroup, analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, accountPredictorEntries: Array<IdbPredictorEntry>, calculateAllMonthlyData: boolean) {
+  constructor(selectedGroup: AnalysisGroup, analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, accountPredictorEntries: Array<IdbPredictorData>, calculateAllMonthlyData: boolean) {
     this.selectedGroup = selectedGroup;
     this.analysisItem = analysisItem;
     this.facility = facility;
@@ -39,11 +44,12 @@ export class MonthlyGroupAnalysisClass {
   }
 
   setStartAndEndDate(calanderizedMeters: Array<CalanderizedMeter>, calculateAllMonthlyData: boolean) {
-    let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = getMonthlyStartAndEndDate(this.facility, this.analysisItem);
+    let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date, bankedAnalysisDate: Date } = getMonthlyStartAndEndDate(this.facility, this.analysisItem, this.selectedGroup);
     this.baselineDate = monthlyStartAndEndDate.baselineDate;
+    this.bankedAnalysisDate = monthlyStartAndEndDate.bankedAnalysisDate;
     if (calculateAllMonthlyData) {
       let lastBill: MonthlyData = getLastBillEntryFromCalanderizedMeterData(calanderizedMeters);
-      let lastPredictorEntry: IdbPredictorEntry = _.maxBy(this.facilityPredictorData, (data: IdbPredictorEntry) => {
+      let lastPredictorEntry: IdbPredictorData = _.maxBy(this.facilityPredictorData, (data: IdbPredictorData) => {
         return data.date;
       });
       if (lastPredictorEntry && lastBill.date > lastPredictorEntry.date) {
@@ -70,7 +76,7 @@ export class MonthlyGroupAnalysisClass {
     });
   }
 
-  setFacilityPredictorData(accountPredictorEntries: Array<IdbPredictorEntry>) {
+  setFacilityPredictorData(accountPredictorEntries: Array<IdbPredictorData>) {
     this.facilityPredictorData = accountPredictorEntries.filter(entry => {
       return entry.facilityId == this.facility.guid;
     });
@@ -86,6 +92,9 @@ export class MonthlyGroupAnalysisClass {
 
   setBaselineYear() {
     this.baselineYear = getFiscalYear(this.baselineDate, this.facility);
+    if(this.bankedAnalysisDate){
+      this.bankedAnalysisYear = getFiscalYear(this.bankedAnalysisDate, this.facility);
+    }
   }
 
   setAnnualMeterDataUsage() {
@@ -96,7 +105,7 @@ export class MonthlyGroupAnalysisClass {
         let totalUsage: number = _.sumBy(yearMeterData, (data: MonthlyData) => { return data.energyUse });
         this.annualMeterDataUsage.push({ year: year, usage: totalUsage });
       } else if (this.analysisItem.analysisCategory == 'water') {
-        let totalUsage: number = _.sumBy(yearMeterData,( data: MonthlyData) => { return data.energyConsumption });
+        let totalUsage: number = _.sumBy(yearMeterData, (data: MonthlyData) => { return data.energyConsumption });
         this.annualMeterDataUsage.push({ year: year, usage: totalUsage });
       }
     }
@@ -104,7 +113,7 @@ export class MonthlyGroupAnalysisClass {
 
   setBaselineYearEnergyIntensity() {
     if (this.selectedGroup.analysisType == 'energyIntensity' || this.selectedGroup.analysisType == 'modifiedEnergyIntensity') {
-      let baselineYearPredictorData: Array<IdbPredictorEntry> = filterYearPredictorData(this.facilityPredictorData, this.baselineYear, this.facility);
+      let baselineYearPredictorData: Array<IdbPredictorData> = filterYearPredictorData(this.facilityPredictorData, this.baselineYear, this.facility);
       let baselineMeterData: Array<MonthlyData> = filterYearMeterData(this.groupMonthlyData, this.baselineYear, this.facility);
       let totalBaselineYearEnergy: number
       if (this.analysisItem.analysisCategory == 'energy') {
@@ -119,9 +128,9 @@ export class MonthlyGroupAnalysisClass {
     }
   }
 
-  getBaselineEnergyIntensity(selectedGroup: AnalysisGroup, facility: IdbFacility, allMeterData: Array<MonthlyData>, baselineYear: number, predictorVariables: Array<PredictorData>, facilityPredictorData: Array<IdbPredictorEntry>): number {
+  getBaselineEnergyIntensity(selectedGroup: AnalysisGroup, facility: IdbFacility, allMeterData: Array<MonthlyData>, baselineYear: number, predictorVariables: Array<AnalysisGroupPredictorVariable>, facilityPredictorData: Array<IdbPredictorData>): number {
     if (selectedGroup.analysisType == 'energyIntensity' || selectedGroup.analysisType == 'modifiedEnergyIntensity') {
-      let baselineYearPredictorData: Array<IdbPredictorEntry> = filterYearPredictorData(facilityPredictorData, baselineYear, facility);
+      let baselineYearPredictorData: Array<IdbPredictorData> = filterYearPredictorData(facilityPredictorData, baselineYear, facility);
       let baselineMeterData: Array<MonthlyData> = filterYearMeterData(allMeterData, baselineYear, facility);
       let totalBaselineYearEnergy: number;
       if (this.analysisItem.analysisCategory == 'energy') {

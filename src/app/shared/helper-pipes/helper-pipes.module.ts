@@ -5,7 +5,6 @@ import { NaicsListPipe } from './naics-list.pipe';
 import { OrderByPipe } from './order-by.pipe';
 import { SettingsLabelPipe } from './settings-label.pipe';
 import { YearOptionsPipe } from './year-options.pipe';
-import { PredictorsOrderByPipe } from './predictors-order-by.pipe';
 import { GroupNamePipe } from './group-name.pipe';
 import { FacilityNamePipe } from './facility-name.pipe';
 import { MonthLabelPipe } from './month-label.pipe';
@@ -19,6 +18,12 @@ import { AnalysisCategoryPipe } from './analysis-category.pipe';
 import { EmissionsDisplayPipe } from './emissions-display.pipe';
 import { MeterSourceColorPipe } from './meter-source-color.pipe';
 import { NaicsDisplayPipe } from './naics-display.pipe';
+import { AveragePipe } from './average.pipe';
+import { DegreeDayTotalPipe } from './degree-day-total.pipe';
+import { RegressionNumberPipe } from './regression-number.pipe';
+import { FacilityAnalysisNamePipe } from './facility-analysis-name.pipe';
+import { FacilityReportNamePipe } from './facility-report-name.pipe';
+import { AccountAnalysisNamePipe } from './account-analysis-name.pipe';
 
 @NgModule({
   declarations: [
@@ -27,7 +32,6 @@ import { NaicsDisplayPipe } from './naics-display.pipe';
     OrderByPipe,
     SettingsLabelPipe,
     YearOptionsPipe,
-    PredictorsOrderByPipe,
     GroupNamePipe,
     FacilityNamePipe,
     MonthLabelPipe,
@@ -40,7 +44,13 @@ import { NaicsDisplayPipe } from './naics-display.pipe';
     AnalysisCategoryPipe,
     EmissionsDisplayPipe,
     MeterSourceColorPipe,
-    NaicsDisplayPipe
+    NaicsDisplayPipe,
+    AveragePipe,
+    DegreeDayTotalPipe,
+    RegressionNumberPipe,
+    FacilityAnalysisNamePipe,
+    FacilityReportNamePipe,
+    AccountAnalysisNamePipe
   ],
   imports: [
     CommonModule
@@ -51,7 +61,6 @@ import { NaicsDisplayPipe } from './naics-display.pipe';
     OrderByPipe,
     SettingsLabelPipe,
     YearOptionsPipe,
-    PredictorsOrderByPipe,
     GroupNamePipe,
     FacilityNamePipe,
     MonthLabelPipe,
@@ -64,7 +73,13 @@ import { NaicsDisplayPipe } from './naics-display.pipe';
     AnalysisCategoryPipe,
     EmissionsDisplayPipe,
     MeterSourceColorPipe,
-    NaicsDisplayPipe
+    NaicsDisplayPipe,
+    AveragePipe,
+    DegreeDayTotalPipe,
+    RegressionNumberPipe,
+    FacilityAnalysisNamePipe,
+    FacilityReportNamePipe,
+    AccountAnalysisNamePipe
   ]
 })
 export class HelperPipesModule { }

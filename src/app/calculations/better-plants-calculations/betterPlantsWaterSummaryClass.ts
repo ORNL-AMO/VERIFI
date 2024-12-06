@@ -1,8 +1,11 @@
 import { CalanderizedMeter, MonthlyData } from "src/app/models/calanderization";
 import * as _ from 'lodash';
 import { BetterPlantsWaterSummary, WaterSummaryItem } from "src/app/models/overview-report";
-import { IdbAccountAnalysisItem, IdbAnalysisItem, IdbFacility, PredictorData } from "src/app/models/idb";
 import { WaterIntakeType } from "src/app/models/constantsAndTypes";
+import { AnalysisGroupPredictorVariable } from "src/app/models/analysis";
+import { IdbFacility } from "src/app/models/idbModels/facility";
+import { IdbAccountAnalysisItem } from "src/app/models/idbModels/accountAnalysisItem";
+import { IdbAnalysisItem } from "src/app/models/idbModels/analysisItem";
 
 export class BetterPlantsWaterSummaryClass {
 
@@ -247,7 +250,7 @@ export class BetterPlantsWaterSummaryClass {
                 let facilityAnalysisItem: IdbAnalysisItem = accountAnalysisItems.find(accountItem => { return accountItem.guid == item.analysisItemId });
                 facilityAnalysisItem.groups.forEach(group => {
                     if (group.analysisType != 'skip') {
-                        let selectedPredictorData: Array<PredictorData> = group.predictorVariables.filter(variable => {
+                        let selectedPredictorData: Array<AnalysisGroupPredictorVariable> = group.predictorVariables.filter(variable => {
                             return variable.productionInAnalysis == true && variable.unit != undefined;
                         });
                         let selectedUnits: Array<string> = selectedPredictorData.map(data => { return data.unit });

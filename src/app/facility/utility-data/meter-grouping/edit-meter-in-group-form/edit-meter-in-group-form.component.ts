@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { MeterGroupType } from 'src/app/models/calanderization';
-import { IdbUtilityMeter } from 'src/app/models/idb';
+import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { getIsEnergyMeter } from 'src/app/shared/sharedHelperFuntions';
 
 @Component({

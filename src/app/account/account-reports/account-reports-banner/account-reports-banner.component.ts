@@ -4,7 +4,7 @@ import { SharedDataService } from 'src/app/shared/helper-services/shared-data.se
 import { Subscription } from 'rxjs';
 import { AccountReportsService } from '../account-reports.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
-import { IdbAccountReport } from 'src/app/models/idb';
+import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 
 @Component({
   selector: 'app-account-reports-banner',

@@ -117,13 +117,16 @@ export class DegreeDaysService {
       for (let i = 0; i < localClimatologicalDataMonth.length; i++) {
         let previousDate: Date;
         let previousDryBulbTemp: number;
+        let previousRelativeHumidity: number;
         if (i == 0) {
           let startDate: Date = new Date(localClimatologicalDataMonth[i].DATE);
           previousDate = new Date(startDate.getFullYear(), startDate.getMonth(), 1, 0, 0);
           previousDryBulbTemp = localClimatologicalDataMonth[i].HourlyDryBulbTemperature;
+          previousRelativeHumidity = localClimatologicalDataMonth[i].HourlyRelativeHumidity;
         } else {
           previousDate = new Date(localClimatologicalDataMonth[i - 1].DATE)
           previousDryBulbTemp = localClimatologicalDataMonth[i - 1].HourlyDryBulbTemperature;
+          previousRelativeHumidity = localClimatologicalDataMonth[i - 1].HourlyRelativeHumidity;
         }
 
         let gapInData: boolean = false
@@ -131,21 +134,48 @@ export class DegreeDaysService {
         if (minutesBetween > 720) {
           gapInData = true;
         }
-        let averageDryBulbTemp: number = (localClimatologicalDataMonth[i].HourlyDryBulbTemperature + previousDryBulbTemp) / 2
-        let portionOfDay: number = (minutesBetween / minutesPerDay);
-        if (averageDryBulbTemp < baseHeatingTemperature || averageDryBulbTemp > baseCoolingTemperature) {
 
+        if (i == (localClimatologicalDataMonth.length - 1)) {
+          let currentDate: Date = new Date(localClimatologicalDataMonth[i].DATE);
+          let endDate: Date = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1, 0, 0);
+          let minutesBetween: number = this.getMinutesBetweenDates(localClimatologicalDataMonth[i].DATE, endDate);
+          if (minutesBetween > 720) {
+            gapInData = true;
+          }
+        }
+
+        let averageDryBulbTemp: number = (localClimatologicalDataMonth[i].HourlyDryBulbTemperature + previousDryBulbTemp) / 2
+
+
+        let baseRelativeHumidity: number = localClimatologicalDataMonth[i].HourlyRelativeHumidity;
+        let averageRelativeHumidity: number = (baseRelativeHumidity + previousRelativeHumidity) / 2
+        let portionOfDay: number = (minutesBetween / minutesPerDay);
+
+        // weightedRelativeHumidity: (averageRelativeHumidity * (1 - (portionOfDay/100))),
+        // weightedDryBulbTemp: (averageDryBulbTemp * (1 - (portionOfDay/100))),
+        let weightedRelativeHumidity: number = (averageRelativeHumidity * minutesBetween);
+        let weightedDryBulbTemp: number = (averageDryBulbTemp * minutesBetween);
+        if (averageDryBulbTemp < baseHeatingTemperature || averageDryBulbTemp > baseCoolingTemperature) {
           let heatingDegreeDay: number = 0;
           let heatingDegreeDifference: number = 0;
           let coolingDegreeDay: number = 0;
           let coolingDegreeDifference: number = 0;
-          if (averageDryBulbTemp < baseHeatingTemperature) {
-            heatingDegreeDifference = baseHeatingTemperature - averageDryBulbTemp;
-            heatingDegreeDay = heatingDegreeDifference * portionOfDay;
+          let gapInData: boolean = false
+          let minutesBetween: number = this.getMinutesBetweenDates(previousDate, localClimatologicalDataMonth[i].DATE);
+          if (minutesBetween > 720) {
+            gapInData = true;
           }
-          if (averageDryBulbTemp > baseCoolingTemperature) {
-            coolingDegreeDifference = averageDryBulbTemp - baseCoolingTemperature;
-            coolingDegreeDay = coolingDegreeDifference * portionOfDay;
+          if (averageDryBulbTemp < baseHeatingTemperature || averageDryBulbTemp > baseCoolingTemperature) {
+            if (averageDryBulbTemp < baseHeatingTemperature) {
+              heatingDegreeDifference = baseHeatingTemperature - averageDryBulbTemp;
+              heatingDegreeDay = heatingDegreeDifference * portionOfDay;
+            }
+            if (averageDryBulbTemp > baseCoolingTemperature) {
+              coolingDegreeDifference = averageDryBulbTemp - baseCoolingTemperature;
+              coolingDegreeDay = coolingDegreeDifference * portionOfDay;
+            }
+
+
           }
 
           results.push({
@@ -159,7 +189,11 @@ export class DegreeDaysService {
             lagDryBulbTemp: averageDryBulbTemp,
             stationId: stationId,
             stationName: stationName,
-            gapInData: gapInData
+            gapInData: gapInData,
+            relativeHumidity: localClimatologicalDataMonth[i].HourlyRelativeHumidity,
+            weightedRelativeHumidity: weightedRelativeHumidity,
+            weightedDryBulbTemp: weightedDryBulbTemp,
+            minutesBetween: minutesBetween
           })
         } else {
           results.push({
@@ -173,14 +207,17 @@ export class DegreeDaysService {
             lagDryBulbTemp: averageDryBulbTemp,
             stationId: stationId,
             stationName: stationName,
-            gapInData: gapInData
+            gapInData: gapInData,
+            relativeHumidity: localClimatologicalDataMonth[i].HourlyRelativeHumidity,
+            weightedRelativeHumidity: weightedRelativeHumidity,
+            weightedDryBulbTemp: weightedDryBulbTemp,
+            minutesBetween: minutesBetween
           })
         }
       }
+      return results;
     }
-    return results;
   }
-
   //find weather station closest to zip code
   async getClosestStation(zipCode: string, furthestDistance: number, neededMonth?: { year: number, month: number }): Promise<Array<WeatherStation>> {
     if (this.hasServerError == false) {
@@ -223,15 +260,11 @@ export class DegreeDaysService {
   }
 
   async getStationDataResponse(weatherStation: WeatherStation, year: number): Promise<Response | 'error'> {
-    // if (this.hasServerError == false) {
     try {
       return await fetch("https://www.ncei.noaa.gov/data/local-climatological-data/access/" + year + "/" + weatherStation.ID + ".csv");
     } catch {
       return 'error'
     }
-
-    // }
-    // return;
   }
 
   getStationYearLCDFromResults(weatherStation: WeatherStation, dataResults: string): Array<LocalClimatologicalData> {
@@ -240,9 +273,10 @@ export class DegreeDaysService {
     // let reportTypes = [];
     for (let i = 1; i < parsedData.length; i++) {
       let currentLine = parsedData[i];
-      let dryBulbTemp: number = parseFloat(currentLine['HourlyDewPointTemperature']);
+      let hourlyDewPointTemperature: number = parseFloat(currentLine['HourlyDewPointTemperature']);
+      let hourlyDryBulbTemperature: number = parseFloat(currentLine['HourlyDryBulbTemperature']);
       // reportTypes.push(currentLine['REPORT_TYPE']);
-      if (currentLine['REPORT_TYPE'] == 'FM-15' && isNaN(dryBulbTemp) == false) {
+      if (currentLine['REPORT_TYPE'] == 'FM-15' && isNaN(hourlyDewPointTemperature) == false && isNaN(hourlyDryBulbTemperature) == false) {
         // if (isNaN(dryBulbTemp) == false) {
         let hourData: LocalClimatologicalData = {
           stationId: weatherStation.ID,

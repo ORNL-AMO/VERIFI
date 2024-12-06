@@ -15,272 +15,413 @@
     </div>
 </div>
 <ng-container *ngIf="!group.groupErrors.missingGroupMeters">
-    <form>
-        <div class="row">
-            <div class="col-md-6 col-sm-12">
-                <div class="form-group">
-                    <label class="bold">1. Select Analysis Type </label>
-                    <div class="sub-column">
-                        <div class="form-check">
-                            <input type="radio" class="form-check-input" name="analysisType"
-                                [value]="'absoluteEnergyConsumption'" id="absoluteEnergyConsumption"
-                                [(ngModel)]="group.analysisType" (change)="setAnalysisType()">
-                            <label class="form-check-label" for="absoluteEnergyConsumption">Absolute</label>
-                        </div>
-                        <div class="form-check">
-                            <input type="radio" class="form-check-input" name="analysisType" [value]="'energyIntensity'"
-                                id="energyIntensity" [(ngModel)]="group.analysisType" (change)="setAnalysisType()">
-                            <label class="form-check-label" for="energyIntensity">Classic Intensity</label>
+    <div class="row">
+        <div class="col-lg-6 col-md-12">
+            <form>
+                <div class="row">
+                    <div class="col-12">
+                        <div class="form-group">
+                            <label class="bold">1. Select Analysis Type </label>
+                            <div class="sub-column">
+                                <div class="form-check">
+                                    <input type="radio" class="form-check-input" name="analysisType"
+                                        [value]="'absoluteEnergyConsumption'" id="absoluteEnergyConsumption"
+                                        [(ngModel)]="group.analysisType" (change)="setAnalysisType()">
+                                    <label class="form-check-label" for="absoluteEnergyConsumption">Absolute</label>
+                                </div>
+                                <div class="form-check">
+                                    <input type="radio" class="form-check-input" name="analysisType"
+                                        [value]="'energyIntensity'" id="energyIntensity"
+                                        [(ngModel)]="group.analysisType" (change)="setAnalysisType()">
+                                    <label class="form-check-label" for="energyIntensity">Classic Intensity</label>
 
-                        </div>
-                        <!--TODO: Remove option-->
-                        <!-- <div class="form-check">
+                                </div>
+                                <!--TODO: Remove option-->
+                                <!-- <div class="form-check">
                             <input type="radio" class="form-check-input" name="analysisType"
                                 [value]="'modifiedEnergyIntensity'" id="modifiedEnergyIntensity"
                                 [(ngModel)]="group.analysisType" (change)="setAnalysisType()">
                             <label class="form-check-label" for="modifiedEnergyIntensity">Modified Energy
                                 Intensity</label>
                         </div> -->
-                        <div class="form-check">
-                            <input type="radio" class="form-check-input" name="analysisType" [value]="'regression'"
-                                id="regression" [(ngModel)]="group.analysisType" (change)="setAnalysisType()">
-                            <label class="form-check-label" for="regression">Regression</label>
-                        </div>
-                        <div class="form-check" *ngIf="analysisItem.analysisCategory == 'water'">
-                            <input type="radio" class="form-check-input" name="analysisType" [value]="'skipAnalysis'"
-                                id="skipAnalysis" [(ngModel)]="group.analysisType" (change)="setAnalysisType()">
-                            <label class="form-check-label" for="skipAnalysis">Skip Analysis</label>
-                        </div>
-                        <div class="form-check">
-                            <input type="radio" class="form-check-input" name="analysisType" [value]="'skip'" id="skip"
-                                [(ngModel)]="group.analysisType" (change)="setAnalysisType()">
-                            <label class="form-check-label" for="skip">Exclude from Analysis</label>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6 col-sm-12"
-                *ngIf="group.analysisType == 'energyIntensity' || group.analysisType == 'modifiedEnergyIntensity'">
-                <!--energyIntensity or modifiedEnergyIntensity production variables-->
-                <div class="row">
-                    <div class="col-12">
-                        <label class="bold">2. Select Production Variables</label>
-                        <div class="row sub-column mb-2 bold">
-                            <div class="col-6">
-                                Production Variables
-                            </div>
-                            <div class="col-6">
-                                Use For Analysis
-                            </div>
-                        </div>
-                        <div class="row sub-column" *ngFor="let predictor of group.predictorVariables">
-                            <div class="col-6 mb-2" *ngIf="predictor.production">
-                                {{predictor.name}}<span *ngIf="predictor.unit">({{predictor.unit}})</span>
-                            </div>
-                            <div class="col-6 mb-2" *ngIf="predictor.production">
-                                <label class="switch" for="{{'predictor_'+predictor.id}}">
-                                    <input class="checkbox" type="checkbox" id="{{'predictor_'+predictor.id}}"
-                                        name="{{'predictor_'+predictor.id}}"
-                                        [(ngModel)]="predictor.productionInAnalysis" (change)="saveItem()">
-                                    <span class="slider round"></span>
-                                </label>
-                            </div>
-                        </div>
-                        <div class="alert alert-danger text-center small"
-                            *ngIf="group.groupErrors.noProductionVariables">
-                            No production variables found for this facility. Please go to your <a
-                                (click)="goToPredictors()">Predictor
-                                Variables</a> management page and set your production variables.
-                        </div>
-                        <div class="alert alert-danger text-center small"
-                            *ngIf="group.groupErrors.missingProductionVariables">
-                            At least one production variable needs to be selected.
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6 col-sm-12" *ngIf="group.analysisType == 'modifiedEnergyIntensity'">
-                <div class="row">
-                    <!--modifiedEnergyIntensity-->
-                    <div class="col-12">
-                        <label class="bold">3. Set Baseload</label>
-                        <div class="row sub-column">
-                            <div class="col-6">
-                                <label for="specifiedMonthlyPercentBaseload">
-                                    Baseload Method
-                                </label>
-                            </div>
-                            <div class="col-6">
-                                <select required class="form-select" name="specifiedMonthlyPercentBaseload"
-                                    id="specifiedMonthlyPercentBaseload"
-                                    [(ngModel)]="group.specifiedMonthlyPercentBaseload" (change)="saveItem()">
-                                    <option [ngValue]="true">% Baseload by Month</option>
-                                    <option [ngValue]="false">Average % Baseload</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="row sub-column" *ngIf="!group.specifiedMonthlyPercentBaseload">
-                            <div class="col-6 mt-2">
-                                <label for="specifiedMonthlyPercentBaseload">
-                                    Average % Baseload
-                                </label>
-                            </div>
-                            <div class="col-6 mt-2">
-                                <div class="input-group">
-                                    <input class="form-control" required type="number" name="averagePercentBaseload"
-                                        [(ngModel)]="group.averagePercentBaseload" id="averagePercentBaseload"
-                                        (input)="saveItem()">
-                                    <span class="input-group-text">%</span>
+                                <div class="form-check">
+                                    <input type="radio" class="form-check-input" name="analysisType"
+                                        [value]="'regression'" id="regression" [(ngModel)]="group.analysisType"
+                                        (change)="setAnalysisType()">
+                                    <label class="form-check-label" for="regression">Regression</label>
                                 </div>
-                            </div>
-                            <div class="col-12 mt-2" *ngIf="group.groupErrors.invalidAverageBaseload">
-                                <div class="alert alert-danger text-center">
-                                    Average % Baseload value required.
+                                <div class="form-check" *ngIf="analysisItem.analysisCategory == 'water'">
+                                    <input type="radio" class="form-check-input" name="analysisType"
+                                        [value]="'skipAnalysis'" id="skipAnalysis" [(ngModel)]="group.analysisType"
+                                        (change)="setAnalysisType()">
+                                    <label class="form-check-label" for="skipAnalysis">Skip Analysis</label>
+                                </div>
+                                <div class="form-check">
+                                    <input type="radio" class="form-check-input" name="analysisType" [value]="'skip'"
+                                        id="skip" [(ngModel)]="group.analysisType" (change)="setAnalysisType()">
+                                    <label class="form-check-label" for="skip">Exclude from Analysis</label>
                                 </div>
                             </div>
                         </div>
-                        <div class="row" *ngIf="group.specifiedMonthlyPercentBaseload">
+                    </div>
+                </div>
+                <div class="row pt-3"
+                    *ngIf="group.analysisType == 'energyIntensity' || group.analysisType == 'modifiedEnergyIntensity'">
+                    <div class="col-12">
+                        <!--energyIntensity or modifiedEnergyIntensity production variables-->
+                        <div class="row">
                             <div class="col-12">
-                                <div class="row sub-column" *ngFor="let monthlyPercent of group.monthlyPercentBaseload">
+                                <label class="bold">2. Select Production Variables</label>
+                                <div class="row sub-column mb-2 bold">
+                                    <div class="col-6">
+                                        Production Variables
+                                    </div>
+                                    <div class="col-6">
+                                        Use For Analysis
+                                    </div>
+                                </div>
+                                <div class="row sub-column" *ngFor="let predictor of group.predictorVariables">
+                                    <div class="col-6 mb-2" *ngIf="predictor.production">
+                                        {{predictor.name}}<span *ngIf="predictor.unit">({{predictor.unit}})</span>
+                                    </div>
+                                    <div class="col-6 mb-2" *ngIf="predictor.production">
+                                        <label class="switch" for="{{'predictor_'+predictor.id}}">
+                                            <input class="checkbox" type="checkbox" id="{{'predictor_'+predictor.id}}"
+                                                name="{{'predictor_'+predictor.id}}"
+                                                [(ngModel)]="predictor.productionInAnalysis" (change)="saveItem()">
+                                            <span class="slider round"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="alert alert-danger text-center small"
+                                    *ngIf="group.groupErrors.noProductionVariables">
+                                    No production variables found for this facility. Please go to your <a
+                                        (click)="goToPredictors()">Predictor
+                                        Variables</a> management page and set your production variables.
+                                </div>
+                                <div class="alert alert-danger text-center small"
+                                    *ngIf="group.groupErrors.missingProductionVariables">
+                                    At least one production variable needs to be selected.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row pt-3" *ngIf="group.analysisType == 'modifiedEnergyIntensity'">
+                    <div class="col-12">
+                        <div class="row">
+                            <!--modifiedEnergyIntensity-->
+                            <div class="col-12">
+                                <label class="bold">3. Set Baseload</label>
+                                <div class="row sub-column">
+                                    <div class="col-6">
+                                        <label for="specifiedMonthlyPercentBaseload">
+                                            Baseload Method
+                                        </label>
+                                    </div>
+                                    <div class="col-6">
+                                        <select required class="form-select" name="specifiedMonthlyPercentBaseload"
+                                            id="specifiedMonthlyPercentBaseload"
+                                            [(ngModel)]="group.specifiedMonthlyPercentBaseload" (change)="saveItem()">
+                                            <option [ngValue]="true">% Baseload by Month</option>
+                                            <option [ngValue]="false">Average % Baseload</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="row sub-column" *ngIf="!group.specifiedMonthlyPercentBaseload">
                                     <div class="col-6 mt-2">
-                                        <label for="{{monthlyPercent.monthNum+'_percent'}}">
-                                            {{monthlyPercent.monthNum | monthLabel}}
+                                        <label for="specifiedMonthlyPercentBaseload">
+                                            Average % Baseload
                                         </label>
                                     </div>
                                     <div class="col-6 mt-2">
                                         <div class="input-group">
                                             <input class="form-control" required type="number"
-                                                name="{{monthlyPercent.monthNum+'_percent'}}"
-                                                [(ngModel)]="monthlyPercent.percent"
-                                                id="{{monthlyPercent.monthNum+'_percent'}}" (input)="saveItem()">
+                                                name="averagePercentBaseload" [(ngModel)]="group.averagePercentBaseload"
+                                                id="averagePercentBaseload" (input)="saveItem()">
                                             <span class="input-group-text">%</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 mt-2" *ngIf="group.groupErrors.invalidAverageBaseload">
+                                        <div class="alert alert-danger text-center">
+                                            Average % Baseload value required.
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row" *ngIf="group.specifiedMonthlyPercentBaseload">
+                                    <div class="col-12">
+                                        <div class="row sub-column"
+                                            *ngFor="let monthlyPercent of group.monthlyPercentBaseload">
+                                            <div class="col-6 mt-2">
+                                                <label for="{{monthlyPercent.monthNum+'_percent'}}">
+                                                    {{monthlyPercent.monthNum | monthLabel}}
+                                                </label>
+                                            </div>
+                                            <div class="col-6 mt-2">
+                                                <div class="input-group">
+                                                    <input class="form-control" required type="number"
+                                                        name="{{monthlyPercent.monthNum+'_percent'}}"
+                                                        [(ngModel)]="monthlyPercent.percent"
+                                                        id="{{monthlyPercent.monthNum+'_percent'}}"
+                                                        (input)="saveItem()">
+                                                    <span class="input-group-text">%</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12" *ngIf="group.groupErrors.invalidMonthlyBaseload">
+                                        <div class="alert alert-danger text-center">
+                                            One or more monthly averages is missing.
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-12" *ngIf="group.groupErrors.invalidMonthlyBaseload">
-                                <div class="alert alert-danger text-center">
-                                    One or more monthly averages is missing.
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <!--data adjustment-->
-            <div class="col-md-6 col-sm-12"
-                *ngIf="group.analysisType != 'skip' && group.analysisType != 'skipAnalysis'">
-                <div class="row sub-column">
-                    <div class="col-6">
-                        <ng-container
-                            *ngIf="group.analysisType == 'regression' || group.analysisType == 'absoluteEnergyConsumption'">
-                            <app-label-with-tooltip [field]="'groupDataAdjustment'" [label]="'2. Add Data Adjustment'"
-                                [isBold]="true" [labelId]="'hasDataAdjustment'"></app-label-with-tooltip>
-                        </ng-container>
-                        <ng-container *ngIf="group.analysisType == 'energyIntensity'">
-                            <app-label-with-tooltip [field]="'groupDataAdjustment'" [label]="'3. Add Data Adjustment'"
-                                [isBold]="true" [labelId]="'hasDataAdjustment'"></app-label-with-tooltip>
-                        </ng-container>
-                        <ng-container *ngIf="group.analysisType == 'modifiedEnergyIntensity'">
-                            <app-label-with-tooltip [field]="'groupDataAdjustment'" [label]="'4. Add Data Adjustment'"
-                                [isBold]="true" [labelId]="'hasDataAdjustment'"></app-label-with-tooltip>
-                        </ng-container>
-                    </div>
-                    <div class="col-6">
-                        <label class="switch" for="hasDataAdjustement">
-                            <input class="checkbox" type="checkbox" id="hasDataAdjustement" name="hasDataAdjustement"
-                                [(ngModel)]="group.hasDataAdjustement" (change)="saveItem()">
-                            <span class="slider round"></span>
-                        </label>
-                    </div>
-                </div>
-                <div class="row sub-column" *ngIf="group.hasDataAdjustement">
-                    <div class="col-12 mt-2" *ngFor="let dataAdjustment of group.dataAdjustments; let index = index;">
+                <div class="row pt-3" *ngIf="group.analysisType != 'skip' && group.analysisType != 'skipAnalysis'">
+                    <!--data adjustment-->
+                    <div class="col-12">
                         <div class="row">
                             <div class="col-6">
-                                <label for="{{'dataAdjustment_'+index}}">{{dataAdjustment.year | yearDisplay:
-                                    facility.fiscalYear}}</label>
+                                <ng-container
+                                    *ngIf="group.analysisType == 'regression' || group.analysisType == 'absoluteEnergyConsumption'">
+                                    <app-label-with-tooltip [field]="'groupDataAdjustment'"
+                                        [label]="'2. Add Data Adjustment'" [isBold]="true"
+                                        [labelId]="'hasDataAdjustment'"></app-label-with-tooltip>
+                                </ng-container>
+                                <ng-container *ngIf="group.analysisType == 'energyIntensity'">
+                                    <app-label-with-tooltip [field]="'groupDataAdjustment'"
+                                        [label]="'3. Add Data Adjustment'" [isBold]="true"
+                                        [labelId]="'hasDataAdjustment'"></app-label-with-tooltip>
+                                </ng-container>
+                                <ng-container *ngIf="group.analysisType == 'modifiedEnergyIntensity'">
+                                    <app-label-with-tooltip [field]="'groupDataAdjustment'"
+                                        [label]="'4. Add Data Adjustment'" [isBold]="true"
+                                        [labelId]="'hasDataAdjustment'"></app-label-with-tooltip>
+                                </ng-container>
                             </div>
                             <div class="col-6">
-                                <div class="input-group">
-                                    <input class="form-control" type="number" name="{{'dataAdjustment_'+index}}"
-                                        id="{{'dataAdjustment_'+index}}" [(ngModel)]="dataAdjustment.amount"
-                                        (input)="saveItem()" min="0">
-                                    <span *ngIf="analysisItem.analysisCategory == 'energy'" class="input-group-text"
-                                        [innerHTML]="analysisItem.energyUnit | settingsLabel:'/yr'"></span>
-                                    <span *ngIf="analysisItem.analysisCategory == 'water'" class="input-group-text"
-                                        [innerHTML]="analysisItem.waterUnit | settingsLabel:'/yr'"></span>
-                                </div>
+                                <label class="switch" for="hasDataAdjustement">
+                                    <input class="checkbox" type="checkbox" id="hasDataAdjustement"
+                                        name="hasDataAdjustement" [(ngModel)]="group.hasDataAdjustement"
+                                        (change)="saveItem()">
+                                    <span class="slider round"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="row sub-column" *ngIf="group.hasDataAdjustement">
+                            <div class="col-12 mt-2"
+                                *ngFor="let dataAdjustment of group.dataAdjustments; let index = index;">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <label for="{{'dataAdjustment_'+index}}">{{dataAdjustment.year | yearDisplay:
+                                            facility.fiscalYear}}</label>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="input-group">
+                                            <input class="form-control" type="number" name="{{'dataAdjustment_'+index}}"
+                                                id="{{'dataAdjustment_'+index}}" [(ngModel)]="dataAdjustment.amount"
+                                                (input)="saveItem()" min="0">
+                                            <span *ngIf="analysisItem.analysisCategory == 'energy'"
+                                                class="input-group-text"
+                                                [innerHTML]="analysisItem.energyUnit | settingsLabel:'/yr'"></span>
+                                            <span *ngIf="analysisItem.analysisCategory == 'water'"
+                                                class="input-group-text"
+                                                [innerHTML]="analysisItem.waterUnit | settingsLabel:'/yr'"></span>
+                                        </div>
 
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <!--baseline adjustment-->
-            <div class="col-md-6 col-sm-12"
-                *ngIf="group.analysisType != 'skip' && group.analysisType != 'skipAnalysis'">
-                <div class="row sub-column">
-                    <div class="col-6">
-                        <ng-container
-                            *ngIf="group.analysisType == 'regression' || group.analysisType == 'absoluteEnergyConsumption'">
-                            <app-label-with-tooltip [field]="'groupBaselineAdjustment'"
-                                [label]="'3. Add Baseline Adjustment'" [isBold]="true"
-                                [labelId]="'hasBaselineAdjustment'"></app-label-with-tooltip>
-                        </ng-container>
-                        <ng-container *ngIf="group.analysisType == 'energyIntensity'">
-                            <app-label-with-tooltip [field]="'groupBaselineAdjustment'"
-                                [label]="'4. Add Baseline Adjustment'" [isBold]="true"
-                                [labelId]="'hasBaselineAdjustment'"></app-label-with-tooltip>
-                        </ng-container>
-                        <ng-container *ngIf="group.analysisType == 'modifiedEnergyIntensity'">
-                            <app-label-with-tooltip [field]="'groupBaselineAdjustment'"
-                                [label]="'5. Add Baseline Adjustment'" [isBold]="true"
-                                [labelId]="'hasBaselineAdjustment'"></app-label-with-tooltip>
-                        </ng-container>
-                    </div>
-                    <div class="col-6">
-                        <label class="switch" for="hasBaselineAdjustment">
-                            <input class="checkbox" type="checkbox" id="hasBaselineAdjustment"
-                                name="hasBaselineAdjustment" [(ngModel)]="group.hasBaselineAdjustmentV2"
-                                (change)="saveItem()">
-                            <span class="slider round"></span>
-                        </label>
-                    </div>
-                </div>
-                <div class="row sub-column" *ngIf="group.hasBaselineAdjustmentV2">
-                    <div class="col-12 mt-2"
-                        *ngFor="let baselineAdjustment of group.baselineAdjustmentsV2; let index = index;">
+                <div class="row pt-3" *ngIf="group.analysisType != 'skip' && group.analysisType != 'skipAnalysis'">
+                    <!--baseline adjustment-->
+                    <div class="col-12">
                         <div class="row">
                             <div class="col-6">
-                                <label for="{{'baselineAdjustment_'+index}}">{{baselineAdjustment.year | yearDisplay:
-                                    facility.fiscalYear}}</label>
+                                <ng-container
+                                    *ngIf="group.analysisType == 'regression' || group.analysisType == 'absoluteEnergyConsumption'">
+                                    <app-label-with-tooltip [field]="'groupBaselineAdjustment'"
+                                        [label]="'3. Add Baseline Adjustment'" [isBold]="true"
+                                        [labelId]="'hasBaselineAdjustment'"></app-label-with-tooltip>
+                                </ng-container>
+                                <ng-container *ngIf="group.analysisType == 'energyIntensity'">
+                                    <app-label-with-tooltip [field]="'groupBaselineAdjustment'"
+                                        [label]="'4. Add Baseline Adjustment'" [isBold]="true"
+                                        [labelId]="'hasBaselineAdjustment'"></app-label-with-tooltip>
+                                </ng-container>
+                                <ng-container *ngIf="group.analysisType == 'modifiedEnergyIntensity'">
+                                    <app-label-with-tooltip [field]="'groupBaselineAdjustment'"
+                                        [label]="'5. Add Baseline Adjustment'" [isBold]="true"
+                                        [labelId]="'hasBaselineAdjustment'"></app-label-with-tooltip>
+                                </ng-container>
                             </div>
                             <div class="col-6">
-                                <div class="input-group">
-                                    <input class="form-control" type="number" name="{{'baselineAdjustment_'+index}}"
-                                        id="{{'baselineAdjustment_'+index}}" [(ngModel)]="baselineAdjustment.amount"
-                                        (input)="saveItem()" min="0">
-                                    <span *ngIf="analysisItem.analysisCategory == 'energy'" class="input-group-text"
-                                        [innerHTML]="analysisItem.energyUnit | settingsLabel:'/yr'"></span>
-                                    <span *ngIf="analysisItem.analysisCategory == 'water'" class="input-group-text"
-                                        [innerHTML]="analysisItem.waterUnit | settingsLabel:'/yr'"></span>
-                                </div>
+                                <label class="switch" for="hasBaselineAdjustment">
+                                    <input class="checkbox" type="checkbox" id="hasBaselineAdjustment"
+                                        name="hasBaselineAdjustment" [(ngModel)]="group.hasBaselineAdjustmentV2"
+                                        (change)="saveItem()">
+                                    <span class="slider round"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="row sub-column" *ngIf="group.hasBaselineAdjustmentV2">
+                            <div class="col-12 mt-2"
+                                *ngFor="let baselineAdjustment of group.baselineAdjustmentsV2; let index = index;">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <label for="{{'baselineAdjustment_'+index}}">{{baselineAdjustment.year |
+                                            yearDisplay:
+                                            facility.fiscalYear}}</label>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="input-group">
+                                            <input class="form-control" type="number"
+                                                name="{{'baselineAdjustment_'+index}}"
+                                                id="{{'baselineAdjustment_'+index}}"
+                                                [(ngModel)]="baselineAdjustment.amount" (input)="saveItem()" min="0">
+                                            <span *ngIf="analysisItem.analysisCategory == 'energy'"
+                                                class="input-group-text"
+                                                [innerHTML]="analysisItem.energyUnit | settingsLabel:'/yr'"></span>
+                                            <span *ngIf="analysisItem.analysisCategory == 'water'"
+                                                class="input-group-text"
+                                                [innerHTML]="analysisItem.waterUnit | settingsLabel:'/yr'"></span>
+                                        </div>
 
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <!--regression-->
-            <div class="col-md-6 col-sm-12" *ngIf="group.analysisType == 'regression'">
-                <label class="bold">4. Regression Model</label>
-                <div class="alert alert-info text-center p-2">
-                    Use "Regression Model" tab to setup the regression model for this group.
+                <div class="row pt-3"
+                    *ngIf="analysisItem.hasBanking && group.analysisType != 'skip' && group.analysisType != 'skipAnalysis'">
+                    <!--banking-->
+                    <div class="col-12">
+                        <div class="row">
+                            <div class="col-6">
+                                <ng-container
+                                    *ngIf="group.analysisType == 'regression' || group.analysisType == 'absoluteEnergyConsumption'">
+                                    <app-label-with-tooltip [field]="'applyBanking'" [label]="'4. Apply Banking'"
+                                        [isBold]="true" [labelId]="'applyBanking'"></app-label-with-tooltip>
+                                </ng-container>
+                                <ng-container *ngIf="group.analysisType == 'energyIntensity'">
+                                    <app-label-with-tooltip [field]="'applyBanking'" [label]="'5. Apply Banking'"
+                                        [isBold]="true" [labelId]="'applyBanking'"></app-label-with-tooltip>
+                                </ng-container>
+                                <ng-container *ngIf="group.analysisType == 'modifiedEnergyIntensity'">
+                                    <app-label-with-tooltip [field]="'applyBanking'" [label]="'6. Apply Banking'"
+                                        [isBold]="true" [labelId]="'applyBanking'"></app-label-with-tooltip>
+                                </ng-container>
+                            </div>
+
+                            <div class="col-6">
+                                <label class="switch" for="applyBanking">
+                                    <input class="checkbox" type="checkbox" id="applyBanking" name="applyBanking"
+                                        [(ngModel)]="group.applyBanking" (change)="saveItem()"
+                                        [disabled]="hasModelsGenerated">
+                                    <span class="slider round"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-group row mt-2 sub-column" *ngIf="group.applyBanking">
+                            <label class="col-6 col-form-label">
+                                Applied Banking Year
+                            </label>
+                            <div class="col-6">
+                                <select required class="form-select" id="bankedAnalysisYear" name="bankedAnalysisYear"
+                                    [(ngModel)]="group.bankedAnalysisYear" (change)="saveItem()" [required]="true"
+                                    [disabled]="hasModelsGenerated">
+                                    <option *ngFor="let year of bankedAnalysisYears" [ngValue]="year">
+                                        {{year| yearDisplay: facility.fiscalYear}}</option>
+                                </select>
+                            </div>
+                            <div class="col-12"
+                                *ngIf="bankedGroup.analysisType == 'regression' && group.bankedAnalysisYear < bankedGroup.regressionModelYear">
+                                <div class="alert alert-warning small mb-1 mt-1">
+                                    <i class="fa fa-exclamation-circle"></i>
+                                    The model year for the banked analysis is after the applied banking year.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group row mt-2 sub-column" *ngIf="group.applyBanking">
+                            <label class="col-6 col-form-label">
+                                New Baseline Year
+                            </label>
+                            <div class="col-6">
+                                <select required class="form-select" id="newBaselineYear" name="newBaselineYear"
+                                    [(ngModel)]="group.newBaselineYear" (change)="saveItem()" [required]="true"
+                                    [disabled]="hasModelsGenerated">
+                                    <option *ngFor="let year of baselineYearOptions" [ngValue]="year">
+                                        {{year| yearDisplay: facility.fiscalYear}}</option>
+                                </select>
+                            </div>
+                            <div class="col-12" *ngIf="group.bankedAnalysisYear >= group.newBaselineYear">
+                                <div class="alert alert-danger small mb-1 mt-1">
+                                    <i class="fa fa-exclamation-circle"></i>
+                                    Banked analysis year cannot be after new baseline year.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row" *ngIf="hasModelsGenerated">
+                            <div class="col-12 mt-2 alert alert-warning">
+                                This group has regression models generated. These settings were used to create the
+                                models and
+                                are
+                                now locked.
+                                <ul class="mb-0">
+                                    <li>
+                                        <a class="click-link" (click)="showEnableForm()">To clear the models so that you
+                                            can
+                                            modify all
+                                            settings click here</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
+                <div class="row pt-3" *ngIf="group.analysisType == 'regression'">
+                    <!--regression-->
+                    <div class="col-12">
+                        <label class="bold" *ngIf="!analysisItem.hasBanking">4. Regression Model</label>
+                        <label class="bold" *ngIf="analysisItem.hasBanking">5. Regression Model</label>
+                        <div class="alert alert-info text-center p-2">
+                            Use "Regression Model" tab to setup the regression model for this group.
+                        </div>
+                    </div>
+                </div>
+            </form>
         </div>
-
-    </form>
+        <div class="col-lg-6 col-md-12" *ngIf="analysisItem.hasBanking && group.applyBanking && group.analysisType != 'skip' && group.analysisType != 'skipAnalysis'">
+            <app-banked-group-results-table></app-banked-group-results-table>
+        </div>
+    </div>
 </ng-container>
+
+
+
+<div [ngClass]="{'windowOverlay': displayEnableForm}"></div>
+<div class="popup" [ngClass]="{'open': displayEnableForm}">
+    <div class="popup-header">Are you sure?
+        <button class="item-right" (click)="cancelEnableForm()">x</button>
+    </div>
+    <div class="popup-body">
+        Are you sure you want to clear the existing regression models in this group? This cannot be undone!
+        <hr>
+        <!-- <div class="row"> -->
+        <div class="col-12 alert alert-info text-center" *ngIf="showInUseMessage">
+            This analysis is used in one or more account analysis. Altering the models in this analysis may effect
+            the results of the corresponding account analysis.
+        </div>
+        <!-- </div> -->
+    </div>
+    <div class="saveCancel popup-footer text-end">
+        <button class="btn btn-secondary" (click)="cancelEnableForm()">Cancel</button>
+        <button class="btn action-btn" (click)="confirmEnableForm()">Clear Models</button>
+    </div>
+</div>

@@ -1,26 +1,28 @@
 import { Injectable } from '@angular/core';
 import * as jStat from 'jstat';
-import { PredictordbService } from 'src/app/indexedDB/predictors-db.service';
-import { AnalysisGroup, JStatRegressionModel, SEPValidation } from 'src/app/models/analysis';
+import { AnalysisGroup, AnalysisGroupPredictorVariable, JStatRegressionModel, SEPValidation } from 'src/app/models/analysis';
 import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
-import { IdbAnalysisItem, IdbFacility, IdbPredictorEntry, PredictorData } from 'src/app/models/idb';
 import * as _ from 'lodash';
 import { getFiscalYear } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
 import { getMonthlyStartAndEndDate } from 'src/app/calculations/shared-calculations/calculationsHelpers';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
+import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
+import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 @Injectable({
   providedIn: 'root'
 })
 export class RegressionModelsService {
 
   allResults: Array<Array<number>>;
-  constructor(private predictorDbService: PredictordbService) { }
+  constructor(private predictorDataDbService: PredictorDataDbService) { }
 
   getModels(analysisGroup: AnalysisGroup, calanderizedMeters: Array<CalanderizedMeter>, facility: IdbFacility, analysisItem: IdbAnalysisItem): Array<JStatRegressionModel> {
-    let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = getMonthlyStartAndEndDate(facility, analysisItem);
+    let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = getMonthlyStartAndEndDate(facility, analysisItem, analysisGroup);
     let baselineDate: Date = monthlyStartAndEndDate.baselineDate;
     let reportYear: number = analysisItem.reportYear;
     let baselineYear: number = getFiscalYear(baselineDate, facility);
-    let predictorVariables: Array<PredictorData> = new Array();
+    let predictorVariables: Array<AnalysisGroupPredictorVariable> = new Array();
     let predictorVariableIds: Array<string> = new Array();
     analysisGroup.predictorVariables.forEach(variable => {
       if (variable.productionInAnalysis) {
@@ -30,11 +32,7 @@ export class RegressionModelsService {
     });
     if (predictorVariableIds.length != 0) {
       let allPredictorVariableCombos: Array<Array<string>> = this.getPredictorCombos(predictorVariableIds, analysisGroup.maxModelVariables);
-      let accountPredictorEntries: Array<IdbPredictorEntry> = this.predictorDbService.accountPredictorEntries.getValue();
-      let facilityPredictorData: Array<IdbPredictorEntry> = accountPredictorEntries.filter(entry => {
-        return entry.facilityId == facility.guid;
-      });
-
+      let facilityPredictorData: Array<IdbPredictorData> = this.predictorDataDbService.getByFacilityId(facility.guid);
       let groupMeters: Array<CalanderizedMeter> = calanderizedMeters.filter(cMeter => { return cMeter.meter.groupId == analysisGroup.idbGroupId });
       let allMeterData: Array<MonthlyData> = groupMeters.flatMap(calanderizedMeter => { return calanderizedMeter.monthlyData });
 
@@ -47,9 +45,9 @@ export class RegressionModelsService {
           try {
             let model: JStatRegressionModel = jStat.models.ols(regressionData.endog, regressionData.exog);
             model['modelYear'] = startYear;
-            let modelPredictorVariables: Array<PredictorData> = new Array();
+            let modelPredictorVariables: Array<AnalysisGroupPredictorVariable> = new Array();
             variableIdCombo.forEach(variableId => {
-              let variable: PredictorData = predictorVariables.find(variable => { return variable.id == variableId });
+              let variable: AnalysisGroupPredictorVariable = predictorVariables.find(variable => { return variable.id == variableId });
               modelPredictorVariables.push(variable);
             });
             model['predictorVariables'] = modelPredictorVariables;
@@ -90,9 +88,9 @@ export class RegressionModelsService {
             models.push(jstatModelToSave);
           } catch (err) {
             console.log(err);
-            let modelPredictorVariables: Array<PredictorData> = new Array();
+            let modelPredictorVariables: Array<AnalysisGroupPredictorVariable> = new Array();
             variableIdCombo.forEach(variableId => {
-              let variable: PredictorData = predictorVariables.find(variable => { return variable.id == variableId });
+              let variable: AnalysisGroupPredictorVariable = predictorVariables.find(variable => { return variable.id == variableId });
               modelPredictorVariables.push(variable);
             });
             models.push({
@@ -133,7 +131,7 @@ export class RegressionModelsService {
     }
   }
 
-  getRegressionData(startDate: Date, endDate: Date, allMeterData: Array<MonthlyData>, facilityPredictorData: Array<IdbPredictorEntry>, predictorVariablesIds: Array<string>, analysisCategory: 'energy' | 'water'): { endog: Array<number>, exog: Array<Array<number>> } {
+  getRegressionData(startDate: Date, endDate: Date, allMeterData: Array<MonthlyData>, facilityPredictorData: Array<IdbPredictorData>, predictorVariablesIds: Array<string>, analysisCategory: 'energy' | 'water'): { endog: Array<number>, exog: Array<Array<number>> } {
     let endog: Array<number> = new Array();
     let exog: Array<Array<number>> = new Array();
     while (startDate < endDate) {
@@ -148,7 +146,7 @@ export class RegressionModelsService {
         energyConsumption = _.sumBy(monthData, 'energyConsumption');
       }
       endog.push(energyConsumption);
-      let monthPredictorData: Array<IdbPredictorEntry> = facilityPredictorData.filter(pData => {
+      let monthPredictorData: Array<IdbPredictorData> = facilityPredictorData.filter(pData => {
         let dataDate: Date = new Date(pData.date);
         return dataDate.getUTCMonth() == startDate.getUTCMonth() && dataDate.getUTCFullYear() == startDate.getUTCFullYear();
       });
@@ -156,10 +154,11 @@ export class RegressionModelsService {
       //need 1 for constants
       let usageArr: Array<number> = [1];
       predictorVariablesIds.forEach(variableId => {
-        let totalUsage: number = 0;
-        monthPredictorData.forEach(pData => {
-          let predictorUsage = pData.predictors.find(predictor => { return predictor.id == variableId });
-          totalUsage = totalUsage + predictorUsage.amount;
+        let variablePredictorData: Array<IdbPredictorData> = monthPredictorData.filter(pData => {
+          return pData.predictorId == variableId;
+        })
+        let totalUsage: number = _.sumBy(variablePredictorData, (pData: IdbPredictorData) => {
+          return pData.amount;
         });
         usageArr.push(totalUsage);
       });
@@ -196,7 +195,7 @@ export class RegressionModelsService {
     }
   }
 
-  setModelVaildAndNotes(model: JStatRegressionModel, facilityPredictorData: Array<IdbPredictorEntry>, reportYear: number, facility: IdbFacility, baselineYear: number): JStatRegressionModel {
+  setModelVaildAndNotes(model: JStatRegressionModel, facilityPredictorData: Array<IdbPredictorData>, reportYear: number, facility: IdbFacility, baselineYear: number): JStatRegressionModel {
     let modelNotes: Array<string> = new Array();
     model['isValid'] = true;
 
@@ -243,7 +242,7 @@ export class RegressionModelsService {
       modelNotes.push('Adjusted R2 < .5');
     }
 
-    let productionVariable: PredictorData = model.predictorVariables.find(variable => { return variable.production });
+    let productionVariable: AnalysisGroupPredictorVariable = model.predictorVariables.find(variable => { return variable.production });
     if (!productionVariable) {
       modelNotes.push('No production variable in model');
     }
@@ -285,14 +284,14 @@ export class RegressionModelsService {
   }
 
 
-  checkSEPNotes(model: JStatRegressionModel, facilityPredictorData: Array<IdbPredictorEntry>, reportYear: number, facility: IdbFacility, baselineYear: number): { SEPNotes: Array<string>, SEPValidation: Array<SEPValidation> } {
+  checkSEPNotes(model: JStatRegressionModel, facilityPredictorData: Array<IdbPredictorData>, reportYear: number, facility: IdbFacility, baselineYear: number): { SEPNotes: Array<string>, SEPValidation: Array<SEPValidation> } {
     let SEPNotes: Array<string> = new Array();
     let SEPValidation: Array<SEPValidation> = new Array();
-    let modelPredictorData: Array<IdbPredictorEntry> = new Array();
-    let reportYearPredictorData: Array<IdbPredictorEntry> = new Array();
-    let baselineYearPredictorData: Array<IdbPredictorEntry> = new Array();
+    let modelPredictorData: Array<IdbPredictorData> = new Array();
+    let reportYearPredictorData: Array<IdbPredictorData> = new Array();
+    let baselineYearPredictorData: Array<IdbPredictorData> = new Array();
     for (let i = 0; i < facilityPredictorData.length; i++) {
-      let fiscalYear: number = getFiscalYear(facilityPredictorData[i].date, facility);
+      let fiscalYear: number = getFiscalYear(new Date(facilityPredictorData[i].date), facility);
       if (fiscalYear == reportYear) {
         reportYearPredictorData.push(facilityPredictorData[i]);
       }
@@ -315,22 +314,28 @@ export class RegressionModelsService {
 
       let variableNotes: Array<string> = new Array();
       let variableValid: boolean = true;
-      let modelYearUsage: Array<number> = modelPredictorData.map(data => {
-        let predictorData: PredictorData = data.predictors.find(predictor => { return predictor.id == variable.id });
-        return predictorData.amount;
+      let variablePredictorData: Array<IdbPredictorData> = modelPredictorData.filter(pData => {
+        return pData.predictorId == variable.id;
+      });
+      let variableReportYearPredictorData: Array<IdbPredictorData> = reportYearPredictorData.filter(pData => {
+        return pData.predictorId == variable.id;
+      })
+      let variableBaselineYearPredictorData: Array<IdbPredictorData> = baselineYearPredictorData.filter(pData => {
+        return pData.predictorId == variable.id;
+      })
+      let modelYearUsage: Array<number> = variablePredictorData.map(data => {
+        return data.amount;
       });
       let modelMin: number = _.min(modelYearUsage);
       let modelMax: number = _.max(modelYearUsage);
 
       let modelAvg: number = _.mean(modelYearUsage);
-      let reportYearUsage: Array<number> = reportYearPredictorData.map(data => {
-        let predictorData: PredictorData = data.predictors.find(predictor => { return predictor.id == variable.id });
-        return predictorData.amount;
+      let reportYearUsage: Array<number> = variableReportYearPredictorData.map(data => {
+        return data.amount;
       });
       let reportAvg: number = _.mean(reportYearUsage);
-      let baselineYearUsage: Array<number> = baselineYearPredictorData.map(data => {
-        let predictorData: PredictorData = data.predictors.find(predictor => { return predictor.id == variable.id });
-        return predictorData.amount;
+      let baselineYearUsage: Array<number> = variableBaselineYearPredictorData.map(data => {
+        return data.amount;
       });
       let baselineAvg: number = _.mean(baselineYearUsage);
       let reportYearError: boolean = false;
@@ -431,7 +436,7 @@ export class RegressionModelsService {
   }
 
   updateModelReportYear(model: JStatRegressionModel, reportYear: number, facility: IdbFacility, baselineYear: number): JStatRegressionModel {
-    let facilityPredictorData: Array<IdbPredictorEntry> = this.predictorDbService.facilityPredictorEntries.getValue();
+    let facilityPredictorData: Array<IdbPredictorData> = this.predictorDataDbService.facilityPredictorData.getValue();
     model = this.setModelVaildAndNotes(model, facilityPredictorData, reportYear, facility, baselineYear);
     return model;
   }

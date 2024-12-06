@@ -25,14 +25,16 @@ import { AccountAnalysisListComponent } from './account-analysis-list/account-an
 import { AnalysisFooterComponent } from './analysis-footer/analysis-footer.component';
 import { TableItemsDropdownModule } from 'src/app/shared/table-items-dropdown/table-items-dropdown.module';
 import { RegressionModelInspectionComponent } from './run-analysis/group-analysis/regression-model-selection/regression-model-inspection/regression-model-inspection.component';
-import { RegressionNumberPipe } from './run-analysis/group-analysis/regression-model-selection/regression-number.pipe';
 import { AnalysisItemCardComponent } from './analysis-dashboard/analysis-item-card/analysis-item-card.component';
 import { EnergyDashboardComponent } from './analysis-dashboard/energy-dashboard/energy-dashboard.component';
 import { WaterDashboardComponent } from './analysis-dashboard/water-dashboard/water-dashboard.component';
 import { AnalysisDashboardTabsComponent } from './analysis-dashboard/analysis-dashboard-tabs/analysis-dashboard-tabs.component';
 import { LabelWithTooltipModule } from 'src/app/shared/label-with-tooltip/label-with-tooltip.module';
-
-
+import { SelectBankedAnalysisComponent } from './run-analysis/analysis-setup/select-banked-analysis/select-banked-analysis.component';
+import { BankedGroupsDetailsComponent } from './run-analysis/analysis-setup/select-banked-analysis/banked-groups-details/banked-groups-details.component';
+import { SharedReportsModule } from "../../shared/shared-reports/shared-reports.module";
+import { BankedGroupAnalysisComponent } from './run-analysis/group-analysis/banked-group-analysis/banked-group-analysis.component';
+import { BankedGroupResultsTableComponent } from './run-analysis/group-analysis/group-analysis-options/banked-group-results-table/banked-group-results-table.component';
 
 @NgModule({
   declarations: [
@@ -54,11 +56,14 @@ import { LabelWithTooltipModule } from 'src/app/shared/label-with-tooltip/label-
     AccountAnalysisListComponent,
     AnalysisFooterComponent,
     RegressionModelInspectionComponent,
-    RegressionNumberPipe,
     AnalysisItemCardComponent,
     EnergyDashboardComponent,
     WaterDashboardComponent,
-    AnalysisDashboardTabsComponent
+    AnalysisDashboardTabsComponent,
+    SelectBankedAnalysisComponent,
+    BankedGroupsDetailsComponent,
+    BankedGroupAnalysisComponent,
+    BankedGroupResultsTableComponent
   ],
   imports: [
     CommonModule,
@@ -69,7 +74,8 @@ import { LabelWithTooltipModule } from 'src/app/shared/label-with-tooltip/label-
     SharedAnalysisModule,
     CalculatingSpinnerModule,
     TableItemsDropdownModule,
-    LabelWithTooltipModule
-  ]
+    LabelWithTooltipModule,
+    SharedReportsModule
+]
 })
 export class AnalysisModule { }

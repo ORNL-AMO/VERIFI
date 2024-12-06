@@ -1,11 +1,13 @@
 import { CalanderizedMeter, MonthlyData } from "src/app/models/calanderization";
 import { YearMonthData } from "src/app/models/dashboard";
-import { IdbAccount, IdbFacility, IdbUtilityMeter } from "src/app/models/idb";
 import { getFiscalYear, getYearlyUsageNumbers } from "../shared-calculations/calanderizationFunctions";
 import * as _ from 'lodash';
 import { AllSources, EnergySources, MeterSource, WaterSources } from "src/app/models/constantsAndTypes";
 import { EmissionsResults } from "src/app/models/eGridEmissions";
 import { getEmissionsTotalsFromArray } from "../shared-calculations/calculationsHelpers";
+import { IdbAccount } from "src/app/models/idbModels/account";
+import { IdbFacility } from "src/app/models/idbModels/facility";
+import { IdbUtilityMeter } from "src/app/models/idbModels/utilityMeter";
 
 export class FacilityOverviewData {
 

@@ -7,13 +7,19 @@
                                         <i class="fa fa-gears"></i>
                                         Analysis Options</a></li>
                         <li class="nav-item"
+                                *ngIf="showBanked && selectedGroup.analysisType != 'skip' && selectedGroup.analysisType != 'skipAnalysis'">
+                                <a class="nav-link" routerLink="banked-analysis" [routerLinkActive]="['active']">
+                                        <i class="fa fa-piggy-bank"></i>
+                                        Banked Analysis</a></li>
+                        <li class="nav-item"
                                 *ngIf="showModelSelection && selectedGroup.analysisType != 'skip' && selectedGroup.analysisType != 'skipAnalysis'">
                                 <a class="nav-link" routerLink="model-selection" [routerLinkActive]="['active']">
                                         <span class="fa fa-exclamation-circle" *ngIf="regressionErrors"></span>
                                         <span class="fa fa-exclamation-circle warning"
                                                 *ngIf="hasInvalidRegressionModel"></span>
                                         <i class=" fa fa-arrow-up-right-dots"></i>
-                                        Regression Model</a></li>
+                                        Regression Model</a>
+                        </li>
                         <li class="nav-item"
                                 *ngIf="selectedGroup.analysisType != 'skip' && selectedGroup.analysisType != 'skipAnalysis'"
                                 [ngClass]="{'disabled': hasErrors}"><a class="nav-link" routerLink="annual-analysis"
@@ -29,7 +35,7 @@
                 </ul>
         </div>
         <div class="content-padding">
-                <h4>{{label}}</h4>
+                <h4 *ngIf="!hideLabel">{{label}}</h4>
                 <router-outlet></router-outlet>
         </div>
 </ng-container>

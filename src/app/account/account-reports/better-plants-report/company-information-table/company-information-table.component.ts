@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { IdbAccount } from 'src/app/models/idb';
+import { IdbAccount } from 'src/app/models/idbModels/account';
 
 @Component({
   selector: 'app-company-information-table',
