@@ -30,8 +30,7 @@ export class DegreeDayTotalPipe implements PipeTransform {
       } else if (sumBy == 'relativeHumidity') {
         weatherDataSelection = 'relativeHumidity';
       }
-      let results = getDegreeDayAmount(values, weatherDataSelection);
-      return results;
+      return getDegreeDayAmount(values, weatherDataSelection);
     }
   }
 
