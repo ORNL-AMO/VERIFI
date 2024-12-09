@@ -1,8 +1,7 @@
 import { Component } from '@angular/core';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { WeatherStation } from 'src/app/models/degreeDays';
-import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
-import { getWeatherStation, WeatherDataService } from '../weather-data.service';
+import { WeatherDataService } from '../weather-data.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { Subscription } from 'rxjs';
 import { IdbAccount } from 'src/app/models/idbModels/account';
@@ -24,7 +23,7 @@ export class WeatherStationsComponent {
   facilitySub: Subscription;
   selectedFacilityId: string;
   fetchingData: boolean = false;
-  constructor(private accountDbService: AccountdbService, private degreeDaysService: DegreeDaysService,
+  constructor(private accountDbService: AccountdbService,
     private weatherDataService: WeatherDataService,
     private facilityDbService: FacilitydbService) {
 
@@ -49,32 +48,16 @@ export class WeatherStationsComponent {
     this.facilitySub.unsubscribe();
   }
 
-
   async setStations() {
     console.log('set stations..')
     if (this.zipCode && this.zipCode.length == 5 && this.furthestDistance) {
       this.fetchingData = true;
       this.stations = await this.weatherDataService.getStations(this.zipCode, this.furthestDistance);
-      console.log(this.stations);
-      // this.weatherDataService.getStations(this.zipCode, this.furthestDistance).subscribe(results => {
-      //   this.stations = JSON.parse(results).stations.map(station => {
-      //     return getWeatherStation(station)
-      //   });
       this.fetchingData = false;
-      // });
     } else {
       this.fetchingData = false;
       this.stations = [];
     }
-
-
-
-    // this.weatherDataService.zipCode = this.zipCode;
-    // if (this.furthestDistance <= 500) {
-    //   this.degreeDaysService.getClosestStation(this.zipCode, this.furthestDistance).then(stations => {
-    //     this.stations = stations;
-    //   });
-    // }
   }
 
   toggleUseZip() {

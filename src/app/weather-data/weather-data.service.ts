@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
-import { WeatherDataSelection, WeatherStation } from '../models/degreeDays';
+import { DetailDegreeDay, WeatherDataSelection, WeatherStation } from '../models/degreeDays';
 import { BehaviorSubject, firstValueFrom, Observable } from 'rxjs';
 import { IdbFacility } from '../models/idbModels/facility';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { getDetailedDataForMonth } from './weatherDataCalculations';
 
 @Injectable({
   providedIn: 'root'
@@ -74,6 +75,12 @@ export class WeatherDataService {
     return this.httpClient.post('/api/station/' + stationId, {}, httpOptions);
   }
 
+  async getStation(stationId: string) {
+    let apiData: string = await firstValueFrom(this.getStationAPI(stationId));
+    let station: WeatherStation = getWeatherStation(JSON.parse(apiData));
+    return station;
+  }
+
 
   async getHourlyData(stationId: string, startDate: Date, endDate: Date, parameters: Array<WeatherDataParams>): Promise<Array<WeatherDataReading>> {
     let apiData: string = await firstValueFrom(this.getHourlyDataAPI(stationId, startDate, endDate, parameters));
@@ -98,6 +105,15 @@ export class WeatherDataService {
       })
     };
     return this.httpClient.post('/api/data', data, httpOptions);
+  }
+
+
+  async getDegreeDaysForMonth(entryDate: Date, stationId: string, weatherStationName: string, heatingBaseTemperature: number, coolingBaseTemperature: number): Promise<Array<DetailDegreeDay>> {
+    let startDate: Date = new Date(entryDate.getFullYear(), entryDate.getMonth() - 1, 1);
+    let endDate: Date = new Date(entryDate.getFullYear(), entryDate.getMonth() + 1, 1);
+    let parsedData: Array<WeatherDataReading> = await this.getHourlyData(stationId, startDate, endDate, ['humidity'])
+    let degreeDays: Array<DetailDegreeDay> = getDetailedDataForMonth(parsedData, entryDate.getMonth(), entryDate.getFullYear(), heatingBaseTemperature, coolingBaseTemperature, stationId, weatherStationName);
+    return degreeDays;
   }
 }
 

@@ -1,11 +1,9 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { DetailDegreeDay, WeatherDataSelection, WeatherDataSelectionOption, WeatherDataSelectionOptions, WeatherStation } from 'src/app/models/degreeDays';
-import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
 import * as _ from 'lodash';
 import { WeatherDataReading, WeatherDataService } from '../weather-data.service';
 import { getDegreeDayAmount } from 'src/app/shared/sharedHelperFuntions';
-import { firstValueFrom } from 'rxjs';
 import { getMonthlyDataFromYear } from '../weatherDataCalculations';
 
 @Component({
@@ -26,7 +24,7 @@ export class AnnualStationDataComponent {
   hasGapsInData: boolean;
   weatherDataSelection: WeatherDataSelection;
   weatherDataSelectionOptions: Array<WeatherDataSelectionOption> = WeatherDataSelectionOptions;
-  constructor(private router: Router, private degreeDaysService: DegreeDaysService,
+  constructor(private router: Router,
     private weatherDataService: WeatherDataService) {
 
   }
@@ -55,18 +53,9 @@ export class AnnualStationDataComponent {
 
   async setDegreeDays() {
     this.calculating = true;
-    // if (this.selectedYear && this.heatingTemp) {
-    //   this.detailedDegreeDays = await this.degreeDaysService.getMonthlyDataFromYear(this.selectedYear, this.heatingTemp, this.coolingTemp, this.weatherStation);
-    //   this.setYearSummaryData();
-    // } else {
-    //   this.detailedDegreeDays = undefined;
-    //   this.yearSummaryData = undefined;
-    // }
-
     if (this.selectedYear && this.heatingTemp) {
       let startDate: Date = new Date(this.selectedYear, 0, 1)
       let endDate: Date = new Date(this.selectedYear + 1, 0, 1);
-      // let weatherData = await firstValueFrom();
       let parsedData: Array<WeatherDataReading> = await this.weatherDataService.getHourlyData(this.weatherStation.ID, startDate, endDate, ['humidity'])
       this.detailedDegreeDays = getMonthlyDataFromYear(parsedData, this.selectedYear, this.heatingTemp, this.coolingTemp, this.weatherStation);
       this.setYearSummaryData();

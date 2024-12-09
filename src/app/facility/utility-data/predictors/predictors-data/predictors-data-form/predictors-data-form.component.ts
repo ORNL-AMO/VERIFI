@@ -11,7 +11,6 @@ import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { DetailDegreeDay } from 'src/app/models/degreeDays';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { getNewIdbPredictorData, IdbPredictorData } from 'src/app/models/idbModels/predictorData';
-import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
 import { WeatherDataService } from 'src/app/weather-data/weather-data.service';
 import * as _ from 'lodash';
 import { IdbAccount } from 'src/app/models/idbModels/account';
@@ -31,11 +30,9 @@ export class PredictorsDataFormComponent {
   calculatingDegreeDays: boolean;
   isSaved: boolean = true;
   paramsSub: Subscription;
-  hasServerError: boolean;
   constructor(private activatedRoute: ActivatedRoute, private predictorDbService: PredictorDbService,
     private router: Router, private facilityDbService: FacilitydbService,
     private accountDbService: AccountdbService, private dbChangesService: DbChangesService,
-    private degreeDaysService: DegreeDaysService,
     private loadingService: LoadingService,
     private toastNotificationService: ToastNotificationsService,
     private weatherDataService: WeatherDataService,
@@ -43,7 +40,6 @@ export class PredictorsDataFormComponent {
   }
 
   ngOnInit() {
-    this.hasServerError = this.degreeDaysService.hasServerError;
     this.paramsSub = this.activatedRoute.parent.params.subscribe(params => {
       let predictorId: string = params['id'];
       this.predictor = this.predictorDbService.getByGuid(predictorId);
@@ -62,7 +58,7 @@ export class PredictorsDataFormComponent {
     });
   }
 
-  ngOnDestroy(){
+  ngOnDestroy() {
     this.paramsSub.unsubscribe();
   }
 
@@ -111,21 +107,16 @@ export class PredictorsDataFormComponent {
       this.calculatingDegreeDays = true;
       let hasWeatherDataWarning: boolean = false;
       if (!this.predictorData.weatherOverride) {
-        let stationId: string = this.predictor.weatherStationId;
         let entryDate: Date = new Date(this.predictorData.date);
-        let degreeDays: 'error' | Array<DetailDegreeDay> = await this.degreeDaysService.getDailyDataFromMonth(entryDate.getMonth(), entryDate.getFullYear(), this.predictor.heatingBaseTemperature, this.predictor.coolingBaseTemperature, stationId)
-        if(degreeDays != 'error'){
-          let hasErrors: DetailDegreeDay = degreeDays.find(degreeDay => {
-            return degreeDay.gapInData == true
-          });
-          if (!hasWeatherDataWarning && hasErrors != undefined || degreeDays.length == 0) {
-            hasWeatherDataWarning = true;
-          }
-          this.predictorData.amount = getDegreeDayAmount(degreeDays, this.predictor.weatherDataType);
-          this.predictorData.weatherDataWarning = hasErrors != undefined || degreeDays.length == 0;
-        }else{
-          this.predictorData.weatherDataWarning = true;
+        let degreeDays: Array<DetailDegreeDay> = await this.weatherDataService.getDegreeDaysForMonth(entryDate, this.predictor.weatherStationId, this.predictor.weatherStationName, this.predictor.heatingBaseTemperature, this.predictor.coolingBaseTemperature);
+        let hasErrors: DetailDegreeDay = degreeDays.find(degreeDay => {
+          return degreeDay.gapInData == true
+        });
+        if (!hasWeatherDataWarning && hasErrors != undefined || degreeDays.length == 0) {
+          hasWeatherDataWarning = true;
         }
+        this.predictorData.amount = getDegreeDayAmount(degreeDays, this.predictor.weatherDataType);
+        this.predictorData.weatherDataWarning = hasErrors != undefined || degreeDays.length == 0;
       }
     }
     this.calculatingDegreeDays = false;
