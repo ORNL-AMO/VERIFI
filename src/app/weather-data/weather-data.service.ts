@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { WeatherDataSelection, WeatherStation } from '../models/degreeDays';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, Observable } from 'rxjs';
 import { IdbFacility } from '../models/idbModels/facility';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 
@@ -37,8 +37,9 @@ export class WeatherDataService {
   }
 
 
-  getStations(zipCode: string, distance: number): Observable<any> {
+  getStationsAPI(zipCode: string, distance: number): Observable<any> {
     let currentDate: Date = new Date();
+    console.log(currentDate.toISOString());
     let data = {
       "zip": zipCode,
       "radial_distance": distance,
@@ -55,8 +56,33 @@ export class WeatherDataService {
     return this.httpClient.post('/api/stations', data, httpOptions);
   }
 
+  async getStations(zipCode: string, distance: number): Promise<Array<WeatherStation>> {
+    let apiData: string = await firstValueFrom(this.getStationsAPI(zipCode, distance));
+    let stations: Array<WeatherStation> = JSON.parse(apiData).stations.map(station => {
+      return getWeatherStation(station)
+    });
+    return stations;
+  }
 
-  getHourlyData(stationId: string, startDate: Date, endDate: Date, parameters: Array<WeatherDataParams>) {
+  getStationAPI(stationId: string): Observable<any> {
+    let httpOptions = {
+      responseType: 'text' as const,
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json',
+      })
+    };
+    return this.httpClient.post('/api/station/' + stationId, {}, httpOptions);
+  }
+
+
+  async getHourlyData(stationId: string, startDate: Date, endDate: Date, parameters: Array<WeatherDataParams>): Promise<Array<WeatherDataReading>> {
+    let apiData: string = await firstValueFrom(this.getHourlyDataAPI(stationId, startDate, endDate, parameters));
+    let parsedData: Array<WeatherDataReading> = JSON.parse(apiData).hourly_data;
+    return parsedData;
+  }
+
+
+  getHourlyDataAPI(stationId: string, startDate: Date, endDate: Date, parameters: Array<WeatherDataParams>): Observable<string> {
     let monthAfterEndDate: Date = new Date(endDate);
     monthAfterEndDate.setMonth(monthAfterEndDate.getMonth() + 1);
     let data = {
@@ -87,8 +113,8 @@ export function getWeatherStation(response: WeatherStationResponse): WeatherStat
     name: response.name,
     country: undefined,
     state: undefined,
-    lat: undefined,
-    lon: undefined,
+    lat: response.lat,
+    lon: response.lon,
     begin: new Date(response.data_begin_date),
     end: new Date(response.data_end_date),
     USAF: undefined,
@@ -105,7 +131,9 @@ export interface WeatherStationResponse {
   "data_begin_date": string,
   "data_end_date": string,
   "distance": number,
-  "rating_percent ": number
+  "rating_percent ": number,
+  "lat": string,
+  "lon": string
 }
 
 export interface WeatherDataReading {

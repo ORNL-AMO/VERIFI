@@ -66,8 +66,8 @@ export class AnnualStationDataComponent {
     if (this.selectedYear && this.heatingTemp) {
       let startDate: Date = new Date(this.selectedYear, 0, 1)
       let endDate: Date = new Date(this.selectedYear + 1, 0, 1);
-      let weatherData = await firstValueFrom(this.weatherDataService.getHourlyData(this.weatherStation.ID, startDate, endDate, ['humidity']));
-      let parsedData: Array<WeatherDataReading> = JSON.parse(weatherData).hourly_data;
+      // let weatherData = await firstValueFrom();
+      let parsedData: Array<WeatherDataReading> = await this.weatherDataService.getHourlyData(this.weatherStation.ID, startDate, endDate, ['humidity'])
       this.detailedDegreeDays = getMonthlyDataFromYear(parsedData, this.selectedYear, this.heatingTemp, this.coolingTemp, this.weatherStation);
       this.setYearSummaryData();
     } else {

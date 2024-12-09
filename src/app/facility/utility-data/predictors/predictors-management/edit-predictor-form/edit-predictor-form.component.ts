@@ -274,7 +274,7 @@ export class EditPredictorFormComponent {
 
   setStations() {
     this.findingStations = true;
-    this.weatherDataService.getStations(this.facility.zip, 50).subscribe(results => {
+    this.weatherDataService.getStationsAPI(this.facility.zip, 50).subscribe(results => {
       this.stations = JSON.parse(results).stations.map(station => {
         return getWeatherStation(station)
       });
@@ -334,8 +334,8 @@ export class EditPredictorFormComponent {
       console.log(endDate);
       // let startDate: Date = new Date(this.selectedMonth.getFullYear(), this.selectedMonth.getMonth(), 1);
       // let endDate: Date = new Date(this.selectedMonth.getFullYear(), this.selectedMonth.getMonth() + 1, 1);
-      let weatherData = await firstValueFrom(this.weatherDataService.getHourlyData(this.predictor.weatherStationId, startDate, endDate, []));
-      let parsedData: Array<WeatherDataReading> = JSON.parse(weatherData).hourly_data;
+      // let weatherData = await firstValueFrom(this.weatherDataService.getHourlyData(this.predictor.weatherStationId, startDate, endDate, []));
+      let parsedData: Array<WeatherDataReading> = await this.weatherDataService.getHourlyData(this.predictor.weatherStationId, startDate, endDate, []);
       console.log(parsedData[parsedData.length - 1]);
       while (startDate <= endDate) {
         if (this.destroyed) {

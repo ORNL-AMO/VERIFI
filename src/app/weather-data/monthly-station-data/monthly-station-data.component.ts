@@ -41,12 +41,17 @@ export class MonthlyStationDataComponent {
   }
 
   async setDegreeDays() {
+
+    // let weatherStation = await firstValueFrom(this.weatherDataService.getStation(this.weatherStation.ID))
+    // console.log(weatherStation);
+
     let startDate: Date = new Date(this.selectedMonth.getFullYear(), this.selectedMonth.getMonth(), 1);
     let endDate: Date = new Date(this.selectedMonth.getFullYear(), this.selectedMonth.getMonth() + 1, 1);
-    let weatherData = await firstValueFrom(this.weatherDataService.getHourlyData(this.weatherStation.ID, startDate, endDate, ['wet_bulb_temp']));
-    let parsedData: Array<WeatherDataReading> = JSON.parse(weatherData).hourly_data;
-    console.log(parsedData);
-    this.detailedDegreeDays = getDetailedDataForMonth(parsedData, this.selectedMonth.getMonth(), this.selectedMonth.getFullYear(), this.heatingTemp, this.coolingTemp, this.weatherStation.ID, this.weatherStation.name);
+    // let weatherData = await firstValueFrom(this.weatherDataService.getHourlyData(this.weatherStation.ID, startDate, endDate, ['wet_bulb_temp']));
+    // let parsedData: Array<WeatherDataReading> = JSON.parse(weatherData).hourly_data;
+    // console.log(parsedData);
+    let weatherData: Array<WeatherDataReading> = await this.weatherDataService.getHourlyData(this.weatherStation.ID, startDate, endDate, ['wet_bulb_temp'])
+    this.detailedDegreeDays = getDetailedDataForMonth(weatherData, this.selectedMonth.getMonth(), this.selectedMonth.getFullYear(), this.heatingTemp, this.coolingTemp, this.weatherStation.ID, this.weatherStation.name);
 
 
     // this.detailedDegreeDays = await this.degreeDaysService.getDailyDataFromMonth(this.selectedMonth.getMonth(), this.selectedMonth.getFullYear(), this.heatingTemp, this.coolingTemp, this.weatherStation.ID);

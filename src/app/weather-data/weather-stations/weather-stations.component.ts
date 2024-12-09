@@ -23,6 +23,7 @@ export class WeatherStationsComponent {
   facilities: Array<IdbFacility>;
   facilitySub: Subscription;
   selectedFacilityId: string;
+  fetchingData: boolean = false;
   constructor(private accountDbService: AccountdbService, private degreeDaysService: DegreeDaysService,
     private weatherDataService: WeatherDataService,
     private facilityDbService: FacilitydbService) {
@@ -49,16 +50,20 @@ export class WeatherStationsComponent {
   }
 
 
-  setStations() {
+  async setStations() {
     console.log('set stations..')
     if (this.zipCode && this.zipCode.length == 5 && this.furthestDistance) {
-      this.weatherDataService.getStations(this.zipCode, this.furthestDistance).subscribe(results => {
-        this.stations = JSON.parse(results).stations.map(station => {
-          return getWeatherStation(station)
-        });
-        console.log(this.stations);
-      });
+      this.fetchingData = true;
+      this.stations = await this.weatherDataService.getStations(this.zipCode, this.furthestDistance);
+      console.log(this.stations);
+      // this.weatherDataService.getStations(this.zipCode, this.furthestDistance).subscribe(results => {
+      //   this.stations = JSON.parse(results).stations.map(station => {
+      //     return getWeatherStation(station)
+      //   });
+      this.fetchingData = false;
+      // });
     } else {
+      this.fetchingData = false;
       this.stations = [];
     }
 
@@ -98,5 +103,9 @@ export class WeatherStationsComponent {
     this.weatherDataService.selectedFacility = this.facilities.find(facility => { return facility.guid == this.selectedFacilityId });
     this.zipCode = this.weatherDataService.selectedFacility?.zip;
     this.setStations();
+  }
+
+  clearStations() {
+    this.stations = [];
   }
 }
