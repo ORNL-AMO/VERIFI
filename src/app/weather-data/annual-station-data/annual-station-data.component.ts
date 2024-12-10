@@ -31,14 +31,19 @@ export class AnnualStationDataComponent {
 
   ngOnInit() {
     this.weatherStation = this.weatherDataService.selectedStation;
+    console.log(this.weatherStation);
     if (!this.weatherStation) {
       this.router.navigateByUrl('weather-data/stations');
     }
     this.setYears();
     this.selectedYear = this.weatherDataService.selectedYear;
+    console.log(this.selectedYear);
     this.heatingTemp = this.weatherDataService.heatingTemp;
+    console.log(this.heatingTemp);
     this.coolingTemp = this.weatherDataService.coolingTemp;
+    console.log(this.coolingTemp);
     this.weatherDataSelection = this.weatherDataService.weatherDataSelection;
+    console.log(this.weatherDataSelection);
     this.setDegreeDays();
   }
 

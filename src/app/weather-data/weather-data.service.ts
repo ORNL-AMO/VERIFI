@@ -77,7 +77,9 @@ export class WeatherDataService {
 
   async getStation(stationId: string) {
     let apiData: string = await firstValueFrom(this.getStationAPI(stationId));
+    console.log(apiData);
     let station: WeatherStation = getWeatherStation(JSON.parse(apiData));
+    station.ID = stationId;
     return station;
   }
 

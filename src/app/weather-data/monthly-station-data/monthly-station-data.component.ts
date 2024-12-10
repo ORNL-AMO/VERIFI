@@ -20,6 +20,7 @@ export class MonthlyStationDataComponent {
   gapsInDataDate: Date;
   weatherDataSelection: WeatherDataSelection;
   weatherDataSelectionOptions: Array<WeatherDataSelectionOption> = WeatherDataSelectionOptions;
+  calculating: boolean = false;
   constructor(private router: Router,
     private weatherDataService: WeatherDataService) {
 
@@ -39,6 +40,7 @@ export class MonthlyStationDataComponent {
   }
 
   async setDegreeDays() {
+    this.calculating = true;
     let startDate: Date = new Date(this.selectedMonth.getFullYear(), this.selectedMonth.getMonth(), 1);
     let endDate: Date = new Date(this.selectedMonth.getFullYear(), this.selectedMonth.getMonth() + 1, 1);
     let weatherData: Array<WeatherDataReading> = await this.weatherDataService.getHourlyData(this.weatherStation.ID, startDate, endDate, ['wet_bulb_temp'])
@@ -53,6 +55,7 @@ export class MonthlyStationDataComponent {
       this.hasGapsInData = undefined;
       this.gapsInDataDate = undefined;
     }
+    this.calculating = false;
   }
 
   setSelectedMonth(eventData: string) {
