@@ -51,6 +51,7 @@ import { FacilityReportsDashboardComponent } from "../facility/facility-reports/
 import { FacilityReportSetupComponent } from "../facility/facility-reports/facility-report-setup/facility-report-setup.component";
 import { FacilityAnalysisReportResultsComponent } from "../facility/facility-reports/facility-analysis-report-results/facility-analysis-report-results.component";
 import { BankedGroupAnalysisComponent } from "../facility/analysis/run-analysis/group-analysis/banked-group-analysis/banked-group-analysis.component";
+import { FacilitySepReportResultsComponent } from "../facility/facility-reports/facility-sep-report-results/facility-sep-report-results.component";
 
 export const FacilityRoutes: Route = {
     path: 'facility/:id',
@@ -290,7 +291,8 @@ export const FacilityRoutes: Route = {
                 { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
                 { path: 'dashboard', component: FacilityReportsDashboardComponent },
                 { path: 'setup', component: FacilityReportSetupComponent },
-                { path: 'analysis-report', component: FacilityAnalysisReportResultsComponent }
+                { path: 'analysis-report', component: FacilityAnalysisReportResultsComponent },
+                { path: 'sep-report', component: FacilitySepReportResultsComponent }
             ]
         }
     ]

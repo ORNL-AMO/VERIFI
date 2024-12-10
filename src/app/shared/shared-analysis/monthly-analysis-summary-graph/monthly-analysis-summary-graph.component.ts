@@ -12,11 +12,11 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
   styleUrls: ['./monthly-analysis-summary-graph.component.css']
 })
 export class MonthlyAnalysisSummaryGraphComponent implements OnInit {
-  @Input()
+  @Input({required: true})
   monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>;
-  @Input()
+  @Input({required: true})
   analysisItem: IdbAnalysisItem | IdbAccountAnalysisItem;
-  @Input()
+  @Input({required: true})
   facilityOrAccount: IdbFacility | IdbAccount;
   @Input()
   inHomeScreen: boolean;

@@ -13,7 +13,8 @@
                     </div>
                 </div>
                 <div class="col-12">
-                    <app-facility-analysis-report-setup></app-facility-analysis-report-setup>
+                    <app-facility-analysis-report-setup *ngIf="facilityReportType == 'analysis'"></app-facility-analysis-report-setup>
+                    <app-facility-sep-report-setup *ngIf="facilityReportType == 'SEP'"></app-facility-sep-report-setup>
                 </div>
             </div>
         </form>

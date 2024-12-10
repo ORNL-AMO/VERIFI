@@ -34,9 +34,7 @@ export class FacilityReportItemCardComponent {
 
   selectReport() {
     this.facilityDbReportsService.selectedReport.next(this.report);
-    if (this.report.facilityReportType == 'analysis') {
-      this.router.navigateByUrl('facility/' + this.facility.id + '/reports/setup');
-    }
+    this.router.navigateByUrl('facility/' + this.facility.id + '/reports/setup');
   }
 
   async createCopy() {

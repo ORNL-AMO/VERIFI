@@ -1,0 +1,142 @@
+<div class="table-responsive">
+    <table class="table table-sm table-hover">
+        <tbody>
+            <tr>
+                <td class="w-50">
+                </td>
+                <td class="bold text-center w-25">
+                    Baseline Year
+                    <br>
+                    {{sepReport.baselineYear | yearDisplay: facility.fiscalYear}}
+                    <ng-container *ngIf="facility.fiscalYear == 'nonCalendarYear'">
+                        <br>
+                        ({{baselineFiscalYearStart | date:"MMM. yy"}} - {{baselineFiscalYearEnd | date:'MMM. yy'}})
+                    </ng-container>
+                    <br>
+                    <span class="fw-light">
+                        (MMBtu)
+                    </span>
+                </td>
+                <td class="bold text-center w-25">
+                    Report Year
+                    <br>
+                    {{sepReport.reportYear | yearDisplay: facility.fiscalYear}}
+                    <ng-container *ngIf="facility.fiscalYear == 'nonCalendarYear'">
+                        <br>
+                        ({{reportFiscalYearStart | date:'MMM. yy'}} - {{reportFiscalYearEnd | date:'MMM. yy'}})
+                    </ng-container>
+                    <br>
+                    <span class="fw-light">
+                        (MMBtu)
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <th colspan="3">
+                    Consumption
+                </th>
+            </tr>
+            <tr *ngFor="let groupSummary of sepReport.groupSummaries">
+                <td class="w-50">
+                    {{groupSummary.group.idbGroupId | groupName}}
+                </td>
+                <td class="text-center">
+                    {{groupSummary.baselineYearSummary.energyUse | customNumber}}
+                </td>
+                <td class="text-center">
+                    {{groupSummary.reportYearSummary.energyUse | customNumber}}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Total Primary Energy
+                </td>
+                <td class="text-center">
+                    {{sepReport.baselineYearAnnualAnalysis.energyUse | customNumber}}
+                </td>
+                <td class="text-center">
+                    {{sepReport.reportYearAnnualAnalysisSummary.energyUse | customNumber}}
+                </td>
+            </tr>
+            <tr>
+                <th colspan="3">
+                    Adjusted Baseline Consumption
+                </th>
+            </tr>
+            <tr *ngFor="let groupSummary of sepReport.groupSummaries">
+                <td class="w-50">
+                    {{groupSummary.group.idbGroupId | groupName}}
+                </td>
+                <td class="text-center">
+                    {{groupSummary.baselineYearSummary.adjusted | customNumber}}
+                </td>
+                <td class="text-center">
+                    {{groupSummary.reportYearSummary.adjusted | customNumber}}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Total Primary Energy
+                </td>
+                <td class="text-center">
+                    {{sepReport.baselineYearAnnualAnalysis.adjusted | customNumber}}
+                </td>
+                <td class="text-center">
+                    {{sepReport.reportYearAnnualAnalysisSummary.adjusted | customNumber}}
+                </td>
+            </tr>
+            <tr>
+                <th colspan="3">
+                    Period Savings
+                </th>
+            </tr>
+            <tr *ngFor="let groupSummary of sepReport.groupSummaries">
+                <td class="w-50">
+                    {{groupSummary.group.idbGroupId | groupName}}
+                </td>
+                <td class="text-center">
+                    {{groupSummary.baselineYearSummary.savings | customNumber}}
+                </td>
+                <td class="text-center">
+                    {{groupSummary.reportYearSummary.savings | customNumber}}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Total Primary Energy
+                </td>
+                <td class="text-center">
+                    {{sepReport.baselineYearAnnualAnalysis.savings | customNumber}}
+                </td>
+                <td class="text-center">
+                    {{sepReport.reportYearAnnualAnalysisSummary.savings | customNumber}}
+                </td>
+            </tr>
+            <div class="mt-4">
+
+            </div>
+            <tr>
+                <th>
+                    SEnPI
+                </th>
+                <td class="text-center">
+                    {{sepReport.baselineYearAnnualAnalysis.SEnPI | customNumber}}
+                </td>
+                <td class="text-center">
+                    {{sepReport.reportYearAnnualAnalysisSummary.SEnPI | customNumber}}
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    Energy Performance Improvement
+                </th>
+                <td class="text-center">
+                    {{sepReport.baselineYearAnnualAnalysis.totalSavingsPercentImprovement| customNumber}} &percnt;
+                </td>
+                <td class="text-center">
+                    {{sepReport.reportYearAnnualAnalysisSummary.totalSavingsPercentImprovement | customNumber}} &percnt;
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>

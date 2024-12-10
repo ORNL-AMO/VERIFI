@@ -1,12 +1,10 @@
 /// <reference lib="webworker" />
 
-import { AnalysisGroup, AnnualAnalysisSummary, MonthlyAnalysisSummary, MonthlyAnalysisSummaryData } from "src/app/models/analysis";
+import { AnalysisGroup, AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from "src/app/models/analysis";
 import { AnnualFacilityAnalysisSummaryClass } from "src/app/calculations/analysis-calculations/annualFacilityAnalysisSummaryClass";
 import { CalanderizedMeter } from "../models/calanderization";
 import { getCalanderizedMeterData } from "../calculations/calanderization/calanderizeMeters";
 import { getNeededUnits } from "../calculations/shared-calculations/calanderizationFunctions";
-import { MonthlyAnalysisSummaryClass } from "../calculations/analysis-calculations/monthlyAnalysisSummaryClass";
-import { AnnualAnalysisSummaryDataClass } from "../calculations/analysis-calculations/annualAnalysisSummaryDataClass";
 
 addEventListener('message', ({ data }) => {
     try {

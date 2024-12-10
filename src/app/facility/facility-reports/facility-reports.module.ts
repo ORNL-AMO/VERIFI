@@ -13,6 +13,12 @@ import { FacilityAnalysisReportResultsComponent } from './facility-analysis-repo
 import { FacilityPrintReportButtonComponent } from './facility-print-report-button/facility-print-report-button.component';
 import { FacilityReportItemCardComponent } from './facility-reports-dashboard/facility-report-item-card/facility-report-item-card.component';
 import { HelperPipesModule } from 'src/app/shared/helper-pipes/helper-pipes.module';
+import { FacilitySepReportResultsComponent } from './facility-sep-report-results/facility-sep-report-results.component';
+import { FacilitySepReportSetupComponent } from './facility-report-setup/facility-sep-report-setup/facility-sep-report-setup.component';
+import { CalculatingSpinnerModule } from 'src/app/shared/calculating-spinner/calculating-spinner.module';
+import { SharedAnalysisModule } from 'src/app/shared/shared-analysis/shared-analysis.module';
+import { SepResultsTableComponent } from './facility-sep-report-results/sep-results-table/sep-results-table.component';
+import { SepFacilityInformationTableComponent } from './facility-sep-report-results/sep-facility-information-table/sep-facility-information-table.component';
 
 
 
@@ -26,14 +32,20 @@ import { HelperPipesModule } from 'src/app/shared/helper-pipes/helper-pipes.modu
     FacilityAnalysisReportSetupComponent,
     FacilityAnalysisReportResultsComponent,
     FacilityPrintReportButtonComponent,
-    FacilityReportItemCardComponent
+    FacilityReportItemCardComponent,
+    FacilitySepReportResultsComponent,
+    FacilitySepReportSetupComponent,
+    SepResultsTableComponent,
+    SepFacilityInformationTableComponent
   ],
   imports: [
     CommonModule,
     RouterModule,
     FormsModule,
     SharedReportsModule,
-    HelperPipesModule
+    HelperPipesModule,
+    CalculatingSpinnerModule,
+    SharedAnalysisModule
   ]
 })
 export class FacilityReportsModule { }

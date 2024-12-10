@@ -23,7 +23,7 @@ export function getNewIdbFacilityReport(facilityId: string, accountId: string, r
     }
 }
 
-export type FacilityReportType = 'analysis';
+export type FacilityReportType = 'analysis' | 'SEP';
 
 
 export function getAnalysisReportSettings(): AnalysisReportSettings {

@@ -15,6 +15,13 @@
                     <i class="fa fa-file"></i>
                     Analysis Report</a>
             </li>
+            <li class="nav-item" [ngClass]="{'disabled': !setupValid}"
+                *ngIf="selectedReport.facilityReportType == 'SEP'">
+                <a class="nav-link" routerLink="sep-report"
+                    [routerLinkActive]="['active']">
+                    <i class="fa fa-file"></i>
+                    SEP Report</a>
+            </li>
         </ul>
     </div>
     <div>

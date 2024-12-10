@@ -1,0 +1,82 @@
+<div class="table-responsive">
+    <table class="table table-sm table-hover">
+        <tbody>
+            <tr>
+                <th class="w-50">
+                    Company Name:
+                </th>
+                <td>
+                    {{account.name}}
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    Unique Facility Name Per SEP Certificate:
+                </th>
+                <td>
+                    {{facility.name}}
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    SEP Enrollment Number:
+                </th>
+                <td>
+                    <!-- {{facility.sepEnrollmentNumber}} -->
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    Facility Zip Code:
+                </th>
+                <td>
+                    <ng-template [ngIf]="facility.zip" [ngIfElse]="zipMdash">
+                        {{facility.zip}}
+                    </ng-template>
+                    <ng-template #zipMdash>
+                        &mdash;
+                    </ng-template>
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    Facility Boundries:
+                </th>
+                <td>
+                    <!-- <ng-template [ngIf]="facility.boundries" [ngIfElse]="zipMdash">
+                        {{facility.zip}}
+                    </ng-template>
+                    <ng-template #zipMdash>
+                        &mdash;
+                    </ng-template> -->
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    Facility Square Footage (ft<sup>2</sup>):
+                </th>
+                <td>
+                    <ng-template [ngIf]="facility.size" [ngIfElse]="sizeMdash">
+                        {{facility.size}}
+                    </ng-template>
+                    <ng-template #sizeMdash>
+                        &mdash;
+                    </ng-template>
+                </td>
+            </tr>
+            <tr>
+                <th>
+                    Start of Date SEP/ISO 50001 Stage 2 Audit:
+                </th>
+                <td>
+                    <!-- <ng-template [ngIf]="facility.size" [ngIfElse]="sizeMdash">
+                        {{facility.size}}
+                    </ng-template>
+                    <ng-template #sizeMdash>
+                        &mdash;
+                    </ng-template> -->
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>

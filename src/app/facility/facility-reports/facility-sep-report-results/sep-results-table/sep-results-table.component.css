@@ -1,0 +1,10 @@
+td:first-of-type{
+    /* text-align: right; */
+    font-weight: 500;
+    padding-left: 1rem;
+}
+
+td, th{
+    border: solid 1px;
+    border-color: inherit;
+}
