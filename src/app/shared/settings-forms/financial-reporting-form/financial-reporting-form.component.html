@@ -29,6 +29,15 @@
             </div>
         </div>
     </div>
+    <div class="row" *ngIf="!inAccount">
+        <div class="col-lg-12 mt-3 mb-3">
+            <label for="sepEnrollmentNumber">SEP Enrollment Number</label>
+            <div class="col-7">
+                <input class="form-control" type="text" id="sepEnrollmentNumber" formControlName="sepEnrollmentNumber"
+                    name="sepEnrollmentNumber" (input)="saveChanges()">
+            </div>
+        </div>
+    </div>
 </form>
 <p class="alert alert-warning" *ngIf="financialReportingDoestMatchAccount">
     Facility financial reporting is different then the what is set for the account. If you would like to use

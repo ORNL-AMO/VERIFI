@@ -138,6 +138,7 @@ export class SettingsFormsService {
     facility.fiscalYear = form.controls.fiscalYear.value;
     facility.fiscalYearMonth = form.controls.fiscalYearMonth.value;
     facility.fiscalYearCalendarEnd = form.controls.fiscalYearCalendarEnd.value;
+    facility.sepEnrollmentNumber = form.controls.sepEnrollmentNumber.value;
     return facility;
   }
 

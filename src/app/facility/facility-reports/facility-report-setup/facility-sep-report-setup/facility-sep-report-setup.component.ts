@@ -67,13 +67,4 @@ export class FacilitySepReportSetupComponent {
     await this.dbChangesService.setAccountFacilityReports(selectedAccount, selectedFacility);
     this.facilityReportsDbService.selectedReport.next(this.facilityReport);
   }
-
-  setSelectedMonth(eventData: string) {
-    //eventData format = yyyy-mm = 2022-06
-    let yearMonth: Array<string> = eventData.split('-');
-    //-1 on month
-    this.facilityReport.sepReportSettings.auditStartDate = new Date(Number(yearMonth[0]), Number(yearMonth[1]) - 1, 1);
-    this.save();
-  }
-
 }

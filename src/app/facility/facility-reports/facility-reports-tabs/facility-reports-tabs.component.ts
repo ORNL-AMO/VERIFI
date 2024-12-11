@@ -43,6 +43,7 @@ export class FacilityReportsTabsComponent {
     });
     this.selectedReportSub = this.facilityReportsDbService.selectedReport.subscribe(val => {
       this.selectedReport = val;
+      this.setupValid = (this.selectedReport.analysisItemId != undefined && this.selectedReport.name != '');
     });
   }
 

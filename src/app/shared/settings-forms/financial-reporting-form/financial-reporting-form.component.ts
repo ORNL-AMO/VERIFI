@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { FormGroup } from '@angular/forms';
+import { FormControl, FormGroup } from '@angular/forms';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { Month, Months } from 'src/app/shared/form-data/months';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
@@ -51,6 +51,7 @@ export class FinancialReportingFormComponent implements OnInit {
           this.financialReportingDoestMatchAccount = this.settingsFormsService.areAccountAndFacilityFinancialReportingDifferent(this.selectedAccount, this.selectedFacility);
           if (this.isFormChange == false) {
             this.form = this.settingsFormsService.getFiscalYearForm(facility);
+            this.form.addControl('sepEnrollmentNumber', new FormControl(facility.sepEnrollmentNumber));
           } else {
             this.isFormChange = false;
           }
@@ -75,6 +76,7 @@ export class FinancialReportingFormComponent implements OnInit {
           this.financialReportingDoestMatchAccount = this.settingsFormsService.areAccountAndFacilityFinancialReportingDifferent(this.selectedAccount, this.selectedFacility);
           if (this.isFormChange == false) {
             this.form = this.settingsFormsService.getFiscalYearForm(facility);
+            this.form.addControl('sepEnrollmentNumber', new FormControl(facility.sepEnrollmentNumber));
           } else {
             this.isFormChange = false;
           }
