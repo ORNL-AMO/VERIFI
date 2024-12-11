@@ -49,9 +49,31 @@
                 <hr>
             </div>
         </div>
-        <app-monthly-analysis-summary-graph [facilityOrAccount]="facility"
-            [monthlyAnalysisSummaryData]="sepReport.monthlyAnalysisSummaryData"
-            [analysisItem]="analysisItem"></app-monthly-analysis-summary-graph>
-        <app-facility-print-report-button></app-facility-print-report-button>
     </div>
+    <div class="report" [ngClass]="{'print': print}">
+        <div class="row print-break-avoid">
+            <div class="col-12">
+                <app-monthly-analysis-summary-graph [facilityOrAccount]="facility"
+                    [monthlyAnalysisSummaryData]="sepReport.monthlyAnalysisSummaryData"
+                    [analysisItem]="analysisItem"></app-monthly-analysis-summary-graph>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <app-sep-report-graphs [monthlyAnalysisSummaryData]="sepReport.monthlyAnalysisSummaryData"
+                    [analysisItem]="analysisItem"></app-sep-report-graphs>
+            </div>
+        </div>
+    </div>
+    <div class="report" [ngClass]="{'print': print}" *ngFor="let groupSummary of sepReport.groupSummaries">
+        <div class="row print-break-avoid">
+            <div class="col-12">
+                <h5>{{groupSummary.groupItem.group.idbGroupId | groupName}}</h5>
+                <app-regression-model-details [groupItem]="groupSummary.groupItem" [analysisItem]="analysisItem"
+                    [facility]="facility" [monthlyAnalysisSummaryData]="groupSummary.monthlyAnalysisSummaryData"
+                    [hideGraph]="true"></app-regression-model-details>
+            </div>
+        </div>
+    </div>
+    <app-facility-print-report-button></app-facility-print-report-button>
 </ng-container>

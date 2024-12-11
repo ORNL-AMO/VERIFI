@@ -19,6 +19,7 @@ import { CalculatingSpinnerModule } from 'src/app/shared/calculating-spinner/cal
 import { SharedAnalysisModule } from 'src/app/shared/shared-analysis/shared-analysis.module';
 import { SepResultsTableComponent } from './facility-sep-report-results/sep-results-table/sep-results-table.component';
 import { SepFacilityInformationTableComponent } from './facility-sep-report-results/sep-facility-information-table/sep-facility-information-table.component';
+import { SepReportGraphsComponent } from './facility-sep-report-results/sep-report-graphs/sep-report-graphs.component';
 
 
 
@@ -36,7 +37,8 @@ import { SepFacilityInformationTableComponent } from './facility-sep-report-resu
     FacilitySepReportResultsComponent,
     FacilitySepReportSetupComponent,
     SepResultsTableComponent,
-    SepFacilityInformationTableComponent
+    SepFacilityInformationTableComponent,
+    SepReportGraphsComponent
   ],
   imports: [
     CommonModule,

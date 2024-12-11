@@ -1,4 +1,4 @@
-<div class="table-responsive">
+<div class="table-responsive print-break-avoid">
     <table class="table table-sm table-hover">
         <tbody>
             <tr>
@@ -38,7 +38,7 @@
             </tr>
             <tr *ngFor="let groupSummary of sepReport.groupSummaries">
                 <td class="w-50">
-                    {{groupSummary.group.idbGroupId | groupName}}
+                    {{groupSummary.groupItem.group.idbGroupId | groupName}}
                 </td>
                 <td class="text-center">
                     {{groupSummary.baselineYearSummary.energyUse | customNumber}}
@@ -65,7 +65,7 @@
             </tr>
             <tr *ngFor="let groupSummary of sepReport.groupSummaries">
                 <td class="w-50">
-                    {{groupSummary.group.idbGroupId | groupName}}
+                    {{groupSummary.groupItem.group.idbGroupId | groupName}}
                 </td>
                 <td class="text-center">
                     {{groupSummary.baselineYearSummary.adjusted | customNumber}}
@@ -92,7 +92,7 @@
             </tr>
             <tr *ngFor="let groupSummary of sepReport.groupSummaries">
                 <td class="w-50">
-                    {{groupSummary.group.idbGroupId | groupName}}
+                    {{groupSummary.groupItem.group.idbGroupId | groupName}}
                 </td>
                 <td class="text-center">
                     {{groupSummary.baselineYearSummary.savings | customNumber}}

@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
-import { AnalysisGroupItem, AnalysisService } from 'src/app/facility/analysis/analysis.service';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
+import { AnalysisGroupItem, getGroupItem } from 'src/app/shared/shared-analysis/analysisGroupItem';
 
 @Component({
   selector: 'app-banked-groups-details',
@@ -16,7 +16,7 @@ export class BankedGroupsDetailsComponent {
 
   groupItems: Array<AnalysisGroupItem>;
 
-  constructor(private analysisService: AnalysisService) {
+  constructor() {
   }
 
   ngOnInit() {
@@ -26,7 +26,7 @@ export class BankedGroupsDetailsComponent {
 
   initializeGroups() {
     this.groupItems = this.analysisItem.groups.map(group => {
-      return this.analysisService.getGroupItem(group);
+      return getGroupItem(group);
     }).filter(item => {
       return item.group.analysisType != 'skip';
     });

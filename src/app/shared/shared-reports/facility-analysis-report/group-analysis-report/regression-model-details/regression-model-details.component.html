@@ -186,7 +186,9 @@
         </table>
     </div>
 </div>
-<hr class="hide-print">
-<div class="print-break-avoid">
-    <div #monthlyAnalysisGraph id="monthlyAnalysisGraph"></div>
-</div>
+<ng-container *ngIf="!hideGraph">
+    <hr class="hide-print">
+    <div class="print-break-avoid">
+        <div #monthlyAnalysisGraph id="monthlyAnalysisGraph"></div>
+    </div>
+</ng-container>

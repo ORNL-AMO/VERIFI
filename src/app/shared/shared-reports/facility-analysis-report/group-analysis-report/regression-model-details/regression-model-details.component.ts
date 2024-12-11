@@ -1,9 +1,9 @@
 import { Component, ElementRef, Input, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
-import { AnalysisGroupItem } from 'src/app/facility/analysis/analysis.service';
 import { MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { AnalysisGroupItem } from 'src/app/shared/shared-analysis/analysisGroupItem';
 
 @Component({
   selector: 'app-regression-model-details',
@@ -19,6 +19,8 @@ export class RegressionModelDetailsComponent {
   analysisItem: IdbAnalysisItem;
   @Input({ required: true })
   facility: IdbFacility;
+  @Input()
+  hideGraph: boolean;
 
 
 

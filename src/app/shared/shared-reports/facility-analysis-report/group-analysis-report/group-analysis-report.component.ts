@@ -1,11 +1,11 @@
 import { Component, Input } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { AnalysisGroupItem, AnalysisService } from 'src/app/facility/analysis/analysis.service';
 import { FacilityReportsService } from 'src/app/facility/facility-reports/facility-reports.service';
 import { AnalysisGroup, AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { AnalysisReportSettings } from 'src/app/models/idbModels/facilityReport';
+import { AnalysisGroupItem, getGroupItem } from 'src/app/shared/shared-analysis/analysisGroupItem';
 
 @Component({
   selector: 'app-group-analysis-report',
@@ -30,11 +30,11 @@ export class GroupAnalysisReportComponent {
   groupItem: AnalysisGroupItem;
   print: boolean;
   printSub: Subscription;
-  constructor(private analysisService: AnalysisService, private facilityReportService: FacilityReportsService) {
+  constructor(private facilityReportService: FacilityReportsService) {
   }
 
   ngOnInit() {
-    this.groupItem = this.analysisService.getGroupItem(this.groupSummary.group);
+    this.groupItem = getGroupItem(this.groupSummary.group);
     this.printSub = this.facilityReportService.print.subscribe(print => {
       this.print = print;
     })

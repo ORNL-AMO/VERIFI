@@ -7,13 +7,14 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { AnalysisGroupItem, AnalysisService } from '../../analysis.service';
+import { AnalysisService } from '../../analysis.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
 import { getNewIdbFacilityReport, IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
+import { AnalysisGroupItem, getGroupItem } from 'src/app/shared/shared-analysis/analysisGroupItem';
 
 @Component({
   selector: 'app-analysis-item-card',
@@ -65,7 +66,7 @@ export class AnalysisItemCardComponent implements OnInit {
 
   initializeGroups() {
     this.groupItems = this.analysisItem.groups.map(group => {
-      return this.analysisService.getGroupItem(group);
+      return getGroupItem(group);
     }).filter(item => {
       return item.group.analysisType != 'skip';
     });
