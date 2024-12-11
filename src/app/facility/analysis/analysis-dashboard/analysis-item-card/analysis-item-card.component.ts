@@ -236,7 +236,8 @@ export class AnalysisItemCardComponent implements OnInit {
   }
 
   async confirmCreateReport() {
-    let newReport: IdbFacilityReport = getNewIdbFacilityReport(this.analysisItem.facilityId, this.analysisItem.accountId, 'analysis');
+    let facility: IdbFacility = this.facilityDbService.getFacilityById(this.analysisItem.facilityId);
+    let newReport: IdbFacilityReport = getNewIdbFacilityReport(facility, 'analysis');
     newReport.analysisItemId = this.analysisItem.guid;
     newReport = await firstValueFrom(this.facilityReportsDbService.addWithObservable(newReport));
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();

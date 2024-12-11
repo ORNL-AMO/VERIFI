@@ -17,7 +17,8 @@ export interface IdbFacility extends IdbEntry, AccountAndFacility {
     selected?: boolean,
     facilityOrder?: number,
     isNewFacility?: boolean,
-    classification?: FacilityClassification
+    classification?: FacilityClassification,
+    sepEnrollmentNumber: string
 }
 
 export function getNewIdbFacility(account: IdbAccount): IdbFacility {
@@ -53,6 +54,7 @@ export function getNewIdbFacility(account: IdbAccount): IdbFacility {
         contactEmail: undefined,
         contactPhone: undefined,
         facilityOrder: undefined,
-        classification: 'Manufacturing'
+        classification: 'Manufacturing',
+        sepEnrollmentNumber: undefined
     }
 }

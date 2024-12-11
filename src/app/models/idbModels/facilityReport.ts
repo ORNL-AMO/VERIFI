@@ -1,4 +1,5 @@
 import { AnalysisTableColumns } from "../analysis";
+import { IdbFacility } from "./facility";
 import { getNewIdbEntry, IdbEntry } from "./idbEntry";
 
 export interface IdbFacilityReport extends IdbEntry {
@@ -8,18 +9,25 @@ export interface IdbFacilityReport extends IdbEntry {
     facilityReportType: FacilityReportType,
     analysisItemId: string,
     analysisReportSettings: AnalysisReportSettings
+    sepReportSettings: SepReportSettings
 }
 
-export function getNewIdbFacilityReport(facilityId: string, accountId: string, reportType: FacilityReportType): IdbFacilityReport {
+export function getNewIdbFacilityReport(facility: IdbFacility, reportType: FacilityReportType): IdbFacilityReport {
     let idbEntry: IdbEntry = getNewIdbEntry();
     return {
         ...idbEntry,
-        facilityId: facilityId,
-        accountId: accountId,
+        facilityId: facility.guid,
+        accountId: facility.accountId,
         facilityReportType: reportType,
         analysisItemId: undefined,
         name: 'New Report',
-        analysisReportSettings: getAnalysisReportSettings()
+        analysisReportSettings: getAnalysisReportSettings(),
+        sepReportSettings: {
+            facilityName: facility.name,
+            boundaries: undefined,
+            auditStartDate: undefined,
+            sepEnrollmentNumber: facility.sepEnrollmentNumber
+        }
     }
 }
 
@@ -97,4 +105,11 @@ export interface AnalysisReportSettings {
     groupAnnualResults: boolean,
     groupAnnualResultsTable: boolean,
     groupAnnualResultsGraphs: boolean
+}
+
+export interface SepReportSettings {
+    facilityName: string,
+    boundaries: string,
+    auditStartDate: Date,
+    sepEnrollmentNumber: string
 }

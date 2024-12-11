@@ -61,7 +61,7 @@ export class FacilityReportsDashboardComponent {
   }
 
   async createReport() {
-    let newReport: IdbFacilityReport = getNewIdbFacilityReport(this.selectedFacility.guid, this.selectedFacility.accountId, this.newReportType);
+    let newReport: IdbFacilityReport = getNewIdbFacilityReport(this.selectedFacility, this.newReportType);
     let addedReport: IdbFacilityReport = await firstValueFrom(this.facilityDbReportsService.addWithObservable(newReport));
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.setAccountFacilityReports(account, this.selectedFacility);

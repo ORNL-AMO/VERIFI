@@ -45,3 +45,56 @@
         Analysis Item Selection Required.
     </div>
 </div>
+
+
+
+<form>
+    <div class="row">
+        <div class="col-12">
+            <div class="row form-group">
+                <label class="col-5 col-form-label semibold" for="facilityName">Unique Facility Name Per SEP
+                    Certificate</label>
+                <div class="col-7">
+                    <input class="form-control" type="text" id="facilityName"
+                        [(ngModel)]="facilityReport.sepReportSettings.facilityName" name="facilityName"
+                        (input)="save()">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="row form-group">
+                <label class="col-5 col-form-label semibold" for="sepEnrollmentNumber">SEP Enrollment Number</label>
+                <div class="col-7">
+                    <input class="form-control" type="text" id="sepEnrollmentNumber"
+                        [(ngModel)]="facilityReport.sepReportSettings.sepEnrollmentNumber" name="sepEnrollmentNumber"
+                        (input)="save()">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="row form-group">
+                <label class="col-5 col-form-label semibold" for="boundaries">Facility Boundaries</label>
+                <div class="col-7">
+                    <input class="form-control" type="text" id="boundaries"
+                        [(ngModel)]="facilityReport.sepReportSettings.boundaries" name="boundaries" (input)="save()">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="row form-group">
+                <label class="col-5 col-form-label semibold" for="auditStartDate">Facility Boundaries</label>
+                <div class="col-7">
+                    <input id="auditStartDate" class="form-control" type="date"
+                        [(ngModel)]="facilityReport.sepReportSettings.auditStartDate" (input)="save()"
+                        name="auditStartDate">
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

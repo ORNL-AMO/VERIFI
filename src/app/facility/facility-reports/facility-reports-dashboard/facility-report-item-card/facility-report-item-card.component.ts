@@ -5,6 +5,7 @@ import { AnalyticsService } from 'src/app/analytics/analytics.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -27,7 +28,8 @@ export class FacilityReportItemCardComponent {
     private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
     private toastNotificationService: ToastNotificationsService,
-    private analyticsService: AnalyticsService
+    private analyticsService: AnalyticsService,
+    private facilityDbService: FacilitydbService
   ) {
 
   }
@@ -38,7 +40,8 @@ export class FacilityReportItemCardComponent {
   }
 
   async createCopy() {
-    let newReport: IdbFacilityReport = getNewIdbFacilityReport(this.report.facilityId, this.report.accountId, this.report.facilityReportType);
+    let facility: IdbFacility = this.facilityDbService.getFacilityById(this.report.facilityId);
+    let newReport: IdbFacilityReport = getNewIdbFacilityReport(facility, this.report.facilityReportType);
     newReport.name = this.report.name + ' (Copy)';
     newReport.analysisItemId = this.report.analysisItemId;
     let addedReport: IdbFacilityReport = await firstValueFrom(this.facilityDbReportsService.addWithObservable(newReport));

@@ -14,7 +14,12 @@
                     Unique Facility Name Per SEP Certificate:
                 </th>
                 <td>
-                    {{facility.name}}
+                    <ng-template [ngIf]="facilityReport.sepReportSettings.facilityName" [ngIfElse]="facilityNameMdash">
+                        {{facilityReport.sepReportSettings.facilityName}}
+                    </ng-template>
+                    <ng-template #facilityNameMdash>
+                        &mdash;
+                    </ng-template>
                 </td>
             </tr>
             <tr>
@@ -22,7 +27,12 @@
                     SEP Enrollment Number:
                 </th>
                 <td>
-                    <!-- {{facility.sepEnrollmentNumber}} -->
+                    <ng-template [ngIf]="facilityReport.sepReportSettings.sepEnrollmentNumber" [ngIfElse]="enrollmentMdash">
+                        {{facilityReport.sepReportSettings.sepEnrollmentNumber}}
+                    </ng-template>
+                    <ng-template #enrollmentMdash>
+                        &mdash;
+                    </ng-template>
                 </td>
             </tr>
             <tr>
@@ -43,12 +53,12 @@
                     Facility Boundries:
                 </th>
                 <td>
-                    <!-- <ng-template [ngIf]="facility.boundries" [ngIfElse]="zipMdash">
-                        {{facility.zip}}
+                    <ng-template [ngIf]="facilityReport.sepReportSettings.boundaries" [ngIfElse]="boundariesMdash">
+                        {{facilityReport.sepReportSettings.boundaries}}
                     </ng-template>
-                    <ng-template #zipMdash>
+                    <ng-template #boundariesMdash>
                         &mdash;
-                    </ng-template> -->
+                    </ng-template>
                 </td>
             </tr>
             <tr>
@@ -69,12 +79,12 @@
                     Start of Date SEP/ISO 50001 Stage 2 Audit:
                 </th>
                 <td>
-                    <!-- <ng-template [ngIf]="facility.size" [ngIfElse]="sizeMdash">
-                        {{facility.size}}
+                    <ng-template [ngIf]="facilityReport.sepReportSettings.auditStartDate" [ngIfElse]="startDateMdash">
+                        {{facilityReport.sepReportSettings.auditStartDate | date: 'dd/MM/yyyy'}}
                     </ng-template>
-                    <ng-template #sizeMdash>
+                    <ng-template #startDateMdash>
                         &mdash;
-                    </ng-template> -->
+                    </ng-template>
                 </td>
             </tr>
         </tbody>

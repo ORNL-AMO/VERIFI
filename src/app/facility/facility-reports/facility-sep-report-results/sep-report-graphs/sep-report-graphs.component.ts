@@ -79,7 +79,7 @@ export class SepReportGraphsComponent {
             standoff: 18
           },
           automargin: true,
-          range: [0.5, 1]
+          range: [0.25, 1.5]
         },
         margin: { r: 0, t: 50 }
       };
@@ -122,7 +122,7 @@ export class SepReportGraphsComponent {
       var trace2 = {
         type: "scatter",
         fill: 'tonexty',
-        fillcolor: 'rgba(0,0,0,0)',
+        fillcolor: 'rgba(29, 66, 138, .2)',
         mode: "none",
         name: '5% Target',
         x: rollingSavings.map(results => { return results.date }),
@@ -148,7 +148,7 @@ export class SepReportGraphsComponent {
       var trace4 = {
         type: "scatter",
         mode: "none",
-        fillcolor: 'rgba(29, 66, 138, .2)',
+        fillcolor: 'rgba(29, 66, 138, .6)',
         name: '15% Target',
         fill: 'tonexty',
         x: rollingSavings.map(results => { return results.date }),
@@ -166,13 +166,16 @@ export class SepReportGraphsComponent {
         yData.push(data.fifteenPercentSavings);
       });
       let maxY: number = _.max(yData);
+      let minY: number = _.min(yData);
+
+
       var trace5 = {
         type: "scatter",
         mode: "none",
-        fillcolor: 'rgba(29, 66, 138, .6)',
+        fillcolor: 'rgba(0, 0, 0, 0)',
         showlegend: false,
         name: '15% Target',
-        fill: 'tonexty',
+        fill: 'tozeroy',
         x: rollingSavings.map(results => { return results.date }),
         y: rollingSavings.map(results => { return maxY * 10 }),
         line: { color: '#7dcea0', width: 4 },
@@ -182,7 +185,7 @@ export class SepReportGraphsComponent {
       }
 
 
-      var data = [trace2, trace3, trace4, trace5, trace1];
+      var data = [trace5, trace4, trace3, trace2, trace1];
 
 
 
@@ -259,7 +262,7 @@ export class SepReportGraphsComponent {
         type: "scatter",
         mode: "none",
         fill: 'tozeroy',
-        fillcolor: 'rgba(0, 122, 62, .4)',
+        fillcolor: 'rgba(0, 122, 62, .3)',
         name: '10% Target',
         x: rollingSavings.map(results => { return results.date }),
         y: rollingSavings.map(results => { return results.tenPercentEnergy }),
@@ -271,7 +274,7 @@ export class SepReportGraphsComponent {
       var trace4 = {
         type: "scatter",
         mode: "none",
-        fillcolor: 'rgba(0, 122, 62, .6)',
+        fillcolor: 'rgba(0, 122, 62, .4)',
         name: '15% Target',
         fill: 'tozeroy',
         x: rollingSavings.map(results => { return results.date }),
