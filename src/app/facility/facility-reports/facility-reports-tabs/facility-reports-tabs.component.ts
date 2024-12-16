@@ -69,7 +69,11 @@ export class FacilityReportsTabsComponent {
     if (this.selectedReport.facilityReportType == 'analysis') {
       this.setupValid = (this.selectedReport.analysisItemId != undefined && this.selectedReport.name != '');
     } else if (this.selectedReport.facilityReportType == 'overview') {
-      this.setupValid = this.selectedReport.name != '';
+      this.setupValid = (this.selectedReport.name != '' &&
+        this.selectedReport.dataOverviewReportSettings.endMonth != undefined &&
+        this.selectedReport.dataOverviewReportSettings.endYear != undefined &&
+        this.selectedReport.dataOverviewReportSettings.startMonth != undefined &&
+        this.selectedReport.dataOverviewReportSettings.startYear != undefined)
     } else {
       this.setupValid = false;
     }

@@ -1,75 +1,98 @@
 <form>
     <div class="row form-group">
-        <label class="col-5 col-form-label semibold" for="startDate">Start Date</label>
+        <label class="col-6 col-form-label semibold" for="startDate">Start Date</label>
 
         <div class="col-3">
-            <select name="startMonth" [(ngModel)]="reportSettings.startMonth" class="form-select" (change)="save()">
+            <select name="startMonth" [(ngModel)]="reportSettings.startMonth" class="form-select" (change)="save()" [required]="true">
                 <option class="pe-2" *ngFor="let month of months" [ngValue]="month.monthNumValue">
                     {{month.abbreviation}}</option>
             </select>
         </div>
         <div class="col-3">
-            <select name="startYear" [(ngModel)]="reportSettings.startYear" class="form-select" (change)="save()">
+            <select name="startYear" [(ngModel)]="reportSettings.startYear" class="form-select" (change)="save()" [required]="true">
                 <option class="pe-2" *ngFor="let year of baselineYears" [ngValue]="year">{{year}}
                 </option>
             </select>
         </div>
     </div>
     <div class="row form-group">
-        <label class="col-5 col-form-label semibold" for="endMonth">End Date</label>
+        <label class="col-6 col-form-label semibold" for="endMonth">End Date</label>
         <div class="col-3">
-            <select name="endMonth" [(ngModel)]="reportSettings.endMonth" class="form-select" (change)="save()">
+            <select name="endMonth" [(ngModel)]="reportSettings.endMonth" class="form-select" (change)="save()" [required]="true">
                 <option class="pe-2" *ngFor="let month of months" [ngValue]="month.monthNumValue">
                     {{month.abbreviation}}</option>
             </select>
         </div>
         <div class="col-3">
-            <select name="endYear" [(ngModel)]="reportSettings.endYear" class="form-select" (change)="save()">
+            <select name="endYear" [(ngModel)]="reportSettings.endYear" class="form-select" (change)="save()" [required]="true">
                 <option class="pe-2" *ngFor="let year of reportYears" [ngValue]="year">{{year}}
                 </option>
             </select>
         </div>
     </div>
-
-    <div class="row">
+    <hr>
+    <div class="row mt-2">
         <div class="col-6">
-            <div class="row form-group">
-                <label class="col-5 col-form-label semibold">Energy displayed as site or source? </label>
-                <div class="col-7">
-                    <div class="form-check">
-                        <input type="radio" class="form-check-input" name="energyIsSource" [value]="true"
-                            id="sourceEnergy" [(ngModel)]="reportSettings.energyIsSource" (change)="save()">
-                        <label class="form-check-label" for="sourceEnergy">Source Energy</label>
-                    </div>
-                    <div class="form-check">
-                        <input type="radio" class="form-check-input" name="energyIsSource" [value]="false"
-                            id="siteEnergy" [(ngModel)]="reportSettings.energyIsSource" (change)="save()">
-                        <label class="form-check-label" for="siteEnergy">Site Energy</label>
-                    </div>
+            <div class="form-group">
+                <label class="semibold">Energy displayed as site or source? </label>
+                <div class="form-check">
+                    <input type="radio" class="form-check-input" name="energyIsSource" [value]="true" id="sourceEnergy"
+                        [(ngModel)]="reportSettings.energyIsSource" (change)="save()">
+                    <label class="form-check-label" for="sourceEnergy">Source Energy</label>
+                </div>
+                <div class="form-check">
+                    <input type="radio" class="form-check-input" name="energyIsSource" [value]="false" id="siteEnergy"
+                        [(ngModel)]="reportSettings.energyIsSource" (change)="save()">
+                    <label class="form-check-label" for="siteEnergy">Site Energy</label>
                 </div>
             </div>
         </div>
         <div class="col-6" *ngIf="reportSettings.includeEmissionsSection">
-            <div class="row form-group">
-                <label class="col-5 col-form-label semibold">Emissions Display</label>
-                <div class="col-7">
-                    <div class="form-check">
-                        <input type="radio" class="form-check-input" name="emissionsDisplay" [value]="'market'"
-                            id="marketEmissions" [(ngModel)]="reportSettings.emissionsDisplay" (change)="save()">
-                        <label class="form-check-label" for="marketEmissions">Market-based</label>
-                    </div>
-                    <div class="form-check">
-                        <input type="radio" class="form-check-input" name="emissionsDisplay" [value]="'location'"
-                            id="locationEmissions" [(ngModel)]="reportSettings.emissionsDisplay" (change)="save()">
-                        <label class="form-check-label" for="locationEmissions">Location-based</label>
-                    </div>
+            <div class="form-group">
+                <label class="semibold">Emissions Display</label>
+                <div class="form-check">
+                    <input type="radio" class="form-check-input" name="emissionsDisplay" [value]="'market'"
+                        id="marketEmissions" [(ngModel)]="reportSettings.emissionsDisplay" (change)="save()">
+                    <label class="form-check-label" for="marketEmissions">Market-based</label>
+                </div>
+                <div class="form-check">
+                    <input type="radio" class="form-check-input" name="emissionsDisplay" [value]="'location'"
+                        id="locationEmissions" [(ngModel)]="reportSettings.emissionsDisplay" (change)="save()">
+                    <label class="form-check-label" for="locationEmissions">Location-based</label>
                 </div>
             </div>
         </div>
     </div>
     <hr>
     <div class="row">
-        <div class="col-12">
+        <div class="col-6">
+            <label class="semibold larger">Sections to Include in Report</label>
+            <div class="section-options">
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" name="includeEnergySection"
+                        id="includeEnergySection" [(ngModel)]="reportSettings.includeEnergySection" (change)="save()">
+                    <label class="form-check-label" for="includeEnergySection">Energy Use</label>
+                </div>
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" name="includeCostsSection" id="includeCostsSection"
+                        [(ngModel)]="reportSettings.includeCostsSection" (change)="save()">
+                    <label class="form-check-label" for="includeCostsSection">Costs</label>
+                </div>
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" name="includeEmissionsSection"
+                        id="includeEmissionsSection" [(ngModel)]="reportSettings.includeEmissionsSection"
+                        (change)="save()">
+                    <label class="form-check-label" for="includeEmissionsSection">Emissions</label>
+                </div>
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" name="includeWaterSection" id="includeWaterSection"
+                        [(ngModel)]="reportSettings.includeWaterSection" (change)="save()">
+                    <label class="form-check-label" for="includeWaterSection">Water</label>
+                </div>
+            </div>
+        </div>
+        <div class="col-6">
+            <label class="semibold larger">Data to Include</label>
             <div class="form-check">
                 <input type="radio" class="form-check-input" name="selectMeterData" [value]="true" id="includeAll"
                     [(ngModel)]="reportSettings.includeAllMeterData" (change)="save()">
@@ -80,72 +103,60 @@
                     id="selectMeterGroups" [(ngModel)]="reportSettings.includeAllMeterData" (change)="save()">
                 <label class="form-check-label" for="selectMeterGroups">Select meter groups to include</label>
             </div>
-        </div>
-        <ng-container *ngIf="!reportSettings.includeAllMeterData">
-            <div class="col-12 pt-2">
-                <label class="semibold">Facility Meter Groups:</label>
-            </div>
-            <!-- <div class="col-2 pb-2"
-                *ngFor="let facilityOption of reportSetup.includedFacilities">
-                <div class="form-check">
-                    <input type="checkbox" class="form-check-input"
-                        name="{{'includeFacility_'+facilityOption.facilityId}}"
-                        id="{{'includeFacility_'+facilityOption.facilityId}}" [(ngModel)]="facilityOption.included"
+            <ng-container *ngIf="!reportSettings.includeAllMeterData">
+                <label class="semibold">Facility Meter Groups</label>
+                <div class="form-check secondary-check" *ngFor="let groupOption of reportSettings.includedGroups">
+                    <input type="checkbox" class="form-check-input" name="{{'includeGroup_'+groupOption.groupId}}"
+                        id="{{'includeGroup_'+groupOption.groupId}}" [(ngModel)]="groupOption.include"
                         (change)="save()">
-                    <label class="form-check-label bold"
-                        for="{{'includeFacility_'+facilityOption.facilityId}}">{{facilityOption.facilityId |
-                        facilityName}}</label>
+                    <label class="form-check-label" for="{{'includeGroup_'+groupOption.groupId}}">
+                        {{groupOption.groupId | groupName}}</label>
                 </div>
-                <ng-container *ngIf="facilityOption.included">
-                    <div class="form-check secondary-check" *ngFor="let groupOption of facilityOption.includedGroups">
-                        <input type="checkbox" class="form-check-input" name="{{'includeGroup_'+groupOption.groupId}}"
-                            id="{{'includeGroup_'+groupOption.groupId}}" [(ngModel)]="groupOption.include"
-                            (change)="save()">
-                        <label class="form-check-label"
-                            for="{{'includeGroup_'+groupOption.groupId}}">{{groupOption.groupId |
-                            groupName}}</label>
-                    </div>
-                </ng-container>
-            </div> -->
-        </ng-container>
-
-        <div class="form-check">
-            <input type="checkbox" class="form-check-input" name="includeMeterUsageStackedLineChart"
-                id="includeMeterUsageStackedLineChart" [(ngModel)]="reportSettings.includeMeterUsageStackedLineChart"
-                (change)="save()">
-            <label class="form-check-label" for="includeMeterUsageStackedLineChart">Meters Stacked Line
-                Chart</label>
-        </div>
-        <div class="form-check">
-            <input type="checkbox" class="form-check-input" name="includeMeterUsageTable" id="includeMeterUsageTable"
-                [(ngModel)]="reportSettings.includeMeterUsageTable" (change)="save()">
-            <label class="form-check-label" for="includeMeterUsageTable">Meter Usage Table</label>
-        </div>
-        <div class="form-check">
-            <input type="checkbox" class="form-check-input" name="includeMeterUsageDonut" id="includeMeterUsageDonut"
-                [(ngModel)]="reportSettings.includeMeterUsageDonut" (change)="save()">
-            <label class="form-check-label" for="includeMeterUsageDonut">Meter Usage
-                Donut Chart</label>
-        </div>
-        <div class="form-check">
-            <input type="checkbox" class="form-check-input" name="includeUtilityTableForFacility"
-                id="includeUtilityTableForFacility" [(ngModel)]="reportSettings.includeUtilityTableForFacility"
-                (change)="save()">
-            <label class="form-check-label" for="includeUtilityTableForFacility">Utilities Table</label>
-        </div>
-        <div class="form-check">
-            <input type="checkbox" class="form-check-input" name="includeAnnualBarChart" id="includeAnnualBarChart"
-                [(ngModel)]="reportSettings.includeAnnualBarChart" (change)="save()">
-            <label class="form-check-label" for="includeAnnualBarChart">Utilities Annual Bar Chart</label>
-        </div>
-        <div class="form-check">
-            <input type="checkbox" class="form-check-input" name="includeMonthlyLineChartForFacility"
-                id="includeMonthlyLineChartForFacility" [(ngModel)]="reportSettings.includeMonthlyLineChartForFacility"
-                (change)="save()">
-            <label class="form-check-label" for="includeMonthlyLineChartForFacility">Monthly Line Chart</label>
+            </ng-container>
         </div>
     </div>
+    <hr>
+    <div class="row">
+        <div class="col-12">
 
+            <label class="semibold larger">Content to Include</label>
+            <div class="form-check">
+                <input type="checkbox" class="form-check-input" name="includeMeterUsageStackedLineChart"
+                    id="includeMeterUsageStackedLineChart"
+                    [(ngModel)]="reportSettings.includeMeterUsageStackedLineChart" (change)="save()">
+                <label class="form-check-label" for="includeMeterUsageStackedLineChart">Meters Stacked Line
+                    Chart</label>
+            </div>
+            <div class="form-check">
+                <input type="checkbox" class="form-check-input" name="includeMeterUsageTable"
+                    id="includeMeterUsageTable" [(ngModel)]="reportSettings.includeMeterUsageTable" (change)="save()">
+                <label class="form-check-label" for="includeMeterUsageTable">Meter Usage Table</label>
+            </div>
+            <div class="form-check">
+                <input type="checkbox" class="form-check-input" name="includeMeterUsageDonut"
+                    id="includeMeterUsageDonut" [(ngModel)]="reportSettings.includeMeterUsageDonut" (change)="save()">
+                <label class="form-check-label" for="includeMeterUsageDonut">Meter Usage
+                    Donut Chart</label>
+            </div>
+            <div class="form-check">
+                <input type="checkbox" class="form-check-input" name="includeUtilityTableForFacility"
+                    id="includeUtilityTableForFacility" [(ngModel)]="reportSettings.includeUtilityTableForFacility"
+                    (change)="save()">
+                <label class="form-check-label" for="includeUtilityTableForFacility">Utilities Table</label>
+            </div>
+            <div class="form-check">
+                <input type="checkbox" class="form-check-input" name="includeAnnualBarChart" id="includeAnnualBarChart"
+                    [(ngModel)]="reportSettings.includeAnnualBarChart" (change)="save()">
+                <label class="form-check-label" for="includeAnnualBarChart">Utilities Annual Bar Chart</label>
+            </div>
+            <div class="form-check">
+                <input type="checkbox" class="form-check-input" name="includeMonthlyLineChartForFacility"
+                    id="includeMonthlyLineChartForFacility"
+                    [(ngModel)]="reportSettings.includeMonthlyLineChartForFacility" (change)="save()">
+                <label class="form-check-label" for="includeMonthlyLineChartForFacility">Monthly Line Chart</label>
+            </div>
+        </div>
+    </div>
 
     <div class="col-12">
         <hr>

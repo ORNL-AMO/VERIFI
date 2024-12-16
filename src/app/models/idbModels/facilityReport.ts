@@ -1,5 +1,6 @@
 import { AnalysisTableColumns } from "../analysis";
 import { getNewIdbEntry, IdbEntry } from "./idbEntry";
+import { IdbUtilityMeterGroup } from "./utilityMeterGroup";
 
 export interface IdbFacilityReport extends IdbEntry {
     facilityId: string,
@@ -11,7 +12,7 @@ export interface IdbFacilityReport extends IdbEntry {
     dataOverviewReportSettings: DataOverviewFacilityReportSettings
 }
 
-export function getNewIdbFacilityReport(facilityId: string, accountId: string, reportType: FacilityReportType): IdbFacilityReport {
+export function getNewIdbFacilityReport(facilityId: string, accountId: string, reportType: FacilityReportType, groups: Array<IdbUtilityMeterGroup>): IdbFacilityReport {
     let idbEntry: IdbEntry = getNewIdbEntry();
     return {
         ...idbEntry,
@@ -21,7 +22,7 @@ export function getNewIdbFacilityReport(facilityId: string, accountId: string, r
         analysisItemId: undefined,
         name: 'New Report',
         analysisReportSettings: getAnalysisReportSettings(),
-        dataOverviewReportSettings: getDataOverviewReportSettings()
+        dataOverviewReportSettings: getDataOverviewReportSettings(groups)
     }
 }
 
@@ -102,7 +103,7 @@ export interface AnalysisReportSettings {
 }
 
 
-export function getDataOverviewReportSettings(): DataOverviewFacilityReportSettings {
+export function getDataOverviewReportSettings(groups: Array<IdbUtilityMeterGroup>): DataOverviewFacilityReportSettings {
     return {
         energyIsSource: true,
         emissionsDisplay: 'market',
@@ -120,7 +121,13 @@ export function getDataOverviewReportSettings(): DataOverviewFacilityReportSetti
         includeMonthlyLineChartForFacility: true,
         includeMeterUsageStackedLineChart: true,
         includeMeterUsageTable: true,
-        includeMeterUsageDonut: true
+        includeMeterUsageDonut: true,
+        includedGroups: groups.map(group => {
+            return {
+                groupId: group.guid,
+                include: true
+            }
+        })
     }
 }
 
@@ -141,10 +148,10 @@ export interface DataOverviewFacilityReportSettings {
     // includeStackedBarChart: boolean,
     // includeMonthlyLineChart: boolean,
     includeAllMeterData: boolean,
-    //   includedGroups: Array<{
-    //     groupId: string,
-    //     include: boolean
-    //   }>
+      includedGroups: Array<{
+        groupId: string,
+        include: boolean
+      }>
     includeMeterUsageStackedLineChart: boolean,
     includeMeterUsageTable: boolean,
     includeMeterUsageDonut: boolean,

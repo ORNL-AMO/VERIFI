@@ -7,9 +7,11 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
+import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { FacilityReportType, getNewIdbFacilityReport, IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
+import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
 
 @Component({
   selector: 'app-facility-reports-dashboard',
@@ -32,7 +34,8 @@ export class FacilityReportsDashboardComponent {
     private accountDbService: AccountdbService,
     private analyticsService: AnalyticsService,
     private toastNotificationService: ToastNotificationsService,
-    private router: Router
+    private router: Router,
+    private utilityMeterGroupDbService: UtilityMeterGroupdbService
   ) {
 
   }
@@ -61,7 +64,8 @@ export class FacilityReportsDashboardComponent {
   }
 
   async createReport() {
-    let newReport: IdbFacilityReport = getNewIdbFacilityReport(this.selectedFacility.guid, this.selectedFacility.accountId, this.newReportType);
+    let groups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.getFacilityGroups(this.selectedFacility.guid);
+    let newReport: IdbFacilityReport = getNewIdbFacilityReport(this.selectedFacility.guid, this.selectedFacility.accountId, this.newReportType, groups);
     let addedReport: IdbFacilityReport = await firstValueFrom(this.facilityDbReportsService.addWithObservable(newReport));
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.setAccountFacilityReports(account, this.selectedFacility);

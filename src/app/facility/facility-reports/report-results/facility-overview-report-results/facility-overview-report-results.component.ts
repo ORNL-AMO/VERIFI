@@ -76,11 +76,17 @@ export class FacilityOverviewReportResultsComponent {
     this.calculating = true;
     this.facility = this.facilityDbService.getFacilityById(this.facilityReport.facilityId);
     let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.getFacilityMetersByFacilityGuid(this.facilityReport.facilityId);
-    // if (this.overviewReport.includeAllMeterData == false) {
-    //   facilityMeters = facilityMeters.filter(meter => {
-    //     return this.includedGroups.includes(meter.groupId);
-    //   });
-    // };
+    if (this.overviewReportSettings.includeAllMeterData == false) {
+      let includeGroupIds: Array<string> = [];
+      this.overviewReportSettings.includedGroups.forEach(group => {
+        if(group.include){
+          includeGroupIds.push(group.groupId);
+        }
+      });
+      facilityMeters = facilityMeters.filter(meter => {
+        return includeGroupIds.includes(meter.groupId);
+      });
+    };
     let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
     let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
     this.dateRange = {

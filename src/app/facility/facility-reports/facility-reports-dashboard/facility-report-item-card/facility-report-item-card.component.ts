@@ -6,9 +6,11 @@ import { ToastNotificationsService } from 'src/app/core-components/toast-notific
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
+import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { getNewIdbFacilityReport, IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
+import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
 
 @Component({
   selector: 'app-facility-report-item-card',
@@ -27,7 +29,8 @@ export class FacilityReportItemCardComponent {
     private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
     private toastNotificationService: ToastNotificationsService,
-    private analyticsService: AnalyticsService
+    private analyticsService: AnalyticsService,
+    private utilityMeterGroupDbService: UtilityMeterGroupdbService
   ) {
 
   }
@@ -38,7 +41,8 @@ export class FacilityReportItemCardComponent {
   }
 
   async createCopy() {
-    let newReport: IdbFacilityReport = getNewIdbFacilityReport(this.report.facilityId, this.report.accountId, this.report.facilityReportType);
+    let groups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.getFacilityGroups(this.report.guid);
+    let newReport: IdbFacilityReport = getNewIdbFacilityReport(this.report.facilityId, this.report.accountId, this.report.facilityReportType, groups);
     newReport.name = this.report.name + ' (Copy)';
     newReport.analysisItemId = this.report.analysisItemId;
     let addedReport: IdbFacilityReport = await firstValueFrom(this.facilityDbReportsService.addWithObservable(newReport));
