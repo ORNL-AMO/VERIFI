@@ -240,9 +240,14 @@ export class CalanderizationService {
     return calanderizationSummary;
   }
 
-  getYearOptionsAccount(meterCategory: 'water' | 'energy' | 'all'): Array<number> {
-    let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
-    let categoryMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return this.isCategoryMeter(meter, meterCategory) });
+  getYearOptionsAccount(meterCategory: 'water' | 'energy' | 'all', facilityId?: string): Array<number> {
+    let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
+    if(facilityId){
+      meters = meters.filter(meter => {
+        return meter.facilityId == facilityId
+      });
+    }
+    let categoryMeters: Array<IdbUtilityMeter> = meters.filter(meter => { return this.isCategoryMeter(meter, meterCategory) });
     let categoryMeterIds: Array<string> = categoryMeters.map(meter => { return meter.guid });
     let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
     let categoryMeterData: Array<IdbUtilityMeterData> = meterData.filter(data => { return categoryMeterIds.includes(data.meterId) });

@@ -110,11 +110,25 @@ export function getDataOverviewReportSettings(): DataOverviewFacilityReportSetti
         includeCostsSection: true,
         includeEmissionsSection: true,
         includeWaterSection: true,
-        includeAllMeterData: true
+        includeAllMeterData: true,
+        startYear: undefined,
+        startMonth: undefined,
+        endYear: undefined,
+        endMonth: undefined,
+        includeUtilityTableForFacility: true,
+        includeAnnualBarChart: true,
+        includeMonthlyLineChartForFacility: true,
+        includeMeterUsageStackedLineChart: true,
+        includeMeterUsageTable: true,
+        includeMeterUsageDonut: true
     }
 }
 
 export interface DataOverviewFacilityReportSettings {
+    startYear: undefined,
+    startMonth: undefined,
+    endYear: undefined,
+    endMonth: undefined,
     energyIsSource: boolean,
     emissionsDisplay: 'market' | 'location',
     includeEnergySection: boolean,
@@ -131,11 +145,11 @@ export interface DataOverviewFacilityReportSettings {
     //     groupId: string,
     //     include: boolean
     //   }>
-    // includeMeterUsageStackedLineChart: boolean,
-    // includeMeterUsageTable: boolean,
-    // includeMeterUsageDonut: boolean,
-    // includeUtilityTableForFacility: boolean,
-    // includeAnnualBarChart: boolean,
-    // includeMonthlyLineChartForFacility: boolean
+    includeMeterUsageStackedLineChart: boolean,
+    includeMeterUsageTable: boolean,
+    includeMeterUsageDonut: boolean,
+    includeUtilityTableForFacility: boolean,
+    includeAnnualBarChart: boolean,
+    includeMonthlyLineChartForFacility: boolean
 
 }

@@ -15,6 +15,8 @@ import { HelperPipesModule } from 'src/app/shared/helper-pipes/helper-pipes.modu
 import { FacilityOverviewReportSetupComponent } from './facility-report-setup/facility-overview-report-setup/facility-overview-report-setup.component';
 import { FacilityOverviewReportResultsComponent } from './report-results/facility-overview-report-results/facility-overview-report-results.component';
 import { FacilityAnalysisReportResultsComponent } from './report-results/facility-analysis-report-results/facility-analysis-report-results.component';
+import { DataOverviewModule } from 'src/app/shared/data-overview/data-overview.module';
+import { CalculatingSpinnerModule } from 'src/app/shared/calculating-spinner/calculating-spinner.module';
 
 
 
@@ -37,7 +39,9 @@ import { FacilityAnalysisReportResultsComponent } from './report-results/facilit
     RouterModule,
     FormsModule,
     SharedReportsModule,
-    HelperPipesModule
+    HelperPipesModule,
+    DataOverviewModule,
+    CalculatingSpinnerModule
   ]
 })
 export class FacilityReportsModule { }

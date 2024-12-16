@@ -7,6 +7,8 @@ import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { DataOverviewFacilityReportSettings, IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
+import { Month, Months } from 'src/app/shared/form-data/months';
+import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 
 @Component({
   selector: 'app-facility-overview-report-setup',
@@ -20,10 +22,14 @@ export class FacilityOverviewReportSetupComponent {
   reportSettings: DataOverviewFacilityReportSettings;
   facilityReportSub: Subscription;
   isFormChange: boolean = false;
+  reportYears: Array<number>;
+  baselineYears: Array<number>;
+  months: Array<Month> = Months;
   constructor(private facilityReportsDbService: FacilityReportsDbService,
     private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService,
-    private dbChangesService: DbChangesService
+    private dbChangesService: DbChangesService,
+    private calanderizationService: CalanderizationService
   ) {
 
   }
@@ -37,6 +43,7 @@ export class FacilityOverviewReportSetupComponent {
         this.isFormChange = false;
       }
     });
+    this.setYearOptions();
   }
 
   ngOnDestroy() {
@@ -55,4 +62,12 @@ export class FacilityOverviewReportSetupComponent {
     this.facilityReportsDbService.selectedReport.next(facilityReport);
   }
 
+  setYearOptions() {
+    //TODO: baseline years less than report year selection
+    //TODO: report years greater than baseline year selection
+    //TODO: get options by water/energy
+    let yearOptions: Array<number> = this.calanderizationService.getYearOptionsAccount('all', this.facilityReport.facilityId);
+    this.reportYears = yearOptions;
+    this.baselineYears = yearOptions;
+  }
 }
