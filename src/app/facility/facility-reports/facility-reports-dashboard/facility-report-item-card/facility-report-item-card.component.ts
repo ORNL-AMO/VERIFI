@@ -34,9 +34,7 @@ export class FacilityReportItemCardComponent {
 
   selectReport() {
     this.facilityDbReportsService.selectedReport.next(this.report);
-    if (this.report.facilityReportType == 'analysis') {
-      this.router.navigateByUrl('facility/' + this.facility.id + '/reports/setup');
-    }
+    this.router.navigateByUrl('facility/' + this.facility.id + '/reports/setup');
   }
 
   async createCopy() {
@@ -50,9 +48,7 @@ export class FacilityReportItemCardComponent {
     this.facilityDbReportsService.selectedReport.next(addedReport);
     this.toastNotificationService.showToast('New Report Created', undefined, undefined, false, "alert-success");
     this.facilityDbReportsService.selectedReport.next(addedReport);
-    if (addedReport.facilityReportType == 'analysis') {
-      this.router.navigateByUrl('facility/' + this.facility.id + '/reports/setup');
-    }
+    this.router.navigateByUrl('facility/' + this.facility.id + '/reports/setup');
   }
 
   deleteItem() {

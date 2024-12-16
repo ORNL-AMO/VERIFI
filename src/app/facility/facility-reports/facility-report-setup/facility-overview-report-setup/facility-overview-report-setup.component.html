@@ -1,0 +1,83 @@
+<form>
+    <div class="row">
+        <div class="col-6">
+            <div class="row form-group">
+                <label class="col-5 col-form-label semibold">Energy displayed as site or source? </label>
+                <div class="col-7">
+                    <div class="form-check">
+                        <input type="radio" class="form-check-input" name="energyIsSource" [value]="true"
+                            id="sourceEnergy" [(ngModel)]="reportSettings.energyIsSource" (change)="save()">
+                        <label class="form-check-label" for="sourceEnergy">Source Energy</label>
+                    </div>
+                    <div class="form-check">
+                        <input type="radio" class="form-check-input" name="energyIsSource" [value]="false"
+                            id="siteEnergy" [(ngModel)]="reportSettings.energyIsSource" (change)="save()">
+                        <label class="form-check-label" for="siteEnergy">Site Energy</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6" *ngIf="reportSettings.includeEmissionsSection">
+            <div class="row form-group">
+                <label class="col-5 col-form-label semibold">Emissions Display</label>
+                <div class="col-7">
+                    <div class="form-check">
+                        <input type="radio" class="form-check-input" name="emissionsDisplay" [value]="'market'"
+                            id="marketEmissions" [(ngModel)]="reportSettings.emissionsDisplay" (change)="save()">
+                        <label class="form-check-label" for="marketEmissions">Market-based</label>
+                    </div>
+                    <div class="form-check">
+                        <input type="radio" class="form-check-input" name="emissionsDisplay" [value]="'location'"
+                            id="locationEmissions" [(ngModel)]="reportSettings.emissionsDisplay" (change)="save()">
+                        <label class="form-check-label" for="locationEmissions">Location-based</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr>
+    <div class="row">
+        <div class="col-12">
+            <div class="form-check">
+                <input type="radio" class="form-check-input" name="selectMeterData" [value]="true" id="includeAll"
+                    [(ngModel)]="reportSettings.includeAllMeterData" (change)="save()">
+                <label class="form-check-label" for="includeAll">Include all account meter data</label>
+            </div>
+            <div class="form-check">
+                <input type="radio" class="form-check-input" name="selectMeterData" [value]="false"
+                    id="selectMeterGroups" [(ngModel)]="reportSettings.includeAllMeterData" (change)="save()">
+                <label class="form-check-label" for="selectMeterGroups">Select meter groups to include</label>
+            </div>
+        </div>
+        <ng-container *ngIf="!reportSettings.includeAllMeterData">
+            <div class="col-12 pt-2">
+                <label class="semibold">Facility Meter Groups:</label>
+            </div>
+            <!-- <div class="col-2 pb-2"
+                *ngFor="let facilityOption of reportSetup.includedFacilities">
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input"
+                        name="{{'includeFacility_'+facilityOption.facilityId}}"
+                        id="{{'includeFacility_'+facilityOption.facilityId}}" [(ngModel)]="facilityOption.included"
+                        (change)="save()">
+                    <label class="form-check-label bold"
+                        for="{{'includeFacility_'+facilityOption.facilityId}}">{{facilityOption.facilityId |
+                        facilityName}}</label>
+                </div>
+                <ng-container *ngIf="facilityOption.included">
+                    <div class="form-check secondary-check" *ngFor="let groupOption of facilityOption.includedGroups">
+                        <input type="checkbox" class="form-check-input" name="{{'includeGroup_'+groupOption.groupId}}"
+                            id="{{'includeGroup_'+groupOption.groupId}}" [(ngModel)]="groupOption.include"
+                            (change)="save()">
+                        <label class="form-check-label"
+                            for="{{'includeGroup_'+groupOption.groupId}}">{{groupOption.groupId |
+                            groupName}}</label>
+                    </div>
+                </ng-container>
+            </div> -->
+        </ng-container>
+        <div class="col-12">
+            <hr>
+        </div>
+    </div>
+</form>

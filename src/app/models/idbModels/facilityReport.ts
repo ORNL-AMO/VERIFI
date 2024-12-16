@@ -7,7 +7,8 @@ export interface IdbFacilityReport extends IdbEntry {
     name: string,
     facilityReportType: FacilityReportType,
     analysisItemId: string,
-    analysisReportSettings: AnalysisReportSettings
+    analysisReportSettings: AnalysisReportSettings,
+    dataOverviewReportSettings: DataOverviewFacilityReportSettings
 }
 
 export function getNewIdbFacilityReport(facilityId: string, accountId: string, reportType: FacilityReportType): IdbFacilityReport {
@@ -19,11 +20,12 @@ export function getNewIdbFacilityReport(facilityId: string, accountId: string, r
         facilityReportType: reportType,
         analysisItemId: undefined,
         name: 'New Report',
-        analysisReportSettings: getAnalysisReportSettings()
+        analysisReportSettings: getAnalysisReportSettings(),
+        dataOverviewReportSettings: getDataOverviewReportSettings()
     }
 }
 
-export type FacilityReportType = 'analysis';
+export type FacilityReportType = 'analysis' | 'overview';
 
 
 export function getAnalysisReportSettings(): AnalysisReportSettings {
@@ -97,4 +99,43 @@ export interface AnalysisReportSettings {
     groupAnnualResults: boolean,
     groupAnnualResultsTable: boolean,
     groupAnnualResultsGraphs: boolean
+}
+
+
+export function getDataOverviewReportSettings(): DataOverviewFacilityReportSettings {
+    return {
+        energyIsSource: true,
+        emissionsDisplay: 'market',
+        includeEnergySection: true,
+        includeCostsSection: true,
+        includeEmissionsSection: true,
+        includeWaterSection: true,
+        includeAllMeterData: true
+    }
+}
+
+export interface DataOverviewFacilityReportSettings {
+    energyIsSource: boolean,
+    emissionsDisplay: 'market' | 'location',
+    includeEnergySection: boolean,
+    includeCostsSection: boolean,
+    includeEmissionsSection: boolean,
+    includeWaterSection: boolean,
+    // includeFacilityTable: boolean,
+    // includeFacilityDonut: boolean,
+    // includeUtilityTable: boolean,
+    // includeStackedBarChart: boolean,
+    // includeMonthlyLineChart: boolean,
+    includeAllMeterData: boolean,
+    //   includedGroups: Array<{
+    //     groupId: string,
+    //     include: boolean
+    //   }>
+    // includeMeterUsageStackedLineChart: boolean,
+    // includeMeterUsageTable: boolean,
+    // includeMeterUsageDonut: boolean,
+    // includeUtilityTableForFacility: boolean,
+    // includeAnnualBarChart: boolean,
+    // includeMonthlyLineChartForFacility: boolean
+
 }

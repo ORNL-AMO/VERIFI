@@ -10,10 +10,15 @@
             </li>
             <li class="nav-item" [ngClass]="{'disabled': !setupValid}"
                 *ngIf="selectedReport.facilityReportType == 'analysis'">
-                <a class="nav-link" routerLink="analysis-report"
-                    [routerLinkActive]="['active']">
+                <a class="nav-link" routerLink="analysis-report" [routerLinkActive]="['active']">
                     <i class="fa fa-file"></i>
                     Analysis Report</a>
+            </li>
+            <li class="nav-item" [ngClass]="{'disabled': !setupValid}"
+                *ngIf="selectedReport.facilityReportType == 'overview'">
+                <a class="nav-link" routerLink="overview-report" [routerLinkActive]="['active']">
+                    <i class="fa fa-file"></i>
+                    Data Overview Report</a>
             </li>
         </ul>
     </div>
