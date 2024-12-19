@@ -132,10 +132,10 @@ export function getDataOverviewReportSettings(groups: Array<IdbUtilityMeterGroup
 }
 
 export interface DataOverviewFacilityReportSettings {
-    startYear: undefined,
-    startMonth: undefined,
-    endYear: undefined,
-    endMonth: undefined,
+    startYear: number,
+    startMonth: number,
+    endYear: number,
+    endMonth: number,
     energyIsSource: boolean,
     emissionsDisplay: 'market' | 'location',
     includeEnergySection: boolean,
