@@ -1,0 +1,15 @@
+.popup{
+    top: 15px;
+    left: 15px;
+    right: 15px;
+    bottom: 15px;
+    width: auto;
+}
+
+.popup-header div.p-0 .close .fa-close, .popup-header div.p-0{
+    color: white;
+}
+
+.larger{
+    font-size: larger;
+}

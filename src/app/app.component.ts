@@ -42,6 +42,8 @@ import { IdbPredictorEntryDeprecated } from './models/idbModels/deprecatedPredic
 import { FacilityReportsDbService } from './indexedDB/facility-reports-db.service';
 import { IdbFacilityReport } from './models/idbModels/facilityReport';
 import { DegreeDaysService } from './shared/helper-services/degree-days.service';
+import { SharedDataService } from './shared/helper-services/shared-data.service';
+import { SurveyService } from './shared/helper-services/survey.service';
 
 // declare ga as a function to access the JS code in TS
 declare let gtag: Function;
@@ -57,6 +59,9 @@ export class AppComponent {
 
   dataInitialized: boolean = false;
   loadingMessage: string = "Loading Accounts...";
+
+  showSurveyToast: boolean;
+  showSurveyModal: boolean;
   constructor(
     private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService,
@@ -83,7 +88,8 @@ export class AppComponent {
     private migratePredictorsService: MigratePredictorsService,
     private dbChangesService: DbChangesService,
     private facilityReportsDbService: FacilityReportsDbService,
-    private degreeDaysService: DegreeDaysService) {
+    private degreeDaysService: DegreeDaysService,
+    private surveyService: SurveyService) {
     if (environment.production) {
       gtag('config', 'G-YG1QD02XSE');
       this.analyticsService.sendEvent('verifi_app_open', undefined);
@@ -100,6 +106,12 @@ export class AppComponent {
     this.initializeData();
     this.automaticBackupsService.subscribeData();
     this.degreeDaysService.testStationResponse();
+    this.surveyService.showSurveyModal.subscribe(val => {
+      this.showSurveyModal = val;
+    });
+    this.surveyService.showSurveyToast.subscribe(val => {
+      this.showSurveyToast = val;
+    });
   }
 
   async initializeData() {
