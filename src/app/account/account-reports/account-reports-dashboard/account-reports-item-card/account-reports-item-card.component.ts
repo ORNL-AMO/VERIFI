@@ -21,6 +21,8 @@ export class AccountReportsItemCardComponent {
 
   displayDeleteModal: boolean;
   isValid: boolean;
+  reportStartDate: Date;
+  reportEndDate: Date;
   constructor(private accountReportDbService: AccountReportDbService,
     private router: Router,
     private dbChangesService: DbChangesService,
@@ -32,6 +34,10 @@ export class AccountReportsItemCardComponent {
 
   ngOnInit() {
     this.isValid = this.accountReportsService.isReportValid(this.report);
+    if(this.report.reportType == 'dataOverview'){
+      this.reportStartDate = this.getDate(this.report.startMonth, this.report.startYear);
+      this.reportEndDate = this.getDate(this.report.endMonth, this.report.endYear);
+    }
 
   }
 

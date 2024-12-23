@@ -17,6 +17,9 @@ import { FacilityOverviewReportResultsComponent } from './report-results/facilit
 import { FacilityAnalysisReportResultsComponent } from './report-results/facility-analysis-report-results/facility-analysis-report-results.component';
 import { DataOverviewModule } from 'src/app/shared/data-overview/data-overview.module';
 import { CalculatingSpinnerModule } from 'src/app/shared/calculating-spinner/calculating-spinner.module';
+import { FacilityReportsDashboardTabsComponent } from './facility-reports-dashboard/facility-reports-dashboard-tabs/facility-reports-dashboard-tabs.component';
+import { FacilityAnalysisReportsDashboardComponent } from './facility-reports-dashboard/facility-analysis-reports-dashboard/facility-analysis-reports-dashboard.component';
+import { FacilityOverviewReportsDashboardComponent } from './facility-reports-dashboard/facility-overview-reports-dashboard/facility-overview-reports-dashboard.component';
 
 
 
@@ -32,7 +35,10 @@ import { CalculatingSpinnerModule } from 'src/app/shared/calculating-spinner/cal
     FacilityPrintReportButtonComponent,
     FacilityReportItemCardComponent,
     FacilityOverviewReportSetupComponent,
-    FacilityOverviewReportResultsComponent
+    FacilityOverviewReportResultsComponent,
+    FacilityReportsDashboardTabsComponent,
+    FacilityAnalysisReportsDashboardComponent,
+    FacilityOverviewReportsDashboardComponent
   ],
   imports: [
     CommonModule,

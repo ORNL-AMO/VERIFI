@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Router } from '@angular/router';
+import { NavigationEnd, Router } from '@angular/router';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { AnalyticsService } from 'src/app/analytics/analytics.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
@@ -28,8 +28,10 @@ export class FacilityReportsDashboardComponent {
 
   newReportType: FacilityReportType = 'analysis';
   displayNewReport: boolean = false;
+  routerSub: Subscription;
+  reportType: 'Analysis' | 'Data Overview';
   constructor(private facilityDbService: FacilitydbService,
-    private facilityDbReportsService: FacilityReportsDbService,
+    private facilityReportsDbService: FacilityReportsDbService,
     private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
     private analyticsService: AnalyticsService,
@@ -45,9 +47,16 @@ export class FacilityReportsDashboardComponent {
       this.selectedFacility = facility;
     });
 
-    this.facilityReportsSub = this.facilityDbReportsService.facilityReports.subscribe(reports => {
+    this.facilityReportsSub = this.facilityReportsDbService.facilityReports.subscribe(reports => {
       this.facilityReports = reports;
-    })
+    });
+    this.routerSub = this.router.events.subscribe((event) => {
+      if (event instanceof NavigationEnd) {
+        this.setReportType(event.urlAfterRedirects);
+      }
+    });
+    //navigationsEnd isn't fired on init. Call here.
+    this.setReportType(this.router.url);
   }
 
   ngOnDestroy() {
@@ -66,16 +75,24 @@ export class FacilityReportsDashboardComponent {
   async createReport() {
     let groups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.getFacilityGroups(this.selectedFacility.guid);
     let newReport: IdbFacilityReport = getNewIdbFacilityReport(this.selectedFacility.guid, this.selectedFacility.accountId, this.newReportType, groups);
-    let addedReport: IdbFacilityReport = await firstValueFrom(this.facilityDbReportsService.addWithObservable(newReport));
+    let addedReport: IdbFacilityReport = await firstValueFrom(this.facilityReportsDbService.addWithObservable(newReport));
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.setAccountFacilityReports(account, this.selectedFacility);
     this.analyticsService.sendEvent('create_facility_analysis', undefined)
-    this.facilityDbReportsService.selectedReport.next(addedReport);
+    this.facilityReportsDbService.selectedReport.next(addedReport);
     this.toastNotificationService.showToast('New Report Created', undefined, undefined, false, "alert-success");
-    this.facilityDbReportsService.selectedReport.next(addedReport);
+    this.facilityReportsDbService.selectedReport.next(addedReport);
     this.router.navigateByUrl('facility/' + this.selectedFacility.id + '/reports/setup');
   }
 
+
+  setReportType(url: string) {
+    if (url.includes('analysis')) {
+      this.reportType = 'Analysis';
+    } else if (url.includes('overview')) {
+      this.reportType = 'Data Overview';
+    }
+  }
 
 
 

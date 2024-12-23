@@ -52,6 +52,8 @@ import { FacilityReportSetupComponent } from "../facility/facility-reports/facil
 import { BankedGroupAnalysisComponent } from "../facility/analysis/run-analysis/group-analysis/banked-group-analysis/banked-group-analysis.component";
 import { FacilityOverviewReportResultsComponent } from "../facility/facility-reports/report-results/facility-overview-report-results/facility-overview-report-results.component";
 import { FacilityAnalysisReportResultsComponent } from "../facility/facility-reports/report-results/facility-analysis-report-results/facility-analysis-report-results.component";
+import { FacilityAnalysisReportsDashboardComponent } from "../facility/facility-reports/facility-reports-dashboard/facility-analysis-reports-dashboard/facility-analysis-reports-dashboard.component";
+import { FacilityOverviewReportsDashboardComponent } from "../facility/facility-reports/facility-reports-dashboard/facility-overview-reports-dashboard/facility-overview-reports-dashboard.component";
 
 export const FacilityRoutes: Route = {
     path: 'facility/:id',
@@ -289,7 +291,15 @@ export const FacilityRoutes: Route = {
             component: FacilityReportsComponent,
             children: [
                 { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
-                { path: 'dashboard', component: FacilityReportsDashboardComponent },
+                {
+                    path: 'dashboard',
+                    component: FacilityReportsDashboardComponent,
+                    children: [
+                        { path: '', pathMatch: 'full', redirectTo: 'analysis' },
+                        { path: 'analysis', component: FacilityAnalysisReportsDashboardComponent },
+                        { path: 'overview', component: FacilityOverviewReportsDashboardComponent },
+                    ]
+                },
                 { path: 'setup', component: FacilityReportSetupComponent },
                 { path: 'analysis-report', component: FacilityAnalysisReportResultsComponent },
                 { path: 'overview-report', component: FacilityOverviewReportResultsComponent }

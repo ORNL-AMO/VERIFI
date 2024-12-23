@@ -24,6 +24,8 @@ export class FacilityReportItemCardComponent {
   facility: IdbFacility;
 
   displayDeleteModal: boolean = false;
+  reportStartDate: Date;
+  reportEndDate: Date;
   constructor(private facilityDbReportsService: FacilityReportsDbService,
     private router: Router,
     private dbChangesService: DbChangesService,
@@ -32,7 +34,13 @@ export class FacilityReportItemCardComponent {
     private analyticsService: AnalyticsService,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService
   ) {
+  }
 
+  ngOnInit(){
+    if(this.report.facilityReportType == 'overview'){
+      this.reportStartDate = new Date(this.report.dataOverviewReportSettings.startYear, this.report.dataOverviewReportSettings.startMonth, 1);
+      this.reportEndDate = new Date(this.report.dataOverviewReportSettings.endYear, this.report.dataOverviewReportSettings.endMonth, 1);
+    }
   }
 
   selectReport() {

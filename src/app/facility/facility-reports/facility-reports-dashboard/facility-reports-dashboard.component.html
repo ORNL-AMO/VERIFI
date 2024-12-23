@@ -1,11 +1,12 @@
 <div class="main-content p-0">
     <!-- <app-analysis-dashboard-tabs *ngIf="hasEnergy && hasWater"></app-analysis-dashboard-tabs> -->
+    <app-facility-reports-dashboard-tabs></app-facility-reports-dashboard-tabs>
     <div class="content-padding">
         <div class="card card-body">
             <h4 class="pt-0">
                 <div class="d-flex justify-content-between">
                     <div class="mt-auto">
-                        <i class="fa fa-folder pe-2"></i>{{selectedFacility.name}} Reports
+                        <i class="fa fa-folder pe-2"></i>{{selectedFacility.name}} {{reportType}} Reports
                     </div>
 
                     <div>
@@ -15,8 +16,8 @@
             </h4>
         </div>
         <hr>
-        <!-- <router-outlet></router-outlet> -->
-        <ng-template [ngIf]="facilityReports.length != 0" [ngIfElse]="noReportsBlock">
+        <router-outlet></router-outlet>
+        <!-- <ng-template [ngIf]="facilityReports.length != 0" [ngIfElse]="noReportsBlock">
             <div class="row">
                 <div class="col-4" *ngFor="let report of facilityReports">
                     <app-facility-report-item-card [report]="report"
@@ -29,7 +30,7 @@
             <div class="alert alert-info">
                 No reports found for the facility.
             </div>
-        </ng-template>
+        </ng-template> -->
     </div>
 </div>
 
