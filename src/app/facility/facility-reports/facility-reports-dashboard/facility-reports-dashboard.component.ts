@@ -62,6 +62,7 @@ export class FacilityReportsDashboardComponent {
   ngOnDestroy() {
     this.selectedFacilitySub.unsubscribe();
     this.facilityReportsSub.unsubscribe();
+    this.routerSub.unsubscribe();
   }
 
   openCreateReport() {

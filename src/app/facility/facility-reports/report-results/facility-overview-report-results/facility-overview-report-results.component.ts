@@ -3,7 +3,6 @@ import { Subscription } from 'rxjs';
 import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
 import { DataOverviewFacilityReportSettings, IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
 import { FacilityReportsService } from '../../facility-reports.service';
-import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
@@ -68,7 +67,7 @@ export class FacilityOverviewReportResultsComponent {
     this.facilityReportSub.unsubscribe();
     this.printSub.unsubscribe();
     if (this.worker) {
-
+      this.worker.terminate();
     }
   }
 

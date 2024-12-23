@@ -1,9 +1,3 @@
-<!-- <hr>
-<div class="row justify-content-center print-break-before pt-3">
-    <div class="col-12 report-page">
-        <app-facility-title-page [facility]="dataOverviewFacility.facility"></app-facility-title-page>
-    </div>
-</div> -->
 <div class="report" *ngIf="calculating != false">
     <app-calculating-spinner [message]="'Calculating Overview...'"
         [error]="calculating == 'error'"></app-calculating-spinner>
