@@ -1,7 +1,8 @@
 import { Component, Input } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { firstValueFrom, Subscription } from 'rxjs';
+import { ApplicationInstanceDbService } from 'src/app/indexedDB/application-instance-db.service';
 import { UserSurvey } from 'src/app/models/userSurvey';
 import { SurveyService } from 'src/app/shared/helper-services/survey.service';
 
@@ -22,13 +23,13 @@ export class UserSurveyComponent {
   constructor(
     private surveyService: SurveyService,
     private router: Router,
-    // private appInstanceDbService: ApplicationInstanceDbService, 
+    private applicationInstanceDbService: ApplicationInstanceDbService,
     private fb: FormBuilder) { }
 
   ngOnInit() {
     this.initForm();
     this.statusSub = this.surveyService.completedStatus.subscribe(status => {
-      this.completedStatus = status; 
+      this.completedStatus = status;
       if (this.completedStatus === 'success' && !this.inModal) {
         this.setSurveyDone();
       }
@@ -57,8 +58,8 @@ export class UserSurveyComponent {
   }
 
   async setSurveyDone() {
-    // let appData = await firstValueFrom(this.appInstanceDbService.setSurveyDone());
-    // this.appInstanceDbService.applicationInstanceData.next(appData);
+    let appData = await firstValueFrom(this.applicationInstanceDbService.setSurveyDone());
+    this.applicationInstanceDbService.applicationInstanceData.next(appData);
   }
 
   setRatingValue(controlName: string, val: number) {
@@ -93,7 +94,7 @@ export class UserSurveyComponent {
       recommendRating: 0,
       questionDescribeSuccess: undefined,
       hasProfilingInterest: false,
-      questionFeedback: undefined, 
+      questionFeedback: undefined,
     }
   }
 
@@ -106,12 +107,21 @@ export class UserSurveyComponent {
       recommendRating: this.userSurveyForm.controls.recommendRating.value,
       questionDescribeSuccess: this.userSurveyForm.controls.questionDescribeSuccess.value,
       hasProfilingInterest: this.userSurveyForm.controls.hasProfilingInterest.value,
-      questionFeedback: this.userSurveyForm.controls.questionFeedback.value, 
+      questionFeedback: this.userSurveyForm.controls.questionFeedback.value,
     }
   }
 
   navigateToPrivacyNotice() {
     this.surveyService.showSurveyModal.next(false);
     this.router.navigate(['/privacy']);
+  }
+
+  async setRemindAndClose() {
+    await firstValueFrom(this.applicationInstanceDbService.setSurveyDone(false));
+    this.surveyService.showSurveyModal.next(false);
+  }
+
+  close() {
+    this.surveyService.showSurveyModal.next(false);
   }
 }

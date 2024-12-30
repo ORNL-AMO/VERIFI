@@ -175,10 +175,24 @@
     </div>
   </div>
 
-  <div *ngIf="this.completedStatus !== 'success'" class="p-2 pull-right">
-    <button type="button" class="btn btn-secondary me-2" (click)="initForm()">Reset Form</button>
-    <button type="button" [disabled]="!userSurveyForm.valid" class="btn btn-primary"
-      (click)="sendAnswers()">Send Answers</button>
-  </div>
+  <ng-template [ngIf]="inModal" [ngIfElse]="notInModalBlock">
+    <div class="d-flex w-100 justify-content-between">
+      <div>
+        <button type="button" class="btn btn-secondary me-2" (click)="setRemindAndClose()">Remind Me Next Time</button>
+      </div>
+      <div>
+        <button type="button" class="btn btn-secondary me-2" (click)="close()">Cancel</button>
+        <button type="button" [disabled]="!userSurveyForm.valid" class="btn btn-primary" (click)="sendAnswers()">Send
+          Answers</button>
+      </div>
+    </div>
+  </ng-template>
+  <ng-template #notInModalBlock>
+    <div *ngIf="this.completedStatus !== 'success'" class="p-2 pull-right">
+      <button type="button" class="btn btn-secondary me-2" (click)="initForm()">Reset Form</button>
+      <button type="button" [disabled]="!userSurveyForm.valid" class="btn btn-primary" (click)="sendAnswers()">Send
+        Answers</button>
+    </div>
+  </ng-template>
 
 </div>

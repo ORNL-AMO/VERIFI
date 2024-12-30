@@ -1,8 +1,14 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { IdbAccount } from 'src/app/models/idbModels/account';
 import { UserSurvey } from 'src/app/models/userSurvey';
 import { environment } from 'src/environments/environment';
+import * as _ from 'lodash';
+import { getMinutesBetweenDates } from '../sharedHelperFuntions';
+import { ConvertValue } from 'src/app/calculations/conversions/convertValue';
+import { ApplicationInstanceData } from 'src/app/models/idbModels/applicationInstanceData';
 
 @Injectable({
   providedIn: 'root'
@@ -13,51 +19,42 @@ export class SurveyService {
   showSurveyToast: BehaviorSubject<boolean>;
   userSurvey: BehaviorSubject<UserSurvey>;
 
-  constructor(private httpClient: HttpClient) {
+  constructor(private httpClient: HttpClient,
+    private accountDbService: AccountdbService
+  ) {
     this.showSurveyModal = new BehaviorSubject<boolean>(false);
-    this.showSurveyToast = new BehaviorSubject<boolean>(true);
+    this.showSurveyToast = new BehaviorSubject<boolean>(false);
     this.completedStatus = new BehaviorSubject<'sending' | 'success' | 'error'>(undefined);
     this.userSurvey = new BehaviorSubject<UserSurvey>(undefined);
   }
 
-//  async getHasMetUsageRequirements(applicationData: ApplicationInstanceData) {
-//       let firstAppInitDate = new Date(applicationData.createdDate);
-//       let currentDate = new Date();
-  
-//       let hasMetUsageThreshold: boolean;
-//       let dateDifference;
-//       if (environment.production) {
-//         dateDifference = currentDate.diff(firstAppInitDate, 'days');
-//         hasMetUsageThreshold = dateDifference >= 30 || applicationData.appOpenCount >= 10;
-//       } else {
-//         dateDifference = currentDate.diff(firstAppInitDate, 'seconds');
-//         hasMetUsageThreshold = dateDifference >= 120 || applicationData.appOpenCount >= 2;
-//       }
-      
-//       return hasMetUsageThreshold;
-//   }
+  getHasMetUsageRequirements(applicationData: ApplicationInstanceData) {
+    let firstAppInitDate = new Date(applicationData.createdDate);
+    let currentDate = new Date();
+    let minutesBetween: number = getMinutesBetweenDates(firstAppInitDate, currentDate);
+    let dateDifference: number = new ConvertValue(minutesBetween, 'min', 'd').convertedValue;
+    return dateDifference >= 30 || applicationData.appOpenCount >= 10;
+  }
 
   /**
    * Check if is legacy user and has used app for 30 days 
    */
-  // async checkIsExistingUser() {
-  //   let currentDate = moment(new Date());
-  //   let allDirs: Directory[] = await firstValueFrom(this.directoryDbService.getAllDirectories());
-  //   let topLevelDirInitDate = allDirs.find(dir => dir.parentDirectoryId === null && dir.name === 'All Assessments')?.createdDate; 
+  checkIsExistingUser(): boolean {
+    let currentDate = new Date();
+    let accounts: Array<IdbAccount> = this.accountDbService.allAccounts.getValue();
+    let accountDates: Array<Date> = accounts.map(acc => {
+      return new Date(acc.createdDate);
+    });
+    let firstDate: Date = _.min(accountDates);
+    if (firstDate) {
+      let minutesBetween: number = getMinutesBetweenDates(firstDate, currentDate);
+      let dateDifference: number = new ConvertValue(minutesBetween, 'min', 'd').convertedValue;
+      return dateDifference >= 30;
+    } else {
+      return false;
+    }
+  }
 
-  //   let dateDifference;
-  //   let isExistingUser;
-  //   if (environment.production) {
-  //     dateDifference = currentDate.diff(topLevelDirInitDate, 'days');
-  //     isExistingUser = dateDifference >= 30;
-  //   } else {
-  //     dateDifference = currentDate.diff(topLevelDirInitDate, 'seconds');
-  //     isExistingUser = dateDifference >= 120;
-  //   }
-
-  //   return isExistingUser;
-  // }
- 
   async sendAnswers() {
     let httpOptions = {
       responseType: 'text' as const,
@@ -68,7 +65,7 @@ export class SurveyService {
 
     this.completedStatus.next('sending');
     let userSurvey: UserSurvey = this.userSurvey.getValue();
-    let url: string = environment.measurUtilitiesApi + 'measur-survey';
+    let url: string = environment.measurUtilitiesApi + 'verifi-survey';
     this.httpClient.post(url, userSurvey, httpOptions).subscribe({
       next: (resp) => {
         this.setStatus(resp);
