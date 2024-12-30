@@ -1,0 +1,184 @@
+<div [ngClass]="{'card-body': inModal}">
+  <div *ngIf="completedStatus === 'error'" class="alert-danger small mx-2 px-3 py-2">
+    <span>An error has occured. Please verify your network connection and try again.</span>
+  </div>
+  <ng-container *ngIf="completedStatus !== 'success' && completedStatus !== 'sending'">
+    <p class="fw-light mb-0" [ngClass]="{'card-text-small': inModal}">
+      The VERIFI team is committed to continuously improving and delivering a high-quality tool for our users.
+      To help us achieve this, we would greatly appreciate your support in sharing a bit of information about yourself.
+      Since we don't currently collect any user data, your voluntary input will provide us with valuable insights that
+      will ensure
+      continued support for the tool and guide future updates and improvements. Rest assured, <span class="bold">all
+        responses are optional</span>, and
+      the information you provide will only be used for the purpose of this survey. <span class="bold">Your input is
+        incredibly valuable to us</span>.
+      <br>
+      <a class="click-link d-block mt-1" (click)="navigateToPrivacyNotice()">Go to privacy notice</a>
+    </p>
+    <div class="banner-thanks mt-3 mb-2">Thank you for being a part of the VERIFI community!</div>
+
+    <hr>
+    <form [formGroup]="userSurveyForm" class="mb-3 pl-3 pr-5">
+      <div class="row">
+        <div class="col-4">
+          <label class="bold" for="email">Email</label>
+          <input (input)="save()" type="text" formControlName="email" name="email" class="form-control" id="email" />
+          <ng-container *ngIf="userSurveyForm.controls.email.invalid && !userSurveyForm.controls.email.pristine">
+            <div class="red">
+              Must be a valid email address
+            </div>
+          </ng-container>
+        </div>
+        <div class="col-4">
+          <label class="bold" for="contactName">Contact Name</label>
+          <input (input)="save()" type="text" formControlName="contactName" name="contactName" class="form-control"
+            id="contactName" />
+        </div>
+        <div class="col-4">
+          <label class="bold" for="companyName">Company Name</label>
+          <input (input)="save()" type="text" formControlName="companyName" name="companyName" class="form-control"
+            id="companyName" />
+        </div>
+      </div>
+
+      <div class="row mt-2">
+        <div class="col-12 mt-2">
+          <label class="bold" for="usefulRating">Have you found VERIFI useful? </label>
+          <div class="fw-light small">(With 1 meaning "not very useful" and 5 meaning "very useful")</div>
+          <div class="btn-group btn-group-sm my-2">
+            <input type="radio" class="btn-check" name="usefulRating" formControlName="usefulRating" id="usefulRating_1"
+              [value]="1">
+            <label class="btn btn-outline-secondary" for="usefulRating_1">1</label>
+
+            <input type="radio" class="btn-check" name="usefulRating" formControlName="usefulRating" id="usefulRating_2"
+              [value]="2">
+            <label class="btn btn-outline-secondary" for="usefulRating_2">2</label>
+
+            <input type="radio" class="btn-check" name="usefulRating" formControlName="usefulRating" id="usefulRating_3"
+              [value]="3">
+            <label class="btn btn-outline-secondary" for="usefulRating_3">3</label>
+
+            <input type="radio" class="btn-check" name="usefulRating" formControlName="usefulRating" id="usefulRating_4"
+              [value]="4">
+            <label class="btn btn-outline-secondary" for="usefulRating_4">4</label>
+
+            <input type="radio" class="btn-check" name="usefulRating" formControlName="usefulRating" id="usefulRating_5"
+              [value]="5">
+            <label class="btn btn-outline-secondary" for="usefulRating_5">5</label>
+          </div>
+        </div>
+        <div class="col-12 mt-2">
+          <label class="bold" for="recommendRating">Would you recommend VERIFI to others for tracking
+            utility bills?</label>
+          <div class="fw-light small">(With 1 meaning "never" and 5 meaning "absolutely")</div>
+          <div class="btn-group btn-group-sm my-2">
+            <input type="radio" class="btn-check" name="recommendRating" formControlName="recommendRating"
+              id="recommendRating_1" [value]="1">
+            <label class="btn btn-outline-secondary" for="recommendRating_1">1</label>
+
+            <input type="radio" class="btn-check" name="recommendRating" formControlName="recommendRating"
+              id="recommendRating_2" [value]="2">
+            <label class="btn btn-outline-secondary" for="recommendRating_2">2</label>
+
+            <input type="radio" class="btn-check" name="recommendRating" formControlName="recommendRating"
+              id="recommendRating_3" [value]="3">
+            <label class="btn btn-outline-secondary" for="recommendRating_3">3</label>
+
+            <input type="radio" class="btn-check" name="recommendRating" formControlName="recommendRating"
+              id="recommendRating_4" [value]="4">
+            <label class="btn btn-outline-secondary" for="recommendRating_4">4</label>
+
+            <input type="radio" class="btn-check" name="recommendRating" formControlName="recommendRating"
+              id="recommendRating_5" [value]="5">
+            <label class="btn btn-outline-secondary" for="recommendRating_5">5</label>
+          </div>
+        </div>
+        <div class="col-12 mt-2">
+          <label class="bold mb-1">Would you be interested in being profiled in a case study?</label>
+          <br>
+          <label class="ps-2" for="hasProfilingInterest">
+            <input (input)="save()" type="checkbox" formControlName="hasProfilingInterest" id="hasProfilingInterest"
+              name="hasProfilingInterest" onfocus="this.select();">
+            <span class="ms-2">Yes, contact me for a case study</span>
+          </label>
+        </div>
+        <div class="col-12 mt-2">
+          <div class="d-flex flex-column">
+            <label for="questionDescribeSuccess" class="bold mb-1">Please describe any real-world successes you
+              have
+              had using the software.</label>
+            <textarea (input)="save()" class="survey-textarea" rows="4" id="questionDescribeSuccess"
+              formControlName="questionDescribeSuccess"
+              placeholder="Describe how VERIFI has helped you succeed"></textarea>
+            <span class="small">
+              Characters remaining: {{ getRemainingCharacters('questionDescribeSuccess') }}
+            </span>
+            <ng-container
+              *ngIf="userSurveyForm.controls.questionDescribeSuccess.invalid && !userSurveyForm.controls.questionDescribeSuccess.pristine">
+              <span class="red small">
+                This field is limited to 2048 characters. Please submit the survey and send any additional feedback
+                to:
+                <a id="supportEmail"
+                  href="mailto:verifi-help@ornl.gov?subject=AMO Tools Support Request">verifi-help&#64;ornl.gov</a>
+              </span>
+            </ng-container>
+          </div>
+        </div>
+
+        <div class="col-12 mt-2">
+          <div class="d-flex flex-column">
+
+            <label for="questionFeedback" class="bold mb-1">Do you have any recommendations on improving the
+              tool?</label>
+            <textarea (input)="save()" class="survey-textarea" rows="4" id="questionFeedback"
+              formControlName="questionFeedback" placeholder="List recommendations..."></textarea>
+            <span class="small">
+              Characters remaining: {{ getRemainingCharacters('questionFeedback') }}
+            </span>
+            <ng-container
+              *ngIf="userSurveyForm.controls.questionFeedback.invalid && !userSurveyForm.controls.questionFeedback.pristine">
+              <span class="red small">
+                This field is limited to 2048 characters. Please submit the survey and send any additional feedback to:
+                <a id="supportEmail"
+                  href="mailto:verifi-help@ornl.gov?subject=AMO Tools Support Request">verifi-help&#64;ornl.gov</a>
+              </span>
+            </ng-container>
+          </div>
+        </div>
+      </div>
+    </form>
+  </ng-container>
+
+
+  <div *ngIf="completedStatus === 'success'" class="alert-success small mx-2 px-3 py-2">
+    Your Survey has been submitted. Thank you!
+  </div>
+
+  <div *ngIf="completedStatus === 'error'" class="alert-danger small mx-2 px-3 py-2">
+    <span>An error has occured. Please verify your network connection and try again.</span>
+  </div>
+
+  <ng-container *ngIf="completedStatus === 'sending'">
+    <div class="spinner-overlay align-items-center w-100 text-center">
+      <div class="spinner mt-2 w-100">
+        <div class="bounce1"></div>
+        <div class="bounce2"></div>
+        <div class="bounce3"></div>
+      </div>
+      <div class="importing-text w-100">Submitting Survey...</div>
+    </div>
+  </ng-container>
+
+  <div class="row">
+    <div class="col-12">
+      <hr class="my-2">
+    </div>
+  </div>
+
+  <div *ngIf="this.completedStatus !== 'success'" class="p-2 pull-right">
+    <button type="button" class="btn btn-secondary me-2" (click)="initForm()">Reset Form</button>
+    <button type="button" [disabled]="!userSurveyForm.valid" class="btn btn-primary"
+      (click)="sendAnswers()">Send Answers</button>
+  </div>
+
+</div>

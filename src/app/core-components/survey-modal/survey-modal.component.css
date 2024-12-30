@@ -13,3 +13,12 @@
 .larger{
     font-size: larger;
 }
+
+.popup-body{
+    overflow-y: auto;
+    height: calc(100vh - 75px);
+}
+
+.text-end{
+    text-align: right;
+}

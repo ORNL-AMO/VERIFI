@@ -5,6 +5,7 @@ import { AcknowledgmentsComponent } from './acknowledgments/acknowledgments.comp
 import { FeedbackComponent } from './feedback/feedback.component';
 import { HelpComponent } from './help/help.component';
 import { PrivacyNoticeComponent } from './privacy-notice/privacy-notice.component';
+import { UserSurveyModule } from '../shared/user-survey/user-survey.module';
 
 @NgModule({
   declarations: [
@@ -15,7 +16,8 @@ import { PrivacyNoticeComponent } from './privacy-notice/privacy-notice.componen
     PrivacyNoticeComponent
   ],
   imports: [
-    CommonModule
+    CommonModule,
+    UserSurveyModule
   ]
 })
 export class StaticContentModule { }

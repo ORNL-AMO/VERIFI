@@ -32,7 +32,7 @@ import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
 import { DeletingAccountDataComponent } from './core-components/deleting-account-data/deleting-account-data.component';
 import { SurveyModalComponent } from './core-components/survey-modal/survey-modal.component';
 import { SurveyToastComponent } from './core-components/survey-toast/survey-toast.component';
-import { UserSurveyComponent } from './core-components/user-survey/user-survey.component';
+import { UserSurveyModule } from './shared/user-survey/user-survey.module';
 
 @NgModule({
     declarations: [
@@ -51,15 +51,13 @@ import { UserSurveyComponent } from './core-components/user-survey/user-survey.c
         ElectronBackupFileComponent,
         DeletingAccountDataComponent,
         SurveyModalComponent,
-        SurveyToastComponent,
-        UserSurveyComponent
+        SurveyToastComponent
     ],
     bootstrap: [AppComponent],
     imports: [
         BrowserModule,
         AppRoutingModule,
         FormsModule,
-        ReactiveFormsModule,
         CommonModule,
         PlotlyViaWindowModule,
         IndexedDBModule,
@@ -72,7 +70,8 @@ import { UserSurveyComponent } from './core-components/user-survey/user-survey.c
         HelperPipesModule,
         NgbTypeaheadModule,
         UploadDataModule,
-        WeatherDataModule
+        WeatherDataModule,
+        UserSurveyModule
     ],
     providers: [provideHttpClient(withInterceptorsFromDi())]
 })

@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { UserSurveyComponent } from './user-survey.component';
+import { UserSurveyComponent } from './user-survey/user-survey.component';
 
 describe('UserSurveyComponent', () => {
   let component: UserSurveyComponent;
