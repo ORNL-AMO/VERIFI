@@ -146,7 +146,7 @@ export class FacilityMetersTableComponent {
   selectEditMeter(meter: IdbUtilityMeter) {
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    this.router.navigateByUrl('data-wizard/' + account.guid + '/facility/' + facility.guid + '/meters/meter/' + meter.guid);
+    this.router.navigateByUrl('data-wizard/' + account.guid + '/facilities/' + facility.guid + '/meters/meter/' + meter.guid);
   }
 
   async createCopy(meter: IdbUtilityMeter) {

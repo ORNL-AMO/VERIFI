@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { firstValueFrom, Subscription } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { FileReference } from 'src/app/upload-data/upload-data-models';
@@ -10,6 +10,7 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
+import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 
 @Component({
   selector: 'app-data-wizard-sidebar',
@@ -32,10 +33,13 @@ export class DataWizardSidebarComponent {
 
   accountPredictors: Array<IdbPredictor>;
   accountPredictorsSub: Subscription;
+
+  facilitiesOpen: boolean = false;
   constructor(private accountDbService: AccountdbService, private facilityDbService: FacilitydbService,
     private dataWizardService: DataWizardService,
     private utilityMeterDbService: UtilityMeterdbService,
-    private predictorDbService: PredictorDbService
+    private predictorDbService: PredictorDbService,
+    private dbChangesService: DbChangesService
   ) {
   }
 
@@ -50,7 +54,7 @@ export class DataWizardSidebarComponent {
       this.fileReferences = fileReferences;
     });
     this.accountMetersSub = this.utilityMeterDbService.accountMeters.subscribe(accountMeters => {
-      this.accountMeters = accountMeters;
+      this.accountMeters = accountMeters.map(meter => { return { ...meter, open: false } });
     });
     this.accountPredictorsSub = this.predictorDbService.accountPredictors.subscribe(accountPredictors => {
       this.accountPredictors = accountPredictors;
@@ -62,5 +66,46 @@ export class DataWizardSidebarComponent {
     this.facilitiesSub.unsubscribe();
     this.fileReferencesSub.unsubscribe();
     this.accountPredictorsSub.unsubscribe();
+  }
+
+  toggleFacilitiesOpen() {
+    this.facilitiesOpen = !this.facilitiesOpen;
+  }
+
+  async toggleFacilityOpen(facility: IdbFacility) {
+    facility.sidebarOpen = !facility.sidebarOpen;
+    this.saveFacility(facility);
+  }
+
+  async toggleMeterOpen(meter: IdbUtilityMeter) {
+    meter.sidebarOpen = !meter.sidebarOpen;
+    await firstValueFrom(this.utilityMeterDbService.updateWithObservable(meter));
+    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    await this.dbChangesService.setMeters(selectedAccount, selectedFacility);
+  }
+
+  async toggleFacilityMetersOpen(facility: IdbFacility) {
+    facility.sidebarMetersOpen = !facility.sidebarMetersOpen;
+    this.saveFacility(facility);
+  }
+
+  async saveFacility(facility: IdbFacility) {
+    await firstValueFrom(this.facilityDbService.updateWithObservable(facility));
+    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    await this.dbChangesService.selectAccount(selectedAccount, false)
+  }
+
+  async toggleFacilityPredictorsOpen(facility: IdbFacility) {
+    facility.sidebarPredictorsOpen = !facility.sidebarPredictorsOpen;
+    this.saveFacility(facility);
+  }
+
+  async togglePredictorOpen(predictor: IdbPredictor) {
+    predictor.sidebarOpen = !predictor.sidebarOpen;
+    await firstValueFrom(this.predictorDbService.updateWithObservable(predictor));
+    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    await this.dbChangesService.setPredictorsV2(selectedAccount, selectedFacility);
   }
 }

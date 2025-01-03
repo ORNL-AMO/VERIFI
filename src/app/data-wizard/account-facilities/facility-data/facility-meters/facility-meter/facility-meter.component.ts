@@ -63,9 +63,9 @@ export class FacilityMeterComponent {
   }
 
   async saveChanges() {
-    let meterToSave: IdbUtilityMeter = this.editMeterFormService.updateMeterFromForm(this.utilityMeter, this.meterForm);
-    await firstValueFrom(this.utilityMeterDbService.updateWithObservable(meterToSave));
-    await this.utilityMeterDbService.updateWithObservable(meterToSave);
+    this.utilityMeter = this.utilityMeterDbService.getFacilityMeterById(this.utilityMeter.guid);
+    this.utilityMeter = this.editMeterFormService.updateMeterFromForm(this.utilityMeter, this.meterForm);
+    await firstValueFrom(this.utilityMeterDbService.updateWithObservable(this.utilityMeter));
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     await this.dbChangesService.setMeters(selectedAccount, selectedFacility);

@@ -5,8 +5,8 @@ import { DataWizardSidebarComponent } from './data-wizard-sidebar/data-wizard-si
 import { RouterModule } from '@angular/router';
 import { AccountSetupComponent } from './account-setup/account-setup.component';
 import { AccountFacilitiesComponent } from './account-facilities/account-facilities.component';
-import { FacilityDataComponent } from './facility-data/facility-data.component';
-import { FacilitySetupComponent } from './facility-data/facility-setup/facility-setup.component';
+import { FacilityDataComponent } from './account-facilities/facility-data/facility-data.component';
+import { FacilitySetupComponent } from './account-facilities/facility-data/facility-setup/facility-setup.component';
 import { SettingsFormsModule } from '../shared/settings-forms/settings-forms.module';
 import { DataWizardImportComponent } from './data-wizard-import/data-wizard-import.component';
 import { UploadFilesComponent } from './data-wizard-import/upload-files/upload-files.component';
@@ -19,12 +19,13 @@ import { HelperPipesModule } from '../shared/helper-pipes/helper-pipes.module';
 import { FormsModule } from '@angular/forms';
 import { MeterGroupOptionsPipe } from './data-wizard-import/process-template-file/process-template-meters/meter-group-options.pipe';
 import { EditMeterFormModule } from '../facility/utility-data/energy-consumption/energy-source/edit-meter-form/edit-meter-form.module';
-import { FacilityMetersComponent } from './facility-data/facility-meters/facility-meters.component';
-import { FacilityMetersTableComponent } from './facility-data/facility-meters/facility-meters-table/facility-meters-table.component';
+import { FacilityMetersComponent } from './account-facilities/facility-data/facility-meters/facility-meters.component';
+import { FacilityMetersTableComponent } from './account-facilities/facility-data/facility-meters/facility-meters-table/facility-meters-table.component';
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
-import { FacilityMeterComponent } from './facility-data/facility-meters/facility-meter/facility-meter.component';
-import { FacilityMeterDataComponent } from './facility-data/facility-meters/facility-meter-data/facility-meter-data.component';
-import { FacilityPredictorsComponent } from './facility-data/facility-predictors/facility-predictors.component';
+import { FacilityMeterComponent } from './account-facilities/facility-data/facility-meters/facility-meter/facility-meter.component';
+import { FacilityMeterDataComponent } from './account-facilities/facility-data/facility-meters/facility-meter-data/facility-meter-data.component';
+import { FacilityPredictorsComponent } from './account-facilities/facility-data/facility-predictors/facility-predictors.component';
+import { FacilitiesListComponent } from './account-facilities/facilities-list/facilities-list.component';
 
 
 
@@ -48,7 +49,8 @@ import { FacilityPredictorsComponent } from './facility-data/facility-predictors
     FacilityMetersTableComponent,
     FacilityMeterComponent,
     FacilityMeterDataComponent,
-    FacilityPredictorsComponent
+    FacilityPredictorsComponent,
+    FacilitiesListComponent
   ],
   imports: [
     CommonModule,
