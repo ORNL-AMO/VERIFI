@@ -1,6 +1,6 @@
 .navbar {
     background-color: white;
-    width: 250px;
+    /* width: 250px; */
     overflow-y: auto;
 }
 
@@ -17,8 +17,7 @@
 }
 
 .sidebar-section {
-    border-left: groove 1px;
-    margin-left: .5rem;
+    border-left: groove 1px black;
     padding-left: .5rem;
 }
 
@@ -30,5 +29,58 @@ a {
 a:hover {
     color: black !important;
     text-decoration: underline !important;
+    cursor: pointer;
+}
+
+
+.navbar {
+    background-color: #ffffff;
+    overflow-y: auto;
+    flex-wrap: nowrap;
+}
+
+.navbar.collapsed {
+    width: auto;
+}
+
+a.nav-link, .btn.btn-dark, .link-section-heading{
+    display: inline-block;
+    line-height: normal;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 100%;
+}
+
+
+.sidebar-container {
+    container-type: inline-size;
+}
+
+.sidebar-content {
+    display: block;
+}
+
+@container (max-width: 45px) {
+    .sidebar-content {
+        display: none;
+    }
+}
+
+
+.toggle-collapse {
+    font-size: x-large;
+}
+
+.toggle-collapse:hover {
+    cursor: pointer;
+    border: so;
+}
+
+.btn.text-left {
+    text-align: left;
+}
+
+.nav-link:hover {
     cursor: pointer;
 }

@@ -8,7 +8,13 @@ import { FileReference } from '../upload-data/upload-data-models';
 export class DataWizardService {
 
   fileReferences: BehaviorSubject<Array<FileReference>>;
-  constructor() {
+  sidebarOpen: BehaviorSubject<boolean>;
+  helpPanelOpen: BehaviorSubject<boolean>;
+  helpWidth: number = 200;
+  sidebarWidth: number = 200;
+  constructor(  ) {
+    this.sidebarOpen = new BehaviorSubject<boolean>(true);
+    this.helpPanelOpen = new BehaviorSubject<boolean>(true);
     this.fileReferences = new BehaviorSubject<Array<FileReference>>([]);
   }
 

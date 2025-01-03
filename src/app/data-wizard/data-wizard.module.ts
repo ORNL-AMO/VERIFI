@@ -25,6 +25,7 @@ import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { FacilityMeterComponent } from './account-facilities/facility-data/facility-meters/facility-meter/facility-meter.component';
 import { FacilityPredictorsComponent } from './account-facilities/facility-data/facility-predictors/facility-predictors.component';
 import { FacilitiesListComponent } from './account-facilities/facilities-list/facilities-list.component';
+import { DataWizardHelpPanelComponent } from './data-wizard-help-panel/data-wizard-help-panel.component';
 
 
 @NgModule({
@@ -47,7 +48,8 @@ import { FacilitiesListComponent } from './account-facilities/facilities-list/fa
     FacilityMetersTableComponent,
     FacilityMeterComponent,
     FacilityPredictorsComponent,
-    FacilitiesListComponent
+    FacilitiesListComponent,
+    DataWizardHelpPanelComponent
   ],
   imports: [
     CommonModule,
