@@ -28,7 +28,6 @@ import { FacilityPredictorsComponent } from './account-facilities/facility-data/
 import { FacilitiesListComponent } from './account-facilities/facilities-list/facilities-list.component';
 
 
-
 @NgModule({
   declarations: [  
     DataWizardComponent, 

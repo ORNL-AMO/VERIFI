@@ -34,7 +34,6 @@ export class DataWizardSidebarComponent {
   accountPredictors: Array<IdbPredictor>;
   accountPredictorsSub: Subscription;
 
-  facilitiesOpen: boolean = false;
   constructor(private accountDbService: AccountdbService, private facilityDbService: FacilitydbService,
     private dataWizardService: DataWizardService,
     private utilityMeterDbService: UtilityMeterdbService,
@@ -68,8 +67,10 @@ export class DataWizardSidebarComponent {
     this.accountPredictorsSub.unsubscribe();
   }
 
-  toggleFacilitiesOpen() {
-    this.facilitiesOpen = !this.facilitiesOpen;
+  async toggleFacilitiesOpen() {
+    this.account.sidebarFacilitiesOpen = !this.account.sidebarFacilitiesOpen;
+    await firstValueFrom(this.accountDbService.updateWithObservable(this.account));
+    await this.accountDbService.selectedAccount.next(this.account);
   }
 
   async toggleFacilityOpen(facility: IdbFacility) {

@@ -12,7 +12,8 @@ export interface IdbAccount extends IdbEntry, AccountAndFacility {
     archiveOption: 'always' | 'never' | 'justOnce' | 'skip',
     isSharedBackupFile?: boolean,
     sharedFileAuthor?: string
-    deleteAccount?: boolean
+    deleteAccount?: boolean,
+    sidebarFacilitiesOpen?: boolean
 }
 
 export function getNewIdbAccount(): IdbAccount {

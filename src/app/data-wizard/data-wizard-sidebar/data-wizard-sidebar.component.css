@@ -1,34 +1,34 @@
-.navbar{
+.navbar {
     background-color: white;
     width: 250px;
     overflow-y: auto;
 }
 
-.nav-link.active{
-    background-color: #ff6000;
+.nav-link.active {
+    background-color: #efefef;
+    font-weight: bolder;
 }
 
-.nav-link.secondary-nav{
-    padding-left: 10px;
-}
-
-.nav-link.third-nav{
-    padding-left: 20px;
-}
-
-.nav-link.fourth-nav{
-    padding-left: 30px;
-}
-.nav-link.fifth-nav{
-    padding-left: 40px;
-}
-
-
-
-
-.nav-link{
+.nav-link {
     padding-left: 3px;
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;
+}
+
+.sidebar-section {
+    border-left: groove 1px;
+    margin-left: .5rem;
+    padding-left: .5rem;
+}
+
+
+a {
+    color: black !important;
+}
+
+a:hover {
+    color: black !important;
+    text-decoration: underline !important;
+    cursor: pointer;
 }

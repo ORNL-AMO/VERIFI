@@ -29,28 +29,28 @@
                     </a>
                 </div>
                 <div class="ps-2 pe-2 nav-item">
-                    <a class="nav-link secondary-nav"
+                    <a class="nav-link"
                         [routerLink]="'/data-wizard/'+account.guid+'/import-data/process-template-file/' +fileReference.id +'/facilities'"
                         [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
                         Facilities
                     </a>
                 </div>
                 <div class="ps-2 pe-2 nav-item">
-                    <a class="nav-link secondary-nav"
+                    <a class="nav-link"
                         [routerLink]="'/data-wizard/'+account.guid+'/import-data/process-template-file/' +fileReference.id +'/meters'"
                         [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
                         Meters
                     </a>
                 </div>
                 <div class="ps-2 pe-2 nav-item">
-                    <a class="nav-link secondary-nav"
+                    <a class="nav-link"
                         [routerLink]="'/data-wizard/'+account.guid+'/import-data/process-template-file/' +fileReference.id +'/meter-readings'"
                         [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
                         Readings
                     </a>
                 </div>
                 <div class="ps-2 pe-2 nav-item">
-                    <a class="nav-link secondary-nav"
+                    <a class="nav-link"
                         [routerLink]="'/data-wizard/'+account.guid+'/import-data/process-template-file/' +fileReference.id +'/predictors'"
                         [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
                         Predictors
@@ -67,15 +67,13 @@
         <div class="ps-2 pe-2 nav-item">
             <a class="nav-link" (click)="toggleFacilitiesOpen()">
                 <span class="fa"
-                    [ngClass]="{'fa-chevron-down': facilitiesOpen, 'fa-chevron-right': !facilitiesOpen}"></span>
-                <!-- <span class="fa"
-                    [ngClass]="{'fa-folder-open': facilitiesRoute.isActive, 'fa-folder': !facilitiesRoute.isActive}"></span> -->
+                    [ngClass]="{'fa-folder-open': account.sidebarFacilitiesOpen, 'fa-folder': !account.sidebarFacilitiesOpen}"></span>
                 Facilities
             </a>
         </div>
-        <ng-container *ngIf="facilitiesOpen">
+        <div class="sidebar-section" *ngIf="account.sidebarFacilitiesOpen">
             <div class="ps-2 pe-2 nav-item">
-                <a class="nav-link secondary-nav" [routerLink]="'/data-wizard/'+account.guid+'/facilities'"
+                <a class="nav-link" [routerLink]="'/data-wizard/'+account.guid+'/facilities'"
                     [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
                     <span class="fa fa-list"></span>
                     Manage Facilities
@@ -83,31 +81,31 @@
             </div>
             <ng-container *ngFor="let facility of facilities">
                 <div class="ps-2 pe-2 nav-item">
-                    <a class="nav-link secondary-nav" (click)="toggleFacilityOpen(facility)">
-                        <span class="fa pe-1"
-                            [ngClass]="{'fa-chevron-down': facility.sidebarOpen, 'fa-chevron-right': !facility.sidebarOpen}"></span>
-                        <span class="fa fa-industry"></span>
+                    <a class="nav-link" (click)="toggleFacilityOpen(facility)">
+                        <span class="fa"
+                            [ngClass]="{'fa-folder-open': facility.sidebarOpen, 'fa-folder': !facility.sidebarOpen}"></span>
+                        <!-- <span class="fa fa-industry" [ngStyle]="{'color': facility.color}"></span> -->
                         {{facility.name}}
                     </a>
                 </div>
-                <ng-container *ngIf="facility.sidebarOpen">
+                <div class="sidebar-section" *ngIf="facility.sidebarOpen">
                     <div class="ps-2 pe-2 nav-item">
-                        <a class="nav-link third-nav"
+                        <a class="nav-link"
                             [routerLink]="'/data-wizard/'+account.guid+'/facilities/'+facility.guid"
                             [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
-                            <span class="fa fa-gear"></span> Settings
+                            <span class="fa fa-gear"></span> Facility Settings
                         </a>
                     </div>
                     <div class="ps-2 pe-2 nav-item">
-                        <a class="nav-link third-nav" (click)="toggleFacilityMetersOpen(facility)">
+                        <a class="nav-link" (click)="toggleFacilityMetersOpen(facility)">
                             <span class="fa"
-                                [ngClass]="{'fa-chevron-down': facility.sidebarMetersOpen, 'fa-chevron-right': !facility.sidebarMetersOpen}"></span>
+                                [ngClass]="{'fa-folder-open': facility.sidebarMetersOpen, 'fa-folder': !facility.sidebarMetersOpen}"></span>
                             Meters
                         </a>
                     </div>
-                    <ng-container *ngIf="facility.sidebarMetersOpen">
+                    <div class="sidebar-section" *ngIf="facility.sidebarMetersOpen">
                         <div class="ps-2 pe-2 nav-item">
-                            <a class="nav-link fourth-nav"
+                            <a class="nav-link"
                                 [routerLink]="'/data-wizard/'+account.guid+'/facilities/'+facility.guid+'/meters'"
                                 [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
                                 <span class="fa fa-list"></span> Manage Meters
@@ -115,40 +113,40 @@
                         </div>
                         <ng-container *ngFor="let meter of facility.guid | facilityMetersList:accountMeters">
                             <div class="ps-2 pe-2 nav-item">
-                                <a class="nav-link fourth-nav" (click)="toggleMeterOpen(meter)">
+                                <a class="nav-link" (click)="toggleMeterOpen(meter)">
                                     <span class="fa"
-                                        [ngClass]="{'fa-chevron-down': meter.sidebarOpen, 'fa-chevron-right': !meter.sidebarOpen}"></span>
+                                        [ngClass]="{'fa-folder-open': meter.sidebarOpen, 'fa-folder': !meter.sidebarOpen}"></span>
                                     {{meter.name}}
                                 </a>
                             </div>
-                            <ng-container *ngIf="meter.sidebarOpen">
+                            <div class="sidebar-section" *ngIf="meter.sidebarOpen">
                                 <div class="ps-2 pe-2 nav-item">
-                                    <a class="nav-link fifth-nav"
+                                    <a class="nav-link"
                                         [routerLink]="'/data-wizard/'+account.guid+'/facilities/'+facility.guid+'/meters/meter/'+meter.guid"
                                         [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
-                                        <span class="fa fa-gear"></span> Manage Meter
+                                        <span class="fa fa-gear"></span> Meter Settings
                                     </a>
                                 </div>
                                 <div class="ps-2 pe-2 nav-item">
-                                    <a class="nav-link fifth-nav"
+                                    <a class="nav-link"
                                         [routerLink]="'/data-wizard/'+account.guid+'/facilities/'+facility.guid+'/meters/meter-data/'+meter.guid"
                                         [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
                                         <span class="fa fa-table"></span> Meter Readings
                                     </a>
                                 </div>
-                            </ng-container>
+                            </div>
                         </ng-container>
-                    </ng-container>
+                    </div>
                     <div class="ps-2 pe-2 nav-item">
-                        <a class="nav-link third-nav" (click)="toggleFacilityPredictorsOpen(facility)">
+                        <a class="nav-link" (click)="toggleFacilityPredictorsOpen(facility)">
                             <span class="fa"
-                                [ngClass]="{'fa-chevron-down': facility.sidebarPredictorsOpen, 'fa-chevron-right': !facility.sidebarPredictorsOpen}"></span>
+                                [ngClass]="{'fa-folder-open': facility.sidebarPredictorsOpen, 'fa-folder': !facility.sidebarPredictorsOpen}"></span>
                             Predictors
                         </a>
                     </div>
-                    <ng-container *ngIf="facility.sidebarPredictorsOpen">
+                    <div class="sidebar-section" *ngIf="facility.sidebarPredictorsOpen">
                         <div class="ps-2 pe-2 nav-item">
-                            <a class="nav-link fourth-nav"
+                            <a class="nav-link"
                                 [routerLink]="'/data-wizard/'+account.guid+'/facilities/'+facility.guid+'/predictors'"
                                 [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
                                 <span class="fa fa-list"></span> Manage Predictors
@@ -156,33 +154,33 @@
                         </div>
                         <ng-container *ngFor="let predictor of facility.guid | facilityPredictorList:accountPredictors">
                             <div class="ps-2 pe-2 nav-item">
-                                <a class="nav-link fourth-nav" (click)="togglePredictorOpen(predictor)">
+                                <a class="nav-link" (click)="togglePredictorOpen(predictor)">
                                     <span class="fa"
-                                        [ngClass]="{'fa-chevron-down': predictor.sidebarOpen, 'fa-chevron-right': !predictor.sidebarOpen}"></span>
+                                        [ngClass]="{'fa-folder-open': predictor.sidebarOpen, 'fa-folder': !predictor.sidebarOpen}"></span>
                                     {{predictor.name}}
                                 </a>
                             </div>
-                            <ng-container *ngIf="predictor.sidebarOpen">
+                            <div class="sidebar-section" *ngIf="predictor.sidebarOpen">
                                 <div class="ps-2 pe-2 nav-item">
-                                    <a class="nav-link fifth-nav"
+                                    <a class="nav-link"
                                         [routerLink]="'/data-wizard/'+account.guid+'/facilities/'+facility.guid+'/predictors/predictor/'+predictor.guid"
                                         [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
-                                        <span class="fa fa-gear"></span> Manage Predictor
+                                        <span class="fa fa-gear"></span> Predictor Settings
                                     </a>
                                 </div>
                                 <div class="ps-2 pe-2 nav-item">
-                                    <a class="nav-link fifth-nav"
+                                    <a class="nav-link"
                                         [routerLink]="'/data-wizard/'+account.guid+'/facilities/'+facility.guid+'/predictors/predictor-data/'+predictor.guid"
                                         [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
                                         <span class="fa fa-table"></span> Predictor Data
                                     </a>
                                 </div>
-                            </ng-container>
+                            </div>
                         </ng-container>
-                    </ng-container>
-                </ng-container>
+                    </div>
+                </div>
             </ng-container>
-        </ng-container>
+        </div>
     </div>
     <div class="p-2 w-100">
         <hr class="my-1">
