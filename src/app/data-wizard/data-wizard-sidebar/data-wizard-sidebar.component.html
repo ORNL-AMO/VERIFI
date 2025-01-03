@@ -81,23 +81,23 @@
             </div>
             <ng-container *ngFor="let facility of facilities">
                 <div class="ps-2 pe-2 nav-item">
-                    <a class="nav-link" (click)="toggleFacilityOpen(facility)">
+                    <a class="nav-link" (click)="toggleFacilityOpen(facility)"
+                        [ngClass]="{'active': facility.guid == selectedFacility.guid}">
                         <span class="fa"
                             [ngClass]="{'fa-folder-open': facility.sidebarOpen, 'fa-folder': !facility.sidebarOpen}"></span>
-                        <!-- <span class="fa fa-industry" [ngStyle]="{'color': facility.color}"></span> -->
                         {{facility.name}}
                     </a>
                 </div>
                 <div class="sidebar-section" *ngIf="facility.sidebarOpen">
                     <div class="ps-2 pe-2 nav-item">
-                        <a class="nav-link"
-                            [routerLink]="'/data-wizard/'+account.guid+'/facilities/'+facility.guid"
+                        <a class="nav-link" [routerLink]="'/data-wizard/'+account.guid+'/facilities/'+facility.guid"
                             [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
                             <span class="fa fa-gear"></span> Facility Settings
                         </a>
                     </div>
                     <div class="ps-2 pe-2 nav-item">
-                        <a class="nav-link" (click)="toggleFacilityMetersOpen(facility)">
+                        <a class="nav-link" (click)="toggleFacilityMetersOpen(facility)"
+                            [ngClass]="{'active': (selectedMeter?.facilityId == facility.guid)}">
                             <span class="fa"
                                 [ngClass]="{'fa-folder-open': facility.sidebarMetersOpen, 'fa-folder': !facility.sidebarMetersOpen}"></span>
                             Meters
@@ -113,7 +113,8 @@
                         </div>
                         <ng-container *ngFor="let meter of facility.guid | facilityMetersList:accountMeters">
                             <div class="ps-2 pe-2 nav-item">
-                                <a class="nav-link" (click)="toggleMeterOpen(meter)">
+                                <a class="nav-link" (click)="toggleMeterOpen(meter)"
+                                    [ngClass]="{'active': meter.guid == selectedMeter?.guid}">
                                     <span class="fa"
                                         [ngClass]="{'fa-folder-open': meter.sidebarOpen, 'fa-folder': !meter.sidebarOpen}"></span>
                                     {{meter.name}}

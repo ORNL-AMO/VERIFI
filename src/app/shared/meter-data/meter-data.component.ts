@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { ActivatedRoute } from '@angular/router';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 
@@ -12,12 +11,9 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 export class MeterDataComponent {
 
   selectedMeter: IdbUtilityMeter;
-  // label: string;
-  // routerSub: Subscription;
   constructor(
     private utilityMeterDbService: UtilityMeterdbService,
-    private activatedRoute: ActivatedRoute,
-    private router: Router
+    private activatedRoute: ActivatedRoute
   ) { }
 
   ngOnInit() {
@@ -25,27 +21,11 @@ export class MeterDataComponent {
       let meterId: string = params['id'];
       let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
       this.selectedMeter = facilityMeters.find(meter => { return meter.guid == meterId });
+      this.utilityMeterDbService.selectedMeter.next(this.selectedMeter);
     });
-    // this.routerSub = this.router.events.subscribe(event => {
-    //   if (event instanceof NavigationEnd) {
-    //     this.setLabel(this.router.url);
-    //   }
-    // });
-    // this.setLabel(this.router.url);
   }
 
-  // ngOnDestroy(){
-  //   this.routerSub.unsubscribe();
-  // }
-
-
-  // setLabel(url: string) {
-  //   if (this.router.url.includes('new-bill')) {
-  //     this.label = 'New Bill'
-  //   } else if (this.router.url.includes('edit-bill')) {
-  //     this.label = 'Edit Bill';
-  //   } else {
-  //     this.label = 'Bills';
-  //   }
-  // }
+  ngOnDestroy() {
+    this.utilityMeterDbService.selectedMeter.next(undefined);
+  }
 }

@@ -1,5 +1,10 @@
-
-button .fa{
-    color: white;
-  }
+nav{
+  background-color: white;
+  /* padding-left: 2rem; */
+  border-bottom: solid black;
+  border-top: solid black;
+}
   
+ol{
+  margin-bottom: 0px;
+}

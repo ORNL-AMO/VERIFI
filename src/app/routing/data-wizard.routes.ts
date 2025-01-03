@@ -14,7 +14,6 @@ import { ProcessTemplatePredictorsComponent } from "../data-wizard/data-wizard-i
 import { FacilityMetersComponent } from "../data-wizard/account-facilities/facility-data/facility-meters/facility-meters.component";
 import { FacilityMetersTableComponent } from "../data-wizard/account-facilities/facility-data/facility-meters/facility-meters-table/facility-meters-table.component";
 import { FacilityMeterComponent } from "../data-wizard/account-facilities/facility-data/facility-meters/facility-meter/facility-meter.component";
-import { FacilityMeterDataComponent } from "../data-wizard/account-facilities/facility-data/facility-meters/facility-meter-data/facility-meter-data.component";
 import { FacilityPredictorsComponent } from "../data-wizard/account-facilities/facility-data/facility-predictors/facility-predictors.component";
 import { MeterDataComponent } from "../shared/meter-data/meter-data.component";
 import { MeterDataTableComponent } from "../shared/meter-data/meter-data-table/meter-data-table.component";

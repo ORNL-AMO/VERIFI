@@ -99,7 +99,7 @@ facilitiesSub: Subscription;
   }
 
   goToFacility(facility: IdbFacility) {
-    this.router.navigateByUrl('/data-wizard/' + facility.accountId + '/facility/' + facility.guid);
+    this.router.navigateByUrl('/data-wizard/' + facility.accountId + '/facilities/' + facility.guid);
   }
 
   setOrderOptions() {

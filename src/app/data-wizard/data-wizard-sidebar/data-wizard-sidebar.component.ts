@@ -25,8 +25,14 @@ export class DataWizardSidebarComponent {
   facilities: Array<IdbFacility>;
   facilitiesSub: Subscription;
 
+  selectedFacility: IdbFacility;
+  selectedFacilitySub: Subscription;
+
   accountMeters: Array<IdbUtilityMeter>;
   accountMetersSub: Subscription;
+
+  selectedMeter: IdbUtilityMeter;
+  selectedMeterSub: Subscription;
 
   fileReferencesSub: Subscription;
   fileReferences: Array<FileReference>;
@@ -57,6 +63,12 @@ export class DataWizardSidebarComponent {
     });
     this.accountPredictorsSub = this.predictorDbService.accountPredictors.subscribe(accountPredictors => {
       this.accountPredictors = accountPredictors;
+    });
+    this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(facility => {
+      this.selectedFacility = facility;
+    });
+    this.selectedMeterSub = this.utilityMeterDbService.selectedMeter.subscribe(meter => {
+      this.selectedMeter = meter;
     })
   }
 
@@ -65,6 +77,9 @@ export class DataWizardSidebarComponent {
     this.facilitiesSub.unsubscribe();
     this.fileReferencesSub.unsubscribe();
     this.accountPredictorsSub.unsubscribe();
+    this.accountMetersSub.unsubscribe();
+    this.selectedFacilitySub.unsubscribe();
+    this.selectedMeterSub.unsubscribe();
   }
 
   async toggleFacilitiesOpen() {

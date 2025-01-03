@@ -23,7 +23,6 @@ import { FacilityMetersComponent } from './account-facilities/facility-data/faci
 import { FacilityMetersTableComponent } from './account-facilities/facility-data/facility-meters/facility-meters-table/facility-meters-table.component';
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { FacilityMeterComponent } from './account-facilities/facility-data/facility-meters/facility-meter/facility-meter.component';
-import { FacilityMeterDataComponent } from './account-facilities/facility-data/facility-meters/facility-meter-data/facility-meter-data.component';
 import { FacilityPredictorsComponent } from './account-facilities/facility-data/facility-predictors/facility-predictors.component';
 import { FacilitiesListComponent } from './account-facilities/facilities-list/facilities-list.component';
 
@@ -47,7 +46,6 @@ import { FacilitiesListComponent } from './account-facilities/facilities-list/fa
     FacilityMetersComponent,
     FacilityMetersTableComponent,
     FacilityMeterComponent,
-    FacilityMeterDataComponent,
     FacilityPredictorsComponent,
     FacilitiesListComponent
   ],

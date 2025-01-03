@@ -43,6 +43,7 @@ export class FacilityMeterComponent {
     this.activatedRoute.params.subscribe(params => {
       let meterId: string = params['id'];
       this.utilityMeter = this.utilityMeterDbService.getFacilityMeterById(meterId);
+      this.utilityMeterDbService.selectedMeter.next(this.utilityMeter);
       if (this.utilityMeter) {
         this.meterForm = this.editMeterFormService.getFormFromMeter(this.utilityMeter);
         this.subscribeChanges();
@@ -54,6 +55,7 @@ export class FacilityMeterComponent {
 
   ngOnDestroy() {
     this.facilitySub.unsubscribe();
+    this.utilityMeterDbService.selectedMeter.next(undefined);
   }
 
   async subscribeChanges() {
