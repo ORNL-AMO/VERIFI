@@ -1,0 +1,16 @@
+<div class="sticky-top banner-border" [ngClass]="{'modal-open': modalOpen}">
+    <div class="utility banner d-flex justify-content-between">
+        <ul class="nav nav-tabs">
+            <li class="nav-item">
+                <a class="nav-link" routerLink="analysis" [routerLinkActive]="['active']">
+                    <i class="fa fa-folder"></i>
+                    Analysis Reports</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" routerLink="overview" [routerLinkActive]="['active']">
+                    <i class="fa fa-folder"></i>
+                    Data Overview Reports</a>
+            </li>
+        </ul>
+    </div>
+</div>

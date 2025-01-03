@@ -18,6 +18,7 @@ import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.se
 import { WeatherDataService } from 'src/app/weather-data/weather-data.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAccount } from 'src/app/models/idbModels/account';
+import { PredictorDataHelperService } from 'src/app/shared/helper-services/predictor-data-helper.service';
 
 @Component({
   selector: 'app-predictors-data-table',
@@ -45,6 +46,9 @@ export class PredictorsDataTableComponent {
   predictor: IdbPredictor;
 
   inDataWizard: boolean;
+  paramSub: Subscription;
+  latestMeterDataReading: Date;
+  filterErrors: boolean = false;
   constructor(private activatedRoute: ActivatedRoute, private predictorDbService: PredictorDbService,
     private predictorDataDbService: PredictorDataDbService,
     private sharedDataService: SharedDataService,
@@ -56,7 +60,8 @@ export class PredictorsDataTableComponent {
     private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
     private degreeDaysService: DegreeDaysService,
-    private weatherDataService: WeatherDataService
+    private weatherDataService: WeatherDataService,
+    private predictorDataHelperService: PredictorDataHelperService
   ) {
 
   }
@@ -67,19 +72,18 @@ export class PredictorsDataTableComponent {
     });
     this.setInDataWizard();
     if (this.inDataWizard) {
-      this.activatedRoute.params.subscribe(params => {
+      this.paramSub = this.activatedRoute.params.subscribe(params => {
         let predictorId: string = params['id'];
         this.predictor = this.predictorDbService.getByGuid(predictorId);
         this.setPredictorData();
       });
     } else {
-      this.activatedRoute.parent.params.subscribe(params => {
+      this.paramSub = this.activatedRoute.parent.params.subscribe(params => {
         let predictorId: string = params['id'];
         this.predictor = this.predictorDbService.getByGuid(predictorId);
         this.setPredictorData();
       });
     }
-
 
     this.itemsPerPageSub = this.sharedDataService.itemsPerPage.subscribe(val => {
       this.itemsPerPage = val;
@@ -89,6 +93,7 @@ export class PredictorsDataTableComponent {
   ngOnDestroy() {
     this.itemsPerPageSub.unsubscribe();
     this.predictorDataSub.unsubscribe();
+    this.paramSub.unsubscribe();
   }
 
   setInDataWizard() {
@@ -97,8 +102,22 @@ export class PredictorsDataTableComponent {
 
   setPredictorData() {
     if (this.predictor) {
+      this.setLatestMeterDataReading();
       this.predictorData = this.predictorDataDbService.getByPredictorId(this.predictor.guid);
       this.setHasWeatherDataWarning();
+      if (this.filterErrors) {
+        this.filterErrors = false;
+      }
+    }
+  }
+
+  setLatestMeterDataReading() {
+    let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let results = this.predictorDataHelperService.checkWeatherPredictorsNeedUpdate(facility, [this.predictor]);
+    if (results.length > 0) {
+      this.latestMeterDataReading = this.predictorDataHelperService.getLastMeterDate(facility);
+    } else {
+      this.latestMeterDataReading = undefined;
     }
   }
 
@@ -220,14 +239,15 @@ export class PredictorsDataTableComponent {
   }
 
   async viewWeatherData(predictorEntry: IdbPredictorData) {
-    let weatherStation: WeatherStation = await this.degreeDaysService.getStationById(this.predictor.weatherStationId);
-    this.weatherDataService.selectedStation = weatherStation;
-    if (this.predictor.weatherDataType == 'CDD') {
-      this.weatherDataService.coolingTemp = this.predictor.coolingBaseTemperature;
-      this.weatherDataService.weatherDataSelection = 'CDD';
-    } else {
-      this.weatherDataService.heatingTemp = this.predictor.heatingBaseTemperature;
-      this.weatherDataService.weatherDataSelection = 'HDD';
+    let weatherStation: WeatherStation | 'error' = await this.degreeDaysService.getStationById(this.predictor.weatherStationId);
+    if (weatherStation != 'error') {
+      this.weatherDataService.selectedStation = weatherStation;
+      this.weatherDataService.weatherDataSelection = this.predictor.weatherDataType;
+      if (this.predictor.weatherDataType == 'CDD') {
+        this.weatherDataService.coolingTemp = this.predictor.coolingBaseTemperature;
+      } else if (this.predictor.weatherDataType == 'HDD') {
+        this.weatherDataService.heatingTemp = this.predictor.heatingBaseTemperature;
+      }
     }
     let entryDate: Date = new Date(predictorEntry.date);
     this.weatherDataService.selectedYear = entryDate.getFullYear();
@@ -256,5 +276,14 @@ export class PredictorsDataTableComponent {
     this.weatherDataService.selectedFacility = selectedFacility;
     this.weatherDataService.zipCode = selectedFacility.zip;
     this.router.navigateByUrl('/weather-data');
+  }
+
+  showUpdateEntries() {
+    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    this.router.navigateByUrl('facility/' + selectedFacility.id + '/utility/predictors/predictor/' + this.predictor.guid + '/update-calculated-entries');
+  }
+
+  toggleFilterErrors() {
+    this.filterErrors = !this.filterErrors;
   }
 }

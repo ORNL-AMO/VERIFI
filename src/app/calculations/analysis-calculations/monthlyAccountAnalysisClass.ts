@@ -20,7 +20,7 @@ export class MonthlyAccountAnalysisClass {
 
     allAccountAnalysisData: Array<MonthlyAnalysisSummaryDataClass>;
     accountMonthSummaries: Array<MonthlyAccountAnalysisDataClass>;
-    monthlyFacilityAnalysisClasses: Array<MonthlyFacilityAnalysisClass>; 
+    monthlyFacilityAnalysisClasses: Array<MonthlyFacilityAnalysisClass>;
     facilitySummaries: Array<{ facility: IdbFacility, analysisItem: IdbAnalysisItem, monthlySummaryData: Array<MonthlyAnalysisSummaryData> }>
     startDate: Date;
     endDate: Date;
@@ -46,7 +46,7 @@ export class MonthlyAccountAnalysisClass {
     }
 
     setStartAndEndDate(account: IdbAccount, analysisItem: IdbAccountAnalysisItem, calculateAllMonthlyData: boolean) {
-        let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = getMonthlyStartAndEndDate(account, analysisItem);
+        let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = getMonthlyStartAndEndDate(account, analysisItem, undefined);
         this.startDate = monthlyStartAndEndDate.baselineDate;
         if (calculateAllMonthlyData) {
             let endDates: Array<Date> = this.monthlyFacilityAnalysisClasses.map(monthFacilityAnalysisClass => { return monthFacilityAnalysisClass.endDate });
@@ -84,7 +84,8 @@ export class MonthlyAccountAnalysisClass {
                     calanderizedMeterData,
                     accountPredictorEntries,
                     calculateAllMonthlyData,
-                    accountPredictors
+                    accountPredictors,
+                    allAccountAnalysisItems
                 );
                 if (analysisItem.analysisCategory == 'energy' && (analysisItem.energyUnit != accountAnalysisItem.energyUnit)) {
                     monthlyFacilityAnalysisClass.convertResults(analysisItem.energyUnit, accountAnalysisItem.energyUnit);
@@ -152,7 +153,11 @@ export class MonthlyAccountAnalysisClass {
                 modelYearDataAdjustment: summaryDataItem.modelYearDataAdjustment,
                 // adjustedStar: summaryDataItem.monthlyAnalysisCalculatedValues.adjustedStar,
                 // adjustedStarStar: summaryDataItem.monthlyAnalysisCalculatedValues.adjustedStarStar,
-                baselineAdjustmentInput: summaryDataItem.baselineAdjustmentInput
+                baselineAdjustmentInput: summaryDataItem.baselineAdjustmentInput,
+                isBanked: false,
+                isIntermediateBanked: false,
+                savingsBanked: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.savingsBanked),
+                savingsUnbanked: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.savingsUnbanked)
 
             }
         })

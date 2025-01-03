@@ -11,7 +11,7 @@
     .show-print {
         display: inline !important;
     } */
-    .hide-print {
+    .hide-print, hr {
         display: none !important;
     }
     /* .chart-row {

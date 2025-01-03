@@ -40,6 +40,7 @@ export class RegressionModelInspectionComponent implements OnInit {
   isSelectedModel: boolean;
   compareSelectedModel: boolean = false;
   analysisItem: IdbAnalysisItem;
+  accountAnalysisItems: Array<IdbAnalysisItem>;
   accountPredictorEntries: Array<IdbPredictorData>;
   selectedGroup: AnalysisGroup;
   selectedModel: JStatRegressionModel;
@@ -57,27 +58,22 @@ export class RegressionModelInspectionComponent implements OnInit {
     this.selectedGroup = this.analysisService.selectedGroup.getValue();
     this.isSelectedModel = this.selectedGroup.selectedModelId == this.model.modelId;
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
+    this.accountAnalysisItems = this.analysisDbService.accountAnalysisItems.getValue();
     this.selectedFacility = this.facilityDbService.selectedFacility.getValue();
     this.accountPredictorEntries = this.predictorDataDbService.accountPredictorData.getValue();
     this.facilityMeters = this.utilityMeterDbService.facilityMeters.getValue();
     this.facilityMeterData = this.utilityMeterDataDbService.facilityMeterData.getValue();
-
     this.calculateInspectedModel();
+  }
 
+  ngAfterViewInit(){
+    this.drawChart();
   }
 
   calculateInspectedModel() {
     let groupCopy: AnalysisGroup = JSON.parse(JSON.stringify(this.selectedGroup));
     groupCopy.regressionConstant = this.model.coef[0];
     groupCopy.regressionModelYear = this.model.modelYear;
-    groupCopy.predictorVariables.forEach(variable => {
-      let coefIndex: number = this.model.predictorVariables.findIndex(pVariable => { return pVariable.id == variable.id });
-      if (coefIndex != -1) {
-        variable.regressionCoefficient = this.model.coef[coefIndex + 1];
-      } else {
-        variable.regressionCoefficient = 0;
-      }
-    });
     if (typeof Worker !== 'undefined') {
       this.worker = new Worker(new URL('src/app/web-workers/monthly-group-analysis.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {
@@ -98,13 +94,15 @@ export class RegressionModelInspectionComponent implements OnInit {
         facility: this.selectedFacility,
         meters: this.facilityMeters,
         meterData: this.facilityMeterData,
-        accountPredictorEntries: this.accountPredictorEntries
+        accountPredictorEntries: this.accountPredictorEntries,
+        accountAnalysisItems: this.accountAnalysisItems
       });
     } else {
       // Web Workers are not supported in this environment.  
       let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(this.facilityMeters, this.facilityMeterData, this.selectedFacility, false, { energyIsSource: this.analysisItem.energyIsSource, neededUnits: getNeededUnits(this.analysisItem) }, [], [], [this.selectedFacility]);
-      let monthlyAnalysisSummaryClass: MonthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(groupCopy, this.analysisItem, this.selectedFacility, calanderizedMeters, this.accountPredictorEntries, false);
-      this.inspectedMonthlyAnalysisSummaryData = monthlyAnalysisSummaryClass.getMonthlyAnalysisSummaryData();
+      let monthlyAnalysisSummaryClass: MonthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(groupCopy, this.analysisItem, this.selectedFacility, calanderizedMeters, this.accountPredictorEntries, false, this.accountAnalysisItems);
+      this.inspectedMonthlyAnalysisSummaryData = monthlyAnalysisSummaryClass.getResults().monthlyAnalysisSummaryData;
+      this.calculating = false;
       this.drawChart();
     }
   }
@@ -130,13 +128,15 @@ export class RegressionModelInspectionComponent implements OnInit {
         facility: this.selectedFacility,
         meters: this.facilityMeters,
         meterData: this.facilityMeterData,
-        accountPredictorEntries: this.accountPredictorEntries
+        accountPredictorEntries: this.accountPredictorEntries,
+        accountAnalysisItems: this.accountAnalysisItems
       });
     } else {
       // Web Workers are not supported in this environment.
       let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(this.facilityMeters, this.facilityMeterData, this.selectedFacility, false, { energyIsSource: this.analysisItem.energyIsSource, neededUnits: getNeededUnits(this.analysisItem) }, [], [], [this.selectedFacility]);
-      let monthlyAnalysisSummaryClass: MonthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(this.selectedGroup, this.analysisItem, this.selectedFacility, calanderizedMeters, this.accountPredictorEntries, false);
-      this.selectedMonthlyAnalysisSummaryData = monthlyAnalysisSummaryClass.getMonthlyAnalysisSummaryData();
+      let monthlyAnalysisSummaryClass: MonthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(this.selectedGroup, this.analysisItem, this.selectedFacility, calanderizedMeters, this.accountPredictorEntries, false, this.accountAnalysisItems);
+      this.selectedMonthlyAnalysisSummaryData = monthlyAnalysisSummaryClass.getResults().monthlyAnalysisSummaryData;
+      this.calculating = false;
       this.drawChart();
     }
   }
@@ -144,7 +144,9 @@ export class RegressionModelInspectionComponent implements OnInit {
 
 
   drawChart() {
+    console.log('draw')
     if (this.monthlyAnalysisGraph) {
+      console.log('....')
       let name: string = this.getGraphName();
 
       let yAxisTitle: string = this.analysisItem.energyUnit;

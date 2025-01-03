@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { firstValueFrom, Observable, of } from 'rxjs';
+import { firstValueFrom, Observable, of, Subscription } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
@@ -16,6 +16,7 @@ import { WeatherDataService } from 'src/app/weather-data/weather-data.service';
 import * as _ from 'lodash';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { getDegreeDayAmount } from 'src/app/shared/sharedHelperFuntions';
 
 @Component({
   selector: 'app-predictors-data-form',
@@ -29,6 +30,8 @@ export class PredictorsDataFormComponent {
   predictorData: IdbPredictorData;
   calculatingDegreeDays: boolean;
   isSaved: boolean = true;
+  paramsSub: Subscription;
+  hasServerError: boolean;
   constructor(private activatedRoute: ActivatedRoute, private predictorDbService: PredictorDbService,
     private router: Router, private facilityDbService: FacilitydbService,
     private accountDbService: AccountdbService, private dbChangesService: DbChangesService,
@@ -40,7 +43,8 @@ export class PredictorsDataFormComponent {
   }
 
   ngOnInit() {
-    this.activatedRoute.parent.params.subscribe(params => {
+    this.hasServerError = this.degreeDaysService.hasServerError;
+    this.paramsSub = this.activatedRoute.parent.params.subscribe(params => {
       let predictorId: string = params['id'];
       this.predictor = this.predictorDbService.getByGuid(predictorId);
     });
@@ -56,6 +60,10 @@ export class PredictorsDataFormComponent {
       }
       this.setDegreeDayValues();
     });
+  }
+
+  ngOnDestroy(){
+    this.paramsSub.unsubscribe();
   }
 
   cancel() {
@@ -105,23 +113,18 @@ export class PredictorsDataFormComponent {
       if (!this.predictorData.weatherOverride) {
         let stationId: string = this.predictor.weatherStationId;
         let entryDate: Date = new Date(this.predictorData.date);
-        let degreeDays: Array<DetailDegreeDay> = await this.degreeDaysService.getDailyDataFromMonth(entryDate.getMonth(), entryDate.getFullYear(), this.predictor.heatingBaseTemperature, this.predictor.coolingBaseTemperature, stationId)
-
-        let hasErrors: DetailDegreeDay = degreeDays.find(degreeDay => {
-          return degreeDay.gapInData == true
-        });
-        if (!hasWeatherDataWarning && hasErrors != undefined) {
-          hasWeatherDataWarning = true;
-        }
-        if (this.predictor.weatherDataType == 'CDD') {
-          let totalCDD: number = _.sumBy(degreeDays, 'coolingDegreeDay');
-          this.predictorData.amount = totalCDD;
-          this.predictorData.weatherDataWarning = hasErrors != undefined;
-
-        } else {
-          let totalHDD: number = _.sumBy(degreeDays, 'heatingDegreeDay');
-          this.predictorData.amount = totalHDD;
-          this.predictorData.weatherDataWarning = hasErrors != undefined;
+        let degreeDays: 'error' | Array<DetailDegreeDay> = await this.degreeDaysService.getDailyDataFromMonth(entryDate.getMonth(), entryDate.getFullYear(), this.predictor.heatingBaseTemperature, this.predictor.coolingBaseTemperature, stationId)
+        if(degreeDays != 'error'){
+          let hasErrors: DetailDegreeDay = degreeDays.find(degreeDay => {
+            return degreeDay.gapInData == true
+          });
+          if (!hasWeatherDataWarning && hasErrors != undefined || degreeDays.length == 0) {
+            hasWeatherDataWarning = true;
+          }
+          this.predictorData.amount = getDegreeDayAmount(degreeDays, this.predictor.weatherDataType);
+          this.predictorData.weatherDataWarning = hasErrors != undefined || degreeDays.length == 0;
+        }else{
+          this.predictorData.weatherDataWarning = true;
         }
       }
     }

@@ -3,7 +3,8 @@
         <div class="col-12 justify-content-end">
             <div class="d-flex small text-center alert alert-warning"
                 *ngIf="predictorForm.controls.predictorType.value == 'Weather' && addOrEdit == 'edit'">
-                Changing weather data properties will cause degree days to re-calculate. Existing predictor entries may
+                Changing weather data properties will cause predictor data to re-calculate. Existing predictor entries
+                may
                 be
                 altered.
             </div>
@@ -20,9 +21,6 @@
         <p class="bold">Predictor Information</p>
         <div class="row">
             <div class="col-lg-6 col-md-12 col-sm-12">
-                <!-- <app-label-with-tooltip [label]="'Name'" [field]="'predictorName'" [labelId]="'predictorName'"
-                [isRequired]="true">
-            </app-label-with-tooltip> -->
                 <label class="semibold" for="name">Name</label>
                 <div class="mb-3">
                     <input id="name" class="form-control" type="text" formControlName="name" onfocus="this.select();"
@@ -32,9 +30,6 @@
                     required</div>
             </div>
             <div class="col-lg-6 col-md-12 col-sm-12">
-                <!-- <app-label-with-tooltip [label]="'Is Production?'" [field]="'isProductionPredictor'"
-                [labelId]="'isProductionPredictor'" [isRequired]="false"> 
-            </app-label-with-tooltip>-->
                 <label class="semibold" for="isProductionPredictor">Is Production?</label>
                 <div class="mb-3">
                     <select id="isProductionPredictor" class="form-select" formControlName="production">
@@ -44,9 +39,6 @@
                 </div>
             </div>
             <div class="col-lg-6 col-md-12 col-sm-12">
-                <!-- <app-label-with-tooltip [label]="'Unit'" [field]="'predictorUnit'" [labelId]="'predictorUnit'"
-                [isRequired]="false">
-            </app-label-with-tooltip> -->
                 <label class="semibold" for="predictorUnit">Unit</label>
                 <div class="mb-3">
                     <input id="predictorUnit" class="form-control" type="text" formControlName="unit"
@@ -54,9 +46,6 @@
                 </div>
             </div>
             <div class="col-lg-6 col-md-12 col-sm-12">
-                <!-- <app-label-with-tooltip [label]="'Unit'" [field]="'predictorUnit'" [labelId]="'predictorUnit'"
-                [isRequired]="false">
-            </app-label-with-tooltip> -->
                 <label class="semibold" for="description">Description</label>
                 <div class="mb-3">
                     <textarea id="description" class="form-control" type="text" formControlName="description"
@@ -69,9 +58,6 @@
                 <hr>
             </div>
             <div class="col-lg-6 col-md-12 col-sm-12">
-                <!-- <app-label-with-tooltip [label]="'Is Production?'" [field]="'isProductionPredictor'"
-                [labelId]="'isProductionPredictor'" [isRequired]="false"> 
-            </app-label-with-tooltip>-->
                 <label class="semibold" for="predictorType">Predictor Type</label>
                 <div class="mb-3">
                     <select id="predictorType" class="form-select" formControlName="predictorType"
@@ -92,6 +78,8 @@
                             (change)="setValidators()">
                             <option [value]="'HDD'">Heating Degree Days</option>
                             <option [value]="'CDD'">Cooling Degree Days</option>
+                            <option [value]="'relativeHumidity'">Relative Humidity</option>
+                            <option [value]="'dryBulbTemp'">Dry Bulb Temp</option>
                         </select>
                     </div>
                 </div>
@@ -151,7 +139,20 @@
                         temperature is
                         required</div>
                 </div>
-                <div class="col-12">
+                <div class="col-lg-6 col-md-12 col-sm-12"
+                    *ngIf="addOrEdit == 'add' && firstMeterReading && latestMeterReading">
+                    <!-- <label class="semibold" for="createPredictorData">Create Predictor Entries</label> -->
+                    <app-label-with-tooltip [field]="'createPredictorData'" [labelId]="'createPredictorData'"
+                        [isBold]="true" [label]="'Create Predictor Entries'"></app-label-with-tooltip>
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" name="createPredictorData"
+                            id="createPredictorData" formControlName="createPredictorData">
+                        <label class="form-check-label" for="createPredictorData">
+                            {{firstMeterReading| date:'MMM, yyyy'}}&mdash;{{latestMeterReading|
+                            date:'MMM, yyyy'}}</label>
+                    </div>
+                </div>
+                <div class="col-12 mt-2">
                     <div class="alert alert-info">
                         Heating and cooling degree days will be calculated using the dry bulb
                         temperature readings from the selected weather station. Weather station data quality varies, you

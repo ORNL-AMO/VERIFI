@@ -18,7 +18,7 @@ export class RegressionModelsService {
   constructor(private predictorDataDbService: PredictorDataDbService) { }
 
   getModels(analysisGroup: AnalysisGroup, calanderizedMeters: Array<CalanderizedMeter>, facility: IdbFacility, analysisItem: IdbAnalysisItem): Array<JStatRegressionModel> {
-    let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = getMonthlyStartAndEndDate(facility, analysisItem);
+    let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = getMonthlyStartAndEndDate(facility, analysisItem, analysisGroup);
     let baselineDate: Date = monthlyStartAndEndDate.baselineDate;
     let reportYear: number = analysisItem.reportYear;
     let baselineYear: number = getFiscalYear(baselineDate, facility);
@@ -291,7 +291,7 @@ export class RegressionModelsService {
     let reportYearPredictorData: Array<IdbPredictorData> = new Array();
     let baselineYearPredictorData: Array<IdbPredictorData> = new Array();
     for (let i = 0; i < facilityPredictorData.length; i++) {
-      let fiscalYear: number = getFiscalYear(facilityPredictorData[i].date, facility);
+      let fiscalYear: number = getFiscalYear(new Date(facilityPredictorData[i].date), facility);
       if (fiscalYear == reportYear) {
         reportYearPredictorData.push(facilityPredictorData[i]);
       }
@@ -314,21 +314,27 @@ export class RegressionModelsService {
 
       let variableNotes: Array<string> = new Array();
       let variableValid: boolean = true;
-      let modelYearUsage: Array<number> = modelPredictorData.map(data => {
-        // let predictorData: IdbPredictorData = data.predictors.find(predictor => { return predictor.id == variable.id });
+      let variablePredictorData: Array<IdbPredictorData> = modelPredictorData.filter(pData => {
+        return pData.predictorId == variable.id;
+      });
+      let variableReportYearPredictorData: Array<IdbPredictorData> = reportYearPredictorData.filter(pData => {
+        return pData.predictorId == variable.id;
+      })
+      let variableBaselineYearPredictorData: Array<IdbPredictorData> = baselineYearPredictorData.filter(pData => {
+        return pData.predictorId == variable.id;
+      })
+      let modelYearUsage: Array<number> = variablePredictorData.map(data => {
         return data.amount;
       });
       let modelMin: number = _.min(modelYearUsage);
       let modelMax: number = _.max(modelYearUsage);
 
       let modelAvg: number = _.mean(modelYearUsage);
-      let reportYearUsage: Array<number> = reportYearPredictorData.map(data => {
-        // let predictorData: PredictorData = data.predictors.find(predictor => { return predictor.id == variable.id });
+      let reportYearUsage: Array<number> = variableReportYearPredictorData.map(data => {
         return data.amount;
       });
       let reportAvg: number = _.mean(reportYearUsage);
-      let baselineYearUsage: Array<number> = baselineYearPredictorData.map(data => {
-        // let predictorData: PredictorData = data.predictors.find(predictor => { return predictor.id == variable.id });
+      let baselineYearUsage: Array<number> = variableBaselineYearPredictorData.map(data => {
         return data.amount;
       });
       let baselineAvg: number = _.mean(baselineYearUsage);

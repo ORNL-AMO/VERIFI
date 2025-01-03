@@ -57,13 +57,15 @@
                         </p>
                         <p>
                             <span
-                                *ngIf="selectedReport.betterPlantsReportSetup.modificationNotes">{{selectedReport.betterPlantsReportSetup.modificationNotes}}</span>
-                            <span *ngIf="!selectedReport.betterPlantsReportSetup.modificationNotes">N/A</span>
+                                *ngIf="selectedReport.betterPlantsReportSetup.modificationNotes">{{selectedReport.betterPlantsReportSetup.modificationNotes}}<br></span>
+                            <span
+                                *ngIf="!selectedReport.betterPlantsReportSetup.modificationNotes">N/A</span>
                         </p>
                     </div>
                 </div>
             </ng-container>
-            <div class="row justify-content-center print-break-before" *ngIf="selectedReport.betterPlantsReportSetup.includePerformanceTable">
+            <div class="row justify-content-center print-break-before"
+                *ngIf="selectedReport.betterPlantsReportSetup.includePerformanceTable">
                 <div class="col-10">
                     <hr class="hide-print">
                     <p class="bold pt-4">
@@ -123,13 +125,14 @@
                         </p>
                         <p>
                             <span
-                                *ngIf="selectedReport.betterPlantsReportSetup.modificationNotes">{{selectedReport.betterPlantsReportSetup.modificationNotes}}</span>
+                                *ngIf="selectedReport.betterPlantsReportSetup.modificationNotes">{{selectedReport.betterPlantsReportSetup.modificationNotes}}<br></span>
                             <span *ngIf="!selectedReport.betterPlantsReportSetup.modificationNotes">N/A</span>
                         </p>
                     </div>
                 </div>
             </ng-container>
-            <div class="row justify-content-center print-break-avoid" *ngIf="selectedReport.betterPlantsReportSetup.includePerformanceTable">
+            <div class="row justify-content-center print-break-avoid"
+                *ngIf="selectedReport.betterPlantsReportSetup.includePerformanceTable">
                 <div class="col-10">
                     <hr class="hide-print">
                     <p class="bold pt-4">
@@ -139,7 +142,8 @@
             </div>
         </ng-container>
         <!--end water-->
-        <div class="row justify-content-center print-break-avoid" *ngIf="selectedReport.betterPlantsReportSetup.includePerformanceTable">
+        <div class="row justify-content-center print-break-avoid"
+            *ngIf="selectedReport.betterPlantsReportSetup.includePerformanceTable">
             <div class="col-6">
                 <app-facility-performance-table [betterPlantsSummary]="betterPlantsSummary"
                     [betterPlantsReportSetup]="selectedReport.betterPlantsReportSetup">

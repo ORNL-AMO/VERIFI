@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { AnalysisGroup, AnalysisTableColumns } from 'src/app/models/analysis';
+import { AnalysisGroup, AnalysisGroupPredictorVariable, AnalysisTableColumns } from 'src/app/models/analysis';
 import * as _ from 'lodash';
 import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
 import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
@@ -72,27 +72,31 @@ export class AnalysisSummaryTableFilterComponent implements OnInit {
     if (this.analysisTableColumns.incrementalImprovement == false) {
       this.analysisTableColumns.SEnPI = false;
       this.analysisTableColumns.savings = false;
-      this.analysisTableColumns.percentSavingsComparedToBaseline = false;
-      this.analysisTableColumns.yearToDateSavings = false;
-      this.analysisTableColumns.yearToDatePercentSavings = false;
+      // this.analysisTableColumns.percentSavingsComparedToBaseline = false;
+      // this.analysisTableColumns.yearToDateSavings = false;
+      // this.analysisTableColumns.yearToDatePercentSavings = false;
       this.analysisTableColumns.rollingSavings = false;
       this.analysisTableColumns.rolling12MonthImprovement = false;
       this.analysisTableColumns.totalSavingsPercentImprovement = false;
       this.analysisTableColumns.annualSavingsPercentImprovement = false;
       this.analysisTableColumns.cummulativeSavings = false;
       this.analysisTableColumns.newSavings = false;
+      this.analysisTableColumns.bankedSavings = false;
+      this.analysisTableColumns.savingsUnbanked = false;
     } else {
       this.analysisTableColumns.SEnPI = true;
       this.analysisTableColumns.savings = true;
-      this.analysisTableColumns.percentSavingsComparedToBaseline = true;
-      this.analysisTableColumns.yearToDateSavings = true;
-      this.analysisTableColumns.yearToDatePercentSavings = true;
+      // this.analysisTableColumns.percentSavingsComparedToBaseline = true;
+      // this.analysisTableColumns.yearToDateSavings = true;
+      // this.analysisTableColumns.yearToDatePercentSavings = true;
       this.analysisTableColumns.rollingSavings = true;
       this.analysisTableColumns.rolling12MonthImprovement = true;
       this.analysisTableColumns.totalSavingsPercentImprovement = true;
       this.analysisTableColumns.annualSavingsPercentImprovement = true;
       this.analysisTableColumns.cummulativeSavings = true;
       this.analysisTableColumns.newSavings = true;
+      this.analysisTableColumns.bankedSavings = true;
+      this.analysisTableColumns.savingsUnbanked = true;
     }
     this.save();
   }
@@ -111,11 +115,13 @@ export class AnalysisSummaryTableFilterComponent implements OnInit {
     this.analysisTableColumns.incrementalImprovement = (
       this.analysisTableColumns.SEnPI ||
       this.analysisTableColumns.savings ||
-      this.analysisTableColumns.percentSavingsComparedToBaseline ||
-      this.analysisTableColumns.yearToDateSavings ||
-      this.analysisTableColumns.yearToDatePercentSavings ||
+      // this.analysisTableColumns.percentSavingsComparedToBaseline ||
+      // this.analysisTableColumns.yearToDateSavings ||
+      // this.analysisTableColumns.yearToDatePercentSavings ||
       this.analysisTableColumns.rollingSavings ||
-      this.analysisTableColumns.rolling12MonthImprovement
+      this.analysisTableColumns.rolling12MonthImprovement ||
+      this.analysisTableColumns.savingsUnbanked ||
+      this.analysisTableColumns.bankedSavings
     )
   }
 
@@ -126,7 +132,9 @@ export class AnalysisSummaryTableFilterComponent implements OnInit {
       this.analysisTableColumns.totalSavingsPercentImprovement ||
       this.analysisTableColumns.annualSavingsPercentImprovement ||
       this.analysisTableColumns.cummulativeSavings ||
-      this.analysisTableColumns.newSavings
+      this.analysisTableColumns.newSavings||
+      this.analysisTableColumns.savingsUnbanked ||
+      this.analysisTableColumns.bankedSavings
     );
   }
 
@@ -143,12 +151,12 @@ export class AnalysisSummaryTableFilterComponent implements OnInit {
   setPredictorVariables() {
     if (this.tableContext != 'annualAccount' && this.tableContext != 'monthAccount') {
       let predictorSelections: Array<{
-        predictor: IdbPredictor,
+        predictor: AnalysisGroupPredictorVariable,
         display: boolean,
         usedInAnalysis: boolean
       }> = new Array();
 
-      let variableCopy: Array<IdbPredictor>;
+      let variableCopy: Array<AnalysisGroupPredictorVariable>;
       if (this.tableContext == 'monthGroup' || this.tableContext == 'annualGroup') {
         let analysisGroup: AnalysisGroup = this.analysisService.selectedGroup.getValue();
         variableCopy = JSON.parse(JSON.stringify(analysisGroup.predictorVariables));
@@ -193,9 +201,9 @@ export class AnalysisSummaryTableFilterComponent implements OnInit {
     this.analysisTableColumns.incrementalImprovement = false;
     this.analysisTableColumns.SEnPI = false;
     this.analysisTableColumns.savings = false;
-    this.analysisTableColumns.percentSavingsComparedToBaseline = false;
-    this.analysisTableColumns.yearToDateSavings = false;
-    this.analysisTableColumns.yearToDatePercentSavings = false;
+    // this.analysisTableColumns.percentSavingsComparedToBaseline = false;
+    // this.analysisTableColumns.yearToDateSavings = false;
+    // this.analysisTableColumns.yearToDatePercentSavings = false;
     this.analysisTableColumns.rollingSavings = false;
     this.analysisTableColumns.rolling12MonthImprovement = false;
     this.analysisTableColumns.productionVariables = true;
@@ -210,6 +218,8 @@ export class AnalysisSummaryTableFilterComponent implements OnInit {
     this.analysisTableColumns.annualSavingsPercentImprovement = true;
     this.analysisTableColumns.cummulativeSavings = true;
     this.analysisTableColumns.newSavings = true;
+    this.analysisTableColumns.bankedSavings = false;
+    this.analysisTableColumns.savingsUnbanked = false;
     this.analysisTableColumns.predictors.forEach(predictor => {
       if (predictor.usedInAnalysis) {
         predictor.display = true;
@@ -220,12 +230,12 @@ export class AnalysisSummaryTableFilterComponent implements OnInit {
     this.save();
   }
 
-  setLabels(){
-    if(this.analysisItem.analysisCategory == 'water'){
+  setLabels() {
+    if (this.analysisItem.analysisCategory == 'water') {
       this.actualUseLabel = 'Actual Consumption';
       this.modeledUseLabel = 'Modeled Consumption';
       this.energyColumnLabel = 'Consumption Columns';
-    }else if(this.analysisItem.analysisCategory == 'energy'){
+    } else if (this.analysisItem.analysisCategory == 'energy') {
       this.actualUseLabel = 'Actual Energy Use';
       this.modeledUseLabel = 'Modeled Energy Use';
       this.energyColumnLabel = 'Energy Columns';

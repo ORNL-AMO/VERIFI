@@ -12,7 +12,7 @@ export class AnalysisCategoryPipe implements PipeTransform {
 
   transform(analysisId: string): 'Energy' | 'Water' | 'No Item Found' {
     if (analysisId) {
-      let accountAnalysisItem: IdbAccountAnalysisItem = this.accountAnalysisDbService.getAccountAnalysisItem(analysisId);
+      let accountAnalysisItem: IdbAccountAnalysisItem = this.accountAnalysisDbService.getByGuid(analysisId);
       if (accountAnalysisItem) {
         if(accountAnalysisItem.analysisCategory == 'energy'){
           return 'Energy';

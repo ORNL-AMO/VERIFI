@@ -1,0 +1,9 @@
+.btn-sm {
+    margin: 0px;
+}
+
+
+.item-name,
+.item-name span.fa {
+    font-size: 18px;
+}

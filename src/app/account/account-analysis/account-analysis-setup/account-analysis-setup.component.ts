@@ -13,7 +13,17 @@ import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.serv
 import { AccountAnalysisService } from '../account-analysis.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
-import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
+import { getNewIdbAnalysisItem, IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
+import { AnalysisType } from 'src/app/models/analysis';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
+import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
+import { LoadingService } from 'src/app/core-components/loading/loading.service';
+import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
+import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
+import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
+import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 
 @Component({
   selector: 'app-account-analysis-setup',
@@ -34,6 +44,8 @@ export class AccountAnalysisSetupComponent implements OnInit {
   disableForm: boolean;
   showInUseMessage: boolean;
   displayEnableForm: boolean = false;
+  displayBulkAnalysisModal: boolean = false;
+  analysisType: AnalysisType = 'absoluteEnergyConsumption';
   constructor(private accountDbService: AccountdbService, private accountAnalysisDbService: AccountAnalysisDbService,
     private router: Router,
     private dbChangesService: DbChangesService,
@@ -41,7 +53,13 @@ export class AccountAnalysisSetupComponent implements OnInit {
     private analysisValidationService: AnalysisValidationService,
     private calendarizationService: CalanderizationService,
     private accountReportDbService: AccountReportDbService,
-    private accountAnalysisService: AccountAnalysisService) { }
+    private accountAnalysisService: AccountAnalysisService,
+    private facilityDbService: FacilitydbService,
+    private analysisService: AnalysisService,
+    private loadingService: LoadingService,
+    private toastNotificationService: ToastNotificationsService,
+    private utiltiyMeterGroupDbService: UtilityMeterGroupdbService,
+    private predictorDbService: PredictorDbService) { }
 
   ngOnInit(): void {
     this.analysisItem = this.accountAnalysisDbService.selectedAnalysisItem.getValue();
@@ -65,7 +83,7 @@ export class AccountAnalysisSetupComponent implements OnInit {
     this.accountAnalysisDbService.selectedAnalysisItem.next(this.analysisItem);
   }
 
-  async changeReportYear() {  
+  async changeReportYear() {
     this.setBaselineYearWarning();
     if (!this.baselineYearWarning) {
       let allAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
@@ -138,5 +156,46 @@ export class AccountAnalysisSetupComponent implements OnInit {
     await this.saveItem();
     this.disableForm = false;
     this.displayEnableForm = undefined;
+  }
+
+  openBulkAnalysisModal() {
+    this.displayBulkAnalysisModal = true;
+  }
+
+  closeBulkAnalysisModal() {
+    this.displayBulkAnalysisModal = false;
+  }
+
+  async confirmBulkAnalysisCreate() {
+    this.closeBulkAnalysisModal();
+    this.loadingService.setLoadingMessage('Creating Analysis Items...');
+    this.loadingService.setLoadingStatus(true);
+    let accountMeterGroups: Array<IdbUtilityMeterGroup> = this.utiltiyMeterGroupDbService.accountMeterGroups.getValue();
+    let accountPredictors: Array<IdbPredictor> = this.predictorDbService.accountPredictors.getValue();
+    let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    for (let i = 0; i < facilities.length; i++) {
+      let facility: IdbFacility = facilities[i];
+      this.dbChangesService.selectFacility(facility);
+      let newIdbItem: IdbAnalysisItem = getNewIdbAnalysisItem(this.account, facility, accountMeterGroups, accountPredictors, this.analysisItem.analysisCategory);
+      newIdbItem.energyIsSource = this.analysisItem.energyIsSource;
+      newIdbItem.reportYear = this.analysisItem.reportYear;
+      newIdbItem.groups.forEach(group => {
+        group.analysisType = this.analysisType;
+        group.groupErrors = this.analysisValidationService.getGroupErrors(group, newIdbItem);
+      });
+      newIdbItem = this.analysisService.setDataAdjustments(newIdbItem);
+      newIdbItem.setupErrors = this.analysisValidationService.getAnalysisItemErrors(newIdbItem);
+      newIdbItem = await firstValueFrom(this.analysisDbService.addWithObservable(newIdbItem));
+      for (let f = 0; f < this.analysisItem.facilityAnalysisItems.length; f++) {
+        if (this.analysisItem.facilityAnalysisItems[f].facilityId == facility.guid) {
+          this.analysisItem.facilityAnalysisItems[f].analysisItemId = newIdbItem.guid;
+        }
+      }
+    }
+    await this.dbChangesService.setAnalysisItems(this.account, true);
+    await this.saveItem();
+    this.loadingService.setLoadingStatus(false);
+    this.toastNotificationService.showToast('Facility Analysis Items Created.', undefined, undefined, false, 'alert-success');
+    this.router.navigateByUrl('/account/analysis/select-items');
   }
 }

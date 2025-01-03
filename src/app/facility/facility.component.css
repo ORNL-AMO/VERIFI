@@ -6,3 +6,10 @@
     /* max-height: 100%; */
     overflow-y: auto;
 }
+
+@media print {
+    .dashboard-container {
+        height: auto;
+        overflow-y: visible;
+    }
+}

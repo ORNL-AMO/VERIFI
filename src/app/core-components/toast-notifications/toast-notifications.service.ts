@@ -32,6 +32,10 @@ export class ToastNotificationsService {
     this.toastNotification.next(undefined);
   }
 
+  weatherDataErrorToast() {
+    this.showToast('Error Calculating Weather Data', 'An error occured while calculating weather data.', undefined, false, 'alert-danger')
+  }
+
 }
 
 

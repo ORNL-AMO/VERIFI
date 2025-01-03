@@ -147,6 +147,7 @@ export function getYearlyUsageNumbers(calanderizedMeters: Array<CalanderizedMete
 
 
 export function getFiscalYear(date: Date, facilityOrAccount: IdbFacility | IdbAccount): number {
+    date = new Date(date);
     if (facilityOrAccount.fiscalYear == 'calendarYear') {
         return date.getUTCFullYear();
     } else {

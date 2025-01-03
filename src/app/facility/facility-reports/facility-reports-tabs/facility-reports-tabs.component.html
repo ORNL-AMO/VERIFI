@@ -1,0 +1,35 @@
+<div class="reports banner sticky-top d-flex justify-content-between" *ngIf="!inDashboard"
+    [ngClass]="{'modal-open': modalOpen}">
+    <div>
+        <ul class="nav nav-tabs">
+            <li class="nav-item">
+                <a class="nav-link" routerLink="setup" [routerLinkActive]="['active']">
+                    <span class="fa fa-exclamation-circle" *ngIf="!setupValid"></span>
+                    <i class="fa fa-gears"></i>
+                    Report Setup</a>
+            </li>
+            <li class="nav-item" [ngClass]="{'disabled': !setupValid}"
+                *ngIf="selectedReport.facilityReportType == 'analysis'">
+                <a class="nav-link" routerLink="analysis-report" [routerLinkActive]="['active']">
+                    <i class="fa fa-file"></i>
+                    Analysis Report</a>
+            </li>
+            <li class="nav-item" [ngClass]="{'disabled': !setupValid}"
+                *ngIf="selectedReport.facilityReportType == 'overview'">
+                <a class="nav-link" routerLink="overview-report" [routerLinkActive]="['active']">
+                    <i class="fa fa-file"></i>
+                    Data Overview Report</a>
+            </li>
+        </ul>
+    </div>
+    <div>
+        <ul class="nav nav-tabs">
+            <li class="nav-item">
+                <a class="nav-link home-link" (click)="goToDashboard()">
+                    <i class="fa fa-list"></i>
+                    All Facility Reports
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>

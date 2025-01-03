@@ -21,11 +21,13 @@ export class GroupAnalysisComponent implements OnInit {
   label: string
   analysisItemSub: Subscription;
   showModelSelection: boolean;
+  showBanked: boolean;
   routerSub: Subscription;
   setupErrors: boolean;
   regressionErrors: boolean;
   hasErrors: boolean;
   hasInvalidRegressionModel: boolean;
+  hideLabel: boolean = false;
   constructor(private activatedRoute: ActivatedRoute, private analysisDbService: AnalysisDbService,
     private analysisService: AnalysisService, private router: Router,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService) { }
@@ -48,6 +50,7 @@ export class GroupAnalysisComponent implements OnInit {
       this.selectedGroup = val;
       if (this.selectedGroup) {
         this.showModelSelection = this.selectedGroup.analysisType == 'regression';
+        this.showBanked = this.selectedGroup.applyBanking && this.analysisItem.hasBanking;
         this.setErrorBools();
       }
     });
@@ -79,6 +82,12 @@ export class GroupAnalysisComponent implements OnInit {
       } else {
         this.label = groupName + ' Setup'
       }
+
+      if (url.includes('banked-analysis')) {
+        this.hideLabel = true;
+      } else {
+        this.hideLabel = false;
+      }
     }
   }
 
@@ -91,7 +100,8 @@ export class GroupAnalysisComponent implements OnInit {
         this.selectedGroup.groupErrors.missingRegressionModelSelection ||
         this.selectedGroup.groupErrors.missingRegressionPredictorCoef);
       this.setupErrors = (this.selectedGroup.groupErrors.invalidAverageBaseload || this.selectedGroup.groupErrors.noProductionVariables ||
-        this.selectedGroup.groupErrors.invalidAverageBaseload || this.selectedGroup.groupErrors.invalidMonthlyBaseload || this.selectedGroup.groupErrors.missingGroupMeters)
+        this.selectedGroup.groupErrors.invalidAverageBaseload || this.selectedGroup.groupErrors.invalidMonthlyBaseload || this.selectedGroup.groupErrors.missingGroupMeters
+        || this.selectedGroup.groupErrors.invalidBankingYears || this.selectedGroup.groupErrors.missingBankingAppliedYear || this.selectedGroup.groupErrors.missingBankingBaselineYear)
     } else {
       this.regressionErrors = false;
       this.setupErrors = false;

@@ -21,7 +21,6 @@ import { AccountTitlePageComponent } from './data-overview-report/data-overview-
 import { DataOverviewModule } from 'src/app/shared/data-overview/data-overview.module';
 import { AccountSectionReportComponent } from './data-overview-report/data-overview-account-report/account-section-report/account-section-report.component';
 import { FacilityTitlePageComponent } from './data-overview-report/data-overview-facility-report/facility-title-page/facility-title-page.component';
-import { FacilitySectionReportComponent } from './data-overview-report/data-overview-facility-report/facility-section-report/facility-section-report.component';
 import { DataOverviewAccountReportComponent } from './data-overview-report/data-overview-account-report/data-overview-account-report.component';
 import { DataOverviewFacilityReportComponent } from './data-overview-report/data-overview-facility-report/data-overview-facility-report.component';
 import { PrintReportButtonComponent } from './print-report-button/print-report-button.component';
@@ -53,6 +52,7 @@ import { EmissionsReductionsChartComponent } from './better-climate-report/emiss
 import { AbsoluteEmissionsChartComponent } from './better-climate-report/absolute-emissions-chart/absolute-emissions-chart.component';
 import { TopEmissionsPerformersTableComponent } from './better-climate-report/top-emissions-performers-table/top-emissions-performers-table.component';
 import { TopPerformersChartComponent } from './better-climate-report/top-performers-chart/top-performers-chart.component';
+import { AccountReportTypePipe } from './report-pipes/account-report-type.pipe';
 
 
 @NgModule({
@@ -72,7 +72,6 @@ import { TopPerformersChartComponent } from './better-climate-report/top-perform
     AccountTitlePageComponent,
     AccountSectionReportComponent,
     FacilityTitlePageComponent,
-    FacilitySectionReportComponent,
     DataOverviewAccountReportComponent,
     DataOverviewFacilityReportComponent,
     PrintReportButtonComponent,
@@ -104,7 +103,8 @@ import { TopPerformersChartComponent } from './better-climate-report/top-perform
     EmissionsReductionsChartComponent,
     AbsoluteEmissionsChartComponent,
     TopEmissionsPerformersTableComponent,
-    TopPerformersChartComponent
+    TopPerformersChartComponent,
+    AccountReportTypePipe
   ],
   imports: [
     CommonModule,

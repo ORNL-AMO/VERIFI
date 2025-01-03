@@ -2,6 +2,7 @@ import { Component, Input, ViewChild, ElementRef, SimpleChanges } from '@angular
 import { PlotlyService } from 'angular-plotly.js';
 import { WeatherDataSelection } from 'src/app/models/degreeDays';
 import { Months } from 'src/app/shared/form-data/months';
+import { AnnualStationDataSummary } from '../annual-station-data.component';
 
 @Component({
   selector: 'app-annual-station-graph',
@@ -10,7 +11,7 @@ import { Months } from 'src/app/shared/form-data/months';
 })
 export class AnnualStationGraphComponent {
   @Input()
-  yearSummaryData: Array<{ date: Date, heatingDegreeDays: number, coolingDegreeDays: number }>;
+  yearSummaryData: Array<AnnualStationDataSummary>;
   @Input()
   selectedYear: number;
   @Input()
@@ -59,13 +60,41 @@ export class AnnualStationGraphComponent {
         })
       }
 
+      let chartTitle: string = 'Monthly Degree Days <br>(' + this.selectedYear + ')';
+
+      if (this.weatherDataSelection == 'relativeHumidity') {
+        chartTitle = 'Relative Humidity <br>(' + this.selectedYear + ')'
+        traceData.push({
+          x: this.yearSummaryData.map(data => { return Months[data.date.getMonth()].name }),
+          y: this.yearSummaryData.map(data => { return data.relativeHumidity }),
+          type: 'bar',
+          name: 'Relative Humidity',
+          marker: {
+            color: '#6c3483'
+          }
+        })
+      }
+
+      if (this.weatherDataSelection == 'dryBulbTemp') {
+        chartTitle = 'Dry Bulb Temp. <br>(' + this.selectedYear + ')'
+        traceData.push({
+          x: this.yearSummaryData.map(data => { return Months[data.date.getMonth()].name }),
+          y: this.yearSummaryData.map(data => { return data.dryBulbTemp }),
+          type: 'bar',
+          name: 'Dry Bulb Temp',
+          marker: {
+            color: '#a04000'
+          }
+        })
+      }
+
       var layout = {
         legend: {
           orientation: "h"
         },
         barmode: 'group',
         title: {
-          text: 'Monthly Degree Days <br>(' + this.selectedYear + ')',
+          text: chartTitle,
           font: {
             size: 18
           },

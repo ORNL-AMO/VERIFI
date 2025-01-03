@@ -246,6 +246,22 @@
                     {{betterPlantsSummary.reportYearAnalysisSummary.newSavings | customNumber}}
                 </td>
             </tr>
+            <tr *ngIf="betterPlantsSummary.totalEnergySavingsUnbanked">
+                <td colspan="2">
+                    Unbanked Energy Savings (MMBtu)
+                </td>
+                <td>
+                    {{betterPlantsSummary.totalEnergySavingsUnbanked | customNumber}}
+                </td>
+            </tr>
+            <tr *ngIf="betterPlantsSummary.totalEnergySavingsBanked">
+                <td colspan="2">
+                    Banked Energy Savings (MMBtu)
+                </td>
+                <td>
+                    {{betterPlantsSummary.totalEnergySavingsBanked | customNumber}}
+                </td>
+            </tr>
             <tr>
                 <td colspan="2">
                     Total Energy Savings since Baseline Year (MMBtu)

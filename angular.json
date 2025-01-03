@@ -50,7 +50,8 @@
               "node_modules/bootstrap/dist/css/bootstrap.min.css",
               "src/styles/printing.css",
               "src/styles/plotly.css",
-              "src/styles/dataWizard.css"
+              "src/styles/dataWizard.css",
+              "src/styles/reports.css"
             ],
             "scripts": [
               "node_modules/plotly.js/dist/plotly.min.js",

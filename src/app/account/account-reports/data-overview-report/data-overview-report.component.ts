@@ -42,6 +42,7 @@ export class DataOverviewReportComponent {
   accountData: DataOverviewAccount;
 
   includedFacilities: Array<string>;
+  includedGroups: Array<string>;
   facilityIndex: number;
 
   calculatingFacilities: boolean = true;
@@ -66,9 +67,15 @@ export class DataOverviewReportComponent {
     let selectedReport: IdbAccountReport = this.accountReportDbService.selectedReport.getValue();
     this.overviewReport = selectedReport.dataOverviewReportSetup;
     this.includedFacilities = new Array();
+    this.includedGroups = new Array();
     this.overviewReport.includedFacilities.forEach(facility => {
-      if (facility.included) {
+      if (facility.included || this.overviewReport.includeAllMeterData) {
         this.includedFacilities.push(facility.facilityId);
+        facility.includedGroups.forEach(group => {
+          if (group.include) {
+            this.includedGroups.push(group.groupId);
+          }
+        })
       }
     });
     if (this.overviewReport.includeAccountReport) {
@@ -103,6 +110,11 @@ export class DataOverviewReportComponent {
     let facility: IdbFacility = accountFacilities.find(facility => { return facility.guid == facilityId });
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == facilityId });
+    if (this.overviewReport.includeAllMeterData == false) {
+      facilityMeters = facilityMeters.filter(meter => {
+        return this.includedGroups.includes(meter.groupId);
+      });
+    };
     let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
     let dataOverviewFacility: DataOverviewFacility = this.initDataOverviewFacility(facility, startDate, endDate);
     let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
@@ -160,14 +172,20 @@ export class DataOverviewReportComponent {
     });
 
     let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
-    let includedMeters: Array<IdbUtilityMeter> = meters.filter(meter => {
-      return this.includedFacilities.includes(meter.facilityId);
-    });
+
+    let includedMeters: Array<IdbUtilityMeter>;
+    if (this.overviewReport.includeAllMeterData) {
+      includedMeters = meters;
+    } else {
+      includedMeters = meters.filter(meter => {
+        return this.includedGroups.includes(meter.groupId);
+      });
+    }
+
     let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
     let startDate: Date = new Date(selectedReport.startYear, selectedReport.startMonth, 1);
     let endDate: Date = new Date(selectedReport.endYear, selectedReport.endMonth, 1);
     let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
-
 
     this.accountData = this.initDataOverviewAccount(this.account, startDate, endDate);
 

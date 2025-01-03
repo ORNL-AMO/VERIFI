@@ -16,9 +16,6 @@ import { FacilityMetersTableComponent } from "../data-wizard/facility-data/facil
 import { FacilityMeterComponent } from "../data-wizard/facility-data/facility-meters/facility-meter/facility-meter.component";
 import { FacilityMeterDataComponent } from "../data-wizard/facility-data/facility-meters/facility-meter-data/facility-meter-data.component";
 import { FacilityPredictorsComponent } from "../data-wizard/facility-data/facility-predictors/facility-predictors.component";
-import { FacilityPredictorDataComponent } from "../data-wizard/facility-data/facility-predictors/facility-predictor-data/facility-predictor-data.component";
-import { FacilityPredictorComponent } from "../data-wizard/facility-data/facility-predictors/facility-predictor/facility-predictor.component";
-import { FacilityPredictorsTableComponent } from "../data-wizard/facility-data/facility-predictors/facility-predictors-table/facility-predictors-table.component";
 import { MeterDataComponent } from "../shared/meter-data/meter-data.component";
 import { MeterDataTableComponent } from "../shared/meter-data/meter-data-table/meter-data-table.component";
 import { PredictorTableComponent } from "../shared/shared-predictors-content/predictor-table/predictor-table.component";

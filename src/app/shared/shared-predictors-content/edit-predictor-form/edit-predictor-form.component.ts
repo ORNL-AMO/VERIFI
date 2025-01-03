@@ -2,28 +2,25 @@ import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { getNewIdbPredictor, IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { UnitConversionTypes } from './unitConversionTypes';
-import { WeatherStation } from 'src/app/models/degreeDays';
+import { DetailDegreeDay, WeatherStation } from 'src/app/models/degreeDays';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { WeatherDataService } from 'src/app/weather-data/weather-data.service';
 import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
-import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { AnalyticsService } from 'src/app/analytics/analytics.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
-import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
-import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
-import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
 import { firstValueFrom, Observable, of } from 'rxjs';
-import * as _ from 'lodash';
+import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
+import { getNewIdbPredictorData, IdbPredictorData } from 'src/app/models/idbModels/predictorData';
+import { getDegreeDayAmount } from 'src/app/shared/sharedHelperFuntions';
+import { PredictorDataHelperService } from 'src/app/shared/helper-services/predictor-data-helper.service';
+import { DatePipe } from '@angular/common';
+import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 
 @Component({
   selector: 'app-edit-predictor-form',
@@ -43,25 +40,26 @@ export class EditPredictorFormComponent {
   stations: Array<WeatherStation> = [];
   facility: IdbFacility;
   findingStations: boolean = false;
-  // facilityPredictorsEntries: Array<IdbPredictorEntry>;
+  latestMeterReading: Date;
+  firstMeterReading: Date;
+  destroyed: boolean;
   constructor(private activatedRoute: ActivatedRoute, private predictorDbService: PredictorDbService,
     private router: Router, private facilityDbService: FacilitydbService,
     private formBuilder: FormBuilder,
     private weatherDataService: WeatherDataService,
     private degreeDaysService: DegreeDaysService,
     private loadingService: LoadingService,
-    private analysisDbService: AnalysisDbService,
     private toastNotificationService: ToastNotificationsService,
-    private utilityMeterDbService: UtilityMeterdbService,
     private accountDbService: AccountdbService,
     private dbChangesService: DbChangesService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private analyticsService: AnalyticsService) {
+    private predictorDataDbService: PredictorDataDbService,
+    private predictorDataHelperService: PredictorDataHelperService,
+    private analysisDbService: AnalysisDbService) {
   }
 
   ngOnInit() {
     this.facility = this.facilityDbService.selectedFacility.getValue();
-    // this.facilityPredictorsEntries = this.predictorDbService.facilityPredictorEntries.getValue();
+    this.setLastMeterReading();
     this.activatedRoute.params.subscribe(params => {
       let predictorId: string = params['id'];
       if (predictorId) {
@@ -76,6 +74,10 @@ export class EditPredictorFormComponent {
         this.setStations();
       }
     });
+  }
+
+  ngOnDestroy() {
+    this.destroyed = true;
   }
 
   setPredictorDataEdit(predictorId: string) {
@@ -115,7 +117,8 @@ export class EditPredictorFormComponent {
       'weatherDataType': [this.predictor.weatherDataType],
       'heatingBaseTemperature': [this.predictor.heatingBaseTemperature],
       'coolingBaseTemperature': [this.predictor.coolingBaseTemperature],
-      'weatherStationId': [this.predictor.weatherStationId]
+      'weatherStationId': [this.predictor.weatherStationId],
+      'createPredictorData': [true]
     });
     this.setShowReferencePredictors()
     // this.setUnitOptions();
@@ -139,6 +142,9 @@ export class EditPredictorFormComponent {
       } else if (this.predictorForm.controls.weatherDataType.value == 'CDD') {
         this.predictorForm.controls.heatingBaseTemperature.setValidators([]);
         this.predictorForm.controls.coolingBaseTemperature.setValidators([Validators.required]);
+      } else {
+        this.predictorForm.controls.heatingBaseTemperature.setValidators([]);
+        this.predictorForm.controls.coolingBaseTemperature.setValidators([]);
       }
     }
     this.predictorForm.controls.heatingBaseTemperature.updateValueAndValidity();
@@ -181,41 +187,61 @@ export class EditPredictorFormComponent {
       weatherDataChange = true;
       this.predictor.weatherStationId = this.predictorForm.controls.weatherStationId.value;
     }
+    if (this.predictor.predictorType == 'Weather') {
+      this.predictor.weatherStationName = this.stations.find(station => {
+        return station.ID == this.predictor.weatherStationId;
+      })?.name;
+    }
     return weatherDataChange;
   }
 
-  async saveChanges(goToEntries?: boolean) {
-    //TODO: update save method..
+  async saveChanges() {
     this.loadingService.setLoadingMessage('Updating Predictors...');
     this.loadingService.setLoadingStatus(true);
     let needsWeatherDataUpdate: boolean = this.setPredictorDataFromForm();
     this.predictorForm.markAsPristine();
-    // let facilityPredictors: Array<PredictorData> = this.predictorDbService.facilityPredictors.getValue();
-    // let facilityPredictorsCopy: Array<PredictorData> = JSON.parse(JSON.stringify(facilityPredictors));
     if (this.addOrEdit == 'add') {
       await firstValueFrom(this.predictorDbService.addWithObservable(this.predictor));
-      //   facilityPredictorsCopy.push(this.predictorData);
-      //   await this.predictorDbService.updateFacilityPredictorEntries(facilityPredictorsCopy);
     } else {
       await firstValueFrom(this.predictorDbService.updateWithObservable(this.predictor));
-      //   let editPredictorIndex: number = facilityPredictorsCopy.findIndex(predictorCopy => { return predictorCopy.id == this.predictorData.id });
-      //   facilityPredictorsCopy[editPredictorIndex] = this.predictorData;
-      //   await this.predictorDbService.updateFacilityPredictorEntries(facilityPredictorsCopy);
     }
-    // if (this.predictorData.predictorType == 'Weather' && needsWeatherDataUpdate) {
-    //   await this.predictorDbService.updatePredictorDegreeDays(this.facility, this.predictorData);
-    // }
-    // await this.analysisDbService.updateAnalysisPredictors(facilityPredictorsCopy, this.facility.guid);
+    if (this.predictor.predictorType == 'Weather') {
+      if (this.addOrEdit == 'edit' && needsWeatherDataUpdate) {
+        let predictorData: Array<IdbPredictorData> = this.predictorDataDbService.getByPredictorId(this.predictor.guid);
+        for (let i = 0; i < predictorData.length; i++) {
+          if (!predictorData[i].weatherOverride) {
+            let entryDate: Date = new Date(predictorData[i].date);
+            this.loadingService.setLoadingMessage('Updating Weather Predictors: (' + i + '/' + predictorData.length + ')');
+            let degreeDays: 'error' | Array<DetailDegreeDay> = await this.degreeDaysService.getDailyDataFromMonth(entryDate.getMonth(), entryDate.getFullYear(), this.predictor.heatingBaseTemperature, this.predictor.coolingBaseTemperature, this.predictor.weatherStationId);
+            if (degreeDays != 'error') {
+              let hasErrors: DetailDegreeDay = degreeDays.find(degreeDay => {
+                return degreeDay.gapInData == true
+              });
+              predictorData[i].amount = getDegreeDayAmount(degreeDays, this.predictor.weatherDataType);
+              predictorData[i].weatherDataWarning = hasErrors != undefined || degreeDays.length == 0;
+              await firstValueFrom(this.predictorDataDbService.updateWithObservable(predictorData[i]));
+            } else {
+              this.toastNotificationService.weatherDataErrorToast();
+            }
+          }
+        }
+      } else if (this.addOrEdit == 'add' && this.predictorForm.controls.createPredictorData.value) {
+        await this.addWeatherData();
+      }
+    }
+
+    if (this.addOrEdit == 'add') {
+      await this.analysisDbService.addAnalysisPredictor(this.predictor);
+    } else {
+      await this.analysisDbService.updateAnalysisPredictor(this.predictor);
+    }
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.setPredictorsV2(account, this.facility);
+    await this.dbChangesService.setPredictorDataV2(account, this.facility);
+    await this.dbChangesService.setAnalysisItems(account, true, this.facility);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('Predictor Entries Updated!', undefined, undefined, false, 'alert-success');
     this.cancel();
-    // if (!goToEntries) {
-    //   this.cancel();
-    // } else {
-    //   this.router.navigateByUrl('facility/' + this.facility.id + '/utility/predictors/entries')
-    // }
   }
 
   setShowReferencePredictors() {
@@ -260,11 +286,10 @@ export class EditPredictorFormComponent {
     this.weatherDataService.selectedStation = weatherStation;
     if (this.predictorForm.controls.weatherDataType.value == 'CDD') {
       this.weatherDataService.coolingTemp = this.predictorForm.controls.coolingBaseTemperature.value;
-      this.weatherDataService.weatherDataSelection = 'CDD';
-    } else {
+    } else if (this.predictorForm.controls.weatherDataType.value == 'HDD') {
       this.weatherDataService.heatingTemp = this.predictorForm.controls.heatingBaseTemperature.value;
-      this.weatherDataService.weatherDataSelection = 'HDD';
     }
+    this.weatherDataService.weatherDataSelection = this.predictorForm.controls.weatherDataType.value;
 
     this.weatherDataService.selectedFacility = this.facility;
     this.weatherDataService.zipCode = this.facility.zip;
@@ -280,42 +305,47 @@ export class EditPredictorFormComponent {
     }
   }
 
-  // goToPredictorEntry() {
-  //   this.setPredictorDataFromForm();
-  //   let facilityPredictors: Array<IdbPredictor> = this.predictorDbService.facilityPredictors.getValue();
-  //   facilityPredictors.push(this.predictorData);
-  //   this.predictorDbService.facilityPredictors.next(facilityPredictors);
-  //   this.router.navigateByUrl('facility/' + this.facility.id + '/utility/predictors/entries/add-entry');
-  // }
-
-  async generateWeatherData() {
-    this.analyticsService.sendEvent('weather_data_predictors');
-    this.loadingService.setLoadingMessage('Updating Predictors...');
-    this.loadingService.setLoadingStatus(true);
-    let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
-    let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == this.facility.guid });
-    let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
-    let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, meterData, this.facility, false, undefined, [], [], [this.facility]);
-    let monthlyData: Array<MonthlyData> = calanderizedMeters.flatMap(cMeter => { return cMeter.monthlyData });
-    monthlyData = _.orderBy(monthlyData, (dataItem: MonthlyData) => { return dataItem.date });
-    let startDate: Date = new Date(monthlyData[0].date);
-    let endDate: Date = new Date(monthlyData[monthlyData.length - 1].date);
-    //TODO: Add/Edit predictor data
-    // while (startDate <= endDate) {
-    //   let newIdbPredictorEntry: IdbPredictorEntry = this.predictorDbService.getNewIdbPredictorEntry(this.facility.guid, this.facility.accountId, new Date(startDate));
-    //   await firstValueFrom(this.predictorDbService.addWithObservable(newIdbPredictorEntry));
-    //   startDate.setMonth(startDate.getMonth() + 1);
-    // }
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    await this.dbChangesService.setPredictorsDeprecated(selectedAccount, this.facility)
-    this.saveChanges();
-  }
-
   canDeactivate(): Observable<boolean> {
     if (this.predictorForm && this.predictorForm.dirty) {
       const result = window.confirm('There are unsaved changes! Are you sure you want to leave this page?');
       return of(result);
     }
     return of(true);
+  }
+
+  setLastMeterReading() {
+    this.latestMeterReading = this.predictorDataHelperService.getLastMeterDate(this.facility);
+    this.firstMeterReading = this.predictorDataHelperService.getFirstMeterDate(this.facility);
+  }
+
+  async addWeatherData() {
+    if (this.latestMeterReading && this.firstMeterReading) {
+      let datePipe: DatePipe = new DatePipe(navigator.language);
+      let stringFormat: string = 'MMM, yyyy';
+      let startDate: Date = new Date(this.firstMeterReading);
+      let endDate: Date = new Date(this.latestMeterReading);
+      while (startDate <= endDate) {
+        if (this.destroyed) {
+          break;
+        }
+        let newDate: Date = new Date(startDate);
+        let dateString = datePipe.transform(newDate, stringFormat);
+        this.loadingService.setLoadingMessage('Adding Weather Predictors: ' + dateString);
+        let degreeDays: 'error' | Array<DetailDegreeDay> = await this.degreeDaysService.getDailyDataFromMonth(newDate.getMonth(), newDate.getFullYear(), this.predictor.heatingBaseTemperature, this.predictor.coolingBaseTemperature, this.predictor.weatherStationId);
+        if (degreeDays != 'error') {
+          let hasErrors: DetailDegreeDay = degreeDays.find(degreeDay => {
+            return degreeDay.gapInData == true
+          });
+          let newPredictorData: IdbPredictorData = getNewIdbPredictorData(this.predictor);
+          newPredictorData.date = newDate;
+          newPredictorData.amount = getDegreeDayAmount(degreeDays, this.predictor.weatherDataType);
+          newPredictorData.weatherDataWarning = hasErrors != undefined || degreeDays.length == 0;
+          await firstValueFrom(this.predictorDataDbService.addWithObservable(newPredictorData));
+        }else{
+          this.toastNotificationService.weatherDataErrorToast();
+        }
+        startDate.setMonth(startDate.getMonth() + 1);
+      }
+    }
   }
 }

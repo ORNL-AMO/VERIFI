@@ -19,7 +19,8 @@ export interface IdbAccountAnalysisItem extends IdbEntry {
     waterUnit: string,
     baselineYear: number,
     setupErrors: AccountAnalysisSetupErrors,
-    facilityItemsInitialized?: boolean
+    facilityItemsInitialized?: boolean,
+    hasBanking: boolean
 }
 
 export function getNewIdbAccountAnalysisItem(analysisCategory: AnalysisCategory, account: IdbAccount, accountFacilities: Array<IdbFacility>): IdbAccountAnalysisItem {
@@ -50,6 +51,7 @@ export function getNewIdbAccountAnalysisItem(analysisCategory: AnalysisCategory,
         energyIsSource: account.energyIsSource,
         waterUnit: account.volumeLiquidUnit,
         analysisCategory: analysisCategory,
+        hasBanking: false,
         setupErrors: {
             hasError: true,
             missingName: false,

@@ -28,7 +28,7 @@ import { CreateReportModalComponent } from './core-components/create-report-moda
 import { WeatherDataModule } from './weather-data/weather-data.module';
 import { ManageAccountsComponent } from './core-components/manage-accounts/manage-accounts.component';
 import { ElectronBackupFileComponent } from './core-components/electron-backup-file/electron-backup-file.component';
-import { HttpClientModule } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { DeletingAccountDataComponent } from './core-components/deleting-account-data/deleting-account-data.component';
 import { HomePageComponent } from './core-components/home-page/home-page.component';
 import { DataWizardModule } from './data-wizard/data-wizard.module';
@@ -50,7 +50,7 @@ import { MeterDataModule } from './shared/meter-data/meter-data.module';
     ManageAccountsComponent,
     ElectronBackupFileComponent,
     DeletingAccountDataComponent,
-    HomePageComponent
+    HomePageComponent,
   ],
   imports: [
     BrowserModule,
@@ -69,11 +69,10 @@ import { MeterDataModule } from './shared/meter-data/meter-data.module';
     NgbTypeaheadModule,
     UploadDataModule,
     WeatherDataModule,
-    HttpClientModule,
     DataWizardModule,
     MeterDataModule
   ],
-  providers: [],
+  providers: [provideHttpClient(withInterceptorsFromDi())],
   bootstrap: [AppComponent]
 })
 

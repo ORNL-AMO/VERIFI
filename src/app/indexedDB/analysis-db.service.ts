@@ -158,7 +158,7 @@ export class AnalysisDbService {
             }
           }
         }
-        group.groupErrors = this.analysisValidationService.getGroupErrors(group);
+        group.groupErrors = this.analysisValidationService.getGroupErrors(group, analysisItem);
         if (group.groupErrors.hasErrors) {
           hasGroupErrors = true;
         }
@@ -184,6 +184,37 @@ export class AnalysisDbService {
           regressionCoefficient: undefined,
           unit: newPredictor.unit
         })
+      })
+      await firstValueFrom(this.updateWithObservable(analysisItem));
+    }
+  }
+
+  async updateAnalysisPredictor(predictor: IdbPredictor) {
+    let accountAnalysisItems: Array<IdbAnalysisItem> = this.accountAnalysisItems.getValue();
+    let facilityAnalysisItems: Array<IdbAnalysisItem> = accountAnalysisItems.filter(item => {
+      return item.facilityId == predictor.facilityId;
+    });
+    for (let index = 0; index < facilityAnalysisItems.length; index++) {
+      let analysisItem: IdbAnalysisItem = facilityAnalysisItems[index];
+      analysisItem.groups.forEach(group => {
+        group.predictorVariables.forEach(pVariable => {
+          if (pVariable.id == predictor.guid) {
+            pVariable.name = predictor.name;
+            pVariable.production = predictor.production;
+            pVariable.unit = predictor.unit;
+          }
+        })
+        if(group.models){
+          group.models.forEach(model => {
+            model.predictorVariables.forEach(pVariable => {
+              if (pVariable.id == predictor.guid) {
+                pVariable.name = predictor.name;
+                pVariable.production = predictor.production;
+                pVariable.unit = predictor.unit;
+              }
+            })
+          })
+        }
       })
       await firstValueFrom(this.updateWithObservable(analysisItem));
     }
@@ -237,6 +268,21 @@ export class AnalysisDbService {
       this.loadingService.setLoadingMessage('Deleting Facility Analysis Items (' + i + '/' + analysisItems.length + ')...');
       await firstValueFrom(this.deleteWithObservable(analysisItems[i].id));
     }
+  }
+
+  getByGuid(guid: string): IdbAnalysisItem {
+    let analysisItems: Array<IdbAnalysisItem> = this.accountAnalysisItems.getValue();
+    return analysisItems.find(item => {
+      return item.guid == guid;
+    });
+  }
+
+  getAnalysisName(guid: string): string {
+    let analysisItem: IdbAnalysisItem = this.getByGuid(guid);
+    if (analysisItem) {
+      return analysisItem.name
+    }
+    return '';
   }
 
   // getMonthlyPercentBaseload(): Array<{ monthNum: number, percent: number }> {

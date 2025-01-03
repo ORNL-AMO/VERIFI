@@ -2,6 +2,8 @@ import { Component, Input, ViewChild, ElementRef, SimpleChanges } from '@angular
 import { PlotlyService } from 'angular-plotly.js';
 import { DetailDegreeDay, WeatherDataSelection } from 'src/app/models/degreeDays';
 import { Months } from 'src/app/shared/form-data/months';
+import * as _ from 'lodash';
+import { getDegreeDayAmount } from 'src/app/shared/sharedHelperFuntions';
 
 @Component({
   selector: 'app-monthly-station-graph',
@@ -31,7 +33,8 @@ export class MonthlyStationGraphComponent {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if ((changes.degreeDays && !changes.degreeDays.isFirstChange()) || (changes.weatherDataSelection && !changes.weatherDataSelection.isFirstChange())) {
+    if ((changes.degreeDays && !changes.degreeDays.isFirstChange()) || (changes.weatherDataSelection && !changes.weatherDataSelection.isFirstChange()) ||
+      (changes.selectedMonth && !changes.selectedMonth.isFirstChange())) {
       this.drawChart();
     }
   }
@@ -84,20 +87,123 @@ export class MonthlyStationGraphComponent {
       let startRange: Date = new Date(this.selectedMonth);
       startRange.setDate(1);
       let endRange: Date = new Date(startRange);
-      endRange.setMonth(endRange.getMonth()+1);
+      endRange.setMonth(endRange.getMonth() + 1);
       endRange.setDate(1);
 
-      traceData.push({
-        x: this.detailedDegreeDays.map(data => { return data.time }),
-        y: this.detailedDegreeDays.map(data => { return data.dryBulbTemp }),
-        type: 'scatter',
-        name: 'Dry Bulb Temp Readings',
-        yaxis: 'y2',
-        mode: 'lines+markers',
-        marker: {
-          color: '#273746'
+
+      let graphTitle: string;
+      let yAxis2 = {
+        title: {
+          text: 'Dry Bulb Temp'
+        },
+        automargin: true,
+        overlaying: 'y',
+        side: 'right',
+        ticksuffix: ' &#8457;',
+        // dtick: yAxis2Dtick,
+        rangemode: 'tozero',
+        tickmode: 'sync'
+      };
+      let yAxis = {
+        title: {
+          text: undefined
+        },
+        automargin: true,
+        overlaying: undefined,
+        side: 'left',
+        ticksuffix: undefined,
+        // dtick: yAxis2Dtick,
+        rangemode: undefined,
+        tickmode: undefined
+      };
+
+      if (this.weatherDataSelection != 'relativeHumidity') {
+        graphTitle = 'Daily Degree Days <br>(' + Months[this.selectedMonth.getMonth()].name + ', ' + this.selectedMonth.getFullYear() + ')'
+        let correspondingYaxis = 'y2';
+        if (this.weatherDataSelection == 'dryBulbTemp') {
+          correspondingYaxis = 'y';
+          yAxis = {
+            title: {
+              text: 'Dry Bulb Temp'
+            },
+            automargin: true,
+            overlaying: undefined,
+            side: 'left',
+            ticksuffix: ' &#8457;',
+            // dtick: yAxis2Dtick,
+            rangemode: 'tozero',
+            tickmode: 'sync'
+          };
+          yAxis2 = {
+            title: {
+              text: undefined
+            },
+            automargin: true,
+            overlaying: undefined,
+            side: 'right',
+            ticksuffix: undefined,
+            // dtick: yAxis2Dtick,
+            rangemode: undefined,
+            tickmode: undefined
+          };
+
         }
-      });
+        traceData.push({
+          x: this.detailedDegreeDays.map(data => { return data.time }),
+          y: this.detailedDegreeDays.map(data => { return data.dryBulbTemp }),
+          type: 'scatter',
+          name: 'Dry Bulb Temp Readings',
+          yaxis: correspondingYaxis,
+          mode: 'lines+markers',
+          marker: {
+            color: '#273746'
+          }
+        });
+      }
+
+      if (this.weatherDataSelection == 'dryBulbTemp') {
+        graphTitle = 'Dry Bulb Temp. <br>(' + Months[this.selectedMonth.getMonth()].name + ', ' + this.selectedMonth.getFullYear() + ')';
+        let results = getDegreeDayAmount(this.detailedDegreeDays, 'dryBulbTemp');
+        traceData.push({
+          x: this.detailedDegreeDays.map(data => { return data.time }),
+          y: this.detailedDegreeDays.map(data => { return results.toFixed(1) }),
+          type: 'scatter',
+          name: 'Dry Bulb Temp',
+          // yaxis: 'y',
+          marker: {
+            color: '#a04000'
+          }
+        })
+      }
+
+      if (this.weatherDataSelection == 'relativeHumidity') {
+        yAxis.title.text = 'Relative Humidity';
+        yAxis.ticksuffix = '%';
+        graphTitle = 'Relative Humidity <br>(' + Months[this.selectedMonth.getMonth()].name + ', ' + this.selectedMonth.getFullYear() + ')'
+        traceData.push({
+          x: this.detailedDegreeDays.map(data => { return data.time }),
+          y: this.detailedDegreeDays.map(data => { return data.relativeHumidity }),
+          type: 'scatter',
+          name: 'Relative Humidity',
+          mode: 'lines+markers',
+          yaxis: 'y',
+          marker: {
+            color: '#6c3483'
+          }
+        });
+
+        let results = getDegreeDayAmount(this.detailedDegreeDays, 'relativeHumidity');
+        traceData.push({
+          x: this.detailedDegreeDays.map(data => { return data.time }),
+          y: this.detailedDegreeDays.map(data => { return results.toFixed(1) }),
+          type: 'scatter',
+          name: 'Month Relative Humidity',
+          yaxis: 'y',
+        })
+      }
+
+
+
 
       var layout = {
         legend: {
@@ -105,7 +211,7 @@ export class MonthlyStationGraphComponent {
         },
         barmode: 'group',
         title: {
-          text: 'Daily Degree Days <br>(' + Months[this.selectedMonth.getMonth()].name + ', ' + this.selectedMonth.getFullYear() + ')',
+          text: graphTitle,
           font: {
             size: 18
           },
@@ -114,21 +220,8 @@ export class MonthlyStationGraphComponent {
           automargin: true,
           range: [startRange, endRange]
         },
-        yaxis: {
-          automargin: true,
-        },
-        yaxis2: {
-          title: {
-            text: 'Dry Bulb Temp'
-          },
-          automargin: true,
-          overlaying: 'y',
-          side: 'right',
-          ticksuffix: ' &#8457;',
-          // dtick: yAxis2Dtick,
-          rangemode: 'tozero',
-          tickmode: 'sync'
-        },
+        yaxis: yAxis,
+        yaxis2: yAxis2,
         // margin: { "t": 0, "b": 0, "l": 0, "r": 0 },
       };
 

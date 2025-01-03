@@ -63,7 +63,7 @@ export class UtilityMeterGroupdbService {
 
     async deleteMeterGroupAsync(meterGroups: Array<IdbUtilityMeterGroup>) {
         for (let i = 0; i < meterGroups.length; i++) {
-            this.loadingService.setLoadingMessage('Deleting Meter Groups (' + i + '/' + meterGroups.length + ')...' );
+            this.loadingService.setLoadingMessage('Deleting Meter Groups (' + i + '/' + meterGroups.length + ')...');
             await firstValueFrom(this.deleteWithObservable(meterGroups[i].id));
         }
     }
@@ -86,5 +86,10 @@ export class UtilityMeterGroupdbService {
         let groups: Array<IdbUtilityMeterGroup> = this.accountMeterGroups.getValue();
         let groupsCopy: Array<IdbUtilityMeterGroup> = JSON.parse(JSON.stringify(groups));
         return groupsCopy;
+    }
+
+    getFacilityGroups(facilityId: string): Array<IdbUtilityMeterGroup> {
+        let groups: Array<IdbUtilityMeterGroup> = this.accountMeterGroups.getValue();
+        return groups.filter(group => { return group.facilityId == facilityId });
     }
 }

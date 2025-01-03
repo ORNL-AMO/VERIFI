@@ -14,12 +14,14 @@ export class MonthlyGroupAnalysisClass {
   analysisItem: IdbAnalysisItem;
   facility: IdbFacility;
   facilityPredictorData: Array<IdbPredictorData>;
+  bankedAnalysisDate: Date;
   baselineDate: Date;
   endDate: Date;
   predictorVariables: Array<AnalysisGroupPredictorVariable>;
   groupMeters: Array<CalanderizedMeter>;
   groupMonthlyData: Array<MonthlyData>;
   baselineYear: number;
+  bankedAnalysisYear: number;
   annualMeterDataUsage: Array<{ year: number, usage: number }>;
   baselineYearEnergyIntensity: number;
   modelYear: number;
@@ -42,8 +44,9 @@ export class MonthlyGroupAnalysisClass {
   }
 
   setStartAndEndDate(calanderizedMeters: Array<CalanderizedMeter>, calculateAllMonthlyData: boolean) {
-    let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date } = getMonthlyStartAndEndDate(this.facility, this.analysisItem);
+    let monthlyStartAndEndDate: { baselineDate: Date, endDate: Date, bankedAnalysisDate: Date } = getMonthlyStartAndEndDate(this.facility, this.analysisItem, this.selectedGroup);
     this.baselineDate = monthlyStartAndEndDate.baselineDate;
+    this.bankedAnalysisDate = monthlyStartAndEndDate.bankedAnalysisDate;
     if (calculateAllMonthlyData) {
       let lastBill: MonthlyData = getLastBillEntryFromCalanderizedMeterData(calanderizedMeters);
       let lastPredictorEntry: IdbPredictorData = _.maxBy(this.facilityPredictorData, (data: IdbPredictorData) => {
@@ -89,6 +92,9 @@ export class MonthlyGroupAnalysisClass {
 
   setBaselineYear() {
     this.baselineYear = getFiscalYear(this.baselineDate, this.facility);
+    if(this.bankedAnalysisDate){
+      this.bankedAnalysisYear = getFiscalYear(this.bankedAnalysisDate, this.facility);
+    }
   }
 
   setAnnualMeterDataUsage() {
@@ -99,7 +105,7 @@ export class MonthlyGroupAnalysisClass {
         let totalUsage: number = _.sumBy(yearMeterData, (data: MonthlyData) => { return data.energyUse });
         this.annualMeterDataUsage.push({ year: year, usage: totalUsage });
       } else if (this.analysisItem.analysisCategory == 'water') {
-        let totalUsage: number = _.sumBy(yearMeterData,( data: MonthlyData) => { return data.energyConsumption });
+        let totalUsage: number = _.sumBy(yearMeterData, (data: MonthlyData) => { return data.energyConsumption });
         this.annualMeterDataUsage.push({ year: year, usage: totalUsage });
       }
     }

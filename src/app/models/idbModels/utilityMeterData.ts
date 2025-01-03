@@ -121,11 +121,17 @@ export function getLastMeterReadingDate(meter: IdbUtilityMeter, accountMeterData
 
 export function checkMeterReadingExistForDate(date: Date, meter: IdbUtilityMeter, accountMeterData: Array<IdbUtilityMeterData>): IdbUtilityMeterData {
     let newDate: Date = new Date(date);
-    let allSelectedMeterData: Array<IdbUtilityMeterData> = getMeterDataFromMeterId(meter.guid, accountMeterData);
-    let existingData: IdbUtilityMeterData = allSelectedMeterData.find(dataItem => {
-        return this.checkSameDate(newDate, dataItem);
-    });
-    return existingData;
+    if (newDate) {
+        let allSelectedMeterData: Array<IdbUtilityMeterData> = getMeterDataFromMeterId(meter.guid, accountMeterData);
+        let existingData: IdbUtilityMeterData = allSelectedMeterData.find(dataItem => {
+            if (dataItem) {
+                return checkSameDate(newDate, dataItem);
+            }
+            return false;
+        });
+        return existingData;
+    }
+    return undefined;
 }
 
 export function checkSameDate(date: Date, dataItem: IdbUtilityMeterData): boolean {

@@ -1,8 +1,8 @@
 <div class="d-flex justify-content-between mb-2">
 
     <div class="p-0">
-        <app-analysis-summary-table-filter [tableContext]="'annualGroup'" [group]="group"
-            *ngIf="dataDisplay == 'table'" [analysisItem]="analysisItem">
+        <app-analysis-summary-table-filter [tableContext]="'annualGroup'" [group]="group" *ngIf="dataDisplay == 'table'"
+            [analysisItem]="analysisItem">
         </app-analysis-summary-table-filter>
     </div>
 
@@ -23,7 +23,7 @@
 
 <div class="w-100 x-scroll" *ngIf="calculating == false">
     <app-annual-analysis-summary-table *ngIf="dataDisplay == 'table'" [annualAnalysisSummary]="annualAnalysisSummary"
-        [analysisItem]="analysisItem" [accountOrFacility]="facility">
+        [analysisItem]="analysisItem" [accountOrFacility]="facility" [printBlock]="'all'" [group]="group">
     </app-annual-analysis-summary-table>
     <app-annual-analysis-summary-graph *ngIf="dataDisplay == 'graph'" [annualAnalysisSummary]="annualAnalysisSummary"
         [analysisItem]="analysisItem">

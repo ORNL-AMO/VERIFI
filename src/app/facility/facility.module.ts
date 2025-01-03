@@ -12,6 +12,7 @@ import { AnalysisModule } from './analysis/analysis.module';
 import { VisualizationModule } from './visualization/visualization.module';
 import { FacilityHomeModule } from './facility-home/facility-home.module';
 import { FacilityOverviewModule } from './facility-overview/facility-overview.module';
+import { FacilityReportsModule } from './facility-reports/facility-reports.module';
 
 
 @NgModule({
@@ -30,7 +31,8 @@ import { FacilityOverviewModule } from './facility-overview/facility-overview.mo
     AnalysisModule,
     VisualizationModule,
     FacilityHomeModule,
-    FacilityOverviewModule
+    FacilityOverviewModule,
+    FacilityReportsModule
   ]
 })
 export class FacilityModule { }

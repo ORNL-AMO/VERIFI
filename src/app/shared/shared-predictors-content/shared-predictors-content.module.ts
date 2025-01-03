@@ -8,6 +8,8 @@ import { OrderPredictorDataTablePipe } from './predictors-data-table/order-predi
 import { TableItemsDropdownModule } from '../table-items-dropdown/table-items-dropdown.module';
 import { HelperPipesModule } from '../helper-pipes/helper-pipes.module';
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
+import { LabelWithTooltipModule } from '../label-with-tooltip/label-with-tooltip.module';
+import { WeatherDataSubLabelComponent } from './weather-data-sub-label/weather-data-sub-label.component';
 
 
 
@@ -16,7 +18,8 @@ import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
     PredictorTableComponent,
     EditPredictorFormComponent,
     PredictorsDataTableComponent,
-    OrderPredictorDataTablePipe
+    OrderPredictorDataTablePipe,
+    WeatherDataSubLabelComponent
   ],
   imports: [
     CommonModule,
@@ -24,12 +27,15 @@ import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
     ReactiveFormsModule,
     TableItemsDropdownModule,
     HelperPipesModule,
-    NgbPaginationModule
+    NgbPaginationModule,
+    LabelWithTooltipModule
   ],
   exports: [
     PredictorTableComponent,
     EditPredictorFormComponent,
-    PredictorsDataTableComponent
+    PredictorsDataTableComponent,
+    OrderPredictorDataTablePipe,
+    WeatherDataSubLabelComponent
   ]
 })
 export class SharedPredictorsContentModule { }

@@ -20,6 +20,12 @@ import { MeterSourceColorPipe } from './meter-source-color.pipe';
 import { FacilityMetersListPipe } from './facility-meters-list.pipe';
 import { FacilityPredictorListPipe } from './facility-predictor-list.pipe';
 import { NaicsDisplayPipe } from './naics-display.pipe';
+import { AveragePipe } from './average.pipe';
+import { DegreeDayTotalPipe } from './degree-day-total.pipe';
+import { RegressionNumberPipe } from './regression-number.pipe';
+import { FacilityAnalysisNamePipe } from './facility-analysis-name.pipe';
+import { FacilityReportNamePipe } from './facility-report-name.pipe';
+import { AccountAnalysisNamePipe } from './account-analysis-name.pipe';
 
 @NgModule({
   declarations: [
@@ -42,7 +48,13 @@ import { NaicsDisplayPipe } from './naics-display.pipe';
     MeterSourceColorPipe,
     FacilityMetersListPipe,
     FacilityPredictorListPipe,
-    NaicsDisplayPipe
+    NaicsDisplayPipe,
+    AveragePipe,
+    DegreeDayTotalPipe,
+    RegressionNumberPipe,
+    FacilityAnalysisNamePipe,
+    FacilityReportNamePipe,
+    AccountAnalysisNamePipe
   ],
   imports: [
     CommonModule
@@ -67,7 +79,13 @@ import { NaicsDisplayPipe } from './naics-display.pipe';
     MeterSourceColorPipe,
     FacilityMetersListPipe,
     FacilityPredictorListPipe,
-    NaicsDisplayPipe
+    NaicsDisplayPipe,
+    AveragePipe,
+    DegreeDayTotalPipe,
+    RegressionNumberPipe,
+    FacilityAnalysisNamePipe,
+    FacilityReportNamePipe,
+    AccountAnalysisNamePipe
   ]
 })
 export class HelperPipesModule { }

@@ -32,6 +32,8 @@ import { IdbAccountReport } from '../models/idbModels/accountReport';
 import { IdbAccountAnalysisItem } from '../models/idbModels/accountAnalysisItem';
 import { IdbAnalysisItem } from '../models/idbModels/analysisItem';
 import { IdbPredictorEntryDeprecated } from '../models/idbModels/deprecatedPredictors';
+import { FacilityReportsDbService } from './facility-reports-db.service';
+import { IdbFacilityReport } from '../models/idbModels/facilityReport';
 
 @Injectable({
   providedIn: 'root'
@@ -52,7 +54,8 @@ export class DbChangesService {
     private customGWPDbService: CustomGWPDbService,
     private predictorDbService: PredictorDbService,
     private predictorDataDbService: PredictorDataDbService,
-    private migratePredictorsService: MigratePredictorsService) { }
+    private migratePredictorsService: MigratePredictorsService,
+    private facilityReportsDbService: FacilityReportsDbService) { }
 
   async updateAccount(account: IdbAccount) {
     let updatedAccount: IdbAccount = await firstValueFrom(this.accountDbService.updateWithObservable(account));
@@ -104,10 +107,12 @@ export class DbChangesService {
     await this.setCustomGWPS(account);
     //set analysis
     await this.setAnalysisItems(account, skipUpdates);
+    //set facility reports
+    await this.setAccountFacilityReports(account);
     //set account analysis
     await this.setAccountAnalysisItems(account, skipUpdates);
     this.accountDbService.selectedAccount.next(account);
-    if(needsMigration){
+    if (needsMigration) {
       await this.migratePredictorsService.migrateAccountPredictors();
       await this.setPredictorsV2(account);
       await this.setPredictorDataV2(account);
@@ -132,6 +137,8 @@ export class DbChangesService {
     this.setFacilityMeterGroups(facility);
     //set analaysis
     this.setFacilityAnalysisItems(facility);
+    //set reports
+    this.setFacilityReports(facility);
     this.facilityDbService.selectedFacility.next(facility);
   }
 
@@ -171,6 +178,21 @@ export class DbChangesService {
     let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
     let facilityAnalysisItems: Array<IdbAnalysisItem> = accountAnalysisItems.filter(item => { return item.facilityId == facility.guid });
     this.analysisDbService.facilityAnalysisItems.next(facilityAnalysisItems);
+  }
+
+  //facility reports
+  async setAccountFacilityReports(account: IdbAccount, facility?: IdbFacility) {
+    let accountFacilityReports: Array<IdbFacilityReport> = await this.facilityReportsDbService.getAllFacilityReportsByAccountId(account.guid);
+    this.facilityReportsDbService.accountFacilityReports.next(accountFacilityReports);
+    if (facility) {
+      this.setFacilityReports(facility);
+    }
+  }
+
+  setFacilityReports(facility: IdbFacility) {
+    let accountFacilityReports: Array<IdbFacilityReport> = this.facilityReportsDbService.accountFacilityReports.getValue();
+    let facilityReports: Array<IdbFacilityReport> = accountFacilityReports.filter(item => { return item.facilityId == facility.guid });
+    this.facilityReportsDbService.facilityReports.next(facilityReports);
   }
 
   async updateFacilities(selectedFacility: IdbFacility, onSelect?: boolean) {
@@ -325,9 +347,11 @@ export class DbChangesService {
     await this.utilityMeterDbService.deleteAllFacilityMeters(facility.guid);
     this.loadingService.setLoadingMessage("Deleting Facility Meter Groups...");
     await this.utilityMeterGroupDbService.deleteAllFacilityMeterGroups(facility.guid);
-    this.loadingService.setLoadingMessage("Updating Reports...")
+    this.loadingService.setLoadingMessage("Deleting Facility Reports...");
+    await this.facilityReportsDbService.deleteFacilityReports(facility.guid);
+    this.loadingService.setLoadingMessage("Updating Account Reports...")
     await this.accountReportDbService.updateReportsRemoveFacility(facility.guid);
-    this.loadingService.setLoadingMessage("Deleting Analysis Items...")
+    this.loadingService.setLoadingMessage("Deleting Account Analysis Items...")
     await this.analysisDbService.deleteAllFacilityAnalysisItems(facility.guid);
     this.loadingService.setLoadingMessage('Updating Account Analysis Items...');
     let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
@@ -349,7 +373,13 @@ export class DbChangesService {
     for (let index = 0; index < accountReports.length; index++) {
       accountReports[index].dataOverviewReportSetup.includedFacilities.push({
         facilityId: newFacility.guid,
-        included: false
+        included: false,
+        includedGroups: []
+      });
+      accountReports[index].betterClimateReportSetup.includedFacilityGroups.push({
+        facilityId: newFacility.guid,
+        include: false,
+        groups: []
       });
       await firstValueFrom(this.accountReportDbService.updateWithObservable(accountReports[index]));
     }

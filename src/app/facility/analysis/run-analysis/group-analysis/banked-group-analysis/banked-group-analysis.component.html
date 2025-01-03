@@ -1,0 +1,10 @@
+<div class="report" *ngIf="calculating != false">
+    <app-calculating-spinner [message]="'Calculating Banked Results...'"
+        [error]="calculating == 'error'"></app-calculating-spinner>
+</div>
+
+<div class="quick-report">
+    <app-group-analysis-report *ngIf="calculating == false" [groupSummary]="groupSummary"
+        [analysisItem]="bankedAnalysisItem" [facility]="facility"
+        [analysisReportSettings]="analysisReportSettings"></app-group-analysis-report>
+</div>

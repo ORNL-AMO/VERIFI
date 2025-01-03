@@ -1,7 +1,7 @@
 
-import { MonthlyAnalysisSummaryData } from "src/app/models/analysis";
+import { AnnualAnalysisSummary, MonthlyAnalysisSummaryData } from "src/app/models/analysis";
 import * as _ from 'lodash';
-import { filterYearPredictorData } from "../shared-calculations/calculationsHelpers";
+import { checkAnalysisValue, filterYearPredictorData } from "../shared-calculations/calculationsHelpers";
 import { IdbFacility } from "src/app/models/idbModels/facility";
 import { IdbPredictorData } from "src/app/models/idbModels/predictorData";
 import { IdbPredictor } from "src/app/models/idbModels/predictor";
@@ -16,6 +16,8 @@ export class AnnualAnalysisSummaryDataClass {
     baselineAdjustment: number;
     SEnPI: number;
     savings: number;
+    savingsBanked: number;
+    savingsUnbanked: number;
     totalSavingsPercentImprovement: number;
     annualSavingsPercentImprovement: number;
     cummulativeSavings: number;
@@ -35,6 +37,8 @@ export class AnnualAnalysisSummaryDataClass {
     //adjustment corresponding to the current year
     dataAdjustment: number;
     baselineAdjustmentInput: number;
+    isBanked: boolean;
+    isIntermediateBanked: boolean;
     constructor(
         monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
         year: number,
@@ -45,6 +49,8 @@ export class AnnualAnalysisSummaryDataClass {
     ) {
         this.year = year;
         this.setYearAnalysisSummaryData(monthlyAnalysisSummaryData);
+        this.setIsBanked();
+        this.setIsIntermediate();
         this.setPredictorUsage(accountPredictorEntries, facility, accountPredictors);
         this.setEnergyUse();
         this.setBaselineAdjustmentInput()
@@ -67,6 +73,18 @@ export class AnnualAnalysisSummaryDataClass {
         this.yearAnalysisSummaryData = _.filter(monthlyAnalysisSummaryData, (data: MonthlyAnalysisSummaryData) => {
             return data.fiscalYear == this.year;
         });
+    }
+
+    setIsBanked() {
+        this.isBanked = this.yearAnalysisSummaryData.find(data => {
+            return data.isBanked;
+        }) != undefined;
+    }
+
+    setIsIntermediate() {
+        this.isIntermediateBanked = this.yearAnalysisSummaryData.find(data => {
+            return data.isIntermediateBanked;
+        }) != undefined;
     }
 
     setEnergyUse() {
@@ -125,6 +143,12 @@ export class AnnualAnalysisSummaryDataClass {
         this.savings = _.sumBy(this.yearAnalysisSummaryData, (data: MonthlyAnalysisSummaryData) => {
             return data.savings;
         });
+        this.savingsUnbanked = _.sumBy(this.yearAnalysisSummaryData, (data: MonthlyAnalysisSummaryData) => {
+            return data.savingsUnbanked;
+        });
+        this.savingsBanked = _.sumBy(this.yearAnalysisSummaryData, (data: MonthlyAnalysisSummaryData) => {
+            return data.savingsBanked;
+        });
     }
 
     setTotalSavingsPercentImprovement() {
@@ -144,12 +168,16 @@ export class AnnualAnalysisSummaryDataClass {
 
     setAnnualSavingsPercentImprovement() {
         this.annualSavingsPercentImprovement = this.totalSavingsPercentImprovement - this.previousYearPercentSavings;
+        if (this.isIntermediateBanked) {
+            this.annualSavingsPercentImprovement = 0;
+        }
     }
 
     setCummulativeSavings(previousYearsSummaryData: Array<AnnualAnalysisSummaryDataClass>) {
-        if (previousYearsSummaryData.length != 0) {
-            let previousYearData: AnnualAnalysisSummaryDataClass = previousYearsSummaryData.find(data => { return data.year == (this.year - 1) })
-            this.cummulativeSavings = previousYearData.cummulativeSavings + this.savings;
+        if (previousYearsSummaryData.length != 0 && !this.isIntermediateBanked) {
+            let previousYearData: Array<AnnualAnalysisSummaryDataClass> = previousYearsSummaryData.filter(data => { return data.year < this.year })
+            let sumSavings: number = _.sumBy(previousYearData, (data: AnnualAnalysisSummaryDataClass) => { return data.cummulativeSavings });
+            this.cummulativeSavings = sumSavings + this.savings;
         } else {
             this.cummulativeSavings = 0;
         }
@@ -157,6 +185,9 @@ export class AnnualAnalysisSummaryDataClass {
 
     setNewSavings() {
         this.newSavings = this.savings - this.previousYearSavings;
+        if (this.isIntermediateBanked) {
+            this.newSavings = 0;
+        }
     }
 
     setPredictorUsage(accountPredictorEntries: Array<IdbPredictorData>, facility: IdbFacility, accountPredictors: Array<IdbPredictor>) {
@@ -181,5 +212,28 @@ export class AnnualAnalysisSummaryDataClass {
             }
         }
     }
+
+    getFormattedResult(): AnnualAnalysisSummary {
+        return {
+            year: this.year,
+            energyUse: this.energyUse,
+            adjusted: this.adjusted,
+            baselineAdjustmentForNormalization: checkAnalysisValue(this.baselineAdjustmentForNormalization),
+            baselineAdjustmentForOtherV2: checkAnalysisValue(this.baselineAdjustmentForOtherV2),
+            baselineAdjustment: checkAnalysisValue(this.baselineAdjustment),
+            SEnPI: checkAnalysisValue(this.SEnPI),
+            savings: checkAnalysisValue(this.savings),
+            totalSavingsPercentImprovement: checkAnalysisValue(this.totalSavingsPercentImprovement) * 100,
+            annualSavingsPercentImprovement: checkAnalysisValue(this.annualSavingsPercentImprovement) * 100,
+            cummulativeSavings: checkAnalysisValue(this.cummulativeSavings),
+            newSavings: checkAnalysisValue(this.newSavings),
+            predictorUsage: this.predictorUsage,
+            isBanked: this.isBanked,
+            isIntermediateBanked: this.isIntermediateBanked,
+            savingsBanked: checkAnalysisValue(this.savingsBanked),
+            savingsUnbanked: checkAnalysisValue(this.savingsUnbanked)
+        }
+    }
+
 
 }

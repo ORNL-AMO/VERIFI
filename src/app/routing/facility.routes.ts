@@ -45,6 +45,15 @@ import { EditPredictorFormComponent } from "../shared/shared-predictors-content/
 import { PredictorsDataComponent } from "../facility/utility-data/predictors/predictors-data/predictors-data.component";
 import { PredictorsDataTableComponent } from "../shared/shared-predictors-content/predictors-data-table/predictors-data-table.component";
 import { PredictorsDataFormComponent } from "../facility/utility-data/predictors/predictors-data/predictors-data-form/predictors-data-form.component";
+import { CalculatedPredictorDataUpdateComponent } from "../facility/utility-data/predictors/predictors-data/calculated-predictor-data-update/calculated-predictor-data-update.component";
+import { FacilityReportsComponent } from "../facility/facility-reports/facility-reports.component";
+import { FacilityReportsDashboardComponent } from "../facility/facility-reports/facility-reports-dashboard/facility-reports-dashboard.component";
+import { FacilityReportSetupComponent } from "../facility/facility-reports/facility-report-setup/facility-report-setup.component";
+import { BankedGroupAnalysisComponent } from "../facility/analysis/run-analysis/group-analysis/banked-group-analysis/banked-group-analysis.component";
+import { FacilityOverviewReportResultsComponent } from "../facility/facility-reports/report-results/facility-overview-report-results/facility-overview-report-results.component";
+import { FacilityAnalysisReportResultsComponent } from "../facility/facility-reports/report-results/facility-analysis-report-results/facility-analysis-report-results.component";
+import { FacilityAnalysisReportsDashboardComponent } from "../facility/facility-reports/facility-reports-dashboard/facility-analysis-reports-dashboard/facility-analysis-reports-dashboard.component";
+import { FacilityOverviewReportsDashboardComponent } from "../facility/facility-reports/facility-reports-dashboard/facility-overview-reports-dashboard/facility-overview-reports-dashboard.component";
 
 export const FacilityRoutes: Route = {
     path: 'facility/:id',
@@ -195,6 +204,11 @@ export const FacilityRoutes: Route = {
                                     component: PredictorsDataFormComponent,
                                     canDeactivate: [canDeactivateGuard]
                                 },
+                                {
+                                    path: 'update-calculated-entries',
+                                    component: CalculatedPredictorDataUpdateComponent
+                                    // canDeactivate: [canDeactivateGuard]
+                                },
                             ]
                         }
                     ]
@@ -251,7 +265,8 @@ export const FacilityRoutes: Route = {
                                 { path: 'options', component: GroupAnalysisOptionsComponent },
                                 { path: 'model-selection', component: RegressionModelSelectionComponent },
                                 { path: 'annual-analysis', component: AnnualAnalysisSummaryComponent },
-                                { path: 'monthly-analysis', component: MonthlyAnalysisSummaryComponent }
+                                { path: 'monthly-analysis', component: MonthlyAnalysisSummaryComponent },
+                                { path: 'banked-analysis', component: BankedGroupAnalysisComponent }
                             ]
                         },
                         {
@@ -271,5 +286,24 @@ export const FacilityRoutes: Route = {
                 }
             ]
         },
+        {
+            path: 'reports',
+            component: FacilityReportsComponent,
+            children: [
+                { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
+                {
+                    path: 'dashboard',
+                    component: FacilityReportsDashboardComponent,
+                    children: [
+                        { path: '', pathMatch: 'full', redirectTo: 'analysis' },
+                        { path: 'analysis', component: FacilityAnalysisReportsDashboardComponent },
+                        { path: 'overview', component: FacilityOverviewReportsDashboardComponent },
+                    ]
+                },
+                { path: 'setup', component: FacilityReportSetupComponent },
+                { path: 'analysis-report', component: FacilityAnalysisReportResultsComponent },
+                { path: 'overview-report', component: FacilityOverviewReportResultsComponent }
+            ]
+        }
     ]
 };

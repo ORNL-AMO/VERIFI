@@ -1,0 +1,12 @@
+.content-padding{
+    padding: 10px 20px;
+    overflow-y: auto;
+}
+
+.wrapper.main-content{
+    margin: 25px 40px;
+}
+
+.row.form-group{
+    margin-bottom:.5rem;
+}

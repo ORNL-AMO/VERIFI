@@ -6,7 +6,6 @@ import { AnalysisGroup, AnalysisGroupPredictorVariable, AnalysisTableColumns, Mo
 import { CopyTableService } from '../../helper-services/copy-table.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 
@@ -28,6 +27,16 @@ export class MonthlyAnalysisSummaryTableComponent implements OnInit {
   predictorVariables: Array<AnalysisGroupPredictorVariable>;
   @Input()
   group: AnalysisGroup;
+  @Input()
+  inReport: boolean;
+  @Input()
+  isBaselineYear: boolean;
+  @Input()
+  isReportYear: boolean;
+  @Input()
+  isGroupModelYear: boolean;
+  @Input({ required: true })
+  printBlock: 'consumption' | 'predictors' | 'savings' | 'all';
 
   @ViewChild('dataTable', { static: false }) dataTable: ElementRef;
 
@@ -40,8 +49,13 @@ export class MonthlyAnalysisSummaryTableComponent implements OnInit {
   numImprovementColumns: number;
   numPredictorColumns: number;
 
-  predictorColumns: Array<IdbPredictor>;
+  predictorColumns: Array<AnalysisGroupPredictorVariable>;
   copyingTable: boolean = false;
+  hasBanked: boolean;
+  hasBankedSavings: boolean;
+  hasTransitionYear: boolean;
+  reportLabel: 'Baseline Year' | 'Report Year' | 'Report & Model Year' | 'Baseline & Model Year' | 'Model Year';
+  modelYear: number;
   constructor(private analysisService: AnalysisService, private copyTableService: CopyTableService, private router: Router) { }
 
   ngOnInit(): void {
@@ -52,6 +66,11 @@ export class MonthlyAnalysisSummaryTableComponent implements OnInit {
       this.setNumPredictorColumns();
       this.setPredictorVariables();
     })
+    this.setHasBanked();
+    this.setModelYear();
+    if (this.inReport) {
+      this.setReportLabel();
+    }
   }
 
   ngOnDestroy() {
@@ -59,16 +78,16 @@ export class MonthlyAnalysisSummaryTableComponent implements OnInit {
   }
 
   setPredictorVariables() {
-    let inAccount: boolean =     this.router.url.includes('account');
-    if(!inAccount){
-      let predictorColumns: Array<IdbPredictor> = new Array();
+    let inAccount: boolean = this.router.url.includes('account');
+    if (!inAccount) {
+      let predictorColumns: Array<AnalysisGroupPredictorVariable> = new Array();
       this.monthlyAnalysisSummaryData.forEach((data, index) => {
         this.analysisTableColumns.predictors.forEach(predictorItem => {
           if (predictorItem.display) {
             if (index == 0) {
               predictorColumns.push(predictorItem.predictor)
             }
-            let monthData: { predictorId: string, usage: number } = data.predictorUsage.find(usageItem => { return usageItem.predictorId == predictorItem.predictor.guid });
+            let monthData: { predictorId: string, usage: number } = data.predictorUsage.find(usageItem => { return usageItem.predictorId == predictorItem.predictor.id });
             if (monthData) {
               data[predictorItem.predictor.name] = monthData.usage;
             }
@@ -78,7 +97,7 @@ export class MonthlyAnalysisSummaryTableComponent implements OnInit {
         })
       })
       this.predictorColumns = predictorColumns;
-    }else{
+    } else {
       this.predictorColumns = [];
     }
   }
@@ -133,15 +152,21 @@ export class MonthlyAnalysisSummaryTableComponent implements OnInit {
     if (this.analysisTableColumns.savings) {
       numImprovementColumns++;
     }
-    if (this.analysisTableColumns.percentSavingsComparedToBaseline) {
+    if(this.analysisTableColumns.savingsUnbanked){
       numImprovementColumns++;
     }
-    if (this.analysisTableColumns.yearToDateSavings) {
+    if(this.analysisTableColumns.bankedSavings){
       numImprovementColumns++;
     }
-    if (this.analysisTableColumns.yearToDatePercentSavings) {
-      numImprovementColumns++;
-    }
+    // if (this.analysisTableColumns.percentSavingsComparedToBaseline) {
+    //   numImprovementColumns++;
+    // }
+    // if (this.analysisTableColumns.yearToDateSavings) {
+    //   numImprovementColumns++;
+    // }
+    // if (this.analysisTableColumns.yearToDatePercentSavings) {
+    //   numImprovementColumns++;
+    // }
     if (this.analysisTableColumns.rollingSavings) {
       numImprovementColumns++;
     }
@@ -162,9 +187,9 @@ export class MonthlyAnalysisSummaryTableComponent implements OnInit {
   }
 
   //TODO: Should be a pipe...
-  checkIsProduction(predictorVariable: IdbPredictor): boolean {
+  checkIsProduction(predictorVariable: AnalysisGroupPredictorVariable): boolean {
     if (this.group) {
-      let groupVariable: AnalysisGroupPredictorVariable = this.group.predictorVariables.find(variable => { return variable.id == predictorVariable.guid })
+      let groupVariable: AnalysisGroupPredictorVariable = this.group.predictorVariables.find(variable => { return variable.id == predictorVariable.id })
       if (groupVariable) {
         return groupVariable.productionInAnalysis;
       }
@@ -178,5 +203,37 @@ export class MonthlyAnalysisSummaryTableComponent implements OnInit {
       this.copyTableService.copyTable(this.dataTable);
       this.copyingTable = false;
     }, 200)
+  }
+
+  setHasBanked() {
+    this.hasBanked = this.monthlyAnalysisSummaryData.find(data => {
+      return data.isBanked
+    }) != undefined;
+    this.hasBankedSavings = this.monthlyAnalysisSummaryData.find(data => {
+      return data.savingsBanked
+    }) != undefined;
+    this.hasTransitionYear = this.monthlyAnalysisSummaryData.find(data => {
+      return data.isIntermediateBanked
+    }) != undefined;
+  }
+
+  setReportLabel() {
+    if (this.isGroupModelYear && !this.isBaselineYear && !this.isReportYear) {
+      this.reportLabel = 'Model Year';
+    } else if (!this.isGroupModelYear && this.isBaselineYear && !this.isReportYear) {
+      this.reportLabel = 'Baseline Year';
+    } else if (!this.isGroupModelYear && !this.isBaselineYear && this.isReportYear) {
+      this.reportLabel = 'Report Year';
+    } else if (this.isGroupModelYear && this.isBaselineYear && !this.isReportYear) {
+      this.reportLabel = 'Baseline & Model Year';
+    } else if (this.isGroupModelYear && !this.isBaselineYear && this.isReportYear) {
+      this.reportLabel = 'Report & Model Year';
+    }
+  }
+
+  setModelYear() {
+    if (this.group && this.group.analysisType == 'regression') {
+      this.modelYear = this.group.regressionModelYear;
+    }
   }
 }

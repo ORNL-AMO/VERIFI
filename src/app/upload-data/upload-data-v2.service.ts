@@ -23,6 +23,8 @@ import { getNewIdbFacility, IdbFacility } from '../models/idbModels/facility';
 import { getNewIdbUtilityMeter, IdbUtilityMeter, MeterReadingDataApplication } from '../models/idbModels/utilityMeter';
 import { IdbUtilityMeterGroup } from '../models/idbModels/utilityMeterGroup';
 import { getNewIdbUtilityMeterData, IdbUtilityMeterData } from '../models/idbModels/utilityMeterData';
+import { IdbPredictor } from '../models/idbModels/predictor';
+import { IdbPredictorData } from '../models/idbModels/predictorData';
 
 @Injectable({
   providedIn: 'root'
@@ -51,10 +53,10 @@ export class UploadDataV2Service {
       throw ('No Facilities Found!')
     } else {
       let importMetersAndGroups: { meters: Array<IdbUtilityMeter>, newGroups: Array<IdbUtilityMeterGroup> } = this.getImportMeters(workbook, importFacilities, selectedAccount);
-      //TODO:
-      // let predictorEntries: Array<IdbPredictorEntry> = this.uploadDataSharedFunctionsService.getPredictorData(workbook, importFacilities, selectedAccount);
       let importMeterData: Array<IdbUtilityMeterData> = this.getUtilityMeterData(workbook, importMetersAndGroups.meters);
-      return { importFacilities: importFacilities, importMeters: importMetersAndGroups.meters, predictors: [], predictorData: [], meterData: importMeterData, newGroups: importMetersAndGroups.newGroups }
+      let importPredictors: Array<IdbPredictor> = this.uploadDataSharedFunctionsService.getPredictors(workbook, importFacilities);
+      let importPredictorData: Array<IdbPredictorData> = this.uploadDataSharedFunctionsService.getPredictorData(workbook, importFacilities, importPredictors);
+      return { importFacilities: importFacilities, importMeters: importMetersAndGroups.meters, predictors: importPredictors, predictorData: importPredictorData, meterData: importMeterData, newGroups: importMetersAndGroups.newGroups }
     }
   }
 

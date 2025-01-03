@@ -1,4 +1,4 @@
-<div class="facility banner d-flex justify-content-between w-100 pb-0">
+<div class="facility banner d-flex justify-content-between w-100 pb-0 hide-print">
     <div class="d-flex">
         <div class="banner-title" *ngIf="selectedFacility">
             <span class="fa fa-industry"></span>
@@ -25,6 +25,10 @@
             <li class="nav-item" title="Facility Analysis" [ngClass]="{'disabled': facilityMeterData.length == 0}">
                 <a class="nav-link" routerLink="analysis" [routerLinkActive]="['active']"><i
                         class="fa fa-microscope"></i>Analysis</a>
+            </li>
+            <li class="nav-item" title="Facility Reports" [ngClass]="{'disabled': facilityMeterData.length == 0}">
+                <a class="nav-link" routerLink="reports" [routerLinkActive]="['active']"><i
+                        class="fa fa-folder"></i>Reports</a>
             </li>
             <li class="nav-item" title="Facility Settings">
                 <a class="nav-link" routerLink="settings" [routerLinkActive]="['active']"><i
