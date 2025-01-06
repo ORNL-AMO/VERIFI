@@ -25,7 +25,6 @@ import { EnergyConsumptionComponent } from "src/app/facility/utility-data/energy
 import { EditMeterComponent } from "src/app/facility/utility-data/energy-consumption/energy-source/edit-meter/edit-meter.component";
 import { EnergySourceComponent } from "src/app/facility/utility-data/energy-consumption/energy-source/energy-source.component";
 import { UtilityMetersTableComponent } from "src/app/facility/utility-data/energy-consumption/energy-source/utility-meters-table/utility-meters-table.component";
-import { EditBillComponent } from "src/app/facility/utility-data/energy-consumption/utility-meter-data/edit-bill/edit-bill.component";
 import { UtilityMeterDataComponent } from "src/app/facility/utility-data/energy-consumption/utility-meter-data/utility-meter-data.component";
 import { MeterGroupingComponent } from "src/app/facility/utility-data/meter-grouping/meter-grouping.component";
 import { UtilityDataComponent } from "src/app/facility/utility-data/utility-data.component";
@@ -53,7 +52,8 @@ import { FacilityOverviewReportResultsComponent } from "../facility/facility-rep
 import { FacilityAnalysisReportResultsComponent } from "../facility/facility-reports/report-results/facility-analysis-report-results/facility-analysis-report-results.component";
 import { FacilityAnalysisReportsDashboardComponent } from "../facility/facility-reports/facility-reports-dashboard/facility-analysis-reports-dashboard/facility-analysis-reports-dashboard.component";
 import { FacilityOverviewReportsDashboardComponent } from "../facility/facility-reports/facility-reports-dashboard/facility-overview-reports-dashboard/facility-overview-reports-dashboard.component";
-import { MeterDataTableComponent } from "../shared/meter-data/meter-data-table/meter-data-table.component";
+import { MeterDataTableComponent } from "../shared/shared-meter-content/meter-data/meter-data-table/meter-data-table.component";
+import { EditBillComponent } from "../shared/shared-meter-content/edit-bill/edit-bill.component";
 
 export const FacilityRoutes: Route = {
     path: 'facility/:id',

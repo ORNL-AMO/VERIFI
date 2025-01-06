@@ -3,7 +3,6 @@ import { FormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { AdditionalChargesFilters, DetailedChargesFilters, ElectricityDataFilters } from 'src/app/models/meterDataFilter';
-import { UtilityMeterDataService } from '../../utility-meter-data.service';
 import { EmissionsResults } from 'src/app/models/eGridEmissions';
 import { getEmissions } from 'src/app/calculations/emissions-calculations/emissions';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
@@ -13,6 +12,7 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { checkMeterReadingExistForDate, IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
+import { UtilityMeterDataService } from 'src/app/facility/utility-data/energy-consumption/utility-meter-data/utility-meter-data.service';
 
 @Component({
   selector: 'app-edit-electricity-bill',

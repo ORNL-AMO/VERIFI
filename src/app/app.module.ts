@@ -32,7 +32,6 @@ import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
 import { DeletingAccountDataComponent } from './core-components/deleting-account-data/deleting-account-data.component';
 import { HomePageComponent } from './core-components/home-page/home-page.component';
 import { DataWizardModule } from './data-wizard/data-wizard.module';
-import { MeterDataModule } from './shared/meter-data/meter-data.module';
 
 @NgModule({
   declarations: [
@@ -69,8 +68,7 @@ import { MeterDataModule } from './shared/meter-data/meter-data.module';
     NgbTypeaheadModule,
     UploadDataModule,
     WeatherDataModule,
-    DataWizardModule,
-    MeterDataModule
+    DataWizardModule
   ],
   providers: [provideHttpClient(withInterceptorsFromDi())],
   bootstrap: [AppComponent]

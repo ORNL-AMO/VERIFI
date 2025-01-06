@@ -2,15 +2,15 @@ import { Component, Input, OnInit } from '@angular/core';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { AdditionalChargesFilters, DetailedChargesFilters, ElectricityDataFilters, EmissionsFilters, GeneralInformationFilters, GeneralUtilityDataFilters, VehicleDataFilters } from 'src/app/models/meterDataFilter';
-import { UtilityMeterDataService } from '../utility-meter-data.service';
 import { checkShowEmissionsOutputRate, getIsEnergyUnit } from 'src/app/shared/sharedHelperFuntions';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
+import { UtilityMeterDataService } from 'src/app/facility/utility-data/energy-consumption/utility-meter-data/utility-meter-data.service';
 
 @Component({
   selector: 'app-utility-meter-data-filter',
   templateUrl: './utility-meter-data-filter.component.html',
-  styleUrls: ['./utility-meter-data-filter.component.css', '../utility-meter-data.component.css']
+  styleUrls: ['./utility-meter-data-filter.component.css']
 })
 export class UtilityMeterDataFilterComponent implements OnInit {
   @Input()

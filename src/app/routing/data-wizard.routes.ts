@@ -15,13 +15,13 @@ import { FacilityMetersComponent } from "../data-wizard/account-facilities/facil
 import { FacilityMetersTableComponent } from "../data-wizard/account-facilities/facility-data/facility-meters/facility-meters-table/facility-meters-table.component";
 import { FacilityMeterComponent } from "../data-wizard/account-facilities/facility-data/facility-meters/facility-meter/facility-meter.component";
 import { FacilityPredictorsComponent } from "../data-wizard/account-facilities/facility-data/facility-predictors/facility-predictors.component";
-import { MeterDataComponent } from "../shared/meter-data/meter-data.component";
-import { MeterDataTableComponent } from "../shared/meter-data/meter-data-table/meter-data-table.component";
+import { MeterDataComponent } from "../shared/shared-meter-content/meter-data/meter-data.component";
+import { MeterDataTableComponent } from "../shared/shared-meter-content/meter-data/meter-data-table/meter-data-table.component";
 import { PredictorTableComponent } from "../shared/shared-predictors-content/predictor-table/predictor-table.component";
 import { EditPredictorFormComponent } from "../shared/shared-predictors-content/edit-predictor-form/edit-predictor-form.component";
 import { PredictorsDataTableComponent } from "../shared/shared-predictors-content/predictors-data-table/predictors-data-table.component";
 import { FacilitiesListComponent } from "../data-wizard/account-facilities/facilities-list/facilities-list.component";
-import { EditBillComponent } from "../facility/utility-data/energy-consumption/utility-meter-data/edit-bill/edit-bill.component";
+import { EditBillComponent } from "../shared/shared-meter-content/edit-bill/edit-bill.component";
 
 export const DataWizardRoutes: Route = {
     path: 'data-wizard/:id',
