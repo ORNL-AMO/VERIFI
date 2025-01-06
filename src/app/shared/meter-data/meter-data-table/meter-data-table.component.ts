@@ -33,6 +33,8 @@ export class MeterDataTableComponent {
   showIndividualDelete: boolean = false;
   paramsSub: Subscription;
   showFilterDropdown: boolean = false;
+
+  inDataWizard: boolean;
   constructor(
     private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
@@ -47,12 +49,18 @@ export class MeterDataTableComponent {
   ) { }
 
   ngOnInit(): void {
+    this.setInDataWizard();
     this.paramsSub = this.activatedRoute.parent.params.subscribe(params => {
       //TODO: update for int
-      let meterId: string = params['id'];
       this.showFilterDropdown = false;
       this.facilityMeters = this.utilityMeterDbService.facilityMeters.getValue();
-      this.selectedMeter = this.facilityMeters.find(meter => { return meter.guid == meterId });
+      if (this.inDataWizard) {
+        let meterId: string = params['id'];
+        this.selectedMeter = this.facilityMeters.find(meter => { return meter.guid == meterId });
+      } else {
+        let meterId: number = parseInt(params['id']);
+        this.selectedMeter = this.facilityMeters.find(meter => { return meter.id == meterId });
+      }
       this.setData();
     });
 
@@ -69,6 +77,10 @@ export class MeterDataTableComponent {
     this.accountMeterDataSub.unsubscribe();
     this.itemsPerPageSub.unsubscribe();
     this.paramsSub.unsubscribe();
+  }
+
+  setInDataWizard() {
+    this.inDataWizard = this.router.url.includes('data-wizard');
   }
 
   setData() {
@@ -118,7 +130,7 @@ export class MeterDataTableComponent {
     this.showIndividualDelete = false;
     await firstValueFrom(this.utilityMeterDataDbService.deleteWithObservable(this.meterDataToDelete.id));
     this.loadingService.setLoadingMessage("Meter Data Deleted...");
-    let selectedFacility: IdbFacility= this.facilityDbService.selectedFacility.getValue();
+    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     this.loadingService.setLoadingMessage("Setting Meter Data...");
     await this.dbChangesService.setMeterData(selectedAccount, selectedFacility);
@@ -145,13 +157,21 @@ export class MeterDataTableComponent {
   meterDataAdd() {
     this.showFilterDropdown = false;
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    this.router.navigateByUrl('facility/' + selectedFacility.id + '/utility/energy-consumption/utility-meter/' + this.selectedMeter.id + '/new-bill');
+    if (this.inDataWizard) {
+      this.router.navigateByUrl('/data-wizard/' + this.selectedMeter.accountId + '/facilities/' + this.selectedMeter.facilityId + '/meters/meter-data/' + this.selectedMeter.guid + '/new-bill');
+    } else {
+      this.router.navigateByUrl('facility/' + selectedFacility.id + '/utility/energy-consumption/utility-meter/' + this.selectedMeter.id + '/new-bill');
+    }
   }
 
   setEditMeterData(meterData: IdbUtilityMeterData) {
     this.showFilterDropdown = false;
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    this.router.navigateByUrl('facility/' + selectedFacility.id + '/utility/energy-consumption/utility-meter/' + this.selectedMeter.id + '/edit-bill/' + meterData.id);
+    if (this.inDataWizard) {
+      this.router.navigateByUrl('/data-wizard/' + this.selectedMeter.accountId + '/facilities/' + this.selectedMeter.facilityId + '/meters/meter-data/' + this.selectedMeter.guid + '/edit-bill/' + meterData.guid);
+    } else {
+      this.router.navigateByUrl('facility/' + selectedFacility.id + '/utility/energy-consumption/utility-meter/' + this.selectedMeter.id + '/edit-bill/' + meterData.id);
+    }
   }
 
   toggleFilterMenu() {

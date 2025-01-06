@@ -13,7 +13,6 @@ import { EditMeterFormModule } from './energy-source/edit-meter-form/edit-meter-
 import { HelperPipesModule } from 'src/app/shared/helper-pipes/helper-pipes.module';
 import { RouterModule } from '@angular/router';
 import { UtilityMetersTableComponent } from './energy-source/utility-meters-table/utility-meters-table.component';
-import { UtilityMeterDataTableComponent } from './utility-meter-data/utility-meter-data-table/utility-meter-data-table.component';
 import { EditBillComponent } from './utility-meter-data/edit-bill/edit-bill.component';
 import { TableItemsDropdownModule } from 'src/app/shared/table-items-dropdown/table-items-dropdown.module';
 import { EditVehicleMeterBillComponent } from './utility-meter-data/edit-bill/edit-vehicle-meter-bill/edit-vehicle-meter-bill.component';
@@ -30,7 +29,6 @@ import { MeterDataModule } from 'src/app/shared/meter-data/meter-data.module';
     UtilityMeterDataComponent,
     EnergyConsumptionComponent,
     UtilityMetersTableComponent,
-    UtilityMeterDataTableComponent,
     EditBillComponent,
     EditVehicleMeterBillComponent,
     RefrigerationCalculationTableComponent,

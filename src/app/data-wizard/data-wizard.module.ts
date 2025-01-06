@@ -27,6 +27,7 @@ import { FacilityPredictorsComponent } from './account-facilities/facility-data/
 import { FacilitiesListComponent } from './account-facilities/facilities-list/facilities-list.component';
 import { DataWizardHelpPanelComponent } from './data-wizard-help-panel/data-wizard-help-panel.component';
 import { WizardSidebarFacilitiesListPipe } from './data-wizard-sidebar/wizard-sidebar-facilities-list.pipe';
+import { TableItemsDropdownModule } from '../shared/table-items-dropdown/table-items-dropdown.module';
 
 
 @NgModule({
@@ -60,7 +61,8 @@ import { WizardSidebarFacilitiesListPipe } from './data-wizard-sidebar/wizard-si
     HelperPipesModule,
     FormsModule,
     EditMeterFormModule,
-    NgbPaginationModule
+    NgbPaginationModule,
+    TableItemsDropdownModule
   ]
 })
 export class DataWizardModule { }

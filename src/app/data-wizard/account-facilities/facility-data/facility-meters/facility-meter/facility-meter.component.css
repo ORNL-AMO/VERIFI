@@ -1,0 +1,7 @@
+.fa-trash{
+    color: red;
+}
+
+button:hover .fa-trash{
+    color: white;
+}

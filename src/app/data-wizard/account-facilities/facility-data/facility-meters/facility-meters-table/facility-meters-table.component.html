@@ -4,7 +4,7 @@
 <ng-template [ngIf]="facilityMeters.length > 0" [ngIfElse]="noMetersBlock">
 
     <div class="d-flex w-100 justify-content-end mb-2">
-        <!-- <app-table-items-dropdown></app-table-items-dropdown> -->
+        <app-table-items-dropdown></app-table-items-dropdown>
         <div class="ps-2">
             <button class="btn nav-btn" (click)="uploadData()"><i class="fa fa-upload"></i> Import Data</button>
         </div>

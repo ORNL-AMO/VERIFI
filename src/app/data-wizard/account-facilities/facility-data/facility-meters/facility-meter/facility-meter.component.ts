@@ -2,14 +2,19 @@ import { Component } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom, Subscription } from 'rxjs';
+import { LoadingService } from 'src/app/core-components/loading/loading.service';
+import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { EditMeterFormService } from 'src/app/facility/utility-data/energy-consumption/energy-source/edit-meter-form/edit-meter-form.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
+import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
+import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
+import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 
 @Component({
   selector: 'app-facility-meter',
@@ -24,13 +29,18 @@ export class FacilityMeterComponent {
 
   utilityMeter: IdbUtilityMeter;
   meterForm: FormGroup;
+  showDeleteMeter: boolean = false;
   constructor(private activatedRoute: ActivatedRoute,
     private utilityMeterDbService: UtilityMeterdbService,
     private facilityDbService: FacilitydbService,
     private editMeterFormService: EditMeterFormService,
     private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
-    private router: Router
+    private router: Router,
+    private sharedDataService: SharedDataService,
+    private toastNotificationsService: ToastNotificationsService,
+    private loadingService: LoadingService,
+    private utilityMeterDataDbService: UtilityMeterDatadbService
   ) {
 
   }
@@ -73,4 +83,37 @@ export class FacilityMeterComponent {
     await this.dbChangesService.setMeters(selectedAccount, selectedFacility);
   }
 
+  showDelete() {
+    this.sharedDataService.modalOpen.next(true);
+    this.showDeleteMeter = true;
+  }
+
+  cancelDelete() {
+    this.sharedDataService.modalOpen.next(false);
+    this.showDeleteMeter = false;
+  }
+
+  async deleteMeter() {
+    this.loadingService.setLoadingMessage('Deleting Meters and Data...')
+    this.loadingService.setLoadingStatus(true);
+    //delete meter
+    await firstValueFrom(this.utilityMeterDbService.deleteIndexWithObservable(this.utilityMeter.id));
+    //delete meter data
+    let allMeterData: Array<IdbUtilityMeterData> = await firstValueFrom(this.utilityMeterDataDbService.getAll());
+    let meterData: Array<IdbUtilityMeterData> = allMeterData.filter(meterData => { return meterData.meterId == this.utilityMeter.guid });
+    for (let index = 0; index < meterData.length; index++) {
+      await firstValueFrom(this.utilityMeterDataDbService.deleteWithObservable(meterData[index].id));
+    }
+
+    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    //set meters
+    await this.dbChangesService.setMeters(account, selectedFacility);
+    //set meter data
+    await this.dbChangesService.setMeterData(account, selectedFacility);
+    this.cancelDelete();
+    this.loadingService.setLoadingStatus(false);
+    this.toastNotificationsService.showToast("Meter and Meter Data Deleted", undefined, undefined, false, "alert-success");
+    this.router.navigateByUrl('/data-wizard/' + account.guid + '/facilities/' + selectedFacility.guid + '/meters')
+  }
 }

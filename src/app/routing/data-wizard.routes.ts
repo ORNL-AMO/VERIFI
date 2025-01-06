@@ -21,6 +21,7 @@ import { PredictorTableComponent } from "../shared/shared-predictors-content/pre
 import { EditPredictorFormComponent } from "../shared/shared-predictors-content/edit-predictor-form/edit-predictor-form.component";
 import { PredictorsDataTableComponent } from "../shared/shared-predictors-content/predictors-data-table/predictors-data-table.component";
 import { FacilitiesListComponent } from "../data-wizard/account-facilities/facilities-list/facilities-list.component";
+import { EditBillComponent } from "../facility/utility-data/energy-consumption/utility-meter-data/edit-bill/edit-bill.component";
 
 export const DataWizardRoutes: Route = {
     path: 'data-wizard/:id',
@@ -77,7 +78,9 @@ export const DataWizardRoutes: Route = {
                                     path: 'meter-data/:id',
                                     component: MeterDataComponent,
                                     children: [
-                                        { path: '', component: MeterDataTableComponent }
+                                        { path: '', component: MeterDataTableComponent },
+                                        { path: 'edit-bill/:id', component: EditBillComponent },
+                                        { path: 'new-bill', component: EditBillComponent }
                                     ]
                                 }
                             ]

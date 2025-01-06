@@ -1,13 +1,17 @@
 import { Component, ElementRef, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { firstValueFrom, Subscription } from 'rxjs';
+import { LoadingService } from 'src/app/core-components/loading/loading.service';
+import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
+import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { getNewIdbUtilityMeter, IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
+import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { CopyTableService } from 'src/app/shared/helper-services/copy-table.service';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 
@@ -41,7 +45,10 @@ export class FacilityMetersTableComponent {
     private router: Router,
     private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService,
-    private dbChangesService: DbChangesService
+    private dbChangesService: DbChangesService,
+    private loadingService: LoadingService,
+    private utilityMeterDataDbService: UtilityMeterDatadbService,
+    private toastNotificationsService: ToastNotificationsService
   ) {
 
   }
@@ -98,37 +105,29 @@ export class FacilityMetersTableComponent {
   }
 
   async deleteMeter() {
-    // let deleteMeterId: number = this.meterToDelete.id;
-    // let deleteMeterGuid: string = this.meterToDelete.guid;
-    // this.meterToDelete = undefined;
-    // this.loadingService.setLoadingMessage('Deleting Meters and Data...')
-    // this.loadingService.setLoadingStatus(true);
-    // //delete meter
-    // await firstValueFrom(this.utilityMeterdbService.deleteIndexWithObservable(deleteMeterId));
-
-
-    // //delete meter data
-
-    // let allMeterData: Array<IdbUtilityMeterData> = await firstValueFrom(this.utilityMeterDatadbService.getAll());
-    // let meterData: Array<IdbUtilityMeterData> = allMeterData.filter(meterData => { return meterData.meterId == deleteMeterGuid });
-    // for (let index = 0; index < meterData.length; index++) {
-    //   await firstValueFrom(this.utilityMeterDatadbService.deleteWithObservable(meterData[index].id));
-    // }
-    // let selectedFacility: IdbFacility = this.facilitydbService.selectedFacility.getValue();
-    // //set meters
-    // let accountMeters: Array<IdbUtilityMeter> = await this.utilityMeterdbService.getAllAccountMeters(selectedFacility.accountId);
-    // this.utilityMeterdbService.accountMeters.next(accountMeters);
-    // let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == selectedFacility.guid });
-    // this.utilityMeterdbService.facilityMeters.next(facilityMeters);
-    // //set meter data
-
-    // let accountMeterData: Array<IdbUtilityMeterData> = await this.utilityMeterDatadbService.getAllAccountMeterData(selectedFacility.accountId);
-    // this.utilityMeterDatadbService.accountMeterData.next(accountMeterData);
-    // let facilityMeterData: Array<IdbUtilityMeterData> = accountMeterData.filter(meterData => { return meterData.facilityId == selectedFacility.guid });
-    // this.utilityMeterDatadbService.facilityMeterData.next(facilityMeterData);
-    // this.cancelDelete();
-    // this.loadingService.setLoadingStatus(false);
-    // this.toastNotificationsService.showToast("Meter and Meter Data Deleted", undefined, undefined, false, "alert-success");
+    let deleteMeterId: number = this.meterToDelete.id;
+    let deleteMeterGuid: string = this.meterToDelete.guid;
+    this.meterToDelete = undefined;
+    this.loadingService.setLoadingMessage('Deleting Meters and Data...')
+    this.loadingService.setLoadingStatus(true);
+    //delete meter
+    await firstValueFrom(this.utilityMeterDbService.deleteIndexWithObservable(deleteMeterId));
+    //delete meter data
+    let allMeterData: Array<IdbUtilityMeterData> = await firstValueFrom(this.utilityMeterDataDbService.getAll());
+    let meterData: Array<IdbUtilityMeterData> = allMeterData.filter(meterData => { return meterData.meterId == deleteMeterGuid });
+    for (let index = 0; index < meterData.length; index++) {
+      await firstValueFrom(this.utilityMeterDataDbService.deleteWithObservable(meterData[index].id));
+    }
+    
+    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    //set meters
+    await this.dbChangesService.setMeters(account, selectedFacility);
+    //set meter data
+    await this.dbChangesService.setMeterData(account, selectedFacility);
+    this.cancelDelete();
+    this.loadingService.setLoadingStatus(false);
+    this.toastNotificationsService.showToast("Meter and Meter Data Deleted", undefined, undefined, false, "alert-success");
   }
 
   setOrderDataField(str: string) {
