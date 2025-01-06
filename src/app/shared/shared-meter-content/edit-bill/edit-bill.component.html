@@ -6,7 +6,7 @@
     <div class="saveCancel item-right">
         <button class="btn btn-secondary" (click)="cancel()">Cancel</button>
         <button *ngIf="addOrEdit == 'edit'" class="btn btn-primary" (click)="saveAndQuit()"
-            [disabled]="meterDataForm.invalid || invalidDate">Save</button>
+            [disabled]="meterDataForm.invalid || invalidDate">Save Changes</button>
         <button *ngIf="addOrEdit == 'add'" class="btn btn-primary me-2" (click)="saveAndQuit()"
             [disabled]="meterDataForm.invalid || invalidDate">Save + Quit</button>
         <button *ngIf="addOrEdit == 'add'" class="btn btn-primary" (click)="saveAndAddAnother()"

@@ -22,6 +22,9 @@ import { EditPredictorFormComponent } from "../shared/shared-predictors-content/
 import { PredictorsDataTableComponent } from "../shared/shared-predictors-content/predictors-data-table/predictors-data-table.component";
 import { FacilitiesListComponent } from "../data-wizard/account-facilities/facilities-list/facilities-list.component";
 import { EditBillComponent } from "../shared/shared-meter-content/edit-bill/edit-bill.component";
+import { canDeactivateGuard } from "./can-deactivate.guard";
+import { PredictorsDataFormComponent } from "../facility/utility-data/predictors/predictors-data/predictors-data-form/predictors-data-form.component";
+import { CalculatedPredictorDataUpdateComponent } from "../facility/utility-data/predictors/predictors-data/calculated-predictor-data-update/calculated-predictor-data-update.component";
 
 export const DataWizardRoutes: Route = {
     path: 'data-wizard/:id',
@@ -79,8 +82,16 @@ export const DataWizardRoutes: Route = {
                                     component: MeterDataComponent,
                                     children: [
                                         { path: '', component: MeterDataTableComponent },
-                                        { path: 'edit-bill/:id', component: EditBillComponent },
-                                        { path: 'new-bill', component: EditBillComponent }
+                                        {
+                                            path: 'edit-bill/:id',
+                                            component: EditBillComponent,
+                                            canDeactivate: [canDeactivateGuard]
+                                        },
+                                        {
+                                            path: 'new-bill',
+                                            component: EditBillComponent,
+                                            canDeactivate: [canDeactivateGuard]
+                                        }
                                     ]
                                 }
                             ]
@@ -91,47 +102,42 @@ export const DataWizardRoutes: Route = {
                             children: [
                                 { path: '', component: PredictorTableComponent },
                                 { path: 'predictor/:id', component: EditPredictorFormComponent },
-                                { path: 'predictor-data/:id', component: PredictorsDataTableComponent }
+                                {
+                                    path: 'edit-predictor/:id',
+                                    component: EditPredictorFormComponent,
+                                    canDeactivate: [canDeactivateGuard]
+                                },
+                                {
+                                    path: 'add-predictor',
+                                    component: EditPredictorFormComponent,
+                                    canDeactivate: [canDeactivateGuard]
+                                },
+                                {
+                                    path: 'predictor-data/:id',
+                                    children: [
+                                        { path: '', component: PredictorsDataTableComponent },
+                                        {
+                                            path: 'edit-entry/:id',
+                                            component: PredictorsDataFormComponent,
+                                            canDeactivate: [canDeactivateGuard]
+                                        },
+                                        {
+                                            path: 'add-entry',
+                                            component: PredictorsDataFormComponent,
+                                            canDeactivate: [canDeactivateGuard]
+                                        },
+                                        {
+                                            path: 'update-calculated-entries',
+                                            component: CalculatedPredictorDataUpdateComponent
+                                            // canDeactivate: [canDeactivateGuard]
+                                        }
+                                    ]
+                                }
                             ]
                         }
                     ]
                 }
             ]
-        },
-        // {
-        //     path: 'facility/:id',
-        //     component: FacilityDataComponent,
-        // children: [
-        //     // { path: '', pathMatch: 'full', redirectTo: 'setup' },
-        //     {
-        //         path: '',
-        //         component: FacilitySetupComponent
-        //     },
-        //     {
-        //         path: 'meters',
-        //         component: FacilityMetersComponent,
-        //         children: [
-        //             { path: '', component: FacilityMetersTableComponent },
-        //             { path: 'meter/:id', component: FacilityMeterComponent },
-        //             {
-        //                 path: 'meter-data/:id',
-        //                 component: MeterDataComponent,
-        //                 children: [
-        //                     { path: '', component: MeterDataTableComponent }
-        //                 ]
-        //             }
-        //         ]
-        //     },
-        //     {
-        //         path: 'predictors',
-        //         component: FacilityPredictorsComponent,
-        //         children: [
-        //             { path: '', component: PredictorTableComponent },
-        //             { path: 'predictor/:id', component: EditPredictorFormComponent },
-        //             { path: 'predictor-data/:id', component: PredictorsDataTableComponent }
-        //         ]
-        //     }
-        // ]
-        // }
+        }
     ]
 }

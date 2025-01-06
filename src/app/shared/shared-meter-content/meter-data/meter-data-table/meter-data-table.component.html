@@ -12,10 +12,11 @@
     </div>
 </div>
 <div *ngIf="meterData.length != 0">
-    <div class="d-flex w-100 mb-2 justify-content-end">
-        <!-- <app-utility-meter-data-filter *ngIf="selectedMeter.scope != 5 && selectedMeter.scope != 6"
-            [meter]="selectedMeter" [filterType]="'table'">
-        </app-utility-meter-data-filter> -->
+    <div class="d-flex w-100 mb-2"
+        [ngClass]="{'justify-content-between': selectedMeter.source == 'Electricity', 'justify-content-end': selectedMeter.source != 'Electricity'}">
+        <app-utility-meter-data-filter *ngIf="selectedMeter.source == 'Electricity'" [meter]="selectedMeter"
+            [filterType]="'table'">
+        </app-utility-meter-data-filter>
 
         <div class="d-flex">
             <!--Bulk Delete-->

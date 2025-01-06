@@ -123,7 +123,11 @@ export class PredictorsDataTableComponent {
 
   addPredictorEntry() {
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    this.router.navigateByUrl('facility/' + selectedFacility.id + '/utility/predictors/predictor/' + this.predictor.guid + '/add-entry');
+    if (this.inDataWizard) {
+      this.router.navigateByUrl('/data-wizard/' + this.predictor.accountId + '/facilities/' + this.predictor.accountId + '/predictors/predictor-data/' + this.predictor.guid + '/add-entry')
+    } else {
+      this.router.navigateByUrl('facility/' + selectedFacility.id + '/utility/predictors/predictor/' + this.predictor.guid + '/add-entry');
+    }
   }
 
   setDeletePredictorData(predictorEntry: IdbPredictorData) {

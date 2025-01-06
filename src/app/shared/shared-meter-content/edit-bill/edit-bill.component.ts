@@ -9,7 +9,7 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { checkShowHeatCapacity, getIsEnergyMeter, getIsEnergyUnit } from 'src/app/shared/sharedHelperFuntions';
-import { firstValueFrom, Observable, of } from 'rxjs';
+import { firstValueFrom, Observable, of, Subscription } from 'rxjs';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { getNewIdbUtilityMeterData, IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
@@ -33,6 +33,8 @@ export class EditBillComponent implements OnInit {
   displayVehicleFuelEfficiency: boolean;
   invalidDate: boolean;
   showFilterDropdown: boolean = false;
+  inDataWizard: boolean;
+  paramsSub: Subscription;
   constructor(private activatedRoute: ActivatedRoute, private utilityMeterDataDbService: UtilityMeterDatadbService,
     private utilityMeterDbService: UtilityMeterdbService, private loadingService: LoadingService,
     private dbChangesService: DbChangesService, private facilityDbService: FacilitydbService, private accountDbService: AccountdbService,
@@ -40,32 +42,65 @@ export class EditBillComponent implements OnInit {
     private router: Router) { }
 
   ngOnInit(): void {
-    this.activatedRoute.parent.params.subscribe(parentParams => {
-      let meterId: number = parseInt(parentParams['id']);
+    this.setInDataWizard();
+    this.paramsSub = this.activatedRoute.parent.params.subscribe(parentParams => {
       let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
-      this.editMeter = accountMeters.find(meter => { return meter.id == meterId });
+      if (this.inDataWizard) {
+        let meterId: string = parentParams['id'];
+        this.editMeter = accountMeters.find(meter => { return meter.guid == meterId });
+      } else {
+        let meterId: number = parseInt(parentParams['id']);
+        this.editMeter = accountMeters.find(meter => { return meter.id == meterId });
+      }
       this.setDisplayHeatCapacity();
       this.activatedRoute.params.subscribe(params => {
-        let meterReadingId: number = parseInt(params['id']);
-        if (meterReadingId) {
-          //existing reading
-          this.addOrEdit = 'edit';
-          let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
-          this.editMeterData = accountMeterData.find(data => { return data.id == meterReadingId });
+        if (this.inDataWizard) {
+          let meterReadingId: string = params['id'];
+          if (meterReadingId) {
+            //existing reading
+            this.addOrEdit = 'edit';
+            let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
+            this.editMeterData = accountMeterData.find(data => { return data.guid == meterReadingId });
+          } else {
+            //new Reading
+            let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
+            this.editMeterData = getNewIdbUtilityMeterData(this.editMeter, accountMeterData);
+            this.addOrEdit = 'add';
+          }
         } else {
-          //new Reading
-          let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
-          this.editMeterData = getNewIdbUtilityMeterData(this.editMeter, accountMeterData);
-          this.addOrEdit = 'add';
+          let meterReadingId: number = parseInt(params['id']);
+          if (meterReadingId) {
+            //existing reading
+            this.addOrEdit = 'edit';
+            let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
+            this.editMeterData = accountMeterData.find(data => { return data.id == meterReadingId });
+          } else {
+            //new Reading
+            let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
+            this.editMeterData = getNewIdbUtilityMeterData(this.editMeter, accountMeterData);
+            this.addOrEdit = 'add';
+          }
         }
         this.setMeterDataForm();
       })
     })
   }
 
+  ngOnDestroy() {
+    this.paramsSub.unsubscribe();
+  }
+
+  setInDataWizard() {
+    this.inDataWizard = this.router.url.includes('data-wizard');
+  }
+
   cancel() {
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    this.router.navigateByUrl('/facility/' + selectedFacility.id + '/utility/energy-consumption/utility-meter/' + this.editMeter.id + '/data-table');
+    if (this.inDataWizard) {
+      this.router.navigateByUrl('/data-wizard/' + this.editMeter.accountId + '/facilities/' + this.editMeter.facilityId + '/meters/meter-data/' + this.editMeter.guid);
+    } else {
+      this.router.navigateByUrl('/facility/' + selectedFacility.id + '/utility/energy-consumption/utility-meter/' + this.editMeter.id + '/data-table');
+    }
   }
 
   async saveAndQuit() {
@@ -132,7 +167,7 @@ export class EditBillComponent implements OnInit {
       if (this.displayVolumeInput) {
         this.meterDataForm.controls.totalEnergyUse.disable();
       }
-      if(this.displayHeatCapacity && this.meterDataForm.controls.heatCapacity.value == undefined){
+      if (this.displayHeatCapacity && this.meterDataForm.controls.heatCapacity.value == undefined) {
         this.meterDataForm.controls.heatCapacity.patchValue(this.editMeter.heatCapacity);
       }
     }

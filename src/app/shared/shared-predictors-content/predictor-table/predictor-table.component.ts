@@ -135,11 +135,19 @@ export class PredictorTableComponent {
   }
 
   selectEditPredictor(predictor: IdbPredictor) {
-    this.router.navigateByUrl('facility/' + this.selectedFacility.id + '/utility/predictors/manage/edit-predictor/' + predictor.guid);
+    if (this.router.url.includes('data-wizard')) {
+      this.router.navigateByUrl('/data-wizard/' + predictor.accountId + '/facilities/' + predictor.facilityId + '/predictors/predictor/' + predictor.guid);
+    } else {
+      this.router.navigateByUrl('facility/' + this.selectedFacility.id + '/utility/predictors/manage/edit-predictor/' + predictor.guid);
+    }
   }
 
   addPredictor() {
-    this.router.navigateByUrl('facility/' + this.selectedFacility.id + '/utility/predictors/manage/add-predictor');
+    if (this.router.url.includes('data-wizard')) {
+      this.router.navigateByUrl('/data-wizard/' + this.selectedFacility.accountId + '/facilities/' + this.selectedFacility.guid + '/predictors/add-predictor');
+    } else {
+      this.router.navigateByUrl('facility/' + this.selectedFacility.id + '/utility/predictors/manage/add-predictor');
+    }
   }
 
   uploadData() {

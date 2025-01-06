@@ -154,7 +154,11 @@ export class EditPredictorFormComponent {
   }
 
   cancel() {
-    this.router.navigateByUrl('facility/' + this.facility.id + '/utility/predictors/manage/predictor-table')
+    if(this.router.url.includes('data-wizard')){
+      this.router.navigateByUrl('facility/' + this.facility.id + '/utility/predictors/manage/predictor-table')
+    }else{
+      this.router.navigateByUrl('facility/' + this.facility.id + '/utility/predictors/manage/predictor-table')
+    }
   }
 
   setPredictorDataFromForm(): boolean {
