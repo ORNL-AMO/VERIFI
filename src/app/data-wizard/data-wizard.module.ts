@@ -26,6 +26,7 @@ import { FacilityMeterComponent } from './account-facilities/facility-data/facil
 import { FacilityPredictorsComponent } from './account-facilities/facility-data/facility-predictors/facility-predictors.component';
 import { FacilitiesListComponent } from './account-facilities/facilities-list/facilities-list.component';
 import { DataWizardHelpPanelComponent } from './data-wizard-help-panel/data-wizard-help-panel.component';
+import { WizardSidebarFacilitiesListPipe } from './data-wizard-sidebar/wizard-sidebar-facilities-list.pipe';
 
 
 @NgModule({
@@ -49,7 +50,8 @@ import { DataWizardHelpPanelComponent } from './data-wizard-help-panel/data-wiza
     FacilityMeterComponent,
     FacilityPredictorsComponent,
     FacilitiesListComponent,
-    DataWizardHelpPanelComponent
+    DataWizardHelpPanelComponent,
+    WizardSidebarFacilitiesListPipe
   ],
   imports: [
     CommonModule,

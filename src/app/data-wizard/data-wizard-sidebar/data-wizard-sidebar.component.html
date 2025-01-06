@@ -1,5 +1,12 @@
 <div class="h-100 navbar d-flex flex-column align-items-start justify-content-start shadow sidebar-container">
     <div class="ps-1 w-100">
+        <h5 class="ps-2 mb-0">
+            <span class="fa fa-building"></span>
+            {{account.name}}
+        </h5>
+        <div class="p-2 w-100">
+            <hr class="my-1">
+        </div>
         <div class="ps-2 pe-2 nav-item">
             <a class="nav-link" [routerLink]="'/data-wizard/'+account.guid + '/account-setup'"
                 [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
@@ -65,11 +72,11 @@
         <div class="ps-2 pe-2 nav-item">
             <a class="nav-link" (click)="toggleFacilitiesOpen()">
                 <span class="fa"
-                    [ngClass]="{'fa-folder-open': account.sidebarFacilitiesOpen, 'fa-folder': !account.sidebarFacilitiesOpen}"></span>
+                    [ngClass]="{'fa-chevron-down': account.sidebarFacilitiesOpen, 'fa-chevron-right': !account.sidebarFacilitiesOpen}"></span>
                 Facilities
             </a>
         </div>
-        <div class="sidebar-section" *ngIf="account.sidebarFacilitiesOpen">
+        <div class="sidebar-section facilities-section" *ngIf="account.sidebarFacilitiesOpen">
             <div class="ps-2 pe-2 nav-item">
                 <a class="nav-link" [routerLink]="'/data-wizard/'+account.guid+'/facilities'"
                     [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
@@ -77,12 +84,13 @@
                     Manage Facilities
                 </a>
             </div>
-            <ng-container *ngFor="let facility of facilities">
+            <ng-container *ngFor="let facility of facilities | wizardSidebarFacilitiesList">
                 <div class="ps-2 pe-2 nav-item">
                     <a class="nav-link" (click)="toggleFacilityOpen(facility)"
-                        [ngClass]="{'active': facility.guid == selectedFacility.guid}">
+                        [ngClass]="{'active': facility.guid == selectedFacility?.guid}">
                         <span class="fa"
-                            [ngClass]="{'fa-folder-open': facility.sidebarOpen, 'fa-folder': !facility.sidebarOpen}"></span>
+                            [ngClass]="{'fa-chevron-down': facility.sidebarOpen, 'fa-chevron-right': !facility.sidebarOpen}"></span>
+                        <span class="fa fa-industry ps-1"></span>
                         {{facility.name}}
                     </a>
                 </div>
@@ -97,7 +105,7 @@
                         <a class="nav-link" (click)="toggleFacilityMetersOpen(facility)"
                             [ngClass]="{'active': (selectedMeter?.facilityId == facility.guid)}">
                             <span class="fa"
-                                [ngClass]="{'fa-folder-open': facility.sidebarMetersOpen, 'fa-folder': !facility.sidebarMetersOpen}"></span>
+                                [ngClass]="{'fa-chevron-down': facility.sidebarMetersOpen, 'fa-chevron-right': !facility.sidebarMetersOpen}"></span>
                             Meters
                         </a>
                     </div>
@@ -114,7 +122,7 @@
                                 <a class="nav-link" (click)="toggleMeterOpen(meter)"
                                     [ngClass]="{'active': meter.guid == selectedMeter?.guid}">
                                     <span class="fa"
-                                        [ngClass]="{'fa-folder-open': meter.sidebarOpen, 'fa-folder': !meter.sidebarOpen}"></span>
+                                        [ngClass]="{'fa-chevron-down': meter.sidebarOpen, 'fa-chevron-right': !meter.sidebarOpen}"></span>
                                     {{meter.name}}
                                 </a>
                             </div>
@@ -139,7 +147,7 @@
                     <div class="ps-2 pe-2 nav-item">
                         <a class="nav-link" (click)="toggleFacilityPredictorsOpen(facility)">
                             <span class="fa"
-                                [ngClass]="{'fa-folder-open': facility.sidebarPredictorsOpen, 'fa-folder': !facility.sidebarPredictorsOpen}"></span>
+                                [ngClass]="{'fa-chevron-down': facility.sidebarPredictorsOpen, 'fa-chevron-right': !facility.sidebarPredictorsOpen}"></span>
                             Predictors
                         </a>
                     </div>
@@ -155,7 +163,7 @@
                             <div class="ps-2 pe-2 nav-item">
                                 <a class="nav-link" (click)="togglePredictorOpen(predictor)">
                                     <span class="fa"
-                                        [ngClass]="{'fa-folder-open': predictor.sidebarOpen, 'fa-folder': !predictor.sidebarOpen}"></span>
+                                        [ngClass]="{'fa-chevron-down': predictor.sidebarOpen, 'fa-chevron-right': !predictor.sidebarOpen}"></span>
                                     {{predictor.name}}
                                 </a>
                             </div>

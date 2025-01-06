@@ -19,6 +19,11 @@
 .sidebar-section {
     border-left: groove 1px black;
     padding-left: .5rem;
+    margin-left: 1rem;
+}
+
+.facilities-section{
+    margin-right: 1rem;
 }
 
 
@@ -83,4 +88,17 @@ a.nav-link, .btn.btn-dark, .link-section-heading{
 
 .nav-link:hover {
     cursor: pointer;
+}
+
+
+.fa-gear{
+    color: #740acb;
+}
+
+.fa-table{
+    color: #099462;
+}
+
+.fa-list{
+    color: #cb360a;
 }
