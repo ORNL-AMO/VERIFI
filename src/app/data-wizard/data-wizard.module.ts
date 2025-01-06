@@ -28,6 +28,7 @@ import { DataWizardHelpPanelComponent } from './data-wizard-help-panel/data-wiza
 import { WizardSidebarFacilitiesListPipe } from './data-wizard-sidebar/wizard-sidebar-facilities-list.pipe';
 import { TableItemsDropdownModule } from '../shared/table-items-dropdown/table-items-dropdown.module';
 import { SharedMeterContentModule } from '../shared/shared-meter-content/shared-meter-content.module';
+import { FacilityMeterMonthlyDataComponent } from './account-facilities/facility-data/facility-meters/facility-meter-monthly-data/facility-meter-monthly-data.component';
 
 
 @NgModule({
@@ -52,7 +53,8 @@ import { SharedMeterContentModule } from '../shared/shared-meter-content/shared-
     FacilityPredictorsComponent,
     FacilitiesListComponent,
     DataWizardHelpPanelComponent,
-    WizardSidebarFacilitiesListPipe
+    WizardSidebarFacilitiesListPipe,
+    FacilityMeterMonthlyDataComponent
   ],
   imports: [
     CommonModule,

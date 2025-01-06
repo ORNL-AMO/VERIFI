@@ -9,7 +9,7 @@ import { VehicleDataTableComponent } from './meter-data/meter-data-table/vehicle
 import { HelperPipesModule } from '../helper-pipes/helper-pipes.module';
 import { RouterModule } from '@angular/router';
 import { TableItemsDropdownModule } from '../table-items-dropdown/table-items-dropdown.module';
-import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbDatepickerModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { UtilityMeterDataFilterComponent } from './utility-meter-data-filter/utility-meter-data-filter.component';
 import { EditBillComponent } from './edit-bill/edit-bill.component';
@@ -26,6 +26,11 @@ import { OtherInformationFormComponent } from './edit-meter-form/other-informati
 import { VehicleFormComponent } from './edit-meter-form/vehicle-form/vehicle-form.component';
 import { UtilityMetersTableComponent } from './utility-meters-table/utility-meters-table.component';
 import { LabelWithTooltipModule } from '../label-with-tooltip/label-with-tooltip.module';
+import { SharedMeterCalendarizationComponent } from './shared-meter-calendarization/shared-meter-calendarization.component';
+import { CalanderizationChartComponent } from './shared-meter-calendarization/calanderization-chart/calanderization-chart.component';
+import { CalanderizationFilterComponent } from './shared-meter-calendarization/calanderization-filter/calanderization-filter.component';
+import { CalanderizedMeterDataTableComponent } from './shared-meter-calendarization/calanderized-meter-data-table/calanderized-meter-data-table.component';
+import { DataApplicationMenuComponent } from './shared-meter-calendarization/data-application-menu/data-application-menu.component';
 
 
 
@@ -50,7 +55,12 @@ import { LabelWithTooltipModule } from '../label-with-tooltip/label-with-tooltip
     EmissionsDetailsTableComponent,
     OtherInformationFormComponent,
     VehicleFormComponent,
-    UtilityMetersTableComponent
+    UtilityMetersTableComponent,
+    SharedMeterCalendarizationComponent,
+    CalanderizationChartComponent,
+    CalanderizationFilterComponent,
+    CalanderizedMeterDataTableComponent,
+    DataApplicationMenuComponent
   ],
   imports: [
     CommonModule,
@@ -60,10 +70,12 @@ import { LabelWithTooltipModule } from '../label-with-tooltip/label-with-tooltip
     NgbPaginationModule,
     FormsModule,
     ReactiveFormsModule,
-    LabelWithTooltipModule
+    LabelWithTooltipModule,
+    NgbDatepickerModule
   ],
   exports: [
-    EditMeterFormComponent
+    EditMeterFormComponent,
+    SharedMeterCalendarizationComponent
   ]
 })
 export class SharedMeterContentModule { }

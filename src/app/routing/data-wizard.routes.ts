@@ -25,6 +25,7 @@ import { EditBillComponent } from "../shared/shared-meter-content/edit-bill/edit
 import { canDeactivateGuard } from "./can-deactivate.guard";
 import { PredictorsDataFormComponent } from "../facility/utility-data/predictors/predictors-data/predictors-data-form/predictors-data-form.component";
 import { CalculatedPredictorDataUpdateComponent } from "../facility/utility-data/predictors/predictors-data/calculated-predictor-data-update/calculated-predictor-data-update.component";
+import { FacilityMeterMonthlyDataComponent } from "../data-wizard/account-facilities/facility-data/facility-meters/facility-meter-monthly-data/facility-meter-monthly-data.component";
 
 export const DataWizardRoutes: Route = {
     path: 'data-wizard/:id',
@@ -93,7 +94,8 @@ export const DataWizardRoutes: Route = {
                                             canDeactivate: [canDeactivateGuard]
                                         }
                                     ]
-                                }
+                                },
+                                { path: 'meter-monthly-data/:id', component: FacilityMeterMonthlyDataComponent }
                             ]
                         },
                         {
