@@ -14,13 +14,13 @@ import { ManageMetersComponent } from './data-setup/file-setup/manage-meters/man
 import { SetFacilityPredictorsComponent } from './data-setup/file-setup/set-facility-predictors/set-facility-predictors.component';
 import { SetFacilityMetersComponent } from './data-setup/file-setup/set-facility-meters/set-facility-meters.component';
 import { TemplateFacilitiesComponent } from './data-setup/file-setup/template-facilities/template-facilities.component';
-import { EditMeterFormModule } from '../facility/utility-data/energy-consumption/energy-source/edit-meter-form/edit-meter-form.module';
 import { ConfirmReadingsComponent } from './data-setup/file-setup/confirm-readings/confirm-readings.component';
 import { ConfirmPredictorsComponent } from './data-setup/file-setup/confirm-predictors/confirm-predictors.component';
 import { ConfirmAndSubmitComponent } from './data-setup/file-setup/confirm-and-submit/confirm-and-submit.component';
 import { LabelWithTooltipModule } from '../shared/label-with-tooltip/label-with-tooltip.module';
 import { HelperPipesModule } from '../shared/helper-pipes/helper-pipes.module';
 import { MeterGroupOptionsPipe2 } from './data-setup/file-setup/manage-meters/meter-group-options.pipe';
+import { SharedMeterContentModule } from '../shared/shared-meter-content/shared-meter-content.module';
 
 
 
@@ -47,7 +47,7 @@ import { MeterGroupOptionsPipe2 } from './data-setup/file-setup/manage-meters/me
     RouterModule,
     FormsModule,
     DragDropModule,
-    EditMeterFormModule,
+    SharedMeterContentModule,
     LabelWithTooltipModule,
     HelperPipesModule
   ]

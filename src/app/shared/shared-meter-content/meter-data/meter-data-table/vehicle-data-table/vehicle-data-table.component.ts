@@ -11,7 +11,7 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
-import { UtilityMeterDataService } from 'src/app/facility/utility-data/energy-consumption/utility-meter-data/utility-meter-data.service';
+import { UtilityMeterDataService } from 'src/app/shared/shared-meter-content/utility-meter-data.service';
 @Component({
   selector: 'app-vehicle-data-table',
   templateUrl: './vehicle-data-table.component.html',

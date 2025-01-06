@@ -18,6 +18,14 @@ import { RefrigerationCalculationTableComponent } from './edit-bill/edit-other-e
 import { EditOtherEmissionsBillComponent } from './edit-bill/edit-other-emissions-bill/edit-other-emissions-bill.component';
 import { EditElectricityBillComponent } from './edit-bill/edit-electricity-bill/edit-electricity-bill.component';
 import { EditUtilityBillComponent } from './edit-bill/edit-utility-bill/edit-utility-bill.component';
+import { EditMeterComponent } from './edit-meter/edit-meter.component';
+import { EditMeterFormComponent } from './edit-meter-form/edit-meter-form.component';
+import { AdditionalElectricityOptionsFormComponent } from './edit-meter-form/additional-electricity-options-form/additional-electricity-options-form.component';
+import { EmissionsDetailsTableComponent } from './edit-meter-form/emissions-details-table/emissions-details-table.component';
+import { OtherInformationFormComponent } from './edit-meter-form/other-information-form/other-information-form.component';
+import { VehicleFormComponent } from './edit-meter-form/vehicle-form/vehicle-form.component';
+import { UtilityMetersTableComponent } from './utility-meters-table/utility-meters-table.component';
+import { LabelWithTooltipModule } from '../label-with-tooltip/label-with-tooltip.module';
 
 
 
@@ -36,6 +44,13 @@ import { EditUtilityBillComponent } from './edit-bill/edit-utility-bill/edit-uti
     EditOtherEmissionsBillComponent,
     EditElectricityBillComponent,
     EditUtilityBillComponent,
+    EditMeterComponent,
+    EditMeterFormComponent,
+    AdditionalElectricityOptionsFormComponent,
+    EmissionsDetailsTableComponent,
+    OtherInformationFormComponent,
+    VehicleFormComponent,
+    UtilityMetersTableComponent
   ],
   imports: [
     CommonModule,
@@ -44,7 +59,11 @@ import { EditUtilityBillComponent } from './edit-bill/edit-utility-bill/edit-uti
     TableItemsDropdownModule,
     NgbPaginationModule,
     FormsModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    LabelWithTooltipModule
+  ],
+  exports: [
+    EditMeterFormComponent
   ]
 })
 export class SharedMeterContentModule { }

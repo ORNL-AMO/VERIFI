@@ -18,7 +18,6 @@ import { ProcessTemplatePredictorsComponent } from './data-wizard-import/process
 import { HelperPipesModule } from '../shared/helper-pipes/helper-pipes.module';
 import { FormsModule } from '@angular/forms';
 import { MeterGroupOptionsPipe } from './data-wizard-import/process-template-file/process-template-meters/meter-group-options.pipe';
-import { EditMeterFormModule } from '../facility/utility-data/energy-consumption/energy-source/edit-meter-form/edit-meter-form.module';
 import { FacilityMetersComponent } from './account-facilities/facility-data/facility-meters/facility-meters.component';
 import { FacilityMetersTableComponent } from './account-facilities/facility-data/facility-meters/facility-meters-table/facility-meters-table.component';
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
@@ -28,6 +27,7 @@ import { FacilitiesListComponent } from './account-facilities/facilities-list/fa
 import { DataWizardHelpPanelComponent } from './data-wizard-help-panel/data-wizard-help-panel.component';
 import { WizardSidebarFacilitiesListPipe } from './data-wizard-sidebar/wizard-sidebar-facilities-list.pipe';
 import { TableItemsDropdownModule } from '../shared/table-items-dropdown/table-items-dropdown.module';
+import { SharedMeterContentModule } from '../shared/shared-meter-content/shared-meter-content.module';
 
 
 @NgModule({
@@ -60,9 +60,9 @@ import { TableItemsDropdownModule } from '../shared/table-items-dropdown/table-i
     SettingsFormsModule,
     HelperPipesModule,
     FormsModule,
-    EditMeterFormModule,
     NgbPaginationModule,
-    TableItemsDropdownModule
+    TableItemsDropdownModule,
+    SharedMeterContentModule
   ]
 })
 export class DataWizardModule { }

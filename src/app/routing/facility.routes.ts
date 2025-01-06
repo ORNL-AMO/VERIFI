@@ -22,9 +22,8 @@ import { FacilitySettingsComponent } from "src/app/facility/facility-settings/fa
 import { FacilityComponent } from "src/app/facility/facility.component";
 import { CalanderizationComponent } from "src/app/facility/utility-data/calanderization/calanderization.component";
 import { EnergyConsumptionComponent } from "src/app/facility/utility-data/energy-consumption/energy-consumption.component";
-import { EditMeterComponent } from "src/app/facility/utility-data/energy-consumption/energy-source/edit-meter/edit-meter.component";
 import { EnergySourceComponent } from "src/app/facility/utility-data/energy-consumption/energy-source/energy-source.component";
-import { UtilityMetersTableComponent } from "src/app/facility/utility-data/energy-consumption/energy-source/utility-meters-table/utility-meters-table.component";
+import { UtilityMetersTableComponent } from "src/app/shared/shared-meter-content/utility-meters-table/utility-meters-table.component";
 import { UtilityMeterDataComponent } from "src/app/facility/utility-data/energy-consumption/utility-meter-data/utility-meter-data.component";
 import { MeterGroupingComponent } from "src/app/facility/utility-data/meter-grouping/meter-grouping.component";
 import { UtilityDataComponent } from "src/app/facility/utility-data/utility-data.component";
@@ -54,6 +53,7 @@ import { FacilityAnalysisReportsDashboardComponent } from "../facility/facility-
 import { FacilityOverviewReportsDashboardComponent } from "../facility/facility-reports/facility-reports-dashboard/facility-overview-reports-dashboard/facility-overview-reports-dashboard.component";
 import { MeterDataTableComponent } from "../shared/shared-meter-content/meter-data/meter-data-table/meter-data-table.component";
 import { EditBillComponent } from "../shared/shared-meter-content/edit-bill/edit-bill.component";
+import { EditMeterComponent } from "../shared/shared-meter-content/edit-meter/edit-meter.component";
 
 export const FacilityRoutes: Route = {
     path: 'facility/:id',

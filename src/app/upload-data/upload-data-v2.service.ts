@@ -12,7 +12,7 @@ import { FuelTypeOption } from '../shared/fuel-options/fuelTypeOption';
 import { getFuelTypeOptions } from '../shared/fuel-options/getFuelTypeOptions';
 import { getHeatingCapacity, getIsEnergyMeter, getIsEnergyUnit, getSiteToSource } from '../shared/sharedHelperFuntions';
 import { UploadDataSharedFunctionsService } from './upload-data-shared-functions.service';
-import { EditMeterFormService } from '../facility/utility-data/energy-consumption/energy-source/edit-meter-form/edit-meter-form.service';
+import { EditMeterFormService } from '../shared/shared-meter-content/edit-meter-form/edit-meter-form.service';
 import { UtilityMeterDatadbService } from '../indexedDB/utilityMeterData-db.service';
 import { getMeterDataCopy } from '../calculations/conversions/convertMeterData';
 import { ConvertValue } from '../calculations/conversions/convertValue';
