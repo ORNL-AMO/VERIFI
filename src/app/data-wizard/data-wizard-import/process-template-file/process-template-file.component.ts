@@ -36,7 +36,7 @@ export class ProcessTemplateFileComponent {
       });
       if (!this.selectedFile) {
         let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-        this.router.navigateByUrl('/data-wizard/' + account.guid);
+        this.router.navigateByUrl('/data-wizard/' + account.guid + '/import-data');
       }
     });
   }

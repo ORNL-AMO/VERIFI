@@ -1,9 +1,20 @@
-<div class="data-wizard-content">
+<div class="data-wizard-content with-footer">
     <div class="row g-0 justify-content-center h-100 w-100 overflow-scroll">
         <div class="col-11 pt-4 pb-4">
             <div class="form-paper">
                 <h4>Process File {{fileReference.name}}</h4>
-                <br>
+                <div class="d-flex w-100 justify-content-end mb-2">
+                    <ng-template [ngIf]="!fileReference.facilitiesSubmitted" [ngIfElse]="notSubmittedBlock">
+                        <button class="btn btn-success btn-sm" (click)="submitFacilities()">
+                            <span class="fa fa-plus"></span> Submit Facilities
+                        </button>
+                    </ng-template>
+                    <ng-template #notSubmittedBlock>
+                        <div class="alert alert-info small p-2">
+                            Facilities submitted. Use the next button to move on to meters upload.
+                        </div>
+                    </ng-template>
+                </div>
                 <div class="table-responsive">
                     <table class="table utility-data table-sm table-bordered table-hover">
                         <thead class="table-mh">
@@ -100,14 +111,18 @@
             <span class="fa fa-chevron-left"></span>
             Go Back
         </button>
-        <div>
-            <button class="btn btn-success me-2" (click)="submitFacilities()">
-                <span class="fa fa-plus"></span> Submit Facilities
-            </button>
-            <button class="btn btn-dark" (click)="next()">
-                Next
-                <span class="fa fa-chevron-right"></span>
-            </button>
+        <div class="footer-text">
+            <ng-template [ngIf]="!fileReference.facilitiesSubmitted" [ngIfElse]="facilitiesSubmittedBlock">
+                Submitting facilities will add them to <i>{{account.name}}</i>. Meters and predictors can then be added to
+                their respective facilities.
+            </ng-template>
+            <ng-template #facilitiesSubmittedBlock>
+                These facilities have been added to {{account.name}}
+            </ng-template>
         </div>
+        <button class="btn btn-dark" (click)="next()">
+            Next
+            <span class="fa fa-chevron-right"></span>
+        </button>
     </div>
 </nav>

@@ -35,40 +35,45 @@
         </div>
         <ng-container *ngFor="let fileReference of fileReferences">
             <ng-template [ngIf]="fileReference.isTemplate" [ngIfElse]="nonTemplateBlock">
-                <div class="ps-2 pe-2 nav-item">
-                    <a class="nav-link"
-                        [routerLink]="'/data-wizard/'+account.guid+'/import-data/process-template-file/' +fileReference.id"
-                        [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
-                        {{fileReference.name}}
-                    </a>
-                </div>
-                <div class="ps-2 pe-2 nav-item">
-                    <a class="nav-link"
-                        [routerLink]="'/data-wizard/'+account.guid+'/import-data/process-template-file/' +fileReference.id +'/facilities'"
-                        [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
-                        Facilities
-                    </a>
-                </div>
-                <div class="ps-2 pe-2 nav-item">
-                    <a class="nav-link"
-                        [routerLink]="'/data-wizard/'+account.guid+'/import-data/process-template-file/' +fileReference.id +'/meters'"
-                        [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
-                        Meters
-                    </a>
-                </div>
-                <div class="ps-2 pe-2 nav-item">
-                    <a class="nav-link"
-                        [routerLink]="'/data-wizard/'+account.guid+'/import-data/process-template-file/' +fileReference.id +'/meter-readings'"
-                        [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
-                        Readings
-                    </a>
-                </div>
-                <div class="ps-2 pe-2 nav-item">
-                    <a class="nav-link"
-                        [routerLink]="'/data-wizard/'+account.guid+'/import-data/process-template-file/' +fileReference.id +'/predictors'"
-                        [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
-                        Predictors
-                    </a>
+                <div class="sidebar-section">
+                    <div class="ps-2 pe-2 nav-item">
+                        <a class="nav-link"
+                            [routerLink]="'/data-wizard/'+account.guid+'/import-data/process-template-file/' +fileReference.id"
+                            [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
+                            <span class="fa fa-file"></span>
+                            {{fileReference.name}}
+                        </a>
+                    </div>
+                    <div class="sidebar-section">
+                        <div class="ps-2 pe-2 nav-item">
+                            <a class="nav-link"
+                                [routerLink]="'/data-wizard/'+account.guid+'/import-data/process-template-file/' +fileReference.id +'/facilities'"
+                                [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
+                                Facilities
+                            </a>
+                        </div>
+                        <div class="ps-2 pe-2 nav-item">
+                            <a class="nav-link"
+                                [routerLink]="'/data-wizard/'+account.guid+'/import-data/process-template-file/' +fileReference.id +'/meters'"
+                                [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
+                                Meters
+                            </a>
+                        </div>
+                        <div class="ps-2 pe-2 nav-item">
+                            <a class="nav-link"
+                                [routerLink]="'/data-wizard/'+account.guid+'/import-data/process-template-file/' +fileReference.id +'/meter-readings'"
+                                [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
+                                Readings
+                            </a>
+                        </div>
+                        <div class="ps-2 pe-2 nav-item">
+                            <a class="nav-link"
+                                [routerLink]="'/data-wizard/'+account.guid+'/import-data/process-template-file/' +fileReference.id +'/predictors'"
+                                [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
+                                Predictors
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </ng-template>
             <ng-template #nonTemplateBlock>

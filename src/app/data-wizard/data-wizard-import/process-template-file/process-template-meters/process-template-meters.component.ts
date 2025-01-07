@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { firstValueFrom, Subscription } from 'rxjs';
 import { DataWizardService } from 'src/app/data-wizard/data-wizard.service';
 import { EditMeterFormService } from 'src/app/shared/shared-meter-content/edit-meter-form/edit-meter-form.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
@@ -13,6 +13,9 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { getNewIdbUtilityMeterGroup, IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
 import { FileReference, getEmptyFileReference } from 'src/app/upload-data/upload-data-models';
 import { UploadDataService } from 'src/app/upload-data/upload-data.service';
+import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
+import { LoadingService } from 'src/app/core-components/loading/loading.service';
+import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 
 @Component({
   selector: 'app-process-template-meters',
@@ -43,7 +46,10 @@ export class ProcessTemplateMetersComponent {
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
     private utilityMeterDbService: UtilityMeterdbService,
     private dataWizardService: DataWizardService,
-    private accountDbService: AccountdbService) { }
+    private accountDbService: AccountdbService,
+    private dbChangesService: DbChangesService,
+    private loadingService: LoadingService,
+    private toastNotificationService: ToastNotificationsService) { }
 
   ngOnInit(): void {
     this.paramsSub = this.activatedRoute.parent.params.subscribe(param => {
@@ -155,8 +161,42 @@ export class ProcessTemplateMetersComponent {
     this.router.navigateByUrl('/data-wizard/' + account.guid + '/import-data/process-template-file/' + this.fileReference.id + '/meter-readings');
   }
 
-  submitMeters() {
+  async submitMeters() {
+    this.loadingService.setLoadingMessage('Adding Utility Meters..')
+    this.loadingService.setLoadingStatus(true);
+    let newGroups: Array<IdbUtilityMeterGroup> = new Array();
+    for (let i = 0; i < this.fileReference.meters.length; i++) {
+      let meter: IdbUtilityMeter = this.fileReference.meters[i];
+      if (!meter.skipImport) {
+        if (meter.id) {
+          await firstValueFrom(this.utilityMeterDbService.updateWithObservable(meter));
+        } else {
+          await firstValueFrom(this.utilityMeterDbService.addWithObservable(meter));
+        }
 
+        if (meter.groupId) {
+          let facilityGroups: Array<IdbUtilityMeterGroup> = this.getFacilityMeterGroups(meter.facilityId);
+          let selectedGroup: IdbUtilityMeterGroup = facilityGroups.find(group => { return group.guid == meter.groupId });
+          if (selectedGroup && !selectedGroup.id) {
+            let groupExists: IdbUtilityMeterGroup = newGroups.find(group => { return group.guid == selectedGroup.guid });
+            if (groupExists == undefined) {
+              newGroups.push(selectedGroup);
+            }
+          }
+        }
+      }
+    }
+    for (let i = 0; i < newGroups.length; i++) {
+      let newGroup: IdbUtilityMeterGroup = newGroups[i];
+      await firstValueFrom(this.utilityMeterGroupDbService.addWithObservable(newGroup));
+    }
+
+    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    await this.dbChangesService.setMeters(account);
+    await this.dbChangesService.setMeterGroups(account);
+    this.loadingService.setLoadingStatus(false);
+    this.toastNotificationService.showToast('Meters Added!', undefined, undefined, false, 'alert-success');
+    this.fileReference.metersSubmitted = true;
   }
 
   getFacilityMeterGroups(facilityId: string): Array<IdbUtilityMeterGroup> {
@@ -190,7 +230,7 @@ export class ProcessTemplateMetersComponent {
       }
       let naturalGasGroup: IdbUtilityMeterGroup = facilityMeterGroups.find(group => { return group.name == 'Natural Gas' });
       if (!naturalGasGroup) {
-        naturalGasGroup =  getNewIdbUtilityMeterGroup("Energy", "Natural Gas", importFacility.guid, importFacility.accountId);
+        naturalGasGroup = getNewIdbUtilityMeterGroup("Energy", "Natural Gas", importFacility.guid, importFacility.accountId);
         facilityMeterGroups.push(naturalGasGroup);
       }
       let otherFuelGroup: IdbUtilityMeterGroup = facilityMeterGroups.find(group => { return group.name == 'Other Fuels' });
@@ -225,7 +265,7 @@ export class ProcessTemplateMetersComponent {
       }
 
 
-      let noGroup: IdbUtilityMeterGroup =  getNewIdbUtilityMeterGroup(undefined, "No Group", undefined, undefined);
+      let noGroup: IdbUtilityMeterGroup = getNewIdbUtilityMeterGroup(undefined, "No Group", undefined, undefined);
       facilityMeterGroups.push(noGroup);
       facilityGroups.push({
         facilityId: importFacility.guid,

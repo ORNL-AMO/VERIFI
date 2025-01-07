@@ -82,7 +82,11 @@ export class UploadDataService {
         skipExistingReadingsMeterIds: [],
         skipExistingPredictorFacilityIds: [],
         newMeterGroups: [],
-        selectedFacilityId: undefined
+        selectedFacilityId: undefined,
+        metersSubmitted: false,
+        facilitiesSubmitted: false,
+        predictorsSubmitted: false,
+        meterReadingsSubmitted: false
       };
     } else {
       //parse template
@@ -113,7 +117,11 @@ export class UploadDataService {
         skipExistingReadingsMeterIds: [],
         skipExistingPredictorFacilityIds: [],
         newMeterGroups: templateData.newGroups,
-        selectedFacilityId: undefined
+        selectedFacilityId: undefined,
+        metersSubmitted: false,
+        facilitiesSubmitted: false,
+        predictorsSubmitted: false,
+        meterReadingsSubmitted: false
       };
     }
   }

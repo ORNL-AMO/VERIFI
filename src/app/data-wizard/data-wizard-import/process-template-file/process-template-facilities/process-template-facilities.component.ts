@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Subscription } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotification, ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { DataWizardService } from 'src/app/data-wizard/data-wizard.service';
@@ -18,6 +18,10 @@ import { FileReference, getEmptyFileReference } from 'src/app/upload-data/upload
 export class ProcessTemplateFacilitiesComponent {
 
   fileReference: FileReference = getEmptyFileReference();
+  paramsSub: Subscription;
+
+  account: IdbAccount;
+
   constructor(private activatedRoute: ActivatedRoute, private dataWizardService: DataWizardService,
     private facilityDbService: FacilitydbService, private router: Router,
     private loadingService: LoadingService,
@@ -26,19 +30,21 @@ export class ProcessTemplateFacilitiesComponent {
     private dbChangesService: DbChangesService) { }
 
   ngOnInit(): void {
-    this.activatedRoute.parent.params.subscribe(param => {
+    this.account = this.accountDbService.selectedAccount.getValue();
+    this.paramsSub = this.activatedRoute.parent.params.subscribe(param => {
       let id: string = param['id'];
       this.fileReference = this.dataWizardService.getFileReferenceById(id);
     });
   }
 
   ngOnDestroy() {
-    // this.paramsSub.unsubscribe();
+    this.paramsSub.unsubscribe();
   }
 
 
   async submitFacilities() {
     this.loadingService.setLoadingMessage('Uploading Facilities..');
+    this.fileReference.facilitiesSubmitted = true;
     for (let i = 0; i < this.fileReference.importFacilities.length; i++) {
       if (this.fileReference.importFacilities[i].id) {
         await firstValueFrom(this.facilityDbService.updateWithObservable(this.fileReference.importFacilities[i]));
@@ -46,18 +52,16 @@ export class ProcessTemplateFacilitiesComponent {
         this.fileReference.importFacilities[i] = await firstValueFrom(this.facilityDbService.addWithObservable(this.fileReference.importFacilities[i]));
       }
     }
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    await this.dbChangesService.selectAccount(account, false);
+    await this.dbChangesService.selectAccount(this.account, false);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('Account Facilities Updated', undefined, undefined, false, 'alert-success', false);
   }
 
   goBack() {
-
+    this.router.navigateByUrl('/data-wizard/' + this.account.guid + '/import-data/');
   }
 
   next() {
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    this.router.navigateByUrl('/data-wizard/' + account.guid + '/import-data/process-template-file/' + this.fileReference.id + '/meters');
+    this.router.navigateByUrl('/data-wizard/' + this.account.guid + '/import-data/process-template-file/' + this.fileReference.id + '/meters');
   }
 }

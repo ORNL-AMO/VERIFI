@@ -1,9 +1,20 @@
-<div class="data-wizard-content">
+<div class="data-wizard-content with-footer">
     <div class="row g-0 justify-content-center h-100 w-100 overflow-scroll">
         <div class="col-11 pt-4 pb-4">
             <div class="form-paper">
                 <h4>Process File {{fileReference.name}}</h4>
-                <br>
+                <div class="d-flex w-100 justify-content-end mb-2" *ngIf="!editMeterForm">
+                    <ng-template [ngIf]="!fileReference.metersSubmitted" [ngIfElse]="notSubmittedBlock">
+                        <button class="btn btn-success btn-sm" (click)="submitMeters()" [disabled]="!allMetersValid">
+                            <span class="fa fa-plus"></span> Submit Meters
+                        </button>
+                    </ng-template>
+                    <ng-template #notSubmittedBlock>
+                        <div class="alert alert-info small p-2">
+                            Meters submitted. Use the next button to move on to meter data upload.
+                        </div>
+                    </ng-template>
+                </div>
                 <div class="d-flex justify-content-end" *ngIf="!allMetersValid">
                     <div class="d-flex flex-column">
                         <div class="alert alert-danger p-2">
@@ -44,7 +55,7 @@
                                         <div>
                                             Group
                                         </div>
-                                        <div>
+                                        <div *ngIf="!fileReference.metersSubmitted">
                                             <a class="text-end click-link" (click)="autoGroup()">Auto Group</a>
                                         </div>
                                     </div>
@@ -55,7 +66,7 @@
                                         <div>
                                             Calanderize?
                                         </div>
-                                        <div>
+                                        <div *ngIf="!fileReference.metersSubmitted">
                                             <a class="text-end click-link" (click)="toggleCalanderizeAll()">Toggle</a>
                                         </div>
                                     </div>
@@ -67,7 +78,7 @@
                                     <div class="w-100 d-flex">
                                         <div class="pe-1">
                                             <input type="checkbox" class="form-check-input" [(ngModel)]="skipAll"
-                                                (change)="setSkipAll()">
+                                                (change)="setSkipAll()" [disabled]="fileReference.metersSubmitted">
                                         </div>
                                         <div>
                                             Skip Import
@@ -83,11 +94,16 @@
                                     {{getFacilityName(meter.facilityId)}}
                                 </td>
                                 <td>
-                                    <a class="click-link" (click)="setEditMeter(meter)"
-                                        *ngIf="!meter.skipImport">{{meter.name}}
-                                        <span *ngIf="!meter.isValid">(click to edit)</span>
-                                    </a>
-                                    <span *ngIf="meter.skipImport">{{meter.name}}</span>
+                                    <ng-template [ngIf]="!fileReference.metersSubmitted && !meter.skipImport"
+                                        [ngIfElse]="nameBlock">
+                                        <a class="click-link" (click)="setEditMeter(meter)"
+                                            *ngIf="!meter.skipImport">{{meter.name}}
+                                            <span *ngIf="!meter.isValid">(click to edit)</span>
+                                        </a>
+                                    </ng-template>
+                                    <ng-template #nameBlock>
+                                        {{meter.name}}
+                                    </ng-template>
                                 </td>
                                 <td>
                                     <span *ngIf="meter.isValid">
@@ -109,7 +125,8 @@
                                     </ng-container>
                                 </td>
                                 <td>
-                                    <select class="form-select" id="meterGroup" [(ngModel)]="meter.groupId">
+                                    <select class="form-select" id="meterGroup" [(ngModel)]="meter.groupId"
+                                        [disabled]="fileReference.metersSubmitted">
                                         <optgroup [label]="'Energy'"
                                             *ngIf="meter.source != 'Water Intake' && meter.source != 'Water Discharge'">
                                             <option
@@ -136,7 +153,8 @@
                                     <!-- {{meter.groupId}} -->
                                     <select class="form-select" id="meterReadingDataApplication"
                                         [(ngModel)]="meter.meterReadingDataApplication"
-                                        (change)="setHasNoCalanderizationSelection()">
+                                        (change)="setHasNoCalanderizationSelection()"
+                                        [disabled]="fileReference.metersSubmitted">
                                         <option [ngValue]="'backward'">Calanderize</option>
                                         <option [ngValue]="'fullMonth'">Do Not Calanderize</option>
                                         <option [ngValue]="'fullYear'">Evenly Distribute Data Annually</option>
@@ -154,7 +172,7 @@
                                 <td>
                                     <div class="d-flex w-100 h-100 justify-content-center align-items-center">
                                         <input type="checkbox" class="form-check-input" [(ngModel)]="meter.skipImport"
-                                            (change)="setValidMeters()">
+                                            (change)="setValidMeters()" [disabled]="fileReference.metersSubmitted">
                                     </div>
                                 </td>
                             </tr>
@@ -163,12 +181,14 @@
                 </div>
 
                 <ng-container *ngIf="editMeterForm">
-                    <div class="d-flex justify-content-between">
+                    <div class="d-flex justify-content-end">
                         <div class="d-flex">
-                            <button class="btn btn-secondary" (click)="cancelEdit()">Cancel</button>
+                            <button class="btn btn-secondary btn-sm" (click)="cancelEdit()">Discard Meter
+                                Changes</button>
                         </div>
                         <div class="d-flex">
-                            <button class="btn btn-success ms-2" (click)="submitMeter()">Submit</button>
+                            <button class="btn btn-success ms-2 btn-sm" (click)="submitMeter()">Save Meter
+                                Changes</button>
                         </div>
                     </div>
                     <app-edit-meter-form [meterForm]="editMeterForm" [facility]="editMeterFacility">
@@ -219,14 +239,18 @@
             <span class="fa fa-chevron-left"></span>
             Go Back
         </button>
-        <div>
-            <button class="btn btn-success me-2" (click)="submitMeters()">
-                <span class="fa fa-plus"></span> Submit Meters
-            </button>
-            <button class="btn btn-dark" (click)="next()">
-                Next
-                <span class="fa fa-chevron-right"></span>
-            </button>
+        <div class="footer-text">
+            <ng-template [ngIf]="!fileReference.metersSubmitted" [ngIfElse]="metersSubmittedBlock">
+                Submitting meters will add them to their facilities. Meter data can then be added
+                to the corresponding meters on the next page.
+            </ng-template>
+            <ng-template #metersSubmittedBlock>
+                These meters have been added to to their facilities!
+            </ng-template>
         </div>
+        <button class="btn btn-dark" (click)="next()">
+            Next
+            <span class="fa fa-chevron-right"></span>
+        </button>
     </div>
 </nav>

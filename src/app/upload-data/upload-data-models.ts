@@ -29,7 +29,11 @@ export interface FileReference {
   skipExistingReadingsMeterIds: Array<string>
   skipExistingPredictorFacilityIds: Array<string>,
   newMeterGroups: Array<IdbUtilityMeterGroup>,
-  selectedFacilityId: string
+  selectedFacilityId: string,
+  facilitiesSubmitted: boolean,
+  metersSubmitted: boolean,
+  meterReadingsSubmitted: boolean,
+  predictorsSubmitted: boolean
 }
 
 export function getEmptyFileReference(): FileReference {
@@ -54,7 +58,11 @@ export function getEmptyFileReference(): FileReference {
     skipExistingReadingsMeterIds: [],
     skipExistingPredictorFacilityIds: [],
     newMeterGroups: [],
-    selectedFacilityId: undefined
+    selectedFacilityId: undefined,
+    facilitiesSubmitted: false,
+    metersSubmitted: false,
+    meterReadingsSubmitted: false,
+    predictorsSubmitted: false
   };
 }
 

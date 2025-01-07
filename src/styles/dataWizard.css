@@ -1,16 +1,20 @@
-.data-wizard-content{
+.data-wizard-content {
     height: 100%;
     /* height: 100%; */
     overflow-y: auto;
 }
 
-.data-wizard-content .form-paper{
+.data-wizard-content.with-footer {
+    height: calc(100% - 4rem);
+}
+
+.data-wizard-content .form-paper {
     min-height: 100%;
     background-color: white;
     padding: 1rem;
 }
 
-.data-wizard-footer.navbar{
+.data-wizard-footer.navbar {
     height: 4rem;
     background-color: #808B96 !important;
     /* opacity: .5; */
@@ -21,6 +25,11 @@
 } */
 
 
-.data-wizard-footer .fa{
+.data-wizard-footer .fa {
     color: white;
+}
+
+.data-wizard-footer .footer-text {
+    color: white;
+    font-weight: bolder;
 }
