@@ -4,6 +4,7 @@ import { BehaviorSubject, firstValueFrom, Observable } from 'rxjs';
 import { IdbFacility } from '../models/idbModels/facility';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { getDetailedDataForMonth } from './weatherDataCalculations';
+import { environment } from 'src/environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -54,7 +55,7 @@ export class WeatherDataService {
         'Content-Type': 'application/json',
       })
     };
-    return this.httpClient.post('/api/stations', data, httpOptions);
+    return this.httpClient.post(environment.weatherApi + '/stations', data, httpOptions);
   }
 
   async getStations(zipCode: string, distance: number): Promise<Array<WeatherStation>> {
@@ -72,7 +73,7 @@ export class WeatherDataService {
         'Content-Type': 'application/json',
       })
     };
-    return this.httpClient.post('/api/station/' + stationId, {}, httpOptions);
+    return this.httpClient.post(environment.weatherApi + '/station/' + stationId, {}, httpOptions);
   }
 
   async getStation(stationId: string) {
@@ -106,7 +107,7 @@ export class WeatherDataService {
         'Content-Type': 'application/json',
       })
     };
-    return this.httpClient.post('/api/data', data, httpOptions);
+    return this.httpClient.post(environment.weatherApi+'/data', data, httpOptions);
   }
 
 
