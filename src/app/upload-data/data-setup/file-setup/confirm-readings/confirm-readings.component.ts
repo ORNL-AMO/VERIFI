@@ -9,6 +9,7 @@ import { checkShowHeatCapacity, getIsEnergyMeter, getIsEnergyUnit } from 'src/ap
 import { FileReference, getEmptyFileReference } from 'src/app/upload-data/upload-data-models';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
+import { MeterDataSummary } from 'src/app/data-wizard/data-wizard-import/process-template-file/process-template-meter-readings/process-template-meter-readings.component';
 
 @Component({
   selector: 'app-confirm-readings',
@@ -148,19 +149,3 @@ export class ConfirmReadingsComponent implements OnInit {
   }
 }
 
-
-export interface MeterDataSummary {
-  meterName: string,
-  meterId: string,
-  facilityName: string,
-  existingEntries: number,
-  existingStart: Date,
-  existingEnd: Date,
-  invalidEntries: number,
-  invalidStart: Date,
-  invalidEnd: Date,
-  newEntries: number
-  newStart: Date,
-  newEnd: Date,
-  skipExisting: boolean
-}
