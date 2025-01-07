@@ -4,6 +4,10 @@
     overflow-y: auto;
 }
 
+.navbar.collapsed {
+    width: auto;
+}
+
 .nav-link.active {
     background-color: #efefef;
     font-weight: bolder;
@@ -73,11 +77,11 @@ a.nav-link, .btn.btn-dark, .link-section-heading{
 }
 
 
-.toggle-collapse {
+.toggle-collapse .fa{
     font-size: x-large;
 }
 
-.toggle-collapse:hover {
+.toggle-collapse:hover .fa{
     cursor: pointer;
     border: so;
 }

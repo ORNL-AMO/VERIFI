@@ -8,8 +8,8 @@ import { DataWizardService } from './data-wizard.service';
 })
 export class DataWizardComponent {
 
-  sidebarWidth: number = 200;
-  helpWidth: number = 200;
+  sidebarWidth: number;
+  helpWidth: number;
   contentWidth: number;
   startingCursorX: number;
   isDraggingSidebar: boolean = false;
@@ -45,6 +45,8 @@ export class DataWizardComponent {
   stopResizing($event: MouseEvent) {
     this.isDraggingSidebar = false;
     this.isDraggingHelp = false;
+    this.dataWizardService.setHelpWidth(this.helpWidth);
+    this.dataWizardService.setSidebarWidth(this.sidebarWidth);
   }
 
   drag(event: MouseEvent) {
@@ -89,14 +91,15 @@ export class DataWizardComponent {
     } else {
       this.helpWidth = 50;
     }
+    this.dataWizardService.setHelpWidth(this.helpWidth);
     this.setContentWidth();
   }
 
   setContentWidth() {
     let contentWidth: number = (window.innerWidth - this.helpWidth - this.sidebarWidth);
-    if(contentWidth < 600){
+    if (contentWidth < 600) {
       this.contentWidth = 600;
-    }else{
+    } else {
       this.contentWidth = contentWidth;
     }
   }

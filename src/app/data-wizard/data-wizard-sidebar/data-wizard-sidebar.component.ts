@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Output } from '@angular/core';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
@@ -18,6 +18,9 @@ import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
   styleUrl: './data-wizard-sidebar.component.css'
 })
 export class DataWizardSidebarComponent {
+  @Output('emitToggleCollapse')
+  emitToggleCollapse: EventEmitter<boolean> = new EventEmitter<boolean>(false);
+
 
   account: IdbAccount;
   accountSub: Subscription;
@@ -39,6 +42,9 @@ export class DataWizardSidebarComponent {
 
   accountPredictors: Array<IdbPredictor>;
   accountPredictorsSub: Subscription;
+
+  sidebarOpen: boolean;
+  sidebarOpenSub: Subscription;
 
   constructor(private accountDbService: AccountdbService, private facilityDbService: FacilitydbService,
     private dataWizardService: DataWizardService,
@@ -69,6 +75,10 @@ export class DataWizardSidebarComponent {
     });
     this.selectedMeterSub = this.utilityMeterDbService.selectedMeter.subscribe(meter => {
       this.selectedMeter = meter;
+    });
+
+    this.sidebarOpenSub = this.dataWizardService.sidebarOpen.subscribe(val => {
+      this.sidebarOpen = val;
     })
   }
 
@@ -80,6 +90,7 @@ export class DataWizardSidebarComponent {
     this.accountMetersSub.unsubscribe();
     this.selectedFacilitySub.unsubscribe();
     this.selectedMeterSub.unsubscribe();
+    this.sidebarOpenSub.unsubscribe();
   }
 
   async toggleFacilitiesOpen() {
@@ -123,5 +134,9 @@ export class DataWizardSidebarComponent {
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     await this.dbChangesService.setPredictorsV2(selectedAccount, selectedFacility);
+  }
+
+  toggleSidebar() {
+    this.emitToggleCollapse.emit(!this.sidebarOpen);
   }
 }

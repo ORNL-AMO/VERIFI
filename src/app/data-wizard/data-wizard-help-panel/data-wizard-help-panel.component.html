@@ -1,3 +1,16 @@
-<div class="w-100 h-100 bg-white">
-    <p>data-wizard-help-panel works!</p>
+<div class="h-100 d-flex flex-column align-items-start justify-content-start shadow help-text help-container"
+    [ngClass]="{'collapsed': !helpPanelOpen}">
+    <div class="w-100 pb-1 d-flex">
+        <div class="toggle-collapse d-flex w-100">
+            <a class="click-link" (click)="toggleCollapseHelpPanel()">
+                <span class="fa fa-circle-question"></span>
+            </a>
+            <div class="d-flex mt-2 ps-1 panel-label" *ngIf="helpPanelOpen">
+                Help
+            </div>
+        </div>
+    </div>
+    <div class="w-100 help-content">
+        <hr class="mt-0">
+    </div>
 </div>
