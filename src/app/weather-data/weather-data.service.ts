@@ -34,6 +34,14 @@ export class WeatherDataService {
   applyToFacility: BehaviorSubject<boolean>;
   selectedFacility: IdbFacility;
   weatherDataSelection: WeatherDataSelection = 'degreeDays';
+
+  requestHeaders: HttpHeaders = new HttpHeaders({
+    'Content-Type': 'application/json',
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'POST, GET, PUT',
+    'Access-Control-Allow-Headers': 'Content-Type',
+  });
+
   constructor(private httpClient: HttpClient) {
     this.applyToFacility = new BehaviorSubject<boolean>(false);
   }
@@ -51,9 +59,7 @@ export class WeatherDataService {
 
     let httpOptions = {
       responseType: 'text' as const,
-      headers: new HttpHeaders({
-        'Content-Type': 'application/json',
-      })
+      headers: this.requestHeaders
     };
     return this.httpClient.post(environment.weatherApi + '/stations', data, httpOptions);
   }
@@ -69,9 +75,7 @@ export class WeatherDataService {
   getStationAPI(stationId: string): Observable<any> {
     let httpOptions = {
       responseType: 'text' as const,
-      headers: new HttpHeaders({
-        'Content-Type': 'application/json',
-      })
+      headers: this.requestHeaders
     };
     return this.httpClient.post(environment.weatherApi + '/station/' + stationId, {}, httpOptions);
   }
@@ -103,11 +107,9 @@ export class WeatherDataService {
     };
     let httpOptions = {
       responseType: 'text' as const,
-      headers: new HttpHeaders({
-        'Content-Type': 'application/json',
-      })
+      headers: this.requestHeaders
     };
-    return this.httpClient.post(environment.weatherApi+'/data', data, httpOptions);
+    return this.httpClient.post(environment.weatherApi + '/data', data, httpOptions);
   }
 
 
