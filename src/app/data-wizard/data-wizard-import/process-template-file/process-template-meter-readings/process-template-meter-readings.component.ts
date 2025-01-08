@@ -60,11 +60,13 @@ export class ProcessTemplateMeterReadingsComponent {
   }
 
   goBack() {
-
+    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    this.router.navigateByUrl('/data-wizard/' + account.guid + '/import-data/process-template-file/' + this.fileReference.id + '/meters');
   }
 
   next() {
-
+    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    this.router.navigateByUrl('/data-wizard/' + account.guid + '/import-data/process-template-file/' + this.fileReference.id + '/predictors');
   }
 
   async submitMeterReadings() {
