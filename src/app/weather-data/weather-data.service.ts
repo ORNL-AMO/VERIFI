@@ -37,8 +37,7 @@ export class WeatherDataService {
 
   requestHeaders: HttpHeaders = new HttpHeaders({
     'Content-Type': 'application/json',
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'POST, GET, PUT',
+    'Access-Control-Allow-Origin': 'https://lcd.ornl.gov',
     'Access-Control-Allow-Headers': 'Content-Type',
   });
 
