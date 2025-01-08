@@ -119,6 +119,7 @@ export class ConfirmReadingsComponent implements OnInit {
         }
         let skipExisting: string = this.fileReference.skipExistingReadingsMeterIds.find(id => { return id == meter.guid });
         dataSummaries.push({
+          meter: meter,
           meterName: meter.name,
           meterId: meter.guid,
           facilityName: this.getFacilityName(meter.facilityId),
@@ -131,7 +132,8 @@ export class ConfirmReadingsComponent implements OnInit {
           newEntries: newReadings.length,
           newStart: newStart,
           newEnd: newEnd,
-          skipExisting: skipExisting != undefined
+          skipExisting: skipExisting != undefined,
+          meterReadings: meterReadings
         })
       }
     })

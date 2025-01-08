@@ -75,7 +75,11 @@ import { DataApplicationMenuComponent } from './shared-meter-calendarization/dat
   ],
   exports: [
     EditMeterFormComponent,
-    SharedMeterCalendarizationComponent
+    SharedMeterCalendarizationComponent,
+    ElectricityDataTableComponent,
+    GeneralUtilityDataTableComponent,
+    OtherEmissionsDataTableComponent,
+    VehicleDataTableComponent
   ]
 })
 export class SharedMeterContentModule { }

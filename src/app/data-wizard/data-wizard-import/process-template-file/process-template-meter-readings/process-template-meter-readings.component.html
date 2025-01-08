@@ -4,87 +4,25 @@
             <div class="form-paper">
                 <h4>Process File {{fileReference.name}}</h4>
                 <ng-template [ngIf]="metersIncluded" [ngIfElse]="noMetersBlock">
-                    <div class="d-flex w-100 justify-content-end mb-2">
-                        <ng-template [ngIf]="!fileReference.meterReadingsSubmitted" [ngIfElse]="notSubmittedBlock">
-                            <button class="btn btn-success btn-sm" (click)="submitMeterReadings()">
-                                <span class="fa fa-plus"></span> Submit Meter Readings
-                            </button>
-                        </ng-template>
-                        <ng-template #notSubmittedBlock>
-                            <div class="alert alert-info small p-2">
-                                Meter readings submitted. Use the next button to move on to predictor upload.
-                            </div>
-                        </ng-template>
-                    </div>
+                    <ng-container *ngIf="!inspectMeterSummary">
+                        <div class="d-flex w-100 justify-content-end mb-2">
+                            <ng-template [ngIf]="!fileReference.meterReadingsSubmitted" [ngIfElse]="notSubmittedBlock">
+                                <button class="btn btn-success btn-sm" (click)="submitMeterReadings()">
+                                    <span class="fa fa-plus"></span> Submit Meter Readings
+                                </button>
+                            </ng-template>
+                            <ng-template #notSubmittedBlock>
+                                <div class="alert alert-info small p-2">
+                                    Meter readings submitted. Use the next button to move on to predictor upload.
+                                </div>
+                            </ng-template>
+                        </div>
 
-                    <div class="table-responsive">
-                        <table class="table table-sm table-bordered table-hover utility-data">
-                            <thead class="table-mh">
-                                <tr>
-                                    <th>
-                                        Facility Name
-                                    </th>
-                                    <th>
-                                        Meter Name
-                                    </th>
-                                    <th>
-                                        New Readings
-                                    </th>
-                                    <th>
-                                        Invalid Readings
-                                    </th>
-                                    <th>
-                                        Existing Readings
-                                    </th>
-                                    <th>
-                                        <div class="w-100 d-flex">
-                                            <div class="pe-1">
-                                                <input type="checkbox" class="form-check-input" [(ngModel)]="skipAll"
-                                                    (change)="setSkipAll()">
-                                            </div>
-                                            <div>
-                                                Skip Existing?
-                                            </div>
-                                        </div>
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody class="table-group-divider">
-                                <tr *ngFor="let summary of meterDataSummaries">
-                                    <td>
-                                        {{summary.facilityName}}
-                                    </td>
-                                    <td>
-                                        {{summary.meterName}}
-                                    </td>
-                                    <td>
-                                        {{summary.newEntries}}
-                                        <span *ngIf="summary.newStart">
-                                            ({{summary.newStart | date}} - {{summary.newEnd | date}})
-                                        </span>
-                                    </td>
-                                    <td>
-                                        {{summary.invalidEntries}}
-                                        <span *ngIf="summary.invalidStart">
-                                            ({{summary.invalidStart | date}} - {{summary.invalidEnd | date}})
-                                        </span>
-                                    </td>
-                                    <td [ngClass]="{'skip': summary.skipExisting}">
-                                        {{summary.existingEntries}}
-                                        <span *ngIf="summary.existingStart">
-                                            ({{summary.existingStart | date}} - {{summary.existingEnd | date}})
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <div class="d-flex w-100 h-100 justify-content-center align-items-center">
-                                            <input type="checkbox" class="form-check-input"
-                                                [(ngModel)]="summary.skipExisting">
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                        <app-meter-data-summary-table [meterDataSummaries]="meterDataSummaries" (emitInspectSummary)="selectMeterSummary($event)"></app-meter-data-summary-table>
+                    </ng-container>
+                    <ng-container *ngIf="inspectMeterSummary">
+                        <app-inspect-meter-data-summary-table [meterDataSummary]="inspectMeterSummary" (emitClose)="selectMeterSummary(undefined)"></app-inspect-meter-data-summary-table>
+                    </ng-container>
                 </ng-template>
                 <ng-template #noMetersBlock>
                     <div class="alert alert-warning">

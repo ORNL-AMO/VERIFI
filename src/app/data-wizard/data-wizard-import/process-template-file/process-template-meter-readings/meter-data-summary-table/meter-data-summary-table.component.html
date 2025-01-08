@@ -1,0 +1,70 @@
+<div class="table-responsive">
+    <table class="table table-sm table-bordered table-hover utility-data">
+        <thead class="table-mh">
+            <tr>
+                <th>
+                    Facility Name
+                </th>
+                <th>
+                    Meter Name
+                </th>
+                <th>
+                    New Readings
+                </th>
+                <th>
+                    Invalid Readings
+                </th>
+                <th>
+                    Existing Readings
+                </th>
+                <th>
+                    <div class="w-100 d-flex">
+                        <div class="pe-1">
+                            <input type="checkbox" class="form-check-input"
+                                [(ngModel)]="skipAll" (change)="setSkipAll()">
+                        </div>
+                        <div>
+                            Skip Existing?
+                        </div>
+                    </div>
+                </th>
+            </tr>
+        </thead>
+        <tbody class="table-group-divider">
+            <tr *ngFor="let summary of meterDataSummaries">
+                <td>
+                    {{summary.facilityName}}
+                </td>
+                <td>
+                    <a class="click-link" (click)="selectMeterSummary(summary)">
+                        {{summary.meterName}}
+                    </a>
+                </td>
+                <td>
+                    {{summary.newEntries}}
+                    <span *ngIf="summary.newStart">
+                        ({{summary.newStart | date}} - {{summary.newEnd | date}})
+                    </span>
+                </td>
+                <td>
+                    {{summary.invalidEntries}}
+                    <span *ngIf="summary.invalidStart">
+                        ({{summary.invalidStart | date}} - {{summary.invalidEnd | date}})
+                    </span>
+                </td>
+                <td [ngClass]="{'skip': summary.skipExisting}">
+                    {{summary.existingEntries}}
+                    <span *ngIf="summary.existingStart">
+                        ({{summary.existingStart | date}} - {{summary.existingEnd | date}})
+                    </span>
+                </td>
+                <td>
+                    <div class="d-flex w-100 h-100 justify-content-center align-items-center">
+                        <input type="checkbox" class="form-check-input"
+                            [(ngModel)]="summary.skipExisting">
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>

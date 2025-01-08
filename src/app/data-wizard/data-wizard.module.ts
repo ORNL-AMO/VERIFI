@@ -29,6 +29,8 @@ import { WizardSidebarFacilitiesListPipe } from './data-wizard-sidebar/wizard-si
 import { TableItemsDropdownModule } from '../shared/table-items-dropdown/table-items-dropdown.module';
 import { SharedMeterContentModule } from '../shared/shared-meter-content/shared-meter-content.module';
 import { FacilityMeterMonthlyDataComponent } from './account-facilities/facility-data/facility-meters/facility-meter-monthly-data/facility-meter-monthly-data.component';
+import { MeterDataSummaryTableComponent } from './data-wizard-import/process-template-file/process-template-meter-readings/meter-data-summary-table/meter-data-summary-table.component';
+import { InspectMeterDataSummaryTableComponent } from './data-wizard-import/process-template-file/process-template-meter-readings/inspect-meter-data-summary-table/inspect-meter-data-summary-table.component';
 
 
 @NgModule({
@@ -54,7 +56,9 @@ import { FacilityMeterMonthlyDataComponent } from './account-facilities/facility
     FacilitiesListComponent,
     DataWizardHelpPanelComponent,
     WizardSidebarFacilitiesListPipe,
-    FacilityMeterMonthlyDataComponent
+    FacilityMeterMonthlyDataComponent,
+    MeterDataSummaryTableComponent,
+    InspectMeterDataSummaryTableComponent
   ],
   imports: [
     CommonModule,

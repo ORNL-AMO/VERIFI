@@ -17,6 +17,7 @@ import { checkShowHeatCapacity, getIsEnergyMeter, getIsEnergyUnit } from 'src/ap
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
+import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 
 @Component({
   selector: 'app-process-template-meter-readings',
@@ -31,6 +32,7 @@ export class ProcessTemplateMeterReadingsComponent {
   meterDataSummaries: Array<MeterDataSummary>;
   skipAll: boolean = false;
   metersIncluded: boolean;
+  inspectMeterSummary: MeterDataSummary;
   constructor(private activatedRoute: ActivatedRoute, private uploadDataService: UploadDataService,
     private router: Router,
     private utilityMeterDbService: UtilityMeterdbService,
@@ -138,6 +140,7 @@ export class ProcessTemplateMeterReadingsComponent {
         }
         let skipExisting: string = this.fileReference.skipExistingReadingsMeterIds.find(id => { return id == meter.guid });
         dataSummaries.push({
+          meter: meter,
           meterName: meter.name,
           meterId: meter.guid,
           facilityName: this.getFacilityName(meter.facilityId),
@@ -150,7 +153,8 @@ export class ProcessTemplateMeterReadingsComponent {
           newEntries: newReadings.length,
           newStart: newStart,
           newEnd: newEnd,
-          skipExisting: skipExisting != undefined
+          skipExisting: skipExisting != undefined,
+          meterReadings: meterReadings
         })
       }
     })
@@ -169,9 +173,13 @@ export class ProcessTemplateMeterReadingsComponent {
 
   }
 
+  selectMeterSummary(meterSummary: MeterDataSummary) {
+    this.inspectMeterSummary = meterSummary;
+  }
 }
 
 export interface MeterDataSummary {
+  meter: IdbUtilityMeter,
   meterName: string,
   meterId: string,
   facilityName: string,
@@ -184,5 +192,6 @@ export interface MeterDataSummary {
   newEntries: number
   newStart: Date,
   newEnd: Date,
-  skipExisting: boolean
+  skipExisting: boolean,
+  meterReadings: Array<IdbUtilityMeterData>
 }
