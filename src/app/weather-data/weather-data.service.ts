@@ -39,6 +39,7 @@ export class WeatherDataService {
     'Content-Type': 'application/json',
     'Access-Control-Allow-Origin': 'https://lcd.ornl.gov',
     'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Methods': 'POST'
   });
 
   constructor(private httpClient: HttpClient) {

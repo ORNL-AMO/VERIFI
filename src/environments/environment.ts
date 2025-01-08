@@ -6,7 +6,7 @@ export const environment = {
   production: false,
   version: packageInfo.version,
   measurUtilitiesApi: 'http://127.0.0.1:3000/',
-  weatherApi: '/api'
+  weatherApi: 'https://lcd.ornl.gov/api'
 };
 
 /*
