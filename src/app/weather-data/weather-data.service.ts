@@ -37,9 +37,9 @@ export class WeatherDataService {
 
   requestHeaders: HttpHeaders = new HttpHeaders({
     'Content-Type': 'application/json',
-    'Access-Control-Allow-Origin': 'https://lcd.ornl.gov',
-    'Access-Control-Allow-Headers': 'Content-Type',
-    'Access-Control-Allow-Methods': 'POST'
+    // 'Access-Control-Allow-Origin': 'https://lcd.ornl.gov',
+    // 'Access-Control-Allow-Headers': 'Content-Type',
+    // 'Access-Control-Allow-Methods': 'POST'
   });
 
   constructor(private httpClient: HttpClient) {
@@ -56,11 +56,11 @@ export class WeatherDataService {
       "start_date": "2013-03-01",
       "end_date": currentDate.getFullYear() + '-' + currentDate.getMonth() + '-' + currentDate.getDate()
     };
-
     let httpOptions = {
       responseType: 'text' as const,
       headers: this.requestHeaders
     };
+
     return this.httpClient.post(environment.weatherApi + '/stations', data, httpOptions);
   }
 
