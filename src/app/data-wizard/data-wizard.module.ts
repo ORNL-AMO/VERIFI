@@ -18,7 +18,6 @@ import { ProcessTemplatePredictorsComponent } from './data-wizard-import/process
 import { HelperPipesModule } from '../shared/helper-pipes/helper-pipes.module';
 import { FormsModule } from '@angular/forms';
 import { MeterGroupOptionsPipe } from './data-wizard-import/process-template-file/process-template-meters/meter-group-options.pipe';
-import { FacilityMetersComponent } from './account-facilities/facility-data/facility-meters/facility-meters.component';
 import { FacilityMetersTableComponent } from './account-facilities/facility-data/facility-meters/facility-meters-table/facility-meters-table.component';
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { FacilityMeterComponent } from './account-facilities/facility-data/facility-meters/facility-meter/facility-meter.component';
@@ -31,6 +30,9 @@ import { SharedMeterContentModule } from '../shared/shared-meter-content/shared-
 import { FacilityMeterMonthlyDataComponent } from './account-facilities/facility-data/facility-meters/facility-meter-monthly-data/facility-meter-monthly-data.component';
 import { MeterDataSummaryTableComponent } from './data-wizard-import/process-template-file/process-template-meter-readings/meter-data-summary-table/meter-data-summary-table.component';
 import { InspectMeterDataSummaryTableComponent } from './data-wizard-import/process-template-file/process-template-meter-readings/inspect-meter-data-summary-table/inspect-meter-data-summary-table.component';
+import { SharedPredictorsContentModule } from "../shared/shared-predictors-content/shared-predictors-content.module";
+import { FacilityPredictorsTableComponent } from './account-facilities/facility-data/facility-predictors/facility-predictors-table/facility-predictors-table.component';
+import { FacilityPredictorComponent } from './account-facilities/facility-data/facility-predictors/facility-predictor/facility-predictor.component';
 
 
 @NgModule({
@@ -49,7 +51,6 @@ import { InspectMeterDataSummaryTableComponent } from './data-wizard-import/proc
     ProcessTemplateMetersComponent,
     ProcessTemplatePredictorsComponent,
     MeterGroupOptionsPipe,
-    FacilityMetersComponent,
     FacilityMetersTableComponent,
     FacilityMeterComponent,
     FacilityPredictorsComponent,
@@ -58,7 +59,9 @@ import { InspectMeterDataSummaryTableComponent } from './data-wizard-import/proc
     WizardSidebarFacilitiesListPipe,
     FacilityMeterMonthlyDataComponent,
     MeterDataSummaryTableComponent,
-    InspectMeterDataSummaryTableComponent
+    InspectMeterDataSummaryTableComponent,
+    FacilityPredictorsTableComponent,
+    FacilityPredictorComponent
   ],
   imports: [
     CommonModule,
@@ -68,7 +71,8 @@ import { InspectMeterDataSummaryTableComponent } from './data-wizard-import/proc
     FormsModule,
     NgbPaginationModule,
     TableItemsDropdownModule,
-    SharedMeterContentModule
-  ]
+    SharedMeterContentModule,
+    SharedPredictorsContentModule
+]
 })
 export class DataWizardModule { }

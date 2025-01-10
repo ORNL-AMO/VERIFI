@@ -1,22 +1,4 @@
 <ng-template [ngIf]="predictorForm">
-    <div class="row">
-        <div class="col-12 justify-content-end">
-            <div class="d-flex small text-center alert alert-warning"
-                *ngIf="predictorForm.controls.predictorType.value == 'Weather' && addOrEdit == 'edit'">
-                Changing weather data properties will cause predictor data to re-calculate. Existing predictor entries
-                may
-                be
-                altered.
-            </div>
-            <div class="d-flex justify-content-end">
-                <button class="btn btn-secondary me-2" (click)="cancel()">Cancel</button>
-                <button class="btn btn-primary" (click)="saveChanges()" [disabled]="predictorForm.invalid">
-                    <span *ngIf="addOrEdit == 'add'">Add Predictor</span>
-                    <span *ngIf="addOrEdit == 'edit'">Save Changes</span>
-                </button>
-            </div>
-        </div>
-    </div>
     <form [formGroup]="predictorForm">
         <p class="bold">Predictor Information</p>
         <div class="row">
@@ -86,27 +68,37 @@
                 <div class="col-lg-6 col-md-12 col-sm-12">
                     <label class="semibold" for="weatherStationId">Weather Station <span>(within 50 miles of
                             {{facility.zip}})</span></label>
-                    <ng-container *ngIf="stations.length != 0">
-                        <div class="mb-3">
-                            <select id="weatherStationId" class="form-select" formControlName="weatherStationId">
-                                <option *ngFor="let station of stations" [ngValue]="station.ID">{{station.name}}
-                                    ({{station.distanceFrom | number}} miles)</option>
-                            </select>
-                        </div>
-                        <div class="alert alert-danger"
-                            *ngIf="predictorForm.get('weatherStationId').hasError('required')">
-                            Weather station is
-                            required</div>
-                    </ng-container>
-                    <ng-template [ngIf]="!findingStations" [ngIfElse]="findingStationsBlock">
-                        <div *ngIf="stations.length == 0" class="alert alert-danger">
-                            No stations found within 50 miles of the facility zip. Use the weather data portion of
-                            VERIFI for
-                            more information.
-                        </div>
+                    <ng-template [ngIf]="facility.zip" [ngIfElse]="noFacilityZipBlock">
+                        <ng-container *ngIf="stations.length != 0">
+                            <div class="mb-3">
+                                <select id="weatherStationId" class="form-select" formControlName="weatherStationId"
+                                    (change)="setWeatherStation()">
+                                    <option *ngFor="let station of stations" [ngValue]="station.ID">{{station.name}}
+                                        ({{station.distanceFrom | number}} miles)</option>
+                                </select>
+                            </div>
+                            <div class="alert alert-danger"
+                                *ngIf="predictorForm.get('weatherStationId').hasError('required')">
+                                Weather station is
+                                required</div>
+                        </ng-container>
+                        <ng-template [ngIf]="!findingStations" [ngIfElse]="findingStationsBlock">
+                            <div *ngIf="stations.length == 0" class="alert alert-danger">
+                                No stations found within 50 miles of the facility zip. Use the weather data portion of
+                                VERIFI for
+                                more information.
+                            </div>
+                        </ng-template>
+                        <ng-template #findingStationsBlock>
+                            Searching for weather stations...
+                        </ng-template>
                     </ng-template>
-                    <ng-template #findingStationsBlock>
-                        Searching for weather stations...
+                    <ng-template #noFacilityZipBlock>
+                        <div class="alert alert-danger p-1">
+                            <span class="fa fa-circle-exclamation"></span> No Facility
+                            Zip. <a class="click-link" (click)="openFacilityZipModal()">Set
+                                facility zip.</a>
+                        </div>
                     </ng-template>
                 </div>
                 <div class="col-lg-6 col-md-12 col-sm-12" *ngIf="predictorForm.controls.weatherDataType.value == 'HDD'">
@@ -165,7 +157,7 @@
             </ng-container>
 
             <!--Math/Conversion-->
-            <div class="col-lg-6 col-md-12 col-sm-12" *ngIf="showReferencePredictors">
+            <!-- <div class="col-lg-6 col-md-12 col-sm-12" *ngIf="showReferencePredictors">
                 <label class="semibold" for="referencePredictorId">Reference Predictor</label>
                 <div class="mb-3">
                     <select id="referencePredictorId" class="form-select" formControlName="referencePredictorId"
@@ -174,7 +166,7 @@
                         </option>
                     </select>
                 </div>
-            </div>
+            </div> -->
             <!--Conversion method not implemented yet-->
             <!-- <ng-container *ngIf="predictorForm.controls.predictorType.value == 'Conversion'">
             <div class="col-lg-6 col-md-12 col-sm-12">
@@ -209,7 +201,7 @@
                 </div>
             </div>
         </ng-container> -->
-            <ng-container *ngIf="predictorForm.controls.predictorType.value == 'Math'">
+            <!-- <ng-container *ngIf="predictorForm.controls.predictorType.value == 'Math'">
                 <div class="col-lg-6 col-md-12 col-sm-12">
                     <label class="semibold" for="mathAction">Math Action</label>
                     <div class="mb-3">
@@ -246,7 +238,23 @@
                         {{predictorForm.controls.mathAmount.value}}
                     </div>
                 </div>
-            </ng-container>
+            </ng-container> -->
         </div>
     </form>
 </ng-template>
+
+
+<div [ngClass]="{'windowOverlay': displayFacilityZipModal}"></div>
+<div class="popup" [class.open]="displayFacilityZipModal">
+    <div class="popup-header" *ngIf="displayFacilityZipModal">Facilit Zip Code: {{facility.name}}
+        <button class="item-right" (click)="closeFacilityZipModal()">x</button>
+    </div>
+    <div class="popup-body">
+        <input type="text" class="form-control" [(ngModel)]="facilityZip" autocomplete="postal-code"
+            onfocus="this.select();" minlength="1" maxlength="12">
+    </div>
+    <div class="saveCancel popup-footer text-end">
+        <button class="btn btn-secondary" (click)="closeFacilityZipModal()">Cancel</button>
+        <button class="btn btn-success" (click)="setFacilityZip()">Set Facility Zip Code</button>
+    </div>
+</div>

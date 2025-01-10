@@ -30,6 +30,7 @@ export class DataWizardComponent {
   ngOnDestroy() {
     this.dataWizardService.sidebarWidth = this.sidebarWidth;
     this.dataWizardService.helpWidth = this.helpWidth;
+    this.dataWizardService.fileReferences.next([]);
   }
 
   startResizingSidebar(event: MouseEvent): void {

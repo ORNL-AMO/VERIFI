@@ -11,7 +11,6 @@ import { ProcessTemplateFacilitiesComponent } from "../data-wizard/data-wizard-i
 import { ProcessTemplateMetersComponent } from "../data-wizard/data-wizard-import/process-template-file/process-template-meters/process-template-meters.component";
 import { ProcessTemplateMeterReadingsComponent } from "../data-wizard/data-wizard-import/process-template-file/process-template-meter-readings/process-template-meter-readings.component";
 import { ProcessTemplatePredictorsComponent } from "../data-wizard/data-wizard-import/process-template-file/process-template-predictors/process-template-predictors.component";
-import { FacilityMetersComponent } from "../data-wizard/account-facilities/facility-data/facility-meters/facility-meters.component";
 import { FacilityMetersTableComponent } from "../data-wizard/account-facilities/facility-data/facility-meters/facility-meters-table/facility-meters-table.component";
 import { FacilityMeterComponent } from "../data-wizard/account-facilities/facility-data/facility-meters/facility-meter/facility-meter.component";
 import { FacilityPredictorsComponent } from "../data-wizard/account-facilities/facility-data/facility-predictors/facility-predictors.component";
@@ -26,6 +25,8 @@ import { canDeactivateGuard } from "./can-deactivate.guard";
 import { PredictorsDataFormComponent } from "../facility/utility-data/predictors/predictors-data/predictors-data-form/predictors-data-form.component";
 import { CalculatedPredictorDataUpdateComponent } from "../facility/utility-data/predictors/predictors-data/calculated-predictor-data-update/calculated-predictor-data-update.component";
 import { FacilityMeterMonthlyDataComponent } from "../data-wizard/account-facilities/facility-data/facility-meters/facility-meter-monthly-data/facility-meter-monthly-data.component";
+import { FacilityPredictorComponent } from "../data-wizard/account-facilities/facility-data/facility-predictors/facility-predictor/facility-predictor.component";
+import { FacilityPredictorsTableComponent } from "../data-wizard/account-facilities/facility-data/facility-predictors/facility-predictors-table/facility-predictors-table.component";
 
 export const DataWizardRoutes: Route = {
     path: 'data-wizard/:id',
@@ -74,12 +75,14 @@ export const DataWizardRoutes: Route = {
                         },
                         {
                             path: 'meters',
-                            component: FacilityMetersComponent,
+                            component: FacilityMetersTableComponent,
+                        },
+                        {
+                            path: 'meters/:id',
                             children: [
-                                { path: '', component: FacilityMetersTableComponent },
-                                { path: 'meter/:id', component: FacilityMeterComponent },
+                                { path: '', component: FacilityMeterComponent },
                                 {
-                                    path: 'meter-data/:id',
+                                    path: 'meter-data',
                                     component: MeterDataComponent,
                                     children: [
                                         { path: '', component: MeterDataTableComponent },
@@ -95,27 +98,29 @@ export const DataWizardRoutes: Route = {
                                         }
                                     ]
                                 },
-                                { path: 'meter-monthly-data/:id', component: FacilityMeterMonthlyDataComponent }
+                                { path: 'meter-monthly-data', component: FacilityMeterMonthlyDataComponent }
                             ]
+
                         },
                         {
                             path: 'predictors',
-                            component: FacilityPredictorsComponent,
+                            component: FacilityPredictorsTableComponent
+                        },
+                        {
+                            path: 'predictors/:id',
                             children: [
-                                { path: '', component: PredictorTableComponent },
-                                { path: 'predictor/:id', component: EditPredictorFormComponent },
                                 {
-                                    path: 'edit-predictor/:id',
-                                    component: EditPredictorFormComponent,
+                                    path: '',
+                                    component: FacilityPredictorComponent,
                                     canDeactivate: [canDeactivateGuard]
                                 },
+                                // {
+                                //     path: 'edit-predictor',
+                                //     component: EditPredictorFormComponent,
+                                //     canDeactivate: [canDeactivateGuard]
+                                // },
                                 {
-                                    path: 'add-predictor',
-                                    component: EditPredictorFormComponent,
-                                    canDeactivate: [canDeactivateGuard]
-                                },
-                                {
-                                    path: 'predictor-data/:id',
+                                    path: 'predictor-data',
                                     children: [
                                         { path: '', component: PredictorsDataTableComponent },
                                         {

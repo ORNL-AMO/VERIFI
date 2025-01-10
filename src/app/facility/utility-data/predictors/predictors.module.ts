@@ -14,6 +14,7 @@ import { SharedPredictorsContentModule } from 'src/app/shared/shared-predictors-
 import { CalculatedPredictorDataUpdateComponent } from './predictors-data/calculated-predictor-data-update/calculated-predictor-data-update.component';
 import { OrderCalculatedPredictorDataPipe } from './predictors-data/calculated-predictor-data-update/order-calculated-predictor-data.pipe';
 import { LabelWithTooltipModule } from "../../../shared/label-with-tooltip/label-with-tooltip.module";
+import { EditPredictorComponent } from './edit-predictor/edit-predictor.component';
 
 
 
@@ -24,7 +25,8 @@ import { LabelWithTooltipModule } from "../../../shared/label-with-tooltip/label
     PredictorsDataComponent,
     PredictorsDataFormComponent,
     CalculatedPredictorDataUpdateComponent,
-    OrderCalculatedPredictorDataPipe
+    OrderCalculatedPredictorDataPipe,
+    EditPredictorComponent
   ],
   imports: [
     CommonModule,

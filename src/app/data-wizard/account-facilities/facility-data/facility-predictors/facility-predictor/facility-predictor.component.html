@@ -1,0 +1,46 @@
+<h4>{{predictor.name}}
+</h4>
+
+<div class="d-flex w-100 flex-column justify-content-end">
+    <div class="d-flex small text-center alert alert-warning"
+        *ngIf="predictorForm.controls.predictorType.value == 'Weather'">
+        Changing weather data properties will cause predictor data to re-calculate. Existing predictor entries
+        may be altered.
+    </div>
+    <div class="d-flex justify-content-end">
+        <button class="btn btn-primary" (click)="saveChanges()"
+            [disabled]="predictorForm.invalid || !predictorForm.dirty">
+            <span class="fa fa-save"></span>
+            Save Changes
+        </button>
+    </div>
+</div>
+
+<app-edit-predictor-form *ngIf="predictor" [predictorForm]="predictorForm" [predictor]="predictor"
+    [latestMeterReading]="latestMeterReading" [firstMeterReading]="firstMeterReading" [addOrEdit]="'edit'"
+    [facility]="facility"></app-edit-predictor-form>
+<hr>
+<div class="d-flex w-100 justify-content-end">
+    <div>
+        <button class="btn btn-danger btn-sm" (click)="showDelete()">
+            <span class="fa fa-trash"></span>
+            Delete Predictor
+        </button>
+    </div>
+</div>
+
+<div [ngClass]="{'windowOverlay': showDeletePredictor}"></div>
+<div class="popup" [class.open]="showDeletePredictor">
+    <div class="popup-header" *ngIf="showDeletePredictor">Delete Predictor: {{predictor.name}}
+        <button class="item-right" (click)="cancelDelete()">x</button>
+    </div>
+    <div class="popup-body">
+        <p>WARNING: By deleting this predictor, you are also deleting all of the predictor data associated with
+            it.
+            Are you sure you want to preform this action?</p>
+    </div>
+    <div class="saveCancel popup-footer text-end">
+        <button class="btn btn-secondary" (click)="cancelDelete()">Cancel</button>
+        <button class="btn btn-danger" (click)="confirmDelete()">Delete</button>
+    </div>
+</div>

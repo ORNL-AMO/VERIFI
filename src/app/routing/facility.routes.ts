@@ -38,7 +38,6 @@ import { WaterDashboardComponent } from "../facility/analysis/analysis-dashboard
 import { PredictorsComponent } from "../facility/utility-data/predictors/predictors.component";
 import { PredictorsManagementComponent } from "../facility/utility-data/predictors/predictors-management/predictors-management.component";
 import { PredictorTableComponent } from "../shared/shared-predictors-content/predictor-table/predictor-table.component";
-import { EditPredictorFormComponent } from "../shared/shared-predictors-content/edit-predictor-form/edit-predictor-form.component";
 import { PredictorsDataComponent } from "../facility/utility-data/predictors/predictors-data/predictors-data.component";
 import { PredictorsDataTableComponent } from "../shared/shared-predictors-content/predictors-data-table/predictors-data-table.component";
 import { PredictorsDataFormComponent } from "../facility/utility-data/predictors/predictors-data/predictors-data-form/predictors-data-form.component";
@@ -54,6 +53,7 @@ import { FacilityOverviewReportsDashboardComponent } from "../facility/facility-
 import { MeterDataTableComponent } from "../shared/shared-meter-content/meter-data/meter-data-table/meter-data-table.component";
 import { EditBillComponent } from "../shared/shared-meter-content/edit-bill/edit-bill.component";
 import { EditMeterComponent } from "../shared/shared-meter-content/edit-meter/edit-meter.component";
+import { EditPredictorComponent } from "../facility/utility-data/predictors/edit-predictor/edit-predictor.component";
 
 export const FacilityRoutes: Route = {
     path: 'facility/:id',
@@ -170,12 +170,12 @@ export const FacilityRoutes: Route = {
 
                                 {
                                     path: 'edit-predictor/:id',
-                                    component: EditPredictorFormComponent,
+                                    component: EditPredictorComponent,
                                     canDeactivate: [canDeactivateGuard]
                                 },
                                 {
                                     path: 'add-predictor',
-                                    component: EditPredictorFormComponent,
+                                    component: EditPredictorComponent,
                                     canDeactivate: [canDeactivateGuard]
                                 }
                             ]

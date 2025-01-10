@@ -99,14 +99,6 @@ export class ProcessTemplateMetersComponent {
   //   this.router.navigateByUrl('/upload/data-setup/file-setup/' + this.fileReference.id + '/confirm-readings');
   // }
 
-  getFacilityName(facilityId: string): string {
-    let facility: IdbFacility = this.fileReference.importFacilities.find(facility => { return facility.guid == facilityId });
-    if (facility) {
-      return facility.name;
-    }
-    return;
-  }
-
   setEditMeter(meter: IdbUtilityMeter) {
     if (meter.id == undefined) {
       this.editMeterPrevGUID = meter.guid;

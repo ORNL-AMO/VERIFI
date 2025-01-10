@@ -40,6 +40,7 @@ export class PredictorDbService {
     }
 
     addWithObservable(predictor: IdbPredictor): Observable<IdbPredictor> {
+        console.log('ADD ?')
         return this.dbService.add('predictor', predictor);
     }
 

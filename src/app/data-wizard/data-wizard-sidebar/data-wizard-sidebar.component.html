@@ -143,21 +143,21 @@
                             <div class="sidebar-section" *ngIf="meter.sidebarOpen">
                                 <div class="ps-2 pe-2 nav-item">
                                     <a class="nav-link"
-                                        [routerLink]="'/data-wizard/'+account.guid+'/facilities/'+facility.guid+'/meters/meter/'+meter.guid"
+                                        [routerLink]="'/data-wizard/'+account.guid+'/facilities/'+facility.guid+'/meters/'+meter.guid"
                                         [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
                                         <span class="fa fa-gear"></span> Meter Settings
                                     </a>
                                 </div>
                                 <div class="ps-2 pe-2 nav-item">
                                     <a class="nav-link"
-                                        [routerLink]="'/data-wizard/'+account.guid+'/facilities/'+facility.guid+'/meters/meter-data/'+meter.guid"
+                                        [routerLink]="'/data-wizard/'+account.guid+'/facilities/'+facility.guid+'/meters/'+meter.guid+'/meter-data'"
                                         [routerLinkActive]="['active']">
                                         <span class="fa fa-table"></span> Meter Readings
                                     </a>
                                 </div>
                                 <div class="ps-2 pe-2 nav-item">
                                     <a class="nav-link"
-                                        [routerLink]="'/data-wizard/'+account.guid+'/facilities/'+facility.guid+'/meters/meter-monthly-data/'+meter.guid"
+                                        [routerLink]="'/data-wizard/'+account.guid+'/facilities/'+facility.guid+'/meters/'+meter.guid+'/meter-monthly-data'"
                                         [routerLinkActive]="['active']">
                                         <span class="fa fa-calendar-days"></span> Meter Monthly Data
                                     </a>
@@ -191,14 +191,14 @@
                             <div class="sidebar-section" *ngIf="predictor.sidebarOpen">
                                 <div class="ps-2 pe-2 nav-item">
                                     <a class="nav-link"
-                                        [routerLink]="'/data-wizard/'+account.guid+'/facilities/'+facility.guid+'/predictors/predictor/'+predictor.guid"
+                                        [routerLink]="'/data-wizard/'+account.guid+'/facilities/'+facility.guid+'/predictors/'+predictor.guid"
                                         [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
                                         <span class="fa fa-gear"></span> Predictor Settings
                                     </a>
                                 </div>
                                 <div class="ps-2 pe-2 nav-item">
                                     <a class="nav-link"
-                                        [routerLink]="'/data-wizard/'+account.guid+'/facilities/'+facility.guid+'/predictors/predictor-data/'+predictor.guid"
+                                        [routerLink]="'/data-wizard/'+account.guid+'/facilities/'+facility.guid+'/predictors/'+predictor.guid+'/predictor-data'"
                                         [routerLinkActive]="['active']">
                                         <span class="fa fa-table"></span> Predictor Data
                                     </a>

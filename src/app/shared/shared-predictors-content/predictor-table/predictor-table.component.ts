@@ -13,7 +13,7 @@ import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.serv
 import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { AnalysisGroup, AnalysisGroupPredictorVariable, JStatRegressionModel } from 'src/app/models/analysis';
 import { WeatherStation } from 'src/app/models/degreeDays';
-import { IdbPredictor } from 'src/app/models/idbModels/predictor';
+import { getNewIdbPredictor, IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
 import { WeatherDataService } from 'src/app/weather-data/weather-data.service';
@@ -134,24 +134,43 @@ export class PredictorTableComponent {
     this.predictorToDelete = undefined;
   }
 
-  selectEditPredictor(predictor: IdbPredictor) {
+  async selectEditPredictor(predictor: IdbPredictor) {
     if (this.router.url.includes('data-wizard')) {
-      this.router.navigateByUrl('/data-wizard/' + predictor.accountId + '/facilities/' + predictor.facilityId + '/predictors/predictor/' + predictor.guid);
+      let facility: IdbFacility = this.facilitydbService.selectedFacility.getValue();
+      predictor.sidebarOpen = true;
+      await firstValueFrom(this.predictorDbService.updateWithObservable(predictor));
+      let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+      await this.dbChangesService.setPredictorsV2(account, facility);
+      this.router.navigateByUrl('/data-wizard/' + predictor.accountId + '/facilities/' + predictor.facilityId + '/predictors/' + predictor.guid);
     } else {
       this.router.navigateByUrl('facility/' + this.selectedFacility.id + '/utility/predictors/manage/edit-predictor/' + predictor.guid);
     }
   }
 
-  addPredictor() {
+  async addPredictor() {
     if (this.router.url.includes('data-wizard')) {
-      this.router.navigateByUrl('/data-wizard/' + this.selectedFacility.accountId + '/facilities/' + this.selectedFacility.guid + '/predictors/add-predictor');
+      let facility: IdbFacility = this.facilitydbService.selectedFacility.getValue();
+      let newPredictor: IdbPredictor = getNewIdbPredictor(facility.accountId, facility.guid);
+      newPredictor = await firstValueFrom(this.predictorDbService.addWithObservable(newPredictor));
+      await this.analysisDbService.addAnalysisPredictor(newPredictor);
+      let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+      await this.dbChangesService.setPredictorsV2(account, facility);
+      await this.dbChangesService.setPredictorDataV2(account, facility);
+      await this.dbChangesService.setAnalysisItems(account, true, facility);
+      this.loadingService.setLoadingStatus(false);
+      this.toastNotificationService.showToast('New Predictor Added!', undefined, undefined, false, 'alert-success');
+      this.selectEditPredictor(newPredictor);
     } else {
       this.router.navigateByUrl('facility/' + this.selectedFacility.id + '/utility/predictors/manage/add-predictor');
     }
   }
 
   uploadData() {
-    this.router.navigateByUrl('/upload');
+    if (this.router.url.includes('data-wizard')) {
+      this.router.navigateByUrl('/data-wizard/' + this.selectedFacility.accountId + '/import-data/upload-files');
+    } else {
+      this.router.navigateByUrl('/upload');
+    }
   }
 
 

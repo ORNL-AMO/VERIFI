@@ -49,7 +49,7 @@ import { DataWizardModule } from './data-wizard/data-wizard.module';
     ManageAccountsComponent,
     ElectronBackupFileComponent,
     DeletingAccountDataComponent,
-    HomePageComponent,
+    HomePageComponent
   ],
   imports: [
     BrowserModule,

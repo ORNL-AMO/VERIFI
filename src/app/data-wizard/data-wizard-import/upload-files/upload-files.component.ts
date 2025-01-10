@@ -60,6 +60,7 @@ export class UploadFilesComponent {
       try {
         console.log('try!')
         let fileReference: FileReference = this.uploadDataService.getFileReference(file, workBook, false);
+        console.log(fileReference);
         this.fileReferences.push(fileReference);
         this.dataWizardService.fileReferences.next(this.fileReferences);
       } catch (err) {
