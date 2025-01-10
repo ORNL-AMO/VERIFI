@@ -15,17 +15,15 @@ import { FacilityMetersTableComponent } from "../data-wizard/account-facilities/
 import { FacilityMeterComponent } from "../data-wizard/account-facilities/facility-data/facility-meters/facility-meter/facility-meter.component";
 import { MeterDataComponent } from "../shared/shared-meter-content/meter-data/meter-data.component";
 import { MeterDataTableComponent } from "../shared/shared-meter-content/meter-data/meter-data-table/meter-data-table.component";
-import { PredictorsDataTableComponent } from "../shared/shared-predictors-content/predictors-data-table/predictors-data-table.component";
 import { FacilitiesListComponent } from "../data-wizard/account-facilities/facilities-list/facilities-list.component";
 import { EditBillComponent } from "../shared/shared-meter-content/edit-bill/edit-bill.component";
 import { canDeactivateGuard } from "./can-deactivate.guard";
-import { PredictorsDataFormComponent } from "../facility/utility-data/predictors/predictors-data/predictors-data-form/predictors-data-form.component";
-import { CalculatedPredictorDataUpdateComponent } from "../facility/utility-data/predictors/predictors-data/calculated-predictor-data-update/calculated-predictor-data-update.component";
 import { FacilityMeterMonthlyDataComponent } from "../data-wizard/account-facilities/facility-data/facility-meters/facility-meter-monthly-data/facility-meter-monthly-data.component";
 import { FacilityPredictorComponent } from "../data-wizard/account-facilities/facility-data/facility-predictors/facility-predictor/facility-predictor.component";
 import { FacilityPredictorsTableComponent } from "../data-wizard/account-facilities/facility-data/facility-predictors/facility-predictors-table/facility-predictors-table.component";
 import { FacilityPredictorDataTableComponent } from "../data-wizard/account-facilities/facility-data/facility-predictors/facility-predictor-data-table/facility-predictor-data-table.component";
 import { FacilityPredictorDataEntryComponent } from "../data-wizard/account-facilities/facility-data/facility-predictors/facility-predictor-data-entry/facility-predictor-data-entry.component";
+import { FacilityPredictorDataBulkUpdateComponent } from "../data-wizard/account-facilities/facility-data/facility-predictors/facility-predictor-data-bulk-update/facility-predictor-data-bulk-update.component";
 
 export const DataWizardRoutes: Route = {
     path: 'data-wizard/:id',
@@ -132,7 +130,7 @@ export const DataWizardRoutes: Route = {
                                         },
                                         {
                                             path: 'update-calculated-entries',
-                                            component: CalculatedPredictorDataUpdateComponent
+                                            component: FacilityPredictorDataBulkUpdateComponent
                                             // canDeactivate: [canDeactivateGuard]
                                         }
                                     ]

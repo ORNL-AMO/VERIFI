@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
@@ -25,12 +25,13 @@ import { PredictorDataHelperService } from 'src/app/shared/helper-services/predi
   styleUrl: './calculated-predictor-data-update.component.css'
 })
 export class CalculatedPredictorDataUpdateComponent {
+  @Input()
+  predictor: IdbPredictor;
 
   itemsPerPage: number;
   itemsPerPageSub: Subscription;
   predictorDataSub: Subscription;
 
-  predictor: IdbPredictor;
   predictorData: Array<CalculatedPredictorTableItem>;
   orderDataField: string = 'date';
   orderByDirection: string = 'desc';
@@ -78,12 +79,13 @@ export class CalculatedPredictorDataUpdateComponent {
       this.setPredictorData();
     });
 
-    this.paramsSub = this.activatedRoute.parent.params.subscribe(params => {
-      let predictorId: string = params['id'];
-      this.predictor = this.predictorDbService.getByGuid(predictorId);
-      this.setPredictorData();
-    });
-
+    if (!this.predictor) {
+      this.paramsSub = this.activatedRoute.parent.params.subscribe(params => {
+        let predictorId: string = params['id'];
+        this.predictor = this.predictorDbService.getByGuid(predictorId);
+        this.setPredictorData();
+      });
+    }
 
     this.itemsPerPageSub = this.sharedDataService.itemsPerPage.subscribe(val => {
       this.itemsPerPage = val;
@@ -285,8 +287,12 @@ export class CalculatedPredictorDataUpdateComponent {
   }
 
   cancel() {
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    this.router.navigateByUrl('facility/' + selectedFacility.id + '/utility/predictors/predictor/' + this.predictor.guid)
+    if (this.router.url.includes('data-wizard')) {
+      this.router.navigateByUrl('/data-wizard/' + this.predictor.accountId + '/facilities/' + this.predictor.facilityId + '/predictors/' + this.predictor.guid + '/predictor-data')
+    } else {
+      let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+      this.router.navigateByUrl('facility/' + selectedFacility.id + '/utility/predictors/predictor/' + this.predictor.guid)
+    }
   }
 
   async updateEntries() {

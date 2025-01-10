@@ -41,7 +41,7 @@ import { PredictorTableComponent } from "../shared/shared-predictors-content/pre
 import { PredictorsDataComponent } from "../facility/utility-data/predictors/predictors-data/predictors-data.component";
 import { PredictorsDataTableComponent } from "../shared/shared-predictors-content/predictors-data-table/predictors-data-table.component";
 import { PredictorsDataFormComponent } from "../facility/utility-data/predictors/predictors-data/predictors-data-form/predictors-data-form.component";
-import { CalculatedPredictorDataUpdateComponent } from "../facility/utility-data/predictors/predictors-data/calculated-predictor-data-update/calculated-predictor-data-update.component";
+import { CalculatedPredictorDataUpdateComponent } from "../shared/shared-predictors-content/calculated-predictor-data-update/calculated-predictor-data-update.component";
 import { FacilityReportsComponent } from "../facility/facility-reports/facility-reports.component";
 import { FacilityReportsDashboardComponent } from "../facility/facility-reports/facility-reports-dashboard/facility-reports-dashboard.component";
 import { FacilityReportSetupComponent } from "../facility/facility-reports/facility-report-setup/facility-report-setup.component";

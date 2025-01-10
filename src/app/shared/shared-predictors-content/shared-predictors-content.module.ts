@@ -12,6 +12,8 @@ import { LabelWithTooltipModule } from '../label-with-tooltip/label-with-tooltip
 import { WeatherDataSubLabelComponent } from './weather-data-sub-label/weather-data-sub-label.component';
 import { EditPredictorDataEntryFormComponent } from './edit-predictor-data-entry-form/edit-predictor-data-entry-form.component';
 import { CalculatingSpinnerModule } from '../calculating-spinner/calculating-spinner.module';
+import { CalculatedPredictorDataUpdateComponent } from './calculated-predictor-data-update/calculated-predictor-data-update.component';
+import { OrderCalculatedPredictorDataPipe } from './calculated-predictor-data-update/order-calculated-predictor-data.pipe';
 
 
 
@@ -22,7 +24,9 @@ import { CalculatingSpinnerModule } from '../calculating-spinner/calculating-spi
     PredictorsDataTableComponent,
     OrderPredictorDataTablePipe,
     WeatherDataSubLabelComponent,
-    EditPredictorDataEntryFormComponent
+    EditPredictorDataEntryFormComponent,
+    CalculatedPredictorDataUpdateComponent,
+    OrderCalculatedPredictorDataPipe
   ],
   imports: [
     CommonModule,
@@ -40,7 +44,8 @@ import { CalculatingSpinnerModule } from '../calculating-spinner/calculating-spi
     PredictorsDataTableComponent,
     OrderPredictorDataTablePipe,
     WeatherDataSubLabelComponent,
-    EditPredictorDataEntryFormComponent
+    EditPredictorDataEntryFormComponent,
+    CalculatedPredictorDataUpdateComponent
   ]
 })
 export class SharedPredictorsContentModule { }

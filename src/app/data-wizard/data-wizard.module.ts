@@ -34,6 +34,7 @@ import { FacilityPredictorsTableComponent } from './account-facilities/facility-
 import { FacilityPredictorComponent } from './account-facilities/facility-data/facility-predictors/facility-predictor/facility-predictor.component';
 import { FacilityPredictorDataTableComponent } from './account-facilities/facility-data/facility-predictors/facility-predictor-data-table/facility-predictor-data-table.component';
 import { FacilityPredictorDataEntryComponent } from './account-facilities/facility-data/facility-predictors/facility-predictor-data-entry/facility-predictor-data-entry.component';
+import { FacilityPredictorDataBulkUpdateComponent } from './account-facilities/facility-data/facility-predictors/facility-predictor-data-bulk-update/facility-predictor-data-bulk-update.component';
 
 
 @NgModule({
@@ -63,7 +64,8 @@ import { FacilityPredictorDataEntryComponent } from './account-facilities/facili
     FacilityPredictorsTableComponent,
     FacilityPredictorComponent,
     FacilityPredictorDataTableComponent,
-    FacilityPredictorDataEntryComponent
+    FacilityPredictorDataEntryComponent,
+    FacilityPredictorDataBulkUpdateComponent
   ],
   imports: [
     CommonModule,
