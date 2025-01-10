@@ -6,7 +6,7 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
-import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
+import { getNewIdbPredictorData, IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { CopyTableService } from 'src/app/shared/helper-services/copy-table.service';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import * as _ from 'lodash';
@@ -121,10 +121,16 @@ export class PredictorsDataTableComponent {
     }
   }
 
-  addPredictorEntry() {
+  async addPredictorEntry() {
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     if (this.inDataWizard) {
-      this.router.navigateByUrl('/data-wizard/' + this.predictor.accountId + '/facilities/' + this.predictor.accountId + '/predictors/predictor-data/' + this.predictor.guid + '/add-entry')
+      let newEntry: IdbPredictorData = getNewIdbPredictorData(this.predictor, this.predictorData);
+      newEntry = await firstValueFrom(this.predictorDataDbService.addWithObservable(newEntry));
+      let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+      let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+      await this.dbChangesService.setPredictorDataV2(account, selectedFacility);
+      this.toastNotificationService.showToast('Predictor Added!', undefined, undefined, false, 'alert-success');
+      this.setEditPredictorData(newEntry);
     } else {
       this.router.navigateByUrl('facility/' + selectedFacility.id + '/utility/predictors/predictor/' + this.predictor.guid + '/add-entry');
     }
@@ -147,12 +153,20 @@ export class PredictorsDataTableComponent {
   }
 
   setEditPredictorData(predictorEntry: IdbPredictorData) {
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    this.router.navigateByUrl('facility/' + selectedFacility.id + '/utility/predictors/predictor/' + this.predictor.guid + '/edit-entry/' + predictorEntry.guid);
+    if (this.inDataWizard) {
+      this.router.navigateByUrl('data-wizard/' + predictorEntry.accountId + '/facilities/' + predictorEntry.facilityId + '/predictors/' + predictorEntry.predictorId + '/predictor-data/edit-entry/' + predictorEntry.guid);
+    } else {
+      let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+      this.router.navigateByUrl('facility/' + selectedFacility.id + '/utility/predictors/predictor/' + this.predictor.guid + '/edit-entry/' + predictorEntry.guid);
+    }
   }
 
   uploadData() {
-    this.router.navigateByUrl('/upload');
+    if (this.inDataWizard) {
+      this.router.navigateByUrl('data-wizard/' + this.predictor.accountId + '/facilities/' + this.predictor.facilityId + '/predictors/' + this.predictor.guid + '/predictor-data');
+    } else {
+      this.router.navigateByUrl('/upload');
+    }
   }
 
   checkAll() {
@@ -283,8 +297,15 @@ export class PredictorsDataTableComponent {
   }
 
   showUpdateEntries() {
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    this.router.navigateByUrl('facility/' + selectedFacility.id + '/utility/predictors/predictor/' + this.predictor.guid + '/update-calculated-entries');
+    if(this.inDataWizard){     
+       this.router.navigateByUrl('data-wizard/' + this.predictor.accountId + '/facilities/' + this.predictor.facilityId + '/predictors/' + this.predictor.guid + '/predictor-data/update-calculated-entries');
+
+
+    }else{
+      let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+      this.router.navigateByUrl('facility/' + selectedFacility.id + '/utility/predictors/predictor/' + this.predictor.guid + '/update-calculated-entries');
+    }
+
   }
 
   toggleFilterErrors() {

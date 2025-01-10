@@ -3,9 +3,11 @@
 
 <div class="d-flex w-100 flex-column justify-content-end">
     <div class="d-flex small text-center alert alert-warning"
-        *ngIf="predictorForm.controls.predictorType.value == 'Weather'">
-        Changing weather data properties will cause predictor data to re-calculate. Existing predictor entries
-        may be altered.
+        *ngIf="predictorForm.controls.predictorType.value == 'Weather' && firstMeterReading && latestMeterReading">
+        Weather predictor data entries will be calculated based off of these settings. Changing weather data stations or
+        other
+        related settings will be used to updated the predictor data entries. Predictor entries will be created to match
+        the first and last meter readings in the facility ({{firstMeterReading | date}} - {{latestMeterReading | date}}).
     </div>
     <div class="d-flex justify-content-end">
         <button class="btn btn-primary" (click)="saveChanges()"

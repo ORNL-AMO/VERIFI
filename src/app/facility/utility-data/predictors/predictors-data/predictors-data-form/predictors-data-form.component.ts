@@ -58,7 +58,6 @@ export class PredictorsDataFormComponent {
         this.addOrEdit = 'add';
         this.setNewPredictorEntry();
       }
-      this.setDegreeDayValues();
     });
   }
 
@@ -97,48 +96,7 @@ export class PredictorsDataFormComponent {
     this.predictorData = getNewIdbPredictorData(this.predictor, predictorDataEntries);
   }
 
-  setDate(eventData: string) {
-    //eventData format = yyyy-mm = 2022-06
-    let yearMonth: Array<string> = eventData.split('-');
-    //-1 on month
-    this.predictorData.date = new Date(Number(yearMonth[0]), Number(yearMonth[1]) - 1, 1);
-    this.isSaved = false;
-    this.setDegreeDayValues();
-  }
-
-  async setDegreeDayValues() {
-    if (this.predictor.predictorType == 'Weather') {
-      this.calculatingDegreeDays = true;
-      let hasWeatherDataWarning: boolean = false;
-      if (!this.predictorData.weatherOverride) {
-        let stationId: string = this.predictor.weatherStationId;
-        let entryDate: Date = new Date(this.predictorData.date);
-        let degreeDays: 'error' | Array<DetailDegreeDay> = await this.degreeDaysService.getDailyDataFromMonth(entryDate.getMonth(), entryDate.getFullYear(), this.predictor.heatingBaseTemperature, this.predictor.coolingBaseTemperature, stationId)
-        if(degreeDays != 'error'){
-          let hasErrors: DetailDegreeDay = degreeDays.find(degreeDay => {
-            return degreeDay.gapInData == true
-          });
-          if (!hasWeatherDataWarning && hasErrors != undefined || degreeDays.length == 0) {
-            hasWeatherDataWarning = true;
-          }
-          this.predictorData.amount = getDegreeDayAmount(degreeDays, this.predictor.weatherDataType);
-          this.predictorData.weatherDataWarning = hasErrors != undefined || degreeDays.length == 0;
-        }else{
-          this.predictorData.weatherDataWarning = true;
-        }
-      }
-    }
-    this.calculatingDegreeDays = false;
-  }
-
-  goToWeatherData() {
-    let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    this.weatherDataService.selectedFacility = facility;
-    this.weatherDataService.zipCode = facility.zip;
-    this.weatherDataService.selectedMonth = this.predictorData.date;
-    this.weatherDataService.selectedYear = new Date(this.predictorData.date).getFullYear();
-    this.router.navigateByUrl('/weather-data');
-  }
+  
 
   setChanged() {
     this.isSaved = false;
@@ -159,13 +117,6 @@ export class PredictorsDataFormComponent {
     }
   }
 
-  async revertManualWeatherData() {
-    if (this.predictor.predictorType == 'Weather') {
-      this.predictorData.weatherOverride = false;
-    }
-    await this.setDegreeDayValues();
-  }
-
   async saveAndQuit() {
     await this.saveChanges();
     this.cancel();
@@ -174,7 +125,6 @@ export class PredictorsDataFormComponent {
   async saveAndAddAnother() {
     await this.saveChanges();
     this.setNewPredictorEntry();
-    this.setDegreeDayValues();
     this.isSaved = false;
   }
 }

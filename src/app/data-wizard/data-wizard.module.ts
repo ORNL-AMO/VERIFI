@@ -21,7 +21,6 @@ import { MeterGroupOptionsPipe } from './data-wizard-import/process-template-fil
 import { FacilityMetersTableComponent } from './account-facilities/facility-data/facility-meters/facility-meters-table/facility-meters-table.component';
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { FacilityMeterComponent } from './account-facilities/facility-data/facility-meters/facility-meter/facility-meter.component';
-import { FacilityPredictorsComponent } from './account-facilities/facility-data/facility-predictors/facility-predictors.component';
 import { FacilitiesListComponent } from './account-facilities/facilities-list/facilities-list.component';
 import { DataWizardHelpPanelComponent } from './data-wizard-help-panel/data-wizard-help-panel.component';
 import { WizardSidebarFacilitiesListPipe } from './data-wizard-sidebar/wizard-sidebar-facilities-list.pipe';
@@ -33,6 +32,8 @@ import { InspectMeterDataSummaryTableComponent } from './data-wizard-import/proc
 import { SharedPredictorsContentModule } from "../shared/shared-predictors-content/shared-predictors-content.module";
 import { FacilityPredictorsTableComponent } from './account-facilities/facility-data/facility-predictors/facility-predictors-table/facility-predictors-table.component';
 import { FacilityPredictorComponent } from './account-facilities/facility-data/facility-predictors/facility-predictor/facility-predictor.component';
+import { FacilityPredictorDataTableComponent } from './account-facilities/facility-data/facility-predictors/facility-predictor-data-table/facility-predictor-data-table.component';
+import { FacilityPredictorDataEntryComponent } from './account-facilities/facility-data/facility-predictors/facility-predictor-data-entry/facility-predictor-data-entry.component';
 
 
 @NgModule({
@@ -53,7 +54,6 @@ import { FacilityPredictorComponent } from './account-facilities/facility-data/f
     MeterGroupOptionsPipe,
     FacilityMetersTableComponent,
     FacilityMeterComponent,
-    FacilityPredictorsComponent,
     FacilitiesListComponent,
     DataWizardHelpPanelComponent,
     WizardSidebarFacilitiesListPipe,
@@ -61,7 +61,9 @@ import { FacilityPredictorComponent } from './account-facilities/facility-data/f
     MeterDataSummaryTableComponent,
     InspectMeterDataSummaryTableComponent,
     FacilityPredictorsTableComponent,
-    FacilityPredictorComponent
+    FacilityPredictorComponent,
+    FacilityPredictorDataTableComponent,
+    FacilityPredictorDataEntryComponent
   ],
   imports: [
     CommonModule,
