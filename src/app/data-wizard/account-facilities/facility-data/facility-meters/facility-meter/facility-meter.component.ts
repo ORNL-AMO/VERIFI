@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { firstValueFrom, Subscription } from 'rxjs';
+import { firstValueFrom, Observable, of, Subscription } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { EditMeterFormService } from 'src/app/shared/shared-meter-content/edit-meter-form/edit-meter-form.service';
@@ -53,12 +53,11 @@ export class FacilityMeterComponent {
     this.activatedRoute.params.subscribe(params => {
       let meterId: string = params['id'];
       this.utilityMeter = this.utilityMeterDbService.getFacilityMeterById(meterId);
-      this.utilityMeterDbService.selectedMeter.next(this.utilityMeter);
       if (this.utilityMeter) {
+        this.utilityMeterDbService.selectedMeter.next(this.utilityMeter);
         this.meterForm = this.editMeterFormService.getFormFromMeter(this.utilityMeter);
-        this.subscribeChanges();
       } else {
-        this.router.navigateByUrl('/verifi')
+        this.goToMeterList();
       }
     });
   }
@@ -68,13 +67,8 @@ export class FacilityMeterComponent {
     this.utilityMeterDbService.selectedMeter.next(undefined);
   }
 
-  async subscribeChanges() {
-    this.meterForm.valueChanges.subscribe(change => {
-      this.saveChanges();
-    })
-  }
-
   async saveChanges() {
+    this.meterForm.markAsPristine();
     this.utilityMeter = this.utilityMeterDbService.getFacilityMeterById(this.utilityMeter.guid);
     this.utilityMeter = this.editMeterFormService.updateMeterFromForm(this.utilityMeter, this.meterForm);
     await firstValueFrom(this.utilityMeterDbService.updateWithObservable(this.utilityMeter));
@@ -114,6 +108,20 @@ export class FacilityMeterComponent {
     this.cancelDelete();
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationsService.showToast("Meter and Meter Data Deleted", undefined, undefined, false, "alert-success");
-    this.router.navigateByUrl('/data-wizard/' + account.guid + '/facilities/' + selectedFacility.guid + '/meters')
+    this.goToMeterList();
   }
+
+  goToMeterList() {
+    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    this.router.navigateByUrl('/data-wizard/' + selectedFacility.accountId + '/facilities/' + selectedFacility.guid + '/meters')
+  }
+
+  canDeactivate(): Observable<boolean> {
+    if (this.meterForm && this.meterForm.dirty) {
+      const result = window.confirm('There are unsaved changes! Are you sure you want to leave this page?');
+      return of(result);
+    }
+    return of(true);
+  }
+
 }

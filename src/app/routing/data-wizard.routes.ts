@@ -77,7 +77,11 @@ export const DataWizardRoutes: Route = {
                         {
                             path: 'meters/:id',
                             children: [
-                                { path: '', component: FacilityMeterComponent },
+                                {
+                                    path: '',
+                                    component: FacilityMeterComponent,
+                                    canDeactivate: [canDeactivateGuard]
+                                },
                                 {
                                     path: 'meter-data',
                                     component: MeterDataComponent,
@@ -119,9 +123,9 @@ export const DataWizardRoutes: Route = {
                                 {
                                     path: 'predictor-data',
                                     children: [
-                                        { 
-                                            path: '', 
-                                            component: FacilityPredictorDataTableComponent 
+                                        {
+                                            path: '',
+                                            component: FacilityPredictorDataTableComponent
                                         },
                                         {
                                             path: 'edit-entry/:id',

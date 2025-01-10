@@ -118,7 +118,7 @@ export class FacilityMetersTableComponent {
     for (let index = 0; index < meterData.length; index++) {
       await firstValueFrom(this.utilityMeterDataDbService.deleteWithObservable(meterData[index].id));
     }
-    
+
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     //set meters
@@ -142,10 +142,12 @@ export class FacilityMetersTableComponent {
     }
   }
 
-  selectEditMeter(meter: IdbUtilityMeter) {
+  async selectEditMeter(meter: IdbUtilityMeter) {
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     meter.sidebarOpen = true;
+    await firstValueFrom(this.utilityMeterDbService.updateWithObservable(meter));
+    await this.dbChangesService.setMeters(account, facility);
     this.router.navigateByUrl('data-wizard/' + account.guid + '/facilities/' + facility.guid + '/meters/' + meter.guid);
   }
 
