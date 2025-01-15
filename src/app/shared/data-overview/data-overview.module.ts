@@ -26,6 +26,7 @@ import { AccountUtilityUsageDonutComponent } from './account-utility-usage-donut
 import { AccountWaterUsageTableComponent } from './account-water-usage-table/account-water-usage-table.component';
 import { AccountWaterUsageDonutComponent } from './account-water-usage-donut/account-water-usage-donut.component';
 import { AccountWaterStackedBarChartComponent } from './account-water-stacked-bar-chart/account-water-stacked-bar-chart.component';
+import { FacilitySectionReportComponent } from './facility-section-report/facility-section-report.component';
 
 
 
@@ -54,7 +55,8 @@ import { AccountWaterStackedBarChartComponent } from './account-water-stacked-ba
     AccountUtilityUsageDonutComponent,
     AccountWaterUsageTableComponent,
     AccountWaterUsageDonutComponent,
-    AccountWaterStackedBarChartComponent
+    AccountWaterStackedBarChartComponent,
+    FacilitySectionReportComponent
   ],
   imports: [
     CommonModule,
@@ -80,7 +82,8 @@ import { AccountWaterStackedBarChartComponent } from './account-water-stacked-ba
     AccountUtilityUsageDonutComponent,
     AccountWaterUsageTableComponent,
     AccountWaterUsageDonutComponent,
-    AccountWaterStackedBarChartComponent
+    AccountWaterStackedBarChartComponent,
+    FacilitySectionReportComponent
   ]
 })
 export class DataOverviewModule { }

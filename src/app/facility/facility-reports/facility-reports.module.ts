@@ -9,10 +9,17 @@ import { FacilityReportSetupComponent } from './facility-report-setup/facility-r
 import { FacilityReportTypePipe } from './facility-report-pipes/facility-report-type.pipe';
 import { FacilityAnalysisReportSetupComponent } from './facility-report-setup/facility-analysis-report-setup/facility-analysis-report-setup.component';
 import { SharedReportsModule } from 'src/app/shared/shared-reports/shared-reports.module';
-import { FacilityAnalysisReportResultsComponent } from './facility-analysis-report-results/facility-analysis-report-results.component';
 import { FacilityPrintReportButtonComponent } from './facility-print-report-button/facility-print-report-button.component';
 import { FacilityReportItemCardComponent } from './facility-reports-dashboard/facility-report-item-card/facility-report-item-card.component';
 import { HelperPipesModule } from 'src/app/shared/helper-pipes/helper-pipes.module';
+import { FacilityOverviewReportSetupComponent } from './facility-report-setup/facility-overview-report-setup/facility-overview-report-setup.component';
+import { FacilityOverviewReportResultsComponent } from './report-results/facility-overview-report-results/facility-overview-report-results.component';
+import { FacilityAnalysisReportResultsComponent } from './report-results/facility-analysis-report-results/facility-analysis-report-results.component';
+import { DataOverviewModule } from 'src/app/shared/data-overview/data-overview.module';
+import { CalculatingSpinnerModule } from 'src/app/shared/calculating-spinner/calculating-spinner.module';
+import { FacilityReportsDashboardTabsComponent } from './facility-reports-dashboard/facility-reports-dashboard-tabs/facility-reports-dashboard-tabs.component';
+import { FacilityAnalysisReportsDashboardComponent } from './facility-reports-dashboard/facility-analysis-reports-dashboard/facility-analysis-reports-dashboard.component';
+import { FacilityOverviewReportsDashboardComponent } from './facility-reports-dashboard/facility-overview-reports-dashboard/facility-overview-reports-dashboard.component';
 
 
 
@@ -26,14 +33,21 @@ import { HelperPipesModule } from 'src/app/shared/helper-pipes/helper-pipes.modu
     FacilityAnalysisReportSetupComponent,
     FacilityAnalysisReportResultsComponent,
     FacilityPrintReportButtonComponent,
-    FacilityReportItemCardComponent
+    FacilityReportItemCardComponent,
+    FacilityOverviewReportSetupComponent,
+    FacilityOverviewReportResultsComponent,
+    FacilityReportsDashboardTabsComponent,
+    FacilityAnalysisReportsDashboardComponent,
+    FacilityOverviewReportsDashboardComponent
   ],
   imports: [
     CommonModule,
     RouterModule,
     FormsModule,
     SharedReportsModule,
-    HelperPipesModule
+    HelperPipesModule,
+    DataOverviewModule,
+    CalculatingSpinnerModule
   ]
 })
 export class FacilityReportsModule { }

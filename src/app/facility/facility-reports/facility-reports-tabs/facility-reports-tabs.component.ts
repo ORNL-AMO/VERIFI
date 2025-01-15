@@ -43,6 +43,9 @@ export class FacilityReportsTabsComponent {
     });
     this.selectedReportSub = this.facilityReportsDbService.selectedReport.subscribe(val => {
       this.selectedReport = val;
+      if (this.selectedReport) {
+        this.setSetupValid();
+      }
     });
   }
 
@@ -60,5 +63,19 @@ export class FacilityReportsTabsComponent {
 
   goToDashboard() {
     this.router.navigateByUrl('/facility/' + this.facility.id + '/reports/dashboard')
+  }
+
+  setSetupValid() {
+    if (this.selectedReport.facilityReportType == 'analysis') {
+      this.setupValid = (this.selectedReport.analysisItemId != undefined && this.selectedReport.name != '');
+    } else if (this.selectedReport.facilityReportType == 'overview') {
+      this.setupValid = (this.selectedReport.name != '' &&
+        this.selectedReport.dataOverviewReportSettings.endMonth != undefined &&
+        this.selectedReport.dataOverviewReportSettings.endYear != undefined &&
+        this.selectedReport.dataOverviewReportSettings.startMonth != undefined &&
+        this.selectedReport.dataOverviewReportSettings.startYear != undefined)
+    } else {
+      this.setupValid = false;
+    }
   }
 }

@@ -1,0 +1,71 @@
+<div class="row justify-content-center">
+    <div class="col-12" *ngIf="sectionOptions.includeMeterUsageStackedLineChart">
+        <ng-container *ngIf="dataType == 'emissions'">
+            <app-emissions-stacked-line-chart [calanderizedMeters]="calanderizedMeters"
+                [dateRange]="dateRange"></app-emissions-stacked-line-chart>
+        </ng-container>
+        <ng-container *ngIf="dataType != 'emissions'">
+            <app-meters-overview-stacked-line-chart [dataType]="dataType" [facilityId]="facility.guid"
+                [calanderizedMeters]="facilityOverviewData.calanderizedMeters"
+                [dateRange]="dateRange"></app-meters-overview-stacked-line-chart>
+        </ng-container>
+
+    </div>
+    <div class="print-break-before" *ngIf="sectionOptions.includeMeterUsageTable"
+        [ngClass]="{'col-10': print, 'col-6': !print}">
+        <app-emissions-usage-table *ngIf="dataType == 'emissions'"
+            [overviewData]="facilityOverviewData"></app-emissions-usage-table>
+
+        <app-meter-usage-table *ngIf="dataType == 'energyUse'" [dataType]="'energyUse'"
+            [facilityOverviewData]="facilityOverviewData" [facilityOverviewMeters]="facilityOverviewData.energyMeters"
+            [energyUnit]="energyUnit"></app-meter-usage-table>
+
+        <app-meter-usage-table *ngIf="dataType == 'cost'" [dataType]="'cost'"
+            [facilityOverviewData]="facilityOverviewData"
+            [facilityOverviewMeters]="facilityOverviewData.costMeters"></app-meter-usage-table>
+
+        <app-meter-usage-table *ngIf="dataType == 'water'" [dataType]="'water'"
+            [facilityOverviewData]="facilityOverviewData" [facilityOverviewMeters]="facilityOverviewData.waterMeters"
+            [waterUnit]="waterUnit"></app-meter-usage-table>
+    </div>
+    <div *ngIf="sectionOptions.includeMeterUsageDonut" [ngClass]="{'col-10': print, 'col-6': !print}">
+        <app-emissions-donut *ngIf="dataType == 'emissions'" [facilityId]="facility.guid"
+            [facilityOverviewMeters]="facilityOverviewMeters"></app-emissions-donut>
+        <app-meter-usage-donut *ngIf="dataType == 'energyUse'" [dataType]="dataType" [facilityId]="facility.guid"
+            [facilityOverviewMeters]="facilityOverviewData.energyMeters"></app-meter-usage-donut>
+        <app-meter-usage-donut *ngIf="dataType == 'cost'" [dataType]="dataType" [facilityId]="facility.guid"
+            [facilityOverviewMeters]="facilityOverviewData.costMeters"></app-meter-usage-donut>
+        <app-meter-usage-donut *ngIf="dataType == 'water'" [dataType]="dataType" [facilityId]="facility.guid"
+            [facilityOverviewMeters]="facilityOverviewData.waterMeters"></app-meter-usage-donut>
+    </div>
+</div>
+<div class="row hide-print">
+    <div class="col-12">
+        <hr>
+    </div>
+</div>
+<div class="row print-break-avoid" *ngIf="sectionOptions.includeUtilityTableForFacility">
+    <div class="col-12">
+        <app-utility-consumption-table [dataType]="dataType" [sourcesUseAndCost]="sourcesUseAndCost"
+            [useAndCostTotal]="useAndCostTotal" [previousYear]="previousYear" [dateRange]="dateRange"
+            [waterUnit]="waterUnit" [energyUnit]="energyUnit"></app-utility-consumption-table>
+    </div>
+</div>
+<div class="row print-break-avoid" *ngIf="sectionOptions.includeAnnualBarChart">
+    <div class="col-12">
+        <ng-container *ngIf="dataType == 'emissions'">
+            <app-emissions-usage-chart [facilityId]="facility.guid"
+                [annualSourceData]="annualSourceData"></app-emissions-usage-chart>
+        </ng-container>
+        <ng-container *ngIf="dataType != 'emissions'">
+            <app-utilities-usage-chart [dataType]="dataType" [facilityId]="facility.guid"
+                [annualSourceData]="facilityOverviewData.annualSourceData"></app-utilities-usage-chart>
+        </ng-container>
+    </div>
+</div>
+<div class="row print-break-avoid" *ngIf="sectionOptions.includeMonthlyLineChartForFacility">
+    <div class="col-12">
+        <app-monthly-utility-usage-line-chart [dataType]="dataType" [facilityId]="facility.guid"
+            [yearMonthData]="yearMonthData"></app-monthly-utility-usage-line-chart>
+    </div>
+</div>

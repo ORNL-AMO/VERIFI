@@ -21,7 +21,6 @@ import { AccountTitlePageComponent } from './data-overview-report/data-overview-
 import { DataOverviewModule } from 'src/app/shared/data-overview/data-overview.module';
 import { AccountSectionReportComponent } from './data-overview-report/data-overview-account-report/account-section-report/account-section-report.component';
 import { FacilityTitlePageComponent } from './data-overview-report/data-overview-facility-report/facility-title-page/facility-title-page.component';
-import { FacilitySectionReportComponent } from './data-overview-report/data-overview-facility-report/facility-section-report/facility-section-report.component';
 import { DataOverviewAccountReportComponent } from './data-overview-report/data-overview-account-report/data-overview-account-report.component';
 import { DataOverviewFacilityReportComponent } from './data-overview-report/data-overview-facility-report/data-overview-facility-report.component';
 import { PrintReportButtonComponent } from './print-report-button/print-report-button.component';
@@ -73,7 +72,6 @@ import { AccountReportTypePipe } from './report-pipes/account-report-type.pipe';
     AccountTitlePageComponent,
     AccountSectionReportComponent,
     FacilityTitlePageComponent,
-    FacilitySectionReportComponent,
     DataOverviewAccountReportComponent,
     DataOverviewFacilityReportComponent,
     PrintReportButtonComponent,

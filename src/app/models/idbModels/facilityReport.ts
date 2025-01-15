@@ -1,5 +1,6 @@
 import { AnalysisTableColumns } from "../analysis";
 import { getNewIdbEntry, IdbEntry } from "./idbEntry";
+import { IdbUtilityMeterGroup } from "./utilityMeterGroup";
 
 export interface IdbFacilityReport extends IdbEntry {
     facilityId: string,
@@ -7,10 +8,11 @@ export interface IdbFacilityReport extends IdbEntry {
     name: string,
     facilityReportType: FacilityReportType,
     analysisItemId: string,
-    analysisReportSettings: AnalysisReportSettings
+    analysisReportSettings: AnalysisReportSettings,
+    dataOverviewReportSettings: DataOverviewFacilityReportSettings
 }
 
-export function getNewIdbFacilityReport(facilityId: string, accountId: string, reportType: FacilityReportType): IdbFacilityReport {
+export function getNewIdbFacilityReport(facilityId: string, accountId: string, reportType: FacilityReportType, groups: Array<IdbUtilityMeterGroup>): IdbFacilityReport {
     let idbEntry: IdbEntry = getNewIdbEntry();
     return {
         ...idbEntry,
@@ -19,11 +21,12 @@ export function getNewIdbFacilityReport(facilityId: string, accountId: string, r
         facilityReportType: reportType,
         analysisItemId: undefined,
         name: 'New Report',
-        analysisReportSettings: getAnalysisReportSettings()
+        analysisReportSettings: getAnalysisReportSettings(),
+        dataOverviewReportSettings: getDataOverviewReportSettings(groups)
     }
 }
 
-export type FacilityReportType = 'analysis';
+export type FacilityReportType = 'analysis' | 'overview';
 
 
 export function getAnalysisReportSettings(): AnalysisReportSettings {
@@ -97,4 +100,63 @@ export interface AnalysisReportSettings {
     groupAnnualResults: boolean,
     groupAnnualResultsTable: boolean,
     groupAnnualResultsGraphs: boolean
+}
+
+
+export function getDataOverviewReportSettings(groups: Array<IdbUtilityMeterGroup>): DataOverviewFacilityReportSettings {
+    return {
+        energyIsSource: true,
+        emissionsDisplay: 'market',
+        includeEnergySection: true,
+        includeCostsSection: true,
+        includeEmissionsSection: true,
+        includeWaterSection: true,
+        includeAllMeterData: true,
+        startYear: undefined,
+        startMonth: undefined,
+        endYear: undefined,
+        endMonth: undefined,
+        includeUtilityTableForFacility: true,
+        includeAnnualBarChart: true,
+        includeMonthlyLineChartForFacility: true,
+        includeMeterUsageStackedLineChart: true,
+        includeMeterUsageTable: true,
+        includeMeterUsageDonut: true,
+        includedGroups: groups.map(group => {
+            return {
+                groupId: group.guid,
+                include: true
+            }
+        })
+    }
+}
+
+export interface DataOverviewFacilityReportSettings {
+    startYear: number,
+    startMonth: number,
+    endYear: number,
+    endMonth: number,
+    energyIsSource: boolean,
+    emissionsDisplay: 'market' | 'location',
+    includeEnergySection: boolean,
+    includeCostsSection: boolean,
+    includeEmissionsSection: boolean,
+    includeWaterSection: boolean,
+    // includeFacilityTable: boolean,
+    // includeFacilityDonut: boolean,
+    // includeUtilityTable: boolean,
+    // includeStackedBarChart: boolean,
+    // includeMonthlyLineChart: boolean,
+    includeAllMeterData: boolean,
+      includedGroups: Array<{
+        groupId: string,
+        include: boolean
+      }>
+    includeMeterUsageStackedLineChart: boolean,
+    includeMeterUsageTable: boolean,
+    includeMeterUsageDonut: boolean,
+    includeUtilityTableForFacility: boolean,
+    includeAnnualBarChart: boolean,
+    includeMonthlyLineChartForFacility: boolean
+
 }
