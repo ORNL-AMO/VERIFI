@@ -213,6 +213,7 @@ export class MonthlyAnalysisSummaryDataClass {
         this.baselineAdjustmentInput = 0;
         this.baselineAdjustmentInputYearTotal = 0;
         if (this.group.hasBaselineAdjustmentV2) {
+            console.log(this.group);
             let yearAdjustment: { year: number, amount: number } = this.group.baselineAdjustmentsV2.find(bAdjustement => { return bAdjustement.year == this.fiscalYear; })
             if (yearAdjustment && yearAdjustment.amount) {
                 this.baselineAdjustmentInput = (this.energyUse / this.annualEnergyUse) * yearAdjustment.amount;
