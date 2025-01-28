@@ -141,8 +141,6 @@ export class MonthlyAnalysisSummaryClass {
                 rolling12MonthImprovement: checkAnalysisValue(summaryDataItem.monthlyAnalysisRollingValues.rolling12MonthImprovement) * 100,
                 modelYearDataAdjustment: summaryDataItem.modelYearDataAdjustment,
                 dataAdjustment: summaryDataItem.dataAdjustment,
-                // adjustedStar: summaryDataItem.monthlyAnalysisCalculatedValues.adjustedStar,
-                // adjustedStarStar: summaryDataItem.monthlyAnalysisCalculatedValues.adjustedStarStar,
                 baselineAdjustmentInput: summaryDataItem.baselineAdjustmentInput,
                 isBanked: summaryDataItem.isBankedAnalysis,
                 isIntermediateBanked: summaryDataItem.isBankedAnalysis,
