@@ -55,7 +55,7 @@ export class MonthlyAnalysisSummaryComponent implements OnInit {
     let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
     let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
     let accountPredictorEntries: Array<IdbPredictorData> = this.predictorDataDbService.accountPredictorData.getValue();
-    if (typeof Worker !== 'undefined') {
+    if (typeof Worker !== 'undefined' && false) {
       this.worker = new Worker(new URL('src/app/web-workers/monthly-group-analysis.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {
         if (!data.error) {

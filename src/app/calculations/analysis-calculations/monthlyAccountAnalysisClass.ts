@@ -158,7 +158,6 @@ export class MonthlyAccountAnalysisClass {
                 isIntermediateBanked: false,
                 savingsBanked: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.savingsBanked),
                 savingsUnbanked: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.savingsUnbanked)
-
             }
         })
     }
