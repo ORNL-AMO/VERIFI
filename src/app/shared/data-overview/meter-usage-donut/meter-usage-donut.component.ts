@@ -9,9 +9,10 @@ import { FacilityOverviewMeter } from 'src/app/calculations/dashboard-calculatio
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
-  selector: 'app-meter-usage-donut',
-  templateUrl: './meter-usage-donut.component.html',
-  styleUrls: ['./meter-usage-donut.component.css']
+    selector: 'app-meter-usage-donut',
+    templateUrl: './meter-usage-donut.component.html',
+    styleUrls: ['./meter-usage-donut.component.css'],
+    standalone: false
 })
 export class MeterUsageDonutComponent {
   @Input()

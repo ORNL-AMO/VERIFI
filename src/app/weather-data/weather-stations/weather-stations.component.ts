@@ -9,9 +9,10 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
-  selector: 'app-weather-stations',
-  templateUrl: './weather-stations.component.html',
-  styleUrls: ['./weather-stations.component.css']
+    selector: 'app-weather-stations',
+    templateUrl: './weather-stations.component.html',
+    styleUrls: ['./weather-stations.component.css'],
+    standalone: false
 })
 export class WeatherStationsComponent {
 

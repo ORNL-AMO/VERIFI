@@ -6,17 +6,18 @@ import { LoadingService } from 'src/app/core-components/loading/loading.service'
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 
 @Component({
-  selector: 'app-electron-update',
-  templateUrl: './electron-update.component.html',
-  styleUrls: ['./electron-update.component.css'],
-  animations: [
-    trigger('updateToast', [
-      state('show', style({ top: '20px' })),
-      state('hide', style({ top: '-200px' })),
-      transition('hide => show', animate('.5s ease')),
-      transition('show => hide', animate('.5s ease'))
-    ])
-  ]
+    selector: 'app-electron-update',
+    templateUrl: './electron-update.component.html',
+    styleUrls: ['./electron-update.component.css'],
+    animations: [
+        trigger('updateToast', [
+            state('show', style({ top: '20px' })),
+            state('hide', style({ top: '-200px' })),
+            transition('hide => show', animate('.5s ease')),
+            transition('show => hide', animate('.5s ease'))
+        ])
+    ],
+    standalone: false
 })
 export class ElectronUpdateComponent implements OnInit {
 

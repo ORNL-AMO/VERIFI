@@ -8,9 +8,10 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { AnalysisReportSettings } from 'src/app/models/idbModels/facilityReport';
 
 @Component({
-  selector: 'app-group-annual-analysis-report',
-  templateUrl: './group-annual-analysis-report.component.html',
-  styleUrl: './group-annual-analysis-report.component.css'
+    selector: 'app-group-annual-analysis-report',
+    templateUrl: './group-annual-analysis-report.component.html',
+    styleUrl: './group-annual-analysis-report.component.css',
+    standalone: false
 })
 export class GroupAnnualAnalysisReportComponent {
   @Input({ required: true })

@@ -19,9 +19,10 @@ import { StationarySolidOptions } from 'src/app/shared/fuel-options/stationarySo
 import { convertHeatCapacity } from 'src/app/shared/sharedHelperFuntions';
 
 @Component({
-  selector: 'app-custom-fuel-data-form',
-  templateUrl: './custom-fuel-data-form.component.html',
-  styleUrls: ['./custom-fuel-data-form.component.css']
+    selector: 'app-custom-fuel-data-form',
+    templateUrl: './custom-fuel-data-form.component.html',
+    styleUrls: ['./custom-fuel-data-form.component.css'],
+    standalone: false
 })
 export class CustomFuelDataFormComponent {
 

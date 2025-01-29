@@ -3,9 +3,10 @@ import { Subscription } from 'rxjs';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service'
 
 @Component({
-  selector: 'app-visualization-banner',
-  templateUrl: './visualization-banner.component.html',
-  styleUrls: ['./visualization-banner.component.css']
+    selector: 'app-visualization-banner',
+    templateUrl: './visualization-banner.component.html',
+    styleUrls: ['./visualization-banner.component.css'],
+    standalone: false
 })
 export class VisualizationBannerComponent implements OnInit {
 

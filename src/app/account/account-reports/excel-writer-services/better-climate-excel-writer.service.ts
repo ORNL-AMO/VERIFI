@@ -351,13 +351,13 @@ export class BetterClimateExcelWriterService {
       case 7: {
         return 'August 31'
       }
-      case 7: {
+      case 8: {
         return 'September 30'
       }
-      case 7: {
+      case 9: {
         return 'October 31'
       }
-      case 7: {
+      case 10: {
         return 'November 30'
       }
       default: {

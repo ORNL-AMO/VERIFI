@@ -10,9 +10,10 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
-  selector: 'app-facility-settings',
-  templateUrl: './facility-settings.component.html',
-  styleUrls: ['./facility-settings.component.css']
+    selector: 'app-facility-settings',
+    templateUrl: './facility-settings.component.html',
+    styleUrls: ['./facility-settings.component.css'],
+    standalone: false
 })
 export class FacilitySettingsComponent implements OnInit {
 

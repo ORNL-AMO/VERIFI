@@ -8,9 +8,10 @@ import { EmissionsTypes, getEmissionsTypeColor, getEmissionsTypes } from 'src/ap
 
 
 @Component({
-  selector: 'app-emissions-stacked-line-chart',
-  templateUrl: './emissions-stacked-line-chart.component.html',
-  styleUrls: ['./emissions-stacked-line-chart.component.css']
+    selector: 'app-emissions-stacked-line-chart',
+    templateUrl: './emissions-stacked-line-chart.component.html',
+    styleUrls: ['./emissions-stacked-line-chart.component.css'],
+    standalone: false
 })
 export class EmissionsStackedLineChartComponent {
   @Input()

@@ -3,9 +3,10 @@ import { LabelTooltips } from './labelTooltips';
 // import * as bootstrap from 'bootstrap'
 declare var bootstrap: any;
 @Component({
-  selector: 'app-label-with-tooltip',
-  templateUrl: './label-with-tooltip.component.html',
-  styleUrls: ['./label-with-tooltip.component.css']
+    selector: 'app-label-with-tooltip',
+    templateUrl: './label-with-tooltip.component.html',
+    styleUrls: ['./label-with-tooltip.component.css'],
+    standalone: false
 })
 export class LabelWithTooltipComponent implements OnInit {
   @Input()

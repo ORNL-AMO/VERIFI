@@ -10,9 +10,10 @@ import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 
 @Component({
-  selector: 'app-set-facility-predictors',
-  templateUrl: './set-facility-predictors.component.html',
-  styleUrls: ['./set-facility-predictors.component.css']
+    selector: 'app-set-facility-predictors',
+    templateUrl: './set-facility-predictors.component.html',
+    styleUrls: ['./set-facility-predictors.component.css'],
+    standalone: false
 })
 export class SetFacilityPredictorsComponent implements OnInit {
 

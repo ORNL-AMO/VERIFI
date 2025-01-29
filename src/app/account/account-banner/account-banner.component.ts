@@ -8,9 +8,10 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 
 @Component({
-  selector: 'app-account-banner',
-  templateUrl: './account-banner.component.html',
-  styleUrls: ['./account-banner.component.css']
+    selector: 'app-account-banner',
+    templateUrl: './account-banner.component.html',
+    styleUrls: ['./account-banner.component.css'],
+    standalone: false
 })
 export class AccountBannerComponent implements OnInit {
 

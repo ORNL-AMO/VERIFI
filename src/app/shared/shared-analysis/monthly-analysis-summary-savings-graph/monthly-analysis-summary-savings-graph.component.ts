@@ -8,9 +8,10 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import * as _ from 'lodash';
 
 @Component({
-  selector: 'app-monthly-analysis-summary-savings-graph',
-  templateUrl: './monthly-analysis-summary-savings-graph.component.html',
-  styleUrls: ['./monthly-analysis-summary-savings-graph.component.css']
+    selector: 'app-monthly-analysis-summary-savings-graph',
+    templateUrl: './monthly-analysis-summary-savings-graph.component.html',
+    styleUrls: ['./monthly-analysis-summary-savings-graph.component.css'],
+    standalone: false
 })
 export class MonthlyAnalysisSummarySavingsGraphComponent {
   @Input({ required: true })

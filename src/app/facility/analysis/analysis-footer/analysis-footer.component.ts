@@ -14,9 +14,10 @@ import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 
 @Component({
-  selector: 'app-analysis-footer',
-  templateUrl: './analysis-footer.component.html',
-  styleUrls: ['./analysis-footer.component.css']
+    selector: 'app-analysis-footer',
+    templateUrl: './analysis-footer.component.html',
+    styleUrls: ['./analysis-footer.component.css'],
+    standalone: false
 })
 export class AnalysisFooterComponent implements OnInit {
 

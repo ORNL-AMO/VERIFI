@@ -4,9 +4,10 @@ import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { BetterPlantsSummary } from 'src/app/models/overview-report';
 
 @Component({
-  selector: 'app-primary-water-consumption-table',
-  templateUrl: './primary-water-consumption-table.component.html',
-  styleUrls: ['./primary-water-consumption-table.component.css']
+    selector: 'app-primary-water-consumption-table',
+    templateUrl: './primary-water-consumption-table.component.html',
+    styleUrls: ['./primary-water-consumption-table.component.css'],
+    standalone: false
 })
 export class PrimaryWaterConsumptionTableComponent {
   @Input()

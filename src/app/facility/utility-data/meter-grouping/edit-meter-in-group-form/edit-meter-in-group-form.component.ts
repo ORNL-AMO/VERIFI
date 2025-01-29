@@ -4,9 +4,10 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { getIsEnergyMeter } from 'src/app/shared/sharedHelperFuntions';
 
 @Component({
-  selector: 'app-edit-meter-in-group-form',
-  templateUrl: './edit-meter-in-group-form.component.html',
-  styleUrl: './edit-meter-in-group-form.component.css'
+    selector: 'app-edit-meter-in-group-form',
+    templateUrl: './edit-meter-in-group-form.component.html',
+    styleUrl: './edit-meter-in-group-form.component.css',
+    standalone: false
 })
 export class EditMeterInGroupFormComponent {
   @Input()

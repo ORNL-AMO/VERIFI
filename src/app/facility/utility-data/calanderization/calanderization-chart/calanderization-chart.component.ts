@@ -3,9 +3,10 @@ import { PlotlyService } from 'angular-plotly.js';
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import * as _ from 'lodash';
 @Component({
-  selector: 'app-calanderization-chart',
-  templateUrl: './calanderization-chart.component.html',
-  styleUrls: ['./calanderization-chart.component.css']
+    selector: 'app-calanderization-chart',
+    templateUrl: './calanderization-chart.component.html',
+    styleUrls: ['./calanderization-chart.component.css'],
+    standalone: false
 })
 export class CalanderizationChartComponent implements OnInit {
   @Input()

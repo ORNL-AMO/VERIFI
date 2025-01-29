@@ -3,9 +3,10 @@ import { NavigationEnd, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 
 @Component({
-  selector: 'app-account-reports-help',
-  templateUrl: './account-reports-help.component.html',
-  styleUrls: ['./account-reports-help.component.css']
+    selector: 'app-account-reports-help',
+    templateUrl: './account-reports-help.component.html',
+    styleUrls: ['./account-reports-help.component.css'],
+    standalone: false
 })
 export class AccountReportsHelpComponent {
 

@@ -6,9 +6,10 @@ import * as _ from 'lodash';
 import { getDegreeDayAmount } from 'src/app/shared/sharedHelperFuntions';
 
 @Component({
-  selector: 'app-monthly-station-graph',
-  templateUrl: './monthly-station-graph.component.html',
-  styleUrls: ['./monthly-station-graph.component.css']
+    selector: 'app-monthly-station-graph',
+    templateUrl: './monthly-station-graph.component.html',
+    styleUrls: ['./monthly-station-graph.component.css'],
+    standalone: false
 })
 export class MonthlyStationGraphComponent {
   @Input()

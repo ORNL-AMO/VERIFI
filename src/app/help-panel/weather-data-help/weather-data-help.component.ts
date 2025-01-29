@@ -4,9 +4,10 @@ import { Subscription } from 'rxjs';
 
 
 @Component({
-  selector: 'app-weather-data-help',
-  templateUrl: './weather-data-help.component.html',
-  styleUrls: ['./weather-data-help.component.css']
+    selector: 'app-weather-data-help',
+    templateUrl: './weather-data-help.component.html',
+    styleUrls: ['./weather-data-help.component.css'],
+    standalone: false
 })
 export class WeatherDataHelpComponent {
 

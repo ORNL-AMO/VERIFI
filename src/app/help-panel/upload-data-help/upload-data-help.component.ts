@@ -3,9 +3,10 @@ import { NavigationEnd, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 
 @Component({
-  selector: 'app-upload-data-help',
-  templateUrl: './upload-data-help.component.html',
-  styleUrls: ['./upload-data-help.component.css']
+    selector: 'app-upload-data-help',
+    templateUrl: './upload-data-help.component.html',
+    styleUrls: ['./upload-data-help.component.css'],
+    standalone: false
 })
 export class UploadDataHelpComponent implements OnInit {
 

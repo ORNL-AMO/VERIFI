@@ -9,9 +9,10 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 
 @Component({
-  selector: 'app-facility-energy-card',
-  templateUrl: './facility-energy-card.component.html',
-  styleUrls: ['./facility-energy-card.component.css']
+    selector: 'app-facility-energy-card',
+    templateUrl: './facility-energy-card.component.html',
+    styleUrls: ['./facility-energy-card.component.css'],
+    standalone: false
 })
 export class FacilityEnergyCardComponent {
 

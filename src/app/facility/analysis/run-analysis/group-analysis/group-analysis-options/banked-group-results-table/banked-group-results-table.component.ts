@@ -20,9 +20,10 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 
 @Component({
-  selector: 'app-banked-group-results-table',
-  templateUrl: './banked-group-results-table.component.html',
-  styleUrl: './banked-group-results-table.component.css'
+    selector: 'app-banked-group-results-table',
+    templateUrl: './banked-group-results-table.component.html',
+    styleUrl: './banked-group-results-table.component.css',
+    standalone: false
 })
 export class BankedGroupResultsTableComponent {
 

@@ -9,9 +9,10 @@ import { IdbCustomGWP } from 'src/app/models/idbModels/customGWP';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 
 @Component({
-  selector: 'app-custom-gwp-dashboard',
-  templateUrl: './custom-gwp-dashboard.component.html',
-  styleUrls: ['./custom-gwp-dashboard.component.css']
+    selector: 'app-custom-gwp-dashboard',
+    templateUrl: './custom-gwp-dashboard.component.html',
+    styleUrls: ['./custom-gwp-dashboard.component.css'],
+    standalone: false
 })
 export class CustomGwpDashboardComponent {
 

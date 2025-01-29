@@ -9,9 +9,10 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 
 @Component({
-  selector: 'app-performance-report-group-table',
-  templateUrl: './performance-report-group-table.component.html',
-  styleUrls: ['./performance-report-group-table.component.css']
+    selector: 'app-performance-report-group-table',
+    templateUrl: './performance-report-group-table.component.html',
+    styleUrls: ['./performance-report-group-table.component.css'],
+    standalone: false
 })
 export class PerformanceReportGroupTableComponent {
   @Input()

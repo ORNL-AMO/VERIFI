@@ -10,9 +10,10 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
-  selector: 'app-data-overview-map',
-  templateUrl: './data-overview-map.component.html',
-  styleUrls: ['./data-overview-map.component.css']
+    selector: 'app-data-overview-map',
+    templateUrl: './data-overview-map.component.html',
+    styleUrls: ['./data-overview-map.component.css'],
+    standalone: false
 })
 export class DataOverviewMapComponent {
   @Input()

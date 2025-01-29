@@ -9,9 +9,10 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 
 @Component({
-  selector: 'app-annual-account-analysis',
-  templateUrl: './annual-account-analysis.component.html',
-  styleUrls: ['./annual-account-analysis.component.css']
+    selector: 'app-annual-account-analysis',
+    templateUrl: './annual-account-analysis.component.html',
+    styleUrls: ['./annual-account-analysis.component.css'],
+    standalone: false
 })
 export class AnnualAccountAnalysisComponent implements OnInit {
 

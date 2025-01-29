@@ -4,8 +4,9 @@ import { DetailDegreeDay, WeatherDataSelection } from 'src/app/models/degreeDays
 import { getDegreeDayAmount } from '../sharedHelperFuntions';
 
 @Pipe({
-  name: 'degreeDayTotal',
-  pure: false
+    name: 'degreeDayTotal',
+    pure: false,
+    standalone: false
 })
 export class DegreeDayTotalPipe implements PipeTransform {
 

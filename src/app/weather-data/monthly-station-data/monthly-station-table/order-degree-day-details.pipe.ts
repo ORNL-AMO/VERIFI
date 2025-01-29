@@ -3,8 +3,9 @@ import { DetailDegreeDay } from 'src/app/models/degreeDays';
 import * as _ from 'lodash';
 
 @Pipe({
-  name: 'orderDegreeDayDetails',
-  pure: false
+    name: 'orderDegreeDayDetails',
+    pure: false,
+    standalone: false
 })
 export class OrderDegreeDayDetailsPipe implements PipeTransform {
 
