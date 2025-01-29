@@ -25,9 +25,10 @@ import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 @Component({
-  selector: 'app-regression-model-menu',
-  templateUrl: './regression-model-menu.component.html',
-  styleUrls: ['./regression-model-menu.component.css']
+    selector: 'app-regression-model-menu',
+    templateUrl: './regression-model-menu.component.html',
+    styleUrls: ['./regression-model-menu.component.css'],
+    standalone: false
 })
 export class RegressionModelMenuComponent implements OnInit {
 

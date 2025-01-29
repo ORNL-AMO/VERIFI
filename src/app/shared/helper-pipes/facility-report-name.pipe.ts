@@ -2,7 +2,8 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
 
 @Pipe({
-  name: 'facilityReportName'
+    name: 'facilityReportName',
+    standalone: false
 })
 export class FacilityReportNamePipe implements PipeTransform {
 

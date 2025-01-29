@@ -8,9 +8,10 @@ import { UploadDataService } from 'src/app/upload-data/upload-data.service';
 import * as XLSX from 'xlsx';
 
 @Component({
-  selector: 'app-select-worksheet',
-  templateUrl: './select-worksheet.component.html',
-  styleUrls: ['./select-worksheet.component.css']
+    selector: 'app-select-worksheet',
+    templateUrl: './select-worksheet.component.html',
+    styleUrls: ['./select-worksheet.component.css'],
+    standalone: false
 })
 export class SelectWorksheetComponent implements OnInit {
 

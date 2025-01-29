@@ -3,9 +3,10 @@ import { AxisOption, VisualizationStateService } from '../visualization-state.se
 import { Subscription } from 'rxjs';
 
 @Component({
-  selector: 'app-correlation-plot',
-  templateUrl: './correlation-plot.component.html',
-  styleUrls: ['./correlation-plot.component.css']
+    selector: 'app-correlation-plot',
+    templateUrl: './correlation-plot.component.html',
+    styleUrls: ['./correlation-plot.component.css'],
+    standalone: false
 })
 export class CorrelationPlotComponent {
 

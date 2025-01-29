@@ -9,9 +9,10 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 
 @Component({
-  selector: 'app-account-analysis-water-dashboard',
-  templateUrl: './account-analysis-water-dashboard.component.html',
-  styleUrls: ['./account-analysis-water-dashboard.component.css']
+    selector: 'app-account-analysis-water-dashboard',
+    templateUrl: './account-analysis-water-dashboard.component.html',
+    styleUrls: ['./account-analysis-water-dashboard.component.css'],
+    standalone: false
 })
 export class AccountAnalysisWaterDashboardComponent {
   accountAnalysisItemsSub: Subscription;

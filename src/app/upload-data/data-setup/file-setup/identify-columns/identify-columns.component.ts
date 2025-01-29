@@ -6,9 +6,10 @@ import * as _ from 'lodash';
 import { Subscription } from 'rxjs';
 import { ColumnGroup, ColumnItem, FileReference, getEmptyFileReference } from 'src/app/upload-data/upload-data-models';
 @Component({
-  selector: 'app-identify-columns',
-  templateUrl: './identify-columns.component.html',
-  styleUrls: ['./identify-columns.component.css']
+    selector: 'app-identify-columns',
+    templateUrl: './identify-columns.component.html',
+    styleUrls: ['./identify-columns.component.css'],
+    standalone: false
 })
 export class IdentifyColumnsComponent implements OnInit {
 

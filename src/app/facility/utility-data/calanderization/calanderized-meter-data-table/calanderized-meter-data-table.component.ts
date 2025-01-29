@@ -3,9 +3,10 @@ import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { CopyTableService } from 'src/app/shared/helper-services/copy-table.service';
 
 @Component({
-  selector: 'app-calanderized-meter-data-table',
-  templateUrl: './calanderized-meter-data-table.component.html',
-  styleUrls: ['./calanderized-meter-data-table.component.css']
+    selector: 'app-calanderized-meter-data-table',
+    templateUrl: './calanderized-meter-data-table.component.html',
+    styleUrls: ['./calanderized-meter-data-table.component.css'],
+    standalone: false
 })
 export class CalanderizedMeterDataTableComponent implements OnInit {
   @Input()

@@ -19,9 +19,10 @@ import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.serv
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 
 @Component({
-  selector: 'app-monthly-analysis-summary',
-  templateUrl: './monthly-analysis-summary.component.html',
-  styleUrls: ['./monthly-analysis-summary.component.css']
+    selector: 'app-monthly-analysis-summary',
+    templateUrl: './monthly-analysis-summary.component.html',
+    styleUrls: ['./monthly-analysis-summary.component.css'],
+    standalone: false
 })
 export class MonthlyAnalysisSummaryComponent implements OnInit {
 

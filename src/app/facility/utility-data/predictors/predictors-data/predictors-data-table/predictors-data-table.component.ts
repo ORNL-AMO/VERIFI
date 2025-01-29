@@ -21,9 +21,10 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { PredictorDataHelperService } from 'src/app/shared/helper-services/predictor-data-helper.service';
 
 @Component({
-  selector: 'app-predictors-data-table',
-  templateUrl: './predictors-data-table.component.html',
-  styleUrl: './predictors-data-table.component.css'
+    selector: 'app-predictors-data-table',
+    templateUrl: './predictors-data-table.component.html',
+    styleUrl: './predictors-data-table.component.css',
+    standalone: false
 })
 export class PredictorsDataTableComponent {
   @ViewChild('predictorTable', { static: false }) predictorTable: ElementRef;

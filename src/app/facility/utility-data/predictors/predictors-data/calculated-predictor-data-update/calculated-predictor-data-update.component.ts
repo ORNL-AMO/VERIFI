@@ -20,9 +20,10 @@ import { getDegreeDayAmount } from 'src/app/shared/sharedHelperFuntions';
 import { PredictorDataHelperService } from 'src/app/shared/helper-services/predictor-data-helper.service';
 
 @Component({
-  selector: 'app-calculated-predictor-data-update',
-  templateUrl: './calculated-predictor-data-update.component.html',
-  styleUrl: './calculated-predictor-data-update.component.css'
+    selector: 'app-calculated-predictor-data-update',
+    templateUrl: './calculated-predictor-data-update.component.html',
+    styleUrl: './calculated-predictor-data-update.component.css',
+    standalone: false
 })
 export class CalculatedPredictorDataUpdateComponent {
 

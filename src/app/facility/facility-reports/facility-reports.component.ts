@@ -7,9 +7,10 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 
 @Component({
-  selector: 'app-facility-reports',
-  templateUrl: './facility-reports.component.html',
-  styleUrl: './facility-reports.component.css'
+    selector: 'app-facility-reports',
+    templateUrl: './facility-reports.component.html',
+    styleUrl: './facility-reports.component.css',
+    standalone: false
 })
 export class FacilityReportsComponent {
 

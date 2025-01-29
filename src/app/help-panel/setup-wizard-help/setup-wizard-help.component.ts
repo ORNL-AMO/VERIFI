@@ -3,9 +3,10 @@ import { NavigationEnd, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 
 @Component({
-  selector: 'app-setup-wizard-help',
-  templateUrl: './setup-wizard-help.component.html',
-  styleUrls: ['./setup-wizard-help.component.css']
+    selector: 'app-setup-wizard-help',
+    templateUrl: './setup-wizard-help.component.html',
+    styleUrls: ['./setup-wizard-help.component.css'],
+    standalone: false
 })
 export class SetupWizardHelpComponent implements OnInit {
 

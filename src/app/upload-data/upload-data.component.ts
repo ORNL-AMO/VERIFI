@@ -4,9 +4,10 @@ import { HelpPanelService } from '../help-panel/help-panel.service';
 import { UploadDataService } from './upload-data.service';
 
 @Component({
-  selector: 'app-upload-data',
-  templateUrl: './upload-data.component.html',
-  styleUrls: ['./upload-data.component.css']
+    selector: 'app-upload-data',
+    templateUrl: './upload-data.component.html',
+    styleUrls: ['./upload-data.component.css'],
+    standalone: false
 })
 export class UploadDataComponent implements OnInit {
 

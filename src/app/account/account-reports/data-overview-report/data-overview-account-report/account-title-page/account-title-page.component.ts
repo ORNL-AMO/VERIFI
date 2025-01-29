@@ -5,9 +5,10 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 
 @Component({
-  selector: 'app-account-title-page',
-  templateUrl: './account-title-page.component.html',
-  styleUrls: ['./account-title-page.component.css']
+    selector: 'app-account-title-page',
+    templateUrl: './account-title-page.component.html',
+    styleUrls: ['./account-title-page.component.css'],
+    standalone: false
 })
 export class AccountTitlePageComponent {
   account: IdbAccount;

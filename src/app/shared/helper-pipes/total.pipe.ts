@@ -1,8 +1,9 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import * as _ from 'lodash';
 @Pipe({
-  name: 'total',
-  pure: false
+    name: 'total',
+    pure: false,
+    standalone: false
 })
 export class TotalPipe implements PipeTransform {
 

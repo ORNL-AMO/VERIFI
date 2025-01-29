@@ -19,9 +19,10 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { getDegreeDayAmount } from 'src/app/shared/sharedHelperFuntions';
 
 @Component({
-  selector: 'app-predictors-data-form',
-  templateUrl: './predictors-data-form.component.html',
-  styleUrl: './predictors-data-form.component.css'
+    selector: 'app-predictors-data-form',
+    templateUrl: './predictors-data-form.component.html',
+    styleUrl: './predictors-data-form.component.css',
+    standalone: false
 })
 export class PredictorsDataFormComponent {
 

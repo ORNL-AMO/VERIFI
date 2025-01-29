@@ -4,9 +4,10 @@ import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.serv
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 
 @Component({
-  selector: 'app-report-setup-help',
-  templateUrl: './report-setup-help.component.html',
-  styleUrls: ['./report-setup-help.component.css']
+    selector: 'app-report-setup-help',
+    templateUrl: './report-setup-help.component.html',
+    styleUrls: ['./report-setup-help.component.css'],
+    standalone: false
 })
 export class ReportSetupHelpComponent {
 

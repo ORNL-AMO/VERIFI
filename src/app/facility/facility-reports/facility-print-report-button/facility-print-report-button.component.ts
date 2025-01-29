@@ -4,9 +4,10 @@ import { FacilityReportsService } from '../facility-reports.service';
 import { Subscription } from 'rxjs';
 
 @Component({
-  selector: 'app-facility-print-report-button',
-  templateUrl: './facility-print-report-button.component.html',
-  styleUrl: './facility-print-report-button.component.css'
+    selector: 'app-facility-print-report-button',
+    templateUrl: './facility-print-report-button.component.html',
+    styleUrl: './facility-print-report-button.component.css',
+    standalone: false
 })
 export class FacilityPrintReportButtonComponent {
 

@@ -12,9 +12,10 @@ import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysis
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 
 @Component({
-  selector: 'app-account-analysis-item-card',
-  templateUrl: './account-analysis-item-card.component.html',
-  styleUrls: ['./account-analysis-item-card.component.css']
+    selector: 'app-account-analysis-item-card',
+    templateUrl: './account-analysis-item-card.component.html',
+    styleUrls: ['./account-analysis-item-card.component.css'],
+    standalone: false
 })
 export class AccountAnalysisItemCardComponent implements OnInit {
   @Input()

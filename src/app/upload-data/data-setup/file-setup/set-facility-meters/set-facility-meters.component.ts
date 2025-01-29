@@ -8,9 +8,10 @@ import { ColumnItem, FacilityGroup, FileReference, getEmptyFileReference } from 
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
-  selector: 'app-set-facility-meters',
-  templateUrl: './set-facility-meters.component.html',
-  styleUrls: ['./set-facility-meters.component.css']
+    selector: 'app-set-facility-meters',
+    templateUrl: './set-facility-meters.component.html',
+    styleUrls: ['./set-facility-meters.component.css'],
+    standalone: false
 })
 export class SetFacilityMetersComponent implements OnInit {
 

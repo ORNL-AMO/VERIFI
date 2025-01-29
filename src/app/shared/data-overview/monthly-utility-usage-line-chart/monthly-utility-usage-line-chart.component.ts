@@ -12,9 +12,10 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
-  selector: 'app-monthly-utility-usage-line-chart',
-  templateUrl: './monthly-utility-usage-line-chart.component.html',
-  styleUrls: ['./monthly-utility-usage-line-chart.component.css']
+    selector: 'app-monthly-utility-usage-line-chart',
+    templateUrl: './monthly-utility-usage-line-chart.component.html',
+    styleUrls: ['./monthly-utility-usage-line-chart.component.css'],
+    standalone: false
 })
 export class MonthlyUtilityUsageLineChartComponent {
   @Input()

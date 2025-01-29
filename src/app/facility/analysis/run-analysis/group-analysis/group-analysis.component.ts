@@ -8,9 +8,10 @@ import { AnalysisGroup } from 'src/app/models/analysis';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 
 @Component({
-  selector: 'app-group-analysis',
-  templateUrl: './group-analysis.component.html',
-  styleUrls: ['./group-analysis.component.css']
+    selector: 'app-group-analysis',
+    templateUrl: './group-analysis.component.html',
+    styleUrls: ['./group-analysis.component.css'],
+    standalone: false
 })
 export class GroupAnalysisComponent implements OnInit {
 

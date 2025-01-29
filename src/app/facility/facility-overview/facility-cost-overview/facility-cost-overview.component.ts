@@ -7,9 +7,10 @@ import { YearMonthData } from 'src/app/models/dashboard';
 import { FacilityOverviewService } from '../facility-overview.service';
 
 @Component({
-  selector: 'app-facility-cost-overview',
-  templateUrl: './facility-cost-overview.component.html',
-  styleUrls: ['./facility-cost-overview.component.css']
+    selector: 'app-facility-cost-overview',
+    templateUrl: './facility-cost-overview.component.html',
+    styleUrls: ['./facility-cost-overview.component.css'],
+    standalone: false
 })
 export class FacilityCostOverviewComponent implements OnInit {
 

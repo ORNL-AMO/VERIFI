@@ -19,9 +19,10 @@ import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { AnalysisValidationService } from 'src/app/shared/helper-services/analysis-validation.service';
 
 @Component({
-  selector: 'app-analysis-dashboard',
-  templateUrl: './analysis-dashboard.component.html',
-  styleUrls: ['./analysis-dashboard.component.css']
+    selector: 'app-analysis-dashboard',
+    templateUrl: './analysis-dashboard.component.html',
+    styleUrls: ['./analysis-dashboard.component.css'],
+    standalone: false
 })
 export class AnalysisDashboardComponent implements OnInit {
 

@@ -2,9 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
-  selector: 'app-energy-source',
-  templateUrl: './energy-source.component.html',
-  styleUrls: ['./energy-source.component.css']
+    selector: 'app-energy-source',
+    templateUrl: './energy-source.component.html',
+    styleUrls: ['./energy-source.component.css'],
+    standalone: false
 })
 export class EnergySourceComponent implements OnInit {
 

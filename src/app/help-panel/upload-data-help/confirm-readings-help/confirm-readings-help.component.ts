@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 
 @Component({
-  selector: 'app-confirm-readings-help',
-  templateUrl: './confirm-readings-help.component.html',
-  styleUrls: ['./confirm-readings-help.component.css']
+    selector: 'app-confirm-readings-help',
+    templateUrl: './confirm-readings-help.component.html',
+    styleUrls: ['./confirm-readings-help.component.css'],
+    standalone: false
 })
 export class ConfirmReadingsHelpComponent implements OnInit {
 

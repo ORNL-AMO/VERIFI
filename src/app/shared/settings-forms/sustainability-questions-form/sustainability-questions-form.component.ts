@@ -9,9 +9,10 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
-  selector: 'app-sustainability-questions-form',
-  templateUrl: './sustainability-questions-form.component.html',
-  styleUrls: ['./sustainability-questions-form.component.css']
+    selector: 'app-sustainability-questions-form',
+    templateUrl: './sustainability-questions-form.component.html',
+    styleUrls: ['./sustainability-questions-form.component.css'],
+    standalone: false
 })
 export class SustainabilityQuestionsFormComponent implements OnInit {
   @Input()

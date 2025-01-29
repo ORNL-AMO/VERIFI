@@ -5,9 +5,10 @@ import { NavigationEnd, Router } from '@angular/router';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 
 @Component({
-  selector: 'app-account-overview-help',
-  templateUrl: './account-overview-help.component.html',
-  styleUrls: ['./account-overview-help.component.css']
+    selector: 'app-account-overview-help',
+    templateUrl: './account-overview-help.component.html',
+    styleUrls: ['./account-overview-help.component.css'],
+    standalone: false
 })
 export class AccountOverviewHelpComponent {
 

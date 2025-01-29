@@ -2,9 +2,10 @@ import { Component, Input } from '@angular/core';
 import { IUseAndCost, UseAndCost } from 'src/app/calculations/dashboard-calculations/useAndCostClass';
 
 @Component({
-  selector: 'app-water-consumption-table',
-  templateUrl: './water-consumption-table.component.html',
-  styleUrls: ['./water-consumption-table.component.css']
+    selector: 'app-water-consumption-table',
+    templateUrl: './water-consumption-table.component.html',
+    styleUrls: ['./water-consumption-table.component.css'],
+    standalone: false
 })
 export class WaterConsumptionTableComponent {
   @Input()

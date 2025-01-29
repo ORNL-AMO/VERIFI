@@ -3,9 +3,10 @@ import { Subscription } from 'rxjs';
 import { AccountReportsService } from './account-reports/account-reports.service';
 
 @Component({
-  selector: 'app-account',
-  templateUrl: './account.component.html',
-  styleUrls: ['./account.component.css']
+    selector: 'app-account',
+    templateUrl: './account.component.html',
+    styleUrls: ['./account.component.css'],
+    standalone: false
 })
 export class AccountComponent implements OnInit {
 

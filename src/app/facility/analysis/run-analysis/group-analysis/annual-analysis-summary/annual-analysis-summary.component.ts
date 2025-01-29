@@ -19,9 +19,10 @@ import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 
 @Component({
-  selector: 'app-annual-analysis-summary',
-  templateUrl: './annual-analysis-summary.component.html',
-  styleUrls: ['./annual-analysis-summary.component.css']
+    selector: 'app-annual-analysis-summary',
+    templateUrl: './annual-analysis-summary.component.html',
+    styleUrls: ['./annual-analysis-summary.component.css'],
+    standalone: false
 })
 export class AnnualAnalysisSummaryComponent implements OnInit {
 
