@@ -22,9 +22,10 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 
 @Component({
-  selector: 'app-facility-analysis-report',
-  templateUrl: './facility-analysis-report.component.html',
-  styleUrl: './facility-analysis-report.component.css'
+    selector: 'app-facility-analysis-report',
+    templateUrl: './facility-analysis-report.component.html',
+    styleUrl: './facility-analysis-report.component.css',
+    standalone: false
 })
 export class FacilityAnalysisReportComponent {
   @Input({ required: true })

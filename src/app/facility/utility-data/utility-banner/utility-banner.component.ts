@@ -10,9 +10,10 @@ import { PredictorDataHelperService } from 'src/app/shared/helper-services/predi
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 
 @Component({
-  selector: 'app-utility-banner',
-  templateUrl: './utility-banner.component.html',
-  styleUrls: ['./utility-banner.component.css']
+    selector: 'app-utility-banner',
+    templateUrl: './utility-banner.component.html',
+    styleUrls: ['./utility-banner.component.css'],
+    standalone: false
 })
 export class UtilityBannerComponent implements OnInit {
 

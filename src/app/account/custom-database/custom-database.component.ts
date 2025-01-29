@@ -3,9 +3,10 @@ import { Subscription } from 'rxjs';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 
 @Component({
-  selector: 'app-custom-database',
-  templateUrl: './custom-database.component.html',
-  styleUrls: ['./custom-database.component.css']
+    selector: 'app-custom-database',
+    templateUrl: './custom-database.component.html',
+    styleUrls: ['./custom-database.component.css'],
+    standalone: false
 })
 export class CustomDatabaseComponent implements OnInit {
 

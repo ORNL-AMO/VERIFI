@@ -4,9 +4,10 @@ import { MeterGroupType } from 'src/app/models/calanderization';
 import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
 
 @Component({
-  selector: 'app-meter-group-chart',
-  templateUrl: './meter-group-chart.component.html',
-  styleUrls: ['./meter-group-chart.component.css']
+    selector: 'app-meter-group-chart',
+    templateUrl: './meter-group-chart.component.html',
+    styleUrls: ['./meter-group-chart.component.css'],
+    standalone: false
 })
 export class MeterGroupChartComponent implements OnInit {
   @Input()

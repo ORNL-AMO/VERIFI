@@ -11,9 +11,10 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 
 @Component({
-  selector: 'app-data-application-menu',
-  templateUrl: './data-application-menu.component.html',
-  styleUrls: ['./data-application-menu.component.css']
+    selector: 'app-data-application-menu',
+    templateUrl: './data-application-menu.component.html',
+    styleUrls: ['./data-application-menu.component.css'],
+    standalone: false
 })
 export class DataApplicationMenuComponent implements OnInit {
   @Input()

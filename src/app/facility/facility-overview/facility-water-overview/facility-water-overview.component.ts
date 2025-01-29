@@ -6,9 +6,10 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { FacilityOverviewService } from '../facility-overview.service';
 
 @Component({
-  selector: 'app-facility-water-overview',
-  templateUrl: './facility-water-overview.component.html',
-  styleUrls: ['./facility-water-overview.component.css']
+    selector: 'app-facility-water-overview',
+    templateUrl: './facility-water-overview.component.html',
+    styleUrls: ['./facility-water-overview.component.css'],
+    standalone: false
 })
 export class FacilityWaterOverviewComponent implements OnInit {
 

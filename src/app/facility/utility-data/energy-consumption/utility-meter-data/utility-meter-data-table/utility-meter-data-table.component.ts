@@ -15,9 +15,10 @@ import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 
 @Component({
-  selector: 'app-utility-meter-data-table',
-  templateUrl: './utility-meter-data-table.component.html',
-  styleUrls: ['./utility-meter-data-table.component.css']
+    selector: 'app-utility-meter-data-table',
+    templateUrl: './utility-meter-data-table.component.html',
+    styleUrls: ['./utility-meter-data-table.component.css'],
+    standalone: false
 })
 export class UtilityMeterDataTableComponent implements OnInit {
 

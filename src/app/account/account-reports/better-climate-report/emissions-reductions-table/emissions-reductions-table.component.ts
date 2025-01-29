@@ -3,9 +3,10 @@ import { BetterClimateYearDetails } from 'src/app/calculations/carbon-calculatio
 import { IdbAccount } from 'src/app/models/idbModels/account';
 
 @Component({
-  selector: 'app-emissions-reductions-table',
-  templateUrl: './emissions-reductions-table.component.html',
-  styleUrls: ['./emissions-reductions-table.component.css']
+    selector: 'app-emissions-reductions-table',
+    templateUrl: './emissions-reductions-table.component.html',
+    styleUrls: ['./emissions-reductions-table.component.css'],
+    standalone: false
 })
 export class EmissionsReductionsTableComponent {
   @Input()

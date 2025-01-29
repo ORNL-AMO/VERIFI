@@ -18,9 +18,10 @@ import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/c
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 
 @Component({
-  selector: 'app-facility-overview-report-results',
-  templateUrl: './facility-overview-report-results.component.html',
-  styleUrl: './facility-overview-report-results.component.css'
+    selector: 'app-facility-overview-report-results',
+    templateUrl: './facility-overview-report-results.component.html',
+    styleUrl: './facility-overview-report-results.component.css',
+    standalone: false
 })
 export class FacilityOverviewReportResultsComponent {
 

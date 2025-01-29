@@ -2,9 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { HelpPanelService } from 'src/app/help-panel/help-panel.service';
 
 @Component({
-  selector: 'app-help',
-  templateUrl: './help.component.html',
-  styleUrls: ['./help.component.css']
+    selector: 'app-help',
+    templateUrl: './help.component.html',
+    styleUrls: ['./help.component.css'],
+    standalone: false
 })
 export class HelpComponent implements OnInit {
 

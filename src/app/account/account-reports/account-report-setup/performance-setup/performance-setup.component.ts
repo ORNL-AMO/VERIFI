@@ -12,9 +12,10 @@ import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 
 @Component({
-  selector: 'app-performance-setup',
-  templateUrl: './performance-setup.component.html',
-  styleUrls: ['./performance-setup.component.css']
+    selector: 'app-performance-setup',
+    templateUrl: './performance-setup.component.html',
+    styleUrls: ['./performance-setup.component.css'],
+    standalone: false
 })
 export class PerformanceSetupComponent {
 

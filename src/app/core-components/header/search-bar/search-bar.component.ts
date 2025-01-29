@@ -14,9 +14,10 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 
 @Component({
-  selector: 'app-search-bar',
-  templateUrl: './search-bar.component.html',
-  styleUrls: ['./search-bar.component.css']
+    selector: 'app-search-bar',
+    templateUrl: './search-bar.component.html',
+    styleUrls: ['./search-bar.component.css'],
+    standalone: false
 })
 export class SearchBarComponent implements OnInit {
 

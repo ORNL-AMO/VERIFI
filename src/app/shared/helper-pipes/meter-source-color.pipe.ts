@@ -3,7 +3,8 @@ import { UtilityColors } from '../utilityColors';
 import { MeterSource } from 'src/app/models/constantsAndTypes';
 
 @Pipe({
-  name: 'meterSourceColor'
+    name: 'meterSourceColor',
+    standalone: false
 })
 export class MeterSourceColorPipe implements PipeTransform {
 

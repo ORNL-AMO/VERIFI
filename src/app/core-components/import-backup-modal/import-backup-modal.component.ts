@@ -13,9 +13,10 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
-  selector: 'app-import-backup-modal',
-  templateUrl: './import-backup-modal.component.html',
-  styleUrls: ['./import-backup-modal.component.css']
+    selector: 'app-import-backup-modal',
+    templateUrl: './import-backup-modal.component.html',
+    styleUrls: ['./import-backup-modal.component.css'],
+    standalone: false
 })
 export class ImportBackupModalComponent implements OnInit {
 

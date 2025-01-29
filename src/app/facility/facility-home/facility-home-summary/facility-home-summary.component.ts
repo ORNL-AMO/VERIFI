@@ -14,9 +14,10 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 
 @Component({
-  selector: 'app-facility-home-summary',
-  templateUrl: './facility-home-summary.component.html',
-  styleUrls: ['./facility-home-summary.component.css']
+    selector: 'app-facility-home-summary',
+    templateUrl: './facility-home-summary.component.html',
+    styleUrls: ['./facility-home-summary.component.css'],
+    standalone: false
 })
 export class FacilityHomeSummaryComponent implements OnInit {
 

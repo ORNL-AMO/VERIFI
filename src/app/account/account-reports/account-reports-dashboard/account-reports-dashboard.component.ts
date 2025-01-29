@@ -16,9 +16,10 @@ import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-
 import { getNewIdbAccountReport, IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 
 @Component({
-  selector: 'app-account-reports-dashboard',
-  templateUrl: './account-reports-dashboard.component.html',
-  styleUrls: ['./account-reports-dashboard.component.css']
+    selector: 'app-account-reports-dashboard',
+    templateUrl: './account-reports-dashboard.component.html',
+    styleUrls: ['./account-reports-dashboard.component.css'],
+    standalone: false
 })
 export class AccountReportsDashboardComponent {
 

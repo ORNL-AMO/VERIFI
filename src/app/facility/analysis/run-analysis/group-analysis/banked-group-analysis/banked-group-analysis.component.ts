@@ -21,9 +21,10 @@ import { getNeededUnits } from 'src/app/calculations/shared-calculations/calande
 import { AnalysisReportSettings, getAnalysisReportSettings } from 'src/app/models/idbModels/facilityReport';
 
 @Component({
-  selector: 'app-banked-group-analysis',
-  templateUrl: './banked-group-analysis.component.html',
-  styleUrl: './banked-group-analysis.component.css'
+    selector: 'app-banked-group-analysis',
+    templateUrl: './banked-group-analysis.component.html',
+    styleUrl: './banked-group-analysis.component.css',
+    standalone: false
 })
 export class BankedGroupAnalysisComponent {
 

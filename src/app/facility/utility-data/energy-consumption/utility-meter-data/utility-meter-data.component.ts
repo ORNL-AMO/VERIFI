@@ -5,9 +5,10 @@ import { Subscription } from 'rxjs';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 
 @Component({
-  selector: 'app-utility-meter-data',
-  templateUrl: './utility-meter-data.component.html',
-  styleUrls: ['./utility-meter-data.component.css']
+    selector: 'app-utility-meter-data',
+    templateUrl: './utility-meter-data.component.html',
+    styleUrls: ['./utility-meter-data.component.css'],
+    standalone: false
 })
 export class UtilityMeterDataComponent implements OnInit {
 

@@ -11,9 +11,10 @@ import { Month, Months } from 'src/app/shared/form-data/months';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 
 @Component({
-  selector: 'app-facility-overview-report-setup',
-  templateUrl: './facility-overview-report-setup.component.html',
-  styleUrl: './facility-overview-report-setup.component.css'
+    selector: 'app-facility-overview-report-setup',
+    templateUrl: './facility-overview-report-setup.component.html',
+    styleUrl: './facility-overview-report-setup.component.css',
+    standalone: false
 })
 export class FacilityOverviewReportSetupComponent {
 

@@ -13,9 +13,10 @@ import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 
 @Component({
-  selector: 'app-account-overview-banner',
-  templateUrl: './account-overview-banner.component.html',
-  styleUrls: ['./account-overview-banner.component.css']
+    selector: 'app-account-overview-banner',
+    templateUrl: './account-overview-banner.component.html',
+    styleUrls: ['./account-overview-banner.component.css'],
+    standalone: false
 })
 export class AccountOverviewBannerComponent implements OnInit {
 

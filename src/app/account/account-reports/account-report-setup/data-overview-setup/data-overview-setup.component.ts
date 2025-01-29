@@ -10,9 +10,10 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { DataOverviewReportSetup } from 'src/app/models/overview-report';
 
 @Component({
-  selector: 'app-data-overview-setup',
-  templateUrl: './data-overview-setup.component.html',
-  styleUrls: ['./data-overview-setup.component.css']
+    selector: 'app-data-overview-setup',
+    templateUrl: './data-overview-setup.component.html',
+    styleUrls: ['./data-overview-setup.component.css'],
+    standalone: false
 })
 export class DataOverviewSetupComponent {
 

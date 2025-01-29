@@ -6,9 +6,10 @@ import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
-  selector: 'app-account-annual-analysis-table',
-  templateUrl: './account-annual-analysis-table.component.html',
-  styleUrls: ['./account-annual-analysis-table.component.css']
+    selector: 'app-account-annual-analysis-table',
+    templateUrl: './account-annual-analysis-table.component.html',
+    styleUrls: ['./account-annual-analysis-table.component.css'],
+    standalone: false
 })
 export class AccountAnnualAnalysisTableComponent {
   @Input()

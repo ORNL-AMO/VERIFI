@@ -3,8 +3,9 @@ import { FacilityListItem } from './sidebar.component';
 import * as _ from 'lodash';
 
 @Pipe({
-  name: 'facilityList',
-  pure: false
+    name: 'facilityList',
+    pure: false,
+    standalone: false
 })
 export class FacilityListPipe implements PipeTransform {
 

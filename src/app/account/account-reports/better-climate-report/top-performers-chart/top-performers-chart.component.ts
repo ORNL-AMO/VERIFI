@@ -6,9 +6,10 @@ import { BetterClimateYearDetails } from 'src/app/calculations/carbon-calculatio
 import { BetterClimateReportSetup } from 'src/app/models/overview-report';
 
 @Component({
-  selector: 'app-top-performers-chart',
-  templateUrl: './top-performers-chart.component.html',
-  styleUrls: ['./top-performers-chart.component.css']
+    selector: 'app-top-performers-chart',
+    templateUrl: './top-performers-chart.component.html',
+    styleUrls: ['./top-performers-chart.component.css'],
+    standalone: false
 })
 export class TopPerformersChartComponent {
   @Input()

@@ -3,9 +3,10 @@ import { Subscription } from 'rxjs';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 
 @Component({
-  selector: 'app-facility-reports-dashboard-tabs',
-  templateUrl: './facility-reports-dashboard-tabs.component.html',
-  styleUrl: './facility-reports-dashboard-tabs.component.css'
+    selector: 'app-facility-reports-dashboard-tabs',
+    templateUrl: './facility-reports-dashboard-tabs.component.html',
+    styleUrl: './facility-reports-dashboard-tabs.component.css',
+    standalone: false
 })
 export class FacilityReportsDashboardTabsComponent {
 

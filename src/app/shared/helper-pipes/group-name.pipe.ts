@@ -2,7 +2,8 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { UtilityMeterGroupdbService } from '../../indexedDB/utilityMeterGroup-db.service';
 
 @Pipe({
-  name: 'groupName'
+    name: 'groupName',
+    standalone: false
 })
 export class GroupNamePipe implements PipeTransform {
 

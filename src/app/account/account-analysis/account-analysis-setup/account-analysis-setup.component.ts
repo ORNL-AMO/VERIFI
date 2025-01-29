@@ -26,9 +26,10 @@ import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 
 @Component({
-  selector: 'app-account-analysis-setup',
-  templateUrl: './account-analysis-setup.component.html',
-  styleUrls: ['./account-analysis-setup.component.css']
+    selector: 'app-account-analysis-setup',
+    templateUrl: './account-analysis-setup.component.html',
+    styleUrls: ['./account-analysis-setup.component.css'],
+    standalone: false
 })
 export class AccountAnalysisSetupComponent implements OnInit {
 

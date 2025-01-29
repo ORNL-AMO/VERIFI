@@ -8,9 +8,10 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 
 @Component({
-  selector: 'app-facility-water-reduction-goal',
-  templateUrl: './facility-water-reduction-goal.component.html',
-  styleUrls: ['./facility-water-reduction-goal.component.css']
+    selector: 'app-facility-water-reduction-goal',
+    templateUrl: './facility-water-reduction-goal.component.html',
+    styleUrls: ['./facility-water-reduction-goal.component.css'],
+    standalone: false
 })
 export class FacilityWaterReductionGoalComponent {
   latestAnalysisSummary: MonthlyAnalysisSummaryData;
