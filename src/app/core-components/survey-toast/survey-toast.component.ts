@@ -13,7 +13,8 @@ import { SurveyService } from 'src/app/shared/helper-services/survey.service';
       transition('hide => show', animate('.5s ease')),
       transition('show => hide', animate('.5s ease'))
     ])
-  ]
+  ],
+  standalone: false
 })
 export class SurveyToastComponent {
   @Output('emitCloseToast')

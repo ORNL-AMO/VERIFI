@@ -9,7 +9,8 @@ import { SurveyService } from 'src/app/shared/helper-services/survey.service';
 @Component({
   selector: 'app-user-survey',
   templateUrl: './user-survey.component.html',
-  styleUrl: './user-survey.component.css'
+  styleUrl: './user-survey.component.css',
+  standalone: false
 })
 export class UserSurveyComponent {
   @Input()

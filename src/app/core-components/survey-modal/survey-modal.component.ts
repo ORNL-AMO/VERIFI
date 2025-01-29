@@ -4,7 +4,8 @@ import { SurveyService } from 'src/app/shared/helper-services/survey.service';
 @Component({
   selector: 'app-survey-modal',
   templateUrl: './survey-modal.component.html',
-  styleUrl: './survey-modal.component.css'
+  styleUrl: './survey-modal.component.css',
+  standalone: false
 })
 export class SurveyModalComponent {
 
