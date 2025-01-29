@@ -1,5 +1,5 @@
 <div [ngClass]="{'card-body': inModal}">
-  <div *ngIf="completedStatus === 'error'" class="alert-danger small mx-2 px-3 py-2">
+  <div *ngIf="completedStatus === 'error'" class="alert alert-danger small mx-2 px-3 py-2">
     <span>An error has occured. Please verify your network connection and try again.</span>
   </div>
   <ng-container *ngIf="completedStatus !== 'success' && completedStatus !== 'sending'">
