@@ -1,0 +1,20 @@
+<div [ngClass]="{'windowOverlay': showModal}"></div>
+<div class="popup" [ngClass]="{'open': showModal}">
+    <div class="popup-header d-flex justify-content-between">
+        <div class="p-0 larger">
+            VERIFI Experience Survey
+        </div>
+        <div class="p-0">
+            <button class="close" aria-label="Close" (click)="close()">
+                <span class="fa fa-close"></span>
+            </button>
+        </div>
+    </div>
+    <div class="popup-body">
+        <div class="row">
+            <div class="col">
+                <app-user-survey [inModal]="true"></app-user-survey>
+            </div>
+        </div>
+    </div>
+</div>
