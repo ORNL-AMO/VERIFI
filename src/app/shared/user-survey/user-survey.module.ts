@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { UserSurveyComponent } from './user-survey.component';
 import { ReactiveFormsModule } from '@angular/forms';
+import { HelperPipesModule } from '../helper-pipes/helper-pipes.module';
 
 
 
@@ -11,7 +12,8 @@ import { ReactiveFormsModule } from '@angular/forms';
   ],
   imports: [
     CommonModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    HelperPipesModule
   ],
   exports: [
     UserSurveyComponent

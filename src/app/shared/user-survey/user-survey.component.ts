@@ -80,12 +80,6 @@ export class UserSurveyComponent {
     this.surveyService.sendAnswers();
   }
 
-  getRemainingCharacters(controlName: string): number {
-    let textLength = this.userSurveyForm.get(controlName).value?.length || 0;
-    let charactersRemaining = 2048 - textLength;
-    return charactersRemaining;
-  }
-
   getDefaultForm() {
     return {
       email: undefined,

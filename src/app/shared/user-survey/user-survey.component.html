@@ -111,7 +111,7 @@
               formControlName="questionDescribeSuccess"
               placeholder="Describe how VERIFI has helped you succeed"></textarea>
             <span class="small">
-              Characters remaining: {{ getRemainingCharacters('questionDescribeSuccess') }}
+              Characters remaining: {{ userSurveyForm.controls.questionDescribeSuccess.value | charactersRemaining:2048}}
             </span>
             <ng-container
               *ngIf="userSurveyForm.controls.questionDescribeSuccess.invalid && !userSurveyForm.controls.questionDescribeSuccess.pristine">
@@ -133,7 +133,7 @@
             <textarea (input)="save()" class="survey-textarea" rows="4" id="questionFeedback"
               formControlName="questionFeedback" placeholder="List recommendations..."></textarea>
             <span class="small">
-              Characters remaining: {{ getRemainingCharacters('questionFeedback') }}
+              Characters remaining: {{userSurveyForm.controls.questionFeedback.value | charactersRemaining:2048 }}
             </span>
             <ng-container
               *ngIf="userSurveyForm.controls.questionFeedback.invalid && !userSurveyForm.controls.questionFeedback.pristine">
