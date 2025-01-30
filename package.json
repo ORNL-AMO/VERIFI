@@ -55,7 +55,7 @@
     "start": "ng serve",
     "build": "ng build --base-href .",
     "build-prod": "ng build --configuration production --base-href /",
-    "build-dev-srv": "ng-build --configuration dev-srv --base-href /",
+    "build-dev-srv": "ng build --configuration dev-srv --base-href /",
     "build-prod-electron": "ng build --configuration production --base-href .",
     "build-watch": "ng build --base-href . --watch",
     "test": "ng test",
