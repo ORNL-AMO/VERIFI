@@ -111,7 +111,8 @@
               formControlName="questionDescribeSuccess"
               placeholder="Describe how VERIFI has helped you succeed"></textarea>
             <span class="small">
-              Characters remaining: {{ userSurveyForm.controls.questionDescribeSuccess.value | charactersRemaining:2048}}
+              Characters remaining: {{ userSurveyForm.controls.questionDescribeSuccess.value |
+              charactersRemaining:2048}}
             </span>
             <ng-container
               *ngIf="userSurveyForm.controls.questionDescribeSuccess.invalid && !userSurveyForm.controls.questionDescribeSuccess.pristine">
@@ -177,18 +178,24 @@
 
   <ng-template [ngIf]="inModal" [ngIfElse]="notInModalBlock">
     <div class="d-flex w-100 justify-content-between">
-      <div>
-        <button type="button" class="btn btn-secondary me-2" (click)="setRemindAndClose()">Remind Me Next Time</button>
-      </div>
-      <div>
-        <button type="button" class="btn btn-secondary me-2" (click)="close()">Cancel</button>
-        <button type="button" [disabled]="!userSurveyForm.valid" class="btn btn-primary" (click)="sendAnswers()">Send
-          Answers</button>
-      </div>
+      <ng-template [ngIf]="completedStatus !== 'success' && completedStatus !== 'error'" [ngIfElse]="closeModalBlock">
+        <div>
+          <button type="button" class="btn btn-secondary me-2" (click)="setRemindAndClose()">Remind Me Next
+            Time</button>
+        </div>
+        <div>
+          <button type="button" class="btn btn-secondary me-2" (click)="close()">Cancel</button>
+          <button type="button" [disabled]="!userSurveyForm.valid" class="btn btn-primary" (click)="sendAnswers()">Send
+            Answers</button>
+        </div>
+      </ng-template>
+      <ng-template #closeModalBlock>
+        <button type="button" class="btn btn-secondary me-2" (click)="close()">Close</button>
+      </ng-template>
     </div>
   </ng-template>
   <ng-template #notInModalBlock>
-    <div *ngIf="this.completedStatus !== 'success'" class="p-2 pull-right">
+    <div *ngIf="completedStatus !== 'success'" class="p-2 pull-right">
       <button type="button" class="btn btn-secondary me-2" (click)="initForm()">Reset Form</button>
       <button type="button" [disabled]="!userSurveyForm.valid" class="btn btn-primary" (click)="sendAnswers()">Send
         Answers</button>

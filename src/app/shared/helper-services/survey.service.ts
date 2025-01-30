@@ -66,7 +66,6 @@ export class SurveyService {
     this.completedStatus.next('sending');
     let userSurvey: UserSurvey = this.userSurvey.getValue();
     let url: string = environment.measurUtilitiesApi + 'verifi-survey';
-    console.log(url);
     this.httpClient.post(url, userSurvey, httpOptions).subscribe({
       next: (resp) => {
         this.setStatus(resp);
