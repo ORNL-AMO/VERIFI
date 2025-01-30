@@ -31,8 +31,9 @@ export class UserSurveyComponent {
     this.initForm();
     this.statusSub = this.surveyService.completedStatus.subscribe(status => {
       this.completedStatus = status;
-      if (this.completedStatus === 'success' && !this.inModal) {
+      if (this.completedStatus === 'success') {
         this.setSurveyDone();
+        this.close()
       }
     });
 
