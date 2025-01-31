@@ -51,10 +51,10 @@ import { ApplicationInstanceDbService } from './indexedDB/application-instance-d
 declare let gtag: Function;
 
 @Component({
-    selector: 'app-root',
-    templateUrl: './app.component.html',
-    styleUrls: ['./app.component.css'],
-    standalone: false
+  selector: 'app-root',
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.css'],
+  standalone: false
 })
 export class AppComponent {
 
@@ -170,7 +170,7 @@ export class AppComponent {
         this.dataInitialized = true;
         this.router.navigateByUrl('setup-wizard');
       }
-      
+
     } catch (err) {
       console.log(err);
       await this.eGridService.parseEGridData();
@@ -346,26 +346,28 @@ export class AppComponent {
   }
 
   async setAppOpenNotifications() {
-    let applicationData: ApplicationInstanceData = this.applicationInstanceDbService.applicationInstanceData.getValue();
-    if (!applicationData.isSurveyDone) {
-      if (applicationData.doSurveyReminder) {
-        setTimeout(() => {
-          this.surveyService.showSurveyModal.next(true);
-        }, 5000);
-        await firstValueFrom(this.applicationInstanceDbService.setSurveyDone());
-      } else {
-        let hasMetUsageRequirement: boolean = this.surveyService.getHasMetUsageRequirements(applicationData);
-        let showModalToExistingUser: boolean = this.surveyService.checkIsExistingUser();
-        let showModal: boolean = showModalToExistingUser || hasMetUsageRequirement;
-
-        setTimeout(() => {
-          this.surveyService.showSurveyModal.next(showModal);
-        }, 5000);
-
-        if (!applicationData.isSurveyToastDone && !showModalToExistingUser) {
+    if (environment.production) {
+      let applicationData: ApplicationInstanceData = this.applicationInstanceDbService.applicationInstanceData.getValue();
+      if (!applicationData.isSurveyDone) {
+        if (applicationData.doSurveyReminder) {
           setTimeout(() => {
-            this.surveyService.showSurveyToast.next(true);
+            this.surveyService.showSurveyModal.next(true);
           }, 5000);
+          await firstValueFrom(this.applicationInstanceDbService.setSurveyDone());
+        } else {
+          let hasMetUsageRequirement: boolean = this.surveyService.getHasMetUsageRequirements(applicationData);
+          let showModalToExistingUser: boolean = this.surveyService.checkIsExistingUser();
+          let showModal: boolean = showModalToExistingUser || hasMetUsageRequirement;
+
+          setTimeout(() => {
+            this.surveyService.showSurveyModal.next(showModal);
+          }, 5000);
+
+          if (!applicationData.isSurveyToastDone && !showModalToExistingUser) {
+            setTimeout(() => {
+              this.surveyService.showSurveyToast.next(true);
+            }, 5000);
+          }
         }
       }
     }

@@ -62,7 +62,7 @@
                             <span
                                 class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
                                 *ngIf="energyAnalysisNeeded || waterAnalysisNeeded">
-                                <span class="fa-exclamation white"></span>
+                                <span class="fa fa-exclamation white"></span>
                             </span>
                         </button>
                     </div>
@@ -93,7 +93,7 @@
                         <li class="list-group-item" *ngIf="meterReadingsNeeded">
                             <a class="nav-link" routerLink="/facility/{{facility.id}}/utility">
                                 <span class="badge rounded-pill bg-danger">
-                                    <span class="fa-exclamation white"></span>
+                                    <span class="fa fa-exclamation white"></span>
                                 </span>
                                 Meter readings needed. <span *ngIf="lastBill">Latest entry {{lastBill.readDate |
                                     date}}.</span>
@@ -103,7 +103,7 @@
                             <a class="nav-link"
                                 routerLink="/facility/{{facility.id}}/analysis/analysis-dashboard/energy">
                                 <span class="badge rounded-pill bg-danger">
-                                    <span class="fa-exclamation white"></span>
+                                    <span class="fa fa-exclamation white"></span>
                                 </span>
                                 Energy analysis needed. <ng-container *ngIf="latestEnergyAnalysisItem">Latest energy
                                     analysis conducted for
@@ -115,7 +115,7 @@
                             <a class="nav-link"
                                 routerLink="/facility/{{facility.id}}/analysis/analysis-dashboard/water">
                                 <span class="badge rounded-pill bg-danger">
-                                    <span class="fa-exclamation white"></span>
+                                    <span class="fa fa-exclamation white"></span>
                                 </span>
                                 Water analysis needed. <ng-container *ngIf="latestWaterAnalysisItem">Latest water
                                     analysis conducted for
