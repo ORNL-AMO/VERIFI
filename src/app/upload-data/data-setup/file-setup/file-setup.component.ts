@@ -5,9 +5,10 @@ import { Subscription } from 'rxjs';
 import { FileReference } from '../../upload-data-models';
 
 @Component({
-  selector: 'app-file-setup',
-  templateUrl: './file-setup.component.html',
-  styleUrls: ['./file-setup.component.css']
+    selector: 'app-file-setup',
+    templateUrl: './file-setup.component.html',
+    styleUrls: ['./file-setup.component.css'],
+    standalone: false
 })
 export class FileSetupComponent implements OnInit {
 

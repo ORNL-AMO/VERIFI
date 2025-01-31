@@ -19,9 +19,10 @@ import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 
 @Component({
-  selector: 'app-facility-analysis',
-  templateUrl: './facility-analysis.component.html',
-  styleUrls: ['./facility-analysis.component.css']
+    selector: 'app-facility-analysis',
+    templateUrl: './facility-analysis.component.html',
+    styleUrls: ['./facility-analysis.component.css'],
+    standalone: false
 })
 export class FacilityAnalysisComponent implements OnInit {
 

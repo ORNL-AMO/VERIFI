@@ -19,9 +19,10 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 
 @Component({
-  selector: 'app-utility-meters-table',
-  templateUrl: './utility-meters-table.component.html',
-  styleUrls: ['./utility-meters-table.component.css']
+    selector: 'app-utility-meters-table',
+    templateUrl: './utility-meters-table.component.html',
+    styleUrls: ['./utility-meters-table.component.css'],
+    standalone: false
 })
 export class UtilityMetersTableComponent implements OnInit {
   @ViewChild('meterTable', { static: false }) meterTable: ElementRef;

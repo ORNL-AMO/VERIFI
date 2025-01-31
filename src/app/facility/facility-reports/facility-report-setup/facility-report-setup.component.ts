@@ -9,9 +9,10 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { FacilityReportType, IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
 
 @Component({
-  selector: 'app-facility-report-setup',
-  templateUrl: './facility-report-setup.component.html',
-  styleUrl: './facility-report-setup.component.css'
+    selector: 'app-facility-report-setup',
+    templateUrl: './facility-report-setup.component.html',
+    styleUrl: './facility-report-setup.component.css',
+    standalone: false
 })
 export class FacilityReportSetupComponent {
 

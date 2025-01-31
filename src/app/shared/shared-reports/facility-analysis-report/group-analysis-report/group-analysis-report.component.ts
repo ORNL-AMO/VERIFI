@@ -8,9 +8,10 @@ import { AnalysisReportSettings } from 'src/app/models/idbModels/facilityReport'
 import { AnalysisGroupItem, getGroupItem } from 'src/app/shared/shared-analysis/analysisGroupItem';
 
 @Component({
-  selector: 'app-group-analysis-report',
-  templateUrl: './group-analysis-report.component.html',
-  styleUrl: './group-analysis-report.component.css'
+    selector: 'app-group-analysis-report',
+    templateUrl: './group-analysis-report.component.html',
+    styleUrl: './group-analysis-report.component.css',
+    standalone: false
 })
 export class GroupAnalysisReportComponent {
   @Input({ required: true })

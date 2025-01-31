@@ -3,9 +3,10 @@ import { SharedDataService } from 'src/app/shared/helper-services/shared-data.se
 import { Subscription } from 'rxjs';
 
 @Component({
-  selector: 'app-account-analysis-dashboard-tabs',
-  templateUrl: './account-analysis-dashboard-tabs.component.html',
-  styleUrls: ['./account-analysis-dashboard-tabs.component.css']
+    selector: 'app-account-analysis-dashboard-tabs',
+    templateUrl: './account-analysis-dashboard-tabs.component.html',
+    styleUrls: ['./account-analysis-dashboard-tabs.component.css'],
+    standalone: false
 })
 export class AccountAnalysisDashboardTabsComponent {
 

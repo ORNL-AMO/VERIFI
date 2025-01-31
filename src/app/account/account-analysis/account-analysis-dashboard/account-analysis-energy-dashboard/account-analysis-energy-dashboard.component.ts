@@ -9,9 +9,10 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 
 @Component({
-  selector: 'app-account-analysis-energy-dashboard',
-  templateUrl: './account-analysis-energy-dashboard.component.html',
-  styleUrls: ['./account-analysis-energy-dashboard.component.css']
+    selector: 'app-account-analysis-energy-dashboard',
+    templateUrl: './account-analysis-energy-dashboard.component.html',
+    styleUrls: ['./account-analysis-energy-dashboard.component.css'],
+    standalone: false
 })
 export class AccountAnalysisEnergyDashboardComponent {
   accountAnalysisItemsSub: Subscription;

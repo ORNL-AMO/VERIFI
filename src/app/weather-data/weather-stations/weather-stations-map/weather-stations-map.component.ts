@@ -5,9 +5,10 @@ import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 import * as _ from 'lodash';
 
 @Component({
-  selector: 'app-weather-stations-map',
-  templateUrl: './weather-stations-map.component.html',
-  styleUrls: ['./weather-stations-map.component.css']
+    selector: 'app-weather-stations-map',
+    templateUrl: './weather-stations-map.component.html',
+    styleUrls: ['./weather-stations-map.component.css'],
+    standalone: false
 })
 export class WeatherStationsMapComponent {
   @Input()

@@ -25,7 +25,8 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 @Component({
   selector: 'app-facility-sep-report-results',
   templateUrl: './facility-sep-report-results.component.html',
-  styleUrl: './facility-sep-report-results.component.css'
+  styleUrl: './facility-sep-report-results.component.css',
+  standalone: false
 })
 export class FacilitySepReportResultsComponent {
 

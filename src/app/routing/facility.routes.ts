@@ -49,9 +49,13 @@ import { CalculatedPredictorDataUpdateComponent } from "../facility/utility-data
 import { FacilityReportsComponent } from "../facility/facility-reports/facility-reports.component";
 import { FacilityReportsDashboardComponent } from "../facility/facility-reports/facility-reports-dashboard/facility-reports-dashboard.component";
 import { FacilityReportSetupComponent } from "../facility/facility-reports/facility-report-setup/facility-report-setup.component";
-import { FacilityAnalysisReportResultsComponent } from "../facility/facility-reports/facility-analysis-report-results/facility-analysis-report-results.component";
 import { BankedGroupAnalysisComponent } from "../facility/analysis/run-analysis/group-analysis/banked-group-analysis/banked-group-analysis.component";
 import { FacilitySepReportResultsComponent } from "../facility/facility-reports/facility-sep-report-results/facility-sep-report-results.component";
+import { FacilityOverviewReportResultsComponent } from "../facility/facility-reports/report-results/facility-overview-report-results/facility-overview-report-results.component";
+import { FacilityAnalysisReportResultsComponent } from "../facility/facility-reports/report-results/facility-analysis-report-results/facility-analysis-report-results.component";
+import { FacilityAnalysisReportsDashboardComponent } from "../facility/facility-reports/facility-reports-dashboard/facility-analysis-reports-dashboard/facility-analysis-reports-dashboard.component";
+import { FacilityOverviewReportsDashboardComponent } from "../facility/facility-reports/facility-reports-dashboard/facility-overview-reports-dashboard/facility-overview-reports-dashboard.component";
+import { FacilitySepReportsDashboardComponent } from "../facility/facility-reports/facility-reports-dashboard/facility-sep-reports-dashboard/facility-sep-reports-dashboard.component";
 
 export const FacilityRoutes: Route = {
     path: 'facility/:id',
@@ -289,10 +293,20 @@ export const FacilityRoutes: Route = {
             component: FacilityReportsComponent,
             children: [
                 { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
-                { path: 'dashboard', component: FacilityReportsDashboardComponent },
+                {
+                    path: 'dashboard',
+                    component: FacilityReportsDashboardComponent,
+                    children: [
+                        { path: '', pathMatch: 'full', redirectTo: 'analysis' },
+                        { path: 'analysis', component: FacilityAnalysisReportsDashboardComponent },
+                        { path: 'overview', component: FacilityOverviewReportsDashboardComponent },
+                        { path: 'sep', component: FacilitySepReportsDashboardComponent }
+                    ]
+                },
                 { path: 'setup', component: FacilityReportSetupComponent },
                 { path: 'analysis-report', component: FacilityAnalysisReportResultsComponent },
-                { path: 'sep-report', component: FacilitySepReportResultsComponent }
+                { path: 'sep-report', component: FacilitySepReportResultsComponent },
+                { path: 'overview-report', component: FacilityOverviewReportResultsComponent }
             ]
         }
     ]

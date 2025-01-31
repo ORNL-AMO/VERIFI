@@ -3,9 +3,10 @@ import { NavigationEnd, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 
 @Component({
-  selector: 'app-edit-bill-help',
-  templateUrl: './edit-bill-help.component.html',
-  styleUrls: ['./edit-bill-help.component.css']
+    selector: 'app-edit-bill-help',
+    templateUrl: './edit-bill-help.component.html',
+    styleUrls: ['./edit-bill-help.component.css'],
+    standalone: false
 })
 export class EditBillHelpComponent {
 

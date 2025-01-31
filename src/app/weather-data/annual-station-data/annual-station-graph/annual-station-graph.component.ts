@@ -5,9 +5,10 @@ import { Months } from 'src/app/shared/form-data/months';
 import { AnnualStationDataSummary } from '../annual-station-data.component';
 
 @Component({
-  selector: 'app-annual-station-graph',
-  templateUrl: './annual-station-graph.component.html',
-  styleUrls: ['./annual-station-graph.component.css']
+    selector: 'app-annual-station-graph',
+    templateUrl: './annual-station-graph.component.html',
+    styleUrls: ['./annual-station-graph.component.css'],
+    standalone: false
 })
 export class AnnualStationGraphComponent {
   @Input()

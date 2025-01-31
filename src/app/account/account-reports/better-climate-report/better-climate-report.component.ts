@@ -22,9 +22,10 @@ import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 
 @Component({
-  selector: 'app-better-climate-report',
-  templateUrl: './better-climate-report.component.html',
-  styleUrls: ['./better-climate-report.component.css']
+    selector: 'app-better-climate-report',
+    templateUrl: './better-climate-report.component.html',
+    styleUrls: ['./better-climate-report.component.css'],
+    standalone: false
 })
 export class BetterClimateReportComponent {
 

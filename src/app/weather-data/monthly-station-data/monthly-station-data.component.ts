@@ -5,9 +5,10 @@ import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.se
 import { WeatherDataService } from 'src/app/weather-data/weather-data.service';
 
 @Component({
-  selector: 'app-monthly-station-data',
-  templateUrl: './monthly-station-data.component.html',
-  styleUrls: ['./monthly-station-data.component.css']
+    selector: 'app-monthly-station-data',
+    templateUrl: './monthly-station-data.component.html',
+    styleUrls: ['./monthly-station-data.component.css'],
+    standalone: false
 })
 export class MonthlyStationDataComponent {
 

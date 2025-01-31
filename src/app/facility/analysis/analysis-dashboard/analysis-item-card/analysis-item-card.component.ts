@@ -15,11 +15,14 @@ import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysis
 import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
 import { getNewIdbFacilityReport, IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
 import { AnalysisGroupItem, getGroupItem } from 'src/app/shared/shared-analysis/analysisGroupItem';
+import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
+import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
 
 @Component({
-  selector: 'app-analysis-item-card',
-  templateUrl: './analysis-item-card.component.html',
-  styleUrls: ['./analysis-item-card.component.css']
+    selector: 'app-analysis-item-card',
+    templateUrl: './analysis-item-card.component.html',
+    styleUrls: ['./analysis-item-card.component.css'],
+    standalone: false
 })
 export class AnalysisItemCardComponent implements OnInit {
   @Input()
@@ -49,7 +52,8 @@ export class AnalysisItemCardComponent implements OnInit {
     private analysisService: AnalysisService, private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService, private toastNotificationService: ToastNotificationsService,
     private accountAnalysisDbService: AccountAnalysisDbService,
-    private facilityReportsDbService: FacilityReportsDbService) { }
+    private facilityReportsDbService: FacilityReportsDbService,
+    private utilityMeterGroupDbService: UtilityMeterGroupdbService) { }
 
   ngOnInit(): void {
     this.selectedFacility = this.facilityDbService.selectedFacility.getValue();
@@ -236,8 +240,8 @@ export class AnalysisItemCardComponent implements OnInit {
   }
 
   async confirmCreateReport() {
-    let facility: IdbFacility = this.facilityDbService.getFacilityById(this.analysisItem.facilityId);
-    let newReport: IdbFacilityReport = getNewIdbFacilityReport(facility, 'analysis');
+    let groups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.getFacilityGroups(this.analysisItem.facilityId);
+    let newReport: IdbFacilityReport = getNewIdbFacilityReport(this.selectedFacility, 'analysis', groups);
     newReport.analysisItemId = this.analysisItem.guid;
     newReport = await firstValueFrom(this.facilityReportsDbService.addWithObservable(newReport));
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();

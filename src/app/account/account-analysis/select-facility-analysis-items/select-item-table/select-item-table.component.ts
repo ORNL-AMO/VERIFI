@@ -19,9 +19,10 @@ import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 @Component({
-  selector: 'app-select-item-table',
-  templateUrl: './select-item-table.component.html',
-  styleUrls: ['./select-item-table.component.css']
+    selector: 'app-select-item-table',
+    templateUrl: './select-item-table.component.html',
+    styleUrls: ['./select-item-table.component.css'],
+    standalone: false
 })
 export class SelectItemTableComponent implements OnInit {
   @Input()

@@ -16,9 +16,10 @@ import { IdbFacility } from '../models/idbModels/facility';
 import { IdbUtilityMeter } from '../models/idbModels/utilityMeter';
 
 @Component({
-  selector: 'app-setup-wizard',
-  templateUrl: './setup-wizard.component.html',
-  styleUrls: ['./setup-wizard.component.css']
+    selector: 'app-setup-wizard',
+    templateUrl: './setup-wizard.component.html',
+    styleUrls: ['./setup-wizard.component.css'],
+    standalone: false
 })
 export class SetupWizardComponent implements OnInit {
 

@@ -4,9 +4,10 @@ import { SourceTotal } from 'src/app/calculations/dashboard-calculations/sourceT
 import { UtilityColors } from '../../utilityColors';
 
 @Component({
-  selector: 'app-account-utility-usage-table',
-  templateUrl: './account-utility-usage-table.component.html',
-  styleUrls: ['./account-utility-usage-table.component.css']
+    selector: 'app-account-utility-usage-table',
+    templateUrl: './account-utility-usage-table.component.html',
+    styleUrls: ['./account-utility-usage-table.component.css'],
+    standalone: false
 })
 export class AccountUtilityUsageTableComponent {
   @Input()

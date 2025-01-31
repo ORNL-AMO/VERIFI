@@ -29,9 +29,10 @@ import { DatePipe } from '@angular/common';
 import { getDegreeDayAmount } from '../shared/sharedHelperFuntions';
 
 @Component({
-  selector: 'app-weather-data',
-  templateUrl: './weather-data.component.html',
-  styleUrls: ['./weather-data.component.css']
+    selector: 'app-weather-data',
+    templateUrl: './weather-data.component.html',
+    styleUrls: ['./weather-data.component.css'],
+    standalone: false
 })
 export class WeatherDataComponent {
 

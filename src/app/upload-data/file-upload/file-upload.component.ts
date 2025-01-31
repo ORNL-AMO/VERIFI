@@ -6,9 +6,10 @@ import { ExportToExcelTemplateService } from 'src/app/shared/helper-services/exp
 import { FileReference } from '../upload-data-models';
 
 @Component({
-  selector: 'app-file-upload',
-  templateUrl: './file-upload.component.html',
-  styleUrls: ['./file-upload.component.css']
+    selector: 'app-file-upload',
+    templateUrl: './file-upload.component.html',
+    styleUrls: ['./file-upload.component.css'],
+    standalone: false
 })
 export class FileUploadComponent implements OnInit {
 

@@ -13,9 +13,10 @@ import { FileReference, getEmptyFileReference } from 'src/app/upload-data/upload
 import { UploadDataService } from 'src/app/upload-data/upload-data.service';
 
 @Component({
-  selector: 'app-manage-meters',
-  templateUrl: './manage-meters.component.html',
-  styleUrls: ['./manage-meters.component.css']
+    selector: 'app-manage-meters',
+    templateUrl: './manage-meters.component.html',
+    styleUrls: ['./manage-meters.component.css'],
+    standalone: false
 })
 export class ManageMetersComponent implements OnInit {
 

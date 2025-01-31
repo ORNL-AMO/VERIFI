@@ -8,9 +8,10 @@ import { IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 
 @Component({
-  selector: 'app-facility-reports-tabs',
-  templateUrl: './facility-reports-tabs.component.html',
-  styleUrl: './facility-reports-tabs.component.css'
+    selector: 'app-facility-reports-tabs',
+    templateUrl: './facility-reports-tabs.component.html',
+    styleUrl: './facility-reports-tabs.component.css',
+    standalone: false
 })
 export class FacilityReportsTabsComponent {
 
@@ -43,7 +44,9 @@ export class FacilityReportsTabsComponent {
     });
     this.selectedReportSub = this.facilityReportsDbService.selectedReport.subscribe(val => {
       this.selectedReport = val;
-      this.setupValid = (this.selectedReport.analysisItemId != undefined && this.selectedReport.name != '');
+      if (this.selectedReport) {
+        this.setSetupValid();
+      }
     });
   }
 
@@ -61,5 +64,19 @@ export class FacilityReportsTabsComponent {
 
   goToDashboard() {
     this.router.navigateByUrl('/facility/' + this.facility.id + '/reports/dashboard')
+  }
+
+  setSetupValid() {
+    if (this.selectedReport.facilityReportType == 'analysis' || this.selectedReport.facilityReportType == 'SEP') {
+      this.setupValid = (this.selectedReport.analysisItemId != undefined && this.selectedReport.name != '');
+    } else if (this.selectedReport.facilityReportType == 'overview') {
+      this.setupValid = (this.selectedReport.name != '' &&
+        this.selectedReport.dataOverviewReportSettings.endMonth != undefined &&
+        this.selectedReport.dataOverviewReportSettings.endYear != undefined &&
+        this.selectedReport.dataOverviewReportSettings.startMonth != undefined &&
+        this.selectedReport.dataOverviewReportSettings.startYear != undefined)
+    } else {
+      this.setupValid = false;
+    }
   }
 }

@@ -7,7 +7,8 @@ import * as _ from 'lodash';
 @Component({
   selector: 'app-sep-report-graphs',
   templateUrl: './sep-report-graphs.component.html',
-  styleUrl: './sep-report-graphs.component.css'
+  styleUrl: './sep-report-graphs.component.css',
+  standalone: false
 })
 export class SepReportGraphsComponent {
   @Input({ required: true })

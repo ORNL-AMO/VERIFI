@@ -6,7 +6,8 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 @Component({
   selector: 'app-sep-results-table',
   templateUrl: './sep-results-table.component.html',
-  styleUrl: './sep-results-table.component.css'
+  styleUrl: './sep-results-table.component.css',
+  standalone: false
 })
 export class SepResultsTableComponent {
   @Input({ required: true })

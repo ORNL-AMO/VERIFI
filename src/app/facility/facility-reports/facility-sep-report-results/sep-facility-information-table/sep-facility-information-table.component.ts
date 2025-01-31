@@ -6,7 +6,8 @@ import { IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
 @Component({
   selector: 'app-sep-facility-information-table',
   templateUrl: './sep-facility-information-table.component.html',
-  styleUrl: './sep-facility-information-table.component.css'
+  styleUrl: './sep-facility-information-table.component.css',
+  standalone: false
 })
 export class SepFacilityInformationTableComponent {
   @Input({required: true})

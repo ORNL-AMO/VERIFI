@@ -6,14 +6,17 @@ import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.serv
 import { CalanderizedMeter } from 'src/app/models/calanderization';
 import { YearMonthData } from 'src/app/models/dashboard';
 import { DataOverviewReportSetup } from 'src/app/models/overview-report';
-import { AccountReportsService } from '../../../account-reports.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
+import { AccountReportsService } from 'src/app/account/account-reports/account-reports.service';
+import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
+import { DataOverviewFacilityReportSettings, IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
 
 @Component({
-  selector: 'app-facility-section-report',
-  templateUrl: './facility-section-report.component.html',
-  styleUrls: ['./facility-section-report.component.css']
+    selector: 'app-facility-section-report',
+    templateUrl: './facility-section-report.component.html',
+    styleUrls: ['./facility-section-report.component.css'],
+    standalone: false
 })
 export class FacilitySectionReportComponent {
   @Input()
@@ -42,19 +45,27 @@ export class FacilitySectionReportComponent {
   dateRange: {startDate: Date, endDate: Date};
   @Input()
   previousYear: Date;
+  @Input()
+  inFacilityReport: boolean;
 
-  sectionOptions: DataOverviewReportSetup;
+  sectionOptions: DataOverviewReportSetup | DataOverviewFacilityReportSettings;
   waterUnit: string;
   energyUnit: string;
   printSub: Subscription;
   print: boolean;
   constructor(private accountReportDbService: AccountReportDbService,
-    private accountReportsService: AccountReportsService) {
+    private accountReportsService: AccountReportsService,
+    private facilityReportDbService: FacilityReportsDbService) {
   }
 
   ngOnInit() {
-    let selectedReport: IdbAccountReport = this.accountReportDbService.selectedReport.getValue();
-    this.sectionOptions = selectedReport.dataOverviewReportSetup;
+    if(!this.inFacilityReport){
+      let selectedReport: IdbAccountReport = this.accountReportDbService.selectedReport.getValue();
+      this.sectionOptions = selectedReport.dataOverviewReportSetup;
+    }else{
+      let selectedReport: IdbFacilityReport = this.facilityReportDbService.selectedReport.getValue();
+      this.sectionOptions = selectedReport.dataOverviewReportSettings;
+    }
     this.waterUnit = this.facility.volumeLiquidUnit;
     this.energyUnit = this.facility.energyUnit;
 

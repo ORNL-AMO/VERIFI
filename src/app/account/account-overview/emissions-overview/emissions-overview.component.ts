@@ -5,9 +5,10 @@ import { AccountOverviewData } from 'src/app/calculations/dashboard-calculations
 import { UtilityUseAndCost } from 'src/app/calculations/dashboard-calculations/useAndCostClass';
 
 @Component({
-  selector: 'app-emissions-overview',
-  templateUrl: './emissions-overview.component.html',
-  styleUrls: ['./emissions-overview.component.css']
+    selector: 'app-emissions-overview',
+    templateUrl: './emissions-overview.component.html',
+    styleUrls: ['./emissions-overview.component.css'],
+    standalone: false
 })
 export class EmissionsOverviewComponent implements OnInit {
 

@@ -9,9 +9,10 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 
 @Component({
-  selector: 'app-meters-overview-stacked-line-chart',
-  templateUrl: './meters-overview-stacked-line-chart.component.html',
-  styleUrls: ['./meters-overview-stacked-line-chart.component.css']
+    selector: 'app-meters-overview-stacked-line-chart',
+    templateUrl: './meters-overview-stacked-line-chart.component.html',
+    styleUrls: ['./meters-overview-stacked-line-chart.component.css'],
+    standalone: false
 })
 export class MetersOverviewStackedLineChartComponent {
   @Input()

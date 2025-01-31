@@ -7,9 +7,10 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { AnalysisReportSettings } from 'src/app/models/idbModels/facilityReport';
 
 @Component({
-  selector: 'app-monthly-facility-analysis-report',
-  templateUrl: './monthly-facility-analysis-report.component.html',
-  styleUrl: './monthly-facility-analysis-report.component.css'
+    selector: 'app-monthly-facility-analysis-report',
+    templateUrl: './monthly-facility-analysis-report.component.html',
+    styleUrl: './monthly-facility-analysis-report.component.css',
+    standalone: false
 })
 export class MonthlyFacilityAnalysisReportComponent {
   @Input({required: true})

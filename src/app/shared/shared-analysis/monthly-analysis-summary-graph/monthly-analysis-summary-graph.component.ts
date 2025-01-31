@@ -7,9 +7,10 @@ import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
-  selector: 'app-monthly-analysis-summary-graph',
-  templateUrl: './monthly-analysis-summary-graph.component.html',
-  styleUrls: ['./monthly-analysis-summary-graph.component.css']
+    selector: 'app-monthly-analysis-summary-graph',
+    templateUrl: './monthly-analysis-summary-graph.component.html',
+    styleUrls: ['./monthly-analysis-summary-graph.component.css'],
+    standalone: false
 })
 export class MonthlyAnalysisSummaryGraphComponent implements OnInit {
   @Input({required: true})

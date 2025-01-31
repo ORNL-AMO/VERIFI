@@ -202,3 +202,9 @@ export function getDegreeDayAmount(degreeDays: Array<DetailDegreeDay>, weatherDa
         return weightedAverage;
     }
 }
+
+export function getMinutesBetweenDates(firstDate: Date, secondDate: Date): number {
+    let diffMilliseconds = Math.abs(firstDate.getTime() - secondDate.getTime());
+    let diffMinutes: number = new ConvertValue(diffMilliseconds, 'ms', 'min').convertedValue;
+    return diffMinutes;
+}

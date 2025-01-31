@@ -10,9 +10,10 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
-  selector: 'app-financial-reporting-form',
-  templateUrl: './financial-reporting-form.component.html',
-  styleUrls: ['./financial-reporting-form.component.css']
+    selector: 'app-financial-reporting-form',
+    templateUrl: './financial-reporting-form.component.html',
+    styleUrls: ['./financial-reporting-form.component.css'],
+    standalone: false
 })
 export class FinancialReportingFormComponent implements OnInit {
   @Input()

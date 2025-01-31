@@ -3,9 +3,10 @@ import { FormGroup } from '@angular/forms';
 import { AgreementType, AgreementTypes } from 'src/app/models/agreementType';
 
 @Component({
-  selector: 'app-additional-electricity-options-form',
-  templateUrl: './additional-electricity-options-form.component.html',
-  styleUrls: ['./additional-electricity-options-form.component.css']
+    selector: 'app-additional-electricity-options-form',
+    templateUrl: './additional-electricity-options-form.component.html',
+    styleUrls: ['./additional-electricity-options-form.component.css'],
+    standalone: false
 })
 export class AdditionalElectricityOptionsFormComponent {
   @Input()

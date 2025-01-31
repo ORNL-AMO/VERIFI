@@ -9,9 +9,10 @@ import { DataOverviewReportSetup } from 'src/app/models/overview-report';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
-  selector: 'app-facilities-usage-stacked-bar-chart',
-  templateUrl: './facilities-usage-stacked-bar-chart.component.html',
-  styleUrls: ['./facilities-usage-stacked-bar-chart.component.css']
+    selector: 'app-facilities-usage-stacked-bar-chart',
+    templateUrl: './facilities-usage-stacked-bar-chart.component.html',
+    styleUrls: ['./facilities-usage-stacked-bar-chart.component.css'],
+    standalone: false
 })
 export class FacilitiesUsageStackedBarChartComponent {
   @Input()

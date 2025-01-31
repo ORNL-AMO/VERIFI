@@ -6,9 +6,10 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { AnalysisGroupItem } from 'src/app/shared/shared-analysis/analysisGroupItem';
 
 @Component({
-  selector: 'app-regression-model-details',
-  templateUrl: './regression-model-details.component.html',
-  styleUrl: './regression-model-details.component.css'
+    selector: 'app-regression-model-details',
+    templateUrl: './regression-model-details.component.html',
+    styleUrl: './regression-model-details.component.css',
+    standalone: false
 })
 export class RegressionModelDetailsComponent {
   @Input({ required: true })

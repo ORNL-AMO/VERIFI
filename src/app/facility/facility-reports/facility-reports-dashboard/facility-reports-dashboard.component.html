@@ -1,11 +1,11 @@
 <div class="main-content p-0">
-    <!-- <app-analysis-dashboard-tabs *ngIf="hasEnergy && hasWater"></app-analysis-dashboard-tabs> -->
+    <app-facility-reports-dashboard-tabs></app-facility-reports-dashboard-tabs>
     <div class="content-padding">
         <div class="card card-body">
             <h4 class="pt-0">
                 <div class="d-flex justify-content-between">
                     <div class="mt-auto">
-                        <i class="fa fa-folder pe-2"></i>{{selectedFacility.name}} Reports
+                        <i class="fa fa-folder pe-2"></i>{{selectedFacility.name}} {{reportType}} Reports
                     </div>
 
                     <div>
@@ -15,21 +15,7 @@
             </h4>
         </div>
         <hr>
-        <!-- <router-outlet></router-outlet> -->
-        <ng-template [ngIf]="facilityReports.length != 0" [ngIfElse]="noReportsBlock">
-            <div class="row">
-                <div class="col-4" *ngFor="let report of facilityReports">
-                    <app-facility-report-item-card [report]="report"
-                        [facility]="selectedFacility"></app-facility-report-item-card>
-                </div>
-            </div>
-        </ng-template>
-
-        <ng-template #noReportsBlock>
-            <div class="alert alert-info">
-                No reports found for the facility.
-            </div>
-        </ng-template>
+        <router-outlet></router-outlet>
     </div>
 </div>
 
@@ -53,6 +39,11 @@
                             id="SEP" [(ngModel)]="newReportType">
                         <label class="form-check-label" for="SEP">SEP 50001 Performance Report</label>
                     </div>
+                    <div class="form-check">
+                        <input type="radio" class="form-check-input" name="newReportType" [value]="'overview'"
+                            id="water" [(ngModel)]="newReportType">
+                        <label class="form-check-label" for="water">Data Overview</label>
+                    </div>
                 </div>
             </div>
         </form>
@@ -60,6 +51,6 @@
     </div>
     <div class="saveCancel popup-footer text-end">
         <button class="btn btn-secondary" (click)="cancelCreate()">Cancel</button>
-        <button class="btn action-btn" (click)="createReport()">Create Analysis</button>
+        <button class="btn action-btn" (click)="createReport()">Create Report</button>
     </div>
 </div>

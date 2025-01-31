@@ -14,9 +14,10 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbElectronBackup } from 'src/app/models/idbModels/electronBackup';
 
 @Component({
-  selector: 'app-electron-backup-file',
-  templateUrl: './electron-backup-file.component.html',
-  styleUrls: ['./electron-backup-file.component.css']
+    selector: 'app-electron-backup-file',
+    templateUrl: './electron-backup-file.component.html',
+    styleUrls: ['./electron-backup-file.component.css'],
+    standalone: false
 })
 export class ElectronBackupFileComponent {
 

@@ -25,9 +25,10 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 
 @Component({
-  selector: 'app-meter-grouping',
-  templateUrl: './meter-grouping.component.html',
-  styleUrls: ['./meter-grouping.component.css']
+    selector: 'app-meter-grouping',
+    templateUrl: './meter-grouping.component.html',
+    styleUrls: ['./meter-grouping.component.css'],
+    standalone: false
 })
 export class MeterGroupingComponent implements OnInit {
 

@@ -13,7 +13,8 @@ import { IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
 @Component({
   selector: 'app-facility-sep-report-setup',
   templateUrl: './facility-sep-report-setup.component.html',
-  styleUrl: './facility-sep-report-setup.component.css'
+  styleUrl: './facility-sep-report-setup.component.css',
+  standalone: false
 })
 export class FacilitySepReportSetupComponent {
 

@@ -13,9 +13,10 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
-  selector: 'app-general-information-form',
-  templateUrl: './general-information-form.component.html',
-  styleUrls: ['./general-information-form.component.css']
+    selector: 'app-general-information-form',
+    templateUrl: './general-information-form.component.html',
+    styleUrls: ['./general-information-form.component.css'],
+    standalone: false
 })
 export class GeneralInformationFormComponent implements OnInit {
   @Input()

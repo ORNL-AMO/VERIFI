@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
-import { Subscription } from 'rxjs';
+import { firstValueFrom, Subscription } from 'rxjs';
 import { NavigationEnd, Router } from '@angular/router';
 import { FacilityOverviewService } from '../facility-overview.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
@@ -12,11 +12,18 @@ import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
+import { getNewIdbFacilityReport, IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
+import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
+import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
+import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
+import { IdbAccount } from 'src/app/models/idbModels/account';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 
 @Component({
-  selector: 'app-facility-overview-banner',
-  templateUrl: './facility-overview-banner.component.html',
-  styleUrls: ['./facility-overview-banner.component.css']
+    selector: 'app-facility-overview-banner',
+    templateUrl: './facility-overview-banner.component.html',
+    styleUrls: ['./facility-overview-banner.component.css'],
+    standalone: false
 })
 export class FacilityOverviewBannerComponent implements OnInit {
 
@@ -39,12 +46,18 @@ export class FacilityOverviewBannerComponent implements OnInit {
 
   dateRangeSub: Subscription;
 
+  showReportModal: boolean = false;
+
+  facilityReport: IdbFacilityReport;
   constructor(private sharedDataService: SharedDataService, private facilityDbService: FacilitydbService,
     private router: Router,
     private facilityOverviewService: FacilityOverviewService,
     private dbChangesService: DbChangesService,
     private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService) { }
+    private utilityMeterDataDbService: UtilityMeterDatadbService,
+    private utilityMeterGroupIdbService: UtilityMeterGroupdbService,
+    private facilityReportDbService: FacilityReportsDbService,
+    private accountDbService: AccountdbService) { }
 
   ngOnInit(): void {
     this.modalOpenSub = this.sharedDataService.modalOpen.subscribe(val => {
@@ -113,8 +126,33 @@ export class FacilityOverviewBannerComponent implements OnInit {
     this.showWater = waterMeter != undefined;
   }
 
-  createReport() {
-    this.sharedDataService.openCreateReportModal.next(true);
+  openCreateReportModal() {
+    let groups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupIdbService.getFacilityGroups(this.selectedFacility.guid);
+    this.facilityReport = getNewIdbFacilityReport(this.selectedFacility, 'overview', groups);
+    this.facilityReport.name = 'New Data Overview Report';
+    this.facilityReport.dataOverviewReportSettings.startMonth = this.minMonth;
+    this.facilityReport.dataOverviewReportSettings.startYear = this.minYear;
+    this.facilityReport.dataOverviewReportSettings.endMonth = this.maxMonth;
+    this.facilityReport.dataOverviewReportSettings.endYear = this.maxYear;
+    this.facilityReport.dataOverviewReportSettings.energyIsSource = this.selectedFacility.energyIsSource;
+    this.facilityReport.dataOverviewReportSettings.emissionsDisplay = this.emissionsDisplay;
+
+    if (!this.showWater) {
+      this.facilityReport.dataOverviewReportSettings.includeWaterSection = false;
+    }
+    this.showReportModal = true;
+  }
+
+  cancelCreateReport() {
+    this.showReportModal = false;
+  }
+
+  async createReport() {
+    this.facilityReport = await firstValueFrom(this.facilityReportDbService.addWithObservable(this.facilityReport));
+    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    await this.dbChangesService.setAccountFacilityReports(account, this.selectedFacility);
+    this.facilityReportDbService.selectedReport.next(this.facilityReport);
+    this.router.navigateByUrl('/facility/' + this.selectedFacility.id + '/reports/setup');
   }
 
   setDate() {

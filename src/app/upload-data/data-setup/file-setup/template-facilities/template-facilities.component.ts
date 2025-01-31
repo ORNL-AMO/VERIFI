@@ -7,9 +7,10 @@ import { FileReference, getEmptyFileReference } from 'src/app/upload-data/upload
 import { UploadDataService } from 'src/app/upload-data/upload-data.service';
 
 @Component({
-  selector: 'app-template-facilities',
-  templateUrl: './template-facilities.component.html',
-  styleUrls: ['./template-facilities.component.css']
+    selector: 'app-template-facilities',
+    templateUrl: './template-facilities.component.html',
+    styleUrls: ['./template-facilities.component.css'],
+    standalone: false
 })
 export class TemplateFacilitiesComponent implements OnInit {
 

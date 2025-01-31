@@ -9,9 +9,10 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 
 @Component({
-  selector: 'app-monthly-facility-analysis',
-  templateUrl: './monthly-facility-analysis.component.html',
-  styleUrls: ['./monthly-facility-analysis.component.css']
+    selector: 'app-monthly-facility-analysis',
+    templateUrl: './monthly-facility-analysis.component.html',
+    styleUrls: ['./monthly-facility-analysis.component.css'],
+    standalone: false
 })
 export class MonthlyFacilityAnalysisComponent implements OnInit {
 

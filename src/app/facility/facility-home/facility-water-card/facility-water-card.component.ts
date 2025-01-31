@@ -9,9 +9,10 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 
 @Component({
-  selector: 'app-facility-water-card',
-  templateUrl: './facility-water-card.component.html',
-  styleUrls: ['./facility-water-card.component.css']
+    selector: 'app-facility-water-card',
+    templateUrl: './facility-water-card.component.html',
+    styleUrls: ['./facility-water-card.component.css'],
+    standalone: false
 })
 export class FacilityWaterCardComponent {
   monthlyWaterAnalysisData: Array<MonthlyAnalysisSummaryData>;

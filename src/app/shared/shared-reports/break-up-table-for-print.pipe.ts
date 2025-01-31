@@ -2,7 +2,8 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { AnalysisTableColumns } from 'src/app/models/analysis';
 
 @Pipe({
-  name: 'breakUpTableForPrint'
+    name: 'breakUpTableForPrint',
+    standalone: false
 })
 export class BreakUpTableForPrintPipe implements PipeTransform {
 

@@ -17,9 +17,10 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbCustomEmissionsItem } from 'src/app/models/idbModels/customEmissions';
 
 @Component({
-  selector: 'app-default-units-form',
-  templateUrl: './default-units-form.component.html',
-  styleUrls: ['./default-units-form.component.css']
+    selector: 'app-default-units-form',
+    templateUrl: './default-units-form.component.html',
+    styleUrls: ['./default-units-form.component.css'],
+    standalone: false
 })
 export class DefaultUnitsFormComponent implements OnInit {
   @Input()

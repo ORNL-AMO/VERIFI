@@ -7,14 +7,17 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
+import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { getNewIdbFacilityReport, IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
+import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
 
 @Component({
-  selector: 'app-facility-report-item-card',
-  templateUrl: './facility-report-item-card.component.html',
-  styleUrl: './facility-report-item-card.component.css'
+    selector: 'app-facility-report-item-card',
+    templateUrl: './facility-report-item-card.component.html',
+    styleUrl: './facility-report-item-card.component.css',
+    standalone: false
 })
 export class FacilityReportItemCardComponent {
   @Input({ required: true })
@@ -23,15 +26,24 @@ export class FacilityReportItemCardComponent {
   facility: IdbFacility;
 
   displayDeleteModal: boolean = false;
+  reportStartDate: Date;
+  reportEndDate: Date;
   constructor(private facilityDbReportsService: FacilityReportsDbService,
     private router: Router,
     private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
     private toastNotificationService: ToastNotificationsService,
     private analyticsService: AnalyticsService,
-    private facilityDbService: FacilitydbService
+    private facilityDbService: FacilitydbService,
+    private utilityMeterGroupDbService: UtilityMeterGroupdbService
   ) {
+  }
 
+  ngOnInit(){
+    if(this.report.facilityReportType == 'overview'){
+      this.reportStartDate = new Date(this.report.dataOverviewReportSettings.startYear, this.report.dataOverviewReportSettings.startMonth, 1);
+      this.reportEndDate = new Date(this.report.dataOverviewReportSettings.endYear, this.report.dataOverviewReportSettings.endMonth, 1);
+    }
   }
 
   selectReport() {
@@ -41,7 +53,8 @@ export class FacilityReportItemCardComponent {
 
   async createCopy() {
     let facility: IdbFacility = this.facilityDbService.getFacilityById(this.report.facilityId);
-    let newReport: IdbFacilityReport = getNewIdbFacilityReport(facility, this.report.facilityReportType);
+    let groups: Array<IdbUtilityMeterGroup> = this.utilityMeterGroupDbService.getFacilityGroups(this.report.guid);
+    let newReport: IdbFacilityReport = getNewIdbFacilityReport(facility, this.report.facilityReportType, groups);
     newReport.name = this.report.name + ' (Copy)';
     newReport.analysisItemId = this.report.analysisItemId;
     let addedReport: IdbFacilityReport = await firstValueFrom(this.facilityDbReportsService.addWithObservable(newReport));
@@ -51,9 +64,7 @@ export class FacilityReportItemCardComponent {
     this.facilityDbReportsService.selectedReport.next(addedReport);
     this.toastNotificationService.showToast('New Report Created', undefined, undefined, false, "alert-success");
     this.facilityDbReportsService.selectedReport.next(addedReport);
-    if (addedReport.facilityReportType == 'analysis') {
-      this.router.navigateByUrl('facility/' + this.facility.id + '/reports/setup');
-    }
+    this.router.navigateByUrl('facility/' + this.facility.id + '/reports/setup');
   }
 
   deleteItem() {
