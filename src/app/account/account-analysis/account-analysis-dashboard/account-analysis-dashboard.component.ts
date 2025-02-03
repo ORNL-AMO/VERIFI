@@ -15,9 +15,10 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
-  selector: 'app-account-analysis-dashboard',
-  templateUrl: './account-analysis-dashboard.component.html',
-  styleUrls: ['./account-analysis-dashboard.component.css']
+    selector: 'app-account-analysis-dashboard',
+    templateUrl: './account-analysis-dashboard.component.html',
+    styleUrls: ['./account-analysis-dashboard.component.css'],
+    standalone: false
 })
 export class AccountAnalysisDashboardComponent implements OnInit {
 

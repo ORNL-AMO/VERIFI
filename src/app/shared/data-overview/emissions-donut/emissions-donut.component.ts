@@ -9,9 +9,10 @@ import { AccountOverviewFacility } from 'src/app/calculations/dashboard-calculat
 import { AccountOverviewService } from 'src/app/account/account-overview/account-overview.service';
 
 @Component({
-  selector: 'app-emissions-donut',
-  templateUrl: './emissions-donut.component.html',
-  styleUrls: ['./emissions-donut.component.css']
+    selector: 'app-emissions-donut',
+    templateUrl: './emissions-donut.component.html',
+    styleUrls: ['./emissions-donut.component.css'],
+    standalone: false
 })
 export class EmissionsDonutComponent {
   @Input()

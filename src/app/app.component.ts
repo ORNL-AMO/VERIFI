@@ -41,6 +41,9 @@ import { IdbAccountAnalysisItem } from './models/idbModels/accountAnalysisItem';
 import { IdbPredictorEntryDeprecated } from './models/idbModels/deprecatedPredictors';
 import { FacilityReportsDbService } from './indexedDB/facility-reports-db.service';
 import { IdbFacilityReport } from './models/idbModels/facilityReport';
+import { SurveyService } from './shared/helper-services/survey.service';
+import { ApplicationInstanceData } from './models/idbModels/applicationInstanceData';
+import { ApplicationInstanceDbService } from './indexedDB/application-instance-db.service';
 
 // declare ga as a function to access the JS code in TS
 declare let gtag: Function;
@@ -48,7 +51,8 @@ declare let gtag: Function;
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+  styleUrls: ['./app.component.css'],
+  standalone: false
 })
 export class AppComponent {
 
@@ -56,6 +60,9 @@ export class AppComponent {
 
   dataInitialized: boolean = false;
   loadingMessage: string = "Loading Accounts...";
+
+  showSurveyToast: boolean;
+  showSurveyModal: boolean;
   constructor(
     private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService,
@@ -81,7 +88,9 @@ export class AppComponent {
     private predictorDataDbService: PredictorDataDbService,
     private migratePredictorsService: MigratePredictorsService,
     private dbChangesService: DbChangesService,
-    private facilityReportsDbService: FacilityReportsDbService) {
+    private facilityReportsDbService: FacilityReportsDbService,
+    private surveyService: SurveyService,
+    private applicationInstanceDbService: ApplicationInstanceDbService) {
     if (environment.production) {
       gtag('config', 'G-YG1QD02XSE');
       this.analyticsService.sendEvent('verifi_app_open', undefined);
@@ -97,6 +106,12 @@ export class AppComponent {
   ngOnInit() {
     this.initializeData();
     this.automaticBackupsService.subscribeData();
+    this.surveyService.showSurveyModal.subscribe(val => {
+      this.showSurveyModal = val;
+    });
+    this.surveyService.showSurveyToast.subscribe(val => {
+      this.showSurveyToast = val;
+    });
   }
 
   async initializeData() {
@@ -112,6 +127,7 @@ export class AppComponent {
       }
 
       await this.eGridService.parseZipCodeLongLat();
+      await this.applicationInstanceDbService.initializeApplicationInstanceData();
       if (account) {
         await this.initializeFacilities(account);
         await this.initilizeMeterGroups(account);
@@ -142,6 +158,7 @@ export class AppComponent {
         }
         this.dataInitialized = true;
         this.automaticBackupsService.initializeAccount();
+        this.setAppOpenNotifications();
       } else {
         await this.eGridService.parseEGridData();
         await this.initializeElectronBackups();
@@ -149,6 +166,7 @@ export class AppComponent {
         this.dataInitialized = true;
         this.router.navigateByUrl('setup-wizard');
       }
+
     } catch (err) {
       console.log(err);
       await this.eGridService.parseEGridData();
@@ -320,6 +338,34 @@ export class AppComponent {
     if (localStorageFacilityId) {
       let facilityReport: IdbFacilityReport = accountFacilityReports.find(item => { return item.id == localStorageFacilityId });
       this.facilityReportsDbService.selectedReport.next(facilityReport);
+    }
+  }
+
+  async setAppOpenNotifications() {
+    if (environment.production) {
+      let applicationData: ApplicationInstanceData = this.applicationInstanceDbService.applicationInstanceData.getValue();
+      if (!applicationData.isSurveyDone) {
+        if (applicationData.doSurveyReminder) {
+          setTimeout(() => {
+            this.surveyService.showSurveyModal.next(true);
+          }, 5000);
+          await firstValueFrom(this.applicationInstanceDbService.setSurveyDone());
+        } else {
+          let hasMetUsageRequirement: boolean = this.surveyService.getHasMetUsageRequirements(applicationData);
+          let showModalToExistingUser: boolean = this.surveyService.checkIsExistingUser();
+          let showModal: boolean = showModalToExistingUser || hasMetUsageRequirement;
+
+          setTimeout(() => {
+            this.surveyService.showSurveyModal.next(showModal);
+          }, 5000);
+
+          if (!applicationData.isSurveyToastDone && !showModalToExistingUser) {
+            setTimeout(() => {
+              this.surveyService.showSurveyToast.next(true);
+            }, 5000);
+          }
+        }
+      }
     }
   }
 

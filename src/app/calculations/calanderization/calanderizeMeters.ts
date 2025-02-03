@@ -93,6 +93,14 @@ function calanderizeMeterData(meter: IdbUtilityMeter, meterData: Array<IdbUtilit
     co2Emissions: Array<SubregionEmissions>,
     customFuels: Array<IdbCustomFuel>,
     facilities: Array<IdbFacility>): Array<MonthlyData> {
+
+    meterData = meterData.map(data => {
+        if (isNaN(data.totalCost) == true) {
+            data.totalCost = 0;
+        }
+        return data;
+    });
+
     if (meter.meterReadingDataApplication == 'fullMonth' || !meter.meterReadingDataApplication) {
         //used as default
         return calanderizeMeterDataFullMonth(meter, meterData, energyIsSource, monthDisplayShort, accountOrFacility, co2Emissions, customFuels, facilities, calanderizedEnergyUnit);
@@ -298,7 +306,6 @@ function getBillPeriodTotal(previousReading: IdbUtilityMeterData, currentReading
     let daysFromPrevious: number = daysBetweenDates(previousReadingDate, currentDate);
     //find per day energy use
     let energyUsePerDayCurrent: number = currentReading.totalEnergyUse / daysFromPrevious;
-
     let volumePerDayCurrent: number = currentReading.totalVolume / daysFromPrevious;
     //apply number of days of current bill
     let daysFromCurrent: number = currentDate.getUTCDate();

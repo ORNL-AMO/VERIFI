@@ -30,7 +30,12 @@ jobs:
       - name: Install dependencies
         run: npm install
       - name: Build
-        run: npm run build-prod
+        run: |
+          if [[ "${{ github.ref_name }}" == "develop" ]]; then
+            npm run build-dev-srv
+          elif [[ "${{ github.ref_name }}" == "master" ]]; then
+            npm run build-prod
+          fi
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:

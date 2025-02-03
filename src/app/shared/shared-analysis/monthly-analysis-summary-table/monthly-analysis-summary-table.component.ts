@@ -10,9 +10,10 @@ import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 
 @Component({
-  selector: 'app-monthly-analysis-summary-table',
-  templateUrl: './monthly-analysis-summary-table.component.html',
-  styleUrls: ['./monthly-analysis-summary-table.component.css']
+    selector: 'app-monthly-analysis-summary-table',
+    templateUrl: './monthly-analysis-summary-table.component.html',
+    styleUrls: ['./monthly-analysis-summary-table.component.css'],
+    standalone: false
 })
 export class MonthlyAnalysisSummaryTableComponent implements OnInit {
   @Input()

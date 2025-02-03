@@ -5,9 +5,10 @@ import { AccountOverviewService } from 'src/app/account/account-overview/account
 import { FacilityOverviewService } from 'src/app/facility/facility-overview/facility-overview.service';
 
 @Component({
-  selector: 'app-emissions-consumption-table',
-  templateUrl: './emissions-consumption-table.component.html',
-  styleUrls: ['./emissions-consumption-table.component.css']
+    selector: 'app-emissions-consumption-table',
+    templateUrl: './emissions-consumption-table.component.html',
+    styleUrls: ['./emissions-consumption-table.component.css'],
+    standalone: false
 })
 export class EmissionsConsumptionTableComponent {
   @Input()

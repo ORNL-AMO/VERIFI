@@ -18,9 +18,10 @@ import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 
 @Component({
-  selector: 'app-account-settings',
-  templateUrl: './account-settings.component.html',
-  styleUrls: ['./account-settings.component.css']
+    selector: 'app-account-settings',
+    templateUrl: './account-settings.component.html',
+    styleUrls: ['./account-settings.component.css'],
+    standalone: false
 })
 export class AccountSettingsComponent implements OnInit {
 

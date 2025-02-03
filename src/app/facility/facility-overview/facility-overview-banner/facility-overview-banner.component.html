@@ -55,7 +55,7 @@
                 </select>
             </div>
             <div class="pe-1">
-                <button class="btn action-btn btn-sm" (click)="createReport()"><span class="fa fa-file"></span> Create
+                <button class="btn action-btn btn-sm" (click)="openCreateReportModal()"><span class="fa fa-file"></span> Create
                     Report</button>
             </div>
             <div class="pe-1" *ngIf="urlDisplay == 'energy'">
@@ -92,5 +92,47 @@
                 </div>
             </div>
         </div>
+    </div>
+</div>
+
+
+
+<div [ngClass]="{'windowOverlay': showReportModal}"></div>
+<div class="popup" [ngClass]="{'open': showReportModal}">
+    <div class="popup-header">Create New Data Overview Report
+        <button class="item-right" (click)="cancelCreateReport()">x</button>
+    </div>
+    <div class="popup-body">
+        <form *ngIf="facilityReport">
+            <label class="semibold larger">Sections to Include in Report</label>
+            <div class="section-options">
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" name="includeEnergySection"
+                        id="includeEnergySection"
+                        [(ngModel)]="facilityReport.dataOverviewReportSettings.includeEnergySection">
+                    <label class="form-check-label" for="includeEnergySection">Energy Use</label>
+                </div>
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" name="includeCostsSection" id="includeCostsSection"
+                        [(ngModel)]="facilityReport.dataOverviewReportSettings.includeCostsSection">
+                    <label class="form-check-label" for="includeCostsSection">Costs</label>
+                </div>
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" name="includeEmissionsSection"
+                        id="includeEmissionsSection"
+                        [(ngModel)]="facilityReport.dataOverviewReportSettings.includeEmissionsSection">
+                    <label class="form-check-label" for="includeEmissionsSection">Emissions</label>
+                </div>
+                <div class="form-check" *ngIf="showWater">
+                    <input type="checkbox" class="form-check-input" name="includeWaterSection" id="includeWaterSection"
+                        [(ngModel)]="facilityReport.dataOverviewReportSettings.includeWaterSection">
+                    <label class="form-check-label" for="includeWaterSection">Water</label>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="popup-footer text-end">
+        <button class="btn btn-secondary" (click)="cancelCreateReport()">Cancel</button>
+        <button class="btn btn-primary" (click)="createReport()">Create Report</button>
     </div>
 </div>

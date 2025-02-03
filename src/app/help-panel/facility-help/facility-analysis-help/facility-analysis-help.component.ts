@@ -3,9 +3,10 @@ import { NavigationEnd, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 
 @Component({
-  selector: 'app-facility-analysis-help',
-  templateUrl: './facility-analysis-help.component.html',
-  styleUrls: ['./facility-analysis-help.component.css']
+    selector: 'app-facility-analysis-help',
+    templateUrl: './facility-analysis-help.component.html',
+    styleUrls: ['./facility-analysis-help.component.css'],
+    standalone: false
 })
 export class FacilityAnalysisHelpComponent {
 

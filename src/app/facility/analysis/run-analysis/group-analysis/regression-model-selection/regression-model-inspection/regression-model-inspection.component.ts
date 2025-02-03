@@ -18,9 +18,10 @@ import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 
 @Component({
-  selector: 'app-regression-model-inspection',
-  templateUrl: './regression-model-inspection.component.html',
-  styleUrls: ['./regression-model-inspection.component.css']
+    selector: 'app-regression-model-inspection',
+    templateUrl: './regression-model-inspection.component.html',
+    styleUrls: ['./regression-model-inspection.component.css'],
+    standalone: false
 })
 export class RegressionModelInspectionComponent implements OnInit {
   @Input()

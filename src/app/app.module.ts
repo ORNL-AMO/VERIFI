@@ -1,7 +1,7 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations'
 import { NgModule } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AppRoutingModule } from './routing/app-routing.module';
 import { AppComponent } from './app.component';
 import { HeaderComponent } from './core-components/header/header.component';
@@ -30,8 +30,12 @@ import { ManageAccountsComponent } from './core-components/manage-accounts/manag
 import { ElectronBackupFileComponent } from './core-components/electron-backup-file/electron-backup-file.component';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { DeletingAccountDataComponent } from './core-components/deleting-account-data/deleting-account-data.component';
+import { SurveyModalComponent } from './core-components/survey-modal/survey-modal.component';
+import { SurveyToastComponent } from './core-components/survey-toast/survey-toast.component';
+import { UserSurveyModule } from './shared/user-survey/user-survey.module';
 
-@NgModule({ declarations: [
+@NgModule({
+    declarations: [
         AppComponent,
         HeaderComponent,
         SidebarComponent,
@@ -45,9 +49,13 @@ import { DeletingAccountDataComponent } from './core-components/deleting-account
         CreateReportModalComponent,
         ManageAccountsComponent,
         ElectronBackupFileComponent,
-        DeletingAccountDataComponent
+        DeletingAccountDataComponent,
+        SurveyModalComponent,
+        SurveyToastComponent
     ],
-    bootstrap: [AppComponent], imports: [BrowserModule,
+    bootstrap: [AppComponent],
+    imports: [
+        BrowserModule,
         AppRoutingModule,
         FormsModule,
         CommonModule,
@@ -62,6 +70,10 @@ import { DeletingAccountDataComponent } from './core-components/deleting-account
         HelperPipesModule,
         NgbTypeaheadModule,
         UploadDataModule,
-        WeatherDataModule], providers: [provideHttpClient(withInterceptorsFromDi())] })
+        WeatherDataModule,
+        UserSurveyModule
+    ],
+    providers: [provideHttpClient(withInterceptorsFromDi())]
+})
 
 export class AppModule { }

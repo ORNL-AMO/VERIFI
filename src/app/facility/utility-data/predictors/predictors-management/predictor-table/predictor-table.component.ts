@@ -22,9 +22,10 @@ import { getGUID } from 'src/app/shared/sharedHelperFuntions';
 import { PredictorDataHelperService, PredictorTableItem } from 'src/app/shared/helper-services/predictor-data-helper.service';
 
 @Component({
-  selector: 'app-predictor-table',
-  templateUrl: './predictor-table.component.html',
-  styleUrl: './predictor-table.component.css'
+    selector: 'app-predictor-table',
+    templateUrl: './predictor-table.component.html',
+    styleUrl: './predictor-table.component.css',
+    standalone: false
 })
 export class PredictorTableComponent {
 

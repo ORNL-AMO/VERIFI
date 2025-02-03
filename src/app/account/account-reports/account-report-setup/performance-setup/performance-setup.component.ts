@@ -12,9 +12,10 @@ import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 
 @Component({
-  selector: 'app-performance-setup',
-  templateUrl: './performance-setup.component.html',
-  styleUrls: ['./performance-setup.component.css']
+    selector: 'app-performance-setup',
+    templateUrl: './performance-setup.component.html',
+    styleUrls: ['./performance-setup.component.css'],
+    standalone: false
 })
 export class PerformanceSetupComponent {
 
@@ -63,7 +64,7 @@ export class PerformanceSetupComponent {
 
   setAnalysisOptions(report: IdbAccountReport) {
     let analysisOptions: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
-    this.accountAnalysisItems = analysisOptions.filter(option => { return option.reportYear == report.reportYear && option.energyIsSource });
+    this.accountAnalysisItems = analysisOptions.filter(option => { return option.reportYear == report.reportYear });
     this.setSelectedAnalysisItem();
     if (!this.selectedAnalysisItem) {
       this.performanceReportForm.controls.analysisItemId.patchValue(undefined);

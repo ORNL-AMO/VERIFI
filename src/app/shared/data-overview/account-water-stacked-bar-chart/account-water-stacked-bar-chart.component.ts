@@ -4,9 +4,10 @@ import { AccountOverviewData, AccountOverviewFacility, WaterTypeData } from 'src
 import * as _ from 'lodash';
 
 @Component({
-  selector: 'app-account-water-stacked-bar-chart',
-  templateUrl: './account-water-stacked-bar-chart.component.html',
-  styleUrls: ['./account-water-stacked-bar-chart.component.css']
+    selector: 'app-account-water-stacked-bar-chart',
+    templateUrl: './account-water-stacked-bar-chart.component.html',
+    styleUrls: ['./account-water-stacked-bar-chart.component.css'],
+    standalone: false
 })
 export class AccountWaterStackedBarChartComponent {
   @Input()

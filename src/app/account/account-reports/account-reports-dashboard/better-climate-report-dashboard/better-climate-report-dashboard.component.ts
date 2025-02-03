@@ -7,9 +7,10 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 
 @Component({
-  selector: 'app-better-climate-report-dashboard',
-  templateUrl: './better-climate-report-dashboard.component.html',
-  styleUrls: ['./better-climate-report-dashboard.component.css']
+    selector: 'app-better-climate-report-dashboard',
+    templateUrl: './better-climate-report-dashboard.component.html',
+    styleUrls: ['./better-climate-report-dashboard.component.css'],
+    standalone: false
 })
 export class BetterClimateReportDashboardComponent {
   

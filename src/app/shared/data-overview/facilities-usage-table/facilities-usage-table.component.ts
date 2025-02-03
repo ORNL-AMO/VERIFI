@@ -7,9 +7,10 @@ import * as _ from 'lodash';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
-  selector: 'app-facilities-usage-table',
-  templateUrl: './facilities-usage-table.component.html',
-  styleUrls: ['./facilities-usage-table.component.css']
+    selector: 'app-facilities-usage-table',
+    templateUrl: './facilities-usage-table.component.html',
+    styleUrls: ['./facilities-usage-table.component.css'],
+    standalone: false
 })
 export class FacilitiesUsageTableComponent {
   @Input()

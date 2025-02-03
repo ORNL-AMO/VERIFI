@@ -2,7 +2,8 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { ScopeOption, ScopeOptions } from 'src/app/models/scopeOption';
 
 @Pipe({
-  name: 'scopeLabel'
+    name: 'scopeLabel',
+    standalone: false
 })
 export class ScopeLabelPipe implements PipeTransform {
 

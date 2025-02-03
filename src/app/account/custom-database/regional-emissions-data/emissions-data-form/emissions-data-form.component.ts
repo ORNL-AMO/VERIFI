@@ -15,9 +15,10 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { getNewAccountEmissionsItem, IdbCustomEmissionsItem } from 'src/app/models/idbModels/customEmissions';
 
 @Component({
-  selector: 'app-emissions-data-form',
-  templateUrl: './emissions-data-form.component.html',
-  styleUrls: ['./emissions-data-form.component.css']
+    selector: 'app-emissions-data-form',
+    templateUrl: './emissions-data-form.component.html',
+    styleUrls: ['./emissions-data-form.component.css'],
+    standalone: false
 })
 export class EmissionsDataFormComponent implements OnInit {
 

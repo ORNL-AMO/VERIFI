@@ -1,7 +1,8 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
-  name: 'tableFill'
+    name: 'tableFill',
+    standalone: false
 })
 export class TableFillPipe implements PipeTransform {
 

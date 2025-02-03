@@ -3,9 +3,10 @@ import { BetterClimateYearDetails } from 'src/app/calculations/carbon-calculatio
 import { IdbAccount } from 'src/app/models/idbModels/account';
 
 @Component({
-  selector: 'app-portfolio-information-table',
-  templateUrl: './portfolio-information-table.component.html',
-  styleUrls: ['./portfolio-information-table.component.css']
+    selector: 'app-portfolio-information-table',
+    templateUrl: './portfolio-information-table.component.html',
+    styleUrls: ['./portfolio-information-table.component.css'],
+    standalone: false
 })
 export class PortfolioInformationTableComponent {
   @Input()

@@ -4,9 +4,10 @@ import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 
 @Component({
-  selector: 'app-energy-consumption',
-  templateUrl: './energy-consumption.component.html',
-  styleUrls: ['./energy-consumption.component.css']
+    selector: 'app-energy-consumption',
+    templateUrl: './energy-consumption.component.html',
+    styleUrls: ['./energy-consumption.component.css'],
+    standalone: false
 })
 export class EnergyConsumptionComponent implements OnInit {
 

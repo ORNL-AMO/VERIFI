@@ -5,9 +5,10 @@ import { AccountAnalysisService } from './account-analysis.service';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 
 @Component({
-  selector: 'app-account-analysis',
-  templateUrl: './account-analysis.component.html',
-  styleUrls: ['./account-analysis.component.css']
+    selector: 'app-account-analysis',
+    templateUrl: './account-analysis.component.html',
+    styleUrls: ['./account-analysis.component.css'],
+    standalone: false
 })
 export class AccountAnalysisComponent implements OnInit {
 

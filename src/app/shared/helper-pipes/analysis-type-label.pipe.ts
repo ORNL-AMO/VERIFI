@@ -2,7 +2,8 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { AnalysisType } from 'src/app/models/analysis';
 
 @Pipe({
-  name: 'analysisTypeLabel'
+    name: 'analysisTypeLabel',
+    standalone: false
 })
 export class AnalysisTypeLabelPipe implements PipeTransform {
 

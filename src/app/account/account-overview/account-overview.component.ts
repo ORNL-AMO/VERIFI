@@ -20,9 +20,10 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
 
 @Component({
-  selector: 'app-account-overview',
-  templateUrl: './account-overview.component.html',
-  styleUrls: ['./account-overview.component.css']
+    selector: 'app-account-overview',
+    templateUrl: './account-overview.component.html',
+    styleUrls: ['./account-overview.component.css'],
+    standalone: false
 })
 export class AccountOverviewComponent implements OnInit {
 

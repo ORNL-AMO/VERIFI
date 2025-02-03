@@ -21,9 +21,10 @@ import { WeatherDataReading, WeatherDataService } from 'src/app/weather-data/wea
 import { getDetailedDataForMonth } from 'src/app/weather-data/weatherDataCalculations';
 
 @Component({
-  selector: 'app-calculated-predictor-data-update',
-  templateUrl: './calculated-predictor-data-update.component.html',
-  styleUrl: './calculated-predictor-data-update.component.css'
+    selector: 'app-calculated-predictor-data-update',
+    templateUrl: './calculated-predictor-data-update.component.html',
+    styleUrl: './calculated-predictor-data-update.component.css',
+    standalone: false
 })
 export class CalculatedPredictorDataUpdateComponent {
 

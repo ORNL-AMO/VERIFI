@@ -5,9 +5,10 @@ import { AccountReportsService } from '../../account-reports.service';
 import { DataOverviewAccount } from '../data-overview-report.component';
 
 @Component({
-  selector: 'app-data-overview-account-report',
-  templateUrl: './data-overview-account-report.component.html',
-  styleUrls: ['./data-overview-account-report.component.css']
+    selector: 'app-data-overview-account-report',
+    templateUrl: './data-overview-account-report.component.html',
+    styleUrls: ['./data-overview-account-report.component.css'],
+    standalone: false
 })
 export class DataOverviewAccountReportComponent {
   @Input()

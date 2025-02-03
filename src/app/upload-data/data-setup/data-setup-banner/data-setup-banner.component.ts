@@ -6,9 +6,10 @@ import { UploadDataService } from '../../upload-data.service';
 import { FileReference } from '../../upload-data-models';
 
 @Component({
-  selector: 'app-data-setup-banner',
-  templateUrl: './data-setup-banner.component.html',
-  styleUrls: ['./data-setup-banner.component.css']
+    selector: 'app-data-setup-banner',
+    templateUrl: './data-setup-banner.component.html',
+    styleUrls: ['./data-setup-banner.component.css'],
+    standalone: false
 })
 export class DataSetupBannerComponent implements OnInit {
 

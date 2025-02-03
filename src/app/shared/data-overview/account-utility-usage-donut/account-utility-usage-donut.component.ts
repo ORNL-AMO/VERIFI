@@ -5,9 +5,10 @@ import { SourceTotal, SourceTotals } from 'src/app/calculations/dashboard-calcul
 import { UtilityColors } from '../../utilityColors';
 
 @Component({
-  selector: 'app-account-utility-usage-donut',
-  templateUrl: './account-utility-usage-donut.component.html',
-  styleUrls: ['./account-utility-usage-donut.component.css']
+    selector: 'app-account-utility-usage-donut',
+    templateUrl: './account-utility-usage-donut.component.html',
+    styleUrls: ['./account-utility-usage-donut.component.css'],
+    standalone: false
 })
 export class AccountUtilityUsageDonutComponent {
   @Input()

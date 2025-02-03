@@ -7,9 +7,10 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 
 @Component({
-  selector: 'app-performance-report-dashboard',
-  templateUrl: './performance-report-dashboard.component.html',
-  styleUrls: ['./performance-report-dashboard.component.css']
+    selector: 'app-performance-report-dashboard',
+    templateUrl: './performance-report-dashboard.component.html',
+    styleUrls: ['./performance-report-dashboard.component.css'],
+    standalone: false
 })
 export class PerformanceReportDashboardComponent {
 

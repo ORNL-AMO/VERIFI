@@ -9,6 +9,7 @@ import { IdbUtilityMeterGroup } from '../models/idbModels/utilityMeterGroup';
 import { IdbAccountReport } from '../models/idbModels/accountReport';
 import { IdbAnalysisItem } from '../models/idbModels/analysisItem';
 import { IdbAccountAnalysisItem } from '../models/idbModels/accountAnalysisItem';
+import { IdbFacilityReport } from '../models/idbModels/facilityReport';
 
 @Injectable({
   providedIn: 'root'

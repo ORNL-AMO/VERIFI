@@ -12,9 +12,10 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 
 @Component({
-  selector: 'app-account-section-report',
-  templateUrl: './account-section-report.component.html',
-  styleUrls: ['./account-section-report.component.css']
+    selector: 'app-account-section-report',
+    templateUrl: './account-section-report.component.html',
+    styleUrls: ['./account-section-report.component.css'],
+    standalone: false
 })
 export class AccountSectionReportComponent {
   @Input()

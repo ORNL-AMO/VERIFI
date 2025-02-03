@@ -5,9 +5,10 @@ import { WeatherDataReading, WeatherDataService } from 'src/app/weather-data/wea
 import { getDetailedDataForMonth } from '../weatherDataCalculations';
 
 @Component({
-  selector: 'app-monthly-station-data',
-  templateUrl: './monthly-station-data.component.html',
-  styleUrls: ['./monthly-station-data.component.css']
+    selector: 'app-monthly-station-data',
+    templateUrl: './monthly-station-data.component.html',
+    styleUrls: ['./monthly-station-data.component.css'],
+    standalone: false
 })
 export class MonthlyStationDataComponent {
 

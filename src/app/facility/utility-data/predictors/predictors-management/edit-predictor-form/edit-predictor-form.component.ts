@@ -24,9 +24,10 @@ import { getDetailedDataForMonth } from 'src/app/weather-data/weatherDataCalcula
 import * as _ from 'lodash';
 
 @Component({
-  selector: 'app-edit-predictor-form',
-  templateUrl: './edit-predictor-form.component.html',
-  styleUrl: './edit-predictor-form.component.css'
+    selector: 'app-edit-predictor-form',
+    templateUrl: './edit-predictor-form.component.html',
+    styleUrl: './edit-predictor-form.component.css',
+    standalone: false
 })
 export class EditPredictorFormComponent {
 

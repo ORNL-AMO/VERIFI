@@ -6,9 +6,10 @@ import { JStatRegressionModel } from 'src/app/models/analysis';
 import { AxisOption, CorrelationPlotOptions, VisualizationStateService } from '../visualization-state.service';
 
 @Component({
-  selector: 'app-correlation-heatmap',
-  templateUrl: './correlation-heatmap.component.html',
-  styleUrls: ['./correlation-heatmap.component.css']
+    selector: 'app-correlation-heatmap',
+    templateUrl: './correlation-heatmap.component.html',
+    styleUrls: ['./correlation-heatmap.component.css'],
+    standalone: false
 })
 export class CorrelationHeatmapComponent {
   @ViewChild('heatMapPlot', { static: false }) heatMapPlot: ElementRef;

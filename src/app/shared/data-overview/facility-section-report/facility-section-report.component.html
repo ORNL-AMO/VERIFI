@@ -28,7 +28,7 @@
             [facilityOverviewData]="facilityOverviewData" [facilityOverviewMeters]="facilityOverviewData.waterMeters"
             [waterUnit]="waterUnit"></app-meter-usage-table>
     </div>
-    <div *ngIf="sectionOptions.includeMeterUsageTable" [ngClass]="{'col-10': print, 'col-6': !print}">
+    <div *ngIf="sectionOptions.includeMeterUsageDonut" [ngClass]="{'col-10': print, 'col-6': !print}">
         <app-emissions-donut *ngIf="dataType == 'emissions'" [facilityId]="facility.guid"
             [facilityOverviewMeters]="facilityOverviewMeters"></app-emissions-donut>
         <app-meter-usage-donut *ngIf="dataType == 'energyUse'" [dataType]="dataType" [facilityId]="facility.guid"

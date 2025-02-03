@@ -2,7 +2,8 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { AgreementType, AgreementTypes } from 'src/app/models/agreementType';
 
 @Pipe({
-  name: 'agreementTypeLabel'
+    name: 'agreementTypeLabel',
+    standalone: false
 })
 export class AgreementTypeLabelPipe implements PipeTransform {
 

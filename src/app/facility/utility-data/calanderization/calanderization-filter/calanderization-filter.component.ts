@@ -5,9 +5,10 @@ import { CalanderizationFilters } from 'src/app/models/calanderization';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 
 @Component({
-  selector: 'app-calanderization-filter',
-  templateUrl: './calanderization-filter.component.html',
-  styleUrls: ['./calanderization-filter.component.css']
+    selector: 'app-calanderization-filter',
+    templateUrl: './calanderization-filter.component.html',
+    styleUrls: ['./calanderization-filter.component.css'],
+    standalone: false
 })
 export class CalanderizationFilterComponent implements OnInit {
 

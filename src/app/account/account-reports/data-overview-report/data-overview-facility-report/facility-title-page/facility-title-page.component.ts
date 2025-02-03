@@ -4,9 +4,10 @@ import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
-  selector: 'app-facility-title-page',
-  templateUrl: './facility-title-page.component.html',
-  styleUrls: ['./facility-title-page.component.css']
+    selector: 'app-facility-title-page',
+    templateUrl: './facility-title-page.component.html',
+    styleUrls: ['./facility-title-page.component.css'],
+    standalone: false
 })
 export class FacilityTitlePageComponent {
   @Input()

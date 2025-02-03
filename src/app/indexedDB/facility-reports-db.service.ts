@@ -53,8 +53,8 @@ export class FacilityReportsDbService {
     return this.dbService.count('facilityReports');
   }
 
-  addWithObservable(analysisItem: IdbFacilityReport): Observable<IdbFacilityReport> {
-    return this.dbService.add('facilityReports', analysisItem);
+  addWithObservable(facilityReport: IdbFacilityReport): Observable<IdbFacilityReport> {
+    return this.dbService.add('facilityReports', facilityReport);
   }
 
   deleteWithObservable(id: number): Observable<any> {

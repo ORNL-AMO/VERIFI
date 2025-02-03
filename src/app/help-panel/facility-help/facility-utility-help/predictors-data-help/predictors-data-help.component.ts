@@ -5,9 +5,10 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
-  selector: 'app-predictors-data-help',
-  templateUrl: './predictors-data-help.component.html',
-  styleUrls: ['./predictors-data-help.component.css']
+    selector: 'app-predictors-data-help',
+    templateUrl: './predictors-data-help.component.html',
+    styleUrls: ['./predictors-data-help.component.css'],
+    standalone: false
 })
 export class PredictorsDataHelpComponent implements OnInit {
 

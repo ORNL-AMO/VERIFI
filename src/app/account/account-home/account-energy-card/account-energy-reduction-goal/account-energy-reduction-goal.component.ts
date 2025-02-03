@@ -8,9 +8,10 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 
 @Component({
-  selector: 'app-account-energy-reduction-goal',
-  templateUrl: './account-energy-reduction-goal.component.html',
-  styleUrls: ['./account-energy-reduction-goal.component.css']
+    selector: 'app-account-energy-reduction-goal',
+    templateUrl: './account-energy-reduction-goal.component.html',
+    styleUrls: ['./account-energy-reduction-goal.component.css'],
+    standalone: false
 })
 export class AccountEnergyReductionGoalComponent {
 

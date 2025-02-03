@@ -9,9 +9,10 @@ import { IdbCustomEmissionsItem } from 'src/app/models/idbModels/customEmissions
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
-  selector: 'app-emissions-data-dashboard',
-  templateUrl: './emissions-data-dashboard.component.html',
-  styleUrls: ['./emissions-data-dashboard.component.css']
+    selector: 'app-emissions-data-dashboard',
+    templateUrl: './emissions-data-dashboard.component.html',
+    styleUrls: ['./emissions-data-dashboard.component.css'],
+    standalone: false
 })
 export class EmissionsDataDashboardComponent implements OnInit {
 

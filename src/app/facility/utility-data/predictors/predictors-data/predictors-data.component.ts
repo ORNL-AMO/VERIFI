@@ -4,9 +4,10 @@ import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 
 @Component({
-  selector: 'app-predictors-data',
-  templateUrl: './predictors-data.component.html',
-  styleUrl: './predictors-data.component.css'
+    selector: 'app-predictors-data',
+    templateUrl: './predictors-data.component.html',
+    styleUrl: './predictors-data.component.css',
+    standalone: false
 })
 export class PredictorsDataComponent {
 

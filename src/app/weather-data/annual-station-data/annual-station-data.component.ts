@@ -7,9 +7,10 @@ import { getDegreeDayAmount } from 'src/app/shared/sharedHelperFuntions';
 import { getMonthlyDataFromYear } from '../weatherDataCalculations';
 
 @Component({
-  selector: 'app-annual-station-data',
-  templateUrl: './annual-station-data.component.html',
-  styleUrls: ['./annual-station-data.component.css']
+    selector: 'app-annual-station-data',
+    templateUrl: './annual-station-data.component.html',
+    styleUrls: ['./annual-station-data.component.css'],
+    standalone: false
 })
 export class AnnualStationDataComponent {
 

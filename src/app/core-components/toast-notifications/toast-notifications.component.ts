@@ -5,17 +5,18 @@ import { Subscription } from 'rxjs';
 import * as confetti from 'canvas-confetti';
 
 @Component({
-  selector: 'app-toast-notifications',
-  templateUrl: './toast-notifications.component.html',
-  styleUrls: ['./toast-notifications.component.css'],
-  animations: [
-    trigger('toast', [
-      state('show', style({ bottom: '0px' })),
-      state('hide', style({ bottom: '-200px' })),
-      transition('hide => show', animate('.5s ease')),
-      transition('show => hide', animate('.5s ease'))
-    ])
-  ]
+    selector: 'app-toast-notifications',
+    templateUrl: './toast-notifications.component.html',
+    styleUrls: ['./toast-notifications.component.css'],
+    animations: [
+        trigger('toast', [
+            state('show', style({ bottom: '0px' })),
+            state('hide', style({ bottom: '-200px' })),
+            transition('hide => show', animate('.5s ease')),
+            transition('show => hide', animate('.5s ease'))
+        ])
+    ],
+    standalone: false
 })
 export class ToastNotificationsComponent implements OnInit {
 

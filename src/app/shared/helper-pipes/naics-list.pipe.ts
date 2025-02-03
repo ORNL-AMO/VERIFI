@@ -2,8 +2,9 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { NAICS } from 'src/app/shared/form-data/naics-data';
 
 @Pipe({
-  name: 'naicsList',
-  pure: false
+    name: 'naicsList',
+    pure: false,
+    standalone: false
 })
 export class NaicsListPipe implements PipeTransform {
 

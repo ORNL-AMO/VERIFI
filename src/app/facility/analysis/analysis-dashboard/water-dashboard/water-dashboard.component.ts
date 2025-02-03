@@ -10,9 +10,10 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 
 @Component({
-  selector: 'app-water-dashboard',
-  templateUrl: './water-dashboard.component.html',
-  styleUrls: ['./water-dashboard.component.css']
+    selector: 'app-water-dashboard',
+    templateUrl: './water-dashboard.component.html',
+    styleUrls: ['./water-dashboard.component.css'],
+    standalone: false
 })
 export class WaterDashboardComponent {
 

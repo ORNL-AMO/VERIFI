@@ -5,9 +5,10 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
-  selector: 'app-setup-confirmation',
-  templateUrl: './setup-confirmation.component.html',
-  styleUrls: ['./setup-confirmation.component.css']
+    selector: 'app-setup-confirmation',
+    templateUrl: './setup-confirmation.component.html',
+    styleUrls: ['./setup-confirmation.component.css'],
+    standalone: false
 })
 export class SetupConfirmationComponent implements OnInit {
 
