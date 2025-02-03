@@ -22,7 +22,8 @@ export class WeatherDataService {
     lat: "+36.023",
     lon: "-084.234",
     name: "OAK RIDGE",
-    state: "TN"
+    state: "TN",
+    ratingPercent: 0
   };
   selectedYear: number = 2022;
   selectedMonth: Date = new Date(2022, 6, 8);
@@ -139,8 +140,8 @@ export function getWeatherStation(response: WeatherStationResponse): WeatherStat
     USAF: undefined,
     WBAN: undefined,
     ID: response.station_id,
-    distanceFrom: response.distance
-    //ratingPercent
+    distanceFrom: response.distance,
+    ratingPercent: response.rating_percent
   }
 }
 
@@ -150,7 +151,7 @@ export interface WeatherStationResponse {
   "data_begin_date": string,
   "data_end_date": string,
   "distance": number,
-  "rating_percent ": number,
+  "rating_percent": number,
   "lat": string,
   "lon": string,
   "state": string
