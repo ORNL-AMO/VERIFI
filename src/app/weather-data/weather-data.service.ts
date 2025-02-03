@@ -49,7 +49,6 @@ export class WeatherDataService {
 
   getStationsAPI(zipCode: string, distance: number): Observable<any> {
     let currentDate: Date = new Date();
-    console.log(currentDate.toISOString());
     let data = {
       "zip": zipCode,
       "radial_distance": distance,
@@ -82,7 +81,6 @@ export class WeatherDataService {
 
   async getStation(stationId: string) {
     let apiData: string = await firstValueFrom(this.getStationAPI(stationId));
-    console.log(apiData);
     let station: WeatherStation = getWeatherStation(JSON.parse(apiData));
     station.ID = stationId;
     return station;
@@ -133,7 +131,7 @@ export function getWeatherStation(response: WeatherStationResponse): WeatherStat
   return {
     name: response.name,
     country: undefined,
-    state: undefined,
+    state: response.state,
     lat: response.lat,
     lon: response.lon,
     begin: new Date(response.data_begin_date),
@@ -154,7 +152,8 @@ export interface WeatherStationResponse {
   "distance": number,
   "rating_percent ": number,
   "lat": string,
-  "lon": string
+  "lon": string,
+  "state": string
 }
 
 export interface WeatherDataReading {
