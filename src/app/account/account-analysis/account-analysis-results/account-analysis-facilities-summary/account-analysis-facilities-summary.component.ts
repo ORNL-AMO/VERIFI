@@ -8,9 +8,10 @@ import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 
 @Component({
-  selector: 'app-account-analysis-facilities-summary',
-  templateUrl: './account-analysis-facilities-summary.component.html',
-  styleUrls: ['./account-analysis-facilities-summary.component.css']
+    selector: 'app-account-analysis-facilities-summary',
+    templateUrl: './account-analysis-facilities-summary.component.html',
+    styleUrls: ['./account-analysis-facilities-summary.component.css'],
+    standalone: false
 })
 export class AccountAnalysisFacilitiesSummaryComponent {
 

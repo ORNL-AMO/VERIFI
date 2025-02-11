@@ -3,7 +3,8 @@ import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 
 @Pipe({
-  name: 'analysisCategory'
+    name: 'analysisCategory',
+    standalone: false
 })
 export class AnalysisCategoryPipe implements PipeTransform {
 

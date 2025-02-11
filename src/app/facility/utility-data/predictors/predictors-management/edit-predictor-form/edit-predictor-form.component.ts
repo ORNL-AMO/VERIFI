@@ -23,9 +23,10 @@ import { DatePipe } from '@angular/common';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 
 @Component({
-  selector: 'app-edit-predictor-form',
-  templateUrl: './edit-predictor-form.component.html',
-  styleUrl: './edit-predictor-form.component.css'
+    selector: 'app-edit-predictor-form',
+    templateUrl: './edit-predictor-form.component.html',
+    styleUrl: './edit-predictor-form.component.css',
+    standalone: false
 })
 export class EditPredictorFormComponent {
 

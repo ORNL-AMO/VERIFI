@@ -8,9 +8,10 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 
 @Component({
-  selector: 'app-account-water-reduction-goal',
-  templateUrl: './account-water-reduction-goal.component.html',
-  styleUrls: ['./account-water-reduction-goal.component.css']
+    selector: 'app-account-water-reduction-goal',
+    templateUrl: './account-water-reduction-goal.component.html',
+    styleUrls: ['./account-water-reduction-goal.component.css'],
+    standalone: false
 })
 export class AccountWaterReductionGoalComponent {
 

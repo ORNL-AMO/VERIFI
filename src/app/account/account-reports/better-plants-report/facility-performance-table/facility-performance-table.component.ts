@@ -3,9 +3,10 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { BetterPlantsReportSetup, BetterPlantsSummary } from 'src/app/models/overview-report';
 
 @Component({
-  selector: 'app-facility-performance-table',
-  templateUrl: './facility-performance-table.component.html',
-  styleUrls: ['./facility-performance-table.component.css']
+    selector: 'app-facility-performance-table',
+    templateUrl: './facility-performance-table.component.html',
+    styleUrls: ['./facility-performance-table.component.css'],
+    standalone: false
 })
 export class FacilityPerformanceTableComponent implements OnInit {
   @Input()

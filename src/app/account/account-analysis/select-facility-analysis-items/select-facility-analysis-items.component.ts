@@ -15,9 +15,10 @@ import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysis
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 
 @Component({
-  selector: 'app-select-facility-analysis-items',
-  templateUrl: './select-facility-analysis-items.component.html',
-  styleUrls: ['./select-facility-analysis-items.component.css']
+    selector: 'app-select-facility-analysis-items',
+    templateUrl: './select-facility-analysis-items.component.html',
+    styleUrls: ['./select-facility-analysis-items.component.css'],
+    standalone: false
 })
 export class SelectFacilityAnalysisItemsComponent implements OnInit {
 

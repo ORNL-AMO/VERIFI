@@ -9,9 +9,10 @@ import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 
 @Component({
-  selector: 'app-custom-fuel-data-dashboard',
-  templateUrl: './custom-fuel-data-dashboard.component.html',
-  styleUrls: ['./custom-fuel-data-dashboard.component.css']
+    selector: 'app-custom-fuel-data-dashboard',
+    templateUrl: './custom-fuel-data-dashboard.component.html',
+    styleUrls: ['./custom-fuel-data-dashboard.component.css'],
+    standalone: false
 })
 export class CustomFuelDataDashboardComponent {
 

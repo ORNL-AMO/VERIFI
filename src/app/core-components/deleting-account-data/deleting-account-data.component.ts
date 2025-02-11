@@ -6,17 +6,18 @@ import { Subscription } from 'rxjs';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 
 @Component({
-  selector: 'app-deleting-account-data',
-  templateUrl: './deleting-account-data.component.html',
-  styleUrl: './deleting-account-data.component.css',
-  animations: [
-    trigger('toast', [
-      state('show', style({ bottom: '0px' })),
-      state('hide', style({ bottom: '-200px' })),
-      transition('hide => show', animate('.5s ease')),
-      transition('show => hide', animate('.5s ease'))
-    ])
-  ]
+    selector: 'app-deleting-account-data',
+    templateUrl: './deleting-account-data.component.html',
+    styleUrl: './deleting-account-data.component.css',
+    animations: [
+        trigger('toast', [
+            state('show', style({ bottom: '0px' })),
+            state('hide', style({ bottom: '-200px' })),
+            transition('hide => show', animate('.5s ease')),
+            transition('show => hide', animate('.5s ease'))
+        ])
+    ],
+    standalone: false
 })
 export class DeletingAccountDataComponent {
 

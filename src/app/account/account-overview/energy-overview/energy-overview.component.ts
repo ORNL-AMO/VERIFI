@@ -5,9 +5,10 @@ import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { AccountOverviewData } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
 import { UtilityUseAndCost } from 'src/app/calculations/dashboard-calculations/useAndCostClass';
 @Component({
-  selector: 'app-energy-overview',
-  templateUrl: './energy-overview.component.html',
-  styleUrls: ['./energy-overview.component.css']
+    selector: 'app-energy-overview',
+    templateUrl: './energy-overview.component.html',
+    styleUrls: ['./energy-overview.component.css'],
+    standalone: false
 })
 export class EnergyOverviewComponent implements OnInit {
 

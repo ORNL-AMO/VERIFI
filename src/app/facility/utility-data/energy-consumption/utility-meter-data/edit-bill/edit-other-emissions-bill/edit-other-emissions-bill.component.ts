@@ -13,9 +13,10 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
 
 @Component({
-  selector: 'app-edit-other-emissions-bill',
-  templateUrl: './edit-other-emissions-bill.component.html',
-  styleUrls: ['./edit-other-emissions-bill.component.css']
+    selector: 'app-edit-other-emissions-bill',
+    templateUrl: './edit-other-emissions-bill.component.html',
+    styleUrls: ['./edit-other-emissions-bill.component.css'],
+    standalone: false
 })
 export class EditOtherEmissionsBillComponent {
   @Input()

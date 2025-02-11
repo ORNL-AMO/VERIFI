@@ -8,9 +8,10 @@ import { IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 
 @Component({
-  selector: 'app-facility-reports-tabs',
-  templateUrl: './facility-reports-tabs.component.html',
-  styleUrl: './facility-reports-tabs.component.css'
+    selector: 'app-facility-reports-tabs',
+    templateUrl: './facility-reports-tabs.component.html',
+    styleUrl: './facility-reports-tabs.component.css',
+    standalone: false
 })
 export class FacilityReportsTabsComponent {
 

@@ -14,9 +14,10 @@ import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
 
 @Component({
-  selector: 'app-other-emissions-data-table',
-  templateUrl: './other-emissions-data-table.component.html',
-  styleUrls: ['./other-emissions-data-table.component.css']
+    selector: 'app-other-emissions-data-table',
+    templateUrl: './other-emissions-data-table.component.html',
+    styleUrls: ['./other-emissions-data-table.component.css'],
+    standalone: false
 })
 export class OtherEmissionsDataTableComponent {
   @Input()

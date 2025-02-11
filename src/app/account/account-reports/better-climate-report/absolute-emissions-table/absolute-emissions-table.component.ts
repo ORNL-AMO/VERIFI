@@ -4,9 +4,10 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { BetterClimateReportSetup } from 'src/app/models/overview-report';
 
 @Component({
-  selector: 'app-absolute-emissions-table',
-  templateUrl: './absolute-emissions-table.component.html',
-  styleUrls: ['./absolute-emissions-table.component.css']
+    selector: 'app-absolute-emissions-table',
+    templateUrl: './absolute-emissions-table.component.html',
+    styleUrls: ['./absolute-emissions-table.component.css'],
+    standalone: false
 })
 export class AbsoluteEmissionsTableComponent {
   @Input()

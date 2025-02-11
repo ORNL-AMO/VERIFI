@@ -13,9 +13,10 @@ import { getNewIdbFacilityReport, IdbFacilityReport } from 'src/app/models/idbMo
 import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
 
 @Component({
-  selector: 'app-facility-report-item-card',
-  templateUrl: './facility-report-item-card.component.html',
-  styleUrl: './facility-report-item-card.component.css'
+    selector: 'app-facility-report-item-card',
+    templateUrl: './facility-report-item-card.component.html',
+    styleUrl: './facility-report-item-card.component.css',
+    standalone: false
 })
 export class FacilityReportItemCardComponent {
   @Input({ required: true })

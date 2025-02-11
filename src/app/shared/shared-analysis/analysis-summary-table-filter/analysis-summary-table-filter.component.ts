@@ -8,9 +8,10 @@ import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 
 @Component({
-  selector: 'app-analysis-summary-table-filter',
-  templateUrl: './analysis-summary-table-filter.component.html',
-  styleUrls: ['./analysis-summary-table-filter.component.css']
+    selector: 'app-analysis-summary-table-filter',
+    templateUrl: './analysis-summary-table-filter.component.html',
+    styleUrls: ['./analysis-summary-table-filter.component.css'],
+    standalone: false
 })
 export class AnalysisSummaryTableFilterComponent implements OnInit {
   @Input()

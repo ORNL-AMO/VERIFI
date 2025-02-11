@@ -2,7 +2,8 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { JStatRegressionModel } from 'src/app/models/analysis';
 
 @Pipe({
-  name: 'modelFilter'
+    name: 'modelFilter',
+    standalone: false
 })
 export class ModelFilterPipe implements PipeTransform {
 

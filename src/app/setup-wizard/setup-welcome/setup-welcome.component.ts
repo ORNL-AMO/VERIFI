@@ -9,9 +9,10 @@ import { firstValueFrom } from 'rxjs';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 
 @Component({
-  selector: 'app-setup-welcome',
-  templateUrl: './setup-welcome.component.html',
-  styleUrls: ['./setup-welcome.component.css']
+    selector: 'app-setup-welcome',
+    templateUrl: './setup-welcome.component.html',
+    styleUrls: ['./setup-welcome.component.css'],
+    standalone: false
 })
 export class SetupWelcomeComponent implements OnInit {
 

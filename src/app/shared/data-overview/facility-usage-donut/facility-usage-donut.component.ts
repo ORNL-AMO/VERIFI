@@ -5,9 +5,10 @@ import { AccountOverviewService } from 'src/app/account/account-overview/account
 import { AccountOverviewFacility } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
 
 @Component({
-  selector: 'app-facility-usage-donut',
-  templateUrl: './facility-usage-donut.component.html',
-  styleUrls: ['./facility-usage-donut.component.css']
+    selector: 'app-facility-usage-donut',
+    templateUrl: './facility-usage-donut.component.html',
+    styleUrls: ['./facility-usage-donut.component.css'],
+    standalone: false
 })
 export class FacilityUsageDonutComponent {
   @Input()

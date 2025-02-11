@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 
 @Component({
-  selector: 'app-other-utility-overview',
-  templateUrl: './other-utility-overview.component.html',
-  styleUrls: ['./other-utility-overview.component.css']
+    selector: 'app-other-utility-overview',
+    templateUrl: './other-utility-overview.component.html',
+    styleUrls: ['./other-utility-overview.component.css'],
+    standalone: false
 })
 export class OtherUtilityOverviewComponent implements OnInit {
 

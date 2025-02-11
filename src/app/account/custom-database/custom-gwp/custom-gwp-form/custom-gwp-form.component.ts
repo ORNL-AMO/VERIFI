@@ -11,9 +11,10 @@ import { getNewAccountCustomGWP, IdbCustomGWP } from 'src/app/models/idbModels/c
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 
 @Component({
-  selector: 'app-custom-gwp-form',
-  templateUrl: './custom-gwp-form.component.html',
-  styleUrls: ['./custom-gwp-form.component.css']
+    selector: 'app-custom-gwp-form',
+    templateUrl: './custom-gwp-form.component.html',
+    styleUrls: ['./custom-gwp-form.component.css'],
+    standalone: false
 })
 export class CustomGwpFormComponent {
 

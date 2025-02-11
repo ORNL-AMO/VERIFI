@@ -3,9 +3,10 @@ import { NavigationEnd, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 
 @Component({
-  selector: 'app-account-help',
-  templateUrl: './account-help.component.html',
-  styleUrls: ['./account-help.component.css']
+    selector: 'app-account-help',
+    templateUrl: './account-help.component.html',
+    styleUrls: ['./account-help.component.css'],
+    standalone: false
 })
 export class AccountHelpComponent implements OnInit {
   helpURL: string;

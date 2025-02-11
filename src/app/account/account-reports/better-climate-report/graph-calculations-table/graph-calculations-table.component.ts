@@ -3,9 +3,10 @@ import { BetterClimateYearDetails } from 'src/app/calculations/carbon-calculatio
 import { IdbAccount } from 'src/app/models/idbModels/account';
 
 @Component({
-  selector: 'app-graph-calculations-table',
-  templateUrl: './graph-calculations-table.component.html',
-  styleUrls: ['./graph-calculations-table.component.css']
+    selector: 'app-graph-calculations-table',
+    templateUrl: './graph-calculations-table.component.html',
+    styleUrls: ['./graph-calculations-table.component.css'],
+    standalone: false
 })
 export class GraphCalculationsTableComponent {
   @Input()

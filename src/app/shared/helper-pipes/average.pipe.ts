@@ -2,8 +2,9 @@ import { Pipe, PipeTransform } from '@angular/core';
 import * as _ from 'lodash';
 
 @Pipe({
-  name: 'average',
-  pure: false
+    name: 'average',
+    pure: false,
+    standalone: false
 })
 export class AveragePipe implements PipeTransform {
 

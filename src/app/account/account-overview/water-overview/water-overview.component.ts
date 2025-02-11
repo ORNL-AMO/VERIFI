@@ -7,9 +7,10 @@ import { UtilityUseAndCost } from 'src/app/calculations/dashboard-calculations/u
 
 
 @Component({
-  selector: 'app-water-overview',
-  templateUrl: './water-overview.component.html',
-  styleUrls: ['./water-overview.component.css']
+    selector: 'app-water-overview',
+    templateUrl: './water-overview.component.html',
+    styleUrls: ['./water-overview.component.css'],
+    standalone: false
 })
 export class WaterOverviewComponent implements OnInit {
 

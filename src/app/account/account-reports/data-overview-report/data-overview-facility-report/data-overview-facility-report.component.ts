@@ -5,9 +5,10 @@ import { AccountReportsService } from '../../account-reports.service';
 import { DataOverviewFacility } from '../data-overview-report.component';
 
 @Component({
-  selector: 'app-data-overview-facility-report',
-  templateUrl: './data-overview-facility-report.component.html',
-  styleUrls: ['./data-overview-facility-report.component.css']
+    selector: 'app-data-overview-facility-report',
+    templateUrl: './data-overview-facility-report.component.html',
+    styleUrls: ['./data-overview-facility-report.component.css'],
+    standalone: false
 })
 export class DataOverviewFacilityReportComponent {
   @Input()

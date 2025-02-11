@@ -7,9 +7,10 @@ import * as _ from 'lodash';
 import { RegressionTableDataItem } from 'src/app/models/visualization';
 
 @Component({
-  selector: 'app-correlation-plot-graph-item',
-  templateUrl: './correlation-plot-graph-item.component.html',
-  styleUrls: ['./correlation-plot-graph-item.component.css']
+    selector: 'app-correlation-plot-graph-item',
+    templateUrl: './correlation-plot-graph-item.component.html',
+    styleUrls: ['./correlation-plot-graph-item.component.css'],
+    standalone: false
 })
 export class CorrelationPlotGraphItemComponent {
   @Input()

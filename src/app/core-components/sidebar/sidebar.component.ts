@@ -10,9 +10,10 @@ import * as _ from 'lodash';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
-  selector: 'app-sidebar',
-  templateUrl: './sidebar.component.html',
-  styleUrls: ['./sidebar.component.css']
+    selector: 'app-sidebar',
+    templateUrl: './sidebar.component.html',
+    styleUrls: ['./sidebar.component.css'],
+    standalone: false
 })
 export class SidebarComponent implements OnInit {
   open: boolean = true;

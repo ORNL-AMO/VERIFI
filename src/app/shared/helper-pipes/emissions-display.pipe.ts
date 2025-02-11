@@ -3,7 +3,8 @@ import { ConvertValue } from 'src/app/calculations/conversions/convertValue';
 import { FuelTypeOption } from '../fuel-options/fuelTypeOption';
 
 @Pipe({
-  name: 'emissionsDisplay'
+    name: 'emissionsDisplay',
+    standalone: false
 })
 export class EmissionsDisplayPipe implements PipeTransform {
 

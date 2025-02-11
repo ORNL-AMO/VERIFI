@@ -5,9 +5,10 @@ import { NavigationEnd, Router } from '@angular/router';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
-  selector: 'app-facility-overview-help',
-  templateUrl: './facility-overview-help.component.html',
-  styleUrls: ['./facility-overview-help.component.css']
+    selector: 'app-facility-overview-help',
+    templateUrl: './facility-overview-help.component.html',
+    styleUrls: ['./facility-overview-help.component.css'],
+    standalone: false
 })
 export class FacilityOverviewHelpComponent {
 

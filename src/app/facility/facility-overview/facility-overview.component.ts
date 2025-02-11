@@ -18,9 +18,10 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
 
 @Component({
-  selector: 'app-facility-overview',
-  templateUrl: './facility-overview.component.html',
-  styleUrls: ['./facility-overview.component.css']
+    selector: 'app-facility-overview',
+    templateUrl: './facility-overview.component.html',
+    styleUrls: ['./facility-overview.component.css'],
+    standalone: false
 })
 export class FacilityOverviewComponent implements OnInit {
 

@@ -10,9 +10,10 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 
 @Component({
-  selector: 'app-better-climate-setup',
-  templateUrl: './better-climate-setup.component.html',
-  styleUrls: ['./better-climate-setup.component.css']
+    selector: 'app-better-climate-setup',
+    templateUrl: './better-climate-setup.component.html',
+    styleUrls: ['./better-climate-setup.component.css'],
+    standalone: false
 })
 export class BetterClimateSetupComponent {
 

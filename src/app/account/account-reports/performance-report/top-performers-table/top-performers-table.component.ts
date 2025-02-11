@@ -7,9 +7,10 @@ import { PerformanceReportSetup } from 'src/app/models/overview-report';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
-  selector: 'app-top-performers-table',
-  templateUrl: './top-performers-table.component.html',
-  styleUrls: ['./top-performers-table.component.css']
+    selector: 'app-top-performers-table',
+    templateUrl: './top-performers-table.component.html',
+    styleUrls: ['./top-performers-table.component.css'],
+    standalone: false
 })
 export class TopPerformersTableComponent {
   @Input()

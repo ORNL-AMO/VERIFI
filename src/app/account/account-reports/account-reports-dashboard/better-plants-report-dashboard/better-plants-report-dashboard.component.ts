@@ -7,9 +7,10 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 
 @Component({
-  selector: 'app-better-plants-report-dashboard',
-  templateUrl: './better-plants-report-dashboard.component.html',
-  styleUrls: ['./better-plants-report-dashboard.component.css']
+    selector: 'app-better-plants-report-dashboard',
+    templateUrl: './better-plants-report-dashboard.component.html',
+    styleUrls: ['./better-plants-report-dashboard.component.css'],
+    standalone: false
 })
 export class BetterPlantsReportDashboardComponent {
 

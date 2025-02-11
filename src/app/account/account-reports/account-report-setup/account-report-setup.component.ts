@@ -11,9 +11,10 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { ReportType } from 'src/app/models/constantsAndTypes';
 @Component({
-  selector: 'app-account-report-setup',
-  templateUrl: './account-report-setup.component.html',
-  styleUrls: ['./account-report-setup.component.css']
+    selector: 'app-account-report-setup',
+    templateUrl: './account-report-setup.component.html',
+    styleUrls: ['./account-report-setup.component.css'],
+    standalone: false
 })
 export class AccountReportSetupComponent {
 

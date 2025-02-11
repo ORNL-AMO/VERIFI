@@ -3,9 +3,10 @@ import { Subscription } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 
 @Component({
-  selector: 'app-energy-unit-dropdown',
-  templateUrl: './energy-unit-dropdown.component.html',
-  styleUrls: ['./energy-unit-dropdown.component.css']
+    selector: 'app-energy-unit-dropdown',
+    templateUrl: './energy-unit-dropdown.component.html',
+    styleUrls: ['./energy-unit-dropdown.component.css'],
+    standalone: false
 })
 export class EnergyUnitDropdownComponent implements OnInit {
   @Input()

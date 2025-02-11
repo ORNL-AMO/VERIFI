@@ -6,9 +6,10 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { FacilityOverviewService } from '../facility-overview.service';
 
 @Component({
-  selector: 'app-facility-emissions-overview',
-  templateUrl: './facility-emissions-overview.component.html',
-  styleUrls: ['./facility-emissions-overview.component.css']
+    selector: 'app-facility-emissions-overview',
+    templateUrl: './facility-emissions-overview.component.html',
+    styleUrls: ['./facility-emissions-overview.component.css'],
+    standalone: false
 })
 export class FacilityEmissionsOverviewComponent implements OnInit {
 

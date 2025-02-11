@@ -3,9 +3,10 @@ import { PlotlyService } from 'angular-plotly.js';
 import { AccountOverviewData } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
 
 @Component({
-  selector: 'app-account-water-usage-donut',
-  templateUrl: './account-water-usage-donut.component.html',
-  styleUrls: ['./account-water-usage-donut.component.css']
+    selector: 'app-account-water-usage-donut',
+    templateUrl: './account-water-usage-donut.component.html',
+    styleUrls: ['./account-water-usage-donut.component.css'],
+    standalone: false
 })
 export class AccountWaterUsageDonutComponent {
   @Input()

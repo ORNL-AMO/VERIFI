@@ -4,9 +4,10 @@ import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup
 import { CopyTableService } from 'src/app/shared/helper-services/copy-table.service';
 
 @Component({
-  selector: 'app-meter-group-table',
-  templateUrl: './meter-group-table.component.html',
-  styleUrls: ['./meter-group-table.component.css']
+    selector: 'app-meter-group-table',
+    templateUrl: './meter-group-table.component.html',
+    styleUrls: ['./meter-group-table.component.css'],
+    standalone: false
 })
 export class MeterGroupTableComponent implements OnInit {
   @Input()

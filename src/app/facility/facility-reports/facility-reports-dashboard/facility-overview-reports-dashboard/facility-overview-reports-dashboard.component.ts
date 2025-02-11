@@ -6,9 +6,10 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
 
 @Component({
-  selector: 'app-facility-overview-reports-dashboard',
-  templateUrl: './facility-overview-reports-dashboard.component.html',
-  styleUrl: './facility-overview-reports-dashboard.component.css'
+    selector: 'app-facility-overview-reports-dashboard',
+    templateUrl: './facility-overview-reports-dashboard.component.html',
+    styleUrl: './facility-overview-reports-dashboard.component.css',
+    standalone: false
 })
 export class FacilityOverviewReportsDashboardComponent {
 

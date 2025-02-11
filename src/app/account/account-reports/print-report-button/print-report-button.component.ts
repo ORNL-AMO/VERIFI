@@ -6,9 +6,10 @@ import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.serv
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 
 @Component({
-  selector: 'app-print-report-button',
-  templateUrl: './print-report-button.component.html',
-  styleUrls: ['./print-report-button.component.css']
+    selector: 'app-print-report-button',
+    templateUrl: './print-report-button.component.html',
+    styleUrls: ['./print-report-button.component.css'],
+    standalone: false
 })
 export class PrintReportButtonComponent {
 

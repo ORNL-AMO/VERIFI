@@ -10,9 +10,10 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 
 @Component({
-  selector: 'app-energy-dashboard',
-  templateUrl: './energy-dashboard.component.html',
-  styleUrls: ['./energy-dashboard.component.css']
+    selector: 'app-energy-dashboard',
+    templateUrl: './energy-dashboard.component.html',
+    styleUrls: ['./energy-dashboard.component.css'],
+    standalone: false
 })
 export class EnergyDashboardComponent {
 
