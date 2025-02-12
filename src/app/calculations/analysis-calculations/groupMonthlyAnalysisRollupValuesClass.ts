@@ -143,8 +143,8 @@ export class GroupMonthlyAnalysisRollupValues {
     setAdjustedSavings(lastBankedMonthSummaryData: MonthlyAnalysisSummaryDataClass) {
         if (lastBankedMonthSummaryData) {
             this.rollingUnbankedSavings = (this.rollingAdjusted - this.rollingActual);
-            this.rollingSavings = (1 + lastBankedMonthSummaryData.monthlyAnalysisRollingValues.rolling12MonthImprovement) * (this.rollingAdjusted - this.rollingActual);
-            this.rollingBankedSavings = this.rollingUnbankedSavings - this.rollingSavings;
+            this.rollingSavings = (1 + lastBankedMonthSummaryData.monthlyAnalysisRollingValues.rolling12MonthImprovement) * this.rollingAdjusted - this.rollingActual;
+            this.rollingBankedSavings =  this.rollingSavings - this.rollingUnbankedSavings;
         } else {
             this.rollingSavings = (this.rollingAdjusted - this.rollingActual);
             this.rollingBankedSavings = 0;
