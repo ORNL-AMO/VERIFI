@@ -77,7 +77,13 @@
             degree day calculations for this month may not be completely accurate.
         </div>
     </div>
-    <div class="row" *ngIf="detailedDegreeDays && detailedDegreeDays.length != 0 && detailedDegreeDays != 'error'">
+    <div class="row" *ngIf="calculating">
+        <div class="col-12 text-center pb-4">
+            @let formattedMonth = selectedMonth | date:'MMMM y';
+            <app-calculating-spinner [message]="'Calculating ' + formattedMonth  + '...'"></app-calculating-spinner>
+        </div>
+    </div>
+    <div class="row" *ngIf="detailedDegreeDays && detailedDegreeDays.length != 0 && !calculating">
         <div class="col-lg-12 col-md-12 col-sm-12">
             <app-monthly-station-graph [detailedDegreeDays]="detailedDegreeDays" [selectedMonth]="selectedMonth"
                 [heatingTemp]="heatingTemp" [coolingTemp]="coolingTemp"
@@ -86,13 +92,6 @@
         <div class="col-lg-12 col-md-12 col-sm-12">
             <app-monthly-station-table [detailedDegreeDays]="detailedDegreeDays"
                 [weatherDataSelection]="weatherDataSelection"></app-monthly-station-table>
-        </div>
-    </div>
-    <div class="row" *ngIf="detailedDegreeDays == 'error'">
-        <div class="col-12">
-            <div class="alert alert-danger">
-                Error occured while calculating degree days.
-            </div>
         </div>
     </div>
 </ng-container>

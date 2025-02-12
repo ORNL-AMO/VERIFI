@@ -41,8 +41,6 @@ import { IdbAccountAnalysisItem } from './models/idbModels/accountAnalysisItem';
 import { IdbPredictorEntryDeprecated } from './models/idbModels/deprecatedPredictors';
 import { FacilityReportsDbService } from './indexedDB/facility-reports-db.service';
 import { IdbFacilityReport } from './models/idbModels/facilityReport';
-import { DegreeDaysService } from './shared/helper-services/degree-days.service';
-import { SharedDataService } from './shared/helper-services/shared-data.service';
 import { SurveyService } from './shared/helper-services/survey.service';
 import { ApplicationInstanceData } from './models/idbModels/applicationInstanceData';
 import { ApplicationInstanceDbService } from './indexedDB/application-instance-db.service';
@@ -91,7 +89,6 @@ export class AppComponent {
     private migratePredictorsService: MigratePredictorsService,
     private dbChangesService: DbChangesService,
     private facilityReportsDbService: FacilityReportsDbService,
-    private degreeDaysService: DegreeDaysService,
     private surveyService: SurveyService,
     private applicationInstanceDbService: ApplicationInstanceDbService) {
     if (environment.production) {
@@ -109,7 +106,6 @@ export class AppComponent {
   ngOnInit() {
     this.initializeData();
     this.automaticBackupsService.subscribeData();
-    this.degreeDaysService.testStationResponse();
     this.surveyService.showSurveyModal.subscribe(val => {
       this.showSurveyModal = val;
     });

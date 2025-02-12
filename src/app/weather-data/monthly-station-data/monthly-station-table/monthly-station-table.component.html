@@ -66,7 +66,7 @@
 
             </th>
             <th *ngIf="weatherDataSelection != 'relativeHumidity'">
-                {{detailedDegreeDays | degreeDayTotal: 'dryBulbTemp' | number:'1.0-1'}} &percnt;
+                {{detailedDegreeDays | degreeDayTotal: 'dryBulbTemp' | number:'1.0-1'}} &#8457;
             </th>
             <th *ngIf="weatherDataSelection == 'degreeDays' || weatherDataSelection == 'HDD'">
                 {{detailedDegreeDays | degreeDayTotal: 'heatingDegreeDay' | number}}

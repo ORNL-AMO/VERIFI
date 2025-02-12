@@ -10,7 +10,8 @@ export interface WeatherStation {
     USAF: string,
     WBAN: string,
     ID: string,
-    distanceFrom: number
+    distanceFrom: number,
+    ratingPercent: number
 }
 
 export interface LocalClimatologicalData {

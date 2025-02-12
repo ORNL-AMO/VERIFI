@@ -1,0 +1,12 @@
+{
+    "/api": {
+      "target": "https://lcd.ornl.gov",
+      "secure": false,
+      "changeOrigin": true
+    },
+    "/test": {
+      "target": "https://api.weather.gov",
+      "secure": false,
+      "changeOrigin": true
+    }
+  }
