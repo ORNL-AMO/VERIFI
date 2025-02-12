@@ -12,14 +12,14 @@
             <label class="semibold" for="zipCode">Zip Code</label>
             <ng-container *ngIf="!useFacility">
                 <input type="text" class="form-control" name="zipCode" id="zipCode" [(ngModel)]="zipCode"
-                    (input)="setStations()">
+                    [disabled]="fetchingData">
                 <a class="float-end" (click)="toggleUseZip()" *ngIf="facilities.length > 0">Choose Facility Zip Code</a>
 
             </ng-container>
 
             <ng-container *ngIf="useFacility">
                 <select class="form-select" name="zipCode" id="zipCode" [(ngModel)]="selectedFacilityId"
-                    (change)="changeFacility()">
+                    (change)="changeFacility()" (input)="clearStations()" [disabled]="fetchingData">
                     <option *ngFor="let facility of facilities" [ngValue]="facility.guid">{{facility.name}}
                         ({{facility.zip}})</option>
                 </select>
@@ -30,15 +30,34 @@
             <label class="semibold" for="furthestDistance">Furthest Distance</label>
             <div class="input-group mb-3">
                 <input type="number" class="form-control" name="furthestDistance" id="furthestDistance"
-                    [(ngModel)]="furthestDistance" (input)="setStations()" max="501">
+                    [(ngModel)]="furthestDistance" (input)="clearStations()" [disabled]="fetchingData" [max]="150">
                 <span class="input-group-text">miles</span>
             </div>
-            <div class="alert-danger alert" *ngIf="furthestDistance > 500">
-                For performance reasons we cannot map further then 500 miles.</div>
+            <div class="alert-danger alert" *ngIf="furthestDistance > 150">
+                For performance reasons we cannot map further then 150 miles.</div>
+        </div>
+        <div class="col-lg-4 col-md-12 col-sm-12">
+            <div class="btn-margin" *ngIf="!fetchingData">
+                <button class="btn action-btn" (click)="setStations()" [disabled]="furthestDistance > 150">Fetch
+                    Stations</button>
+            </div>
         </div>
     </div>
 </form>
 <hr>
-<app-weather-stations-table [stations]="stations"></app-weather-stations-table>
-<app-weather-stations-map [stations]="stations" [zipCode]="zipCode"
-    [furthestDistance]="furthestDistance"></app-weather-stations-map>
+<div class="row" *ngIf="fetchingData">
+    <div class="col-12 text-center pb-4">
+        <app-calculating-spinner [message]="'Fetching Stations...'"></app-calculating-spinner>
+    </div>
+</div>
+<ng-template [ngIf]="stations.length > 0" [ngIfElse]="noStationsBlock">
+    <app-weather-stations-table [stations]="stations"></app-weather-stations-table>
+    <app-weather-stations-map [stations]="stations" [zipCode]="zipCode"
+        [furthestDistance]="furthestDistance"></app-weather-stations-map>
+</ng-template>
+<ng-template #noStationsBlock>
+    <div class="alert alert-info p-2" *ngIf="!fetchingData">
+        Set the zip code, furthest distance and then click "Fetch Stations" to get a list of weather stations with
+        hourly weather data.
+    </div>
+</ng-template>

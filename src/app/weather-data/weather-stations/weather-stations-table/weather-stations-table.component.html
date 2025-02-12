@@ -10,6 +10,7 @@
                 Distance Away</th>
             <th (click)="setOrderDataField('begin')" [ngClass]="{'active': orderDataField == 'begin'}">Data Start</th>
             <th (click)="setOrderDataField('end')" [ngClass]="{'active': orderDataField == 'end'}">Data End</th>
+            <th (click)="setOrderDataField('ratingPercent')" [ngClass]="{'active': orderDataField == 'ratingPercent'}">Percent Rating</th>
         </tr>
     </thead>
     <tbody class="table-group-divider">
@@ -30,6 +31,9 @@
             </td>
             <td>
                 {{station.end | date }}
+            </td>
+            <td>
+                {{station.ratingPercent}} &percnt;
             </td>
         </tr>
     </tbody>

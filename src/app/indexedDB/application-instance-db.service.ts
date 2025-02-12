@@ -16,13 +16,11 @@ export class ApplicationInstanceDbService {
   async initializeApplicationInstanceData(){
     let instanceData: Array<ApplicationInstanceData> = await firstValueFrom(this.getApplicationInstanceData());
     if(instanceData && instanceData.length > 0){
-      console.log('exists');
       let instanceDataVal: ApplicationInstanceData = instanceData[0];
       instanceDataVal.appOpenCount++;
       instanceDataVal = await firstValueFrom(this.updateWithObservable(instanceDataVal));
       this.applicationInstanceData.next(instanceDataVal);
     }else{
-      console.log("not exists");
       let newInstanceData: ApplicationInstanceData = getNewApplicationInstanceData();
       newInstanceData = await firstValueFrom(this.addWithObservable(newInstanceData));
       this.applicationInstanceData.next(newInstanceData);

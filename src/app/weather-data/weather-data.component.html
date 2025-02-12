@@ -28,14 +28,7 @@
         the number of minutes that a reading covers.
     </p>
     <hr>
-    <ng-template [ngIf]="hasServerError == false" [ngIfElse]="serverErrorBlock">
-        <router-outlet></router-outlet>
-    </ng-template>
-    <ng-template #serverErrorBlock>
-        <div class="alert alert-danger">
-            An error occured when accessing the weather data servers.
-        </div>
-    </ng-template>
+    <router-outlet></router-outlet>
 </div>
 
 <div [ngClass]="{'windowOverlay': applyToFacility}"></div>
