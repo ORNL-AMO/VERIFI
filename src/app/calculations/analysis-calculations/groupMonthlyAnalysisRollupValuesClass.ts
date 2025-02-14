@@ -48,6 +48,9 @@ export class GroupMonthlyAnalysisRollupValues {
     rollingAdjusted: number;
     rollingBaselineAdjustmentForNormalization: number;
     rollingBaselingAdjustmentForOther: number;
+
+    monthDataAdjustment: number;
+    rollingDataAdjustment: number;
     constructor(
         energyUse: number,
         modeledEnergy: number,
@@ -64,11 +67,12 @@ export class GroupMonthlyAnalysisRollupValues {
         this.energyUse = energyUse;
         this.modeledEnergy = modeledEnergy;
         this.fiscalYear = fiscalYear;
+        this.monthDataAdjustment = dataAdjustment;
         if (previousMonthValues.length > 10) {
             //step 1
-            this.setRollingVals(previousMonthValues);
+            this.setRollingVals(previousMonthValues, dataAdjustment);
             //step 2
-            this.setAdjusted(modelYearDataAdjusted, baselineAdjustementInput, dataAdjustment);
+            this.setAdjusted(modelYearDataAdjusted, baselineAdjustementInput);
             //step 3
             this.setAdjustedSavings(lastBankedMonthSummaryData);
             //step 4
@@ -78,9 +82,9 @@ export class GroupMonthlyAnalysisRollupValues {
             //step 6
             this.setMonthlyAdjustedBaseline(previousMonthValues);
             //step 7
-            this.setAdjustmentForNormalization(modelYearDataAdjusted, dataAdjustment, previousMonthValues);
+            this.setAdjustmentForNormalization(modelYearDataAdjusted, previousMonthValues);
             //step 8
-            this.setAdjustmentForOtherV3(baselineAdjustementInput, modelYearDataAdjusted, dataAdjustment, previousMonthValues);
+            this.setAdjustmentForOtherV3(baselineAdjustementInput, modelYearDataAdjusted, previousMonthValues);
         } else {
             this.setBaselineYearValues();
         }
@@ -103,10 +107,11 @@ export class GroupMonthlyAnalysisRollupValues {
         this.savingsBanked = 0;
         this.baselineAdjustmentForNormalization = 0;
         this.baselineAdjustmentForOtherV2 = 0;
+        this.rollingDataAdjustment = 0
     }
 
     //step 1
-    setRollingVals(previousMonthsValues: Array<GroupMonthlyAnalysisRollupValues>) {
+    setRollingVals(previousMonthsValues: Array<GroupMonthlyAnalysisRollupValues>, dataAdjustment: number) {
         let previousMonthData: Array<GroupMonthlyAnalysisRollupValues> = previousMonthsValues.map(val => {
             return val;
         });
@@ -131,12 +136,14 @@ export class GroupMonthlyAnalysisRollupValues {
         this.rollingModeled = _.sumBy(rollingValues, (val: GroupMonthlyAnalysisRollupValues) => {
             return val.modeledEnergy;
         }) + this.modeledEnergy;
-
+        this.rollingDataAdjustment =  _.sumBy(rollingValues, (val: GroupMonthlyAnalysisRollupValues) => {
+            return val.monthDataAdjustment;
+        }) + dataAdjustment;
     }
 
     //step 2: calculate the BP adjusted baseline
-    setAdjusted(modelYearDataAdjusted: number, baselineAdjustementInput: number, dataAdjustment: number) {
-        this.rollingAdjusted = (this.rollingActualBaseline + baselineAdjustementInput) * this.getAdjustmentRatio(modelYearDataAdjusted, dataAdjustment);
+    setAdjusted(modelYearDataAdjusted: number, baselineAdjustementInput: number) {
+        this.rollingAdjusted = (this.rollingActualBaseline + baselineAdjustementInput) * this.getAdjustmentRatio(modelYearDataAdjusted);
     }
 
     //step 3: calculate BP adjusted savings
@@ -197,8 +204,8 @@ export class GroupMonthlyAnalysisRollupValues {
     }
 
     //step 7: calculate adjustment for normalization
-    setAdjustmentForNormalization(modelYearDataAdjusted: number, dataAdjustment: number, previousMonthsValues: Array<GroupMonthlyAnalysisRollupValues>) {
-        this.rollingBaselineAdjustmentForNormalization = (this.rollingActualBaseline * this.getAdjustmentRatio(modelYearDataAdjusted, dataAdjustment)) - this.rollingActualBaseline;
+    setAdjustmentForNormalization(modelYearDataAdjusted: number, previousMonthsValues: Array<GroupMonthlyAnalysisRollupValues>) {
+        this.rollingBaselineAdjustmentForNormalization = (this.rollingActualBaseline * this.getAdjustmentRatio(modelYearDataAdjusted)) - this.rollingActualBaseline;
         if (previousMonthsValues.length > 10) {
             let startIndex: number = previousMonthsValues.length - 11;
             let last11MonthsData: Array<GroupMonthlyAnalysisRollupValues> = previousMonthsValues.slice(startIndex, previousMonthsValues.length);
@@ -212,8 +219,8 @@ export class GroupMonthlyAnalysisRollupValues {
     }
 
     //step 8: calculate adjustment for operational changes
-    setAdjustmentForOtherV3(baselineAdjustementInput: number, modelYearDataAdjusted: number, dataAdjustment: number, previousMonthsValues: Array<GroupMonthlyAnalysisRollupValues>) {
-        this.rollingBaselingAdjustmentForOther = baselineAdjustementInput * this.getAdjustmentRatio(modelYearDataAdjusted, dataAdjustment);
+    setAdjustmentForOtherV3(baselineAdjustementInput: number, modelYearDataAdjusted: number, previousMonthsValues: Array<GroupMonthlyAnalysisRollupValues>) {
+        this.rollingBaselingAdjustmentForOther = baselineAdjustementInput * this.getAdjustmentRatio(modelYearDataAdjusted);
         if (previousMonthsValues.length > 10) {
             let startIndex: number = previousMonthsValues.length - 11;
             let last11MonthsData: Array<GroupMonthlyAnalysisRollupValues> = previousMonthsValues.slice(startIndex, previousMonthsValues.length);
@@ -226,8 +233,8 @@ export class GroupMonthlyAnalysisRollupValues {
         }
     }
 
-    getAdjustmentRatio(modelYearDataAdjusted: number, dataAdjustment: number): number {
-        return ((this.rollingModeled - modelYearDataAdjusted) / (this.rollingModeledBaseline - modelYearDataAdjusted)) * (this.rollingActual / (this.rollingActual - dataAdjustment));
+    getAdjustmentRatio(modelYearDataAdjusted: number): number {
+        return ((this.rollingModeled - modelYearDataAdjusted) / (this.rollingModeledBaseline - modelYearDataAdjusted)) * (this.rollingActual / (this.rollingActual - this.rollingDataAdjustment));
     }
 
     setBaselineAdjustment() {

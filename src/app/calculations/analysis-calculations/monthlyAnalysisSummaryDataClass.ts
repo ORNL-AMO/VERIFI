@@ -276,7 +276,7 @@ export class MonthlyAnalysisSummaryDataClass {
             previousMonthsAnalysisRollingValues,
             this.baselineActualEnergyUse,
             this.modelYearDataAdjustmentYearTotal,
-            this.dataAdjustmentCurrentYear,
+            this.dataAdjustment,
             lastBankedMonthlyAnalysis,
             this.originalBaselineYearBaselineActualEnergyUse,
 
