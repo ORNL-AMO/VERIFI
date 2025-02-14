@@ -75,16 +75,15 @@ export class MonthlyAnalysisCalculatedValuesSummation {
         }
     }
 
-
     setEnergyUse(currentMonthData: Array<MonthlyAnalysisSummaryDataClass>) {
         this.energyUse = _.sumBy(currentMonthData, (data: MonthlyAnalysisSummaryDataClass) => {
-            return data.monthlyAnalysisCalculatedValues.energyUse;
+            return data.monthlyAnalysisRollingValues.energyUse;
         });
     }
 
     setYearToDateBaselineActualEnergyUse(currentMonthData: Array<MonthlyAnalysisSummaryDataClass>) {
         this.yearToDateBaselineActualEnergyUse = _.sumBy(currentMonthData, (data: MonthlyAnalysisSummaryDataClass) => {
-            return data.monthlyAnalysisCalculatedValues.yearToDateBaselineActualEnergyUse;
+            return data.monthlyAnalysisRollingValues.yearToDateBaselineActualEnergyUse;
         });
     }
 
@@ -94,7 +93,7 @@ export class MonthlyAnalysisCalculatedValuesSummation {
 
     setAdjusted(currentMonthData: Array<MonthlyAnalysisSummaryDataClass>) {
         this.adjusted = _.sumBy(currentMonthData, (data: MonthlyAnalysisSummaryDataClass) => {
-            return data.monthlyAnalysisCalculatedValues.adjusted;
+            return data.monthlyAnalysisRollingValues.adjusted;
         });
     }
 
@@ -104,7 +103,7 @@ export class MonthlyAnalysisCalculatedValuesSummation {
 
     setBaselineAdjustmentForOtherV2(currentMonthData: Array<MonthlyAnalysisSummaryDataClass>, baselineAdjustmentForNew: number) {
         this.baselineAdjustmentForOtherV2 = _.sumBy(currentMonthData, (data: MonthlyAnalysisSummaryDataClass) => {
-            return data.monthlyAnalysisCalculatedValues.baselineAdjustmentForOtherV2;
+            return data.monthlyAnalysisRollingValues.baselineAdjustmentForOtherV2;
         });
         this.baselineAdjustmentForOtherV2 = this.baselineAdjustmentForOtherV2 + baselineAdjustmentForNew;
     }
@@ -115,15 +114,15 @@ export class MonthlyAnalysisCalculatedValuesSummation {
 
     setSavings(currentMonthData: Array<MonthlyAnalysisSummaryDataClass>) {
         this.savings = _.sumBy(currentMonthData, (data: MonthlyAnalysisSummaryDataClass) => {
-            return data.monthlyAnalysisCalculatedValues.savings;
+            return data.monthlyAnalysisRollingValues.savings;
         });
 
         this.savingsUnbanked = _.sumBy(currentMonthData, (data: MonthlyAnalysisSummaryDataClass) => {
-            return data.monthlyAnalysisCalculatedValues.savingsUnbanked;
+            return data.monthlyAnalysisRollingValues.savingsUnbanked;
         });
 
         this.savingsBanked = _.sumBy(currentMonthData, (data: MonthlyAnalysisSummaryDataClass) => {
-            return data.monthlyAnalysisCalculatedValues.savingsBanked;
+            return data.monthlyAnalysisRollingValues.savingsBanked;
         });
     }
 
@@ -142,13 +141,13 @@ export class MonthlyAnalysisCalculatedValuesSummation {
 
     setBaselineAdjustmentForNormalization(currentMonthData: Array<MonthlyAnalysisSummaryDataClass>) {
         this.baselineAdjustmentForNormalization = _.sumBy(currentMonthData, (data: MonthlyAnalysisSummaryDataClass) => {
-            return data.monthlyAnalysisCalculatedValues.baselineAdjustmentForNormalization;
+            return data.monthlyAnalysisRollingValues.baselineAdjustmentForNormalization;
         });
     }
 
     setBaselineAdjustment(currentMonthData: Array<MonthlyAnalysisSummaryDataClass>) {
         this.baselineAdjustment = _.sumBy(currentMonthData, (data: MonthlyAnalysisSummaryDataClass) => {
-            return data.monthlyAnalysisCalculatedValues.baselineAdjustment;
+            return data.monthlyAnalysisRollingValues.baselineAdjustment;
         }) + this.baselineAdjustmentForOtherV2;
     }
 
