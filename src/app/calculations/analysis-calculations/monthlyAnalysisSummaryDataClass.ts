@@ -270,7 +270,7 @@ export class MonthlyAnalysisSummaryDataClass {
         this.monthlyAnalysisRollingValues = new GroupMonthlyAnalysisRollupValues(
             this.energyUse,
             this.modeledEnergy,
-            this.baselineAdjustmentInputYearTotal,
+            this.baselineAdjustmentInput,
             this.fiscalYear,
             baselineOrBankedYear,
             previousMonthsAnalysisRollingValues,
