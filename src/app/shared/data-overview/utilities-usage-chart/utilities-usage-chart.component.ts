@@ -8,9 +8,10 @@ import { EnergySources, WaterSources } from 'src/app/models/constantsAndTypes';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
-  selector: 'app-utilities-usage-chart',
-  templateUrl: './utilities-usage-chart.component.html',
-  styleUrls: ['./utilities-usage-chart.component.css']
+    selector: 'app-utilities-usage-chart',
+    templateUrl: './utilities-usage-chart.component.html',
+    styleUrls: ['./utilities-usage-chart.component.css'],
+    standalone: false
 })
 export class UtilitiesUsageChartComponent {
   @Input()

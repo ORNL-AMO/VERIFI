@@ -397,7 +397,8 @@ export class DegreeDaysService {
       USAF: USAF,
       WBAN: WBAN,
       ID: ID,
-      distanceFrom: undefined
+      distanceFrom: undefined,
+      ratingPercent: undefined
     }
   }
 }

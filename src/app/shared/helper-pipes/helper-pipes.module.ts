@@ -26,6 +26,7 @@ import { RegressionNumberPipe } from './regression-number.pipe';
 import { FacilityAnalysisNamePipe } from './facility-analysis-name.pipe';
 import { FacilityReportNamePipe } from './facility-report-name.pipe';
 import { AccountAnalysisNamePipe } from './account-analysis-name.pipe';
+import { CharactersRemainingPipe } from './characters-remaining.pipe';
 
 @NgModule({
   declarations: [
@@ -54,7 +55,8 @@ import { AccountAnalysisNamePipe } from './account-analysis-name.pipe';
     RegressionNumberPipe,
     FacilityAnalysisNamePipe,
     FacilityReportNamePipe,
-    AccountAnalysisNamePipe
+    AccountAnalysisNamePipe,
+    CharactersRemainingPipe
   ],
   imports: [
     CommonModule
@@ -85,7 +87,8 @@ import { AccountAnalysisNamePipe } from './account-analysis-name.pipe';
     RegressionNumberPipe,
     FacilityAnalysisNamePipe,
     FacilityReportNamePipe,
-    AccountAnalysisNamePipe
+    AccountAnalysisNamePipe,
+    CharactersRemainingPipe
   ]
 })
 export class HelperPipesModule { }

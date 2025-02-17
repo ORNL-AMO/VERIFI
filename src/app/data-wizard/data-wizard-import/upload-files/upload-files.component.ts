@@ -11,7 +11,8 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 @Component({
   selector: 'app-upload-files',
   templateUrl: './upload-files.component.html',
-  styleUrl: './upload-files.component.css'
+  styleUrl: './upload-files.component.css',
+  standalone: false
 })
 export class UploadFilesComponent {
 

@@ -13,7 +13,8 @@ import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 @Component({
   selector: 'app-facility-predictor-data-table',
   templateUrl: './facility-predictor-data-table.component.html',
-  styleUrl: './facility-predictor-data-table.component.css'
+  styleUrl: './facility-predictor-data-table.component.css',
+  standalone: false
 })
 export class FacilityPredictorDataTableComponent {
 

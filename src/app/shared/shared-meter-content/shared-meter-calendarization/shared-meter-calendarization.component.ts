@@ -21,7 +21,8 @@ import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
 @Component({
   selector: 'app-shared-meter-calendarization',
   templateUrl: './shared-meter-calendarization.component.html',
-  styleUrl: './shared-meter-calendarization.component.css'
+  styleUrl: './shared-meter-calendarization.component.css',
+  standalone: false
 })
 export class SharedMeterCalendarizationComponent {
   @Input({ required: true })

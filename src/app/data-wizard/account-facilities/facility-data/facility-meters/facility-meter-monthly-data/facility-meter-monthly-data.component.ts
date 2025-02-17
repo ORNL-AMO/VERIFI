@@ -6,7 +6,8 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 @Component({
   selector: 'app-facility-meter-monthly-data',
   templateUrl: './facility-meter-monthly-data.component.html',
-  styleUrl: './facility-meter-monthly-data.component.css'
+  styleUrl: './facility-meter-monthly-data.component.css',
+  standalone: false
 })
 export class FacilityMeterMonthlyDataComponent {
 

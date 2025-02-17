@@ -1,13 +1,14 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { DetailDegreeDay, WeatherDataSelection, WeatherDataSelectionOption, WeatherDataSelectionOptions, WeatherStation } from 'src/app/models/degreeDays';
-import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
-import { WeatherDataService } from 'src/app/weather-data/weather-data.service';
+import { WeatherDataReading, WeatherDataService } from 'src/app/weather-data/weather-data.service';
+import { getDetailedDataForMonth } from '../weatherDataCalculations';
 
 @Component({
-  selector: 'app-monthly-station-data',
-  templateUrl: './monthly-station-data.component.html',
-  styleUrls: ['./monthly-station-data.component.css']
+    selector: 'app-monthly-station-data',
+    templateUrl: './monthly-station-data.component.html',
+    styleUrls: ['./monthly-station-data.component.css'],
+    standalone: false
 })
 export class MonthlyStationDataComponent {
 
@@ -15,12 +16,13 @@ export class MonthlyStationDataComponent {
   selectedMonth: Date;
   heatingTemp: number;
   coolingTemp: number;
-  detailedDegreeDays: Array<DetailDegreeDay> | 'error';
+  detailedDegreeDays: Array<DetailDegreeDay>;
   hasGapsInData: boolean;
   gapsInDataDate: Date;
   weatherDataSelection: WeatherDataSelection;
   weatherDataSelectionOptions: Array<WeatherDataSelectionOption> = WeatherDataSelectionOptions;
-  constructor(private router: Router, private degreeDaysService: DegreeDaysService,
+  calculating: boolean = false;
+  constructor(private router: Router,
     private weatherDataService: WeatherDataService) {
 
   }
@@ -39,19 +41,22 @@ export class MonthlyStationDataComponent {
   }
 
   async setDegreeDays() {
-    this.detailedDegreeDays = await this.degreeDaysService.getDailyDataFromMonth(this.selectedMonth.getMonth(), this.selectedMonth.getFullYear(), this.heatingTemp, this.coolingTemp, this.weatherStation.ID);
-    if (this.detailedDegreeDays != 'error') {
-      let errorIndex: number = this.detailedDegreeDays.findIndex(degreeDay => {
-        return degreeDay.gapInData == true;
-      })
-      if (errorIndex != -1) {
-        this.hasGapsInData = true;
-        this.gapsInDataDate = new Date(this.detailedDegreeDays[errorIndex].time);
-      } else {
-        this.hasGapsInData = undefined;
-        this.gapsInDataDate = undefined;
-      }
+    this.calculating = true;
+    let startDate: Date = new Date(this.selectedMonth.getFullYear(), this.selectedMonth.getMonth(), 1);
+    let endDate: Date = new Date(this.selectedMonth.getFullYear(), this.selectedMonth.getMonth() + 1, 1);
+    let weatherData: Array<WeatherDataReading> = await this.weatherDataService.getHourlyData(this.weatherStation.ID, startDate, endDate, ['wet_bulb_temp'])
+    this.detailedDegreeDays = getDetailedDataForMonth(weatherData, this.selectedMonth.getMonth(), this.selectedMonth.getFullYear(), this.heatingTemp, this.coolingTemp, this.weatherStation.ID, this.weatherStation.name);
+    let errorIndex: number = this.detailedDegreeDays.findIndex(degreeDay => {
+      return degreeDay.gapInData == true;
+    })
+    if (errorIndex != -1) {
+      this.hasGapsInData = true;
+      this.gapsInDataDate = new Date(this.detailedDegreeDays[errorIndex].time);
+    } else {
+      this.hasGapsInData = undefined;
+      this.gapsInDataDate = undefined;
     }
+    this.calculating = false;
   }
 
   setSelectedMonth(eventData: string) {

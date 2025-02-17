@@ -2,9 +2,10 @@ import { Component, EventEmitter, Output } from '@angular/core';
 import { GlobalWarmingPotential, GlobalWarmingPotentials } from 'src/app/models/globalWarmingPotentials';
 
 @Component({
-  selector: 'app-existing-gwps-modal',
-  templateUrl: './existing-gwps-modal.component.html',
-  styleUrls: ['./existing-gwps-modal.component.css']
+    selector: 'app-existing-gwps-modal',
+    templateUrl: './existing-gwps-modal.component.html',
+    styleUrls: ['./existing-gwps-modal.component.css'],
+    standalone: false
 })
 export class ExistingGwpsModalComponent {
   @Output('emitClose')

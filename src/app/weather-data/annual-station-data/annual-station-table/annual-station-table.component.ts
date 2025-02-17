@@ -5,9 +5,10 @@ import { WeatherDataSelection } from 'src/app/models/degreeDays';
 import { AnnualStationDataSummary } from '../annual-station-data.component';
 
 @Component({
-  selector: 'app-annual-station-table',
-  templateUrl: './annual-station-table.component.html',
-  styleUrls: ['./annual-station-table.component.css']
+    selector: 'app-annual-station-table',
+    templateUrl: './annual-station-table.component.html',
+    styleUrls: ['./annual-station-table.component.css'],
+    standalone: false
 })
 export class AnnualStationTableComponent {
   @Input()

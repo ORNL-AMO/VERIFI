@@ -3,7 +3,8 @@ import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import * as _ from 'lodash';
 
 @Pipe({
-  name: 'orderPredictorDataTable'
+  name: 'orderPredictorDataTable',
+  standalone: false
 })
 export class OrderPredictorDataTablePipe implements PipeTransform {
 

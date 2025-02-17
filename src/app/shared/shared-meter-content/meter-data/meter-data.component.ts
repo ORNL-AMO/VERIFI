@@ -6,7 +6,8 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 @Component({
   selector: 'app-meter-data',
   templateUrl: './meter-data.component.html',
-  styleUrl: './meter-data.component.css'
+  styleUrl: './meter-data.component.css',
+  standalone: false
 })
 export class MeterDataComponent {
 

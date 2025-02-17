@@ -1,7 +1,7 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations'
 import { NgModule } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AppRoutingModule } from './routing/app-routing.module';
 import { AppComponent } from './app.component';
 import { HeaderComponent } from './core-components/header/header.component';
@@ -30,48 +30,54 @@ import { ManageAccountsComponent } from './core-components/manage-accounts/manag
 import { ElectronBackupFileComponent } from './core-components/electron-backup-file/electron-backup-file.component';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { DeletingAccountDataComponent } from './core-components/deleting-account-data/deleting-account-data.component';
-import { HomePageComponent } from './core-components/home-page/home-page.component';
+import { SurveyModalComponent } from './core-components/survey-modal/survey-modal.component';
+import { SurveyToastComponent } from './core-components/survey-toast/survey-toast.component';
+import { UserSurveyModule } from './shared/user-survey/user-survey.module';
 import { DataWizardModule } from './data-wizard/data-wizard.module';
+import { HomePageComponent } from './core-components/home-page/home-page.component';
 
 @NgModule({
-  declarations: [
-    AppComponent,
-    HeaderComponent,
-    SidebarComponent,
-    LoadingComponent,
-    PageNotFoundComponent,
-    ToastNotificationsComponent,
-    ElectronUpdateComponent,
-    ImportBackupModalComponent,
-    SearchBarComponent,
-    FacilityListPipe,
-    CreateReportModalComponent,
-    ManageAccountsComponent,
-    ElectronBackupFileComponent,
-    DeletingAccountDataComponent,
-    HomePageComponent
-  ],
-  imports: [
-    BrowserModule,
-    AppRoutingModule,
-    FormsModule,
-    CommonModule,
-    PlotlyViaWindowModule,
-    IndexedDBModule,
-    HelpPanelModule,
-    StaticContentModule,
-    BrowserAnimationsModule,
-    FacilityModule,
-    AccountModule,
-    SetupWizardModule,
-    HelperPipesModule,
-    NgbTypeaheadModule,
-    UploadDataModule,
-    WeatherDataModule,
-    DataWizardModule
-  ],
-  providers: [provideHttpClient(withInterceptorsFromDi())],
-  bootstrap: [AppComponent]
+    declarations: [
+        AppComponent,
+        HeaderComponent,
+        SidebarComponent,
+        LoadingComponent,
+        PageNotFoundComponent,
+        ToastNotificationsComponent,
+        ElectronUpdateComponent,
+        ImportBackupModalComponent,
+        SearchBarComponent,
+        FacilityListPipe,
+        CreateReportModalComponent,
+        ManageAccountsComponent,
+        ElectronBackupFileComponent,
+        DeletingAccountDataComponent,
+        SurveyModalComponent,
+        SurveyToastComponent,
+        HomePageComponent
+    ],
+    bootstrap: [AppComponent],
+    imports: [
+        BrowserModule,
+        AppRoutingModule,
+        FormsModule,
+        CommonModule,
+        PlotlyViaWindowModule,
+        IndexedDBModule,
+        HelpPanelModule,
+        StaticContentModule,
+        BrowserAnimationsModule,
+        FacilityModule,
+        AccountModule,
+        SetupWizardModule,
+        HelperPipesModule,
+        NgbTypeaheadModule,
+        UploadDataModule,
+        WeatherDataModule,
+        UserSurveyModule,
+        DataWizardModule
+    ],
+    providers: [provideHttpClient(withInterceptorsFromDi())]
 })
 
 export class AppModule { }

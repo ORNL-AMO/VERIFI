@@ -2,7 +2,8 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 
 @Pipe({
-  name: 'facilityPredictorList'
+  name: 'facilityPredictorList',
+  standalone: false
 })
 export class FacilityPredictorListPipe implements PipeTransform {
 

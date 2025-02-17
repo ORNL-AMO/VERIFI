@@ -11,7 +11,8 @@ import { getNewIdbAccount, IdbAccount } from 'src/app/models/idbModels/account';
 @Component({
   selector: 'app-home-page',
   templateUrl: './home-page.component.html',
-  styleUrl: './home-page.component.css'
+  styleUrl: './home-page.component.css',
+  standalone: false
 })
 export class HomePageComponent {
   backupFile: any;

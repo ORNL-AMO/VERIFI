@@ -14,9 +14,10 @@ import { CustomGWPDbService } from 'src/app/indexedDB/custom-gwp-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 
 @Component({
-  selector: 'app-manage-accounts',
-  templateUrl: './manage-accounts.component.html',
-  styleUrls: ['./manage-accounts.component.css']
+    selector: 'app-manage-accounts',
+    templateUrl: './manage-accounts.component.html',
+    styleUrls: ['./manage-accounts.component.css'],
+    standalone: false
 })
 export class ManageAccountsComponent {
 

@@ -5,9 +5,10 @@ import { BetterClimateYearDetails } from 'src/app/calculations/carbon-calculatio
 import { BetterClimateReportSetup } from 'src/app/models/overview-report';
 
 @Component({
-  selector: 'app-top-emissions-performers-table',
-  templateUrl: './top-emissions-performers-table.component.html',
-  styleUrls: ['./top-emissions-performers-table.component.css']
+    selector: 'app-top-emissions-performers-table',
+    templateUrl: './top-emissions-performers-table.component.html',
+    styleUrls: ['./top-emissions-performers-table.component.css'],
+    standalone: false
 })
 export class TopEmissionsPerformersTableComponent {
   @Input()

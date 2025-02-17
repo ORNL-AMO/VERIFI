@@ -11,9 +11,10 @@ import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 
 @Component({
-  selector: 'app-account-home-summary',
-  templateUrl: './account-home-summary.component.html',
-  styleUrls: ['./account-home-summary.component.css']
+    selector: 'app-account-home-summary',
+    templateUrl: './account-home-summary.component.html',
+    styleUrls: ['./account-home-summary.component.css'],
+    standalone: false
 })
 export class AccountHomeSummaryComponent implements OnInit {
 

@@ -23,16 +23,6 @@ export class AnnualGroupAnalysisSummaryClass {
     utilityClassification: MeterSource | 'Mixed';
     group: AnalysisGroup;
     constructor(selectedGroup: AnalysisGroup, analysisItem: IdbAnalysisItem, facility: IdbFacility, calanderizedMeters: Array<CalanderizedMeter>, accountPredictorEntries: Array<IdbPredictorData>, monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>, accountPredictors: Array<IdbPredictor>, accountAnalysisItems: Array<IdbAnalysisItem>) {
-        // let bankedAnalysisItem: IdbAnalysisItem;
-        // if (analysisItem.hasBanking) {
-        //     bankedAnalysisItem = accountAnalysisItems.find(item => {
-        //         return item.guid == analysisItem.bankedAnalysisItemId;
-        //     });
-        //     let bankedAnalysisCpy: IdbAnalysisItem = JSON.parse(JSON.stringify(bankedAnalysisItem));
-        //     bankedAnalysisCpy.reportYear = selectedGroup.newBaselineYear;
-        //     this.bankedAnnualGroupAnalysisSummaryClass = new AnnualGroupAnalysisSummaryClass(selectedGroup, bankedAnalysisItem, facility, calanderizedMeters, accountPredictorEntries, undefined, accountPredictors, accountAnalysisItems);
-        // }
-
         this.group = selectedGroup;
         if (!this.monthlyAnalysisSummaryData) {
             this.setMonthlyAnalysisSummaryData(selectedGroup, analysisItem, facility, calanderizedMeters, accountPredictorEntries, accountAnalysisItems);
@@ -112,7 +102,6 @@ export class AnnualGroupAnalysisSummaryClass {
         return this.annualAnalysisSummaryDataClasses.map(summaryDataClass => {
             return this.getFormattedResult(summaryDataClass);
         });
-        // }
     }
 
     getFormattedResult(summaryDataClass: AnnualAnalysisSummaryDataClass): AnnualAnalysisSummary {

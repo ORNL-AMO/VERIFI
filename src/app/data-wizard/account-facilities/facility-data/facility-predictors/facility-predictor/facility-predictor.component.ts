@@ -27,7 +27,8 @@ import { checkSameMonth } from 'src/app/upload-data/upload-helper-functions';
 @Component({
   selector: 'app-facility-predictor',
   templateUrl: './facility-predictor.component.html',
-  styleUrl: './facility-predictor.component.css'
+  styleUrl: './facility-predictor.component.css',
+  standalone: false
 })
 export class FacilityPredictorComponent {
 

@@ -17,9 +17,10 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { UtilityMeterDataService } from 'src/app/shared/shared-meter-content/utility-meter-data.service';
 
 @Component({
-  selector: 'app-edit-bill',
-  templateUrl: './edit-bill.component.html',
-  styleUrls: ['./edit-bill.component.css']
+    selector: 'app-edit-bill',
+    templateUrl: './edit-bill.component.html',
+    styleUrls: ['./edit-bill.component.css'],
+    standalone: false
 })
 export class EditBillComponent implements OnInit {
 

@@ -15,9 +15,10 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 
 @Component({
-  selector: 'app-group-analysis-options',
-  templateUrl: './group-analysis-options.component.html',
-  styleUrls: ['./group-analysis-options.component.css']
+    selector: 'app-group-analysis-options',
+    templateUrl: './group-analysis-options.component.html',
+    styleUrls: ['./group-analysis-options.component.css'],
+    standalone: false
 })
 export class GroupAnalysisOptionsComponent implements OnInit {
 

@@ -5,9 +5,10 @@ import { SetupWizardService } from '../setup-wizard.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
-  selector: 'app-setup-wizard-footer',
-  templateUrl: './setup-wizard-footer.component.html',
-  styleUrls: ['./setup-wizard-footer.component.css']
+    selector: 'app-setup-wizard-footer',
+    templateUrl: './setup-wizard-footer.component.html',
+    styleUrls: ['./setup-wizard-footer.component.css'],
+    standalone: false
 })
 export class SetupWizardFooterComponent implements OnInit {
 

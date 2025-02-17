@@ -9,7 +9,8 @@ import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 @Component({
   selector: 'app-facility-predictor-data-bulk-update',
   templateUrl: './facility-predictor-data-bulk-update.component.html',
-  styleUrl: './facility-predictor-data-bulk-update.component.css'
+  styleUrl: './facility-predictor-data-bulk-update.component.css',
+  standalone: false
 })
 export class FacilityPredictorDataBulkUpdateComponent {
 

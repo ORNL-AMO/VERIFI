@@ -3,9 +3,10 @@ import { NavigationEnd, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 
 @Component({
-  selector: 'app-edit-meter-help',
-  templateUrl: './edit-meter-help.component.html',
-  styleUrls: ['./edit-meter-help.component.css']
+    selector: 'app-edit-meter-help',
+    templateUrl: './edit-meter-help.component.html',
+    styleUrls: ['./edit-meter-help.component.css'],
+    standalone: false
 })
 export class EditMeterHelpComponent {
 

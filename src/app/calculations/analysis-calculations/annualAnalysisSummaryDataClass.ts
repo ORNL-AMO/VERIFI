@@ -176,7 +176,7 @@ export class AnnualAnalysisSummaryDataClass {
     setCummulativeSavings(previousYearsSummaryData: Array<AnnualAnalysisSummaryDataClass>) {
         if (previousYearsSummaryData.length != 0 && !this.isIntermediateBanked) {
             let previousYearData: Array<AnnualAnalysisSummaryDataClass> = previousYearsSummaryData.filter(data => { return data.year < this.year })
-            let sumSavings: number = _.sumBy(previousYearData, (data: AnnualAnalysisSummaryDataClass) => { return data.cummulativeSavings });
+            let sumSavings: number = _.sumBy(previousYearData, (data: AnnualAnalysisSummaryDataClass) => { return data.savings });
             this.cummulativeSavings = sumSavings + this.savings;
         } else {
             this.cummulativeSavings = 0;

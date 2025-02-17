@@ -9,9 +9,10 @@ import * as _ from 'lodash';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
-  selector: 'app-correlation-plot-menu',
-  templateUrl: './correlation-plot-menu.component.html',
-  styleUrls: ['./correlation-plot-menu.component.css']
+    selector: 'app-correlation-plot-menu',
+    templateUrl: './correlation-plot-menu.component.html',
+    styleUrls: ['./correlation-plot-menu.component.css'],
+    standalone: false
 })
 export class CorrelationPlotMenuComponent {
 

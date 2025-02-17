@@ -4,9 +4,10 @@ import { Subscription } from 'rxjs';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 
 @Component({
-  selector: 'app-account-home-help',
-  templateUrl: './account-home-help.component.html',
-  styleUrls: ['./account-home-help.component.css']
+    selector: 'app-account-home-help',
+    templateUrl: './account-home-help.component.html',
+    styleUrls: ['./account-home-help.component.css'],
+    standalone: false
 })
 export class AccountHomeHelpComponent {
   selectedAccount: IdbAccount;

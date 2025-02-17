@@ -15,7 +15,8 @@ import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 @Component({
   selector: 'app-data-wizard-sidebar',
   templateUrl: './data-wizard-sidebar.component.html',
-  styleUrl: './data-wizard-sidebar.component.css'
+  styleUrl: './data-wizard-sidebar.component.css',
+  standalone: false
 })
 export class DataWizardSidebarComponent {
   @Output('emitToggleCollapse')

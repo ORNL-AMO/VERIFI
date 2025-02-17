@@ -25,7 +25,8 @@ import { PredictorDataHelperService, PredictorTableItem } from 'src/app/shared/h
 @Component({
   selector: 'app-predictor-table',
   templateUrl: './predictor-table.component.html',
-  styleUrl: './predictor-table.component.css'
+  styleUrl: './predictor-table.component.css',
+  standalone: false
 })
 export class PredictorTableComponent {
 

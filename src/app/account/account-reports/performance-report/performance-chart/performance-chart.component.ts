@@ -9,9 +9,10 @@ import { AnalysisGroup } from 'src/app/models/analysis';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
-  selector: 'app-performance-chart',
-  templateUrl: './performance-chart.component.html',
-  styleUrls: ['./performance-chart.component.css']
+    selector: 'app-performance-chart',
+    templateUrl: './performance-chart.component.html',
+    styleUrls: ['./performance-chart.component.css'],
+    standalone: false
 })
 export class PerformanceChartComponent {
   @Input()

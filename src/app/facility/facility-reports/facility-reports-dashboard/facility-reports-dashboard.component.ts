@@ -14,9 +14,10 @@ import { FacilityReportType, getNewIdbFacilityReport, IdbFacilityReport } from '
 import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
 
 @Component({
-  selector: 'app-facility-reports-dashboard',
-  templateUrl: './facility-reports-dashboard.component.html',
-  styleUrl: './facility-reports-dashboard.component.css'
+    selector: 'app-facility-reports-dashboard',
+    templateUrl: './facility-reports-dashboard.component.html',
+    styleUrl: './facility-reports-dashboard.component.css',
+    standalone: false
 })
 export class FacilityReportsDashboardComponent {
 

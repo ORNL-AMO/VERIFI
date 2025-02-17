@@ -4,9 +4,10 @@ import { FacilityOverviewService } from 'src/app/facility/facility-overview/faci
 import { FacilityOverviewData, FacilityOverviewMeter } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';
 
 @Component({
-  selector: 'app-meter-usage-table',
-  templateUrl: './meter-usage-table.component.html',
-  styleUrls: ['./meter-usage-table.component.css']
+    selector: 'app-meter-usage-table',
+    templateUrl: './meter-usage-table.component.html',
+    styleUrls: ['./meter-usage-table.component.css'],
+    standalone: false
 })
 export class MeterUsageTableComponent {
   @Input()

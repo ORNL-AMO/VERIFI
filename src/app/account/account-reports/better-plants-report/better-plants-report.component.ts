@@ -25,9 +25,10 @@ import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysis
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 
 @Component({
-  selector: 'app-better-plants-report',
-  templateUrl: './better-plants-report.component.html',
-  styleUrls: ['./better-plants-report.component.css']
+    selector: 'app-better-plants-report',
+    templateUrl: './better-plants-report.component.html',
+    styleUrls: ['./better-plants-report.component.css'],
+    standalone: false
 })
 export class BetterPlantsReportComponent implements OnInit {
 

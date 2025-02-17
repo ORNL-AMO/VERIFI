@@ -16,9 +16,10 @@ import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
 import { UtilityMeterDataService } from 'src/app/shared/shared-meter-content/utility-meter-data.service';
 
 @Component({
-  selector: 'app-general-utility-data-table',
-  templateUrl: './general-utility-data-table.component.html',
-  styleUrls: ['./general-utility-data-table.component.css']
+    selector: 'app-general-utility-data-table',
+    templateUrl: './general-utility-data-table.component.html',
+    styleUrls: ['./general-utility-data-table.component.css'],
+    standalone: false
 })
 export class GeneralUtilityDataTableComponent implements OnInit {
   @Input()

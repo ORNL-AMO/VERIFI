@@ -3,7 +3,8 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import * as _ from 'lodash';
 
 @Pipe({
-  name: 'wizardSidebarFacilitiesList'
+  name: 'wizardSidebarFacilitiesList',
+  standalone: false
 })
 export class WizardSidebarFacilitiesListPipe implements PipeTransform {
 

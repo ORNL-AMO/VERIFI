@@ -4,9 +4,10 @@ import * as _ from 'lodash';
 import { BetterClimateYearDetails } from 'src/app/calculations/carbon-calculations/betterClimateYearsDetails';
 import { BetterClimateReportSetup } from 'src/app/models/overview-report';
 @Component({
-  selector: 'app-annual-facility-climate-summary-table',
-  templateUrl: './annual-facility-climate-summary-table.component.html',
-  styleUrls: ['./annual-facility-climate-summary-table.component.css']
+    selector: 'app-annual-facility-climate-summary-table',
+    templateUrl: './annual-facility-climate-summary-table.component.html',
+    styleUrls: ['./annual-facility-climate-summary-table.component.css'],
+    standalone: false
 })
 export class AnnualFacilityClimateSummaryTableComponent {
   @Input()

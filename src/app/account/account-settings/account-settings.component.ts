@@ -14,9 +14,10 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { getNewIdbFacility, IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
-  selector: 'app-account-settings',
-  templateUrl: './account-settings.component.html',
-  styleUrls: ['./account-settings.component.css']
+    selector: 'app-account-settings',
+    templateUrl: './account-settings.component.html',
+    styleUrls: ['./account-settings.component.css'],
+    standalone: false
 })
 export class AccountSettingsComponent implements OnInit {
 

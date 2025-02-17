@@ -12,9 +12,10 @@ import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { MeterDataSummary } from 'src/app/data-wizard/data-wizard-import/process-template-file/process-template-meter-readings/process-template-meter-readings.component';
 
 @Component({
-  selector: 'app-confirm-readings',
-  templateUrl: './confirm-readings.component.html',
-  styleUrls: ['./confirm-readings.component.css']
+    selector: 'app-confirm-readings',
+    templateUrl: './confirm-readings.component.html',
+    styleUrls: ['./confirm-readings.component.css'],
+    standalone: false
 })
 export class ConfirmReadingsComponent implements OnInit {
 

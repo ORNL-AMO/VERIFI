@@ -2,9 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 @Component({
-  selector: 'app-energy-consumption-help',
-  templateUrl: './energy-consumption-help.component.html',
-  styleUrls: ['./energy-consumption-help.component.css']
+    selector: 'app-energy-consumption-help',
+    templateUrl: './energy-consumption-help.component.html',
+    styleUrls: ['./energy-consumption-help.component.css'],
+    standalone: false
 })
 export class EnergyConsumptionHelpComponent implements OnInit {
 

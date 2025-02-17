@@ -16,7 +16,8 @@ import { getNewIdbPredictorData, IdbPredictorData } from 'src/app/models/idbMode
 @Component({
   selector: 'app-facility-predictor-data-entry',
   templateUrl: './facility-predictor-data-entry.component.html',
-  styleUrl: './facility-predictor-data-entry.component.css'
+  styleUrl: './facility-predictor-data-entry.component.css',
+  standalone: false
 })
 export class FacilityPredictorDataEntryComponent {
 

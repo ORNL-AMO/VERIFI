@@ -13,9 +13,10 @@ import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
 import { UtilityMeterDataService } from 'src/app/shared/shared-meter-content/utility-meter-data.service';
 @Component({
-  selector: 'app-vehicle-data-table',
-  templateUrl: './vehicle-data-table.component.html',
-  styleUrls: ['./vehicle-data-table.component.css']
+    selector: 'app-vehicle-data-table',
+    templateUrl: './vehicle-data-table.component.html',
+    styleUrls: ['./vehicle-data-table.component.css'],
+    standalone: false
 })
 export class VehicleDataTableComponent {
   @Input()

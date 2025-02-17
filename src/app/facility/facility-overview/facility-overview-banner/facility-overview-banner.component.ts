@@ -20,9 +20,10 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 
 @Component({
-  selector: 'app-facility-overview-banner',
-  templateUrl: './facility-overview-banner.component.html',
-  styleUrls: ['./facility-overview-banner.component.css']
+    selector: 'app-facility-overview-banner',
+    templateUrl: './facility-overview-banner.component.html',
+    styleUrls: ['./facility-overview-banner.component.css'],
+    standalone: false
 })
 export class FacilityOverviewBannerComponent implements OnInit {
 

@@ -20,7 +20,8 @@ import { ToastNotificationsService } from 'src/app/core-components/toast-notific
 @Component({
   selector: 'app-process-template-meters',
   templateUrl: './process-template-meters.component.html',
-  styleUrl: './process-template-meters.component.css'
+  styleUrl: './process-template-meters.component.css',
+  standalone: false
 })
 export class ProcessTemplateMetersComponent {
 

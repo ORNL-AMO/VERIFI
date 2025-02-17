@@ -11,9 +11,10 @@ import { ToastNotificationsService } from 'src/app/core-components/toast-notific
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
-  selector: 'app-setup-facilities',
-  templateUrl: './setup-facilities.component.html',
-  styleUrls: ['./setup-facilities.component.css']
+    selector: 'app-setup-facilities',
+    templateUrl: './setup-facilities.component.html',
+    styleUrls: ['./setup-facilities.component.css'],
+    standalone: false
 })
 export class SetupFacilitiesComponent implements OnInit {
 

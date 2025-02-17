@@ -23,9 +23,10 @@ import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysis
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 
 @Component({
-  selector: 'app-performance-report',
-  templateUrl: './performance-report.component.html',
-  styleUrls: ['./performance-report.component.css']
+    selector: 'app-performance-report',
+    templateUrl: './performance-report.component.html',
+    styleUrls: ['./performance-report.component.css'],
+    standalone: false
 })
 export class PerformanceReportComponent {
   selectedReport: IdbAccountReport;

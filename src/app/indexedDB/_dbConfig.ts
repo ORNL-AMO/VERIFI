@@ -195,5 +195,11 @@ export const dbConfig: DBConfig = {
       { name: 'facilityId', keypath: 'facilityId', options: { unique: false } },
     ]
   },
+  {
+    store: 'application',
+    storeConfig: { keyPath: 'id', autoIncrement: true },
+    storeSchema: [
+    ]
+  },
   ]
 };

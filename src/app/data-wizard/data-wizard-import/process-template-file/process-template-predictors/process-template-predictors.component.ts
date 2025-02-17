@@ -25,7 +25,8 @@ import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 @Component({
   selector: 'app-process-template-predictors',
   templateUrl: './process-template-predictors.component.html',
-  styleUrl: './process-template-predictors.component.css'
+  styleUrl: './process-template-predictors.component.css',
+  standalone: false
 })
 export class ProcessTemplatePredictorsComponent {
 

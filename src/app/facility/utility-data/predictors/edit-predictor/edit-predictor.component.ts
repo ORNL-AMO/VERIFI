@@ -24,7 +24,8 @@ import { getDegreeDayAmount } from 'src/app/shared/sharedHelperFuntions';
 @Component({
   selector: 'app-edit-predictor',
   templateUrl: './edit-predictor.component.html',
-  styleUrl: './edit-predictor.component.css'
+  styleUrl: './edit-predictor.component.css',
+  standalone: false
 })
 export class EditPredictorComponent {
 

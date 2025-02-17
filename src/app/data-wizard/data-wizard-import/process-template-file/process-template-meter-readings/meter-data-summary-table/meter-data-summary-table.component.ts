@@ -4,7 +4,8 @@ import { MeterDataSummary } from '../process-template-meter-readings.component';
 @Component({
   selector: 'app-meter-data-summary-table',
   templateUrl: './meter-data-summary-table.component.html',
-  styleUrl: './meter-data-summary-table.component.css'
+  styleUrl: './meter-data-summary-table.component.css',
+  standalone: false
 })
 export class MeterDataSummaryTableComponent {
   @Input({required: true})

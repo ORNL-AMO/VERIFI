@@ -8,9 +8,10 @@ import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 
 @Component({
-  selector: 'app-analysis-banner',
-  templateUrl: './analysis-banner.component.html',
-  styleUrls: ['./analysis-banner.component.css']
+    selector: 'app-analysis-banner',
+    templateUrl: './analysis-banner.component.html',
+    styleUrls: ['./analysis-banner.component.css'],
+    standalone: false
 })
 export class AnalysisBannerComponent implements OnInit {
 

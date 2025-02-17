@@ -3,8 +3,9 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Pipe({
-  pure: false,
-  name: 'facilityName'
+    pure: false,
+    name: 'facilityName',
+    standalone: false
 })
 export class FacilityNamePipe implements PipeTransform {
 

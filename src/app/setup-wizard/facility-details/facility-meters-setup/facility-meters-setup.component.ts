@@ -6,7 +6,8 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 @Component({
   selector: 'app-facility-meters-setup',
   templateUrl: './facility-meters-setup.component.html',
-  styleUrl: './facility-meters-setup.component.css'
+  styleUrl: './facility-meters-setup.component.css',
+  standalone: false
 })
 export class FacilityMetersSetupComponent {
 

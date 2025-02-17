@@ -3,7 +3,8 @@ import { getNAICS } from '../form-data/naics-data';
 import { AccountAndFacility } from 'src/app/models/idbModels/accountAndFacility';
 
 @Pipe({
-  name: 'naicsDisplay'
+    name: 'naicsDisplay',
+    standalone: false
 })
 export class NaicsDisplayPipe implements PipeTransform {
 

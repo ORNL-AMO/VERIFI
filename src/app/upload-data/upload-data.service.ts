@@ -27,8 +27,6 @@ import { PredictorDataDbService } from '../indexedDB/predictor-data-db.service';
 import { getNewIdbPredictor, IdbPredictor } from '../models/idbModels/predictor';
 import { getNewIdbPredictorData, IdbPredictorData } from '../models/idbModels/predictorData';
 import { checkSameDay, checkSameMonth } from './upload-helper-functions';
-import { ToastNotificationsService } from '../core-components/toast-notifications/toast-notifications.service';
-import { DegreeDaysService } from '../shared/helper-services/degree-days.service';
 
 @Injectable({
   providedIn: 'root'
@@ -47,9 +45,7 @@ export class UploadDataService {
     private editMeterFormService: EditMeterFormService,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
     private uploadDataV1Service: UploadDataV1Service,
-    private uploadDataV2Service: UploadDataV2Service,
-    private degreeDaysService: DegreeDaysService,
-    private toastNotificationService: ToastNotificationsService) {
+    private uploadDataV2Service: UploadDataV2Service) {
     this.allFilesSet = new BehaviorSubject<boolean>(false);
     this.fileReferences = new Array();
     this.uploadMeters = new Array();

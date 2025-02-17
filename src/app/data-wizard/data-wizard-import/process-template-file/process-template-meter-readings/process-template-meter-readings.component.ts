@@ -22,7 +22,8 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 @Component({
   selector: 'app-process-template-meter-readings',
   templateUrl: './process-template-meter-readings.component.html',
-  styleUrl: './process-template-meter-readings.component.css'
+  styleUrl: './process-template-meter-readings.component.css',
+  standalone: false
 })
 export class ProcessTemplateMeterReadingsComponent {
 

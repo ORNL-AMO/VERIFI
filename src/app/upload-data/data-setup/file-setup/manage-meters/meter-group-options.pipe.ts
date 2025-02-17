@@ -2,7 +2,8 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
 
 @Pipe({
-  name: 'meterGroupOptions2'
+    name: 'meterGroupOptions2',
+    standalone: false
 })
 export class MeterGroupOptionsPipe2 implements PipeTransform {
 

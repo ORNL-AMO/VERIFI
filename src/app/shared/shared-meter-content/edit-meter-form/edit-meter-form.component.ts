@@ -18,9 +18,10 @@ import { IdbCustomGWP } from 'src/app/models/idbModels/customGWP';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
 
 @Component({
-  selector: 'app-edit-meter-form',
-  templateUrl: './edit-meter-form.component.html',
-  styleUrls: ['./edit-meter-form.component.css']
+    selector: 'app-edit-meter-form',
+    templateUrl: './edit-meter-form.component.html',
+    styleUrls: ['./edit-meter-form.component.css'],
+    standalone: false
 })
 export class EditMeterFormComponent implements OnInit {
   @Input({required: true})

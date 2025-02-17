@@ -1,9 +1,10 @@
 import { Component } from '@angular/core';
 
 @Component({
-  selector: 'app-group-analysis-help',
-  templateUrl: './group-analysis-help.component.html',
-  styleUrls: ['./group-analysis-help.component.css']
+    selector: 'app-group-analysis-help',
+    templateUrl: './group-analysis-help.component.html',
+    styleUrls: ['./group-analysis-help.component.css'],
+    standalone: false
 })
 export class GroupAnalysisHelpComponent {
 

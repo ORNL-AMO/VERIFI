@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NgxIndexedDBModule } from 'ngx-indexed-db';
-import { dbConfig } from './dbConfig';
+import { dbConfig } from './_dbConfig';
 import { provideNgxWebstorage, withLocalStorage, withNgxWebstorageConfig, withSessionStorage } from 'ngx-webstorage';
 
 @NgModule({

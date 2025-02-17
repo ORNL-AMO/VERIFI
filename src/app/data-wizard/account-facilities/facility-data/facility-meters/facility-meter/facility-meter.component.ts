@@ -19,7 +19,8 @@ import { SharedDataService } from 'src/app/shared/helper-services/shared-data.se
 @Component({
   selector: 'app-facility-meter',
   templateUrl: './facility-meter.component.html',
-  styleUrl: './facility-meter.component.css'
+  styleUrl: './facility-meter.component.css',
+  standalone: false
 })
 export class FacilityMeterComponent {
 

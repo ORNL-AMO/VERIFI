@@ -10,9 +10,10 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 
 @Component({
-  selector: 'app-visualization',
-  templateUrl: './visualization.component.html',
-  styleUrls: ['./visualization.component.css']
+    selector: 'app-visualization',
+    templateUrl: './visualization.component.html',
+    styleUrls: ['./visualization.component.css'],
+    standalone: false
 })
 export class VisualizationComponent implements OnInit {
 

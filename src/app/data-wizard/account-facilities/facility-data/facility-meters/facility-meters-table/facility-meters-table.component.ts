@@ -18,7 +18,8 @@ import { SharedDataService } from 'src/app/shared/helper-services/shared-data.se
 @Component({
   selector: 'app-facility-meters-table',
   templateUrl: './facility-meters-table.component.html',
-  styleUrl: './facility-meters-table.component.css'
+  styleUrl: './facility-meters-table.component.css',
+  standalone: false
 })
 export class FacilityMetersTableComponent {
   @ViewChild('meterTable', { static: false }) meterTable: ElementRef;

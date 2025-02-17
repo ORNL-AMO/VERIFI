@@ -7,9 +7,10 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
-  selector: 'app-utility-data',
-  templateUrl: './utility-data.component.html',
-  styleUrls: ['./utility-data.component.css']
+    selector: 'app-utility-data',
+    templateUrl: './utility-data.component.html',
+    styleUrls: ['./utility-data.component.css'],
+    standalone: false
 })
 export class UtilityDataComponent implements OnInit {
 

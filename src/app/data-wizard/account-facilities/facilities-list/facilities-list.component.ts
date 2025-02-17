@@ -13,7 +13,8 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 @Component({
   selector: 'app-facilities-list',
   templateUrl: './facilities-list.component.html',
-  styleUrl: './facilities-list.component.css'
+  styleUrl: './facilities-list.component.css',
+  standalone: false
 })
 export class FacilitiesListComponent {
 facilitiesSub: Subscription;

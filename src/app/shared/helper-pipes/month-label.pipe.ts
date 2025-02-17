@@ -2,7 +2,8 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { Month, Months } from '../form-data/months';
 
 @Pipe({
-  name: 'monthLabel'
+    name: 'monthLabel',
+    standalone: false
 })
 export class MonthLabelPipe implements PipeTransform {
 

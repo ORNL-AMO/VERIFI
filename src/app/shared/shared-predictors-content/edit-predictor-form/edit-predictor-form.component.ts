@@ -14,7 +14,8 @@ import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 @Component({
   selector: 'app-edit-predictor-form',
   templateUrl: './edit-predictor-form.component.html',
-  styleUrl: './edit-predictor-form.component.css'
+  styleUrl: './edit-predictor-form.component.css',
+   standalone: false
 })
 export class EditPredictorFormComponent {
   @Input({ required: true })

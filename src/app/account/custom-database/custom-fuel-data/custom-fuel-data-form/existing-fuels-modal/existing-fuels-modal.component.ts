@@ -18,9 +18,10 @@ import { StationaryLiquidOptions } from 'src/app/shared/fuel-options/stationaryL
 import { StationarySolidOptions } from 'src/app/shared/fuel-options/stationarySolidOptions';
 
 @Component({
-  selector: 'app-existing-fuels-modal',
-  templateUrl: './existing-fuels-modal.component.html',
-  styleUrls: ['./existing-fuels-modal.component.css']
+    selector: 'app-existing-fuels-modal',
+    templateUrl: './existing-fuels-modal.component.html',
+    styleUrls: ['./existing-fuels-modal.component.css'],
+    standalone: false
 })
 export class ExistingFuelsModalComponent {
   @Input()

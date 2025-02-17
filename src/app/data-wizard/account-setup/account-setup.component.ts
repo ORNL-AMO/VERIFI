@@ -12,7 +12,8 @@ import { BackupDataService, BackupFile } from 'src/app/shared/helper-services/ba
 @Component({
   selector: 'app-account-setup',
   templateUrl: './account-setup.component.html',
-  styleUrl: './account-setup.component.css'
+  styleUrl: './account-setup.component.css',
+  standalone: false
 })
 export class AccountSetupComponent {
 

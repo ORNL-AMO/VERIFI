@@ -2,7 +2,8 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import * as _ from 'lodash';
 @Pipe({
-  name: 'facilityMetersList'
+  name: 'facilityMetersList',
+  standalone: false
 })
 export class FacilityMetersListPipe implements PipeTransform {
 

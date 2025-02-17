@@ -7,7 +7,8 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 @Component({
   selector: 'app-facility-data',
   templateUrl: './facility-data.component.html',
-  styleUrl: './facility-data.component.css'
+  styleUrl: './facility-data.component.css',
+  standalone: false
 })
 export class FacilityDataComponent {
 

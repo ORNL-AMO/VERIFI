@@ -9,7 +9,8 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 @Component({
   selector: 'app-process-template-file',
   templateUrl: './process-template-file.component.html',
-  styleUrl: './process-template-file.component.css'
+  styleUrl: './process-template-file.component.css',
+  standalone: false
 })
 export class ProcessTemplateFileComponent {
 

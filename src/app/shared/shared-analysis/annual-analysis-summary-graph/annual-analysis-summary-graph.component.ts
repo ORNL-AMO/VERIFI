@@ -5,9 +5,10 @@ import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysis
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 
 @Component({
-  selector: 'app-annual-analysis-summary-graph',
-  templateUrl: './annual-analysis-summary-graph.component.html',
-  styleUrls: ['./annual-analysis-summary-graph.component.css']
+    selector: 'app-annual-analysis-summary-graph',
+    templateUrl: './annual-analysis-summary-graph.component.html',
+    styleUrls: ['./annual-analysis-summary-graph.component.css'],
+    standalone: false
 })
 export class AnnualAnalysisSummaryGraphComponent implements OnInit {
   @Input()

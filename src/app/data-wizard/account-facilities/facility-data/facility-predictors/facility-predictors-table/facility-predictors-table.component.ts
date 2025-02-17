@@ -6,7 +6,8 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 @Component({
   selector: 'app-facility-predictors-table',
   templateUrl: './facility-predictors-table.component.html',
-  styleUrl: './facility-predictors-table.component.css'
+  styleUrl: './facility-predictors-table.component.css',
+  standalone: false
 })
 export class FacilityPredictorsTableComponent {
 

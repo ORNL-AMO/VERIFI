@@ -22,7 +22,8 @@ import { PredictorDataHelperService } from 'src/app/shared/helper-services/predi
 @Component({
   selector: 'app-calculated-predictor-data-update',
   templateUrl: './calculated-predictor-data-update.component.html',
-  styleUrl: './calculated-predictor-data-update.component.css'
+  styleUrl: './calculated-predictor-data-update.component.css',
+  standalone: false
 })
 export class CalculatedPredictorDataUpdateComponent {
   @Input()

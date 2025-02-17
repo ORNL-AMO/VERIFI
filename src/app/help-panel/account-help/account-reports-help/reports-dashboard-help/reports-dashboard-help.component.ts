@@ -1,9 +1,10 @@
 import { Component } from '@angular/core';
 
 @Component({
-  selector: 'app-reports-dashboard-help',
-  templateUrl: './reports-dashboard-help.component.html',
-  styleUrls: ['./reports-dashboard-help.component.css']
+    selector: 'app-reports-dashboard-help',
+    templateUrl: './reports-dashboard-help.component.html',
+    styleUrls: ['./reports-dashboard-help.component.css'],
+    standalone: false
 })
 export class ReportsDashboardHelpComponent {
 

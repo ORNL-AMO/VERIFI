@@ -17,7 +17,8 @@ import { SharedDataService } from 'src/app/shared/helper-services/shared-data.se
 @Component({
   selector: 'app-meter-data-table',
   templateUrl: './meter-data-table.component.html',
-  styleUrl: './meter-data-table.component.css'
+  styleUrl: './meter-data-table.component.css',
+  standalone: false
 })
 export class MeterDataTableComponent {
   itemsPerPage: number;

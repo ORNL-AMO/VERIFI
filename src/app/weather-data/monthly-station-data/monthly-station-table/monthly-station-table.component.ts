@@ -4,9 +4,10 @@ import { Subscription } from 'rxjs';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 
 @Component({
-  selector: 'app-monthly-station-table',
-  templateUrl: './monthly-station-table.component.html',
-  styleUrls: ['./monthly-station-table.component.css']
+    selector: 'app-monthly-station-table',
+    templateUrl: './monthly-station-table.component.html',
+    styleUrls: ['./monthly-station-table.component.css'],
+    standalone: false
 })
 export class MonthlyStationTableComponent {
   @Input()

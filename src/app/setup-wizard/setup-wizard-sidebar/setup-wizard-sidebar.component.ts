@@ -8,7 +8,8 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 @Component({
   selector: 'app-setup-wizard-sidebar',
   templateUrl: './setup-wizard-sidebar.component.html',
-  styleUrl: './setup-wizard-sidebar.component.css'
+  styleUrl: './setup-wizard-sidebar.component.css',
+  standalone: false
 })
 export class SetupWizardSidebarComponent {
 

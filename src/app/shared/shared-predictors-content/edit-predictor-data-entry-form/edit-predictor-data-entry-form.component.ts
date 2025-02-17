@@ -12,7 +12,8 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 @Component({
   selector: 'app-edit-predictor-data-entry-form',
   templateUrl: './edit-predictor-data-entry-form.component.html',
-  styleUrl: './edit-predictor-data-entry-form.component.css'
+  styleUrl: './edit-predictor-data-entry-form.component.css',
+  standalone: false
 })
 export class EditPredictorDataEntryFormComponent {
   @Input({ required: true })

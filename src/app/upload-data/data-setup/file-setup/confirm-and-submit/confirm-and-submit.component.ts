@@ -26,9 +26,10 @@ import { FileReference } from 'src/app/upload-data/upload-data-models';
 import { UploadDataService } from 'src/app/upload-data/upload-data.service';
 
 @Component({
-  selector: 'app-confirm-and-submit',
-  templateUrl: './confirm-and-submit.component.html',
-  styleUrls: ['./confirm-and-submit.component.css']
+    selector: 'app-confirm-and-submit',
+    templateUrl: './confirm-and-submit.component.html',
+    styleUrls: ['./confirm-and-submit.component.css'],
+    standalone: false
 })
 export class ConfirmAndSubmitComponent implements OnInit {
 

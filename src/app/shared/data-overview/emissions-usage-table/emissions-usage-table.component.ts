@@ -7,9 +7,10 @@ import { AccountOverviewService } from 'src/app/account/account-overview/account
 import { EmissionsTypes, getEmissionsTypeColor } from 'src/app/models/eGridEmissions';
 
 @Component({
-  selector: 'app-emissions-usage-table',
-  templateUrl: './emissions-usage-table.component.html',
-  styleUrls: ['./emissions-usage-table.component.css']
+    selector: 'app-emissions-usage-table',
+    templateUrl: './emissions-usage-table.component.html',
+    styleUrls: ['./emissions-usage-table.component.css'],
+    standalone: false
 })
 export class EmissionsUsageTableComponent {
   @Input()

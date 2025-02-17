@@ -8,9 +8,10 @@ import { AccountAnalysisService } from '../account-analysis.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
-  selector: 'app-account-analysis-footer',
-  templateUrl: './account-analysis-footer.component.html',
-  styleUrls: ['./account-analysis-footer.component.css']
+    selector: 'app-account-analysis-footer',
+    templateUrl: './account-analysis-footer.component.html',
+    styleUrls: ['./account-analysis-footer.component.css'],
+    standalone: false
 })
 export class AccountAnalysisFooterComponent implements OnInit {
 

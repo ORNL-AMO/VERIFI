@@ -5,7 +5,8 @@ import { DataWizardService } from '../data-wizard.service';
 @Component({
   selector: 'app-data-wizard-help-panel',
   templateUrl: './data-wizard-help-panel.component.html',
-  styleUrl: './data-wizard-help-panel.component.css'
+  styleUrl: './data-wizard-help-panel.component.css',
+  standalone: false
 })
 export class DataWizardHelpPanelComponent {
   @Output('emitToggleCollapse')

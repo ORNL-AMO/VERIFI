@@ -24,9 +24,10 @@ import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 
 @Component({
-  selector: 'app-data-overview-report',
-  templateUrl: './data-overview-report.component.html',
-  styleUrls: ['./data-overview-report.component.css']
+    selector: 'app-data-overview-report',
+    templateUrl: './data-overview-report.component.html',
+    styleUrls: ['./data-overview-report.component.css'],
+    standalone: false
 })
 export class DataOverviewReportComponent {
 

@@ -4,9 +4,10 @@ import { BetterClimateYearDetails } from 'src/app/calculations/carbon-calculatio
 import { getEmissionsTypeColor } from 'src/app/models/eGridEmissions';
 
 @Component({
-  selector: 'app-absolute-emissions-chart',
-  templateUrl: './absolute-emissions-chart.component.html',
-  styleUrls: ['./absolute-emissions-chart.component.css']
+    selector: 'app-absolute-emissions-chart',
+    templateUrl: './absolute-emissions-chart.component.html',
+    styleUrls: ['./absolute-emissions-chart.component.css'],
+    standalone: false
 })
 export class AbsoluteEmissionsChartComponent {
   @Input()

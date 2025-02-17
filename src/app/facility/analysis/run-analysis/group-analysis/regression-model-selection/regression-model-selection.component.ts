@@ -12,9 +12,10 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 @Component({
-  selector: 'app-regression-model-selection',
-  templateUrl: './regression-model-selection.component.html',
-  styleUrls: ['./regression-model-selection.component.css']
+    selector: 'app-regression-model-selection',
+    templateUrl: './regression-model-selection.component.html',
+    styleUrls: ['./regression-model-selection.component.css'],
+    standalone: false
 })
 export class RegressionModelSelectionComponent implements OnInit {
 

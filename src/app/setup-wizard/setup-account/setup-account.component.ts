@@ -6,9 +6,10 @@ import { Subscription } from 'rxjs';
 import { Router } from '@angular/router';
 import { getNewIdbAccount, IdbAccount } from 'src/app/models/idbModels/account';
 @Component({
-  selector: 'app-setup-account',
-  templateUrl: './setup-account.component.html',
-  styleUrls: ['./setup-account.component.css']
+    selector: 'app-setup-account',
+    templateUrl: './setup-account.component.html',
+    styleUrls: ['./setup-account.component.css'],
+    standalone: false
 })
 export class SetupAccountComponent implements OnInit {
 

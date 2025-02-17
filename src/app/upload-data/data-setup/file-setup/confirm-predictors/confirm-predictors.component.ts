@@ -7,9 +7,10 @@ import { FileReference, getEmptyFileReference } from 'src/app/upload-data/upload
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 
 @Component({
-  selector: 'app-confirm-predictors',
-  templateUrl: './confirm-predictors.component.html',
-  styleUrls: ['./confirm-predictors.component.css']
+    selector: 'app-confirm-predictors',
+    templateUrl: './confirm-predictors.component.html',
+    styleUrls: ['./confirm-predictors.component.css'],
+    standalone: false
 })
 export class ConfirmPredictorsComponent implements OnInit {
   

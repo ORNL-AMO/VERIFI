@@ -13,7 +13,8 @@ import { FileReference, getEmptyFileReference } from 'src/app/upload-data/upload
 @Component({
   selector: 'app-process-template-facilities',
   templateUrl: './process-template-facilities.component.html',
-  styleUrl: './process-template-facilities.component.css'
+  styleUrl: './process-template-facilities.component.css',
+  standalone: false
 })
 export class ProcessTemplateFacilitiesComponent {
 

@@ -14,9 +14,10 @@ import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
 import { UtilityMeterDataService } from 'src/app/shared/shared-meter-content/utility-meter-data.service';
 
 @Component({
-  selector: 'app-other-emissions-data-table',
-  templateUrl: './other-emissions-data-table.component.html',
-  styleUrls: ['./other-emissions-data-table.component.css']
+    selector: 'app-other-emissions-data-table',
+    templateUrl: './other-emissions-data-table.component.html',
+    styleUrls: ['./other-emissions-data-table.component.css'],
+    standalone: false
 })
 export class OtherEmissionsDataTableComponent {
   @Input()

@@ -5,9 +5,10 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 
 @Component({
-  selector: 'app-primary-energy-consumption-table',
-  templateUrl: './primary-energy-consumption-table.component.html',
-  styleUrls: ['./primary-energy-consumption-table.component.css']
+    selector: 'app-primary-energy-consumption-table',
+    templateUrl: './primary-energy-consumption-table.component.html',
+    styleUrls: ['./primary-energy-consumption-table.component.css'],
+    standalone: false
 })
 export class PrimaryEnergyConsumptionTableComponent implements OnInit {
   @Input()

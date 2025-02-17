@@ -13,9 +13,10 @@ import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.
 import { DataOverviewFacilityReportSettings, IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
 
 @Component({
-  selector: 'app-facility-section-report',
-  templateUrl: './facility-section-report.component.html',
-  styleUrls: ['./facility-section-report.component.css']
+    selector: 'app-facility-section-report',
+    templateUrl: './facility-section-report.component.html',
+    styleUrls: ['./facility-section-report.component.css'],
+    standalone: false
 })
 export class FacilitySectionReportComponent {
   @Input()

@@ -4,7 +4,8 @@ import * as _ from 'lodash';
 
 @Pipe({
   name: 'orderCalculatedPredictorData',
-  pure: false
+  pure: false,
+  standalone: false
 })
 export class OrderCalculatedPredictorDataPipe implements PipeTransform {
 
