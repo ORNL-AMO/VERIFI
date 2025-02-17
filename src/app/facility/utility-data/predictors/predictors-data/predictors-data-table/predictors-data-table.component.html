@@ -53,6 +53,7 @@
     of this facility.
 </div>
 <ng-template [ngIf]="predictorData.length != 0" [ngIfElse]="noDataBlock">
+    @let filteredPredictorData = predictorData| orderPredictorDataTable:orderDataField:orderByDirection:filterErrors;
     <table class="table utility-data table-sm table-bordered table-hover" #predictorTable
         [ngClass]="{'copying-table': copyingTable}">
         <thead class="sortable">
@@ -80,7 +81,7 @@
         </thead>
         <tbody class="table-group-divider">
             <tr
-                *ngFor="let pData of predictorData| orderPredictorDataTable:orderDataField:orderByDirection:filterErrors | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage ">
+                *ngFor="let pData of filteredPredictorData| slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage;">
                 <td class="input" *ngIf="!copyingTable">
                     <input type="checkbox" name="predictorEntry" (change)="setHasChecked()" [(ngModel)]="pData.checked">
                 </td>
@@ -122,8 +123,8 @@
                 <span class="fa fa-copy"></span> Copy Table
             </button>
         </div>
-        <ngb-pagination [collectionSize]="predictorData.length" [(page)]="currentPageNumber" [pageSize]="itemsPerPage"
-            [maxSize]="5" [rotate]="true" aria-label="Pagination">
+        <ngb-pagination [collectionSize]="filteredPredictorData.length" [(page)]="currentPageNumber"
+            [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true" aria-label="Pagination">
         </ngb-pagination>
     </div>
 </ng-template>

@@ -141,8 +141,8 @@ export class MonthlyFacilityAnalysisClass {
                 baselineAdjustmentInput: summaryDataItem.baselineAdjustmentInput,
                 isBanked: false,
                 isIntermediateBanked: false,
-                savingsBanked: summaryDataItem.monthlyAnalysisCalculatedValues.savingsBanked,
-                savingsUnbanked: summaryDataItem.monthlyAnalysisCalculatedValues.savingsUnbanked
+                savingsBanked: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.savingsBanked),
+                savingsUnbanked: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.savingsUnbanked)
             }
         })
     }
