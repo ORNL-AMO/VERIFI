@@ -6,12 +6,14 @@ import { NavigationEnd, Router } from '@angular/router';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { AccountAnalysisService } from '../account-analysis.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
+import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 
 @Component({
-    selector: 'app-account-analysis-footer',
-    templateUrl: './account-analysis-footer.component.html',
-    styleUrls: ['./account-analysis-footer.component.css'],
-    standalone: false
+  selector: 'app-account-analysis-footer',
+  templateUrl: './account-analysis-footer.component.html',
+  styleUrls: ['./account-analysis-footer.component.css'],
+  standalone: false
 })
 export class AccountAnalysisFooterComponent implements OnInit {
 
@@ -23,13 +25,21 @@ export class AccountAnalysisFooterComponent implements OnInit {
   routerSub: Subscription;
   inDashboard: boolean;
   showContinue: boolean;
+  analysisItem: IdbAccountAnalysisItem;
+  analysisItemSub: Subscription
   constructor(private sharedDataService: SharedDataService,
     private helpPanelService: HelpPanelService,
     private router: Router,
     private facilityDbService: FacilitydbService,
-    private accountAnalysisService: AccountAnalysisService) { }
+    private accountAnalysisService: AccountAnalysisService,
+    private accountAnalysisDbService: AccountAnalysisDbService) { }
 
   ngOnInit(): void {
+
+    this.analysisItemSub = this.accountAnalysisDbService.selectedAnalysisItem.subscribe(val => {
+      this.analysisItem = val;
+    });
+
     this.routerSub = this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
         this.setInDashboard(event.url);
@@ -51,6 +61,7 @@ export class AccountAnalysisFooterComponent implements OnInit {
     this.sidebarOpenSub.unsubscribe();
     this.helpPanelOpenSub.unsubscribe();
     this.routerSub.unsubscribe();
+    this.analysisItemSub.unsubscribe();
   }
 
   setInDashboard(url: string) {

@@ -12,3 +12,9 @@
 .fixed-bottom.help-panel-open{
     right: 260px;
 }
+
+.analysis-name{
+    background-color: white;
+    padding: .5rem;
+    font-weight: bold;
+}
