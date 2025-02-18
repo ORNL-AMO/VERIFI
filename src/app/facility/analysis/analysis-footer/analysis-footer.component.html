@@ -3,10 +3,11 @@
         <div>
             <button class="btn" (click)="goBack()"><span class="fa fa-chevron-left pe-1"></span>Back </button>
         </div>
-        <div *ngIf="showGoBackToAccount">
-            <button class="btn btn-secondary" (click)="goBackToAccount()">Return to Account Analysis</button>
+        <div class="analysis-name">
+            {{analysisItem.name}}
         </div>
         <div>
+            <button *ngIf="showGoBackToAccount" class="btn btn-secondary me-1" (click)="goBackToAccount()">Return to Account Analysis</button>
             <button *ngIf="showContinue" class="btn" (click)="continue()" [disabled]="disableContinue">Continue<span class="fa fa-chevron-right ps-1"></span></button>
             <button *ngIf="!showContinue" class="btn" (click)="returnToDashboard()">
                 <i class="fa fa-list"></i> All Facility Analysis
