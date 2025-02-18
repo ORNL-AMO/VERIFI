@@ -6,13 +6,12 @@
                 <ng-template [ngIf]="metersIncluded" [ngIfElse]="noMetersIncludedBlock">
                     <div class="d-flex w-100 justify-content-end mb-2" *ngIf="!editMeterForm">
                         <ng-template [ngIf]="!fileReference.metersSubmitted" [ngIfElse]="notSubmittedBlock">
-                            <button class="btn btn-success btn-sm" (click)="submitMeters()"
-                                [disabled]="!allMetersValid">
-                                <span class="fa fa-plus"></span> Submit Meters
+                            <button class="btn btn-success" (click)="submitMeters()" [disabled]="!allMetersValid">
+                                <span class="fa fa-upload"></span> Submit Meters
                             </button>
                         </ng-template>
                         <ng-template #notSubmittedBlock>
-                            <div class="alert alert-info small p-2">
+                            <div class="alert alert-info p-2">
                                 Meters submitted. Use the next button to move on to meter data upload.
                             </div>
                         </ng-template>
@@ -188,11 +187,11 @@
                     <ng-container *ngIf="editMeterForm">
                         <div class="d-flex justify-content-end">
                             <div class="d-flex">
-                                <button class="btn btn-secondary btn-sm" (click)="cancelEdit()">Discard Meter
+                                <button class="btn btn-secondary" (click)="cancelEdit()">Discard Meter
                                     Changes</button>
                             </div>
                             <div class="d-flex">
-                                <button class="btn btn-success ms-2 btn-sm" (click)="submitMeter()">Save Meter
+                                <button class="btn btn-success ms-2" (click)="submitMeter()">Save Meter
                                     Changes</button>
                             </div>
                         </div>
@@ -231,7 +230,8 @@
                 </ng-template>
                 <ng-template #noMetersIncludedBlock>
                     <div class="alert alert-warning p-2">
-                        No import meters found. Go back to column selection and include meters or click continue to move on
+                        No import meters found. Go back to column selection and include meters or click continue to move
+                        on
                         to predictors.
                     </div>
                 </ng-template>
@@ -246,7 +246,7 @@
             <span class="fa fa-chevron-left"></span>
             Go Back
         </button>
-        <div class="footer-text">
+        <!-- <div class="footer-text">
             <ng-template [ngIf]="!fileReference.metersSubmitted" [ngIfElse]="metersSubmittedBlock">
                 Submitting meters will add them to their facilities. Meter data can then be added
                 to the corresponding meters on the next page.
@@ -254,9 +254,14 @@
             <ng-template #metersSubmittedBlock>
                 These meters have been added to to their facilities!
             </ng-template>
-        </div>
+        </div> -->
         <button class="btn btn-dark" (click)="next()">
-            Next
+            <ng-template [ngIf]="fileReference.metersSubmitted" [ngIfElse]="skipMetersBlock">
+                Next
+            </ng-template>
+            <ng-template #skipMetersBlock>
+                Skip Meters
+            </ng-template>
             <span class="fa fa-chevron-right"></span>
         </button>
     </div>

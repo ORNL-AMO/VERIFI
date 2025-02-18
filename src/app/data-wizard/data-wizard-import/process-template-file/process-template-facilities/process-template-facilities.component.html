@@ -5,12 +5,12 @@
                 <h4>Process File {{fileReference.name}}</h4>
                 <div class="d-flex w-100 justify-content-end mb-2">
                     <ng-template [ngIf]="!fileReference.facilitiesSubmitted" [ngIfElse]="notSubmittedBlock">
-                        <button class="btn btn-success btn-sm" (click)="submitFacilities()">
-                            <span class="fa fa-plus"></span> Submit Facilities
+                        <button class="btn btn-success" (click)="submitFacilities()">
+                            <span class="fa fa-upload"></span> Submit Facilities
                         </button>
                     </ng-template>
                     <ng-template #notSubmittedBlock>
-                        <div class="alert alert-info small p-2">
+                        <div class="alert alert-info p-2">
                             Facilities submitted. Use the next button to move on to meters upload.
                         </div>
                     </ng-template>
@@ -111,17 +111,23 @@
             <span class="fa fa-chevron-left"></span>
             Go Back
         </button>
-        <div class="footer-text">
+        <!-- <div class="footer-text">
             <ng-template [ngIf]="!fileReference.facilitiesSubmitted" [ngIfElse]="facilitiesSubmittedBlock">
-                Submitting facilities will add them to <i>{{account.name}}</i>. Meters and predictors can then be added to
+                Submitting facilities will add them to <i>{{account.name}}</i>. Meters and predictors can then be added
+                to
                 their respective facilities.
             </ng-template>
             <ng-template #facilitiesSubmittedBlock>
                 These facilities have been added to {{account.name}}
             </ng-template>
-        </div>
+        </div> -->
         <button class="btn btn-dark" (click)="next()">
-            Next
+            <ng-template [ngIf]="fileReference.facilitiesSubmitted" [ngIfElse]="skipBlock">
+                Next
+            </ng-template>
+            <ng-template #skipBlock>
+                Skip Facilities
+            </ng-template>
             <span class="fa fa-chevron-right"></span>
         </button>
     </div>
