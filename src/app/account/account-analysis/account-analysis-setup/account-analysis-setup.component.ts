@@ -6,7 +6,7 @@ import { Month, Months } from 'src/app/shared/form-data/months';
 import { EnergyUnitOptions, UnitOption, VolumeLiquidOptions } from 'src/app/shared/unitOptions';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Subscription } from 'rxjs';
 import { AnalysisValidationService } from 'src/app/shared/helper-services/analysis-validation.service';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
@@ -26,10 +26,10 @@ import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 
 @Component({
-    selector: 'app-account-analysis-setup',
-    templateUrl: './account-analysis-setup.component.html',
-    styleUrls: ['./account-analysis-setup.component.css'],
-    standalone: false
+  selector: 'app-account-analysis-setup',
+  templateUrl: './account-analysis-setup.component.html',
+  styleUrls: ['./account-analysis-setup.component.css'],
+  standalone: false
 })
 export class AccountAnalysisSetupComponent implements OnInit {
 
@@ -47,6 +47,9 @@ export class AccountAnalysisSetupComponent implements OnInit {
   displayEnableForm: boolean = false;
   displayBulkAnalysisModal: boolean = false;
   analysisType: AnalysisType = 'absoluteEnergyConsumption';
+
+  analysisItemSub: Subscription;
+  isFormChange: boolean = false;
   constructor(private accountDbService: AccountdbService, private accountAnalysisDbService: AccountAnalysisDbService,
     private router: Router,
     private dbChangesService: DbChangesService,
@@ -63,19 +66,30 @@ export class AccountAnalysisSetupComponent implements OnInit {
     private predictorDbService: PredictorDbService) { }
 
   ngOnInit(): void {
-    this.analysisItem = this.accountAnalysisDbService.selectedAnalysisItem.getValue();
-    if (!this.analysisItem) {
-      this.router.navigateByUrl('/account/analysis/dashboard')
-    }
-    this.account = this.accountDbService.selectedAccount.getValue();
-    this.setDisableForm();
-    this.setShowInUseMessage();
-    this.energyUnit = this.account.energyUnit;
-    this.yearOptions = this.calendarizationService.getYearOptionsAccount(this.analysisItem.analysisCategory);
-    this.setBaselineYearWarning();
+    this.analysisItemSub = this.accountAnalysisDbService.selectedAnalysisItem.subscribe(item => {
+      if (!this.isFormChange) {
+        this.analysisItem = item;
+        if (!this.analysisItem) {
+          this.router.navigateByUrl('/account/analysis/dashboard')
+        }
+        this.account = this.accountDbService.selectedAccount.getValue();
+        this.setDisableForm();
+        this.setShowInUseMessage();
+        this.energyUnit = this.account.energyUnit;
+        this.yearOptions = this.calendarizationService.getYearOptionsAccount(this.analysisItem.analysisCategory);
+        this.setBaselineYearWarning();
+      }else{
+        this.isFormChange = false;
+      }
+    });
+  }
+
+  ngOnDestroy(){
+    this.analysisItemSub.unsubscribe();
   }
 
   async saveItem() {
+    this.isFormChange = true;
     let analysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
     this.analysisItem.setupErrors = this.analysisValidationService.getAccountAnalysisSetupErrors(this.analysisItem, analysisItems);
     await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(this.analysisItem));

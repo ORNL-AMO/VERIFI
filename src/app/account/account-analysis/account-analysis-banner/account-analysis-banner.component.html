@@ -10,11 +10,13 @@
             </li>
             <li class="nav-item" [ngClass]="{'disabled': accountAnalysisItem.setupErrors.hasError}">
                 <a class="nav-link" routerLink="/account/analysis/select-items" [routerLinkActive]="['active']">
-                    <span class="fa fa-exclamation-circle" *ngIf="accountAnalysisItem.setupErrors.facilitiesSelectionsInvalid"></span>
+                    <span class="fa fa-exclamation-circle"
+                        *ngIf="accountAnalysisItem.setupErrors.facilitiesSelectionsInvalid"></span>
                     <i class="fa fa-list-check"></i>
                     Select Facility Items</a>
             </li>
-            <li class="nav-item" [ngClass]="{'disabled': accountAnalysisItem.setupErrors.facilitiesSelectionsInvalid || accountAnalysisItem.setupErrors.hasError}">
+            <li class="nav-item"
+                [ngClass]="{'disabled': accountAnalysisItem.setupErrors.facilitiesSelectionsInvalid || accountAnalysisItem.setupErrors.hasError}">
                 <a class="nav-link" routerLink="/account/analysis/results" [routerLinkActive]="['active']">
                     <i class="fa fa-magnifying-glass-chart"></i>
                     Analysis Results</a>
@@ -22,13 +24,39 @@
         </ul>
     </div>
     <div>
-        <ul class="nav nav-tabs">
-            <li class="nav-item">
-                <a class="nav-link home-link" routerLink="dashboard" [routerLinkActive]="['active']">
-                    <i class="fa fa-list"></i>
-                    All Account Analysis
-                </a>
-            </li>
-        </ul>
+        <div>
+            <ul class="nav nav-tabs">
+                <li class="nav-item dropdown">
+                    <a class="nav-link home-link dropdown-toggle" (click)="toggleShow()">
+                        <i *ngIf="accountAnalysisItem.analysisCategory == 'water'" class="fa fa-droplet"></i>
+                        <i *ngIf="accountAnalysisItem.analysisCategory == 'energy'" class="fa fa-plug"></i>
+                        {{accountAnalysisItem.name}} - ({{accountAnalysisItem.reportYear}})
+                    </a>
+                    <ul class="dropdown-menu" [ngClass]="{'show': showDropdown}">
+                        <ng-container *ngFor="let analysisItemOption of accountAnalysisItems">
+                            <li *ngIf="accountAnalysisItem.guid != analysisItemOption.guid">
+                                <a class="dropdown-item" (click)="selectItem(analysisItemOption)">
+                                    <i *ngIf="analysisItemOption.analysisCategory == 'water'" class="fa fa-droplet"></i>
+                                    <i *ngIf="analysisItemOption.analysisCategory == 'energy'" class="fa fa-plug"></i>
+                                    {{analysisItemOption.name}} 
+                                    <span class="badge text-bg-secondary ms-2 float-right">
+                                        {{analysisItemOption.reportYear}}
+                                    </span>
+                                </a>
+                            </li>
+                        </ng-container>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li>
+                            <a class="dropdown-item" routerLink="dashboard" [routerLinkActive]="['active']">
+                                <i class="fa fa-list"></i> View All Account Analysis
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+
     </div>
 </div>

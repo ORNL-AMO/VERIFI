@@ -29,9 +29,9 @@
     background-color: white;
 }
 
-.nav-tabs .nav-link:not(.active){
+.nav-tabs a.nav-link:not(.active){
     background-color: #145A32;
-    color: white;
+    color: white !important;
     border: solid 1px white;
 }
 
@@ -43,4 +43,13 @@
     background-color: #17202A;
     color: white;
     border-color: #17202A;
+}
+
+.dropdown-menu{
+    z-index: 9999;
+    position: fixed;
+}
+
+.float-right{
+    float: right;
 }
