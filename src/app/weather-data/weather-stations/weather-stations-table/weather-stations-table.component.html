@@ -10,7 +10,9 @@
                 Distance Away</th>
             <th (click)="setOrderDataField('begin')" [ngClass]="{'active': orderDataField == 'begin'}">Data Start</th>
             <th (click)="setOrderDataField('end')" [ngClass]="{'active': orderDataField == 'end'}">Data End</th>
-            <th (click)="setOrderDataField('ratingPercent')" [ngClass]="{'active': orderDataField == 'ratingPercent'}">Percent Rating</th>
+            <th (click)="setOrderDataField('ratingPercent')" [ngClass]="{'active': orderDataField == 'ratingPercent'}">
+                &percnt; Hourly Coverage
+            </th>
         </tr>
     </thead>
     <tbody class="table-group-divider">
