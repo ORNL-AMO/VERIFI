@@ -35,30 +35,33 @@
     <div>
         <ul class="nav nav-tabs">
             <li class="nav-item dropdown">
-                <a class="nav-link home-link dropdown-toggle" (click)="toggleShow()">   
+                <a class="nav-link home-link dropdown-toggle" (click)="toggleShow()">
                     <i *ngIf="analysisItem.analysisCategory == 'water'" class="fa fa-droplet"></i>
-                    <i *ngIf="analysisItem.analysisCategory == 'energy'" class="fa fa-plug"></i> 
+                    <i *ngIf="analysisItem.analysisCategory == 'energy'" class="fa fa-plug"></i>
                     {{analysisItem.name}} - ({{analysisItem.reportYear}})
                 </a>
                 <ul class="dropdown-menu" [ngClass]="{'show': showDropdown}">
-                    <ng-container *ngFor="let analysisItemOption of analysisItems">
-                        <li *ngIf="analysisItem.guid != analysisItemOption.guid">
-                            <a class="dropdown-item" (click)="selectItem(analysisItemOption)">
-                                <i *ngIf="analysisItemOption.analysisCategory == 'water'" class="fa fa-droplet"></i>
-                                <i *ngIf="analysisItemOption.analysisCategory == 'energy'" class="fa fa-plug"></i>
-                                {{analysisItemOption.name}}
-                                <span class="badge text-bg-secondary ms-2 float-right">
-                                    {{analysisItemOption.reportYear}}
-                                </span>
-                            </a>
-                        </li>
-                    </ng-container>
+                    <div class="menu-scroll-section">
+                        <ng-container *ngFor="let analysisItemOption of analysisItems">
+                            <li
+                                *ngIf="analysisItem.guid != analysisItemOption.guid && analysisItemOption.analysisCategory == analysisItem.analysisCategory">
+                                <a class="dropdown-item" (click)="selectItem(analysisItemOption)">
+                                    <i *ngIf="analysisItemOption.analysisCategory == 'water'" class="fa fa-droplet"></i>
+                                    <i *ngIf="analysisItemOption.analysisCategory == 'energy'" class="fa fa-plug"></i>
+                                    {{analysisItemOption.name}}
+                                    <span class="badge text-bg-secondary ms-2 float-right">
+                                        {{analysisItemOption.reportYear}}
+                                    </span>
+                                </a>
+                            </li>
+                        </ng-container>
+                    </div>
                     <li>
                         <hr class="dropdown-divider">
                     </li>
                     <li>
                         <a class="dropdown-item" routerLink="analysis-dashboard" [routerLinkActive]="['active']">
-                           <i class="fa fa-list"></i> View All Facility Analysis
+                            <i class="fa fa-list"></i> View All Facility Analysis
                         </a>
                     </li>
                 </ul>

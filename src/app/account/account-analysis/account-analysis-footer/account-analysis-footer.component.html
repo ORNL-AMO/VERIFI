@@ -3,9 +3,6 @@
         <div>
             <button class="btn" (click)="goBack()"><span class="fa fa-chevron-left pe-1"></span>Back </button>
         </div>
-        <div class="analysis-name">
-            {{analysisItem.name}}
-        </div>
         <div>
             <button *ngIf="showContinue" class="btn" (click)="continue()">Continue<span class="fa fa-chevron-right ps-1"></span></button>
             <button *ngIf="!showContinue" class="btn" (click)="returnToDashboard()">
