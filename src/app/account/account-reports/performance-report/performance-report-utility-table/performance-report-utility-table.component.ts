@@ -8,9 +8,10 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 
 @Component({
-  selector: 'app-performance-report-utility-table',
-  templateUrl: './performance-report-utility-table.component.html',
-  styleUrls: ['./performance-report-utility-table.component.css']
+    selector: 'app-performance-report-utility-table',
+    templateUrl: './performance-report-utility-table.component.html',
+    styleUrls: ['./performance-report-utility-table.component.css'],
+    standalone: false
 })
 export class PerformanceReportUtilityTableComponent {
   @Input()

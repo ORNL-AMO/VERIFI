@@ -22,9 +22,10 @@ import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 
 @Component({
-  selector: 'app-facility-home',
-  templateUrl: './facility-home.component.html',
-  styleUrls: ['./facility-home.component.css']
+    selector: 'app-facility-home',
+    templateUrl: './facility-home.component.html',
+    styleUrls: ['./facility-home.component.css'],
+    standalone: false
 })
 export class FacilityHomeComponent implements OnInit {
 

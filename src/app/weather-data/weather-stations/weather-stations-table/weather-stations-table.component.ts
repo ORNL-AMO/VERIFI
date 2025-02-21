@@ -6,9 +6,10 @@ import { Router } from '@angular/router';
 import { WeatherDataService } from '../../weather-data.service';
 
 @Component({
-  selector: 'app-weather-stations-table',
-  templateUrl: './weather-stations-table.component.html',
-  styleUrls: ['./weather-stations-table.component.css']
+    selector: 'app-weather-stations-table',
+    templateUrl: './weather-stations-table.component.html',
+    styleUrls: ['./weather-stations-table.component.css'],
+    standalone: false
 })
 export class WeatherStationsTableComponent {
   @Input()

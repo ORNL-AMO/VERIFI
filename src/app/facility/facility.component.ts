@@ -7,9 +7,10 @@ import { IdbFacility } from '../models/idbModels/facility';
 import { FacilityReportsService } from './facility-reports/facility-reports.service';
 
 @Component({
-  selector: 'app-facility',
-  templateUrl: './facility.component.html',
-  styleUrls: ['./facility.component.css']
+    selector: 'app-facility',
+    templateUrl: './facility.component.html',
+    styleUrls: ['./facility.component.css'],
+    standalone: false
 })
 export class FacilityComponent implements OnInit {
 

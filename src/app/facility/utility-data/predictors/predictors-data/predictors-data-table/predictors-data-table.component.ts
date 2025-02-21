@@ -14,16 +14,16 @@ import { ToastNotificationsService } from 'src/app/core-components/toast-notific
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { WeatherStation } from 'src/app/models/degreeDays';
-import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
 import { WeatherDataService } from 'src/app/weather-data/weather-data.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { PredictorDataHelperService } from 'src/app/shared/helper-services/predictor-data-helper.service';
 
 @Component({
-  selector: 'app-predictors-data-table',
-  templateUrl: './predictors-data-table.component.html',
-  styleUrl: './predictors-data-table.component.css'
+    selector: 'app-predictors-data-table',
+    templateUrl: './predictors-data-table.component.html',
+    styleUrl: './predictors-data-table.component.css',
+    standalone: false
 })
 export class PredictorsDataTableComponent {
   @ViewChild('predictorTable', { static: false }) predictorTable: ElementRef;
@@ -58,7 +58,6 @@ export class PredictorsDataTableComponent {
     private toastNotificationService: ToastNotificationsService,
     private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
-    private degreeDaysService: DegreeDaysService,
     private weatherDataService: WeatherDataService,
     private predictorDataHelperService: PredictorDataHelperService
   ) {
@@ -227,8 +226,8 @@ export class PredictorsDataTableComponent {
   }
 
   async viewWeatherData(predictorEntry: IdbPredictorData) {
-    let weatherStation: WeatherStation | 'error' = await this.degreeDaysService.getStationById(this.predictor.weatherStationId);
-    if (weatherStation != 'error') {
+    let weatherStation: WeatherStation = await this.weatherDataService.getStation(this.predictor.weatherStationId);
+    if (weatherStation) {
       this.weatherDataService.selectedStation = weatherStation;
       this.weatherDataService.weatherDataSelection = this.predictor.weatherDataType;
       if (this.predictor.weatherDataType == 'CDD') {

@@ -6,9 +6,10 @@ import { UtilityUseAndCost } from 'src/app/calculations/dashboard-calculations/u
 import { YearMonthData } from 'src/app/models/dashboard';
 
 @Component({
-  selector: 'app-costs-overview',
-  templateUrl: './costs-overview.component.html',
-  styleUrls: ['./costs-overview.component.css']
+    selector: 'app-costs-overview',
+    templateUrl: './costs-overview.component.html',
+    styleUrls: ['./costs-overview.component.css'],
+    standalone: false
 })
 export class CostsOverviewComponent implements OnInit {
 

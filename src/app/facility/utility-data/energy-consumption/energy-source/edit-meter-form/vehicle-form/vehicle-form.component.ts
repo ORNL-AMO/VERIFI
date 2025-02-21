@@ -12,9 +12,10 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
 
 @Component({
-  selector: 'app-vehicle-form',
-  templateUrl: './vehicle-form.component.html',
-  styleUrls: ['./vehicle-form.component.css']
+    selector: 'app-vehicle-form',
+    templateUrl: './vehicle-form.component.html',
+    styleUrls: ['./vehicle-form.component.css'],
+    standalone: false
 })
 export class VehicleFormComponent {
   @Input()

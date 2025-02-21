@@ -12,9 +12,10 @@ import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 
 @Component({
-  selector: 'app-better-plants-setup',
-  templateUrl: './better-plants-setup.component.html',
-  styleUrls: ['./better-plants-setup.component.css']
+    selector: 'app-better-plants-setup',
+    templateUrl: './better-plants-setup.component.html',
+    styleUrls: ['./better-plants-setup.component.css'],
+    standalone: false
 })
 export class BetterPlantsSetupComponent {
 

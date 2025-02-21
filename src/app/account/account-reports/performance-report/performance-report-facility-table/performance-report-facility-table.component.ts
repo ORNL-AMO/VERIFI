@@ -7,9 +7,10 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 
 @Component({
-  selector: 'app-performance-report-facility-table',
-  templateUrl: './performance-report-facility-table.component.html',
-  styleUrls: ['./performance-report-facility-table.component.css']
+    selector: 'app-performance-report-facility-table',
+    templateUrl: './performance-report-facility-table.component.html',
+    styleUrls: ['./performance-report-facility-table.component.css'],
+    standalone: false
 })
 export class PerformanceReportFacilityTableComponent {
   @Input()

@@ -19,9 +19,10 @@ import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
 
 @Component({
-  selector: 'app-calanderization',
-  templateUrl: './calanderization.component.html',
-  styleUrls: ['./calanderization.component.css']
+    selector: 'app-calanderization',
+    templateUrl: './calanderization.component.html',
+    styleUrls: ['./calanderization.component.css'],
+    standalone: false
 })
 export class CalanderizationComponent implements OnInit {
 

@@ -1,7 +1,8 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
-  name: 'tableCellShading'
+    name: 'tableCellShading',
+    standalone: false
 })
 export class TableCellShadingPipe implements PipeTransform {
 

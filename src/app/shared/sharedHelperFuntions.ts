@@ -170,18 +170,30 @@ import * as _ from 'lodash';
 export function getDegreeDayAmount(degreeDays: Array<DetailDegreeDay>, weatherDataSelection: WeatherDataSelection): number {
     if (weatherDataSelection == 'CDD') {
         return _.sumBy(degreeDays, (degreeDay: DetailDegreeDay) => {
-            return degreeDay.coolingDegreeDay
+            if (isNaN(degreeDay.coolingDegreeDay) == false) {
+                return degreeDay.coolingDegreeDay
+            }
+            return 0;
         });
     } else if (weatherDataSelection == 'HDD') {
         return _.sumBy(degreeDays, (degreeDay: DetailDegreeDay) => {
-            return degreeDay.heatingDegreeDay
+            if (isNaN(degreeDay.heatingDegreeDay) == false) {
+                return degreeDay.heatingDegreeDay
+            }
+            return 0;
         });
     } else if (weatherDataSelection == 'relativeHumidity') {
         let totalWeightedRH: number = _.sumBy(degreeDays, (degreeDay: DetailDegreeDay) => {
-            return degreeDay.weightedRelativeHumidity;
+            if (isNaN(degreeDay.weightedRelativeHumidity) == false) {
+                return degreeDay.weightedRelativeHumidity;
+            }
+            return 0;
         });
         let totalMinutes: number = _.sumBy(degreeDays, (degreeDay: DetailDegreeDay) => {
-            return degreeDay.minutesBetween;
+            if (isNaN(degreeDay.minutesBetween) == false) {
+                return degreeDay.minutesBetween;
+            }
+            return 0;
         });
         let weightedAverage: number = (totalWeightedRH / totalMinutes);
         if (isNaN(weightedAverage)) {
@@ -190,10 +202,16 @@ export function getDegreeDayAmount(degreeDays: Array<DetailDegreeDay>, weatherDa
         return weightedAverage;
     } else if (weatherDataSelection == 'dryBulbTemp') {
         let totalWeightedDryBulb: number = _.sumBy(degreeDays, (degreeDay: DetailDegreeDay) => {
-            return degreeDay.weightedDryBulbTemp;
+            if (isNaN(degreeDay.weightedDryBulbTemp) == false) {
+                return degreeDay.weightedDryBulbTemp;
+            }
+            return 0;
         });
         let totalMinutes: number = _.sumBy(degreeDays, (degreeDay: DetailDegreeDay) => {
-            return degreeDay.minutesBetween;
+            if (isNaN(degreeDay.minutesBetween) == false) {
+                return degreeDay.minutesBetween;
+            }
+            return 0;
         });
         let weightedAverage: number = (totalWeightedDryBulb / totalMinutes);
         if (isNaN(weightedAverage)) {
@@ -201,4 +219,10 @@ export function getDegreeDayAmount(degreeDays: Array<DetailDegreeDay>, weatherDa
         }
         return weightedAverage;
     }
+}
+
+export function getMinutesBetweenDates(firstDate: Date, secondDate: Date): number {
+    let diffMilliseconds = Math.abs(firstDate.getTime() - secondDate.getTime());
+    let diffMinutes: number = new ConvertValue(diffMilliseconds, 'ms', 'min').convertedValue;
+    return diffMinutes;
 }

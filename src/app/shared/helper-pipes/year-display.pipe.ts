@@ -1,8 +1,9 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
-  name: 'yearDisplay',
-  pure: false
+    name: 'yearDisplay',
+    pure: false,
+    standalone: false
 })
 export class YearDisplayPipe implements PipeTransform {
 

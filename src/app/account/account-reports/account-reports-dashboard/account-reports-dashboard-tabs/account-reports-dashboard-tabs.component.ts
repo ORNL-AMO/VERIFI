@@ -3,9 +3,10 @@ import { Subscription } from 'rxjs';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 
 @Component({
-  selector: 'app-account-reports-dashboard-tabs',
-  templateUrl: './account-reports-dashboard-tabs.component.html',
-  styleUrls: ['./account-reports-dashboard-tabs.component.css']
+    selector: 'app-account-reports-dashboard-tabs',
+    templateUrl: './account-reports-dashboard-tabs.component.html',
+    styleUrls: ['./account-reports-dashboard-tabs.component.css'],
+    standalone: false
 })
 export class AccountReportsDashboardTabsComponent {
 

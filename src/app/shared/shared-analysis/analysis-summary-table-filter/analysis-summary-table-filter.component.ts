@@ -10,7 +10,8 @@ import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysis
 @Component({
   selector: 'app-analysis-summary-table-filter',
   templateUrl: './analysis-summary-table-filter.component.html',
-  styleUrls: ['./analysis-summary-table-filter.component.css']
+  styleUrls: ['./analysis-summary-table-filter.component.css'],
+  standalone: false
 })
 export class AnalysisSummaryTableFilterComponent implements OnInit {
   @Input()
@@ -132,7 +133,7 @@ export class AnalysisSummaryTableFilterComponent implements OnInit {
       this.analysisTableColumns.totalSavingsPercentImprovement ||
       this.analysisTableColumns.annualSavingsPercentImprovement ||
       this.analysisTableColumns.cummulativeSavings ||
-      this.analysisTableColumns.newSavings||
+      this.analysisTableColumns.newSavings ||
       this.analysisTableColumns.savingsUnbanked ||
       this.analysisTableColumns.bankedSavings
     );
@@ -159,22 +160,44 @@ export class AnalysisSummaryTableFilterComponent implements OnInit {
       let variableCopy: Array<AnalysisGroupPredictorVariable>;
       if (this.tableContext == 'monthGroup' || this.tableContext == 'annualGroup') {
         let analysisGroup: AnalysisGroup = this.analysisService.selectedGroup.getValue();
-        variableCopy = JSON.parse(JSON.stringify(analysisGroup.predictorVariables));
+        variableCopy = analysisGroup.predictorVariables.map(pVar => {
+          return {
+            id: pVar.id,
+            name: pVar.name,
+            production: pVar.production,
+            productionInAnalysis: pVar.productionInAnalysis,
+            regressionCoefficient: pVar.regressionCoefficient,
+            unit: pVar.unit
+          }
+        });
       } else if (this.tableContext == 'monthFacility' || this.tableContext == 'annualFacility') {
         let predictorVariables: Array<IdbPredictor> = this.predictorDbService.facilityPredictors.getValue();
-        variableCopy = JSON.parse(JSON.stringify(predictorVariables));
+        variableCopy = predictorVariables.map(pVar => {
+          return {
+            id: pVar.guid,
+            name: pVar.name,
+            production: pVar.production,
+            productionInAnalysis: pVar.productionInAnalysis,
+            regressionCoefficient: pVar.regressionCoefficient,
+            unit: pVar.unit
+          }
+        });
         variableCopy.forEach(variable => {
           variable.productionInAnalysis = false;
         });
       }
+      let variableIds: Array<string> = variableCopy.map(v => { return v.id });
+      let objectIds: Array<string> = this.analysisTableColumns.predictors.map(predictorItem => {
+        return predictorItem.predictor.id
+      });
+
       let updatePredictors: boolean = false;
-      if (this.group) {
-        if (this.group.idbGroupId != this.analysisTableColumns.predictorGroupId) {
+
+      variableIds.forEach(id => {
+        if (objectIds.includes(id) == false) {
           updatePredictors = true;
         }
-      } else if (this.analysisTableColumns.predictorGroupId != undefined) {
-        updatePredictors = true;
-      }
+      });
 
       if (updatePredictors) {
         variableCopy.forEach(variable => {

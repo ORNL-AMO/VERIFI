@@ -2,7 +2,8 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { AnalysisTableColumns } from 'src/app/models/analysis';
 
 @Pipe({
-  name: 'includeTable'
+    name: 'includeTable',
+    standalone: false
 })
 export class IncludeTablePipe implements PipeTransform {
 

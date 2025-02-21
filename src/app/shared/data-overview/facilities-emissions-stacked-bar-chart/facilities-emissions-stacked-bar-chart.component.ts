@@ -7,9 +7,10 @@ import { AccountOverviewFacility } from 'src/app/calculations/dashboard-calculat
 import { getEmissionsTypeColor } from 'src/app/models/eGridEmissions';
 
 @Component({
-  selector: 'app-facilities-emissions-stacked-bar-chart',
-  templateUrl: './facilities-emissions-stacked-bar-chart.component.html',
-  styleUrls: ['./facilities-emissions-stacked-bar-chart.component.css']
+    selector: 'app-facilities-emissions-stacked-bar-chart',
+    templateUrl: './facilities-emissions-stacked-bar-chart.component.html',
+    styleUrls: ['./facilities-emissions-stacked-bar-chart.component.css'],
+    standalone: false
 })
 export class FacilitiesEmissionsStackedBarChartComponent {
   @Input()

@@ -4,9 +4,10 @@ import { Subscription } from 'rxjs';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
-  selector: 'app-facility-home-help',
-  templateUrl: './facility-home-help.component.html',
-  styleUrls: ['./facility-home-help.component.css']
+    selector: 'app-facility-home-help',
+    templateUrl: './facility-home-help.component.html',
+    styleUrls: ['./facility-home-help.component.css'],
+    standalone: false
 })
 export class FacilityHomeHelpComponent {
 

@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { WeatherStation } from 'src/app/models/degreeDays';
-import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
 import { WeatherDataService } from '../weather-data.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { Subscription } from 'rxjs';
@@ -9,9 +8,10 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
-  selector: 'app-weather-stations',
-  templateUrl: './weather-stations.component.html',
-  styleUrls: ['./weather-stations.component.css']
+    selector: 'app-weather-stations',
+    templateUrl: './weather-stations.component.html',
+    styleUrls: ['./weather-stations.component.css'],
+    standalone: false
 })
 export class WeatherStationsComponent {
 
@@ -23,7 +23,8 @@ export class WeatherStationsComponent {
   facilities: Array<IdbFacility>;
   facilitySub: Subscription;
   selectedFacilityId: string;
-  constructor(private accountDbService: AccountdbService, private degreeDaysService: DegreeDaysService,
+  fetchingData: boolean = false;
+  constructor(private accountDbService: AccountdbService,
     private weatherDataService: WeatherDataService,
     private facilityDbService: FacilitydbService) {
 
@@ -48,13 +49,14 @@ export class WeatherStationsComponent {
     this.facilitySub.unsubscribe();
   }
 
-
-  setStations() {
-    this.weatherDataService.zipCode = this.zipCode;
-    if (this.furthestDistance <= 500) {
-      this.degreeDaysService.getClosestStation(this.zipCode, this.furthestDistance).then(stations => {
-        this.stations = stations;
-      });
+  async setStations() {
+    if (this.zipCode && this.zipCode.length == 5 && this.furthestDistance) {
+      this.fetchingData = true;
+      this.stations = await this.weatherDataService.getStations(this.zipCode, this.furthestDistance);
+      this.fetchingData = false;
+    } else {
+      this.fetchingData = false;
+      this.stations = [];
     }
   }
 
@@ -84,5 +86,9 @@ export class WeatherStationsComponent {
     this.weatherDataService.selectedFacility = this.facilities.find(facility => { return facility.guid == this.selectedFacilityId });
     this.zipCode = this.weatherDataService.selectedFacility?.zip;
     this.setStations();
+  }
+
+  clearStations() {
+    this.stations = [];
   }
 }

@@ -2,7 +2,8 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { ReportType } from 'src/app/models/constantsAndTypes';
 
 @Pipe({
-  name: 'accountReportType'
+    name: 'accountReportType',
+    standalone: false
 })
 export class AccountReportTypePipe implements PipeTransform {
 

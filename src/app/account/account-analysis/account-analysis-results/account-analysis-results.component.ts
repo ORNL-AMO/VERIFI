@@ -21,9 +21,10 @@ import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 
 @Component({
-  selector: 'app-account-analysis-results',
-  templateUrl: './account-analysis-results.component.html',
-  styleUrls: ['./account-analysis-results.component.css']
+    selector: 'app-account-analysis-results',
+    templateUrl: './account-analysis-results.component.html',
+    styleUrls: ['./account-analysis-results.component.css'],
+    standalone: false
 })
 export class AccountAnalysisResultsComponent implements OnInit {
 

@@ -4,9 +4,10 @@ import * as _ from 'lodash';
 import { AxisOption, CorrelationPlotOptions, VisualizationStateService } from '../visualization-state.service';
 
 @Component({
-  selector: 'app-time-series',
-  templateUrl: './time-series.component.html',
-  styleUrls: ['./time-series.component.css']
+    selector: 'app-time-series',
+    templateUrl: './time-series.component.html',
+    styleUrls: ['./time-series.component.css'],
+    standalone: false
 })
 export class TimeSeriesComponent implements OnInit {
 

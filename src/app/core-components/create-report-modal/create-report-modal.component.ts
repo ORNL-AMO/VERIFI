@@ -20,9 +20,10 @@ import { getNewIdbAccountReport, IdbAccountReport } from 'src/app/models/idbMode
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 
 @Component({
-  selector: 'app-create-report-modal',
-  templateUrl: './create-report-modal.component.html',
-  styleUrls: ['./create-report-modal.component.css']
+    selector: 'app-create-report-modal',
+    templateUrl: './create-report-modal.component.html',
+    styleUrls: ['./create-report-modal.component.css'],
+    standalone: false
 })
 export class CreateReportModalComponent {
 

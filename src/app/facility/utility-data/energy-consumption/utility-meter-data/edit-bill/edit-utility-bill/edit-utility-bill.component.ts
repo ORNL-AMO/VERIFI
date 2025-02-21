@@ -17,9 +17,10 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
 
 @Component({
-  selector: 'app-edit-utility-bill',
-  templateUrl: './edit-utility-bill.component.html',
-  styleUrls: ['./edit-utility-bill.component.css']
+    selector: 'app-edit-utility-bill',
+    templateUrl: './edit-utility-bill.component.html',
+    styleUrls: ['./edit-utility-bill.component.css'],
+    standalone: false
 })
 export class EditUtilityBillComponent implements OnInit {
   @Input()

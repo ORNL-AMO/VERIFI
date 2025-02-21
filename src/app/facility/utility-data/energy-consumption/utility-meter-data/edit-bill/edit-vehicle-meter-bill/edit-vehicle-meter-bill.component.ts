@@ -14,9 +14,10 @@ import { FuelTypeOption } from 'src/app/shared/fuel-options/fuelTypeOption';
 import { getMobileFuelTypes } from 'src/app/shared/fuel-options/getFuelTypeOptions';
 
 @Component({
-  selector: 'app-edit-vehicle-meter-bill',
-  templateUrl: './edit-vehicle-meter-bill.component.html',
-  styleUrls: ['./edit-vehicle-meter-bill.component.css']
+    selector: 'app-edit-vehicle-meter-bill',
+    templateUrl: './edit-vehicle-meter-bill.component.html',
+    styleUrls: ['./edit-vehicle-meter-bill.component.css'],
+    standalone: false
 })
 export class EditVehicleMeterBillComponent {
   @Input()

@@ -7,9 +7,10 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 
 @Component({
-  selector: 'app-facility-banner',
-  templateUrl: './facility-banner.component.html',
-  styleUrls: ['./facility-banner.component.css']
+    selector: 'app-facility-banner',
+    templateUrl: './facility-banner.component.html',
+    styleUrls: ['./facility-banner.component.css'],
+    standalone: false
 })
 export class FacilityBannerComponent implements OnInit {
 

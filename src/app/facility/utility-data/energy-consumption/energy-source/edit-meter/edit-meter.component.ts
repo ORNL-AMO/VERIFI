@@ -17,9 +17,10 @@ import { getNewIdbUtilityMeter, IdbUtilityMeter } from 'src/app/models/idbModels
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 
 @Component({
-  selector: 'app-edit-meter',
-  templateUrl: './edit-meter.component.html',
-  styleUrls: ['./edit-meter.component.css']
+    selector: 'app-edit-meter',
+    templateUrl: './edit-meter.component.html',
+    styleUrls: ['./edit-meter.component.css'],
+    standalone: false
 })
 export class EditMeterComponent implements OnInit {
 

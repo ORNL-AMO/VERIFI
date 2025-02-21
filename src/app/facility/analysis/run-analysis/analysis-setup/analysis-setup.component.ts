@@ -8,7 +8,7 @@ import { AnalysisService } from '../../analysis.service';
 import { Router } from '@angular/router';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Subscription } from 'rxjs';
 import { VolumeLiquidOptions } from 'src/app/shared/unitOptions';
 import { AnalysisValidationService } from 'src/app/shared/helper-services/analysis-validation.service';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
@@ -19,9 +19,10 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 @Component({
-  selector: 'app-analysis-setup',
-  templateUrl: './analysis-setup.component.html',
-  styleUrls: ['./analysis-setup.component.css']
+    selector: 'app-analysis-setup',
+    templateUrl: './analysis-setup.component.html',
+    styleUrls: ['./analysis-setup.component.css'],
+    standalone: false
 })
 export class AnalysisSetupComponent implements OnInit {
 
@@ -42,6 +43,9 @@ export class AnalysisSetupComponent implements OnInit {
   newReportYear: number;
 
   facilityAnalysisItems: Array<IdbAnalysisItem>;
+
+  analysisItemSub: Subscription;
+  isFormChange: boolean = false;
   constructor(private facilityDbService: FacilitydbService, private analysisDbService: AnalysisDbService,
     private analysisService: AnalysisService, private router: Router,
     private analysisValidationService: AnalysisValidationService,
@@ -52,15 +56,26 @@ export class AnalysisSetupComponent implements OnInit {
     private regressionModelsService: RegressionModelsService) { }
 
   ngOnInit(): void {
-    this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
-    this.facility = this.facilityDbService.selectedFacility.getValue();
-    this.yearOptions = this.calanderizationService.getYearOptionsFacility(this.facility.guid, this.analysisItem.analysisCategory);
-    this.setReportYears();
-    this.setBaselineYearWarning();
-    this.setComponentBools();
+    this.analysisItemSub = this.analysisDbService.selectedAnalysisItem.subscribe(item => {
+      if(!this.isFormChange){
+        this.analysisItem = item;
+        this.facility = this.facilityDbService.selectedFacility.getValue();
+        this.yearOptions = this.calanderizationService.getYearOptionsFacility(this.facility.guid, this.analysisItem.analysisCategory);
+        this.setReportYears();
+        this.setBaselineYearWarning();
+        this.setComponentBools();
+      }else{
+        this.isFormChange = false;
+      }
+    })
+  }
+
+  ngOnDestroy(){
+    this.analysisItemSub.unsubscribe();
   }
 
   async saveItem() {
+    this.isFormChange = true;
     this.analysisItem.setupErrors = this.analysisValidationService.getAnalysisItemErrors(this.analysisItem);
     await firstValueFrom(this.analysisDbService.updateWithObservable(this.analysisItem));
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();

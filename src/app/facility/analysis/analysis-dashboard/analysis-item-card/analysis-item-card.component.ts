@@ -18,9 +18,10 @@ import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-
 import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
 
 @Component({
-  selector: 'app-analysis-item-card',
-  templateUrl: './analysis-item-card.component.html',
-  styleUrls: ['./analysis-item-card.component.css']
+    selector: 'app-analysis-item-card',
+    templateUrl: './analysis-item-card.component.html',
+    styleUrls: ['./analysis-item-card.component.css'],
+    standalone: false
 })
 export class AnalysisItemCardComponent implements OnInit {
   @Input()

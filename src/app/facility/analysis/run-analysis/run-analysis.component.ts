@@ -4,9 +4,10 @@ import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 
 @Component({
-  selector: 'app-run-analysis',
-  templateUrl: './run-analysis.component.html',
-  styleUrls: ['./run-analysis.component.css']
+    selector: 'app-run-analysis',
+    templateUrl: './run-analysis.component.html',
+    styleUrls: ['./run-analysis.component.css'],
+    standalone: false
 })
 export class RunAnalysisComponent implements OnInit {
 

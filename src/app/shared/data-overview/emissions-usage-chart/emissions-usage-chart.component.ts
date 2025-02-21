@@ -9,9 +9,10 @@ import { EmissionsTypes, getEmissionsTypeColor, getEmissionsTypes } from 'src/ap
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
-  selector: 'app-emissions-usage-chart',
-  templateUrl: './emissions-usage-chart.component.html',
-  styleUrls: ['./emissions-usage-chart.component.css']
+    selector: 'app-emissions-usage-chart',
+    templateUrl: './emissions-usage-chart.component.html',
+    styleUrls: ['./emissions-usage-chart.component.css'],
+    standalone: false
 })
 export class EmissionsUsageChartComponent {
   @Input()

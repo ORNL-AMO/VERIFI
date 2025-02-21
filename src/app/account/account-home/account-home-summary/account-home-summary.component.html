@@ -26,7 +26,7 @@
                             <span
                                 class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
                                 *ngIf="energyAnalysisNeeded || waterAnalysisNeeded">
-                                <span class="fa-exclamation white"></span>
+                                <span class="fa fa-exclamation white"></span>
                             </span>
                         </button>
                     </div>
@@ -67,7 +67,7 @@
                         <li class="list-group-item" *ngIf="energyAnalysisNeeded">
                             <a class="nav-link" routerLink="/account/analysis/dashboard/energy">
                                 <span class="badge rounded-pill bg-danger">
-                                    <span class="fa-exclamation white"></span>
+                                    <span class="fa fa-exclamation white"></span>
                                 </span>
                                 Energy analysis needed. <ng-container *ngIf="latestEnergyAnalysisItem">Latest energy
                                     analysis conducted for
@@ -78,7 +78,7 @@
                         <li class="list-group-item" *ngIf="waterAnalysisNeeded">
                             <a class="nav-link" routerLink="/account/analysis/dashboard/water">
                                 <span class="badge rounded-pill bg-danger">
-                                    <span class="fa-exclamation white"></span>
+                                    <span class="fa fa-exclamation white"></span>
                                 </span>
                                 Water analysis needed. <ng-container *ngIf="latestWaterAnalysisItem">Latest water
                                     analysis conducted for

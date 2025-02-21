@@ -13,9 +13,10 @@ import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 
 @Component({
-  selector: 'app-analysis',
-  templateUrl: './analysis.component.html',
-  styleUrls: ['./analysis.component.css']
+    selector: 'app-analysis',
+    templateUrl: './analysis.component.html',
+    styleUrls: ['./analysis.component.css'],
+    standalone: false
 })
 export class AnalysisComponent implements OnInit {
 

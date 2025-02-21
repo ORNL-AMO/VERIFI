@@ -1,15 +1,16 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { DetailDegreeDay, WeatherDataSelection, WeatherDataSelectionOption, WeatherDataSelectionOptions, WeatherStation } from 'src/app/models/degreeDays';
-import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
 import * as _ from 'lodash';
-import { WeatherDataService } from '../weather-data.service';
+import { WeatherDataReading, WeatherDataService } from '../weather-data.service';
 import { getDegreeDayAmount } from 'src/app/shared/sharedHelperFuntions';
+import { getMonthlyDataFromYear } from '../weatherDataCalculations';
 
 @Component({
-  selector: 'app-annual-station-data',
-  templateUrl: './annual-station-data.component.html',
-  styleUrls: ['./annual-station-data.component.css']
+    selector: 'app-annual-station-data',
+    templateUrl: './annual-station-data.component.html',
+    styleUrls: ['./annual-station-data.component.css'],
+    standalone: false
 })
 export class AnnualStationDataComponent {
 
@@ -24,7 +25,7 @@ export class AnnualStationDataComponent {
   hasGapsInData: boolean;
   weatherDataSelection: WeatherDataSelection;
   weatherDataSelectionOptions: Array<WeatherDataSelectionOption> = WeatherDataSelectionOptions;
-  constructor(private router: Router, private degreeDaysService: DegreeDaysService,
+  constructor(private router: Router,
     private weatherDataService: WeatherDataService) {
 
   }
@@ -54,7 +55,10 @@ export class AnnualStationDataComponent {
   async setDegreeDays() {
     this.calculating = true;
     if (this.selectedYear && this.heatingTemp) {
-      this.detailedDegreeDays = await this.degreeDaysService.getMonthlyDataFromYear(this.selectedYear, this.heatingTemp, this.coolingTemp, this.weatherStation);
+      let startDate: Date = new Date(this.selectedYear, 0, 1)
+      let endDate: Date = new Date(this.selectedYear + 1, 0, 1);
+      let parsedData: Array<WeatherDataReading> = await this.weatherDataService.getHourlyData(this.weatherStation.ID, startDate, endDate, ['humidity'])
+      this.detailedDegreeDays = getMonthlyDataFromYear(parsedData, this.selectedYear, this.heatingTemp, this.coolingTemp, this.weatherStation);
       this.setYearSummaryData();
     } else {
       this.detailedDegreeDays = undefined;
@@ -74,9 +78,9 @@ export class AnnualStationDataComponent {
           return day.time.getMonth() == startDate.getMonth();
         });
         let totalHeatingDegreeDays: number = getDegreeDayAmount(monthData, 'HDD');
-        let totalCoolingDegreeDays: number =  getDegreeDayAmount(monthData, 'CDD');
-        let relativeHumidity: number =  getDegreeDayAmount(monthData, 'relativeHumidity');
-        let dryBulbTemp: number =  getDegreeDayAmount(monthData, 'dryBulbTemp');
+        let totalCoolingDegreeDays: number = getDegreeDayAmount(monthData, 'CDD');
+        let relativeHumidity: number = getDegreeDayAmount(monthData, 'relativeHumidity');
+        let dryBulbTemp: number = getDegreeDayAmount(monthData, 'dryBulbTemp');
         let hasErrors: DetailDegreeDay = monthData.find(degreeDay => {
           return degreeDay.gapInData == true
         });

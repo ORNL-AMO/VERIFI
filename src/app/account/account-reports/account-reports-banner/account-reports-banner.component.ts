@@ -7,9 +7,10 @@ import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.serv
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 
 @Component({
-  selector: 'app-account-reports-banner',
-  templateUrl: './account-reports-banner.component.html',
-  styleUrls: ['./account-reports-banner.component.css']
+    selector: 'app-account-reports-banner',
+    templateUrl: './account-reports-banner.component.html',
+    styleUrls: ['./account-reports-banner.component.css'],
+    standalone: false
 })
 export class AccountReportsBannerComponent {
 

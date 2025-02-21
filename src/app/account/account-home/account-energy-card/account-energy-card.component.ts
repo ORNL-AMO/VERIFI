@@ -9,9 +9,10 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 
 @Component({
-  selector: 'app-account-energy-card',
-  templateUrl: './account-energy-card.component.html',
-  styleUrls: ['./account-energy-card.component.css']
+    selector: 'app-account-energy-card',
+    templateUrl: './account-energy-card.component.html',
+    styleUrls: ['./account-energy-card.component.css'],
+    standalone: false
 })
 export class AccountEnergyCardComponent {
 

@@ -11,9 +11,10 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 
 @Component({
-  selector: 'app-confirm-readings',
-  templateUrl: './confirm-readings.component.html',
-  styleUrls: ['./confirm-readings.component.css']
+    selector: 'app-confirm-readings',
+    templateUrl: './confirm-readings.component.html',
+    styleUrls: ['./confirm-readings.component.css'],
+    standalone: false
 })
 export class ConfirmReadingsComponent implements OnInit {
 

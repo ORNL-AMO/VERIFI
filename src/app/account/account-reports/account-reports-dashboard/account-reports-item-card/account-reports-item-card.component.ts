@@ -10,9 +10,10 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 
 @Component({
-  selector: 'app-account-reports-item-card',
-  templateUrl: './account-reports-item-card.component.html',
-  styleUrls: ['./account-reports-item-card.component.css']
+    selector: 'app-account-reports-item-card',
+    templateUrl: './account-reports-item-card.component.html',
+    styleUrls: ['./account-reports-item-card.component.css'],
+    standalone: false
 })
 export class AccountReportsItemCardComponent {
   @Input()

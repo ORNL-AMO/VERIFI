@@ -8,9 +8,10 @@ import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { PredictorDataHelperService, PredictorTableItem } from 'src/app/shared/helper-services/predictor-data-helper.service';
 
 @Component({
-  selector: 'app-predictors',
-  templateUrl: './predictors.component.html',
-  styleUrl: './predictors.component.css'
+    selector: 'app-predictors',
+    templateUrl: './predictors.component.html',
+    styleUrl: './predictors.component.css',
+    standalone: false
 })
 export class PredictorsComponent {
 

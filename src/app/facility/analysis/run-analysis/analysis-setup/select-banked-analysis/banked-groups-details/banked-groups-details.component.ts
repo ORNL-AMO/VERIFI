@@ -3,9 +3,10 @@ import { AnalysisGroupItem, AnalysisService } from 'src/app/facility/analysis/an
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 
 @Component({
-  selector: 'app-banked-groups-details',
-  templateUrl: './banked-groups-details.component.html',
-  styleUrl: './banked-groups-details.component.css'
+    selector: 'app-banked-groups-details',
+    templateUrl: './banked-groups-details.component.html',
+    styleUrl: './banked-groups-details.component.css',
+    standalone: false
 })
 export class BankedGroupsDetailsComponent {
   @Input({ required: true })

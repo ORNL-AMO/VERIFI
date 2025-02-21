@@ -14,9 +14,10 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
 
 @Component({
-  selector: 'app-edit-meter-group-form',
-  templateUrl: './edit-meter-group-form.component.html',
-  styleUrls: ['./edit-meter-group-form.component.css']
+    selector: 'app-edit-meter-group-form',
+    templateUrl: './edit-meter-group-form.component.html',
+    styleUrls: ['./edit-meter-group-form.component.css'],
+    standalone: false
 })
 export class EditMeterGroupFormComponent implements OnInit {
   @Input()

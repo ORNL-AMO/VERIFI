@@ -2,7 +2,8 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 
 @Pipe({
-  name: 'facilityAnalysisName'
+    name: 'facilityAnalysisName',
+    standalone: false
 })
 export class FacilityAnalysisNamePipe implements PipeTransform {
 

@@ -8,9 +8,10 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
-  selector: 'app-setup-wizard-banner',
-  templateUrl: './setup-wizard-banner.component.html',
-  styleUrls: ['./setup-wizard-banner.component.css']
+    selector: 'app-setup-wizard-banner',
+    templateUrl: './setup-wizard-banner.component.html',
+    styleUrls: ['./setup-wizard-banner.component.css'],
+    standalone: false
 })
 export class SetupWizardBannerComponent implements OnInit {
 

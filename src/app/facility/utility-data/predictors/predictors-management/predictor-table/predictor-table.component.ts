@@ -15,7 +15,6 @@ import { AnalysisGroup, AnalysisGroupPredictorVariable, JStatRegressionModel } f
 import { WeatherStation } from 'src/app/models/degreeDays';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
-import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
 import { WeatherDataService } from 'src/app/weather-data/weather-data.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
@@ -23,9 +22,10 @@ import { getGUID } from 'src/app/shared/sharedHelperFuntions';
 import { PredictorDataHelperService, PredictorTableItem } from 'src/app/shared/helper-services/predictor-data-helper.service';
 
 @Component({
-  selector: 'app-predictor-table',
-  templateUrl: './predictor-table.component.html',
-  styleUrl: './predictor-table.component.css'
+    selector: 'app-predictor-table',
+    templateUrl: './predictor-table.component.html',
+    styleUrl: './predictor-table.component.css',
+    standalone: false
 })
 export class PredictorTableComponent {
 
@@ -48,7 +48,7 @@ export class PredictorTableComponent {
   displayCopyModal: boolean = false;
   constructor(private predictorDbService: PredictorDbService, private router: Router,
     private facilitydbService: FacilitydbService, private loadingService: LoadingService,
-    private weatherDataService: WeatherDataService, private degreeDaysService: DegreeDaysService,
+    private weatherDataService: WeatherDataService,
     private analysisDbService: AnalysisDbService,
     private accountAnalysisDbService: AccountAnalysisDbService,
     private dbChangesService: DbChangesService,
@@ -148,8 +148,8 @@ export class PredictorTableComponent {
 
 
   async viewWeatherData(predictor: IdbPredictor) {
-    let weatherStation: 'error' | WeatherStation = await this.degreeDaysService.getStationById(predictor.weatherStationId);
-    if (weatherStation != 'error') {
+    let weatherStation: WeatherStation = await this.weatherDataService.getStation(predictor.weatherStationId);
+    if (weatherStation) {
       this.weatherDataService.selectedStation = weatherStation;
       if (predictor.weatherDataType == 'CDD') {
         this.weatherDataService.coolingTemp = predictor.coolingBaseTemperature;

@@ -131,6 +131,6 @@ ngb-typeahead-window.dropdown-menu .badge, ngb-typeahead-window.dropdown-menu .t
 }
 body {
   /* Firefox */
-  scrollbar-color: rgb(0 0 0 / 15%) transparent;
+  /* scrollbar-color: rgb(0 0 0 / 15%) transparent; */
   scrollbar-width: thin;
 }

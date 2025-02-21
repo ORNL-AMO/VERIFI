@@ -8,16 +8,19 @@
                     <i class="fa fa-gears"></i>
                     Analysis Setup</a>
             </li>
-            <li class="nav-item" *ngFor="let group of groups" [ngClass]="{'disabled': analysisItem.setupErrors.hasError}">
+            <li class="nav-item" *ngFor="let group of analysisItem.groups"
+                [ngClass]="{'disabled': analysisItem.setupErrors.hasError}">
                 <a class="nav-link" routerLink="run-analysis/group-analysis/{{group.idbGroupId}}"
                     [routerLinkActive]="['active']">
                     <span class="fa fa-exclamation-circle" *ngIf="group.groupErrors?.hasErrors"></span>
-                    <span class="fa fa-exclamation-circle warning" *ngIf="group.groupErrors?.hasInvalidRegressionModel"></span>
+                    <span class="fa fa-exclamation-circle warning"
+                        *ngIf="group.groupErrors?.hasInvalidRegressionModel"></span>
                     <i class="fa fa-file-edit"></i>
                     {{group.idbGroupId | groupName}}
                 </a>
             </li>
-            <li class="nav-item" [ngClass]="{'disabled': analysisItem.setupErrors.groupsHaveErrors || analysisItem.setupErrors.hasError}">
+            <li class="nav-item"
+                [ngClass]="{'disabled': analysisItem.setupErrors.groupsHaveErrors || analysisItem.setupErrors.hasError}">
                 <a class="nav-link" routerLink="run-analysis/facility-analysis" [routerLinkActive]="['active']">
                     <i class="fa fa-magnifying-glass-chart"></i>Facility
                     Summary</a>
@@ -31,10 +34,37 @@
     </div>
     <div>
         <ul class="nav nav-tabs">
-            <li class="nav-item">
-                <a class="nav-link home-link" routerLink="analysis-dashboard" [routerLinkActive]="['active']">
-                    <i class="fa fa-list"></i>
-                    All Facility Analysis</a>
+            <li class="nav-item dropdown">
+                <a class="nav-link home-link dropdown-toggle" (click)="toggleShow()">
+                    <i *ngIf="analysisItem.analysisCategory == 'water'" class="fa fa-droplet"></i>
+                    <i *ngIf="analysisItem.analysisCategory == 'energy'" class="fa fa-plug"></i>
+                    {{analysisItem.name}} - ({{analysisItem.reportYear}})
+                </a>
+                <ul class="dropdown-menu" [ngClass]="{'show': showDropdown}">
+                    <div class="menu-scroll-section">
+                        <ng-container *ngFor="let analysisItemOption of analysisItems">
+                            <li
+                                *ngIf="analysisItem.guid != analysisItemOption.guid && analysisItemOption.analysisCategory == analysisItem.analysisCategory">
+                                <a class="dropdown-item" (click)="selectItem(analysisItemOption)">
+                                    <i *ngIf="analysisItemOption.analysisCategory == 'water'" class="fa fa-droplet"></i>
+                                    <i *ngIf="analysisItemOption.analysisCategory == 'energy'" class="fa fa-plug"></i>
+                                    {{analysisItemOption.name}}
+                                    <span class="badge text-bg-secondary ms-2 float-right">
+                                        {{analysisItemOption.reportYear}}
+                                    </span>
+                                </a>
+                            </li>
+                        </ng-container>
+                    </div>
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
+                    <li>
+                        <a class="dropdown-item" routerLink="analysis-dashboard" [routerLinkActive]="['active']">
+                            <i class="fa fa-list"></i> View All Facility Analysis
+                        </a>
+                    </li>
+                </ul>
             </li>
         </ul>
     </div>

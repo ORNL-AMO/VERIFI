@@ -8,9 +8,10 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 
 @Component({
-  selector: 'app-utility-meter-data-filter',
-  templateUrl: './utility-meter-data-filter.component.html',
-  styleUrls: ['./utility-meter-data-filter.component.css', '../utility-meter-data.component.css']
+    selector: 'app-utility-meter-data-filter',
+    templateUrl: './utility-meter-data-filter.component.html',
+    styleUrls: ['./utility-meter-data-filter.component.css', '../utility-meter-data.component.css'],
+    standalone: false
 })
 export class UtilityMeterDataFilterComponent implements OnInit {
   @Input()
