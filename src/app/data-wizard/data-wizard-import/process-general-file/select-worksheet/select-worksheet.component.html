@@ -1,0 +1,91 @@
+<div class="data-wizard-content with-footer">
+    <div class="row g-0 justify-content-center h-100 w-100 overflow-scroll">
+        <div class="col-11 pt-4 pb-4">
+            <div class="form-paper">
+                <h4>Process File {{fileReference.name}}</h4>
+                <div class="d-flex w-100 justify-content-end mb-2">
+                    <ng-template [ngIf]="!fileReference.facilitiesSubmitted" [ngIfElse]="notSubmittedBlock">
+                        <button class="btn btn-success" (click)="submitSelection()">
+                            <span class="fa fa-upload"></span> Submit Selection
+                        </button>
+                    </ng-template>
+                    <ng-template #notSubmittedBlock>
+                        <div class="alert alert-info p-2">
+                            Worksheet selected. Use the next button to move on to meters upload.
+                        </div>
+                    </ng-template>
+                </div>
+                <hr>
+                <div class="row">
+                    <div class="col-6">
+                        <app-label-with-tooltip [field]="'selectWorksheet'" [label]="'Select Worksheet'" [isBold]="true"
+                            [labelId]="'worksheetName'" [isFloatRight]="true"></app-label-with-tooltip>
+                        <select class="form-select" name="worksheetName"
+                            [(ngModel)]="fileReference.selectedWorksheetName" (change)="setSelectedWorksheetName()"
+                            id="worksheetName">
+                            <option *ngFor="let name of worksheetNames" [ngValue]="name">
+                                {{name}}
+                            </option>
+                        </select>
+                        <ng-container *ngIf="hasHiddenTabs">
+                            <a class="click-link small pull-right" *ngIf="!showHiddenTabs"
+                                (click)="setShowHidden(true)">Show Hidden Tabs</a>
+                            <a class="click-link small pull-right" *ngIf="showHiddenTabs"
+                                (click)="setShowHidden(false)">Don't Show Hidden Tabs</a>
+                        </ng-container>
+                    </div>
+                    <div class="col-6">
+                        <app-label-with-tooltip [field]="'selectImportFacility'" [label]="'Select Import Facility'"
+                            [isBold]="true" [labelId]="'selectedFacilityId'"
+                            [isFloatRight]="true"></app-label-with-tooltip>
+                        <select class="form-select" name="selectedFacilityId"
+                            [(ngModel)]="fileReference.selectedFacilityId" (change)="setImportFacility()">
+                            <option [ngValue]="undefined">
+                                Multiple Facilities
+                            </option>
+                            <option *ngFor="let facility of facilityOptions" [ngValue]="facility.guid">
+                                {{facility.name}}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+                <br>
+                <div class="table-responsive" *ngIf="fileReference.selectedWorksheetData">
+                    <table class="table table-bordered table-sm table-hover utility-data">
+                        <thead class="table-mh">
+                            <tr>
+                                <th *ngFor="let header of fileReference.selectedWorksheetData[0]">
+                                    {{header}}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="table-group-divider">
+                            <tr *ngFor="let worksheetData of fileReference.selectedWorksheetData; let index = index;"
+                                [ngClass]="{'hidden': index == 0}">
+                                <td *ngFor="let data of worksheetData">
+                                    {{data}}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<nav class="data-wizard-footer navbar">
+    <div class="container-fluid justify-content-between">
+        <button class="btn btn-dark" (click)="goBack()">
+            <span class="fa fa-chevron-left"></span>
+            Go Back
+        </button>
+
+        <button class="btn btn-dark" (click)="next()">
+            <ng-template [ngIf]="fileReference.selectedWorksheetName">
+                Next
+            </ng-template>
+            <span class="fa fa-chevron-right"></span>
+        </button>
+    </div>
+</nav>

@@ -24,6 +24,9 @@ import { FacilityPredictorsTableComponent } from "../data-wizard/account-facilit
 import { FacilityPredictorDataTableComponent } from "../data-wizard/account-facilities/facility-data/facility-predictors/facility-predictor-data-table/facility-predictor-data-table.component";
 import { FacilityPredictorDataEntryComponent } from "../data-wizard/account-facilities/facility-data/facility-predictors/facility-predictor-data-entry/facility-predictor-data-entry.component";
 import { FacilityPredictorDataBulkUpdateComponent } from "../data-wizard/account-facilities/facility-data/facility-predictors/facility-predictor-data-bulk-update/facility-predictor-data-bulk-update.component";
+import { ProcessGeneralFileComponent } from "../data-wizard/data-wizard-import/process-general-file/process-general-file.component";
+import { SelectWorksheetComponent } from "../data-wizard/data-wizard-import/process-general-file/select-worksheet/select-worksheet.component";
+import { IdentifyColumnsComponent } from "../data-wizard/data-wizard-import/process-general-file/identify-columns/identify-columns.component";
 
 export const DataWizardRoutes: Route = {
     path: 'data-wizard/:id',
@@ -51,6 +54,15 @@ export const DataWizardRoutes: Route = {
                         { path: 'predictors', component: ProcessTemplatePredictorsComponent }
                     ]
                 },
+                {
+                    path: 'process-general-file/:id',
+                    component: ProcessGeneralFileComponent,
+                    children: [
+                        { path: '', pathMatch: 'full', redirectTo: 'select-worksheet' },
+                        { path: 'select-worksheet', component: SelectWorksheetComponent },
+                        { path: 'identify-columns', component: IdentifyColumnsComponent }
+                    ]
+                }
             ]
         },
         {

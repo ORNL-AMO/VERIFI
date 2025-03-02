@@ -100,11 +100,12 @@ export class UploadFilesComponent {
   }
 
   goToFile(fileReference: FileReference) {
+    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     if (fileReference.isTemplate) {
-      let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
       this.router.navigateByUrl('/data-wizard/' + account.guid + '/import-data/process-template-file/' + fileReference.id)
     } else {
       //todo
+      this.router.navigateByUrl('/data-wizard/' + account.guid + '/import-data/process-general-file/' + fileReference.id)
     }
   }
 }

@@ -35,16 +35,21 @@ import { FacilityPredictorComponent } from './account-facilities/facility-data/f
 import { FacilityPredictorDataTableComponent } from './account-facilities/facility-data/facility-predictors/facility-predictor-data-table/facility-predictor-data-table.component';
 import { FacilityPredictorDataEntryComponent } from './account-facilities/facility-data/facility-predictors/facility-predictor-data-entry/facility-predictor-data-entry.component';
 import { FacilityPredictorDataBulkUpdateComponent } from './account-facilities/facility-data/facility-predictors/facility-predictor-data-bulk-update/facility-predictor-data-bulk-update.component';
+import { ProcessGeneralFileComponent } from './data-wizard-import/process-general-file/process-general-file.component';
+import { SelectWorksheetComponent } from './data-wizard-import/process-general-file/select-worksheet/select-worksheet.component';
+import { LabelWithTooltipModule } from '../shared/label-with-tooltip/label-with-tooltip.module';
+import { IdentifyColumnsComponent } from './data-wizard-import/process-general-file/identify-columns/identify-columns.component';
+import { DragDropModule } from '@angular/cdk/drag-drop';
 
 
 @NgModule({
-  declarations: [  
-    DataWizardComponent, 
-    DataWizardSidebarComponent, 
-    AccountSetupComponent, 
-    AccountFacilitiesComponent, 
-    FacilityDataComponent, 
-    FacilitySetupComponent, 
+  declarations: [
+    DataWizardComponent,
+    DataWizardSidebarComponent,
+    AccountSetupComponent,
+    AccountFacilitiesComponent,
+    FacilityDataComponent,
+    FacilitySetupComponent,
     DataWizardImportComponent,
     UploadFilesComponent,
     ProcessTemplateFileComponent,
@@ -65,7 +70,10 @@ import { FacilityPredictorDataBulkUpdateComponent } from './account-facilities/f
     FacilityPredictorComponent,
     FacilityPredictorDataTableComponent,
     FacilityPredictorDataEntryComponent,
-    FacilityPredictorDataBulkUpdateComponent
+    FacilityPredictorDataBulkUpdateComponent,
+    ProcessGeneralFileComponent,
+    SelectWorksheetComponent,
+    IdentifyColumnsComponent
   ],
   imports: [
     CommonModule,
@@ -76,7 +84,9 @@ import { FacilityPredictorDataBulkUpdateComponent } from './account-facilities/f
     NgbPaginationModule,
     TableItemsDropdownModule,
     SharedMeterContentModule,
-    SharedPredictorsContentModule
-]
+    SharedPredictorsContentModule,
+    LabelWithTooltipModule,
+    DragDropModule
+  ]
 })
 export class DataWizardModule { }
