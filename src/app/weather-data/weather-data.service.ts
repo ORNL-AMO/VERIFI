@@ -96,6 +96,7 @@ export class WeatherDataService {
 
 
   getHourlyDataAPI(stationId: string, startDate: Date, endDate: Date, parameters: Array<WeatherDataParams>): Observable<string> {
+    console.log(stationId);
     let monthAfterEndDate: Date = new Date(endDate);
     monthAfterEndDate.setMonth(monthAfterEndDate.getMonth() + 1);
     let data = {

@@ -74,6 +74,9 @@ export class WeatherDataComponent {
         }
       }
     });
+    this.weatherDataService.getStation("71265099999").then(results => {
+      console.log(results);
+    })
   }
 
   ngOnDestroy() {

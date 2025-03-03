@@ -50,9 +50,11 @@ export class WeatherStationsComponent {
   }
 
   async setStations() {
+    this.weatherDataService.zipCode = this.zipCode;
     if (this.zipCode && this.zipCode.length == 5 && this.furthestDistance) {
       this.fetchingData = true;
       this.stations = await this.weatherDataService.getStations(this.zipCode, this.furthestDistance);
+      console.log(this.stations);
       this.fetchingData = false;
     } else {
       this.fetchingData = false;
