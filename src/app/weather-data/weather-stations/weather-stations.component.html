@@ -3,12 +3,24 @@
         <li class="breadcrumb-item active">Weather Stations</li>
     </ol>
 </nav>
-<p>
+<!-- <p>
     Explore weather stations. Set the zip code and the radius distance from that location to include weather stations.
-</p>
+</p> -->
 <form>
     <div class="row">
-        <div class="col-lg-4 col-md-12 col-sm-12">
+        <div class="col-4">
+            <label class="semibold" for="address">Address</label>
+            <input class="form-control" type="text" [(ngModel)]="addressString" name="address" id="address">
+        </div>
+        <div class="col-4">
+            <label class="semibold" for="country">Country</label>
+            <select class="form-select" name="country" id="country" [(ngModel)]="country"  [disabled]="fetchingData">
+                <option *ngFor="let country of CountryList" [ngValue]="country.code">{{country.name}}</option>
+            </select>
+        </div>
+    </div>
+    <div class="row">
+        <!-- <div class="col-lg-4 col-md-12 col-sm-12">
             <label class="semibold" for="zipCode">Zip Code</label>
             <ng-container *ngIf="!useFacility">
                 <input type="text" class="form-control" name="zipCode" id="zipCode" [(ngModel)]="zipCode"
@@ -25,7 +37,7 @@
                 </select>
                 <a class="float-end" (click)="toggleUseZip()">Manually Set Zip</a>
             </ng-container>
-        </div>
+        </div> -->
         <div class="col-lg-4 col-md-12 col-sm-12">
             <label class="semibold" for="furthestDistance">Furthest Distance</label>
             <div class="input-group mb-3">
@@ -53,7 +65,7 @@
 <ng-template [ngIf]="stations.length > 0" [ngIfElse]="noStationsBlock">
     <app-weather-stations-table [stations]="stations"></app-weather-stations-table>
     <app-weather-stations-map [stations]="stations" [zipCode]="zipCode"
-        [furthestDistance]="furthestDistance"></app-weather-stations-map>
+        [furthestDistance]="furthestDistance" [addressLatLong]="addressLatLong"></app-weather-stations-map>
 </ng-template>
 <ng-template #noStationsBlock>
     <div class="alert alert-info p-2" *ngIf="!fetchingData">

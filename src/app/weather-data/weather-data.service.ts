@@ -64,8 +64,53 @@ export class WeatherDataService {
     return this.httpClient.post(environment.weatherApi + '/stations', data, httpOptions);
   }
 
+
+
+  getStationsAPILatLong(latLong: { latitude: number, longitude: number }, distance: number): Observable<any> {
+    let currentDate: Date = new Date();
+    let data = {
+      "latitude": latLong.latitude,
+      "longitude": latLong.longitude,
+      "radial_distance": distance,
+      "start_date": "2013-03-01",
+      "end_date": currentDate.getFullYear() + '-' + currentDate.getMonth() + '-' + currentDate.getDate()
+    };
+    let httpOptions = {
+      responseType: 'text' as const,
+      headers: this.requestHeaders
+    };
+
+    return this.httpClient.post(environment.weatherApi + '/stations', data, httpOptions);
+  }
+
+ 
+  getStationByCountryAPI(country: string): Observable<any> {
+    let httpOptions = {
+      responseType: 'text' as const,
+      headers: this.requestHeaders
+    };
+    return this.httpClient.post(environment.weatherApi + '/cntry-stations/' + country, {}, httpOptions);
+  }
+
+
   async getStations(zipCode: string, distance: number): Promise<Array<WeatherStation>> {
     let apiData: string = await firstValueFrom(this.getStationsAPI(zipCode, distance));
+    let stations: Array<WeatherStation> = JSON.parse(apiData).stations.map(station => {
+      return getWeatherStation(station)
+    });
+    return stations;
+  }
+
+  async getStationsLatLong(latLong: { latitude: number, longitude: number }, distance: number): Promise<Array<WeatherStation>> {
+    let apiData: string = await firstValueFrom(this.getStationsAPILatLong(latLong, distance));
+    let stations: Array<WeatherStation> = JSON.parse(apiData).stations.map(station => {
+      return getWeatherStation(station)
+    });
+    return stations;
+  }
+
+  async getStationsByCountry(country: string): Promise<Array<WeatherStation>> {
+    let apiData: string = await firstValueFrom(this.getStationByCountryAPI(country));
     let stations: Array<WeatherStation> = JSON.parse(apiData).stations.map(station => {
       return getWeatherStation(station)
     });
@@ -119,6 +164,34 @@ export class WeatherDataService {
     let degreeDays: Array<DetailDegreeDay> = getDetailedDataForMonth(parsedData, entryDate.getMonth(), entryDate.getFullYear(), heatingBaseTemperature, coolingBaseTemperature, stationId, weatherStationName);
     return degreeDays;
   }
+
+  async getLocation(addressString: string): Promise<{
+    latitude: number,
+    longitude: number,
+  }> {
+    if (addressString) {
+      let url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(addressString)}&format=json`;
+      console.log(url);
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+        console.log(data);
+        if (data.length > 0) {
+          let latLong = {
+            latitude: parseFloat(data[0].lat),
+            longitude: parseFloat(data[0].lon),
+          };
+          console.log(latLong);
+          return latLong;
+        }
+      } catch (err) {
+
+      }
+    }
+    return null;
+  }
+
+
 }
 
 export function getWeatherDataDate(date: Date): string {

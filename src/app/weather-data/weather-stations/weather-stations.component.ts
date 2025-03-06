@@ -6,12 +6,13 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { Subscription } from 'rxjs';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { CountryList } from './country-list';
 
 @Component({
-    selector: 'app-weather-stations',
-    templateUrl: './weather-stations.component.html',
-    styleUrls: ['./weather-stations.component.css'],
-    standalone: false
+  selector: 'app-weather-stations',
+  templateUrl: './weather-stations.component.html',
+  styleUrls: ['./weather-stations.component.css'],
+  standalone: false
 })
 export class WeatherStationsComponent {
 
@@ -24,6 +25,16 @@ export class WeatherStationsComponent {
   facilitySub: Subscription;
   selectedFacilityId: string;
   fetchingData: boolean = false;
+  addressString: string;
+  city: string;
+  country: string;
+  CountryList = CountryList;
+
+  addressLatLong: {
+    latitude: number,
+    longitude: number,
+  };
+  listByCountry: boolean = false;
   constructor(private accountDbService: AccountdbService,
     private weatherDataService: WeatherDataService,
     private facilityDbService: FacilitydbService) {
@@ -50,13 +61,23 @@ export class WeatherStationsComponent {
   }
 
   async setStations() {
-    if (this.zipCode && this.zipCode.length == 5 && this.furthestDistance) {
+    console.log(this.country);
+    if (this.listByCountry && this.country) {
+      console.log(this.country);
       this.fetchingData = true;
-      this.stations = await this.weatherDataService.getStations(this.zipCode, this.furthestDistance);
+      this.stations = await this.weatherDataService.getStationsByCountry(this.country);
       this.fetchingData = false;
-    } else {
-      this.fetchingData = false;
-      this.stations = [];
+    } else if (this.addressString) {
+      this.addressLatLong = await this.weatherDataService.getLocation(this.addressString);
+      console.log(this.addressLatLong);
+      if (this.addressLatLong.latitude && this.furthestDistance) {
+        this.fetchingData = true;
+        this.stations = await this.weatherDataService.getStationsLatLong(this.addressLatLong, this.furthestDistance);
+        this.fetchingData = false;
+      } else {
+        this.fetchingData = false;
+        this.stations = [];
+      }
     }
   }
 

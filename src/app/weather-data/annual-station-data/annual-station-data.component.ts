@@ -58,6 +58,7 @@ export class AnnualStationDataComponent {
       let startDate: Date = new Date(this.selectedYear, 0, 1)
       let endDate: Date = new Date(this.selectedYear + 1, 0, 1);
       let parsedData: Array<WeatherDataReading> = await this.weatherDataService.getHourlyData(this.weatherStation.ID, startDate, endDate, ['humidity'])
+      console.log(parsedData);
       this.detailedDegreeDays = getMonthlyDataFromYear(parsedData, this.selectedYear, this.heatingTemp, this.coolingTemp, this.weatherStation);
       this.setYearSummaryData();
     } else {

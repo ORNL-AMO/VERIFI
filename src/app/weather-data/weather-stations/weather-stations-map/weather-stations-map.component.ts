@@ -5,10 +5,10 @@ import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 import * as _ from 'lodash';
 
 @Component({
-    selector: 'app-weather-stations-map',
-    templateUrl: './weather-stations-map.component.html',
-    styleUrls: ['./weather-stations-map.component.css'],
-    standalone: false
+  selector: 'app-weather-stations-map',
+  templateUrl: './weather-stations-map.component.html',
+  styleUrls: ['./weather-stations-map.component.css'],
+  standalone: false
 })
 export class WeatherStationsMapComponent {
   @Input()
@@ -17,6 +17,11 @@ export class WeatherStationsMapComponent {
   zipCode: string;
   @Input()
   furthestDistance: number;
+  @Input()
+  addressLatLong: {
+    latitude: number,
+    longitude: number,
+  };
 
   @ViewChild('weatherStationMap', { static: false }) weatherStationMap: ElementRef;
 
@@ -36,23 +41,27 @@ export class WeatherStationsMapComponent {
 
   ngAfterViewInit() {
     this.drawChart();
+    // this.drawChart2();
   }
 
   ngOnChanges(changes: SimpleChanges) {
     if ((changes.stations && !changes.stations.isFirstChange())) {
-        this.setMapData();
-        this.drawChart();
+      this.setMapData();
+      this.drawChart();
     }
+    // if ((changes.addressLatLong && !changes.addressLatLong.isFirstChange())) {
+    //     this.drawChart2();
+    // }
   }
 
   drawChart() {
     if (this.weatherStationMap && this.mapData && this.mapData.length != 0) {
-      let zipCodeItem: {
-        lng: string,
-        lat: string,
-        name: string,
-        isZip: boolean
-      } = this.mapData.find(item => { return item.isZip == true });
+      // let zipCodeItem: {
+      //   lng: string,
+      //   lat: string,
+      //   name: string,
+      //   isZip: boolean
+      // } = this.mapData.find(item => { return item.isZip == true });
 
       var data = [{
         type: 'scattergeo',
@@ -92,17 +101,17 @@ export class WeatherStationsMapComponent {
 
       var layout = {
         'geo': {
-          scope: 'usa',
+          scope: 'world',
           resolution: 110,
           showland: true,
           // landcolor: 'rgb(20, 90, 50)',
-          subunitwidth: 1,
-          countrywidth: 1,
+          // subunitwidth: 1,
+          // countrywidth: 1,
           // subunitcolor: 'rgb(255,255,255)',
           // countrycolor: 'rgb(255,255,255)',
           center: {
-            lat: zipCodeItem.lat,
-            lon: zipCodeItem.lng
+            lat: this.addressLatLong?.latitude.toString(),
+            lng: this.addressLatLong?.longitude.toString(),
           },
           // projection: {
           //   scale: this.getScale()
@@ -131,15 +140,23 @@ export class WeatherStationsMapComponent {
         isZip: false
       }
     });
-    let locationLatLong: { ZIP: string, LAT: string, LNG: string } = this.eGridService.zipLatLong.find(zipLL => { return zipLL.ZIP == this.zipCode });
-    if (locationLatLong) {
+    if (this.addressLatLong) {
       this.mapData.push({
-        lat: locationLatLong.LAT,
-        lng: locationLatLong.LNG,
-        name: this.zipCode,
+        lat: this.addressLatLong.latitude.toString(),
+        lng: this.addressLatLong.longitude.toString(),
+        name: "Address Location",
         isZip: true
       })
     }
+    // let locationLatLong: { ZIP: string, LAT: string, LNG: string } = this.eGridService.zipLatLong.find(zipLL => { return zipLL.ZIP == this.zipCode });
+    // if (locationLatLong) {
+    //   this.mapData.push({
+    //     lat: locationLatLong.LAT,
+    //     lng: locationLatLong.LNG,
+    //     name: this.zipCode,
+    //     isZip: true
+    //   })
+    // }
   }
 
   getScale() {
@@ -153,5 +170,66 @@ export class WeatherStationsMapComponent {
       return 1;
     }
   }
+
+
+  drawChart2() {
+    if (this.weatherStationMap && this.addressLatLong) {
+
+      var data = [{
+        type: 'scattergeo',
+        mode: 'markers',
+        lat: [this.addressLatLong.latitude],
+        lon: [this.addressLatLong.longitude],
+        // hovertext: this.getHoverData(),
+        hoverinfo: 'text',
+        text: ['Address Location'],
+        marker: {
+          text: ['Address Location'],
+          size: [20],
+          color: ['orange'],
+          // cmin: 0,
+          // cmax: cmax,
+          line: {
+            color: 'black'
+          },
+          // symbol: this.getSymbol()
+        },
+        // name: this.getName(),
+
+        // locationmode: "USA-states",
+      }];
+
+      var layout = {
+        'geo': {
+          scope: 'world',
+          resolution: 110,
+          showland: true,
+          // landcolor: 'rgb(20, 90, 50)',
+          subunitwidth: 1,
+          countrywidth: 1,
+          // subunitcolor: 'rgb(255,255,255)',
+          // countrycolor: 'rgb(255,255,255)',
+          center: {
+            lat: this.addressLatLong.latitude,
+            lon: this.addressLatLong.longitude
+          },
+          // projection: {
+          //   scale: this.getScale()
+          // }
+        },
+        showlegend: false,
+        margin: { "t": 0, "b": 50, "l": 0, "r": 50 },
+      };
+
+      let config = {
+        displaylogo: false,
+        responsive: true,
+        // scrollZoom: false
+      }
+
+      this.plotlyService.newPlot(this.weatherStationMap.nativeElement, data, layout, config);
+    }
+  }
+
 
 }
