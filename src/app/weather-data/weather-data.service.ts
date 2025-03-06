@@ -50,8 +50,12 @@ export class WeatherDataService {
 
   getStationsAPI(zipCode: string, distance: number): Observable<any> {
     let currentDate: Date = new Date();
+    console.log(zipCode);
+    console.log(typeof zipCode)
+    let zipString = String(zipCode);
+    console.log(zipString)
     let data = {
-      "zip": zipCode,
+      "zip": zipString,
       "radial_distance": distance,
       "start_date": "2013-03-01",
       "end_date": currentDate.getFullYear() + '-' + currentDate.getMonth() + '-' + currentDate.getDate()
