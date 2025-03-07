@@ -31,6 +31,7 @@ export class WeatherStationsMapComponent {
     name: string,
     isZip: boolean
   }>;
+  scope: string;
   constructor(private plotlyService: PlotlyService,
     private eGridService: EGridService) { }
 
@@ -104,6 +105,8 @@ export class WeatherStationsMapComponent {
           scope: 'world',
           resolution: 110,
           showland: true,
+          showcountries: true,
+          showsubunits: true,
           // landcolor: 'rgb(20, 90, 50)',
           // subunitwidth: 1,
           // countrywidth: 1,
@@ -113,6 +116,7 @@ export class WeatherStationsMapComponent {
             lat: this.addressLatLong?.latitude.toString(),
             lng: this.addressLatLong?.longitude.toString(),
           },
+          zoom: 3
           // projection: {
           //   scale: this.getScale()
           // }
@@ -148,6 +152,13 @@ export class WeatherStationsMapComponent {
         isZip: true
       })
     }
+    console.log(this.stations);
+    let countries: Array<string> = this.stations.flatMap(station => {
+      return station.country
+    });
+    countries = _.uniq(countries);
+    console.log(countries);
+
     // let locationLatLong: { ZIP: string, LAT: string, LNG: string } = this.eGridService.zipLatLong.find(zipLL => { return zipLL.ZIP == this.zipCode });
     // if (locationLatLong) {
     //   this.mapData.push({
@@ -170,66 +181,5 @@ export class WeatherStationsMapComponent {
       return 1;
     }
   }
-
-
-  drawChart2() {
-    if (this.weatherStationMap && this.addressLatLong) {
-
-      var data = [{
-        type: 'scattergeo',
-        mode: 'markers',
-        lat: [this.addressLatLong.latitude],
-        lon: [this.addressLatLong.longitude],
-        // hovertext: this.getHoverData(),
-        hoverinfo: 'text',
-        text: ['Address Location'],
-        marker: {
-          text: ['Address Location'],
-          size: [20],
-          color: ['orange'],
-          // cmin: 0,
-          // cmax: cmax,
-          line: {
-            color: 'black'
-          },
-          // symbol: this.getSymbol()
-        },
-        // name: this.getName(),
-
-        // locationmode: "USA-states",
-      }];
-
-      var layout = {
-        'geo': {
-          scope: 'world',
-          resolution: 110,
-          showland: true,
-          // landcolor: 'rgb(20, 90, 50)',
-          subunitwidth: 1,
-          countrywidth: 1,
-          // subunitcolor: 'rgb(255,255,255)',
-          // countrycolor: 'rgb(255,255,255)',
-          center: {
-            lat: this.addressLatLong.latitude,
-            lon: this.addressLatLong.longitude
-          },
-          // projection: {
-          //   scale: this.getScale()
-          // }
-        },
-        showlegend: false,
-        margin: { "t": 0, "b": 50, "l": 0, "r": 50 },
-      };
-
-      let config = {
-        displaylogo: false,
-        responsive: true,
-        // scrollZoom: false
-      }
-
-      this.plotlyService.newPlot(this.weatherStationMap.nativeElement, data, layout, config);
-    }
-  }
-
 
 }

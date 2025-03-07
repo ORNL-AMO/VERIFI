@@ -50,8 +50,12 @@ export class WeatherDataService {
 
   getStationsAPI(zipCode: string, distance: number): Observable<any> {
     let currentDate: Date = new Date();
+    console.log(zipCode);
+    console.log(typeof zipCode)
+    let zipString = String(zipCode);
+    console.log(zipString)
     let data = {
-      "zip": zipCode,
+      "zip": zipString,
       "radial_distance": distance,
       "start_date": "2013-03-01",
       "end_date": currentDate.getFullYear() + '-' + currentDate.getMonth() + '-' + currentDate.getDate()
@@ -165,24 +169,20 @@ export class WeatherDataService {
     return degreeDays;
   }
 
-  async getLocation(addressString: string): Promise<{
-    latitude: number,
-    longitude: number,
-  }> {
+  async getLocation(addressString: string): Promise<Array<NominatimLocation>> {
     if (addressString) {
       let url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(addressString)}&format=json`;
-      console.log(url);
       try {
         const response = await fetch(url);
         const data = await response.json();
         console.log(data);
         if (data.length > 0) {
-          let latLong = {
-            latitude: parseFloat(data[0].lat),
-            longitude: parseFloat(data[0].lon),
-          };
-          console.log(latLong);
-          return latLong;
+          // let latLong = {
+          //   latitude: parseFloat(data[0].lat),
+          //   longitude: parseFloat(data[0].lon),
+          // };
+          // console.log(latLong);
+          return data;
         }
       } catch (err) {
 
@@ -239,4 +239,12 @@ export interface WeatherDataReading {
   'pressure': number,
   'precipitation': number,
   'wind_speed': number
+}
+
+export interface NominatimLocation {
+  addresstype: string,
+  display_name: string,
+  lat: string,
+  lon: string,
+  place_id: number
 }

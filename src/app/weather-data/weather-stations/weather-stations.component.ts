@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { WeatherStation } from 'src/app/models/degreeDays';
-import { WeatherDataService } from '../weather-data.service';
+import { NominatimLocation, WeatherDataService } from '../weather-data.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { Subscription } from 'rxjs';
 import { IdbAccount } from 'src/app/models/idbModels/account';
@@ -16,7 +16,6 @@ import { CountryList } from './country-list';
 })
 export class WeatherStationsComponent {
 
-  zipCode: string;
   furthestDistance: number = 75;
   stations: Array<WeatherStation> = [];
   useFacility: boolean = false;
@@ -29,16 +28,22 @@ export class WeatherStationsComponent {
   city: string;
   country: string;
   CountryList = CountryList;
-
   addressLatLong: {
     latitude: number,
     longitude: number,
-  };
+  } = {
+      latitude: undefined,
+      longitude: undefined,
+    };
   listByCountry: boolean = false;
+
+  addressLookupItems: Array<NominatimLocation> = [];
+  searchingLatLong: boolean = false;
+  isLocationSearch: boolean = true;
+  selectedLocationId: number;
   constructor(private accountDbService: AccountdbService,
     private weatherDataService: WeatherDataService,
     private facilityDbService: FacilitydbService) {
-
   }
 
   ngOnInit() {
@@ -46,40 +51,67 @@ export class WeatherStationsComponent {
       this.facilities = val;
       this.checkSelectedFacility();
     })
-    if (!this.weatherDataService.zipCode) {
-      let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-      this.zipCode = selectedAccount.zip;
-    } else {
-      this.zipCode = this.weatherDataService.zipCode;
-    }
-    this.selectedFacilityId = this.weatherDataService.selectedFacility?.guid;
-    this.setStations();
+    // this.selectedFacilityId = this.weatherDataService.selectedFacility?.guid;
+    // this.setStations();
   }
 
   ngOnDestroy() {
     this.facilitySub.unsubscribe();
   }
 
+
+
   async setStations() {
-    console.log(this.country);
-    if (this.listByCountry && this.country) {
-      console.log(this.country);
+    if (this.addressLatLong.latitude && this.addressLatLong.longitude && this.furthestDistance) {
       this.fetchingData = true;
-      this.stations = await this.weatherDataService.getStationsByCountry(this.country);
+      this.stations = await this.weatherDataService.getStationsLatLong(this.addressLatLong, this.furthestDistance);
       this.fetchingData = false;
-    } else if (this.addressString) {
-      this.addressLatLong = await this.weatherDataService.getLocation(this.addressString);
-      console.log(this.addressLatLong);
-      if (this.addressLatLong.latitude && this.furthestDistance) {
-        this.fetchingData = true;
-        this.stations = await this.weatherDataService.getStationsLatLong(this.addressLatLong, this.furthestDistance);
-        this.fetchingData = false;
-      } else {
-        this.fetchingData = false;
-        this.stations = [];
-      }
+    } else {
+      this.fetchingData = false;
+      this.stations = [];
     }
   }
+
+  async searchLatLong() {
+    this.selectedLocationId = undefined;
+    this.searchingLatLong = true;
+    this.addressLookupItems = await this.weatherDataService.getLocation(this.addressString);
+    this.searchingLatLong = false;
+    if (this.addressLookupItems.length > 0) {
+      this.selectedLocationId = this.addressLookupItems[0].place_id
+      this.setLatLongFromItem(this.addressLookupItems[0]);
+    }
+  }
+
+  async setLatLongFromItem(item: NominatimLocation) {
+    this.addressLatLong = {
+      latitude: parseFloat(item.lat),
+      longitude: parseFloat(item.lon)
+    }
+    this.stations = [];
+  }
+
+
+  // async setStations() {
+  //   console.log(this.country);
+  //   if (this.listByCountry && this.country) {
+  //     console.log(this.country);
+  //     this.fetchingData = true;
+  //     this.stations = await this.weatherDataService.getStationsByCountry(this.country);
+  //     this.fetchingData = false;
+  //   } else if (this.addressString) {
+  //     this.addressLatLong = await this.weatherDataService.getLocation(this.addressString);
+  //     console.log(this.addressLatLong);
+  //     if (this.addressLatLong.latitude && this.furthestDistance) {
+  //       this.fetchingData = true;
+  //       this.stations = await this.weatherDataService.getStationsLatLong(this.addressLatLong, this.furthestDistance);
+  //       this.fetchingData = false;
+  //     } else {
+  //       this.fetchingData = false;
+  //       this.stations = [];
+  //     }
+  //   }
+  // }
 
   toggleUseZip() {
     this.useFacility = !this.useFacility;
@@ -94,18 +126,18 @@ export class WeatherStationsComponent {
   }
 
   checkSelectedFacility() {
-    if (this.weatherDataService.selectedFacility) {
-      let facilityExists: IdbFacility = this.facilities.find(facility => { return facility.guid == this.weatherDataService.selectedFacility.guid });
-      if (facilityExists) {
-        this.useFacility = true;
-        this.zipCode = this.weatherDataService.selectedFacility.zip;
-      }
-    }
+    // if (this.weatherDataService.selectedFacility) {
+    //   let facilityExists: IdbFacility = this.facilities.find(facility => { return facility.guid == this.weatherDataService.selectedFacility.guid });
+    //   if (facilityExists) {
+    //     this.useFacility = true;
+    //     this.zipCode = this.weatherDataService.selectedFacility.zip;
+    //   }
+    // }
   }
 
   changeFacility() {
-    this.weatherDataService.selectedFacility = this.facilities.find(facility => { return facility.guid == this.selectedFacilityId });
-    this.zipCode = this.weatherDataService.selectedFacility?.zip;
+    // this.weatherDataService.selectedFacility = this.facilities.find(facility => { return facility.guid == this.selectedFacilityId });
+    // this.zipCode = this.weatherDataService.selectedFacility?.zip;
     this.setStations();
   }
 
