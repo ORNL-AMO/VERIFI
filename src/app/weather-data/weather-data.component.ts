@@ -27,12 +27,13 @@ import { getNewIdbPredictor, IdbPredictor } from '../models/idbModels/predictor'
 import { DatePipe } from '@angular/common';
 import { getDegreeDayAmount } from '../shared/sharedHelperFuntions';
 import { getDetailedDataForMonth } from './weatherDataCalculations';
+import { DegreeDaysService } from '../shared/helper-services/degree-days.service';
 
 @Component({
-    selector: 'app-weather-data',
-    templateUrl: './weather-data.component.html',
-    styleUrls: ['./weather-data.component.css'],
-    standalone: false
+  selector: 'app-weather-data',
+  templateUrl: './weather-data.component.html',
+  styleUrls: ['./weather-data.component.css'],
+  standalone: false
 })
 export class WeatherDataComponent {
 
@@ -55,7 +56,8 @@ export class WeatherDataComponent {
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private utilityMeterDbService: UtilityMeterdbService,
     private dbChangesService: DbChangesService,
-    private analyticsService: AnalyticsService) {
+    private analyticsService: AnalyticsService,
+    private degreeDaysService: DegreeDaysService) {
 
   }
 
@@ -168,15 +170,20 @@ export class WeatherDataComponent {
 
     let endDate: Date = new Date(monthlyData[monthlyData.length - 1].date);
     let startDate: Date = new Date(monthlyData[0].date);
-    let weatherData: Array<WeatherDataReading> = await this.weatherDataService.getHourlyData(this.weatherDataService.selectedStation.ID, startDate, endDate, ['wet_bulb_temp'])
+    //ISSUE: 1822
+    // let weatherData: Array<WeatherDataReading> = await this.weatherDataService.getHourlyData(this.weatherDataService.selectedStation.ID, startDate, endDate, ['wet_bulb_temp'])
     while (startDate <= endDate) {
       let entryDate: Date = new Date(startDate);
+      await this.degreeDaysService.setYearHourlyData(entryDate.getMonth(), entryDate.getFullYear(), this.weatherDataService.selectedStation.ID)
 
       let datePipe: DatePipe = new DatePipe(navigator.language);
       let stringFormat: string = 'MMM y';
       let dateStr = datePipe.transform(startDate.toLocaleDateString(), stringFormat);
       this.loadingService.setLoadingMessage('Calculating Predictors: ' + dateStr + ' ...');
-      let degreeDays: Array<DetailDegreeDay> = await getDetailedDataForMonth(weatherData, entryDate.getMonth(), entryDate.getFullYear(), this.weatherDataService.heatingTemp, this.weatherDataService.coolingTemp, this.weatherDataService.selectedStation.ID, this.weatherDataService.selectedStation.name)
+
+      //ISSUE: 1822
+      // let degreeDays: Array<DetailDegreeDay> = await getDetailedDataForMonth(weatherData, entryDate.getMonth(), entryDate.getFullYear(), this.weatherDataService.heatingTemp, this.weatherDataService.coolingTemp, this.weatherDataService.selectedStation.ID, this.weatherDataService.selectedStation.name)
+      let degreeDays: Array<DetailDegreeDay> = await this.degreeDaysService.getDetailedDataForMonth(entryDate.getMonth(), this.weatherDataService.heatingTemp, this.weatherDataService.coolingTemp)
       let hasErrors: DetailDegreeDay = degreeDays.find(degreeDay => {
         return degreeDay.gapInData == true
       });

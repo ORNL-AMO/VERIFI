@@ -16,12 +16,13 @@ import * as _ from 'lodash';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { getDegreeDayAmount } from 'src/app/shared/sharedHelperFuntions';
+import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
 
 @Component({
-    selector: 'app-predictors-data-form',
-    templateUrl: './predictors-data-form.component.html',
-    styleUrl: './predictors-data-form.component.css',
-    standalone: false
+  selector: 'app-predictors-data-form',
+  templateUrl: './predictors-data-form.component.html',
+  styleUrl: './predictors-data-form.component.css',
+  standalone: false
 })
 export class PredictorsDataFormComponent {
 
@@ -37,7 +38,8 @@ export class PredictorsDataFormComponent {
     private loadingService: LoadingService,
     private toastNotificationService: ToastNotificationsService,
     private weatherDataService: WeatherDataService,
-    private predictorDataDbService: PredictorDataDbService) {
+    private predictorDataDbService: PredictorDataDbService,
+    private degreeDaysService: DegreeDaysService) {
   }
 
   ngOnInit() {
@@ -109,7 +111,10 @@ export class PredictorsDataFormComponent {
       let hasWeatherDataWarning: boolean = false;
       if (!this.predictorData.weatherOverride) {
         let entryDate: Date = new Date(this.predictorData.date);
-        let degreeDays: Array<DetailDegreeDay> = await this.weatherDataService.getDegreeDaysForMonth(entryDate, this.predictor.weatherStationId, this.predictor.weatherStationName, this.predictor.heatingBaseTemperature, this.predictor.coolingBaseTemperature);
+        //ISSUE 1822
+        await this.degreeDaysService.setYearHourlyData(entryDate.getMonth(), entryDate.getFullYear(), this.predictor.weatherStationId,)
+        let degreeDays: Array<DetailDegreeDay> = await this.degreeDaysService.getDetailedDataForMonth(entryDate.getMonth(), this.predictor.heatingBaseTemperature, this.predictor.coolingBaseTemperature)
+        // let degreeDays: Array<DetailDegreeDay> = await this.weatherDataService.getDegreeDaysForMonth(entryDate, this.predictor.weatherStationId, this.predictor.weatherStationName, this.predictor.heatingBaseTemperature, this.predictor.coolingBaseTemperature);
         let hasErrors: DetailDegreeDay = degreeDays.find(degreeDay => {
           return degreeDay.gapInData == true
         });
