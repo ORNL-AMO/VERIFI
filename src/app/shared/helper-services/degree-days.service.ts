@@ -75,17 +75,25 @@ export class DegreeDaysService {
         }
         if (station) {
           let neededDate: Date = new Date(year, month, 1);
-          if (neededDate >= station.begin && neededDate <= station.end) {
-            let response: Response | 'error' = await this.getStationDataResponse(station, year);
-            if (response != 'error') {
-              let dataResults: string = await response.text();
-              this.stationDataResponse = {
-                response: response,
-                station: station,
-                year: year,
-                dataResults: dataResults
+          let dataExists: boolean = false;
+          if (this.yearHourlyData && this.yearHourlyData.length > 0 && this.yearHourlyData[0].stationId == station.ID) {
+            //check exists            
+            let currentDataYear: number = new Date(this.yearHourlyData[0].DATE).getFullYear();
+            dataExists = (year == currentDataYear);
+          }
+          if (!dataExists) {
+            if (neededDate >= station.begin && neededDate <= station.end) {
+              let response: Response | 'error' = await this.getStationDataResponse(station, year);
+              if (response != 'error') {
+                let dataResults: string = await response.text();
+                this.stationDataResponse = {
+                  response: response,
+                  station: station,
+                  year: year,
+                  dataResults: dataResults
+                }
+                this.yearHourlyData = this.getStationYearLCDFromResults(station, dataResults);
               }
-              this.yearHourlyData = this.getStationYearLCDFromResults(station, dataResults);
             }
           } else {
             this.yearHourlyData = undefined;
@@ -397,7 +405,8 @@ export class DegreeDaysService {
       USAF: USAF,
       WBAN: WBAN,
       ID: ID,
-      distanceFrom: undefined
+      distanceFrom: undefined,
+      ratingPercent: undefined
     }
   }
 }

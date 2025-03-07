@@ -19,12 +19,13 @@ import { getDegreeDayAmount } from 'src/app/shared/sharedHelperFuntions';
 import { PredictorDataHelperService } from 'src/app/shared/helper-services/predictor-data-helper.service';
 import { WeatherDataReading, WeatherDataService } from 'src/app/weather-data/weather-data.service';
 import { getDetailedDataForMonth } from 'src/app/weather-data/weatherDataCalculations';
+import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
 
 @Component({
-    selector: 'app-calculated-predictor-data-update',
-    templateUrl: './calculated-predictor-data-update.component.html',
-    styleUrl: './calculated-predictor-data-update.component.css',
-    standalone: false
+  selector: 'app-calculated-predictor-data-update',
+  templateUrl: './calculated-predictor-data-update.component.html',
+  styleUrl: './calculated-predictor-data-update.component.css',
+  standalone: false
 })
 export class CalculatedPredictorDataUpdateComponent {
 
@@ -69,7 +70,8 @@ export class CalculatedPredictorDataUpdateComponent {
     private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
     private predictorDataHelperService: PredictorDataHelperService,
-    private weatherDataService: WeatherDataService
+    private weatherDataService: WeatherDataService,
+    private degreeDaysService: DegreeDaysService
   ) {
 
   }
@@ -157,7 +159,10 @@ export class CalculatedPredictorDataUpdateComponent {
       let predictorIndex: number = existingPredictorIndex[i];
       if (!this.predictorData[predictorIndex].weatherOverride && !this.predictorData[predictorIndex].updatedAmount) {
         let entryDate: Date = new Date(this.predictorData[predictorIndex].date);
-        let degreeDays: Array<DetailDegreeDay> = await this.weatherDataService.getDegreeDaysForMonth(entryDate, this.predictor.weatherStationId, this.predictor.weatherStationName, this.predictor.heatingBaseTemperature, this.predictor.coolingBaseTemperature);
+        // let degreeDays: Array<DetailDegreeDay> = await this.weatherDataService.getDegreeDaysForMonth(entryDate, this.predictor.weatherStationId, this.predictor.weatherStationName, this.predictor.heatingBaseTemperature, this.predictor.coolingBaseTemperature);
+        //ISSUE 1822
+        await this.degreeDaysService.setYearHourlyData(entryDate.getMonth(), entryDate.getFullYear(), this.predictor.weatherStationId,)
+        let degreeDays: Array<DetailDegreeDay> = await this.degreeDaysService.getDetailedDataForMonth(entryDate.getMonth(), this.predictor.heatingBaseTemperature, this.predictor.coolingBaseTemperature)
 
         let hasErrors: DetailDegreeDay = degreeDays.find(degreeDay => {
           return degreeDay.gapInData == true
@@ -221,7 +226,7 @@ export class CalculatedPredictorDataUpdateComponent {
   }
 
   async addDegreeDays(startDate: Date, endDate: Date) {
-    let parsedData: Array<WeatherDataReading> = await this.weatherDataService.getHourlyData(this.predictor.weatherStationId, startDate, endDate, ['humidity']);
+    // let parsedData: Array<WeatherDataReading> = await this.weatherDataService.getHourlyData(this.predictor.weatherStationId, startDate, endDate, ['humidity']);
     while (startDate <= endDate) {
       if (this.destroyed) {
         break;
@@ -229,7 +234,10 @@ export class CalculatedPredictorDataUpdateComponent {
       this.calculatingData = true;
       let newDate: Date = new Date(startDate);
       this.calculationDate = new Date(newDate);
-      let degreeDays: Array<DetailDegreeDay> = getDetailedDataForMonth(parsedData, newDate.getMonth(), newDate.getFullYear(), this.predictor.heatingBaseTemperature, this.predictor.coolingBaseTemperature, this.predictor.weatherStationId, this.predictor.weatherStationName);
+      //ISSUE 1822
+      // let degreeDays: Array<DetailDegreeDay> = getDetailedDataForMonth(parsedData, newDate.getMonth(), newDate.getFullYear(), this.predictor.heatingBaseTemperature, this.predictor.coolingBaseTemperature, this.predictor.weatherStationId, this.predictor.weatherStationName);
+      await this.degreeDaysService.setYearHourlyData(newDate.getMonth(), newDate.getFullYear(), this.predictor.weatherStationId,)
+      let degreeDays: Array<DetailDegreeDay> = await this.degreeDaysService.getDetailedDataForMonth(newDate.getMonth(), this.predictor.heatingBaseTemperature, this.predictor.coolingBaseTemperature)
       let hasErrors: DetailDegreeDay = degreeDays.find(degreeDay => {
         return degreeDay.gapInData == true
       });
