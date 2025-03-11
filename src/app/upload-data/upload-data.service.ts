@@ -55,7 +55,6 @@ export class UploadDataService {
 
 
   getFileReference(file: File, workBook: XLSX.WorkBook, inSetupWizard: boolean): FileReference {
-    console.log(workBook.SheetNames);
     let isTemplate: "V1" | "V2" | "Non-template" | "ETH" = this.checkSheetNamesForTemplate(workBook.SheetNames);
     if (isTemplate == "Non-template") {
       let accountFacilities: Array<IdbFacility> = this.facilityDbService.getAccountFacilitiesCopy();

@@ -23,8 +23,8 @@ import { getNewIdbFacility, IdbFacility } from '../models/idbModels/facility';
 import { getNewIdbUtilityMeter, IdbUtilityMeter, MeterReadingDataApplication } from '../models/idbModels/utilityMeter';
 import { IdbUtilityMeterGroup } from '../models/idbModels/utilityMeterGroup';
 import { getNewIdbUtilityMeterData, IdbUtilityMeterData } from '../models/idbModels/utilityMeterData';
-import { IdbPredictor } from '../models/idbModels/predictor';
-import { IdbPredictorData } from '../models/idbModels/predictorData';
+import { getNewIdbPredictor, IdbPredictor } from '../models/idbModels/predictor';
+import { getNewIdbPredictorData, IdbPredictorData } from '../models/idbModels/predictorData';
 import { Months } from '../shared/form-data/months';
 
 
@@ -50,91 +50,109 @@ export class UploadDataEnergyTreasureHuntService {
     } else {
       selectedAccount = this.accountDbService.selectedAccount.getValue();
     }
-    let importFacility: IdbFacility = this.getImportFacilities(workbook, selectedAccount);
-    if (!importFacility) {
-      throw ('No Facilities Found!')
+    let hostPlantSummaryWorksheet: XLSX.WorkSheet = workbook.Sheets['Host Plant Summary'];
+    let hostPlant: IdbFacility = this.getImportFacilities(hostPlantSummaryWorksheet, selectedAccount, 'Host Plant');
+    let hostPlantUtilitiesWorksheet: XLSX.WorkSheet = workbook.Sheets['Host Plant Utilities'];
+    let hostPlantResults: ParsedTemplate = this.getTemplateResultsFromWorksheet(hostPlant, selectedAccount, hostPlantUtilitiesWorksheet);
+
+
+    let exchangePlantSummaryWorksheet: XLSX.WorkSheet = workbook.Sheets['Exchange Plant Summary'];
+    let exchangePlant: IdbFacility = this.getImportFacilities(exchangePlantSummaryWorksheet, selectedAccount, 'Exchange Plant');
+    let exchangePlantUtilitiesWorksheet: XLSX.WorkSheet = workbook.Sheets['Exchange Plant Utilities'];
+    let exchangePlantResults: ParsedTemplate = this.getTemplateResultsFromWorksheet(hostPlant, selectedAccount, exchangePlantUtilitiesWorksheet)
+
+    if (exchangePlantResults.meterData.length > 0 || exchangePlantResults.predictorData.length > 0) {
+      return {
+        importFacilities: [hostPlant, exchangePlant],
+        importMeters: _.concat(hostPlantResults.importMeters, exchangePlantResults.importMeters),
+        predictors:  _.concat(hostPlantResults.predictors, exchangePlantResults.predictors),
+        predictorData:  _.concat(hostPlantResults.predictorData, exchangePlantResults.predictorData),
+        meterData:  _.concat(hostPlantResults.meterData, exchangePlantResults.meterData),
+        newGroups: []
+      }
     } else {
-      let meters: Array<IdbUtilityMeter> = [];
-      let meterData: Array<IdbUtilityMeterData> = [];
-      let hostPLantUtilitiesWorksheet: XLSX.WorkSheet = workbook.Sheets['Host Plant Utilities'];
-      //electricity
-      let electricityMeterAndData: { meter: IdbUtilityMeter, meterData: Array<IdbUtilityMeterData> } = this.getElectricityMeterAndData(hostPLantUtilitiesWorksheet, importFacility, selectedAccount);
-      if (electricityMeterAndData.meterData.length != 0) {
-        meters.push(electricityMeterAndData.meter);
-        electricityMeterAndData.meterData.forEach(mData => {
-          meterData.push(mData);
-        })
-      }
-      //NG
-      let naturalGasMeter: { meter: IdbUtilityMeter, meterData: Array<IdbUtilityMeterData> } = this.getNaturalGasMeterAndData(hostPLantUtilitiesWorksheet, importFacility, selectedAccount);
-      if (naturalGasMeter.meterData.length != 0) {
-        meters.push(naturalGasMeter.meter);
-        naturalGasMeter.meterData.forEach(mData => {
-          meterData.push(mData);
-        })
-      }
-      //coal and/or oil consumption
-      let coalOilMeterAndData: { meter: IdbUtilityMeter, meterData: Array<IdbUtilityMeterData> } = this.getCoalOilMeterAndData(hostPLantUtilitiesWorksheet, importFacility, selectedAccount);
-      if (coalOilMeterAndData.meterData.length != 0) {
-        meters.push(coalOilMeterAndData.meter);
-        coalOilMeterAndData.meterData.forEach(mData => {
-          meterData.push(mData);
-        })
-      }
-      //other energy consumption
-      let otherEnergyMeterAndData: { meter: IdbUtilityMeter, meterData: Array<IdbUtilityMeterData> } = this.getOtherEnergyMeterAndData(hostPLantUtilitiesWorksheet, importFacility, selectedAccount);
-      if (otherEnergyMeterAndData.meterData.length != 0) {
-        meters.push(otherEnergyMeterAndData.meter);
-        otherEnergyMeterAndData.meterData.forEach(mData => {
-          meterData.push(mData);
-        })
-      }
-      //utility water
-      let waterMeterAndData: { meter: IdbUtilityMeter, meterData: Array<IdbUtilityMeterData> } = this.getWaterMeterAndData(hostPLantUtilitiesWorksheet, importFacility, selectedAccount);
-      if (waterMeterAndData.meterData.length != 0) {
-        meters.push(waterMeterAndData.meter);
-        waterMeterAndData.meterData.forEach(mData => {
-          meterData.push(mData);
-        })
-      }
-      //utility sewer
-      let sewerMeterAndData: { meter: IdbUtilityMeter, meterData: Array<IdbUtilityMeterData> } = this.getWaterSewerAndData(hostPLantUtilitiesWorksheet, importFacility, selectedAccount);
-      if (sewerMeterAndData.meterData.length != 0) {
-        meters.push(sewerMeterAndData.meter);
-        sewerMeterAndData.meterData.forEach(mData => {
-          meterData.push(mData);
-        })
-      }
-      //self sourced water
-      let selfWaterMeterAndData: { meter: IdbUtilityMeter, meterData: Array<IdbUtilityMeterData> } = this.getWaterOtherAndData(hostPLantUtilitiesWorksheet, importFacility, selectedAccount);
-      if (selfWaterMeterAndData.meterData.length != 0) {
-        meters.push(selfWaterMeterAndData.meter);
-        selfWaterMeterAndData.meterData.forEach(mData => {
-          meterData.push(mData);
-        })
-      }
-      return { importFacilities: [importFacility], importMeters: meters, predictors: [], predictorData: [], meterData: meterData, newGroups: [] }
+      return { importFacilities: [hostPlant], importMeters: hostPlantResults.importMeters, predictors: hostPlantResults.predictors, predictorData: hostPlantResults.predictorData, meterData: hostPlantResults.meterData, newGroups: [] }
     }
+
   }
 
-  getImportFacilities(workbook: XLSX.WorkBook, selectedAccount: IdbAccount): IdbFacility {
-    let hostPlantSummaryWorksheet: XLSX.WorkSheet = workbook.Sheets['Host Plant Summary'];
-    let facilityName: string = hostPlantSummaryWorksheet['C9']?.v;
-    // let facilitiesData = XLSX.utils.sheet_to_json(workbook.Sheets['Host Plant Summary']);
-    // console.log(facilitiesData);
+  getTemplateResultsFromWorksheet(facility: IdbFacility, account: IdbAccount, worksheet: XLSX.WorkSheet): ParsedTemplate {
+    let meters: Array<IdbUtilityMeter> = [];
+    let meterData: Array<IdbUtilityMeterData> = [];
+    //electricity
+    let electricityMeterAndData: { meter: IdbUtilityMeter, meterData: Array<IdbUtilityMeterData> } = this.getElectricityMeterAndData(worksheet, facility, account);
+    if (electricityMeterAndData.meterData.length != 0) {
+      meters.push(electricityMeterAndData.meter);
+      electricityMeterAndData.meterData.forEach(mData => {
+        meterData.push(mData);
+      })
+    }
+    //NG
+    let naturalGasMeter: { meter: IdbUtilityMeter, meterData: Array<IdbUtilityMeterData> } = this.getNaturalGasMeterAndData(worksheet, facility, account);
+    if (naturalGasMeter.meterData.length != 0) {
+      meters.push(naturalGasMeter.meter);
+      naturalGasMeter.meterData.forEach(mData => {
+        meterData.push(mData);
+      })
+    }
+    //coal and/or oil consumption
+    let coalOilMeterAndData: { meter: IdbUtilityMeter, meterData: Array<IdbUtilityMeterData> } = this.getCoalOilMeterAndData(worksheet, facility, account);
+    if (coalOilMeterAndData.meterData.length != 0) {
+      meters.push(coalOilMeterAndData.meter);
+      coalOilMeterAndData.meterData.forEach(mData => {
+        meterData.push(mData);
+      })
+    }
+    //other energy consumption
+    let otherEnergyMeterAndData: { meter: IdbUtilityMeter, meterData: Array<IdbUtilityMeterData> } = this.getOtherEnergyMeterAndData(worksheet, facility, account);
+    if (otherEnergyMeterAndData.meterData.length != 0) {
+      meters.push(otherEnergyMeterAndData.meter);
+      otherEnergyMeterAndData.meterData.forEach(mData => {
+        meterData.push(mData);
+      })
+    }
+    //utility water
+    let waterMeterAndData: { meter: IdbUtilityMeter, meterData: Array<IdbUtilityMeterData> } = this.getWaterMeterAndData(worksheet, facility, account);
+    if (waterMeterAndData.meterData.length != 0) {
+      meters.push(waterMeterAndData.meter);
+      waterMeterAndData.meterData.forEach(mData => {
+        meterData.push(mData);
+      })
+    }
+    //utility sewer
+    let sewerMeterAndData: { meter: IdbUtilityMeter, meterData: Array<IdbUtilityMeterData> } = this.getWaterSewerAndData(worksheet, facility, account);
+    if (sewerMeterAndData.meterData.length != 0) {
+      meters.push(sewerMeterAndData.meter);
+      sewerMeterAndData.meterData.forEach(mData => {
+        meterData.push(mData);
+      })
+    }
+    //self sourced water
+    let selfWaterMeterAndData: { meter: IdbUtilityMeter, meterData: Array<IdbUtilityMeterData> } = this.getWaterOtherAndData(worksheet, facility, account);
+    if (selfWaterMeterAndData.meterData.length != 0) {
+      meters.push(selfWaterMeterAndData.meter);
+      selfWaterMeterAndData.meterData.forEach(mData => {
+        meterData.push(mData);
+      })
+    }
+    let pData: { predictors: Array<IdbPredictor>, predictorData: Array<IdbPredictorData> } = this.getProductionData(worksheet, facility, account);
+    return { importFacilities: [facility], importMeters: meters, predictors: pData.predictors, predictorData: pData.predictorData, meterData: meterData, newGroups: [] }
+  }
+
+
+  getImportFacilities(worksheet: XLSX.WorkSheet, selectedAccount: IdbAccount, defaultFacilityName: string): IdbFacility {
+    let facilityName: string = worksheet['C9']?.v;
     let accountFacilities: Array<IdbFacility> = this.facilityDbService.getAccountFacilitiesCopy();
-    // facilitiesData.forEach(facilityDataRow => {
-    //   let facilityName: string = facilityDataRow['Facility Name'];
     let facility: IdbFacility;
     if (facilityName) {
       facility = accountFacilities.find(facility => { return facility.name == facilityName });
-      console.log(facility);
       if (!facility) {
         facility = getNewIdbFacility(selectedAccount);
         facility.name = facilityName;
       }
     } else {
-      facility.name = 'ETH Facility';
+      facility = getNewIdbFacility(selectedAccount);
+      facility.name = defaultFacilityName;
     }
     //TODO: Parse addtional data from document
     // facility.address = facilityDataRow['Address'];
@@ -274,6 +292,7 @@ export class UploadDataEnergyTreasureHuntService {
     meter.name = 'Utility Water';
     meter.meterReadingDataApplication = 'fullMonth';
     meter.includeInEnergy = false;
+    meter.scope = 100;
     meter.startingUnit = 'kgal';
     //TODO: set meter details
     meter.source = 'Water Intake';
@@ -302,6 +321,7 @@ export class UploadDataEnergyTreasureHuntService {
     meter.name = 'Utility Sewer';
     meter.meterReadingDataApplication = 'fullMonth';
     meter.includeInEnergy = false;
+    meter.scope = 100;
     meter.startingUnit = 'kgal';
     //TODO: set meter details
     meter.source = 'Water Discharge';
@@ -330,6 +350,7 @@ export class UploadDataEnergyTreasureHuntService {
     meter.name = 'Self Sourced Water';
     meter.meterReadingDataApplication = 'fullMonth';
     meter.includeInEnergy = false;
+    meter.scope = 100;
     //TODO: set meter details
     meter.source = 'Water Intake';
     let meterData: Array<IdbUtilityMeterData> = new Array();
@@ -346,6 +367,85 @@ export class UploadDataEnergyTreasureHuntService {
       }
     };
     return { meter: meter, meterData: meterData }
+  }
+
+  getProductionData(worksheet: XLSX.WorkSheet, facility: IdbFacility, account: IdbAccount): { predictors: Array<IdbPredictor>, predictorData: Array<IdbPredictorData> } {
+    let predictor1: IdbPredictor = getNewIdbPredictor(account.guid, facility.guid);
+    predictor1.name = 'Production Metric 1';
+    predictor1.production = true;
+    let productionData1: Array<IdbPredictorData> = [];
+    let predictor2: IdbPredictor = getNewIdbPredictor(account.guid, facility.guid);
+    predictor2.name = 'Production Metric 2';
+    predictor2.production = true;
+    let productionData2: Array<IdbPredictorData> = [];
+    let predictor3: IdbPredictor = getNewIdbPredictor(account.guid, facility.guid);
+    predictor3.name = 'Production Metric 3';
+    predictor3.production = true;
+    let productionData3: Array<IdbPredictorData> = [];
+    let predictorTotalHours: IdbPredictor = getNewIdbPredictor(account.guid, facility.guid);
+    predictorTotalHours.name = 'Total Hours of Production';
+    predictorTotalHours.production = true;
+    let productionDataTotalHours: Array<IdbPredictorData> = [];
+
+    for (let index: number = 156; index < 180; index++) {
+      let date: Date = this.getDateFromSheet(index, worksheet);
+      let pd1: number = worksheet['D' + index]?.v;
+      if (pd1) {
+        let pd1Data: IdbPredictorData = getNewIdbPredictorData(predictor1)
+        pd1Data.date = date;
+        pd1Data.amount = pd1;
+        productionData1.push(pd1Data);
+      }
+      let pd2: number = worksheet['E' + index]?.v;
+      if (pd2) {
+        let pd2Data: IdbPredictorData = getNewIdbPredictorData(predictor2)
+        pd2Data.date = date;
+        pd2Data.amount = pd2;
+        productionData2.push(pd2Data);
+      }
+      let pd3: number = worksheet['F' + index]?.v;
+      if (pd3) {
+        let pd3Data: IdbPredictorData = getNewIdbPredictorData(predictor3)
+        pd3Data.date = date;
+        pd3Data.amount = pd3;
+        productionData3.push(pd3Data);
+      }
+      let totalHours: number = worksheet['H' + index]?.v;
+      if (totalHours) {
+        let totalHoursData: IdbPredictorData = getNewIdbPredictorData(predictorTotalHours)
+        totalHoursData.date = date;
+        totalHoursData.amount = totalHours;
+        productionDataTotalHours.push(totalHoursData);
+      }
+    };
+
+    let predictorData: Array<IdbPredictorData> = [];
+    let predictors: Array<IdbPredictor> = [];
+    if (productionData1.length > 0) {
+      predictors.push(predictor1);
+      productionData1.forEach(pData => {
+        predictorData.push(pData);
+      })
+    }
+    if (productionData2.length > 0) {
+      predictors.push(predictor2);
+      productionData2.forEach(pData => {
+        predictorData.push(pData);
+      })
+    }
+    if (productionData3.length > 0) {
+      predictors.push(predictor3);
+      productionData3.forEach(pData => {
+        predictorData.push(pData);
+      })
+    }
+    if (productionDataTotalHours.length > 0) {
+      predictors.push(predictorTotalHours);
+      productionDataTotalHours.forEach(pData => {
+        predictorData.push(pData);
+      })
+    }
+    return { predictorData: predictorData, predictors: predictors }
   }
 
   getExistingDbEntry(utilityMeterData: Array<IdbUtilityMeterData>, meter: IdbUtilityMeter, readDate: Date): IdbUtilityMeterData {
