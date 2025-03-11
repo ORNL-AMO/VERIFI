@@ -73,7 +73,7 @@ export function getFuelEnum(fuel: string, source: MeterSource, phase: MeterPhase
 export function getMeterReadingDataApplication(yesOrNo: 'Yes' | 'No'): 'backward' | 'fullMonth' {
     if (yesOrNo == 'Yes') {
         return 'backward'
-    } else if ('No') {
+    } else if (yesOrNo == 'No') {
         return 'fullMonth';
     } else {
         return;
