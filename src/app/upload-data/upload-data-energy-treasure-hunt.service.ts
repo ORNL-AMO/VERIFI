@@ -4,28 +4,14 @@ import { ParsedTemplate } from './upload-data-models';
 import { AccountdbService } from '../indexedDB/account-db.service';
 import { FacilitydbService } from '../indexedDB/facility-db.service';
 import * as _ from 'lodash';
-import { checkImportCellNumber, checkImportStartingUnit, checkSameDay, getAgreementType, getCountryCode, getFuelEnum, getMeterSource, getPhase, getScope, getState, getYesNoBool, getZip } from './upload-helper-functions';
-import { EGridService } from '../shared/helper-services/e-grid.service';
-import { SubRegionData } from '../models/eGridEmissions';
-import { UtilityMeterdbService } from '../indexedDB/utilityMeter-db.service';
-import { FuelTypeOption } from '../shared/fuel-options/fuelTypeOption';
-import { getFuelTypeOptions } from '../shared/fuel-options/getFuelTypeOptions';
-import { getHeatingCapacity, getIsEnergyMeter, getIsEnergyUnit, getSiteToSource } from '../shared/sharedHelperFuntions';
-import { UploadDataSharedFunctionsService } from './upload-data-shared-functions.service';
-import { EditMeterFormService } from '../facility/utility-data/energy-consumption/energy-source/edit-meter-form/edit-meter-form.service';
-import { UtilityMeterDatadbService } from '../indexedDB/utilityMeterData-db.service';
-import { getMeterDataCopy } from '../calculations/conversions/convertMeterData';
-import { ConvertValue } from '../calculations/conversions/convertValue';
-import { GlobalWarmingPotential, GlobalWarmingPotentials } from '../models/globalWarmingPotentials';
 import { SetupWizardService } from '../setup-wizard/setup-wizard.service';
 import { IdbAccount } from '../models/idbModels/account';
 import { getNewIdbFacility, IdbFacility } from '../models/idbModels/facility';
-import { getNewIdbUtilityMeter, IdbUtilityMeter, MeterReadingDataApplication } from '../models/idbModels/utilityMeter';
-import { IdbUtilityMeterGroup } from '../models/idbModels/utilityMeterGroup';
+import { getNewIdbUtilityMeter, IdbUtilityMeter } from '../models/idbModels/utilityMeter';
 import { getNewIdbUtilityMeterData, IdbUtilityMeterData } from '../models/idbModels/utilityMeterData';
 import { getNewIdbPredictor, IdbPredictor } from '../models/idbModels/predictor';
 import { getNewIdbPredictorData, IdbPredictorData } from '../models/idbModels/predictorData';
-import { Months } from '../shared/form-data/months';
+import { checkSameDay } from './upload-helper-functions';
 
 
 @Injectable({
@@ -35,11 +21,6 @@ export class UploadDataEnergyTreasureHuntService {
 
   constructor(private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService,
-    private eGridService: EGridService,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private uploadDataSharedFunctionsService: UploadDataSharedFunctionsService,
-    private editMeterFormService: EditMeterFormService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
     private setupWizardService: SetupWizardService) { }
 
 
@@ -55,19 +36,18 @@ export class UploadDataEnergyTreasureHuntService {
     let hostPlantUtilitiesWorksheet: XLSX.WorkSheet = workbook.Sheets['Host Plant Utilities'];
     let hostPlantResults: ParsedTemplate = this.getTemplateResultsFromWorksheet(hostPlant, selectedAccount, hostPlantUtilitiesWorksheet);
 
-
     let exchangePlantSummaryWorksheet: XLSX.WorkSheet = workbook.Sheets['Exchange Plant Summary'];
     let exchangePlant: IdbFacility = this.getImportFacilities(exchangePlantSummaryWorksheet, selectedAccount, 'Exchange Plant');
     let exchangePlantUtilitiesWorksheet: XLSX.WorkSheet = workbook.Sheets['Exchange Plant Utilities'];
-    let exchangePlantResults: ParsedTemplate = this.getTemplateResultsFromWorksheet(hostPlant, selectedAccount, exchangePlantUtilitiesWorksheet)
+    let exchangePlantResults: ParsedTemplate = this.getTemplateResultsFromWorksheet(exchangePlant, selectedAccount, exchangePlantUtilitiesWorksheet)
 
     if (exchangePlantResults.meterData.length > 0 || exchangePlantResults.predictorData.length > 0) {
       return {
         importFacilities: [hostPlant, exchangePlant],
         importMeters: _.concat(hostPlantResults.importMeters, exchangePlantResults.importMeters),
-        predictors:  _.concat(hostPlantResults.predictors, exchangePlantResults.predictors),
-        predictorData:  _.concat(hostPlantResults.predictorData, exchangePlantResults.predictorData),
-        meterData:  _.concat(hostPlantResults.meterData, exchangePlantResults.meterData),
+        predictors: _.concat(hostPlantResults.predictors, exchangePlantResults.predictors),
+        predictorData: _.concat(hostPlantResults.predictorData, exchangePlantResults.predictorData),
+        meterData: _.concat(hostPlantResults.meterData, exchangePlantResults.meterData),
         newGroups: []
       }
     } else {
@@ -193,12 +173,14 @@ export class UploadDataEnergyTreasureHuntService {
       //TODO: PEAK DEMAND GOES WHERE?
       if (siteEnergy != undefined || cost != undefined) {
         let date: Date = this.getDateFromSheet(index, worksheet);
-        //check existing
-        let meterReading: IdbUtilityMeterData = getNewIdbUtilityMeterData(electricConsumptionMeter, []);
-        meterReading.readDate = date;
-        meterReading.totalEnergyUse = siteEnergy;
-        meterReading.totalCost = cost;
-        meterData.push(meterReading)
+        if (date) {
+          //check existing
+          let meterReading: IdbUtilityMeterData = getNewIdbUtilityMeterData(electricConsumptionMeter, []);
+          meterReading.readDate = date;
+          meterReading.totalEnergyUse = siteEnergy;
+          meterReading.totalCost = cost;
+          meterData.push(meterReading)
+        }
       }
     };
     return { meter: electricConsumptionMeter, meterData: meterData }
@@ -223,12 +205,14 @@ export class UploadDataEnergyTreasureHuntService {
       let cost: number = worksheet['F' + index]?.v;
       if (siteEnergy != undefined || cost != undefined) {
         let date: Date = this.getDateFromSheet(index, worksheet);
-        //check existing
-        let meterReading: IdbUtilityMeterData = getNewIdbUtilityMeterData(ngConsumptionMeter, []);
-        meterReading.readDate = date;
-        meterReading.totalEnergyUse = siteEnergy;
-        meterReading.totalCost = cost;
-        meterData.push(meterReading)
+        if (date) {
+          //check existing
+          let meterReading: IdbUtilityMeterData = getNewIdbUtilityMeterData(ngConsumptionMeter, []);
+          meterReading.readDate = date;
+          meterReading.totalEnergyUse = siteEnergy;
+          meterReading.totalCost = cost;
+          meterData.push(meterReading)
+        }
       }
     };
     return { meter: ngConsumptionMeter, meterData: meterData }
@@ -238,8 +222,9 @@ export class UploadDataEnergyTreasureHuntService {
   //coal and/or oil consumption
   getCoalOilMeterAndData(worksheet: XLSX.WorkSheet, facility: IdbFacility, account: IdbAccount): { meter: IdbUtilityMeter, meterData: Array<IdbUtilityMeterData> } {
     //check existing
-    let meter: IdbUtilityMeter = getNewIdbUtilityMeter(facility.guid, account.guid, true, 'kWh');
+    let meter: IdbUtilityMeter = getNewIdbUtilityMeter(facility.guid, account.guid, true, 'MMBtu');
     meter.name = 'Coal and/or Oil';
+    meter.scope = 1;
     meter.meterReadingDataApplication = 'fullMonth';
     //TODO: set meter details
     meter.source = 'Other Fuels';
@@ -249,12 +234,14 @@ export class UploadDataEnergyTreasureHuntService {
       let cost: number = worksheet['F' + index]?.v;
       if (siteEnergy != undefined || cost != undefined) {
         let date: Date = this.getDateFromSheet(index, worksheet);
-        //check existing
-        let meterReading: IdbUtilityMeterData = getNewIdbUtilityMeterData(meter, []);
-        meterReading.readDate = date;
-        meterReading.totalEnergyUse = siteEnergy;
-        meterReading.totalCost = cost;
-        meterData.push(meterReading)
+        if (date) {
+          //check existing
+          let meterReading: IdbUtilityMeterData = getNewIdbUtilityMeterData(meter, []);
+          meterReading.readDate = date;
+          meterReading.totalEnergyUse = siteEnergy;
+          meterReading.totalCost = cost;
+          meterData.push(meterReading)
+        }
       }
     };
     return { meter: meter, meterData: meterData }
@@ -263,23 +250,26 @@ export class UploadDataEnergyTreasureHuntService {
   getOtherEnergyMeterAndData(worksheet: XLSX.WorkSheet, facility: IdbFacility, account: IdbAccount): { meter: IdbUtilityMeter, meterData: Array<IdbUtilityMeterData> } {
     //check existing
     let meter: IdbUtilityMeter = getNewIdbUtilityMeter(facility.guid, account.guid, true, 'MMBtu');
+    meter.startingUnit = 'MMBtu';
     meter.name = 'Other Energy';
+    meter.scope = 4;
     meter.meterReadingDataApplication = 'fullMonth';
-    meter.startingUnit = 'kgal';
     //TODO: set meter details
-    meter.source = 'Other Fuels';
+    meter.source = 'Other Energy';
     let meterData: Array<IdbUtilityMeterData> = new Array();
     for (let index: number = 98; index < 122; index++) {
       let siteEnergy: number = worksheet['D' + index]?.v
       let cost: number = worksheet['F' + index]?.v;
       if (siteEnergy != undefined || cost != undefined) {
         let date: Date = this.getDateFromSheet(index, worksheet);
-        //check existing
-        let meterReading: IdbUtilityMeterData = getNewIdbUtilityMeterData(meter, []);
-        meterReading.readDate = date;
-        meterReading.totalEnergyUse = siteEnergy;
-        meterReading.totalCost = cost;
-        meterData.push(meterReading)
+        if (date) {
+          //check existing
+          let meterReading: IdbUtilityMeterData = getNewIdbUtilityMeterData(meter, []);
+          meterReading.readDate = date;
+          meterReading.totalEnergyUse = siteEnergy;
+          meterReading.totalCost = cost;
+          meterData.push(meterReading)
+        }
       }
     };
     return { meter: meter, meterData: meterData }
@@ -303,13 +293,15 @@ export class UploadDataEnergyTreasureHuntService {
       let cost: number = worksheet['G' + index]?.v;
       if (consumption != undefined || cost != undefined) {
         let date: Date = this.getDateFromSheet(index, worksheet);
-        //check existing
-        let meterReading: IdbUtilityMeterData = getNewIdbUtilityMeterData(meter, []);
-        meterReading.readDate = date;
-        meterReading.totalEnergyUse = 0;
-        meterReading.totalVolume = consumption;
-        meterReading.totalCost = cost;
-        meterData.push(meterReading)
+        if (date) {
+          //check existing
+          let meterReading: IdbUtilityMeterData = getNewIdbUtilityMeterData(meter, []);
+          meterReading.readDate = date;
+          meterReading.totalEnergyUse = 0;
+          meterReading.totalVolume = consumption;
+          meterReading.totalCost = cost;
+          meterData.push(meterReading)
+        }
       }
     };
     return { meter: meter, meterData: meterData }
@@ -331,13 +323,15 @@ export class UploadDataEnergyTreasureHuntService {
       let cost: number = worksheet['H' + index]?.v;
       if (consumption != undefined || cost != undefined) {
         let date: Date = this.getDateFromSheet(index, worksheet);
-        //check existing
-        let meterReading: IdbUtilityMeterData = getNewIdbUtilityMeterData(meter, []);
-        meterReading.readDate = date;
-        meterReading.totalEnergyUse = 0;
-        meterReading.totalVolume = consumption;
-        meterReading.totalCost = cost;
-        meterData.push(meterReading)
+        if (date) {
+          //check existing
+          let meterReading: IdbUtilityMeterData = getNewIdbUtilityMeterData(meter, []);
+          meterReading.readDate = date;
+          meterReading.totalEnergyUse = 0;
+          meterReading.totalVolume = consumption;
+          meterReading.totalCost = cost;
+          meterData.push(meterReading)
+        }
       }
     };
     return { meter: meter, meterData: meterData }
@@ -358,12 +352,14 @@ export class UploadDataEnergyTreasureHuntService {
       let consumption: number = worksheet['D' + index]?.v;
       if (consumption != undefined) {
         let date: Date = this.getDateFromSheet(index, worksheet);
-        //check existing
-        let meterReading: IdbUtilityMeterData = getNewIdbUtilityMeterData(meter, []);
-        meterReading.readDate = date;
-        meterReading.totalEnergyUse = 0;
-        meterReading.totalVolume = consumption;
-        meterData.push(meterReading)
+        if (date) {
+          //check existing
+          let meterReading: IdbUtilityMeterData = getNewIdbUtilityMeterData(meter, []);
+          meterReading.readDate = date;
+          meterReading.totalEnergyUse = 0;
+          meterReading.totalVolume = consumption;
+          meterData.push(meterReading)
+        }
       }
     };
     return { meter: meter, meterData: meterData }
@@ -389,33 +385,35 @@ export class UploadDataEnergyTreasureHuntService {
 
     for (let index: number = 156; index < 180; index++) {
       let date: Date = this.getDateFromSheet(index, worksheet);
-      let pd1: number = worksheet['D' + index]?.v;
-      if (pd1) {
-        let pd1Data: IdbPredictorData = getNewIdbPredictorData(predictor1)
-        pd1Data.date = date;
-        pd1Data.amount = pd1;
-        productionData1.push(pd1Data);
-      }
-      let pd2: number = worksheet['E' + index]?.v;
-      if (pd2) {
-        let pd2Data: IdbPredictorData = getNewIdbPredictorData(predictor2)
-        pd2Data.date = date;
-        pd2Data.amount = pd2;
-        productionData2.push(pd2Data);
-      }
-      let pd3: number = worksheet['F' + index]?.v;
-      if (pd3) {
-        let pd3Data: IdbPredictorData = getNewIdbPredictorData(predictor3)
-        pd3Data.date = date;
-        pd3Data.amount = pd3;
-        productionData3.push(pd3Data);
-      }
-      let totalHours: number = worksheet['H' + index]?.v;
-      if (totalHours) {
-        let totalHoursData: IdbPredictorData = getNewIdbPredictorData(predictorTotalHours)
-        totalHoursData.date = date;
-        totalHoursData.amount = totalHours;
-        productionDataTotalHours.push(totalHoursData);
+      if (date) {
+        let pd1: number = worksheet['D' + index]?.v;
+        if (pd1) {
+          let pd1Data: IdbPredictorData = getNewIdbPredictorData(predictor1)
+          pd1Data.date = date;
+          pd1Data.amount = pd1;
+          productionData1.push(pd1Data);
+        }
+        let pd2: number = worksheet['E' + index]?.v;
+        if (pd2) {
+          let pd2Data: IdbPredictorData = getNewIdbPredictorData(predictor2)
+          pd2Data.date = date;
+          pd2Data.amount = pd2;
+          productionData2.push(pd2Data);
+        }
+        let pd3: number = worksheet['F' + index]?.v;
+        if (pd3) {
+          let pd3Data: IdbPredictorData = getNewIdbPredictorData(predictor3)
+          pd3Data.date = date;
+          pd3Data.amount = pd3;
+          productionData3.push(pd3Data);
+        }
+        let totalHours: number = worksheet['H' + index]?.v;
+        if (totalHours) {
+          let totalHoursData: IdbPredictorData = getNewIdbPredictorData(predictorTotalHours)
+          totalHoursData.date = date;
+          totalHoursData.amount = totalHours;
+          productionDataTotalHours.push(totalHoursData);
+        }
       }
     };
 
@@ -460,15 +458,19 @@ export class UploadDataEnergyTreasureHuntService {
   }
 
   getDateFromSheet(index: number, sheet: XLSX.WorkSheet): Date {
-    let monthDateStr: Date = new Date(sheet['B' + index].v);
-    let monthNum: number = monthDateStr.getMonth();
-    let year: number = sheet['C' + index].v
-    if (monthNum == 11) {
-      monthNum = 0;
-    } else {
-      monthNum++;
+    let monthVal = sheet['B' + index]?.v;
+    let year: number = sheet['C' + index]?.v
+    if (year && monthVal) {
+      let monthDateStr: Date = new Date(monthVal);
+      let monthNum: number = monthDateStr.getMonth();
+      if (monthNum == 11) {
+        monthNum = 0;
+      } else {
+        monthNum++;
+      }
+      let date: Date = new Date(year, monthNum, 1);
+      return date;
     }
-    let date: Date = new Date(year, monthNum, 1);
-    return date;
+    return undefined;
   }
 }
