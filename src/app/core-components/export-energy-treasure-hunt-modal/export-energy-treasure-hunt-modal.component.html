@@ -1,0 +1,45 @@
+<div [ngClass]="{'windowOverlay': showModal}"></div>
+<div class="popup" [ngClass]="{'open': showModal}">
+    <div class="popup-header">Export to Energy Treasure Hunt
+        <button class="item-right" (click)="cancelExport()">x</button>
+    </div>
+    <div class="popup-body">
+        <p class="fw-light mb-1">
+            Export facility data to the <b>Energy Treasure Hunt (ETH)</b> application form.
+        </p>
+        <form>
+            <label for="startYear">
+                Years
+            </label>
+            <select class="form-select" name="startYear" id="startYear" [(ngModel)]="startYear">
+                <option *ngFor="let year of yearOptions" [ngValue]="year">
+                    {{year}} - {{year+1}}
+                </option>
+            </select>
+            <label class="mt-2" for="hostFacilityId">
+                Host Plant
+            </label>
+            <select class="form-select" name="hostFacilityId" id="hostFacilityId" [(ngModel)]="hostFacilityId">
+                <option *ngFor="let facility of facilityOptions" [ngValue]="facility.guid">
+                    {{facility.name}}
+                </option>
+            </select>
+            <label class="mt-2" for="exchangeFacilityId">
+                Exchange Plant
+            </label>
+            <select class="form-select" name="exchangeFacilityId" id="exchangeFacilityId"
+                [(ngModel)]="exchangeFacilityId">
+                <option [ngValue]="undefined">
+                    No Exchange Plant
+                </option>
+                <option *ngFor="let facility of facilityOptions" [ngValue]="facility.guid">
+                    {{facility.name}}
+                </option>
+            </select>
+        </form>
+    </div>
+    <div class="popup-footer text-end">
+        <button class="btn btn-secondary" (click)="cancelExport()">Cancel</button>
+        <button class="btn btn-primary" (click)="exportData()" [disabled]="!startYear || !hostFacilityId">Export Data</button>
+    </div>
+</div>

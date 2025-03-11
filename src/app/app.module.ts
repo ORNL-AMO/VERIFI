@@ -33,6 +33,7 @@ import { DeletingAccountDataComponent } from './core-components/deleting-account
 import { SurveyModalComponent } from './core-components/survey-modal/survey-modal.component';
 import { SurveyToastComponent } from './core-components/survey-toast/survey-toast.component';
 import { UserSurveyModule } from './shared/user-survey/user-survey.module';
+import { ExportEnergyTreasureHuntModalComponent } from './core-components/export-energy-treasure-hunt-modal/export-energy-treasure-hunt-modal.component';
 
 @NgModule({
     declarations: [
@@ -51,7 +52,8 @@ import { UserSurveyModule } from './shared/user-survey/user-survey.module';
         ElectronBackupFileComponent,
         DeletingAccountDataComponent,
         SurveyModalComponent,
-        SurveyToastComponent
+        SurveyToastComponent,
+        ExportEnergyTreasureHuntModalComponent
     ],
     bootstrap: [AppComponent],
     imports: [

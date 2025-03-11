@@ -59,6 +59,12 @@
                             Export Account <br> Utility Data
                         </button>
                     </div>
+                    <div class="p-1">
+                        <button class="btn btn-outline m-0" (click)="openTreasureHuntModal()">
+                            <span class="fa fa-gem"></span><br>
+                            Export Energy <br> Treasure Hunt
+                        </button>
+                    </div>
                 </div>
                 <div class="d-flex justify-content-center"
                     *ngIf="(energyAnalysisNeeded || waterAnalysisNeeded) && !disableButtons">
