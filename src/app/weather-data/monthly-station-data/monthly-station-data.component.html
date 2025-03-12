@@ -94,4 +94,22 @@
                 [weatherDataSelection]="weatherDataSelection"></app-monthly-station-table>
         </div>
     </div>
+    <div class="row" *ngIf="detailedDegreeDays && detailedDegreeDays.length != 0 && !calculating">
+        <!-- <ng-template [ngIf]="detailedDegreeDays != 'error'" [ngIfElse]="errorBlock"> -->
+            <div class="col-lg-12 col-md-12 col-sm-12">
+                <app-monthly-station-graph [detailedDegreeDays]="detailedDegreeDays" [selectedMonth]="selectedMonth"
+                    [heatingTemp]="heatingTemp" [coolingTemp]="coolingTemp"
+                    [weatherDataSelection]="weatherDataSelection"></app-monthly-station-graph>
+            </div>
+            <div class="col-lg-12 col-md-12 col-sm-12">
+                <app-monthly-station-table [detailedDegreeDays]="detailedDegreeDays"
+                    [weatherDataSelection]="weatherDataSelection"></app-monthly-station-table>
+            </div>
+        <!-- </ng-template>
+        <ng-template #errorBlock>
+            <div class="alert alert-danger p-2">
+                An error occured when fetching degree days.
+            </div>
+        </ng-template> -->
+    </div>
 </ng-container>

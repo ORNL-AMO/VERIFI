@@ -148,7 +148,7 @@ export class MonthlyAnalysisCalculatedValuesSummation {
     setBaselineAdjustment(currentMonthData: Array<MonthlyAnalysisSummaryDataClass>) {
         this.baselineAdjustment = _.sumBy(currentMonthData, (data: MonthlyAnalysisSummaryDataClass) => {
             return data.monthlyAnalysisRollingValues.baselineAdjustment;
-        }) + this.baselineAdjustmentForOtherV2;
+        });
     }
 
     setRollingSavingsValues(previousMonthsValues: Array<MonthlyAnalysisCalculatedValuesSummation>) {

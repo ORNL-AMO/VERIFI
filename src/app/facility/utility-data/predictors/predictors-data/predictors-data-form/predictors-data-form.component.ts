@@ -89,8 +89,6 @@ export class PredictorsDataFormComponent {
     this.predictorData = getNewIdbPredictorData(this.predictor, predictorDataEntries);
   }
 
-  
-
   setChanged() {
     this.isSaved = false;
   }

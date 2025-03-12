@@ -171,7 +171,6 @@ export class WeatherDataComponent {
     let weatherData: Array<WeatherDataReading> = await this.weatherDataService.getHourlyData(this.weatherDataService.selectedStation.ID, startDate, endDate, ['wet_bulb_temp'])
     while (startDate <= endDate) {
       let entryDate: Date = new Date(startDate);
-
       let datePipe: DatePipe = new DatePipe(navigator.language);
       let stringFormat: string = 'MMM y';
       let dateStr = datePipe.transform(startDate.toLocaleDateString(), stringFormat);

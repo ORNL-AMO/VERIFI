@@ -47,7 +47,7 @@ export class GroupMonthlyAnalysisRollupValues {
     rollingModeledBaseline: number;
     rollingAdjusted: number;
     rollingBaselineAdjustmentForNormalization: number;
-    rollingBaselingAdjustmentForOther: number;
+    rollingBaselineAdjustmentForOther: number;
 
     monthDataAdjustment: number;
     rollingDataAdjustment: number;
@@ -225,16 +225,16 @@ export class GroupMonthlyAnalysisRollupValues {
 
     //step 8: calculate adjustment for operational changes
     setAdjustmentForOtherV3(modelYearDataAdjusted: number, previousMonthsValues: Array<GroupMonthlyAnalysisRollupValues>) {
-        this.rollingBaselingAdjustmentForOther = this.rollingBaselineAdjustmentOther * this.getAdjustmentRatio(modelYearDataAdjusted);
+        this.rollingBaselineAdjustmentForOther = this.rollingBaselineAdjustmentOther * this.getAdjustmentRatio(modelYearDataAdjusted);
         if (previousMonthsValues.length > 10) {
             let startIndex: number = previousMonthsValues.length - 11;
             let last11MonthsData: Array<GroupMonthlyAnalysisRollupValues> = previousMonthsValues.slice(startIndex, previousMonthsValues.length);
             let last11monthsBaselineAdjustment: number = _.sumBy(last11MonthsData, (data: GroupMonthlyAnalysisRollupValues) => {
                 return data.baselineAdjustmentForOtherV2;
             })
-            this.baselineAdjustmentForOtherV2 = this.rollingBaselingAdjustmentForOther - last11monthsBaselineAdjustment;
+            this.baselineAdjustmentForOtherV2 = this.rollingBaselineAdjustmentOther - last11monthsBaselineAdjustment;
         } else {
-            this.baselineAdjustmentForOtherV2 = this.rollingBaselingAdjustmentForOther;
+            this.baselineAdjustmentForOtherV2 = this.rollingBaselineAdjustmentOther;
         }
     }
 

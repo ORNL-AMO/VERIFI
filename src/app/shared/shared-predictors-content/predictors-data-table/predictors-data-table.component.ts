@@ -266,14 +266,6 @@ export class PredictorsDataTableComponent {
         this.weatherDataService.heatingTemp = this.predictor.heatingBaseTemperature;
       }
     }
-    let entryDate: Date = new Date(predictorEntry.date);
-    this.weatherDataService.selectedYear = entryDate.getFullYear();
-    this.weatherDataService.selectedDate = entryDate;
-    this.weatherDataService.selectedMonth = entryDate;
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    this.weatherDataService.selectedFacility = selectedFacility;
-    this.weatherDataService.zipCode = selectedFacility.zip;
-    this.router.navigateByUrl('weather-data/monthly-station');
   }
 
   setHasWeatherDataWarning() {
@@ -298,8 +290,6 @@ export class PredictorsDataTableComponent {
   showUpdateEntries() {
     if(this.inDataWizard){     
        this.router.navigateByUrl('data-wizard/' + this.predictor.accountId + '/facilities/' + this.predictor.facilityId + '/predictors/' + this.predictor.guid + '/predictor-data/update-calculated-entries');
-
-
     }else{
       let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
       this.router.navigateByUrl('facility/' + selectedFacility.id + '/utility/predictors/predictor/' + this.predictor.guid + '/update-calculated-entries');

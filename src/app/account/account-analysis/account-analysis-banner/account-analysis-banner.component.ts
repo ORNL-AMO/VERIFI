@@ -20,6 +20,10 @@ export class AccountAnalysisBannerComponent implements OnInit {
   accountAnalysisItem: IdbAccountAnalysisItem;
   accountAnalysisItemSub: Subscription;
   routerSub: Subscription;
+
+  accountAnalysisItems: Array<IdbAccountAnalysisItem>;
+  accountAnalysisItemsSub: Subscription;
+  showDropdown: boolean = false;
   constructor(private router: Router,
     private sharedDataService: SharedDataService, private accountAnalysisDbService: AccountAnalysisDbService) { }
 
@@ -28,6 +32,7 @@ export class AccountAnalysisBannerComponent implements OnInit {
       if (event instanceof NavigationEnd) {
         this.setInDashboard(event.url);
       }
+      this.showDropdown = false;
     });
     this.setInDashboard(this.router.url);
     this.modalOpenSub = this.sharedDataService.modalOpen.subscribe(val => {
@@ -36,14 +41,18 @@ export class AccountAnalysisBannerComponent implements OnInit {
 
     this.accountAnalysisItemSub = this.accountAnalysisDbService.selectedAnalysisItem.subscribe(val => {
       this.accountAnalysisItem = val;
-    })
+    });
 
+    this.accountAnalysisItemsSub = this.accountAnalysisDbService.accountAnalysisItems.subscribe(items => {
+      this.accountAnalysisItems = items;
+    });
   }
 
   ngOnDestroy() {
     this.accountAnalysisItemSub.unsubscribe();
     this.modalOpenSub.unsubscribe();
     this.routerSub.unsubscribe();
+    this.accountAnalysisItemsSub.unsubscribe();
   }
 
   setInDashboard(url: string) {
@@ -52,5 +61,14 @@ export class AccountAnalysisBannerComponent implements OnInit {
 
   goToDashboard() {
     this.router.navigateByUrl('/analysis/dashboard')
+  }
+
+  toggleShow(){
+    this.showDropdown = !this.showDropdown;
+  }
+
+  selectItem(item: IdbAccountAnalysisItem){
+    this.accountAnalysisDbService.selectedAnalysisItem.next(item);
+    this.router.navigateByUrl('/account/analysis/setup');
   }
 }

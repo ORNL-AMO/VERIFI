@@ -54,7 +54,8 @@ import { HomePageComponent } from './core-components/home-page/home-page.compone
         DeletingAccountDataComponent,
         SurveyModalComponent,
         SurveyToastComponent,
-        HomePageComponent
+        HomePageComponent,
+        SurveyToastComponent
     ],
     bootstrap: [AppComponent],
     imports: [
@@ -75,7 +76,8 @@ import { HomePageComponent } from './core-components/home-page/home-page.compone
         UploadDataModule,
         WeatherDataModule,
         UserSurveyModule,
-        DataWizardModule
+        DataWizardModule,
+        UserSurveyModule
     ],
     providers: [provideHttpClient(withInterceptorsFromDi())]
 })

@@ -6,6 +6,7 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { Subscription } from 'rxjs';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
 
 @Component({
     selector: 'app-weather-stations',
@@ -26,7 +27,8 @@ export class WeatherStationsComponent {
   fetchingData: boolean = false;
   constructor(private accountDbService: AccountdbService,
     private weatherDataService: WeatherDataService,
-    private facilityDbService: FacilitydbService) {
+    private facilityDbService: FacilitydbService,
+    private degreeDaysService: DegreeDaysService) {
 
   }
 
