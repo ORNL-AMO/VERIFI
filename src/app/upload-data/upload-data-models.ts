@@ -69,7 +69,8 @@ export function getEmptyFileReference(): FileReference {
 export interface ColumnGroup {
   groupLabel: string,
   groupItems: Array<ColumnItem>,
-  id: string
+  id: string,
+  dragDropClass?: string
 }
 
 export interface FacilityGroup {

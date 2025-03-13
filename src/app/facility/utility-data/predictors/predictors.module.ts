@@ -15,9 +15,6 @@ import { LabelWithTooltipModule } from "../../../shared/label-with-tooltip/label
 import { EditPredictorComponent } from './edit-predictor/edit-predictor.component';
 import { CalculatedPredictorDataUpdateComponent } from './predictors-data/calculated-predictor-data-update/calculated-predictor-data-update.component';
 import { OrderCalculatedPredictorDataPipe } from './predictors-data/calculated-predictor-data-update/order-calculated-predictor-data.pipe';
-import { WeatherDataSubLabelComponent } from './weather-data-sub-label/weather-data-sub-label.component';
-
-
 
 @NgModule({
   declarations: [
@@ -29,8 +26,7 @@ import { WeatherDataSubLabelComponent } from './weather-data-sub-label/weather-d
     CalculatedPredictorDataUpdateComponent,
     OrderCalculatedPredictorDataPipe,
     CalculatedPredictorDataUpdateComponent,
-    OrderCalculatedPredictorDataPipe,
-    WeatherDataSubLabelComponent
+    OrderCalculatedPredictorDataPipe
   ],
   imports: [
     CommonModule,

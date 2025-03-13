@@ -17,14 +17,15 @@ import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 
-@Component({
-  selector: 'app-process-template-meters',
-  templateUrl: './process-template-meters.component.html',
-  styleUrl: './process-template-meters.component.css',
-  standalone: false
-})
-export class ProcessTemplateMetersComponent {
 
+@Component({
+  selector: 'app-process-meters',
+  standalone: false,
+  
+  templateUrl: './process-meters.component.html',
+  styleUrl: './process-meters.component.css'
+})
+export class ProcessMetersComponent {
   fileReference: FileReference = getEmptyFileReference();
   paramsSub: Subscription;
   editMeterForm: FormGroup;

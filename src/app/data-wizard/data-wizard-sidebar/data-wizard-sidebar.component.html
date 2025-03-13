@@ -77,7 +77,88 @@
                 </div>
             </ng-template>
             <ng-template #nonTemplateBlock>
-
+                <div class="sidebar-section">
+                    <div class="ps-2 pe-2 nav-item">
+                        <a class="nav-link"
+                            [routerLink]="'/data-wizard/'+account.guid+'/import-data/process-general-file/' +fileReference.id"
+                            [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
+                            <span class="fa fa-file"></span>
+                            {{fileReference.name}}
+                        </a>
+                    </div>
+                    <div class="sidebar-section">
+                        <div class="ps-2 pe-2 nav-item">
+                            <a class="nav-link"
+                                [routerLink]="'/data-wizard/'+account.guid+'/import-data/process-general-file/' +fileReference.id +'/select-worksheet'"
+                                [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
+                                Select Worksheet
+                            </a>
+                        </div>
+                    </div>
+                    <div class="sidebar-section">
+                        <div class="ps-2 pe-2 nav-item">
+                            <a class="nav-link"
+                                [routerLink]="'/data-wizard/'+account.guid+'/import-data/process-general-file/' +fileReference.id +'/identify-columns'"
+                                [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
+                                Idenfity Columns
+                            </a>
+                        </div>
+                    </div>
+                    <div class="sidebar-section">
+                        <div class="ps-2 pe-2 nav-item">
+                            <a class="nav-link"
+                                [routerLink]="'/data-wizard/'+account.guid+'/import-data/process-general-file/' +fileReference.id +'/map-meters-to-facilities'"
+                                [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
+                                Map Facility Meters
+                            </a>
+                        </div>
+                    </div>
+                    <!-- <div class="sidebar-section">
+                        <div class="ps-2 pe-2 nav-item">
+                            <a class="nav-link"
+                                [routerLink]="'/data-wizard/'+account.guid+'/import-data/process-general-file/' +fileReference.id +'/identify-columns'"
+                                [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
+                                Confirm Meters
+                            </a>
+                        </div>
+                    </div>
+                    <div class="sidebar-section">
+                        <div class="ps-2 pe-2 nav-item">
+                            <a class="nav-link"
+                                [routerLink]="'/data-wizard/'+account.guid+'/import-data/process-general-file/' +fileReference.id +'/identify-columns'"
+                                [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
+                                Confirm Meter Readings
+                            </a>
+                        </div>
+                    </div>
+                    <div class="sidebar-section">
+                        <div class="ps-2 pe-2 nav-item">
+                            <a class="nav-link"
+                                [routerLink]="'/data-wizard/'+account.guid+'/import-data/process-general-file/' +fileReference.id +'/identify-columns'"
+                                [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
+                                Map Facility Predictors
+                            </a>
+                        </div>
+                    </div>
+                    <div class="sidebar-section">
+                        <div class="ps-2 pe-2 nav-item">
+                            <a class="nav-link"
+                                [routerLink]="'/data-wizard/'+account.guid+'/import-data/process-general-file/' +fileReference.id +'/identify-columns'"
+                                [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
+                                Confirm Predictors
+                            </a>
+                        </div>
+                    </div>
+                    <div class="sidebar-section">
+                        <div class="ps-2 pe-2 nav-item">
+                            <a class="nav-link"
+                                [routerLink]="'/data-wizard/'+account.guid+'/import-data/process-general-file/' +fileReference.id +'/identify-columns'"
+                                [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
+                                Finish Upload
+                            </a>
+                        </div>
+                    </div> -->
+                </div>
             </ng-template>
         </ng-container>
         <div class="p-2 w-100">

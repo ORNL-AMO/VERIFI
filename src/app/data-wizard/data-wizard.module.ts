@@ -13,11 +13,10 @@ import { UploadFilesComponent } from './data-wizard-import/upload-files/upload-f
 import { ProcessTemplateFileComponent } from './data-wizard-import/process-template-file/process-template-file.component';
 import { ProcessTemplateFacilitiesComponent } from './data-wizard-import/process-template-file/process-template-facilities/process-template-facilities.component';
 import { ProcessTemplateMeterReadingsComponent } from './data-wizard-import/process-template-file/process-template-meter-readings/process-template-meter-readings.component';
-import { ProcessTemplateMetersComponent } from './data-wizard-import/process-template-file/process-template-meters/process-template-meters.component';
 import { ProcessTemplatePredictorsComponent } from './data-wizard-import/process-template-file/process-template-predictors/process-template-predictors.component';
 import { HelperPipesModule } from '../shared/helper-pipes/helper-pipes.module';
 import { FormsModule } from '@angular/forms';
-import { MeterGroupOptionsPipe } from './data-wizard-import/process-template-file/process-template-meters/meter-group-options.pipe';
+import { MeterGroupOptionsPipe } from './data-wizard-import/shared-process-file/process-meters/meter-group-options.pipe';
 import { FacilityMetersTableComponent } from './account-facilities/facility-data/facility-meters/facility-meters-table/facility-meters-table.component';
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { FacilityMeterComponent } from './account-facilities/facility-data/facility-meters/facility-meter/facility-meter.component';
@@ -40,6 +39,9 @@ import { SelectWorksheetComponent } from './data-wizard-import/process-general-f
 import { LabelWithTooltipModule } from '../shared/label-with-tooltip/label-with-tooltip.module';
 import { IdentifyColumnsComponent } from './data-wizard-import/process-general-file/identify-columns/identify-columns.component';
 import { DragDropModule } from '@angular/cdk/drag-drop';
+import { MapMetersToFacilitiesComponent } from './data-wizard-import/process-general-file/map-meters-to-facilities/map-meters-to-facilities.component';
+import { MapPredictorsToFacilitiesComponent } from './data-wizard-import/process-general-file/map-predictors-to-facilities/map-predictors-to-facilities.component';
+import { ProcessMetersComponent } from './data-wizard-import/shared-process-file/process-meters/process-meters.component';
 
 
 @NgModule({
@@ -55,7 +57,6 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
     ProcessTemplateFileComponent,
     ProcessTemplateFacilitiesComponent,
     ProcessTemplateMeterReadingsComponent,
-    ProcessTemplateMetersComponent,
     ProcessTemplatePredictorsComponent,
     MeterGroupOptionsPipe,
     FacilityMetersTableComponent,
@@ -73,7 +74,10 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
     FacilityPredictorDataBulkUpdateComponent,
     ProcessGeneralFileComponent,
     SelectWorksheetComponent,
-    IdentifyColumnsComponent
+    IdentifyColumnsComponent,
+    MapMetersToFacilitiesComponent,
+    MapPredictorsToFacilitiesComponent,
+    ProcessMetersComponent
   ],
   imports: [
     CommonModule,

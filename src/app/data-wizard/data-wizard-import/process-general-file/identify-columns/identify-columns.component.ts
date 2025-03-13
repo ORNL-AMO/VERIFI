@@ -1,11 +1,12 @@
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { UploadDataService } from 'src/app/upload-data/upload-data.service';
 import * as _ from 'lodash';
 import { Subscription } from 'rxjs';
 import { ColumnGroup, ColumnItem, FileReference } from 'src/app/upload-data/upload-data-models';
 import { DataWizardService } from 'src/app/data-wizard/data-wizard.service';
+import { IdbAccount } from 'src/app/models/idbModels/account';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 @Component({
   selector: 'app-identify-columns',
   templateUrl: './identify-columns.component.html',
@@ -24,7 +25,7 @@ export class IdentifyColumnsComponent implements OnInit {
   noPredictorsOrMeters: boolean;
   noDateColumn: boolean;
   constructor(private activatedRoute: ActivatedRoute, private dataWizardService: DataWizardService,
-    private router: Router) { }
+    private router: Router, private accountDbService: AccountdbService) { }
 
   ngOnInit(): void {
     this.fileReferenceSub = this.dataWizardService.fileReferences.subscribe(fileReferences => {
@@ -49,7 +50,7 @@ export class IdentifyColumnsComponent implements OnInit {
     this.paramsSub.unsubscribe();
   }
 
-  dropColumn(dropData: CdkDragDrop<ColumnGroup[]>) {
+  dropColumn(dropData) {
     this.fileReference.columnGroups.forEach(group => {
       if (group.id == dropData.previousContainer.id) {
         //remove
@@ -68,7 +69,7 @@ export class IdentifyColumnsComponent implements OnInit {
           if (group.groupItems.length != 0) {
             let removeExisting: ColumnItem = group.groupItems.pop();
             this.fileReference.columnGroups.forEach(group => {
-              if (group.groupLabel == 'Unused') {
+              if (group.groupLabel == 'Worksheet Columns') {
                 group.groupItems.push(removeExisting);
               }
             });
@@ -119,24 +120,28 @@ export class IdentifyColumnsComponent implements OnInit {
       unusedColumns.splice(dateColumnIndex, 1);
     }
     columnGroups.push({
-      groupLabel: 'Date',
-      groupItems: dateGroupItems,
-      id: Math.random().toString(36).substr(2, 9)
+      groupLabel: 'Worksheet Columns',
+      groupItems: unusedColumns,
+      id: Math.random().toString(36).substr(2, 9),
+      dragDropClass: 'Unused'
     });
     columnGroups.push({
       groupLabel: 'Meters',
       groupItems: [],
-      id: Math.random().toString(36).substr(2, 9)
+      id: Math.random().toString(36).substr(2, 9),
+      dragDropClass: 'Meters'
     });
     columnGroups.push({
       groupLabel: 'Predictors',
       groupItems: [],
-      id: Math.random().toString(36).substr(2, 9)
+      id: Math.random().toString(36).substr(2, 9),
+      dragDropClass: 'Predictors'
     });
     columnGroups.push({
-      groupLabel: 'Unused',
-      groupItems: unusedColumns,
-      id: Math.random().toString(36).substr(2, 9)
+      groupLabel: 'Date',
+      groupItems: dateGroupItems,
+      id: Math.random().toString(36).substr(2, 9),
+      dragDropClass: 'Date'
     });
     this.fileReference.columnGroups = columnGroups;
     this.fileReference.meterFacilityGroups = [];
@@ -180,10 +185,12 @@ export class IdentifyColumnsComponent implements OnInit {
   }
 
   goBack() {
-    // this.router.navigateByUrl('/upload/data-setup/file-setup/' + this.fileReference.id + '/select-worksheet')
+    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    this.router.navigateByUrl('/data-wizard/' + account.guid + '/import-data/process-general-file/' + this.fileReference.id + '/select-worksheet')
   }
 
   next() {
-
+    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    this.router.navigateByUrl('/data-wizard/' + account.guid + '/import-data/process-general-file/' + this.fileReference.id + '/map-meters-to-facilities')
   }
 }
