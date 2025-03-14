@@ -1,13 +1,9 @@
-import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import * as _ from 'lodash';
 import { Subscription } from 'rxjs';
 import { ColumnGroup, ColumnItem, FileReference } from 'src/app/upload-data/upload-data-models';
 import { DataWizardService } from 'src/app/data-wizard/data-wizard.service';
-import { IdbAccount } from 'src/app/models/idbModels/account';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { UploadDataService } from 'src/app/upload-data/upload-data.service';
 @Component({
   selector: 'app-identify-columns',
   templateUrl: './identify-columns.component.html',
@@ -25,9 +21,7 @@ export class IdentifyColumnsComponent implements OnInit {
   paramsSub: Subscription;
   noPredictorsOrMeters: boolean;
   noDateColumn: boolean;
-  constructor(private activatedRoute: ActivatedRoute, private dataWizardService: DataWizardService,
-    private router: Router, private accountDbService: AccountdbService,
-    private uploadDataService: UploadDataService) { }
+  constructor(private activatedRoute: ActivatedRoute, private dataWizardService: DataWizardService) { }
 
   ngOnInit(): void {
     this.fileReferenceSub = this.dataWizardService.fileReferences.subscribe(fileReferences => {
@@ -180,19 +174,5 @@ export class IdentifyColumnsComponent implements OnInit {
     });
     this.noDateColumn = noDateColumn;
     this.noPredictorsOrMeters = noPredictorsOrMeters;
-  }
-
-  submitColumns() {
-
-  }
-
-  goBack() {
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    this.router.navigateByUrl('/data-wizard/' + account.guid + '/import-data/process-general-file/' + this.fileReference.id + '/select-worksheet')
-  }
-
-  next() {
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    this.router.navigateByUrl('/data-wizard/' + account.guid + '/import-data/process-general-file/' + this.fileReference.id + '/map-meters-to-facilities')
   }
 }

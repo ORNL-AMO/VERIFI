@@ -53,7 +53,7 @@ export const DataWizardRoutes: Route = {
                     children: [
                         { path: '', pathMatch: 'full', redirectTo: 'facilities' },
                         { path: 'facilities', component: ProcessTemplateFacilitiesComponent },
-                        { path: 'meters', component: ProcessMetersComponent },
+                        { path: 'confirm-meters', component: ProcessMetersComponent },
                         { path: 'meter-readings', component: ProcessMeterReadingsComponent },
                         { path: 'predictors', component: ProcessPredictorsComponent },
                         { path: 'confirm-predictor-data', component: ProcessPredictorReadingsComponent},

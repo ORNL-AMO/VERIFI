@@ -44,6 +44,7 @@ import { MeterDataSummaryTableComponent } from './data-wizard-import/shared-proc
 import { ProcessPredictorsComponent } from './data-wizard-import/shared-process-file/process-predictors/process-predictors.component';
 import { ProcessPredictorReadingsComponent } from './data-wizard-import/shared-process-file/process-predictor-readings/process-predictor-readings.component';
 import { SubmitImportDataComponent } from './data-wizard-import/shared-process-file/submit-import-data/submit-import-data.component';
+import { DataWizardImportFooterComponent } from './data-wizard-import/data-wizard-import-footer/data-wizard-import-footer.component';
 
 
 @NgModule({
@@ -81,7 +82,8 @@ import { SubmitImportDataComponent } from './data-wizard-import/shared-process-f
     ProcessMeterReadingsComponent,
     ProcessPredictorsComponent,
     ProcessPredictorReadingsComponent,
-    SubmitImportDataComponent
+    SubmitImportDataComponent,
+    DataWizardImportFooterComponent
   ],
   imports: [
     CommonModule,

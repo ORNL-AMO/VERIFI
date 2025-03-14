@@ -9,6 +9,7 @@ import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { FileReference, getEmptyFileReference } from 'src/app/upload-data/upload-data-models';
+import { DataWizardImportNavigationService } from '../../data-wizard-import-navigation.service';
 
 @Component({
   selector: 'app-process-template-facilities',
@@ -27,8 +28,7 @@ export class ProcessTemplateFacilitiesComponent {
     private facilityDbService: FacilitydbService, private router: Router,
     private loadingService: LoadingService,
     private accountDbService: AccountdbService,
-    private toastNotificationService: ToastNotificationsService,
-    private dbChangesService: DbChangesService) { }
+    private dataWizardImportNavigationService: DataWizardImportNavigationService) { }
 
   ngOnInit(): void {
     this.account = this.accountDbService.selectedAccount.getValue();
@@ -42,26 +42,12 @@ export class ProcessTemplateFacilitiesComponent {
     this.paramsSub.unsubscribe();
   }
 
-
-  // async submitFacilities() {
-  //   this.loadingService.setLoadingMessage('Uploading Facilities..');
-  //   for (let i = 0; i < this.fileReference.importFacilities.length; i++) {
-  //     if (this.fileReference.importFacilities[i].id) {
-  //       await firstValueFrom(this.facilityDbService.updateWithObservable(this.fileReference.importFacilities[i]));
-  //     } else {
-  //       this.fileReference.importFacilities[i] = await firstValueFrom(this.facilityDbService.addWithObservable(this.fileReference.importFacilities[i]));
-  //     }
-  //   }
-  //   await this.dbChangesService.selectAccount(this.account, false);
-  //   this.loadingService.setLoadingStatus(false);
-  //   this.toastNotificationService.showToast('Account Facilities Updated', undefined, undefined, false, 'alert-success', false);
-  // }
-
   goBack() {
-    this.router.navigateByUrl('/data-wizard/' + this.account.guid + '/import-data/upload-files');
+    this.dataWizardImportNavigationService.goToPage('upload-files', this.fileReference);
   }
 
   next() {
-    this.router.navigateByUrl('/data-wizard/' + this.account.guid + '/import-data/process-template-file/' + this.fileReference.id + '/meters');
+    // this.dataWizardImportNavigationService.goToPage('meters', this.fileReference)
+    // this.router.navigateByUrl('/data-wizard/' + this.account.guid + '/import-data/process-template-file/' + this.fileReference.id + '/meters');
   }
 }

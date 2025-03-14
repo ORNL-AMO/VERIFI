@@ -236,30 +236,6 @@
         </div>
     </div>
 </div>
-
-<nav class="data-wizard-footer navbar">
-    <div class="container-fluid justify-content-between">
-        <button class="btn btn-dark" (click)="goBack()">
-            <span class="fa fa-chevron-left"></span>
-            Go Back
-        </button>
-        <!-- <div class="footer-text">
-            <ng-template [ngIf]="!fileReference.metersSubmitted" [ngIfElse]="metersSubmittedBlock">
-                Submitting meters will add them to their facilities. Meter data can then be added
-                to the corresponding meters on the next page.
-            </ng-template>
-            <ng-template #metersSubmittedBlock>
-                These meters have been added to to their facilities!
-            </ng-template>
-        </div> -->
-        <button class="btn btn-dark" (click)="next()">
-            <!-- <ng-template [ngIf]="fileReference.metersSubmitted" [ngIfElse]="skipMetersBlock"> -->
-            Next
-            <!-- </ng-template>
-            <ng-template #skipMetersBlock>
-                Skip Meters
-            </ng-template> -->
-            <span class="fa fa-chevron-right"></span>
-        </button>
-    </div>
-</nav>
+<!--TODO: disable next-->
+<app-data-wizard-import-footer [fileReference]="fileReference"
+    [navOption]="'confirm-meters'"></app-data-wizard-import-footer>

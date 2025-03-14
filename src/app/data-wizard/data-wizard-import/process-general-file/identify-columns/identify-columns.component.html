@@ -63,8 +63,9 @@
                     <div class="w-50 me-2">
                         <!--unused items-->
                         <div class="card" (cdkDropListDropped)="dropColumn($event)"
-                            id={{fileReference.columnGroups[0].id}} [ngClass]="fileReference.columnGroups[0].dragDropClass"
-                            cdkDropList [cdkDropListData]="fileReference.columnGroups"
+                            id={{fileReference.columnGroups[0].id}}
+                            [ngClass]="fileReference.columnGroups[0].dragDropClass" cdkDropList
+                            [cdkDropListData]="fileReference.columnGroups"
                             [cdkDropListConnectedTo]="columnGroupItemIds">
                             <div class="card-header">
                                 {{fileReference.columnGroups[0].groupLabel}}
@@ -88,7 +89,8 @@
                                         {{columnGroup.groupLabel}}
                                     </div>
                                     <div class="card-body">
-                                        <ng-template [ngIf]="columnGroup.groupItems.length > 0" [ngIfElse]="noItemsBlock">
+                                        <ng-template [ngIf]="columnGroup.groupItems.length > 0"
+                                            [ngIfElse]="noItemsBlock">
                                             <div class="list-item mt-2 mb-2 p-2" [cdkDragData]="groupItem"
                                                 *ngFor="let groupItem of columnGroup.groupItems" cdkDrag>
                                                 <span class="fa fa-arrows-alt"></span>{{groupItem.value}}
@@ -96,10 +98,11 @@
                                         </ng-template>
                                         <ng-template #noItemsBlock>
                                             <div class="alert alert-dark text-center p-2 mb-0">
-                                                No {{columnGroup.groupLabel}} Identified. 
+                                                No {{columnGroup.groupLabel}} Identified.
                                             </div>
                                         </ng-template>
-                                        <p class="alert alert-warning p-2 mb-0" *ngIf="columnGroup.groupLabel == 'Date'">Date
+                                        <p class="alert alert-warning p-2 mb-0"
+                                            *ngIf="columnGroup.groupLabel == 'Date'">Date
                                             range based on selection: ({{minDate | date}} - {{maxDate | date}})</p>
                                     </div>
                                 </div>
@@ -118,46 +121,10 @@
                         </div>
                     </div>
                 </div>
-
-
-
-
-                <!-- <div class="row no-gutters">
-                    <div cdkDropList [cdkDropListData]="fileReference.columnGroups" class="card col-md-3 col-sm-6"
-                        *ngFor="let columnGroup of fileReference.columnGroups" (cdkDropListDropped)="dropColumn($event)"
-                        id={{columnGroup.id}} [cdkDropListConnectedTo]="columnGroupItemIds"
-                        [ngClass]="columnGroup.groupLabel">
-                        <div class="card-header">
-                            {{columnGroup.groupLabel}}
-                        </div>
-                        <div class="card-body">
-                            <div class="list-item mt-2 mb-2 p-2" [cdkDragData]="groupItem"
-                                *ngFor="let groupItem of columnGroup.groupItems" cdkDrag>
-                                <span class="fa fa-arrows-alt"></span>{{groupItem.value}}
-                            </div>
-                            <p class="alert alert-warning" *ngIf="columnGroup.groupLabel == 'Date'">Date range based on
-                                selection:
-                                ({{minDate | date}} - {{maxDate | date}})</p>
-                        </div>
-                    </div>
-                </div> -->
             </div>
         </div>
     </div>
 </div>
-
-<nav class="data-wizard-footer navbar">
-    <div class="container-fluid justify-content-between">
-        <button class="btn btn-dark" (click)="goBack()">
-            <span class="fa fa-chevron-left"></span>
-            Go Back
-        </button>
-
-        <button class="btn btn-dark" (click)="next()">
-            <ng-template [ngIf]="fileReference.selectedWorksheetName">
-                Next
-            </ng-template>
-            <span class="fa fa-chevron-right"></span>
-        </button>
-    </div>
-</nav>
+<!--TODO: disable next-->
+<app-data-wizard-import-footer [fileReference]="fileReference"
+    [navOption]="'identify-columns'"></app-data-wizard-import-footer>

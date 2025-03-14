@@ -91,20 +91,15 @@ export class SelectWorksheetComponent implements OnInit {
     this.setWorksheetNames();
   }
 
-  //TODO: Logic..
-  submitSelection() {
+  // next() {
+  //   let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+  //   this.router.navigateByUrl('/data-wizard/' + account.guid + '/import-data/process-general-file/' + this.fileReference.id + '/identify-columns');
+  // }
 
-  }
-
-  next() {
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    this.router.navigateByUrl('/data-wizard/' + account.guid + '/import-data/process-general-file/' + this.fileReference.id + '/identify-columns');
-  }
-
-  goBack() {
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    this.router.navigateByUrl('/data-wizard/' + account.guid + '/import-data');
-  }
+  // goBack() {
+  //   let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+  //   this.router.navigateByUrl('/data-wizard/' + account.guid + '/import-data');
+  // }
 
 
 }

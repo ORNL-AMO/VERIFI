@@ -1,11 +1,9 @@
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { Component } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { DataWizardService } from 'src/app/data-wizard/data-wizard.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { ColumnItem, FacilityGroup, FileReference } from 'src/app/upload-data/upload-data-models';
 import { UploadDataService } from 'src/app/upload-data/upload-data.service';
@@ -25,8 +23,7 @@ export class MapMetersToFacilitiesComponent {
   paramsSub: Subscription;
   importMetersFound: boolean;
   constructor(private dataWizardService: DataWizardService, private facilityDbService: FacilitydbService,
-    private router: Router, private activatedRoute: ActivatedRoute,
-    private accountDbService: AccountdbService,
+    private activatedRoute: ActivatedRoute,
     private uploadDataService: UploadDataService) { }
 
   ngOnInit(): void {
@@ -164,18 +161,7 @@ export class MapMetersToFacilitiesComponent {
     this.facilityGroupIds = this.fileReference.meterFacilityGroups.map(group => { return group.facilityId });
     this.fileReference.meters = this.uploadDataService.parseMetersFromGroups(this.fileReference);
   }
-
-
-  goBack() {
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    this.router.navigateByUrl('/data-wizard/' + account.guid + '/import-data/process-general-file/' + this.fileReference.id + '/identify-columns')
-  }
-
-  next() {
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    this.router.navigateByUrl('/data-wizard/' + account.guid + '/import-data/process-general-file/' + this.fileReference.id + '/confirm-meters')
-  }
-
+  
   setMeterGroupsFound() {
     let importMetersFound: boolean = false;
     this.fileReference.columnGroups.forEach(group => {

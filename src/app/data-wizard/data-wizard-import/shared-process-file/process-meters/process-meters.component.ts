@@ -1,21 +1,16 @@
 import { Component } from '@angular/core';
 import { FormGroup } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
-import { firstValueFrom, Subscription } from 'rxjs';
+import { ActivatedRoute } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { DataWizardService } from 'src/app/data-wizard/data-wizard.service';
 import { EditMeterFormService } from 'src/app/shared/shared-meter-content/edit-meter-form/edit-meter-form.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
-import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { getNewIdbUtilityMeterGroup, IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
 import { FileReference, getEmptyFileReference } from 'src/app/upload-data/upload-data-models';
 import { UploadDataService } from 'src/app/upload-data/upload-data.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { LoadingService } from 'src/app/core-components/loading/loading.service';
-import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 
 
 @Component({
@@ -45,14 +40,10 @@ export class ProcessMetersComponent {
   existingMeterOptions: Array<IdbUtilityMeter> = [];
 
   constructor(private activatedRoute: ActivatedRoute, private uploadDataService: UploadDataService,
-    private editMeterFormService: EditMeterFormService, private router: Router,
+    private editMeterFormService: EditMeterFormService,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
     private utilityMeterDbService: UtilityMeterdbService,
-    private dataWizardService: DataWizardService,
-    private accountDbService: AccountdbService,
-    private dbChangesService: DbChangesService,
-    private loadingService: LoadingService,
-    private toastNotificationService: ToastNotificationsService) { }
+    private dataWizardService: DataWizardService) { }
 
   ngOnInit(): void {
     this.paramsSub = this.activatedRoute.parent.params.subscribe(param => {
@@ -77,31 +68,6 @@ export class ProcessMetersComponent {
   ngOnDestroy() {
     this.paramsSub.unsubscribe();
   }
-
-  // continue() {
-  //   if (!this.fileReference.isTemplate && this.metersIncluded) {
-  //     let meterData: Array<IdbUtilityMeterData> = this.uploadDataService.parseExcelMeterData(this.fileReference);
-  //     this.fileReference.meterData = meterData;
-  //   }
-  //   if (this.metersIncluded) {
-  //     let newGroups: Array<IdbUtilityMeterGroup> = new Array();
-  //     this.fileReference.meters.forEach(meter => {
-  //       if (meter.groupId) {
-  //         let facilityGroups: Array<IdbUtilityMeterGroup> = this.getFacilityMeterGroups(meter.facilityId);
-  //         let selectedGroup: IdbUtilityMeterGroup = facilityGroups.find(group => { return group.guid == meter.groupId });
-  //         if (selectedGroup && !selectedGroup.id) {
-  //           let groupExists: IdbUtilityMeterGroup = newGroups.find(group => { return group.guid == selectedGroup.guid });
-  //           if (groupExists == undefined) {
-  //             newGroups.push(selectedGroup);
-  //           }
-  //         }
-  //       }
-  //     });
-  //     this.fileReference.newMeterGroups = newGroups;
-  //   }
-
-  //   this.router.navigateByUrl('/upload/data-setup/file-setup/' + this.fileReference.id + '/confirm-readings');
-  // }
 
   setEditMeter(meter: IdbUtilityMeter) {
     if (meter.id == undefined) {
@@ -155,62 +121,6 @@ export class ProcessMetersComponent {
       this.fileReference.meterData = this.uploadDataService.parseExcelMeterData(this.fileReference);
     }
   }
-
-  goBack() {
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    if (this.router.url.includes('process-template-file')) {
-      this.router.navigateByUrl('/data-wizard/' + account.guid + '/import-data/process-template-file/' + this.fileReference.id + '/facilities');
-    } else {
-      this.router.navigateByUrl('/data-wizard/' + account.guid + '/import-data/process-general-file/' + this.fileReference.id + '/map-meters-to-facilities');
-    }
-  }
-
-  next() {
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    if (this.router.url.includes('process-template-file')) {
-      this.router.navigateByUrl('/data-wizard/' + account.guid + '/import-data/process-template-file/' + this.fileReference.id + '/meter-readings');
-    } else {
-      this.router.navigateByUrl('/data-wizard/' + account.guid + '/import-data/process-general-file/' + this.fileReference.id + '/meter-readings');
-    }
-  }
-
-  // async submitMeters() {
-  //   this.loadingService.setLoadingMessage('Adding Utility Meters..')
-  //   this.loadingService.setLoadingStatus(true);
-  //   let newGroups: Array<IdbUtilityMeterGroup> = new Array();
-  //   for (let i = 0; i < this.fileReference.meters.length; i++) {
-  //     let meter: IdbUtilityMeter = this.fileReference.meters[i];
-  //     if (!meter.skipImport) {
-  //       if (meter.id) {
-  //         await firstValueFrom(this.utilityMeterDbService.updateWithObservable(meter));
-  //       } else {
-  //         await firstValueFrom(this.utilityMeterDbService.addWithObservable(meter));
-  //       }
-
-  //       if (meter.groupId) {
-  //         let facilityGroups: Array<IdbUtilityMeterGroup> = this.getFacilityMeterGroups(meter.facilityId);
-  //         let selectedGroup: IdbUtilityMeterGroup = facilityGroups.find(group => { return group.guid == meter.groupId });
-  //         if (selectedGroup && !selectedGroup.id) {
-  //           let groupExists: IdbUtilityMeterGroup = newGroups.find(group => { return group.guid == selectedGroup.guid });
-  //           if (groupExists == undefined) {
-  //             newGroups.push(selectedGroup);
-  //           }
-  //         }
-  //       }
-  //     }
-  //   }
-  //   for (let i = 0; i < newGroups.length; i++) {
-  //     let newGroup: IdbUtilityMeterGroup = newGroups[i];
-  //     await firstValueFrom(this.utilityMeterGroupDbService.addWithObservable(newGroup));
-  //   }
-
-  //   let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-  //   await this.dbChangesService.setMeters(account);
-  //   await this.dbChangesService.setMeterGroups(account);
-  //   this.loadingService.setLoadingStatus(false);
-  //   this.toastNotificationService.showToast('Meters Added!', undefined, undefined, false, 'alert-success');
-  //   this.fileReference.metersSubmitted = true;
-  // }
 
   getFacilityMeterGroups(facilityId: string): Array<IdbUtilityMeterGroup> {
     let facilityGroups: {

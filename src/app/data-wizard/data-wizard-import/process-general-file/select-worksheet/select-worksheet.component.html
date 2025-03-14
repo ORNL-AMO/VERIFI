@@ -72,19 +72,5 @@
         </div>
     </div>
 </div>
-
-<nav class="data-wizard-footer navbar">
-    <div class="container-fluid justify-content-between">
-        <button class="btn btn-dark" (click)="goBack()">
-            <span class="fa fa-chevron-left"></span>
-            Go Back
-        </button>
-
-        <button class="btn btn-dark" (click)="next()">
-            <ng-template [ngIf]="fileReference.selectedWorksheetName">
-                Next
-            </ng-template>
-            <span class="fa fa-chevron-right"></span>
-        </button>
-    </div>
-</nav>
+<app-data-wizard-import-footer [fileReference]="fileReference" [disableNext]="!fileReference.selectedWorksheetName"
+    [navOption]="'select-worksheet'"></app-data-wizard-import-footer>
