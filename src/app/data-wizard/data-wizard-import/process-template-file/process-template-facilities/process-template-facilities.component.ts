@@ -43,23 +43,22 @@ export class ProcessTemplateFacilitiesComponent {
   }
 
 
-  async submitFacilities() {
-    this.loadingService.setLoadingMessage('Uploading Facilities..');
-    this.fileReference.facilitiesSubmitted = true;
-    for (let i = 0; i < this.fileReference.importFacilities.length; i++) {
-      if (this.fileReference.importFacilities[i].id) {
-        await firstValueFrom(this.facilityDbService.updateWithObservable(this.fileReference.importFacilities[i]));
-      } else {
-        this.fileReference.importFacilities[i] = await firstValueFrom(this.facilityDbService.addWithObservable(this.fileReference.importFacilities[i]));
-      }
-    }
-    await this.dbChangesService.selectAccount(this.account, false);
-    this.loadingService.setLoadingStatus(false);
-    this.toastNotificationService.showToast('Account Facilities Updated', undefined, undefined, false, 'alert-success', false);
-  }
+  // async submitFacilities() {
+  //   this.loadingService.setLoadingMessage('Uploading Facilities..');
+  //   for (let i = 0; i < this.fileReference.importFacilities.length; i++) {
+  //     if (this.fileReference.importFacilities[i].id) {
+  //       await firstValueFrom(this.facilityDbService.updateWithObservable(this.fileReference.importFacilities[i]));
+  //     } else {
+  //       this.fileReference.importFacilities[i] = await firstValueFrom(this.facilityDbService.addWithObservable(this.fileReference.importFacilities[i]));
+  //     }
+  //   }
+  //   await this.dbChangesService.selectAccount(this.account, false);
+  //   this.loadingService.setLoadingStatus(false);
+  //   this.toastNotificationService.showToast('Account Facilities Updated', undefined, undefined, false, 'alert-success', false);
+  // }
 
   goBack() {
-    this.router.navigateByUrl('/data-wizard/' + this.account.guid + '/import-data/');
+    this.router.navigateByUrl('/data-wizard/' + this.account.guid + '/import-data/upload-files');
   }
 
   next() {

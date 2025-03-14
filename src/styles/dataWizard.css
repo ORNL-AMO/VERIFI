@@ -33,3 +33,12 @@
     color: white;
     font-weight: bolder;
 }
+
+.data-wizard-content .badge .fa.fa-file{
+    color: white;
+}
+
+.data-wizard-content h4 .badge {
+    font-size: 12px;
+}
+

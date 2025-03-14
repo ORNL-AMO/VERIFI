@@ -2,7 +2,19 @@
     <div class="row g-0 justify-content-center h-100 w-100 overflow-container">
         <div class="col-11 pt-4 pb-4 h-100">
             <div class="form-paper d-flex flex-column h-100">
-                <h4>Map Meters to Facilities</h4>
+                <h4>
+                    <div class="d-flex w-100 justify-content-between">
+                        <div class="h4 mb-0">
+                            Map Meters to Facilities
+                        </div>
+                        <div>
+                            <span class="badge bg-primary">
+                                <span class="fa fa-file"></span>
+                                {{fileReference.name}}
+                            </span>
+                        </div>
+                    </div>
+                </h4>
                 <ng-template [ngIf]="importMetersFound" [ngIfElse]="noMetersBlock">
 
                     <div class="d-flex h-100 overflow-container">

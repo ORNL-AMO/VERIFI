@@ -2,26 +2,28 @@
     <div class="row g-0 justify-content-center h-100 w-100 overflow-auto">
         <div class="col-11 pt-4 pb-4">
             <div class="form-paper">
-                <h4>Process File {{fileReference.name}}</h4>
+                <h4>
+                    <div class="d-flex w-100 justify-content-between">
+                        <div class="h4 mb-0">
+                            Meter Readings
+                        </div>
+                        <div>
+                            <span class="badge bg-primary">
+                                <span class="fa fa-file"></span>
+                                {{fileReference.name}}
+                            </span>
+                        </div>
+                    </div>
+                </h4>
+
                 <ng-template [ngIf]="metersIncluded" [ngIfElse]="noMetersBlock">
                     <ng-container *ngIf="!inspectMeterSummary">
-                        <!-- <div class="d-flex w-100 justify-content-end mb-2">
-                            <ng-template [ngIf]="!fileReference.meterReadingsSubmitted" [ngIfElse]="notSubmittedBlock">
-                                <button class="btn btn-success btn-sm" (click)="submitMeterReadings()">
-                                    <span class="fa fa-plus"></span> Submit Meter Readings
-                                </button>
-                            </ng-template>
-                            <ng-template #notSubmittedBlock>
-                                <div class="alert alert-info small p-2">
-                                    Meter readings submitted. Use the next button to move on to predictor upload.
-                                </div>
-                            </ng-template>
-                        </div> -->
-
-                        <app-meter-data-summary-table [meterDataSummaries]="meterDataSummaries" (emitInspectSummary)="selectMeterSummary($event)"></app-meter-data-summary-table>
+                        <app-meter-data-summary-table [meterDataSummaries]="meterDataSummaries"
+                            (emitInspectSummary)="selectMeterSummary($event)"></app-meter-data-summary-table>
                     </ng-container>
                     <ng-container *ngIf="inspectMeterSummary">
-                        <app-inspect-meter-data-summary-table [meterDataSummary]="inspectMeterSummary" (emitClose)="selectMeterSummary(undefined)"></app-inspect-meter-data-summary-table>
+                        <app-inspect-meter-data-summary-table [meterDataSummary]="inspectMeterSummary"
+                            (emitClose)="selectMeterSummary(undefined)"></app-inspect-meter-data-summary-table>
                     </ng-container>
                 </ng-template>
                 <ng-template #noMetersBlock>

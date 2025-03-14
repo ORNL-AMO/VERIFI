@@ -174,43 +174,43 @@ export class ProcessMetersComponent {
     }
   }
 
-  async submitMeters() {
-    this.loadingService.setLoadingMessage('Adding Utility Meters..')
-    this.loadingService.setLoadingStatus(true);
-    let newGroups: Array<IdbUtilityMeterGroup> = new Array();
-    for (let i = 0; i < this.fileReference.meters.length; i++) {
-      let meter: IdbUtilityMeter = this.fileReference.meters[i];
-      if (!meter.skipImport) {
-        if (meter.id) {
-          await firstValueFrom(this.utilityMeterDbService.updateWithObservable(meter));
-        } else {
-          await firstValueFrom(this.utilityMeterDbService.addWithObservable(meter));
-        }
+  // async submitMeters() {
+  //   this.loadingService.setLoadingMessage('Adding Utility Meters..')
+  //   this.loadingService.setLoadingStatus(true);
+  //   let newGroups: Array<IdbUtilityMeterGroup> = new Array();
+  //   for (let i = 0; i < this.fileReference.meters.length; i++) {
+  //     let meter: IdbUtilityMeter = this.fileReference.meters[i];
+  //     if (!meter.skipImport) {
+  //       if (meter.id) {
+  //         await firstValueFrom(this.utilityMeterDbService.updateWithObservable(meter));
+  //       } else {
+  //         await firstValueFrom(this.utilityMeterDbService.addWithObservable(meter));
+  //       }
 
-        if (meter.groupId) {
-          let facilityGroups: Array<IdbUtilityMeterGroup> = this.getFacilityMeterGroups(meter.facilityId);
-          let selectedGroup: IdbUtilityMeterGroup = facilityGroups.find(group => { return group.guid == meter.groupId });
-          if (selectedGroup && !selectedGroup.id) {
-            let groupExists: IdbUtilityMeterGroup = newGroups.find(group => { return group.guid == selectedGroup.guid });
-            if (groupExists == undefined) {
-              newGroups.push(selectedGroup);
-            }
-          }
-        }
-      }
-    }
-    for (let i = 0; i < newGroups.length; i++) {
-      let newGroup: IdbUtilityMeterGroup = newGroups[i];
-      await firstValueFrom(this.utilityMeterGroupDbService.addWithObservable(newGroup));
-    }
+  //       if (meter.groupId) {
+  //         let facilityGroups: Array<IdbUtilityMeterGroup> = this.getFacilityMeterGroups(meter.facilityId);
+  //         let selectedGroup: IdbUtilityMeterGroup = facilityGroups.find(group => { return group.guid == meter.groupId });
+  //         if (selectedGroup && !selectedGroup.id) {
+  //           let groupExists: IdbUtilityMeterGroup = newGroups.find(group => { return group.guid == selectedGroup.guid });
+  //           if (groupExists == undefined) {
+  //             newGroups.push(selectedGroup);
+  //           }
+  //         }
+  //       }
+  //     }
+  //   }
+  //   for (let i = 0; i < newGroups.length; i++) {
+  //     let newGroup: IdbUtilityMeterGroup = newGroups[i];
+  //     await firstValueFrom(this.utilityMeterGroupDbService.addWithObservable(newGroup));
+  //   }
 
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    await this.dbChangesService.setMeters(account);
-    await this.dbChangesService.setMeterGroups(account);
-    this.loadingService.setLoadingStatus(false);
-    this.toastNotificationService.showToast('Meters Added!', undefined, undefined, false, 'alert-success');
-    this.fileReference.metersSubmitted = true;
-  }
+  //   let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+  //   await this.dbChangesService.setMeters(account);
+  //   await this.dbChangesService.setMeterGroups(account);
+  //   this.loadingService.setLoadingStatus(false);
+  //   this.toastNotificationService.showToast('Meters Added!', undefined, undefined, false, 'alert-success');
+  //   this.fileReference.metersSubmitted = true;
+  // }
 
   getFacilityMeterGroups(facilityId: string): Array<IdbUtilityMeterGroup> {
     let facilityGroups: {

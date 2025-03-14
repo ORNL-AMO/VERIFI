@@ -2,8 +2,21 @@
     <div class="row g-0 justify-content-center h-100 w-100 overflow-auto">
         <div class="col-11 pt-4 pb-4">
             <div class="form-paper">
-                <h4>Process File {{fileReference.name}}</h4>
-                <div class="d-flex w-100 justify-content-end mb-2">
+                <h4>
+                    <div class="d-flex w-100 justify-content-between">
+                        <div class="h4 mb-0">
+                            Facilities
+                        </div>
+                        <div>
+                            <span class="badge bg-primary">
+                                <span class="fa fa-file"></span>
+                                {{fileReference.name}}
+                            </span>
+                        </div>
+                    </div>
+                </h4>
+                <!-- <h4>Process File {{fileReference.name}}</h4> -->
+                <!-- <div class="d-flex w-100 justify-content-end mb-2">
                     <ng-template [ngIf]="!fileReference.facilitiesSubmitted" [ngIfElse]="notSubmittedBlock">
                         <button class="btn btn-success" (click)="submitFacilities()">
                             <span class="fa fa-upload"></span> Submit Facilities
@@ -14,7 +27,7 @@
                             Facilities submitted. Use the next button to move on to meters upload.
                         </div>
                     </ng-template>
-                </div>
+                </div> -->
                 <div class="table-responsive">
                     <table class="table utility-data table-sm table-bordered table-hover">
                         <thead class="table-mh">
@@ -37,8 +50,8 @@
                                 <th>
                                     Zip
                                 </th>
-                                <th>
-                                    <!-- NAICS Code 2
+                                <!-- <th>
+                                    NAICS Code 2
                                 </th>
                                 <th>
                                     NAICS Code 3
@@ -46,9 +59,9 @@
                                 <th>
                                     Contact Name
                                 </th>
-                                <th>
+                                <!-- <th>
                                     Contact Phone
-                                </th>
+                                </th> -->
                                 <th>
                                     Contact Email
                                 </th>
@@ -86,9 +99,9 @@
                                 <td>
                                     {{facility.contactName}}
                                 </td>
-                                <td>
+                                <!-- <td>
                                     {{facility.contactPhone}}
-                                </td>
+                                </td> -->
                                 <td>
                                     {{facility.contactEmail}}
                                 </td>
@@ -122,12 +135,7 @@
             </ng-template>
         </div> -->
         <button class="btn btn-dark" (click)="next()">
-            <ng-template [ngIf]="fileReference.facilitiesSubmitted" [ngIfElse]="skipBlock">
-                Next
-            </ng-template>
-            <ng-template #skipBlock>
-                Skip Facilities
-            </ng-template>
+            Next
             <span class="fa fa-chevron-right"></span>
         </button>
     </div>

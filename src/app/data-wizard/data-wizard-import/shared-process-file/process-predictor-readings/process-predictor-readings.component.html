@@ -2,7 +2,19 @@
     <div class="row g-0 justify-content-center h-100 w-100 overflow-auto">
         <div class="col-11 pt-4 pb-4">
             <div class="form-paper">
-                <h4>Process File {{fileReference.name}}</h4>
+                <h4>
+                    <div class="d-flex w-100 justify-content-between">
+                        <div class="h4 mb-0">
+                            Predictor Readings
+                        </div>
+                        <div>
+                            <span class="badge bg-primary">
+                                <span class="fa fa-file"></span>
+                                {{fileReference.name}}
+                            </span>
+                        </div>
+                    </div>
+                </h4>
                 <ng-template [ngIf]="predictorsExist" [ngIfElse]="noPredictorsIncludedBlock">
                     <div class="table-responsive">
                         <table class="table table-sm table-bordered table-hover utility-data">

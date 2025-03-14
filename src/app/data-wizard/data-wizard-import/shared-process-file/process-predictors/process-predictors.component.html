@@ -2,7 +2,19 @@
     <div class="row g-0 justify-content-center h-100 w-100 overflow-auto">
         <div class="col-11 pt-4 pb-4">
             <div class="form-paper">
-                <h4>Process File {{fileReference.name}}</h4>
+                <h4>
+                    <div class="d-flex w-100 justify-content-between">
+                        <div class="h4 mb-0">
+                            Predictors
+                        </div>
+                        <div>
+                            <span class="badge bg-primary">
+                                <span class="fa fa-file"></span>
+                                {{fileReference.name}}
+                            </span>
+                        </div>
+                    </div>
+                </h4>
                 <ng-template [ngIf]="predictorsIncluded" [ngIfElse]="noPredictorsIncludedBlock">
                     <ng-template [ngIf]="!editPredictorForm" [ngIfElse]="editPredictorFormBlock">
                         <div class="table-responsive">
@@ -28,8 +40,7 @@
                                             <div class="w-100 d-flex">
                                                 <div class="pe-1">
                                                     <input type="checkbox" class="form-check-input"
-                                                        [(ngModel)]="skipAll" (change)="setSkipAll()"
-                                                        [disabled]="fileReference.predictorsSubmitted">
+                                                        [(ngModel)]="skipAll" (change)="setSkipAll()">
                                                 </div>
                                                 <div>
                                                     Skip Import
@@ -87,8 +98,7 @@
                                         <td>
                                             <div class="d-flex w-100 h-100 justify-content-center align-items-center">
                                                 <input type="checkbox" class="form-check-input"
-                                                    [(ngModel)]="predictor.skipImport" (change)="setValidPredictors()"
-                                                    [disabled]="fileReference.predictorsSubmitted">
+                                                    [(ngModel)]="predictor.skipImport" (change)="setValidPredictors()">
                                             </div>
                                         </td>
                                     </tr>

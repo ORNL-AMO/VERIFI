@@ -30,6 +30,7 @@ import { ProcessMeterReadingsComponent } from "../data-wizard/data-wizard-import
 import { MapPredictorsToFacilitiesComponent } from "../data-wizard/data-wizard-import/process-general-file/map-predictors-to-facilities/map-predictors-to-facilities.component";
 import { ProcessPredictorsComponent } from "../data-wizard/data-wizard-import/shared-process-file/process-predictors/process-predictors.component";
 import { ProcessPredictorReadingsComponent } from "../data-wizard/data-wizard-import/shared-process-file/process-predictor-readings/process-predictor-readings.component";
+import { SubmitImportDataComponent } from "../data-wizard/data-wizard-import/shared-process-file/submit-import-data/submit-import-data.component";
 
 export const DataWizardRoutes: Route = {
     path: 'data-wizard/:id',
@@ -55,7 +56,9 @@ export const DataWizardRoutes: Route = {
                         { path: 'meters', component: ProcessMetersComponent },
                         { path: 'meter-readings', component: ProcessMeterReadingsComponent },
                         { path: 'predictors', component: ProcessPredictorsComponent },
-                        { path: 'confirm-predictor-data', component: ProcessPredictorReadingsComponent}
+                        { path: 'confirm-predictor-data', component: ProcessPredictorReadingsComponent},
+                        { path: 'predictor-data', component: ProcessPredictorReadingsComponent},
+                        { path: 'review-and-submit', component: SubmitImportDataComponent}
                     ]
                 },
                 {
@@ -70,7 +73,8 @@ export const DataWizardRoutes: Route = {
                         { path: 'meter-readings', component: ProcessMeterReadingsComponent },
                         { path: 'map-predictors-to-facilities', component: MapPredictorsToFacilitiesComponent },
                         { path: 'confirm-predictors', component: ProcessPredictorsComponent},
-                        { path: 'predictor-data', component: ProcessPredictorReadingsComponent}
+                        { path: 'predictor-data', component: ProcessPredictorReadingsComponent},
+                        { path: 'review-and-submit', component: SubmitImportDataComponent}
                     ]
                 }
             ]
