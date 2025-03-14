@@ -85,3 +85,8 @@
       background-image: none;
     }
 }
+
+.overflow-auto{
+    overflow-y: auto;
+    overflow-x: auto;
+}

@@ -47,27 +47,6 @@
                                 </ng-container>
                             </ng-container>
                         </div>
-                        <!-- <div class="row no-gutters">
-                        <div cdkDropList [cdkDropListData]="fileReference.meterFacilityGroups"
-                            class="card col-md-3 col-sm-6"
-                            *ngFor="let facilityGroup of fileReference.meterFacilityGroups; let index = index"
-                            (cdkDropListDropped)="dropColumn($event)" id={{facilityGroup.facilityId}}
-                            [cdkDropListConnectedTo]="facilityGroupIds">
-                            <div class="card-header">
-                                <i *ngIf="index != 0" class="fa fa-industry"
-                                    [ngStyle]="{color: facilityGroup.color}"></i>
-                                {{facilityGroup.facilityName}}
-                                <a *ngIf="index != 0" class="click-link float-end"
-                                    (click)="setFacility(facilityGroup.facilityId)">+Add
-                                    All</a>
-                            </div>
-                            <div class="card-body">
-                                <div class="list-item mt-2 mb-2 p-2" [cdkDragData]="groupItem"
-                                    *ngFor="let groupItem of facilityGroup.groupItems" cdkDrag>
-                                    <span class="fa fa-arrows-alt"></span>{{groupItem.value}} <br>
-                                </div>
-                            </div>
-                        </div> -->
                     </div>
                 </ng-template>
                 <ng-template #noMetersBlock>

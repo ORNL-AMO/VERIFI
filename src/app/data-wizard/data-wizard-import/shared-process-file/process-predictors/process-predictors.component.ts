@@ -3,16 +3,10 @@ import { FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { DataWizardService } from 'src/app/data-wizard/data-wizard.service';
-import { EditMeterFormService } from 'src/app/shared/shared-meter-content/edit-meter-form/edit-meter-form.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
-import { getNewIdbUtilityMeterGroup, IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
 import { FileReference, getEmptyFileReference } from 'src/app/upload-data/upload-data-models';
-import { UploadDataService } from 'src/app/upload-data/upload-data.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
@@ -20,15 +14,16 @@ import { EditPredictorFormService } from 'src/app/shared/shared-predictors-conte
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
-
+import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 
 @Component({
-  selector: 'app-process-template-predictors',
-  templateUrl: './process-template-predictors.component.html',
-  styleUrl: './process-template-predictors.component.css',
-  standalone: false
+  selector: 'app-process-predictors',
+  standalone: false,
+  
+  templateUrl: './process-predictors.component.html',
+  styleUrl: './process-predictors.component.css'
 })
-export class ProcessTemplatePredictorsComponent {
+export class ProcessPredictorsComponent {
 
   fileReference: FileReference = getEmptyFileReference();
   paramsSub: Subscription;
@@ -75,35 +70,43 @@ export class ProcessTemplatePredictorsComponent {
 
   goBack() {
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    this.router.navigateByUrl('/data-wizard/' + account.guid + '/import-data/process-template-file/' + this.fileReference.id + '/meter-readings');
+    if (this.router.url.includes('process-template-file')) {
+      this.router.navigateByUrl('/data-wizard/' + account.guid + '/import-data/process-template-file/' + this.fileReference.id + '/meter-readings');
+    } else {
+      this.router.navigateByUrl('/data-wizard/' + account.guid + '/import-data/process-general-file/' + this.fileReference.id + '/map-predictors-to-facilities');
+    }
   }
 
   next() {
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    this.router.navigateByUrl('/data-wizard/' + account.guid + '/import-data/process-template-file/' + this.fileReference.id + '/predictor-data');
+    if (this.router.url.includes('process-template-file')) {
+      this.router.navigateByUrl('/data-wizard/' + account.guid + '/import-data/process-template-file/' + this.fileReference.id + '/predictor-data');
+    } else {
+      this.router.navigateByUrl('/data-wizard/' + account.guid + '/import-data/process-general-file/' + this.fileReference.id + '/predictor-data');
+    }
   }
 
-  async submitPredictors() {
-    this.loadingService.setLoadingMessage('Uploading Predictors..');
-    this.loadingService.setLoadingStatus(true);
-    for (let i = 0; i < this.fileReference.predictors.length; i++) {
-      let predictor: IdbPredictor = this.fileReference.predictors[i];
-      if (!predictor.skipImport) {
-        if (predictor.id) {
-          await firstValueFrom(this.predictorDbService.updateWithObservable(predictor));
-          await this.analysisDbService.updateAnalysisPredictor(predictor);
-        } else {
-          await firstValueFrom(this.predictorDbService.addWithObservable(predictor));
-          await this.analysisDbService.addAnalysisPredictor(predictor);
-        }
-      }
-    }
-    this.fileReference.predictorsSubmitted = true;
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    await this.dbChangesService.setPredictorsV2(account);
-    this.loadingService.setLoadingStatus(false);
-    this.toastNotificationService.showToast('Predictors Uploaded!', undefined, undefined, false, 'alert-success');
-  }
+  // async submitPredictors() {
+  //   this.loadingService.setLoadingMessage('Uploading Predictors..');
+  //   this.loadingService.setLoadingStatus(true);
+  //   for (let i = 0; i < this.fileReference.predictors.length; i++) {
+  //     let predictor: IdbPredictor = this.fileReference.predictors[i];
+  //     if (!predictor.skipImport) {
+  //       if (predictor.id) {
+  //         await firstValueFrom(this.predictorDbService.updateWithObservable(predictor));
+  //         await this.analysisDbService.updateAnalysisPredictor(predictor);
+  //       } else {
+  //         await firstValueFrom(this.predictorDbService.addWithObservable(predictor));
+  //         await this.analysisDbService.addAnalysisPredictor(predictor);
+  //       }
+  //     }
+  //   }
+  //   this.fileReference.predictorsSubmitted = true;
+  //   let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+  //   await this.dbChangesService.setPredictorsV2(account);
+  //   this.loadingService.setLoadingStatus(false);
+  //   this.toastNotificationService.showToast('Predictors Uploaded!', undefined, undefined, false, 'alert-success');
+  // }
 
 
   setValidPredictors() {

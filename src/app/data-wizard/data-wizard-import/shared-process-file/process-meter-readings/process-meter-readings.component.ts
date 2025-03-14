@@ -79,26 +79,26 @@ export class ProcessMeterReadingsComponent {
     }
   }
 
-  async submitMeterReadings() {
-    this.loadingService.setLoadingMessage('Uploading Meter Data...');
-    this.loadingService.setLoadingStatus(true);
-    for (let i = 0; i < this.fileReference.meterData.length; i++) {
-      let meterData: IdbUtilityMeterData = this.fileReference.meterData[i];
-      if (meterData.id) {
-        let summary: MeterDataSummary = this.meterDataSummaries.find(summary => { return summary.meterId == meterData.meterId });
-        if (!summary.skipExisting) {
-          await firstValueFrom(this.utilityMeterDataDbService.updateWithObservable(meterData));
-        }
-      } else {
-        await firstValueFrom(this.utilityMeterDataDbService.addWithObservable(meterData));
-      }
-    }
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    this.fileReference.meterReadingsSubmitted = true;
-    this.dbChangesService.setMeterData(account);
-    this.loadingService.setLoadingStatus(false);
-    this.toastNotificationService.showToast('Meter Data Uploaded!', undefined, undefined, false, 'alert-success');
-  }
+  // async submitMeterReadings() {
+  //   this.loadingService.setLoadingMessage('Uploading Meter Data...');
+  //   this.loadingService.setLoadingStatus(true);
+  //   for (let i = 0; i < this.fileReference.meterData.length; i++) {
+  //     let meterData: IdbUtilityMeterData = this.fileReference.meterData[i];
+  //     if (meterData.id) {
+  //       let summary: MeterDataSummary = this.meterDataSummaries.find(summary => { return summary.meterId == meterData.meterId });
+  //       if (!summary.skipExisting) {
+  //         await firstValueFrom(this.utilityMeterDataDbService.updateWithObservable(meterData));
+  //       }
+  //     } else {
+  //       await firstValueFrom(this.utilityMeterDataDbService.addWithObservable(meterData));
+  //     }
+  //   }
+  //   let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+  //   this.fileReference.meterReadingsSubmitted = true;
+  //   this.dbChangesService.setMeterData(account);
+  //   this.loadingService.setLoadingStatus(false);
+  //   this.toastNotificationService.showToast('Meter Data Uploaded!', undefined, undefined, false, 'alert-success');
+  // }
 
   setSummary() {
     let dataSummaries: Array<MeterDataSummary> = new Array();

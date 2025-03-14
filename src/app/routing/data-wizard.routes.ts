@@ -8,7 +8,6 @@ import { DataWizardImportComponent } from "../data-wizard/data-wizard-import/dat
 import { UploadFilesComponent } from "../data-wizard/data-wizard-import/upload-files/upload-files.component";
 import { ProcessTemplateFileComponent } from "../data-wizard/data-wizard-import/process-template-file/process-template-file.component";
 import { ProcessTemplateFacilitiesComponent } from "../data-wizard/data-wizard-import/process-template-file/process-template-facilities/process-template-facilities.component";
-import { ProcessTemplatePredictorsComponent } from "../data-wizard/data-wizard-import/process-template-file/process-template-predictors/process-template-predictors.component";
 import { FacilityMetersTableComponent } from "../data-wizard/account-facilities/facility-data/facility-meters/facility-meters-table/facility-meters-table.component";
 import { FacilityMeterComponent } from "../data-wizard/account-facilities/facility-data/facility-meters/facility-meter/facility-meter.component";
 import { MeterDataComponent } from "../shared/shared-meter-content/meter-data/meter-data.component";
@@ -28,6 +27,9 @@ import { IdentifyColumnsComponent } from "../data-wizard/data-wizard-import/proc
 import { MapMetersToFacilitiesComponent } from "../data-wizard/data-wizard-import/process-general-file/map-meters-to-facilities/map-meters-to-facilities.component";
 import { ProcessMetersComponent } from "../data-wizard/data-wizard-import/shared-process-file/process-meters/process-meters.component";
 import { ProcessMeterReadingsComponent } from "../data-wizard/data-wizard-import/shared-process-file/process-meter-readings/process-meter-readings.component";
+import { MapPredictorsToFacilitiesComponent } from "../data-wizard/data-wizard-import/process-general-file/map-predictors-to-facilities/map-predictors-to-facilities.component";
+import { ProcessPredictorsComponent } from "../data-wizard/data-wizard-import/shared-process-file/process-predictors/process-predictors.component";
+import { ProcessPredictorReadingsComponent } from "../data-wizard/data-wizard-import/shared-process-file/process-predictor-readings/process-predictor-readings.component";
 
 export const DataWizardRoutes: Route = {
     path: 'data-wizard/:id',
@@ -52,7 +54,8 @@ export const DataWizardRoutes: Route = {
                         { path: 'facilities', component: ProcessTemplateFacilitiesComponent },
                         { path: 'meters', component: ProcessMetersComponent },
                         { path: 'meter-readings', component: ProcessMeterReadingsComponent },
-                        { path: 'predictors', component: ProcessTemplatePredictorsComponent }
+                        { path: 'predictors', component: ProcessPredictorsComponent },
+                        { path: 'confirm-predictor-data', component: ProcessPredictorReadingsComponent}
                     ]
                 },
                 {
@@ -65,13 +68,9 @@ export const DataWizardRoutes: Route = {
                         { path: 'map-meters-to-facilities', component: MapMetersToFacilitiesComponent },
                         { path: 'confirm-meters', component: ProcessMetersComponent },
                         { path: 'meter-readings', component: ProcessMeterReadingsComponent },
-                        // { path: 'set-facility-meters', component: SetFacilityMetersComponent },
-                        // { path: 'set-facility-predictors', component: SetFacilityPredictorsComponent },
-                        // { path: 'manage-meters', component: ManageMetersComponent },
-                        // { path: 'template-facilities', component: TemplateFacilitiesComponent },
-                        // { path: 'confirm-readings', component: ConfirmReadingsComponent },
-                        // { path: 'confirm-predictors', component: ConfirmPredictorsComponent },
-                        // { path: 'submit', component: ConfirmAndSubmitComponent }
+                        { path: 'map-predictors-to-facilities', component: MapPredictorsToFacilitiesComponent },
+                        { path: 'confirm-predictors', component: ProcessPredictorsComponent},
+                        { path: 'predictor-data', component: ProcessPredictorReadingsComponent}
                     ]
                 }
             ]

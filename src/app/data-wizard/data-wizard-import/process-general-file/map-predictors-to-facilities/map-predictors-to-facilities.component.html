@@ -1,1 +1,77 @@
-<p>map-predictors-to-facilities works!</p>
+<div class="data-wizard-content with-footer">
+    <div class="row g-0 justify-content-center h-100 w-100 overflow-container">
+        <div class="col-11 pt-4 pb-4 h-100">
+            <div class="form-paper d-flex flex-column h-100">
+                <h4>Map Meters to Facilities</h4>
+                <ng-template [ngIf]="predictorsIncluded" [ngIfElse]="noPredictorsBlock">
+
+                    <div class="d-flex h-100 overflow-container">
+                        <div class="w-50 me-2 overflow-container">
+                            <!--unused-->
+                            @let unmappedPredictorsGroup = fileReference.predictorFacilityGroups[0];
+                            <div class="card" (cdkDropListDropped)="dropColumn($event)"
+                                id={{unmappedPredictorsGroup.facilityId}} cdkDropList
+                                [cdkDropListData]="fileReference.predictorFacilityGroups"
+                                [cdkDropListConnectedTo]="facilityGroupIds">
+                                <div class="card-header">
+                                    {{unmappedPredictorsGroup.facilityName}}
+                                </div>
+                                <div class="card-body">
+                                    <div class="list-item mt-2 mb-2 p-2" [cdkDragData]="groupItem"
+                                        *ngFor="let groupItem of unmappedPredictorsGroup.groupItems" cdkDrag>
+                                        <span class="fa fa-arrows-alt"></span>{{groupItem.value}} <br>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="w-50 ms-2 d-flex flex-column h-100 overflow-container">
+                            <ng-container
+                                *ngFor="let facilityGroup of fileReference.predictorFacilityGroups; let first = first;">
+                                <ng-container *ngIf="!first">
+                                    <div class="card" cdkDropList (cdkDropListDropped)="dropColumn($event)"
+                                        id={{facilityGroup.facilityId}} [cdkDropListConnectedTo]="facilityGroupIds">
+                                        <div class="card-header">
+                                            <i class="fa fa-industry" [ngStyle]="{color: facilityGroup.color}"></i>
+                                            {{facilityGroup.facilityName}}
+                                            <a class="click-link float-end"
+                                                (click)="setFacility(facilityGroup.facilityId)">+Add
+                                                All</a>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="list-item mt-2 mb-2 p-2" [cdkDragData]="groupItem"
+                                                *ngFor="let groupItem of facilityGroup.groupItems" cdkDrag>
+                                                <span class="fa fa-arrows-alt"></span>{{groupItem.value}} <br>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </ng-container>
+                            </ng-container>
+                        </div>
+                    </div>
+                </ng-template>
+                <ng-template #noPredictorsBlock>
+                    <div class="alert alert-warning p-2">
+                        No predictors found. Go back to column selection and include predictors or click continue to upload included meter
+                        data.
+                    </div>
+                </ng-template>
+            </div>
+        </div>
+    </div>
+</div>
+
+<nav class="data-wizard-footer navbar">
+    <div class="container-fluid justify-content-between">
+        <button class="btn btn-dark" (click)="goBack()">
+            <span class="fa fa-chevron-left"></span>
+            Go Back
+        </button>
+
+        <button class="btn btn-dark" (click)="next()">
+            <ng-template [ngIf]="fileReference.selectedWorksheetName">
+                Next
+            </ng-template>
+            <span class="fa fa-chevron-right"></span>
+        </button>
+    </div>
+</nav>

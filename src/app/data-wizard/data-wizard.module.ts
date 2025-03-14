@@ -12,7 +12,6 @@ import { DataWizardImportComponent } from './data-wizard-import/data-wizard-impo
 import { UploadFilesComponent } from './data-wizard-import/upload-files/upload-files.component';
 import { ProcessTemplateFileComponent } from './data-wizard-import/process-template-file/process-template-file.component';
 import { ProcessTemplateFacilitiesComponent } from './data-wizard-import/process-template-file/process-template-facilities/process-template-facilities.component';
-import { ProcessTemplatePredictorsComponent } from './data-wizard-import/process-template-file/process-template-predictors/process-template-predictors.component';
 import { HelperPipesModule } from '../shared/helper-pipes/helper-pipes.module';
 import { FormsModule } from '@angular/forms';
 import { MeterGroupOptionsPipe } from './data-wizard-import/shared-process-file/process-meters/meter-group-options.pipe';
@@ -42,6 +41,8 @@ import { ProcessMetersComponent } from './data-wizard-import/shared-process-file
 import { ProcessMeterReadingsComponent } from './data-wizard-import/shared-process-file/process-meter-readings/process-meter-readings.component';
 import { InspectMeterDataSummaryTableComponent } from './data-wizard-import/shared-process-file/process-meter-readings/inspect-meter-data-summary-table/inspect-meter-data-summary-table.component';
 import { MeterDataSummaryTableComponent } from './data-wizard-import/shared-process-file/process-meter-readings/meter-data-summary-table/meter-data-summary-table.component';
+import { ProcessPredictorsComponent } from './data-wizard-import/shared-process-file/process-predictors/process-predictors.component';
+import { ProcessPredictorReadingsComponent } from './data-wizard-import/shared-process-file/process-predictor-readings/process-predictor-readings.component';
 
 
 @NgModule({
@@ -56,7 +57,6 @@ import { MeterDataSummaryTableComponent } from './data-wizard-import/shared-proc
     UploadFilesComponent,
     ProcessTemplateFileComponent,
     ProcessTemplateFacilitiesComponent,
-    ProcessTemplatePredictorsComponent,
     MeterGroupOptionsPipe,
     FacilityMetersTableComponent,
     FacilityMeterComponent,
@@ -77,7 +77,9 @@ import { MeterDataSummaryTableComponent } from './data-wizard-import/shared-proc
     MapMetersToFacilitiesComponent,
     MapPredictorsToFacilitiesComponent,
     ProcessMetersComponent,
-    ProcessMeterReadingsComponent
+    ProcessMeterReadingsComponent,
+    ProcessPredictorsComponent,
+    ProcessPredictorReadingsComponent
   ],
   imports: [
     CommonModule,

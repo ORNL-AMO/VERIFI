@@ -152,6 +152,15 @@
                     <div class="sidebar-section">
                         <div class="ps-2 pe-2 nav-item">
                             <a class="nav-link"
+                                [routerLink]="'/data-wizard/'+account.guid+'/import-data/process-general-file/' +fileReference.id +'/confirm-predictor-data'"
+                                [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
+                                Confirm Predictor Data
+                            </a>
+                        </div>
+                    </div>
+                    <div class="sidebar-section">
+                        <div class="ps-2 pe-2 nav-item">
+                            <a class="nav-link"
                                 [routerLink]="'/data-wizard/'+account.guid+'/import-data/process-general-file/' +fileReference.id +'/finish-upload'"
                                 [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
                                 Finish Upload
