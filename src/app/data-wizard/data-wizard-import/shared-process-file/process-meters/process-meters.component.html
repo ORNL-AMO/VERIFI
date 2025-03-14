@@ -16,7 +16,7 @@
                             </div>
                         </ng-template>
                     </div> -->
-                    <div class="d-flex justify-content-end" *ngIf="!allMetersValid">
+                    <div class="d-flex justify-content-center" *ngIf="!allMetersValid">
                         <div class="d-flex flex-column">
                             <div class="alert alert-danger p-2">
                                 One or more meters are invalid. Please fix the meter by clicking on it's name or
@@ -26,7 +26,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="d-flex justify-content-end" *ngIf="hasNoCalanderizationSelection">
+                    <div class="d-flex justify-content-center" *ngIf="hasNoCalanderizationSelection">
                         <div class="d-flex flex-column">
                             <div class="alert alert-warning p-2">
                                 One or more meters are missing a calanderization method selection.

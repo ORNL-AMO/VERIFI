@@ -5,7 +5,7 @@
                 <h4>Process File {{fileReference.name}}</h4>
                 <ng-template [ngIf]="metersIncluded" [ngIfElse]="noMetersBlock">
                     <ng-container *ngIf="!inspectMeterSummary">
-                        <div class="d-flex w-100 justify-content-end mb-2">
+                        <!-- <div class="d-flex w-100 justify-content-end mb-2">
                             <ng-template [ngIf]="!fileReference.meterReadingsSubmitted" [ngIfElse]="notSubmittedBlock">
                                 <button class="btn btn-success btn-sm" (click)="submitMeterReadings()">
                                     <span class="fa fa-plus"></span> Submit Meter Readings
@@ -16,7 +16,7 @@
                                     Meter readings submitted. Use the next button to move on to predictor upload.
                                 </div>
                             </ng-template>
-                        </div>
+                        </div> -->
 
                         <app-meter-data-summary-table [meterDataSummaries]="meterDataSummaries" (emitInspectSummary)="selectMeterSummary($event)"></app-meter-data-summary-table>
                     </ng-container>
@@ -41,7 +41,7 @@
             <span class="fa fa-chevron-left"></span>
             Go Back
         </button>
-        <div class="footer-text" *ngIf="metersIncluded">
+        <!-- <div class="footer-text" *ngIf="metersIncluded">
             <ng-template [ngIf]="!fileReference.meterReadingsSubmitted" [ngIfElse]="submittedBlock">
                 Submitting meter readings will add them to their meters. Predictors can then be added
                 to their respective facilities.
@@ -49,7 +49,7 @@
             <ng-template #submittedBlock>
                 Meter data has been added to meters!
             </ng-template>
-        </div>
+        </div> -->
         <button class="btn btn-dark" (click)="next()">
             Next
             <span class="fa fa-chevron-right"></span>

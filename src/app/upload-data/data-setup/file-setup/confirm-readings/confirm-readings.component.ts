@@ -9,7 +9,7 @@ import { checkShowHeatCapacity, getIsEnergyMeter, getIsEnergyUnit } from 'src/ap
 import { FileReference, getEmptyFileReference } from 'src/app/upload-data/upload-data-models';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
-import { MeterDataSummary } from 'src/app/data-wizard/data-wizard-import/process-template-file/process-template-meter-readings/process-template-meter-readings.component';
+import { MeterDataSummary } from 'src/app/data-wizard/data-wizard-import/shared-process-file/process-meter-readings/process-meter-readings.component';
 
 @Component({
     selector: 'app-confirm-readings',

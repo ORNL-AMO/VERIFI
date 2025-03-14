@@ -19,14 +19,15 @@ import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 
-@Component({
-  selector: 'app-process-template-meter-readings',
-  templateUrl: './process-template-meter-readings.component.html',
-  styleUrl: './process-template-meter-readings.component.css',
-  standalone: false
-})
-export class ProcessTemplateMeterReadingsComponent {
 
+@Component({
+  selector: 'app-process-meter-readings',
+  standalone: false,
+
+  templateUrl: './process-meter-readings.component.html',
+  styleUrl: './process-meter-readings.component.css'
+})
+export class ProcessMeterReadingsComponent {
   fileReference: FileReference = getEmptyFileReference();
   paramsSub: Subscription;
 
@@ -62,12 +63,20 @@ export class ProcessTemplateMeterReadingsComponent {
 
   goBack() {
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    this.router.navigateByUrl('/data-wizard/' + account.guid + '/import-data/process-template-file/' + this.fileReference.id + '/meters');
+    if (this.router.url.includes('process-template-file')) {
+      this.router.navigateByUrl('/data-wizard/' + account.guid + '/import-data/process-template-file/' + this.fileReference.id + '/meters');
+    } else {
+      this.router.navigateByUrl('/data-wizard/' + account.guid + '/import-data/process-general-file/' + this.fileReference.id + '/confirm-meters');
+    }
   }
 
   next() {
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    this.router.navigateByUrl('/data-wizard/' + account.guid + '/import-data/process-template-file/' + this.fileReference.id + '/predictors');
+    if (this.router.url.includes('process-template-file')) {
+      this.router.navigateByUrl('/data-wizard/' + account.guid + '/import-data/process-template-file/' + this.fileReference.id + '/predictors');
+    } else {
+      this.router.navigateByUrl('/data-wizard/' + account.guid + '/import-data/process-general-file/' + this.fileReference.id + '/map-predictors-to-facilities');
+    }
   }
 
   async submitMeterReadings() {

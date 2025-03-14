@@ -12,7 +12,6 @@ import { DataWizardImportComponent } from './data-wizard-import/data-wizard-impo
 import { UploadFilesComponent } from './data-wizard-import/upload-files/upload-files.component';
 import { ProcessTemplateFileComponent } from './data-wizard-import/process-template-file/process-template-file.component';
 import { ProcessTemplateFacilitiesComponent } from './data-wizard-import/process-template-file/process-template-facilities/process-template-facilities.component';
-import { ProcessTemplateMeterReadingsComponent } from './data-wizard-import/process-template-file/process-template-meter-readings/process-template-meter-readings.component';
 import { ProcessTemplatePredictorsComponent } from './data-wizard-import/process-template-file/process-template-predictors/process-template-predictors.component';
 import { HelperPipesModule } from '../shared/helper-pipes/helper-pipes.module';
 import { FormsModule } from '@angular/forms';
@@ -26,8 +25,6 @@ import { WizardSidebarFacilitiesListPipe } from './data-wizard-sidebar/wizard-si
 import { TableItemsDropdownModule } from '../shared/table-items-dropdown/table-items-dropdown.module';
 import { SharedMeterContentModule } from '../shared/shared-meter-content/shared-meter-content.module';
 import { FacilityMeterMonthlyDataComponent } from './account-facilities/facility-data/facility-meters/facility-meter-monthly-data/facility-meter-monthly-data.component';
-import { MeterDataSummaryTableComponent } from './data-wizard-import/process-template-file/process-template-meter-readings/meter-data-summary-table/meter-data-summary-table.component';
-import { InspectMeterDataSummaryTableComponent } from './data-wizard-import/process-template-file/process-template-meter-readings/inspect-meter-data-summary-table/inspect-meter-data-summary-table.component';
 import { SharedPredictorsContentModule } from "../shared/shared-predictors-content/shared-predictors-content.module";
 import { FacilityPredictorsTableComponent } from './account-facilities/facility-data/facility-predictors/facility-predictors-table/facility-predictors-table.component';
 import { FacilityPredictorComponent } from './account-facilities/facility-data/facility-predictors/facility-predictor/facility-predictor.component';
@@ -42,6 +39,9 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
 import { MapMetersToFacilitiesComponent } from './data-wizard-import/process-general-file/map-meters-to-facilities/map-meters-to-facilities.component';
 import { MapPredictorsToFacilitiesComponent } from './data-wizard-import/process-general-file/map-predictors-to-facilities/map-predictors-to-facilities.component';
 import { ProcessMetersComponent } from './data-wizard-import/shared-process-file/process-meters/process-meters.component';
+import { ProcessMeterReadingsComponent } from './data-wizard-import/shared-process-file/process-meter-readings/process-meter-readings.component';
+import { InspectMeterDataSummaryTableComponent } from './data-wizard-import/shared-process-file/process-meter-readings/inspect-meter-data-summary-table/inspect-meter-data-summary-table.component';
+import { MeterDataSummaryTableComponent } from './data-wizard-import/shared-process-file/process-meter-readings/meter-data-summary-table/meter-data-summary-table.component';
 
 
 @NgModule({
@@ -56,7 +56,6 @@ import { ProcessMetersComponent } from './data-wizard-import/shared-process-file
     UploadFilesComponent,
     ProcessTemplateFileComponent,
     ProcessTemplateFacilitiesComponent,
-    ProcessTemplateMeterReadingsComponent,
     ProcessTemplatePredictorsComponent,
     MeterGroupOptionsPipe,
     FacilityMetersTableComponent,
@@ -77,7 +76,8 @@ import { ProcessMetersComponent } from './data-wizard-import/shared-process-file
     IdentifyColumnsComponent,
     MapMetersToFacilitiesComponent,
     MapPredictorsToFacilitiesComponent,
-    ProcessMetersComponent
+    ProcessMetersComponent,
+    ProcessMeterReadingsComponent
   ],
   imports: [
     CommonModule,

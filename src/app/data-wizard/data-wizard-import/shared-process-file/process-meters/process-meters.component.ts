@@ -21,7 +21,7 @@ import { ToastNotificationsService } from 'src/app/core-components/toast-notific
 @Component({
   selector: 'app-process-meters',
   standalone: false,
-  
+
   templateUrl: './process-meters.component.html',
   styleUrl: './process-meters.component.css'
 })
@@ -43,6 +43,7 @@ export class ProcessMetersComponent {
   skipAll: boolean = false;
   showExisting: boolean = false;
   existingMeterOptions: Array<IdbUtilityMeter> = [];
+
   constructor(private activatedRoute: ActivatedRoute, private uploadDataService: UploadDataService,
     private editMeterFormService: EditMeterFormService, private router: Router,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
@@ -66,6 +67,7 @@ export class ProcessMetersComponent {
         });
         this.setValidMeters();
         this.setHasNoCalanderizationSelection();
+        this.setMeterData();
       } else {
         this.allMetersValid = true;
       }
@@ -140,19 +142,36 @@ export class ProcessMetersComponent {
     }
     this.fileReference.meters[editMeterIndex] = this.editMeterFormService.updateMeterFromForm(this.editMeter, this.editMeterForm);
     this.fileReference.meters[editMeterIndex].isValid = this.editMeterFormService.getFormFromMeter(this.fileReference.meters[editMeterIndex]).valid;
-    this.fileReference.meterData = this.uploadDataService.getMeterDataEntries(this.fileReference.workbook, this.fileReference.meters);
+    this.setMeterData();
     this.cancelEdit();
     this.setValidMeters();
   }
 
+
+  setMeterData(){
+    if(this.fileReference.isTemplate){
+      this.fileReference.meterData = this.uploadDataService.getMeterDataEntries(this.fileReference.workbook, this.fileReference.meters);
+    }else{
+      this.fileReference.meterData = this.uploadDataService.parseExcelMeterData(this.fileReference);
+    }
+  }
+
   goBack() {
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    this.router.navigateByUrl('/data-wizard/' + account.guid + '/import-data/process-template-file/' + this.fileReference.id + '/facilities');
+    if (this.router.url.includes('process-template-file')) {
+      this.router.navigateByUrl('/data-wizard/' + account.guid + '/import-data/process-template-file/' + this.fileReference.id + '/facilities');
+    } else {
+      this.router.navigateByUrl('/data-wizard/' + account.guid + '/import-data/process-general-file/' + this.fileReference.id + '/map-meters-to-facilities');
+    }
   }
 
   next() {
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    this.router.navigateByUrl('/data-wizard/' + account.guid + '/import-data/process-template-file/' + this.fileReference.id + '/meter-readings');
+    if (this.router.url.includes('process-template-file')) {
+      this.router.navigateByUrl('/data-wizard/' + account.guid + '/import-data/process-template-file/' + this.fileReference.id + '/meter-readings');
+    } else {
+      this.router.navigateByUrl('/data-wizard/' + account.guid + '/import-data/process-general-file/' + this.fileReference.id + '/meter-readings');
+    }
   }
 
   async submitMeters() {

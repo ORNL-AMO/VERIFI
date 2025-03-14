@@ -31,7 +31,7 @@
   .card{
       border-radius: 0px;
       background: #efefef;
-      border: 3px solid #2c386b;
+      /* border: 3px solid #2c386b; */
   }
 
   
@@ -91,4 +91,12 @@
     height: calc(100vh - 290px);
     overflow-y: auto;
 
+}
+
+.h-100{
+    max-height: 100%;
+}
+
+.overflow-container{
+    overflow-y: auto;
 }

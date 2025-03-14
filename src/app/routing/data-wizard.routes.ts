@@ -8,7 +8,6 @@ import { DataWizardImportComponent } from "../data-wizard/data-wizard-import/dat
 import { UploadFilesComponent } from "../data-wizard/data-wizard-import/upload-files/upload-files.component";
 import { ProcessTemplateFileComponent } from "../data-wizard/data-wizard-import/process-template-file/process-template-file.component";
 import { ProcessTemplateFacilitiesComponent } from "../data-wizard/data-wizard-import/process-template-file/process-template-facilities/process-template-facilities.component";
-import { ProcessTemplateMeterReadingsComponent } from "../data-wizard/data-wizard-import/process-template-file/process-template-meter-readings/process-template-meter-readings.component";
 import { ProcessTemplatePredictorsComponent } from "../data-wizard/data-wizard-import/process-template-file/process-template-predictors/process-template-predictors.component";
 import { FacilityMetersTableComponent } from "../data-wizard/account-facilities/facility-data/facility-meters/facility-meters-table/facility-meters-table.component";
 import { FacilityMeterComponent } from "../data-wizard/account-facilities/facility-data/facility-meters/facility-meter/facility-meter.component";
@@ -28,6 +27,7 @@ import { SelectWorksheetComponent } from "../data-wizard/data-wizard-import/proc
 import { IdentifyColumnsComponent } from "../data-wizard/data-wizard-import/process-general-file/identify-columns/identify-columns.component";
 import { MapMetersToFacilitiesComponent } from "../data-wizard/data-wizard-import/process-general-file/map-meters-to-facilities/map-meters-to-facilities.component";
 import { ProcessMetersComponent } from "../data-wizard/data-wizard-import/shared-process-file/process-meters/process-meters.component";
+import { ProcessMeterReadingsComponent } from "../data-wizard/data-wizard-import/shared-process-file/process-meter-readings/process-meter-readings.component";
 
 export const DataWizardRoutes: Route = {
     path: 'data-wizard/:id',
@@ -51,7 +51,7 @@ export const DataWizardRoutes: Route = {
                         { path: '', pathMatch: 'full', redirectTo: 'facilities' },
                         { path: 'facilities', component: ProcessTemplateFacilitiesComponent },
                         { path: 'meters', component: ProcessMetersComponent },
-                        { path: 'meter-readings', component: ProcessTemplateMeterReadingsComponent },
+                        { path: 'meter-readings', component: ProcessMeterReadingsComponent },
                         { path: 'predictors', component: ProcessTemplatePredictorsComponent }
                     ]
                 },
@@ -63,7 +63,8 @@ export const DataWizardRoutes: Route = {
                         { path: 'select-worksheet', component: SelectWorksheetComponent },
                         { path: 'identify-columns', component: IdentifyColumnsComponent },
                         { path: 'map-meters-to-facilities', component: MapMetersToFacilitiesComponent },
-                        { path: 'confirm-meters', component: ProcessMetersComponent }
+                        { path: 'confirm-meters', component: ProcessMetersComponent },
+                        { path: 'meter-readings', component: ProcessMeterReadingsComponent },
                         // { path: 'set-facility-meters', component: SetFacilityMetersComponent },
                         // { path: 'set-facility-predictors', component: SetFacilityPredictorsComponent },
                         // { path: 'manage-meters', component: ManageMetersComponent },

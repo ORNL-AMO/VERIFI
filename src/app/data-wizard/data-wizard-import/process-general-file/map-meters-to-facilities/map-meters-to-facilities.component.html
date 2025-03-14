@@ -1,15 +1,53 @@
 <div class="data-wizard-content with-footer">
-    <div class="row g-0 justify-content-center h-100 w-100 overflow-scroll">
-        <div class="col-11 pt-4 pb-4">
-            <div class="form-paper">
+    <div class="row g-0 justify-content-center h-100 w-100 overflow-container">
+        <div class="col-11 pt-4 pb-4 h-100">
+            <div class="form-paper d-flex flex-column h-100">
                 <h4>Map Meters to Facilities</h4>
-                <ng-container *ngIf="importMetersFound">
-                    <h6 class="map-columns-label">Map the meters to their corresponding facilities by
-                        dragging and dropping them
-                        into the correct columns.
-                    </h6>
-                    <hr>
-                    <div class="row no-gutters">
+                <ng-template [ngIf]="importMetersFound" [ngIfElse]="noMetersBlock">
+
+                    <div class="d-flex h-100 overflow-container">
+                        <div class="w-50 me-2 overflow-container">
+                            <!--unused-->
+                            @let unmappedMetersGroup = fileReference.meterFacilityGroups[0];
+                            <div class="card" (cdkDropListDropped)="dropColumn($event)"
+                                id={{unmappedMetersGroup.facilityId}} cdkDropList
+                                [cdkDropListData]="fileReference.meterFacilityGroups"
+                                [cdkDropListConnectedTo]="facilityGroupIds">
+                                <div class="card-header">
+                                    {{unmappedMetersGroup.facilityName}}
+                                </div>
+                                <div class="card-body">
+                                    <div class="list-item mt-2 mb-2 p-2" [cdkDragData]="groupItem"
+                                        *ngFor="let groupItem of unmappedMetersGroup.groupItems" cdkDrag>
+                                        <span class="fa fa-arrows-alt"></span>{{groupItem.value}} <br>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="w-50 ms-2 d-flex flex-column h-100 overflow-container">
+                            <ng-container
+                                *ngFor="let facilityGroup of fileReference.meterFacilityGroups; let first = first;">
+                                <ng-container *ngIf="!first">
+                                    <div class="card" cdkDropList (cdkDropListDropped)="dropColumn($event)"
+                                        id={{facilityGroup.facilityId}} [cdkDropListConnectedTo]="facilityGroupIds">
+                                        <div class="card-header">
+                                            <i class="fa fa-industry" [ngStyle]="{color: facilityGroup.color}"></i>
+                                            {{facilityGroup.facilityName}}
+                                            <a class="click-link float-end"
+                                                (click)="setFacility(facilityGroup.facilityId)">+Add
+                                                All</a>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="list-item mt-2 mb-2 p-2" [cdkDragData]="groupItem"
+                                                *ngFor="let groupItem of facilityGroup.groupItems" cdkDrag>
+                                                <span class="fa fa-arrows-alt"></span>{{groupItem.value}} <br>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </ng-container>
+                            </ng-container>
+                        </div>
+                        <!-- <div class="row no-gutters">
                         <div cdkDropList [cdkDropListData]="fileReference.meterFacilityGroups"
                             class="card col-md-3 col-sm-6"
                             *ngFor="let facilityGroup of fileReference.meterFacilityGroups; let index = index"
@@ -29,14 +67,16 @@
                                     <span class="fa fa-arrows-alt"></span>{{groupItem.value}} <br>
                                 </div>
                             </div>
-                        </div>
+                        </div> -->
                     </div>
-                </ng-container>
-
-                <div class="alert alert-warning p-2" *ngIf="!importMetersFound">
-                    No import meters found. Go back to column selection and include meters or click continue to move on
-                    to predictors.
-                </div>
+                </ng-template>
+                <ng-template #noMetersBlock>
+                    <div class="alert alert-warning p-2">
+                        No import meters found. Go back to column selection and include meters or click continue to move
+                        on
+                        to predictors.
+                    </div>
+                </ng-template>
             </div>
         </div>
     </div>

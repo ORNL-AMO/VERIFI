@@ -7,6 +7,7 @@ import { ColumnGroup, ColumnItem, FileReference } from 'src/app/upload-data/uplo
 import { DataWizardService } from 'src/app/data-wizard/data-wizard.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { UploadDataService } from 'src/app/upload-data/upload-data.service';
 @Component({
   selector: 'app-identify-columns',
   templateUrl: './identify-columns.component.html',
@@ -25,7 +26,8 @@ export class IdentifyColumnsComponent implements OnInit {
   noPredictorsOrMeters: boolean;
   noDateColumn: boolean;
   constructor(private activatedRoute: ActivatedRoute, private dataWizardService: DataWizardService,
-    private router: Router, private accountDbService: AccountdbService) { }
+    private router: Router, private accountDbService: AccountdbService,
+    private uploadDataService: UploadDataService) { }
 
   ngOnInit(): void {
     this.fileReferenceSub = this.dataWizardService.fileReferences.subscribe(fileReferences => {

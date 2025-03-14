@@ -8,6 +8,7 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { ColumnItem, FacilityGroup, FileReference } from 'src/app/upload-data/upload-data-models';
+import { UploadDataService } from 'src/app/upload-data/upload-data.service';
 
 @Component({
   selector: 'app-map-meters-to-facilities',
@@ -25,7 +26,8 @@ export class MapMetersToFacilitiesComponent {
   importMetersFound: boolean;
   constructor(private dataWizardService: DataWizardService, private facilityDbService: FacilitydbService,
     private router: Router, private activatedRoute: ActivatedRoute,
-    private accountDbService: AccountdbService) { }
+    private accountDbService: AccountdbService,
+    private uploadDataService: UploadDataService) { }
 
   ngOnInit(): void {
     this.fileReferenceSub = this.dataWizardService.fileReferences.subscribe(fileReferences => {
@@ -90,6 +92,7 @@ export class MapMetersToFacilitiesComponent {
       });
     });
     this.fileReference.meterFacilityGroups = facilityGroups;
+    this.fileReference.meters = this.uploadDataService.parseMetersFromGroups(this.fileReference);
   }
 
   dropColumn(dropData: CdkDragDrop<FacilityGroup[]>) {
@@ -106,6 +109,7 @@ export class MapMetersToFacilitiesComponent {
         group.groupItems.push(dropData.item.data);
       }
     });
+    this.fileReference.meters = this.uploadDataService.parseMetersFromGroups(this.fileReference);
   }
 
   continue() {
@@ -158,6 +162,7 @@ export class MapMetersToFacilitiesComponent {
     });
     this.fileReference.meterFacilityGroups = facilityGroups;
     this.facilityGroupIds = this.fileReference.meterFacilityGroups.map(group => { return group.facilityId });
+    this.fileReference.meters = this.uploadDataService.parseMetersFromGroups(this.fileReference);
   }
 
 

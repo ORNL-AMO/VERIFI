@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { MeterDataSummary } from '../process-template-meter-readings.component';
+import { MeterDataSummary } from '../process-meter-readings.component';
 
 @Component({
   selector: 'app-inspect-meter-data-summary-table',
