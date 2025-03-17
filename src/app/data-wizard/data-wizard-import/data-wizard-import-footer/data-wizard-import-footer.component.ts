@@ -21,7 +21,6 @@ export class DataWizardImportFooterComponent {
   goBackOptions: Array<GoToOption> = [];
 
   constructor(private dataWizardImportNavigationService: DataWizardImportNavigationService) {
-
   }
 
   ngOnInit() {
@@ -38,5 +37,9 @@ export class DataWizardImportFooterComponent {
 
   goToOption(optionValue: GoToOptionValue) {
     this.dataWizardImportNavigationService.goToPage(optionValue, this.fileReference);
+  }
+
+  submitImport() {
+
   }
 }

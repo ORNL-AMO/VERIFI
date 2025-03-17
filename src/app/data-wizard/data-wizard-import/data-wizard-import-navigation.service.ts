@@ -23,7 +23,7 @@ export class DataWizardImportNavigationService {
       this.goToPage('confirm-meters', fileReference)
     } else if (currentNavOption == 'confirm-meters') {
       this.goToPage('meter-readings', fileReference)
-    } else if (currentNavOption == 'meter-readings') {
+    } else if (currentNavOption == 'meter-readings' && !fileReference.isTemplate) {
       this.goToPage('map-predictors-to-facilities', fileReference);
     } else if (currentNavOption == 'map-predictors-to-facilities') {
       this.goToPage('confirm-predictors', fileReference)
@@ -31,6 +31,10 @@ export class DataWizardImportNavigationService {
       this.goToPage('predictor-data', fileReference)
     } else if (currentNavOption == 'predictor-data') {
       this.goToPage('review-and-submit', fileReference)
+    } else if (currentNavOption == 'facilities') {
+      this.goToPage('confirm-meters', fileReference)
+    } else if (currentNavOption == 'meter-readings' && fileReference.isTemplate) {
+      this.goToPage('confirm-predictors', fileReference);
     }
   }
 
@@ -47,13 +51,21 @@ export class DataWizardImportNavigationService {
       this.goToPage('confirm-meters', fileReference)
     } else if (currentNavOption == 'map-predictors-to-facilities') {
       this.goToPage('meter-readings', fileReference)
-    } else if (currentNavOption == 'confirm-predictors') {
+    } else if (currentNavOption == 'confirm-predictors' && !fileReference.isTemplate) {
       this.goToPage('map-predictors-to-facilities', fileReference)
     } else if (currentNavOption == 'predictor-data') {
       this.goToPage('confirm-predictors', fileReference)
     } else if (currentNavOption == 'review-and-submit') {
       this.goToPage('predictor-data', fileReference)
-    }
+    } else if (currentNavOption == 'facilities') {
+      this.goToPage('upload-files', fileReference)
+    } else if (currentNavOption == 'confirm-meters' && fileReference.isTemplate) {
+      this.goToPage('facilities', fileReference)
+    } else if (currentNavOption == 'meter-readings' && fileReference.isTemplate) {
+      this.goToPage('confirm-meters', fileReference)
+    } else if (currentNavOption == 'confirm-predictors' && fileReference.isTemplate) {
+      this.goToPage('meter-readings', fileReference)
+    } 
 
   }
 
@@ -70,6 +82,7 @@ export class DataWizardImportNavigationService {
 
   getGoBackOptions(currentNavOption: GoToOptionValue, fileReference: FileReference): Array<GoToOption> {
     let optionValues: Array<GoToOptionValue> = [];
+    //not template
     if (currentNavOption == 'identify-columns') {
       optionValues = ['upload-files', 'select-worksheet'];
     } else if (currentNavOption == 'map-meters-to-facilities') {
@@ -86,6 +99,18 @@ export class DataWizardImportNavigationService {
       optionValues = ['upload-files', 'select-worksheet', 'identify-columns', 'map-meters-to-facilities', 'confirm-meters', 'meter-readings', 'map-predictors-to-facilities', 'confirm-predictors'];
     } else if (currentNavOption == 'review-and-submit' && !fileReference.isTemplate) {
       optionValues = ['upload-files', 'select-worksheet', 'identify-columns', 'map-meters-to-facilities', 'confirm-meters', 'meter-readings', 'map-predictors-to-facilities', 'confirm-predictors', 'predictor-data'];
+    }
+    //Template
+    else if (currentNavOption == 'confirm-meters' && fileReference.isTemplate) {
+      optionValues = ['upload-files', 'facilities'];
+    } else if (currentNavOption == 'meter-readings' && fileReference.isTemplate) {
+      optionValues = ['upload-files', 'facilities', 'confirm-meters'];
+    } else if (currentNavOption == 'confirm-predictors' && fileReference.isTemplate) {
+      optionValues = ['upload-files', 'facilities', 'confirm-meters', 'meter-readings'];
+    } else if (currentNavOption == 'predictor-data' && fileReference.isTemplate) {
+      optionValues = ['upload-files', 'facilities', 'confirm-meters', 'meter-readings', 'confirm-predictors'];
+    } else if (currentNavOption == 'review-and-submit' && fileReference.isTemplate) {
+      optionValues = ['upload-files', 'facilities', 'confirm-meters', 'meter-readings', 'confirm-predictors', 'predictor-data'];
     }
     return optionValues.map(opVal => {
       return this.getGoToOption(opVal)

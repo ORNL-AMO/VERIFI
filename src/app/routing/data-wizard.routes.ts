@@ -55,8 +55,7 @@ export const DataWizardRoutes: Route = {
                         { path: 'facilities', component: ProcessTemplateFacilitiesComponent },
                         { path: 'confirm-meters', component: ProcessMetersComponent },
                         { path: 'meter-readings', component: ProcessMeterReadingsComponent },
-                        { path: 'predictors', component: ProcessPredictorsComponent },
-                        { path: 'confirm-predictor-data', component: ProcessPredictorReadingsComponent},
+                        { path: 'confirm-predictors', component: ProcessPredictorsComponent },
                         { path: 'predictor-data', component: ProcessPredictorReadingsComponent},
                         { path: 'review-and-submit', component: SubmitImportDataComponent}
                     ]

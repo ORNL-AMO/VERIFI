@@ -20,14 +20,6 @@
     </div>
 </div>
 
-<nav class="data-wizard-footer navbar">
-    <div class="container-fluid justify-content-between">
-        <button class="btn btn-dark" (click)="goBack()">
-            <span class="fa fa-chevron-left"></span>
-            Go Back
-        </button>
-        <button class="btn btn-success" (click)="next()">
-            Import Data
-        </button>
-    </div>
-</nav>
+<!--TODO: disable next-->
+<app-data-wizard-import-footer [fileReference]="fileReference"
+    [navOption]="'review-and-submit'"></app-data-wizard-import-footer>

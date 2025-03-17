@@ -118,25 +118,6 @@
     </div>
 </div>
 
-<nav class="data-wizard-footer navbar">
-    <div class="container-fluid justify-content-between">
-        <button class="btn btn-dark" (click)="goBack()">
-            <span class="fa fa-chevron-left"></span>
-            Go Back
-        </button>
-        <!-- <div class="footer-text">
-            <ng-template [ngIf]="!fileReference.facilitiesSubmitted" [ngIfElse]="facilitiesSubmittedBlock">
-                Submitting facilities will add them to <i>{{account.name}}</i>. Meters and predictors can then be added
-                to
-                their respective facilities.
-            </ng-template>
-            <ng-template #facilitiesSubmittedBlock>
-                These facilities have been added to {{account.name}}
-            </ng-template>
-        </div> -->
-        <button class="btn btn-dark" (click)="next()">
-            Next
-            <span class="fa fa-chevron-right"></span>
-        </button>
-    </div>
-</nav>
+<!--TODO: disable next-->
+<app-data-wizard-import-footer [fileReference]="fileReference"
+    [navOption]="'facilities'"></app-data-wizard-import-footer>

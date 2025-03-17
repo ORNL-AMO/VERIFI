@@ -1,6 +1,6 @@
 import { CdkDragDrop } from '@angular/cdk/drag-drop';
-import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Component } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { ColumnItem, FacilityGroup, FileReference, getEmptyFileReference } from 'src/app/upload-data/upload-data-models';
@@ -9,8 +9,6 @@ import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { DataWizardService } from 'src/app/data-wizard/data-wizard.service';
 import { UploadDataService } from 'src/app/upload-data/upload-data.service';
-import { IdbAccount } from 'src/app/models/idbModels/account';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 
 @Component({
   selector: 'app-map-predictors-to-facilities',
@@ -26,9 +24,8 @@ export class MapPredictorsToFacilitiesComponent {
   fileReference: FileReference = getEmptyFileReference();
   paramsSub: Subscription;
   predictorsIncluded: boolean;
-  constructor(private dataWizardService: DataWizardService, private facilityDbService: FacilitydbService, private router: Router,
-    private activatedRoute: ActivatedRoute, private uploadDataService: UploadDataService,
-  private accountDbService: AccountdbService) { }
+  constructor(private dataWizardService: DataWizardService, private facilityDbService: FacilitydbService,
+    private activatedRoute: ActivatedRoute, private uploadDataService: UploadDataService) { }
 
   ngOnInit(): void {
     this.fileReferenceSub = this.dataWizardService.fileReferences.subscribe(fileReferences => {
@@ -98,15 +95,6 @@ export class MapPredictorsToFacilitiesComponent {
     this.parsePredictors();
   }
 
-  continue() {
-    // if (this.predictorsIncluded) {
-    //   let parsedPredictors: { predictors: Array<IdbPredictor>, predictorData: Array<IdbPredictorData> } = this.uploadDataService.parseExcelPredictorsData(this.fileReference);
-    //   this.fileReference.predictors = parsedPredictors.predictors;
-    //   this.fileReference.predictorData = parsedPredictors.predictorData;
-    // }
-    // this.router.navigateByUrl('/upload/data-setup/file-setup/' + this.fileReference.id + '/confirm-predictors');
-  }
-
   setFacility(facilityId: string) {
     let facilityGroups: Array<FacilityGroup> = new Array();
     let facilityPredictors: Array<ColumnItem> = this.getFacilityPredictors();
@@ -156,16 +144,6 @@ export class MapPredictorsToFacilitiesComponent {
       }
     });
     return facilityPredictors;
-  }
-
-  goBack() {
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    this.router.navigateByUrl('/data-wizard/' + account.guid + '/import-data/process-general-file/' + this.fileReference.id + '/meter-readings')
-  }
-
-  next() {
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    this.router.navigateByUrl('/data-wizard/' + account.guid + '/import-data/process-general-file/' + this.fileReference.id + '/confirm-predictors')
   }
 
   setPredictorsIncluded() {

@@ -11,12 +11,6 @@
                     <span class="visually-hidden">Toggle Dropdown</span>
                 </button>
                 <ul class="dropdown-menu">
-                    <!-- <li>
-                        <a class="dropdown-item" (click)="goToOption('upload-files')">
-                            <span class="fa fa-chevron-left"></span>
-                            File Upload
-                        </a>
-                    </li> -->
                     <li *ngFor="let option of goBackOptions">
                         <a class="dropdown-item" (click)="goToOption(option.value)">
                             <span class="fa fa-chevron-left"></span>
@@ -28,10 +22,19 @@
         </div>
 
         <div class="btn-group">
-            <button class="btn btn-dark" (click)="next()" [disabled]="disableNext">
-                Next
-                <span class="fa fa-chevron-right"></span>
-            </button>
+            <ng-template [ngIf]="navOption != 'review-and-submit'" [ngIfElse]="reviewAndSubmitBlock">
+                <button class="btn btn-dark" (click)="next()" [disabled]="disableNext">
+                    Next
+                    <span class="fa fa-chevron-right"></span>
+                </button>
+            </ng-template>
+            <ng-template #reviewAndSubmitBlock>
+                <div class="btn-group">
+                    <button class="btn btn-success" (click)="submitImport()">
+                        Import Data
+                    </button>
+                </div>
+            </ng-template>
         </div>
     </div>
 </nav>
