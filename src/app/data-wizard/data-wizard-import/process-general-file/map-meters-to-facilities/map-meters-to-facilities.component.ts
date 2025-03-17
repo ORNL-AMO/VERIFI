@@ -3,8 +3,10 @@ import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { DataWizardService } from 'src/app/data-wizard/data-wizard.service';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { IdbAccount } from 'src/app/models/idbModels/account';
+import { getNewIdbFacility, IdbFacility } from 'src/app/models/idbModels/facility';
 import { ColumnItem, FacilityGroup, FileReference } from 'src/app/upload-data/upload-data-models';
 import { UploadDataService } from 'src/app/upload-data/upload-data.service';
 
@@ -22,9 +24,12 @@ export class MapMetersToFacilitiesComponent {
   fileReference: FileReference;
   paramsSub: Subscription;
   importMetersFound: boolean;
+  displayAddFacilityModal: boolean = false;
+  addFacilityName: string = 'New Facility';
   constructor(private dataWizardService: DataWizardService, private facilityDbService: FacilitydbService,
     private activatedRoute: ActivatedRoute,
-    private uploadDataService: UploadDataService) { }
+    private uploadDataService: UploadDataService,
+    private accountDbService: AccountdbService) { }
 
   ngOnInit(): void {
     this.fileReferenceSub = this.dataWizardService.fileReferences.subscribe(fileReferences => {
@@ -38,7 +43,6 @@ export class MapMetersToFacilitiesComponent {
         if (this.fileReference.meterFacilityGroups.length == 0) {
           this.setFacilityGroups();
         }
-        this.facilityGroupIds = this.fileReference.meterFacilityGroups.map(group => { return group.facilityId });
       }
     });
   }
@@ -75,8 +79,8 @@ export class MapMetersToFacilitiesComponent {
       facilityName: 'Unmapped Meters',
       color: ''
     })
-    let idbFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
-    idbFacilities.forEach(facility => {
+    // let idbFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    this.fileReference.importFacilities.forEach(facility => {
       let groupItems: Array<ColumnItem> = new Array();
       if (facility.guid == this.fileReference.selectedFacilityId) {
         groupItems = initialMeterMap;
@@ -89,6 +93,7 @@ export class MapMetersToFacilitiesComponent {
       });
     });
     this.fileReference.meterFacilityGroups = facilityGroups;
+    this.facilityGroupIds = this.fileReference.meterFacilityGroups.map(group => { return group.facilityId });
     this.fileReference.meters = this.uploadDataService.parseMetersFromGroups(this.fileReference);
   }
 
@@ -107,13 +112,6 @@ export class MapMetersToFacilitiesComponent {
       }
     });
     this.fileReference.meters = this.uploadDataService.parseMetersFromGroups(this.fileReference);
-  }
-
-  continue() {
-    // this.fileReference.meters = this.uploadDataService.parseMetersFromGroups(this.fileReference);
-    // let fileReferenceIndex: number = this.uploadDataService.fileReferences.findIndex(file => { return file.id == this.fileReference.id });
-    // this.uploadDataService.fileReferences[fileReferenceIndex] = this.fileReference;
-    // this.router.navigateByUrl('/upload/data-setup/file-setup/' + this.fileReference.id + '/manage-meters');
   }
 
   setFacility(facilityId: string) {
@@ -139,8 +137,8 @@ export class MapMetersToFacilitiesComponent {
       facilityName: 'Unmapped Meters',
       color: ''
     })
-    let idbFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
-    idbFacilities.forEach(facility => {
+    // let idbFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+    this.fileReference.importFacilities.forEach(facility => {
       if (facility.guid == facilityId) {
         facilityGroups.push({
           facilityId: facility.guid,
@@ -161,7 +159,7 @@ export class MapMetersToFacilitiesComponent {
     this.facilityGroupIds = this.fileReference.meterFacilityGroups.map(group => { return group.facilityId });
     this.fileReference.meters = this.uploadDataService.parseMetersFromGroups(this.fileReference);
   }
-  
+
   setMeterGroupsFound() {
     let importMetersFound: boolean = false;
     this.fileReference.columnGroups.forEach(group => {
@@ -170,5 +168,23 @@ export class MapMetersToFacilitiesComponent {
       }
     });
     this.importMetersFound = importMetersFound;
+  }
+
+  openAddFacilityModal() {
+    this.addFacilityName = 'New Facility';
+    this.displayAddFacilityModal = true;
+  }
+
+  cancelAddFacility() {
+    this.displayAddFacilityModal = false;
+  }
+
+  addFacility() {
+    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let newFacility: IdbFacility = getNewIdbFacility(account);
+    newFacility.name = this.addFacilityName;
+    this.fileReference.importFacilities.push(newFacility);
+    this.setFacilityGroups();
+    this.cancelAddFacility();
   }
 }

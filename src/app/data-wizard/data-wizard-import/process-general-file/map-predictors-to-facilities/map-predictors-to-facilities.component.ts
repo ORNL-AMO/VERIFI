@@ -24,7 +24,7 @@ export class MapPredictorsToFacilitiesComponent {
   fileReference: FileReference = getEmptyFileReference();
   paramsSub: Subscription;
   predictorsIncluded: boolean;
-  constructor(private dataWizardService: DataWizardService, private facilityDbService: FacilitydbService,
+  constructor(private dataWizardService: DataWizardService,
     private activatedRoute: ActivatedRoute, private uploadDataService: UploadDataService) { }
 
   ngOnInit(): void {
@@ -61,8 +61,7 @@ export class MapPredictorsToFacilitiesComponent {
       facilityName: 'Unmapped Predictors',
       color: ''
     })
-    let idbFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
-    idbFacilities.forEach(facility => {
+    this.fileReference.importFacilities.forEach(facility => {
       let groupItems: Array<ColumnItem> = new Array();
       if (this.fileReference.selectedFacilityId == facility.guid) {
         groupItems = initialPredictorMap;
@@ -104,8 +103,7 @@ export class MapPredictorsToFacilitiesComponent {
       facilityName: 'Unmapped Predictors',
       color: ''
     })
-    let idbFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
-    idbFacilities.forEach(facility => {
+    this.fileReference.importFacilities.forEach(facility => {
       if (facility.guid == facilityId) {
         facilityGroups.push({
           facilityId: facility.guid,

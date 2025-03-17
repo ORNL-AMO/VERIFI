@@ -100,10 +100,12 @@
 <nav class="data-wizard-footer navbar">
     <div class="container-fluid justify-content-end">
         <ng-template [ngIf]="fileReferences.length != 0" [ngIfElse]="noFilesBlock">
-            <button class="btn btn-dark" (click)="next()">
-                Process {{fileReferences[0].name}}
-                <span class="fa fa-chevron-right"></span>
-            </button>
+            <div class="btn-group">
+                <button class="btn btn-dark" (click)="next()">
+                    Process {{fileReferences[0].name}}
+                    <span class="fa fa-chevron-right"></span>
+                </button>
+            </div>
         </ng-template>
         <ng-template #noFilesBlock>
             <div class="w-100 text-center footer-text">

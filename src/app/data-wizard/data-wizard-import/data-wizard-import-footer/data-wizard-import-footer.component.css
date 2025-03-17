@@ -2,3 +2,11 @@ a.dropdown-item,
 a.dropdown-item .fa {
     color: black;
 }
+
+.btn-group{
+    width: 100px;
+}
+
+.progress{
+    background-color: white;
+}
