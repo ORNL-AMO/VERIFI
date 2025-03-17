@@ -21,20 +21,20 @@
             </ng-template>
         </div>
 
-        <div class="btn-group">
-            <ng-template [ngIf]="navOption != 'review-and-submit'" [ngIfElse]="reviewAndSubmitBlock">
+        <ng-template [ngIf]="navOption != 'review-and-submit'">
+            <div class="btn-group">
                 <button class="btn btn-dark" (click)="next()" [disabled]="disableNext">
                     Next
                     <span class="fa fa-chevron-right"></span>
                 </button>
-            </ng-template>
-            <ng-template #reviewAndSubmitBlock>
+                <!-- <ng-template #reviewAndSubmitBlock>
                 <div class="btn-group">
                     <button class="btn btn-success" (click)="submitImport()">
                         Import Data
                     </button>
                 </div>
-            </ng-template>
-        </div>
+            </ng-template> -->
+            </div>
+        </ng-template>
     </div>
 </nav>

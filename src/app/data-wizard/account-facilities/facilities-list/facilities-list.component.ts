@@ -17,7 +17,7 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
   standalone: false
 })
 export class FacilitiesListComponent {
-facilitiesSub: Subscription;
+  facilitiesSub: Subscription;
   facilities: Array<IdbFacility>;
   modalOpen: boolean;
   modalOpenSub: Subscription;
@@ -94,9 +94,10 @@ facilitiesSub: Subscription;
   }
 
   async confirmDeleteFacility() {
-    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    await this.dbChangesService.deleteFacility(this.facilityToDelete, selectedAccount);
+    let facilityToDelete: IdbFacility = this.facilityToDelete;
     this.cancelFacilityDelete();
+    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    await this.dbChangesService.deleteFacility(facilityToDelete, selectedAccount);
   }
 
   goToFacility(facility: IdbFacility) {

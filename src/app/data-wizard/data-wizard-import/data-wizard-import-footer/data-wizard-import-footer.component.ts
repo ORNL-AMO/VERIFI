@@ -1,6 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { DataWizardImportNavigationService, GoToOption, GoToOptionValue } from '../data-wizard-import-navigation.service';
 import { FileReference } from 'src/app/upload-data/upload-data-models';
+import { UploadDataService } from 'src/app/upload-data/upload-data.service';
 
 @Component({
   selector: 'app-data-wizard-import-footer',
@@ -20,7 +21,9 @@ export class DataWizardImportFooterComponent {
 
   goBackOptions: Array<GoToOption> = [];
 
-  constructor(private dataWizardImportNavigationService: DataWizardImportNavigationService) {
+  constructor(private dataWizardImportNavigationService: DataWizardImportNavigationService,
+    private uploadDataService: UploadDataService
+  ) {
   }
 
   ngOnInit() {
@@ -37,9 +40,5 @@ export class DataWizardImportFooterComponent {
 
   goToOption(optionValue: GoToOptionValue) {
     this.dataWizardImportNavigationService.goToPage(optionValue, this.fileReference);
-  }
-
-  submitImport() {
-
   }
 }

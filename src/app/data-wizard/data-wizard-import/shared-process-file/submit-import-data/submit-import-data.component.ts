@@ -3,7 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { DataWizardService } from 'src/app/data-wizard/data-wizard.service';
 import { FileReference } from 'src/app/upload-data/upload-data-models';
-import { DataWizardImportNavigationService } from '../../data-wizard-import-navigation.service';
+import { UploadDataService } from 'src/app/upload-data/upload-data.service';
 
 @Component({
   selector: 'app-submit-import-data',
@@ -18,7 +18,8 @@ export class SubmitImportDataComponent {
 
   constructor(
     private activatedRoute: ActivatedRoute,
-    private dataWizardService: DataWizardService
+    private dataWizardService: DataWizardService,
+    private uploadDataService: UploadDataService
   ) { }
 
 
@@ -31,5 +32,9 @@ export class SubmitImportDataComponent {
 
   ngOnDestroy() {
     this.paramsSub.unsubscribe();
+  }
+
+  async submitImport() {
+    this.fileReference = await this.uploadDataService.submit(this.fileReference);
   }
 }

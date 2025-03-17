@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import * as XLSX from 'xlsx';
 import { FacilitydbService } from '../indexedDB/facility-db.service';
 import { AccountdbService } from '../indexedDB/account-db.service';
@@ -27,6 +27,12 @@ import { PredictorDataDbService } from '../indexedDB/predictor-data-db.service';
 import { getNewIdbPredictor, IdbPredictor } from '../models/idbModels/predictor';
 import { getNewIdbPredictorData, IdbPredictorData } from '../models/idbModels/predictorData';
 import { checkSameDay, checkSameMonth } from './upload-helper-functions';
+import { LoadingService } from '../core-components/loading/loading.service';
+import { ToastNotificationsService } from '../core-components/toast-notifications/toast-notifications.service';
+import { SharedDataService } from '../shared/helper-services/shared-data.service';
+import { FormGroup } from '@angular/forms';
+import { UtilityMeterDataService } from '../shared/shared-meter-content/utility-meter-data.service';
+import { DbChangesService } from '../indexedDB/db-changes.service';
 
 @Injectable({
   providedIn: 'root'
@@ -45,7 +51,12 @@ export class UploadDataService {
     private editMeterFormService: EditMeterFormService,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService,
     private uploadDataV1Service: UploadDataV1Service,
-    private uploadDataV2Service: UploadDataV2Service) {
+    private uploadDataV2Service: UploadDataV2Service,
+    private loadingService: LoadingService,
+    private toastNotificationService: ToastNotificationsService,
+    private sharedDataService: SharedDataService,
+    private utilityMeterDataService: UtilityMeterDataService,
+    private dbChangesService: DbChangesService) {
     this.allFilesSet = new BehaviorSubject<boolean>(false);
     this.fileReferences = new Array();
     this.uploadMeters = new Array();
@@ -453,4 +464,118 @@ export class UploadDataService {
     }
     return;
   }
+
+
+  async submit(fileReference: FileReference): Promise<FileReference> {
+    this.sharedDataService.modalOpen.next(true);
+    this.loadingService.setLoadingMessage('Submitting File Data..');
+    this.loadingService.setLoadingStatus(true);
+
+    this.loadingService.setLoadingMessage('Uploading Facilities..');
+    for (let i = 0; i < fileReference.importFacilities.length; i++) {
+      let facility: IdbFacility = fileReference.importFacilities[i];
+      if (facility.id) {
+        await firstValueFrom(this.facilityDbService.updateWithObservable(facility));
+      } else {
+        await firstValueFrom(this.facilityDbService.addWithObservable(facility));
+      }
+    }
+
+    this.loadingService.setLoadingMessage('Uploading Meters..');
+    for (let i = 0; i < fileReference.meters.length; i++) {
+      let meter: IdbUtilityMeter = fileReference.meters[i];
+      if (!meter.skipImport) {
+        if (meter.id) {
+          await firstValueFrom(this.utilityMeterDbService.updateWithObservable(meter));
+        } else {
+          await firstValueFrom(this.utilityMeterDbService.addWithObservable(meter));
+        }
+      }
+    }
+
+    this.loadingService.setLoadingMessage('Creating Meter Groups..');
+    for (let i = 0; i < fileReference.newMeterGroups.length; i++) {
+      let meterGroup: IdbUtilityMeterGroup = fileReference.newMeterGroups[i];
+      await firstValueFrom(this.utilityMeterGroupDbService.addWithObservable(meterGroup));
+    }
+
+    this.loadingService.setLoadingMessage('Uploading Meter Data...');
+    for (let i = 0; i < fileReference.meterData.length; i++) {
+      let meterData: IdbUtilityMeterData = fileReference.meterData[i];
+      let meter: IdbUtilityMeter = fileReference.meters.find(meter => { return meter.guid == meterData.meterId })
+      if (!meter.skipImport) {
+        let form: FormGroup;
+        if (meter.source == 'Electricity') {
+          form = this.utilityMeterDataService.getElectricityMeterDataForm(meterData);
+        } else {
+          let displayVolumeInput: boolean = (getIsEnergyUnit(meter.startingUnit) == false);
+          let displayEnergyUse: boolean = getIsEnergyMeter(meter.source);
+          let displayHeatCapacity: boolean = checkShowHeatCapacity(meter.source, meter.startingUnit, meter.scope);
+          let displayVehicleFuelEfficiency: boolean = (meter.scope == 2 && meter.vehicleCategory == 2);
+          form = this.utilityMeterDataService.getGeneralMeterDataForm(meterData, displayVolumeInput, displayEnergyUse, displayHeatCapacity, displayVehicleFuelEfficiency);
+        }
+
+        if (form.valid) {
+          if (meterData.id) {
+            let skipMeterData: boolean = false;
+            for (let x = 0; x < fileReference.skipExistingReadingsMeterIds.length; x++) {
+              if (fileReference.skipExistingReadingsMeterIds[x] == meterData.meterId) {
+                skipMeterData = true;
+              }
+            }
+            if (!skipMeterData) {
+              await firstValueFrom(this.utilityMeterDataDbService.updateWithObservable(meterData));
+            }
+          } else {
+            await firstValueFrom(this.utilityMeterDataDbService.addWithObservable(meterData));
+          }
+        }
+      }
+    }
+
+    this.loadingService.setLoadingMessage('Uploading Predictors..');
+    for (let i = 0; i < fileReference.predictors.length; i++) {
+      let predictor: IdbPredictor = fileReference.predictors[i];
+      if (predictor.id) {
+        let skipPredictorData: boolean = false;
+        for (let x = 0; x < fileReference.skipExistingPredictorFacilityIds.length; x++) {
+          if (fileReference.skipExistingPredictorFacilityIds[x] == predictor.facilityId) {
+            skipPredictorData = true;
+          }
+        }
+        if (!skipPredictorData) {
+          await firstValueFrom(this.predictorDbService.updateWithObservable(predictor));
+        }
+      } else {
+        await firstValueFrom(this.predictorDbService.addWithObservable(predictor));
+      }
+    }
+    this.loadingService.setLoadingMessage('Uploading Predictor Data..');
+    for (let i = 0; i < fileReference.predictorData.length; i++) {
+      let predictorData: IdbPredictorData = fileReference.predictorData[i];
+      if (predictorData.id) {
+        let skipPredictorData: boolean = false;
+        for (let x = 0; x < fileReference.skipExistingPredictorFacilityIds.length; x++) {
+          if (fileReference.skipExistingPredictorFacilityIds[x] == predictorData.facilityId) {
+            skipPredictorData = true;
+          }
+        }
+        if (!skipPredictorData) {
+          await firstValueFrom(this.predictorDataDbService.updateWithObservable(predictorData));
+        }
+      } else {
+        await firstValueFrom(this.predictorDataDbService.addWithObservable(predictorData));
+      }
+    }
+
+    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    this.loadingService.setLoadingMessage('Finishing Up...');
+    await this.dbChangesService.selectAccount(selectedAccount, false)
+    fileReference.dataSubmitted = true;
+    this.loadingService.setLoadingStatus(false);
+    this.toastNotificationService.showToast(fileReference.name + ' Data Submitted', undefined, undefined, false, "alert-success");
+    this.sharedDataService.modalOpen.next(false);
+    return fileReference;
+  }
+
 }
