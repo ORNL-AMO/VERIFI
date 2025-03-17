@@ -16,7 +16,14 @@
                     </div>
                 </h4>
                 <ng-template [ngIf]="predictorsIncluded" [ngIfElse]="noPredictorsBlock">
-
+                    <div class="d-flex justify-content-end mb-2">
+                        <div>
+                            <button class="btn btn-outline-success" (click)="openAddFacilityModal()">
+                                <span class="fa fa-plus"></span>
+                                Add Facility
+                            </button>
+                        </div>
+                    </div>
                     <div class="d-flex h-100 overflow-container">
                         <div class="w-50 me-2 overflow-container">
                             <!--unused-->
@@ -63,7 +70,8 @@
                 </ng-template>
                 <ng-template #noPredictorsBlock>
                     <div class="alert alert-warning p-2">
-                        No predictors found. Go back to column selection and include predictors or click continue to upload included meter
+                        No predictors found. Go back to column selection and include predictors or click continue to
+                        upload included meter
                         data.
                     </div>
                 </ng-template>
@@ -73,4 +81,28 @@
 </div>
 <!--TODO: disable next-->
 <app-data-wizard-import-footer [fileReference]="fileReference"
-[navOption]="'map-predictors-to-facilities'"></app-data-wizard-import-footer>
+    [navOption]="'map-predictors-to-facilities'"></app-data-wizard-import-footer>
+
+
+<div [ngClass]="{'windowOverlay': displayAddFacilityModal}"></div>
+<div class="popup" [class.open]="displayAddFacilityModal" *ngIf="displayAddFacilityModal">
+    <div class="popup-header">Add Facility
+        <button class="item-right" (click)="cancelAddFacility()">x</button>
+    </div>
+    <div class="popup-body">
+        <form>
+            <label for="addFacilityName">
+                Facility Name
+            </label>
+            <input class="form-control" type="text" [(ngModel)]="addFacilityName" name="addFacilityName"
+                id="addFacilityName">
+        </form>
+    </div>
+    <div class="popup-footer text-end">
+        <button class="btn btn-secondary" (click)="cancelAddFacility()">Cancel</button>
+        <button class="btn btn-outline-success" (click)="addFacility()">
+            <span class="fa fa-plus"></span>
+            Add Facility
+        </button>
+    </div>
+</div>

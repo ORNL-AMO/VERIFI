@@ -2,13 +2,14 @@ import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { ColumnItem, FacilityGroup, FileReference, getEmptyFileReference } from 'src/app/upload-data/upload-data-models';
-import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { getNewIdbFacility, IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { DataWizardService } from 'src/app/data-wizard/data-wizard.service';
 import { UploadDataService } from 'src/app/upload-data/upload-data.service';
+import { IdbAccount } from 'src/app/models/idbModels/account';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 
 @Component({
   selector: 'app-map-predictors-to-facilities',
@@ -24,8 +25,11 @@ export class MapPredictorsToFacilitiesComponent {
   fileReference: FileReference = getEmptyFileReference();
   paramsSub: Subscription;
   predictorsIncluded: boolean;
+  displayAddFacilityModal: boolean = false;
+  addFacilityName: string = 'New Facility';
   constructor(private dataWizardService: DataWizardService,
-    private activatedRoute: ActivatedRoute, private uploadDataService: UploadDataService) { }
+    private activatedRoute: ActivatedRoute, private uploadDataService: UploadDataService,
+    private accountDbService: AccountdbService) { }
 
   ngOnInit(): void {
     this.fileReferenceSub = this.dataWizardService.fileReferences.subscribe(fileReferences => {
@@ -158,5 +162,35 @@ export class MapPredictorsToFacilitiesComponent {
     let parsedPredictors: { predictors: Array<IdbPredictor>, predictorData: Array<IdbPredictorData> } = this.uploadDataService.parseExcelPredictorsData(this.fileReference);
     this.fileReference.predictors = parsedPredictors.predictors;
     this.fileReference.predictorData = parsedPredictors.predictorData;
+  }
+
+  openAddFacilityModal() {
+    this.addFacilityName = 'New Facility';
+    this.displayAddFacilityModal = true;
+  }
+
+  cancelAddFacility() {
+    this.displayAddFacilityModal = false;
+  }
+
+  addFacility() {
+    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let newFacility: IdbFacility = getNewIdbFacility(account);
+    newFacility.name = this.addFacilityName;
+    this.fileReference.importFacilities.push(newFacility);
+    this.fileReference.predictorFacilityGroups.push({
+      facilityId: newFacility.guid,
+      groupItems: [],
+      facilityName: newFacility.name,
+      color: newFacility.color
+    })
+    this.fileReference.meterFacilityGroups.push({
+      facilityId: newFacility.guid,
+      groupItems: [],
+      facilityName: newFacility.name,
+      color: newFacility.color
+    })
+    this.facilityGroupIds.push(newFacility.guid);
+    this.cancelAddFacility();
   }
 }

@@ -43,6 +43,7 @@ export class MapMetersToFacilitiesComponent {
         if (this.fileReference.meterFacilityGroups.length == 0) {
           this.setFacilityGroups();
         }
+        this.facilityGroupIds = this.fileReference.meterFacilityGroups.map(group => { return group.facilityId });
       }
     });
   }
@@ -93,7 +94,6 @@ export class MapMetersToFacilitiesComponent {
       });
     });
     this.fileReference.meterFacilityGroups = facilityGroups;
-    this.facilityGroupIds = this.fileReference.meterFacilityGroups.map(group => { return group.facilityId });
     this.fileReference.meters = this.uploadDataService.parseMetersFromGroups(this.fileReference);
   }
 
@@ -184,7 +184,22 @@ export class MapMetersToFacilitiesComponent {
     let newFacility: IdbFacility = getNewIdbFacility(account);
     newFacility.name = this.addFacilityName;
     this.fileReference.importFacilities.push(newFacility);
-    this.setFacilityGroups();
+    this.fileReference.meterFacilityGroups.push({
+      facilityId: newFacility.guid,
+      groupItems: [],
+      facilityName: newFacility.name,
+      color: newFacility.color
+    });
+    if (this.fileReference.predictorFacilityGroups.length > 0) {
+      this.fileReference.predictorFacilityGroups.push({
+        facilityId: newFacility.guid,
+        groupItems: [],
+        facilityName: newFacility.name,
+        color: newFacility.color
+      });
+
+    }
+    this.facilityGroupIds.push(newFacility.guid);
     this.cancelAddFacility();
   }
 }

@@ -100,3 +100,12 @@
 .overflow-container{
     overflow-y: auto;
 }
+
+
+.btn-outline-success .fa {
+    color: #198754;
+}
+
+.btn-outline-success:hover .fa{
+    color: white;
+}
