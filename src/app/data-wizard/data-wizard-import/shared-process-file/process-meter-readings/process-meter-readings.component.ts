@@ -1,22 +1,14 @@
 import { Component } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { first, firstValueFrom, Subscription } from 'rxjs';
-import { LoadingService } from 'src/app/core-components/loading/loading.service';
-import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
+import { ActivatedRoute } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { DataWizardService } from 'src/app/data-wizard/data-wizard.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
-import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { FileReference, getEmptyFileReference } from 'src/app/upload-data/upload-data-models';
-import { UploadDataService } from 'src/app/upload-data/upload-data.service';
 import * as _ from 'lodash';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { FormGroup } from '@angular/forms';
 import { UtilityMeterDataService } from 'src/app/shared/shared-meter-content/utility-meter-data.service';
 import { checkShowHeatCapacity, getIsEnergyMeter, getIsEnergyUnit } from 'src/app/shared/sharedHelperFuntions';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 
 
@@ -35,16 +27,9 @@ export class ProcessMeterReadingsComponent {
   skipAll: boolean = false;
   metersIncluded: boolean;
   inspectMeterSummary: MeterDataSummary;
-  constructor(private activatedRoute: ActivatedRoute, private uploadDataService: UploadDataService,
-    private router: Router,
-    private utilityMeterDbService: UtilityMeterdbService,
+  constructor(private activatedRoute: ActivatedRoute,
     private dataWizardService: DataWizardService,
-    private accountDbService: AccountdbService,
-    private dbChangesService: DbChangesService,
-    private loadingService: LoadingService,
-    private toastNotificationService: ToastNotificationsService,
-    private utilityMeterDataService: UtilityMeterDataService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService) { }
+    private utilityMeterDataService: UtilityMeterDataService) { }
 
   ngOnInit(): void {
     this.paramsSub = this.activatedRoute.parent.params.subscribe(param => {
@@ -60,45 +45,6 @@ export class ProcessMeterReadingsComponent {
   ngOnDestroy() {
     this.paramsSub.unsubscribe();
   }
-
-  goBack() {
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    if (this.router.url.includes('process-template-file')) {
-      this.router.navigateByUrl('/data-wizard/' + account.guid + '/import-data/process-template-file/' + this.fileReference.id + '/meters');
-    } else {
-      this.router.navigateByUrl('/data-wizard/' + account.guid + '/import-data/process-general-file/' + this.fileReference.id + '/confirm-meters');
-    }
-  }
-
-  next() {
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    if (this.router.url.includes('process-template-file')) {
-      this.router.navigateByUrl('/data-wizard/' + account.guid + '/import-data/process-template-file/' + this.fileReference.id + '/predictors');
-    } else {
-      this.router.navigateByUrl('/data-wizard/' + account.guid + '/import-data/process-general-file/' + this.fileReference.id + '/map-predictors-to-facilities');
-    }
-  }
-
-  // async submitMeterReadings() {
-  //   this.loadingService.setLoadingMessage('Uploading Meter Data...');
-  //   this.loadingService.setLoadingStatus(true);
-  //   for (let i = 0; i < this.fileReference.meterData.length; i++) {
-  //     let meterData: IdbUtilityMeterData = this.fileReference.meterData[i];
-  //     if (meterData.id) {
-  //       let summary: MeterDataSummary = this.meterDataSummaries.find(summary => { return summary.meterId == meterData.meterId });
-  //       if (!summary.skipExisting) {
-  //         await firstValueFrom(this.utilityMeterDataDbService.updateWithObservable(meterData));
-  //       }
-  //     } else {
-  //       await firstValueFrom(this.utilityMeterDataDbService.addWithObservable(meterData));
-  //     }
-  //   }
-  //   let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-  //   this.fileReference.meterReadingsSubmitted = true;
-  //   this.dbChangesService.setMeterData(account);
-  //   this.loadingService.setLoadingStatus(false);
-  //   this.toastNotificationService.showToast('Meter Data Uploaded!', undefined, undefined, false, 'alert-success');
-  // }
 
   setSummary() {
     let dataSummaries: Array<MeterDataSummary> = new Array();

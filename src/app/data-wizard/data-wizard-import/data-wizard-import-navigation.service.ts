@@ -23,6 +23,14 @@ export class DataWizardImportNavigationService {
       this.goToPage('confirm-meters', fileReference)
     } else if (currentNavOption == 'confirm-meters') {
       this.goToPage('meter-readings', fileReference)
+    } else if (currentNavOption == 'meter-readings') {
+      this.goToPage('map-predictors-to-facilities', fileReference);
+    } else if (currentNavOption == 'map-predictors-to-facilities') {
+      this.goToPage('confirm-predictors', fileReference)
+    } else if (currentNavOption == 'confirm-predictors') {
+      this.goToPage('predictor-data', fileReference)
+    } else if (currentNavOption == 'predictor-data') {
+      this.goToPage('review-and-submit', fileReference)
     }
   }
 
@@ -35,6 +43,16 @@ export class DataWizardImportNavigationService {
       this.goToPage('identify-columns', fileReference)
     } else if (currentNavOption == 'confirm-meters' && !fileReference.isTemplate) {
       this.goToPage('map-meters-to-facilities', fileReference)
+    } else if (currentNavOption == 'meter-readings' && !fileReference.isTemplate) {
+      this.goToPage('confirm-meters', fileReference)
+    } else if (currentNavOption == 'map-predictors-to-facilities') {
+      this.goToPage('meter-readings', fileReference)
+    } else if (currentNavOption == 'confirm-predictors') {
+      this.goToPage('map-predictors-to-facilities', fileReference)
+    } else if (currentNavOption == 'predictor-data') {
+      this.goToPage('confirm-predictors', fileReference)
+    } else if (currentNavOption == 'review-and-submit') {
+      this.goToPage('predictor-data', fileReference)
     }
 
   }
@@ -53,12 +71,21 @@ export class DataWizardImportNavigationService {
   getGoBackOptions(currentNavOption: GoToOptionValue, fileReference: FileReference): Array<GoToOption> {
     let optionValues: Array<GoToOptionValue> = [];
     if (currentNavOption == 'identify-columns') {
-      optionValues = ['facilities'];
+      optionValues = ['upload-files', 'select-worksheet'];
     } else if (currentNavOption == 'map-meters-to-facilities') {
-      optionValues = ['select-worksheet', 'facilities'];
+      optionValues = ['upload-files', 'select-worksheet', 'identify-columns'];
     } else if (currentNavOption == 'confirm-meters' && !fileReference.isTemplate) {
-      optionValues = ['select-worksheet', 'facilities', 'map-meters-to-facilities'];
-
+      optionValues = ['upload-files', 'select-worksheet', 'identify-columns', 'map-meters-to-facilities'];
+    } else if (currentNavOption == 'meter-readings' && !fileReference.isTemplate) {
+      optionValues = ['upload-files', 'select-worksheet', 'identify-columns', 'map-meters-to-facilities', 'confirm-meters'];
+    } else if (currentNavOption == 'map-predictors-to-facilities') {
+      optionValues = ['upload-files', 'select-worksheet', 'identify-columns', 'map-meters-to-facilities', 'confirm-meters', 'meter-readings'];
+    } else if (currentNavOption == 'confirm-predictors' && !fileReference.isTemplate) {
+      optionValues = ['upload-files', 'select-worksheet', 'identify-columns', 'map-meters-to-facilities', 'confirm-meters', 'meter-readings', 'map-predictors-to-facilities'];
+    } else if (currentNavOption == 'predictor-data' && !fileReference.isTemplate) {
+      optionValues = ['upload-files', 'select-worksheet', 'identify-columns', 'map-meters-to-facilities', 'confirm-meters', 'meter-readings', 'map-predictors-to-facilities', 'confirm-predictors'];
+    } else if (currentNavOption == 'review-and-submit' && !fileReference.isTemplate) {
+      optionValues = ['upload-files', 'select-worksheet', 'identify-columns', 'map-meters-to-facilities', 'confirm-meters', 'meter-readings', 'map-predictors-to-facilities', 'confirm-predictors', 'predictor-data'];
     }
     return optionValues.map(opVal => {
       return this.getGoToOption(opVal)
@@ -84,7 +111,11 @@ export type GoToOptionValue = 'upload-files' |
   'select-worksheet' |
   'identify-columns' |
   'map-meters-to-facilities' |
-  'meter-readings';
+  'meter-readings' |
+  'map-predictors-to-facilities' |
+  'confirm-predictors' |
+  'predictor-data' |
+  'review-and-submit';
 
 export const GoToOptionLabels = {
   'upload-files': 'Upload Files',
@@ -93,5 +124,9 @@ export const GoToOptionLabels = {
   'select-worksheet': 'Select Worksheet',
   'identify-columns': 'Identify Columns',
   'meter-readings': 'Meter Readings',
-  'map-meters-to-facilities': 'Map Meters to Facilities'
+  'map-meters-to-facilities': 'Map Meters to Facilities',
+  'map-predictors-to-facilities': 'Map Predictors to Facilities',
+  'confirm-predictors': 'Confirm Predictors',
+  'predictor-data': 'Predictor Data',
+  'review-and-submit': 'Review and Submit'
 }

@@ -11,12 +11,12 @@
                     <span class="visually-hidden">Toggle Dropdown</span>
                 </button>
                 <ul class="dropdown-menu">
-                    <li>
+                    <!-- <li>
                         <a class="dropdown-item" (click)="goToOption('upload-files')">
                             <span class="fa fa-chevron-left"></span>
                             File Upload
                         </a>
-                    </li>
+                    </li> -->
                     <li *ngFor="let option of goBackOptions">
                         <a class="dropdown-item" (click)="goToOption(option.value)">
                             <span class="fa fa-chevron-left"></span>

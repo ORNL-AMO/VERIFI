@@ -37,24 +37,6 @@
     </div>
 </div>
 
-<nav class="data-wizard-footer navbar">
-    <div class="container-fluid justify-content-between">
-        <button class="btn btn-dark" (click)="goBack()">
-            <span class="fa fa-chevron-left"></span>
-            Go Back
-        </button>
-        <!-- <div class="footer-text" *ngIf="metersIncluded">
-            <ng-template [ngIf]="!fileReference.meterReadingsSubmitted" [ngIfElse]="submittedBlock">
-                Submitting meter readings will add them to their meters. Predictors can then be added
-                to their respective facilities.
-            </ng-template>
-            <ng-template #submittedBlock>
-                Meter data has been added to meters!
-            </ng-template>
-        </div> -->
-        <button class="btn btn-dark" (click)="next()">
-            Next
-            <span class="fa fa-chevron-right"></span>
-        </button>
-    </div>
-</nav>
+<!--TODO: disable next-->
+<app-data-wizard-import-footer [fileReference]="fileReference"
+    [navOption]="'meter-readings'"></app-data-wizard-import-footer>

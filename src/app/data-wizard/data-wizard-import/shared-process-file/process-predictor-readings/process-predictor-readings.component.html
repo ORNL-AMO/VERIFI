@@ -96,24 +96,6 @@
     </div>
 </div>
 
-<nav class="data-wizard-footer navbar">
-    <div class="container-fluid justify-content-between">
-        <button class="btn btn-dark" (click)="goBack()">
-            <span class="fa fa-chevron-left"></span>
-            Go Back
-        </button>
-        <!-- <div class="footer-text">
-            <ng-template [ngIf]="!fileReference.predictorsSubmitted" [ngIfElse]="metersSubmittedBlock">
-                Submitting predictors will add them to their facilities. Predictor data can then be added
-                to the corresponding predictors on the next page.
-            </ng-template>
-            <ng-template #metersSubmittedBlock>
-                These predictors have been added to to their facilities!
-            </ng-template>
-        </div> -->
-        <button class="btn btn-dark" (click)="next()">
-            Next
-            <span class="fa fa-chevron-right"></span>
-        </button>
-    </div>
-</nav>
+<!--TODO: disable next-->
+<app-data-wizard-import-footer [fileReference]="fileReference"
+    [navOption]="'predictor-data'"></app-data-wizard-import-footer>

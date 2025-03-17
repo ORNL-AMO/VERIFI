@@ -36,14 +36,14 @@ export class SubmitImportDataComponent {
 
   goBack() {
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    if (this.router.url.includes('process-template-file')) {
+    if (this.fileReference.isTemplate) {
       this.router.navigateByUrl('/data-wizard/' + account.guid + '/import-data/process-template-file/' + this.fileReference.id + '/meter-readings');
     } else {
-      this.router.navigateByUrl('/data-wizard/' + account.guid + '/import-data/process-general-file/' + this.fileReference.id + '/map-predictors-to-facilities');
+      this.router.navigateByUrl('/data-wizard/' + account.guid + '/import-data/process-general-file/' + this.fileReference.id + '/predictor-data');
     }
   }
 
   next() {
-    
+
   }
 }

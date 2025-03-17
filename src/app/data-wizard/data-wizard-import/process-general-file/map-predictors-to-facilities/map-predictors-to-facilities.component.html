@@ -5,7 +5,7 @@
                 <h4>
                     <div class="d-flex w-100 justify-content-between">
                         <div class="h4 mb-0">
-                            Map Meters to Facilities
+                            Map Predictors to Facilities
                         </div>
                         <div>
                             <span class="badge bg-primary">
@@ -72,7 +72,7 @@
     </div>
 </div>
 
-<nav class="data-wizard-footer navbar">
+<!-- <nav class="data-wizard-footer navbar">
     <div class="container-fluid justify-content-between">
         <button class="btn btn-dark" (click)="goBack()">
             <span class="fa fa-chevron-left"></span>
@@ -86,4 +86,7 @@
             <span class="fa fa-chevron-right"></span>
         </button>
     </div>
-</nav>
+</nav> -->
+<!--TODO: disable next-->
+<app-data-wizard-import-footer [fileReference]="fileReference"
+[navOption]="'map-predictors-to-facilities'"></app-data-wizard-import-footer>

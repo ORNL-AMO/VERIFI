@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { DataWizardService } from 'src/app/data-wizard/data-wizard.service';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
@@ -7,8 +7,6 @@ import { FileReference } from 'src/app/upload-data/upload-data-models';
 import * as _ from 'lodash';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { IdbAccount } from 'src/app/models/idbModels/account';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 
 @Component({
   selector: 'app-process-predictor-readings',
@@ -23,9 +21,7 @@ export class ProcessPredictorReadingsComponent {
   predictorDataSummaries: Array<PredictorDataSummary>;
   predictorsExist: boolean;
   skipAll: boolean = false;
-  constructor(private activatedRoute: ActivatedRoute, private dataWizardService: DataWizardService,
-    private router: Router,
-    private accountDbService: AccountdbService) { }
+  constructor(private activatedRoute: ActivatedRoute, private dataWizardService: DataWizardService) { }
 
   ngOnInit(): void {
     this.paramsSub = this.activatedRoute.parent.params.subscribe(param => {
@@ -38,11 +34,6 @@ export class ProcessPredictorReadingsComponent {
 
   ngOnDestroy() {
     this.paramsSub.unsubscribe();
-  }
-
-  continue() {
-    // this.fileReference.predictors = this.uploadDataService.updateProductionPredictorData(this.fileReference);
-    // this.router.navigateByUrl('/upload/data-setup/file-setup/' + this.fileReference.id + '/submit');
   }
 
   setSummary() {
@@ -91,24 +82,6 @@ export class ProcessPredictorReadingsComponent {
       }
     })
     this.predictorDataSummaries = dataSummaries;
-  }
-
-  goBack() {
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    if (this.router.url.includes('process-template-file')) {
-      this.router.navigateByUrl('/data-wizard/' + account.guid + '/import-data/process-template-file/' + this.fileReference.id + '/confirm-predictors');
-    } else {
-      this.router.navigateByUrl('/data-wizard/' + account.guid + '/import-data/process-general-file/' + this.fileReference.id + '/confirm-predictors');
-    }
-  }
-
-  next() {
-    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    if (this.router.url.includes('process-template-file')) {
-      this.router.navigateByUrl('/data-wizard/' + account.guid + '/import-data/process-template-file/' + this.fileReference.id + '/review-and-submit');
-    } else {
-      this.router.navigateByUrl('/data-wizard/' + account.guid + '/import-data/process-general-file/' + this.fileReference.id + '/review-and-submit');
-    }
   }
 
   setSkipAll() {
