@@ -11,7 +11,8 @@ export interface IdbPredictorData extends IdbEntry {
     date: Date,
     checked?: boolean,
     weatherDataWarning: boolean,
-    weatherOverride: boolean
+    weatherOverride: boolean,
+    notes?: string
 }
 
 export function getNewIdbPredictorData(predictor: IdbPredictor, existingData?: Array<IdbPredictorData>): IdbPredictorData {
@@ -32,10 +33,10 @@ export function getNewIdbPredictorData(predictor: IdbPredictor, existingData?: A
         accountId: predictor.accountId,
         predictorId: predictor.guid,
         amount: undefined,
-        //todo: increment date
         date: pDate,
         checked: false,
         weatherDataWarning: false,
-        weatherOverride: false
+        weatherOverride: false,
+        notes: ''
     }
 }
