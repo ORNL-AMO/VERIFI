@@ -290,6 +290,7 @@ export class CalculatedPredictorDataUpdateComponent {
     for (let i = 0; i < this.predictorData.length; i++) {
       let pData: CalculatedPredictorTableItem = this.predictorData[i];
       if (pData.changeAmount && !pData.added && !pData.deleted) {
+        pData.amount = pData.updatedAmount;
         delete pData.changeAmount;
         delete pData.updatedAmount;
         await firstValueFrom(this.predictorDataDbService.updateWithObservable(pData));
