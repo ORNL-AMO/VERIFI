@@ -7,7 +7,7 @@
         [ngClass]="{'open': open}" (mouseenter)="setHoverAccount(true)" (mouseleave)="setHoverAccount(false)"><i
             class="fa fa-building"></i>
         <span [hidden]="!open" class="ps-2 nav-label bold">
-            {{accountName}}
+            {{account.name}}
         </span>
     </a>
 
@@ -74,10 +74,17 @@
         <span *ngIf="showAllFacilities"><i class="fa fa-chevron-up"></i> Show First Four Facilities</span>
     </a>
     <hr *ngIf="facilityList.length > 4 && open">
-    <a title="Upload Data" class="nav-link" routerLink="/upload" [routerLinkActive]="['active']"><i
-            class="fa fa-upload"></i> <span [hidden]="!open" class="ps-2 nav-label">Upload Data</span> </a>
+    <a class="nav-link" title="Data Wizard" routerLink="/data-wizard/{{account.guid}}">
+        <i class="fa fa-wand-magic-sparkles"></i>
+        <span [hidden]="!open" class="ps-2 nav-label">Data Wizard</span>
+    </a>
+    <!--TODO EPIC 1525: Remove and open modal for Data Wizard-->
+    <a title="Upload Data" class="nav-link" (click)="openDataWizardModal()"><i
+            class="fa fa-upload"></i> <span [hidden]="!open" class="ps-2 nav-label">Upload Data</span>
+    </a>
     <a title="Weather Data" class="nav-link" routerLink="/weather-data" [routerLinkActive]="['active']"><i
-            class="fa fa-temperature-half"></i> <span [hidden]="!open" class="ps-2 nav-label">Weather Data</span> </a>
+            class="fa fa-temperature-half"></i> <span [hidden]="!open" class="ps-2 nav-label">Weather Data</span> 
+    </a>
     <a title="Help Content" class="nav-link" routerLink="/help" [routerLinkActive]="['active']"
         [routerLinkActiveOptions]="{ exact: true }"><i class="fa fa-question"></i> <span [hidden]="!open"
             class="ps-2 nav-label">Help</span> </a>

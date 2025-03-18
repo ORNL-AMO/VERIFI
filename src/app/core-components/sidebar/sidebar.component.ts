@@ -8,18 +8,18 @@ import { SharedDataService } from 'src/app/shared/helper-services/shared-data.se
 import { environment } from 'src/environments/environment';
 import * as _ from 'lodash';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { IdbAccount } from 'src/app/models/idbModels/account';
 
 @Component({
-    selector: 'app-sidebar',
-    templateUrl: './sidebar.component.html',
-    styleUrls: ['./sidebar.component.css'],
-    standalone: false
+  selector: 'app-sidebar',
+  templateUrl: './sidebar.component.html',
+  styleUrls: ['./sidebar.component.css'],
+  standalone: false
 })
 export class SidebarComponent implements OnInit {
   open: boolean = true;
   isDev: boolean;
 
-  accountName: string;
   accountSub: Subscription;
 
   facilityList: Array<FacilityListItem>;
@@ -31,6 +31,8 @@ export class SidebarComponent implements OnInit {
   showAllFacilities: boolean = false;
   hoverIndex: number;
   hoverAccount: boolean;
+  account: IdbAccount;
+  displayDataWizardModal: boolean = false;
   constructor(private localStorageService: LocalStorageService, private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService, private router: Router,
     private sharedDataService: SharedDataService) {
@@ -49,9 +51,7 @@ export class SidebarComponent implements OnInit {
   ngOnInit() {
     this.isDev = !environment.production;
     this.accountSub = this.accountDbService.selectedAccount.subscribe(account => {
-      if (account) {
-        this.accountName = account.name;
-      }
+      this.account = account;
     });
 
     this.facilityListSub = this.facilityDbService.accountFacilities.subscribe(val => {
@@ -158,6 +158,18 @@ export class SidebarComponent implements OnInit {
 
   setHoverAccount(bool: boolean) {
     this.hoverAccount = bool;
+  }
+
+  openDataWizardModal() {
+    this.displayDataWizardModal = true;
+  }
+
+  closeDataWizardModal() {
+    this.displayDataWizardModal = false;
+  }
+
+  goToDataWizard() {
+    this.router.navigateByUrl('/data-wizard/' + this.account.guid);
   }
 }
 

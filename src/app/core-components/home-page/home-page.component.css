@@ -11,3 +11,8 @@ h1.verifi:first-letter {
     background-color: white;
     font-weight: bold;
   }
+
+  .list-item-label{
+    font-size: 14px;
+    vertical-align: middle;
+  }

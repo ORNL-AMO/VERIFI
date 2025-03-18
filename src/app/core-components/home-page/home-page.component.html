@@ -105,15 +105,15 @@
             <div class="list-group">
                 <div class="list-group-item" *ngFor="let account of accounts">
                     <div class="d-flex justify-content-between">
-                        <div>
+                        <div class="list-item-label mt-auto mb-auto">
                             {{account.name}}
                         </div>
                         <div>
                             <button class="btn nav-btn me-2" (click)="goToAccountHome(account)">
-                                <span class="fa fa-home"></span>
+                                <span class="fa fa-home"></span> Account Portfolio Home
                             </button>
                             <button class="btn nav-btn" (click)="goToDataWizard(account)">
-                                <span class="fa fa-wand-magic-sparkles"></span>
+                                <span class="fa fa-wand-magic-sparkles"></span> Data Management Wizard
                             </button>
                         </div>
                     </div>
