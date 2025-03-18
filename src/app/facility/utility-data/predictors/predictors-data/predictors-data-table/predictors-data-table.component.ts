@@ -49,6 +49,7 @@ export class PredictorsDataTableComponent {
   paramSub: Subscription;
   latestMeterDataReading: Date;
   filterErrors: boolean = false;
+  hasCalculatedOverride: boolean = false;
   constructor(private activatedRoute: ActivatedRoute, private predictorDbService: PredictorDbService,
     private predictorDataDbService: PredictorDataDbService,
     private sharedDataService: SharedDataService,
@@ -259,8 +260,12 @@ export class PredictorsDataTableComponent {
       this.hasWeatherDataWarnings = this.predictorData.find(data => {
         return data.weatherDataWarning;
       }) != undefined;
+      this.hasCalculatedOverride = this.predictorData.find(data => {
+        return data.weatherOverride;
+      }) != undefined;
     } else {
       this.hasWeatherDataWarnings = false;
+      this.hasCalculatedOverride = false;
     }
   }
 
