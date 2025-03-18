@@ -55,7 +55,7 @@
 </div>
 
 <div class="alert alert-warning text-center p-1" *ngIf="hasCalculatedOverride">
-    <span class="fa fa-asterisk"></span> Indicates that the calculated predictor entry was mannually overridden.
+    <span class="fa fa-asterisk"></span> Indicates that the calculated predictor entry was manually overridden.
 </div>
 <ng-template [ngIf]="predictorData.length != 0" [ngIfElse]="noDataBlock">
     @let filteredPredictorData = predictorData| orderPredictorDataTable:orderDataField:orderByDirection:filterErrors;
