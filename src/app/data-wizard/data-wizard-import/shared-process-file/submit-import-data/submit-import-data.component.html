@@ -15,11 +15,120 @@
                         </div>
                     </div>
                 </h4>
-                <div class="d-flex w-100 justify-content-center">
-                    <div class="p-4">
+                <div class="d-flex w-100 justify-content-between pt-2 pb-2">
+                    <div class="me-2">
+                        <p class="mb-0 fw-light">
+                            The below content will be imported into the selected account. Items marked with an <span
+                                class="fa fa-asterisk"></span> currently exist in the account and will be updated on
+                            import.
+                        </p>
+                    </div>
+                    <div>
                         <button class="btn btn-success" (click)="submitImport()">
                             Import Data
                         </button>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4" *ngFor="let summary of facilitySummaries">
+                        <div class="card mb-2">
+                            <div class="card-header bold">
+                                <span class="fa fa-industry"></span>
+                                {{summary.facility.name}}
+                            </div>
+                            <div class="card-body d-flex flex-column">
+                                <ng-container *ngIf="summary.existingMeters.length > 0 || summary.newMeters.length > 0">
+                                    <label class="bold">
+                                        Meters
+                                    </label>
+                                    <ng-container *ngFor="let meterSummary of summary.existingMeters">
+                                        <div class="d-flex">
+                                            <div class="associated-item">
+
+                                            </div>
+                                            <div class="ps-1 item-label">
+                                                {{meterSummary.meter.name}} <span class="fa fa-asterisk"></span>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex" *ngIf="meterSummary.newReadings.length">
+                                            <div class="associated-item">
+
+                                            </div>
+                                            <div class="ps-1 item-label">
+                                                New Data Entries:
+                                                {{meterSummary.newReadings.length}}
+                                                <span *ngIf="meterSummary.newDateRange.startDate">
+                                                    ({{meterSummary.newDateRange.startDate | date}} -
+                                                    {{meterSummary.newDateRange.endDate | date}})
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex" *ngIf="meterSummary.existingReadings.length">
+                                            <div class="associated-item">
+
+                                            </div>
+                                            <div class="ps-1 item-label">
+                                                Existing Data Entries:
+                                                {{meterSummary.existingReadings.length}}
+                                                <span *ngIf="meterSummary.existingDateRange.startDate">
+                                                    ({{meterSummary.existingDateRange.startDate | date}} -
+                                                    {{meterSummary.existingDateRange.endDate | date}})
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </ng-container>
+                                    <ng-container *ngFor="let meterSummary of summary.newMeters">
+                                        <div class="d-flex">
+                                            <div class="associated-item">
+
+                                            </div>
+                                            <div class="ps-1 item-label">
+                                                {{meterSummary.meter.name}}
+                                            </div>
+                                        </div>
+                                        <div class="d-flex" *ngIf="meterSummary.newReadings.length">
+                                            <div class="associated-item">
+
+                                            </div>
+                                            <div class="ps-1 item-label">
+                                                New Data Entries:
+                                                {{meterSummary.newReadings.length}}
+                                                <span *ngIf="meterSummary.newDateRange.startDate">
+                                                    ({{meterSummary.newDateRange.startDate | date}} -
+                                                    {{meterSummary.newDateRange.endDate | date}})
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </ng-container>
+                                </ng-container>
+                                <ng-container
+                                    *ngIf="summary.existingPredictors.length > 0 || summary.existingPredictors.length > 0">
+                                    <label class="bold">
+                                        Predictors
+                                    </label>
+                                    <ng-container *ngFor="let predictorSummary of summary.existingPredictors">
+                                        <div class="d-flex">
+                                            <div class="associated-item">
+
+                                            </div>
+                                            <div class="ps-1 item-label">
+                                                {{predictorSummary.predictor.name}} <span class="fa fa-asterisk"></span>
+                                            </div>
+                                        </div>
+                                    </ng-container>
+                                    <ng-container *ngFor="let predictorSummary of summary.newPredictors">
+                                        <div class="d-flex">
+                                            <div class="associated-item">
+
+                                            </div>
+                                            <div class="ps-1 item-label">
+                                                {{predictorSummary.predictor.name}}
+                                            </div>
+                                        </div>
+                                    </ng-container>
+                                </ng-container>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
