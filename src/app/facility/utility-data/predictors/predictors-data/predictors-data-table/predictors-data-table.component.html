@@ -25,10 +25,10 @@
                 Predictor
                 Entry</button>
         </div>
-        <!-- ISSUE 1822
+        <!-- ISSUE 1822 -->
         <div class="ps-2" *ngIf="predictor.predictorType == 'Weather'">
             <button class="btn action-btn" (click)="showUpdateEntries()"><i class="fa fa-redo"></i> Bulk Update</button>
-        </div> -->
+        </div>
         <div class="ps-2" *ngIf="predictor.predictorType == 'Weather' && hasWeatherDataWarnings">
             <button class="btn action-btn" (click)="toggleFilterErrors()">
                 <i class="fa fa-filter"></i>

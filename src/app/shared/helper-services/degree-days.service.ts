@@ -168,7 +168,6 @@ export class DegreeDaysService {
           let heatingDegreeDifference: number = 0;
           let coolingDegreeDay: number = 0;
           let coolingDegreeDifference: number = 0;
-          let gapInData: boolean = false
           let minutesBetween: number = this.getMinutesBetweenDates(previousDate, localClimatologicalDataMonth[i].DATE);
           if (minutesBetween > 720) {
             gapInData = true;
