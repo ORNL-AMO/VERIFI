@@ -22,6 +22,15 @@ export class SubmitImportDataComponent {
   fileReference: FileReference;
   paramsSub: Subscription;
 
+  importSummary: {
+    numFacilities: number,
+    numUtilityData: number,
+    numPredictorData: number
+  } = {
+      numFacilities: 0,
+      numPredictorData: 0,
+      numUtilityData: 0
+    };
   facilitySummaries: Array<ImportSummaryItem> = [];
   constructor(
     private activatedRoute: ActivatedRoute,
@@ -84,7 +93,12 @@ export class SubmitImportDataComponent {
           })
         })
       }
-    })
+    });
+    this.importSummary = {
+      numFacilities: this.facilitySummaries.length,
+      numPredictorData: this.fileReference.predictorData.length,
+      numUtilityData: this.fileReference.meterData.length
+    }
   }
 
   getMeterItem(meter: IdbUtilityMeter): {
@@ -95,7 +109,7 @@ export class SubmitImportDataComponent {
     newDateRange: { startDate: Date, endDate: Date }
   } {
     let existingReadings: Array<IdbUtilityMeterData> = this.fileReference.meterData.filter(mData => {
-      return mData.meterId == meter.guid && mData.id == undefined
+      return mData.meterId == meter.guid && mData.id != undefined
     });
     let minExistingStartDate: Date;
     let maxExistingStartDate: Date;
@@ -110,7 +124,7 @@ export class SubmitImportDataComponent {
       maxExistingStartDate = new Date(maxExisting.readDate);
     }
     let newReadings: Array<IdbUtilityMeterData> = this.fileReference.meterData.filter(mData => {
-      return mData.meterId == meter.guid && mData.id != undefined
+      return mData.meterId == meter.guid && mData.id == undefined
     });
     let minNewStartDate: Date;
     let maxNewStartDate: Date;
@@ -147,7 +161,7 @@ export class SubmitImportDataComponent {
   } {
 
     let existingReadings: Array<IdbPredictorData> = this.fileReference.predictorData.filter(pData => {
-      return pData.predictorId == predictor.guid && pData.id == undefined
+      return pData.predictorId == predictor.guid && pData.id != undefined
     });
 
     let minExistingStartDate: Date;
@@ -163,7 +177,7 @@ export class SubmitImportDataComponent {
       maxExistingStartDate = new Date(maxExisting.date);
     }
     let newReadings: Array<IdbPredictorData> = this.fileReference.predictorData.filter(pData => {
-      return pData.predictorId == predictor.guid && pData.id != undefined
+      return pData.predictorId == predictor.guid && pData.id == undefined
     });
     let minNewStartDate: Date;
     let maxNewStartDate: Date;

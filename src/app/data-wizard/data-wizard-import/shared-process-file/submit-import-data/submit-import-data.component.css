@@ -1,7 +1,11 @@
-.associated-item{
-    margin-left: .5rem;
-    padding-left: .75rem;
-    border-left: solid 1px;
-    border-bottom: solid 1px;
-    margin-bottom: 11px;
+th{
+    width: 33%;
+}
+
+th.bg-dark{
+    color: white;
+}
+
+h5, h5 i{
+    font-size: 16px;
 }
