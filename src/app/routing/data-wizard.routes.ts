@@ -31,6 +31,7 @@ import { MapPredictorsToFacilitiesComponent } from "../data-wizard/data-wizard-i
 import { ProcessPredictorsComponent } from "../data-wizard/data-wizard-import/shared-process-file/process-predictors/process-predictors.component";
 import { ProcessPredictorReadingsComponent } from "../data-wizard/data-wizard-import/shared-process-file/process-predictor-readings/process-predictor-readings.component";
 import { SubmitImportDataComponent } from "../data-wizard/data-wizard-import/shared-process-file/submit-import-data/submit-import-data.component";
+import { FacilityMeterGroupingComponent } from "../data-wizard/account-facilities/facility-data/facility-meters/facility-meter-grouping/facility-meter-grouping.component";
 
 export const DataWizardRoutes: Route = {
     path: 'data-wizard/:id',
@@ -56,8 +57,8 @@ export const DataWizardRoutes: Route = {
                         { path: 'confirm-meters', component: ProcessMetersComponent },
                         { path: 'meter-readings', component: ProcessMeterReadingsComponent },
                         { path: 'confirm-predictors', component: ProcessPredictorsComponent },
-                        { path: 'predictor-data', component: ProcessPredictorReadingsComponent},
-                        { path: 'review-and-submit', component: SubmitImportDataComponent}
+                        { path: 'predictor-data', component: ProcessPredictorReadingsComponent },
+                        { path: 'review-and-submit', component: SubmitImportDataComponent }
                     ]
                 },
                 {
@@ -71,9 +72,9 @@ export const DataWizardRoutes: Route = {
                         { path: 'confirm-meters', component: ProcessMetersComponent },
                         { path: 'meter-readings', component: ProcessMeterReadingsComponent },
                         { path: 'map-predictors-to-facilities', component: MapPredictorsToFacilitiesComponent },
-                        { path: 'confirm-predictors', component: ProcessPredictorsComponent},
-                        { path: 'predictor-data', component: ProcessPredictorReadingsComponent},
-                        { path: 'review-and-submit', component: SubmitImportDataComponent}
+                        { path: 'confirm-predictors', component: ProcessPredictorsComponent },
+                        { path: 'predictor-data', component: ProcessPredictorReadingsComponent },
+                        { path: 'review-and-submit', component: SubmitImportDataComponent }
                     ]
                 }
             ]
@@ -127,6 +128,10 @@ export const DataWizardRoutes: Route = {
                                 { path: 'meter-monthly-data', component: FacilityMeterMonthlyDataComponent }
                             ]
 
+                        },
+                        {
+                            path: 'meter-grouping',
+                            component: FacilityMeterGroupingComponent,
                         },
                         {
                             path: 'predictors',

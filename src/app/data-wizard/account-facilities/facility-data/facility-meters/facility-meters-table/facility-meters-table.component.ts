@@ -75,7 +75,7 @@ export class FacilityMetersTableComponent {
 
 
   uploadData() {
-
+    this.router.navigateByUrl('/data-wizard/' + this.facility.accountId + '/import-data');
   }
 
   async addMeter() {

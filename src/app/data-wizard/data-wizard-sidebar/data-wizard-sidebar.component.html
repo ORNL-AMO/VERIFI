@@ -106,6 +106,13 @@
                                 <span class="fa fa-list"></span> Manage Meters
                             </a>
                         </div>
+                        <div class="ps-2 nav-item">
+                            <a class="nav-link"
+                                [routerLink]="'/data-wizard/'+account.guid+'/facilities/'+facility.guid+'/meter-grouping'"
+                                [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
+                                <span class="fa fa-layer-group"></span> Meter Grouping
+                            </a>
+                        </div>
                         <ng-container *ngFor="let meter of facility.guid | facilityMetersList:accountMeters">
                             <div class="ps-2 nav-item">
                                 <a class="nav-link" (click)="toggleMeterOpen(meter)"

@@ -13,7 +13,7 @@ import { UploadFilesComponent } from './data-wizard-import/upload-files/upload-f
 import { ProcessTemplateFileComponent } from './data-wizard-import/process-template-file/process-template-file.component';
 import { ProcessTemplateFacilitiesComponent } from './data-wizard-import/process-template-file/process-template-facilities/process-template-facilities.component';
 import { HelperPipesModule } from '../shared/helper-pipes/helper-pipes.module';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MeterGroupOptionsPipe } from './data-wizard-import/shared-process-file/process-meters/meter-group-options.pipe';
 import { FacilityMetersTableComponent } from './account-facilities/facility-data/facility-meters/facility-meters-table/facility-meters-table.component';
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
@@ -45,6 +45,9 @@ import { ProcessPredictorsComponent } from './data-wizard-import/shared-process-
 import { ProcessPredictorReadingsComponent } from './data-wizard-import/shared-process-file/process-predictor-readings/process-predictor-readings.component';
 import { SubmitImportDataComponent } from './data-wizard-import/shared-process-file/submit-import-data/submit-import-data.component';
 import { DataWizardImportFooterComponent } from './data-wizard-import/data-wizard-import-footer/data-wizard-import-footer.component';
+import { FacilityMeterGroupingComponent } from './account-facilities/facility-data/facility-meters/facility-meter-grouping/facility-meter-grouping.component';
+import { MeterGroupFormComponent } from './account-facilities/facility-data/facility-meters/facility-meter-grouping/meter-group-form/meter-group-form.component';
+import { MeterGroupTableComponent } from './account-facilities/facility-data/facility-meters/facility-meter-grouping/meter-group-table/meter-group-table.component';
 
 
 @NgModule({
@@ -83,7 +86,10 @@ import { DataWizardImportFooterComponent } from './data-wizard-import/data-wizar
     ProcessPredictorsComponent,
     ProcessPredictorReadingsComponent,
     SubmitImportDataComponent,
-    DataWizardImportFooterComponent
+    DataWizardImportFooterComponent,
+    FacilityMeterGroupingComponent,
+    MeterGroupFormComponent,
+    MeterGroupTableComponent
   ],
   imports: [
     CommonModule,
@@ -96,7 +102,8 @@ import { DataWizardImportFooterComponent } from './data-wizard-import/data-wizar
     SharedMeterContentModule,
     SharedPredictorsContentModule,
     LabelWithTooltipModule,
-    DragDropModule
+    DragDropModule,
+    ReactiveFormsModule
   ]
 })
 export class DataWizardModule { }
