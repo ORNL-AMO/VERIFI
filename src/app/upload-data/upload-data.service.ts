@@ -573,7 +573,7 @@ export class UploadDataService {
     await this.dbChangesService.selectAccount(selectedAccount, false)
     fileReference.dataSubmitted = true;
     this.loadingService.setLoadingStatus(false);
-    this.toastNotificationService.showToast(fileReference.name + ' Data Submitted', undefined, undefined, false, "alert-success");
+    this.toastNotificationService.showToast(fileReference.name + ' Data Submitted', 'The data has been added to the selected account. You may continue to use the upload data wizard to process additional files.', undefined, false, "alert-success");
     this.sharedDataService.modalOpen.next(false);
     return fileReference;
   }

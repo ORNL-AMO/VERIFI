@@ -1,7 +1,6 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { DataWizardImportNavigationService, GoToOption, GoToOptionValue } from '../data-wizard-import-navigation.service';
 import { FileReference } from 'src/app/upload-data/upload-data-models';
-import { UploadDataService } from 'src/app/upload-data/upload-data.service';
 
 @Component({
   selector: 'app-data-wizard-import-footer',
@@ -17,15 +16,15 @@ export class DataWizardImportFooterComponent {
   fileReference: FileReference;
   @Input({ required: true })
   navOption: GoToOptionValue;
+  @Output('emitSubmit')
+  emitSubmit: EventEmitter<boolean> = new EventEmitter<boolean>();
 
 
   goBackOptions: Array<GoToOption> = [];
   stepNumber: number;
   totalSteps: number;
   progressWidth: number;
-  constructor(private dataWizardImportNavigationService: DataWizardImportNavigationService,
-    private uploadDataService: UploadDataService
-  ) {
+  constructor(private dataWizardImportNavigationService: DataWizardImportNavigationService) {
   }
 
   ngOnInit() {
@@ -33,9 +32,9 @@ export class DataWizardImportFooterComponent {
     let allOptions: Array<GoToOptionValue> = this.dataWizardImportNavigationService.getGoBackOptions('review-and-submit', this.fileReference).map(option => {
       return option.value;
     });
-    if(this.navOption != 'review-and-submit'){
+    if (this.navOption != 'review-and-submit') {
       this.stepNumber = allOptions.indexOf(this.navOption);
-    }else{
+    } else {
       this.stepNumber = allOptions.length;
     }
     this.totalSteps = allOptions.length;
@@ -55,6 +54,6 @@ export class DataWizardImportFooterComponent {
   }
 
   async submitImport() {
-    this.fileReference = await this.uploadDataService.submit(this.fileReference);
+    this.emitSubmit.emit(true);
   }
 }

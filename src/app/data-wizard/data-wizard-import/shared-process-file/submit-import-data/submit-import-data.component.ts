@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { DataWizardService } from 'src/app/data-wizard/data-wizard.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -10,6 +10,8 @@ import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { FileReference } from 'src/app/upload-data/upload-data-models';
 import { UploadDataService } from 'src/app/upload-data/upload-data.service';
 import * as _ from 'lodash';
+import { IdbAccount } from 'src/app/models/idbModels/account';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 
 @Component({
   selector: 'app-submit-import-data',
@@ -35,7 +37,9 @@ export class SubmitImportDataComponent {
   constructor(
     private activatedRoute: ActivatedRoute,
     private dataWizardService: DataWizardService,
-    private uploadDataService: UploadDataService
+    private uploadDataService: UploadDataService,
+    private router: Router,
+    private accountDbService: AccountdbService
   ) { }
 
 
@@ -53,6 +57,11 @@ export class SubmitImportDataComponent {
 
   async submitImport() {
     this.fileReference = await this.uploadDataService.submit(this.fileReference);
+    let fileReferences: Array<FileReference> = this.dataWizardService.fileReferences.getValue();
+    fileReferences = fileReferences.filter(fileRef => { return fileRef.id != this.fileReference.id });
+    this.dataWizardService.fileReferences.next(fileReferences);
+    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    this.router.navigateByUrl('/data-wizard/' + account.guid + '/import-data')
   }
 
   setFacilitySummaries() {
