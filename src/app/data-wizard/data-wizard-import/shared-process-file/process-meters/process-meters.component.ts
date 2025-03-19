@@ -114,10 +114,10 @@ export class ProcessMetersComponent {
   }
 
 
-  setMeterData(){
-    if(this.fileReference.isTemplate){
+  setMeterData() {
+    if (this.fileReference.isTemplate) {
       this.fileReference.meterData = this.uploadDataService.getMeterDataEntries(this.fileReference.workbook, this.fileReference.meters);
-    }else{
+    } else {
       this.fileReference.meterData = this.uploadDataService.parseExcelMeterData(this.fileReference);
     }
   }
@@ -250,6 +250,7 @@ export class ProcessMetersComponent {
         }
       }
     });
+    this.setNewGroups();
   }
 
   setHasNoCalanderizationSelection() {
@@ -290,5 +291,22 @@ export class ProcessMetersComponent {
     this.editMeter.importWizardName = importWizardName;
     this.editMeterForm = this.editMeterFormService.getFormFromMeter(meter);
     this.showExisting = false;
+  }
+
+  setNewGroups() {
+    let newGroups: Array<IdbUtilityMeterGroup> = new Array();
+    this.fileReference.meters.forEach(meter => {
+      if (meter.groupId) {
+        let facilityGroups: Array<IdbUtilityMeterGroup> = this.getFacilityMeterGroups(meter.facilityId);
+        let selectedGroup: IdbUtilityMeterGroup = facilityGroups.find(group => { return group.guid == meter.groupId });
+        if (selectedGroup && !selectedGroup.id) {
+          let groupExists: IdbUtilityMeterGroup = newGroups.find(group => { return group.guid == selectedGroup.guid });
+          if (groupExists == undefined) {
+            newGroups.push(selectedGroup);
+          }
+        }
+      }
+    });
+    this.fileReference.newMeterGroups = newGroups;
   }
 }

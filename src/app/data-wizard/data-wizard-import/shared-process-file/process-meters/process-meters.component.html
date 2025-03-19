@@ -97,8 +97,7 @@
                                         {{meter.facilityId | facilityName:fileReference.importFacilities}}
                                     </td>
                                     <td>
-                                        <ng-template [ngIf]="!meter.skipImport"
-                                            [ngIfElse]="nameBlock">
+                                        <ng-template [ngIf]="!meter.skipImport" [ngIfElse]="nameBlock">
                                             <a class="click-link" (click)="setEditMeter(meter)"
                                                 *ngIf="!meter.skipImport">{{meter.name}}
                                                 <span *ngIf="!meter.isValid">(click to edit)</span>
@@ -128,7 +127,8 @@
                                         </ng-container>
                                     </td>
                                     <td>
-                                        <select class="form-select" id="meterGroup" [(ngModel)]="meter.groupId">
+                                        <select class="form-select" id="meterGroup" [(ngModel)]="meter.groupId"
+                                            (change)="setNewGroups()">
                                             <optgroup [label]="'Energy'"
                                                 *ngIf="meter.source != 'Water Intake' && meter.source != 'Water Discharge'">
                                                 <option

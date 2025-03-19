@@ -40,8 +40,10 @@
                 </div>
             </ng-template>
             <ng-template #noEnergyGroupsBlock>
-                <div class="alert alert-info p-1">
-                    No energy meter groups.
+                <div class="p-2">
+                    <div class="alert alert-info p-1 mt-1">
+                        No energy meter groups.
+                    </div>
                 </div>
             </ng-template>
         </ng-template>
@@ -74,8 +76,10 @@
                 </div>
             </ng-template>
             <ng-template #noWaterGroupsBlock>
-                <div class="alert alert-info p-1">
-                    No water meter groups.
+                <div class="p-2">
+                    <div class="alert alert-info p-1 mt-1">
+                        No water meter groups.
+                    </div>
                 </div>
             </ng-template>
         </ng-template>
@@ -156,7 +160,7 @@
 
 <div [ngClass]="{'windowOverlay': groupToDelete}"></div>
 <div class="popup" [class.open]="groupToDelete">
-    <div class="popup-header" *ngIf="groupToDelete">Delete Meter Data {{groupToDelete.name}}
+    <div class="popup-header" *ngIf="groupToDelete">Delete Meter Group: {{groupToDelete.name}}
         <button class="item-right" (click)="closeDeleteGroup()">x</button>
     </div>
     <div class="popup-body">
