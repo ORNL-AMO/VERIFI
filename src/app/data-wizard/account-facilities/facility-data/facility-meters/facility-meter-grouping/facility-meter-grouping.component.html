@@ -119,7 +119,7 @@
             </div>
         </ng-template>
 
-        <ng-template [ngIf]="ungroupedMeters.length > 0">
+        <ng-container *ngIf="ungroupedMeters.length > 0">
             <div class="group-section mt-2">
                 <h5>
                     Ungrouped Meters
@@ -128,7 +128,7 @@
             <div class="d-flex flex-column p-2">
                 <app-meter-group-table [groupId]="undefined"></app-meter-group-table>
             </div>
-        </ng-template>
+        </ng-container>
     </ng-template>
 
     <ng-template #editMeterGroupFormBlock>

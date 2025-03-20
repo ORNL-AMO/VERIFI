@@ -10,9 +10,6 @@
             <p class="large">VERIFI is a tool used to track and analyze utility consumption data at both a coorporate
                 and facility level.</p>
         </div>
-        <div class="col-12">
-            <hr>
-        </div>
     </div>
 
     <div class="row justify-content-center">
@@ -84,9 +81,6 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-12">
-            <hr>
-        </div>
         <div class="col-12 text-end">
             <p class="mb-0">
                 If you need help along the way, click or hover the <span class="fa fa-question-circle"></span> icon and
@@ -95,12 +89,7 @@
         </div>
     </div>
     <div class="row justify-content-center" *ngIf="accounts.length > 0">
-        <div class="col-12">
-            <hr>
-        </div>
         <div class="col-9">
-            <!-- <div class="table table-responsive table-bordered"> -->
-
             <h5>VERIFI Accounts</h5>
             <div class="list-group">
                 <div class="list-group-item" *ngFor="let account of accounts">
@@ -110,16 +99,15 @@
                         </div>
                         <div>
                             <button class="btn nav-btn me-2" (click)="goToAccountHome(account)">
-                                <span class="fa fa-home"></span> Account Portfolio Home
+                                <span class="fa fa-home"></span> Account Home
                             </button>
                             <button class="btn nav-btn" (click)="goToDataWizard(account)">
-                                <span class="fa fa-wand-magic-sparkles"></span> Data Management Wizard
+                                <span class="fa fa-database"></span> Account Data
                             </button>
                         </div>
                     </div>
                 </div>
             </div>
-            <!-- </div> -->
         </div>
     </div>
 

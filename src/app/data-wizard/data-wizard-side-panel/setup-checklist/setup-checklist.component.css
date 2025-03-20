@@ -1,0 +1,11 @@
+.badge .fa{
+    color: white;
+}
+
+.list-group-item-action{
+    font-weight: bold;
+}
+
+.list-group-item-action.active{
+    color: white;
+}

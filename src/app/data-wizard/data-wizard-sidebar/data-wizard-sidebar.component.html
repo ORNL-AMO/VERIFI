@@ -79,7 +79,7 @@
                         [ngClass]="{'active': facility.guid == selectedFacility?.guid}">
                         <span class="fa"
                             [ngClass]="{'fa-chevron-down': facility.sidebarOpen, 'fa-chevron-right': !facility.sidebarOpen}"></span>
-                        <span class="fa fa-industry ps-1"></span>
+                        <span class="fa fa-industry ps-1" [ngStyle]="{color: facility.color}"></span>
                         {{facility.name}}
                     </a>
                 </div>

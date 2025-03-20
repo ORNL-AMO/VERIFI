@@ -1,0 +1,61 @@
+<div class="list-group">
+    <div class="list-group-item list-group-item-action list-group-item-secondary" (click)="setStep('instructions')"
+        [ngClass]="{'active': step == 'instructions'}">
+        Getting Started Instructions
+    </div>
+    <div class="list-group-item collapse" [ngClass]="{'show': step == 'instructions'}">
+        <p class="fw-light">
+            We have pulled the core data management pieces from the main portfolio into a data focused portion of the
+            application. This was done in an effort to
+            streamline the user experience of setting up and managing account data. The below checklist and help content has
+            been provied to assist in get a new account setup. Once completed, the account portfolio can be used for analysis
+            and data reporting.
+        </p>
+    </div>
+    <div class="list-group-item list-group-item-action list-group-item-secondary" (click)="setStep('accountDetails')"
+        [ngClass]="{'active': step == 'accountDetails'}">
+        1. Fill out corporate settings
+    </div>
+    <div class="list-group-item collapse" [ngClass]="{'show': step == 'accountDetails'}">
+        <p class="fw-light">
+            Add general corporate settings like name and address of the account. Fill out any corporate goals for the account. These
+            details are optional but will provide a better experience when using VERIFI for data reporting, emissions
+            calculations and weather data.
+        </p>
+    </div>
+    <div class="list-group-item list-group-item-action list-group-item-secondary" (click)="setStep('uploadData')"
+        [ngClass]="{'active': step == 'uploadData'}">
+        2. Upload utility and predictor data
+    </div>
+    <div class="list-group-item collapse" [ngClass]="{'show': step == 'uploadData'}">
+        <p class="fw-light">
+            Data can be uploaded to VERIFI using excel spreadsheets. A template has been provided for easier upload.
+            Download and fill out the template and then upload it to back into VERIFI to populate your account with
+            facility, utility, and predictor data.
+        </p>
+        <p class="fw-light">
+            VERIFI does it's best to handle other formats of excel spreadsheets as well. Meter and predictor data can be
+            uploaded if the worksheet is setup with date readings and usage in a column format.
+        </p>
+    </div>
+    <div class="list-group-item list-group-item-action list-group-item-secondary" (click)="setStep('facilityDetails')"
+        [ngClass]="{'active': step == 'facilityDetails'}">
+        3. Fill out facility details
+    </div>
+    <div class="list-group-item list-group-item-action list-group-item-secondary" (click)="setStep('meterData')"
+        [ngClass]="{'active': step == 'meterData'}">
+        4. Add meters and meter data
+    </div>
+    <div class="list-group-item list-group-item-action list-group-item-secondary" (click)="setStep('predictorData')"
+        [ngClass]="{'active': step == 'predictorData'}">
+        5. Add predictors and predictor data
+    </div>
+    <div class="list-group-item list-group-item-action list-group-item-secondary" (click)="setStep('repeatSteps')"
+        [ngClass]="{'active': step == 'repeatSteps'}">
+        6. Repeat steps 3 - 5 for all facilities
+    </div>
+    <div class="list-group-item list-group-item-action list-group-item-secondary" (click)="setStep('portfolio')"
+        [ngClass]="{'active': step == 'portfolio'}">
+        7. Go to portfolio for analysis and reporting
+    </div>
+</div>

@@ -22,7 +22,7 @@ export class FacilitiesListComponent {
   modalOpen: boolean;
   modalOpenSub: Subscription;
 
-  numberOfFacilities: number = 4;
+  numberOfFacilities: number = 1;
   orderOptions: Array<number> = [];
   facilityToDelete: IdbFacility;
   displayAddFacilityModal: boolean = false;
