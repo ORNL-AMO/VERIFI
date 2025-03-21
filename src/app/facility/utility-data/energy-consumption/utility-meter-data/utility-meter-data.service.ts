@@ -220,7 +220,6 @@ export class UtilityMeterDataService {
 
 
   getGeneralMeterDataForm(meterData: IdbUtilityMeterData, displayVolumeInput: boolean, displayEnergyInput: boolean, displayHeatCapacity: boolean, displayFuelEfficiency: boolean): FormGroup {
-    console.log('....???????')
     //need to use date string for calander to work in form 
     let dateString: string;
     if (meterData.readDate && isNaN(new Date(meterData.readDate).getTime()) == false) {
