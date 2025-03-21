@@ -66,6 +66,11 @@ export class WeatherStationsComponent {
       this.fetchingData = true;
       this.stations = await this.weatherDataService.getStationsLatLong(this.addressLatLong, this.furthestDistance);
       this.fetchingData = false;
+      // this.fetchingData = true;
+      // this.degreeDaysService.getClosestStation(this.zipCode, this.furthestDistance).then(stations => {
+      //   this.stations = stations;
+      //   this.fetchingData = false;
+      // });
     } else {
       this.fetchingData = false;
       this.stations = [];

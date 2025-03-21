@@ -18,12 +18,13 @@ import { WeatherDataService } from 'src/app/weather-data/weather-data.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { PredictorDataHelperService } from 'src/app/shared/helper-services/predictor-data-helper.service';
+// import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
 
 @Component({
-    selector: 'app-predictors-data-table',
-    templateUrl: './predictors-data-table.component.html',
-    styleUrl: './predictors-data-table.component.css',
-    standalone: false
+  selector: 'app-predictors-data-table',
+  templateUrl: './predictors-data-table.component.html',
+  styleUrl: './predictors-data-table.component.css',
+  standalone: false
 })
 export class PredictorsDataTableComponent {
   @ViewChild('predictorTable', { static: false }) predictorTable: ElementRef;
@@ -48,6 +49,7 @@ export class PredictorsDataTableComponent {
   paramSub: Subscription;
   latestMeterDataReading: Date;
   filterErrors: boolean = false;
+  hasCalculatedOverride: boolean = false;
   constructor(private activatedRoute: ActivatedRoute, private predictorDbService: PredictorDbService,
     private predictorDataDbService: PredictorDataDbService,
     private sharedDataService: SharedDataService,
@@ -59,7 +61,8 @@ export class PredictorsDataTableComponent {
     private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
     private weatherDataService: WeatherDataService,
-    private predictorDataHelperService: PredictorDataHelperService
+    private predictorDataHelperService: PredictorDataHelperService,
+    // private degreeDaysService: DegreeDaysService
   ) {
 
   }
@@ -226,24 +229,30 @@ export class PredictorsDataTableComponent {
   }
 
   async viewWeatherData(predictorEntry: IdbPredictorData) {
-    let weatherStation: WeatherStation = await this.weatherDataService.getStation(this.predictor.weatherStationId);
-    if (weatherStation) {
-      this.weatherDataService.selectedStation = weatherStation;
-      this.weatherDataService.weatherDataSelection = this.predictor.weatherDataType;
-      if (this.predictor.weatherDataType == 'CDD') {
-        this.weatherDataService.coolingTemp = this.predictor.coolingBaseTemperature;
-      } else if (this.predictor.weatherDataType == 'HDD') {
-        this.weatherDataService.heatingTemp = this.predictor.heatingBaseTemperature;
+    //ISSUE 1822
+    let weatherStation: WeatherStation | 'error' = await this.weatherDataService.getStation(this.predictor.weatherStationId);
+    // let weatherStation: WeatherStation | 'error' = await this.degreeDaysService.getStationById(this.predictor.weatherStationId);
+    if (weatherStation != 'error') {
+      if (weatherStation) {
+        this.weatherDataService.selectedStation = weatherStation;
+        this.weatherDataService.weatherDataSelection = this.predictor.weatherDataType;
+        if (this.predictor.weatherDataType == 'CDD') {
+          this.weatherDataService.coolingTemp = this.predictor.coolingBaseTemperature;
+        } else if (this.predictor.weatherDataType == 'HDD') {
+          this.weatherDataService.heatingTemp = this.predictor.heatingBaseTemperature;
+        }
       }
+      let entryDate: Date = new Date(predictorEntry.date);
+      this.weatherDataService.selectedYear = entryDate.getFullYear();
+      this.weatherDataService.selectedDate = entryDate;
+      this.weatherDataService.selectedMonth = entryDate;
+      let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+      this.weatherDataService.selectedFacility = selectedFacility;
+      this.weatherDataService.zipCode = selectedFacility.zip;
+      this.router.navigateByUrl('weather-data/monthly-station');
+    } else {
+      this.toastNotificationService.showToast('An Error Occured', undefined, undefined, false, 'alert-danger');
     }
-    let entryDate: Date = new Date(predictorEntry.date);
-    this.weatherDataService.selectedYear = entryDate.getFullYear();
-    this.weatherDataService.selectedDate = entryDate;
-    this.weatherDataService.selectedMonth = entryDate;
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    this.weatherDataService.selectedFacility = selectedFacility;
-    this.weatherDataService.zipCode = selectedFacility.zip;
-    this.router.navigateByUrl('weather-data/monthly-station');
   }
 
   setHasWeatherDataWarning() {
@@ -251,8 +260,12 @@ export class PredictorsDataTableComponent {
       this.hasWeatherDataWarnings = this.predictorData.find(data => {
         return data.weatherDataWarning;
       }) != undefined;
+      this.hasCalculatedOverride = this.predictorData.find(data => {
+        return data.weatherOverride;
+      }) != undefined;
     } else {
       this.hasWeatherDataWarnings = false;
+      this.hasCalculatedOverride = false;
     }
   }
 
