@@ -9,10 +9,13 @@
         </div>
     </div>
     <div class="ps-1 w-100" [hidden]="!sidebarOpen">
-        <h5 class="ps-2 mb-0">
-            <span class="fa fa-building"></span>
-            {{account.name}}
-        </h5>
+        <a class="nav-link" [routerLink]="'/data-wizard/'+account.guid + '/home'"
+            [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
+            <h5 class="ps-2 mb-0">
+                <span class="fa fa-building"></span>
+                {{account.name}}
+            </h5>
+        </a>
         <div class="p-2 w-100">
             <hr class="my-1">
         </div>

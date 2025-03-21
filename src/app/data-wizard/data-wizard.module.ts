@@ -19,7 +19,6 @@ import { FacilityMetersTableComponent } from './account-facilities/facility-data
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { FacilityMeterComponent } from './account-facilities/facility-data/facility-meters/facility-meter/facility-meter.component';
 import { FacilitiesListComponent } from './account-facilities/facilities-list/facilities-list.component';
-import { DataWizardHelpPanelComponent } from './data-wizard-help-panel/data-wizard-help-panel.component';
 import { WizardSidebarFacilitiesListPipe } from './data-wizard-sidebar/wizard-sidebar-facilities-list.pipe';
 import { TableItemsDropdownModule } from '../shared/table-items-dropdown/table-items-dropdown.module';
 import { SharedMeterContentModule } from '../shared/shared-meter-content/shared-meter-content.module';
@@ -51,6 +50,7 @@ import { MeterGroupTableComponent } from './account-facilities/facility-data/fac
 import { DataWizardSidePanelComponent } from './data-wizard-side-panel/data-wizard-side-panel.component';
 import { HelpPanelComponent } from './data-wizard-side-panel/help-panel/help-panel.component';
 import { SetupChecklistComponent } from './data-wizard-side-panel/setup-checklist/setup-checklist.component';
+import { DataWizardHomeComponent } from './data-wizard-home/data-wizard-home.component';
 
 
 @NgModule({
@@ -69,7 +69,6 @@ import { SetupChecklistComponent } from './data-wizard-side-panel/setup-checklis
     FacilityMetersTableComponent,
     FacilityMeterComponent,
     FacilitiesListComponent,
-    DataWizardHelpPanelComponent,
     WizardSidebarFacilitiesListPipe,
     FacilityMeterMonthlyDataComponent,
     MeterDataSummaryTableComponent,
@@ -95,7 +94,8 @@ import { SetupChecklistComponent } from './data-wizard-side-panel/setup-checklis
     MeterGroupTableComponent,
     DataWizardSidePanelComponent,
     HelpPanelComponent,
-    SetupChecklistComponent
+    SetupChecklistComponent,
+    DataWizardHomeComponent
   ],
   imports: [
     CommonModule,

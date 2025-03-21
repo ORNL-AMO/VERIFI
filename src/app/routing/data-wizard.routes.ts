@@ -32,12 +32,17 @@ import { ProcessPredictorsComponent } from "../data-wizard/data-wizard-import/sh
 import { ProcessPredictorReadingsComponent } from "../data-wizard/data-wizard-import/shared-process-file/process-predictor-readings/process-predictor-readings.component";
 import { SubmitImportDataComponent } from "../data-wizard/data-wizard-import/shared-process-file/submit-import-data/submit-import-data.component";
 import { FacilityMeterGroupingComponent } from "../data-wizard/account-facilities/facility-data/facility-meters/facility-meter-grouping/facility-meter-grouping.component";
+import { DataWizardHomeComponent } from "../data-wizard/data-wizard-home/data-wizard-home.component";
 
 export const DataWizardRoutes: Route = {
     path: 'data-wizard/:id',
     component: DataWizardComponent,
     children: [
-        { path: '', pathMatch: 'full', redirectTo: 'account-setup' },
+        { path: '', pathMatch: 'full', redirectTo: 'home' },
+        {
+            path: 'home',
+            component: DataWizardHomeComponent
+        },
         {
             path: 'account-setup',
             component: AccountSetupComponent
