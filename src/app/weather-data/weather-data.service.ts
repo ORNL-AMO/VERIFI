@@ -80,18 +80,27 @@ export class WeatherDataService {
     return this.httpClient.post(environment.weatherApi + '/station/' + stationId, {}, httpOptions);
   }
 
-  async getStation(stationId: string) {
-    let apiData: string = await firstValueFrom(this.getStationAPI(stationId));
-    let station: WeatherStation = getWeatherStation(JSON.parse(apiData));
-    station.ID = stationId;
-    return station;
+  async getStation(stationId: string): Promise<WeatherStation | 'error'> {
+    try {
+      let apiData: string = await firstValueFrom(this.getStationAPI(stationId));
+      let station: WeatherStation = getWeatherStation(JSON.parse(apiData));
+      station.ID = stationId;
+      return station;
+    } catch (err) {
+      return 'error'
+    }
   }
 
 
-  async getHourlyData(stationId: string, startDate: Date, endDate: Date, parameters: Array<WeatherDataParams>): Promise<Array<WeatherDataReading>> {
-    let apiData: string = await firstValueFrom(this.getHourlyDataAPI(stationId, startDate, endDate, parameters));
-    let parsedData: Array<WeatherDataReading> = JSON.parse(apiData).hourly_data;
-    return parsedData;
+  async getHourlyData(stationId: string, startDate: Date, endDate: Date, parameters: Array<WeatherDataParams>): Promise<Array<WeatherDataReading> | 'error'> {
+    try {
+      let apiData: string = await firstValueFrom(this.getHourlyDataAPI(stationId, startDate, endDate, parameters));
+      let parsedData: Array<WeatherDataReading> = JSON.parse(apiData).hourly_data;
+      return parsedData;
+    } catch (err) {
+      console.log(err)
+      return 'error';
+    }
   }
 
 
@@ -112,12 +121,16 @@ export class WeatherDataService {
   }
 
 
-  async getDegreeDaysForMonth(entryDate: Date, stationId: string, weatherStationName: string, heatingBaseTemperature: number, coolingBaseTemperature: number): Promise<Array<DetailDegreeDay>> {
+  async getDegreeDaysForMonth(entryDate: Date, stationId: string, weatherStationName: string, heatingBaseTemperature: number, coolingBaseTemperature: number): Promise<Array<DetailDegreeDay> | "error"> {
     let startDate: Date = new Date(entryDate.getFullYear(), entryDate.getMonth() - 1, 1);
     let endDate: Date = new Date(entryDate.getFullYear(), entryDate.getMonth() + 1, 1);
-    let parsedData: Array<WeatherDataReading> = await this.getHourlyData(stationId, startDate, endDate, ['humidity'])
-    let degreeDays: Array<DetailDegreeDay> = getDetailedDataForMonth(parsedData, entryDate.getMonth(), entryDate.getFullYear(), heatingBaseTemperature, coolingBaseTemperature, stationId, weatherStationName);
-    return degreeDays;
+    let parsedData: Array<WeatherDataReading> | "error" = await this.getHourlyData(stationId, startDate, endDate, ['humidity'])
+    if (parsedData != "error") {
+      let degreeDays: Array<DetailDegreeDay> = getDetailedDataForMonth(parsedData, entryDate.getMonth(), entryDate.getFullYear(), heatingBaseTemperature, coolingBaseTemperature, stationId, weatherStationName);
+      return degreeDays;
+    } else {
+      return "error"
+    }
   }
 }
 

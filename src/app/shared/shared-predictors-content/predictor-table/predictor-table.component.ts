@@ -21,6 +21,7 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { getGUID } from 'src/app/shared/sharedHelperFuntions';
 import { PredictorDataHelperService, PredictorTableItem } from 'src/app/shared/helper-services/predictor-data-helper.service';
+// import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
 
 @Component({
   selector: 'app-predictor-table',
@@ -56,7 +57,9 @@ export class PredictorTableComponent {
     private toastNotificationService: ToastNotificationsService,
     private accountDbService: AccountdbService,
     private predictorDataDbService: PredictorDataDbService,
-    private predictorDataHelperService: PredictorDataHelperService) {
+    private predictorDataHelperService: PredictorDataHelperService,
+    // private degreeDaysService: DegreeDaysService
+  ) {
 
   }
 
@@ -176,8 +179,10 @@ export class PredictorTableComponent {
 
 
   async viewWeatherData(predictor: IdbPredictor) {
-    let weatherStation: 'error' | WeatherStation = await this.degreeDaysService.getStationById(predictor.weatherStationId);
-    if (weatherStation != 'error') {
+    //ISSUE 1822
+    // let weatherStation: WeatherStation | 'error' = await this.degreeDaysService.getStationById(predictor.weatherStationId)
+    let weatherStation: WeatherStation | 'error' = await this.weatherDataService.getStation(predictor.weatherStationId);
+    if (weatherStation && weatherStation != 'error') {
       this.weatherDataService.selectedStation = weatherStation;
       if (predictor.weatherDataType == 'CDD') {
         this.weatherDataService.coolingTemp = predictor.coolingBaseTemperature;

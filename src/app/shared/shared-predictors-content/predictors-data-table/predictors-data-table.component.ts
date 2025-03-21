@@ -18,6 +18,7 @@ import { WeatherDataService } from 'src/app/weather-data/weather-data.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { PredictorDataHelperService } from 'src/app/shared/helper-services/predictor-data-helper.service';
+// import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
 
 @Component({
     selector: 'app-predictors-data-table',
@@ -61,7 +62,8 @@ export class PredictorsDataTableComponent {
     private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
     private weatherDataService: WeatherDataService,
-    private predictorDataHelperService: PredictorDataHelperService
+    private predictorDataHelperService: PredictorDataHelperService,
+    // private degreeDaysService: DegreeDaysService
   ) {
 
   }
@@ -257,14 +259,18 @@ export class PredictorsDataTableComponent {
   }
 
   async viewWeatherData(predictorEntry: IdbPredictorData) {
-    let weatherStation: WeatherStation = await this.weatherDataService.getStation(this.predictor.weatherStationId);
-    if (weatherStation) {
-      this.weatherDataService.selectedStation = weatherStation;
-      this.weatherDataService.weatherDataSelection = this.predictor.weatherDataType;
-      if (this.predictor.weatherDataType == 'CDD') {
-        this.weatherDataService.coolingTemp = this.predictor.coolingBaseTemperature;
-      } else if (this.predictor.weatherDataType == 'HDD') {
-        this.weatherDataService.heatingTemp = this.predictor.heatingBaseTemperature;
+    //ISSUE 1822
+    let weatherStation: WeatherStation | 'error' = await this.weatherDataService.getStation(this.predictor.weatherStationId);
+    // let weatherStation: WeatherStation | 'error' = await this.degreeDaysService.getStationById(this.predictor.weatherStationId);
+    if (weatherStation != 'error') {
+      if (weatherStation) {
+        this.weatherDataService.selectedStation = weatherStation;
+        this.weatherDataService.weatherDataSelection = this.predictor.weatherDataType;
+        if (this.predictor.weatherDataType == 'CDD') {
+          this.weatherDataService.coolingTemp = this.predictor.coolingBaseTemperature;
+        } else if (this.predictor.weatherDataType == 'HDD') {
+          this.weatherDataService.heatingTemp = this.predictor.heatingBaseTemperature;
+        }
       }
     }
   }

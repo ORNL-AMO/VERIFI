@@ -4,12 +4,13 @@ import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { WeatherStation } from 'src/app/models/degreeDays';
 import { Router } from '@angular/router';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { WeatherDataService } from 'src/app/weather-data/weather-data.service';
-import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
+import { getWeatherStation, WeatherDataService } from 'src/app/weather-data/weather-data.service';
+// import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { EditPredictorFormService } from '../edit-predictor-form.service';
 import { firstValueFrom } from 'rxjs';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
+import * as _ from 'lodash';
 
 @Component({
   selector: 'app-edit-predictor-form',
@@ -40,7 +41,7 @@ export class EditPredictorFormComponent {
   constructor(
     private router: Router, private facilityDbService: FacilitydbService,
     private weatherDataService: WeatherDataService,
-    private degreeDaysService: DegreeDaysService,
+    // private degreeDaysService: DegreeDaysService,
     private editPredictorFormService: EditPredictorFormService,
     private dbChangesService: DbChangesService) {
   }
@@ -72,8 +73,13 @@ export class EditPredictorFormComponent {
 
   setStations() {
     this.findingStations = true;
-    this.degreeDaysService.getClosestStation(this.facility.zip, 50).then(stations => {
-      this.stations = stations;
+    this.weatherDataService.getStationsAPI(this.facility.zip, 50).subscribe(results => {
+      this.stations = JSON.parse(results).stations.map(station => {
+        return getWeatherStation(station)
+      });
+      this.stations = _.orderBy(this.stations, (station: WeatherStation) => {
+        return station.distanceFrom;
+      })
       this.findingStations = false;
     });
   }

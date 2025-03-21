@@ -18,11 +18,13 @@ import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { getNewIdbPredictor, IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { getNewIdbPredictorData, IdbPredictorData } from 'src/app/models/idbModels/predictorData';
-import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
+// import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
 import { PredictorDataHelperService } from 'src/app/shared/helper-services/predictor-data-helper.service';
 import { EditPredictorFormService } from 'src/app/shared/shared-predictors-content/edit-predictor-form.service';
 import { getDegreeDayAmount } from 'src/app/shared/sharedHelperFuntions';
 import { checkSameMonth } from 'src/app/upload-data/upload-helper-functions';
+import { WeatherDataReading, WeatherDataService } from 'src/app/weather-data/weather-data.service';
+import { getDetailedDataForMonth } from 'src/app/weather-data/weatherDataCalculations';
 
 @Component({
   selector: 'app-facility-predictor',
@@ -48,12 +50,13 @@ export class FacilityPredictorComponent {
     private editPredictorFormService: EditPredictorFormService,
     private loadingService: LoadingService,
     private predictorDataDbService: PredictorDataDbService,
-    private degreeDaysService: DegreeDaysService,
+    // private degreeDaysService: DegreeDaysService,
     private analysisDbService: AnalysisDbService,
     private accountDbService: AccountdbService,
     private dbChangesService: DbChangesService,
     private predictorDataHelperService: PredictorDataHelperService,
-    private accountAnalysisDbService: AccountAnalysisDbService
+    private accountAnalysisDbService: AccountAnalysisDbService,
+    private weatherDataService: WeatherDataService
   ) {
   }
 
@@ -127,15 +130,16 @@ export class FacilityPredictorComponent {
       let stringFormat: string = 'MMM, yyyy';
       let startDate: Date = new Date(this.firstMeterReading);
       let endDate: Date = new Date(this.latestMeterReading);
-      while (startDate <= endDate) {
-        if (this.destroyed) {
-          break;
-        }
-        let newDate: Date = new Date(startDate);
-        let dateString = datePipe.transform(newDate, stringFormat);
-        this.loadingService.setLoadingMessage('Adding Weather Predictors: ' + dateString);
-        let degreeDays: 'error' | Array<DetailDegreeDay> = await this.degreeDaysService.getDailyDataFromMonth(newDate.getMonth(), newDate.getFullYear(), this.predictor.heatingBaseTemperature, this.predictor.coolingBaseTemperature, this.predictor.weatherStationId);
-        if (degreeDays != 'error') {
+      let parsedData: Array<WeatherDataReading> | 'error' = await this.weatherDataService.getHourlyData(this.predictor.weatherStationId, startDate, endDate, []);
+      if (parsedData != 'error') {
+        while (startDate <= endDate) {
+          if (this.destroyed) {
+            break;
+          }
+          let newDate: Date = new Date(startDate);
+          let dateString = datePipe.transform(newDate, stringFormat);
+          this.loadingService.setLoadingMessage('Adding Weather Predictors: ' + dateString);
+          let degreeDays: Array<DetailDegreeDay> = getDetailedDataForMonth(parsedData, newDate.getMonth(), newDate.getFullYear(), this.predictor.heatingBaseTemperature, this.predictor.coolingBaseTemperature, this.predictor.weatherStationId, this.predictor.weatherStationName);
           let hasErrors: DetailDegreeDay = degreeDays.find(degreeDay => {
             return degreeDay.gapInData == true
           });
@@ -152,10 +156,10 @@ export class FacilityPredictorComponent {
             predictorExists.weatherDataWarning = hasErrors != undefined || degreeDays.length == 0;
             await firstValueFrom(this.predictorDataDbService.updateWithObservable(predictorExists));
           }
-        } else {
-          this.toastNotificationService.weatherDataErrorToast();
+          startDate.setMonth(startDate.getMonth() + 1);
         }
-        startDate.setMonth(startDate.getMonth() + 1);
+      } else {
+        this.toastNotificationService.weatherDataErrorToast();
       }
       //remove data outside of start/end date for meters
       let startDateFilter: Date = new Date(this.firstMeterReading);
