@@ -154,7 +154,8 @@ export class UtilityMeterDataService {
     }
     return this.formBuilder.group({
       readDate: [dateString, Validators.required],
-      totalEnergyUse: [meterData.totalEnergyUse, [Validators.required, Validators.min(0)]],
+      //ISSUE 1176: Validators.min(0) removed
+      totalEnergyUse: [meterData.totalEnergyUse, [Validators.required]],
       totalCost: [meterData.totalCost, [Validators.min(0)]],
       deliveryCharge: [meterData.deliveryCharge, [Validators.min(0)]],
       totalRealDemand: [meterData.totalRealDemand, [Validators.min(0)]],
