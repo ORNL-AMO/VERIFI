@@ -19,7 +19,7 @@ import { getDegreeDayAmount } from 'src/app/shared/sharedHelperFuntions';
 import { PredictorDataHelperService } from 'src/app/shared/helper-services/predictor-data-helper.service';
 import { WeatherDataReading, WeatherDataService } from 'src/app/weather-data/weather-data.service';
 import { getDetailedDataForMonth } from 'src/app/weather-data/weatherDataCalculations';
-import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
+// import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
 
 @Component({
   selector: 'app-calculated-predictor-data-update',
@@ -70,8 +70,8 @@ export class CalculatedPredictorDataUpdateComponent {
     private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
     private predictorDataHelperService: PredictorDataHelperService,
-    private weatherDataService: WeatherDataService,
-    private degreeDaysService: DegreeDaysService
+    private weatherDataService: WeatherDataService
+    // private degreeDaysService: DegreeDaysService
   ) {
 
   }
@@ -159,17 +159,20 @@ export class CalculatedPredictorDataUpdateComponent {
       let predictorIndex: number = existingPredictorIndex[i];
       if (!this.predictorData[predictorIndex].weatherOverride && !this.predictorData[predictorIndex].updatedAmount) {
         let entryDate: Date = new Date(this.predictorData[predictorIndex].date);
-        // let degreeDays: Array<DetailDegreeDay> = await this.weatherDataService.getDegreeDaysForMonth(entryDate, this.predictor.weatherStationId, this.predictor.weatherStationName, this.predictor.heatingBaseTemperature, this.predictor.coolingBaseTemperature);
+        let degreeDays: Array<DetailDegreeDay> | 'error' = await this.weatherDataService.getDegreeDaysForMonth(entryDate, this.predictor.weatherStationId, this.predictor.weatherStationName, this.predictor.heatingBaseTemperature, this.predictor.coolingBaseTemperature);
         //ISSUE 1822
-        await this.degreeDaysService.setYearHourlyData(entryDate.getMonth(), entryDate.getFullYear(), this.predictor.weatherStationId,)
-        let degreeDays: Array<DetailDegreeDay> = await this.degreeDaysService.getDetailedDataForMonth(entryDate.getMonth(), this.predictor.heatingBaseTemperature, this.predictor.coolingBaseTemperature)
-
-        let hasErrors: DetailDegreeDay = degreeDays.find(degreeDay => {
-          return degreeDay.gapInData == true
-        });
-        this.predictorData[predictorIndex].updatedAmount = getDegreeDayAmount(degreeDays, this.predictor.weatherDataType);
-        this.predictorData[predictorIndex].changeAmount = Math.abs(this.predictorData[predictorIndex].amount - this.predictorData[predictorIndex].updatedAmount)
-        this.predictorData[predictorIndex].weatherDataWarning = hasErrors != undefined || degreeDays.length == 0;
+        // await this.degreeDaysService.setYearHourlyData(entryDate.getMonth(), entryDate.getFullYear(), this.predictor.weatherStationId,)
+        // let degreeDays: Array<DetailDegreeDay> = await this.degreeDaysService.getDetailedDataForMonth(entryDate.getMonth(), this.predictor.heatingBaseTemperature, this.predictor.coolingBaseTemperature)
+        if (degreeDays != 'error') {
+          let hasErrors: DetailDegreeDay = degreeDays.find(degreeDay => {
+            return degreeDay.gapInData == true
+          });
+          this.predictorData[predictorIndex].updatedAmount = getDegreeDayAmount(degreeDays, this.predictor.weatherDataType);
+          this.predictorData[predictorIndex].changeAmount = Math.abs(this.predictorData[predictorIndex].amount - this.predictorData[predictorIndex].updatedAmount)
+          this.predictorData[predictorIndex].weatherDataWarning = hasErrors != undefined || degreeDays.length == 0;
+        } else {
+          this.toastNotificationService.weatherDataErrorToast();
+        }
       }
     }
     this.setDataSummary();
@@ -226,34 +229,38 @@ export class CalculatedPredictorDataUpdateComponent {
   }
 
   async addDegreeDays(startDate: Date, endDate: Date) {
-    // let parsedData: Array<WeatherDataReading> = await this.weatherDataService.getHourlyData(this.predictor.weatherStationId, startDate, endDate, ['humidity']);
-    while (startDate <= endDate) {
-      if (this.destroyed) {
-        break;
+    let parsedData: Array<WeatherDataReading> | 'error' = await this.weatherDataService.getHourlyData(this.predictor.weatherStationId, startDate, endDate, ['humidity']);
+    if (parsedData != 'error') {
+      while (startDate <= endDate) {
+        if (this.destroyed) {
+          break;
+        }
+        this.calculatingData = true;
+        let newDate: Date = new Date(startDate);
+        this.calculationDate = new Date(newDate);
+        //ISSUE 1822
+        let degreeDays: Array<DetailDegreeDay> = getDetailedDataForMonth(parsedData, newDate.getMonth(), newDate.getFullYear(), this.predictor.heatingBaseTemperature, this.predictor.coolingBaseTemperature, this.predictor.weatherStationId, this.predictor.weatherStationName);
+        // await this.degreeDaysService.setYearHourlyData(newDate.getMonth(), newDate.getFullYear(), this.predictor.weatherStationId,)
+        // let degreeDays: Array<DetailDegreeDay> = await this.degreeDaysService.getDetailedDataForMonth(newDate.getMonth(), this.predictor.heatingBaseTemperature, this.predictor.coolingBaseTemperature)
+        let hasErrors: DetailDegreeDay = degreeDays.find(degreeDay => {
+          return degreeDay.gapInData == true
+        });
+        let newPredictorData: IdbPredictorData = getNewIdbPredictorData(this.predictor);
+        newPredictorData.date = newDate;
+        newPredictorData.amount = getDegreeDayAmount(degreeDays, this.predictor.weatherDataType);
+        newPredictorData.weatherDataWarning = hasErrors != undefined || degreeDays.length == 0;
+        let tableItem: CalculatedPredictorTableItem = {
+          ...newPredictorData,
+          updatedAmount: newPredictorData.amount,
+          changeAmount: 0,
+          deleted: false,
+          added: true
+        };
+        this.predictorData.push(tableItem);
+        startDate.setMonth(startDate.getMonth() + 1);
       }
-      this.calculatingData = true;
-      let newDate: Date = new Date(startDate);
-      this.calculationDate = new Date(newDate);
-      //ISSUE 1822
-      // let degreeDays: Array<DetailDegreeDay> = getDetailedDataForMonth(parsedData, newDate.getMonth(), newDate.getFullYear(), this.predictor.heatingBaseTemperature, this.predictor.coolingBaseTemperature, this.predictor.weatherStationId, this.predictor.weatherStationName);
-      await this.degreeDaysService.setYearHourlyData(newDate.getMonth(), newDate.getFullYear(), this.predictor.weatherStationId,)
-      let degreeDays: Array<DetailDegreeDay> = await this.degreeDaysService.getDetailedDataForMonth(newDate.getMonth(), this.predictor.heatingBaseTemperature, this.predictor.coolingBaseTemperature)
-      let hasErrors: DetailDegreeDay = degreeDays.find(degreeDay => {
-        return degreeDay.gapInData == true
-      });
-      let newPredictorData: IdbPredictorData = getNewIdbPredictorData(this.predictor);
-      newPredictorData.date = newDate;
-      newPredictorData.amount = getDegreeDayAmount(degreeDays, this.predictor.weatherDataType);
-      newPredictorData.weatherDataWarning = hasErrors != undefined || degreeDays.length == 0;
-      let tableItem: CalculatedPredictorTableItem = {
-        ...newPredictorData,
-        updatedAmount: newPredictorData.amount,
-        changeAmount: 0,
-        deleted: false,
-        added: true
-      };
-      this.predictorData.push(tableItem);
-      startDate.setMonth(startDate.getMonth() + 1);
+    }else{
+      this.toastNotificationService.weatherDataErrorToast();
     }
   }
 

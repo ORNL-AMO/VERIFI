@@ -16,7 +16,7 @@ import * as _ from 'lodash';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { getDegreeDayAmount } from 'src/app/shared/sharedHelperFuntions';
-import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
+// import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
 
 @Component({
   selector: 'app-predictors-data-form',
@@ -38,8 +38,9 @@ export class PredictorsDataFormComponent {
     private loadingService: LoadingService,
     private toastNotificationService: ToastNotificationsService,
     private weatherDataService: WeatherDataService,
-    private predictorDataDbService: PredictorDataDbService,
-    private degreeDaysService: DegreeDaysService) {
+    private predictorDataDbService: PredictorDataDbService
+    // private degreeDaysService: DegreeDaysService
+  ) {
   }
 
   ngOnInit() {
@@ -112,17 +113,21 @@ export class PredictorsDataFormComponent {
       if (!this.predictorData.weatherOverride) {
         let entryDate: Date = new Date(this.predictorData.date);
         //ISSUE 1822
-        await this.degreeDaysService.setYearHourlyData(entryDate.getMonth(), entryDate.getFullYear(), this.predictor.weatherStationId,)
-        let degreeDays: Array<DetailDegreeDay> = await this.degreeDaysService.getDetailedDataForMonth(entryDate.getMonth(), this.predictor.heatingBaseTemperature, this.predictor.coolingBaseTemperature)
-        // let degreeDays: Array<DetailDegreeDay> = await this.weatherDataService.getDegreeDaysForMonth(entryDate, this.predictor.weatherStationId, this.predictor.weatherStationName, this.predictor.heatingBaseTemperature, this.predictor.coolingBaseTemperature);
-        let hasErrors: DetailDegreeDay = degreeDays.find(degreeDay => {
-          return degreeDay.gapInData == true
-        });
-        if (!hasWeatherDataWarning && hasErrors != undefined || degreeDays.length == 0) {
-          hasWeatherDataWarning = true;
+        // await this.degreeDaysService.setYearHourlyData(entryDate.getMonth(), entryDate.getFullYear(), this.predictor.weatherStationId,)
+        // let degreeDays: Array<DetailDegreeDay> = await this.degreeDaysService.getDetailedDataForMonth(entryDate.getMonth(), this.predictor.heatingBaseTemperature, this.predictor.coolingBaseTemperature)
+        let degreeDays: Array<DetailDegreeDay> | 'error' = await this.weatherDataService.getDegreeDaysForMonth(entryDate, this.predictor.weatherStationId, this.predictor.weatherStationName, this.predictor.heatingBaseTemperature, this.predictor.coolingBaseTemperature);
+        if (degreeDays != 'error') {
+          let hasErrors: DetailDegreeDay = degreeDays.find(degreeDay => {
+            return degreeDay.gapInData == true
+          });
+          if (!hasWeatherDataWarning && hasErrors != undefined || degreeDays.length == 0) {
+            hasWeatherDataWarning = true;
+          }
+          this.predictorData.amount = getDegreeDayAmount(degreeDays, this.predictor.weatherDataType);
+          this.predictorData.weatherDataWarning = hasErrors != undefined || degreeDays.length == 0;
+        } else {
+          this.toastNotificationService.weatherDataErrorToast();
         }
-        this.predictorData.amount = getDegreeDayAmount(degreeDays, this.predictor.weatherDataType);
-        this.predictorData.weatherDataWarning = hasErrors != undefined || degreeDays.length == 0;
       }
     }
     this.calculatingDegreeDays = false;

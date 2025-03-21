@@ -48,77 +48,90 @@ export class WeatherDataService {
   }
 
 
-  // getStationsAPI(zipCode: string, distance: number): Observable<any> {
-  //   let currentDate: Date = new Date();
-  //   let data = {
-  //     "zip": zipCode,
-  //     "radial_distance": distance,
-  //     "start_date": "2013-03-01",
-  //     "end_date": currentDate.getFullYear() + '-' + currentDate.getMonth() + '-' + currentDate.getDate()
-  //   };
-  //   let httpOptions = {
-  //     responseType: 'text' as const,
-  //     headers: this.requestHeaders
-  //   };
+  getStationsAPI(zipCode: string, distance: number): Observable<any> {
+    let currentDate: Date = new Date();
+    let data = {
+      "zip": zipCode,
+      "radial_distance": distance,
+      "start_date": "2013-03-01",
+      "end_date": currentDate.getFullYear() + '-' + currentDate.getMonth() + '-' + currentDate.getDate()
+    };
+    let httpOptions = {
+      responseType: 'text' as const,
+      headers: this.requestHeaders
+    };
 
-  //   return this.httpClient.post(environment.weatherApi + '/stations', data, httpOptions);
-  // }
+    return this.httpClient.post(environment.weatherApi + '/stations', data, httpOptions);
+  }
 
-  // async getStations(zipCode: string, distance: number): Promise<Array<WeatherStation>> {
-  //   let apiData: string = await firstValueFrom(this.getStationsAPI(zipCode, distance));
-  //   let stations: Array<WeatherStation> = JSON.parse(apiData).stations.map(station => {
-  //     return getWeatherStation(station)
-  //   });
-  //   return stations;
-  // }
+  async getStations(zipCode: string, distance: number): Promise<Array<WeatherStation>> {
+    let apiData: string = await firstValueFrom(this.getStationsAPI(zipCode, distance));
+    let stations: Array<WeatherStation> = JSON.parse(apiData).stations.map(station => {
+      return getWeatherStation(station)
+    });
+    return stations;
+  }
 
-  // getStationAPI(stationId: string): Observable<any> {
-  //   let httpOptions = {
-  //     responseType: 'text' as const,
-  //     headers: this.requestHeaders
-  //   };
-  //   return this.httpClient.post(environment.weatherApi + '/station/' + stationId, {}, httpOptions);
-  // }
+  getStationAPI(stationId: string): Observable<any> {
+    let httpOptions = {
+      responseType: 'text' as const,
+      headers: this.requestHeaders
+    };
+    return this.httpClient.post(environment.weatherApi + '/station/' + stationId, {}, httpOptions);
+  }
 
-  // async getStation(stationId: string) {
-  //   let apiData: string = await firstValueFrom(this.getStationAPI(stationId));
-  //   let station: WeatherStation = getWeatherStation(JSON.parse(apiData));
-  //   station.ID = stationId;
-  //   return station;
-  // }
-
-
-  // async getHourlyData(stationId: string, startDate: Date, endDate: Date, parameters: Array<WeatherDataParams>): Promise<Array<WeatherDataReading>> {
-  //   let apiData: string = await firstValueFrom(this.getHourlyDataAPI(stationId, startDate, endDate, parameters));
-  //   let parsedData: Array<WeatherDataReading> = JSON.parse(apiData).hourly_data;
-  //   return parsedData;
-  // }
+  async getStation(stationId: string): Promise<WeatherStation | 'error'> {
+    try {
+      let apiData: string = await firstValueFrom(this.getStationAPI(stationId));
+      let station: WeatherStation = getWeatherStation(JSON.parse(apiData));
+      station.ID = stationId;
+      return station;
+    } catch (err) {
+      return 'error'
+    }
+  }
 
 
-  // getHourlyDataAPI(stationId: string, startDate: Date, endDate: Date, parameters: Array<WeatherDataParams>): Observable<string> {
-  //   let monthAfterEndDate: Date = new Date(endDate);
-  //   monthAfterEndDate.setMonth(monthAfterEndDate.getMonth() + 1);
-  //   let data = {
-  //     "station_id": stationId,
-  //     "start_date": getWeatherDataDate(startDate),
-  //     "end_date": getWeatherDataDate(monthAfterEndDate),
-  //     "parameters": ['dry_bulb_temp', 'humidity', 'dew_point_temp', 'wet_bulb_temp', 'pressure', 'precipitation', 'wind_speed']
-  //   };
-  //   let httpOptions = {
-  //     responseType: 'text' as const,
-  //     headers: this.requestHeaders
-  //   };
-  //   return this.httpClient.post(environment.weatherApi + '/data', data, httpOptions);
-  // }
+  async getHourlyData(stationId: string, startDate: Date, endDate: Date, parameters: Array<WeatherDataParams>): Promise<Array<WeatherDataReading> | 'error'> {
+    try {
+      let apiData: string = await firstValueFrom(this.getHourlyDataAPI(stationId, startDate, endDate, parameters));
+      let parsedData: Array<WeatherDataReading> = JSON.parse(apiData).hourly_data;
+      return parsedData;
+    } catch (err) {
+      console.log(err)
+      return 'error';
+    }
+  }
 
 
-  // async getDegreeDaysForMonth(entryDate: Date, stationId: string, weatherStationName: string, heatingBaseTemperature: number, coolingBaseTemperature: number): Promise<Array<DetailDegreeDay>> {
-  //   let startDate: Date = new Date(entryDate.getFullYear(), entryDate.getMonth() - 1, 1);
-  //   let endDate: Date = new Date(entryDate.getFullYear(), entryDate.getMonth() + 1, 1);
-  //   let parsedData: Array<WeatherDataReading> = await this.getHourlyData(stationId, startDate, endDate, ['humidity'])
-  //   let degreeDays: Array<DetailDegreeDay> = getDetailedDataForMonth(parsedData, entryDate.getMonth(), entryDate.getFullYear(), heatingBaseTemperature, coolingBaseTemperature, stationId, weatherStationName);
-  //   return degreeDays;
-  // }
+  getHourlyDataAPI(stationId: string, startDate: Date, endDate: Date, parameters: Array<WeatherDataParams>): Observable<string> {
+    let monthAfterEndDate: Date = new Date(endDate);
+    monthAfterEndDate.setMonth(monthAfterEndDate.getMonth() + 1);
+    let data = {
+      "station_id": stationId,
+      "start_date": getWeatherDataDate(startDate),
+      "end_date": getWeatherDataDate(monthAfterEndDate),
+      "parameters": ['dry_bulb_temp', 'humidity', 'dew_point_temp', 'wet_bulb_temp', 'pressure', 'precipitation', 'wind_speed']
+    };
+    let httpOptions = {
+      responseType: 'text' as const,
+      headers: this.requestHeaders
+    };
+    return this.httpClient.post(environment.weatherApi + '/data', data, httpOptions);
+  }
+
+
+  async getDegreeDaysForMonth(entryDate: Date, stationId: string, weatherStationName: string, heatingBaseTemperature: number, coolingBaseTemperature: number): Promise<Array<DetailDegreeDay> | "error"> {
+    let startDate: Date = new Date(entryDate.getFullYear(), entryDate.getMonth() - 1, 1);
+    let endDate: Date = new Date(entryDate.getFullYear(), entryDate.getMonth() + 1, 1);
+    let parsedData: Array<WeatherDataReading> | "error" = await this.getHourlyData(stationId, startDate, endDate, ['humidity'])
+    if (parsedData != "error") {
+      let degreeDays: Array<DetailDegreeDay> = getDetailedDataForMonth(parsedData, entryDate.getMonth(), entryDate.getFullYear(), heatingBaseTemperature, coolingBaseTemperature, stationId, weatherStationName);
+      return degreeDays;
+    } else {
+      return "error"
+    }
+  }
 }
 
 export function getWeatherDataDate(date: Date): string {

@@ -5,7 +5,8 @@ import * as _ from 'lodash';
 import { WeatherDataReading, WeatherDataService } from '../weather-data.service';
 import { getDegreeDayAmount } from 'src/app/shared/sharedHelperFuntions';
 import { getMonthlyDataFromYear } from '../weatherDataCalculations';
-import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
+import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
+// import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
 
 @Component({
   selector: 'app-annual-station-data',
@@ -28,7 +29,9 @@ export class AnnualStationDataComponent {
   weatherDataSelectionOptions: Array<WeatherDataSelectionOption> = WeatherDataSelectionOptions;
   constructor(private router: Router,
     private weatherDataService: WeatherDataService,
-    private degreeDaysService: DegreeDaysService) {
+    // private degreeDaysService: DegreeDaysService,
+    private toastNotificationService: ToastNotificationsService
+  ) {
 
   }
 
@@ -58,12 +61,17 @@ export class AnnualStationDataComponent {
     this.calculating = true;
     if (this.selectedYear && this.heatingTemp) {
       //ISSUE 1822
-      // let startDate: Date = new Date(this.selectedYear, 0, 1)
-      // let endDate: Date = new Date(this.selectedYear + 1, 0, 1);
-      // let parsedData: Array<WeatherDataReading> = await this.weatherDataService.getHourlyData(this.weatherStation.ID, startDate, endDate, ['humidity'])
-      // this.detailedDegreeDays = getMonthlyDataFromYear(parsedData, this.selectedYear, this.heatingTemp, this.coolingTemp, this.weatherStation);
-      this.detailedDegreeDays = await this.degreeDaysService.getMonthlyDataFromYear(this.selectedYear, this.heatingTemp, this.coolingTemp, this.weatherStation);
-      this.setYearSummaryData();
+      let startDate: Date = new Date(this.selectedYear, 0, 1)
+      let endDate: Date = new Date(this.selectedYear + 1, 0, 1);
+      let parsedData: Array<WeatherDataReading> | 'error' = await this.weatherDataService.getHourlyData(this.weatherStation.ID, startDate, endDate, ['humidity'])
+      if (parsedData != 'error') {
+        this.detailedDegreeDays = getMonthlyDataFromYear(parsedData, this.selectedYear, this.heatingTemp, this.coolingTemp, this.weatherStation);
+        // this.detailedDegreeDays = await this.degreeDaysService.getMonthlyDataFromYear(this.selectedYear, this.heatingTemp, this.coolingTemp, this.weatherStation);
+        this.setYearSummaryData();
+      }else{
+        this.yearSummaryData = [];
+        this.toastNotificationService.weatherDataErrorToast();
+      }
     } else {
       this.detailedDegreeDays = undefined;
       this.yearSummaryData = undefined;
