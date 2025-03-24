@@ -6,7 +6,7 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { Subscription } from 'rxjs';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
+// import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
 
 @Component({
   selector: 'app-weather-stations',
@@ -28,7 +28,8 @@ export class WeatherStationsComponent {
   constructor(private accountDbService: AccountdbService,
     private weatherDataService: WeatherDataService,
     private facilityDbService: FacilitydbService,
-    private degreeDaysService: DegreeDaysService) {
+    // private degreeDaysService: DegreeDaysService
+  ) {
 
   }
 
@@ -53,15 +54,15 @@ export class WeatherStationsComponent {
 
   async setStations() {
     if (this.zipCode && this.zipCode.length == 5 && this.furthestDistance && this.furthestDistance <= 500) {
-      //ISSUE: 822
-      // this.fetchingData = true;
-      // this.stations = await this.weatherDataService.getStations(this.zipCode, this.furthestDistance);
-      // this.fetchingData = false;
+      //ISSUE: 1822
       this.fetchingData = true;
-      this.degreeDaysService.getClosestStation(this.zipCode, this.furthestDistance).then(stations => {
-        this.stations = stations;
-        this.fetchingData = false;
-      });
+      this.stations = await this.weatherDataService.getStations(this.zipCode, this.furthestDistance);
+      this.fetchingData = false;
+      // this.fetchingData = true;
+      // this.degreeDaysService.getClosestStation(this.zipCode, this.furthestDistance).then(stations => {
+      //   this.stations = stations;
+      //   this.fetchingData = false;
+      // });
     } else {
       this.fetchingData = false;
       this.stations = [];
