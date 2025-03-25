@@ -75,7 +75,6 @@ export function getDetailedDataForMonth(hourlyData: Array<WeatherDataReading>, m
                 heatingDegreeDay = heatingDegreeDifference * portionOfDay;
             }
 
-            let gapInData: boolean = false
             let minutesBetween: number = getMinutesBetweenDates(previousDate, localClimatologicalDataMonth[i].time);
             if (minutesBetween > 720) {
                 gapInData = true;
