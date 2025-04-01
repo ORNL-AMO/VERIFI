@@ -45,9 +45,9 @@ export class ManageAccountsComponent {
     this.allAccountsSub = this.accountDbService.allAccounts.subscribe(accounts => {
       this.accounts = accounts;
       this.accountErrors = this.accounts.map(account => { return undefined });
-      if (this.accounts.length == 0) {
-        this.router.navigateByUrl('/setup-wizard');
-      }
+      // if (this.accounts.length == 0) {
+      //   this.router.navigateByUrl('/setup-wizard');
+      // }
     });
   }
 
@@ -126,7 +126,7 @@ export class ManageAccountsComponent {
   async deleteDatabase() {
     this.loadingService.setLoadingStatus(true);
     this.loadingService.setLoadingMessage('Resetting Database, if this takes too long restart application..');
-    this.accountDbService.deleteDatabase();
+    await this.accountDbService.deleteDatabase();
   }
 
   toggleResetDatabase() {
