@@ -22,6 +22,18 @@ export class WeatherStationsMapComponent {
     latitude: number,
     longitude: number,
   };
+  @Input()
+  stateLines = {
+    type: 'scattergeo',
+    mode: 'lines',
+    lat: [],
+    lon: [],
+    line: {
+      color: 'gray',
+      width: 1
+    },
+    showlegend: false
+  };
 
   @ViewChild('weatherStationMap', { static: false }) weatherStationMap: ElementRef;
 
@@ -50,26 +62,15 @@ export class WeatherStationsMapComponent {
       this.setMapData();
       this.drawChart();
     }
-    // if ((changes.addressLatLong && !changes.addressLatLong.isFirstChange())) {
-    //     this.drawChart2();
-    // }
   }
 
   drawChart() {
     if (this.weatherStationMap && this.mapData && this.mapData.length != 0) {
-      // let zipCodeItem: {
-      //   lng: string,
-      //   lat: string,
-      //   name: string,
-      //   isZip: boolean
-      // } = this.mapData.find(item => { return item.isZip == true });
-
       var data = [{
         type: 'scattergeo',
         mode: 'markers',
         lat: this.mapData.map(item => { return item.lat }),
         lon: this.mapData.map(item => { return item.lng }),
-        // hovertext: this.getHoverData(),
         hoverinfo: 'text',
         text: this.mapData.map(item => { return item.name }),
         marker: {
@@ -88,38 +89,30 @@ export class WeatherStationsMapComponent {
               return 'blue';
             }
           }),
-          // cmin: 0,
-          // cmax: cmax,
           line: {
             color: 'black'
           },
-          // symbol: this.getSymbol()
         },
-        // name: this.getName(),
-
-        // locationmode: "USA-states",
       }];
 
-      var layout = {
-        'geo': {
+
+      // Layout configuration
+      const layout = {
+        geo: {
           scope: 'world',
-          resolution: 110,
           showland: true,
+          landcolor: 'lightgray',
+          showocean: true,
+          oceancolor: 'lightblue',
           showcountries: true,
-          showsubunits: true,
-          // landcolor: 'rgb(20, 90, 50)',
-          // subunitwidth: 1,
-          // countrywidth: 1,
-          // subunitcolor: 'rgb(255,255,255)',
-          // countrycolor: 'rgb(255,255,255)',
-          center: {
-            lat: this.addressLatLong?.latitude.toString(),
-            lng: this.addressLatLong?.longitude.toString(),
+          countrycolor: 'black',
+          showlakes: true,
+          lakecolor: 'lightblue',
+          projection: {
+            type: 'natural earth'
           },
-          zoom: 3
-          // projection: {
-          //   scale: this.getScale()
-          // }
+          lonaxis: {},
+          lataxis: {}
         },
         showlegend: false,
         margin: { "t": 0, "b": 50, "l": 0, "r": 50 },
@@ -128,10 +121,12 @@ export class WeatherStationsMapComponent {
       let config = {
         displaylogo: false,
         responsive: true,
-        // scrollZoom: false
       }
+      // Combine data and state lines
+      const allData = [this.stateLines, ...data];
 
-      this.plotlyService.newPlot(this.weatherStationMap.nativeElement, data, layout, config);
+      // Create the plot
+      this.plotlyService.newPlot(this.weatherStationMap.nativeElement, allData, layout, config);
     }
   }
 
@@ -148,26 +143,14 @@ export class WeatherStationsMapComponent {
       this.mapData.push({
         lat: this.addressLatLong.latitude.toString(),
         lng: this.addressLatLong.longitude.toString(),
-        name: "Address Location",
+        name: "Search Location",
         isZip: true
       })
     }
-    console.log(this.stations);
     let countries: Array<string> = this.stations.flatMap(station => {
       return station.country
     });
     countries = _.uniq(countries);
-    console.log(countries);
-
-    // let locationLatLong: { ZIP: string, LAT: string, LNG: string } = this.eGridService.zipLatLong.find(zipLL => { return zipLL.ZIP == this.zipCode });
-    // if (locationLatLong) {
-    //   this.mapData.push({
-    //     lat: locationLatLong.LAT,
-    //     lng: locationLatLong.LNG,
-    //     name: this.zipCode,
-    //     isZip: true
-    //   })
-    // }
   }
 
   getScale() {

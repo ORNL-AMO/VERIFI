@@ -93,7 +93,7 @@ export class WeatherDataService {
       responseType: 'text' as const,
       headers: this.requestHeaders
     };
-    return this.httpClient.post(environment.weatherApi + '/cntry-stations/' + country, {}, httpOptions);
+    return this.httpClient.post(environment.weatherApi + '/country-stations/' + country, {}, httpOptions);
   }
 
 

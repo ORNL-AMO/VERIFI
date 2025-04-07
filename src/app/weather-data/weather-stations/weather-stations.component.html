@@ -1,11 +1,3 @@
-<!-- <nav aria-label="breadcrumb">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item active">Weather Stations</li>
-    </ol>
-</nav> -->
-<!-- <p>
-    Explore weather stations. Set the zip code and the radius distance from that location to include weather stations.
-</p> -->
 <div class="d-flex w-100 justify-content-between">
     <div class="large semibold mt-auto">
         Weather Stations
@@ -43,22 +35,17 @@
                             Use the Lat/Long search to find locations. Weather stations can be found using
                             geocoordinates.
                         </p>
-                        <ng-container *ngIf="!useFacility">
-                            <input type="text" class="form-control" name="addressString" id="addressString"
-                                [(ngModel)]="addressString" [disabled]="fetchingData">
-
-
-                        </ng-container>
 
                         <ng-container *ngIf="useFacility">
-                            <select class="form-select" name="zipCode" id="zipCode" [(ngModel)]="selectedFacilityId"
-                                (change)="changeFacility()" (input)="clearStations()" [disabled]="fetchingData">
+                            <select class="form-select" name="selectedFacilityId" id="selectedFacilityId"
+                                [(ngModel)]="selectedFacilityId" (change)="changeFacility()" [disabled]="fetchingData">
                                 <option *ngFor="let facility of facilities" [ngValue]="facility.guid">{{facility.name}}
-                                    <!--todo add address-->
-                                    <!-- ({{facility }}) -->
                                 </option>
                             </select>
                         </ng-container>
+                        <input type="text" class="form-control" name="addressString" id="addressString"
+                            [(ngModel)]="addressString" [disabled]="fetchingData">
+
                     </div>
                     <div class="col-12 mt-3">
                         <div class="float-end" *ngIf="!fetchingData">
@@ -84,78 +71,89 @@
             </ng-template>
         </div>
         <div class="col-6">
-            <ng-template [ngIf]="isLocationSearch">
-                <table class="table table-sm table-bordered">
-                    <thead>
-                        <tr>
-                            <th>
-
-                            </th>
-                            <th>
-                                Type
-                            </th>
-                            <th>
-                                Display Name
-                            </th>
-                            <th>
-                                (Lat, Long)
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <ng-template [ngIf]="addressLookupItems.length > 0" [ngIfElse]="noItemsBlock">
-                            <tr *ngFor="let item of addressLookupItems">
-                                <td>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="selectedLocationId"
-                                            [(ngModel)]="selectedLocationId" id="{{item.place_id}}"
-                                            [value]="item.place_id" (change)="setLatLongFromItem(item)">
-                                    </div>
-                                </td>
-                                <td>
-                                    {{item.addresstype}}
-                                </td>
-                                <td>
-                                    {{item.display_name}}
-                                </td>
-                                <td>
-                                    ({{item.lat}}, {{item.lon}})
-                                </td>
-                            </tr>
-                        </ng-template>
-                        <ng-template #noItemsBlock>
+            <label class="semibold w-100">
+                Select Location to Search For Stations
+            </label>
+            <ng-template [ngIf]="!searchingLatLong" [ngIfElse]="searchingLatLongBlock">
+                <ng-template [ngIf]="isLocationSearch">
+                    <table class="table table-sm table-bordered">
+                        <thead>
                             <tr>
-                                <td colspan="4">
-                                    Use search to the left to find list of corresponding locations to choose from.
-                                </td>
+                                <th>
+
+                                </th>
+                                <th>
+                                    Type
+                                </th>
+                                <th>
+                                    Display Name
+                                </th>
+                                <th>
+                                    (Lat, Long)
+                                </th>
                             </tr>
-                        </ng-template>
-                    </tbody>
-                </table>
-                <hr class="my-1">
+                        </thead>
+                        <tbody>
+                            <ng-template [ngIf]="addressLookupItems.length > 0" [ngIfElse]="noItemsBlock">
+                                <tr *ngFor="let item of addressLookupItems">
+                                    <td>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="selectedLocationId"
+                                                [(ngModel)]="selectedLocationId" id="{{item.place_id}}"
+                                                [value]="item.place_id" (change)="setLatLongFromItem(item)">
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {{item.addresstype}}
+                                    </td>
+                                    <td>
+                                        {{item.display_name}}
+                                    </td>
+                                    <td>
+                                        ({{item.lat}}, {{item.lon}})
+                                    </td>
+                                </tr>
+                            </ng-template>
+                            <ng-template #noItemsBlock>
+                                <tr>
+                                    <td colspan="4">
+                                        Use search to the left to find list of corresponding locations to choose from.
+                                    </td>
+                                </tr>
+                            </ng-template>
+                        </tbody>
+                    </table>
+                    <hr class="my-1">
+                </ng-template>
+                <div class="col-12">
+                    <label class="semibold" for="furthestDistance">Furthest Distance</label>
+                    <div class="input-group mb-3">
+                        <input type="number" class="form-control" name="furthestDistance" id="furthestDistance"
+                            [(ngModel)]="furthestDistance" (input)="clearStations()" [disabled]="fetchingData"
+                            [max]="150">
+                        <span class="input-group-text">miles</span>
+                    </div>
+                    <div class="alert-danger alert" *ngIf="furthestDistance > 150">
+                        For performance reasons we cannot map further then 150 miles.</div>
+                </div>
+                <div class="col-12">
+                    <div class="float-end" *ngIf="!fetchingData">
+                        <button class="btn action-btn" (click)="setStations()"
+                            [disabled]="furthestDistance > 150 || addressLatLong.latitude == undefined|| addressLatLong.longitude == undefined">Fetch
+                            Stations</button>
+                    </div>
+                </div>
             </ng-template>
-            <div class="col-12">
-                <label class="semibold" for="furthestDistance">Furthest Distance</label>
-                <div class="input-group mb-3">
-                    <input type="number" class="form-control" name="furthestDistance" id="furthestDistance"
-                        [(ngModel)]="furthestDistance" (input)="clearStations()" [disabled]="fetchingData" [max]="150">
-                    <span class="input-group-text">miles</span>
+            <ng-template #searchingLatLongBlock>
+                <div class="col-12 text-center pb-4 small">
+                    <app-calculating-spinner [message]="'Searching Lat/Lng Locations...'"></app-calculating-spinner>
                 </div>
-                <div class="alert-danger alert" *ngIf="furthestDistance > 150">
-                    For performance reasons we cannot map further then 150 miles.</div>
-            </div>
-            <div class="col-12">
-                <div class="float-end" *ngIf="!fetchingData">
-                    <button class="btn action-btn" (click)="setStations()"
-                        [disabled]="furthestDistance > 150 || addressLatLong.latitude == undefined|| addressLatLong.longitude == undefined">Fetch
-                        Stations</button>
-                </div>
-            </div>
+            </ng-template>
         </div>
     </div>
 </form>
 <hr>
-<div class="row" *ngIf="fetchingData">
+<div class="row" *ngIf="fetchingData && !stationSearchError">
     <div class="col-12 text-center pb-4">
         <app-calculating-spinner [message]="'Fetching Stations...'"></app-calculating-spinner>
     </div>
@@ -163,11 +161,19 @@
 <ng-template [ngIf]="stations.length > 0" [ngIfElse]="noStationsBlock">
     <app-weather-stations-table [stations]="stations"></app-weather-stations-table>
     <app-weather-stations-map [stations]="stations" [furthestDistance]="furthestDistance"
-        [addressLatLong]="addressLatLong"></app-weather-stations-map>
+        [addressLatLong]="addressLatLong" [stateLines]="stateLines"></app-weather-stations-map>
 </ng-template>
 <ng-template #noStationsBlock>
-    <div class="alert alert-info p-2" *ngIf="!fetchingData">
-        Set the zip code, furthest distance and then click "Fetch Stations" to get a list of weather stations with
-        hourly weather data.
-    </div>
+    <ng-template [ngIf]="!stationSearchError" [ngIfElse]="stationSearchErrorBlock">
+        <div class="alert alert-info p-2" *ngIf="!fetchingData">
+            Set the zip code, furthest distance and then click "Fetch Stations" to get a list of weather stations with
+            hourly weather data.
+        </div>
+    </ng-template>
+    <ng-template #stationSearchErrorBlock>
+        <div class="alert alert-danger p-1">
+            An error occured while searching for stations. Please make sure the Lat/Long selection is correct. Notify
+            the VERIFI team if this error persists.
+        </div>
+    </ng-template>
 </ng-template>
