@@ -15,7 +15,7 @@ import { WeatherDataService } from 'src/app/weather-data/weather-data.service';
 import * as _ from 'lodash';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { getDegreeDayAmount } from 'src/app/shared/sharedHelperFuntions';
+import { getDegreeDayAmount, getWeatherSearchFromFacility } from 'src/app/shared/sharedHelperFuntions';
 // import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
 
 @Component({
@@ -136,7 +136,7 @@ export class PredictorsDataFormComponent {
   goToWeatherData() {
     let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     this.weatherDataService.selectedFacility = facility;
-    this.weatherDataService.addressSearchStr = facility.city + ', ' + facility.country;
+    this.weatherDataService.addressSearchStr = getWeatherSearchFromFacility(facility);
     this.weatherDataService.selectedMonth = this.predictorData.date;
     this.weatherDataService.selectedYear = new Date(this.predictorData.date).getFullYear();
     this.router.navigateByUrl('/weather-data');

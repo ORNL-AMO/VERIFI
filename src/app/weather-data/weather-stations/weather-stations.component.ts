@@ -5,6 +5,7 @@ import { NominatimLocation, WeatherDataService } from '../weather-data.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { Subscription } from 'rxjs';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { getWeatherSearchFromFacility } from 'src/app/shared/sharedHelperFuntions';
 
 @Component({
   selector: 'app-weather-stations',
@@ -125,7 +126,7 @@ export class WeatherStationsComponent {
   async changeFacility() {
     if (this.selectedFacilityId) {
       let facility: IdbFacility = this.facilities.find(facility => { return facility.guid == this.selectedFacilityId });
-      this.addressString = facility.city + ', ' + facility.country;
+      this.addressString = getWeatherSearchFromFacility(facility);
     } else {
       this.addressString = '';
     }

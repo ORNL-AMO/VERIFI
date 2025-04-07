@@ -119,7 +119,7 @@
                                         {{item.display_name}}
                                     </td>
                                     <td>
-                                        ({{item.lat}}, {{item.lon}})
+                                        ({{item.lat | number:'1.4-4'}}, {{item.lon | number:'1.4-4'}})
                                     </td>
                                 </tr>
                             </ng-template>

@@ -16,7 +16,7 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { firstValueFrom, Observable, of } from 'rxjs';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { getNewIdbPredictorData, IdbPredictorData } from 'src/app/models/idbModels/predictorData';
-import { getDegreeDayAmount } from 'src/app/shared/sharedHelperFuntions';
+import { getDegreeDayAmount, getWeatherSearchFromFacility } from 'src/app/shared/sharedHelperFuntions';
 import { PredictorDataHelperService } from 'src/app/shared/helper-services/predictor-data-helper.service';
 import { DatePipe } from '@angular/common';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
@@ -296,7 +296,7 @@ export class EditPredictorFormComponent {
     this.weatherDataService.weatherDataSelection = this.predictorForm.controls.weatherDataType.value;
 
     this.weatherDataService.selectedFacility = this.facility;
-    this.weatherDataService.addressSearchStr = this.facility.city + ', ' + this.facility.country;
+    this.weatherDataService.addressSearchStr = getWeatherSearchFromFacility(this.facility);
     if (weatherStation) {
       let endDate: Date = new Date(weatherStation.end);
       endDate.setFullYear(endDate.getFullYear() - 1);
