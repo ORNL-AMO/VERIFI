@@ -63,11 +63,16 @@ export class WeatherStationsComponent {
     this.facilitySub = this.facilityDbService.accountFacilities.subscribe(val => {
       this.facilities = val;
     });
+    this.addressString = this.weatherDataService.addressSearchStr
+    if(this.addressString){
+      this.searchLatLong();
+    }
     this.setStateLines();
   }
 
   ngOnDestroy() {
     this.facilitySub.unsubscribe();
+    this.weatherDataService.addressSearchStr = this.addressString;
   }
 
 
@@ -80,7 +85,7 @@ export class WeatherStationsComponent {
         this.stations = await this.weatherDataService.getStationsLatLong(this.addressLatLong, this.furthestDistance);
         this.fetchingData = false;
       } catch (err) {
-        console.log('err')
+        console.log(err)
         this.stationSearchError = true;
         this.stations = [];
         this.fetchingData = false;
@@ -99,6 +104,7 @@ export class WeatherStationsComponent {
     if (this.addressLookupItems.length > 0) {
       this.selectedLocationId = this.addressLookupItems[0].place_id
       this.setLatLongFromItem(this.addressLookupItems[0]);
+      this.setStations();
     }
     this.stationSearchError = false;
   }

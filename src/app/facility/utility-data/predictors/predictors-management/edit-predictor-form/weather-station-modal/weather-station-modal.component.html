@@ -38,30 +38,17 @@
 </div>
 <hr>
 <form>
-
     <div class="row">
         <div class="col-6">
             <ng-template [ngIf]="isLocationSearch" [ngIfElse]="latLongSearchBlock">
                 <div class="row">
                     <div class="col-12">
                         <label class="semibold w-100" for="address">Location Search
-                            <ng-template [ngIf]="facilities.length > 0">
-                                <a *ngIf="!useFacility" class="float-end" (click)="toggleUseZip()">Search By
-                                    Facility</a>
-                                <a *ngIf="useFacility" class="float-end" (click)="toggleUseZip()">Manually Search</a>
-                            </ng-template>
                         </label>
                         <p class="fw-light mb-0 small">
                             Use the Lat/Long search to find locations.
                         </p>
 
-                        <ng-container *ngIf="useFacility">
-                            <select class="form-select" name="selectedFacilityId" id="selectedFacilityId"
-                                [(ngModel)]="selectedFacilityId" (change)="changeFacility()" [disabled]="fetchingData">
-                                <option *ngFor="let facility of facilities" [ngValue]="facility.guid">{{facility.name}}
-                                </option>
-                            </select>
-                        </ng-container>
                         <input type="text" class="form-control" name="addressString" id="addressString"
                             [(ngModel)]="addressString" [disabled]="fetchingData">
 
@@ -148,20 +135,9 @@
                     <hr class="my-1">
                 </ng-template>
                 <div class="col-12">
-                    <label class="semibold" for="furthestDistance">Furthest Distance</label>
-                    <div class="input-group mb-3">
-                        <input type="number" class="form-control" name="furthestDistance" id="furthestDistance"
-                            [(ngModel)]="furthestDistance" (input)="clearStations()" [disabled]="fetchingData"
-                            [max]="150">
-                        <span class="input-group-text">miles</span>
-                    </div>
-                    <div class="alert-danger alert" *ngIf="furthestDistance > 150">
-                        For performance reasons we cannot map further then 150 miles.</div>
-                </div>
-                <div class="col-12">
                     <div class="float-end" *ngIf="!fetchingData">
                         <button class="btn action-btn" (click)="setStations()"
-                            [disabled]="furthestDistance > 150 || addressLatLong.latitude == undefined|| addressLatLong.longitude == undefined">Fetch
+                            [disabled]="addressLatLong.latitude == undefined|| addressLatLong.longitude == undefined">Fetch
                             Stations</button>
                     </div>
                 </div>
@@ -181,14 +157,60 @@
     </div>
 </div>
 <ng-template [ngIf]="stations.length > 0" [ngIfElse]="noStationsBlock">
-    <app-weather-stations-table [stations]="stations"></app-weather-stations-table>
-    <app-weather-stations-map [stations]="stations" [furthestDistance]="furthestDistance"
-        [addressLatLong]="addressLatLong" [stateLines]="stateLines"></app-weather-stations-map>
+    <table class="table utility-data table-sm table-bordered table-hover">
+        <thead class="sortable">
+            <tr>
+                <th (click)="setOrderDataField('name')" [ngClass]="{'active': orderDataField == 'name'}">Station Name
+                </th>
+                <th (click)="setOrderDataField('state')" [ngClass]="{'active': orderDataField == 'state'}">State</th>
+                <th (click)="setOrderDataField('distanceFrom')"
+                    [ngClass]="{'active': orderDataField == 'distanceFrom'}">
+                    Distance Away</th>
+                <th (click)="setOrderDataField('begin')" [ngClass]="{'active': orderDataField == 'begin'}">Data Start
+                </th>
+                <th (click)="setOrderDataField('end')" [ngClass]="{'active': orderDataField == 'end'}">Data End</th>
+                <th (click)="setOrderDataField('ratingPercent')"
+                    [ngClass]="{'active': orderDataField == 'ratingPercent'}">
+                    &percnt; Hourly Coverage
+                </th>
+            </tr>
+        </thead>
+        <tbody class="table-group-divider">
+            <tr
+                *ngFor="let station of stations| orderBy: orderDataField: orderByDirection| slice: ((currentPageNumber-1) * 6): currentPageNumber * 6">
+                <td>
+                    <a class="click-link" (click)="selectStation(station)">{{station.name}} ({{station.lat}},
+                        {{station.lon}})</a>
+                </td>
+                <td>
+                    {{station.state}}
+                </td>
+                <td>
+                    {{station.distanceFrom | number}} miles
+                </td>
+                <td>
+                    {{station.begin | date }}
+                </td>
+                <td>
+                    {{station.end | date }}
+                </td>
+                <td>
+                    {{station.ratingPercent}} &percnt;
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <div class="d-flex w-100 justify-content-end">
+        <ngb-pagination [collectionSize]="stations.length" [(page)]="currentPageNumber" [pageSize]="6"
+            [maxSize]="5" [rotate]="true" aria-label="Pagination">
+        </ngb-pagination>
+    </div>
 </ng-template>
 <ng-template #noStationsBlock>
     <ng-template [ngIf]="!stationSearchError" [ngIfElse]="stationSearchErrorBlock">
         <div class="alert alert-info p-2" *ngIf="!fetchingData">
-            Set or search for the latitude and longitude of a location and then click "Fetch Stations" to get a list of weather stations with
+            Set or search for the latitude and longitude of a location and then click "Fetch Stations" to get a list of
+            weather stations with
             hourly weather data.
         </div>
     </ng-template>
