@@ -1,7 +1,6 @@
 import { Component, SimpleChanges, ElementRef, ViewChild, Input } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { WeatherStation } from 'src/app/models/degreeDays';
-import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 import * as _ from 'lodash';
 
 @Component({
@@ -44,8 +43,7 @@ export class WeatherStationsMapComponent {
     isZip: boolean
   }>;
   scope: string;
-  constructor(private plotlyService: PlotlyService,
-    private eGridService: EGridService) { }
+  constructor(private plotlyService: PlotlyService) { }
 
   ngOnInit(): void {
     this.setMapData();
@@ -54,7 +52,6 @@ export class WeatherStationsMapComponent {
 
   ngAfterViewInit() {
     this.drawChart();
-    // this.drawChart2();
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -152,17 +149,4 @@ export class WeatherStationsMapComponent {
     });
     countries = _.uniq(countries);
   }
-
-  getScale() {
-    if (this.furthestDistance < 10) {
-      return 25;
-    } else if (this.furthestDistance >= 10 && this.furthestDistance < 150) {
-      return 10;
-    } else if (this.furthestDistance >= 150 && this.furthestDistance < 500) {
-      return 5;
-    } else {
-      return 1;
-    }
-  }
-
 }

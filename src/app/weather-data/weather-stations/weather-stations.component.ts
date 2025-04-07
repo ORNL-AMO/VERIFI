@@ -4,9 +4,7 @@ import { WeatherStation } from 'src/app/models/degreeDays';
 import { NominatimLocation, WeatherDataService } from '../weather-data.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { Subscription } from 'rxjs';
-import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { CountryList } from './country-list';
 
 @Component({
   selector: 'app-weather-stations',
@@ -25,9 +23,6 @@ export class WeatherStationsComponent {
   selectedFacilityId: string;
   fetchingData: boolean = false;
   addressString: string;
-  city: string;
-  country: string;
-  CountryList = CountryList;
   addressLatLong: {
     latitude: number,
     longitude: number,
@@ -54,7 +49,7 @@ export class WeatherStationsComponent {
     },
     showlegend: false
   };
-  constructor(private accountDbService: AccountdbService,
+  constructor(
     private weatherDataService: WeatherDataService,
     private facilityDbService: FacilitydbService) {
   }
