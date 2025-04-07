@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { WeatherStation } from 'src/app/models/degreeDays';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { getWeatherSearchFromFacility } from 'src/app/shared/sharedHelperFuntions';
 import { NominatimLocation, WeatherDataService } from 'src/app/weather-data/weather-data.service';
 
 @Component({
@@ -41,7 +42,7 @@ export class WeatherStationModalComponent {
   }
 
   ngOnInit() {
-    this.addressString = this.facility.city + ', ' + this.facility.country;
+    this.addressString = getWeatherSearchFromFacility(this.facility);
     this.searchLatLong();
   }
 

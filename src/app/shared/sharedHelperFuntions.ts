@@ -1,6 +1,7 @@
 import { ConvertValue } from "../calculations/conversions/convertValue";
 import { MeterPhase, MeterSource } from "../models/constantsAndTypes";
 import { DetailDegreeDay, WeatherDataSelection } from "../models/degreeDays";
+import { IdbFacility } from "../models/idbModels/facility";
 import { IdbUtilityMeter } from "../models/idbModels/utilityMeter";
 import { FuelTypeOption } from "./fuel-options/fuelTypeOption";
 import { StationaryOtherEnergyOptions } from "./fuel-options/stationaryOtherEnergyOptions";
@@ -225,4 +226,17 @@ export function getMinutesBetweenDates(firstDate: Date, secondDate: Date): numbe
     let diffMilliseconds = Math.abs(firstDate.getTime() - secondDate.getTime());
     let diffMinutes: number = new ConvertValue(diffMilliseconds, 'ms', 'min').convertedValue;
     return diffMinutes;
+}
+
+
+export function getWeatherSearchFromFacility(facility: IdbFacility): string {
+    if (facility.city && facility.state) {
+        return facility.city + ', ' + facility.state
+    } else if (facility.city && facility.country) {
+        return facility.city + ', ' + facility.country
+    } else if (facility.state && facility.country) {
+        return facility.state + ', ' + facility.country;
+    } else if (facility.zip) {
+        return facility.zip;
+    }
 }

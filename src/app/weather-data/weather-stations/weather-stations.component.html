@@ -132,7 +132,7 @@
                                         {{item.display_name}}
                                     </td>
                                     <td>
-                                        ({{item.lat}}, {{item.lon}})
+                                        ({{item.lat | number:'1.4-4'}}, {{item.lon | number:'1.4-4'}})
                                     </td>
                                 </tr>
                             </ng-template>
@@ -188,7 +188,8 @@
 <ng-template #noStationsBlock>
     <ng-template [ngIf]="!stationSearchError" [ngIfElse]="stationSearchErrorBlock">
         <div class="alert alert-info p-2" *ngIf="!fetchingData">
-            Set or search for the latitude and longitude of a location and then click "Fetch Stations" to get a list of weather stations with
+            Set or search for the latitude and longitude of a location and then click "Fetch Stations" to get a list of
+            weather stations with
             hourly weather data.
         </div>
     </ng-template>
