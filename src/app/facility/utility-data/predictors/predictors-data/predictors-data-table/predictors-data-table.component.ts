@@ -248,7 +248,7 @@ export class PredictorsDataTableComponent {
       this.weatherDataService.selectedMonth = entryDate;
       let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
       this.weatherDataService.selectedFacility = selectedFacility;
-      this.weatherDataService.zipCode = selectedFacility.zip;
+      this.weatherDataService.addressSearchStr = selectedFacility.city + ', ' + selectedFacility.country;
       this.router.navigateByUrl('weather-data/monthly-station');
     } else {
       this.toastNotificationService.showToast('An Error Occured', undefined, undefined, false, 'alert-danger');
@@ -274,7 +274,7 @@ export class PredictorsDataTableComponent {
     this.weatherDataService.selectedFacility = facility;
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     this.weatherDataService.selectedFacility = selectedFacility;
-    this.weatherDataService.zipCode = selectedFacility.zip;
+    this.weatherDataService.addressSearchStr = selectedFacility.city + ', ' + selectedFacility.country;
     this.router.navigateByUrl('/weather-data');
   }
 

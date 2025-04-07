@@ -18,6 +18,7 @@ import { CalculatedPredictorDataUpdateComponent } from './predictors-data/calcul
 import { OrderCalculatedPredictorDataPipe } from './predictors-data/calculated-predictor-data-update/order-calculated-predictor-data.pipe';
 import { WeatherDataSubLabelComponent } from './weather-data-sub-label/weather-data-sub-label.component';
 import { LabelWithTooltipModule } from "../../../shared/label-with-tooltip/label-with-tooltip.module";
+import { WeatherStationModalComponent } from './predictors-management/edit-predictor-form/weather-station-modal/weather-station-modal.component';
 
 
 
@@ -33,7 +34,8 @@ import { LabelWithTooltipModule } from "../../../shared/label-with-tooltip/label
     OrderPredictorDataTablePipe,
     CalculatedPredictorDataUpdateComponent,
     OrderCalculatedPredictorDataPipe,
-    WeatherDataSubLabelComponent
+    WeatherDataSubLabelComponent,
+    WeatherStationModalComponent
   ],
   imports: [
     CommonModule,

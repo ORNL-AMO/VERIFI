@@ -186,7 +186,7 @@ export class PredictorTableComponent {
       this.weatherDataService.selectedMonth = endDate;
     }
     this.weatherDataService.selectedFacility = this.selectedFacility;
-    this.weatherDataService.zipCode = this.selectedFacility.zip;
+    this.weatherDataService.addressSearchStr =  this.selectedFacility.city + ', ' + this.selectedFacility.country;
     this.router.navigateByUrl('weather-data/annual-station')
   }
 
@@ -199,9 +199,8 @@ export class PredictorTableComponent {
   }
 
   goToWeatherData() {
-    let facility: IdbFacility = this.facilitydbService.selectedFacility.getValue();
-    this.weatherDataService.selectedFacility = facility;
-    this.weatherDataService.zipCode = facility.zip;
+    this.weatherDataService.selectedFacility = this.selectedFacility;
+    this.weatherDataService.addressSearchStr =  this.selectedFacility.city + ', ' + this.selectedFacility.country;
     this.router.navigateByUrl('/weather-data');
   }
 

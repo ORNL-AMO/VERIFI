@@ -1,0 +1,223 @@
+<div class="d-flex w-100 justify-content-between">
+    <div class="mt-auto">
+        <label class="semibold">
+            Search For Weather Stations
+        </label>
+        <ol>
+            <ng-template [ngIf]="isLocationSearch" [ngIfElse]="notLocationSearchBlock">
+                <li>
+                    Use the location search below to find latitude and longitude associated with a location.
+                </li>
+                <li>
+                    Select the location from the table populated on the right.
+                </li>
+            </ng-template>
+            <ng-template #notLocationSearchBlock>
+                <li>
+                    Enter the latitude and longitude of a location.
+                </li>
+            </ng-template>
+            <li>
+                "Fetch Stations" will retrieve the list of closest weather stations in our system and display below.
+            </li>
+        </ol>
+    </div>
+    <div class="d-flex flex-column">
+        <label class="semibold">Lookup Method</label>
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="inlineRadioOptions" id="locationSearch"
+                [(ngModel)]="isLocationSearch" [value]="true">
+            <label class="form-check-label" for="locationSearch">Location Search</label>
+        </div>
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="inlineRadioOptions" id="latLongEntry"
+                [(ngModel)]="isLocationSearch" [value]="false">
+            <label class="form-check-label" for="latLongEntry">Lat/Long Entry</label>
+        </div>
+    </div>
+</div>
+<hr>
+<form>
+    <div class="row">
+        <div class="col-6">
+            <ng-template [ngIf]="isLocationSearch" [ngIfElse]="latLongSearchBlock">
+                <div class="row">
+                    <div class="col-12">
+                        <label class="semibold w-100" for="address">Location Search
+                        </label>
+                        <p class="fw-light mb-0 small">
+                            Use the Lat/Long search to find locations.
+                        </p>
+
+                        <input type="text" class="form-control" name="addressString" id="addressString"
+                            [(ngModel)]="addressString" [disabled]="fetchingData">
+
+                    </div>
+                    <div class="col-12 mt-3">
+                        <div class="float-end" *ngIf="!fetchingData">
+                            <button class="btn action-btn" (click)="searchLatLong()"
+                                [disabled]="!addressString && !searchingLatLong">
+                                <span class="fa fa-search"></span> Search
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </ng-template>
+            <ng-template #latLongSearchBlock>
+                <div class="col-12">
+                    <label class="semibold" for="latitude">Latitude</label>
+                    <input class="form-control" type="number" [(ngModel)]="addressLatLong.latitude" name="latitude"
+                        id="latitude">
+                </div>
+                <div class="col-12">
+                    <label class="semibold" for="longitude">Longitude</label>
+                    <input class="form-control" type="number" [(ngModel)]="addressLatLong.longitude" name="longitude"
+                        id="longitude">
+                </div>
+            </ng-template>
+        </div>
+        <div class="col-6">
+            <label class="semibold w-100">
+                Select Location to Search For Stations
+            </label>
+            <p class="fw-light mb-0">
+                Weather stations can be found using geocoordinates.
+            </p>
+            <ng-template [ngIf]="!searchingLatLong" [ngIfElse]="searchingLatLongBlock">
+                <ng-template [ngIf]="isLocationSearch">
+                    <table class="table table-sm table-bordered">
+                        <thead>
+                            <tr>
+                                <th>
+
+                                </th>
+                                <th>
+                                    Type
+                                </th>
+                                <th>
+                                    Display Name
+                                </th>
+                                <th>
+                                    (Lat, Long)
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <ng-template [ngIf]="addressLookupItems.length > 0" [ngIfElse]="noItemsBlock">
+                                <tr *ngFor="let item of addressLookupItems">
+                                    <td>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="selectedLocationId"
+                                                [(ngModel)]="selectedLocationId" id="{{item.place_id}}"
+                                                [value]="item.place_id" (change)="setLatLongFromItem(item)">
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {{item.addresstype}}
+                                    </td>
+                                    <td>
+                                        {{item.display_name}}
+                                    </td>
+                                    <td>
+                                        ({{item.lat}}, {{item.lon}})
+                                    </td>
+                                </tr>
+                            </ng-template>
+                            <ng-template #noItemsBlock>
+                                <tr>
+                                    <td colspan="4">
+                                        Use search to the left to find list of corresponding locations to choose from.
+                                    </td>
+                                </tr>
+                            </ng-template>
+                        </tbody>
+                    </table>
+                    <hr class="my-1">
+                </ng-template>
+                <div class="col-12">
+                    <div class="float-end" *ngIf="!fetchingData">
+                        <button class="btn action-btn" (click)="setStations()"
+                            [disabled]="addressLatLong.latitude == undefined|| addressLatLong.longitude == undefined">Fetch
+                            Stations</button>
+                    </div>
+                </div>
+            </ng-template>
+            <ng-template #searchingLatLongBlock>
+                <div class="col-12 text-center pb-4 small">
+                    <app-calculating-spinner [message]="'Searching Lat/Lng Locations...'"></app-calculating-spinner>
+                </div>
+            </ng-template>
+        </div>
+    </div>
+</form>
+<hr>
+<div class="row" *ngIf="fetchingData && !stationSearchError">
+    <div class="col-12 text-center pb-4">
+        <app-calculating-spinner [message]="'Fetching Stations...'"></app-calculating-spinner>
+    </div>
+</div>
+<ng-template [ngIf]="stations.length > 0" [ngIfElse]="noStationsBlock">
+    <table class="table utility-data table-sm table-bordered table-hover">
+        <thead class="sortable">
+            <tr>
+                <th (click)="setOrderDataField('name')" [ngClass]="{'active': orderDataField == 'name'}">Station Name
+                </th>
+                <th (click)="setOrderDataField('state')" [ngClass]="{'active': orderDataField == 'state'}">State</th>
+                <th (click)="setOrderDataField('distanceFrom')"
+                    [ngClass]="{'active': orderDataField == 'distanceFrom'}">
+                    Distance Away</th>
+                <th (click)="setOrderDataField('begin')" [ngClass]="{'active': orderDataField == 'begin'}">Data Start
+                </th>
+                <th (click)="setOrderDataField('end')" [ngClass]="{'active': orderDataField == 'end'}">Data End</th>
+                <th (click)="setOrderDataField('ratingPercent')"
+                    [ngClass]="{'active': orderDataField == 'ratingPercent'}">
+                    &percnt; Hourly Coverage
+                </th>
+            </tr>
+        </thead>
+        <tbody class="table-group-divider">
+            <tr
+                *ngFor="let station of stations| orderBy: orderDataField: orderByDirection| slice: ((currentPageNumber-1) * 6): currentPageNumber * 6">
+                <td>
+                    <a class="click-link" (click)="selectStation(station)">{{station.name}} ({{station.lat}},
+                        {{station.lon}})</a>
+                </td>
+                <td>
+                    {{station.state}}
+                </td>
+                <td>
+                    {{station.distanceFrom | number}} miles
+                </td>
+                <td>
+                    {{station.begin | date }}
+                </td>
+                <td>
+                    {{station.end | date }}
+                </td>
+                <td>
+                    {{station.ratingPercent}} &percnt;
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <div class="d-flex w-100 justify-content-end">
+        <ngb-pagination [collectionSize]="stations.length" [(page)]="currentPageNumber" [pageSize]="6"
+            [maxSize]="5" [rotate]="true" aria-label="Pagination">
+        </ngb-pagination>
+    </div>
+</ng-template>
+<ng-template #noStationsBlock>
+    <ng-template [ngIf]="!stationSearchError" [ngIfElse]="stationSearchErrorBlock">
+        <div class="alert alert-info p-2" *ngIf="!fetchingData">
+            Set or search for the latitude and longitude of a location and then click "Fetch Stations" to get a list of
+            weather stations with
+            hourly weather data.
+        </div>
+    </ng-template>
+    <ng-template #stationSearchErrorBlock>
+        <div class="alert alert-danger p-1">
+            An error occured while searching for stations. Please make sure the Lat/Long selection is correct. Notify
+            the VERIFI team if this error persists.
+        </div>
+    </ng-template>
+</ng-template>
