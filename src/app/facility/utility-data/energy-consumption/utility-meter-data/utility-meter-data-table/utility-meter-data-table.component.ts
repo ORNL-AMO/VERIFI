@@ -14,6 +14,7 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import * as _ from 'lodash';
+import { getHasDuplicateReadings } from '../../../../../shared/helper-pipes/invalid-meter.pipe';
 
 @Component({
   selector: 'app-utility-meter-data-table',
@@ -80,7 +81,7 @@ export class UtilityMeterDataTableComponent implements OnInit {
     this.hasNegativeReadings = this.meterData.findIndex(mData => {
       return mData.totalEnergyUse < 0
     }) != -1;
-    this.setHasDuplicateReadings();
+    this.duplicateReadingDates = getHasDuplicateReadings(this.selectedMeter.guid, this.meterData);
     this.setHasCheckedItems();
   }
 
@@ -164,23 +165,5 @@ export class UtilityMeterDataTableComponent implements OnInit {
 
   toggleFilterMenu() {
     this.showFilterDropdown = !this.showFilterDropdown;
-  }
-
-  setHasDuplicateReadings() {
-    let readDates: Array<Date> = this.meterData.map(mData => {
-      let date: Date = new Date(mData.readDate);
-      // return date.getFullYear() + '_' + date.getMonth() + '_' + date.getDate();
-      return date
-    });
-    let counts: Array<any> = _.countBy(readDates, (date: Date) => {
-      return date.getFullYear() + '_' + date.getMonth() + '_' + date.getDate();
-    })
-    this.duplicateReadingDates = new Array();
-    for (let obj in counts) {
-      if (counts[obj] > 1) {
-        let vals = obj.split('_');
-        this.duplicateReadingDates.push(new Date(Number(vals[0]), Number(vals[1]), Number(vals[2])));
-      }
-    }
   }
 }

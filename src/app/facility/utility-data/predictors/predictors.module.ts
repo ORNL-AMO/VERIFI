@@ -11,7 +11,7 @@ import { PredictorsDataTableComponent } from './predictors-data/predictors-data-
 import { PredictorsDataFormComponent } from './predictors-data/predictors-data-form/predictors-data-form.component';
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { TableItemsDropdownModule } from 'src/app/shared/table-items-dropdown/table-items-dropdown.module';
-import { HelperPipesModule } from 'src/app/shared/helper-pipes/helper-pipes.module';
+import { HelperPipesModule } from 'src/app/shared/helper-pipes/_helper-pipes.module';
 import { CalculatingSpinnerModule } from 'src/app/shared/calculating-spinner/calculating-spinner.module';
 import { OrderPredictorDataTablePipe } from './predictors-data/predictors-data-table/order-predictor-data-table.pipe';
 import { CalculatedPredictorDataUpdateComponent } from './predictors-data/calculated-predictor-data-update/calculated-predictor-data-update.component';

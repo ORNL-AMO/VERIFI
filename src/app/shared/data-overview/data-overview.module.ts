@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { DataOverviewMapComponent } from './data-overview-map/data-overview-map.component';
 import { FacilityUsageDonutComponent } from './facility-usage-donut/facility-usage-donut.component';
 import { FacilitiesUsageTableComponent } from './facilities-usage-table/facilities-usage-table.component';
-import { HelperPipesModule } from '../helper-pipes/helper-pipes.module';
+import { HelperPipesModule } from '../helper-pipes/_helper-pipes.module';
 // import { AccountUtilityConsumptionTableComponent } from './account-utility-consumption-table/account-utility-consumption-table.component';
 import { FacilitiesUsageStackedBarChartComponent } from './facilities-usage-stacked-bar-chart/facilities-usage-stacked-bar-chart.component';
 import { MonthlyUtilityUsageLineChartComponent } from './monthly-utility-usage-line-chart/monthly-utility-usage-line-chart.component';

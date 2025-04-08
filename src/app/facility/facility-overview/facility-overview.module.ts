@@ -7,7 +7,7 @@ import { FacilityCostOverviewComponent } from './facility-cost-overview/facility
 import { FacilityEmissionsOverviewComponent } from './facility-emissions-overview/facility-emissions-overview.component';
 import { FacilityOverviewBannerComponent } from './facility-overview-banner/facility-overview-banner.component';
 import { RouterModule } from '@angular/router';
-import { HelperPipesModule } from 'src/app/shared/helper-pipes/helper-pipes.module';
+import { HelperPipesModule } from 'src/app/shared/helper-pipes/_helper-pipes.module';
 import { CalculatingSpinnerModule } from 'src/app/shared/calculating-spinner/calculating-spinner.module';
 import { DataOverviewModule } from 'src/app/shared/data-overview/data-overview.module';
 import { FormsModule } from '@angular/forms';
