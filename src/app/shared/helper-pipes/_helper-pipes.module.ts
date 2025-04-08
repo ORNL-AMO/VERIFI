@@ -25,6 +25,7 @@ import { FacilityAnalysisNamePipe } from './facility-analysis-name.pipe';
 import { FacilityReportNamePipe } from './facility-report-name.pipe';
 import { AccountAnalysisNamePipe } from './account-analysis-name.pipe';
 import { CharactersRemainingPipe } from './characters-remaining.pipe';
+import { InvalidMeterPipe } from './invalid-meter.pipe';
 
 @NgModule({
   declarations: [
@@ -52,7 +53,8 @@ import { CharactersRemainingPipe } from './characters-remaining.pipe';
     FacilityAnalysisNamePipe,
     FacilityReportNamePipe,
     AccountAnalysisNamePipe,
-    CharactersRemainingPipe
+    CharactersRemainingPipe,
+    InvalidMeterPipe
   ],
   imports: [
     CommonModule
@@ -82,7 +84,8 @@ import { CharactersRemainingPipe } from './characters-remaining.pipe';
     FacilityAnalysisNamePipe,
     FacilityReportNamePipe,
     AccountAnalysisNamePipe,
-    CharactersRemainingPipe
+    CharactersRemainingPipe,
+    InvalidMeterPipe
   ]
 })
 export class HelperPipesModule { }

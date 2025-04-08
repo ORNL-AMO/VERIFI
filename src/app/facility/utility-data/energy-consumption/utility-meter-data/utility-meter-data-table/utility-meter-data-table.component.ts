@@ -13,12 +13,14 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
+import * as _ from 'lodash';
+import { getHasDuplicateReadings } from '../../../../../shared/helper-pipes/invalid-meter.pipe';
 
 @Component({
-    selector: 'app-utility-meter-data-table',
-    templateUrl: './utility-meter-data-table.component.html',
-    styleUrls: ['./utility-meter-data-table.component.css'],
-    standalone: false
+  selector: 'app-utility-meter-data-table',
+  templateUrl: './utility-meter-data-table.component.html',
+  styleUrls: ['./utility-meter-data-table.component.css'],
+  standalone: false
 })
 export class UtilityMeterDataTableComponent implements OnInit {
 
@@ -35,6 +37,8 @@ export class UtilityMeterDataTableComponent implements OnInit {
   showIndividualDelete: boolean = false;
   paramsSub: Subscription;
   showFilterDropdown: boolean = false;
+  hasNegativeReadings: boolean;
+  duplicateReadingDates: Array<Date>;
   constructor(
     private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
@@ -74,6 +78,10 @@ export class UtilityMeterDataTableComponent implements OnInit {
 
   setData() {
     this.meterData = this.utilityMeterDataDbService.getMeterDataFromMeterId(this.selectedMeter.guid);
+    this.hasNegativeReadings = this.meterData.findIndex(mData => {
+      return mData.totalEnergyUse < 0
+    }) != -1;
+    this.duplicateReadingDates = getHasDuplicateReadings(this.selectedMeter.guid, this.meterData);
     this.setHasCheckedItems();
   }
 

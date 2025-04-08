@@ -19,7 +19,6 @@ export class FacilityBannerComponent implements OnInit {
 
   facilityMeterData: Array<IdbUtilityMeterData>;
   facilityMeterDataSub: Subscription;
-
   constructor(private facilityDbService: FacilitydbService,
     private helpPanelService: HelpPanelService, private utilityMeterDataDbService: UtilityMeterDatadbService) { }
 

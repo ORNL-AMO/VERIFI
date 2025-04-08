@@ -12,7 +12,7 @@ import { EnergyConsumptionComponent } from './energy-consumption.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { EditMeterFormModule } from './energy-source/edit-meter-form/edit-meter-form.module';
-import { HelperPipesModule } from 'src/app/shared/helper-pipes/helper-pipes.module';
+import { HelperPipesModule } from 'src/app/shared/helper-pipes/_helper-pipes.module';
 import { RouterModule } from '@angular/router';
 import { UtilityMetersTableComponent } from './energy-source/utility-meters-table/utility-meters-table.component';
 import { UtilityMeterDataTableComponent } from './utility-meter-data/utility-meter-data-table/utility-meter-data-table.component';

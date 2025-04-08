@@ -11,7 +11,7 @@ import { AnalysisSetupComponent } from './run-analysis/analysis-setup/analysis-s
 import { FormsModule } from '@angular/forms';
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { RouterModule } from '@angular/router';
-import { HelperPipesModule } from '../../shared/helper-pipes/helper-pipes.module';
+import { HelperPipesModule } from '../../shared/helper-pipes/_helper-pipes.module';
 import { RegressionModelSelectionComponent } from './run-analysis/group-analysis/regression-model-selection/regression-model-selection.component';
 import { AnnualAnalysisSummaryComponent } from './run-analysis/group-analysis/annual-analysis-summary/annual-analysis-summary.component';
 import { MonthlyAnalysisSummaryComponent } from './run-analysis/group-analysis/monthly-analysis-summary/monthly-analysis-summary.component';
