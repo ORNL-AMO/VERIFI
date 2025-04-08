@@ -13,12 +13,13 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
+import * as _ from 'lodash';
 
 @Component({
-    selector: 'app-utility-meter-data-table',
-    templateUrl: './utility-meter-data-table.component.html',
-    styleUrls: ['./utility-meter-data-table.component.css'],
-    standalone: false
+  selector: 'app-utility-meter-data-table',
+  templateUrl: './utility-meter-data-table.component.html',
+  styleUrls: ['./utility-meter-data-table.component.css'],
+  standalone: false
 })
 export class UtilityMeterDataTableComponent implements OnInit {
 
@@ -35,6 +36,8 @@ export class UtilityMeterDataTableComponent implements OnInit {
   showIndividualDelete: boolean = false;
   paramsSub: Subscription;
   showFilterDropdown: boolean = false;
+  hasNegativeReadings: boolean;
+  duplicateReadingDates: Array<Date>;
   constructor(
     private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
@@ -74,6 +77,10 @@ export class UtilityMeterDataTableComponent implements OnInit {
 
   setData() {
     this.meterData = this.utilityMeterDataDbService.getMeterDataFromMeterId(this.selectedMeter.guid);
+    this.hasNegativeReadings = this.meterData.findIndex(mData => {
+      return mData.totalEnergyUse < 0
+    }) != -1;
+    this.setHasDuplicateReadings();
     this.setHasCheckedItems();
   }
 
@@ -157,5 +164,23 @@ export class UtilityMeterDataTableComponent implements OnInit {
 
   toggleFilterMenu() {
     this.showFilterDropdown = !this.showFilterDropdown;
+  }
+
+  setHasDuplicateReadings() {
+    let readDates: Array<Date> = this.meterData.map(mData => {
+      let date: Date = new Date(mData.readDate);
+      // return date.getFullYear() + '_' + date.getMonth() + '_' + date.getDate();
+      return date
+    });
+    let counts: Array<any> = _.countBy(readDates, (date: Date) => {
+      return date.getFullYear() + '_' + date.getMonth() + '_' + date.getDate();
+    })
+    this.duplicateReadingDates = new Array();
+    for (let obj in counts) {
+      if (counts[obj] > 1) {
+        let vals = obj.split('_');
+        this.duplicateReadingDates.push(new Date(Number(vals[0]), Number(vals[1]), Number(vals[2])));
+      }
+    }
   }
 }
