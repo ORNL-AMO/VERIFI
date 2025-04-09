@@ -1,3 +1,15 @@
 button span {
     color: white;
 }
+
+.float-right{
+    float: right;
+}
+
+.popup{
+    top: 15px;
+    left: 15px;
+    right: 15px;
+    bottom: 15px;
+    width: auto;
+}

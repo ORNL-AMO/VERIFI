@@ -6,7 +6,7 @@ import { SharedAnalysisModule } from '../shared-analysis/shared-analysis.module'
 import { AnnualFacilityAnalysisReportComponent } from './facility-analysis-report/annual-facility-analysis-report/annual-facility-analysis-report.component';
 import { MonthlyFacilityAnalysisReportComponent } from './facility-analysis-report/monthly-facility-analysis-report/monthly-facility-analysis-report.component';
 import { GroupAnalysisReportComponent } from './facility-analysis-report/group-analysis-report/group-analysis-report.component';
-import { HelperPipesModule } from '../helper-pipes/helper-pipes.module';
+import { HelperPipesModule } from '../helper-pipes/_helper-pipes.module';
 import { RegressionModelDetailsComponent } from './facility-analysis-report/group-analysis-report/regression-model-details/regression-model-details.component';
 import { IncludeTablePipe } from './include-table.pipe';
 import { GroupAnnualAnalysisReportComponent } from './facility-analysis-report/group-analysis-report/group-annual-analysis-report/group-annual-analysis-report.component';

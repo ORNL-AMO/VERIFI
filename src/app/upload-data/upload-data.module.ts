@@ -19,7 +19,7 @@ import { ConfirmReadingsComponent } from './data-setup/file-setup/confirm-readin
 import { ConfirmPredictorsComponent } from './data-setup/file-setup/confirm-predictors/confirm-predictors.component';
 import { ConfirmAndSubmitComponent } from './data-setup/file-setup/confirm-and-submit/confirm-and-submit.component';
 import { LabelWithTooltipModule } from '../shared/label-with-tooltip/label-with-tooltip.module';
-import { HelperPipesModule } from '../shared/helper-pipes/helper-pipes.module';
+import { HelperPipesModule } from '../shared/helper-pipes/_helper-pipes.module';
 import { MeterGroupOptionsPipe } from './data-setup/file-setup/manage-meters/meter-group-options.pipe';
 
 

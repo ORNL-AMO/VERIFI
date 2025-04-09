@@ -18,7 +18,7 @@ import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { WeatherDataService } from 'src/app/weather-data/weather-data.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
-import { getGUID } from 'src/app/shared/sharedHelperFuntions';
+import { getGUID, getWeatherSearchFromFacility } from 'src/app/shared/sharedHelperFuntions';
 import { PredictorDataHelperService, PredictorTableItem } from 'src/app/shared/helper-services/predictor-data-helper.service';
 // import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
 
@@ -186,7 +186,7 @@ export class PredictorTableComponent {
       this.weatherDataService.selectedMonth = endDate;
     }
     this.weatherDataService.selectedFacility = this.selectedFacility;
-    this.weatherDataService.zipCode = this.selectedFacility.zip;
+    this.weatherDataService.addressSearchStr = getWeatherSearchFromFacility(this.selectedFacility);
     this.router.navigateByUrl('weather-data/annual-station')
   }
 
@@ -199,9 +199,8 @@ export class PredictorTableComponent {
   }
 
   goToWeatherData() {
-    let facility: IdbFacility = this.facilitydbService.selectedFacility.getValue();
-    this.weatherDataService.selectedFacility = facility;
-    this.weatherDataService.zipCode = facility.zip;
+    this.weatherDataService.selectedFacility = this.selectedFacility;
+    this.weatherDataService.addressSearchStr = getWeatherSearchFromFacility(this.selectedFacility);
     this.router.navigateByUrl('/weather-data');
   }
 
