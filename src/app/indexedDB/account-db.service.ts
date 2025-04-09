@@ -71,11 +71,14 @@ export class AccountdbService {
     //     }
     // }
 
-    async deleteDatabase() {
+    async deleteDatabase(): Promise<boolean> {
         try {
             await firstValueFrom(this.dbService.deleteDatabase());
+            this.finishDelete();
+            return true
         } catch (err) {
             console.log(err);
+            return false
         }
     }
 

@@ -14,10 +14,10 @@ import { CustomGWPDbService } from 'src/app/indexedDB/custom-gwp-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 
 @Component({
-    selector: 'app-manage-accounts',
-    templateUrl: './manage-accounts.component.html',
-    styleUrls: ['./manage-accounts.component.css'],
-    standalone: false
+  selector: 'app-manage-accounts',
+  templateUrl: './manage-accounts.component.html',
+  styleUrls: ['./manage-accounts.component.css'],
+  standalone: false
 })
 export class ManageAccountsComponent {
 
@@ -28,6 +28,7 @@ export class ManageAccountsComponent {
   selectedAccount: IdbAccount;
   resetDatabase: boolean = false;
   allAccountsSub: Subscription;
+  displayMoreHelp: boolean = false;
   constructor(private accountDbService: AccountdbService, private loadingService: LoadingService,
     private dbChangesService: DbChangesService, private router: Router,
     private toastNotificationService: ToastNotificationsService,
@@ -126,10 +127,23 @@ export class ManageAccountsComponent {
   async deleteDatabase() {
     this.loadingService.setLoadingStatus(true);
     this.loadingService.setLoadingMessage('Resetting Database, if this takes too long restart application..');
-    await this.accountDbService.deleteDatabase();
+    let success: boolean = await this.accountDbService.deleteDatabase();
+    if (!success) {
+      this.loadingService.setLoadingStatus(false);
+      this.toastNotificationService.showToast('An error occured', 'There was an error when trying to reset the database follow the instructions delete database manually.', undefined, false, 'alert-danger')
+      this.showMoreHelp();
+    }
   }
 
   toggleResetDatabase() {
     this.resetDatabase = !this.resetDatabase;
+  }
+
+  showMoreHelp() {
+    this.displayMoreHelp = true;
+  }
+
+  hideMoreHelp() {
+    this.displayMoreHelp = false;
   }
 }
