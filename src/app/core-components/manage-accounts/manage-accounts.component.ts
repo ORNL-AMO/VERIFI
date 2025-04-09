@@ -7,17 +7,13 @@ import { Router } from '@angular/router';
 import { ToastNotificationsService } from '../toast-notifications/toast-notifications.service';
 import { BackupDataService } from 'src/app/shared/helper-services/backup-data.service';
 import { ExportToExcelTemplateService } from 'src/app/shared/helper-services/export-to-excel-template.service';
-import { CustomEmissionsDbService } from 'src/app/indexedDB/custom-emissions-db.service';
-import { ElectronBackupsDbService } from 'src/app/indexedDB/electron-backups-db.service';
-import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
-import { CustomGWPDbService } from 'src/app/indexedDB/custom-gwp-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 
 @Component({
-    selector: 'app-manage-accounts',
-    templateUrl: './manage-accounts.component.html',
-    styleUrls: ['./manage-accounts.component.css'],
-    standalone: false
+  selector: 'app-manage-accounts',
+  templateUrl: './manage-accounts.component.html',
+  styleUrls: ['./manage-accounts.component.css'],
+  standalone: false
 })
 export class ManageAccountsComponent {
 
@@ -28,15 +24,12 @@ export class ManageAccountsComponent {
   selectedAccount: IdbAccount;
   resetDatabase: boolean = false;
   allAccountsSub: Subscription;
+  displayMoreHelp: boolean = false;
   constructor(private accountDbService: AccountdbService, private loadingService: LoadingService,
     private dbChangesService: DbChangesService, private router: Router,
     private toastNotificationService: ToastNotificationsService,
     private backupDataService: BackupDataService,
-    private exportToExcelTemplateService: ExportToExcelTemplateService,
-    private customEmissionsDbService: CustomEmissionsDbService,
-    private electronBackupsDbService: ElectronBackupsDbService,
-    private customFuelDbService: CustomFuelDbService,
-    private customGWPDbService: CustomGWPDbService
+    private exportToExcelTemplateService: ExportToExcelTemplateService
   ) {
   }
 
@@ -45,9 +38,6 @@ export class ManageAccountsComponent {
     this.allAccountsSub = this.accountDbService.allAccounts.subscribe(accounts => {
       this.accounts = accounts;
       this.accountErrors = this.accounts.map(account => { return undefined });
-      if (this.accounts.length == 0) {
-        this.router.navigateByUrl('/setup-wizard');
-      }
     });
   }
 
@@ -126,10 +116,23 @@ export class ManageAccountsComponent {
   async deleteDatabase() {
     this.loadingService.setLoadingStatus(true);
     this.loadingService.setLoadingMessage('Resetting Database, if this takes too long restart application..');
-    this.accountDbService.deleteDatabase();
+    let success: boolean = await this.accountDbService.deleteDatabase();
+    if (!success) {
+      this.loadingService.setLoadingStatus(false);
+      this.toastNotificationService.showToast('An error occured', 'There was an error when trying to reset the database follow the instructions delete database manually.', undefined, false, 'alert-danger')
+      this.showMoreHelp();
+    }
   }
 
   toggleResetDatabase() {
     this.resetDatabase = !this.resetDatabase;
+  }
+
+  showMoreHelp() {
+    this.displayMoreHelp = true;
+  }
+
+  hideMoreHelp() {
+    this.displayMoreHelp = false;
   }
 }

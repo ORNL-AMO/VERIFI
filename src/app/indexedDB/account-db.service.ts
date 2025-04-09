@@ -1,6 +1,6 @@
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, Observable } from 'rxjs';
 import { LocalStorageService } from 'ngx-webstorage';
 import { ElectronService } from '../electron/electron.service';
 import { IdbAccount } from '../models/idbModels/account';
@@ -52,22 +52,33 @@ export class AccountdbService {
     }
 
     // *WARNING* Can not be undone
-    deleteDatabase() {
+    // deleteDatabase() {
+    //     try {
+    //         this.dbService.deleteDatabase().subscribe(
+    //             () => {
+    //                 console.log('database deleted..');
+    //                 this.finishDelete();
+    //             },
+    //             error => {
+    //                 console.log(error);
+    //                 this.finishDelete();
+    //             }
+    //         );
+    //     } catch (err) {
+    //         console.log('ERROR')
+    //         console.log(err);
+    //         this.finishDelete();
+    //     }
+    // }
+
+    async deleteDatabase(): Promise<boolean> {
         try {
-            this.dbService.deleteDatabase().subscribe(
-                () => {
-                    console.log('database deleted..');
-                    this.finishDelete();
-                },
-                error => {
-                    console.log(error);
-                    this.finishDelete();
-                }
-            );
-        } catch (err) {
-            console.log('ERROR')
-            console.log(err);
+            await firstValueFrom(this.dbService.deleteDatabase());
             this.finishDelete();
+            return true
+        } catch (err) {
+            console.log(err);
+            return false
         }
     }
 
