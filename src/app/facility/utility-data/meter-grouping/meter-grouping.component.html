@@ -160,6 +160,14 @@
                             <p class="group-desc">{{meterGroup.description}}</p>
                         </div>
                     </div>
+                    <div class="row" *ngIf="meterGroup.totalEnergyUse < 0">
+                        <div class="col">
+                            <div class="p-1 alert alert-warning text-center">
+                                Energy use for group is less than 0. Accurate analysis of this group cannot be
+                                conducted. Be sure to exclude this group from any analysis of this facility.
+                            </div>
+                        </div>
+                    </div>
 
                     <div [cdkDragData]="meter" class="group-meters" *ngFor="let meter of meterGroup.groupData" cdkDrag>
                         <!-- id={{meter.id}}> -->
