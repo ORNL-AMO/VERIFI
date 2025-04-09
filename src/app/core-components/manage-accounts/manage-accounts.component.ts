@@ -7,10 +7,6 @@ import { Router } from '@angular/router';
 import { ToastNotificationsService } from '../toast-notifications/toast-notifications.service';
 import { BackupDataService } from 'src/app/shared/helper-services/backup-data.service';
 import { ExportToExcelTemplateService } from 'src/app/shared/helper-services/export-to-excel-template.service';
-import { CustomEmissionsDbService } from 'src/app/indexedDB/custom-emissions-db.service';
-import { ElectronBackupsDbService } from 'src/app/indexedDB/electron-backups-db.service';
-import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
-import { CustomGWPDbService } from 'src/app/indexedDB/custom-gwp-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 
 @Component({
@@ -33,11 +29,7 @@ export class ManageAccountsComponent {
     private dbChangesService: DbChangesService, private router: Router,
     private toastNotificationService: ToastNotificationsService,
     private backupDataService: BackupDataService,
-    private exportToExcelTemplateService: ExportToExcelTemplateService,
-    private customEmissionsDbService: CustomEmissionsDbService,
-    private electronBackupsDbService: ElectronBackupsDbService,
-    private customFuelDbService: CustomFuelDbService,
-    private customGWPDbService: CustomGWPDbService
+    private exportToExcelTemplateService: ExportToExcelTemplateService
   ) {
   }
 
@@ -46,9 +38,6 @@ export class ManageAccountsComponent {
     this.allAccountsSub = this.accountDbService.allAccounts.subscribe(accounts => {
       this.accounts = accounts;
       this.accountErrors = this.accounts.map(account => { return undefined });
-      // if (this.accounts.length == 0) {
-      //   this.router.navigateByUrl('/setup-wizard');
-      // }
     });
   }
 
