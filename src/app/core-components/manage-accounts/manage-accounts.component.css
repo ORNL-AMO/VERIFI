@@ -9,3 +9,12 @@ a.large{
 .fa-trash-can{
     color: #ec0000 !important;
 }
+
+
+.img{
+    border: solid 2px;
+}
+
+a.click-link .fa{
+    color: #007bff;
+}

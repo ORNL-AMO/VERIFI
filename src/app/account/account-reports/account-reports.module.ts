@@ -5,7 +5,7 @@ import { AccountReportsBannerComponent } from './account-reports-banner/account-
 import { RouterModule } from '@angular/router';
 import { AccountReportsDashboardComponent } from './account-reports-dashboard/account-reports-dashboard.component';
 import { AccountReportsItemCardComponent } from './account-reports-dashboard/account-reports-item-card/account-reports-item-card.component';
-import { HelperPipesModule } from 'src/app/shared/helper-pipes/helper-pipes.module';
+import { HelperPipesModule } from 'src/app/shared/helper-pipes/_helper-pipes.module';
 import { AccountReportSetupComponent } from './account-report-setup/account-report-setup.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BetterPlantsSetupComponent } from './account-report-setup/better-plants-setup/better-plants-setup.component';

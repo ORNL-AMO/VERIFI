@@ -4,10 +4,14 @@
             <li class="nav-item"><a class="nav-link" routerLink="energy-source" [routerLinkActive]="['active']">
                     <i class="fa fa-gauge-high"></i>
                     Meters</a></li>
-            <li class="nav-item" *ngFor="let meter of utilityMeters"><a class="nav-link"
-                    routerLink="utility-meter/{{meter.id}}" [routerLinkActive]="['active']">
+            <li class="nav-item" *ngFor="let meter of utilityMeters">
+                <a class="nav-link" routerLink="utility-meter/{{meter.id}}" [routerLinkActive]="['active']">
                     <i class="fa fa-file-invoice"></i>
-                    {{meter.name}}</a></li>
+                    {{meter.name}}
+                    <i class="fa fa-exclamation-circle" *ngIf="meter.guid | invalidMeter: meterData"></i>
+                </a>
+
+            </li>
         </ul>
     </div>
     <div class="content-padding">
