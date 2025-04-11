@@ -158,7 +158,7 @@ export class PredictorTableComponent {
       this.weatherDataService.selectedStation = weatherStation;
       if (predictor.weatherDataType == 'CDD') {
         this.weatherDataService.coolingTemp = predictor.coolingBaseTemperature;
-        let predictorPair: IdbPredictor = this.degreeDayPredictors.find(predictorPair => { return predictorPair.predictor.weatherStationId == predictor.weatherStationId && predictorPair.predictor.weatherDataType == 'HDD' }).predictor;
+        let predictorPair: IdbPredictor = this.degreeDayPredictors.find(predictorPair => { return predictorPair.predictor.weatherStationId == predictor.weatherStationId && predictorPair.predictor.weatherDataType == 'HDD' })?.predictor;
         if (predictorPair) {
           this.weatherDataService.heatingTemp = predictorPair.heatingBaseTemperature;
           this.weatherDataService.weatherDataSelection = 'degreeDays';
@@ -167,7 +167,7 @@ export class PredictorTableComponent {
         }
       } else if (predictor.weatherDataType == 'HDD') {
         this.weatherDataService.heatingTemp = predictor.heatingBaseTemperature;
-        let predictorPair: IdbPredictor = this.degreeDayPredictors.find(predictorPair => { return predictorPair.predictor.weatherStationId == predictor.weatherStationId && predictorPair.predictor.weatherDataType == 'CDD' }).predictor;
+        let predictorPair: IdbPredictor = this.degreeDayPredictors.find(predictorPair => { return predictorPair.predictor.weatherStationId == predictor.weatherStationId && predictorPair.predictor.weatherDataType == 'CDD' })?.predictor;
         if (predictorPair) {
           this.weatherDataService.coolingTemp = predictorPair.coolingBaseTemperature;
           this.weatherDataService.weatherDataSelection = 'degreeDays';
