@@ -8,10 +8,10 @@ import { IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 
 @Component({
-    selector: 'app-facility-reports-tabs',
-    templateUrl: './facility-reports-tabs.component.html',
-    styleUrl: './facility-reports-tabs.component.css',
-    standalone: false
+  selector: 'app-facility-reports-tabs',
+  templateUrl: './facility-reports-tabs.component.html',
+  styleUrl: './facility-reports-tabs.component.css',
+  standalone: false
 })
 export class FacilityReportsTabsComponent {
 
@@ -22,7 +22,8 @@ export class FacilityReportsTabsComponent {
   setupValid: boolean = true;
   selectedReportSub: Subscription;
   selectedReport: IdbFacilityReport;
-
+  errorSub: Subscription;
+  errorMessage: string = '';
   facility: IdbFacility;
   facilitySub: Subscription;
   constructor(private router: Router,
@@ -42,6 +43,12 @@ export class FacilityReportsTabsComponent {
     this.modalOpenSub = this.sharedDataService.modalOpen.subscribe(val => {
       this.modalOpen = val;
     });
+
+    this.errorSub = this.facilityReportsDbService.errorMessage$.subscribe(errorMessage => {
+      this.errorMessage = errorMessage;
+      this.setSetupValid();  //setValidation() is called here to take care of the validation on browser reload.
+    });
+
     this.selectedReportSub = this.facilityReportsDbService.selectedReport.subscribe(val => {
       this.selectedReport = val;
       if (this.selectedReport) {
@@ -74,7 +81,8 @@ export class FacilityReportsTabsComponent {
         this.selectedReport.dataOverviewReportSettings.endMonth != undefined &&
         this.selectedReport.dataOverviewReportSettings.endYear != undefined &&
         this.selectedReport.dataOverviewReportSettings.startMonth != undefined &&
-        this.selectedReport.dataOverviewReportSettings.startYear != undefined)
+        this.selectedReport.dataOverviewReportSettings.startYear != undefined &&
+        this.errorMessage.length <= 0)
     } else {
       this.setupValid = false;
     }

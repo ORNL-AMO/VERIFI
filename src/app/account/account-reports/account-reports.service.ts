@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { BetterClimateReportSetup, BetterPlantsReportSetup, DataOverviewReportSetup, PerformanceReportSetup } from 'src/app/models/overview-report';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 
 @Injectable({
@@ -11,9 +11,28 @@ export class AccountReportsService {
 
   print: BehaviorSubject<boolean>;
   generateExcel: BehaviorSubject<boolean>;
+  errorMessage = new Subject<string>();
+  errorMessage$ = this.errorMessage.asObservable();
+
   constructor(private formBuilder: FormBuilder) {
     this.print = new BehaviorSubject<boolean>(false);
     this.generateExcel = new BehaviorSubject<boolean>(false);
+
+    // store the error message in local storage to persist the value after browser reload
+    const message = localStorage.getItem('errorMessage');
+    if (message) {
+      this.errorMessage.next(message);
+    }
+  }
+
+  setErrorMessage(message: string) {
+    this.errorMessage.next(message);
+    localStorage.setItem('errorMessage', message);
+  }
+
+  clearMessage() {
+    this.errorMessage.next(null);
+    localStorage.removeItem('errorMessage');
   }
 
   getSetupFormFromReport(report: IdbAccountReport): FormGroup {
