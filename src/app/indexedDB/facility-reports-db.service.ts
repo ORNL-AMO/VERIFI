@@ -13,8 +13,9 @@ export class FacilityReportsDbService {
   accountFacilityReports: BehaviorSubject<Array<IdbFacilityReport>>;
   facilityReports: BehaviorSubject<Array<IdbFacilityReport>>;
   selectedReport: BehaviorSubject<IdbFacilityReport>;
-  errorMessage = new Subject<string>();
-  errorMessage$ = this.errorMessage.asObservable();
+  
+  // errorMessage = new Subject<string>();
+  // errorMessage$ = this.errorMessage.asObservable();
 
   constructor(private dbService: NgxIndexedDBService, private localStorageService: LocalStorageService,
     private loadingService: LoadingService) {
@@ -29,21 +30,21 @@ export class FacilityReportsDbService {
     });
 
     // store error message in local storage for browser reload case
-    const message = localStorage.getItem('errorMessage');
-    if (message) {
-      this.errorMessage.next(message);
-    }
+    // const message = localStorage.getItem('errorMessage');
+    // if (message) {
+    //   this.errorMessage.next(message);
+    // }
   }
 
-  setErrorMessage(message: string) {
-    this.errorMessage.next(message);
-    localStorage.setItem('errorMessage', message);
-  }
+  // setErrorMessage(message: string) {
+  //   this.errorMessage.next(message);
+  //   localStorage.setItem('errorMessage', message);
+  // }
 
-  clearMessage() {
-    this.errorMessage.next(null);
-    localStorage.removeItem('errorMessage');
-  }
+  // clearMessage() {
+  //   this.errorMessage.next(null);
+  //   localStorage.removeItem('errorMessage');
+  // }
 
   getInitialReport(): number {
     let reportId: number = this.localStorageService.retrieve("facilityReportId");

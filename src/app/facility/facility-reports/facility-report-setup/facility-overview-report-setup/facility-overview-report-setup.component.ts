@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { firstValueFrom, Subscription } from 'rxjs';
-import { FacilityOverviewService } from 'src/app/facility/facility-overview/facility-overview.service';
+// import { FacilityOverviewService } from 'src/app/facility/facility-overview/facility-overview.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
@@ -10,6 +10,7 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { DataOverviewFacilityReportSettings, IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
 import { Month, Months } from 'src/app/shared/form-data/months';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
+import { FacilityReportsService } from '../../facility-reports.service';
 
 @Component({
     selector: 'app-facility-overview-report-setup',
@@ -26,25 +27,27 @@ export class FacilityOverviewReportSetupComponent {
   reportYears: Array<number>;
   baselineYears: Array<number>;
   months: Array<Month> = Months;
-  startMonth: number;
-  startYear: number;
-  endMonth: number;
-  endYear: number;
-  dateRangeSub: Subscription;
-  errorMessage: string = '';
+  // startMonth: number;
+  // startYear: number;
+  // endMonth: number;
+  // endYear: number;
+  // dateRangeSub: Subscription;
+  errorMessage: string;
+  errorMessageSub: Subscription;
 
   constructor(private facilityReportsDbService: FacilityReportsDbService,
     private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService,
     private dbChangesService: DbChangesService,
     private calanderizationService: CalanderizationService,
-    private facilityOverviewService: FacilityOverviewService
+    // private facilityOverviewService: FacilityOverviewService,
+    private facilityReportsService: FacilityReportsService
   ) {
 
   }
 
   ngOnInit() {
-    this.facilityReportsDbService.setErrorMessage(this.errorMessage);
+    // this.facilityReportsDbService.setErrorMessage(this.errorMessage);
     this.facilityReportSub = this.facilityReportsDbService.selectedReport.subscribe(report => {
       if (this.isFormChange == false) {
         this.facilityReport = report;
@@ -55,50 +58,38 @@ export class FacilityOverviewReportSetupComponent {
     });
     this.setYearOptions();
 
-    this.dateRangeSub = this.facilityOverviewService.dateRange.subscribe(dateRange => {
-      if (dateRange) {
-        this.startMonth = this.facilityReport.dataOverviewReportSettings.startMonth;
-        this.startYear = this.facilityReport.dataOverviewReportSettings.startYear;
-        this.endMonth = this.facilityReport.dataOverviewReportSettings.endMonth;
-        this.endYear = this.facilityReport.dataOverviewReportSettings.endYear;
-      }
+    this.errorMessageSub = this.facilityReportsService.errorMessage.subscribe(message => {
+      this.errorMessage = message;
     });
-
-    // on browser reload
-    if (this.facilityReport.dataOverviewReportSettings.startMonth !== undefined 
-      && this.facilityReport.dataOverviewReportSettings.startYear !== undefined 
-      && this.facilityReport.dataOverviewReportSettings.endMonth !== undefined
-      && this.facilityReport.dataOverviewReportSettings.endYear !== undefined) {
-      this.validateDate();
-    }
   }
 
   ngOnDestroy() {
     this.facilityReportSub.unsubscribe();
-    this.dateRangeSub.unsubscribe();
+    // this.dateRangeSub.unsubscribe();
+    this.errorMessageSub.unsubscribe();
   }
 
-  validateDate() {
+  // validateDate() {
 
-    let startDate: Date = new Date(this.facilityReport.dataOverviewReportSettings.startYear, this.facilityReport.dataOverviewReportSettings.startMonth, 1);
-    let endDate: Date = new Date(this.facilityReport.dataOverviewReportSettings.endYear, this.facilityReport.dataOverviewReportSettings.endMonth, 1);
+  //   let startDate: Date = new Date(this.facilityReport.dataOverviewReportSettings.startYear, this.facilityReport.dataOverviewReportSettings.startMonth, 1);
+  //   let endDate: Date = new Date(this.facilityReport.dataOverviewReportSettings.endYear, this.facilityReport.dataOverviewReportSettings.endMonth, 1);
 
-    // compare start and end date
-    if (startDate.getTime() >= endDate.getTime()) {
-      this.errorMessage = 'Start date cannot be later than the end date.';
-      this.facilityReportsDbService.setErrorMessage(this.errorMessage); // store error message in local storage
-      return;
-    }
+  //   // compare start and end date
+  //   if (startDate.getTime() >= endDate.getTime()) {
+  //     this.errorMessage = 'Start date cannot be later than the end date.';
+  //     this.facilityReportsDbService.setErrorMessage(this.errorMessage); // store error message in local storage
+  //     return;
+  //   }
 
-    this.errorMessage = '';
-    this.facilityReportsDbService.setErrorMessage(this.errorMessage);  // store error message in local storage
+  //   this.errorMessage = '';
+  //   this.facilityReportsDbService.setErrorMessage(this.errorMessage);  // store error message in local storage
 
-    // Proceed with valid date range
-    this.facilityOverviewService.dateRange.next({
-      startDate: startDate,
-      endDate: endDate
-    });
-  }
+  //   // Proceed with valid date range
+  //   this.facilityOverviewService.dateRange.next({
+  //     startDate: startDate,
+  //     endDate: endDate
+  //   });
+  // }
 
   async save() {
     this.isFormChange = true;
@@ -111,12 +102,12 @@ export class FacilityOverviewReportSetupComponent {
     this.facilityReportsDbService.selectedReport.next(facilityReport);
 
     // proceed with date validation if all the date fields are filled
-    if (this.facilityReport.dataOverviewReportSettings.startMonth !== undefined 
-      && this.facilityReport.dataOverviewReportSettings.startYear !== undefined 
-      && this.facilityReport.dataOverviewReportSettings.endMonth !== undefined
-      && this.facilityReport.dataOverviewReportSettings.endYear !== undefined) {
-      this.validateDate();
-    }
+    // if (this.facilityReport.dataOverviewReportSettings.startMonth !== undefined 
+    //   && this.facilityReport.dataOverviewReportSettings.startYear !== undefined 
+    //   && this.facilityReport.dataOverviewReportSettings.endMonth !== undefined
+    //   && this.facilityReport.dataOverviewReportSettings.endYear !== undefined) {
+    //   this.validateDate();
+    // }
   }
 
   setYearOptions() {

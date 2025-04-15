@@ -6,6 +6,7 @@ import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
+import { FacilityReportsService } from '../facility-reports.service';
 
 @Component({
   selector: 'app-facility-reports-tabs',
@@ -23,13 +24,14 @@ export class FacilityReportsTabsComponent {
   selectedReportSub: Subscription;
   selectedReport: IdbFacilityReport;
   errorSub: Subscription;
-  errorMessage: string = '';
+  errorMessage: string;
   facility: IdbFacility;
   facilitySub: Subscription;
   constructor(private router: Router,
     private sharedDataService: SharedDataService,
     private facilityReportsDbService: FacilityReportsDbService,
-    private facilityDbService: FacilitydbService) { }
+    private facilityDbService: FacilitydbService,
+    private facilityReportsService: FacilityReportsService) { }
   ngOnInit() {
     this.routerSub = this.router.events.subscribe(event => {
       this.setInDashboard();
@@ -44,9 +46,9 @@ export class FacilityReportsTabsComponent {
       this.modalOpen = val;
     });
 
-    this.errorSub = this.facilityReportsDbService.errorMessage$.subscribe(errorMessage => {
+    this.errorSub = this.facilityReportsService.errorMessage.subscribe(errorMessage => {
       this.errorMessage = errorMessage;
-      this.setSetupValid();  //setValidation() is called here to take care of the validation on browser reload.
+      this.setSetupValid();
     });
 
     this.selectedReportSub = this.facilityReportsDbService.selectedReport.subscribe(val => {
@@ -82,7 +84,7 @@ export class FacilityReportsTabsComponent {
         this.selectedReport.dataOverviewReportSettings.endYear != undefined &&
         this.selectedReport.dataOverviewReportSettings.startMonth != undefined &&
         this.selectedReport.dataOverviewReportSettings.startYear != undefined &&
-        this.errorMessage.length <= 0)
+        this.errorMessage == undefined)
     } else {
       this.setupValid = false;
     }
