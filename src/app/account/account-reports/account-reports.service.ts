@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms'
 import { BetterClimateReportSetup, BetterPlantsReportSetup, DataOverviewReportSetup, PerformanceReportSetup } from 'src/app/models/overview-report';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
+import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 
 @Injectable({
   providedIn: 'root'
@@ -11,28 +12,36 @@ export class AccountReportsService {
 
   print: BehaviorSubject<boolean>;
   generateExcel: BehaviorSubject<boolean>;
-  errorMessage = new Subject<string>();
-  errorMessage$ = this.errorMessage.asObservable();
 
-  constructor(private formBuilder: FormBuilder) {
+  errorMessage: BehaviorSubject<string>;
+
+  constructor(private accountReportDbService: AccountReportDbService,
+    private formBuilder: FormBuilder
+  ) {
     this.print = new BehaviorSubject<boolean>(false);
     this.generateExcel = new BehaviorSubject<boolean>(false);
+    this.errorMessage = new BehaviorSubject<string>(undefined);
 
-    // store the error message in local storage to persist the value after browser reload
-    const message = localStorage.getItem('errorMessage');
-    if (message) {
-      this.errorMessage.next(message);
+    this.accountReportDbService.selectedReport.subscribe(report => {
+      this.validateReport(report);
+    });
+  }
+
+  validateReport(report: IdbAccountReport) {
+    let errorMessage: string = '';
+    //write validation for report
+    if (report.startMonth >= 0 && report.endMonth >= 0 && report.startYear > 0  && report.endYear > 0) {
+      let startDate: Date = new Date(report.startYear, report.startMonth, 1);
+      let endDate: Date = new Date(report.endYear, report.endMonth, 1);
+      // compare start and end date
+      if (startDate.getTime() >= endDate.getTime()) {
+        errorMessage = 'Start date cannot be later than the end date.';
+      }
+      else {
+        errorMessage = '';
+      }
     }
-  }
-
-  setErrorMessage(message: string) {
-    this.errorMessage.next(message);
-    localStorage.setItem('errorMessage', message);
-  }
-
-  clearMessage() {
-    this.errorMessage.next(null);
-    localStorage.removeItem('errorMessage');
+    this.errorMessage.next(errorMessage)
   }
 
   getSetupFormFromReport(report: IdbAccountReport): FormGroup {
