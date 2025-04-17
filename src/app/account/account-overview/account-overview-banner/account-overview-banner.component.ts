@@ -36,7 +36,7 @@ export class AccountOverviewBannerComponent implements OnInit {
   maxYear: number;
   months: Array<Month> = Months;
   years: Array<number>;
-
+  errorMessage: string = '';
   dateRangeSub: Subscription;
   constructor(private sharedDataService: SharedDataService, private accountDbService: AccountdbService,
     private router: Router,
@@ -117,9 +117,20 @@ export class AccountOverviewBannerComponent implements OnInit {
     this.sharedDataService.openCreateReportModal.next(true);
   }
 
+  //date validation
   setDate() {
     let startDate: Date = new Date(this.minYear, this.minMonth, 1);
     let endDate: Date = new Date(this.maxYear, this.maxMonth, 1);
+ 
+    // compare start and end date
+    if (startDate.getTime() >= endDate.getTime()) {
+      this.errorMessage = 'Start date cannot be later than the end date';
+      return;
+    }
+
+    this.errorMessage = '';
+
+    // Proceed with valid date range
     this.accountOverviewService.dateRange.next({
       startDate: startDate,
       endDate: endDate

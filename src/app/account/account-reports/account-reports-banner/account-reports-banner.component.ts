@@ -7,10 +7,10 @@ import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.serv
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 
 @Component({
-    selector: 'app-account-reports-banner',
-    templateUrl: './account-reports-banner.component.html',
-    styleUrls: ['./account-reports-banner.component.css'],
-    standalone: false
+  selector: 'app-account-reports-banner',
+  templateUrl: './account-reports-banner.component.html',
+  styleUrls: ['./account-reports-banner.component.css'],
+  standalone: false
 })
 export class AccountReportsBannerComponent {
 
@@ -21,6 +21,9 @@ export class AccountReportsBannerComponent {
   setupValid: boolean;
   selectedReportSub: Subscription;
   selectedReport: IdbAccountReport;
+  errorMessage: string = '';
+  errorSub: Subscription;
+
   constructor(private router: Router,
     private sharedDataService: SharedDataService,
     private accountReportsService: AccountReportsService,
@@ -33,6 +36,14 @@ export class AccountReportsBannerComponent {
     this.modalOpenSub = this.sharedDataService.modalOpen.subscribe(val => {
       this.modalOpen = val;
     });
+
+    this.errorSub = this.accountReportsService.errorMessage.subscribe(errorMessage => {
+      this.errorMessage = errorMessage;
+      if (this.selectedReport) {
+        this.setValidation(this.selectedReport);
+      }
+    });
+
     this.selectedReportSub = this.accountReportDbService.selectedReport.subscribe(val => {
       this.selectedReport = val;
       if (val) {
@@ -45,6 +56,7 @@ export class AccountReportsBannerComponent {
     this.modalOpenSub.unsubscribe();
     this.routerSub.unsubscribe();
     this.selectedReportSub.unsubscribe();
+    this.errorSub.unsubscribe();
   }
 
 
@@ -57,14 +69,23 @@ export class AccountReportsBannerComponent {
     let betterPlantsValid: boolean = true;
     let dataOverviewValid: boolean = true;
     let performanceValid: boolean = true;
-    if (report.reportType == 'betterPlants') {
-      betterPlantsValid = this.accountReportsService.getBetterPlantsFormFromReport(report.betterPlantsReportSetup).valid;
-    } else if (report.reportType == 'dataOverview') {
-      dataOverviewValid = this.accountReportsService.getDataOverviewFormFromReport(report.dataOverviewReportSetup).valid;
-    } else if (report.reportType == 'performance') {
-      performanceValid = this.accountReportsService.getPerformanceFormFromReport(report.performanceReportSetup).valid;
+    if (report.reportType == 'dataOverview') {
+      if (this.errorMessage.length > 0) {
+        dataOverviewValid = false;
+      }
+      else {
+        dataOverviewValid = this.accountReportsService.getDataOverviewFormFromReport(report.dataOverviewReportSetup).valid;
+      }
+      this.setupValid = (setupValid && dataOverviewValid);
     }
-    this.setupValid = (setupValid && betterPlantsValid && dataOverviewValid && performanceValid);
+    else {
+      if (report.reportType == 'betterPlants') {
+        betterPlantsValid = this.accountReportsService.getBetterPlantsFormFromReport(report.betterPlantsReportSetup).valid;
+      } else if (report.reportType == 'performance') {
+        performanceValid = this.accountReportsService.getPerformanceFormFromReport(report.performanceReportSetup).valid;
+      }
+      this.setupValid = (setupValid && betterPlantsValid && performanceValid);
+    }
   }
 
   goToDashboard() {

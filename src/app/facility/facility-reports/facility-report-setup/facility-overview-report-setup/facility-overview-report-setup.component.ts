@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { firstValueFrom, Subscription } from 'rxjs';
+// import { FacilityOverviewService } from 'src/app/facility/facility-overview/facility-overview.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
@@ -9,6 +10,7 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { DataOverviewFacilityReportSettings, IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
 import { Month, Months } from 'src/app/shared/form-data/months';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
+import { FacilityReportsService } from '../../facility-reports.service';
 
 @Component({
     selector: 'app-facility-overview-report-setup',
@@ -18,7 +20,6 @@ import { CalanderizationService } from 'src/app/shared/helper-services/calanderi
 })
 export class FacilityOverviewReportSetupComponent {
 
-
   facilityReport: IdbFacilityReport;
   reportSettings: DataOverviewFacilityReportSettings;
   facilityReportSub: Subscription;
@@ -26,11 +27,15 @@ export class FacilityOverviewReportSetupComponent {
   reportYears: Array<number>;
   baselineYears: Array<number>;
   months: Array<Month> = Months;
+  errorMessage: string;
+  errorMessageSub: Subscription;
+
   constructor(private facilityReportsDbService: FacilityReportsDbService,
     private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService,
     private dbChangesService: DbChangesService,
-    private calanderizationService: CalanderizationService
+    private calanderizationService: CalanderizationService,
+    private facilityReportsService: FacilityReportsService
   ) {
 
   }
@@ -45,12 +50,16 @@ export class FacilityOverviewReportSetupComponent {
       }
     });
     this.setYearOptions();
+
+    this.errorMessageSub = this.facilityReportsService.errorMessage.subscribe(message => {
+      this.errorMessage = message;
+    });
   }
 
   ngOnDestroy() {
     this.facilityReportSub.unsubscribe();
+    this.errorMessageSub.unsubscribe();
   }
-
 
   async save() {
     this.isFormChange = true;
