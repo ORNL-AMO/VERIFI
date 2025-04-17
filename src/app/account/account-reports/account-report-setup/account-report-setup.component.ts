@@ -52,35 +52,7 @@ export class AccountReportSetupComponent {
     this.errorMessageSub.unsubscribe();
   }
 
-  // validateDate() {
-
-  //   let startDate: Date = new Date(this.setupForm.get('startYear').value, this.setupForm.get('startMonth').value, 1);
-  //   let endDate: Date = new Date(this.setupForm.get('endYear').value, this.setupForm.get('endMonth').value, 1);
-
-  //   // compare start and end date
-  //   if (startDate.getTime() >= endDate.getTime()) {
-  //     this.errorMessage = 'Start date cannot be later than the end date';
-  //     this.accountReportsService.setErrorMessage(this.errorMessage); // setting the message in the local storage
-  //     return;
-  //   }
-
-  //   this.errorMessage = '';
-  //   this.accountReportsService.setErrorMessage(this.errorMessage); // setting the message in the local storage
-
-  //   // Proceed with valid date range
-  //   this.accountOverviewService.dateRange.next({
-  //     startDate: startDate,
-  //     endDate: endDate
-  //   });
-  // }
-
   async save() {
-
-    // // if all the date fields are filled, validate the date
-    // if (this.setupForm.get('startYear').value !== null && this.setupForm.get('startMonth').value !== null && this.setupForm.get('endYear').value !== null
-    //   && this.setupForm.get('endMonth').value !== null) {
-    //   this.validateDate();
-    // }
     let selectedReport: IdbAccountReport = this.accountReportDbService.selectedReport.getValue();
     selectedReport = this.accountReportsService.updateReportFromSetupForm(selectedReport, this.setupForm);
     selectedReport = await firstValueFrom(this.accountReportDbService.updateWithObservable(selectedReport));

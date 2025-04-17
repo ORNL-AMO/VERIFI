@@ -27,11 +27,6 @@ export class FacilityOverviewReportSetupComponent {
   reportYears: Array<number>;
   baselineYears: Array<number>;
   months: Array<Month> = Months;
-  // startMonth: number;
-  // startYear: number;
-  // endMonth: number;
-  // endYear: number;
-  // dateRangeSub: Subscription;
   errorMessage: string;
   errorMessageSub: Subscription;
 
@@ -40,14 +35,12 @@ export class FacilityOverviewReportSetupComponent {
     private facilityDbService: FacilitydbService,
     private dbChangesService: DbChangesService,
     private calanderizationService: CalanderizationService,
-    // private facilityOverviewService: FacilityOverviewService,
     private facilityReportsService: FacilityReportsService
   ) {
 
   }
 
   ngOnInit() {
-    // this.facilityReportsDbService.setErrorMessage(this.errorMessage);
     this.facilityReportSub = this.facilityReportsDbService.selectedReport.subscribe(report => {
       if (this.isFormChange == false) {
         this.facilityReport = report;
@@ -65,31 +58,8 @@ export class FacilityOverviewReportSetupComponent {
 
   ngOnDestroy() {
     this.facilityReportSub.unsubscribe();
-    // this.dateRangeSub.unsubscribe();
     this.errorMessageSub.unsubscribe();
   }
-
-  // validateDate() {
-
-  //   let startDate: Date = new Date(this.facilityReport.dataOverviewReportSettings.startYear, this.facilityReport.dataOverviewReportSettings.startMonth, 1);
-  //   let endDate: Date = new Date(this.facilityReport.dataOverviewReportSettings.endYear, this.facilityReport.dataOverviewReportSettings.endMonth, 1);
-
-  //   // compare start and end date
-  //   if (startDate.getTime() >= endDate.getTime()) {
-  //     this.errorMessage = 'Start date cannot be later than the end date.';
-  //     this.facilityReportsDbService.setErrorMessage(this.errorMessage); // store error message in local storage
-  //     return;
-  //   }
-
-  //   this.errorMessage = '';
-  //   this.facilityReportsDbService.setErrorMessage(this.errorMessage);  // store error message in local storage
-
-  //   // Proceed with valid date range
-  //   this.facilityOverviewService.dateRange.next({
-  //     startDate: startDate,
-  //     endDate: endDate
-  //   });
-  // }
 
   async save() {
     this.isFormChange = true;
@@ -100,14 +70,6 @@ export class FacilityOverviewReportSetupComponent {
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     await this.dbChangesService.setAccountFacilityReports(selectedAccount, selectedFacility);
     this.facilityReportsDbService.selectedReport.next(facilityReport);
-
-    // proceed with date validation if all the date fields are filled
-    // if (this.facilityReport.dataOverviewReportSettings.startMonth !== undefined 
-    //   && this.facilityReport.dataOverviewReportSettings.startYear !== undefined 
-    //   && this.facilityReport.dataOverviewReportSettings.endMonth !== undefined
-    //   && this.facilityReport.dataOverviewReportSettings.endYear !== undefined) {
-    //   this.validateDate();
-    // }
   }
 
   setYearOptions() {
