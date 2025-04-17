@@ -13,7 +13,7 @@
                     </div>
                 </div>
                 <div class="col-6" *ngIf="setupForm.controls.reportType.value != 'dataOverview'">
-                    <div class="row form-group">
+                    <div class="row form-group" *ngIf="setupForm.controls.reportType.value != 'betterPlants'">
                         <label class="col-5 col-form-label semibold" for="baselineYear">Baseline Year</label>
 
                         <div class="col-7">
