@@ -25,18 +25,32 @@ export class AccountReportsService {
       dateValidators = [Validators.required];
     }
 
-
-    let form: FormGroup = this.formBuilder.group({
-      reportName: [report.name, Validators.required],
-      reportType: [report.reportType, Validators.required],
-      reportYear: [report.reportYear, yearValidators],
-      baselineYear: [report.baselineYear, yearValidators],
-      startMonth: [report.startMonth, dateValidators],
-      startYear: [report.startYear, dateValidators],
-      endMonth: [report.endMonth, dateValidators],
-      endYear: [report.endYear, dateValidators]
-    });
-    return form;
+    if (report.reportType == 'performance' || report.reportType == 'betterClimate' || report.reportType == 'dataOverview') {
+      let form: FormGroup = this.formBuilder.group({
+        reportName: [report.name, Validators.required],
+        reportType: [report.reportType, Validators.required],
+        reportYear: [report.reportYear, yearValidators],
+        baselineYear: [report.baselineYear, yearValidators],
+        startMonth: [report.startMonth, dateValidators],
+        startYear: [report.startYear, dateValidators],
+        endMonth: [report.endMonth, dateValidators],
+        endYear: [report.endYear, dateValidators]
+      });
+      return form;
+    }
+    else if (report.reportType == 'betterPlants') {
+      let form: FormGroup = this.formBuilder.group({
+        reportName: [report.name, Validators.required],
+        reportType: [report.reportType, Validators.required],
+        reportYear: [report.reportYear, yearValidators],
+        baselineYear: [report.baselineYear, ''],
+        startMonth: [report.startMonth, dateValidators],
+        startYear: [report.startYear, dateValidators],
+        endMonth: [report.endMonth, dateValidators],
+        endYear: [report.endYear, dateValidators]
+      });
+      return form;
+    }
   }
 
   updateReportFromSetupForm(report: IdbAccountReport, form: FormGroup): IdbAccountReport {
