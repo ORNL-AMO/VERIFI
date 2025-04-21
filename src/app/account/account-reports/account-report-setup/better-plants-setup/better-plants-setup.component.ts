@@ -12,10 +12,10 @@ import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 
 @Component({
-    selector: 'app-better-plants-setup',
-    templateUrl: './better-plants-setup.component.html',
-    styleUrls: ['./better-plants-setup.component.css'],
-    standalone: false
+  selector: 'app-better-plants-setup',
+  templateUrl: './better-plants-setup.component.html',
+  styleUrls: ['./better-plants-setup.component.css'],
+  standalone: false
 })
 export class BetterPlantsSetupComponent {
 
@@ -57,8 +57,11 @@ export class BetterPlantsSetupComponent {
   async save() {
     this.isFormChange = true;
     this.setSelectedAnalysisItem();
-    let selectedReport: IdbAccountReport = this.accountReportDbService.selectedReport.getValue()
+    let selectedReport: IdbAccountReport = this.accountReportDbService.selectedReport.getValue();
     selectedReport.betterPlantsReportSetup = this.accountReportsService.updateBetterPlantsReportFromForm(selectedReport.betterPlantsReportSetup, this.betterPlantsReportForm);
+    if (this.selectedAnalysisItem) {
+      selectedReport.baselineYear = this.selectedAnalysisItem.baselineYear;
+    }
     await firstValueFrom(this.accountReportDbService.updateWithObservable(selectedReport));
     await this.dbChangesService.setAccountReports(this.account);
     this.accountReportDbService.selectedReport.next(selectedReport);
@@ -93,7 +96,7 @@ export class BetterPlantsSetupComponent {
     if (this.selectedAnalysisItem && this.selectedAnalysisItem.analysisCategory == 'water') {
       this.methodsUndertakenLabel = 'If a baseline adjustment was made, please indicate the reason for making the adjustment';
       this.modificationNotesLabel = 'Please briefly describe major technologies, strategies, and practices employed during the previous year to decrease water intensity. Please identify: systems/processes impacted, approximate water savings from projects, and implementation cost';
-    } else if (this.selectedAnalysisItem && this.selectedAnalysisItem.analysisCategory == 'energy'){
+    } else if (this.selectedAnalysisItem && this.selectedAnalysisItem.analysisCategory == 'energy') {
       this.methodsUndertakenLabel = 'Please describe any methods undertaken to normalize energy intensity data or adjust baseline data to account for economic and other factors that affect energy use:';
       this.modificationNotesLabel = 'Please describe the energy efficient technologies, strategies, and practices employed during the previous year to decrease intensity. Please identify systems impacted and approximate savings from projects. (Ex: Furnace insulation project-12,000 MMBtu/yr savings, compressor controls upgrade-6,000 MMBtu/yr, energy awareness campaign, etc):';
     }
