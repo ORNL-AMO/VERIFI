@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
 import { firstValueFrom, Subscription } from 'rxjs';
-// import { FacilityOverviewService } from 'src/app/facility/facility-overview/facility-overview.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';

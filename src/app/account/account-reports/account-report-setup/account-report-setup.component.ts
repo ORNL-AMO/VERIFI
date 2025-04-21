@@ -10,7 +10,7 @@ import { CalanderizationService } from 'src/app/shared/helper-services/calanderi
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { ReportType } from 'src/app/models/constantsAndTypes';
-import { AccountOverviewService } from '../../account-overview/account-overview.service';
+
 @Component({
   selector: 'app-account-report-setup',
   templateUrl: './account-report-setup.component.html',
@@ -24,7 +24,6 @@ export class AccountReportSetupComponent {
   reportYears: Array<number>;
   baselineYears: Array<number>;
   months: Array<Month> = Months;
-  //TODO: Report years validation. Start < End (issue-1194)
   reportType: ReportType;
   errorMessage: string = '';
   errorMessageSub: Subscription;

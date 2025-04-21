@@ -31,8 +31,8 @@
         </div>
     </div>
 
-    <div class="row justify-content-end">
-        <span class="col-6 alert alert-danger small mt-2" *ngIf="errorMessage">
+    <div class="row justify-content-end" *ngIf="errorMessage">
+        <span class="col-6 alert alert-danger small mt-2">
             {{errorMessage}}
         </span>
     </div>

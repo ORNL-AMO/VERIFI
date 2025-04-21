@@ -64,6 +64,7 @@ export class FacilityReportsTabsComponent {
     this.routerSub.unsubscribe();
     this.selectedReportSub.unsubscribe();
     this.facilitySub.unsubscribe();
+    this.errorSub.unsubscribe();
   }
 
 
