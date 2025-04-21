@@ -21,7 +21,10 @@ export class FacilityOverviewService {
 
   constructor() {
     this.emissionsDisplay = new BehaviorSubject<"market" | "location">("market");
-    this.dateRange = new BehaviorSubject(undefined);
+    this.dateRange = new BehaviorSubject<{
+      startDate: Date,
+      endDate: Date
+    }>(undefined);
     this.utilityUseAndCost = new BehaviorSubject(undefined);
     this.facilityOverviewData = new BehaviorSubject(undefined);
     this.calculating = new BehaviorSubject(undefined);
