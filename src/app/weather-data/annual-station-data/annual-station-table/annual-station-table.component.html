@@ -1,4 +1,5 @@
-<table class="table utility-data table-sm table-bordered table-hover">
+<table class="table utility-data table-sm table-bordered table-hover" #dataTable
+    [ngClass]="{'copying-table': copyingTable}">
     <thead>
         <tr>
             <th>Month</th>
@@ -44,3 +45,9 @@
         </tr>
     </tfoot>
 </table>
+
+<div>
+    <button class="btn action-btn btn-sm" (click)="copyTable()">
+        <span class="fa fa-copy"></span> Copy Table
+    </button>
+</div>
