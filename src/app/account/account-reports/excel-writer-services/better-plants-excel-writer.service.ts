@@ -13,12 +13,14 @@ import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysis
 })
 export class BetterPlantsExcelWriterService {
 
+  isBlank: boolean;
   constructor() { }
 
   exportToExcel(report: IdbAccountReport, account: IdbAccount, betterPlantsSummaries: Array<BetterPlantsSummary>, analysisItem: IdbAccountAnalysisItem) {
     let workbook = new ExcelJS.Workbook();
     var request = new XMLHttpRequest();
     let requestURL: string;
+    this.isBlank = true;
     if (analysisItem.analysisCategory == 'energy') {
       requestURL = 'BBBP-Challenge-Annual-Reporting-Form';
     } else if (analysisItem.analysisCategory == 'water') {
@@ -65,8 +67,13 @@ export class BetterPlantsExcelWriterService {
   writeEnergyReportInformation(workbook: ExcelJS.Workbook, account: IdbAccount, report: IdbAccountReport, betterPlantsSummary: BetterPlantsSummary) {
     let worksheet: ExcelJS.Worksheet;
     if (report.betterPlantsReportSetup.includeAllYears) {
+      if (this.isBlank) {
+        worksheet = workbook.getWorksheet('Annual Form');
+        worksheet.name = 'Annual Form (blank)';
+        this.isBlank = false;
+      }
       //create copy of worksheet for each report
-      let reportYearWorksheet: ExcelJS.Worksheet = workbook.getWorksheet('Annual Form')
+      let reportYearWorksheet: ExcelJS.Worksheet = workbook.getWorksheet('Annual Form (blank)')
       worksheet = workbook.addWorksheet('Annual Form (' + betterPlantsSummary.reportYear + ')');
       worksheet.model = Object.assign(reportYearWorksheet.model, {
         mergeCells: reportYearWorksheet.model['merges']
@@ -229,8 +236,13 @@ export class BetterPlantsExcelWriterService {
   writeWaterReportInformation(workbook: ExcelJS.Workbook, account: IdbAccount, report: IdbAccountReport, betterPlantsSummary: BetterPlantsSummary) {
     let worksheet: ExcelJS.Worksheet;
     if (report.betterPlantsReportSetup.includeAllYears) {
+      if (this.isBlank) {
+        worksheet = workbook.getWorksheet('Baseline Form');
+        worksheet.name = 'Baseline Form (blank)';
+        this.isBlank = false;
+      }
       //create copy of worksheet for each report
-      let reportYearWorksheet: ExcelJS.Worksheet = workbook.getWorksheet('Baseline Form')
+      let reportYearWorksheet: ExcelJS.Worksheet = workbook.getWorksheet('Baseline Form (blank)')
       worksheet = workbook.addWorksheet('Baseline Form (' + betterPlantsSummary.reportYear + ')');
       worksheet.model = Object.assign(reportYearWorksheet.model, {
         mergeCells: reportYearWorksheet.model['merges']
