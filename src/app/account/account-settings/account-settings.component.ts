@@ -108,12 +108,12 @@ export class AccountSettingsComponent implements OnInit {
     this.loadingService.setLoadingMessage('Updating Reports...');
     let accountReports: Array<IdbAccountReport> = this.accountReportDbService.accountReports.getValue();
     for (let index = 0; index < accountReports.length; index++) {
-      accountReports[index].dataOverviewReportSetup.includedFacilities.push({
+      accountReports[index].dataOverviewReportSetup?.includedFacilities.push({
         facilityId: newFacility.guid,
         included: false,
         includedGroups: []
       });
-      accountReports[index].betterClimateReportSetup.includedFacilityGroups.push({
+      accountReports[index].betterClimateReportSetup?.includedFacilityGroups?.push({
         facilityId: newFacility.guid,
         include: false,
         groups: []

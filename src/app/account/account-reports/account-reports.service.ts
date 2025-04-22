@@ -30,7 +30,7 @@ export class AccountReportsService {
   validateReport(report: IdbAccountReport) {
     let errorMessage: string = '';
     //write validation for report
-    if (report.startMonth >= 0 && report.endMonth >= 0 && report.startYear > 0  && report.endYear > 0) {
+    if (report && report.startMonth >= 0 && report.endMonth >= 0 && report.startYear > 0  && report.endYear > 0) {
       let startDate: Date = new Date(report.startYear, report.startMonth, 1);
       let endDate: Date = new Date(report.endYear, report.endMonth, 1);
       // compare start and end date
