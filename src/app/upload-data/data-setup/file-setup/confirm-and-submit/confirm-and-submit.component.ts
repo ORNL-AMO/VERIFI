@@ -111,7 +111,7 @@ export class ConfirmAndSubmitComponent implements OnInit {
           let displayEnergyUse: boolean = getIsEnergyMeter(meter.source);
           let displayHeatCapacity: boolean = checkShowHeatCapacity(meter.source, meter.startingUnit, meter.scope);
           let displayVehicleFuelEfficiency: boolean = (meter.scope == 2 && meter.vehicleCategory == 2);
-          form = this.utilityMeterDataService.getGeneralMeterDataForm(meterData, displayVolumeInput, displayEnergyUse, displayHeatCapacity, displayVehicleFuelEfficiency);
+          form = this.utilityMeterDataService.getGeneralMeterDataForm(meterData, displayVolumeInput, displayEnergyUse, displayHeatCapacity, displayVehicleFuelEfficiency, meter.source);
         }
 
         if (form.valid) {
