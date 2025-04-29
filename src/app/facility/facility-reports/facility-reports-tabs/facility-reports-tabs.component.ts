@@ -77,17 +77,19 @@ export class FacilityReportsTabsComponent {
   }
 
   setSetupValid() {
-    if (this.selectedReport.facilityReportType == 'analysis') {
-      this.setupValid = (this.selectedReport.analysisItemId != undefined && this.selectedReport.name != '');
-    } else if (this.selectedReport.facilityReportType == 'overview') {
-      this.setupValid = (this.selectedReport.name != '' &&
-        this.selectedReport.dataOverviewReportSettings.endMonth != undefined &&
-        this.selectedReport.dataOverviewReportSettings.endYear != undefined &&
-        this.selectedReport.dataOverviewReportSettings.startMonth != undefined &&
-        this.selectedReport.dataOverviewReportSettings.startYear != undefined &&
-        this.errorMessage == undefined)
-    } else {
-      this.setupValid = false;
+    if (this.selectedReport != undefined) {
+      if (this.selectedReport.facilityReportType == 'analysis') {
+        this.setupValid = (this.selectedReport.analysisItemId != undefined && this.selectedReport.name != '');
+      } else if (this.selectedReport.facilityReportType == 'overview') {
+        this.setupValid = (this.selectedReport.name != '' &&
+          this.selectedReport.dataOverviewReportSettings.endMonth != undefined &&
+          this.selectedReport.dataOverviewReportSettings.endYear != undefined &&
+          this.selectedReport.dataOverviewReportSettings.startMonth != undefined &&
+          this.selectedReport.dataOverviewReportSettings.startYear != undefined &&
+          this.errorMessage == undefined)
+      } else {
+        this.setupValid = false;
+      }
     }
   }
 }

@@ -26,7 +26,8 @@ export class GroupAnalysisReportComponent {
 };
   @Input({required: true})
   analysisReportSettings: AnalysisReportSettings;
-
+  @Input()
+  isFirstGroup: boolean = false;
 
   groupItem: AnalysisGroupItem;
   print: boolean;
