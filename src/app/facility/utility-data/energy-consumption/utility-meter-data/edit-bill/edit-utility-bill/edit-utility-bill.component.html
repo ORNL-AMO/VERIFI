@@ -49,11 +49,6 @@
       <div class="alert alert-danger" *ngIf="meterDataForm.get('totalEnergyUse').hasError('required')">Total energy use
         is
         required</div>
-      <!-- <div class="alert alert-danger" *ngIf="meterDataForm.get('totalEnergyUse').hasError('min')">Can't be less than 0
-      </div>
-      <div class="alert alert-warning" *ngIf="meterDataForm.controls.totalEnergyUse.value === 0">Total energy use should
-        be
-        greater than 0</div> -->
     </div>
 
     <div *ngIf="displayHeatCapacity" class="col-md-6 col-sm-12">
