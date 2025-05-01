@@ -16,7 +16,7 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { firstValueFrom, Observable, of } from 'rxjs';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { getNewIdbPredictorData, IdbPredictorData } from 'src/app/models/idbModels/predictorData';
-import { getDegreeDayAmount } from 'src/app/shared/sharedHelperFuntions';
+import { getDegreeDayAmount, getWeatherSearchFromFacility } from 'src/app/shared/sharedHelperFuntions';
 import { PredictorDataHelperService } from 'src/app/shared/helper-services/predictor-data-helper.service';
 import { DatePipe } from '@angular/common';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
@@ -40,12 +40,13 @@ export class EditPredictorFormComponent {
   unitConversionTypes: Array<{ measure: string, display: string }> = UnitConversionTypes;
   unitOptions: Array<string> = [];
   referencePredictorName: string;
-  stations: Array<WeatherStation> = [];
   facility: IdbFacility;
   findingStations: boolean = false;
   latestMeterReading: Date;
   firstMeterReading: Date;
   destroyed: boolean;
+
+  displaySationModal: boolean = false;
   constructor(private activatedRoute: ActivatedRoute, private predictorDbService: PredictorDbService,
     private router: Router, private facilityDbService: FacilitydbService,
     private formBuilder: FormBuilder,
@@ -75,7 +76,6 @@ export class EditPredictorFormComponent {
       }
       if (this.predictor) {
         this.setReferencePredictors();
-        this.setStations();
       }
     });
   }
@@ -191,11 +191,6 @@ export class EditPredictorFormComponent {
       weatherDataChange = true;
       this.predictor.weatherStationId = this.predictorForm.controls.weatherStationId.value;
     }
-    if (this.predictor.predictorType == 'Weather') {
-      this.predictor.weatherStationName = this.stations.find(station => {
-        return station.ID == this.predictor.weatherStationId;
-      })?.name;
-    }
     return weatherDataChange;
   }
 
@@ -281,43 +276,19 @@ export class EditPredictorFormComponent {
     }
   }
 
-  setStations() {
-    this.findingStations = true;
-    this.weatherDataService.getStationsAPI(this.facility.zip, 50).subscribe(results => {
-      this.stations = JSON.parse(results).stations.map(station => {
-        return getWeatherStation(station)
-      });
-      this.stations = _.orderBy(this.stations, (station: WeatherStation) => {
-        return station.distanceFrom;
-      })
-      this.findingStations = false;
-    });
-    //ISSUE 1822
-    // this.degreeDaysService.getClosestStation(this.facility.zip, 50).then(results => {
-    //   this.stations = results;
-    //   this.stations = _.orderBy(this.stations, (station: WeatherStation) => {
-    //     return station.distanceFrom;
-    //   })
-    //   this.findingStations = false;
-    // });
-  }
-
-  goToWeatherData() {
-    this.weatherDataService.zipCode = this.facility.zip;
-    let weatherStation: WeatherStation = this.stations.find(station => {
-      return station.ID == this.predictorForm.controls.weatherStationId.value
-    });
-    this.weatherDataService.selectedStation = weatherStation;
+  async goToWeatherData() {
+    this.displaySationModal = false;
     if (this.predictorForm.controls.weatherDataType.value == 'CDD') {
       this.weatherDataService.coolingTemp = this.predictorForm.controls.coolingBaseTemperature.value;
     } else if (this.predictorForm.controls.weatherDataType.value == 'HDD') {
       this.weatherDataService.heatingTemp = this.predictorForm.controls.heatingBaseTemperature.value;
     }
     this.weatherDataService.weatherDataSelection = this.predictorForm.controls.weatherDataType.value;
-
     this.weatherDataService.selectedFacility = this.facility;
-    this.weatherDataService.zipCode = this.facility.zip;
-    if (weatherStation) {
+    this.weatherDataService.addressSearchStr = getWeatherSearchFromFacility(this.facility);
+    let weatherStation: WeatherStation | "error" = await this.weatherDataService.getStation(this.predictorForm.controls.weatherStationId.value)
+    if (weatherStation && weatherStation != 'error') {
+      this.weatherDataService.selectedStation = weatherStation;
       let endDate: Date = new Date(weatherStation.end);
       endDate.setFullYear(endDate.getFullYear() - 1);
       this.weatherDataService.selectedYear = endDate.getFullYear();
@@ -371,9 +342,24 @@ export class EditPredictorFormComponent {
           await firstValueFrom(this.predictorDataDbService.addWithObservable(newPredictorData));
           startDate.setMonth(startDate.getMonth() + 1);
         }
-      }else{
+      } else {
         this.toastNotificationService.weatherDataErrorToast();
       }
     }
+  }
+
+  openStationModal() {
+    this.displaySationModal = true;
+  }
+
+  cancelStationSelect() {
+    this.displaySationModal = false;
+  }
+
+  selectStation(station: WeatherStation) {
+    this.predictor.weatherStationId = station.ID;
+    this.predictor.weatherStationName = station.name;
+    this.predictorForm.controls['weatherStationId'].patchValue(station.ID);
+    this.cancelStationSelect();
   }
 }

@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, Menu, shell, dialog } = require('electron');
+const { app, BrowserWindow, ipcMain, Menu, shell, dialog, session } = require('electron');
 const path = require('path');
 const url = require('url');
 const log = require('electron-log');
@@ -10,6 +10,7 @@ function isDev() {
     // return require.filename.indexOf('app.asar') === -1;
     return false;
 };
+
 
 app.allowRendererProcessReuse = false
 // Logger for autoUpdater
@@ -48,6 +49,15 @@ app.on('ready', function () {
     win.on('closed', function () {
         win = null;
     });
+
+
+
+    session.defaultSession.webRequest.onBeforeSendHeaders((details, callback) => {
+        details.requestHeaders['User-Agent'] = 'VERIFI'
+        details.requestHeaders['Origin'] = 'https://verifi.ornl.gov';
+        callback({ cancel: false, requestHeaders: details.requestHeaders });
+    });
+
 
     //signal from core.component to check for update
     ipcMain.on('ready', (coreCompEvent, arg) => {

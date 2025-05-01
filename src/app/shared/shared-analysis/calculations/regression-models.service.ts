@@ -404,7 +404,7 @@ export class RegressionModelsService {
       if (baselineYearError) {
         variableNotes.push(variable.name + ' failed data validation for the baseline year.');
       }
-      if (reportYear) {
+      if (reportYearError) {
         variableNotes.push(variable.name + ' failed data validation for the report year.');
       }
 

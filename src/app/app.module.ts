@@ -19,7 +19,7 @@ import { ImportBackupModalComponent } from './core-components/import-backup-moda
 import { FacilityModule } from './facility/facility.module';
 import { AccountModule } from './account/account.module';
 import { SetupWizardModule } from './setup-wizard/setup-wizard.module';
-import { HelperPipesModule } from './shared/helper-pipes/helper-pipes.module';
+import { HelperPipesModule } from './shared/helper-pipes/_helper-pipes.module';
 import { SearchBarComponent } from './core-components/header/search-bar/search-bar.component';
 import { NgbTypeaheadModule } from '@ng-bootstrap/ng-bootstrap';
 import { FacilityListPipe } from './core-components/sidebar/facility-list.pipe';

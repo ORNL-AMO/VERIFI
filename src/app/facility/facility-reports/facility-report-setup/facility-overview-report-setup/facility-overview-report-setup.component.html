@@ -30,11 +30,18 @@
             </select>
         </div>
     </div>
+
+    <div class="row justify-content-end" *ngIf="errorMessage">
+        <span class="col-6 alert alert-danger small mt-2">
+            {{errorMessage}}
+        </span>
+    </div>
+    
     <hr>
     <div class="row mt-2">
         <div class="col-6">
             <div class="form-group">
-                <label class="semibold">Energy displayed as site or source? </label>
+                <label class="semibold">Analysis Boundary </label>
                 <div class="form-check">
                     <input type="radio" class="form-check-input" name="energyIsSource" [value]="true" id="sourceEnergy"
                         [(ngModel)]="reportSettings.energyIsSource" (change)="save()">

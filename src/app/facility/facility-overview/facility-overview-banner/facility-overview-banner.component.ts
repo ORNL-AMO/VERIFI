@@ -43,11 +43,9 @@ export class FacilityOverviewBannerComponent implements OnInit {
   maxYear: number;
   months: Array<Month> = Months;
   years: Array<number>;
-
   dateRangeSub: Subscription;
-
   showReportModal: boolean = false;
-
+  errorMessage: string;
   facilityReport: IdbFacilityReport;
   constructor(private sharedDataService: SharedDataService, private facilityDbService: FacilitydbService,
     private router: Router,
@@ -155,9 +153,18 @@ export class FacilityOverviewBannerComponent implements OnInit {
     this.router.navigateByUrl('/facility/' + this.selectedFacility.id + '/reports/setup');
   }
 
+  // date validation
   setDate() {
     let startDate: Date = new Date(this.minYear, this.minMonth, 1);
     let endDate: Date = new Date(this.maxYear, this.maxMonth, 1);
+
+    //compare start date and end date
+    if (startDate.getTime() >= endDate.getTime()) {
+      this.errorMessage = 'Start date cannot be later than the end date';
+      return;
+    }
+
+    this.errorMessage = '';
     this.facilityOverviewService.dateRange.next({
       startDate: startDate,
       endDate: endDate
