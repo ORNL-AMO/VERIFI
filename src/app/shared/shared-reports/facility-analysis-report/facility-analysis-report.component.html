@@ -25,9 +25,9 @@
     </ng-container>
     <!--group reports-->
     <ng-container *ngIf="analysisReportSettings.groupReports">
-        <ng-container *ngFor="let groupSummary of groupSummaries">
+        <ng-container *ngFor="let groupSummary of groupSummaries; let i = index">
             <app-group-analysis-report [groupSummary]="groupSummary" [analysisItem]="analysisItem" [facility]="facility"
-                [analysisReportSettings]="analysisReportSettings"></app-group-analysis-report>
+                [analysisReportSettings]="analysisReportSettings" [isFirstGroup]="i === 0"></app-group-analysis-report>
             <div class="report-spacer-container">
                 <hr>
             </div>
