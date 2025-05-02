@@ -110,8 +110,8 @@ export class SustainabilityQuestionsFormComponent implements OnInit {
       }
       if (this.inAccount) {
         this.selectedAccount = this.settingsFormsService.updateAccountFromSustainabilityQuestionsForm(this.form, this.selectedAccount);
+        this.selectedAccount.isBetterPlantsPartner = this.form.controls['isBetterPlantsPartner'].value;
         let updatedAccount: IdbAccount = await firstValueFrom(this.accountDbService.updateWithObservable(this.selectedAccount));
-        updatedAccount.isBetterPlantsPartner = this.form.controls['isBetterPlantsPartner'].value
         let allAccounts: Array<IdbAccount> = await firstValueFrom(this.accountDbService.getAll());
         this.accountDbService.selectedAccount.next(updatedAccount);
         this.accountDbService.allAccounts.next(allAccounts);

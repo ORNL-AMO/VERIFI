@@ -12,12 +12,15 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
+import { IdbAccount } from 'src/app/models/idbModels/account';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 
 @Component({
-    selector: 'app-facility-home-summary',
-    templateUrl: './facility-home-summary.component.html',
-    styleUrls: ['./facility-home-summary.component.css'],
-    standalone: false
+  selector: 'app-facility-home-summary',
+  templateUrl: './facility-home-summary.component.html',
+  styleUrls: ['./facility-home-summary.component.css'],
+  standalone: false
 })
 export class FacilityHomeSummaryComponent implements OnInit {
 
@@ -33,15 +36,19 @@ export class FacilityHomeSummaryComponent implements OnInit {
   energyAnalysisNeeded: boolean;
   meterReadingsNeeded: boolean;
   predictorsNeeded: boolean;
+  account: IdbAccount;
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService,
     private facilityDbService: FacilitydbService, private facilityHomeService: FacilityHomeService,
     private router: Router,
     private utilityMeterDbService: UtilityMeterdbService,
-    private exportToExcelTemplateService: ExportToExcelTemplateService) { }
+    private exportToExcelTemplateService: ExportToExcelTemplateService,
+    private accountDbService: AccountdbService,
+    private sharedDataService: SharedDataService) { }
 
   ngOnInit(): void {
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
-      this.facility = this.facilityDbService.selectedFacility.getValue();
+      this.facility = val;
+      this.account = this.accountDbService.selectedAccount.getValue();
       this.setFacilityStatus();
     });
   }
@@ -128,4 +135,7 @@ export class FacilityHomeSummaryComponent implements OnInit {
   }
 
 
+  openTreasureHuntModal() {
+    this.sharedDataService.exportEnergyTreasureHuntModalOpen.next(true);
+  }
 }

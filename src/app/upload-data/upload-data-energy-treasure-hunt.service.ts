@@ -132,7 +132,11 @@ export class UploadDataEnergyTreasureHuntService {
       }
     } else {
       facility = getNewIdbFacility(selectedAccount);
-      facility.name = defaultFacilityName;
+      if(!facilityName){
+        facility.name = facilityName;
+      }else{
+        facility.name = defaultFacilityName;
+      }
     }
     //TODO: Parse addtional data from document
     // facility.address = facilityDataRow['Address'];
@@ -170,6 +174,7 @@ export class UploadDataEnergyTreasureHuntService {
     for (let index: number = 8; index < 32; index++) {
       let siteEnergy: number = worksheet['D' + index]?.v
       let cost: number = worksheet['G' + index]?.v;
+      let demandUsage: number = worksheet['F' + index]?.v;
       //TODO: PEAK DEMAND GOES WHERE?
       if (siteEnergy != undefined || cost != undefined) {
         let date: Date = this.getDateFromSheet(index, worksheet);
@@ -179,6 +184,7 @@ export class UploadDataEnergyTreasureHuntService {
           meterReading.readDate = date;
           meterReading.totalEnergyUse = siteEnergy;
           meterReading.totalCost = cost;
+          meterReading.totalBilledDemand = demandUsage;
           meterData.push(meterReading)
         }
       }
@@ -367,15 +373,21 @@ export class UploadDataEnergyTreasureHuntService {
 
   getProductionData(worksheet: XLSX.WorkSheet, facility: IdbFacility, account: IdbAccount): { predictors: Array<IdbPredictor>, predictorData: Array<IdbPredictorData> } {
     let predictor1: IdbPredictor = getNewIdbPredictor(account.guid, facility.guid);
-    predictor1.name = 'Production Metric 1';
+    //D155
+    let p1Name: string = worksheet['D155']?.v;
+    predictor1.name = p1Name ? p1Name :'Production Metric 1';
     predictor1.production = true;
     let productionData1: Array<IdbPredictorData> = [];
     let predictor2: IdbPredictor = getNewIdbPredictor(account.guid, facility.guid);
-    predictor2.name = 'Production Metric 2';
+    //E155
+    let p2Name: string = worksheet['E155']?.v;
+    predictor2.name =  p2Name ? p2Name :'Production Metric 2';
     predictor2.production = true;
     let productionData2: Array<IdbPredictorData> = [];
     let predictor3: IdbPredictor = getNewIdbPredictor(account.guid, facility.guid);
-    predictor3.name = 'Production Metric 3';
+    //F155
+    let p3Name: string = worksheet['F155']?.v;
+    predictor3.name =  p3Name ? p3Name : 'Production Metric 3';
     predictor3.production = true;
     let productionData3: Array<IdbPredictorData> = [];
     let predictorTotalHours: IdbPredictor = getNewIdbPredictor(account.guid, facility.guid);

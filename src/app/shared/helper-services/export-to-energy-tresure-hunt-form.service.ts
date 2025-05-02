@@ -15,6 +15,8 @@ import * as _ from 'lodash';
 import { ConvertValue } from 'src/app/calculations/conversions/convertValue';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
+import { IdbAccount } from 'src/app/models/idbModels/account';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 
 @Injectable({
   providedIn: 'root'
@@ -26,7 +28,8 @@ export class ExportToEnergyTresureHuntFormService {
     private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private predictorDbService: PredictorDbService,
-    private predictorDataDbService: PredictorDataDbService
+    private predictorDataDbService: PredictorDataDbService,
+    private accountDbService: AccountdbService
   ) { }
 
   exportFacilityData(startYear: number, hostFacilityId: string, exchangeFacilityId: string) {
@@ -44,7 +47,6 @@ export class ExportToEnergyTresureHuntFormService {
           a.href = url;
           // let date = new Date();
           // let datePipe = new DatePipe('en-us');
-          // let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
           // let accountName: string = account.name;
           // accountName = accountName.replaceAll(' ', '-');
           // accountName = accountName.replaceAll('.', '_');
@@ -80,11 +82,13 @@ export class ExportToEnergyTresureHuntFormService {
       let exchangePlantUtilitiesWorksheet: ExcelJS.Worksheet = workbook.getWorksheet('Exchange Plant Utilities');
       this.fillPlantUtilities(exchangePlantUtilitiesWorksheet, exchangeFacility, startYear);
     }
-
+    workbook.getWorksheet("Cover Page");
   }
 
   fillPlantSummary(worksheet: ExcelJS.Worksheet, facility: IdbFacility) {
     worksheet.getCell('C9').value = facility.name;
+    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    worksheet.getCell('C8').value = account.name;
   }
 
   fillPlantUtilities(worksheet: ExcelJS.Worksheet, facility: IdbFacility, startYear: number) {
@@ -106,15 +110,23 @@ export class ExportToEnergyTresureHuntFormService {
           let date: Date = new Date(mData.date);
           return date.getFullYear() == startYear && date.getMonth() == i;
         });
-        let totalEnergyUse: number = _.sumBy(yearMonthData, (mData: MonthlyData) => {
-          return mData.energyUse
-        });
-        let totalCost: number = _.sumBy(yearMonthData, (mData: MonthlyData) => {
-          return mData.energyCost
-        });
-        worksheet.getCell('C' + cellIndex).value = startYear;
-        worksheet.getCell('D' + cellIndex).value = new ConvertValue(totalEnergyUse, 'MMBtu', 'kWh').convertedValue;
-        worksheet.getCell('G' + cellIndex).value = totalCost;
+        if (yearMonthData.length != 0) {
+          let totalEnergyUse: number = _.sumBy(yearMonthData, (mData: MonthlyData) => {
+            return mData.energyUse
+          });
+          let totalCost: number = _.sumBy(yearMonthData, (mData: MonthlyData) => {
+            return mData.energyCost
+          });
+          //NEED DEMAND IN CALANDERIZED DATA
+          // let totalDemand: number = _.sumBy(yearMonthData, (mData: MonthlyData) => {
+          //   return mData.
+          // });
+          worksheet.getCell('C' + cellIndex).value = startYear;
+          worksheet.getCell('D' + cellIndex).value = new ConvertValue(totalEnergyUse, 'MMBtu', 'kWh').convertedValue;
+          worksheet.getCell('G' + cellIndex).value = totalCost;
+          // worksheet.getCell('F' + cellIndex).value = totalDemand;
+        }
+
         cellIndex++;
       }
       //year 2
@@ -123,15 +135,22 @@ export class ExportToEnergyTresureHuntFormService {
           let date: Date = new Date(mData.date);
           return (date.getFullYear() == startYear + 1) && date.getMonth() == i;
         });
-        let totalEnergyUse: number = _.sumBy(yearMonthData, (mData: MonthlyData) => {
-          return mData.energyUse
-        });
-        let totalCost: number = _.sumBy(yearMonthData, (mData: MonthlyData) => {
-          return mData.energyCost
-        });
-        worksheet.getCell('C' + cellIndex).value = startYear + 1;
-        worksheet.getCell('D' + cellIndex).value = new ConvertValue(totalEnergyUse, 'MMBtu', 'kWh').convertedValue;
-        worksheet.getCell('G' + cellIndex).value = totalCost;
+        if (yearMonthData.length != 0) {
+          let totalEnergyUse: number = _.sumBy(yearMonthData, (mData: MonthlyData) => {
+            return mData.energyUse
+          });
+          let totalCost: number = _.sumBy(yearMonthData, (mData: MonthlyData) => {
+            return mData.energyCost
+          });
+          //NEED DEMAND IN CALANDERIZED DATA
+          // let totalDemand: number = _.sumBy(yearMonthData, (mData: MonthlyData) => {
+          //   return mData.
+          // });
+          worksheet.getCell('C' + cellIndex).value = startYear + 1;
+          worksheet.getCell('D' + cellIndex).value = new ConvertValue(totalEnergyUse, 'MMBtu', 'kWh').convertedValue;
+          worksheet.getCell('G' + cellIndex).value = totalCost;
+          // worksheet.getCell('F' + cellIndex).value = totalDemand;
+        }
         cellIndex++;
       }
     }
@@ -146,14 +165,16 @@ export class ExportToEnergyTresureHuntFormService {
           let date: Date = new Date(mData.date);
           return date.getFullYear() == startYear && date.getMonth() == i;
         });
-        let totalEnergyUse: number = _.sumBy(yearMonthData, (mData: MonthlyData) => {
-          return mData.energyUse
-        });
-        let totalCost: number = _.sumBy(yearMonthData, (mData: MonthlyData) => {
-          return mData.energyCost
-        });
-        worksheet.getCell('D' + cellIndex).value = totalEnergyUse;
-        worksheet.getCell('F' + cellIndex).value = totalCost;
+        if (yearMonthData.length != 0) {
+          let totalEnergyUse: number = _.sumBy(yearMonthData, (mData: MonthlyData) => {
+            return mData.energyUse
+          });
+          let totalCost: number = _.sumBy(yearMonthData, (mData: MonthlyData) => {
+            return mData.energyCost
+          });
+          worksheet.getCell('D' + cellIndex).value = totalEnergyUse;
+          worksheet.getCell('F' + cellIndex).value = totalCost;
+        }
         cellIndex++;
       }
       for (let i = 0; i < 12; i++) {
@@ -161,14 +182,16 @@ export class ExportToEnergyTresureHuntFormService {
           let date: Date = new Date(mData.date);
           return (date.getFullYear() == startYear + 1) && date.getMonth() == i;
         });
-        let totalEnergyUse: number = _.sumBy(yearMonthData, (mData: MonthlyData) => {
-          return mData.energyUse
-        });
-        let totalCost: number = _.sumBy(yearMonthData, (mData: MonthlyData) => {
-          return mData.energyCost
-        });
-        worksheet.getCell('D' + cellIndex).value = totalEnergyUse;
-        worksheet.getCell('F' + cellIndex).value = totalCost;
+        if (yearMonthData.length != 0) {
+          let totalEnergyUse: number = _.sumBy(yearMonthData, (mData: MonthlyData) => {
+            return mData.energyUse
+          });
+          let totalCost: number = _.sumBy(yearMonthData, (mData: MonthlyData) => {
+            return mData.energyCost
+          });
+          worksheet.getCell('D' + cellIndex).value = totalEnergyUse;
+          worksheet.getCell('F' + cellIndex).value = totalCost;
+        }
         cellIndex++;
       }
     }
@@ -182,14 +205,16 @@ export class ExportToEnergyTresureHuntFormService {
           let date: Date = new Date(mData.date);
           return date.getFullYear() == startYear && date.getMonth() == i;
         });
-        let totalEnergyUse: number = _.sumBy(yearMonthData, (mData: MonthlyData) => {
-          return mData.energyUse
-        });
-        let totalCost: number = _.sumBy(yearMonthData, (mData: MonthlyData) => {
-          return mData.energyCost
-        });
-        worksheet.getCell('D' + cellIndex).value = totalEnergyUse;
-        worksheet.getCell('F' + cellIndex).value = totalCost;
+        if (yearMonthData.length != 0) {
+          let totalEnergyUse: number = _.sumBy(yearMonthData, (mData: MonthlyData) => {
+            return mData.energyUse
+          });
+          let totalCost: number = _.sumBy(yearMonthData, (mData: MonthlyData) => {
+            return mData.energyCost
+          });
+          worksheet.getCell('D' + cellIndex).value = totalEnergyUse;
+          worksheet.getCell('F' + cellIndex).value = totalCost;
+        }
         cellIndex++;
       }
       for (let i = 0; i < 12; i++) {
@@ -197,14 +222,16 @@ export class ExportToEnergyTresureHuntFormService {
           let date: Date = new Date(mData.date);
           return (date.getFullYear() == startYear + 1) && date.getMonth() == i;
         });
-        let totalEnergyUse: number = _.sumBy(yearMonthData, (mData: MonthlyData) => {
-          return mData.energyUse
-        });
-        let totalCost: number = _.sumBy(yearMonthData, (mData: MonthlyData) => {
-          return mData.energyCost
-        });
-        worksheet.getCell('D' + cellIndex).value = totalEnergyUse;
-        worksheet.getCell('F' + cellIndex).value = totalCost;
+        if (yearMonthData.length != 0) {
+          let totalEnergyUse: number = _.sumBy(yearMonthData, (mData: MonthlyData) => {
+            return mData.energyUse
+          });
+          let totalCost: number = _.sumBy(yearMonthData, (mData: MonthlyData) => {
+            return mData.energyCost
+          });
+          worksheet.getCell('D' + cellIndex).value = totalEnergyUse;
+          worksheet.getCell('F' + cellIndex).value = totalCost;
+        }
         cellIndex++;
       }
     }
@@ -219,14 +246,16 @@ export class ExportToEnergyTresureHuntFormService {
           let date: Date = new Date(mData.date);
           return date.getFullYear() == startYear && date.getMonth() == i;
         });
-        let totalEnergyUse: number = _.sumBy(yearMonthData, (mData: MonthlyData) => {
-          return mData.energyUse
-        });
-        let totalCost: number = _.sumBy(yearMonthData, (mData: MonthlyData) => {
-          return mData.energyCost
-        });
-        worksheet.getCell('D' + cellIndex).value = totalEnergyUse;
-        worksheet.getCell('F' + cellIndex).value = totalCost;
+        if (yearMonthData.length != 0) {
+          let totalEnergyUse: number = _.sumBy(yearMonthData, (mData: MonthlyData) => {
+            return mData.energyUse
+          });
+          let totalCost: number = _.sumBy(yearMonthData, (mData: MonthlyData) => {
+            return mData.energyCost
+          });
+          worksheet.getCell('D' + cellIndex).value = totalEnergyUse;
+          worksheet.getCell('F' + cellIndex).value = totalCost;
+        }
         cellIndex++;
       }
       for (let i = 0; i < 12; i++) {
@@ -234,14 +263,16 @@ export class ExportToEnergyTresureHuntFormService {
           let date: Date = new Date(mData.date);
           return (date.getFullYear() == startYear + 1) && date.getMonth() == i;
         });
-        let totalEnergyUse: number = _.sumBy(yearMonthData, (mData: MonthlyData) => {
-          return mData.energyUse
-        });
-        let totalCost: number = _.sumBy(yearMonthData, (mData: MonthlyData) => {
-          return mData.energyCost
-        });
-        worksheet.getCell('D' + cellIndex).value = totalEnergyUse;
-        worksheet.getCell('F' + cellIndex).value = totalCost;
+        if (yearMonthData.length != 0) {
+          let totalEnergyUse: number = _.sumBy(yearMonthData, (mData: MonthlyData) => {
+            return mData.energyUse
+          });
+          let totalCost: number = _.sumBy(yearMonthData, (mData: MonthlyData) => {
+            return mData.energyCost
+          });
+          worksheet.getCell('D' + cellIndex).value = totalEnergyUse;
+          worksheet.getCell('F' + cellIndex).value = totalCost;
+        }
         cellIndex++;
       }
     }
@@ -261,14 +292,16 @@ export class ExportToEnergyTresureHuntFormService {
           let date: Date = new Date(mData.date);
           return date.getFullYear() == startYear && date.getMonth() == i;
         });
-        let totalEnergyUse: number = _.sumBy(yearMonthData, (mData: MonthlyData) => {
-          return mData.energyConsumption
-        });
-        let totalCost: number = _.sumBy(yearMonthData, (mData: MonthlyData) => {
-          return mData.energyCost
-        });
-        worksheet.getCell('D' + cellIndex).value = totalEnergyUse;
-        worksheet.getCell('G' + cellIndex).value = totalCost;
+        if (yearMonthData.length != 0) {
+          let totalEnergyUse: number = _.sumBy(yearMonthData, (mData: MonthlyData) => {
+            return mData.energyConsumption
+          });
+          let totalCost: number = _.sumBy(yearMonthData, (mData: MonthlyData) => {
+            return mData.energyCost
+          });
+          worksheet.getCell('D' + cellIndex).value = totalEnergyUse;
+          worksheet.getCell('G' + cellIndex).value = totalCost;
+        }
         cellIndex++;
       }
       for (let i = 0; i < 12; i++) {
@@ -276,14 +309,16 @@ export class ExportToEnergyTresureHuntFormService {
           let date: Date = new Date(mData.date);
           return (date.getFullYear() == startYear + 1) && date.getMonth() == i;
         });
-        let totalEnergyUse: number = _.sumBy(yearMonthData, (mData: MonthlyData) => {
-          return mData.energyConsumption
-        });
-        let totalCost: number = _.sumBy(yearMonthData, (mData: MonthlyData) => {
-          return mData.energyCost
-        });
-        worksheet.getCell('D' + cellIndex).value = totalEnergyUse;
-        worksheet.getCell('G' + cellIndex).value = totalCost;
+        if (yearMonthData.length != 0) {
+          let totalEnergyUse: number = _.sumBy(yearMonthData, (mData: MonthlyData) => {
+            return mData.energyConsumption
+          });
+          let totalCost: number = _.sumBy(yearMonthData, (mData: MonthlyData) => {
+            return mData.energyCost
+          });
+          worksheet.getCell('D' + cellIndex).value = totalEnergyUse;
+          worksheet.getCell('G' + cellIndex).value = totalCost;
+        }
         cellIndex++;
       }
     }
@@ -299,14 +334,16 @@ export class ExportToEnergyTresureHuntFormService {
           let date: Date = new Date(mData.date);
           return date.getFullYear() == startYear && date.getMonth() == i;
         });
-        let totalEnergyUse: number = _.sumBy(yearMonthData, (mData: MonthlyData) => {
-          return mData.energyConsumption
-        });
-        let totalCost: number = _.sumBy(yearMonthData, (mData: MonthlyData) => {
-          return mData.energyCost
-        });
-        worksheet.getCell('E' + cellIndex).value = totalEnergyUse;
-        worksheet.getCell('H' + cellIndex).value = totalCost;
+        if (yearMonthData.length != 0) {
+          let totalEnergyUse: number = _.sumBy(yearMonthData, (mData: MonthlyData) => {
+            return mData.energyConsumption
+          });
+          let totalCost: number = _.sumBy(yearMonthData, (mData: MonthlyData) => {
+            return mData.energyCost
+          });
+          worksheet.getCell('E' + cellIndex).value = totalEnergyUse;
+          worksheet.getCell('H' + cellIndex).value = totalCost;
+        }
         cellIndex++;
       }
       for (let i = 0; i < 12; i++) {
@@ -314,14 +351,16 @@ export class ExportToEnergyTresureHuntFormService {
           let date: Date = new Date(mData.date);
           return (date.getFullYear() == startYear + 1) && date.getMonth() == i;
         });
-        let totalEnergyUse: number = _.sumBy(yearMonthData, (mData: MonthlyData) => {
-          return mData.energyConsumption
-        });
-        let totalCost: number = _.sumBy(yearMonthData, (mData: MonthlyData) => {
-          return mData.energyCost
-        });
-        worksheet.getCell('E' + cellIndex).value = totalEnergyUse;
-        worksheet.getCell('H' + cellIndex).value = totalCost;
+        if (yearMonthData.length != 0) {
+          let totalEnergyUse: number = _.sumBy(yearMonthData, (mData: MonthlyData) => {
+            return mData.energyConsumption
+          });
+          let totalCost: number = _.sumBy(yearMonthData, (mData: MonthlyData) => {
+            return mData.energyCost
+          });
+          worksheet.getCell('E' + cellIndex).value = totalEnergyUse;
+          worksheet.getCell('H' + cellIndex).value = totalCost;
+        }
         cellIndex++;
       }
     }
@@ -337,10 +376,12 @@ export class ExportToEnergyTresureHuntFormService {
           let date: Date = new Date(mData.date);
           return date.getFullYear() == startYear && date.getMonth() == i;
         });
-        let totalEnergyUse: number = _.sumBy(yearMonthData, (mData: MonthlyData) => {
-          return mData.energyUse
-        });
-        worksheet.getCell('F' + cellIndex).value = totalEnergyUse;
+        if (yearMonthData.length != 0) {
+          let totalEnergyUse: number = _.sumBy(yearMonthData, (mData: MonthlyData) => {
+            return mData.energyUse
+          });
+          worksheet.getCell('F' + cellIndex).value = totalEnergyUse;
+        }
         cellIndex++;
       }
       for (let i = 0; i < 12; i++) {
@@ -348,10 +389,12 @@ export class ExportToEnergyTresureHuntFormService {
           let date: Date = new Date(mData.date);
           return (date.getFullYear() == startYear + 1) && date.getMonth() == i;
         });
-        let totalEnergyUse: number = _.sumBy(yearMonthData, (mData: MonthlyData) => {
-          return mData.energyConsumption
-        });
-        worksheet.getCell('F' + cellIndex).value = totalEnergyUse;
+        if (yearMonthData.length != 0) {
+          let totalEnergyUse: number = _.sumBy(yearMonthData, (mData: MonthlyData) => {
+            return mData.energyConsumption
+          });
+          worksheet.getCell('F' + cellIndex).value = totalEnergyUse;
+        }
         cellIndex++;
       }
     }
@@ -365,16 +408,19 @@ export class ExportToEnergyTresureHuntFormService {
       let p1Data: Array<IdbPredictorData>;
       if (p1) {
         p1Data = this.predictorDataDbService.getByPredictorId(p1.guid);
+        worksheet.getCell('D155').value = p1.name;
       }
       let p2: IdbPredictor = productionPredictors[1];
       let p2Data: Array<IdbPredictorData>;
       if (p2) {
         p2Data = this.predictorDataDbService.getByPredictorId(p2.guid);
+        worksheet.getCell('E155').value = p2.name;
       }
       let p3: IdbPredictor = productionPredictors[2];
       let p3Data: Array<IdbPredictorData>;
       if (p3) {
         p3Data = this.predictorDataDbService.getByPredictorId(p3.guid);
+        worksheet.getCell('F155').value = p3.name;
       }
       cellIndex = 156
       for (let i = 0; i < 12; i++) {
@@ -383,10 +429,12 @@ export class ExportToEnergyTresureHuntFormService {
             let date: Date = new Date(mData.date);
             return date.getFullYear() == startYear && date.getMonth() == i;
           });
-          let totalPredictor: number = _.sumBy(p1MonthData, (pData: IdbPredictorData) => {
-            return pData.amount
-          });
-          worksheet.getCell('D' + cellIndex).value = totalPredictor;
+          if (p1MonthData.length != 0) {
+            let totalPredictor: number = _.sumBy(p1MonthData, (pData: IdbPredictorData) => {
+              return pData.amount
+            });
+            worksheet.getCell('D' + cellIndex).value = totalPredictor;
+          }
         }
 
         if (p2) {
@@ -394,20 +442,24 @@ export class ExportToEnergyTresureHuntFormService {
             let date: Date = new Date(mData.date);
             return date.getFullYear() == startYear && date.getMonth() == i;
           });
-          let totalPredictor: number = _.sumBy(p2MonthData, (pData: IdbPredictorData) => {
-            return pData.amount
-          });
-          worksheet.getCell('E' + cellIndex).value = totalPredictor;
+          if (p2MonthData.length != 0) {
+            let totalPredictor: number = _.sumBy(p2MonthData, (pData: IdbPredictorData) => {
+              return pData.amount
+            });
+            worksheet.getCell('E' + cellIndex).value = totalPredictor;
+          }
         }
         if (p3) {
           let p3MonthData: Array<IdbPredictorData> = p3Data.filter(mData => {
             let date: Date = new Date(mData.date);
             return date.getFullYear() == startYear && date.getMonth() == i;
           });
-          let totalPredictor: number = _.sumBy(p3MonthData, (pData: IdbPredictorData) => {
-            return pData.amount
-          });
-          worksheet.getCell('F' + cellIndex).value = totalPredictor;
+          if (p3MonthData.length != 0) {
+            let totalPredictor: number = _.sumBy(p3MonthData, (pData: IdbPredictorData) => {
+              return pData.amount
+            });
+            worksheet.getCell('F' + cellIndex).value = totalPredictor;
+          }
         }
         cellIndex++;
       }
@@ -417,30 +469,36 @@ export class ExportToEnergyTresureHuntFormService {
             let date: Date = new Date(mData.date);
             return (date.getFullYear() == startYear + 1) && date.getMonth() == i;
           });
-          let totalPredictor: number = _.sumBy(p1MonthData, (pData: IdbPredictorData) => {
-            return pData.amount
-          });
-          worksheet.getCell('D' + cellIndex).value = totalPredictor;
+          if (p1MonthData.length != 0) {
+            let totalPredictor: number = _.sumBy(p1MonthData, (pData: IdbPredictorData) => {
+              return pData.amount
+            });
+            worksheet.getCell('D' + cellIndex).value = totalPredictor;
+          }
         }
         if (p2) {
           let p2MonthData: Array<IdbPredictorData> = p2Data.filter(mData => {
             let date: Date = new Date(mData.date);
             return (date.getFullYear() == startYear + 1) && date.getMonth() == i;
           });
-          let totalPredictor: number = _.sumBy(p2MonthData, (pData: IdbPredictorData) => {
-            return pData.amount
-          });
-          worksheet.getCell('E' + cellIndex).value = totalPredictor;
+          if (p2MonthData.length != 0) {
+            let totalPredictor: number = _.sumBy(p2MonthData, (pData: IdbPredictorData) => {
+              return pData.amount
+            });
+            worksheet.getCell('E' + cellIndex).value = totalPredictor;
+          }
         }
         if (p3) {
           let p3MonthData: Array<IdbPredictorData> = p3Data.filter(mData => {
             let date: Date = new Date(mData.date);
             return (date.getFullYear() == startYear + 1) && date.getMonth() == i;
           });
-          let totalPredictor: number = _.sumBy(p3MonthData, (pData: IdbPredictorData) => {
-            return pData.amount
-          });
-          worksheet.getCell('F' + cellIndex).value = totalPredictor;
+          if (p3MonthData.length != 0) {
+            let totalPredictor: number = _.sumBy(p3MonthData, (pData: IdbPredictorData) => {
+              return pData.amount
+            });
+            worksheet.getCell('F' + cellIndex).value = totalPredictor;
+          }
         }
         cellIndex++;
       }

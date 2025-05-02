@@ -7,6 +7,7 @@ import { Subscription } from 'rxjs';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';
 import { ExportToEnergyTresureHuntFormService } from 'src/app/shared/helper-services/export-to-energy-tresure-hunt-form.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-export-energy-treasure-hunt-modal',
@@ -32,7 +33,8 @@ export class ExportEnergyTreasureHuntModalComponent {
     private toastNotificationService: ToastNotificationsService,
     private facilityDbService: FacilitydbService,
     private calanderizationService: CalanderizationService,
-    private exportToEnergyTreasureHuntFormService: ExportToEnergyTresureHuntFormService) { }
+    private exportToEnergyTreasureHuntFormService: ExportToEnergyTresureHuntFormService,
+    private router: Router) { }
 
   ngOnInit() {
     this.showModalSub = this.sharedDataService.exportEnergyTreasureHuntModalOpen.subscribe(val => {
@@ -60,7 +62,12 @@ export class ExportEnergyTreasureHuntModalComponent {
     this.yearOptions = this.calanderizationService.getYearOptionsAccount('all');
     this.yearOptions.pop();
     this.facilityOptions = this.facilityDbService.accountFacilities.getValue();
-    this.hostFacilityId = undefined;
+    if (this.router.url.includes('facility')) {
+      let selectedFacility = this.facilityDbService.selectedFacility.getValue();
+      this.hostFacilityId = selectedFacility.guid;
+    } else {
+      this.hostFacilityId = undefined;
+    }
     this.exchangeFacilityId = undefined;
     this.startYear = undefined;
 
