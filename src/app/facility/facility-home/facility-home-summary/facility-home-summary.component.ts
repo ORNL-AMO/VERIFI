@@ -12,12 +12,13 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
+import { ExportToNewTemplateService } from 'src/app/shared/helper-services/export-to-new-template.service';
 
 @Component({
-    selector: 'app-facility-home-summary',
-    templateUrl: './facility-home-summary.component.html',
-    styleUrls: ['./facility-home-summary.component.css'],
-    standalone: false
+  selector: 'app-facility-home-summary',
+  templateUrl: './facility-home-summary.component.html',
+  styleUrls: ['./facility-home-summary.component.css'],
+  standalone: false
 })
 export class FacilityHomeSummaryComponent implements OnInit {
 
@@ -37,7 +38,8 @@ export class FacilityHomeSummaryComponent implements OnInit {
     private facilityDbService: FacilitydbService, private facilityHomeService: FacilityHomeService,
     private router: Router,
     private utilityMeterDbService: UtilityMeterdbService,
-    private exportToExcelTemplateService: ExportToExcelTemplateService) { }
+    private exportToExcelTemplateService: ExportToExcelTemplateService,
+    private exportToNewTemplateService: ExportToNewTemplateService) { }
 
   ngOnInit(): void {
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
@@ -124,7 +126,8 @@ export class FacilityHomeSummaryComponent implements OnInit {
 
   exportData() {
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    this.exportToExcelTemplateService.exportFacilityData(selectedFacility.guid);
+    // this.exportToExcelTemplateService.exportFacilityData(selectedFacility.guid);
+    this.exportToNewTemplateService.exportFacilityData(selectedFacility.guid);
   }
 
 
