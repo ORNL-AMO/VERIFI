@@ -12,7 +12,8 @@ export interface IdbAccount extends IdbEntry, AccountAndFacility {
     archiveOption: 'always' | 'never' | 'justOnce' | 'skip',
     isSharedBackupFile?: boolean,
     sharedFileAuthor?: string
-    deleteAccount?: boolean
+    deleteAccount?: boolean,
+    assessmentReportVersion?: '2024' | '2025'
 }
 
 export function getNewIdbAccount(): IdbAccount {
@@ -74,6 +75,7 @@ export function getNewIdbAccount(): IdbAccount {
         contactPhone: undefined,
         archiveOption: 'skip',
         isSharedBackupFile: false,
-        color: undefined
+        color: undefined,
+        assessmentReportVersion: '2024'
     }
 }

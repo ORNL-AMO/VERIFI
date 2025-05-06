@@ -160,7 +160,7 @@ export class AppComponent {
         this.automaticBackupsService.initializeAccount();
         this.setAppOpenNotifications();
       } else {
-        await this.eGridService.parseEGridData();
+        await this.eGridService.parseEGridData('2024');
         await this.initializeElectronBackups();
 
         this.dataInitialized = true;
@@ -169,7 +169,7 @@ export class AppComponent {
 
     } catch (err) {
       console.log(err);
-      await this.eGridService.parseEGridData();
+      await this.eGridService.parseEGridData('2024');
       await this.initializeElectronBackups();
       this.toastNotificationService.showToast('An Error Occured', 'There was an error when trying to initialize the application data.', 15000, false, 'alert-danger');
       this.router.navigateByUrl('/manage-accounts');
@@ -307,7 +307,10 @@ export class AppComponent {
       uSAverageItem = await firstValueFrom(this.customEmissionsDbService.addWithObservable(uSAverageItem));
       customEmissionsItems.push(uSAverageItem);
     }
-    await this.eGridService.parseEGridData();
+    if(!account.assessmentReportVersion){
+      account.assessmentReportVersion = '2024';
+    }
+    await this.eGridService.parseEGridData(account.assessmentReportVersion);
     this.customEmissionsDbService.accountEmissionsItems.next(customEmissionsItems);
   }
 

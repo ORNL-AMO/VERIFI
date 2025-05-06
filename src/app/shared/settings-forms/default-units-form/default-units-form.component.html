@@ -92,12 +92,22 @@
     <div class="row">
         <div class="col">
             <hr>
-            <label class="mb-3">Electricity Global Warming Potential
-                <!-- <span (click)="toggleCustomEmissionsRate()" class="float-end click-link"
-                    *ngIf="!form.controls.customEmissionsRate.value">Rate Known</span>
-                <span (click)="toggleCustomEmissionsRate()" class="float-end click-link"
-                    *ngIf="form.controls.customEmissionsRate.value && showCustomLink">Use eGRID</span> -->
-            </label>
+            <h5>Electricity Global Warming Potential</h5>
+        </div>
+    </div>
+    <div class="col-12 pb-3" *ngIf="inAccount">
+        <div class="form-group">
+            <label for="assessmentReportVersion">Assessment Report Version</label>
+            <div class="form-check ps-5">
+                <input type="radio" class="form-check-input" name="assessmentReportVersion" formControlName="assessmentReportVersion" value="2024"
+                    (change)="changeAssessmentReportVersion()" id="AR2024">
+                <label class="form-check-label" for="AR2024">AR2024</label>
+            </div>
+            <div class="form-check ps-5">
+                <input type="radio" class="form-check-input" name="assessmentReportVersion" formControlName="assessmentReportVersion"
+                    value="2025" (change)="changeAssessmentReportVersion()" id="AR2025">
+                <label class="form-check-label" for="AR2025">AR2025</label>
+            </div>
         </div>
     </div>
     <div class="row">

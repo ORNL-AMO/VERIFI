@@ -34,6 +34,7 @@ import { IdbAnalysisItem } from '../models/idbModels/analysisItem';
 import { IdbPredictorEntryDeprecated } from '../models/idbModels/deprecatedPredictors';
 import { FacilityReportsDbService } from './facility-reports-db.service';
 import { IdbFacilityReport } from '../models/idbModels/facilityReport';
+import { EGridService } from '../shared/helper-services/e-grid.service';
 
 @Injectable({
   providedIn: 'root'
@@ -55,7 +56,8 @@ export class DbChangesService {
     private predictorDbService: PredictorDbService,
     private predictorDataDbService: PredictorDataDbService,
     private migratePredictorsService: MigratePredictorsService,
-    private facilityReportsDbService: FacilityReportsDbService) { }
+    private facilityReportsDbService: FacilityReportsDbService,
+    private eGridService: EGridService) { }
 
   async updateAccount(account: IdbAccount) {
     let updatedAccount: IdbAccount = await firstValueFrom(this.accountDbService.updateWithObservable(account));
@@ -73,6 +75,8 @@ export class DbChangesService {
         await this.updateAccount(account)
       }
     }
+
+
     //set account facilities
     let accountFacilites: Array<IdbFacility> = await this.facilityDbService.getAllAccountFacilities(account.guid);
     if (!skipUpdates) {
@@ -101,6 +105,8 @@ export class DbChangesService {
     await this.setMeterGroups(account);
     //set custom emissions
     await this.setCustomEmissions(account);
+    //set global warming potentials
+    await this.eGridService.parseEGridData(account.assessmentReportVersion);
     //set custom fuels
     await this.setCustomFuels(account);
     //set custom GWPs

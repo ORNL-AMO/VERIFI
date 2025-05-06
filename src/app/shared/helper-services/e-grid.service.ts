@@ -21,28 +21,26 @@ export class EGridService {
     });
   }
 
-  async parseEGridData() {
-    await fetch('assets/eGrid_data/eGrid_zipcode_lookup.xlsx')
-      .then(response => response.arrayBuffer())
-      .then(buffer => {
-        let wb: XLSX.WorkBook = XLSX.read(new Uint8Array(buffer), { type: "array", raw: false });
-        //zip code regions
-        // [0: "ZIP (character)"
-        // 1: "ZIP (numeric)"
-        // 2: "state"
-        // 3: "eGRID Subregion #1"
-        // 4: "eGRID Subregion #2"
-        // 5: "eGRID Subregion #3"]
-        let sheetOne = XLSX.utils.sheet_to_json(wb.Sheets["eGrid_zipcode_lookup"], { raw: false });
-        this.setSubRegionsByZip(sheetOne)
-        //eGrid data
-        //0: SUBRGN
-        //1: YEAR
-        //2: CATEGORY
-        //3: CO2e
-        let sheetTwo = XLSX.utils.sheet_to_json(wb.Sheets["eGrid_co2"], { raw: false });
-        this.setCo2Emissions(sheetTwo);
-      });
+  async parseEGridData(assessmentReportVersion: '2024' | '2025') {
+    let response = await fetch('assets/eGrid_data/eGrid_zipcode_lookup.xlsx')
+    let buffer = await response.arrayBuffer();
+    let wb: XLSX.WorkBook = XLSX.read(new Uint8Array(buffer), { type: "array", raw: false });
+    //zip code regions
+    // [0: "ZIP (character)"
+    // 1: "ZIP (numeric)"
+    // 2: "state"
+    // 3: "eGRID Subregion #1"
+    // 4: "eGRID Subregion #2"
+    // 5: "eGRID Subregion #3"]
+    let sheetOne = XLSX.utils.sheet_to_json(wb.Sheets["eGrid_zipcode_lookup"], { raw: false });
+    this.setSubRegionsByZip(sheetOne)
+    //eGrid data
+    //0: SUBRGN
+    //1: YEAR
+    //2: CATEGORY
+    //3: CO2e
+    let sheetTwo = XLSX.utils.sheet_to_json(wb.Sheets["eGrid_co2"], { raw: false });
+    this.setCo2Emissions(sheetTwo, assessmentReportVersion);
   }
 
   setSubRegionsByZip(fileData: Array<any>) {
@@ -64,13 +62,17 @@ export class EGridService {
   }
 
 
-  setCo2Emissions(csvResults: Array<any>) {
+  setCo2Emissions(csvResults: Array<any>, assessmentReportVersion: '2024' | '2025') {
     let subregionEmissions = new Array<SubregionEmissions>();
     csvResults.forEach(result => {
       let subregion: string = result['SUBRGN'];
       if (subregion) {
-        //TODO: issue 1597 update to handle AR5
-        let co2Emissions: number = Number(result['CO2e_AR4']);
+        let co2Emissions: number;
+        if (assessmentReportVersion == '2024' || !assessmentReportVersion) {
+          co2Emissions = Number(result['CO2e_AR4']);
+        } else {
+          co2Emissions = Number(result['CO2e_AR5']);
+        }
         let year: number = Number(result['YEAR']);
         let category: 'LocationMix' | 'ResidualMix' = result['CATEGORY'];
         subregionEmissions = this.addEmissionRate(subregion, co2Emissions, year, category, subregionEmissions);
