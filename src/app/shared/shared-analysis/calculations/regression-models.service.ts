@@ -82,7 +82,8 @@ export class RegressionModelsService {
               modelPValue: model.modelPValue,
               modelNotes: model.modelNotes,
               errorModeling: model.errorModeling,
-              SEPValidation: model.SEPValidation
+              SEPValidation: model.SEPValidation,
+              SEPValidationPass: model.SEPValidationPass
             };
 
             models.push(jstatModelToSave);
@@ -118,7 +119,8 @@ export class RegressionModelsService {
               isValid: false,
               modelPValue: undefined,
               modelNotes: ['Model could not be calculated.'],
-              errorModeling: true
+              errorModeling: true,
+              SEPValidationPass: false
             })
           }
         })
@@ -252,6 +254,7 @@ export class RegressionModelsService {
       modelNotes.push(note);
     });
     model['SEPValidation'] = validationCheck.SEPValidation;
+    model['SEPValidationPass'] = validationCheck.SEPValidation.every(SEPValidation => SEPValidation.isValid);
     model['modelNotes'] = modelNotes;
     return model;
   }

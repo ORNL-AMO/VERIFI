@@ -72,8 +72,8 @@
                 </tr>
             </thead>
             <tbody>
-                <tr *ngFor="let model of selectedGroup.models | orderBy: orderDataField: orderByDirection | modelFilter:showInvalid
-                | modelDataValidationFilter:showFailedValidationModel; let modelIndex = index;"
+                <tr *ngFor="let model of selectedGroup.models | orderBy: orderDataField: orderByDirection | modelFilter:showInvalid:'invalidModel'
+                | modelFilter:showFailedValidationModel:'failedDataValidation'; let modelIndex = index;"
                     [ngClass]="{'selected-model': selectedGroup.selectedModelId == model.modelId}">
                     <td class="text-center" *ngIf="!model.errorModeling">
                         <input type="radio" class="rowToggle" [(ngModel)]="selectedGroup.selectedModelId"
@@ -120,8 +120,10 @@
                         <span *ngIf="!model.isValid">Invalid</span>
                     </td>
                     <td *ngIf="showFailedValidationModel && !model.errorModeling">
-                        <span *ngIf="allModelsValid(model)">Valid</span>
-                        <span *ngIf="!allModelsValid(model)">Invalid</span>
+                        <span *ngFor="let SEPValidation of model.SEPValidation">
+                            <span *ngIf="!SEPValidation.isValid">{{SEPValidation.predictorVariable}}: Invalid</span>
+                        </span>
+                        <span *ngIf="model.SEPValidationPass">&mdash;</span>
                     </td>
                     <!--error modeling-->
                     <td class="alert-danger" *ngIf="model.errorModeling" colspan="9">

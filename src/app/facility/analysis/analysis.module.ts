@@ -35,7 +35,6 @@ import { BankedGroupsDetailsComponent } from './run-analysis/analysis-setup/sele
 import { SharedReportsModule } from "../../shared/shared-reports/shared-reports.module";
 import { BankedGroupAnalysisComponent } from './run-analysis/group-analysis/banked-group-analysis/banked-group-analysis.component';
 import { BankedGroupResultsTableComponent } from './run-analysis/group-analysis/group-analysis-options/banked-group-results-table/banked-group-results-table.component';
-import { ModelDataValidationFilterPipe } from './run-analysis/group-analysis/regression-model-selection/model-data-validation-filter.pipe';
 
 @NgModule({
   declarations: [
@@ -64,8 +63,7 @@ import { ModelDataValidationFilterPipe } from './run-analysis/group-analysis/reg
     SelectBankedAnalysisComponent,
     BankedGroupsDetailsComponent,
     BankedGroupAnalysisComponent,
-    BankedGroupResultsTableComponent,
-    ModelDataValidationFilterPipe
+    BankedGroupResultsTableComponent
   ],
   imports: [
     CommonModule,

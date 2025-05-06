@@ -123,8 +123,4 @@ export class RegressionModelSelectionComponent implements OnInit {
     this.showInUseMessage = false;
     this.analysisService.hideInUseMessage = true;
   }
-
-  allModelsValid(model: JStatRegressionModel): boolean {
-    return model.SEPValidation.every(SEPValidation => SEPValidation.isValid);
-  }
 }
