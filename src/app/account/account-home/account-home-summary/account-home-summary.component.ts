@@ -9,6 +9,7 @@ import { ExportToExcelTemplateService } from 'src/app/shared/helper-services/exp
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
+import { ExportToNewTemplateService } from 'src/app/shared/helper-services/export-to-new-template.service';
 
 @Component({
     selector: 'app-account-home-summary',
@@ -28,7 +29,8 @@ export class AccountHomeSummaryComponent implements OnInit {
   constructor(private accountDbService: AccountdbService, private accountHomeService: AccountHomeService,
     private router: Router,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private exportToExcelTemplateService: ExportToExcelTemplateService) { }
+    private exportToExcelTemplateService: ExportToExcelTemplateService,
+    private exportToNewTemplateService: ExportToNewTemplateService) { }
 
   ngOnInit(): void {
     this.accountSub = this.accountDbService.selectedAccount.subscribe(val => {
@@ -52,7 +54,8 @@ export class AccountHomeSummaryComponent implements OnInit {
   }
 
   exportData() {
-    this.exportToExcelTemplateService.exportFacilityData();
+    // this.exportToExcelTemplateService.exportFacilityData();
+    this.exportToNewTemplateService.exportFacilityData();
   }
 
 

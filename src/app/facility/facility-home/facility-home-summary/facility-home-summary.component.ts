@@ -124,10 +124,10 @@ export class FacilityHomeSummaryComponent implements OnInit {
     this.sources = _.uniq(sources);
   }
 
-  exportData() {
+  async exportData() {
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     // this.exportToExcelTemplateService.exportFacilityData(selectedFacility.guid);
-    this.exportToNewTemplateService.exportFacilityData(selectedFacility.guid);
+    await this.exportToNewTemplateService.exportFacilityData(selectedFacility.guid);
   }
 
 

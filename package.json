@@ -109,7 +109,7 @@
     "@types/node": "20.12.5",
     "electron": "29.2.0",
     "electron-builder": "24.13.3",
-    "exceljs": "4.3.0",
+    "exceljs": "4.4.0",
     "jasmine-core": "4.6.0",
     "jasmine-spec-reporter": "7.0.0",
     "karma": "^6.4.0",
