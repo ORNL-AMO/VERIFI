@@ -22,7 +22,7 @@ export class EGridService {
   }
 
   async parseEGridData() {
-    let response = await fetch('assets/eGrid_data/eGrid_zipcode_lookup.xlsx')
+    let response = await fetch('assets/eGrid_data/eGrid_zipcode_lookup_2025.xlsx')
     let buffer = await response.arrayBuffer();
     let wb: XLSX.WorkBook = XLSX.read(new Uint8Array(buffer), { type: "array", raw: false });
     //zip code regions

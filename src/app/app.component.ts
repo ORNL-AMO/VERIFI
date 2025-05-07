@@ -302,10 +302,37 @@ export class AppComponent {
   async initializeCustomEmissions(account: IdbAccount) {
     this.loadingMessage = 'Loading Emissions Rates...';
     let customEmissionsItems: Array<IdbCustomEmissionsItem> = await this.customEmissionsDbService.getAllAccountCustomEmissions(account.guid);
-    if (customEmissionsItems.length == 0) {
-      let uSAverageItem: IdbCustomEmissionsItem = this.customEmissionsDbService.getUSAverage(account);
-      uSAverageItem = await firstValueFrom(this.customEmissionsDbService.addWithObservable(uSAverageItem));
-      customEmissionsItems.push(uSAverageItem);
+    if (customEmissionsItems.length != 0) {
+      for (let i = 0; i < customEmissionsItems.length; i++) {
+        if (customEmissionsItems[i].subregion == 'U.S. Average') {
+          await this.customEmissionsDbService.deleteWithObservable(customEmissionsItems[i].id)
+          customEmissionsItems = customEmissionsItems.filter(item => { return item.guid != customEmissionsItems[i].guid })
+        } else {
+          customEmissionsItems[i].locationEmissionRates.forEach(rate => {
+            if (rate.CH4 == undefined) {
+              rate.CH4 = 0;
+            }
+            if (rate.CO2 == undefined) {
+              rate.CO2 = 0;
+            }
+            if (rate.N2O == undefined) {
+              rate.N2O = 0;
+            }
+          })
+          customEmissionsItems[i].residualEmissionRates.forEach(rate => {
+            if (rate.CH4 == undefined) {
+              rate.CH4 = 0;
+            }
+            if (rate.CO2 == undefined) {
+              rate.CO2 = 0;
+            }
+            if (rate.N2O == undefined) {
+              rate.N2O = 0;
+            }
+          });
+          await this.customEmissionsDbService.updateWithObservable(customEmissionsItems[i]);
+        }
+      }
     }
     await this.eGridService.parseEGridData();
     this.customEmissionsDbService.accountEmissionsItems.next(customEmissionsItems);

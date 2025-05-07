@@ -55,7 +55,9 @@ export function getEmissions(meter: IdbUtilityMeter,
         }
         let convertedEnergyUse: number = new ConvertValue(energyUse, energyUnit, 'kWh').convertedValue;
         let facility: IdbFacility = facilities.find(facility => { return facility.guid == meter.facilityId });
-        let emissionsRates: { marketRate: EmissionsRate, locationRate: EmissionsRate } = getEmissionsRate(facility.eGridSubregion, year, co2Emissions, CH4_Multiplier, N2O_Multiplier);
+        // console.log(facility.eGridSubregion)
+        let emissionsRates: { marketRate: EmissionsRate, locationRate: EmissionsRate } = getEmissionsRate(facility.eGridSubregion, year, co2Emissions);
+        // console.log(emissionsRates);
         // let marketEmissionsOutputRate: number = emissionsRates.marketRate;
         if (!isCompressedAir) {
             if (meter.includeInEnergy) {
@@ -216,7 +218,7 @@ export function getEmissions(meter: IdbUtilityMeter,
 }
 
 
-export function getEmissionsRate(subregion: string, year: number, co2Emissions: Array<SubregionEmissions>, CH4_Multiplier: number, N2O_Multiplier: number): { marketRate: EmissionsRate, locationRate: EmissionsRate } {
+export function getEmissionsRate(subregion: string, year: number, co2Emissions: Array<SubregionEmissions>): { marketRate: EmissionsRate, locationRate: EmissionsRate } {
     if (co2Emissions) {
         let subregionEmissions: SubregionEmissions = co2Emissions.find(emissions => { return emissions.subregion == subregion });
         if (subregionEmissions) {
@@ -366,5 +368,6 @@ export function calculateTotalEmissions(energyUse: number, emissionsRate: Emissi
     //stationary other
     let totalCH4 = energyUse * CH4_Multiplier * emissionsRate.CH4;
     let totalN2O = energyUse * N2O_Multiplier * emissionsRate.N2O;
-    return (co2Emissions + totalCH4 + totalN2O) * ghgMultiplier;
+    let total =  (co2Emissions + totalCH4 + totalN2O) * ghgMultiplier;
+    return total;
 }
