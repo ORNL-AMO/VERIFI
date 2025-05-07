@@ -64,77 +64,78 @@ export class CustomEmissionsDbService {
   getUSAverage(selectedAccount: IdbAccount): IdbCustomEmissionsItem {
     let uSAverageItem: IdbCustomEmissionsItem = getNewAccountEmissionsItem(selectedAccount.guid);
     uSAverageItem.subregion = 'U.S. Average';
+    //TODO: NEED UPDATED US AVERAGE EMISSIONS DATA
     uSAverageItem.locationEmissionRates = [
-      {
-        year: 2022,
-        co2Emissions: 0.373127954
-      },
-      {
-        year: 2021,
-        co2Emissions: 0.403403406
-      },
-      {
-        year: 2015,
-        co2Emissions: 0.517937082
-      },
-      {
-        year: 2014,
-        co2Emissions: 0.561726056
-      },
-      {
-        year: 2018,
-        co2Emissions: 0.455530652
-      },
-      {
-        year: 2019,
-        co2Emissions: 0.455530652
-      },
-      {
-        year: 2020,
-        co2Emissions: 0.43222827
-      },
-      {
-        year: 2023,
-        co2Emissions: 0.388753292
-      },
-      {
-        year: 2024,
-        co2Emissions: 0.375338761752
-      }
+      // {
+      //   year: 2022,
+      //   co2Emissions: 0.373127954
+      // },
+      // {
+      //   year: 2021,
+      //   co2Emissions: 0.403403406
+      // },
+      // {
+      //   year: 2015,
+      //   co2Emissions: 0.517937082
+      // },
+      // {
+      //   year: 2014,
+      //   co2Emissions: 0.561726056
+      // },
+      // {
+      //   year: 2018,
+      //   co2Emissions: 0.455530652
+      // },
+      // {
+      //   year: 2019,
+      //   co2Emissions: 0.455530652
+      // },
+      // {
+      //   year: 2020,
+      //   co2Emissions: 0.43222827
+      // },
+      // {
+      //   year: 2023,
+      //   co2Emissions: 0.388753292
+      // },
+      // {
+      //   year: 2024,
+      //   co2Emissions: 0.375338761752
+      // }
     ];
     uSAverageItem.residualEmissionRates = [
-      {
-        year: 2023,
-        co2Emissions: 0.428527644879606
-      },
-      {
-        year: 2022,
-        co2Emissions: 0.382795242
-      },
-      {
-        year: 2021,
-        co2Emissions: 0.411992734
-      },
-      {
-        year: 2015,
-        co2Emissions: 0.517937082
-      },
-      {
-        year: 2014,
-        co2Emissions: 0.561726056
-      },
-      {
-        year: 2018,
-        co2Emissions: 0.455530652
-      },
-      {
-        year: 2019,
-        co2Emissions: 0.46307276
-      },
-      {
-        year: 2020,
-        co2Emissions: 0.439195115
-      }
+      // {
+      //   year: 2023,
+      //   co2Emissions: 0.428527644879606
+      // },
+      // {
+      //   year: 2022,
+      //   co2Emissions: 0.382795242
+      // },
+      // {
+      //   year: 2021,
+      //   co2Emissions: 0.411992734
+      // },
+      // {
+      //   year: 2015,
+      //   co2Emissions: 0.517937082
+      // },
+      // {
+      //   year: 2014,
+      //   co2Emissions: 0.561726056
+      // },
+      // {
+      //   year: 2018,
+      //   co2Emissions: 0.455530652
+      // },
+      // {
+      //   year: 2019,
+      //   co2Emissions: 0.46307276
+      // },
+      // {
+      //   year: 2020,
+      //   co2Emissions: 0.439195115
+      // }
     ]
     return uSAverageItem;
   }

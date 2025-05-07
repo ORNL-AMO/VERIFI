@@ -20,12 +20,14 @@ import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { IdbAccount } from 'src/app/models/idbModels/account';
 
 @Component({
-    selector: 'app-facility-home',
-    templateUrl: './facility-home.component.html',
-    styleUrls: ['./facility-home.component.css'],
-    standalone: false
+  selector: 'app-facility-home',
+  templateUrl: './facility-home.component.html',
+  styleUrls: ['./facility-home.component.css'],
+  standalone: false
 })
 export class FacilityHomeComponent implements OnInit {
 
@@ -43,7 +45,8 @@ export class FacilityHomeComponent implements OnInit {
     private router: Router, private predictorDbService: PredictorDbService,
     private predictorDataDbService: PredictorDataDbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private analysisDbService: AnalysisDbService) { }
+    private analysisDbService: AnalysisDbService,
+    private accountDbService: AccountdbService) { }
 
   ngOnInit(): void {
     this.facilityMeterDataSub = this.facilityDbService.selectedFacility.subscribe(val => {
@@ -105,6 +108,7 @@ export class FacilityHomeComponent implements OnInit {
     let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
     let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
     let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
+    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     if (typeof Worker !== 'undefined') {
       this.annualEnergyAnalysisWorker = new Worker(new URL('src/app/web-workers/annual-facility-analysis.worker', import.meta.url));
       this.annualEnergyAnalysisWorker.onmessage = ({ data }) => {
@@ -127,12 +131,13 @@ export class FacilityHomeComponent implements OnInit {
         calculateAllMonthlyData: true,
         meterData: facilityMeterData,
         accountPredictors: accountPredictors,
-        accountAnalysisItems: accountAnalysisItems
+        accountAnalysisItems: accountAnalysisItems,
+        assessmentReportVersion: account.assessmentReportVersion
       });
     } else {
 
       // Web Workers are not supported in this environment.
-      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, facilityMeterData, this.facility, false, { energyIsSource: this.facilityHomeService.latestEnergyAnalysisItem.energyIsSource, neededUnits: this.facilityHomeService.latestEnergyAnalysisItem.energyUnit }, [], [], [this.facility]);
+      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, facilityMeterData, this.facility, false, { energyIsSource: this.facilityHomeService.latestEnergyAnalysisItem.energyIsSource, neededUnits: this.facilityHomeService.latestEnergyAnalysisItem.energyUnit }, [], [], [this.facility], account.assessmentReportVersion);
       let annualAnalysisSummaryClass: AnnualFacilityAnalysisSummaryClass = new AnnualFacilityAnalysisSummaryClass(this.facilityHomeService.latestEnergyAnalysisItem, this.facility, calanderizedMeters, accountPredictorEntries, true, accountPredictors, accountAnalysisItems, false);
       let annualAnalysisSummaries: Array<AnnualAnalysisSummary> = annualAnalysisSummaryClass.getAnnualAnalysisSummaries();
       let monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData> = annualAnalysisSummaryClass.monthlyAnalysisSummaryData;
@@ -160,6 +165,7 @@ export class FacilityHomeComponent implements OnInit {
     let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
     let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
     let accountAnalysisItems: Array<IdbAnalysisItem> = this.analysisDbService.accountAnalysisItems.getValue();
+    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     if (typeof Worker !== 'undefined') {
       this.annualWaterAnalysisWorker = new Worker(new URL('src/app/web-workers/annual-facility-analysis.worker', import.meta.url));
       this.annualWaterAnalysisWorker.onmessage = ({ data }) => {
@@ -182,11 +188,12 @@ export class FacilityHomeComponent implements OnInit {
         calculateAllMonthlyData: true,
         meterData: facilityMeterData,
         accountPredictors: accountPredictors,
-        accountAnalysisItems: accountAnalysisItems
+        accountAnalysisItems: accountAnalysisItems,
+        assessmentReportVersion: account.assessmentReportVersion
       });
     } else {
       // Web Workers are not supported in this environment.
-      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, facilityMeterData, this.facility, false, { energyIsSource: this.facilityHomeService.latestWaterAnalysisItem.energyIsSource, neededUnits: this.facilityHomeService.latestWaterAnalysisItem.waterUnit }, [], [], [this.facility]);
+      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, facilityMeterData, this.facility, false, { energyIsSource: this.facilityHomeService.latestWaterAnalysisItem.energyIsSource, neededUnits: this.facilityHomeService.latestWaterAnalysisItem.waterUnit }, [], [], [this.facility], account.assessmentReportVersion);
       let annualAnalysisSummaryClass: AnnualFacilityAnalysisSummaryClass = new AnnualFacilityAnalysisSummaryClass(this.facilityHomeService.latestWaterAnalysisItem, this.facility, calanderizedMeters, accountPredictorEntries, true, accountPredictors, accountAnalysisItems, false);
       let annualAnalysisSummaries: Array<AnnualAnalysisSummary> = annualAnalysisSummaryClass.getAnnualAnalysisSummaries();
       let monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData> = annualAnalysisSummaryClass.monthlyAnalysisSummaryData;
@@ -209,6 +216,7 @@ export class FacilityHomeComponent implements OnInit {
   setFacilityOverview() {
     let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
     let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
+    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     if (typeof Worker !== 'undefined') {
       this.overviewWorker = new Worker(new URL('src/app/web-workers/facility-overview.worker', import.meta.url));
       this.overviewWorker.onmessage = ({ data }) => {
@@ -234,11 +242,12 @@ export class FacilityHomeComponent implements OnInit {
         meterData: meterData,
         meters: meters,
         co2Emissions: [],
-        customFuels: []
+        customFuels: [],
+        assessmentReportVersion: account.assessmentReportVersion
       });
     } else {
       // Web Workers are not supported in this environment.
-      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(meters, meterData, this.facility, true, { energyIsSource: this.facility.energyIsSource, neededUnits: undefined }, [], [], [this.facility]);
+      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(meters, meterData, this.facility, true, { energyIsSource: this.facility.energyIsSource, neededUnits: undefined }, [], [], [this.facility], account.assessmentReportVersion);
       let dateRange: { endDate: Date, startDate: Date };
       if (calanderizedMeters && calanderizedMeters.length > 0) {
         let monthlyData: Array<MonthlyData> = calanderizedMeters.flatMap(val => { return val.monthlyData });

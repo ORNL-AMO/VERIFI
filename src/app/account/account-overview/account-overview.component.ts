@@ -120,7 +120,7 @@ export class AccountOverviewComponent implements OnInit {
 
     } else {
       // Web Workers are not supported in this environment.
-      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(meters, meterData, this.account, true, { energyIsSource: this.account.energyIsSource, neededUnits: undefined }, this.eGridService.co2Emissions, customFuels, facilities);
+      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(meters, meterData, this.account, true, { energyIsSource: this.account.energyIsSource, neededUnits: undefined }, this.eGridService.co2Emissions, customFuels, facilities, this.account.assessmentReportVersion);
       if (!this.dateRange) {
         if (calanderizedMeters && calanderizedMeters.length > 0) {
           let monthlyData: Array<MonthlyData> = calanderizedMeters.flatMap(val => { return val.monthlyData });

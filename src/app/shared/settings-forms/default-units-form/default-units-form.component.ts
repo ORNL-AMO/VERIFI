@@ -223,9 +223,4 @@ export class DefaultUnitsFormComponent implements OnInit {
   goToCustomData() {
     this.router.navigateByUrl('/account/custom-data/emissions')
   }
-
-  async changeAssessmentReportVersion() {
-    await this.eGridService.parseEGridData(this.form.controls.assessmentReportVersion.value);
-    await this.saveChanges();
-  }
 }

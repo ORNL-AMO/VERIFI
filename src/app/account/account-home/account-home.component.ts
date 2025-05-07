@@ -269,7 +269,7 @@ export class AccountHomeComponent implements OnInit {
       });
     } else {
       // Web Workers are not supported in this environment.
-      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(meters, meterData, this.account, true, { energyIsSource: this.account.energyIsSource, neededUnits: undefined }, co2Emissions, customFuels, facilities);
+      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(meters, meterData, this.account, true, { energyIsSource: this.account.energyIsSource, neededUnits: undefined }, co2Emissions, customFuels, facilities, this.account.assessmentReportVersion);
       let dateRange: { endDate: Date, startDate: Date };
       if (calanderizedMeters && calanderizedMeters.length > 0) {
         let monthlyData: Array<MonthlyData> = calanderizedMeters.flatMap(val => { return val.monthlyData });

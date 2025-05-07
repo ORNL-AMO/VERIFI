@@ -38,7 +38,7 @@ export class MonthlyAccountAnalysisClass {
         meterData: Array<IdbUtilityMeterData>,
         accountPredictors: Array<IdbPredictor>
     ) {
-        this.setMonthlyFacilityAnlysisClasses(accountAnalysisItem, accountFacilities, accountPredictorEntries, allAccountAnalysisItems, calculateAllMonthlyData, meters, meterData, accountPredictors);
+        this.setMonthlyFacilityAnlysisClasses(accountAnalysisItem, accountFacilities, accountPredictorEntries, allAccountAnalysisItems, calculateAllMonthlyData, meters, meterData, accountPredictors, account.assessmentReportVersion);
         this.setStartAndEndDate(account, accountAnalysisItem, calculateAllMonthlyData);
         this.setBaselineYear(account);
         this.setAnnualUsageValues();
@@ -69,7 +69,8 @@ export class MonthlyAccountAnalysisClass {
         calculateAllMonthlyData: boolean,
         meters: Array<IdbUtilityMeter>,
         meterData: Array<IdbUtilityMeterData>,
-        accountPredictors: Array<IdbPredictor>) {
+        accountPredictors: Array<IdbPredictor>,
+        assessmentReportVersion: 'AR24' | 'AR25') {
         this.monthlyFacilityAnalysisClasses = new Array();
         this.facilitySummaries = new Array();
         accountAnalysisItem.facilityAnalysisItems.forEach(item => {
@@ -77,7 +78,7 @@ export class MonthlyAccountAnalysisClass {
                 let analysisItem: IdbAnalysisItem = allAccountAnalysisItems.find(accountItem => { return item.analysisItemId == accountItem.guid });
                 let facility: IdbFacility = accountFacilities.find(facility => { return facility.guid == item.facilityId });
                 let facilityMeters: Array<IdbUtilityMeter> = meters.filter(meter => { return meter.facilityId == facility.guid });
-                let calanderizedMeterData: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, meterData, facility, false, { energyIsSource: analysisItem.energyIsSource, neededUnits: getNeededUnits(analysisItem) }, [], [], accountFacilities);
+                let calanderizedMeterData: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, meterData, facility, false, { energyIsSource: analysisItem.energyIsSource, neededUnits: getNeededUnits(analysisItem) }, [], [], accountFacilities, assessmentReportVersion);
                 let monthlyFacilityAnalysisClass: MonthlyFacilityAnalysisClass = new MonthlyFacilityAnalysisClass(
                     analysisItem,
                     facility,

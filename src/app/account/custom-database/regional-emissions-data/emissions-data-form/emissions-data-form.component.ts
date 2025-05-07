@@ -60,7 +60,10 @@ export class EmissionsDataFormComponent implements OnInit {
   addLocationEmissionRate() {
     this.editCustomEmissions.locationEmissionRates.push({
       year: undefined,
-      co2Emissions: undefined
+      co2Emissions: undefined,
+      CO2: undefined,
+      N2O: undefined,
+      CH4: undefined
     });
     this.checkInvalid();
   }
@@ -68,7 +71,10 @@ export class EmissionsDataFormComponent implements OnInit {
   addResidualEmissionRate() {
     this.editCustomEmissions.residualEmissionRates.push({
       year: undefined,
-      co2Emissions: undefined
+      co2Emissions: undefined,
+      CO2: undefined,
+      N2O: undefined,
+      CH4: undefined
     });
     this.checkInvalid();
   }

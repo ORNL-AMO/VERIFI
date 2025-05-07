@@ -100,6 +100,7 @@ export class WeatherDataComponent {
     this.loadingService.setLoadingStatus(true);
 
 
+    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let hddPredictor: IdbPredictor;
     let cddPredictor: IdbPredictor;
     let relativeHumidityPredictor: IdbPredictor;
@@ -165,7 +166,7 @@ export class WeatherDataComponent {
     let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
     let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == this.selectedFacility.guid });
     let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
-    let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, meterData, this.selectedFacility, false, undefined, [], [], [this.selectedFacility]);
+    let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, meterData, this.selectedFacility, false, undefined, [], [], [this.selectedFacility], selectedAccount.assessmentReportVersion);
     let monthlyData: Array<MonthlyData> = calanderizedMeters.flatMap(cMeter => { return cMeter.monthlyData });
     monthlyData = _.orderBy(monthlyData, (dataItem: MonthlyData) => { return dataItem.date });
 
@@ -223,7 +224,6 @@ export class WeatherDataComponent {
         startDate.setMonth(startDate.getMonth() + 1);
       }
 
-      let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
       await this.dbChangesService.selectAccount(selectedAccount, true);
       this.loadingService.setLoadingStatus(false);
       this.toastNotificationService.showToast('Degree Day Predictors Created', undefined, undefined, false, 'alert-success', false);

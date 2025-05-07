@@ -55,12 +55,14 @@ export function getEmissions(meter: IdbUtilityMeter,
         }
         let convertedEnergyUse: number = new ConvertValue(energyUse, energyUnit, 'kWh').convertedValue;
         let facility: IdbFacility = facilities.find(facility => { return facility.guid == meter.facilityId });
-        let emissionsRates: { marketRate: number, locationRate: number } = getEmissionsRate(facility.eGridSubregion, year, co2Emissions, CH4_Multiplier, N2O_Multiplier);
-        let marketEmissionsOutputRate: number = emissionsRates.marketRate;
+        let emissionsRates: { marketRate: EmissionsRate, locationRate: EmissionsRate } = getEmissionsRate(facility.eGridSubregion, year, co2Emissions, CH4_Multiplier, N2O_Multiplier);
+        // let marketEmissionsOutputRate: number = emissionsRates.marketRate;
         if (!isCompressedAir) {
             if (meter.includeInEnergy) {
-                locationElectricityEmissions = (convertedEnergyUse * emissionsRates.locationRate * meter.locationGHGMultiplier) / 1000;
-                marketElectricityEmissions = (convertedEnergyUse * emissionsRates.marketRate * meter.marketGHGMultiplier) / 1000;
+
+
+                locationElectricityEmissions = calculateTotalEmissions(convertedEnergyUse, emissionsRates.locationRate, CH4_Multiplier, N2O_Multiplier, meter.locationGHGMultiplier) / 1000;
+                marketElectricityEmissions = calculateTotalEmissions(convertedEnergyUse, emissionsRates.locationRate, CH4_Multiplier, N2O_Multiplier, meter.marketGHGMultiplier)/ 1000;
             } else {
                 marketElectricityEmissions = 0;
                 locationElectricityEmissions = 0;
@@ -69,7 +71,8 @@ export function getEmissions(meter: IdbUtilityMeter,
             //Purchased Compressed Air
             marketElectricityEmissions = 0;
             locationElectricityEmissions = 0;
-            scope2Other = (convertedEnergyUse * emissionsRates.locationRate * meter.locationGHGMultiplier) / 1000;
+            // scope2Other = (convertedEnergyUse * emissionsRates.locationRate * meter.locationGHGMultiplier) / 1000;
+            scope2Other = calculateTotalEmissions(convertedEnergyUse, emissionsRates.locationRate, CH4_Multiplier, N2O_Multiplier, meter.locationGHGMultiplier) / 1000;
         }
 
         RECs = convertedEnergyUse * meter.recsMultiplier;
@@ -83,7 +86,8 @@ export function getEmissions(meter: IdbUtilityMeter,
         } else {
             excessRECs = RECs;
         }
-        excessRECsEmissions = excessRECs * marketEmissionsOutputRate;
+        // excessRECsEmissions = excessRECs * marketEmissionsOutputRate;
+        excessRECsEmissions = calculateTotalEmissions(excessRECs, emissionsRates.marketRate, CH4_Multiplier, N2O_Multiplier);
         excessRECs = new ConvertValue(excessRECs, 'kWh', 'MWh').convertedValue;
         RECs = new ConvertValue(RECs, 'kWh', 'MWh').convertedValue;
         excessRECsEmissions = excessRECsEmissions / 1000;
@@ -355,4 +359,12 @@ export function setUtilityDataEmissionsValues(utilityData: IdbUtilityMeterData, 
     utilityData.stationaryCarbonEmissions = emissionsResults.stationaryCarbonEmissions;
     utilityData.stationaryOtherEmissions = emissionsResults.stationaryOtherEmissions;
     return utilityData;
+}
+
+export function calculateTotalEmissions(energyUse: number, emissionsRate: EmissionsRate, CH4_Multiplier: number, N2O_Multiplier: number, ghgMultiplier: number = 1): number {
+    let co2Emissions: number = (energyUse * emissionsRate.CO2) / 1000;
+    //stationary other
+    let totalCH4 = energyUse * CH4_Multiplier * emissionsRate.CH4;
+    let totalN2O = energyUse * N2O_Multiplier * emissionsRate.N2O;
+    return (co2Emissions + totalCH4 + totalN2O) * ghgMultiplier;
 }
