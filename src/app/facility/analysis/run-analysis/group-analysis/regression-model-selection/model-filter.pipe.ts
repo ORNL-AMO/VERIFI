@@ -7,22 +7,15 @@ import { JStatRegressionModel } from 'src/app/models/analysis';
 })
 export class ModelFilterPipe implements PipeTransform {
 
-  transform(models: Array<JStatRegressionModel>, showInvalid: boolean, filterType: 'invalidModel' | 'failedDataValidation'): Array<JStatRegressionModel> {
+  transform(models: Array<JStatRegressionModel>, showInvalid: boolean, showFailedValidationModel: boolean): Array<JStatRegressionModel> {
 
-    if (filterType == 'invalidModel') {
-      if (!showInvalid) {
-        return models.filter(model => { return model.isValid });
-      } else {
-        return models;
-      }
+    let filteredModels: Array<JStatRegressionModel> = models;
+    if(!showInvalid){
+      filteredModels = filteredModels.filter(model => { return model.isValid });
     }
-
-    if (filterType == 'failedDataValidation') {
-      if (!showInvalid) {
-        return models.filter(model => { return model.SEPValidation.every(SEPValidation => SEPValidation.isValid) });
-      } else {
-        return models;
-      }
+    if(!showFailedValidationModel){
+      filteredModels = filteredModels.filter(model => { return model.SEPValidation.every(SEPValidation => SEPValidation.isValid) });
     }
+    return filteredModels;
   }
 }
