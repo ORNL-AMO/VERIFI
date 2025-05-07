@@ -13,7 +13,7 @@ export interface IdbAccount extends IdbEntry, AccountAndFacility {
     isSharedBackupFile?: boolean,
     sharedFileAuthor?: string
     deleteAccount?: boolean,
-    assessmentReportVersion?: '2024' | '2025'
+    assessmentReportVersion?: 'AR24' | 'AR25'
 }
 
 export function getNewIdbAccount(): IdbAccount {
@@ -76,6 +76,6 @@ export function getNewIdbAccount(): IdbAccount {
         archiveOption: 'skip',
         isSharedBackupFile: false,
         color: undefined,
-        assessmentReportVersion: '2024'
+        assessmentReportVersion: 'AR24'
     }
 }

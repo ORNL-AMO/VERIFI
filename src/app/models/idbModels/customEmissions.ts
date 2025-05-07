@@ -4,8 +4,8 @@ export interface IdbCustomEmissionsItem extends IdbEntry {
     accountId: string,
     date: Date,
     subregion: string,
-    locationEmissionRates: Array<{ co2Emissions: number, year: number }>,
-    residualEmissionRates: Array<{ co2Emissions: number, year: number }>,
+    locationEmissionRates: Array<{ co2Emissions: number, CO2: number, CH4: number, N2O: number, year: number }>,
+    residualEmissionRates: Array<{ co2Emissions: number, CO2: number, CH4: number, N2O: number, year: number }>,
 }
 
 export function getNewAccountEmissionsItem(accountGuid: string): IdbCustomEmissionsItem {

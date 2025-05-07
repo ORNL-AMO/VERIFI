@@ -36,7 +36,7 @@ export class UpdateDbEntryService {
     }
 
     if(!account.assessmentReportVersion){
-      account.assessmentReportVersion = '2024';
+      account.assessmentReportVersion = 'AR24';
       isChanged = true;
     }
 
