@@ -25,10 +25,10 @@ import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 @Component({
-    selector: 'app-regression-model-menu',
-    templateUrl: './regression-model-menu.component.html',
-    styleUrls: ['./regression-model-menu.component.css'],
-    standalone: false
+  selector: 'app-regression-model-menu',
+  templateUrl: './regression-model-menu.component.html',
+  styleUrls: ['./regression-model-menu.component.css'],
+  standalone: false
 })
 export class RegressionModelMenuComponent implements OnInit {
 
@@ -36,9 +36,11 @@ export class RegressionModelMenuComponent implements OnInit {
   selectedGroupSub: Subscription;
   yearOptions: Array<number>;
   showInvalid: boolean = false;
+  showFailedValidationModel: boolean = true;
   hasLaterDate: boolean;
   showUpdateModelsModal: boolean = false;
   noValidModels: boolean;
+  noDataValidationModels: boolean;
   showConfirmPredictorChangeModel: boolean = false;
   modelingError: boolean = false;
   selectedFacility: IdbFacility;
@@ -59,6 +61,7 @@ export class RegressionModelMenuComponent implements OnInit {
   ngOnInit(): void {
     this.selectedFacility = this.facilityDbService.selectedFacility.getValue();
     this.showInvalid = this.analysisService.showInvalidModels.getValue();
+    this.showFailedValidationModel = this.analysisService.showFailedValidationModels.getValue();
     this.analysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
     this.yearOptions = this.calanderizationService.getYearOptionsFacility(this.selectedFacility.guid, this.analysisItem.analysisCategory);
     this.selectedGroupSub = this.analysisService.selectedGroup.subscribe(group => {
@@ -68,10 +71,12 @@ export class RegressionModelMenuComponent implements OnInit {
         if (this.group.models && this.group.models.length != 0) {
           this.checkModelData();
           this.checkHasValidModels();
+          this.checkFailedValidationModels();
         } else if (this.group.models == undefined) {
           this.generateModels();
         } else {
           this.noValidModels = false;
+          this.noDataValidationModels = false;
         }
       } else {
         this.isFormChange = false;
@@ -125,6 +130,7 @@ export class RegressionModelMenuComponent implements OnInit {
       if (this.group.models) {
         this.modelingError = false;
         this.checkHasValidModels();
+        this.checkFailedValidationModels();
         this.hasLaterDate = false;
         this.group.dateModelsGenerated = new Date();
         if (autoSelect) {
@@ -177,6 +183,18 @@ export class RegressionModelMenuComponent implements OnInit {
 
   saveInvalidChange() {
     this.analysisService.showInvalidModels.next(this.showInvalid);
+  }
+
+  checkFailedValidationModels() {
+    this.noDataValidationModels = this.group.models.find(model => 
+      {return model.SEPValidation.every(SEPValidation => SEPValidation.isValid) == true}) == undefined;
+    if(!this.showFailedValidationModel && this.noDataValidationModels){
+      this.showFailedValidationModel = true;
+    }
+    this.saveFailedValidationChange();
+  }
+  saveFailedValidationChange() {
+    this.analysisService.showFailedValidationModels.next(this.showFailedValidationModel);
   }
 
   checkModelData() {

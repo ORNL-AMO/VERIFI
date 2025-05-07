@@ -168,7 +168,8 @@ export interface JStatRegressionModel {
   modelPValue: number,
   modelNotes: Array<string>,
   errorModeling?: boolean,
-  SEPValidation?: Array<SEPValidation>
+  SEPValidation?: Array<SEPValidation>,
+  SEPValidationPass: boolean
 }
 
 export interface SEPValidation {
