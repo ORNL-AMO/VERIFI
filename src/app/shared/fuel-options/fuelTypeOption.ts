@@ -10,5 +10,6 @@ export interface FuelTypeOption {
     N2O: number,
     isBiofuel?: boolean,
     isMobile?: boolean,
-    isOnRoad?: boolean
+    isOnRoad?: boolean,
+    directEmissionsRate?: boolean
 }

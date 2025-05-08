@@ -99,13 +99,13 @@
         <div class="form-group">
             <label for="assessmentReportVersion">IPCC Assessment Report Version</label>
             <div class="form-check ps-5">
-                <input type="radio" class="form-check-input" name="assessmentReportVersion" formControlName="assessmentReportVersion" value="24"
-                    (change)="saveChanges()" id="AR24">
+                <input type="radio" class="form-check-input" name="assessmentReportVersion"
+                    formControlName="assessmentReportVersion" value="24" (change)="saveChanges()" id="AR24">
                 <label class="form-check-label" for="AR24">AR24</label>
             </div>
             <div class="form-check ps-5">
-                <input type="radio" class="form-check-input" name="assessmentReportVersion" formControlName="assessmentReportVersion"
-                    value="25" (change)="saveChanges()" id="AR25">
+                <input type="radio" class="form-check-input" name="assessmentReportVersion"
+                    formControlName="assessmentReportVersion" value="25" (change)="saveChanges()" id="AR25">
                 <label class="form-check-label" for="AR25">AR25</label>
             </div>
         </div>
@@ -138,14 +138,14 @@
 </form>
 
 <p class="alert alert-info w-100 text-center">The eGRID Subregion and emissions output rate will be set
-    based on your zipcode and the <a class="click-link" target="_blank"
-        href="https://www.epa.gov/sites/default/files/2021-04/documents/emission-factors_apr2021.pdf">EPA
-        Emissions & Generation
-        Resource Integrated Database (2021)</a>
+    based on your zipcode and the data found in the <a class="click-link" target="_blank"
+        href="https://www.epa.gov/climateleadership/ghg-emission-factors-hub">EPA
+        GHG Emissions Factors Hub</a>.
     <ng-container *ngIf="!inWizard">
         <br>
         <br>
-        Custom emssions rates can be added and managed in the <a class="click-link" (click)="goToCustomData()">Account Custom Data</a>
+        Custom emssions rates can be added and managed in the <a class="click-link" (click)="goToCustomData()">Account
+            Custom Data</a>
         page.
     </ng-container>
 

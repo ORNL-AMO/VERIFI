@@ -17,7 +17,8 @@ export interface EmissionsRate {
   year: number,
   CO2: number,
   CH4: number,
-  N2O: number
+  N2O: number,
+  directEmissionsRate?: number
 }
 
 export interface EmissionsResults {

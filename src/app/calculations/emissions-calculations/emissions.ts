@@ -108,21 +108,29 @@ export function getEmissions(meter: IdbUtilityMeter,
             CH4: number,
             N2O: number,
             outputRate: number,
-            isBiogenic: boolean
+            isBiogenic: boolean,
+            directEmissionsOutputRate: boolean
         } = getFuelEmissionsOutputRate(meter.source, meter.fuel, meter.phase, customFuels, meter.scope, meter.vehicleCategory, meter.vehicleType);
-        //emissions calculated in kg CO2e using emissions factors, converted to tonne CO2e
-        if (fuelOutputRate.isBiogenic) {
-            stationaryBiogenicEmmissions = convertedEnergyUse * fuelOutputRate.CO2;
-            stationaryCarbonEmissions = 0;
-        } else {
-            stationaryCarbonEmissions = (convertedEnergyUse * fuelOutputRate.CO2) / 1000;
+        if(fuelOutputRate.directEmissionsOutputRate){
+            stationaryCarbonEmissions = (convertedEnergyUse * fuelOutputRate.outputRate) / 1000;
+            stationaryEmissions = stationaryCarbonEmissions;
             stationaryBiogenicEmmissions = 0;
+            stationaryOtherEmissions = 0;
+        }else{
+            //emissions calculated in kg CO2e using emissions factors, converted to tonne CO2e
+            if (fuelOutputRate.isBiogenic) {
+                stationaryBiogenicEmmissions = convertedEnergyUse * fuelOutputRate.CO2;
+                stationaryCarbonEmissions = 0;
+            } else {
+                stationaryCarbonEmissions = (convertedEnergyUse * fuelOutputRate.CO2) / 1000;
+                stationaryBiogenicEmmissions = 0;
+            }
+            //stationary other
+            let totalCH4 = convertedEnergyUse * CH4_Multiplier * fuelOutputRate.CH4;
+            let totalN2O = convertedEnergyUse * N2O_Multiplier * fuelOutputRate.N2O;
+            stationaryOtherEmissions = ((totalCH4 + totalN2O) / 1000) / 1000;
+            stationaryEmissions = (stationaryCarbonEmissions + stationaryOtherEmissions);
         }
-        //stationary other
-        let totalCH4 = convertedEnergyUse * CH4_Multiplier * fuelOutputRate.CH4;
-        let totalN2O = convertedEnergyUse * N2O_Multiplier * fuelOutputRate.N2O;
-        stationaryOtherEmissions = ((totalCH4 + totalN2O) / 1000) / 1000;
-        stationaryEmissions = (stationaryCarbonEmissions + stationaryOtherEmissions);
 
     } else if (meter.source == 'Other Fuels' && meter.scope == 2) {
         //Mobile emissions
@@ -247,7 +255,8 @@ export function getFuelEmissionsOutputRate(source: MeterSource, fuel: string, ph
     CH4: number,
     N2O: number,
     outputRate: number,
-    isBiogenic: boolean
+    isBiogenic: boolean,
+    directEmissionsOutputRate: boolean
 } {
     //emissions rates in kg/MMBtu
     let emissionsRate: number;
@@ -255,6 +264,7 @@ export function getFuelEmissionsOutputRate(source: MeterSource, fuel: string, ph
     let CH4: number = 0
     let N2O: number = 0;
     let isBiogenic: boolean = false;
+    let directEmissionsOutputRate: boolean = false;
     if (source == 'Natural Gas') {
         emissionsRate = 53.1148;
         CO2 = 53.06;
@@ -270,6 +280,7 @@ export function getFuelEmissionsOutputRate(source: MeterSource, fuel: string, ph
             CH4 = selectedFuel.CH4;
             N2O = selectedFuel.N2O;
             isBiogenic = selectedFuel.isBiofuel;
+            directEmissionsOutputRate = selectedFuel.directEmissionsRate;
         }
     }
     return {
@@ -277,7 +288,8 @@ export function getFuelEmissionsOutputRate(source: MeterSource, fuel: string, ph
         isBiogenic: isBiogenic,
         N2O: N2O,
         CH4: CH4,
-        CO2: CO2
+        CO2: CO2,
+        directEmissionsOutputRate: directEmissionsOutputRate
     };
 }
 
