@@ -47,7 +47,8 @@
                 <div class="col-3" *ngIf="form.controls.isMobile.value == true">
                     <label for="isOnRoad">Is On-road? <span class="required">*</span> </label>
                     <div class="mb-3">
-                        <select name="isOnRoad" class="form-select" id="isOnRoad" type="text" formControlName="isOnRoad">
+                        <select name="isOnRoad" class="form-select" id="isOnRoad" type="text"
+                            formControlName="isOnRoad">
                             <option [ngValue]="false">No</option>
                             <option [ngValue]="true">Yes</option>
                         </select>
@@ -138,7 +139,6 @@
 
                 <div class="col-3" *ngIf="form.controls.isMobile.value == false">
                     <label for="emissionsOutputRate">Emissions Output Rate <span class="required">*</span>
-
                     </label>
                     <div class="input-group">
                         <input name="emissionsOutputRate" id="emissionsOutputRate" class="form-control" type="number"
@@ -154,8 +154,15 @@
                         <ng-container *ngIf="form.controls.directEmissionsRate.value == true">
                             <a class="float-right" (click)="setRate(false)">Calculate Rate</a>
                         </ng-container>
-
                     </div>
+                </div>
+                <div class="col-12" *ngIf="form.controls.directEmissionsRate.value == false">
+                    <p class="small fw-light pt-2">
+                        <span class="fa fa-exclamation-circle"></span> The Emissions Rate displayed here is calculated
+                        using
+                        AR5 GWP factors. If AR4 is selected in Company Settings then an emissions rate calculated
+                        with AR4 GWP factors will be used in analysis and reports.
+                    </p>
                 </div>
             </div>
         </form>

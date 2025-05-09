@@ -210,7 +210,7 @@ export class CustomFuelDataFormComponent {
         CH4 = CH4 / conversionHelper;
         N2O = N2O / conversionHelper;
       }
-      let outputRate: number = CO2 + (CH4 * (25 / 1000)) + (N2O * (298 / 1000));
+      let outputRate: number = CO2 + (CH4 * (28 / 1000)) + (N2O * (265 / 1000));
       this.form.controls.emissionsOutputRate.patchValue(outputRate);
     }
   }

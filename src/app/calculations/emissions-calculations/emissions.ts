@@ -55,16 +55,12 @@ export function getEmissions(meter: IdbUtilityMeter,
         }
         let convertedEnergyUse: number = new ConvertValue(energyUse, energyUnit, 'kWh').convertedValue;
         let facility: IdbFacility = facilities.find(facility => { return facility.guid == meter.facilityId });
-        // console.log(facility.eGridSubregion)
         let emissionsRates: { marketRate: EmissionsRate, locationRate: EmissionsRate } = getEmissionsRate(facility.eGridSubregion, year, co2Emissions);
-        // console.log(emissionsRates);
         // let marketEmissionsOutputRate: number = emissionsRates.marketRate;
         if (!isCompressedAir) {
             if (meter.includeInEnergy) {
-
-
                 locationElectricityEmissions = calculateTotalEmissions(convertedEnergyUse, emissionsRates.locationRate, CH4_Multiplier, N2O_Multiplier, meter.locationGHGMultiplier) / 1000;
-                marketElectricityEmissions = calculateTotalEmissions(convertedEnergyUse, emissionsRates.locationRate, CH4_Multiplier, N2O_Multiplier, meter.marketGHGMultiplier)/ 1000;
+                marketElectricityEmissions = calculateTotalEmissions(convertedEnergyUse, emissionsRates.locationRate, CH4_Multiplier, N2O_Multiplier, meter.marketGHGMultiplier) / 1000;
             } else {
                 marketElectricityEmissions = 0;
                 locationElectricityEmissions = 0;
@@ -111,12 +107,12 @@ export function getEmissions(meter: IdbUtilityMeter,
             isBiogenic: boolean,
             directEmissionsOutputRate: boolean
         } = getFuelEmissionsOutputRate(meter.source, meter.fuel, meter.phase, customFuels, meter.scope, meter.vehicleCategory, meter.vehicleType);
-        if(fuelOutputRate.directEmissionsOutputRate){
+        if (fuelOutputRate.directEmissionsOutputRate) {
             stationaryCarbonEmissions = (convertedEnergyUse * fuelOutputRate.outputRate) / 1000;
             stationaryEmissions = stationaryCarbonEmissions;
             stationaryBiogenicEmmissions = 0;
             stationaryOtherEmissions = 0;
-        }else{
+        } else {
             //emissions calculated in kg CO2e using emissions factors, converted to tonne CO2e
             if (fuelOutputRate.isBiogenic) {
                 stationaryBiogenicEmmissions = convertedEnergyUse * fuelOutputRate.CO2;
@@ -226,12 +222,13 @@ export function getEmissions(meter: IdbUtilityMeter,
 }
 
 
-export function getEmissionsRate(subregion: string, year: number, co2Emissions: Array<SubregionEmissions>): { marketRate: EmissionsRate, locationRate: EmissionsRate } {
+export function getEmissionsRate(subregion: string, year: number, co2Emissions: Array<SubregionEmissions>): { marketRate: EmissionsRate, locationRate: EmissionsRate, directEmissionsRate: boolean } {
     if (co2Emissions) {
         let subregionEmissions: SubregionEmissions = co2Emissions.find(emissions => { return emissions.subregion == subregion });
         if (subregionEmissions) {
             let marketRate: EmissionsRate = { CO2: 0, N2O: 0, CH4: 0, year: year };
             let locationRate: EmissionsRate = { CO2: 0, N2O: 0, CH4: 0, year: year };
+            let directEmissionsRate: boolean = subregionEmissions.directEmissionsRate;
             if (subregionEmissions.locationEmissionRates.length != 0) {
                 let closestYearRate: EmissionsRate = _.minBy(subregionEmissions.locationEmissionRates, (emissionRate: EmissionsRate) => {
                     return Math.abs(emissionRate.year - year);
@@ -244,10 +241,10 @@ export function getEmissionsRate(subregion: string, year: number, co2Emissions: 
                 });
                 marketRate = closestYearRate;
             }
-            return { marketRate: marketRate, locationRate: locationRate };
+            return { marketRate: marketRate, locationRate: locationRate, directEmissionsRate: directEmissionsRate };
         }
     }
-    return { marketRate: { CO2: 0, N2O: 0, CH4: 0, year: year }, locationRate: { CO2: 0, N2O: 0, CH4: 0, year: year } };
+    return { marketRate: { CO2: 0, N2O: 0, CH4: 0, year: year }, locationRate: { CO2: 0, N2O: 0, CH4: 0, year: year }, directEmissionsRate: false };
 }
 
 export function getFuelEmissionsOutputRate(source: MeterSource, fuel: string, phase: MeterPhase, customFuels: Array<IdbCustomFuel>, scope: number, vehicleCategory: number, vehicleType: number): {
@@ -380,6 +377,6 @@ export function calculateTotalEmissions(energyUse: number, emissionsRate: Emissi
     //stationary other
     let totalCH4 = energyUse * CH4_Multiplier * emissionsRate.CH4;
     let totalN2O = energyUse * N2O_Multiplier * emissionsRate.N2O;
-    let total =  (co2Emissions + totalCH4 + totalN2O) * ghgMultiplier;
+    let total = (co2Emissions + totalCH4 + totalN2O) * ghgMultiplier;
     return total;
 }

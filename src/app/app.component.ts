@@ -330,7 +330,7 @@ export class AppComponent {
               rate.N2O = 0;
             }
           });
-          await this.customEmissionsDbService.updateWithObservable(customEmissionsItems[i]);
+          await firstValueFrom(this.customEmissionsDbService.updateWithObservable(customEmissionsItems[i]));
         }
       }
     }
@@ -348,6 +348,12 @@ export class AppComponent {
   async initializeCustomFuels(account: IdbAccount) {
     this.loadingMessage = 'Loading Custom Fuels...';
     let customFuels: Array<IdbCustomFuel> = await this.customFuelDbservice.getAllAccountCustomFuels(account.guid);
+    for(let i = 0; i < customFuels.length; i++){
+      if(isNaN(customFuels[i].CO2) && customFuels[i].directEmissionsRate == undefined){
+        customFuels[i].directEmissionsRate = true;
+        await firstValueFrom(this.customFuelDbservice.updateWithObservable(customFuels[i]));
+      }
+    }
     this.customFuelDbservice.accountCustomFuels.next(customFuels);
   }
 
