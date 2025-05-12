@@ -210,6 +210,8 @@ export class CustomFuelDataFormComponent {
         CH4 = CH4 / conversionHelper;
         N2O = N2O / conversionHelper;
       }
+      //Calculate and save output rate using AR5 values (28/265)
+      //Emissions calculations use settings
       let outputRate: number = CO2 + (CH4 * (28 / 1000)) + (N2O * (265 / 1000));
       this.form.controls.emissionsOutputRate.patchValue(outputRate);
     }

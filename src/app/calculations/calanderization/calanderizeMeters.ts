@@ -18,7 +18,7 @@ export function getCalanderizedMeterData(meters: Array<IdbUtilityMeter>, allMete
     co2Emissions: Array<SubregionEmissions>,
     customFuels: Array<IdbCustomFuel>,
     facilities: Array<IdbFacility>,
-    assessmentReportVersion: 'AR24' | 'AR25'): Array<CalanderizedMeter> {
+    assessmentReportVersion: 'AR4' | 'AR5'): Array<CalanderizedMeter> {
     let calanderizedMeterData: Array<CalanderizedMeter> = new Array();
     meters.forEach(meter => {
         let energyIsSource: boolean = accountOrFacility.energyIsSource;
@@ -94,7 +94,7 @@ function calanderizeMeterData(meter: IdbUtilityMeter, meterData: Array<IdbUtilit
     co2Emissions: Array<SubregionEmissions>,
     customFuels: Array<IdbCustomFuel>,
     facilities: Array<IdbFacility>,
-    assessmentReportVersion: 'AR24' | 'AR25'): Array<MonthlyData> {
+    assessmentReportVersion: 'AR4' | 'AR5'): Array<MonthlyData> {
 
     meterData = meterData.map(data => {
         if (isNaN(data.totalCost) == true) {
@@ -120,7 +120,7 @@ function calanderizeMeterDataBackwards(meter: IdbUtilityMeter, meterData: Array<
     customFuels: Array<IdbCustomFuel>,
     facilities: Array<IdbFacility>,
     energyUnit: string,
-    assessmentReportVersion: 'AR24' | 'AR25'): Array<MonthlyData> {
+    assessmentReportVersion: 'AR4' | 'AR5'): Array<MonthlyData> {
     let calanderizeData: Array<MonthlyData> = new Array();
     let orderedMeterData: Array<IdbUtilityMeterData> = _.orderBy(meterData, (data) => { return new Date(data.readDate) });
 
@@ -294,7 +294,7 @@ function getBillPeriodTotal(previousReading: IdbUtilityMeterData, currentReading
     customFuels: Array<IdbCustomFuel>,
     facilities: Array<IdbFacility>,
     energyUnit: string,
-    assessmentReportVersion: 'AR24' | 'AR25'): {
+    assessmentReportVersion: 'AR4' | 'AR5'): {
         totalConsumption: number,
         totalEnergyUse: number,
         totalCost: number,
@@ -416,7 +416,7 @@ function calanderizeMeterDataFullMonth(meter: IdbUtilityMeter, meterData: Array<
     customFuels: Array<IdbCustomFuel>,
     facilities: Array<IdbFacility>,
     energyUnit: string,
-    assessmentReportVersion: 'AR24' | 'AR25'): Array<MonthlyData> {
+    assessmentReportVersion: 'AR4' | 'AR5'): Array<MonthlyData> {
     let calanderizeData: Array<MonthlyData> = new Array();
     let orderedMeterData: Array<IdbUtilityMeterData> = _.orderBy(meterData, (data) => { return new Date(data.readDate) });
     if (orderedMeterData.length != 0) {
@@ -513,7 +513,7 @@ function calanderizeFullYear(meter: IdbUtilityMeter, meterData: Array<IdbUtility
     customFuels: Array<IdbCustomFuel>,
     facilities: Array<IdbFacility>,
     energyUnit: string,
-    assessmentReportVersion: 'AR24' | 'AR25'): Array<MonthlyData> {
+    assessmentReportVersion: 'AR4' | 'AR5'): Array<MonthlyData> {
     let calanderizeData: Array<MonthlyData> = new Array();
     let orderedMeterData: Array<IdbUtilityMeterData> = _.orderBy(meterData, (data) => { return new Date(data.readDate) });
     let years: Array<number> = orderedMeterData.map(mData => { return new Date(mData.readDate).getFullYear() })

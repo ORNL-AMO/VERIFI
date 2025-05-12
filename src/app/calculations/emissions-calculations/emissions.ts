@@ -21,12 +21,12 @@ export function getEmissions(meter: IdbUtilityMeter,
     vehicleCollectionUnit: string,
     vehicleDistanceUnit: string,
     hhvOrFuelEfficiency: number,
-    assessmentReportVersion: 'AR24' | 'AR25'): EmissionsResults {
+    assessmentReportVersion: 'AR4' | 'AR5'): EmissionsResults {
     let isCompressedAir: boolean = (meter.source == 'Other Energy' && meter.fuel == 'Purchased Compressed Air');
 
     let CH4_Multiplier: number = 25;
     let N2O_Multiplier: number = 298;
-    if (assessmentReportVersion == 'AR25') {
+    if (assessmentReportVersion == 'AR5') {
         CH4_Multiplier = 28;
         N2O_Multiplier = 265;
     }

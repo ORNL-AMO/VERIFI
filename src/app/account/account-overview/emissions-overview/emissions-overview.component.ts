@@ -33,7 +33,6 @@ export class EmissionsOverviewComponent implements OnInit {
 
     this.accountOverviewDataSub = this.accountOverviewService.accountOverviewData.subscribe(val => {
       this.accountOverviewData = val;
-      console.log(this.accountOverviewData.facilitiesCost);
     });
 
     this.utilityUseAndCostSub = this.accountOverviewService.utilityUseAndCost.subscribe(val => {

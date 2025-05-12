@@ -214,6 +214,8 @@ export class EmissionsDataFormComponent implements OnInit {
       CH4 = CH4 / conversionHelper;
       N2O = N2O / conversionHelper;
     }
+    //Calculate and save output rate using AR5 values (28/265)
+    //Emissions calculations use settings
     let results: number = CO2 + (CH4 * (28 / 1000)) + (N2O * (265 / 1000));
     const factor = Math.pow(10, 4);
     return Math.round(results * factor) / factor;

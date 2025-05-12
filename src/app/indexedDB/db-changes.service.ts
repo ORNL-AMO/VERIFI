@@ -322,30 +322,6 @@ export class DbChangesService {
         if (customEmissionsItems[i].subregion == 'U.S. Average') {
           await this.customEmissionsDbService.deleteWithObservable(customEmissionsItems[i].id)
           customEmissionsItems = customEmissionsItems.filter(item => { return item.guid != customEmissionsItems[i].guid })
-        } else {
-          customEmissionsItems[i].locationEmissionRates.forEach(rate => {
-            if (rate.CH4 == undefined) {
-              rate.CH4 = 0;
-            }
-            if (rate.CO2 == undefined) {
-              rate.CO2 = 0;
-            }
-            if (rate.N2O == undefined) {
-              rate.N2O = 0;
-            }
-          })
-          customEmissionsItems[i].residualEmissionRates.forEach(rate => {
-            if (rate.CH4 == undefined) {
-              rate.CH4 = 0;
-            }
-            if (rate.CO2 == undefined) {
-              rate.CO2 = 0;
-            }
-            if (rate.N2O == undefined) {
-              rate.N2O = 0;
-            }
-          });
-          await this.customEmissionsDbService.updateWithObservable(customEmissionsItems[i]);
         }
       }
     }

@@ -86,7 +86,7 @@ export class BetterPlantsReportClass {
         meters: Array<IdbUtilityMeter>,
         meterData: Array<IdbUtilityMeterData>,
         accountPredictors: Array<IdbPredictor>,
-        assessmentReportVersion: 'AR24' | 'AR25') {
+        assessmentReportVersion: 'AR4' | 'AR5') {
 
         this.facilityPerformance = new Array();
         selectedAnalysisItem.facilityAnalysisItems.forEach(item => {

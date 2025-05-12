@@ -86,7 +86,7 @@ export class PerformanceReport {
         meters: Array<IdbUtilityMeter>,
         meterData: Array<IdbUtilityMeterData>,
         accountPredictors: Array<IdbPredictor>,
-        assessmentReportVersion: 'AR24' | 'AR25') {
+        assessmentReportVersion: 'AR4' | 'AR5') {
         this.annualFacilityAnalysisSummaries = new Array();
         selectedAnalysisItem.facilityAnalysisItems.forEach(item => {
             if (item.analysisItemId != undefined && item.analysisItemId != 'skip') {
