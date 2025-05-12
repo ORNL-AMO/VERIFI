@@ -86,7 +86,8 @@
                                     <div class="input-group">
                                         <input name="{{'locationCH4_'+index}}" id="{{'locationCH4_'+index}}"
                                             class="form-control" type="number" [(ngModel)]="emissionRate.CH4"
-                                            onfocus="this.select();" (input)="setOutputRate()">
+                                            onfocus="this.select();" (input)="setOutputRate()"
+                                            [required]="!editCustomEmissions.directEmissionsRate">
                                         <div class="input-group-text">
                                             kg CO<sub>2</sub>/<span
                                                 [innerHTML]="selectedAccount.energyUnit| settingsLabel"></span>
@@ -102,7 +103,8 @@
                                     <div class="input-group">
                                         <input name="{{'locationCO2_'+index}}" id="{{'locationCO2_'+index}}"
                                             class="form-control" type="number" [(ngModel)]="emissionRate.CO2"
-                                            onfocus="this.select();" (input)="setOutputRate()">
+                                            onfocus="this.select();" (input)="setOutputRate()"
+                                            [required]="!editCustomEmissions.directEmissionsRate">
                                         <div class="input-group-text">
                                             g CH<sub>4</sub>/<span
                                                 [innerHTML]="selectedAccount.energyUnit| settingsLabel"></span>
@@ -118,7 +120,8 @@
                                     <div class="input-group">
                                         <input name="{{'locationN2O_'+index}}" id="{{'locationN2O_'+index}}"
                                             class="form-control" type="number" [(ngModel)]="emissionRate.N2O"
-                                            onfocus="this.select();" (input)="setOutputRate()">
+                                            onfocus="this.select();" (input)="setOutputRate()"
+                                            [required]="!editCustomEmissions.directEmissionsRate">
                                         <div class="input-group-text">
                                             g N<sub>2</sub>O/<span
                                                 [innerHTML]="selectedAccount.energyUnit| settingsLabel"></span>
@@ -198,7 +201,8 @@
                                     <div class="input-group">
                                         <input name="{{'residualCO2_'+index}}" id="{{'residualCO2_'+index}}"
                                             class="form-control" type="number" [(ngModel)]="emissionRate.CH4"
-                                            onfocus="this.select();" (input)="setOutputRate()">
+                                            onfocus="this.select();" (input)="setOutputRate()"
+                                            [required]="!editCustomEmissions.directEmissionsRate">
                                         <div class="input-group-text">
                                             kg CO<sub>2</sub>/<span
                                                 [innerHTML]="selectedAccount.energyUnit| settingsLabel"></span>
@@ -214,7 +218,8 @@
                                     <div class="input-group">
                                         <input name="{{'residualCH4_'+index}}" id="{{'residualCH4_'+index}}"
                                             class="form-control" type="number" [(ngModel)]="emissionRate.CO2"
-                                            onfocus="this.select();" (input)="setOutputRate()">
+                                            onfocus="this.select();" (input)="setOutputRate()"
+                                            [required]="!editCustomEmissions.directEmissionsRate">
                                         <div class="input-group-text">
                                             g CH<sub>4</sub>/<span
                                                 [innerHTML]="selectedAccount.energyUnit| settingsLabel"></span>
@@ -230,7 +235,8 @@
                                     <div class="input-group">
                                         <input name="{{'residualN2O_'+index}}" id="{{'residualN2O_'+index}}"
                                             class="form-control" type="number" [(ngModel)]="emissionRate.N2O"
-                                            onfocus="this.select();" (input)="setOutputRate()">
+                                            onfocus="this.select();" (input)="setOutputRate()"
+                                            [required]="!editCustomEmissions.directEmissionsRate">
                                         <div class="input-group-text">
                                             g N<sub>2</sub>O/<span
                                                 [innerHTML]="selectedAccount.energyUnit| settingsLabel"></span>
