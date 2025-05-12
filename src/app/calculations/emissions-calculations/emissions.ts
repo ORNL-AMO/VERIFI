@@ -375,8 +375,8 @@ export function setUtilityDataEmissionsValues(utilityData: IdbUtilityMeterData, 
 export function calculateTotalEmissions(energyUse: number, emissionsRate: EmissionsRate, CH4_Multiplier: number, N2O_Multiplier: number, ghgMultiplier: number = 1): number {
     let co2Emissions: number = (energyUse * emissionsRate.CO2) / 1000;
     //stationary other
-    let totalCH4 = energyUse * CH4_Multiplier * emissionsRate.CH4;
-    let totalN2O = energyUse * N2O_Multiplier * emissionsRate.N2O;
+    let totalCH4 = energyUse * CH4_Multiplier * emissionsRate.CH4 / 1000000;
+    let totalN2O = energyUse * N2O_Multiplier * emissionsRate.N2O / 1000000;
     let total = (co2Emissions + totalCH4 + totalN2O) * ghgMultiplier;
     return total;
 }
