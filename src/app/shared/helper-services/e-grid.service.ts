@@ -39,7 +39,7 @@ export class EGridService {
     //1: YEAR
     //2: CATEGORY
     //3: CO2e
-    let sheetTwo = XLSX.utils.sheet_to_json(wb.Sheets["eGrid_co2"], { raw: false });
+    let sheetTwo = XLSX.utils.sheet_to_json(wb.Sheets["eGrid_data_2025"], { raw: false });
     this.setCo2Emissions(sheetTwo);
   }
 
@@ -67,10 +67,10 @@ export class EGridService {
     csvResults.forEach(result => {
       let subregion: string = result['SUBRGN'];
       if (subregion) {
-        let CO2: number = Number(result['CO2e']); 
-        let CH4: number = Number(result['CO2e']); 
-        let N2O: number = Number(result['CO2e']); 
-        let year: number = Number(result['YEAR']);
+        let CO2: number = Number(result['CO2']); 
+        let CH4: number = Number(result['CH4']); 
+        let N2O: number = Number(result['N2O']); 
+        let year: number = Number(result['Year']);
         let category: 'LocationMix' | 'ResidualMix' = result['CATEGORY'];
         subregionEmissions = this.addEmissionRate(subregion, CO2, CH4, N2O, year, category, subregionEmissions);
       }
