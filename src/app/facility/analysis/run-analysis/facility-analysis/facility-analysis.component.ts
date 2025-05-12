@@ -17,12 +17,14 @@ import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.serv
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
+import { IdbAccount } from 'src/app/models/idbModels/account';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 
 @Component({
-    selector: 'app-facility-analysis',
-    templateUrl: './facility-analysis.component.html',
-    styleUrls: ['./facility-analysis.component.css'],
-    standalone: false
+  selector: 'app-facility-analysis',
+  templateUrl: './facility-analysis.component.html',
+  styleUrls: ['./facility-analysis.component.css'],
+  standalone: false
 })
 export class FacilityAnalysisComponent implements OnInit {
 
@@ -35,7 +37,8 @@ export class FacilityAnalysisComponent implements OnInit {
     private predictorDbService: PredictorDbService,
     private predictorDataDbService: PredictorDataDbService,
     private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService
+    private utilityMeterDataDbService: UtilityMeterDatadbService,
+    private accountDbService: AccountdbService
   ) { }
 
   ngOnInit(): void {
@@ -46,6 +49,7 @@ export class FacilityAnalysisComponent implements OnInit {
     let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
     let accountPredictorEntries: Array<IdbPredictorData> = this.predictorDataDbService.accountPredictorData.getValue();
     let accountPredictors: Array<IdbPredictor> = this.predictorDbService.accountPredictors.getValue();
+    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     if (typeof Worker !== 'undefined') {
       this.worker = new Worker(new URL('src/app/web-workers/annual-facility-analysis.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {
@@ -69,11 +73,12 @@ export class FacilityAnalysisComponent implements OnInit {
         accountPredictorEntries: accountPredictorEntries,
         calculateAllMonthlyData: false,
         accountPredictors: accountPredictors,
-        accountAnalysisItems: accountAnalysisItems
+        accountAnalysisItems: accountAnalysisItems,
+        assessmentReportVersion: account.assessmentReportVersion
       });
     } else {
       // Web Workers are not supported in this environment.     
-      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, facilityMeterData, facility, false, { energyIsSource: analysisItem.energyIsSource, neededUnits: getNeededUnits(analysisItem) }, [], [], [facility]);
+      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, facilityMeterData, facility, false, { energyIsSource: analysisItem.energyIsSource, neededUnits: getNeededUnits(analysisItem) }, [], [], [facility], account.assessmentReportVersion);
       let annualAnalysisSummaryClass: AnnualFacilityAnalysisSummaryClass = new AnnualFacilityAnalysisSummaryClass(analysisItem, facility, calanderizedMeters, accountPredictorEntries, false, accountPredictors, accountAnalysisItems, false);
       let annualAnalysisSummaries: Array<AnnualAnalysisSummary> = annualAnalysisSummaryClass.getAnnualAnalysisSummaries();
       let monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData> = annualAnalysisSummaryClass.monthlyAnalysisSummaryData;

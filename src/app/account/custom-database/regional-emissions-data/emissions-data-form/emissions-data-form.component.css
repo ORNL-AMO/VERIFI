@@ -11,6 +11,13 @@ label{
 
 .delete-button{
     font-size: x-small;
-    margin-left: .2rem;
-    margin-right: .2rem;
+    float: right;
+}
+
+.form-group label{
+    font-size: small;
+}
+
+.form-group{
+    padding-bottom: .25rem;
 }

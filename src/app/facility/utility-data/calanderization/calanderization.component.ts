@@ -19,10 +19,10 @@ import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
 
 @Component({
-    selector: 'app-calanderization',
-    templateUrl: './calanderization.component.html',
-    styleUrls: ['./calanderization.component.css'],
-    standalone: false
+  selector: 'app-calanderization',
+  templateUrl: './calanderization.component.html',
+  styleUrls: ['./calanderization.component.css'],
+  standalone: false
 })
 export class CalanderizationComponent implements OnInit {
 
@@ -111,7 +111,8 @@ export class CalanderizationComponent implements OnInit {
       let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
       let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
       let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
-      let allCalanderizedMeterData: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, facilityMeterData, this.selectedFacility, false, undefined, this.eGridService.co2Emissions, customFuels, [this.selectedFacility]);
+      let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+      let allCalanderizedMeterData: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, facilityMeterData, this.selectedFacility, false, undefined, this.eGridService.co2Emissions, customFuels, [this.selectedFacility], account.assessmentReportVersion);
 
       let calanderizedMeterData: Array<CalanderizedMeter> = allCalanderizedMeterData.filter(cMeter => {
         return cMeter.meter.guid == this.selectedMeter.guid

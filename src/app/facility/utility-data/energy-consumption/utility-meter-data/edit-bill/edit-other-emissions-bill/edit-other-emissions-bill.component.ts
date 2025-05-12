@@ -11,12 +11,14 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { checkMeterReadingExistForDate, IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { IdbAccount } from 'src/app/models/idbModels/account';
 
 @Component({
-    selector: 'app-edit-other-emissions-bill',
-    templateUrl: './edit-other-emissions-bill.component.html',
-    styleUrls: ['./edit-other-emissions-bill.component.css'],
-    standalone: false
+  selector: 'app-edit-other-emissions-bill',
+  templateUrl: './edit-other-emissions-bill.component.html',
+  styleUrls: ['./edit-other-emissions-bill.component.css'],
+  standalone: false
 })
 export class EditOtherEmissionsBillComponent {
   @Input()
@@ -40,7 +42,8 @@ export class EditOtherEmissionsBillComponent {
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService,
     private facilityDbService: FacilitydbService,
     private eGridService: EGridService,
-    private customFuelDbService: CustomFuelDbService) { }
+    private customFuelDbService: CustomFuelDbService,
+    private accountDbService: AccountdbService) { }
 
   ngOnInit(): void {
     this.setTotalEmissions();
@@ -82,13 +85,14 @@ export class EditOtherEmissionsBillComponent {
     if (this.meterDataForm.controls.totalVolume.value) {
       let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
       let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
+      let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
       //meed to use total volume for fugitive/process emissions
       let emissionsValues: EmissionsResults = getEmissions(this.editMeter,
         this.meterDataForm.controls.totalEnergyUse.value,
         this.editMeter.energyUnit,
         new Date(this.meterDataForm.controls.readDate.value).getFullYear(),
         false, [facility], this.eGridService.co2Emissions, customFuels,
-        this.meterDataForm.controls.totalVolume.value, undefined, undefined, undefined);
+        this.meterDataForm.controls.totalVolume.value, undefined, undefined, undefined, account.assessmentReportVersion);
       this.fugitiveEmissions = emissionsValues.fugitiveEmissions;
       this.processEmissions = emissionsValues.processEmissions;
     } else {

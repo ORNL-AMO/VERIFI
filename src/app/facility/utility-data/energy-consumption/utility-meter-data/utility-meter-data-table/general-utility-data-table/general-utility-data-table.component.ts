@@ -14,12 +14,14 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { IdbAccount } from 'src/app/models/idbModels/account';
 
 @Component({
-    selector: 'app-general-utility-data-table',
-    templateUrl: './general-utility-data-table.component.html',
-    styleUrls: ['./general-utility-data-table.component.css'],
-    standalone: false
+  selector: 'app-general-utility-data-table',
+  templateUrl: './general-utility-data-table.component.html',
+  styleUrls: ['./general-utility-data-table.component.css'],
+  standalone: false
 })
 export class GeneralUtilityDataTableComponent implements OnInit {
   @Input()
@@ -59,7 +61,8 @@ export class GeneralUtilityDataTableComponent implements OnInit {
   constructor(public utilityMeterDataService: UtilityMeterDataService,
     private copyTableService: CopyTableService,
     private eGridService: EGridService, private facilityDbService: FacilitydbService,
-    private customFuelDbService: CustomFuelDbService) { }
+    private customFuelDbService: CustomFuelDbService,
+    private accountDbService: AccountdbService) { }
 
   ngOnInit(): void {
     this.setData();
@@ -186,8 +189,9 @@ export class GeneralUtilityDataTableComponent implements OnInit {
   setEmissions() {
     let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
+    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     this.selectedMeterData.forEach(dataItem => {
-      let emissionsValues: EmissionsResults = getEmissions(this.selectedMeter, dataItem.totalEnergyUse, this.selectedMeter.energyUnit, new Date(dataItem.readDate).getFullYear(), false, [facility], this.eGridService.co2Emissions, customFuels, dataItem.totalVolume, undefined, undefined, dataItem.heatCapacity);
+      let emissionsValues: EmissionsResults = getEmissions(this.selectedMeter, dataItem.totalEnergyUse, this.selectedMeter.energyUnit, new Date(dataItem.readDate).getFullYear(), false, [facility], this.eGridService.co2Emissions, customFuels, dataItem.totalVolume, undefined, undefined, dataItem.heatCapacity, account.assessmentReportVersion);
       dataItem = setUtilityDataEmissionsValues(dataItem, emissionsValues);
     });
   }

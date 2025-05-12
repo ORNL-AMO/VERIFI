@@ -2,6 +2,16 @@
     <div class="card-body">
         <form>
             <div class="row">
+                <div class="col-12">
+                    <div class="d-flex justify-content-end align-items-center h-100">
+                        <button class="btn btn-secondary me-2" (click)="navigateHome()">Cancel</button>
+                        <button class="btn btn-success" [disabled]="isInvalid" (click)="save()">
+                            <span class="fa fa-save"></span>
+                            Save</button>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
                 <div class="col-6">
                     <div class="form-group">
                         <label for="subregion">Subregion Name</label>
@@ -15,118 +25,263 @@
                         </div>
                     </div>
                 </div>
+
                 <div class="col-6">
-                    <div class="d-flex justify-content-end align-items-center h-100">
-                        <button class="btn btn-secondary me-2" (click)="navigateHome()">Cancel</button>
-                        <button class="btn btn-success" [disabled]="isInvalid" (click)="save()">
-                            <span class="fa fa-save"></span>
-                            Save</button>
+                    <div class="form-group">
+                        <label for="subregion">Emissions Rate Method</label>
+                        <select class="form-select" [(ngModel)]="editCustomEmissions.directEmissionsRate"
+                            name="directEmissionsRate" id="directEmissionsRate" (change)="setOutputRate()">
+                            <option [ngValue]="false">Calculate CO<sub>2</sub>e</option>
+                            <option [ngValue]="true">Known CO<sub>2</sub>e</option>
+                        </select>
                     </div>
                 </div>
+            </div>
+            <div class="col-12" *ngIf="editCustomEmissions.directEmissionsRate == false">
+                <p class="small fw-light pt-2">
+                    <span class="fa fa-exclamation-circle"></span> The Emissions Rate displayed here is calculated using
+                    AR5 GWP factors. If AR4 is selected in Company Settings then an emissions rate calculated
+                    with AR4 GWP factors will be used in analysis and reports.
+                </p>
+            </div>
+            <div class="col-12" *ngIf="editCustomEmissions.directEmissionsRate == true">
+                <p class="small fw-light pt-2">
+                    <span class="fa fa-exclamation-circle"></span>Please enter the CO2e emissions rate using consistent
+                    GWP factors for all sites in your portfolio
+                </p>
             </div>
             <hr>
             <div class="row">
                 <div class="col-6">
-                    <label>Location Emission Rates</label>
-                    <table class="table table-hover table-border utility-data">
-                        <thead>
-                            <tr>
-                                <th class="w-50">
-                                    Year
-                                </th>
-                                <th class="w-50">
-                                    Emissions Rate <br>(kg CO<sub>2</sub>/kWh)
-                                </th>
-                                <th *ngIf="editCustomEmissions.locationEmissionRates.length != 1">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <label>Location Emission Rates</label>
+                        </div>
+                        <div class="p-0">
+                            <a class="click-link" (click)="addLocationEmissionRate()">+Add Year</a>
+                        </div>
+                    </div>
 
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr
-                                *ngFor="let emissionRate of editCustomEmissions.locationEmissionRates; let index = index;">
-                                <td>
-                                    <select class="form-select" [(ngModel)]="emissionRate.year" name="{{'locationYear_'+index}}"
-                                        id="{{'locationYear_'+index}}" (change)="checkInvalid()" required>
-                                        <option *ngFor="let year of years" [ngValue]="year">{{year}}</option>
-                                    </select>
-                                </td>
-                                <td>
+                    <div class="alert alert-danger" *ngIf="invalidLocation">
+                        {{invalidLocation}}
+                    </div>
+                    <ng-container
+                        *ngFor="let emissionRate of editCustomEmissions.locationEmissionRates; let index = index;">
+
+                        <div class="row form-group">
+                            <label class="col-5 col-form-label" for="{{'locationYear_'+index}}">Year</label>
+                            <div class="col-7">
+                                <select class="form-select" [(ngModel)]="emissionRate.year"
+                                    name="{{'locationYear_'+index}}" id="{{'locationYear_'+index}}"
+                                    (change)="checkInvalid()" required>
+                                    <option *ngFor="let year of years" [ngValue]="year">{{year}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <ng-container *ngIf="!editCustomEmissions.directEmissionsRate">
+                            <div class="row form-group">
+                                <label class="col-5 col-form-label" for="{{'locationCO2_'+index}}">CO<sub>2</sub>
+                                    Factor</label>
+                                <div class="col-7">
+                                    <div class="input-group">
+                                        <input name="{{'locationCH4_'+index}}" id="{{'locationCH4_'+index}}"
+                                            class="form-control" type="number" [(ngModel)]="emissionRate.CH4"
+                                            onfocus="this.select();" (input)="setOutputRate()"
+                                            [required]="!editCustomEmissions.directEmissionsRate">
+                                        <div class="input-group-text">
+                                            kg CO<sub>2</sub>/<span
+                                                [innerHTML]="selectedAccount.energyUnit| settingsLabel"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row form-group">
+                                <label class="col-5 col-form-label" for="{{'locationCH4_'+index}}">CH<sub>4</sub>
+                                    Factor</label>
+                                <div class="col-7">
+                                    <div class="input-group">
+                                        <input name="{{'locationCO2_'+index}}" id="{{'locationCO2_'+index}}"
+                                            class="form-control" type="number" [(ngModel)]="emissionRate.CO2"
+                                            onfocus="this.select();" (input)="setOutputRate()"
+                                            [required]="!editCustomEmissions.directEmissionsRate">
+                                        <div class="input-group-text">
+                                            g CH<sub>4</sub>/<span
+                                                [innerHTML]="selectedAccount.energyUnit| settingsLabel"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row form-group">
+                                <label class="col-5 col-form-label" for="{{'locationN2O_'+index}}">N<sub>2</sub>O
+                                    Factor</label>
+                                <div class="col-7">
+                                    <div class="input-group">
+                                        <input name="{{'locationN2O_'+index}}" id="{{'locationN2O_'+index}}"
+                                            class="form-control" type="number" [(ngModel)]="emissionRate.N2O"
+                                            onfocus="this.select();" (input)="setOutputRate()"
+                                            [required]="!editCustomEmissions.directEmissionsRate">
+                                        <div class="input-group-text">
+                                            g N<sub>2</sub>O/<span
+                                                [innerHTML]="selectedAccount.energyUnit| settingsLabel"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </ng-container>
+                        <div class="row form-group">
+                            <label class="col-5 col-form-label" for="{{'locationCo2Emissions_'+index}}">Emissions
+                                Rate</label>
+                            <div class="col-7">
+                                <ng-template [ngIf]="editCustomEmissions.directEmissionsRate"
+                                    [ngIfElse]="notDirectRateBlock">
                                     <div class="input-group">
                                         <input class="form-control" type="number"
                                             [(ngModel)]="emissionRate.co2Emissions"
                                             name="{{'locationCo2Emissions_'+index}}"
                                             id="{{'locationCo2Emissions_'+index}}" (input)="checkInvalid()" required
                                             min="0">
-                                        <span class="input-group-text">kg CO<sub>2</sub>/kWh</span>
+                                        <div class="input-group-text">
+                                            kg CO<sub>2</sub>/kWh
+                                        </div>
                                     </div>
-                                </td>
-                                <td class="p-0" *ngIf="editCustomEmissions.locationEmissionRates.length != 1">
-                                    <button class="btn btn-secondary delete-button" (click)="deleteLocationEmissions(index)">
-                                        <span class="fa fa-trash"></span>
-                                    </button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <div class="d-flex justify-content-end">
-                        <a class="click-link" (click)="addLocationEmissionRate()">+Add Location Emissions
-                            Rate</a>
-                    </div>
-                    <div class="alert alert-danger" *ngIf="invalidLocation">
-                        {{invalidLocation}}
-                    </div>
+                                </ng-template>
+                                <ng-template #notDirectRateBlock>
+                                    <div class="text-center">
+                                        {{emissionRate.co2Emissions}} kg CO<sub>2</sub>/kWh
+                                    </div>
+                                </ng-template>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12" *ngIf="editCustomEmissions.locationEmissionRates.length != 1">
+                                <button class="btn btn-secondary delete-button"
+                                    (click)="deleteLocationEmissions(index)">
+                                    <span class="fa fa-trash"></span>
+                                </button>
+                            </div>
+                            <div class="col-12">
+                                <hr>
+                            </div>
+                        </div>
+                    </ng-container>
                 </div>
                 <div class="col-6">
-                    <label>Residual Emission Rates</label>
-                    <table class="table table-hover table-border utility-data">
-                        <thead>
-                            <tr>
-                                <th class="w-50">
-                                    Year
-                                </th>
-                                <th class="w-50">
-                                    Emissions Rate <br>(kg CO<sub>2</sub>/kWh)
-                                </th>
-                                <th *ngIf="editCustomEmissions.residualEmissionRates.length != 1">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <label>Residual Emission Rates</label>
+                        </div>
+                        <div class="p-0">
+                            <a class="click-link" (click)="addResidualEmissionRate()">+Add Year</a>
+                        </div>
+                    </div>
+                    <div class="alert alert-danger" *ngIf="invalidResidual">
+                        {{invalidResidual}}
+                    </div>
+                    <ng-container
+                        *ngFor="let emissionRate of editCustomEmissions.residualEmissionRates; let index = index;">
 
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr
-                                *ngFor="let emissionRate of editCustomEmissions.residualEmissionRates; let index = index;">
-                                <td>
-                                    <select class="form-select" [(ngModel)]="emissionRate.year" name="{{'residualYear_'+index}}"
-                                        id="{{'residualYear_'+index}}" (change)="checkInvalid()" required>
-                                        <option *ngFor="let year of years" [ngValue]="year">{{year}}</option>
-                                    </select>
-                                </td>
-                                <td>
+                        <div class="row form-group">
+                            <label class="col-5 col-form-label" for="{{'residualYear_'+index}}">Year</label>
+                            <div class="col-7">
+                                <select class="form-select" [(ngModel)]="emissionRate.year"
+                                    name="{{'residualYear_'+index}}" id="{{'residualYear_'+index}}"
+                                    (change)="checkInvalid()" required>
+                                    <option *ngFor="let year of years" [ngValue]="year">{{year}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <ng-container *ngIf="!editCustomEmissions.directEmissionsRate">
+                            <div class="row form-group">
+                                <label class="col-5 col-form-label" for="{{'residualCO2_'+index}}">CO<sub>2</sub>
+                                    Factor</label>
+                                <div class="col-7">
+                                    <div class="input-group">
+                                        <input name="{{'residualCO2_'+index}}" id="{{'residualCO2_'+index}}"
+                                            class="form-control" type="number" [(ngModel)]="emissionRate.CH4"
+                                            onfocus="this.select();" (input)="setOutputRate()"
+                                            [required]="!editCustomEmissions.directEmissionsRate">
+                                        <div class="input-group-text">
+                                            kg CO<sub>2</sub>/<span
+                                                [innerHTML]="selectedAccount.energyUnit| settingsLabel"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row form-group">
+                                <label class="col-5 col-form-label" for="{{'residualCH4_'+index}}">CH<sub>4</sub>
+                                    Factor</label>
+                                <div class="col-7">
+                                    <div class="input-group">
+                                        <input name="{{'residualCH4_'+index}}" id="{{'residualCH4_'+index}}"
+                                            class="form-control" type="number" [(ngModel)]="emissionRate.CO2"
+                                            onfocus="this.select();" (input)="setOutputRate()"
+                                            [required]="!editCustomEmissions.directEmissionsRate">
+                                        <div class="input-group-text">
+                                            g CH<sub>4</sub>/<span
+                                                [innerHTML]="selectedAccount.energyUnit| settingsLabel"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row form-group">
+                                <label class="col-5 col-form-label" for="{{'residualN2O_'+index}}">N<sub>2</sub>O
+                                    Factor</label>
+                                <div class="col-7">
+                                    <div class="input-group">
+                                        <input name="{{'residualN2O_'+index}}" id="{{'residualN2O_'+index}}"
+                                            class="form-control" type="number" [(ngModel)]="emissionRate.N2O"
+                                            onfocus="this.select();" (input)="setOutputRate()"
+                                            [required]="!editCustomEmissions.directEmissionsRate">
+                                        <div class="input-group-text">
+                                            g N<sub>2</sub>O/<span
+                                                [innerHTML]="selectedAccount.energyUnit| settingsLabel"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </ng-container>
+                        <div class="row form-group">
+                            <label class="col-5 col-form-label" for="{{'residualCo2Emissions_'+index}}">Emissions
+                                Rate</label>
+                            <div class="col-7">
+                                <ng-template [ngIf]="editCustomEmissions.directEmissionsRate"
+                                    [ngIfElse]="notDirectRateBlock">
                                     <div class="input-group">
                                         <input class="form-control" type="number"
                                             [(ngModel)]="emissionRate.co2Emissions"
                                             name="{{'residualCo2Emissions_'+index}}"
                                             id="{{'residualCo2Emissions_'+index}}" (input)="checkInvalid()" required
                                             min="0">
-                                        <span class="input-group-text">kg CO<sub>2</sub>/kWh</span>
+                                        <div class="input-group-text">
+                                            kg CO<sub>2</sub>/kWh
+                                        </div>
                                     </div>
-                                </td>
-                                <td class="p-0" *ngIf="editCustomEmissions.residualEmissionRates.length != 1">
-                                    <button class="btn btn-secondary delete-button" (click)="deleteResidualEmissions(index)">
-                                        <span class="fa fa-trash"></span>
-                                    </button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <div class="d-flex justify-content-end">
-                        <a class="click-link" (click)="addResidualEmissionRate()">+Add Residual Emissions
-                            Rate</a>
-                    </div>
-                    <div class="alert alert-danger" *ngIf="invalidResidual">
-                        {{invalidResidual}}
-                    </div>
+                                </ng-template>
+                                <ng-template #notDirectRateBlock>
+                                    <div class="text-center">
+                                        {{emissionRate.co2Emissions}} kg CO<sub>2</sub>/kWh
+                                    </div>
+                                </ng-template>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12" *ngIf="editCustomEmissions.residualEmissionRates.length != 1">
+                                <button class="btn btn-secondary delete-button"
+                                    (click)="deleteResidualEmissions(index)">
+                                    <span class="fa fa-trash"></span>
+                                </button>
+                            </div>
+                            <div class="col-12">
+                                <hr>
+                            </div>
+                        </div>
+                    </ng-container>
                 </div>
             </div>
         </form>

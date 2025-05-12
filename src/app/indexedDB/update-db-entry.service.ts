@@ -35,6 +35,11 @@ export class UpdateDbEntryService {
       isChanged = true;
     }
 
+    if(!account.assessmentReportVersion){
+      account.assessmentReportVersion = 'AR5';
+      isChanged = true;
+    }
+
     return { account: account, isChanged: isChanged };
   }
 

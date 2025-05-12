@@ -12,6 +12,8 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { checkSameMonth } from 'src/app/upload-data/upload-helper-functions';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { IdbAccount } from 'src/app/models/idbModels/account';
 
 @Injectable({
   providedIn: 'root'
@@ -20,7 +22,8 @@ export class PredictorDataHelperService {
 
   constructor(private predictorDbService: PredictorDbService, private predictorDataDbService: PredictorDataDbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private utilityMeterDbService: UtilityMeterdbService
+    private utilityMeterDbService: UtilityMeterdbService,
+    private accountDbService: AccountdbService
   ) { }
 
   checkWeatherPredictorsNeedUpdate(facility: IdbFacility, facilityPredictors?: Array<IdbPredictor>): Array<{ predictor: IdbPredictor, latestReadingDate: Date }> {
@@ -64,7 +67,8 @@ export class PredictorDataHelperService {
     let filteredMeters: Array<IdbUtilityMeter> = utilityMeters.filter(meter => {
       return meter.meterReadingDataApplication != 'fullYear';
     });
-    let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(filteredMeters, utilityMeterData, facility, true, { energyIsSource: facility.energyIsSource, neededUnits: undefined }, [], [], [facility]);
+    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(filteredMeters, utilityMeterData, facility, true, { energyIsSource: facility.energyIsSource, neededUnits: undefined }, [], [], [facility], account.assessmentReportVersion);
     let monthlyData: Array<MonthlyData> = calanderizedMeters.flatMap(cMeter => {
       return cMeter.monthlyData;
     });
@@ -83,7 +87,8 @@ export class PredictorDataHelperService {
     let filteredMeters: Array<IdbUtilityMeter> = utilityMeters.filter(meter => {
       return meter.meterReadingDataApplication != 'fullYear';
     });
-    let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(filteredMeters, utilityMeterData, facility, true, { energyIsSource: facility.energyIsSource, neededUnits: undefined }, [], [], [facility]);
+    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(filteredMeters, utilityMeterData, facility, true, { energyIsSource: facility.energyIsSource, neededUnits: undefined }, [], [], [facility], account.assessmentReportVersion);
     let monthlyData: Array<MonthlyData> = calanderizedMeters.flatMap(cMeter => {
       return cMeter.monthlyData;
     });
