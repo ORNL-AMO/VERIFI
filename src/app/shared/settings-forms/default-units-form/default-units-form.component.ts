@@ -173,7 +173,7 @@ export class DefaultUnitsFormComponent implements OnInit {
   }
 
   setSubRegionData() {
-    this.zipCodeSubRegionData = new Array();
+    this.zipCodeSubRegionData = ['US Average'];
     this.addCustomSubregions();
     if (this.currentZip && this.currentZip.length == 5) {
       let subRegionData: SubRegionData = _.find(this.eGridService.subRegionsByZipcode, (val) => { return val.zip == this.currentZip });
