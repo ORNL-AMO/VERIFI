@@ -781,7 +781,8 @@ export class BackupDataService {
       modelNotes: model.modelNotes,
       errorModeling: model.errorModeling,
       SEPValidation: model.SEPValidation,
-      SEPValidationPass: model.SEPValidationPass
+      SEPValidationPass: model.SEPValidationPass,
+      dataValidationNotes: model.dataValidationNotes
     }
   }
 
