@@ -4,7 +4,7 @@ import { UtilityMeterDataService } from '../../utility-meter-data.service';
 import * as _ from 'lodash';
 import { CopyTableService } from 'src/app/shared/helper-services/copy-table.service';
 import { AdditionalChargesFilters, DetailedChargesFilters, EmissionsFilters, GeneralInformationFilters } from 'src/app/models/meterDataFilter';
-import { EmissionsResults } from 'src/app/models/eGridEmissions';
+import { EmissionsResults, SubregionEmissions } from 'src/app/models/eGridEmissions';
 import { getEmissions, setUtilityDataEmissionsValues } from 'src/app/calculations/emissions-calculations/emissions';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
@@ -175,8 +175,9 @@ export class ElectricityDataTableComponent implements OnInit {
     let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let co2EmissionsRates: Array<SubregionEmissions> = this.eGridService.co2Emissions.map(rate => {return rate});
     this.selectedMeterData.forEach(dataItem => {
-      let emissionsValues: EmissionsResults = getEmissions(this.selectedMeter, dataItem.totalEnergyUse, this.selectedMeter.energyUnit, new Date(dataItem.readDate).getFullYear(), false, [facility], this.eGridService.co2Emissions, customFuels, 0, undefined, undefined, dataItem.heatCapacity, account.assessmentReportVersion);
+      let emissionsValues: EmissionsResults = getEmissions(this.selectedMeter, dataItem.totalEnergyUse, this.selectedMeter.energyUnit, new Date(dataItem.readDate).getFullYear(), false, [facility], co2EmissionsRates, customFuels, 0, undefined, undefined, dataItem.heatCapacity, account.assessmentReportVersion);
       dataItem = setUtilityDataEmissionsValues(dataItem, emissionsValues);
     });
   }
