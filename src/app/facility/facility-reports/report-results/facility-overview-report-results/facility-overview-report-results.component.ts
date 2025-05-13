@@ -16,12 +16,14 @@ import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
 import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
 import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/calanderizeMeters';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { IdbAccount } from 'src/app/models/idbModels/account';
 
 @Component({
-    selector: 'app-facility-overview-report-results',
-    templateUrl: './facility-overview-report-results.component.html',
-    styleUrl: './facility-overview-report-results.component.css',
-    standalone: false
+  selector: 'app-facility-overview-report-results',
+  templateUrl: './facility-overview-report-results.component.html',
+  styleUrl: './facility-overview-report-results.component.css',
+  standalone: false
 })
 export class FacilityOverviewReportResultsComponent {
 
@@ -48,7 +50,8 @@ export class FacilityOverviewReportResultsComponent {
     private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private customFuelDbService: CustomFuelDbService,
-    private eGridService: EGridService
+    private eGridService: EGridService,
+    private accountDbService: AccountdbService
   ) {
 
   }
@@ -79,7 +82,7 @@ export class FacilityOverviewReportResultsComponent {
     if (this.overviewReportSettings.includeAllMeterData == false) {
       let includeGroupIds: Array<string> = [];
       this.overviewReportSettings.includedGroups.forEach(group => {
-        if(group.include){
+        if (group.include) {
           includeGroupIds.push(group.groupId);
         }
       });
@@ -93,6 +96,7 @@ export class FacilityOverviewReportResultsComponent {
       startDate: new Date(this.overviewReportSettings.startYear, this.overviewReportSettings.startMonth, 1),
       endDate: new Date(this.overviewReportSettings.endYear, this.overviewReportSettings.endMonth, 1)
     }
+    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     if (typeof Worker !== 'undefined') {
       this.worker = new Worker(new URL('src/app/web-workers/facility-overview.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {
@@ -115,14 +119,15 @@ export class FacilityOverviewReportResultsComponent {
         meterData: meterData,
         inOverview: false,
         co2Emissions: this.eGridService.co2Emissions,
-        customFuels: customFuels
+        customFuels: customFuels,
+        assessmentReportVersion: account.assessmentReportVersion
       });
 
 
 
     } else {
       // Web Workers are not supported in this environment.
-      this.calanderizedMeters = getCalanderizedMeterData(facilityMeters, meterData, this.facility, false, { energyIsSource: this.overviewReportSettings.energyIsSource, neededUnits: undefined }, this.eGridService.co2Emissions, customFuels, [this.facility]);
+      this.calanderizedMeters = getCalanderizedMeterData(facilityMeters, meterData, this.facility, false, { energyIsSource: this.overviewReportSettings.energyIsSource, neededUnits: undefined }, this.eGridService.co2Emissions, customFuels, [this.facility], account.assessmentReportVersion);
       this.facilityOverviewData = new FacilityOverviewData(this.calanderizedMeters, this.dateRange, this.facility);
       this.utilityUseAndCost = new UtilityUseAndCost(this.calanderizedMeters, this.dateRange);
       this.calculating = false;

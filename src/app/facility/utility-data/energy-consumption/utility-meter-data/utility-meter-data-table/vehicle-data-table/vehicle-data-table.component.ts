@@ -12,11 +12,13 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { IdbAccount } from 'src/app/models/idbModels/account';
 @Component({
-    selector: 'app-vehicle-data-table',
-    templateUrl: './vehicle-data-table.component.html',
-    styleUrls: ['./vehicle-data-table.component.css'],
-    standalone: false
+  selector: 'app-vehicle-data-table',
+  templateUrl: './vehicle-data-table.component.html',
+  styleUrls: ['./vehicle-data-table.component.css'],
+  standalone: false
 })
 export class VehicleDataTableComponent {
   @Input()
@@ -54,7 +56,8 @@ export class VehicleDataTableComponent {
   constructor(private utilityMeterDataService: UtilityMeterDataService,
     private copyTableService: CopyTableService,
     private customFuelDbService: CustomFuelDbService,
-    private facilityDbService: FacilitydbService) {
+    private facilityDbService: FacilitydbService,
+    private accountDbService: AccountdbService) {
 
   }
 
@@ -77,9 +80,9 @@ export class VehicleDataTableComponent {
 
   ngOnChanges() {
     this.setData();
-    if(this.selectedMeter.scope != 2){
+    if (this.selectedMeter.scope != 2) {
       this.consumptionLabel = 'Consumption';
-    }else{
+    } else {
       this.consumptionLabel = 'Distance';
     }
   }
@@ -147,8 +150,9 @@ export class VehicleDataTableComponent {
   setEmissions() {
     let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
+    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     this.selectedMeterData.forEach(dataItem => {
-      let emissionsValues: EmissionsResults = getEmissions(this.selectedMeter, dataItem.totalEnergyUse, this.selectedMeter.energyUnit, new Date(dataItem.readDate).getFullYear(), false, [facility], [], customFuels, dataItem.totalVolume, this.selectedMeter.vehicleCollectionUnit, this.selectedMeter.vehicleDistanceUnit, dataItem.vehicleFuelEfficiency);
+      let emissionsValues: EmissionsResults = getEmissions(this.selectedMeter, dataItem.totalEnergyUse, this.selectedMeter.energyUnit, new Date(dataItem.readDate).getFullYear(), false, [facility], [], customFuels, dataItem.totalVolume, this.selectedMeter.vehicleCollectionUnit, this.selectedMeter.vehicleDistanceUnit, dataItem.vehicleFuelEfficiency, account.assessmentReportVersion);
       dataItem.mobileBiogenicEmissions = emissionsValues.mobileBiogenicEmissions;
       dataItem.mobileCarbonEmissions = emissionsValues.mobileCarbonEmissions;
       dataItem.mobileOtherEmissions = emissionsValues.mobileOtherEmissions;

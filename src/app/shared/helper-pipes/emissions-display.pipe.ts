@@ -1,6 +1,7 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { ConvertValue } from 'src/app/calculations/conversions/convertValue';
 import { FuelTypeOption } from '../fuel-options/fuelTypeOption';
+import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
 
 @Pipe({
     name: 'emissionsDisplay',
@@ -8,7 +9,7 @@ import { FuelTypeOption } from '../fuel-options/fuelTypeOption';
 })
 export class EmissionsDisplayPipe implements PipeTransform {
 
-  transform(selectedFuelType: FuelTypeOption, energyUnits: string, valType: 'HHV' | 'CO2' | 'CH4' | 'N2O', collectionUnit?: string, distanceUnit?: string): string {
+  transform(selectedFuelType: FuelTypeOption | IdbCustomFuel, energyUnits: string, valType: 'HHV' | 'CO2' | 'CH4' | 'N2O', collectionUnit?: string, distanceUnit?: string): string {
     let value: number;
     if (valType == 'HHV') {
       value = selectedFuelType.heatCapacityValue;

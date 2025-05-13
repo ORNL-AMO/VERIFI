@@ -12,16 +12,18 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 @Component({
-    selector: 'app-regression-model-selection',
-    templateUrl: './regression-model-selection.component.html',
-    styleUrls: ['./regression-model-selection.component.css'],
-    standalone: false
+  selector: 'app-regression-model-selection',
+  templateUrl: './regression-model-selection.component.html',
+  styleUrls: ['./regression-model-selection.component.css'],
+  standalone: false
 })
 export class RegressionModelSelectionComponent implements OnInit {
 
   selectedGroup: AnalysisGroup;
   showInvalid: boolean;
+  showFailedValidationModel: boolean;
   showInvalidSub: Subscription;
+  showFailedDataValidationSub: Subscription;
   orderDataField: string = 'adjust_R2';
   orderByDirection: 'asc' | 'desc' = 'desc';
   selectedGroupSub: Subscription;
@@ -43,12 +45,16 @@ export class RegressionModelSelectionComponent implements OnInit {
     this.showInvalidSub = this.analysisService.showInvalidModels.subscribe(val => {
       this.showInvalid = val;
     });
+    this.showFailedDataValidationSub = this.analysisService.showFailedValidationModels.subscribe(val => {
+      this.showFailedValidationModel = val;
+    })
     this.setShowInUseMessage();
 
   }
   ngOnDestroy() {
     this.selectedGroupSub.unsubscribe();
     this.showInvalidSub.unsubscribe();
+    this.showFailedDataValidationSub.unsubscribe();
   }
 
   selectModel() {

@@ -1,4 +1,10 @@
 
-.emission-rates label{
+/* .emission-rates label{
     font-size: 22px;
+} */
+
+.emission-rates{
+    padding: .25rem;
+    max-height: calc(100vh - 20px);
+    overflow-y: auto;
 }

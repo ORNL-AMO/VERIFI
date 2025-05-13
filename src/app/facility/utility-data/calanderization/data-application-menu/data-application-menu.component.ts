@@ -9,12 +9,14 @@ import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/c
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { IdbAccount } from 'src/app/models/idbModels/account';
 
 @Component({
-    selector: 'app-data-application-menu',
-    templateUrl: './data-application-menu.component.html',
-    styleUrls: ['./data-application-menu.component.css'],
-    standalone: false
+  selector: 'app-data-application-menu',
+  templateUrl: './data-application-menu.component.html',
+  styleUrls: ['./data-application-menu.component.css'],
+  standalone: false
 })
 export class DataApplicationMenuComponent implements OnInit {
   @Input()
@@ -31,7 +33,8 @@ export class DataApplicationMenuComponent implements OnInit {
   displayMonths: number = 4;
   hoverDataDate: Date;
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private calanderizationService: CalanderizationService,
-    private facilityDbService: FacilitydbService) { }
+    private facilityDbService: FacilitydbService,
+    private accountDbService: AccountdbService) { }
 
   ngOnInit(): void {
     let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataFromMeterId(this.meter.guid);
@@ -56,7 +59,8 @@ export class DataApplicationMenuComponent implements OnInit {
   calanderizeMeter() {
     if (this.utilityMeterData.length > 2) {
       let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-      let calanderizedData: Array<CalanderizedMeter> = getCalanderizedMeterData([this.meter], this.utilityMeterData, selectedFacility, false, undefined, [], [], [selectedFacility]);
+      let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+      let calanderizedData: Array<CalanderizedMeter> = getCalanderizedMeterData([this.meter], this.utilityMeterData, selectedFacility, false, undefined, [], [], [selectedFacility], account.assessmentReportVersion);
       this.monthlyData = calanderizedData[0].monthlyData;
       if (this.meter.meterReadingDataApplication == 'backward') {
         this.monthlyData = this.monthlyData.splice(0, 2);

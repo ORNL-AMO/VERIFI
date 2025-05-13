@@ -16,6 +16,8 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { IdbAccount } from 'src/app/models/idbModels/account';
 
 @Component({
     selector: 'app-regression-model-inspection',
@@ -47,13 +49,15 @@ export class RegressionModelInspectionComponent implements OnInit {
   selectedModel: JStatRegressionModel;
   facilityMeters: Array<IdbUtilityMeter>;
   facilityMeterData: Array<IdbUtilityMeterData>;
+  account: IdbAccount;
   constructor(private analysisService: AnalysisService,
     private analysisDbService: AnalysisDbService,
     private facilityDbService: FacilitydbService,
     private predictorDataDbService: PredictorDataDbService,
     private plotlyService: PlotlyService,
     private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService) { }
+    private utilityMeterDataDbService: UtilityMeterDatadbService,
+    private accountDbService: AccountdbService) { }
 
   ngOnInit(): void {
     this.selectedGroup = this.analysisService.selectedGroup.getValue();
@@ -64,6 +68,7 @@ export class RegressionModelInspectionComponent implements OnInit {
     this.accountPredictorEntries = this.predictorDataDbService.accountPredictorData.getValue();
     this.facilityMeters = this.utilityMeterDbService.facilityMeters.getValue();
     this.facilityMeterData = this.utilityMeterDataDbService.facilityMeterData.getValue();
+    this.account = this.accountDbService.selectedAccount.getValue();
     this.calculateInspectedModel();
   }
 
@@ -96,11 +101,12 @@ export class RegressionModelInspectionComponent implements OnInit {
         meters: this.facilityMeters,
         meterData: this.facilityMeterData,
         accountPredictorEntries: this.accountPredictorEntries,
-        accountAnalysisItems: this.accountAnalysisItems
+        accountAnalysisItems: this.accountAnalysisItems,
+        assessmentReportVersion: this.account.assessmentReportVersion
       });
     } else {
       // Web Workers are not supported in this environment.  
-      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(this.facilityMeters, this.facilityMeterData, this.selectedFacility, false, { energyIsSource: this.analysisItem.energyIsSource, neededUnits: getNeededUnits(this.analysisItem) }, [], [], [this.selectedFacility]);
+      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(this.facilityMeters, this.facilityMeterData, this.selectedFacility, false, { energyIsSource: this.analysisItem.energyIsSource, neededUnits: getNeededUnits(this.analysisItem) }, [], [], [this.selectedFacility], this.account.assessmentReportVersion);
       let monthlyAnalysisSummaryClass: MonthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(groupCopy, this.analysisItem, this.selectedFacility, calanderizedMeters, this.accountPredictorEntries, false, this.accountAnalysisItems);
       this.inspectedMonthlyAnalysisSummaryData = monthlyAnalysisSummaryClass.getResults().monthlyAnalysisSummaryData;
       this.calculating = false;
@@ -130,11 +136,12 @@ export class RegressionModelInspectionComponent implements OnInit {
         meters: this.facilityMeters,
         meterData: this.facilityMeterData,
         accountPredictorEntries: this.accountPredictorEntries,
-        accountAnalysisItems: this.accountAnalysisItems
+        accountAnalysisItems: this.accountAnalysisItems,
+        assessmentReportVersion: this.account.assessmentReportVersion
       });
     } else {
       // Web Workers are not supported in this environment.
-      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(this.facilityMeters, this.facilityMeterData, this.selectedFacility, false, { energyIsSource: this.analysisItem.energyIsSource, neededUnits: getNeededUnits(this.analysisItem) }, [], [], [this.selectedFacility]);
+      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(this.facilityMeters, this.facilityMeterData, this.selectedFacility, false, { energyIsSource: this.analysisItem.energyIsSource, neededUnits: getNeededUnits(this.analysisItem) }, [], [], [this.selectedFacility], this.account.assessmentReportVersion);
       let monthlyAnalysisSummaryClass: MonthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(this.selectedGroup, this.analysisItem, this.selectedFacility, calanderizedMeters, this.accountPredictorEntries, false, this.accountAnalysisItems);
       this.selectedMonthlyAnalysisSummaryData = monthlyAnalysisSummaryClass.getResults().monthlyAnalysisSummaryData;
       this.calculating = false;

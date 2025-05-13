@@ -98,7 +98,7 @@ export class ExportToEnergyTresureHuntFormService {
     let energyMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => {
       return meter.source != 'Water Discharge' && meter.source != 'Water Intake'
     })
-    let calanderizedMeterData: Array<CalanderizedMeter> = getCalanderizedMeterData(energyMeters, facilityMeterData, facility, false, { energyIsSource: false, neededUnits: 'MMBtu' }, [], [], [facility])
+    let calanderizedMeterData: Array<CalanderizedMeter> = getCalanderizedMeterData(energyMeters, facilityMeterData, facility, false, { energyIsSource: false, neededUnits: 'MMBtu' }, [], [], [facility], 'AR5')
     //electricity
     let electricityMeters: Array<CalanderizedMeter> = calanderizedMeterData.filter(cMeter => { return cMeter.meter.source == 'Electricity' });
     let cellIndex: number = 8
@@ -279,7 +279,7 @@ export class ExportToEnergyTresureHuntFormService {
     let facilityWaterMeters: Array<IdbUtilityMeter> = facilityMeters.filter(meter => {
       return meter.source == 'Water Discharge' || meter.source == 'Water Intake'
     })
-    let calanderizedWaterMeterData: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityWaterMeters, facilityMeterData, facility, false, { energyIsSource: false, neededUnits: 'kgal' }, [], [], [facility])
+    let calanderizedWaterMeterData: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityWaterMeters, facilityMeterData, facility, false, { energyIsSource: false, neededUnits: 'kgal' }, [], [], [facility], 'AR5')
     //water
     let waterMeters: Array<CalanderizedMeter> = calanderizedWaterMeterData.filter(cMeter => {
       return cMeter.meter.source == 'Water Intake' && (cMeter.meter.waterIntakeType == 'Municipal (Non-potable)' || cMeter.meter.waterIntakeType == 'Municipal (Potable)')
