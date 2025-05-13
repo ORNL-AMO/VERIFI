@@ -104,7 +104,7 @@ export class FacilityUsageDonutComponent {
       }
 
       var layout = {
-        height: 325,
+        height: height,
         title: {
           text: this.titleText,
           font: {
