@@ -120,8 +120,8 @@
                         <span *ngIf="!model.isValid">Invalid</span>
                     </td>
                     <td *ngIf="showFailedValidationModel && !model.errorModeling">
-                        <span *ngFor="let SEPValidation of model.SEPValidation">
-                            <span *ngIf="!SEPValidation.isValid">{{SEPValidation.predictorVariable}}: Invalid</span>
+                        <span *ngFor="let notes of model.dataValidationNotes">
+                            {{notes}}<br>
                         </span>
                         <span *ngIf="model.SEPValidationPass">&mdash;</span>
                     </td>

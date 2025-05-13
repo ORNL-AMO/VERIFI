@@ -83,7 +83,8 @@ export class RegressionModelsService {
               modelNotes: model.modelNotes,
               errorModeling: model.errorModeling,
               SEPValidation: model.SEPValidation,
-              SEPValidationPass: model.SEPValidationPass
+              SEPValidationPass: model.SEPValidationPass,
+              dataValidationNotes: model.dataValidationNotes
             };
 
             models.push(jstatModelToSave);
@@ -120,7 +121,8 @@ export class RegressionModelsService {
               modelPValue: undefined,
               modelNotes: ['Model could not be calculated.'],
               errorModeling: true,
-              SEPValidationPass: false
+              SEPValidationPass: false,
+              dataValidationNotes: ['']
             })
           }
         })
@@ -199,6 +201,7 @@ export class RegressionModelsService {
 
   setModelVaildAndNotes(model: JStatRegressionModel, facilityPredictorData: Array<IdbPredictorData>, reportYear: number, facility: IdbFacility, baselineYear: number): JStatRegressionModel {
     let modelNotes: Array<string> = new Array();
+    let dataValidationNotes: Array<string> = new Array();
     model['isValid'] = true;
 
     model.coef.forEach((coef, index) => {
@@ -251,11 +254,12 @@ export class RegressionModelsService {
 
     let validationCheck: { SEPNotes: Array<string>, SEPValidation: Array<SEPValidation> } = this.checkSEPNotes(model, facilityPredictorData, reportYear, facility, baselineYear);
     validationCheck.SEPNotes.forEach(note => {
-      modelNotes.push(note);
-    });
+      dataValidationNotes.push(note);
+    })
     model['SEPValidation'] = validationCheck.SEPValidation;
     model['SEPValidationPass'] = validationCheck.SEPValidation.every(SEPValidation => SEPValidation.isValid);
     model['modelNotes'] = modelNotes;
+    model['dataValidationNotes'] = dataValidationNotes;
     return model;
   }
 
@@ -305,8 +309,6 @@ export class RegressionModelsService {
         baselineYearPredictorData.push(facilityPredictorData[i]);
       }
     }
-
-
 
     model.predictorVariables.forEach(variable => {
       let modelMinValid: boolean = true;
