@@ -406,11 +406,14 @@ export class RegressionModelsService {
         variableValid = true;
       }
 
-      if (baselineYearError) {
-        variableNotes.push(variable.name + ' failed data validation for the baseline year.');
+      if(baselineYearError && reportYearError) {
+        variableNotes.push(variable.name + ' failed in baseline and report year.')
       }
-      if (reportYearError) {
-        variableNotes.push(variable.name + ' failed data validation for the report year.');
+      else if (baselineYearError) {
+        variableNotes.push(variable.name + ' failed in baseline year.');
+      }
+      else if (reportYearError) {
+        variableNotes.push(variable.name + ' failed in report year.');
       }
 
       SEPValidation.push({
