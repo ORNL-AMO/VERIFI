@@ -7,7 +7,7 @@ import { CalanderizedMeter, MonthlyData } from "../models/calanderization";
 import * as _ from 'lodash';
 addEventListener('message', ({ data }) => {
     try {
-        let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(data.meters, data.meterData, data.account, true, { energyIsSource: data.energyIsSource, neededUnits: undefined }, data.co2Emissions, data.customFuels, data.facilities);
+        let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(data.meters, data.meterData, data.account, true, { energyIsSource: data.energyIsSource, neededUnits: undefined }, data.co2Emissions, data.customFuels, data.facilities, data.account.assessmentReportVersion);
         let dateRange: { endDate: Date, startDate: Date };
         if (!data.dateRange) {
             if (calanderizedMeters && calanderizedMeters.length > 0) {

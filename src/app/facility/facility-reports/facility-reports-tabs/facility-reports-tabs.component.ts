@@ -6,12 +6,13 @@ import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
+import { FacilityReportsService } from '../facility-reports.service';
 
 @Component({
-    selector: 'app-facility-reports-tabs',
-    templateUrl: './facility-reports-tabs.component.html',
-    styleUrl: './facility-reports-tabs.component.css',
-    standalone: false
+  selector: 'app-facility-reports-tabs',
+  templateUrl: './facility-reports-tabs.component.html',
+  styleUrl: './facility-reports-tabs.component.css',
+  standalone: false
 })
 export class FacilityReportsTabsComponent {
 
@@ -22,13 +23,15 @@ export class FacilityReportsTabsComponent {
   setupValid: boolean = true;
   selectedReportSub: Subscription;
   selectedReport: IdbFacilityReport;
-
+  errorSub: Subscription;
+  errorMessage: string;
   facility: IdbFacility;
   facilitySub: Subscription;
   constructor(private router: Router,
     private sharedDataService: SharedDataService,
     private facilityReportsDbService: FacilityReportsDbService,
-    private facilityDbService: FacilitydbService) { }
+    private facilityDbService: FacilitydbService,
+    private facilityReportsService: FacilityReportsService) { }
   ngOnInit() {
     this.routerSub = this.router.events.subscribe(event => {
       this.setInDashboard();
@@ -42,6 +45,12 @@ export class FacilityReportsTabsComponent {
     this.modalOpenSub = this.sharedDataService.modalOpen.subscribe(val => {
       this.modalOpen = val;
     });
+
+    this.errorSub = this.facilityReportsService.errorMessage.subscribe(errorMessage => {
+      this.errorMessage = errorMessage;
+      this.setSetupValid();
+    });
+
     this.selectedReportSub = this.facilityReportsDbService.selectedReport.subscribe(val => {
       this.selectedReport = val;
       if (this.selectedReport) {
@@ -55,6 +64,7 @@ export class FacilityReportsTabsComponent {
     this.routerSub.unsubscribe();
     this.selectedReportSub.unsubscribe();
     this.facilitySub.unsubscribe();
+    this.errorSub.unsubscribe();
   }
 
 
@@ -67,16 +77,19 @@ export class FacilityReportsTabsComponent {
   }
 
   setSetupValid() {
-    if (this.selectedReport.facilityReportType == 'analysis') {
-      this.setupValid = (this.selectedReport.analysisItemId != undefined && this.selectedReport.name != '');
-    } else if (this.selectedReport.facilityReportType == 'overview') {
-      this.setupValid = (this.selectedReport.name != '' &&
-        this.selectedReport.dataOverviewReportSettings.endMonth != undefined &&
-        this.selectedReport.dataOverviewReportSettings.endYear != undefined &&
-        this.selectedReport.dataOverviewReportSettings.startMonth != undefined &&
-        this.selectedReport.dataOverviewReportSettings.startYear != undefined)
-    } else {
-      this.setupValid = false;
+    if (this.selectedReport != undefined) {
+      if (this.selectedReport.facilityReportType == 'analysis') {
+        this.setupValid = (this.selectedReport.analysisItemId != undefined && this.selectedReport.name != '');
+      } else if (this.selectedReport.facilityReportType == 'overview') {
+        this.setupValid = (this.selectedReport.name != '' &&
+          this.selectedReport.dataOverviewReportSettings.endMonth != undefined &&
+          this.selectedReport.dataOverviewReportSettings.endYear != undefined &&
+          this.selectedReport.dataOverviewReportSettings.startMonth != undefined &&
+          this.selectedReport.dataOverviewReportSettings.startYear != undefined &&
+          this.errorMessage == undefined)
+      } else {
+        this.setupValid = false;
+      }
     }
   }
 }

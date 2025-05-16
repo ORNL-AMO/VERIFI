@@ -119,7 +119,8 @@ export class MeterGroupingComponent implements OnInit {
 
   setCalanderizedMeters() {
     let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
-    this.calanderizedMeters = getCalanderizedMeterData(this.facilityMeters, facilityMeterData, this.selectedFacility, false, undefined, [], [], [this.selectedFacility]);
+    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    this.calanderizedMeters = getCalanderizedMeterData(this.facilityMeters, facilityMeterData, this.selectedFacility, false, undefined, [], [], [this.selectedFacility], account.assessmentReportVersion);
   }
 
   initializeDateRange() {

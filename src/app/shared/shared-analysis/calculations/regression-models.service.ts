@@ -82,7 +82,9 @@ export class RegressionModelsService {
               modelPValue: model.modelPValue,
               modelNotes: model.modelNotes,
               errorModeling: model.errorModeling,
-              SEPValidation: model.SEPValidation
+              SEPValidation: model.SEPValidation,
+              SEPValidationPass: model.SEPValidationPass,
+              dataValidationNotes: model.dataValidationNotes
             };
 
             models.push(jstatModelToSave);
@@ -118,7 +120,9 @@ export class RegressionModelsService {
               isValid: false,
               modelPValue: undefined,
               modelNotes: ['Model could not be calculated.'],
-              errorModeling: true
+              errorModeling: true,
+              SEPValidationPass: false,
+              dataValidationNotes: ['']
             })
           }
         })
@@ -197,6 +201,7 @@ export class RegressionModelsService {
 
   setModelVaildAndNotes(model: JStatRegressionModel, facilityPredictorData: Array<IdbPredictorData>, reportYear: number, facility: IdbFacility, baselineYear: number): JStatRegressionModel {
     let modelNotes: Array<string> = new Array();
+    let dataValidationNotes: Array<string> = new Array();
     model['isValid'] = true;
 
     model.coef.forEach((coef, index) => {
@@ -249,10 +254,12 @@ export class RegressionModelsService {
 
     let validationCheck: { SEPNotes: Array<string>, SEPValidation: Array<SEPValidation> } = this.checkSEPNotes(model, facilityPredictorData, reportYear, facility, baselineYear);
     validationCheck.SEPNotes.forEach(note => {
-      modelNotes.push(note);
-    });
+      dataValidationNotes.push(note);
+    })
     model['SEPValidation'] = validationCheck.SEPValidation;
+    model['SEPValidationPass'] = validationCheck.SEPValidation.every(SEPValidation => SEPValidation.isValid);
     model['modelNotes'] = modelNotes;
+    model['dataValidationNotes'] = dataValidationNotes;
     return model;
   }
 
@@ -302,8 +309,6 @@ export class RegressionModelsService {
         baselineYearPredictorData.push(facilityPredictorData[i]);
       }
     }
-
-
 
     model.predictorVariables.forEach(variable => {
       let modelMinValid: boolean = true;
@@ -401,11 +406,14 @@ export class RegressionModelsService {
         variableValid = true;
       }
 
-      if (baselineYearError) {
-        variableNotes.push(variable.name + ' failed data validation for the baseline year.');
+      if(baselineYearError && reportYearError) {
+        variableNotes.push(variable.name + ' failed in baseline and report year.')
       }
-      if (reportYear) {
-        variableNotes.push(variable.name + ' failed data validation for the report year.');
+      else if (baselineYearError) {
+        variableNotes.push(variable.name + ' failed in baseline year.');
+      }
+      else if (reportYearError) {
+        variableNotes.push(variable.name + ' failed in report year.');
       }
 
       SEPValidation.push({

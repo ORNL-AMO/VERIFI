@@ -25,7 +25,7 @@ export class BetterClimateReport {
         this.baselineYear = baselineYear;
         this.reportYear = reportYear;
         account.energyIsSource = false;
-        let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(selectedMeters, meterData, account, false, { energyIsSource: false, neededUnits: 'MMBtu' }, co2Emissions, customFuels, selectedFacilities);
+        let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(selectedMeters, meterData, account, false, { energyIsSource: false, neededUnits: 'MMBtu' }, co2Emissions, customFuels, selectedFacilities, account.assessmentReportVersion);
         this.setPortfolioYearDetails(calanderizedMeters, selectedFacilities, emissionsDisplay, emissionsGoal);
         this.setAnnualFacilitiesSummaries(calanderizedMeters, selectedFacilities, emissionsDisplay);
         // this.setFacilityTotals();

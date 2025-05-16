@@ -15,6 +15,8 @@ import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { IdbAccount } from 'src/app/models/idbModels/account';
 
 @Injectable({
   providedIn: 'root'
@@ -31,7 +33,8 @@ export class VisualizationStateService {
   constructor(private predictorDbService: PredictorDbService,
     private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService, private utilityMeterGroupDbService: UtilityMeterGroupdbService,
-    private predictorDataDbService: PredictorDataDbService) {
+    private predictorDataDbService: PredictorDataDbService,
+    private accountDbService: AccountdbService) {
     this.dateRange = new BehaviorSubject<{ minDate: Date, maxDate: Date }>(undefined);
 
     this.menuOpen = new BehaviorSubject<boolean>(true);
@@ -41,8 +44,8 @@ export class VisualizationStateService {
   setCalanderizedMeters(facility: IdbFacility) {
     let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
     let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
-    this.calanderizedMeters = getCalanderizedMeterData(facilityMeters, meterData, facility, true, undefined, [], [], [facility]);
-
+    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    this.calanderizedMeters = getCalanderizedMeterData(facilityMeters, meterData, facility, true, undefined, [], [], [facility], account.assessmentReportVersion);
   }
 
   initilizeCorrelationPlotOptions() {

@@ -8,9 +8,18 @@ export interface SubRegionData {
 
 export interface SubregionEmissions {
   subregion: string,
-  locationEmissionRates: Array<{ co2Emissions: number, year: number }>,
-  residualEmissionRates: Array<{ co2Emissions: number, year: number }>,
-  isCustom?: boolean
+  locationEmissionRates: Array<EmissionsRate>,
+  residualEmissionRates: Array<EmissionsRate>,
+  isCustom?: boolean,
+  directEmissionsRate?: boolean
+}
+
+export interface EmissionsRate {
+  year: number,
+  CO2: number,
+  CH4: number,
+  N2O: number,
+  co2Emissions?: number
 }
 
 export interface EmissionsResults {

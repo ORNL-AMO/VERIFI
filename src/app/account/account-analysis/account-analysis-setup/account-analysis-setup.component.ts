@@ -78,13 +78,13 @@ export class AccountAnalysisSetupComponent implements OnInit {
         this.energyUnit = this.account.energyUnit;
         this.yearOptions = this.calendarizationService.getYearOptionsAccount(this.analysisItem.analysisCategory);
         this.setBaselineYearWarning();
-      }else{
+      } else {
         this.isFormChange = false;
       }
     });
   }
 
-  ngOnDestroy(){
+  ngOnDestroy() {
     this.analysisItemSub.unsubscribe();
   }
 
@@ -194,6 +194,9 @@ export class AccountAnalysisSetupComponent implements OnInit {
       let newIdbItem: IdbAnalysisItem = getNewIdbAnalysisItem(this.account, facility, accountMeterGroups, accountPredictors, this.analysisItem.analysisCategory);
       newIdbItem.energyIsSource = this.analysisItem.energyIsSource;
       newIdbItem.reportYear = this.analysisItem.reportYear;
+      if (this.analysisItem.name != '') {
+        newIdbItem.name = this.analysisItem.name;
+      }
       newIdbItem.groups.forEach(group => {
         group.analysisType = this.analysisType;
         group.groupErrors = this.analysisValidationService.getGroupErrors(group, newIdbItem);

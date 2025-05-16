@@ -17,12 +17,14 @@ import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { IdbAccount } from 'src/app/models/idbModels/account';
 
 @Component({
-    selector: 'app-monthly-analysis-summary',
-    templateUrl: './monthly-analysis-summary.component.html',
-    styleUrls: ['./monthly-analysis-summary.component.css'],
-    standalone: false
+  selector: 'app-monthly-analysis-summary',
+  templateUrl: './monthly-analysis-summary.component.html',
+  styleUrls: ['./monthly-analysis-summary.component.css'],
+  standalone: false
 })
 export class MonthlyAnalysisSummaryComponent implements OnInit {
 
@@ -40,7 +42,8 @@ export class MonthlyAnalysisSummaryComponent implements OnInit {
     private predictorDataDbService: PredictorDataDbService,
     private sharedDataService: SharedDataService,
     private utilityMeterDbService: UtilityMeterdbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService) { }
+    private utilityMeterDataDbService: UtilityMeterDatadbService,
+    private accountDbService: AccountdbService) { }
 
   ngOnInit(): void {
     this.itemsPerPageSub = this.sharedDataService.itemsPerPage.subscribe(val => {
@@ -56,6 +59,7 @@ export class MonthlyAnalysisSummaryComponent implements OnInit {
     let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
     let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
     let accountPredictorEntries: Array<IdbPredictorData> = this.predictorDataDbService.accountPredictorData.getValue();
+    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     if (typeof Worker !== 'undefined') {
       this.worker = new Worker(new URL('src/app/web-workers/monthly-group-analysis.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {
@@ -77,11 +81,12 @@ export class MonthlyAnalysisSummaryComponent implements OnInit {
         meters: facilityMeters,
         meterData: facilityMeterData,
         accountPredictorEntries: accountPredictorEntries,
-        accountAnalysisItems: accountAnalysisItems
+        accountAnalysisItems: accountAnalysisItems,
+        assessmentReportVersion: account.assessmentReportVersion
       });
     } else {
       // Web Workers are not supported in this environment.
-      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, facilityMeterData, this.facility, false, { energyIsSource: this.analysisItem.energyIsSource, neededUnits: getNeededUnits(this.analysisItem) }, [], [], [this.facility]);
+      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, facilityMeterData, this.facility, false, { energyIsSource: this.analysisItem.energyIsSource, neededUnits: getNeededUnits(this.analysisItem) }, [], [], [this.facility], account.assessmentReportVersion);
       let monthlyAnalysisSummaryClass: MonthlyAnalysisSummaryClass = new MonthlyAnalysisSummaryClass(this.group, this.analysisItem, this.facility, calanderizedMeters, accountPredictorEntries, false, accountAnalysisItems);
       this.monthlyAnalysisSummary = monthlyAnalysisSummaryClass.getResults();
       this.calculating = false;

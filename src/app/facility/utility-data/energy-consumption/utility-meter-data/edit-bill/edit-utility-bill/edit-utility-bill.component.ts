@@ -15,6 +15,8 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { checkMeterReadingExistForDate, IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { IdbAccount } from 'src/app/models/idbModels/account';
 
 @Component({
     selector: 'app-edit-utility-bill',
@@ -52,7 +54,8 @@ export class EditUtilityBillComponent implements OnInit {
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService,
     private facilityDbService: FacilitydbService,
     private eGridService: EGridService,
-    private customFuelDbService: CustomFuelDbService) { }
+    private customFuelDbService: CustomFuelDbService,
+    private accountDbService: AccountdbService) { }
 
   ngOnInit(): void {
     this.setIsBiofuel();
@@ -103,6 +106,7 @@ export class EditUtilityBillComponent implements OnInit {
     if ((this.meterDataForm.controls.totalEnergyUse.value || this.meterDataForm.controls.totalVolume.value) && this.showEmissions) {
       let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
       let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
+      let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
       //meed to use total volume for fugitive/process emissions
       this.emissionsResults = getEmissions(this.editMeter,
         this.meterDataForm.controls.totalEnergyUse.value,
@@ -110,7 +114,8 @@ export class EditUtilityBillComponent implements OnInit {
         new Date(this.meterDataForm.controls.readDate.value).getFullYear(),
         false, [facility], this.eGridService.co2Emissions, customFuels,
         this.meterDataForm.controls.totalVolume.value, undefined, undefined,
-        this.meterDataForm.controls.heatCapacity.value);
+        this.meterDataForm.controls.heatCapacity.value,
+        account.assessmentReportVersion);
     } else {
       this.emissionsResults = getZeroEmissionsResults();
     }

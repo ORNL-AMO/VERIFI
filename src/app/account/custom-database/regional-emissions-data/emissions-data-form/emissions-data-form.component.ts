@@ -9,16 +9,17 @@ import { ToastNotificationsService } from 'src/app/core-components/toast-notific
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { firstValueFrom } from 'rxjs';
-import { SubregionEmissions } from 'src/app/models/eGridEmissions';
+import { EmissionsRate, SubregionEmissions } from 'src/app/models/eGridEmissions';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { getNewAccountEmissionsItem, IdbCustomEmissionsItem } from 'src/app/models/idbModels/customEmissions';
+import { ConvertValue } from 'src/app/calculations/conversions/convertValue';
 
 @Component({
-    selector: 'app-emissions-data-form',
-    templateUrl: './emissions-data-form.component.html',
-    styleUrls: ['./emissions-data-form.component.css'],
-    standalone: false
+  selector: 'app-emissions-data-form',
+  templateUrl: './emissions-data-form.component.html',
+  styleUrls: ['./emissions-data-form.component.css'],
+  standalone: false
 })
 export class EmissionsDataFormComponent implements OnInit {
 
@@ -30,6 +31,7 @@ export class EmissionsDataFormComponent implements OnInit {
   invalidLocation: string;
   subregionInvalid: string;
   previousSubregion: string;
+  selectedAccount: IdbAccount;
   constructor(private router: Router, private customEmissionsDbService: CustomEmissionsDbService, private accountDbService: AccountdbService,
     private eGridService: EGridService, private loadingService: LoadingService, private toastNotificationService: ToastNotificationsService,
     private activatedRoute: ActivatedRoute, private facilityDbService: FacilitydbService, private dbChangesService: DbChangesService) { }
@@ -37,9 +39,9 @@ export class EmissionsDataFormComponent implements OnInit {
   ngOnInit(): void {
     this.setYears();
     this.isAdd = this.router.url.includes('add');
+    this.selectedAccount = this.accountDbService.selectedAccount.getValue();
     if (this.isAdd) {
-      let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
-      this.editCustomEmissions = getNewAccountEmissionsItem(selectedAccount.guid);
+      this.editCustomEmissions = getNewAccountEmissionsItem(this.selectedAccount.guid);
       this.addLocationEmissionRate();
       this.addResidualEmissionRate();
     } else {
@@ -60,7 +62,10 @@ export class EmissionsDataFormComponent implements OnInit {
   addLocationEmissionRate() {
     this.editCustomEmissions.locationEmissionRates.push({
       year: undefined,
-      co2Emissions: undefined
+      co2Emissions: undefined,
+      CO2: undefined,
+      N2O: undefined,
+      CH4: undefined
     });
     this.checkInvalid();
   }
@@ -68,7 +73,10 @@ export class EmissionsDataFormComponent implements OnInit {
   addResidualEmissionRate() {
     this.editCustomEmissions.residualEmissionRates.push({
       year: undefined,
-      co2Emissions: undefined
+      co2Emissions: undefined,
+      CO2: undefined,
+      N2O: undefined,
+      CH4: undefined
     });
     this.checkInvalid();
   }
@@ -116,7 +124,7 @@ export class EmissionsDataFormComponent implements OnInit {
     let emissionsValues: Array<number> = emissionsData.map(data => { return data.co2Emissions });
     let hasUndefined: number = emissionsValues.findIndex(val => { return isNaN(val) || val == undefined || val < 0 });
     if (hasUndefined != -1) {
-      return 'Invalid number found for emissions';
+      return 'Invalid value found for emissions';
     }
     let yearValues: Array<number> = emissionsData.map(data => { return data.year });
     hasUndefined = yearValues.findIndex(val => { return isNaN(val) });
@@ -143,11 +151,10 @@ export class EmissionsDataFormComponent implements OnInit {
       await firstValueFrom(this.customEmissionsDbService.updateWithObservable(this.editCustomEmissions));
       let hasUpdatedValues: boolean = false;
       //update account and facilities previously referencing this subregion
-      let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-      if (account.eGridSubregion == this.previousSubregion) {
-        account.eGridSubregion = this.editCustomEmissions.subregion;
-        await firstValueFrom(this.accountDbService.updateWithObservable(account));
-        this.accountDbService.selectedAccount.next(account);
+      if (this.selectedAccount.eGridSubregion == this.previousSubregion) {
+        this.selectedAccount.eGridSubregion = this.editCustomEmissions.subregion;
+        await firstValueFrom(this.accountDbService.updateWithObservable(this.selectedAccount));
+        this.accountDbService.selectedAccount.next(this.selectedAccount);
         hasUpdatedValues = true;
       }
       let accountFacilites: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
@@ -160,7 +167,7 @@ export class EmissionsDataFormComponent implements OnInit {
         }
       }
       if (hasUpdatedValues) {
-        this.dbChangesService.selectAccount(account, false);
+        this.dbChangesService.selectAccount(this.selectedAccount, false);
       }
       successMessage = 'Custom Emissions Updated!'
     }
@@ -182,5 +189,35 @@ export class EmissionsDataFormComponent implements OnInit {
 
   deleteResidualEmissions(index: number) {
     this.editCustomEmissions.residualEmissionRates.splice(index, 1);
+  }
+
+  setOutputRate() {
+    if (!this.editCustomEmissions.directEmissionsRate) {
+      this.editCustomEmissions.locationEmissionRates.forEach(emissionRate => {
+        emissionRate.co2Emissions = this.getOutputRate(emissionRate);
+      });
+      this.editCustomEmissions.residualEmissionRates.forEach(emissionRate => {
+        emissionRate.co2Emissions = this.getOutputRate(emissionRate);
+      });
+    }
+    this.checkResidualInvalid();
+    this.checkLocationInvalid();
+  }
+
+  getOutputRate(emissionRate: EmissionsRate): number {
+    let CO2: number = emissionRate.CO2;
+    let CH4: number = emissionRate.CH4;
+    let N2O: number = emissionRate.N2O;
+    if (this.selectedAccount.energyUnit != 'MMBtu') {
+      let conversionHelper: number = new ConvertValue(1, 'MMBtu', this.selectedAccount.energyUnit).convertedValue;
+      CO2 = CO2 / conversionHelper;
+      CH4 = CH4 / conversionHelper;
+      N2O = N2O / conversionHelper;
+    }
+    //Calculate and save output rate using AR5 values (28/265)
+    //Emissions calculations use settings
+    let results: number = CO2 + (CH4 * (28 / 1000)) + (N2O * (265 / 1000));
+    const factor = Math.pow(10, 4);
+    return Math.round(results * factor) / factor;
   }
 }

@@ -194,7 +194,7 @@ export class WeatherDataService {
           return data;
         }
       } catch (err) {
-
+        return [];
       }
     }
     return null;

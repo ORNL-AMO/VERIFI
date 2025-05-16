@@ -34,6 +34,7 @@ import { IdbAnalysisItem } from '../models/idbModels/analysisItem';
 import { IdbPredictorEntryDeprecated } from '../models/idbModels/deprecatedPredictors';
 import { FacilityReportsDbService } from './facility-reports-db.service';
 import { IdbFacilityReport } from '../models/idbModels/facilityReport';
+import { EGridService } from '../shared/helper-services/e-grid.service';
 
 @Injectable({
   providedIn: 'root'
@@ -73,6 +74,8 @@ export class DbChangesService {
         await this.updateAccount(account)
       }
     }
+
+
     //set account facilities
     let accountFacilites: Array<IdbFacility> = await this.facilityDbService.getAllAccountFacilities(account.guid);
     if (!skipUpdates) {
@@ -314,10 +317,13 @@ export class DbChangesService {
 
   async setCustomEmissions(account: IdbAccount) {
     let customEmissionsItems: Array<IdbCustomEmissionsItem> = await this.customEmissionsDbService.getAllAccountCustomEmissions(account.guid);
-    if (customEmissionsItems.length == 0) {
-      let uSAverageItem: IdbCustomEmissionsItem = this.customEmissionsDbService.getUSAverage(account);
-      uSAverageItem = await firstValueFrom(this.customEmissionsDbService.addWithObservable(uSAverageItem));
-      customEmissionsItems.push(uSAverageItem);
+    if (customEmissionsItems.length != 0) {
+      for (let i = 0; i < customEmissionsItems.length; i++) {
+        if (customEmissionsItems[i].subregion == 'U.S. Average') {
+          await this.customEmissionsDbService.deleteWithObservable(customEmissionsItems[i].id)
+          customEmissionsItems = customEmissionsItems.filter(item => { return item.guid != customEmissionsItems[i].guid })
+        }
+      }
     }
     this.customEmissionsDbService.accountEmissionsItems.next(customEmissionsItems);
   }
