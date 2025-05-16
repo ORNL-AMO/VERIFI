@@ -137,9 +137,8 @@ export class ExportToNewTemplateService {
 
   setHiddenElectricityWorksheet(workbook: ExcelJS.Workbook): ExcelJS.Worksheet {
     let worksheet = workbook.getWorksheet('HIDE_ELEC');
-    console.log(worksheet.getCell('A16').value);
-    worksheet.getCell('A16').value = { formula: '_xlfn._xlws.FILTER(Facilities!$A:$A,(Facilities!$A:$A<>"")*(Facilities!$A:$A<>"Facility Name")*(Facilities!$A:$A<>"√ Facility Setup"))'};
-    // console.log(worksheet.getCell('A16').value);
+    //filter with @ symbol
+    // worksheet.getCell('A16').value = { formula: '_xlfn._xlws.FILTER(Facilities!$A:$A,(Facilities!$A:$A<>"")*(Facilities!$A:$A<>"Facility Name")*(Facilities!$A:$A<>"√ Facility Setup"))'};
     return worksheet;
   }
 
