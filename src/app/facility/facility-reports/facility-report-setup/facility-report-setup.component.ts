@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
-import { firstValueFrom } from 'rxjs';
+import { FormGroup } from '@angular/forms';
+import { firstValueFrom, Subscription } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
@@ -18,19 +19,27 @@ export class FacilityReportSetupComponent {
 
   facilityReportType: FacilityReportType;
   reportName: string;
+  selectedReportSub: Subscription;
   constructor(private facilityReportDbService: FacilityReportsDbService,
     private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService
-  ) {
-
-  }
+  ) {}
 
   ngOnInit() {
     let facilityReport: IdbFacilityReport = this.facilityReportDbService.selectedReport.getValue();
     this.facilityReportType = facilityReport.facilityReportType;
     this.reportName = facilityReport.name;
+     this.selectedReportSub = this.facilityReportDbService.selectedReport.subscribe(val => {
+      facilityReport = val;
+      this.reportName = facilityReport.name;
+    });
   }
+
+   ngOnDestroy() {
+    this.selectedReportSub.unsubscribe();
+  }
+
 
   async saveName() {
     let facilityReport: IdbFacilityReport = this.facilityReportDbService.selectedReport.getValue();

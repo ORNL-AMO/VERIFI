@@ -27,6 +27,7 @@ export class AccountReportSetupComponent {
   reportType: ReportType;
   errorMessage: string = '';
   errorMessageSub: Subscription;
+  selectedReportSub: Subscription;
   constructor(private accountReportDbService: AccountReportDbService,
     private accountReportsService: AccountReportsService,
     private dbChangesService: DbChangesService,
@@ -45,6 +46,12 @@ export class AccountReportSetupComponent {
     this.errorMessageSub = this.accountReportsService.errorMessage.subscribe(message => {
       this.errorMessage = message;
     });
+
+    this.selectedReportSub = this.accountReportDbService.selectedReport.subscribe(val => {
+      selectedReport = val;
+      this.setupForm = this.accountReportsService.getSetupFormFromReport(selectedReport);
+    });
+    
   }
 
   ngOnDestroy() {

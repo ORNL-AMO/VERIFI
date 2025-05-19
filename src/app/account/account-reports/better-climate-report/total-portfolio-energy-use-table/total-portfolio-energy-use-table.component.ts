@@ -1,5 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { BetterClimateYearDetails } from 'src/app/calculations/carbon-calculations/betterClimateYearsDetails';
+import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
+import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { BetterClimateReportSetup } from 'src/app/models/overview-report';
 
 @Component({
@@ -17,6 +19,13 @@ export class TotalPortfolioEnergyUseTableComponent {
   tableType: 'total' | 'stationary';
   @Input()
   betterClimateReportSetup: BetterClimateReportSetup;
-  @Input() 
+  @Input()
   showTitle: boolean = false;
+  selectedReport: IdbAccountReport;
+
+  constructor(private accountReportDbService: AccountReportDbService) { }
+
+  ngOnInit(): void {
+    this.selectedReport = this.accountReportDbService.selectedReport.getValue();
+  }
 }

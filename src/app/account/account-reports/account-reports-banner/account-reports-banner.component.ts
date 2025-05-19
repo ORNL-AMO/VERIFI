@@ -23,6 +23,9 @@ export class AccountReportsBannerComponent {
   selectedReport: IdbAccountReport;
   errorMessage: string = '';
   errorSub: Subscription;
+  showDropdown: boolean = false;
+  reportList: Array<IdbAccountReport>;
+  reportListSub: Subscription;
 
   constructor(private router: Router,
     private sharedDataService: SharedDataService,
@@ -31,6 +34,7 @@ export class AccountReportsBannerComponent {
   ngOnInit() {
     this.routerSub = this.router.events.subscribe(event => {
       this.setInDashboard();
+      this.showDropdown = false;
     });
     this.setInDashboard();
     this.modalOpenSub = this.sharedDataService.modalOpen.subscribe(val => {
@@ -50,6 +54,10 @@ export class AccountReportsBannerComponent {
         this.setValidation(val);
       }
     });
+
+    this.reportListSub = this.accountReportDbService.accountReports.subscribe(reports => {
+      this.reportList = reports;
+    });
   }
 
   ngOnDestroy() {
@@ -57,11 +65,13 @@ export class AccountReportsBannerComponent {
     this.routerSub.unsubscribe();
     this.selectedReportSub.unsubscribe();
     this.errorSub.unsubscribe();
+    this.reportListSub.unsubscribe();
   }
 
 
   setInDashboard() {
     this.inDashboard = this.router.url.includes('dashboard');
+
   }
 
   setValidation(report: IdbAccountReport) {
@@ -95,10 +105,21 @@ export class AccountReportsBannerComponent {
       this.router.navigateByUrl('/account/reports/dashboard/overview')
     } else if (this.selectedReport.reportType == 'performance') {
       this.router.navigateByUrl('/account/reports/dashboard/performance')
+    } else if (this.selectedReport.reportType == 'betterClimate') {
+      this.router.navigateByUrl('/account/reports/dashboard/better-climate')
     } else {
       this.router.navigateByUrl('/account/reports/dashboard')
     }
   }
 
+  toggleShow() {
+    this.showDropdown = !this.showDropdown;
+  }
+
+  selectItem(item: IdbAccountReport) {
+    this.accountReportDbService.selectedReport.next(item);
+    this.router.navigateByUrl('/account/reports/setup');
+    this.showDropdown = false;
+  }
 
 }

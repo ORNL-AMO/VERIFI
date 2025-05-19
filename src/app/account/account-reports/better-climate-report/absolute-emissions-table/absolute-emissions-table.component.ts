@@ -1,6 +1,8 @@
 import { Component, Input } from '@angular/core';
 import { BetterClimateYearDetails } from 'src/app/calculations/carbon-calculations/betterClimateYearsDetails';
+import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
+import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { BetterClimateReportSetup } from 'src/app/models/overview-report';
 
 @Component({
@@ -25,10 +27,8 @@ export class AbsoluteEmissionsTableComponent {
   hasProcess: boolean;
   hasBiomass: boolean;
   hasOtherScope2: boolean;
-  constructor() {
-
-  }
-
+  selectedReport: IdbAccountReport;
+  constructor(private accountReportDbService: AccountReportDbService) {}
 
   ngOnInit() {
     this.hasStationary = this.yearDetails.find(detail => {
@@ -49,6 +49,8 @@ export class AbsoluteEmissionsTableComponent {
     this.hasOtherScope2 = this.yearDetails.find(detail => {
       return detail.emissionsResults.otherScope2Emissions != 0;
     }) != undefined;
+
+    this.selectedReport = this.accountReportDbService.selectedReport.getValue();
   }
 
 }
