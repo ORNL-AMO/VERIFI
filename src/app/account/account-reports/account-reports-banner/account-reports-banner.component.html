@@ -38,13 +38,12 @@
         <div>
             <ul class="nav nav-tabs">
                 <li class="nav-item dropdown">
-                    <a class="nav-link home-link dropdown-toggle" *ngIf="selectedReport.reportType == 'betterPlants' || selectedReport.reportType == 'performance' || selectedReport.reportType == 'betterClimate'"  (click)="toggleShow()">
-                        <i class="fa fa-file"></i>
-                        {{selectedReport.name}} - ({{selectedReport.reportYear}})
-                    </a>
-                     <a class="nav-link home-link dropdown-toggle" *ngIf="selectedReport.reportType == 'dataOverview'" (click)="toggleShow()">
+                    <a class="nav-link home-link dropdown-toggle" (click)="toggleShow()">
                         <i class="fa fa-file"></i>
                         {{selectedReport.name}}
+                        <ng-container *ngIf="selectedReport.reportType != 'dataOverview'">
+                            - ({{selectedReport.reportYear}})
+                        </ng-container>
                     </a>
 
                     <ul class="dropdown-menu" [ngClass]="{'show': showDropdown}">

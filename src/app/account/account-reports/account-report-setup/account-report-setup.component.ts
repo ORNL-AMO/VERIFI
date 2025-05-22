@@ -28,6 +28,7 @@ export class AccountReportSetupComponent {
   errorMessage: string = '';
   errorMessageSub: Subscription;
   selectedReportSub: Subscription;
+  isFormChange: boolean = false;
   constructor(private accountReportDbService: AccountReportDbService,
     private accountReportsService: AccountReportsService,
     private dbChangesService: DbChangesService,
@@ -40,7 +41,6 @@ export class AccountReportSetupComponent {
     this.account = this.accountDbService.selectedAccount.getValue();
     let selectedReport: IdbAccountReport = this.accountReportDbService.selectedReport.getValue()
     this.reportType = selectedReport.reportType;
-    this.setupForm = this.accountReportsService.getSetupFormFromReport(selectedReport);
     this.setYearOptions();
 
     this.errorMessageSub = this.accountReportsService.errorMessage.subscribe(message => {
@@ -49,16 +49,20 @@ export class AccountReportSetupComponent {
 
     this.selectedReportSub = this.accountReportDbService.selectedReport.subscribe(val => {
       selectedReport = val;
-      this.setupForm = this.accountReportsService.getSetupFormFromReport(selectedReport);
+      if (!this.isFormChange)
+        this.setupForm = this.accountReportsService.getSetupFormFromReport(selectedReport);
+      else
+        this.isFormChange = false;
     });
-    
   }
 
   ngOnDestroy() {
     this.errorMessageSub.unsubscribe();
+    this.selectedReportSub.unsubscribe();
   }
 
   async save() {
+    this.isFormChange = true;
     let selectedReport: IdbAccountReport = this.accountReportDbService.selectedReport.getValue();
     selectedReport = this.accountReportsService.updateReportFromSetupForm(selectedReport, this.setupForm);
     selectedReport = await firstValueFrom(this.accountReportDbService.updateWithObservable(selectedReport));
