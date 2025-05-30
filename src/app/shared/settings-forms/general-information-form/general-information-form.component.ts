@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
-import { Subscription, firstValueFrom } from 'rxjs';
+import { Subscription, catchError, firstValueFrom, of, switchMap } from 'rxjs';
 import { Countries, Country } from 'src/app/shared/form-data/countries';
 import { FirstNaicsList, NAICS, SecondNaicsList, ThirdNaicsList } from 'src/app/shared/form-data/naics-data';
 import { State, States } from 'src/app/shared/form-data/states';
@@ -11,20 +11,20 @@ import { SetupWizardService } from 'src/app/setup-wizard/setup-wizard.service';
 import { FacilityClassification, FacilityClassifications } from 'src/app/models/constantsAndTypes';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { GeneralInformationService, ZipResponse } from './general-information.service';
+import { error } from 'console';
 
 @Component({
-    selector: 'app-general-information-form',
-    templateUrl: './general-information-form.component.html',
-    styleUrls: ['./general-information-form.component.css'],
-    standalone: false
+  selector: 'app-general-information-form',
+  templateUrl: './general-information-form.component.html',
+  styleUrls: ['./general-information-form.component.css'],
+  standalone: false
 })
 export class GeneralInformationFormComponent implements OnInit {
   @Input()
   inAccount: boolean;
   @Input()
   inWizard: boolean;
-
-
 
   form: FormGroup;
   unitsOfMeasure: string;
@@ -40,8 +40,12 @@ export class GeneralInformationFormComponent implements OnInit {
   states: Array<State> = States;
   isFormChange: boolean = false;
   facilityClassifications: Array<FacilityClassification> = FacilityClassifications;
+
+  city: string;
+  state: string;
+
   constructor(private accountDbService: AccountdbService, private settingsFormsService: SettingsFormsService, private facilityDbService: FacilitydbService,
-    private setupWizardService: SetupWizardService) { }
+    private setupWizardService: SetupWizardService, private generalInformationService: GeneralInformationService) { }
 
   ngOnInit(): void {
     if (this.inAccount) {
@@ -101,6 +105,75 @@ export class GeneralInformationFormComponent implements OnInit {
       }
     }
   }
+
+  async getZipInfo(zip: string) {
+    //this.form.get('zip')!.valueChanges.subscribe(async zip => {
+    this.form.patchValue({ city: '', state: '' }, { emitEvent: false });
+    if (zip && zip.length == 5) {
+      const response = await this.generalInformationService.getStateAndCityByZip(zip);
+      if (response) {
+        this.form.patchValue({
+          city: response.city,
+          state: response.state
+        }, { emitEvent: false });
+      }
+    }
+    //this.selectedAccount = this.settingsFormsService.updateCityAndStateFromZip(this.form, this.selectedAccount);
+    this.saveChanges();
+    //  });
+  }
+
+  async getPostalCodeInfo(zip: string) {
+    this.form.patchValue({ city: '', state: '' }, { emitEvent: false });
+    if (zip && zip.length == 5) {
+      const response = await this.generalInformationService.getStateAndCity(zip);
+      if (response.length > 0) {
+        this.form.patchValue({
+          city: response[0].address.city,
+          state: response[0].address.state
+        }, { emitEvent: false });
+      }
+    }
+    this.saveChanges();
+  }
+
+  // getZipInfo() {
+
+  //   this.form.get('zip')!.valueChanges.pipe(
+  //     switchMap(zip => {
+  //       this.form.patchValue({ city: '', state: '' }, { emitEvent: false });
+  //       if (zip && zip.length == 5) {
+
+  //         return this.generalInformationService.getStateAndCityByZip(zip).pipe(catchError(() => of(undefined)));
+  //       }
+  //       return of(undefined);
+  //     })
+  //   ).subscribe(response => {
+  //     if (response) {
+  //       this.form.patchValue({
+  //         city: response.city,
+  //         state: response.state
+  //       }, { emitEvent: false });
+
+  //       this.selectedAccount = this.settingsFormsService.updateCityAndStateFromZip(this.form, this.selectedAccount);
+  //     }
+  //   });
+  // }
+
+  // getZipInfo() {
+  //   this.response = undefined;
+  //   if (this.zipCode.length == 5) {
+  //     this.generalInformationService.getStateAndCityByZip(this.zipCode).subscribe({
+  //       next: (response) => {
+  //         this.response = response;
+  //       },
+  //       error: (error) => {
+  //         console.error(error.message);
+  //         this.response = undefined;
+  //       }
+  //     });
+  //   }
+  // }
 
   ngOnDestroy() {
     if (this.inAccount) {

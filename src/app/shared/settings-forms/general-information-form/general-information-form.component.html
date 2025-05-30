@@ -22,7 +22,7 @@
                     <option *ngFor="let country of countries" [ngValue]="country.code">{{country.name}}</option>
                 </select>
             </div>
-            <div class="mb-3 col-md-6 col-sm-12" *ngIf="form.controls.country.value == 'US'">
+            <!-- <div class="mb-3 col-md-6 col-sm-12" *ngIf="form.controls.country.value == 'US'">
                 <label for="state">State</label>
                 <select class="form-select" formControlName="state" (change)="saveChanges()">
                     <option *ngFor="let state of states" [ngValue]="state.name">{{state.name}}</option>
@@ -37,6 +37,19 @@
                 <label for="zip">Zip</label>
                 <input type="text" class="form-control" formControlName="zip" (input)="saveChanges()"
                     autocomplete="postal-code" onfocus="this.select();" minlength="1" maxlength="12">
+            </div> -->
+
+            <div class="mb-3 col-md-6 col-sm-12" *ngIf="form.controls.country.value == 'US'">
+                <label for="zip">Zip</label>
+                <input type="text" class="form-control" formControlName="zip" (input)="getPostalCodeInfo($any($event.target).value)">
+            </div>
+            <div class="mb-3 col-md-6 col-sm-12" *ngIf="form.controls.country.value == 'US'">
+                <label for="state">State</label>
+                <input type="text" class="form-control" formControlName="state" readonly>
+            </div>
+            <div class="mb-3 col-md-6 col-sm-12" [ngClass]="{'col-6':form.controls.country.value == 'US'}">
+                <label for="city">City</label>
+                <input type="text" class="form-control" formControlName="city" readonly>
             </div>
         </div>
 
