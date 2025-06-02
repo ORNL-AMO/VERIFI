@@ -33,6 +33,9 @@
             </td>
             <td>
                 {{item.name}}
+                <span class="text-danger ps-1" *ngIf="item.setupErrors.hasError || item.setupErrors.groupsHaveErrors">
+                    <span class="fa fa-exclamation-circle"></span> Contains Errors
+                </span>
             </td>
             <td>
                 {{item.baselineYear}}
