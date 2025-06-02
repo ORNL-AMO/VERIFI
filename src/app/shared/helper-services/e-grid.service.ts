@@ -85,12 +85,7 @@ export class EGridService {
       let customEmissions: Array<IdbCustomEmissionsItem> = this.customEmissionsDbService.accountEmissionsItems.getValue();
       this.co2Emissions = this.excelCo2Emissions.map(emissions => { return emissions });
       customEmissions.forEach(customEmission => {
-        this.co2Emissions.push({
-          subregion: customEmission.subregion,
-          locationEmissionRates: customEmission.locationEmissionRates,
-          residualEmissionRates: customEmission.residualEmissionRates,
-          isCustom: true
-        });
+        this.co2Emissions.push(customEmission);
       });
     }
   }
