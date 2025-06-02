@@ -61,7 +61,7 @@
                         Model Notes
                     </th>
                     <th *ngIf="showInvalid">
-                        Model<br> Validation
+                        Model Validation<br> Failures
                     </th>
                     <th *ngIf="showFailedValidationModel">
                         Data Validation<br> Failures
@@ -115,9 +115,11 @@
                             &mdash;
                         </span>
                     </td>
-                    <td *ngIf="showInvalid && !model.errorModeling">
-                        <span *ngIf="model.isValid">Valid</span>
-                        <span *ngIf="!model.isValid">Invalid</span>
+                     <td *ngIf="showInvalid && !model.errorModeling">
+                        <span *ngIf="model.isValid">&mdash;</span>
+                        <span *ngFor="let notes of model.modelValidationNotes">
+                            {{notes}}<br>
+                        </span>
                     </td>
                     <td *ngIf="showFailedValidationModel && !model.errorModeling">
                         <span *ngFor="let notes of model.dataValidationNotes">
