@@ -9,12 +9,48 @@
         <span class="alert alert-danger" *ngIf="form.get('name').hasError('required')">{{formNameLabel}} name is
             required</span>
 
-        <div class="mb-3">
+        <!-- <div class="mb-3">
             <label for="address">Address</label>
             <input type="text" class="form-control" formControlName="address" autocomplete="shipping street-address"
                 (input)="saveChanges()" onfocus="this.select();" minlength="1" maxlength="60">
-        </div>
+        </div> -->
 
+        <div class="row">
+            <div class="col-12">
+                <label for="address">Address</label>
+                <div class="address-container">
+
+                    <input type="text" class="form-control" formControlName="address" (input)="saveChanges()">
+                    <button (click)="getAddressInfo()">
+                        <i class="fa fa-search"></i>
+                        Search
+                    </button>
+                </div>
+            </div>
+
+             <span class="alert alert-info address-alert" *ngIf="!isSuccessful">Address not found. Please enter manually.</span>
+
+             <div class="loader-overlay" *ngIf="loading">
+                <div class="spinner"></div>
+             </div>
+
+            <div class="modal-overlay" *ngIf="showModal && addressOptions.length > 0">
+                <div class="modal-content">
+                    <span class="modal-header">Select an Address</span>
+                    <ul class="address-list">
+                        <label class="address-option" *ngFor="let addressOption of addressOptions">
+                            <input class="form-check-input" type="radio" [value]="addressOption.place_id"
+                                (change)="selectAddress(addressOption)" />
+                            <div class="address-content">
+                                <i class="fas fa-map-marker-alt icon"></i>
+                                <span class="text">{{ addressOption.display_name }}</span>
+                            </div>
+                        </label>
+                    </ul>
+                    <button class="close-btn" (click)="closeModal()">Close</button>
+                </div>
+            </div>
+        </div>
         <div class="row">
             <div class="mb-3 col-md-6 col-sm-12">
                 <label for="country">Country</label>
@@ -38,18 +74,17 @@
                 <input type="text" class="form-control" formControlName="zip" (input)="saveChanges()"
                     autocomplete="postal-code" onfocus="this.select();" minlength="1" maxlength="12">
             </div> -->
-
             <div class="mb-3 col-md-6 col-sm-12" *ngIf="form.controls.country.value == 'US'">
                 <label for="zip">Zip</label>
-                <input type="text" class="form-control" formControlName="zip" (input)="getPostalCodeInfo($any($event.target).value)">
+                <input type="text" class="form-control" formControlName="zip" (input)="saveChanges()">
             </div>
             <div class="mb-3 col-md-6 col-sm-12" *ngIf="form.controls.country.value == 'US'">
                 <label for="state">State</label>
-                <input type="text" class="form-control" formControlName="state" readonly>
+                <input type="text" class="form-control" formControlName="state" (input)="saveChanges()">
             </div>
             <div class="mb-3 col-md-6 col-sm-12" [ngClass]="{'col-6':form.controls.country.value == 'US'}">
                 <label for="city">City</label>
-                <input type="text" class="form-control" formControlName="city" readonly>
+                <input type="text" class="form-control" formControlName="city" (input)="saveChanges()">
             </div>
         </div>
 

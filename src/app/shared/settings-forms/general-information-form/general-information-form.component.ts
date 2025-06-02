@@ -11,8 +11,7 @@ import { SetupWizardService } from 'src/app/setup-wizard/setup-wizard.service';
 import { FacilityClassification, FacilityClassifications } from 'src/app/models/constantsAndTypes';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { GeneralInformationService, ZipResponse } from './general-information.service';
-import { error } from 'console';
+import { GeneralInformationService } from './general-information.service';
 
 @Component({
   selector: 'app-general-information-form',
@@ -41,8 +40,12 @@ export class GeneralInformationFormComponent implements OnInit {
   isFormChange: boolean = false;
   facilityClassifications: Array<FacilityClassification> = FacilityClassifications;
 
-  city: string;
-  state: string;
+  addressOptions: any[] = [];
+  //displayOptions: boolean = false;
+  showModal: boolean = false;
+  addressDisplayed: string;
+  loading: boolean = false;
+  isSuccessful: boolean = true;
 
   constructor(private accountDbService: AccountdbService, private settingsFormsService: SettingsFormsService, private facilityDbService: FacilitydbService,
     private setupWizardService: SetupWizardService, private generalInformationService: GeneralInformationService) { }
@@ -106,74 +109,82 @@ export class GeneralInformationFormComponent implements OnInit {
     }
   }
 
-  async getZipInfo(zip: string) {
-    //this.form.get('zip')!.valueChanges.subscribe(async zip => {
-    this.form.patchValue({ city: '', state: '' }, { emitEvent: false });
-    if (zip && zip.length == 5) {
-      const response = await this.generalInformationService.getStateAndCityByZip(zip);
-      if (response) {
-        this.form.patchValue({
-          city: response.city,
-          state: response.state
-        }, { emitEvent: false });
-      }
-    }
-    //this.selectedAccount = this.settingsFormsService.updateCityAndStateFromZip(this.form, this.selectedAccount);
-    this.saveChanges();
-    //  });
-  }
-
-  async getPostalCodeInfo(zip: string) {
-    this.form.patchValue({ city: '', state: '' }, { emitEvent: false });
-    if (zip && zip.length == 5) {
-      const response = await this.generalInformationService.getStateAndCity(zip);
-      if (response.length > 0) {
-        this.form.patchValue({
-          city: response[0].address.city,
-          state: response[0].address.state
-        }, { emitEvent: false });
-      }
-    }
-    this.saveChanges();
-  }
-
-  // getZipInfo() {
-
-  //   this.form.get('zip')!.valueChanges.pipe(
-  //     switchMap(zip => {
-  //       this.form.patchValue({ city: '', state: '' }, { emitEvent: false });
-  //       if (zip && zip.length == 5) {
-
-  //         return this.generalInformationService.getStateAndCityByZip(zip).pipe(catchError(() => of(undefined)));
-  //       }
-  //       return of(undefined);
-  //     })
-  //   ).subscribe(response => {
+  // async getZipInfo(zip: string) {
+  //   //this.form.get('zip')!.valueChanges.subscribe(async zip => {
+  //   this.form.patchValue({ city: '', state: '' }, { emitEvent: false });
+  //   if (zip && zip.length == 5) {
+  //     const response = await this.generalInformationService.getStateAndCityByZip(zip);
   //     if (response) {
   //       this.form.patchValue({
   //         city: response.city,
   //         state: response.state
   //       }, { emitEvent: false });
-
-  //       this.selectedAccount = this.settingsFormsService.updateCityAndStateFromZip(this.form, this.selectedAccount);
   //     }
-  //   });
+  //   }
+  //   //this.selectedAccount = this.settingsFormsService.updateCityAndStateFromZip(this.form, this.selectedAccount);
+  //   this.saveChanges();
+  //   //  });
   // }
 
-  // getZipInfo() {
-  //   this.response = undefined;
-  //   if (this.zipCode.length == 5) {
-  //     this.generalInformationService.getStateAndCityByZip(this.zipCode).subscribe({
-  //       next: (response) => {
-  //         this.response = response;
-  //       },
-  //       error: (error) => {
-  //         console.error(error.message);
-  //         this.response = undefined;
-  //       }
-  //     });
+  // async getPostalCodeInfo(zip: string) {
+  //   this.form.patchValue({ city: '', state: '' }, { emitEvent: false });
+  //   if (zip && zip.length == 5) {
+  //     const response = await this.generalInformationService.getStateAndCity(zip);
+  //     if (response.length > 0) {
+  //       this.form.patchValue({
+  //         city: response[0].address.city,
+  //         state: response[0].address.state
+  //       }, { emitEvent: false });
+  //     }
   //   }
+  //   this.saveChanges();
   // }
+
+  async getAddressInfo() {
+    this.showModal = true;
+    this.loading = true;
+    const addressString = this.form.get('address')?.value;
+    if (addressString) {
+      const response = await this.generalInformationService.getCompleteAddress(addressString);
+      if (response && response.length > 0) {
+        this.addressOptions = response;
+        this.loading = false;
+        this.isSuccessful = true;
+      }
+      else {
+        this.addressOptions = [];
+        this.showModal = false;
+        this.loading = false;
+        this.isSuccessful = false;
+      }
+    }
+  }
+
+  selectAddress(addressOption: any) {
+    let houseNo: string;
+    let road: string;
+    if (addressOption) {
+      houseNo = addressOption.address?.house_number || '';
+      road = addressOption.address?.road || '';
+      this.addressDisplayed = houseNo + " " + road;
+      if (this.addressDisplayed.length == 1)
+        this.addressDisplayed = addressOption.display_name;
+      this.form.patchValue({
+        address: this.addressDisplayed,
+        city: addressOption.address.city,
+        state: addressOption.address.state,
+        zip: addressOption.address.postcode
+      }, { emitEvent: false });
+    }
+    this.saveChanges();
+    this.showModal = false;
+    this.addressOptions = [];
+  }
+
+  closeModal() {
+    this.showModal = false;
+    this.addressOptions = [];
+  }
 
   ngOnDestroy() {
     if (this.inAccount) {
@@ -185,6 +196,7 @@ export class GeneralInformationFormComponent implements OnInit {
   }
 
   async saveChanges() {
+    this.isSuccessful = true;
     this.isFormChange = true;
     if (!this.inAccount) {
       if (!this.inWizard) {
