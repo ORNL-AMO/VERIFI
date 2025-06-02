@@ -12,21 +12,19 @@ import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 })
 export class AccountTitlePageComponent {
   account: IdbAccount;
-  
+  report: IdbAccountReport;
   dateRange: {startDate: Date, endDate: Date};
   currentDate: Date = new Date();
   constructor(private accountDbService: AccountdbService,
     private accountReportDbService: AccountReportDbService) {
-
   }
 
   ngOnInit() {
     this.account = this.accountDbService.selectedAccount.getValue();
-
-    let report: IdbAccountReport = this.accountReportDbService.selectedReport.getValue();
+    this.report = this.accountReportDbService.selectedReport.getValue();
     this.dateRange = {
-      startDate: new Date(report.startYear, report.startMonth, 1),
-      endDate: new Date(report.endYear, report.endMonth, 1)
+      startDate: new Date(this.report.startYear, this.report.startMonth, 1),
+      endDate: new Date(this.report.endYear, this.report.endMonth, 1)
     };
   }
 }

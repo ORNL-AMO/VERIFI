@@ -23,10 +23,13 @@ export class FacilityReportsTabsComponent {
   setupValid: boolean = true;
   selectedReportSub: Subscription;
   selectedReport: IdbFacilityReport;
+  reportList: Array<IdbFacilityReport>;
+  reportListSub: Subscription;
   errorSub: Subscription;
   errorMessage: string;
   facility: IdbFacility;
   facilitySub: Subscription;
+  showDropdown: boolean = false;
   constructor(private router: Router,
     private sharedDataService: SharedDataService,
     private facilityReportsDbService: FacilityReportsDbService,
@@ -35,6 +38,7 @@ export class FacilityReportsTabsComponent {
   ngOnInit() {
     this.routerSub = this.router.events.subscribe(event => {
       this.setInDashboard();
+      this.showDropdown = false;
     });
     this.setInDashboard();
 
@@ -57,6 +61,10 @@ export class FacilityReportsTabsComponent {
         this.setSetupValid();
       }
     });
+
+    this.reportListSub = this.facilityReportsDbService.facilityReports.subscribe(reports => {
+      this.reportList = reports;
+    });
   }
 
   ngOnDestroy() {
@@ -65,6 +73,7 @@ export class FacilityReportsTabsComponent {
     this.selectedReportSub.unsubscribe();
     this.facilitySub.unsubscribe();
     this.errorSub.unsubscribe();
+    this.reportListSub.unsubscribe();
   }
 
 
@@ -73,7 +82,12 @@ export class FacilityReportsTabsComponent {
   }
 
   goToDashboard() {
-    this.router.navigateByUrl('/facility/' + this.facility.id + '/reports/dashboard')
+    if (this.selectedReport.facilityReportType == 'analysis') {
+      this.router.navigateByUrl('/facility/' + this.facility.id + '/reports/dashboard/analysis');
+    }
+    else if (this.selectedReport.facilityReportType == 'overview') {
+      this.router.navigateByUrl('/facility/' + this.facility.id + '/reports/dashboard/overview');
+    }
   }
 
   setSetupValid() {
@@ -92,4 +106,16 @@ export class FacilityReportsTabsComponent {
       }
     }
   }
+
+  toggleShow() {
+    this.showDropdown = !this.showDropdown;
+  }
+
+  selectItem(item: IdbFacilityReport) {
+    this.facilityReportsDbService.selectedReport.next(item);
+    let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    this.router.navigateByUrl('/facility/' + facility.id + '/reports/setup');
+    this.showDropdown = false;
+  }
+
 }

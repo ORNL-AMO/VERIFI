@@ -44,3 +44,17 @@
     color: white !important;
     border-color: #17202A;
 }
+
+.dropdown-menu{
+    z-index: 9999;
+    position: fixed;
+}
+
+.menu-scroll-section{
+    max-height: 350px;
+    overflow-y: auto;
+}
+
+.float-right{
+    float: right;
+}
