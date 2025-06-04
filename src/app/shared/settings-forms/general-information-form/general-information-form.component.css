@@ -38,7 +38,15 @@
     color: white;
 }
 
-.address-input {
+.address-link {
+    color: blue;
+    text-decoration: underline;
+    font-size: 12px;
+    cursor: pointer;
+    padding: 8px;
+}
+
+/* .address-input {
     position: relative;
     width: 100%;
     margin-bottom: 10px;
@@ -66,7 +74,7 @@
 
 .search-btn i {
     font-size: 18px;
-}
+} */
 
 .modal-overlay {
     position: fixed;

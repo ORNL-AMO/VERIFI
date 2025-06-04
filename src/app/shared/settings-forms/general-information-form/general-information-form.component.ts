@@ -47,6 +47,8 @@ export class GeneralInformationFormComponent implements OnInit {
   loading: boolean = false;
   isSuccessful: boolean = true;
   modalAddress = new FormControl('');
+  selectedCountry: string;
+
   constructor(private accountDbService: AccountdbService, private settingsFormsService: SettingsFormsService, private facilityDbService: FacilitydbService,
     private setupWizardService: SetupWizardService, private generalInformationService: GeneralInformationService) { }
 
@@ -144,18 +146,25 @@ export class GeneralInformationFormComponent implements OnInit {
     //this.showModal = true;
     //this.loading = true;
     //const addressString = this.form.get('modalAddress')?.value;
+    this.selectedCountry = this.form.get('country')?.value;
+    console.log('Country code is' + this.selectedCountry);
     const addressString = this.modalAddress?.value;
     if (addressString) {
       const response = await this.generalInformationService.getCompleteAddress(addressString);
       if (response && response.length > 0) {
-        this.addressOptions = response;
-       // this.loading = false;
-        this.isSuccessful = true;
+        this.addressOptions = response.filter(data => 
+          data.address?.country_code == this.selectedCountry.toLowerCase());
+        //  this.addressOptions = response;
+        // this.loading = false;
+        console.log(this.addressOptions);
+        if (this.addressOptions.length == 0)
+          this.isSuccessful = false;
+        else this.isSuccessful = true;
       }
       else {
         this.addressOptions = [];
-      //  this.showModal = false;
-     //   this.loading = false;
+        //  this.showModal = false;
+        //   this.loading = false;
         this.isSuccessful = false;
       }
     }
@@ -172,12 +181,13 @@ export class GeneralInformationFormComponent implements OnInit {
         this.addressDisplayed = addressOption.display_name;
       this.form.patchValue({
         address: this.addressDisplayed,
-        city: addressOption.address.city,
+        city: addressOption.address.city || addressOption.address.town,
         state: addressOption.address.state,
         zip: addressOption.address.postcode
       }, { emitEvent: false });
     }
     this.saveChanges();
+    this.isSuccessful = true;
     this.showModal = false;
     this.addressOptions = [];
   }
@@ -189,6 +199,7 @@ export class GeneralInformationFormComponent implements OnInit {
 
   closeModal() {
     this.showModal = false;
+    this.isSuccessful = true;
     this.addressOptions = [];
   }
 
