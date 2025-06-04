@@ -17,27 +17,49 @@
 
         <div class="row">
             <div class="col-12">
-                <label for="address">Address</label>
-                <div class="address-container">
-
+                <!-- <label for="address">Address</label> -->
+                  <app-label-with-tooltip [label]="'Address'" [field]="'settingsAddressLabel'"
+                    [isRequired]="false" [isFloatRight]="true">
+                </app-label-with-tooltip>
+                <div class="address-input">
                     <input type="text" class="form-control" formControlName="address" (input)="saveChanges()">
-                    <button (click)="getAddressInfo()">
+                    <button type="button" class="search-btn" (click)="openModal()">
                         <i class="fa fa-search"></i>
-                        Search
                     </button>
                 </div>
             </div>
 
-             <span class="alert alert-info address-alert" *ngIf="!isSuccessful">Address not found. Please enter manually.</span>
+            <!-- <span class="alert alert-info address-alert" *ngIf="!isSuccessful">Address not found. Please enter
+                manually.</span> -->
 
-             <div class="loader-overlay" *ngIf="loading">
+            <!-- <div class="loader-overlay" *ngIf="loading">
                 <div class="spinner"></div>
-             </div>
+            </div> -->
 
-            <div class="modal-overlay" *ngIf="showModal && addressOptions.length > 0">
+            <div class="modal-overlay" *ngIf="showModal">
                 <div class="modal-content">
-                    <span class="modal-header">Select an Address</span>
-                    <ul class="address-list">
+                    <span class="modal-header mb-3">Address Lookup</span>
+
+                    <!-- <div class="col-12"> -->
+                    <!-- <label for="address">Address</label> -->
+                    <div class="address-container">
+
+                        <input type="text" class="form-control" [formControl]="modalAddress"
+                            placeholder="Type your address">
+                        <button (click)="getAddressInfo()">
+                            <i class="fa fa-search"></i>
+                            Search
+                        </button>
+                    </div>
+                    <!-- </div> -->
+
+                    <div>
+                        <span class="alert alert-info address-alert" *ngIf="!isSuccessful">Address not found. Please
+                            enter
+                            manually.</span>
+                    </div>
+
+                    <ul class="address-list" *ngIf="addressOptions.length > 0">
                         <label class="address-option" *ngFor="let addressOption of addressOptions">
                             <input class="form-check-input" type="radio" [value]="addressOption.place_id"
                                 (change)="selectAddress(addressOption)" />
@@ -47,7 +69,9 @@
                             </div>
                         </label>
                     </ul>
+
                     <button class="close-btn" (click)="closeModal()">Close</button>
+
                 </div>
             </div>
         </div>

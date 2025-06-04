@@ -46,7 +46,7 @@ export class GeneralInformationFormComponent implements OnInit {
   addressDisplayed: string;
   loading: boolean = false;
   isSuccessful: boolean = true;
-
+  modalAddress = new FormControl('');
   constructor(private accountDbService: AccountdbService, private settingsFormsService: SettingsFormsService, private facilityDbService: FacilitydbService,
     private setupWizardService: SetupWizardService, private generalInformationService: GeneralInformationService) { }
 
@@ -141,20 +141,21 @@ export class GeneralInformationFormComponent implements OnInit {
   // }
 
   async getAddressInfo() {
-    this.showModal = true;
-    this.loading = true;
-    const addressString = this.form.get('address')?.value;
+    //this.showModal = true;
+    //this.loading = true;
+    //const addressString = this.form.get('modalAddress')?.value;
+    const addressString = this.modalAddress?.value;
     if (addressString) {
       const response = await this.generalInformationService.getCompleteAddress(addressString);
       if (response && response.length > 0) {
         this.addressOptions = response;
-        this.loading = false;
+       // this.loading = false;
         this.isSuccessful = true;
       }
       else {
         this.addressOptions = [];
-        this.showModal = false;
-        this.loading = false;
+      //  this.showModal = false;
+     //   this.loading = false;
         this.isSuccessful = false;
       }
     }
@@ -181,6 +182,11 @@ export class GeneralInformationFormComponent implements OnInit {
     this.addressOptions = [];
   }
 
+  openModal() {
+    this.modalAddress.reset();
+    this.showModal = true;
+  }
+
   closeModal() {
     this.showModal = false;
     this.addressOptions = [];
@@ -196,7 +202,7 @@ export class GeneralInformationFormComponent implements OnInit {
   }
 
   async saveChanges() {
-    this.isSuccessful = true;
+    //this.isSuccessful = true;
     this.isFormChange = true;
     if (!this.inAccount) {
       if (!this.inWizard) {

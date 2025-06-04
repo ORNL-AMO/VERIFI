@@ -55,5 +55,8 @@ export const LabelTooltips = {
     },
     "createPredictorData": {
         "tooltip": "Predictor entries will be created to match the date range for meter data in this facility."
+    },
+    "settingsAddressLabel": {
+        "tooltip": "Click on the search icon to lookup the address or enter the address manually."
     }
 }
