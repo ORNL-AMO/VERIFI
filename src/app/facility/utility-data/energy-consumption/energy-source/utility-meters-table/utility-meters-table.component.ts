@@ -17,14 +17,16 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
+import { ElectronService } from 'src/app/electron/electron.service';
 
 @Component({
-    selector: 'app-utility-meters-table',
-    templateUrl: './utility-meters-table.component.html',
-    styleUrls: ['./utility-meters-table.component.css'],
-    standalone: false
+  selector: 'app-utility-meters-table',
+  templateUrl: './utility-meters-table.component.html',
+  styleUrls: ['./utility-meters-table.component.css'],
+  standalone: false
 })
 export class UtilityMetersTableComponent implements OnInit {
+
   @ViewChild('meterTable', { static: false }) meterTable: ElementRef;
 
   currentPageNumber: number = 1;
@@ -38,6 +40,9 @@ export class UtilityMetersTableComponent implements OnInit {
   orderDataField: string = 'name';
   orderByDirection: string = 'desc';
   copyingTable: boolean = false;
+  isElectron: boolean;
+  savedUtilityFilePath: string;
+  savedUtilityFilePathSub: Subscription;
   constructor(private utilityMeterdbService: UtilityMeterdbService,
     private copyTableService: CopyTableService,
     private router: Router,
@@ -49,9 +54,11 @@ export class UtilityMetersTableComponent implements OnInit {
     private editMeterFormService: EditMeterFormService,
     private dbChangesService: DbChangesService,
     private accountDbService: AccountdbService,
-    private sharedDataService: SharedDataService) { }
+    private sharedDataService: SharedDataService,
+    private electronService: ElectronService) { }
 
   ngOnInit(): void {
+    this.isElectron = this.electronService.isElectron;
     this.selectedFacilitySub = this.facilitydbService.selectedFacility.subscribe(facility => {
       this.selectedFacility = facility;
     });
@@ -62,13 +69,23 @@ export class UtilityMetersTableComponent implements OnInit {
 
     this.itemsPerPageSub = this.sharedDataService.itemsPerPage.subscribe(val => {
       this.itemsPerPage = val;
-    })
+    });
+
+    if (this.isElectron) {
+      this.savedUtilityFilePathSub = this.electronService.savedUtilityFilePath.subscribe(savedUtilityFilePath => {
+        this.savedUtilityFilePath = savedUtilityFilePath;
+        console.log('Saved path is: ' + this.savedUtilityFilePath);
+      });
+    }
   }
 
   ngOnDestroy() {
     this.meterListSub.unsubscribe();
     this.selectedFacilitySub.unsubscribe();
     this.itemsPerPageSub.unsubscribe();
+    if (this.savedUtilityFilePathSub) {
+      this.savedUtilityFilePathSub.unsubscribe();
+    }
   }
 
   uploadData() {
@@ -172,5 +189,15 @@ export class UtilityMetersTableComponent implements OnInit {
     let facility: IdbFacility = this.facilitydbService.selectedFacility.getValue();
     await this.dbChangesService.setMeters(account, facility);
     this.selectEditMeter(copyMeter);
+  }
+
+  async uploadBill() {
+    console.log('upload bill');
+    await this.electronService.selectFile();
+  }
+
+  async openBillLocation() {
+    console.log('opening bill at ' + this.savedUtilityFilePath);
+    await this.electronService.openFile(this.savedUtilityFilePath);
   }
 }

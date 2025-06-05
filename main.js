@@ -4,6 +4,7 @@ const url = require('url');
 const log = require('electron-log');
 const { autoUpdater } = require('electron-updater');
 const jetpack = require('fs-jetpack');
+const { event } = require('jquery');
 
 function isDev() {
     //TODO: check for isDev. Latest electron update breaks old
@@ -183,6 +184,23 @@ ipcMain.on("openDialog", (event, arg) => {
         // jetpack.writeAsync(results.filePath, arg.fileData);
     });
 
+});
+
+ipcMain.on("uploadFileDialog", async (event) => {
+    log.info('open upload bill dialog');
+    const result = await dialog.showOpenDialog({
+        properties: ['openFile']
+    });
+    if (result && result.filePaths.length > 0){
+        win.webContents.send('utility-file-path', result.filePaths[0]);
+    }
+});
+
+ipcMain.on("openUploadedFileLocation", (event, filepath) => {
+    log.info('File opened at location ' + filepath);
+    if(filepath){
+        shell.showItemInFolder(filepath);
+    }
 });
 
 ipcMain.on("fileExists", (event, arg) => {

@@ -9,16 +9,17 @@ import { BackupFile } from '../shared/helper-services/backup-data.service';
 })
 export class ElectronService {
 
-
   updateAvailable: BehaviorSubject<boolean>;
   updateInfo: BehaviorSubject<{ releaseName: string, releaseNotes: string }>;
   updateError: BehaviorSubject<boolean>;
   isElectron: boolean;
   savedFilePath: BehaviorSubject<string>;
+  savedUtilityFilePath: BehaviorSubject<string>;
   fileExists: BehaviorSubject<boolean>;
   accountLatestBackupFile: BehaviorSubject<BackupFile>;
   constructor(private localStorageService: LocalStorageService, private toastNotificationService: ToastNotificationsService) {
     this.savedFilePath = new BehaviorSubject<string>(undefined);
+    this.savedUtilityFilePath = new BehaviorSubject<string>(undefined);
     this.accountLatestBackupFile = new BehaviorSubject<BackupFile>(undefined);
     this.updateAvailable = new BehaviorSubject<boolean>(false);
     this.updateInfo = new BehaviorSubject<{ releaseName: string, releaseNotes: string }>(undefined);
@@ -76,6 +77,12 @@ export class ElectronService {
     window["electronAPI"].on("data-file", (data) => {
       this.accountLatestBackupFile.next(data);
     });
+
+     window["electronAPI"].on("utility-file-path", (data) => {
+      console.log('electron service utility-file-path...')
+      this.savedUtilityFilePath.next(data);
+    });
+
 
   }
 
@@ -157,6 +164,22 @@ export class ElectronService {
     }
     window["electronAPI"].send("getDataFile", args);
   }
+
+  selectFile() {
+     if (!window["electronAPI"]) {
+      return;
+    }  
+    window["electronAPI"].send("uploadFileDialog");
+  }
+
+
+   openFile(path: string) {
+     if (!window["electronAPI"]) {
+      return;
+    }  
+    window["electronAPI"].send("openUploadedFileLocation", path);
+  }
+  
 
 
   showWebDisclaimer() {
