@@ -5,6 +5,7 @@ const log = require('electron-log');
 const { autoUpdater } = require('electron-updater');
 const jetpack = require('fs-jetpack');
 const { event } = require('jquery');
+const fs = require('fs');
 
 function isDev() {
     //TODO: check for isDev. Latest electron update breaks old
@@ -193,6 +194,7 @@ ipcMain.on("uploadFileDialog", async (event) => {
     });
     if (result && result.filePaths.length > 0){
         win.webContents.send('utility-file-path', result.filePaths[0]);
+        log.info('path selected is ' + result.filePaths[0]);
     }
 });
 
@@ -201,6 +203,18 @@ ipcMain.on("openUploadedFileLocation", (event, filepath) => {
     if(filepath){
         shell.showItemInFolder(filepath);
     }
+});
+
+// ipcMain.on("utilityFileExists", (event, path) => {
+//     log.info('Checking if file exists');
+//     const exists = fs.existsSync(path);
+//     win.webContents.send('utility-file-exists', exists);
+// });
+
+ipcMain.on("utilityFileExists", (event, path) => {
+    log.info('Checking if file exists');
+    const exists = fs.existsSync(path);
+    event.reply('utility-file-exists', exists);
 });
 
 ipcMain.on("fileExists", (event, arg) => {

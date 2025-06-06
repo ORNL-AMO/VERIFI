@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { LocalStorageService } from 'ngx-webstorage';
-import { BehaviorSubject, Subscription } from 'rxjs';
+import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { ToastNotificationsService } from '../core-components/toast-notifications/toast-notifications.service';
 import { BackupFile } from '../shared/helper-services/backup-data.service';
 
@@ -14,12 +14,15 @@ export class ElectronService {
   updateError: BehaviorSubject<boolean>;
   isElectron: boolean;
   savedFilePath: BehaviorSubject<string>;
-  savedUtilityFilePath: BehaviorSubject<string>;
+  savedUtilityFilePath: { [key: string]: BehaviorSubject<string> } = {};
+  fileDeletedSubject: { [key: string]: BehaviorSubject<boolean> } = {};
   fileExists: BehaviorSubject<boolean>;
+  currentKey: string;
   accountLatestBackupFile: BehaviorSubject<BackupFile>;
   constructor(private localStorageService: LocalStorageService, private toastNotificationService: ToastNotificationsService) {
     this.savedFilePath = new BehaviorSubject<string>(undefined);
-    this.savedUtilityFilePath = new BehaviorSubject<string>(undefined);
+    //this.savedUtilityFilePath = new BehaviorSubject<string>(undefined);
+    //this.fileDeletedSubject = new BehaviorSubject<boolean>(false);
     this.accountLatestBackupFile = new BehaviorSubject<BackupFile>(undefined);
     this.updateAvailable = new BehaviorSubject<boolean>(false);
     this.updateInfo = new BehaviorSubject<{ releaseName: string, releaseNotes: string }>(undefined);
@@ -78,11 +81,29 @@ export class ElectronService {
       this.accountLatestBackupFile.next(data);
     });
 
-     window["electronAPI"].on("utility-file-path", (data) => {
-      console.log('electron service utility-file-path...')
-      this.savedUtilityFilePath.next(data);
+    window["electronAPI"].on("utility-file-path", (path) => {
+      console.log('electron service utility-file-path...');
+      if (this.currentKey && this.savedUtilityFilePath[this.currentKey]) {
+        this.savedUtilityFilePath[this.currentKey].next(path);
+        this.checkUtilityFileExists(this.currentKey, path);
+        //this.fileDeletedSubject.next(false);
+      }
     });
 
+    window["electronAPI"].on("utility-file-exists", (exists: boolean) => {
+      console.log('electron service utility-file-exists...')
+     if(this.currentKey && this.fileDeletedSubject[this.currentKey]) {
+      this.fileDeletedSubject[this.currentKey].next(!exists);
+     }
+    });
+
+    // window["electronAPI"].on("utility-file-exists", (exists: boolean) => {
+    //   console.log('electron service utility-file-exists...')
+    //   if (!exists) {
+    //     this.savedUtilityFilePath.next(null);
+    //     this.fileDeletedSubject.next(true);
+    //   }
+    // });
 
   }
 
@@ -155,7 +176,7 @@ export class ElectronService {
     window["electronAPI"].send("openDialog", args);
   }
 
-  getDataFile(dataBackupFilePath: string){
+  getDataFile(dataBackupFilePath: string) {
     if (!window["electronAPI"]) {
       return;
     }
@@ -165,23 +186,64 @@ export class ElectronService {
     window["electronAPI"].send("getDataFile", args);
   }
 
-  selectFile() {
-     if (!window["electronAPI"]) {
+  selectFile(key: string) {
+    console.log('Inside selectFile()');
+    if (!window["electronAPI"]) {
       return;
-    }  
+    }
+    this.checkKeyExists(key);
+    this.currentKey = key;
     window["electronAPI"].send("uploadFileDialog");
   }
 
+  checkKeyExists(key: string) {
+    if (!this.savedUtilityFilePath[key]) {
+      this.savedUtilityFilePath[key] = new BehaviorSubject<string>(null);
+    }
+    if(!this.fileDeletedSubject[key]) {
+      this.fileDeletedSubject[key] = new BehaviorSubject<boolean>(false);
+    }
+  }
+
+  getFilePath(key: string): Observable<string> {
+    this.checkKeyExists(key);
+    return this.savedUtilityFilePath[key].asObservable();
+  }
+
+  getCurrentPath(key: string) {
+    return this.savedUtilityFilePath[key]?.value;
+  }
+
+  getDeletedFile(key: string): Observable<boolean> {
+    this.checkKeyExists(key);
+    return this.fileDeletedSubject[key].asObservable();
+  }
 
    openFile(path: string) {
-     if (!window["electronAPI"]) {
+    if (!window["electronAPI"]) {
       return;
-    }  
+    }
     window["electronAPI"].send("openUploadedFileLocation", path);
   }
+
+  checkUtilityFileExists(key: string, path: string) {
+    if (!window["electronAPI"]) {
+      return;
+    }
+    this.checkKeyExists(key);
+    this.currentKey = key;
+    window["electronAPI"].send("utilityFileExists", path);
+  }
+
+  // listenSelectedFile(callback: (path: string) => void): void {
+  //   console.log('Inside listenSelectedFile()');
+  //   const handler = (event: any, path: string) => {
+  //     window["electronAPI"].off("utility-file-path", handler);
+  //     callback(path);
+  //   };
+  //    window["electronAPI"].on("utility-file-path", handler);
+  //  }
   
-
-
   showWebDisclaimer() {
     let title: string = "VERIFI Web";
     let body: string = `You are running VERIFI in a web browser. All application data is saved within this browser (The DOE does not have access to your data). 

@@ -109,23 +109,6 @@
             [maxSize]="5" [rotate]="true" aria-label="Pagination">
         </ngb-pagination>
     </div>
-
-    <div *ngIf="isElectron">
-        <h5>
-            Upload Utility Bill
-        </h5>
-        <ng-container>
-            <button class="btn action-btn btn-secondary" (click)="uploadBill()">
-                <span class="fa fa-upload"></span> Upload Bill
-            </button>
-        </ng-container>
-        <ng-container>
-            <p>
-                This file is available at: <br>
-                <a class="click-link" (click)="openBillLocation()">{{ savedUtilityFilePath }}</a>
-            </p>
-        </ng-container>
-    </div>
 </div>
 
 <div [ngClass]="{'windowOverlay': meterToDelete}"></div>

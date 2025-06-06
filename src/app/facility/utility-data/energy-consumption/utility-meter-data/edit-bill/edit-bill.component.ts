@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
@@ -15,6 +15,7 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { getNewIdbUtilityMeterData, IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
+import { ElectronService } from 'src/app/electron/electron.service';
 
 @Component({
     selector: 'app-edit-bill',
@@ -34,13 +35,22 @@ export class EditBillComponent implements OnInit {
   displayVehicleFuelEfficiency: boolean;
   invalidDate: boolean;
   showFilterDropdown: boolean = false;
+  isElectron: boolean;
+  savedUtilityFilePath: string;
+  //savedUtilityFilePathSub: Subscription;
+  utilityFileDeleted: boolean = false;
+  //utilityFileDeletedSub: Subscription;
+  key: string;
   constructor(private activatedRoute: ActivatedRoute, private utilityMeterDataDbService: UtilityMeterDatadbService,
     private utilityMeterDbService: UtilityMeterdbService, private loadingService: LoadingService,
     private dbChangesService: DbChangesService, private facilityDbService: FacilitydbService, private accountDbService: AccountdbService,
     private utilityMeterDataService: UtilityMeterDataService, private toastNotificationService: ToastNotificationsService,
-    private router: Router) { }
+    private router: Router,
+        private electronService: ElectronService,
+        private cd: ChangeDetectorRef) { }
 
   ngOnInit(): void {
+    this.isElectron = this.electronService.isElectron;
     this.activatedRoute.parent.params.subscribe(parentParams => {
       let meterId: number = parseInt(parentParams['id']);
       let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
@@ -53,15 +63,32 @@ export class EditBillComponent implements OnInit {
           this.addOrEdit = 'edit';
           let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
           this.editMeterData = accountMeterData.find(data => { return data.id == meterReadingId });
+          this.key = this.editMeterData.guid;
         } else {
           //new Reading
           let accountMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.accountMeterData.getValue();
           this.editMeterData = getNewIdbUtilityMeterData(this.editMeter, accountMeterData);
+          this.key = this.editMeterData.guid;
           this.addOrEdit = 'add';
         }
         this.setMeterDataForm();
       })
-    })
+    });
+
+    if (this.isElectron) {
+      this.electronService.getFilePath(this.key).subscribe(path => {
+        this.savedUtilityFilePath = path;
+        if (path) {
+          this.electronService.checkUtilityFileExists(this.key, path);
+        }
+        this.cd.detectChanges();
+      });
+
+      this.electronService.getDeletedFile(this.key).subscribe(deleted => {
+        this.utilityFileDeleted = deleted;
+        this.cd.detectChanges();
+      });
+    }
   }
 
   cancel() {
@@ -155,4 +182,17 @@ export class EditBillComponent implements OnInit {
   setDisplayHeatCapacity() {
     this.displayHeatCapacity = checkShowHeatCapacity(this.editMeter.source, this.editMeter.startingUnit, this.editMeter.scope);
   }
+
+   async uploadBill() {
+    console.log('upload bill');
+    await this.electronService.selectFile(this.key);
+  }
+
+  async openBillLocation() {
+    if (this.savedUtilityFilePath) {
+      console.log('opening bill at ' + this.savedUtilityFilePath);
+      await this.electronService.openFile(this.savedUtilityFilePath);
+    }
+  }
+
 }

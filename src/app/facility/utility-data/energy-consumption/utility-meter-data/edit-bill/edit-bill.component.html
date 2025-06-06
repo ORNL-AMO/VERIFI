@@ -34,3 +34,25 @@
     [editMeterData]="editMeterData" [addOrEdit]="addOrEdit" [editMeter]="editMeter" [meterDataForm]="meterDataForm"
     [invalidDate]="invalidDate">
 </app-edit-other-emissions-bill>
+
+<div *ngIf="isElectron">
+        <h5>
+            Connect Utility Bill
+        </h5>
+        <ng-container *ngIf="!savedUtilityFilePath || utilityFileDeleted">
+            <button class="btn action-btn btn-secondary" (click)="uploadBill()">
+                <span class="fa fa-upload"></span> Upload Bill
+            </button>
+        </ng-container>
+        <ng-container *ngIf="savedUtilityFilePath && !utilityFileDeleted">
+            <p>
+                This file is available at: <br>
+                <a class="click-link" (click)="openBillLocation()">{{ savedUtilityFilePath }}</a>
+            </p>
+        </ng-container>
+         <ng-container *ngIf="utilityFileDeleted">
+            <p style="color: red;">
+               The file has been deleted from the system.
+            </p>
+        </ng-container>
+    </div>
