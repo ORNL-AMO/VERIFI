@@ -20,9 +20,11 @@
                     </p>
                     <p>
                         If the "Reset Database" button doesn't work you'll have to completely delete your database and
-                        refresh... <a *ngIf="!displayMoreHelp" class="click-link" (click)="showMoreHelp()"><span class="fa fa-plus"></span> View
+                        refresh... <a *ngIf="!displayMoreHelp" class="click-link" (click)="showMoreHelp()"><span
+                                class="fa fa-plus"></span> View
                             More</a>
-                            <a *ngIf="displayMoreHelp" class="click-link" (click)="hideMoreHelp()"><span class="fa fa-minus"></span> Collapse</a>
+                        <a *ngIf="displayMoreHelp" class="click-link" (click)="hideMoreHelp()"><span
+                                class="fa fa-minus"></span> Collapse</a>
                     </p>
                     <div class="d-flex" *ngIf="displayMoreHelp">
                         <ol>
@@ -98,11 +100,16 @@
             </div>
         </div>
     </div>
+
     <div class="row">
         <div class="col justify-content-center">
             <hr>
             <div class="card">
                 <div class="card-body d-flex justify-content-end">
+                    <div>
+                        <button class="btn action-btn me-3" (click)="addNewAccount()">Add New Account
+                        </button>
+                    </div>
                     <div>
                         <button *ngIf="!resetDatabase" class="btn btn-danger" (click)="toggleResetDatabase()">Reset
                             Database

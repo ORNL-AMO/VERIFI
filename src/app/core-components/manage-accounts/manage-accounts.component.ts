@@ -135,4 +135,8 @@ export class ManageAccountsComponent {
   hideMoreHelp() {
     this.displayMoreHelp = false;
   }
+
+  addNewAccount() {
+    this.router.navigateByUrl('/setup-wizard');
+  }
 }
