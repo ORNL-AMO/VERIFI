@@ -117,7 +117,7 @@ export class AccountUtilityUsageDonutComponent {
         };
 
         let config = {
-          modeBarButtonsToRemove: ['autoScale2d', 'lasso2d', 'pan2d', 'select2d', 'toggleSpikelines', 'hoverClosestCartesian', 'hoverCompareCartesian'],
+          modeBarButtonsToRemove: ['lasso2d', 'select2d', 'toggleSpikelines', 'hoverClosestCartesian', 'hoverCompareCartesian'],
           displaylogo: false,
           responsive: true
         };
@@ -125,43 +125,6 @@ export class AccountUtilityUsageDonutComponent {
       }
     }
   }
-
-  // drawChart() {
-  //   if (this.donutChart && this.accountOverviewData) {
-  //     let sourceTotals: Array<SourceTotal> = this.getSourceTotals(this.accountOverviewData.sourceTotals);
-  //     if (this.accountOverviewData.sourceTotals)
-  //       var data = [{
-  //         values: sourceTotals.map(sTotal => { return this.getSourceValue(sTotal) }),
-  //         labels: sourceTotals.map(sTotal => { return sTotal.sourceLabel }),
-  //         marker: {
-  //           colors: sourceTotals.map(sTotal => { return UtilityColors[sTotal.sourceLabel]?.color }),
-  //           line: {
-  //             color: '#fff',
-  //             width: 5
-  //           }
-  //         },
-  //         texttemplate: '%{label}: (%{percent:.1%})',
-  //         textposition: 'auto',
-  //         insidetextorientation: "horizontal",
-  //         hovertemplate: '%{label}: %{value:,.0f} ' + this.energyUnit + ' <extra></extra>',
-  //         hole: .5,
-  //         type: 'pie',
-  //         automargin: true,
-  //         sort: false
-  //       }];
-
-  //     var layout = {
-  //       margin: { "t": 50, "b": 50, "l": 50, "r": 50 },
-  //       showlegend: false
-  //     };
-
-  //     let config = {
-  //       displaylogo: false,
-  //       responsive: true
-  //     }
-  //     this.plotlyService.newPlot(this.donutChart.nativeElement, data, layout, config);
-  //   }
-  // }
 
   getSourceTotals(sourceTotals: SourceTotals): Array<SourceTotal> {
     if (this.dataType == 'energyUse') {

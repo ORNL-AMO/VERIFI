@@ -69,13 +69,6 @@ export class FacilityUsageDonutComponent {
 
       if (hasNoValue) {
         this.isVisible = false;
-        // data = [{
-        //   type: "treemap",
-        //   values: values,
-        //   labels: labels,
-        //   parents: parents,
-        //   visible: false
-        // }];
       }
       else {
         this.isVisible = true;
@@ -139,60 +132,6 @@ export class FacilityUsageDonutComponent {
       return labels.map(label => label == 'rootLabel' ? '' : ('%{label}: %{value:,.0f} tonne CO<sub>2</sub>e <extra></extra>'));
     }
   }
-
-  // drawChart() {
-  //   if (this.usageDonut && this.accountOverviewFacilities) {
-  //     var data = [{
-  //       values: this.getValues(),
-  //       labels: this.accountOverviewFacilities.map(summary => { return summary.facility.name }),
-  //       marker: {
-  //         colors: this.accountOverviewFacilities.map(summary => { return summary.facility.color }),
-  //         line: {
-  //           color: '#fff',
-  //           width: 5
-  //         }
-  //       },
-  //       texttemplate: '%{label}: (%{percent:.1%})',
-  //       textposition: 'auto',
-  //       insidetextorientation: "horizontal",
-  //       hovertemplate: this.getHoverTemplate(),
-  //       hole: .5,
-  //       type: 'pie',
-  //       automargin: true
-  //     }];
-
-  //     let height: number;
-  //     if (this.inHomeScreen) {
-  //       height = 350;
-  //     }
-
-  //     var layout = {
-  //       height: height,
-  //       margin: { "t": 50, "b": 50, "l": 50, "r": 50 },
-  //       showlegend: false
-  //     };
-
-  //     let config = {
-  //       displaylogo: false,
-  //       responsive: true
-  //     }
-  //     this.plotlyService.newPlot(this.usageDonut.nativeElement, data, layout, config);
-  //   }
-  // }
-
-
-
-  // getHoverTemplate(): string {
-  //   if (this.dataType == 'energyUse') {
-  //     return '%{label}: %{value:,.0f} ' + this.energyUnit + ' <extra></extra>';
-  //   } else if (this.dataType == 'cost') {
-  //     return '%{label}: %{value:$,.0f} <extra></extra>';
-  //   } else if (this.dataType == 'water') {
-  //     return '%{label}: %{value:,.0f} ' + this.waterUnit + ' <extra></extra>';
-  //   } else if (this.dataType == 'emissions') {
-  //     return '%{label}: %{value:,.0f} tonne CO<sub>2</sub>e <extra></extra>';
-  //   }
-  // }
 
   getValues(): Array<number> {
     if (this.dataType == 'energyUse') {

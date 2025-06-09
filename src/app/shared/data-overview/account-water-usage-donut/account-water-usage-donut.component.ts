@@ -32,7 +32,7 @@ export class AccountWaterUsageDonutComponent {
 
   drawChart() {
     if (this.donutChart && this.accountOverviewData) {
-      if (this.accountOverviewData.sourceTotals){
+      if (this.accountOverviewData.sourceTotals) {
         let values = this.accountOverviewData.waterTypeData.map(waterData => { return waterData.totalConsumption });
         values.reverse();
         let hasNoValue = values.every(value => value == 0);
@@ -47,26 +47,26 @@ export class AccountWaterUsageDonutComponent {
           return text;
         });
 
-        if(hasNoValue){
+        if (hasNoValue) {
           this.isVisible = false;
         }
-        else{
+        else {
           this.isVisible = true;
-        var data = [{
-          type: 'bar',
-          orientation: 'h',
-          x: values,
-          y: labelText,
-          marker: {
-            color: colors
-          },
-          texttemplate: '%{x:,.0f} ' + this.waterUnit,
-          textposition: 'auto',
-          hovertemplate: '%{x:,.0f} ' + this.waterUnit + ' <extra></extra>',
-          automargin: true,
+          var data = [{
+            type: 'bar',
+            orientation: 'h',
+            x: values,
+            y: labelText,
+            marker: {
+              color: colors
+            },
+            texttemplate: '%{x:,.0f} ' + this.waterUnit,
+            textposition: 'auto',
+            hovertemplate: '%{x:,.0f} ' + this.waterUnit + ' <extra></extra>',
+            automargin: true,
 
-        }];
-      }
+          }];
+        }
         var layout = {
           height: 400,
           title: {
@@ -81,62 +81,26 @@ export class AccountWaterUsageDonutComponent {
           },
           xaxis: {
             automargin: true,
-           title: {
-            text: '(' + this.waterUnit + ')',
-            font: {
-              size: 12,
-              family: 'Arial'
+            title: {
+              text: '(' + this.waterUnit + ')',
+              font: {
+                size: 12,
+                family: 'Arial'
+              }
             }
-          }
           },
           font: {
             family: 'Arial'
           }
         };
-      
+
         let config = {
-          modeBarButtonsToRemove: ['autoScale2d', 'lasso2d', 'pan2d', 'select2d', 'toggleSpikelines', 'hoverClosestCartesian', 'hoverCompareCartesian'],
+          modeBarButtonsToRemove: ['lasso2d', 'select2d', 'toggleSpikelines', 'hoverClosestCartesian', 'hoverCompareCartesian'],
           displaylogo: false,
           responsive: true
         };
-      this.plotlyService.newPlot(this.donutChart.nativeElement, data, layout, config);
+        this.plotlyService.newPlot(this.donutChart.nativeElement, data, layout, config);
+      }
     }
   }
-}
-
-  // drawChart() {
-  //   if (this.donutChart && this.accountOverviewData) {
-  //     if (this.accountOverviewData.sourceTotals)
-  //       var data = [{
-  //         values: this.accountOverviewData.waterTypeData.map(waterData => { return waterData.totalConsumption }),
-  //         labels: this.accountOverviewData.waterTypeData.map(waterData => { return waterData.waterType }),
-  //         marker: {
-  //           colors: this.accountOverviewData.waterTypeData.map((total, index) => { return total.color }),
-  //           line: {
-  //             color: '#fff',
-  //             width: 5
-  //           }
-  //         },
-  //         texttemplate: '%{label}: (%{percent:.1%})',
-  //         textposition: 'auto',
-  //         insidetextorientation: "horizontal",
-  //         hovertemplate: '%{label}: %{value:,.0f} ' + this.waterUnit + ' <extra></extra>',
-  //         hole: .5,
-  //         type: 'pie',
-  //         automargin: true,
-  //         sort: false
-  //       }];
-
-  //     var layout = {
-  //       margin: { "t": 50, "b": 50, "l": 50, "r": 50 },
-  //       showlegend: false
-  //     };
-
-  //     let config = {
-  //       displaylogo: false,
-  //       responsive: true
-  //     }
-  //     this.plotlyService.newPlot(this.donutChart.nativeElement, data, layout, config);
-  //   }
-  // }
 }

@@ -134,7 +134,7 @@ export class MeterUsageDonutComponent {
       };
 
       let config = {
-        modeBarButtonsToRemove: ['autoScale2d', 'lasso2d', 'pan2d', 'select2d', 'toggleSpikelines', 'hoverClosestCartesian', 'hoverCompareCartesian'],
+        modeBarButtonsToRemove: ['lasso2d', 'select2d', 'toggleSpikelines', 'hoverClosestCartesian', 'hoverCompareCartesian'],
         displaylogo: false,
         responsive: true
       };
@@ -161,62 +161,7 @@ export class MeterUsageDonutComponent {
       return '%{x:,.0f} ' + this.energyUnit;
     }
   }
-
-  // drawChart() {
-  //   if (this.energyUseDonut && this.facilityOverviewMeters) {
-  //     this.facilityOverviewMeters = _.orderBy(this.facilityOverviewMeters, (meterOverview) => { return meterOverview.meter.source });
-
-  //     var data = [{
-  //       values: this.getValues(),
-  //       labels: this.facilityOverviewMeters.map(meterOverview => { return meterOverview.meter.name }),
-  //       marker: {
-  //         colors: this.facilityOverviewMeters.map(meterOverview => { return UtilityColors[meterOverview.meter.source].color }),
-  //         line: {
-  //           color: '#fff',
-  //           width: 5
-  //         }
-  //       },
-  //       texttemplate: '%{label}: (%{percent:.1%})',
-  //       textposition: 'auto',
-  //       insidetextorientation: "horizontal",
-  //       hovertemplate: this.getHoverTemplate(),
-  //       hole: .5,
-  //       type: 'pie',
-  //       automargin: true,
-  //       sort: false
-  //     }];
-
-  //     let height: number;
-  //     if (this.inHomeScreen) {
-  //       height = 350;
-  //     }
-
-  //     var layout = {
-  //       height: height,
-  //       margin: { "t": 50, "b": 50, "l": 50, "r": 50 },
-  //       showlegend: false
-  //     };
-
-  //     let config = {
-  //       displaylogo: false,
-  //       responsive: true
-  //     }
-  //     this.plotlyService.newPlot(this.energyUseDonut.nativeElement, data, layout, config);
-  //   }
-  // }
-
-  // getHoverTemplate(): string {
-  //   if (this.dataType == 'energyUse') {
-  //     return '%{label}: %{value:,.0f} ' + this.selectedFacility.energyUnit + ' <extra></extra>';
-  //   } else if (this.dataType == 'cost') {
-  //     return '%{label}: %{value:$,.0f} <extra></extra>';
-  //   } else if (this.dataType == 'emissions') {
-  //     return '%{label}: %{value:,.0f} tonne CO<sub>2</sub>e <extra></extra>';
-  //   } else if (this.dataType == 'water') {
-  //     return '%{label}: %{value:,.0f} ' + this.selectedFacility.volumeLiquidUnit + ' <extra></extra>';
-  //   }
-
-
+  
   getValues(): Array<number> {
     if (this.dataType == 'energyUse' || this.dataType == 'water') {
       return this.facilityOverviewMeters.map(meterOverview => { return meterOverview.totalUsage });
