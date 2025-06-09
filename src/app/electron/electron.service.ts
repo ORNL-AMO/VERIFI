@@ -21,8 +21,6 @@ export class ElectronService {
   accountLatestBackupFile: BehaviorSubject<BackupFile>;
   constructor(private localStorageService: LocalStorageService, private toastNotificationService: ToastNotificationsService) {
     this.savedFilePath = new BehaviorSubject<string>(undefined);
-    //this.savedUtilityFilePath = new BehaviorSubject<string>(undefined);
-    //this.fileDeletedSubject = new BehaviorSubject<boolean>(false);
     this.accountLatestBackupFile = new BehaviorSubject<BackupFile>(undefined);
     this.updateAvailable = new BehaviorSubject<boolean>(false);
     this.updateInfo = new BehaviorSubject<{ releaseName: string, releaseNotes: string }>(undefined);
@@ -83,28 +81,23 @@ export class ElectronService {
 
     window["electronAPI"].on("utility-file-path", (path) => {
       console.log('electron service utility-file-path...');
+      this.checkKeyExists(this.currentKey);
       if (this.currentKey && this.savedUtilityFilePath[this.currentKey]) {
         this.savedUtilityFilePath[this.currentKey].next(path);
-        this.checkUtilityFileExists(this.currentKey, path);
-        //this.fileDeletedSubject.next(false);
+        this.fileDeletedSubject[this.currentKey].next(false);
       }
     });
 
-    window["electronAPI"].on("utility-file-exists", (exists: boolean) => {
-      console.log('electron service utility-file-exists...')
-     if(this.currentKey && this.fileDeletedSubject[this.currentKey]) {
-      this.fileDeletedSubject[this.currentKey].next(!exists);
-     }
+     window["electronAPI"].on("utility-file-exists", (exists: boolean) => {
+      console.log('electron service utility-file-exists...');
+      this.checkKeyExists(this.currentKey);
+      if(this.currentKey &&  this.fileDeletedSubject[this.currentKey]) {
+        this.fileDeletedSubject[this.currentKey].next(!exists);
+        if(!exists) {
+          this.savedUtilityFilePath[this.currentKey].next(null);
+        }
+      }
     });
-
-    // window["electronAPI"].on("utility-file-exists", (exists: boolean) => {
-    //   console.log('electron service utility-file-exists...')
-    //   if (!exists) {
-    //     this.savedUtilityFilePath.next(null);
-    //     this.fileDeletedSubject.next(true);
-    //   }
-    // });
-
   }
 
   //Used to tell electron that app is ready
@@ -193,14 +186,14 @@ export class ElectronService {
     }
     this.checkKeyExists(key);
     this.currentKey = key;
-    window["electronAPI"].send("uploadFileDialog");
+    window["electronAPI"].send("uploadFileDialog", key);
   }
 
   checkKeyExists(key: string) {
     if (!this.savedUtilityFilePath[key]) {
       this.savedUtilityFilePath[key] = new BehaviorSubject<string>(null);
     }
-    if(!this.fileDeletedSubject[key]) {
+    if (!this.fileDeletedSubject[key]) {
       this.fileDeletedSubject[key] = new BehaviorSubject<boolean>(false);
     }
   }
@@ -210,20 +203,23 @@ export class ElectronService {
     return this.savedUtilityFilePath[key].asObservable();
   }
 
-  getCurrentPath(key: string) {
-    return this.savedUtilityFilePath[key]?.value;
-  }
-
   getDeletedFile(key: string): Observable<boolean> {
     this.checkKeyExists(key);
     return this.fileDeletedSubject[key].asObservable();
   }
 
-   openFile(path: string) {
-    if (!window["electronAPI"]) {
+  openFileLocation(key: string) {
+    this.currentKey = key;
+    const path = this.savedUtilityFilePath[this.currentKey].getValue();
+    if(!path) {
+      this.fileDeletedSubject[this.currentKey].next(true);
       return;
     }
-    window["electronAPI"].send("openUploadedFileLocation", path);
+    this.checkUtilityFileExists(this.currentKey, path);
+    const isDeleted = this.fileDeletedSubject[this.currentKey].value;
+    if(!isDeleted) {
+       window["electronAPI"].send("openUploadedFileLocation", path);
+    }
   }
 
   checkUtilityFileExists(key: string, path: string) {
@@ -235,15 +231,6 @@ export class ElectronService {
     window["electronAPI"].send("utilityFileExists", path);
   }
 
-  // listenSelectedFile(callback: (path: string) => void): void {
-  //   console.log('Inside listenSelectedFile()');
-  //   const handler = (event: any, path: string) => {
-  //     window["electronAPI"].off("utility-file-path", handler);
-  //     callback(path);
-  //   };
-  //    window["electronAPI"].on("utility-file-path", handler);
-  //  }
-  
   showWebDisclaimer() {
     let title: string = "VERIFI Web";
     let body: string = `You are running VERIFI in a web browser. All application data is saved within this browser (The DOE does not have access to your data). 

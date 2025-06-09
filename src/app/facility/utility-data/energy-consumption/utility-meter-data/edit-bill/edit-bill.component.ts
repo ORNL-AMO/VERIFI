@@ -10,7 +10,7 @@ import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { checkShowHeatCapacity, getIsEnergyMeter, getIsEnergyUnit } from 'src/app/shared/sharedHelperFuntions';
 import { UtilityMeterDataService } from '../utility-meter-data.service';
-import { firstValueFrom, Observable, of } from 'rxjs';
+import { firstValueFrom, Observable, of, take } from 'rxjs';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { getNewIdbUtilityMeterData, IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
@@ -37,17 +37,15 @@ export class EditBillComponent implements OnInit {
   showFilterDropdown: boolean = false;
   isElectron: boolean;
   savedUtilityFilePath: string;
-  //savedUtilityFilePathSub: Subscription;
   utilityFileDeleted: boolean = false;
-  //utilityFileDeletedSub: Subscription;
   key: string;
   constructor(private activatedRoute: ActivatedRoute, private utilityMeterDataDbService: UtilityMeterDatadbService,
     private utilityMeterDbService: UtilityMeterdbService, private loadingService: LoadingService,
     private dbChangesService: DbChangesService, private facilityDbService: FacilitydbService, private accountDbService: AccountdbService,
     private utilityMeterDataService: UtilityMeterDataService, private toastNotificationService: ToastNotificationsService,
     private router: Router,
-        private electronService: ElectronService,
-        private cd: ChangeDetectorRef) { }
+    private electronService: ElectronService,
+    private cd: ChangeDetectorRef) { }
 
   ngOnInit(): void {
     this.isElectron = this.electronService.isElectron;
@@ -79,13 +77,16 @@ export class EditBillComponent implements OnInit {
       this.electronService.getFilePath(this.key).subscribe(path => {
         this.savedUtilityFilePath = path;
         if (path) {
-          this.electronService.checkUtilityFileExists(this.key, path);
+          this.utilityFileDeleted = false;
         }
         this.cd.detectChanges();
       });
 
       this.electronService.getDeletedFile(this.key).subscribe(deleted => {
         this.utilityFileDeleted = deleted;
+        if(this.utilityFileDeleted) {
+          this.savedUtilityFilePath = null;
+        }
         this.cd.detectChanges();
       });
     }
@@ -188,11 +189,8 @@ export class EditBillComponent implements OnInit {
     await this.electronService.selectFile(this.key);
   }
 
-  async openBillLocation() {
-    if (this.savedUtilityFilePath) {
-      console.log('opening bill at ' + this.savedUtilityFilePath);
-      await this.electronService.openFile(this.savedUtilityFilePath);
-    }
+  async openBillLocation() {    
+    this.electronService.openFileLocation(this.key);
   }
 
 }

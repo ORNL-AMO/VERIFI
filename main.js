@@ -205,16 +205,10 @@ ipcMain.on("openUploadedFileLocation", (event, filepath) => {
     }
 });
 
-// ipcMain.on("utilityFileExists", (event, path) => {
-//     log.info('Checking if file exists');
-//     const exists = fs.existsSync(path);
-//     win.webContents.send('utility-file-exists', exists);
-// });
-
 ipcMain.on("utilityFileExists", (event, path) => {
     log.info('Checking if file exists');
     const exists = fs.existsSync(path);
-    event.reply('utility-file-exists', exists);
+    win.webContents.send('utility-file-exists', exists);
 });
 
 ipcMain.on("fileExists", (event, arg) => {
