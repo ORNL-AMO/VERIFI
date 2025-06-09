@@ -39,6 +39,7 @@ export class ExportToEnergyTresureHuntFormService {
     request.responseType = 'blob';
     request.onload = () => {
       workbook.xlsx.load(request.response).then(() => {
+        console.log(workbook)
         this.fillWorkbook(workbook, startYear, hostFacilityId, exchangeFacilityId);
         workbook.xlsx.writeBuffer().then(excelData => {
           let blob: Blob = new Blob([excelData], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
@@ -121,6 +122,8 @@ export class ExportToEnergyTresureHuntFormService {
           // let totalDemand: number = _.sumBy(yearMonthData, (mData: MonthlyData) => {
           //   return mData.
           // });
+          worksheet.getCell('B' + cellIndex).value = new Date(2024, i, 1);
+          worksheet.getCell('B' + cellIndex).numFmt = 'mmm';
           worksheet.getCell('C' + cellIndex).value = startYear;
           worksheet.getCell('D' + cellIndex).value = new ConvertValue(totalEnergyUse, 'MMBtu', 'kWh').convertedValue;
           worksheet.getCell('G' + cellIndex).value = totalCost;
@@ -146,6 +149,8 @@ export class ExportToEnergyTresureHuntFormService {
           // let totalDemand: number = _.sumBy(yearMonthData, (mData: MonthlyData) => {
           //   return mData.
           // });
+          worksheet.getCell('B' + cellIndex).value = new Date(2024, i, 1);
+          worksheet.getCell('B' + cellIndex).numFmt = 'mmm';
           worksheet.getCell('C' + cellIndex).value = startYear + 1;
           worksheet.getCell('D' + cellIndex).value = new ConvertValue(totalEnergyUse, 'MMBtu', 'kWh').convertedValue;
           worksheet.getCell('G' + cellIndex).value = totalCost;
@@ -505,6 +510,24 @@ export class ExportToEnergyTresureHuntFormService {
     }
 
     //hrs?
+  }
+
+  getMonthStr(num: number): string {
+    switch (num) {
+      case 0: return 'Jan';
+      case 1: return 'Feb';
+      case 2: return 'Mar';
+      case 3: return 'Apr';
+      case 4: return 'May';
+      case 5: return 'Jun';
+      case 6: return 'Jul';
+      case 7: return 'Aug';
+      case 8: return 'Sep';
+      case 9: return 'Oct';
+      case 10: return 'Nov';
+      case 11: return 'Dec';
+      default: return '';
+    }
   }
 
 }
