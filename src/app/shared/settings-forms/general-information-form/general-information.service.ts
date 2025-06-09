@@ -9,22 +9,6 @@ import { firstValueFrom } from 'rxjs';
 export class GeneralInformationService {
   constructor(private http: HttpClient) { }
 
-  async getStateAndCity(zip: string): Promise<Array<NominatimResponse>> {
-    if (zip) {
-      let url = `https://nominatim.openstreetmap.org/search?q=${zip}+USA&format=json&addressdetails=1`;
-      try {
-        const response = await fetch(url);
-        const data = await response.json();
-        if (data.length > 0) {
-          return data;
-        }
-      } catch (err) {
-        return [];
-      }
-    }
-    return null;
-  }
-
   async getCompleteAddress(address: string): Promise<Array<NominatimResponse>> {
     if(address){
       let url = `https://nominatim.openstreetmap.org/search?q=${address}&format=json&addressdetails=1`;

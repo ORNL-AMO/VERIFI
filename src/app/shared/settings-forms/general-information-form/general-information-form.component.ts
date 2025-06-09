@@ -41,10 +41,8 @@ export class GeneralInformationFormComponent implements OnInit {
   facilityClassifications: Array<FacilityClassification> = FacilityClassifications;
 
   addressOptions: any[] = [];
-  //displayOptions: boolean = false;
   showModal: boolean = false;
   addressDisplayed: string;
-  loading: boolean = false;
   isSuccessful: boolean = true;
   modalAddress = new FormControl('');
   selectedCountry: string;
@@ -111,41 +109,7 @@ export class GeneralInformationFormComponent implements OnInit {
     }
   }
 
-  // async getZipInfo(zip: string) {
-  //   //this.form.get('zip')!.valueChanges.subscribe(async zip => {
-  //   this.form.patchValue({ city: '', state: '' }, { emitEvent: false });
-  //   if (zip && zip.length == 5) {
-  //     const response = await this.generalInformationService.getStateAndCityByZip(zip);
-  //     if (response) {
-  //       this.form.patchValue({
-  //         city: response.city,
-  //         state: response.state
-  //       }, { emitEvent: false });
-  //     }
-  //   }
-  //   //this.selectedAccount = this.settingsFormsService.updateCityAndStateFromZip(this.form, this.selectedAccount);
-  //   this.saveChanges();
-  //   //  });
-  // }
-
-  // async getPostalCodeInfo(zip: string) {
-  //   this.form.patchValue({ city: '', state: '' }, { emitEvent: false });
-  //   if (zip && zip.length == 5) {
-  //     const response = await this.generalInformationService.getStateAndCity(zip);
-  //     if (response.length > 0) {
-  //       this.form.patchValue({
-  //         city: response[0].address.city,
-  //         state: response[0].address.state
-  //       }, { emitEvent: false });
-  //     }
-  //   }
-  //   this.saveChanges();
-  // }
-
   async getAddressInfo() {
-    //this.showModal = true;
-    //this.loading = true;
-    //const addressString = this.form.get('modalAddress')?.value;
     this.selectedCountry = this.form.get('country')?.value;
     console.log('Country code is' + this.selectedCountry);
     const addressString = this.modalAddress?.value;
@@ -154,8 +118,6 @@ export class GeneralInformationFormComponent implements OnInit {
       if (response && response.length > 0) {
         this.addressOptions = response.filter(data => 
           data.address?.country_code == this.selectedCountry.toLowerCase());
-        //  this.addressOptions = response;
-        // this.loading = false;
         console.log(this.addressOptions);
         if (this.addressOptions.length == 0)
           this.isSuccessful = false;
@@ -163,8 +125,6 @@ export class GeneralInformationFormComponent implements OnInit {
       }
       else {
         this.addressOptions = [];
-        //  this.showModal = false;
-        //   this.loading = false;
         this.isSuccessful = false;
       }
     }
@@ -213,7 +173,6 @@ export class GeneralInformationFormComponent implements OnInit {
   }
 
   async saveChanges() {
-    //this.isSuccessful = true;
     this.isFormChange = true;
     if (!this.inAccount) {
       if (!this.inWizard) {

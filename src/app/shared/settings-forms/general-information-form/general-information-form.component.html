@@ -9,12 +9,6 @@
         <span class="alert alert-danger" *ngIf="form.get('name').hasError('required')">{{formNameLabel}} name is
             required</span>
 
-        <!-- <div class="mb-3">
-            <label for="address">Address</label>
-            <input type="text" class="form-control" formControlName="address" autocomplete="shipping street-address"
-                (input)="saveChanges()" onfocus="this.select();" minlength="1" maxlength="60">
-        </div> -->
-
         <div class="col-12 mb-3">
             <label for="country">Country</label>
             <select class="form-select" formControlName="country" (change)="saveChanges()">
@@ -37,25 +31,11 @@
                 </div>
                 <div>
                     <input type="text" class="form-control" formControlName="address" (input)="saveChanges()">
-                    <!-- <button type="button" class="search-btn" (click)="openModal()">
-                        <i class="fa fa-search"></i>
-                    </button> -->
                 </div>
             </div>
-
-            <!-- <span class="alert alert-info address-alert" *ngIf="!isSuccessful">Address not found. Please enter
-                manually.</span> -->
-
-            <!-- <div class="loader-overlay" *ngIf="loading">
-                <div class="spinner"></div>
-            </div> -->
-
             <div class="modal-overlay" *ngIf="showModal">
                 <div class="modal-content">
                     <span class="modal-header mb-3">Address Lookup</span>
-
-                    <!-- <div class="col-12"> -->
-                    <!-- <label for="address">Address</label> -->
                     <div class="address-container">
 
                         <input type="text" class="form-control" [formControl]="modalAddress"
@@ -65,12 +45,9 @@
                             Search
                         </button>
                     </div>
-                    <!-- </div> -->
 
                     <div>
-                        <span class="alert alert-info address-alert" *ngIf="!isSuccessful">Address not found. Please
-                            enter
-                            manually.</span>
+                        <span class="alert alert-info address-alert" *ngIf="!isSuccessful">Address not found. Please enter manually.</span>
                     </div>
 
                     <ul class="address-list" *ngIf="addressOptions.length > 0">
@@ -90,28 +67,6 @@
             </div>
         </div>
         <div class="row">
-            <!-- <div class="mb-3 col-md-6 col-sm-12">
-                <label for="country">Country</label>
-                <select class="form-select" formControlName="country" (change)="saveChanges()">
-                    <option *ngFor="let country of countries" [ngValue]="country.code">{{country.name}}</option>
-                </select>
-            </div> -->
-            <!-- <div class="mb-3 col-md-6 col-sm-12" *ngIf="form.controls.country.value == 'US'">
-                <label for="state">State</label>
-                <select class="form-select" formControlName="state" (change)="saveChanges()">
-                    <option *ngFor="let state of states" [ngValue]="state.name">{{state.name}}</option>
-                </select>
-            </div>
-            <div class="mb-3 col-md-6 col-sm-12" [ngClass]="{'col-6':form.controls.country.value == 'US'}">
-                <label for="city">City</label>
-                <input type="text" class="form-control" formControlName="city" (input)="saveChanges()"
-                    onfocus="this.select();" minlength="1" maxlength="85">
-            </div>
-            <div class="mb-3 col-md-6 col-sm-12" *ngIf="form.controls.country.value == 'US'">
-                <label for="zip">Zip</label>
-                <input type="text" class="form-control" formControlName="zip" (input)="saveChanges()"
-                    autocomplete="postal-code" onfocus="this.select();" minlength="1" maxlength="12">
-            </div> -->
             <div class="mb-3 col-md-6 col-sm-12" *ngIf="form.controls.country.value == 'US'">
                 <label for="state">State</label>
                 <input type="text" class="form-control" formControlName="state" (input)="saveChanges()">
