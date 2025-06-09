@@ -83,6 +83,7 @@ export class TopPerformersChartComponent {
         margin: { r: 0, t: 50 }
       };
       var config = {
+        modeBarButtonsToRemove: ['lasso2d', 'select2d', 'toggleSpikelines', 'hoverClosestCartesian', 'hoverCompareCartesian'],
         displaylogo: false,
         responsive: true
       };

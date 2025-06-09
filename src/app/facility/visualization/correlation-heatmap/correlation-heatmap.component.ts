@@ -113,6 +113,7 @@ export class CorrelationHeatmapComponent {
           }
         }
         let config = {
+          modeBarButtonsToRemove: ['lasso2d', 'select2d', 'toggleSpikelines', 'hoverClosestCartesian', 'hoverCompareCartesian'],
           displaylogo: false,
           responsive: true
         };

@@ -93,7 +93,7 @@ export class EmissionsReductionsChartComponent {
     }
 
     let config = {
-      modeBarButtonsToRemove: ['autoScale2d', 'lasso2d', 'pan2d', 'select2d', 'toggleSpikelines', 'hoverClosestCartesian', 'hoverCompareCartesian'],
+      modeBarButtonsToRemove: ['lasso2d', 'select2d', 'toggleSpikelines', 'hoverClosestCartesian', 'hoverCompareCartesian'],
       displaylogo: false,
       responsive: true,
     };

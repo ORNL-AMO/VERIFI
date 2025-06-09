@@ -99,6 +99,7 @@ export class MeterUsageDonutComponent {
       };
 
       let config = {
+        displayModeBar: true,
         displaylogo: false,
         responsive: true
       }

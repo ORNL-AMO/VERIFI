@@ -97,6 +97,7 @@ export class EmissionsDonutComponent {
       };
 
       let config = {
+        displayModeBar: true,
         displaylogo: false,
         responsive: true
       }

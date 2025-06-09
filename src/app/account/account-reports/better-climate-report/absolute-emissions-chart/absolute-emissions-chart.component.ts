@@ -131,7 +131,7 @@ export class AbsoluteEmissionsChartComponent {
       margin: { t: 10 }
     };
     let config = {
-      modeBarButtonsToRemove: ['autoScale2d', 'lasso2d', 'pan2d', 'select2d', 'toggleSpikelines', 'hoverClosestCartesian', 'hoverCompareCartesian', 'autoscale', 'zoom', 'zoomin', 'zoomout'],
+      modeBarButtonsToRemove: ['lasso2d', 'select2d', 'toggleSpikelines', 'hoverClosestCartesian', 'hoverCompareCartesian'],
       displaylogo: false,
       responsive: true,
     };

@@ -181,8 +181,7 @@ export class CalanderizationChartComponent implements OnInit {
       };
       var config = { 
         responsive: true,
-        modeBarButtonsToRemove: ['autoScale2d', 'lasso2d', 'pan2d', 'select2d', 'toggleSpikelines', 'hoverClosestCartesian', 'hoverCompareCartesian', 'autoscale', 'zoom', 'zoomin', 'zoomout'],
-        displaylogo: false,
+        modeBarButtonsToRemove: ['lasso2d', 'select2d', 'toggleSpikelines', 'hoverClosestCartesian', 'hoverCompareCartesian'],
       };
       this.plotlyService.newPlot(this.monthlyMeterDataChart.nativeElement, traceData, layout, config);
     }

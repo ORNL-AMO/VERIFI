@@ -58,6 +58,7 @@ export class AccountWaterUsageDonutComponent {
       };
 
       let config = {
+        displayModeBar: true,
         displaylogo: false,
         responsive: true
       }

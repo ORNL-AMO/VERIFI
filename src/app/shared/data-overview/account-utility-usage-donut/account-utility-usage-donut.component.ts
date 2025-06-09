@@ -64,6 +64,7 @@ export class AccountUtilityUsageDonutComponent {
       };
 
       let config = {
+        displayModeBar: true,
         displaylogo: false,
         responsive: true
       }

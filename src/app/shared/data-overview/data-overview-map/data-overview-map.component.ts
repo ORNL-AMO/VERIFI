@@ -121,6 +121,7 @@ export class DataOverviewMapComponent {
       };
 
       let config = {
+        modeBarButtonsToRemove:['lasso2d', 'select2d', 'toggleSpikelines', 'hoverClosestCartesian', 'hoverCompareCartesian'],
         displaylogo: false,
         responsive: true,
         scrollZoom: false
