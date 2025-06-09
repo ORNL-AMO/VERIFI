@@ -23,13 +23,36 @@
         </ul>
     </div>
     <div>
-        <ul class="nav nav-tabs">
-            <li class="nav-item">
-                <a class="nav-link home-link" (click)="goToDashboard()">
-                    <i class="fa fa-list"></i>
-                    All Facility Reports
-                </a>
-            </li>
-        </ul>
+        <div>
+            <ul class="nav nav-tabs">
+                <li class="nav-item dropdown">
+                     <a class="nav-link home-link dropdown-toggle" (click)="toggleShow()">
+                        <i class="fa fa-file"></i>
+                        {{selectedReport.name}}
+                    </a>
+                    <ul class="dropdown-menu" [ngClass]="{'show': showDropdown}">
+                        <div class="menu-scroll-section">
+                            <ng-container *ngFor="let report of reportList">
+                                <li
+                                    *ngIf="selectedReport.guid != report.guid && selectedReport.facilityReportType == report.facilityReportType">
+                                    <a class="dropdown-item" (click)="selectItem(report)">
+                                        <i class="fa fa-file"></i>
+                                        {{report.name}}
+                                    </a>
+                                </li>
+                            </ng-container>
+                        </div>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li>
+                            <a class="dropdown-item" (click)="goToDashboard()">
+                                <i class="fa fa-list"></i> All Facility Reports
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
     </div>
 </div>
