@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
-import { Subscription, firstValueFrom } from 'rxjs';
+import { Subscription, catchError, firstValueFrom, of, switchMap } from 'rxjs';
 import { Countries, Country } from 'src/app/shared/form-data/countries';
 import { FirstNaicsList, NAICS, SecondNaicsList, ThirdNaicsList } from 'src/app/shared/form-data/naics-data';
 import { State, States } from 'src/app/shared/form-data/states';
@@ -11,20 +11,19 @@ import { SetupWizardService } from 'src/app/setup-wizard/setup-wizard.service';
 import { FacilityClassification, FacilityClassifications } from 'src/app/models/constantsAndTypes';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { GeneralInformationService } from './general-information.service';
 
 @Component({
-    selector: 'app-general-information-form',
-    templateUrl: './general-information-form.component.html',
-    styleUrls: ['./general-information-form.component.css'],
-    standalone: false
+  selector: 'app-general-information-form',
+  templateUrl: './general-information-form.component.html',
+  styleUrls: ['./general-information-form.component.css'],
+  standalone: false
 })
 export class GeneralInformationFormComponent implements OnInit {
   @Input()
   inAccount: boolean;
   @Input()
   inWizard: boolean;
-
-
 
   form: FormGroup;
   unitsOfMeasure: string;
@@ -40,8 +39,16 @@ export class GeneralInformationFormComponent implements OnInit {
   states: Array<State> = States;
   isFormChange: boolean = false;
   facilityClassifications: Array<FacilityClassification> = FacilityClassifications;
+
+  addressOptions: any[] = [];
+  showModal: boolean = false;
+  addressDisplayed: string;
+  isSuccessful: boolean = true;
+  modalAddress = new FormControl('');
+  selectedCountry: string;
+
   constructor(private accountDbService: AccountdbService, private settingsFormsService: SettingsFormsService, private facilityDbService: FacilitydbService,
-    private setupWizardService: SetupWizardService) { }
+    private setupWizardService: SetupWizardService, private generalInformationService: GeneralInformationService) { }
 
   ngOnInit(): void {
     if (this.inAccount) {
@@ -100,6 +107,58 @@ export class GeneralInformationFormComponent implements OnInit {
         });
       }
     }
+  }
+
+  async getAddressInfo() {
+    this.selectedCountry = this.form.get('country')?.value;
+    const addressString = this.modalAddress?.value;
+    if (addressString) {
+      const response = await this.generalInformationService.getCompleteAddress(addressString);
+      if (response && response.length > 0) {
+        this.addressOptions = response.filter(data => 
+          data.address?.country_code == this.selectedCountry.toLowerCase());
+        if (this.addressOptions.length == 0)
+          this.isSuccessful = false;
+        else this.isSuccessful = true;
+      }
+      else {
+        this.addressOptions = [];
+        this.isSuccessful = false;
+      }
+    }
+  }
+
+  selectAddress(addressOption: any) {
+    let houseNo: string;
+    let road: string;
+    if (addressOption) {
+      houseNo = addressOption.address?.house_number || '';
+      road = addressOption.address?.road || '';
+      this.addressDisplayed = houseNo + " " + road;
+      if (this.addressDisplayed.length == 1)
+        this.addressDisplayed = addressOption.display_name;
+      this.form.patchValue({
+        address: this.addressDisplayed,
+        city: addressOption.address.city || addressOption.address.town,
+        state: addressOption.address.state,
+        zip: addressOption.address.postcode
+      }, { emitEvent: false });
+    }
+    this.saveChanges();
+    this.isSuccessful = true;
+    this.showModal = false;
+    this.addressOptions = [];
+  }
+
+  openModal() {
+    this.modalAddress.reset();
+    this.showModal = true;
+  }
+
+  closeModal() {
+    this.showModal = false;
+    this.isSuccessful = true;
+    this.addressOptions = [];
   }
 
   ngOnDestroy() {

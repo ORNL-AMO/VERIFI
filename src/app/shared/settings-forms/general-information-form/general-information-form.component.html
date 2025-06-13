@@ -9,35 +9,45 @@
         <span class="alert alert-danger" *ngIf="form.get('name').hasError('required')">{{formNameLabel}} name is
             required</span>
 
-        <div class="mb-3">
-            <label for="address">Address</label>
-            <input type="text" class="form-control" formControlName="address" autocomplete="shipping street-address"
-                (input)="saveChanges()" onfocus="this.select();" minlength="1" maxlength="60">
+        <div class="col-12 mb-3">
+            <label for="country">Country</label>
+            <select class="form-select" formControlName="country" (change)="saveChanges()">
+                <option *ngFor="let country of countries" [ngValue]="country.code">{{country.name}}</option>
+            </select>
         </div>
 
         <div class="row">
-            <div class="mb-3 col-md-6 col-sm-12">
-                <label for="country">Country</label>
-                <select class="form-select" formControlName="country" (change)="saveChanges()">
-                    <option *ngFor="let country of countries" [ngValue]="country.code">{{country.name}}</option>
-                </select>
+            <div class="col-12 mb-3">
+                <div class="row">
+                    <div class="col-6">
+                        <label for="address">Address</label>
+                        <span class="address-link" (click)="openModal()">Search Address</span>
+                    </div>
+                    <div class="col-6">
+                        <app-label-with-tooltip [field]="'settingsAddressLabel'" [isRequired]="false"
+                            [isFloatRight]="true">
+                        </app-label-with-tooltip>
+                    </div>
+                </div>
+                <div>
+                    <input type="text" class="form-control" formControlName="address" (input)="saveChanges()">
+                </div>
             </div>
+        </div>
+        <div class="row">
             <div class="mb-3 col-md-6 col-sm-12" *ngIf="form.controls.country.value == 'US'">
                 <label for="state">State</label>
-                <select class="form-select" formControlName="state" (change)="saveChanges()">
-                    <option *ngFor="let state of states" [ngValue]="state.name">{{state.name}}</option>
-                </select>
+                <input type="text" class="form-control" formControlName="state" (input)="saveChanges()">
             </div>
             <div class="mb-3 col-md-6 col-sm-12" [ngClass]="{'col-6':form.controls.country.value == 'US'}">
                 <label for="city">City</label>
-                <input type="text" class="form-control" formControlName="city" (input)="saveChanges()"
-                    onfocus="this.select();" minlength="1" maxlength="85">
+                <input type="text" class="form-control" formControlName="city" (input)="saveChanges()">
             </div>
             <div class="mb-3 col-md-6 col-sm-12" *ngIf="form.controls.country.value == 'US'">
                 <label for="zip">Zip</label>
-                <input type="text" class="form-control" formControlName="zip" (input)="saveChanges()"
-                    autocomplete="postal-code" onfocus="this.select();" minlength="1" maxlength="12">
+                <input type="text" class="form-control" formControlName="zip" (input)="saveChanges()">
             </div>
+
         </div>
 
         <div class="row">
@@ -246,3 +256,40 @@
 
     </ng-container>
 </form>
+<div class="modal-overlay" *ngIf="showModal">
+    <div class="modal-content">
+        <span class="modal-header">Address Lookup</span>
+        <p class="modal-help">
+            <i class="far fa-question-circle"></i>
+            Enter location details such as city, zip code or street address to search for a list of locations. Select
+            the location to fill out the form data.
+        </p>
+        <div class="address-container">
+
+            <input type="text" class="form-control" [formControl]="modalAddress" placeholder="Type your address">
+            <button (click)="getAddressInfo()">
+                <i class="fa fa-search"></i>
+                Search
+            </button>
+        </div>
+
+        <div>
+            <span class="alert alert-info address-alert" *ngIf="!isSuccessful">Address not found. Please enter
+                manually.</span>
+        </div>
+
+        <ul class="address-list" *ngIf="addressOptions.length > 0">
+            <label class="address-option" *ngFor="let addressOption of addressOptions">
+                <input class="form-check-input" type="radio" [value]="addressOption.place_id"
+                    (change)="selectAddress(addressOption)" />
+                <div class="address-content">
+                    <i class="fas fa-map-marker-alt icon"></i>
+                    <span class="text">{{ addressOption.display_name }}</span>
+                </div>
+            </label>
+        </ul>
+
+        <button class="close-btn" (click)="closeModal()">Close</button>
+
+    </div>
+</div>
