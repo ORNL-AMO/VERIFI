@@ -38,6 +38,7 @@ export class EditBillComponent implements OnInit {
   isElectron: boolean;
   savedUtilityFilePath: string;
   utilityFileDeleted: boolean = false;
+  deletedPath: string;
   key: string;
   constructor(private activatedRoute: ActivatedRoute, private utilityMeterDataDbService: UtilityMeterDatadbService,
     private utilityMeterDbService: UtilityMeterdbService, private loadingService: LoadingService,
@@ -84,9 +85,11 @@ export class EditBillComponent implements OnInit {
 
       this.electronService.getDeletedFile(this.key).subscribe(deleted => {
         this.utilityFileDeleted = deleted;
-        if(this.utilityFileDeleted) {
-          this.savedUtilityFilePath = null;
-        }
+         console.log('deleted path is: ' + this.savedUtilityFilePath);
+        this.deletedPath = this.savedUtilityFilePath;
+        // if(this.utilityFileDeleted) {
+        //   this.savedUtilityFilePath = null;
+        // }
         this.cd.detectChanges();
       });
     }

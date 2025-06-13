@@ -94,7 +94,7 @@ export class ElectronService {
       if(this.currentKey &&  this.fileDeletedSubject[this.currentKey]) {
         this.fileDeletedSubject[this.currentKey].next(!exists);
         if(!exists) {
-          this.savedUtilityFilePath[this.currentKey].next(null);
+         // this.savedUtilityFilePath[this.currentKey].next(null);
         }
       }
     });
@@ -211,10 +211,10 @@ export class ElectronService {
   openFileLocation(key: string) {
     this.currentKey = key;
     const path = this.savedUtilityFilePath[this.currentKey].getValue();
-    if(!path) {
-      this.fileDeletedSubject[this.currentKey].next(true);
-      return;
-    }
+    // if(!path) {
+    //   this.fileDeletedSubject[this.currentKey].next(true);
+    //   return;
+    // }
     this.checkUtilityFileExists(this.currentKey, path);
     const isDeleted = this.fileDeletedSubject[this.currentKey].value;
     if(!isDeleted) {
