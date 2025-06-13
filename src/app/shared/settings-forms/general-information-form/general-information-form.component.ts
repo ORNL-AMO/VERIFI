@@ -111,14 +111,12 @@ export class GeneralInformationFormComponent implements OnInit {
 
   async getAddressInfo() {
     this.selectedCountry = this.form.get('country')?.value;
-    console.log('Country code is' + this.selectedCountry);
     const addressString = this.modalAddress?.value;
     if (addressString) {
       const response = await this.generalInformationService.getCompleteAddress(addressString);
       if (response && response.length > 0) {
         this.addressOptions = response.filter(data => 
           data.address?.country_code == this.selectedCountry.toLowerCase());
-        console.log(this.addressOptions);
         if (this.addressOptions.length == 0)
           this.isSuccessful = false;
         else this.isSuccessful = true;

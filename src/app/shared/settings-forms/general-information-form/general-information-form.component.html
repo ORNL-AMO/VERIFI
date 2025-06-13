@@ -33,38 +33,6 @@
                     <input type="text" class="form-control" formControlName="address" (input)="saveChanges()">
                 </div>
             </div>
-            <div class="modal-overlay" *ngIf="showModal">
-                <div class="modal-content">
-                    <span class="modal-header mb-3">Address Lookup</span>
-                    <div class="address-container">
-
-                        <input type="text" class="form-control" [formControl]="modalAddress"
-                            placeholder="Type your address">
-                        <button (click)="getAddressInfo()">
-                            <i class="fa fa-search"></i>
-                            Search
-                        </button>
-                    </div>
-
-                    <div>
-                        <span class="alert alert-info address-alert" *ngIf="!isSuccessful">Address not found. Please enter manually.</span>
-                    </div>
-
-                    <ul class="address-list" *ngIf="addressOptions.length > 0">
-                        <label class="address-option" *ngFor="let addressOption of addressOptions">
-                            <input class="form-check-input" type="radio" [value]="addressOption.place_id"
-                                (change)="selectAddress(addressOption)" />
-                            <div class="address-content">
-                                <i class="fas fa-map-marker-alt icon"></i>
-                                <span class="text">{{ addressOption.display_name }}</span>
-                            </div>
-                        </label>
-                    </ul>
-
-                    <button class="close-btn" (click)="closeModal()">Close</button>
-
-                </div>
-            </div>
         </div>
         <div class="row">
             <div class="mb-3 col-md-6 col-sm-12" *ngIf="form.controls.country.value == 'US'">
@@ -288,3 +256,40 @@
 
     </ng-container>
 </form>
+<div class="modal-overlay" *ngIf="showModal">
+    <div class="modal-content">
+        <span class="modal-header">Address Lookup</span>
+        <p class="modal-help">
+            <i class="far fa-question-circle"></i>
+            Enter location details such as city, zip code or street address to search for a list of locations. Select
+            the location to fill out the form data.
+        </p>
+        <div class="address-container">
+
+            <input type="text" class="form-control" [formControl]="modalAddress" placeholder="Type your address">
+            <button (click)="getAddressInfo()">
+                <i class="fa fa-search"></i>
+                Search
+            </button>
+        </div>
+
+        <div>
+            <span class="alert alert-info address-alert" *ngIf="!isSuccessful">Address not found. Please enter
+                manually.</span>
+        </div>
+
+        <ul class="address-list" *ngIf="addressOptions.length > 0">
+            <label class="address-option" *ngFor="let addressOption of addressOptions">
+                <input class="form-check-input" type="radio" [value]="addressOption.place_id"
+                    (change)="selectAddress(addressOption)" />
+                <div class="address-content">
+                    <i class="fas fa-map-marker-alt icon"></i>
+                    <span class="text">{{ addressOption.display_name }}</span>
+                </div>
+            </label>
+        </ul>
+
+        <button class="close-btn" (click)="closeModal()">Close</button>
+
+    </div>
+</div>

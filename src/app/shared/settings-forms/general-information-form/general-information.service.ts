@@ -12,7 +12,6 @@ export class GeneralInformationService {
   async getCompleteAddress(address: string): Promise<Array<NominatimResponse>> {
     if(address){
       let url = `https://nominatim.openstreetmap.org/search?q=${address}&format=json&addressdetails=1`;
-      console.log(url);
       try{
         const response = await fetch(url);
         const data = await response.json();
