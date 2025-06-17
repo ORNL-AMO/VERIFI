@@ -204,9 +204,7 @@ export class DefaultUnitsFormComponent implements OnInit {
   }
 
   setSelectedSubregionEmissions(needSave: boolean) {
-    console.log(this.eGridService.co2Emissions);
     this.selectedSubregionEmissions = this.eGridService.co2Emissions.find(region => { return this.form.controls.eGridSubregion.value === region.subregion; });
-    console.log(this.selectedSubregionEmissions);
     if (needSave) {
       this.saveChanges();
     }
