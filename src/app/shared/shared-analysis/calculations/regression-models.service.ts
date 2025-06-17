@@ -220,12 +220,12 @@ export class RegressionModelsService {
     if (model.f.pvalue > .1) {
       model['isValid'] = false;
       modeValidationNotes.push('Model p-Value > .1');
-     // modelNotes.push('Model p-Value > .1');
+      // modelNotes.push('Model p-Value > .1');
     }
 
     model.t.p.forEach((val, index) => {
       if (val > .2 && index != 0) {
-     //   modelNotes.push(model.predictorVariables[index - 1].name + ' p-Value > .2')
+        //   modelNotes.push(model.predictorVariables[index - 1].name + ' p-Value > .2')
         modeValidationNotes.push(model.predictorVariables[index - 1].name + ' p-Value > .2');
         model['isValid'] = false;
       }
@@ -241,13 +241,13 @@ export class RegressionModelsService {
     if (!hasLessThan) {
       model['isValid'] = false;
       modeValidationNotes.push('No variable p-Value < 0.1');
-   //   modelNotes.push('No variable p-Value < 0.1')
+      //   modelNotes.push('No variable p-Value < 0.1')
     }
 
     if (model.R2 < .5) {
       model['isValid'] = false;
       modeValidationNotes.push('R2 < .5');
-   //   modelNotes.push('R2 < .5');
+      //   modelNotes.push('R2 < .5');
     }
 
     if (model.adjust_R2 < .5) {
@@ -264,7 +264,11 @@ export class RegressionModelsService {
       dataValidationNotes.push(note);
     })
     model['SEPValidation'] = validationCheck.SEPValidation;
-    model['SEPValidationPass'] = validationCheck.SEPValidation.every(SEPValidation => SEPValidation.isValid);
+    if (validationCheck.SEPValidation) {
+      model['SEPValidationPass'] = validationCheck.SEPValidation.every(SEPValidation => SEPValidation.isValid);
+    } else {
+      model['SEPValidationPass'] = false;
+    }
     model['modelNotes'] = modelNotes;
     model['dataValidationNotes'] = dataValidationNotes;
     model['modelValidationNotes'] = modeValidationNotes;
@@ -414,7 +418,7 @@ export class RegressionModelsService {
         variableValid = true;
       }
 
-      if(baselineYearError && reportYearError) {
+      if (baselineYearError && reportYearError) {
         variableNotes.push(variable.name + ' failed in baseline and report year.')
       }
       else if (baselineYearError) {
