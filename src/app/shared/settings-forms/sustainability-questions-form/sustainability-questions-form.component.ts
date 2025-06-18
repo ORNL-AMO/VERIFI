@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { FormGroup } from '@angular/forms';
+import { FormControl, FormGroup } from '@angular/forms';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
@@ -9,10 +9,10 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
-    selector: 'app-sustainability-questions-form',
-    templateUrl: './sustainability-questions-form.component.html',
-    styleUrls: ['./sustainability-questions-form.component.css'],
-    standalone: false
+  selector: 'app-sustainability-questions-form',
+  templateUrl: './sustainability-questions-form.component.html',
+  styleUrls: ['./sustainability-questions-form.component.css'],
+  standalone: false
 })
 export class SustainabilityQuestionsFormComponent implements OnInit {
   @Input()
@@ -40,6 +40,7 @@ export class SustainabilityQuestionsFormComponent implements OnInit {
           this.fiscalYearOption = account.fiscalYear;
           if (this.isFormChange == false) {
             this.form = this.settingsFormsService.getSustainabilityQuestionsForm(account);
+            this.form.addControl('isBetterPlantsPartner', new FormControl(account.isBetterPlantsPartner))
           } else {
             this.isFormChange = false;
           }
@@ -66,6 +67,7 @@ export class SustainabilityQuestionsFormComponent implements OnInit {
           this.fiscalYearOption = account.fiscalYear;
           if (this.isFormChange == false) {
             this.form = this.settingsFormsService.getSustainabilityQuestionsForm(account);
+            this.form.addControl('isBetterPlantsPartner', new FormControl(account.isBetterPlantsPartner))
           } else {
             this.isFormChange = false;
           }
@@ -108,6 +110,7 @@ export class SustainabilityQuestionsFormComponent implements OnInit {
       }
       if (this.inAccount) {
         this.selectedAccount = this.settingsFormsService.updateAccountFromSustainabilityQuestionsForm(this.form, this.selectedAccount);
+        this.selectedAccount.isBetterPlantsPartner = this.form.controls['isBetterPlantsPartner'].value;
         let updatedAccount: IdbAccount = await firstValueFrom(this.accountDbService.updateWithObservable(this.selectedAccount));
         let allAccounts: Array<IdbAccount> = await firstValueFrom(this.accountDbService.getAll());
         this.accountDbService.selectedAccount.next(updatedAccount);
@@ -120,6 +123,7 @@ export class SustainabilityQuestionsFormComponent implements OnInit {
       }
       if (this.inAccount) {
         this.selectedAccount = this.settingsFormsService.updateAccountFromSustainabilityQuestionsForm(this.form, this.selectedAccount);
+        this.selectedAccount.isBetterPlantsPartner = this.form.controls['isBetterPlantsPartner'].value
         this.setupWizardService.account.next(this.selectedAccount);
       }
     }

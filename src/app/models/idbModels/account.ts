@@ -13,6 +13,7 @@ export interface IdbAccount extends IdbEntry, AccountAndFacility {
     isSharedBackupFile?: boolean,
     sharedFileAuthor?: string
     deleteAccount?: boolean,
+    isBetterPlantsPartner?: boolean,
     assessmentReportVersion?: 'AR4' | 'AR5'
 }
 
