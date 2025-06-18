@@ -187,9 +187,14 @@ export class RegressionModelMenuComponent implements OnInit {
   }
 
   checkFailedValidationModels() {
-    this.noDataValidationModels = this.group.models.find(model => 
-      {return model.SEPValidation.every(SEPValidation => SEPValidation.isValid) == true}) == undefined;
-    if(!this.showFailedValidationModel && this.noDataValidationModels){
+    this.noDataValidationModels = this.group.models.find(model => {
+      if (model.SEPValidation) {
+        return model.SEPValidation.every(SEPValidation => SEPValidation.isValid) == true
+      }else{
+        return undefined;
+      }
+    }) == undefined;
+    if (!this.showFailedValidationModel && this.noDataValidationModels) {
       this.showFailedValidationModel = true;
     }
     this.saveFailedValidationChange();

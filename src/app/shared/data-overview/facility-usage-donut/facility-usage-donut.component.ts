@@ -5,10 +5,10 @@ import { AccountOverviewService } from 'src/app/account/account-overview/account
 import { AccountOverviewFacility } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
 
 @Component({
-    selector: 'app-facility-usage-donut',
-    templateUrl: './facility-usage-donut.component.html',
-    styleUrls: ['./facility-usage-donut.component.css'],
-    standalone: false
+  selector: 'app-facility-usage-donut',
+  templateUrl: './facility-usage-donut.component.html',
+  styleUrls: ['./facility-usage-donut.component.css'],
+  standalone: false
 })
 export class FacilityUsageDonutComponent {
   @Input()
@@ -21,6 +21,8 @@ export class FacilityUsageDonutComponent {
   accountOverviewFacilities: Array<AccountOverviewFacility>;
   @Input()
   inHomeScreen: boolean;
+  isVisible: boolean = true;
+  titleText: string;
 
   @ViewChild('usageDonut', { static: false }) usageDonut: ElementRef;
 
@@ -57,26 +59,38 @@ export class FacilityUsageDonutComponent {
   }
 
   drawChart() {
+    let hasNoValue = this.getValues().every(value => value == 0)
     if (this.usageDonut && this.accountOverviewFacilities) {
-      var data = [{
-        values: this.getValues(),
-        labels: this.accountOverviewFacilities.map(summary => { return summary.facility.name }),
-        marker: {
-          colors: this.accountOverviewFacilities.map(summary => { return summary.facility.color }),
-          line: {
-            color: '#fff',
-            width: 5
-          }
-        },
-        texttemplate: '%{label}: (%{percent:.1%})',
-        textposition: 'auto',
-        insidetextorientation: "horizontal",
-        hovertemplate: this.getHoverTemplate(),
-        hole: .5,
-        type: 'pie',
-        automargin: true
-      }];
+      let values = [null, ...this.getValues()];
+      let labels = ['rootLabel', ...this.accountOverviewFacilities.map(summary => { return summary.facility.name })];
+      let parents = ['', ...this.accountOverviewFacilities.map(() => '')];
+      let colors = [null, ...this.accountOverviewFacilities.map(summary => { return summary.facility.color })];
+      let data = [];
 
+      if (hasNoValue) {
+        this.isVisible = false;
+      }
+      else {
+        this.isVisible = true;
+        data = [{
+          type: "treemap",
+          values: values,
+          labels: labels,
+          parents: parents,
+          texttemplate: '%{label}<br>%{percentParent:.1%}',
+          hovertemplate: this.getHoverTemplate(labels),
+          textposition: 'auto',
+          insidetextorientation: "horizontal",
+          automargin: true,
+          marker: {
+            colors: colors,
+            line: {
+              color: '#fff',
+              width: 0
+            }
+          }
+        }];
+      }
       let height: number;
       if (this.inHomeScreen) {
         height = 350;
@@ -84,6 +98,13 @@ export class FacilityUsageDonutComponent {
 
       var layout = {
         height: height,
+        title: {
+          text: this.titleText,
+          font: {
+            size: 14,
+            family: 'Arial'
+          }
+        },
         margin: { "t": 50, "b": 50, "l": 50, "r": 50 },
         showlegend: false
       };
@@ -96,15 +117,19 @@ export class FacilityUsageDonutComponent {
     }
   }
 
-  getHoverTemplate(): string {
+  getHoverTemplate(labels: any): string {
     if (this.dataType == 'energyUse') {
-      return '%{label}: %{value:,.0f} ' + this.energyUnit + ' <extra></extra>';
+      this.titleText = '<b>Company Energy Use Breakdown</b>';
+      return labels.map(label => label == 'rootLabel' ? '' : ('%{label}: %{value:,.0f} ' + this.energyUnit + ' <extra></extra>'));
     } else if (this.dataType == 'cost') {
-      return '%{label}: %{value:$,.0f} <extra></extra>';
+      this.titleText = '<b>Company Utility Cost Breakdown</b>';
+      return labels.map(label => label == 'rootLabel' ? '' : ('%{label}: %{value:$,.0f} <extra></extra>'));
     } else if (this.dataType == 'water') {
-      return '%{label}: %{value:,.0f} ' + this.waterUnit + ' <extra></extra>'
+      this.titleText = '<b>Company Water Flow Breakdown</b>';
+      return labels.map(label => label == 'rootLabel' ? '' : ('%{label}: %{value:,.0f} ' + this.waterUnit + ' <extra></extra>'));
     } else if (this.dataType == 'emissions') {
-      return '%{label}: %{value:,.0f} tonne CO<sub>2</sub>e <extra></extra>'
+      this.titleText = '<b>Company Emissions Breakdown</b>';
+      return labels.map(label => label == 'rootLabel' ? '' : ('%{label}: %{value:,.0f} tonne CO<sub>2</sub>e <extra></extra>'));
     }
   }
 

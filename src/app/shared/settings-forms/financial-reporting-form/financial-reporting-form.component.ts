@@ -10,10 +10,10 @@ import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
-    selector: 'app-financial-reporting-form',
-    templateUrl: './financial-reporting-form.component.html',
-    styleUrls: ['./financial-reporting-form.component.css'],
-    standalone: false
+  selector: 'app-financial-reporting-form',
+  templateUrl: './financial-reporting-form.component.html',
+  styleUrls: ['./financial-reporting-form.component.css'],
+  standalone: false
 })
 export class FinancialReportingFormComponent implements OnInit {
   @Input()
@@ -106,6 +106,16 @@ export class FinancialReportingFormComponent implements OnInit {
         let allAccounts: Array<IdbAccount> = await firstValueFrom(this.accountDbService.getAll());
         this.accountDbService.selectedAccount.next(updatedAccount);
         this.accountDbService.allAccounts.next(allAccounts);
+        let accountFacilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
+        if (accountFacilities && accountFacilities.length > 0) {
+          for (let i = 0; i < accountFacilities.length; i++) {
+            accountFacilities[i].fiscalYear = updatedAccount.fiscalYear;
+            accountFacilities[i].fiscalYearMonth = updatedAccount.fiscalYearMonth;
+            accountFacilities[i].fiscalYearCalendarEnd = updatedAccount.fiscalYearCalendarEnd;
+            await firstValueFrom(this.facilityDbService.updateWithObservable(accountFacilities[i]));
+          }
+        }
+        this.facilityDbService.accountFacilities.next(accountFacilities);
       }
     } else {
       if (!this.inAccount) {
