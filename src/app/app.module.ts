@@ -1,7 +1,7 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations'
 import { NgModule } from '@angular/core';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormsModule } from '@angular/forms';
 import { AppRoutingModule } from './routing/app-routing.module';
 import { AppComponent } from './app.component';
 import { HeaderComponent } from './core-components/header/header.component';
@@ -33,7 +33,6 @@ import { DeletingAccountDataComponent } from './core-components/deleting-account
 import { SurveyModalComponent } from './core-components/survey-modal/survey-modal.component';
 import { SurveyToastComponent } from './core-components/survey-toast/survey-toast.component';
 import { UserSurveyModule } from './shared/user-survey/user-survey.module';
-import { ExportEnergyTreasureHuntModalComponent } from './core-components/export-energy-treasure-hunt-modal/export-energy-treasure-hunt-modal.component';
 
 @NgModule({
     declarations: [
@@ -52,8 +51,7 @@ import { ExportEnergyTreasureHuntModalComponent } from './core-components/export
         ElectronBackupFileComponent,
         DeletingAccountDataComponent,
         SurveyModalComponent,
-        SurveyToastComponent,
-        ExportEnergyTreasureHuntModalComponent
+        SurveyToastComponent
     ],
     bootstrap: [AppComponent],
     imports: [

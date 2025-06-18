@@ -133,9 +133,4 @@ export class FacilityHomeSummaryComponent implements OnInit {
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     this.exportToExcelTemplateService.exportFacilityData(selectedFacility.guid);
   }
-
-
-  openTreasureHuntModal() {
-    this.sharedDataService.exportEnergyTreasureHuntModalOpen.next(true);
-  }
 }

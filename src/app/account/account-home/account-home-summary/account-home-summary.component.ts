@@ -9,7 +9,6 @@ import { ExportToExcelTemplateService } from 'src/app/shared/helper-services/exp
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
-import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 
 @Component({
     selector: 'app-account-home-summary',
@@ -29,8 +28,7 @@ export class AccountHomeSummaryComponent implements OnInit {
   constructor(private accountDbService: AccountdbService, private accountHomeService: AccountHomeService,
     private router: Router,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private exportToExcelTemplateService: ExportToExcelTemplateService,
-    private sharedDataService: SharedDataService
+    private exportToExcelTemplateService: ExportToExcelTemplateService
     ) { }
 
   ngOnInit(): void {
@@ -96,9 +94,4 @@ export class AccountHomeSummaryComponent implements OnInit {
       this.waterAnalysisNeeded = false;
     }
   }
-
-  openTreasureHuntModal(){
-    this.sharedDataService.exportEnergyTreasureHuntModalOpen.next(true);
-  }
-
 }
