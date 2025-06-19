@@ -13,7 +13,7 @@
                     </div>
                 </div>
                 <div class="col-6" *ngIf="setupForm.controls.reportType.value != 'dataOverview'">
-                    <div class="row form-group" *ngIf="setupForm.controls.reportType.value != 'betterPlants'">
+                    <div class="row form-group" *ngIf="setupForm.controls.reportType.value != 'betterPlants' && setupForm.controls.reportType.value != 'analysis'">
                         <label class="col-5 col-form-label semibold" for="baselineYear">Baseline Year</label>
 
                         <div class="col-7">
@@ -86,6 +86,8 @@
             <app-performance-setup *ngIf="setupForm.controls.reportType.value == 'performance'"></app-performance-setup>
             <app-better-climate-setup
                 *ngIf="setupForm.controls.reportType.value == 'betterClimate'"></app-better-climate-setup>
+            <app-analysis-report-setup
+                *ngIf="setupForm.controls.reportType.value == 'analysis'"></app-analysis-report-setup>
         </ng-container>
         <ng-container *ngIf="setupForm.valid == false || errorMessage.length > 0">
             <div class="alert alert-warning text-center">

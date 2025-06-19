@@ -79,6 +79,7 @@ export class AccountReportsBannerComponent {
     let betterPlantsValid: boolean = true;
     let dataOverviewValid: boolean = true;
     let performanceValid: boolean = true;
+    let analysisValid: boolean = true;
     if (report.reportType == 'dataOverview') {
       if (this.errorMessage.length > 0) {
         dataOverviewValid = false;
@@ -93,8 +94,10 @@ export class AccountReportsBannerComponent {
         betterPlantsValid = this.accountReportsService.getBetterPlantsFormFromReport(report.betterPlantsReportSetup).valid;
       } else if (report.reportType == 'performance') {
         performanceValid = this.accountReportsService.getPerformanceFormFromReport(report.performanceReportSetup).valid;
+      } else if (report.reportType == 'analysis') {
+        analysisValid = this.accountReportsService.getAnalysisFormFromReport(report.analysisReportSetup).valid;
       }
-      this.setupValid = (setupValid && betterPlantsValid && performanceValid);
+      this.setupValid = (setupValid && betterPlantsValid && performanceValid && analysisValid);
     }
   }
 
@@ -107,6 +110,8 @@ export class AccountReportsBannerComponent {
       this.router.navigateByUrl('/account/reports/dashboard/performance')
     } else if (this.selectedReport.reportType == 'betterClimate') {
       this.router.navigateByUrl('/account/reports/dashboard/better-climate')
+    } else if (this.selectedReport.reportType == 'analysis') {
+      this.router.navigateByUrl('/account/reports/dashboard/analysis')
     } else {
       this.router.navigateByUrl('/account/reports/dashboard')
     }

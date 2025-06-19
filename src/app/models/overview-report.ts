@@ -165,3 +165,7 @@ export interface BetterClimateReportSetup {
     }>
   }>
 }
+
+export interface AnalysisReportSetup {
+  analysisItemId: string
+}

@@ -1,0 +1,14 @@
+<div class="report" [ngClass]="{'print': print}">
+    <ng-container *ngIf="facilityDetails">
+        <app-analysis-facility-report
+            [facilityDetails]="facilityDetails"></app-analysis-facility-report>
+    </ng-container>
+</div>
+
+<div class="w-100 justify-content-center" *ngIf="!facilityDetails">
+    <div class="pt-5">
+        <app-calculating-spinner [message]="'Generating Analysis Report...'"></app-calculating-spinner>
+    </div>
+</div>
+
+<app-print-report-button *ngIf="facilityDetails"></app-print-report-button>

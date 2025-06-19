@@ -53,7 +53,10 @@ import { AbsoluteEmissionsChartComponent } from './better-climate-report/absolut
 import { TopEmissionsPerformersTableComponent } from './better-climate-report/top-emissions-performers-table/top-emissions-performers-table.component';
 import { TopPerformersChartComponent } from './better-climate-report/top-performers-chart/top-performers-chart.component';
 import { AccountReportTypePipe } from './report-pipes/account-report-type.pipe';
-
+import { AnalysisReportDashboardComponent } from './account-reports-dashboard/analysis-report-dashboard/analysis-report-dashboard.component';
+import { AnalysisReportComponent } from './analysis-report/analysis-report.component';
+import { AnalysisReportSetupComponent } from './account-report-setup/analysis-report-setup/analysis-report-setup.component';
+import { AnalysisFacilityReportComponent } from './analysis-report/analysis-facility-report/analysis-facility-report.component';
 
 @NgModule({
   declarations: [
@@ -104,7 +107,11 @@ import { AccountReportTypePipe } from './report-pipes/account-report-type.pipe';
     AbsoluteEmissionsChartComponent,
     TopEmissionsPerformersTableComponent,
     TopPerformersChartComponent,
-    AccountReportTypePipe
+    AccountReportTypePipe,
+    AnalysisReportDashboardComponent,
+    AnalysisReportComponent,
+    AnalysisReportSetupComponent,
+    AnalysisFacilityReportComponent
   ],
   imports: [
     CommonModule,
