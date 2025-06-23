@@ -6,6 +6,7 @@ const { autoUpdater } = require('electron-updater');
 const jetpack = require('fs-jetpack');
 const { event } = require('jquery');
 const fs = require('fs');
+const os = require('os');
 
 function isDev() {
     //TODO: check for isDev. Latest electron update breaks old
@@ -187,21 +188,64 @@ ipcMain.on("openDialog", (event, arg) => {
 
 });
 
-ipcMain.on("uploadFileDialog", async (event) => {
+// ipcMain.on("uploadFileDialog", async (event) => {
+//     log.info('open upload bill dialog');
+//     const result = await dialog.showOpenDialog({
+//         properties: ['openFile']
+//     });
+//     if (result && result.filePaths.length > 0){
+//         win.webContents.send('utility-file-path', result.filePaths[0]);
+//         log.info('path selected is ' + result.filePaths[0]);
+//     }
+// });
+
+ipcMain.on("uploadFileDialog", async (event, {key, meterNumber, date}) => {
     log.info('open upload bill dialog');
     const result = await dialog.showOpenDialog({
-        properties: ['openFile']
+        properties: ['openFile'],
     });
-    if (result && result.filePaths.length > 0){
-        win.webContents.send('utility-file-path', result.filePaths[0]);
-        log.info('path selected is ' + result.filePaths[0]);
+    if (result.canceled || result.filePaths.length === 0) {
+        log.info('File selection was canceled');
+        return;
     }
+
+    const originalFilePath = result.filePaths[0];
+    const fileExtension = path.extname(originalFilePath).toLowerCase();
+    //const originalFileName = path.basename(originalFilePath);
+
+    const userDocuments = path.join(os.homedir(), 'Documents');
+    const uploadFolder = path.join(userDocuments, 'VERIFI Utility Bills');
+
+    try {
+        if (!fs.existsSync(uploadFolder)) {
+            fs.mkdirSync(uploadFolder, { recursive: true });
+        }
+    } catch (err) {
+        log.error('Error creating upload folder:', err);
+        dialog.showErrorBox('Folder Creation Error', 'An error occurred while creating the upload folder.');
+    }
+
+    meterNumber = meterNumber.trim().split(/\s+/).join('_');
+
+    const newFileName = `${meterNumber}_${date}${fileExtension}`;
+    const destinationPath = path.join(uploadFolder, newFileName);
+
+    fs.copyFile(originalFilePath, destinationPath, (err) => {
+        if (err) {
+            log.error('Error copying file:', err);
+            dialog.showErrorBox('File Upload Error', 'An error occurred while uploading the file.');
+            return;
+        }
+        log.info('File copied to upload folder: ' + destinationPath);
+        win.webContents.send('utility-file-path', destinationPath);
+    });
 });
+
 
 ipcMain.on("openUploadedFileLocation", (event, filepath) => {
     log.info('File opened at location ' + filepath);
-    if(filepath){
-        shell.showItemInFolder(filepath);
+    if (filepath) {
+        shell.openPath(filepath);
     }
 });
 

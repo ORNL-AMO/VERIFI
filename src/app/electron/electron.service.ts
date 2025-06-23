@@ -179,14 +179,14 @@ export class ElectronService {
     window["electronAPI"].send("getDataFile", args);
   }
 
-  selectFile(key: string) {
+  selectFile(key: string, meterNumber: string, date: string) {
     console.log('Inside selectFile()');
     if (!window["electronAPI"]) {
       return;
     }
     this.checkKeyExists(key);
     this.currentKey = key;
-    window["electronAPI"].send("uploadFileDialog", key);
+    window["electronAPI"].send("uploadFileDialog", {key, meterNumber, date});
   }
 
   checkKeyExists(key: string) {

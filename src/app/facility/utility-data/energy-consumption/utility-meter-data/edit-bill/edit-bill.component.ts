@@ -189,7 +189,10 @@ export class EditBillComponent implements OnInit {
 
    async uploadBill() {
     console.log('upload bill');
-    await this.electronService.selectFile(this.key);
+    let date;
+    if((this.editMeterData.readDate))
+      date = this.editMeterData.readDate.getFullYear() + '-' + (this.editMeterData.readDate.getMonth() + 1) + '-' + this.editMeterData.readDate.getDate();
+    await this.electronService.selectFile(this.key, this.editMeterData.meterNumber, date);
   }
 
   async openBillLocation() {    

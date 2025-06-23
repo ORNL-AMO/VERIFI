@@ -35,27 +35,33 @@
     [invalidDate]="invalidDate">
 </app-edit-other-emissions-bill>
 
-<div class="mt-3" *ngIf="isElectron">
-    <h5>
-        
-            <span class="fa-solid fa-link"></span>
-       
-        Connect Utility Bill
-    </h5>
-    <ng-container *ngIf="!savedUtilityFilePath || utilityFileDeleted">
-        <button class="btn btn-outline mt-2" (click)="uploadBill()">
-            Connect Bill
-        </button>
-    </ng-container>
-    <ng-container *ngIf="savedUtilityFilePath && !utilityFileDeleted">
-        <p class="mt-3">
-            This file is available at: <br>
-            <a class="click-link" (click)="openBillLocation()">{{ savedUtilityFilePath }}</a>
-        </p>
-    </ng-container>
-    <ng-container *ngIf="utilityFileDeleted">
-        <p class="mt-2" style="color: red;">
-            The file has been deleted from the location {{ deletedPath }}
-        </p>
-    </ng-container>
+<div class="shadow-sm p-3 mb-3 mt-3 bg-light rounded" *ngIf="isElectron">
+    <div class="align-items-center justify-content-center">
+        <h4 class="text-center">
+            <span class="fa-solid fa-link me-2"></span>
+            Connect Utility Bill
+        </h4>
+        <div class="mb-3 text-center fw-bold">
+            The utility bill connected to this meter will be copied to 'C:\Users\&lt;USERNAME&gt;\Documents\VERIFI
+            Utility Bills'
+        </div>
+        <ng-container *ngIf="!savedUtilityFilePath || utilityFileDeleted">
+            <div class="text-center">
+                <button class="btn btn-outline mt-2" (click)="uploadBill()">
+                    Connect Bill
+                </button>
+            </div>
+        </ng-container>
+        <ng-container *ngIf="savedUtilityFilePath && !utilityFileDeleted">
+            <div class="alert alert-success mt-3 text-center">
+                The selected file is available at: &nbsp;
+                <a class="click-link" (click)="openBillLocation()">{{ savedUtilityFilePath }}</a>
+            </div>
+        </ng-container>
+        <ng-container *ngIf="utilityFileDeleted">
+            <div class="alert alert-danger mt-3 text-center">
+                The file has been deleted from the location {{ deletedPath }}
+            </div>
+        </ng-container>
+    </div>
 </div>
