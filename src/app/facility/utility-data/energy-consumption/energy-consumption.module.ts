@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
-import { HelperPipesModule } from 'src/app/shared/helper-pipes/helper-pipes.module';
+import { HelperPipesModule } from 'src/app/shared/helper-pipes/_helper-pipes.module';
 import { RouterModule } from '@angular/router';
 import { TableItemsDropdownModule } from 'src/app/shared/table-items-dropdown/table-items-dropdown.module';
 import { SharedMeterContentModule } from 'src/app/shared/shared-meter-content/shared-meter-content.module';

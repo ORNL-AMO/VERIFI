@@ -18,6 +18,7 @@ import { WeatherDataService } from 'src/app/weather-data/weather-data.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { PredictorDataHelperService } from 'src/app/shared/helper-services/predictor-data-helper.service';
+import { getWeatherSearchFromFacility } from 'src/app/shared/sharedHelperFuntions';
 // import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
 
 @Component({
@@ -272,6 +273,17 @@ export class PredictorsDataTableComponent {
           this.weatherDataService.heatingTemp = this.predictor.heatingBaseTemperature;
         }
       }
+      let entryDate: Date = new Date(predictorEntry.date);
+      this.weatherDataService.selectedYear = entryDate.getFullYear();
+      this.weatherDataService.selectedDate = entryDate;
+      this.weatherDataService.selectedMonth = entryDate;
+      let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+      this.weatherDataService.selectedFacility = selectedFacility;
+      this.weatherDataService.addressSearchStr = getWeatherSearchFromFacility(selectedFacility);
+      //TODO: Update to new route
+      // this.router.navigateByUrl('weather-data/monthly-station');
+    } else {
+      this.toastNotificationService.showToast('An Error Occured', undefined, undefined, false, 'alert-danger');
     }
   }
 
@@ -294,7 +306,7 @@ export class PredictorsDataTableComponent {
     this.weatherDataService.selectedFacility = facility;
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     this.weatherDataService.selectedFacility = selectedFacility;
-    this.weatherDataService.zipCode = selectedFacility.zip;
+    this.weatherDataService.addressSearchStr = getWeatherSearchFromFacility(selectedFacility);
     this.router.navigateByUrl('/weather-data');
   }
 

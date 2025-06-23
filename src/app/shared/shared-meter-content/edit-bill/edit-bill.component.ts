@@ -159,12 +159,12 @@ export class EditBillComponent implements OnInit {
     } else if (this.editMeter.source == 'Other') {
       this.displayVolumeInput = (getIsEnergyUnit(this.editMeter.startingUnit) == false);
       this.displayEnergyUse = (getIsEnergyUnit(this.editMeter.startingUnit) == true);
-      this.meterDataForm = this.utilityMeterDataService.getGeneralMeterDataForm(this.editMeterData, this.displayVolumeInput, this.displayEnergyUse, this.displayHeatCapacity, false);
+      this.meterDataForm = this.utilityMeterDataService.getGeneralMeterDataForm(this.editMeterData, this.displayVolumeInput, this.displayEnergyUse, this.displayHeatCapacity, false, this.editMeter.source);
     } else {
       this.displayVolumeInput = (getIsEnergyUnit(this.editMeter.startingUnit) == false);
       this.displayEnergyUse = getIsEnergyMeter(this.editMeter.source);
       this.displayVehicleFuelEfficiency = (this.editMeter.scope == 2 && this.editMeter.vehicleCategory == 2);
-      this.meterDataForm = this.utilityMeterDataService.getGeneralMeterDataForm(this.editMeterData, this.displayVolumeInput, this.displayEnergyUse, this.displayHeatCapacity, this.displayVehicleFuelEfficiency);
+      this.meterDataForm = this.utilityMeterDataService.getGeneralMeterDataForm(this.editMeterData, this.displayVolumeInput, this.displayEnergyUse, this.displayHeatCapacity, this.displayVehicleFuelEfficiency, this.editMeter.source);
       if (this.displayVolumeInput) {
         this.meterDataForm.controls.totalEnergyUse.disable();
       }

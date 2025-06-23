@@ -72,7 +72,7 @@ export class SharedMeterCalendarizationComponent {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if (changes['selectedMeter'] && !changes['selectedMeter'].firstChange){
+    if (changes['selectedMeter'] && !changes['selectedMeter'].firstChange) {
       this.setHasMeterData();
       this.setCalanderizedMeterData();
     }
@@ -99,7 +99,8 @@ export class SharedMeterCalendarizationComponent {
       let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
       let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
       let facilityMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
-      let allCalanderizedMeterData: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, facilityMeterData, this.selectedFacility, false, undefined, this.eGridService.co2Emissions, customFuels, [this.selectedFacility]);
+      let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+      let allCalanderizedMeterData: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, facilityMeterData, this.selectedFacility, false, undefined, this.eGridService.co2Emissions, customFuels, [this.selectedFacility], selectedAccount.assessmentReportVersion);
 
       let calanderizedMeterData: Array<CalanderizedMeter> = allCalanderizedMeterData.filter(cMeter => {
         return cMeter.meter.guid == this.selectedMeter.guid

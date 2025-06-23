@@ -17,7 +17,6 @@
         <app-utility-meter-data-filter *ngIf="selectedMeter.source == 'Electricity'" [meter]="selectedMeter"
             [filterType]="'table'">
         </app-utility-meter-data-filter>
-
         <div class="d-flex">
             <!--Bulk Delete-->
             <div class="pe-2 bulk-delete" [class.show]="hasCheckedItems">
@@ -38,6 +37,38 @@
     </div>
 
     <div class="meter">
+        <div *ngIf="hasNegativeReadings" class="p-1 small alert alert-warning text-center">
+            Negative energy use entered for one or more readings.
+        </div>
+        <div *ngIf="duplicateReadingDates.length > 0" class="p-1 alert alert-danger">
+            Two or more readings have been entered for the same day. Calanderization will experience errors.
+            <ul class="mb-0">
+                <li *ngFor="let d of duplicateReadingDates">
+                    {{d | date}}
+                </li>
+            </ul>
+        </div>
+        <!--<div class="meterData">
+
+            <p class="section-name bold">
+                {{meterListItem.idbMeter.name}}
+                <span class="alert-danger" *ngIf="meterListItem.errorDate">
+                    {{meterListItem.errorDate | date}} has multiple data entries.
+                </span>
+                <span class="alert-warning" *ngIf="meterListItem.warningDate">
+                    {{meterListItem.warningDate | date:'MMM, y'}} has multiple data entries. <a
+                        (click)="ignoreSameMonth(meterListItem.idbMeter)">Ignore <b>duplicate</b> months for this
+                        meter</a>
+                </span>
+                <span class="alert-warning" *ngIf="meterListItem.missingMonth">
+                    {{meterListItem.missingMonth | date:'MMMM, y'}} is missing a data entry. <a
+                        (click)="ignoreMissingMonth(meterListItem.idbMeter)">Ignore <b>missing</b> months this meter</a>
+                </span>
+            </p>
+            <p *ngIf="meterListItem.idbMeter.visible">{{meterListItem.idbMeter.notes}}</p>
+        </div>
+    -->
+
         <div class="row no-margin">
             <div class="col no-margin table-responsive">
                 <app-electricity-data-table *ngIf="selectedMeter.source == 'Electricity'"

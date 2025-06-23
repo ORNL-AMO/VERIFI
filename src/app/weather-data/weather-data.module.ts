@@ -14,7 +14,7 @@ import { AnnualStationGraphComponent } from './annual-station-data/annual-statio
 import { MonthlyStationDataComponent } from './monthly-station-data/monthly-station-data.component';
 import { MonthlyStationGraphComponent } from './monthly-station-data/monthly-station-graph/monthly-station-graph.component';
 import { MonthlyStationTableComponent } from './monthly-station-data/monthly-station-table/monthly-station-table.component';
-import { HelperPipesModule } from '../shared/helper-pipes/helper-pipes.module';
+import { HelperPipesModule } from '../shared/helper-pipes/_helper-pipes.module';
 import { CalculatingSpinnerModule } from '../shared/calculating-spinner/calculating-spinner.module';
 import { OrderDegreeDayDetailsPipe } from './monthly-station-data/monthly-station-table/order-degree-day-details.pipe';
 

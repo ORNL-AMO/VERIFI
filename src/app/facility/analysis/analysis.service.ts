@@ -17,6 +17,7 @@ export class AnalysisService {
 
   analysisTableColumns: BehaviorSubject<AnalysisTableColumns>;
   showInvalidModels: BehaviorSubject<boolean>;
+  showFailedValidationModels: BehaviorSubject<boolean>;
   calculating: BehaviorSubject<boolean | 'error'>;
   annualAnalysisSummary: BehaviorSubject<Array<AnnualAnalysisSummary>>;
   monthlyAccountAnalysisData: BehaviorSubject<Array<MonthlyAnalysisSummaryData>>;
@@ -31,6 +32,7 @@ export class AnalysisService {
     this.selectedGroup = new BehaviorSubject<AnalysisGroup>(undefined);
     this.dataDisplay = new BehaviorSubject<"graph" | "table">(dataDisplay);
     this.showInvalidModels = new BehaviorSubject<boolean>(false);
+    this.showFailedValidationModels = new BehaviorSubject<boolean>(true);
     this.calculating = new BehaviorSubject<boolean>(true);
     this.annualAnalysisSummary = new BehaviorSubject([]);
     this.monthlyAccountAnalysisData = new BehaviorSubject([]);
@@ -98,14 +100,34 @@ export class AnalysisService {
         let yearDataAdjustments: Array<{ year: number, amount: number }> = new Array();
         let baselineAdjustments: Array<{ year: number, amount: number }> = new Array();
         for (let year: number = analysisItem.baselineYear + 1; year <= analysisItem.reportYear; year++) {
-          yearDataAdjustments.push({
-            year: year,
-            amount: 0
+          let currentDataAdjustment = group.dataAdjustments.find(adjustment => {
+            return adjustment.year == year
           });
-          baselineAdjustments.push({
-            year: year,
-            amount: 0
+          if (currentDataAdjustment) {
+            yearDataAdjustments.push({
+              year: year,
+              amount: currentDataAdjustment.amount
+            });
+          } else {
+            yearDataAdjustments.push({
+              year: year,
+              amount: 0
+            });
+          }
+          let currentBaselineAdjustment = group.baselineAdjustmentsV2.find(adjustment => {
+            return adjustment.year == year
           });
+          if (currentBaselineAdjustment) {
+            baselineAdjustments.push({
+              year: year,
+              amount: currentBaselineAdjustment.amount
+            });
+          } else {
+            baselineAdjustments.push({
+              year: year,
+              amount: 0
+            });
+          }
         }
         group.dataAdjustments = yearDataAdjustments;
         group.baselineAdjustmentsV2 = baselineAdjustments;

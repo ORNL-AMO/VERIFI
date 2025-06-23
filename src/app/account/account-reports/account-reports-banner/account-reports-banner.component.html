@@ -10,42 +10,68 @@
             </li>
             <li class="nav-item" [ngClass]="{'disabled': !setupValid}"
                 *ngIf="selectedReport.reportType == 'betterPlants'">
-                <a class="nav-link" routerLink="/account/reports/better-plants-report"
-                    [routerLinkActive]="['active']">
+                <a class="nav-link" routerLink="/account/reports/better-plants-report" [routerLinkActive]="['active']">
                     <i class="fa fa-file"></i>
                     Better Plants Report</a>
             </li>
             <li class="nav-item" [ngClass]="{'disabled': !setupValid}"
                 *ngIf="selectedReport.reportType == 'dataOverview'">
-                <a class="nav-link" routerLink="/account/reports/data-overview-report"
-                    [routerLinkActive]="['active']">
+                <a class="nav-link" routerLink="/account/reports/data-overview-report" [routerLinkActive]="['active']">
                     <i class="fa fa-file"></i>
                     Data Overview</a>
             </li>
             <li class="nav-item" [ngClass]="{'disabled': !setupValid}"
                 *ngIf="selectedReport.reportType == 'performance'">
-                <a class="nav-link" routerLink="/account/reports/performance-report"
-                    [routerLinkActive]="['active']">
+                <a class="nav-link" routerLink="/account/reports/performance-report" [routerLinkActive]="['active']">
                     <i class="fa fa-file"></i>
                     Performance Report</a>
             </li>
             <li class="nav-item" [ngClass]="{'disabled': !setupValid}"
                 *ngIf="selectedReport.reportType == 'betterClimate'">
-                <a class="nav-link" routerLink="/account/reports/better-climate-report"
-                    [routerLinkActive]="['active']">
+                <a class="nav-link" routerLink="/account/reports/better-climate-report" [routerLinkActive]="['active']">
                     <i class="fa fa-file"></i>
                     Better Climate Report</a>
             </li>
         </ul>
     </div>
     <div>
-        <ul class="nav nav-tabs">
-            <li class="nav-item">
-                <a class="nav-link home-link" (click)="goToDashboard()">
-                    <i class="fa fa-list"></i>
-                    All Account Reports
-                </a>
-            </li>
-        </ul>
+        <div>
+            <ul class="nav nav-tabs">
+                <li class="nav-item dropdown">
+                    <a class="nav-link home-link dropdown-toggle" (click)="toggleShow()">
+                        <i class="fa fa-file"></i>
+                        {{selectedReport.name}}
+                        <ng-container *ngIf="selectedReport.reportType != 'dataOverview'">
+                            - ({{selectedReport.reportYear}})
+                        </ng-container>
+                    </a>
+
+                    <ul class="dropdown-menu" [ngClass]="{'show': showDropdown}">
+                        <div class="menu-scroll-section">
+                            <ng-container *ngFor="let report of reportList">
+                                <li
+                                    *ngIf="selectedReport.guid != report.guid && selectedReport.reportType == report.reportType">
+                                    <a class="dropdown-item" (click)="selectItem(report)">
+                                        <i class="fa fa-file"></i>
+                                        {{report.name}}
+                                        <span class="badge text-bg-secondary ms-2 float-right" *ngIf="selectedReport.reportType == 'betterPlants' || selectedReport.reportType == 'performance' || selectedReport.reportType == 'betterClimate'">
+                                            {{report.reportYear}}
+                                        </span>
+                                    </a>
+                                </li>
+                            </ng-container>
+                        </div>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li>
+                            <a class="dropdown-item" (click)="goToDashboard()">
+                                <i class="fa fa-list"></i> All Account Reports
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
     </div>
 </div>

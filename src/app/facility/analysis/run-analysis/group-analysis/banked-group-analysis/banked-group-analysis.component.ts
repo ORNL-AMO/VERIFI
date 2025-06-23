@@ -19,6 +19,8 @@ import { getCalanderizedMeterData } from 'src/app/calculations/calanderization/c
 import { AnnualFacilityAnalysisSummaryClass } from 'src/app/calculations/analysis-calculations/annualFacilityAnalysisSummaryClass';
 import { getNeededUnits } from 'src/app/calculations/shared-calculations/calanderizationFunctions';
 import { AnalysisReportSettings, getAnalysisReportSettings } from 'src/app/models/idbModels/facilityReport';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { IdbAccount } from 'src/app/models/idbModels/account';
 
 @Component({
     selector: 'app-banked-group-analysis',
@@ -48,7 +50,8 @@ export class BankedGroupAnalysisComponent {
     private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private predictorDataDbService: PredictorDataDbService,
-    private predictorDbService: PredictorDbService
+    private predictorDbService: PredictorDbService,
+    private accountDbService: AccountdbService
   ) {
 
   }
@@ -88,7 +91,7 @@ export class BankedGroupAnalysisComponent {
     let facilityMeterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getFacilityMeterDataByFacilityGuid(this.bankedAnalysisItem.facilityId);
     let accountPredictorEntries: Array<IdbPredictorData> = this.predictorDataDbService.getByFacilityId(this.bankedAnalysisItem.facilityId);
     let accountPredictors: Array<IdbPredictor> = this.predictorDbService.getByFacilityId(this.bankedAnalysisItem.facilityId);
-
+    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     // this.bankedAnalysisItem.reportYear = this.selectedGroup.bankedAnalysisYear;
     if (typeof Worker !== 'undefined') {
       this.worker = new Worker(new URL('src/app/web-workers/annual-facility-analysis.worker', import.meta.url));
@@ -113,11 +116,12 @@ export class BankedGroupAnalysisComponent {
         calculateAllMonthlyData: false,
         accountPredictors: accountPredictors,
         accountAnalysisItems: accountAnalysisItems,
-        includeGroupSummaries: true
+        includeGroupSummaries: true,
+        assessmentReportVersion: account.assessmentReportVersion
       });
     } else {
       // Web Workers are not supported in this environment.     
-      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, facilityMeterData, this.facility, false, { energyIsSource: this.bankedAnalysisItem.energyIsSource, neededUnits: getNeededUnits(this.bankedAnalysisItem) }, [], [], [this.facility]);
+      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(facilityMeters, facilityMeterData, this.facility, false, { energyIsSource: this.bankedAnalysisItem.energyIsSource, neededUnits: getNeededUnits(this.bankedAnalysisItem) }, [], [], [this.facility], account.assessmentReportVersion);
       let annualAnalysisSummaryClass: AnnualFacilityAnalysisSummaryClass = new AnnualFacilityAnalysisSummaryClass(this.bankedAnalysisItem, this.facility, calanderizedMeters, accountPredictorEntries, false, accountPredictors, undefined, true);
       this.groupSummary = annualAnalysisSummaryClass.groupSummaries.find(summary => {
         return summary.group.idbGroupId == this.selectedGroup.idbGroupId;

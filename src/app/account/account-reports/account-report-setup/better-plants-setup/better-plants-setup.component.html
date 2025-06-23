@@ -21,6 +21,9 @@
                                 Facilities Included
                             </td>
                             <td>
+                                Baseline Year
+                            </td>
+                            <td>
                             </td>
                         </tr>
                     </thead>
@@ -48,6 +51,9 @@
                                     </span>
                                 </span>
                             </td>
+                            <td>
+                                {{analysisItem.baselineYear}}
+                            </td>
                             <td class="text-center">
                                 <a class="click-link" (click)="viewAnalysis(analysisItem)">View Analysis</a>
                             </td>
@@ -60,6 +66,10 @@
                     </tbody>
                 </table>
             </div>
+            <div class="alert alert-warning text-center p-1" *ngIf="baselineYearWarning">
+                {{baselineYearWarning}}
+            </div>
+
             <!-- <div class="alert alert-danger" *ngIf="!reportOptions.analysisItemId">
             Analysis Item Required
         </div> -->

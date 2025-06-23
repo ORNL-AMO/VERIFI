@@ -6,7 +6,7 @@ import { ElectricityDataTableComponent } from './meter-data/meter-data-table/ele
 import { GeneralUtilityDataTableComponent } from './meter-data/meter-data-table/general-utility-data-table/general-utility-data-table.component';
 import { OtherEmissionsDataTableComponent } from './meter-data/meter-data-table/other-emissions-data-table/other-emissions-data-table.component';
 import { VehicleDataTableComponent } from './meter-data/meter-data-table/vehicle-data-table/vehicle-data-table.component';
-import { HelperPipesModule } from '../helper-pipes/helper-pipes.module';
+import { HelperPipesModule } from '../helper-pipes/_helper-pipes.module';
 import { RouterModule } from '@angular/router';
 import { TableItemsDropdownModule } from '../table-items-dropdown/table-items-dropdown.module';
 import { NgbDatepickerModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';

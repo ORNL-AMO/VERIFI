@@ -69,7 +69,7 @@ export class SetupFacilitiesComponent implements OnInit {
             reader.onload = (e: any) => {
               const bstr: string = e.target.result;
               let workBook: XLSX.WorkBook = XLSX.read(bstr, { type: 'binary', cellDates: true });
-              let isTemplate: "V1" | "V2" | "Non-template" = this.uploadDataService.checkSheetNamesForTemplate(workBook.SheetNames);
+              let isTemplate: "V1" | "V2" | "Non-template" | "ETH" = this.uploadDataService.checkSheetNamesForTemplate(workBook.SheetNames);
               if (isTemplate == "Non-template") {
                 this.fileUploadError = 'File selected is not a VERIFI template. Please upload template file.'
               } else {

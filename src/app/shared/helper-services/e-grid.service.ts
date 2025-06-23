@@ -22,27 +22,25 @@ export class EGridService {
   }
 
   async parseEGridData() {
-    await fetch('assets/eGrid_data/eGrid_zipcode_lookup.xlsx')
-      .then(response => response.arrayBuffer())
-      .then(buffer => {
-        let wb: XLSX.WorkBook = XLSX.read(new Uint8Array(buffer), { type: "array", raw: false });
-        //zip code regions
-        // [0: "ZIP (character)"
-        // 1: "ZIP (numeric)"
-        // 2: "state"
-        // 3: "eGRID Subregion #1"
-        // 4: "eGRID Subregion #2"
-        // 5: "eGRID Subregion #3"]
-        let sheetOne = XLSX.utils.sheet_to_json(wb.Sheets["eGrid_zipcode_lookup"], { raw: false });
-        this.setSubRegionsByZip(sheetOne)
-        //eGrid data
-        //0: SUBRGN
-        //1: YEAR
-        //2: CATEGORY
-        //3: CO2e
-        let sheetTwo = XLSX.utils.sheet_to_json(wb.Sheets["eGrid_co2"], { raw: false });
-        this.setCo2Emissions(sheetTwo);
-      });
+    let response = await fetch('assets/eGrid_data/eGrid_zipcode_lookup_2025.xlsx')
+    let buffer = await response.arrayBuffer();
+    let wb: XLSX.WorkBook = XLSX.read(new Uint8Array(buffer), { type: "array", raw: false });
+    //zip code regions
+    // [0: "ZIP (character)"
+    // 1: "ZIP (numeric)"
+    // 2: "state"
+    // 3: "eGRID Subregion #1"
+    // 4: "eGRID Subregion #2"
+    // 5: "eGRID Subregion #3"]
+    let sheetOne = XLSX.utils.sheet_to_json(wb.Sheets["eGrid_zipcode_lookup"], { raw: false });
+    this.setSubRegionsByZip(sheetOne)
+    //eGrid data
+    //0: SUBRGN
+    //1: YEAR
+    //2: CATEGORY
+    //3: CO2e
+    let sheetTwo = XLSX.utils.sheet_to_json(wb.Sheets["eGrid_data_2025"], { raw: false });
+    this.setCo2Emissions(sheetTwo);
   }
 
   setSubRegionsByZip(fileData: Array<any>) {
@@ -69,11 +67,12 @@ export class EGridService {
     csvResults.forEach(result => {
       let subregion: string = result['SUBRGN'];
       if (subregion) {
-        //TODO: issue 1597 update to handle AR5
-        let co2Emissions: number = Number(result['CO2e_AR4']);
-        let year: number = Number(result['YEAR']);
+        let CO2: number = Number(result['CO2']); 
+        let CH4: number = Number(result['CH4']); 
+        let N2O: number = Number(result['N2O']); 
+        let year: number = Number(result['Year']);
         let category: 'LocationMix' | 'ResidualMix' = result['CATEGORY'];
-        subregionEmissions = this.addEmissionRate(subregion, co2Emissions, year, category, subregionEmissions);
+        subregionEmissions = this.addEmissionRate(subregion, CO2, CH4, N2O, year, category, subregionEmissions);
       }
     });
 
@@ -86,29 +85,28 @@ export class EGridService {
       let customEmissions: Array<IdbCustomEmissionsItem> = this.customEmissionsDbService.accountEmissionsItems.getValue();
       this.co2Emissions = this.excelCo2Emissions.map(emissions => { return emissions });
       customEmissions.forEach(customEmission => {
-        this.co2Emissions.push({
-          subregion: customEmission.subregion,
-          locationEmissionRates: customEmission.locationEmissionRates,
-          residualEmissionRates: customEmission.residualEmissionRates,
-          isCustom: true
-        });
+        this.co2Emissions.push(customEmission);
       });
     }
   }
 
 
-  addEmissionRate(subregion: string, co2Emissions: number, year: number, category: 'LocationMix' | 'ResidualMix', subregionEmissions: Array<SubregionEmissions>): Array<SubregionEmissions> {
+  addEmissionRate(subregion: string, CO2: number, CH4: number, N2O: number, year: number, category: 'LocationMix' | 'ResidualMix', subregionEmissions: Array<SubregionEmissions>): Array<SubregionEmissions> {
     let subregionIndex: number = subregionEmissions.findIndex(sEmissions => { return sEmissions.subregion == subregion });
     if (subregionIndex != -1) {
       if (category == 'LocationMix') {
         subregionEmissions[subregionIndex].locationEmissionRates.push({
           year: year,
-          co2Emissions: co2Emissions
+          CO2: CO2, 
+          CH4: CH4, 
+          N2O: N2O,
         })
       } else {
         subregionEmissions[subregionIndex].residualEmissionRates.push({
           year: year,
-          co2Emissions: co2Emissions
+          CO2: CO2, 
+          CH4: CH4, 
+          N2O: N2O,
         })
       }
     } else {
@@ -118,7 +116,9 @@ export class EGridService {
           subregion: subregion,
           locationEmissionRates: [{
             year: year,
-            co2Emissions: co2Emissions
+            CO2: CO2, 
+            CH4: CH4, 
+            N2O: N2O,
           }],
           residualEmissionRates: new Array()
         })
@@ -128,7 +128,9 @@ export class EGridService {
           locationEmissionRates: new Array(),
           residualEmissionRates: [{
             year: year,
-            co2Emissions: co2Emissions
+            CO2: CO2, 
+            CH4: CH4, 
+            N2O: N2O,
           }]
         })
       }

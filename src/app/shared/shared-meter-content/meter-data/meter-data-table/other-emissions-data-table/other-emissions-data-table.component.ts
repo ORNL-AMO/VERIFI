@@ -12,12 +12,14 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
 import { UtilityMeterDataService } from 'src/app/shared/shared-meter-content/utility-meter-data.service';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { IdbAccount } from 'src/app/models/idbModels/account';
 
 @Component({
-    selector: 'app-other-emissions-data-table',
-    templateUrl: './other-emissions-data-table.component.html',
-    styleUrls: ['./other-emissions-data-table.component.css'],
-    standalone: false
+  selector: 'app-other-emissions-data-table',
+  templateUrl: './other-emissions-data-table.component.html',
+  styleUrls: ['./other-emissions-data-table.component.css'],
+  standalone: false
 })
 export class OtherEmissionsDataTableComponent {
   @Input()
@@ -54,7 +56,8 @@ export class OtherEmissionsDataTableComponent {
   constructor(private utilityMeterDataService: UtilityMeterDataService,
     private copyTableService: CopyTableService,
     private customFuelDbService: CustomFuelDbService,
-    private facilityDbService: FacilitydbService) {
+    private facilityDbService: FacilitydbService,
+    private accountDbService: AccountdbService) {
 
   }
 
@@ -139,8 +142,9 @@ export class OtherEmissionsDataTableComponent {
   setEmissions() {
     let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
+    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     this.selectedMeterData.forEach(dataItem => {
-      let emissionsValues: EmissionsResults = getEmissions(this.selectedMeter, dataItem.totalEnergyUse, this.selectedMeter.energyUnit, new Date(dataItem.readDate).getFullYear(), false, [facility], [], customFuels, dataItem.totalVolume, this.selectedMeter.vehicleCollectionUnit, this.selectedMeter.vehicleDistanceUnit, dataItem.heatCapacity);
+      let emissionsValues: EmissionsResults = getEmissions(this.selectedMeter, dataItem.totalEnergyUse, this.selectedMeter.energyUnit, new Date(dataItem.readDate).getFullYear(), false, [facility], [], customFuels, dataItem.totalVolume, this.selectedMeter.vehicleCollectionUnit, this.selectedMeter.vehicleDistanceUnit, dataItem.heatCapacity, account.assessmentReportVersion);
       dataItem.processEmissions = emissionsValues.processEmissions;
       dataItem.fugitiveEmissions = emissionsValues.fugitiveEmissions;
     })

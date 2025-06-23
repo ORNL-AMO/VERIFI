@@ -13,10 +13,10 @@ import { FileReference, getEmptyFileReference } from 'src/app/upload-data/upload
 import { UploadDataService } from 'src/app/upload-data/upload-data.service';
 
 @Component({
-    selector: 'app-manage-meters',
-    templateUrl: './manage-meters.component.html',
-    styleUrls: ['./manage-meters.component.css'],
-    standalone: false
+  selector: 'app-manage-meters',
+  templateUrl: './manage-meters.component.html',
+  styleUrls: ['./manage-meters.component.css'],
+  standalone: false
 })
 export class ManageMetersComponent implements OnInit {
 
@@ -66,7 +66,7 @@ export class ManageMetersComponent implements OnInit {
   }
 
   continue() {
-    if (!this.fileReference.isTemplate && this.metersIncluded) {
+    if (!this.fileReference.isTemplate && !this.fileReference.isTreasureHuntTemplate && this.metersIncluded) {
       let meterData: Array<IdbUtilityMeterData> = this.uploadDataService.parseExcelMeterData(this.fileReference);
       this.fileReference.meterData = meterData;
     }
@@ -137,7 +137,10 @@ export class ManageMetersComponent implements OnInit {
     }
     this.fileReference.meters[editMeterIndex] = this.editMeterFormService.updateMeterFromForm(this.editMeter, this.editMeterForm);
     this.fileReference.meters[editMeterIndex].isValid = this.editMeterFormService.getFormFromMeter(this.fileReference.meters[editMeterIndex]).valid;
-    this.fileReference.meterData = this.uploadDataService.getMeterDataEntries(this.fileReference.workbook, this.fileReference.meters);
+    if (this.fileReference.isTreasureHuntTemplate) {
+      //TODO: update meter readings in treasure hunt template
+      this.fileReference.meterData = this.uploadDataService.getMeterDataEntries(this.fileReference.workbook, this.fileReference.meters);
+    }
     this.cancelEdit();
     this.setValidMeters();
   }

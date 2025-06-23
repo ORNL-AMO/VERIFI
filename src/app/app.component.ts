@@ -302,10 +302,13 @@ export class AppComponent {
   async initializeCustomEmissions(account: IdbAccount) {
     this.loadingMessage = 'Loading Emissions Rates...';
     let customEmissionsItems: Array<IdbCustomEmissionsItem> = await this.customEmissionsDbService.getAllAccountCustomEmissions(account.guid);
-    if (customEmissionsItems.length == 0) {
-      let uSAverageItem: IdbCustomEmissionsItem = this.customEmissionsDbService.getUSAverage(account);
-      uSAverageItem = await firstValueFrom(this.customEmissionsDbService.addWithObservable(uSAverageItem));
-      customEmissionsItems.push(uSAverageItem);
+    if (customEmissionsItems.length != 0) {
+      for (let i = 0; i < customEmissionsItems.length; i++) {
+        if (customEmissionsItems[i].subregion == 'U.S. Average') {
+          await this.customEmissionsDbService.deleteWithObservable(customEmissionsItems[i].id)
+          customEmissionsItems = customEmissionsItems.filter(item => { return item.guid != customEmissionsItems[i].guid })
+        }
+      }
     }
     await this.eGridService.parseEGridData();
     this.customEmissionsDbService.accountEmissionsItems.next(customEmissionsItems);
@@ -321,6 +324,12 @@ export class AppComponent {
   async initializeCustomFuels(account: IdbAccount) {
     this.loadingMessage = 'Loading Custom Fuels...';
     let customFuels: Array<IdbCustomFuel> = await this.customFuelDbservice.getAllAccountCustomFuels(account.guid);
+    for(let i = 0; i < customFuels.length; i++){
+      if(isNaN(customFuels[i].CO2) && customFuels[i].directEmissionsRate == undefined){
+        customFuels[i].directEmissionsRate = true;
+        await firstValueFrom(this.customFuelDbservice.updateWithObservable(customFuels[i]));
+      }
+    }
     this.customFuelDbservice.accountCustomFuels.next(customFuels);
   }
 

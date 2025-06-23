@@ -18,6 +18,37 @@
                         data in
                         your system and allow you to start over fresh.
                     </p>
+                    <p>
+                        If the "Reset Database" button doesn't work you'll have to completely delete your database and
+                        refresh... <a *ngIf="!displayMoreHelp" class="click-link" (click)="showMoreHelp()"><span
+                                class="fa fa-plus"></span> View
+                            More</a>
+                        <a *ngIf="displayMoreHelp" class="click-link" (click)="hideMoreHelp()"><span
+                                class="fa fa-minus"></span> Collapse</a>
+                    </p>
+                    <div class="d-flex" *ngIf="displayMoreHelp">
+                        <ol>
+                            <li>
+                                Open the browsers "Developer Tools"
+                            </li>
+                            <li>
+                                Go to the "Application Tab"
+                            </li>
+                            <li>
+                                Find the IndexedDb Section
+                            </li>
+                            <li>
+                                Click on the "verifi" DB under IndexedDB
+                            </li>
+                            <li>
+                                Click the "Delete database" button
+                            </li>
+                            <li>
+                                Refresh the page or close/open the application
+                            </li>
+                        </ol>
+                        <img class="w-50 rounded mx-auto img" src="assets/images/resetDatabase.png">
+                    </div>
                 </div>
             </div>
             <hr>
@@ -69,11 +100,16 @@
             </div>
         </div>
     </div>
+
     <div class="row">
         <div class="col justify-content-center">
             <hr>
             <div class="card">
                 <div class="card-body d-flex justify-content-end">
+                    <div>
+                        <button class="btn action-btn me-3" (click)="addNewAccount()">Add New Account
+                        </button>
+                    </div>
                     <div>
                         <button *ngIf="!resetDatabase" class="btn btn-danger" (click)="toggleResetDatabase()">Reset
                             Database

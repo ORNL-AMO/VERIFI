@@ -4,10 +4,10 @@ import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 
 @Component({
-    selector: 'app-calanderization',
-    templateUrl: './calanderization.component.html',
-    styleUrls: ['./calanderization.component.css'],
-    standalone: false
+  selector: 'app-calanderization',
+  templateUrl: './calanderization.component.html',
+  styleUrls: ['./calanderization.component.css'],
+  standalone: false
 })
 export class CalanderizationComponent implements OnInit {
 

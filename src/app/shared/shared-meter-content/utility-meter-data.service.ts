@@ -6,6 +6,7 @@ import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { AdditionalChargesFilters, DetailedChargesFilters, ElectricityDataFilters, EmissionsFilters, GeneralInformationFilters, GeneralUtilityDataFilters, VehicleDataFilters } from 'src/app/models/meterDataFilter';
 import * as _ from 'lodash';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
+import { MeterSource } from 'src/app/models/constantsAndTypes';
 
 @Injectable({
   providedIn: 'root'
@@ -154,7 +155,8 @@ export class UtilityMeterDataService {
     }
     return this.formBuilder.group({
       readDate: [dateString, Validators.required],
-      totalEnergyUse: [meterData.totalEnergyUse, [Validators.required, Validators.min(0)]],
+      //ISSUE 1176: Validators.min(0) removed
+      totalEnergyUse: [meterData.totalEnergyUse, [Validators.required]],
       totalCost: [meterData.totalCost, [Validators.min(0)]],
       deliveryCharge: [meterData.deliveryCharge, [Validators.min(0)]],
       totalRealDemand: [meterData.totalRealDemand, [Validators.min(0)]],
@@ -218,7 +220,7 @@ export class UtilityMeterDataService {
   }
 
 
-  getGeneralMeterDataForm(meterData: IdbUtilityMeterData, displayVolumeInput: boolean, displayEnergyInput: boolean, displayHeatCapacity: boolean, displayFuelEfficiency: boolean): FormGroup {
+  getGeneralMeterDataForm(meterData: IdbUtilityMeterData, displayVolumeInput: boolean, displayEnergyInput: boolean, displayHeatCapacity: boolean, displayFuelEfficiency: boolean, source: MeterSource): FormGroup {
     //need to use date string for calander to work in form 
     let dateString: string;
     if (meterData.readDate && isNaN(new Date(meterData.readDate).getTime()) == false) {
@@ -232,7 +234,12 @@ export class UtilityMeterDataService {
     }
     let totalEnergyUseValidators: Array<ValidatorFn> = [];
     if (displayEnergyInput) {
-      totalEnergyUseValidators = [Validators.required, Validators.min(0)];
+      if (source == 'Natural Gas' || source == 'Other Energy' || source == 'Other Fuels') {
+        totalEnergyUseValidators = [Validators.required];
+      }
+      else {
+        totalEnergyUseValidators = [Validators.required, Validators.min(0)];
+      }
     }
 
     let heatCapacityValidators: Array<ValidatorFn> = [];

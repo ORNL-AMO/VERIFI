@@ -80,7 +80,7 @@ export class EditPredictorDataEntryFormComponent {
   goToWeatherData() {
     let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     this.weatherDataService.selectedFacility = facility;
-    this.weatherDataService.zipCode = facility.zip;
+    //TODO: CHECK THIS NAVIGATION TO WEATHER DATA
     this.weatherDataService.selectedMonth = this.predictorData.date;
     this.weatherDataService.selectedYear = new Date(this.predictorData.date).getFullYear();
     this.router.navigateByUrl('/weather-data');

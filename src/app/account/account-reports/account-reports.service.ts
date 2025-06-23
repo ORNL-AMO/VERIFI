@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { BetterClimateReportSetup, BetterPlantsReportSetup, DataOverviewReportSetup, PerformanceReportSetup } from 'src/app/models/overview-report';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
+import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 
 @Injectable({
   providedIn: 'root'
@@ -11,9 +12,36 @@ export class AccountReportsService {
 
   print: BehaviorSubject<boolean>;
   generateExcel: BehaviorSubject<boolean>;
-  constructor(private formBuilder: FormBuilder) {
+
+  errorMessage: BehaviorSubject<string>;
+
+  constructor(private accountReportDbService: AccountReportDbService,
+    private formBuilder: FormBuilder
+  ) {
     this.print = new BehaviorSubject<boolean>(false);
     this.generateExcel = new BehaviorSubject<boolean>(false);
+    this.errorMessage = new BehaviorSubject<string>(undefined);
+
+    this.accountReportDbService.selectedReport.subscribe(report => {
+      this.validateReport(report);
+    });
+  }
+
+  validateReport(report: IdbAccountReport) {
+    let errorMessage: string = '';
+    //write validation for report
+    if (report && report.startMonth >= 0 && report.endMonth >= 0 && report.startYear > 0  && report.endYear > 0) {
+      let startDate: Date = new Date(report.startYear, report.startMonth, 1);
+      let endDate: Date = new Date(report.endYear, report.endMonth, 1);
+      // compare start and end date
+      if (startDate.getTime() >= endDate.getTime()) {
+        errorMessage = 'Start date cannot be later than the end date.';
+      }
+      else {
+        errorMessage = '';
+      }
+    }
+    this.errorMessage.next(errorMessage)
   }
 
   getSetupFormFromReport(report: IdbAccountReport): FormGroup {
@@ -25,18 +53,32 @@ export class AccountReportsService {
       dateValidators = [Validators.required];
     }
 
-
-    let form: FormGroup = this.formBuilder.group({
-      reportName: [report.name, Validators.required],
-      reportType: [report.reportType, Validators.required],
-      reportYear: [report.reportYear, yearValidators],
-      baselineYear: [report.baselineYear, yearValidators],
-      startMonth: [report.startMonth, dateValidators],
-      startYear: [report.startYear, dateValidators],
-      endMonth: [report.endMonth, dateValidators],
-      endYear: [report.endYear, dateValidators]
-    });
-    return form;
+    if (report.reportType == 'performance' || report.reportType == 'betterClimate' || report.reportType == 'dataOverview') {
+      let form: FormGroup = this.formBuilder.group({
+        reportName: [report.name, Validators.required],
+        reportType: [report.reportType, Validators.required],
+        reportYear: [report.reportYear, yearValidators],
+        baselineYear: [report.baselineYear, yearValidators],
+        startMonth: [report.startMonth, dateValidators],
+        startYear: [report.startYear, dateValidators],
+        endMonth: [report.endMonth, dateValidators],
+        endYear: [report.endYear, dateValidators]
+      });
+      return form;
+    }
+    else if (report.reportType == 'betterPlants') {
+      let form: FormGroup = this.formBuilder.group({
+        reportName: [report.name, Validators.required],
+        reportType: [report.reportType, Validators.required],
+        reportYear: [report.reportYear, yearValidators],
+        baselineYear: [report.baselineYear, ''],
+        startMonth: [report.startMonth, dateValidators],
+        startYear: [report.startYear, dateValidators],
+        endMonth: [report.endMonth, dateValidators],
+        endYear: [report.endYear, dateValidators]
+      });
+      return form;
+    }
   }
 
   updateReportFromSetupForm(report: IdbAccountReport, form: FormGroup): IdbAccountReport {

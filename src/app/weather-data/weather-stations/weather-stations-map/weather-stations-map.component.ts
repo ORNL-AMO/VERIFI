@@ -1,14 +1,13 @@
 import { Component, SimpleChanges, ElementRef, ViewChild, Input } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { WeatherStation } from 'src/app/models/degreeDays';
-import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 import * as _ from 'lodash';
 
 @Component({
-    selector: 'app-weather-stations-map',
-    templateUrl: './weather-stations-map.component.html',
-    styleUrls: ['./weather-stations-map.component.css'],
-    standalone: false
+  selector: 'app-weather-stations-map',
+  templateUrl: './weather-stations-map.component.html',
+  styleUrls: ['./weather-stations-map.component.css'],
+  standalone: false
 })
 export class WeatherStationsMapComponent {
   @Input()
@@ -17,6 +16,23 @@ export class WeatherStationsMapComponent {
   zipCode: string;
   @Input()
   furthestDistance: number;
+  @Input()
+  addressLatLong: {
+    latitude: number,
+    longitude: number,
+  };
+  @Input()
+  stateLines = {
+    type: 'scattergeo',
+    mode: 'lines',
+    lat: [],
+    lon: [],
+    line: {
+      color: 'gray',
+      width: 1
+    },
+    showlegend: false
+  };
 
   @ViewChild('weatherStationMap', { static: false }) weatherStationMap: ElementRef;
 
@@ -26,8 +42,8 @@ export class WeatherStationsMapComponent {
     name: string,
     isZip: boolean
   }>;
-  constructor(private plotlyService: PlotlyService,
-    private eGridService: EGridService) { }
+  scope: string;
+  constructor(private plotlyService: PlotlyService) { }
 
   ngOnInit(): void {
     this.setMapData();
@@ -40,26 +56,18 @@ export class WeatherStationsMapComponent {
 
   ngOnChanges(changes: SimpleChanges) {
     if ((changes.stations && !changes.stations.isFirstChange())) {
-        this.setMapData();
-        this.drawChart();
+      this.setMapData();
+      this.drawChart();
     }
   }
 
   drawChart() {
     if (this.weatherStationMap && this.mapData && this.mapData.length != 0) {
-      let zipCodeItem: {
-        lng: string,
-        lat: string,
-        name: string,
-        isZip: boolean
-      } = this.mapData.find(item => { return item.isZip == true });
-
       var data = [{
         type: 'scattergeo',
         mode: 'markers',
         lat: this.mapData.map(item => { return item.lat }),
         lon: this.mapData.map(item => { return item.lng }),
-        // hovertext: this.getHoverData(),
         hoverinfo: 'text',
         text: this.mapData.map(item => { return item.name }),
         marker: {
@@ -78,35 +86,30 @@ export class WeatherStationsMapComponent {
               return 'blue';
             }
           }),
-          // cmin: 0,
-          // cmax: cmax,
           line: {
             color: 'black'
           },
-          // symbol: this.getSymbol()
         },
-        // name: this.getName(),
-
-        // locationmode: "USA-states",
       }];
 
-      var layout = {
-        'geo': {
-          scope: 'usa',
-          resolution: 110,
+
+      // Layout configuration
+      const layout = {
+        geo: {
+          scope: 'world',
           showland: true,
-          // landcolor: 'rgb(20, 90, 50)',
-          subunitwidth: 1,
-          countrywidth: 1,
-          // subunitcolor: 'rgb(255,255,255)',
-          // countrycolor: 'rgb(255,255,255)',
-          center: {
-            lat: zipCodeItem.lat,
-            lon: zipCodeItem.lng
+          landcolor: 'lightgray',
+          showocean: true,
+          oceancolor: 'lightblue',
+          showcountries: true,
+          countrycolor: 'black',
+          showlakes: true,
+          lakecolor: 'lightblue',
+          projection: {
+            type: 'natural earth'
           },
-          // projection: {
-          //   scale: this.getScale()
-          // }
+          lonaxis: {},
+          lataxis: {}
         },
         showlegend: false,
         margin: { "t": 0, "b": 50, "l": 0, "r": 50 },
@@ -115,10 +118,12 @@ export class WeatherStationsMapComponent {
       let config = {
         displaylogo: false,
         responsive: true,
-        // scrollZoom: false
       }
+      // Combine data and state lines
+      const allData = [this.stateLines, ...data];
 
-      this.plotlyService.newPlot(this.weatherStationMap.nativeElement, data, layout, config);
+      // Create the plot
+      this.plotlyService.newPlot(this.weatherStationMap.nativeElement, allData, layout, config);
     }
   }
 
@@ -131,27 +136,17 @@ export class WeatherStationsMapComponent {
         isZip: false
       }
     });
-    let locationLatLong: { ZIP: string, LAT: string, LNG: string } = this.eGridService.zipLatLong.find(zipLL => { return zipLL.ZIP == this.zipCode });
-    if (locationLatLong) {
+    if (this.addressLatLong) {
       this.mapData.push({
-        lat: locationLatLong.LAT,
-        lng: locationLatLong.LNG,
-        name: this.zipCode,
+        lat: this.addressLatLong.latitude.toString(),
+        lng: this.addressLatLong.longitude.toString(),
+        name: "Search Location",
         isZip: true
       })
     }
+    let countries: Array<string> = this.stations.flatMap(station => {
+      return station.country
+    });
+    countries = _.uniq(countries);
   }
-
-  getScale() {
-    if (this.furthestDistance < 10) {
-      return 25;
-    } else if (this.furthestDistance >= 10 && this.furthestDistance < 150) {
-      return 10;
-    } else if (this.furthestDistance >= 150 && this.furthestDistance < 500) {
-      return 5;
-    } else {
-      return 1;
-    }
-  }
-
 }

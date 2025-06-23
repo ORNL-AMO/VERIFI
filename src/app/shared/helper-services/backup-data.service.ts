@@ -134,7 +134,7 @@ export class BackupDataService {
     let dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(stringifyData);
     dlLink.setAttribute("href", dataStr);
     const date = new Date();
-    const dateStr = (date.getMonth() + 1) + '-' + date.getDate() + '-' + date.getFullYear();
+    const dateStr = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
     let name = backupName + dateStr;
     dlLink.setAttribute('download', name + '.json');
     dlLink.click();
@@ -780,7 +780,10 @@ export class BackupDataService {
       modelPValue: model.modelPValue,
       modelNotes: model.modelNotes,
       errorModeling: model.errorModeling,
-      SEPValidation: model.SEPValidation
+      SEPValidation: model.SEPValidation,
+      SEPValidationPass: model.SEPValidationPass,
+      dataValidationNotes: model.dataValidationNotes,
+      modelValidationNotes: model.modelValidationNotes
     }
   }
 

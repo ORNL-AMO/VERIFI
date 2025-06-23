@@ -24,7 +24,7 @@ export class ImportBackupModalComponent implements OnInit {
   backupFile: any;
   backupFileError: string;
   importIsAccount: boolean;
-  overwriteData: boolean = true;
+  overwriteData: boolean = false;
   selectedAccount: IdbAccount;
   accountFacilities: Array<IdbFacility>;
   overwriteFacility: IdbFacility;
@@ -50,6 +50,7 @@ export class ImportBackupModalComponent implements OnInit {
         this.backupFile = undefined;
         this.backupFileError = undefined;
         this.backupName = undefined;
+        this.overwriteData = false;
         this.selectedAccount = this.accountDbService.selectedAccount.getValue();
         this.accountFacilities = this.facilityDbService.accountFacilities.getValue();
         if (!this.selectedAccount) {

@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FacilityHomeComponent } from './facility-home.component';
 import { FacilityHomeSummaryComponent } from './facility-home-summary/facility-home-summary.component';
 import { RouterModule } from '@angular/router';
-import { HelperPipesModule } from 'src/app/shared/helper-pipes/helper-pipes.module';
+import { HelperPipesModule } from 'src/app/shared/helper-pipes/_helper-pipes.module';
 import { CalculatingSpinnerModule } from 'src/app/shared/calculating-spinner/calculating-spinner.module';
 import { SharedAnalysisModule } from 'src/app/shared/shared-analysis/shared-analysis.module';
 import { FacilityEnergyReductionGoalComponent } from './facility-energy-card/facility-energy-reduction-goal/facility-energy-reduction-goal.component';

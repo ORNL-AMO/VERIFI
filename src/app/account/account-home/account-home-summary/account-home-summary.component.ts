@@ -28,7 +28,8 @@ export class AccountHomeSummaryComponent implements OnInit {
   constructor(private accountDbService: AccountdbService, private accountHomeService: AccountHomeService,
     private router: Router,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private exportToExcelTemplateService: ExportToExcelTemplateService) { }
+    private exportToExcelTemplateService: ExportToExcelTemplateService
+    ) { }
 
   ngOnInit(): void {
     this.accountSub = this.accountDbService.selectedAccount.subscribe(val => {
@@ -94,6 +95,4 @@ export class AccountHomeSummaryComponent implements OnInit {
       this.waterAnalysisNeeded = false;
     }
   }
-
-
 }

@@ -12,7 +12,7 @@ import { DataWizardImportComponent } from './data-wizard-import/data-wizard-impo
 import { UploadFilesComponent } from './data-wizard-import/upload-files/upload-files.component';
 import { ProcessTemplateFileComponent } from './data-wizard-import/process-template-file/process-template-file.component';
 import { ProcessTemplateFacilitiesComponent } from './data-wizard-import/process-template-file/process-template-facilities/process-template-facilities.component';
-import { HelperPipesModule } from '../shared/helper-pipes/helper-pipes.module';
+import { HelperPipesModule } from '../shared/helper-pipes/_helper-pipes.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MeterGroupOptionsPipe } from './data-wizard-import/shared-process-file/process-meters/meter-group-options.pipe';
 import { FacilityMetersTableComponent } from './account-facilities/facility-data/facility-meters/facility-meters-table/facility-meters-table.component';

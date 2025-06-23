@@ -3,7 +3,7 @@ import { Subscription } from 'rxjs';
 import * as _ from 'lodash';
 import { CopyTableService } from 'src/app/shared/helper-services/copy-table.service';
 import { AdditionalChargesFilters, DetailedChargesFilters, EmissionsFilters, GeneralInformationFilters } from 'src/app/models/meterDataFilter';
-import { EmissionsResults } from 'src/app/models/eGridEmissions';
+import { EmissionsResults, SubregionEmissions } from 'src/app/models/eGridEmissions';
 import { getEmissions, setUtilityDataEmissionsValues } from 'src/app/calculations/emissions-calculations/emissions';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
@@ -13,12 +13,14 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
 import { UtilityMeterDataService } from 'src/app/shared/shared-meter-content/utility-meter-data.service';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { IdbAccount } from 'src/app/models/idbModels/account';
 
 @Component({
-    selector: 'app-electricity-data-table',
-    templateUrl: './electricity-data-table.component.html',
-    styleUrls: ['./electricity-data-table.component.css'],
-    standalone: false
+  selector: 'app-electricity-data-table',
+  templateUrl: './electricity-data-table.component.html',
+  styleUrls: ['./electricity-data-table.component.css'],
+  standalone: false
 })
 export class ElectricityDataTableComponent implements OnInit {
   @Input()
@@ -57,7 +59,8 @@ export class ElectricityDataTableComponent implements OnInit {
   isRECs: boolean;
   constructor(private utilityMeterDataService: UtilityMeterDataService, private copyTableService: CopyTableService,
     private eGridService: EGridService, private facilityDbService: FacilitydbService,
-    private customFuelDbService: CustomFuelDbService) { }
+    private customFuelDbService: CustomFuelDbService,
+    private accountDbService: AccountdbService) { }
 
   ngOnInit(): void {
     this.setIsRECs();
@@ -171,8 +174,10 @@ export class ElectricityDataTableComponent implements OnInit {
   setEmissions() {
     let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
+    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    let co2EmissionsRates: Array<SubregionEmissions> = this.eGridService.co2Emissions.map(rate => {return rate});
     this.selectedMeterData.forEach(dataItem => {
-      let emissionsValues: EmissionsResults = getEmissions(this.selectedMeter, dataItem.totalEnergyUse, this.selectedMeter.energyUnit, new Date(dataItem.readDate).getFullYear(), false, [facility], this.eGridService.co2Emissions, customFuels, 0, undefined, undefined, dataItem.heatCapacity);
+      let emissionsValues: EmissionsResults = getEmissions(this.selectedMeter, dataItem.totalEnergyUse, this.selectedMeter.energyUnit, new Date(dataItem.readDate).getFullYear(), false, [facility], co2EmissionsRates, customFuels, 0, undefined, undefined, dataItem.heatCapacity, account.assessmentReportVersion);
       dataItem = setUtilityDataEmissionsValues(dataItem, emissionsValues);
     });
   }

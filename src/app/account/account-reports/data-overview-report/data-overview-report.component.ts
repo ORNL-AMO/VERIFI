@@ -147,14 +147,15 @@ export class DataOverviewReportComponent {
         meterData: meterData,
         inOverview: false,
         co2Emissions: this.eGridService.co2Emissions,
-        customFuels: customFuels
+        customFuels: customFuels,
+        assessmentReportVersion: this.account.assessmentReportVersion
       });
 
 
 
     } else {
       // Web Workers are not supported in this environment.
-      dataOverviewFacility.calanderizedMeters = getCalanderizedMeterData(facilityMeters, meterData, this.account, false, { energyIsSource: this.overviewReport.energyIsSource, neededUnits: undefined }, this.eGridService.co2Emissions, customFuels, [facility]);
+      dataOverviewFacility.calanderizedMeters = getCalanderizedMeterData(facilityMeters, meterData, this.account, false, { energyIsSource: this.overviewReport.energyIsSource, neededUnits: undefined }, this.eGridService.co2Emissions, customFuels, [facility], this.account.assessmentReportVersion);
       dataOverviewFacility.facilityOverviewData = new FacilityOverviewData(dataOverviewFacility.calanderizedMeters, dataOverviewFacility.dateRange, facility);
       dataOverviewFacility.utilityUseAndCost = new UtilityUseAndCost(dataOverviewFacility.calanderizedMeters, dataOverviewFacility.dateRange);
       this.facilitiesData.push(dataOverviewFacility);
@@ -219,7 +220,7 @@ export class DataOverviewReportComponent {
       });
     } else {
       // Web Workers are not supported in this environment.
-      this.accountData.calanderizedMeters = getCalanderizedMeterData(meters, meterData, this.account, false, { energyIsSource: this.overviewReport.energyIsSource, neededUnits: undefined }, this.eGridService.co2Emissions, customFuels, includedFacilities);
+      this.accountData.calanderizedMeters = getCalanderizedMeterData(meters, meterData, this.account, false, { energyIsSource: this.overviewReport.energyIsSource, neededUnits: undefined }, this.eGridService.co2Emissions, customFuels, includedFacilities, this.account.assessmentReportVersion);
       this.accountData.accountOverviewData = new AccountOverviewData(this.accountData.calanderizedMeters, facilities, this.account, this.accountData.dateRange);
       this.accountData.utilityUseAndCost = new UtilityUseAndCost(this.accountData.calanderizedMeters, this.accountData.dateRange);
       this.calculatingAccounts = false;

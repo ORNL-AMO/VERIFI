@@ -13,6 +13,8 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
+import * as _ from 'lodash';
+import { getHasDuplicateReadings } from 'src/app/shared/helper-pipes/invalid-meter.pipe';
 
 @Component({
   selector: 'app-meter-data-table',
@@ -36,6 +38,8 @@ export class MeterDataTableComponent {
   showFilterDropdown: boolean = false;
 
   inDataWizard: boolean;
+  hasNegativeReadings: boolean;
+  duplicateReadingDates: Array<Date>;
   constructor(
     private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
@@ -86,6 +90,10 @@ export class MeterDataTableComponent {
 
   setData() {
     this.meterData = this.utilityMeterDataDbService.getMeterDataFromMeterId(this.selectedMeter.guid);
+    this.hasNegativeReadings = this.meterData.findIndex(mData => {
+      return mData.totalEnergyUse < 0
+    }) != -1;
+    this.duplicateReadingDates = getHasDuplicateReadings(this.selectedMeter.guid, this.meterData);
     this.setHasCheckedItems();
   }
 

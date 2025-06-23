@@ -33,6 +33,7 @@ import { SharedDataService } from '../shared/helper-services/shared-data.service
 import { FormGroup } from '@angular/forms';
 import { UtilityMeterDataService } from '../shared/shared-meter-content/utility-meter-data.service';
 import { DbChangesService } from '../indexedDB/db-changes.service';
+import { UploadDataEnergyTreasureHuntService } from './upload-data-energy-treasure-hunt.service';
 
 @Injectable({
   providedIn: 'root'
@@ -56,7 +57,8 @@ export class UploadDataService {
     private toastNotificationService: ToastNotificationsService,
     private sharedDataService: SharedDataService,
     private utilityMeterDataService: UtilityMeterDataService,
-    private dbChangesService: DbChangesService) {
+    private dbChangesService: DbChangesService,
+    private uploadDataEnergyTreasureHuntService: UploadDataEnergyTreasureHuntService) {
     this.allFilesSet = new BehaviorSubject<boolean>(false);
     this.fileReferences = new Array();
     this.uploadMeters = new Array();
@@ -64,10 +66,9 @@ export class UploadDataService {
 
 
   getFileReference(file: File, workBook: XLSX.WorkBook, inSetupWizard: boolean): FileReference {
-    let isTemplate: "V1" | "V2" | "Non-template" = this.checkSheetNamesForTemplate(workBook.SheetNames);
+    let isTemplate: "V1" | "V2" | "Non-template" | "ETH" = this.checkSheetNamesForTemplate(workBook.SheetNames);
     if (isTemplate == "Non-template") {
       let accountFacilities: Array<IdbFacility> = this.facilityDbService.getAccountFacilitiesCopy();
-
       return {
         name: file.name,
         file: file,
@@ -75,6 +76,7 @@ export class UploadDataService {
         id: Math.random().toString(36).substr(2, 9),
         workbook: workBook,
         isTemplate: false,
+        isTreasureHuntTemplate: false,
         selectedWorksheetName: workBook.Workbook.Sheets[0].name,
         selectedWorksheetData: [],
         columnGroups: [],
@@ -91,7 +93,9 @@ export class UploadDataService {
         newMeterGroups: [],
         selectedFacilityId: undefined
       };
-    } else {
+    }
+    else if (isTemplate == 'ETH') {
+      //parse treasure hunt template
       //parse template
       let templateData: ParsedTemplate = this.parseTemplate(workBook, isTemplate, inSetupWizard);
       let predictorFacilityGroups: Array<FacilityGroup> = this.getPredictorFacilityGroups(templateData);
@@ -106,6 +110,40 @@ export class UploadDataService {
         id: Math.random().toString(36).substr(2, 9),
         workbook: workBook,
         isTemplate: true,
+        isTreasureHuntTemplate: false,
+        selectedWorksheetName: undefined,
+        selectedWorksheetData: [],
+        columnGroups: [],
+        meterFacilityGroups: [],
+        predictorFacilityGroups: predictorFacilityGroups,
+        headerMap: [],
+        importFacilities: templateData.importFacilities,
+        meters: templateData.importMeters,
+        meterData: templateData.meterData,
+        predictors: templateData.predictors,
+        predictorData: templateData.predictorData,
+        skipExistingReadingsMeterIds: [],
+        skipExistingPredictorFacilityIds: [],
+        newMeterGroups: templateData.newGroups,
+        selectedFacilityId: undefined
+      };
+    }
+    else {
+      //parse template
+      let templateData: ParsedTemplate = this.parseTemplate(workBook, isTemplate, inSetupWizard);
+      let predictorFacilityGroups: Array<FacilityGroup> = this.getPredictorFacilityGroups(templateData);
+      let fileName: string = 'Upload File';
+      if (file) {
+        fileName = file.name;
+      }
+      return {
+        name: fileName,
+        file: file,
+        dataSubmitted: false,
+        id: Math.random().toString(36).substr(2, 9),
+        workbook: workBook,
+        isTemplate: true,
+        isTreasureHuntTemplate: false,
         selectedWorksheetName: undefined,
         selectedWorksheetData: [],
         columnGroups: [],
@@ -125,7 +163,7 @@ export class UploadDataService {
     }
   }
 
-  checkSheetNamesForTemplate(sheetNames: Array<string>): "V1" | "V2" | "Non-template" {
+  checkSheetNamesForTemplate(sheetNames: Array<string>): "V1" | "V2" | "Non-template" | "ETH" {
     if (sheetNames[0] == "V2" && sheetNames[1] == "Help" && sheetNames[2] == "HIDE_Lists" && sheetNames[3] == "HIDE_Meter_Lists" &&
       sheetNames[4] == "Facilities" && sheetNames[5] == "Meters-Utilities" && sheetNames[6] == "HIDE_Meters-Utilites" && sheetNames[7] == "Electricity"
       && sheetNames[8] == "Stationary Fuel - Other Energy" && sheetNames[9] == "Mobile Fuel" && sheetNames[10] == "Water" && sheetNames[11] == "Other Utility - Emission"
@@ -137,21 +175,24 @@ export class UploadDataService {
       sheetNames[4] == "Facilities" && sheetNames[5] == "Meters-Utilities" && sheetNames[6] == "HIDE_Meters-Utilites" && sheetNames[7] == "Electricity"
       && sheetNames[8] == "Stationary Fuel - Other Energy" && sheetNames[9] == "Mobile Fuel" && sheetNames[10] == "Water" && sheetNames[11] == "Other Utility - Emission"
       && sheetNames[12] == "Predictors" && sheetNames[13] == "Troubleshooting" && sheetNames[14] == "HIDE_NAICS3") {
-      console.log("V2.2")
       return "V2";
     } else if (sheetNames[0] == "Help" && sheetNames[1] == 'Facilities' && sheetNames[2] == "Meters-Utilities" && sheetNames[3] == "Electricity" && sheetNames[4] == "Non-electricity" && sheetNames[5] == "Predictors") {
       return "V1";
-    } else {
+    } else if (sheetNames.includes("ETH VERIFI Upload")) {
+      return "ETH";
+    }
+    else {
       return "Non-template";
     }
   }
 
-  parseTemplate(workbook: XLSX.WorkBook, templateVersion: "V1" | "V2", inSetupWizard: boolean): ParsedTemplate {
+  parseTemplate(workbook: XLSX.WorkBook, templateVersion: "V1" | "V2" | "ETH", inSetupWizard: boolean): ParsedTemplate {
     if (templateVersion == "V1") {
       return this.uploadDataV1Service.parseTemplate(workbook, inSetupWizard);
     } else if (templateVersion == "V2") {
-      console.log('V2!');
       return this.uploadDataV2Service.parseTemplate(workbook, inSetupWizard);
+    } else if (templateVersion == "ETH") {
+      return this.uploadDataEnergyTreasureHuntService.parseTemplate(workbook, inSetupWizard);
     }
   }
 
@@ -180,7 +221,7 @@ export class UploadDataService {
 
 
   getMeterDataEntries(workbook: XLSX.WorkBook, importMeters: Array<IdbUtilityMeter>): Array<IdbUtilityMeterData> {
-    let isTemplate: "V1" | "V2" | "Non-template" = this.checkSheetNamesForTemplate(workbook.SheetNames);
+    let isTemplate: "V1" | "V2" | "Non-template" | "ETH" = this.checkSheetNamesForTemplate(workbook.SheetNames);
     if (isTemplate == "V1") {
       return this.uploadDataV1Service.getMeterDataEntries(workbook, importMeters);
     } else if (isTemplate == "V2") {
@@ -512,7 +553,7 @@ export class UploadDataService {
           let displayEnergyUse: boolean = getIsEnergyMeter(meter.source);
           let displayHeatCapacity: boolean = checkShowHeatCapacity(meter.source, meter.startingUnit, meter.scope);
           let displayVehicleFuelEfficiency: boolean = (meter.scope == 2 && meter.vehicleCategory == 2);
-          form = this.utilityMeterDataService.getGeneralMeterDataForm(meterData, displayVolumeInput, displayEnergyUse, displayHeatCapacity, displayVehicleFuelEfficiency);
+          form = this.utilityMeterDataService.getGeneralMeterDataForm(meterData, displayVolumeInput, displayEnergyUse, displayHeatCapacity, displayVehicleFuelEfficiency, meter.source);
         }
 
         if (form.valid) {

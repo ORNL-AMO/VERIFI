@@ -1,26 +1,38 @@
-<div class="row">
-    <div class="col">
-        <button class="close item-right" (click)="closeEmissionsRates()">&times;</button>
-    </div>
+<div class="d-flex justify-content-end pb-1">
+    <button class="btn btn-sm btn-secondary" (click)="closeEmissionsRates()">&times;</button>
 </div>
-<div class="row">
-    <div class="col" *ngIf="selectedSubregionEmissions">
-
-
-        <table class="table" *ngIf="selectedSubregionEmissions.locationEmissionRates.length != 0">
+<ng-container *ngIf="selectedSubregionEmissions">
+    <div class="d-flex flex-column">
+        <table class="table table-sm table-bordered mb-0"
+            *ngIf="selectedSubregionEmissions.locationEmissionRates.length != 0">
             <thead>
                 <tr>
-                    <th colspan="2">
+                    <th colspan="4">
                         {{eGridSubregion}} Location Emission Rates
                     </th>
                 </tr>
                 <tr>
-                    <th class="w-50">
+                    <th
+                        [ngClass]="{'w-50': selectedSubregionEmissions.directEmissionsRate, 'w-25': !selectedSubregionEmissions.directEmissionsRate}">
                         Year
                     </th>
-                    <th class="w-50">
-                        Emissions Rate <br>(kg CO<sub>2</sub>/kWh)
-                    </th>
+                    <ng-template [ngIf]="!selectedSubregionEmissions.directEmissionsRate"
+                        [ngIfElse]="directEmissionsRateBlock">
+                        <th class="w-25">
+                            CO<sub>2</sub> <br>(kg CO<sub>2</sub>/MWh)
+                        </th>
+                        <th class="w-25">
+                            CH<sub>4</sub> <br>(g CH<sub>4</sub>/MWh)
+                        </th>
+                        <th class="w-25">
+                            N<sub>2</sub>O <br>(g N<sub>2</sub>O/MWh)
+                        </th>
+                    </ng-template>
+                    <ng-template #directEmissionsRateBlock>
+                        <th>
+                            Emissions Rate <br>(kg CO<sub>2</sub>/kWh)
+                        </th>
+                    </ng-template>
                 </tr>
             </thead>
             <tbody>
@@ -29,34 +41,60 @@
                     <td>
                         {{emissionRate.year}}
                     </td>
-                    <td>
-                        {{emissionRate.co2Emissions | number}}
-                    </td>
+                    <ng-template [ngIf]="!selectedSubregionEmissions.directEmissionsRate"
+                        [ngIfElse]="directEmissionsRateBlock2">
+                        <td>
+                            {{emissionRate.CO2 | number}}
+                        </td>
+                        <td>
+                            {{emissionRate.CH4 | number}}
+                        </td>
+                        <td>
+                            {{emissionRate.N2O | number}}
+                        </td>
+                    </ng-template>
+                    <ng-template #directEmissionsRateBlock2>
+                        <td>
+                            {{emissionRate.co2Emissions | number}}
+                        </td>
+                    </ng-template>
                 </tr>
             </tbody>
         </table>
         <div class="alert alert-warning" *ngIf="selectedSubregionEmissions.locationEmissionRates.length == 0">
             No location emissions found for this region.
         </div>
-    </div>
-</div>
-<hr>
-<div class="row">
-    <div class="col" *ngIf="selectedSubregionEmissions">
-        <table class="table" *ngIf="selectedSubregionEmissions.residualEmissionRates.length != 0">
+        <hr class="my-1">
+        <table class="table table-sm table-bordered"
+            *ngIf="selectedSubregionEmissions.residualEmissionRates.length != 0">
             <thead>
                 <tr>
-                    <th colspan="2">
+                    <th colspan="4">
                         {{eGridSubregion}} Residual Emission Rates
                     </th>
                 </tr>
                 <tr>
-                    <th class="w-50">
+                    <th
+                        [ngClass]="{'w-50': selectedSubregionEmissions.directEmissionsRate, 'w-25': !selectedSubregionEmissions.directEmissionsRate}">
                         Year
                     </th>
-                    <th class="w-50">
-                        Emissions Rate <br>(kg CO<sub>2</sub>/kWh)
-                    </th>
+                    <ng-template [ngIf]="!selectedSubregionEmissions.directEmissionsRate"
+                        [ngIfElse]="directEmissionsRateBlock">
+                        <th class="w-25">
+                            CO<sub>2</sub> <br>(kg CO<sub>2</sub>/MWh)
+                        </th>
+                        <th class="w-25">
+                            CH<sub>4</sub> <br>(g CH<sub>4</sub>/MWh)
+                        </th>
+                        <th class="w-25">
+                            N<sub>2</sub>O <br>(g N<sub>2</sub>O/MWh)
+                        </th>
+                    </ng-template>
+                    <ng-template #directEmissionsRateBlock>
+                        <th>
+                            Emissions Rate <br>(kg CO<sub>2</sub>/kWh)
+                        </th>
+                    </ng-template>
                 </tr>
             </thead>
             <tbody>
@@ -65,9 +103,23 @@
                     <td>
                         {{emissionRate.year}}
                     </td>
-                    <td>
-                        {{emissionRate.co2Emissions | number}}
-                    </td>
+                    <ng-template [ngIf]="!selectedSubregionEmissions.directEmissionsRate"
+                        [ngIfElse]="directEmissionsRateBlock2">
+                        <td>
+                            {{emissionRate.CO2 | number}}
+                        </td>
+                        <td>
+                            {{emissionRate.CH4 | number}}
+                        </td>
+                        <td>
+                            {{emissionRate.N2O | number}}
+                        </td>
+                    </ng-template>
+                    <ng-template #directEmissionsRateBlock2>
+                        <td>
+                            {{emissionRate.co2Emissions | number}}
+                        </td>
+                    </ng-template>
                 </tr>
             </tbody>
         </table>
@@ -75,4 +127,4 @@
             No residual emissions found for this region.
         </div>
     </div>
-</div>
+</ng-container>

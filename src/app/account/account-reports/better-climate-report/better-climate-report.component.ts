@@ -40,6 +40,8 @@ export class BetterClimateReportComponent {
   betterClimateReportSetup: BetterClimateReportSetup;
   cellWidth: number;
   generateExcelSub: Subscription;
+  showTitleForStationary: boolean;
+  showTitleForTotal: boolean;
   constructor(private accountReportDbService: AccountReportDbService,
     private accountReportsService: AccountReportsService,
     private router: Router, private accountDbService: AccountdbService,
@@ -70,6 +72,8 @@ export class BetterClimateReportComponent {
         this.generateExcelReport();
       }
     });
+    this.showTitleForTotal = this.betterClimateReportSetup.includePortfolioEnergyUse;
+    this.showTitleForStationary = !this.betterClimateReportSetup.includePortfolioEnergyUse && this.betterClimateReportSetup.includeStationaryEnergyUse;
   }
 
   ngOnDestroy() {

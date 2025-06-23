@@ -5,7 +5,7 @@ import { GeneralInformationFormComponent } from './general-information-form/gene
 import { FinancialReportingFormComponent } from './financial-reporting-form/financial-reporting-form.component';
 import { DefaultUnitsFormComponent } from './default-units-form/default-units-form.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { HelperPipesModule } from '../helper-pipes/helper-pipes.module';
+import { HelperPipesModule } from '../helper-pipes/_helper-pipes.module';
 import { LabelWithTooltipModule } from '../label-with-tooltip/label-with-tooltip.module';
 import { EGridEmissionsTableComponent } from './default-units-form/e-grid-emissions-table/e-grid-emissions-table.component';
 

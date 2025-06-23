@@ -66,40 +66,20 @@
                     </div>
                 </div>
                 <div class="col-lg-6 col-md-12 col-sm-12">
-                    <label class="semibold" for="weatherStationId">Weather Station <span>(within 50 miles of
-                            {{facility.zip}})</span></label>
-                    <ng-template [ngIf]="facility.zip" [ngIfElse]="noFacilityZipBlock">
-                        <ng-container *ngIf="stations.length != 0">
-                            <div class="mb-3">
-                                <select id="weatherStationId" class="form-select" formControlName="weatherStationId"
-                                    (change)="setWeatherStation()">
-                                    <option *ngFor="let station of stations" [ngValue]="station.ID">{{station.name}}
-                                        ({{station.distanceFrom | number}} miles)</option>
-                                </select>
-                            </div>
-                            <div class="alert alert-danger"
-                                *ngIf="predictorForm.get('weatherStationId').hasError('required')">
-                                Weather station is
-                                required</div>
-                        </ng-container>
-                        <ng-template [ngIf]="!findingStations" [ngIfElse]="findingStationsBlock">
-                            <div *ngIf="stations.length == 0" class="alert alert-danger">
-                                No stations found within 50 miles of the facility zip. Use the weather data portion of
-                                VERIFI for
-                                more information.
-                            </div>
-                        </ng-template>
-                        <ng-template #findingStationsBlock>
-                            Searching for weather stations...
-                        </ng-template>
-                    </ng-template>
-                    <ng-template #noFacilityZipBlock>
-                        <div class="alert alert-danger p-1">
-                            <span class="fa fa-circle-exclamation"></span> No Facility
-                            Zip. <a class="click-link" (click)="openFacilityZipModal()">Set
-                                facility zip.</a>
+                    <label class="semibold w-100" for="weatherStationId">Weather Station
+                        <a class="click-link float-right" (click)="openStationModal()">
+                            <i class="fa fa-search"></i>
+                            Search Stations
+                        </a>
+                    </label>
+                    <ng-container *ngIf="predictor.weatherStationName">
+                        <div class="mb-3">
+                            {{predictor.weatherStationName}}
                         </div>
-                    </ng-template>
+                    </ng-container>
+                    <div class="alert alert-danger" *ngIf="predictorForm.get('weatherStationId').hasError('required')">
+                        Weather station is
+                        required</div>
                 </div>
                 <div class="col-lg-6 col-md-12 col-sm-12" *ngIf="predictorForm.controls.weatherDataType.value == 'HDD'">
                     <label class="semibold" for="heatingBaseTemperature">Heating Base Temperature</label>
@@ -244,17 +224,25 @@
 </ng-template>
 
 
-<div [ngClass]="{'windowOverlay': displayFacilityZipModal}"></div>
-<div class="popup" [class.open]="displayFacilityZipModal">
-    <div class="popup-header" *ngIf="displayFacilityZipModal">Facilit Zip Code: {{facility.name}}
-        <button class="item-right" (click)="closeFacilityZipModal()">x</button>
+<div [ngClass]="{'windowOverlay': displaySationModal}"></div>
+<div class="popup" [class.open]="displaySationModal">
+    <div class="popup-header">
+        Select Station
+        <button class="item-right" (click)="cancelStationSelect()">x</button>
     </div>
     <div class="popup-body">
-        <input type="text" class="form-control" [(ngModel)]="facilityZip" autocomplete="postal-code"
-            onfocus="this.select();" minlength="1" maxlength="12">
+        <app-weather-station-modal *ngIf="displaySationModal" [facility]="facility"
+            (emitSelectStation)="selectStation($event)"></app-weather-station-modal>
     </div>
-    <div class="saveCancel popup-footer text-end">
-        <button class="btn btn-secondary" (click)="closeFacilityZipModal()">Cancel</button>
-        <button class="btn btn-success" (click)="setFacilityZip()">Set Facility Zip Code</button>
+    <div class="d-flex w-100 justify-content-between">
+        <div class="p-0">
+            <p class="fw-light mb-0">
+                For more details about weather station go to the "<a class="click-link"
+                    (click)="goToWeatherData()">Weather Data</a>" page.
+            </p>
+        </div>
+        <div class="p-0">
+            <button class="btn btn-secondary" (click)="cancelStationSelect()">Cancel</button>
+        </div>
     </div>
 </div>

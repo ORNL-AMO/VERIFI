@@ -13,12 +13,14 @@ import { checkMeterReadingExistForDate, IdbUtilityMeterData } from 'src/app/mode
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
 import { UtilityMeterDataService } from 'src/app/shared/shared-meter-content/utility-meter-data.service';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { IdbAccount } from 'src/app/models/idbModels/account';
 
 @Component({
-    selector: 'app-edit-electricity-bill',
-    templateUrl: './edit-electricity-bill.component.html',
-    styleUrls: ['./edit-electricity-bill.component.css'],
-    standalone: false
+  selector: 'app-edit-electricity-bill',
+  templateUrl: './edit-electricity-bill.component.html',
+  styleUrls: ['./edit-electricity-bill.component.css'],
+  standalone: false
 })
 export class EditElectricityBillComponent implements OnInit {
   @Input()
@@ -46,7 +48,8 @@ export class EditElectricityBillComponent implements OnInit {
   RECs: number = 0;
   constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private utilityMeterDataService: UtilityMeterDataService,
     private eGridService: EGridService, private facilityDbService: FacilitydbService,
-    private customFuelDbService: CustomFuelDbService) { }
+    private customFuelDbService: CustomFuelDbService,
+    private accountDbService: AccountdbService) { }
 
   ngOnInit(): void {
     this.electricityDataFiltersSub = this.utilityMeterDataService.electricityInputFilters.subscribe(dataFilters => {
@@ -98,7 +101,8 @@ export class EditElectricityBillComponent implements OnInit {
     if (this.meterDataForm.controls.totalEnergyUse.value) {
       let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
       let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
-      let emissionsValues: EmissionsResults = getEmissions(this.editMeter, this.meterDataForm.controls.totalEnergyUse.value, this.editMeter.energyUnit, new Date(this.meterDataForm.controls.readDate.value).getFullYear(), false, [facility], this.eGridService.co2Emissions, customFuels, 0, undefined, undefined, undefined);
+      let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
+      let emissionsValues: EmissionsResults = getEmissions(this.editMeter, this.meterDataForm.controls.totalEnergyUse.value, this.editMeter.energyUnit, new Date(this.meterDataForm.controls.readDate.value).getFullYear(), false, [facility], this.eGridService.co2Emissions, customFuels, 0, undefined, undefined, undefined, account.assessmentReportVersion);
       this.totalLocationEmissions = emissionsValues.locationElectricityEmissions;
       this.totalMarketEmissions = emissionsValues.marketElectricityEmissions;
       this.RECs = emissionsValues.RECs;

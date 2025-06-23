@@ -8,7 +8,7 @@ import { PredictorsDataComponent } from './predictors-data/predictors-data.compo
 import { PredictorsDataFormComponent } from './predictors-data/predictors-data-form/predictors-data-form.component';
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { TableItemsDropdownModule } from 'src/app/shared/table-items-dropdown/table-items-dropdown.module';
-import { HelperPipesModule } from 'src/app/shared/helper-pipes/helper-pipes.module';
+import { HelperPipesModule } from 'src/app/shared/helper-pipes/_helper-pipes.module';
 import { CalculatingSpinnerModule } from 'src/app/shared/calculating-spinner/calculating-spinner.module';
 import { SharedPredictorsContentModule } from 'src/app/shared/shared-predictors-content/shared-predictors-content.module';
 import { LabelWithTooltipModule } from "../../../shared/label-with-tooltip/label-with-tooltip.module";

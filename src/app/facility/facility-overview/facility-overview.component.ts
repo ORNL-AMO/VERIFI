@@ -5,7 +5,7 @@ import { FacilityOverviewData } from 'src/app/calculations/dashboard-calculation
 import { UtilityUseAndCost } from 'src/app/calculations/dashboard-calculations/useAndCostClass';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { FacilityOverviewService } from './facility-overview.service';
-import { CalanderizedMeter } from 'src/app/models/calanderization';
+import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';
 import * as _ from 'lodash';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
@@ -16,12 +16,14 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { IdbAccount } from 'src/app/models/idbModels/account';
 
 @Component({
-    selector: 'app-facility-overview',
-    templateUrl: './facility-overview.component.html',
-    styleUrls: ['./facility-overview.component.css'],
-    standalone: false
+  selector: 'app-facility-overview',
+  templateUrl: './facility-overview.component.html',
+  styleUrls: ['./facility-overview.component.css'],
+  standalone: false
 })
 export class FacilityOverviewComponent implements OnInit {
 
@@ -38,7 +40,8 @@ export class FacilityOverviewComponent implements OnInit {
     private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private eGridService: EGridService,
-    private customFuelsDbService: CustomFuelDbService) { }
+    private customFuelsDbService: CustomFuelDbService,
+    private accountDbService: AccountdbService) { }
 
   ngOnInit(): void {
     this.customFuels = this.customFuelsDbService.accountCustomFuels.getValue();
@@ -82,6 +85,7 @@ export class FacilityOverviewComponent implements OnInit {
   calculateFacilitiesSummary() {
     let meters: Array<IdbUtilityMeter> = this.utilityMeterDbService.facilityMeters.getValue();
     let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.facilityMeterData.getValue();
+    let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     if (typeof Worker !== 'undefined') {
       this.worker = new Worker(new URL('src/app/web-workers/facility-overview.worker', import.meta.url));
       this.worker.onmessage = ({ data }) => {
@@ -112,14 +116,29 @@ export class FacilityOverviewComponent implements OnInit {
         meterData: meterData,
         meters: meters,
         co2Emissions: this.eGridService.co2Emissions,
-        customFuels: this.customFuels
+        customFuels: this.customFuels,
+        assessmentReportVersion: account.assessmentReportVersion
       });
     } else {
       // Web Workers are not supported in this environment.
       if (this.facilityOverviewService.utilityUseAndCost.getValue() == undefined) {
         this.facilityOverviewService.calculating.next(true);
       }
-      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(meters, meterData, this.facility, false, undefined, this.eGridService.co2Emissions, this.customFuels, [this.facility]);
+      let calanderizedMeters: Array<CalanderizedMeter> = getCalanderizedMeterData(meters, meterData, this.facility, false, undefined, this.eGridService.co2Emissions, this.customFuels, [this.facility], account.assessmentReportVersion);
+      if (!this.dateRange) {
+        if (calanderizedMeters && calanderizedMeters.length > 0) {
+          let monthlyData: Array<MonthlyData> = calanderizedMeters.flatMap(val => { return val.monthlyData });
+          let latestData: MonthlyData = _.maxBy(monthlyData, 'date');
+          let maxDate: Date = new Date(latestData.year, latestData.monthNumValue);
+          let minDate: Date = new Date(maxDate.getUTCFullYear() - 1, maxDate.getMonth(), 1);
+          minDate.setMonth(minDate.getMonth() + 1);
+          this.dateRange = {
+            endDate: maxDate,
+            startDate: minDate
+          };
+          this.facilityOverviewService.dateRange.next(this.dateRange);
+        }
+      }
       let facilityOverviewData: FacilityOverviewData = new FacilityOverviewData(calanderizedMeters, this.dateRange, this.facility);
       let utilityUseAndCost: UtilityUseAndCost = new UtilityUseAndCost(calanderizedMeters, this.dateRange);
       this.facilityOverviewService.facilityOverviewData.next(facilityOverviewData);

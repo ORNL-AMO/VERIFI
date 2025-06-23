@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { FormGroup } from '@angular/forms';
+import { FormControl, FormGroup } from '@angular/forms';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
@@ -17,10 +17,10 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbCustomEmissionsItem } from 'src/app/models/idbModels/customEmissions';
 
 @Component({
-    selector: 'app-default-units-form',
-    templateUrl: './default-units-form.component.html',
-    styleUrls: ['./default-units-form.component.css'],
-    standalone: false
+  selector: 'app-default-units-form',
+  templateUrl: './default-units-form.component.html',
+  styleUrls: ['./default-units-form.component.css'],
+  standalone: false
 })
 export class DefaultUnitsFormComponent implements OnInit {
   @Input()
@@ -61,6 +61,7 @@ export class DefaultUnitsFormComponent implements OnInit {
         if (account && this.inAccount) {
           if (this.isFormChange == false) {
             this.form = this.settingsFormsService.getUnitsForm(account);
+            this.form.addControl('assessmentReportVersion', new FormControl(account.assessmentReportVersion))
             this.checkCurrentZip();
           } else {
             this.isFormChange = false;
@@ -86,6 +87,7 @@ export class DefaultUnitsFormComponent implements OnInit {
         if (account && this.inAccount) {
           if (this.isFormChange == false) {
             this.form = this.settingsFormsService.getUnitsForm(account);
+            this.form.addControl('assessmentReportVersion', new FormControl(account.assessmentReportVersion))
             this.checkCurrentZip();
           } else {
             this.isFormChange = false;
@@ -124,6 +126,7 @@ export class DefaultUnitsFormComponent implements OnInit {
     if (!this.inWizard) {
       if (this.inAccount) {
         this.selectedAccount = this.settingsFormsService.updateAccountFromUnitsForm(this.form, this.selectedAccount);
+        this.selectedAccount.assessmentReportVersion = this.form.controls.assessmentReportVersion.value;
         let updatedAccount: IdbAccount = await firstValueFrom(this.accountDbService.updateWithObservable(this.selectedAccount));
         let allAccounts: Array<IdbAccount> = await firstValueFrom(this.accountDbService.getAll());
         this.accountDbService.selectedAccount.next(updatedAccount);
@@ -140,6 +143,7 @@ export class DefaultUnitsFormComponent implements OnInit {
     } else {
       if (this.inAccount) {
         this.selectedAccount = this.settingsFormsService.updateAccountFromUnitsForm(this.form, this.selectedAccount);
+        this.selectedAccount.assessmentReportVersion = this.form.controls.assessmentReportVersion.value;
         this.setupWizardService.account.next(this.selectedAccount);
       }
       if (!this.inAccount) {
@@ -169,7 +173,7 @@ export class DefaultUnitsFormComponent implements OnInit {
   }
 
   setSubRegionData() {
-    this.zipCodeSubRegionData = new Array();
+    this.zipCodeSubRegionData = ['US Average'];
     this.addCustomSubregions();
     if (this.currentZip && this.currentZip.length == 5) {
       let subRegionData: SubRegionData = _.find(this.eGridService.subRegionsByZipcode, (val) => { return val.zip == this.currentZip });

@@ -1,4 +1,14 @@
 <form [formGroup]="form">
+
+    <ng-container *ngIf="inAccount">
+        <label class="semibold" for="isBetterPlantsPartner">Is this account a member of the Better Plants Program?</label>
+        <div class="form-check">
+            <input type="checkbox" class="form-check-input" name="isBetterPlantsPartner"
+                formControlName="isBetterPlantsPartner" (change)="saveChanges()" id="isBetterPlantsPartner">
+            <label class="form-check-label" for="isBetterPlantsPartner">Better Plants Program Partner</label>
+        </div>
+        <hr>
+    </ng-container>
     <!--energy reduction-->
     <div class="form-check">
         <input type="checkbox" class="form-check-input" name="energyReductionGoal" formControlName="energyReductionGoal"

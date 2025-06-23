@@ -6,7 +6,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { PredictorsDataTableComponent } from './predictors-data-table/predictors-data-table.component';
 import { OrderPredictorDataTablePipe } from './predictors-data-table/order-predictor-data-table.pipe';
 import { TableItemsDropdownModule } from '../table-items-dropdown/table-items-dropdown.module';
-import { HelperPipesModule } from '../helper-pipes/helper-pipes.module';
+import { HelperPipesModule } from '../helper-pipes/_helper-pipes.module';
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { LabelWithTooltipModule } from '../label-with-tooltip/label-with-tooltip.module';
 import { WeatherDataSubLabelComponent } from './weather-data-sub-label/weather-data-sub-label.component';
@@ -14,6 +14,7 @@ import { EditPredictorDataEntryFormComponent } from './edit-predictor-data-entry
 import { CalculatingSpinnerModule } from '../calculating-spinner/calculating-spinner.module';
 import { CalculatedPredictorDataUpdateComponent } from './calculated-predictor-data-update/calculated-predictor-data-update.component';
 import { OrderCalculatedPredictorDataPipe } from './calculated-predictor-data-update/order-calculated-predictor-data.pipe';
+import { WeatherStationModalComponent } from './weather-station-modal/weather-station-modal.component';
 
 
 
@@ -26,7 +27,8 @@ import { OrderCalculatedPredictorDataPipe } from './calculated-predictor-data-up
     WeatherDataSubLabelComponent,
     EditPredictorDataEntryFormComponent,
     CalculatedPredictorDataUpdateComponent,
-    OrderCalculatedPredictorDataPipe
+    OrderCalculatedPredictorDataPipe,
+    WeatherStationModalComponent
   ],
   imports: [
     CommonModule,
@@ -45,7 +47,8 @@ import { OrderCalculatedPredictorDataPipe } from './calculated-predictor-data-up
     OrderPredictorDataTablePipe,
     WeatherDataSubLabelComponent,
     EditPredictorDataEntryFormComponent,
-    CalculatedPredictorDataUpdateComponent
+    CalculatedPredictorDataUpdateComponent,
+    WeatherStationModalComponent
   ]
 })
 export class SharedPredictorsContentModule { }
