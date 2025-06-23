@@ -36,6 +36,10 @@ export function getZip(zip: string): string {
     if (zip) {
         if (zip.length == 5) {
             return zip;
+        } else if(zip.length > 5) {
+            // If the zip code is longer than 5 characters, we will return the first 5 characters
+            // ETH Form format xxxxx-xxxx
+            return zip.slice(0, 5);
         } else {
             let neededZeros: number = 5 - zip.length;
             for (let i = 0; i < neededZeros; i++) {
@@ -73,7 +77,7 @@ export function getFuelEnum(fuel: string, source: MeterSource, phase: MeterPhase
 export function getMeterReadingDataApplication(yesOrNo: 'Yes' | 'No'): 'backward' | 'fullMonth' {
     if (yesOrNo == 'Yes') {
         return 'backward'
-    } else if ('No') {
+    } else if (yesOrNo == 'No') {
         return 'fullMonth';
     } else {
         return;

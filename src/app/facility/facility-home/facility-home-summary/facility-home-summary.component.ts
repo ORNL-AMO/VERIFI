@@ -14,10 +14,10 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 
 @Component({
-    selector: 'app-facility-home-summary',
-    templateUrl: './facility-home-summary.component.html',
-    styleUrls: ['./facility-home-summary.component.css'],
-    standalone: false
+  selector: 'app-facility-home-summary',
+  templateUrl: './facility-home-summary.component.html',
+  styleUrls: ['./facility-home-summary.component.css'],
+  standalone: false
 })
 export class FacilityHomeSummaryComponent implements OnInit {
 
@@ -41,7 +41,7 @@ export class FacilityHomeSummaryComponent implements OnInit {
 
   ngOnInit(): void {
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
-      this.facility = this.facilityDbService.selectedFacility.getValue();
+      this.facility = val;
       this.setFacilityStatus();
     });
   }
@@ -126,6 +126,4 @@ export class FacilityHomeSummaryComponent implements OnInit {
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     this.exportToExcelTemplateService.exportFacilityData(selectedFacility.guid);
   }
-
-
 }
