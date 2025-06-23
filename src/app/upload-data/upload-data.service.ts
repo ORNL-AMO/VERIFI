@@ -87,7 +87,6 @@ export class UploadDataService {
       //parse treasure hunt template
       //parse template
       let templateData: ParsedTemplate = this.parseTemplate(workBook, isTemplate, inSetupWizard);
-      console.log(templateData);
       let predictorFacilityGroups: Array<FacilityGroup> = this.getPredictorFacilityGroups(templateData);
       let fileName: string = 'Upload File';
       if (file) {
@@ -165,7 +164,6 @@ export class UploadDataService {
       sheetNames[4] == "Facilities" && sheetNames[5] == "Meters-Utilities" && sheetNames[6] == "HIDE_Meters-Utilites" && sheetNames[7] == "Electricity"
       && sheetNames[8] == "Stationary Fuel - Other Energy" && sheetNames[9] == "Mobile Fuel" && sheetNames[10] == "Water" && sheetNames[11] == "Other Utility - Emission"
       && sheetNames[12] == "Predictors" && sheetNames[13] == "Troubleshooting" && sheetNames[14] == "HIDE_NAICS3") {
-      console.log("V2.2")
       return "V2";
     } else if (sheetNames[0] == "Help" && sheetNames[1] == 'Facilities' && sheetNames[2] == "Meters-Utilities" && sheetNames[3] == "Electricity" && sheetNames[4] == "Non-electricity" && sheetNames[5] == "Predictors") {
       return "V1";
@@ -181,7 +179,6 @@ export class UploadDataService {
     if (templateVersion == "V1") {
       return this.uploadDataV1Service.parseTemplate(workbook, inSetupWizard);
     } else if (templateVersion == "V2") {
-      console.log('V2!');
       return this.uploadDataV2Service.parseTemplate(workbook, inSetupWizard);
     } else if (templateVersion == "ETH") {
       return this.uploadDataEnergyTreasureHuntService.parseTemplate(workbook, inSetupWizard);
