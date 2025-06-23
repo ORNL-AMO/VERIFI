@@ -11,7 +11,9 @@ import { getNewIdbUtilityMeter, IdbUtilityMeter } from '../models/idbModels/util
 import { getNewIdbUtilityMeterData, IdbUtilityMeterData } from '../models/idbModels/utilityMeterData';
 import { getNewIdbPredictor, IdbPredictor } from '../models/idbModels/predictor';
 import { getNewIdbPredictorData, IdbPredictorData } from '../models/idbModels/predictorData';
-import { checkSameDay } from './upload-helper-functions';
+import { checkSameDay, getCountryCode, getState, getZip } from './upload-helper-functions';
+import { SubRegionData } from '../models/eGridEmissions';
+import { EGridService } from '../shared/helper-services/e-grid.service';
 
 
 @Injectable({
@@ -21,7 +23,8 @@ export class UploadDataEnergyTreasureHuntService {
 
   constructor(private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService,
-    private setupWizardService: SetupWizardService) { }
+    private setupWizardService: SetupWizardService,
+    private eGridService: EGridService) { }
 
 
   parseTemplate(workbook: XLSX.WorkBook, inSetupWizard: boolean): ParsedTemplate {
@@ -132,33 +135,26 @@ export class UploadDataEnergyTreasureHuntService {
       }
     } else {
       facility = getNewIdbFacility(selectedAccount);
-      if(!facilityName){
+      if (!facilityName) {
         facility.name = facilityName;
-      }else{
+      } else {
         facility.name = defaultFacilityName;
       }
     }
-    //TODO: Parse addtional data from document
-    // facility.address = facilityDataRow['Address'];
-    // facility.country = getCountryCode(facilityDataRow['Country']);
-    // facility.state = getState(facilityDataRow['State']);
-    // facility.city = facilityDataRow['City'];
-    // facility.zip = getZip(facilityDataRow['Zip']);
-    // facility.naics2 = facilityDataRow['NAICS Code 2 digit'];
-    // facility.naics3 = facilityDataRow['NAICS Code 3 digit'];
-    // facility.contactName = facilityDataRow['Contact Name'];
-    // facility.contactPhone = facilityDataRow['Contact Phone'];
-    // facility.contactEmail = facilityDataRow['Contact Email'];
-    // if (facility.zip && facility.zip.length == 5) {
-    //   let subRegionData: SubRegionData = _.find(this.eGridService.subRegionsByZipcode, (val) => { return val.zip == facility.zip });
-    //   if (subRegionData) {
-    //     if (subRegionData.subregions.length != 0) {
-    //       facility.eGridSubregion = subRegionData.subregions[0]
-    //     }
-    //   }
-    // }
-    //   }
-    // });
+    facility.address = worksheet['F9']?.v;
+    facility.country = getCountryCode("US");
+    facility.state = getState(worksheet['F11']?.v);
+    facility.city = worksheet['F10']?.v;
+    facility.zip = getZip(worksheet['F12']?.v);
+    facility.size = worksheet['C13']?.v;
+    if (facility.zip && facility.zip.length == 5) {
+      let subRegionData: SubRegionData = _.find(this.eGridService.subRegionsByZipcode, (val) => { return val.zip == facility.zip });
+      if (subRegionData) {
+        if (subRegionData.subregions.length != 0) {
+          facility.eGridSubregion = subRegionData.subregions[0]
+        }
+      }
+    }
     return facility;
   }
 
@@ -167,7 +163,6 @@ export class UploadDataEnergyTreasureHuntService {
     let electricConsumptionMeter: IdbUtilityMeter = getNewIdbUtilityMeter(facility.guid, account.guid, true, 'kWh');
     electricConsumptionMeter.name = 'Electric';
     electricConsumptionMeter.meterReadingDataApplication = 'fullMonth';
-    //TODO: set electricity details
     electricConsumptionMeter.source = 'Electricity';
     electricConsumptionMeter.siteToSource = 3;
     let meterData: Array<IdbUtilityMeterData> = new Array();
@@ -175,7 +170,7 @@ export class UploadDataEnergyTreasureHuntService {
       let siteEnergy: number = worksheet['D' + index]?.v
       let cost: number = worksheet['G' + index]?.v;
       let demandUsage: number = worksheet['F' + index]?.v;
-      //TODO: PEAK DEMAND GOES WHERE?
+      //TODO: PEAK DEMAND AFTER REFACTOR
       if (siteEnergy != undefined || cost != undefined) {
         let date: Date = this.getDateFromSheet(index, worksheet);
         if (date) {
@@ -200,11 +195,6 @@ export class UploadDataEnergyTreasureHuntService {
     ngConsumptionMeter.phase = 'Gas';
     ngConsumptionMeter.meterReadingDataApplication = 'fullMonth';
     ngConsumptionMeter.scope = 1;
-    //TODO: set NG details
-    // this.setMeterUnits(excelMeter, meter, facility);
-    // let isEnergyUnit: boolean = getIsEnergyUnit(meter.startingUnit);
-    // ngConsumption.heatCapacity = this.parseHeatCapacity(excelMeter, meter, isEnergyUnit);
-    // ngConsumption.siteToSource = this.parseSiteToSource(excelMeter, meter);
     let meterData: Array<IdbUtilityMeterData> = new Array();
     for (let index: number = 38; index < 62; index++) {
       let siteEnergy: number = worksheet['D' + index]?.v
@@ -232,7 +222,6 @@ export class UploadDataEnergyTreasureHuntService {
     meter.name = 'Coal and/or Oil';
     meter.scope = 1;
     meter.meterReadingDataApplication = 'fullMonth';
-    //TODO: set meter details
     meter.source = 'Other Fuels';
     let meterData: Array<IdbUtilityMeterData> = new Array();
     for (let index: number = 68; index < 92; index++) {
@@ -260,7 +249,6 @@ export class UploadDataEnergyTreasureHuntService {
     meter.name = 'Other Energy';
     meter.scope = 4;
     meter.meterReadingDataApplication = 'fullMonth';
-    //TODO: set meter details
     meter.source = 'Other Energy';
     let meterData: Array<IdbUtilityMeterData> = new Array();
     for (let index: number = 98; index < 122; index++) {
@@ -290,7 +278,6 @@ export class UploadDataEnergyTreasureHuntService {
     meter.includeInEnergy = false;
     meter.scope = 100;
     meter.startingUnit = 'kgal';
-    //TODO: set meter details
     meter.source = 'Water Intake';
     meter.waterIntakeType = 'Municipal (Potable)';
     let meterData: Array<IdbUtilityMeterData> = new Array();
@@ -321,7 +308,6 @@ export class UploadDataEnergyTreasureHuntService {
     meter.includeInEnergy = false;
     meter.scope = 100;
     meter.startingUnit = 'kgal';
-    //TODO: set meter details
     meter.source = 'Water Discharge';
     let meterData: Array<IdbUtilityMeterData> = new Array();
     for (let index: number = 128; index < 152; index++) {
@@ -351,7 +337,6 @@ export class UploadDataEnergyTreasureHuntService {
     meter.meterReadingDataApplication = 'fullMonth';
     meter.includeInEnergy = false;
     meter.scope = 100;
-    //TODO: set meter details
     meter.source = 'Water Intake';
     let meterData: Array<IdbUtilityMeterData> = new Array();
     for (let index: number = 128; index < 152; index++) {
@@ -375,19 +360,19 @@ export class UploadDataEnergyTreasureHuntService {
     let predictor1: IdbPredictor = getNewIdbPredictor(account.guid, facility.guid);
     //D155
     let p1Name: string = worksheet['D155']?.v;
-    predictor1.name = p1Name ? p1Name :'Production Metric 1';
+    predictor1.name = p1Name ? p1Name : 'Production Metric 1';
     predictor1.production = true;
     let productionData1: Array<IdbPredictorData> = [];
     let predictor2: IdbPredictor = getNewIdbPredictor(account.guid, facility.guid);
     //E155
     let p2Name: string = worksheet['E155']?.v;
-    predictor2.name =  p2Name ? p2Name :'Production Metric 2';
+    predictor2.name = p2Name ? p2Name : 'Production Metric 2';
     predictor2.production = true;
     let productionData2: Array<IdbPredictorData> = [];
     let predictor3: IdbPredictor = getNewIdbPredictor(account.guid, facility.guid);
     //F155
     let p3Name: string = worksheet['F155']?.v;
-    predictor3.name =  p3Name ? p3Name : 'Production Metric 3';
+    predictor3.name = p3Name ? p3Name : 'Production Metric 3';
     predictor3.production = true;
     let productionData3: Array<IdbPredictorData> = [];
     let predictorTotalHours: IdbPredictor = getNewIdbPredictor(account.guid, facility.guid);
