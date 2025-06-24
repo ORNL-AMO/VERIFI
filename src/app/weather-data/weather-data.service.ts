@@ -84,7 +84,7 @@ export class WeatherDataService {
     return this.httpClient.post(environment.weatherApi + '/stations', data, httpOptions);
   }
 
- 
+
   getStationByCountryAPI(country: string): Observable<any> {
     let httpOptions = {
       responseType: 'text' as const,
@@ -123,15 +123,22 @@ export class WeatherDataService {
       responseType: 'text' as const,
       headers: this.requestHeaders
     };
+
     return this.httpClient.post(environment.weatherApi + '/station/' + stationId, {}, httpOptions);
   }
 
   async getStation(stationId: string): Promise<WeatherStation | 'error'> {
     try {
       let apiData: string = await firstValueFrom(this.getStationAPI(stationId));
-      let station: WeatherStation = getWeatherStation(JSON.parse(apiData));
-      station.ID = stationId;
-      return station;
+      let stationsResponse: { stations: Array<WeatherStationResponse> } = JSON.parse(apiData);
+      let stationsArr: Array<WeatherStationResponse> = stationsResponse.stations;
+      if (stationsArr.length > 0) {
+        let station: WeatherStation = getWeatherStation(stationsArr[0]);
+        station.ID = stationId;
+        return station;
+      } else {
+        return 'error';
+      }
     } catch (err) {
       return 'error'
     }
