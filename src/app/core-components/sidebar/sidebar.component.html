@@ -75,8 +75,8 @@
     </a>
     <hr *ngIf="facilityList.length > 4 && open">
     <a class="nav-link" title="Data Wizard" routerLink="/data-wizard/{{account.guid}}">
-        <i class="fa fa-wand-magic-sparkles"></i>
-        <span [hidden]="!open" class="ps-2 nav-label">Data Wizard</span>
+        <i class="fa fa-database"></i>
+        <span [hidden]="!open" class="ps-2 nav-label">Data Entry</span>
     </a>
     <!--TODO EPIC 1525: Remove and open modal for Data Wizard-->
     <a title="Upload Data" class="nav-link" (click)="openDataWizardModal()"><i

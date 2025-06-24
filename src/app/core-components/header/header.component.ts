@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { AccountdbService } from "../../indexedDB/account-db.service";
 import { FacilitydbService } from "../../indexedDB/facility-db.service";
 import { UtilityMeterdbService } from "../../indexedDB/utilityMeter-db.service";
@@ -16,12 +16,13 @@ import { ElectronService } from 'src/app/electron/electron.service';
 import { ToastNotificationsService } from '../toast-notifications/toast-notifications.service';
 import { AutomaticBackupsService } from 'src/app/electron/automatic-backups.service';
 import { getNewIdbAccount, IdbAccount } from 'src/app/models/idbModels/account';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
-    selector: 'app-header',
-    templateUrl: './header.component.html',
-    styleUrls: ['./header.component.css'],
-    standalone: false
+  selector: 'app-header',
+  templateUrl: './header.component.html',
+  styleUrls: ['./header.component.css'],
+  standalone: false
 })
 export class HeaderComponent implements OnInit {
   @Input()
@@ -45,6 +46,9 @@ export class HeaderComponent implements OnInit {
 
   savingBackup: boolean;
   savingBackupSub: Subscription;
+
+  inDashboard: boolean = false;
+  displayToggle: boolean = false;
   constructor(
     private router: Router,
     public accountdbService: AccountdbService,
@@ -86,6 +90,13 @@ export class HeaderComponent implements OnInit {
         this.cd.detectChanges();
       })
     }
+
+    this.router.events.subscribe(event => {
+      if (event instanceof NavigationEnd) {
+        this.setInDashboard(event.urlAfterRedirects);
+      }
+    });
+    this.setInDashboard(this.router.url);
   }
 
   ngOnDestroy() {
@@ -118,7 +129,11 @@ export class HeaderComponent implements OnInit {
       await this.dbChangesService.selectAccount(account, false);
       this.loadingService.setLoadingStatus(false);
       this.automaticBackupService.initializeAccount();
-      this.router.navigate(['/account']);
+      if (this.inDashboard) {
+        this.goToDashboard(true);
+      } else {
+        this.goToDataEntry(true);
+      }
     } catch (err) {
       this.toastNotificationService.showToast('An Error Occured', 'There was an error when trying to switch to ' + account.name + '. The action was unable to be completed.', 15000, false, 'alert-danger');
       this.loadingService.setLoadingStatus(false);
@@ -177,6 +192,34 @@ export class HeaderComponent implements OnInit {
     this.router.navigate(['/verifi']).then(() => {
       this.accountdbService.selectedAccount.next(undefined);
     });
+  }
 
+  setInDashboard(url: string) {
+    this.inDashboard = url.includes('data-wizard') == false;
+    this.displayToggle = url.includes('verifi') == false;
+  }
+
+  goToDataEntry(forceNavigation: boolean = false) {
+    if (this.inDashboard || forceNavigation) {
+      let url: string = this.router.url;
+      if (url.includes('facility')) {
+        let selectedFacility: IdbFacility = this.facilitydbService.selectedFacility.getValue();
+        this.router.navigateByUrl('/data-wizard/' + this.activeAccount.guid + '/facilities/' + selectedFacility.guid);
+      } else {
+        this.router.navigateByUrl('/data-wizard/' + this.activeAccount.guid)
+      }
+    }
+  }
+
+  goToDashboard(forceNavigation: boolean = false) {
+    if (!this.inDashboard || forceNavigation) {
+      let url: string = this.router.url;
+      if (url.includes('facilities')) {
+        let selectedFacility: IdbFacility = this.facilitydbService.selectedFacility.getValue();
+        this.router.navigateByUrl('/facility/' + selectedFacility.id);
+      } else {
+        this.router.navigateByUrl('/account')
+      }
+    }
   }
 }

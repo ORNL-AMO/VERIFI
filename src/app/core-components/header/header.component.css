@@ -1,12 +1,14 @@
-.navbar{
+.navbar {
     background-color: white;
     padding: .5rem .5rem;
 }
 
-.navbar-brand:first-letter, .dropdown-toggle span.active{
+.navbar-brand:first-letter,
+.dropdown-toggle span.active {
     color: #ff6000;
 }
-a:not([href]).navbar-brand{
+
+a:not([href]).navbar-brand {
     color: black !important;
 }
 
@@ -17,7 +19,7 @@ a:not([href]).dropdown-item.active {
 
 }
 
-.navbar-brand{
+.navbar-brand {
     font-weight: 500;
     font-size: 30px;
     color: black;
@@ -25,20 +27,30 @@ a:not([href]).dropdown-item.active {
     padding-bottom: 0px;
 }
 
-.btn{
+.btn {
     margin: 0px;
 }
 
-.dropdown-menu{
+.dropdown-menu {
     z-index: 9999;
 }
 
-.fa.fa-file-arrow-down{
+.fa.fa-file-arrow-down {
     font-size: 22px;
     color: white;
 }
 
-.badge.bg-success:hover .fa.fa-file-arrow-down{
+.badge.bg-success:hover .fa.fa-file-arrow-down {
     cursor: pointer;
     color: black;
+}
+
+.btn.action-btn.active {
+    background-color: #2c386b;
+    color: white;
+    border-color: #2c386b;
+}
+
+.btn.action-btn.active .fa{
+    color: white;
 }

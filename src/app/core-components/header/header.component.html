@@ -9,11 +9,18 @@
                 Update Available!
             </button>
         </div>
-        <div class="ps-2" *ngIf="dataInitialized && activeAccount">
+        <!-- <div class="ps-2" *ngIf="dataInitialized && activeAccount">
             <app-search-bar></app-search-bar>
+        </div> -->
+
+        <div class="btn btn-group ms-auto" *ngIf="dataInitialized && activeAccount && displayToggle">
+            <button type="button" class="btn action-btn" (click)="goToDataEntry()"
+                [ngClass]="{'active': !inDashboard}"><span class="fa fa-database"></span> Data Entry</button>
+            <button type="button" class="btn action-btn" (click)="goToDashboard()"
+                [ngClass]="{'active': inDashboard}"><span class="fa fa-home"></span> Dashboard</button>
         </div>
 
-        <div class="dropdown ms-auto" *ngIf="dataInitialized">
+        <div class="dropdown" *ngIf="dataInitialized">
             <button *ngIf="activeAccount" class="btn action-btn dropdown-toggle" data-bs-toggle="dropdown"
                 aria-expanded="false"><span class="fa fa-building"></span>
                 {{activeAccount.name}}
@@ -50,7 +57,8 @@
                 </div>
             </ng-container>
             <div class="ps-2" *ngIf="activeAccount.dataBackupFilePath">
-                <div class="badge" title="Automatic Account Backups Active" [ngClass]="{'bg-warning': savingBackup, 'bg-success': !savingBackup}" (click)="checkLatestFile()">
+                <div class="badge" title="Automatic Account Backups Active"
+                    [ngClass]="{'bg-warning': savingBackup, 'bg-success': !savingBackup}" (click)="checkLatestFile()">
                     <span class="fa fa-file-arrow-down"></span>
                 </div>
             </div>
