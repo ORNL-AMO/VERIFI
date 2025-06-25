@@ -74,9 +74,17 @@ export class EditPredictorFormComponent {
       this.weatherDataService.selectedYear = endDate.getFullYear();
       this.weatherDataService.selectedDate = endDate;
       this.weatherDataService.selectedMonth = endDate;
-      this.router.navigateByUrl('/weather-data/annual-station');
+      if (this.router.url.includes('data-wizard')) {
+        this.router.navigateByUrl('/data-wizard/' + this.predictor.accountId + '/weather-data/annual-station');
+      } else {
+        this.router.navigateByUrl('/weather-data/annual-station');
+      }
     } else {
-      this.router.navigateByUrl('/weather-data');
+      if (this.router.url.includes('data-wizard')) {
+        this.router.navigateByUrl('/data-wizard/' + this.predictor.accountId + '/weather-data');
+      } else {
+        this.router.navigateByUrl('/weather-data');
+      }
     }
   }
 

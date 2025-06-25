@@ -2,11 +2,11 @@ import { Component, Input, SimpleChanges } from '@angular/core';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 // import { DegreeDaysService } from '../../helper-services/degree-days.service';
-import { DetailDegreeDay } from 'src/app/models/degreeDays';
-import { getDegreeDayAmount } from '../../sharedHelperFuntions';
+import { DetailDegreeDay, WeatherStation } from 'src/app/models/degreeDays';
+import { getDegreeDayAmount, getWeatherSearchFromFacility } from '../../sharedHelperFuntions';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { WeatherDataService } from 'src/app/weather-data/weather-data.service';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
@@ -29,7 +29,8 @@ export class EditPredictorDataEntryFormComponent {
     // private degreeDaysService: DegreeDaysService,
     private facilityDbService: FacilitydbService,
     private weatherDataService: WeatherDataService,
-    private router: Router
+    private router: Router,
+    private activatedRoute: ActivatedRoute
   ) {
   }
 
@@ -77,13 +78,41 @@ export class EditPredictorDataEntryFormComponent {
     this.calculatingDegreeDays = false;
   }
 
-  goToWeatherData() {
+  async goToWeatherData() {
     let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     this.weatherDataService.selectedFacility = facility;
-    //TODO: CHECK THIS NAVIGATION TO WEATHER DATA
     this.weatherDataService.selectedMonth = this.predictorData.date;
     this.weatherDataService.selectedYear = new Date(this.predictorData.date).getFullYear();
-    this.router.navigateByUrl('/weather-data');
+
+    if (this.predictor.weatherDataType == 'CDD') {
+      this.weatherDataService.coolingTemp = this.predictor.coolingBaseTemperature;
+    } else if (this.predictor.weatherDataType == 'HDD') {
+      this.weatherDataService.heatingTemp = this.predictor.heatingBaseTemperature;
+    }
+    this.weatherDataService.weatherDataSelection = this.predictor.weatherDataType;
+    this.weatherDataService.selectedFacility = facility;
+    this.weatherDataService.addressSearchStr = getWeatherSearchFromFacility(facility);
+    let weatherStation: WeatherStation | "error" = await this.weatherDataService.getStation(this.predictor.weatherStationId);
+    if (weatherStation && weatherStation != 'error') {
+      this.weatherDataService.selectedStation = weatherStation;
+      let endDate: Date = new Date(weatherStation.end);
+      endDate.setFullYear(endDate.getFullYear() - 1);
+      this.weatherDataService.selectedYear = endDate.getFullYear();
+      this.weatherDataService.selectedDate = endDate;
+      this.weatherDataService.selectedMonth = endDate;
+      if (this.router.url.includes('data-wizard')) {
+        this.router.navigateByUrl('/data-wizard/' + this.predictor.accountId + '/weather-data/annual-station');
+      } else {
+        this.router.navigateByUrl('/weather-data/annual-station');
+      }
+    } else {
+      if (this.router.url.includes('data-wizard')) {
+        this.router.navigateByUrl('/data-wizard/' + this.predictor.accountId + '/weather-data');
+      } else {
+        this.router.navigateByUrl('/weather-data');
+      }
+    }
+
   }
 
   setChanged() {

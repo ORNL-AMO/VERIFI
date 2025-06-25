@@ -215,7 +215,11 @@ export class PredictorTableComponent {
     }
     this.weatherDataService.selectedFacility = this.selectedFacility;
     this.weatherDataService.addressSearchStr = getWeatherSearchFromFacility(this.selectedFacility);
-    this.router.navigateByUrl('weather-data/annual-station')
+    if (this.router.url.includes('data-wizard')) {
+      this.router.navigateByUrl('/data-wizard/' + this.selectedFacility.accountId + '/weather-data/annual-station');
+    } else {
+      this.router.navigateByUrl('/weather-data/annual-station');
+    }
   }
 
   checkWeatherPredictor(predictor: IdbPredictor): boolean {
@@ -229,7 +233,11 @@ export class PredictorTableComponent {
   goToWeatherData() {
     this.weatherDataService.selectedFacility = this.selectedFacility;
     this.weatherDataService.addressSearchStr = getWeatherSearchFromFacility(this.selectedFacility);
-    this.router.navigateByUrl('/weather-data');
+    if (this.router.url.includes('data-wizard')) {
+      this.router.navigateByUrl('/data-wizard/' + this.selectedFacility.accountId + '/weather-data');
+    } else {
+      this.router.navigateByUrl('/weather-data');
+    }
   }
 
   selectCopy(predictor: IdbPredictor) {

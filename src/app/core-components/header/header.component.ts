@@ -205,6 +205,8 @@ export class HeaderComponent implements OnInit {
       if (url.includes('facility')) {
         let selectedFacility: IdbFacility = this.facilitydbService.selectedFacility.getValue();
         this.router.navigateByUrl('/data-wizard/' + this.activeAccount.guid + '/facilities/' + selectedFacility.guid);
+      } else if (url.includes('weather-data')) {
+        this.router.navigateByUrl('/data-wizard/' + this.activeAccount.guid + '/weather-data');
       } else {
         this.router.navigateByUrl('/data-wizard/' + this.activeAccount.guid)
       }
@@ -217,7 +219,9 @@ export class HeaderComponent implements OnInit {
       if (url.includes('facilities')) {
         let selectedFacility: IdbFacility = this.facilitydbService.selectedFacility.getValue();
         this.router.navigateByUrl('/facility/' + selectedFacility.id);
-      } else {
+      }  else if (url.includes('weather-data')) {
+        this.router.navigateByUrl('/weather-data');
+      }else {
         this.router.navigateByUrl('/account')
       }
     }

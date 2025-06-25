@@ -281,7 +281,11 @@ export class PredictorsDataTableComponent {
       this.weatherDataService.selectedFacility = selectedFacility;
       this.weatherDataService.addressSearchStr = getWeatherSearchFromFacility(selectedFacility);
       //TODO: Update to new route
-      // this.router.navigateByUrl('weather-data/monthly-station');
+    if (this.inDataWizard) {
+      this.router.navigateByUrl('/data-wizard/' + selectedFacility.accountId + '/weather-data/monthly-station');
+    } else {
+      this.router.navigateByUrl('/weather-data');
+    }
     } else {
       this.toastNotificationService.showToast('An Error Occured', undefined, undefined, false, 'alert-danger');
     }
@@ -304,10 +308,12 @@ export class PredictorsDataTableComponent {
   goToWeatherData() {
     let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     this.weatherDataService.selectedFacility = facility;
-    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    this.weatherDataService.selectedFacility = selectedFacility;
-    this.weatherDataService.addressSearchStr = getWeatherSearchFromFacility(selectedFacility);
-    this.router.navigateByUrl('/weather-data');
+    this.weatherDataService.addressSearchStr = getWeatherSearchFromFacility(facility);
+    if (this.inDataWizard) {
+      this.router.navigateByUrl('/data-wizard/' + facility.accountId + '/weather-data');
+    } else {
+      this.router.navigateByUrl('/weather-data');
+    }
   }
 
   showUpdateEntries() {
