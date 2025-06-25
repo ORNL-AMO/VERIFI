@@ -33,6 +33,7 @@ import { ProcessPredictorReadingsComponent } from "../data-wizard/data-wizard-im
 import { SubmitImportDataComponent } from "../data-wizard/data-wizard-import/shared-process-file/submit-import-data/submit-import-data.component";
 import { FacilityMeterGroupingComponent } from "../data-wizard/account-facilities/facility-data/facility-meters/facility-meter-grouping/facility-meter-grouping.component";
 import { DataWizardHomeComponent } from "../data-wizard/data-wizard-home/data-wizard-home.component";
+import { WeatherDataRoutes } from "./weather-data.routes";
 
 export const DataWizardRoutes: Route = {
     path: 'data-wizard/:id',
@@ -179,6 +180,7 @@ export const DataWizardRoutes: Route = {
                     ]
                 }
             ]
-        }
+        },
+        WeatherDataRoutes
     ]
 }

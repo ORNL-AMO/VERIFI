@@ -198,6 +198,16 @@
             <hr class="my-1">
         </div>
         <div class="ps-2 pe-2 nav-item">
+            <a class="nav-link" [routerLink]="'/data-wizard/'+account.guid+'/weather-data'"
+                [routerLinkActive]="['active']">
+                <span class="fa fa-temperature-half"></span>
+                Weather Data
+            </a>
+        </div>
+        <div class="p-2 w-100">
+            <hr class="my-1">
+        </div>
+        <div class="ps-2 pe-2 nav-item">
             <a class="nav-link" [routerLink]="'/account'" [routerLinkActive]="['active']"
                 [routerLinkActiveOptions]="{ exact: true }">
                 <span class="fa fa-home"></span>

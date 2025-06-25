@@ -5,7 +5,7 @@ import { Subscription, firstValueFrom } from 'rxjs';
 import { WeatherDataReading, WeatherDataService } from './weather-data.service';
 import { FacilitydbService } from '../indexedDB/facility-db.service';
 import { LoadingService } from '../core-components/loading/loading.service';
-import { Router } from '@angular/router';
+import { NavigationEnd, Router } from '@angular/router';
 import { AnalysisDbService } from '../indexedDB/analysis-db.service';
 import { ToastNotificationsService } from '../core-components/toast-notifications/toast-notifications.service';
 import { DetailDegreeDay, WeatherDataSelection } from '../models/degreeDays';
@@ -44,6 +44,7 @@ export class WeatherDataComponent {
   weatherDataSelection: WeatherDataSelection;
   facilityPredictorData: Array<IdbPredictorData>;
   facilityMeterData: Array<IdbUtilityMeterData>;
+  inDashboard: boolean = false;
   constructor(private helpPanelService: HelpPanelService, private accountDbService: AccountdbService,
     private weatherDataService: WeatherDataService,
     private facilityDbService: FacilitydbService,
@@ -77,6 +78,13 @@ export class WeatherDataComponent {
         }
       }
     });
+
+    this.router.events.subscribe(event => {
+      if (event instanceof NavigationEnd) {
+        this.setInDashboard(event.urlAfterRedirects);
+      }
+    });
+    this.setInDashboard(this.router.url);
   }
 
   ngOnDestroy() {
@@ -242,6 +250,10 @@ export class WeatherDataComponent {
       this.facilityPredictorData = [];
       this.facilityMeterData = [];
     }
+  }
+
+  setInDashboard(url: string) {
+    this.inDashboard = url.includes('data-wizard') == false;
   }
 }
 

@@ -20,7 +20,7 @@
                 [ngClass]="{'active': inDashboard}"><span class="fa fa-home"></span> Dashboard</button>
         </div>
 
-        <div class="dropdown" *ngIf="dataInitialized">
+        <div class="dropdown" *ngIf="dataInitialized" [ngClass]="{'ms-auto': !displayToggle}">
             <button *ngIf="activeAccount" class="btn action-btn dropdown-toggle" data-bs-toggle="dropdown"
                 aria-expanded="false"><span class="fa fa-building"></span>
                 {{activeAccount.name}}

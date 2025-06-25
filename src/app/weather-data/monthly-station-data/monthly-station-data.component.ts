@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { DetailDegreeDay, WeatherDataSelection, WeatherDataSelectionOption, WeatherDataSelectionOptions, WeatherStation } from 'src/app/models/degreeDays';
 import { WeatherDataReading, WeatherDataService } from 'src/app/weather-data/weather-data.service';
 import { getDetailedDataForMonth } from '../weatherDataCalculations';
@@ -27,7 +27,8 @@ export class MonthlyStationDataComponent {
   constructor(private router: Router,
     private weatherDataService: WeatherDataService,
     // private degreeDaysService: DegreeDaysService,
-    private toastNotificationService: ToastNotificationsService
+    private toastNotificationService: ToastNotificationsService,
+    private activatedRoute: ActivatedRoute
   ) {
 
   }
@@ -36,7 +37,7 @@ export class MonthlyStationDataComponent {
     this.weatherStation = this.weatherDataService.selectedStation;
     this.selectedMonth = this.weatherDataService.selectedMonth;
     if (!this.weatherStation || !this.selectedMonth) {
-      this.router.navigateByUrl('weather-data/stations');
+      this.goToStations();
     } else {
       this.heatingTemp = this.weatherDataService.heatingTemp;
       this.coolingTemp = this.weatherDataService.coolingTemp;
@@ -79,11 +80,11 @@ export class MonthlyStationDataComponent {
   }
 
   goToStations() {
-    this.router.navigateByUrl('weather-data/stations');
+    this.router.navigate(['../stations'], { relativeTo: this.activatedRoute });
   }
 
   goToAnnualData() {
-    this.router.navigateByUrl('weather-data/annual-station');
+    this.router.navigate(['../annual-station'], { relativeTo: this.activatedRoute });
   }
 
   async setHeatingBaseTemp() {
