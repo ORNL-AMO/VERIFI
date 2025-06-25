@@ -19,10 +19,10 @@ import { StationarySolidOptions } from 'src/app/shared/fuel-options/stationarySo
 import { convertHeatCapacity } from 'src/app/shared/sharedHelperFuntions';
 
 @Component({
-    selector: 'app-custom-fuel-data-form',
-    templateUrl: './custom-fuel-data-form.component.html',
-    styleUrls: ['./custom-fuel-data-form.component.css'],
-    standalone: false
+  selector: 'app-custom-fuel-data-form',
+  templateUrl: './custom-fuel-data-form.component.html',
+  styleUrls: ['./custom-fuel-data-form.component.css'],
+  standalone: false
 })
 export class CustomFuelDataFormComponent {
 
@@ -165,7 +165,11 @@ export class CustomFuelDataFormComponent {
   }
 
   navigateHome() {
-    this.router.navigateByUrl('/account/custom-data/fuels');
+    if (this.isAdd) {
+      this.router.navigate(['../'], { relativeTo: this.activatedRoute });
+    } else {
+      this.router.navigate(['../../'], { relativeTo: this.activatedRoute });
+    }
   }
 
   setForm(editItem: IdbCustomFuel) {
@@ -294,13 +298,13 @@ export class CustomFuelDataFormComponent {
   }
 
   setIsMobile() {
-    if(this.form.controls.isMobile.value == true){
+    if (this.form.controls.isMobile.value == true) {
       this.form.controls.siteToSourceMultiplier.patchValue(1);
       this.form.controls.phase.patchValue('Liquid');
       this.form.controls.heatCapacityValue.patchValue(1);
       this.setUnits();
       this.setRate(false);
-    }else{
+    } else {
       this.setOutputRate();
     }
   }

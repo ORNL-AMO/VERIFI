@@ -9,8 +9,8 @@
         </div>
     </div>
     <div class="ps-1 w-100" [hidden]="!sidebarOpen">
-        <a class="nav-link" [routerLink]="'/data-wizard/'+account.guid + '/home'"
-            [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
+        <a class="nav-link" [routerLink]="'/data-wizard/'+account.guid + '/home'" [routerLinkActive]="['active']"
+            [routerLinkActiveOptions]="{ exact: true }">
             <h5 class="ps-2 mb-0">
                 <span class="fa fa-building"></span>
                 {{account.name}}
@@ -193,6 +193,39 @@
                     </div>
                 </div>
             </ng-container>
+        </div>
+        <div class="p-2 w-100">
+            <hr class="my-1">
+        </div>
+        <div class="ps-2 pe-2 nav-item">
+            <a class="nav-link" (click)="toggleCustomDataOpen()">
+                <span class="fa"
+                    [ngClass]="{'fa-chevron-down': account.sidebarCustomDataOpen, 'fa-chevron-right': !account.sidebarCustomDataOpen}"></span>
+                Custom Database Items
+            </a>
+        </div>
+        <div class="sidebar-section facilities-section" *ngIf="account.sidebarCustomDataOpen">
+            <div class="ps-2 nav-item">
+                <a class="nav-link" [routerLink]="'/data-wizard/'+account.guid+'/account-custom-data/custom-grid-factors'"
+                    [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
+                    <span class="fa fa-list"></span>
+                    Grid Factors
+                </a>
+            </div>
+            <div class="ps-2 nav-item">
+                <a class="nav-link" [routerLink]="'/data-wizard/'+account.guid+'/account-custom-data/custom-fuels'"
+                    [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
+                    <span class="fa fa-list"></span>
+                    Fuels
+                </a>
+            </div>
+            <div class="ps-2 nav-item">
+                <a class="nav-link" [routerLink]="'/data-wizard/'+account.guid+'/account-custom-data/custom-gwps'"
+                    [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }">
+                    <span class="fa fa-list"></span>
+                    Global Warming Potentials
+                </a>
+            </div>
         </div>
         <div class="p-2 w-100">
             <hr class="my-1">

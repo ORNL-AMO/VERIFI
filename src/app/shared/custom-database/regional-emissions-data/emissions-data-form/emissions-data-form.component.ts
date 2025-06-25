@@ -180,9 +180,13 @@ export class EmissionsDataFormComponent implements OnInit {
   }
 
   navigateHome() {
-    this.router.navigateByUrl('/account/custom-data/emissions');
+    if (this.isAdd) {
+      this.router.navigate(['../'], { relativeTo: this.activatedRoute });
+    } else {
+      this.router.navigate(['../../'], { relativeTo: this.activatedRoute });
+    }
   }
-
+  
   deleteLocationEmissions(index: number) {
     this.editCustomEmissions.locationEmissionRates.splice(index, 1);
   }

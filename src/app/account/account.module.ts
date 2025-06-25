@@ -9,7 +9,7 @@ import { HelperPipesModule } from '../shared/helper-pipes/_helper-pipes.module';
 import { SettingsFormsModule } from '../shared/settings-forms/settings-forms.module';
 import { AccountAnalysisModule } from './account-analysis/account-analysis.module';
 import { AccountHomeModule } from './account-home/account-home.module';
-import { CustomDatabaseModule } from './custom-database/custom-database.module';
+import { CustomDatabaseModule } from '../shared/custom-database/custom-database.module';
 import { AccountOverviewModule } from './account-overview/account-overview.module';
 import { AccountReportsModule } from './account-reports/account-reports.module';
 

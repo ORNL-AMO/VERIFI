@@ -34,6 +34,16 @@ import { SubmitImportDataComponent } from "../data-wizard/data-wizard-import/sha
 import { FacilityMeterGroupingComponent } from "../data-wizard/account-facilities/facility-data/facility-meters/facility-meter-grouping/facility-meter-grouping.component";
 import { DataWizardHomeComponent } from "../data-wizard/data-wizard-home/data-wizard-home.component";
 import { WeatherDataRoutes } from "./weather-data.routes";
+import { CustomGWPComponent } from "../shared/custom-database/custom-gwp/custom-gwp.component";
+import { RegionalEmissionsDataComponent } from "../shared/custom-database/regional-emissions-data/regional-emissions-data.component";
+import { CustomFuelDataComponent } from "../shared/custom-database/custom-fuel-data/custom-fuel-data.component";
+import { EmissionsDataDashboardComponent } from "../shared/custom-database/regional-emissions-data/emissions-data-dashboard/emissions-data-dashboard.component";
+import { EmissionsDataFormComponent } from "../shared/custom-database/regional-emissions-data/emissions-data-form/emissions-data-form.component";
+import { CustomFuelDataDashboardComponent } from "../shared/custom-database/custom-fuel-data/custom-fuel-data-dashboard/custom-fuel-data-dashboard.component";
+import { CustomFuelDataFormComponent } from "../shared/custom-database/custom-fuel-data/custom-fuel-data-form/custom-fuel-data-form.component";
+import { CustomGwpFormComponent } from "../shared/custom-database/custom-gwp/custom-gwp-form/custom-gwp-form.component";
+import { CustomGwpDashboardComponent } from "../shared/custom-database/custom-gwp/custom-gwp-dashboard/custom-gwp-dashboard.component";
+import { AccountCustomDataComponent } from "../data-wizard/account-custom-data/account-custom-data.component";
 
 export const DataWizardRoutes: Route = {
     path: 'data-wizard/:id',
@@ -181,6 +191,41 @@ export const DataWizardRoutes: Route = {
                 }
             ]
         },
-        WeatherDataRoutes
+        WeatherDataRoutes,
+        {
+            path: 'account-custom-data',
+            component: AccountCustomDataComponent,
+            children: [
+                {
+                    path: 'custom-grid-factors',
+                    component: RegionalEmissionsDataComponent,
+                    children: [
+                        { path: '', component: EmissionsDataDashboardComponent },
+                        { path: 'edit/:id', component: EmissionsDataFormComponent },
+                        { path: 'add', component: EmissionsDataFormComponent }
+
+                    ]
+                },
+                {
+                    path: 'custom-gwps',
+                    component: CustomGWPComponent,
+                    children: [
+                        { path: '', component: CustomGwpDashboardComponent },
+                        { path: 'edit/:id', component: CustomGwpFormComponent },
+                        { path: 'add', component: CustomGwpFormComponent }
+                    ]
+                },
+                {
+                    path: 'custom-fuels',
+                    component: CustomFuelDataComponent,
+                    children: [
+                        { path: '', component: CustomFuelDataDashboardComponent },
+                        { path: 'edit/:id', component: CustomFuelDataFormComponent },
+                        { path: 'add', component: CustomFuelDataFormComponent }
+
+                    ]
+                }
+            ]
+        }
     ]
 }

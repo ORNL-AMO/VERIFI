@@ -20,10 +20,10 @@ import { BetterPlantsReportComponent } from "src/app/account/account-reports/bet
 import { DataOverviewReportComponent } from "src/app/account/account-reports/data-overview-report/data-overview-report.component";
 import { AccountSettingsComponent } from "src/app/account/account-settings/account-settings.component";
 import { AccountComponent } from "src/app/account/account.component";
-import { CustomDatabaseComponent } from "src/app/account/custom-database/custom-database.component";
-import { EmissionsDataDashboardComponent } from "src/app/account/custom-database/regional-emissions-data/emissions-data-dashboard/emissions-data-dashboard.component";
-import { EmissionsDataFormComponent } from "src/app/account/custom-database/regional-emissions-data/emissions-data-form/emissions-data-form.component";
-import { RegionalEmissionsDataComponent } from "src/app/account/custom-database/regional-emissions-data/regional-emissions-data.component";
+import { CustomDatabaseComponent } from "src/app/shared/custom-database/custom-database.component";
+import { EmissionsDataDashboardComponent } from "src/app/shared/custom-database/regional-emissions-data/emissions-data-dashboard/emissions-data-dashboard.component";
+import { EmissionsDataFormComponent } from "src/app/shared/custom-database/regional-emissions-data/emissions-data-form/emissions-data-form.component";
+import { RegionalEmissionsDataComponent } from "src/app/shared/custom-database/regional-emissions-data/regional-emissions-data.component";
 import { AccountAnalysisEnergyDashboardComponent } from "src/app/account/account-analysis/account-analysis-dashboard/account-analysis-energy-dashboard/account-analysis-energy-dashboard.component";
 import { AccountAnalysisWaterDashboardComponent } from "src/app/account/account-analysis/account-analysis-dashboard/account-analysis-water-dashboard/account-analysis-water-dashboard.component";
 import { AccountAnalysisFacilitiesSummaryComponent } from "src/app/account/account-analysis/account-analysis-results/account-analysis-facilities-summary/account-analysis-facilities-summary.component";
@@ -33,12 +33,12 @@ import { OverviewReportDashboardComponent } from "src/app/account/account-report
 import { PerformanceReportDashboardComponent } from "src/app/account/account-reports/account-reports-dashboard/performance-report-dashboard/performance-report-dashboard.component";
 import { BetterClimateReportDashboardComponent } from "src/app/account/account-reports/account-reports-dashboard/better-climate-report-dashboard/better-climate-report-dashboard.component";
 import { BetterClimateReportComponent } from "src/app/account/account-reports/better-climate-report/better-climate-report.component";
-import { CustomFuelDataComponent } from "src/app/account/custom-database/custom-fuel-data/custom-fuel-data.component";
-import { CustomFuelDataDashboardComponent } from "src/app/account/custom-database/custom-fuel-data/custom-fuel-data-dashboard/custom-fuel-data-dashboard.component";
-import { CustomFuelDataFormComponent } from "src/app/account/custom-database/custom-fuel-data/custom-fuel-data-form/custom-fuel-data-form.component";
-import { CustomGWPComponent } from "src/app/account/custom-database/custom-gwp/custom-gwp.component";
-import { CustomGwpDashboardComponent } from "src/app/account/custom-database/custom-gwp/custom-gwp-dashboard/custom-gwp-dashboard.component";
-import { CustomGwpFormComponent } from "src/app/account/custom-database/custom-gwp/custom-gwp-form/custom-gwp-form.component";
+import { CustomFuelDataComponent } from "src/app/shared/custom-database/custom-fuel-data/custom-fuel-data.component";
+import { CustomFuelDataDashboardComponent } from "src/app/shared/custom-database/custom-fuel-data/custom-fuel-data-dashboard/custom-fuel-data-dashboard.component";
+import { CustomFuelDataFormComponent } from "src/app/shared/custom-database/custom-fuel-data/custom-fuel-data-form/custom-fuel-data-form.component";
+import { CustomGWPComponent } from "src/app/shared/custom-database/custom-gwp/custom-gwp.component";
+import { CustomGwpDashboardComponent } from "src/app/shared/custom-database/custom-gwp/custom-gwp-dashboard/custom-gwp-dashboard.component";
+import { CustomGwpFormComponent } from "src/app/shared/custom-database/custom-gwp/custom-gwp-form/custom-gwp-form.component";
 
 export const AccountRoutes: Route = {
     path: 'account',

@@ -207,6 +207,14 @@ export class HeaderComponent implements OnInit {
         this.router.navigateByUrl('/data-wizard/' + this.activeAccount.guid + '/facilities/' + selectedFacility.guid);
       } else if (url.includes('weather-data')) {
         this.router.navigateByUrl('/data-wizard/' + this.activeAccount.guid + '/weather-data');
+      } else if (url.includes('custom-data')) {
+        if (url.includes('emissions')) {
+          this.router.navigateByUrl('/data-wizard/' + this.activeAccount.guid + '/account-custom-data/custom-grid-factors');
+        } else if (url.includes('fuels')) {
+          this.router.navigateByUrl('/data-wizard/' + this.activeAccount.guid + '/account-custom-data/custom-fuels');
+        } else if (url.includes('gwp')) {
+          this.router.navigateByUrl('/data-wizard/' + this.activeAccount.guid + '/account-custom-data/custom-gwps');
+        }
       } else {
         this.router.navigateByUrl('/data-wizard/' + this.activeAccount.guid)
       }
@@ -219,9 +227,17 @@ export class HeaderComponent implements OnInit {
       if (url.includes('facilities')) {
         let selectedFacility: IdbFacility = this.facilitydbService.selectedFacility.getValue();
         this.router.navigateByUrl('/facility/' + selectedFacility.id);
-      }  else if (url.includes('weather-data')) {
+      } else if (url.includes('weather-data')) {
         this.router.navigateByUrl('/weather-data');
-      }else {
+      } else if (url.includes('account-custom-data')) {
+        if (url.includes('custom-grid-factors')) {
+          this.router.navigateByUrl('/account/custom-data/emissions');
+        } else if (url.includes('custom-fuels')) {
+          this.router.navigateByUrl('/account/custom-data/fuels');
+        } else if (url.includes('custom-gwps')) {
+          this.router.navigateByUrl('/account/custom-data/gwp');
+        }
+      } else {
         this.router.navigateByUrl('/account')
       }
     }

@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { CustomEmissionsDbService } from 'src/app/indexedDB/custom-emissions-db.service';
@@ -25,7 +25,8 @@ export class EmissionsDataDashboardComponent implements OnInit {
   constructor(private customEmissionsDbService: CustomEmissionsDbService,
     private router: Router,
     private accountDbService: AccountdbService,
-    private facilityDbService: FacilitydbService) { }
+    private facilityDbService: FacilitydbService,
+    private activatedRoute: ActivatedRoute) { }
 
   ngOnInit(): void {
     this.customEmissionsItemsSub = this.customEmissionsDbService.accountEmissionsItems.subscribe(val => {
@@ -43,7 +44,11 @@ export class EmissionsDataDashboardComponent implements OnInit {
   }
 
   addNewItem() {
-    this.router.navigateByUrl('account/custom-data/emissions/add');
+    if (this.router.url.includes('data-wizard')) {
+      this.router.navigate(['./add'], { relativeTo: this.activatedRoute });
+    } else {
+      this.router.navigate(['../add'], { relativeTo: this.activatedRoute });
+    }
   }
 
   deleteItem(customEmissionsItem: IdbCustomEmissionsItem) {
@@ -52,7 +57,11 @@ export class EmissionsDataDashboardComponent implements OnInit {
   }
 
   editItem(customEmissionsItem: IdbCustomEmissionsItem) {
-    this.router.navigateByUrl('account/custom-data/emissions/edit/' + customEmissionsItem.guid);
+    if (this.router.url.includes('data-wizard')) {
+      this.router.navigate(['./edit', customEmissionsItem.guid], { relativeTo: this.activatedRoute });
+    } else {
+      this.router.navigate(['../edit', customEmissionsItem.guid], { relativeTo: this.activatedRoute });
+    }
   }
 
   setDeleteItemInUse() {

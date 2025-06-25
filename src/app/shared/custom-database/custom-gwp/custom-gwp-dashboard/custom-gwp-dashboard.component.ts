@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { CustomGWPDbService } from 'src/app/indexedDB/custom-gwp-db.service';
@@ -9,10 +9,10 @@ import { IdbCustomGWP } from 'src/app/models/idbModels/customGWP';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 
 @Component({
-    selector: 'app-custom-gwp-dashboard',
-    templateUrl: './custom-gwp-dashboard.component.html',
-    styleUrls: ['./custom-gwp-dashboard.component.css'],
-    standalone: false
+  selector: 'app-custom-gwp-dashboard',
+  templateUrl: './custom-gwp-dashboard.component.html',
+  styleUrls: ['./custom-gwp-dashboard.component.css'],
+  standalone: false
 })
 export class CustomGwpDashboardComponent {
 
@@ -24,7 +24,8 @@ export class CustomGwpDashboardComponent {
   deleteGWPInUse: boolean = false;
   constructor(private customGWPDbService: CustomGWPDbService, private router: Router,
     private accountDbService: AccountdbService,
-    private utilityMeterDbService: UtilityMeterdbService) { }
+    private utilityMeterDbService: UtilityMeterdbService,
+    private activatedRoute: ActivatedRoute) { }
 
   ngOnInit(): void {
     this.customGWPsSub = this.customGWPDbService.accountCustomGWPs.subscribe(val => {
@@ -41,9 +42,12 @@ export class CustomGwpDashboardComponent {
     this.selectedAccountSub.unsubscribe();
   }
 
-
   addNewItem() {
-    this.router.navigateByUrl('account/custom-data/gwp/add');
+    if (this.router.url.includes('data-wizard')) {
+      this.router.navigate(['./add'], { relativeTo: this.activatedRoute });
+    } else {
+      this.router.navigate(['../add'], { relativeTo: this.activatedRoute });
+    }
   }
 
   deleteItem(customGWP: IdbCustomGWP) {
@@ -52,7 +56,11 @@ export class CustomGwpDashboardComponent {
   }
 
   editItem(customGWP: IdbCustomGWP) {
-    this.router.navigateByUrl('account/custom-data/gwp/edit/' + customGWP.guid);
+    if (this.router.url.includes('data-wizard')) {
+      this.router.navigate(['./edit', customGWP.guid], { relativeTo: this.activatedRoute });
+    } else {
+      this.router.navigate(['../edit', customGWP.guid], { relativeTo: this.activatedRoute });
+    }
   }
 
   cancelDelete() {

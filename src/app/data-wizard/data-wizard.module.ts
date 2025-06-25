@@ -51,6 +51,8 @@ import { DataWizardSidePanelComponent } from './data-wizard-side-panel/data-wiza
 import { HelpPanelComponent } from './data-wizard-side-panel/help-panel/help-panel.component';
 import { SetupChecklistComponent } from './data-wizard-side-panel/setup-checklist/setup-checklist.component';
 import { DataWizardHomeComponent } from './data-wizard-home/data-wizard-home.component';
+import { CustomDatabaseModule } from '../shared/custom-database/custom-database.module';
+import { AccountCustomDataComponent } from './account-custom-data/account-custom-data.component';
 
 
 @NgModule({
@@ -95,7 +97,8 @@ import { DataWizardHomeComponent } from './data-wizard-home/data-wizard-home.com
     DataWizardSidePanelComponent,
     HelpPanelComponent,
     SetupChecklistComponent,
-    DataWizardHomeComponent
+    DataWizardHomeComponent,
+    AccountCustomDataComponent
   ],
   imports: [
     CommonModule,
@@ -109,7 +112,8 @@ import { DataWizardHomeComponent } from './data-wizard-home/data-wizard-home.com
     SharedPredictorsContentModule,
     LabelWithTooltipModule,
     DragDropModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    CustomDatabaseModule
   ]
 })
 export class DataWizardModule { }

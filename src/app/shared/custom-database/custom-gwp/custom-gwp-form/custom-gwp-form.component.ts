@@ -121,7 +121,11 @@ export class CustomGwpFormComponent {
   }
 
   navigateHome() {
-    this.router.navigateByUrl('/account/custom-data/gwp');
+    if (this.isAdd) {
+      this.router.navigate(['../'], { relativeTo: this.activatedRoute });
+    } else {
+      this.router.navigate(['../../'], { relativeTo: this.activatedRoute });
+    }
   }
 
   setForm(editItem: IdbCustomGWP) {

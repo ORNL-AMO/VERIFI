@@ -137,6 +137,12 @@ export class DataWizardSidebarComponent {
     await this.dbChangesService.setPredictorsV2(selectedAccount, selectedFacility);
   }
 
+  async toggleCustomDataOpen(){
+    this.account.sidebarCustomDataOpen = !this.account.sidebarCustomDataOpen;
+    await firstValueFrom(this.accountDbService.updateWithObservable(this.account));
+    await this.accountDbService.selectedAccount.next(this.account);
+  }
+
   toggleSidebar() {
     this.emitToggleCollapse.emit(!this.sidebarOpen);
   }

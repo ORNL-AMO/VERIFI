@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { CustomFuelDbService } from 'src/app/indexedDB/custom-fuel-db.service';
@@ -9,10 +9,10 @@ import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 
 @Component({
-    selector: 'app-custom-fuel-data-dashboard',
-    templateUrl: './custom-fuel-data-dashboard.component.html',
-    styleUrls: ['./custom-fuel-data-dashboard.component.css'],
-    standalone: false
+  selector: 'app-custom-fuel-data-dashboard',
+  templateUrl: './custom-fuel-data-dashboard.component.html',
+  styleUrls: ['./custom-fuel-data-dashboard.component.css'],
+  standalone: false
 })
 export class CustomFuelDataDashboardComponent {
 
@@ -24,7 +24,8 @@ export class CustomFuelDataDashboardComponent {
   deleteFuelInUse: boolean = false;
   constructor(private customFuelDbService: CustomFuelDbService, private router: Router,
     private accountDbService: AccountdbService,
-    private utilityMeterDbService: UtilityMeterdbService) { }
+    private utilityMeterDbService: UtilityMeterdbService,
+    private activatedRoute: ActivatedRoute) { }
 
   ngOnInit(): void {
     this.customFuelsSub = this.customFuelDbService.accountCustomFuels.subscribe(val => {
@@ -41,9 +42,12 @@ export class CustomFuelDataDashboardComponent {
     this.selectedAccountSub.unsubscribe();
   }
 
-
   addNewItem() {
-    this.router.navigateByUrl('account/custom-data/fuels/add');
+    if (this.router.url.includes('data-wizard')) {
+      this.router.navigate(['./add'], { relativeTo: this.activatedRoute });
+    } else {
+      this.router.navigate(['../add'], { relativeTo: this.activatedRoute });
+    }
   }
 
   deleteItem(customFuel: IdbCustomFuel) {
@@ -52,7 +56,11 @@ export class CustomFuelDataDashboardComponent {
   }
 
   editItem(customFuel: IdbCustomFuel) {
-    this.router.navigateByUrl('account/custom-data/fuels/edit/' + customFuel.guid);
+    if (this.router.url.includes('data-wizard')) {
+      this.router.navigate(['./edit', customFuel.guid], { relativeTo: this.activatedRoute });
+    } else {
+      this.router.navigate(['../edit', customFuel.guid], { relativeTo: this.activatedRoute });
+    }
   }
 
   cancelDelete() {
