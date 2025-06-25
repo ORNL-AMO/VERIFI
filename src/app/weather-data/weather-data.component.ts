@@ -30,10 +30,10 @@ import { getDetailedDataForMonth } from './weatherDataCalculations';
 // import { DegreeDaysService } from '../shared/helper-services/degree-days.service';
 
 @Component({
-    selector: 'app-weather-data',
-    templateUrl: './weather-data.component.html',
-    styleUrls: ['./weather-data.component.css'],
-    standalone: false
+  selector: 'app-weather-data',
+  templateUrl: './weather-data.component.html',
+  styleUrls: ['./weather-data.component.css'],
+  standalone: false
 })
 export class WeatherDataComponent {
 
@@ -235,7 +235,11 @@ export class WeatherDataComponent {
       await this.dbChangesService.selectAccount(selectedAccount, true);
       this.loadingService.setLoadingStatus(false);
       this.toastNotificationService.showToast('Degree Day Predictors Created', undefined, undefined, false, 'alert-success', false);
-      this.router.navigateByUrl('facility/' + this.selectedFacility.id + '/utility/predictors/manage/predictor-table');
+      if (this.router.url.includes('data-wizard')) {
+        this.router.navigateByUrl('data-wizard/' + this.selectedFacility.accountId + '/facilities/'+this.selectedFacility.guid +'/predictors');
+      } else {
+        this.router.navigateByUrl('facility/' + this.selectedFacility.id + '/utility/predictors/manage/predictor-table');
+      }
     } else {
       this.toastNotificationService.weatherDataErrorToast();
     }
