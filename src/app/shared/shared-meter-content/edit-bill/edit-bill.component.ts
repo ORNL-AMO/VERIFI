@@ -17,10 +17,10 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { UtilityMeterDataService } from 'src/app/shared/shared-meter-content/utility-meter-data.service';
 
 @Component({
-    selector: 'app-edit-bill',
-    templateUrl: './edit-bill.component.html',
-    styleUrls: ['./edit-bill.component.css'],
-    standalone: false
+  selector: 'app-edit-bill',
+  templateUrl: './edit-bill.component.html',
+  styleUrls: ['./edit-bill.component.css'],
+  standalone: false
 })
 export class EditBillComponent implements OnInit {
 
@@ -98,7 +98,7 @@ export class EditBillComponent implements OnInit {
   cancel() {
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     if (this.inDataWizard) {
-      this.router.navigateByUrl('/data-wizard/' + this.editMeter.accountId + '/facilities/' + this.editMeter.facilityId + '/meters/meter-data/' + this.editMeter.guid);
+      this.router.navigateByUrl('/data-wizard/' + this.editMeter.accountId + '/facilities/' + this.editMeter.facilityId + '/meters/' + this.editMeter.guid + '/meter-data');
     } else {
       this.router.navigateByUrl('/facility/' + selectedFacility.id + '/utility/energy-consumption/utility-meter/' + this.editMeter.id + '/data-table');
     }

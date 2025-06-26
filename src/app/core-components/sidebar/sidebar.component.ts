@@ -114,7 +114,7 @@ export class SidebarComponent implements OnInit {
   }
 
   setShowSidebar() {
-    this.showSidebar = !this.router.url.includes('setup-wizard') && !this.router.url.includes('manage-accounts') && !this.router.url.includes('verifi') && !this.router.url.includes('data-wizard');
+    this.showSidebar = !this.router.url.includes('setup-wizard') && !this.router.url.includes('manage-accounts') && !this.router.url.includes('welcome') && !this.router.url.includes('data-wizard');
   }
 
   setFacilityList(accountFacilities: Array<IdbFacility>) {

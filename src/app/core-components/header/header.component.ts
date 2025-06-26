@@ -189,14 +189,14 @@ export class HeaderComponent implements OnInit {
   }
 
   goHome() {
-    this.router.navigate(['/verifi']).then(() => {
+    this.router.navigate(['/welcome']).then(() => {
       this.accountdbService.selectedAccount.next(undefined);
     });
   }
 
   setInDashboard(url: string) {
     this.inDashboard = url.includes('data-wizard') == false;
-    this.displayToggle = url.includes('verifi') == false;
+    this.displayToggle = url.includes('welcome') == false;
   }
 
   goToDataEntry(forceNavigation: boolean = false) {

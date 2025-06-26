@@ -4,13 +4,41 @@
             <div class="form-paper">
                 <h4>{{account.name}} Data Management</h4>
                 <p class="fw-light">
-                    We have pulled the core data management pieces from the main portfolio area of VERIFI, into this data
+                    We have pulled the core data management pieces from the main portfolio area of VERIFI, into this
+                    data
                     focused portion of the
                     application. This was done in an effort to
-                    streamline the user experience for setting up and managing account data. Use the below steps and help
-                    content to assist in getting a new account setup. Once completed, the account portfolio can be used for
+                    streamline the user experience for setting up and managing account data. Use the below steps and
+                    help
+                    content to assist in getting a new account setup. Once completed, the account portfolio can be used
+                    for
                     analysis and data reporting.
                 </p>
+                <hr>
+                <!-- <div class="row">
+                    <div class="col-4" *ngFor="let facility of facilities | wizardSidebarFacilitiesList">
+                        <h5>
+                            <span class="fa fa-industry ps-1" [ngStyle]="{color: facility.color}"></span>
+                            {{facility.guid | facilityName}}
+                        </h5>
+                        <table class="table table-sm table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        Meters
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let meter of facility.guid | facilityMetersList:meters">
+                                    <td>
+                                        {{meter.name}}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div> -->
             </div>
         </div>
     </div>

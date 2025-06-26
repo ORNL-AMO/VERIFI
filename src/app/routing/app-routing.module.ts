@@ -19,9 +19,9 @@ const routes: Routes = [
   {
     path: '',
     pathMatch: 'full',
-    redirectTo: 'verifi'
+    redirectTo: 'welcome'
   },
-  { path: 'verifi', component: HomePageComponent },
+  { path: 'welcome', component: HomePageComponent },
   AccountRoutes,
   FacilityRoutes,
   SetupWizardRoutes,
