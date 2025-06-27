@@ -1,5 +1,5 @@
-import { Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { ChangeDetectorRef, Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
+import { skip, Subscription, take } from 'rxjs';
 import { VehicleDataFilters } from 'src/app/models/meterDataFilter';
 import { UtilityMeterDataService } from '../../utility-meter-data.service';
 import * as _ from 'lodash';
@@ -14,6 +14,7 @@ import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
+import { ElectronService } from 'src/app/electron/electron.service';
 
 @Component({
   selector: 'app-other-emissions-data-table',
@@ -52,17 +53,24 @@ export class OtherEmissionsDataTableComponent {
   showEmissionsSection: boolean;
   showDetailedCharges: boolean;
   volumeUnit: string;
-  energyUnit: string
+  energyUnit: string;
+  isElectron: boolean;
+  key: string;
+  savedUtilityFilePath: string;
+  utilityFileDeleted: boolean = false;
+  deletedPath: string
   constructor(private utilityMeterDataService: UtilityMeterDataService,
     private copyTableService: CopyTableService,
     private customFuelDbService: CustomFuelDbService,
     private facilityDbService: FacilitydbService,
-    private accountDbService: AccountdbService) {
+    private accountDbService: AccountdbService,
+    private electronService: ElectronService,
+    private cd: ChangeDetectorRef) {
 
   }
 
   ngOnInit(): void {
-
+    this.isElectron = this.electronService.isElectron;
     if (this.selectedMeterData.length != 0) {
       let hasFalseChecked: IdbUtilityMeterData = this.selectedMeterData.find(meterDataItem => { return meterDataItem.checked == false });
       this.allChecked = (hasFalseChecked == undefined);
@@ -117,6 +125,38 @@ export class OtherEmissionsDataTableComponent {
 
   setDeleteMeterData(meterData): void {
     this.setDelete.emit(meterData);
+  }
+
+  async viewUtilityBill(meterData) {
+    console.log('isBillConnected', meterData.isBillConnected);
+    this.key = meterData.guid;
+    this.electronService.getFilePath(this.key).pipe(take(1)).subscribe(path => {
+      this.savedUtilityFilePath = path;
+      if (this.savedUtilityFilePath) {
+        this.electronService.checkUtilityFileExists(this.key, this.savedUtilityFilePath);
+        this.electronService.getDeletedFile(this.key).pipe(
+          skip(1),
+          take(1)
+        ).subscribe(isDeleted => {
+          this.utilityFileDeleted = isDeleted;
+          this.cd.detectChanges();
+          if (!isDeleted) {
+            this.electronService.openFileLocation(this.key);
+            this.cd.detectChanges();
+          } else {
+            this.utilityFileDeleted = true;
+            this.savedUtilityFilePath = null;
+            meterData.isBillConnected = false;
+            this.cd.detectChanges();
+            console.warn('File does not exist or has been deleted.');
+          }
+        });
+      } else {
+        this.utilityFileDeleted = true;
+        meterData.isBillConnected = false;
+        this.cd.detectChanges();
+      }
+    });
   }
 
   setOrderDataField(str: string) {

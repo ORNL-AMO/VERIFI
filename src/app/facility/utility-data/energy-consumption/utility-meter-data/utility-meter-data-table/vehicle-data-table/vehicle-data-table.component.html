@@ -26,7 +26,8 @@
                 Total {{consumptionLabel}}<br> (<span [innerHTML]="volumeUnit | settingsLabel"></span>)
             </th>
             <th (click)="setOrderDataField('totalEnergyUse')" [ngClass]="{'active': orderDataField == 'totalEnergyUse'}"
-                *ngIf="vehicleDataFilters.totalEnergy">Total Energy<br> (<span [innerHTML]="energyUnit | settingsLabel"></span>)</th>
+                *ngIf="vehicleDataFilters.totalEnergy">Total Energy<br> (<span
+                    [innerHTML]="energyUnit | settingsLabel"></span>)</th>
             <th *ngIf="vehicleDataFilters.totalCost" (click)="setOrderDataField('totalCost')"
                 [ngClass]="{'active': orderDataField == 'totalCost'}">Total
                 Cost</th>
@@ -34,16 +35,13 @@
                 (click)="setOrderDataField('mobileBiogenicEmissions')"
                 [ngClass]="{'active': orderDataField == 'mobileBiogenicEmissions'}">Total Biogenic <br>Emissions (tonne
                 CO<sub>2</sub>e)</th>
-            <th *ngIf="vehicleDataFilters.mobileCarbonEmissions"
-                (click)="setOrderDataField('mobileCarbonEmissions')"
+            <th *ngIf="vehicleDataFilters.mobileCarbonEmissions" (click)="setOrderDataField('mobileCarbonEmissions')"
                 [ngClass]="{'active': orderDataField == 'mobileCarbonEmissions'}">Total Carbon <br>Emissions (tonne
                 CO<sub>2</sub>e)</th>
-            <th *ngIf="vehicleDataFilters.mobileOtherEmissions"
-                (click)="setOrderDataField('mobileOtherEmissions')"
+            <th *ngIf="vehicleDataFilters.mobileOtherEmissions" (click)="setOrderDataField('mobileOtherEmissions')"
                 [ngClass]="{'active': orderDataField == 'mobileOtherEmissions'}">Total Other <br>Emissions (tonne
                 CO<sub>2</sub>e)</th>
-            <th *ngIf="vehicleDataFilters.mobileTotalEmissions"
-                (click)="setOrderDataField('mobileTotalEmissions')"
+            <th *ngIf="vehicleDataFilters.mobileTotalEmissions" (click)="setOrderDataField('mobileTotalEmissions')"
                 [ngClass]="{'active': orderDataField == 'mobileTotalEmissions'}">Total <br>Emissions (tonne
                 CO<sub>2</sub>e)</th>
             <th *ngIf="vehicleDataFilters.otherCharge" (click)="setOrderDataField('otherCharge')"
@@ -80,6 +78,10 @@
                 <div class="btn-group">
                     <button class="btn btn-sm btn-outline" (click)="setEditMeterData(meterData)" title="Edit">
                         <i class="fa fa-pencil"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline" *ngIf="isElectron" (click)="viewUtilityBill(meterData)"
+                        [disabled]="!meterData.isBillConnected" title="View Bill">
+                        <i class="fa fa-link"></i>
                     </button>
                     <button class="btn btn-sm btn-outline" (click)="setDeleteMeterData(meterData)" title="Delete">
                         <i class="fa fa-trash"></i>

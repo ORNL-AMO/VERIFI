@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { Subscription, firstValueFrom } from 'rxjs';
+import { Subscription, firstValueFrom, skip, take } from 'rxjs';
 import { BackupDataService, BackupFile } from 'src/app/shared/helper-services/backup-data.service';
 import { ImportBackupModalService } from 'src/app/core-components/import-backup-modal/import-backup-modal.service';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
@@ -18,10 +18,10 @@ import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
 
 @Component({
-    selector: 'app-account-settings',
-    templateUrl: './account-settings.component.html',
-    styleUrls: ['./account-settings.component.css'],
-    standalone: false
+  selector: 'app-account-settings',
+  templateUrl: './account-settings.component.html',
+  styleUrls: ['./account-settings.component.css'],
+  standalone: false
 })
 export class AccountSettingsComponent implements OnInit {
 
@@ -51,6 +51,8 @@ export class AccountSettingsComponent implements OnInit {
   updatingFilePath: boolean = false;
   isElectron: boolean;
   backupFile: BackupFile;
+  folderPath: string;
+   folderError: string;
   constructor(
     private router: Router,
     private accountDbService: AccountdbService,
@@ -82,6 +84,11 @@ export class AccountSettingsComponent implements OnInit {
         if (this.updatingFilePath) {
           this.updateFilePath(savedFilePath)
         }
+      });
+
+      this.electronService.getFolderPath().subscribe(path => {
+        this.folderPath = path;
+        this.cd.detectChanges();
       });
     }
   }
@@ -281,5 +288,23 @@ export class AccountSettingsComponent implements OnInit {
     //#isWhatItIs
     await this.saveChanges();
     this.cd.detectChanges();
+  }
+
+  async createUtilityBillFolder() {
+    await this.electronService.selectFolder();
+  }
+
+  async openFolder() {
+    this.electronService.checkBillFolderExists();
+    this.electronService.getFolderError().pipe( skip(1),take(1)).subscribe(error => {
+      if (error == 'Deleted') {
+        this.folderError = error;
+        console.log('Folder was deleted' + this.folderError);
+      }
+      else {
+        this.folderError = null;
+        this.electronService.openBillsFolder(this.folderPath);
+      }
+    });
   }
 }

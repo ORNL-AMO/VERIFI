@@ -3,6 +3,7 @@ import { LocalStorageService } from 'ngx-webstorage';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { ToastNotificationsService } from '../core-components/toast-notifications/toast-notifications.service';
 import { BackupFile } from '../shared/helper-services/backup-data.service';
+import { exists } from 'fs-jetpack';
 
 @Injectable({
   providedIn: 'root'
@@ -17,6 +18,8 @@ export class ElectronService {
   savedUtilityFilePath: { [key: string]: BehaviorSubject<string> } = {};
   fileDeletedSubject: { [key: string]: BehaviorSubject<boolean> } = {};
   fileExists: BehaviorSubject<boolean>;
+  folderPathSubject: BehaviorSubject<string>;
+  folderErrorSubject: BehaviorSubject<string>;;
   currentKey: string;
   accountLatestBackupFile: BehaviorSubject<BackupFile>;
   constructor(private localStorageService: LocalStorageService, private toastNotificationService: ToastNotificationsService) {
@@ -26,6 +29,8 @@ export class ElectronService {
     this.updateInfo = new BehaviorSubject<{ releaseName: string, releaseNotes: string }>(undefined);
     this.updateError = new BehaviorSubject<boolean>(false);
     this.fileExists = new BehaviorSubject<boolean>(false);
+    this.folderPathSubject = new BehaviorSubject<string>(null);
+    this.folderErrorSubject = new BehaviorSubject<string>(null);
     this.isElectron = window["electronAPI"]
     if (this.isElectron) {
       this.listen();
@@ -88,17 +93,34 @@ export class ElectronService {
       }
     });
 
-     window["electronAPI"].on("utility-file-exists", (exists: boolean) => {
+    window["electronAPI"].on("utility-file-exists", (exists: boolean) => {
       console.log('electron service utility-file-exists...');
       this.checkKeyExists(this.currentKey);
-      if(this.currentKey &&  this.fileDeletedSubject[this.currentKey]) {
+      if (this.currentKey && this.fileDeletedSubject[this.currentKey]) {
         this.fileDeletedSubject[this.currentKey].next(!exists);
-        if(!exists) {
-         // this.savedUtilityFilePath[this.currentKey].next(null);
+        if (!exists) {
+          // this.savedUtilityFilePath[this.currentKey].next(null);
         }
       }
     });
+
+    window["electronAPI"].on("folder-exists", ({ exists, folderPath }: { exists: boolean, folderPath: string }) => {
+     const currentFolderPath = this.folderPathSubject.value;
+      if(!exists && currentFolderPath === folderPath) {
+        this.folderPathSubject.next(null);
+        this.folderErrorSubject.next('Deleted');
+      }
+      else {
+        this.folderErrorSubject.next(null);
+      }
+    });
+
+    window["electronAPI"].on("folder-selected", (path) => {
+      this.folderPathSubject.next(path);
+      this.folderErrorSubject.next(null);
+    });
   }
+
 
   //Used to tell electron that app is ready
   //does nothing when in browser
@@ -179,14 +201,14 @@ export class ElectronService {
     window["electronAPI"].send("getDataFile", args);
   }
 
-  selectFile(key: string, meterNumber: string, date: string) {
+  selectFile(key: string, folderPath: string, meterNumber: string, date: string) {
     console.log('Inside selectFile()');
     if (!window["electronAPI"]) {
       return;
     }
     this.checkKeyExists(key);
     this.currentKey = key;
-    window["electronAPI"].send("uploadFileDialog", {key, meterNumber, date});
+    window["electronAPI"].send("uploadFileDialog", { key, folderPath, meterNumber, date });
   }
 
   checkKeyExists(key: string) {
@@ -208,17 +230,43 @@ export class ElectronService {
     return this.fileDeletedSubject[key].asObservable();
   }
 
+  getFolderPath(): Observable<string> {
+    return this.folderPathSubject.asObservable();
+  }
+
+  getFolderError(): Observable<string> {
+    return this.folderErrorSubject.asObservable();
+  }
+
   openFileLocation(key: string) {
     this.currentKey = key;
-    const path = this.savedUtilityFilePath[this.currentKey].getValue();
-    // if(!path) {
-    //   this.fileDeletedSubject[this.currentKey].next(true);
-    //   return;
-    // }
+    const path = this.savedUtilityFilePath[this.currentKey].value;
     this.checkUtilityFileExists(this.currentKey, path);
-    const isDeleted = this.fileDeletedSubject[this.currentKey].value;
-    if(!isDeleted) {
-       window["electronAPI"].send("openUploadedFileLocation", path);
+    window["electronAPI"].send("openUploadedFileLocation", path);
+    
+  }
+
+  selectFolder() {
+    if (!window["electronAPI"]) { 
+      return;
+    }
+    window["electronAPI"].send("selectFolder");
+  }
+
+  openBillsFolder(folderPath: string) {
+    if (!window["electronAPI"]) {
+      return;
+    }
+    window["electronAPI"].send("openBillsFolder", folderPath);
+  }
+
+  checkBillFolderExists() {
+    if (!window["electronAPI"]) {
+      return;
+    }
+    const currentFolderPath = this.folderPathSubject.value;
+    if (currentFolderPath) {
+     window["electronAPI"].send("checkFolderExists", currentFolderPath);
     }
   }
 

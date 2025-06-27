@@ -1,5 +1,5 @@
-import { Component, ElementRef, EventEmitter, Input, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { ChangeDetectorRef, Component, ElementRef, EventEmitter, Input, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
+import { skip, Subscription, take } from 'rxjs';
 import { UtilityMeterDataService } from '../../utility-meter-data.service';
 import * as _ from 'lodash';
 import { CopyTableService } from 'src/app/shared/helper-services/copy-table.service';
@@ -15,6 +15,7 @@ import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
+import { ElectronService } from 'src/app/electron/electron.service';
 
 @Component({
   selector: 'app-electricity-data-table',
@@ -35,7 +36,7 @@ export class ElectricityDataTableComponent implements OnInit {
   setEdit: EventEmitter<IdbUtilityMeterData> = new EventEmitter<IdbUtilityMeterData>();
   @Output('setDelete')
   setDelete: EventEmitter<IdbUtilityMeterData> = new EventEmitter<IdbUtilityMeterData>();
-
+  
   @ViewChild('meterTable', { static: false }) meterTable: ElementRef;
 
 
@@ -57,12 +58,20 @@ export class ElectricityDataTableComponent implements OnInit {
   numEmissions: number;
   showEstimated: boolean;
   isRECs: boolean;
+  isElectron: boolean;
+  key: string;
+  savedUtilityFilePath: string;
+  utilityFileDeleted: boolean = false;
+  deletedPath: string;
   constructor(private utilityMeterDataService: UtilityMeterDataService, private copyTableService: CopyTableService,
     private eGridService: EGridService, private facilityDbService: FacilitydbService,
     private customFuelDbService: CustomFuelDbService,
-    private accountDbService: AccountdbService) { }
+    private accountDbService: AccountdbService,
+    private electronService: ElectronService,
+    private cd: ChangeDetectorRef) { }
 
   ngOnInit(): void {
+    this.isElectron = this.electronService.isElectron;
     this.setIsRECs();
     this.energyUnit = this.selectedMeter.startingUnit;
     if (this.selectedMeterData.length != 0) {
@@ -128,6 +137,38 @@ export class ElectricityDataTableComponent implements OnInit {
     this.setDelete.emit(meterData);
   }
 
+  async viewUtilityBill(meterData) {
+    console.log('isBillConnected', meterData.isBillConnected);
+    this.key = meterData.guid;
+    this.electronService.getFilePath(this.key).pipe(take(1)).subscribe(path => {
+      this.savedUtilityFilePath = path;
+      if (this.savedUtilityFilePath) {
+        this.electronService.checkUtilityFileExists(this.key, this.savedUtilityFilePath);
+        this.electronService.getDeletedFile(this.key).pipe(
+          skip(1),
+          take(1)
+        ).subscribe(isDeleted => {
+          this.utilityFileDeleted = isDeleted;
+          this.cd.detectChanges();
+          if (!isDeleted) {
+            this.electronService.openFileLocation(this.key);
+            this.cd.detectChanges();
+          } else {
+            this.utilityFileDeleted = true;
+            this.savedUtilityFilePath = null;
+            meterData.isBillConnected = false;
+            this.cd.detectChanges();
+            console.warn('File does not exist or has been deleted.');
+          }
+        });
+      } else {
+        this.utilityFileDeleted = true;
+        meterData.isBillConnected = false;
+        this.cd.detectChanges();
+      }
+    });
+  }
+
   setOrderDataField(str: string) {
     if (str == this.orderDataField) {
       if (this.orderByDirection == 'desc') {
@@ -175,7 +216,7 @@ export class ElectricityDataTableComponent implements OnInit {
     let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    let co2EmissionsRates: Array<SubregionEmissions> = this.eGridService.co2Emissions.map(rate => {return rate});
+    let co2EmissionsRates: Array<SubregionEmissions> = this.eGridService.co2Emissions.map(rate => { return rate });
     this.selectedMeterData.forEach(dataItem => {
       let emissionsValues: EmissionsResults = getEmissions(this.selectedMeter, dataItem.totalEnergyUse, this.selectedMeter.energyUnit, new Date(dataItem.readDate).getFullYear(), false, [facility], co2EmissionsRates, customFuels, 0, undefined, undefined, dataItem.heatCapacity, account.assessmentReportVersion);
       dataItem = setUtilityDataEmissionsValues(dataItem, emissionsValues);

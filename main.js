@@ -188,63 +188,87 @@ ipcMain.on("openDialog", (event, arg) => {
 
 });
 
-// ipcMain.on("uploadFileDialog", async (event) => {
-//     log.info('open upload bill dialog');
-//     const result = await dialog.showOpenDialog({
-//         properties: ['openFile']
-//     });
-//     if (result && result.filePaths.length > 0){
-//         win.webContents.send('utility-file-path', result.filePaths[0]);
-//         log.info('path selected is ' + result.filePaths[0]);
-//     }
-// });
-
-ipcMain.on("uploadFileDialog", async (event, {key, meterNumber, date}) => {
-    log.info('open upload bill dialog');
-    const result = await dialog.showOpenDialog({
-        properties: ['openFile'],
-    });
-    if (result.canceled || result.filePaths.length === 0) {
-        log.info('File selection was canceled');
-        return;
-    }
-
-    const originalFilePath = result.filePaths[0];
-    const fileExtension = path.extname(originalFilePath).toLowerCase();
-    //const originalFileName = path.basename(originalFilePath);
-
-    const userDocuments = path.join(os.homedir(), 'Documents');
-    const uploadFolder = path.join(userDocuments, 'VERIFI Utility Bills');
-
+ipcMain.on("selectFolder", async (event) => {
     try {
-        if (!fs.existsSync(uploadFolder)) {
-            fs.mkdirSync(uploadFolder, { recursive: true });
-        }
-    } catch (err) {
-        log.error('Error creating upload folder:', err);
-        dialog.showErrorBox('Folder Creation Error', 'An error occurred while creating the upload folder.');
-    }
+        const result = await dialog.showOpenDialog({
+            title: "Select a Folder",
+            properties: ['openDirectory']
+        });
 
-    meterNumber = meterNumber.trim().split(/\s+/).join('_');
-
-    const newFileName = `${meterNumber}_${date}${fileExtension}`;
-    const destinationPath = path.join(uploadFolder, newFileName);
-
-    fs.copyFile(originalFilePath, destinationPath, (err) => {
-        if (err) {
-            log.error('Error copying file:', err);
-            dialog.showErrorBox('File Upload Error', 'An error occurred while uploading the file.');
+        if (result.canceled || !result.filePaths || result.filePaths.length === 0) {
+            win.webContents.send('folder-selected', null);
             return;
         }
-        log.info('File copied to upload folder: ' + destinationPath);
-        win.webContents.send('utility-file-path', destinationPath);
-    });
+        const selectedPath = result.filePaths[0];
+
+        if (fs.existsSync(selectedPath)) {
+            win.webContents.send('folder-selected', selectedPath);
+        } else {
+            win.webContents.send('folder-selected', null);
+        }
+    } catch (err) {
+        log.error('Error getting bills folder:', err);
+    }
 });
 
+ipcMain.on("checkFolderExists", async (event, folderPath) => {
+    const exists = fs.existsSync(folderPath);
+    log.info(`Folder exists check for ${folderPath}: ${exists}`);
+    win.webContents.send('folder-exists', { exists, folderPath });
+});
+
+ipcMain.on("openBillsFolder", async (event, folderPath) => {
+    try {
+        if (folderPath && fs.existsSync(folderPath)) {
+            shell.openPath(folderPath);
+        }
+    }
+    catch (err) {
+        log.error('Error opening bills folder:', err);
+    }
+
+});
+
+ipcMain.on("uploadFileDialog", async (event, { key, folderPath, meterNumber, date }) => {
+    try {
+        log.info('open upload bill dialog');
+        const result = await dialog.showOpenDialog({
+            properties: ['openFile'],
+        });
+        if (result.canceled || result.filePaths.length === 0) {
+            log.info('File selection was canceled');
+            return;
+        }
+
+        const originalFilePath = result.filePaths[0];
+        const fileExtension = path.extname(originalFilePath).toLowerCase();
+
+        meterNumber = meterNumber.trim().split(/\s+/).join('_');
+        const facilityName = meterNumber.split('_')[0];
+
+        const newFileName = `${meterNumber}_${date}${fileExtension}`;
+        const subFolderPath = path.join(folderPath, facilityName);
+        if(!fs.existsSync(subFolderPath)) {
+            fs.mkdirSync(subFolderPath, { recursive: true });
+        }
+        const destinationPath = path.join(subFolderPath, newFileName);
+
+        fs.copyFile(originalFilePath, destinationPath, (err) => {
+            if (err) {
+                log.error('Error copying file:', err);
+                return;
+            }
+            log.info('File copied to upload folder: ' + destinationPath);
+            win.webContents.send('utility-file-path', destinationPath);
+        });
+    } catch (err) {
+        log.error('Error during file upload:', err);
+    }
+});
 
 ipcMain.on("openUploadedFileLocation", (event, filepath) => {
     log.info('File opened at location ' + filepath);
-    if (filepath) {
+    if (filepath && fs.existsSync(filepath)) {
         shell.openPath(filepath);
     }
 });
@@ -252,6 +276,7 @@ ipcMain.on("openUploadedFileLocation", (event, filepath) => {
 ipcMain.on("utilityFileExists", (event, path) => {
     log.info('Checking if file exists');
     const exists = fs.existsSync(path);
+    log.info(`File exists check for ${path}: ${exists}`);
     win.webContents.send('utility-file-exists', exists);
 });
 

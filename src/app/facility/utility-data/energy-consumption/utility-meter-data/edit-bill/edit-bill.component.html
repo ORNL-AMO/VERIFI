@@ -41,10 +41,6 @@
             <span class="fa-solid fa-link me-2"></span>
             Connect Utility Bill
         </h4>
-        <div class="mb-3 text-center fw-bold">
-            The utility bill connected to this meter will be copied to 'C:\Users\&lt;USERNAME&gt;\Documents\VERIFI
-            Utility Bills'
-        </div>
         <ng-container *ngIf="!savedUtilityFilePath || utilityFileDeleted">
             <div class="text-center">
                 <button class="btn btn-outline mt-2" (click)="uploadBill()">

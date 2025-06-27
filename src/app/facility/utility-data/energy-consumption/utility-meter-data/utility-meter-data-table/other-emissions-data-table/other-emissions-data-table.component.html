@@ -52,6 +52,10 @@
                     <button class="btn btn-sm btn-outline" (click)="setEditMeterData(meterData)" title="Edit">
                         <i class="fa fa-pencil"></i>
                     </button>
+                     <button class="btn btn-sm btn-outline" *ngIf="isElectron" (click)="viewUtilityBill(meterData)"
+                        [disabled]="!meterData.isBillConnected" title="View Bill">
+                        <i class="fa fa-link"></i>
+                    </button>
                     <button class="btn btn-sm btn-outline" (click)="setDeleteMeterData(meterData)" title="Delete">
                         <i class="fa fa-trash"></i>
                     </button>

@@ -10,18 +10,19 @@ import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { checkShowHeatCapacity, getIsEnergyMeter, getIsEnergyUnit } from 'src/app/shared/sharedHelperFuntions';
 import { UtilityMeterDataService } from '../utility-meter-data.service';
-import { firstValueFrom, Observable, of, take } from 'rxjs';
+import { firstValueFrom, Observable, of, skip, take } from 'rxjs';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { getNewIdbUtilityMeterData, IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { ElectronService } from 'src/app/electron/electron.service';
+import { create } from 'domain';
 
 @Component({
-    selector: 'app-edit-bill',
-    templateUrl: './edit-bill.component.html',
-    styleUrls: ['./edit-bill.component.css'],
-    standalone: false
+  selector: 'app-edit-bill',
+  templateUrl: './edit-bill.component.html',
+  styleUrls: ['./edit-bill.component.css'],
+  standalone: false
 })
 export class EditBillComponent implements OnInit {
 
@@ -40,6 +41,7 @@ export class EditBillComponent implements OnInit {
   utilityFileDeleted: boolean = false;
   deletedPath: string;
   key: string;
+  folderPath: string;
   constructor(private activatedRoute: ActivatedRoute, private utilityMeterDataDbService: UtilityMeterDatadbService,
     private utilityMeterDbService: UtilityMeterdbService, private loadingService: LoadingService,
     private dbChangesService: DbChangesService, private facilityDbService: FacilitydbService, private accountDbService: AccountdbService,
@@ -85,11 +87,12 @@ export class EditBillComponent implements OnInit {
 
       this.electronService.getDeletedFile(this.key).subscribe(deleted => {
         this.utilityFileDeleted = deleted;
-         console.log('deleted path is: ' + this.savedUtilityFilePath);
         this.deletedPath = this.savedUtilityFilePath;
-        // if(this.utilityFileDeleted) {
-        //   this.savedUtilityFilePath = null;
-        // }
+        this.cd.detectChanges();
+      });
+
+      this.electronService.getFolderPath().subscribe(path => {
+        this.folderPath = path;
         this.cd.detectChanges();
       });
     }
@@ -164,7 +167,7 @@ export class EditBillComponent implements OnInit {
       if (this.displayVolumeInput) {
         this.meterDataForm.controls.totalEnergyUse.disable();
       }
-      if(this.displayHeatCapacity && this.meterDataForm.controls.heatCapacity.value == undefined){
+      if (this.displayHeatCapacity && this.meterDataForm.controls.heatCapacity.value == undefined) {
         this.meterDataForm.controls.heatCapacity.patchValue(this.editMeter.heatCapacity);
       }
     }
@@ -187,16 +190,28 @@ export class EditBillComponent implements OnInit {
     this.displayHeatCapacity = checkShowHeatCapacity(this.editMeter.source, this.editMeter.startingUnit, this.editMeter.scope);
   }
 
-   async uploadBill() {
+  async uploadBill() {
     console.log('upload bill');
     let date;
-    if((this.editMeterData.readDate))
+    if ((this.editMeterData.readDate))
       date = this.editMeterData.readDate.getFullYear() + '-' + (this.editMeterData.readDate.getMonth() + 1) + '-' + this.editMeterData.readDate.getDate();
-    await this.electronService.selectFile(this.key, this.editMeterData.meterNumber, date);
+    await this.electronService.selectFile(this.key, this.folderPath, this.editMeterData.meterNumber, date);
+    this.editMeterData.isBillConnected = true;
   }
 
-  async openBillLocation() {    
-    this.electronService.openFileLocation(this.key);
+  async openBillLocation() {
+    this.electronService.checkUtilityFileExists(this.key, this.savedUtilityFilePath);
+    this.electronService.getDeletedFile(this.key).pipe(
+      skip(1),
+      take(1)
+    ).subscribe(isDeleted => {
+      if (!isDeleted) {
+        this.electronService.openFileLocation(this.key);
+      } else {
+        this.editMeterData.isBillConnected = false;
+        console.warn('File does not exist or has been deleted.');
+      }
+    });
   }
 
 }
