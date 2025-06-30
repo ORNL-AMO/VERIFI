@@ -10,6 +10,8 @@ import { Router } from '@angular/router';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
+import { AnalysisReportSetup } from 'src/app/models/overview-report';
+import { AnalysisGroup, JStatRegressionModel } from 'src/app/models/analysis';
 
 @Component({
   selector: 'app-analysis-report',
@@ -26,6 +28,8 @@ export class AnalysisReportComponent {
   selectedAnalysisItem: IdbAccountAnalysisItem;
   facilityAnalysisItems: Array<IdbAnalysisItem> = [];
   facilityDetails: Array<IdbAnalysisItem> = [];
+  analysisReportSetup: AnalysisReportSetup;
+  executiveSummaryItems: Array<FacilityGroupAnalysisItem> = [];
 
   constructor(private accountReportDbService: AccountReportDbService,
     private accountReportsService: AccountReportsService,
@@ -41,6 +45,8 @@ export class AnalysisReportComponent {
     this.selectedReport = this.accountReportDbService.selectedReport.getValue();
     if (!this.selectedReport) {
       this.router.navigateByUrl('/account/reports/dashboard');
+    } else {
+      this.analysisReportSetup = this.selectedReport.analysisReportSetup;
     }
     this.account = this.accountDbService.selectedAccount.getValue();
     this.analysisDbService.getAllAccountAnalysisItems(this.account.guid).then(items => {
@@ -63,5 +69,43 @@ export class AnalysisReportComponent {
       });
       return match;
     });
+
+    this.initializeGroups();
   }
+
+  initializeGroups() {
+    this.facilityDetails.forEach(facility => {
+      facility.groups.forEach(group => {
+        let groupItem: FacilityGroupAnalysisItem = this.getGroupItem(group, facility.facilityId, facility.baselineYear);
+        if (groupItem) {
+          this.executiveSummaryItems.push(groupItem);
+        }
+      });
+    });
+    this.executiveSummaryItems = this.executiveSummaryItems.filter(item => {
+      return item.group.analysisType != 'skip';
+    });
+  }
+
+  getGroupItem(group: AnalysisGroup, facilityId: string, baselineYear: number): FacilityGroupAnalysisItem {
+    let selectedModel: JStatRegressionModel;
+    if (group.analysisType == 'regression') {
+      if (group.selectedModelId) {
+        selectedModel = group.models.find(model => { return model.modelId == group.selectedModelId });
+      }
+    }
+    return {
+      group: group,
+      selectedModel: selectedModel,
+      facilityId: facilityId,
+      baselineYear: baselineYear
+    }
+  }
+}
+
+export interface FacilityGroupAnalysisItem {
+  group: AnalysisGroup,
+  selectedModel: JStatRegressionModel,
+  facilityId: string,
+  baselineYear: number
 }

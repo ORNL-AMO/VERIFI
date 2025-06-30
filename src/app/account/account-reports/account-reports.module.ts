@@ -57,6 +57,8 @@ import { AnalysisReportDashboardComponent } from './account-reports-dashboard/an
 import { AnalysisReportComponent } from './analysis-report/analysis-report.component';
 import { AnalysisReportSetupComponent } from './account-report-setup/analysis-report-setup/analysis-report-setup.component';
 import { AnalysisFacilityReportComponent } from './analysis-report/analysis-facility-report/analysis-facility-report.component';
+import { AnalysisProblemsInformationComponent } from './analysis-report/analysis-problems-information/analysis-problems-information.component';
+import { AnalysisDataValidationTablesComponent } from './analysis-report/analysis-data-validation-tables/analysis-data-validation-tables.component';
 
 @NgModule({
   declarations: [
@@ -111,7 +113,9 @@ import { AnalysisFacilityReportComponent } from './analysis-report/analysis-faci
     AnalysisReportDashboardComponent,
     AnalysisReportComponent,
     AnalysisReportSetupComponent,
-    AnalysisFacilityReportComponent
+    AnalysisFacilityReportComponent,
+    AnalysisProblemsInformationComponent,
+    AnalysisDataValidationTablesComponent
   ],
   imports: [
     CommonModule,

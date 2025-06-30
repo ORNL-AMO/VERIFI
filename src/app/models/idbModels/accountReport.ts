@@ -113,7 +113,10 @@ export function getNewIdbAccountReport(account: IdbAccount, facilities: Array<Id
             }),
         },
         analysisReportSetup: {
-            analysisItemId: undefined
+            analysisItemId: undefined,
+            includeProblemsInformation: true,
+            includeExecutiveSummary: true,
+            includeDataValidationTables: true
         }
     }
 }

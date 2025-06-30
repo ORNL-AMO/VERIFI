@@ -1,19 +1,19 @@
 import { Component, Input } from '@angular/core';
-import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
+import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { AnalysisGroup, JStatRegressionModel } from 'src/app/models/analysis';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
-import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
+import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { AnalysisReportSetup } from 'src/app/models/overview-report';
 import { FacilityGroupAnalysisItem } from '../analysis-report.component';
 
 @Component({
-  selector: 'app-analysis-facility-report',
+  selector: 'app-analysis-data-validation-tables',
   standalone: false,
 
-  templateUrl: './analysis-facility-report.component.html',
-  styleUrl: './analysis-facility-report.component.css'
+  templateUrl: './analysis-data-validation-tables.component.html',
+  styleUrl: './analysis-data-validation-tables.component.css'
 })
-export class AnalysisFacilityReportComponent {
+export class AnalysisDataValidationTablesComponent {
 
   @Input()
   facilityDetails: Array<IdbAnalysisItem>;
@@ -22,8 +22,6 @@ export class AnalysisFacilityReportComponent {
   @Input()
   executiveSummaryItems: Array<FacilityGroupAnalysisItem>;
   regressionGroupItems: Array<FacilityGroupAnalysisItem> = [];
-  classicIntensityGroupItems: Array<FacilityGroupAnalysisItem> = [];
-  absoluteGroupItems: Array<FacilityGroupAnalysisItem> = [];
   selectedReport: IdbAccountReport;
 
   constructor(private accountReportDbService: AccountReportDbService) { }
@@ -31,8 +29,6 @@ export class AnalysisFacilityReportComponent {
   ngOnChanges() {
     this.selectedReport = this.accountReportDbService.selectedReport.getValue();
     this.getRegressionGroupItems(this.executiveSummaryItems);
-    this.getClassicIntensityItems(this.executiveSummaryItems);
-    this.getAbsoluteItems(this.executiveSummaryItems);
   }
 
   getRegressionGroupItems(executiveSummaryItems: FacilityGroupAnalysisItem[]) {
@@ -40,20 +36,4 @@ export class AnalysisFacilityReportComponent {
       return item.group.analysisType == 'regression';
     });
   }
-
-  getClassicIntensityItems(executiveSummaryItems: FacilityGroupAnalysisItem[]) {
-    this.classicIntensityGroupItems = executiveSummaryItems.filter(item => {
-      return item.group.analysisType == 'energyIntensity';
-    });
-  }
-
-  getAbsoluteItems(executiveSummaryItems: FacilityGroupAnalysisItem[]) {
-    this.absoluteGroupItems = executiveSummaryItems.filter(item => {
-      return item.group.analysisType == 'absoluteEnergyConsumption';
-    });
-  }
 }
-
-
-
-

@@ -258,11 +258,17 @@ export class AccountReportsService {
   getAnalysisFormFromReport(analysisReportSetup: AnalysisReportSetup): FormGroup {
     if (!analysisReportSetup) {
       analysisReportSetup = {
-        analysisItemId: undefined
+        analysisItemId: undefined,
+        includeProblemsInformation: true,
+        includeExecutiveSummary: true,
+        includeDataValidationTables: true
       };
     }
     let form: FormGroup = this.formBuilder.group({
-      analysisItemId: [analysisReportSetup.analysisItemId, Validators.required]
+      analysisItemId: [analysisReportSetup.analysisItemId, Validators.required],
+      includeProblemsInformation: [analysisReportSetup.includeProblemsInformation],
+      includeExecutiveSummary: [analysisReportSetup.includeExecutiveSummary],
+      includeDataValidationTables: [analysisReportSetup.includeDataValidationTables],
     });
     return form;
   }
@@ -270,10 +276,16 @@ export class AccountReportsService {
   updateAnalysisReportFromForm(analysisReportSetup: AnalysisReportSetup, form: FormGroup): AnalysisReportSetup {
     if (!analysisReportSetup) {
       analysisReportSetup = {
-        analysisItemId: undefined
+        analysisItemId: undefined,
+        includeProblemsInformation: true,
+        includeExecutiveSummary: true,
+        includeDataValidationTables: true
       };
     }
     analysisReportSetup.analysisItemId = form.controls.analysisItemId.value;
+    analysisReportSetup.includeProblemsInformation = form.controls.includeProblemsInformation.value;
+    analysisReportSetup.includeExecutiveSummary = form.controls.includeExecutiveSummary.value;  
+    analysisReportSetup.includeDataValidationTables = form.controls.includeDataValidationTables.value;
     return analysisReportSetup;
   }
 

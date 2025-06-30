@@ -1,5 +1,5 @@
 <form [formGroup]="analysisReportForm">
-    <div class="row">
+    <div class="row mb-4">
         <div class="col-12">
             <app-label-with-tooltip [isSemiBold]="true" [label]="'Select Account Analysis'"
                 [field]="'selectAccountAnalysis'" [isFloatRight]="true">
@@ -65,6 +65,29 @@
                         </tr>
                     </tbody>
                 </table>
+            </div>
+        </div>
+    </div>
+</form>
+
+<form [formGroup]="analysisReportForm">
+    <div class="row">
+        <div class="col-4">
+            <label class="semibold">Sections to Include In the Report</label>
+            <div class="form-check">
+                <input type="checkbox" class="form-check-input" name="includeProblemsInformation"
+                    id="includeProblemsInformation" formControlName="includeProblemsInformation" (change)="save()">
+                <label class="form-check-label" for="includeProblemsInformation">Problems Summary</label>
+            </div>
+            <div class="form-check">
+                <input type="checkbox" class="form-check-input" name="includeExecutiveSummary"
+                    id="includeExecutiveSummary" formControlName="includeExecutiveSummary" (change)="save()">
+                <label class="form-check-label" for="includeExecutiveSummary">Executive Summary</label>
+            </div>
+            <div class="form-check">
+                <input type="checkbox" class="form-check-input" name="includeDataValidationTables"
+                    id="includeDataValidationTables" formControlName="includeDataValidationTables" (change)="save()">
+                <label class="form-check-label" for="includeDataValidationTables">Data Validation Tables</label>
             </div>
         </div>
     </div>

@@ -1,9 +1,21 @@
-<div class="report" [ngClass]="{'print': print}">
-    <ng-container *ngIf="facilityDetails">
-        <app-analysis-facility-report
-            [facilityDetails]="facilityDetails"></app-analysis-facility-report>
-    </ng-container>
-</div>
+<ng-container *ngIf="selectedReport">
+    <div class="report" [ngClass]="{'print': print}" *ngIf="analysisReportSetup.includeProblemsInformation">
+        <ng-container *ngIf="facilityDetails">
+        <app-analysis-problems-information [facilityDetails]="facilityDetails" [executiveSummaryItems]="executiveSummaryItems"></app-analysis-problems-information>
+        </ng-container>
+    </div>
+
+    <div class="report" [ngClass]="{'print': print}" *ngIf="analysisReportSetup.includeExecutiveSummary">
+        <ng-container *ngIf="facilityDetails">
+            <app-analysis-facility-report [facilityDetails]="facilityDetails" [analysisReportSetup]="analysisReportSetup" [executiveSummaryItems]="executiveSummaryItems"></app-analysis-facility-report>
+        </ng-container>
+    </div>
+
+     <div class="report" [ngClass]="{'print': print}" *ngIf="analysisReportSetup.includeDataValidationTables">
+        <app-analysis-data-validation-tables [facilityDetails]="facilityDetails" [analysisReportSetup]="analysisReportSetup" [executiveSummaryItems]="executiveSummaryItems"></app-analysis-data-validation-tables>
+    </div>
+</ng-container>
+
 
 <div class="w-100 justify-content-center" *ngIf="!facilityDetails">
     <div class="pt-5">
