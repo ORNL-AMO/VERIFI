@@ -1,5 +1,16 @@
 import { Component } from '@angular/core';
-import { Router } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
+import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
+import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
+import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
+import { IdbAccount } from 'src/app/models/idbModels/account';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
+import { IdbPredictor } from 'src/app/models/idbModels/predictor';
+import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
+import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
+import { getTodoList } from '../../todo-list';
 
 @Component({
   selector: 'app-setup-checklist',
@@ -10,16 +21,68 @@ import { Router } from '@angular/router';
 })
 export class SetupChecklistComponent {
 
+  account: IdbAccount;
+  accountSub: Subscription;
 
-  step: 'accountDetails' | 'uploadData' | 'facilityDetails' | 'meterData' | 'predictorData' | 'repeatSteps' | 'portfolio' | 'instructions' = 'instructions';
-  constructor(private router: Router) {
+  facilities: Array<IdbFacility>;
+  facilitiesSub: Subscription;
+
+  metersSub: Subscription;
+  meters: Array<IdbUtilityMeter>;
+
+  predictors: Array<IdbPredictor>;
+  predictorsSub: Subscription;
+
+  meterData: Array<IdbUtilityMeterData>
+  meterDataSub: Subscription;
+
+
+  toDoItems: Array<{ label: string, url: string, description: string }> = [];
+  constructor(private accountDbService: AccountdbService,
+    private facilityDbService: FacilitydbService,
+    private utilityMeterDbService: UtilityMeterdbService,
+    private predictorDbService: PredictorDbService,
+    private utilityMeterDataDbService: UtilityMeterDatadbService
+  ) {
+
   }
 
-  setStep(val: 'accountDetails' | 'uploadData' | 'facilityDetails' | 'meterData' | 'predictorData' | 'repeatSteps' | 'portfolio' | 'instructions') {
-    this.step = val;
+  ngOnInit() {
+    this.accountSub = this.accountDbService.selectedAccount.subscribe(account => {
+      this.account = account;
+      this.setTodoItems();
+    });
+    this.facilitiesSub = this.facilityDbService.accountFacilities.subscribe(facilities => {
+      this.facilities = facilities;
+      this.setTodoItems();
+    });
+    this.metersSub = this.utilityMeterDbService.accountMeters.subscribe(meters => {
+      this.meters = meters;
+      this.setTodoItems();
+    });
+    this.predictorsSub = this.predictorDbService.accountPredictors.subscribe(predictors => {
+      this.predictors = predictors;
+      this.setTodoItems();
+    });
+    this.meterDataSub = this.utilityMeterDataDbService.accountMeterData.subscribe(meterData => {
+      this.meterData = meterData;
+      this.setTodoItems();
+    });
   }
 
-  goToPortfolio() {
-    this.router.navigateByUrl('/account/home')
+  ngOnDestroy() {
+    this.accountSub.unsubscribe();
+    this.facilitiesSub.unsubscribe();
+    this.metersSub.unsubscribe();
+    this.predictorsSub.unsubscribe();
+    this.meterDataSub.unsubscribe();
+  }
+
+  setTodoItems() {
+    this.toDoItems = getTodoList(this.account,
+      this.facilities,
+      this.meters,
+      this.predictors,
+      this.meterData);
   }
 }

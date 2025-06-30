@@ -6,9 +6,7 @@ const { autoUpdater } = require('electron-updater');
 const jetpack = require('fs-jetpack');
 
 function isDev() {
-    //TODO: check for isDev. Latest electron update breaks old
-    // return require.filename.indexOf('app.asar') === -1;
-    return false;
+    return app.isPackaged == false;
 };
 
 

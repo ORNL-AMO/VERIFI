@@ -226,6 +226,9 @@ export class HeaderComponent implements OnInit {
       let url: string = this.router.url;
       if (url.includes('facilities')) {
         let selectedFacility: IdbFacility = this.facilitydbService.selectedFacility.getValue();
+        if(selectedFacility){
+          
+        }
         this.router.navigateByUrl('/facility/' + selectedFacility.id);
       } else if (url.includes('weather-data')) {
         this.router.navigateByUrl('/weather-data');
