@@ -213,7 +213,6 @@ ipcMain.on("selectFolder", async (event) => {
 
 ipcMain.on("checkFolderExists", async (event, folderPath) => {
     const exists = fs.existsSync(folderPath);
-    log.info(`Folder exists check for ${folderPath}: ${exists}`);
     win.webContents.send('folder-exists', { exists, folderPath });
 });
 
@@ -258,7 +257,6 @@ ipcMain.on("uploadFileDialog", async (event, { key, folderPath, meterNumber, dat
                 log.error('Error copying file:', err);
                 return;
             }
-            log.info('File copied to upload folder: ' + destinationPath);
             win.webContents.send('utility-file-path', destinationPath);
         });
     } catch (err) {
@@ -267,7 +265,6 @@ ipcMain.on("uploadFileDialog", async (event, { key, folderPath, meterNumber, dat
 });
 
 ipcMain.on("openUploadedFileLocation", (event, filepath) => {
-    log.info('File opened at location ' + filepath);
     if (filepath && fs.existsSync(filepath)) {
         shell.openPath(filepath);
     }
@@ -276,7 +273,6 @@ ipcMain.on("openUploadedFileLocation", (event, filepath) => {
 ipcMain.on("utilityFileExists", (event, path) => {
     log.info('Checking if file exists');
     const exists = fs.existsSync(path);
-    log.info(`File exists check for ${path}: ${exists}`);
     win.webContents.send('utility-file-exists', exists);
 });
 

@@ -42,6 +42,7 @@ export class EditBillComponent implements OnInit {
   deletedPath: string;
   key: string;
   folderPath: string;
+  folderError: boolean = false;
   constructor(private activatedRoute: ActivatedRoute, private utilityMeterDataDbService: UtilityMeterDatadbService,
     private utilityMeterDbService: UtilityMeterdbService, private loadingService: LoadingService,
     private dbChangesService: DbChangesService, private facilityDbService: FacilitydbService, private accountDbService: AccountdbService,
@@ -191,12 +192,18 @@ export class EditBillComponent implements OnInit {
   }
 
   async uploadBill() {
-    console.log('upload bill');
-    let date;
-    if ((this.editMeterData.readDate))
-      date = this.editMeterData.readDate.getFullYear() + '-' + (this.editMeterData.readDate.getMonth() + 1) + '-' + this.editMeterData.readDate.getDate();
-    await this.electronService.selectFile(this.key, this.folderPath, this.editMeterData.meterNumber, date);
-    this.editMeterData.isBillConnected = true;
+    if (!this.folderPath) {
+      this.folderError = true;
+      return;
+    }
+    else {
+      this.folderError = false;
+      let date;
+      if ((this.editMeterData.readDate))
+        date = this.editMeterData.readDate.getFullYear() + '-' + (this.editMeterData.readDate.getMonth() + 1) + '-' + this.editMeterData.readDate.getDate();
+      await this.electronService.selectFile(this.key, this.folderPath, this.editMeterData.meterNumber, date);
+      this.editMeterData.isBillConnected = true;
+    }
   }
 
   async openBillLocation() {

@@ -54,6 +54,11 @@
                 <a class="click-link" (click)="openBillLocation()">{{ savedUtilityFilePath }}</a>
             </div>
         </ng-container>
+        <ng-container *ngIf="folderError">
+            <div class="alert alert-danger mt-3 text-center">
+                The upload folder is not available. Please select a folder in the account settings.
+            </div>
+        </ng-container>
         <ng-container *ngIf="utilityFileDeleted">
             <div class="alert alert-danger mt-3 text-center">
                 The file has been deleted from the location {{ deletedPath }}
