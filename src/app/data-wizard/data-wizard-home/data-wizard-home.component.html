@@ -2,88 +2,79 @@
     <div class="row g-0 justify-content-center h-100 w-100 overflow-auto">
         <div class="col-11 pt-4 pb-4">
             <div class="form-paper">
-                <h4>{{account.name}} To Do List:</h4>
-                <p>
+                <h4>
+                    <i class="fa fa-list-check"></i>
+                    {{account.name}} To Do List:
+                    <ng-container *ngIf="toDoItems.length > 0">
+                        <span class="badge bg-primary float-end">{{toDoItems.length}} items</span>
+                    </ng-container>
+
+                </h4>
+                <div class="d-flex justify-content-between mb-3">
+                    <div class="d-flex flex-column">
+                        <label>To Do Options:</label>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" role="switch" id="includeOutdatedMeters"
+                                name="includeOutdatedMeters" [(ngModel)]="includeOutdatedMeters"
+                                (change)="updateIncludedItems()">
+                            <label class="form-check-label" for="includeOutdatedMeters">Include outdated
+                                meters</label>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" role="switch" id="includeOutdatedPredictors"
+                                name="includeOutdatedPredictors" [(ngModel)]="includeOutdatedPredictors"
+                                (change)="updateIncludedItems()">
+                            <label class="form-check-label" for="includeOutdatedPredictors">Include outdated
+                                predictors</label>
+                        </div>
+                        <div class="d-flex" *ngIf="includeOutdatedMeters || includeOutdatedPredictors">
+                            <select class="form-select form-select-sm" id="outdatedDays" name="outdatedDays"
+                                [(ngModel)]="outdatedDays" (change)="updateIncludedItems()">
+                                <option *ngFor="let days of outdatedDaysOptions" [value]="days">
+                                    Outdated after {{days}} days</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="d-flex flex-column" *ngIf="toDoItems.length > 0 && showWeatherButton">
+                        <button class="btn btn-outline">
+                            <span class="fa fa-temperature-half"></span><br>
+                            Update Weather<br> Predictors
+                        </button>
+                    </div>
+                </div>
+                <hr class="my-auto">
+                <p class="mt-2">
                     The following items have been identified as needing action for this account.
                 </p>
-                <ul class="list-group">
-                    <li class="list-group-item" *ngFor="let item of toDoItems; let index = index;">
-                        {{index + 1}}.
-                        <a [routerLink]="item.url">{{item.label}}</a><br>
-                        <p class="fw-light mb-0" *ngIf="item.description">
-                            {{item.description}}</p>
-                    </li>
-                </ul>
+                <ng-template [ngIf]="toDoItems.length > 0" [ngIfElse]="noToDoItems">
+                    <ul class="list-group">
+                        <li class="list-group-item list-group-item-action"
+                            *ngFor="let item of toDoItems; let index = index;" [routerLink]="item.url">
+                            <div class="d-flex w-100 justify-content-between">
+                                <div class="p-0">
+                                    {{index + 1}}.
+                                    <span class="fa fa-temperature-half pe-2" *ngIf="item.isWeather"></span>
+                                    <a>{{item.label}}</a>
+                                </div>
+                                <div *ngIf="item.facilityId">
+                                    @let facility = item.facilityId | facilityItem;
+                                    <span class="badge"
+                                        [ngStyle]="{'background-color': facility.color}">{{facility.name}}</span>
+                                </div>
+                            </div>
 
-
-                <!-- <div *ngFor="let facility of facilities | wizardSidebarFacilitiesList">
-                    <h5>
-                        <span class="fa fa-industry ps-1" [ngStyle]="{color: facility.color}"></span>
-                        {{facility.guid | facilityName}}
-                    </h5>
-                    <table class="table table-sm table-bordered">
-                        <thead>
-                            <tr>
-                                <th (click)="facility.sidebarMetersOpen = !facility.sidebarMetersOpen">
-                                    <span class="fa"
-                                        [ngClass]="{'fa-chevron-down': facility.sidebarMetersOpen, 'fa-chevron-right': !facility.sidebarMetersOpen}"></span>
-                                    Meters
-                                    @let metersCount = (facility.guid | facilityMetersList:meters).length;
-                                    ({{metersCount}})
-                                </th>
-                            </tr>
-                            <tr *ngIf="facility.sidebarMetersOpen">
-                                <th>
-                                    Name
-                                </th>
-                                <th>
-                                    First Reading
-                                </th>
-                                <th>
-                                    Last Reading
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody *ngIf="facility.sidebarMetersOpen">
-                            <tr *ngFor="let meter of facility.guid | facilityMetersList:meters">
-                                <td>
-                                    {{meter.name}}
-                                </td>
-                                <td>
-
-                                </td>
-                                <td>
-
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div> -->
-
-                <!-- <div class="row">
-                    <div class="col-4" *ngFor="let facility of facilities | wizardSidebarFacilitiesList">
-                        <h5>
-                            <span class="fa fa-industry ps-1" [ngStyle]="{color: facility.color}"></span>
-                            {{facility.guid | facilityName}}
-                        </h5>
-                        <table class="table table-sm table-bordered">
-                            <thead>
-                                <tr>
-                                    <th>
-                                        Meters
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr *ngFor="let meter of facility.guid | facilityMetersList:meters">
-                                    <td>
-                                        {{meter.name}}
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                            <!-- <br> -->
+                            <p class="fw-light mb-0 ms-3" *ngIf="item.description">
+                                {{item.description}}</p>
+                        </li>
+                    </ul>
+                </ng-template>
+                <ng-template #noToDoItems>
+                    <div class="alert alert-info" role="alert">
+                        <i class="fa fa-check-circle"></i>
+                        No items to do at this time. Proceed to data evaluation and analysis!
                     </div>
-                </div> -->
+                </ng-template>
             </div>
         </div>
     </div>

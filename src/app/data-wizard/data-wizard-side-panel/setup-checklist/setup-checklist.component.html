@@ -4,11 +4,15 @@
         The following items have been identified as needing action for this account.
     </p>
     <ul class="list-group">
-        <li class="list-group-item" *ngFor="let item of toDoItems; let index = index;">
-            {{index + 1}}.
-            <a [routerLink]="item.url">{{item.label}}</a><br>
-            <p class="fw-light mb-0 small" *ngIf="item.description">
-                {{item.description}}</p>
+        <li class="list-group-item list-group-item-action" *ngFor="let item of toDoItems; let index = index;"
+            [routerLink]="item.url">
+            <div class="d-flex w-100 justify-content-between">
+                <div class="p-0">
+                    {{index + 1}}.
+                    <a>{{item.label}}</a>
+                </div>
+            </div>
+
         </li>
     </ul>
 </div>

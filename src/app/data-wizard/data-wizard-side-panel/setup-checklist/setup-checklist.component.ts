@@ -10,7 +10,9 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
-import { getTodoList } from '../../todo-list';
+import { getTodoList, TodoItem } from '../../todo-list';
+import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
+import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 
 @Component({
   selector: 'app-setup-checklist',
@@ -36,13 +38,17 @@ export class SetupChecklistComponent {
   meterData: Array<IdbUtilityMeterData>
   meterDataSub: Subscription;
 
+  predictorDataSub: Subscription;
+  predictorData: Array<IdbPredictorData>;
 
-  toDoItems: Array<{ label: string, url: string, description: string }> = [];
+  toDoItems: Array<TodoItem> = [];
+  showWeatherButton: boolean = false;
   constructor(private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService,
     private utilityMeterDbService: UtilityMeterdbService,
     private predictorDbService: PredictorDbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService
+    private utilityMeterDataDbService: UtilityMeterDatadbService,
+    private predictorDataDbService: PredictorDataDbService
   ) {
 
   }
@@ -68,6 +74,10 @@ export class SetupChecklistComponent {
       this.meterData = meterData;
       this.setTodoItems();
     });
+    this.predictorDataSub = this.predictorDataDbService.accountPredictorData.subscribe(predictorData => {
+      this.predictorData = predictorData;
+      this.setTodoItems();
+    });
   }
 
   ngOnDestroy() {
@@ -76,6 +86,7 @@ export class SetupChecklistComponent {
     this.metersSub.unsubscribe();
     this.predictorsSub.unsubscribe();
     this.meterDataSub.unsubscribe();
+    this.predictorDataSub.unsubscribe();
   }
 
   setTodoItems() {
@@ -83,6 +94,12 @@ export class SetupChecklistComponent {
       this.facilities,
       this.meters,
       this.predictors,
-      this.meterData);
+      this.meterData,
+      this.predictorData,
+      {
+        includeOutdatedMeters: true,
+        includeOutdatedPredictors: true,
+        outdatedDays: 60
+      });
   }
 }

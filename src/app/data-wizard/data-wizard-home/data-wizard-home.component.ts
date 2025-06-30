@@ -10,7 +10,9 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
-import { getTodoList } from '../todo-list';
+import { getTodoList, TodoItem } from '../todo-list';
+import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
+import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 
 @Component({
   selector: 'app-data-wizard-home',
@@ -36,13 +38,22 @@ export class DataWizardHomeComponent {
   meterData: Array<IdbUtilityMeterData>
   meterDataSub: Subscription;
 
+  predictorDataSub: Subscription;
+  predictorData: Array<IdbPredictorData>;
 
-  toDoItems: Array<{ label: string, url: string, description: string }> = [];
+  toDoItems: Array<TodoItem> = [];
+
+  includeOutdatedMeters: boolean = true;
+  includeOutdatedPredictors: boolean = true;
+  outdatedDays: number = 60;
+  outdatedDaysOptions: Array<number> = [30, 60, 90, 180, 365];
+  showWeatherButton: boolean = false;
   constructor(private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService,
     private utilityMeterDbService: UtilityMeterdbService,
     private predictorDbService: PredictorDbService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService
+    private utilityMeterDataDbService: UtilityMeterDatadbService,
+    private predictorDataDbService: PredictorDataDbService
   ) {
 
   }
@@ -68,6 +79,10 @@ export class DataWizardHomeComponent {
       this.meterData = meterData;
       this.setTodoItems();
     });
+    this.predictorDataSub = this.predictorDataDbService.accountPredictorData.subscribe(predictorData => {
+      this.predictorData = predictorData;
+      this.setTodoItems();
+    });
   }
 
   ngOnDestroy() {
@@ -76,6 +91,7 @@ export class DataWizardHomeComponent {
     this.metersSub.unsubscribe();
     this.predictorsSub.unsubscribe();
     this.meterDataSub.unsubscribe();
+    this.predictorDataSub.unsubscribe();
   }
 
   setTodoItems() {
@@ -83,6 +99,19 @@ export class DataWizardHomeComponent {
       this.facilities,
       this.meters,
       this.predictors,
-      this.meterData);
+      this.meterData,
+      this.predictorData,
+      {
+        includeOutdatedMeters: this.includeOutdatedMeters,
+        includeOutdatedPredictors: this.includeOutdatedPredictors,
+        outdatedDays: this.outdatedDays
+      });
+    this.showWeatherButton = this.toDoItems.find(item => {
+      return item.isWeather && item.type === 'predictor';
+    }) != undefined;
+  }
+
+  updateIncludedItems() {
+    this.setTodoItems();
   }
 }

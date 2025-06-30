@@ -1,0 +1,25 @@
+
+.list-group-item-action:hover{
+    cursor: pointer;
+}
+
+
+i.fa.fa-list-check {
+    font-size: inherit;
+}
+
+select.form-select{
+    width: auto;
+}
+
+label.form-label{
+    white-space: nowrap;
+}
+
+.btn .fa.fa-temperature-half {
+    font-size: 22px;
+}
+
+.btn:hover .fa.fa-temperature-half{
+    color: white;
+}

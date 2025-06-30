@@ -2,9 +2,9 @@
     color: white;
 }
 
-.list-group-item-action{
+/* .list-group-item-action{
     font-weight: bold;
-}
+} */
 
 .list-group-item-action:hover{
     cursor: pointer;
