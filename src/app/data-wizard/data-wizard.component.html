@@ -1,11 +1,3 @@
-<!-- <div class="d-flex w-100 h-100">
-    <app-data-wizard-sidebar></app-data-wizard-sidebar>
-    <div class="flex-fill">
-        <router-outlet></router-outlet>
-    </div>
-</div> -->
-
-
 <div class="d-flex w-100 h-100" (mousemove)="drag($event)" (mouseup)="stopResizing($event)" #pageContent
     (mouseleave)="stopResizing($event)">
     <div class="d-flex" [ngStyle]="{'width.px': sidebarWidth}">
@@ -32,8 +24,7 @@
             </div>
         </div>
         <div class="w-100">
-            <!-- <app-data-wizard-help-panel (emitToggleCollapse)="toggleCollapseHelp($event)"></app-data-wizard-help-panel> -->
-             <app-data-wizard-side-panel (emitToggleCollapse)="toggleCollapseHelp($event)"></app-data-wizard-side-panel>
+             <app-data-management-side-panel (emitToggleCollapse)="toggleCollapseHelp($event)"></app-data-management-side-panel>
         </div>
     </div>
 </div>

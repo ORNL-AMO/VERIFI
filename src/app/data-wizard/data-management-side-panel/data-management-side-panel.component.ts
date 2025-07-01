@@ -3,13 +3,13 @@ import { DataWizardService } from '../data-wizard.service';
 import { Subscription } from 'rxjs';
 
 @Component({
-  selector: 'app-data-wizard-side-panel',
+  selector: 'app-data-management-side-panel',
   standalone: false,
   
-  templateUrl: './data-wizard-side-panel.component.html',
-  styleUrl: './data-wizard-side-panel.component.css'
+  templateUrl: './data-management-side-panel.component.html',
+  styleUrl: './data-management-side-panel.component.css'
 })
-export class DataWizardSidePanelComponent {
+export class DataManagementSidePanelComponent {
   @Output('emitToggleCollapse')
   emitToggleCollapse: EventEmitter<boolean> = new EventEmitter<boolean>(false);
 

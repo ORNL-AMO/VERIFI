@@ -45,9 +45,9 @@ import { ProcessPredictorReadingsComponent } from './data-wizard-import/shared-p
 import { SubmitImportDataComponent } from './data-wizard-import/shared-process-file/submit-import-data/submit-import-data.component';
 import { DataWizardImportFooterComponent } from './data-wizard-import/data-wizard-import-footer/data-wizard-import-footer.component';
 import { FacilityMeterGroupingComponent } from './account-facilities/facility-data/facility-meters/facility-meter-grouping/facility-meter-grouping.component';
-import { DataWizardSidePanelComponent } from './data-wizard-side-panel/data-wizard-side-panel.component';
-import { HelpPanelComponent } from './data-wizard-side-panel/help-panel/help-panel.component';
-import { SetupChecklistComponent } from './data-wizard-side-panel/setup-checklist/setup-checklist.component';
+import { DataManagementSidePanelComponent } from './data-management-side-panel/data-management-side-panel.component';
+import { HelpPanelComponent } from './data-management-side-panel/help-panel/help-panel.component';
+import { SetupChecklistComponent } from './data-management-side-panel/setup-checklist/setup-checklist.component';
 import { DataManagementHomeComponent } from './data-management-home/data-management-home.component';
 import { CustomDatabaseModule } from '../shared/custom-database/custom-database.module';
 import { AccountCustomDataComponent } from './account-custom-data/account-custom-data.component';
@@ -90,7 +90,7 @@ import { AccountCustomDataComponent } from './account-custom-data/account-custom
     SubmitImportDataComponent,
     DataWizardImportFooterComponent,
     FacilityMeterGroupingComponent,
-    DataWizardSidePanelComponent,
+    DataManagementSidePanelComponent,
     HelpPanelComponent,
     SetupChecklistComponent,
     DataManagementHomeComponent,
