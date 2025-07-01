@@ -20,13 +20,13 @@ import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 
 @Component({
-  selector: 'app-data-wizard-home',
+  selector: 'app-data-management-home',
   standalone: false,
 
-  templateUrl: './data-wizard-home.component.html',
-  styleUrl: './data-wizard-home.component.css'
+  templateUrl: './data-management-home.component.html',
+  styleUrl: './data-management-home.component.css'
 })
-export class DataWizardHomeComponent {
+export class DataManagementHomeComponent {
 
   account: IdbAccount;
   accountSub: Subscription;
