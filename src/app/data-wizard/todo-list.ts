@@ -115,19 +115,32 @@ function setMeterTodoItems(meter: IdbUtilityMeter,
             facilityId: meter.facilityId,
             type: 'meter'
         });
-    } else if (options.includeOutdatedMeters) {
-        let latestReading: IdbUtilityMeterData = _.maxBy(meterDataForMeter, (data: IdbUtilityMeterData) => new Date(data.readDate).getTime());
-        let readingDate: Date = new Date(latestReading.readDate);
-
-        if (latestReading && readingDate.getTime() < (new Date().getTime() - options.outdatedDays * 24 * 60 * 60 * 1000) && meter.meterReadingDataApplication != 'fullYear') {
-            const formattedDate = formatDate(readingDate, 'MM/dd/yyyy', 'en-US');
+    } else {
+        if(!meter.meterReadingDataApplication){
             toDoItems.push({
-                label: 'Update utility meter data for ' + meter.name,
-                url: '/data-wizard/' + meter.accountId + '/facilities/' + meter.facilityId + '/meters/' + meter.guid + '/meter-data',
-                description: "Update utility meter data for the meter. The latest reading (" + formattedDate + ") is more than " + options.outdatedDays + " days old.",
+                label: 'Set calendarization method for ' + meter.name,
+                url: '/data-wizard/' + meter.accountId + '/facilities/' + meter.facilityId + '/meters/' + meter.guid + '/meter-monthly-data',
+                description: "Select the method with which to calendarize the meter data for this meter. Calendarization is the process of properly applying the correct amount of energy use to a month.",
                 facilityId: meter.facilityId,
-                type: 'meter',
+                type: 'meter'
             });
+        }
+
+
+        if (options.includeOutdatedMeters) {
+            let latestReading: IdbUtilityMeterData = _.maxBy(meterDataForMeter, (data: IdbUtilityMeterData) => new Date(data.readDate).getTime());
+            let readingDate: Date = new Date(latestReading.readDate);
+
+            if (latestReading && readingDate.getTime() < (new Date().getTime() - options.outdatedDays * 24 * 60 * 60 * 1000) && meter.meterReadingDataApplication != 'fullYear') {
+                const formattedDate = formatDate(readingDate, 'MM/dd/yyyy', 'en-US');
+                toDoItems.push({
+                    label: 'Update utility meter data for ' + meter.name,
+                    url: '/data-wizard/' + meter.accountId + '/facilities/' + meter.facilityId + '/meters/' + meter.guid + '/meter-data',
+                    description: "Update utility meter data for the meter. The latest reading (" + formattedDate + ") is more than " + options.outdatedDays + " days old.",
+                    facilityId: meter.facilityId,
+                    type: 'meter',
+                });
+            }
         }
     }
 }
