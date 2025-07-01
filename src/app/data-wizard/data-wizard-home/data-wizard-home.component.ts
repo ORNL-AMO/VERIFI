@@ -10,9 +10,12 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
-import { getTodoList, TodoItem } from '../todo-list';
+import { getTodoList, TodoItem, TodoListOptions } from '../todo-list';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
+import { DataWizardService } from '../data-wizard.service';
+import { WeatherPredictorManagementService } from 'src/app/weather-data/weather-predictor-management.service';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'app-data-wizard-home',
@@ -43,17 +46,24 @@ export class DataWizardHomeComponent {
 
   toDoItems: Array<TodoItem> = [];
 
-  includeOutdatedMeters: boolean = true;
-  includeOutdatedPredictors: boolean = true;
-  outdatedDays: number = 60;
+  todoListOptions: TodoListOptions;
+  todoListOptionsSub: Subscription;
+
   outdatedDaysOptions: Array<number> = [30, 60, 90, 180, 365];
   showWeatherButton: boolean = false;
+
+  showWeatherPredictorModal: boolean = false;
+  showMenu: boolean = false;
   constructor(private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService,
     private utilityMeterDbService: UtilityMeterdbService,
     private predictorDbService: PredictorDbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private predictorDataDbService: PredictorDataDbService
+    private predictorDataDbService: PredictorDataDbService,
+    private dataWizardService: DataWizardService,
+    private weatherPredictorManagementService: WeatherPredictorManagementService,
+    private router: Router,
+    private activatedRoute: ActivatedRoute
   ) {
 
   }
@@ -83,6 +93,10 @@ export class DataWizardHomeComponent {
       this.predictorData = predictorData;
       this.setTodoItems();
     });
+    this.todoListOptionsSub = this.dataWizardService.todoListOptions.subscribe(options => {
+      this.todoListOptions = options;
+      this.setTodoItems();
+    });
   }
 
   ngOnDestroy() {
@@ -92,6 +106,7 @@ export class DataWizardHomeComponent {
     this.predictorsSub.unsubscribe();
     this.meterDataSub.unsubscribe();
     this.predictorDataSub.unsubscribe();
+    this.todoListOptionsSub.unsubscribe();
   }
 
   setTodoItems() {
@@ -101,17 +116,41 @@ export class DataWizardHomeComponent {
       this.predictors,
       this.meterData,
       this.predictorData,
-      {
-        includeOutdatedMeters: this.includeOutdatedMeters,
-        includeOutdatedPredictors: this.includeOutdatedPredictors,
-        outdatedDays: this.outdatedDays
-      });
+      this.todoListOptions);
     this.showWeatherButton = this.toDoItems.find(item => {
       return item.isWeather && item.type === 'predictor';
     }) != undefined;
+
+    this.showMenu = this.toDoItems.find(item => {
+      return item.type == 'predictor' || item.type == 'meter'
+    }) != undefined;
+
   }
 
   updateIncludedItems() {
-    this.setTodoItems();
+    this.dataWizardService.todoListOptions.next(this.todoListOptions);
+  }
+
+  openWeatherPredictorModal() {
+    this.showWeatherPredictorModal = true;
+  }
+
+  closeWeatherPredictorModal() {
+    this.showWeatherPredictorModal = false;
+  }
+
+  async updateAccountWeatherPredictors() {
+      this.closeWeatherPredictorModal();
+    let results = await this.weatherPredictorManagementService.updateAccountWeatherPredictors();
+    if (results === "success") {
+      console.log('success....')
+    } else {
+      // Handle error case
+      console.error("Error updating weather predictors");
+    }
+  }
+
+  goToUpload(){
+    this.router.navigate(['../import-data'], {relativeTo: this.activatedRoute});
   }
 }

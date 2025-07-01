@@ -26,6 +26,6 @@
     </div>
     <ng-template [ngIf]="helpPanelOpen">
         <app-help-panel *ngIf="activePanel == 'help'"></app-help-panel>
-        <app-setup-checklist *ngIf="activePanel == 'checklist'"></app-setup-checklist>
+        <app-setup-checklist class="w-100" *ngIf="activePanel == 'checklist'"></app-setup-checklist>
     </ng-template>
 </div>

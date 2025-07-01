@@ -28,7 +28,7 @@ export class FacilityDataComponent {
       if (selectedFacility) {
         this.dbChangesService.selectFacility(selectedFacility);
       } else {
-        this.router.navigateByUrl('/verifi')
+        this.router.navigateByUrl('/welcome')
       }
     });
   }

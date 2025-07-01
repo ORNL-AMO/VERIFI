@@ -10,9 +10,10 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
-import { getTodoList, TodoItem } from '../../todo-list';
+import { getTodoList, TodoItem, TodoListOptions } from '../../todo-list';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
+import { DataWizardService } from '../../data-wizard.service';
 
 @Component({
   selector: 'app-setup-checklist',
@@ -42,13 +43,19 @@ export class SetupChecklistComponent {
   predictorData: Array<IdbPredictorData>;
 
   toDoItems: Array<TodoItem> = [];
-  showWeatherButton: boolean = false;
+
+  todoListOptions: TodoListOptions;
+  todoListOptionsSub: Subscription;
+
+  outdatedDaysOptions: Array<number> = [30, 60, 90, 180, 365];
+  showMenu: boolean = false;
   constructor(private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService,
     private utilityMeterDbService: UtilityMeterdbService,
     private predictorDbService: PredictorDbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private predictorDataDbService: PredictorDataDbService
+    private predictorDataDbService: PredictorDataDbService,
+    private dataWizardService: DataWizardService
   ) {
 
   }
@@ -78,6 +85,10 @@ export class SetupChecklistComponent {
       this.predictorData = predictorData;
       this.setTodoItems();
     });
+    this.todoListOptionsSub = this.dataWizardService.todoListOptions.subscribe(options => {
+      this.todoListOptions = options;
+      this.setTodoItems();
+    });
   }
 
   ngOnDestroy() {
@@ -87,6 +98,7 @@ export class SetupChecklistComponent {
     this.predictorsSub.unsubscribe();
     this.meterDataSub.unsubscribe();
     this.predictorDataSub.unsubscribe();
+    this.todoListOptionsSub.unsubscribe();
   }
 
   setTodoItems() {
@@ -101,5 +113,12 @@ export class SetupChecklistComponent {
         includeOutdatedPredictors: true,
         outdatedDays: 60
       });
+
+      this.showMenu = this.toDoItems.find(item => {
+        return item.type == 'predictor' || item.type == 'meter'
+      }) != undefined;
+  }
+  updateIncludedItems() {
+    this.dataWizardService.todoListOptions.next(this.todoListOptions);
   }
 }

@@ -70,7 +70,7 @@ export class AccountSetupComponent {
     await firstValueFrom(this.accountDbService.updateWithObservable(this.selectedAccount));
     let accounts: Array<IdbAccount> = await firstValueFrom(this.accountDbService.getAll());
     this.accountDbService.allAccounts.next(accounts);
-    this.router.navigateByUrl('/verifi');
+    this.router.navigateByUrl('/welcome');
   }
 
   cancelAccountDelete() {

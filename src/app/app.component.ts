@@ -164,7 +164,7 @@ export class AppComponent {
         await this.initializeElectronBackups();
 
         this.dataInitialized = true;
-        this.router.navigateByUrl('verifi');
+        this.router.navigateByUrl('welcome');
       }
 
     } catch (err) {

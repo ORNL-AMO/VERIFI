@@ -10,40 +10,50 @@
                     </ng-container>
 
                 </h4>
-                <div class="d-flex justify-content-between mb-3">
-                    <div class="d-flex flex-column">
-                        <label>To Do Options:</label>
-                        <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" role="switch" id="includeOutdatedMeters"
-                                name="includeOutdatedMeters" [(ngModel)]="includeOutdatedMeters"
-                                (change)="updateIncludedItems()">
-                            <label class="form-check-label" for="includeOutdatedMeters">Include outdated
-                                meters</label>
+                <ng-container *ngIf="showMenu">
+                    <div class="d-flex justify-content-between mb-3">
+                        <div class="d-flex flex-column">
+                            <label>To Do Options:</label>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" role="switch" id="includeOutdatedMeters"
+                                    name="includeOutdatedMeters" [(ngModel)]="todoListOptions.includeOutdatedMeters"
+                                    (change)="updateIncludedItems()">
+                                <label class="form-check-label" for="includeOutdatedMeters">Include outdated
+                                    meters</label>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" role="switch"
+                                    id="includeOutdatedPredictors" name="includeOutdatedPredictors"
+                                    [(ngModel)]="todoListOptions.includeOutdatedPredictors"
+                                    (change)="updateIncludedItems()">
+                                <label class="form-check-label" for="includeOutdatedPredictors">Include outdated
+                                    predictors</label>
+                            </div>
+                            <div class="d-flex"
+                                *ngIf="todoListOptions.includeOutdatedMeters || todoListOptions.includeOutdatedPredictors">
+                                <select class="form-select form-select-sm" id="outdatedDays" name="outdatedDays"
+                                    [(ngModel)]="todoListOptions.outdatedDays" (change)="updateIncludedItems()">
+                                    <option *ngFor="let days of outdatedDaysOptions" [value]="days">
+                                        Outdated after {{days}} days</option>
+                                </select>
+                            </div>
                         </div>
-                        <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" role="switch" id="includeOutdatedPredictors"
-                                name="includeOutdatedPredictors" [(ngModel)]="includeOutdatedPredictors"
-                                (change)="updateIncludedItems()">
-                            <label class="form-check-label" for="includeOutdatedPredictors">Include outdated
-                                predictors</label>
-                        </div>
-                        <div class="d-flex" *ngIf="includeOutdatedMeters || includeOutdatedPredictors">
-                            <select class="form-select form-select-sm" id="outdatedDays" name="outdatedDays"
-                                [(ngModel)]="outdatedDays" (change)="updateIncludedItems()">
-                                <option *ngFor="let days of outdatedDaysOptions" [value]="days">
-                                    Outdated after {{days}} days</option>
-                            </select>
+                        <div class="d-flex" *ngIf="toDoItems.length > 0">
+                            <button class="btn btn-outline" (click)="goToUpload()"
+                                [ngClass]="{'me-2': showWeatherButton}">
+                                <span class="fa fa-upload"></span><br>
+                                Upload Data
+                            </button>
+                            <button class="btn btn-outline" (click)="openWeatherPredictorModal()"
+                                *ngIf="showWeatherButton">
+                                <span class="fa fa-temperature-half"></span><br>
+                                Update Weather<br> Predictors
+                            </button>
                         </div>
                     </div>
-                    <div class="d-flex flex-column" *ngIf="toDoItems.length > 0 && showWeatherButton">
-                        <button class="btn btn-outline">
-                            <span class="fa fa-temperature-half"></span><br>
-                            Update Weather<br> Predictors
-                        </button>
-                    </div>
-                </div>
-                <hr class="my-auto">
-                <p class="mt-2">
+                    <hr class="my-2">
+                </ng-container>
+                <p>
                     The following items have been identified as needing action for this account.
                 </p>
                 <ng-template [ngIf]="toDoItems.length > 0" [ngIfElse]="noToDoItems">
@@ -77,5 +87,28 @@
                 </ng-template>
             </div>
         </div>
+    </div>
+</div>
+
+
+
+
+<div [ngClass]="{'windowOverlay': showWeatherPredictorModal}">
+</div>
+
+<div class="popup" [class.open]="showWeatherPredictorModal" *ngIf="showWeatherPredictorModal">
+    <div class="popup-header">Update Weather Predictors
+        <button class="item-right" (click)="closeWeatherPredictorModal()">x</button>
+    </div>
+    <div class="popup-body">
+        <p>
+            Updating weather predictor data will add predictor data entries from the latest entry for the predictor up
+            to the current month. This will not delete or modify any existing predictor data. Be sure to double check
+            the new weather readings as some stations may have gaps in their data.
+        </p>
+    </div>
+    <div class="popup-footer text-end">
+        <button class="btn btn-secondary" (click)="closeWeatherPredictorModal()">Cancel</button>
+        <button class="btn btn-success" (click)="updateAccountWeatherPredictors()">Confirm Update</button>
     </div>
 </div>

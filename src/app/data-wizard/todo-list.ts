@@ -15,12 +15,12 @@ export function getTodoList(account: IdbAccount,
     predictorData: Array<IdbPredictorData>,
     options: TodoListOptions): Array<TodoItem> {
     let toDoItems: Array<TodoItem> = [];
-    if (account && facilities && meters && predictors && meterData && predictorData) {
+    if (account && facilities && meters && predictors && meterData && predictorData && options) {
         if (account.name == 'New Account') {
             toDoItems.push({
                 label: 'Setup account settings',
                 url: '/data-wizard/' + account.guid + '/account-setup',
-                description: "Set the account with a name, unit settings, location and sustainability goals. This will help you manage your data effectively.",
+                description: "Set the account name, unit settings, location and sustainability goals. This will help you manage your data effectively.",
                 facilityId: undefined,
                 type: 'account'
             })
@@ -105,12 +105,12 @@ function setMeterTodoItems(meter: IdbUtilityMeter,
         let latestReading: IdbUtilityMeterData = _.maxBy(meterDataForMeter, (data: IdbUtilityMeterData) => new Date(data.readDate).getTime());
         let readingDate: Date = new Date(latestReading.readDate);
 
-        if (latestReading && readingDate.getTime() < new Date().getTime() - options.outdatedDays * 24 * 60 * 60 * 1000 && meter.meterReadingDataApplication != 'fullYear') {
+        if (latestReading && readingDate.getTime() < (new Date().getTime() - options.outdatedDays * 24 * 60 * 60 * 1000) && meter.meterReadingDataApplication != 'fullYear') {
             const formattedDate = formatDate(readingDate, 'MM/dd/yyyy', 'en-US');
             toDoItems.push({
                 label: 'Update utility meter data for ' + meter.name,
                 url: '/data-wizard/' + meter.accountId + '/facilities/' + meter.facilityId + '/meters/' + meter.guid + '/meter-data',
-                description: "Update utility meter data for the meter. The latest reading (" + formattedDate + ") is more than 60 days old.",
+                description: "Update utility meter data for the meter. The latest reading (" + formattedDate + ") is more than " + options.outdatedDays + " days old.",
                 facilityId: meter.facilityId,
                 type: 'meter',
             });
@@ -135,13 +135,16 @@ function setPredictorTodoItems(predictor: IdbPredictor,
     } else if (options.includeOutdatedPredictors) {
         let latestReading: IdbPredictorData = _.maxBy(predictorDataForFacility, (data: IdbPredictorData) => new Date(data.date).getTime());
         let readingDate: Date = new Date(latestReading.date);
+        // Set readingDate to end of the month
+        readingDate = new Date(readingDate.getFullYear(), readingDate.getMonth() + 1, 0);
+        //
         // Check if the latest reading is more than 60 days old
-        if (latestReading && readingDate.getTime() < new Date().getTime() - options.outdatedDays * 24 * 60 * 60 * 1000) {
-            const formattedDate = formatDate(readingDate, 'MM/dd/yyyy', 'en-US');
+        if (latestReading && readingDate.getTime() < (new Date().getTime() - options.outdatedDays * 24 * 60 * 60 * 1000)) {
+            const formattedDate = formatDate(readingDate, 'MM/yyyy', 'en-US');
             toDoItems.push({
                 label: 'Update predictor data for ' + predictor.name,
                 url: '/data-wizard/' + predictor.accountId + '/facilities/' + predictor.facilityId + '/predictors/' + predictor.guid + '/predictor-data',
-                description: "Update predictor data for the predictor. The latest reading (" + formattedDate + ") is more than 60 days old.",
+                description: "Update predictor data for the predictor. The latest reading (" + formattedDate + ") is more than " + options.outdatedDays + " days old.",
                 facilityId: predictor.facilityId,
                 type: 'predictor',
                 isWeather: predictor.predictorType == 'Weather'
