@@ -1,0 +1,42 @@
+<div class="data-wizard-content with-footer">
+    <div class="row g-0 justify-content-center h-100 w-100 overflow-auto">
+        <div class="col-11 pt-4 pb-4">
+            <div class="form-paper">
+                <h4>
+                    <div class="d-flex w-100 justify-content-between">
+                        <div class="h4 mb-0">
+                            Meter Readings
+                        </div>
+                        <div>
+                            <span class="badge bg-primary">
+                                <span class="fa fa-file"></span>
+                                {{fileReference.name}}
+                            </span>
+                        </div>
+                    </div>
+                </h4>
+
+                <ng-template [ngIf]="metersIncluded" [ngIfElse]="noMetersBlock">
+                    <ng-container *ngIf="!inspectMeterSummary">
+                        <app-meter-data-summary-table [meterDataSummaries]="meterDataSummaries"
+                            (emitInspectSummary)="selectMeterSummary($event)"></app-meter-data-summary-table>
+                    </ng-container>
+                    <ng-container *ngIf="inspectMeterSummary">
+                        <app-inspect-meter-data-summary-table [meterDataSummary]="inspectMeterSummary"
+                            (emitClose)="selectMeterSummary(undefined)"></app-inspect-meter-data-summary-table>
+                    </ng-container>
+                </ng-template>
+                <ng-template #noMetersBlock>
+                    <div class="alert alert-warning p-2">
+                        No meters found for upload.
+                    </div>
+                </ng-template>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--TODO: disable next-->
+<app-data-management-import-footer [fileReference]="fileReference"
+    [navOption]="'meter-readings'"></app-data-management-import-footer>

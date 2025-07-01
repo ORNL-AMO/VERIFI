@@ -1,13 +1,13 @@
 import { Route } from "@angular/router";
-import { DataWizardComponent } from "../data-wizard/data-wizard.component";
+import { DataManagementComponent } from "../data-wizard/data-management.component";
 import { AccountSetupComponent } from "../data-wizard/account-setup/account-setup.component";
 import { AccountFacilitiesComponent } from "../data-wizard/account-facilities/account-facilities.component";
 import { FacilityDataComponent } from "../data-wizard/account-facilities/facility-data/facility-data.component";
 import { FacilitySetupComponent } from "../data-wizard/account-facilities/facility-data/facility-setup/facility-setup.component";
-import { DataWizardImportComponent } from "../data-wizard/data-wizard-import/data-wizard-import.component";
-import { UploadFilesComponent } from "../data-wizard/data-wizard-import/upload-files/upload-files.component";
-import { ProcessTemplateFileComponent } from "../data-wizard/data-wizard-import/process-template-file/process-template-file.component";
-import { ProcessTemplateFacilitiesComponent } from "../data-wizard/data-wizard-import/process-template-file/process-template-facilities/process-template-facilities.component";
+import { DataManagementImportComponent } from "../data-wizard/data-management-import/data-management-import.component";
+import { UploadFilesComponent } from "../data-wizard/data-management-import/upload-files/upload-files.component";
+import { ProcessTemplateFileComponent } from "../data-wizard/data-management-import/process-template-file/process-template-file.component";
+import { ProcessTemplateFacilitiesComponent } from "../data-wizard/data-management-import/process-template-file/process-template-facilities/process-template-facilities.component";
 import { FacilityMetersTableComponent } from "../data-wizard/account-facilities/facility-data/facility-meters/facility-meters-table/facility-meters-table.component";
 import { FacilityMeterComponent } from "../data-wizard/account-facilities/facility-data/facility-meters/facility-meter/facility-meter.component";
 import { MeterDataComponent } from "../shared/shared-meter-content/meter-data/meter-data.component";
@@ -21,16 +21,16 @@ import { FacilityPredictorsTableComponent } from "../data-wizard/account-facilit
 import { FacilityPredictorDataTableComponent } from "../data-wizard/account-facilities/facility-data/facility-predictors/facility-predictor-data-table/facility-predictor-data-table.component";
 import { FacilityPredictorDataEntryComponent } from "../data-wizard/account-facilities/facility-data/facility-predictors/facility-predictor-data-entry/facility-predictor-data-entry.component";
 import { FacilityPredictorDataBulkUpdateComponent } from "../data-wizard/account-facilities/facility-data/facility-predictors/facility-predictor-data-bulk-update/facility-predictor-data-bulk-update.component";
-import { ProcessGeneralFileComponent } from "../data-wizard/data-wizard-import/process-general-file/process-general-file.component";
-import { SelectWorksheetComponent } from "../data-wizard/data-wizard-import/process-general-file/select-worksheet/select-worksheet.component";
-import { IdentifyColumnsComponent } from "../data-wizard/data-wizard-import/process-general-file/identify-columns/identify-columns.component";
-import { MapMetersToFacilitiesComponent } from "../data-wizard/data-wizard-import/process-general-file/map-meters-to-facilities/map-meters-to-facilities.component";
-import { ProcessMetersComponent } from "../data-wizard/data-wizard-import/shared-process-file/process-meters/process-meters.component";
-import { ProcessMeterReadingsComponent } from "../data-wizard/data-wizard-import/shared-process-file/process-meter-readings/process-meter-readings.component";
-import { MapPredictorsToFacilitiesComponent } from "../data-wizard/data-wizard-import/process-general-file/map-predictors-to-facilities/map-predictors-to-facilities.component";
-import { ProcessPredictorsComponent } from "../data-wizard/data-wizard-import/shared-process-file/process-predictors/process-predictors.component";
-import { ProcessPredictorReadingsComponent } from "../data-wizard/data-wizard-import/shared-process-file/process-predictor-readings/process-predictor-readings.component";
-import { SubmitImportDataComponent } from "../data-wizard/data-wizard-import/shared-process-file/submit-import-data/submit-import-data.component";
+import { ProcessGeneralFileComponent } from "../data-wizard/data-management-import/process-general-file/process-general-file.component";
+import { SelectWorksheetComponent } from "../data-wizard/data-management-import/process-general-file/select-worksheet/select-worksheet.component";
+import { IdentifyColumnsComponent } from "../data-wizard/data-management-import/process-general-file/identify-columns/identify-columns.component";
+import { MapMetersToFacilitiesComponent } from "../data-wizard/data-management-import/process-general-file/map-meters-to-facilities/map-meters-to-facilities.component";
+import { ProcessMetersComponent } from "../data-wizard/data-management-import/shared-process-file/process-meters/process-meters.component";
+import { ProcessMeterReadingsComponent } from "../data-wizard/data-management-import/shared-process-file/process-meter-readings/process-meter-readings.component";
+import { MapPredictorsToFacilitiesComponent } from "../data-wizard/data-management-import/process-general-file/map-predictors-to-facilities/map-predictors-to-facilities.component";
+import { ProcessPredictorsComponent } from "../data-wizard/data-management-import/shared-process-file/process-predictors/process-predictors.component";
+import { ProcessPredictorReadingsComponent } from "../data-wizard/data-management-import/shared-process-file/process-predictor-readings/process-predictor-readings.component";
+import { SubmitImportDataComponent } from "../data-wizard/data-management-import/shared-process-file/submit-import-data/submit-import-data.component";
 import { FacilityMeterGroupingComponent } from "../data-wizard/account-facilities/facility-data/facility-meters/facility-meter-grouping/facility-meter-grouping.component";
 import { DataManagementHomeComponent } from "../data-wizard/data-management-home/data-management-home.component";
 import { WeatherDataRoutes } from "./weather-data.routes";
@@ -47,7 +47,7 @@ import { AccountCustomDataComponent } from "../data-wizard/account-custom-data/a
 
 export const DataWizardRoutes: Route = {
     path: 'data-wizard/:id',
-    component: DataWizardComponent,
+    component: DataManagementComponent,
     children: [
         { path: '', pathMatch: 'full', redirectTo: 'home' },
         {
@@ -60,7 +60,7 @@ export const DataWizardRoutes: Route = {
         },
         {
             path: 'import-data',
-            component: DataWizardImportComponent,
+            component: DataManagementImportComponent,
             children: [
                 { path: '', pathMatch: 'full', redirectTo: 'upload-files' },
                 { path: 'upload-files', component: UploadFilesComponent },

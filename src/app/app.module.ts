@@ -33,7 +33,7 @@ import { DeletingAccountDataComponent } from './core-components/deleting-account
 import { SurveyModalComponent } from './core-components/survey-modal/survey-modal.component';
 import { SurveyToastComponent } from './core-components/survey-toast/survey-toast.component';
 import { UserSurveyModule } from './shared/user-survey/user-survey.module';
-import { DataWizardModule } from './data-wizard/data-wizard.module';
+import { DataManagementModule } from './data-wizard/data-management.module';
 import { HomePageComponent } from './core-components/home-page/home-page.component';
 
 @NgModule({
@@ -76,7 +76,7 @@ import { HomePageComponent } from './core-components/home-page/home-page.compone
         UploadDataModule,
         WeatherDataModule,
         UserSurveyModule,
-        DataWizardModule,
+        DataManagementModule,
         UserSurveyModule
     ],
     providers: [provideHttpClient(withInterceptorsFromDi())]

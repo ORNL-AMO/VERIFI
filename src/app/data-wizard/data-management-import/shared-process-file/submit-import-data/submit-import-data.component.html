@@ -1,0 +1,189 @@
+<div class="data-wizard-content with-footer">
+    <div class="row g-0 justify-content-center h-100 w-100 overflow-auto">
+        <div class="col-11 pt-4 pb-4">
+            <div class="form-paper">
+                <h4>
+                    <div class="d-flex w-100 justify-content-between">
+                        <div class="h4 mb-0">
+                            Review and Submit Upload Data
+                        </div>
+                        <div>
+                            <span class="badge bg-primary">
+                                <span class="fa fa-file"></span>
+                                {{fileReference.name}}
+                            </span>
+                        </div>
+                    </div>
+                </h4>
+                <div class="d-flex w-100 justify-content-between pt-2 pb-2">
+                    <div class="me-2 w-75">
+                        <p class="mb-0 fw-light">
+                            The below content will be imported into the selected account. Items marked with an <span
+                                class="fa fa-asterisk"></span> currently exist in the account and will be updated on
+                            import.
+                        </p>
+                    </div>
+                    <div>
+                        <button class="btn btn-success" (click)="submitImport()">
+                            Import Data
+                        </button>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <table class="table table-bordered table-sm table-hover">
+                            <tbody>
+                                <tr>
+                                    <th class="bg-dark text-center">
+                                        Facilities
+                                    </th>
+                                    <th class="bg-dark text-center">
+                                        Total Meter Readings
+                                    </th>
+                                    <th class="bg-dark text-center">
+                                        Total Predictor Readings
+                                    </th>
+                                </tr>
+                                <tr>
+                                    <td class="text-center">
+                                        {{importSummary.numFacilities}}
+                                    </td>
+                                    <td class="text-center">
+                                        {{importSummary.numUtilityData}}
+                                    </td>
+                                    <td class="text-center">
+                                        {{importSummary.numPredictorData}}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+
+
+                <div class="row">
+                    <div class="col-12" *ngFor="let summary of facilitySummaries">
+                        <h5>
+                            <i class="fa fa-industry" [ngStyle]="{color: summary.facility.color}"></i>
+                            {{summary.facility.name}}
+                        </h5>
+                        <table class="table table-bordered table-sm table-hover">
+                            <tbody>
+                                <ng-container *ngIf="summary.existingMeters.length > 0 || summary.newMeters.length > 0">
+                                    <tr>
+                                        <th class="bg-dark">
+                                            Meters
+                                        </th>
+                                        <th class="bg-dark">
+                                            Existing Readings
+                                        </th>
+                                        <th class="bg-dark">
+                                            New Readings
+                                        </th>
+                                    </tr>
+                                    <ng-container *ngIf="summary.existingMeters.length > 0">
+                                        <tr *ngFor="let meterSummary of summary.existingMeters">
+                                            <td class="ps-3">
+                                                {{meterSummary.meter.name}} <span class="fa fa-asterisk"></span>
+                                            </td>
+                                            <td>
+                                                {{meterSummary.existingReadings.length}}
+                                                <span *ngIf="meterSummary.existingDateRange.startDate">
+                                                    ({{meterSummary.existingDateRange.startDate | date}} -
+                                                    {{meterSummary.existingDateRange.endDate | date}})
+                                                </span>
+                                            </td>
+                                            <td>
+                                                {{meterSummary.newReadings.length}}
+                                                <span *ngIf="meterSummary.newDateRange.startDate">
+                                                    ({{meterSummary.newDateRange.startDate | date}} -
+                                                    {{meterSummary.newDateRange.endDate | date}})
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    </ng-container>
+                                    <ng-container *ngIf="summary.newMeters.length > 0">
+                                        <tr *ngFor="let meterSummary of summary.newMeters">
+                                            <td class="ps-3">
+                                                {{meterSummary.meter.name}}
+                                            </td>
+                                            <td>
+                                                &mdash;
+                                            </td>
+                                            <td>
+                                                {{meterSummary.newReadings.length}}
+                                                <span *ngIf="meterSummary.newDateRange.startDate">
+                                                    ({{meterSummary.newDateRange.startDate | date}} -
+                                                    {{meterSummary.newDateRange.endDate | date}})
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    </ng-container>
+                                </ng-container>
+
+                                <ng-container
+                                    *ngIf="summary.existingPredictors.length > 0 || summary.newPredictors.length > 0">
+                                    <tr>
+                                        <th class="bg-dark">
+                                            Predictors
+                                        </th>
+                                        <th class="bg-dark">
+                                            Existing Readings
+                                        </th>
+                                        <th class="bg-dark">
+                                            New Readings
+                                        </th>
+                                    </tr>
+                                    <ng-container *ngIf="summary.existingPredictors.length > 0">
+                                        <tr *ngFor="let predictorSummary of summary.existingPredictors">
+                                            <td class="ps-3">
+                                                {{predictorSummary.predictor.name}} <span class="fa fa-asterisk"></span>
+                                            </td>
+                                            <td>
+                                                {{predictorSummary.existingReadings.length}}
+                                                <span *ngIf="predictorSummary.existingDateRange.startDate">
+                                                    ({{predictorSummary.existingDateRange.startDate | date}} -
+                                                    {{predictorSummary.existingDateRange.endDate | date}})
+                                                </span>
+                                            </td>
+                                            <td>
+                                                {{predictorSummary.newReadings.length}}
+                                                <span *ngIf="predictorSummary.newDateRange.startDate">
+                                                    ({{predictorSummary.newDateRange.startDate | date}} -
+                                                    {{predictorSummary.newDateRange.endDate | date}})
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    </ng-container>
+                                    <ng-container *ngIf="summary.newPredictors.length > 0">
+                                        <tr *ngFor="let predictorSummary of summary.newPredictors">
+                                            <td class="ps-3">
+                                                {{predictorSummary.predictor.name}}
+                                            </td>
+                                            <td>
+                                                &mdash;
+                                            </td>
+                                            <td>
+                                                {{predictorSummary.newReadings.length}}
+                                                <span *ngIf="predictorSummary.newDateRange.startDate">
+                                                    ({{predictorSummary.newDateRange.startDate | date}} -
+                                                    {{predictorSummary.newDateRange.endDate | date}})
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    </ng-container>
+                                </ng-container>
+                            </tbody>
+                        </table>
+                        <hr>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--TODO: disable next-->
+<app-data-management-import-footer [fileReference]="fileReference" [navOption]="'review-and-submit'"
+    (emitSubmit)="submitImport()"></app-data-management-import-footer>
