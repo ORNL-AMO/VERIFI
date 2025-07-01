@@ -32,7 +32,7 @@ import { ProcessPredictorsComponent } from "../data-wizard/data-wizard-import/sh
 import { ProcessPredictorReadingsComponent } from "../data-wizard/data-wizard-import/shared-process-file/process-predictor-readings/process-predictor-readings.component";
 import { SubmitImportDataComponent } from "../data-wizard/data-wizard-import/shared-process-file/submit-import-data/submit-import-data.component";
 import { FacilityMeterGroupingComponent } from "../data-wizard/account-facilities/facility-data/facility-meters/facility-meter-grouping/facility-meter-grouping.component";
-import { DataWizardHomeComponent } from "../data-wizard/data-wizard-home/data-wizard-home.component";
+import { DataManagementHomeComponent } from "../data-wizard/data-management-home/data-management-home.component";
 import { WeatherDataRoutes } from "./weather-data.routes";
 import { CustomGWPComponent } from "../shared/custom-database/custom-gwp/custom-gwp.component";
 import { RegionalEmissionsDataComponent } from "../shared/custom-database/regional-emissions-data/regional-emissions-data.component";
@@ -52,7 +52,7 @@ export const DataWizardRoutes: Route = {
         { path: '', pathMatch: 'full', redirectTo: 'home' },
         {
             path: 'home',
-            component: DataWizardHomeComponent
+            component: DataManagementHomeComponent
         },
         {
             path: 'account-setup',

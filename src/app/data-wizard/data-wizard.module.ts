@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DataWizardComponent } from './data-wizard.component';
-import { DataWizardSidebarComponent } from './data-wizard-sidebar/data-wizard-sidebar.component';
+import { DataManagementSidebarComponent } from './data-management-sidebar/data-management-sidebar.component';
 import { RouterModule } from '@angular/router';
 import { AccountSetupComponent } from './account-setup/account-setup.component';
 import { AccountFacilitiesComponent } from './account-facilities/account-facilities.component';
@@ -19,7 +19,7 @@ import { FacilityMetersTableComponent } from './account-facilities/facility-data
 import { NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { FacilityMeterComponent } from './account-facilities/facility-data/facility-meters/facility-meter/facility-meter.component';
 import { FacilitiesListComponent } from './account-facilities/facilities-list/facilities-list.component';
-import { WizardSidebarFacilitiesListPipe } from './data-wizard-sidebar/wizard-sidebar-facilities-list.pipe';
+import { DataManagementSidebarFacilitiesListPipe } from './data-management-sidebar/data-management-sidebar-facilities-list.pipe';
 import { TableItemsDropdownModule } from '../shared/table-items-dropdown/table-items-dropdown.module';
 import { SharedMeterContentModule } from '../shared/shared-meter-content/shared-meter-content.module';
 import { FacilityMeterMonthlyDataComponent } from './account-facilities/facility-data/facility-meters/facility-meter-monthly-data/facility-meter-monthly-data.component';
@@ -56,7 +56,7 @@ import { AccountCustomDataComponent } from './account-custom-data/account-custom
 @NgModule({
   declarations: [
     DataWizardComponent,
-    DataWizardSidebarComponent,
+    DataManagementSidebarComponent,
     AccountSetupComponent,
     AccountFacilitiesComponent,
     FacilityDataComponent,
@@ -69,7 +69,7 @@ import { AccountCustomDataComponent } from './account-custom-data/account-custom
     FacilityMetersTableComponent,
     FacilityMeterComponent,
     FacilitiesListComponent,
-    WizardSidebarFacilitiesListPipe,
+    DataManagementSidebarFacilitiesListPipe,
     FacilityMeterMonthlyDataComponent,
     MeterDataSummaryTableComponent,
     InspectMeterDataSummaryTableComponent,

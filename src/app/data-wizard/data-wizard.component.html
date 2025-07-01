@@ -10,7 +10,7 @@
     (mouseleave)="stopResizing($event)">
     <div class="d-flex" [ngStyle]="{'width.px': sidebarWidth}">
         <div class="w-100">
-            <app-data-wizard-sidebar (emitToggleCollapse)="toggleCollapseSidebar($event)"></app-data-wizard-sidebar>
+            <app-data-management-sidebar (emitToggleCollapse)="toggleCollapseSidebar($event)"></app-data-management-sidebar>
         </div>
         <div class="resize-handle pe-1 ps-1" (mousedown)="startResizingSidebar($event)">
             <div class="h-100 d-flex align-items-center">

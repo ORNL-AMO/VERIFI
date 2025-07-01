@@ -76,7 +76,7 @@
                     Manage Facilities
                 </a>
             </div>
-            <ng-container *ngFor="let facility of facilities | wizardSidebarFacilitiesList">
+            <ng-container *ngFor="let facility of facilities | dataManagementSidebarFacilitiesList">
                 <div class="ps-2 nav-item">
                     <a class="nav-link" (click)="toggleFacilityOpen(facility)"
                         [ngClass]="{'active': facility.guid == selectedFacility?.guid}">

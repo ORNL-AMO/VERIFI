@@ -1,4 +1,4 @@
-import { WizardSidebarFacilitiesListPipe } from './wizard-sidebar-facilities-list.pipe';
+import { WizardSidebarFacilitiesListPipe } from './data-management-sidebar-facilities-list.pipe';
 
 describe('WizardSidebarFacilitiesListPipe', () => {
   it('create an instance', () => {

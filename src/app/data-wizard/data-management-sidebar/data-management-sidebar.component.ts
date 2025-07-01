@@ -13,12 +13,12 @@ import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 
 @Component({
-  selector: 'app-data-wizard-sidebar',
-  templateUrl: './data-wizard-sidebar.component.html',
-  styleUrl: './data-wizard-sidebar.component.css',
+  selector: 'app-data-management-sidebar',
+  templateUrl: './data-management-sidebar.component.html',
+  styleUrl: './data-management-sidebar.component.css',
   standalone: false
 })
-export class DataWizardSidebarComponent {
+export class DataManagementSidebarComponent {
   @Output('emitToggleCollapse')
   emitToggleCollapse: EventEmitter<boolean> = new EventEmitter<boolean>(false);
 
