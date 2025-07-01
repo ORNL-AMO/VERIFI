@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { DataWizardService } from 'src/app/data-wizard/data-wizard.service';
+import { DataManagementService } from 'src/app/data-wizard/data-management.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { FileReference, getEmptyFileReference } from 'src/app/upload-data/upload-data-models';
@@ -19,14 +19,14 @@ export class ProcessTemplateFacilitiesComponent {
 
   account: IdbAccount;
 
-  constructor(private activatedRoute: ActivatedRoute, private dataWizardService: DataWizardService,
+  constructor(private activatedRoute: ActivatedRoute, private dataManagementService: DataManagementService,
     private accountDbService: AccountdbService) { }
 
   ngOnInit(): void {
     this.account = this.accountDbService.selectedAccount.getValue();
     this.paramsSub = this.activatedRoute.parent.params.subscribe(param => {
       let id: string = param['id'];
-      this.fileReference = this.dataWizardService.getFileReferenceById(id);
+      this.fileReference = this.dataManagementService.getFileReferenceById(id);
     });
   }
 

@@ -6,7 +6,7 @@ import { ColumnItem, FacilityGroup, FileReference, getEmptyFileReference } from 
 import { getNewIdbFacility, IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
-import { DataWizardService } from 'src/app/data-wizard/data-wizard.service';
+import { DataManagementService } from 'src/app/data-wizard/data-management.service';
 import { UploadDataService } from 'src/app/upload-data/upload-data.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
@@ -27,12 +27,12 @@ export class MapPredictorsToFacilitiesComponent {
   predictorsIncluded: boolean;
   displayAddFacilityModal: boolean = false;
   addFacilityName: string = 'New Facility';
-  constructor(private dataWizardService: DataWizardService,
+  constructor(private dataManagementService: DataManagementService,
     private activatedRoute: ActivatedRoute, private uploadDataService: UploadDataService,
     private accountDbService: AccountdbService) { }
 
   ngOnInit(): void {
-    this.fileReferenceSub = this.dataWizardService.fileReferences.subscribe(fileReferences => {
+    this.fileReferenceSub = this.dataManagementService.fileReferences.subscribe(fileReferences => {
       this.fileReferences = fileReferences;
     });
     this.paramsSub = this.activatedRoute.parent.params.subscribe(param => {

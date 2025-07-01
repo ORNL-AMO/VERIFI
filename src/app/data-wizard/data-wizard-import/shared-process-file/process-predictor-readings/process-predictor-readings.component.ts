@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { DataWizardService } from 'src/app/data-wizard/data-wizard.service';
+import { DataManagementService } from 'src/app/data-wizard/data-management.service';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { FileReference } from 'src/app/upload-data/upload-data-models';
 import * as _ from 'lodash';
@@ -21,12 +21,12 @@ export class ProcessPredictorReadingsComponent {
   predictorDataSummaries: Array<PredictorDataSummary>;
   predictorsExist: boolean;
   skipAll: boolean = false;
-  constructor(private activatedRoute: ActivatedRoute, private dataWizardService: DataWizardService) { }
+  constructor(private activatedRoute: ActivatedRoute, private dataManagementService: DataManagementService) { }
 
   ngOnInit(): void {
     this.paramsSub = this.activatedRoute.parent.params.subscribe(param => {
       let id: string = param['id'];
-      this.fileReference = this.dataWizardService.getFileReferenceById(id);
+      this.fileReference = this.dataManagementService.getFileReferenceById(id);
       this.predictorsExist = this.fileReference.predictors.length != 0 || this.fileReference.predictorData.length != 0;
       this.setSummary();
     });

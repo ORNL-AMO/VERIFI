@@ -3,7 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import * as _ from 'lodash';
 import { Subscription } from 'rxjs';
 import { ColumnGroup, ColumnItem, FileReference } from 'src/app/upload-data/upload-data-models';
-import { DataWizardService } from 'src/app/data-wizard/data-wizard.service';
+import { DataManagementService } from 'src/app/data-wizard/data-management.service';
 @Component({
   selector: 'app-identify-columns',
   templateUrl: './identify-columns.component.html',
@@ -21,10 +21,10 @@ export class IdentifyColumnsComponent implements OnInit {
   paramsSub: Subscription;
   noPredictorsOrMeters: boolean;
   noDateColumn: boolean;
-  constructor(private activatedRoute: ActivatedRoute, private dataWizardService: DataWizardService) { }
+  constructor(private activatedRoute: ActivatedRoute, private dataManagementService: DataManagementService) { }
 
   ngOnInit(): void {
-    this.fileReferenceSub = this.dataWizardService.fileReferences.subscribe(fileReferences => {
+    this.fileReferenceSub = this.dataManagementService.fileReferences.subscribe(fileReferences => {
       this.fileReferences = fileReferences;
     });
     this.paramsSub = this.activatedRoute.parent.params.subscribe(param => {

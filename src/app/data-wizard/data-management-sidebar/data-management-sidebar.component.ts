@@ -3,7 +3,7 @@ import { firstValueFrom, Subscription } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { FileReference } from 'src/app/upload-data/upload-data-models';
-import { DataWizardService } from '../data-wizard.service';
+import { DataManagementService } from '../data-management.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
@@ -48,7 +48,7 @@ export class DataManagementSidebarComponent {
   sidebarOpenSub: Subscription;
 
   constructor(private accountDbService: AccountdbService, private facilityDbService: FacilitydbService,
-    private dataWizardService: DataWizardService,
+    private dataManagementService: DataManagementService,
     private utilityMeterDbService: UtilityMeterdbService,
     private predictorDbService: PredictorDbService,
     private dbChangesService: DbChangesService
@@ -62,7 +62,7 @@ export class DataManagementSidebarComponent {
     this.facilitiesSub = this.facilityDbService.accountFacilities.subscribe(facilities => {
       this.facilities = facilities;
     });
-    this.fileReferencesSub = this.dataWizardService.fileReferences.subscribe(fileReferences => {
+    this.fileReferencesSub = this.dataManagementService.fileReferences.subscribe(fileReferences => {
       this.fileReferences = fileReferences;
     });
     this.accountMetersSub = this.utilityMeterDbService.accountMeters.subscribe(accountMeters => {
@@ -78,7 +78,7 @@ export class DataManagementSidebarComponent {
       this.selectedMeter = meter;
     });
 
-    this.sidebarOpenSub = this.dataWizardService.sidebarOpen.subscribe(val => {
+    this.sidebarOpenSub = this.dataManagementService.sidebarOpen.subscribe(val => {
       this.sidebarOpen = val;
     })
   }

@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import * as XLSX from 'xlsx';
 import { FileReference } from 'src/app/upload-data/upload-data-models';
 import { Subscription } from 'rxjs';
-import { DataWizardService } from '../../data-wizard.service';
+import { DataManagementService } from '../../data-management.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 
@@ -23,14 +23,14 @@ export class UploadFilesComponent {
   fileReferencesSub: Subscription;
   constructor(private router: Router,
     private uploadDataService: UploadDataService,
-    private dataWizardService: DataWizardService,
+    private dataManagementService: DataManagementService,
     private accountDbService: AccountdbService
   ) {
 
   }
 
   ngOnInit() {
-    this.fileReferencesSub = this.dataWizardService.fileReferences.subscribe(fileReferences => {
+    this.fileReferencesSub = this.dataManagementService.fileReferences.subscribe(fileReferences => {
       this.fileReferences = fileReferences;
     });
   }
@@ -59,13 +59,10 @@ export class UploadFilesComponent {
       const bstr: string = e.target.result;
       let workBook: XLSX.WorkBook = XLSX.read(bstr, { type: 'binary', cellDates: true });
       try {
-        console.log('try!')
         let fileReference: FileReference = this.uploadDataService.getFileReference(file, workBook, false);
-        console.log(fileReference);
         this.fileReferences.push(fileReference);
-        this.dataWizardService.fileReferences.next(this.fileReferences);
+        this.dataManagementService.fileReferences.next(this.fileReferences);
       } catch (err) {
-        console.log(err);
         this.fileUploadError = true;
       }
     };
@@ -74,7 +71,7 @@ export class UploadFilesComponent {
 
   removeReference(index: number) {
     this.fileReferences.splice(index, 1);
-    this.dataWizardService.fileReferences.next(this.fileReferences);
+    this.dataManagementService.fileReferences.next(this.fileReferences);
   }
 
   setDragEnter() {
@@ -104,7 +101,6 @@ export class UploadFilesComponent {
     if (fileReference.isTemplate) {
       this.router.navigateByUrl('/data-wizard/' + account.guid + '/import-data/process-template-file/' + fileReference.id)
     } else {
-      //todo
       this.router.navigateByUrl('/data-wizard/' + account.guid + '/import-data/process-general-file/' + fileReference.id)
     }
   }

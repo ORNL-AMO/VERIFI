@@ -1,13 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { DataWizardService } from 'src/app/data-wizard/data-wizard.service';
-import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { DataManagementService } from 'src/app/data-wizard/data-management.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { FileReference, getEmptyFileReference } from 'src/app/upload-data/upload-data-models';
-import { UploadDataService } from 'src/app/upload-data/upload-data.service';
+import { FileReference } from 'src/app/upload-data/upload-data-models';
 import * as XLSX from 'xlsx';
 
 @Component({
@@ -28,12 +25,11 @@ export class SelectWorksheetComponent implements OnInit {
   worksheetNames: Array<string>;
   hasHiddenTabs: boolean;
   showHiddenTabs: boolean = false;
-  constructor(private activatedRoute: ActivatedRoute, private dataWizardService: DataWizardService,
-    private router: Router, private facilityDbService: FacilitydbService,
-    private accountDbService: AccountdbService) { }
+  constructor(private activatedRoute: ActivatedRoute, private dataManagementService: DataManagementService,
+    private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
-    this.fileReferenceSub = this.dataWizardService.fileReferences.subscribe(fileReferences => {
+    this.fileReferenceSub = this.dataManagementService.fileReferences.subscribe(fileReferences => {
       this.fileReferences = fileReferences;
     });
     this.paramsSub = this.activatedRoute.parent.params.subscribe(param => {

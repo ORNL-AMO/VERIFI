@@ -13,7 +13,7 @@ import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { getTodoList, TodoItem, TodoListOptions } from '../todo-list';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
-import { DataWizardService } from '../data-wizard.service';
+import { DataManagementService } from '../data-management.service';
 import { WeatherPredictorManagementService } from 'src/app/weather-data/weather-predictor-management.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
@@ -65,7 +65,7 @@ export class DataManagementHomeComponent {
     private predictorDbService: PredictorDbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private predictorDataDbService: PredictorDataDbService,
-    private dataWizardService: DataWizardService,
+    private dataManagementService: DataManagementService,
     private weatherPredictorManagementService: WeatherPredictorManagementService,
     private router: Router,
     private activatedRoute: ActivatedRoute,
@@ -103,7 +103,7 @@ export class DataManagementHomeComponent {
       this.meterGroups = meterGroups;
       this.setTodoItems();
     });
-    this.todoListOptionsSub = this.dataWizardService.todoListOptions.subscribe(options => {
+    this.todoListOptionsSub = this.dataManagementService.todoListOptions.subscribe(options => {
       this.todoListOptions = options;
       this.setTodoItems();
     });
@@ -140,7 +140,7 @@ export class DataManagementHomeComponent {
   }
 
   updateIncludedItems() {
-    this.dataWizardService.todoListOptions.next(this.todoListOptions);
+    this.dataManagementService.todoListOptions.next(this.todoListOptions);
   }
 
   openWeatherPredictorModal() {

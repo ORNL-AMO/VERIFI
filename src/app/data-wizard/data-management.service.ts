@@ -7,7 +7,7 @@ import { TodoListOptions } from './todo-list';
 @Injectable({
   providedIn: 'root'
 })
-export class DataWizardService {
+export class DataManagementService {
 
   fileReferences: BehaviorSubject<Array<FileReference>>;
   sidebarOpen: BehaviorSubject<boolean>;

@@ -2,9 +2,8 @@ import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { DataWizardService } from 'src/app/data-wizard/data-wizard.service';
+import { DataManagementService } from 'src/app/data-wizard/data-management.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { getNewIdbFacility, IdbFacility } from 'src/app/models/idbModels/facility';
 import { ColumnItem, FacilityGroup, FileReference } from 'src/app/upload-data/upload-data-models';
@@ -26,13 +25,13 @@ export class MapMetersToFacilitiesComponent {
   importMetersFound: boolean;
   displayAddFacilityModal: boolean = false;
   addFacilityName: string = 'New Facility';
-  constructor(private dataWizardService: DataWizardService, private facilityDbService: FacilitydbService,
+  constructor(private dataManagementService: DataManagementService,
     private activatedRoute: ActivatedRoute,
     private uploadDataService: UploadDataService,
     private accountDbService: AccountdbService) { }
 
   ngOnInit(): void {
-    this.fileReferenceSub = this.dataWizardService.fileReferences.subscribe(fileReferences => {
+    this.fileReferenceSub = this.dataManagementService.fileReferences.subscribe(fileReferences => {
       this.fileReferences = fileReferences;
     });
     this.paramsSub = this.activatedRoute.parent.params.subscribe(param => {

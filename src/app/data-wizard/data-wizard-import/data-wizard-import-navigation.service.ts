@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { DataWizardService } from '../data-wizard.service';
 import { FileReference } from 'src/app/upload-data/upload-data-models';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 

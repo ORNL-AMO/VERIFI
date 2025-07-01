@@ -13,7 +13,7 @@ import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { getTodoList, TodoItem, TodoListOptions } from '../../todo-list';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
-import { DataWizardService } from '../../data-wizard.service';
+import { DataManagementService } from '../../data-management.service';
 import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
 
@@ -60,7 +60,7 @@ export class SetupChecklistComponent {
     private predictorDbService: PredictorDbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private predictorDataDbService: PredictorDataDbService,
-    private dataWizardService: DataWizardService,
+    private dataManagementService: DataManagementService,
     private utilityMeterGroupDbService: UtilityMeterGroupdbService
   ) {
 
@@ -95,7 +95,7 @@ export class SetupChecklistComponent {
       this.meterGroups = meterGroups;
       this.setTodoItems();
     });
-    this.todoListOptionsSub = this.dataWizardService.todoListOptions.subscribe(options => {
+    this.todoListOptionsSub = this.dataManagementService.todoListOptions.subscribe(options => {
       this.todoListOptions = options;
       this.setTodoItems();
     });
@@ -131,6 +131,6 @@ export class SetupChecklistComponent {
       }) != undefined;
   }
   updateIncludedItems() {
-    this.dataWizardService.todoListOptions.next(this.todoListOptions);
+    this.dataManagementService.todoListOptions.next(this.todoListOptions);
   }
 }

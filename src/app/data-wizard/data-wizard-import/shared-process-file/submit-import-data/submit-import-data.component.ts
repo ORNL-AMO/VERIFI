@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { DataWizardService } from 'src/app/data-wizard/data-wizard.service';
+import { DataManagementService } from 'src/app/data-wizard/data-management.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
@@ -36,7 +36,7 @@ export class SubmitImportDataComponent {
   facilitySummaries: Array<ImportSummaryItem> = [];
   constructor(
     private activatedRoute: ActivatedRoute,
-    private dataWizardService: DataWizardService,
+    private dataManagementService: DataManagementService,
     private uploadDataService: UploadDataService,
     private router: Router,
     private accountDbService: AccountdbService
@@ -46,7 +46,7 @@ export class SubmitImportDataComponent {
   ngOnInit(): void {
     this.paramsSub = this.activatedRoute.parent.params.subscribe(param => {
       let id: string = param['id'];
-      this.fileReference = this.dataWizardService.getFileReferenceById(id);
+      this.fileReference = this.dataManagementService.getFileReferenceById(id);
       this.setFacilitySummaries();
     });
   }
@@ -57,9 +57,9 @@ export class SubmitImportDataComponent {
 
   async submitImport() {
     this.fileReference = await this.uploadDataService.submit(this.fileReference);
-    let fileReferences: Array<FileReference> = this.dataWizardService.fileReferences.getValue();
+    let fileReferences: Array<FileReference> = this.dataManagementService.fileReferences.getValue();
     fileReferences = fileReferences.filter(fileRef => { return fileRef.id != this.fileReference.id });
-    this.dataWizardService.fileReferences.next(fileReferences);
+    this.dataManagementService.fileReferences.next(fileReferences);
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     this.router.navigateByUrl('/data-wizard/' + account.guid + '/import-data')
   }

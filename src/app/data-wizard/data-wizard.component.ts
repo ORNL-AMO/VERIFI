@@ -1,5 +1,5 @@
 import { Component, HostListener } from '@angular/core';
-import { DataWizardService } from './data-wizard.service';
+import { DataManagementService } from './data-management.service';
 
 @Component({
   selector: 'app-data-wizard',
@@ -17,21 +17,21 @@ export class DataWizardComponent {
   isDraggingHelp: boolean = false;
   sidebarCollapsed: boolean = false;
   constructor(
-    private dataWizardService: DataWizardService
+    private dataManagementService: DataManagementService
   ) {
 
   }
 
   ngOnInit() {
-    this.sidebarWidth = this.dataWizardService.sidebarWidth;
-    this.helpWidth = this.dataWizardService.helpWidth;
+    this.sidebarWidth = this.dataManagementService.sidebarWidth;
+    this.helpWidth = this.dataManagementService.helpWidth;
     this.setContentWidth();
   }
 
   ngOnDestroy() {
-    this.dataWizardService.sidebarWidth = this.sidebarWidth;
-    this.dataWizardService.helpWidth = this.helpWidth;
-    this.dataWizardService.fileReferences.next([]);
+    this.dataManagementService.sidebarWidth = this.sidebarWidth;
+    this.dataManagementService.helpWidth = this.helpWidth;
+    this.dataManagementService.fileReferences.next([]);
   }
 
   startResizingSidebar(event: MouseEvent): void {
@@ -47,18 +47,18 @@ export class DataWizardComponent {
   stopResizing($event: MouseEvent) {
     this.isDraggingSidebar = false;
     this.isDraggingHelp = false;
-    this.dataWizardService.setHelpWidth(this.helpWidth);
-    this.dataWizardService.setSidebarWidth(this.sidebarWidth);
+    this.dataManagementService.setHelpWidth(this.helpWidth);
+    this.dataManagementService.setSidebarWidth(this.sidebarWidth);
   }
 
   drag(event: MouseEvent) {
     if (this.isDraggingSidebar) {
       if (event.clientX > 50) {
         this.sidebarWidth = event.clientX;
-        this.dataWizardService.sidebarOpen.next(true);
+        this.dataManagementService.sidebarOpen.next(true);
       } else {
         this.sidebarWidth = 50;
-        this.dataWizardService.sidebarOpen.next(false);
+        this.dataManagementService.sidebarOpen.next(false);
       }
       this.setContentWidth();
     }
@@ -66,10 +66,10 @@ export class DataWizardComponent {
       let helpWidth: number = (window.innerWidth - event.clientX)
       if (helpWidth > 50) {
         this.helpWidth = helpWidth;
-        this.dataWizardService.helpPanelOpen.next(true);
+        this.dataManagementService.helpPanelOpen.next(true);
       } else {
         this.helpWidth = 50;
-        this.dataWizardService.helpPanelOpen.next(false);
+        this.dataManagementService.helpPanelOpen.next(false);
       }
       this.setContentWidth();
     }
@@ -77,7 +77,7 @@ export class DataWizardComponent {
 
 
   toggleCollapseSidebar(sidebarOpen: boolean) {
-    this.dataWizardService.sidebarOpen.next(sidebarOpen);
+    this.dataManagementService.sidebarOpen.next(sidebarOpen);
     if (sidebarOpen) {
       this.sidebarWidth = 200;
     } else {
@@ -87,13 +87,13 @@ export class DataWizardComponent {
   }
 
   toggleCollapseHelp(helpPanelOpen: boolean) {
-    this.dataWizardService.helpPanelOpen.next(helpPanelOpen);
+    this.dataManagementService.helpPanelOpen.next(helpPanelOpen);
     if (helpPanelOpen) {
       this.helpWidth = 200;
     } else {
       this.helpWidth = 50;
     }
-    this.dataWizardService.setHelpWidth(this.helpWidth);
+    this.dataManagementService.setHelpWidth(this.helpWidth);
     this.setContentWidth();
   }
 

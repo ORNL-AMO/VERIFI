@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Output } from '@angular/core';
-import { DataWizardService } from '../data-wizard.service';
+import { DataManagementService } from '../data-management.service';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -20,13 +20,13 @@ export class DataManagementSidePanelComponent {
   activePanel: 'help' | 'checklist' = 'checklist';
 
   constructor(
-    private dataWizardService: DataWizardService
+    private dataManagementService: DataManagementService
   ) {
 
   }
 
   ngOnInit() {
-    this.helpPanelOpenSub = this.dataWizardService.helpPanelOpen.subscribe(val => {
+    this.helpPanelOpenSub = this.dataManagementService.helpPanelOpen.subscribe(val => {
       this.helpPanelOpen = val;
       //needed to resize charts
       setTimeout(() => {

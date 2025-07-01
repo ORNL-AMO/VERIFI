@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { DataWizardService } from 'src/app/data-wizard/data-wizard.service';
+import { DataManagementService } from 'src/app/data-wizard/data-management.service';
 import { FileReference, getEmptyFileReference } from 'src/app/upload-data/upload-data-models';
 import * as _ from 'lodash';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
@@ -28,13 +28,13 @@ export class ProcessMeterReadingsComponent {
   metersIncluded: boolean;
   inspectMeterSummary: MeterDataSummary;
   constructor(private activatedRoute: ActivatedRoute,
-    private dataWizardService: DataWizardService,
+    private dataManagementService: DataManagementService,
     private utilityMeterDataService: UtilityMeterDataService) { }
 
   ngOnInit(): void {
     this.paramsSub = this.activatedRoute.parent.params.subscribe(param => {
       let id: string = param['id'];
-      this.fileReference = this.dataWizardService.getFileReferenceById(id);
+      this.fileReference = this.dataManagementService.getFileReferenceById(id);
       this.metersIncluded = this.fileReference.meters.length != 0;
       if (this.metersIncluded) {
         this.setSummary();

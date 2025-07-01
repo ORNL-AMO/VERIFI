@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { FileReference } from 'src/app/upload-data/upload-data-models';
-import { DataWizardService } from '../../data-wizard.service';
+import { DataManagementService } from '../../data-management.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 
@@ -19,7 +19,7 @@ export class ProcessGeneralFileComponent {
   fileReferenceSub: Subscription;
 
   selectedFile: FileReference;
-  constructor(private activatedRoute: ActivatedRoute, private dataWizardService: DataWizardService,
+  constructor(private activatedRoute: ActivatedRoute, private dataManagementService: DataManagementService,
     private router: Router,
     private accountDbService: AccountdbService
   ) {
@@ -27,7 +27,7 @@ export class ProcessGeneralFileComponent {
   }
 
   ngOnInit() {
-    this.fileReferenceSub = this.dataWizardService.fileReferences.subscribe(fileReferences => {
+    this.fileReferenceSub = this.dataManagementService.fileReferences.subscribe(fileReferences => {
       this.fileReferences = fileReferences;
     });
 

@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { DataWizardService } from 'src/app/data-wizard/data-wizard.service';
+import { DataManagementService } from 'src/app/data-wizard/data-management.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { FileReference, getEmptyFileReference } from 'src/app/upload-data/upload-data-models';
 import { EditPredictorFormService } from 'src/app/shared/shared-predictors-content/edit-predictor-form.service';
@@ -28,13 +28,13 @@ export class ProcessPredictorsComponent {
 
   skipAll: boolean = false;
   constructor(private activatedRoute: ActivatedRoute,
-    private dataWizardService: DataWizardService,
+    private dataManagementService: DataManagementService,
     private editPredictorFormService: EditPredictorFormService) { }
 
   ngOnInit(): void {
     this.paramsSub = this.activatedRoute.parent.params.subscribe(param => {
       let id: string = param['id'];
-      this.fileReference = this.dataWizardService.getFileReferenceById(id);
+      this.fileReference = this.dataManagementService.getFileReferenceById(id);
       this.predictorsIncluded = this.fileReference.predictors.length != 0;
       if (this.predictorsIncluded) {
         this.fileReference.predictors.forEach(predictor => {
