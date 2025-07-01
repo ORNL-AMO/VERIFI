@@ -1,4 +1,4 @@
-<!-- <h4>
+<h4>
     {{facility.name}} Meter Groups
 </h4>
 <ng-template [ngIf]="facilityMeters.length > 0" [ngIfElse]="noMetersBlock">
@@ -47,7 +47,7 @@
                 </div>
             </ng-template>
         </ng-template>
-        <!--WATER--
+        <!--WATER-->
         <ng-template [ngIf]="hasWaterMeters">
             <div class="group-section">
                 <h5>
@@ -84,7 +84,7 @@
             </ng-template>
         </ng-template>
 
-        <!--OTHER--
+        <!--OTHER-->
         <div class="group-section mt-2">
             <h5>
                 Other Groups
@@ -171,6 +171,4 @@
         <button class="btn btn-secondary" (click)="closeDeleteGroup()">Cancel</button>
         <button class="btn btn-danger" (click)="deleteMeterGroup()">Delete</button>
     </div>
-</div> -->
-
-<app-set-meter-grouping></app-set-meter-grouping>
+</div>

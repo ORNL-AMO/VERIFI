@@ -1,7 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { UtilityDataComponent } from './utility-data.component';
-import { MeterGroupingModule } from './meter-grouping/meter-grouping.module';
 import { EnergyConsumptionModule } from './energy-consumption/energy-consumption.module';
 import { UtilityBannerComponent } from './utility-banner/utility-banner.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -12,16 +11,17 @@ import { RouterModule } from '@angular/router';
 import { PredictorsModule } from './predictors/predictors.module';
 import { CalanderizationComponent } from './calanderization/calanderization.component';
 import { SharedMeterContentModule } from "../../shared/shared-meter-content/shared-meter-content.module";
+import { MeterGroupingComponent } from './meter-grouping/meter-grouping.component';
 
 @NgModule({
   declarations: [
     UtilityDataComponent,
     UtilityBannerComponent,
-    CalanderizationComponent
+    CalanderizationComponent,
+    MeterGroupingComponent
   ],
   imports: [
     CommonModule,
-    MeterGroupingModule,
     EnergyConsumptionModule,
     FormsModule,
     HelperPipesModule,

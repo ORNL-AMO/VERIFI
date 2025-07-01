@@ -14,9 +14,9 @@
         </div> -->
 
         <div class="btn btn-group ms-auto" *ngIf="dataInitialized && activeAccount && displayToggle">
-            <button type="button" class="btn action-btn" (click)="goToDataEntry()"
+            <button type="button" class="btn toggle-btn" (click)="goToDataEntry()"
                 [ngClass]="{'active': !inDashboard}"><span class="fa fa-database"></span> Data Management</button>
-            <button type="button" class="btn action-btn" (click)="goToDashboard()"
+            <button type="button" class="btn toggle-btn" (click)="goToDashboard()"
                 [ngClass]="{'active': inDashboard}"><span class="fa fa-chart-simple"></span> Data Evaluation</button>
         </div>
 

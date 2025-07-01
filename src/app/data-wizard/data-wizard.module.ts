@@ -45,8 +45,6 @@ import { ProcessPredictorReadingsComponent } from './data-wizard-import/shared-p
 import { SubmitImportDataComponent } from './data-wizard-import/shared-process-file/submit-import-data/submit-import-data.component';
 import { DataWizardImportFooterComponent } from './data-wizard-import/data-wizard-import-footer/data-wizard-import-footer.component';
 import { FacilityMeterGroupingComponent } from './account-facilities/facility-data/facility-meters/facility-meter-grouping/facility-meter-grouping.component';
-import { MeterGroupFormComponent } from './account-facilities/facility-data/facility-meters/facility-meter-grouping/meter-group-form/meter-group-form.component';
-import { MeterGroupTableComponent } from './account-facilities/facility-data/facility-meters/facility-meter-grouping/meter-group-table/meter-group-table.component';
 import { DataWizardSidePanelComponent } from './data-wizard-side-panel/data-wizard-side-panel.component';
 import { HelpPanelComponent } from './data-wizard-side-panel/help-panel/help-panel.component';
 import { SetupChecklistComponent } from './data-wizard-side-panel/setup-checklist/setup-checklist.component';
@@ -92,8 +90,6 @@ import { AccountCustomDataComponent } from './account-custom-data/account-custom
     SubmitImportDataComponent,
     DataWizardImportFooterComponent,
     FacilityMeterGroupingComponent,
-    MeterGroupFormComponent,
-    MeterGroupTableComponent,
     DataWizardSidePanelComponent,
     HelpPanelComponent,
     SetupChecklistComponent,

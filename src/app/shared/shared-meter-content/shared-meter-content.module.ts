@@ -31,6 +31,9 @@ import { CalanderizationChartComponent } from './shared-meter-calendarization/ca
 import { CalanderizationFilterComponent } from './shared-meter-calendarization/calanderization-filter/calanderization-filter.component';
 import { CalanderizedMeterDataTableComponent } from './shared-meter-calendarization/calanderized-meter-data-table/calanderized-meter-data-table.component';
 import { DataApplicationMenuComponent } from './shared-meter-calendarization/data-application-menu/data-application-menu.component';
+import { SetMeterGroupingComponent } from './set-meter-grouping/set-meter-grouping.component';
+import { MeterGroupFormComponent } from './set-meter-grouping/meter-group-form/meter-group-form.component';
+import { MeterGroupTableComponent } from './set-meter-grouping/meter-group-table/meter-group-table.component';
 
 
 
@@ -60,7 +63,10 @@ import { DataApplicationMenuComponent } from './shared-meter-calendarization/dat
     CalanderizationChartComponent,
     CalanderizationFilterComponent,
     CalanderizedMeterDataTableComponent,
-    DataApplicationMenuComponent
+    DataApplicationMenuComponent,
+    SetMeterGroupingComponent,
+    MeterGroupFormComponent,
+    MeterGroupTableComponent
   ],
   imports: [
     CommonModule,
@@ -79,7 +85,8 @@ import { DataApplicationMenuComponent } from './shared-meter-calendarization/dat
     ElectricityDataTableComponent,
     GeneralUtilityDataTableComponent,
     OtherEmissionsDataTableComponent,
-    VehicleDataTableComponent
+    VehicleDataTableComponent,
+    SetMeterGroupingComponent
   ]
 })
 export class SharedMeterContentModule { }

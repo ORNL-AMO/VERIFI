@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AccountdbService } from '../../indexedDB/account-db.service';
 import { FacilitydbService } from '../../indexedDB/facility-db.service';
-import { MeterGroupingService } from './meter-grouping/meter-grouping.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 
@@ -21,8 +20,7 @@ export class UtilityDataComponent implements OnInit {
   selectedFacilitySub: Subscription;
   constructor(
     private accountdbService: AccountdbService,
-    private facilityDbService: FacilitydbService,
-    private meterGroupingService: MeterGroupingService
+    private facilityDbService: FacilitydbService
   ) {
   }
 
@@ -39,6 +37,5 @@ export class UtilityDataComponent implements OnInit {
   ngOnDestroy() {
     this.selectedAccountSub.unsubscribe();
     this.selectedFacilitySub.unsubscribe();
-    this.meterGroupingService.dateRange.next({ minDate: undefined, maxDate: undefined })
   }
 }
