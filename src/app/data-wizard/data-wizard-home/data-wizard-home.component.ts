@@ -16,6 +16,8 @@ import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { DataWizardService } from '../data-wizard.service';
 import { WeatherPredictorManagementService } from 'src/app/weather-data/weather-predictor-management.service';
 import { ActivatedRoute, Router } from '@angular/router';
+import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
+import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
 
 @Component({
   selector: 'app-data-wizard-home',
@@ -49,6 +51,9 @@ export class DataWizardHomeComponent {
   todoListOptions: TodoListOptions;
   todoListOptionsSub: Subscription;
 
+  meterGroupsSub: Subscription;
+  meterGroups: Array<IdbUtilityMeterGroup>;
+
   outdatedDaysOptions: Array<number> = [30, 60, 90, 180, 365];
   showWeatherButton: boolean = false;
 
@@ -63,7 +68,8 @@ export class DataWizardHomeComponent {
     private dataWizardService: DataWizardService,
     private weatherPredictorManagementService: WeatherPredictorManagementService,
     private router: Router,
-    private activatedRoute: ActivatedRoute
+    private activatedRoute: ActivatedRoute,
+    private utilityMeterGroupDbService: UtilityMeterGroupdbService
   ) {
 
   }
@@ -93,6 +99,10 @@ export class DataWizardHomeComponent {
       this.predictorData = predictorData;
       this.setTodoItems();
     });
+    this.meterGroupsSub = this.utilityMeterGroupDbService.accountMeterGroups.subscribe(meterGroups => {
+      this.meterGroups = meterGroups;
+      this.setTodoItems();
+    });
     this.todoListOptionsSub = this.dataWizardService.todoListOptions.subscribe(options => {
       this.todoListOptions = options;
       this.setTodoItems();
@@ -107,6 +117,7 @@ export class DataWizardHomeComponent {
     this.meterDataSub.unsubscribe();
     this.predictorDataSub.unsubscribe();
     this.todoListOptionsSub.unsubscribe();
+    this.meterGroupsSub.unsubscribe();
   }
 
   setTodoItems() {
@@ -116,6 +127,7 @@ export class DataWizardHomeComponent {
       this.predictors,
       this.meterData,
       this.predictorData,
+      this.meterGroups,
       this.todoListOptions);
     this.showWeatherButton = this.toDoItems.find(item => {
       return item.isWeather && item.type === 'predictor';

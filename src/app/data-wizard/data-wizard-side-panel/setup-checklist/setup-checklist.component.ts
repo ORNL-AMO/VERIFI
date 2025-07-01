@@ -14,6 +14,8 @@ import { getTodoList, TodoItem, TodoListOptions } from '../../todo-list';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { DataWizardService } from '../../data-wizard.service';
+import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-db.service';
+import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
 
 @Component({
   selector: 'app-setup-checklist',
@@ -47,6 +49,9 @@ export class SetupChecklistComponent {
   todoListOptions: TodoListOptions;
   todoListOptionsSub: Subscription;
 
+  meterGroupsSub: Subscription;
+  meterGroups: Array<IdbUtilityMeterGroup>;
+
   outdatedDaysOptions: Array<number> = [30, 60, 90, 180, 365];
   showMenu: boolean = false;
   constructor(private accountDbService: AccountdbService,
@@ -55,7 +60,8 @@ export class SetupChecklistComponent {
     private predictorDbService: PredictorDbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private predictorDataDbService: PredictorDataDbService,
-    private dataWizardService: DataWizardService
+    private dataWizardService: DataWizardService,
+    private utilityMeterGroupDbService: UtilityMeterGroupdbService
   ) {
 
   }
@@ -85,6 +91,10 @@ export class SetupChecklistComponent {
       this.predictorData = predictorData;
       this.setTodoItems();
     });
+    this.meterGroupsSub = this.utilityMeterGroupDbService.accountMeterGroups.subscribe(meterGroups => {
+      this.meterGroups = meterGroups;
+      this.setTodoItems();
+    });
     this.todoListOptionsSub = this.dataWizardService.todoListOptions.subscribe(options => {
       this.todoListOptions = options;
       this.setTodoItems();
@@ -99,6 +109,7 @@ export class SetupChecklistComponent {
     this.meterDataSub.unsubscribe();
     this.predictorDataSub.unsubscribe();
     this.todoListOptionsSub.unsubscribe();
+    this.meterGroupsSub.unsubscribe();
   }
 
   setTodoItems() {
@@ -108,6 +119,7 @@ export class SetupChecklistComponent {
       this.predictors,
       this.meterData,
       this.predictorData,
+      this.meterGroups,
       {
         includeOutdatedMeters: true,
         includeOutdatedPredictors: true,

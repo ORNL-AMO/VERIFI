@@ -6,6 +6,7 @@ import { IdbPredictorData } from "../models/idbModels/predictorData";
 import { IdbUtilityMeter } from "../models/idbModels/utilityMeter";
 import { IdbUtilityMeterData } from "../models/idbModels/utilityMeterData";
 import * as _ from 'lodash';
+import { IdbUtilityMeterGroup } from "../models/idbModels/utilityMeterGroup";
 
 export function getTodoList(account: IdbAccount,
     facilities: Array<IdbFacility>,
@@ -13,9 +14,10 @@ export function getTodoList(account: IdbAccount,
     predictors: Array<IdbPredictor>,
     meterData: Array<IdbUtilityMeterData>,
     predictorData: Array<IdbPredictorData>,
+    meterGroups: Array<IdbUtilityMeterGroup>,
     options: TodoListOptions): Array<TodoItem> {
     let toDoItems: Array<TodoItem> = [];
-    if (account && facilities && meters && predictors && meterData && predictorData && options) {
+    if (account && facilities && meters && predictors && meterData && predictorData && options && meterGroups) {
         if (account.name == 'New Account') {
             toDoItems.push({
                 label: 'Setup account settings',
@@ -43,7 +45,7 @@ export function getTodoList(account: IdbAccount,
             });
         } else {
             facilities.forEach(facility => {
-                setFacilityTodoItems(facility, meters, predictors, meterData, predictorData, toDoItems, options);
+                setFacilityTodoItems(facility, meters, predictors, meterData, predictorData, toDoItems, meterGroups, options);
             });
         }
     }
@@ -56,6 +58,7 @@ function setFacilityTodoItems(facility: IdbFacility, meters: Array<IdbUtilityMet
     meterData: Array<IdbUtilityMeterData>,
     predictorData: Array<IdbPredictorData>,
     toDoItems: Array<TodoItem>,
+    meterGroups: Array<IdbUtilityMeterGroup>,
     options: TodoListOptions) {
     let facilityMeters: Array<IdbUtilityMeter> = meters.filter(m => m.facilityId === facility.guid);
     if (facilityMeters.length === 0) {
@@ -67,6 +70,17 @@ function setFacilityTodoItems(facility: IdbFacility, meters: Array<IdbUtilityMet
             type: 'meter'
         });
     } else {
+        // Check if there are any meter groups for the facility
+        let facilityMeterGroups: Array<IdbUtilityMeterGroup> = meterGroups.filter(m => m.facilityId === facility.guid);
+        if (facilityMeterGroups.length === 0) {
+            toDoItems.push({
+                label: 'Add utility meter groups for ' + facility.name,
+                url: '/data-wizard/' + facility.accountId + '/facilities/' + facility.guid + '/meter-grouping',
+                description: "Add utility meter groups to the facility. Utility meter groups are used to group meters for analysis and reporting.",
+                facilityId: facility.guid,
+                type: 'meter'
+            });
+        }
         facilityMeters.forEach(meter => {
             setMeterTodoItems(meter, meterData, toDoItems, options);
         })
