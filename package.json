@@ -107,7 +107,7 @@
     "@types/jasmine": "5.1.4",
     "@types/jasminewd2": "^2.0.10",
     "@types/node": "20.12.5",
-    "electron": "29.2.0",
+    "electron": "29.3.3",
     "electron-builder": "24.13.3",
     "exceljs": "4.3.0",
     "jasmine-core": "4.6.0",
