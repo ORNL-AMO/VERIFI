@@ -32,7 +32,6 @@ export class SidebarComponent implements OnInit {
   hoverIndex: number;
   hoverAccount: boolean;
   account: IdbAccount;
-  displayDataWizardModal: boolean = false;
   constructor(private localStorageService: LocalStorageService, private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService, private router: Router,
     private sharedDataService: SharedDataService) {
@@ -158,14 +157,6 @@ export class SidebarComponent implements OnInit {
 
   setHoverAccount(bool: boolean) {
     this.hoverAccount = bool;
-  }
-
-  openDataWizardModal() {
-    this.displayDataWizardModal = true;
-  }
-
-  closeDataWizardModal() {
-    this.displayDataWizardModal = false;
   }
 
   goToDataWizard() {

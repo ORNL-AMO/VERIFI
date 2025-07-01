@@ -126,4 +126,8 @@ export class FacilityHomeSummaryComponent implements OnInit {
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     this.exportToExcelTemplateService.exportFacilityData(selectedFacility.guid);
   }
+
+  goToDataManagement(){
+    this.router.navigateByUrl('/data-wizard/' + this.facility.accountId + '/facilities/' + this.facility.guid);
+  }
 }

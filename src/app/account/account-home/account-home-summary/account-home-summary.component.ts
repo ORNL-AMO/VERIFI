@@ -95,4 +95,8 @@ export class AccountHomeSummaryComponent implements OnInit {
       this.waterAnalysisNeeded = false;
     }
   }
+
+  goToDataManagement(){
+    this.router.navigateByUrl('/data-wizard/' + this.account.guid + '/import-data');
+  }
 }
