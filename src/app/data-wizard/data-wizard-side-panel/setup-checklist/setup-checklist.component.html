@@ -35,9 +35,9 @@
         <li class="list-group-item list-group-item-action" *ngFor="let item of toDoItems; let index = index;"
             [routerLink]="item.url">
             <div class="d-flex w-100 justify-content-between">
-                <div class="p-0">
+                <div class="p-0 bold">
                     {{index + 1}}.
-                    <a>{{item.label}}</a>
+                    {{item.label}}
                 </div>
             </div>
 
