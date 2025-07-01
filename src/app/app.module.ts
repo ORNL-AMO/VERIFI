@@ -33,7 +33,7 @@ import { DeletingAccountDataComponent } from './core-components/deleting-account
 import { SurveyModalComponent } from './core-components/survey-modal/survey-modal.component';
 import { SurveyToastComponent } from './core-components/survey-toast/survey-toast.component';
 import { UserSurveyModule } from './shared/user-survey/user-survey.module';
-import { DataManagementModule } from './data-wizard/data-management.module';
+import { DataManagementModule } from './data-management/data-management.module';
 import { HomePageComponent } from './core-components/home-page/home-page.component';
 
 @NgModule({

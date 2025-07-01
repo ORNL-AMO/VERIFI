@@ -113,7 +113,7 @@ export class SidebarComponent implements OnInit {
   }
 
   setShowSidebar() {
-    this.showSidebar = !this.router.url.includes('setup-wizard') && !this.router.url.includes('manage-accounts') && !this.router.url.includes('welcome') && !this.router.url.includes('data-wizard');
+    this.showSidebar = !this.router.url.includes('setup-wizard') && !this.router.url.includes('manage-accounts') && !this.router.url.includes('welcome') && !this.router.url.includes('data-management');
   }
 
   setFacilityList(accountFacilities: Array<IdbFacility>) {
@@ -160,7 +160,7 @@ export class SidebarComponent implements OnInit {
   }
 
   goToDataWizard() {
-    this.router.navigateByUrl('/data-wizard/' + this.account.guid);
+    this.router.navigateByUrl('/data-management/' + this.account.guid);
   }
 }
 

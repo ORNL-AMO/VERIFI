@@ -128,6 +128,6 @@ export class FacilityHomeSummaryComponent implements OnInit {
   }
 
   goToDataManagement(){
-    this.router.navigateByUrl('/data-wizard/' + this.facility.accountId + '/facilities/' + this.facility.guid);
+    this.router.navigateByUrl('/data-management/' + this.facility.accountId + '/facilities/' + this.facility.guid);
   }
 }

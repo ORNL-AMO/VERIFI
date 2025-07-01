@@ -85,7 +85,7 @@ export class MeterDataTableComponent {
   }
 
   setInDataWizard() {
-    this.inDataWizard = this.router.url.includes('data-wizard');
+    this.inDataWizard = this.router.url.includes('data-management');
   }
 
   setData() {
@@ -167,7 +167,7 @@ export class MeterDataTableComponent {
     this.showFilterDropdown = false;
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     if (this.inDataWizard) {
-      this.router.navigateByUrl('/data-wizard/' + this.selectedMeter.accountId + '/facilities/' + this.selectedMeter.facilityId + '/meters/' + this.selectedMeter.guid + '/meter-data/new-bill');
+      this.router.navigateByUrl('/data-management/' + this.selectedMeter.accountId + '/facilities/' + this.selectedMeter.facilityId + '/meters/' + this.selectedMeter.guid + '/meter-data/new-bill');
     } else {
       this.router.navigateByUrl('facility/' + selectedFacility.id + '/utility/energy-consumption/utility-meter/' + this.selectedMeter.id + '/new-bill');
     }
@@ -177,7 +177,7 @@ export class MeterDataTableComponent {
     this.showFilterDropdown = false;
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     if (this.inDataWizard) {
-      this.router.navigateByUrl('/data-wizard/' + this.selectedMeter.accountId + '/facilities/' + this.selectedMeter.facilityId + '/meters/' + this.selectedMeter.guid + '/meter-data/edit-bill/' + meterData.guid);
+      this.router.navigateByUrl('/data-management/' + this.selectedMeter.accountId + '/facilities/' + this.selectedMeter.facilityId + '/meters/' + this.selectedMeter.guid + '/meter-data/edit-bill/' + meterData.guid);
     } else {
       this.router.navigateByUrl('facility/' + selectedFacility.id + '/utility/energy-consumption/utility-meter/' + this.selectedMeter.id + '/edit-bill/' + meterData.id);
     }

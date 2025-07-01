@@ -49,7 +49,7 @@ export class AccountHomeSummaryComponent implements OnInit {
       this.router.navigateByUrl('account/' + urlStr);
     } else {
       // this.router.navigateByUrl('/' + urlStr);
-      this.router.navigateByUrl('/data-wizard/'+this.account.guid+'/import-data')
+      this.router.navigateByUrl('/data-management/'+this.account.guid+'/import-data')
     }
   }
 
@@ -97,6 +97,6 @@ export class AccountHomeSummaryComponent implements OnInit {
   }
 
   goToDataManagement(){
-    this.router.navigateByUrl('/data-wizard/' + this.account.guid + '/import-data');
+    this.router.navigateByUrl('/data-management/' + this.account.guid + '/import-data');
   }
 }

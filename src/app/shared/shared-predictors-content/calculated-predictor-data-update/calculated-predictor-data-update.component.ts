@@ -292,8 +292,8 @@ export class CalculatedPredictorDataUpdateComponent {
   }
 
   cancel() {
-    if (this.router.url.includes('data-wizard')) {
-      this.router.navigateByUrl('/data-wizard/' + this.predictor.accountId + '/facilities/' + this.predictor.facilityId + '/predictors/' + this.predictor.guid + '/predictor-data')
+    if (this.router.url.includes('data-management')) {
+      this.router.navigateByUrl('/data-management/' + this.predictor.accountId + '/facilities/' + this.predictor.facilityId + '/predictors/' + this.predictor.guid + '/predictor-data')
     } else {
       let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
       this.router.navigateByUrl('facility/' + selectedFacility.id + '/utility/predictors/predictor/' + this.predictor.guid)

@@ -67,7 +67,7 @@ export class HomePageComponent {
     let account: IdbAccount = getNewIdbAccount();
     account = await firstValueFrom(this.accountDbService.addWithObservable(account));
     await this.dbChangesService.selectAccount(account, false);
-    this.router.navigateByUrl('/data-wizard/' + account.guid);
+    this.router.navigateByUrl('/data-management/' + account.guid);
   }
 
   openLoadTestData() {
@@ -85,6 +85,6 @@ export class HomePageComponent {
 
   async goToDataWizard(account: IdbAccount) {
     await this.dbChangesService.selectAccount(account, false);
-    this.router.navigateByUrl('/data-wizard/' + account.guid);
+    this.router.navigateByUrl('/data-management/' + account.guid);
   }
 }

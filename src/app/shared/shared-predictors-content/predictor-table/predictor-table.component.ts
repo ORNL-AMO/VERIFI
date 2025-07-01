@@ -139,20 +139,20 @@ export class PredictorTableComponent {
   }
 
   async selectEditPredictor(predictor: IdbPredictor) {
-    if (this.router.url.includes('data-wizard')) {
+    if (this.router.url.includes('data-management')) {
       let facility: IdbFacility = this.facilitydbService.selectedFacility.getValue();
       predictor.sidebarOpen = true;
       await firstValueFrom(this.predictorDbService.updateWithObservable(predictor));
       let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
       await this.dbChangesService.setPredictorsV2(account, facility);
-      this.router.navigateByUrl('/data-wizard/' + predictor.accountId + '/facilities/' + predictor.facilityId + '/predictors/' + predictor.guid);
+      this.router.navigateByUrl('/data-management/' + predictor.accountId + '/facilities/' + predictor.facilityId + '/predictors/' + predictor.guid);
     } else {
       this.router.navigateByUrl('facility/' + this.selectedFacility.id + '/utility/predictors/manage/edit-predictor/' + predictor.guid);
     }
   }
 
   async addPredictor() {
-    if (this.router.url.includes('data-wizard')) {
+    if (this.router.url.includes('data-management')) {
       let facility: IdbFacility = this.facilitydbService.selectedFacility.getValue();
       let newPredictor: IdbPredictor = getNewIdbPredictor(facility.accountId, facility.guid);
       newPredictor = await firstValueFrom(this.predictorDbService.addWithObservable(newPredictor));
@@ -170,8 +170,8 @@ export class PredictorTableComponent {
   }
 
   uploadData() {
-    if (this.router.url.includes('data-wizard')) {
-      this.router.navigateByUrl('/data-wizard/' + this.selectedFacility.accountId + '/import-data/upload-files');
+    if (this.router.url.includes('data-management')) {
+      this.router.navigateByUrl('/data-management/' + this.selectedFacility.accountId + '/import-data/upload-files');
     } else {
       this.router.navigateByUrl('/upload');
     }
@@ -215,8 +215,8 @@ export class PredictorTableComponent {
     }
     this.weatherDataService.selectedFacility = this.selectedFacility;
     this.weatherDataService.addressSearchStr = getWeatherSearchFromFacility(this.selectedFacility);
-    if (this.router.url.includes('data-wizard')) {
-      this.router.navigateByUrl('/data-wizard/' + this.selectedFacility.accountId + '/weather-data/annual-station');
+    if (this.router.url.includes('data-management')) {
+      this.router.navigateByUrl('/data-management/' + this.selectedFacility.accountId + '/weather-data/annual-station');
     } else {
       this.router.navigateByUrl('/weather-data/annual-station');
     }
@@ -233,8 +233,8 @@ export class PredictorTableComponent {
   goToWeatherData() {
     this.weatherDataService.selectedFacility = this.selectedFacility;
     this.weatherDataService.addressSearchStr = getWeatherSearchFromFacility(this.selectedFacility);
-    if (this.router.url.includes('data-wizard')) {
-      this.router.navigateByUrl('/data-wizard/' + this.selectedFacility.accountId + '/weather-data');
+    if (this.router.url.includes('data-management')) {
+      this.router.navigateByUrl('/data-management/' + this.selectedFacility.accountId + '/weather-data');
     } else {
       this.router.navigateByUrl('/weather-data');
     }

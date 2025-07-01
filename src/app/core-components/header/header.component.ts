@@ -117,7 +117,7 @@ export class HeaderComponent implements OnInit {
     let account: IdbAccount = getNewIdbAccount();
     account = await firstValueFrom(this.accountdbService.addWithObservable(account));
     await this.dbChangesService.selectAccount(account, false);
-    this.router.navigateByUrl('/data-wizard/' + account.guid);
+    this.router.navigateByUrl('/data-management/' + account.guid);
   }
 
   async switchAccount(account: IdbAccount) {
@@ -195,7 +195,7 @@ export class HeaderComponent implements OnInit {
   }
 
   setInDashboard(url: string) {
-    this.inDashboard = url.includes('data-wizard') == false;
+    this.inDashboard = url.includes('data-management') == false;
     this.displayToggle = url.includes('welcome') == false;
   }
 
@@ -204,19 +204,19 @@ export class HeaderComponent implements OnInit {
       let url: string = this.router.url;
       if (url.includes('facility')) {
         let selectedFacility: IdbFacility = this.facilitydbService.selectedFacility.getValue();
-        this.router.navigateByUrl('/data-wizard/' + this.activeAccount.guid + '/facilities/' + selectedFacility.guid);
+        this.router.navigateByUrl('/data-management/' + this.activeAccount.guid + '/facilities/' + selectedFacility.guid);
       } else if (url.includes('weather-data')) {
-        this.router.navigateByUrl('/data-wizard/' + this.activeAccount.guid + '/weather-data');
+        this.router.navigateByUrl('/data-management/' + this.activeAccount.guid + '/weather-data');
       } else if (url.includes('custom-data')) {
         if (url.includes('emissions')) {
-          this.router.navigateByUrl('/data-wizard/' + this.activeAccount.guid + '/account-custom-data/custom-grid-factors');
+          this.router.navigateByUrl('/data-management/' + this.activeAccount.guid + '/account-custom-data/custom-grid-factors');
         } else if (url.includes('fuels')) {
-          this.router.navigateByUrl('/data-wizard/' + this.activeAccount.guid + '/account-custom-data/custom-fuels');
+          this.router.navigateByUrl('/data-management/' + this.activeAccount.guid + '/account-custom-data/custom-fuels');
         } else if (url.includes('gwp')) {
-          this.router.navigateByUrl('/data-wizard/' + this.activeAccount.guid + '/account-custom-data/custom-gwps');
+          this.router.navigateByUrl('/data-management/' + this.activeAccount.guid + '/account-custom-data/custom-gwps');
         }
       } else {
-        this.router.navigateByUrl('/data-wizard/' + this.activeAccount.guid)
+        this.router.navigateByUrl('/data-management/' + this.activeAccount.guid)
       }
     }
   }

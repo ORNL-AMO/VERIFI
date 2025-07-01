@@ -74,7 +74,7 @@
         <span *ngIf="showAllFacilities"><i class="fa fa-chevron-up"></i> Show First Four Facilities</span>
     </a>
     <hr *ngIf="facilityList.length > 4 && open">
-    <a class="nav-link" title="Data Wizard" routerLink="/data-wizard/{{account.guid}}">
+    <a class="nav-link" title="Data Wizard" routerLink="/data-management/{{account.guid}}">
         <i class="fa fa-database"></i>
         <span [hidden]="!open" class="ps-2 nav-label">Data Management</span>
     </a>

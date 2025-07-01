@@ -44,7 +44,7 @@ export class EmissionsDataDashboardComponent implements OnInit {
   }
 
   addNewItem() {
-    if (this.router.url.includes('data-wizard')) {
+    if (this.router.url.includes('data-management')) {
       this.router.navigate(['./add'], { relativeTo: this.activatedRoute });
     } else {
       this.router.navigate(['../add'], { relativeTo: this.activatedRoute });
@@ -57,7 +57,7 @@ export class EmissionsDataDashboardComponent implements OnInit {
   }
 
   editItem(customEmissionsItem: IdbCustomEmissionsItem) {
-    if (this.router.url.includes('data-wizard')) {
+    if (this.router.url.includes('data-management')) {
       this.router.navigate(['./edit', customEmissionsItem.guid], { relativeTo: this.activatedRoute });
     } else {
       this.router.navigate(['../edit', customEmissionsItem.guid], { relativeTo: this.activatedRoute });
