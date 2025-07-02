@@ -7,7 +7,6 @@ import { FeedbackComponent } from 'src/app/static-content/feedback/feedback.comp
 import { HelpComponent } from 'src/app/static-content/help/help.component';
 import { AccountRoutes } from './account.routes';
 import { FacilityRoutes } from './facility.routes';
-import { SetupWizardRoutes } from './setup-wizard.routes';
 import { UploadRoutes } from './upload.routes';
 import { WeatherDataRoutes } from './weather-data.routes';
 import { ManageAccountsComponent } from '../core-components/manage-accounts/manage-accounts.component';
@@ -24,7 +23,6 @@ const routes: Routes = [
   { path: 'welcome', component: HomePageComponent },
   AccountRoutes,
   FacilityRoutes,
-  SetupWizardRoutes,
   DataManagementRoutes,
   { path: 'about', component: AboutComponent },
   { path: 'acknowledgments', component: AcknowledgmentsComponent },

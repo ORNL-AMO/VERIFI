@@ -17,7 +17,6 @@ import { getFuelTypeOptions } from '../shared/fuel-options/getFuelTypeOptions';
 import { ColumnGroup, ColumnItem, FacilityGroup, FileReference, ParsedTemplate } from './upload-data-models';
 import { checkImportCellNumber, checkImportStartingUnit, checkSameDay, getAgreementType, getCountryCode, getFuelEnum, getMeterReadingDataApplication, getMeterSource, getPhase, getScope, getState, getYesNoBool, getZip } from './upload-helper-functions';
 import { UploadDataSharedFunctionsService } from './upload-data-shared-functions.service';
-import { SetupWizardService } from '../setup-wizard/setup-wizard.service';
 import { IdbAccount } from '../models/idbModels/account';
 import { getNewIdbFacility, IdbFacility } from '../models/idbModels/facility';
 import { getNewIdbUtilityMeter, IdbUtilityMeter } from '../models/idbModels/utilityMeter';
@@ -38,18 +37,12 @@ export class UploadDataV1Service {
     private energyUnitsHelperService: EnergyUnitsHelperService,
     private editMeterFormService: EditMeterFormService,
     private eGridService: EGridService,
-    private uploadDataSharedFunctionsService: UploadDataSharedFunctionsService,
-    private setupWizardService: SetupWizardService) { }
+    private uploadDataSharedFunctionsService: UploadDataSharedFunctionsService) { }
 
-  parseTemplate(workbook: XLSX.WorkBook, inSetupWizard: boolean): ParsedTemplate {
+  parseTemplate(workbook: XLSX.WorkBook): ParsedTemplate {
     let facilitiesData = XLSX.utils.sheet_to_json(workbook.Sheets['Facilities']);
     let importFacilities: Array<IdbFacility> = new Array();
-    let selectedAccount: IdbAccount;
-    if (inSetupWizard) {
-      selectedAccount = this.setupWizardService.account.getValue();
-    } else {
-      selectedAccount = this.accountDbService.selectedAccount.getValue();
-    }
+    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let accountFacilities: Array<IdbFacility> = this.facilityDbService.getAccountFacilitiesCopy();
     facilitiesData.forEach(facilityDataRow => {
       let facilityName: string = facilityDataRow['Facility Name'];

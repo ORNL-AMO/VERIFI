@@ -59,7 +59,7 @@ export class UploadFilesComponent {
       const bstr: string = e.target.result;
       let workBook: XLSX.WorkBook = XLSX.read(bstr, { type: 'binary', cellDates: true });
       try {
-        let fileReference: FileReference = this.uploadDataService.getFileReference(file, workBook, false);
+        let fileReference: FileReference = this.uploadDataService.getFileReference(file, workBook);
         this.fileReferences.push(fileReference);
         this.dataManagementService.fileReferences.next(this.fileReferences);
       } catch (err) {

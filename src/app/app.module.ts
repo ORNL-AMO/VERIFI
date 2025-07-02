@@ -18,7 +18,6 @@ import { StaticContentModule } from './static-content/static-content.module';
 import { ImportBackupModalComponent } from './core-components/import-backup-modal/import-backup-modal.component';
 import { FacilityModule } from './facility/facility.module';
 import { AccountModule } from './account/account.module';
-import { SetupWizardModule } from './setup-wizard/setup-wizard.module';
 import { HelperPipesModule } from './shared/helper-pipes/_helper-pipes.module';
 import { SearchBarComponent } from './core-components/header/search-bar/search-bar.component';
 import { NgbTypeaheadModule } from '@ng-bootstrap/ng-bootstrap';
@@ -70,7 +69,6 @@ import { HomePageComponent } from './core-components/home-page/home-page.compone
         BrowserAnimationsModule,
         FacilityModule,
         AccountModule,
-        SetupWizardModule,
         HelperPipesModule,
         NgbTypeaheadModule,
         UploadDataModule,

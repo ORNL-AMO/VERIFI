@@ -60,7 +60,7 @@ export class FileUploadComponent implements OnInit {
       let workBook: XLSX.WorkBook = XLSX.read(bstr, { type: 'binary', cellDates: true });
       try {
         console.log('try!')
-        let fileReference: FileReference = this.uploadDataService.getFileReference(file, workBook, false);
+        let fileReference: FileReference = this.uploadDataService.getFileReference(file, workBook);
         this.fileReferences.push(fileReference);
       } catch (err) {
         console.log(err);

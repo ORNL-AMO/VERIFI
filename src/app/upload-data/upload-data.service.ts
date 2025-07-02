@@ -65,7 +65,7 @@ export class UploadDataService {
   }
 
 
-  getFileReference(file: File, workBook: XLSX.WorkBook, inSetupWizard: boolean): FileReference {
+  getFileReference(file: File, workBook: XLSX.WorkBook): FileReference {
     let isTemplate: "V1" | "V2" | "Non-template" | "ETH" = this.checkSheetNamesForTemplate(workBook.SheetNames);
     if (isTemplate == "Non-template") {
       let accountFacilities: Array<IdbFacility> = this.facilityDbService.getAccountFacilitiesCopy();
@@ -97,7 +97,7 @@ export class UploadDataService {
     else if (isTemplate == 'ETH') {
       //parse treasure hunt template
       //parse template
-      let templateData: ParsedTemplate = this.parseTemplate(workBook, isTemplate, inSetupWizard);
+      let templateData: ParsedTemplate = this.parseTemplate(workBook, isTemplate);
       let predictorFacilityGroups: Array<FacilityGroup> = this.getPredictorFacilityGroups(templateData);
       let fileName: string = 'Upload File';
       if (file) {
@@ -130,7 +130,7 @@ export class UploadDataService {
     }
     else {
       //parse template
-      let templateData: ParsedTemplate = this.parseTemplate(workBook, isTemplate, inSetupWizard);
+      let templateData: ParsedTemplate = this.parseTemplate(workBook, isTemplate);
       let predictorFacilityGroups: Array<FacilityGroup> = this.getPredictorFacilityGroups(templateData);
       let fileName: string = 'Upload File';
       if (file) {
@@ -186,13 +186,13 @@ export class UploadDataService {
     }
   }
 
-  parseTemplate(workbook: XLSX.WorkBook, templateVersion: "V1" | "V2" | "ETH", inSetupWizard: boolean): ParsedTemplate {
+  parseTemplate(workbook: XLSX.WorkBook, templateVersion: "V1" | "V2" | "ETH"): ParsedTemplate {
     if (templateVersion == "V1") {
-      return this.uploadDataV1Service.parseTemplate(workbook, inSetupWizard);
+      return this.uploadDataV1Service.parseTemplate(workbook);
     } else if (templateVersion == "V2") {
-      return this.uploadDataV2Service.parseTemplate(workbook, inSetupWizard);
+      return this.uploadDataV2Service.parseTemplate(workbook);
     } else if (templateVersion == "ETH") {
-      return this.uploadDataEnergyTreasureHuntService.parseTemplate(workbook, inSetupWizard);
+      return this.uploadDataEnergyTreasureHuntService.parseTemplate(workbook);
     }
   }
 

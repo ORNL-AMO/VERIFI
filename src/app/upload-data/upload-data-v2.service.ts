@@ -17,7 +17,6 @@ import { UtilityMeterDatadbService } from '../indexedDB/utilityMeterData-db.serv
 import { getMeterDataCopy } from '../calculations/conversions/convertMeterData';
 import { ConvertValue } from '../calculations/conversions/convertValue';
 import { GlobalWarmingPotential, GlobalWarmingPotentials } from '../models/globalWarmingPotentials';
-import { SetupWizardService } from '../setup-wizard/setup-wizard.service';
 import { IdbAccount } from '../models/idbModels/account';
 import { getNewIdbFacility, IdbFacility } from '../models/idbModels/facility';
 import { getNewIdbUtilityMeter, IdbUtilityMeter, MeterReadingDataApplication } from '../models/idbModels/utilityMeter';
@@ -37,17 +36,11 @@ export class UploadDataV2Service {
     private utilityMeterDbService: UtilityMeterdbService,
     private uploadDataSharedFunctionsService: UploadDataSharedFunctionsService,
     private editMeterFormService: EditMeterFormService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private setupWizardService: SetupWizardService) { }
+    private utilityMeterDataDbService: UtilityMeterDatadbService) { }
 
 
-  parseTemplate(workbook: XLSX.WorkBook, inSetupWizard: boolean): ParsedTemplate {
-    let selectedAccount: IdbAccount;
-    if (inSetupWizard) {
-      selectedAccount = this.setupWizardService.account.getValue();
-    } else {
-      selectedAccount = this.accountDbService.selectedAccount.getValue();
-    }
+  parseTemplate(workbook: XLSX.WorkBook): ParsedTemplate {
+    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let importFacilities: Array<IdbFacility> = this.getImportFacilities(workbook, selectedAccount);
     if (importFacilities.length == 0) {
       throw ('No Facilities Found!')
