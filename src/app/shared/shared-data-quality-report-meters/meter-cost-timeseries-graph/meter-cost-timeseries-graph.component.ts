@@ -1,0 +1,86 @@
+import { Component, ElementRef, Input, SimpleChanges, ViewChild } from '@angular/core';
+import { PlotlyService } from 'angular-plotly.js';
+import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
+
+@Component({
+  selector: 'app-meter-cost-timeseries-graph',
+  standalone: false,
+
+  templateUrl: './meter-cost-timeseries-graph.component.html',
+  styleUrl: './meter-cost-timeseries-graph.component.css'
+})
+export class MeterCostTimeseriesGraphComponent {
+
+  @Input()
+  meterData: Array<IdbUtilityMeterData>;
+  @ViewChild('meterCostTimeSeriesGraph', { static: false }) meterCostTimeSeriesGraph: ElementRef;
+  allCostsNull: boolean = false;
+  viewInitialized: boolean = false;
+
+  constructor(private plotlyService: PlotlyService) { }
+
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['meterData'] && this.viewInitialized) {
+      this.drawChart();
+    }
+  }
+
+  ngAfterViewInit() {
+    this.viewInitialized = true;
+    if (this.meterData) {
+      this.drawChart();
+    }
+  }
+
+  drawChart() {
+    var data = [
+      {
+        type: "scatter",
+        mode: "lines+markers",
+        name: 'Meter Data',
+        x: this.meterData.map(data => { return data.readDate }),
+        y: this.meterData.map(data => { return data.totalCost }),
+        line: { color: '#7F7F7F', width: 4 },
+        marker: {
+          size: 8
+        }
+      }
+    ];
+
+    let height: number = 400;
+    const containerWidth = this.meterCostTimeSeriesGraph.nativeElement.offsetWidth;
+
+    var layout = {
+      height: height,
+      width: containerWidth,
+      autosize: true,
+      legend: {
+        orientation: "h"
+      },
+      xaxis: {
+        hoverformat: "%b, %Y"
+      },
+      yaxis: {
+        title: {
+          text: 'Cost ($)',
+          font: {
+            size: 16
+          },
+          standoff: 18
+        },
+        automargin: true,
+      },
+      margin: { r: 0, t: 50 }
+    };
+    var config = {
+      displaylogo: false,
+      responsive: true
+    };
+    this.plotlyService.newPlot(this.meterCostTimeSeriesGraph.nativeElement, data, layout, config);
+  }
+}
+
+
+
+

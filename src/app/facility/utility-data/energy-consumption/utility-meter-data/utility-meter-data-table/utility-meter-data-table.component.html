@@ -33,6 +33,10 @@
                 <button class="btn action-btn" (click)="meterDataAdd()"><i class="fa fa-plus"></i>
                     Add New Bill</button>
             </div>
+            <div class="ps-2">
+                <button #openModalBtn class="btn action-btn" data-bs-toggle="modal"
+                    data-bs-target="#dataQualityModal"><i class="fa fa-file"></i> Data Quality Report</button>
+            </div>
         </div>
     </div>
 
@@ -127,5 +131,106 @@
     <div class="saveCancel popup-footer text-end">
         <button class="btn btn-secondary" (click)="cancelBulkDelete()">Cancel</button>
         <button class="btn btn-danger" (click)="bulkDelete()">Delete</button>
+    </div>
+</div>
+
+<div class="modal fade" id="dataQualityModal" tabindex="-1" aria-labelledby="dataQualityModalLabel" aria-hidden="true"
+    data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered modal-xl modal-size" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="dataQualityModalLabel">Data Quality Report: {{ meterName }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" style="overflow-y: auto; width: 100%;">
+                <div class="accordion" id="dataQualityAccordion">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingEnergy">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#collapseEnergy" aria-expanded="true" aria-controls="collapseEnergy"
+                                (click)="selectOption('energy-timeseries')">
+                                Energy Consumption
+                            </button>
+                        </h2>
+                        <div id="collapseEnergy" class="accordion-collapse collapse show"
+                            aria-labelledby="headingEnergy" data-bs-parent="#dataQualityAccordion">
+                            <div class="accordion-body">
+                                <app-meter-energy-timeseries-graph
+                                    *ngIf="showGraphs && activeGraph === 'energy-timeseries'"
+                                    [meterData]="meterData"></app-meter-energy-timeseries-graph>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingCost">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#collapseCost" aria-expanded="false" aria-controls="collapseCost"
+                                (click)="selectOption('cost-timeseries')">
+                                Total Cost
+                            </button>
+                        </h2>
+                        <div id="collapseCost" class="accordion-collapse collapse" aria-labelledby="headingCost"
+                            data-bs-parent="#dataQualityAccordion">
+                            <div class="accordion-body">
+                                <app-meter-cost-timeseries-graph *ngIf="showGraphs && activeGraph === 'cost-timeseries'"
+                                    [meterData]="meterData"></app-meter-cost-timeseries-graph>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingStats">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#collapseStats" aria-expanded="false" aria-controls="collapseStats"
+                                (click)="selectOption('statistics')">
+                                Energy Consumption and Cost Statistics
+                            </button>
+                        </h2>
+                        <div id="collapseStats" class="accordion-collapse collapse" aria-labelledby="headingStats"
+                            data-bs-parent="#dataQualityAccordion">
+                            <div class="accordion-body">
+                                <app-meter-statistics-table *ngIf="showGraphs && activeGraph === 'statistics'"
+                                    [meterData]="meterData"></app-meter-statistics-table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingEnergyHist">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#collapseEnergyHist" aria-expanded="false"
+                                aria-controls="collapseEnergyHist" (click)="selectOption('energy-histogram')">
+                                Distribution of Energy Consumption
+                            </button>
+                        </h2>
+                        <div id="collapseEnergyHist" class="accordion-collapse collapse"
+                            aria-labelledby="headingEnergyHist" data-bs-parent="#dataQualityAccordion">
+                            <div class="accordion-body">
+                                <app-meter-energy-histogram *ngIf="showGraphs && activeGraph === 'energy-histogram'"
+                                    [meterData]="meterData"></app-meter-energy-histogram>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingCostHist">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#collapseCostHist" aria-expanded="false"
+                                aria-controls="collapseCostHist" (click)="selectOption('cost-histogram')">
+                                Distribution of Total Cost
+                            </button>
+                        </h2>
+                        <div id="collapseCostHist" class="accordion-collapse collapse" aria-labelledby="headingCostHist"
+                            data-bs-parent="#dataQualityAccordion">
+                            <div class="accordion-body">
+                                <app-meter-cost-histogram *ngIf="showGraphs && activeGraph === 'cost-histogram'"
+                                    [meterData]="meterData"></app-meter-cost-histogram>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+                    (click)="onModalClose()">Close</button>
+            </div>
+        </div>
     </div>
 </div>

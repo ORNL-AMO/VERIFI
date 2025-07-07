@@ -1,0 +1,143 @@
+<div *ngIf="meterData && meterData.length > 0" class="container-fluid">
+    <div class="text-center mt-3 mb-3">
+        <h4>
+            Energy Consumption and Cost Statistics
+        </h4>
+    </div>
+    <table class="table table-responsive table-bordered">
+        <thead class="table-secondary">
+            <tr>
+                <th></th>
+                <th>Minimum</th>
+                <th>Maximum</th>
+                <th>Average</th>
+                <th>Standard Deviation</th>
+                <th>Mean - 3 SD</th>
+                <th>Mean + 3 SD</th>
+                <th>Number of Outliers</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>
+                    Energy Consumption (kWh)
+                </td>
+                <td>
+                    <span *ngIf="energyStats.min !== null && energyStats.min > 0">
+                        {{ energyStats.min | customNumber }}
+                    </span>
+                    <span *ngIf="energyStats.min === null || energyStats.min <= 0 || isValueNaN(energyStats.min)">
+                        &mdash;
+                    </span>
+                </td>
+                <td>
+                    <span *ngIf="energyStats.max !== null && energyStats.max > 0">
+                        {{ energyStats.max | customNumber }}
+                    </span>
+                    <span *ngIf="energyStats.max === null || energyStats.max <= 0 || isValueNaN(energyStats.max)">
+                        &mdash;
+                    </span>
+                </td>
+                <td>
+                    <span *ngIf="energyStats.average !== null && energyStats.average > 0">
+                        {{ energyStats.average | customNumber }}
+                    </span>
+                    <span *ngIf="energyStats.average === null || energyStats.average <= 0 || isValueNaN(energyStats.average)">
+                        &mdash;
+                    </span>
+                </td>
+                <td>
+                    <span *ngIf="energyStats.sd !== null && energyStats.sd > 0">
+                        {{ energyStats.sd | customNumber }}
+                    </span>
+                    <span *ngIf="energyStats.sd === null || energyStats.sd <= 0 || isValueNaN(energyStats.sd)">
+                        &mdash;
+                    </span>
+                </td>
+                <td>
+                    <span *ngIf="energyStats.meanMinus3Sd !== null && energyStats.meanMinus3Sd !== 0">
+                        {{ energyStats.meanMinus3Sd | customNumber }}
+                    </span>
+                    <span *ngIf="energyStats.meanMinus3Sd === null || isValueNaN(energyStats.meanMinus3Sd) || energyStats.meanMinus3Sd == 0">
+                        &mdash;
+                    </span>
+                </td>
+                <td>
+                    <span *ngIf="energyStats.meanPlus3Sd !== null && energyStats.meanPlus3Sd !== 0">
+                        {{ energyStats.meanPlus3Sd | customNumber }}
+                    </span>
+                    <span *ngIf="energyStats.meanPlus3Sd === null || isValueNaN(energyStats.meanPlus3Sd) || energyStats.meanPlus3Sd == 0">
+                        &mdash;
+                    </span>
+                </td>
+                <td>
+                    <span *ngIf="energyStats.outliers !== null">
+                        {{ energyStats.outliers }}
+                    </span>
+                    <span *ngIf="energyStats.outliers === null || isValueNaN(energyStats.outliers)">
+                        &mdash;
+                    </span>
+            </tr>
+            <tr>
+                <td>
+                    Cost ($)
+                </td>
+                <td>
+                    <span *ngIf="costStats.min !== null && costStats.min > 0">
+                        {{ costStats.min | customNumber:true }}
+                    </span>
+                    <span *ngIf="costStats.min === null || costStats.min <= 0 || isValueNaN(costStats.min)">
+                        &mdash;
+                    </span>
+                </td>
+                <td>
+                    <span *ngIf="costStats.max !== null && costStats.max > 0">
+                        {{ costStats.max | customNumber:true }}
+                    </span>
+                    <span *ngIf="costStats.max === null || costStats.max <= 0 || isValueNaN(costStats.max)">
+                        &mdash;
+                    </span>
+                </td>
+                <td>
+                    <span *ngIf="costStats.average !== null && costStats.average > 0">
+                        {{ costStats.average | customNumber:true }}
+                    </span>
+                    <span *ngIf="costStats.average === null || costStats.average <= 0 || isValueNaN(costStats.average)">
+                        &mdash;
+                    </span>
+                </td>
+                <td>
+                    <span *ngIf="costStats.sd !== null && costStats.sd > 0">
+                        {{ costStats.sd | customNumber:true }}
+                    </span>
+                    <span *ngIf="costStats.sd === null || costStats.sd <= 0 || isValueNaN(costStats.sd)">
+                        &mdash;
+                    </span>
+                </td>
+                <td>
+                    <span *ngIf="costStats.meanMinus3Sd !== null && costStats.meanMinus3Sd !== 0">
+                        {{ costStats.meanMinus3Sd | customNumber:true }}
+                    </span>
+                    <span *ngIf="costStats.meanMinus3Sd === null || isValueNaN(costStats.meanMinus3Sd) || costStats.meanMinus3Sd == 0">
+                        &mdash;
+                    </span>
+                </td>
+                <td>
+                    <span *ngIf="costStats.meanPlus3Sd !== null && costStats.meanPlus3Sd !== 0">
+                        {{ costStats.meanPlus3Sd | customNumber:true }}
+                    </span>
+                    <span *ngIf="costStats.meanPlus3Sd === null || isValueNaN(costStats.meanPlus3Sd) || costStats.meanPlus3Sd == 0">
+                        &mdash;
+                    </span>
+                </td>
+                <td>
+                    <span *ngIf="costStats.outliers !== null">
+                        {{ costStats.outliers }}
+                    </span>
+                    <span *ngIf="costStats.outliers === null || isValueNaN(costStats.outliers)">
+                        &mdash;
+                    </span>
+            </tr>
+        </tbody>
+    </table>
+</div>

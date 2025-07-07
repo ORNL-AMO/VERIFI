@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
@@ -39,6 +39,10 @@ export class UtilityMeterDataTableComponent implements OnInit {
   showFilterDropdown: boolean = false;
   hasNegativeReadings: boolean;
   duplicateReadingDates: Array<Date>;
+  @ViewChild('openModalBtn') openModalBtn: ElementRef;
+  meterName: string;
+  showGraphs: boolean = false;
+  activeGraph: string;
   constructor(
     private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
@@ -70,6 +74,42 @@ export class UtilityMeterDataTableComponent implements OnInit {
     });
   }
 
+  ngAfterViewInit() {
+    const modal = document.getElementById('dataQualityModal');
+    if (modal) {
+      modal.addEventListener('show.bs.modal', () => {
+        this.activeGraph = 'energy-timeseries';
+        const allPanels = modal.querySelectorAll('.accordion-collapse.show');
+        const allButtons = modal.querySelectorAll('.accordion-button');
+        allPanels.forEach(panel => {
+          panel.classList.remove('show');
+        });
+        allButtons.forEach(button => {
+          button.classList.add('collapsed');
+        });
+
+        const panelFirst = modal.querySelector('#collapseEnergy');
+        const buttonFirst = modal.querySelector('#headingEnergy .accordion-button');
+        if (panelFirst) {
+          panelFirst.classList.add('show');
+        }
+        if (buttonFirst) {
+          buttonFirst.classList.remove('collapsed');
+        }
+
+      });
+
+      modal.addEventListener('shown.bs.modal', () => {
+        this.showGraphs = true;
+      });
+
+      modal.addEventListener('hidden.bs.modal', () => {
+        this.showGraphs = false;
+        this.activeGraph = '';
+      });
+    }
+  }
+
   ngOnDestroy() {
     this.accountMeterDataSub.unsubscribe();
     this.itemsPerPageSub.unsubscribe();
@@ -83,6 +123,7 @@ export class UtilityMeterDataTableComponent implements OnInit {
     }) != -1;
     this.duplicateReadingDates = getHasDuplicateReadings(this.selectedMeter.guid, this.meterData);
     this.setHasCheckedItems();
+    this.meterName = this.meterData[0].meterNumber.split(' ').slice(1).join(' ');
   }
 
   uploadData() {
@@ -165,5 +206,13 @@ export class UtilityMeterDataTableComponent implements OnInit {
 
   toggleFilterMenu() {
     this.showFilterDropdown = !this.showFilterDropdown;
+  }
+
+  onModalClose() {
+    this.openModalBtn.nativeElement.focus();
+  }
+
+  selectOption(option: string) {
+    this.activeGraph = option;
   }
 }
