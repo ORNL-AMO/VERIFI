@@ -135,7 +135,7 @@ export class DataManagementHomeComponent {
 
     this.showMenu = this.toDoItems.find(item => {
       return item.type == 'predictor' || item.type == 'meter'
-    }) != undefined;
+    }) != undefined || !this.todoListOptions.includeOutdatedMeters || !this.todoListOptions.includeOutdatedPredictors;
 
   }
 
@@ -152,7 +152,7 @@ export class DataManagementHomeComponent {
   }
 
   async updateAccountWeatherPredictors() {
-      this.closeWeatherPredictorModal();
+    this.closeWeatherPredictorModal();
     let results = await this.weatherPredictorManagementService.updateAccountWeatherPredictors();
     if (results === "success") {
       console.log('success....')
@@ -162,7 +162,7 @@ export class DataManagementHomeComponent {
     }
   }
 
-  goToUpload(){
-    this.router.navigate(['../import-data'], {relativeTo: this.activatedRoute});
+  goToUpload() {
+    this.router.navigate(['../import-data'], { relativeTo: this.activatedRoute });
   }
 }

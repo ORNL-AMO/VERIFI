@@ -120,15 +120,11 @@ export class SetupChecklistComponent {
       this.meterData,
       this.predictorData,
       this.meterGroups,
-      {
-        includeOutdatedMeters: true,
-        includeOutdatedPredictors: true,
-        outdatedDays: 60
-      });
+      this.todoListOptions);
 
       this.showMenu = this.toDoItems.find(item => {
         return item.type == 'predictor' || item.type == 'meter'
-      }) != undefined;
+      }) != undefined || !this.todoListOptions.includeOutdatedMeters || !this.todoListOptions.includeOutdatedPredictors;
   }
   updateIncludedItems() {
     this.dataManagementService.todoListOptions.next(this.todoListOptions);
