@@ -10,7 +10,7 @@ import { Subscription } from 'rxjs';
 })
 export class UploadDataHelpComponent implements OnInit {
 
-  helpURL: string;
+  helpURL: UploadHelpUrl;
   routerSub: Subscription;
   constructor(private router: Router) { }
 
@@ -29,21 +29,23 @@ export class UploadDataHelpComponent implements OnInit {
   }
 
   setHelpURL(url: string){
-    let componentOptions: Array<string> = [
+    let componentOptions: Array<UploadHelpUrl> = [
       'confirm-predictors',
-      'confirm-readings',
+      'meter-readings',
       'upload-files',
       'identify-columns',
-      'manage-meters',
+      'confirm-meters',
       'select-worksheet',
       'map-meters-to-facilities',
-      'set-facility-predictors',
+      'map-predictors-to-facilities',
       'submit',
-      'template-facilities'
+      'template-facilities',
+       'predictor-data'
     ];
     this.helpURL = componentOptions.find(option => {
       return url.includes(option);
     });
   }
-
 }
+
+type UploadHelpUrl = 'confirm-predictors' | 'meter-readings' | 'upload-files' | 'identify-columns' | 'confirm-meters' | 'select-worksheet' | 'map-meters-to-facilities' | 'map-predictors-to-facilities' | 'submit' | 'template-facilities' | 'predictor-data';

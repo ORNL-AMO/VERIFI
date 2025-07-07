@@ -1,12 +1,12 @@
 <h5>Upload Data</h5>
 <hr>
-<app-confirm-predictors-help *ngIf="helpURL == 'confirm-predictors'"></app-confirm-predictors-help>
-<app-confirm-readings-help *ngIf="helpURL == 'confirm-readings'"></app-confirm-readings-help>
+<app-confirm-predictors-help *ngIf="helpURL == 'confirm-predictors' || helpURL == 'predictor-data'"></app-confirm-predictors-help>
+<app-confirm-readings-help *ngIf="helpURL == 'meter-readings'"></app-confirm-readings-help>
 <app-file-upload-help *ngIf="helpURL == 'upload-files'"></app-file-upload-help>
 <app-identify-columns-help *ngIf="helpURL == 'identify-columns'"></app-identify-columns-help>
-<app-manage-meters-help *ngIf="helpURL == 'manage-meters'"></app-manage-meters-help>
+<app-manage-meters-help *ngIf="helpURL == 'confirm-meters'"></app-manage-meters-help>
 <app-select-worksheet-help *ngIf="helpURL == 'select-worksheet'"></app-select-worksheet-help>
 <app-set-facility-meters-help *ngIf="helpURL == 'map-meters-to-facilities'"></app-set-facility-meters-help>
-<app-set-facility-predictors-help *ngIf="helpURL == 'set-facility-predictors'"></app-set-facility-predictors-help>
+<app-set-facility-predictors-help *ngIf="helpURL == 'map-predictors-to-facilities'"></app-set-facility-predictors-help>
 <app-submit-help *ngIf="helpURL == 'submit'"></app-submit-help>
 <app-template-facilities-help *ngIf="helpURL == 'template-facilities'"></app-template-facilities-help>

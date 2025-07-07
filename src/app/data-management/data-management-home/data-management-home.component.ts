@@ -132,10 +132,11 @@ export class DataManagementHomeComponent {
     this.showWeatherButton = this.toDoItems.find(item => {
       return item.isWeather && item.type === 'predictor';
     }) != undefined;
-
-    this.showMenu = this.toDoItems.find(item => {
-      return item.type == 'predictor' || item.type == 'meter'
-    }) != undefined || !this.todoListOptions.includeOutdatedMeters || !this.todoListOptions.includeOutdatedPredictors;
+    if (this.todoListOptions) {
+      this.showMenu = this.toDoItems.find(item => {
+        return item.type == 'predictor' || item.type == 'meter'
+      }) != undefined || !this.todoListOptions.includeOutdatedMeters || !this.todoListOptions.includeOutdatedPredictors;
+    }
 
   }
 

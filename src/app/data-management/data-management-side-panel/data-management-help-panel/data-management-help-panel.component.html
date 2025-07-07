@@ -1,5 +1,6 @@
 
 
-<app-todo-list-help class="w-100" *ngIf="helpURL == 'todo-list'"></app-todo-list-help>
-<app-account-settings-help class="w-100" *ngIf="helpURL == 'account-setup'"></app-account-settings-help>
-<app-upload-data-help class="w-100" *ngIf="helpURL == 'upload'"></app-upload-data-help>
+<app-todo-list-help class="w-100" *ngIf="helpContext == 'todo-list'"></app-todo-list-help>
+<app-account-settings-help class="w-100" *ngIf="helpContext == 'account-setup'"></app-account-settings-help>
+<app-upload-data-help class="w-100" *ngIf="helpContext == 'upload'"></app-upload-data-help>
+<app-data-management-facility-help class="w-100" *ngIf="helpContext == 'facility'"></app-data-management-facility-help>

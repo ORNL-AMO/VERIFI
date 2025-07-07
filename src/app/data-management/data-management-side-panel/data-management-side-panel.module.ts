@@ -8,6 +8,8 @@ import { SharedHelpContentModule } from 'src/app/shared/shared-help-content/shar
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { UploadDataHelpModule } from './data-management-help-panel/upload-data-help/upload-data-help.module';
+import { DataManagementFacilityHelpComponent } from './data-management-help-panel/data-management-facility-help/data-management-facility-help.component';
+import { FacilityListHelpComponent } from './data-management-help-panel/data-management-facility-help/facility-list-help/facility-list-help.component';
 
 
 
@@ -16,7 +18,9 @@ import { UploadDataHelpModule } from './data-management-help-panel/upload-data-h
     DataManagementHelpPanelComponent,
     DataManagementSidePanelComponent,
     TodoListHelpComponent,
-    SetupChecklistComponent
+    SetupChecklistComponent,
+    DataManagementFacilityHelpComponent,
+    FacilityListHelpComponent
   ],
   imports: [
     CommonModule,

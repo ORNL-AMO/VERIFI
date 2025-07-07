@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FacilityHelpComponent } from './facility-help.component';
 import { FacilityHomeHelpComponent } from './facility-home-help/facility-home-help.component';
 import { FacilityOverviewHelpComponent } from './facility-overview-help/facility-overview-help.component';
-import { FacilitySettingsHelpComponent } from './facility-settings-help/facility-settings-help.component';
 import { FacilityUtilityHelpComponent } from './facility-utility-help/facility-utility-help.component';
 import { FacilityVisualizationHelpComponent } from './facility-visualization-help/facility-visualization-help.component';
 import { FacilityAnalysisHelpComponent } from './facility-analysis-help/facility-analysis-help.component';
@@ -24,6 +23,7 @@ import { ManagePredictorsHelpComponent } from './facility-utility-help/predictor
 import { PredictorEntriesHelpComponent } from './facility-utility-help/predictors-data-help/predictor-entries-help/predictor-entries-help.component';
 import { PredictorFormHelpComponent } from './facility-utility-help/predictors-data-help/predictor-form-help/predictor-form-help.component';
 import { PredictorEntryFormHelpComponent } from './facility-utility-help/predictors-data-help/predictor-entry-form-help/predictor-entry-form-help.component';
+import { SharedHelpContentModule } from 'src/app/shared/shared-help-content/shared-help-content.module';
 
 
 
@@ -32,7 +32,6 @@ import { PredictorEntryFormHelpComponent } from './facility-utility-help/predict
     FacilityHelpComponent,
     FacilityHomeHelpComponent,
     FacilityOverviewHelpComponent,
-    FacilitySettingsHelpComponent,
     FacilityUtilityHelpComponent,
     FacilityVisualizationHelpComponent,
     FacilityAnalysisHelpComponent,
@@ -55,7 +54,8 @@ import { PredictorEntryFormHelpComponent } from './facility-utility-help/predict
     PredictorEntryFormHelpComponent
   ],
   imports: [
-    CommonModule
+    CommonModule,
+    SharedHelpContentModule
   ],
   exports: [
     FacilityHelpComponent
