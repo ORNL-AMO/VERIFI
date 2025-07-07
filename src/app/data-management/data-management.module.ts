@@ -45,12 +45,10 @@ import { ProcessPredictorReadingsComponent } from './data-management-import/shar
 import { SubmitImportDataComponent } from './data-management-import/shared-process-file/submit-import-data/submit-import-data.component';
 import { DataManagementImportFooterComponent } from './data-management-import/data-management-import-footer/data-management-import-footer.component';
 import { FacilityMeterGroupingComponent } from './account-facilities/facility-data/facility-meters/facility-meter-grouping/facility-meter-grouping.component';
-import { DataManagementSidePanelComponent } from './data-management-side-panel/data-management-side-panel.component';
-import { HelpPanelComponent } from './data-management-side-panel/help-panel/help-panel.component';
-import { SetupChecklistComponent } from './data-management-side-panel/setup-checklist/setup-checklist.component';
 import { DataManagementHomeComponent } from './data-management-home/data-management-home.component';
 import { CustomDatabaseModule } from '../shared/custom-database/custom-database.module';
 import { AccountCustomDataComponent } from './account-custom-data/account-custom-data.component';
+import { DataManagementSidePanelModule } from './data-management-side-panel/data-management-side-panel.module';
 
 
 @NgModule({
@@ -90,9 +88,6 @@ import { AccountCustomDataComponent } from './account-custom-data/account-custom
     SubmitImportDataComponent,
     DataManagementImportFooterComponent,
     FacilityMeterGroupingComponent,
-    DataManagementSidePanelComponent,
-    HelpPanelComponent,
-    SetupChecklistComponent,
     DataManagementHomeComponent,
     AccountCustomDataComponent
   ],
@@ -109,7 +104,8 @@ import { AccountCustomDataComponent } from './account-custom-data/account-custom
     LabelWithTooltipModule,
     DragDropModule,
     ReactiveFormsModule,
-    CustomDatabaseModule
+    CustomDatabaseModule,
+    DataManagementSidePanelModule
   ]
 })
 export class DataManagementModule { }

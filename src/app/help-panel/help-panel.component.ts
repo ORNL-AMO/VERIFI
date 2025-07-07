@@ -49,7 +49,6 @@ export class HelpPanelComponent implements OnInit {
 
   setHelpURL(url: string) {
     let componentOptions: Array<string> = [
-      'upload',
       'help',
       'facility',
       'account',

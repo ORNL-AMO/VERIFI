@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { HelpPanelComponent } from './help-panel.component';
+import { TodoListHelpComponent } from './todo-list-help.component';
 
-describe('HelpPanelComponent', () => {
-  let component: HelpPanelComponent;
-  let fixture: ComponentFixture<HelpPanelComponent>;
+describe('TodoListHelpComponent', () => {
+  let component: TodoListHelpComponent;
+  let fixture: ComponentFixture<TodoListHelpComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [HelpPanelComponent]
+      declarations: [TodoListHelpComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(HelpPanelComponent);
+    fixture = TestBed.createComponent(TodoListHelpComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
