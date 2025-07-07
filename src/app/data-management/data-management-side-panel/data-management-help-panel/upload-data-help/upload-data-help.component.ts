@@ -32,11 +32,11 @@ export class UploadDataHelpComponent implements OnInit {
     let componentOptions: Array<string> = [
       'confirm-predictors',
       'confirm-readings',
-      'file-upload',
+      'upload-files',
       'identify-columns',
       'manage-meters',
       'select-worksheet',
-      'set-facility-meters',
+      'map-meters-to-facilities',
       'set-facility-predictors',
       'submit',
       'template-facilities'

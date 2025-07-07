@@ -37,6 +37,8 @@ export class DataManagementHelpPanelComponent {
       this.helpURL = 'todo-list';
     } else if(url.includes('account-setup')) {
       this.helpURL = 'account-setup';
+    } else if(url.includes('import-data')){
+      this.helpURL = 'upload';
     }
 
     // let componentOptions: Array<string> = [

@@ -7,6 +7,7 @@ import { SetupChecklistComponent } from './setup-checklist/setup-checklist.compo
 import { SharedHelpContentModule } from 'src/app/shared/shared-help-content/shared-help-content.module';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { UploadDataHelpModule } from './data-management-help-panel/upload-data-help/upload-data-help.module';
 
 
 
@@ -21,7 +22,8 @@ import { FormsModule } from '@angular/forms';
     CommonModule,
     SharedHelpContentModule,
     RouterModule,
-    FormsModule
+    FormsModule,
+    UploadDataHelpModule
   ],
   exports: [
     DataManagementSidePanelComponent
