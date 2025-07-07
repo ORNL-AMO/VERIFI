@@ -43,7 +43,7 @@ export class CustomGwpDashboardComponent {
   }
 
   addNewItem() {
-    if (this.router.url.includes('data-wizard')) {
+    if (this.router.url.includes('data-management')) {
       this.router.navigate(['./add'], { relativeTo: this.activatedRoute });
     } else {
       this.router.navigate(['../add'], { relativeTo: this.activatedRoute });
@@ -56,7 +56,7 @@ export class CustomGwpDashboardComponent {
   }
 
   editItem(customGWP: IdbCustomGWP) {
-    if (this.router.url.includes('data-wizard')) {
+    if (this.router.url.includes('data-management')) {
       this.router.navigate(['./edit', customGWP.guid], { relativeTo: this.activatedRoute });
     } else {
       this.router.navigate(['../edit', customGWP.guid], { relativeTo: this.activatedRoute });

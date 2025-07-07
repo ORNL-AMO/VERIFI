@@ -1,0 +1,130 @@
+<div class="data-management-content with-footer">
+    <div class="row g-0 justify-content-center h-100 w-100 overflow-auto">
+        <div class="col-11 pt-4 pb-4">
+            <div class="form-paper">
+                <h4>
+                    <div class="d-flex w-100 justify-content-between">
+                        <div class="h4 mb-0">
+                            Identify Columns
+                        </div>
+                        <div>
+                            <span class="badge bg-primary">
+                                <span class="fa fa-file"></span>
+                                {{fileReference.name}}
+                            </span>
+                        </div>
+                    </div>
+                </h4>
+                <!-- <div class="d-flex w-100 justify-content-end mb-2">
+                    <ng-template [ngIf]="!fileReference.facilitiesSubmitted" [ngIfElse]="notSubmittedBlock">
+                        <button class="btn btn-success" (click)="submitColumns()">
+                            <span class="fa fa-upload"></span> Submit Columns
+                        </button>
+                    </ng-template>
+                    <ng-template #notSubmittedBlock>
+                        <div class="alert alert-info p-2">
+                            Worksheet selected. Use the next button to move on to meters upload.
+                        </div>
+                    </ng-template>
+                </div>
+                <hr> -->
+                <!-- <div class="worksheet-data-table">
+                    <table class="table table-sm table-bordered" *ngIf="fileReference.selectedWorksheetData">
+                        <thead>
+                            <tr>
+                                <th *ngFor="let header of fileReference.selectedWorksheetData[0]"
+                                    [ngClass]="getColumnClass(header)">
+                                    {{header}}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let worksheetData of fileReference.selectedWorksheetData; let index = index;"
+                                [ngClass]="{'hidden': index == 0}">
+                                <td *ngFor="let data of worksheetData">
+                                    {{data}}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div> -->
+                <!-- <hr> -->
+                <!--TODO: Move to help text-->
+                <!-- <h6 class="map-columns-label">Map the data columns from the excel file to the
+                    appropriate data type. <br>
+                    Column headers will be used to create meters or predictors.<br>
+                    Row data will be used as data entries associated with the corresponding date column and meter or
+                    predictor.<br>
+                    Please use site energy data when possible.
+                </h6>
+                <hr> -->
+
+                <div class="d-flex">
+                    <div class="w-50 me-2">
+                        <!--unused items-->
+                        <div class="card" (cdkDropListDropped)="dropColumn($event)"
+                            id={{fileReference.columnGroups[0].id}}
+                            [ngClass]="fileReference.columnGroups[0].dragDropClass" cdkDropList
+                            [cdkDropListData]="fileReference.columnGroups"
+                            [cdkDropListConnectedTo]="columnGroupItemIds">
+                            <div class="card-header">
+                                {{fileReference.columnGroups[0].groupLabel}}
+                            </div>
+                            <div class="card-body">
+                                <div class="list-item mt-2 mb-2 p-2" [cdkDragData]="groupItem"
+                                    *ngFor="let groupItem of fileReference.columnGroups[0].groupItems" cdkDrag>
+                                    <span class="fa fa-arrows-alt"></span>{{groupItem.value}}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="w-50 ms-2 d-flex flex-column">
+                        <ng-container *ngFor="let columnGroup of fileReference.columnGroups; let first = first;">
+                            <ng-container *ngIf="!first">
+                                <div class="card" (cdkDropListDropped)="dropColumn($event)" id={{columnGroup.id}}
+                                    [ngClass]="columnGroup.dragDropClass" cdkDropList
+                                    [cdkDropListData]="fileReference.columnGroups"
+                                    [cdkDropListConnectedTo]="columnGroupItemIds">
+                                    <div class="card-header">
+                                        {{columnGroup.groupLabel}}
+                                    </div>
+                                    <div class="card-body">
+                                        <ng-template [ngIf]="columnGroup.groupItems.length > 0"
+                                            [ngIfElse]="noItemsBlock">
+                                            <div class="list-item mt-2 mb-2 p-2" [cdkDragData]="groupItem"
+                                                *ngFor="let groupItem of columnGroup.groupItems" cdkDrag>
+                                                <span class="fa fa-arrows-alt"></span>{{groupItem.value}}
+                                            </div>
+                                        </ng-template>
+                                        <ng-template #noItemsBlock>
+                                            <div class="alert alert-dark text-center p-2 mb-0">
+                                                No {{columnGroup.groupLabel}} Identified.
+                                            </div>
+                                        </ng-template>
+                                        <p class="alert alert-warning p-2 mb-0"
+                                            *ngIf="columnGroup.groupLabel == 'Date'">Date
+                                            range based on selection: ({{minDate | date}} - {{maxDate | date}})</p>
+                                    </div>
+                                </div>
+                            </ng-container>
+                        </ng-container>
+                        <div class="d-flex justify-content-center" *ngIf="noPredictorsOrMeters || noDateColumn">
+                            <div class="d-flex flex-column">
+                                <div *ngIf="noPredictorsOrMeters" class="alert alert-danger p-2">
+                                    No predictors or meters selected.
+                                </div>
+                                <div *ngIf="noDateColumn" class="alert alert-danger p-2">
+                                    Date column required.
+                                </div>
+                            </div>
+                            <hr>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--TODO: disable next-->
+<app-data-management-import-footer [fileReference]="fileReference"
+    [navOption]="'identify-columns'"></app-data-management-import-footer>

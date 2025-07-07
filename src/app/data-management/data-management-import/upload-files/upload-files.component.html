@@ -1,0 +1,116 @@
+<div class="data-management-content with-footer">
+    <div class="row g-0 justify-content-center h-100 w-100 overflow-auto">
+        <div class="col-11 pt-4 pb-4">
+            <div class="form-paper">
+                <h4>
+                    Upload Data From .XLSX Files
+                </h4>
+                <br>
+                <div class="row">
+                    <div class="col-12">
+                        <h5>Data Entry Options </h5>
+                    </div>
+                    <div class="col-12">
+                        <p class="large">VERIFI has two options for adding utility data to corporate accounts. Users
+                            with
+                            only a couple
+                            facilities may want to add data manually by filling out data forms for facilities, meters,
+                            bills and
+                            predictors. Otherwise, accounts with many facilities can use our excel
+                            template for uploading
+                            all the data tracking information at once.</p>
+                        <p>
+                            It should be noted that a combination of manual data entry and excel data uploading can be
+                            used.
+                        </p>
+                    </div>
+                </div>
+                <hr>
+                <p>
+                    An excel template has been created to more easily upload facility and utility data. <a
+                        class="click-link" href="assets/csv_templates/VERIFI-Import-Data.xlsx">
+                        <span class="fa fa-download"></span>
+                        Download Template</a>
+                </p>
+                <input class="form-control" [ngClass]="{'drag-in': dragOver}" type="file" #importFile id="importFile"
+                    (dragenter)="setDragEnter()" (input)="setImportFile($event.target)" multiple accept=".xlsx"
+                    (dragleave)="setDragOut()">
+                <div *ngIf="fileUploadError">
+                    <div class="p-2 alert-danger">
+                        There was an error processing this file. Please try a different file.
+                    </div>
+                </div>
+                <hr>
+                <div class="alert alert-info">
+                    <ul class="mb-0">
+                        <li>
+                            Select the files you wish to upload data from into facilities.
+                        </li>
+                        <li>
+                            Data must be in excel (.XLSX) files.
+                        </li>
+                        <li>
+                            Once the files have been selected we will work through parsing out the relevant data into
+                            the correct
+                            places.
+                        </li>
+                        <li>
+                            Click the "Choose Files" button or drag and drop files into the grey box.
+                        </li>
+                        <li>
+                            Multiple files can be uploaded.
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="table-responsive" *ngIf="fileReferences.length != 0">
+                    <hr>
+                    <table class="table table-hover table-sm table-bordered utility-data">
+                        <thead class="table-mh">
+                            <tr>
+                                <th>
+                                    Files
+                                </th>
+                                <th>
+                                    <!-- Remove -->
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="table-group-divider">
+                            <tr *ngFor="let reference of fileReferences; let index = index;">
+                                <td>
+                                    <a class="click-link" (click)="goToFile(reference)">
+                                        {{reference.name}}
+                                    </a>
+                                </td>
+                                <td class="text-center">
+                                    <button class="btn btn-danger btn-sm danger"
+                                        (click)="removeReference(index)">Remove</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<nav class="data-management-footer navbar">
+    <div class="container-fluid justify-content-end">
+        <ng-template [ngIf]="fileReferences.length != 0" [ngIfElse]="noFilesBlock">
+            <div class="btn-group">
+                <button class="btn btn-dark" (click)="next()">
+                    Process {{fileReferences[0].name}}
+                    <span class="fa fa-chevron-right"></span>
+                </button>
+            </div>
+        </ng-template>
+        <ng-template #noFilesBlock>
+            <div class="w-100 text-center footer-text">
+                Upload files to get started!
+            </div>
+        </ng-template>
+    </div>
+</nav>

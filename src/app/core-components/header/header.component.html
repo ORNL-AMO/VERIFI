@@ -13,14 +13,8 @@
             <app-search-bar></app-search-bar>
         </div> -->
 
-        <div class="btn btn-group ms-auto" *ngIf="dataInitialized && activeAccount && displayToggle">
-            <button type="button" class="btn toggle-btn" (click)="goToDataEntry()"
-                [ngClass]="{'active': !inDashboard}"><span class="fa fa-database"></span> Data Management</button>
-            <button type="button" class="btn toggle-btn" (click)="goToDashboard()"
-                [ngClass]="{'active': inDashboard}"><span class="fa fa-chart-simple"></span> Data Evaluation</button>
-        </div>
 
-        <div class="dropdown" *ngIf="dataInitialized" [ngClass]="{'ms-auto': !displayToggle}">
+        <div class="dropdown ms-auto" *ngIf="dataInitialized">
             <button *ngIf="activeAccount" class="btn action-btn dropdown-toggle" data-bs-toggle="dropdown"
                 aria-expanded="false"><span class="fa fa-building"></span>
                 {{activeAccount.name}}
@@ -45,6 +39,12 @@
                         Accounts</a>
                 </li>
             </ul>
+        </div>
+        <div class="btn btn-group ms-2" *ngIf="dataInitialized && activeAccount && displayToggle">
+            <button type="button" class="btn toggle-btn" (click)="goToDataEntry()"
+                [ngClass]="{'active': !inDashboard}"><span class="fa fa-database"></span> Data Management</button>
+            <button type="button" class="btn toggle-btn" (click)="goToDashboard()"
+                [ngClass]="{'active': inDashboard}"><span class="fa fa-chart-simple"></span> Data Evaluation</button>
         </div>
         <ng-container *ngIf="dataInitialized && activeAccount">
             <ng-container *ngIf="!activeAccount.dataBackupFilePath">

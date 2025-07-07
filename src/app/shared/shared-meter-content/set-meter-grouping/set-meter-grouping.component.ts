@@ -78,7 +78,7 @@ facilityMeters: Array<IdbUtilityMeter>;
   }
 
   uploadData() {
-    this.router.navigateByUrl('/data-wizard/' + this.facility.accountId + '/import-data');
+    this.router.navigateByUrl('/data-management/' + this.facility.accountId + '/import-data');
   }
 
   async addMeter() {
@@ -86,7 +86,7 @@ facilityMeters: Array<IdbUtilityMeter>;
     newMeter = await firstValueFrom(this.utilityMeterDbService.addWithObservable(newMeter));
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
     await this.dbChangesService.setMeters(account, this.facility);
-    this.router.navigateByUrl('data-wizard/' + account.guid + '/facilities/' + this.facility.guid + '/meters/' + newMeter.guid);
+    this.router.navigateByUrl('data-management/' + account.guid + '/facilities/' + this.facility.guid + '/meters/' + newMeter.guid);
   }
 
   addGroup() {

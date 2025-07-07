@@ -7,12 +7,11 @@ import { FeedbackComponent } from 'src/app/static-content/feedback/feedback.comp
 import { HelpComponent } from 'src/app/static-content/help/help.component';
 import { AccountRoutes } from './account.routes';
 import { FacilityRoutes } from './facility.routes';
-import { SetupWizardRoutes } from './setup-wizard.routes';
 import { UploadRoutes } from './upload.routes';
 import { WeatherDataRoutes } from './weather-data.routes';
 import { ManageAccountsComponent } from '../core-components/manage-accounts/manage-accounts.component';
 import { HomePageComponent } from '../core-components/home-page/home-page.component';
-import { DataWizardRoutes } from './data-wizard.routes';
+import { DataManagementRoutes } from './data-management.routes';
 import { PrivacyNoticeComponent } from '../static-content/privacy-notice/privacy-notice.component';
 
 const routes: Routes = [
@@ -24,8 +23,7 @@ const routes: Routes = [
   { path: 'welcome', component: HomePageComponent },
   AccountRoutes,
   FacilityRoutes,
-  SetupWizardRoutes,
-  DataWizardRoutes,
+  DataManagementRoutes,
   { path: 'about', component: AboutComponent },
   { path: 'acknowledgments', component: AcknowledgmentsComponent },
   { path: 'feedback', component: FeedbackComponent },

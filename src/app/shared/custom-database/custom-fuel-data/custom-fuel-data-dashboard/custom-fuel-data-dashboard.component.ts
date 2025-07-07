@@ -43,7 +43,7 @@ export class CustomFuelDataDashboardComponent {
   }
 
   addNewItem() {
-    if (this.router.url.includes('data-wizard')) {
+    if (this.router.url.includes('data-management')) {
       this.router.navigate(['./add'], { relativeTo: this.activatedRoute });
     } else {
       this.router.navigate(['../add'], { relativeTo: this.activatedRoute });
@@ -56,7 +56,7 @@ export class CustomFuelDataDashboardComponent {
   }
 
   editItem(customFuel: IdbCustomFuel) {
-    if (this.router.url.includes('data-wizard')) {
+    if (this.router.url.includes('data-management')) {
       this.router.navigate(['./edit', customFuel.guid], { relativeTo: this.activatedRoute });
     } else {
       this.router.navigate(['../edit', customFuel.guid], { relativeTo: this.activatedRoute });

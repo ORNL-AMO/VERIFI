@@ -238,8 +238,8 @@ export class WeatherDataComponent {
     if (results == "success") {
       this.loadingService.setLoadingStatus(false);
       this.toastNotificationService.showToast('Degree Day Predictors Created', undefined, undefined, false, 'alert-success', false);
-      if (this.router.url.includes('data-wizard')) {
-        this.router.navigateByUrl('data-wizard/' + this.selectedFacility.accountId + '/facilities/' + this.selectedFacility.guid + '/predictors');
+      if (this.router.url.includes('data-management')) {
+        this.router.navigateByUrl('data-management/' + this.selectedFacility.accountId + '/facilities/' + this.selectedFacility.guid + '/predictors');
       } else {
         this.router.navigateByUrl('facility/' + this.selectedFacility.id + '/utility/predictors/manage/predictor-table');
       }
@@ -260,7 +260,7 @@ export class WeatherDataComponent {
   }
 
   setInDashboard(url: string) {
-    this.inDashboard = url.includes('data-wizard') == false;
+    this.inDashboard = url.includes('data-management') == false;
   }
 }
 

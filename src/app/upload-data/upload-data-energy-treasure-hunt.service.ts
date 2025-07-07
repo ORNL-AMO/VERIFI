@@ -4,7 +4,6 @@ import { ParsedTemplate } from './upload-data-models';
 import { AccountdbService } from '../indexedDB/account-db.service';
 import { FacilitydbService } from '../indexedDB/facility-db.service';
 import * as _ from 'lodash';
-import { SetupWizardService } from '../setup-wizard/setup-wizard.service';
 import { IdbAccount } from '../models/idbModels/account';
 import { getNewIdbFacility, IdbFacility } from '../models/idbModels/facility';
 import { getNewIdbUtilityMeter, IdbUtilityMeter } from '../models/idbModels/utilityMeter';
@@ -23,17 +22,11 @@ export class UploadDataEnergyTreasureHuntService {
 
   constructor(private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService,
-    private setupWizardService: SetupWizardService,
     private eGridService: EGridService) { }
 
 
-  parseTemplate(workbook: XLSX.WorkBook, inSetupWizard: boolean): ParsedTemplate {
-    let selectedAccount: IdbAccount;
-    if (inSetupWizard) {
-      selectedAccount = this.setupWizardService.account.getValue();
-    } else {
-      selectedAccount = this.accountDbService.selectedAccount.getValue();
-    }
+  parseTemplate(workbook: XLSX.WorkBook): ParsedTemplate {
+    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let hostPlantSummaryWorksheet: XLSX.WorkSheet = workbook.Sheets['Host Plant Summary'];
     let hostPlant: IdbFacility = this.getImportFacilities(hostPlantSummaryWorksheet, selectedAccount, 'Host Plant');
     let hostPlantUtilitiesWorksheet: XLSX.WorkSheet = workbook.Sheets['Host Plant Utilities'];

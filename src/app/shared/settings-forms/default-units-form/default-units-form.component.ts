@@ -7,7 +7,6 @@ import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 import { EnergyUnitOptions, MassUnitOptions, UnitOption, VolumeGasOptions, VolumeLiquidOptions } from 'src/app/shared/unitOptions';
 import * as _ from 'lodash';
 import { SettingsFormsService } from '../settings-forms.service';
-import { SetupWizardService } from 'src/app/setup-wizard/setup-wizard.service';
 import { CustomEmissionsDbService } from 'src/app/indexedDB/custom-emissions-db.service';
 import { Router } from '@angular/router';
 import { SharedDataService } from '../../helper-services/shared-data.service';
@@ -25,9 +24,6 @@ import { IdbCustomEmissionsItem } from 'src/app/models/idbModels/customEmissions
 export class DefaultUnitsFormComponent implements OnInit {
   @Input()
   inAccount: boolean;
-  @Input()
-  inWizard: boolean;
-
 
   form: FormGroup;
 
@@ -49,65 +45,36 @@ export class DefaultUnitsFormComponent implements OnInit {
   constructor(private accountDbService: AccountdbService, private settingsFormsService: SettingsFormsService,
     private facilityDbService: FacilitydbService,
     private eGridService: EGridService,
-    private setupWizardService: SetupWizardService,
     private customEmissionsDbService: CustomEmissionsDbService,
     private router: Router,
     private sharedDataService: SharedDataService) { }
 
   ngOnInit(): void {
-    if (!this.inWizard) {
-      this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(account => {
-        this.selectedAccount = account;
-        if (account && this.inAccount) {
-          if (this.isFormChange == false) {
-            this.form = this.settingsFormsService.getUnitsForm(account);
-            this.form.addControl('assessmentReportVersion', new FormControl(account.assessmentReportVersion))
-            this.checkCurrentZip();
-          } else {
-            this.isFormChange = false;
-          }
+    this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(account => {
+      this.selectedAccount = account;
+      if (account && this.inAccount) {
+        if (this.isFormChange == false) {
+          this.form = this.settingsFormsService.getUnitsForm(account);
+          this.form.addControl('assessmentReportVersion', new FormControl(account.assessmentReportVersion))
+          this.checkCurrentZip();
+        } else {
+          this.isFormChange = false;
         }
-      });
+      }
+    });
 
-      this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(facility => {
-        this.selectedFacility = facility;
-        if (facility && !this.inAccount) {
-          this.checkUnitsDontMatch();
-          if (this.isFormChange == false) {
-            this.form = this.settingsFormsService.getUnitsForm(facility);
-            this.checkCurrentZip();
-          } else {
-            this.isFormChange = false;
-          }
+    this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(facility => {
+      this.selectedFacility = facility;
+      if (facility && !this.inAccount) {
+        this.checkUnitsDontMatch();
+        if (this.isFormChange == false) {
+          this.form = this.settingsFormsService.getUnitsForm(facility);
+          this.checkCurrentZip();
+        } else {
+          this.isFormChange = false;
         }
-      });
-    } else {
-      this.selectedAccountSub = this.setupWizardService.account.subscribe(account => {
-        this.selectedAccount = account;
-        if (account && this.inAccount) {
-          if (this.isFormChange == false) {
-            this.form = this.settingsFormsService.getUnitsForm(account);
-            this.form.addControl('assessmentReportVersion', new FormControl(account.assessmentReportVersion))
-            this.checkCurrentZip();
-          } else {
-            this.isFormChange = false;
-          }
-        }
-      });
-
-      this.selectedFacilitySub = this.setupWizardService.selectedFacility.subscribe(facility => {
-        this.selectedFacility = facility;
-        if (facility && !this.inAccount) {
-          this.checkUnitsDontMatch();
-          if (this.isFormChange == false) {
-            this.form = this.settingsFormsService.getUnitsForm(facility);
-            this.checkCurrentZip();
-          } else {
-            this.isFormChange = false;
-          }
-        }
-      });
-    }
+      }
+    });
   }
 
   ngOnDestroy() {
@@ -123,33 +90,21 @@ export class DefaultUnitsFormComponent implements OnInit {
   async saveChanges() {
     this.form = this.settingsFormsService.checkCustom(this.form);
     this.isFormChange = true;
-    if (!this.inWizard) {
-      if (this.inAccount) {
-        this.selectedAccount = this.settingsFormsService.updateAccountFromUnitsForm(this.form, this.selectedAccount);
-        this.selectedAccount.assessmentReportVersion = this.form.controls.assessmentReportVersion.value;
-        let updatedAccount: IdbAccount = await firstValueFrom(this.accountDbService.updateWithObservable(this.selectedAccount));
-        let allAccounts: Array<IdbAccount> = await firstValueFrom(this.accountDbService.getAll());
-        this.accountDbService.selectedAccount.next(updatedAccount);
-        this.accountDbService.allAccounts.next(allAccounts);
-      }
-      if (!this.inAccount) {
-        this.selectedFacility = this.settingsFormsService.updateFacilityFromUnitsForm(this.form, this.selectedFacility);
-        let updatedFacility: IdbFacility = await firstValueFrom(this.facilityDbService.updateWithObservable(this.selectedFacility));
-        let allFacilities: Array<IdbFacility> = await firstValueFrom(this.facilityDbService.getAll());
-        this.facilityDbService.selectedFacility.next(updatedFacility);
-        let accountFacilities: Array<IdbFacility> = allFacilities.filter(facility => { return facility.accountId == this.selectedFacility.accountId });
-        this.facilityDbService.accountFacilities.next(accountFacilities);
-      }
-    } else {
-      if (this.inAccount) {
-        this.selectedAccount = this.settingsFormsService.updateAccountFromUnitsForm(this.form, this.selectedAccount);
-        this.selectedAccount.assessmentReportVersion = this.form.controls.assessmentReportVersion.value;
-        this.setupWizardService.account.next(this.selectedAccount);
-      }
-      if (!this.inAccount) {
-        this.selectedFacility = this.settingsFormsService.updateFacilityFromUnitsForm(this.form, this.selectedFacility);
-        this.setupWizardService.selectedFacility.next(this.selectedFacility);
-      }
+    if (this.inAccount) {
+      this.selectedAccount = this.settingsFormsService.updateAccountFromUnitsForm(this.form, this.selectedAccount);
+      this.selectedAccount.assessmentReportVersion = this.form.controls.assessmentReportVersion.value;
+      let updatedAccount: IdbAccount = await firstValueFrom(this.accountDbService.updateWithObservable(this.selectedAccount));
+      let allAccounts: Array<IdbAccount> = await firstValueFrom(this.accountDbService.getAll());
+      this.accountDbService.selectedAccount.next(updatedAccount);
+      this.accountDbService.allAccounts.next(allAccounts);
+    }
+    if (!this.inAccount) {
+      this.selectedFacility = this.settingsFormsService.updateFacilityFromUnitsForm(this.form, this.selectedFacility);
+      let updatedFacility: IdbFacility = await firstValueFrom(this.facilityDbService.updateWithObservable(this.selectedFacility));
+      let allFacilities: Array<IdbFacility> = await firstValueFrom(this.facilityDbService.getAll());
+      this.facilityDbService.selectedFacility.next(updatedFacility);
+      let accountFacilities: Array<IdbFacility> = allFacilities.filter(facility => { return facility.accountId == this.selectedFacility.accountId });
+      this.facilityDbService.accountFacilities.next(accountFacilities);
     }
   }
 
@@ -221,6 +176,16 @@ export class DefaultUnitsFormComponent implements OnInit {
   }
 
   goToCustomData() {
-    this.router.navigateByUrl('/account/custom-data/emissions')
+    if (this.router.url.includes('data-management')) {
+      let accountId: string;
+      if (this.inAccount) {
+        accountId = this.selectedAccount.guid;
+      } else {
+        accountId = this.selectedFacility.accountId;
+      }
+      this.router.navigateByUrl('data-management/' + accountId + '/account-custom-data/custom-gwps');
+    } else {
+      this.router.navigateByUrl('/account/custom-data/emissions')
+    }
   }
 }

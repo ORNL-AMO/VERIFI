@@ -18,7 +18,6 @@ import { StaticContentModule } from './static-content/static-content.module';
 import { ImportBackupModalComponent } from './core-components/import-backup-modal/import-backup-modal.component';
 import { FacilityModule } from './facility/facility.module';
 import { AccountModule } from './account/account.module';
-import { SetupWizardModule } from './setup-wizard/setup-wizard.module';
 import { HelperPipesModule } from './shared/helper-pipes/_helper-pipes.module';
 import { SearchBarComponent } from './core-components/header/search-bar/search-bar.component';
 import { NgbTypeaheadModule } from '@ng-bootstrap/ng-bootstrap';
@@ -33,7 +32,7 @@ import { DeletingAccountDataComponent } from './core-components/deleting-account
 import { SurveyModalComponent } from './core-components/survey-modal/survey-modal.component';
 import { SurveyToastComponent } from './core-components/survey-toast/survey-toast.component';
 import { UserSurveyModule } from './shared/user-survey/user-survey.module';
-import { DataWizardModule } from './data-wizard/data-wizard.module';
+import { DataManagementModule } from './data-management/data-management.module';
 import { HomePageComponent } from './core-components/home-page/home-page.component';
 
 @NgModule({
@@ -70,13 +69,12 @@ import { HomePageComponent } from './core-components/home-page/home-page.compone
         BrowserAnimationsModule,
         FacilityModule,
         AccountModule,
-        SetupWizardModule,
         HelperPipesModule,
         NgbTypeaheadModule,
         UploadDataModule,
         WeatherDataModule,
         UserSurveyModule,
-        DataWizardModule,
+        DataManagementModule,
         UserSurveyModule
     ],
     providers: [provideHttpClient(withInterceptorsFromDi())]

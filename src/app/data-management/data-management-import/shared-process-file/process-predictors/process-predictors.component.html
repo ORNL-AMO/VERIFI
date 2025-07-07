@@ -1,0 +1,138 @@
+<div class="data-management-content with-footer">
+    <div class="row g-0 justify-content-center h-100 w-100 overflow-auto">
+        <div class="col-11 pt-4 pb-4">
+            <div class="form-paper">
+                <h4>
+                    <div class="d-flex w-100 justify-content-between">
+                        <div class="h4 mb-0">
+                            Predictors
+                        </div>
+                        <div>
+                            <span class="badge bg-primary">
+                                <span class="fa fa-file"></span>
+                                {{fileReference.name}}
+                            </span>
+                        </div>
+                    </div>
+                </h4>
+                <ng-template [ngIf]="predictorsIncluded" [ngIfElse]="noPredictorsIncludedBlock">
+                    <ng-template [ngIf]="!editPredictorForm" [ngIfElse]="editPredictorFormBlock">
+                        <div class="table-responsive">
+                            <table class="table utility-data table-sm table-bordered table-hover">
+                                <thead class="table-mh">
+                                    <tr>
+                                        <th>
+                                            Facility Name
+                                        </th>
+                                        <th>
+                                            Predictor Name
+                                        </th>
+                                        <th>
+                                            Is<br> Production?
+                                        </th>
+                                        <th>
+                                            Is<br> Valid?
+                                        </th>
+                                        <th>
+                                            New / Existing
+                                        </th>
+                                        <th>
+                                            <div class="w-100 d-flex">
+                                                <div class="pe-1">
+                                                    <input type="checkbox" class="form-check-input"
+                                                        [(ngModel)]="skipAll" (change)="setSkipAll()">
+                                                </div>
+                                                <div>
+                                                    Skip Import
+                                                </div>
+                                            </div>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody class="table-group-divider">
+                                    <tr *ngFor="let predictor of fileReference?.predictors | orderBy: 'isValid': 'asc'"
+                                        [ngClass]="{'skip': predictor.skipImport, 'alert-danger': !predictor.isValid}">
+                                        <td>
+                                            {{predictor.facilityId | facilityName:fileReference.importFacilities}}
+                                        </td>
+                                        <td>
+                                            <ng-template [ngIf]="!predictor.skipImport" [ngIfElse]="nameBlock">
+                                                <a class="click-link"
+                                                    (click)="setEditPredictor(predictor)">{{predictor.name}}
+                                                    <span *ngIf="!predictor.isValid">(click to edit)</span>
+                                                </a>
+                                            </ng-template>
+                                            <ng-template #nameBlock>
+                                                {{predictor.name}}
+                                            </ng-template>
+                                        </td>
+                                        <td>
+                                            <!-- <span *ngIf="predictor.production">
+                                                Yes
+                                            </span>
+                                            <span *ngIf="!predictor.production">
+                                                No
+                                            </span> -->
+                                            <input class="form-check-input" type="checkbox"
+                                                name="{{predictor.name + '_isProduction'}}"
+                                                id="{{predictor.name + '_isProduction'}}"
+                                                [(ngModel)]="predictor.production">
+                                        </td>
+                                        <td>
+                                            <span *ngIf="predictor.isValid">
+                                                Yes
+                                            </span>
+                                            <span *ngIf="!predictor.isValid">
+                                                No
+                                            </span>
+                                        </td>
+
+                                        <td>
+                                            <span *ngIf="predictor.id">
+                                                Existing
+                                            </span>
+                                            <span *ngIf="!predictor.id">
+                                                New
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex w-100 h-100 justify-content-center align-items-center">
+                                                <input type="checkbox" class="form-check-input"
+                                                    [(ngModel)]="predictor.skipImport" (change)="setValidPredictors()">
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </ng-template>
+                    <ng-template #editPredictorFormBlock>
+
+                        <div class="d-flex justify-content-end">
+                            <div class="d-flex">
+                                <button class="btn btn-secondary btn-sm" (click)="cancelEdit()">Discard Predictor
+                                    Changes</button>
+                            </div>
+                            <div class="d-flex">
+                                <button class="btn btn-success ms-2 btn-sm" (click)="submitPredictor()">Save Predictor
+                                    Changes</button>
+                            </div>
+                        </div>
+                        <app-edit-predictor-form [predictorForm]="editPredictorForm" [predictor]="editPredictor"
+                            [facility]="editPredictorFacility"></app-edit-predictor-form>
+                        <!--TODO: map predictor to existing if new predictor like in meters-->
+                    </ng-template>
+                </ng-template>
+                <ng-template #noPredictorsIncludedBlock>
+                    <div class="alert alert-warning p-2">
+                        No import predictors found.
+                    </div>
+                </ng-template>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--TODO: disable next-->
+<app-data-management-import-footer [fileReference]="fileReference"
+    [navOption]="'confirm-predictors'"></app-data-management-import-footer>

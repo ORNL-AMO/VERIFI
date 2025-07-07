@@ -92,13 +92,13 @@ export class EditBillComponent implements OnInit {
   }
 
   setInDataWizard() {
-    this.inDataWizard = this.router.url.includes('data-wizard');
+    this.inDataWizard = this.router.url.includes('data-management');
   }
 
   cancel() {
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     if (this.inDataWizard) {
-      this.router.navigateByUrl('/data-wizard/' + this.editMeter.accountId + '/facilities/' + this.editMeter.facilityId + '/meters/' + this.editMeter.guid + '/meter-data');
+      this.router.navigateByUrl('/data-management/' + this.editMeter.accountId + '/facilities/' + this.editMeter.facilityId + '/meters/' + this.editMeter.guid + '/meter-data');
     } else {
       this.router.navigateByUrl('/facility/' + selectedFacility.id + '/utility/energy-consumption/utility-meter/' + this.editMeter.id + '/data-table');
     }
