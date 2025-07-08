@@ -113,19 +113,19 @@ export class SetupChecklistComponent {
   }
 
   setTodoItems() {
-    this.toDoItems = getTodoList(this.account,
-      this.facilities,
-      this.meters,
-      this.predictors,
-      this.meterData,
-      this.predictorData,
-      this.meterGroups,
-      this.todoListOptions);
-    if (this.todoListOptions) {
-      this.showMenu = this.toDoItems.find(item => {
-        return item.type == 'predictor' || item.type == 'meter'
-      }) != undefined || !this.todoListOptions.includeOutdatedMeters || !this.todoListOptions.includeOutdatedPredictors;
-    }
+    // this.toDoItems = getTodoList(this.account,
+    //   this.facilities,
+    //   this.meters,
+    //   this.predictors,
+    //   this.meterData,
+    //   this.predictorData,
+    //   this.meterGroups,
+    //   this.todoListOptions);
+    // if (this.todoListOptions) {
+    //   this.showMenu = this.toDoItems.find(item => {
+    //     return item.type == 'predictor' || item.type == 'meter'
+    //   }) != undefined || !this.todoListOptions.includeOutdatedMeters || !this.todoListOptions.includeOutdatedPredictors;
+    // }
   }
   updateIncludedItems() {
     this.dataManagementService.todoListOptions.next(this.todoListOptions);

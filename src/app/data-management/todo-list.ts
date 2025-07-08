@@ -15,11 +15,16 @@ export function getTodoList(account: IdbAccount,
     meterData: Array<IdbUtilityMeterData>,
     predictorData: Array<IdbPredictorData>,
     meterGroups: Array<IdbUtilityMeterGroup>,
-    options: TodoListOptions): Array<TodoItem> {
-    let toDoItems: Array<TodoItem> = [];
+    options: TodoListOptions): {
+        facilityTodoItems: Array<FacilityTodoItem>,
+        otherItems: Array<TodoItem>
+    } {
+    let otherItems: Array<TodoItem> = [];
+    let facilityTodoItems: Array<FacilityTodoItem> = [];
+
     if (account && facilities && meters && predictors && meterData && predictorData && options && meterGroups) {
         if (account.name == 'New Account') {
-            toDoItems.push({
+            otherItems.push({
                 label: 'Setup account settings',
                 url: '/data-management/' + account.guid + '/account-setup',
                 description: "Set the account name, unit settings, location and sustainability goals. This will help you manage your data effectively.",
@@ -29,14 +34,14 @@ export function getTodoList(account: IdbAccount,
         }
 
         if (facilities.length === 0) {
-            toDoItems.push({
+            otherItems.push({
                 label: 'Upload data',
                 url: '/data-management/' + account.guid + '/import-data',
                 description: "Upload data to the account. Facility, utility and predictor data can be imported from an excel template provided by VERIFI or from a variety of excel files.",
                 facilityId: undefined,
                 type: 'account'
             });
-            toDoItems.push({
+            otherItems.push({
                 label: 'Add data manually',
                 url: '/data-management/' + account.guid + '/facilities',
                 description: "Create one or more facilities for this account manually. Once a facility is created, you can add utility meters and predictors to it.",
@@ -45,24 +50,34 @@ export function getTodoList(account: IdbAccount,
             });
         } else {
             facilities.forEach(facility => {
-                setFacilityTodoItems(facility, meters, predictors, meterData, predictorData, toDoItems, meterGroups, options);
+                let facilityTodoItem: FacilityTodoItem = getFacilityTodoItem(facility, meters, predictors, meterData, predictorData, meterGroups, options);
+                if (facilityTodoItem.numberOfItems > 0) {
+                    facilityTodoItems.push(facilityTodoItem);
+                }
             });
         }
     }
-    return toDoItems;
+    return {
+        facilityTodoItems: facilityTodoItems,
+        otherItems: otherItems
+    };
 }
 
 
-function setFacilityTodoItems(facility: IdbFacility, meters: Array<IdbUtilityMeter>,
+function getFacilityTodoItem(facility: IdbFacility, meters: Array<IdbUtilityMeter>,
     predictors: Array<IdbPredictor>,
     meterData: Array<IdbUtilityMeterData>,
     predictorData: Array<IdbPredictorData>,
-    toDoItems: Array<TodoItem>,
     meterGroups: Array<IdbUtilityMeterGroup>,
-    options: TodoListOptions) {
+    options: TodoListOptions): FacilityTodoItem {
+
+    let meterTodoItems: Array<TodoItem> = [];
+    let predictorTodoItems: Array<TodoItem> = [];
+
+
     let facilityMeters: Array<IdbUtilityMeter> = meters.filter(m => m.facilityId === facility.guid);
     if (facilityMeters.length === 0) {
-        toDoItems.push({
+        meterTodoItems.push({
             label: 'Add utility meters for ' + facility.name,
             url: '/data-management/' + facility.accountId + '/facilities/' + facility.guid + '/meters',
             description: "Add utility meters to the facility. Utility meters are used to track energy, water, and other resource usage.",
@@ -73,7 +88,7 @@ function setFacilityTodoItems(facility: IdbFacility, meters: Array<IdbUtilityMet
         // Check if there are any meter groups for the facility
         let facilityMeterGroups: Array<IdbUtilityMeterGroup> = meterGroups.filter(m => m.facilityId === facility.guid);
         if (facilityMeterGroups.length === 0) {
-            toDoItems.push({
+            meterTodoItems.push({
                 label: 'Add utility meter groups for ' + facility.name,
                 url: '/data-management/' + facility.accountId + '/facilities/' + facility.guid + '/meter-grouping',
                 description: "Add utility meter groups to the facility. Utility meter groups are used to group meters for analysis and reporting.",
@@ -82,12 +97,12 @@ function setFacilityTodoItems(facility: IdbFacility, meters: Array<IdbUtilityMet
             });
         }
         facilityMeters.forEach(meter => {
-            setMeterTodoItems(meter, meterData, toDoItems, options);
+            setMeterTodoItems(meter, meterData, meterTodoItems, options);
         })
     }
     let facilityPredictors: Array<IdbPredictor> = predictors.filter(p => p.facilityId === facility.guid);
     if (facilityPredictors.length === 0) {
-        toDoItems.push({
+        predictorTodoItems.push({
             label: 'Add predictors for ' + facility.name,
             url: '/data-management/' + facility.accountId + '/facilities/' + facility.guid + '/predictors',
             description: "Add predictors to the facility. Predictors are used to analyze and forecast resource usage based on various factors.",
@@ -96,8 +111,17 @@ function setFacilityTodoItems(facility: IdbFacility, meters: Array<IdbUtilityMet
         });
     } else {
         facilityPredictors.forEach(predictor => {
-            setPredictorTodoItems(predictor, predictorData, toDoItems, options);
+            setPredictorTodoItems(predictor, predictorData, predictorTodoItems, options);
         });
+    }
+
+    return {
+        facility: facility,
+        meterTodoItems: meterTodoItems,
+        showMeterItems: false,
+        predictorTodoItems: predictorTodoItems,
+        showPredictorItems: false,
+        numberOfItems: meterTodoItems.length + predictorTodoItems.length
     }
 
 }
@@ -116,7 +140,7 @@ function setMeterTodoItems(meter: IdbUtilityMeter,
             type: 'meter'
         });
     } else {
-        if(!meter.meterReadingDataApplication){
+        if (!meter.meterReadingDataApplication) {
             toDoItems.push({
                 label: 'Set calendarization method for ' + meter.name,
                 url: '/data-management/' + meter.accountId + '/facilities/' + meter.facilityId + '/meters/' + meter.guid + '/meter-monthly-data',
@@ -194,4 +218,13 @@ export interface TodoListOptions {
     includeOutdatedMeters: boolean;
     includeOutdatedPredictors: boolean;
     outdatedDays: number;
+}
+
+export interface FacilityTodoItem {
+    facility: IdbFacility,
+    showMeterItems: boolean,
+    meterTodoItems: Array<TodoItem>,
+    predictorTodoItems: Array<TodoItem>,
+    showPredictorItems: boolean,
+    numberOfItems: number
 }

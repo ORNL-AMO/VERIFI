@@ -23,3 +23,15 @@ label.form-label {
 .btn:hover .fa.fa-temperature-half {
     color: white;
 }
+
+.list-group-item-action.sub-item-1{
+    margin-left: 1rem;
+    /* margin-right: 1rem; */
+    width: auto;
+}
+
+.list-group-item-action.sub-item-2{
+    margin-left: 2rem;
+    /* margin-right: 1rem; */
+    width: auto;
+}

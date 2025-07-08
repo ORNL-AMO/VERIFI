@@ -10,7 +10,7 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
-import { getTodoList, TodoItem, TodoListOptions } from '../todo-list';
+import { FacilityTodoItem, getTodoList, TodoItem, TodoListOptions } from '../todo-list';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { DataManagementService } from '../data-management.service';
@@ -46,7 +46,10 @@ export class DataManagementHomeComponent {
   predictorDataSub: Subscription;
   predictorData: Array<IdbPredictorData>;
 
-  toDoItems: Array<TodoItem> = [];
+  toDoItems: {
+    facilityTodoItems: Array<FacilityTodoItem>,
+    otherItems: Array<TodoItem>
+  };
 
   todoListOptions: TodoListOptions;
   todoListOptionsSub: Subscription;
@@ -59,6 +62,8 @@ export class DataManagementHomeComponent {
 
   showWeatherPredictorModal: boolean = false;
   showMenu: boolean = false;
+
+  hasTodoItems: boolean = false;
   constructor(private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService,
     private utilityMeterDbService: UtilityMeterdbService,
@@ -129,15 +134,19 @@ export class DataManagementHomeComponent {
       this.predictorData,
       this.meterGroups,
       this.todoListOptions);
-    this.showWeatherButton = this.toDoItems.find(item => {
+    
+    let allTodoItems: Array<TodoItem> = this.toDoItems.facilityTodoItems.flatMap(f => f.meterTodoItems.concat(f.predictorTodoItems));
+
+    this.showWeatherButton = allTodoItems.find(item => {
       return item.isWeather && item.type === 'predictor';
     }) != undefined;
     if (this.todoListOptions) {
-      this.showMenu = this.toDoItems.find(item => {
+      this.showMenu = allTodoItems.find(item => {
         return item.type == 'predictor' || item.type == 'meter'
       }) != undefined || !this.todoListOptions.includeOutdatedMeters || !this.todoListOptions.includeOutdatedPredictors;
     }
 
+    this.hasTodoItems = allTodoItems.length > 0 || this.toDoItems.otherItems.length > 0;
   }
 
   updateIncludedItems() {
@@ -165,5 +174,13 @@ export class DataManagementHomeComponent {
 
   goToUpload() {
     this.router.navigate(['../import-data'], { relativeTo: this.activatedRoute });
+  }
+
+  toggleShowPredictorItem(facilityIndex: number){
+    this.toDoItems.facilityTodoItems[facilityIndex].showPredictorItems = !this.toDoItems.facilityTodoItems[facilityIndex].showPredictorItems;
+  }
+
+  toggleShowMeterItem(facilityIndex: number) {
+    this.toDoItems.facilityTodoItems[facilityIndex].showMeterItems = !this.toDoItems.facilityTodoItems[facilityIndex].showMeterItems;
   }
 }
