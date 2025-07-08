@@ -28,6 +28,6 @@ export class EditMeterHelpComponent {
   }
 
   setIsEdit(url: string) {
-    this.isEdit = url.includes('edit-meter')
+    this.isEdit = url.includes('edit-meter') || url.includes('data-management');
   }
 }
