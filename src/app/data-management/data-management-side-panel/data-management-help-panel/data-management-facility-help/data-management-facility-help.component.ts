@@ -51,7 +51,7 @@ export class DataManagementFacilityHelpComponent {
             this.helpContext = 'facility-setup';
           } else if (subComponent === 'FacilityMetersTableComponent') {
             this.helpContext = 'facility-meters'
-          } else if (subComponent === 'FacilityMeterGroupingComponent') {
+          } else if (subComponent === 'SetMeterGroupingComponent') {
             this.helpContext = 'facility-meter-grouping'
           } else if (subComponent === 'FacilityPredictorsTableComponent') {
             this.helpContext = 'facility-predictors';

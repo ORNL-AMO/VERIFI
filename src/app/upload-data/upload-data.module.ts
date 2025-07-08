@@ -14,7 +14,6 @@ import { SetFacilityMetersComponent } from './data-setup/file-setup/set-facility
 import { TemplateFacilitiesComponent } from './data-setup/file-setup/template-facilities/template-facilities.component';
 import { ConfirmReadingsComponent } from './data-setup/file-setup/confirm-readings/confirm-readings.component';
 import { ConfirmPredictorsComponent } from './data-setup/file-setup/confirm-predictors/confirm-predictors.component';
-import { ConfirmAndSubmitComponent } from './data-setup/file-setup/confirm-and-submit/confirm-and-submit.component';
 import { LabelWithTooltipModule } from '../shared/label-with-tooltip/label-with-tooltip.module';
 import { MeterGroupOptionsPipe2 } from './data-setup/file-setup/manage-meters/meter-group-options.pipe';
 import { SharedMeterContentModule } from '../shared/shared-meter-content/shared-meter-content.module';
@@ -36,7 +35,6 @@ import { HelperPipesModule } from '../shared/helper-pipes/_helper-pipes.module';
     TemplateFacilitiesComponent,
     ConfirmReadingsComponent,
     ConfirmPredictorsComponent,
-    ConfirmAndSubmitComponent,
     MeterGroupOptionsPipe2
   ],
   imports: [

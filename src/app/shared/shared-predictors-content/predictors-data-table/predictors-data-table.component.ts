@@ -165,11 +165,8 @@ export class PredictorsDataTableComponent {
   }
 
   uploadData() {
-    if (this.inDataWizard) {
-      this.router.navigateByUrl('data-management/' + this.predictor.accountId + '/facilities/' + this.predictor.facilityId + '/predictors/' + this.predictor.guid + '/predictor-data');
-    } else {
-      this.router.navigateByUrl('/upload');
-    }
+    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    this.router.navigateByUrl('/data-management/' + selectedAccount.guid + '/import-data');
   }
 
   checkAll() {

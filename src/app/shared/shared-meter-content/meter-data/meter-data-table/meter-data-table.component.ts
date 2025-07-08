@@ -98,7 +98,8 @@ export class MeterDataTableComponent {
   }
 
   uploadData() {
-    this.router.navigateByUrl('/upload');
+    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    this.router.navigateByUrl('/data-management/' + selectedAccount.guid + '/import-data');
   }
 
   async bulkDelete() {

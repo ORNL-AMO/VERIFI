@@ -7,7 +7,6 @@ import { FeedbackComponent } from 'src/app/static-content/feedback/feedback.comp
 import { HelpComponent } from 'src/app/static-content/help/help.component';
 import { AccountRoutes } from './account.routes';
 import { FacilityRoutes } from './facility.routes';
-import { UploadRoutes } from './upload.routes';
 import { WeatherDataRoutes } from './weather-data.routes';
 import { ManageAccountsComponent } from '../core-components/manage-accounts/manage-accounts.component';
 import { HomePageComponent } from '../core-components/home-page/home-page.component';
@@ -30,7 +29,6 @@ const routes: Routes = [
   { path: 'help', component: HelpComponent },
   { path: 'manage-accounts', component: ManageAccountsComponent },
   { path: 'privacy', component: PrivacyNoticeComponent },
-  UploadRoutes,
   WeatherDataRoutes,
   //wildcard/page not found needs to be last route
   { path: "**", component: PageNotFoundComponent },
