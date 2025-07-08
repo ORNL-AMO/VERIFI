@@ -4,7 +4,8 @@ import { HelpPanelComponent } from './help-panel.component';
 import { HelpPageComponent } from './help-page/help-page.component';
 import { AccountHelpModule } from './account-help/account-help.module';
 import { FacilityHelpModule } from './facility-help/facility-help.module';
-import { WeatherDataHelpModule } from './weather-data-help/weather-data-help.module';
+import { SharedHelpContentModule } from '../shared/shared-help-content/shared-help-content.module';
+
 @NgModule({
   declarations: [
     HelpPanelComponent,
@@ -14,7 +15,7 @@ import { WeatherDataHelpModule } from './weather-data-help/weather-data-help.mod
     CommonModule,
     AccountHelpModule,
     FacilityHelpModule,
-    WeatherDataHelpModule
+    SharedHelpContentModule
   ],
   exports: [
     HelpPanelComponent

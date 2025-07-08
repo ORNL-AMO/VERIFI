@@ -15,6 +15,11 @@ import { PredictorEntryFormHelpComponent } from './facility-utility-help/predict
 import { PredictorFormHelpComponent } from './facility-utility-help/predictors-data-help/predictor-form-help/predictor-form-help.component';
 import { PredictorsDataHelpComponent } from './facility-utility-help/predictors-data-help/predictors-data-help.component';
 import { FacilityUtilityHelpComponent } from './facility-utility-help/facility-utility-help.component';
+import { WeatherDataHelpComponent } from './weather-data-help/weather-data-help.component';
+import { WeatherStationsHelpComponent } from './weather-data-help/weather-stations-help/weather-stations-help.component';
+import { AnnualStationHelpComponent } from './weather-data-help/annual-station-help/annual-station-help.component';
+import { DailyStationHelpComponent } from './weather-data-help/daily-station-help/daily-station-help.component';
+import { MonthlyStationHelpComponent } from './weather-data-help/monthly-station-help/monthly-station-help.component';
 
 
 
@@ -34,7 +39,12 @@ import { FacilityUtilityHelpComponent } from './facility-utility-help/facility-u
     PredictorEntryFormHelpComponent,
     PredictorFormHelpComponent,
     PredictorsDataHelpComponent,
-    FacilityUtilityHelpComponent
+    FacilityUtilityHelpComponent,
+    WeatherDataHelpComponent,
+    WeatherStationsHelpComponent,
+    AnnualStationHelpComponent,
+    DailyStationHelpComponent,
+    MonthlyStationHelpComponent
   ],
   imports: [
     CommonModule
@@ -54,7 +64,8 @@ import { FacilityUtilityHelpComponent } from './facility-utility-help/facility-u
     PredictorEntryFormHelpComponent,
     PredictorFormHelpComponent,
     PredictorsDataHelpComponent,
-    FacilityUtilityHelpComponent
+    FacilityUtilityHelpComponent,
+    WeatherDataHelpComponent
   ]
 })
 export class SharedHelpContentModule { }
