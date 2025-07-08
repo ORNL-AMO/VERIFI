@@ -31,7 +31,6 @@ import { MapPredictorsToFacilitiesComponent } from "../data-management/data-mana
 import { ProcessPredictorsComponent } from "../data-management/data-management-import/shared-process-file/process-predictors/process-predictors.component";
 import { ProcessPredictorReadingsComponent } from "../data-management/data-management-import/shared-process-file/process-predictor-readings/process-predictor-readings.component";
 import { SubmitImportDataComponent } from "../data-management/data-management-import/shared-process-file/submit-import-data/submit-import-data.component";
-import { FacilityMeterGroupingComponent } from "../data-management/account-facilities/facility-data/facility-meters/facility-meter-grouping/facility-meter-grouping.component";
 import { DataManagementHomeComponent } from "../data-management/data-management-home/data-management-home.component";
 import { WeatherDataRoutes } from "./weather-data.routes";
 import { CustomGWPComponent } from "../shared/custom-database/custom-gwp/custom-gwp.component";
@@ -44,6 +43,7 @@ import { CustomFuelDataFormComponent } from "../shared/custom-database/custom-fu
 import { CustomGwpFormComponent } from "../shared/custom-database/custom-gwp/custom-gwp-form/custom-gwp-form.component";
 import { CustomGwpDashboardComponent } from "../shared/custom-database/custom-gwp/custom-gwp-dashboard/custom-gwp-dashboard.component";
 import { AccountCustomDataComponent } from "../data-management/account-custom-data/account-custom-data.component";
+import { SetMeterGroupingComponent } from "../shared/shared-meter-content/set-meter-grouping/set-meter-grouping.component";
 
 export const DataManagementRoutes: Route = {
     path: 'data-management/:id',
@@ -147,7 +147,7 @@ export const DataManagementRoutes: Route = {
                         },
                         {
                             path: 'meter-grouping',
-                            component: FacilityMeterGroupingComponent,
+                            component: SetMeterGroupingComponent,
                         },
                         {
                             path: 'predictors',

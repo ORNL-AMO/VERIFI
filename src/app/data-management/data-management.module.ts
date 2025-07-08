@@ -44,11 +44,11 @@ import { ProcessPredictorsComponent } from './data-management-import/shared-proc
 import { ProcessPredictorReadingsComponent } from './data-management-import/shared-process-file/process-predictor-readings/process-predictor-readings.component';
 import { SubmitImportDataComponent } from './data-management-import/shared-process-file/submit-import-data/submit-import-data.component';
 import { DataManagementImportFooterComponent } from './data-management-import/data-management-import-footer/data-management-import-footer.component';
-import { FacilityMeterGroupingComponent } from './account-facilities/facility-data/facility-meters/facility-meter-grouping/facility-meter-grouping.component';
 import { DataManagementHomeComponent } from './data-management-home/data-management-home.component';
 import { CustomDatabaseModule } from '../shared/custom-database/custom-database.module';
 import { AccountCustomDataComponent } from './account-custom-data/account-custom-data.component';
 import { DataManagementSidePanelModule } from './data-management-side-panel/data-management-side-panel.module';
+import { SidebarItemActivePipe } from './data-management-sidebar/sidebar-item-active.pipe';
 
 
 @NgModule({
@@ -87,9 +87,9 @@ import { DataManagementSidePanelModule } from './data-management-side-panel/data
     ProcessPredictorReadingsComponent,
     SubmitImportDataComponent,
     DataManagementImportFooterComponent,
-    FacilityMeterGroupingComponent,
     DataManagementHomeComponent,
-    AccountCustomDataComponent
+    AccountCustomDataComponent,
+    SidebarItemActivePipe
   ],
   imports: [
     CommonModule,

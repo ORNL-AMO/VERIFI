@@ -11,6 +11,7 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
+import { NavigationEnd, Router } from '@angular/router';
 
 @Component({
   selector: 'app-data-management-sidebar',
@@ -47,11 +48,14 @@ export class DataManagementSidebarComponent {
   sidebarOpen: boolean;
   sidebarOpenSub: Subscription;
 
+  url: string;
+  routerSub: Subscription;
   constructor(private accountDbService: AccountdbService, private facilityDbService: FacilitydbService,
     private dataManagementService: DataManagementService,
     private utilityMeterDbService: UtilityMeterdbService,
     private predictorDbService: PredictorDbService,
-    private dbChangesService: DbChangesService
+    private dbChangesService: DbChangesService,
+    private router: Router
   ) {
   }
 
@@ -81,6 +85,12 @@ export class DataManagementSidebarComponent {
     this.sidebarOpenSub = this.dataManagementService.sidebarOpen.subscribe(val => {
       this.sidebarOpen = val;
     })
+    this.routerSub = this.router.events.subscribe((event) => {
+      if (event instanceof NavigationEnd) {
+        this.url = this.router.url;
+      }
+    });
+    this.url = this.router.url;
   }
 
   ngOnDestroy() {
@@ -92,6 +102,7 @@ export class DataManagementSidebarComponent {
     this.selectedFacilitySub.unsubscribe();
     this.selectedMeterSub.unsubscribe();
     this.sidebarOpenSub.unsubscribe();
+    this.routerSub.unsubscribe();
   }
 
   async toggleFacilitiesOpen() {
@@ -137,7 +148,7 @@ export class DataManagementSidebarComponent {
     await this.dbChangesService.setPredictorsV2(selectedAccount, selectedFacility);
   }
 
-  async toggleCustomDataOpen(){
+  async toggleCustomDataOpen() {
     this.account.sidebarCustomDataOpen = !this.account.sidebarCustomDataOpen;
     await firstValueFrom(this.accountDbService.updateWithObservable(this.account));
     await this.accountDbService.selectedAccount.next(this.account);

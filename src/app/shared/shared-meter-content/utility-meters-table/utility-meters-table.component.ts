@@ -72,7 +72,8 @@ export class UtilityMetersTableComponent implements OnInit {
   }
 
   uploadData() {
-    this.router.navigateByUrl('/upload');
+    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    this.router.navigateByUrl('/data-management/' + selectedAccount.guid + '/import-data');
   }
 
   addMeter() {

@@ -170,11 +170,8 @@ export class PredictorTableComponent {
   }
 
   uploadData() {
-    if (this.router.url.includes('data-management')) {
-      this.router.navigateByUrl('/data-management/' + this.selectedFacility.accountId + '/import-data/upload-files');
-    } else {
-      this.router.navigateByUrl('/upload');
-    }
+    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    this.router.navigateByUrl('/data-management/' + selectedAccount.guid + '/import-data');
   }
 
 

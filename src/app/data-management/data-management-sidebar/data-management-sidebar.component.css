@@ -8,9 +8,11 @@
     width: auto;
 }
 
-.nav-link.active {
-    background-color: #efefef;
+.nav-link.active, .nav-link.active .fa {
+    background-color: #cecece;
     font-weight: bolder;
+    /* background-color: #ff6000;
+    color: white !important */
 }
 
 .nav-link {
