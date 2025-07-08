@@ -35,34 +35,5 @@
     [invalidDate]="invalidDate">
 </app-edit-other-emissions-bill>
 
-<div class="shadow-sm p-3 mb-3 mt-3 bg-light rounded" *ngIf="isElectron">
-    <div class="align-items-center justify-content-center">
-        <h4 class="text-center">
-            <span class="fa-solid fa-link me-2"></span>
-            Connect Utility Bill
-        </h4>
-        <ng-container *ngIf="!savedUtilityFilePath || utilityFileDeleted">
-            <div class="text-center">
-                <button class="btn btn-outline mt-2" (click)="uploadBill()">
-                    Connect Bill
-                </button>
-            </div>
-        </ng-container>
-        <ng-container *ngIf="savedUtilityFilePath && !utilityFileDeleted">
-            <div class="alert alert-success mt-3 text-center">
-                The selected file is available at: &nbsp;
-                <a class="click-link" (click)="openBillLocation()">{{ savedUtilityFilePath }}</a>
-            </div>
-        </ng-container>
-        <ng-container *ngIf="folderError">
-            <div class="alert alert-danger mt-3 text-center">
-                The upload folder is not available. Please select a folder in the account settings.
-            </div>
-        </ng-container>
-        <ng-container *ngIf="utilityFileDeleted">
-            <div class="alert alert-danger mt-3 text-center">
-                The file has been deleted from the location {{ deletedPath }}
-            </div>
-        </ng-container>
-    </div>
-</div>
+<app-edit-connect-bill *ngIf="isElectron" [editMeterData]="editMeterData">
+</app-edit-connect-bill>

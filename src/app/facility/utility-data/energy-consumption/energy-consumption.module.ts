@@ -23,6 +23,8 @@ import { VehicleDataTableComponent } from './utility-meter-data/utility-meter-da
 import { RefrigerationCalculationTableComponent } from './utility-meter-data/edit-bill/edit-other-emissions-bill/refrigeration-calculation-table/refrigeration-calculation-table.component';
 import { EditOtherEmissionsBillComponent } from './utility-meter-data/edit-bill/edit-other-emissions-bill/edit-other-emissions-bill.component';
 import { OtherEmissionsDataTableComponent } from './utility-meter-data/utility-meter-data-table/other-emissions-data-table/other-emissions-data-table.component';
+import { EditConnectBillComponent } from './utility-meter-data/edit-bill/edit-connect-bill/edit-connect-bill.component';
+import { ViewConnectBillComponent } from './utility-meter-data/utility-meter-data-table/view-connect-bill/view-connect-bill.component';
 @NgModule({
   declarations: [
     EditMeterComponent,
@@ -41,7 +43,9 @@ import { OtherEmissionsDataTableComponent } from './utility-meter-data/utility-m
     VehicleDataTableComponent,
     RefrigerationCalculationTableComponent,
     EditOtherEmissionsBillComponent,
-    OtherEmissionsDataTableComponent
+    OtherEmissionsDataTableComponent,
+    EditConnectBillComponent,
+    ViewConnectBillComponent
   ],
   imports: [
     CommonModule,

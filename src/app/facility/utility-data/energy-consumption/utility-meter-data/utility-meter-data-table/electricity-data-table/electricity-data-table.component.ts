@@ -59,16 +59,11 @@ export class ElectricityDataTableComponent implements OnInit {
   showEstimated: boolean;
   isRECs: boolean;
   isElectron: boolean;
-  key: string;
-  savedUtilityFilePath: string;
-  utilityFileDeleted: boolean = false;
-  deletedPath: string;
   constructor(private utilityMeterDataService: UtilityMeterDataService, private copyTableService: CopyTableService,
     private eGridService: EGridService, private facilityDbService: FacilitydbService,
     private customFuelDbService: CustomFuelDbService,
     private accountDbService: AccountdbService,
-    private electronService: ElectronService,
-    private cd: ChangeDetectorRef) { }
+    private electronService: ElectronService) { }
 
   ngOnInit(): void {
     this.isElectron = this.electronService.isElectron;
@@ -135,38 +130,6 @@ export class ElectricityDataTableComponent implements OnInit {
 
   setDeleteMeterData(meterData): void {
     this.setDelete.emit(meterData);
-  }
-
-  async viewUtilityBill(meterData) {
-    console.log('isBillConnected', meterData.isBillConnected);
-    this.key = meterData.guid;
-    this.electronService.getFilePath(this.key).pipe(take(1)).subscribe(path => {
-      this.savedUtilityFilePath = path;
-      if (this.savedUtilityFilePath) {
-        this.electronService.checkUtilityFileExists(this.key, this.savedUtilityFilePath);
-        this.electronService.getDeletedFile(this.key).pipe(
-          skip(1),
-          take(1)
-        ).subscribe(isDeleted => {
-          this.utilityFileDeleted = isDeleted;
-          this.cd.detectChanges();
-          if (!isDeleted) {
-            this.electronService.openFileLocation(this.key);
-            this.cd.detectChanges();
-          } else {
-            this.utilityFileDeleted = true;
-            this.savedUtilityFilePath = null;
-            meterData.isBillConnected = false;
-            this.cd.detectChanges();
-            console.warn('File does not exist or has been deleted.');
-          }
-        });
-      } else {
-        this.utilityFileDeleted = true;
-        meterData.isBillConnected = false;
-        this.cd.detectChanges();
-      }
-    });
   }
 
   setOrderDataField(str: string) {
@@ -254,6 +217,5 @@ export class ElectricityDataTableComponent implements OnInit {
       }
     });
     this.numGeneralInformation = generalInfoCount + 2;
-
   }
 }

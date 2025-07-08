@@ -181,13 +181,15 @@ export class UtilityMeterDataService {
       stateSalesTax: [meterData.stateSalesTax, [Validators.min(0)]],
       latePayment: [meterData.latePayment, [Validators.min(0)]],
       otherCharge: [meterData.otherCharge, [Validators.min(0)]],
-      isEstimated: [meterData.isEstimated || false]
+      isEstimated: [meterData.isEstimated || false],
+      isBillConnected: [meterData.isBillConnected || false],
     })
   }
 
 
   updateElectricityMeterDataFromForm(meterData: IdbUtilityMeterData, form: FormGroup): IdbUtilityMeterData {
     //UTC date is one day behind from form
+    console.log('updateElectricityMeterDataFromForm', form);
     let formDate: Date = new Date(form.controls.readDate.value)
     meterData.readDate = new Date(formDate.getUTCFullYear(), formDate.getUTCMonth(), formDate.getUTCDate());
     meterData.totalEnergyUse = form.controls.totalEnergyUse.value;
@@ -216,6 +218,7 @@ export class UtilityMeterDataService {
     meterData.latePayment = form.controls.latePayment.value;
     meterData.otherCharge = form.controls.otherCharge.value;
     meterData.isEstimated = form.controls.isEstimated.value;
+    meterData.isBillConnected = form.controls.isBillConnected.value;
     return meterData;
   }
 
@@ -262,7 +265,8 @@ export class UtilityMeterDataService {
       otherCharge: [meterData.otherCharge],
       isEstimated: [meterData.isEstimated || false],
       heatCapacity: [meterData.heatCapacity, heatCapacityValidators],
-      vehicleFuelEfficiency: [meterData.vehicleFuelEfficiency, vehicleFuelEfficiencyValidators]
+      vehicleFuelEfficiency: [meterData.vehicleFuelEfficiency, vehicleFuelEfficiencyValidators],
+      isBillConnected: [meterData.isBillConnected || false]
     });
     form.controls.heatCapacity.disable();
     form.controls.vehicleFuelEfficiency.disable();
@@ -282,6 +286,7 @@ export class UtilityMeterDataService {
     meterData.isEstimated = form.controls.isEstimated.value;
     meterData.heatCapacity = form.controls.heatCapacity.value;
     meterData.vehicleFuelEfficiency = form.controls.vehicleFuelEfficiency.value;
+    meterData.isBillConnected = form.controls.isBillConnected.value;
     return meterData;
   }
 }
