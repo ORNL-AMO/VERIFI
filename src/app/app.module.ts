@@ -22,7 +22,6 @@ import { HelperPipesModule } from './shared/helper-pipes/_helper-pipes.module';
 import { SearchBarComponent } from './core-components/header/search-bar/search-bar.component';
 import { NgbTypeaheadModule } from '@ng-bootstrap/ng-bootstrap';
 import { FacilityListPipe } from './core-components/sidebar/facility-list.pipe';
-import { UploadDataModule } from './upload-data/upload-data.module';
 import { CreateReportModalComponent } from './core-components/create-report-modal/create-report-modal.component';
 import { WeatherDataModule } from './weather-data/weather-data.module';
 import { ManageAccountsComponent } from './core-components/manage-accounts/manage-accounts.component';
@@ -71,7 +70,6 @@ import { HomePageComponent } from './core-components/home-page/home-page.compone
         AccountModule,
         HelperPipesModule,
         NgbTypeaheadModule,
-        UploadDataModule,
         WeatherDataModule,
         UserSurveyModule,
         DataManagementModule,

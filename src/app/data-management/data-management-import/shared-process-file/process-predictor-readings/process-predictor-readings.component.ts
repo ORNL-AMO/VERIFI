@@ -3,7 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { DataManagementService } from 'src/app/data-management/data-management.service';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
-import { FileReference } from 'src/app/upload-data/upload-data-models';
+import { FileReference } from 'src/app/data-management/data-management-import/import-services/upload-data-models';
 import * as _ from 'lodash';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { IdbFacility } from 'src/app/models/idbModels/facility';

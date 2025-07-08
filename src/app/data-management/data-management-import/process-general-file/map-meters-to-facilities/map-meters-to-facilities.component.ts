@@ -6,8 +6,8 @@ import { DataManagementService } from 'src/app/data-management/data-management.s
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { getNewIdbFacility, IdbFacility } from 'src/app/models/idbModels/facility';
-import { ColumnItem, FacilityGroup, FileReference } from 'src/app/upload-data/upload-data-models';
-import { UploadDataService } from 'src/app/upload-data/upload-data.service';
+import { ColumnItem, FacilityGroup, FileReference } from 'src/app/data-management/data-management-import/import-services/upload-data-models';
+import { UploadDataService } from 'src/app/data-management/data-management-import/import-services/upload-data.service';
 
 @Component({
   selector: 'app-map-meters-to-facilities',

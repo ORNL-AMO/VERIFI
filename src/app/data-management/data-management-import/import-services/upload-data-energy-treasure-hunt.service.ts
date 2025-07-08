@@ -1,18 +1,18 @@
 import { Injectable } from '@angular/core';
 import * as XLSX from 'xlsx';
 import { ParsedTemplate } from './upload-data-models';
-import { AccountdbService } from '../indexedDB/account-db.service';
-import { FacilitydbService } from '../indexedDB/facility-db.service';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import * as _ from 'lodash';
-import { IdbAccount } from '../models/idbModels/account';
-import { getNewIdbFacility, IdbFacility } from '../models/idbModels/facility';
-import { getNewIdbUtilityMeter, IdbUtilityMeter } from '../models/idbModels/utilityMeter';
-import { getNewIdbUtilityMeterData, IdbUtilityMeterData } from '../models/idbModels/utilityMeterData';
-import { getNewIdbPredictor, IdbPredictor } from '../models/idbModels/predictor';
-import { getNewIdbPredictorData, IdbPredictorData } from '../models/idbModels/predictorData';
+import { IdbAccount } from 'src/app/models/idbModels/account';
+import { getNewIdbFacility, IdbFacility } from 'src/app/models/idbModels/facility';
+import { getNewIdbUtilityMeter, IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
+import { getNewIdbUtilityMeterData, IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
+import { getNewIdbPredictor, IdbPredictor } from 'src/app/models/idbModels/predictor';
+import { getNewIdbPredictorData, IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { checkSameDay, getCountryCode, getState, getZip } from './upload-helper-functions';
-import { SubRegionData } from '../models/eGridEmissions';
-import { EGridService } from '../shared/helper-services/e-grid.service';
+import { SubRegionData } from 'src/app/models/eGridEmissions';
+import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 
 
 @Injectable({

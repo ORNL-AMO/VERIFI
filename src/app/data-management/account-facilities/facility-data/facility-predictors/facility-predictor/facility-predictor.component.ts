@@ -22,7 +22,7 @@ import { getNewIdbPredictorData, IdbPredictorData } from 'src/app/models/idbMode
 import { PredictorDataHelperService } from 'src/app/shared/helper-services/predictor-data-helper.service';
 import { EditPredictorFormService } from 'src/app/shared/shared-predictors-content/edit-predictor-form.service';
 import { getDegreeDayAmount } from 'src/app/shared/sharedHelperFuntions';
-import { checkSameMonth } from 'src/app/upload-data/upload-helper-functions';
+import { checkSameMonth } from 'src/app/data-management/data-management-import/import-services/upload-helper-functions';
 import { WeatherDataReading, WeatherDataService } from 'src/app/weather-data/weather-data.service';
 import { getDetailedDataForMonth } from 'src/app/weather-data/weatherDataCalculations';
 

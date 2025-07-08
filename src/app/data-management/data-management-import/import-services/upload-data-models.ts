@@ -1,10 +1,10 @@
 import { WorkBook } from "xlsx"
-import { IdbFacility } from "../models/idbModels/facility"
-import { IdbUtilityMeter } from "../models/idbModels/utilityMeter"
-import { IdbUtilityMeterData } from "../models/idbModels/utilityMeterData"
-import { IdbUtilityMeterGroup } from "../models/idbModels/utilityMeterGroup"
-import { IdbPredictor } from "../models/idbModels/predictor"
-import { IdbPredictorData } from "../models/idbModels/predictorData"
+import { IdbFacility } from "../../../models/idbModels/facility"
+import { IdbUtilityMeter } from "../../../models/idbModels/utilityMeter"
+import { IdbUtilityMeterData } from "../../../models/idbModels/utilityMeterData"
+import { IdbUtilityMeterGroup } from "../../../models/idbModels/utilityMeterGroup"
+import { IdbPredictor } from "../../../models/idbModels/predictor"
+import { IdbPredictorData } from "../../../models/idbModels/predictorData"
 
 export interface FileReference {
   name: string,

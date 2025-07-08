@@ -4,7 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { DataManagementService } from 'src/app/data-management/data-management.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { FileReference, getEmptyFileReference } from 'src/app/upload-data/upload-data-models';
+import { FileReference, getEmptyFileReference } from 'src/app/data-management/data-management-import/import-services/upload-data-models';
 import { EditPredictorFormService } from 'src/app/shared/shared-predictors-content/edit-predictor-form.service';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 

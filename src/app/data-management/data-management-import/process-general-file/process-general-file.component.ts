@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { FileReference } from 'src/app/upload-data/upload-data-models';
+import { FileReference } from 'src/app/data-management/data-management-import/import-services/upload-data-models';
 import { DataManagementService } from '../../data-management.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';

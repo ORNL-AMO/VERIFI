@@ -9,8 +9,8 @@ import { UtilityMeterGroupdbService } from 'src/app/indexedDB/utilityMeterGroup-
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { getNewIdbUtilityMeterGroup, IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
-import { FileReference, getEmptyFileReference } from 'src/app/upload-data/upload-data-models';
-import { UploadDataService } from 'src/app/upload-data/upload-data.service';
+import { FileReference, getEmptyFileReference } from 'src/app/data-management/data-management-import/import-services/upload-data-models';
+import { UploadDataService } from 'src/app/data-management/data-management-import/import-services/upload-data.service';
 
 
 @Component({

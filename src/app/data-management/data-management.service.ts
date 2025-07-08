@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { FileReference } from '../upload-data/upload-data-models';
+import { FileReference } from './data-management-import/import-services/upload-data-models';
 import { LocalStorageService } from 'ngx-webstorage';
 import { TodoListOptions } from './todo-list';
 

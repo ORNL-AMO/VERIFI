@@ -4,7 +4,7 @@ import { Subscription } from 'rxjs';
 import { DataManagementService } from 'src/app/data-management/data-management.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
-import { FileReference } from 'src/app/upload-data/upload-data-models';
+import { FileReference } from 'src/app/data-management/data-management-import/import-services/upload-data-models';
 import * as XLSX from 'xlsx';
 
 @Component({

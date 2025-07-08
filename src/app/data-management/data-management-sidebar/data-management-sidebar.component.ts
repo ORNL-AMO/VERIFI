@@ -2,7 +2,7 @@ import { Component, EventEmitter, Output } from '@angular/core';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { FileReference } from 'src/app/upload-data/upload-data-models';
+import { FileReference } from 'src/app/data-management/data-management-import/import-services/upload-data-models';
 import { DataManagementService } from '../data-management.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
