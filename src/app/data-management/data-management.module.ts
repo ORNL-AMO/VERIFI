@@ -49,6 +49,7 @@ import { DataManagementHomeComponent } from './data-management-home/data-managem
 import { CustomDatabaseModule } from '../shared/custom-database/custom-database.module';
 import { AccountCustomDataComponent } from './account-custom-data/account-custom-data.component';
 import { DataManagementSidePanelModule } from './data-management-side-panel/data-management-side-panel.module';
+import { SidebarItemActivePipe } from './data-management-sidebar/sidebar-item-active.pipe';
 
 
 @NgModule({
@@ -89,7 +90,8 @@ import { DataManagementSidePanelModule } from './data-management-side-panel/data
     DataManagementImportFooterComponent,
     FacilityMeterGroupingComponent,
     DataManagementHomeComponent,
-    AccountCustomDataComponent
+    AccountCustomDataComponent,
+    SidebarItemActivePipe
   ],
   imports: [
     CommonModule,
