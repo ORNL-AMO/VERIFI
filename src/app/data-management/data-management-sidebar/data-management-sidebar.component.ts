@@ -102,6 +102,7 @@ export class DataManagementSidebarComponent {
     this.selectedFacilitySub.unsubscribe();
     this.selectedMeterSub.unsubscribe();
     this.sidebarOpenSub.unsubscribe();
+    this.routerSub.unsubscribe();
   }
 
   async toggleFacilitiesOpen() {
