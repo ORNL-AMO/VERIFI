@@ -4,7 +4,7 @@ import { Subscription } from 'rxjs';
 import { DataManagementService } from 'src/app/data-management/data-management.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
-import { FileReference, getEmptyFileReference } from 'src/app/upload-data/upload-data-models';
+import { FileReference, getEmptyFileReference } from 'src/app/data-management/data-management-import/import-services/upload-data-models';
 
 @Component({
   selector: 'app-process-template-facilities',

@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { DataManagementService } from 'src/app/data-management/data-management.service';
-import { FileReference, getEmptyFileReference } from 'src/app/upload-data/upload-data-models';
+import { FileReference, getEmptyFileReference } from 'src/app/data-management/data-management-import/import-services/upload-data-models';
 import * as _ from 'lodash';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { FormGroup } from '@angular/forms';

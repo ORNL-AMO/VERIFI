@@ -2,12 +2,12 @@ import { CdkDragDrop } from '@angular/cdk/drag-drop';
 import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { ColumnItem, FacilityGroup, FileReference, getEmptyFileReference } from 'src/app/upload-data/upload-data-models';
+import { ColumnItem, FacilityGroup, FileReference, getEmptyFileReference } from 'src/app/data-management/data-management-import/import-services/upload-data-models';
 import { getNewIdbFacility, IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { DataManagementService } from 'src/app/data-management/data-management.service';
-import { UploadDataService } from 'src/app/upload-data/upload-data.service';
+import { UploadDataService } from 'src/app/data-management/data-management-import/import-services/upload-data.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 

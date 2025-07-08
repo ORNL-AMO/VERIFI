@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
-import { UploadDataService } from 'src/app/upload-data/upload-data.service';
+import { UploadDataService } from 'src/app/data-management/data-management-import/import-services/upload-data.service';
 import { Router } from '@angular/router';
 import * as XLSX from 'xlsx';
-import { FileReference } from 'src/app/upload-data/upload-data-models';
+import { FileReference } from 'src/app/data-management/data-management-import/import-services/upload-data-models';
 import { Subscription } from 'rxjs';
 import { DataManagementService } from '../../data-management.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';

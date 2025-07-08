@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { DataManagementImportNavigationService, GoToOption, GoToOptionValue } from '../data-management-import-navigation.service';
-import { FileReference } from 'src/app/upload-data/upload-data-models';
+import { FileReference } from 'src/app/data-management/data-management-import/import-services/upload-data-models';
 
 @Component({
   selector: 'app-data-management-import-footer',
