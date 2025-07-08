@@ -2,11 +2,9 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HelpPanelComponent } from './help-panel.component';
 import { HelpPageComponent } from './help-page/help-page.component';
-import { UploadDataHelpModule } from './upload-data-help/upload-data-help.module';
 import { AccountHelpModule } from './account-help/account-help.module';
 import { FacilityHelpModule } from './facility-help/facility-help.module';
 import { WeatherDataHelpModule } from './weather-data-help/weather-data-help.module';
-
 @NgModule({
   declarations: [
     HelpPanelComponent,
@@ -14,7 +12,6 @@ import { WeatherDataHelpModule } from './weather-data-help/weather-data-help.mod
   ],
   imports: [
     CommonModule,
-    UploadDataHelpModule,
     AccountHelpModule,
     FacilityHelpModule,
     WeatherDataHelpModule
