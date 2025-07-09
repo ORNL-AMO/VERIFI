@@ -71,7 +71,7 @@ export class AnalysisReportSetupComponent {
 
   setAnalysisOptions(report: IdbAccountReport) {
     let analysisOptions: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
-    this.accountAnalysisItems = analysisOptions.filter(option => { return option.reportYear == report.reportYear && option.energyIsSource });
+    this.accountAnalysisItems = analysisOptions.filter(option => { return option.reportYear == report.reportYear });
     this.setSelectedAnalysisItem();
     if (!this.selectedAnalysisItem) {
       this.analysisReportForm.controls.analysisItemId.patchValue(undefined);
