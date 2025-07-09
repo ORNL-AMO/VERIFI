@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
@@ -10,17 +10,18 @@ import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { checkShowHeatCapacity, getIsEnergyMeter, getIsEnergyUnit } from 'src/app/shared/sharedHelperFuntions';
 import { UtilityMeterDataService } from '../utility-meter-data.service';
-import { firstValueFrom, Observable, of } from 'rxjs';
+import { firstValueFrom, Observable, of, skip, take } from 'rxjs';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { getNewIdbUtilityMeterData, IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
+import { ElectronService } from 'src/app/electron/electron.service';
 
 @Component({
-    selector: 'app-edit-bill',
-    templateUrl: './edit-bill.component.html',
-    styleUrls: ['./edit-bill.component.css'],
-    standalone: false
+  selector: 'app-edit-bill',
+  templateUrl: './edit-bill.component.html',
+  styleUrls: ['./edit-bill.component.css'],
+  standalone: false
 })
 export class EditBillComponent implements OnInit {
 
@@ -34,13 +35,16 @@ export class EditBillComponent implements OnInit {
   displayVehicleFuelEfficiency: boolean;
   invalidDate: boolean;
   showFilterDropdown: boolean = false;
+  isElectron: boolean;
   constructor(private activatedRoute: ActivatedRoute, private utilityMeterDataDbService: UtilityMeterDatadbService,
     private utilityMeterDbService: UtilityMeterdbService, private loadingService: LoadingService,
     private dbChangesService: DbChangesService, private facilityDbService: FacilitydbService, private accountDbService: AccountdbService,
     private utilityMeterDataService: UtilityMeterDataService, private toastNotificationService: ToastNotificationsService,
-    private router: Router) { }
+    private router: Router,
+    private electronService: ElectronService) { }
 
   ngOnInit(): void {
+    this.isElectron = this.electronService.isElectron;
     this.activatedRoute.parent.params.subscribe(parentParams => {
       let meterId: number = parseInt(parentParams['id']);
       let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
@@ -59,9 +63,11 @@ export class EditBillComponent implements OnInit {
           this.editMeterData = getNewIdbUtilityMeterData(this.editMeter, accountMeterData);
           this.addOrEdit = 'add';
         }
-        this.setMeterDataForm();
+        if(this.editMeterData) {
+          this.setMeterDataForm();
+        }
       })
-    })
+    });
   }
 
   cancel() {
@@ -133,7 +139,7 @@ export class EditBillComponent implements OnInit {
       if (this.displayVolumeInput) {
         this.meterDataForm.controls.totalEnergyUse.disable();
       }
-      if(this.displayHeatCapacity && this.meterDataForm.controls.heatCapacity.value == undefined){
+      if (this.displayHeatCapacity && this.meterDataForm.controls.heatCapacity.value == undefined) {
         this.meterDataForm.controls.heatCapacity.patchValue(this.editMeter.heatCapacity);
       }
     }

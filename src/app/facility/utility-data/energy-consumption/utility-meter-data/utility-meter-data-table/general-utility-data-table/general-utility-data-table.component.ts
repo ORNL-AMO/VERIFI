@@ -1,8 +1,8 @@
-import { Component, ElementRef, EventEmitter, Input, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, EventEmitter, Input, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { UtilityMeterDataService } from '../../utility-meter-data.service';
 import * as _ from 'lodash';
 import { CopyTableService } from 'src/app/shared/helper-services/copy-table.service';
-import { Subscription } from 'rxjs';
+import { skip, Subscription, take } from 'rxjs';
 import { GeneralUtilityDataFilters } from 'src/app/models/meterDataFilter';
 import { checkShowEmissionsOutputRate, getIsEnergyMeter, getIsEnergyUnit } from 'src/app/shared/sharedHelperFuntions';
 import { EmissionsResults } from 'src/app/models/eGridEmissions';
@@ -16,6 +16,7 @@ import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
+import { ElectronService } from 'src/app/electron/electron.service';
 
 @Component({
   selector: 'app-general-utility-data-table',
@@ -58,15 +59,17 @@ export class GeneralUtilityDataTableComponent implements OnInit {
   showEmissionsSection: boolean;
   showDetailedCharges: boolean;
   showEstimated: boolean;
+  isElectron: boolean;
   constructor(public utilityMeterDataService: UtilityMeterDataService,
     private copyTableService: CopyTableService,
     private eGridService: EGridService, private facilityDbService: FacilitydbService,
     private customFuelDbService: CustomFuelDbService,
-    private accountDbService: AccountdbService) { }
+    private accountDbService: AccountdbService,
+    private electronService: ElectronService) { }
 
   ngOnInit(): void {
     this.setData();
-
+    this.isElectron = this.electronService.isElectron;
     if (this.selectedMeterData.length != 0) {
       let hasFalseChecked: IdbUtilityMeterData = this.selectedMeterData.find(meterDataItem => { return meterDataItem.checked == false });
       this.allChecked = (hasFalseChecked == undefined);

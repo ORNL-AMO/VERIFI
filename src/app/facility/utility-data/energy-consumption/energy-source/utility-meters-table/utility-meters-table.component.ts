@@ -19,12 +19,13 @@ import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 
 @Component({
-    selector: 'app-utility-meters-table',
-    templateUrl: './utility-meters-table.component.html',
-    styleUrls: ['./utility-meters-table.component.css'],
-    standalone: false
+  selector: 'app-utility-meters-table',
+  templateUrl: './utility-meters-table.component.html',
+  styleUrls: ['./utility-meters-table.component.css'],
+  standalone: false
 })
 export class UtilityMetersTableComponent implements OnInit {
+
   @ViewChild('meterTable', { static: false }) meterTable: ElementRef;
 
   currentPageNumber: number = 1;
@@ -62,7 +63,7 @@ export class UtilityMetersTableComponent implements OnInit {
 
     this.itemsPerPageSub = this.sharedDataService.itemsPerPage.subscribe(val => {
       this.itemsPerPage = val;
-    })
+    });
   }
 
   ngOnDestroy() {

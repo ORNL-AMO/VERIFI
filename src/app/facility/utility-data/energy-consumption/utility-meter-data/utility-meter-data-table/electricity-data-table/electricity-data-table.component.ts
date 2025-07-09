@@ -1,5 +1,5 @@
-import { Component, ElementRef, EventEmitter, Input, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { ChangeDetectorRef, Component, ElementRef, EventEmitter, Input, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
+import { skip, Subscription, take } from 'rxjs';
 import { UtilityMeterDataService } from '../../utility-meter-data.service';
 import * as _ from 'lodash';
 import { CopyTableService } from 'src/app/shared/helper-services/copy-table.service';
@@ -15,6 +15,7 @@ import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
+import { ElectronService } from 'src/app/electron/electron.service';
 
 @Component({
   selector: 'app-electricity-data-table',
@@ -35,7 +36,7 @@ export class ElectricityDataTableComponent implements OnInit {
   setEdit: EventEmitter<IdbUtilityMeterData> = new EventEmitter<IdbUtilityMeterData>();
   @Output('setDelete')
   setDelete: EventEmitter<IdbUtilityMeterData> = new EventEmitter<IdbUtilityMeterData>();
-
+  
   @ViewChild('meterTable', { static: false }) meterTable: ElementRef;
 
 
@@ -57,12 +58,15 @@ export class ElectricityDataTableComponent implements OnInit {
   numEmissions: number;
   showEstimated: boolean;
   isRECs: boolean;
+  isElectron: boolean;
   constructor(private utilityMeterDataService: UtilityMeterDataService, private copyTableService: CopyTableService,
     private eGridService: EGridService, private facilityDbService: FacilitydbService,
     private customFuelDbService: CustomFuelDbService,
-    private accountDbService: AccountdbService) { }
+    private accountDbService: AccountdbService,
+    private electronService: ElectronService) { }
 
   ngOnInit(): void {
+    this.isElectron = this.electronService.isElectron;
     this.setIsRECs();
     this.energyUnit = this.selectedMeter.startingUnit;
     if (this.selectedMeterData.length != 0) {
@@ -175,7 +179,7 @@ export class ElectricityDataTableComponent implements OnInit {
     let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     let customFuels: Array<IdbCustomFuel> = this.customFuelDbService.accountCustomFuels.getValue();
     let account: IdbAccount = this.accountDbService.selectedAccount.getValue();
-    let co2EmissionsRates: Array<SubregionEmissions> = this.eGridService.co2Emissions.map(rate => {return rate});
+    let co2EmissionsRates: Array<SubregionEmissions> = this.eGridService.co2Emissions.map(rate => { return rate });
     this.selectedMeterData.forEach(dataItem => {
       let emissionsValues: EmissionsResults = getEmissions(this.selectedMeter, dataItem.totalEnergyUse, this.selectedMeter.energyUnit, new Date(dataItem.readDate).getFullYear(), false, [facility], co2EmissionsRates, customFuels, 0, undefined, undefined, dataItem.heatCapacity, account.assessmentReportVersion);
       dataItem = setUtilityDataEmissionsValues(dataItem, emissionsValues);
@@ -213,6 +217,5 @@ export class ElectricityDataTableComponent implements OnInit {
       }
     });
     this.numGeneralInformation = generalInfoCount + 2;
-
   }
 }

@@ -1,5 +1,5 @@
-import { Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { ChangeDetectorRef, Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
+import { skip, Subscription, take } from 'rxjs';
 import { VehicleDataFilters } from 'src/app/models/meterDataFilter';
 import { UtilityMeterDataService } from '../../utility-meter-data.service';
 import * as _ from 'lodash';
@@ -14,6 +14,7 @@ import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
+import { ElectronService } from 'src/app/electron/electron.service';
 
 @Component({
   selector: 'app-other-emissions-data-table',
@@ -52,17 +53,19 @@ export class OtherEmissionsDataTableComponent {
   showEmissionsSection: boolean;
   showDetailedCharges: boolean;
   volumeUnit: string;
-  energyUnit: string
+  energyUnit: string;
+  isElectron: boolean;
   constructor(private utilityMeterDataService: UtilityMeterDataService,
     private copyTableService: CopyTableService,
     private customFuelDbService: CustomFuelDbService,
     private facilityDbService: FacilitydbService,
-    private accountDbService: AccountdbService) {
+    private accountDbService: AccountdbService,
+    private electronService: ElectronService) {
 
   }
 
   ngOnInit(): void {
-
+    this.isElectron = this.electronService.isElectron;
     if (this.selectedMeterData.length != 0) {
       let hasFalseChecked: IdbUtilityMeterData = this.selectedMeterData.find(meterDataItem => { return meterDataItem.checked == false });
       this.allChecked = (hasFalseChecked == undefined);
