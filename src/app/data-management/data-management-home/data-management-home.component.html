@@ -5,77 +5,109 @@
                 <h4>
                     <i class="fa fa-list-check"></i>
                     {{account.name}} To Do List:
-                    <ng-container *ngIf="toDoItems.length > 0">
-                        <span class="badge bg-primary float-end">{{toDoItems.length}} items</span>
-                    </ng-container>
-
                 </h4>
-                <ng-container *ngIf="showMenu">
-                    <div class="d-flex justify-content-between mb-3">
-                        <div class="d-flex flex-column">
-                            <label>To Do Options:</label>
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" role="switch" id="includeOutdatedMeters"
-                                    name="includeOutdatedMeters" [(ngModel)]="todoListOptions.includeOutdatedMeters"
-                                    (change)="updateIncludedItems()">
-                                <label class="form-check-label" for="includeOutdatedMeters">Include outdated
-                                    meters</label>
-                            </div>
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" role="switch"
-                                    id="includeOutdatedPredictors" name="includeOutdatedPredictors"
-                                    [(ngModel)]="todoListOptions.includeOutdatedPredictors"
-                                    (change)="updateIncludedItems()">
-                                <label class="form-check-label" for="includeOutdatedPredictors">Include outdated
-                                    predictors</label>
-                            </div>
-                            <div class="d-flex"
-                                *ngIf="todoListOptions.includeOutdatedMeters || todoListOptions.includeOutdatedPredictors">
-                                <select class="form-select form-select-sm" id="outdatedDays" name="outdatedDays"
-                                    [(ngModel)]="todoListOptions.outdatedDays" (change)="updateIncludedItems()">
-                                    <option *ngFor="let days of outdatedDaysOptions" [value]="days">
-                                        Outdated after {{days}} days</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="d-flex flex-column" *ngIf="toDoItems.length > 0">
-                            <button class="btn btn-outline mb-2" (click)="openWeatherPredictorModal()"
-                                *ngIf="showWeatherButton">
-                                <span class="fa fa-temperature-half"></span>
-                                Update Weather Predictors
-                            </button>
-                            <button class="btn nav-btn" (click)="goToUpload()">
-                                <span class="fa fa-upload"></span>
-                                Upload Data
-                            </button>
+                <div class="d-flex justify-content-between mb-3">
+                    <div class="d-flex flex-column">
+                        <div class="d-flex">
+                            <select class="form-select" id="outdatedDays" name="outdatedDays"
+                                [(ngModel)]="account.toDoListOutdatedDays" (change)="updateIncludedItems()">
+                                <option *ngFor="let days of outdatedDaysOptions" [value]="days">
+                                    Data outdated after {{days}} days</option>
+                            </select>
                         </div>
                     </div>
-                    <hr class="my-2">
-                </ng-container>
+                    <div class="d-flex flex-column" *ngIf="hasTodoItems">
+                        <button class="btn btn-outline mb-2" (click)="openWeatherPredictorModal()"
+                            *ngIf="showWeatherButton">
+                            <span class="fa fa-temperature-half"></span>
+                            Update Weather Predictors
+                        </button>
+                        <button class="btn nav-btn" (click)="goToUpload()">
+                            <span class="fa fa-upload"></span>
+                            Upload Data
+                        </button>
+                    </div>
+                </div>
+                <hr class="my-2">
                 <p>
                     The following items have been identified as needing action for this account.
                 </p>
-                <ng-template [ngIf]="toDoItems.length > 0" [ngIfElse]="noToDoItems">
-                    <ul class="list-group">
+                <ng-template [ngIf]="hasTodoItems" [ngIfElse]="noToDoItems">
+                    <ul class="list-group list-group-flush">
+                        <!--Other Todo Items-->
                         <li class="list-group-item list-group-item-action"
-                            *ngFor="let item of toDoItems; let index = index;" [routerLink]="item.url">
-                            <div class="d-flex w-100 justify-content-between">
-                                <div class="p-0 bold">
-                                    {{index + 1}}.
-                                    <span class="fa fa-temperature-half pe-2" *ngIf="item.isWeather"></span>
-                                    {{item.label}}
-                                </div>
-                                <div *ngIf="item.facilityId">
-                                    @let facility = item.facilityId | facilityItem;
-                                    <span class="badge"
-                                        [ngStyle]="{'background-color': facility.color}">{{facility.name}}</span>
-                                </div>
-                            </div>
-
-                            <!-- <br> -->
+                            *ngFor="let item of toDoItems.otherItems; let index = index;" [routerLink]="item.url">
+                            {{item.label}}
                             <p class="fw-light mb-0 ms-3" *ngIf="item.description">
                                 {{item.description}}</p>
                         </li>
+                        <!--Items shown by facility-->
+                        <ng-template [ngIf]="totalTodoItems > 10" [ngIfElse]="listItemsBlock">
+                            <ng-container
+                                *ngFor="let facilityItem of toDoItems.facilityTodoItems; let facilityIndex = index;">
+                                <li class="list-group-item bold">
+                                    <span class="fa fa-industry"
+                                        [ngStyle]="{'color': facilityItem.facility.color}"></span>
+                                    {{facilityItem.facility.name}}
+                                    <span class="badge bg-secondary float-end">
+                                        {{facilityItem.numberOfItems}} items
+                                    </span>
+                                </li>
+                                <li class="list-group-item list-group-item-action sub-item-1"
+                                    (click)="toggleShowMeterItem(facilityIndex)">
+                                    <span class="fa"
+                                        [ngClass]="{'fa-chevron-right': !facilityItem.showMeterItems, 'fa-chevron-down': facilityItem.showMeterItems}"></span>
+                                    Meter To Do Items: {{facilityItem.meterTodoItems.length}}
+                                </li>
+                                <ng-container *ngIf="facilityItem.showMeterItems">
+                                    <li class="list-group-item list-group-item-action sub-item-2"
+                                        *ngFor="let meterItem of facilityItem.meterTodoItems; let meterIndex = index;"
+                                        [routerLink]="meterItem.url">
+                                        {{meterItem.label}}
+                                        <p class="fw-light mb-0 ms-3" *ngIf="meterItem.description">
+                                            {{meterItem.description}}</p>
+                                    </li>
+                                </ng-container>
+                                <li class="list-group-item list-group-item-action sub-item-1"
+                                    (click)="toggleShowPredictorItem(facilityIndex)">
+                                    <span class="fa"
+                                        [ngClass]="{'fa-chevron-right': !facilityItem.showPredictorItems, 'fa-chevron-down': facilityItem.showPredictorItems}"></span>
+                                    Predictor To Do Items: {{facilityItem.predictorTodoItems.length}}
+                                </li>
+                                <ng-container *ngIf="facilityItem.showPredictorItems">
+                                    <li class="list-group-item list-group-item-action sub-item-2"
+                                        *ngFor="let predictorItem of facilityItem.predictorTodoItems; let predictorIndex = index;"
+                                        [routerLink]="predictorItem.url">
+                                        <span class="fa fa-temperature-half pe-2"
+                                            *ngIf="predictorItem.isWeather"></span>
+                                        {{predictorItem.label}}
+                                        <p class="fw-light mb-0 ms-3" *ngIf="predictorItem.description">
+                                            {{predictorItem.description}}</p>
+                                    </li>
+                                </ng-container>
+                            </ng-container>
+                        </ng-template>
+                        <!--List of all To Do Items-->
+                        <ng-template #listItemsBlock>
+                            <li class="list-group-item list-group-item-action"
+                                *ngFor="let todoItem of allTodoItems; let meterIndex = index;"
+                                [routerLink]="todoItem.url">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <div class="p-0 bold">
+                                        <span class="fa fa-temperature-half pe-2" *ngIf="todoItem.isWeather"></span>
+                                        {{todoItem.label}}
+                                    </div>
+                                    <div>
+                                        @let facility = todoItem.facilityId | facilityItem;
+                                        <span class="badge"
+                                            [ngStyle]="{'background-color': facility.color}">{{facility.name}}</span>
+                                    </div>
+                                </div>
+                                <p class="fw-light mb-0 ms-3" *ngIf="todoItem.description">
+                                    {{todoItem.description}}</p>
+                            </li>
+                        </ng-template>
+
                     </ul>
                 </ng-template>
                 <ng-template #noToDoItems>

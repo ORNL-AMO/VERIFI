@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { FileReference } from './data-management-import/import-services/upload-data-models';
 import { LocalStorageService } from 'ngx-webstorage';
-import { TodoListOptions } from './todo-list';
 
 @Injectable({
   providedIn: 'root'
@@ -14,8 +13,6 @@ export class DataManagementService {
   helpPanelOpen: BehaviorSubject<boolean>;
   helpWidth: number = 200;
   sidebarWidth: number = 200;
-
-  todoListOptions: BehaviorSubject<TodoListOptions>;
   constructor(private localStorageService: LocalStorageService) {
     this.fileReferences = new BehaviorSubject<Array<FileReference>>([]);
 
@@ -38,13 +35,6 @@ export class DataManagementService {
     } else {
       this.sidebarOpen = new BehaviorSubject<boolean>(true);
     }
-
-
-    this.todoListOptions = new BehaviorSubject<TodoListOptions>({
-      includeOutdatedMeters: true,
-      includeOutdatedPredictors: true,
-      outdatedDays: 60
-    });
   }
 
   getFileReferenceById(id: string): FileReference {

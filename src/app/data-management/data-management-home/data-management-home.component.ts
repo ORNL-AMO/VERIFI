@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { firstValueFrom, Subscription } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
@@ -10,10 +10,9 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
-import { getTodoList, TodoItem, TodoListOptions } from '../todo-list';
+import { FacilityTodoItem, getTodoList, TodoItem } from '../todo-list';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
-import { DataManagementService } from '../data-management.service';
 import { WeatherPredictorManagementService } from 'src/app/weather-data/weather-predictor-management.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
@@ -46,11 +45,6 @@ export class DataManagementHomeComponent {
   predictorDataSub: Subscription;
   predictorData: Array<IdbPredictorData>;
 
-  toDoItems: Array<TodoItem> = [];
-
-  todoListOptions: TodoListOptions;
-  todoListOptionsSub: Subscription;
-
   meterGroupsSub: Subscription;
   meterGroups: Array<IdbUtilityMeterGroup>;
 
@@ -58,14 +52,20 @@ export class DataManagementHomeComponent {
   showWeatherButton: boolean = false;
 
   showWeatherPredictorModal: boolean = false;
-  showMenu: boolean = false;
+
+  toDoItems: {
+    facilityTodoItems: Array<FacilityTodoItem>,
+    otherItems: Array<TodoItem>
+  };
+  hasTodoItems: boolean = false;
+  totalTodoItems: number = 0;
+  allTodoItems: Array<TodoItem> = [];
   constructor(private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService,
     private utilityMeterDbService: UtilityMeterdbService,
     private predictorDbService: PredictorDbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private predictorDataDbService: PredictorDataDbService,
-    private dataManagementService: DataManagementService,
     private weatherPredictorManagementService: WeatherPredictorManagementService,
     private router: Router,
     private activatedRoute: ActivatedRoute,
@@ -77,6 +77,9 @@ export class DataManagementHomeComponent {
   ngOnInit() {
     this.accountSub = this.accountDbService.selectedAccount.subscribe(account => {
       this.account = account;
+      if(!this.account.toDoListOutdatedDays){
+        this.account.toDoListOutdatedDays = 60;
+      }
       this.setTodoItems();
     });
     this.facilitiesSub = this.facilityDbService.accountFacilities.subscribe(facilities => {
@@ -103,10 +106,6 @@ export class DataManagementHomeComponent {
       this.meterGroups = meterGroups;
       this.setTodoItems();
     });
-    this.todoListOptionsSub = this.dataManagementService.todoListOptions.subscribe(options => {
-      this.todoListOptions = options;
-      this.setTodoItems();
-    });
   }
 
   ngOnDestroy() {
@@ -116,7 +115,6 @@ export class DataManagementHomeComponent {
     this.predictorsSub.unsubscribe();
     this.meterDataSub.unsubscribe();
     this.predictorDataSub.unsubscribe();
-    this.todoListOptionsSub.unsubscribe();
     this.meterGroupsSub.unsubscribe();
   }
 
@@ -127,21 +125,20 @@ export class DataManagementHomeComponent {
       this.predictors,
       this.meterData,
       this.predictorData,
-      this.meterGroups,
-      this.todoListOptions);
-    this.showWeatherButton = this.toDoItems.find(item => {
+      this.meterGroups);
+    
+    this.allTodoItems = this.toDoItems.facilityTodoItems.flatMap(f => f.meterTodoItems.concat(f.predictorTodoItems));
+
+    this.showWeatherButton = this.allTodoItems.find(item => {
       return item.isWeather && item.type === 'predictor';
     }) != undefined;
-    if (this.todoListOptions) {
-      this.showMenu = this.toDoItems.find(item => {
-        return item.type == 'predictor' || item.type == 'meter'
-      }) != undefined || !this.todoListOptions.includeOutdatedMeters || !this.todoListOptions.includeOutdatedPredictors;
-    }
-
+    this.hasTodoItems = this.allTodoItems.length > 0 || this.toDoItems.otherItems.length > 0;
+    this.totalTodoItems = this.allTodoItems.length + this.toDoItems.otherItems.length;
   }
 
-  updateIncludedItems() {
-    this.dataManagementService.todoListOptions.next(this.todoListOptions);
+  async updateIncludedItems() {
+    this.account = await firstValueFrom(this.accountDbService.updateWithObservable(this.account));
+    this.accountDbService.selectedAccount.next(this.account);
   }
 
   openWeatherPredictorModal() {
@@ -165,5 +162,13 @@ export class DataManagementHomeComponent {
 
   goToUpload() {
     this.router.navigate(['../import-data'], { relativeTo: this.activatedRoute });
+  }
+
+  toggleShowPredictorItem(facilityIndex: number){
+    this.toDoItems.facilityTodoItems[facilityIndex].showPredictorItems = !this.toDoItems.facilityTodoItems[facilityIndex].showPredictorItems;
+  }
+
+  toggleShowMeterItem(facilityIndex: number) {
+    this.toDoItems.facilityTodoItems[facilityIndex].showMeterItems = !this.toDoItems.facilityTodoItems[facilityIndex].showMeterItems;
   }
 }

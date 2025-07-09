@@ -35,7 +35,13 @@ export class DataManagementFacilityHelpComponent {
 
   setHelpURL() {
     let parentRoute: ActivatedRoute = this.activatedRoute.firstChild;
+    if (!parentRoute) {
+      return;
+    }
     let childRoute: ActivatedRoute = parentRoute.firstChild;
+    if (!childRoute) {
+      return;
+    }
     let currentComponent = childRoute.component.name;
     if (currentComponent === 'FacilitiesListComponent') {
       this.helpContext = 'facilities-list'
