@@ -19,8 +19,8 @@
 
 <div class="w-100 justify-content-center" *ngIf="!facilityDetails">
     <div class="pt-5">
-        <app-calculating-spinner [message]="'Generating Analysis Report...'"></app-calculating-spinner>
+        <app-calculating-spinner [message]="'Generating Modeling Report...'"></app-calculating-spinner>
     </div>
 </div>
 
-<app-print-report-button *ngIf="facilityDetails"></app-print-report-button>
+<app-print-report-button *ngIf="facilityDetails.length > 0"></app-print-report-button>
