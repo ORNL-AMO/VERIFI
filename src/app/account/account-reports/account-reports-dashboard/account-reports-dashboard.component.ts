@@ -63,6 +63,8 @@ export class AccountReportsDashboardComponent {
       this.newReportType = 'dataOverview';
     } else if (this.router.url.includes('better-climate')) {
       this.newReportType = 'betterClimate';
+    } else if (this.router.url.includes('analysis')) {
+      this.newReportType = 'analysis';
     }
     this.displayNewReport = true;
   }
