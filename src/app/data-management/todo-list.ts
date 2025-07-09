@@ -14,15 +14,14 @@ export function getTodoList(account: IdbAccount,
     predictors: Array<IdbPredictor>,
     meterData: Array<IdbUtilityMeterData>,
     predictorData: Array<IdbPredictorData>,
-    meterGroups: Array<IdbUtilityMeterGroup>,
-    options: TodoListOptions): {
+    meterGroups: Array<IdbUtilityMeterGroup>): {
         facilityTodoItems: Array<FacilityTodoItem>,
         otherItems: Array<TodoItem>
     } {
     let otherItems: Array<TodoItem> = [];
     let facilityTodoItems: Array<FacilityTodoItem> = [];
 
-    if (account && facilities && meters && predictors && meterData && predictorData && options && meterGroups) {
+    if (account && facilities && meters && predictors && meterData && predictorData && meterGroups) {
         if (account.name == 'New Account') {
             otherItems.push({
                 label: 'Setup account settings',
@@ -50,7 +49,7 @@ export function getTodoList(account: IdbAccount,
             });
         } else {
             facilities.forEach(facility => {
-                let facilityTodoItem: FacilityTodoItem = getFacilityTodoItem(facility, meters, predictors, meterData, predictorData, meterGroups, options);
+                let facilityTodoItem: FacilityTodoItem = getFacilityTodoItem(facility, meters, predictors, meterData, predictorData, meterGroups, account.toDoListOutdatedDays);
                 if (facilityTodoItem.numberOfItems > 0) {
                     facilityTodoItems.push(facilityTodoItem);
                 }
@@ -69,7 +68,7 @@ function getFacilityTodoItem(facility: IdbFacility, meters: Array<IdbUtilityMete
     meterData: Array<IdbUtilityMeterData>,
     predictorData: Array<IdbPredictorData>,
     meterGroups: Array<IdbUtilityMeterGroup>,
-    options: TodoListOptions): FacilityTodoItem {
+    outdatedDays: number): FacilityTodoItem {
 
     let meterTodoItems: Array<TodoItem> = [];
     let predictorTodoItems: Array<TodoItem> = [];
@@ -97,7 +96,7 @@ function getFacilityTodoItem(facility: IdbFacility, meters: Array<IdbUtilityMete
             });
         }
         facilityMeters.forEach(meter => {
-            setMeterTodoItems(meter, meterData, meterTodoItems, options);
+            setMeterTodoItems(meter, meterData, meterTodoItems, outdatedDays);
         })
     }
     let facilityPredictors: Array<IdbPredictor> = predictors.filter(p => p.facilityId === facility.guid);
@@ -111,7 +110,7 @@ function getFacilityTodoItem(facility: IdbFacility, meters: Array<IdbUtilityMete
         });
     } else {
         facilityPredictors.forEach(predictor => {
-            setPredictorTodoItems(predictor, predictorData, predictorTodoItems, options);
+            setPredictorTodoItems(predictor, predictorData, predictorTodoItems, outdatedDays);
         });
     }
 
@@ -129,7 +128,7 @@ function getFacilityTodoItem(facility: IdbFacility, meters: Array<IdbUtilityMete
 function setMeterTodoItems(meter: IdbUtilityMeter,
     meterData: Array<IdbUtilityMeterData>,
     toDoItems: Array<TodoItem>,
-    options: TodoListOptions) {
+    outdatedDays: number) {
     let meterDataForMeter: Array<IdbUtilityMeterData> = meterData.filter(d => d.meterId === meter.guid);
     if (meterDataForMeter.length === 0) {
         toDoItems.push({
@@ -151,20 +150,18 @@ function setMeterTodoItems(meter: IdbUtilityMeter,
         }
 
 
-        if (options.includeOutdatedMeters) {
-            let latestReading: IdbUtilityMeterData = _.maxBy(meterDataForMeter, (data: IdbUtilityMeterData) => new Date(data.readDate).getTime());
-            let readingDate: Date = new Date(latestReading.readDate);
+        let latestReading: IdbUtilityMeterData = _.maxBy(meterDataForMeter, (data: IdbUtilityMeterData) => new Date(data.readDate).getTime());
+        let readingDate: Date = new Date(latestReading.readDate);
 
-            if (latestReading && readingDate.getTime() < (new Date().getTime() - options.outdatedDays * 24 * 60 * 60 * 1000) && meter.meterReadingDataApplication != 'fullYear') {
-                const formattedDate = formatDate(readingDate, 'MM/dd/yyyy', 'en-US');
-                toDoItems.push({
-                    label: 'Update utility meter data for ' + meter.name,
-                    url: '/data-management/' + meter.accountId + '/facilities/' + meter.facilityId + '/meters/' + meter.guid + '/meter-data',
-                    description: "Update utility meter data for the meter. The latest reading (" + formattedDate + ") is more than " + options.outdatedDays + " days old.",
-                    facilityId: meter.facilityId,
-                    type: 'meter',
-                });
-            }
+        if (latestReading && readingDate.getTime() < (new Date().getTime() - outdatedDays * 24 * 60 * 60 * 1000) && meter.meterReadingDataApplication != 'fullYear') {
+            const formattedDate = formatDate(readingDate, 'MM/dd/yyyy', 'en-US');
+            toDoItems.push({
+                label: 'Update utility meter data for ' + meter.name,
+                url: '/data-management/' + meter.accountId + '/facilities/' + meter.facilityId + '/meters/' + meter.guid + '/meter-data',
+                description: "Update utility meter data for the meter. The latest reading (" + formattedDate + ") is more than " + outdatedDays + " days old.",
+                facilityId: meter.facilityId,
+                type: 'meter',
+            });
         }
     }
 }
@@ -172,7 +169,7 @@ function setMeterTodoItems(meter: IdbUtilityMeter,
 function setPredictorTodoItems(predictor: IdbPredictor,
     predictorData: Array<IdbPredictorData>,
     toDoItems: Array<TodoItem>,
-    options: TodoListOptions) {
+    outdatedDays: number) {
     let predictorDataForFacility: Array<IdbPredictorData> = predictorData.filter(d => d.predictorId === predictor.guid);
     if (predictorDataForFacility.length === 0) {
         toDoItems.push({
@@ -183,19 +180,19 @@ function setPredictorTodoItems(predictor: IdbPredictor,
             type: 'predictor',
             isWeather: predictor.predictorType == 'Weather'
         });
-    } else if (options.includeOutdatedPredictors) {
+    } else {
         let latestReading: IdbPredictorData = _.maxBy(predictorDataForFacility, (data: IdbPredictorData) => new Date(data.date).getTime());
         let readingDate: Date = new Date(latestReading.date);
         // Set readingDate to end of the month
         readingDate = new Date(readingDate.getFullYear(), readingDate.getMonth() + 1, 0);
         //
         // Check if the latest reading is more than 60 days old
-        if (latestReading && readingDate.getTime() < (new Date().getTime() - options.outdatedDays * 24 * 60 * 60 * 1000)) {
+        if (latestReading && readingDate.getTime() < (new Date().getTime() - outdatedDays * 24 * 60 * 60 * 1000)) {
             const formattedDate = formatDate(readingDate, 'MM/yyyy', 'en-US');
             toDoItems.push({
                 label: 'Update predictor data for ' + predictor.name,
                 url: '/data-management/' + predictor.accountId + '/facilities/' + predictor.facilityId + '/predictors/' + predictor.guid + '/predictor-data',
-                description: "Update predictor data for the predictor. The latest reading (" + formattedDate + ") is more than " + options.outdatedDays + " days old.",
+                description: "Update predictor data for the predictor. The latest reading (" + formattedDate + ") is more than " + outdatedDays + " days old.",
                 facilityId: predictor.facilityId,
                 type: 'predictor',
                 isWeather: predictor.predictorType == 'Weather'
@@ -212,12 +209,6 @@ export interface TodoItem {
     facilityId: string,
     type: 'account' | 'facility' | 'meter' | 'predictor';
     isWeather?: boolean
-}
-
-export interface TodoListOptions {
-    includeOutdatedMeters: boolean;
-    includeOutdatedPredictors: boolean;
-    outdatedDays: number;
 }
 
 export interface FacilityTodoItem {

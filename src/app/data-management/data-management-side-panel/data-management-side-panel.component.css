@@ -59,7 +59,7 @@ nav.navbar .nav.nav-tabs .nav-item .nav-link{
 
 
 nav.navbar .nav.nav-tabs .nav-item .nav-link.active{
-    background-color: black;
+    background-color: #ff6000;
     color: white !important;
     border-bottom-color: black;
 }
@@ -69,6 +69,6 @@ nav.navbar .nav.nav-tabs .nav-item .nav-link.active{
 }
 
 nav.navbar .nav.nav-tabs .nav-item .nav-link:hover {
-    background-color: gray;
+    background-color: #ff873c;
     color: black;
 }

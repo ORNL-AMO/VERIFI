@@ -116,6 +116,8 @@ export class HeaderComponent implements OnInit {
   async addNewAccount() {
     let account: IdbAccount = getNewIdbAccount();
     account = await firstValueFrom(this.accountdbService.addWithObservable(account));
+    let accounts: Array<IdbAccount> = await firstValueFrom(this.accountdbService.getAll());
+    this.accountdbService.allAccounts.next(accounts);
     await this.dbChangesService.selectAccount(account, false);
     this.router.navigateByUrl('/data-management/' + account.guid);
   }
@@ -226,8 +228,8 @@ export class HeaderComponent implements OnInit {
       let url: string = this.router.url;
       if (url.includes('facilities')) {
         let selectedFacility: IdbFacility = this.facilitydbService.selectedFacility.getValue();
-        if(selectedFacility){
-          
+        if (selectedFacility) {
+
         }
         this.router.navigateByUrl('/facility/' + selectedFacility.id);
       } else if (url.includes('weather-data')) {

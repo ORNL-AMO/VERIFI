@@ -10,6 +10,7 @@ import { FormsModule } from '@angular/forms';
 import { UploadDataHelpModule } from './data-management-help-panel/upload-data-help/upload-data-help.module';
 import { DataManagementFacilityHelpComponent } from './data-management-help-panel/data-management-facility-help/data-management-facility-help.component';
 import { FacilityListHelpComponent } from './data-management-help-panel/data-management-facility-help/facility-list-help/facility-list-help.component';
+import { HelperPipesModule } from 'src/app/shared/helper-pipes/_helper-pipes.module';
 
 
 
@@ -27,7 +28,8 @@ import { FacilityListHelpComponent } from './data-management-help-panel/data-man
     SharedHelpContentModule,
     RouterModule,
     FormsModule,
-    UploadDataHelpModule
+    UploadDataHelpModule,
+    HelperPipesModule
   ],
   exports: [
     DataManagementSidePanelComponent

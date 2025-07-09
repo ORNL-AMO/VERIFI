@@ -16,7 +16,8 @@ export interface IdbAccount extends IdbEntry, AccountAndFacility {
     sidebarFacilitiesOpen?: boolean,
     isBetterPlantsPartner?: boolean,
     assessmentReportVersion?: 'AR4' | 'AR5',
-    sidebarCustomDataOpen?: boolean
+    sidebarCustomDataOpen?: boolean,
+    toDoListOutdatedDays?: number
 }
 
 export function getNewIdbAccount(): IdbAccount {

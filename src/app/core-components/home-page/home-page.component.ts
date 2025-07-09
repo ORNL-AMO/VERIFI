@@ -24,7 +24,9 @@ export class HomePageComponent {
     private dbChangesService: DbChangesService) { }
 
   ngOnInit(): void {
-    this.accounts = this.accountDbService.allAccounts.getValue();
+    this.accounts = this.accountDbService.allAccounts.getValue().filter(account => {
+      return !account.deleteAccount;
+    });
   }
 
   loadTestData() {
