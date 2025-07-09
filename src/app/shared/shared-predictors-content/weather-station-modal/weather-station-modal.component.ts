@@ -47,7 +47,7 @@ export class WeatherStationModalComponent {
   }
 
   async setStations() {
-    if (this.addressLatLong.latitude && this.addressLatLong.longitude) {
+    if (this.addressLatLong && this.addressLatLong.latitude && this.addressLatLong.longitude) {
       this.fetchingData = true;
       this.stationSearchError = false;
       try {
@@ -70,10 +70,14 @@ export class WeatherStationModalComponent {
     this.searchingLatLong = true;
     this.addressLookupItems = await this.weatherDataService.getLocation(this.addressString);
     this.searchingLatLong = false;
-    if (this.addressLookupItems.length > 0) {
+    if (this.addressLookupItems && this.addressLookupItems.length > 0) {
+      this.addressLookupItems = this.addressLookupItems.sort((a, b) => {
+        const aUS = a.display_name.includes('United States') ? 0 : 1;
+        const bUS = b.display_name.includes('United States') ? 0 : 1;
+        return aUS - bUS;
+      });
       this.selectedLocationId = this.addressLookupItems[0].place_id
       this.setLatLongFromItem(this.addressLookupItems[0]);
-      this.setStations();
     }
     this.stationSearchError = false;
   }

@@ -103,7 +103,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <ng-template [ngIf]="addressLookupItems.length > 0" [ngIfElse]="noItemsBlock">
+                            <ng-template [ngIf]="addressLookupItems?.length > 0" [ngIfElse]="noItemsBlock">
                                 <tr *ngFor="let item of addressLookupItems">
                                     <td>
                                         <div class="form-check">

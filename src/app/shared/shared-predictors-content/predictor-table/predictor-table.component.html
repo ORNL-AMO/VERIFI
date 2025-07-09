@@ -1,4 +1,4 @@
-<div class="d-flex w-100 justify-content-end mb-2">
+<div class="d-flex w-100 justify-content-end mb-2" *ngIf="facilityPredictors.length != 0">
     <div class="alert alert-warning small mb-0 p-1" *ngIf="hasUpdateWarning">
         <span>
             <i class="fa fa-exclamation-triangle"></i>
@@ -147,10 +147,18 @@
 </ng-container>
 
 <ng-container *ngIf="facilityPredictors.length == 0">
-    <div class="alert alert-warning">
-        No predictor data found for this facility. Click "<span class="fa fa-plus"></span> Add New Predictor" button to
-        create your first predictor or the "<span class="fa fa-upload"></span> Import Data" button to use the upload
-        data wizard to upload data from a .xlsx file.
+    <div class="text-center mt-5 no-meters">
+        <h5>No predictors found for this facility.</h5>
+        <p>Please <i class="fa fa-plus"></i> Add New Predictor or <i class="fa fa-upload"></i> Import multiple predictors from
+            excel.</p>
+        <div class="d-flex w-100 justify-content-center">
+            <div class="pe-1">
+                <button class="btn action-btn" (click)="addPredictor()"><i class="fa fa-plus"></i> Add New Predictor</button>
+            </div>
+            <div class="ps-1">
+                <button class="btn nav-btn" (click)="uploadData()"><i class="fa fa-upload"></i> Import Data</button>
+            </div>
+        </div>
     </div>
 </ng-container>
 

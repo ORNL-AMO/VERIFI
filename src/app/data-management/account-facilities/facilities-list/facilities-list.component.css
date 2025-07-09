@@ -1,3 +1,3 @@
-.fa-plus{
+:not(.alert) .fa-plus{
     color: white;
 }

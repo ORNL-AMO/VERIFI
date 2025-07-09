@@ -17,17 +17,19 @@
     </div>
     <div class="d-flex">
         <!--Items Per Page-->
-        <button class="btn btn-outline me-1" (click)="openCheckForUpdatesModal()">
+        <button class="btn btn-outline me-1" (click)="openCheckForUpdatesModal()" *ngIf="firstMeterReading">
             <i class="fa fa-redo"></i>
             Check For Changes
         </button>
         <app-table-items-dropdown *ngIf="predictorData.length != 0"></app-table-items-dropdown>
         <button class="btn btn-secondary ms-1" (click)="cancel()">Cancel</button>
-        <button class="btn btn-primary ms-1" (click)="updateEntries()" [disabled]="calculatingData">Update
+        <button class="btn btn-primary ms-1" (click)="updateEntries()" [disabled]="calculatingData">
+            @let btnLabel = firstMeterReading ? 'Update' : 'Add';
+            {{btnLabel}}
             Entries</button>
     </div>
 </div>
-<div class="d-flex mt-1 mb-1">
+<div class="d-flex mt-1 mb-1" *ngIf="firstMeterReading || latestMeterReading">
     <div class="alert alert-warning small mb-0 p-1">
         <span>
             <i class="fa fa-exclamation-triangle"></i>

@@ -209,6 +209,7 @@ export class PredictorsDataTableComponent {
   }
 
   async bulkDelete() {
+    this.cancelBulkDelete();
     this.loadingService.setLoadingMessage("Deleting Predictor Entries...");
     this.loadingService.setLoadingStatus(true);
     let checkedItems: Array<IdbPredictorData> = new Array();
@@ -222,7 +223,6 @@ export class PredictorsDataTableComponent {
     }
 
     this.allChecked = false;
-    this.cancelBulkDelete();
     await this.finishDelete();
   }
 
@@ -232,6 +232,7 @@ export class PredictorsDataTableComponent {
     await this.dbChangesService.setPredictorDataV2(account, selectedFacility);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast("Predictor Data Deleted!", undefined, undefined, false, "alert-success");
+    this.setHasChecked();
   }
 
 

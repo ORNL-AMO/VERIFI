@@ -84,6 +84,9 @@ export class DataManagementSidebarComponent {
 
     this.sidebarOpenSub = this.dataManagementService.sidebarOpen.subscribe(val => {
       this.sidebarOpen = val;
+      setTimeout(() => {
+        window.dispatchEvent(new Event("resize"));
+      }, 100)
     })
     this.routerSub = this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
