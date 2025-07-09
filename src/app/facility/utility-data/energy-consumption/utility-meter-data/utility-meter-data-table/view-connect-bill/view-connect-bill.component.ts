@@ -1,6 +1,7 @@
 import { ChangeDetectorRef, Component, Input } from '@angular/core';
 import { skip, take } from 'rxjs';
 import { ElectronService } from 'src/app/electron/electron.service';
+import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 
 @Component({
@@ -14,27 +15,21 @@ export class ViewConnectBillComponent {
 
   @Input()
   meterData: IdbUtilityMeterData;
+  @Input()
+  selectedMeter: IdbUtilityMeter;
   isElectron: boolean;
   key: string;
   savedUtilityFilePath: string;
   utilityFileDeleted: boolean = false;
   deletedPath: string;
-  isBillConnected: boolean = false;
   constructor(
     private electronService: ElectronService,
     private cd: ChangeDetectorRef) { }
 
   ngOnInit(): void {
     this.isElectron = this.electronService.isElectron;
-    this.isBillConnected = this.meterData.isBillConnected;
   }
-
-  ngOnChanges() {
-    if (this.meterData) {
-      this.isBillConnected = this.meterData.isBillConnected;
-    }
-  }
-
+  
   async viewUtilityBill(meterData) {
     this.key = meterData.guid;
     this.electronService.getFilePath(this.key).pipe(take(1)).subscribe(path => {

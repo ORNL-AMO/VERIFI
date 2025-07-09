@@ -55,7 +55,8 @@ export interface IdbUtilityMeterData extends Partial<EmissionsResults>, IdbEntry
     heatCapacity?: number,
     vehicleFuelEfficiency?: number,
 
-    isBillConnected?: boolean
+    isBillConnected?: boolean,
+    uploadedFilePath?: string
 
 }
 
@@ -109,7 +110,8 @@ export function getNewIdbUtilityMeterData(meter: IdbUtilityMeter, accountMeterDa
         meterNumber: meter.meterNumber,
         heatCapacity: meter.heatCapacity,
         vehicleFuelEfficiency: meter.vehicleFuelEfficiency,
-        isBillConnected: false
+        isBillConnected: false,
+        uploadedFilePath: undefined
     }
 }
 

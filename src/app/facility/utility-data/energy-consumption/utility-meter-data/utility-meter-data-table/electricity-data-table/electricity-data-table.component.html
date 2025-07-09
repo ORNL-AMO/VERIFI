@@ -183,7 +183,7 @@
                     <button class="btn btn-sm btn-outline" (click)="setEditMeterData(meterData)" title="Edit">
                         <i class="fa fa-pencil"></i>
                     </button>
-                    <app-view-connect-bill *ngIf="isElectron" [meterData]="meterData"></app-view-connect-bill>
+                    <app-view-connect-bill *ngIf="isElectron" [meterData]="meterData" [selectedMeter]="selectedMeter"></app-view-connect-bill>
                     <button class="btn btn-sm btn-outline" (click)="setDeleteMeterData(meterData)" title="Delete">
                         <i class="fa fa-trash"></i>
                     </button>
@@ -241,7 +241,7 @@
                     <button class="btn btn-sm btn-outline" (click)="setEditMeterData(meterData)" title="Edit">
                         <i class="fa fa-pencil"></i>
                     </button>
-                    <app-view-connect-bill *ngIf="isElectron" [meterData]="meterData"></app-view-connect-bill>
+                    <app-view-connect-bill *ngIf="isElectron" [meterData]="meterData" [selectedMeter]="selectedMeter"></app-view-connect-bill>
                     <button class="btn btn-sm btn-outline" (click)="setDeleteMeterData(meterData)" title="Delete">
                         <i class="fa fa-trash"></i>
                     </button>
