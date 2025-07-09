@@ -12,6 +12,7 @@ import { ManageAccountsComponent } from '../core-components/manage-accounts/mana
 import { HomePageComponent } from '../core-components/home-page/home-page.component';
 import { DataManagementRoutes } from './data-management.routes';
 import { PrivacyNoticeComponent } from '../static-content/privacy-notice/privacy-notice.component';
+import { DataEvaluationRoutes } from './data-evaluation.routes';
 
 const routes: Routes = [
   {
@@ -20,8 +21,9 @@ const routes: Routes = [
     redirectTo: 'welcome'
   },
   { path: 'welcome', component: HomePageComponent },
-  AccountRoutes,
-  FacilityRoutes,
+  DataEvaluationRoutes,
+  // AccountRoutes,
+  // FacilityRoutes,
   DataManagementRoutes,
   { path: 'about', component: AboutComponent },
   { path: 'acknowledgments', component: AcknowledgmentsComponent },
@@ -29,7 +31,7 @@ const routes: Routes = [
   { path: 'help', component: HelpComponent },
   { path: 'manage-accounts', component: ManageAccountsComponent },
   { path: 'privacy', component: PrivacyNoticeComponent },
-  WeatherDataRoutes,
+  // WeatherDataRoutes,
   //wildcard/page not found needs to be last route
   { path: "**", component: PageNotFoundComponent },
 ];

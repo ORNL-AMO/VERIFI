@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { HelpPanelService } from 'src/app/help-panel/help-panel.service';
 import { AccountReportsService } from '../account-reports.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
@@ -15,11 +14,8 @@ export class PrintReportButtonComponent {
 
   print: boolean;
   printSub: Subscription;
-  helpPanelOpen: boolean;
-  helpPanelOpenSub: Subscription;
   selectedReport: IdbAccountReport;
   constructor(private accountReportsService: AccountReportsService,
-    private helpPanelService: HelpPanelService,
     private accountReportDbService: AccountReportDbService) {
 
   }
@@ -32,15 +28,10 @@ export class PrintReportButtonComponent {
         this.printReport();
       }
     });
-
-    this.helpPanelOpenSub = this.helpPanelService.helpPanelOpen.subscribe(val => {
-      this.helpPanelOpen = val;
-    });
   }
 
   ngOnDestroy() {
     this.printSub.unsubscribe();
-    this.helpPanelOpenSub.unsubscribe();
   }
 
 

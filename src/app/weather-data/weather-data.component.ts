@@ -1,32 +1,18 @@
 import { Component } from '@angular/core';
-import { HelpPanelService } from '../help-panel/help-panel.service';
-import { AccountdbService } from '../indexedDB/account-db.service';
-import { Subscription, firstValueFrom } from 'rxjs';
-import { WeatherDataReading, WeatherDataService } from './weather-data.service';
+import { Subscription } from 'rxjs';
+import { WeatherDataService } from './weather-data.service';
 import { FacilitydbService } from '../indexedDB/facility-db.service';
 import { LoadingService } from '../core-components/loading/loading.service';
 import { NavigationEnd, Router } from '@angular/router';
-import { AnalysisDbService } from '../indexedDB/analysis-db.service';
 import { ToastNotificationsService } from '../core-components/toast-notifications/toast-notifications.service';
-import { DetailDegreeDay, WeatherDataSelection } from '../models/degreeDays';
+import { WeatherDataSelection } from '../models/degreeDays';
 import { UtilityMeterDatadbService } from '../indexedDB/utilityMeterData-db.service';
-import { UtilityMeterdbService } from '../indexedDB/utilityMeter-db.service';
-import { CalanderizedMeter, MonthlyData } from '../models/calanderization';
 import * as _ from 'lodash';
-import { DbChangesService } from '../indexedDB/db-changes.service';
-import { getCalanderizedMeterData } from '../calculations/calanderization/calanderizeMeters';
 import { AnalyticsService } from '../analytics/analytics.service';
-import { IdbAccount } from '../models/idbModels/account';
 import { IdbFacility } from '../models/idbModels/facility';
 import { IdbUtilityMeterData } from '../models/idbModels/utilityMeterData';
-import { IdbUtilityMeter } from '../models/idbModels/utilityMeter';
-import { getNewIdbPredictorData, IdbPredictorData } from '../models/idbModels/predictorData';
-import { PredictorDbService } from '../indexedDB/predictor-db.service';
+import { IdbPredictorData } from '../models/idbModels/predictorData';
 import { PredictorDataDbService } from '../indexedDB/predictor-data-db.service';
-import { getNewIdbPredictor, IdbPredictor } from '../models/idbModels/predictor';
-import { DatePipe } from '@angular/common';
-import { getDegreeDayAmount } from '../shared/sharedHelperFuntions';
-import { getDetailedDataForMonth } from './weatherDataCalculations';
 import { WeatherPredictorManagementService } from './weather-predictor-management.service';
 // import { DegreeDaysService } from '../shared/helper-services/degree-days.service';
 
@@ -46,18 +32,14 @@ export class WeatherDataComponent {
   facilityPredictorData: Array<IdbPredictorData>;
   facilityMeterData: Array<IdbUtilityMeterData>;
   inDashboard: boolean = false;
-  constructor(private helpPanelService: HelpPanelService, private accountDbService: AccountdbService,
+  constructor(
     private weatherDataService: WeatherDataService,
     private facilityDbService: FacilitydbService,
-    private predictorDbService: PredictorDbService,
     private predictorDataDbService: PredictorDataDbService,
     private loadingService: LoadingService,
     private router: Router,
-    private analysisDbService: AnalysisDbService,
     private toastNotificationService: ToastNotificationsService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
-    private utilityMeterDbService: UtilityMeterdbService,
-    private dbChangesService: DbChangesService,
     private analyticsService: AnalyticsService,
     // private degreeDaysService: DegreeDaysService
     private weatherPredictorManagementService: WeatherPredictorManagementService
@@ -92,12 +74,7 @@ export class WeatherDataComponent {
   ngOnDestroy() {
     this.applyToFacilitySub.unsubscribe();
   }
-
-  toggleHelpPanel() {
-    let helpPanelOpen: boolean = this.helpPanelService.helpPanelOpen.getValue();
-    this.helpPanelService.helpPanelOpen.next(!helpPanelOpen);
-  }
-
+  
   cancelApplyToFacility() {
     this.weatherDataService.applyToFacility.next(false);
   }

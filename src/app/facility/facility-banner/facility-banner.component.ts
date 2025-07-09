@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { HelpPanelService } from 'src/app/help-panel/help-panel.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -20,7 +19,7 @@ export class FacilityBannerComponent implements OnInit {
   facilityMeterData: Array<IdbUtilityMeterData>;
   facilityMeterDataSub: Subscription;
   constructor(private facilityDbService: FacilitydbService,
-    private helpPanelService: HelpPanelService, private utilityMeterDataDbService: UtilityMeterDatadbService) { }
+     private utilityMeterDataDbService: UtilityMeterDatadbService) { }
 
   ngOnInit(): void {
     this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(val => {
@@ -36,10 +35,4 @@ export class FacilityBannerComponent implements OnInit {
     this.selectedFacilitySub.unsubscribe();
     this.facilityMeterDataSub.unsubscribe();
   }
-
-  toggleHelpPanel() {
-    let helpPanelOpen: boolean = this.helpPanelService.helpPanelOpen.getValue();
-    this.helpPanelService.helpPanelOpen.next(!helpPanelOpen);
-  }
-
 }

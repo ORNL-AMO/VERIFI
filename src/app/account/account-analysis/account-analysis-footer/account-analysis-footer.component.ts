@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { HelpPanelService } from 'src/app/help-panel/help-panel.service';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { Subscription } from 'rxjs';
 import { NavigationEnd, Router } from '@angular/router';
@@ -20,15 +19,12 @@ export class AccountAnalysisFooterComponent implements OnInit {
 
   sidebarOpen: boolean;
   sidebarOpenSub: Subscription;
-  helpPanelOpen: boolean;
-  helpPanelOpenSub: Subscription;
   routerSub: Subscription;
   inDashboard: boolean;
   showContinue: boolean;
   analysisItem: IdbAccountAnalysisItem;
   analysisItemSub: Subscription
   constructor(private sharedDataService: SharedDataService,
-    private helpPanelService: HelpPanelService,
     private router: Router,
     private facilityDbService: FacilitydbService,
     private accountAnalysisService: AccountAnalysisService,
@@ -51,15 +47,10 @@ export class AccountAnalysisFooterComponent implements OnInit {
     this.sidebarOpenSub = this.sharedDataService.sidebarOpen.subscribe(val => {
       this.sidebarOpen = val;
     });
-
-    this.helpPanelOpenSub = this.helpPanelService.helpPanelOpen.subscribe(val => {
-      this.helpPanelOpen = val;
-    })
   }
 
   ngOnDestroy() {
     this.sidebarOpenSub.unsubscribe();
-    this.helpPanelOpenSub.unsubscribe();
     this.routerSub.unsubscribe();
     this.analysisItemSub.unsubscribe();
   }

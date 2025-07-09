@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { HelpPanelService } from 'src/app/help-panel/help-panel.service';
 import { FacilityReportsService } from '../facility-reports.service';
 import { Subscription } from 'rxjs';
 
@@ -13,10 +12,7 @@ export class FacilityPrintReportButtonComponent {
 
   print: boolean;
   printSub: Subscription;
-  helpPanelOpen: boolean;
-  helpPanelOpenSub: Subscription;
-  constructor(private facilityReportsService: FacilityReportsService,
-    private helpPanelService: HelpPanelService) {
+  constructor(private facilityReportsService: FacilityReportsService) {
 
   }
 
@@ -27,15 +23,10 @@ export class FacilityPrintReportButtonComponent {
         this.printReport();
       }
     });
-
-    this.helpPanelOpenSub = this.helpPanelService.helpPanelOpen.subscribe(val => {
-      this.helpPanelOpen = val;
-    });
   }
 
   ngOnDestroy() {
     this.printSub.unsubscribe();
-    this.helpPanelOpenSub.unsubscribe();
   }
 
 

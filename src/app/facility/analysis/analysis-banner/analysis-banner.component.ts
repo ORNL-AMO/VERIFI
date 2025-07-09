@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { HelpPanelService } from 'src/app/help-panel/help-panel.service';
 import { AnalysisDbService } from 'src/app/indexedDB/analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
@@ -27,7 +26,7 @@ export class AnalysisBannerComponent implements OnInit {
   analysisItemsSub: Subscription;
 
   showDropdown: boolean = false;
-  constructor(private helpPanelService: HelpPanelService, private router: Router,
+  constructor(private router: Router,
     private analysisDbService: AnalysisDbService, private sharedDataService: SharedDataService,
     private facilityDbService: FacilitydbService) { }
 
@@ -56,11 +55,6 @@ export class AnalysisBannerComponent implements OnInit {
     this.modalOpenSub.unsubscribe();
     this.routerSub.unsubscribe();
     this.analysisItemsSub.unsubscribe();
-  }
-
-  toggleHelpPanel() {
-    let helpPanelOpen: boolean = this.helpPanelService.helpPanelOpen.getValue();
-    this.helpPanelService.helpPanelOpen.next(!helpPanelOpen);
   }
 
   setInRunAnalysis(url: string) {

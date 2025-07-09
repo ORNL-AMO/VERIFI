@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import { Subscription } from 'rxjs';
-import { HelpPanelService } from 'src/app/help-panel/help-panel.service';
 import { NavigationEnd, Router } from '@angular/router';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { AnalysisService } from '../analysis.service';
@@ -23,8 +22,6 @@ export class AnalysisFooterComponent implements OnInit {
 
   sidebarOpen: boolean;
   sidebarOpenSub: Subscription;
-  helpPanelOpen: boolean;
-  helpPanelOpenSub: Subscription;
   analysisItem: IdbAnalysisItem;
   analysisItemSub: Subscription;
   selectedGroup: AnalysisGroup;
@@ -35,7 +32,6 @@ export class AnalysisFooterComponent implements OnInit {
   showGoBackToAccount: boolean;
   disableContinue: boolean = false;
   constructor(private sharedDataService: SharedDataService,
-    private helpPanelService: HelpPanelService,
     private router: Router,
     private facilityDbService: FacilitydbService,
     private analysisService: AnalysisService,
@@ -56,10 +52,6 @@ export class AnalysisFooterComponent implements OnInit {
       this.sidebarOpen = val;
     });
 
-    this.helpPanelOpenSub = this.helpPanelService.helpPanelOpen.subscribe(val => {
-      this.helpPanelOpen = val;
-    });
-
     this.analysisItemSub = this.analysisDbService.selectedAnalysisItem.subscribe(val => {
       this.analysisItem = val;
       this.setDisableContinue();
@@ -73,7 +65,6 @@ export class AnalysisFooterComponent implements OnInit {
 
   ngOnDestroy() {
     this.sidebarOpenSub.unsubscribe();
-    this.helpPanelOpenSub.unsubscribe();
     this.analysisItemSub.unsubscribe();
     this.selectedGroupSub.unsubscribe();
     this.routerSub.unsubscribe();

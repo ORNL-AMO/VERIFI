@@ -1,0 +1,110 @@
+<div class="h-100 navbar d-flex flex-column align-items-start justify-content-start shadow sidebar-container"
+    [ngClass]="{'collapsed': !sidebarOpen}">
+    <div class="ps-1 pe-1 w-100 pb-2">
+        <div class="toggle-collapse" [ngClass]="{'text-end': sidebarOpen, 'text-center': !sidebarOpen}">
+            <a class="click-link" (click)="toggleSidebar()">
+                <span class="fa"
+                    [ngClass]="{'fa-circle-chevron-right': !sidebarOpen, 'fa-circle-chevron-left': sidebarOpen}"></span>
+            </a>
+        </div>
+    </div>
+    <hr>
+    <div class="ps-1 w-100" [hidden]="!sidebarOpen">
+
+        <a title="Account Home" class="nav-link" routerLink="/account" [routerLinkActive]="['active-head']"
+            [ngClass]="{'open': open}" (mouseenter)="setHoverAccount(true)" (mouseleave)="setHoverAccount(false)"><i
+                class="fa fa-building"></i>
+            <span [hidden]="!open" class="ps-2 nav-label bold">
+                {{account.name}}
+            </span>
+        </a>
+
+        <div class="d-flex"
+            [ngClass]="{'flex-column not-open': !open, 'icon-row open': open, 'hidden': checkHideAccountLinks()}"
+            (mouseenter)="setHoverAccount(true)" (mouseleave)="setHoverAccount(false)">
+            <a title="Account Home" class="nav-link" routerLink="/account/home" [routerLinkActive]="['active']"><i
+                    class="fa fa-home"></i>
+            </a>
+            <a title="Account Overview" class="nav-link" routerLink="/account/overview"
+                [routerLinkActive]="['active']"><i class="fa fa-chart-column"></i>
+            </a>
+            <a title="Account Analysis" class="nav-link" routerLink="/account/analysis"
+                [routerLinkActive]="['active']"><i class="fa fa-microscope"></i>
+            </a>
+            <a title="Account Reports" class="nav-link" routerLink="/account/reports" [routerLinkActive]="['active']"><i
+                    class="fa fa-folder"></i>
+            </a>
+            <a title="Account Settings" class="nav-link" routerLink="/account/settings"
+                [routerLinkActive]="['active']"><i class="fa fa-cog"></i>
+            </a>
+            <a title="Custom Data" class="nav-link" routerLink="/account/custom-data" [routerLinkActive]="['active']"><i
+                    class="fa fa-smog"></i>
+            </a>
+        </div>
+        <hr class="bold-hr">
+        <div *ngFor="let facility of facilityList | facilityList:(showAllFacilities && open); let index = index;"
+            [ngClass]="{'open': open, 'not-open': !open}" (mouseenter)="setHoverIndex(index)"
+            (mouseleave)="setHoverIndex(undefined)">
+            <a title="Facility Home" class="nav-link" routerLink="/facility/{{facility.id}}"
+                [routerLinkActive]="['active-head']"><i class="fa fa-industry" [ngStyle]="{color: facility.color}"></i>
+                <span [hidden]="!open" class="ps-2 nav-label">
+                    {{facility.guid | facilityName}}
+                </span>
+            </a>
+            <div class="d-flex icon-row"
+                [ngClass]="{'flex-column not-open': !open, 'icon-row': open, 'hidden': checkHideFacilityLinks(facility.guid, index)}">
+                <a title="Facility Home" class="nav-link" routerLink="/facility/{{facility.id}}/home"
+                    [routerLinkActive]="['active']"><i class="fa fa-home"></i>
+                </a>
+                <a title="Facility Utility Data" class="nav-link" routerLink="/facility/{{facility.id}}/utility"
+                    [routerLinkActive]="['active']"><i class="fa fa-book"></i>
+                </a>
+                <a title="Facility Overview" class="nav-link" routerLink="/facility/{{facility.id}}/overview"
+                    [routerLinkActive]="['active']"><i class="fa fa-chart-column"></i>
+                </a>
+                <a title="Facility Data Visualization" class="nav-link"
+                    routerLink="/facility/{{facility.id}}/visualization" [routerLinkActive]="['active']"><i
+                        class="fa fa-chart-line"></i>
+                </a>
+                <a title="Facility Analysis" class="nav-link" routerLink="/facility/{{facility.id}}/analysis"
+                    [routerLinkActive]="['active']"><i class="fa fa-microscope"></i>
+                </a>
+                <a title="Facility Analysis" class="nav-link" routerLink="/facility/{{facility.id}}/reports"
+                    [routerLinkActive]="['active']"><i class="fa fa-folder"></i>
+                </a>
+                <a title="Facility Settings" class="nav-link" routerLink="/facility/{{facility.id}}/settings"
+                    [routerLinkActive]="['active']"><i class="fa fa-cog"></i>
+                </a>
+            </div>
+            <hr>
+        </div>
+        <a *ngIf="facilityList.length > 4" class="nav-link" [hidden]="!open" (click)="toggleShowAllFacilities()">
+            <span *ngIf="!showAllFacilities"><i class="fa fa-chevron-down"></i> Show All Facilities</span>
+            <span *ngIf="showAllFacilities"><i class="fa fa-chevron-up"></i> Show First Four Facilities</span>
+        </a>
+        <hr *ngIf="facilityList.length > 4 && open">
+        <a class="nav-link" title="Data Wizard" routerLink="/data-management/{{account.guid}}">
+            <i class="fa fa-database"></i>
+            <span [hidden]="!open" class="ps-2 nav-label">Data Management</span>
+        </a>
+        <a title="Weather Data" class="nav-link" routerLink="/weather-data" [routerLinkActive]="['active']"><i
+                class="fa fa-temperature-half"></i> <span [hidden]="!open" class="ps-2 nav-label">Weather Data</span>
+        </a>
+        <a title="Help Content" class="nav-link" routerLink="/help" [routerLinkActive]="['active']"
+            [routerLinkActiveOptions]="{ exact: true }"><i class="fa fa-question"></i> <span [hidden]="!open"
+                class="ps-2 nav-label">Help</span> </a>
+        <a title="About" class="nav-link" routerLink="/about" [routerLinkActive]="['active']"
+            [routerLinkActiveOptions]="{ exact: true }"><i class="fa fa-info-circle"></i> <span [hidden]="!open"
+                class="ps-2 nav-label">About</span></a>
+        <a title="Feedback" class="nav-link" routerLink="/feedback" [routerLinkActive]="['active']"
+            [routerLinkActiveOptions]="{ exact: true }"><i class="fa fa-inbox"></i> <span [hidden]="!open"
+                class="ps-2 nav-label">Feedback</span></a>
+        <a title="Acknowledgments" class="nav-link" routerLink="/acknowledgments" [routerLinkActive]="['active']"
+            [routerLinkActiveOptions]="{ exact: true }"><i class="fa fa-trophy"></i>
+            <span [hidden]="!open" class="ps-2 nav-label">Acknowledgments</span></a>
+        <a title="Privacy" class="nav-link" routerLink="/privacy" [routerLinkActive]="['active']"
+            [routerLinkActiveOptions]="{ exact: true }"><i class="fa fa-shield-halved"></i>
+            <span [hidden]="!open" class="ps-2 nav-label">Privacy</span></a>
+        <hr>
+    </div>
+</div>
