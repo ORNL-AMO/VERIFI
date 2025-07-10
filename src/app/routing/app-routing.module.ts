@@ -25,12 +25,7 @@ const routes: Routes = [
   // AccountRoutes,
   // FacilityRoutes,
   DataManagementRoutes,
-  { path: 'about', component: AboutComponent },
-  { path: 'acknowledgments', component: AcknowledgmentsComponent },
-  { path: 'feedback', component: FeedbackComponent },
-  { path: 'help', component: HelpComponent },
   { path: 'manage-accounts', component: ManageAccountsComponent },
-  { path: 'privacy', component: PrivacyNoticeComponent },
   // WeatherDataRoutes,
   //wildcard/page not found needs to be last route
   { path: "**", component: PageNotFoundComponent },

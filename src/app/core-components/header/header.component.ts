@@ -47,7 +47,7 @@ export class HeaderComponent implements OnInit {
   savingBackup: boolean;
   savingBackupSub: Subscription;
 
-  inDashboard: boolean = false;
+  inDataEvaluation: boolean = false;
   displayToggle: boolean = false;
   constructor(
     private router: Router,
@@ -131,7 +131,7 @@ export class HeaderComponent implements OnInit {
       await this.dbChangesService.selectAccount(account, false);
       this.loadingService.setLoadingStatus(false);
       this.automaticBackupService.initializeAccount();
-      if (this.inDashboard) {
+      if (this.inDataEvaluation) {
         this.goToDashboard(true);
       } else {
         this.goToDataEntry(true);
@@ -197,12 +197,12 @@ export class HeaderComponent implements OnInit {
   }
 
   setInDashboard(url: string) {
-    this.inDashboard = url.includes('data-management') == false;
+    this.inDataEvaluation = url.includes('data-management') == false;
     this.displayToggle = url.includes('welcome') == false;
   }
 
   goToDataEntry(forceNavigation: boolean = false) {
-    if (this.inDashboard || forceNavigation) {
+    if (this.inDataEvaluation || forceNavigation) {
       let url: string = this.router.url;
       if (url.includes('facility')) {
         let selectedFacility: IdbFacility = this.facilitydbService.selectedFacility.getValue();
@@ -224,7 +224,7 @@ export class HeaderComponent implements OnInit {
   }
 
   goToDashboard(forceNavigation: boolean = false) {
-    if (!this.inDashboard || forceNavigation) {
+    if (!this.inDataEvaluation || forceNavigation) {
       // let url: string = this.router.url;
       // if (url.includes('facilities')) {
       //   let selectedFacility: IdbFacility = this.facilitydbService.selectedFacility.getValue();
@@ -245,7 +245,7 @@ export class HeaderComponent implements OnInit {
       // } else {
       //   this.router.navigateByUrl('/account')
       // }
-      this.router.navigateByUrl('/data-evaluation')
+      this.router.navigateByUrl('/data-evaluation/account')
     }
   }
 }

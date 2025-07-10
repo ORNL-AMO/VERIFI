@@ -245,11 +245,43 @@
             <hr class="my-1">
         </div>
         <div class="ps-2 pe-2 nav-item">
-            <a class="nav-link" [routerLink]="'/account'" [routerLinkActive]="['active']"
+            <a class="nav-link" [routerLink]="'/data-evaluation/account'" [routerLinkActive]="['active']"
                 [routerLinkActiveOptions]="{ exact: true }">
                 <span class="fa fa-chart-simple"></span>
                 Data Evaluation
             </a>
+        </div>
+        <div class="p-2 w-100">
+            <hr class="my-1">
+        </div>
+        <div class="ps-2 pe-2 nav-item">
+            <a title="Help Content" class="nav-link" [routerLink]="'/data-management/'+account.guid+'/help'" [routerLinkActive]="['active']"
+                [routerLinkActiveOptions]="{ exact: true }"><i class="fa fa-question"></i> <span [hidden]="!sidebarOpen"
+                    class="ps-2 nav-label">Help</span> </a>
+
+        </div>
+        <div class="ps-2 pe-2 nav-item">
+            <a title="About" class="nav-link" [routerLink]="'/data-management/'+account.guid+'/about'" [routerLinkActive]="['active']"
+                [routerLinkActiveOptions]="{ exact: true }"><i class="fa fa-info-circle"></i> <span
+                    [hidden]="!sidebarOpen" class="ps-2 nav-label">About</span></a>
+
+        </div>
+        <div class="ps-2 pe-2 nav-item">
+            <a title="Feedback" class="nav-link" [routerLink]="'/data-management/'+account.guid+'/feedback'" [routerLinkActive]="['active']"
+                [routerLinkActiveOptions]="{ exact: true }"><i class="fa fa-inbox"></i> <span [hidden]="!sidebarOpen"
+                    class="ps-2 nav-label">Feedback</span></a>
+
+        </div>
+        <div class="ps-2 pe-2 nav-item">
+            <a title="Acknowledgments" class="nav-link" [routerLink]="'/data-management/'+account.guid+'/acknowledgments'"
+                [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }"><i class="fa fa-trophy"></i>
+                <span [hidden]="!sidebarOpen" class="ps-2 nav-label">Acknowledgments</span></a>
+
+        </div>
+        <div class="ps-2 pe-2 nav-item">
+            <a title="Privacy" class="nav-link" [routerLink]="'/data-management/'+account.guid+'/privacy'" [routerLinkActive]="['active']"
+                [routerLinkActiveOptions]="{ exact: true }"><i class="fa fa-shield-halved"></i>
+                <span [hidden]="!sidebarOpen" class="ps-2 nav-label">Privacy</span></a>
         </div>
     </div>
     <div class="p-2 w-100">

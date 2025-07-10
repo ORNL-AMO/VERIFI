@@ -44,6 +44,11 @@ import { CustomGwpFormComponent } from "../shared/custom-database/custom-gwp/cus
 import { CustomGwpDashboardComponent } from "../shared/custom-database/custom-gwp/custom-gwp-dashboard/custom-gwp-dashboard.component";
 import { AccountCustomDataComponent } from "../data-management/account-custom-data/account-custom-data.component";
 import { SetMeterGroupingComponent } from "../shared/shared-meter-content/set-meter-grouping/set-meter-grouping.component";
+import { PrivacyNoticeComponent } from "../static-content/privacy-notice/privacy-notice.component";
+import { AboutComponent } from "../static-content/about/about.component";
+import { AcknowledgmentsComponent } from "../static-content/acknowledgments/acknowledgments.component";
+import { FeedbackComponent } from "../static-content/feedback/feedback.component";
+import { HelpComponent } from "../static-content/help/help.component";
 
 export const DataManagementRoutes: Route = {
     path: 'data-management/:id',
@@ -226,6 +231,11 @@ export const DataManagementRoutes: Route = {
                     ]
                 }
             ]
-        }
+        },
+        { path: 'privacy', component: PrivacyNoticeComponent },
+        { path: 'about', component: AboutComponent },
+        { path: 'acknowledgments', component: AcknowledgmentsComponent },
+        { path: 'feedback', component: FeedbackComponent },
+        { path: 'help', component: HelpComponent },
     ]
 }

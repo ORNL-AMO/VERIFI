@@ -5,7 +5,7 @@
     </div>
     <div class="d-flex overflow-hidden flex-grow-1">
       <!-- <app-sidebar class="hide-print" *ngIf="dataInitialized"></app-sidebar> -->
-      <div class="content w-100" role="main" *ngIf="dataInitialized">
+      <div class="content w-100" role="main" *ngIf="dataInitialized" [ngClass]="{'data-management': inDataManagement}">
         <router-outlet></router-outlet>
         <app-import-backup-modal class="hide-print"></app-import-backup-modal>
         <app-create-report-modal class="hide-print"></app-create-report-modal>
