@@ -16,7 +16,7 @@ import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysis
 import { getNewIdbAnalysisItem, IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { AnalysisType } from 'src/app/models/analysis';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
+import { AnalysisService } from 'src/app/data-evaluation/facility/analysis/analysis.service';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
 import { ToastNotificationsService } from 'src/app/core-components/toast-notifications/toast-notifications.service';
 import { IdbFacility } from 'src/app/models/idbModels/facility';

@@ -14,7 +14,6 @@ import { ToastNotificationsComponent } from './core-components/toast-notificatio
 import { ElectronUpdateComponent } from './core-components/electron-update/electron-update.component';
 import { StaticContentModule } from './static-content/static-content.module';
 import { ImportBackupModalComponent } from './core-components/import-backup-modal/import-backup-modal.component';
-import { FacilityModule } from './facility/facility.module';
 import { HelperPipesModule } from './shared/helper-pipes/_helper-pipes.module';
 import { SearchBarComponent } from './core-components/header/search-bar/search-bar.component';
 import { NgbTypeaheadModule } from '@ng-bootstrap/ng-bootstrap';
@@ -61,7 +60,6 @@ import { DataEvaluationModule } from './data-evaluation/data-evaluation.module';
         IndexedDBModule,
         StaticContentModule,
         BrowserAnimationsModule,
-        FacilityModule,
         HelperPipesModule,
         NgbTypeaheadModule,
         WeatherDataModule,

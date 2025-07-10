@@ -7,6 +7,7 @@ import { HelperPipesModule } from '../shared/helper-pipes/_helper-pipes.module';
 import { FacilityListPipe } from './sidebar/facility-list.pipe';
 import { HelpPanelModule } from './help-panel/help-panel.module';
 import { AccountModule } from './account/account.module';
+import { FacilityModule } from './facility/facility.module';
 
 
 
@@ -21,7 +22,8 @@ import { AccountModule } from './account/account.module';
     RouterModule,
     HelperPipesModule,
     HelpPanelModule,
-    AccountModule
+    AccountModule,
+    FacilityModule
   ]
 })
 export class DataEvaluationModule { }

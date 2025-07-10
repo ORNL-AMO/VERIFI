@@ -10,7 +10,7 @@ import { ToastNotificationsService } from '../toast-notifications/toast-notifica
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
-import { FacilityOverviewService } from 'src/app/facility/facility-overview/facility-overview.service';
+import { FacilityOverviewService } from 'src/app/data-evaluation/facility/facility-overview/facility-overview.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';

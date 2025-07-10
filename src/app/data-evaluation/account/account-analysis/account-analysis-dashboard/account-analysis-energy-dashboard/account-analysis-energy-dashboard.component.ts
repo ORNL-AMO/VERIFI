@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
+import { AnalysisService } from 'src/app/data-evaluation/facility/analysis/analysis.service';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { CalanderizationService } from 'src/app/shared/helper-services/calanderization.service';

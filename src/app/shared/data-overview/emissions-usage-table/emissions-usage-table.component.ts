@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { FacilityOverviewService } from 'src/app/facility/facility-overview/facility-overview.service';
+import { FacilityOverviewService } from 'src/app/data-evaluation/facility/facility-overview/facility-overview.service';
 import { FacilityOverviewData, FacilityOverviewMeter } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';
 import { AccountOverviewData } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
 import { AccountOverviewService } from 'src/app/data-evaluation/account/account-overview/account-overview.service';
