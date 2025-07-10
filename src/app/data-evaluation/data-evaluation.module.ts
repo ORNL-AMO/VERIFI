@@ -6,6 +6,7 @@ import { RouterModule } from '@angular/router';
 import { HelperPipesModule } from '../shared/helper-pipes/_helper-pipes.module';
 import { FacilityListPipe } from './sidebar/facility-list.pipe';
 import { HelpPanelModule } from './help-panel/help-panel.module';
+import { AccountModule } from './account/account.module';
 
 
 
@@ -19,7 +20,8 @@ import { HelpPanelModule } from './help-panel/help-panel.module';
     CommonModule,
     RouterModule,
     HelperPipesModule,
-    HelpPanelModule
+    HelpPanelModule,
+    AccountModule
   ]
 })
 export class DataEvaluationModule { }

@@ -3,7 +3,7 @@ import { Subscription } from 'rxjs';
 import { FacilityOverviewService } from 'src/app/facility/facility-overview/facility-overview.service';
 import { FacilityOverviewData, FacilityOverviewMeter } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';
 import { AccountOverviewData } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
-import { AccountOverviewService } from 'src/app/account/account-overview/account-overview.service';
+import { AccountOverviewService } from 'src/app/data-evaluation/account/account-overview/account-overview.service';
 import { EmissionsTypes, getEmissionsTypeColor } from 'src/app/models/eGridEmissions';
 
 @Component({

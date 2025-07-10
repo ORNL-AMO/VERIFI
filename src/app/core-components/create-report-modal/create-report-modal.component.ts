@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
-import { AccountOverviewService } from 'src/app/account/account-overview/account-overview.service';
+import { AccountOverviewService } from 'src/app/data-evaluation/account/account-overview/account-overview.service';
 import { ToastNotificationsService } from '../toast-notifications/toast-notifications.service';
 import { AccountAnalysisDbService } from 'src/app/indexedDB/account-analysis-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';

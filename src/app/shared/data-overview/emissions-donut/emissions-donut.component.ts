@@ -6,7 +6,7 @@ import { FacilityOverviewService } from 'src/app/facility/facility-overview/faci
 import { FacilityOverviewMeter } from 'src/app/calculations/dashboard-calculations/facilityOverviewClass';
 import { EmissionsResults, EmissionsTypes, getEmissionsTypeColor, getEmissionsTypes } from 'src/app/models/eGridEmissions';
 import { AccountOverviewFacility } from 'src/app/calculations/dashboard-calculations/accountOverviewClass';
-import { AccountOverviewService } from 'src/app/account/account-overview/account-overview.service';
+import { AccountOverviewService } from 'src/app/data-evaluation/account/account-overview/account-overview.service';
 
 @Component({
   selector: 'app-emissions-donut',

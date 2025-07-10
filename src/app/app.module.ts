@@ -15,11 +15,9 @@ import { ElectronUpdateComponent } from './core-components/electron-update/elect
 import { StaticContentModule } from './static-content/static-content.module';
 import { ImportBackupModalComponent } from './core-components/import-backup-modal/import-backup-modal.component';
 import { FacilityModule } from './facility/facility.module';
-import { AccountModule } from './account/account.module';
 import { HelperPipesModule } from './shared/helper-pipes/_helper-pipes.module';
 import { SearchBarComponent } from './core-components/header/search-bar/search-bar.component';
 import { NgbTypeaheadModule } from '@ng-bootstrap/ng-bootstrap';
-import { FacilityListPipe } from './data-evaluation/sidebar/facility-list.pipe';
 import { CreateReportModalComponent } from './core-components/create-report-modal/create-report-modal.component';
 import { WeatherDataModule } from './weather-data/weather-data.module';
 import { ManageAccountsComponent } from './core-components/manage-accounts/manage-accounts.component';
@@ -64,7 +62,6 @@ import { DataEvaluationModule } from './data-evaluation/data-evaluation.module';
         StaticContentModule,
         BrowserAnimationsModule,
         FacilityModule,
-        AccountModule,
         HelperPipesModule,
         NgbTypeaheadModule,
         WeatherDataModule,
