@@ -53,11 +53,11 @@ export class DataEvaluationComponent {
 
   drag(event: MouseEvent) {
     if (this.isDraggingSidebar) {
-      if (event.clientX > 50) {
+      if (event.clientX > 70) {
         this.sidebarWidth = event.clientX;
         this.dataEvaluationService.sidebarOpen.next(true);
       } else {
-        this.sidebarWidth = 50;
+        this.sidebarWidth = 70;
         this.dataEvaluationService.sidebarOpen.next(false);
       }
       this.setContentWidth();
@@ -79,9 +79,9 @@ export class DataEvaluationComponent {
   toggleCollapseSidebar(sidebarOpen: boolean) {
     this.dataEvaluationService.sidebarOpen.next(sidebarOpen);
     if (sidebarOpen) {
-      this.sidebarWidth = 200;
+      this.sidebarWidth = 260;
     } else {
-      this.sidebarWidth = 50;
+      this.sidebarWidth = 70;
     }
     this.setContentWidth();
   }

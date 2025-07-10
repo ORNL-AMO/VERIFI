@@ -10,6 +10,12 @@ i.fa {
 }
 .nav-link{
     padding-left: 2rem;
+    padding-top: .5rem;
+    padding-bottom: .5rem;
+}
+
+.nav-label{
+    font-size: 14px;
 }
 
 nav.sidebar.open{
@@ -28,10 +34,6 @@ nav.sidebar{
     transition: .2s width;
     box-shadow: 2px 3px 5px 0px #77777759;
     height: 100%;
-}
-
-.nav-link .nav-label{
-    /* animation: fadeInAnimation .7s ease; */
 }
 
 .open .nav-link span {
@@ -66,6 +68,10 @@ div.hidden, div.d-flex.hidden{
 
 .icon-row i.fa{
     width: auto;
+}
+
+.icon-row{
+    width: fit-content;
 }
 
 .not-open .nav-link.active, .open .nav-link.active-head{
@@ -103,15 +109,13 @@ div.hidden, div.d-flex.hidden{
     width: auto;
 }
 
-.nav-link.active, .nav-link.active .fa {
+/* .nav-link.active, .nav-link.active .fa {
     background-color: #cecece;
     font-weight: bolder;
-    /* background-color: #ff6000;
-    color: white !important */
-}
+} */
 
 .nav-link {
-    padding-left: 3px;
+    /* padding-left: 3px; */
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;
@@ -149,14 +153,14 @@ a:hover {
     width: auto;
 }
 
-a.nav-link, .btn.btn-dark, .link-section-heading{
+/* a.nav-link, .btn.btn-dark, .link-section-heading{
     display: inline-block;
     line-height: normal;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
     width: 100%;
-}
+} */
 
 
 .sidebar-container {

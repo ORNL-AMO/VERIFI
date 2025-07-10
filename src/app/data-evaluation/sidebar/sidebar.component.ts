@@ -21,7 +21,6 @@ export class SidebarComponent implements OnInit {
   @Output('emitToggleCollapse')
   emitToggleCollapse: EventEmitter<boolean> = new EventEmitter<boolean>(false);
 
-  open: boolean = true;
   isDev: boolean;
 
   accountSub: Subscription;
@@ -43,16 +42,6 @@ export class SidebarComponent implements OnInit {
     private facilityDbService: FacilitydbService, private router: Router,
     private sharedDataService: SharedDataService,
     private dataEvaluationService: DataEvaluationService) {
-    let sidebarOpen: boolean = this.localStorageService.retrieve("sidebarOpen");
-    if (sidebarOpen != undefined) {
-      this.open = sidebarOpen;
-      this.sharedDataService.sidebarOpen.next(this.open);
-    }
-    this.router.events.subscribe(event => {
-      if (event instanceof NavigationEnd) {
-        this.setShowSidebar();
-      }
-    });
   }
 
   ngOnInit() {
@@ -88,11 +77,12 @@ export class SidebarComponent implements OnInit {
   }
 
 
+  //TODO PIPE
   checkHideFacilityLinks(facilityId: string, index: number): boolean {
     if (this.showAllFacilities && index > 0 && index != this.hoverIndex) {
       return true;
     } else {
-      if (this.open && !this.showAllFacilities) {
+      if (this.sidebarOpen && !this.showAllFacilities) {
         return false;
       } else if (this.router.url.includes('account') && !this.router.url.includes('facility')) {
         if (index == this.hoverIndex) {
@@ -111,8 +101,9 @@ export class SidebarComponent implements OnInit {
     return false;
   }
 
+  //TODO PIPE
   checkHideAccountLinks(): boolean {
-    if (this.open || this.hoverAccount) {
+    if (this.sidebarOpen || this.hoverAccount) {
       return false;
     } else if (!this.router.url.includes('account') || this.router.url.includes('facility')) {
       return true;
@@ -120,9 +111,9 @@ export class SidebarComponent implements OnInit {
     return false;
   }
 
-  setShowSidebar() {
-    this.showSidebar = !this.router.url.includes('manage-accounts') && !this.router.url.includes('welcome') && !this.router.url.includes('data-management');
-  }
+  // setShowSidebar() {
+  //   this.showSidebar = !this.router.url.includes('manage-accounts') && !this.router.url.includes('welcome') && !this.router.url.includes('data-management');
+  // }
 
   setFacilityList(accountFacilities: Array<IdbFacility>) {
     if (!this.facilityList) {
