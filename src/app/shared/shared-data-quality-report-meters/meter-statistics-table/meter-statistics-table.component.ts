@@ -1,4 +1,5 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 
 @Component({
@@ -12,30 +13,75 @@ export class MeterStatisticsTableComponent {
 
   @Input()
   meterData: Array<IdbUtilityMeterData>;
+  @Input()
+  selectedMeter: IdbUtilityMeter;
+  @Output()
+  outlierCount = new EventEmitter<{ energy: number; cost: number }>();
   energyStats: Statistics;
   costStats: Statistics;
- 
+
   ngOnChanges() {
     const energyData = this.meterData?.map(d => d.totalEnergyUse);
     const costData = this.meterData?.map(d => d.totalCost);
     this.energyStats = this.getStatistics(energyData);
     this.costStats = this.getStatistics(costData);
+    this.outlierCount.emit({ energy: this.energyStats.outliers, cost: this.costStats.outliers });
   }
 
   getStatistics(data: number[]): Statistics {
     if (!data.length) {
-      return { min: NaN, max: NaN, average: NaN, sd: NaN, meanMinus3Sd: NaN, meanPlus3Sd: NaN, outliers: 0 };
+      return { min: NaN, max: NaN, average: NaN, median: NaN, medianAbsDev: NaN, medianminus2_5MAD: NaN, medianplus2_5MAD: NaN, outliers: 0 };
     }
     const min = Math.min(...data);
     const max = Math.max(...data);
     const average = data.reduce((sum, v) => sum + v, 0) / data.length;
-    const variance = data.reduce((sum, v) => sum + Math.pow(v - average, 2), 0) / data.length;
-    const sd = Math.sqrt(variance);
-    const meanMinus3Sd = average - 3 * sd;
-    const meanPlus3Sd = average + 3 * sd;
-    const outliers = data.filter(v => v < meanMinus3Sd || v > meanPlus3Sd).length;
-    return { min, max, average, sd, meanMinus3Sd, meanPlus3Sd, outliers };
+
+    const median = this.calculateMedian(data);
+    const medianAbsDev = this.calculateMAD(data, median);
+    const medianminus2_5MAD = median - 2.5 * medianAbsDev;
+    const medianplus2_5MAD = median + 2.5 * medianAbsDev;
+    const outliers = this.calculateOutliers(data, median, medianAbsDev);
+    return { min, max, average, median, medianAbsDev, medianminus2_5MAD, medianplus2_5MAD, outliers };
+
+    // const variance = data.reduce((sum, v) => sum + Math.pow(v - average, 2), 0) / data.length;
+    // const sd = Math.sqrt(variance);
+    // const meanMinus3Sd = average - 3 * sd;
+    // const meanPlus3Sd = average + 3 * sd;
+    // const outliers = data.filter(v => v < meanMinus3Sd || v > meanPlus3Sd).length;
+    // return { min, max, average, sd, meanMinus3Sd, meanPlus3Sd, outliers };
   }
+
+  calculateMedian(data: number[]): number {
+    const sortedData = [...data].sort((a, b) => a - b);
+    const mid = Math.floor(sortedData.length / 2);
+    if (sortedData.length % 2 === 0) {
+      return (sortedData[mid - 1] + sortedData[mid]) / 2;
+    } else {
+      return sortedData[mid];
+    }
+  }
+
+  calculateMAD(data: number[], median: number): number {
+    const absDeviations = data.map(value => Math.abs(value - median));
+    return this.calculateMedian(absDeviations);
+  }
+
+  calculateOutliers(data: number[], median: number, mad: number): number {
+    if(!data || data.length === 0) {
+      return 0;
+    }
+
+    if(mad === 0) {
+      return 0; 
+    }
+
+    const lowerBound = median - 2.5 * mad;
+    const upperBound = median + 2.5 * mad;
+
+    return data.filter(value => value < lowerBound || value > upperBound).length;
+  }
+
+
 
   isValueNaN(value: number): any {
     return isNaN(value);
@@ -46,8 +92,9 @@ interface Statistics {
   min: number;
   max: number;
   average: number;
-  sd: number;
-  meanMinus3Sd: number;
-  meanPlus3Sd: number;
+  median: number;
+  medianAbsDev: number;
+  medianminus2_5MAD: number;
+  medianplus2_5MAD: number;
   outliers: number;
 }

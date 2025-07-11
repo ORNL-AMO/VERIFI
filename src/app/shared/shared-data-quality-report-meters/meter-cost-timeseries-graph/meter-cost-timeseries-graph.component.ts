@@ -41,10 +41,14 @@ export class MeterCostTimeseriesGraphComponent {
         name: 'Meter Data',
         x: this.meterData.map(data => { return data.readDate }),
         y: this.meterData.map(data => { return data.totalCost }),
-        line: { color: '#7F7F7F', width: 4 },
+        line: { color: '#832a75', width: 3 },
         marker: {
-          size: 8
-        }
+          size: 8,
+          color: '#43a047',
+          symbol: 'circle',
+          line: { width: 2, color: '#fff' }
+        },
+        hovertemplate: 'Date: %{x}<br>Cost: $%{y}<extra></extra>',
       }
     ];
 
@@ -55,6 +59,8 @@ export class MeterCostTimeseriesGraphComponent {
       height: height,
       width: containerWidth,
       autosize: true,
+      plot_bgcolor: "#e7f1f2",
+      paper_bgcolor: "#e7f1f2",
       legend: {
         orientation: "h"
       },
@@ -65,7 +71,8 @@ export class MeterCostTimeseriesGraphComponent {
         title: {
           text: 'Cost ($)',
           font: {
-            size: 16
+            size: 16,
+            weight: "bold"
           },
           standoff: 18
         },

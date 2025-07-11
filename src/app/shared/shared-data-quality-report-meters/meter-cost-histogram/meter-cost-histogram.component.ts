@@ -35,9 +35,16 @@ export class MeterCostHistogramComponent {
       {
         type: "histogram",
         x: this.meterData.map(data => { return data.totalCost }),
-        marker: { color: '#7F7F7F' },
+        marker: {
+          color: '#833c60',
+          line: { color: '#fff', width: 1 }
+        },
         xbins: {
           size: 10000
+        },
+        hoverlabel: {
+          bgcolor: "#1976d2",
+          font: { color: "#fff", size: 14 }
         }
       }
     ];
@@ -49,9 +56,11 @@ export class MeterCostHistogramComponent {
       height: height,
       width: containerWidth,
       autosize: true,
+      plot_bgcolor: "#e7f1f2",
+      paper_bgcolor: "#e7f1f2",
       xaxis: {
         title: {
-          text: 'Total Cost ($)',
+          text: '<b>Total Cost ($)</b>',
           font: {
             size: 16
           },
@@ -59,7 +68,7 @@ export class MeterCostHistogramComponent {
         },
         automargin: true,
       },
-      bargap: 0.05
+      bargap: 0.15
     };
     var config = {
       displaylogo: false,

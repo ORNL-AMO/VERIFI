@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
@@ -43,6 +43,11 @@ export class UtilityMeterDataTableComponent implements OnInit {
   meterName: string;
   showGraphs: boolean = false;
   activeGraph: string;
+  energyOutlierCount: number = 0;
+  costOutlierCount: number = 0;
+  showAlert: boolean = false;
+  expandSection: string = '';
+
   constructor(
     private utilityMeterDbService: UtilityMeterdbService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
@@ -53,7 +58,8 @@ export class UtilityMeterDataTableComponent implements OnInit {
     private facilityDbService: FacilitydbService,
     private accountDbService: AccountdbService,
     private dbChangesService: DbChangesService,
-    private sharedDataService: SharedDataService
+    private sharedDataService: SharedDataService,
+    private cd: ChangeDetectorRef
   ) { }
 
   ngOnInit(): void {
@@ -78,34 +84,21 @@ export class UtilityMeterDataTableComponent implements OnInit {
     const modal = document.getElementById('dataQualityModal');
     if (modal) {
       modal.addEventListener('show.bs.modal', () => {
-        this.activeGraph = 'energy-timeseries';
-        const allPanels = modal.querySelectorAll('.accordion-collapse.show');
-        const allButtons = modal.querySelectorAll('.accordion-button');
-        allPanels.forEach(panel => {
-          panel.classList.remove('show');
-        });
-        allButtons.forEach(button => {
-          button.classList.add('collapsed');
-        });
-
-        const panelFirst = modal.querySelector('#collapseEnergy');
-        const buttonFirst = modal.querySelector('#headingEnergy .accordion-button');
-        if (panelFirst) {
-          panelFirst.classList.add('show');
-        }
-        if (buttonFirst) {
-          buttonFirst.classList.remove('collapsed');
-        }
-
+        this.activeGraph = 'statistics';
       });
 
       modal.addEventListener('shown.bs.modal', () => {
         this.showGraphs = true;
+        if (!this.showAlert) {
+          this.expandSection = 'statistics';
+        }
       });
 
       modal.addEventListener('hidden.bs.modal', () => {
         this.showGraphs = false;
+        this.showAlert = false;
         this.activeGraph = '';
+        this.expandSection = '';
       });
     }
   }
@@ -214,5 +207,22 @@ export class UtilityMeterDataTableComponent implements OnInit {
 
   selectOption(option: string) {
     this.activeGraph = option;
+  }
+
+  onOutlierDetection(outlierCount: { energy: number; cost: number }) {
+    this.energyOutlierCount = outlierCount.energy;
+    this.costOutlierCount = outlierCount.cost;
+    if (this.energyOutlierCount > 0 || this.costOutlierCount > 0) {
+      this.showAlert = true;
+    } else {
+      this.showAlert = false;
+    }
+    this.expandSection = this.showAlert ? '' : 'statistics';
+    this.cd.detectChanges();
+  }
+
+  onPanelClick(section: string) {
+    this.expandSection = this.expandSection === section ? '' : section;
+    this.activeGraph = this.expandSection === section ? section : '';
   }
 }
