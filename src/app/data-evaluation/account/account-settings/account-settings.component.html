@@ -164,6 +164,7 @@
             </ng-container>
 
         </div>
+
         <div class="col-lg-6">
             <h4>Backup Account</h4>
             <p>You can protect your files from accidental loss by creating a backup. We recommend backing up your data
@@ -185,83 +186,99 @@
                 your data before proceeding with this step.</p>
             <button class="btn btn-danger" (click)="editAccount()">Delete Account</button>
         </div>
-    </div>
-</div>
-
-
-<div [ngClass]="{'windowOverlay': (showDeleteAccount || displayDeleteFacility || displayApplyFacilitySettings)}">
-</div>
-
-<div class="popup" [class.open]="showDeleteAccount" *ngIf="showDeleteAccount">
-    <div class="popup-header">Delete Account: {{selectedAccount.name}}
-        <button class="item-right" (click)="cancelAccountDelete()">x</button>
-    </div>
-    <div class="popup-body">
-        <p>WARNING: By deleting this account, you are also deleting all of the data associated with it.
-            Are you sure you want to preform this action?</p>
-        <p>
-            This may take a little bit to complete depending on the amount of data you have in your account.
-        </p>
-    </div>
-    <div class="popup-footer text-end">
-        <button class="btn btn-secondary" (click)="cancelAccountDelete()">Cancel</button>
-        <button class="btn btn-danger" (click)="confirmAccountDelete()">Confirm Delete</button>
-    </div>
-</div>
-
-<div class="popup" [class.open]="displayDeleteFacility" *ngIf="displayDeleteFacility">
-    <div class="popup-header">Delete Facility: {{facilityToDelete.name}}
-        <button class="item-right" (click)="cancelFacilityDelete()">x</button>
-    </div>
-    <div class="popup-body">
-        <p>WARNING: By deleting this facility, you are also deleting all of the data associated with it.
-            Are you sure you want to preform this action?</p>
-        <p>
-            This may take a little bit to complete depending on the amount of data you have in your facility.
-        </p>
-    </div>
-    <div class="popup-footer text-end">
-        <button class="btn btn-secondary" (click)="cancelFacilityDelete()">Cancel</button>
-        <button class="btn btn-danger" (click)="confirmFacilityDelete()">Confirm Delete</button>
-    </div>
-</div>
-
-
-<div class="popup" [class.open]="displayApplyFacilitySettings" *ngIf="displayApplyFacilitySettings">
-    <div class="popup-header">Apply Account Settings to Facilities
-        <button class="item-right" (click)="closeApplySettingsModel()">x</button>
-    </div>
-    <div class="popup-body">
-        <p>
-            Select the account settings you want to apply to all of the facilities in this account.
-        </p>
-        <p>WARNING: Applying account settings will override any existing facility settings.</p>
-        <hr>
-        <div class="form-check">
-            <input class="form-check-input" type="checkbox" id="applyUnits" name="applyUnits"
-                [(ngModel)]="applySettingsOptions.units">
-            <label class="form-check-label" for="applyUnits">
-                Apply Default Units
-            </label>
-        </div>
-        <div class="form-check">
-            <input class="form-check-input" type="checkbox" id="sustainabilityQuestions" name="sustainabilityQuestions"
-                [(ngModel)]="applySettingsOptions.sustainabilityQuestions">
-            <label class="form-check-label" for="sustainabilityQuestions">
-                Apply Sustainabity Goals
-            </label>
-        </div>
-
-        <div class="form-check">
-            <input class="form-check-input" type="checkbox" id="financialReporting" name="financialReporting"
-                [(ngModel)]="applySettingsOptions.financialReporting">
-            <label class="form-check-label" for="financialReporting">
-                Apply Financial Reporting Details
-            </label>
+        <div class="col-lg-6 mt-3" *ngIf="isElectron">
+            <h4>Connect Utility Bills</h4>
+            <div *ngIf="!folderPath">
+                <p>Select a folder on your machine where you want to save your utility bills. All the bills will be
+                    copied to the selected folder.</p>
+                <button class="btn btn-outline" (click)="createUtilityBillFolder()">Select
+                    Folder</button>
+            </div>
+            <div *ngIf="folderPath">
+                You can view your utility bills at: &nbsp;
+                <a class="click-link" (click)="openFolder()">{{ folderPath }}</a>
+            </div>
+            <div class="alert alert-danger mt-3 text-center" *ngIf="!folderPath && folderError">
+                The folder has been deleted from the location
+            </div>
         </div>
     </div>
-    <div class="popup-footer text-end">
-        <button class="btn btn-secondary" (click)="closeApplySettingsModel()">Cancel</button>
-        <button class="btn btn-outline" (click)="applySettingsToFacility()">Apply Settings</button>
+
+
+
+    <div [ngClass]="{'windowOverlay': (showDeleteAccount || displayDeleteFacility || displayApplyFacilitySettings)}">
     </div>
-</div>
+
+    <div class="popup" [class.open]="showDeleteAccount" *ngIf="showDeleteAccount">
+        <div class="popup-header">Delete Account: {{selectedAccount.name}}
+            <button class="item-right" (click)="cancelAccountDelete()">x</button>
+        </div>
+        <div class="popup-body">
+            <p>WARNING: By deleting this account, you are also deleting all of the data associated with it.
+                Are you sure you want to preform this action?</p>
+            <p>
+                This may take a little bit to complete depending on the amount of data you have in your account.
+            </p>
+        </div>
+        <div class="popup-footer text-end">
+            <button class="btn btn-secondary" (click)="cancelAccountDelete()">Cancel</button>
+            <button class="btn btn-danger" (click)="confirmAccountDelete()">Confirm Delete</button>
+        </div>
+    </div>
+
+    <div class="popup" [class.open]="displayDeleteFacility" *ngIf="displayDeleteFacility">
+        <div class="popup-header">Delete Facility: {{facilityToDelete.name}}
+            <button class="item-right" (click)="cancelFacilityDelete()">x</button>
+        </div>
+        <div class="popup-body">
+            <p>WARNING: By deleting this facility, you are also deleting all of the data associated with it.
+                Are you sure you want to preform this action?</p>
+            <p>
+                This may take a little bit to complete depending on the amount of data you have in your facility.
+            </p>
+        </div>
+        <div class="popup-footer text-end">
+            <button class="btn btn-secondary" (click)="cancelFacilityDelete()">Cancel</button>
+            <button class="btn btn-danger" (click)="confirmFacilityDelete()">Confirm Delete</button>
+        </div>
+    </div>
+
+
+    <div class="popup" [class.open]="displayApplyFacilitySettings" *ngIf="displayApplyFacilitySettings">
+        <div class="popup-header">Apply Account Settings to Facilities
+            <button class="item-right" (click)="closeApplySettingsModel()">x</button>
+        </div>
+        <div class="popup-body">
+            <p>
+                Select the account settings you want to apply to all of the facilities in this account.
+            </p>
+            <p>WARNING: Applying account settings will override any existing facility settings.</p>
+            <hr>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="applyUnits" name="applyUnits"
+                    [(ngModel)]="applySettingsOptions.units">
+                <label class="form-check-label" for="applyUnits">
+                    Apply Default Units
+                </label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="sustainabilityQuestions"
+                    name="sustainabilityQuestions" [(ngModel)]="applySettingsOptions.sustainabilityQuestions">
+                <label class="form-check-label" for="sustainabilityQuestions">
+                    Apply Sustainabity Goals
+                </label>
+            </div>
+
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="financialReporting" name="financialReporting"
+                    [(ngModel)]="applySettingsOptions.financialReporting">
+                <label class="form-check-label" for="financialReporting">
+                    Apply Financial Reporting Details
+                </label>
+            </div>
+        </div>
+        <div class="popup-footer text-end">
+            <button class="btn btn-secondary" (click)="closeApplySettingsModel()">Cancel</button>
+            <button class="btn btn-outline" (click)="applySettingsToFacility()">Apply Settings</button>
+        </div>
+    </div>

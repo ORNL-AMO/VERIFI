@@ -50,6 +50,11 @@
                             id="betterClimate" [(ngModel)]="newReportType">
                         <label class="form-check-label" for="betterClimate">Better Climate Report</label>
                     </div>
+                    <div class="form-check">
+                        <input type="radio" class="form-check-input" name="reportType" [value]="'analysis'"
+                            id="analysis" [(ngModel)]="newReportType">
+                        <label class="form-check-label" for="analysis">Modeling Report</label>
+                    </div>
                 </div>
             </div>
         </form>

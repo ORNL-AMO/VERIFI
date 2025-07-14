@@ -34,6 +34,8 @@ import { DataApplicationMenuComponent } from './shared-meter-calendarization/dat
 import { SetMeterGroupingComponent } from './set-meter-grouping/set-meter-grouping.component';
 import { MeterGroupFormComponent } from './set-meter-grouping/meter-group-form/meter-group-form.component';
 import { MeterGroupTableComponent } from './set-meter-grouping/meter-group-table/meter-group-table.component';
+import { ViewConnectBillComponent } from './meter-data/meter-data-table/view-connect-bill/view-connect-bill.component';
+import { EditConnectBillComponent } from './edit-bill/edit-connect-bill/edit-connect-bill.component';
 
 
 
@@ -66,7 +68,9 @@ import { MeterGroupTableComponent } from './set-meter-grouping/meter-group-table
     DataApplicationMenuComponent,
     SetMeterGroupingComponent,
     MeterGroupFormComponent,
-    MeterGroupTableComponent
+    MeterGroupTableComponent,
+    ViewConnectBillComponent,
+    EditConnectBillComponent
   ],
   imports: [
     CommonModule,

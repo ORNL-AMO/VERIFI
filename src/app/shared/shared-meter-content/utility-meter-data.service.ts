@@ -186,7 +186,7 @@ export class UtilityMeterDataService {
   }
 
 
-  updateElectricityMeterDataFromForm(meterData: IdbUtilityMeterData, form: FormGroup): IdbUtilityMeterData {
+  updateElectricityMeterDataFromForm(meterData: IdbUtilityMeterData, form: FormGroup, uploadedFilePath?: string): IdbUtilityMeterData {
     //UTC date is one day behind from form
     let formDate: Date = new Date(form.controls.readDate.value)
     meterData.readDate = new Date(formDate.getUTCFullYear(), formDate.getUTCMonth(), formDate.getUTCDate());
@@ -216,6 +216,14 @@ export class UtilityMeterDataService {
     meterData.latePayment = form.controls.latePayment.value;
     meterData.otherCharge = form.controls.otherCharge.value;
     meterData.isEstimated = form.controls.isEstimated.value;
+    if (uploadedFilePath != undefined && uploadedFilePath != null && uploadedFilePath != 'Deleted') {
+      meterData.uploadedFilePath = uploadedFilePath;
+      meterData.isBillConnected = true;
+    }
+    if (uploadedFilePath == 'Deleted') {
+      meterData.uploadedFilePath = undefined;
+      meterData.isBillConnected = false;
+    }
     return meterData;
   }
 
@@ -269,7 +277,7 @@ export class UtilityMeterDataService {
     return form;
   }
 
-  updateGeneralMeterDataFromForm(meterData: IdbUtilityMeterData, form: FormGroup): IdbUtilityMeterData {
+  updateGeneralMeterDataFromForm(meterData: IdbUtilityMeterData, form: FormGroup, uploadedFilePath?: string): IdbUtilityMeterData {
     //UTC date is one day behind from form
     let formDate: Date = new Date(form.controls.readDate.value)
     meterData.readDate = new Date(formDate.getUTCFullYear(), formDate.getUTCMonth(), formDate.getUTCDate());
@@ -282,6 +290,14 @@ export class UtilityMeterDataService {
     meterData.isEstimated = form.controls.isEstimated.value;
     meterData.heatCapacity = form.controls.heatCapacity.value;
     meterData.vehicleFuelEfficiency = form.controls.vehicleFuelEfficiency.value;
+    if (uploadedFilePath != undefined && uploadedFilePath != null && uploadedFilePath != 'Deleted') {
+      meterData.uploadedFilePath = uploadedFilePath;
+      meterData.isBillConnected = true;
+    }
+    if (uploadedFilePath == 'Deleted') {
+      meterData.uploadedFilePath = undefined;
+      meterData.isBillConnected = false;
+    }
     return meterData;
   }
 }
