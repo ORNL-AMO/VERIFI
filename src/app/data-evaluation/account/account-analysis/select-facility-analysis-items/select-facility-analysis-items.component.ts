@@ -52,7 +52,7 @@ export class SelectFacilityAnalysisItemsComponent implements OnInit {
     })
 
     if (!this.selectedAnalysisItem) {
-      this.router.navigateByUrl('/account/analysis/dashboard')
+      this.router.navigateByUrl('/data-evaluation/account/analysis/dashboard')
     }
     this.selectedFacilitySub = this.accountAnalysisService.selectedFacility.subscribe(val => {
       if (val) {

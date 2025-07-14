@@ -100,15 +100,15 @@ export class AccountReportsBannerComponent {
 
   goToDashboard() {
     if (this.selectedReport.reportType == 'betterPlants') {
-      this.router.navigateByUrl('/account/reports/dashboard/better-plants')
+      this.router.navigateByUrl('/data-evaluation/account/reports/dashboard/better-plants')
     } else if (this.selectedReport.reportType == 'dataOverview') {
-      this.router.navigateByUrl('/account/reports/dashboard/overview')
+      this.router.navigateByUrl('/data-evaluation/account/reports/dashboard/overview')
     } else if (this.selectedReport.reportType == 'performance') {
-      this.router.navigateByUrl('/account/reports/dashboard/performance')
+      this.router.navigateByUrl('/data-evaluation/account/reports/dashboard/performance')
     } else if (this.selectedReport.reportType == 'betterClimate') {
-      this.router.navigateByUrl('/account/reports/dashboard/better-climate')
+      this.router.navigateByUrl('/data-evaluation/account/reports/dashboard/better-climate')
     } else {
-      this.router.navigateByUrl('/account/reports/dashboard')
+      this.router.navigateByUrl('/data-evaluation/account/reports/dashboard')
     }
   }
 
@@ -118,7 +118,7 @@ export class AccountReportsBannerComponent {
 
   selectItem(item: IdbAccountReport) {
     this.accountReportDbService.selectedReport.next(item);
-    this.router.navigateByUrl('/account/reports/setup');
+    this.router.navigateByUrl('/data-evaluation/account/reports/setup');
     this.showDropdown = false;
   }
 

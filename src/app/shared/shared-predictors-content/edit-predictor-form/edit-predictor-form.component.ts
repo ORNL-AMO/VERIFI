@@ -77,13 +77,13 @@ export class EditPredictorFormComponent {
       if (this.router.url.includes('data-management')) {
         this.router.navigateByUrl('/data-management/' + this.predictor.accountId + '/weather-data/annual-station');
       } else {
-        this.router.navigateByUrl('/weather-data/annual-station');
+        this.router.navigateByUrl('/data-evaluation/weather-data/annual-station');
       }
     } else {
       if (this.router.url.includes('data-management')) {
         this.router.navigateByUrl('/data-management/' + this.predictor.accountId + '/weather-data');
       } else {
-        this.router.navigateByUrl('/weather-data');
+        this.router.navigateByUrl('/data-evaluation/weather-data');
       }
     }
   }

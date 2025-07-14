@@ -147,7 +147,7 @@ export class AccountOverviewComponent implements OnInit {
     //TODO: Update select facility call
     let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
     if (facilities.length > 0) {
-      this.router.navigateByUrl('facility/' + facilities[0].id + '/utility');
+      this.router.navigateByUrl('/data-evaluation/facility/' + facilities[0].id + '/utility');
     }
   }
 }

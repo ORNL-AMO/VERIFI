@@ -94,7 +94,7 @@ export class EditPredictorComponent {
   }
 
   cancel() {
-    this.router.navigateByUrl('facility/' + this.facility.id + '/utility/predictors/manage/predictor-table')
+    this.router.navigateByUrl('/data-evaluation/facility/' + this.facility.id + '/utility/predictors/manage/predictor-table')
   }
 
   async saveChanges() {

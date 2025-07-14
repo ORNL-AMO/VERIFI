@@ -7,7 +7,7 @@ import { Router } from '@angular/router';
 import { ToastNotificationsService } from '../toast-notifications/toast-notifications.service';
 import { BackupDataService } from 'src/app/shared/helper-services/backup-data.service';
 import { ExportToExcelTemplateService } from 'src/app/shared/helper-services/export-to-excel-template.service';
-import { IdbAccount } from 'src/app/models/idbModels/account';
+import { getNewIdbAccount, IdbAccount } from 'src/app/models/idbModels/account';
 
 @Component({
   selector: 'app-manage-accounts',
@@ -136,7 +136,12 @@ export class ManageAccountsComponent {
     this.displayMoreHelp = false;
   }
 
-  addNewAccount() {
-    this.router.navigateByUrl('/setup-wizard');
+  async addNewAccount() {
+    let account: IdbAccount = getNewIdbAccount();
+    account = await firstValueFrom(this.accountDbService.addWithObservable(account));
+    let allAccounts: Array<IdbAccount> = await firstValueFrom(this.accountDbService.getAll());
+    this.accountDbService.allAccounts.next(allAccounts);
+    await this.dbChangesService.selectAccount(account, false);
+    this.router.navigateByUrl('/data-management/' + account.guid);
   }
 }

@@ -45,9 +45,9 @@ export class AccountAnalysisItemCardComponent implements OnInit {
   selectAnalysisItem() {
     this.accountAnalysisDbService.selectedAnalysisItem.next(this.analysisItem);
     if (this.analysisItem.setupErrors.hasError || this.analysisItem.setupErrors.facilitiesSelectionsInvalid) {
-      this.router.navigateByUrl('account/analysis/setup');
+      this.router.navigateByUrl('/data-evaluation/account/analysis/setup');
     } else {
-      this.router.navigateByUrl('account/analysis/results');
+      this.router.navigateByUrl('/data-evaluation/account/analysis/results');
     }
   }
 

@@ -93,12 +93,12 @@ export class GroupAnalysisOptionsComponent implements OnInit {
 
   goToPredictors() {
     let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    this.router.navigateByUrl('facility/' + facility.id + '/utility/predictors');
+    this.router.navigateByUrl('/data-evaluation/facility/' + facility.id + '/utility/predictors');
   }
 
   goToMeterGroups() {
     let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    this.router.navigateByUrl('facility/' + facility.id + '/utility/meter-groups');
+    this.router.navigateByUrl('/data-evaluation/facility/' + facility.id + '/utility/meter-groups');
   }
 
   setShowInUseMessage() {

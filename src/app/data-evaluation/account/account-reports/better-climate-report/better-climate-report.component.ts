@@ -59,7 +59,7 @@ export class BetterClimateReportComponent {
     });
     this.selectedReport = this.accountReportDbService.selectedReport.getValue();
     if (!this.selectedReport) {
-      this.router.navigateByUrl('/account/reports/dashboard');
+      this.router.navigateByUrl('/data-evaluation/account/reports/dashboard');
     } else {
       this.betterClimateReportSetup = this.selectedReport.betterClimateReportSetup;
     }

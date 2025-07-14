@@ -80,10 +80,10 @@ export class WaterDashboardComponent {
   }
   
   goToSettings() {
-    this.router.navigateByUrl('facility/' + this.selectedFacility.id + '/settings');
+    this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility.id + '/settings');
   }
 
   goToUtilityData() {
-    this.router.navigateByUrl('facility/' + this.selectedFacility.id + '/utility');
+    this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility.id + '/utility');
   }
 }

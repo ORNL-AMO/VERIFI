@@ -70,7 +70,7 @@ export class AccountAnalysisSetupComponent implements OnInit {
       if (!this.isFormChange) {
         this.analysisItem = item;
         if (!this.analysisItem) {
-          this.router.navigateByUrl('/account/analysis/dashboard')
+          this.router.navigateByUrl('/data-evaluation/account/analysis/dashboard')
         }
         this.account = this.accountDbService.selectedAccount.getValue();
         this.setDisableForm();
@@ -214,6 +214,6 @@ export class AccountAnalysisSetupComponent implements OnInit {
     await this.saveItem();
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('Facility Analysis Items Created.', undefined, undefined, false, 'alert-success');
-    this.router.navigateByUrl('/account/analysis/select-items');
+    this.router.navigateByUrl('/data-evaluation/account/analysis/select-items');
   }
 }

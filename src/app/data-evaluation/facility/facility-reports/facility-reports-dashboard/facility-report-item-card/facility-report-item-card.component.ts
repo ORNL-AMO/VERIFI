@@ -46,7 +46,7 @@ export class FacilityReportItemCardComponent {
 
   selectReport() {
     this.facilityDbReportsService.selectedReport.next(this.report);
-    this.router.navigateByUrl('facility/' + this.facility.id + '/reports/setup');
+    this.router.navigateByUrl('/data-evaluation/facility/' + this.facility.id + '/reports/setup');
   }
 
   async createCopy() {
@@ -61,7 +61,7 @@ export class FacilityReportItemCardComponent {
     this.facilityDbReportsService.selectedReport.next(addedReport);
     this.toastNotificationService.showToast('New Report Created', undefined, undefined, false, "alert-success");
     this.facilityDbReportsService.selectedReport.next(addedReport);
-    this.router.navigateByUrl('facility/' + this.facility.id + '/reports/setup');
+    this.router.navigateByUrl('/data-evaluation/facility/' + this.facility.id + '/reports/setup');
   }
 
   deleteItem() {

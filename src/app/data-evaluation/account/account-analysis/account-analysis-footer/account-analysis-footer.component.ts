@@ -62,41 +62,41 @@ export class AccountAnalysisFooterComponent implements OnInit {
 
   goBack() {
     if (this.router.url.includes('setup')) {
-      this.router.navigateByUrl('account/analysis/dashboard');
+      this.router.navigateByUrl('/data-evaluation/account/analysis/dashboard');
     } else if (this.router.url.includes('account/analysis/select-items')) {
       let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
       let selectedFacility: IdbFacility = this.accountAnalysisService.selectedFacility.getValue();
       let facilityIndex: number = facilities.findIndex(facility => { return facility.guid == selectedFacility.guid });
       if (facilityIndex == 0) {
-        this.router.navigateByUrl('/account/analysis/setup');
+        this.router.navigateByUrl('/data-evaluation/account/analysis/setup');
       } else {
         this.accountAnalysisService.selectedFacility.next(facilities[facilityIndex - 1]);
       }
     } else if (this.router.url.includes('results')) {
       if (this.router.url.includes('monthly-analysis')) {
-        this.router.navigateByUrl('/account/analysis/results/annual-analysis');
+        this.router.navigateByUrl('/data-evaluation/account/analysis/results/annual-analysis');
       } else {
         let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
         this.accountAnalysisService.selectedFacility.next(facilities[facilities.length - 1]);
-        this.router.navigateByUrl('account/analysis/select-items');
+        this.router.navigateByUrl('/data-evaluation/account/analysis/select-items');
       }
     }
   }
 
   continue() {
     if (this.router.url.includes('setup')) {
-      this.router.navigateByUrl('account/analysis/select-items');
+      this.router.navigateByUrl('/data-evaluation/account/analysis/select-items');
     } else if (this.router.url.includes('select-items')) {
       let facilities: Array<IdbFacility> = this.facilityDbService.accountFacilities.getValue();
       let selectedFacility: IdbFacility = this.accountAnalysisService.selectedFacility.getValue();
       let facilityIndex: number = facilities.findIndex(facility => { return facility.guid == selectedFacility.guid });
       if (facilityIndex == facilities.length - 1) {
-        this.router.navigateByUrl('/account/analysis/results/annual-analysis');
+        this.router.navigateByUrl('/data-evaluation/account/analysis/results/annual-analysis');
       } else {
         this.accountAnalysisService.selectedFacility.next(facilities[facilityIndex + 1]);
       }
     } else if (this.router.url.includes('results')) {
-      this.router.navigateByUrl('/account/analysis/results/monthly-analysis');
+      this.router.navigateByUrl('/data-evaluation/account/analysis/results/monthly-analysis');
     }
   }
 
@@ -109,6 +109,6 @@ export class AccountAnalysisFooterComponent implements OnInit {
   }
 
   returnToDashboard() {
-    this.router.navigateByUrl('/account/analysis/dashboard');
+    this.router.navigateByUrl('/data-evaluation/account/analysis/dashboard');
   }
 }

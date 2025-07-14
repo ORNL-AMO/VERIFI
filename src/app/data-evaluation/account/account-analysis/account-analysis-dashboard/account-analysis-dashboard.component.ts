@@ -60,7 +60,7 @@ export class AccountAnalysisDashboardComponent implements OnInit {
     this.analyticsService.sendEvent('create_account_analysis');
     this.accountAnalysisDbService.selectedAnalysisItem.next(addedItem);
     this.toastNotificationService.showToast('Analysis Item Created', undefined, undefined, false, "alert-success");
-    this.router.navigateByUrl('account/analysis/setup');
+    this.router.navigateByUrl('/data-evaluation/account/analysis/setup');
   }
 
   async openCreateAnalysis() {
@@ -103,10 +103,10 @@ export class AccountAnalysisDashboardComponent implements OnInit {
     this.hasEnergy = hasEnergy;
     //check nav
     if (this.analysisType == 'Energy' && !this.hasEnergy) {
-      this.router.navigateByUrl('/account/analysis/dashboard/water');
+      this.router.navigateByUrl('/data-evaluation/account/analysis/dashboard/water');
     }
     if (this.analysisType == 'Water' && !this.hasWater) {
-      this.router.navigateByUrl('/account/analysis/dashboard/energy');
+      this.router.navigateByUrl('/data-evaluation/account/analysis/dashboard/energy');
     }
   }
 

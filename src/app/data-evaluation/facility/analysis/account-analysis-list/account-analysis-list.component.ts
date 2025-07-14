@@ -53,7 +53,7 @@ export class AccountAnalysisListComponent implements OnInit {
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     this.accountAnalysisService.selectedFacility.next(selectedFacility);
     this.accountAnalysisDbService.selectedAnalysisItem.next(item);
-    this.router.navigateByUrl('/account/analysis/select-items')
+    this.router.navigateByUrl('/data-evaluation/account/analysis/select-items')
   }
 
   goBackToAccount() {
@@ -61,6 +61,6 @@ export class AccountAnalysisListComponent implements OnInit {
   }
 
   goToAccountAnalysisDashboard() {
-    this.router.navigateByUrl('/account/analysis')
+    this.router.navigateByUrl('/data-evaluation/account/analysis')
   }
 }

@@ -44,7 +44,7 @@ export class AccountReportsItemCardComponent {
 
   selectReport() {
     this.accountReportDbService.selectedReport.next(this.report);
-    this.router.navigateByUrl('account/reports/setup');
+    this.router.navigateByUrl('/data-evaluation/account/reports/setup');
   }
 
   async createCopy() {
@@ -57,7 +57,7 @@ export class AccountReportsItemCardComponent {
     await this.dbChangesService.setAccountReports(selectedAccount);
     this.accountReportDbService.selectedReport.next(addedReport);
     this.toastNotificationService.showToast('Report Copy Created', undefined, undefined, false, "alert-success");
-    this.router.navigateByUrl('account/reports/setup');
+    this.router.navigateByUrl('/data-evaluation/account/reports/setup');
 
   }
 

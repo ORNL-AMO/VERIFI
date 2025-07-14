@@ -34,6 +34,6 @@ export class FacilityReportsComponent {
 
   goToUtilityData() {
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    this.router.navigateByUrl('/facility/' + selectedFacility.id + '/utility')
+    this.router.navigateByUrl('/data-evaluation/facility/' + selectedFacility.id + '/utility')
   }
 }

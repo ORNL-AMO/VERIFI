@@ -225,27 +225,27 @@ export class HeaderComponent implements OnInit {
 
   goToDashboard(forceNavigation: boolean = false) {
     if (!this.inDataEvaluation || forceNavigation) {
-      // let url: string = this.router.url;
-      // if (url.includes('facilities')) {
-      //   let selectedFacility: IdbFacility = this.facilitydbService.selectedFacility.getValue();
-      //   if (selectedFacility) {
-
-      //   }
-      //   this.router.navigateByUrl('/facility/' + selectedFacility.id);
-      // } else if (url.includes('weather-data')) {
-      //   this.router.navigateByUrl('/weather-data');
-      // } else if (url.includes('account-custom-data')) {
-      //   if (url.includes('custom-grid-factors')) {
-      //     this.router.navigateByUrl('/account/custom-data/emissions');
-      //   } else if (url.includes('custom-fuels')) {
-      //     this.router.navigateByUrl('/account/custom-data/fuels');
-      //   } else if (url.includes('custom-gwps')) {
-      //     this.router.navigateByUrl('/account/custom-data/gwp');
-      //   }
-      // } else {
-      //   this.router.navigateByUrl('/account')
-      // }
-      this.router.navigateByUrl('/data-evaluation/account')
+      let url: string = this.router.url;
+      if (url.includes('facilities')) {
+        let selectedFacility: IdbFacility = this.facilitydbService.selectedFacility.getValue();
+        if (selectedFacility) {
+          this.router.navigateByUrl('/data-evaluation/facility/' + selectedFacility.id);
+        } else {
+          this.router.navigateByUrl('/data-evaluation/account')
+        }
+      } else if (url.includes('weather-data')) {
+        this.router.navigateByUrl('/data-evaluation/weather-data');
+      } else if (url.includes('account-custom-data')) {
+        if (url.includes('custom-grid-factors')) {
+          this.router.navigateByUrl('/data-evaluation/account/custom-data/emissions');
+        } else if (url.includes('custom-fuels')) {
+          this.router.navigateByUrl('/data-evaluation/account/custom-data/fuels');
+        } else if (url.includes('custom-gwps')) {
+          this.router.navigateByUrl('/data-evaluation/account/custom-data/gwp');
+        }
+      } else {
+        this.router.navigateByUrl('/data-evaluation/account')
+      }
     }
   }
 }

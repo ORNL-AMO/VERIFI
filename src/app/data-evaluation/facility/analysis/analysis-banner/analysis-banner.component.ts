@@ -62,7 +62,7 @@ export class AnalysisBannerComponent implements OnInit {
   }
 
   goToDashboard() {
-    this.router.navigateByUrl('/analysis/analysis-dashboard')
+    this.router.navigateByUrl('/data-evaluation/analysis/analysis-dashboard')
   }
 
   toggleShow() {
@@ -72,7 +72,7 @@ export class AnalysisBannerComponent implements OnInit {
   selectItem(item: IdbAnalysisItem) {
     this.analysisDbService.selectedAnalysisItem.next(item);
     let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    this.router.navigateByUrl('/facility/' + facility.id + '/analysis/run-analysis/analysis-setup');
+    this.router.navigateByUrl('/data-evaluation/facility/' + facility.id + '/analysis/run-analysis/analysis-setup');
     this.showDropdown = false;
   }
 }

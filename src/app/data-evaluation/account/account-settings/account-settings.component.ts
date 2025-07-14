@@ -90,7 +90,7 @@ export class AccountSettingsComponent implements OnInit {
 
   switchFacility(facility: IdbFacility) {
     this.facilityDbService.selectedFacility.next(facility);
-    this.router.navigateByUrl('facility/' + facility.id + '/settings');
+    this.router.navigateByUrl('/data-evaluation/facility/' + facility.id + '/settings');
   }
 
   async addNewFacility() {
@@ -103,7 +103,7 @@ export class AccountSettingsComponent implements OnInit {
     await this.dbChangesService.selectAccount(this.selectedAccount, false);
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('New Facility Added!', undefined, undefined, false, 'alert-success');
-    this.router.navigateByUrl('/facility/' + newFacility.id + '/settings');
+    this.router.navigateByUrl('/data-evaluation/facility/' + newFacility.id + '/settings');
   }
 
 
@@ -125,7 +125,7 @@ export class AccountSettingsComponent implements OnInit {
       this.router.navigateByUrl('/manage-accounts');
     } else {
       this.accountDbService.selectedAccount.next(undefined);
-      this.router.navigateByUrl('/setup-wizard');
+      this.router.navigateByUrl('/welcome');
     }
   }
 

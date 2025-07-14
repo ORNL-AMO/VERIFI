@@ -52,9 +52,9 @@ export class FacilityHomeSummaryComponent implements OnInit {
 
   navigateTo(urlStr: string) {
     if (urlStr != 'upload') {
-      this.router.navigateByUrl('facility/' + this.facility.id + '/' + urlStr);
+      this.router.navigateByUrl('/data-evaluation/facility/' + this.facility.id + '/' + urlStr);
     } else {
-      this.router.navigateByUrl('/' + urlStr);
+      this.router.navigateByUrl('/data-management/' + this.facility.accountId + '/import-data');
     }
   }
 
@@ -127,7 +127,7 @@ export class FacilityHomeSummaryComponent implements OnInit {
     this.exportToExcelTemplateService.exportFacilityData(selectedFacility.guid);
   }
 
-  goToDataManagement(){
+  goToDataManagement() {
     this.router.navigateByUrl('/data-management/' + this.facility.accountId + '/facilities/' + this.facility.guid);
   }
 }

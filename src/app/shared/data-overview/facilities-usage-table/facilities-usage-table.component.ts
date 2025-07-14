@@ -51,7 +51,7 @@ export class FacilitiesUsageTableComponent {
   }
 
   selectFacility(facility: IdbFacility) {
-    this.router.navigateByUrl('facility/' + facility.id);
+    this.router.navigateByUrl('/data-evaluation/facility/' + facility.id);
   }
 
   setOrderBy() {

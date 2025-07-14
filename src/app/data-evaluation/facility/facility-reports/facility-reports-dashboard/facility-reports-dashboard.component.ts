@@ -84,7 +84,7 @@ export class FacilityReportsDashboardComponent {
     this.facilityReportsDbService.selectedReport.next(addedReport);
     this.toastNotificationService.showToast('New Report Created', undefined, undefined, false, "alert-success");
     this.facilityReportsDbService.selectedReport.next(addedReport);
-    this.router.navigateByUrl('facility/' + this.selectedFacility.id + '/reports/setup');
+    this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility.id + '/reports/setup');
   }
 
 

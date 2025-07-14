@@ -79,7 +79,7 @@ export class PerformanceSetupComponent {
 
   confirmEditItem() {
     this.accountAnalysisDbService.selectedAnalysisItem.next(this.itemToEdit);
-    this.router.navigateByUrl('account/analysis/results/annual-analysis');
+    this.router.navigateByUrl('/data-evaluation/account/analysis/results/annual-analysis');
   }
 
   cancelEditItem() {

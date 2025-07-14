@@ -54,7 +54,7 @@ export class PerformanceReportComponent {
     });
     this.selectedReport = this.accountReportDbService.selectedReport.getValue();
     if (!this.selectedReport) {
-      this.router.navigateByUrl('/account/reports/dashboard');
+      this.router.navigateByUrl('/data-evaluation/account/reports/dashboard');
     }
     this.account = this.accountDbService.selectedAccount.getValue();
     this.setAnalysisItem();

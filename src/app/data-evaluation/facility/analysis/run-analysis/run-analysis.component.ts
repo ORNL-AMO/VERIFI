@@ -16,7 +16,7 @@ export class RunAnalysisComponent implements OnInit {
   ngOnInit(): void {
     let analysisItem: IdbAnalysisItem = this.analysisDbService.selectedAnalysisItem.getValue();
     if (!analysisItem) {
-      this.router.navigateByUrl('/analysis/analysis-dashboard')
+      this.router.navigateByUrl('/data-evaluation/analysis/analysis-dashboard')
     }
   }
 }

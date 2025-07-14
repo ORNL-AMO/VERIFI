@@ -34,7 +34,7 @@ export class FacilityComponent implements OnInit {
       if (selectedFacility) {
         this.dbChangesService.selectFacility(selectedFacility);
       }else{
-        this.router.navigateByUrl('account')
+        this.router.navigateByUrl('/data-evaluation/account')
       }
     });
 

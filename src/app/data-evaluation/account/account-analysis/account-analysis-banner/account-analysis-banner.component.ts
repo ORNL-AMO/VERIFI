@@ -60,7 +60,7 @@ export class AccountAnalysisBannerComponent implements OnInit {
   }
 
   goToDashboard() {
-    this.router.navigateByUrl('/analysis/dashboard')
+    this.router.navigateByUrl('/data-evaluation/account/analysis/dashboard')
   }
 
   toggleShow(){
@@ -69,6 +69,6 @@ export class AccountAnalysisBannerComponent implements OnInit {
 
   selectItem(item: IdbAccountAnalysisItem){
     this.accountAnalysisDbService.selectedAnalysisItem.next(item);
-    this.router.navigateByUrl('/account/analysis/setup');
+    this.router.navigateByUrl('/data-evaluation/account/analysis/setup');
   }
 }

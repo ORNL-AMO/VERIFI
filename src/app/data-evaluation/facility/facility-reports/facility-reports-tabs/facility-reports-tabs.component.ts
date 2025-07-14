@@ -83,10 +83,10 @@ export class FacilityReportsTabsComponent {
 
   goToDashboard() {
     if (this.selectedReport.facilityReportType == 'analysis') {
-      this.router.navigateByUrl('/facility/' + this.facility.id + '/reports/dashboard/analysis');
+      this.router.navigateByUrl('/data-evaluation/facility/' + this.facility.id + '/reports/dashboard/analysis');
     }
     else if (this.selectedReport.facilityReportType == 'overview') {
-      this.router.navigateByUrl('/facility/' + this.facility.id + '/reports/dashboard/overview');
+      this.router.navigateByUrl('/data-evaluation/facility/' + this.facility.id + '/reports/dashboard/overview');
     }
   }
 
@@ -114,7 +114,7 @@ export class FacilityReportsTabsComponent {
   selectItem(item: IdbFacilityReport) {
     this.facilityReportsDbService.selectedReport.next(item);
     let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    this.router.navigateByUrl('/facility/' + facility.id + '/reports/setup');
+    this.router.navigateByUrl('/data-evaluation/facility/' + facility.id + '/reports/setup');
     this.showDropdown = false;
   }
 

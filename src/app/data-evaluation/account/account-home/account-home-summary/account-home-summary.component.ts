@@ -46,9 +46,8 @@ export class AccountHomeSummaryComponent implements OnInit {
 
   navigateTo(urlStr: string) {
     if (urlStr != 'upload') {
-      this.router.navigateByUrl('account/' + urlStr);
+      this.router.navigateByUrl('/data-evaluation/account/' + urlStr);
     } else {
-      // this.router.navigateByUrl('/' + urlStr);
       this.router.navigateByUrl('/data-management/'+this.account.guid+'/import-data')
     }
   }

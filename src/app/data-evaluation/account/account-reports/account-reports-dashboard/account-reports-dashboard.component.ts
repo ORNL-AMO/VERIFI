@@ -50,7 +50,7 @@ export class AccountReportsDashboardComponent {
     this.analyticsService.sendEvent('create_report');
     this.accountReportDbService.selectedReport.next(addedReport);
     this.toastNotificationService.showToast('Report Created', undefined, undefined, false, "alert-success");
-    this.router.navigateByUrl('account/reports/setup');
+    this.router.navigateByUrl('/data-evaluation/account/reports/setup');
 
   }
 

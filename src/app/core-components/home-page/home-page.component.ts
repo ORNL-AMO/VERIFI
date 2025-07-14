@@ -50,7 +50,7 @@ export class HomePageComponent {
           this.accountDbService.allAccounts.next(allAccounts);
           await this.dbChangesService.selectAccount(newAccount, false);
           this.loadingService.setLoadingStatus(false);
-          this.router.navigateByUrl('/account');
+          this.router.navigateByUrl('/data-evaluation/account');
         } catch (err) {
           console.log(err);
           this.loadingService.setLoadingMessage('Something has gone horribly wrong with the example data..');
@@ -68,6 +68,8 @@ export class HomePageComponent {
   async createNewAccount() {
     let account: IdbAccount = getNewIdbAccount();
     account = await firstValueFrom(this.accountDbService.addWithObservable(account));
+    let allAccounts: Array<IdbAccount> = await firstValueFrom(this.accountDbService.getAll());
+    this.accountDbService.allAccounts.next(allAccounts);
     await this.dbChangesService.selectAccount(account, false);
     this.router.navigateByUrl('/data-management/' + account.guid);
   }
@@ -82,7 +84,7 @@ export class HomePageComponent {
 
   async goToAccountHome(account: IdbAccount) {
     await this.dbChangesService.selectAccount(account, false);
-    this.router.navigateByUrl('/account/home');
+    this.router.navigateByUrl('/data-evaluation/account/home');
   }
 
   async goToDataWizard(account: IdbAccount) {
