@@ -1,7 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { AnnualAnalysisSummaryDataClass } from 'src/app/calculations/analysis-calculations/annualAnalysisSummaryDataClass';
-import { FacilityReportsService } from 'src/app/facility/facility-reports/facility-reports.service';
+import { FacilityReportsService } from 'src/app/data-evaluation/facility/facility-reports/facility-reports.service';
 import { AnalysisGroup, AnnualAnalysisSummary } from 'src/app/models/analysis';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbFacility } from 'src/app/models/idbModels/facility';

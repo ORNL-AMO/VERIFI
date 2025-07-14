@@ -170,7 +170,7 @@ export class MeterDataTableComponent {
     if (this.inDataWizard) {
       this.router.navigateByUrl('/data-management/' + this.selectedMeter.accountId + '/facilities/' + this.selectedMeter.facilityId + '/meters/' + this.selectedMeter.guid + '/meter-data/new-bill');
     } else {
-      this.router.navigateByUrl('facility/' + selectedFacility.id + '/utility/energy-consumption/utility-meter/' + this.selectedMeter.id + '/new-bill');
+      this.router.navigateByUrl('/data-evaluation/facility/' + selectedFacility.id + '/utility/energy-consumption/utility-meter/' + this.selectedMeter.id + '/new-bill');
     }
   }
 
@@ -180,7 +180,7 @@ export class MeterDataTableComponent {
     if (this.inDataWizard) {
       this.router.navigateByUrl('/data-management/' + this.selectedMeter.accountId + '/facilities/' + this.selectedMeter.facilityId + '/meters/' + this.selectedMeter.guid + '/meter-data/edit-bill/' + meterData.guid);
     } else {
-      this.router.navigateByUrl('facility/' + selectedFacility.id + '/utility/energy-consumption/utility-meter/' + this.selectedMeter.id + '/edit-bill/' + meterData.id);
+      this.router.navigateByUrl('/data-evaluation/facility/' + selectedFacility.id + '/utility/energy-consumption/utility-meter/' + this.selectedMeter.id + '/edit-bill/' + meterData.id);
     }
   }
 

@@ -1,6 +1,7 @@
 .navbar {
     background-color: white;
     padding: .5rem .5rem;
+    transition: background-color 1s;
 }
 
 .navbar-brand:first-letter,
@@ -12,11 +13,9 @@ a:not([href]).navbar-brand {
     color: black !important;
 }
 
-
 a:not([href]).dropdown-item.active {
     color: #ff6000 !important;
     background-color: #efefef;
-
 }
 
 .navbar-brand {
@@ -51,6 +50,6 @@ a:not([href]).dropdown-item.active {
     border-color: #2c386b;
 }
 
-.btn.action-btn.active .fa{
+.btn.action-btn.active .fa {
     color: white;
 }

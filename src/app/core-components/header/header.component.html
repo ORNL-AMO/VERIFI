@@ -42,9 +42,9 @@
         </div>
         <div class="btn btn-group ms-2" *ngIf="dataInitialized && activeAccount && displayToggle">
             <button type="button" class="btn toggle-btn" (click)="goToDataEntry()"
-                [ngClass]="{'active': !inDashboard}"><span class="fa fa-database"></span> Data Management</button>
+                [ngClass]="{'active': !inDataEvaluation}"><span class="fa fa-database"></span> Data Management</button>
             <button type="button" class="btn toggle-btn" (click)="goToDashboard()"
-                [ngClass]="{'active': inDashboard}"><span class="fa fa-chart-simple"></span> Data Evaluation</button>
+                [ngClass]="{'active': inDataEvaluation}"><span class="fa fa-chart-simple"></span> Data Evaluation</button>
         </div>
         <ng-container *ngIf="dataInitialized && activeAccount">
             <ng-container *ngIf="!activeAccount.dataBackupFilePath">

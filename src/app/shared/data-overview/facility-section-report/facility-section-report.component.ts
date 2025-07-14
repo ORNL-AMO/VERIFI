@@ -8,7 +8,7 @@ import { YearMonthData } from 'src/app/models/dashboard';
 import { DataOverviewReportSetup } from 'src/app/models/overview-report';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
-import { AccountReportsService } from 'src/app/account/account-reports/account-reports.service';
+import { AccountReportsService } from 'src/app/data-evaluation/account/account-reports/account-reports.service';
 import { FacilityReportsDbService } from 'src/app/indexedDB/facility-reports-db.service';
 import { DataOverviewFacilityReportSettings, IdbFacilityReport } from 'src/app/models/idbModels/facilityReport';
 

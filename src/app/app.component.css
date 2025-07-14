@@ -72,7 +72,15 @@
   background-size: 100%;
   max-width: 100%;
   overflow-x: auto;
+  transition: background-color .7s;
 }
+
+
+.content.data-management {
+    /* background-color: #373A36; */
+    background-color: #005776;
+}
+
 
 @media print {
     .container-fluid{

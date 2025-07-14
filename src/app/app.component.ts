@@ -63,6 +63,7 @@ export class AppComponent {
 
   showSurveyToast: boolean;
   showSurveyModal: boolean;
+  inDataManagement: boolean = false;
   constructor(
     private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService,
@@ -112,6 +113,12 @@ export class AppComponent {
     this.surveyService.showSurveyToast.subscribe(val => {
       this.showSurveyToast = val;
     });
+    this.router.events.subscribe(event => {
+      if (event instanceof NavigationEnd) {
+        this.inDataManagement = this.router.url.includes('data-management');
+      }
+    });
+    this.inDataManagement = this.router.url.includes('data-management');
   }
 
   async initializeData() {
@@ -324,8 +331,8 @@ export class AppComponent {
   async initializeCustomFuels(account: IdbAccount) {
     this.loadingMessage = 'Loading Custom Fuels...';
     let customFuels: Array<IdbCustomFuel> = await this.customFuelDbservice.getAllAccountCustomFuels(account.guid);
-    for(let i = 0; i < customFuels.length; i++){
-      if(isNaN(customFuels[i].CO2) && customFuels[i].directEmissionsRate == undefined){
+    for (let i = 0; i < customFuels.length; i++) {
+      if (isNaN(customFuels[i].CO2) && customFuels[i].directEmissionsRate == undefined) {
         customFuels[i].directEmissionsRate = true;
         await firstValueFrom(this.customFuelDbservice.updateWithObservable(customFuels[i]));
       }

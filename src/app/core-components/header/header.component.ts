@@ -47,7 +47,7 @@ export class HeaderComponent implements OnInit {
   savingBackup: boolean;
   savingBackupSub: Subscription;
 
-  inDashboard: boolean = false;
+  inDataEvaluation: boolean = false;
   displayToggle: boolean = false;
   constructor(
     private router: Router,
@@ -131,7 +131,7 @@ export class HeaderComponent implements OnInit {
       await this.dbChangesService.selectAccount(account, false);
       this.loadingService.setLoadingStatus(false);
       this.automaticBackupService.initializeAccount();
-      if (this.inDashboard) {
+      if (this.inDataEvaluation) {
         this.goToDashboard(true);
       } else {
         this.goToDataEntry(true);
@@ -197,12 +197,12 @@ export class HeaderComponent implements OnInit {
   }
 
   setInDashboard(url: string) {
-    this.inDashboard = url.includes('data-management') == false;
+    this.inDataEvaluation = url.includes('data-management') == false;
     this.displayToggle = url.includes('welcome') == false;
   }
 
   goToDataEntry(forceNavigation: boolean = false) {
-    if (this.inDashboard || forceNavigation) {
+    if (this.inDataEvaluation || forceNavigation) {
       let url: string = this.router.url;
       if (url.includes('facility')) {
         let selectedFacility: IdbFacility = this.facilitydbService.selectedFacility.getValue();
@@ -224,26 +224,27 @@ export class HeaderComponent implements OnInit {
   }
 
   goToDashboard(forceNavigation: boolean = false) {
-    if (!this.inDashboard || forceNavigation) {
+    if (!this.inDataEvaluation || forceNavigation) {
       let url: string = this.router.url;
       if (url.includes('facilities')) {
         let selectedFacility: IdbFacility = this.facilitydbService.selectedFacility.getValue();
         if (selectedFacility) {
-
+          this.router.navigateByUrl('/data-evaluation/facility/' + selectedFacility.id);
+        } else {
+          this.router.navigateByUrl('/data-evaluation/account')
         }
-        this.router.navigateByUrl('/facility/' + selectedFacility.id);
       } else if (url.includes('weather-data')) {
-        this.router.navigateByUrl('/weather-data');
+        this.router.navigateByUrl('/data-evaluation/weather-data');
       } else if (url.includes('account-custom-data')) {
         if (url.includes('custom-grid-factors')) {
-          this.router.navigateByUrl('/account/custom-data/emissions');
+          this.router.navigateByUrl('/data-evaluation/account/custom-data/emissions');
         } else if (url.includes('custom-fuels')) {
-          this.router.navigateByUrl('/account/custom-data/fuels');
+          this.router.navigateByUrl('/data-evaluation/account/custom-data/fuels');
         } else if (url.includes('custom-gwps')) {
-          this.router.navigateByUrl('/account/custom-data/gwp');
+          this.router.navigateByUrl('/data-evaluation/account/custom-data/gwp');
         }
       } else {
-        this.router.navigateByUrl('/account')
+        this.router.navigateByUrl('/data-evaluation/account')
       }
     }
   }

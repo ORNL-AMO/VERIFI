@@ -77,7 +77,7 @@ export class UtilityMetersTableComponent implements OnInit {
   }
 
   addMeter() {
-    this.router.navigateByUrl('facility/' + this.selectedFacility.id + '/utility/energy-consumption/energy-source/new-meter');
+    this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility.id + '/utility/energy-consumption/energy-source/new-meter');
   }
 
 
@@ -160,7 +160,7 @@ export class UtilityMetersTableComponent implements OnInit {
   }
 
   selectEditMeter(meter: IdbUtilityMeter) {
-    this.router.navigateByUrl('facility/' + this.selectedFacility.id + '/utility/energy-consumption/energy-source/edit-meter/' + meter.guid);
+    this.router.navigateByUrl('/data-evaluation/facility/' + this.selectedFacility.id + '/utility/energy-consumption/energy-source/edit-meter/' + meter.guid);
   }
 
   async createCopy(meter: IdbUtilityMeter) {

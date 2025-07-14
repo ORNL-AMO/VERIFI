@@ -185,7 +185,7 @@ export class DefaultUnitsFormComponent implements OnInit {
       }
       this.router.navigateByUrl('data-management/' + accountId + '/account-custom-data/custom-gwps');
     } else {
-      this.router.navigateByUrl('/account/custom-data/emissions')
+      this.router.navigateByUrl('/data-evaluation/account/custom-data/emissions')
     }
   }
 }
