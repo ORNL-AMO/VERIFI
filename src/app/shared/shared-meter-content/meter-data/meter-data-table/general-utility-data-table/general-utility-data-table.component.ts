@@ -16,6 +16,7 @@ import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
 import { UtilityMeterDataService } from 'src/app/shared/shared-meter-content/utility-meter-data.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
+import { ElectronService } from 'src/app/electron/electron.service';
 
 @Component({
   selector: 'app-general-utility-data-table',
@@ -58,15 +59,17 @@ export class GeneralUtilityDataTableComponent implements OnInit {
   showEmissionsSection: boolean;
   showDetailedCharges: boolean;
   showEstimated: boolean;
+  isElectron: boolean;
   constructor(public utilityMeterDataService: UtilityMeterDataService,
     private copyTableService: CopyTableService,
     private eGridService: EGridService, private facilityDbService: FacilitydbService,
     private customFuelDbService: CustomFuelDbService,
-    private accountDbService: AccountdbService) { }
+    private accountDbService: AccountdbService,
+    private electronService: ElectronService) { }
 
   ngOnInit(): void {
     this.setData();
-
+    this.isElectron = this.electronService.isElectron;
     if (this.selectedMeterData.length != 0) {
       let hasFalseChecked: IdbUtilityMeterData = this.selectedMeterData.find(meterDataItem => { return meterDataItem.checked == false });
       this.allChecked = (hasFalseChecked == undefined);

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
@@ -15,6 +15,7 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { getNewIdbUtilityMeterData, IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { UtilityMeterDataService } from 'src/app/shared/shared-meter-content/utility-meter-data.service';
+import { ElectronService } from 'src/app/electron/electron.service';
 
 @Component({
   selector: 'app-edit-bill',
@@ -36,14 +37,17 @@ export class EditBillComponent implements OnInit {
   showFilterDropdown: boolean = false;
   inDataWizard: boolean;
   paramsSub: Subscription;
+  isElectron: boolean;
   constructor(private activatedRoute: ActivatedRoute, private utilityMeterDataDbService: UtilityMeterDatadbService,
     private utilityMeterDbService: UtilityMeterdbService, private loadingService: LoadingService,
     private dbChangesService: DbChangesService, private facilityDbService: FacilitydbService, private accountDbService: AccountdbService,
     private utilityMeterDataService: UtilityMeterDataService, private toastNotificationService: ToastNotificationsService,
-    private router: Router) { }
+    private router: Router,
+    private electronService: ElectronService) { }
 
   ngOnInit(): void {
     this.setInDataWizard();
+    this.isElectron = this.electronService.isElectron;
     this.paramsSub = this.activatedRoute.parent.params.subscribe(parentParams => {
       let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
       if (this.inDataWizard) {
@@ -82,9 +86,11 @@ export class EditBillComponent implements OnInit {
             this.addOrEdit = 'add';
           }
         }
-        this.setMeterDataForm();
+        if (this.editMeterData) {
+          this.setMeterDataForm();
+        }
       })
-    })
+    });
   }
 
   ngOnDestroy() {

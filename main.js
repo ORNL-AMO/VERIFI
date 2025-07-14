@@ -4,6 +4,9 @@ const url = require('url');
 const log = require('electron-log');
 const { autoUpdater } = require('electron-updater');
 const jetpack = require('fs-jetpack');
+const { event } = require('jquery');
+const fs = require('fs');
+const os = require('os');
 
 function isDev() {
     return app.isPackaged == false;
@@ -181,6 +184,94 @@ ipcMain.on("openDialog", (event, arg) => {
         // jetpack.writeAsync(results.filePath, arg.fileData);
     });
 
+});
+
+ipcMain.on("selectFolder", async (event) => {
+    try {
+        const result = await dialog.showOpenDialog({
+            title: "Select a Folder",
+            properties: ['openDirectory']
+        });
+
+        if (result.canceled || !result.filePaths || result.filePaths.length === 0) {
+            win.webContents.send('folder-selected', null);
+            return;
+        }
+        const selectedPath = result.filePaths[0];
+
+        if (fs.existsSync(selectedPath)) {
+            win.webContents.send('folder-selected', selectedPath);
+        } else {
+            win.webContents.send('folder-selected', null);
+        }
+    } catch (err) {
+        log.error('Error getting bills folder:', err);
+    }
+});
+
+ipcMain.on("checkFolderExists", async (event, folderPath) => {
+    const exists = fs.existsSync(folderPath);
+    win.webContents.send('folder-exists', { exists, folderPath });
+});
+
+ipcMain.on("openBillsFolder", async (event, folderPath) => {
+    try {
+        if (folderPath && fs.existsSync(folderPath)) {
+            shell.openPath(folderPath);
+        }
+    }
+    catch (err) {
+        log.error('Error opening bills folder:', err);
+    }
+
+});
+
+ipcMain.on("uploadFileDialog", async (event, { key, folderPath, meterNumber, date }) => {
+    try {
+        log.info('open upload bill dialog');
+        const result = await dialog.showOpenDialog({
+            properties: ['openFile'],
+        });
+        if (result.canceled || result.filePaths.length === 0) {
+            log.info('File selection was canceled');
+            return;
+        }
+
+        const originalFilePath = result.filePaths[0];
+        const fileExtension = path.extname(originalFilePath).toLowerCase();
+
+        meterNumber = meterNumber.trim().split(/\s+/).join('_');
+        const facilityName = meterNumber.split('_')[0];
+
+        const newFileName = `${meterNumber}_${date}${fileExtension}`;
+        const subFolderPath = path.join(folderPath, facilityName);
+        if(!fs.existsSync(subFolderPath)) {
+            fs.mkdirSync(subFolderPath, { recursive: true });
+        }
+        const destinationPath = path.join(subFolderPath, newFileName);
+
+        fs.copyFile(originalFilePath, destinationPath, (err) => {
+            if (err) {
+                log.error('Error copying file:', err);
+                return;
+            }
+            win.webContents.send('utility-file-path', destinationPath);
+        });
+    } catch (err) {
+        log.error('Error during file upload:', err);
+    }
+});
+
+ipcMain.on("openUploadedFileLocation", (event, filepath) => {
+    if (filepath && fs.existsSync(filepath)) {
+        shell.openPath(filepath);
+    }
+});
+
+ipcMain.on("utilityFileExists", (event, path) => {
+    log.info('Checking if file exists');
+    const exists = fs.existsSync(path);
+    win.webContents.send('utility-file-exists', exists);
 });
 
 ipcMain.on("fileExists", (event, arg) => {
