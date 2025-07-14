@@ -319,7 +319,7 @@ export class PredictorsDataTableComponent {
        this.router.navigateByUrl('data-management/' + this.predictor.accountId + '/facilities/' + this.predictor.facilityId + '/predictors/' + this.predictor.guid + '/predictor-data/update-calculated-entries');
     }else{
       let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-      this.router.navigateByUrl('/data-evaluationfacility/' + selectedFacility.id + '/utility/predictors/predictor/' + this.predictor.guid + '/update-calculated-entries');
+      this.router.navigateByUrl('/data-evaluation/facility/' + selectedFacility.id + '/utility/predictors/predictor/' + this.predictor.guid + '/update-calculated-entries');
     }
 
   }

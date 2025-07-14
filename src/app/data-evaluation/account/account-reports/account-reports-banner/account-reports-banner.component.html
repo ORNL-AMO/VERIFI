@@ -3,32 +3,32 @@
     <div>
         <ul class="nav nav-tabs">
             <li class="nav-item">
-                <a class="nav-link" routerLink="/account/reports/setup" [routerLinkActive]="['active']">
+                <a class="nav-link" routerLink="setup" [routerLinkActive]="['active']">
                     <span class="fa fa-exclamation-circle" *ngIf="!setupValid"></span>
                     <i class="fa fa-gears"></i>
                     Report Setup</a>
             </li>
             <li class="nav-item" [ngClass]="{'disabled': !setupValid}"
                 *ngIf="selectedReport.reportType == 'betterPlants'">
-                <a class="nav-link" routerLink="/account/reports/better-plants-report" [routerLinkActive]="['active']">
+                <a class="nav-link" routerLink="better-plants-report" [routerLinkActive]="['active']">
                     <i class="fa fa-file"></i>
                     Better Plants Report</a>
             </li>
             <li class="nav-item" [ngClass]="{'disabled': !setupValid}"
                 *ngIf="selectedReport.reportType == 'dataOverview'">
-                <a class="nav-link" routerLink="/account/reports/data-overview-report" [routerLinkActive]="['active']">
+                <a class="nav-link" routerLink="data-overview-report" [routerLinkActive]="['active']">
                     <i class="fa fa-file"></i>
                     Data Overview</a>
             </li>
             <li class="nav-item" [ngClass]="{'disabled': !setupValid}"
                 *ngIf="selectedReport.reportType == 'performance'">
-                <a class="nav-link" routerLink="/account/reports/performance-report" [routerLinkActive]="['active']">
+                <a class="nav-link" routerLink="performance-report" [routerLinkActive]="['active']">
                     <i class="fa fa-file"></i>
                     Performance Report</a>
             </li>
             <li class="nav-item" [ngClass]="{'disabled': !setupValid}"
                 *ngIf="selectedReport.reportType == 'betterClimate'">
-                <a class="nav-link" routerLink="/account/reports/better-climate-report" [routerLinkActive]="['active']">
+                <a class="nav-link" routerLink="better-climate-report" [routerLinkActive]="['active']">
                     <i class="fa fa-file"></i>
                     Better Climate Report</a>
             </li>
