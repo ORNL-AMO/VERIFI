@@ -1,5 +1,7 @@
 import { Component, ElementRef, Input, SimpleChanges, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
+import { data } from 'browserslist';
+import { get } from 'http';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 
@@ -17,7 +19,8 @@ export class MeterEnergyHistogramComponent {
   selectedMeter: IdbUtilityMeter;
   viewInitialized: boolean = false;
   @ViewChild('meterEnergyHistogram', { static: false }) meterEnergyHistogram: ElementRef;
-
+  meterDataToPlot: number[];
+  unit: string;
   constructor(private plotlyService: PlotlyService) { }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -33,22 +36,56 @@ export class MeterEnergyHistogramComponent {
     }
   }
 
+  getDataAndUnit() {
+    if (this.selectedMeter.source === 'Electricity') {
+      this.meterDataToPlot = this.meterData.map(data => { return data.totalEnergyUse });
+      this.unit = this.selectedMeter.energyUnit;
+    }
+    if (this.selectedMeter.source !== 'Electricity' && (this.selectedMeter.scope == 5 || this.selectedMeter.scope == 6)) {
+      this.meterDataToPlot = this.meterData.map(data => { return data.totalVolume }),
+        this.unit = this.selectedMeter.startingUnit;
+    }
+    else if (this.selectedMeter.source !== 'Electricity' && this.selectedMeter.scope == 2) {
+      this.meterDataToPlot = this.meterData.map(data => { return data.totalEnergyUse });
+      this.unit = this.selectedMeter.energyUnit;
+    }
+    else if (this.selectedMeter.source != 'Electricity' && (this.selectedMeter.scope != 2 && this.selectedMeter.scope != 5 && this.selectedMeter.scope != 6)) {
+      const allEnergyInvalid = this.meterData.every(data =>
+        data.totalEnergyUse === 0 ||
+        data.totalEnergyUse === undefined ||
+        data.totalEnergyUse === null
+      );
+      if (allEnergyInvalid) {
+        this.meterDataToPlot = this.meterData.map(data => data.totalVolume);
+        this.unit = this.selectedMeter.startingUnit;
+      } else {
+        this.meterDataToPlot = this.meterData.map(data => data.totalEnergyUse);
+        this.unit = this.selectedMeter.energyUnit;
+      }
+    }
+  }
+
   drawChart() {
-    const unit = this.selectedMeter.startingUnit;
+    this.getDataAndUnit();
+
+    const min = Math.min(...this.meterDataToPlot);
+    const max = Math.max(...this.meterDataToPlot);
+    const binSize = (max - min) / 20;
+    
     var data = [
       {
         type: "histogram",
-        x: this.meterData.map(data => { return data.totalEnergyUse }),
+        x: this.meterDataToPlot,
         marker: {
           color: '#833c60',
           line: { color: '#fff', width: 1 }
         },
         xbins: {
-          size: 10000
+          size: binSize
         },
         hoverlabel: {
-          bgcolor: "#1976d2",   
-          font: { color: "#fff", size: 14 } 
+          bgcolor: "#1976d2",
+          font: { color: "#fff", size: 14 }
         }
       }
     ];
@@ -64,7 +101,7 @@ export class MeterEnergyHistogramComponent {
       paper_bgcolor: "#e7f1f2",
       xaxis: {
         title: {
-          text: `<b>Energy Consumption (${unit})</b>`,
+          text: `<b>Total Consumption (${this.unit})</b>`,
           font: {
             size: 16
           },

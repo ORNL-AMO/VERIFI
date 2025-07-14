@@ -6,6 +6,7 @@ import { CommonModule } from "@angular/common";
 import { HelperPipesModule } from "../helper-pipes/_helper-pipes.module";
 import { MeterCostHistogramComponent } from './meter-cost-histogram/meter-cost-histogram.component';
 import { MeterEnergyHistogramComponent } from './meter-energy-histogram/meter-energy-histogram.component';
+import { FormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
@@ -17,7 +18,9 @@ import { MeterEnergyHistogramComponent } from './meter-energy-histogram/meter-en
   ],
   imports: [
     CommonModule,
-    HelperPipesModule
+    HelperPipesModule,
+    FormsModule
+    
 ],
   exports: [
     MeterEnergyTimeseriesGraphComponent,

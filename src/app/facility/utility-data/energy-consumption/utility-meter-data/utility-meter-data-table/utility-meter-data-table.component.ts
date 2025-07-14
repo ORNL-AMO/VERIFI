@@ -15,6 +15,8 @@ import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 import * as _ from 'lodash';
 import { getHasDuplicateReadings } from '../../../../../shared/helper-pipes/invalid-meter.pipe';
+import { UtilityMeterDataService } from '../utility-meter-data.service';
+import { GeneralUtilityDataFilters, VehicleDataFilters, GeneralInformationFilters } from 'src/app/models/meterDataFilter';
 
 @Component({
   selector: 'app-utility-meter-data-table',
@@ -40,7 +42,6 @@ export class UtilityMeterDataTableComponent implements OnInit {
   hasNegativeReadings: boolean;
   duplicateReadingDates: Array<Date>;
   @ViewChild('openModalBtn') openModalBtn: ElementRef;
-  meterName: string;
   showGraphs: boolean = false;
   activeGraph: string;
   energyOutlierCount: number = 0;
@@ -59,7 +60,7 @@ export class UtilityMeterDataTableComponent implements OnInit {
     private accountDbService: AccountdbService,
     private dbChangesService: DbChangesService,
     private sharedDataService: SharedDataService,
-    private cd: ChangeDetectorRef
+    private cd: ChangeDetectorRef,
   ) { }
 
   ngOnInit(): void {
@@ -116,7 +117,6 @@ export class UtilityMeterDataTableComponent implements OnInit {
     }) != -1;
     this.duplicateReadingDates = getHasDuplicateReadings(this.selectedMeter.guid, this.meterData);
     this.setHasCheckedItems();
-    this.meterName = this.meterData[0].meterNumber.split(' ').slice(1).join(' ');
   }
 
   uploadData() {

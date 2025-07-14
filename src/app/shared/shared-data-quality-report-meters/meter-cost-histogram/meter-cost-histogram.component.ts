@@ -31,6 +31,9 @@ export class MeterCostHistogramComponent {
   }
 
   drawChart() {
+    const min = Math.min(...this.meterData.map(data => data.totalCost));
+    const max = Math.max(...this.meterData.map(data => data.totalCost));
+    const binSize = (max - min) / 20;
     var data = [
       {
         type: "histogram",
@@ -40,7 +43,7 @@ export class MeterCostHistogramComponent {
           line: { color: '#fff', width: 1 }
         },
         xbins: {
-          size: 10000
+          size: binSize
         },
         hoverlabel: {
           bgcolor: "#1976d2",

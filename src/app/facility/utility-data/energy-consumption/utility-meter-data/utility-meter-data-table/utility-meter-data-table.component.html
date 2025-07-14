@@ -35,7 +35,7 @@
             </div>
             <div class="ps-2">
                 <button #openModalBtn class="btn action-btn" data-bs-toggle="modal" data-bs-target="#dataQualityModal">
-                    <i class="fa fa-file me-1"></i> Data Status Check</button>
+                    <i class="fa fa-file me-1"></i> Data Validity Check</button>
             </div>
         </div>
     </div>
@@ -139,7 +139,7 @@
     <div class="modal-dialog modal-dialog-centered modal-xl modal-size" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="dataQualityModalLabel">Data Status Check: {{ meterName }}</h5>
+                <h5 class="modal-title" id="dataQualityModalLabel">Data Validity Check: {{ selectedMeter.name }}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body" style="overflow-y: auto; width: 100%;">
@@ -186,7 +186,7 @@
                                 [ngClass]="{'collapsed': expandSection !== 'statistics'}"
                                 (click)="onPanelClick('statistics')">
                                 <i class="fa fa-table me-2"></i>
-                                Energy Consumption and Cost Statistics
+                                Total Consumption and Cost Statistics
                             </button>
                         </h2>
                         <div id="collapseStats" class="accordion-collapse collapse" aria-labelledby="headingStats"
@@ -198,14 +198,14 @@
                             </div>
                         </div>
                     </div>
-                    <div class="accordion-item" *ngIf="selectedMeter.includeInEnergy">
+                    <div class="accordion-item" *ngIf="!(selectedMeter.source == 'Electricity' && !selectedMeter.includeInEnergy)">
                         <h2 class="accordion-header" id="headingEnergy">
                             <button class="accordion-button" type="button"
                                 [attr.aria-expanded]="expandSection === 'energy-timeseries'"
                                 [ngClass]="{'collapsed': expandSection !== 'energy-timeseries'}"
                                 (click)="onPanelClick('energy-timeseries')">
                                 <i class="fa fa-line-chart me-2"></i>
-                                Energy Consumption
+                                Total Consumption
                             </button>
                         </h2>
                         <div id="collapseEnergy" class="accordion-collapse collapse" aria-labelledby="headingEnergy"
@@ -235,14 +235,14 @@
                             </div>
                         </div>
                     </div>
-                    <div class="accordion-item" *ngIf="selectedMeter.includeInEnergy">
+                    <div class="accordion-item" *ngIf="!(selectedMeter.source == 'Electricity' && !selectedMeter.includeInEnergy)">
                         <h2 class="accordion-header" id="headingEnergyHist">
                             <button class="accordion-button collapsed" type="button"
                                 [attr.aria-expanded]="expandSection === 'energy-histogram'"
                                 [ngClass]="{'collapsed': expandSection !== 'energy-histogram'}"
                                 (click)="onPanelClick('energy-histogram')">
                                 <i class="fa fa-chart-bar me-2"></i>
-                                Distribution of Energy Consumption
+                                Distribution of Total Consumption
                             </button>
                         </h2>
                         <div id="collapseEnergyHist" class="accordion-collapse collapse"

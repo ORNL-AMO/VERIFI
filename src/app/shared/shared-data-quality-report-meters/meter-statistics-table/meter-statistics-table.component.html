@@ -14,9 +14,9 @@
             </tr>
         </thead>
         <tbody>
-            <tr class="align-middle" *ngIf="selectedMeter.includeInEnergy">
+            <tr class="align-middle" *ngIf="!(selectedMeter.source == 'Electricity' && !selectedMeter.includeInEnergy)">
                 <td>
-                    Energy Consumption ({{ selectedMeter.startingUnit }})
+                    Total Consumption ({{ unit }})
                 </td>
                 <td>
                     <span *ngIf="energyStats.min !== null">
