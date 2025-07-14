@@ -1,4 +1,4 @@
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
@@ -51,6 +51,12 @@ export class PredictorsDataTableComponent {
   latestMeterDataReading: Date;
   filterErrors: boolean = false;
   hasCalculatedOverride: boolean = false;
+  @ViewChild('openModalBtn') openModalBtn: ElementRef;
+  showGraphs: boolean = false;
+  activeGraph: string;
+  outlierCount: number = 0;
+  showAlert: boolean = false;
+  expandSection: string = '';
   constructor(private activatedRoute: ActivatedRoute, private predictorDbService: PredictorDbService,
     private predictorDataDbService: PredictorDataDbService,
     private sharedDataService: SharedDataService,
@@ -63,6 +69,7 @@ export class PredictorsDataTableComponent {
     private accountDbService: AccountdbService,
     private weatherDataService: WeatherDataService,
     private predictorDataHelperService: PredictorDataHelperService,
+    private cd: ChangeDetectorRef
     // private degreeDaysService: DegreeDaysService
   ) {
 
@@ -83,6 +90,29 @@ export class PredictorsDataTableComponent {
     this.itemsPerPageSub = this.sharedDataService.itemsPerPage.subscribe(val => {
       this.itemsPerPage = val;
     });
+  }
+
+  ngAfterViewInit() {
+    const modal = document.getElementById('dataQualityModal');
+    if (modal) {
+      modal.addEventListener('show.bs.modal', () => {
+        this.activeGraph = 'statistics';
+      });
+
+      modal.addEventListener('shown.bs.modal', () => {
+        this.showGraphs = true;
+        if (!this.showAlert) {
+          this.expandSection = 'statistics';
+        }
+      });
+
+      modal.addEventListener('hidden.bs.modal', () => {
+        this.showGraphs = false;
+        this.showAlert = false;
+        this.activeGraph = '';
+        this.expandSection = '';
+      });
+    }
   }
 
   ngOnDestroy() {
@@ -287,4 +317,29 @@ export class PredictorsDataTableComponent {
   toggleFilterErrors() {
     this.filterErrors = !this.filterErrors;
   }
+
+  onModalClose() {
+    this.openModalBtn.nativeElement.focus();
+  }
+
+  selectOption(option: string) {
+    this.activeGraph = option;
+  }
+
+  onOutlierDetection(outlierCount: number) {
+    this.outlierCount = outlierCount;
+    if (this.outlierCount > 0) {
+      this.showAlert = true;
+    } else {
+      this.showAlert = false;
+    }
+    this.expandSection = this.showAlert ? '' : 'statistics';
+    this.cd.detectChanges();
+  }
+
+  onPanelClick(section: string) {
+    this.expandSection = this.expandSection === section ? '' : section;
+    this.activeGraph = this.expandSection === section ? section : '';
+  }
+
 }

@@ -19,6 +19,7 @@ import { OrderCalculatedPredictorDataPipe } from './predictors-data/calculated-p
 import { WeatherDataSubLabelComponent } from './weather-data-sub-label/weather-data-sub-label.component';
 import { LabelWithTooltipModule } from "../../../shared/label-with-tooltip/label-with-tooltip.module";
 import { WeatherStationModalComponent } from './predictors-management/edit-predictor-form/weather-station-modal/weather-station-modal.component';
+import { SharedDataQualityReportPredictorsModule } from 'src/app/shared/shared-data-quality-reports-predictor/shared-data-quality-reports-predictor.module';
 
 
 
@@ -46,7 +47,8 @@ import { WeatherStationModalComponent } from './predictors-management/edit-predi
     TableItemsDropdownModule,
     HelperPipesModule,
     CalculatingSpinnerModule,
-    LabelWithTooltipModule
+    LabelWithTooltipModule,
+    SharedDataQualityReportPredictorsModule
 ]
 })
 export class PredictorsModule { }
