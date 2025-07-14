@@ -21,7 +21,7 @@
                 </span>
             </a>
             <div class="d-flex icon-row"
-                [ngClass]="{'flex-column not-open': !sidebarOpen, 'icon-row open': sidebarOpen, 'hidden': checkHideAccountLinks()}"
+                [ngClass]="{'flex-column not-open': !sidebarOpen, 'icon-row open': sidebarOpen, 'hidden': url|hideAccountLinks:sidebarOpen:hoverAccount}"
                 (mouseenter)="setHoverAccount(true)" (mouseleave)="setHoverAccount(false)">
                 <a title="Account Home" class="nav-link" routerLink="/data-evaluation/account/home"
                     [routerLinkActive]="['active']"><i class="fa fa-home"></i>
@@ -54,7 +54,7 @@
                 </span>
             </a>
             <div class="d-flex icon-row"
-                [ngClass]="{'flex-column not-open': !sidebarOpen, 'icon-row': sidebarOpen, 'hidden': checkHideFacilityLinks(facility.guid, index)}">
+                [ngClass]="{'flex-column not-open': !sidebarOpen, 'icon-row': sidebarOpen, 'hidden': url|hideFacilityLinks:index:sidebarOpen:showAllFacilities:hoverIndex:selectedFacility:facility.guid}">
                 <a title="Facility Home" class="nav-link" routerLink="/data-evaluation/facility/{{facility.id}}/home"
                     [routerLinkActive]="['active']"><i class="fa fa-home"></i>
                 </a>
@@ -109,8 +109,8 @@
         <a title="Feedback" class="nav-link" routerLink="/data-evaluation/feedback" [routerLinkActive]="['active']"
             [routerLinkActiveOptions]="{ exact: true }"><i class="fa fa-inbox"></i> <span [hidden]="!sidebarOpen"
                 class="ps-2 nav-label">Feedback</span></a>
-        <a title="Acknowledgments" class="nav-link" routerLink="/data-evaluation/acknowledgments" [routerLinkActive]="['active']"
-            [routerLinkActiveOptions]="{ exact: true }"><i class="fa fa-trophy"></i>
+        <a title="Acknowledgments" class="nav-link" routerLink="/data-evaluation/acknowledgments"
+            [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }"><i class="fa fa-trophy"></i>
             <span [hidden]="!sidebarOpen" class="ps-2 nav-label">Acknowledgments</span></a>
         <a title="Privacy" class="nav-link" routerLink="/data-evaluation/privacy" [routerLinkActive]="['active']"
             [routerLinkActiveOptions]="{ exact: true }"><i class="fa fa-shield-halved"></i>

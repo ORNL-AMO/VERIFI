@@ -8,6 +8,8 @@ import { FacilityListPipe } from './sidebar/facility-list.pipe';
 import { HelpPanelModule } from './help-panel/help-panel.module';
 import { AccountModule } from './account/account.module';
 import { FacilityModule } from './facility/facility.module';
+import { HideAccountLinksPipe } from './sidebar/hide-account-links.pipe';
+import { HideFacilityLinksPipe } from './sidebar/hide-facility-links.pipe';
 
 
 
@@ -15,7 +17,9 @@ import { FacilityModule } from './facility/facility.module';
   declarations: [
     DataEvaluationComponent,
     SidebarComponent,
-    FacilityListPipe
+    FacilityListPipe,
+    HideAccountLinksPipe,
+    HideFacilityLinksPipe
   ],
   imports: [
     CommonModule,

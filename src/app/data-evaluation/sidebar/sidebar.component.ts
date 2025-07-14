@@ -38,9 +38,10 @@ export class SidebarComponent implements OnInit {
 
   sidebarOpen: boolean;
   sidebarOpenSub: Subscription;
-  constructor(private localStorageService: LocalStorageService, private accountDbService: AccountdbService,
+  url: string;
+  routerSub: Subscription;
+  constructor(private accountDbService: AccountdbService,
     private facilityDbService: FacilitydbService, private router: Router,
-    private sharedDataService: SharedDataService,
     private dataEvaluationService: DataEvaluationService) {
   }
 
@@ -62,58 +63,27 @@ export class SidebarComponent implements OnInit {
       setTimeout(() => {
         window.dispatchEvent(new Event("resize"));
       }, 100)
-    })
+    });
+
+    this.routerSub = this.router.events.subscribe(event => {
+      if (event instanceof NavigationEnd) {
+        this.url = this.router.url;
+      }
+    });
+    this.url = this.router.url;
   }
 
   ngOnDestroy() {
     this.accountSub.unsubscribe();
     this.facilityListSub.unsubscribe();
     this.selectedFacilitySub.unsubscribe();
+    this.routerSub.unsubscribe();
   }
 
 
   toggleSidebar() {
     this.emitToggleCollapse.emit(!this.sidebarOpen);
   }
-
-
-  //TODO PIPE
-  checkHideFacilityLinks(facilityId: string, index: number): boolean {
-    if (this.showAllFacilities && index > 0 && index != this.hoverIndex) {
-      return true;
-    } else {
-      if (this.sidebarOpen && !this.showAllFacilities) {
-        return false;
-      } else if (this.router.url.includes('account') && !this.router.url.includes('facility')) {
-        if (index == this.hoverIndex) {
-          return false;
-        } else {
-          return true;
-        }
-      } else if (this.selectedFacility) {
-        if (index == this.hoverIndex) {
-          return false;
-        } else if (this.selectedFacility.guid != facilityId) {
-          return true;
-        }
-      }
-    }
-    return false;
-  }
-
-  //TODO PIPE
-  checkHideAccountLinks(): boolean {
-    if (this.sidebarOpen || this.hoverAccount) {
-      return false;
-    } else if (!this.router.url.includes('account') || this.router.url.includes('facility')) {
-      return true;
-    }
-    return false;
-  }
-
-  // setShowSidebar() {
-  //   this.showSidebar = !this.router.url.includes('manage-accounts') && !this.router.url.includes('welcome') && !this.router.url.includes('data-management');
-  // }
 
   setFacilityList(accountFacilities: Array<IdbFacility>) {
     if (!this.facilityList) {
