@@ -260,9 +260,11 @@
         <div class="col-lg-5 col-md-12 col-sm-12">
             <app-other-information-form [meterForm]="meterForm"></app-other-information-form>
         </div>
-
-        <div class="col-lg-7 col-md-12 col-sm-12" *ngIf="meterForm.controls.source.value == 'Electricity'">
-            <hr>
+        <hr>
+        <div class="col-lg-7 col-md-12 col-sm-12">
+            <app-meter-charges-form [meterForm]="meterForm"></app-meter-charges-form>
+        </div>
+        <div class="col-lg-5 col-md-12 col-sm-12" *ngIf="meterForm.controls.source.value == 'Electricity'">
             <app-additional-electricity-options-form [meterForm]="meterForm"
                 [displayIncludeEnergy]="displayIncludeEnergy" [displayRetainRecs]="displayRetainRecs"
                 (emitChangeAgreementType)="changeAgreementType()"

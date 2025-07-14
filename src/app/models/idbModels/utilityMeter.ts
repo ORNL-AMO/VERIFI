@@ -55,7 +55,8 @@ export interface IdbUtilityMeter {
     vehicleDistanceUnit?: string
     globalWarmingPotentialOption?: number,
     globalWarmingPotential?: number,
-    sidebarOpen?: boolean
+    sidebarOpen?: boolean,
+    charges?: Array<MeterCharge>
 }
 
 export function getNewIdbUtilityMeter(facilityId: string, accountId: string, setDefaults: boolean, energyUnit: string): IdbUtilityMeter {
@@ -101,6 +102,14 @@ export function getNewIdbUtilityMeter(facilityId: string, accountId: string, set
         vehicleCategory: 1,
         vehicleCollectionType: 1,
         vehicleDistanceUnit: 'mi',
-        vehicleCollectionUnit: 'gal'
+        vehicleCollectionUnit: 'gal',
+        charges: []
     }
+}
+
+export interface MeterCharge {
+    guid: string,
+    name: string,
+    chargeType: string,
+    chargeUnit: string
 }

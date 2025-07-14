@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
-import { FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { FormArray, FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { MeterSource } from 'src/app/models/constantsAndTypes';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
-import { checkShowHeatCapacity, checkShowSiteToSource } from 'src/app/shared/sharedHelperFuntions';
+import { checkShowHeatCapacity, checkShowSiteToSource, getGUID } from 'src/app/shared/sharedHelperFuntions';
 
 @Injectable({
   providedIn: 'root'
@@ -21,6 +21,17 @@ export class EditMeterFormService {
     let basicVehicleValidation: Array<ValidatorFn> = this.getBasicVehicleValidation(meter.scope);
     let additionalVehicleValidation: Array<ValidatorFn> = this.getAdditionalVehicleValidation(meter.scope, meter.vehicleCategory)
     let globalWarmingPotentialValidation: Array<ValidatorFn> = this.getGlobalWarmingPotentialValidation(meter.scope);
+
+    let chargesArray: FormArray = this.formBuilder.array(meter.charges ? meter.charges.map(charge => {
+      return this.formBuilder.group({
+        guid: [charge.guid],
+        name: [charge.name, Validators.required],
+        chargeType: [charge.chargeType, Validators.required],
+        chargeUnit: [charge.chargeUnit, Validators.required]
+      });
+    }) : []);
+
+
     let form: FormGroup = this.formBuilder.group({
       meterNumber: [meter.meterNumber],
       accountNumber: [meter.accountNumber],
@@ -51,7 +62,8 @@ export class EditMeterFormService {
       vehicleFuelEfficiency: [meter.vehicleFuelEfficiency, additionalVehicleValidation],
       vehicleDistanceUnit: [meter.vehicleDistanceUnit, additionalVehicleValidation],
       globalWarmingPotentialOption: [meter.globalWarmingPotentialOption, globalWarmingPotentialValidation],
-      globalWarmingPotential: [meter.globalWarmingPotential, globalWarmingPotentialValidation]
+      globalWarmingPotential: [meter.globalWarmingPotential, globalWarmingPotentialValidation],
+      chargesArray: chargesArray
     });
     // if(form.controls.source.value == 'Electricity'){
     //   form.controls.startingUnit.disable();
@@ -94,6 +106,20 @@ export class EditMeterFormService {
     meter.globalWarmingPotential = form.controls.globalWarmingPotential.value;
     //set multipliers
     meter = this.setMultipliers(meter);
+
+    let chargesArray: FormArray = form.get('chargesArray') as FormArray;
+    if (!meter.charges) {
+      meter.charges = [];
+    }
+    meter.charges = chargesArray.controls.map(chargeGroup => {
+      return {
+        guid: chargeGroup.get('guid').value,
+        name: chargeGroup.get('name').value,
+        chargeType: chargeGroup.get('chargeType').value,
+        chargeUnit: chargeGroup.get('chargeUnit').value
+      };
+    });
+
     return meter;
   }
 
@@ -257,5 +283,16 @@ export class EditMeterFormService {
     } else {
       return undefined;
     }
+  }
+
+  addCharge(form: FormGroup) {
+    const chargesArray = form.get('chargesArray') as FormArray;
+    let newCharge = this.formBuilder.group({
+      guid: [getGUID()],
+      name: ['New Charge', Validators.required],
+      chargeType: ['consumption', Validators.required],
+      chargeUnit: ['dollarsPerKilowatt', Validators.required]
+    });
+    chargesArray.push(newCharge);
   }
 }

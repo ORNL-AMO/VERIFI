@@ -36,6 +36,8 @@ import { MeterGroupFormComponent } from './set-meter-grouping/meter-group-form/m
 import { MeterGroupTableComponent } from './set-meter-grouping/meter-group-table/meter-group-table.component';
 import { ViewConnectBillComponent } from './meter-data/meter-data-table/view-connect-bill/view-connect-bill.component';
 import { EditConnectBillComponent } from './edit-bill/edit-connect-bill/edit-connect-bill.component';
+import { MeterChargesFormComponent } from './edit-meter-form/meter-charges-form/meter-charges-form.component';
+import { ChargesUnitOptionsPipe } from './edit-meter-form/meter-charges-form/charges-unit-options.pipe';
 
 
 
@@ -70,7 +72,9 @@ import { EditConnectBillComponent } from './edit-bill/edit-connect-bill/edit-con
     MeterGroupFormComponent,
     MeterGroupTableComponent,
     ViewConnectBillComponent,
-    EditConnectBillComponent
+    EditConnectBillComponent,
+    MeterChargesFormComponent,
+    ChargesUnitOptionsPipe
   ],
   imports: [
     CommonModule,
