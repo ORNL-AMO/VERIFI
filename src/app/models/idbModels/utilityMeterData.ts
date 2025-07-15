@@ -17,11 +17,12 @@ export interface IdbUtilityMeterData extends Partial<EmissionsResults>, IdbEntry
     totalVolume?: number,
     totalEnergyUse: number,
     totalCost: number,
-    commodityCharge?: number,
-    deliveryCharge?: number,
     checked: boolean,
     meterNumber?: string,
     totalImportConsumption?: number
+    //electricity
+    totalRealDemand?: number,
+    totalBilledDemand?: number,
 
     //TODO: Check emissions usage for meters...
     isEstimated?: boolean,
@@ -36,9 +37,9 @@ export interface IdbUtilityMeterData extends Partial<EmissionsResults>, IdbEntry
     charges?: Array<MeterDataCharge>,
 
     //DEPRECATED fields no longer used
+    commodityCharge?: number,
+    deliveryCharge?: number,
     //electricity
-    totalRealDemand?: number,
-    totalBilledDemand?: number,
     nonEnergyCharge?: number,
     block1Consumption?: number,
     block1ConsumptionCharge?: number,

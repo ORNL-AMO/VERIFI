@@ -4,12 +4,15 @@ import { FacilitydbService } from './facility-db.service';
 import { AnalysisValidationService } from '../shared/helper-services/analysis-validation.service';
 import { IdbAccount } from '../models/idbModels/account';
 import { IdbFacility } from '../models/idbModels/facility';
-import { IdbUtilityMeter } from '../models/idbModels/utilityMeter';
+import { IdbUtilityMeter, MeterCharge } from '../models/idbModels/utilityMeter';
 import { IdbUtilityMeterGroup } from '../models/idbModels/utilityMeterGroup';
 import { IdbAccountReport } from '../models/idbModels/accountReport';
 import { IdbAnalysisItem } from '../models/idbModels/analysisItem';
 import { IdbAccountAnalysisItem } from '../models/idbModels/accountAnalysisItem';
 import { IdbFacilityReport } from '../models/idbModels/facilityReport';
+import { IdbUtilityMeterData } from '../models/idbModels/utilityMeterData';
+import { getGUID } from '../shared/sharedHelperFuntions';
+import { ChargeCostUnit, MeterChargeType } from '../shared/shared-meter-content/edit-meter-form/meter-charges-form/meterChargesOptions';
 
 @Injectable({
   providedIn: 'root'
@@ -35,7 +38,7 @@ export class UpdateDbEntryService {
       isChanged = true;
     }
 
-    if(!account.assessmentReportVersion){
+    if (!account.assessmentReportVersion) {
       account.assessmentReportVersion = 'AR5';
       isChanged = true;
     }
@@ -158,8 +161,12 @@ export class UpdateDbEntryService {
     return { analysisItem: analysisItem, isChanged: isChanged };
   }
 
-  updateUtilityMeter(utilityMeter: IdbUtilityMeter): { utilityMeter: IdbUtilityMeter, isChanged: boolean } {
+  updateUtilityMeter(utilityMeter: IdbUtilityMeter,
+    utilityMeterData: Array<IdbUtilityMeterData>
+  ): { utilityMeter: IdbUtilityMeter, isChanged: boolean, utilityMeterData: Array<IdbUtilityMeterData>, meterDataChanged: boolean } {
     let isChanged: boolean = false;
+    let meterDataChanged: boolean = false;
+    let meterData: Array<IdbUtilityMeterData>;
     let source: string = utilityMeter.source;
     if (source == 'Water') {
       isChanged = true;
@@ -193,9 +200,92 @@ export class UpdateDbEntryService {
       delete utilityMeter.importWizardName;
       isChanged = true;
     }
-    return { utilityMeter: utilityMeter, isChanged: isChanged };
+
+
+    if (!utilityMeter.charges) {
+      utilityMeter.charges = [];
+      isChanged = true;
+      meterDataChanged = true;
+      meterData = utilityMeterData.filter(data => data.meterId == utilityMeter.guid);
+      meterData.forEach(dataItem => {
+        if (dataItem.commodityCharge) {
+          this.addCharge(utilityMeter, dataItem, dataItem.commodityCharge, 0, 'other', 'Commodity Charge', 'dollars');
+        }
+        if (dataItem.deliveryCharge) {
+          this.addCharge(utilityMeter, dataItem, dataItem.deliveryCharge, 0, 'other', 'Delivery Charge', 'dollars');
+        }
+        //electricity
+        if (dataItem.nonEnergyCharge) {
+          this.addCharge(utilityMeter, dataItem, dataItem.nonEnergyCharge, 0, 'other', 'Non-Energy Charge', 'dollars');
+        }
+        if (dataItem.block1Consumption || dataItem.block1ConsumptionCharge) {
+          this.addCharge(utilityMeter, dataItem, dataItem.block1ConsumptionCharge, dataItem.block1Consumption, 'consumption', 'Block 1 Consumption Charge', 'dollarsPerKilowattHour');
+        }
+        if (dataItem.block2Consumption || dataItem.block2ConsumptionCharge) {
+          this.addCharge(utilityMeter, dataItem, dataItem.block2ConsumptionCharge, dataItem.block2Consumption, 'consumption', 'Block 2 Consumption Charge', 'dollarsPerKilowattHour');
+        }
+        if (dataItem.block3Consumption || dataItem.block3ConsumptionCharge) {
+          this.addCharge(utilityMeter, dataItem, dataItem.block3ConsumptionCharge, dataItem.block3Consumption, 'consumption', 'Block 3 Consumption Charge', 'dollarsPerKilowattHour');
+        }
+        if (dataItem.otherConsumption || dataItem.otherConsumptionCharge) {
+          this.addCharge(utilityMeter, dataItem, dataItem.otherConsumptionCharge, dataItem.otherConsumption, 'consumption', 'Other Consumption Charge', 'dollarsPerKilowattHour');
+        }
+        if (dataItem.onPeakAmount || dataItem.onPeakCharge) {
+          this.addCharge(utilityMeter, dataItem, dataItem.onPeakCharge, dataItem.onPeakAmount, 'other', 'On-Peak Charge', 'dollars');
+        }
+        if (dataItem.offPeakAmount || dataItem.offPeakCharge) {
+          this.addCharge(utilityMeter, dataItem, dataItem.offPeakCharge, dataItem.offPeakAmount, 'other', 'Off-Peak Charge', 'dollars');
+        }
+        if (dataItem.transmissionAndDeliveryCharge) {
+          this.addCharge(utilityMeter, dataItem, dataItem.transmissionAndDeliveryCharge, 0, 'other', 'Transmission and Delivery Charge', 'dollars');
+        }
+        if (dataItem.powerFactor || dataItem.powerFactorCharge) {
+          this.addCharge(utilityMeter, dataItem, dataItem.powerFactorCharge, 0, 'other', 'Power Factor Charge', 'dollars');
+        }
+        if (dataItem.localSalesTax) {
+          this.addCharge(utilityMeter, dataItem, dataItem.localSalesTax, 0, 'tax', 'Local Sales Tax', 'dollars');
+        }
+        if (dataItem.stateSalesTax) {
+          this.addCharge(utilityMeter, dataItem, dataItem.stateSalesTax, 0, 'tax', 'State Sales Tax', 'dollars');
+        }
+        if (dataItem.latePayment) {
+          this.addCharge(utilityMeter, dataItem, dataItem.latePayment, 0, 'lateFee', 'Late Payment', 'dollars');
+        }
+        if (dataItem.otherCharge) {
+          this.addCharge(utilityMeter, dataItem, dataItem.otherCharge, 0, 'other', 'Other Charge', 'dollars');
+        }
+        //non-electricity
+        if (dataItem.demandUsage || dataItem.demandCharge) {
+          this.addCharge(utilityMeter, dataItem, dataItem.demandCharge, dataItem.demandUsage, 'demand', 'Demand Charge', 'dollarsPerKilowatt');
+        }
+      })
+    }
+    return { utilityMeter: utilityMeter, isChanged: isChanged, utilityMeterData: meterData, meterDataChanged: meterDataChanged };
   }
 
+  addCharge(meter: IdbUtilityMeter, meterData: IdbUtilityMeterData, chargeAmount: number, chargeUsage: number, chargeType: MeterChargeType, chargeName: string, chargeUnit: ChargeCostUnit): void {
+    let chargeExists: MeterCharge = meter.charges.find(charge => charge.name == chargeName);
+    if (chargeExists) {
+      meterData.charges.push({
+        chargeGuid: chargeExists.guid,
+        chargeAmount: chargeAmount,
+        chargeUsage: chargeUsage
+      })
+    } else {
+      let guid: string = getGUID();
+      meter.charges.push({
+        guid: guid,
+        name: chargeName,
+        chargeType: chargeType,
+        chargeUnit: chargeUnit,
+      })
+      meterData.charges.push({
+        chargeGuid: guid,
+        chargeAmount: chargeAmount,
+        chargeUsage: chargeUsage
+      });
+    }
+  }
 
   updateReport(report: IdbAccountReport, facilities: Array<IdbFacility>, groups: Array<IdbUtilityMeterGroup>): { report: IdbAccountReport, isChanged: boolean } {
     let isChanged: boolean = false;
