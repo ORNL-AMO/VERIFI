@@ -1,1 +1,12 @@
+<div class="d-flex align-items-end gap-3 mb-4" style="flex-wrap: wrap;">
+  <div>
+    <label for="binInput" class="form-label fw-bold mb-1" style="font-size:1.1rem;">Number of bins:</label>
+    <input id="binInput" type="number" [(ngModel)]="numberOfBins"
+      class="form-control border-2 border-primary shadow-sm"
+      style="max-width: 120px; font-size:1.1rem;">
+  </div>
+  <button class="btn btn-primary" style="font-size:1.1rem;" (click)="updateGraph()">
+    Update
+  </button>
+</div>
 <div #meterEnergyHistogram id="meterEnergyHistogram" style="width: 100%;"></div>

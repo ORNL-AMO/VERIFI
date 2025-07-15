@@ -48,6 +48,8 @@ export class UtilityMeterDataTableComponent implements OnInit {
   costOutlierCount: number = 0;
   showAlert: boolean = false;
   expandSection: string = '';
+  binSizeEnergy: number = 10;
+  binSizeCost: number = 10;
 
   constructor(
     private utilityMeterDbService: UtilityMeterdbService,

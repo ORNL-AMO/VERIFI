@@ -1,4 +1,4 @@
-import { Component, ElementRef, Input, SimpleChanges, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { data } from 'browserslist';
 import { get } from 'http';
@@ -17,14 +17,22 @@ export class MeterEnergyHistogramComponent {
   meterData: Array<IdbUtilityMeterData>;
   @Input()
   selectedMeter: IdbUtilityMeter;
+  @Input()
+  binSize: number = 10;
+  @Output()
+  onBinSizeChange: EventEmitter<number> = new EventEmitter<number>();
+
   viewInitialized: boolean = false;
   @ViewChild('meterEnergyHistogram', { static: false }) meterEnergyHistogram: ElementRef;
   meterDataToPlot: number[];
   unit: string;
+  numberOfBins: number = 10;
+
   constructor(private plotlyService: PlotlyService) { }
 
   ngOnChanges(changes: SimpleChanges) {
-    if (changes['meterData'] && this.viewInitialized) {
+    if (changes['meterData'] && this.viewInitialized && changes['binSize']) {
+      this.numberOfBins = this.binSize;
       this.drawChart();
     }
   }
@@ -32,6 +40,14 @@ export class MeterEnergyHistogramComponent {
   ngAfterViewInit() {
     this.viewInitialized = true;
     if (this.meterData) {
+      this.numberOfBins = this.binSize;
+      this.drawChart();
+    }
+  }
+
+  updateGraph() {
+    this.onBinSizeChange.emit(this.numberOfBins);
+    if (this.viewInitialized) {
       this.drawChart();
     }
   }
@@ -70,8 +86,8 @@ export class MeterEnergyHistogramComponent {
 
     const min = Math.min(...this.meterDataToPlot);
     const max = Math.max(...this.meterDataToPlot);
-    const binSize = (max - min) / 20;
-    
+    const binSize = (max - min) / this.numberOfBins;
+
     var data = [
       {
         type: "histogram",

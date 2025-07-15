@@ -250,7 +250,7 @@
                             [ngClass]="{'show': expandSection === 'energy-histogram'}">
                             <div class="accordion-body">
                                 <app-meter-energy-histogram *ngIf="showGraphs && activeGraph === 'energy-histogram'"
-                                    [meterData]="meterData" [selectedMeter]="selectedMeter"></app-meter-energy-histogram>
+                                    [meterData]="meterData" [selectedMeter]="selectedMeter" [binSize]="binSizeEnergy" (onBinSizeChange)="binSizeEnergy = $event"></app-meter-energy-histogram>
                             </div>
                         </div>
                     </div>
@@ -268,7 +268,7 @@
                             [ngClass]="{'show': expandSection === 'cost-histogram'}">
                             <div class="accordion-body">
                                 <app-meter-cost-histogram *ngIf="showGraphs && activeGraph === 'cost-histogram'"
-                                    [meterData]="meterData"></app-meter-cost-histogram>
+                                    [meterData]="meterData" [binSize]="binSizeCost" (onBinSizeChange)="binSizeCost = $event"></app-meter-cost-histogram>
                             </div>
                         </div>
                     </div>
