@@ -1,6 +1,6 @@
 
 export const ConsumptionCostUnits: Array<{ value: ChargeCostUnit, label: string }> = [
-    { value: 'dollarsPerKilowatt', label: '$/kWh' },
+    { value: 'dollarsPerKilowattHour', label: '$/kWh' },
     { value: 'dollarsPerMWh', label: '$/MWh' },
     { value: 'dollarsPerMMBtu', label: '$/MMBtu' },
     { value: 'dollarsPerGJ', label: '$/GJ' },

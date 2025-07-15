@@ -146,26 +146,4 @@
   <div class="alert alert-warning" *ngIf="meterDataForm.controls.totalCost.value === 0">Total cost should be greater
     than
     0</div>
-
-
-  <label for="commodityCharge">Commodity Charge</label>
-  <div class="input-group mb-3">
-    <input id="commodityCharge" class="form-control" type="number" formControlName="commodityCharge"
-      onfocus="this.select();" min="0" max="999999999999999">
-    <span class="input-group-text">$</span>
-  </div>
-
-  <label for="deliveryCharge">Delivery Charges</label>
-  <div class="input-group mb-3">
-    <input id="deliveryCharge" class="form-control" type="number" formControlName="deliveryCharge"
-      onfocus="this.select();" min="0" max="999999999999999">
-    <span class="input-group-text">$</span>
-  </div>
-
-  <label for="otherCharge">Other Charges</label>
-  <div class="input-group mb-3">
-    <input id="otherCharge" class="form-control" type="number" formControlName="otherCharge" onfocus="this.select();"
-      min="0" max="999999999999999">
-    <span class="input-group-text">$</span>
-  </div>
 </form>

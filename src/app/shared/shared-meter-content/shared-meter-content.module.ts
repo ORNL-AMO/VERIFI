@@ -38,6 +38,9 @@ import { ViewConnectBillComponent } from './meter-data/meter-data-table/view-con
 import { EditConnectBillComponent } from './edit-bill/edit-connect-bill/edit-connect-bill.component';
 import { MeterChargesFormComponent } from './edit-meter-form/meter-charges-form/meter-charges-form.component';
 import { ChargesUnitOptionsPipe } from './edit-meter-form/meter-charges-form/charges-unit-options.pipe';
+import { EditBillChargesComponent } from './edit-bill/edit-bill-charges/edit-bill-charges.component';
+import { MeterChargePipe } from './edit-bill/edit-bill-charges/meter-charge.pipe';
+import { ChargeUnitDisplayPipe } from './edit-bill/edit-bill-charges/charge-unit-display.pipe';
 
 
 
@@ -74,7 +77,10 @@ import { ChargesUnitOptionsPipe } from './edit-meter-form/meter-charges-form/cha
     ViewConnectBillComponent,
     EditConnectBillComponent,
     MeterChargesFormComponent,
-    ChargesUnitOptionsPipe
+    ChargesUnitOptionsPipe,
+    EditBillChargesComponent,
+    MeterChargePipe,
+    ChargeUnitDisplayPipe
   ],
   imports: [
     CommonModule,

@@ -25,6 +25,7 @@ export class MeterChargesFormComponent {
 
   addCharge() {
     this.editMeterFormService.addCharge(this.meterForm);
+    this.meterForm.markAsDirty();
   }
 
   removeCharge(index: number) {

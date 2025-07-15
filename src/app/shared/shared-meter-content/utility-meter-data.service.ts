@@ -1,6 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { Injectable } from '@angular/core';
-import { FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { FormArray, FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { BehaviorSubject } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { AdditionalChargesFilters, DetailedChargesFilters, ElectricityDataFilters, EmissionsFilters, GeneralInformationFilters, GeneralUtilityDataFilters, VehicleDataFilters } from 'src/app/models/meterDataFilter';
@@ -153,35 +153,24 @@ export class UtilityMeterDataService {
       let stringFormat: string = 'y-MM-dd'; // YYYY-MM-DD  
       dateString = datePipe.transform(meterData.readDate, stringFormat);
     }
+
+    let chargesArray: FormArray = this.formBuilder.array(meterData.charges ? meterData.charges.map(charge => {
+      return this.formBuilder.group({
+        chargeGuid: [charge.chargeGuid],
+        chargeAmount: [charge.chargeAmount],
+        chargeUsage: [charge.chargeUsage]
+      });
+    }) : []);
+
     return this.formBuilder.group({
       readDate: [dateString, Validators.required],
       //ISSUE 1176: Validators.min(0) removed
       totalEnergyUse: [meterData.totalEnergyUse, [Validators.required]],
       totalCost: [meterData.totalCost, [Validators.min(0)]],
-      deliveryCharge: [meterData.deliveryCharge, [Validators.min(0)]],
       totalRealDemand: [meterData.totalRealDemand, [Validators.min(0)]],
       totalBilledDemand: [meterData.totalBilledDemand, [Validators.min(0)]],
-      nonEnergyCharge: [meterData.nonEnergyCharge, [Validators.min(0)]],
-      block1Consumption: [meterData.block1Consumption, [Validators.min(0)]],
-      block1ConsumptionCharge: [meterData.block1ConsumptionCharge, [Validators.min(0)]],
-      block2Consumption: [meterData.block2Consumption, [Validators.min(0)]],
-      block2ConsumptionCharge: [meterData.block2ConsumptionCharge, [Validators.min(0)]],
-      block3Consumption: [meterData.block3Consumption, [Validators.min(0)]],
-      block3ConsumptionCharge: [meterData.block3ConsumptionCharge, [Validators.min(0)]],
-      otherConsumption: [meterData.otherConsumption, [Validators.min(0)]],
-      otherConsumptionCharge: [meterData.otherConsumptionCharge, [Validators.min(0)]],
-      onPeakAmount: [meterData.onPeakAmount, [Validators.min(0)]],
-      onPeakCharge: [meterData.onPeakCharge, [Validators.min(0)]],
-      offPeakAmount: [meterData.offPeakAmount, [Validators.min(0)]],
-      offPeakCharge: [meterData.offPeakCharge, [Validators.min(0)]],
-      transmissionAndDeliveryCharge: [meterData.transmissionAndDeliveryCharge, [Validators.min(0)]],
-      powerFactor: [meterData.powerFactor, [Validators.min(0)]],
-      powerFactorCharge: [meterData.powerFactorCharge, [Validators.min(0)]],
-      localSalesTax: [meterData.localSalesTax, [Validators.min(0)]],
-      stateSalesTax: [meterData.stateSalesTax, [Validators.min(0)]],
-      latePayment: [meterData.latePayment, [Validators.min(0)]],
-      otherCharge: [meterData.otherCharge, [Validators.min(0)]],
-      isEstimated: [meterData.isEstimated || false]
+      isEstimated: [meterData.isEstimated || false],
+      chargesArray: chargesArray,
     })
   }
 
@@ -192,29 +181,8 @@ export class UtilityMeterDataService {
     meterData.readDate = new Date(formDate.getUTCFullYear(), formDate.getUTCMonth(), formDate.getUTCDate());
     meterData.totalEnergyUse = form.controls.totalEnergyUse.value;
     meterData.totalCost = form.controls.totalCost.value;
-    meterData.deliveryCharge = form.controls.deliveryCharge.value;
     meterData.totalRealDemand = form.controls.totalRealDemand.value;
     meterData.totalBilledDemand = form.controls.totalBilledDemand.value;
-    meterData.nonEnergyCharge = form.controls.nonEnergyCharge.value;
-    meterData.block1Consumption = form.controls.block1Consumption.value;
-    meterData.block1ConsumptionCharge = form.controls.block1ConsumptionCharge.value;
-    meterData.block2Consumption = form.controls.block2Consumption.value;
-    meterData.block2ConsumptionCharge = form.controls.block2ConsumptionCharge.value;
-    meterData.block3Consumption = form.controls.block3Consumption.value;
-    meterData.block3ConsumptionCharge = form.controls.block3ConsumptionCharge.value;
-    meterData.otherConsumption = form.controls.otherConsumption.value;
-    meterData.otherConsumptionCharge = form.controls.otherConsumptionCharge.value;
-    meterData.onPeakAmount = form.controls.onPeakAmount.value;
-    meterData.onPeakCharge = form.controls.onPeakCharge.value;
-    meterData.offPeakAmount = form.controls.offPeakAmount.value;
-    meterData.offPeakCharge = form.controls.offPeakCharge.value;
-    meterData.transmissionAndDeliveryCharge = form.controls.transmissionAndDeliveryCharge.value;
-    meterData.powerFactor = form.controls.powerFactor.value;
-    meterData.powerFactorCharge = form.controls.powerFactorCharge.value;
-    meterData.localSalesTax = form.controls.localSalesTax.value;
-    meterData.stateSalesTax = form.controls.stateSalesTax.value;
-    meterData.latePayment = form.controls.latePayment.value;
-    meterData.otherCharge = form.controls.otherCharge.value;
     meterData.isEstimated = form.controls.isEstimated.value;
     if (uploadedFilePath != undefined && uploadedFilePath != null && uploadedFilePath != 'Deleted') {
       meterData.uploadedFilePath = uploadedFilePath;
@@ -224,6 +192,20 @@ export class UtilityMeterDataService {
       meterData.uploadedFilePath = undefined;
       meterData.isBillConnected = false;
     }
+
+
+    let chargesArray: FormArray = form.get('chargesArray') as FormArray;
+    if (!meterData.charges) {
+      meterData.charges = [];
+    }
+    meterData.charges = chargesArray.controls.map(chargeGroup => {
+      return {
+        chargeGuid: chargeGroup.get('chargeGuid').value,
+        chargeAmount: chargeGroup.get('chargeAmount').value,
+        chargeUsage: chargeGroup.get('chargeUsage').value
+      };
+    });
+
     return meterData;
   }
 
@@ -259,6 +241,13 @@ export class UtilityMeterDataService {
     if (displayFuelEfficiency) {
       vehicleFuelEfficiencyValidators = [Validators.required, Validators.min(0)];
     }
+    let chargesArray: FormArray = this.formBuilder.array(meterData.charges ? meterData.charges.map(charge => {
+      return this.formBuilder.group({
+        chargeGuid: [charge.chargeGuid],
+        chargeAmount: [charge.chargeAmount],
+        chargeUsage: [charge.chargeUsage]
+      });
+    }) : []);
 
     let form: FormGroup = this.formBuilder.group({
       readDate: [dateString, Validators.required],
@@ -270,7 +259,8 @@ export class UtilityMeterDataService {
       otherCharge: [meterData.otherCharge],
       isEstimated: [meterData.isEstimated || false],
       heatCapacity: [meterData.heatCapacity, heatCapacityValidators],
-      vehicleFuelEfficiency: [meterData.vehicleFuelEfficiency, vehicleFuelEfficiencyValidators]
+      vehicleFuelEfficiency: [meterData.vehicleFuelEfficiency, vehicleFuelEfficiencyValidators],
+      chargesArray: chargesArray
     });
     form.controls.heatCapacity.disable();
     form.controls.vehicleFuelEfficiency.disable();
@@ -284,9 +274,6 @@ export class UtilityMeterDataService {
     meterData.totalVolume = form.controls.totalVolume.value;
     meterData.totalEnergyUse = form.controls.totalEnergyUse.value;
     meterData.totalCost = form.controls.totalCost.value;
-    meterData.commodityCharge = form.controls.commodityCharge.value;
-    meterData.deliveryCharge = form.controls.deliveryCharge.value;
-    meterData.otherCharge = form.controls.otherCharge.value;
     meterData.isEstimated = form.controls.isEstimated.value;
     meterData.heatCapacity = form.controls.heatCapacity.value;
     meterData.vehicleFuelEfficiency = form.controls.vehicleFuelEfficiency.value;
@@ -298,6 +285,17 @@ export class UtilityMeterDataService {
       meterData.uploadedFilePath = undefined;
       meterData.isBillConnected = false;
     }
+    let chargesArray: FormArray = form.get('chargesArray') as FormArray;
+    if (!meterData.charges) {
+      meterData.charges = [];
+    }
+    meterData.charges = chargesArray.controls.map(chargeGroup => {
+      return {
+        chargeGuid: chargeGroup.get('chargeGuid').value,
+        chargeAmount: chargeGroup.get('chargeAmount').value,
+        chargeUsage: chargeGroup.get('chargeUsage').value
+      };
+    });
     return meterData;
   }
 }

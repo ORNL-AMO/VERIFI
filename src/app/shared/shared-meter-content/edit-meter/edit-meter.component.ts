@@ -14,13 +14,13 @@ import { Observable, firstValueFrom, of } from 'rxjs';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { getNewIdbUtilityMeter, IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
-import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
+import { IdbUtilityMeterData, updateMeterDataCharges } from 'src/app/models/idbModels/utilityMeterData';
 
 @Component({
-    selector: 'app-edit-meter',
-    templateUrl: './edit-meter.component.html',
-    styleUrls: ['./edit-meter.component.css'],
-    standalone: false
+  selector: 'app-edit-meter',
+  templateUrl: './edit-meter.component.html',
+  styleUrls: ['./edit-meter.component.css'],
+  standalone: false
 })
 export class EditMeterComponent implements OnInit {
 
@@ -68,7 +68,7 @@ export class EditMeterComponent implements OnInit {
           this.meterForm.controls.vehicleFuel.disable();
           this.meterForm.controls.vehicleFuelEfficiency.disable();
           this.meterForm.controls.vehicleDistanceUnit.disable();
-          
+
 
         }
       } else {
@@ -82,13 +82,10 @@ export class EditMeterComponent implements OnInit {
   async saveChanges() {
     this.loadingService.setLoadingMessage('Saving Meter...');
     this.loadingService.setLoadingStatus(true);
-    //if data exists. See if you need to re-calculate energy
-    if (this.meterDataExists && (this.editMeter.startingUnit != this.meterForm.controls.startingUnit.value) || (this.editMeter.heatCapacity != this.meterForm.controls.heatCapacity.value)) {
-      await this.checkMeterData();
-    }
     let meterToSave: IdbUtilityMeter = this.editMeterFormService.updateMeterFromForm(this.editMeter, this.meterForm);
     if (this.addOrEdit == 'edit') {
       await firstValueFrom(this.utilityMeterDbService.updateWithObservable(meterToSave));
+      await this.updateMeterData(meterToSave);
     } else if (this.addOrEdit == 'add') {
       delete meterToSave.id;
       meterToSave = await firstValueFrom(this.utilityMeterDbService.addWithObservable(meterToSave));
@@ -108,17 +105,14 @@ export class EditMeterComponent implements OnInit {
     this.router.navigateByUrl('/data-evaluation/facility/' + selectedFacility.id + '/utility/energy-consumption/energy-source/meters')
   }
 
-  async checkMeterData() {
-    let isEnergyMeter: boolean = getIsEnergyMeter(this.editMeter.source);
-    let isEnergyUnit: boolean = getIsEnergyUnit(this.editMeter.startingUnit);
-    //energy meter with data entered as consumption
-    if (isEnergyMeter && !isEnergyUnit) {
-      this.loadingService.setLoadingMessage('Updating Meter Data...')
-      this.loadingService.setLoadingStatus(true);
-      let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataFromMeterId(this.editMeter.guid);
-      for (let i = 0; i < meterData.length; i++) {
-        meterData[i].totalEnergyUse = meterData[i].totalVolume * this.meterForm.controls.heatCapacity.value;
-        await firstValueFrom(this.utilityMeterDataDbService.updateWithObservable(meterData[i]));
+  async updateMeterData(meter: IdbUtilityMeter) {
+    this.loadingService.setLoadingMessage('Updating Meter Data...')
+    this.loadingService.setLoadingStatus(true);
+    let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataFromMeterId(this.editMeter.guid);
+    let dataNeedsUpdate: Array<IdbUtilityMeterData> = updateMeterDataCharges(meter, meterData)
+    if (dataNeedsUpdate.length > 0) {
+      for (let i = 0; i < dataNeedsUpdate.length; i++) {
+        await this.utilityMeterDataDbService.updateWithObservable(dataNeedsUpdate[i]);
       }
       let accountMeterData: Array<IdbUtilityMeterData> = await this.utilityMeterDataDbService.getAllAccountMeterData(this.selectedFacility.accountId);
       this.utilityMeterDataDbService.accountMeterData.next(accountMeterData);
@@ -127,7 +121,7 @@ export class EditMeterComponent implements OnInit {
       this.toastNotificationService.showToast("Meter and Meter Data Updated", undefined, undefined, false, "alert-success");
     }
   }
-  
+
   canDeactivate(): Observable<boolean> {
     if (this.meterForm.dirty) {
       const result = window.confirm('There are unsaved changes! Are you sure you want to leave this page?');
