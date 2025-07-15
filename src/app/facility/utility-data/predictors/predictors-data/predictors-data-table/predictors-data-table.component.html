@@ -258,7 +258,7 @@
                             <div class="accordion-body">
                                 <app-predictor-histogram-graph *ngIf="showGraphs && activeGraph === 'histogram'"
                                     [predictorData]="predictorData"
-                                    [selectedPredictor]="predictor"></app-predictor-histogram-graph>
+                                    [selectedPredictor]="predictor" [binSize]="binSize" (onBinSizeChange)="binSize = $event"></app-predictor-histogram-graph>
                             </div>
                         </div>
                     </div>

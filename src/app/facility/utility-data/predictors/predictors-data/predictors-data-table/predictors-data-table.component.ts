@@ -57,6 +57,7 @@ export class PredictorsDataTableComponent {
   outlierCount: number = 0;
   showAlert: boolean = false;
   expandSection: string = '';
+  binSize: number = 10;
   constructor(private activatedRoute: ActivatedRoute, private predictorDbService: PredictorDbService,
     private predictorDataDbService: PredictorDataDbService,
     private sharedDataService: SharedDataService,

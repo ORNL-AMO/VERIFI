@@ -1,4 +1,4 @@
-import { Component, ElementRef, Input, SimpleChanges, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
@@ -16,15 +16,21 @@ export class PredictorHistogramGraphComponent {
   predictorData: Array<IdbPredictorData>;
   @Input()
   selectedPredictor: IdbPredictor;
+  @Input()
+  binSize: number = 10;
+  @Output()
+  onBinSizeChange: EventEmitter<number> = new EventEmitter<number>();
 
   @ViewChild('predictorHistogram', { static: false }) predictorHistogram: ElementRef;
   viewInitialized: boolean = false;
   meterEnergyHistogram: any;
+  numberOfBins: number = 10;
 
   constructor(private plotlyService: PlotlyService) { }
 
   ngOnChanges(changes: SimpleChanges) {
-    if (changes['predictorData'] && this.viewInitialized) {
+    if (changes['predictorData'] && this.viewInitialized && changes['binSize']) {
+      this.numberOfBins = this.binSize;
       this.drawChart();
     }
   }
@@ -32,6 +38,14 @@ export class PredictorHistogramGraphComponent {
   ngAfterViewInit() {
     this.viewInitialized = true;
     if (this.predictorData) {
+      this.numberOfBins = this.binSize;
+      this.drawChart();
+    }
+  }
+
+  updateGraph() {
+    this.onBinSizeChange.emit(this.numberOfBins);
+    if (this.viewInitialized) {
       this.drawChart();
     }
   }
@@ -52,6 +66,10 @@ export class PredictorHistogramGraphComponent {
     }
     else
       unit = '';
+
+    const min = Math.min(...this.predictorData.map(data => { return data.amount }));
+    const max = Math.max(...this.predictorData.map(data => { return data.amount }));
+    const binSize = (max - min) / this.numberOfBins;
     var data = [
       {
         type: "histogram",
@@ -61,7 +79,7 @@ export class PredictorHistogramGraphComponent {
           line: { color: '#fff', width: 1 }
         },
         xbins: {
-          size: 10000
+          size: binSize
         },
         hoverlabel: {
           bgcolor: "#1976d2",
