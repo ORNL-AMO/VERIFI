@@ -1,0 +1,180 @@
+<button #openModalBtn class="btn action-btn" (click)="openModal()">
+    <i class="fa fa-file me-1"></i> Data Validity Check</button>
+
+
+
+<!-- <div class="modal fade" id="dataQualityModal" tabindex="-1" aria-labelledby="dataQualityModalLabel" aria-hidden="true"
+    data-bs-backdrop="static" data-bs-keyboard="false" #dataQualityModal>
+    <div class="modal-dialog modal-dialog-centered modal-xl modal-size" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="dataQualityModalLabel">Data Validity Check: {{ selectedMeter.name }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" style="overflow-y: auto; width: 100%;">
+                <div class="accordion" id="dataQualityAccordion">
+                    <div *ngIf="showAlert"
+                        class="alert alert-warning d-flex flex-column align-items-center justify-content-center gap-3 mb-3 text-center"
+                        style="font-size: 1.1rem;">
+                        <i class="fa fa-exclamation-triangle me-3" aria-hidden="true"
+                            style="font-size:3rem; color: #b52223;"></i>
+                        <div>
+                            <span *ngIf="energyOutlierCount > 0 && costOutlierCount > 0"
+                                style="font-size:1.5rem; text-align: center;">
+                                There is an issue in
+                                <span class="fw-bold text-danger" style="font-size:1.5rem;">{{ energyOutlierCount
+                                    }}</span>
+                                energy reading<span *ngIf="energyOutlierCount > 1" style="font-size:1.5rem;">s</span>
+                                and
+                                <span class="fw-bold text-danger" style="font-size:1.5rem;">{{ costOutlierCount
+                                    }}</span>
+                                cost reading<span *ngIf="costOutlierCount > 1" style="font-size:1.5rem;">s</span>
+                                <br>
+                            </span>
+                            <span *ngIf="energyOutlierCount > 0 && costOutlierCount == 0"
+                                style="font-size:1.5rem; text-align: center;">
+                                There is an issue in
+                                <span class="fw-bold text-danger" style="font-size:1.5rem;">{{ energyOutlierCount
+                                    }}</span>
+                                energy reading<span *ngIf="energyOutlierCount > 1" style="font-size:1.5rem;">s</span>
+                                <br>
+                            </span>
+                            <span *ngIf="costOutlierCount > 0 && energyOutlierCount == 0"
+                                style="font-size:1.5rem; text-align: center;">
+                                There is an issue in
+                                <span class="fw-bold text-danger" style="font-size:1.5rem;">{{ costOutlierCount
+                                    }}</span>
+                                cost reading<span *ngIf="costOutlierCount > 1" style="font-size:1.5rem;">s</span>
+                                <br>
+                            </span>
+                            <span
+                                style="font-size:1.3rem; font-style:italic; color:#872e2e; display:block; text-align: center;">
+                                Expand the sections below to view details.
+                            </span>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingStats">
+                            <button class="accordion-button collapsed" type="button"
+                                [attr.aria-expanded]="expandSection === 'statistics'"
+                                [ngClass]="{'collapsed': expandSection !== 'statistics'}"
+                                (click)="onPanelClick('statistics')">
+                                <i class="fa fa-table me-2"></i>
+                                Total Consumption and Cost Statistics
+                            </button>
+                        </h2>
+                        <div id="collapseStats" class="accordion-collapse collapse" aria-labelledby="headingStats"
+                            [ngClass]="{'show': expandSection === 'statistics'}">
+                            <div class="accordion-body">
+                                <app-meter-statistics-table *ngIf="showGraphs && activeGraph === 'statistics'"
+                                    (outlierCount)="onOutlierDetection($event)" [meterData]="meterData"
+                                    [selectedMeter]="selectedMeter"></app-meter-statistics-table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item"
+                        *ngIf="!(selectedMeter.source == 'Electricity' && !selectedMeter.includeInEnergy)">
+                        <h2 class="accordion-header" id="headingEnergy">
+                            <button class="accordion-button" type="button"
+                                [attr.aria-expanded]="expandSection === 'energy-timeseries'"
+                                [ngClass]="{'collapsed': expandSection !== 'energy-timeseries'}"
+                                (click)="onPanelClick('energy-timeseries')">
+                                <i class="fa fa-line-chart me-2"></i>
+                                Total Consumption
+                            </button>
+                        </h2>
+                        <div id="collapseEnergy" class="accordion-collapse collapse" aria-labelledby="headingEnergy"
+                            [ngClass]="{'show': expandSection === 'energy-timeseries'}">
+                            <div class="accordion-body">
+                                <app-meter-energy-timeseries-graph
+                                    *ngIf="showGraphs && activeGraph === 'energy-timeseries'" [meterData]="meterData"
+                                    [selectedMeter]="selectedMeter"></app-meter-energy-timeseries-graph>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingCost">
+                            <button class="accordion-button collapsed" type="button"
+                                [attr.aria-expanded]="expandSection === 'cost-timeseries'"
+                                [ngClass]="{'collapsed': expandSection !== 'cost-timeseries'}"
+                                (click)="onPanelClick('cost-timeseries')">
+                                <i class="fa fa-line-chart me-2"></i>
+                                Total Cost
+                            </button>
+                        </h2>
+                        <div id="collapseCost" class="accordion-collapse collapse" aria-labelledby="headingCost"
+                            [ngClass]="{'show': expandSection === 'cost-timeseries'}">
+                            <div class="accordion-body">
+                                <app-meter-cost-timeseries-graph *ngIf="showGraphs && activeGraph === 'cost-timeseries'"
+                                    [meterData]="meterData"></app-meter-cost-timeseries-graph>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item"
+                        *ngIf="!(selectedMeter.source == 'Electricity' && !selectedMeter.includeInEnergy)">
+                        <h2 class="accordion-header" id="headingEnergyHist">
+                            <button class="accordion-button collapsed" type="button"
+                                [attr.aria-expanded]="expandSection === 'energy-histogram'"
+                                [ngClass]="{'collapsed': expandSection !== 'energy-histogram'}"
+                                (click)="onPanelClick('energy-histogram')">
+                                <i class="fa fa-chart-bar me-2"></i>
+                                Distribution of Total Consumption
+                            </button>
+                        </h2>
+                        <div id="collapseEnergyHist" class="accordion-collapse collapse"
+                            aria-labelledby="headingEnergyHist"
+                            [ngClass]="{'show': expandSection === 'energy-histogram'}">
+                            <div class="accordion-body">
+                                <app-meter-energy-histogram *ngIf="showGraphs && activeGraph === 'energy-histogram'"
+                                    [meterData]="meterData" [selectedMeter]="selectedMeter" [binSize]="binSizeEnergy"
+                                    (onBinSizeChange)="binSizeEnergy = $event"></app-meter-energy-histogram>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingCostHist">
+                            <button class="accordion-button collapsed" type="button"
+                                [attr.aria-expanded]="expandSection === 'cost-histogram'"
+                                [ngClass]="{'collapsed': expandSection !== 'cost-histogram'}"
+                                (click)="onPanelClick('cost-histogram')">
+                                <i class="fa fa-chart-bar me-2"></i>
+                                Distribution of Total Cost
+                            </button>
+                        </h2>
+                        <div id="collapseCostHist" class="accordion-collapse collapse" aria-labelledby="headingCostHist"
+                            [ngClass]="{'show': expandSection === 'cost-histogram'}">
+                            <div class="accordion-body">
+                                <app-meter-cost-histogram *ngIf="showGraphs && activeGraph === 'cost-histogram'"
+                                    [meterData]="meterData" [binSize]="binSizeCost"
+                                    (onBinSizeChange)="binSizeCost = $event"></app-meter-cost-histogram>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+                    (click)="onModalClose()">Close</button>
+            </div>
+        </div>
+    </div>
+</div> -->
+
+
+
+
+
+<div [ngClass]="{'windowOverlay': showModal}"></div>
+<div class="popup" [class.open]="showModal">
+    <div class="popup-header" *ngIf="showModal">Delete Meter Data
+        <button class="item-right" (click)="hideModal()">x</button>
+    </div>
+    <div class="popup-body">
+        <app-meter-data-quality-report [selectedMeter]="selectedMeter"
+            [meterData]="meterData"></app-meter-data-quality-report>
+    </div>
+    <div class="saveCancel popup-footer text-end">
+        <hr class="my-1">
+        <button class="btn btn-secondary" (click)="hideModal()">Close</button>
+    </div>
+</div>

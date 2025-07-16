@@ -1,0 +1,171 @@
+<h5 class="modal-title" id="dataQualityModalLabel">Data Validity Check: {{ selectedMeter.name }}</h5>
+<ng-container *ngIf="showAlert">
+    <div
+        class="alert alert-warning d-flex flex-column align-items-center justify-content-center gap-3 mb-3 text-center">
+        <i class="fa fa-exclamation-triangle me-3" aria-hidden="true"></i>
+        <div>
+            <span class="alert-message" *ngIf="energyOutlierCount > 0 && costOutlierCount > 0">
+                There is an issue in
+                <span class="fw-bold text-danger">{{ energyOutlierCount
+                    }}</span>
+                energy reading<ng-container *ngIf="energyOutlierCount > 1">s</ng-container>
+                and
+                <span class="fw-bold text-danger">{{ costOutlierCount
+                    }}</span>
+                cost reading<ng-container *ngIf="costOutlierCount > 1">s</ng-container>
+                <br>
+            </span>
+            <span class="alert-message" *ngIf="energyOutlierCount > 0 && costOutlierCount == 0">
+                There is an issue in
+                <span class="fw-bold text-danger">{{ energyOutlierCount
+                    }}</span>
+                energy reading<ng-container *ngIf="energyOutlierCount > 1">s</ng-container>
+                <br>
+            </span>
+            <span class="alert-message" *ngIf="costOutlierCount > 0 && energyOutlierCount == 0">
+                There is an issue in
+                <span class="fw-bold text-danger">{{ costOutlierCount
+                    }}</span>
+                cost reading<ng-container *ngIf="costOutlierCount > 1">s</ng-container>
+                <br>
+            </span>
+            <!-- <span class="alert-message"
+                style="font-size:1.3rem; font-style:italic; color:#872e2e; display:block; text-align: center;">
+                Expand the sections below to view details.
+            </span> -->
+        </div>
+    </div>
+</ng-container>
+
+<h5>
+    <i class="fa fa-table me-2"></i>
+    Total Consumption and Cost Statistics
+</h5>
+<app-meter-statistics-table [meterData]="meterData" [selectedMeter]="selectedMeter" [energyStats]="energyStats"
+    [costStats]="costStats"></app-meter-statistics-table>
+<hr>
+<div class="row">
+    <div class="col-md-6 col-sm-12">
+        <h5>
+            <i class="fa fa-line-chart me-2"></i>
+            Total Consumption
+        </h5>
+        <app-meter-energy-timeseries-graph [meterData]="meterData"
+            [selectedMeter]="selectedMeter"></app-meter-energy-timeseries-graph>
+    </div>
+    <div class="col-md-6 col-sm-12">
+        <h5>
+            <i class="fa fa-line-chart me-2"></i>
+            Total Cost
+        </h5>
+        <app-meter-cost-timeseries-graph [meterData]="meterData"></app-meter-cost-timeseries-graph>
+    </div>
+</div>
+
+<hr>
+<div class="row">
+    <ng-container *ngIf="!(selectedMeter.source == 'Electricity' && !selectedMeter.includeInEnergy)">
+        <div class="col-md-6 col-sm-12">
+            <h5>
+                <i class="fa fa-chart-bar me-2"></i>
+                Distribution of Total Consumption
+            </h5>
+            <app-meter-energy-histogram [meterData]="meterData" [selectedMeter]="selectedMeter"
+                [binSize]="binSizeEnergy" (onBinSizeChange)="binSizeEnergy = $event"></app-meter-energy-histogram>
+        </div>
+    </ng-container>
+    <div class="col-md-6 col-sm-12">
+        <h5>
+            <i class="fa fa-chart-bar me-2"></i>
+            Distribution of Total Cost
+        </h5>
+        <app-meter-cost-histogram [meterData]="meterData"></app-meter-cost-histogram>
+    </div>
+</div>
+
+
+<!-- <div class="accordion-item">
+    <h2 class="accordion-header" id="headingStats">
+        <button class="accordion-button collapsed" type="button" [attr.aria-expanded]="expandSection === 'statistics'"
+            [ngClass]="{'collapsed': expandSection !== 'statistics'}" (click)="onPanelClick('statistics')">
+            <i class="fa fa-table me-2"></i>
+
+        </button>
+    </h2>
+    <div id="collapseStats" class="accordion-collapse collapse" aria-labelledby="headingStats"
+        [ngClass]="{'show': expandSection === 'statistics'}">
+        <div class="accordion-body">
+        </div>
+    </div>
+</div>
+<div class="accordion-item" *ngIf="!(selectedMeter.source == 'Electricity' && !selectedMeter.includeInEnergy)">
+    <h2 class="accordion-header" id="headingEnergy">
+        <button class="accordion-button" type="button" [attr.aria-expanded]="expandSection === 'energy-timeseries'"
+            [ngClass]="{'collapsed': expandSection !== 'energy-timeseries'}"
+            (click)="onPanelClick('energy-timeseries')">
+            <i class="fa fa-line-chart me-2"></i>
+            Total Consumption
+        </button>
+    </h2>
+    <div id="collapseEnergy" class="accordion-collapse collapse" aria-labelledby="headingEnergy"
+        [ngClass]="{'show': expandSection === 'energy-timeseries'}">
+        <div class="accordion-body">
+            <app-meter-energy-timeseries-graph *ngIf="showGraphs && activeGraph === 'energy-timeseries'"
+                [meterData]="meterData" [selectedMeter]="selectedMeter"></app-meter-energy-timeseries-graph>
+        </div>
+    </div>
+</div>
+<div class="accordion-item">
+    <h2 class="accordion-header" id="headingCost">
+        <button class="accordion-button collapsed" type="button"
+            [attr.aria-expanded]="expandSection === 'cost-timeseries'"
+            [ngClass]="{'collapsed': expandSection !== 'cost-timeseries'}" (click)="onPanelClick('cost-timeseries')">
+            <i class="fa fa-line-chart me-2"></i>
+            Total Cost
+        </button>
+    </h2>
+    <div id="collapseCost" class="accordion-collapse collapse" aria-labelledby="headingCost"
+        [ngClass]="{'show': expandSection === 'cost-timeseries'}">
+        <div class="accordion-body">
+            <app-meter-cost-timeseries-graph *ngIf="showGraphs && activeGraph === 'cost-timeseries'"
+                [meterData]="meterData"></app-meter-cost-timeseries-graph>
+        </div>
+    </div>
+</div>
+<div class="accordion-item" *ngIf="!(selectedMeter.source == 'Electricity' && !selectedMeter.includeInEnergy)">
+    <h2 class="accordion-header" id="headingEnergyHist">
+        <button class="accordion-button collapsed" type="button"
+            [attr.aria-expanded]="expandSection === 'energy-histogram'"
+            [ngClass]="{'collapsed': expandSection !== 'energy-histogram'}" (click)="onPanelClick('energy-histogram')">
+            <i class="fa fa-chart-bar me-2"></i>
+            Distribution of Total Consumption
+        </button>
+    </h2>
+    <div id="collapseEnergyHist" class="accordion-collapse collapse" aria-labelledby="headingEnergyHist"
+        [ngClass]="{'show': expandSection === 'energy-histogram'}">
+        <div class="accordion-body">
+            <app-meter-energy-histogram *ngIf="showGraphs && activeGraph === 'energy-histogram'" [meterData]="meterData"
+                [selectedMeter]="selectedMeter" [binSize]="binSizeEnergy"
+                (onBinSizeChange)="binSizeEnergy = $event"></app-meter-energy-histogram>
+        </div>
+    </div>
+</div>
+<div class="accordion-item">
+    <h2 class="accordion-header" id="headingCostHist">
+        <button class="accordion-button collapsed" type="button"
+            [attr.aria-expanded]="expandSection === 'cost-histogram'"
+            [ngClass]="{'collapsed': expandSection !== 'cost-histogram'}" (click)="onPanelClick('cost-histogram')">
+            <i class="fa fa-chart-bar me-2"></i>
+            Distribution of Total Cost
+        </button>
+    </h2>
+    <div id="collapseCostHist" class="accordion-collapse collapse" aria-labelledby="headingCostHist"
+        [ngClass]="{'show': expandSection === 'cost-histogram'}">
+        <div class="accordion-body">
+            <app-meter-cost-histogram *ngIf="showGraphs && activeGraph === 'cost-histogram'" [meterData]="meterData"
+                [binSize]="binSizeCost" (onBinSizeChange)="binSizeCost = $event"></app-meter-cost-histogram>
+        </div>
+    </div>
+</div>
+</div>
+</div> -->

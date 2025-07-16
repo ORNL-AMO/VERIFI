@@ -41,15 +41,6 @@ export class UtilityMeterDataTableComponent implements OnInit {
   showFilterDropdown: boolean = false;
   hasNegativeReadings: boolean;
   duplicateReadingDates: Array<Date>;
-  @ViewChild('openModalBtn') openModalBtn: ElementRef;
-  showGraphs: boolean = false;
-  activeGraph: string;
-  energyOutlierCount: number = 0;
-  costOutlierCount: number = 0;
-  showAlert: boolean = false;
-  expandSection: string = '';
-  binSizeEnergy: number = 10;
-  binSizeCost: number = 10;
 
   constructor(
     private utilityMeterDbService: UtilityMeterdbService,
@@ -81,29 +72,6 @@ export class UtilityMeterDataTableComponent implements OnInit {
     this.itemsPerPageSub = this.sharedDataService.itemsPerPage.subscribe(val => {
       this.itemsPerPage = val;
     });
-  }
-
-  ngAfterViewInit() {
-    const modal = document.getElementById('dataQualityModal');
-    if (modal) {
-      modal.addEventListener('show.bs.modal', () => {
-        this.activeGraph = 'statistics';
-      });
-
-      modal.addEventListener('shown.bs.modal', () => {
-        this.showGraphs = true;
-        if (!this.showAlert) {
-          this.expandSection = 'statistics';
-        }
-      });
-
-      modal.addEventListener('hidden.bs.modal', () => {
-        this.showGraphs = false;
-        this.showAlert = false;
-        this.activeGraph = '';
-        this.expandSection = '';
-      });
-    }
   }
 
   ngOnDestroy() {
@@ -203,28 +171,4 @@ export class UtilityMeterDataTableComponent implements OnInit {
     this.showFilterDropdown = !this.showFilterDropdown;
   }
 
-  onModalClose() {
-    this.openModalBtn.nativeElement.focus();
-  }
-
-  selectOption(option: string) {
-    this.activeGraph = option;
-  }
-
-  onOutlierDetection(outlierCount: { energy: number; cost: number }) {
-    this.energyOutlierCount = outlierCount.energy;
-    this.costOutlierCount = outlierCount.cost;
-    if (this.energyOutlierCount > 0 || this.costOutlierCount > 0) {
-      this.showAlert = true;
-    } else {
-      this.showAlert = false;
-    }
-    this.expandSection = this.showAlert ? '' : 'statistics';
-    this.cd.detectChanges();
-  }
-
-  onPanelClick(section: string) {
-    this.expandSection = this.expandSection === section ? '' : section;
-    this.activeGraph = this.expandSection === section ? section : '';
-  }
 }

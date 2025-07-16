@@ -12,10 +12,6 @@ export class MeterCostHistogramComponent {
 
   @Input()
   meterData: Array<IdbUtilityMeterData>;
-  @Input()
-  binSize: number = 10;
-  @Output()
-  onBinSizeChange: EventEmitter<number> = new EventEmitter<number>();
 
   @ViewChild('meterCostHistogram', { static: false }) meterCostHistogram: ElementRef;
   viewInitialized: boolean = false;
@@ -25,7 +21,6 @@ export class MeterCostHistogramComponent {
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['meterData'] && this.viewInitialized && changes['binSize']) {
-      this.numberOfBins = this.binSize;
       this.drawChart();
     }
   }
@@ -33,13 +28,11 @@ export class MeterCostHistogramComponent {
   ngAfterViewInit() {
     this.viewInitialized = true;
     if (this.meterData) {
-      this.numberOfBins = this.binSize;
       this.drawChart();
     }
   }
 
   updateGraph() {
-    this.onBinSizeChange.emit(this.numberOfBins);
     if (this.viewInitialized) {
       this.drawChart();
     }
@@ -49,6 +42,7 @@ export class MeterCostHistogramComponent {
     const min = Math.min(...this.meterData.map(data => data.totalCost));
     const max = Math.max(...this.meterData.map(data => data.totalCost));
     const binSize = (max - min) / this.numberOfBins;
+    console.log(binSize);
     var data = [
       {
         type: "histogram",
