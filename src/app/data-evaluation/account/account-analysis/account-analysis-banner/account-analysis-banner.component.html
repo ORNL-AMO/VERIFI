@@ -3,13 +3,13 @@
     <div>
         <ul class="nav nav-tabs">
             <li class="nav-item">
-                <a class="nav-link" routerLink="/account/analysis/setup" [routerLinkActive]="['active']">
+                <a class="nav-link" routerLink="setup" [routerLinkActive]="['active']">
                     <span class="fa fa-exclamation-circle" *ngIf="accountAnalysisItem.setupErrors.hasError"></span>
                     <i class="fa fa-gears"></i>
                     Analysis Setup</a>
             </li>
             <li class="nav-item" [ngClass]="{'disabled': accountAnalysisItem.setupErrors.hasError}">
-                <a class="nav-link" routerLink="/account/analysis/select-items" [routerLinkActive]="['active']">
+                <a class="nav-link" routerLink="select-items" [routerLinkActive]="['active']">
                     <span class="fa fa-exclamation-circle"
                         *ngIf="accountAnalysisItem.setupErrors.facilitiesSelectionsInvalid"></span>
                     <i class="fa fa-list-check"></i>
@@ -17,7 +17,7 @@
             </li>
             <li class="nav-item"
                 [ngClass]="{'disabled': accountAnalysisItem.setupErrors.facilitiesSelectionsInvalid || accountAnalysisItem.setupErrors.hasError}">
-                <a class="nav-link" routerLink="/account/analysis/results" [routerLinkActive]="['active']">
+                <a class="nav-link" routerLink="results" [routerLinkActive]="['active']">
                     <i class="fa fa-magnifying-glass-chart"></i>
                     Analysis Results</a>
             </li>
