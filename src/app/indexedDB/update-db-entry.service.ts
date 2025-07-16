@@ -208,11 +208,14 @@ export class UpdateDbEntryService {
       meterDataChanged = true;
       meterData = utilityMeterData.filter(data => data.meterId == utilityMeter.guid);
       meterData.forEach(dataItem => {
+        if(!dataItem.charges){
+          dataItem.charges = [];
+        }
         if (dataItem.commodityCharge) {
-          this.addCharge(utilityMeter, dataItem, dataItem.commodityCharge, 0, 'other', 'Commodity Charge', 'dollars');
+          this.addCharge(utilityMeter, dataItem, dataItem.commodityCharge, 0, 'consumption', 'Commodity Charge', 'dollarsPerKilowattHour');
         }
         if (dataItem.deliveryCharge) {
-          this.addCharge(utilityMeter, dataItem, dataItem.deliveryCharge, 0, 'other', 'Delivery Charge', 'dollars');
+          this.addCharge(utilityMeter, dataItem, dataItem.deliveryCharge, 0, 'consumption', 'Delivery Charge', 'dollarsPerKilowattHour');
         }
         //electricity
         if (dataItem.nonEnergyCharge) {
@@ -231,13 +234,13 @@ export class UpdateDbEntryService {
           this.addCharge(utilityMeter, dataItem, dataItem.otherConsumptionCharge, dataItem.otherConsumption, 'consumption', 'Other Consumption Charge', 'dollarsPerKilowattHour');
         }
         if (dataItem.onPeakAmount || dataItem.onPeakCharge) {
-          this.addCharge(utilityMeter, dataItem, dataItem.onPeakCharge, dataItem.onPeakAmount, 'other', 'On-Peak Charge', 'dollars');
+          this.addCharge(utilityMeter, dataItem, dataItem.onPeakCharge, dataItem.onPeakAmount, 'consumption', 'On-Peak Charge', 'dollarsPerKilowattHour');
         }
         if (dataItem.offPeakAmount || dataItem.offPeakCharge) {
-          this.addCharge(utilityMeter, dataItem, dataItem.offPeakCharge, dataItem.offPeakAmount, 'other', 'Off-Peak Charge', 'dollars');
+          this.addCharge(utilityMeter, dataItem, dataItem.offPeakCharge, dataItem.offPeakAmount, 'consumption', 'Off-Peak Charge', 'dollarsPerKilowattHour');
         }
         if (dataItem.transmissionAndDeliveryCharge) {
-          this.addCharge(utilityMeter, dataItem, dataItem.transmissionAndDeliveryCharge, 0, 'other', 'Transmission and Delivery Charge', 'dollars');
+          this.addCharge(utilityMeter, dataItem, dataItem.transmissionAndDeliveryCharge, 0, 'consumption', 'Transmission and Delivery Charge', 'dollarsPerKilowattHour');
         }
         if (dataItem.powerFactor || dataItem.powerFactorCharge) {
           this.addCharge(utilityMeter, dataItem, dataItem.powerFactorCharge, 0, 'other', 'Power Factor Charge', 'dollars');
