@@ -26,6 +26,14 @@ export class MonthlyAnalysisCalculatedValuesSummation {
     summaryDataIndex: number;
     monthIndex: number;
     baselineAdjustmentForOtherV2: number;
+
+    //1964
+    rollingAdjusted: number;
+
+    fivePercentTarget: number;
+    tenPercentTarget: number;
+    fifteenPercentTarget: number;
+
     constructor(
         currentMonthData: Array<MonthlyAnalysisSummaryDataClass>,
         baselineAdjustmentForNew: number,
@@ -49,6 +57,9 @@ export class MonthlyAnalysisCalculatedValuesSummation {
         this.setBaselineAdjustment(currentMonthData);
         this.setRollingSavingsValues(previousMonthsValues)
         this.setYearToDatePercentSavings();
+        this.setFivePercentTarget();
+        this.setTenPercentTarget();
+        this.setFifteenPercentTarget();
     }
 
 
@@ -154,14 +165,13 @@ export class MonthlyAnalysisCalculatedValuesSummation {
     setRollingSavingsValues(previousMonthsValues: Array<MonthlyAnalysisCalculatedValuesSummation>) {
         if (this.summaryDataIndex > 11) {
             let last11MonthsData: Array<MonthlyAnalysisCalculatedValuesSummation> = previousMonthsValues.splice(this.summaryDataIndex - 11, this.summaryDataIndex);
-            // let total12MonthsEnergyUse: number = _.sumBy(last11MonthsData, (data: MonthlyAnalysisCalculatedValuesSummation) => { return data.energyUse }) + this.energyUse;
-            let total12MonthsAdjusedBaseline: number = _.sumBy(last11MonthsData, (data: MonthlyAnalysisCalculatedValuesSummation) => { return data.adjusted }) + this.adjusted;
+            this.rollingAdjusted = _.sumBy(last11MonthsData, (data: MonthlyAnalysisCalculatedValuesSummation) => { return data.adjusted }) + this.adjusted;
             this.rollingSavings = _.sumBy(last11MonthsData, (data: MonthlyAnalysisCalculatedValuesSummation) => { return data.savings }) + this.savings;
-            // this.rollingSavings = total12MonthsAdjusedBaseline - total12MonthsEnergyUse;
-            this.rolling12MonthImprovement = this.rollingSavings / total12MonthsAdjusedBaseline;
+            this.rolling12MonthImprovement = this.rollingSavings / this.rollingAdjusted;
         } else {
             this.rolling12MonthImprovement = 0;
             this.rollingSavings = 0;
+            this.rollingAdjusted = 0;
         }
     }
 
@@ -178,5 +188,19 @@ export class MonthlyAnalysisCalculatedValuesSummation {
         this.savings = new ConvertValue(this.savings, startingUnit, endingUnit).convertedValue;
         this.yearToDateSavings = new ConvertValue(this.yearToDateSavings, startingUnit, endingUnit).convertedValue;
         this.rollingSavings = new ConvertValue(this.rollingSavings, startingUnit, endingUnit).convertedValue;
+        this.fivePercentTarget = new ConvertValue(this.fivePercentTarget, startingUnit, endingUnit).convertedValue;
+        this.tenPercentTarget = new ConvertValue(this.tenPercentTarget, startingUnit, endingUnit).convertedValue;
+        this.fifteenPercentTarget = new ConvertValue(this.fifteenPercentTarget, startingUnit, endingUnit).convertedValue;
+    }
+
+    //1964
+    setFivePercentTarget() {
+        this.fivePercentTarget = this.rollingAdjusted * 0.95;
+    }
+    setTenPercentTarget() {
+        this.tenPercentTarget = this.rollingAdjusted * 0.90;
+    }
+    setFifteenPercentTarget() {
+        this.fifteenPercentTarget = this.rollingAdjusted * 0.85;
     }
 }

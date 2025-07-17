@@ -145,7 +145,10 @@ export class MonthlyAnalysisSummaryClass {
                 isBanked: summaryDataItem.isBankedAnalysis,
                 isIntermediateBanked: summaryDataItem.isBankedAnalysis,
                 savingsBanked: checkAnalysisValue(summaryDataItem.monthlyAnalysisRollingValues.savingsBanked),
-                savingsUnbanked: checkAnalysisValue(summaryDataItem.monthlyAnalysisRollingValues.savingsUnbanked)
+                savingsUnbanked: checkAnalysisValue(summaryDataItem.monthlyAnalysisRollingValues.savingsUnbanked),
+                fivePercentTarget: checkAnalysisValue(summaryDataItem.monthlyAnalysisRollingValues.fivePercentTarget),
+                tenPercentTarget: checkAnalysisValue(summaryDataItem.monthlyAnalysisRollingValues.tenPercentTarget),
+                fifteenPercentTarget: checkAnalysisValue(summaryDataItem.monthlyAnalysisRollingValues.fifteenPercentTarget)
             }
         })
     }
