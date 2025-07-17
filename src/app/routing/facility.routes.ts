@@ -54,6 +54,8 @@ import { FacilityOverviewReportResultsComponent } from "../facility/facility-rep
 import { FacilityAnalysisReportResultsComponent } from "../facility/facility-reports/report-results/facility-analysis-report-results/facility-analysis-report-results.component";
 import { FacilityAnalysisReportsDashboardComponent } from "../facility/facility-reports/facility-reports-dashboard/facility-analysis-reports-dashboard/facility-analysis-reports-dashboard.component";
 import { FacilityOverviewReportsDashboardComponent } from "../facility/facility-reports/facility-reports-dashboard/facility-overview-reports-dashboard/facility-overview-reports-dashboard.component";
+import { FacilitySavingsReportsDashboardComponent } from "../facility/facility-reports/facility-reports-dashboard/facility-savings-reports-dashboard/facility-savings-reports-dashboard.component";
+import { FacilitySavingsReportResultsComponent } from "../facility/facility-reports/report-results/facility-savings-report-results/facility-savings-report-results.component";
 
 export const FacilityRoutes: Route = {
     path: 'facility/:id',
@@ -298,11 +300,13 @@ export const FacilityRoutes: Route = {
                         { path: '', pathMatch: 'full', redirectTo: 'analysis' },
                         { path: 'analysis', component: FacilityAnalysisReportsDashboardComponent },
                         { path: 'overview', component: FacilityOverviewReportsDashboardComponent },
+                        { path: 'savings', component: FacilitySavingsReportsDashboardComponent },
                     ]
                 },
                 { path: 'setup', component: FacilityReportSetupComponent },
                 { path: 'analysis-report', component: FacilityAnalysisReportResultsComponent },
-                { path: 'overview-report', component: FacilityOverviewReportResultsComponent }
+                { path: 'overview-report', component: FacilityOverviewReportResultsComponent },
+                { path: 'savings-report', component: FacilitySavingsReportResultsComponent }
             ]
         }
     ]

@@ -20,6 +20,12 @@
                     <i class="fa fa-file"></i>
                     Data Overview Report</a>
             </li>
+            <li class="nav-item" [ngClass]="{'disabled': !setupValid}"
+                *ngIf="selectedReport.facilityReportType == 'savings'">
+                <a class="nav-link" routerLink="savings-report" [routerLinkActive]="['active']">
+                    <i class="fa fa-file"></i>
+                    Savings Report</a>
+            </li>
         </ul>
     </div>
     <div>

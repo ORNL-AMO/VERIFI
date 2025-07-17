@@ -3,7 +3,7 @@
         <div class="d-flex justify-content-between">
             <a class="item-name click-link" (click)="selectReport()">
                 <span class="fa pe-2"
-                    [ngClass]="{'fa-microscope': report.facilityReportType == 'analysis', 'fa-file': report.facilityReportType == 'overview'}"></span>
+                    [ngClass]="{'fa-microscope': report.facilityReportType == 'analysis', 'fa-file': report.facilityReportType == 'overview', 'fa-sack-dollar': report.facilityReportType == 'savings'}"></span>
                 {{report.name}}
             </a>
             <div class="d-flex">
@@ -47,6 +47,9 @@
                 </ng-container>
                 <ng-container *ngIf="report.facilityReportType == 'overview'">
                     Overview Report
+                </ng-container>
+                <ng-container *ngIf="report.facilityReportType == 'savings'">
+                    Savings Report
                 </ng-container>
             </div>
             <div class="d-flex">

@@ -39,6 +39,11 @@
                             id="water" [(ngModel)]="newReportType">
                         <label class="form-check-label" for="water">Data Overview</label>
                     </div>
+                    <div class="form-check">
+                        <input type="radio" class="form-check-input" name="newReportType" [value]="'savings'"
+                            id="savings" [(ngModel)]="newReportType">
+                        <label class="form-check-label" for="savings">Savings</label>
+                    </div>
                 </div>
             </div>
         </form>

@@ -20,6 +20,10 @@ import { CalculatingSpinnerModule } from 'src/app/shared/calculating-spinner/cal
 import { FacilityReportsDashboardTabsComponent } from './facility-reports-dashboard/facility-reports-dashboard-tabs/facility-reports-dashboard-tabs.component';
 import { FacilityAnalysisReportsDashboardComponent } from './facility-reports-dashboard/facility-analysis-reports-dashboard/facility-analysis-reports-dashboard.component';
 import { FacilityOverviewReportsDashboardComponent } from './facility-reports-dashboard/facility-overview-reports-dashboard/facility-overview-reports-dashboard.component';
+import { FacilitySavingsReportsDashboardComponent } from './facility-reports-dashboard/facility-savings-reports-dashboard/facility-savings-reports-dashboard.component';
+import { FacilitySavingsReportSetupComponent } from './facility-report-setup/facility-savings-report-setup/facility-savings-report-setup.component';
+import { FacilitySavingsReportResultsComponent } from './report-results/facility-savings-report-results/facility-savings-report-results.component';
+import { SharedAnalysisModule } from 'src/app/shared/shared-analysis/shared-analysis.module';
 
 
 
@@ -38,7 +42,10 @@ import { FacilityOverviewReportsDashboardComponent } from './facility-reports-da
     FacilityOverviewReportResultsComponent,
     FacilityReportsDashboardTabsComponent,
     FacilityAnalysisReportsDashboardComponent,
-    FacilityOverviewReportsDashboardComponent
+    FacilityOverviewReportsDashboardComponent,
+    FacilitySavingsReportsDashboardComponent,
+    FacilitySavingsReportSetupComponent,
+    FacilitySavingsReportResultsComponent
   ],
   imports: [
     CommonModule,
@@ -47,7 +54,8 @@ import { FacilityOverviewReportsDashboardComponent } from './facility-reports-da
     SharedReportsModule,
     HelperPipesModule,
     DataOverviewModule,
-    CalculatingSpinnerModule
+    CalculatingSpinnerModule,
+    SharedAnalysisModule
   ]
 })
 export class FacilityReportsModule { }

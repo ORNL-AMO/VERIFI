@@ -1,0 +1,62 @@
+<label class="bold">
+    Select Analysis Item
+</label>
+
+<table class="table table-bordered table-sm">
+    <thead>
+        <tr>
+            <th>
+
+            </th>
+            <th>
+                Name
+            </th>
+            <th>
+                Baseline Year
+            </th>
+            <th>
+                Report Year
+            </th>
+            <th>
+                Analysis Type
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr *ngFor="let item of analysisItems">
+            <td>
+                <div class="form-check">
+                    <input type="radio" class="form-check-input" name="{{item.name + '_item'}}" [value]="item.guid"
+                        id="{{item.name + '_item'}}" [(ngModel)]="facilityReport.analysisItemId"
+                        (change)="setSelectedAnalysisItem(false)">
+                </div>
+            </td>
+            <td>
+                {{item.name}}
+                <span class="text-danger ps-1" *ngIf="item.setupErrors.hasError || item.setupErrors.groupsHaveErrors">
+                    <span class="fa fa-exclamation-circle"></span> Contains Errors
+                </span>
+            </td>
+            <td>
+                {{item.baselineYear}}
+            </td>
+            <td>
+                {{item.reportYear}}
+            </td>
+            <td>
+                <ng-template [ngIf]="item.analysisCategory == 'water'">
+                    Water
+                </ng-template>
+                <ng-template [ngIf]="item.analysisCategory == 'energy'">
+                    Energy
+                </ng-template>
+            </td>
+        </tr>
+    </tbody>
+</table>
+<div class="w-100 m-2" *ngIf="!facilityReport.analysisItemId">
+    <div class="alert alert-danger">
+        Analysis Item Selection Required.
+    </div>
+</div>
+<hr>

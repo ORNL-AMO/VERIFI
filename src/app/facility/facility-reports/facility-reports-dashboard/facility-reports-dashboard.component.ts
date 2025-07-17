@@ -30,7 +30,7 @@ export class FacilityReportsDashboardComponent {
   newReportType: FacilityReportType = 'analysis';
   displayNewReport: boolean = false;
   routerSub: Subscription;
-  reportType: 'Analysis' | 'Data Overview';
+  reportType: 'Analysis' | 'Data Overview' | 'Savings';
   constructor(private facilityDbService: FacilitydbService,
     private facilityReportsDbService: FacilityReportsDbService,
     private dbChangesService: DbChangesService,
@@ -93,6 +93,8 @@ export class FacilityReportsDashboardComponent {
       this.reportType = 'Analysis';
     } else if (url.includes('overview')) {
       this.reportType = 'Data Overview';
+    } else if (url.includes('savings')) {
+      this.reportType = 'Savings';
     }
   }
 

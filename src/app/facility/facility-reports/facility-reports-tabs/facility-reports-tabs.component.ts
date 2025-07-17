@@ -88,6 +88,9 @@ export class FacilityReportsTabsComponent {
     else if (this.selectedReport.facilityReportType == 'overview') {
       this.router.navigateByUrl('/facility/' + this.facility.id + '/reports/dashboard/overview');
     }
+    else if (this.selectedReport.facilityReportType == 'savings') {
+      this.router.navigateByUrl('/facility/' + this.facility.id + '/reports/dashboard/savings');
+    }
   }
 
   setSetupValid() {
@@ -101,7 +104,10 @@ export class FacilityReportsTabsComponent {
           this.selectedReport.dataOverviewReportSettings.startMonth != undefined &&
           this.selectedReport.dataOverviewReportSettings.startYear != undefined &&
           this.errorMessage == undefined)
-      } else {
+      } else if (this.selectedReport.facilityReportType == 'savings') {
+        this.setupValid = (this.selectedReport.analysisItemId != undefined && this.selectedReport.name != '');
+      }
+      else {
         this.setupValid = false;
       }
     }
