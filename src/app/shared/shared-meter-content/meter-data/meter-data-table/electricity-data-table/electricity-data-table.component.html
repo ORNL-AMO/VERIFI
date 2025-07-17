@@ -48,8 +48,13 @@
             <th *ngIf="emissionsFilters.recs" (click)="setOrderDataField('RECs')"
                 [ngClass]="{'active': orderDataField == 'RECs'}">RECs<br> (MWh)</th>
             <ng-container *ngFor="let charge of selectedMeter.charges">
+                <ng-container *ngIf="charge.chargeType == 'consumption' || charge.chargeType == 'demand'">
+                    <th>
+                        {{charge.name}} <br>({{charge.chargeUnit | chargeUnitDisplay}})
+                    </th>
+                </ng-container>
                 <th>
-                    {{ charge.name }}
+                    {{ charge.name }} <br>(&dollar;)
                 </th>
             </ng-container>
 
@@ -84,6 +89,11 @@
             <td *ngIf="emissionsFilters.recs">{{meterData.RECs | customNumber}}</td>
 
             <ng-container *ngFor="let meterCharge of selectedMeter.charges">
+                <ng-container *ngIf="meterCharge.chargeType == 'consumption' || meterCharge.chargeType == 'demand'">
+                    <td>
+                        {{meterData.charges | meterChargeValue: meterCharge.guid: 'usage' | customNumber}}
+                    </td>
+                </ng-container>
                 <td>
                     {{meterData.charges | meterChargeValue: meterCharge.guid: 'amount' | customNumber:true}}
                 </td>
