@@ -53,11 +53,8 @@ export class MeterCostTimeseriesGraphComponent {
     ];
 
     let height: number = 400;
-    const containerWidth = this.meterCostTimeSeriesGraph.nativeElement.offsetWidth;
-
     var layout = {
       height: height,
-      width: containerWidth,
       autosize: true,
       plot_bgcolor: "#e7f1f2",
       paper_bgcolor: "#e7f1f2",

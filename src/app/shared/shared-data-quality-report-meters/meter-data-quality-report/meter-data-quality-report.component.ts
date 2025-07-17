@@ -21,15 +21,10 @@ export class MeterDataQualityReportComponent {
   energyOutlierCount: number = 0;
   costOutlierCount: number = 0;
   showAlert: boolean = false;
-  expandSection: string = '';
-  binSizeEnergy: number = 10;
-  binSizeCost: number = 10;
-
-
-
   energyStats: Statistics;
   costStats: Statistics;
 
+  includeCosts: boolean = true;
   ngOnChanges() {
     this.setStatistics();
   }
@@ -38,6 +33,7 @@ export class MeterDataQualityReportComponent {
     const { energyStats, costStats } = getStatistics(this.meterData, this.selectedMeter);
     this.energyStats = energyStats;
     this.costStats = costStats;
+    this.includeCosts = (this.costStats.average != 0);
     this.energyOutlierCount = energyStats.outliers;
     this.costOutlierCount = costStats.outliers;
     if (this.energyOutlierCount > 0 || this.costOutlierCount > 0) {

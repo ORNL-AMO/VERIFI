@@ -26,7 +26,7 @@ export function getStatistics(meterData: Array<IdbUtilityMeterData>, selectedMet
     }
 }
 
-function getConsumptionData(meterData: Array<IdbUtilityMeterData>, selectedMeter: IdbUtilityMeter): number[] {
+export function getConsumptionData(meterData: Array<IdbUtilityMeterData>, selectedMeter: IdbUtilityMeter): number[] {
     if (selectedMeter.source === 'Electricity') {
         return meterData.map(data => { return data.totalEnergyUse });
     }
@@ -51,6 +51,29 @@ function getConsumptionData(meterData: Array<IdbUtilityMeterData>, selectedMeter
 }
 
 
+export function getUnitFromMeter(meter: IdbUtilityMeter, meterData: Array<IdbUtilityMeterData>): string {
+    if (meter.source === 'Electricity') {
+        return meter.energyUnit;
+    }
+    if (meter.scope == 5 || meter.scope == 6) {
+        return meter.startingUnit;
+    }
+    else if (meter.scope == 2) {
+        return meter.energyUnit;
+    }
+    else {
+        const allEnergyInvalid = meterData.every(data =>
+            data.totalEnergyUse === 0 ||
+            data.totalEnergyUse === undefined ||
+            data.totalEnergyUse === null
+        );
+        if (allEnergyInvalid) {
+            return meter.startingUnit;
+        } else {
+            return meter.energyUnit;
+        }
+    }
+}
 
 export function calculateStatistics(data: number[]): Statistics {
     if (!data.length) {

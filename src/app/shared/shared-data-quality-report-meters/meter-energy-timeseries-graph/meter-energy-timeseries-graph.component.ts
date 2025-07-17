@@ -6,6 +6,7 @@ import { UtilityMeterDataService } from 'src/app/facility/utility-data/energy-co
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { GeneralInformationFilters, GeneralUtilityDataFilters, VehicleDataFilters } from 'src/app/models/meterDataFilter';
+import { getConsumptionData, getUnitFromMeter } from '../meterDataQualityStatistics';
 
 @Component({
   selector: 'app-meter-energy-timeseries-graph',
@@ -41,32 +42,8 @@ export class MeterEnergyTimeseriesGraphComponent {
   }
 
   getDataAndUnit() {
-    if (this.selectedMeter.source === 'Electricity') {
-      this.meterDataToPlot = this.meterData.map(data => { return data.totalEnergyUse });
-      this.unit = this.selectedMeter.energyUnit;
-    }
-    if (this.selectedMeter.source !== 'Electricity' && (this.selectedMeter.scope == 5 || this.selectedMeter.scope == 6)) {
-      this.meterDataToPlot = this.meterData.map(data => { return data.totalVolume }),
-        this.unit = this.selectedMeter.startingUnit;
-    }
-    else if (this.selectedMeter.source !== 'Electricity' && this.selectedMeter.scope == 2) {
-      this.meterDataToPlot = this.meterData.map(data => { return data.totalEnergyUse });
-      this.unit = this.selectedMeter.energyUnit;
-    }
-    else if (this.selectedMeter.source != 'Electricity' && (this.selectedMeter.scope != 2 && this.selectedMeter.scope != 5 && this.selectedMeter.scope != 6)) {
-      const allEnergyInvalid = this.meterData.every(data =>
-        data.totalEnergyUse === 0 ||
-        data.totalEnergyUse === undefined ||
-        data.totalEnergyUse === null
-      );
-      if (allEnergyInvalid) {
-        this.meterDataToPlot = this.meterData.map(data => data.totalVolume);
-        this.unit = this.selectedMeter.startingUnit;
-      } else {
-        this.meterDataToPlot = this.meterData.map(data => data.totalEnergyUse);
-        this.unit = this.selectedMeter.energyUnit;
-      }
-    }
+    this.unit = getUnitFromMeter(this.selectedMeter, this.meterData);
+    this.meterDataToPlot = getConsumptionData(this.meterData, this.selectedMeter);
   }
 
   drawChart() {
@@ -91,11 +68,9 @@ export class MeterEnergyTimeseriesGraphComponent {
     ];
 
     let height: number = 400;
-    const containerWidth = this.meterEnergyTimeSeriesGraph.nativeElement.offsetWidth;
 
     var layout = {
       height: height,
-      width: containerWidth,
       autosize: true,
       plot_bgcolor: "#e7f1f2",
       paper_bgcolor: "#e7f1f2",

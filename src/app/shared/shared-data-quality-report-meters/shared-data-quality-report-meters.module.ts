@@ -10,6 +10,7 @@ import { FormsModule } from '@angular/forms';
 import { MeterDataQualityReportComponent } from './meter-data-quality-report/meter-data-quality-report.component';
 import { MeterDataQualityReportModalComponent } from './meter-data-quality-report-modal/meter-data-quality-report-modal.component';
 
+
 @NgModule({
   declarations: [
     MeterEnergyTimeseriesGraphComponent,
@@ -23,8 +24,8 @@ import { MeterDataQualityReportModalComponent } from './meter-data-quality-repor
   imports: [
     CommonModule,
     HelperPipesModule,
-    FormsModule
-  ],
+    FormsModule,
+],
   exports: [
     MeterDataQualityReportModalComponent
   ]

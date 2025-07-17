@@ -1,9 +1,7 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { Console } from 'console';
-import { get } from 'http';
+import { Component, Input } from '@angular/core';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
-import { Statistics } from '../meterDataQualityStatistics';
+import { getUnitFromMeter, Statistics } from '../meterDataQualityStatistics';
 
 @Component({
   selector: 'app-meter-statistics-table',
@@ -29,27 +27,7 @@ export class MeterStatisticsTableComponent {
   }
 
   setUnit() {
-    if (this.selectedMeter.source === 'Electricity') {
-      this.unit = this.selectedMeter.energyUnit;
-    }
-    if (this.selectedMeter.source !== 'Electricity' && (this.selectedMeter.scope == 5 || this.selectedMeter.scope == 6)) {
-      this.unit = this.selectedMeter.startingUnit;
-    }
-    else if (this.selectedMeter.source !== 'Electricity' && this.selectedMeter.scope == 2) {
-      this.unit = this.selectedMeter.energyUnit;
-    }
-    else if (this.selectedMeter.source != 'Electricity' && (this.selectedMeter.scope != 2 && this.selectedMeter.scope != 5 && this.selectedMeter.scope != 6)) {
-      const allEnergyInvalid = this.meterData.every(data =>
-        data.totalEnergyUse === 0 ||
-        data.totalEnergyUse === undefined ||
-        data.totalEnergyUse === null
-      );
-      if (allEnergyInvalid) {
-        this.unit = this.selectedMeter.startingUnit;
-      } else {
-        this.unit = this.selectedMeter.energyUnit;
-      }
-    }
+    this.unit = getUnitFromMeter(this.selectedMeter, this.meterData);
   }
 
   isValueNaN(value: any): boolean {
