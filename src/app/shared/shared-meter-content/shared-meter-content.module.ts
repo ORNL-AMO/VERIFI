@@ -41,6 +41,7 @@ import { ChargesUnitOptionsPipe } from './edit-meter-form/meter-charges-form/cha
 import { EditBillChargesComponent } from './edit-bill/edit-bill-charges/edit-bill-charges.component';
 import { MeterChargePipe } from './edit-bill/edit-bill-charges/meter-charge.pipe';
 import { ChargeUnitDisplayPipe } from './edit-bill/edit-bill-charges/charge-unit-display.pipe';
+import { MeterChargeValuePipe } from './meter-data/meter-charge-value.pipe';
 
 
 
@@ -80,7 +81,8 @@ import { ChargeUnitDisplayPipe } from './edit-bill/edit-bill-charges/charge-unit
     ChargesUnitOptionsPipe,
     EditBillChargesComponent,
     MeterChargePipe,
-    ChargeUnitDisplayPipe
+    ChargeUnitDisplayPipe,
+    MeterChargeValuePipe
   ],
   imports: [
     CommonModule,
