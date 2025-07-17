@@ -83,7 +83,8 @@ export interface MonthlyAnalysisSummaryData {
   //1964
   fivePercentTarget: number,
   tenPercentTarget: number,
-  fifteenPercentTarget: number
+  fifteenPercentTarget: number,
+  rollingActual: number
 }
 
 export interface AnnualAnalysisSummary {

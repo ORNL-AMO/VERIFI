@@ -33,7 +33,7 @@ export class MonthlyAnalysisCalculatedValuesSummation {
     fivePercentTarget: number;
     tenPercentTarget: number;
     fifteenPercentTarget: number;
-
+    rollingActual: number;
     constructor(
         currentMonthData: Array<MonthlyAnalysisSummaryDataClass>,
         baselineAdjustmentForNew: number,
@@ -168,10 +168,12 @@ export class MonthlyAnalysisCalculatedValuesSummation {
             this.rollingAdjusted = _.sumBy(last11MonthsData, (data: MonthlyAnalysisCalculatedValuesSummation) => { return data.adjusted }) + this.adjusted;
             this.rollingSavings = _.sumBy(last11MonthsData, (data: MonthlyAnalysisCalculatedValuesSummation) => { return data.savings }) + this.savings;
             this.rolling12MonthImprovement = this.rollingSavings / this.rollingAdjusted;
+            this.rollingActual = _.sumBy(last11MonthsData, (data: MonthlyAnalysisCalculatedValuesSummation) => { return data.energyUse }) + this.energyUse;
         } else {
             this.rolling12MonthImprovement = 0;
             this.rollingSavings = 0;
             this.rollingAdjusted = 0;
+            this.rollingActual = 0;
         }
     }
 

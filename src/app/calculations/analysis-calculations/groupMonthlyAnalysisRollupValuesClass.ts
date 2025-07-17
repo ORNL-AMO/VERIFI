@@ -355,6 +355,7 @@ export class GroupMonthlyAnalysisRollupValues {
         this.fivePercentTarget = new ConvertValue(this.fivePercentTarget, startingUnit, endingUnit).convertedValue;
         this.tenPercentTarget = new ConvertValue(this.tenPercentTarget, startingUnit, endingUnit).convertedValue;
         this.fifteenPercentTarget = new ConvertValue(this.fifteenPercentTarget, startingUnit, endingUnit).convertedValue;
+        this.rollingActual = new ConvertValue(this.rollingActual, startingUnit, endingUnit).convertedValue;
     }
 
     //1964

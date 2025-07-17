@@ -161,7 +161,8 @@ export class MonthlyAccountAnalysisClass {
                 savingsUnbanked: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.savingsUnbanked),
                 fivePercentTarget: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.fivePercentTarget),
                 tenPercentTarget: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.tenPercentTarget),
-                fifteenPercentTarget: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.fifteenPercentTarget)
+                fifteenPercentTarget: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.fifteenPercentTarget),
+                rollingActual: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.rollingActual),
             }
         })
     }
