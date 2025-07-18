@@ -52,6 +52,14 @@ export class GroupMonthlyAnalysisRollupValues {
     monthDataAdjustment: number;
     rollingDataAdjustment: number;
     rollingBaselineAdjustmentOther: number;
+
+    //1964
+    rollingChangeRatio: number;
+    monthlyChangeRatio: number;
+    fivePercentTarget: number;
+    tenPercentTarget: number;
+    fifteenPercentTarget: number;
+
     constructor(
         energyUse: number,
         modeledEnergy: number,
@@ -86,6 +94,13 @@ export class GroupMonthlyAnalysisRollupValues {
             this.setAdjustmentForNormalization(modelYearDataAdjusted, previousMonthValues);
             //step 8
             this.setAdjustmentForOtherV3(modelYearDataAdjusted, previousMonthValues);
+            //1964
+            this.setRollingChangeRatio();
+            this.setMonthlyChangeRatio();
+            this.setFifteenPercentTarget();
+            this.setTenPercentTarget();
+            this.setFivePercentTarget();
+
         } else {
             this.setBaselineYearValues();
         }
@@ -110,6 +125,12 @@ export class GroupMonthlyAnalysisRollupValues {
         this.baselineAdjustmentForOtherV2 = 0;
         this.rollingDataAdjustment = 0;
         this.rollingBaselineAdjustmentOther = 0;
+        //1964
+        this.rollingChangeRatio = 1;
+        this.monthlyChangeRatio = 1;
+        this.tenPercentTarget = 0;
+        this.fivePercentTarget = 0;
+        this.fifteenPercentTarget = 0;
     }
 
     //step 1
@@ -138,10 +159,10 @@ export class GroupMonthlyAnalysisRollupValues {
         this.rollingModeled = _.sumBy(rollingValues, (val: GroupMonthlyAnalysisRollupValues) => {
             return val.modeledEnergy;
         }) + this.modeledEnergy;
-        this.rollingDataAdjustment =  _.sumBy(rollingValues, (val: GroupMonthlyAnalysisRollupValues) => {
+        this.rollingDataAdjustment = _.sumBy(rollingValues, (val: GroupMonthlyAnalysisRollupValues) => {
             return val.monthDataAdjustment;
         }) + dataAdjustment;
-        this.rollingBaselineAdjustmentOther =  _.sumBy(rollingValues, (val: GroupMonthlyAnalysisRollupValues) => {
+        this.rollingBaselineAdjustmentOther = _.sumBy(rollingValues, (val: GroupMonthlyAnalysisRollupValues) => {
             return val.baselineAdjustmentForOtherV2;
         }) + baselineAdjustementInput;
     }
@@ -156,7 +177,7 @@ export class GroupMonthlyAnalysisRollupValues {
         if (lastBankedMonthSummaryData) {
             this.rollingUnbankedSavings = (this.rollingAdjusted - this.rollingActual);
             this.rollingSavings = (1 + lastBankedMonthSummaryData.monthlyAnalysisRollingValues.rolling12MonthImprovement) * this.rollingAdjusted - this.rollingActual;
-            this.rollingBankedSavings =  this.rollingSavings - this.rollingUnbankedSavings;
+            this.rollingBankedSavings = this.rollingSavings - this.rollingUnbankedSavings;
         } else {
             this.rollingSavings = (this.rollingAdjusted - this.rollingActual);
             this.rollingBankedSavings = 0;
@@ -330,5 +351,27 @@ export class GroupMonthlyAnalysisRollupValues {
         this.savingsUnbanked = new ConvertValue(this.savingsUnbanked, startingUnit, endingUnit).convertedValue;
         this.yearToDateSavings = new ConvertValue(this.yearToDateSavings, startingUnit, endingUnit).convertedValue;
         this.rollingSavings = new ConvertValue(this.rollingSavings, startingUnit, endingUnit).convertedValue;
+
+        this.fivePercentTarget = new ConvertValue(this.fivePercentTarget, startingUnit, endingUnit).convertedValue;
+        this.tenPercentTarget = new ConvertValue(this.tenPercentTarget, startingUnit, endingUnit).convertedValue;
+        this.fifteenPercentTarget = new ConvertValue(this.fifteenPercentTarget, startingUnit, endingUnit).convertedValue;
+        this.rollingActual = new ConvertValue(this.rollingActual, startingUnit, endingUnit).convertedValue;
+    }
+
+    //1964
+    setRollingChangeRatio() {
+        this.rollingChangeRatio = (this.rollingModeled / this.rollingModeledBaseline)
+    }
+    setMonthlyChangeRatio() {
+        this.monthlyChangeRatio = (this.modeledEnergy / this.baselineModeledEnergyUse);
+    }
+    setFivePercentTarget() {
+        this.fivePercentTarget = this.rollingAdjusted * 0.95;
+    }
+    setTenPercentTarget() {
+        this.tenPercentTarget = this.rollingAdjusted * 0.90;
+    }
+    setFifteenPercentTarget() {
+        this.fifteenPercentTarget = this.rollingAdjusted * 0.85;
     }
 }
