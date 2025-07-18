@@ -12,20 +12,15 @@ export class MeterCostHistogramComponent {
 
   @Input()
   meterData: Array<IdbUtilityMeterData>;
-  @Input()
-  binSize: number = 10;
-  @Output()
-  onBinSizeChange: EventEmitter<number> = new EventEmitter<number>();
 
   @ViewChild('meterCostHistogram', { static: false }) meterCostHistogram: ElementRef;
   viewInitialized: boolean = false;
-  numberOfBins: number = 10;
+  numberOfBins: number = 50;
 
   constructor(private plotlyService: PlotlyService) { }
 
   ngOnChanges(changes: SimpleChanges) {
-    if (changes['meterData'] && this.viewInitialized && changes['binSize']) {
-      this.numberOfBins = this.binSize;
+    if (changes['meterData'] && this.viewInitialized) {
       this.drawChart();
     }
   }
@@ -33,13 +28,11 @@ export class MeterCostHistogramComponent {
   ngAfterViewInit() {
     this.viewInitialized = true;
     if (this.meterData) {
-      this.numberOfBins = this.binSize;
       this.drawChart();
     }
   }
 
   updateGraph() {
-    this.onBinSizeChange.emit(this.numberOfBins);
     if (this.viewInitialized) {
       this.drawChart();
     }
@@ -68,11 +61,8 @@ export class MeterCostHistogramComponent {
     ];
 
     let height: number = 400;
-    const containerWidth = this.meterCostHistogram.nativeElement.offsetWidth;
-
     var layout = {
       height: height,
-      width: containerWidth,
       autosize: true,
       plot_bgcolor: "#e7f1f2",
       paper_bgcolor: "#e7f1f2",

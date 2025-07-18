@@ -7,6 +7,9 @@ import { HelperPipesModule } from "../helper-pipes/_helper-pipes.module";
 import { MeterCostHistogramComponent } from './meter-cost-histogram/meter-cost-histogram.component';
 import { MeterEnergyHistogramComponent } from './meter-energy-histogram/meter-energy-histogram.component';
 import { FormsModule } from '@angular/forms';
+import { MeterDataQualityReportComponent } from './meter-data-quality-report/meter-data-quality-report.component';
+import { MeterDataQualityReportModalComponent } from './meter-data-quality-report-modal/meter-data-quality-report-modal.component';
+
 
 @NgModule({
   declarations: [
@@ -15,19 +18,16 @@ import { FormsModule } from '@angular/forms';
     MeterStatisticsTableComponent,
     MeterCostHistogramComponent,
     MeterEnergyHistogramComponent,
+    MeterDataQualityReportComponent,
+    MeterDataQualityReportModalComponent,
   ],
   imports: [
     CommonModule,
     HelperPipesModule,
-    FormsModule
-    
+    FormsModule,
 ],
   exports: [
-    MeterEnergyTimeseriesGraphComponent,
-    MeterCostTimeseriesGraphComponent,
-    MeterStatisticsTableComponent,
-    MeterCostHistogramComponent,
-    MeterEnergyHistogramComponent,
+    MeterDataQualityReportModalComponent
   ]
 })
 export class SharedDataQualityReportMetersModule { }

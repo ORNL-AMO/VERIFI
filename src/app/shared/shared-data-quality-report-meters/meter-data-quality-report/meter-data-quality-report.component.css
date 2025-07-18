@@ -1,0 +1,21 @@
+.alert.alert-warning{
+    font-size: 1.1rem;
+}
+
+.alert.alert-warning .fa.fa-exclamation-triangle {
+    font-size: 3rem; 
+    color: #b52223;
+}
+
+.alert.alert-warning .alert-message {
+    font-size: 1.5rem;
+    text-align: center;
+}
+
+.alert.alert-warning .alert-message span.text-danger {
+    font-size: 1.5rem;
+}
+
+i.fa{
+    font-size: 1.5rem;
+}
