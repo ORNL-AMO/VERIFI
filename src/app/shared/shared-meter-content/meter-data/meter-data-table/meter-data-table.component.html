@@ -34,8 +34,14 @@
                     Add New Bill</button>
             </div>
             <div class="ps-2">
-                <app-meter-data-quality-report-modal [selectedMeter]="selectedMeter"
-                    [meterData]="meterData"></app-meter-data-quality-report-modal>
+                <ng-template [ngIf]="inDataManagement" [ngIfElse]="dataQualityReport">
+                    <button class="btn action-btn" (click)="goToDataQualityReport()"><i class="fa fa-file"></i> Data
+                        Quality Report</button>
+                </ng-template>
+                <ng-template #dataQualityReport>
+                    <app-meter-data-quality-report-modal [selectedMeter]="selectedMeter"
+                        [meterData]="meterData"></app-meter-data-quality-report-modal>
+                </ng-template>
             </div>
         </div>
     </div>

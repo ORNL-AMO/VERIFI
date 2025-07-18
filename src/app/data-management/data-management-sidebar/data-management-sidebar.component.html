@@ -143,6 +143,13 @@
                                 </div>
                                 <div class="ps-2 nav-item">
                                     <a class="nav-link"
+                                        [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/meters/'+meter.guid+'/data-quality-report'"
+                                        [routerLinkActive]="['active']">
+                                        <span class="fa fa-clipboard-check"></span> Meter Data Quality Report
+                                    </a>
+                                </div>
+                                <div class="ps-2 nav-item">
+                                    <a class="nav-link"
                                         [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/meters/'+meter.guid+'/meter-monthly-data'"
                                         [routerLinkActive]="['active']">
                                         <span class="fa fa-calendar-days"></span> Meter Monthly Data

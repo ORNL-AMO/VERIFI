@@ -27,7 +27,8 @@ import { MeterDataQualityReportModalComponent } from './meter-data-quality-repor
     FormsModule,
 ],
   exports: [
-    MeterDataQualityReportModalComponent
+    MeterDataQualityReportModalComponent,
+    MeterDataQualityReportComponent
   ]
 })
 export class SharedDataQualityReportMetersModule { }

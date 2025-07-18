@@ -1,9 +1,9 @@
 <button #openModalBtn class="btn action-btn" (click)="openModal()">
-    <i class="fa fa-file me-1"></i> Data Validity Check</button>
+    <i class="fa fa-clipboard-check me-1"></i> Data Validity Check</button>
 
 <div [ngClass]="{'windowOverlay': showModal}"></div>
 <div class="popup" [class.open]="showModal">
-    <div class="popup-header" *ngIf="showModal">Data Validity Check {{selectedMeter?.name}}
+    <div class="popup-header" *ngIf="showModal"><i class="fa fa-clipboard-check me-1"></i> Data Validity Check: {{selectedMeter?.name}}
         <button class="item-right" (click)="hideModal()">x</button>
     </div>
     <div class="popup-body">

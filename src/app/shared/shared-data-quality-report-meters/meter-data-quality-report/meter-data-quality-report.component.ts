@@ -15,9 +15,6 @@ export class MeterDataQualityReportComponent {
   @Input({ required: true })
   meterData: Array<IdbUtilityMeterData>;
 
-
-  showGraphs: boolean = false;
-  activeGraph: string;
   energyOutlierCount: number = 0;
   costOutlierCount: number = 0;
   showAlert: boolean = false;
