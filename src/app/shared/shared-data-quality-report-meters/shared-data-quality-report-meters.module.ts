@@ -9,6 +9,7 @@ import { MeterEnergyHistogramComponent } from './meter-energy-histogram/meter-en
 import { FormsModule } from '@angular/forms';
 import { MeterDataQualityReportComponent } from './meter-data-quality-report/meter-data-quality-report.component';
 import { MeterDataQualityReportModalComponent } from './meter-data-quality-report-modal/meter-data-quality-report-modal.component';
+import { MeterDataQualityStatusPipe } from './meter-data-quality-status.pipe';
 
 
 @NgModule({
@@ -20,6 +21,7 @@ import { MeterDataQualityReportModalComponent } from './meter-data-quality-repor
     MeterEnergyHistogramComponent,
     MeterDataQualityReportComponent,
     MeterDataQualityReportModalComponent,
+    MeterDataQualityStatusPipe,
   ],
   imports: [
     CommonModule,
@@ -28,7 +30,8 @@ import { MeterDataQualityReportModalComponent } from './meter-data-quality-repor
 ],
   exports: [
     MeterDataQualityReportModalComponent,
-    MeterDataQualityReportComponent
+    MeterDataQualityReportComponent,
+    MeterDataQualityStatusPipe
   ]
 })
 export class SharedDataQualityReportMetersModule { }

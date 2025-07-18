@@ -1,4 +1,4 @@
-<button #openModalBtn class="btn action-btn" (click)="openModal()">
+<button #openModalBtn class="btn action-btn" (click)="openModal()" [ngClass]="selectedMeter | meterDataQualityStatus: meterData: true">
     <i class="fa fa-clipboard-check me-1"></i> Data Validity Check</button>
 
 <div [ngClass]="{'windowOverlay': showModal}"></div>

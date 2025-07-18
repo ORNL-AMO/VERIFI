@@ -112,3 +112,15 @@ a.nav-link, .btn.btn-dark, .link-section-heading{
 .fa-calendar-days { 
     color: #943809;
 }
+
+.fa-clipboard-check.success{
+    color: #198754;
+}
+
+.fa-clipboard-check.warning{
+    color: #ffc107;
+}
+
+.fa-clipboard-check.danger{
+    color: #d9534f;
+}
