@@ -2,6 +2,7 @@ import { Component, Input } from '@angular/core';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { getStatistics, Statistics } from '../meterDataQualityStatistics';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-meter-data-quality-report',
@@ -22,21 +23,41 @@ export class MeterDataQualityReportComponent {
   costStats: Statistics;
 
   includeCosts: boolean = true;
+
+  hasData: boolean;
+
+  constructor(private router: Router) { }
+
   ngOnChanges() {
     this.setStatistics();
   }
 
   setStatistics() {
-    const { energyStats, costStats } = getStatistics(this.meterData, this.selectedMeter);
-    this.energyStats = energyStats;
-    this.costStats = costStats;
-    this.includeCosts = isNaN(this.costStats.average) == false || this.costStats.average == 0;
-    this.energyOutlierCount = energyStats.outliers;
-    this.costOutlierCount = costStats.outliers;
-    if (this.energyOutlierCount > 0 || this.costOutlierCount > 0) {
-      this.showAlert = true;
+    if (this.meterData.length === 0) {
+      this.hasData = false;
     } else {
-      this.showAlert = false;
+      this.hasData = true;
+      const { energyStats, costStats } = getStatistics(this.meterData, this.selectedMeter);
+      this.energyStats = energyStats;
+      this.costStats = costStats;
+      this.includeCosts = isNaN(this.costStats.average) == false || this.costStats.average == 0;
+      this.energyOutlierCount = energyStats.outliers;
+      this.costOutlierCount = costStats.outliers;
+      if (this.energyOutlierCount > 0 || this.costOutlierCount > 0) {
+        this.showAlert = true;
+      } else {
+        this.showAlert = false;
+      }
     }
+  }
+
+
+  meterDataAdd() {
+    this.router.navigateByUrl('/data-management/' + this.selectedMeter.accountId + '/facilities/' + this.selectedMeter.facilityId + '/meters/' + this.selectedMeter.guid + '/meter-data/new-bill');
+
+  }
+
+  uploadData() {
+    this.router.navigateByUrl('/data-management/' + this.selectedMeter.accountId + '/import-data');
   }
 }
