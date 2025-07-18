@@ -1,6 +1,6 @@
 import { Component, ElementRef, Input, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
-import { AnalysisGroupItem } from 'src/app/facility/analysis/analysis.service';
+import { AnalysisGroupItem } from 'src/app/data-evaluation/facility/analysis/analysis.service';
 import { MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';
 import { IdbFacility } from 'src/app/models/idbModels/facility';

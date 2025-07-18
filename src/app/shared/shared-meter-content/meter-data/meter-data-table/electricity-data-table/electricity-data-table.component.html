@@ -1,0 +1,270 @@
+<table class="table utility-data table-sm table-bordered table-hover" #meterTable
+    [ngClass]="{'copying-table': copyingTable}" *ngIf="!isRECs">
+    <thead class="sortable">
+        <tr class="table-mh">
+            <th></th>
+            <th [attr.colspan]="numGeneralInformation">
+                General Information
+            </th>
+            <th *ngIf="emissionsFilters.showSection" [attr.colspan]="numEmissions">
+                Emissions
+            </th>
+            <th *ngIf="detailedChargesFilters.showSection" [attr.colspan]="numDetailedCharges">
+                Detailed Charges
+            </th>
+            <th *ngIf="additionalChargesFilters.showSection" [attr.colspan]="numAdditionalCharges">
+                Additional Charges
+            </th>
+            <th>
+
+            </th>
+        </tr>
+        <tr>
+            <th *ngIf="!copyingTable" class="input">
+                <input #masterCheckbox type="checkbox" (change)="checkAll()" [(ngModel)]="allChecked">
+            </th>
+            <th (click)="setOrderDataField('readDate')" [ngClass]="{'active': orderDataField == 'readDate'}"
+                class="row-year">Meter Read Date</th>
+            <th (click)="setOrderDataField('totalEnergyUse')"
+                [ngClass]="{'active': orderDataField == 'totalEnergyUse'}">Total Energy<br> (<span
+                    [innerHTML]="energyUnit | settingsLabel"></span>)</th>
+            <th *ngIf="generalInformationFilters.totalCost" (click)="setOrderDataField('totalCost')"
+                [ngClass]="{'active': orderDataField == 'totalCost'}">Total
+                Cost</th>
+            <!-- totalRealDemand -->
+            <th *ngIf="generalInformationFilters.realDemand" (click)="setOrderDataField('totalRealDemand')"
+                [ngClass]="{'active': orderDataField == 'totalRealDemand'}">Total
+                Real<br> Demand (kW)</th>
+            <!-- totalBilledDemand -->
+            <th *ngIf="generalInformationFilters.billedDemand" (click)="setOrderDataField('totalBilledDemand')"
+                [ngClass]="{'active': orderDataField == 'totalBilledDemand'}">Total
+                Billed<br> Demand (kW)</th>
+            <th *ngIf="emissionsFilters.marketEmissions" (click)="setOrderDataField('totalMarketEmissions')"
+                [ngClass]="{'active': orderDataField == 'totalMarketEmissions'}">Total <br>Market-Based <br>Emissions
+                (tonne
+                CO<sub>2</sub>e)</th>
+            <th *ngIf="emissionsFilters.locationEmissions" (click)="setOrderDataField('totalLocationEmissions')"
+                [ngClass]="{'active': orderDataField == 'totalLocationEmissions'}">Total <br>Location-Based
+                <br>Emissions (tonne
+                CO<sub>2</sub>e)
+            </th>
+            <th *ngIf="emissionsFilters.recs" (click)="setOrderDataField('RECs')"
+                [ngClass]="{'active': orderDataField == 'RECs'}">RECs<br> (MWh)</th>
+
+            <!-- block1Consumption -->
+            <th *ngIf="detailedChargesFilters.block1" (click)="setOrderDataField('block1Consumption')"
+                [ngClass]="{'active': orderDataField == 'block1Consumption'}">Block 1<br> Consumption (<span
+                    [innerHTML]="energyUnit | settingsLabel"></span>)</th>
+            <!-- block1ConsumptionCharge -->
+            <th *ngIf="detailedChargesFilters.block1" (click)="setOrderDataField('block1ConsumptionCharge')"
+                [ngClass]="{'active': orderDataField == 'block1ConsumptionCharge'}">Block 1<br> Consumption Charge</th>
+            <!-- block2Consumption -->
+            <th *ngIf="detailedChargesFilters.block2" (click)="setOrderDataField('block2Consumption')"
+                [ngClass]="{'active': orderDataField == 'block2Consumption'}">Block 2<br> Consumption (<span
+                    [innerHTML]="energyUnit | settingsLabel"></span>)</th>
+            <!-- block2ConsumptionCharge -->
+            <th *ngIf="detailedChargesFilters.block2" (click)="setOrderDataField('block2ConsumptionCharge')"
+                [ngClass]="{'active': orderDataField == 'block2ConsumptionCharge'}">Block 2<br> Consumption Charge</th>
+            <!-- block3Consumption -->
+            <th *ngIf="detailedChargesFilters.block3" (click)="setOrderDataField('block3Consumption')"
+                [ngClass]="{'active': orderDataField == 'block3Consumption'}">Block 3<br> Consumption (<span
+                    [innerHTML]="energyUnit | settingsLabel"></span>)</th>
+            <!-- block3ConsumptionCharge -->
+            <th *ngIf="detailedChargesFilters.block3" (click)="setOrderDataField('block3ConsumptionCharge')"
+                [ngClass]="{'active': orderDataField == 'block3ConsumptionCharge'}">Block 3<br> Consumption Charge</th>
+            <!-- otherConsumption -->
+            <th *ngIf="detailedChargesFilters.other" (click)="setOrderDataField('otherConsumption')"
+                [ngClass]="{'active': orderDataField == 'otherConsumption'}">Other<br> Consumption (<span
+                    [innerHTML]="energyUnit | settingsLabel"></span>)</th>
+            <!-- otherConsumptionCharge -->
+            <th *ngIf="detailedChargesFilters.other" (click)="setOrderDataField('otherConsumptionCharge')"
+                [ngClass]="{'active': orderDataField == 'otherConsumptionCharge'}">Other<br> Consumption Charge</th>
+            <!-- onPeakAmount -->
+            <th *ngIf="detailedChargesFilters.onPeak" (click)="setOrderDataField('onPeakAmount')"
+                [ngClass]="{'active': orderDataField == 'onPeakAmount'}">
+                On-Peak<br> Consumption (<span [innerHTML]="energyUnit | settingsLabel"></span>)</th>
+            <!-- onPeakCharge -->
+            <th *ngIf="detailedChargesFilters.onPeak" (click)="setOrderDataField('onPeakCharge')"
+                [ngClass]="{'active': orderDataField == 'onPeakCharge'}">
+                On-Peak<br> Consumption Charge</th>
+            <!-- offPeakAmount -->
+            <th *ngIf="detailedChargesFilters.offPeak" (click)="setOrderDataField('offPeakAmount')"
+                [ngClass]="{'active': orderDataField == 'offPeakAmount'}">
+                Off-Peak<br> Consumption (<span [innerHTML]="energyUnit | settingsLabel"></span>)</th>
+            <!-- offPeakCharge -->
+            <th *ngIf="detailedChargesFilters.offPeak" (click)="setOrderDataField('offPeakCharge')"
+                [ngClass]="{'active': orderDataField == 'offPeakCharge'}">
+                Off-Peak<br> Consumption Charge</th>
+            <!-- powerFactor -->
+            <th *ngIf="detailedChargesFilters.powerFactor" (click)="setOrderDataField('powerFactor')"
+                [ngClass]="{'active': orderDataField == 'powerFactor'}">
+                Power<br> Factor</th>
+            <!-- powerFactorCharge -->
+            <th *ngIf="detailedChargesFilters.powerFactor" (click)="setOrderDataField('powerFactorCharge')"
+                [ngClass]="{'active': orderDataField == 'powerFactorCharge'}">
+                Power<br> Factor Charge</th>
+
+            <!-- nonEnergyCharge -->
+            <th *ngIf="additionalChargesFilters.nonEnergyCharge" (click)="setOrderDataField('nonEnergyCharge')"
+                [ngClass]="{'active': orderDataField == 'nonEnergyCharge'}">
+                Non-Energy<br> Charge</th>
+            <!-- transmissionAndDeliveryCharge -->
+            <th *ngIf="additionalChargesFilters.transmissionAndDelivery"
+                (click)="setOrderDataField('transmissionAndDeliveryCharge')"
+                [ngClass]="{'active': orderDataField == 'transmissionAndDeliveryCharge'}">
+                Transmission and<br> Delivery Charge</th>
+            <!-- localSalesTax -->
+            <th *ngIf="additionalChargesFilters.localSalesTax" (click)="setOrderDataField('localSalesTax')"
+                [ngClass]="{'active': orderDataField == 'localSalesTax'}">
+                Local<br> Sales Tax</th>
+            <!-- stateSalesTax -->
+            <th *ngIf="additionalChargesFilters.stateSalesTax" (click)="setOrderDataField('stateSalesTax')"
+                [ngClass]="{'active': orderDataField == 'stateSalesTax'}">
+                State<br> Sales Tax</th>
+            <!-- latePayment -->
+            <th *ngIf="additionalChargesFilters.latePayment" (click)="setOrderDataField('latePayment')"
+                [ngClass]="{'active': orderDataField == 'latePayment'}">
+                Late<br> Payment</th>
+            <!-- otherCharge -->
+            <th *ngIf="additionalChargesFilters.otherCharge" (click)="setOrderDataField('otherCharge')"
+                [ngClass]="{'active': orderDataField == 'otherCharge'}">
+                Other<br> Charge</th>
+            <th *ngIf="!copyingTable">Actions</th>
+        </tr>
+    </thead>
+    <tbody class="table-group-divider">
+        <tr
+            *ngFor="let meterData of selectedMeterData | orderBy: orderDataField: orderByDirection | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage">
+            <td *ngIf="!copyingTable" class="input">
+                <input type="checkbox" name="metersSelected" (change)="toggleChecked()" [(ngModel)]="meterData.checked">
+            </td>
+            <td class="read-date" [ngClass]="checkError(meterData.readDate)">{{meterData.readDate | date}}</td>
+            <td>
+                <span class="fa fa-asterisk" *ngIf="meterData.isEstimated"></span>
+                <ng-container *ngIf="selectedMeter.includeInEnergy">
+                    {{meterData.totalEnergyUse | customNumber}}
+                </ng-container>
+                <ng-container *ngIf="!selectedMeter.includeInEnergy">
+                    {{0 | customNumber}}
+                </ng-container>
+            </td>
+            <td *ngIf="generalInformationFilters.totalCost">{{meterData.totalCost | customNumber:true}}</td>
+            <td *ngIf="generalInformationFilters.realDemand">{{meterData.totalRealDemand | customNumber}}</td>
+            <td *ngIf="generalInformationFilters.billedDemand">{{meterData.totalBilledDemand | customNumber}}</td>
+
+            <td *ngIf="emissionsFilters.marketEmissions">{{meterData.totalWithMarketEmissions | customNumber}}</td>
+            <td *ngIf="emissionsFilters.locationEmissions">{{meterData.totalWithLocationEmissions | customNumber}}</td>
+            <td *ngIf="emissionsFilters.recs">{{meterData.RECs | customNumber}}</td>
+
+            <td *ngIf="detailedChargesFilters.block1">{{meterData.block1Consumption | customNumber}}</td>
+            <td *ngIf="detailedChargesFilters.block1">{{meterData.block1ConsumptionCharge | customNumber:true}}</td>
+            <td *ngIf="detailedChargesFilters.block2">{{meterData.block2Consumption | customNumber}}</td>
+            <td *ngIf="detailedChargesFilters.block2">{{meterData.block2ConsumptionCharge | customNumber:true}}</td>
+            <td *ngIf="detailedChargesFilters.block3">{{meterData.block3Consumption | customNumber}}</td>
+            <td *ngIf="detailedChargesFilters.block3">{{meterData.block3ConsumptionCharge | customNumber:true}}</td>
+            <td *ngIf="detailedChargesFilters.other">{{meterData.otherConsumption | customNumber}}</td>
+            <td *ngIf="detailedChargesFilters.other">{{meterData.otherConsumptionCharge | customNumber:true}}</td>
+            <td *ngIf="detailedChargesFilters.onPeak">{{meterData.onPeakAmount | customNumber}}</td>
+            <td *ngIf="detailedChargesFilters.onPeak">{{meterData.onPeakCharge | customNumber:true}}</td>
+            <td *ngIf="detailedChargesFilters.offPeak">{{meterData.offPeakAmount | customNumber}}</td>
+            <td *ngIf="detailedChargesFilters.offPeak">{{meterData.offPeakCharge | customNumber:true}}</td>
+            <td *ngIf="detailedChargesFilters.powerFactor">{{meterData.powerFactor | customNumber}}</td>
+            <td *ngIf="detailedChargesFilters.powerFactor">{{meterData.powerFactorCharge | customNumber:true}}</td>
+
+            <td *ngIf="additionalChargesFilters.nonEnergyCharge">{{meterData.nonEnergyCharge | customNumber:true}}</td>
+            <td *ngIf="additionalChargesFilters.transmissionAndDelivery">{{meterData.transmissionAndDeliveryCharge |
+                customNumber:true}}</td>
+            <td *ngIf="additionalChargesFilters.localSalesTax">{{meterData.localSalesTax | customNumber:true}}</td>
+            <td *ngIf="additionalChargesFilters.stateSalesTax">{{meterData.stateSalesTax | customNumber:true}}</td>
+            <td *ngIf="additionalChargesFilters.latePayment">{{meterData.latePayment | customNumber:true}}</td>
+            <td *ngIf="additionalChargesFilters.otherCharge">{{meterData.otherCharge | customNumber:true}}</td>
+            <td *ngIf="!copyingTable" class="actions">
+                <div class="btn-group">
+                    <button class="btn btn-sm btn-outline" (click)="setEditMeterData(meterData)" title="Edit">
+                        <i class="fa fa-pencil"></i>
+                    </button>
+                    <app-view-connect-bill *ngIf="isElectron" [meterData]="meterData" [selectedMeter]="selectedMeter"></app-view-connect-bill>
+                    <button class="btn btn-sm btn-outline" (click)="setDeleteMeterData(meterData)" title="Delete">
+                        <i class="fa fa-trash"></i>
+                    </button>
+                </div>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<table class="table utility-data table-sm table-bordered table-hover" #meterTable
+    [ngClass]="{'copying-table': copyingTable}" *ngIf="isRECs">
+    <thead class="sortable">
+        <tr class="table-mh">
+            <th></th>
+            <th [attr.colspan]="2">
+                General Information
+            </th>
+            <th *ngIf="emissionsFilters.showSection" [attr.colspan]="3">
+                Emissions
+            </th>
+            <th>
+
+            </th>
+        </tr>
+        <tr>
+            <th *ngIf="!copyingTable" class="input">
+                <input #masterCheckbox type="checkbox" (change)="checkAll()" [(ngModel)]="allChecked">
+            </th>
+            <th (click)="setOrderDataField('readDate')" [ngClass]="{'active': orderDataField == 'readDate'}"
+                class="row-year">Meter Read Date</th>
+            <th (click)="setOrderDataField('totalCost')" [ngClass]="{'active': orderDataField == 'totalCost'}">Total
+                Cost</th>
+            <th (click)="setOrderDataField('RECs')" [ngClass]="{'active': orderDataField == 'RECs'}">RECs<br> (MWh)</th>
+            <th (click)="setOrderDataField('excessRECs')" [ngClass]="{'active': orderDataField == 'excessRECs'}">Excess
+                RECs<br> (MWh)</th>
+            <th (click)="setOrderDataField('excessRECsEmissions')"
+                [ngClass]="{'active': orderDataField == 'excessRECsEmissions'}">Excess
+                RECs<br> Emissions (tonne CO<sub>2</sub>e)</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody class="table-group-divider">
+        <tr
+            *ngFor="let meterData of selectedMeterData | orderBy: orderDataField: orderByDirection | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage">
+            <td *ngIf="!copyingTable" class="input">
+                <input type="checkbox" name="metersSelected" (change)="toggleChecked()" [(ngModel)]="meterData.checked">
+            </td>
+            <td class="read-date" [ngClass]="checkError(meterData.readDate)">{{meterData.readDate | date}}</td>
+            <td>{{meterData.totalCost | customNumber:true}}</td>
+            <td>{{meterData.RECs | customNumber}}</td>
+            <td>{{meterData.excessRECs | customNumber}}</td>
+            <td>{{meterData.excessRECsEmissions | customNumber}}</td>
+            <td *ngIf="!copyingTable" class="actions">
+                <div class="btn-group">
+                    <button class="btn btn-sm btn-outline" (click)="setEditMeterData(meterData)" title="Edit">
+                        <i class="fa fa-pencil"></i>
+                    </button>
+                    <app-view-connect-bill *ngIf="isElectron" [meterData]="meterData" [selectedMeter]="selectedMeter"></app-view-connect-bill>
+                    <button class="btn btn-sm btn-outline" (click)="setDeleteMeterData(meterData)" title="Delete">
+                        <i class="fa fa-trash"></i>
+                    </button>
+                </div>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+
+<div class="d-flex w-100 justify-content-between">
+    <div class="d-flex">
+        <div>
+            <button class="btn action-btn btn-sm" (click)="copyTable()">
+                <span class="fa fa-copy"></span> Copy Table
+            </button>
+        </div>
+        <div class="ps-2" *ngIf="showEstimated">
+            <span class="fa fa-asterisk"></span> Indicates Estimated Reading
+        </div>
+    </div>
+
+    <ngb-pagination [collectionSize]="selectedMeterData.length" [(page)]="currentPageNumber" [pageSize]="itemsPerPage"
+        [maxSize]="5" [rotate]="true" aria-label="Pagination">
+    </ngb-pagination>
+</div>

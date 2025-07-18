@@ -1,0 +1,12 @@
+a.dropdown-item,
+a.dropdown-item .fa {
+    color: black;
+}
+
+.btn-group{
+    width: 150px;
+}
+
+.progress{
+    background-color: white;
+}

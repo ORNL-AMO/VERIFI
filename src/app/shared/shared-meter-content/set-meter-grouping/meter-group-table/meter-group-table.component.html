@@ -1,0 +1,29 @@
+<ng-template [ngIf]="meters.length > 0" [ngIfElse]="noMetersBlock">
+    <table class="table table-bordered table-sm">
+        <thead>
+            <tr>
+                <th>Meter</th>
+                <th>Source</th>
+                <th>Scope</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let meter of meters">
+                <td>
+                    {{meter.name}}
+                </td>
+                <td>
+                    {{meter.source}}
+                </td>
+                <td>
+                    <span [innerHTML]="meter.scope | scopeLabel"></span>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</ng-template>
+<ng-template #noMetersBlock>
+    <div class="alert alert-info p-1">
+        No meters added to this group.
+    </div>
+</ng-template>

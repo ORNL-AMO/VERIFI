@@ -1,0 +1,11 @@
+.fa-trash{
+    color: red;
+}
+
+button:hover .fa-trash{
+    color: white;
+}
+
+.fa-save{
+    color: white;
+}

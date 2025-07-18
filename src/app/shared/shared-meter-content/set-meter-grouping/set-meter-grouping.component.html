@@ -1,0 +1,174 @@
+<h4>
+    {{facility.name}} Meter Groups
+</h4>
+<ng-template [ngIf]="facilityMeters.length > 0" [ngIfElse]="noMetersBlock">
+    <ng-template [ngIf]="!showEditGroupForm" [ngIfElse]="editMeterGroupFormBlock">
+        <div class="d-flex w-100 justify-content-end mb-2">
+            <div class="ps-2">
+                <button class="btn nav-btn" (click)="uploadData()"><i class="fa fa-upload"></i> Import Data</button>
+            </div>
+            <div class="ps-2">
+                <button class="btn action-btn" (click)="addGroup()"><i class="fa fa-plus"></i> Add
+                    New Meter Group</button>
+            </div>
+        </div>
+        <ng-template [ngIf]="hasEnergyMeters">
+            <div class="group-section">
+                <h5>
+                    Energy Groups
+                </h5>
+            </div>
+            <ng-template [ngIf]="energyGroups.length > 0" [ngIfElse]="noEnergyGroupsBlock">
+                <div class="d-flex flex-column p-2" *ngFor="let group of energyGroups">
+                    <div class="d-flex justify-content-between">
+                        <a class="semibold group-label click-link" (click)="setEditGroup(group)">
+                            <i class="fa fa-layer-group"></i>
+                            {{group.name}}
+                        </a>
+                        <div class="btn-group">
+                            <button class="btn btn-sm btn-outline" (click)="setEditGroup(group)" title="Edit">
+                                <i class="fa fa-pencil"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline" (click)="setDeleteGroup(group)" title="Delete">
+                                <i class="fa fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="pt-2">
+                        <app-meter-group-table [groupId]="group.guid"></app-meter-group-table>
+                    </div>
+                </div>
+            </ng-template>
+            <ng-template #noEnergyGroupsBlock>
+                <div class="p-2">
+                    <div class="alert alert-info p-1 mt-1">
+                        No energy meter groups.
+                    </div>
+                </div>
+            </ng-template>
+        </ng-template>
+        <!--WATER-->
+        <ng-template [ngIf]="hasWaterMeters">
+            <div class="group-section">
+                <h5>
+                    Water Groups
+                </h5>
+            </div>
+            <ng-template [ngIf]="waterGroups.length > 0" [ngIfElse]="noWaterGroupsBlock">
+                <div class="d-flex flex-column p-2" *ngFor="let group of waterGroups">
+                    <div class="d-flex justify-content-between">
+                        <a class="semibold group-label click-link" (click)="setEditGroup(group)">
+                            <i class="fa fa-layer-group"></i>
+                            {{group.name}}
+                        </a>
+                        <div class="btn-group">
+                            <button class="btn btn-sm btn-outline" (click)="setEditGroup(group)" title="Edit">
+                                <i class="fa fa-pencil"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline" (click)="setDeleteGroup(group)" title="Delete">
+                                <i class="fa fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="pt-2">
+                        <app-meter-group-table [groupId]="group.guid"></app-meter-group-table>
+                    </div>
+                </div>
+            </ng-template>
+            <ng-template #noWaterGroupsBlock>
+                <div class="p-2">
+                    <div class="alert alert-info p-1 mt-1">
+                        No water meter groups.
+                    </div>
+                </div>
+            </ng-template>
+        </ng-template>
+
+        <!--OTHER-->
+        <div class="group-section mt-2">
+            <h5>
+                Other Groups
+            </h5>
+        </div>
+        <ng-template [ngIf]="otherGroups.length > 0" [ngIfElse]="noOtherGroupsBlock">
+            <div class="d-flex flex-column p-2" *ngFor="let group of otherGroups">
+                <div class="d-flex justify-content-between">
+                    <a class="semibold group-label click-link" (click)="setEditGroup(group)">
+                        <i class="fa fa-layer-group"></i>
+                        {{group.name}}
+                    </a>
+                    <div class="btn-group">
+                        <button class="btn btn-sm btn-outline" (click)="setEditGroup(group)" title="Edit">
+                            <i class="fa fa-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline" (click)="setDeleteGroup(group)" title="Delete">
+                            <i class="fa fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="pt-2">
+                    <app-meter-group-table [groupId]="group.guid"></app-meter-group-table>
+                </div>
+            </div>
+        </ng-template>
+        <ng-template #noOtherGroupsBlock>
+            <div class="p-2">
+                <div class="alert alert-info p-1 mt-1">
+                    No other meter groups.
+                </div>
+            </div>
+        </ng-template>
+
+        <ng-container *ngIf="ungroupedMeters.length > 0">
+            <div class="group-section mt-2">
+                <h5>
+                    Ungrouped Meters
+                </h5>
+            </div>
+            <div class="d-flex flex-column p-2">
+                <app-meter-group-table [groupId]="undefined"></app-meter-group-table>
+            </div>
+        </ng-container>
+    </ng-template>
+
+    <ng-template #editMeterGroupFormBlock>
+        <app-meter-group-form (emitClose)="closeGroupForm()" [hasEnergyMeters]="hasEnergyMeters"
+            [hasWaterMeters]="hasWaterMeters" [meterGroup]="groupToEdit"></app-meter-group-form>
+    </ng-template>
+</ng-template>
+
+
+
+<ng-template #noMetersBlock>
+    <div class="text-center mt-5 no-meters">
+        <h5>No utility meters found for this facility.</h5>
+        <p>Please <i class="fa fa-plus"></i> Add New Meter or <i class="fa fa-upload"></i> Import multiple meters from
+            excel.</p>
+        <div class="d-flex w-100 justify-content-center">
+            <div class="pe-1">
+                <button class="btn action-btn" (click)="addMeter()"><i class="fa fa-plus"></i> Add New Meter</button>
+            </div>
+            <div class="ps-1">
+                <button class="btn nav-btn" (click)="uploadData()"><i class="fa fa-upload"></i> Import Data</button>
+            </div>
+        </div>
+    </div>
+</ng-template>
+
+
+
+
+<div [ngClass]="{'windowOverlay': groupToDelete}"></div>
+<div class="popup" [class.open]="groupToDelete">
+    <div class="popup-header" *ngIf="groupToDelete">Delete Meter Group: {{groupToDelete.name}}
+        <button class="item-right" (click)="closeDeleteGroup()">x</button>
+    </div>
+    <div class="popup-body">
+        <p>WARNING: Deleting meter group cannot be undone. Analysis and reports will be updated.
+            Are you sure you want to preform this action?</p>
+    </div>
+    <div class="saveCancel popup-footer text-end">
+        <button class="btn btn-secondary" (click)="closeDeleteGroup()">Cancel</button>
+        <button class="btn btn-danger" (click)="deleteMeterGroup()">Delete</button>
+    </div>
+</div>

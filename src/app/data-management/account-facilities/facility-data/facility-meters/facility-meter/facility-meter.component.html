@@ -1,0 +1,37 @@
+<h4>{{utilityMeter.name}} <span class="badge float-end"
+        [ngStyle]="{'background-color': utilityMeter.source | meterSourceColor}">{{utilityMeter.source}}</span>
+</h4>
+
+<div class="d-flex w-100 justify-content-end">
+    <div>
+        <button class="btn btn-primary me-2" (click)="saveChanges()" [disabled]="meterForm.invalid || meterForm.pristine">
+            <span class="fa fa-save"></span>
+            Save Changes</button>
+    </div>
+</div>
+<app-edit-meter-form [meterForm]="meterForm" [facility]="facility"></app-edit-meter-form>
+<hr>
+<div class="d-flex w-100 justify-content-end">
+    <div>
+        <button class="btn btn-danger btn-sm" (click)="showDelete()">
+            <span class="fa fa-trash"></span>
+            Delete Meter
+        </button>
+    </div>
+</div>
+
+<div [ngClass]="{'windowOverlay': showDeleteMeter}"></div>
+<div class="popup" [class.open]="showDeleteMeter">
+    <div class="popup-header" *ngIf="showDeleteMeter">Delete Meter: {{utilityMeter.name}}
+        <button class="item-right" (click)="cancelDelete()">x</button>
+    </div>
+    <div class="popup-body">
+        <p>WARNING: By deleting this meter, you are also deleting all of the meter data and bills associated with
+            it.
+            Are you sure you want to preform this action?</p>
+    </div>
+    <div class="saveCancel popup-footer text-end">
+        <button class="btn btn-secondary" (click)="cancelDelete()">Cancel</button>
+        <button class="btn btn-danger" (click)="deleteMeter()">Delete</button>
+    </div>
+</div>

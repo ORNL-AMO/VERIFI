@@ -141,14 +141,11 @@
     based on your zipcode and the data found in the <a class="click-link" target="_blank"
         href="https://www.epa.gov/climateleadership/ghg-emission-factors-hub">EPA
         GHG Emissions Factors Hub</a>.
-    <ng-container *ngIf="!inWizard">
-        <br>
-        <br>
-        Custom emssions rates can be added and managed in the <a class="click-link" (click)="goToCustomData()">Account
-            Custom Data</a>
-        page.
-    </ng-container>
-
+    <br>
+    <br>
+    Custom emssions rates can be added and managed in the <a class="click-link" (click)="goToCustomData()">Account
+        Custom Data</a>
+    page.
 </p>
 
 <div class="windowOverlay" *ngIf="openEmissionsRates"></div>

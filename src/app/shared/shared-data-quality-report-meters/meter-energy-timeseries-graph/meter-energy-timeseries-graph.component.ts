@@ -1,11 +1,7 @@
-import { style } from '@angular/animations';
-import { Component, ElementRef, Input, SimpleChange, SimpleChanges, ViewChild } from '@angular/core';
+import { Component, ElementRef, Input, SimpleChanges, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
-import { Subscription } from 'rxjs';
-import { UtilityMeterDataService } from 'src/app/facility/utility-data/energy-consumption/utility-meter-data/utility-meter-data.service';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
-import { GeneralInformationFilters, GeneralUtilityDataFilters, VehicleDataFilters } from 'src/app/models/meterDataFilter';
 import { getConsumptionData, getUnitFromMeter } from '../meterDataQualityStatistics';
 
 @Component({
