@@ -1,0 +1,23 @@
+<div class="h-100 d-flex flex-column align-items-start justify-content-start shadow help-text help-container"
+    [ngClass]="{'collapsed': !helpPanelOpen}">
+    <div class="w-100 pb-1 d-flex">
+        <div class="d-flex flex-column w-100">
+            <nav class="navbar pt-0">
+                <a class="click-link toggle-collapse" (click)="toggleCollapseHelpPanel()">
+                    <!-- <i class="fa"
+                        [ngClass]="{'fa-circle-chevron-left': !helpPanelOpen, 'fa-circle-chevron-right': helpPanelOpen}"></i> -->
+                    <i class="fa fa-circle-question"></i>
+                    <span class="ps-1 large" [ngClass]="{'collapse': !helpPanelOpen, 'expand': helpPanelOpen}">Help</span>
+                </a>
+            </nav>
+        </div>
+    </div>
+    <ng-template [ngIf]="helpPanelOpen">
+        <div class="help-content">
+            <app-account-help *ngIf="helpURL == 'account'"></app-account-help>
+            <app-facility-help *ngIf="helpURL == 'facility'"></app-facility-help>
+            <app-help-page *ngIf="helpURL == 'help'"></app-help-page>
+            <app-weather-data-help *ngIf="helpURL == 'weather-data'"></app-weather-data-help>
+        </div>
+    </ng-template>
+</div>

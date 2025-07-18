@@ -13,8 +13,11 @@ export interface IdbAccount extends IdbEntry, AccountAndFacility {
     isSharedBackupFile?: boolean,
     sharedFileAuthor?: string
     deleteAccount?: boolean,
+    sidebarFacilitiesOpen?: boolean,
     isBetterPlantsPartner?: boolean,
-    assessmentReportVersion?: 'AR4' | 'AR5'
+    assessmentReportVersion?: 'AR4' | 'AR5',
+    sidebarCustomDataOpen?: boolean,
+    toDoListOutdatedDays?: number
 }
 
 export function getNewIdbAccount(): IdbAccount {

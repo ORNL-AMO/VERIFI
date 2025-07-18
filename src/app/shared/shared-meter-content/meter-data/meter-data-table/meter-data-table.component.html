@@ -1,0 +1,131 @@
+<div *ngIf="meterData.length == 0" class="text-center mt-5">
+    <h5>No {{selectedMeter.name}} bills found for this facility.</h5>
+    <p>Please <i class="fa fa-plus"></i> Add New Bill or <i class="fa fa-upload"></i> Import multiple bills from excel.
+    </p>
+    <div class="d-flex w-100 justify-content-center">
+        <div class="pe-1">
+            <button class="btn action-btn" (click)="meterDataAdd()"><i class="fa fa-plus"></i> Add New Bill</button>
+        </div>
+        <div class="ps-1">
+            <button class="btn nav-btn" (click)="uploadData()"><i class="fa fa-upload"></i> Import Data</button>
+        </div>
+    </div>
+</div>
+<div *ngIf="meterData.length != 0">
+    <div class="d-flex w-100 mb-2"
+        [ngClass]="{'justify-content-between': selectedMeter.source == 'Electricity', 'justify-content-end': selectedMeter.source != 'Electricity'}">
+        <app-utility-meter-data-filter *ngIf="selectedMeter.source == 'Electricity'" [meter]="selectedMeter"
+            [filterType]="'table'">
+        </app-utility-meter-data-filter>
+        <div class="d-flex">
+            <!--Bulk Delete-->
+            <div class="pe-2 bulk-delete" [class.show]="hasCheckedItems">
+                <button class="btn btn-danger" (click)='openBulkDelete()' [disabled]="!hasCheckedItems">Bulk
+                    Delete</button>
+            </div>
+            <!--Items Per Page-->
+            <app-table-items-dropdown></app-table-items-dropdown>
+            <!--Import/Export-->
+            <div class="ps-2">
+                <button class="btn nav-btn" (click)="uploadData()"><i class="fa fa-upload"></i> Import Data</button>
+            </div>
+            <div class="ps-2">
+                <button class="btn action-btn" (click)="meterDataAdd()"><i class="fa fa-plus"></i>
+                    Add New Bill</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="meter">
+        <div *ngIf="hasNegativeReadings" class="p-1 small alert alert-warning text-center">
+            Negative energy use entered for one or more readings.
+        </div>
+        <div *ngIf="duplicateReadingDates.length > 0" class="p-1 alert alert-danger">
+            Two or more readings have been entered for the same day. Calanderization will experience errors.
+            <ul class="mb-0">
+                <li *ngFor="let d of duplicateReadingDates">
+                    {{d | date}}
+                </li>
+            </ul>
+        </div>
+        <!--<div class="meterData">
+
+            <p class="section-name bold">
+                {{meterListItem.idbMeter.name}}
+                <span class="alert-danger" *ngIf="meterListItem.errorDate">
+                    {{meterListItem.errorDate | date}} has multiple data entries.
+                </span>
+                <span class="alert-warning" *ngIf="meterListItem.warningDate">
+                    {{meterListItem.warningDate | date:'MMM, y'}} has multiple data entries. <a
+                        (click)="ignoreSameMonth(meterListItem.idbMeter)">Ignore <b>duplicate</b> months for this
+                        meter</a>
+                </span>
+                <span class="alert-warning" *ngIf="meterListItem.missingMonth">
+                    {{meterListItem.missingMonth | date:'MMMM, y'}} is missing a data entry. <a
+                        (click)="ignoreMissingMonth(meterListItem.idbMeter)">Ignore <b>missing</b> months this meter</a>
+                </span>
+            </p>
+            <p *ngIf="meterListItem.idbMeter.visible">{{meterListItem.idbMeter.notes}}</p>
+        </div>
+    -->
+
+        <div class="row no-margin">
+            <div class="col no-margin table-responsive">
+                <app-electricity-data-table *ngIf="selectedMeter.source == 'Electricity'"
+                    [selectedMeter]="selectedMeter" [selectedMeterData]="meterData" [itemsPerPage]="itemsPerPage"
+                    (setChecked)="setHasCheckedItems()" (setEdit)="setEditMeterData($event)"
+                    (setDelete)="setDeleteMeterData($event)">
+                </app-electricity-data-table>
+                <app-general-utility-data-table
+                    *ngIf="selectedMeter.source != 'Electricity' && (selectedMeter.scope != 2 && selectedMeter.scope != 5 && selectedMeter.scope != 6)"
+                    [selectedMeter]="selectedMeter" [selectedMeterData]="meterData" [itemsPerPage]="itemsPerPage"
+                    (setChecked)="setHasCheckedItems()" (setEdit)="setEditMeterData($event)"
+                    (setDelete)="setDeleteMeterData($event)">
+                </app-general-utility-data-table>
+                <app-vehicle-data-table *ngIf="selectedMeter.source != 'Electricity' && selectedMeter.scope == 2"
+                    [selectedMeter]="selectedMeter" [selectedMeterData]="meterData" [itemsPerPage]="itemsPerPage"
+                    (setChecked)="setHasCheckedItems()" (setEdit)="setEditMeterData($event)"
+                    (setDelete)="setDeleteMeterData($event)">
+                </app-vehicle-data-table>
+                <app-other-emissions-data-table
+                    *ngIf="selectedMeter.source != 'Electricity' && (selectedMeter.scope == 5 || selectedMeter.scope ==6)"
+                    [selectedMeter]="selectedMeter" [selectedMeterData]="meterData" [itemsPerPage]="itemsPerPage"
+                    (setChecked)="setHasCheckedItems()" (setEdit)="setEditMeterData($event)"
+                    (setDelete)="setDeleteMeterData($event)">
+                </app-other-emissions-data-table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div [ngClass]="{'windowOverlay': showIndividualDelete || showBulkDelete}"></div>
+<!--individual delete-->
+<div class="popup" [class.open]="showIndividualDelete">
+    <div class="popup-header" *ngIf="meterDataToDelete">Delete Meter Data
+        <button class="item-right" (click)="cancelDelete()">x</button>
+    </div>
+    <div class="popup-body">
+        <p>WARNING: Deleting meter data cannot be undone.
+            Are you sure you want to preform this action?</p>
+    </div>
+    <div class="saveCancel popup-footer text-end">
+        <button class="btn btn-secondary" (click)="cancelDelete()">Cancel</button>
+        <button class="btn btn-danger" (click)="deleteMeterData()">Delete</button>
+    </div>
+</div>
+<!--bulk delete-->
+<div class="popup" [class.open]="showBulkDelete">
+    <div class="popup-header" *ngIf="showBulkDelete">Delete Meter Data Items
+        <button class="item-right" (click)="cancelBulkDelete()">x</button>
+    </div>
+    <div class="popup-body">
+        <p>WARNING: Deleting meter data cannot be undone.
+            Are you sure you want to preform this action?</p>
+    </div>
+    <div class="saveCancel popup-footer text-end">
+        <button class="btn btn-secondary" (click)="cancelBulkDelete()">Cancel</button>
+        <button class="btn btn-danger" (click)="bulkDelete()">Delete</button>
+    </div>
+</div>

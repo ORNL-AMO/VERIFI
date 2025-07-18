@@ -135,7 +135,7 @@ export class ImportBackupModalComponent implements OnInit {
         }
       }
       this.loadingService.setLoadingStatus(false);
-      this.router.navigateByUrl('account');
+      this.router.navigateByUrl('/data-evaluation/account');
     } catch (err) {
       console.log(err);
       this.toastNotificationService.showToast('Error importing backup', 'There was an error importing this data file.', 15000, false, 'alert-danger');

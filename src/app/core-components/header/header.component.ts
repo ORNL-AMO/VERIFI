@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { AccountdbService } from "../../indexedDB/account-db.service";
 import { FacilitydbService } from "../../indexedDB/facility-db.service";
 import { UtilityMeterdbService } from "../../indexedDB/utilityMeter-db.service";
@@ -15,13 +15,14 @@ import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { ElectronService } from 'src/app/electron/electron.service';
 import { ToastNotificationsService } from '../toast-notifications/toast-notifications.service';
 import { AutomaticBackupsService } from 'src/app/electron/automatic-backups.service';
-import { IdbAccount } from 'src/app/models/idbModels/account';
+import { getNewIdbAccount, IdbAccount } from 'src/app/models/idbModels/account';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
 
 @Component({
-    selector: 'app-header',
-    templateUrl: './header.component.html',
-    styleUrls: ['./header.component.css'],
-    standalone: false
+  selector: 'app-header',
+  templateUrl: './header.component.html',
+  styleUrls: ['./header.component.css'],
+  standalone: false
 })
 export class HeaderComponent implements OnInit {
   @Input()
@@ -45,6 +46,9 @@ export class HeaderComponent implements OnInit {
 
   savingBackup: boolean;
   savingBackupSub: Subscription;
+
+  inDataEvaluation: boolean = false;
+  displayToggle: boolean = false;
   constructor(
     private router: Router,
     public accountdbService: AccountdbService,
@@ -86,6 +90,13 @@ export class HeaderComponent implements OnInit {
         this.cd.detectChanges();
       })
     }
+
+    this.router.events.subscribe(event => {
+      if (event instanceof NavigationEnd) {
+        this.setInDashboard(event.urlAfterRedirects);
+      }
+    });
+    this.setInDashboard(this.router.url);
   }
 
   ngOnDestroy() {
@@ -102,8 +113,13 @@ export class HeaderComponent implements OnInit {
     }
   }
 
-  addNewAccount() {
-    this.router.navigateByUrl('/setup-wizard');
+  async addNewAccount() {
+    let account: IdbAccount = getNewIdbAccount();
+    account = await firstValueFrom(this.accountdbService.addWithObservable(account));
+    let accounts: Array<IdbAccount> = await firstValueFrom(this.accountdbService.getAll());
+    this.accountdbService.allAccounts.next(accounts);
+    await this.dbChangesService.selectAccount(account, false);
+    this.router.navigateByUrl('/data-management/' + account.guid);
   }
 
   async switchAccount(account: IdbAccount) {
@@ -115,7 +131,11 @@ export class HeaderComponent implements OnInit {
       await this.dbChangesService.selectAccount(account, false);
       this.loadingService.setLoadingStatus(false);
       this.automaticBackupService.initializeAccount();
-      this.router.navigate(['/']);
+      if (this.inDataEvaluation) {
+        this.goToDashboard(true);
+      } else {
+        this.goToDataEntry(true);
+      }
     } catch (err) {
       this.toastNotificationService.showToast('An Error Occured', 'There was an error when trying to switch to ' + account.name + '. The action was unable to be completed.', 15000, false, 'alert-danger');
       this.loadingService.setLoadingStatus(false);
@@ -168,5 +188,64 @@ export class HeaderComponent implements OnInit {
   checkLatestFile() {
     this.automaticBackupService.forceModal = true;
     this.electronService.getDataFile(this.activeAccount.dataBackupFilePath);
+  }
+
+  goHome() {
+    this.router.navigate(['/welcome']).then(() => {
+      this.accountdbService.selectedAccount.next(undefined);
+    });
+  }
+
+  setInDashboard(url: string) {
+    this.inDataEvaluation = url.includes('data-management') == false;
+    this.displayToggle = url.includes('welcome') == false;
+  }
+
+  goToDataEntry(forceNavigation: boolean = false) {
+    if (this.inDataEvaluation || forceNavigation) {
+      let url: string = this.router.url;
+      if (url.includes('facility')) {
+        let selectedFacility: IdbFacility = this.facilitydbService.selectedFacility.getValue();
+        this.router.navigateByUrl('/data-management/' + this.activeAccount.guid + '/facilities/' + selectedFacility.guid);
+      } else if (url.includes('weather-data')) {
+        this.router.navigateByUrl('/data-management/' + this.activeAccount.guid + '/weather-data');
+      } else if (url.includes('custom-data')) {
+        if (url.includes('emissions')) {
+          this.router.navigateByUrl('/data-management/' + this.activeAccount.guid + '/account-custom-data/custom-grid-factors');
+        } else if (url.includes('fuels')) {
+          this.router.navigateByUrl('/data-management/' + this.activeAccount.guid + '/account-custom-data/custom-fuels');
+        } else if (url.includes('gwp')) {
+          this.router.navigateByUrl('/data-management/' + this.activeAccount.guid + '/account-custom-data/custom-gwps');
+        }
+      } else {
+        this.router.navigateByUrl('/data-management/' + this.activeAccount.guid)
+      }
+    }
+  }
+
+  goToDashboard(forceNavigation: boolean = false) {
+    if (!this.inDataEvaluation || forceNavigation) {
+      let url: string = this.router.url;
+      if (url.includes('facilities')) {
+        let selectedFacility: IdbFacility = this.facilitydbService.selectedFacility.getValue();
+        if (selectedFacility) {
+          this.router.navigateByUrl('/data-evaluation/facility/' + selectedFacility.id);
+        } else {
+          this.router.navigateByUrl('/data-evaluation/account')
+        }
+      } else if (url.includes('weather-data')) {
+        this.router.navigateByUrl('/data-evaluation/weather-data');
+      } else if (url.includes('account-custom-data')) {
+        if (url.includes('custom-grid-factors')) {
+          this.router.navigateByUrl('/data-evaluation/account/custom-data/emissions');
+        } else if (url.includes('custom-fuels')) {
+          this.router.navigateByUrl('/data-evaluation/account/custom-data/fuels');
+        } else if (url.includes('custom-gwps')) {
+          this.router.navigateByUrl('/data-evaluation/account/custom-data/gwp');
+        }
+      } else {
+        this.router.navigateByUrl('/data-evaluation/account')
+      }
+    }
   }
 }

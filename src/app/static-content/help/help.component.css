@@ -24,3 +24,7 @@
         color: #db281b;
     }
   }
+
+  a {
+    word-wrap: break-word;
+  }

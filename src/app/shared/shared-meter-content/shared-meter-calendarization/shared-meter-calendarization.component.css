@@ -1,0 +1,13 @@
+
+.popup.calanderization{
+    top: 30px;
+    left: 35px;
+    right: 35px;
+    width: auto;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.btn-label{
+    font-size: 16px;
+}

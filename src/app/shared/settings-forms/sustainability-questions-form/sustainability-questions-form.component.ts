@@ -3,7 +3,6 @@ import { FormControl, FormGroup } from '@angular/forms';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { SetupWizardService } from 'src/app/setup-wizard/setup-wizard.service';
 import { SettingsFormsService } from '../settings-forms.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
@@ -17,8 +16,6 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 export class SustainabilityQuestionsFormComponent implements OnInit {
   @Input()
   inAccount: boolean;
-  @Input()
-  inWizard: boolean;
 
   form: FormGroup;
   selectedFacilitySub: Subscription;
@@ -29,64 +26,34 @@ export class SustainabilityQuestionsFormComponent implements OnInit {
   years: Array<number> = new Array();
   isFormChange: boolean = false;
   fiscalYearOption: "calendarYear" | "nonCalendarYear";
-  constructor(private accountDbService: AccountdbService, private settingsFormsService: SettingsFormsService, private facilityDbService: FacilitydbService,
-    private setupWizardService: SetupWizardService) { }
+  constructor(private accountDbService: AccountdbService, private settingsFormsService: SettingsFormsService, private facilityDbService: FacilitydbService) { }
 
   ngOnInit(): void {
-    if (!this.inWizard) {
-      this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(account => {
-        this.selectedAccount = account;
-        if (account && this.inAccount) {
-          this.fiscalYearOption = account.fiscalYear;
-          if (this.isFormChange == false) {
-            this.form = this.settingsFormsService.getSustainabilityQuestionsForm(account);
-            this.form.addControl('isBetterPlantsPartner', new FormControl(account.isBetterPlantsPartner))
-          } else {
-            this.isFormChange = false;
-          }
+    this.selectedAccountSub = this.accountDbService.selectedAccount.subscribe(account => {
+      this.selectedAccount = account;
+      if (account && this.inAccount) {
+        this.fiscalYearOption = account.fiscalYear;
+        if (this.isFormChange == false) {
+          this.form = this.settingsFormsService.getSustainabilityQuestionsForm(account);
+          this.form.addControl('isBetterPlantsPartner', new FormControl(account.isBetterPlantsPartner))
+        } else {
+          this.isFormChange = false;
         }
-      });
+      }
+    });
 
-
-      this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(facility => {
-        this.selectedFacility = facility;
-        if (facility && !this.inAccount) {
-          this.fiscalYearOption = facility.fiscalYear;
-          this.sustainQuestionsDontMatchAccount = this.settingsFormsService.areAccountAndFacilitySustainQuestionsDifferent(this.selectedAccount, this.selectedFacility);
-          if (this.isFormChange == false) {
-            this.form = this.settingsFormsService.getSustainabilityQuestionsForm(facility);
-          } else {
-            this.isFormChange = false;
-          }
+    this.selectedFacilitySub = this.facilityDbService.selectedFacility.subscribe(facility => {
+      this.selectedFacility = facility;
+      if (facility && !this.inAccount) {
+        this.fiscalYearOption = facility.fiscalYear;
+        this.sustainQuestionsDontMatchAccount = this.settingsFormsService.areAccountAndFacilitySustainQuestionsDifferent(this.selectedAccount, this.selectedFacility);
+        if (this.isFormChange == false) {
+          this.form = this.settingsFormsService.getSustainabilityQuestionsForm(facility);
+        } else {
+          this.isFormChange = false;
         }
-      });
-    } else {
-      this.selectedAccountSub = this.setupWizardService.account.subscribe(account => {
-        this.selectedAccount = account;
-        if (account && this.inAccount) {
-          this.fiscalYearOption = account.fiscalYear;
-          if (this.isFormChange == false) {
-            this.form = this.settingsFormsService.getSustainabilityQuestionsForm(account);
-            this.form.addControl('isBetterPlantsPartner', new FormControl(account.isBetterPlantsPartner))
-          } else {
-            this.isFormChange = false;
-          }
-        }
-      });
-
-      this.selectedFacilitySub = this.setupWizardService.selectedFacility.subscribe(facility => {
-        this.selectedFacility = facility;
-        if (facility && !this.inAccount) {
-          this.fiscalYearOption = facility.fiscalYear;
-          this.sustainQuestionsDontMatchAccount = this.settingsFormsService.areAccountAndFacilitySustainQuestionsDifferent(this.selectedAccount, this.selectedFacility);
-          if (this.isFormChange == false) {
-            this.form = this.settingsFormsService.getSustainabilityQuestionsForm(facility);
-          } else {
-            this.isFormChange = false;
-          }
-        }
-      });
-    }
+      }
+    });
     for (let i = 2050; i > 2000; i--) {
       this.years.push(i);
     }
@@ -99,33 +66,21 @@ export class SustainabilityQuestionsFormComponent implements OnInit {
 
   async saveChanges() {
     this.isFormChange = true;
-    if (!this.inWizard) {
-      if (!this.inAccount) {
-        this.selectedFacility = this.settingsFormsService.updateFacilityFromSustainabilityQuestionsForm(this.form, this.selectedFacility);
-        let updatedFacility: IdbFacility = await firstValueFrom(this.facilityDbService.updateWithObservable(this.selectedFacility));
-        let allFacilities: Array<IdbFacility> = await firstValueFrom(this.facilityDbService.getAll());
-        this.facilityDbService.selectedFacility.next(updatedFacility);
-        let accountFacilities: Array<IdbFacility> = allFacilities.filter(facility => { return facility.accountId == this.selectedFacility.accountId });
-        this.facilityDbService.accountFacilities.next(accountFacilities);
-      }
-      if (this.inAccount) {
-        this.selectedAccount = this.settingsFormsService.updateAccountFromSustainabilityQuestionsForm(this.form, this.selectedAccount);
-        this.selectedAccount.isBetterPlantsPartner = this.form.controls['isBetterPlantsPartner'].value;
-        let updatedAccount: IdbAccount = await firstValueFrom(this.accountDbService.updateWithObservable(this.selectedAccount));
-        let allAccounts: Array<IdbAccount> = await firstValueFrom(this.accountDbService.getAll());
-        this.accountDbService.selectedAccount.next(updatedAccount);
-        this.accountDbService.allAccounts.next(allAccounts);
-      }
-    } else {
-      if (!this.inAccount) {
-        this.selectedFacility = this.settingsFormsService.updateFacilityFromSustainabilityQuestionsForm(this.form, this.selectedFacility);
-        this.setupWizardService.selectedFacility.next(this.selectedFacility);
-      }
-      if (this.inAccount) {
-        this.selectedAccount = this.settingsFormsService.updateAccountFromSustainabilityQuestionsForm(this.form, this.selectedAccount);
-        this.selectedAccount.isBetterPlantsPartner = this.form.controls['isBetterPlantsPartner'].value
-        this.setupWizardService.account.next(this.selectedAccount);
-      }
+    if (!this.inAccount) {
+      this.selectedFacility = this.settingsFormsService.updateFacilityFromSustainabilityQuestionsForm(this.form, this.selectedFacility);
+      let updatedFacility: IdbFacility = await firstValueFrom(this.facilityDbService.updateWithObservable(this.selectedFacility));
+      let allFacilities: Array<IdbFacility> = await firstValueFrom(this.facilityDbService.getAll());
+      this.facilityDbService.selectedFacility.next(updatedFacility);
+      let accountFacilities: Array<IdbFacility> = allFacilities.filter(facility => { return facility.accountId == this.selectedFacility.accountId });
+      this.facilityDbService.accountFacilities.next(accountFacilities);
+    }
+    if (this.inAccount) {
+      this.selectedAccount = this.settingsFormsService.updateAccountFromSustainabilityQuestionsForm(this.form, this.selectedAccount);
+      this.selectedAccount.isBetterPlantsPartner = this.form.controls['isBetterPlantsPartner'].value;
+      let updatedAccount: IdbAccount = await firstValueFrom(this.accountDbService.updateWithObservable(this.selectedAccount));
+      let allAccounts: Array<IdbAccount> = await firstValueFrom(this.accountDbService.getAll());
+      this.accountDbService.selectedAccount.next(updatedAccount);
+      this.accountDbService.allAccounts.next(allAccounts);
     }
   }
 

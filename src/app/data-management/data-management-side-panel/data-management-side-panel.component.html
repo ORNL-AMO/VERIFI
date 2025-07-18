@@ -1,0 +1,31 @@
+<div class="h-100 d-flex flex-column align-items-start justify-content-start shadow help-text help-container"
+    [ngClass]="{'collapsed': !helpPanelOpen}">
+    <div class="w-100 pb-1 d-flex">
+        <div class="d-flex flex-column w-100">
+            <nav class="navbar pt-0">
+                <a class="click-link toggle-collapse" (click)="toggleCollapseHelpPanel()">
+                    <i class="fa"
+                        [ngClass]="{'fa-circle-chevron-left': !helpPanelOpen, 'fa-circle-chevron-right': helpPanelOpen}"></i>
+                </a>
+                <ul class="nav nav-tabs" *ngIf="helpPanelOpen">
+                    <li class="nav-item">
+                        <a class="nav-link" (click)="setActivePanel('help')"
+                            [ngClass]="{'active': activePanel == 'help'}">
+                            <i class="fa fa-question-circle"></i>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link mt-auto" (click)="setActivePanel('checklist')"
+                            [ngClass]="{'active': activePanel == 'checklist'}">
+                            <i class="fa fa-list-check "></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+    <ng-template [ngIf]="helpPanelOpen">
+        <app-data-management-help-panel *ngIf="activePanel == 'help'"></app-data-management-help-panel>
+        <app-setup-checklist class="w-100" *ngIf="activePanel == 'checklist'"></app-setup-checklist>
+    </ng-template>
+</div>
