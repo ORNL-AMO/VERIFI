@@ -1,7 +1,7 @@
 import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
+import { AnalysisService } from 'src/app/data-evaluation/facility/analysis/analysis.service';
 import { AnalysisGroup, AnalysisGroupPredictorVariable, AnalysisTableColumns, MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { CopyTableService } from '../../helper-services/copy-table.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';

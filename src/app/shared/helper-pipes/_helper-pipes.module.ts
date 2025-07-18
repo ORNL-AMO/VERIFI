@@ -17,6 +17,8 @@ import { TotalPipe } from './total.pipe';
 import { AnalysisCategoryPipe } from './analysis-category.pipe';
 import { EmissionsDisplayPipe } from './emissions-display.pipe';
 import { MeterSourceColorPipe } from './meter-source-color.pipe';
+import { FacilityMetersListPipe } from './facility-meters-list.pipe';
+import { FacilityPredictorListPipe } from './facility-predictor-list.pipe';
 import { NaicsDisplayPipe } from './naics-display.pipe';
 import { AveragePipe } from './average.pipe';
 import { DegreeDayTotalPipe } from './degree-day-total.pipe';
@@ -26,6 +28,7 @@ import { FacilityReportNamePipe } from './facility-report-name.pipe';
 import { AccountAnalysisNamePipe } from './account-analysis-name.pipe';
 import { CharactersRemainingPipe } from './characters-remaining.pipe';
 import { InvalidMeterPipe } from './invalid-meter.pipe';
+import { FacilityItemPipe } from './facility-item.pipe';
 
 @NgModule({
   declarations: [
@@ -46,6 +49,8 @@ import { InvalidMeterPipe } from './invalid-meter.pipe';
     AnalysisCategoryPipe,
     EmissionsDisplayPipe,
     MeterSourceColorPipe,
+    FacilityMetersListPipe,
+    FacilityPredictorListPipe,
     NaicsDisplayPipe,
     AveragePipe,
     DegreeDayTotalPipe,
@@ -54,7 +59,8 @@ import { InvalidMeterPipe } from './invalid-meter.pipe';
     FacilityReportNamePipe,
     AccountAnalysisNamePipe,
     CharactersRemainingPipe,
-    InvalidMeterPipe
+    InvalidMeterPipe,
+    FacilityItemPipe
   ],
   imports: [
     CommonModule
@@ -77,6 +83,8 @@ import { InvalidMeterPipe } from './invalid-meter.pipe';
     AnalysisCategoryPipe,
     EmissionsDisplayPipe,
     MeterSourceColorPipe,
+    FacilityMetersListPipe,
+    FacilityPredictorListPipe,
     NaicsDisplayPipe,
     AveragePipe,
     DegreeDayTotalPipe,
@@ -85,7 +93,8 @@ import { InvalidMeterPipe } from './invalid-meter.pipe';
     FacilityReportNamePipe,
     AccountAnalysisNamePipe,
     CharactersRemainingPipe,
-    InvalidMeterPipe
+    InvalidMeterPipe,
+    FacilityItemPipe
   ]
 })
 export class HelperPipesModule { }

@@ -1,0 +1,8 @@
+table.sep-table{
+    width: auto;
+}
+
+tr.border-top, tfoot.border-top{
+    border-top: solid black 2px !important;
+}
+

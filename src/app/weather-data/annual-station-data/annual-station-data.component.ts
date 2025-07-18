@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { DetailDegreeDay, WeatherDataSelection, WeatherDataSelectionOption, WeatherDataSelectionOptions, WeatherStation } from 'src/app/models/degreeDays';
 import * as _ from 'lodash';
 import { WeatherDataReading, WeatherDataService } from '../weather-data.service';
@@ -9,10 +9,10 @@ import { ToastNotificationsService } from 'src/app/core-components/toast-notific
 // import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
 
 @Component({
-  selector: 'app-annual-station-data',
-  templateUrl: './annual-station-data.component.html',
-  styleUrls: ['./annual-station-data.component.css'],
-  standalone: false
+    selector: 'app-annual-station-data',
+    templateUrl: './annual-station-data.component.html',
+    styleUrls: ['./annual-station-data.component.css'],
+    standalone: false
 })
 export class AnnualStationDataComponent {
 
@@ -30,7 +30,8 @@ export class AnnualStationDataComponent {
   constructor(private router: Router,
     private weatherDataService: WeatherDataService,
     // private degreeDaysService: DegreeDaysService,
-    private toastNotificationService: ToastNotificationsService
+    private toastNotificationService: ToastNotificationsService,
+    private activatedRoute: ActivatedRoute
   ) {
 
   }
@@ -38,7 +39,7 @@ export class AnnualStationDataComponent {
   ngOnInit() {
     this.weatherStation = this.weatherDataService.selectedStation;
     if (!this.weatherStation) {
-      this.router.navigateByUrl('weather-data/stations');
+      this.goToStations();
     }
     this.setYears();
     this.selectedYear = this.weatherDataService.selectedYear;
@@ -114,7 +115,7 @@ export class AnnualStationDataComponent {
   }
 
   goToStations() {
-    this.router.navigateByUrl('weather-data/stations');
+    this.router.navigate(['../stations'], { relativeTo: this.activatedRoute });
   }
 
   async setHeatingBaseTemp() {

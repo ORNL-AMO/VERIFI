@@ -1,0 +1,106 @@
+<table class="table utility-data table-sm table-bordered table-hover" #meterTable
+    [ngClass]="{'copying-table': copyingTable}">
+    <thead class="sortable">
+        <tr class="table-mh">
+            <th></th>
+            <th [attr.colspan]="numGeneralInformation">
+                General Information
+            </th>
+            <th *ngIf="showEmissionsSection" [attr.colspan]="numEmissions">
+                Emissions
+            </th>
+            <th *ngIf="showDetailedCharges" [attr.colspan]="numDetailedCharges">
+                Detailed Charges
+            </th>
+            <th>
+
+            </th>
+        </tr>
+        <tr>
+            <th *ngIf="!copyingTable" class="input">
+                <input #masterCheckbox type="checkbox" (change)="checkAll()" [(ngModel)]="allChecked">
+            </th>
+            <th (click)="setOrderDataField('readDate')" [ngClass]="{'active': orderDataField == 'readDate'}"
+                class="row-year">Meter Read Date</th>
+            <th (click)="setOrderDataField('totalVolume')" [ngClass]="{'active': orderDataField == 'totalVolume'}">
+                Total {{consumptionLabel}}<br> (<span [innerHTML]="volumeUnit | settingsLabel"></span>)
+            </th>
+            <th (click)="setOrderDataField('totalEnergyUse')" [ngClass]="{'active': orderDataField == 'totalEnergyUse'}"
+                *ngIf="vehicleDataFilters.totalEnergy">Total Energy<br> (<span
+                    [innerHTML]="energyUnit | settingsLabel"></span>)</th>
+            <th *ngIf="vehicleDataFilters.totalCost" (click)="setOrderDataField('totalCost')"
+                [ngClass]="{'active': orderDataField == 'totalCost'}">Total
+                Cost</th>
+            <th *ngIf="vehicleDataFilters.mobileBiogenicEmissions"
+                (click)="setOrderDataField('mobileBiogenicEmissions')"
+                [ngClass]="{'active': orderDataField == 'mobileBiogenicEmissions'}">Total Biogenic <br>Emissions (tonne
+                CO<sub>2</sub>e)</th>
+            <th *ngIf="vehicleDataFilters.mobileCarbonEmissions" (click)="setOrderDataField('mobileCarbonEmissions')"
+                [ngClass]="{'active': orderDataField == 'mobileCarbonEmissions'}">Total Carbon <br>Emissions (tonne
+                CO<sub>2</sub>e)</th>
+            <th *ngIf="vehicleDataFilters.mobileOtherEmissions" (click)="setOrderDataField('mobileOtherEmissions')"
+                [ngClass]="{'active': orderDataField == 'mobileOtherEmissions'}">Total Other <br>Emissions (tonne
+                CO<sub>2</sub>e)</th>
+            <th *ngIf="vehicleDataFilters.mobileTotalEmissions" (click)="setOrderDataField('mobileTotalEmissions')"
+                [ngClass]="{'active': orderDataField == 'mobileTotalEmissions'}">Total <br>Emissions (tonne
+                CO<sub>2</sub>e)</th>
+            <th *ngIf="vehicleDataFilters.otherCharge" (click)="setOrderDataField('otherCharge')"
+                [ngClass]="{'active': orderDataField == 'otherCharge'}">Other
+                Charges</th>
+            <th *ngIf="!copyingTable">Actions</th>
+        </tr>
+    </thead>
+    <tbody class="table-group-divider">
+        <tr
+            *ngFor="let meterData of selectedMeterData | orderBy: orderDataField: orderByDirection | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage">
+            <td *ngIf="!copyingTable" class="input">
+                <input type="checkbox" name="metersSelected" (change)="toggleChecked()" [(ngModel)]="meterData.checked">
+            </td>
+            <td class="read-date">{{meterData.readDate | date}}</td>
+            <td>
+                <span class="fa fa-asterisk" *ngIf="meterData.isEstimated"></span>
+                {{meterData.totalVolume | customNumber}}
+            </td>
+            <td *ngIf="vehicleDataFilters.totalEnergy">
+                {{meterData.totalEnergyUse | customNumber}}
+            </td>
+            <td *ngIf="vehicleDataFilters.totalCost">{{meterData.totalCost | customNumber:true}}</td>
+            <td *ngIf="vehicleDataFilters.mobileBiogenicEmissions">{{meterData.mobileBiogenicEmissions
+                | customNumber}}</td>
+            <td *ngIf="vehicleDataFilters.mobileCarbonEmissions">
+                {{meterData.mobileCarbonEmissions | customNumber}}</td>
+            <td *ngIf="vehicleDataFilters.mobileOtherEmissions">{{meterData.mobileOtherEmissions
+                | customNumber}}</td>
+            <td *ngIf="vehicleDataFilters.mobileTotalEmissions">
+                {{meterData.mobileTotalEmissions | customNumber}}</td>
+            <td *ngIf="vehicleDataFilters.otherCharge">{{meterData.otherCharge | customNumber:true}}</td>
+            <td class="actions" *ngIf="!copyingTable">
+                <div class="btn-group">
+                    <button class="btn btn-sm btn-outline" (click)="setEditMeterData(meterData)" title="Edit">
+                        <i class="fa fa-pencil"></i>
+                    </button>
+                    <app-view-connect-bill [meterData]="meterData" *ngIf="isElectron" [selectedMeter]="selectedMeter"></app-view-connect-bill>
+                    <button class="btn btn-sm btn-outline" (click)="setDeleteMeterData(meterData)" title="Delete">
+                        <i class="fa fa-trash"></i>
+                    </button>
+                </div>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<div class="d-flex w-100 justify-content-between">
+    <div class="d-flex">
+        <div>
+            <button class="btn action-btn btn-sm" (click)="copyTable()">
+                <span class="fa fa-copy"></span> Copy Table
+            </button>
+        </div>
+        <div class="ps-2" *ngIf="showEstimated">
+            <span class="fa fa-asterisk"></span> Indicates Estimated Reading
+        </div>
+    </div>
+    <ngb-pagination [collectionSize]="selectedMeterData.length" [(page)]="currentPageNumber" [pageSize]="itemsPerPage"
+        [maxSize]="5" [rotate]="true" aria-label="Pagination">
+    </ngb-pagination>
+</div>

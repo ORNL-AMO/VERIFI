@@ -54,7 +54,8 @@ export interface IdbUtilityMeter {
     vehicleFuelEfficiency?: number,
     vehicleDistanceUnit?: string
     globalWarmingPotentialOption?: number,
-    globalWarmingPotential?: number
+    globalWarmingPotential?: number,
+    sidebarOpen?: boolean
 }
 
 export function getNewIdbUtilityMeter(facilityId: string, accountId: string, setDefaults: boolean, energyUnit: string): IdbUtilityMeter {

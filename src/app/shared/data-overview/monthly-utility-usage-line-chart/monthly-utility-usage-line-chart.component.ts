@@ -1,12 +1,12 @@
 import { Component, ElementRef, ViewChild, Input, SimpleChanges } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
 import { Subscription } from 'rxjs';
-import { AccountOverviewService } from 'src/app/account/account-overview/account-overview.service';
+import { AccountOverviewService } from 'src/app/data-evaluation/account/account-overview/account-overview.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { YearMonthData } from 'src/app/models/dashboard';
 import { Month, Months } from '../../form-data/months';
 import * as _ from 'lodash';
-import { FacilityOverviewService } from 'src/app/facility/facility-overview/facility-overview.service';
+import { FacilityOverviewService } from 'src/app/data-evaluation/facility/facility-overview/facility-overview.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';

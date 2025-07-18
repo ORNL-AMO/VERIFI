@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { AnalysisGroup, AnalysisGroupPredictorVariable, AnalysisTableColumns } from 'src/app/models/analysis';
 import * as _ from 'lodash';
-import { AnalysisService } from 'src/app/facility/analysis/analysis.service';
+import { AnalysisService } from 'src/app/data-evaluation/facility/analysis/analysis.service';
 import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbAnalysisItem } from 'src/app/models/idbModels/analysisItem';

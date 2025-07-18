@@ -1,0 +1,44 @@
+.data-management-content {
+    height: 100%;
+    /* height: 100%; */
+    overflow-y: auto;
+}
+
+.data-management-content.with-footer {
+    height: calc(100% - 4rem);
+}
+
+.data-management-content .form-paper {
+    min-height: 100%;
+    background-color: white;
+    padding: 1rem;
+}
+
+.data-management-footer.navbar {
+    height: 4rem;
+    background-color: #ff6000 !important;
+    /* opacity: .5; */
+}
+
+/* .setup-management-footer.navbar:hover{
+    opacity: 1;
+} */
+
+
+.data-management-footer .fa {
+    color: white;
+}
+
+.data-management-footer .footer-text {
+    color: white;
+    font-weight: bolder;
+}
+
+.data-management-content .badge .fa.fa-file{
+    color: white;
+}
+
+.data-management-content h4 .badge {
+    font-size: 12px;
+}
+

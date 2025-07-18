@@ -1,0 +1,12 @@
+.dashboard-container {
+    height: calc(100vh - 104px);
+    overflow-y: auto;
+}
+
+
+@media print {
+    .dashboard-container {
+        height: auto;
+        overflow-y: visible;
+    }
+}

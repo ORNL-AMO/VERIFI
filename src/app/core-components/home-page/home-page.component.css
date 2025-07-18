@@ -1,0 +1,18 @@
+
+h1.verifi:first-letter {
+    color: #ff6000;
+  }
+  
+  .large{
+    font-size: 16px;
+  }
+  
+  .card-header, .card-footer{
+    background-color: white;
+    font-weight: bold;
+  }
+
+  .list-item-label{
+    font-size: 14px;
+    vertical-align: middle;
+  }

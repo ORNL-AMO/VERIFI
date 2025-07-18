@@ -22,7 +22,7 @@ import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
-import { checkSameMonth } from 'src/app/upload-data/upload-helper-functions';
+import { checkSameMonth } from 'src/app/data-management/data-management-import/import-services/upload-helper-functions';
 
 @Injectable({
   providedIn: 'root'
