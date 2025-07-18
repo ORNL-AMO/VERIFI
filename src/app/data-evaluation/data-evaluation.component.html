@@ -1,0 +1,30 @@
+<div class="d-flex w-100 h-100" (mousemove)="drag($event)" (mouseup)="stopResizing($event)" #pageContent
+    (mouseleave)="stopResizing($event)">
+    <div class="d-flex" [ngStyle]="{'width.px': sidebarWidth}">
+        <div class="w-100">
+            <app-sidebar (emitToggleCollapse)="toggleCollapseSidebar($event)"></app-sidebar>
+        </div>
+        <div class="resize-handle pe-1 ps-1" (mousedown)="startResizingSidebar($event)">
+            <div class="h-100 d-flex align-items-center">
+                <div>
+                    <span class="fa-vertical-grip"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="main-content" [ngStyle]="{'width.px': contentWidth}">
+        <router-outlet></router-outlet>
+    </div>
+    <div class="d-flex" [ngStyle]="{'width.px': helpWidth}">
+        <div class="resize-handle ps-1 pe-1" (mousedown)="startResizingHelp($event)">
+            <div class="h-100 d-flex align-items-center">
+                <div>
+                    <span class="fa-vertical-grip"></span>
+                </div>
+            </div>
+        </div>
+        <div class="w-100">
+             <app-help-panel (emitToggleCollapse)="toggleCollapseHelp($event)"></app-help-panel>
+        </div>
+    </div>
+</div>

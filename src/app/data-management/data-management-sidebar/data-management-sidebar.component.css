@@ -1,0 +1,114 @@
+.navbar {
+    background-color: white;
+    /* width: 250px; */
+    overflow-y: auto;
+}
+
+.navbar.collapsed {
+    width: auto;
+}
+
+.nav-link.active, .nav-link.active .fa {
+    background-color: #cecece;
+    font-weight: bolder;
+    /* background-color: #ff6000;
+    color: white !important */
+}
+
+.nav-link {
+    padding-left: 3px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.sidebar-section {
+    border-left: groove 1px black;
+    padding-left: .5rem;
+    margin-left: 1rem;
+}
+
+.facilities-section{
+    margin-right: 1rem;
+}
+
+
+a {
+    color: black !important;
+}
+
+a:hover {
+    color: black !important;
+    text-decoration: underline !important;
+    cursor: pointer;
+}
+
+
+.navbar {
+    background-color: #ffffff;
+    overflow-y: auto;
+    flex-wrap: nowrap;
+}
+
+.navbar.collapsed {
+    width: auto;
+}
+
+a.nav-link, .btn.btn-dark, .link-section-heading{
+    display: inline-block;
+    line-height: normal;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 100%;
+}
+
+
+.sidebar-container {
+    container-type: inline-size;
+}
+
+.sidebar-content {
+    display: block;
+}
+
+@container (max-width: 45px) {
+    .sidebar-content {
+        display: none;
+    }
+}
+
+
+.toggle-collapse .fa{
+    font-size: x-large;
+}
+
+.toggle-collapse:hover .fa{
+    cursor: pointer;
+    border: so;
+}
+
+.btn.text-left {
+    text-align: left;
+}
+
+.nav-link:hover {
+    cursor: pointer;
+}
+
+
+.fa-gear{
+    color: #740acb;
+}
+
+.fa-table{
+    color: #099462;
+}
+
+.fa-list{
+    color: #cb360a;
+}
+
+.fa-calendar-days { 
+    color: #943809;
+}

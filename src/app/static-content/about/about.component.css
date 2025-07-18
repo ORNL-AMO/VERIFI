@@ -1,3 +1,7 @@
 #about .banner {
     background-color: #2c386b;
 }
+
+a {
+    word-wrap: break-word;
+}

@@ -1,6 +1,6 @@
 import { Component, ElementRef, ViewChild, Input, SimpleChanges } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
-import { FacilityOverviewService } from 'src/app/facility/facility-overview/facility-overview.service';
+import { FacilityOverviewService } from 'src/app/data-evaluation/facility/facility-overview/facility-overview.service';
 import * as _ from 'lodash';
 import { Subscription } from 'rxjs';
 import { CalanderizedMeter, MonthlyData } from 'src/app/models/calanderization';

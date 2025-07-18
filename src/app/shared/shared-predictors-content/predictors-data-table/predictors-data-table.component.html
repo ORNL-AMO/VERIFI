@@ -1,0 +1,296 @@
+<ng-template [ngIf]="predictorData.length != 0" [ngIfElse]="noDataBlock">
+    <div class="d-flex w-100 mb-2"
+        [ngClass]="{'justify-content-end': !latestMeterDataReading, 'justify-content-between': latestMeterDataReading}">
+        <div class="alert alert-warning small mb-0 p-1" *ngIf="latestMeterDataReading">
+            <span>
+                <i class="fa fa-exclamation-triangle"></i>
+                Latest Meter Reading: {{latestMeterDataReading| date:'MMM, yyyy'}}
+            </span>
+        </div>
+        <div class="d-flex">
+            <!--Bulk Delete-->
+            <div class="pe-2 bulk-delete" [class.show]="hasCheckedItems">
+                <button class="btn btn-danger" (click)='openBulkDelete()' [disabled]="!hasCheckedItems">Bulk
+                    Delete</button>
+            </div>
+            <!--Items Per Page-->
+            <app-table-items-dropdown *ngIf="predictorData.length != 0"></app-table-items-dropdown>
+            <div class="ps-2">
+                <button class="btn nav-btn" (click)="uploadData()"><i class="fa fa-upload"></i> Import
+                    Data</button>
+            </div>
+
+
+            <div class="ps-2">
+                <button class="btn action-btn" (click)="addPredictorEntry()"><i class="fa fa-plus"></i> Add
+                    Predictor
+                    Entry</button>
+            </div>
+            <div class="ps-2" *ngIf="predictor.predictorType == 'Weather'">
+                <button class="btn action-btn" (click)="showUpdateEntries()"><i class="fa fa-redo"></i> Bulk
+                    Update</button>
+            </div>
+            <div class="ps-2" *ngIf="predictor.predictorType == 'Weather' && hasWeatherDataWarnings">
+                <button class="btn action-btn" (click)="toggleFilterErrors()">
+                    <i class="fa fa-filter"></i>
+                    <ng-container *ngIf="!filterErrors">
+                        Filter Errors
+                    </ng-container>
+                    <ng-container *ngIf="filterErrors">
+                        Show All
+                    </ng-container>
+                </button>
+            </div>
+            <div class="ps-2">
+                <button #openModalBtn class="btn action-btn" data-bs-toggle="modal" data-bs-target="#dataQualityModal">
+                    <i class="fa fa-file me-1"></i> Model Validity Check</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="alert alert-warning text-center p-1" *ngIf="hasWeatherDataWarnings">
+        <span class="fa fa-exclamation-circle"></span> Indicates that the predictor entry was calculated from weather
+        data
+        with gaps of twelve hours or more and the
+        results may not be accurate. To inspect the weather data for that month, click the <span
+            class="fa fa-thermometer-half"></span> button. To manually override
+        the values click the <span class="fa fa-pencil"></span> button. If you have several <span
+            class="fa fa-exclamation-circle"></span>, it may be best to select a different weather station for
+        this facility - use the <a (click)="goToWeatherData()">Weather Data</a> page to explore other stations in the
+        area
+        of this facility.
+    </div>
+
+    <div class="alert alert-warning text-center p-1" *ngIf="hasCalculatedOverride">
+        <span class="fa fa-asterisk"></span> Indicates that the calculated predictor entry was manually overridden.
+    </div>
+    @let filteredPredictorData = predictorData| orderPredictorDataTable:orderDataField:orderByDirection:filterErrors;
+    <table class="table utility-data table-sm table-bordered table-hover" #predictorTable
+        [ngClass]="{'copying-table': copyingTable}">
+        <thead class="sortable">
+            <tr>
+                <th class="input" *ngIf="!copyingTable">
+                    <input #masterCheckbox type="checkbox" (change)="checkAll()" [(ngModel)]="allChecked">
+                </th>
+                <th (click)="setOrderDataField('date')" [ngClass]="{'active': orderDataField == 'date'}">Date
+                </th>
+                <th class="header" (click)="setOrderDataField('amount')"
+                    [ngClass]="{'active': orderDataField == 'amount'}">
+                    <span *ngIf="predictor.predictorType == 'Weather'" class="fa fa-temperature-half"></span>
+                    {{predictor.name}}
+                    <ng-container *ngIf="predictor.unit && predictor.predictorType != 'Weather'">
+                        <br>
+                        <span class="small block">({{predictor.unit}})</span>
+                    </ng-container>
+                    <app-weather-data-sub-label *ngIf="predictor.predictorType == 'Weather'"
+                        [predictor]="predictor"></app-weather-data-sub-label>
+                </th>
+                <td class="actions" *ngIf="!copyingTable">
+
+                </td>
+            </tr>
+        </thead>
+        <tbody class="table-group-divider">
+            <tr
+                *ngFor="let pData of predictorData| orderPredictorDataTable:orderDataField:orderByDirection:filterErrors | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage ">
+                <td class="input" *ngIf="!copyingTable">
+                    <input type="checkbox" name="predictorEntry" (change)="setHasChecked()" [(ngModel)]="pData.checked">
+                </td>
+                <td>{{pData.date | date:'MMM, yyyy'}}</td>
+                <td>
+                    <span *ngIf="pData.weatherDataWarning" class="fa fa-exclamation-circle" data-bs-toggle="tooltip"
+                        data-bs-placement="top"
+                        title="Gaps found in weather data for this reading. It may not be accurate."
+                        data-bs-html="true"></span>
+                    <span *ngIf="pData.weatherOverride" class="fa fa-asterisk" data-bs-toggle="tooltip"
+                        data-bs-placement="top" title="Weather data manually set." data-bs-html="true"></span>
+                    <ng-container *ngIf="pData.amount != undefined">
+                        {{pData.amount | customNumber}}
+                    </ng-container>
+                    <ng-container *ngIf="pData.amount == undefined">
+                        &mdash;
+                    </ng-container>
+                </td>
+                <td class="actions" *ngIf="!copyingTable">
+                    <div class="btn-group">
+                        <button class="btn btn-sm btn-outline" (click)="setEditPredictorData(pData)" title="Edit">
+                            <i class="fa fa-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline" (click)="setDeletePredictorData(pData)" title="Delete">
+                            <i class="fa fa-trash"></i>
+                        </button>
+                        <button *ngIf="predictor.predictorType == 'Weather'" class="btn btn-sm btn-outline"
+                            (click)="viewWeatherData(pData)" title="View Weather Data">
+                            <i class="fa fa-temperature-half"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <div class="d-flex w-100 justify-content-between">
+        <div>
+            <button class="btn action-btn btn-sm" (click)="copyTable()">
+                <span class="fa fa-copy"></span> Copy Table
+            </button>
+        </div>
+        <ngb-pagination [collectionSize]="filteredPredictorData.length" [(page)]="currentPageNumber"
+            [pageSize]="itemsPerPage" [maxSize]="5" [rotate]="true" aria-label="Pagination">
+        </ngb-pagination>
+    </div>
+</ng-template>
+<ng-template #noDataBlock>
+    <div class="text-center mt-5 no-meters">
+        <h5>No predictor entries found for this predictor.</h5>
+        <p>Please <i class="fa fa-plus"></i> Add New Predictor Entry or <i class="fa fa-upload"></i> Import multiple
+            predictor entries from
+            excel.
+            <ng-container *ngIf="predictor.predictorType == 'Weather'">
+                <br>
+                Weather predictor data can be added in bulk by clicking the <i class="fa fa-temperature-half"></i> Bulk
+                Add Weather button.
+            </ng-container>
+        </p>
+        <div class="d-flex w-100 justify-content-center">
+            <div class="pe-1">
+                <button class="btn action-btn" (click)="addPredictorEntry()"><i class="fa fa-plus"></i> Add New
+                    Predictor Entry</button>
+            </div>
+            <div class="ps-1 pe-1" *ngIf="predictor.predictorType == 'Weather'">
+                <button class="btn action-btn" (click)="showUpdateEntries()"><i class="fa fa-temperature-half"></i> Bulk
+                    Add Weather</button>
+            </div>
+            <div class="ps-1">
+                <button class="btn nav-btn" (click)="uploadData()"><i class="fa fa-upload"></i> Import Data</button>
+            </div>
+        </div>
+    </div>
+</ng-template>
+
+
+<div [ngClass]="{'windowOverlay': predictorDataToDelete || showBulkDelete}"></div>
+<div class="popup" [class.open]="predictorDataToDelete">
+    <div class="popup-header">
+        Delete {{predictorDataToDelete?.date | date:'MMM, yyyy'}}?
+        <button class="item-right" (click)="cancelDeletePredictorData()">x</button>
+    </div>
+    <div class="popup-body">
+        <p>WARNING:
+            Are you sure you want to delete the predictor entry for {{predictorDataToDelete?.date | date:'MMM, yyyy'}}?
+            This cannot be undone.</p>
+    </div>
+    <div class="saveCancel popup-footer text-end">
+        <button class="btn btn-secondary" (click)="cancelDeletePredictorData()">Cancel</button>
+        <button class="btn btn-danger" (click)="confirmDeletePredictorData()">Confirm Delete</button>
+    </div>
+</div>
+<div class="popup" [class.open]="showBulkDelete">
+    <div class="popup-header">
+        Bulk Delete Predictors?
+        <button class="item-right" (click)="cancelBulkDelete()">x</button>
+    </div>
+    <div class="popup-body">
+        <p>WARNING:
+            Are you sure you want to delete the selected predictor entries?
+            This cannot be undone.</p>
+    </div>
+    <div class="saveCancel popup-footer text-end">
+        <button class="btn btn-secondary" (click)="cancelBulkDelete()">Cancel</button>
+        <button class="btn btn-danger" (click)="bulkDelete()">Confirm Delete</button>
+    </div>
+</div>
+
+<div class="modal fade" id="dataQualityModal" tabindex="-1" aria-labelledby="dataQualityModalLabel" aria-hidden="true"
+    data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered modal-xl modal-size" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="dataQualityModalLabel">Model Validity Check: {{ predictor.name }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" style="overflow-y: auto; width: 100%;">
+                <div class="accordion" id="dataQualityAccordion">
+                    <div *ngIf="showAlert"
+                        class="alert alert-warning d-flex flex-column align-items-center justify-content-center gap-3 mb-3 text-center"
+                        style="font-size: 1.1rem;">
+                        <i class="fa fa-exclamation-triangle me-3" aria-hidden="true"
+                            style="font-size:3rem; color: #b52223;"></i>
+                        <div>
+                            <span *ngIf="outlierCount > 0" style="font-size:1.5rem; text-align: center;">
+                                There is an issue in
+                                <span class="fw-bold text-danger" style="font-size:1.5rem;">{{ outlierCount }}</span>
+                                reading<span *ngIf="outlierCount > 1" style="font-size:1.5rem;">s</span>
+                                <br>
+                            </span>
+                            <span
+                                style="font-size:1.3rem; font-style:italic; color:#872e2e; display:block; text-align: center;">
+                                Expand the sections below to view details.
+                            </span>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingStats">
+                            <button class="accordion-button collapsed" type="button"
+                                [attr.aria-expanded]="expandSection === 'statistics'"
+                                [ngClass]="{'collapsed': expandSection !== 'statistics'}"
+                                (click)="onPanelClick('statistics')">
+                                <i class="fa fa-table me-2"></i>
+                                Statistics
+                            </button>
+                        </h2>
+                        <div id="collapseStats" class="accordion-collapse collapse" aria-labelledby="headingStats"
+                            [ngClass]="{'show': expandSection === 'statistics'}">
+                            <div class="accordion-body">
+                                <app-predictor-statistics-table *ngIf="showGraphs && activeGraph === 'statistics'"
+                                    [predictorData]="predictorData" [selectedPredictor]="predictor"
+                                    (outlierCount)="onOutlierDetection($event)"></app-predictor-statistics-table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingTimeseries">
+                            <button class="accordion-button" type="button"
+                                [attr.aria-expanded]="expandSection === 'timeseries'"
+                                [ngClass]="{'collapsed': expandSection !== 'timeseries'}"
+                                (click)="onPanelClick('timeseries')">
+                                <i class="fa fa-line-chart me-2"></i>
+                                Predictor Time Series
+                            </button>
+                        </h2>
+                        <div id="collapseTimeseries" class="accordion-collapse collapse"
+                            aria-labelledby="headingTimeseries" [ngClass]="{'show': expandSection === 'timeseries'}">
+                            <div class="accordion-body">
+                                <app-predictor-timeseries-graph *ngIf="showGraphs && activeGraph === 'timeseries'"
+                                    [predictorData]="predictorData"
+                                    [selectedPredictor]="predictor"></app-predictor-timeseries-graph>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingHistogram">
+                            <button class="accordion-button collapsed" type="button"
+                                [attr.aria-expanded]="expandSection === 'histogram'"
+                                [ngClass]="{'collapsed': expandSection !== 'histogram'}"
+                                (click)="onPanelClick('histogram')">
+                                <i class="fa fa-chart-bar me-2"></i>
+                                Distribution of Predictors
+                            </button>
+                        </h2>
+                        <div id="collapseHistogram" class="accordion-collapse collapse"
+                            aria-labelledby="headingHistogram" [ngClass]="{'show': expandSection === 'histogram'}">
+                            <div class="accordion-body">
+                                <app-predictor-histogram-graph *ngIf="showGraphs && activeGraph === 'histogram'"
+                                    [predictorData]="predictorData" [selectedPredictor]="predictor" [binSize]="binSize"
+                                    (onBinSizeChange)="binSize = $event"></app-predictor-histogram-graph>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+                    (click)="onModalClose()">Close</button>
+            </div>
+        </div>
+    </div>
+</div>

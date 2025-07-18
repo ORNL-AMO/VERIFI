@@ -372,4 +372,31 @@ export class DbChangesService {
     this.loadingService.setLoadingStatus(false);
     this.toastNotificationService.showToast('Facility Deleted!', undefined, undefined, false, 'alert-success');
   }
+
+  async updateDataNewFacility(newFacility: IdbFacility) {
+    this.loadingService.setLoadingMessage('Updating Reports...');
+    let accountReports: Array<IdbAccountReport> = this.accountReportDbService.accountReports.getValue();
+    for (let index = 0; index < accountReports.length; index++) {
+      accountReports[index].dataOverviewReportSetup.includedFacilities.push({
+        facilityId: newFacility.guid,
+        included: false,
+        includedGroups: []
+      });
+      accountReports[index].betterClimateReportSetup.includedFacilityGroups.push({
+        facilityId: newFacility.guid,
+        include: false,
+        groups: []
+      });
+      await firstValueFrom(this.accountReportDbService.updateWithObservable(accountReports[index]));
+    }
+    this.loadingService.setLoadingMessage('Updating Analysis Items...');
+    let accountAnalysisItems: Array<IdbAccountAnalysisItem> = this.accountAnalysisDbService.accountAnalysisItems.getValue();
+    for (let index = 0; index < accountAnalysisItems.length; index++) {
+      accountAnalysisItems[index].facilityAnalysisItems.push({
+        facilityId: newFacility.guid,
+        analysisItemId: undefined
+      });
+      await firstValueFrom(this.accountAnalysisDbService.updateWithObservable(accountAnalysisItems[index]));
+    }
+  }
 }

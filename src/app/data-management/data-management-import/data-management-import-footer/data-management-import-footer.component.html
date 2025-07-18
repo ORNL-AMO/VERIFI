@@ -1,0 +1,48 @@
+<nav class="data-management-footer navbar">
+    <div class="container-fluid justify-content-between">
+        <div class="btn-group dropup">
+            <button class="btn btn-dark" (click)="goBack()">
+                <span class="fa fa-chevron-left"></span>
+                Go Back
+            </button>
+            <ng-template [ngIf]="goBackOptions.length > 0">
+                <button type="button" class="btn btn-dark dropdown-toggle dropdown-toggle-split"
+                    data-bs-toggle="dropdown" aria-expanded="false">
+                    <span class="visually-hidden">Toggle Dropdown</span>
+                </button>
+                <ul class="dropdown-menu">
+                    <li *ngFor="let option of goBackOptions">
+                        <a class="dropdown-item" (click)="goToOption(option.value)">
+                            <span class="fa fa-chevron-left"></span>
+                            {{option.label}}
+                        </a>
+                    </li>
+                </ul>
+            </ng-template>
+        </div>
+        <div class="flex-fill ps-4 pe-4">
+            <div class="progress progress-bar-striped h-100" role="progressbar" aria-label="Basic example"
+                aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                <div class="progress-bar bg-dark" [ngStyle]="{'width.%': progressWidth}">
+                    Step: {{stepNumber}} / {{totalSteps}}
+                </div>
+            </div>
+        </div>
+
+        <div class="btn-group">
+            <ng-template [ngIf]="navOption != 'review-and-submit'" [ngIfElse]="reviewAndSubmitBlock">
+                <button class="btn btn-dark" (click)="next()" [disabled]="disableNext">
+                    Next
+                    <span class="fa fa-chevron-right"></span>
+                </button>
+            </ng-template>
+            <ng-template #reviewAndSubmitBlock>
+                <div class="btn-group">
+                    <button *ngIf="!fileReference.dataSubmitted" class="btn btn-success" (click)="submitImport()">
+                        Import Data
+                    </button>
+                </div>
+            </ng-template>
+        </div>
+    </div>
+</nav>
