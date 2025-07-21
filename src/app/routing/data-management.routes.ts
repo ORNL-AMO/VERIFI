@@ -49,6 +49,8 @@ import { AboutComponent } from "../static-content/about/about.component";
 import { AcknowledgmentsComponent } from "../static-content/acknowledgments/acknowledgments.component";
 import { FeedbackComponent } from "../static-content/feedback/feedback.component";
 import { HelpComponent } from "../static-content/help/help.component";
+import { FacilityMeterDataQualityReportComponent } from "../data-management/account-facilities/facility-data/facility-meters/facility-meter-data-quality-report/facility-meter-data-quality-report.component";
+import { FacilityPredictorDataQualityReportComponent } from "../data-management/account-facilities/facility-data/facility-predictors/facility-predictor-data-quality-report/facility-predictor-data-quality-report.component";
 
 export const DataManagementRoutes: Route = {
     path: 'data-management/:id',
@@ -146,7 +148,8 @@ export const DataManagementRoutes: Route = {
                                         }
                                     ]
                                 },
-                                { path: 'meter-monthly-data', component: FacilityMeterMonthlyDataComponent }
+                                { path: 'meter-monthly-data', component: FacilityMeterMonthlyDataComponent },
+                                { path: 'data-quality-report', component: FacilityMeterDataQualityReportComponent }
                             ]
 
                         },
@@ -189,7 +192,8 @@ export const DataManagementRoutes: Route = {
                                             // canDeactivate: [canDeactivateGuard]
                                         }
                                     ]
-                                }
+                                },
+                                { path: 'data-quality-report', component: FacilityPredictorDataQualityReportComponent }
                             ]
                         }
                     ]

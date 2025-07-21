@@ -87,7 +87,6 @@ export class DataEvaluationComponent {
   }
 
   toggleCollapseHelp(helpPanelOpen: boolean) {
-    console.log(helpPanelOpen);
     this.dataEvaluationService.helpPanelOpen.next(helpPanelOpen);
     if (helpPanelOpen) {
       this.helpWidth = 200;
@@ -105,6 +104,7 @@ export class DataEvaluationComponent {
     } else {
       this.contentWidth = contentWidth;
     }
+    this.dataEvaluationService.helpWidthBs.next(this.helpWidth);
   }
 
   @HostListener('window:resize', ['$event'])

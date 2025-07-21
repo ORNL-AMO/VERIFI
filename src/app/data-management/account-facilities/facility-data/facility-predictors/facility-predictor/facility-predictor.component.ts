@@ -191,6 +191,7 @@ export class FacilityPredictorComponent {
   }
 
   async confirmDelete() {
+    this.showDeletePredictor = false;
     this.loadingService.setLoadingMessage('Deleting Predictor Data...');
     this.loadingService.setLoadingStatus(true);
     //delete predictor

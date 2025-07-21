@@ -17,6 +17,7 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-shared-meter-calendarization',
@@ -53,7 +54,8 @@ export class SharedMeterCalendarizationComponent {
     private sharedDataService: SharedDataService,
     private utilityMeterDataDbService: UtilityMeterDatadbService,
     private eGridService: EGridService,
-    private customFuelDbService: CustomFuelDbService) { }
+    private customFuelDbService: CustomFuelDbService,
+    private router: Router) { }
 
   ngOnInit(): void {
     this.displayGraphCost = this.calanderizationService.displayGraphCost;
@@ -261,6 +263,21 @@ export class SharedMeterCalendarizationComponent {
       this.setCalanderizedMeterData();
     } else {
       this.hasMeterData = false;
+    }
+  }
+
+  uploadData() {
+    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    this.router.navigateByUrl('/data-management/' + selectedAccount.guid + '/import-data');
+  }
+
+
+  meterDataAdd() {
+    if (this.router.url.includes('data-management')) {
+      this.router.navigateByUrl('/data-management/' + this.selectedMeter.accountId + '/facilities/' + this.selectedMeter.facilityId + '/meters/' + this.selectedMeter.guid + '/meter-data/new-bill');
+    } else {
+      let facility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+      this.router.navigateByUrl('/data-evaluation/facility/' + facility.id + '/utility/energy-consumption/utility-meter/' + this.selectedMeter.id + '/new-bill');
     }
   }
 }

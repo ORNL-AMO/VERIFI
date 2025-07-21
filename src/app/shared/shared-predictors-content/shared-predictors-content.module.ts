@@ -15,6 +15,7 @@ import { CalculatingSpinnerModule } from '../calculating-spinner/calculating-spi
 import { CalculatedPredictorDataUpdateComponent } from './calculated-predictor-data-update/calculated-predictor-data-update.component';
 import { OrderCalculatedPredictorDataPipe } from './calculated-predictor-data-update/order-calculated-predictor-data.pipe';
 import { WeatherStationModalComponent } from './weather-station-modal/weather-station-modal.component';
+import { SharedDataQualityReportPredictorsModule } from '../shared-data-quality-report-predictor/shared-data-quality-report-predictor.module';
 
 
 
@@ -38,7 +39,8 @@ import { WeatherStationModalComponent } from './weather-station-modal/weather-st
     HelperPipesModule,
     NgbPaginationModule,
     LabelWithTooltipModule,
-    CalculatingSpinnerModule
+    CalculatingSpinnerModule,
+    SharedDataQualityReportPredictorsModule
   ],
   exports: [
     PredictorTableComponent,

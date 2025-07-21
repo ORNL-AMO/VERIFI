@@ -40,15 +40,13 @@ import { DataEvaluationModule } from './data-evaluation/data-evaluation.module';
         ElectronUpdateComponent,
         ImportBackupModalComponent,
         SearchBarComponent,
-        // FacilityListPipe,
         CreateReportModalComponent,
         ManageAccountsComponent,
         ElectronBackupFileComponent,
         DeletingAccountDataComponent,
         SurveyModalComponent,
         SurveyToastComponent,
-        HomePageComponent,
-        SurveyToastComponent
+        HomePageComponent
     ],
     bootstrap: [AppComponent],
     imports: [
@@ -65,7 +63,6 @@ import { DataEvaluationModule } from './data-evaluation/data-evaluation.module';
         WeatherDataModule,
         UserSurveyModule,
         DataManagementModule,
-        UserSurveyModule,
         DataEvaluationModule
     ],
     providers: [provideHttpClient(withInterceptorsFromDi())]

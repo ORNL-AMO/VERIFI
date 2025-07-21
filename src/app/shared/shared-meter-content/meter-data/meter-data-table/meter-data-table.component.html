@@ -1,5 +1,5 @@
 <div *ngIf="meterData.length == 0" class="text-center mt-5">
-    <h5>No {{selectedMeter.name}} bills found for this facility.</h5>
+    <h5>No bills found for {{selectedMeter.name}}.</h5>
     <p>Please <i class="fa fa-plus"></i> Add New Bill or <i class="fa fa-upload"></i> Import multiple bills from excel.
     </p>
     <div class="d-flex w-100 justify-content-center">
@@ -32,6 +32,19 @@
             <div class="ps-2">
                 <button class="btn action-btn" (click)="meterDataAdd()"><i class="fa fa-plus"></i>
                     Add New Bill</button>
+            </div>
+            <div class="ps-2">
+                <ng-template [ngIf]="inDataManagement" [ngIfElse]="dataQualityReport">
+                    <button class="btn" (click)="goToDataQualityReport()"
+                        [ngClass]="selectedMeter | meterDataQualityStatus: meterData: true"><i
+                            class="fa fa-clipboard-check"></i>
+                        Data
+                        Quality Report</button>
+                </ng-template>
+                <ng-template #dataQualityReport>
+                    <app-meter-data-quality-report-modal [selectedMeter]="selectedMeter"
+                        [meterData]="meterData"></app-meter-data-quality-report-modal>
+                </ng-template>
             </div>
         </div>
     </div>

@@ -1,0 +1,158 @@
+<div *ngIf="meterData && meterData.length > 0" class="container-fluid px-0">
+    <table class="table table-bordered rounded">
+        <thead>
+            <tr>
+                <th class="header"></th>
+                <th class="header">Minimum</th>
+                <th class="header">Maximum</th>
+                <th class="header">Average</th>
+                <th class="header">Median</th>
+                <th class="header">Median Absolute Deviation <br>(MAD)</th>
+                <th class="header">Median - 2.5 MAD</th>
+                <th class="header">Median + 2.5 MAD</th>
+                <th class="header">Number of Outliers</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="align-middle" *ngIf="!(selectedMeter.source == 'Electricity' && !selectedMeter.includeInEnergy)">
+                <td>
+                    Total Consumption ({{ unit }})
+                </td>
+                <td>
+                    <span *ngIf="energyStats.min !== null">
+                        {{ energyStats.min | customNumber }}
+                    </span>
+                    <span *ngIf="energyStats.min === null || isValueNaN(energyStats.min)">
+                        &mdash;
+                    </span>
+                </td>
+                <td>
+                    <span *ngIf="energyStats.max !== null">
+                        {{ energyStats.max | customNumber }}
+                    </span>
+                    <span *ngIf="energyStats.max === null || isValueNaN(energyStats.max)">
+                        &mdash;
+                    </span>
+                </td>
+                <td>
+                    <span *ngIf="energyStats.average !== null">
+                        {{ energyStats.average | customNumber }}
+                    </span>
+                    <span *ngIf="energyStats.average === null || isValueNaN(energyStats.average)">
+                        &mdash;
+                    </span>
+                </td>
+                <td>
+                    <span *ngIf="energyStats.median !== null">
+                        {{ energyStats.median | customNumber }}
+                    </span>
+                    <span *ngIf="energyStats.median === null || isValueNaN(energyStats.median)">
+                        &mdash;
+                    </span>
+                </td>
+                <td>
+                    <span *ngIf="energyStats.medianAbsDev !== null">
+                        {{ energyStats.medianAbsDev | customNumber }}
+                    </span>
+                    <span *ngIf="energyStats.medianAbsDev === null || isValueNaN(energyStats.medianAbsDev)">
+                        &mdash;
+                    </span>
+                </td>
+                <td>
+                    <span *ngIf="energyStats.medianminus2_5MAD !== null">
+                        {{ energyStats.medianminus2_5MAD | customNumber }}
+                    </span>
+                    <span *ngIf="energyStats.medianminus2_5MAD === null || isValueNaN(energyStats.medianminus2_5MAD)">
+                        &mdash;
+                    </span>
+                </td>
+                <td>
+                    <span *ngIf="energyStats.medianplus2_5MAD !== null">
+                        {{ energyStats.medianplus2_5MAD | customNumber }}
+                    </span>
+                    <span *ngIf="energyStats.medianplus2_5MAD === null || isValueNaN(energyStats.medianplus2_5MAD)">
+                        &mdash;
+                    </span>
+                </td>
+                <td>
+                    <span *ngIf="energyStats.outliers !== null">
+                        <span *ngIf="energyStats.outliers > 0" class="badge bg-warning text-dark px-2 py-1 fs-5">{{ energyStats.outliers }}</span>
+                        <span *ngIf="energyStats.outliers === 0" class="badge bg-success px-2 py-1 fs-5">0</span>
+                    </span>
+                    <span *ngIf="energyStats.outliers === null || isValueNaN(energyStats.outliers)">
+                        &mdash;
+                    </span>
+                </td>
+            </tr>
+            <tr class="align-middle" *ngIf="costStats.average != 0 && !isValueNaN(costStats.average)">
+                <td>
+                    Cost ($)
+                </td>
+                <td>
+                    <span *ngIf="costStats.min !== null">
+                        {{ costStats.min | customNumber:true }}
+                    </span>
+                    <span *ngIf="costStats.min === null || isValueNaN(costStats.min)">
+                        &mdash;
+                    </span>
+                </td>
+                <td>
+                    <span *ngIf="costStats.max !== null">
+                        {{ costStats.max | customNumber:true }}
+                    </span>
+                    <span *ngIf="costStats.max === null || isValueNaN(costStats.max)">
+                        &mdash;
+                    </span>
+                </td>
+                <td>
+                    <span *ngIf="costStats.average !== null">
+                        {{ costStats.average | customNumber:true }}
+                    </span>
+                    <span *ngIf="costStats.average === null || isValueNaN(costStats.average)">
+                        &mdash;
+                    </span>
+                </td>
+                <td>
+                    <span *ngIf="costStats.median !== null">
+                        {{ costStats.median | customNumber:true }}
+                    </span>
+                    <span *ngIf="costStats.median === null || isValueNaN(costStats.median)">
+                        &mdash;
+                    </span>
+                </td>
+                <td>
+                    <span *ngIf="costStats.medianAbsDev !== null">
+                        {{ costStats.medianAbsDev | customNumber:true }}
+                    </span>
+                    <span *ngIf="costStats.medianAbsDev === null || isValueNaN(costStats.medianAbsDev)">
+                        &mdash;
+                    </span>
+                </td>
+                <td>
+                    <span *ngIf="costStats.medianminus2_5MAD !== null">
+                        {{ costStats.medianminus2_5MAD | customNumber:true }}
+                    </span>
+                    <span *ngIf="costStats.medianminus2_5MAD === null || isValueNaN(costStats.medianminus2_5MAD)">
+                        &mdash;
+                    </span>
+                </td>
+                 <td>
+                    <span *ngIf="costStats.medianplus2_5MAD !== null">
+                        {{ costStats.medianplus2_5MAD | customNumber:true }}
+                    </span>
+                    <span *ngIf="costStats.medianplus2_5MAD === null || isValueNaN(costStats.medianplus2_5MAD)">
+                        &mdash;
+                    </span>
+                </td>
+                <td>
+                   <span *ngIf="costStats.outliers !== null">
+                        <span *ngIf="costStats.outliers > 0" class="badge bg-warning text-dark px-2 py-1 fs-5">{{ costStats.outliers }}</span>
+                        <span *ngIf="costStats.outliers === 0" class="badge bg-success px-2 py-1 fs-5">0</span>
+                    </span>
+                    <span *ngIf="costStats.outliers === null || isValueNaN(costStats.outliers)">
+                        &mdash;
+                    </span>
+            </tr>
+        </tbody>
+    </table>
+</div>

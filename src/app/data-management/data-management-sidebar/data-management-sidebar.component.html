@@ -143,6 +143,15 @@
                                 </div>
                                 <div class="ps-2 nav-item">
                                     <a class="nav-link"
+                                        [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/meters/'+meter.guid+'/data-quality-report'"
+                                        [routerLinkActive]="['active']">
+                                        <span class="fa fa-clipboard-check"
+                                            [ngClass]="meter | meterDataQualityStatus: accountMeterData: false"></span>
+                                        Meter Data Quality Report
+                                    </a>
+                                </div>
+                                <div class="ps-2 nav-item">
+                                    <a class="nav-link"
                                         [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/meters/'+meter.guid+'/meter-monthly-data'"
                                         [routerLinkActive]="['active']">
                                         <span class="fa fa-calendar-days"></span> Meter Monthly Data
@@ -189,6 +198,15 @@
                                         [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/predictors/'+predictor.guid+'/predictor-data'"
                                         [routerLinkActive]="['active']">
                                         <span class="fa fa-table"></span> Predictor Data
+                                    </a>
+                                </div>
+                                <div class="ps-2 nav-item">
+                                    <a class="nav-link"
+                                        [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/predictors/'+predictor.guid+'/data-quality-report'"
+                                        [routerLinkActive]="['active']">
+                                        <span class="fa fa-clipboard-check"
+                                            [ngClass]="predictor | predictorDataQualityStatus: accountPredictorData: false"></span>
+                                        Predictor Data Quality Report
                                     </a>
                                 </div>
                             </div>
@@ -255,32 +273,34 @@
             <hr class="my-1">
         </div>
         <div class="ps-2 pe-2 nav-item">
-            <a title="Help Content" class="nav-link" [routerLink]="'/data-management/'+account.guid+'/help'" [routerLinkActive]="['active']"
-                [routerLinkActiveOptions]="{ exact: true }"><i class="fa fa-question"></i> <span [hidden]="!sidebarOpen"
-                    class="ps-2 nav-label">Help</span> </a>
+            <a title="Help Content" class="nav-link" [routerLink]="'/data-management/'+account.guid+'/help'"
+                [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }"><i
+                    class="fa fa-question"></i> <span [hidden]="!sidebarOpen" class="ps-2 nav-label">Help</span> </a>
 
         </div>
         <div class="ps-2 pe-2 nav-item">
-            <a title="About" class="nav-link" [routerLink]="'/data-management/'+account.guid+'/about'" [routerLinkActive]="['active']"
-                [routerLinkActiveOptions]="{ exact: true }"><i class="fa fa-info-circle"></i> <span
-                    [hidden]="!sidebarOpen" class="ps-2 nav-label">About</span></a>
+            <a title="About" class="nav-link" [routerLink]="'/data-management/'+account.guid+'/about'"
+                [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }"><i
+                    class="fa fa-info-circle"></i> <span [hidden]="!sidebarOpen" class="ps-2 nav-label">About</span></a>
 
         </div>
         <div class="ps-2 pe-2 nav-item">
-            <a title="Feedback" class="nav-link" [routerLink]="'/data-management/'+account.guid+'/feedback'" [routerLinkActive]="['active']"
-                [routerLinkActiveOptions]="{ exact: true }"><i class="fa fa-inbox"></i> <span [hidden]="!sidebarOpen"
-                    class="ps-2 nav-label">Feedback</span></a>
+            <a title="Feedback" class="nav-link" [routerLink]="'/data-management/'+account.guid+'/feedback'"
+                [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }"><i class="fa fa-inbox"></i>
+                <span [hidden]="!sidebarOpen" class="ps-2 nav-label">Feedback</span></a>
 
         </div>
         <div class="ps-2 pe-2 nav-item">
-            <a title="Acknowledgments" class="nav-link" [routerLink]="'/data-management/'+account.guid+'/acknowledgments'"
-                [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }"><i class="fa fa-trophy"></i>
+            <a title="Acknowledgments" class="nav-link"
+                [routerLink]="'/data-management/'+account.guid+'/acknowledgments'" [routerLinkActive]="['active']"
+                [routerLinkActiveOptions]="{ exact: true }"><i class="fa fa-trophy"></i>
                 <span [hidden]="!sidebarOpen" class="ps-2 nav-label">Acknowledgments</span></a>
 
         </div>
         <div class="ps-2 pe-2 nav-item">
-            <a title="Privacy" class="nav-link" [routerLink]="'/data-management/'+account.guid+'/privacy'" [routerLinkActive]="['active']"
-                [routerLinkActiveOptions]="{ exact: true }"><i class="fa fa-shield-halved"></i>
+            <a title="Privacy" class="nav-link" [routerLink]="'/data-management/'+account.guid+'/privacy'"
+                [routerLinkActive]="['active']" [routerLinkActiveOptions]="{ exact: true }"><i
+                    class="fa fa-shield-halved"></i>
                 <span [hidden]="!sidebarOpen" class="ps-2 nav-label">Privacy</span></a>
         </div>
     </div>

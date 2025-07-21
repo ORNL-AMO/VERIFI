@@ -9,7 +9,7 @@ const fs = require('fs');
 const os = require('os');
 
 function isDev() {
-    return app.isPackaged == false;
+    return app.isPackaged === false;
 };
 
 
