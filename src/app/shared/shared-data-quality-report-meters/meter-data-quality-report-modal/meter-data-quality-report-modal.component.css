@@ -1,0 +1,26 @@
+.modal-dialog.modal-size {
+  max-width: 75vw;
+  width: 75vw;
+  margin: auto;
+}
+
+.modal-content {
+  height: 70vh;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.popup{
+    top: 10px;
+    left: 10px;
+    width: calc(100vw - 20px)
+}
+
+.popup .popup-body{
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
+}
+
+.popup-header .fa{
+  color: white;
+}

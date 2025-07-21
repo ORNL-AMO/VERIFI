@@ -1,0 +1,6 @@
+<h4>{{utilityMeter.name}} Data Quality Report
+    <span class="badge float-end"
+        [ngStyle]="{'background-color': utilityMeter.source | meterSourceColor}">{{utilityMeter.source}}</span>
+</h4>
+<app-meter-data-quality-report [meterData]="utilityMeterData"
+    [selectedMeter]="utilityMeter"></app-meter-data-quality-report>

@@ -36,6 +36,7 @@ import { MeterGroupFormComponent } from './set-meter-grouping/meter-group-form/m
 import { MeterGroupTableComponent } from './set-meter-grouping/meter-group-table/meter-group-table.component';
 import { ViewConnectBillComponent } from './meter-data/meter-data-table/view-connect-bill/view-connect-bill.component';
 import { EditConnectBillComponent } from './edit-bill/edit-connect-bill/edit-connect-bill.component';
+import { SharedDataQualityReportMetersModule } from '../shared-data-quality-report-meters/shared-data-quality-report-meters.module';
 
 
 
@@ -81,7 +82,8 @@ import { EditConnectBillComponent } from './edit-bill/edit-connect-bill/edit-con
     FormsModule,
     ReactiveFormsModule,
     LabelWithTooltipModule,
-    NgbDatepickerModule
+    NgbDatepickerModule,
+    SharedDataQualityReportMetersModule
   ],
   exports: [
     EditMeterFormComponent,
