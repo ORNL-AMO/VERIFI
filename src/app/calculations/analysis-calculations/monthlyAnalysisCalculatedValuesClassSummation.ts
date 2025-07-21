@@ -34,6 +34,11 @@ export class MonthlyAnalysisCalculatedValuesSummation {
     tenPercentTarget: number;
     fifteenPercentTarget: number;
     rollingActual: number;
+    fifteenPercentSavings: number;
+    tenPercentSavings: number;
+    fivePercentSavings: number;
+    thirtyPercentTarget: number;
+    thirtyPercentSavings: number;
     constructor(
         currentMonthData: Array<MonthlyAnalysisSummaryDataClass>,
         baselineAdjustmentForNew: number,
@@ -60,6 +65,11 @@ export class MonthlyAnalysisCalculatedValuesSummation {
         this.setFivePercentTarget();
         this.setTenPercentTarget();
         this.setFifteenPercentTarget();
+        this.setFifteenPercentSavings();
+        this.setTenPercentSavings();    
+        this.setFivePercentSavings();
+        this.setThirtyPercentTarget();
+        this.setThirtyPercentSavings();
     }
 
 
@@ -193,6 +203,11 @@ export class MonthlyAnalysisCalculatedValuesSummation {
         this.fivePercentTarget = new ConvertValue(this.fivePercentTarget, startingUnit, endingUnit).convertedValue;
         this.tenPercentTarget = new ConvertValue(this.tenPercentTarget, startingUnit, endingUnit).convertedValue;
         this.fifteenPercentTarget = new ConvertValue(this.fifteenPercentTarget, startingUnit, endingUnit).convertedValue;
+        this.fifteenPercentSavings = new ConvertValue(this.fifteenPercentSavings, startingUnit, endingUnit).convertedValue;
+        this.tenPercentSavings = new ConvertValue(this.tenPercentSavings, startingUnit, endingUnit).convertedValue;
+        this.fivePercentSavings = new ConvertValue(this.fivePercentSavings, startingUnit, endingUnit).convertedValue;
+        this.thirtyPercentTarget = new ConvertValue(this.thirtyPercentTarget, startingUnit, endingUnit).convertedValue;
+        this.thirtyPercentSavings = new ConvertValue(this.thirtyPercentSavings, startingUnit, endingUnit).convertedValue;
     }
 
     //1964
@@ -204,5 +219,21 @@ export class MonthlyAnalysisCalculatedValuesSummation {
     }
     setFifteenPercentTarget() {
         this.fifteenPercentTarget = this.rollingAdjusted * 0.85;
+    }
+    setThirtyPercentTarget() {
+        this.thirtyPercentTarget = this.rollingAdjusted * 0.70;
+    }
+
+    setFifteenPercentSavings() {
+        this.fifteenPercentSavings = this.rollingAdjusted - this.fifteenPercentTarget;
+    }
+    setTenPercentSavings() {
+        this.tenPercentSavings = this.rollingAdjusted - this.tenPercentTarget;
+    }
+    setFivePercentSavings() {
+        this.fivePercentSavings = this.rollingAdjusted - this.fivePercentTarget;
+    }
+    setThirtyPercentSavings() {
+        this.thirtyPercentSavings = this.rollingAdjusted - this.thirtyPercentTarget;
     }
 }

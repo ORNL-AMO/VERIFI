@@ -41,6 +41,8 @@ import { CustomGwpDashboardComponent } from "src/app/account/custom-database/cus
 import { CustomGwpFormComponent } from "src/app/account/custom-database/custom-gwp/custom-gwp-form/custom-gwp-form.component";
 import { AnalysisReportDashboardComponent } from "../account/account-reports/account-reports-dashboard/analysis-report-dashboard/analysis-report-dashboard.component";
 import { AnalysisReportComponent } from "../account/account-reports/analysis-report/analysis-report.component";
+import { AccountSavingsReportDashboardComponent } from "../account/account-reports/account-reports-dashboard/account-savings-report-dashboard/account-savings-report-dashboard.component";
+import { AccountSavingsReportComponent } from "../account/account-reports/account-savings-report/account-savings-report.component";
 
 export const AccountRoutes: Route = {
     path: 'account',
@@ -85,7 +87,8 @@ export const AccountRoutes: Route = {
                         { path: 'overview', component: OverviewReportDashboardComponent },
                         { path: 'performance', component: PerformanceReportDashboardComponent },
                         { path: 'better-climate', component: BetterClimateReportDashboardComponent },
-                        { path: 'analysis', component: AnalysisReportDashboardComponent }
+                        { path: 'analysis', component: AnalysisReportDashboardComponent },
+                        { path: 'account-savings', component: AccountSavingsReportDashboardComponent }
                     ]
                 },
                 { path: 'setup', component: AccountReportSetupComponent },
@@ -93,7 +96,8 @@ export const AccountRoutes: Route = {
                 { path: 'data-overview-report', component: DataOverviewReportComponent },
                 { path: 'performance-report', component: PerformanceReportComponent },
                 { path: 'better-climate-report', component: BetterClimateReportComponent },
-                { path: 'analysis-report', component: AnalysisReportComponent }
+                { path: 'analysis-report', component: AnalysisReportComponent },
+                { path: 'account-savings-report', component: AccountSavingsReportComponent }
             ]
         },
         {

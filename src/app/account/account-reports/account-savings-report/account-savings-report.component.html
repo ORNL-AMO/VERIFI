@@ -1,0 +1,15 @@
+<ng-container *ngIf="selectedReport && selectedAnalysisItem">
+    <ng-container>
+        <app-annual-savings-summary-table [selectedAnalysisItem]="selectedAnalysisItem"
+            [account]="account" [selectedReport]="selectedReport"></app-annual-savings-summary-table>
+    </ng-container>
+</ng-container>
+
+<!-- <div class="w-100 justify-content-center">
+    <div class="pt-5">
+        <app-calculating-spinner *ngIf="calculating != false" [message]="'Generating Savings Report...'"
+            [error]="calculating == 'error'"></app-calculating-spinner>
+    </div>
+</div> -->
+
+<!-- <app-print-report-button *ngIf="selectedReport"></app-print-report-button> -->

@@ -163,6 +163,11 @@ export class MonthlyAccountAnalysisClass {
                 tenPercentTarget: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.tenPercentTarget),
                 fifteenPercentTarget: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.fifteenPercentTarget),
                 rollingActual: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.rollingActual),
+                fifteenPercentSavings: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.fifteenPercentSavings),
+                tenPercentSavings: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.tenPercentSavings),
+                fivePercentSavings: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.fivePercentSavings),
+                thirtyPercentTarget: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.thirtyPercentTarget),
+                thirtyPercentSavings: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.thirtyPercentSavings)
             }
         })
     }

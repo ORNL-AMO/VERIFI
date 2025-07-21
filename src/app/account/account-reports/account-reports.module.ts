@@ -59,6 +59,12 @@ import { AnalysisReportSetupComponent } from './account-report-setup/analysis-re
 import { AnalysisFacilityReportComponent } from './analysis-report/analysis-facility-report/analysis-facility-report.component';
 import { AnalysisProblemsInformationComponent } from './analysis-report/analysis-problems-information/analysis-problems-information.component';
 import { AnalysisDataValidationTablesComponent } from './analysis-report/analysis-data-validation-tables/analysis-data-validation-tables.component';
+import { AccountSavingsReportDashboardComponent } from './account-reports-dashboard/account-savings-report-dashboard/account-savings-report-dashboard.component';
+import { AccountSavingsReportComponent } from './account-savings-report/account-savings-report.component';
+import { AccountSavingsReportSetupComponent } from './account-report-setup/account-savings-report-setup/account-savings-report-setup.component';
+import { SharedAnalysisModule } from "src/app/shared/shared-analysis/shared-analysis.module";
+import { AnnualSavingsSummaryTableComponent } from './account-savings-report/annual-savings-summary-table/annual-savings-summary-table.component';
+import { AnnualFacilitySavingsSummaryTableComponent } from './account-savings-report/annual-facility-savings-summary-table/annual-facility-savings-summary-table.component';
 
 @NgModule({
   declarations: [
@@ -115,7 +121,12 @@ import { AnalysisDataValidationTablesComponent } from './analysis-report/analysi
     AnalysisReportSetupComponent,
     AnalysisFacilityReportComponent,
     AnalysisProblemsInformationComponent,
-    AnalysisDataValidationTablesComponent
+    AnalysisDataValidationTablesComponent,
+    AccountSavingsReportDashboardComponent,
+    AccountSavingsReportComponent,
+    AccountSavingsReportSetupComponent,
+    AnnualSavingsSummaryTableComponent,
+    AnnualFacilitySavingsSummaryTableComponent
   ],
   imports: [
     CommonModule,
@@ -125,7 +136,8 @@ import { AnalysisDataValidationTablesComponent } from './analysis-report/analysi
     FormsModule,
     LabelWithTooltipModule,
     CalculatingSpinnerModule,
-    DataOverviewModule
-  ]
+    DataOverviewModule,
+    SharedAnalysisModule
+]
 })
 export class AccountReportsModule { }

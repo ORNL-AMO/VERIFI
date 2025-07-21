@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
-import { AnalysisReportSetup, BetterClimateReportSetup, BetterPlantsReportSetup, DataOverviewReportSetup, PerformanceReportSetup } from 'src/app/models/overview-report';
+import { AccountSavingsReportSetup, AnalysisReportSetup, BetterClimateReportSetup, BetterPlantsReportSetup, DataOverviewReportSetup, PerformanceReportSetup } from 'src/app/models/overview-report';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
@@ -47,7 +47,7 @@ export class AccountReportsService {
   getSetupFormFromReport(report: IdbAccountReport): FormGroup {
     let yearValidators: Array<ValidatorFn> = [];
     let dateValidators: Array<ValidatorFn> = [];
-    if (report.reportType == 'betterPlants' || report.reportType == 'performance' || report.reportType == 'betterClimate' || report.reportType == 'analysis') {
+    if (report.reportType == 'betterPlants' || report.reportType == 'performance' || report.reportType == 'betterClimate' || report.reportType == 'analysis' || report.reportType == 'accountSavings') {
       yearValidators = [Validators.required];
     } else if (report.reportType == 'dataOverview') {
       dateValidators = [Validators.required];
@@ -66,7 +66,7 @@ export class AccountReportsService {
       });
       return form;
     }
-    else if (report.reportType == 'betterPlants' || report.reportType == 'analysis') {
+    else if (report.reportType == 'betterPlants' || report.reportType == 'analysis' || report.reportType == 'accountSavings') {
       let form: FormGroup = this.formBuilder.group({
         reportName: [report.name, Validators.required],
         reportType: [report.reportType, Validators.required],
@@ -289,6 +289,40 @@ export class AccountReportsService {
     return analysisReportSetup;
   }
 
+  getAccountSavingsFormFromReport(accountSavingsReportSetup: AccountSavingsReportSetup): FormGroup {
+    if (!accountSavingsReportSetup) {
+      accountSavingsReportSetup = {
+         analysisItemId: undefined,
+        // includeProblemsInformation: true,
+        // includeExecutiveSummary: true,
+        // includeDataValidationTables: true
+      };
+    }
+    let form: FormGroup = this.formBuilder.group({
+       analysisItemId: [accountSavingsReportSetup.analysisItemId, Validators.required],
+      // includeProblemsInformation: [accountSavingsReportSetup.includeProblemsInformation],
+      // includeExecutiveSummary: [accountSavingsReportSetup.includeExecutiveSummary],
+      // includeDataValidationTables: [accountSavingsReportSetup.includeDataValidationTables],
+    });
+    return form;
+  }
+
+  updateAccountSavingsReportFromForm(accountSavingsReportSetup: AccountSavingsReportSetup, form: FormGroup): AccountSavingsReportSetup {
+    if (!accountSavingsReportSetup) {
+      accountSavingsReportSetup = {
+         analysisItemId: undefined,
+        // includeProblemsInformation: true,
+        // includeExecutiveSummary: true,
+        // includeDataValidationTables: true
+      };
+    }
+     accountSavingsReportSetup.analysisItemId = form.controls.analysisItemId.value;
+    // accountSavingsReportSetup.includeProblemsInformation = form.controls.includeProblemsInformation.value;
+    // accountSavingsReportSetup.includeExecutiveSummary = form.controls.includeExecutiveSummary.value;
+    // accountSavingsReportSetup.includeDataValidationTables = form.controls.includeDataValidationTables.value;
+    return accountSavingsReportSetup;
+  }
+
   isReportValid(report: IdbAccountReport): boolean {
     let setupForm: FormGroup = this.getSetupFormFromReport(report);
     if (setupForm.invalid) {
@@ -309,6 +343,9 @@ export class AccountReportsService {
     } else if (report.reportType == 'analysis') {
       let analysisForm: FormGroup = this.getAnalysisFormFromReport(report.analysisReportSetup);
       return analysisForm.valid;
+    } else if (report.reportType == 'accountSavings') {
+      let accountSavingsForm: FormGroup = this.getAccountSavingsFormFromReport(report.accountSavingsReportSetup);
+      return accountSavingsForm.valid;
     }
   }
 }

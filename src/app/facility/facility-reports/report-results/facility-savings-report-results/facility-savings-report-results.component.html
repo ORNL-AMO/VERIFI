@@ -49,6 +49,15 @@
                         [analysisItem]="analysisItem" [facilityOrAccount]="facility">
                     </app-monthly-analysis-summary-graph>
                 </div>
+                <hr>
+                <app-rolling-energy-consumption-graph *ngIf="monthlyAnalysisSummaryData"
+                    [monthlyAnalysisSummaryData]="groupSummary.monthlyAnalysisSummaryData" [analysisItem]="analysisItem"
+                    [facilityOrAccount]="facility"></app-rolling-energy-consumption-graph>
+                <hr>
+                <app-rolling-energy-savings-graph *ngIf="monthlyAnalysisSummaryData"
+                    [monthlyAnalysisSummaryData]="groupSummary.monthlyAnalysisSummaryData" [analysisItem]="analysisItem"
+                    [facilityOrAccount]="facility"></app-rolling-energy-savings-graph>
+                <hr>
             </ng-container>
         </ng-container>
     </div>

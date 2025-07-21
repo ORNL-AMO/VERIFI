@@ -59,6 +59,11 @@ export class GroupMonthlyAnalysisRollupValues {
     fivePercentTarget: number;
     tenPercentTarget: number;
     fifteenPercentTarget: number;
+    thirtyPercentTarget: number;
+    fifteenPercentSavings: number;
+    tenPercentSavings: number;
+    fivePercentSavings: number;
+    thirtyPercentSavings: number;
 
     constructor(
         energyUse: number,
@@ -100,6 +105,11 @@ export class GroupMonthlyAnalysisRollupValues {
             this.setFifteenPercentTarget();
             this.setTenPercentTarget();
             this.setFivePercentTarget();
+            this.setFifteenPercentSavings();
+            this.setTenPercentSavings();
+            this.setFivePercentSavings();
+            this.setThirtyPercentTarget();
+            this.setThirtyPercentSavings();
 
         } else {
             this.setBaselineYearValues();
@@ -131,6 +141,11 @@ export class GroupMonthlyAnalysisRollupValues {
         this.tenPercentTarget = 0;
         this.fivePercentTarget = 0;
         this.fifteenPercentTarget = 0;
+        this.fifteenPercentSavings = 0;
+        this.tenPercentSavings = 0;
+        this.fivePercentSavings = 0;
+        this.thirtyPercentTarget = 0;
+        this.thirtyPercentSavings = 0;
     }
 
     //step 1
@@ -356,6 +371,11 @@ export class GroupMonthlyAnalysisRollupValues {
         this.tenPercentTarget = new ConvertValue(this.tenPercentTarget, startingUnit, endingUnit).convertedValue;
         this.fifteenPercentTarget = new ConvertValue(this.fifteenPercentTarget, startingUnit, endingUnit).convertedValue;
         this.rollingActual = new ConvertValue(this.rollingActual, startingUnit, endingUnit).convertedValue;
+        this.fifteenPercentSavings = new ConvertValue(this.fifteenPercentSavings, startingUnit, endingUnit).convertedValue;
+        this.tenPercentSavings = new ConvertValue(this.tenPercentSavings, startingUnit, endingUnit).convertedValue;
+        this.fivePercentSavings = new ConvertValue(this.fivePercentSavings, startingUnit, endingUnit).convertedValue;
+        this.thirtyPercentTarget = new ConvertValue(this.thirtyPercentTarget, startingUnit, endingUnit).convertedValue;
+        this.thirtyPercentSavings = new ConvertValue(this.thirtyPercentSavings, startingUnit, endingUnit).convertedValue;
     }
 
     //1964
@@ -373,5 +393,23 @@ export class GroupMonthlyAnalysisRollupValues {
     }
     setFifteenPercentTarget() {
         this.fifteenPercentTarget = this.rollingAdjusted * 0.85;
+    }
+    setThirtyPercentTarget() {
+        this.thirtyPercentTarget = this.rollingAdjusted * 0.70;
+    }
+
+    setFifteenPercentSavings() {
+        this.fifteenPercentSavings = this.rollingAdjusted - this.fifteenPercentTarget;
+    }
+
+    setTenPercentSavings() {
+        this.tenPercentSavings = this.rollingAdjusted - this.tenPercentTarget;
+    }
+
+    setFivePercentSavings() {
+        this.fivePercentSavings = this.rollingAdjusted - this.fivePercentTarget;
+    }
+    setThirtyPercentSavings() {
+        this.thirtyPercentSavings = this.rollingAdjusted - this.thirtyPercentTarget;
     }
 }

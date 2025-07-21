@@ -147,7 +147,12 @@ export class MonthlyFacilityAnalysisClass {
                 fivePercentTarget: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.fivePercentTarget),
                 tenPercentTarget: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.tenPercentTarget),
                 fifteenPercentTarget: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.fifteenPercentTarget),
-                rollingActual: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.rollingActual)
+                rollingActual: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.rollingActual),
+                fivePercentSavings: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.fivePercentSavings),
+                tenPercentSavings: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.tenPercentSavings),
+                fifteenPercentSavings: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.fifteenPercentSavings),
+                thirtyPercentTarget: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.thirtyPercentTarget),
+                thirtyPercentSavings: checkAnalysisValue(summaryDataItem.monthlyAnalysisCalculatedValues.thirtyPercentSavings)
             }
         })
     }
