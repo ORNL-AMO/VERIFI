@@ -200,6 +200,15 @@
                                         <span class="fa fa-table"></span> Predictor Data
                                     </a>
                                 </div>
+                                <div class="ps-2 nav-item">
+                                    <a class="nav-link"
+                                        [routerLink]="'/data-management/'+account.guid+'/facilities/'+facility.guid+'/predictors/'+predictor.guid+'/data-quality-report'"
+                                        [routerLinkActive]="['active']">
+                                        <span class="fa fa-clipboard-check"
+                                            [ngClass]="predictor | predictorDataQualityStatus: accountPredictorData: false"></span>
+                                        Predictor Data Quality Report
+                                    </a>
+                                </div>
                             </div>
                         </ng-container>
                     </div>

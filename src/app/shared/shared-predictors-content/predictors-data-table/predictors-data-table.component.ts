@@ -1,4 +1,4 @@
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { LoadingService } from 'src/app/core-components/loading/loading.service';
@@ -22,10 +22,10 @@ import { getWeatherSearchFromFacility } from 'src/app/shared/sharedHelperFuntion
 // import { DegreeDaysService } from 'src/app/shared/helper-services/degree-days.service';
 
 @Component({
-    selector: 'app-predictors-data-table',
-    templateUrl: './predictors-data-table.component.html',
-    styleUrl: './predictors-data-table.component.css',
-    standalone: false
+  selector: 'app-predictors-data-table',
+  templateUrl: './predictors-data-table.component.html',
+  styleUrl: './predictors-data-table.component.css',
+  standalone: false
 })
 export class PredictorsDataTableComponent {
   @ViewChild('predictorTable', { static: false }) predictorTable: ElementRef;
@@ -52,6 +52,7 @@ export class PredictorsDataTableComponent {
   latestMeterDataReading: Date;
   filterErrors: boolean = false;
   hasCalculatedOverride: boolean = false;
+
   constructor(private activatedRoute: ActivatedRoute, private predictorDbService: PredictorDbService,
     private predictorDataDbService: PredictorDataDbService,
     private sharedDataService: SharedDataService,
@@ -64,6 +65,7 @@ export class PredictorsDataTableComponent {
     private accountDbService: AccountdbService,
     private weatherDataService: WeatherDataService,
     private predictorDataHelperService: PredictorDataHelperService,
+    private cd: ChangeDetectorRef
     // private degreeDaysService: DegreeDaysService
   ) {
 
@@ -279,11 +281,11 @@ export class PredictorsDataTableComponent {
       this.weatherDataService.selectedFacility = selectedFacility;
       this.weatherDataService.addressSearchStr = getWeatherSearchFromFacility(selectedFacility);
       //TODO: Update to new route
-    if (this.inDataWizard) {
-      this.router.navigateByUrl('/data-management/' + selectedFacility.accountId + '/weather-data/monthly-station');
-    } else {
-      this.router.navigateByUrl('/data-evaluation/weather-data');
-    }
+      if (this.inDataWizard) {
+        this.router.navigateByUrl('/data-management/' + selectedFacility.accountId + '/weather-data/monthly-station');
+      } else {
+        this.router.navigateByUrl('/data-evaluation/weather-data');
+      }
     } else {
       this.toastNotificationService.showToast('An Error Occured', undefined, undefined, false, 'alert-danger');
     }
@@ -315,9 +317,9 @@ export class PredictorsDataTableComponent {
   }
 
   showUpdateEntries() {
-    if(this.inDataWizard){     
-       this.router.navigateByUrl('data-management/' + this.predictor.accountId + '/facilities/' + this.predictor.facilityId + '/predictors/' + this.predictor.guid + '/predictor-data/update-calculated-entries');
-    }else{
+    if (this.inDataWizard) {
+      this.router.navigateByUrl('data-management/' + this.predictor.accountId + '/facilities/' + this.predictor.facilityId + '/predictors/' + this.predictor.guid + '/predictor-data/update-calculated-entries');
+    } else {
       let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
       this.router.navigateByUrl('/data-evaluation/facility/' + selectedFacility.id + '/utility/predictors/predictor/' + this.predictor.guid + '/update-calculated-entries');
     }

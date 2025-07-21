@@ -14,6 +14,8 @@ import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { NavigationEnd, Router } from '@angular/router';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
+import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
+import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.service';
 
 @Component({
   selector: 'app-data-management-sidebar',
@@ -50,6 +52,9 @@ export class DataManagementSidebarComponent {
   accountMeterData: Array<IdbUtilityMeterData>;
   accountMeterDataSub: Subscription;
 
+  accountPredictorData: Array<IdbPredictorData>;
+  accountPredictorDataSub: Subscription;
+
   sidebarOpen: boolean;
   sidebarOpenSub: Subscription;
 
@@ -61,7 +66,8 @@ export class DataManagementSidebarComponent {
     private predictorDbService: PredictorDbService,
     private dbChangesService: DbChangesService,
     private router: Router,
-    private utilityMeterDataDbService: UtilityMeterDatadbService
+    private utilityMeterDataDbService: UtilityMeterDatadbService,
+    private predictorDataDbService: PredictorDataDbService
   ) {
   }
 
@@ -92,6 +98,10 @@ export class DataManagementSidebarComponent {
       this.accountMeterData = accountMeterData;
     });
 
+    this.accountPredictorDataSub = this.predictorDataDbService.accountPredictorData.subscribe(accountPredictorData => {
+      this.accountPredictorData = accountPredictorData;
+    });
+
     this.sidebarOpenSub = this.dataManagementService.sidebarOpen.subscribe(val => {
       this.sidebarOpen = val;
       setTimeout(() => {
@@ -117,6 +127,7 @@ export class DataManagementSidebarComponent {
     this.sidebarOpenSub.unsubscribe();
     this.routerSub.unsubscribe();
     this.accountMeterDataSub.unsubscribe();
+    this.accountPredictorDataSub.unsubscribe();
   }
 
   async toggleFacilitiesOpen() {

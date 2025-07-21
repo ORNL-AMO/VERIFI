@@ -51,6 +51,8 @@ import { DataManagementSidePanelModule } from './data-management-side-panel/data
 import { SidebarItemActivePipe } from './data-management-sidebar/sidebar-item-active.pipe';
 import { FacilityMeterDataQualityReportComponent } from './account-facilities/facility-data/facility-meters/facility-meter-data-quality-report/facility-meter-data-quality-report.component';
 import { SharedDataQualityReportMetersModule } from "src/app/shared/shared-data-quality-report-meters/shared-data-quality-report-meters.module";
+import { FacilityPredictorDataQualityReportComponent } from './account-facilities/facility-data/facility-predictors/facility-predictor-data-quality-report/facility-predictor-data-quality-report.component';
+import { SharedDataQualityReportPredictorsModule } from '../shared/shared-data-quality-report-predictor/shared-data-quality-report-predictor.module';
 
 
 @NgModule({
@@ -92,7 +94,8 @@ import { SharedDataQualityReportMetersModule } from "src/app/shared/shared-data-
     DataManagementHomeComponent,
     AccountCustomDataComponent,
     SidebarItemActivePipe,
-    FacilityMeterDataQualityReportComponent
+    FacilityMeterDataQualityReportComponent,
+    FacilityPredictorDataQualityReportComponent
   ],
   imports: [
     CommonModule,
@@ -109,7 +112,8 @@ import { SharedDataQualityReportMetersModule } from "src/app/shared/shared-data-
     ReactiveFormsModule,
     CustomDatabaseModule,
     DataManagementSidePanelModule,
-    SharedDataQualityReportMetersModule
+    SharedDataQualityReportMetersModule,
+    SharedDataQualityReportPredictorsModule
 ]
 })
 export class DataManagementModule { }

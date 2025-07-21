@@ -1,14 +1,14 @@
-<button #openModalBtn class="btn" (click)="openModal()" [ngClass]="selectedMeter | meterDataQualityStatus: meterData: true">
+<button #openModalBtn class="btn" (click)="openModal()" [ngClass]="selectedPredictor | predictorDataQualityStatus: predictorData: true">
     <i class="fa fa-clipboard-check me-1"></i> Data Validity Check</button>
 
 <div [ngClass]="{'windowOverlay': showModal}"></div>
 <div class="popup" [class.open]="showModal">
-    <div class="popup-header" *ngIf="showModal"><i class="fa fa-clipboard-check me-1"></i> Data Validity Check: {{selectedMeter?.name}}
+    <div class="popup-header" *ngIf="showModal"><i class="fa fa-clipboard-check me-1"></i> Data Validity Check: {{selectedPredictor?.name}}
         <button class="item-right" (click)="hideModal()">x</button>
     </div>
     <div class="popup-body">
-        <app-meter-data-quality-report [selectedMeter]="selectedMeter"
-            [meterData]="meterData"></app-meter-data-quality-report>
+        <app-predictor-data-quality-report [selectedPredictor]="selectedPredictor"
+            [predictorData]="predictorData"></app-predictor-data-quality-report>
     </div>
     <div class="saveCancel popup-footer text-end">
         <hr class="my-1">
