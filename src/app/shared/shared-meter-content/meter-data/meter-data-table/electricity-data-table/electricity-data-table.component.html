@@ -9,7 +9,7 @@
             <th *ngIf="emissionsFilters.showSection" [attr.colspan]="numEmissions">
                 Emissions
             </th>
-            <th *ngIf="detailedChargesFilters.showSection" [attr.colspan]="selectedMeter.charges?.length">
+            <th [attr.colspan]="numDetailedCharges">
                 Detailed Charges
             </th>
             <th>
@@ -49,11 +49,13 @@
                 [ngClass]="{'active': orderDataField == 'RECs'}">RECs<br> (MWh)</th>
             <ng-container *ngFor="let charge of selectedMeter.charges">
                 <ng-container *ngIf="charge.chargeType == 'consumption' || charge.chargeType == 'demand'">
-                    <th>
+                    <th (click)="setOrderDataField(charge.guid, 'usage')"
+                        [ngClass]="{'active': orderDataField == charge.guid && orderByCharge == 'usage'}">
                         {{charge.name}} <br>({{charge.chargeUnit | chargeUnitDisplay}})
                     </th>
                 </ng-container>
-                <th>
+                <th (click)="setOrderDataField(charge.guid, 'amount')"
+                    [ngClass]="{'active': orderDataField == charge.guid && orderByCharge == 'amount'}">
                     {{ charge.name }} <br>(&dollar;)
                 </th>
             </ng-container>
@@ -66,7 +68,7 @@
     </thead>
     <tbody class="table-group-divider">
         <tr
-            *ngFor="let meterData of selectedMeterData | orderBy: orderDataField: orderByDirection | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage">
+            *ngFor="let meterData of selectedMeterData | orderMeterDataBy: orderDataField: orderByDirection : orderByCharge| slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage">
             <td *ngIf="!copyingTable" class="input">
                 <input type="checkbox" name="metersSelected" (change)="toggleChecked()" [(ngModel)]="meterData.checked">
             </td>
@@ -151,7 +153,7 @@
     </thead>
     <tbody class="table-group-divider">
         <tr
-            *ngFor="let meterData of selectedMeterData | orderBy: orderDataField: orderByDirection | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage">
+            *ngFor="let meterData of selectedMeterData | orderMeterDataBy: orderDataField: orderByDirection | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage">
             <td *ngIf="!copyingTable" class="input">
                 <input type="checkbox" name="metersSelected" (change)="toggleChecked()" [(ngModel)]="meterData.checked">
             </td>

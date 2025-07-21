@@ -43,6 +43,7 @@ import { MeterChargePipe } from './edit-bill/edit-bill-charges/meter-charge.pipe
 import { ChargeUnitDisplayPipe } from './edit-bill/edit-bill-charges/charge-unit-display.pipe';
 import { MeterChargeValuePipe } from './meter-data/meter-charge-value.pipe';
 import { SharedDataQualityReportMetersModule } from '../shared-data-quality-report-meters/shared-data-quality-report-meters.module';
+import { OrderMeterDataByPipe } from './meter-data/meter-data-table/order-meter-data-by.pipe';
 
 
 
@@ -83,7 +84,8 @@ import { SharedDataQualityReportMetersModule } from '../shared-data-quality-repo
     EditBillChargesComponent,
     MeterChargePipe,
     ChargeUnitDisplayPipe,
-    MeterChargeValuePipe
+    MeterChargeValuePipe,
+    OrderMeterDataByPipe
   ],
   imports: [
     CommonModule,
