@@ -49,6 +49,8 @@ import { CustomDatabaseModule } from '../shared/custom-database/custom-database.
 import { AccountCustomDataComponent } from './account-custom-data/account-custom-data.component';
 import { DataManagementSidePanelModule } from './data-management-side-panel/data-management-side-panel.module';
 import { SidebarItemActivePipe } from './data-management-sidebar/sidebar-item-active.pipe';
+import { FacilityMeterDataQualityReportComponent } from './account-facilities/facility-data/facility-meters/facility-meter-data-quality-report/facility-meter-data-quality-report.component';
+import { SharedDataQualityReportMetersModule } from "src/app/shared/shared-data-quality-report-meters/shared-data-quality-report-meters.module";
 
 
 @NgModule({
@@ -89,7 +91,8 @@ import { SidebarItemActivePipe } from './data-management-sidebar/sidebar-item-ac
     DataManagementImportFooterComponent,
     DataManagementHomeComponent,
     AccountCustomDataComponent,
-    SidebarItemActivePipe
+    SidebarItemActivePipe,
+    FacilityMeterDataQualityReportComponent
   ],
   imports: [
     CommonModule,
@@ -105,7 +108,8 @@ import { SidebarItemActivePipe } from './data-management-sidebar/sidebar-item-ac
     DragDropModule,
     ReactiveFormsModule,
     CustomDatabaseModule,
-    DataManagementSidePanelModule
-  ]
+    DataManagementSidePanelModule,
+    SharedDataQualityReportMetersModule
+]
 })
 export class DataManagementModule { }

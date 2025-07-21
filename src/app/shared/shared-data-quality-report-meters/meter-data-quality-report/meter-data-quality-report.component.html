@@ -1,0 +1,131 @@
+<ng-template [ngIf]="!hasData" [ngIfElse]="hasDataTemplate">
+    <div class="text-center mt-5">
+        <h5>No bills found for {{selectedMeter.name}}.</h5>
+        <p>Please <i class="fa fa-plus"></i> Add New Bill or <i class="fa fa-upload"></i> Import multiple bills from
+            excel.
+        </p>
+        <div class="d-flex w-100 justify-content-center">
+            <div class="pe-1">
+                <button class="btn action-btn" (click)="meterDataAdd()"><i class="fa fa-plus"></i> Add New Bill</button>
+            </div>
+            <div class="ps-1">
+                <button class="btn nav-btn" (click)="uploadData()"><i class="fa fa-upload"></i> Import Data</button>
+            </div>
+        </div>
+    </div>
+</ng-template>
+<ng-template #hasDataTemplate>
+    <ng-container *ngIf="showAlert">
+        <div
+            class="alert alert-warning d-flex flex-column align-items-center justify-content-center gap-3 mb-3 text-center">
+            <i class="fa fa-exclamation-triangle me-3" aria-hidden="true"></i>
+            <div>
+                <span class="alert-message" *ngIf="energyOutlierCount > 0 && costOutlierCount > 0">
+                    There is an issue in
+                    <span class="fw-bold text-danger">{{ energyOutlierCount
+                        }}</span>
+                    energy reading<ng-container *ngIf="energyOutlierCount > 1">s</ng-container>
+                    and
+                    <span class="fw-bold text-danger">{{ costOutlierCount
+                        }}</span>
+                    cost reading<ng-container *ngIf="costOutlierCount > 1">s</ng-container>
+                    <br>
+                </span>
+                <span class="alert-message" *ngIf="energyOutlierCount > 0 && costOutlierCount == 0">
+                    There is an issue in
+                    <span class="fw-bold text-danger">{{ energyOutlierCount
+                        }}</span>
+                    energy reading<ng-container *ngIf="energyOutlierCount > 1">s</ng-container>
+                    <br>
+                </span>
+                <span class="alert-message" *ngIf="costOutlierCount > 0 && energyOutlierCount == 0 && includeCosts">
+                    There is an issue in
+                    <span class="fw-bold text-danger">{{ costOutlierCount
+                        }}</span>
+                    cost reading<ng-container *ngIf="costOutlierCount > 1">s</ng-container>
+                    <br>
+                </span>
+            </div>
+        </div>
+    </ng-container>
+
+    <ng-template [ngIf]="includeCosts" [ngIfElse]="noCostsTemplate">
+        <h5>
+            <i class="fa fa-table me-2"></i>
+            Total Consumption and Cost Statistics
+        </h5>
+        <app-meter-statistics-table [meterData]="meterData" [selectedMeter]="selectedMeter" [energyStats]="energyStats"
+            [costStats]="costStats"></app-meter-statistics-table>
+        <hr>
+        <div class="row">
+            <div class="col-md-6 col-sm-12">
+                <h5>
+                    <i class="fa fa-line-chart me-2"></i>
+                    Total Consumption
+                </h5>
+                <app-meter-energy-timeseries-graph [meterData]="meterData" [selectedMeter]="selectedMeter"
+                    [energyStats]="energyStats"></app-meter-energy-timeseries-graph>
+            </div>
+            <div class="col-md-6 col-sm-12">
+                <h5>
+                    <i class="fa fa-line-chart me-2"></i>
+                    Total Cost
+                </h5>
+                <app-meter-cost-timeseries-graph [meterData]="meterData"
+                    [costStats]="costStats"></app-meter-cost-timeseries-graph>
+            </div>
+        </div>
+
+        <hr>
+        <div class="row">
+            <ng-container *ngIf="!(selectedMeter.source == 'Electricity' && !selectedMeter.includeInEnergy)">
+                <div class="col-md-6 col-sm-12">
+                    <h5>
+                        <i class="fa fa-chart-bar me-2"></i>
+                        Distribution of Total Consumption
+                    </h5>
+                    <app-meter-energy-histogram [meterData]="meterData"
+                        [selectedMeter]="selectedMeter"></app-meter-energy-histogram>
+                </div>
+            </ng-container>
+            <div class="col-md-6 col-sm-12">
+                <h5>
+                    <i class="fa fa-chart-bar me-2"></i>
+                    Distribution of Total Cost
+                </h5>
+                <app-meter-cost-histogram [meterData]="meterData"></app-meter-cost-histogram>
+            </div>
+        </div>
+    </ng-template>
+
+    <ng-template #noCostsTemplate>
+        <h5>
+            <i class="fa fa-table me-2"></i>
+            Total Consumption and Cost Statistics
+        </h5>
+        <app-meter-statistics-table [meterData]="meterData" [selectedMeter]="selectedMeter" [energyStats]="energyStats"
+            [costStats]="costStats"></app-meter-statistics-table>
+        <hr>
+        <div class="row">
+            @let includeConsumption = !(selectedMeter.source == 'Electricity' && !selectedMeter.includeInEnergy);
+            <div class="col-md-6 col-sm-12" [ngClass]="{'col-md-12': !includeConsumption}">
+                <h5>
+                    <i class="fa fa-line-chart me-2"></i>
+                    Total Consumption
+                </h5>
+                <app-meter-energy-timeseries-graph [meterData]="meterData"
+                    [selectedMeter]="selectedMeter" [energyStats]="energyStats"></app-meter-energy-timeseries-graph>
+            </div>
+            <ng-container *ngIf="includeConsumption">
+                <div class="col-md-6 col-sm-12">
+                    <h5>
+                        <i class="fa fa-chart-bar me-2"></i>
+                        Distribution of Total Consumption
+                    </h5>
+                    <app-meter-energy-histogram [meterData]="meterData"
+                        [selectedMeter]="selectedMeter"></app-meter-energy-histogram>
+                </div>
+            </ng-container>
+        </div>
+    </ng-template>
+</ng-template>

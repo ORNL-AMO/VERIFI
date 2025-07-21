@@ -118,9 +118,22 @@
         </div>
     </ng-container>
 </ng-container>
-<div class="alert alert-warning text-center" *ngIf="!hasMeterData">
-    No data found for this meter. Please enter utility bills under the "Meter Management" tab.
-</div>
+<ng-container *ngIf="!hasMeterData">
+    <div class="text-center mt-5">
+        <h5>No bills found for {{selectedMeter.name}}.</h5>
+        <p>Please <i class="fa fa-plus"></i> Add New Bill or <i class="fa fa-upload"></i> Import multiple bills from
+            excel.
+        </p>
+        <div class="d-flex w-100 justify-content-center">
+            <div class="pe-1">
+                <button class="btn action-btn" (click)="meterDataAdd()"><i class="fa fa-plus"></i> Add New Bill</button>
+            </div>
+            <div class="ps-1">
+                <button class="btn nav-btn" (click)="uploadData()"><i class="fa fa-upload"></i> Import Data</button>
+            </div>
+        </div>
+    </div>
+</ng-container>
 
 
 
