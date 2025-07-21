@@ -13,6 +13,7 @@ export class DataEvaluationService {
   helpPanelOpen: BehaviorSubject<boolean>;
   helpWidth: number = 200;
   sidebarWidth: number = 200;
+  helpWidthBs: BehaviorSubject<number>;
   constructor(private localStorageService: LocalStorageService) {
     this.fileReferences = new BehaviorSubject<Array<FileReference>>([]);
 
@@ -25,6 +26,8 @@ export class DataEvaluationService {
     } else {
       this.helpPanelOpen = new BehaviorSubject<boolean>(true);
     }
+
+    this.helpWidthBs = new BehaviorSubject<number>(this.helpWidth);
 
     this.sidebarWidth = this.localStorageService.retrieve("dataEvalSidebarWidth");
     if (!this.sidebarWidth) {

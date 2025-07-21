@@ -1,7 +1,7 @@
 .button-div{
     position: fixed;
     bottom: 0px;
-    right: 0px;
+    /* right: 0px; */
     background-color: white;
     /* border-radius: 25px; */
     padding: 9.5px;
@@ -16,12 +16,3 @@
     font-size: 25px
 }
 
-.button-div.help-open{
-    right: 260px;
-}
-
-@media (max-width: 1500px) {
-    .button-div.help-open{
-        right: 200px;
-    }
-}
