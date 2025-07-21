@@ -33,8 +33,7 @@ export class PredictorDataQualityReportComponent {
   }
 
   predictorDataAdd() {
-    this.router.navigateByUrl('/data-management/' + this.selectedPredictor.accountId + '/facilities/' + this.selectedPredictor.facilityId + '/predictors/' + this.selectedPredictor.guid + '/predictor-data/new-entry');
-
+    this.router.navigateByUrl('/data-management/' + this.selectedPredictor.accountId + '/facilities/' + this.selectedPredictor.facilityId + '/predictors/' + this.selectedPredictor.guid + '/predictor-data');
   }
 
   uploadData() {

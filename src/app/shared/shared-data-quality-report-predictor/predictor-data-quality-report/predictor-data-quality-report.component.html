@@ -1,14 +1,15 @@
 <ng-template [ngIf]="!hasData" [ngIfElse]="hasDataTemplate">
-    <div class="text-center mt-5">
-        <h5>No data found for {{selectedPredictor.name}}.</h5>
-        <p>Please <i class="fa fa-plus"></i> Add New Data or <i class="fa fa-upload"></i> Import multiple data points
-            from
+
+    <div class="text-center mt-5 no-meters">
+        <h5>No predictor entries found for this predictor.</h5>
+        <p>Please <i class="fa fa-plus"></i> Add New Predictor Entry or <i class="fa fa-upload"></i> Import multiple
+            predictor entries from
             excel.
         </p>
         <div class="d-flex w-100 justify-content-center">
             <div class="pe-1">
-                <button class="btn action-btn" (click)="predictorDataAdd()"><i class="fa fa-plus"></i> Add New
-                    Data</button>
+                <button class="btn action-btn" (click)="predictorDataAdd()"><i class="fa fa-plus"></i> Add
+                    Predictor Data</button>
             </div>
             <div class="ps-1">
                 <button class="btn nav-btn" (click)="uploadData()"><i class="fa fa-upload"></i> Import Data</button>
