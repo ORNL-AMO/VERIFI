@@ -5,12 +5,18 @@ import { PredictorTimeseriesGraphComponent } from "./predictor-timeseries-graph/
 import { PredictorHistogramGraphComponent } from "./predictor-histogram-graph/predictor-histogram-graph.component";
 import { PredictorStatisticsTableComponent } from "./predictor-statistics-table/predictor-statistics-table.component";
 import { FormsModule } from "@angular/forms";
+import { PredictorDataQualityReportComponent } from "./predictor-data-quality-report/predictor-data-quality-report.component";
+import { PredictorDataQualityReportModalComponent } from "./predictor-data-quality-report-modal/predictor-data-quality-report-modal.component";
+import { PredictorDataQualityStatusPipe } from './predictor-data-quality-status.pipe';
 
 @NgModule({
   declarations: [
     PredictorTimeseriesGraphComponent,
     PredictorHistogramGraphComponent,
-    PredictorStatisticsTableComponent
+    PredictorStatisticsTableComponent,
+    PredictorDataQualityReportComponent,
+    PredictorDataQualityReportModalComponent,
+    PredictorDataQualityStatusPipe
   ],
   imports: [
     CommonModule,
@@ -18,9 +24,9 @@ import { FormsModule } from "@angular/forms";
     FormsModule
 ],
   exports: [
-    PredictorTimeseriesGraphComponent,
-    PredictorHistogramGraphComponent,
-    PredictorStatisticsTableComponent
+    PredictorDataQualityReportComponent,
+    PredictorDataQualityReportModalComponent,
+    PredictorDataQualityStatusPipe
   ]
 })
 export class SharedDataQualityReportPredictorsModule { }

@@ -12,25 +12,21 @@ import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 })
 export class PredictorHistogramGraphComponent {
 
-  @Input()
+  @Input({ required: true })
   predictorData: Array<IdbPredictorData>;
-  @Input()
+  @Input({ required: true })
   selectedPredictor: IdbPredictor;
-  @Input()
-  binSize: number = 10;
-  @Output()
-  onBinSizeChange: EventEmitter<number> = new EventEmitter<number>();
 
   @ViewChild('predictorHistogram', { static: false }) predictorHistogram: ElementRef;
   viewInitialized: boolean = false;
   meterEnergyHistogram: any;
-  numberOfBins: number = 10;
+  numberOfBins: number = 50;
+  binSize: number;
 
   constructor(private plotlyService: PlotlyService) { }
 
   ngOnChanges(changes: SimpleChanges) {
-    if (changes['predictorData'] && this.viewInitialized && changes['binSize']) {
-      this.numberOfBins = this.binSize;
+    if (changes['predictorData'] && this.viewInitialized) {
       this.drawChart();
     }
   }
@@ -38,13 +34,11 @@ export class PredictorHistogramGraphComponent {
   ngAfterViewInit() {
     this.viewInitialized = true;
     if (this.predictorData) {
-      this.numberOfBins = this.binSize;
       this.drawChart();
     }
   }
 
   updateGraph() {
-    this.onBinSizeChange.emit(this.numberOfBins);
     if (this.viewInitialized) {
       this.drawChart();
     }
@@ -69,7 +63,8 @@ export class PredictorHistogramGraphComponent {
 
     const min = Math.min(...this.predictorData.map(data => { return data.amount }));
     const max = Math.max(...this.predictorData.map(data => { return data.amount }));
-    const binSize = (max - min) / this.numberOfBins;
+    this.binSize = this.numberOfBins && this.numberOfBins > 1 ? (max - min) / (this.numberOfBins) : (max);
+    this.binSize = Math.ceil(this.binSize)
     var data = [
       {
         type: "histogram",
@@ -79,7 +74,9 @@ export class PredictorHistogramGraphComponent {
           line: { color: '#fff', width: 1 }
         },
         xbins: {
-          size: binSize
+          start: min,
+          size: this.binSize,
+          end: max
         },
         hoverlabel: {
           bgcolor: "#1976d2",
@@ -89,11 +86,9 @@ export class PredictorHistogramGraphComponent {
     ];
 
     let height: number = 400;
-    const containerWidth = this.predictorHistogram.nativeElement.offsetWidth;
 
     var layout = {
       height: height,
-      width: containerWidth,
       autosize: true,
       plot_bgcolor: "#e7f1f2",
       paper_bgcolor: "#e7f1f2",

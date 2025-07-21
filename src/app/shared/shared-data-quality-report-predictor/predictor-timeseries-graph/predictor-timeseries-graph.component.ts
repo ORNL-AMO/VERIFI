@@ -2,6 +2,7 @@ import { Component, ElementRef, Input, SimpleChanges, ViewChild } from '@angular
 import { PlotlyService } from 'angular-plotly.js';
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
+import { PredictorStatistics } from '../predictorDataQualityStatistics';
 
 @Component({
   selector: 'app-predictor-timeseries-graph',
@@ -12,10 +13,12 @@ import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 })
 export class PredictorTimeseriesGraphComponent {
 
-  @Input()
+  @Input({ required: true })
   predictorData: Array<IdbPredictorData>;
-  @Input()
+  @Input({ required: true })
   selectedPredictor: IdbPredictor;
+  @Input({ required: true })
+  stats: PredictorStatistics;
 
   @ViewChild('predictorTimeSeriesGraph', { static: false }) predictorTimeSeriesGraph: ElementRef;
   viewInitialized: boolean = false;
@@ -39,18 +42,37 @@ export class PredictorTimeseriesGraphComponent {
     if (this.selectedPredictor.unit && this.selectedPredictor.predictorType != 'Weather') {
       return this.selectedPredictor.unit;
     } else if (this.selectedPredictor.predictorType == 'Weather') {
-      return '&#8457;';
+      if (this.selectedPredictor.weatherDataType == 'CDD' || this.selectedPredictor.weatherDataType == 'HDD') {
+        return 'days';
+      } else if (this.selectedPredictor.weatherDataType == 'dryBulbTemp') {
+        return '&#8457;';
+      } else if (this.selectedPredictor.weatherDataType == 'relativeHumidity') {
+        return '%';
+      }
     }
     return '';
   }
 
   drawChart() {
     let unit = this.calculateUnit();
-    if(unit != null && unit != undefined && unit != '') {
+    if (unit != null && unit != undefined && unit != '') {
       unit = '(' + unit + ')';
     }
-    else 
+    else {
       unit = '';
+    }
+
+
+    let markers: Array<{
+      color: string,
+      symbol: string,
+      size: number
+    }> = this.predictorData.map(data => { return this.getMarker(data.amount) });
+
+    let markerSizes: Array<number> = markers.map(marker => marker.size);
+    let markerColors: Array<string> = markers.map(marker => marker.color);
+    let markerSymbols: Array<string> = markers.map(marker => marker.symbol);
+
     var data = [
       {
         type: "scatter",
@@ -60,21 +82,19 @@ export class PredictorTimeseriesGraphComponent {
         y: this.predictorData.map(data => { return data.amount }),
         line: { color: '#832a75', width: 3 },
         marker: {
-          size: 8,
-          color: '#43a047',
-          symbol: 'circle',
+          color: markerColors,
+          size: markerSizes,
+          symbol: markerSymbols,
           line: { width: 2, color: '#fff' }
         },
-         hovertemplate: `Date: %{x}<br>${this.selectedPredictor.name}: %{y} ${unit} <extra></extra>`
+        hovertemplate: `Date: %{x}<br>${this.selectedPredictor.name}: %{y} ${unit} <extra></extra>`
       }
     ];
 
     let height: number = 400;
-    const containerWidth = this.predictorTimeSeriesGraph.nativeElement.offsetWidth;
 
     var layout = {
       height: height,
-      width: containerWidth,
       autosize: true,
       plot_bgcolor: "#e7f1f2",
       paper_bgcolor: "#e7f1f2",
@@ -102,6 +122,25 @@ export class PredictorTimeseriesGraphComponent {
       responsive: true
     };
     this.plotlyService.newPlot(this.predictorTimeSeriesGraph.nativeElement, data, layout, config);
+  }
+
+
+  getMarker(dataValue: number) {
+    if (dataValue > this.stats.medianminus2_5MAD && dataValue < this.stats.medianplus2_5MAD) {
+      return {
+        size: 8,
+        color: '#43a047',
+        symbol: 'circle',
+        line: { width: 2, color: '#fff' }
+      };
+    } else {
+      return {
+        size: 12,
+        color: '#d32f2f',
+        symbol: 'x',
+        line: { width: 2, color: '#fff' }
+      };
+    }
   }
 }
 
