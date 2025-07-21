@@ -3,6 +3,7 @@ import { Subscription } from 'rxjs';
 import { AccountReportsService } from '../account-reports.service';
 import { AccountReportDbService } from 'src/app/indexedDB/account-report-db.service';
 import { IdbAccountReport } from 'src/app/models/idbModels/accountReport';
+import { DataEvaluationService } from 'src/app/data-evaluation/data-evaluation.service';
 
 @Component({
     selector: 'app-print-report-button',
@@ -15,8 +16,12 @@ export class PrintReportButtonComponent {
   print: boolean;
   printSub: Subscription;
   selectedReport: IdbAccountReport;
+
+  helpWidth: number;
+  helpWidthSub: Subscription;
   constructor(private accountReportsService: AccountReportsService,
-    private accountReportDbService: AccountReportDbService) {
+    private accountReportDbService: AccountReportDbService,
+    private dataEvaluationService: DataEvaluationService) {
 
   }
 
@@ -28,10 +33,14 @@ export class PrintReportButtonComponent {
         this.printReport();
       }
     });
+    this.helpWidthSub = this.dataEvaluationService.helpWidthBs.subscribe(helpWidth => {
+      this.helpWidth = helpWidth;
+    });
   }
 
   ngOnDestroy() {
     this.printSub.unsubscribe();
+    this.helpWidthSub.unsubscribe();
   }
 
 
