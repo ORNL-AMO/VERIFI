@@ -63,8 +63,6 @@ import { AccountSavingsReportDashboardComponent } from './account-reports-dashbo
 import { AccountSavingsReportComponent } from './account-savings-report/account-savings-report.component';
 import { AccountSavingsReportSetupComponent } from './account-report-setup/account-savings-report-setup/account-savings-report-setup.component';
 import { SharedAnalysisModule } from "src/app/shared/shared-analysis/shared-analysis.module";
-import { AnnualSavingsSummaryTableComponent } from './account-savings-report/annual-savings-summary-table/annual-savings-summary-table.component';
-import { AnnualFacilitySavingsSummaryTableComponent } from './account-savings-report/annual-facility-savings-summary-table/annual-facility-savings-summary-table.component';
 
 @NgModule({
   declarations: [
@@ -124,9 +122,7 @@ import { AnnualFacilitySavingsSummaryTableComponent } from './account-savings-re
     AnalysisDataValidationTablesComponent,
     AccountSavingsReportDashboardComponent,
     AccountSavingsReportComponent,
-    AccountSavingsReportSetupComponent,
-    AnnualSavingsSummaryTableComponent,
-    AnnualFacilitySavingsSummaryTableComponent
+    AccountSavingsReportSetupComponent
   ],
   imports: [
     CommonModule,
