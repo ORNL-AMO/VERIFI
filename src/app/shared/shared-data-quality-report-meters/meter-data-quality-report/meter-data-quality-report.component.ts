@@ -40,7 +40,7 @@ export class MeterDataQualityReportComponent {
       const { energyStats, costStats } = getStatistics(this.meterData, this.selectedMeter);
       this.energyStats = energyStats;
       this.costStats = costStats;
-      this.includeCosts = isNaN(this.costStats.average) == false || this.costStats.average == 0;
+      this.includeCosts = isNaN(this.costStats.average) == false && this.costStats.average != 0;
       this.energyOutlierCount = energyStats.outliers;
       this.costOutlierCount = costStats.outliers;
       if (this.energyOutlierCount > 0 || this.costOutlierCount > 0) {

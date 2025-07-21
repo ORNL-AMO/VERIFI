@@ -22,6 +22,7 @@ export class MeterEnergyHistogramComponent {
   meterDataToPlot: number[];
   unit: string;
   numberOfBins: number = 50;
+  binSize: number;
 
   constructor(private plotlyService: PlotlyService) { }
 
@@ -54,8 +55,8 @@ export class MeterEnergyHistogramComponent {
 
     const min = Math.min(...this.meterDataToPlot);
     const max = Math.max(...this.meterDataToPlot);
-    const binSize = (max - min) / this.numberOfBins;
-
+    this.binSize = this.numberOfBins && this.numberOfBins > 1 ? (max - min) / (this.numberOfBins) : (max);
+    this.binSize = Math.ceil(this.binSize)
     var data = [
       {
         type: "histogram",
@@ -65,7 +66,9 @@ export class MeterEnergyHistogramComponent {
           line: { color: '#fff', width: 1 }
         },
         xbins: {
-          size: binSize
+          start: min,
+          size: this.binSize,
+          end: max
         },
         hoverlabel: {
           bgcolor: "#1976d2",

@@ -63,15 +63,16 @@
                     <i class="fa fa-line-chart me-2"></i>
                     Total Consumption
                 </h5>
-                <app-meter-energy-timeseries-graph [meterData]="meterData"
-                    [selectedMeter]="selectedMeter"></app-meter-energy-timeseries-graph>
+                <app-meter-energy-timeseries-graph [meterData]="meterData" [selectedMeter]="selectedMeter"
+                    [energyStats]="energyStats"></app-meter-energy-timeseries-graph>
             </div>
             <div class="col-md-6 col-sm-12">
                 <h5>
                     <i class="fa fa-line-chart me-2"></i>
                     Total Cost
                 </h5>
-                <app-meter-cost-timeseries-graph [meterData]="meterData"></app-meter-cost-timeseries-graph>
+                <app-meter-cost-timeseries-graph [meterData]="meterData"
+                    [costStats]="costStats"></app-meter-cost-timeseries-graph>
             </div>
         </div>
 
@@ -113,7 +114,7 @@
                     Total Consumption
                 </h5>
                 <app-meter-energy-timeseries-graph [meterData]="meterData"
-                    [selectedMeter]="selectedMeter"></app-meter-energy-timeseries-graph>
+                    [selectedMeter]="selectedMeter" [energyStats]="energyStats"></app-meter-energy-timeseries-graph>
             </div>
             <ng-container *ngIf="includeConsumption">
                 <div class="col-md-6 col-sm-12">

@@ -84,7 +84,7 @@
                     </span>
                 </td>
             </tr>
-            <tr class="align-middle" *ngIf="costStats.average != 0">
+            <tr class="align-middle" *ngIf="costStats.average != 0 && !isValueNaN(costStats.average)">
                 <td>
                     Cost ($)
                 </td>

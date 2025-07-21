@@ -16,6 +16,7 @@ export class MeterCostHistogramComponent {
   @ViewChild('meterCostHistogram', { static: false }) meterCostHistogram: ElementRef;
   viewInitialized: boolean = false;
   numberOfBins: number = 50;
+  binSize: number;
 
   constructor(private plotlyService: PlotlyService) { }
 
@@ -41,7 +42,8 @@ export class MeterCostHistogramComponent {
   drawChart() {
     const min = Math.min(...this.meterData.map(data => data.totalCost));
     const max = Math.max(...this.meterData.map(data => data.totalCost));
-    const binSize = (max - min) / this.numberOfBins;
+    this.binSize = this.numberOfBins && this.numberOfBins > 1 ? (max - min) / (this.numberOfBins) : (max);
+    this.binSize = Math.ceil(this.binSize)
     var data = [
       {
         type: "histogram",
@@ -51,7 +53,9 @@ export class MeterCostHistogramComponent {
           line: { color: '#fff', width: 1 }
         },
         xbins: {
-          size: binSize
+          start: min,
+          size: this.binSize,
+          end: max
         },
         hoverlabel: {
           bgcolor: "#1976d2",
