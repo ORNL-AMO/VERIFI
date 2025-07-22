@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { BehaviorSubject } from 'rxjs';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { AdditionalChargesFilters, DetailedChargesFilters, ElectricityDataFilters, EmissionsFilters, GeneralInformationFilters, GeneralUtilityDataFilters, VehicleDataFilters } from 'src/app/models/meterDataFilter';
+import { ElectricityDataFilters, EmissionsFilters, GeneralInformationFilters, GeneralUtilityDataFilters, VehicleDataFilters } from 'src/app/models/meterDataFilter';
 import * as _ from 'lodash';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { MeterSource } from 'src/app/models/constantsAndTypes';
@@ -51,12 +51,6 @@ export class UtilityMeterDataService {
   }
 
   checkSavedFilters(dataFilters: ElectricityDataFilters): ElectricityDataFilters {
-    if (!dataFilters.additionalCharges) {
-      dataFilters.additionalCharges = this.getDefaultAdditionalChargesFilters();
-    }
-    if (!dataFilters.detailedCharges) {
-      dataFilters.detailedCharges = this.getDefaultDetailChargesFilters();
-    }
     if (!dataFilters.emissionsFilters) {
       dataFilters.emissionsFilters = this.getDefaultEmissionsFilters();
     }
@@ -69,38 +63,11 @@ export class UtilityMeterDataService {
 
   getDefaultFilters(): ElectricityDataFilters {
     return {
-      detailedCharges: this.getDefaultDetailChargesFilters(),
-      additionalCharges: this.getDefaultAdditionalChargesFilters(),
       emissionsFilters: this.getDefaultEmissionsFilters(),
       generalInformationFilters: this.getDefaultGeneralInformationFilters()
     }
   }
-
-  getDefaultDetailChargesFilters(): DetailedChargesFilters {
-    return {
-      showSection: false,
-      block1: false,
-      block2: false,
-      block3: false,
-      other: false,
-      onPeak: false,
-      offPeak: false,
-      powerFactor: false
-    }
-  }
-
-
-  getDefaultAdditionalChargesFilters(): AdditionalChargesFilters {
-    return {
-      showSection: false,
-      nonEnergyCharge: false,
-      transmissionAndDelivery: false,
-      localSalesTax: false,
-      stateSalesTax: false,
-      latePayment: false,
-      otherCharge: false,
-    }
-  }
+  
   getDefaultGeneralInformationFilters(): GeneralInformationFilters {
     return {
       showSection: true,

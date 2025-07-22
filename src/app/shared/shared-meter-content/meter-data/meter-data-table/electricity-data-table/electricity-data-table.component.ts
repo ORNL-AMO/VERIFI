@@ -2,7 +2,7 @@ import { Component, ElementRef, EventEmitter, Input, OnInit, Output, SimpleChang
 import { Subscription } from 'rxjs';
 import * as _ from 'lodash';
 import { CopyTableService } from 'src/app/shared/helper-services/copy-table.service';
-import { AdditionalChargesFilters, DetailedChargesFilters, EmissionsFilters, GeneralInformationFilters } from 'src/app/models/meterDataFilter';
+import { EmissionsFilters, GeneralInformationFilters } from 'src/app/models/meterDataFilter';
 import { EmissionsResults, SubregionEmissions } from 'src/app/models/eGridEmissions';
 import { getEmissions, setUtilityDataEmissionsValues } from 'src/app/calculations/emissions-calculations/emissions';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
@@ -167,9 +167,10 @@ export class ElectricityDataTableComponent implements OnInit {
     let detailedChargesCount: number = 0;
     if (this.selectedMeter.charges) {
       this.selectedMeter.charges.forEach(charge => {
-        if (charge.chargeType == 'demand' || charge.chargeType == 'consumption') {
-          detailedChargesCount += 2;
-        } else {
+        if ((charge.chargeType == 'demand' || charge.chargeType == 'consumption') && charge.displayUsageInTable) {
+          detailedChargesCount++;
+        }
+        if (charge.displayChargeInTable) {
           detailedChargesCount++;
         }
       });

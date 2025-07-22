@@ -1,8 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { FormGroup } from '@angular/forms';
-import { Subscription } from 'rxjs';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { AdditionalChargesFilters, DetailedChargesFilters, ElectricityDataFilters } from 'src/app/models/meterDataFilter';
 import { EmissionsResults } from 'src/app/models/eGridEmissions';
 import { getEmissions } from 'src/app/calculations/emissions-calculations/emissions';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
@@ -12,7 +10,6 @@ import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { checkMeterReadingExistForDate, IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbCustomFuel } from 'src/app/models/idbModels/customFuel';
-import { UtilityMeterDataService } from 'src/app/shared/shared-meter-content/utility-meter-data.service';
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 
@@ -34,29 +31,16 @@ export class EditElectricityBillComponent implements OnInit {
   @Input()
   invalidDate: boolean;
 
-  electricityDataFilters: ElectricityDataFilters;
-  electricityDataFiltersSub: Subscription;
-  showDetailsColumnOne: boolean;
-  showDetailsColumnTwo: boolean;
-  detailedChargesFilter: DetailedChargesFilters;
-  additionalChargesFilter: AdditionalChargesFilters;
-
-
   energyUnit: string;
   totalLocationEmissions: number = 0;
   totalMarketEmissions: number = 0;
   RECs: number = 0;
-  constructor(private utilityMeterDataDbService: UtilityMeterDatadbService, private utilityMeterDataService: UtilityMeterDataService,
+  constructor(private utilityMeterDataDbService: UtilityMeterDatadbService,
     private eGridService: EGridService, private facilityDbService: FacilitydbService,
     private customFuelDbService: CustomFuelDbService,
     private accountDbService: AccountdbService) { }
 
   ngOnInit(): void {
-    this.electricityDataFiltersSub = this.utilityMeterDataService.electricityInputFilters.subscribe(dataFilters => {
-      this.detailedChargesFilter = dataFilters.detailedCharges;
-      this.additionalChargesFilter = dataFilters.additionalCharges;
-      this.setDisplayColumns();
-    });
     this.setTotalEmissions();
   }
 
@@ -64,20 +48,6 @@ export class EditElectricityBillComponent implements OnInit {
     this.energyUnit = this.editMeter.startingUnit;
     this.checkDate();
     this.setTotalEmissions();
-  }
-
-  ngOnDestroy() {
-    this.electricityDataFiltersSub.unsubscribe();
-  }
-
-  setDisplayColumns() {
-    this.showDetailsColumnOne = (
-      this.detailedChargesFilter.block1 || this.detailedChargesFilter.block2 || this.detailedChargesFilter.block3 || this.detailedChargesFilter.other
-    );
-
-    this.showDetailsColumnTwo = (
-      this.detailedChargesFilter.onPeak || this.detailedChargesFilter.offPeak || this.detailedChargesFilter.powerFactor
-    );
   }
 
   checkDate() {

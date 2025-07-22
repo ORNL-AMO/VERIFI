@@ -112,5 +112,7 @@ export interface MeterCharge {
     guid: string,
     name: string,
     chargeType: string,
-    chargeUnit: ChargeCostUnit
+    chargeUnit: ChargeCostUnit,
+    displayUsageInTable: boolean,
+    displayChargeInTable: boolean
 }

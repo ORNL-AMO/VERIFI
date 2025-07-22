@@ -116,7 +116,9 @@ export class EditMeterFormService {
         guid: chargeGroup.get('guid').value,
         name: chargeGroup.get('name').value,
         chargeType: chargeGroup.get('chargeType').value,
-        chargeUnit: chargeGroup.get('chargeUnit').value
+        chargeUnit: chargeGroup.get('chargeUnit').value,
+        displayUsageInTable: chargeGroup.get('displayUsageInTable').value,
+        displayChargeInTable: chargeGroup.get('displayChargeInTable').value
       };
     });
 
@@ -291,7 +293,9 @@ export class EditMeterFormService {
       guid: [getGUID()],
       name: ['New Charge', Validators.required],
       chargeType: ['consumption', Validators.required],
-      chargeUnit: ['dollarsPerKilowatt', Validators.required]
+      chargeUnit: ['dollarsPerKilowattHour', Validators.required],
+      displayChargeInTable: [true],
+      displayUsageInTable: [true]
     });
     chargesArray.push(newCharge);
   }

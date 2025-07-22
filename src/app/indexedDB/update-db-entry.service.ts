@@ -281,6 +281,8 @@ export class UpdateDbEntryService {
         name: chargeName,
         chargeType: chargeType,
         chargeUnit: chargeUnit,
+        displayUsageInTable: true,
+        displayChargeInTable: true
       })
       meterData.charges.push({
         chargeGuid: guid,
