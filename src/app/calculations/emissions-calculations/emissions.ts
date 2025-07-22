@@ -146,15 +146,16 @@ export function getEmissions(meter: IdbUtilityMeter,
                 mobileCarbonEmissions = (totalVolume * meterFuel.CO2) / 1000;
                 mobileBiogenicEmissions = 0;
             }
-
-            // let miles = (totalVolume * hhvOrFuelEfficiency);
-            // let totalCH4 = miles * CH4_Multiplier * meterFuel.CH4;
-            // let totalN2O = miles * N2O_Multiplier * meterFuel.N2O;
-            
-            let totalCH4 = ((CH4_Multiplier * totalVolume * meterFuel.CH4) / 1000) / 1000;
-            let totalN2O = ((N2O_Multiplier * totalVolume * meterFuel.N2O) / 1000) / 1000;
-            mobileOtherEmissions = ((totalCH4 + totalN2O) / 1000) / 1000;
-
+            if (meter.vehicleCategory == 2) {
+                let miles = (totalVolume * hhvOrFuelEfficiency);
+                let totalCH4 = miles * CH4_Multiplier * meterFuel.CH4;
+                let totalN2O = miles * N2O_Multiplier * meterFuel.N2O;
+                mobileOtherEmissions = ((totalCH4 + totalN2O) / 1000) / 1000;
+            } else {
+                let totalCH4 = ((CH4_Multiplier * totalVolume * meterFuel.CH4) / 1000) / 1000;
+                let totalN2O = ((N2O_Multiplier * totalVolume * meterFuel.N2O) / 1000) / 1000;
+                mobileOtherEmissions = ((totalCH4 + totalN2O) / 1000) / 1000;
+            }
         } else {
             //TOTAL VOLUME IS IN MILES
             if (vehicleDistanceUnit != 'mi') {
