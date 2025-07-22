@@ -13,7 +13,7 @@ import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
-import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
+import { IdbUtilityMeterData, updateMeterDataCharges } from 'src/app/models/idbModels/utilityMeterData';
 import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 
 @Component({
@@ -41,7 +41,8 @@ export class FacilityMeterComponent {
     private sharedDataService: SharedDataService,
     private toastNotificationsService: ToastNotificationsService,
     private loadingService: LoadingService,
-    private utilityMeterDataDbService: UtilityMeterDatadbService
+    private utilityMeterDataDbService: UtilityMeterDatadbService,
+    private toastNotificationService: ToastNotificationsService
   ) {
 
   }
@@ -69,13 +70,34 @@ export class FacilityMeterComponent {
   }
 
   async saveChanges() {
+    this.loadingService.setLoadingMessage('Saving Meter...');
+    this.loadingService.setLoadingStatus(true);
     this.meterForm.markAsPristine();
     this.utilityMeter = this.utilityMeterDbService.getFacilityMeterById(this.utilityMeter.guid);
     this.utilityMeter = this.editMeterFormService.updateMeterFromForm(this.utilityMeter, this.meterForm);
     await firstValueFrom(this.utilityMeterDbService.updateWithObservable(this.utilityMeter));
+    await this.updateMeterData(this.utilityMeter);
     let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
     await this.dbChangesService.setMeters(selectedAccount, selectedFacility);
+    this.loadingService.setLoadingStatus(false);
+  }
+
+  async updateMeterData(meter: IdbUtilityMeter) {
+    this.loadingService.setLoadingMessage('Updating Meter Data...')
+    this.loadingService.setLoadingStatus(true);
+    let meterData: Array<IdbUtilityMeterData> = this.utilityMeterDataDbService.getMeterDataFromMeterId(meter.guid);
+    let dataNeedsUpdate: Array<IdbUtilityMeterData> = updateMeterDataCharges(meter, meterData);
+    if (dataNeedsUpdate.length > 0) {
+      for (let i = 0; i < dataNeedsUpdate.length; i++) {
+        await firstValueFrom(this.utilityMeterDataDbService.updateWithObservable(dataNeedsUpdate[i]));
+      }
+      let accountMeterData: Array<IdbUtilityMeterData> = await this.utilityMeterDataDbService.getAllAccountMeterData(meter.accountId);
+      this.utilityMeterDataDbService.accountMeterData.next(accountMeterData);
+      let facilityMeterData: Array<IdbUtilityMeterData> = accountMeterData.filter(meterData => { return meterData.facilityId == meter.facilityId });
+      this.utilityMeterDataDbService.facilityMeterData.next(facilityMeterData);
+      this.toastNotificationService.showToast("Meter and Meter Data Updated", undefined, undefined, false, "alert-success");
+    }
   }
 
   showDelete() {

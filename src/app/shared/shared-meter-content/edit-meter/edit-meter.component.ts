@@ -68,8 +68,6 @@ export class EditMeterComponent implements OnInit {
           this.meterForm.controls.vehicleFuel.disable();
           this.meterForm.controls.vehicleFuelEfficiency.disable();
           this.meterForm.controls.vehicleDistanceUnit.disable();
-
-
         }
       } else {
         this.addOrEdit = 'add';
@@ -112,7 +110,7 @@ export class EditMeterComponent implements OnInit {
     let dataNeedsUpdate: Array<IdbUtilityMeterData> = updateMeterDataCharges(meter, meterData)
     if (dataNeedsUpdate.length > 0) {
       for (let i = 0; i < dataNeedsUpdate.length; i++) {
-        await this.utilityMeterDataDbService.updateWithObservable(dataNeedsUpdate[i]);
+        await firstValueFrom(this.utilityMeterDataDbService.updateWithObservable(dataNeedsUpdate[i]));
       }
       let accountMeterData: Array<IdbUtilityMeterData> = await this.utilityMeterDataDbService.getAllAccountMeterData(this.selectedFacility.accountId);
       this.utilityMeterDataDbService.accountMeterData.next(accountMeterData);
