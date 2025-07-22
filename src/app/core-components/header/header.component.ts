@@ -114,12 +114,12 @@ export class HeaderComponent implements OnInit {
   }
 
   async addNewAccount() {
-    let account: IdbAccount = getNewIdbAccount();
-    account = await firstValueFrom(this.accountdbService.addWithObservable(account));
-    let accounts: Array<IdbAccount> = await firstValueFrom(this.accountdbService.getAll());
-    this.accountdbService.allAccounts.next(accounts);
-    await this.dbChangesService.selectAccount(account, false);
-    this.router.navigateByUrl('/data-management/' + account.guid);
+    // let account: IdbAccount = getNewIdbAccount();
+    // account = await firstValueFrom(this.accountdbService.addWithObservable(account));
+    // let accounts: Array<IdbAccount> = await firstValueFrom(this.accountdbService.getAll());
+    // this.accountdbService.allAccounts.next(accounts);
+    // await this.dbChangesService.selectAccount(account, false);
+    this.router.navigateByUrl('/welcome');
   }
 
   async switchAccount(account: IdbAccount) {

@@ -58,5 +58,8 @@ export const LabelTooltips = {
     },
     "settingsAddressLabel": {
         "tooltip": "Click on the search link to find the address or enter the address manually."
+    },
+    "meterCharges": {
+        "tooltip": "Add charges associated with this meter. Examples of charges include: demand charges, delivery fees, and taxes."
     }
 }

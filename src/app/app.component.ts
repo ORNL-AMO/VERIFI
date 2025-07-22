@@ -282,12 +282,18 @@ export class AppComponent {
     //set meters
     this.loadingMessage = "Loading Meters..";
     let accountMeters: Array<IdbUtilityMeter> = await this.utilityMeterDbService.getAllAccountMeters(account.guid);
+    let accountMeterData: Array<IdbUtilityMeterData> = await this.utilityMeterDataDbService.getAllAccountMeterData(account.guid);
     for (let i = 0; i < accountMeters.length; i++) {
-      let updateMeter: { utilityMeter: IdbUtilityMeter, isChanged: boolean } = this.updateDbEntryService.updateUtilityMeter(accountMeters[i]);
+      let updateMeter: { utilityMeter: IdbUtilityMeter, isChanged: boolean, utilityMeterData: Array<IdbUtilityMeterData>, meterDataChanged: boolean } = this.updateDbEntryService.updateUtilityMeter(accountMeters[i], accountMeterData);
       if (updateMeter.isChanged) {
         accountMeters[i] = updateMeter.utilityMeter;
         await firstValueFrom(this.utilityMeterDbService.updateWithObservable(accountMeters[i]));
       };
+      if(updateMeter.meterDataChanged) {
+        for(let i = 0; i < updateMeter.utilityMeterData.length; i++) {
+          await firstValueFrom(this.utilityMeterDataDbService.updateWithObservable(updateMeter.utilityMeterData[i]));
+        }
+      }
     }
     this.utilityMeterDbService.accountMeters.next(accountMeters);
   }

@@ -2,7 +2,7 @@ import { Component, ElementRef, EventEmitter, Input, OnInit, Output, SimpleChang
 import { Subscription } from 'rxjs';
 import * as _ from 'lodash';
 import { CopyTableService } from 'src/app/shared/helper-services/copy-table.service';
-import { AdditionalChargesFilters, DetailedChargesFilters, EmissionsFilters, GeneralInformationFilters } from 'src/app/models/meterDataFilter';
+import { EmissionsFilters, GeneralInformationFilters } from 'src/app/models/meterDataFilter';
 import { EmissionsResults, SubregionEmissions } from 'src/app/models/eGridEmissions';
 import { getEmissions, setUtilityDataEmissionsValues } from 'src/app/calculations/emissions-calculations/emissions';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
@@ -16,6 +16,7 @@ import { UtilityMeterDataService } from 'src/app/shared/shared-meter-content/uti
 import { AccountdbService } from 'src/app/indexedDB/account-db.service';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { ElectronService } from 'src/app/electron/electron.service';
+import { OrderMeterDataByPipe } from '../order-meter-data-by.pipe';
 
 @Component({
   selector: 'app-electricity-data-table',
@@ -36,13 +37,11 @@ export class ElectricityDataTableComponent implements OnInit {
   setEdit: EventEmitter<IdbUtilityMeterData> = new EventEmitter<IdbUtilityMeterData>();
   @Output('setDelete')
   setDelete: EventEmitter<IdbUtilityMeterData> = new EventEmitter<IdbUtilityMeterData>();
-  
+
   @ViewChild('meterTable', { static: false }) meterTable: ElementRef;
 
 
   electricityDataFilterSub: Subscription;
-  detailedChargesFilters: DetailedChargesFilters;
-  additionalChargesFilters: AdditionalChargesFilters;
   generalInformationFilters: GeneralInformationFilters;
   emissionsFilters: EmissionsFilters;
   allChecked: boolean;
@@ -50,10 +49,11 @@ export class ElectricityDataTableComponent implements OnInit {
 
   orderDataField: string = 'readDate';
   orderByDirection: string = 'desc';
+  orderByCharge: 'amount' | 'usage';
   currentPageNumber: number = 1;
   copyingTable: boolean = false;
   numDetailedCharges: number;
-  numAdditionalCharges: number;
+
   numGeneralInformation: number;
   numEmissions: number;
   showEstimated: boolean;
@@ -74,8 +74,6 @@ export class ElectricityDataTableComponent implements OnInit {
       this.allChecked = (hasFalseChecked == undefined);
     }
     this.electricityDataFilterSub = this.utilityMeterDataService.tableElectricityFilters.subscribe(electricityDataFilters => {
-      this.detailedChargesFilters = electricityDataFilters.detailedCharges;
-      this.additionalChargesFilters = electricityDataFilters.additionalCharges;
       this.generalInformationFilters = electricityDataFilters.generalInformationFilters;
       this.emissionsFilters = electricityDataFilters.emissionsFilters;
       this.setColumnNumbers();
@@ -103,7 +101,7 @@ export class ElectricityDataTableComponent implements OnInit {
 
   checkAll() {
     if (this.allChecked) {
-      this.selectedMeterData = _.orderBy(this.selectedMeterData, this.orderDataField, this.orderByDirection)
+      this.selectedMeterData = new OrderMeterDataByPipe().transform(this.selectedMeterData, this.orderDataField, this.orderByDirection, this.orderByCharge);
       let displayedItems = this.selectedMeterData.slice(((this.currentPageNumber - 1) * this.itemsPerPage), (this.currentPageNumber * this.itemsPerPage))
       displayedItems.forEach(item => {
         item.checked = this.allChecked;
@@ -132,7 +130,8 @@ export class ElectricityDataTableComponent implements OnInit {
     this.setDelete.emit(meterData);
   }
 
-  setOrderDataField(str: string) {
+  setOrderDataField(str: string, orderByCharge?: 'amount' | 'usage') {
+    this.orderByCharge = orderByCharge;
     if (str == this.orderDataField) {
       if (this.orderByDirection == 'desc') {
         this.orderByDirection = 'asc';
@@ -144,28 +143,6 @@ export class ElectricityDataTableComponent implements OnInit {
     }
   }
 
-  checkError(readDate: Date): string {
-    let readDateItem: Date = new Date(readDate);
-    // if (this.meterListItem.errorDate) {
-    //   if (readDateItem.getUTCFullYear() == this.meterListItem.errorDate.getUTCFullYear() && readDateItem.getUTCMonth() == this.meterListItem.errorDate.getUTCMonth() && readDateItem.getUTCDate() == this.meterListItem.errorDate.getUTCDate()) {
-    //     return 'alert-danger';
-    //   }
-    // } else if (this.meterListItem.warningDate) {
-    //   if (readDateItem.getUTCFullYear() == this.meterListItem.warningDate.getUTCFullYear() && readDateItem.getUTCMonth() == this.meterListItem.warningDate.getUTCMonth()) {
-    //     return 'alert-warning';
-    //   }
-    // } else if (this.meterListItem.missingMonth) {
-    //   let testDate1: Date = new Date(readDateItem.getUTCFullYear(), readDateItem.getUTCMonth() - 1);
-    //   let testDate2: Date = new Date(readDateItem.getUTCFullYear(), readDateItem.getUTCMonth() + 1);
-    //   if (testDate1.getUTCFullYear() == this.meterListItem.missingMonth.getUTCFullYear() && testDate1.getUTCMonth() == this.meterListItem.missingMonth.getUTCMonth()) {
-    //     return 'alert-warning';
-    //   }
-    //   if (testDate2.getUTCFullYear() == this.meterListItem.missingMonth.getUTCFullYear() && testDate2.getUTCMonth() == this.meterListItem.missingMonth.getUTCMonth()) {
-    //     return 'alert-warning';
-    //   }
-    // }
-    return undefined;
-  }
 
   copyTable() {
     this.copyingTable = true;
@@ -187,35 +164,57 @@ export class ElectricityDataTableComponent implements OnInit {
   }
 
   setColumnNumbers() {
-    let additionalChargesCount: number = 0;
-    Object.keys(this.additionalChargesFilters).forEach(key => {
-      if (key != 'showSection' && this.additionalChargesFilters[key] == true) {
-        additionalChargesCount++;
-      }
-    });
-    this.numAdditionalCharges = additionalChargesCount;
     let detailedChargesCount: number = 0;
-    Object.keys(this.detailedChargesFilters).forEach(key => {
-      if (key != 'showSection' && this.detailedChargesFilters[key] == true) {
-        detailedChargesCount++;
-      }
-    });
-    this.numDetailedCharges = detailedChargesCount * 2;
+    if (this.selectedMeter.charges) {
+      this.selectedMeter.charges.forEach(charge => {
+        if ((charge.chargeType == 'demand' || charge.chargeType == 'consumption') && charge.displayUsageInTable) {
+          detailedChargesCount++;
+        }
+        if (charge.displayChargeInTable) {
+          detailedChargesCount++;
+        }
+      });
+    }
+    this.numDetailedCharges = detailedChargesCount;
 
     let emissionCount: number = 0;
-    Object.keys(this.emissionsFilters).forEach(key => {
-      if (key != 'showSection' && this.emissionsFilters[key] == true) {
+    if (this.isRECs) {
+      if (this.emissionsFilters.recs) {
         emissionCount++;
       }
-    });
+      if (this.emissionsFilters.excessRECs) {
+        emissionCount++;
+      }
+      if (this.emissionsFilters.excessRECsEmissions) {
+        emissionCount++;
+      }
+    } else {
+      if (this.emissionsFilters.marketEmissions) {
+        emissionCount++;
+      }
+      if (this.emissionsFilters.locationEmissions) {
+        emissionCount++;
+      }
+      if (this.emissionsFilters.recs) {
+        emissionCount++;
+      }
+    }
     this.numEmissions = emissionCount;
 
-    let generalInfoCount: number = 0;
-    Object.keys(this.generalInformationFilters).forEach(key => {
-      if (key != 'showSection' && this.generalInformationFilters[key] == true) {
-        generalInfoCount++;
+    if (this.isRECs) {
+      if(this.generalInformationFilters.totalCost){
+        this.numGeneralInformation = 2
+      }else{
+        this.numGeneralInformation = 1;
       }
-    });
-    this.numGeneralInformation = generalInfoCount + 2;
+    } else {
+      let generalInfoCount: number = 0;
+      Object.keys(this.generalInformationFilters).forEach(key => {
+        if (key != 'showSection' && this.generalInformationFilters[key] == true) {
+          generalInfoCount++;
+        }
+      });
+      this.numGeneralInformation = generalInfoCount + 2;
+    }
   }
 }

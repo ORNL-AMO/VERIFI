@@ -35,7 +35,7 @@ export class EditBillComponent implements OnInit {
   displayVehicleFuelEfficiency: boolean;
   invalidDate: boolean;
   showFilterDropdown: boolean = false;
-  inDataWizard: boolean;
+  inDataManagement: boolean;
   paramsSub: Subscription;
   isElectron: boolean;
   constructor(private activatedRoute: ActivatedRoute, private utilityMeterDataDbService: UtilityMeterDatadbService,
@@ -46,11 +46,11 @@ export class EditBillComponent implements OnInit {
     private electronService: ElectronService) { }
 
   ngOnInit(): void {
-    this.setInDataWizard();
+    this.setInDataManagement();
     this.isElectron = this.electronService.isElectron;
     this.paramsSub = this.activatedRoute.parent.params.subscribe(parentParams => {
       let accountMeters: Array<IdbUtilityMeter> = this.utilityMeterDbService.accountMeters.getValue();
-      if (this.inDataWizard) {
+      if (this.inDataManagement) {
         let meterId: string = parentParams['id'];
         this.editMeter = accountMeters.find(meter => { return meter.guid == meterId });
       } else {
@@ -59,7 +59,7 @@ export class EditBillComponent implements OnInit {
       }
       this.setDisplayHeatCapacity();
       this.activatedRoute.params.subscribe(params => {
-        if (this.inDataWizard) {
+        if (this.inDataManagement) {
           let meterReadingId: string = params['id'];
           if (meterReadingId) {
             //existing reading
@@ -97,13 +97,13 @@ export class EditBillComponent implements OnInit {
     this.paramsSub.unsubscribe();
   }
 
-  setInDataWizard() {
-    this.inDataWizard = this.router.url.includes('data-management');
+  setInDataManagement() {
+    this.inDataManagement = this.router.url.includes('data-management');
   }
 
   cancel() {
     let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
-    if (this.inDataWizard) {
+    if (this.inDataManagement) {
       this.router.navigateByUrl('/data-management/' + this.editMeter.accountId + '/facilities/' + this.editMeter.facilityId + '/meters/' + this.editMeter.guid + '/meter-data');
     } else {
       this.router.navigateByUrl('/data-evaluation/facility/' + selectedFacility.id + '/utility/energy-consumption/utility-meter/' + this.editMeter.id + '/data-table');

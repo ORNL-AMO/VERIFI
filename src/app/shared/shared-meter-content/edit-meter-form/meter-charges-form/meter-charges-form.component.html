@@ -1,0 +1,49 @@
+<div class="d-flex w-100 justify-content-between align-items-center mb-3">
+    <div>
+        <app-label-with-tooltip [label]="'Meter Charges'" [field]="'meterCharges'"
+            [isBold]="true"></app-label-with-tooltip>
+    </div>
+    <div>
+        <button class="btn action-btn btn-sm" (click)="addCharge()">
+            <i class="fa fa-plus"></i> Add Charge
+        </button>
+    </div>
+</div>
+
+<form [formGroup]="meterForm">
+    <div formArrayName="chargesArray">
+        <ng-template [ngIf]="chargesArray.length != 0" [ngIfElse]="noChargesBlock">
+            <ng-container *ngFor="let chargeGroup of chargesArray.controls; let index = index" [formGroupName]="index">
+                <div class="row g-2 align-items-center">
+                    <div class="col">
+                        <label *ngIf="index == 0">Name</label>
+                        <input class="form-control" formControlName="name" placeholder="Charge Name" />
+                    </div>
+                    <div class="col">
+                        <label *ngIf="index == 0">Charge Type</label>
+                        <select class="form-select" formControlName="chargeType" aria-label="Charge Type"
+                            (change)="updateChargeUnit(index)">
+                            <option *ngFor="let type of chargeTypes" [value]="type.value">{{ type.label }}</option>
+                        </select>
+                    </div>
+                    <div class="col">
+                        <label *ngIf="index == 0">Charge Unit</label>
+                        <select class="form-select" formControlName="chargeUnit" placeholder="Charge Unit">
+                            <option *ngFor="let unitOption of chargeGroup.get('chargeType').value | chargesUnitOptions"
+                                [value]="unitOption.value">{{ unitOption.label }}</option>
+                        </select>
+                    </div>
+                    <div class="col-auto mt-auto">
+                        <button type="button" class="btn btn-danger" (click)="removeCharge(index)"><i
+                                class="fa fa-trash"></i></button>
+                    </div>
+                </div>
+            </ng-container>
+        </ng-template>
+        <ng-template #noChargesBlock>
+            <div class="text-muted">No charges added for this meter. Click "<i class="fa fa-plus"></i> Add Charge" to
+                track additional charges for
+                this meter.</div>
+        </ng-template>
+    </div>
+</form>

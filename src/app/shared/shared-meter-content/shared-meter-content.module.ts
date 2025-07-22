@@ -36,7 +36,14 @@ import { MeterGroupFormComponent } from './set-meter-grouping/meter-group-form/m
 import { MeterGroupTableComponent } from './set-meter-grouping/meter-group-table/meter-group-table.component';
 import { ViewConnectBillComponent } from './meter-data/meter-data-table/view-connect-bill/view-connect-bill.component';
 import { EditConnectBillComponent } from './edit-bill/edit-connect-bill/edit-connect-bill.component';
+import { MeterChargesFormComponent } from './edit-meter-form/meter-charges-form/meter-charges-form.component';
+import { ChargesUnitOptionsPipe } from './edit-meter-form/meter-charges-form/charges-unit-options.pipe';
+import { EditBillChargesComponent } from './edit-bill/edit-bill-charges/edit-bill-charges.component';
+import { MeterChargePipe } from './edit-bill/edit-bill-charges/meter-charge.pipe';
+import { ChargeUnitDisplayPipe } from './edit-bill/edit-bill-charges/charge-unit-display.pipe';
+import { MeterChargeValuePipe } from './meter-data/meter-charge-value.pipe';
 import { SharedDataQualityReportMetersModule } from '../shared-data-quality-report-meters/shared-data-quality-report-meters.module';
+import { OrderMeterDataByPipe } from './meter-data/meter-data-table/order-meter-data-by.pipe';
 
 
 
@@ -71,7 +78,14 @@ import { SharedDataQualityReportMetersModule } from '../shared-data-quality-repo
     MeterGroupFormComponent,
     MeterGroupTableComponent,
     ViewConnectBillComponent,
-    EditConnectBillComponent
+    EditConnectBillComponent,
+    MeterChargesFormComponent,
+    ChargesUnitOptionsPipe,
+    EditBillChargesComponent,
+    MeterChargePipe,
+    ChargeUnitDisplayPipe,
+    MeterChargeValuePipe,
+    OrderMeterDataByPipe
   ],
   imports: [
     CommonModule,

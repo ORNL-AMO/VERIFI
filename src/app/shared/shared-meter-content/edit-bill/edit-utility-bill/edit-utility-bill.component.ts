@@ -148,7 +148,7 @@ export class EditUtilityBillComponent implements OnInit {
       let meterFuel: FuelTypeOption = fuels.find(fuel => {
         return fuel.value == this.editMeter.fuel;
       });
-      this.isBiofuel = meterFuel.isBiofuel;
+      this.isBiofuel = meterFuel?.isBiofuel;
     } else {
       this.isBiofuel = false;
     }

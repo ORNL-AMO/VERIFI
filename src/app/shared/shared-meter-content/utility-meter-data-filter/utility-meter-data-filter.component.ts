@@ -1,26 +1,24 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { DbChangesService } from 'src/app/indexedDB/db-changes.service';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { AdditionalChargesFilters, DetailedChargesFilters, ElectricityDataFilters, EmissionsFilters, GeneralInformationFilters, GeneralUtilityDataFilters, VehicleDataFilters } from 'src/app/models/meterDataFilter';
+import { ElectricityDataFilters, EmissionsFilters, GeneralInformationFilters, GeneralUtilityDataFilters, VehicleDataFilters } from 'src/app/models/meterDataFilter';
 import { checkShowEmissionsOutputRate, getIsEnergyUnit } from 'src/app/shared/sharedHelperFuntions';
 import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { UtilityMeterDataService } from 'src/app/shared/shared-meter-content/utility-meter-data.service';
+import { firstValueFrom } from 'rxjs';
+import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 
 @Component({
-    selector: 'app-utility-meter-data-filter',
-    templateUrl: './utility-meter-data-filter.component.html',
-    styleUrls: ['./utility-meter-data-filter.component.css'],
-    standalone: false
+  selector: 'app-utility-meter-data-filter',
+  templateUrl: './utility-meter-data-filter.component.html',
+  styleUrls: ['./utility-meter-data-filter.component.css'],
+  standalone: false
 })
 export class UtilityMeterDataFilterComponent implements OnInit {
   @Input()
-  filterType: string;
-  @Input()
   meter: IdbUtilityMeter;
 
-  detailedChargesFilters: DetailedChargesFilters;
-  additionalChargesFilters: AdditionalChargesFilters;
   generalInformationFilters: GeneralInformationFilters;
   emissionsFilters: EmissionsFilters;
   generalUtilityDataFilters: GeneralUtilityDataFilters;
@@ -29,7 +27,8 @@ export class UtilityMeterDataFilterComponent implements OnInit {
   vehicleDataFilters: VehicleDataFilters;
   isRECs: boolean;
   constructor(private utilityMeterDataService: UtilityMeterDataService, private facilityDbService: FacilitydbService,
-    private dbChangesService: DbChangesService) { }
+    private dbChangesService: DbChangesService,
+    private utilityMeterDbService: UtilityMeterdbService) { }
 
   ngOnInit(): void {
   }
@@ -38,13 +37,7 @@ export class UtilityMeterDataFilterComponent implements OnInit {
     if (this.meter.source == 'Electricity') {
       this.isRECs = (this.meter.agreementType == 4 || this.meter.agreementType == 6);
       let electricityDataFilters: ElectricityDataFilters;
-      if (this.filterType == 'table') {
-        electricityDataFilters = this.utilityMeterDataService.tableElectricityFilters.getValue();
-      } else {
-        electricityDataFilters = this.utilityMeterDataService.electricityInputFilters.getValue();
-      }
-      this.additionalChargesFilters = electricityDataFilters.additionalCharges;
-      this.detailedChargesFilters = electricityDataFilters.detailedCharges;
+      electricityDataFilters = this.utilityMeterDataService.tableElectricityFilters.getValue();
       this.emissionsFilters = electricityDataFilters.emissionsFilters;
       this.generalInformationFilters = electricityDataFilters.generalInformationFilters;
     } else if (this.meter.scope != 2) {
@@ -71,55 +64,28 @@ export class UtilityMeterDataFilterComponent implements OnInit {
     if (this.meter.source == 'Electricity') {
       this.checkShowSection();
       let electricityDataFilters: ElectricityDataFilters = {
-        detailedCharges: this.detailedChargesFilters,
-        additionalCharges: this.additionalChargesFilters,
         emissionsFilters: this.emissionsFilters,
         generalInformationFilters: this.generalInformationFilters
       }
 
-      if (this.filterType == 'table') {
-        selectedFacility.tableElectricityFilters = electricityDataFilters;
-      } else {
-        selectedFacility.electricityInputFilters = electricityDataFilters;
-      }
+      selectedFacility.tableElectricityFilters = electricityDataFilters;
     } else if (this.meter.scope != 2) {
-      if (this.filterType == 'table') {
-        selectedFacility.tableGeneralUtilityFilters = this.generalUtilityDataFilters;
-      }
+      selectedFacility.tableGeneralUtilityFilters = this.generalUtilityDataFilters;
     } else if (this.meter.scope == 2) {
-      if (this.filterType == 'table') {
-        selectedFacility.tableVehicleDataFilters = this.vehicleDataFilters;
-      }
+      selectedFacility.tableVehicleDataFilters = this.vehicleDataFilters;
     }
     await this.dbChangesService.updateFacilities(selectedFacility);
   }
 
   async showAllColumns() {
     if (this.meter.source == 'Electricity') {
-      this.detailedChargesFilters = {
-        showSection: true,
-        block1: true,
-        block2: true,
-        block3: true,
-        other: true,
-        onPeak: true,
-        offPeak: true,
-        powerFactor: true
-      };
-      this.additionalChargesFilters = {
-        showSection: true,
-        nonEnergyCharge: true,
-        transmissionAndDelivery: true,
-        localSalesTax: true,
-        stateSalesTax: true,
-        latePayment: true,
-        otherCharge: true,
-      }
       this.emissionsFilters = {
         showSection: true,
         marketEmissions: true,
         locationEmissions: true,
-        recs: true
+        recs: true,
+        excessRECs: true,
+        excessRECsEmissions: true
 
       }
       this.generalInformationFilters = {
@@ -133,9 +99,6 @@ export class UtilityMeterDataFilterComponent implements OnInit {
       this.generalUtilityDataFilters = {
         totalVolume: true,
         totalCost: true,
-        commodityCharge: true,
-        deliveryCharge: true,
-        otherCharge: true,
         stationaryBiogenicEmmissions: true,
         stationaryCarbonEmissions: true,
         stationaryOtherEmissions: true,
@@ -145,42 +108,29 @@ export class UtilityMeterDataFilterComponent implements OnInit {
       this.vehicleDataFilters = {
         totalEnergy: true,
         totalCost: true,
-        otherCharge: true,
         mobileBiogenicEmissions: true,
         mobileCarbonEmissions: true,
         mobileOtherEmissions: true,
         mobileTotalEmissions: true,
       }
     }
-    await this.save();
+
+    this.meter.charges.forEach(charge => {
+      charge.displayChargeInTable = true;
+      charge.displayUsageInTable = true;
+    })
+    this.changeCharge();
   }
 
   async hideAllColumns() {
     if (this.meter.source == 'Electricity') {
-      this.detailedChargesFilters = {
-        showSection: false,
-        block1: false,
-        block2: false,
-        block3: false,
-        other: false,
-        onPeak: false,
-        offPeak: false,
-        powerFactor: false
-      };
-      this.additionalChargesFilters = {
-        showSection: false,
-        nonEnergyCharge: false,
-        transmissionAndDelivery: false,
-        localSalesTax: false,
-        stateSalesTax: false,
-        latePayment: false,
-        otherCharge: false,
-      }
       this.emissionsFilters = {
         showSection: false,
         marketEmissions: false,
         locationEmissions: false,
-        recs: false
+        recs: false,
+        excessRECs: false,
+        excessRECsEmissions: false
 
       }
       this.generalInformationFilters = {
@@ -194,9 +144,6 @@ export class UtilityMeterDataFilterComponent implements OnInit {
       this.generalUtilityDataFilters = {
         totalVolume: false,
         totalCost: false,
-        commodityCharge: false,
-        deliveryCharge: false,
-        otherCharge: false,
         stationaryBiogenicEmmissions: false,
         stationaryCarbonEmissions: false,
         stationaryOtherEmissions: false,
@@ -206,29 +153,20 @@ export class UtilityMeterDataFilterComponent implements OnInit {
       this.vehicleDataFilters = {
         totalEnergy: false,
         totalCost: false,
-        otherCharge: false,
         mobileBiogenicEmissions: false,
         mobileCarbonEmissions: false,
         mobileOtherEmissions: false,
         mobileTotalEmissions: false,
       }
     }
-    await this.save();
+    this.meter.charges.forEach(charge => {
+      charge.displayChargeInTable = false;
+      charge.displayUsageInTable = false;
+    })
+    this.changeCharge();
   }
 
   checkShowSection() {
-    this.additionalChargesFilters.showSection = (
-      this.additionalChargesFilters.nonEnergyCharge || this.additionalChargesFilters.latePayment
-      || this.additionalChargesFilters.otherCharge || this.additionalChargesFilters.transmissionAndDelivery
-      || this.additionalChargesFilters.localSalesTax
-      || this.additionalChargesFilters.stateSalesTax || this.additionalChargesFilters.latePayment
-      || this.additionalChargesFilters.otherCharge
-    );
-    this.detailedChargesFilters.showSection = (
-      this.detailedChargesFilters.block1 || this.detailedChargesFilters.block2 || this.detailedChargesFilters.block3 || this.detailedChargesFilters.other ||
-      this.detailedChargesFilters.onPeak || this.detailedChargesFilters.offPeak || this.detailedChargesFilters.powerFactor
-    );
-
     this.generalInformationFilters.showSection = (
       this.generalInformationFilters.totalCost || this.generalInformationFilters.realDemand || this.generalInformationFilters.billedDemand);
 
@@ -236,4 +174,15 @@ export class UtilityMeterDataFilterComponent implements OnInit {
       this.emissionsFilters.marketEmissions || this.emissionsFilters.locationEmissions || this.emissionsFilters.recs
     )
   };
+
+  async changeCharge() {
+    await firstValueFrom(this.utilityMeterDbService.updateWithObservable(this.meter));
+    let meters: Array<IdbUtilityMeter> = await firstValueFrom(this.utilityMeterDbService.getAll());
+    let accountMeters: Array<IdbUtilityMeter> = meters.filter(meter => { return this.meter.accountId == meter.accountId });
+    this.utilityMeterDbService.accountMeters.next(accountMeters);
+    let facilityMeters: Array<IdbUtilityMeter> = accountMeters.filter(meter => { return meter.facilityId == this.meter.facilityId });
+    this.utilityMeterDbService.facilityMeters.next(facilityMeters);
+    this.utilityMeterDbService.selectedMeter.next(this.meter);
+    this.save();
+  }
 }

@@ -9,7 +9,7 @@
             <th *ngIf="showEmissionsSection && showEmissions" [attr.colspan]="numEmissions">
                 Emissions
             </th>
-            <th *ngIf="showDetailedCharges" [attr.colspan]="numDetailedCharges">
+            <th *ngIf="numDetailedCharges > 0" [attr.colspan]="numDetailedCharges">
                 Detailed Charges
             </th>
             <th>
@@ -69,19 +69,28 @@
 
             </ng-container>
 
-            <th *ngIf="generalUtilityDataFilters.commodityCharge" (click)="setOrderDataField('commodityCharge')"
-                [ngClass]="{'active': orderDataField == 'commodityCharge'}">Commodity Charge</th>
-            <th *ngIf="generalUtilityDataFilters.deliveryCharge" (click)="setOrderDataField('deliveryCharge')"
-                [ngClass]="{'active': orderDataField == 'deliveryCharge'}">Delivery Charge</th>
-            <th *ngIf="generalUtilityDataFilters.otherCharge" (click)="setOrderDataField('otherCharge')"
-                [ngClass]="{'active': orderDataField == 'otherCharge'}">Other
-                Charges</th>
+
+            <ng-container *ngFor="let charge of selectedMeter.charges">
+                <ng-container
+                    *ngIf="(charge.chargeType == 'consumption' || charge.chargeType == 'demand') && charge.displayUsageInTable">
+                    <th (click)="setOrderDataField(charge.guid, 'usage')"
+                        [ngClass]="{'active': orderDataField == charge.guid && orderByCharge == 'usage'}">
+                        {{charge.name}} <br>({{charge.chargeUnit | chargeUnitDisplay}})
+                    </th>
+                </ng-container>
+                <th *ngIf="charge.displayChargeInTable" (click)="setOrderDataField(charge.guid, 'amount')"
+                    [ngClass]="{'active': orderDataField == charge.guid && orderByCharge == 'amount'}">
+                    {{ charge.name }} <br>(&dollar;)
+                </th>
+            </ng-container>
+
+
             <th *ngIf="!copyingTable">Actions</th>
         </tr>
     </thead>
     <tbody class="table-group-divider">
         <tr
-            *ngFor="let meterData of selectedMeterData | orderBy: orderDataField: orderByDirection | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage">
+            *ngFor="let meterData of selectedMeterData | orderMeterDataBy: orderDataField: orderByDirection : orderByCharge | slice: ((currentPageNumber-1) * itemsPerPage): currentPageNumber * itemsPerPage">
             <td *ngIf="!copyingTable" class="input">
                 <input type="checkbox" name="metersSelected" (change)="toggleChecked()" [(ngModel)]="meterData.checked">
             </td>
@@ -123,15 +132,25 @@
 
 
 
-            <td *ngIf="generalUtilityDataFilters.commodityCharge">{{meterData.commodityCharge | customNumber:true}}</td>
-            <td *ngIf="generalUtilityDataFilters.deliveryCharge">{{meterData.deliveryCharge | customNumber:true}}</td>
-            <td *ngIf="generalUtilityDataFilters.otherCharge">{{meterData.otherCharge | customNumber:true}}</td>
+            <ng-container *ngFor="let meterCharge of selectedMeter.charges">
+                <ng-container
+                    *ngIf="(meterCharge.chargeType == 'consumption' || meterCharge.chargeType == 'demand') && meterCharge.displayUsageInTable">
+                    <td>
+                        {{meterData.charges | meterChargeValue: meterCharge.guid: 'usage' | customNumber}}
+                    </td>
+                </ng-container>
+                <td *ngIf="meterCharge.displayChargeInTable">
+                    {{meterData.charges | meterChargeValue: meterCharge.guid: 'amount' | customNumber:true}}
+                </td>
+
+            </ng-container>
             <td class="actions" *ngIf="!copyingTable">
                 <div class="btn-group">
                     <button class="btn btn-sm btn-outline" (click)="setEditMeterData(meterData)" title="Edit">
                         <i class="fa fa-pencil"></i>
                     </button>
-                    <app-view-connect-bill *ngIf="isElectron" [meterData]="meterData" [selectedMeter]="selectedMeter"></app-view-connect-bill>
+                    <app-view-connect-bill *ngIf="isElectron" [meterData]="meterData"
+                        [selectedMeter]="selectedMeter"></app-view-connect-bill>
                     <button class="btn btn-sm btn-outline" (click)="setDeleteMeterData(meterData)" title="Delete">
                         <i class="fa fa-trash"></i>
                     </button>
