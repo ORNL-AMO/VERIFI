@@ -83,7 +83,9 @@ export class UtilityMeterDataFilterComponent implements OnInit {
         showSection: true,
         marketEmissions: true,
         locationEmissions: true,
-        recs: true
+        recs: true,
+        excessRECs: true,
+        excessRECsEmissions: true
 
       }
       this.generalInformationFilters = {
@@ -97,9 +99,6 @@ export class UtilityMeterDataFilterComponent implements OnInit {
       this.generalUtilityDataFilters = {
         totalVolume: true,
         totalCost: true,
-        commodityCharge: true,
-        deliveryCharge: true,
-        otherCharge: true,
         stationaryBiogenicEmmissions: true,
         stationaryCarbonEmissions: true,
         stationaryOtherEmissions: true,
@@ -109,14 +108,18 @@ export class UtilityMeterDataFilterComponent implements OnInit {
       this.vehicleDataFilters = {
         totalEnergy: true,
         totalCost: true,
-        otherCharge: true,
         mobileBiogenicEmissions: true,
         mobileCarbonEmissions: true,
         mobileOtherEmissions: true,
         mobileTotalEmissions: true,
       }
     }
-    await this.save();
+
+    this.meter.charges.forEach(charge => {
+      charge.displayChargeInTable = true;
+      charge.displayUsageInTable = true;
+    })
+    this.changeCharge();
   }
 
   async hideAllColumns() {
@@ -125,7 +128,9 @@ export class UtilityMeterDataFilterComponent implements OnInit {
         showSection: false,
         marketEmissions: false,
         locationEmissions: false,
-        recs: false
+        recs: false,
+        excessRECs: false,
+        excessRECsEmissions: false
 
       }
       this.generalInformationFilters = {
@@ -139,9 +144,6 @@ export class UtilityMeterDataFilterComponent implements OnInit {
       this.generalUtilityDataFilters = {
         totalVolume: false,
         totalCost: false,
-        commodityCharge: false,
-        deliveryCharge: false,
-        otherCharge: false,
         stationaryBiogenicEmmissions: false,
         stationaryCarbonEmissions: false,
         stationaryOtherEmissions: false,
@@ -151,14 +153,17 @@ export class UtilityMeterDataFilterComponent implements OnInit {
       this.vehicleDataFilters = {
         totalEnergy: false,
         totalCost: false,
-        otherCharge: false,
         mobileBiogenicEmissions: false,
         mobileCarbonEmissions: false,
         mobileOtherEmissions: false,
         mobileTotalEmissions: false,
       }
     }
-    await this.save();
+    this.meter.charges.forEach(charge => {
+      charge.displayChargeInTable = false;
+      charge.displayUsageInTable = false;
+    })
+    this.changeCharge();
   }
 
   checkShowSection() {

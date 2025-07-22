@@ -82,6 +82,8 @@ export class UtilityMeterDataService {
       showSection: true,
       marketEmissions: true,
       locationEmissions: true,
+      excessRECs: true,
+      excessRECsEmissions: true,
       recs: true
     }
   }
@@ -90,9 +92,6 @@ export class UtilityMeterDataService {
     return {
       totalVolume: true,
       totalCost: true,
-      commodityCharge: true,
-      deliveryCharge: true,
-      otherCharge: true,
       stationaryBiogenicEmmissions: true,
       stationaryCarbonEmissions: true,
       stationaryOtherEmissions: true,
@@ -107,8 +106,7 @@ export class UtilityMeterDataService {
       mobileBiogenicEmissions: true,
       mobileCarbonEmissions: false,
       mobileOtherEmissions: false,
-      mobileTotalEmissions: true,
-      otherCharge: true
+      mobileTotalEmissions: true
     }
   }
 
@@ -221,9 +219,6 @@ export class UtilityMeterDataService {
       totalVolume: [meterData.totalVolume, totalVolumeValidators],
       totalEnergyUse: [meterData.totalEnergyUse, totalEnergyUseValidators],
       totalCost: [meterData.totalCost],
-      commodityCharge: [meterData.commodityCharge],
-      deliveryCharge: [meterData.deliveryCharge],
-      otherCharge: [meterData.otherCharge],
       isEstimated: [meterData.isEstimated || false],
       heatCapacity: [meterData.heatCapacity, heatCapacityValidators],
       vehicleFuelEfficiency: [meterData.vehicleFuelEfficiency, vehicleFuelEfficiencyValidators],

@@ -48,7 +48,8 @@
             <th *ngIf="emissionsFilters.recs" (click)="setOrderDataField('RECs')"
                 [ngClass]="{'active': orderDataField == 'RECs'}">RECs<br> (MWh)</th>
             <ng-container *ngFor="let charge of selectedMeter.charges">
-                <ng-container *ngIf="(charge.chargeType == 'consumption' || charge.chargeType == 'demand') && charge.displayUsageInTable">
+                <ng-container
+                    *ngIf="(charge.chargeType == 'consumption' || charge.chargeType == 'demand') && charge.displayUsageInTable">
                     <th (click)="setOrderDataField(charge.guid, 'usage')"
                         [ngClass]="{'active': orderDataField == charge.guid && orderByCharge == 'usage'}">
                         {{charge.name}} <br>({{charge.chargeUnit | chargeUnitDisplay}})
@@ -91,7 +92,8 @@
             <td *ngIf="emissionsFilters.recs">{{meterData.RECs | customNumber}}</td>
 
             <ng-container *ngFor="let meterCharge of selectedMeter.charges">
-                <ng-container *ngIf="(meterCharge.chargeType == 'consumption' || meterCharge.chargeType == 'demand') && meterCharge.displayUsageInTable">
+                <ng-container
+                    *ngIf="(meterCharge.chargeType == 'consumption' || meterCharge.chargeType == 'demand') && meterCharge.displayUsageInTable">
                     <td>
                         {{meterData.charges | meterChargeValue: meterCharge.guid: 'usage' | customNumber}}
                     </td>
@@ -124,11 +126,14 @@
     <thead class="sortable">
         <tr class="table-mh">
             <th></th>
-            <th [attr.colspan]="2">
+            <th [attr.colspan]="numGeneralInformation">
                 General Information
             </th>
-            <th *ngIf="emissionsFilters.showSection" [attr.colspan]="3">
+            <th *ngIf="numEmissions > 0" [attr.colspan]="numEmissions">
                 Emissions
+            </th>
+            <th *ngIf="numDetailedCharges > 0" [attr.colspan]="numDetailedCharges">
+                Detailed Charges
             </th>
             <th>
 
@@ -140,14 +145,31 @@
             </th>
             <th (click)="setOrderDataField('readDate')" [ngClass]="{'active': orderDataField == 'readDate'}"
                 class="row-year">Meter Read Date</th>
-            <th (click)="setOrderDataField('totalCost')" [ngClass]="{'active': orderDataField == 'totalCost'}">Total
+            <th *ngIf="generalInformationFilters.totalCost" (click)="setOrderDataField('totalCost')"
+                [ngClass]="{'active': orderDataField == 'totalCost'}">Total
                 Cost</th>
-            <th (click)="setOrderDataField('RECs')" [ngClass]="{'active': orderDataField == 'RECs'}">RECs<br> (MWh)</th>
-            <th (click)="setOrderDataField('excessRECs')" [ngClass]="{'active': orderDataField == 'excessRECs'}">Excess
+            <th *ngIf="emissionsFilters.recs" (click)="setOrderDataField('RECs')"
+                [ngClass]="{'active': orderDataField == 'RECs'}">RECs<br> (MWh)</th>
+            <th *ngIf="emissionsFilters.excessRECs" (click)="setOrderDataField('excessRECs')"
+                [ngClass]="{'active': orderDataField == 'excessRECs'}">Excess
                 RECs<br> (MWh)</th>
-            <th (click)="setOrderDataField('excessRECsEmissions')"
+            <th *ngIf="emissionsFilters.excessRECsEmissions" (click)="setOrderDataField('excessRECsEmissions')"
                 [ngClass]="{'active': orderDataField == 'excessRECsEmissions'}">Excess
                 RECs<br> Emissions (tonne CO<sub>2</sub>e)</th>
+            <ng-container *ngFor="let charge of selectedMeter.charges">
+                <ng-container
+                    *ngIf="(charge.chargeType == 'consumption' || charge.chargeType == 'demand') && charge.displayUsageInTable">
+                    <th (click)="setOrderDataField(charge.guid, 'usage')"
+                        [ngClass]="{'active': orderDataField == charge.guid && orderByCharge == 'usage'}">
+                        {{charge.name}} <br>({{charge.chargeUnit | chargeUnitDisplay}})
+                    </th>
+                </ng-container>
+                <th *ngIf="charge.displayChargeInTable" (click)="setOrderDataField(charge.guid, 'amount')"
+                    [ngClass]="{'active': orderDataField == charge.guid && orderByCharge == 'amount'}">
+                    {{ charge.name }} <br>(&dollar;)
+                </th>
+            </ng-container>
+
             <th></th>
         </tr>
     </thead>
@@ -158,10 +180,22 @@
                 <input type="checkbox" name="metersSelected" (change)="toggleChecked()" [(ngModel)]="meterData.checked">
             </td>
             <td class="read-date">{{meterData.readDate | date}}</td>
-            <td>{{meterData.totalCost | customNumber:true}}</td>
-            <td>{{meterData.RECs | customNumber}}</td>
-            <td>{{meterData.excessRECs | customNumber}}</td>
-            <td>{{meterData.excessRECsEmissions | customNumber}}</td>
+            <td *ngIf="generalInformationFilters.totalCost">{{meterData.totalCost | customNumber:true}}</td>
+            <td *ngIf="emissionsFilters.recs">{{meterData.RECs | customNumber}}</td>
+            <td *ngIf="emissionsFilters.excessRECs">{{meterData.excessRECs | customNumber}}</td>
+            <td *ngIf="emissionsFilters.excessRECsEmissions">{{meterData.excessRECsEmissions | customNumber}}</td>
+            <ng-container *ngFor="let meterCharge of selectedMeter.charges">
+                <ng-container
+                    *ngIf="(meterCharge.chargeType == 'consumption' || meterCharge.chargeType == 'demand') && meterCharge.displayUsageInTable">
+                    <td>
+                        {{meterData.charges | meterChargeValue: meterCharge.guid: 'usage' | customNumber}}
+                    </td>
+                </ng-container>
+                <td *ngIf="meterCharge.displayChargeInTable">
+                    {{meterData.charges | meterChargeValue: meterCharge.guid: 'amount' | customNumber:true}}
+                </td>
+
+            </ng-container>
             <td *ngIf="!copyingTable" class="actions">
                 <div class="btn-group">
                     <button class="btn btn-sm btn-outline" (click)="setEditMeterData(meterData)" title="Edit">

@@ -40,6 +40,7 @@ export class VehicleDataTableComponent {
   allChecked: boolean;
   orderDataField: string = 'readDate';
   orderByDirection: string = 'desc';
+  orderByCharge: 'amount' | 'usage';
   currentPageNumber: number = 1;
   copyingTable: boolean = false;
   filterSub: Subscription;
@@ -51,7 +52,6 @@ export class VehicleDataTableComponent {
   numDetailedCharges: number;
 
   showEmissionsSection: boolean;
-  showDetailedCharges: boolean;
   volumeUnit: string;
   energyUnit: string
   consumptionLabel: 'Consumption' | 'Distance';
@@ -132,7 +132,8 @@ export class VehicleDataTableComponent {
     this.setDelete.emit(meterData);
   }
 
-  setOrderDataField(str: string) {
+  setOrderDataField(str: string, orderByCharge?: 'amount' | 'usage') {
+    this.orderByCharge = orderByCharge;
     if (str == this.orderDataField) {
       if (this.orderByDirection == 'desc') {
         this.orderByDirection = 'asc';
@@ -171,7 +172,6 @@ export class VehicleDataTableComponent {
     this.numGeneralInformation = 3;
     this.numEmissions = 0;
     this.showEmissionsSection = (this.vehicleDataFilters.mobileOtherEmissions || this.vehicleDataFilters.mobileBiogenicEmissions || this.vehicleDataFilters.mobileCarbonEmissions || this.vehicleDataFilters.mobileTotalEmissions);
-    this.showDetailedCharges = this.vehicleDataFilters.otherCharge;
     if (this.vehicleDataFilters.mobileOtherEmissions) {
       this.numEmissions++;
     }
@@ -193,9 +193,17 @@ export class VehicleDataTableComponent {
     if (this.vehicleDataFilters.totalCost) {
       this.numGeneralInformation++;
     }
-
-    if (this.vehicleDataFilters.otherCharge) {
-      this.numDetailedCharges++;
+    let detailedChargesCount: number = 0;
+    if (this.selectedMeter.charges) {
+      this.selectedMeter.charges.forEach(charge => {
+        if ((charge.chargeType == 'demand' || charge.chargeType == 'consumption') && charge.displayUsageInTable) {
+          detailedChargesCount++;
+        }
+        if (charge.displayChargeInTable) {
+          detailedChargesCount++;
+        }
+      });
     }
+    this.numDetailedCharges = detailedChargesCount;
   }
 }

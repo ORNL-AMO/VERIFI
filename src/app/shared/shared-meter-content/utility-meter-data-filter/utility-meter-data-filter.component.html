@@ -1,4 +1,4 @@
-<div class="dropdown" [hidden]="isRECs">
+<div class="dropdown">
     <button class="btn action-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside"
         aria-expanded="false">
         Choose Columns
@@ -27,7 +27,7 @@
                 </ng-container>
             </div>
             <div class="col">
-                <ng-container *ngIf="!isRECs">
+                <ng-template [ngIf]="!isRECs" [ngIfElse]="recsBlock">
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" name="marketEmissions" id="marketEmissions"
                             [(ngModel)]="emissionsFilters.marketEmissions" (change)="save()">
@@ -38,13 +38,25 @@
                             [(ngModel)]="emissionsFilters.locationEmissions" (change)="save()">
                         <label for="locationEmissions" class="form-check-label">Location Emissions</label>
                     </div>
-                </ng-container>
+                </ng-template>
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" name="recs" id="recs"
                         [(ngModel)]="emissionsFilters.recs" (change)="save()">
 
                     <label for="recs" class="form-check-label">RECs</label>
                 </div>
+                <ng-template #recsBlock>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="excessRECs" id="excessRECs"
+                            [(ngModel)]="emissionsFilters.excessRECs" (change)="save()">
+                        <label for="excessRECs" class="form-check-label">Excess RECs</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="excessRECsEmissions" id="excessRECsEmissions"
+                            [(ngModel)]="emissionsFilters.excessRECsEmissions" (change)="save()">
+                        <label for="excessRECsEmissions" class="form-check-label">Excess RECs Emissions</label>
+                    </div>
+                </ng-template>
             </div>
             <ng-container *ngTemplateOutlet="chargesBlock"></ng-container>
         </div>
@@ -89,6 +101,7 @@
                     <label for="totalEmissions" class="form-check-label">Total Emissions</label>
                 </div>
             </div>
+            <ng-container *ngTemplateOutlet="chargesBlock"></ng-container>
         </div>
         <!--non electricity filters, non-vehicles-->
         <div class="row" *ngIf="meter.source != 'Electricity' && meter.scope == 2">
@@ -102,11 +115,6 @@
                     <input class="form-check-input" type="checkbox" name="totalCost" id="totalCost"
                         [(ngModel)]="vehicleDataFilters.totalCost" (change)="save()">
                     <label for="totalCost" class="form-check-label">Total Cost</label>
-                </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" name="otherCharge" id="otherCharge"
-                        [(ngModel)]="vehicleDataFilters.otherCharge" (change)="save()">
-                    <label for="otherCharge" class="form-check-label">Other Charge</label>
                 </div>
             </div>
             <div class="col">
@@ -138,6 +146,7 @@
                         Emissions</label>
                 </div>
             </div>
+            <ng-container *ngTemplateOutlet="chargesBlock"></ng-container>
         </div>
 
 

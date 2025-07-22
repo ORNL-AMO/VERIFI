@@ -27,7 +27,9 @@ export class EditMeterFormService {
         guid: [charge.guid],
         name: [charge.name, Validators.required],
         chargeType: [charge.chargeType, Validators.required],
-        chargeUnit: [charge.chargeUnit, Validators.required]
+        chargeUnit: [charge.chargeUnit, Validators.required],
+        displayUsageInTable: [charge.displayUsageInTable],
+        displayChargeInTable: [charge.displayChargeInTable]
       });
     }) : []);
 

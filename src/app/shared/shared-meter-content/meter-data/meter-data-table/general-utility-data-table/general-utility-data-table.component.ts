@@ -47,6 +47,7 @@ export class GeneralUtilityDataTableComponent implements OnInit {
   showEnergyColumn: boolean;
   orderDataField: string = 'readDate';
   orderByDirection: string = 'desc';
+  orderByCharge: 'amount' | 'usage';
   currentPageNumber: number = 1;
   copyingTable: boolean = false;
   showEmissions: boolean;
@@ -57,7 +58,6 @@ export class GeneralUtilityDataTableComponent implements OnInit {
   numGeneralInformation: number;
   numEmissions: number;
   showEmissionsSection: boolean;
-  showDetailedCharges: boolean;
   showEstimated: boolean;
   isElectron: boolean;
   constructor(public utilityMeterDataService: UtilityMeterDataService,
@@ -145,7 +145,8 @@ export class GeneralUtilityDataTableComponent implements OnInit {
     this.setDelete.emit(meterData);
   }
 
-  setOrderDataField(str: string) {
+  setOrderDataField(str: string, orderByCharge?: 'amount' | 'usage') {
+    this.orderByCharge = orderByCharge;
     if (str == this.orderDataField) {
       if (this.orderByDirection == 'desc') {
         this.orderByDirection = 'asc';
@@ -200,7 +201,6 @@ export class GeneralUtilityDataTableComponent implements OnInit {
   }
 
   setNumColumns() {
-    this.numDetailedCharges = 0;
     this.numGeneralInformation = 2;
     this.numEmissions = 0;
     if (this.selectedMeter.source == 'Other Fuels' || this.selectedMeter.source == 'Natural Gas') {
@@ -227,9 +227,6 @@ export class GeneralUtilityDataTableComponent implements OnInit {
         }
       }
     }
-
-    this.showDetailedCharges = (this.generalUtilityDataFilters.commodityCharge || this.generalUtilityDataFilters.deliveryCharge || this.generalUtilityDataFilters.otherCharge);
-
     if (this.generalUtilityDataFilters.totalVolume && this.showVolumeColumn) {
       this.numGeneralInformation++;
     }
@@ -239,14 +236,17 @@ export class GeneralUtilityDataTableComponent implements OnInit {
     if (this.generalUtilityDataFilters.totalCost) {
       this.numGeneralInformation++;
     }
-    if (this.generalUtilityDataFilters.commodityCharge) {
-      this.numDetailedCharges++;
+    let detailedChargesCount: number = 0;
+    if (this.selectedMeter.charges) {
+      this.selectedMeter.charges.forEach(charge => {
+        if ((charge.chargeType == 'demand' || charge.chargeType == 'consumption') && charge.displayUsageInTable) {
+          detailedChargesCount++;
+        }
+        if (charge.displayChargeInTable) {
+          detailedChargesCount++;
+        }
+      });
     }
-    if (this.generalUtilityDataFilters.deliveryCharge) {
-      this.numDetailedCharges++;
-    }
-    if (this.generalUtilityDataFilters.otherCharge) {
-      this.numDetailedCharges++;
-    }
+    this.numDetailedCharges = detailedChargesCount;
   }
 }

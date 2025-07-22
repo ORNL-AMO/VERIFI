@@ -178,19 +178,43 @@ export class ElectricityDataTableComponent implements OnInit {
     this.numDetailedCharges = detailedChargesCount;
 
     let emissionCount: number = 0;
-    Object.keys(this.emissionsFilters).forEach(key => {
-      if (key != 'showSection' && this.emissionsFilters[key] == true) {
+    if (this.isRECs) {
+      if (this.emissionsFilters.recs) {
         emissionCount++;
       }
-    });
+      if (this.emissionsFilters.excessRECs) {
+        emissionCount++;
+      }
+      if (this.emissionsFilters.excessRECsEmissions) {
+        emissionCount++;
+      }
+    } else {
+      if (this.emissionsFilters.marketEmissions) {
+        emissionCount++;
+      }
+      if (this.emissionsFilters.locationEmissions) {
+        emissionCount++;
+      }
+      if (this.emissionsFilters.recs) {
+        emissionCount++;
+      }
+    }
     this.numEmissions = emissionCount;
 
-    let generalInfoCount: number = 0;
-    Object.keys(this.generalInformationFilters).forEach(key => {
-      if (key != 'showSection' && this.generalInformationFilters[key] == true) {
-        generalInfoCount++;
+    if (this.isRECs) {
+      if(this.generalInformationFilters.totalCost){
+        this.numGeneralInformation = 2
+      }else{
+        this.numGeneralInformation = 1;
       }
-    });
-    this.numGeneralInformation = generalInfoCount + 2;
+    } else {
+      let generalInfoCount: number = 0;
+      Object.keys(this.generalInformationFilters).forEach(key => {
+        if (key != 'showSection' && this.generalInformationFilters[key] == true) {
+          generalInfoCount++;
+        }
+      });
+      this.numGeneralInformation = generalInfoCount + 2;
+    }
   }
 }
