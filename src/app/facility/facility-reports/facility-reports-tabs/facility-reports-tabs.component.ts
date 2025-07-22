@@ -105,7 +105,12 @@ export class FacilityReportsTabsComponent {
           this.selectedReport.dataOverviewReportSettings.startYear != undefined &&
           this.errorMessage == undefined)
       } else if (this.selectedReport.facilityReportType == 'savings') {
-        this.setupValid = (this.selectedReport.analysisItemId != undefined && this.selectedReport.name != '');
+        this.setupValid = (this.selectedReport.analysisItemId != undefined && this.selectedReport.name != '' &&
+          this.selectedReport.savingsReportSettings.endMonth != undefined &&
+          this.selectedReport.savingsReportSettings.endYear != undefined &&
+          this.selectedReport.savingsReportSettings.startMonth != undefined &&
+          this.selectedReport.savingsReportSettings.startYear != undefined &&
+          this.errorMessage == undefined);
       }
       else {
         this.setupValid = false;

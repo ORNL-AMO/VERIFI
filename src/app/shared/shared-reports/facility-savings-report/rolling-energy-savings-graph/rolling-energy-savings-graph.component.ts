@@ -1,5 +1,6 @@
 import { Component, ElementRef, Input, ViewChild } from '@angular/core';
 import { PlotlyService } from 'angular-plotly.js';
+import { max } from 'rxjs';
 import { MonthlyAnalysisSummaryData } from 'src/app/models/analysis';
 import { IdbAccount } from 'src/app/models/idbModels/account';
 import { IdbAccountAnalysisItem } from 'src/app/models/idbModels/accountAnalysisItem';
@@ -32,15 +33,17 @@ export class RollingEnergySavingsGraphComponent {
     }
   
     drawChart() {
-      const monthlySummaryData = this.monthlyAnalysisSummaryData.slice(11);
       let title = 'Trailing 12-Month Actual Energy Savings';
 
-      const fivePercentLowerBound = monthlySummaryData.map(results => results.fivePercentSavings);
-      const fivePercentUpperBound = monthlySummaryData.map(results => results.tenPercentSavings);
-      const tenPercentUpperBound = monthlySummaryData.map(results => results.fifteenPercentSavings);
-      const thirtyPercentTarget = monthlySummaryData.map(results => results.thirtyPercentSavings);
-      const rollingSavingsForComparison = monthlySummaryData.map(results => results.rollingSavings * 1.3);
-      const fifteenPercentUpperBound = thirtyPercentTarget > rollingSavingsForComparison ? thirtyPercentTarget : rollingSavingsForComparison;
+      const fivePercentLowerBound = this.monthlyAnalysisSummaryData.map(results => results.fivePercentSavings);
+      const fivePercentUpperBound = this.monthlyAnalysisSummaryData.map(results => results.tenPercentSavings);
+      const tenPercentUpperBound = this.monthlyAnalysisSummaryData.map(results => results.fifteenPercentSavings);
+      const thirtyPercentTarget = this.monthlyAnalysisSummaryData.map(results => results.thirtyPercentSavings);
+      const rollingSavingsForComparison = this.monthlyAnalysisSummaryData.map(results => results.rollingSavings * 1.3);
+      const combinedArray = [...thirtyPercentTarget, ...rollingSavingsForComparison];
+      const maxTarget = Math.max(...combinedArray);
+      const fifteenPercentUpperBound = new Array(this.monthlyAnalysisSummaryData.length).fill(maxTarget);
+      //const fifteenPercentUpperBound = thirtyPercentTarget > rollingSavingsForComparison ? thirtyPercentTarget : rollingSavingsForComparison;
 
       if (this.rollingEnergySavingsGraph) {
 
@@ -62,8 +65,8 @@ export class RollingEnergySavingsGraphComponent {
           type: "scatter",
           mode: "lines+markers",
           name: trace1Name,
-          x: monthlySummaryData.map(results => { return results.date }),
-          y: monthlySummaryData.map(results => { return results.rollingSavings }),
+          x: this.monthlyAnalysisSummaryData.map(results => { return results.date }),
+          y: this.monthlyAnalysisSummaryData.map(results => { return results.rollingSavings }),
           line: { color: '#063970', width: 4 },
           marker: {
             size: 8
@@ -71,7 +74,7 @@ export class RollingEnergySavingsGraphComponent {
         }
   
         var trace2lb = {
-          x: monthlySummaryData.map(results => { return results.date }),
+          x: this.monthlyAnalysisSummaryData.map(results => { return results.date }),
           y: fivePercentLowerBound,
           fill: 'none',
           line: { color: 'rgba(0, 0, 0, 0)' },
@@ -82,7 +85,7 @@ export class RollingEnergySavingsGraphComponent {
         }
 
         var trace2 = {
-          x: monthlySummaryData.map(results => { return results.date }),
+          x: this.monthlyAnalysisSummaryData.map(results => { return results.date }),
           y: fivePercentUpperBound,
           fillcolor: '#d2d9e8',
           fill: 'tonexty',
@@ -92,7 +95,7 @@ export class RollingEnergySavingsGraphComponent {
         }
 
          var trace3lb = {
-          x: monthlySummaryData.map(results => { return results.date }),
+          x: this.monthlyAnalysisSummaryData.map(results => { return results.date }),
           y: fivePercentUpperBound,
           fill: 'none',
           line: { color: 'rgba(0, 0, 0, 0)' },
@@ -103,7 +106,7 @@ export class RollingEnergySavingsGraphComponent {
         }
 
         var trace3 = {
-          x: monthlySummaryData.map(results => { return results.date }),
+          x: this.monthlyAnalysisSummaryData.map(results => { return results.date }),
           y: tenPercentUpperBound,
           fillcolor: '#a5b3d0',
           fill: 'tonexty',
@@ -113,7 +116,7 @@ export class RollingEnergySavingsGraphComponent {
         }
 
         var trace4lb = {
-          x: monthlySummaryData.map(results => { return results.date }),
+          x: this.monthlyAnalysisSummaryData.map(results => { return results.date }),
           y: tenPercentUpperBound,
           fill: 'none',
           line: { color: 'rgba(0, 0, 0, 0)' },
@@ -124,7 +127,7 @@ export class RollingEnergySavingsGraphComponent {
         }
 
         var trace4 = {
-          x: monthlySummaryData.map(results => { return results.date }),
+          x: this.monthlyAnalysisSummaryData.map(results => { return results.date }),
           y: fifteenPercentUpperBound,
           fillcolor: '#687faa',
           fill: 'tonexty',

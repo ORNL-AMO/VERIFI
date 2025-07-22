@@ -150,10 +150,10 @@ export interface DataOverviewFacilityReportSettings {
     // includeStackedBarChart: boolean,
     // includeMonthlyLineChart: boolean,
     includeAllMeterData: boolean,
-      includedGroups: Array<{
+    includedGroups: Array<{
         groupId: string,
         include: boolean
-      }>
+    }>
     includeMeterUsageStackedLineChart: boolean,
     includeMeterUsageTable: boolean,
     includeMeterUsageDonut: boolean,
@@ -165,10 +165,34 @@ export interface DataOverviewFacilityReportSettings {
 
 export function getSavingsReportSettings(): SavingsFacilityReportSettings {
     return {
-       
+        startYear: undefined,
+        startMonth: undefined,
+        endYear: undefined,
+        endMonth: undefined,
+        facilityAnnualResults: true,
+        facilityAnnualResultsTable: true,
+        groupReports: true,
+        groupMonthlyResults: true,
+        groupMonthlyResultsTable: true,
+        groupMonthlyResultsGraphs: true,
+        groupTrailingTwelveMonthsConsumption: true,
+        groupTrailingTwelveMonthsSavings: true,
+        groupAnnualResultsTable: true,
     };
 }
 
 export interface SavingsFacilityReportSettings {
-    
+    startYear: number,
+    startMonth: number,
+    endYear: number,
+    endMonth: number,
+    facilityAnnualResults: boolean,
+    facilityAnnualResultsTable: boolean,
+    groupReports: boolean,
+    groupMonthlyResults: boolean,
+    groupMonthlyResultsTable: boolean,
+    groupMonthlyResultsGraphs: boolean,
+    groupTrailingTwelveMonthsConsumption: boolean,
+    groupTrailingTwelveMonthsSavings: boolean,
+    groupAnnualResultsTable: boolean,
 }

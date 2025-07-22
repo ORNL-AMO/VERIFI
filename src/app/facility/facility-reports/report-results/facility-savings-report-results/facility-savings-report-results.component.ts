@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { get } from 'http';
 import { Subscription } from 'rxjs';
 import { AccountAnalysisService } from 'src/app/account/account-analysis/account-analysis.service';
 import { AccountReportsService } from 'src/app/account/account-reports/account-reports.service';
@@ -24,6 +25,7 @@ import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
+import { SharedDataService } from 'src/app/shared/helper-services/shared-data.service';
 
 @Component({
   selector: 'app-facility-savings-report-results',
@@ -39,6 +41,7 @@ export class FacilitySavingsReportResultsComponent {
   analysisItem: IdbAnalysisItem;
   worker: Worker;
   annualAnalysisSummaries: Array<AnnualAnalysisSummary>;
+  annualAnalysisSummariesSelected: Array<AnnualAnalysisSummary>;
   calculating: boolean | 'error' = false;
   facility: IdbFacility;
   annualAnalysisSummarySub: Subscription;
@@ -49,7 +52,16 @@ export class FacilitySavingsReportResultsComponent {
     group: AnalysisGroup,
     monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
     annualAnalysisSummaryData: Array<AnnualAnalysisSummary>
-  }>
+  }>;
+  selectedGroupSummaries: Array<{
+    group: AnalysisGroup,
+    monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData>,
+    annualAnalysisSummaryData: Array<AnnualAnalysisSummary>
+  }>;
+  itemsPerPage: number;
+  itemsPerPageSub: Subscription;
+  startDate: Date;
+  endDate: Date;
   constructor(
     private facilityDbService: FacilitydbService,
     private predictorDbService: PredictorDbService,
@@ -59,6 +71,7 @@ export class FacilitySavingsReportResultsComponent {
     private analysisDbService: AnalysisDbService,
     private accountReportsService: AccountReportsService,
     private accountDbService: AccountdbService,
+    private sharedDataService: SharedDataService,
     private facilityReportsDbService: FacilityReportsDbService,
   ) { }
 
@@ -71,7 +84,47 @@ export class FacilitySavingsReportResultsComponent {
     this.printSub = this.accountReportsService.print.subscribe(print => {
       this.print = print;
     });
+
+    this.itemsPerPageSub = this.sharedDataService.itemsPerPage.subscribe(val => {
+      this.itemsPerPage = val;
+    });
+
+    this.startDate = new Date(this.facilityReport.savingsReportSettings.startYear, this.facilityReport.savingsReportSettings.startMonth, 1);
+    this.endDate = new Date(this.facilityReport.savingsReportSettings.endYear, this.facilityReport.savingsReportSettings.endMonth, 1);
+
     this.getAnnualAnalysisSummary();
+  }
+
+  getSelectedSummaries() {
+    if (this.facilityReport.savingsReportSettings.endMonth != 11) {
+      this.annualAnalysisSummariesSelected = this.annualAnalysisSummaries.filter(summary => {
+        return summary.year >= this.facilityReport.savingsReportSettings.startYear && summary.year < this.facilityReport.savingsReportSettings.endYear;
+      });
+
+      this.selectedGroupSummaries = this.groupSummaries.map(groupSummary => ({
+        ...groupSummary,
+        monthlyAnalysisSummaryData: groupSummary.monthlyAnalysisSummaryData.filter(summary => {
+          return summary.date >= this.startDate && summary.date <= this.endDate;
+        }),
+        annualAnalysisSummaryData: groupSummary.annualAnalysisSummaryData.filter(summary => {
+          return summary.year >= this.facilityReport.savingsReportSettings.startYear && summary.year < this.facilityReport.savingsReportSettings.endYear;
+        })
+      }));
+    } else {
+      this.annualAnalysisSummariesSelected = this.annualAnalysisSummaries.filter(summary => {
+        return summary.year >= this.facilityReport.savingsReportSettings.startYear && summary.year <= this.facilityReport.savingsReportSettings.endYear;
+      });
+
+      this.selectedGroupSummaries = this.groupSummaries.map(groupSummary => ({
+        ...groupSummary,
+        monthlyAnalysisSummaryData: groupSummary.monthlyAnalysisSummaryData.filter(summary => {
+          return summary.date >= this.startDate && summary.date <= this.endDate;
+        }),
+        annualAnalysisSummaryData: groupSummary.annualAnalysisSummaryData.filter(summary => {
+          return summary.year >= this.facilityReport.savingsReportSettings.startYear && summary.year <= this.facilityReport.savingsReportSettings.endYear;
+        })
+      }));
+    }
   }
 
   getAnnualAnalysisSummary() {
@@ -91,6 +144,7 @@ export class FacilitySavingsReportResultsComponent {
           this.monthlyAnalysisSummaryData = data.monthlyAnalysisSummaryData;
           this.groupSummaries = data.groupSummaries;
           this.calculating = false;
+          this.getSelectedSummaries();
         } else {
           this.calculating = 'error';
         }
@@ -116,6 +170,7 @@ export class FacilitySavingsReportResultsComponent {
       this.annualAnalysisSummaries = annualAnalysisSummaryClass.getAnnualAnalysisSummaries();
       this.monthlyAnalysisSummaryData = annualAnalysisSummaryClass.monthlyAnalysisSummaryData;
       this.groupSummaries = annualAnalysisSummaryClass.groupSummaries;
+      this.getSelectedSummaries();
     }
   }
 
@@ -125,5 +180,6 @@ export class FacilitySavingsReportResultsComponent {
     }
     this.facilityReportSub.unsubscribe();
     this.printSub.unsubscribe();
+    this.itemsPerPageSub.unsubscribe();
   }
 }

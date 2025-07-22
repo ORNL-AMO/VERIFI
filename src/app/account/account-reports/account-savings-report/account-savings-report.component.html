@@ -17,6 +17,10 @@
                     [annualAnalysisSummary]="annualAnalysisSummary" [analysisItem]="selectedAnalysisItem"
                     [accountOrFacility]="account" [printBlock]="'all'">
                 </app-annual-analysis-summary-table>
+
+                <app-annual-analysis-summary-graph [annualAnalysisSummary]="annualAnalysisSummary"
+                    [analysisItem]="selectedAnalysisItem">
+                </app-annual-analysis-summary-graph>
                 <div *ngIf="annualAnalysisSummary.length === 0">
                     <p>No data available for this account.</p>
                 </div>
@@ -34,9 +38,13 @@
                             *ngIf="summary.annualFacilityAnalysisSummaries && summary.annualFacilityAnalysisSummaries.length > 0"
                             [annualAnalysisSummary]="summary.annualFacilityAnalysisSummaries"
                             [analysisItem]="summary.facilitySummary.analysisItem"
-                            [accountOrFacility]="summary.facilitySummary.facility" [printBlock]="'all'"
-                            [inReport]="true">
+                            [accountOrFacility]="summary.facilitySummary.facility" [printBlock]="'all'">
                         </app-annual-analysis-summary-table>
+
+                        <app-annual-analysis-summary-graph
+                            [annualAnalysisSummary]="summary.annualFacilityAnalysisSummaries"
+                            [analysisItem]="summary.facilitySummary.analysisItem">
+                        </app-annual-analysis-summary-graph>
                         <hr>
                         <div *ngIf="summary.annualFacilityAnalysisSummaries.length === 0">
                             <p>No data available for this facility.</p>
@@ -57,6 +65,10 @@
                     <app-performance-report-facility-table *ngIf="performanceReport" [account]="account"
                         [performanceReport]="performanceReport" [selectedAnalysisItem]="selectedAnalysisItem"
                         [performanceReportSetup]="selectedReport.performanceReportSetup"></app-performance-report-facility-table>
+
+                    <app-performance-chart [performanceReport]="performanceReport" [chartDataOption]="'savings'"
+                        [chartDataType]="'facility'"
+                        [performanceReportSetup]="selectedReport.performanceReportSetup"></app-performance-chart>
                 </div>
             </ng-container>
         </div>
@@ -65,7 +77,8 @@
 
 <div class="w-100 justify-content-center">
     <div class="pt-5">
-        <app-calculating-spinner *ngIf="calculatingPerformance != false && calculatingAnalysis != false" [message]="'Generating Savings Report...'"
+        <app-calculating-spinner *ngIf="calculatingPerformance != false && calculatingAnalysis != false"
+            [message]="'Generating Savings Report...'"
             [error]="calculatingPerformance == 'error' || calculatingAnalysis == 'error'"></app-calculating-spinner>
     </div>
 </div>
