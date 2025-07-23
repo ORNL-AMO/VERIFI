@@ -5,12 +5,12 @@ import { getNewIdbFacility, IdbFacility } from 'src/app/models/idbModels/facilit
 import { IdbPredictor } from 'src/app/models/idbModels/predictor';
 import { IdbPredictorData } from 'src/app/models/idbModels/predictorData';
 import { getNewIdbUtilityMeter, IdbUtilityMeter, MeterCharge, MeterReadingDataApplication } from 'src/app/models/idbModels/utilityMeter';
-import { IdbUtilityMeterData } from 'src/app/models/idbModels/utilityMeterData';
+import { getNewIdbUtilityMeterData, IdbUtilityMeterData, MeterDataCharge } from 'src/app/models/idbModels/utilityMeterData';
 import { IdbUtilityMeterGroup } from 'src/app/models/idbModels/utilityMeterGroup';
 import * as XLSX from 'xlsx';
 import { ParsedTemplate } from './upload-data-models';
 import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
-import { checkImportStartingUnit, getAgreementType, getCountryCode, getMeterSource, getScope, getState, getYesNoBool, getZip, parseNAICs } from './upload-helper-functions';
+import { checkImportCellNumber, checkImportStartingUnit, checkSameDay, getAgreementType, getCountryCode, getMeterSource, getScope, getState, getYesNoBool, getZip, parseNAICs } from './upload-helper-functions';
 import * as _ from 'lodash';
 import { EGridService } from 'src/app/shared/helper-services/e-grid.service';
 import { SubRegionData } from 'src/app/models/eGridEmissions';
@@ -43,7 +43,6 @@ export class UploadDataV3Service {
       let meters: Array<IdbUtilityMeter> = [];
       let newGroups: Array<IdbUtilityMeterGroup> = [];
       ({ meters, newGroups } = this.getElectricityMeters(workbook, importFacilities, selectedAccount, meters, newGroups));
-      console.log(meters);
       // let importMetersAndGroups: { meters: Array<IdbUtilityMeter>, newGroups: Array<IdbUtilityMeterGroup> } = this.getImportMeters(workbook, importFacilities, selectedAccount);
       // let importMeterData: Array<IdbUtilityMeterData> = this.getUtilityMeterData(workbook, importMetersAndGroups.meters);
       // let importPredictors: Array<IdbPredictor> = this.uploadDataSharedFunctionsService.getPredictors(workbook, importFacilities);
@@ -185,18 +184,80 @@ export class UploadDataV3Service {
     return { meters: meters, newGroups: newGroups };
   }
 
+  getElectricityData(workbook: XLSX.WorkBook, importMeters: Array<IdbUtilityMeter>, importMeterData: Array<IdbUtilityMeterData>, utilityMeterData: Array<IdbUtilityMeterData>): Array<IdbUtilityMeterData> {
+    //electricity readings
+    let electricityData = XLSX.utils.sheet_to_json(workbook.Sheets['Electricity']);
+
+    electricityData.forEach(dataPoint => {
+      let meterNumber: string = dataPoint['Meter Number'];
+      let readDate: Date = new Date(dataPoint['Read Date']);
+      let meter: IdbUtilityMeter = importMeters.find(meter => { return meter.meterNumber == meterNumber });
+      if (meter) {
+        let dbDataPoint: IdbUtilityMeterData = this.getExistingDbEntry(utilityMeterData, meter, readDate);
+        if (!dbDataPoint) {
+          dbDataPoint = getNewIdbUtilityMeterData(meter, []);
+        }
+        dbDataPoint.readDate = readDate;
+        dbDataPoint.totalEnergyUse = checkImportCellNumber(dataPoint['Total Usage']);
+        dbDataPoint.totalRealDemand = checkImportCellNumber(dataPoint['Actual Demand']);
+        dbDataPoint.totalBilledDemand = checkImportCellNumber(dataPoint['Total Billed Demand']);
+        dbDataPoint.totalCost = checkImportCellNumber(dataPoint['Total Cost ($)']);
+        dbDataPoint.powerFactor = checkImportCellNumber(dataPoint['Power Factor']);
+
+        meter.charges.forEach(charge => {
+          if (dataPoint[charge.name]) {
+            let dbCharge: MeterDataCharge = dbDataPoint.charges.find(dataCharge => {
+              return dataCharge.chargeGuid == charge.guid
+            });
+            if (dbCharge) {
+
+            } else {
+              dbDataPoint.charges.push({
+                chargeGuid: charge.guid,
+                chargeAmount: checkImportCellNumber(dataPoint[charge.name]),
+                chargeUsage: checkImportCellNumber(dataPoint[charge.name + ' Usage'])
+              })
+            }
+          }
+        })
+
+
+
+        importMeterData.push(dbDataPoint);
+      } else {
+        console.log('no meter');
+      }
+    });
+    return importMeterData;
+  }
+
+  addMeterDataCharges() {
+
+  }
+
+
   addCharges(excelMeter, meter: IdbUtilityMeter) {
     for (let i = 1; i < 16; i++) {
       if (excelMeter['Cost ' + i + ' Name']) {
-        let charge: MeterCharge = {
-          guid: getGUID(),
-          name: excelMeter['Cost ' + i + ' Name'],
-          chargeType: this.getChargeType(excelMeter['Cost ' + i + ' Type']),
-          chargeUnit: 'dollarsPerKilowattHour',
-          displayChargeInTable: true,
-          displayUsageInTable: true
+        let chargeName: string = excelMeter['Cost ' + i + ' Name'];
+        let charge: MeterCharge = meter.charges.find(charge => {
+          return charge.name == chargeName
+        });
+        if (charge) {
+          charge.name = excelMeter['Cost ' + i + ' Name'];
+          charge.chargeType = this.getChargeType(excelMeter['Cost ' + i + ' Type']);
+          charge.chargeUnit = this.getChargeUnit(excelMeter['Cost ' + i + ' Unit']);
+        } else {
+          charge = {
+            guid: getGUID(),
+            name: excelMeter['Cost ' + i + ' Name'],
+            chargeType: this.getChargeType(excelMeter['Cost ' + i + ' Type']),
+            chargeUnit: this.getChargeUnit(excelMeter['Cost ' + i + ' Unit']),
+            displayChargeInTable: true,
+            displayUsageInTable: true
+          }
+          meter.charges.push(charge);
         }
-        meter.charges.push(charge);
       }
     }
   }
@@ -268,6 +329,7 @@ export class UploadDataV3Service {
       meter.energyUnit = facility.energyUnit;
     }
   }
+
   parseSiteToSource(excelMeter: any, meter: IdbUtilityMeter): number {
     let siteToSource: number = excelMeter['S2S Factor'];
     if (siteToSource == undefined) {
@@ -289,5 +351,17 @@ export class UploadDataV3Service {
     } else if (excelSelection == 'Evenly Distribute') {
       return 'fullYear';
     };
+  }
+
+
+  getExistingDbEntry(utilityMeterData: Array<IdbUtilityMeterData>, meter: IdbUtilityMeter, readDate: Date): IdbUtilityMeterData {
+    return utilityMeterData.find(meterDataItem => {
+      if (meterDataItem.meterId == meter.guid) {
+        let dateItemDate: Date = new Date(meterDataItem.readDate);
+        return checkSameDay(dateItemDate, readDate);
+      } else {
+        return false;
+      }
+    })
   }
 }
