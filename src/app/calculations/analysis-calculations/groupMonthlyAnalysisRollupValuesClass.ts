@@ -232,9 +232,9 @@ export class GroupMonthlyAnalysisRollupValues {
             let last11monthsBaselineAdjustment: number = _.sumBy(last11MonthsData, (data: GroupMonthlyAnalysisRollupValues) => {
                 return data.baselineAdjustmentForOtherV2;
             })
-            this.baselineAdjustmentForOtherV2 = this.rollingBaselineAdjustmentOther - last11monthsBaselineAdjustment;
+            this.baselineAdjustmentForOtherV2 = this.rollingBaselineAdjustmentForOther - last11monthsBaselineAdjustment;
         } else {
-            this.baselineAdjustmentForOtherV2 = this.rollingBaselineAdjustmentOther;
+            this.baselineAdjustmentForOtherV2 = this.rollingBaselineAdjustmentForOther;
         }
     }
 
