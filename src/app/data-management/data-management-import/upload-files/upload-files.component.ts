@@ -63,6 +63,7 @@ export class UploadFilesComponent {
         this.fileReferences.push(fileReference);
         this.dataManagementService.fileReferences.next(this.fileReferences);
       } catch (err) {
+        console.log(err);
         this.fileUploadError = true;
       }
     };

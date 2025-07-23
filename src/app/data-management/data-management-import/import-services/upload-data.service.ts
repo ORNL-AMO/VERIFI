@@ -13,7 +13,7 @@ import { checkShowHeatCapacity, checkShowSiteToSource, getHeatingCapacity, getIs
 import { MeterPhase, MeterSource } from '../../../models/constantsAndTypes';
 import { getMeterDataCopy } from '../../../calculations/conversions/convertMeterData';
 import { FuelTypeOption } from '../../../shared/fuel-options/fuelTypeOption';;
-import { ColumnGroup, ColumnItem, FacilityGroup, FileReference, ParsedTemplate } from './upload-data-models';
+import { ColumnGroup, ColumnItem, FacilityGroup, FileReference, ParsedTemplate, TemplateVersion } from './upload-data-models';
 import { UploadDataV1Service } from './upload-data-v1.service';
 import { UploadDataV2Service } from './upload-data-v2.service';
 import * as _ from 'lodash';
@@ -34,6 +34,7 @@ import { FormGroup } from '@angular/forms';
 import { UtilityMeterDataService } from '../../../shared/shared-meter-content/utility-meter-data.service';
 import { DbChangesService } from '../../../indexedDB/db-changes.service';
 import { UploadDataEnergyTreasureHuntService } from './upload-data-energy-treasure-hunt.service';
+import { UploadDataV3Service } from './upload-data-v3.service';
 
 @Injectable({
   providedIn: 'root'
@@ -58,7 +59,8 @@ export class UploadDataService {
     private sharedDataService: SharedDataService,
     private utilityMeterDataService: UtilityMeterDataService,
     private dbChangesService: DbChangesService,
-    private uploadDataEnergyTreasureHuntService: UploadDataEnergyTreasureHuntService) {
+    private uploadDataEnergyTreasureHuntService: UploadDataEnergyTreasureHuntService,
+    private uploadDataV3Service: UploadDataV3Service) {
     this.allFilesSet = new BehaviorSubject<boolean>(false);
     this.fileReferences = new Array();
     this.uploadMeters = new Array();
@@ -66,7 +68,7 @@ export class UploadDataService {
 
 
   getFileReference(file: File, workBook: XLSX.WorkBook): FileReference {
-    let isTemplate: "V1" | "V2" | "Non-template" | "ETH" = this.checkSheetNamesForTemplate(workBook.SheetNames);
+    let isTemplate: TemplateVersion = this.checkSheetNamesForTemplate(workBook.SheetNames);
     if (isTemplate == "Non-template") {
       let accountFacilities: Array<IdbFacility> = this.facilityDbService.getAccountFacilitiesCopy();
       return {
@@ -163,7 +165,8 @@ export class UploadDataService {
     }
   }
 
-  checkSheetNamesForTemplate(sheetNames: Array<string>): "V1" | "V2" | "Non-template" | "ETH" {
+  checkSheetNamesForTemplate(sheetNames: Array<string>): TemplateVersion {
+    console.log(sheetNames);
     if (sheetNames[0] == "V2" && sheetNames[1] == "Help" && sheetNames[2] == "HIDE_Lists" && sheetNames[3] == "HIDE_Meter_Lists" &&
       sheetNames[4] == "Facilities" && sheetNames[5] == "Meters-Utilities" && sheetNames[6] == "HIDE_Meters-Utilites" && sheetNames[7] == "Electricity"
       && sheetNames[8] == "Stationary Fuel - Other Energy" && sheetNames[9] == "Mobile Fuel" && sheetNames[10] == "Water" && sheetNames[11] == "Other Utility - Emission"
@@ -180,19 +183,22 @@ export class UploadDataService {
       return "V1";
     } else if (sheetNames.includes("ETH VERIFI Upload")) {
       return "ETH";
-    }
-    else {
+    } else if (sheetNames.includes("V3")) {
+      return "V3";
+    } else {
       return "Non-template";
     }
   }
 
-  parseTemplate(workbook: XLSX.WorkBook, templateVersion: "V1" | "V2" | "ETH"): ParsedTemplate {
+  parseTemplate(workbook: XLSX.WorkBook, templateVersion: TemplateVersion): ParsedTemplate {
     if (templateVersion == "V1") {
       return this.uploadDataV1Service.parseTemplate(workbook);
     } else if (templateVersion == "V2") {
       return this.uploadDataV2Service.parseTemplate(workbook);
     } else if (templateVersion == "ETH") {
       return this.uploadDataEnergyTreasureHuntService.parseTemplate(workbook);
+    } else if (templateVersion == "V3") {
+      return this.uploadDataV3Service.parseTemplate(workbook);
     }
   }
 
@@ -221,11 +227,14 @@ export class UploadDataService {
 
 
   getMeterDataEntries(workbook: XLSX.WorkBook, importMeters: Array<IdbUtilityMeter>): Array<IdbUtilityMeterData> {
-    let isTemplate: "V1" | "V2" | "Non-template" | "ETH" = this.checkSheetNamesForTemplate(workbook.SheetNames);
+    let isTemplate: TemplateVersion = this.checkSheetNamesForTemplate(workbook.SheetNames);
     if (isTemplate == "V1") {
       return this.uploadDataV1Service.getMeterDataEntries(workbook, importMeters);
     } else if (isTemplate == "V2") {
       return this.uploadDataV2Service.getUtilityMeterData(workbook, importMeters);
+    } else if (isTemplate == "V3") {
+      // return this.uploadDataV3Service.getUtilityMeterData(workbook, importMeters);
+
     }
     return [];
   }

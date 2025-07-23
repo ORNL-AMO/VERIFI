@@ -92,3 +92,5 @@ export interface ParsedTemplate {
   meterData: Array<IdbUtilityMeterData>,
   newGroups: Array<IdbUtilityMeterGroup>
 }
+
+export type TemplateVersion = "V1" | "V2" | "V3" | "ETH" | "Non-template";
