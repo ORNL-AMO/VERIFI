@@ -27,7 +27,8 @@ import { PredictorDataDbService } from 'src/app/indexedDB/predictor-data-db.serv
 import { PredictorDbService } from 'src/app/indexedDB/predictor-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
 import { UtilityMeterDatadbService } from 'src/app/indexedDB/utilityMeterData-db.service';
-import { PerformanceReport } from 'src/app/calculations/performance-report-calculations/performanceReport';
+import { PerformanceReport, PerformanceReportAnnualData } from 'src/app/calculations/performance-report-calculations/performanceReport';
+import { data } from 'browserslist';
 
 @Component({
   selector: 'app-account-savings-report',
@@ -48,10 +49,12 @@ export class AccountSavingsReportComponent {
   calculatingAnalysis: boolean | 'error';
   calculatingPerformance: boolean | 'error';
   annualAnalysisSummary: Array<AnnualAnalysisSummary>;
+  selectedAnnualAnalysisSummary: Array<AnnualAnalysisSummary>;
   workerAnalysis: Worker;
   workerPerformance: Worker;
   monthlyAnalysisSummaryData: Array<MonthlyAnalysisSummaryData> = [];
   facilitySummaries: Array<{ facility: IdbFacility, analysisItem: IdbAnalysisItem, monthlySummaryData: Array<MonthlyAnalysisSummaryData> }> = [];
+  selectedFacilitySummaries: Array<{ facilitySummary: { facility: IdbFacility, analysisItem: IdbAnalysisItem, monthlySummaryData: Array<MonthlyAnalysisSummaryData> }, annualFacilityAnalysisSummaries: Array<AnnualAnalysisSummary> }> = [];
   annualFacilityAnalysisSummaries: Array<AnnualAnalysisSummary> = [];
   accountPredictorEntries: Array<IdbPredictorData> = [];
   accountPredictors: Array<IdbPredictor> = [];
@@ -59,9 +62,9 @@ export class AccountSavingsReportComponent {
   meterData: Array<IdbUtilityMeterData> = [];
   facilitySummariesWithAnnual: Array<{ facilitySummary: { facility: IdbFacility, analysisItem: IdbAnalysisItem, monthlySummaryData: Array<MonthlyAnalysisSummaryData> }, annualFacilityAnalysisSummaries: Array<AnnualAnalysisSummary> }> = [];
   performanceReport: PerformanceReport;
+  selectedPerformanceReport: PerformanceReport;
   accountFacilities: Array<IdbFacility> = [];
   analysisItems: Array<IdbAnalysisItem> = [];
-  calculating: boolean;
 
   constructor(private accountReportDbService: AccountReportDbService,
     private accountReportsService: AccountReportsService,
@@ -89,6 +92,8 @@ export class AccountSavingsReportComponent {
     this.account = this.accountDbService.selectedAccount.getValue();
     this.accountAnalysisItems = this.accountAnalysisDbService.accountAnalysisItems.getValue();
     this.selectedAnalysisItem = this.accountAnalysisItems.find(item => { return item.guid == this.selectedReport.accountSavingsReportSetup.analysisItemId });
+    this.selectedReport.baselineYear = this.selectedAnalysisItem.baselineYear;
+    this.selectedReport.reportYear = this.selectedAnalysisItem.reportYear;
 
     this.accountFacilities = this.facilityDbService.accountFacilities.getValue();
     this.accountPredictorEntries = this.predictorDataDbService.accountPredictorData.getValue();
@@ -116,6 +121,7 @@ export class AccountSavingsReportComponent {
         if (!data.error) {
           this.performanceReport = data.performanceReport;
           this.calculatingPerformance = false;
+          this.getSelectedPerformanceSummaries();
         } else {
           this.calculatingPerformance = 'error';
         }
@@ -148,6 +154,7 @@ export class AccountSavingsReportComponent {
         accountMeterData,
         this.accountPredictors);
       this.calculatingPerformance = false;
+      this.getSelectedPerformanceSummaries();
     }
   }
 
@@ -186,7 +193,7 @@ export class AccountSavingsReportComponent {
       this.annualAnalysisSummary = annualAnalysisSummaries;
       this.monthlyAnalysisSummaryData = monthlyAnalysisSummaryData;
       this.facilitySummaries = annualAnalysisSummaryClass.facilitySummaries;
-      this.calculating = false;
+      this.calculatingAnalysis = false;
       this.getFacilityData();
     }
   }
@@ -205,6 +212,59 @@ export class AccountSavingsReportComponent {
         annualFacilityAnalysisSummaries: this.annualFacilityAnalysisSummaries
       });
     });
+    this.getSelectedSummaries();
+  }
+
+  getSelectedSummaries() {
+    if (this.selectedReport.endMonth != 11) {
+      this.selectedAnnualAnalysisSummary = this.annualAnalysisSummary.filter(summary => {
+        return summary.year >= this.selectedReport.startYear && summary.year < this.selectedReport.endYear;
+      });
+
+      this.selectedFacilitySummaries = this.facilitySummariesWithAnnual.map(summary => ({
+        facilitySummary: summary.facilitySummary,
+        annualFacilityAnalysisSummaries: summary.annualFacilityAnalysisSummaries.filter(annualSummary => {
+          return annualSummary.year >= this.selectedReport.startYear && annualSummary.year < this.selectedReport.endYear;
+        })
+      }));
+    } else {
+      this.selectedAnnualAnalysisSummary = this.annualAnalysisSummary.filter(summary => {
+        return summary.year >= this.selectedReport.startYear && summary.year <= this.selectedReport.endYear;
+      });
+      this.selectedFacilitySummaries = this.facilitySummariesWithAnnual.map(summary => ({
+        facilitySummary: summary.facilitySummary,
+        annualFacilityAnalysisSummaries: summary.annualFacilityAnalysisSummaries.filter(annualSummary => {
+          return annualSummary.year >= this.selectedReport.startYear && annualSummary.year <= this.selectedReport.endYear;
+        })
+      }));
+    }
+  }
+
+  getSelectedPerformanceSummaries() {
+    this.selectedPerformanceReport = JSON.parse(JSON.stringify(this.performanceReport));
+    if (this.selectedReport.endMonth != 11) {
+      this.selectedPerformanceReport.annualFacilityData = this.performanceReport.annualFacilityData.map(facility => ({
+        annualData: facility.annualData.filter(data => {
+          return data.year >= this.selectedReport.startYear && data.year < this.selectedReport.endYear;
+        }),
+        facility: facility.facility,
+      }));
+
+      this.selectedPerformanceReport.facilityTotals = this.performanceReport.facilityTotals.filter(data => {
+        return data.year >= this.selectedReport.startYear && data.year < this.selectedReport.endYear;
+      });
+    }
+    else {
+      this.selectedPerformanceReport.annualFacilityData = this.performanceReport.annualFacilityData.map(facility => ({
+        annualData: facility.annualData.filter(data => {
+          return data.year >= this.selectedReport.startYear && data.year <= this.selectedReport.endYear;
+        }),
+        facility: facility.facility,
+      }));
+      this.selectedPerformanceReport.facilityTotals = this.performanceReport.facilityTotals.filter(data => {
+        return data.year >= this.selectedReport.startYear && data.year <= this.selectedReport.endYear;
+      });
+    }
   }
 
   ngOnDestroy(): void {

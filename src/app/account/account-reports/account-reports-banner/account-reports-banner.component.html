@@ -53,7 +53,7 @@
                     <a class="nav-link home-link dropdown-toggle" (click)="toggleShow()">
                         <i class="fa fa-file"></i>
                         {{selectedReport.name}}
-                        <ng-container *ngIf="selectedReport.reportType != 'dataOverview'">
+                        <ng-container *ngIf="selectedReport.reportType != 'dataOverview' && selectedReport.reportType != 'accountSavings'">
                             - ({{selectedReport.reportYear}})
                         </ng-container>
                     </a>

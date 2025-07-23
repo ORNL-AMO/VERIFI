@@ -1,86 +1,156 @@
 <form [formGroup]="accountSavingsReportForm">
-    <div class="row mb-4">
-        <div class="col-12">
-            <app-label-with-tooltip [isSemiBold]="true" [label]="'Select Account Analysis'"
-                [field]="'selectAccountAnalysis'" [isFloatRight]="true">
-            </app-label-with-tooltip>
-            <div class="table-responsive">
-                <table class="table table-sm table-hover table-bordered">
-                    <thead>
-                        <tr>
-                            <td>
+    <div>
+        <label class="bold">
+            Select Analysis Item
+        </label>
 
-                            </td>
-                            <td>
-                                Analysis Name
-                            </td>
-                            <td>
-                                Analysis Category
-                            </td>
-                            <td>
-                                Facilities Included
-                            </td>
-                            <td>
-                                Baseline Year
-                            </td>
-                            <td>
-                            </td>
-                        </tr>
-                    </thead>
+        <table class="table table-bordered table-sm">
+            <thead>
+                <tr>
+                    <th>
 
-                    <tbody class="table-group-divider">
-                        <tr *ngFor="let analysisItem of accountAnalysisItems">
-                            <td class="text-center">
-                                <input type="radio" class="form-check-input" formControlName="analysisItemId"
-                                    [value]="analysisItem.guid" id="{{analysisItem.guid+'_selectedAccountItemId'}}"
-                                    (change)="save()">
-                            </td>
-                            <td>
-                                {{analysisItem.name}}
-                            </td>
-                            <td>
-                                <ng-container *ngIf="analysisItem.analysisCategory == 'energy'">Energy</ng-container>
-                                <ng-container *ngIf="analysisItem.analysisCategory == 'water'">Water</ng-container>
-                            </td>
-                            <td>
-                                <span
-                                    *ngFor="let facilityItem of analysisItem.facilityAnalysisItems; let index = index;">
-                                    <span *ngIf="facilityItem.analysisItemId && facilityItem.analysisItemId != 'skip'">
-                                        {{facilityItem.facilityId | facilityName}}<span
-                                            *ngIf="index != analysisItem.facilityAnalysisItems.length-1">,</span>
-                                    </span>
-                                </span>
-                            </td>
-                            <td>
-                                {{analysisItem.baselineYear}}
-                            </td>
-                            <td class="text-center">
-                                <a class="click-link" (click)="viewAnalysis(analysisItem)">View Analysis</a>
-                            </td>
-                        </tr>
-                        <tr *ngIf="accountAnalysisItems.length == 0">
-                            <td colspan="4" class="alert alert-warning">
-                                No analysis items matching selected report year.
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                    </th>
+                    <th>
+                        Name
+                    </th>
+                    <th>
+                        Baseline Year
+                    </th>
+                    <th>
+                        Report Year
+                    </th>
+                    <th>
+                        Analysis Type
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let item of analysisOptions">
+                    <td>
+                        <div class="form-check">
+                            <input type="radio" class="form-check-input" formControlName="analysisItemId"
+                                [value]="item.guid" id="{{item.guid + '_selectedAccountItemId'}}"
+                                (change)="setSelectedAnalysisItem(false)">
+                        </div>
+                    </td>
+                    <td>
+                        {{item.name}}
+                    </td>
+                    <td>
+                        {{item.baselineYear}}
+                    </td>
+                    <td>
+                        {{item.reportYear}}
+                    </td>
+                    <td>
+                        <ng-template [ngIf]="item.analysisCategory == 'water'">
+                            Water
+                        </ng-template>
+                        <ng-template [ngIf]="item.analysisCategory == 'energy'">
+                            Energy
+                        </ng-template>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="w-100 m-2" *ngIf="analysisOptions.length == 0">
+            <div class="alert alert-danger">
+                Analysis Item Selection Required.
+            </div>
+        </div>
+        <hr>
+
+        <div *ngIf="selectedAnalysisItem">
+            <span class="bold">
+                Sections to Include
+            </span>
+            <div class="row">
+                <div class="col">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="includeAnnualResults"
+                            id="includeAnnualResults" formControlName="includeAnnualResults" (change)="save()">
+                        <label class="bold form-check-label" for="includeAnnualResults">Account Annual Results
+                        </label>
+                    </div>
+                    <ng-container *ngIf="reportSetup.includeAnnualResults">
+                        <div class="form-check ms-2">
+                            <input class="form-check-input" type="checkbox" name="includeAnnualResultsTable"
+                                id="includeAnnualResultsTable" formControlName="includeAnnualResultsTable"
+                                (change)="save()">
+                            <label class="form-check-label" for="includeAnnualResultsTable">Account Annual Results
+                                Table
+                            </label>
+                        </div>
+                        <div class="form-check ms-2">
+                            <input class="form-check-input" type="checkbox" name="includeAnnualResultsGraph"
+                                id="includeAnnualResultsGraph" formControlName="includeAnnualResultsGraph"
+                                (change)="save()">
+                            <label class="form-check-label" for="includeAnnualResultsGraph">Account Annual Results
+                                Graph
+                            </label>
+                        </div>
+                    </ng-container>
+                </div>
+
+                <div class="col">
+                    <div class="form-check ms-2">
+                        <input class="form-check-input" type="checkbox" name="includeFacilityResults"
+                            id="includeFacilityResults" formControlName="includeFacilityResults" (change)="save()">
+                        <label class="bold form-check-label" for="includeFacilityResults">Facility Results
+                        </label>
+                    </div>
+                    <ng-container *ngIf="reportSetup.includeFacilityResults">
+                        <div class="form-check ms-2">
+                            <input class="form-check-input" type="checkbox" name="includeFacilityResultsTable"
+                                id="includeFacilityResultsTable" formControlName="includeFacilityResultsTable"
+                                (change)="save()">
+                            <label class="form-check-label" for="includeFacilityResultsTable">Facility Results
+                                Table
+                            </label>
+                        </div>
+                        <div class="form-check ms-2">
+                            <input class="form-check-input" type="checkbox" name="includeFacilityResultsGraph"
+                                id="includeFacilityResultsGraph" formControlName="includeFacilityResultsGraph"
+                                (change)="save()">
+                            <label class="form-check-label" for="includeFacilityResultsGraph">Facility Results
+                                Graph
+                            </label>
+                        </div>
+                    </ng-container>
+                </div>
+
+                <div class="col">
+                    <div class="form-check ms-2">
+                        <input class="form-check-input" type="checkbox" name="includePerformanceResults"
+                            id="includePerformanceResults" formControlName="includePerformanceResults"
+                            (change)="save()">
+                        <label class="boldform-check-label" for="includePerformanceResults">Performance Results
+                        </label>
+                    </div>
+                    <ng-container *ngIf="reportSetup.includePerformanceResults">
+                        <div class="form-check ms-2">
+                            <input class="form-check-input" type="checkbox" name="includePerformanceResultsTable"
+                                id="includePerformanceResultsTable" formControlName="includePerformanceResultsTable"
+                                (change)="save()">
+                            <label class="form-check-label" for="includePerformanceResultsTable">Performance Results
+                                Table
+                            </label>
+                        </div>
+                        <div class="form-check ms-2">
+                            <input class="form-check-input" type="checkbox" name="includePerformanceResultsGraph"
+                                id="includePerformanceResultsGraph" formControlName="includePerformanceResultsGraph"
+                                (change)="save()">
+                            <label class="form-check-label" for="includePerformanceResultsGraph">Performance Results
+                                Graph
+                            </label>
+                        </div>
+                    </ng-container>
+                </div>
             </div>
         </div>
     </div>
 </form>
 
-<div [ngClass]="{'windowOverlay': itemToEdit}"></div>
-<div class="popup" [class.open]="itemToEdit">
-    <div class="popup-header" *ngIf="itemToEdit">Go To: {{itemToEdit.name}}
-        <button class="item-right" (click)="cancelEditItem()">x</button>
-    </div>
-    <div class="popup-body">
-        <p>WARNING: Are you sure you want to go to this analysis item? Your progress will be saved and you will leave
-            this screen.</p>
-    </div>
-    <div class="saveCancel popup-footer text-end">
-        <button class="btn btn-secondary" (click)="cancelEditItem()">Cancel</button>
-        <button class="btn btn-outline" (click)="confirmEditItem()">Go To Analysis</button>
-    </div>
-</div>
+
+
+

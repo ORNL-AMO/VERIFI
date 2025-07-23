@@ -12,8 +12,8 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-6" *ngIf="setupForm.controls.reportType.value != 'dataOverview'">
-                    <div class="row form-group" *ngIf="setupForm.controls.reportType.value != 'betterPlants' && setupForm.controls.reportType.value != 'analysis' && setupForm.controls.reportType.value != 'accountSavings'">
+                <div class="col-6" *ngIf="setupForm.controls.reportType.value != 'dataOverview' && setupForm.controls.reportType.value != 'accountSavings'">
+                    <div class="row form-group" *ngIf="setupForm.controls.reportType.value != 'betterPlants' && setupForm.controls.reportType.value != 'accountSavings'">
                         <label class="col-5 col-form-label semibold" for="baselineYear">Baseline Year</label>
 
                         <div class="col-7">
@@ -35,7 +35,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-6" *ngIf="setupForm.controls.reportType.value == 'dataOverview'">
+                <div class="col-6" *ngIf="setupForm.controls.reportType.value == 'dataOverview' || setupForm.controls.reportType.value == 'accountSavings'">
 
                     <div class="row form-group">
                         <label class="col-5 col-form-label semibold" for="startDate">Start Date</label>

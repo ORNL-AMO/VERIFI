@@ -126,7 +126,7 @@ export class PerformanceChartComponent {
     }> = this.performanceReport.annualFacilityData.map(data => { return data });
     annualFacilityData = _.orderBy(annualFacilityData, (data: { facility: IdbFacility, annualData: Array<PerformanceReportAnnualData> }) => {
       let yearSummary: PerformanceReportAnnualData = data.annualData.find(summary => { return summary.year == this.performanceReport.reportYear })
-      return yearSummary[this.chartDataOption];
+      return yearSummary ? yearSummary[this.chartDataOption] : 0;
     }, 'desc');
     for (let i = 0; i < this.performanceReportSetup.numberOfTopPerformers; i++) {
       let topItem = annualFacilityData[i];

@@ -175,4 +175,13 @@ export interface AnalysisReportSetup {
 
 export interface AccountSavingsReportSetup {
   analysisItemId: string,
+  includeAnnualResults: boolean,
+  includeAnnualResultsTable: boolean,
+  includeAnnualResultsGraph: boolean,
+  includeFacilityResults: boolean,
+  includeFacilityResultsTable: boolean,
+  includeFacilityResultsGraph: boolean,
+  includePerformanceResults: boolean,
+  includePerformanceResultsTable: boolean,
+  includePerformanceResultsGraph: boolean
 }

@@ -18,7 +18,7 @@
     </div>
     <div class="card-body">
         <ng-template [ngIf]="report.facilityReportType == 'analysis' || report.facilityReportType == 'savings'">
-            <p class="mb-0" *ngIf="report.facilityReportType == 'analysis' || report.facilityReportType == 'savings'">
+            <p class="mb-0">
                 Analysis Item: {{report.analysisItemId | facilityAnalysisName}}
             </p>
         </ng-template>

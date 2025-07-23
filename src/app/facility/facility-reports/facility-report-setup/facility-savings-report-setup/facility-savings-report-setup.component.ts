@@ -28,8 +28,6 @@ export class FacilitySavingsReportSetupComponent {
 
   analysisItems: Array<IdbAnalysisItem>;
   analysisItemsSub: Subscription;
-
-  analysisTableColumns: AnalysisTableColumns;
   selectedAnalysisItem: IdbAnalysisItem;
   energyColumnLabel: string;
   actualUseLabel: string;
@@ -57,7 +55,6 @@ export class FacilitySavingsReportSetupComponent {
     this.facilityReportSub = this.facilityReportsDbService.selectedReport.subscribe(report => {
       if (this.isFormChange == false) {
         this.facilityReport = report;
-        this.analysisTableColumns = this.facilityReport.analysisReportSettings.analysisTableColumns;
         this.reportSettings = this.facilityReport.savingsReportSettings;
       } else {
         this.isFormChange = false;

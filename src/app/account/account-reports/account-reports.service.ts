@@ -30,7 +30,7 @@ export class AccountReportsService {
   validateReport(report: IdbAccountReport) {
     let errorMessage: string = '';
     //write validation for report
-    if (report && report.startMonth >= 0 && report.endMonth >= 0 && report.startYear > 0  && report.endYear > 0) {
+    if (report && report.startMonth >= 0 && report.endMonth >= 0 && report.startYear > 0 && report.endYear > 0) {
       let startDate: Date = new Date(report.startYear, report.startMonth, 1);
       let endDate: Date = new Date(report.endYear, report.endMonth, 1);
       // compare start and end date
@@ -47,13 +47,13 @@ export class AccountReportsService {
   getSetupFormFromReport(report: IdbAccountReport): FormGroup {
     let yearValidators: Array<ValidatorFn> = [];
     let dateValidators: Array<ValidatorFn> = [];
-    if (report.reportType == 'betterPlants' || report.reportType == 'performance' || report.reportType == 'betterClimate' || report.reportType == 'analysis' || report.reportType == 'accountSavings') {
+    if (report.reportType == 'betterPlants' || report.reportType == 'performance' || report.reportType == 'betterClimate' || report.reportType == 'analysis') {
       yearValidators = [Validators.required];
-    } else if (report.reportType == 'dataOverview') {
+    } else if (report.reportType == 'dataOverview' || report.reportType == 'accountSavings') {
       dateValidators = [Validators.required];
     }
 
-    if (report.reportType == 'performance' || report.reportType == 'betterClimate' || report.reportType == 'dataOverview') {
+    if (report.reportType == 'performance' || report.reportType == 'betterClimate' || report.reportType == 'dataOverview' || report.reportType == 'accountSavings') {
       let form: FormGroup = this.formBuilder.group({
         reportName: [report.name, Validators.required],
         reportType: [report.reportType, Validators.required],
@@ -66,7 +66,7 @@ export class AccountReportsService {
       });
       return form;
     }
-    else if (report.reportType == 'betterPlants' || report.reportType == 'analysis' || report.reportType == 'accountSavings') {
+    else if (report.reportType == 'betterPlants' || report.reportType == 'analysis') {
       let form: FormGroup = this.formBuilder.group({
         reportName: [report.name, Validators.required],
         reportType: [report.reportType, Validators.required],
@@ -284,7 +284,7 @@ export class AccountReportsService {
     }
     analysisReportSetup.analysisItemId = form.controls.analysisItemId.value;
     analysisReportSetup.includeProblemsInformation = form.controls.includeProblemsInformation.value;
-    analysisReportSetup.includeExecutiveSummary = form.controls.includeExecutiveSummary.value;  
+    analysisReportSetup.includeExecutiveSummary = form.controls.includeExecutiveSummary.value;
     analysisReportSetup.includeDataValidationTables = form.controls.includeDataValidationTables.value;
     return analysisReportSetup;
   }
@@ -292,17 +292,29 @@ export class AccountReportsService {
   getAccountSavingsFormFromReport(accountSavingsReportSetup: AccountSavingsReportSetup): FormGroup {
     if (!accountSavingsReportSetup) {
       accountSavingsReportSetup = {
-         analysisItemId: undefined,
-        // includeProblemsInformation: true,
-        // includeExecutiveSummary: true,
-        // includeDataValidationTables: true
+        analysisItemId: undefined,
+        includeAnnualResults: true,
+        includeAnnualResultsTable: true,
+        includeAnnualResultsGraph: true,
+        includeFacilityResults: true,
+        includeFacilityResultsTable: true,
+        includeFacilityResultsGraph: true,
+        includePerformanceResults: true,
+        includePerformanceResultsTable: true,
+        includePerformanceResultsGraph: true,
       };
     }
     let form: FormGroup = this.formBuilder.group({
-       analysisItemId: [accountSavingsReportSetup.analysisItemId, Validators.required],
-      // includeProblemsInformation: [accountSavingsReportSetup.includeProblemsInformation],
-      // includeExecutiveSummary: [accountSavingsReportSetup.includeExecutiveSummary],
-      // includeDataValidationTables: [accountSavingsReportSetup.includeDataValidationTables],
+      analysisItemId: [accountSavingsReportSetup.analysisItemId, Validators.required],
+      includeAnnualResults: [accountSavingsReportSetup.includeAnnualResults],
+      includeAnnualResultsTable: [accountSavingsReportSetup.includeAnnualResultsTable], 
+      includeAnnualResultsGraph: [accountSavingsReportSetup.includeAnnualResultsGraph],
+      includeFacilityResults: [accountSavingsReportSetup.includeFacilityResults],
+      includeFacilityResultsTable: [accountSavingsReportSetup.includeFacilityResultsTable],
+      includeFacilityResultsGraph: [accountSavingsReportSetup.includeFacilityResultsGraph],
+      includePerformanceResults: [accountSavingsReportSetup.includePerformanceResults],
+      includePerformanceResultsTable: [accountSavingsReportSetup.includePerformanceResultsTable],
+      includePerformanceResultsGraph: [accountSavingsReportSetup.includePerformanceResultsGraph]
     });
     return form;
   }
@@ -310,16 +322,28 @@ export class AccountReportsService {
   updateAccountSavingsReportFromForm(accountSavingsReportSetup: AccountSavingsReportSetup, form: FormGroup): AccountSavingsReportSetup {
     if (!accountSavingsReportSetup) {
       accountSavingsReportSetup = {
-         analysisItemId: undefined,
-        // includeProblemsInformation: true,
-        // includeExecutiveSummary: true,
-        // includeDataValidationTables: true
+        analysisItemId: undefined,
+        includeAnnualResults: true,
+        includeAnnualResultsTable: true,
+        includeAnnualResultsGraph: true,
+        includeFacilityResults: true,
+        includeFacilityResultsTable: true,
+        includeFacilityResultsGraph: true,
+        includePerformanceResults: true,
+        includePerformanceResultsTable: true,
+        includePerformanceResultsGraph: true,
       };
     }
-     accountSavingsReportSetup.analysisItemId = form.controls.analysisItemId.value;
-    // accountSavingsReportSetup.includeProblemsInformation = form.controls.includeProblemsInformation.value;
-    // accountSavingsReportSetup.includeExecutiveSummary = form.controls.includeExecutiveSummary.value;
-    // accountSavingsReportSetup.includeDataValidationTables = form.controls.includeDataValidationTables.value;
+    accountSavingsReportSetup.analysisItemId = form.controls.analysisItemId.value;
+    accountSavingsReportSetup.includeAnnualResults = form.controls.includeAnnualResults.value;
+    accountSavingsReportSetup.includeAnnualResultsTable = form.controls.includeAnnualResultsTable.value;
+    accountSavingsReportSetup.includeAnnualResultsGraph = form.controls.includeAnnualResultsGraph.value;
+    accountSavingsReportSetup.includeFacilityResults = form.controls.includeFacilityResults.value;
+    accountSavingsReportSetup.includeFacilityResultsTable = form.controls.includeFacilityResultsTable.value;
+    accountSavingsReportSetup.includeFacilityResultsGraph = form.controls.includeFacilityResultsGraph.value;
+    accountSavingsReportSetup.includePerformanceResults = form.controls.includePerformanceResults.value;
+    accountSavingsReportSetup.includePerformanceResultsTable = form.controls.includePerformanceResultsTable.value;
+    accountSavingsReportSetup.includePerformanceResultsGraph = form.controls.includePerformanceResultsGraph.value;
     return accountSavingsReportSetup;
   }
 
