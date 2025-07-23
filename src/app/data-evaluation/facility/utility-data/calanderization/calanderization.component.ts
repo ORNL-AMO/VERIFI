@@ -1,6 +1,11 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { AccountdbService } from 'src/app/indexedDB/account-db.service';
+import { FacilitydbService } from 'src/app/indexedDB/facility-db.service';
 import { UtilityMeterdbService } from 'src/app/indexedDB/utilityMeter-db.service';
+import { IdbAccount } from 'src/app/models/idbModels/account';
+import { IdbFacility } from 'src/app/models/idbModels/facility';
 import { IdbUtilityMeter } from 'src/app/models/idbModels/utilityMeter';
 
 @Component({
@@ -15,7 +20,11 @@ export class CalanderizationComponent implements OnInit {
   facilityMeters: Array<IdbUtilityMeter>;
 
   selectedMeter: IdbUtilityMeter;
-  constructor(private utilityMeterDbService: UtilityMeterdbService) { }
+  constructor(private utilityMeterDbService: UtilityMeterdbService,
+    private accountDbService: AccountdbService,
+    private facilityDbService: FacilitydbService,
+    private router: Router
+  ) { }
 
   ngOnInit(): void {
     this.facilityMetersSub = this.utilityMeterDbService.facilityMeters.subscribe(facilityMeters => {
@@ -26,19 +35,6 @@ export class CalanderizationComponent implements OnInit {
 
   ngOnDestroy() {
     this.facilityMetersSub.unsubscribe();
-    // this.facilityMeterDataSub.unsubscribe();
-    // this.calanderizedDataFiltersSub.unsubscribe();
-    // this.itemsPerPageSub.unsubscribe();
-    // this.calanderizationService.calanderizedDataFilters.next({
-    //   selectedSources: [],
-    //   showAllSources: true,
-    //   selectedDateMax: undefined,
-    //   selectedDateMin: undefined,
-    //   dataDateRange: undefined
-    // });
-    // this.calanderizationService.displayGraphCost = this.displayGraphCost;
-    // this.calanderizationService.displayGraphEnergy = this.displayGraphEnergy;
-    // this.calanderizationService.dataDisplay = this.dataDisplay;
   }
 
   initializeSelectedMeter() {
@@ -54,5 +50,15 @@ export class CalanderizationComponent implements OnInit {
 
   selectMeter(meter: IdbUtilityMeter) {
     this.selectedMeter = meter;
+  }
+
+  uploadData() {
+    let selectedAccount: IdbAccount = this.accountDbService.selectedAccount.getValue();
+    this.router.navigateByUrl('/data-management/' + selectedAccount.guid + '/import-data');
+  }
+
+  addMeter() {
+    let selectedFacility: IdbFacility = this.facilityDbService.selectedFacility.getValue();
+    this.router.navigateByUrl('/data-evaluation/facility/' + selectedFacility.id + '/utility/energy-consumption/energy-source/new-meter');
   }
 }

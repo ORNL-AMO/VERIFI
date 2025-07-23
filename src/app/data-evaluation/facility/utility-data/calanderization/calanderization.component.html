@@ -1,11 +1,30 @@
 <div class="wrapper main-content p-0">
-    <ul class="nav nav-tabs">
-        <li class="nav-item" *ngFor="let meter of facilityMeters"><a class="nav-link" (click)="selectMeter(meter)"
-                [ngClass]="{'active': selectedMeter.id == meter.id}">
-                <i class="fa fa-calendar-days"></i>
-                {{meter.name}}</a></li>
-    </ul>
-    <div class="content-padding">
-        <app-shared-meter-calendarization [selectedMeter]="selectedMeter"></app-shared-meter-calendarization>
-    </div>
+    <ng-template [ngIf]="facilityMeters.length > 0" [ngIfElse]="noMetersBlock">
+        <ul class="nav nav-tabs">
+            <li class="nav-item" *ngFor="let meter of facilityMeters"><a class="nav-link" (click)="selectMeter(meter)"
+                    [ngClass]="{'active': selectedMeter.id == meter.id}">
+                    <i class="fa fa-calendar-days"></i>
+                    {{meter.name}}</a></li>
+        </ul>
+        <div class="content-padding">
+            <app-shared-meter-calendarization [selectedMeter]="selectedMeter"></app-shared-meter-calendarization>
+        </div>
+    </ng-template>
+    <ng-template #noMetersBlock>
+        <div class="text-center mt-5">
+            <h5>No utility meters found for this facility.</h5>
+            <p>Please <i class="fa fa-plus"></i> Add New Meter or <i class="fa fa-upload"></i> Import multiple meters
+                from
+                excel.</p>
+            <div class="d-flex w-100 justify-content-center">
+                <div class="pe-1">
+                    <button class="btn action-btn" (click)="addMeter()"><i class="fa fa-plus"></i> Add New
+                        Meter</button>
+                </div>
+                <div class="ps-1">
+                    <button class="btn nav-btn" (click)="uploadData()"><i class="fa fa-upload"></i> Import Data</button>
+                </div>
+            </div>
+        </div>
+    </ng-template>
 </div>
