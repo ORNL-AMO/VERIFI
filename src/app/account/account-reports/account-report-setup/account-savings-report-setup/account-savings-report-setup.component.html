@@ -69,7 +69,7 @@
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" name="includeAnnualResults"
                             id="includeAnnualResults" formControlName="includeAnnualResults" (change)="save()">
-                        <label class="bold form-check-label" for="includeAnnualResults">Account Annual Results
+                        <label class="bold form-check-label" for="includeAnnualResults">Account Results
                         </label>
                     </div>
                     <ng-container *ngIf="reportSetup.includeAnnualResults">
@@ -124,7 +124,7 @@
                         <input class="form-check-input" type="checkbox" name="includePerformanceResults"
                             id="includePerformanceResults" formControlName="includePerformanceResults"
                             (change)="save()">
-                        <label class="boldform-check-label" for="includePerformanceResults">Performance Results
+                        <label class="bold form-check-label" for="includePerformanceResults">Performance Results
                         </label>
                     </div>
                     <ng-container *ngIf="reportSetup.includePerformanceResults">
