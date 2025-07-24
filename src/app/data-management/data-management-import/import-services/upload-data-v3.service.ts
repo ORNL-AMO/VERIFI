@@ -357,6 +357,10 @@ export class UploadDataV3Service {
         return 'flatFee';
       } else if (excelChargeType == 'Other') {
         return 'other';
+      } else if(excelChargeType == 'Usage'){
+        return 'usage';
+      } else if(excelChargeType == 'Demand/MDQ'){
+        return 'demandMDQ';
       }
     }
     return undefined;

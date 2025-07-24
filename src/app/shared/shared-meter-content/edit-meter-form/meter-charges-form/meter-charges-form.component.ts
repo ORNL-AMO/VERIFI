@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { FormArray, FormGroup } from '@angular/forms';
 import { EditMeterFormService } from '../edit-meter-form.service';
-import { ChargesTypes, MeterChargeType } from './meterChargesOptions';
+import { getChargeTypes, MeterChargeType } from './meterChargesOptions';
 import { getChargeTypeUnitOptions } from './charges-unit-options.pipe';
 
 @Component({
@@ -15,12 +15,13 @@ export class MeterChargesFormComponent {
   meterForm: FormGroup;
 
   chargesArray: FormArray;
-  chargeTypes: Array<{ value: string, label: string }> = ChargesTypes;
+  chargeTypes: Array<{ value: string, label: string }>;
 
   constructor(private editMeterFormService: EditMeterFormService) { }
 
   ngOnChanges() {
     this.chargesArray = this.meterForm.get('chargesArray') as FormArray;
+    this.chargeTypes = getChargeTypes(this.meterForm.controls.source.value);
   }
 
   addCharge() {

@@ -1,3 +1,4 @@
+import { MeterSource } from "src/app/models/constantsAndTypes";
 
 export const ConsumptionCostUnits: Array<{ value: ChargeCostUnit, label: string }> = [
     { value: 'dollarsPerKilowattHour', label: '$/kWh' },
@@ -23,22 +24,32 @@ export const OtherCostUnits: Array<{ value: ChargeCostUnit, label: string }> = [
     { value: 'dollars', label: '$' },
 ]
 
-export type ChargeCostUnit = 'dollarsPerKilowatt' | 'dollarsPerKVa' | 'dollarsPerMW' | 'dollarsPerMVA' | 'percent' | 'dollars' | 'dollarsPerKilowattHour' | 'dollarsPerMWh' | 'dollarsPerMMBtu' | 'dollarsPerGJ' | 'dollarsPerMJ' | 'dollarsPerkJ' | 'dollarsPerTherms' | 'dollarsPerDTherms' | 'dollarsPerKcal';
+export type ChargeCostUnit = 'dollarsPerKilowatt' | 'dollarsPerKVa' | 'dollarsPerMW' | 'dollarsPerMVA' | 'percent' | 'dollars' | 'dollarsPerKilowattHour' |
+    'dollarsPerMWh' | 'dollarsPerMMBtu' | 'dollarsPerGJ' | 'dollarsPerMJ' | 'dollarsPerkJ' | 'dollarsPerTherms' | 'dollarsPerDTherms' | 'dollarsPerKcal';
 
+export function getChargeTypes(meterSource: MeterSource): Array<{ value: MeterChargeType, label: string, sourceType: Array<MeterSource> }> {
+    return ChargesTypes.filter(chargeType => {
+        return chargeType.sourceType.includes(meterSource);
+    });
+}
 
-export const ChargesTypes: Array<{ value: MeterChargeType, label: string }> = [
+export const ChargesTypes: Array<{ value: MeterChargeType, label: string, sourceType: Array<MeterSource> }> = [
     //Consmption
-    { label: 'Consumption', value: 'consumption' },
+    { label: 'Consumption', value: 'consumption', sourceType: ['Electricity'] },
     //Demand
-    { label: 'Demand', value: 'demand' },
+    { label: 'Demand', value: 'demand', sourceType: ['Electricity'] },
     //Tax
-    { label: 'Tax', value: 'tax' },
+    { label: 'Tax', value: 'tax', sourceType: ['Electricity', 'Natural Gas', 'Other Fuels'] },
     //Late Fee
-    { label: 'Late Fee', value: 'lateFee' },
+    { label: 'Late Fee', value: 'lateFee', sourceType: ['Electricity', 'Natural Gas', 'Other Fuels'] },
     //Flat Fee
-    { label: 'Flat Fee', value: 'flatFee' },
+    { label: 'Flat Fee', value: 'flatFee', sourceType: ['Electricity', 'Natural Gas', 'Other Fuels'] },
     //Other
-    { label: 'Other', value: 'other' }
+    { label: 'Other', value: 'other', sourceType: ['Electricity', 'Natural Gas', 'Other Fuels'] },
+    //Demand/MDQ
+    { label: 'Demand/MDQ', value: 'demandMDQ', sourceType: ['Natural Gas', 'Other Fuels'] },
+    //Demand/MDQ
+    { label: 'Usage', value: 'usage', sourceType: ['Natural Gas', 'Other Fuels'] }
 ]
 
-export type MeterChargeType = 'consumption' | 'demand' | 'tax' | 'lateFee' | 'flatFee' | 'other';
+export type MeterChargeType = 'consumption' | 'demand' | 'tax' | 'lateFee' | 'flatFee' | 'other' | 'demandMDQ' | 'usage';
